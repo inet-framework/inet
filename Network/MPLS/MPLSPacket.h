@@ -42,7 +42,7 @@ class MPLSPacket: public cMessage
     /**
      * cloning function
      */
-    virtual cObject *dup() const { return new MPLSPacket(*this); }
+    virtual cObject *dup() const {return new MPLSPacket(*this);}
 
     /**
      * Swap Label operation
@@ -60,14 +60,14 @@ class MPLSPacket: public cMessage
     inline void popLabel()  {labels.pop();}
 
     /**
-     * Returns true if the label stack is empty
+     * Returns true if the label stack is not empty
      */
-    inline bool noLabel()  {return labels.empty(); }
+    inline bool hasLabel()  {return !labels.empty();}
 
     /**
      * Returns the top label
      */
-    inline int getLabel()  {return labels.top();}
+    inline int topLabel()  {return labels.top();}
 };
 
 #endif

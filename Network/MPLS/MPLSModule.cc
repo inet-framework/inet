@@ -224,7 +224,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
         // Here we process MPLS packets
         InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
         string senderInterface = string(ientry->name.c_str());
-        int oldLabel = mplsPacket->getLabel();
+        int oldLabel = mplsPacket->topLabel();
 
         if (oldLabel != -1)  // This is not IP native packet
         {
@@ -273,10 +273,9 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
                 mplsPacket->popLabel();
 
                 // Test if this is a tunnel ER
-                if (mplsPacket->noLabel())
+                if (!mplsPacket->hasLabel())
                 {
-                    IPDatagram *nativeIP =
-                        check_and_cast < IPDatagram * >(mplsPacket->decapsulate());
+                    IPDatagram *nativeIP = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
 
                     ev << " Swap label(" << oldLabel << ") by label(" << newLabel << ")\n";
 
