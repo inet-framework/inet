@@ -26,6 +26,7 @@
 #include "IP.h"
 #include "IPDatagram.h"
 #include "IPControlInfo_m.h"
+#include "ICMPMessage_m.h"
 
 Define_Module(IP);
 
@@ -57,11 +58,11 @@ void IP::handleMessage(cMessage *msg)
     else
     {
         IPDatagram *dgram = check_and_cast<IPDatagram *>(msg);
-        handleDatagramFromNetwork(dgram);
+        handlePacketFromNetwork(dgram);
     }
 }
 
-void IP::handleDatagramFromNetwork(IPDatagram *datagram)
+void IP::handlePacketFromNetwork(IPDatagram *datagram)
 {
     //
     // "Prerouting"
@@ -153,7 +154,7 @@ void IP::handleMessageFromHL(cMessage *msg)
     //send(dgram, "routingOut");
 }
 
-void IP::handleMulticastPacket(IPDatagram *dgram)
+void IP::handleMulticastPacket(IPDatagram *datagram)
 {
     // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
 
@@ -161,8 +162,7 @@ void IP::handleMulticastPacket(IPDatagram *dgram)
 
     // FIXME We should probably handle if IGMP message comes from localIn.
     // IGMP is not implemented.
-    IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
-    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(msg->controlInfo());
+    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
     int inputPort = controlInfo->inputPort();
 
     IPAddress destAddress = datagram->destAddress();
@@ -246,7 +246,7 @@ void IP::localDeliver(IPDatagram *datagram)
 
 void IP::fragmentAndSend(IPDatagram *datagram)
 {
-    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(msg->controlInfo());
+    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
     int outputPort = controlInfo->outputPort();
 
     RoutingTable *rt = routingTableAccess.get();
@@ -379,6 +379,7 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
         return;
     }
 
+    int numOfPorts = 8; //FIXME
     if (outputPort >= numOfPorts)
         error("Illegal output port %d", outputPort);
 

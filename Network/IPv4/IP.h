@@ -19,10 +19,15 @@
 #ifndef __IP_H__
 #define __IP_H__
 
-
 #include "RoutingTableAccess.h"
+#include "RoutingTable.h"
+#include "ICMPAccess.h"
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
+
+
+// ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
+const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
 
 /**
