@@ -24,7 +24,7 @@ foreach line {
    {"FlatNet"             "FlatNet"            "./FlatNet"            "FlatNet"}
    {"KIDSNw1"             "KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
    {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2"}
-   {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis"}
+   {"PerformAnalysis"     "PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
    {"TCPClientServerNet"  "TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
 } {
    set name $i
