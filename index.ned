@@ -22,7 +22,7 @@
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
-// <center><h3>snapshot 2005-01-02</h3></center>
+// <center><h3>snapshot 2005-04-04</h3></center>
 //
 // <nohtml>INET Framework contains IPv4, TCP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
