@@ -19,12 +19,14 @@
 
 
 /**
- * Basic Telnet application. The server app should be TCPGenericSrvApp.
+ * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
 class TelnetApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;
+    int numLines;   // lines (commands) already typed in this session
+    int lineLength; // characters already typed on this line
 
   public:
     Module_Class_Members(TelnetApp, TCPGenericCliAppBase, 0);

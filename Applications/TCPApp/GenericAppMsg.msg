@@ -34,7 +34,9 @@ message GenericAppMsg
         omitGetVerb = true;
     fields:
         int expectedReplyLength;  // in bytes
-        bool close;  // with TCP: if true, server should close the connection
+        double replyDelay;  // reply after this many seconds
+        bool close;  // with TCP: if true, server should close the 
+                     // connection after sending the reply
 };
 
 

@@ -18,7 +18,14 @@
 
 
 //
-// Basic Telnet application. The server app should be TCPGenericSrvApp.
+// An example Telnet client application. The server app should be
+// TCPGenericSrvApp.
+//
+// NOTE: This module emulates a very specific user behaviour, and as such,
+// it should be viewed as an example rather than a generic Telnet model.
+// If you want to model realistic Telnet traffic, you are encouraged
+// to gather statistics from packet traces on a real network, and
+// write your model accordingly.
 //
 simple TelnetApp
     parameters:
