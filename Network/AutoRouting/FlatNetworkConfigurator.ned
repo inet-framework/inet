@@ -27,13 +27,13 @@
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#. assign \IP addresses to hosts and routers. All hosts and
+//   -#  assign \IP addresses to hosts and routers. All hosts and
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
-//   -#. then it'll discover the topology of the network (using OMNeT++'s
+//   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
-//   -#. finally, it will add routes which correspond to the shortest
+//   -#  finally, it will add routes which correspond to the shortest
 //       paths to the routing tables (see RoutingTable::addRoutingEntry()).
 //
 // How does it know which modules are routers, hosts, et.c that need to
