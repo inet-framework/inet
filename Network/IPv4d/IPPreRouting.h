@@ -30,7 +30,7 @@
 #include "ICMPAccess.h"
 
 /**
- * Decrements hop counter and sends packet to Routing.
+ * Decrements hop counter and sends packet to IPRouting.
  * More info in the NED file.
  */
 class IPPreRouting : public cSimpleModule

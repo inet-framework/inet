@@ -18,19 +18,19 @@
 
 
 //
-// Receives packet from Transport layer, ICMP or Tunneling (IP tunneled
-// datagram) and encapsulates it into an \IP datagram.
-//  - set version
-//  - set TOS (currently  constant 0!!!)
-//  - set ds.codepoint
-//  - set TTL
-//  - choose and set fragmentation identifier
-//  - set fragment offset = 0, more fragments = 0 (fragmentation occurs in IPFragmentation)
-//  - set 'don't Fragment'-bit to received value (default 0)
-//  - set Protocol to received value
-//  - set destination address to received value
-//  - send datagram to Routing
-//  - if IPInterfacePacket is invalid (e.g. invalid source address), it is thrown away
+// Receives packet from transport layer, ICMP or IPTunneling (IP tunneled
+// datagram) and encapsulates it into an IPDatagram.
+//  - sets version
+//  - sets TOS (currently  constant 0!!!)
+//  - sets ds.codepoint
+//  - sets TTL
+//  - chooses and sets fragmentation identifier
+//  - sets fragment offset = 0, more fragments = 0 (fragmentation occurs in IPFragmentation)
+//  - sets 'don't Fragment'-bit to received value (default 0)
+//  - sets Protocol to received value
+//  - sets destination address to received value
+//  - sends datagram to IPRouting
+//  - if IPControlInfo is invalid (e.g. invalid source address), it is thrown away
 //    without feedback
 //
 // Author: Jochen Reber

@@ -21,7 +21,7 @@
 //
 // Handles \IP multicasts.
 //
-// Receive datagram with multicast address from Routing:
+// Receive datagram with multicast address from IPRouting:
 // - duplicate datagram if it is sent to more than one output port
 //   (to map multicast address on output port, uses multicast routing table)
 // - send copy to local deliver, if NetworkCardAddr.[] is part of multicast

@@ -22,12 +22,13 @@
 // ICMP implementation
 //
 // Receive ICMP message from localDeliver and process it:
-// - echo/timestamp reply: strip ICMP header and send to pingOut
-// - echo/timestamp request: create reply and send to IPSend
-// - destination unreachable: ignore/send to Routing (static)?
-// - time exceeded: ignore ?
-// - parameter problem: ignore ?
-// - redirect ?
+//   - echo/timestamp reply: strip ICMP header and send to pingOut
+//   - echo/timestamp request: create reply and send to IPSend
+//   - destination unreachable: ignore/send to IPRouting (static)?
+//   - time exceeded: ignore ?
+//   - parameter problem: ignore ?
+//   - redirect ?
+//#FIXME question marks above...
 //
 // Receive echo/timestamp message from pingIn: encapsulate in ICMP header
 // and send to IPSend

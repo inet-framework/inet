@@ -19,7 +19,7 @@
 
 import
     "IPPreRouting",
-    "Routing",
+    "IPRouting",
     "IPLocalDeliver",
     "IPMulticast",
     "IPSend",
@@ -55,7 +55,7 @@ module IPProcessing
             gatesizes:
                 in[2];
             display: "b=32,30;p=95,177;i=prot3";
-        routing: Routing;
+        routing: IPRouting;
             gatesizes:
                 in[2];
             display: "b=34,34;p=179,177;i=bwgen";
@@ -101,7 +101,7 @@ module IPProcessing
         // IPPreRouting Output
         preRouting.routingOut --> routing.in[0];
 
-        // Routing output
+        // IPRouting output
         routing.localOut --> localDeliver.in[0];
         routing.multicastOut --> multicast.routingIn;
         routing.fragmentationOut --> fragmentation.routingIn;

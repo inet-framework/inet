@@ -40,8 +40,7 @@
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // Redesign: Andras Varga, 02.2004
 //
-//# FIXME rename to IPRouting
-simple Routing
+simple IPRouting
     parameters:
         procdelay : numeric const,
         qosBehaviorClass: string;

@@ -20,7 +20,7 @@
 
 //
 // Fragments \IP datagrams if size is greater than MTU of output port.
-// - receive valid \IP datagram from Routing or Multicast
+// - receive valid \IP datagram from IPRouting or IPMulticast
 // - Fragment datagram if size > MTU [output port]
 // - send fragments to IPOutput[output port]
 //

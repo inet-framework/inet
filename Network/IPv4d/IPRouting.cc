@@ -23,14 +23,14 @@
 #include <stdlib.h>
 #include <omnetpp.h>
 #include "IPControlInfo_m.h"
-#include "Routing.h"
+#include "IPRouting.h"
 #include "watch2.h"  // FIXME
 
 
-Define_Module(Routing);
+Define_Module(IPRouting);
 
 
-void Routing::initialize()
+void IPRouting::initialize()
 {
     QueueWithQoS::initialize();
 
@@ -43,7 +43,7 @@ void Routing::initialize()
     WATCH(numForwarded);
 }
 
-void Routing::endService(cMessage *msg)
+void IPRouting::endService(cMessage *msg)
 {
     // FIXME may we get ICMP here? what to do with it then?
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);

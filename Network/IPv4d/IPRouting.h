@@ -34,7 +34,7 @@
  * to IPLocalDeliver, Multicast or Fragmentation, or error to ICMP.
  * More detailed info in NED file.
  */
-class Routing : public QueueWithQoS
+class IPRouting : public QueueWithQoS
 {
   private:
     RoutingTableAccess routingTableAccess;
@@ -48,7 +48,7 @@ class Routing : public QueueWithQoS
     int numForwarded;
 
   public:
-    Module_Class_Members(Routing, QueueWithQoS, 0);
+    Module_Class_Members(IPRouting, QueueWithQoS, 0);
 
   protected:
     virtual void initialize();
