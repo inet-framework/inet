@@ -32,7 +32,7 @@ simple TelnetApp
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on
         connectAddress: string,
-        connectPort: numeric const,
+        connectPort: numeric const;
     gates:
         in: tcpIn;
         out: tcpOut;
