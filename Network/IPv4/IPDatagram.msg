@@ -18,8 +18,6 @@
 //
 
 
-//import "IPInterfacePacket.msg";
-
 //
 // Protocol field: taken from RFC 1700.
 // Replacing old RFC1700 with newer (28/06/01) Protocol Numbers
