@@ -8,7 +8,7 @@ data packets
 The hosts are simple UDP hosts which send data packets to randomly
 chosen hosts or multicast groups.
 
-Connections between router and hosts are configured as10Mb ethernet,
+Connections between router and hosts are configured as 10Mb ethernet,
 connections between the router are fast fibre optic cables. Host 2 is
 connected to host 3 with a serial modem connection which is used only
 for direct communication between them both - all other packets are

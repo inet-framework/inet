@@ -1,7 +1,1 @@
-This is an example for a differentiated services network. It shows the
-use of four different router types. Three hosts in two domains are
-connected through five routers.
-
-Different classifiers and queueing mechanisms are used inside a KIDS
-router. Hook types are used for interior router, first hop router and
-border router. An EF service is defined between host 3 and 4.
+Three hosts in two domains are connected through five routers.

@@ -41,11 +41,8 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }
-    else
+    else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
-        // must be data or some kind of indication -- can be dropped
-        // (lengths of indications are all zero)
-        ASSERT(msg->length()==0 || msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA);
         bytesRcvd += msg->length()/8;
         delete msg;
 
@@ -55,6 +52,11 @@ void TCPSinkApp::handleMessage(cMessage *msg)
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
             displayString().setTagArg("t",0,buf);
         }
+    }
+    else
+    {
+        // must be data or some kind of indication -- can be dropped
+        delete msg;
     }
 }
 

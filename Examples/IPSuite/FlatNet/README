@@ -1,0 +1,3 @@
+Demonstrates automatic IP address assignment and automatic routing
+table setup using the FlatNetworkConfigurator module.
+
