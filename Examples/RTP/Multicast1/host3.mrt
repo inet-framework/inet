@@ -3,8 +3,8 @@
 
 ifconfig:
 
-# ethernet card 0 to router
-name: eth0  inet_addr: 173.0.0.3   MTU: 1500   Metric: 1  BROADCAST MULTICAST
+# ethernet card (modelled by point-to-point link) 0 to router
+name: ppp0  inet_addr: 173.0.0.3   MTU: 1500   Metric: 1  BROADCAST MULTICAST
 Groups: 225.0.0.1
 
 ifconfigend.
@@ -12,8 +12,8 @@ ifconfigend.
 
 route:
 
-225.0.0.1       172.0.0.13      255.0.0.0       G   0   eth0
-default:        173.0.0.13      0.0.0.0         G   0   eth0
+225.0.0.1       172.0.0.13      255.0.0.0       G   0   ppp0
+default:        173.0.0.13      0.0.0.0         G   0   ppp0
 
 routeend.
 
