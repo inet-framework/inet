@@ -39,10 +39,19 @@ class PPPInterface : public cSimpleModule
     cQueue queue;
     cMessage *endTransmissionEvent;
 
-    void registerInterface(double datarate);
+    InterfaceEntry *interfaceEntry;  // points into RoutingTable
+
+    // statistics
+    long numSent;
+    long numRcvdOK;
+    long numBitErr;
+    long numDropped;
+
+    InterfaceEntry *registerInterface(double datarate);
     void startTransmitting(cMessage *msg);
     PPPFrame *encapsulate(cMessage *msg);
     cMessage *decapsulate(PPPFrame *pppFrame);
+    void updateDisplayString();
 
   public:
     Module_Class_Members(PPPInterface, cSimpleModule, 0);

@@ -35,6 +35,14 @@ void PPPInterface::initialize()
     frameCapacity = par("frameCapacity");
     bitCapacity = par("bitCapacity");
 
+    interfaceEntry = NULL;
+
+    numSent = numRcvdOK = numBitErr = numDropped = 0;
+    WATCH(numSent);
+    WATCH(numRcvdOK);
+    WATCH(numBitErr);
+    WATCH(numDropped);
+
     // if we're connected, get the gatee with transmission rate
     gateToWatch = gate("physOut");
     connected = false;
@@ -76,10 +84,10 @@ void PPPInterface::initialize()
     }
 
     // register our interface entry in RoutingTable
-    registerInterface(datarate);
+    interfaceEntry = registerInterface(datarate);
 }
 
-void PPPInterface::registerInterface(double datarate)
+InterfaceEntry *PPPInterface::registerInterface(double datarate)
 {
     InterfaceEntry *e = new InterfaceEntry();
 
@@ -117,6 +125,8 @@ void PPPInterface::registerInterface(double datarate)
     // add
     RoutingTableAccess routingTableAccess;
     routingTableAccess.get()->addInterface(e);
+
+    return e;
 }
 
 
@@ -139,10 +149,9 @@ void PPPInterface::handleMessage(cMessage *msg)
     {
         ev << "Interface is not connected, dropping packet " << msg << endl;
         delete msg;
-        return;
+        numDropped++;
     }
-
-    if (msg==endTransmissionEvent)
+    else if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
         ev << "Transmission finished.\n";
@@ -151,6 +160,7 @@ void PPPInterface::handleMessage(cMessage *msg)
         {
             msg = (cMessage *) queue.getTail();
             startTransmitting(msg);
+            numSent++;
         }
     }
     else if (msg->arrivedOn("physIn"))
@@ -159,30 +169,48 @@ void PPPInterface::handleMessage(cMessage *msg)
         if (msg->hasBitError())
         {
             ev << "Bit error in " << msg << endl;
+            numBitErr++;
             delete msg;
-            return;
         }
-
-        // pass up payload
-        cMessage *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
-        send(payload,"netwOut");
+        else
+        {
+            // pass up payload
+            cMessage *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
+            numRcvdOK++;
+            send(payload,"netwOut");
+        }
     }
     else // arrived on gate "in"
     {
         if (endTransmissionEvent->isScheduled())
         {
             // We are currently busy, so just queue up the packet.
-            ev << "Received " << msg << " but transmitter busy, queueing.\n";
+            ev << "Received " << msg << " for transmission, but transmitter busy, queueing.\n";
             if (ev.isGUI() && queue.length()>=3) displayString().setTagArg("i",1,"red");
             queue.insert(msg);  // FIXME use frameCapacity, bitCapacity
         }
         else
         {
             // We are idle, so we can start transmitting right away.
-            ev << "Received " << msg << endl;
+            ev << "Received " << msg << " for transmission\n";
             startTransmitting(msg);
+            numSent++;
         }
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
+
+}
+
+void PPPInterface::updateDisplayString()
+{
+    char buf[80];
+    if (numBitErr>0)
+        sprintf(buf, "r:%ld E:%ld s:%ld", numRcvdOK, numBitErr, numSent);
+    else
+        sprintf(buf, "r:%ld s:%ld", numRcvdOK, numSent);
+    displayString().setTagArg("t",0,buf);
 }
 
 PPPFrame *PPPInterface::encapsulate(cMessage *msg)
