@@ -30,6 +30,8 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <string>
+#include "ipsuite_defs.h"
+
 
 /**
  * String size to hold an address.
@@ -62,7 +64,7 @@ class IPAddress
   protected:
     // Coded in the form of 4 numbers, following the format "addr[0].addr[1].addr[2].addr[3]"
     // Example for the address 192.24.65.10: addr[0]=192, addr[1]=24 etc.
-    unsigned char addr[4];
+    unsigned char addr[4];  // FIXME use a simple uint32 instead
 
   protected:
     // Only keeps the n first bits of the address, completing it with zeros.
@@ -84,7 +86,7 @@ class IPAddress
     /**
      * IP address as int
      */
-    IPAddress(int i); // FIXME make unsigned!!!
+    IPAddress(uint32 i);
 
     /**
      * IP address bytes: "i0.i1.i2.i3" format
@@ -109,7 +111,7 @@ class IPAddress
     /**
      * IP address as int
      */
-    void set(int i);
+    void set(uint32 i);
 
     /**
      * IP address bytes: "i0.i1.i2.i3" format
@@ -152,7 +154,7 @@ class IPAddress
     /**
      * Returns the address as an int.
      */
-    int getInt() const;
+    uint32 getInt() const;
 
     /**
      * Returns the corresponding part of the address specified by the index

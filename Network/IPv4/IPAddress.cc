@@ -29,7 +29,7 @@
 #include "IPAddress.h"
 
 
-IPAddress::IPAddress(int ip)
+IPAddress::IPAddress(uint32 ip)
 {
     set(ip);
 }
@@ -52,7 +52,7 @@ IPAddress::IPAddress(const IPAddress& obj)
     operator=(obj);
 }
 
-void IPAddress::set(int ip)
+void IPAddress::set(uint32 ip)
 {
     addr[0] = (ip >> 24) & 0xFF;
     addr[1] = (ip >> 16) & 0xFF;
@@ -111,7 +111,7 @@ void IPAddress::set(const char *text)
         opp_error("Invalid IP address string `%s'", text);
 }
 
-int IPAddress::getInt () const
+uint32 IPAddress::getInt () const
 {
     return (addr[0] << 24)
         +  (addr[1] << 16)
@@ -236,14 +236,14 @@ bool IPAddress::prefixMatches(const IPAddress& to_cmp, int numbits) const
     if (numbits<1)
         return true;
 
-    int addr1 = getInt();
-    int addr2 = to_cmp.getInt();
+    uint32 addr1 = getInt();
+    uint32 addr2 = to_cmp.getInt();
 
     if (numbits > 31)
         return addr1==addr2;
 
     // The right shift on an unsigned int produces 0 on the left
-    unsigned int mask = 0xFFFFFFFF;
+    uint32 mask = 0xFFFFFFFF;
     mask = ~(mask >> numbits);
 
     return (addr1 & mask) == (addr2 & mask);
@@ -251,10 +251,10 @@ bool IPAddress::prefixMatches(const IPAddress& to_cmp, int numbits) const
 
 int IPAddress::numMatchingPrefixBits(const IPAddress& to_cmp) const
 {
-    int addr1 = getInt();
-    int addr2 = to_cmp.getInt();
+    uint32 addr1 = getInt();
+    uint32 addr2 = to_cmp.getInt();
 
-    int res = addr1 ^ addr2;
+    uint32 res = addr1 ^ addr2;
     // If the bits are equal, there is a 0, so counting
     // the zeros from the left
     int i;
@@ -273,14 +273,13 @@ void IPAddress::keepFirstBits (unsigned int n)
 
     int len_bytes = n / 8;
 
-    unsigned int mask = 0xFF;
+    uint32 mask = 0xFF;
     mask = ~(mask >> ((n - (len_bytes * 8))));
 
     addr[len_bytes] = addr[len_bytes] & mask;
 
-    for (int i = len_bytes + 1; i < 4; i++) {
+    for (int i = len_bytes+1; i < 4; i++)
         addr[i] = 0;
-    }
 }
 
 

@@ -236,6 +236,7 @@ InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 bool RoutingTable::localDeliver(const IPAddress& dest)
 {
     Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
+    // check if we have an interface with this address
     return interfaceByAddress(dest)!=NULL;
 }
 
@@ -251,104 +252,68 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 }
 
 
-/*FIXME
+RoutingEntry *RoutingTable::selectBestMatchingRoute(const IPAddress& dest)
+{
+    // find best match (one with longest prefix)
+    RoutingEntry *bestRoute = NULL;
+    uint32 longestNetmask = 0;
+    for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
+    {
+        RoutingEntry *e = *i;
+        if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask) &&  // match
+            e->netmask.getInt()>longestNetmask)  // longest so far
+        {
+            bestRoute = e;
+            longestNetmask = e->netmask.getInt();
+        }
+    }
+    return bestRoute ? bestRoute : defaultRoute;
+}
+
 int RoutingTable::outputPortNo(const IPAddress& dest)
 {
     Enter_Method("outputPortNo(%s)=?", dest.str().c_str());
 
-    RoutingEntry *e;
-    for (int i=0; i < route->items(); i++)
-    {
-        if (route->get(i)) {
-            // The destination in the datagram should /always/ be
-            // compared against the destination-address of the interface,
-            // and the gateway will be used on Layer 2.
-            // Theoretically, there should be a differentiation between
-            // Host and Network (rather than between Host and Gateway),
-            // but none is made here.
-            // -- Jochen Reber, 27.10.00
-            //
-            // FIXME shouldn't we do *best* match here? This looks like first match.
-            // -- Andras
-            //
-            e = (RoutingEntry*)route->get(i);
-            if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask)) {
-                return interfaceByName(e->interfaceName.c_str());
-            }
-        }
-    }
-
-    // Is it gateway here?
-    if (defaultRoute) {
-        return interfaceByName(defaultRoute->interfaceName.c_str());
-    }
-
-    return -1;
-}
-
-
-int RoutingTable::multicastOutputPortNo(const IPAddress& dest, int index)
-{
-    Enter_Method("multicastOutputPortNo(%s, %d)=?", dest.str().c_str(), index);
-
-    if (index >= mcRoute->items())
-        opp_error("wrong multicast port index");
-
-    int mcDestCtr = 0;
-    int i = -1;
-    RoutingEntry *e = NULL;
-    while (mcDestCtr < index + 1) {
-        i++;
-
-        if (i == mcRoute->items())
-            opp_error("wrong multicast port index");
-
-        if (mcRoute->get(i)) {
-            e = (RoutingEntry*)mcRoute->get(i);
-            if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
-                mcDestCtr++;
-        }
-    }
-
-    // FIXME what if e==NULL?
-    return interfaceByName(e->interfaceName.c_str());
-}
-
-int RoutingTable::numMulticastDestinations(const IPAddress& dest)
-{
-    int mcDestCtr = 0;
-    RoutingEntry *e;
-
-    for (int i = 0; i < mcRoute->items(); i++) {
-        if (mcRoute->get(i)) {
-            e = (RoutingEntry*)mcRoute->get(i);
-            if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask)) {
-                mcDestCtr++;
-            }
-        }
-    }
-    return mcDestCtr;
+    // FIXME join with the next function...
+    RoutingEntry *e = selectBestMatchingRoute(dest);
+    if (!e) return -1;
+    return interfaceByName(e->interfaceName.c_str())->outputPort; // Ughhhh
 }
 
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 {
     Enter_Method("nextGatewayAddress(%s)=?", dest.str().c_str());
 
-    for (int i = 0; i < route->items(); i++) {
-        if (route->get(i)) {
-            RoutingEntry *e = (RoutingEntry*)route->get(i);
-            if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask)) {
-                return e->gateway;
-            }
+    RoutingEntry *e = selectBestMatchingRoute(dest);
+    if (!e) return IPAddress();
+    return e->gateway;
+}
+
+
+MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
+{
+    Enter_Method("multicastOutputPortNo(%s, %d)=?", dest.str().c_str(), index);
+
+    MulticastRoutes res;
+    res.reserve(16);
+    for (RouteVector::iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
+    {
+        RoutingEntry *e = *i;
+        if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
+        {
+            MulticastRoute r;
+            r.interf = interfaceByName(e->interfaceName.c_str()); // Ughhhh
+            r.gateway = e->gateway;
+            res.push_back(r);
         }
     }
+    return res;
 
-    if (defaultRoute)
-        return defaultRoute->gateway;
-
-    return IPAddress();
 }
-*/
+
+// int RoutingTable::multicastOutputPortNo(const IPAddress& dest, int index)
+// int RoutingTable::numMulticastDestinations(const IPAddress& dest)
+
 
 int RoutingTable::numRoutingEntries()
 {

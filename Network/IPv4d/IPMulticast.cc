@@ -86,8 +86,8 @@ void IPMulticast::handleMessage(cMessage *msg)
         return;
     }
 
-    int numDest = rt->numMulticastDestinations(destAddress);
-    if (numDest == 0)
+    MulticastRoutes routes = rt->multicastRoutesFor(destAddress);
+    if (routes.size()==0)
     {
         // no destination: delete datagram
         delete datagram;
@@ -95,9 +95,9 @@ void IPMulticast::handleMessage(cMessage *msg)
     else
     {
         // copy original datagram for multiple destinations
-        for (int i=0; i<numDest; i++)
+        for (int i=0; i<routes.size(); i++)
         {
-            int outputPort = rt->multicastOutputPortNo(destAddress, i);
+            int outputPort = routes[i].interf->outputPort;
 
             // don't forward to input port
             if (outputPort>=0 && outputPort!=inputPort)

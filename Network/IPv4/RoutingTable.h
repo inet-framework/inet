@@ -142,6 +142,14 @@ class RoutingEntry : public cPolymorphic
     RoutingEntry& operator=(const RoutingEntry& obj);
 };
 
+/** Returned as the result of multicast routing */
+struct MulticastRoute
+{
+    InterfaceEntry *interf;
+    IPAddress gateway;
+};
+typedef std::vector<MulticastRoute> MulticastRoutes;
+
 
 /**
  * Represents the routing table. This object has one instance per host
@@ -179,6 +187,9 @@ class RoutingTable: public cSimpleModule
                              const IPAddress& gw,
                              int metric,
                              const char *dev);
+
+    // the routing function
+    RoutingEntry *selectBestMatchingRoute(const IPAddress& dest);
 
   public:
     Module_Class_Members(RoutingTable, cSimpleModule, 0);
@@ -268,15 +279,9 @@ class RoutingTable: public cSimpleModule
     bool multicastLocalDeliver(const IPAddress& dest);
 
     /**
-     * Returns the port number to send the packets with dest as
-     * multicast destination address, or -1 if destination is not in routing table.
+     * Returns routes for a multicast address.
      */
-    int multicastOutputPortNo(const IPAddress& dest, int index);
-
-    /**
-     * Returns the number of multicast destinations.
-     */
-    int numMulticastDestinations(const IPAddress& dest);
+    MulticastRoutes multicastRoutesFor(const IPAddress& dest);
     //@}
 
     /** @name Route table manipulation */
@@ -290,7 +295,7 @@ class RoutingTable: public cSimpleModule
     /**
      * Return kth routing entry.
      */
-     RoutingEntry *routingEntry(int k);
+    RoutingEntry *routingEntry(int k);
 
     /**
      * Find first routing entry with the given parameters.
