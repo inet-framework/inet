@@ -34,6 +34,8 @@ import
 //
 module StandardHost2
     parameters:
+        numTcpApps : numeric const,
+        numUdpApps : numeric const,
         IPForward : bool,
         routingFile : string;
     gates:
@@ -42,16 +44,16 @@ module StandardHost2
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=56,78";
-        tcpApp: TCPSessionApp;
+        tcpApp: TCPSessionApp[numTcpApps];
             display: "p=125,58;i=app";
         tcp: TCPMain;
             display: "p=125,138;i=prot2";
-        udpApp: UDPApp;
-            display: "i=app;p=212,58";
+        udpApp: UDPApp[numUdpApps];
+            display: "i=app;p=234,58";
         udp: UDPProcessing;
-            display: "p=212,138;i=prot1";
+            display: "p=234,138;i=prot1";
         pingApp: PingApp;
-            display: "i=app;p=305,58";
+            display: "i=app;p=291,193";
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = IPForward,
@@ -63,14 +65,18 @@ module StandardHost2
         ppp: PPPInterface[sizeof(out)];
             display: "p=170,303,row;q=queue;i=iface";
     connections nocheck:
-        tcpApp.tcpOut --> tcp.from_appl;
-        tcpApp.tcpIn <-- tcp.to_appl;
+        for i=0..numTcpApps-1 do
+            tcpApp[i].tcpOut --> tcp.from_appl++;
+            tcpApp[i].tcpIn <-- tcp.to_appl++;
+        endfor
 
         tcp.to_ip --> networkLayer.TCPIn;
         tcp.from_ip <-- networkLayer.TCPOut;
 
-        udpApp.to_udp --> udp.from_application;
-        udpApp.from_udp <-- udp.to_application;
+        for i=0..numUdpApps-1 do
+            udpApp[i].to_udp --> udp.from_application++;
+            udpApp[i].from_udp <-- udp.to_application++;
+        endfor
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

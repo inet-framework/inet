@@ -28,10 +28,7 @@ module ClientServerNetwork
     submodules:
         client1: StandardHost2;
             parameters:
-                // TCP parameters
-                local_addr = (10 << 24) + 1,
-                server_addr = (10 << 24) + 4,
-                // network parameters
+                IPForward = false,
                 routingFile = "client1.irt";
             gatesizes:
                 in[2],
@@ -40,10 +37,7 @@ module ClientServerNetwork
         // clients
         client2: StandardHost2;
             parameters:
-                // TCP parameters
-                local_addr = (10 << 24) + 2,
-                server_addr = (10 << 24) + 4,
-                // network parameters
+                IPForward = false,
                 routingFile = "client2.irt";
             gatesizes:
                 in[1],
@@ -51,10 +45,7 @@ module ClientServerNetwork
             display: "p=201,45;i=comp";
         client3: StandardHost2;
             parameters:
-                // TCP parameters
-                local_addr = (10 << 24) + 3,
-                server_addr = (10 << 24) + 4,
-                // network parameters
+                IPForward = false,
                 routingFile = "client3.irt";
             gatesizes:
                 in[1],
@@ -62,9 +53,7 @@ module ClientServerNetwork
             display: "p=208,164;i=comp";
         server4: StandardHost2;
             parameters:
-                // TCP parameters
-                local_addr = (10 << 24) + 4,
-                // network parameters
+                IPForward = false,
                 routingFile = "server4.irt";
             gatesizes:
                 in[2],
@@ -72,7 +61,6 @@ module ClientServerNetwork
             display: "p=63,161;i=pc";
         router: Router;
             parameters:
-                // network parameters
                 routingFile = "router.irt";
             gatesizes:
                 in[4],

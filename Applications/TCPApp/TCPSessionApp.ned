@@ -21,7 +21,7 @@
 // Single-connection TCP application: it opens a connection, sends
 // the given number of bytes, and closes. Sending may be one-off,
 // or may be controlled by a "script" which is a series of
-// (time, number of bytes) pair.
+// (time, number of bytes) pairs.
 //
 // <b>Opening the connection</b>
 //

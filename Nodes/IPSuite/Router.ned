@@ -33,7 +33,7 @@ module Router
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=proc2;p=70,60";
         networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
@@ -44,7 +44,7 @@ module Router
                 physOut[sizeof(out)];
             display: "p=160,60;i=fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,120,row;q=queue;i=iface";
+            display: "p=80,150,row;q=queue;i=iface";
     connections nocheck:
         // connections to network outside
         for i=0..sizeof(out)-1 do
