@@ -26,21 +26,21 @@ import
 module ClientServerNetwork
     submodules:
         client1: StandardHost2;
-            display: "p=66,50;i=comp";
+            display: "p=120,60;i=comp";
         client2: StandardHost2;
-            display: "p=201,45;i=comp";
+            display: "p=260,60;i=comp";
         client3: StandardHost2;
-            display: "p=208,164;i=comp";
+            display: "p=260,160;i=comp";
         server: StandardHost2;
-            display: "p=63,161;i=pc";
+            display: "p=120,160;i=pc";
         router: Router;
-            display: "p=138,102;i=ipc";
+            display: "p=190,102;i=ipc";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypesToProcess = "Router StandardHost2",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "p=60,100;i=cogwheel";
+            display: "p=50,70;i=cogwheel";
     connections:
         client1.out++ --> datarate 1000000 --> router.in++;
         client1.in++ <-- datarate 1000000 <-- router.out++;
