@@ -40,12 +40,61 @@ class TCPSegment;
 // testingEV writes log that automated test cases can check (*.test files)
 #define testingEV (ev.disable_tracing||!TCPMain::testing)?ev:ev
 
+
+
+
+
 /**
- * Implements the TCP protocol.
+ * Implements the TCP protocol. This section describes the internal
+ * architecture of the TCP model.
  *
- * This class only manages connections (TCPConnection) and dispatches
- * messages and events to them. Everything of interest takes place
- * in TCPConnection.
+ * Usage and compliance with various RFCs are discussed in the corresponding
+ * NED documentation for TCPMain. Also, you may want to check the TCPSocket
+ * class which makes it easier to use TCP from applications.
+ *
+ * The TCP protocol implementation is composed of several classes (discussion
+ * follows below):
+ *  - TCPMain: the module class
+ *  - TCPConnection: manages a connection
+ *  - TCPSendQueue, TCPReceiveQueue: abstract base classes for various types
+ *    of send and receive queues
+ *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
+ *    queues with "virtual" bytes (byte counts only)
+ *  - TCPAlgorithm: abstract base class for TCP algorithms
+ *  - DummyTCPAlg and TCPTahoeReno, two concrete TCPAlgorithm implementations.
+ *
+ * TCPMain subclassed from cSimpleModule. It manages socketpair-to-connection
+ * mapping, and dispatches segments and user commands to the appropriate
+ * TCPConnection object.
+ *
+ * TCPConnection manages the connection, with the help of other objects.
+ * TCPConnection itself implements the basic TCP "machinery": takes care
+ * of the state machine, stores the state variables (TCB), sends/receives
+ * SYN, FIN, RST, ACKs, etc.
+ *
+ * TCPConnection internally relies on 3 objects. The first two are subclassed
+ * from TCPSendQueue and TCPReceiveQueue. They manage the actual data stream,
+ * so TCPConnection itself only works with sequence number variables.
+ * This makes it possible to easily accomodate need for various types of
+ * simulated data transfer: real byte stream, "virtual" bytes (byte counts
+ * only), and sequence of cMessage objects (where every message object is
+ * mapped to a TCP sequence number range).
+ *
+ * Currently implemented send queue and receive queue classes are
+ * TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
+ * queues with "virtual" bytes (byte conunts only).
+ *
+ * The third object is subclassed from TCPAlgorithm. Control over
+ * retransmissions, congestion control and ACK sending are "outsourced"
+ * from TCPConnection into TCPAlgorithm: delayed acks, slow start, fast rexmit,
+ * etc. are all implemented in TCPAlgorithm subclasses. This simplifies the
+ * design of TCPConnection and makes it a lot easier to implement new TCP
+ * variations such as NewReno, Vegas or LinuxTCP as TCPAlgorithm subclasses.
+ *
+ * Currently implemented TCPAlgorithm classes are DummyTCPAlg and TCPTahoeReno.
+ *
+ * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
+ * or in a module parameter.
  */
 class TCPMain : public cSimpleModule
 {

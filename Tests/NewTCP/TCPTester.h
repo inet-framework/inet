@@ -50,23 +50,8 @@ class TCPTesterBase : public cSimpleModule
 /**
  * Dumps every packet using the TCPDumper class, and in addition it can delete,
  * delay or duplicate TCP segments, and insert new segments.
- *
- * Script format:
- *
- * <i><segment><operation><args>; <segment><operation><args>; ...</i>
- *
- * e.g.:
- *
- * <tt>A2 delete; B3 delete; A3 delay 0.2; A4 copy 1.0,1.2; ...</tt>
- *
- * Where:
- * - <i><segment></i>: A10 means 10th segment arriving from A
- * - <i><operation></i> can be <tt>delete</tt>, <tt>delay</tt> or <tt>copy</tt>:
- *    - <tt>delete</tt>: removes (doesn't copy) segment
- *    - <tt>delay</tt> <i><delay></i>: forwards segment after a delay
- *    - <tt>copy</tt> <i><delay1>,<delay2>,<delay3>,...</i>:
- *      forwards a copy of the segment after the given delays
- *      (<tt>copy 0.5</tt> is the same as <tt>delay 0.5</tt>)
+ * 
+ * Script format: see NED documentation.
  */
 class TCPScriptableTester : public TCPTesterBase
 {

@@ -39,9 +39,9 @@ class TCPStatusInfo;
  * and can also help you deal with packets and notification messages arriving
  * from TCP.
  *
- * An example session which opens a connection from local port 1000 to
- * 10.0.0.2:2000, sends 16K of data and closes the connection looks
- * like this (the code can be placed in your handleMessage() or activity()):
+ * A session which opens a connection from local port 1000 to 10.0.0.2:2000,
+ * sends 16K of data and closes the connection may be as simple as this
+ * (the code can be placed in your handleMessage() or activity()):
  *
  * <pre>
  *   TCPSocket socket;
@@ -58,16 +58,16 @@ class TCPStatusInfo;
  * more cumbersome. Basically you have two choices: you either process those
  * messages yourself, or let TCPSocket do part of the job. For the latter,
  * you give TCPSocket a callback object on which it'll invoke the appropriate
- * member functions: dataArrived(), established(), connectionReset(),
- * remoteTCPClosed(), etc (actually these are methods of TCPSocket::CallBackInterface,
- * and their names are prefixed with "socket"). The callback object can be
- * your simple module class too (for this you'll have to use multiple inheritance).
+ * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
+ * socketPeerClosed(), etc (these are methods of TCPSocket::CallBackInterface).,
+ * The callback object can be your simple module class too.
  *
  * This code skeleton example shows how to set up a TCPSocket to use the module
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TCPSocket::CallBackInterface {
+ * class MyModule : public cSimpleModule, public TCPSocket::CallBackInterface
+ * {
  *    TCPSocket socket;
  *    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
  *    virtual void socketFailure(int connId, void *yourPtr, int code);
@@ -86,17 +86,17 @@ class TCPStatusInfo;
  * }
  *
  * void MyModule::socketDataArrived(int, void *, cMessage *msg, bool) {
- *     ev << "Received TCP data, " << msg->length()/8 << " bytes\n";
+ *     ev << "Received TCP data, " << msg->length()/8 << " bytes\\n";
  *     delete msg;
  * }
  *
  * void MyModule::socketFailure(int, void *, int code) {
  *     if (code==TCP_I_CONNECTION_RESET)
- *         ev << "Connection reset!\n";
+ *         ev << "Connection reset!\\n";
  *     else if (code==TCP_I_CONNECTION_REFUSED)
- *         ev << "Connection refused!\n";
+ *         ev << "Connection refused!\\n";
  *     else if (code==TCP_I_TIMEOUT)
- *         ev << "Connection timed out!\n";
+ *         ev << "Connection timed out!\\n";
  * }
  * </pre>
  *
@@ -236,6 +236,13 @@ class TCPSocket
      *
      * TCPSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
+     *
+     * YourPtr is an optional pointer. It may contain any value you wish --
+     * TCPSocket will not look at it or do anything with it except passing
+     * it back to you in the CallBackInterface calls. You may find it
+     * useful if you maintain additional per-connection information:
+     * in that case you don't have to look it up by connId in the callbacks,
+     * you can have it passed to you as yourPtr.
      */
     void setCallbackObject(CallBackInterface *cb, void *yourPtr=NULL);
 

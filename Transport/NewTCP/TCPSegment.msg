@@ -28,7 +28,7 @@
 // - Options: none supported currently (MSS comes from config)
 // - Padding
 //
-// cMessage::kind() may be set to an arbitrary value: TCP entities should
+// cMessage::kind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
 message TCPSegment extends cMessage

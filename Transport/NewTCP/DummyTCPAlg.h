@@ -34,17 +34,12 @@ class DummyTCPStateVariables : public TCPStateVariables
 
 
 /**
- * Includes basic TCP algorithms: retransmission, PERSIST timer, keep-alive,
- * delayed acknowledge.
+ * A very simplistic but concrete TCPAlgorithm implementation, only for
+ * demonstration. Doesn't even include retransmissions.
  */
 class DummyTCPAlg : public TCPAlgorithm
 {
   protected:
-    cMessage *rexmitTimer;
-    cMessage *persistTimer;
-    cMessage *delayedAckTimer;
-    cMessage *keepAliveTimer;
-
     DummyTCPStateVariables *state;
 
   public:
@@ -59,7 +54,7 @@ class DummyTCPAlg : public TCPAlgorithm
     virtual ~DummyTCPAlg();
 
     /**
-     * Create and return a DummyTCPStateVariables object.
+     * Creates and returns a DummyTCPStateVariables object.
      */
     virtual TCPStateVariables *createStateVariables();
 

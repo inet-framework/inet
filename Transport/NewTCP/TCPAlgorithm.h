@@ -31,7 +31,7 @@
  * Abstract base class for TCP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
  * retransmit/recovery, selective acknowledgement etc. Subclasses
- * may implement various sets and flavours of the above these algorithms.
+ * may implement various sets and flavours of the above algorithms.
  */
 class TCPAlgorithm : public cPolymorphic
 {

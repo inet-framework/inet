@@ -183,18 +183,18 @@ void TCPConnection::sendToApp(cMessage *msg)
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
     // create send/receive queues
-    const char *sendQueueClass = openCmd->getSendQueueClass();
+    const char *sendQueueClass = openCmd->sendQueueClass();
     if (!sendQueueClass || !sendQueueClass[0])
         sendQueueClass = tcpMain->par("sendQueueClass");
     sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
 
-    const char *receiveQueueClass = openCmd->getReceiveQueueClass();
+    const char *receiveQueueClass = openCmd->receiveQueueClass();
     if (!receiveQueueClass || !receiveQueueClass[0])
         receiveQueueClass = tcpMain->par("receiveQueueClass");
     receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
 
     // create algorithm
-    const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();
+    const char *tcpAlgorithmClass = openCmd->tcpAlgorithmClass();
     if (!tcpAlgorithmClass || !tcpAlgorithmClass[0])
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
     tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));

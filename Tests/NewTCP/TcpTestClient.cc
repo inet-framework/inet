@@ -17,6 +17,9 @@
 #include "TCPSocket.h"
 
 
+/**
+ * TCP client application for testing the TCP model.
+ */
 class TcpTestClient : public cSimpleModule
 {
   protected:
@@ -145,12 +148,20 @@ void TcpTestClient::finish()
 {
     int n = 0;
     int bytes = 0;
+    int nind = 0;
     while (!queue.empty())
     {
         cMessage *msg = (cMessage *)queue.pop();
-        n++;
-        bytes+=msg->length()/8;
         //ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
+        if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+        {
+            n++;
+            bytes+=msg->length()/8;
+        }
+        else
+        {
+            nind++;
+        }
         delete msg;
     }
     ev << fullPath() << ": received " << bytes << " bytes in " << n << " packets\n";

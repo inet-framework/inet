@@ -26,7 +26,9 @@
 #include "TCPReceiveQueue.h"
 
 /**
+ * Receive queue that manages "virtual bytes", that is, byte counts only.
  *
+ * @see TCPVirtualDataSendQueue
  */
 class TCPVirtualDataRcvQueue : public TCPReceiveQueue
 {

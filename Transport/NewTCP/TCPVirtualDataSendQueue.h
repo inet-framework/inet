@@ -22,7 +22,11 @@
 #include "TCPSendQueue.h"
 
 /**
- *
+ * Send queue that manages "virtual bytes", that is, byte counts only.
+ * It uses the length() field of the messages only, everything else is
+ * ignored.
+ * 
+ * @see TCPVirtualDataRcvQueue
  */
 class TCPVirtualDataSendQueue : public TCPSendQueue
 {

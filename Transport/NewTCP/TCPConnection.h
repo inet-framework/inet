@@ -208,30 +208,47 @@ class TCPStateVariables : public cPolymorphic
  * timers (2MSL, CONN-ESTAB, FIN-WAIT-2) and events (OPEN, SEND, etc)
  * associated with TCP state changes.
  *
- * The implementation (e.g. the method process_RCV_SEGMENT()) largely follows
- * the functional specification at the end of RFC 793. Code comments extensively
- * quote RFC 793 to make it easier to understand.
+ * The implementation largely follows the functional specification at the end
+ * of RFC 793. Code comments extensively quote RFC 793 to make it easier
+ * to understand.
  *
- * TCPConnection delegates all details of the TCP data transfer (in ESTABLISHED,
- * etc. state) to an object subclassed from  TCPAlgorithm. This covers
- * handling timers such as REXMIT, PERSIST, KEEPALIVE, DELAYED-ACK; window
- * management, congestion control schemes, SACK, etc. The concrete TCPAlgorithm
- * class to use can be chosen per connection (in OPEN) or in a module
- * parameter. Delegation to TCPAlgorithm facilitates experimenting with
- * various TCP features.
+ * TCPConnection objects are not used alone -- they are instantiated and managed
+ * by a TCPMain module.
  *
- * TCPConnection also delegates the handling of send and receive buffers
- * to instances of TCPSendQueue and TCPReceiveQueue subclasses. This
- * makes it possible to easily accomodate need for various types of
- * simulated data transfer: real byte stream, "virtual" bytes (byte counts
- * only), and sequence of cMessage objects (where every message object is
- * mapped to a TCP sequence number range).
+ * TCPConnection "outsources" several tasks to objects subclassed from
+ * TCPSendQueue, TCPReceiveQueue and TCPAlgorithm; see overview of this
+ * with TCPMain documentation.
  *
- * TCPConnections are not used alone -- they are instantiated and managed by
- * a TCPMain module.
+ * Connection variables (TCB) are kept in TCPStateVariables. TCPAlgorithm
+ * implementations can extend TCPStateVariables to add their own stuff
+ * (see TCPAlgorithm::createStateVariables() factory method.)
  *
- * Remarks: there's no implicit RECEIVE command expected from applications --
- * received data are automatically and immediately passed up to the app.
+ * The "entry points" of TCPConnnection from TCPMain are:
+ *  - processTimer(cMessage *msg): handle self-messages which belong to the connection
+ *  - processTCPSegment(TCPSegment *tcpSeg, IPAddress srcAddr, IPAddress destAddr):
+ *    handle segment arrivals
+ *  - processAppCommand(cMessage *msg): process commands which arrive from the
+ *    application (TCP_C_xxx)
+ *
+ * All three methods follow a common structure:
+ *
+ *  -# dispatch to specific methods. For example, processAppCommand() invokes
+ *     one of process_OPEN_ACTIVE(), process_OPEN_PASSIVE() or process_SEND(),
+ *     etc., and processTCPSegment() dispatches to processSegmentInListen(),
+ *     processSegmentInSynSent() or processSegment1stThru8th().
+ *     Those methods will do the REAL JOB.
+ *  -# after they return, we'll know the state machine event (TCPEventCode,
+ *     TCP_E_xxx) for sure, so we can:
+ *  -# invoke performStateTransition() which executes the necessary state
+ *     transition (for example, TCP_E_RCV_SYN will take the state machine
+ *     from TCP_S_LISTEN to TCP_S_SYN_RCVD). No other actions are taken
+ *     in this step.
+ *  -# if there was a state change (for example, we entered the
+ *     TCP_S_ESTABLISHED state), performStateTransition() invokes stateEntered(),
+ *     which performs some necessary housekeeping (cancel the CONN-ESTAB timer).
+ *
+ * When the CLOSED state is reached, TCPMain will delete the TCPConnection object.
+ *
  */
 class TCPConnection
 {
@@ -279,7 +296,7 @@ class TCPConnection
     void stateEntered(int state);
     //@}
 
-    /** @name Processing app commands (may override event code) */
+    /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
     void process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     void process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
@@ -289,13 +306,18 @@ class TCPConnection
     void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     //@}
 
-    /** @name Processing TCP segment arrivals.
-     * Event code TCP_E_SEGMENT gets replaced by specific ones (e.g. TCP_E_RCV_SYN) here.
-     */
+    /** @name Processing TCP segment arrivals. Invoked from processTCPSegment(). */
     //@{
-    bool tryFastRoute(TCPSegment *tcpseg); // shortcut most common case
+    /**
+     * Shortcut to process most common case as fast as possible. Returns false
+     * if segment requires normal (slow) route.
+     */
+    bool tryFastRoute(TCPSegment *tcpseg);
+    /**
+     * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
+     * which will drive the state machine.
+     */
     TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
-
     TCPEventCode processSegmentInListen(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
     TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
     TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
@@ -303,13 +325,12 @@ class TCPConnection
     bool processAckInEstabEtc(TCPSegment *tcpseg);
     //@}
 
-    /** @name Processing timeouts (may override event code) */
+    /** @name Processing timeouts. Invoked from processTimer(). */
     //@{
     void process_TIMEOUT_2MSL();
     void process_TIMEOUT_CONN_ESTAB();
     void process_TIMEOUT_FIN_WAIT_2();
     void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
-
     //@}
 
     /** Utility: creates send/receive queues and tcpAlgorithm */
@@ -337,14 +358,14 @@ class TCPConnection
      */
     bool sendData(bool fullSegments, int maxNumBytes=-1);
 
-    /**
-     * Utility: retransmit one segment from snd_una
-     */
+    /** Utility: retransmit one segment from snd_una */
     void retransmitData();
 
     /** Utility: sends RST */
     void sendRst(uint32 seqNo);
+    /** Utility: sends RST (called from TCPMain) */
     static void sendRst(uint32 seq, IPAddress src, IPAddress dest, int srcPort, int destPort);
+    /** Utility: sends RST+ACK (called from TCPMain) */
     static void sendRstAck(uint32 seq, uint32 ack, IPAddress src, IPAddress dest, int srcPort, int destPort);
 
     /** Utility: sends FIN */
@@ -390,12 +411,12 @@ class TCPConnection
     static void segmentArrivalWhileClosed(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
 
     /**
-     * Ctor.
+     * Constructor.
      */
     TCPConnection(TCPMain *mod, int appGateIndex, int connId);
 
     /**
-     * Dtor.
+     * Destructor.
      */
     ~TCPConnection();
 
