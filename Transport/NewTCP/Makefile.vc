@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPCommand_m.obj TCPSegment_m.obj PlainTCP.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPMain.obj TCPSocket.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
+OBJS= TCPCommand_m.obj TCPSegment_m.obj PlainTCP.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
@@ -103,6 +103,9 @@ TCPConnectionRcvSegment.obj: TCPConnectionRcvSegment.cc
 
 TCPConnectionUtil.obj: TCPConnectionUtil.cc
 	$(CXX) -c $(COPTS) /Tp TCPConnectionUtil.cc
+
+TCPDump.obj: TCPDump.cc
+	$(CXX) -c $(COPTS) /Tp TCPDump.cc
 
 TCPMain.obj: TCPMain.cc
 	$(CXX) -c $(COPTS) /Tp TCPMain.cc
@@ -207,6 +210,11 @@ TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   ..\..\Network\IPv4\Core/IPAddress.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4\Core/IPDatagram_m.h
+TCPDump.obj: TCPDump.cc \
+  TCPDump.h \
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  ..\..\Network\IPv4\Core/IPDatagram_m.h \
+  TCPSegment_m.h
 TCPMain.obj: TCPMain.cc \
   TCPMain.h \
   TCPConnection.h \
