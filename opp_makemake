@@ -406,7 +406,8 @@ echo 'subdirs: $(SUBDIRS)'
 echo
 for i in $subdirs; do
      echo "$i:"
-     echo '	cd' $i '&& $(MAKE)' 
+     echo '	cd' $i '&& $(MAKE)'
+     echo 
 done
 
 # rules for ned files

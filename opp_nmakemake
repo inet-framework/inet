@@ -328,7 +328,7 @@ if ($mpi eq "y")
 
 
 $sobjs = join( " \\\n            ", @sobj_list);
-
+$extdirobjs = join( " \\\n            ", @extdirobjs);
 
 print OUT "
 
@@ -389,7 +389,7 @@ print OUT "OBJS= $objs\n";
 print OUT "\n";
 $subdirs = join(" ", @subdirs);
 print OUT "# subdirectories to recurse into\n";
-print OUT "SUBDIRS= $subdirs";
+print OUT "SUBDIRS= $subdirs\n";
 print OUT "\n";
 
 # include external Makefile fragments at top, so that they can
@@ -434,19 +434,20 @@ elsif ($type eq 'o')
 print OUT "\n";
 
 # rule for Purify
-print OUT "# purify: \$(OBJS) \$(EXTRA_OBJS) $linkdirsphony $makefile\n";
-print OUT "# \tpurify \$(CXX) \$(LDFLAGS) \$(OBJS) \$(EXTRA_OBJS) \$(SUBDIR_OBJS) \$(LIBS) -L\$(OMNETPP_LIB_DIR) \$(KERNEL_LIBS) \$(USERIF_LIBS) \$(SYS_LIBS_PURE) -o \$(TARGET).pure\n";
+print OUT "# purify: \$(OBJS) \$(EXTRA_OBJS) subdirs $makefile\n";
+print OUT "# \tpurify \$(CXX) \$(LDFLAGS) \$(OBJS) \$(EXTRA_OBJS) \$(EXT_DIR_OBJS) \$(LIBS) -L\$(OMNETPP_LIB_DIR) \$(KERNEL_LIBS) \$(USERIF_LIBS) \$(SYS_LIBS_PURE) -o \$(TARGET).pure\n";
 print OUT "\n";
 
 # rules for recursive build
 # simplified because @#$!? microsoft doesn't know about phony targets
-print OUT "subdirs:\n"; 
+print OUT "subdirs:"; 
+foreach $i (@subdirs) {print OUT " ${i}_dir";}
+print OUT "\n\n"; 
 foreach $i (@subdirs)
 {
-   print OUT "\tcd $i && cd && $makecommand\n";
+   print OUT "${i}_dir:\n";
+   print OUT "\tcd $i && cd && $makecommand\n\n";
 }
-print OUT "\n";
-
 
 # rules for ned files
 foreach $i (glob("*.ned"))

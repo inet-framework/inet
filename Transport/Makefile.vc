@@ -60,12 +60,18 @@ OBJS=
 SUBDIRS= Socketv4 TCPv4 UDPv4
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: Socketv4_dir TCPv4_dir UDPv4_dir
+
+Socketv4_dir:
 	cd Socketv4 && cd && nmake /nologo /f Makefile.vc
+
+TCPv4_dir:
 	cd TCPv4 && cd && nmake /nologo /f Makefile.vc
+
+UDPv4_dir:
 	cd UDPv4 && cd && nmake /nologo /f Makefile.vc
 
 

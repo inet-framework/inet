@@ -63,23 +63,41 @@ SUBDIRS= Applications Examples Network NetworkInterfaces Nodes PHY Tests Transpo
 
 all: $(TARGET)
 
-Network Transport NetworkInterfaces PHY Applications : Util 
-Nodes : Network Transport NetworkInterfaces PHY Applications 
-Examples Tests : Nodes
+Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir : Util_dir 
+Nodes_dir : Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir 
+Examples_dir Tests_dir : Nodes_dir
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: Applications_dir Examples_dir Network_dir NetworkInterfaces_dir Nodes_dir PHY_dir Tests_dir Transport_dir Util_dir
+
+Applications_dir:
 	cd Applications && cd && nmake /nologo /f Makefile.vc
+
+Examples_dir:
 	cd Examples && cd && nmake /nologo /f Makefile.vc
+
+Network_dir:
 	cd Network && cd && nmake /nologo /f Makefile.vc
+
+NetworkInterfaces_dir:
 	cd NetworkInterfaces && cd && nmake /nologo /f Makefile.vc
+
+Nodes_dir:
 	cd Nodes && cd && nmake /nologo /f Makefile.vc
+
+PHY_dir:
 	cd PHY && cd && nmake /nologo /f Makefile.vc
+
+Tests_dir:
 	cd Tests && cd && nmake /nologo /f Makefile.vc
+
+Transport_dir:
 	cd Transport && cd && nmake /nologo /f Makefile.vc
+
+Util_dir:
 	cd Util && cd && nmake /nologo /f Makefile.vc
 
 

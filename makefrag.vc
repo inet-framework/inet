@@ -2,6 +2,6 @@
 
 all: $(TARGET)
 
-Network Transport NetworkInterfaces PHY Applications : Util 
-Nodes : Network Transport NetworkInterfaces PHY Applications 
-Examples Tests : Nodes
+Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir : Util_dir 
+Nodes_dir : Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir 
+Examples_dir Tests_dir : Nodes_dir

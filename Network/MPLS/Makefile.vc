@@ -60,12 +60,18 @@ OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj Info
 SUBDIRS= Core LDP RSVP_TE
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: Core_dir LDP_dir RSVP_TE_dir
+
+Core_dir:
 	cd Core && cd && nmake /nologo /f Makefile.vc
+
+LDP_dir:
 	cd LDP && cd && nmake /nologo /f Makefile.vc
+
+RSVP_TE_dir:
 	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
 
 DatalinkLayer_n.obj: DatalinkLayer_n.cc

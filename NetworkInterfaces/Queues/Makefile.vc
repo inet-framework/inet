@@ -60,8 +60,8 @@ OBJS= InputQueue_n.obj OutputQueue_n.obj Dequeue.obj Enqueue.obj InputQueue.obj
 SUBDIRS= 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs:
 

@@ -27,7 +27,7 @@ INCLUDE_PATH= -I..\Tester -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS
 EXTRA_OBJS=
 
 # object files from other directories to link with
-EXT_DIR_OBJS=
+EXT_DIR_OBJS= /*.obj
 
 # Additional libraries (-L option -l option)
 LIBS=
@@ -61,8 +61,8 @@ SUBDIRS=
 $(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) /out:$(TARGET)
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs:
 

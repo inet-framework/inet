@@ -60,13 +60,21 @@ OBJS=
 SUBDIRS= IPv4 LDP MPLS RSVP_TE
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
-# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
-# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: IPv4_dir LDP_dir MPLS_dir RSVP_TE_dir
+
+IPv4_dir:
 	cd IPv4 && cd && nmake /nologo /f Makefile.vc
+
+LDP_dir:
 	cd LDP && cd && nmake /nologo /f Makefile.vc
+
+MPLS_dir:
 	cd MPLS && cd && nmake /nologo /f Makefile.vc
+
+RSVP_TE_dir:
 	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
 
 
