@@ -1,0 +1,24 @@
+
+# filename: server4.irt
+# routing table host no. 4 (server) of TCP Client/Server network
+# author: Jochen Reber
+
+
+ifconfig:
+
+# PPP link 0 to Router
+name: ppp0 encap: Point-to-Point 	inet_addr: 10.0.0.4 	
+MTU: 1500	Metric: 1 
+
+# PPP link 1 to client 1
+name: ppp1 encap: Point-to-Point 	inet_addr: 10.0.0.12
+MTU: 1500	Metric: 1 
+
+ifconfigend.
+
+route:
+10.0.0.1		*				255.255.255.255 H	0	ppp1
+default:		10.0.1.4		0.0.0.0			G	0	ppp0
+
+routeend.
+

@@ -1,0 +1,72 @@
+#CODEPOINT OVERVIEW:
+#  EF        = 1
+#  GEF/EFSB  = 2
+#  AF        = 3
+#  EFMD      = 4
+#  BE        = 0
+
+#-------------------------------------------------------------------------------------
+
+
+#EF = 1, EFSB = 2, AF = 3, BE = 0
+
+CLASSIFIER CP_FHR_EFSB
+INGATE *
+
+#CP				Outgate
+1					0
+2					1
+3         2
+4         3
+
+
+
+#-------------------------------------------------------------------------------------
+
+# Classifier for Inner Routers; should be the same as for First Hop Routers
+#EF = 1, EFSB = 2, AF = 3, BE = 0
+
+
+CLASSIFIER CP_IR_EFSB
+INGATE *
+
+#CP				Outgate
+1					0
+2					1
+3         2
+4					3
+
+
+
+
+#-------------------------------------------------------------------------------------
+
+# Multifield Classifier for FHR
+# Outgates: 0 = EF, 1 = GEF, 2 = AF, default = BE
+
+
+CLASSIFIER MF_FHR_L3
+INGATE *
+
+#Src-IP   Dest-IP    Src-Port   Dest-Port   Prot    Outgate
+172.1.2.0 *			 *			*			*		0
+
+# Multifield Classifier for FHR
+# Outgates: 0 = EF, 1 = GEF, 2 = AF, default = BE
+
+
+CLASSIFIER IA_BR_L3
+INGATE *
+
+#  Outgate
+
+
+# In Adapter Classifier
+# 1 -> Ingress, alles andere Egress
+
+
+CLASSIFIER IA_1
+INGATE  *
+	
+#	IA	Outgate	
+	1	0

@@ -1,0 +1,29 @@
+
+# file name: procnode1_2.irt
+# routing table for node2 in ProcNetwork1
+# author: Jochen Reber
+
+
+ifconfig:
+
+# ethernet card 0 to node 1
+name: eth0		encap: Ethernet		HWaddr: 00:90:27:CB:DC:2	
+inet_addr: 10.10.0.2 	Bcast: 10.10.255.255 	Mask: 255.255.255.0	
+MTU: 1500	Metric: 1 BROADCAST MULTICAST 
+
+# ethernet card 1 to dl-sink
+name: eth1		encap: Ethernet		HWaddr: 00:95:FF:FF:DF:3
+inet_addr: 10.10.1.2 	Bcast: 129.13.35.255 	Mask: 255.255.255.0	
+MTU: 1500	Metric: 1 BROADCAST MULTICAST 
+
+ifconfigend.
+
+route:
+
+10.10.0.1		*				255.255.255.255	H	0	eth0
+10.20.0.3		*				255.255.255.250	H	0	eth1
+#127.0.0.0		*				255.0.0.0		H	0	lo
+default:		10.10.0.1		0.0.0.0			G	0	eth0
+
+routeend.
+

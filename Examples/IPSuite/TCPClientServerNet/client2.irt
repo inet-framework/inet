@@ -1,0 +1,19 @@
+
+# filename: client2.irt
+# routing table host no. 2 (client) of TCP Client/Server network
+# author: Jochen Reber
+
+
+ifconfig:
+
+# PPP link 0 to Router
+name: ppp0 encap: Point-to-Point 	inet_addr: 10.0.0.2
+MTU: 1500	Metric: 1 
+
+ifconfigend.
+
+route:
+default:		10.0.1.2		0.0.0.0			G	0	ppp0
+
+routeend.
+

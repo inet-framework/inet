@@ -1,0 +1,13 @@
+#lib table for MPLS network simulation test
+#lib3.table for LSR3
+
+LIB TABLE:
+
+In-lbl       In-intf 	Out-lbl   	Out-intf
+
+
+
+
+
+
+

@@ -1,0 +1,35 @@
+
+# filename: mchost1.mrt
+# routing table for host 1 of multicast network
+# author: Jochen Reber
+
+
+ifconfig:
+
+# ethernet card 0 to router
+name: eth0		encap: Ethernet		HWaddr: 00:90:27:CB:BC:1	
+inet_addr: 10.0.0.1 	Bcast: 10.10.255.255 	Mask: 255.255.255.0	
+Groups: 225.0.0.1:230.0.1.0
+MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+
+# Point to Point link 1 to Host 2
+name: ppp0		encap: PPP 			inet_addr: 10.1.0.1
+MTU: 1500	Metric: 1
+
+ifconfigend.
+
+route:
+10.0.0.2		*				255.255.255.255	H	0	ppp0
+10.0.0.4		*				255.255.255.255 H	0	eth0
+default:		10.0.0.4		0.0.0.0			G	0	eth0
+225.0.0.1		*				255.255.255.255 H	0	ppp0
+225.0.0.1		10.0.0.4		255.255.255.255 G	0	eth0
+
+230.0.0.1		*				255.255.255.255 H	0	ppp0
+230.0.1.0		*				255.255.255.255 H	0	ppp0
+
+230.0.0.0		10.0.0.4		255.0.0.0		G	0	eth0
+
+
+routeend.
+

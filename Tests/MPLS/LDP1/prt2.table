@@ -1,0 +1,10 @@
+#prt table for MPLS network simulation test
+#prt2.table for LSR2
+
+
+PRT TABLE:
+Prefix			Pointer
+
+
+
+

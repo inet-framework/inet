@@ -1,0 +1,30 @@
+
+# filename: fhrouter1.irt
+# routing table for First Hop Router, No 1 of KIDS Network 1
+# connected to host 1,2 and Interior Router 2
+# author: Jochen Reber
+
+
+ifconfig:
+
+# ethernet card 0 to host 1
+name: eth0		encap: Ethernet 	inet_addr: 172.0.0.3
+MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+
+# ethernet card 1 to host 2
+name: eth1		encap: Ethernet 	inet_addr: 172.0.0.4
+MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+
+# router connection 0 to interior router 2 
+name: ppp0 		encap: PPP			inet_addr: 172.0.1.0
+MTU: 1200	Metric: 1
+
+ifconfigend.
+
+route:
+172.0.0.1		*				255.255.255.255 H	0	eth0
+172.0.0.2		*				255.255.255.255 H	0	eth1
+default:		172.0.1.1		255.0.0.0		G	0	ppp0
+
+routeend.
+
