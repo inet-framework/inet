@@ -16,9 +16,11 @@ void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
     ev << q->info() <<"\n";
 }
 
-void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, ulong numBytes)
+void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, uint32 toSeq)
 {
-    ev << "createSegmentWithBytes(" << fromSeq << ", " << numBytes << "): ";
+    ev << "createSegmentWithBytes(" << fromSeq << ", " << toSeq << "): ";
+
+    ulong numBytes = toSeq-fromSeq;
     TCPSegment *tcpseg = q->createSegmentWithBytes(fromSeq, numBytes);
 
     for (int i=0; i<tcpseg->payloadArraySize(); i++)
@@ -58,10 +60,28 @@ createSegmentWithBytes(q, 1000, 2100);
 createSegmentWithBytes(q, 2000, 2099);
 createSegmentWithBytes(q, 2000, 2100);
 
-discardUpTo(q, 2000);
+discardUpTo(q, 2099);
+discardUpTo(q, 2100);
 
-createSegmentWithBytes(q, 2000, 2100);
+createSegmentWithBytes(q, 2100, 2100);
+
+ev << ".\n";
 
 
 %contains: stdout
-dfsdfgsd
+[1000..1000), 0 packets
+enqueue("msg1", 100): [1000..1100), 1 packets
+enqueue("msg2", 400): [1000..1500), 2 packets
+enqueue("msg3", 600): [1000..2100), 3 packets
+enqueue("msg4", 200): [1000..2300), 4 packets
+createSegmentWithBytes(1000, 1099):
+createSegmentWithBytes(1000, 1100):  msg1 ..1100
+createSegmentWithBytes(1000, 2099):  msg1 ..1100, msg2 ..1500
+createSegmentWithBytes(1000, 2100):  msg1 ..1100, msg2 ..1500, msg3 ..2100
+createSegmentWithBytes(2000, 2099):
+createSegmentWithBytes(2000, 2100):  msg3 ..2100
+discardUpTo(2099): [2099..2300), 2 packets
+discardUpTo(2100): [2100..2300), 1 packets
+createSegmentWithBytes(2100, 2100):
+.
+
