@@ -1015,15 +1015,6 @@ void EtherMAC::updateConnectionColor(int txState)
         g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
         g = g->toGate();
     }
-    g = gate("physicalIn");
-    while (g && g->type()=='I')
-    {
-        g = g->fromGate();
-        if (!g)
-            break;
-        g->displayString().setTagArg("o",0,color);
-        g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
-    }
 }
 
 void EtherMAC::beginSendFrames()
