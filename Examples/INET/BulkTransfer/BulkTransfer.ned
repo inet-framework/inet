@@ -26,22 +26,22 @@ import
 module BulkTransfer
     submodules:
         client1: StandardHost;
-            display: "p=120,60;i=device/pc3";
+            display: "p=131,67;i=device/pc3";
         client2: StandardHost;
-            display: "p=260,60;i=device/pc3";
+            display: "p=337,67;i=device/pc3";
         client3: StandardHost;
-            display: "p=260,160;i=device/pc3";
+            display: "p=337,247;i=device/pc3";
         server: StandardHost;
-            display: "p=120,160;i=device/pc2";
+            display: "p=131,247;i=device/pc2";
         router: Router;
-            display: "p=190,102;i=device/router";
+            display: "p=239,156;i=device/router";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "p=50,70;i=block/cogwheel";
+            display: "p=62,119;i=block/cogwheel";
     connections:
         client1.out++ --> datarate 1000000 --> router.in++;
         client1.in++ <-- datarate 1000000 <-- router.out++;

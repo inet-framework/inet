@@ -48,7 +48,7 @@ module KIDSNw1
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=102,209,row;i=device/pc2";
+            display: "p=101,307,row;i=device/pc2";
 
         // First Hop Router
         fhrouter: Router[2];
@@ -62,7 +62,7 @@ module KIDSNw1
             gatesizes if index==0:
                 in[3],
                 out[3];
-            display: "p=120,153,row,130;i=device/router";
+            display: "p=119,222,row,130;i=device/router";
 
         // InteriorRouter
         irouter: Router;
@@ -71,8 +71,7 @@ module KIDSNw1
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=116,116;i=device/router";
-
+            display: "p=115,144;i=device/router";
         // Border Gatgeway Router
         bgrouter: Router[2];
             parameters:
@@ -84,7 +83,6 @@ module KIDSNw1
                 in[2],
                 out[2];
             display: "p=135,64,row;i=abstract/router";
-
     connections nocheck:
         // * host connections *
         host[0].out[0] --> ethernet --> fhrouter[0].in[0];

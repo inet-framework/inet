@@ -37,11 +37,11 @@ module RouterPerfNetwork
                 netmask = "255.255.0.0";
             display: "p=60,160;i=block/cogwheel";
         sender: BurstHost[nodeNo];
-            display: "p=100,285,row;i=device/pc3,yellow,10";
+            display: "p=100,317,row;i=device/pc3,yellow,10";
         recip: BurstHost[nodeNo];
             display: "p=100,68,row;i=device/pc3";
         router: Router;
-            display: "p=172,174;i=abstract/router";
+            display: "p=172,182;i=abstract/router";
     connections nocheck:
         for i=0..nodeNo-1 do
             sender[i].out++ --> datarate 1000000 --> router.in++;

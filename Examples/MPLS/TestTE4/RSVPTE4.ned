@@ -41,7 +41,7 @@ module RSVPTE4
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=112,175;i=abstract/router";
+            display: "p=173,132;i=abstract/router";
         LSR2: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -49,7 +49,7 @@ module RSVPTE4
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=206,263;i=abstract/router";
+            display: "p=255,213;i=abstract/router";
         LSR3: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -57,7 +57,7 @@ module RSVPTE4
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=186,95;i=abstract/router";
+            display: "p=255,61;i=abstract/router";
         LSR4: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -65,7 +65,7 @@ module RSVPTE4
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=286,159;i=abstract/router";
+            display: "p=346,132;i=abstract/router";
         LSR5: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -73,25 +73,25 @@ module RSVPTE4
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=388,159;i=abstract/router";
-        host1: StandardHost;  // client
+            display: "p=450,132;i=abstract/router";
+        host1: StandardHost; // client
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=26,98;i=device/pc2";
-        host3: StandardHost;  // server
+            display: "p=51,133;i=device/pc2";
+        host3: StandardHost; // server
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=482,96;i=device/server3";
+            display: "p=552,131;i=device/server3";
         ted: TED;
             parameters:
-               moduleTypes = "StandardHost RSVP_LSR";
-            display: "p=120,280;i=block/table";
+                moduleTypes = "StandardHost RSVP_LSR";
+            display: "p=426,237;i=block/table";
         tester: NewRouteTester;
             parameters:
                 startTime = 100;
-            display: "p=309,300;i=block/cogwheel";
+            display: "p=488,237;i=block/cogwheel";
     connections nocheck:
         host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];
         host1.out[0] --> delay 0ms datarate 700 --> LSR1.in[0];
@@ -114,7 +114,6 @@ module RSVPTE4
 
         LSR5.out[1] --> delay 0ms datarate 600 --> host3.in[0];
         LSR5.in[1] <-- delay 10ms datarate 600 <-- host3.out[0];
-
 
 endmodule
 

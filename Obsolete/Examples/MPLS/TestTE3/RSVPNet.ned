@@ -33,7 +33,7 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=104,95;i=abstract/router";
+            display: "p=165,68;i=abstract/router";
         LSR2: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -41,7 +41,7 @@ module RSVPNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=142,271;i=abstract/router";
+            display: "p=203,244;i=abstract/router";
         LSR3: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -49,7 +49,7 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=266,95;i=abstract/router";
+            display: "p=344,68;i=abstract/router";
         LSR4: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -57,7 +57,7 @@ module RSVPNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=422,271;i=abstract/router";
+            display: "p=483,244;i=abstract/router";
         LSR5: RSVP_LSR;
             parameters:
                 isIR = false,
@@ -65,21 +65,21 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=500,95;i=abstract/router";
-        host2: StandardHost;  // client
+            display: "p=561,68;i=abstract/router";
+        host2: StandardHost; // client
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=26,256;i=device/pc2";
-        host4: StandardHost;  // server
+            display: "p=65,159;i=device/pc2";
+        host4: StandardHost; // server
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=578,240;i=device/server3";
+            display: "p=643,155;i=device/server3";
         ted: TED;
             parameters:
-               moduleTypes = "StandardHost RSVP_LSR";
-            display: "p=276,340;i=block/table";
+                moduleTypes = "StandardHost RSVP_LSR";
+            display: "p=97,262;i=block/table";
     connections nocheck:
 
         host2.in[0] <-- delay 0ms datarate 9000 <-- LSR1.out[1];

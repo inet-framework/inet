@@ -38,8 +38,8 @@ module StandardHost
     parameters:
         numTcpApps : numeric const,
         numUdpApps : numeric const,
-        tcpAppType: string,
-        udpAppType: string,
+        tcpAppType : string,
+        udpAppType : string,
         IPForward : bool,
         routingFile : string;
     gates:
@@ -57,31 +57,31 @@ module StandardHost
                 routingFile = routingFile;
             display: "p=60,150;i=block/table";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
-            display: "p=125,58;i=block/app";
+            display: "p=139,67;i=block/app";
         tcp: TCPMain;
-            display: "p=125,138;i=block/wheelbarrow";
+            display: "p=139,154;i=block/wheelbarrow";
         udpApp: udpAppType[numUdpApps] like UDPApp;
-            display: "i=block/app;p=234,58";
+            display: "i=block/app;p=248,67";
         udp: UDPProcessing;
-            display: "p=234,138;i=block/transport";
+            display: "p=248,154;i=block/transport";
         pingApp: PingApp;
-            display: "i=block/app;p=291,193";
+            display: "i=block/app;p=319,200";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=210,220;i=block/fork;q=queue";
+            display: "p=224,247;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=170,300,row,90;q=queue;i=block/ifcard";
+            display: "p=181,350,row,90;q=queue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             parameters:
                 proxyARP = false;
-            display: "p=205,300,row,90;q=queue;i=block/ifcard";
+            display: "p=216,350,row,90;q=queue;i=block/ifcard";
     connections:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
             tcpApp[i].tcpIn <-- tcp.to_appl++;
-        endfor
+        endfor;
 
         tcp.to_ip --> networkLayer.TCPIn;
         tcp.from_ip <-- networkLayer.TCPOut;
@@ -89,7 +89,7 @@ module StandardHost
         for i=0..numUdpApps-1 do
             udpApp[i].to_udp --> udp.from_application++;
             udpApp[i].from_udp <-- udp.to_application++;
-        endfor
+        endfor;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

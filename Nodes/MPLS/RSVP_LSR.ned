@@ -42,32 +42,32 @@ module RSVP_LSR
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "p=260,60;i=block/blackboard";
+            display: "p=270,68;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=60,130;i=block/table";
+            display: "p=271,141;i=block/table";
         ospf_te: OspfTe;
-            display: "p=60,190;b=40,24;o=#008040";
+            display: "i=block/cogwheel;p=60,199;o=#008040";
         signal_module: RSVPAppl;
             parameters:
                 isIR = isIR,
                 isER = isER;
-            display: "o=#8080ff;p=80,52;b=32,30";
+            display: "i=block/control;o=#8080ff;p=87,60";
         rsvp: RSVP;
             parameters:
                 isIR = isIR,
                 isER = isER;
-            display: "o=#0080c0;p=190,51;b=40,24,rect";
+            display: "i=block/square;o=#0080c0;p=192,60";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=192,163;i=block/fork";
+            display: "p=192,155;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=88,297,row,90;q=queue;i=block/ifcard";
+            display: "p=88,306,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -77,12 +77,12 @@ module RSVP_LSR
                 toL3[sizeof(out)],
                 fromL2[sizeof(out)],
                 toL2[sizeof(out)];
-            display: "o=#ff8000;p=192,238;b=66,14";
+            display: "i=block/switch;o=#ff8000;p=192,247";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=block/table;p=280,184";
+            display: "i=block/table;p=271,232";
     connections nocheck:
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;

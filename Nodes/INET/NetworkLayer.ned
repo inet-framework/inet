@@ -61,13 +61,13 @@ module NetworkLayer
                 transportOut[6],
                 queueIn[sizeof(physIn)],
                 queueOut[sizeof(physOut)];
-            display: "p=90,140;i=block/cogwheel;q=queue";
+            display: "p=85,95;i=block/cogwheel;q=queue";
         icmp: ICMP;
-            display: "p=180,90;i=block/cogwheel";
+            display: "p=160,63;i=block/cogwheel_s";
         igmp: IGMP;
-            display: "p=180,190;i=block/cogwheel";
+            display: "p=160,122;i=block/cogwheel_s";
         errorHandling: ErrorHandling;
-            display: "p=120,220;i=block/process_s";
+            display: "p=133,174;i=block/process_s";
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;

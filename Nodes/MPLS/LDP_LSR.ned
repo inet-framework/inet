@@ -58,18 +58,18 @@ module LDP_LSR
                 helloTimeout = helloTimeout,
                 isER = isER,
                 isIR = isIR;
-            display: "p=190,60;b=40,24";
+            display: "i=block/control;p=206,67";
         tcp: TCPMain;
-            display: "p=145,120;i=block/wheelbarrow";
+            display: "p=161,145;i=block/wheelbarrow";
         udp: UDPProcessing;
-            display: "p=235,120;i=block/transport";
+            display: "p=251,145;i=block/transport";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=190,186;i=block/fork";
+            display: "p=208,223;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=87,320,row,90;q=queue;i=block/ifcard";
+            display: "p=105,364,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -79,12 +79,12 @@ module LDP_LSR
                 toL3[sizeof(out)],
                 fromL2[sizeof(out)],
                 toL2[sizeof(out)];
-            display: "o=#ff8000;p=190,250;b=66,14";
+            display: "i=block/switch;o=#ff8000;p=208,294";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=block/table;p=279,207";
+            display: "i=block/table;p=297,251";
     connections nocheck:
         signal_module.from_tcp_interface <-- tcp.to_appl++;
         signal_module.to_tcp_interface --> tcp.from_appl++;

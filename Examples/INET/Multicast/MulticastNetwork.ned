@@ -47,7 +47,7 @@ module MulticastNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=62,46;i=device/pc2";
+            display: "p=125,52;i=device/pc2";
         host2: StandardHost;
             parameters:
                 IPForward = true,
@@ -55,7 +55,7 @@ module MulticastNetwork
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=38,200;i=device/pc2";
+            display: "p=60,244;i=device/pc2";
         host3: StandardHost;
             parameters:
                 IPForward = true,
@@ -63,7 +63,7 @@ module MulticastNetwork
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=140,200;i=device/pc2";
+            display: "p=196,244;i=device/pc2";
         host4: StandardHost;
             parameters:
                 IPForward = false,
@@ -71,7 +71,7 @@ module MulticastNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=240,269;i=device/pc2";
+            display: "p=406,305;i=device/pc2";
         host5: StandardHost;
             parameters:
                 IPForward = false,
@@ -79,7 +79,7 @@ module MulticastNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=344,41;i=device/pc2";
+            display: "p=492,59;i=device/pc2";
         host6: StandardHost;
             parameters:
                 IPForward = false,
@@ -87,35 +87,35 @@ module MulticastNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=364,189;i=device/pc2";
+            display: "p=492,204;i=device/pc2";
         router1: Router;
             parameters:
                 routingFile = "mcrouter1.mrt";
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=68,115;i=abstract/router";
+            display: "p=124,135;i=abstract/router";
         router2: Router;
             parameters:
                 routingFile = "mcrouter2.mrt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=214,115;i=abstract/router";
+            display: "p=292,135;i=abstract/router";
         router3: Router;
             parameters:
                 routingFile = "mcrouter3.mrt";
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=214,194;i=abstract/router";
+            display: "p=292,238;i=abstract/router";
         router4: Router;
             parameters:
                 routingFile = "mcrouter4.mrt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=300,115;i=abstract/router";
+            display: "p=408,135;i=abstract/router";
     connections:
         // * Domain 1 * (172.0.0.x)
         host1.out[0] --> ethernet --> router1.in[0];
