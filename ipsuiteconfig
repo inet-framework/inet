@@ -6,8 +6,8 @@
 # The command is:  opp_makemake -f --genconfig omnetppconfig
 #
 
+# include omnetppconfig from this directory
 ROOT=$(HOME)/IPSuite
-
 include $(ROOT)/omnetppconfig
 
 #INCLUDE_PATH+= ...additional include directories...
