@@ -30,7 +30,6 @@
 #define TABLE_SIZE        10
 
 
-
 struct PathStateBlock_t{
 
     /* SESSION object structure */
@@ -163,6 +162,11 @@ typedef struct {
     FilterSpecObj FilterSpecObject;
 } FHandleType;
 */
+
+void print(RSVPPathMsg *p);
+void print(RSVPPathTear *p);
+void print(RSVPResvMsg *p);
+void print(RSVPResvTear *p);
 
 class RSVP :  public cSimpleModule
 {

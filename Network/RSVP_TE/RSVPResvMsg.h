@@ -34,37 +34,8 @@ class RSVPResvMsg : public RSVPResvMsg_Base
     inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list_var;} //FIXME
     inline void setFlowDescriptor(FlowDescriptor_t* f) {for(int i=0; i<InLIST_SIZE; i++) setFlow_descriptor_list(i,f[i]);} // FIXME
-    void print();
 };
 
-inline void RSVPResvMsg::print()
-{
-    int sIP = 0;
-    ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
-          "ProtId   = " << getProtId() << "\n" <<
-          "DestPort = " << getDestPort() << "\n" <<
-          "Next Hop = " << IPAddress(getNHOP()) << "\n" <<
-          "LIH      = " << IPAddress(getLIH()) << "\n";
-
-    for (int i = 0; i < InLIST_SIZE; i++)
-            if ((sIP = getFlow_descriptor_list(i).Filter_Spec_Object.SrcAddress) != 0)
-            {
-                ev << "Receiver =" << IPAddress(sIP) <<
-                    ",OutLabel=" << getFlow_descriptor_list(i).label <<
-                    ", BW=" << getFlow_descriptor_list(i).Flowspec_Object.req_bandwidth <<
-                    ", Delay=" << getFlow_descriptor_list(i).Flowspec_Object.link_delay << "\n";
-                ev << "RRO={";
-                for (int c = 0; c < MAX_ROUTE; c++)
-                {
-                    int rroEle = getFlow_descriptor_list(i).RRO[c];
-                    if (rroEle != 0)
-                        ev << IPAddress(rroEle) << ",";
-                }
-                ev << "}\n";
-            }
-}
-
-//---
 
 /**
  * RESV TEAR message
@@ -82,29 +53,8 @@ class RSVPResvTear : public RSVPResvTear_Base
 
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list_var;} //FIXME
     inline void setFlowDescriptor(FlowDescriptor_t* f) {for(int i=0; i<InLIST_SIZE; i++) setFlow_descriptor_list(i,f[i]);}
-
-    void print();
 };
 
-inline void RSVPResvTear::print()
-{
-    int sIP = 0;
-    ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
-        "ProtId   = " << getProtId() << "\n" <<
-        "DestPort = " << getDestPort() << "\n" <<
-        "Next Hop = " << IPAddress(getNHOP()) << "\n" <<
-        "LIH      = " << IPAddress(getLIH()) << "\n";
-
-    for (int i = 0; i < InLIST_SIZE; i++)
-        if ((sIP = getFlow_descriptor_list(i).Filter_Spec_Object.SrcAddress) != 0)
-        {
-            ev << "Receiver =" << IPAddress(sIP) <<
-                ", BW=" << getFlow_descriptor_list(i).Flowspec_Object.req_bandwidth <<
-                ", Delay=" << getFlow_descriptor_list(i).Flowspec_Object.link_delay << "\n";
-
-
-        }
-}
 
 /**
  * RESV ERROR message
@@ -120,7 +70,6 @@ class RSVPResvError : public RSVPResvError_Base
     inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
     inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
 };
-
 
 #endif
 

@@ -634,7 +634,7 @@ void RSVPAppl::sendResvMessage(RSVPPathMsg * pMsg, int inLabel)
     rMsg->addPar("dest_addr") = IPAddress(pMsg->getNHOP()).str().c_str();
     ev << "Next peer " << IPAddress(pMsg->getNHOP());
     ev << "RESV MESSAGE content: \n";
-    rMsg->print();
+    print(rMsg);
     send(rMsg, "to_rsvp");
 }
 
@@ -794,7 +794,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 
 
     ev << "PATH message content sent:\n";
-    pMsg->print();
+    print(pMsg);
 
     send(pMsg, "to_rsvp");
 }

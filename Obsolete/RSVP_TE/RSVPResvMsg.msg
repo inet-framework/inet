@@ -16,29 +16,21 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
-struct SessionObj_t;
 struct RsvpHopObj_t;
-struct SenderTemplateObj_t;
-struct SenderTspecObj_t;
-struct FlowSpecObj_t;
-struct FilterSpecObj_t;
-struct LabelRequestObj_t;
-struct SenderDescriptor_t;
 struct FlowDescriptor_t;
-struct EroObj_t;
 class RSVPPacket;
 
 
 //
-// RSVP RESV packet
+// RSVP RESV message
 //
 // <code>
 //  <Resv Message> ::= <Common Header> [ <INTEGRITY> ]
-//                             <SESSION>  <RSVP_HOP>
-//                             <TIME_VALUES>
-//                             [ <RESV_CONFIRM> ]  [ <SCOPE> ]
-//                             [ <POLICY_DATA> ... ]
-//                             <STYLE> <flow descriptor list>
+//                     <SESSION>  <RSVP_HOP>
+//                     <TIME_VALUES>
+//                     [ <RESV_CONFIRM> ]  [ <SCOPE> ]
+//                     [ <POLICY_DATA> ... ]
+//                     <STYLE> <flow descriptor list>
 // </code>
 //
 message RSVPResvMsg extends RSVPPacket
@@ -54,7 +46,7 @@ message RSVPResvMsg extends RSVPPacket
 
 
 //
-// RESV TEAR packet
+// RESV TEAR message
 //
 // <code>
 // <ResvTear Message> ::= <Common Header> [<INTEGRITY>]
@@ -73,7 +65,7 @@ message RSVPResvTear extends RSVPPacket
 };
 
 //
-// RESV ERROR packet
+// RESV ERROR message
 //
 // <code>
 //    <ResvErr Message> ::= <Common Header> [ <INTEGRITY> ]

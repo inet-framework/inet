@@ -20,6 +20,86 @@
 
 Define_Module(RSVP);
 
+
+inline bool equal(const SenderTemplateObj_t& a, const SenderTemplateObj_t& b)
+{
+    return a.SrcAddress==b.SrcAddress && a.SrcPort==b.SrcPort && a.Lsp_Id==b.Lsp_Id;
+}
+
+void print(RSVPPathMsg *p)
+{
+    ev << "DestAddr = " << IPAddress(p->getDestAddress()) << "\n" <<
+        "ProtId   = " << p->getProtId() << "\n" <<
+        "DestPort = " << p->getDestPort() << "\n" <<
+        "SrcAddr  = " << IPAddress(p->getSrcAddress()) << "\n" <<
+        "SrcPort  = " << p->getSrcPort() << "\n" <<
+        "Lsp_Id   = " << p->getLspId() << "\n" <<
+        "Next Hop = " << IPAddress(p->getNHOP()) << "\n" <<
+        "LIH      = " << IPAddress(p->getLIH()) << "\n" <<
+        "Delay    = " << p->getDelay() << "\n" << "Bandwidth= " << p->getBW() << "\n";
+
+}
+
+void print(RSVPPathTear *p)
+{
+    ev << "DestAddr = " << IPAddress(p->getDestAddress()) << "\n" <<
+          "ProtId   = " << p->getProtId() << "\n" <<
+          "DestPort = " << p->getDestPort() << "\n" <<
+          "SrcAddr  = " << IPAddress(p->getSrcAddress()) << "\n" <<
+          "SrcPort  = " << p->getSrcPort() << "\n" <<
+          "Next Hop = " << IPAddress(p->getNHOP()) << "\n" <<
+          "LIH      = " << IPAddress(p->getLIH()) << "\n";
+}
+
+void print(RSVPResvMsg *p)
+{
+    int sIP = 0;
+    ev << "DestAddr = " << IPAddress(p->getDestAddress()) << "\n" <<
+          "ProtId   = " << p->getProtId() << "\n" <<
+          "DestPort = " << p->getDestPort() << "\n" <<
+          "Next Hop = " << IPAddress(p->getNHOP()) << "\n" <<
+          "LIH      = " << IPAddress(p->getLIH()) << "\n";
+
+    for (int i = 0; i < InLIST_SIZE; i++)
+        if ((sIP = p->getFlow_descriptor_list(i).Filter_Spec_Object.SrcAddress) != 0)
+        {
+            ev << "Receiver =" << IPAddress(sIP) <<
+                ",OutLabel=" << p->getFlow_descriptor_list(i).label <<
+                ", BW=" << p->getFlow_descriptor_list(i).Flowspec_Object.req_bandwidth <<
+                ", Delay=" << p->getFlow_descriptor_list(i).Flowspec_Object.link_delay << "\n";
+            ev << "RRO={";
+            for (int c = 0; c < MAX_ROUTE; c++)
+            {
+                int rroEle = p->getFlow_descriptor_list(i).RRO[c];
+                if (rroEle != 0)
+                    ev << IPAddress(rroEle) << ",";
+            }
+            ev << "}\n";
+        }
+}
+
+void print(RSVPResvTear *p)
+{
+    int sIP = 0;
+    ev << "DestAddr = " << IPAddress(p->getDestAddress()) << "\n" <<
+          "ProtId   = " << p->getProtId() << "\n" <<
+          "DestPort = " << p->getDestPort() << "\n" <<
+          "Next Hop = " << IPAddress(p->getNHOP()) << "\n" <<
+          "LIH      = " << IPAddress(p->getLIH()) << "\n";
+
+    for (int i = 0; i < InLIST_SIZE; i++)
+        if ((sIP = p->getFlow_descriptor_list(i).Filter_Spec_Object.SrcAddress) != 0)
+        {
+            ev << "Receiver =" << IPAddress(sIP) <<
+                ", BW=" << p->getFlow_descriptor_list(i).Flowspec_Object.req_bandwidth <<
+                ", Delay=" << p->getFlow_descriptor_list(i).Flowspec_Object.link_delay << "\n";
+
+
+        }
+}
+
+//---
+
 void RSVP::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)
@@ -151,7 +231,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
     ResvStateBlock_t r_iter;
 
     ev << "Received PATH MESSAGE\n";
-    pmsg->print();
+    print(pmsg);
 
     EroObj_t *ERO;
 
@@ -225,7 +305,8 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
              */
 
             if (pmsg->isInSession(&p_iter.Session_Object) &&
-                pmsg->equalST(&p_iter.Sender_Template_Object) && p_iter.Local_Only_Flag == OFF)
+                equal(pmsg->getSenderTemplate(),p_iter.Sender_Template_Object) &&
+                p_iter.Local_Only_Flag == OFF)
             {
                 fPSB = &p_iter;
             }
@@ -238,7 +319,8 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
                Search for matching of the interface, if PSB found
              */
             if (pmsg->isInSession(&p_iter.Session_Object) &&
-                pmsg->equalST(&p_iter.Sender_Template_Object) && (p_iter.IncInterface == InIf))
+                equal(pmsg->getSenderTemplate(), p_iter.Sender_Template_Object) &&
+                p_iter.IncInterface == InIf)
             {
 
                 ev << "Matching PSB found \n";
@@ -257,7 +339,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
                 if (pmsg->getNHOP() != p_iter.Previous_Hop_Address ||
                     pmsg->getLIH() != p_iter.LIH ||
-                    (!pmsg->equalST((SenderTemplateObj_t *) & p_iter.Sender_Tspec_Object)))
+                    !equal(pmsg->getSenderTemplate(), (SenderTemplateObj_t&)p_iter.Sender_Tspec_Object))
                 {
                     p_iter.Previous_Hop_Address = pmsg->getNHOP();
                     p_iter.LIH = pmsg->getLIH();
@@ -467,7 +549,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
 
     ev << "Entered ResvMsgPro ";
     ev << "Process RESV message with content\n";
-    rmsg->print();
+    print(rmsg);
 
     for (int i = 0; i < InLIST_SIZE; i++)
     {
@@ -945,7 +1027,7 @@ void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
         {
 
             if (pmsg->isInSession(&PSBList[m].Session_Object) &&
-                pmsg->equalST(&PSBList[m].Sender_Template_Object))
+                equal(pmsg->getSenderTemplate(), PSBList[m].Sender_Template_Object)) //FIXME we match for lsp_id as well -- is that wrong?
             {
                 fPSB = &PSBList[m];
 
@@ -1060,7 +1142,7 @@ void RSVP::RTearMsgPro(RSVPResvTear * rmsg)
 
     ev << "Entered Resv Tear Message Pro ";
     ev << "Process ResvTear message with content\n";
-    rmsg->print();
+    print(rmsg);
     int OI = rmsg->getLIH();
 
     for (int inx = 0; inx < InLIST_SIZE; ++inx)
@@ -1462,7 +1544,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
 
     ev << "Send RESV message to " << IPAddress(PH) << "\n";
     ev << "RESV content is: \n";
-    outRM->print();
+    print(outRM);
     //outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
     //resvMsg->addPar("src_addr")=IPAddress(outRM->Rsvp_Hop_Object.Next_Hop_Address).str().c_str();
     //send(outRM, "to_ip");
@@ -1501,7 +1583,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     outRM->setRsvp_hop(hop);
     ev << "Send RESV TEAR message to " << IPAddress(PH) << "\n";
     ev << "RESV TEAR content is: \n";
-    outRM->print();
+    print(outRM);
     //outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
     //send(outRM, "to_ip");
     sendToIP(outRM, IPAddress(PH));
@@ -2365,8 +2447,8 @@ bool RSVP::doCACCheck(RSVPPathMsg * pmsg, int OI)
                 pe->setErrorCode(1);    // Admission Control Error
                 pe->setErrorNode(routerId);
                 pe->setSession(pmsg->getSession());
-                pe->setSenderTemplate(*pmsg->getSenderTemplate());
-                pe->setSenderTspec(*pmsg->getSenderTspec());
+                pe->setSenderTemplate(pmsg->getSenderTemplate());
+                pe->setSenderTspec(pmsg->getSenderTspec());
                 ev << "Propagate PATH ERROR to " << IPAddress(pmsg->getNHOP()) << "\n";
                 //pe->addPar("src_addr") = IPAddress(routerId).str().c_str();
                 //pe->addPar("dest_addr") = IPAddress(pmsg->getNHOP()).str().c_str();
