@@ -113,11 +113,13 @@ void RSVPAppl::activity()
                 Unicast_Route_Query(receiverIP, &outInf);
 
                 // Convert to name
-                int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
-                int inInfIndex = rt->interfaceByAddress(IPAddress(inInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
+                InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
+                if (!outInfP) error("no interface with address %s",IPAddress(outInf).str().c_str());
+                if (!inInfP) error("no interface with address %s",IPAddress(inInf).str().c_str());
 
-                const char *outInfName = rt->interfaceByPortNo(outInfIndex)->name.c_str();
-                const char *inInfName = rt->interfaceByPortNo(inInfIndex)->name.c_str();
+                const char *outInfName = outInfP->name.c_str();
+                const char *inInfName = inInfP->name.c_str();
 
                 if (isER)
                 {
