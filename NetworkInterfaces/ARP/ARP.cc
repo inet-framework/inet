@@ -169,7 +169,8 @@ void ARP::processOutboundPacket(cMessage *msg)
         sendPacketToMAC(msg, broadcastAddr);
         return;
 #if 0
-        // experimental RFC 1112 code:
+        // experimental RFC 1112 code
+        // TBD needs counterpart to be implemented in EtherMAC processReceivedDataFrame().
         unsigned char macBytes[6];
         macBytes[0] = 0x01;
         macBytes[1] = 0x00;
