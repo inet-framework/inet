@@ -48,7 +48,7 @@ module UDPSocketHost
                 physOut[sizeof(out)];
             display: "p=80,220;i=fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,280,row;i=iface";
+            display: "p=80,280,row;q=queue;i=iface";
     connections nocheck:
         // transport connections
         applClient.out --> socketLayer.from_appl[0];

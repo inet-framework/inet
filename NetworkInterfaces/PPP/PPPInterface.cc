@@ -173,6 +173,7 @@ void PPPInterface::handleMessage(cMessage *msg)
         {
             // We are currently busy, so just queue up the packet.
             ev << "Received " << msg << " but transmitter busy, queueing.\n";
+            if (ev.isGUI() && queue.length()>=3) displayString().setTagArg("i",1,"red");
             queue.insert(msg);  // FIXME use frameCapacity, bitCapacity
         }
         else

@@ -87,7 +87,7 @@ module LSRNode
                 physOut[sizeof(out)];
             display: "b=32,30;p=191,186;i=fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=87,320,row;i=iface";
+            display: "p=87,320,row;q=queue;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,

@@ -42,7 +42,7 @@ module Router
                 physOut[sizeof(out)];
             display: "p=160,60;i=fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,120,row;i=iface";
+            display: "p=80,120,row;q=queue;i=iface";
     connections nocheck:
         // connections to network outside
         for i=0..sizeof(out)-1 do

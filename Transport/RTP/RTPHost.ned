@@ -62,7 +62,7 @@ module RTPHost
                 physOut[sizeof(out)];
             display: "b=32,30;p=87,242;i=fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,300,row;b=38,24";
+            display: "p=80,300,row;q=queue;i=iface";
     connections nocheck:
         // transport connections
         application.toRTP --> rtpLayer.fromApp;

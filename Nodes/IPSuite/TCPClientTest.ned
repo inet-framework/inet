@@ -40,7 +40,7 @@ module TCPClientTest
                 physOut[sizeof(out)];
             display: "p=87,155;i=fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,220,row;i=iface";
+            display: "p=80,220,row;q=queue;i=iface";
     connections nocheck:
         // transport connections
         networkLayer.TCPOut --> tcpApp.in;

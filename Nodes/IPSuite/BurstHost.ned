@@ -57,7 +57,7 @@ module BurstHost
                 physOut[1];
             display: "b=32,30;p=80,120;i=fork";
         ppp : PPPInterface[1];
-            display: "p=80,180,row;i=iface";
+            display: "p=80,180,row;q=queue;i=iface";
     connections nocheck:
         // transport connections
         networkLayer.UDPOut --> burstGenerator.in;
