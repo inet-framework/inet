@@ -27,7 +27,7 @@
 // It also includes an MPLS model with \RSVP-TE and LDP signalling.
 // Link-layer models are PPP and Ethernet.</nohtml>
 //
-// The current codebase is a result of a complete rewrite of the original
+// The current codebase is the result of a complete rewrite of the original
 // IPSuite by Andras Varga, started in 2003. The original IPSuite was written by 
 // Klaus Wehrle, Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann, 
 // Ulrich Kaage and others at the University of Karlsruhe during 2000-2001.
@@ -66,7 +66,8 @@
 //    etc.
 //
 // Starting points for the MPLS models:
-//  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe
+//  - the core modules: MPLSModule, LIBTable, NewLDP, RSVP, TED, OspfTe
+//  - MPLS-enabled routers: LSRNode, RSVP_LSR_Node
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>
 //
