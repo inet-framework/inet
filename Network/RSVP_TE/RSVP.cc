@@ -2451,12 +2451,11 @@ void RSVP::propagateTEDchanges()
     TED::getGlobalInstance()->updateTED(ted);
 }
 
-void RSVP::sendToIP(cMessage *msg, IPAddress destAddr, IPAddress srcAddr)
+void RSVP::sendToIP(cMessage *msg, IPAddress destAddr)
 {
     // attach control info to packet
     IPControlInfo *controlInfo = new IPControlInfo();
     controlInfo->setDestAddr(destAddr);
-    controlInfo->setSrcAddr(srcAddr);
     controlInfo->setProtocol(IP_PROT_RSVP);
     msg->setControlInfo(controlInfo);
 

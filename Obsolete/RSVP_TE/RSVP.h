@@ -233,7 +233,7 @@ private:
     void preemptTunnel(int tunnelId);
     void propagateTEDchanges();
 
-    void sendToIP(cMessage *msg, IPAddress destAddr, IPAddress srcAddr=IPAddress());
+    void sendToIP(cMessage *msg, IPAddress destAddr);
 
  public:
     Module_Class_Members(RSVP, cSimpleModule, 16384);
