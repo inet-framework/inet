@@ -1,94 +1,50 @@
--*- text -*-
+IPSuite directory structure
+===========================
 
-Contents: Description of the directory structure
+Compared to the original IPSuite, the directories have been rearranged 
+roughly according to OSI layers. 
 
-Subdirectories:
----------------
+Bottom-up:
 
-- Networks
-  Example networks with the corresponding ned files
+ PHY/                  physical layer models (none yet)
 
-- IPNode
-  * ProcessorAccess and ProcessManager base classes
-  * ned files for a generic IPNode and for specialized preconfigured
-    StandardHost, TCPServerNode, TCPClientNode, UDPHost and Router
+ NetworkInterfaces/    L2 (data link layer) protocols
+   PPP-old/            PPP implementation
+   Queues/             input/output queues
 
-- MAC_LLC
-  * routing table implementation and RoutingTableAccess base class
-  * IP input and output queue modules: InputQueue, OutputQueue,
-    Enqueue, Dequeue
-  * MAC modules: PPPModule
-  * NetworkLayers.ned file containing the network layer and IP
-    processing
+ Network/              L3 (network layer) protocols
+   IPv4/               IPv4 and associated protocols
+     Core/             IPv4, ICMP, etc. modules
+     QoSStub/          prototypes for QoS modules
+     QoS/              DiffServ implementation
+   MPLS/               MPLS implementation
+   LDP/                LDP signalling protocol for MPLS
+   RSVP_TE/            RSVP-TE signalling protocol for MPLS
 
-- IPProcessing
-  * NED structure of IPProcessing and all included submodules like
-    PreRouting, Routing, LocalDeliver, IPMulticast, IPTunneling, ICMP,
-    IPFragmentation, IPSend and IPOutput. The core modules implement
-    the IP mechanisms respectively.
-  * the ICMP header file is separated and placed into the Interface
-    directory because its definitions are needed outside of
-    IPProcessing, too.
+ Transport/            transport layer protocols
+   TCP/                TCP protocol
+   UDP/                UDP protocol
+   Socket/             experimental socket layer over TCP and UDP
 
-- Qos
-  * Support for QoS
+ Applications/         application layer
+   Generic/            traffic generators (directly for IP?)
+   PingApp/            ping application (incomplete)
+   TCPApp/             simple TCP client-server application
+   TCPExample/         simple TCP client-server application
 
-- TCP
-  * transport layer: tcpmodule, Tcp2Ip, Ip2Tcp
-  * application layer: TcpClient, TcpServer and the NED file tcp4ip
+Further directories are:
 
-- UDP
-  * transport layer: UDP, UDPProcessing
-  * application layer: UDPApp - a generic UDP traffic generator
+ Util/                 constants and classes for the whole IPSuite
 
-- ControlApps
-  * module ControlApps that contains the implementation of an ICMP
-    error output module and a ping module
+ Nodes/                protocol stacks, host and router models
+   IPSuite/            using IPSuite components only
+   MPLS/               router models with MPLS/LDP/RSVP-TE 
 
-- TrafficGen
-  * The SimpleApp module generates randomly sized packets at random
-    time intervals
-  * ConstTrafficGen module generates constant sized packets at
-    constant time intervals
-  * TrafficGenerator NED file that implements a generic structure of a
-    traffic generator
+ Examples/             example networks
+   IPSuite/            example networks based on IPSuite
+   MPLS/               example networks for MPLS/LDP/RSVP-TE
 
-- Interface
-  * interface classes and definitions needed by different modules,
-    e.g.
-    + packet definitions: IPDatagram, IPInterfacePacket, Transport
-      Packet, PPPFrame
-    + type and constant definitions: hook_types, basic_defs and ICMP
+ Tests/                test suite
+   IPSuite/            for IPSuite (none yet)
+   MPLS/               for the MPLS models
 
-
-The next picture describes the directory structure hierarchically:
-
-    
-                            ------------
-                            | Networks |
-                            ------------
-                                 |
-                                 |
-                                 |
-                             ----------
-                             | IPNode |
-                             ----------
-                                 |
-      ----------------------------------------------------------
-      |            |          |             |                  |
- -----------    -------    -------    --------------    ---------------
- | MAC_LLC |    | TCP |    | UDP |    | TrafficGen |    | ControlApps |
- -----------    -------    -------    --------------    ---------------
-      |
-      --------------
-         |         |
- ----------------  |
- | IPProcessing |  |
- ----------------  |
-         |         |
-         |      -------
-         -------| QoS |
-                -------
-                           --------------
-                           | Interfaces |
-                           --------------

@@ -10,3 +10,5 @@ The TCP finite state machine: Design, Initial coding
 * Verena Kahmann	<kahmann@telematik.informatik.uni-karlsruhe.de>
 * Uli Kaage		<kaage@int.uni-karlsruhe.de>
 
+The MPLS, LDP, RSVP-TE models have been contributed by:
+* Xuan Thang Nguyen     <Xuan.T.Nguyen@uts.edu.au>

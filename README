@@ -1,38 +1,60 @@
 The OMNeT++ Internet Protocol Suite contains numerous internet
 protocols. Beyond IP there is TCP, UDP and support for QoS.
+MPLS, LDP and RSVP-TE models have also been contributed.
+See the CREDITS file for the names of people involved in the
+development. 
 
 Compilation instructions for Unix:
 ----------------------------------
 
-1. you need a recent working OMNeT++ installation that must be newer
-   than 2.1. This means you need to get a OMNeT++ snapshot version
-   from here (follow step 2. or 3. from the Download&Build Instructions):
-   http://cvs-int.etec.uni-karlsruhe.de/omnetpp/model-doc/omnetpp.html
+  1. You need a working OMNeT++ installation, version 2.3 or newer.
 
-   Sorry for this inconvenience but we had to make the IP-Suite const
-   save. Only recent OMNeT++ development versions support this as will
-   upcoming stable releases.
-   
+  2. Change to the IPSuite directory. Edit the ipsuiteconfig file
+     and adjust the ROOT variable in it.  
+     
+  3. Type "make" to build everything.
 
-2. If you have a recent working OMNeT++ installation newer than 2.1,
-   you need to build all Makefiles in the ip-suite sub directories:
+  4. Finally, you can have a look at the example networks by launching a
+     simple demo front end:
 
-   $ make Makefiles
+     $ ./ipsuite-demo
+           or 
+     $ ./mpls-demo
 
-   This may take a while because OMNeT++ already starts compiling some
-   subdirectories in this stage.
+Should you ever need to re-build the makefiles (only if you add/remove
+files or directories), use the following command:
 
-3. Build all examples:
+   $ ./makemake 
 
-   $ make all
-
-4. Finally, you can have a look at the example networks by launching a
-   simple demo front end:
-
-   $ rundemo
 
 Compilation instructions for Windows:
 -------------------------------------
 
-Since I'm not using Windows, this is left as an exercise for the
-interested user :-)
+If you're using Cygwin or MinGW, see instructions for Unix.
+ 
+If you're using Microsoft Visual C++:
+
+  1. You need a working OMNeT++ installation, version 2.3 or newer.
+
+  2. Change to the IPSuite directory. Edit the ipsuiteconfig.vc file
+     and adjust the ROOT and OMNETPP_ROOT variables in it.  
+     
+  3. Type "nmake -f Makefile.vc" to build everything.
+
+  4. Finally, you can have a look at the example networks by launching a
+     simple demo front end:
+
+     wish84 ipsuite-demo
+           or 
+     wish84 mpls-demo
+
+Where wish84 is the wish shell from the Tcl/Tk distribution. You may
+have to specify its directory too, if it's not in the PATH. 
+
+Should you ever need to re-build the makefiles (only if you add/remove
+files or directories), use the following command:
+
+   makemake.cmd 
+
+Have fun.
+
