@@ -128,12 +128,6 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 {
     TCPConnection *conn = new TCPConnection(tcpMain,appGateIndex,connId);
 
-    conn->state->active = false;
-    conn->state->fork = true;
-    conn->localAddr = localAddr;
-    conn->localPort = localPort;
-    FSM_Goto(conn->fsm, TCP_S_LISTEN);
-
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->className();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
@@ -147,6 +141,13 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     conn->tcpAlgorithm->initialize();
 
     conn->state = conn->tcpAlgorithm->createStateVariables();
+
+    // put it into LISTEN, with our localAddr/localPort
+    conn->state->active = false;
+    conn->state->fork = true;
+    conn->localAddr = localAddr;
+    conn->localPort = localPort;
+    FSM_Goto(conn->fsm, TCP_S_LISTEN);
 
     return conn;
 }
