@@ -18,18 +18,25 @@
 
 
 //
-// Accepts any number of incoming TCP connections, and sends back the 
-// messages that arrive on them, The lengths of the messages are
-// multiplied by echoFactor before sending them back (echoFactor=1 will 
-// result in sending back the same message unmodified.) The reply can also be 
-// delayed by a constant time (echoDelay parameter).
+// Generic server application for modelling TCP-based request-reply style
+// protocols or applications.
 //
-simple TCPEchoApp
+// Requires message object preserving sendQueue/receiveQueue classes
+// to be used with TCP (that is, TCPMessageSendQueue and TCPMessageRcvQueue;
+// TCPVirtualBytesSendQueue and TCPVirtualBytesRcvQueue are not good).
+//
+// The module accepts any number of incoming TCP connections, and expects
+// to receive messages of class GenericAppMsg on them. A message should
+// contain how large the reply should be (number of bytes). TCPGenericSrvApp
+// will just change the length of the received message accordingly, and send
+// back the same message object. The reply can be delayed by a constant time
+// (replyDelay parameter).
+//
+simple TCPGenericSrvApp
     parameters:
         address: string, // local address; may be left empty ("")
         port: numeric const, // port number to listen on
-        echoFactor: numeric const,
-        echoDelay: numeric const;
+        replyDelay: numeric const;
     gates:
         in: tcpIn;
         out: tcpOut;

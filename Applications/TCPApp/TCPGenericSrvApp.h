@@ -11,30 +11,31 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPECHOAPP_H_
-#define __TCPECHOAPP_H_
+#ifndef __TCPGENERICSRVAPP_H_
+#define __TCPGENERICSRVAPP_H_
 
 #include <omnetpp.h>
 
 
 
 /**
- * Accepts any number of incoming connections, and sends back whatever
- * arrives on them.
+ * Generic server application. It serves requests coming in GenericAppMsg
+ * request messages.
  */
-class TCPEchoApp : public cSimpleModule
+class TCPGenericSrvApp : public cSimpleModule
 {
   protected:
     double delay;
-    double echoFactor;
 
+    long msgsRcvd;
+    long msgsSent;
     long bytesRcvd;
     long bytesSent;
 
     void sendOrSchedule(cMessage *msg);
 
   public:
-    Module_Class_Members(TCPEchoApp, cSimpleModule, 0);
+    Module_Class_Members(TCPGenericSrvApp, cSimpleModule, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

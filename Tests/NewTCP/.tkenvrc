@@ -15,7 +15,7 @@ option animation_msgcolors	{1}
 option penguin_mode	{0}
 option showlayouting	{0}
 option bubbles	{1}
-option animation_speed	{1}
+option animation_speed	{2.94}
 option bkpts_enabled	{1}
 option expressmode_autoupdate	{1}
 config rununtil-event	{}

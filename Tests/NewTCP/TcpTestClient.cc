@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <omnetpp.h>
+#include <string>
 #include "TCPSocket.h"
 
 
@@ -33,8 +34,11 @@ class TcpTestClient : public cSimpleModule
 
     cQueue queue;
 
+    int ctr;
+
   protected:
     void parseScript(const char *script);
+    std::string makeMsgName();
 
   public:
     Module_Class_Members(TcpTestClient, cSimpleModule, 16384);
@@ -80,6 +84,13 @@ void TcpTestClient::parseScript(const char *script)
     }
 }
 
+std::string TcpTestClient::makeMsgName()
+{
+    char buf[40];
+    sprintf(buf,"data-%d", ++ctr);
+    return std::string(buf);
+}
+
 void TcpTestClient::activity()
 {
     // parameters
@@ -103,6 +114,8 @@ void TcpTestClient::activity()
     socket.setOutputGate(gate("tcpOut"));
     queue.setName("queue");
 
+    ctr = 0;
+
     // open
     waitAndEnqueue(tOpen-simTime(), &queue);
 
@@ -118,7 +131,7 @@ void TcpTestClient::activity()
     {
         waitAndEnqueue(tSend-simTime(), &queue);
 
-        cMessage *msg = new cMessage("data1");
+        cMessage *msg = new cMessage(makeMsgName().c_str());
         msg->setLength(8*sendBytes);
         socket.send(msg);
     }
@@ -126,7 +139,7 @@ void TcpTestClient::activity()
     {
         waitAndEnqueue(i->tSend-simTime(), &queue);
 
-        cMessage *msg = new cMessage("data1");
+        cMessage *msg = new cMessage(makeMsgName().c_str());
         msg->setLength(8*i->numBytes);
         socket.send(msg);
     }

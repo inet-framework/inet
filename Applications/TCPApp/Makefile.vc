@@ -62,10 +62,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPEchoApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj
+OBJS= GenericAppMsg_m.obj TCPEchoApp.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= 
+GENERATEDHEADERS= GenericAppMsg_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -90,8 +90,17 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
+GenericAppMsg_m.obj: GenericAppMsg_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp GenericAppMsg_m.cc
+
+GenericAppMsg_m.cc GenericAppMsg_m.h: GenericAppMsg.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) GenericAppMsg.msg
+
 TCPEchoApp.obj: TCPEchoApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPEchoApp.cc
+
+TCPGenericSrvApp.obj: TCPGenericSrvApp.cc
+	$(CXX) -c $(COPTS) /Tp TCPGenericSrvApp.cc
 
 TCPSessionApp.obj: TCPSessionApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPSessionApp.cc
@@ -134,6 +143,12 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
+TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
+  TCPGenericSrvApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \

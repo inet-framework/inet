@@ -18,20 +18,23 @@
 
 
 //
-// Accepts any number of incoming TCP connections, and sends back the 
-// messages that arrive on them, The lengths of the messages are
-// multiplied by echoFactor before sending them back (echoFactor=1 will 
-// result in sending back the same message unmodified.) The reply can also be 
-// delayed by a constant time (echoDelay parameter).
+// Message class for generic request-reply style applications.
+// The client sends a GenericAppMsg which contains the number of
+// bytes the client wants the server to send back as reply.
 //
-simple TCPEchoApp
-    parameters:
-        address: string, // local address; may be left empty ("")
-        port: numeric const, // port number to listen on
-        echoFactor: numeric const,
-        echoDelay: numeric const;
-    gates:
-        in: tcpIn;
-        out: tcpOut;
-endsimple
+// This way intelligence (behaviour specific to the modelled application,
+// e.g. HTTP, SMB, database protocol) needs only to be present in
+// the client, and the server model can be kept simple and dumb.
+//
+// @see TCPGenericSrvApp
+//
+message GenericAppMsg
+{
+    properties:
+        omitGetVerb = true;
+    fields:
+        int expectedReplyLength;  // in bytes
+};
+
+
 
