@@ -27,14 +27,16 @@
 class TCPGenericSrvApp : public cSimpleModule
 {
   protected:
-    double delay;
+    simtime_t delay;
+    simtime_t maxMsgDelay;
 
     long msgsRcvd;
     long msgsSent;
     long bytesRcvd;
     long bytesSent;
 
-    void sendOrSchedule(cMessage *msg);
+    void sendBack(cMessage *msg);
+    void sendOrSchedule(cMessage *msg, simtime_t delay);
 
   public:
     Module_Class_Members(TCPGenericSrvApp, cSimpleModule, 0);

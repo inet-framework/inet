@@ -25,6 +25,7 @@ void TCPGenericSrvApp::initialize()
     const char *address = par("address");
     int port = par("port");
     delay = par("replyDelay");
+    maxMsgDelay = 0;
 
     msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
     WATCH(msgsRcvd);
@@ -38,34 +39,34 @@ void TCPGenericSrvApp::initialize()
     socket.listen(true);
 }
 
-void TCPGenericSrvApp::sendOrSchedule(cMessage *msg)
+void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 {
     if (delay==0)
-    {
-        msgsSent++;
-        bytesSent += msg->length()/8;
-        send(msg, "tcpOut");
-    }
+        sendBack(msg);
     else
-    {
         scheduleAt(simTime()+delay, msg);
-    }
+}
+
+void TCPGenericSrvApp::sendBack(cMessage *msg)
+{
+    msgsSent++;
+    bytesSent += msg->length()/8;
+
+    send(msg, "tcpOut");
 }
 
 void TCPGenericSrvApp::handleMessage(cMessage *msg)
 {
-    // FIXME todo: handle "close" and "replyDelay" fields of GenericAppMsg!
     if (msg->isSelfMessage())
     {
-        msgsSent++;
-        bytesSent += msg->length()/8;
-        send(msg, "tcpOut");
+        sendBack(msg);
     }
     else if (msg->kind()==TCP_I_PEER_CLOSED)
     {
-        // we'll close too
+        // we'll close too, but only after there's surely no message
+        // pending to be sent back in this connection
         msg->setKind(TCP_C_CLOSE);
-        sendOrSchedule(msg);
+        sendOrSchedule(msg,delay+maxMsgDelay);
     }
     else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
@@ -82,23 +83,38 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
         long requestedBytes = appmsg->expectedReplyLength();
 
+        simtime_t msgDelay = appmsg->replyDelay();
+        if (msgDelay>maxMsgDelay)
+            maxMsgDelay = msgDelay;
+
+        bool doClose = appmsg->close();
+        int connId = check_and_cast<TCPCommand *>(msg->controlInfo())->connId();
+
         if (requestedBytes==0)
         {
             delete msg;
         }
         else
         {
-            // reverse direction, set length, and send it back
-            msg->setKind(TCP_C_SEND);
-            TCPCommand *ind = check_and_cast<TCPCommand *>(msg->removeControlInfo());
+            delete msg->removeControlInfo();
             TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setConnId(ind->connId());
+            cmd->setConnId(connId);
             msg->setControlInfo(cmd);
-            delete ind;
 
+            // set length and send it back
+            msg->setKind(TCP_C_SEND);
             msg->setLength(requestedBytes*8);
+            sendOrSchedule(msg, delay+msgDelay);
+        }
 
-            sendOrSchedule(msg);
+        if (doClose)
+        {
+            cMessage *msg = new cMessage("close");
+            msg->setKind(TCP_C_CLOSE);
+            TCPCommand *cmd = new TCPCommand();
+            cmd->setConnId(connId);
+            msg->setControlInfo(cmd);
+            sendOrSchedule(msg, delay+maxMsgDelay);
         }
     }
     else
@@ -117,5 +133,12 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
 void TCPGenericSrvApp::finish()
 {
+    ev << fullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
+    ev << fullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+
+    recordScalar("packets sent", msgsSent);
+    recordScalar("packets rcvd", msgsRcvd);
+    recordScalar("bytes sent", bytesSent);
+    recordScalar("bytes rcvd", bytesRcvd);
 }
 
