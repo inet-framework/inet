@@ -315,16 +315,15 @@ string LIBTable::findOutgoingInterface(string senderInterface, int newLabel, int
 int LIBTable::findNewLabel(string senderInterface, int oldLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
-        if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
+        if (lib[i].inInterface == senderInterface && lib[i].inLabel == oldLabel)
             return lib[i].outLabel;
-
     return -2;
 }
 
 int LIBTable::getOptCode(string senderInterface, int oldLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
-        if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
+        if (lib[i].inInterface == senderInterface && lib[i].inLabel == oldLabel)
             return lib[i].optcode;
     return -1;
 }

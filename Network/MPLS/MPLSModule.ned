@@ -73,11 +73,9 @@
 //
 simple MPLSModule
     parameters:
-        numOfPorts : numeric,
-        classifier : numeric,
-        isER : bool,
-        isIR : bool,
-        procdelay : numeric;
+        classifier : numeric, // 1: by dest address; 2: by src & dest address
+        isER : bool, // is Egress router?
+        isIR : bool; // is Ingress router?
 
     gates:
         in: fromL3[];

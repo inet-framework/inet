@@ -91,9 +91,7 @@ module LSRNode
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
-                isER = isER,
-                numOfPorts = sizeof(out),
-                procdelay = 1;
+                isER = isER;
             gatesizes:
                 fromL3[sizeof(out)],
                 toL3[sizeof(out)],
