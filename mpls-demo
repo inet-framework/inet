@@ -19,6 +19,7 @@ exec wish "$0" "$@"
 
 set topdir [exec pwd]
 
+set id 0
 foreach i {
    {ldp-mlps1 Examples/MPLS/ldp-mpls1 "MPLS-LDP"}
    {TestTE1 Examples/MPLS/TestTE1  "CSPF Routing"}
@@ -28,10 +29,11 @@ foreach i {
    {TestTE5 Examples/MPLS/TestTE5  "Traffic Reroute 2"}
    {TestTE6 Examples/MPLS/TestTE6  "Reservation preemption"}
 } {
-   set sample [lindex $i 0]
    lappend samples $sample
+   set prog($sample) [lindex $i 0]
    set dir($sample) [lindex $i 1]
    set name($sample) [lindex $i 2]
+   incr id
 }
 
 
@@ -106,8 +108,8 @@ proc createWindow {} {
     label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
     pack .sel.banner -fill x -side top
     foreach i $samples {
-        button .sel.$name($i) -text $name($i) -command "showDemo $i"
-        pack .sel.$name($i) -fill x -side top -padx 5 -pady 2
+        button .sel.$i -text $name($i) -command "showDemo $i"
+        pack .sel.$i -fill x -side top -padx 5 -pady 2
     }
     showDemo [lindex $samples 0]
 }
@@ -125,18 +127,18 @@ Dept. of Telecommunications
 
 }
 
-proc showDemo {sample} {
+proc showDemo {id} {
    global samples dir name colors tcl_platform
 
    foreach i $samples {
-        .sel.$name($i) config -relief raised -bg $colors(unselbutton)
+        .sel.$i config -relief raised -bg $colors(unselbutton)
    }
-   .sel.$name($sample) config -relief sunken -bg $colors(selbutton)
+   .sel.$sample config -relief sunken -bg $colors(selbutton)
 
     if {$tcl_platform(platform) == "unix"} {
-      set runprog "./$sample &"
+      set runprog "./$prog(id) &"
     } else {
-      set runprog "start $sample" 
+      set runprog "start $prog(id)" 
     }
     set cmd "cd $dir($sample); $runprog"
 
@@ -162,10 +164,10 @@ proc loadFile {t filename} {
     $t see insert
 }
 
-proc runSample {sample} {
+proc runSample {id} {
    global topdir samples dir name
 
-   if [catch {cd $dir($sample); exec ./$sample &; cd $topdir}] {
+   if [catch {cd $dir($sample); exec ./$prog(id) &; cd $topdir}] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
                     -message {Error running the simulation program.}
    }
