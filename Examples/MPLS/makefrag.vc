@@ -2,4 +2,4 @@
 
 all : $(TARGET)
 
-demo2_dir ldp-mpls1_dir TestTE1_dir TestTE2_dir TestTE3_dir TestTE4_dir TestTE4Old_dir TestTE5_dir TestTE6_dir : Tester_dir
+ldp-mpls1_dir TestTE1_dir TestTE2_dir TestTE3_dir TestTE4_dir TestTE5_dir TestTE6_dir : Tester_dir

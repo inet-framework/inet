@@ -2,4 +2,4 @@
 
 all: $(TARGET)
 
-demo2 ldp-mpls1 TestTE1 TestTE2 TestTE3 TestTE4 TestTE4Old TestTE5 TestTE6 : Tester
+ldp-mpls1 TestTE1 TestTE2 TestTE3 TestTE4 TestTE5 TestTE6 : Tester
