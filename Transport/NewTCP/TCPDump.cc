@@ -95,8 +95,8 @@ void TCPDump::handleMessage(cMessage *msg)
     else if (dynamic_cast<TCPSegment *>(msg))
     {
         bool dir = msg->arrivedOn("in1");
-        tcpdump.dump((TCPSegment *)msg, std::string(dir ? "first" : "second"),
-                                        std::string(dir ? "second" : "first")
+        tcpdump.dump((TCPSegment *)msg, std::string(dir ? "A" : "B"),
+                                        std::string(dir ? "B" : "A")
                     );
     }
 

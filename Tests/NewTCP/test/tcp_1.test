@@ -22,15 +22,15 @@ preload-ned-files = *.ned @../../../../nedfiles.lst
 include ../../defaults.ini
 
 %contains: stdout
-[0.100] first.1024 > second.2000: S 0:0(0) win 2048
-[0.100] second.2000 > first.1024: S 25040:25040(0) ack 1 win 2048
-[0.300] first.1024 > second.2000: . ack 25041 win 2048
-[0.600] first.1024 > second.2000: . 1:11(10) ack 25041 win 0
-[0.600] second.2000 > first.1024: . ack 11 win 2048
-[2.100] first.1024 > second.2000: F ack 25041 win 2048
-[2.100] second.2000 > first.1024: . ack 12 win 2048
-[3.000] second.2000 > first.1024: F ack 12 win 2048
-[3.200] first.1024 > second.2000: . ack 25042 win 2048
+[0.100] A.1024 > B.2000: S 0:0(0) win 2048
+[0.100] B.2000 > A.1024: S 25040:25040(0) ack 1 win 2048
+[0.300] A.1024 > B.2000: . ack 25041 win 2048
+[0.600] A.1024 > B.2000: . 1:11(10) ack 25041 win 0
+[0.600] B.2000 > A.1024: . ack 11 win 2048
+[2.100] A.1024 > B.2000: F ack 25041 win 2048
+[2.100] B.2000 > A.1024: . ack 12 win 2048
+[3.000] B.2000 > A.1024: F ack 12 win 2048
+[3.200] A.1024 > B.2000: . ack 25042 win 2048
 
 %contains: stdout
 tcpTest.tcpcli: finishing with 0 connections open.
