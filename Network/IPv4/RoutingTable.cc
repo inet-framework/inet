@@ -229,6 +229,50 @@ InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
     return NULL;
 }
 
+void RoutingTable::addLocalLoopback()
+{
+    InterfaceEntry *loopbackInterface = new InterfaceEntry();
+
+    loopbackInterface->name = "lo0";
+
+    //loopbackInterface->inetAddr = IPAddress("127.0.0.1");
+    //loopbackInterface->mask = IPAddress("255.0.0.0");
+// BCH Andras -- code from UTS MPLS model
+    IPAddress loopbackIP = IPAddress("127.0.0.1");
+    for (cModule *curmod=parentModule(); curmod != NULL;curmod = curmod->parentModule())
+    {
+        // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+        // the following line is a terrible hack. For some unknown reason,
+        // the MPLS models use the host's "local_addr" parameter (string)
+        // as loopback address (and also change its netmask to 255.255.255.255).
+        // But this conflicts with the IPSuite which also has "local_addr" parameters,
+        // numeric and not intended for use as loopback address. So until we
+        // figure out why exactly the MPLS models do this, we just patch up
+        // the thing and only regard "local_addr" parameters that are strings....
+        // Horrible hacking.  --Andras
+        if (curmod->hasPar("local_addr") && curmod->par("local_addr").type()=='S')
+        {
+            loopbackIP = IPAddress(curmod->par("local_addr").stringValue());
+            break;
+        }
+
+    }
+    ev << "My loopback address is : " << loopbackIP << "\n";
+    loopbackInterface->inetAddr = loopbackIP;
+    loopbackInterface->mask = IPAddress("255.255.255.255");  // ????? -- Andras
+// ECH
+
+    loopbackInterface->mtu = 3924;
+    loopbackInterface->metric = 1;
+    loopbackInterface->loopback = true;
+
+    loopbackInterface->multicastGroupCtr = 0;
+    loopbackInterface->multicastGroup = NULL;
+
+    // add interface to table
+    addInterface(loopbackInterface);
+}
+
 //---
 
 bool RoutingTable::localDeliver(const IPAddress& dest)

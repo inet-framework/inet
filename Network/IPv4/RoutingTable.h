@@ -206,6 +206,10 @@ class RoutingTable: public cSimpleModule
     bool IPForward;
 
   protected:
+    // Add the entry of the local loopback interface automatically
+    void addLocalLoopback();
+
+    // check if a route table entry corresponds to the following parameters
     bool routingEntryMatches(RoutingEntry *entry,
                              const IPAddress& target,
                              const IPAddress& nmask,

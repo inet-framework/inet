@@ -343,54 +343,6 @@ void RoutingTableParser::parseMulticastGroups (char *groupStr,
     }
 }
 
-
-void RoutingTableParser::addLocalLoopback()
-{
-    rt->loopbackInterface = new InterfaceEntry();
-
-    rt->loopbackInterface->name = "lo";
-    rt->loopbackInterface->encap = "Local Loopback";
-
-    //loopbackInterface->inetAddr = IPAddress("127.0.0.1");
-    //loopbackInterface->mask = IPAddress("255.0.0.0");
-// BCH Andras -- code from UTS MPLS model
-    cModule *curmod = rt;
-    IPAddress loopbackIP = IPAddress("127.0.0.1");
-
-    for (curmod = rt->parentModule(); curmod != NULL;curmod = curmod->parentModule())
-    {
-        // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
-        // the following line is a terrible hack. For some unknown reason,
-        // the MPLS models use the host's "local_addr" parameter (string)
-        // as loopback address (and also change its netmask to 255.255.255.255).
-        // But this conflicts with the IPSuite which also has "local_addr" parameters,
-        // numeric and not intended for use as loopback address. So until we
-        // figure out why exactly the MPLS models do this, we just patch up
-        // the thing and only regard "local_addr" parameters that are strings....
-        // Horrible hacking.  --Andras
-        if (curmod->hasPar("local_addr") && curmod->par("local_addr").type()=='S')
-        {
-            loopbackIP = IPAddress(curmod->par("local_addr").stringValue());
-            break;
-        }
-
-    }
-    ev << "My loopback Address is : " << loopbackIP << "\n";
-    rt->loopbackInterface->inetAddr = loopbackIP;
-    rt->loopbackInterface->mask = IPAddress("255.255.255.255");  // ????? -- Andras
-// ECH
-
-    rt->loopbackInterface->mtu = 3924;
-    rt->loopbackInterface->metric = 1;
-    rt->loopbackInterface->loopback = true;
-
-    // add default multicast groups
-    char emptyGroupStr[MAX_GROUP_STRING_SIZE];
-    strcpy(emptyGroupStr, "");
-    parseMulticastGroups(emptyGroupStr, rt->loopbackInterface);
-}
-
-
 void RoutingTableParser::parseRouting(char *routeFile)
 {
     int i, charpointer = 0;

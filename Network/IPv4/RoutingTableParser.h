@@ -72,9 +72,6 @@ class RoutingTableParser
     // write them into the routing table.
     void parseRouting(char *routeFile);
 
-    // Add the entry of the local loopback interface automatically
-    void addLocalLoopback();
-
     char *parseInterfaceEntry (char *ifconfigFile,
                                const char *tokenStr,
                                int &charpointer,
