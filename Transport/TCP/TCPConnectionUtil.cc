@@ -365,6 +365,9 @@ void TCPConnection::sendFin()
 
 bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
 {
+
+tcpEV<<"DBG: sendData (" << fullSegments << ", " << maxNumBytes << "\n"; //FIXME
+
     // start sending from snd_max
     state->snd_nxt = state->snd_max;
 

@@ -253,6 +253,8 @@ bool TCPTahoeReno::sendData()
     // the largest window ever advertised by the receiver"
 
     bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
+    if (fullSegmentsOnly)
+        tcpEV << "Nagle is enabled and there's unack'ed data: only full segments will be sent\n";
 
     //
     // Slow start, congestion control etc.: send window is effectively the
