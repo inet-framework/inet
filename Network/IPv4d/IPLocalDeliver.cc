@@ -19,16 +19,16 @@
 
 
 #include <omnetpp.h>
-#include "LocalDeliver.h"
+#include "IPLocalDeliver.h"
 #include "IPControlInfo_m.h"
 
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-Define_Module(LocalDeliver);
+Define_Module(IPLocalDeliver);
 
 
-void LocalDeliver::initialize()
+void IPLocalDeliver::initialize()
 {
     fragmentTimeoutTime = par("fragmentTimeout");
     lastCheckTime = 0;
@@ -36,7 +36,7 @@ void LocalDeliver::initialize()
     mapping.parseProtocolMapping(par("protocolMapping"));
 }
 
-void LocalDeliver::handleMessage(cMessage *msg)
+void IPLocalDeliver::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 
@@ -71,7 +71,7 @@ void LocalDeliver::handleMessage(cMessage *msg)
     }
 }
 
-cMessage *LocalDeliver::decapsulateIP(IPDatagram *datagram)
+cMessage *IPLocalDeliver::decapsulateIP(IPDatagram *datagram)
 {
     cMessage *packet = datagram->decapsulate();
 

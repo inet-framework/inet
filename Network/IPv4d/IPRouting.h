@@ -31,7 +31,7 @@
 
 /**
  * Use source routing or look into routing table, and send IP datagram
- * to LocalDeliver, Multicast or Fragmentation, or error to ICMP.
+ * to IPLocalDeliver, Multicast or Fragmentation, or error to ICMP.
  * More detailed info in NED file.
  */
 class Routing : public QueueWithQoS

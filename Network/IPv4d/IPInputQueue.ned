@@ -22,7 +22,7 @@
 //
 // author: Jochen Reber
 //
-simple InputQueue
+simple IPInputQueue
     parameters:
         procdelay: numeric const;
     gates:

@@ -33,13 +33,13 @@
  * Decrements hop counter and sends packet to Routing.
  * More info in the NED file.
  */
-class PreRouting : public cSimpleModule
+class IPPreRouting : public cSimpleModule
 {
   private:
     ICMPAccess icmpAccess;
 
   public:
-    Module_Class_Members(PreRouting, cSimpleModule, 0);
+    Module_Class_Members(IPPreRouting, cSimpleModule, 0);
 
   protected:
     virtual void handleMessage(cMessage *msg);

@@ -21,15 +21,15 @@
 // Pre-routing handling of \IP datagram: check for errors and decrement TTL.
 //
 // Handling:
-// - receive \IP datagram
-// - check for header error -> throw away and notify ICMP Module on error
-// - decrement hop counter
-// - send correct datagram to Routing Module
+//   - receive \IP datagram
+//   - check for header error -> throw away and notify ICMP module on error
+//   - decrement hop counter
+//   - send correct datagram to Routing module
 //
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // Redesign: Andras Varga, 02.2004
 //
-simple PreRouting
+simple IPPreRouting
     gates:
         in: in[];
         out: routingOut;

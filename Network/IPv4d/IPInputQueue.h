@@ -27,10 +27,10 @@
  * Demultiplex incoming packets from all network interfaces into
  * one queue for the network layer.
  */
-class InputQueue : public QueueBase
+class IPInputQueue : public QueueBase
 {
   public:
-    Module_Class_Members(InputQueue, QueueBase, 0);
+    Module_Class_Members(IPInputQueue, QueueBase, 0);
 
   protected:
     virtual void endService(cMessage *msg);

@@ -21,12 +21,12 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include <omnetpp.h>
-#include "PreRouting.h"
+#include "IPPreRouting.h"
 
-Define_Module(PreRouting);
+Define_Module(IPPreRouting);
 
 
-void PreRouting::handleMessage(cMessage *msg)
+void IPPreRouting::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 

@@ -18,15 +18,15 @@
 
 
 import
-    "PreRouting",
+    "IPPreRouting",
     "Routing",
-    "LocalDeliver",
+    "IPLocalDeliver",
     "IPMulticast",
     "IPSend",
     "IPFragmentation",
     "IPTunneling",
     "IPOutput",
-    "InputQueue";
+    "IPInputQueue";
 
 
 
@@ -51,7 +51,7 @@ module IPProcessing
         in: queueIn[];
         out: queueOut[];
     submodules:
-        preRouting: PreRouting;
+        preRouting: IPPreRouting;
             gatesizes:
                 in[2];
             display: "b=32,30;p=95,177;i=prot3";
@@ -59,7 +59,7 @@ module IPProcessing
             gatesizes:
                 in[2];
             display: "b=34,34;p=179,177;i=bwgen";
-        localDeliver: LocalDeliver;
+        localDeliver: IPLocalDeliver;
             parameters:
                 fragmentTimeout = fragmentTimeout,
                 protocolMapping = protocolMapping;
@@ -84,21 +84,21 @@ module IPProcessing
             display: "b=16,15;p=370,152;i=bwxcon_s";
         output: IPOutput[sizeof(queueOut)];
             display: "b=32,30;p=110,304,row;i=prot2";
-        inputQueue: InputQueue;
+        inputQueue: IPInputQueue;
             gatesizes:
                 fromNW[sizeof(queueIn)];
             display: "p=50,304;i=queue";
     connections nocheck:
 
-        // L2 input to InputQueue
+        // L2 input to IPInputQueue
         for i=0..sizeof(queueIn)-1 do
             queueIn[i] --> inputQueue.fromNW[i];
         endfor;
 
-        // PreRouting Input
+        // IPPreRouting Input
         inputQueue.toIP --> preRouting.in[0];
 
-        // PreRouting Output
+        // IPPreRouting Output
         preRouting.routingOut --> routing.in[0];
 
         // Routing output
@@ -106,7 +106,7 @@ module IPProcessing
         routing.multicastOut --> multicast.routingIn;
         routing.fragmentationOut --> fragmentation.routingIn;
 
-        // LocalDeliver output
+        // IPLocalDeliver output
         localDeliver.preRoutingOut --> preRouting.in[1];
         for i=0..sizeof(transportOut)-1 do
             localDeliver.transportOut[i] --> transportOut[i];

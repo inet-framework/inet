@@ -17,13 +17,13 @@
 //
 
 #include <omnetpp.h>
-#include "InputQueue.h"
+#include "IPInputQueue.h"
 #include "IPDatagram.h"
 #include "IPControlInfo_m.h"
 
-Define_Module(InputQueue);
+Define_Module(IPInputQueue);
 
-void InputQueue::endService(cMessage *msg)
+void IPInputQueue::endService(cMessage *msg)
 {
     // remember on which port the packet came in
     IPRoutingDecision *routingDecision = new IPRoutingDecision();

@@ -136,13 +136,13 @@ ARP.obj: ARP.cc \
   ../Ethernet/EtherCtrl_m.h \
   ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
+  ../../Network/IPv4/RoutingTable.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../Ethernet/EtherMAC.h \
   ../_802/MACAddress.h \
   ../Ethernet/Ethernet.h \
   ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
-  ../../Network/IPv4/RoutingTable.h \
   ../Ethernet/EtherFrame_m.h \
   ../Ethernet/utils.h
 ARPPacket_m.obj: ARPPacket_m.cc \

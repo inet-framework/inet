@@ -35,7 +35,7 @@
  * decapsulate and forward to corresponding transport protocol.
  * More info in the NED file.
  */
-class LocalDeliver : public cSimpleModule
+class IPLocalDeliver : public cSimpleModule
 {
   private:
     // fragmentation reassembly
@@ -50,7 +50,7 @@ class LocalDeliver : public cSimpleModule
     cMessage *decapsulateIP(IPDatagram *);
 
   public:
-    Module_Class_Members(LocalDeliver, cSimpleModule, 0);
+    Module_Class_Members(IPLocalDeliver, cSimpleModule, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

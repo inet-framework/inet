@@ -60,7 +60,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= EnqueueWithoutQoS.obj ErrorHandling.obj InputQueue.obj IPFragmentation.obj IPMulticast.obj IPOutput.obj IPSend.obj IPTunneling.obj LocalDeliver.obj PreRouting.obj Routing.obj
+OBJS= EnqueueWithoutQoS.obj ErrorHandling.obj IPFragmentation.obj IPInputQueue.obj IPLocalDeliver.obj IPMulticast.obj IPOutput.obj IPPreRouting.obj IPRouting.obj IPSend.obj IPTunneling.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -94,11 +94,14 @@ EnqueueWithoutQoS.obj: EnqueueWithoutQoS.cc
 ErrorHandling.obj: ErrorHandling.cc
 	$(CXX) -c $(COPTS) /Tp ErrorHandling.cc
 
-InputQueue.obj: InputQueue.cc
-	$(CXX) -c $(COPTS) /Tp InputQueue.cc
-
 IPFragmentation.obj: IPFragmentation.cc
 	$(CXX) -c $(COPTS) /Tp IPFragmentation.cc
+
+IPInputQueue.obj: IPInputQueue.cc
+	$(CXX) -c $(COPTS) /Tp IPInputQueue.cc
+
+IPLocalDeliver.obj: IPLocalDeliver.cc
+	$(CXX) -c $(COPTS) /Tp IPLocalDeliver.cc
 
 IPMulticast.obj: IPMulticast.cc
 	$(CXX) -c $(COPTS) /Tp IPMulticast.cc
@@ -106,20 +109,17 @@ IPMulticast.obj: IPMulticast.cc
 IPOutput.obj: IPOutput.cc
 	$(CXX) -c $(COPTS) /Tp IPOutput.cc
 
+IPPreRouting.obj: IPPreRouting.cc
+	$(CXX) -c $(COPTS) /Tp IPPreRouting.cc
+
+IPRouting.obj: IPRouting.cc
+	$(CXX) -c $(COPTS) /Tp IPRouting.cc
+
 IPSend.obj: IPSend.cc
 	$(CXX) -c $(COPTS) /Tp IPSend.cc
 
 IPTunneling.obj: IPTunneling.cc
 	$(CXX) -c $(COPTS) /Tp IPTunneling.cc
-
-LocalDeliver.obj: LocalDeliver.cc
-	$(CXX) -c $(COPTS) /Tp LocalDeliver.cc
-
-PreRouting.obj: PreRouting.cc
-	$(CXX) -c $(COPTS) /Tp PreRouting.cc
-
-Routing.obj: Routing.cc
-	$(CXX) -c $(COPTS) /Tp Routing.cc
 
 
 #doc: neddoc doxy
@@ -163,15 +163,6 @@ ErrorHandling.obj: ErrorHandling.cc \
   ../IPv4/IPDatagram_m.h \
   ../../Base/ipsuite_defs.h \
   ../IPv4/ICMPMessage_m.h
-InputQueue.obj: InputQueue.cc \
-  InputQueue.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPControlInfo_m.h \
-  ../../Base/QueueBase.h \
-  ../../Base/AbstractQueue.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
 IPFragmentation.obj: IPFragmentation.cc \
   IPFragmentation.h \
   ../IPv4/IPControlInfo_m.h \
@@ -186,6 +177,17 @@ IPFragmentation.obj: IPFragmentation.cc \
   ../IPv4/ICMP.h \
   ../IPv4/ICMPMessage.h \
   ../IPv4/ICMPMessage_m.h
+IPInputQueue.obj: IPInputQueue.cc \
+  ../IPv4/IPDatagram.h \
+  ../IPv4/IPControlInfo_m.h \
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h
+IPLocalDeliver.obj: IPLocalDeliver.cc \
+  ../IPv4/IPControlInfo_m.h \
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h \
+  ../../Base/ipsuite_defs.h
 IPMulticast.obj: IPMulticast.cc \
   IPMulticast.h \
   ../IPv4/IPControlInfo_m.h \
@@ -210,6 +212,13 @@ IPOutput.obj: IPOutput.cc \
   ../IPv4/IPAddress.h \
   ../IPv4/ICMPMessage_m.h \
   ../IPv4/IPDatagram_m.h
+IPPreRouting.obj: IPPreRouting.cc
+IPRouting.obj: IPRouting.cc \
+  ../IPv4/IPControlInfo_m.h \
+  ../../Util/watch2.h \
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h \
+  ../../Base/ipsuite_defs.h
 IPSend.obj: IPSend.cc \
   IPSend.h \
   ../IPv4/IPDatagram.h \
@@ -227,43 +236,3 @@ IPTunneling.obj: IPTunneling.cc \
   ../IPv4/IPDatagram_m.h \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
-LocalDeliver.obj: LocalDeliver.cc \
-  LocalDeliver.h \
-  ../IPv4/IPControlInfo_m.h \
-  ../IPv4/IPFragBuf.h \
-  ../IPv4/ProtocolMap.h \
-  ../IPv4/IPDatagram.h \
-  ../../Base/ipsuite_defs.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h
-PreRouting.obj: PreRouting.cc \
-  PreRouting.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/ICMPAccess.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Base/ModuleAccess.h \
-  ../IPv4/ICMP.h \
-  ../IPv4/RoutingTableAccess.h \
-  ../IPv4/ICMPMessage.h \
-  ../IPv4/RoutingTable.h \
-  ../IPv4/ICMPMessage_m.h
-Routing.obj: Routing.cc \
-  ../IPv4/IPControlInfo_m.h \
-  Routing.h \
-  ../../Util/watch2.h \
-  ../IPv4/IPAddress.h \
-  ../IPv4/IPDatagram_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Base/QueueWithQoS.h \
-  ../IPv4/RoutingTableAccess.h \
-  ../IPv4/RoutingTable.h \
-  ../IPv4/ICMPAccess.h \
-  ../../Base/AbstractQueue.h \
-  ../../Base/EnqueueHook.h \
-  ../../Base/ModuleAccess.h \
-  ../IPv4/ICMP.h \
-  ../IPv4/ICMPMessage.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/ICMPMessage_m.h

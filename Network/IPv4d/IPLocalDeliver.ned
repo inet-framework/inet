@@ -48,7 +48,7 @@
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // Rewrite: Andras Varga, 2004
 //
-simple LocalDeliver
+simple IPLocalDeliver
     parameters:
         protocolMapping : string,
         fragmentTimeout : numeric const;

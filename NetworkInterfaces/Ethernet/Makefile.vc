@@ -202,13 +202,9 @@ EtherMAC.obj: EtherMAC.cc \
   utils.h \
   Ethernet.h \
   EtherFrame_m.h \
-  ../../Network/IPv4/RoutingTable.h \
-  ../../Network/IPv4/RoutingTableAccess.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/IPAddress.h \
-  ../../Base/ModuleAccess.h
+  ../../Base/ipsuite_defs.h
 MACRelayUnitBase.obj: MACRelayUnitBase.cc \
   MACRelayUnitBase.h \
   ../_802/MACAddress.h \
