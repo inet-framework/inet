@@ -17,7 +17,10 @@
 //
 
 //
-// ARP implementation. Performs interface registration in RoutingTable as well.
+// \ARP implementation. Performs interface registration in RoutingTable as well.
+// Expects IPRoutingDecision control info objects to be attached to packets
+// coming from higher layers. \ARP packets are represented by the ARPPacket 
+// class.
 //
 simple ARP
     parameters:
