@@ -142,12 +142,15 @@ void TCPSocket::close()
 
 void TCPSocket::abort()
 {
-    cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
-    TCPCommand *cmd = new TCPCommand();
-    cmd->setConnId(connId);
-    msg->setControlInfo(cmd);
-    sendToTCP(msg);
-    sockstate = SOCKERROR;
+    if (sockstate!=NOT_BOUND && sockstate!=BOUND && sockstate!=CLOSED && sockstate!=SOCKERROR)
+    {
+        cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
+        TCPCommand *cmd = new TCPCommand();
+        cmd->setConnId(connId);
+        msg->setControlInfo(cmd);
+        sendToTCP(msg);
+    }
+    sockstate = CLOSED;
 }
 
 void TCPSocket::requestStatus()
@@ -178,47 +181,54 @@ void TCPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer
 
 void TCPSocket::processMessage(cMessage *msg)
 {
-    if (!cb)
-        opp_error("TCPSocket: callback object must be set via setCallbackObject() "
-                  "before processMessage() can be invoked");
-
     ASSERT(belongsToSocket(msg));
 
     TCPStatusInfo *status;
     switch (msg->kind())
     {
         case TCP_I_DATA:
-             cb->socketDataArrived(connId, yourPtr, msg, false);
+             if (cb)
+                 cb->socketDataArrived(connId, yourPtr, msg, false);
+             else
+                 delete msg;
              break;
         case TCP_I_URGENT_DATA:
-             cb->socketDataArrived(connId, yourPtr, msg, true);
+             if (cb)
+                 cb->socketDataArrived(connId, yourPtr, msg, true);
+             else
+                 delete msg;
              break;
         case TCP_I_ESTABLISHED:
              sockstate = CONNECTED;
              delete msg;
-             cb->socketEstablished(connId, yourPtr);
+             if (cb)
+                 cb->socketEstablished(connId, yourPtr);
              break;
         case TCP_I_PEER_CLOSED:
              sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
              delete msg;
-             cb->socketPeerClosed(connId, yourPtr);
+             if (cb)
+                 cb->socketPeerClosed(connId, yourPtr);
              break;
         case TCP_I_CLOSED:
              sockstate = CLOSED;
              delete msg;
-             cb->socketClosed(connId, yourPtr);
+             if (cb)
+                 cb->socketClosed(connId, yourPtr);
              break;
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
              sockstate = SOCKERROR;
-             cb->socketFailure(connId, yourPtr, msg->kind());
+             if (cb)
+                 cb->socketFailure(connId, yourPtr, msg->kind());
              delete msg;
              break;
         case TCP_I_STATUS:
              status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
              delete msg;
-             cb->socketStatusArrived(connId, yourPtr, status);
+             if (cb)
+                 cb->socketStatusArrived(connId, yourPtr, status);
              break;
         default:
              opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->kind());
