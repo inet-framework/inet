@@ -83,7 +83,7 @@ private:
      *  @param filename The lib table file input
      *  @return The successful or unsuccessful code
      */
-    int readLibTableFromFile(const char* filename);
+    int readLibTableFromFile(const char *filename);
 
     /**
      * Load the Partial Routing Information from files
@@ -91,8 +91,7 @@ private:
      * @param filename The prt table file input
      * @return The successfule or unsuccesful code
      */
-    int readPrtTableFromFile(const char* filename);
-
+    int readPrtTableFromFile(const char *filename);
 
 public:
 

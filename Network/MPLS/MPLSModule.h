@@ -47,7 +47,9 @@ class MPLSModule : public cSimpleModule
      /**
       * Element in the FEC (Forwarding Equivalence Class) table.
       * SrcAddr and destAddr are criteria for the IP packet used in classification,
-      * and fecId is the resulting FEC.
+      * and fecId identifies the resulting FEC. (The FEC value itself depends on the
+      * packet classifier; i.e. if dest-based classifier is used, FEC is destAddr
+      * or more generally an address prefix.)
       */
      struct FECElem
      {
@@ -95,16 +97,16 @@ class MPLSModule : public cSimpleModule
       virtual void processIPDatagramFromL2(IPDatagram *ipdatagram);
 
       /** Invoked from processPacketFromSignalling() */
-      virtual void trySendBufferedPackets(int returnedFEC);
+      virtual void trySendBufferedPackets(int returnedFecId);
 
-      virtual void sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress dest, int gateindex);
+      virtual void sendPathRequestToSignalling(int fecId, IPAddress src, IPAddress dest, int gateindex);
 
       //@}
 
       /** @name Packet classification and FEC list mgmt */
       //@{
       /**
-       * Classify FEC for packet. If FEC already exists, returns its fecId,
+       * Determine FEC for a packet. If FEC already exists, returns its fecId,
        * otherwise returns -1. Type parameter denotes scheme of classification,
        * e.g destination-based or destination and sender-based (constants
        * DEST_CLASSIFIER, SRC_AND_DEST_CLASSIFIER).
@@ -113,7 +115,7 @@ class MPLSModule : public cSimpleModule
 
       /**
        * Complements classifyPacket(): adds a new FEC based on the packet
-       * content and returns the FEC value.
+       * content and returns its fecId.
        */
       int addFEC(IPDatagram *ipdatagram, int type);
       //@}

@@ -117,24 +117,24 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
         return;
     }
 
-    // Get the mapping from the message: "label", "fec" parameters
+    // Get the mapping from the message: "label", "fecId" parameters
     int label = msg->par("label").longValue();
-    int returnedFEC = (int) (msg->par("fec").longValue());
-    bool isLDP = msg->hasPar("my_name");
+    int returnedFecId = (int) (msg->par("fecId").longValue());
+    bool isLDP = msg->hasPar("my_name"); // FIXME ???
     delete msg;
 
-    ev << "Message from signalling: label=" << label << ", FEC=" << returnedFEC << "\n";
+    ev << "Message from signalling: label=" << label << ", fecId=" << returnedFecId << "\n";
 
     // Update FEC table
     if (!isLDP)
     {
         for (int i = 0; i < fecList.size(); i++)
         {
-            // FIXME!!!! pending FEC's seem to get an id (2*MAX_LSP_NO-returnedFEC)
-            // until they are resolved!!! Ughhh!!! should use a bool flag "pending"
-            if (fecList[i].fecId == (2 * MAX_LSP_NO - returnedFEC))
+            // FIXME pending FEC's seem to get an id (2*MAX_LSP_NO-returnedFecId)
+            // until they are resolved. Find out why. Should use a bool flag "pending"?
+            if (fecList[i].fecId == (2 * MAX_LSP_NO - returnedFecId))
             {
-                fecList[i].fecId = returnedFEC;
+                fecList[i].fecId = returnedFecId;
                 break;
             }
         }
@@ -143,11 +143,11 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
     dumpFECTable();
 
     // try sending out buffered IP datagrams and MPLS packets which are waiting for this FEC
-    trySendBufferedPackets(returnedFEC);
+    trySendBufferedPackets(returnedFecId);
 }
 
 
-void MPLSModule::trySendBufferedPackets(int returnedFEC)
+void MPLSModule::trySendBufferedPackets(int returnedFecId)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -162,8 +162,8 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
         IPDatagram *datagram = check_and_cast<IPDatagram *>(queuedmsg);
 
         // Is it the FEC we just resolved?
-        int fecID = classifyPacket(datagram, classifierType);
-        if (fecID!=returnedFEC)
+        int fecId = classifyPacket(datagram, classifierType);
+        if (fecId!=returnedFecId)
             continue;
 
         // Remove the message
@@ -181,11 +181,11 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
         // Find label and outgoing interface
         int label;
         string outgoingInterface;
-        bool found = lt->resolveFec(returnedFEC, label, outgoingInterface);
+        bool found = lt->resolveFec(returnedFecId, label, outgoingInterface);
         ASSERT(found);
 
         newPacket->pushLabel(label);
-        newPacket->setKind(fecID);
+        newPacket->setKind(fecId);
 
         ev << "Encapsulating buffered packet " << datagram << " into MPLS with label=" <<
               label << ", sending to " << outgoingInterface << "\n";
@@ -341,20 +341,20 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
     ev << "Message from outside to Ingress node\n";
 
     bool makeRequest = false;
-    int fecID = classifyPacket(ipdatagram, classifierType);
-    if (fecID == -1)
+    int fecId = classifyPacket(ipdatagram, classifierType);
+    if (fecId == -1)
     {
         makeRequest = true;
-        fecID = addFEC(ipdatagram, classifierType);
-        ev << "Registered new FEC=" << fecID << "\n";
+        fecId = addFEC(ipdatagram, classifierType);
+        ev << "Registered new fecId=" << fecId << "\n";
     }
     ev << "Packet src=" << ipdatagram->srcAddress() <<
           ", dest=" << ipdatagram->destAddress() <<
-          " --> FEC=" << fecID << "\n";
+          " --> fecId=" << fecId << "\n";
 
     int label;
     string outgoingInterface;
-    bool found = lt->resolveFec(fecID, label, outgoingInterface);
+    bool found = lt->resolveFec(fecId, label, outgoingInterface);
 
     if (found)  // New Label found
     {
@@ -366,10 +366,10 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         newPacket->encapsulate(ipdatagram);
 
         // consistent in packet color
-        if (fecID < MAX_LSP_NO)
-            newPacket->setKind(fecID);
+        if (fecId < MAX_LSP_NO)
+            newPacket->setKind(fecId);
         else
-            newPacket->setKind(2 * MAX_LSP_NO - fecID);
+            newPacket->setKind(2 * MAX_LSP_NO - fecId);
 
         newPacket->pushLabel(label);
 
@@ -388,13 +388,13 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         {
             // if FEC just made it into fecList, we haven't asked signalling yet: do it now
             ev << "Sending path request to signalling module\n";
-            sendPathRequestToSignalling(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
+            sendPathRequestToSignalling(fecId, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
         }
     }
 }
 
 
-void MPLSModule::sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress dest, int gateIndex)
+void MPLSModule::sendPathRequestToSignalling(int fecId, IPAddress src, IPAddress dest, int gateIndex)
 {
     cModule *signallingMod = parentModule()->submodule("signal_module");
     if (!signallingMod)
@@ -402,7 +402,7 @@ void MPLSModule::sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress
 
     // assemble Path Request command
     cMessage *signalMessage = new cMessage("PATH_REQUEST");
-    signalMessage->addPar("FEC") = fecID;
+    signalMessage->addPar("fecId") = fecId;
     signalMessage->addPar("src_addr") = src.getInt();
     signalMessage->addPar("dest_addr") = dest.getInt();
     signalMessage->addPar("gateIndex") = gateIndex;
