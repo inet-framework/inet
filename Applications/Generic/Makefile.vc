@@ -96,7 +96,8 @@ SimpleApp.obj: SimpleApp.cc
 #	@doxygen doxy.cfg
 
 clean:
-	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
+	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) 2>NUL
+	-del *_n.cc *_n.h *_m.cc *_m.h 2>NUL
 	-del *.vec *.sca 2>NUL
 	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
 
@@ -108,43 +109,4 @@ re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-AppIn.obj: AppIn.cc \
-  AppIn.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
-  ..\..\Util/basic_consts.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Util/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ip_address.h
-BurstGenerator.obj: BurstGenerator.cc \
-  BurstGenerator.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
-  ..\..\Util/basic_consts.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Util/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ip_address.h
-ConstTrafficGen.obj: ConstTrafficGen.cc \
-  ConstTrafficGen.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
-  ..\..\Util/basic_consts.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Util/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ip_address.h
-SimpleApp.obj: SimpleApp.cc \
-  SimpleApp.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
-  ..\..\Util/basic_consts.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Util/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ip_address.h
+

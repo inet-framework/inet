@@ -19,6 +19,25 @@
 // traffic generators for testing purposes
 
 
+simple AppIn
+    parameters: 
+        nodename : string;
+    gates: 
+        in: in; 
+endsimple 
+
+simple GeneratorAppOut
+    parameters: 
+        tcpProtocol : bool, 
+        nodename : string,
+        nodenr, 
+        generationTime,
+        generationSize, // (bit)
+        burstPackets : numeric const;
+    gates: 
+        out: out; 
+endsimple 
+
 
 //
 // Transport Application with Protocol set
@@ -54,23 +73,4 @@ module TrafficGenerator
         appOut.out --> out; 
     display: "p=10,10;b=203,147,rect";
 endmodule 
-
-simple AppIn
-    parameters: 
-        nodename : string;
-    gates: 
-        in: in; 
-endsimple 
-
-simple GeneratorAppOut
-    parameters: 
-        tcpProtocol : bool, 
-        nodename : string,
-        nodenr, 
-        generationTime,
-        generationSize, // (bit)
-        burstPackets : numeric const;
-    gates: 
-        out: out; 
-endsimple 
 
