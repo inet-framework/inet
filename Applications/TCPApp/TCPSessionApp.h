@@ -33,10 +33,17 @@ class TCPSessionApp : public cSimpleModule
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
 
-    cQueue queue;
+    TCPSocket socket;
+
+    // statistics
+    int packetsRcvd;
+    int bytesRcvd;
+    int indicationsRcvd;
 
   protected:
     void parseScript(const char *script);
+    void waitUntil(simtime_t t);
+    void count(cMessage *msg);
 
   public:
     Module_Class_Members(TCPSessionApp, cSimpleModule, 16384);

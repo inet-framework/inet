@@ -53,8 +53,42 @@ void TCPSessionApp::parseScript(const char *script)
     }
 }
 
+void TCPSessionApp::count(cMessage *msg)
+{
+    if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+    {
+        packetsRcvd++;
+        bytesRcvd+=msg->length()/8;
+    }
+    else
+    {
+        indicationsRcvd++;
+    }
+}
+
+void TCPSessionApp::waitUntil(simtime_t t)
+{
+    if (simTime()>=t)
+        return;
+
+    cMessage *timeoutMsg = new cMessage("timeout");
+    scheduleAt(t, timeoutMsg);
+    cMessage *msg=NULL;
+    while ((msg=receive())!=timeoutMsg)
+    {
+        count(msg);
+        socket.processMessage(msg);
+    }
+    delete timeoutMsg;
+}
+
 void TCPSessionApp::activity()
 {
+    packetsRcvd = bytesRcvd = indicationsRcvd = 0;
+    WATCH(packetsRcvd);
+    WATCH(bytesRcvd);
+    WATCH(indicationsRcvd);
+
     // parameters
     const char *address = par("address");
     int port = par("port");
@@ -72,38 +106,48 @@ void TCPSessionApp::activity()
     if (sendBytes>0 && commands.size()>0)
         throw new cException("cannot use both sendScript and tSend+sendBytes");
 
-    TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    queue.setName("queue");
 
     // open
-    waitAndEnqueue(tOpen-simTime(), &queue);
+    waitUntil(tOpen);
 
     if (!address[0])
         socket.bind(port);
     else
         socket.bind(IPAddress(address), port);
 
+    ev << "issuing OPEN command\n";
+    if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting":"listening");
+
     if (active)
         socket.connect(IPAddress(connectAddress), connectPort);
     else
         socket.listen();
 
+    // wait until connection gets established
+    while (socket.state()!=TCPSocket::CONNECTED)
+    {
+        socket.processMessage(receive());
+        if (socket.state()==TCPSocket::SOCKERROR)
+            return;
+    }
+
+    ev << "connection established, starting sending\n";
+    if (ev.isGUI()) displayString().setTagArg("t",0,"connected");
+
     // send
     if (sendBytes>0)
     {
-        if (tSend>simTime())
-            waitAndEnqueue(tSend-simTime(), &queue);
-
+        waitUntil(tSend);
+        ev << "sending " << sendBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
         msg->setLength(8*sendBytes);
         socket.send(msg);
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
     {
-        if (i->tSend>simTime())
-            waitAndEnqueue(i->tSend-simTime(), &queue);
-
+        waitUntil(i->tSend);
+        ev << "sending " << i->numBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
         msg->setLength(8*i->numBytes);
         socket.send(msg);
@@ -112,37 +156,22 @@ void TCPSessionApp::activity()
     // close
     if (tClose>=0)
     {
-        if (tClose>simTime())
-            waitAndEnqueue(tClose-simTime(), &queue);
+        waitUntil(tClose);
+        ev << "issuing CLOSE command\n";
+        if (ev.isGUI()) displayString().setTagArg("t",0,"closing");
         socket.close();
     }
 
-    while (true)
+    // wait until peer closes too and all data arrive
+    for (;;)
     {
         cMessage *msg = receive();
-        queue.insert(msg);
+        count(msg);
+        socket.processMessage(msg);
     }
 }
 
 void TCPSessionApp::finish()
 {
-    int n = 0;
-    int bytes = 0;
-    int nind = 0;
-    while (!queue.empty())
-    {
-        cMessage *msg = (cMessage *)queue.pop();
-        //ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
-        if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
-        {
-            n++;
-            bytes+=msg->length()/8;
-        }
-        else
-        {
-            nind++;
-        }
-        delete msg;
-    }
-    ev << fullPath() << ": received " << bytes << " bytes in " << n << " packets\n";
+    ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }

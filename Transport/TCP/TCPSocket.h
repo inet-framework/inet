@@ -290,6 +290,11 @@ class TCPSocket
      * to the appropriate method of it with the same yourPtr that
      * you gave in the setCallbackObject() call.
      *
+     * The method deletes the message, unless (1) there is a callback object
+     * installed AND (2) the message is payload (message kind TCP_I_DATA or
+     * TCP_I_URGENT_DATA) when the responsibility of destruction is on the
+     * socketDataArrived() callback method.
+     *
      * IMPORTANT: for performance reasons, this method doesn't check that
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
