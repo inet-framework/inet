@@ -58,8 +58,8 @@ module BurstHost
             display: "p=140,200,row,90;q=queue;i=iface";
     connections nocheck:
         // transport connections
-        networkLayer.UDPOut --> trafGen.to_ip;
-        networkLayer.UDPIn <-- trafGen.from_ip;
+        networkLayer.UDPOut --> trafGen.from_ip;
+        networkLayer.UDPIn <-- trafGen.to_ip;
 
         // connections to network outside
         for i=0..0 do
