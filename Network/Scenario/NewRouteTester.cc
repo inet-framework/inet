@@ -23,7 +23,7 @@
 class NewRouteTester : public cSimpleModule
 {
 private:
-   int timeOut;
+   simtime_t startTime;
 
 public:
    Module_Class_Members(NewRouteTester, cSimpleModule, 16384);
@@ -37,13 +37,13 @@ Define_Module(NewRouteTester);
 
 void NewRouteTester::initialize()
 {
-    timeOut = par("timeStart").longValue();
+    startTime = par("startTime");
 }
 
 void NewRouteTester::activity()
 {
     cMessage *timeout_msg = new cMessage;
-    scheduleAt( simTime()+timeOut, timeout_msg );
+    scheduleAt( simTime()+startTime, timeout_msg );
 
     cMessage* msg = receive();
 

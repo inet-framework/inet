@@ -80,7 +80,7 @@ module RSVPTE4
             display: "p=120,280;i=proc2";
         tester: NewBWRequestTester;
             parameters:
-                timeStart = 100;
+                startTime = 100;
             display: "p=309,300;i=cogwheel";
     connections nocheck:
         host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];

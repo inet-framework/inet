@@ -22,7 +22,7 @@
 class NewBWRequestTester : public cSimpleModule
 {
   private:
-    int timeOut;
+    simtime_t startTime;
 
   public:
     Module_Class_Members(NewBWRequestTester, cSimpleModule, 16384);
@@ -35,13 +35,13 @@ Define_Module(NewBWRequestTester);
 
 void NewBWRequestTester::initialize()
 {
-    timeOut = par("timeStart").longValue();
+    startTime = par("startTime");
 }
 
 void NewBWRequestTester::activity()
 {
     cMessage *timeout_msg = new cMessage;
-    scheduleAt( simTime()+timeOut, timeout_msg );
+    scheduleAt( simTime()+startTime, timeout_msg );
 
     cMessage* msg = receive();
 
