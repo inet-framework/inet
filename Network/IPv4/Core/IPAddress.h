@@ -1,0 +1,253 @@
+//
+// Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
+// Institute of Telematics, University of Karlsruhe, Germany.
+// University Comillas, Madrid, Spain.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+/*
+ *  Purpose: Represention of an IPv4 address
+ *  Author: Vincent Oberle
+ *  Date: Jan-March 2001
+ */
+
+#ifndef __IP_ADDRESS_H
+#define __IP_ADDRESS_H
+
+#include <omnetpp.h>
+#include <iostream>
+
+/**
+ * String size to hold an address.
+ * This is the size of the string that should be used to
+ * initialize the IPAddress class, and it is the size of the string
+ * returned by IPAddress::getString()
+ */
+const int ADDRESS_STRING_SIZE = 20;
+
+
+// FIXME do something (away) with this:
+#define IPADDRESS_UNDEF IPAddress()
+
+
+/**
+ * TCP/UDP port number
+ */
+typedef short PortNumber;
+
+const short PORT_UNDEF = 0;
+const short PORT_MAX = 0x7fff;
+
+
+
+/**
+ * IPv4 address.
+ */
+class IPAddress
+{
+  protected:
+    // Coded in the form of 4 numbers, following the format "addr[0].addr[1].addr[2].addr[3]"
+    // Example for the address 192.24.65.10: addr[0]=192, addr[1]=24 etc.
+    unsigned char addr[4];
+
+    // to store the return value for getString()
+    mutable char addrString[ADDRESS_STRING_SIZE];
+
+  protected:
+    // Only keeps the n first bits of the address, completing it with zeros.
+    // Typical usage is when the length of an IP prefix is done and to check
+    // the address ends with the right number of 0.
+    virtual void keepFirstBits (unsigned int n);
+
+    // Parses IP address into the given bytes, and returns true if syntax was OK.
+    static bool parseIPAddress(const char *text, unsigned char tobytes[]);
+  public:
+    /** name Constructors, destructor */
+    //@{
+
+    /**
+     * Default constructor, initializes to 0.0.0.0.
+     */
+    IPAddress() {addr[0] = addr[1] = addr[2] = addr[3] = 0;}
+
+    /**
+     * IP address as int
+     */
+    IPAddress(int i); // FIXME make unsigned!!!
+
+    /**
+     * IP address bytes: "i0.i1.i2.i3" format
+     */
+    IPAddress(int i0, int i1, int i2, int i3);
+
+    /**
+     * IP address given as text: "192.66.86.1"
+     */
+    IPAddress(const char *t);
+
+    /**
+     * Copy constructor
+     */
+    IPAddress(const IPAddress& obj);
+
+    virtual ~IPAddress() {}
+    //@}
+
+    /** name Setting the address */
+    //@{
+    /**
+     * IP address as int
+     */
+    void set(int i);
+
+    /**
+     * IP address bytes: "i0.i1.i2.i3" format
+     */
+    void set(int i0, int i1, int i2, int i3);
+
+    /**
+     * IP address given as text: "192.66.86.1"
+     */
+    void set(const char *t);
+    //@}
+
+    /**
+     * Assignment
+     */
+    virtual IPAddress& operator=(const IPAddress& obj);
+
+    /**
+     * FIXME or is "0.0.0.0" a valid address?
+     */
+    virtual bool isNull() const {return !addr[0] && !addr[1] && !addr[2] && !addr[3];}
+
+    /**
+     * Returns true if the 2 addresses are equal
+     */
+    virtual bool isEqualTo(const IPAddress& toCmp) const;
+
+    /**
+     * Returns binary AND of the 2 addresses
+     */
+    virtual IPAddress doAnd(const IPAddress& ip) const;
+
+    /**
+     * Returns pointer to a string (size ADDRESS_STRING_SIZE) representing the address.
+     */
+    // FIXME shouldn't use internal buffer
+    virtual const char *getString() const;
+
+    /**
+     * Returns the address as an int.
+     */
+    virtual int getInt() const;
+
+    /**
+     * Returns the corresponding part of the address specified by the index
+     * ("[0].[1].[2].[3]")
+     */
+    virtual int getDByte(int i) const {return addr[i];}
+
+    /**
+     * Returns the network class of the address: char 'A', 'B', 'C', 'D', 'E',
+     * or '?' (returned when the address begins with at least five 1 bits.)
+     */
+    virtual char getIPClass() const;
+
+    /**
+     * Returns true if IP class is "D"
+     */
+    virtual bool isMulticast() const {return getIPClass()=='D';}
+
+    /**
+     * Returns a dynamically allocated new address with the network part of
+     * the address (the bits of the hosts part are to 0)
+     */
+    // FIXME why not a new IPAddress by value?
+    virtual IPAddress* getNetwork() const;
+
+    /**
+     * Returns a dynamically allocated new address with the network mask
+     * corresponding to the address class.
+     */
+    // FIXME why not a new IPAddress by value?
+    virtual IPAddress* getNetworkMask() const;
+
+    /**
+     * Indicates if the address is from the same network
+     */
+    virtual bool isNetwork(IPAddress *toCmp) const;
+
+    /**
+     * Compares the first nbbits of the two addresses.
+     */
+    // FIXME name not very good
+    virtual bool compareTo(IPAddress *to_cmp, unsigned int nbbits) const;
+
+    /**
+     * Indicates how many bits from the to_cmp address, starting counting
+     * from the left, matches the address.
+     * E.g. if the address is 130.206.72.237, and to_cmp 130.206.72.0,
+     * 24 will be returned.
+     *
+     * Typical usage for comparing IP prefixes.
+     */
+    virtual int nbBitsMatching(IPAddress *to_cmp) const;
+
+    /**
+     * Test if the masked addresses (ie the mask is applied to addr1 and
+     * addr2) are equal. Warning: netmask == NULL is treated as all 1,
+     * ie (*addr1 == *addr2) is returned.
+     */
+    // FIXME why static?
+    static bool maskedAddrAreEqual (const IPAddress *addr1,
+                                    const IPAddress *addr2,
+                                    const IPAddress *netmask);
+
+    friend std::ostream& operator<<(std::ostream& os, const IPAddress& obj);
+    friend cEnvir& operator<<(cEnvir& ev, const IPAddress& obj);
+    bool operator==(const IPAddress& toCmp) const {return isEqualTo(toCmp);}
+    bool operator!=(const IPAddress& toCmp) const {return !isEqualTo(toCmp);}
+
+    operator const char *() const  { return getString(); }
+
+    /**
+     * Returns true if the format of the string corresponds to an IP address
+     * with the dotted notation ("192.66.86.1"), and false otherwise.
+     *
+     * This function can be used to verify an IP address string before assigning
+     * it to an IPAddress object (both its ctor and set() function raises an
+     * error if the string has invalid format.)
+     */
+    static bool isWellFormed(const char *text);
+    //@}
+};
+
+inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
+{
+    os << ip.getString();
+    return os;
+}
+
+inline cEnvir& operator<<(cEnvir& ev, const IPAddress& ip)
+{
+    ev << ip.getString();
+    return ev;
+}
+
+#endif
+
+

@@ -1,0 +1,1 @@
+for %%i in (%*) do perl -i.bak -pe "s/\t/    /g;" %%i
