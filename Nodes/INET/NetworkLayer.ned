@@ -61,9 +61,9 @@ module NetworkLayer
                 transportOut[6],
                 queueIn[sizeof(physIn)],
                 queueOut[sizeof(physOut)];
-            display: "p=85,95;i=block/cogwheel;q=queue";
+            display: "p=85,95;i=block/routing;q=queue";
         icmp: ICMP;
-            display: "p=160,63;i=block/cogwheel_s";
+            display: "p=160,63;i=block/control_s";
         igmp: IGMP;
             display: "p=160,122;i=block/cogwheel_s";
         errorHandling: ErrorHandling;

@@ -41,16 +41,16 @@ module Router
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
-            display: "p=62,135;i=block/table";
+            display: "p=62,140;i=block/table";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=160,124;i=block/fork;q=queue";
+            display: "p=200,124;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=80,214,row,90;q=queue;i=block/ifcard";
+            display: "p=90,240,row,110;q=queue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
-            display: "p=125,214,row,90;q=queue;i=block/ifcard";
+            display: "p=145,240,row,110;q=queue;i=block/ifcard";
     connections:
         // connections to network outside
         for i=0..sizeof(out)-1 do
