@@ -2,29 +2,26 @@
 
 ifconfig:
 
-# MPLS2IP link 0 	to 		LSR1
-name: ppp2_1 	encap: Point-to-Point 	inet_addr: 1.0.1.2
-MTU: 1500	Groups: 224.0.0.0	Metric: 1 
+# MPLS2IP link 0    to      LSR1
+name: ppp2_1    inet_addr: 1.0.1.2    MTU: 1500   Groups: 224.0.0.0   Metric: 1
 
-# MPLS2IP link 1 	dummy
-name: ppp2_2 	encap: Point-to-Point 	inet_addr: 1.0.3.2
-MTU: 1500	Groups: 224.0.0.0	Metric: 1
+# MPLS2IP link 1    dummy
+name: ppp2_2    inet_addr: 1.0.3.2    MTU: 1500   Groups: 224.0.0.0   Metric: 1
 
-# MPLS2IP link 2 	to LSR4
-name: ppp2_4 	encap: Point-to-Point 	inet_addr: 1.0.2.2
-MTU: 1500	Metric: 1 
+# MPLS2IP link 2    to LSR4
+name: ppp2_4    inet_addr: 1.0.2.2    MTU: 1500   Metric: 1
 
 
 ifconfigend.
 
 route:
 
-1.0.0.1		*	255.255.255.255 	H	0	ppp2_1
-1.0.0.4		*	255.255.255.255	H	0	ppp2_4
-10.0.0.1		*	255.255.255.255	H	0	ppp2_1
-11.0.0.1		*	255.255.255.255	H	0	ppp2_1
+1.0.0.1     *   255.255.255.255     H   0   ppp2_1
+1.0.0.4     *   255.255.255.255     H   0   ppp2_4
+10.0.0.1    *   255.255.255.255     H   0   ppp2_1
+11.0.0.1    *   255.255.255.255     H   0   ppp2_1
 
-default:	1.0.0.4		0.0.0.0 		G	0	ppp2_4
+default:    1.0.0.4     0.0.0.0     G   0   ppp2_4
 
 routeend.
 

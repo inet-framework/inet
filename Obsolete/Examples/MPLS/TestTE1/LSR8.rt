@@ -2,32 +2,28 @@
 
 ifconfig:
 
-# MPLS2IP link 0 
-name: ppp8_6 	encap: Point-to-Point 	inet_addr: 1.0.1.8
-MTU: 1500	Groups: 224.0.0.0	Metric: 1 
+# MPLS2IP link 0
+name: ppp8_6    inet_addr: 1.0.1.8    MTU: 1500   Groups: 224.0.0.0   Metric: 1
 
-# MPLS2IP link 1 
-name: ppp8_7 	encap: Point-to-Point 	inet_addr: 1.0.2.8
-MTU: 1500	Metric: 1 
+# MPLS2IP link 1
+name: ppp8_7    inet_addr: 1.0.2.8    MTU: 1500   Metric: 1
 
-# MPLS2IP link 2 
-name: ppp0 	encap: Point-to-Point 	inet_addr: 1.0.3.8
-MTU: 1500	Metric: 1
+# MPLS2IP link 2
+name: ppp0  inet_addr: 1.0.3.8    MTU: 1500   Metric: 1
 
-# MPLS2IP link 3 
-name: ppp1 	encap: Point-to-Point 	inet_addr: 1.0.4.8
-MTU: 1500	Metric: 1
+# MPLS2IP link 3
+name: ppp1  inet_addr: 1.0.4.8    MTU: 1500   Metric: 1
 
 ifconfigend.
 
 route:
 
-10.0.1.2	*	255.255.255.255 	H	0	ppp0
-11.0.1.2	*	255.255.255.255	H	0	ppp1
-1.0.0.6	*	255.255.255.255	H	0	ppp8_6
-1.0.0.7	*	255.255.255.255	H	0	ppp8_7
+10.0.1.2    *   255.255.255.255     H   0   ppp0
+11.0.1.2    *   255.255.255.255     H   0   ppp1
+1.0.0.6     *   255.255.255.255     H   0   ppp8_6
+1.0.0.7     *   255.255.255.255     H   0   ppp8_7
 
-default:	1.0.0.7		0.0.0.0 	G	0	ppp8_7
+default:    1.0.0.7     0.0.0.0     G   0   ppp8_7
 
 routeend.
 

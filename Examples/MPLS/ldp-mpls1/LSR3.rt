@@ -2,40 +2,36 @@
 
 ifconfig:
 
-# MPLS2IP link 0 	to 		LSR1
-name: MPLS2IP0 	encap: Point-to-Point 	inet_addr: 1.0.0.3
-MTU: 1500	Groups: 224.0.0.0	Metric: 1
+# MPLS2IP link 0    to      LSR1
+name: MPLS2IP0  inet_addr: 1.0.0.3    MTU: 1500   Groups: 224.0.0.0   Metric: 1
 
-# MPLS2IP link 1 	to 		LSR2
-name: MPLS2IP1 	encap: Point-to-Point 	inet_addr: 1.0.0.3
-MTU: 1500	Metric: 1 
+# MPLS2IP link 1    to      LSR2
+name: MPLS2IP1  inet_addr: 1.0.0.3    MTU: 1500   Metric: 1
 
-# MPLS2IP link 2 	to 		LSR4
-name: MPLS2IP2 	encap: Point-to-Point 	inet_addr: 1.0.0.3
-MTU: 1500	Metric: 1 
+# MPLS2IP link 2    to      LSR4
+name: MPLS2IP2  inet_addr: 1.0.0.3    MTU: 1500   Metric: 1
 
-# MPLS2IP link 3 	to 		LSR5
-name: MPLS2IP3 	encap: Point-to-Point 	inet_addr: 1.0.0.3
-MTU: 1500	Metric: 1 
+# MPLS2IP link 3    to      LSR5
+name: MPLS2IP3  inet_addr: 1.0.0.3    MTU: 1500   Metric: 1
 
 ifconfigend.
 
 route:
 
-1.0.0.1		*	255.255.255.255 	H	0 	MPLS2IP0
-1.0.0.2		*	255.255.255.255 	H	0	MPLS2IP1
-1.0.0.4		*	255.255.255.255 	H	0	MPLS2IP2
-1.0.0.5		*	255.255.255.255		H	0	MPLS2IP3
-10.0.1.2		*	255.255.255.255	H	0	MPLS2IP3
-10.0.0.1		*	255.255.255.255	H	0	MPLS2IP0
-11.0.1.2		*	255.255.255.255	H	0	MPLS2IP2
-11.0.0.1		*	255.255.255.255	H	0	MPLS2IP1
+1.0.0.1     *   255.255.255.255     H   0   MPLS2IP0
+1.0.0.2     *   255.255.255.255     H   0   MPLS2IP1
+1.0.0.4     *   255.255.255.255     H   0   MPLS2IP2
+1.0.0.5     *   255.255.255.255     H   0   MPLS2IP3
+10.0.1.2    *   255.255.255.255     H   0   MPLS2IP3
+10.0.0.1    *   255.255.255.255     H   0   MPLS2IP0
+11.0.1.2    *   255.255.255.255     H   0   MPLS2IP2
+11.0.0.1    *   255.255.255.255     H   0   MPLS2IP1
 
-224.2.0.0	*	255.192.0.0		H	0	MPLS2IP0
-224.3.0.0	*	255.192.0.0		H	0	MPLS2IP1
-224.4.0.0	*	255.192.0.0		H	0	MPLS2IP2
-224.5.0.0	*	255.192.0.0		H	0	MPLS2IP3
+224.2.0.0   *   255.192.0.0         H   0   MPLS2IP0
+224.3.0.0   *   255.192.0.0         H   0   MPLS2IP1
+224.4.0.0   *   255.192.0.0         H   0   MPLS2IP2
+224.5.0.0   *   255.192.0.0         H   0   MPLS2IP3
 
-default:		1.0.0.1		0.0.0.0 		G	0	MPLS2IP0
+default:    1.0.0.1     0.0.0.0     G   0   MPLS2IP0
 
 routeend.
