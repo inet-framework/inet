@@ -23,13 +23,11 @@ type="exe"
 includes=""
 libpath=""
 libs=""
-dirs=""
+linkdirs=""
 xobjs=""
 fragments=""
 makefilein=n
 doxyconf=doxy.cfg
-nedfiles=""
-msgfiles=""
 cfgfile=""
 
 while [ ! $# = 0 ] ; do
@@ -37,7 +35,7 @@ while [ ! $# = 0 ] ; do
 
         -h | --help)
         cat <<EOT
-opp_makemake: write OMNeT++ Makefile based on source files in current directory
+opp_makemake: generate OMNeT++ Makefile based on contents of current directory 
 
 opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
         [-c configfile] [-p] [-Idir] [-Llibrary-path] [-llibrary] 
@@ -131,7 +129,7 @@ EOT
         includes="$includes $1"
         ;;
 
-      -L*)
+        -L*)
         libpath="$libpath $1"
         ;;
 
@@ -141,7 +139,7 @@ EOT
 
         *)
         if [ -d $1 ]; then
-            dirs="$dirs $1"
+            linkdirs="$linkdirs $1"
         else
             if [ ! -f $1 ]; then
                 echo "opp_makemake: $1 is neither an existing file/dir nor a valid option" 1>&2
@@ -162,59 +160,21 @@ else
 fi
 
 if [ -f $outputfile ]; then
-    if [ ! -s $outputfile ]; then
-        echo "opp_makemake: synopsis changed (no longer needs >$outputfile), type opp_makemake -h" 1>&2
-        rm $outputfile
-        exit
-    fi
     if [ ! "$force" = "y" ]; then
         echo "opp_makemake: use -f to force overwriting existing $outputfile" 1>&2
         exit
     fi
 fi
 
-# warning for obsolete subclassing syntax
-for i in *.ned; do
-    if [ "$i" = "*.ned" ]; then break; fi;
-    grep '^//--subclassing--' $i >/dev/null
-    if [ "$?" = "0" ]; then
-        imsg=`echo $i | sed 's/\.ned$/.msg/'`
-        echo "Warning: $i contains experimental message subclassing header line:"
-        echo "       //--subclassing--"
-        echo "   Handling of msg files has changed: these files should have .msg suffix,"
-        echo "   and they will be compiled by opp_msgc into _m.h and _m.cc files."
-        echo "   Rename $i to $imsg and re-run opp_makemake;"
-        echo "   the '//--subclassing--' line will no longer be needed."
+subdirs=
+sobjs=
+for i in *; do
+    if [ -d $i -a $i != "CVS" -a $i != "backups" -a $i != "." -a $i != ".." ]; then
+        subdirs="$subdirs $i"
+        sobjs="$sobjs $i/*.o"
     fi
 done
 
-sobjs=""
-
-for i in $dirs; do
-    echo "*** Running make in $i to see object and ned file names"
-    if (cd $i && make); then
-        o=`echo $i/*.o`
-        if [ "$o" = "$i/*.o" ]; then
-            echo "opp_makemake: warning: no object files in $i" 1>&2
-        else
-            sobjs="$sobjs $o"
-        fi
-
-        # collect ned files of subdirectory for target neddoc.html.
-        nedf=`echo $i/*.ned`
-        if [ ! "$nedf" = "$i/*.ned" ]; then
-            nedfiles="$nedfiles $nedf"
-        fi
-        ## collect msg files of subdirectory for target neddoc.html.
-        #msgf=`echo $i/*.msg`
-        #if [ ! "$msgf" = "$i/*.msg" ]; then
-        #    msgfiles="$msgfiles $msgf"
-        #fi
-    else
-        echo "opp_makemake: make in $i failed, exiting" 1>&2
-        exit
-    fi
-done
 
 objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
 
@@ -372,13 +332,10 @@ NEDCOPTS=\$(CFLAGS) \$(NEDCFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
 EOT
 fi
 
-if [ "$dirs" != "" ]; then
-    subdirsphony=subdirs-phony
-else
-    subdirsphony=""
-fi
-
-echo '# Object files from this directory to link'
+echo '# subdirectories to recurse into'
+echo "SUBDIRS= $subdirs"
+echo
+echo '# object files in this directory'
 echo "OBJS= $objs"
 echo
 
@@ -411,23 +368,16 @@ echo 'purify: $(OBJS) $(EXRA_OBJS) ' $subdirsphony ' Makefile'
 echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
 echo
 
-if [ "$type" != "o" ]; then
-    if [ "$dirs" != "" ]; then
-        echo 'subdirs-phony:'
-        for i in $dirs
-        do
-           echo "	(cd $i && make)"
-        done
-        echo
-    fi
-fi
 
-for i in *.ned
-do
+echo ".PHONY: subdirs $subdirs" 
+echo "subdirs: $subdirs" 
+for i in $subdirs; do
+     echo "$subdir:"
+     echo '	cd ' $subdir ' && $(MAKE)' 
+done
+
+for i in *.ned; do
         if [ "$i" = "*.ned" ]; then break; fi;
-
-        # extend list for target neddoc.html
-        nedfiles="$nedfiles $i"
 
         obj=`echo $i | sed 's/\.ned/_n.o/g'`
         c=`echo $i | sed 's/\.ned/_n.cc/g'`
@@ -441,12 +391,8 @@ do
         echo
 done
 
-for i in *.msg
-do
+for i in *.msg; do
         if [ "$i" = "*.msg" ]; then break; fi;
-
-        ## extend list for target neddoc.html
-        #msgfiles="$msgfiles $i"
 
         obj=`echo $i | sed 's/\.msg/_m.o/g'`
         c=`echo $i | sed 's/\.msg/_m.cc/g'`
@@ -475,33 +421,17 @@ args1=`echo " $args " | sed 's/	/ /g;s/ -f / /g;s/ -m / /g'`
 
 cat <<EOT
 
-doc: neddoc.html htmldocs
+doc: neddoc doxy
 
-neddoc.html: $nedfiles
-	@opp_neddoc $nedfiles > neddoc.html
-	@echo File neddoc.html generated.
+neddoc:
+	opp_neddoc -a
 
-htmldocs:
-	@doxygen -g- | sed "s/^PROJECT_NAME.*/PROJECT_NAME = $outfile/;\\
-	s|^INPUT *=.*|INPUT = . $dirs|;\\
-	s/^EXTRACT_ALL *=.*/EXTRACT_ALL = yes/;\\
-	s/^EXTRACT_PRIVATE *=.*/EXTRACT_PRIVATE = yes/;\\
-	s/^EXCLUDE_PATTERNS *=.*/EXCLUDE_PATTERNS = *_n.cc *_n.h/;\\
-	s/^ALPHABETICAL_INDEX *=.*/ALPHABETICAL_INDEX = yes/;\\
-	s/^HTML_OUTPUT *=.*/HTML_OUTPUT = htmldoc/;\\
-	s/^GENERATE_LATEX *=.*/GENERATE_LATEX = no/;\\
-	s/^GENERATE_TREEVIEW *=.*/GENERATE_TREEVIEW = yes/;\\
-	s/^HIDE_UNDOC_RELATIONS *=.*/HIDE_UNDOC_RELATIONS = no/;\\
-	s|^TAGFILES *=.*|TAGFILES = /home/andras/omnetpp/doc/api/opptags.xml=/home/andras/omnetpp/doc/api|;\\
-	s|^GENERATE_TAGFILE *=.*|GENERATE_TAGFILE = htmldoc/tags.xml|;\\
-	s/^QUIET *=.*/QUIET = yes/" > $doxyconf
-	@doxygen $doxyconf
-	@echo Code documentation generated. Now, point your web browser to ./htmldoc/index.html.
+doxy: $doxyconf
+	doxygen $doxyconf
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h \$(TARGET)\$(EXE_SUFFIX)
 	rm -f *.vec *.sca
-	rm -rf neddoc.html htmldoc
 
 depend:
 	\$(MAKEDEPEND) \$(INCLUDE_PATH) -- *.cc
