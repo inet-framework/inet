@@ -58,6 +58,7 @@ module NetworkLayerWithMPLS
             gatesizes:
                 transportIn[4],
                 transportOut[4],
+                queueIn[numOfPorts],
                 queueOut[numOfPorts];
             display: "b=32,30;p=172,66;i=cogwheel";
         routingTable: RoutingTable;

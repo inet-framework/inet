@@ -55,6 +55,7 @@ module NetworkLayer
             gatesizes:
                 transportIn[2],
                 transportOut[2],
+                queueIn[numOfPorts],
                 queueOut[numOfPorts];
             display: "b=32,30;p=102,55;i=cogwheel";
         routingTable: RoutingTable;

@@ -38,7 +38,37 @@ void LocalDeliver::initialize()
 
 void LocalDeliver::parseTransportMap(const char *s)
 {
-    //FIXME ...
+    while (isspace(*s)) s++;
+
+    while (*s)
+    {
+        TransportEntry entry;
+
+        if (!isdigit(*s))
+            throw new cException("syntax error: protocol number expected");
+        entry.protocolNumber = atoi(s);
+        while (isdigit(*s)) s++;
+
+        if (*s++!=':')
+            throw new cException("syntax error: colon expected");
+
+        while (isspace(*s)) s++;
+        if (!isdigit(*s))
+            throw new cException("syntax error in script: output gate index expected");
+        entry.outGateIndex = atoi(s);
+        while (isdigit(*s)) s++;
+
+        // add
+        transportMap.push_back(entry);
+
+        // skip delimiter
+        while (isspace(*s)) s++;
+        if (!*s) break;
+        if (*s++!=',')
+            throw new cException("syntax error: comma expected");
+        while (isspace(*s)) s++;
+    }
+
 }
 
 int LocalDeliver::outputGateForProtocol(int protocol)
