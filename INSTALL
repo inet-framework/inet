@@ -23,8 +23,8 @@ LINUX (UNIX)
 
 4. Type "make" to build everything. That should be it.
 
-5. If there's a Makefile-related error or if you change add/remove files, 
-   you'll need to recreate the makefiles by typing "./makemake".
+5. If there's a Makefile-related error, or if you change add/remove files, 
+   try recreating the makefiles by typing "./makemake".
    If you add/remove/rename directories, you'll need to modify makemake.
 
 Finally, you can try running the demo simulations. cd to either
@@ -53,8 +53,8 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
 
 3. Type "nmake -f Makefile.vc" to build everything.
 
-4. If there's a Makefile-related error or if you change add/remove files, 
-   you'll need to recreate the makefiles by typing "makemake", then
+4. If there's a Makefile-related error, or if you change add/remove files, 
+   try recreating the makefiles by typing "makemake", then
    "nmake -f makefile.vc depend".
    If you add/remove/rename directories, you'll need to modify makemake.cmd.
 

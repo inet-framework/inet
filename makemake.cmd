@@ -36,7 +36,6 @@ cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteco
 cd %root%\Examples\IPSuite\McNetwork2 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\TCPClientServerNet && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
-cd %root%\Examples\IPSuite\TCPUDPDirectNet && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 
 cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
 cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%

@@ -46,7 +46,7 @@ module BurstHost
                 burstPackets = burstPackets,
                 generationTime = 0,
                 generationSize = packetSize;
-            display: "i=app;p=132,46";
+            display: "i=app;p=132,60";
         networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
@@ -55,9 +55,9 @@ module BurstHost
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "p=132,106;i=fork";
+            display: "p=132,120;i=fork";
         ppp: PPPInterface[1];
-            display: "p=132,166,row,90;q=queue;i=iface";
+            display: "p=132,200,row,90;q=queue;i=iface";
     connections nocheck:
         // transport connections
         networkLayer.UDPOut --> burstGenerator.in;

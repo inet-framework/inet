@@ -23,7 +23,6 @@ foreach line {
    {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2.exe"}
    {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis.exe"}
    {"TCPClientServerNet"  "TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet.exe"}
-   {"TCPUDPDirectNet"     "TCPUDPDirectNet"    "./TCPUDPDirectNet"    "TCPUDPDirectNet.exe"}
 } {
    set name $i
    incr i
