@@ -80,8 +80,8 @@ cd %root%\Examples\MPLS\TestTE5 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE6 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 
 cd %root%\Tests\MPLS && %MAKEMAKE% %OPTS% -n -r
-cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Tests\NewTCP && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %OPTS% -w %ALL_MPLS_IPSUITE_INCLUDES%
+cd %root%\Tests\NewTCP && %MAKEMAKE% %OPTS% -w %ALL_MPLS_IPSUITE_INCLUDES%
 
 : #--------------------------------------
 
