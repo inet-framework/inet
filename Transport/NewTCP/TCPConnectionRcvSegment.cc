@@ -594,11 +594,12 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         //"
         state->rcv_nxt = tcpseg->sequenceNo()+1;
         state->irs = tcpseg->sequenceNo();
-        receiveQueue->init(state->rcv_nxt);
+        receiveQueue->init(state->rcv_nxt);   //FIXME may init twice...
         selectInitialSeqNum();
         sendSynAck();
         startSynRexmitTimer();
-        scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
+        if (!connEstabTimer->isScheduled())
+            scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
 
         //"
         // Note that any other incoming control or data (combined with SYN)
