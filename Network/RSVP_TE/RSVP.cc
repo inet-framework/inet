@@ -103,35 +103,28 @@ void print(RSVPResvTear *p)
 void RSVP::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and get their auto-assigned IP addresses (stage 2)
-    if (stage!=3)
+    // and get their auto-assigned IP addresses (stage 2); and also TED has
+    // to initialize first (stage 3)
+
+    if (stage!=4)
         return;
 
     RoutingTable *rt = routingTableAccess.get();
 
-    // Get routerId
+    // get routerId
     routerId = rt->getRouterId().getInt();
     ASSERT(routerId!=0);
 
     IsIR = par("isIR").boolValue();
     IsER = par("isER").boolValue();
 
-    // Initialize interface address list
+    // initialize interface address list
     NoOfLinks = rt->numInterfaces();
-}
 
-void RSVP::activity()
-{
-    cMessage *msg;
-
-    int inInf;
-    int i;
-
-    /*********************SETUP RESOURCE******************************/
-    // Buid the link table
-    int linkNo = 0;
+    // fill in LocalAddress[] array, using TED (in stage>=4!)
     updateTED();
 
+    int linkNo = 0;
     std::vector<TELinkState>::iterator tedIter;
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
@@ -142,57 +135,44 @@ void RSVP::activity()
             linkNo++;
         }
     }
-    for (i = linkNo + 1; i < InLIST_SIZE; i++)
-    {
+    int i;
+    for (i = linkNo; i<InLIST_SIZE; i++)
         LocalAddress[i] = 0;
-    }
 
     // Debug:
-    ev << "LocalAddress array:\n";
-    for (i = 0; i < InLIST_SIZE; i++)
-        ev << IPAddress(LocalAddress[i]) << "\n";
+    ev << fullPath() << " LocalAddress[] array:\n";
+    for (i=0; i<InLIST_SIZE; i++)
+        ev << "  " << IPAddress(LocalAddress[i]) << "\n";
+}
 
-    /****************************PROCESS MESSAGES*************************/
+void RSVP::handleMessage(cMessage *msg)
+{
+    delete msg->removeControlInfo();
+    int inInf;
 
-    while (true)
+    switch (msg->kind())
     {
-        msg = receive();
-        delete msg->removeControlInfo();
-
-        // if (!(strcmp(msg->arrivalGate()->name(), "from_rsvp_app")))
-        //     send(msg, "to_ip");
-        // else
-        {
-
-            switch (msg->kind())
-            {
-            case PATH_MESSAGE:
-                inInf = msg->par("peerInf");
-                processPathMsg(check_and_cast<RSVPPathMsg *>(msg), inInf);
-                break;
-
-            case RESV_MESSAGE:
-                processResvMsg(check_and_cast<RSVPResvMsg *>(msg));
-                break;
-
-            case PTEAR_MESSAGE:
-                processPathTearMsg(check_and_cast<RSVPPathTear *>(msg));
-                break;
-            case RTEAR_MESSAGE:
-                processResvTearMsg(check_and_cast<RSVPResvTear *>(msg));
-                break;
-            case PERROR_MESSAGE:
-                processPathErrorMsg(check_and_cast<RSVPPathError *>(msg));
-                break;
-            case RERROR_MESSAGE:
-                rem = ;
-                processResvErrorMsg(check_and_cast<RSVPResvError *>(msg));
-                break;
-            default:
-                error("Unrecognized RSVP packet format");
-            }
-
-        }
+        case PATH_MESSAGE:
+            inInf = msg->par("peerInf");
+            processPathMsg(check_and_cast<RSVPPathMsg *>(msg), inInf);
+            break;
+        case RESV_MESSAGE:
+            processResvMsg(check_and_cast<RSVPResvMsg *>(msg));
+            break;
+        case PTEAR_MESSAGE:
+            processPathTearMsg(check_and_cast<RSVPPathTear *>(msg));
+            break;
+        case RTEAR_MESSAGE:
+            processResvTearMsg(check_and_cast<RSVPResvTear *>(msg));
+            break;
+        case PERROR_MESSAGE:
+            processPathErrorMsg(check_and_cast<RSVPPathError *>(msg));
+            break;
+        case RERROR_MESSAGE:
+            processResvErrorMsg(check_and_cast<RSVPResvError *>(msg));
+            break;
+        default:
+            error("Unrecognized RSVP packet format");
     }
 }
 

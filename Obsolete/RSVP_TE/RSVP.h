@@ -169,7 +169,7 @@ private:
 
     int routerId;  // FIXME change to IPAddress
     int NoOfLinks;
-    int LocalAddress[InLIST_SIZE ];
+    int LocalAddress[InLIST_SIZE];
     bool IsIR;
     bool IsER;
 
@@ -182,7 +182,6 @@ private:
     void processResvTearMsg(RSVPResvTear *rmsg);
     void processPathErrorMsg(RSVPPathError *pmsg);
     void processResvErrorMsg(RSVPResvError *rmsg);
-
 
     bool isLocalAddress(int ip);
     void PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero ) ;
@@ -227,14 +226,14 @@ private:
 
     void sendToIP(cMessage *msg, IPAddress destAddr);
 
- public:
-    Module_Class_Members(RSVP, cSimpleModule, 16384);
-
-    virtual int numInitStages() const  {return 4;}
-    virtual void initialize(int stage);
-    virtual void activity();
     void Mcast_Route_Query(int sa, int iad, int da, int *outl);
 
+ public:
+    Module_Class_Members(RSVP, cSimpleModule, 0);
+
+    virtual int numInitStages() const  {return 5;}
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif
