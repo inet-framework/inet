@@ -41,13 +41,25 @@ typedef unsigned int uint32;
 //
 // Macro to prevent executing ev<< statements in Express mode.
 // Compare ev/sec values with code compiled with #define EV ev.
-// After 3.0a4 change to:
-// #define EV ev.disabled()?ev:ev
 //
-#define EV ev.disable_tracing?ev:ev
+#define EV ev.disabled()?std::cout:ev
+
 
 //
-// 
+// Macro to protect expressions like gate("out")->toGate()->toGate()
+// from crashing if something in between returns NULL.
+// The above expression should be changed to 
+//    CHK(CHK(gate("out"))->toGate())->toGate()
+// which is uglier but doesn't crash, just stops with a nice 
+// error message if something goes wrong.
 //
+template <class T>  
+T *__checknull(T *p, const char *expr, const char *file, int line) 
+{
+    if (!p) 
+        opp_error("Expression %s returned NULL at %s:%d",expr,file,line);
+    return p;
+}
+#define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
 
 #endif

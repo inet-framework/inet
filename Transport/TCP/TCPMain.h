@@ -32,13 +32,13 @@ class TCPConnection;
 class TCPSegment;
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV (ev.disable_tracing||TCPMain::testing)?ev:ev
+#define tcpEV (ev.disable_tracing||TCPMain::testing)?std::cout:ev
 
 // macro for more verbose ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV2 (ev.disable_tracing||TCPMain::testing||!TCPMain::logverbose)?ev:ev
+#define tcpEV2 (ev.disable_tracing||TCPMain::testing||!TCPMain::logverbose)?std::cout:ev
 
 // testingEV writes log that automated test cases can check (*.test files)
-#define testingEV (ev.disable_tracing||!TCPMain::testing)?ev:ev
+#define testingEV (ev.disable_tracing||!TCPMain::testing)?std::cout:ev
 
 
 
