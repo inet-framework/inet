@@ -120,7 +120,7 @@ class RoutingEntry : public cPolymorphic
 
     /// Interface name and nb
     opp_string interfaceName;
-    int interfaceNo;
+    InterfaceEntry *interfacePtr;
 
     /// Route type: Direct or Remote
     RouteType type;
@@ -278,6 +278,7 @@ class RoutingTable: public cSimpleModule
 
     /** @name Routing functions (query the route table) */
     //@{
+    bool ipForward()  {return IPForward;}
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.

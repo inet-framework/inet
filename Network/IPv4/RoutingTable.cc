@@ -47,6 +47,7 @@ InterfaceEntry::InterfaceEntry()
     pointToPoint= false;
     loopback = false;
 
+    // add default mouticast groups!
     multicastGroupCtr = 0;
     multicastGroup = NULL;
 }
@@ -87,7 +88,7 @@ std::string InterfaceEntry::detailedInfo() const
 
 RoutingEntry::RoutingEntry()
 {
-    interfaceNo = -1;
+    interfacePtr = NULL;
 
     metric = 0;
     type = DIRECT;
@@ -185,6 +186,7 @@ void RoutingTable::addInterface(InterfaceEntry *entry)
 
 bool RoutingTable::deleteInterface(InterfaceEntry *entry)
 {
+    // FIXME TBD: check if any route table entries refer to this interface
     InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
     if (i==interfaces.end())
         return false;
@@ -192,6 +194,7 @@ bool RoutingTable::deleteInterface(InterfaceEntry *entry)
     interfaces.erase(i);
     delete entry;
 
+    // renumber other interfaces
     for (i=interfaces.begin(); i!=interfaces.end(); ++i)
         (*i)->index = i-interfaces.begin();
     return true;

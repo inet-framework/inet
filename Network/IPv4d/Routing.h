@@ -39,7 +39,6 @@ class Routing : public QueueWithQoS
   private:
     RoutingTableAccess routingTableAccess;
     ICMPAccess icmpAccess;
-    bool IPForward;
 
     // statistics
     int numMulticast;

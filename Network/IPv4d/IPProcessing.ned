@@ -54,8 +54,6 @@ module IPProcessing
                 in[2];
             display: "b=32,30;p=95,177;i=prot3";
         routing: Routing;
-            parameters:
-                IPForward = IPForward;
             gatesizes:
                 in[2];
             display: "b=34,34;p=179,177;i=bwgen";
@@ -68,8 +66,6 @@ module IPProcessing
                 transportOut[sizeof(transportOut)];
             display: "b=32,30;p=95,78;i=fork";
         multicast: IPMulticast;
-            parameters:
-                IPForward = IPForward;
             display: "b=17,17;p=305,175;i=bwgen_s";
         send: IPSend;
             parameters:

@@ -33,8 +33,6 @@
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 //
 simple IPMulticast
-    parameters:
-        IPForward: bool;
     gates:
         in: routingIn;
         out: localOut, fragmentationOut, tunnelOut;

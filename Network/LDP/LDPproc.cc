@@ -331,7 +331,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
     int i = 0;
     int k = 0;
-    int interfaceIndex = rt->interfaceByName(interfaceName.c_str())->index;
+    InterfaceEntry *interfacep = rt->interfaceByName(interfaceName.c_str());
 
     RoutingEntry *anEntry;
 
@@ -340,7 +340,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
         for (k = 0; k < myPeers.size(); k++)
         {
             anEntry = rt->routingEntry(i);
-            if (anEntry->host.getInt()==myPeers[k].peerIP && anEntry->interfaceNo==interfaceIndex)
+            if (anEntry->host.getInt()==myPeers[k].peerIP && anEntry->interfacePtr==interfacep)
             {
                 return myPeers[k].peerIP;
             }

@@ -31,7 +31,6 @@ Define_Module(IP);
 
 void IP::initialize()
 {
-    IPForward = par("IPForward").boolValue();
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
     fragmentTimeoutTime = par("fragmentTimeout");
@@ -43,7 +42,6 @@ void IP::initialize()
 
     numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(IPForward);
     WATCH(numMulticast);
     WATCH(numLocalDeliver);
     WATCH(numDropped);
@@ -125,7 +123,7 @@ void IP::routePacket(IPDatagram *datagram)
 
     // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
     int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    if (inputPort!=-1 && !IPForward)
+    if (inputPort!=-1 && !rt->ipForward())
     {
         ev << "forwarding off, dropping packet\n";
         numDropped++;
@@ -189,8 +187,8 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
         localDeliver(datagramCopy);
     }
 
-    // forward datagram only if IPForward is true or sent locally
-    if (inputPort!=-1 && !IPForward)
+    // forward datagram only if IP forward is enabled, or sent locally
+    if (inputPort!=-1 && !rt->ipForward())
     {
         delete datagram;
         return;

@@ -44,7 +44,6 @@ simple IP
     parameters:
         timeToLive : numeric const,
         multicastTimeToLive : numeric const,
-        IPForward : bool,
         protocolMapping : string,
         fragmentTimeout : numeric const;
     gates:

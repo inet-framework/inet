@@ -36,7 +36,6 @@ const char  *IFCONFIG_START_TOKEN = "ifconfig:",
             *ROUTE_START_TOKEN = "route:",
             *ROUTE_END_TOKEN = "routeend.";
 
-/*
 RoutingTableParser::RoutingTableParser(RoutingTable *r)
 {
     rt = r;
@@ -117,7 +116,6 @@ int RoutingTableParser::readRoutingTableFromFile (const char *filename)
 
     // parse filtered files
     parseInterfaces(ifconfigFile);
-    addLocalLoopback();
     parseRouting(routeFile);
 
     delete ifconfigFile;
@@ -165,25 +163,27 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
     {
         // name entry
         if (streq(ifconfigFile + charpointer, "name:")) {
+            // FIXME find existing one instead of adding a new one
             e = new InterfaceEntry();
-            rt->intrface[rt->numIntrfaces] = e;
-            rt->numIntrfaces++; // ready for the next one
             e->name = parseInterfaceEntry(ifconfigFile, "name:", charpointer,
                                           new char[MAX_ENTRY_STRING_SIZE]);
+            rt->addInterface(e);
             continue;
         }
 
         // encap entry
         if (streq(ifconfigFile + charpointer, "encap:")) {
-            e->encap = parseInterfaceEntry(ifconfigFile, "encap:", charpointer,
-                                           new char[MAX_ENTRY_STRING_SIZE]);
+            // ignore encap
+            parseInterfaceEntry(ifconfigFile, "encap:", charpointer,
+                                new char[MAX_ENTRY_STRING_SIZE]);
             continue;
         }
 
         // HWaddr entry
         if (streq(ifconfigFile + charpointer, "HWaddr:")) {
-            e->hwAddrStr = parseInterfaceEntry(ifconfigFile, "HWaddr:", charpointer,
-                                               new char[MAX_ENTRY_STRING_SIZE]);
+            // ignore hwAddr
+            parseInterfaceEntry(ifconfigFile, "HWaddr:", charpointer,
+                                new char[MAX_ENTRY_STRING_SIZE]);
             continue;
         }
 
@@ -196,8 +196,9 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // Broadcast address entry
         if (streq(ifconfigFile + charpointer, "Bcast:")) {
-            e->bcastAddr = IPAddress(parseInterfaceEntry(ifconfigFile, "Bcast:", charpointer,
-                                     new char[MAX_ENTRY_STRING_SIZE]));  // FIXME mem leak
+            // ignore Bcast
+            parseInterfaceEntry(ifconfigFile, "Bcast:", charpointer,
+                                new char[MAX_ENTRY_STRING_SIZE]);  // FIXME mem leak
             continue;
         }
 
@@ -222,7 +223,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "MTU:")) {
             e->mtu = atoi(
                 parseInterfaceEntry(ifconfigFile, "MTU:", charpointer,
-                                    new char[MAX_ENTRY_STRING_SIZE]));
+                                    new char[MAX_ENTRY_STRING_SIZE])); // FIXME mem leak
             continue;
         }
 
@@ -261,17 +262,6 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         // no entry discovered: move charpointer on
         charpointer++;
     }
-
-    // add default multicast groups to all interfaces without
-    // set multicast group field
-    for (int i = 0; i < rt->numIntrfaces; i++) {
-        InterfaceEntry *interf = rt->intrface[i];
-        if (interf->multicastGroupCtr == 0) {
-            char emptyGroupStr[MAX_GROUP_STRING_SIZE];
-            strcpy(emptyGroupStr, "");
-            parseMulticastGroups(emptyGroupStr, interf);
-        }
-    }
 }
 
 
@@ -308,8 +298,8 @@ void RoutingTableParser::parseMulticastGroups (char *groupStr,
         strcat(groupStr, ":224.0.0.1");
     }
 
-    // add 224.0.0.2" only if Router (IPForward == true)
-    if (rt->IPForward) {
+    // add 224.0.0.2" only if Router (IP forwarding enabled)
+    if (rt->ipForward()) {
         strcat(groupStr, ":224.0.0.2");
     }
 
@@ -345,42 +335,27 @@ void RoutingTableParser::parseMulticastGroups (char *groupStr,
 
 void RoutingTableParser::parseRouting(char *routeFile)
 {
-    int i, charpointer = 0;
-    RoutingEntry *e;
     char *str = new char[MAX_ENTRY_STRING_SIZE];
 
-    charpointer += strlen(ROUTE_START_TOKEN);
-    skipBlanks(routeFile, charpointer);
-    while (routeFile[charpointer] != '\0')
+    int pos = strlen(ROUTE_START_TOKEN);
+    skipBlanks(routeFile, pos);
+    while (routeFile[pos] != '\0')
     {
         // 1st entry: Host
-        charpointer += strcpyword(str, routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
-        e = new RoutingEntry();
+        pos += strcpyword(str, routeFile + pos);
+        skipBlanks(routeFile, pos);
+        RoutingEntry *e = new RoutingEntry();
         if (strcmp(str, "default:"))
         {
             // if entry is not the default entry
             if (!IPAddress::isWellFormed(str))
                 opp_error("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IP address", str);
-
             e->host = IPAddress(str);
-
-            // check if entry is for multicast address
-            if (!e->host.isMulticast()) {
-                rt->route->add(e);
-            } else {
-                rt->mcRoute->add(e);
-            }
-        }
-        else
-        {
-            // default entry
-            rt->defaultRoute = e;
         }
 
         // 2nd entry: Gateway
-        charpointer += strcpyword(str, routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
+        pos += strcpyword(str, routeFile + pos);
+        skipBlanks(routeFile, pos);
         if (!strcmp(str, "*") || !strcmp(str, "0.0.0.0"))
         {
             e->gateway = IPAddress("0.0.0.0");
@@ -393,42 +368,45 @@ void RoutingTableParser::parseRouting(char *routeFile)
         }
 
         // 3rd entry: Netmask
-        charpointer += strcpyword(str, routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
+        pos += strcpyword(str, routeFile + pos);
+        skipBlanks(routeFile, pos);
         if (!IPAddress::isWellFormed(str))
             opp_error("Syntax error in routing file: `%s' on 3rd column should be a valid IP address", str);
         e->netmask = IPAddress(str);
 
         // 4th entry: flags
-        charpointer += strcpyword(str, routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
+        pos += strcpyword(str, routeFile + pos);
+        skipBlanks(routeFile, pos);
         // parse flag-String to set flags
-        for(i = 0; str[i]; i++)
+        for (int i = 0; str[i]; i++)
         {
             if (str[i] == 'H') {
-                e->type = DIRECT;
+                e->type = RoutingEntry::DIRECT;
             } else if (str[i] == 'G') {
-                e->type = REMOTE;
+                e->type = RoutingEntry::REMOTE;
             } else {
                 opp_error("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);
             }
         }
 
-        // 5th entry: references (unsupported by Linux)
-        charpointer += strcpyword(str, routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
-        e->ref = atoi(str);
-        if (e->ref==0 && str[0]!='0')
+        // 5th entry: references (ignored)
+        pos += strcpyword(str, routeFile + pos);
+        skipBlanks(routeFile, pos);
+        int ref = atoi(str);
+        if (ref==0 && str[0]!='0')
             opp_error("Syntax error in routing file: 5th column should be numeric not `%s'", str);
 
         // 6th entry: interfaceName
         e->interfaceName.reserve(MAX_ENTRY_STRING_SIZE);
-        charpointer += strcpyword(e->interfaceName.buffer(), routeFile + charpointer);
-        skipBlanks(routeFile, charpointer);
-        e->interfaceNo = rt->interfaceByName(e->interfaceName.c_str());
-        if (e->interfaceNo==-1)
+        pos += strcpyword(e->interfaceName.buffer(), routeFile + pos);
+        skipBlanks(routeFile, pos);
+        e->interfacePtr = rt->interfaceByName(e->interfaceName.c_str());
+        if (e->interfacePtr==NULL)
             opp_error("Syntax error in routing file: 6th column should be an existing "
                       "interface name not `%s'", e->interfaceName.c_str());
+
+        // add entry
+        rt->addRoutingEntry(e);
     }
 }
-*/
+

@@ -33,11 +33,9 @@ Define_Module(Routing);
 void Routing::initialize()
 {
     QueueWithQoS::initialize();
-    IPForward = par("IPForward").boolValue();
 
     numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(IPForward);
     WATCH(numMulticast);
     WATCH(numLocalDeliver);
     WATCH(numDropped);
@@ -76,8 +74,8 @@ void Routing::endService(cMessage *msg)
         return;
     }
 
-    // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
-    if (routingDecision->inputPort()!=-1 && !IPForward)
+    // if datagram arrived from input gate and IP forwarding is off, delete datagram
+    if (routingDecision->inputPort()!=-1 && !rt->ipForward())
     {
         ev << "forwarding off, dropping packet\n";
         numDropped++;

@@ -32,7 +32,6 @@ Define_Module(IPMulticast);
 
 void IPMulticast::initialize()
 {
-    IPForward = par("IPForward").boolValue();
 }
 
 void IPMulticast::handleMessage(cMessage *msg)
@@ -79,8 +78,8 @@ void IPMulticast::handleMessage(cMessage *msg)
         send(datagramCopy, "localOut");
     }
 
-    // forward datagram only if IPForward is true or sent locally
-    if (inputPort!=-1 && !IPForward)
+    // forward datagram only if IP forwarding is on, or sent locally
+    if (inputPort!=-1 && !rt->ipForward())
     {
         delete datagram;
         return;

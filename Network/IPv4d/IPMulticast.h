@@ -37,7 +37,6 @@ class IPMulticast : public cSimpleModule
 {
   private:
     RoutingTableAccess routingTableAccess;
-    bool IPForward;
 
   public:
     Module_Class_Members(IPMulticast, cSimpleModule, 0);

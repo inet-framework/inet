@@ -18,9 +18,13 @@
 
 
 //
-// Routing module.
+// Examines the packet's destination address and decides where it should
+// be sent. The decision is stored in the IPRoutingDecision control info
+// attached to the packet. The actual routing decision is done by
+// invoking functions in the RoutingTable module.
 //
-// Receives correct IP datagram, then:
+// Detailed operation:
+// - receive correct IP datagram, then:
 // - if source routing option is on, use next source addr. as dest. addr.
 // - map IP address on output port, use static routing table
 // - if destination address is not in routing table,
@@ -31,15 +35,16 @@
 // - send datagram with Multicast addr. to Multicast module
 // - otherwise, send to Fragmentation module
 //
+// @see RoutingTable
+//
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // Redesign: Andras Varga, 02.2004
 //
-
+//# FIXME rename to IPRouting
 simple Routing
     parameters:
         procdelay : numeric const,
         qosBehaviorClass: string,
-        IPForward : bool;
     gates:
         in: in[];
         out: localOut;

@@ -42,7 +42,6 @@ class IP : public cSimpleModule
     ICMPAccess icmpAccess;
 
     // config
-    bool IPForward;
     int defaultTimeToLive;
     int defaultMCTimeToLive;
     simtime_t fragmentTimeoutTime;
