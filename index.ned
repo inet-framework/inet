@@ -47,13 +47,16 @@
 // A few useful starting points for browsing IPSuite:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a>
 //    includes all modules and networks
-//  - example models such as NClients, ClientServerNetwork, McNetwork2, 
+//  - example networks: NClients, ClientServerNetwork, McNetwork2, 
 //    ARPTest, MixedLAN, etc.
-//  - hosts, routers, switches: StandardHost2, Router, EtherSwitch, EtherHub
+//  - hosts, routers, switches: StandardHost2, Router, EtherSwitch, EtherHub, 
+//    etc.
 //  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing, 
 //    PPPInterface, ARP, EtherMAC, etc.
 //  - a central module which holds the interface table and the route table: 
 //    RoutingTable
+//  - if you don't want to manually set up \IP addresses and routing: 
+//    FlatNetworkConfigurator
 //  - message classes: IPDatagram, TCPSegment, UDPPacket, EthernetIIFrame, 
 //    ARPPacket, PPPFrame, GenericAppMsg, EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
