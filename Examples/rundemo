@@ -138,11 +138,11 @@ proc createWindow {} {
     #pack .sel.banner -fill x -side top
     foreach i $samples {
         if {$type($i)=="spacer"} {
-            label .sel.$i -relief flat
-            pack .sel.$i -fill x -side top -padx 5 -pady 2
+            frame .sel.$i -relief flat
+            pack .sel.$i -fill x -side top -pady 5
         } elseif {$type($i)=="heading"} {
             label .sel.$i -text $title($i) -bg $colors(banner) -relief groove  -font $fonts(bold)
-            pack .sel.$i -fill x -side top -padx 5 -pady 2
+            pack .sel.$i -fill x -side top -padx 5 -pady 5
         } else {
             button .sel.$i -text $title($i) -command "showDemo $i"
             pack .sel.$i -fill x -side top -padx 5 -pady 2
