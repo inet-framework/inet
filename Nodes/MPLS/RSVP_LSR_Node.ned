@@ -88,7 +88,7 @@ module RSVP_LSR_Node
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
             display: "b=32,30;p=192,163;i=fork";
-        ppp: LinkLayer[sizeof(out)];
+        ppp: PPPInterface[sizeof(out)];
             display: "p=88,297,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
@@ -113,9 +113,6 @@ module RSVP_LSR_Node
 
         rsvp.to_ip --> rsvpInterface.from_rsvp_app;
         rsvp.from_ip <-- rsvpInterface.to_rsvp_app;
-
-        networkLayer.OSPFOut --> ospf_te.from_ip;
-        networkLayer.OSPFIn <-- ospf_te.to_ip;
 
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;

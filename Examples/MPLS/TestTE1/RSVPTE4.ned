@@ -71,17 +71,15 @@ module RSVPTE4
             display: "p=388,159;i=srouter";
         host1: TCPClientTest;
             parameters:
-                start_time = 0,
+                start_time = 0;
             display: "p=26,98;i=comp_s";
         host2: TCPClientTest;
             parameters:
-                start_time = 0,
+                start_time = 0;
             display: "p=26,256;i=comp_s";
         host3: TCPServerTest;
-            parameters:
             display: "p=610,80;i=comp_s";
         host4: TCPServerTest;
-            parameters:
             display: "p=602,248;i=comp_s";
         ted: TED;
             display: "p=148,376;b=24,16";

@@ -86,7 +86,7 @@ module LSRNode
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
             display: "b=32,30;p=191,186;i=fork";
-        ppp: LinkLayer[sizeof(out)];
+        ppp: PPPInterface[sizeof(out)];
             display: "p=87,320,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
