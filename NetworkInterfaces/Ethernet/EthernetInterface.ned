@@ -35,7 +35,7 @@ module EthernetInterface
         arp: ARP;
             parameters:
                 proxyARP = proxyARP;
-            display: "i=proc2;p=100,80";
+            display: "p=100,80;i=proc2;q=pendingQueue";
         encap: EtherEncap;
             gatesizes:
                 upperLayerIn[1],

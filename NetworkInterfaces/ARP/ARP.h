@@ -108,6 +108,8 @@ class ARP : public cSimpleModule
     void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 
     void dumpARPPacket(ARPPacket *arp);
+    void updateDisplayString();
+
 };
 
 #endif

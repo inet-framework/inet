@@ -29,10 +29,10 @@ static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
 
 static std::ostream& operator<< (std::ostream& ev, const ARP::ARPCacheEntry& e)
 {
-    ev << "MAC=" << e.macAddress;
+    ev << "MAC:" << e.macAddress;
     if (e.pending)
-        ev << " pending," << e.numRetries << " retries";
-    ev << " age:" << simulation.simTime()-e.lastUpdate;
+        ev << "  pending (" << e.numRetries << " retries)";
+    ev << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
     return ev;
 }
 
@@ -71,7 +71,7 @@ void ARP::initialize(int stage)
     WATCH(numResolutions);
     WATCH(numFailedResolutions);
 
-    WATCH_MAP(arpCache);
+    WATCH_PTRMAP(arpCache);
 }
 
 void ARP::finish()
@@ -110,6 +110,17 @@ void ARP::handleMessage(cMessage *msg)
     {
         processOutboundPacket(msg);
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
+}
+
+void ARP::updateDisplayString()
+{
+    char buf[80];
+    sprintf(buf, "%d cache entries\nsent req:%d repl:%d fail:%d",
+                 arpCache.size(), numRequestsSent, numRepliesSent, numFailedResolutions);
+    displayString().setTagArg("t",0,buf);
 }
 
 void ARP::processInboundPacket(cMessage *msg)

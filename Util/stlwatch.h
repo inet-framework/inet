@@ -50,7 +50,8 @@ class cVectorWatcher : public cVectorWatcherBase
     virtual string at(int i) const {stringstream out; out << v[i]; return out.str();}
 };
 
-template <class T> void createVectorWatcher(const char *varname, vector<T>& v)
+template <class T>
+void createVectorWatcher(const char *varname, vector<T>& v)
 {
     new cVectorWatcher<T>(varname, v);
 }
@@ -67,7 +68,8 @@ class cPointerVectorWatcher : public cVectorWatcher<T>
     virtual string at(int i) const {stringstream out; out << *v[i]; return out.str();}
 };
 
-template <class T> void createPointerVectorWatcher(const char *varname, vector<T>& v)
+template <class T>
+void createPointerVectorWatcher(const char *varname, vector<T>& v)
 {
     new cPointerVectorWatcher<T>(varname, v);
 }
@@ -103,23 +105,50 @@ class cMapWatcher : public cVectorWatcherBase
         if (it==m.end()) {
             return string("out of bounds");
         }
+        return atIt();
+    }
+    virtual string atIt() const {
         stringstream out;
         out << "KEY {" << it->first << "}  VALUE {" << it->second << "}";
         return out.str();
     }
 };
 
-template <class _K, class _V, class _C> void createMapWatcher(const char *varname, map<_K,_V,_C>& m)
+template <class _K, class _V, class _C>
+void createMapWatcher(const char *varname, map<_K,_V,_C>& m)
 {
     new cMapWatcher<_K,_V,_C>(varname, m);
 }
 
 
-#define WATCH_VECTOR(v)   createVectorWatcher(#v,(v))
+//
+// Internal class
+//
+template<class _K, class _V, class _C>
+class cPointerMapWatcher : public cMapWatcher<_K,_V,_C>
+{
+  public:
+    cPointerMapWatcher(const char *name, map<_K,_V,_C>& var) : cMapWatcher<_K,_V,_C>(name, var) {}
+    virtual string atIt() const {
+        stringstream out;
+        out << "KEY {" << it->first << "}  VALUE {" << *(it->second) << "}";
+        return out.str();
+    }
+};
+
+template<class _K, class _V, class _C>
+void createPointerMapWatcher(const char *varname, map<_K,_V,_C>& m)
+{
+    new cPointerMapWatcher<_K,_V,_C>(varname, m);
+}
+
+#define WATCH_VECTOR(v)      createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
 
-#define WATCH_MAP(m)   createMapWatcher(#m,(m))
+#define WATCH_MAP(m)         createMapWatcher(#m,(m))
+
+#define WATCH_PTRMAP(m)      createPointerMapWatcher(#m,(m))
 
 #endif
 
