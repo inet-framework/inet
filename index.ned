@@ -21,7 +21,7 @@
 //
 // @titlepage
 //
-// <center><h1>INET Framework for OMNeT++</h1></center>
+// <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
 // <center><h3>snapshot 2004-10-06</h3></center>
 //
 // <nohtml>INET Framework contains IPv4, TCP, UDP protocol implementations,
@@ -67,11 +67,23 @@
 //
 // @page history.html, History
 //
-// The OMNeT++ INET framework is a successor of the IPSuite package.
+// The OMNeT++/OMNEST INET framework is a successor of the IPSuite package.
 //
 // The original IPSuite was written by Klaus Wehrle, Jochen Reber,
 // Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage and others
 // at the University of Karlsruhe during 2000-2001.
+//
+// After a period of IPSuite being unmaintained, Andras Varga took over
+// the development in July 2003. Through a series of snapshot releases in
+// 2003-2004, modules got completely reorganized, documented, and many of them
+// rewritten from scratch. The MPLS models (see below) was also merged
+// into the codebase. The complete change log is available
+// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPSuiteLogOfChanges" target="_top">here</a>.
+// Most notable additions are a new, modular and extensible TCP implementation,
+// application models, Ethernet implementation and an all-in-one IP model
+// to replace the earlier, modularized one.
+//
+// The package was renamed INET framework in October 2004.
 //
 // The MPLS, LDP and \RSVP-TE models were built as an add-on to IPSuite.
 // The package consists of around 10,000 LOCs, and it was written by Xuan
@@ -80,14 +92,6 @@
 // See <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" target="_top">project page</a>
 // (no longer updated).
 //
-// After a period of IPSuite being unmaintained, Andras Varga took over
-// the development in July 2003. Through a series of snapshot releases in
-// 2003-2004, modules got completely reorganized, documented, and many of them
-// rewritten from scratch. A complete change log is available
-// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPSuiteLogOfChanges" target="_top">here</a>.
-// Most notable additions are a new, modular and extensible TCP implementation,
-// application models, Ethernet implementation and an all-in-one IP model
-// to replace the earlier, modularized one.
-//
-// The package was renamed INET framework in October 2004.
+// The MPLS models are now also maintained by Andras Varga, as part of the
+// INET framework.
 //
