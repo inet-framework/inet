@@ -1210,7 +1210,7 @@ void TcpModule::anaEvent(TcpTcb* tcb_block, cMessage* msg, MsgSource source)
     }
     
   // now print what we learned
-  if (debug) ev << "Received event " << eventName(tcb_block->st_event.event) 
+  if (debug) ev << "TCP received event " << eventName(tcb_block->st_event.event) 
                 << " in state " << stateName((TcpState)tcb_block->fsm.state()) << endl;
 }
 
