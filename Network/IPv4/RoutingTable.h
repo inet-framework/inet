@@ -46,40 +46,45 @@ const int   MAX_ENTRY_STRING_SIZE = 20;
 const int   MAX_GROUP_STRING_SIZE = 160;
 
 /**
- * Interface entry for the interface table.
+ * Interface entry for the interface table in RoutingTable.
+ *
+ * @see RoutingTable
  */
 class InterfaceEntry : public cPolymorphic
 {
   public:
-    int index;  // index in interfaces[] (!= outputPort!!!)
-    int outputPort;  // FIXME fill this in!!!!
-    int mtu;
-    int metric;
-    opp_string name;
-    opp_string encap;
-    opp_string hwAddrStr;
-    IPAddress inetAddr;
-    IPAddress bcastAddr;
-    IPAddress mask;
-    bool broadcast, multicast, pointToPoint, loopback;
+    int index;          //< index in interfaces[]
+    opp_string name;    //< interface name (must be unique)
+    IPAddress inetAddr; //< IP address of interface
+    IPAddress mask;     //< netmask
+    int outputPort;     //< output gate index (-1 if unused)
+    int mtu;            //< Maximum Transmission Unit (e.g. 1500 on Ethernet)
+    int metric;         //< link "cost"; see e.g. MS KB article Q299540
+    bool broadcast;     //< interface supports broadcast
+    bool multicast;     //< interface supports multicast
+    bool pointToPoint;  //< interface is point-to-point link
+    bool loopback;      //< interface is loopback interface
 
-    int multicastGroupCtr; // table size
-    IPAddress *multicastGroup;  // dynamically allocated IPAddress table
+    int multicastGroupCtr; //< table size
+    IPAddress *multicastGroup;  //< dynamically allocated IPAddress table
+
+  private:
+    // copying not supported: following are private and also left undefined
+    InterfaceEntry(const InterfaceEntry& obj);
+    InterfaceEntry& operator=(const InterfaceEntry& obj);
 
   public:
     InterfaceEntry();
     virtual ~InterfaceEntry() {}
     virtual void info(char *buf);
     virtual std::string detailedInfo() const;
-
-    // copy not supported: declare the following but leave them undefined
-    InterfaceEntry(const InterfaceEntry& obj);
-    InterfaceEntry& operator=(const InterfaceEntry& obj);
 };
 
 
 /**
- * Routing entry.
+ * Routing entry in RoutingTable.
+ *
+ * @see RoutingTable
  */
 class RoutingEntry : public cPolymorphic
 {
@@ -104,43 +109,45 @@ class RoutingEntry : public cPolymorphic
         BGP
     };
 
-    // Destination
+    /// Destination
     IPAddress host;
 
-    // Route mask (replace it with a prefix?)
+    /// Route mask (replace it with a prefix?)
     IPAddress netmask;
 
-    // Next hop
+    /// Next hop
     IPAddress gateway;
 
-    // Interface name and nb
+    /// Interface name and nb
     opp_string interfaceName;
     int interfaceNo;
 
-    // Route type: Direct or Remote
+    /// Route type: Direct or Remote
     RouteType type;
 
-    // Source of route, MANUAL by reading a file,
-    // routing protocol name otherwise
+    /// Source of route, MANUAL by reading a file,
+    /// routing protocol name otherwise
     RouteSource source;
 
-    // Metric, "cost" to reach the destination
+    /// Metric ("cost" to reach the destination)
     int metric;
 
-    // Route age (in seconds, since the route was last updated)
-    // Not implemented
+    /// Route age (in seconds, since the route was last updated)
+    //FIXME not implemented
     int age;
+
+  private:
+    // copying not supported: following are private and also left undefined
+    RoutingEntry(const RoutingEntry& obj);
+    RoutingEntry& operator=(const RoutingEntry& obj);
 
   public:
     RoutingEntry();
     virtual ~RoutingEntry() {}
     virtual void info(char *buf);
     virtual std::string detailedInfo() const;
-
-    // copy not supported: declare the following but leave them undefined
-    RoutingEntry(const RoutingEntry& obj);
-    RoutingEntry& operator=(const RoutingEntry& obj);
 };
+
 
 /** Returned as the result of multicast routing */
 struct MulticastRoute
@@ -153,13 +160,31 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
 
 /**
  * Represents the routing table. This object has one instance per host
- * or router. It has methods to manage the routing table and the interface table,
- * simulating the "route" and "ifconfig" commands.
+ * or router. It has methods to manage the route table and the interface table,
+ * so one can active functionality similar to the "route" and "ifconfig" commands.
  *
  * This is a simple module without gates, it requires function calls to it
- * (message handling does nothing).
+ * (message handling does nothing). Methods are provided for reading and
+ * updating the interface table and the route table, as well as for unicast
+ * and multicast routing.
+ *
+ * Interfaces are dynamically registered: at the start of the simulation,
+ * every L2 module adds its own interface entry to the table.
+ *
+ * The route table is read from a file (RoutingTableParser); the file can
+ * also fill in or overwrite interface settings. The route table can also
+ * be read and modified during simulation, typically by routing protocol
+ * implementations (e.g. OSPF).
+ *
+ * Interfaces are represented by InterfaceEntry objects, and entries in the
+ * route table by RoutingEntry objects. Both can be polymorphic: if an
+ * interface or a routing protocol needs to store additional data, it can
+ * simply subclass from InterfaceEntry or RoutingEntry, and add the derived
+ * object to the table.
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
+ *
+ * @see InterfaceEntry, RoutingEntry
  */
 class RoutingTable: public cSimpleModule
 {

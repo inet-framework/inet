@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "stlwatch.h"
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
 
@@ -35,6 +36,9 @@
 
 InterfaceEntry::InterfaceEntry()
 {
+    index = -1;
+    outputPort = -1;
+
     mtu = 0;
     metric = 0;
 
@@ -51,10 +55,8 @@ void InterfaceEntry::info(char *buf)
 {
     std::stringstream out;
     out << (!name.empty() ? name.c_str() : "*");
-    out << "  e:" << (!encap.empty() ? encap.c_str() : "*");
-    out << "  HW:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
-    out << "  ia:" << inetAddr << "  M:" << mask;
-    out << "...";
+    out << "  addr:" << inetAddr << "  mask:" << mask;
+    out << "  MTU:" << mtu << "  Metric:" << metric;
     strcpy(buf, out.str().c_str());
 }
 
@@ -62,17 +64,7 @@ std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
     out << "name:" << (!name.empty() ? name.c_str() : "*");
-    out << "\tencap:" << (!encap.empty() ? encap.c_str() : "*");
-    out << "\tHWaddr:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
-    out << "\n";
-
-    if (!inetAddr.isNull())
-        out << "inet addr:" << inetAddr;
-    if (!bcastAddr.isNull())
-        out << "\tBcast: " << bcastAddr;
-    if (!mask.isNull())
-        out << "\tMask: " << mask;
-    out << "\n";
+    out << "\tinet addr:" << inetAddr << "\tMask: " << mask << "\n";
 
     out << "MTU: " << mtu << " \tMetric: " << metric << "\n";
 
@@ -140,6 +132,11 @@ void RoutingTable::initialize()
     RoutingTableParser parser(this);
     if (parser.readRoutingTableFromFile(filename) == -1)
         error("Error reading routing table file %s", filename);
+
+    WATCH_vector(interfaces);
+    WATCH_vector(routes);
+    WATCH_vector(multicastRoutes);
+    //FIXME WATCH(defaultRoute)
 
     //printIfconfig();
     //printRoutingTable();
