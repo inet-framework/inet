@@ -25,7 +25,7 @@ Define_Module(LIBTable);
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::PRTEntry & prt)
 {
-    return os << "Pos:" << prt.libIndex << "  Fec:" << prt.fecValue;
+    return os << "Pos:" << prt.libIndex << "  FEC:" << prt.fec;
 }
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
@@ -163,9 +163,9 @@ int LIBTable::readPrtTableFromFile(const char *filename)
         StringTokenizer tokenizer(line, ", ");
         const char *aField;
         if ((aField = tokenizer.nextToken()) != NULL)
-            record.fecValue = IPAddress(aField).getInt(); // FIXME probably whole PRT table is broken (Andras)
+            record.fec = IPAddress(aField).getInt(); // FIXME probably whole PRT table is broken (Andras)
         else
-            record.fecValue = 0;
+            record.fec = 0;
 
         if ((aField = tokenizer.nextToken()) != NULL)
             record.libIndex = atoi(aField);
@@ -193,7 +193,7 @@ void LIBTable::printTables() const
     ev << "*****************PRT TABLE CONTENT**************\n";
     ev << "Pos  Fec \n";
     for (i = 0; i < prt.size(); i++)
-        ev << prt[i].libIndex << "    " << prt[i].fecValue << "\n";
+        ev << prt[i].libIndex << "    " << prt[i].fec << "\n";
 }
 
 int LIBTable::installNewLabel(int outLabel, string inInterface,
@@ -211,7 +211,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
 
     PRTEntry aPrt;
     aPrt.libIndex = lib.size() - 1;
-    aPrt.fecValue = fec;
+    aPrt.fec = fec;
     prt.push_back(aPrt);
     printTables();
 
@@ -223,7 +223,7 @@ bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) con
     // search in the PRT for exact match of the FEC value
     for (int i=0; i<prt.size(); i++)
     {
-        if (prt[i].fecValue == fec)
+        if (prt[i].fec == fec)
         {
             // found
             int p = prt[i].libIndex;
@@ -240,8 +240,8 @@ bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) con
     return false;
 }
 
-bool LIBTable::resolveLabel(int inLabel, std::string inInterface, 
-                            int& outOptCode, int& outLabel, 
+bool LIBTable::resolveLabel(int inLabel, std::string inInterface,
+                            int& outOptCode, int& outLabel,
                             std::string& outInterface) const
 {
     for (int i = 0; i < lib.size(); i++)

@@ -59,7 +59,7 @@ public:
     // to a single LIB entry.
     struct PRTEntry
     {
-        int fecValue;
+        int fec;       // *not* fecId! (this is destAddr)
         int libIndex;  // index into the LIB table
     };
 
@@ -116,7 +116,7 @@ public:
      * Installs a new label on this Label Switching Router when receiving a label
      * mapping from peers.
      *
-     * @param outLabel     The label returned from peers
+     * @param outLabel     The label returned from peers (-1 on Egress router)
      * @param inInterface  The name of the incoming interface of the label mapping
      * @param outInterface The name of the outgoing interface that new label mapping
      *                     will be forwarded

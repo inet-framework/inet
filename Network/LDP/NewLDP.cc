@@ -466,17 +466,22 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     IPAddress srcAddr = packet->getSenderAddress();
     int fecId = packet->getFecId();
 
+    ev << "Request from LSR " << IPAddress(srcAddr) << " for FEC " << fec << "\n";
+
     int i;
-    for (i = 0; i < fecSenderBinds.size(); i++)
+    for (i=0; i < fecSenderBinds.size(); i++)
         if (fecSenderBinds[i].fec == fec)
             break;
     if (i!=fecSenderBinds.size())
     {
         // repeated request: do nothing
-        ev << "This is a repeated request for fec " << fec << ", ignoring\n";
+        ev << "Repeated request, ignoring\n";
         delete packet;
         return;
     }
+
+    // This is the incoming interface if label found
+    string fromInterface = findInterfaceFromPeerAddr(srcAddr);
 
     // Add new request to table
     fec_src_bind newBind;
@@ -484,74 +489,56 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     newBind.fromInterface = fromInterface;
     fecSenderBinds.push_back(newBind);
 
-    // This is the incoming interface if label found
-    string fromInterface = findInterfaceFromPeerAddr(srcAddr);
-
-    // This is the outgoing interface if label found
-    string nextInterface = findInterfaceFromPeerAddr(fec);  //FIXME what the holy shit???? --Andras
-
-    // Look up table for this fec
+    // Look up FEC in our LIB table
     int label;
     string outgoingInterface;
     bool found = lt->resolveFec(fec.getInt(), label, outgoingInterface);
 
-    ev << "Request from LSR(" << IPAddress(srcAddr) << ") for fec=" << IPAddress(fec) << ")\n";
-
-    if (found)  // Found the label
+    if (found)
     {
-        ev << "Label =" << label << " found for fec =" << IPAddress(fec) << "\n";
-
-        // Construct a label mapping message
-
-        LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
-        lmMessage->setType(LABEL_MAPPING);
-        lmMessage->setLength(30*8); // FIXME find out actual length
-
-        lmMessage->setLabel(label);
-        lmMessage->setFec(fec);
-
-        // Set dest to the requested upstream LSR
-        lmMessage->setReceiverAddress(srcAddr);
-        lmMessage->setSenderAddress(rt->getRouterId());
-        lmMessage->setFecId(fecId);
-
-        ev << "Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
-            "LSR(" << IPAddress(srcAddr) << ")\n";
-
-        // send msg to peer over TCP
-        peerSocket(srcAddr)->send(lmMessage);
-
-        delete packet;
-
-    }
-    else if (isER)
-    {
-        ev << "Generates new label for the fec " << IPAddress(fec) << "\n";
-
-        // Install new labels
-        // Note this is the ER router, we must base on rt to find the next hop
-        // Rely on port index to find the to-outside interface name
-        // int index = rt->outputPortNo(IPAddress(peerIP));
-        // nextInterface= string(rt->interfaceByPortNo(index)->name);
-        int inLabel = (lt->installNewLabel(-1, fromInterface, nextInterface, fecId, POP_OPER)); // fec));
+        // We already have a mapping for this FEC, let our upstream peer know
+        // about it by sending back a Label Mapping message
+        ev << "FEC " << fec << " found in LIB: outLabel=" << label << ", outIf=" << outgoingInterface << "\n";
+        ev << "Sending back a Label Mapping message about it\n";
 
         // Send LABEL MAPPING upstream
         LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
         lmMessage->setType(LABEL_MAPPING);
         lmMessage->setLength(30*8); // FIXME find out actual length
-
-        lmMessage->setLabel(inLabel);
-        lmMessage->setFec(fec);
-
-        // Set dest to the requested upstream LSR
         lmMessage->setReceiverAddress(srcAddr);
         lmMessage->setSenderAddress(rt->getRouterId());
+        lmMessage->setLabel(label);
+        lmMessage->setFec(fec);
         lmMessage->setFecId(fecId);
 
+        // send msg to peer over TCP
+        peerSocket(srcAddr)->send(lmMessage);
+        delete packet;
+    }
+    else if (isER)
+    {
+        // Note this is the ER router, we must base on rt to find the next hop
+        // Rely on port index to find the to-outside interface name
+        int portNo = rt->outputPortNo(fec);
+        string outInterface = string(rt->interfaceByPortNo(portNo)->name);
+
+        int inLabel = lt->installNewLabel(-1, fromInterface, outInterface, fecId, POP_OPER);
+
+        ev << "Egress router reached. FEC " << fec << "wi\n";
         ev << "Send Label mapping to " << "LSR(" << srcAddr << ")\n";
 
-        peerSocket(srcAddr)->send(lmMessage);
+        // Send LABEL MAPPING upstream
+        LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
+        lmMessage->setType(LABEL_MAPPING);
+        lmMessage->setLength(30*8); // FIXME find out actual length
+        lmMessage->setReceiverAddress(srcAddr);
+        lmMessage->setSenderAddress(rt->getRouterId());
+        lmMessage->setLabel(inLabel);
+        lmMessage->setFec(fec);
+        lmMessage->setFecId(fecId);
 
+        // send msg to peer over TCP
+        peerSocket(srcAddr)->send(lmMessage);
         delete packet;
     }
     else  // Propagate downstream
@@ -653,8 +640,6 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
             " for fec =" << IPAddress(fec) << " to " << "LSR(" << addrToSend << ")\n";
 
         peerSocket(addrToSend)->send(packet);
-
-        // delete packet;
     }
 }
 
@@ -673,7 +658,6 @@ TCPSocket *NewLDP::peerSocket(IPAddress peerAddr)
     if (i==-1 || !(myPeers[i].socket) || myPeers[i].socket->state()!=TCPSocket::CONNECTED)
     {
         // we don't have an LDP session to this peer
-        //FIXME perhaps we should queue up this request and try it later?
         error("No LDP session to peer %s yet", peerAddr.str().c_str());
     }
     return myPeers[i].socket;

@@ -251,7 +251,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
     if (oldLabel==-1)
     {
-        // This is not IP native packet
+        // This is a IP native packet
         // Decapsulate the message and pass up to L3 since this is LDP packet
         //
         // FIXME this smells like hacking. Or is this an "IPv4 Explicit NULL Label"
