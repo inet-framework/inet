@@ -174,7 +174,7 @@ void LDPproc::activity()
             int fecInt = msg->par("dest_addr");
             // int dest =msg->par("dest_addr"); FIXME was not used (?)
             int gateIndex = msg->par("gateIndex");
-            InterfaceEntry *ientry = rt->getInterfaceByIndex(gateIndex);
+            InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
 
             string fromInterface = string(ientry->name.c_str());
 
@@ -338,7 +338,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
     int i = 0;
     int k = 0;
-    int interfaceIndex = rt->findInterfaceByName(interfaceName.c_str());
+    int interfaceIndex = rt->interfaceByName(interfaceName.c_str())->index;
     cArray *routeTable = rt->getRouteTable();
 
     RoutingEntry *anEntry;
@@ -388,7 +388,7 @@ string LDPproc::findInterfaceFromPeerAddr(int peerIP)
 */
 //    Rely on port index to find the interface name
     int index = rt->outputPortNo(IPAddress(peerIP));
-    return string(rt->getInterfaceByIndex(index)->name.c_str());
+    return rt->interfaceByPortNo(index)->name;
 
 }
 
@@ -466,7 +466,7 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
         // Note this is the ER router, we must base on rt to find the next hop
         // Rely on port index to find the to-outside interface name
         // int index = rt->outputPortNo(IPAddress(peerIP));
-        // nextInterface= string(rt->getInterfaceByIndex(index)->name);
+        // nextInterface= string(rt->interfaceByPortNo(index)->name);
         int inLabel = (lt->installNewLabel(-1, fromInterface, nextInterface, fecId, POP_OPER)); // fec));
 
         // Send LABEL MAPPING upstream

@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -131,14 +132,11 @@ void RoutingTable::initialize()
     IPForward = par("IPForward").boolValue();
     const char *filename = par("routingTableFileName");
 
-    numIntrfaces = 0;
-    intrface = new InterfaceEntry *[MAX_INTERFACE_NO];
-
     defaultRoute = NULL;
-    loopbackInterface = NULL;
+
+    // FIXME todo: add loopback interface
 
     // Read routing table file
-    // Abort simulation if no routing file could be read
     RoutingTableParser parser(this);
     if (parser.readRoutingTableFromFile(filename) == -1)
         error("Error reading routing table file %s", filename);
@@ -154,40 +152,85 @@ void RoutingTable::handleMessage(cMessage *msg)
 }
 
 
-// --------------
-//  Print tables
-// --------------
-
 void RoutingTable::printIfconfig()
 {
-    InterfaceEntry *e;
-
-    ev.printf("\n---- IF config ----\n");
-    for (int i = -1; i < numIntrfaces; i++)
-    {
-        // trick to add loopback interface in front
-        e = (i == -1) ? loopbackInterface : (InterfaceEntry*)(intrface[i]);
-        ev << i << "\t" << e->detailedInfo() << "\n";
-    }
+    ev << "---- IF config ----\n";
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        ev << i->detailedInfo() << "\n";
     ev << "\n";
 }
 
 void RoutingTable::printRoutingTable()
 {
-    ev.printf("\n-- Routing table --\n");
+    ev << "-- Routing table --\n";
     ev.printf("%-16s %-16s %-16s %-3s %s\n",
-           "Destination", "Gateway", "Netmask", "Iface");
+              "Destination", "Gateway", "Netmask", "Iface");
 
     for (int i=0; i<numRoutingEntries(); i++)
         ev << routingEntry(i)->detailedInfo() << "\n";
     ev << "\n";
 }
 
+//---
 
+InterfaceEntry *RoutingTable::interfaceByIndex(int index)
+{
+    if (index<0 || index>=interfaces.size())
+        opp_error("interfaceById(): nonexistent interface %d", index);
+    return interfaces[index];
+}
 
-// -----------------------------------
-//  Access of interface/routing table
-// -----------------------------------
+void RoutingTable::addInterface(InterfaceEntry *entry)
+{
+    entry->index = interfaces.size();
+    interfaces.push_back(entry);
+}
+
+bool RoutingTable::deleteInterface(InterfaceEntry *entry)
+{
+    InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
+    if (i==interfaces.end())
+        return false;
+
+    interfaces.erase(i);
+    delete entry;
+
+    for (i=interfaces.begin(); i!=interfaces.end(); ++i)
+        i->index = i-interfaces.begin();
+    return true;
+}
+
+InterfaceEntry *RoutingTable::interfaceByPortNo(int portNo)
+{
+    // TBD change this to a port-to-interface table (more efficient)
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        if (i->outputPort==portNo)
+            return *i;
+}
+
+InterfaceEntry *RoutingTable::interfaceByName(const char *name)
+{
+    Enter_Method("interfaceByName(%s)=?", name);
+    if (!name)
+        return -1;
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        if (!strcmp(name, i->name.c_str()))
+            return i-interfaces.begin();
+    return -1;
+}
+
+InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
+{
+    Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
+    if (addr.isNull())
+        return -1;
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        if (IPAddress::maskedAddrAreEqual(addr,i->inetAddr,i->mask))
+            return i-interfaces.begin();
+    return -1;
+}
+
+//---
 
 bool RoutingTable::localDeliver(const IPAddress& dest)
 {
@@ -200,7 +243,6 @@ bool RoutingTable::localDeliver(const IPAddress& dest)
     }
 
     if (dest.equals(loopbackInterface->inetAddr)) {
-        ev << "LOCAL LOOPBACK INVOKED\n";
         return true;
     }
 
@@ -245,14 +287,14 @@ int RoutingTable::outputPortNo(const IPAddress& dest)
             //
             e = (RoutingEntry*)route->get(i);
             if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask)) {
-                return findInterfaceByName(e->interfaceName.c_str());
+                return interfaceByName(e->interfaceName.c_str());
             }
         }
     }
 
     // Is it gateway here?
     if (defaultRoute) {
-        return findInterfaceByName(defaultRoute->interfaceName.c_str());
+        return interfaceByName(defaultRoute->interfaceName.c_str());
     }
 
     return -1;
@@ -283,7 +325,7 @@ int RoutingTable::multicastOutputPortNo(const IPAddress& dest, int index)
     }
 
     // FIXME what if e==NULL?
-    return findInterfaceByName(e->interfaceName.c_str());
+    return interfaceByName(e->interfaceName.c_str());
 }
 
 int RoutingTable::numMulticastDestinations(const IPAddress& dest)
@@ -301,56 +343,7 @@ int RoutingTable::numMulticastDestinations(const IPAddress& dest)
     }
     return mcDestCtr;
 }
-*/
 
-InterfaceEntry *RoutingTable::getInterfaceByIndex(int index)
-{
-    if (index<0 || index>=numIntrfaces)
-        opp_error("getInterfaceByIndex(): nonexistent interface %d", index);
-
-    InterfaceEntry *interf = intrface[index];
-    return interf;
-}
-
-
-int RoutingTable::findInterfaceByName(const char *name)
-{
-    Enter_Method("findInterfaceByName(%s)=?", name);
-    if (!name)
-        return -1;
-
-    for (int i=0; i<numIntrfaces; i++)
-        if (!strcmp(name, intrface[i]->name.c_str()))
-            return i;
-
-    // loopback interface has no number
-    return -1;
-}
-
-
-int RoutingTable::findInterfaceByAddress(const IPAddress& addr)
-{
-    Enter_Method("findInterfaceByAddress(%s)=?", addr.str().c_str());
-    if (addr.isNull())
-        return -1;
-
-    for (int i = 0; i < numIntrfaces; i++)
-        if (IPAddress::maskedAddrAreEqual(addr,intrface[i]->inetAddr,intrface[i]->mask))
-            return i;
-
-// BCH Andras -- code from UTS MPLS model
-    // FIXME this seems to be a bloody hack. Why do we return 0 when intrface[0]
-    // is obviously NOT what we were looking for???  --Andras
-
-    // Add number for loopback
-    if((loopbackInterface->inetAddr.getInt()) == (addr.getInt()))
-        return 0;
-// ECH
-    return -1;
-}
-
-
-/*
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 {
     Enter_Method("nextGatewayAddress(%s)=?", dest.str().c_str());

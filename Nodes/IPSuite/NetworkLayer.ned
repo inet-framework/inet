@@ -50,8 +50,8 @@ module NetworkLayer
         out: pingOut; 
                       
     submodules: 
-        //ip: IPProcessing;
-        ip: IP; 
+        ip: IPProcessing;
+        //ip: IP; 
             parameters: 
                 IPForward = IPForward, 
                 timeToLive = 8, 

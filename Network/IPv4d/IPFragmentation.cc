@@ -42,7 +42,7 @@ void IPFragmentation::handleMessage(cMessage *msg)
     int outputPort = controlInfo->outputPort();
 
     RoutingTable *rt = routingTableAccess.get();
-    int mtu = rt->getInterfaceByIndex(outputPort)->mtu;
+    int mtu = rt->interfaceByPortNo(outputPort)->mtu;
 
     // check if datagram does not require fragmentation
     if (datagram->length()/8 <= mtu)

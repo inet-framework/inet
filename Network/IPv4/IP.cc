@@ -274,7 +274,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
 void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
 {
     RoutingTable *rt = routingTableAccess.get();
-    int mtu = rt->getInterfaceByIndex(outputPort)->mtu;
+    int mtu = rt->interfaceByPortNo(outputPort)->mtu;
 
     // check if datagram does not require fragmentation
     if (datagram->length()/8 <= mtu)
@@ -356,7 +356,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     if (!src.isNull())
     {
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->findInterfaceByAddress(src) == -1)
+        if (rt->interfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->className(), transportPacket->fullName());
         datagram->setSrcAddress(src);
@@ -364,7 +364,8 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     else
     {
         // otherwise, just use the first
-        datagram->setSrcAddress(rt->getInterfaceByIndex(0)->inetAddr);
+        // FIXME this is shit
+        datagram->setSrcAddress(rt->interfaceByPortNo(0)->inetAddr);
     }
 
     // set other fields

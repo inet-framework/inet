@@ -32,8 +32,6 @@
 #include <vector>
 #include <omnetpp.h>
 #include "ipsuite_defs.h"
-
-// required for IPAddress typdef
 #include "IPAddress.h"
 
 class RoutingTableParser;
@@ -50,9 +48,11 @@ const int   MAX_GROUP_STRING_SIZE = 160;
 /**
  * Interface entry for the interface table.
  */
-class InterfaceEntry : public cObject // FIXME only cObject so that cArray can by used
+class InterfaceEntry : public cPolymorphic
 {
   public:
+    int id;  // index in interfaces[] (!= outputPort!!!)
+    int outputPort;  // FIXME fill this in!!!!
     int mtu;
     int metric;
     opp_string name;
@@ -114,7 +114,6 @@ class RoutingEntry : public cPolymorphic
     IPAddress gateway;
 
     // Interface name and nb
-    opp_string interfaceName;
     int interfaceNo;
 
     // Route type: Direct or Remote
@@ -156,20 +155,11 @@ class RoutingEntry : public cPolymorphic
 class RoutingTable: public cSimpleModule
 {
   private:
-    friend class RoutingTableParser;   // FIXME a bit ugly, we should have enough public functions...
-
     //
     // Interfaces:
     //
-
-    // Number of interfaces
-    int numIntrfaces;
-
-    // Interface array
-    InterfaceEntry **intrface;   // FIXME replace with std::vector
-
-    // Loopback interface
-    InterfaceEntry *loopbackInterface;
+    typedef std::vector<InterfaceEntry *> InterfaceVector;
+    InterfaceVector interfaces;
 
     //
     // Routes:
@@ -199,10 +189,53 @@ class RoutingTable: public cSimpleModule
      */
     void handleMessage(cMessage *);
 
+    /** @name Debug/utility */
+    //@{
     void printIfconfig();
     void printRoutingTable();
+    //@}
 
-    /** @name Accessing the interfaces and the routing table */
+    /** @name Interfaces */
+    //@{
+    /**
+     * Returns the number of interfaces.
+     */
+    int numInterfaces()  {return interfaces.size();}
+
+    /**
+     * Returns the InterfaceEntry specified by its index (0..numInterfaces-1).
+     */
+    InterfaceEntry *interfaceByIndex(int index);
+
+    /**
+     * Add an interface.
+     */
+    void addInterface(InterfaceEntry *entry);
+
+    /**
+     * Delete an interface. Returns false if the interface was not in the
+     * interface table. Indices of interfaces above this one will change!
+     */
+    bool deleteInterface(InterfaceEntry *entry);
+
+    /**
+     * Returns an interface given by its port number (gate index).
+     * Returns NULL if not found.
+     */
+    InterfaceEntry *interfaceByPortNo(int portNo);
+
+    /**
+     * Returns an interface given by its name. Returns NULL if not found.
+     */
+    InterfaceEntry *interfaceByName(const char *name);
+
+    /**
+     * Returns an interface given by its address. Returns NULL if not found.
+     */
+    InterfaceEntry *interfaceByAddress(const IPAddress& address);
+    //@}
+
+    /** @name Routing functions (query the route table) */
     //@{
 
     /**
@@ -217,36 +250,14 @@ class RoutingTable: public cSimpleModule
     int outputPortNo(const IPAddress& dest);
 
     /**
-     * Returns the InterfaceEntry specified by its index.
-     */
-    InterfaceEntry *getInterfaceByIndex(int index);
-
-    /**
-     * Returns the index of an interface given by its name.
-     * Return -1 on error.
-     */
-    int findInterfaceByName(const char *name);
-
-    /**
-     * Returns the index of an interface given by its address.
-     * Returns -1 on error.
-     */
-    int findInterfaceByAddress(const IPAddress& address);
-
-    /**
      * Returns the gateway to send the destination,
      * address if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
     IPAddress nextGatewayAddress(const IPAddress& dest); //FIXME join with outputPortNo()
-
-    /**
-     * Returns the number of interfaces.
-     */
-    int numInterfaces()  {return numIntrfaces;}
     //@}
 
-    /** @name Multicast functions */
+    /** @name Multicast routing functions */
     //@{
 
     /**
@@ -267,7 +278,7 @@ class RoutingTable: public cSimpleModule
     int numMulticastDestinations(const IPAddress& dest);
     //@}
 
-    /** @name Route table manipulation functions */
+    /** @name Route table manipulation */
     //@{
 
     /**

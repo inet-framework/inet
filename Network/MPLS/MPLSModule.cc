@@ -151,7 +151,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
             data = check_and_cast < IPDatagram * >(mplsPck->decapsulate());
         }
 
-        InterfaceEntry *ientry = rt->getInterfaceByIndex(gateIndex);
+        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
         string senderInterface = string(ientry->name.c_str());
         int fecID = classifyPacket(data, classifierType);
 
@@ -194,7 +194,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
             string outgoingInterface = lt->requestOutgoingInterface(senderInterface, label);
 
             // A check routine will be added later to make sure outgoingInterface !="X"
-            int outgoingPort = rt->findInterfaceByName(outgoingInterface.c_str());
+            int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
             send(newPacket, "toL2", outgoingPort);
         }
@@ -222,7 +222,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
     else if (mplsPacket != NULL)
     {
         // Here we process MPLS packets
-        InterfaceEntry *ientry = rt->getInterfaceByIndex(gateIndex);
+        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
         string senderInterface = string(ientry->name.c_str());
         int oldLabel = mplsPacket->getLabel();
 
@@ -250,7 +250,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
 
                 string outgoingInterface = lt->requestOutgoingInterface(senderInterface, newLabel);
 
-                int outgoingPort = rt->findInterfaceByName(outgoingInterface.c_str());
+                int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
                 if (optCode == SWAP_OPER)
                     ev << " Swap label(" << oldLabel << ") with label(" << newLabel << ")\n";
@@ -268,7 +268,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
             {
                 string outgoingInterface =
                     lt->requestOutgoingInterface(senderInterface, newLabel, oldLabel);
-                int outgoingPort = rt->findInterfaceByName(outgoingInterface.c_str());
+                int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
                 mplsPacket->popLabel();
 
@@ -311,7 +311,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
         else
         {
             // Incoming interface
-            InterfaceEntry *ientry = rt->getInterfaceByIndex(gateIndex);
+            InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
             string senderInterface = string(ientry->name.c_str());
             ev << " Message from outside to Ingress node" << "\n";
             /*
@@ -387,7 +387,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
                 // string outgoingInterface= lt->requestOutgoingInterface(senderInterface, label);
                 string outgoingInterface = lt->requestOutgoingInterface(fecID);
 
-                int outgoingPort = rt->findInterfaceByName(outgoingInterface.c_str());
+                int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
                 // Send out the packet
                 ev << " Ingress Node push new label and sending this packet\n";

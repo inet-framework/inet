@@ -113,11 +113,11 @@ void RSVPAppl::activity()
                 Unicast_Route_Query(receiverIP, &outInf);
 
                 // Convert to name
-                int outInfIndex = rt->findInterfaceByAddress(IPAddress(outInf));
-                int inInfIndex = rt->findInterfaceByAddress(IPAddress(inInf));
+                int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                int inInfIndex = rt->interfaceByAddress(IPAddress(inInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
 
-                const char *outInfName = rt->getInterfaceByIndex(outInfIndex)->name.c_str();
-                const char *inInfName = rt->getInterfaceByIndex(inInfIndex)->name.c_str();
+                const char *outInfName = rt->interfaceByPortNo(outInfIndex)->name.c_str();
+                const char *inInfName = rt->interfaceByPortNo(inInfIndex)->name.c_str();
 
                 if (isER)
                 {
@@ -215,11 +215,11 @@ void RSVPAppl::activity()
                                     // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
                                     // Install new label
                                     int outInf = rMessage->getLIH();
-                                    int outInfIndex = rt->findInterfaceByAddress(IPAddress(outInf));
+                                    int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
                                     const char *outInfName =
-                                        (rt->getInterfaceByIndex(outInfIndex))->name.c_str();
+                                        (rt->interfaceByPortNo(outInfIndex))->name.c_str();
                                     const char *inInfName =
-                                        (rt->getInterfaceByIndex(aTunnel.inInfIndex))->name.c_str();
+                                        (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
 
                                     ev << "INSTALL new label \n";
                                     ev << "src=" << IPAddress(aTunnel.Sender_Template.
@@ -782,7 +782,7 @@ void RSVPAppl::Unicast_Route_Query(int da, int *outl)
     int foundIndex;
     // int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
+    (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
 
     return;
 
@@ -795,7 +795,7 @@ void RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
     int foundIndex;
     // int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
+    (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
 
     return;
 }

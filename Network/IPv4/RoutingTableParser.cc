@@ -473,7 +473,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         e->interfaceName.reserve(MAX_ENTRY_STRING_SIZE);
         charpointer += strcpyword(e->interfaceName.buffer(), routeFile + charpointer);
         skipBlanks(routeFile, charpointer);
-        e->interfaceNo = rt->findInterfaceByName(e->interfaceName.c_str());
+        e->interfaceNo = rt->interfaceByName(e->interfaceName.c_str());
         if (e->interfaceNo==-1)
             opp_error("Syntax error in routing file: 6th column should be an existing "
                       "interface name not `%s'", e->interfaceName.c_str());

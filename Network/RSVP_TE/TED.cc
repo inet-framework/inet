@@ -117,9 +117,9 @@ void TED::buildDatabase()
             int remote_gateIndex = node->out(j)->remoteGate()->index();
 
             // Get local address
-            entry->local = myRT->getInterfaceByIndex(local_gateIndex)->inetAddr;
+            entry->local = myRT->interfaceByPortNo(local_gateIndex)->inetAddr;
             // Get remote address
-            entry->remote = neighbourRT->getInterfaceByIndex(remote_gateIndex)->inetAddr;
+            entry->remote = neighbourRT->interfaceByPortNo(remote_gateIndex)->inetAddr;
 
             double BW = node->out(j)->localGate()->datarate()->doubleValue();
             double delay = node->out(j)->localGate()->delay()->doubleValue();
