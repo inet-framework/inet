@@ -34,8 +34,6 @@ void LDPproc::initialize()
 
 void LDPproc::activity()
 {
-    RoutingTable *rt = routingTableAccess.get();
-    MPLSModule *mplsMod = mplsAccess.get();
 
 /********************************************************************************
 *                                                                               *
@@ -146,8 +144,9 @@ void LDPproc::activity()
     }
 
     // Signal the MPLS that it can start making queries
+    ev << "Finished LDP session setup with peers\n";
+    MPLSModule *mplsMod = mplsAccess.get();
     cMessage *signalMsg = new cMessage();
-    ev << "Finish LDP sessions setup with peers\n";
     sendDirect(signalMsg, 0.0, mplsMod, "fromSignalModule");
 
 /********************************************************************************
@@ -162,16 +161,16 @@ void LDPproc::activity()
 
     for (;;)
     {
-
         cMessage *msg = receive();
 
-        // Data from MPLS switch - Initial Lable Request
         if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+        {
             processRequestFromMPLSSwitch(msg);
-        // Data from TCP Interface
+        }
         else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
+        {
             processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
-
+        }
     }
 
 }

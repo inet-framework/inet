@@ -19,12 +19,6 @@
 // to establish label switched paths through a network by mapping network layer
 // routing information directly to data-link layer switched paths.
 //
-// In contrast to other common static modules, LDPproc modules are dynamically created.
-// Each time there is a LDP session requested to be established from a peer,
-// the LSR will spawn a new LDPproc to process LDP messages exchanged between
-// that peer and itself.
-//#FIXME this is probably false...
-//
 // Operations
 //
 // Message processing in LDPproc module is explained in
