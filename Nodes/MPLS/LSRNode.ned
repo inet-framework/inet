@@ -47,7 +47,6 @@ module LSRNode
         isER : bool,
 
         //# Network information
-        numOfPorts : numeric,
         routingFile : string,
         LibTableFileName : string,
         PrtTableFileName : string;
@@ -82,25 +81,24 @@ module LSRNode
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
-                numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "b=32,30;p=191,186;i=fork";
-        ppp: LinkLayer[numOfPorts];
+        ppp: LinkLayer[sizeof(out)];
             display: "p=87,320,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
                 isER = isER,
-                numOfPorts = numOfPorts,
+                numOfPorts = sizeof(out),
                 procdelay = 1;
             gatesizes:
-                fromL3[numOfPorts],
-                toL3[numOfPorts],
-                fromL2[numOfPorts],
-                toL2[numOfPorts];
+                fromL3[sizeof(out)],
+                toL3[sizeof(out)],
+                fromL2[sizeof(out)],
+                toL2[sizeof(out)];
             display: "o=#ff8000;p=191,261;b=66,14";
         libTable: LIBTable;
             parameters:
@@ -120,7 +118,7 @@ module LSRNode
         signal_module.to_tcp_interface --> tcpApp.from_ldp;
         //# ldp.to_mpls_switch --> mplsModule.fromLDP;
 
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
 

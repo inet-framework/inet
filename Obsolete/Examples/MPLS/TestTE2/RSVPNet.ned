@@ -31,8 +31,7 @@ module RSVPNet
         LSR1: RSVP_LSR_Node;
             parameters:
                 isIR = true,
-                isER = false,
-                numOfPorts = 4;
+                isER = false;
             gatesizes:
                 in[4],
                 out[4];
@@ -40,8 +39,7 @@ module RSVPNet
         LSR2: RSVP_LSR_Node;
             parameters:
                 isIR = false,
-                isER = false,
-                numOfPorts = 3;
+                isER = false;
             gatesizes:
                 in[3],
                 out[3];
@@ -49,8 +47,7 @@ module RSVPNet
         LSR3: RSVP_LSR_Node;
             parameters:
                 isIR = false,
-                isER = false,
-                numOfPorts = 4;
+                isER = false;
             gatesizes:
                 in[4],
                 out[4];
@@ -58,8 +55,7 @@ module RSVPNet
         LSR4: RSVP_LSR_Node;
             parameters:
                 isIR = false,
-                isER = false,
-                numOfPorts = 3;
+                isER = false;
             gatesizes:
                 in[3],
                 out[3];
@@ -67,19 +63,16 @@ module RSVPNet
         LSR5: RSVP_LSR_Node;
             parameters:
                 isIR = false,
-                isER = true,
-                numOfPorts = 4;
+                isER = true;
             gatesizes:
                 in[4],
                 out[4];
             display: "p=500,95;i=srouter";
         host1: TCPClientTest;
             parameters:
-                numOfPorts = 1;
             display: "p=26,98;i=comp_s";
         host3: TCPServerTest;
             parameters:
-                numOfPorts = 1;
             display: "p=570,88;i=comp_s";
         ted: TED;
             display: "p=276,320;b=24,16";

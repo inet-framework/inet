@@ -33,7 +33,6 @@ module ClientServerNetwork
                 local_addr = (10 << 24) + 1,
                 server_addr = (10 << 24) + 4,
                 // network parameters
-                numOfPorts = 2,
                 routingFile = "client1.irt";
             gatesizes:
                 in[2],
@@ -46,7 +45,6 @@ module ClientServerNetwork
                 local_addr = (10 << 24) + 2,
                 server_addr = (10 << 24) + 4,
                 // network parameters
-                numOfPorts = 1,
                 routingFile = "client2.irt";
             gatesizes:
                 in[1],
@@ -58,7 +56,6 @@ module ClientServerNetwork
                 local_addr = (10 << 24) + 3,
                 server_addr = (10 << 24) + 4,
                 // network parameters
-                numOfPorts = 1,
                 routingFile = "client3.irt";
             gatesizes:
                 in[1],
@@ -69,7 +66,6 @@ module ClientServerNetwork
                 // TCP parameters
                 local_addr = (10 << 24) + 4,
                 // network parameters
-                numOfPorts = 2,
                 routingFile = "server4.irt";
             gatesizes:
                 in[2],
@@ -78,7 +74,6 @@ module ClientServerNetwork
         router: Router;
             parameters:
                 // network parameters
-                numOfPorts = 4,
                 routingFile = "router.irt";
             gatesizes:
                 in[4],

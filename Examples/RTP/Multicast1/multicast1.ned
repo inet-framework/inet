@@ -25,7 +25,6 @@ module RTPMulticast1
                 portNumber = 5004,
                 bandwidth = 8000,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "host1.mrt";
             display: "p=150,50;i=pc";
         host2: RTPHost;
@@ -36,7 +35,6 @@ module RTPMulticast1
                 portNumber = 5004,
                 bandwidth = 8000,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "host2.mrt";
             display: "p=250,150;i=pc";
         host3: RTPHost;
@@ -47,7 +45,6 @@ module RTPMulticast1
                 portNumber = 5004,
                 bandwidth = 8000,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "host3.mrt";
             display: "p=150,250;i=pc";
         host4: RTPHost;
@@ -58,12 +55,10 @@ module RTPMulticast1
                 portNumber = 5004,
                 bandwidth = 8000,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "host4.mrt";
             display: "p=50,150;i=pc";
         router1: Router;
             parameters:
-                numOfPorts = 4,
                 routingFile = "router1.mrt",
                 numOfProcessors = 1;
             gatesizes:

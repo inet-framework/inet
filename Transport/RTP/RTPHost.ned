@@ -21,7 +21,6 @@ module RTPHost
         payloadType : numeric,
         // network information
         numOfProcessors : numeric,
-        numOfPorts : numeric,
         routingFile : string;
     gates:
         in: in[];
@@ -57,13 +56,12 @@ module RTPHost
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
-                numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "b=32,30;p=87,242;i=fork";
-        ppp : PPPInterface[numOfPorts];
+        ppp : PPPInterface[sizeof(out)];
             display: "p=80,300,row;b=38,24";
     connections nocheck:
         // transport connections
@@ -79,7 +77,7 @@ module RTPHost
         networkLayer.UDPIn <-- udpModule.to_ip;
 
         // connections to network outside
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
             ppp[i].netwOut --> networkLayer.physIn[i];

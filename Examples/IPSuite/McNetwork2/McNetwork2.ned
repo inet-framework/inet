@@ -43,7 +43,6 @@ module McNetwork2
         host1: UDPHost;
             parameters:
                 IPForward = false,
-                numOfPorts = 1,
                 routingFile = "mchost1.mrt";
             gatesizes:
                 in[1],
@@ -52,7 +51,6 @@ module McNetwork2
         host2: UDPHost;
             parameters:
                 IPForward = true,
-                numOfPorts = 2,
                 routingFile = "mchost2.mrt";
             gatesizes:
                 in[2],
@@ -61,7 +59,6 @@ module McNetwork2
         host3: UDPHost;
             parameters:
                 IPForward = true,
-                numOfPorts = 2,
                 routingFile = "mchost3.mrt";
             gatesizes:
                 in[2],
@@ -70,7 +67,6 @@ module McNetwork2
         host4: UDPHost;
             parameters:
                 IPForward = false,
-                numOfPorts = 1,
                 routingFile = "mchost4.mrt";
             gatesizes:
                 in[1],
@@ -79,7 +75,6 @@ module McNetwork2
         host5: UDPHost;
             parameters:
                 IPForward = false,
-                numOfPorts = 1,
                 routingFile = "mchost5.mrt";
             gatesizes:
                 in[1],
@@ -88,7 +83,6 @@ module McNetwork2
         host6: UDPHost;
             parameters:
                 IPForward = false,
-                numOfPorts = 1,
                 routingFile = "mchost6.mrt";
             gatesizes:
                 in[1],
@@ -96,7 +90,6 @@ module McNetwork2
             display: "p=364,189;i=pc";
         router1: Router;
             parameters:
-                numOfPorts = 4,
                 routingFile = "mcrouter1.mrt";
             gatesizes:
                 in[4],
@@ -104,7 +97,6 @@ module McNetwork2
             display: "p=68,115;i=srouter";
         router2: Router;
             parameters:
-                numOfPorts = 3,
                 routingFile = "mcrouter2.mrt";
             gatesizes:
                 in[3],
@@ -112,7 +104,6 @@ module McNetwork2
             display: "p=214,115;i=srouter";
         router3: Router;
             parameters:
-                numOfPorts = 2,
                 routingFile = "mcrouter3.mrt";
             gatesizes:
                 in[2],
@@ -120,7 +111,6 @@ module McNetwork2
             display: "p=214,194;i=srouter";
         router4: Router;
             parameters:
-                numOfPorts = 3,
                 routingFile = "mcrouter4.mrt";
             gatesizes:
                 in[3],

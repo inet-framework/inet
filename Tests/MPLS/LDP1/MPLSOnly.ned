@@ -29,8 +29,7 @@ module MPLSNetOnly
             parameters:
                 isIR = true,
                 isER = false,
-                peerNo = 2,
-                numOfPorts = 4;
+                peerNo = 2;
             gatesizes:
                 in[4],
                 out[4];
@@ -39,8 +38,7 @@ module MPLSNetOnly
             parameters:
                 isIR = false,
                 isER = false,
-                peerNo = 3,
-                numOfPorts = 3;
+                peerNo = 3;
             gatesizes:
                 in[3],
                 out[3];
@@ -49,8 +47,7 @@ module MPLSNetOnly
             parameters:
                 isIR = false,
                 isER = false,
-                peerNo = 4,
-                numOfPorts = 4;
+                peerNo = 4;
             gatesizes:
                 in[4],
                 out[4];
@@ -59,8 +56,7 @@ module MPLSNetOnly
             parameters:
                 isIR = false,
                 isER = false,
-                peerNo = 3,
-                numOfPorts = 3;
+                peerNo = 3;
             gatesizes:
                 in[3],
                 out[3];
@@ -69,8 +65,7 @@ module MPLSNetOnly
             parameters:
                 isIR = false,
                 isER = true,
-                peerNo = 2,
-                numOfPorts = 4;
+                peerNo = 2;
             gatesizes:
                 in[4],
                 out[4];

@@ -38,8 +38,7 @@ module KIDSNw1
     submodules:
         host: UDPHost[3];
             parameters:
-                IPForward = false,
-                numOfPorts = 1;
+                IPForward = false;
             parameters if index==0:
                 routingFile = "host1.irt";
             parameters if index==1:
@@ -54,11 +53,9 @@ module KIDSNw1
         // First Hop Router
         fhrouter: Router[2];
             parameters if index==0:
-                routingFile = "fhrouter1.irt",
-                numOfPorts = 3;
+                routingFile = "fhrouter1.irt";
             parameters if index==1:
-                routingFile = "fhrouter5.irt",
-                numOfPorts = 2;
+                routingFile = "fhrouter5.irt";
             gatesizes:
                 in[2],
                 out[2];
@@ -70,8 +67,7 @@ module KIDSNw1
         // InteriorRouter
         irouter: Router;
             parameters:
-                routingFile = "irouter2.irt",
-                numOfPorts = 2;
+                routingFile = "irouter2.irt";
             gatesizes:
                 in[2],
                 out[2];
@@ -80,7 +76,6 @@ module KIDSNw1
         // Border Gatgeway Router
         bgrouter: Router[2];
             parameters:
-                numOfPorts = 2;
             parameters if index==0:
                 routingFile = "bgrouter3.irt";
             parameters if index==1:

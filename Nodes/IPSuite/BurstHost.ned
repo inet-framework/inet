@@ -51,7 +51,6 @@ module BurstHost
             parameters:
                 // other Network parameters
                 IPForward = false,
-                numOfPorts = 1,
                 routingFile = routingFile;
             gatesizes:
                 physIn[1],

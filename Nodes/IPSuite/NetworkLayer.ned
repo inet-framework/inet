@@ -35,7 +35,6 @@ import
 module NetworkLayer
     parameters:
         IPForward : bool,
-        numOfPorts : numeric,
         routingFile : string;
     gates:
         in: physIn[]; // FIXME to be renamed
@@ -60,8 +59,8 @@ module NetworkLayer
             gatesizes:
                 transportIn[5],
                 transportOut[5],
-                queueIn[numOfPorts],
-                queueOut[numOfPorts];
+                queueIn[sizeof(physIn)],
+                queueOut[sizeof(physOut)];
             display: "p=155,98;i=cogwheel";
         icmp: ICMP;
             display: "p=259,78;i=cogwheel";
@@ -92,7 +91,7 @@ module NetworkLayer
         ip.transportIn[4] <-- RSVPIn;
 
         // L2 interfaces to IP
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(physOut)-1 do
             physIn[i] --> ip.queueIn[i] display "m=s";
             physOut[i] <-- ip.queueOut[i] display "m=s";
         endfor;

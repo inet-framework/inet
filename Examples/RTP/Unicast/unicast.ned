@@ -22,7 +22,6 @@ module RTPNetwork
                 fileName = "../Data/moving.mpg.gdf",
                 payloadType = 32,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "server1.irt";
         receiver: RTPHost;
             parameters:
@@ -34,7 +33,6 @@ module RTPNetwork
                 fileName = "",
                 payloadType = 0,
                 numOfProcessors = 1,
-                numOfPorts = 1,
                 routingFile = "client2.irt";
 
     connections:

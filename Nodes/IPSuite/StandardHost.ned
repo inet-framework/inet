@@ -37,7 +37,6 @@ module StandardHost
         server_addr : numeric,
 
         // Network information
-        numOfPorts : numeric,
         routingFile : string;
     gates:
         in: in[];
@@ -62,13 +61,12 @@ module StandardHost
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
-                numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "p=120,110;i=fork";
-        ppp: LinkLayer[numOfPorts];
+        ppp: LinkLayer[sizeof(out)];
             display: "p=60,180,row;i=iface";
     connections nocheck:
         // transport connections
@@ -82,7 +80,7 @@ module StandardHost
         networkLayer.pingIn <-- pingApp.out;
 
         // connections to network outside
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
             ppp[i].netwOut --> networkLayer.physIn[i];

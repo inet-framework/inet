@@ -35,7 +35,6 @@ module TCPUDPDirectNet
                 local_addr = (10 << 24) + 1,
                 server_addr = (10 << 24) + 0,
                 // network parameters
-                numOfPorts = 3,
                 routingFile = "server1.irt";
             gatesizes:
                 in[3],
@@ -49,7 +48,6 @@ module TCPUDPDirectNet
                 local_addr = (10 << 24) + 2,
                 server_addr = (10 << 24) + 1,
                 // network parameters
-                numOfPorts = 3,
                 routingFile = "client2.irt";
             gatesizes:
                 in[3],
@@ -62,7 +60,6 @@ module TCPUDPDirectNet
                 local_addr = (10 << 24) + 3,
                 server_addr = (10 << 24) + 1,
                 // network parameters
-                numOfPorts = 3,
                 routingFile = "client3.irt";
             gatesizes:
                 in[3],
@@ -75,7 +72,6 @@ module TCPUDPDirectNet
                 local_addr = (10 << 24) + 4,
                 server_addr = (10 << 24) + 1,
                 // network parameters
-                numOfPorts = 3,
                 routingFile = "client4.irt";
             gatesizes:
                 in[3],

@@ -30,8 +30,7 @@ module MPLSNet
                 id = "LSR1",
                 isIR = true,
                 isER = false,
-                peerNo = 2,
-                numOfPorts = 4;
+                peerNo = 2;
             gatesizes:
                 in[4],
                 out[4];
@@ -41,8 +40,7 @@ module MPLSNet
                 id = "LSR2",
                 isIR = false,
                 isER = false,
-                peerNo = 3,
-                numOfPorts = 3;
+                peerNo = 3;
             gatesizes:
                 in[3],
                 out[3];
@@ -52,8 +50,7 @@ module MPLSNet
                 id = "LSR3",
                 isIR = false,
                 isER = false,
-                peerNo = 4,
-                numOfPorts = 4;
+                peerNo = 4;
             gatesizes:
                 in[4],
                 out[4];
@@ -63,8 +60,7 @@ module MPLSNet
                 id = "LSR4",
                 isIR = false,
                 isER = false,
-                peerNo = 3,
-                numOfPorts = 3;
+                peerNo = 3;
             gatesizes:
                 in[3],
                 out[3];
@@ -74,27 +70,22 @@ module MPLSNet
                 id = "LSR5",
                 isIR = false,
                 isER = true,
-                peerNo = 2,
-                numOfPorts = 4;
+                peerNo = 2;
             gatesizes:
                 in[4],
                 out[4];
             display: "p=500,95;i=srouter";
         host1: TCPClientTest;
             parameters:
-                numOfPorts = 1;
             display: "p=26,98;i=comp_s";
         host2: TCPClientTest;
             parameters:
-                numOfPorts = 1;
             display: "p=26,256;i=comp_s";
         host3: TCPServerTest;
             parameters:
-                numOfPorts = 1;
             display: "p=570,88;i=comp_s";
         host4: TCPServerTest;
             parameters:
-                numOfPorts = 1;
             display: "p=578,240;i=comp_s";
     connections nocheck:
         host1.in[0] <-- LSR1.out[0];

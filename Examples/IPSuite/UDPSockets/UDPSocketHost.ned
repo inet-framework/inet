@@ -27,7 +27,6 @@ import
 module UDPSocketHost
     parameters:
         client_name : string,
-        numOfPorts : numeric,
         routingFile : string;
     gates:
         in: in[];
@@ -43,13 +42,12 @@ module UDPSocketHost
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
-                numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "p=80,220;i=fork";
-        ppp : PPPInterface[numOfPorts];
+        ppp : PPPInterface[sizeof(out)];
             display: "p=80,280,row;i=iface";
     connections nocheck:
         // transport connections
@@ -61,7 +59,7 @@ module UDPSocketHost
         networkLayer.UDPIn <-- udp.to_ip;
 
         // connections to network outside
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
             ppp[i].netwOut --> networkLayer.physIn[i];

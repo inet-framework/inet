@@ -49,7 +49,6 @@ module RSVP_LSR_Node
         isER : bool,
 
         //# Network information
-        numOfPorts : numeric,
         routingFile : string,
         LibTableFileName : string,
         PrtTableFileName : string;
@@ -84,25 +83,24 @@ module RSVP_LSR_Node
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = true,
-                numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "b=32,30;p=192,163;i=fork";
-        ppp: LinkLayer[numOfPorts];
+        ppp: LinkLayer[sizeof(out)];
             display: "p=88,297,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
                 isER = isER,
-                numOfPorts = numOfPorts,
+                numOfPorts = sizeof(out),
                 procdelay = 1;
             gatesizes:
-                fromL3[numOfPorts],
-                toL3[numOfPorts],
-                fromL2[numOfPorts],
-                toL2[numOfPorts];
+                fromL3[sizeof(out)],
+                toL3[sizeof(out)],
+                fromL2[sizeof(out)],
+                toL2[sizeof(out)];
             display: "o=#ff8000;p=192,238;b=66,14";
         libTable: LIBTable;
             parameters:
@@ -122,7 +120,7 @@ module RSVP_LSR_Node
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
 
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
 

@@ -28,7 +28,6 @@ module UDPSockets
         server1: UDPSocketHost;
             parameters:
                 client_name = "UDPSocketTestServer",
-                numOfPorts = 1,
                 routingFile = "server1.irt";
             gatesizes:
                 in[1],
@@ -38,7 +37,6 @@ module UDPSockets
         client2: UDPSocketHost;
             parameters:
                 client_name = "UDPSocketTestClient",
-                numOfPorts = 1,
                 routingFile = "client2.irt";
             gatesizes:
                 in[1],
