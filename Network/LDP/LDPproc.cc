@@ -167,139 +167,137 @@ void LDPproc::activity()
 
         // Data from MPLS switch - Initial Lable Request
         if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
-        {
-            // This is a request for new label finding
-
-            int fecId = msg->par("FEC");
-            int fecInt = msg->par("dest_addr");
-            // int dest =msg->par("dest_addr"); FIXME was not used (?)
-            int gateIndex = msg->par("gateIndex");
-            InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-
-            string fromInterface = string(ientry->name.c_str());
-
-            // LDP checks if there is any previous pending requests for
-            // the same FEC.
-
-            int i;
-            for (i = 0; i < FecSenderBinds.size(); i++)
-            {
-                if (FecSenderBinds[i].fec == fecInt)
-                    break;
-            }
-
-            if (i == FecSenderBinds.size())  // There is no previous same requests
-            {
-
-                fec_src_bind newBind;
-                newBind.fec = fecInt;
-                newBind.fromInterface = fromInterface;
-                newBind.fecID = fecId;
-
-                FecSenderBinds.push_back(newBind);
-
-                // Genarate new LABEL REQUEST and send downstream
-
-                LabelRequestMessage *requestMsg = new LabelRequestMessage();
-                requestMsg->setFec(fecInt);
-                requestMsg->addPar("fecId") = fecId;
-
-                // LDP does the simple job of matching L3 routing to L2 routing
-
-                // We need to find which peer (from L2 perspective) corresponds to
-                // IP host of the next-hop.
-
-                int nextPeerAddr = locateNextHop(fecInt);
-
-                if (nextPeerAddr != 0)
-                {
-                    requestMsg->setReceiverAddress(nextPeerAddr);
-                    requestMsg->setSenderAddress(local_addr);
-
-                    ev << "LSR(" << IPAddress(local_addr) <<
-                        "):Request for FEC(" << fecInt << ") from outside \n";
-
-                    ev << "LSR(" << IPAddress(local_addr) <<
-                        ")  forward LABEL REQUEST to " <<
-                        "LSR(" << IPAddress(nextPeerAddr) << ")\n";
-
-                    delete msg;
-
-                    send(requestMsg, "to_tcp_interface");
-                }
-                else
-                {
-                    // Send a NOTIFICATION of NO ROUTE message
-                    ev << "LSR(" << IPAddress(local_addr) <<
-                        "): NO ROUTE found for FEC(" << fecInt << "\n";
-
-                    delete msg;
-                }
-            }
-        }  // End if
+            processRequestFromMPLSSwitch(msg);
         // Data from TCP Interface
         else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
+            processMessageFromTCP(check_and_cast<LDPpacket *>(msg));
+
+    }
+
+}
+
+
+void LDPproc::processRequestFromMPLSSwitch(cMessage *msg)
+{
+    // This is a request for new label finding
+    RoutingTable *rt = routingTableAccess.get();
+
+    int fecId = msg->par("FEC");
+    int fecInt = msg->par("dest_addr");
+    // int dest =msg->par("dest_addr"); FIXME was not used (?)
+    int gateIndex = msg->par("gateIndex");
+    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
+
+    string fromInterface = string(ientry->name.c_str());
+
+    // LDP checks if there is any previous pending requests for
+    // the same FEC.
+
+    int i;
+    for (i = 0; i < FecSenderBinds.size(); i++)
+    {
+        if (FecSenderBinds[i].fec == fecInt)
+            break;
+    }
+
+    if (i == FecSenderBinds.size())  // There is no previous same requests
+    {
+
+        fec_src_bind newBind;
+        newBind.fec = fecInt;
+        newBind.fromInterface = fromInterface;
+        newBind.fecID = fecId;
+
+        FecSenderBinds.push_back(newBind);
+
+        // Genarate new LABEL REQUEST and send downstream
+
+        LabelRequestMessage *requestMsg = new LabelRequestMessage();
+        requestMsg->setFec(fecInt);
+        requestMsg->addPar("fecId") = fecId;
+
+        // LDP does the simple job of matching L3 routing to L2 routing
+
+        // We need to find which peer (from L2 perspective) corresponds to
+        // IP host of the next-hop.
+
+        int nextPeerAddr = locateNextHop(fecInt);
+
+        if (nextPeerAddr != 0)
         {
-            // We process ldp packet only
-            LDPpacket *ldpPacket = check_and_cast < LDPpacket * >(msg);
+            requestMsg->setReceiverAddress(nextPeerAddr);
+            requestMsg->setSenderAddress(local_addr);
 
-            int msgType = ldpPacket->kind();
-            switch (msgType)
-            {
-            case HELLO:
-                // processingHELLO(ldpPacket);
-                ev << "Received LDP HELLO message\n";  // FIXME so what to do with it? --Andras
-                break;
+            ev << "LSR(" << IPAddress(local_addr) <<
+                "):Request for FEC(" << fecInt << ") from outside \n";
 
-            case ADDRESS:
-                // processingADDRESS(ldpPacket);
-                error("Received LDP ADDRESS message, unsupported in this version");
-                // delete msg;
-                // break;
+            ev << "LSR(" << IPAddress(local_addr) <<
+                ")  forward LABEL REQUEST to " <<
+                "LSR(" << IPAddress(nextPeerAddr) << ")\n";
 
-            case ADDRESS_WITHDRAW:
-                // processingADDRESS_WITHDRAW(ldpPacket);
-                error
-                    ("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
-                // delete msg;
-                // break;
+            delete msg;
 
-            case LABEL_MAPPING:
-                processingLABEL_MAPPING(check_and_cast < LabelMappingMessage * >(ldpPacket));
-                break;
+            send(requestMsg, "to_tcp_interface");
+        }
+        else
+        {
+            // Send a NOTIFICATION of NO ROUTE message
+            ev << "LSR(" << IPAddress(local_addr) <<
+                "): NO ROUTE found for FEC(" << fecInt << "\n";
 
-            case LABEL_REQUEST:
-                processingLABEL_REQUEST(check_and_cast < LabelRequestMessage * >(ldpPacket));
-                break;
+            delete msg;
+        }
+    }
+}
 
-            case LABEL_WITHDRAW:
-                // processingLABEL_WITHDRAW(ldpPacket);
-                error
-                    ("LDP PROC DEBUG: Received LDP LABEL_WITHDRAW message, unsupported in this version");
-                // delete msg;
-                // break;
 
-            case LABEL_RELEASE:
-                // processingLABEL_RELEASE(ldpPacket);
-                error
-                    ("LDP PROC DEBUG: Received LDP LABEL_RELEASE message, unsupported in this version");
-                // delete msg;
-                // break;
+void LDPproc::processMessageFromTCP(LDPpacket *ldpPacket)
+{
+    int msgType = ldpPacket->kind();
+    switch (msgType)
+    {
+    case HELLO:
+        // processingHELLO(ldpPacket);
+        ev << "Received LDP HELLO message\n";  // FIXME so what to do with it? --Andras
+        delete ldpPacket;
+        break;
 
-            default:
-                error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", msgType);
-                delete msg;
-            }
-        }  // End else if
+    case ADDRESS:
+        // processingADDRESS(ldpPacket);
+        error("Received LDP ADDRESS message, unsupported in this version");
+        break;
 
-    }  // End for
+    case ADDRESS_WITHDRAW:
+        // processingADDRESS_WITHDRAW(ldpPacket);
+        error("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
+        break;
 
-}  // End activity method
+    case LABEL_MAPPING:
+        processingLABEL_MAPPING(check_and_cast<LabelMappingMessage *>(ldpPacket));
+        break;
 
-// Mapping L3 IP-host of next hop  to L2 peer address.
+    case LABEL_REQUEST:
+        processingLABEL_REQUEST(check_and_cast<LabelRequestMessage *>(ldpPacket));
+        break;
+
+    case LABEL_WITHDRAW:
+        // processingLABEL_WITHDRAW(ldpPacket);
+        error("LDP PROC DEBUG: Received LDP LABEL_WITHDRAW message, unsupported in this version");
+        break;
+
+    case LABEL_RELEASE:
+        // processingLABEL_RELEASE(ldpPacket);
+        error("LDP PROC DEBUG: Received LDP LABEL_RELEASE message, unsupported in this version");
+        break;
+
+    default:
+        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", msgType);
+    }
+}
 
 int LDPproc::locateNextHop(int fec)
 {
+    // Mapping L3 IP-host of next hop  to L2 peer address.
     RoutingTable *rt = routingTableAccess.get();
 
     // Lookup the routing table, rfc3036
@@ -551,7 +549,6 @@ void LDPproc::processingLABEL_MAPPING(LabelMappingMessage * packet)
     }
     else
     {
-
         // Install new label
         for (int k = 0; k < FecSenderBinds.size(); k++)
         {

@@ -102,7 +102,7 @@ private:
 
   public:
 
-     Module_Class_Members(LDPproc,cSimpleModule,16384);
+  Module_Class_Members(LDPproc,cSimpleModule,16384);
 
   virtual void activity();
 
@@ -110,6 +110,9 @@ private:
 
   void processingLABEL_MAPPING(LabelMappingMessage *packet);
   void processingLABEL_REQUEST(LabelRequestMessage *packet);
+
+  void processRequestFromMPLSSwitch(cMessage *msg);
+  void processMessageFromTCP(LDPpacket *ldpPacket);
 
   //void printDebugInfo(string dInfo);
 
