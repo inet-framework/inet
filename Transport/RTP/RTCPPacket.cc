@@ -21,7 +21,7 @@ RTCPReceiverReportPacket, RTCPSenderReportPacket, RTCPSDESPacket,
 RTCPByePacket and RTCPCompoundPacket are implemented.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "RTCPPacket.h"
@@ -43,7 +43,7 @@ RTCPPacket::RTCPPacket(const char *name = NULL) : cPacket(name) {
 	_count = 0;
 	_packetType = RTCP_PT_UNDEF;
 	// rtcpLength can be calculated with cPacket::length()
-	
+
 	// RTCP header length size is 4 bytes
 	// not all rtcp packets (in particular RTCPSDESPacket) have
 	// the ssrc identifier stored in the header

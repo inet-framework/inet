@@ -25,7 +25,7 @@ This file declares the class RTPPayloadReceiver.
 
 
 #include <fstream.h>
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "RTPPacket.h"
 
 
@@ -34,7 +34,7 @@ The class RTPPayloadReceiver acts as a base class for modules
 processing incoming rtp data packets.
 */
 class RTPPayloadReceiver : public cSimpleModule {
-	
+
 	Module_Class_Members(RTPPayloadReceiver, cSimpleModule, 0);
 
 	/*!

@@ -19,7 +19,7 @@
 This file contains the implementaion of member functions of the class RTPPacket.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "RTPPacket.h"
@@ -38,7 +38,7 @@ RTPPacket::RTPPacket(const char *name = NULL) : cPacket(name) {
 	_sequenceNumber = 0;
 	_timeStamp = 0;
 	_ssrc = 0;
-	
+
 	// a standard rtp packet without csrcs and data has a length of 12 bytes
 	setLength(fixedHeaderLength());
 };

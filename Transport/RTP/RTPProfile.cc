@@ -21,7 +21,7 @@ This file contains the implementaion of member functions of the class RTPProfile
 
 #include <string.h>
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "RTPProfile.h"
 #include "RTPInnerPacket.h"
@@ -38,7 +38,7 @@ void RTPProfile::initialize() {
 	_profileName = "Profile";
 	_rtcpPercentage = 5;
 	_preferredPort = IN_Port(IN_Port::PORT_UNDEF);
-	
+
 	// how many gates to payload receivers do we have
 	_maxReceivers = gate("toPayloadReceiver")->size();
 	_ssrcGates = new cArray("SSRCGates");
@@ -53,7 +53,7 @@ void RTPProfile::handleMessage(cMessage *msg) {
 	}
 
 	else if (msg->arrivalGateId() == findGate("fromPayloadSender")) {
-		handleMessageFromPayloadSender(msg);	
+		handleMessageFromPayloadSender(msg);
 	}
 
 	else if (msg->arrivalGateId() >= findGate("fromPayloadReceiver") && msg->arrivalGateId() < findGate("fromPayloadReceiver") + _maxReceivers) {
@@ -72,9 +72,9 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg) {
 
 	if (opp_strcmp(msg->className(), "RTPInnerPacket"))
 		error("RTPProfile: message received from RTPModule is not an RTPInnerPacket !");
-	
+
 		RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
-	
+
 		if (rinpIn->type() == RTPInnerPacket::RTP_INP_INITIALIZE_PROFILE) {
 			initializeProfile(rinpIn);
 		}
@@ -82,15 +82,15 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg) {
 		else if (rinpIn->type() == RTPInnerPacket::RTP_INP_CREATE_SENDER_MODULE) {
 			createSenderModule(rinpIn);
 		}
-		
+
 		else if (rinpIn->type() == RTPInnerPacket::RTP_INP_DELETE_SENDER_MODULE) {
 			deleteSenderModule(rinpIn);
 		}
-		
+
 		else if (rinpIn->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
 			senderModuleControl(rinpIn);
 		}
-		
+
 		else if (rinpIn->type() == RTPInnerPacket::RTP_INP_DATA_IN) {
 			dataIn(rinpIn);
 		}
@@ -98,7 +98,7 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg) {
 		else {
 			ev << "RTPProfile: RTPInnerPacket from RTPModule has wrong type !"<< endl;
 		}
-		
+
 }
 
 
@@ -156,10 +156,10 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp) {
 
 	connect(this, findGate("toPayloadSender"), NULL, rtpPayloadSender, rtpPayloadSender->findGate("fromProfile"));
 	connect(rtpPayloadSender, rtpPayloadSender->findGate("toProfile"), NULL, this, findGate("fromPayloadSender"));
-	
+
 	rtpPayloadSender->initialize();
 	rtpPayloadSender->scheduleStart(simTime());
-	
+
 	RTPInnerPacket *rinpOut1 = new RTPInnerPacket("senderModuleCreated()");
 	rinpOut1->senderModuleCreated(ssrc);
 	send(rinpOut1, "toRTP");
@@ -194,16 +194,16 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp) {
 	processIncomingPacket(rinp);
 
 	RTPPacket *packet = (RTPPacket *)(rinp->encapsulatedMsg());
-	
+
 	u_int32 ssrc = packet->ssrc();
-	
+
 	RTPSSRCGate *ssrcGate = findSSRCGate(ssrc);
-	
+
 	if (!ssrcGate) {
 		ssrcGate = newSSRCGate(ssrc);
 		char payloadReceiverName[100];
 		sprintf(payloadReceiverName, "RTP%sPayload%iReceiver", _profileName, packet->payloadType());
-		
+
 		cModuleType *moduleType = findModuleType(payloadReceiverName);
 		if (moduleType == NULL) {
 			opp_error("Receiver module %s not found !", payloadReceiverName);
@@ -219,9 +219,9 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp) {
 			connect(receiverModule, receiverModule->findGate("toProfile"), NULL, this,  ssrcGate->gateId() - findGate("toPayloadReceiver") + findGate("fromPayloadReceiver"));
 			receiverModule->callInitialize(0);
 			receiverModule->scheduleStart(simTime());
-		}                   
+		}
 	};
-	
+
 	send(rinp, ssrcGate->gateId());
 };
 

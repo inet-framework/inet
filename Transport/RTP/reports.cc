@@ -20,7 +20,7 @@ This file contains the implementations of member functions of the
 class SenderReport and ReceptionReport.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "reports.h"

@@ -23,7 +23,7 @@ This file declares the class RTPAVProfilePayload32Receiver.
 #ifndef __RTPAVPROFILEPAYLOAD32RECEIVER_H__
 #define __RTPAVPROFILEPAYLOAD32RECEIVER_H__
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "RTPPayloadReceiver.h"
 
@@ -38,7 +38,7 @@ mpeg player.
 */
 
 class RTPAVProfilePayload32Receiver : public RTPPayloadReceiver {
-	
+
 	Module_Class_Members(RTPAVProfilePayload32Receiver, RTPPayloadReceiver, 0);
 
 	/*!

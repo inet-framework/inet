@@ -21,7 +21,7 @@ In this file member functions of RTPAVProfilePayload32Receiver are
 implemented.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "RTPPayloadReceiver.h"
 #include "RTPAVProfilePayload32Receiver.h"
@@ -58,27 +58,27 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket) {
 		// this can happen when the marked packet has been
 		// lost or arrives late
 		bool nextTimeStamp = rtpPacket->timeStamp() > _lowestAllowedTimeStamp;
-		
+
 		// is this packet marked, which means that it's
 		// the last packet of this frame
 		bool marked = rtpPacket->marker();
-		
+
 		// test if end of frame reached
-		
+
 		// check if we received the last (= marked)
 		// packet of the frame or
 		// we received a packet of the next frame
-		
+
 		if (nextTimeStamp || marked) {
-			
+
 			// a marked packet belongs to this frame
 			if (marked && !nextTimeStamp) {
 				_queue->insert(rtpPacket);
 			}
-			
+
 			int pictureType = 0;
 			int frameSize = 0;
-			
+
 			// the queue contains all packets for this frame
 			// we have received
 			while (!_queue->empty()) {
@@ -88,18 +88,18 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket) {
 				if (pictureType == 0)
 					pictureType = mpegPacket->pictureType();
 				frameSize = frameSize + mpegPacket->payloadLength();
-				
+
 				delete mpegPacket;
 				delete readPacket;
 			};
-			
+
 			// we start the next frame
 			// set the allowed time stamp
 			if (nextTimeStamp) {
 				_lowestAllowedTimeStamp = rtpPacket->timeStamp();
 				_queue->insert(rtpPacket);
 			};
-			
+
 			// we have calculated a frame
 			if (frameSize > 0) {
 				char line[100];
@@ -113,7 +113,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket) {
 					picture = 'B';
 				else if (pictureType == 4)
 					picture = 'D';
-				
+
 				// create sim line
 				sprintf(line, "%f %i %c-Frame", simTime(), frameSize * 8, picture);
 				// and write it to the file

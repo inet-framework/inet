@@ -20,7 +20,7 @@ This file contains the implementation for member functions
 of RTPApplication.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "in_addr.h"
 #include "in_port.h"
@@ -35,23 +35,23 @@ Define_Module(RTPApplication)
 void RTPApplication::initialize() {
 
 	// read all omnet parameters
-	
+
 	// the common name (CNAME) of this host
 	_commonName = par("commonName");
-	
+
 	// which rtp profile is to be used (usually RTPAVProfile)
 	_profileName = par("profileName");
-	
+
 	// bandwidth in bytes per second for this session
 	_bandwidth = par("bandwidth");
-	
+
 	// the ip address to connect to (unicast or multicast)
 	_destinationAddress = IN_Addr(par("destinationAddress"));
-	
+
 	// port number which is to be used; to ports are actually used: one
 	// for rtp and one for rtcp
 	_port = IN_Port((int)(par("portNumber").longValue()));
-	
+
 	// fileName of file to be transmitted
 	// NULL or "" means this system acts only as a receiver
 	_fileName = par("fileName");
@@ -154,12 +154,12 @@ void RTPApplication::activity() {
 				}
 				else {
 				}
-			} 
+			}
 			else if (rifpIn->type() == RTPInterfacePacket::RTP_IFP_SESSION_LEFT) {
 				sessionLeft = true;
-			} 
+			}
 		}
 		delete msgIn;
-		
+
 	}
 }

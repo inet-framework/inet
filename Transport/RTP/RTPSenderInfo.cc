@@ -20,7 +20,7 @@
 This file contains the implementation of member functions of the class RTPSenderInfo.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "RTPSenderInfo.h"
@@ -75,7 +75,7 @@ const char *RTPSenderInfo::className() const {
 void RTPSenderInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime) {
 	_packetsSent++;
 	_bytesSent = _bytesSent + packet->payloadLength();
-	
+
 	// call corresponding method of superclass
 	// for setting _silentIntervals
 	// it deletes the packet !!!
@@ -92,10 +92,10 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now) {
 	if (isSender()) {
 		SenderReport *senderReport = new SenderReport("SenderReport");
 		// ntp time stamp is 64 bit integer
-		
+
 		u_int64 ntpSeconds = (u_int64)now;
 		u_int64 ntpFraction = (u_int64)((now - (simtime_t)ntpSeconds) * 65536.0 * 65536.0);
-		
+
 		senderReport->setNTPTimeStamp((u_int64)(ntpSeconds << 32) + ntpFraction);
 		senderReport->setRTPTimeStamp((now - _startTime) * _clockRate);
 		senderReport->setPacketCount(_packetsSent);

@@ -24,7 +24,7 @@ This file declares the class RTPPayloadSender.
 #define __RTPPAYLOADSENDER_H__
 
 #include <fstream.h>
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "types.h"
 #include "RTPInnerPacket.h"
 
@@ -36,7 +36,7 @@ packet sender like opening and closing the data file and choosing sequence
 number and time stamp start values.
 */
 class RTPPayloadSender : public cSimpleModule {
-	
+
 	Module_Class_Members(RTPPayloadSender, cSimpleModule, 8192);
 
 	/*!
@@ -45,7 +45,7 @@ class RTPPayloadSender : public cSimpleModule {
 	virtual ~RTPPayloadSender();
 
 	public:
-	
+
 		/*!
 		Chooses sequence number and time stamp base values and
 		reads the omnet parameter "mtu".
@@ -61,56 +61,56 @@ class RTPPayloadSender : public cSimpleModule {
 			STOPPED, //!< No transmission.
 			PLAYING //!< Data is being sent.
 		};
-	
+
 	protected:
-	
+
 		/*!
 		The input file stream for the data file.
 		*/
 		ifstream  _inputFileStream;
-		
+
 		/*!
 		The maximum size of an RTPPacket.
 		*/
 		int _mtu;
-		
+
 		/*!
 		The ssrc identifier of this sender module.
 		*/
 		u_int32 _ssrc;
-		
+
 		/*!
 		The payload type this sender creates.
 		*/
 		int _payloadType;
-		
+
 		/*!
 		The clock rate in ticks per second this sender uses.
 		*/
 		int _clockRate;
-		
+
 		/*!
 		The first rtp time stamp used for created rtp data
 		packets. The value is chosen randomly.
 		*/
 		u_int32 _timeStampBase;
-		
+
 		/*!
 		The current rtp time stamp.
 		*/
 		u_int32 _timeStamp;
-		
+
 		/*!
 		The first sequence number used for created rtp data
 		packets. The value is chosen randomly.
 		*/
 		u_int16 _sequenceNumberBase;
-		
+
 		/*!
 		The current sequence number.
 		*/
 		u_int16 _sequenceNumber;
-		
+
 		/*!
 		The current state of data transmission.
 		*/
@@ -122,12 +122,12 @@ class RTPPayloadSender : public cSimpleModule {
 		must be cancelled.
 		*/
 		cMessage *_reminderMessage;
-		
+
 		/*!
 		This method is called when a newly create sender module
 		received its initialization message from profile module.
 		It returns an RTP_INP_SENDER_MODULE_INITIALIZED message which
-		contains information needed by the rtcp module. 
+		contains information needed by the rtcp module.
 		*/
 		virtual void initializeSenderModule(RTPInnerPacket *);
 
@@ -155,33 +155,33 @@ class RTPPayloadSender : public cSimpleModule {
 		/*!
 		Starts transmission from the current file position and plays until given
 		time (relative to start of file) is reached.
-		Implementation in sender modules is optional.  
+		Implementation in sender modules is optional.
 		*/
 		virtual void playUntilTime(simtime_t moment);
 
 		/*!
 		Starts transmission from the current file position and plays until given
 		byte position (excluding file header) is reached.
-		Implementation in sender modules is optional.  
+		Implementation in sender modules is optional.
 		*/
 		virtual void playUntilByte(int position);
 
 		/*!
 		When data is being transmitted this methods suspends till
 		a new PLAY command.
-		Implementation in sender modules is optional. 
+		Implementation in sender modules is optional.
 		*/
 		virtual void pause();
 
 		/*!
-		When the data transmission is paused the current position is 
+		When the data transmission is paused the current position is
 		changed to this time (relative to start of file).
 		Implementation in sender modules is optional.
 		*/
 		virtual void seekTime(simtime_t moment);
 
 		/*!
-		When the data transmission is paused the current position is 
+		When the data transmission is paused the current position is
 		changed to this byte position (excluding file header).
 		Implementation in sender modules is optional.
 		*/

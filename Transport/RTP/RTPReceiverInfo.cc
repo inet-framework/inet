@@ -20,7 +20,7 @@
 This file contains the implementation of member functions of the class RTPReceiverInfo.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "RTPReceiverInfo.h"
@@ -29,24 +29,24 @@ This file contains the implementation of member functions of the class RTPReceiv
 Register_Class(RTPReceiverInfo);
 
 RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc = 0) : RTPParticipantInfo(ssrc)  {
-	
+
 	_sequenceNumberBase = 0;
 	_highestSequenceNumber = 0;
 	_highestSequenceNumberPrior = 0;
 	_sequenceNumberCycles = 0;
-	
+
 	_packetsReceived = 0;
 	_packetsReceivedPrior = 0;
-	
+
 	_jitter = 0.0;
 	_clockRate = 0;
 	_lastSenderReportRTPTimeStamp = 0;
 	_lastSenderReportNTPTimeStamp = 0;
 	_lastPacketRTPTimeStamp = 0;
-	
+
 	_lastPacketArrivalTime = 0.0;
 	_lastSenderReportArrivalTime = 0.0;
-	
+
 	_inactiveIntervals = 0;
 	_startOfInactivity = 0.0;
 	_itemsReceived = 0;
@@ -65,28 +65,28 @@ RTPReceiverInfo::~RTPReceiverInfo() {
 
 RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo) {
 	RTPParticipantInfo::operator=(receiverInfo);
-	
+
 	_sequenceNumberBase = receiverInfo._sequenceNumberBase;
 	_highestSequenceNumber = receiverInfo._highestSequenceNumber;
 	_highestSequenceNumberPrior = receiverInfo._highestSequenceNumberPrior;
 	_sequenceNumberCycles = receiverInfo._sequenceNumberCycles;
-	
+
 	_packetsReceived = receiverInfo._packetsReceived;
 	_packetsReceivedPrior = receiverInfo._packetsReceivedPrior;
-	
+
 	_jitter = receiverInfo._jitter;
 	_clockRate = receiverInfo._clockRate;
 	_lastSenderReportRTPTimeStamp = receiverInfo._lastSenderReportRTPTimeStamp;
 	_lastSenderReportNTPTimeStamp = receiverInfo._lastSenderReportNTPTimeStamp;
 	_lastPacketRTPTimeStamp = receiverInfo._lastPacketRTPTimeStamp;
-	
+
 	_lastPacketArrivalTime = receiverInfo._lastPacketArrivalTime;
 	_lastSenderReportArrivalTime = receiverInfo._lastSenderReportArrivalTime;
-	
+
 	_inactiveIntervals = receiverInfo._inactiveIntervals;
 	_startOfInactivity = receiverInfo._startOfInactivity;
 	_itemsReceived = receiverInfo._itemsReceived;
-	
+
 	return *this;
 };
 
@@ -105,10 +105,10 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime)
 
 	// this endsystem sends, it isn't inactive
 	_inactiveIntervals = 0;
-	
+
 	_packetsReceived++;
 	_itemsReceived++;
-	
+
 	if (_packetsReceived == 1) {
 		_sequenceNumberBase = packet->sequenceNumber();
 	}
@@ -136,16 +136,16 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime)
 		_lastPacketRTPTimeStamp = packet->timeStamp();
 		_lastPacketArrivalTime = arrivalTime;
 	};
-	
-	
-	
+
+
+
 	RTPParticipantInfo::processRTPPacket(packet, arrivalTime);
 
 };
 
 
 void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime) {
-	
+
 	_lastSenderReportArrivalTime = arrivalTime;
 	if (_lastSenderReportRTPTimeStamp == 0) {
 		_lastSenderReportRTPTimeStamp = report->rtpTimeStamp();
@@ -157,10 +157,10 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
 		long double ntpSeconds = (long double)ntpDifference / (long double)(0xFFFFFFFF);
 		_clockRate = (int)((long double)rtpTicks / ntpSeconds);
 	}
-	
+
 	_inactiveIntervals = 0;
 	_itemsReceived++;
-	
+
 	delete report;
 };
 
@@ -177,10 +177,10 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now) {
 	if (isSender()) {
 		ReceptionReport *receptionReport = new ReceptionReport("ReceiverReport");
 		receptionReport->setSSRC(ssrc());
-	
+
 		u_int64 packetsExpected = _sequenceNumberCycles + (u_int64)_highestSequenceNumber - (u_int64)_sequenceNumberBase + (u_int64)1;
 		u_int64 packetsLost = packetsExpected - _packetsReceived;
-	
+
 		int32 packetsExpectedInInterval = _sequenceNumberCycles + _highestSequenceNumber - _highestSequenceNumberPrior;
 		int32 packetsReceivedInInterval = _packetsReceived - _packetsReceivedPrior;
 		int32 packetsLostInInterval = packetsExpectedInInterval - packetsReceivedInInterval;
@@ -188,22 +188,22 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now) {
 		if (packetsLostInInterval > 0) {
 			fractionLost = (packetsLostInInterval << 8) / packetsExpectedInInterval;
 		};
-	
+
 		receptionReport->setFractionLost(fractionLost);
 		receptionReport->setPacketsLostCumulative(packetsLost);
 		receptionReport->setSequenceNumber(_sequenceNumberCycles + _highestSequenceNumber);
-	
+
 		receptionReport->setJitter((u_int32)_jitter);
-	
+
 		// the middle 32 bit of the ntp time stamp of the last sender report
 		receptionReport->setLastSR((_lastSenderReportNTPTimeStamp >> 16) & 0xFFFFFFFF);
-	
+
 		// the delay since the arrival of the last sender report in units
 		// of 1 / 65536 seconds
 		// 0 if no sender report has ben received
-		
+
 		receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (u_int32)((now - _lastSenderReportArrivalTime) * 65536.0));
-	
+
 		return receptionReport;
 	}
 	else

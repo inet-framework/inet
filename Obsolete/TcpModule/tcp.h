@@ -27,7 +27,7 @@
 #ifndef _TCP_H_
 #define _TCP_H_
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

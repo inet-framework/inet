@@ -19,7 +19,7 @@
 This file contains the implementation of member functions of the class RTPEndsystemModule.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "SocketInterfacePacket.h"
 #include "in_port.h"
@@ -53,19 +53,19 @@ void RTPEndsystemModule::handleMessage(cMessage *msg) {
 	if (msg->arrivalGateId() == findGate("fromApp")) {
 		handleMessageFromApp(msg);
 	}
-	
+
 	else if (msg->arrivalGateId() == findGate("fromProfile")) {
 		handleMessageFromProfile(msg);
 	}
-	
+
 	else if (msg->arrivalGateId() == findGate("fromRTCP")) {
 		handleMessageFromRTCP(msg);
 	}
-	
+
 	else if (msg->arrivalGateId() == findGate("fromSocketLayer")) {
 		handleMessageFromSocketLayer(msg);
 	}
-	
+
 	else {
 		ev << "RTPEndsystemModule: Message from unknown Gate !" << endl;
 	}
@@ -169,9 +169,9 @@ void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp) {
 	if (_port % 2 != 0) {
 		_port = _port - 1;
 	}
-	
+
 	_mtu = resolveMTU();
-	
+
 	createProfile();
 	initializeProfile();
 
@@ -271,9 +271,9 @@ void RTPEndsystemModule::dataOut(RTPInnerPacket *rinp) {
 	SocketInterfacePacket *sifpOut = new SocketInterfacePacket("write()");
 	sifpOut->write(_socketFdOut, encapsulatedMsg);
 	send(sifpOut, "toSocketLayer");
-	
+
 	// RTCP module must be informed about sent rtp data packet
-	
+
 	RTPInnerPacket *rinpOut = new RTPInnerPacket(*rinp);
 	rinpOut->encapsulate(new RTPPacket(*encapsulatedMsg));
 	send(rinpOut, "toRTCP");
@@ -304,28 +304,28 @@ void RTPEndsystemModule::sessionLeft(RTPInnerPacket *rinp) {
 void RTPEndsystemModule::socketRet(SocketInterfacePacket *sifp) {
 	if (_socketFdIn == Socket::FILEDESC_UNDEF) {
 		_socketFdIn = sifp->filedesc();
-		
+
 		SocketInterfacePacket *sifpOut = new SocketInterfacePacket("bind()");
-		
+
 		IPAddress ipaddr(_destinationAddress);
-		
+
 		if (ipaddr.isMulticast()) {
 			sifpOut->bind(_socketFdIn, IN_Addr(_destinationAddress), IN_Port(_port));
 		}
-		else {		
+		else {
 			sifpOut->bind(_socketFdIn, IN_Addr(IN_Addr::ADDR_UNDEF), IN_Port(_port));
 		}
 		send(sifpOut, "toSocketLayer");
-		
+
 		createClientSocket();
 	}
 	else if (_socketFdOut == Socket::FILEDESC_UNDEF) {
 		_socketFdOut = sifp->filedesc();
-		
+
 		SocketInterfacePacket *sifpOut = new SocketInterfacePacket("connect()");
 		sifpOut->connect(_socketFdOut, _destinationAddress, _port);
 		send(sifpOut, "toSocketLayer");
-	
+
 	}
 	else {
 		ev << "RTPEndsystemModule: SA_SOCKET_RET from socket layer but no socket requested !" << endl;
@@ -343,19 +343,19 @@ void RTPEndsystemModule::connectRet(SocketInterfacePacket *sifp) {
 
 
 void RTPEndsystemModule::readRet(SocketInterfacePacket *sifp) {
-	
+
 	cMessage *msg = sifp->decapsulate();
-	
+
 	RTPPacket *packet1 = (RTPPacket *)msg;
 	RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
 	rinp1->dataIn(packet1, sifp->fAddr(), sifp->fPort());
-	
+
 	//RTPPacket *packet2 = new RTPPacket(*packet1);
-	
+
 	RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
-	
+
 	//rinp2->dataIn(packet2, IN_Addr(sifp->fAddr()), IN_Port(sifp->fPort()));
-	
+
 	send(rinp2, "toRTCP");
 	send(rinp1, "toProfile");
 
@@ -379,10 +379,10 @@ void RTPEndsystemModule::createProfile() {
 		error("Profile type not found !");
 	};
 	RTPProfile *profile = (RTPProfile *)(moduleType->create("Profile", this));
-	
+
 	profile->setGateSize("toPayloadReceiver", 4);
 	profile->setGateSize("fromPayloadReceiver", 4);
-	
+
 	connect(this, findGate("toProfile"), NULL, profile, profile->findGate("fromRTP"));
 	connect(profile, profile->findGate("toRTP"), NULL, this, findGate("fromProfile"));
 	profile->initialize();

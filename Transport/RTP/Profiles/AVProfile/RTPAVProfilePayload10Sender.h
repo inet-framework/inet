@@ -25,7 +25,7 @@
 
 #include <audiofile.h>
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "RTPPayloadSender.h"
 #include "RTPAVProfileSampleBasedAudioSender.h"

@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "RTPSenderControlMessage.h"
 

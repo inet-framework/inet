@@ -19,11 +19,11 @@
 
 */
 
-#ifndef __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__ 
+#ifndef __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
 #define __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
 
 #include <audiofile.h>
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "RTPPayloadReceiver.h"
 
 

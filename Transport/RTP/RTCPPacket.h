@@ -34,7 +34,7 @@ over the network.
 
 #include <iostream.h>
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "reports.h"
@@ -47,7 +47,7 @@ packets. It isn't intended to be used directly.
 class RTCPPacket : public cPacket {
 
 	public:
-	
+
 		/*!
 		The values for the packet type field in the rtcp header as defined
 		in the rfc.
@@ -64,80 +64,80 @@ class RTCPPacket : public cPacket {
 		Default constructor.
 		*/
 		RTCPPacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPPacket(const RTCPPacket& rtcpPacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPPacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPPacket& operator=(const RTCPPacket& rtcpPacket);
-		
+
 		/*!
 		Return the class name "RTCPPacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Duplicates the RTCPPacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Writes a short info about this RTCPPacket into the given buffer.
 		*/
 		virtual void info(char *buf) const;
-		
+
 		/*!
 		Writes a detailed report about this RTCPPacket into the given stream.
 		*/
 		virtual void writeContents(ostream& os) const;
-		
+
 		/*!
 		Returns the rtp version of the rtcp packet. It's always 2.
 		*/
 		virtual int version();
-		
+
 		/*!
 		1 if padding exists, 0 otherwise. In this implementation only
 		0 is used.
 		*/
 		virtual int padding();
-		
+
 		/*!
 		Returns the value of the count field in the rtcp header. Depending
 		on the type of rtcp packet it stands for number of receiver reports
 		or number of sdes chunks contained in this packet.
 		*/
 		virtual int count();
-		
+
 		/*!
 		Returns the packet type of this rtcp packet.
 		*/
 		virtual RTCP_PACKET_TYPE packetType();
-		
+
 		/*!
 		Returns the value of the field length in the rtcp header.
 		The value isn't stored because it can be calculated
 		with the length() method inherited from cPacket.
 		*/
 		virtual int rtcpLength() const;
-		
-	
+
+
 	protected:
-		
+
 		/*!
 		The rtp version used. Always 2.
 		*/
 		int _version;
-		
+
 		/*!
 		Set to 1 if padding (bytes at the end of the packet to assure
 		that the packet length in bytes is a multiple of a certain number;
@@ -145,14 +145,14 @@ class RTCPPacket : public cPacket {
 		isn't needed, so it is always 0.
 		*/
 		int _padding;
-		
+
 		/*!
 		Depending on the packet type, here is stored how many receiver reports
 		or sdes chunks are contained in the packet. Values from 0 to 31
 		are allowed.
 		*/
 		int _count;
-		
+
 		/*!
 		The packet type of the rtcp packet.
 		*/
@@ -168,76 +168,76 @@ ReceptionReports. Also the header field ssrc is included.
 class RTCPReceiverReportPacket : public RTCPPacket {
 
 	public:
-	
+
 		/*!
 		Default contructor.
 		*/
 		RTCPReceiverReportPacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPReceiverReportPacket(const RTCPReceiverReportPacket& rtcpReceiverReportPacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPReceiverReportPacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& rtcpReceiverReportPacket);
-		
+
 		/*!
 		Duplicates the RTCPReceiverReportPacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Returns the class name "RTCPReceiverReportPacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Reports a one line info about the RTCPReceiverReportPacket.
 		*/
 		virtual void info(char *buf) const;
-		
+
 		/*!
 		Writes a report about the RTCPReceiverReportPacket into the stream.
 		*/
 		virtual void writeContents(ostream& os) const;
-		
+
 		/*!
 		Returns the ssrc indentifier of the source which has sent this
 		rtcp receiver report packet.
 		*/
 		virtual u_int32 ssrc();
-		
+
 		/*!
 		Sets the ssrc identifier for the rtcp receiver report packet.
 		*/
 		virtual void setSSRC(u_int32 ssrc);
-		
+
 		/*!
 		Adds a receiver report to this receiver report packet.
 		*/
 		virtual void addReceptionReport(ReceptionReport *report);
-		
+
 		/*!
 		Return a copy of the cArray of receiver reports stored
 		in the object.
 		*/
 		virtual cArray *receptionReports();
-	
+
 	protected:
-		
+
 		/*!
 		The ssrc identifier of the source of this rtcp packet.
 		*/
 		u_int32 _ssrc;
-		
+
 		/*!
 		The reception reports in this packet are stored here.
 		*/
@@ -257,53 +257,53 @@ of RTPReceiverReportPacket.
 class RTCPSenderReportPacket : public RTCPReceiverReportPacket {
 
 	public:
-	
+
 		/*!
 		Default constructor.
 		*/
 		RTCPSenderReportPacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPSenderReportPacket(const RTCPSenderReportPacket& rtcpSenderReportPacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPSenderReportPacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& rtcpSenderReportPacket);
-		
+
 		/*!
 		Duplicates the RTCPSenderReportPacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Return the class name "RTCPSenderReportPacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Writes a one line info about this RTCPSenderReportPacket into the given string.
 		*/
 		virtual void info(char *buf) const;
-		
+
 		/*!
 		Writes a longer info about this RTCPSenderReportPacket into the given stream.
 		*/
 		virtual void writeContents(ostream& os) const;
-		
+
 		/*!
 		Returns a copy of the  sender report stored in this RTCPSenderReportPacket.
 		\sa SenderReport
 		*/
 		virtual SenderReport *senderReport();
-		
+
 		/*!
 		Sets the sender report.
 		\sa SenderReport
@@ -311,7 +311,7 @@ class RTCPSenderReportPacket : public RTCPReceiverReportPacket {
 		virtual void setSenderReport(SenderReport *senderReport);
 
 	private:
-	
+
 		/*!
 		The sender report stored in the packet.
 		\sa SenderReport
@@ -326,61 +326,61 @@ participants of the rtp session.
 \sa SDESChunk
 */
 class RTCPSDESPacket : public RTCPPacket {
-	
+
 	public:
 		/*!
 		Default constructor.
 		*/
 		RTCPSDESPacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPSDESPacket(const RTCPSDESPacket& rtcpSDESPacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPSDESPacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPSDESPacket& operator=(const RTCPSDESPacket& rtcpSDESPacket);
-		
+
 		/*!
 		Duplicates the RTCPSDESPacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Return the class name "RTCPSDESPacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Writes a short info about this RTCPSDESPacket into the given string.
 		*/
 		virtual void info(char *buf) const;
-		
+
 		/*!
 		Writes a longer report about this RTCPSDESPacket into the given stream.
 		*/
 		virtual void writeContents(ostream& os) const;
-		
+
 		/*!
 		Returns a copy of the cArray where the sdes chunks are stored.
 		*/
 		virtual cArray *sdesChunks();
-		
+
 		/*!
 		Adds an sdes chunk to this rtcp sdes packet.
 		\sa SDESChunk
 		*/
 		virtual void addSDESChunk(SDESChunk *sdesChunk);
-		
+
 	private:
-	
+
 		/*!
 		In this cArray the sdes chunks are stored.
 		*/
@@ -402,42 +402,42 @@ class RTCPByePacket : public RTCPPacket {
 		Default constructor.
 		*/
 		RTCPByePacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPByePacket(const RTCPByePacket& rtcpByePacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPByePacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPByePacket& operator=(const RTCPByePacket& rtcpByePacket);
-		
+
 		/*!
 		Duplicates the RTCPByePacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Returns the class name "RTCPByePacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Returns the ssrc identifier.
 		*/
 		virtual u_int32 ssrc();
-		
+
 		/*!
 		Sets the ssrc identifier.
 		*/
 		virtual void setSSRC(u_int32 ssrc);
-		
+
 	protected:
 		/*!
 		The ssrc identifier.
@@ -460,55 +460,55 @@ class RTCPCompoundPacket : public cPacket {
 		Default constructor.
 		*/
 		RTCPCompoundPacket(const char *name = NULL);
-		
+
 		/*!
 		Copy constructor.
 		*/
 		RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket);
-		
+
 		/*!
 		Destructor.
 		*/
 		virtual ~RTCPCompoundPacket();
-		
+
 		/*!
 		Assignment operator.
 		*/
 		RTCPCompoundPacket& operator=(const RTCPCompoundPacket& rtcpCompoundPacket);
-		
+
 		/*!
 		Duplicates the RTCPCompoundPacket by calling the copy constructor.
 		*/
 		virtual cObject *dup() const;
-		
+
 		/*!
 		Return the class name "RTCPCompoundPacket".
 		*/
 		virtual const char *className() const;
-		
+
 		/*!
 		Writes a short info about this RTCPCompoundPacket into the given string.
 		*/
 		virtual void info(char *buf) const;
-		
+
 		/*!
 		Writes a longer info about this RTCPCompoundPacket into the given stream.
 		*/
 		virtual void writeContents(ostream& os) const;
-		
+
 		/*!
 		Adds an RTCPPacket to this RTCPCompoundPacket.
 		*/
 		virtual void addRTCPPacket(RTCPPacket *rtcpPacket);
-		
+
 		/*!
 		Returns a copy of the cArray in which the rtcp
 		packets are stored.
 		*/
 		virtual cArray *rtcpPackets();
-		
+
 	private:
-		
+
 		/*!
 		The cArray in which the rtcp packets are stored.
 		*/

@@ -45,7 +45,7 @@ using std::map;
 
 // #define FSM_DEBUG       // To enable debugging in omnetpp.h
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "tcp.h"
 
 

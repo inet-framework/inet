@@ -22,7 +22,7 @@ This file declares the class RTPProfile.
 #ifndef __RTPPROFILE_H__
 #define __RTPPROFILE_H__
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "in_port.h"
 
@@ -44,19 +44,19 @@ RTP<profileName>Payload<payloadType>Receiver
 class RTPProfile : public cSimpleModule {
 
 	Module_Class_Members(RTPProfile, cSimpleModule, 0);
-	
+
 	/*!
 	Initializes variables. Must be overwritten by subclasses.
 	*/
 	virtual void initialize();
-	
+
 	/*!
 	Creates and removes payload sender and receiver modules on demand.
 	*/
 	virtual void handleMessage(cMessage *msg);
-	
+
 	protected:
-		
+
 		/*!
 		Handles messages received from the rtp module.
 		*/
@@ -140,47 +140,47 @@ class RTPProfile : public cSimpleModule {
 		to outgoing rtp packets.
 		*/
 		virtual void processOutgoingPacket(RTPInnerPacket *rinp);
-	
+
 		/*!
 		Finds the gate of the receiver module for rtp data
 		packets from this ssrc.
 		*/
 		virtual RTPSSRCGate *findSSRCGate(u_int32 ssrc);
-		
+
 		/*!
 		Creates a new association ssrc/gateId for this ssrc.
 		*/
 		virtual RTPSSRCGate *newSSRCGate(u_int32 ssrc);
-		
+
 		/*!
 		The name of this profile. Needed for dynamic creating
 		of sender and receiver modules.
 		*/
 		const char *_profileName;
-		
+
 		/*!
 		The maximum number of incoming data streams this profile
 		module can handle. It is set to the gate size of
 		"toPayloadReceiver", "fromPayloadReceiver".
 		*/
 		int _maxReceivers;
-		
+
 		/*!
 		Stores information to which gate rtp data packets
 		from a ssrc must be forwarded.
 		*/
 		cArray *_ssrcGates;
-		
+
 		/*!
 		The percentage of the available bandwidth to be used for rtcp.
 		*/
 		int _rtcpPercentage;
-		
+
 		/*!
 		The rtp port this profile uses if no port is given.
 		*/
 		IN_Port _preferredPort;
-		
+
 		/*!
 		The maximum size an RTPPacket can have.
 		*/
@@ -191,7 +191,7 @@ class RTPProfile : public cSimpleModule {
 		file name for payload receiver modules so the user is not bothered
 		to set them manually during simulation runtime.
 		*/
-		bool _autoOutputFileNames;       
+		bool _autoOutputFileNames;
 
 
 

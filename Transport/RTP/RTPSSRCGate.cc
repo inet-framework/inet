@@ -20,7 +20,7 @@
 This file contains the implementation of member functions of the class RTPSSRCGate.
 */
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 #include "types.h"
 #include "RTPSSRCGate.h"

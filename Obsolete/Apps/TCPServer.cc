@@ -27,7 +27,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tcp.h"
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 class TCPServer:public cSimpleModule
 {
