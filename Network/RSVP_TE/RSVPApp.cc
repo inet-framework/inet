@@ -96,10 +96,10 @@ void RSVPAppl::processRSVP_PERROR(RSVPPathError *pe)
     pt->setSession(pe->getSession());
 
     // Setup PHOP
-    RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-    rsvp_hop->Logical_Interface_Handle = -1;
-    rsvp_hop->Next_Hop_Address = routerId;
-    pt->setHop(rsvp_hop);
+    RsvpHopObj_t rsvp_hop;
+    rsvp_hop.Logical_Interface_Handle = -1;
+    rsvp_hop.Next_Hop_Address = routerId;
+    pt->setRsvp_hop(rsvp_hop);
     send(pt, "to_rsvp");
 
     delete pe;
@@ -266,20 +266,18 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                     if (lsp_id > MAX_LSP_NO)
                     {
                         RSVPPathTear *pt = new RSVPPathTear();
-                        SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
-                        sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
-                        sTemplate->SrcAddress =
-                            (*(flow_d + k)).Filter_Spec_Object.SrcAddress;
-                        sTemplate->SrcPort =
-                            (*(flow_d + k)).Filter_Spec_Object.SrcPort;
+                        SenderTemplateObj_t sTemplate;
+                        sTemplate.Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
+                        sTemplate.SrcAddress = flow_d[k].Filter_Spec_Object.SrcAddress;
+                        sTemplate.SrcPort = flow_d[k].Filter_Spec_Object.SrcPort;
 
                         pt->setSenderTemplate(sTemplate);
                         pt->setSession(rMessage->getSession());
                         // Setup PHOP
-                        RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-                        rsvp_hop->Logical_Interface_Handle = -1;
-                        rsvp_hop->Next_Hop_Address = routerId;
-                        pt->setHop(rsvp_hop);
+                        RsvpHopObj_t rsvp_hop;
+                        rsvp_hop.Logical_Interface_Handle = -1;
+                        rsvp_hop.Next_Hop_Address = routerId;
+                        pt->setRsvp_hop(rsvp_hop);
                         send(pt, "to_rsvp");
                     }
                 }
@@ -320,12 +318,12 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
         error("Cannot find the session to teardown");
 
     RSVPPathTear *pt = new RSVPPathTear();
-    pt->setSenderTemplate(&aTunnel.Sender_Template);
+    pt->setSenderTemplate(aTunnel.Sender_Template);
     pt->setSession(aTunnel.Session);
-    RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-    rsvp_hop->Logical_Interface_Handle = -1;
-    rsvp_hop->Next_Hop_Address = routerId;
-    pt->setHop(rsvp_hop);
+    RsvpHopObj_t rsvp_hop;
+    rsvp_hop.Logical_Interface_Handle = -1;
+    rsvp_hop.Next_Hop_Address = routerId;
+    pt->setRsvp_hop(rsvp_hop);
     send(pt, "to_rsvp");
 
     delete msg;

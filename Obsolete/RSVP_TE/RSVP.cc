@@ -2365,8 +2365,8 @@ bool RSVP::doCACCheck(RSVPPathMsg * pmsg, int OI)
                 pe->setErrorCode(1);    // Admission Control Error
                 pe->setErrorNode(routerId);
                 pe->setSession(pmsg->getSession());
-                pe->setSenderTemplate(pmsg->getSenderTemplate());
-                pe->setSenderTspec(pmsg->getSenderTspec());
+                pe->setSenderTemplate(*pmsg->getSenderTemplate());
+                pe->setSenderTspec(*pmsg->getSenderTspec());
                 ev << "Propagate PATH ERROR to " << IPAddress(pmsg->getNHOP()) << "\n";
                 //pe->addPar("src_addr") = IPAddress(routerId).str().c_str();
                 //pe->addPar("dest_addr") = IPAddress(pmsg->getNHOP()).str().c_str();
@@ -2402,7 +2402,7 @@ void RSVP::preemptTunnel(int tunnelId)
             {
                 RSVPPathTear *ptMsg = new RSVPPathTear();
                 ptMsg->setSession(PSBList[m].Session_Object);
-                ptMsg->setSenderTemplate(&PSBList[m].Sender_Template_Object);
+                ptMsg->setSenderTemplate(PSBList[m].Sender_Template_Object);
 
                 locList.push_back(PSBList[m].Previous_Hop_Address);
 

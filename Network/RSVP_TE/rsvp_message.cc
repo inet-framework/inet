@@ -27,46 +27,6 @@
 
 
 /********************************PATH TEAR MESSAGE*************************/
-RSVPPathTear::RSVPPathTear():RSVPPacket()
-{
-    setKind(PTEAR_MESSAGE);
-}
-
-void RSVPPathTear::setHop(RsvpHopObj_t * h)
-{
-    rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
-    rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
-
-}
-
-void RSVPPathTear::setSenderTemplate(SenderTemplateObj_t * s)
-{
-    senderTemplate.SrcAddress = s->SrcAddress;
-    senderTemplate.SrcPort = s->SrcPort;
-}
-
-
-bool RSVPPathTear::equalST(SenderTemplateObj_t * s)
-{
-    if (senderTemplate.SrcAddress == s->SrcAddress && senderTemplate.SrcPort == s->SrcPort)
-        return true;
-    return false;
-
-}
-
-
-void RSVPPathTear::print()
-{
-    ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
-        "ProtId   = " << getProtId() << "\n" <<
-        "DestPort = " << getDestPort() << "\n" <<
-        "SrcAddr  = " << IPAddress(getSrcAddress()) << "\n" <<
-        "SrcPort  = " << getSrcPort() << "\n" <<
-        "Next Hop = " << IPAddress(getNHOP()) << "\n" <<
-        "LIH      = " << IPAddress(getLIH()) << "\n";
-
-
-}
 
 /********************************RESV TEAR MESSAGE*************************/
 RSVPResvTear::RSVPResvTear():RSVPPacket()
@@ -104,46 +64,6 @@ void RSVPResvTear::print()
 
 /********************************PATH ERROR MESSAGE*************************/
 
-RSVPPathError::RSVPPathError():RSVPPacket()
-{
-    setKind(PERROR_MESSAGE);
-
-}
-
-bool RSVPPathError::equalST(SenderTemplateObj_t * s)
-{
-    if (sender_descriptor.Sender_Template_Object.SrcAddress ==
-        s->SrcAddress && sender_descriptor.Sender_Template_Object.SrcPort == s->SrcPort)
-        return true;
-    return false;
-
-}
-
-bool RSVPPathError::equalSD(SenderDescriptor_t * s)
-{
-    if (sender_descriptor.Sender_Template_Object.SrcAddress ==
-        s->Sender_Template_Object.SrcAddress &&
-        sender_descriptor.Sender_Template_Object.SrcPort ==
-        s->Sender_Template_Object.SrcPort &&
-        sender_descriptor.Sender_Tspec_Object.link_delay ==
-        s->Sender_Tspec_Object.link_delay &&
-        sender_descriptor.Sender_Tspec_Object.req_bandwidth == s->Sender_Tspec_Object.req_bandwidth)
-        return true;
-    return false;
-}
-
-void RSVPPathError::setSenderTspec(SenderTspecObj_t * s)
-{
-    sender_descriptor.Sender_Tspec_Object.link_delay = s->link_delay;
-    sender_descriptor.Sender_Tspec_Object.req_bandwidth = s->req_bandwidth;
-}
-
-void RSVPPathError::setSenderTemplate(SenderTemplateObj_t * s)
-{
-    sender_descriptor.Sender_Template_Object.SrcAddress = s->SrcAddress;
-    sender_descriptor.Sender_Template_Object.SrcPort = s->SrcPort;
-    sender_descriptor.Sender_Template_Object.Lsp_Id = s->Lsp_Id;
-}
 
 /********************************RESV ERROR MESSAGE*************************/
 

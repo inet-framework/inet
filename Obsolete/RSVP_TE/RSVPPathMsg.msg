@@ -16,17 +16,15 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
-struct SessionObj_t;
 struct RsvpHopObj_t;
 struct SenderTemplateObj_t;
-struct SenderTspecObj_t;
-struct FlowSpecObj_t;
-struct FilterSpecObj_t;
 struct LabelRequestObj_t;
 struct SenderDescriptor_t;
 struct FlowDescriptor_t;
 struct EroObj_t;
+
 class RSVPPacket;
+
 
 //
 // RSVP PATH message
@@ -57,5 +55,45 @@ message RSVPPathMsg extends RSVPPacket
         LabelRequestObj_t label_request;
         SenderDescriptor_t sender_descriptor;
         bool hasERO;
-}
+};
+
+//
+// PATH TEAR message
+//
+// <code>
+//   <PathTear Message> ::= <Common Header> [ <INTEGRITY> ]
+//                          <SESSION> <RSVP_HOP>
+//                          [ <sender descriptor> ]
+// </code>
+//
+message RSVPPathTear extends RSVPPacket
+{
+    properties:
+        customize=true;
+    fields:
+        RsvpHopObj_t rsvp_hop;
+        SenderTemplateObj_t senderTemplate;
+        //SenderDescriptor_t sender_descriptor;
+};
+
+
+//
+// PATH ERROR message
+//
+// <code>
+//   <PathErr message> ::= <Common Header> [ <INTEGRITY> ]
+//                         <SESSION> <ERROR_SPEC>
+//                         [ <POLICY_DATA> ...]
+//                         [ <sender descriptor> ]
+// </code>
+//
+message RSVPPathError extends RSVPPacket
+{
+    properties:
+        customize=true;
+    fields:
+        int errorNode;
+        int errorCode;
+        SenderDescriptor_t sender_descriptor;
+};
 
