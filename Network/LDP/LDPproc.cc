@@ -308,7 +308,7 @@ void LDPproc::activity()
 
 		  int fecId = msg->par("FEC");
 		  int fecInt = msg->par("dest_addr");
-		  int dest =msg->par("dest_addr");
+		  //int dest =msg->par("dest_addr"); FIXME was not used (?)
 		  int gateIndex =msg->par("gateIndex");
 		  InterfaceEntry* ientry= rt->getInterfaceByIndex(gateIndex);
 			
@@ -789,7 +789,7 @@ void LDPproc::processingLABEL_MAPPING(LabelMappingMessage *packet)
 			int fec = packet->getFec();
 			int label = packet->getLabel();
 			int fromIP = packet->getSenderAddress();
-			int fecId = packet->par("fecId");
+			// int fecId = packet->par("fecId"); -- FIXME was not used (?)
 
 			ev << "LSR("<<IPAddress(local_addr).getString() << ") gets mapping Label =" << label << " for fec =" <<
 

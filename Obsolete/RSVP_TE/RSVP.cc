@@ -386,7 +386,7 @@ void RSVP::PathMsgPro(PathMessage *pmsg, int InIf)
 		else
 		{
 			int tOutList[InLIST_SIZE];
-			int olFlag = OFF;
+			//int olFlag = OFF;
 	
 			Mcast_Route_Query( 
 				cPSB->Sender_Template_Object.SrcAddress, InIf,
@@ -732,7 +732,7 @@ RSVP::ResvMsgPro(ResvMessage *rmsg)
 		for(r_iterI = RSBList.begin(); r_iterI != RSBList.end(); r_iterI++)
 		{
 			r_iter = (ResvStateBlock_t)*r_iterI;
-			bool matchRSB =false;
+			//bool matchRSB =false;
 			if(!(rmsg->isInSession(&r_iter.Session_Object)))
 				continue;
 			if(r_iter.Next_Hop_Address != rmsg->getNHOP())
@@ -1271,7 +1271,8 @@ RSVP::PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero )
 {
 	PathMessage* pm = new PathMessage;
 	
-	int data_len;     /*
+	//int data_len;
+	/*
 
 
     o    Insert TIME_VALUES object into the PATH message being
@@ -1285,7 +1286,7 @@ RSVP::PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero )
          PSB, and pack it into the PATH message being built.*/
 	
 	//Get the destination address
-	int dest = psbEle->Session_Object.DestAddress;
+	//int dest = psbEle->Session_Object.DestAddress;
 	
 	pm->setSession(&psbEle->Session_Object);
 	pm->setLabelRequest(&psbEle->LabelRequest);
@@ -1378,14 +1379,14 @@ RSVP::ResvRefresh( ResvStateBlock_t *rsbEle, int PH )
 
 	int i;
 	
-	int PHOP;
+	//int PHOP;
 	int found =OFF;
-	int B_Merge=OFF;
+	//int B_Merge=OFF;
 	ResvMessage* outRM = new ResvMessage;
     FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
     std::vector<PathStateBlock_t>::iterator p_iterI;
 	PathStateBlock_t p_iter;
-    std::vector<ResvStateBlock_t>::iterator r_iterI;
+    //std::vector<ResvStateBlock_t>::iterator r_iterI;
 	ResvStateBlock_t r_iter;
     std::vector<TrafficControlStateBlock_t>::iterator t_iterI;
 	TrafficControlStateBlock_t t_iter;
@@ -1568,11 +1569,11 @@ RSVP::ResvRefresh( ResvStateBlock_t *rsbEle, int PH )
 void RSVP:: RTearFwd(ResvStateBlock_t *rsbEle, int PH)
 {
 
-	int PHOP;
-	int found =OFF;
-	int B_Merge=OFF;
+	//int PHOP;
+	//int found =OFF;
+	//int B_Merge=OFF;
 	ResvTearMessage* outRM = new ResvTearMessage;
-    FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
+    //FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
     
 
 
@@ -1647,7 +1648,7 @@ void RSVP::RemoveTrafficControl(ResvStateBlock_t *activeRSB)
 	{
 		int handle = tEle->Rhandle;
 		std::vector<RHandleType_t>::iterator iterR;
-		RHandleType_t iter1;
+		//RHandleType_t iter1;
 		bool handleFound =false;
   		int m;
 		
@@ -1670,7 +1671,7 @@ void RSVP::RemoveTrafficControl(ResvStateBlock_t *activeRSB)
 		ev << "Delete TCSB:\n";
 		printTCSB(tEle);
 		//TCSBList.erase(t_iterI);
-		FlowSpecObj_t *fwdFS = new FlowSpecObj_t;
+		//FlowSpecObj_t *fwdFS = new FlowSpecObj_t;
 		//Release the resource to TED
 		//GetFwdFS(activeRSB->OI, fwdFS) ;
 
@@ -2181,7 +2182,7 @@ RSVP::GetFwdFS(int oi, FlowSpecObj_t *fwdFS)
 	RHandleType_t iter;
 	 std::vector<telinkstate>::iterator ted_iterI;
 	telinkstate ted_iter;
-	double req_BW=0;
+	//double req_BW=0;
 
 	
 	for(iterR = FlowTable.begin(); iterR != FlowTable.end(); iterR++)
@@ -2213,10 +2214,10 @@ RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)
 	}
 	
 	int foundIndex;
-	int j=0;
+	//int j=0;
 	
 	foundIndex = rt->outputPortNoNew(IPAddress(da));
-	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt();
+	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); // FIXME why not return???
 
 	return;
 }
@@ -2665,10 +2666,10 @@ ev << "*******************ENTER PREEMPT TUNNEL *********************************
 //Send PATH TEAR and RESV TEAR to both directions to tear off the current reservation
 
 //PATH TEAR
-std::vector<PathStateBlock_t>::iterator p_iterI;
+//std::vector<PathStateBlock_t>::iterator p_iterI;
 PathStateBlock_t p_iter;
 
-std::vector<ResvStateBlock_t>::iterator r_iterI;
+//std::vector<ResvStateBlock_t>::iterator r_iterI;
 ResvStateBlock_t r_iter;
 
 std::vector<int> locList;

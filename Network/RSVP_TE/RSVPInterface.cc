@@ -68,15 +68,15 @@ void RSVPInterface::activity()
 
 void RSVPInterface::processMsgFromIp(cMessage *msg)
 {
-	int i;
-	int applicationNo = -1;
-	int port;
+	//int i;
+	//int applicationNo = -1;
+	//int port;
 	PathMessage *pMsg;
 	ResvMessage *rMsg;
 	PathTearMessage *ptMsg;
 	PathErrorMessage *peMsg;
-	ResvTearMessage *rtMsg;
-	ResvErrorMessage *reMsg;
+	//ResvTearMessage *rtMsg;
+	//ResvErrorMessage *reMsg;
 	
 	IPInterfacePacket *iPacket = (IPInterfacePacket *)msg;
 	

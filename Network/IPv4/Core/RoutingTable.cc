@@ -1085,7 +1085,6 @@ void RoutingTable::parseRouting(char *routeFile)
 	int i, charpointer = 0;
 	RoutingEntry *e;
 	char *str = new char[MAX_ENTRY_STRING_SIZE];
-	InterfaceEntry *interf;
 
 	charpointer += strlen(ROUTE_START_TOKEN);
 	skipBlanks(routeFile, charpointer);

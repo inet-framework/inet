@@ -751,7 +751,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId)
 
 				
 
-					std::vector<int>::iterator ero_iterI;
+					//std::vector<int>::iterator ero_iterI;
 					int hopCount =0;
 
 						for (int n=0; n< ero.size(); n++)
@@ -842,9 +842,9 @@ void
 RSVPAppl::Unicast_Route_Query(int da, int* outl)
 {
 	int foundIndex;
-	int j=0;
+	//int j=0;
 	foundIndex = rt->outputPortNoNew(IPAddress(da));
-	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt();
+	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); //FIXME why not return outl???
 
 	return;
 
@@ -855,9 +855,9 @@ RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
 {
 
 	int foundIndex;
-	int j=0;
+	//int j=0;
 	foundIndex = rt->outputPortNoNew(IPAddress(da));
-	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt();
+	(*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); //FIXME why not return outl???
 
 	return;
 }

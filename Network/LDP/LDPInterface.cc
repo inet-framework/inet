@@ -266,12 +266,8 @@ int LDPInterface::getModidByPeerIP(int peerIP)
 		if(peerIP==ldpSessions[i].peerAddr)
 			return ldpSessions[i].mod_id;
 	}
-	if(i==ldpSessions.size())
-	{
 	ev << "LDP PROC DEBUG: Unknown Peer IP: " << IPAddress(peerIP).getString() <<"\n";
-		return id(); 
-	}
-	
+	return id();  // FIXME is this good??? Andras 
 }
 
 void LDPInterface::createClient(int destAddr)
@@ -322,9 +318,6 @@ void LDPInterface::passiveOpen(double timeout, cModuleType* procserver_type)
   //server appl. calls 
   cMessage *open_passive;
   
-  int rem_port                      = ConstType::ldp_port; 
-  int rem_addr                      = -1;
- 
   open_passive                      = new cMessage("TCP_C_OPEN_PASSIVE", TCP_C_OPEN_PASSIVE);
   open_passive->addPar("src_port")  = local_port; 
   open_passive->addPar("src_addr")  = local_addr;

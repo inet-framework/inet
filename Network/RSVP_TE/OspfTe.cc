@@ -204,7 +204,7 @@ OspfTe::CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *Candidates
 
 void OspfTe::CspfBuildSPT(FlowSpecObj_t* fspec, std::vector<CSPFVertex_Struct> *CandidatesList )
 {
-	int Inx, i;
+	//int Inx, i;
 	CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
 
 	double shortestDist = OSPFType::LSInfinity;
@@ -332,7 +332,7 @@ void OspfTe::CspfBuildSPT(std::vector<simple_link_t> *links, FlowSpecObj_t *old_
 						  std::vector<CSPFVertex_Struct> *CandidatesList )
 {
 
-	int Inx, i;
+	// int Inx, i;
 	CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
 
 	double shortestDist = OSPFType::LSInfinity;

@@ -2865,10 +2865,10 @@ unsigned long TcpModule::sndDataSize(TcpTcb* tcb_block)
 //(returns 0 if no data should be sent)
 unsigned long TcpModule::retransDataSize(TcpTcb* tcb_block, cQueue & retrans_queue)
 {
-  cQueue &      tcp_send_queue = tcb_block->tcp_send_queue;
+  // cQueue &tcp_send_queue = tcb_block->tcp_send_queue;
   
   unsigned long retrans_queue_size;
-  unsigned long snd_queue_size;
+  //unsigned long snd_queue_size;
   unsigned long total_wnd;
   unsigned long avail_wnd;
 

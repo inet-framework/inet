@@ -22,8 +22,8 @@ Define_Module( LIBTable );
 
 void LIBTable::initialize()
 {
-const char *libFilename = par("LibTableFileName").stringValue();
-const char *prtFilename = par("PrtTableFileName").stringValue();
+// const char *libFilename = par("LibTableFileName").stringValue(); -- FIXME was not used (?)
+// const char *prtFilename = par("PrtTableFileName").stringValue(); -- FIXME was not used (?)
 
  
 
