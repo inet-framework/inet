@@ -25,8 +25,8 @@ class TelnetApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;
-    int numLines;   // lines (commands) already typed in this session
-    int lineLength; // characters already typed on this line
+    int numLinesToType; // lines (commands) the user will type in this session
+    int numCharsToType; // characters the user will type for current line (command)
 
   public:
     Module_Class_Members(TelnetApp, TCPGenericCliAppBase, 0);

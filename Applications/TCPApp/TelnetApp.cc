@@ -26,9 +26,9 @@ void TelnetApp::initialize()
 
     timeoutMsg = new cMessage("timer");
 
-    lineLength = numLines = 0;
-    WATCH(lineLength);
-    WATCH(numLines);
+    numCharsToType = numLinesToType = 0;
+    WATCH(numCharsToType);
+    WATCH(numLinesToType);
 
     timeoutMsg->setKind(MSGKIND_CONNECT);
     scheduleAt(10, timeoutMsg);
@@ -43,16 +43,16 @@ void TelnetApp::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_SEND:
-           if (lineLength==10)
+           if (numCharsToType>1)
            {
                sendPacket(1,1);  // user types a character and expects it to be echoed
                scheduleAt(simTime()+0.1, timeoutMsg);
-               lineLength++;
+               numCharsToType--;
            }
            else
            {
                sendPacket(1,50); // user hits Enter, and waits for type command's output
-               lineLength = 0;
+               numCharsToType = 15;
 
                // Note: no scheduleAt(), because user only starts typing next command
                // when output from previous one has arrived (see socketDataArrived())
@@ -70,7 +70,8 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
     TCPGenericCliAppBase::socketEstablished(connId, ptr);
 
     // schedule first sending
-    lineLength = numLines = 0;
+    numLinesToType = 5;
+    numCharsToType = 15;
     timeoutMsg->setKind(MSGKIND_SEND);
     scheduleAt(simTime()+1, timeoutMsg);
 }
@@ -89,9 +90,9 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
         // output from last typed command arrived.
         // If user has finished working, she closes the connection, otherwise
         // starts typing again after a delay
-        numLines++;
+        numLinesToType--;
 
-        if (numLines>100)
+        if (numLinesToType==0)
         {
             close();
         }
