@@ -142,17 +142,17 @@ message IPDatagram
     fields:
         short version = 4;
         short headerLength = DEFAULT_HEADER_LENGTH;
-        unsigned char diffServCodePoint;
 
+        IPAddress srcAddress;
+        IPAddress destAddress;
+
+        int transportProtocol enum(IPProtocolFieldId) = IP_PROT_NONE;
+        short timeToLive;
         int identification;
         bool moreFragments;
         bool dontFragment;
         int fragmentOffset;
-
-        short timeToLive;
-        int transportProtocol enum(IPProtocolFieldId) = IP_PROT_NONE;
-        IPAddress srcAddress;
-        IPAddress destAddress;
+        unsigned char diffServCodePoint;
 
         int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
         IPRecordRouteOption recordRoute;

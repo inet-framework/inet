@@ -53,7 +53,7 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
     for (int i=0; i<rt->numInterfaces(); i++)
     {
         InterfaceEntry *e = rt->interfaceByIndex(i);
-        if (!e->inetAddr.isNull())
+        if (!e->inetAddr.isNull() && !e->loopback)
         {
             if (!addr.isNull() && e->inetAddr!=addr)
                 opp_error("IPAddressResolver: IP address is ambiguous: different "

@@ -195,7 +195,7 @@ void ARP::processInboundPacket(cMessage *msg)
 
 void ARP::processOutboundPacket(cMessage *msg)
 {
-    EV << "Packet " << msg << " arrived from higher layer\n";
+    EV << "Packet " << msg << " arrived from higher layer, ";
 
     // get next hop address from optional control info in packet
     IPAddress nextHopAddr;
@@ -209,9 +209,9 @@ void ARP::processOutboundPacket(cMessage *msg)
     if (nextHopAddr.isNull())
     {
         // try proxy ARP
-        EV << "No next hop address, trying Proxy ARP\n";
         IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
         nextHopAddr = datagram->destAddress();
+        EV << "destination address " << nextHopAddr << " (no next-hop address)\n";
     }
 
     // try look up
@@ -252,7 +252,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     else
     {
         // valid ARP cache entry found, flag msg with MAC address and send it out
-        EV << "MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
+        EV << "ARP cache hit, MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
         sendPacketToMAC(msg, (*it).second->macAddress);
     }
 }
