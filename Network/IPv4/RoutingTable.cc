@@ -216,12 +216,16 @@ void RoutingTable::addInterface(InterfaceEntry *entry)
     interfaces.push_back(entry);
 }
 
-bool RoutingTable::deleteInterface(InterfaceEntry *entry)
+void RoutingTable::deleteInterface(InterfaceEntry *entry)
 {
-    // FIXME TBD: check if any route table entries refer to this interface
+    // check if any route table entries refer to this interface
+    for (int k=0; k<numRoutingEntries(); k++)
+        if (routingEntry(k)->interfacePtr==entry)
+            opp_error("deleteInterface(): interface '%s' is still referenced by routes", entry->name.c_str());
+
     InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
     if (i==interfaces.end())
-        return false;
+        opp_error("deleteInterface(): interface '%s' not found in interface table", entry->name.c_str());
 
     interfaces.erase(i);
     delete entry;
@@ -229,12 +233,11 @@ bool RoutingTable::deleteInterface(InterfaceEntry *entry)
     // renumber other interfaces
     for (i=interfaces.begin(); i!=interfaces.end(); ++i)
         (*i)->index = i-interfaces.begin();
-    return true;
 }
 
 InterfaceEntry *RoutingTable::interfaceByPortNo(int portNo)
 {
-    // TBD change this to a port-to-interface table (more efficient)
+    // linear search is OK because normally we have don't have many interfaces (1..4, rarely more)
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
         if ((*i)->outputPort==portNo)
             return *i;
@@ -387,9 +390,6 @@ MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
     return res;
 
 }
-
-// int RoutingTable::multicastOutputPortNo(const IPAddress& dest, int index)
-// int RoutingTable::numMulticastDestinations(const IPAddress& dest)
 
 
 int RoutingTable::numRoutingEntries()

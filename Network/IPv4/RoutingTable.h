@@ -255,10 +255,10 @@ class RoutingTable: public cSimpleModule
     void addInterface(InterfaceEntry *entry);
 
     /**
-     * Delete an interface. Returns false if the interface was not in the
+     * Delete an interface. Throws an error if the interface is not in the
      * interface table. Indices of interfaces above this one will change!
      */
-    bool deleteInterface(InterfaceEntry *entry);
+    void deleteInterface(InterfaceEntry *entry);
 
     /**
      * Returns an interface given by its port number (gate index).
