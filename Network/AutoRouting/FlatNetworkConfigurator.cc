@@ -30,7 +30,7 @@ void FlatNetworkConfigurator::initialize(int stage)
     cTopology topo("topo");
 
     // FIXME use par("moduleTypesToProcess")
-    topo.extractByModuleType("UDPHost", "Router", NULL);
+    topo.extractByModuleType("StandardHost2", "Router", NULL);
     ev << "cTopology found " << topo.nodes() << " nodes\n";
 
     // assign IP addresses
@@ -56,7 +56,7 @@ void FlatNetworkConfigurator::initialize(int stage)
             if (e->outputPort!=-1)
             {
                 e->inetAddr = IPAddress(addr);
-                e->mask = IPAddress(netmask);
+                e->mask = IPAddress(255,255,255,255); // full match needed
             }
         }
     }
@@ -66,6 +66,7 @@ void FlatNetworkConfigurator::initialize(int stage)
     {
         cTopology::Node *destNode = topo.node(i);
         uint32 destAddr = networkAddress | uint32(i+1);
+        std::string destModName = destNode->module()->fullName();
 
         topo.unweightedSingleShortestPathsTo(destNode);
 
@@ -77,7 +78,8 @@ void FlatNetworkConfigurator::initialize(int stage)
             uint32 atAddr = networkAddress | uint32(j+1);
 
             int outputPort = atNode->path(0)->localGate()->index();
-            ev << "  from " << IPAddress(atAddr) << " towards " << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
+            ev << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
+            ev << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
 
             // add route
             RoutingTable *rt = findRoutingTable(atNode->module());

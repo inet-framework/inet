@@ -295,7 +295,6 @@ void RoutingTable::addLocalLoopback()
         }
 
     }
-    ev << "My loopback address is : " << loopbackIP << "\n";
     loopbackInterface->inetAddr = loopbackIP;
     loopbackInterface->mask = IPAddress("255.255.255.255");  // ????? -- Andras
 // ECH
