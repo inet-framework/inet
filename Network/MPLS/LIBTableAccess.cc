@@ -15,7 +15,6 @@
 *********************************************************************/
 
 
-#include <sstream>
 #include "LIBTableAccess.h"
 
 Define_Module( LIBTableAccess );

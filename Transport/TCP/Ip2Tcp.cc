@@ -48,7 +48,7 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     
 	// get the source and destination address 
 	const char *src_addr = ipintpacket->srcAddr();
-    const char*dest_addr = ipintpacket->destAddr();
+        const char*dest_addr = ipintpacket->destAddr();
 
 	// decapsulate the IPpacket into a transport packet
 	tpacket = (TransportPacket *) ipintpacket->decapsulate();
@@ -64,15 +64,15 @@ void Ip2Tcp::handleMessage(cMessage *msg)
 	tcpmessage->setKind(tpacket->msgKind());
 
 	if (!ipv6)
-    {
-      tcpmessage->addPar("src_addr") = (new IPAddress(src_addr))->getInt();
-      tcpmessage->addPar("dest_addr") = (new IPAddress(dest_addr))->getInt();
-    }
-    else
-    { 
-      tcpmessage->addPar("src_addr") = src_addr;
-      tcpmessage->addPar("dest_addr") = dest_addr;
-    }
+        {
+           tcpmessage->addPar("src_addr") = IPAddress(src_addr)->getInt();
+           tcpmessage->addPar("dest_addr") = IPAddress(dest_addr)->getInt();
+        }
+        else
+        { 
+           tcpmessage->addPar("src_addr") = src_addr;
+           tcpmessage->addPar("dest_addr") = dest_addr;
+        }
 
         delete tpacket;
         delete msg;

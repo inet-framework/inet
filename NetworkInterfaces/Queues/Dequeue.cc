@@ -43,8 +43,6 @@
 */
 
 #include <omnetpp.h>
-#include <sstream>
-#include <string>
 
 #include "hook_types.h"
 #include "Dequeue.h"

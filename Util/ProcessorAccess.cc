@@ -27,8 +27,6 @@
     --------------------------------------------------------- */
 
 
-//#include <stream.h> ?
-#include <sstream>
 #include "ProcessorManager.h"
 #include "ProcessorAccess.h"
 
