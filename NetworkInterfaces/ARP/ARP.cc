@@ -410,6 +410,7 @@ void ARP::processARPPacket(ARPPacket *arp)
         {
             case ARP_REQUEST:
             {
+                EV << "Packet was ARP REQUEST, sending REPLY\n";
                 // "Swap hardware and protocol fields", etc.
                 arp->setDestIPAddress(srcIPAddress);
                 arp->setDestMACAddress(srcMACAddress);
@@ -419,8 +420,14 @@ void ARP::processARPPacket(ARPPacket *arp)
                 delete arp->removeControlInfo();
                 sendPacketToMAC(arp, srcMACAddress);
                 numRepliesSent++;
+                break;
             }
-            case ARP_REPLY: delete arp; break;
+            case ARP_REPLY:
+            {
+                EV << "Packet was ARP REPLY, discarding it\n";
+                delete arp;
+                break;
+            }
             case ARP_RARP_REQUEST: error("RARP request received: RARP is not supported");
             case ARP_RARP_REPLY: error("RARP reply received: RARP is not supported");
             default: error("Unsupported opcode %d in received ARP packet",arp->getOpcode());
@@ -436,7 +443,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
 void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
 {
-    EV << "Updating ARP cache entry: " << entry->myIter->first << " --> " << macAddress << "\n";
+    EV << "Updating ARP cache entry: " << entry->myIter->first << " <--> " << macAddress << "\n";
 
     // update entry
     if (entry->pending)
@@ -457,6 +464,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
         cMessage *msg = (*i);
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
+        EV << "Sending out queued packet " << msg << "\n";
         sendPacketToMAC(msg, macAddress);
     }
 }

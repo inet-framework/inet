@@ -216,7 +216,8 @@ void EtherBus::handleMessage (cMessage *msg)
 void EtherBus::tokenize(const char *str, std::vector<double>& array)
 {
     char *str2 = opp_strdup(str);
-    char *s = strtok(str2, " ");
+    if (!str2) return;
+	char *s = strtok(str2, " ");
     while (s)
     {
         array.push_back(atof(s));
