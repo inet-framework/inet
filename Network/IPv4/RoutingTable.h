@@ -112,7 +112,6 @@ class RoutingEntry : public cPolymorphic
     IPAddress host;
 
     /// Route mask
-    //FIXME replace it with a prefix?
     IPAddress netmask;
 
     /// Next hop

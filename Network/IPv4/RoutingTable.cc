@@ -39,6 +39,9 @@ InterfaceEntry::InterfaceEntry()
     id = -1;
     outputPort = -1;
 
+    static const IPAddress allOnes("255.255.255.255");
+    mask = allOnes;
+
     mtu = 0;
     metric = 0;
 
@@ -320,8 +323,12 @@ InterfaceEntry *RoutingTable::addLocalLoopback()
 bool RoutingTable::localDeliver(const IPAddress& dest)
 {
     Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
-    // check if we have an interface with this address
-    return interfaceByAddress(dest)!=NULL;
+
+    // check if we have an interface with this address, obeying interface's netmask
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        if (IPAddress::maskedAddrAreEqual(dest, (*i)->inetAddr, (*i)->mask))
+            return true;
+    return false;
 }
 
 bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
