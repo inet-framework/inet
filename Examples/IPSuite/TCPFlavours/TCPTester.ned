@@ -27,11 +27,7 @@ import
 
 
 //
-// Simple test environment for the TCP FSM.
-//
-// x clients <==> switch <==> 1 server
-//
-// author V.Boehm, June 19 1999
+// Part of TCPTester.
 //
 module Client
         parameters:
@@ -48,7 +44,7 @@ module Client
 		local_addr = l_addr,
 		server_addr = s_addr,
 		//default timeout according to RFC 793 5min (here 5s)
-		timeout =  input(5m, "Timeout: "), 	
+        timeout =  input(5m, "Timeout: "),  
 		appl_timeout = input(10m, "Application timeout: "),
 		conn_ia_time = input(1s, "Connection interarrival time: "),
 	   	msg_ia_time = input(0.5s, "Data message interarrival time: "),
@@ -56,9 +52,8 @@ module Client
                 message_length = input(8000, "Number of bits to be received: "); 
 	   tcp: TcpModule
 	        parameters:
-		//TCPSlowStart = input(true, "Slow Start / Congestion Avoidance: "),
-		TCPDelayedAck = input(true, "Delayed Acknowledgements: "),
-	        TCPFastRetrans = input(false, "Fast Retransmission (TCP-Tahoe): "),
+        TCPDelayedAck = input(true, "Delayed Acknowledge: "),
+        TCPFastRetrans = input(false, "Fast Retransmission (TCP-Tahoe): "),
 		TCPFastRecovery = input(false, "Fast Recovery: "),
                 TCPNewReno = input(false, "New Reno: ");
 	   ip: IpModule;
@@ -76,6 +71,10 @@ module Client
 	   comnw.from_compound <-- from_switch;
 endmodule
 
+
+//
+// Part of TCPTester.
+//
 module Server
         parameters:
 	  server_name : string,
@@ -99,9 +98,8 @@ module Server
 		 message_length = 0;
 	   tcp: TcpModule
 	     parameters:
-		//TCPSlowStart = input(true, "Slow Start / Congestion Avoidance: "),
-	        TCPDelayedAck = input(true, "Delayed Acknowledgements: "),	
-		TCPFastRetrans = input(false, "Fast Retransmission (TCP-Tahoe): "),
+            TCPDelayedAck = input(true, "Delayed Acknowledge: "),
+            TCPFastRetrans = input(false, "Fast Retransmission (TCP-Tahoe): "),
 		TCPFastRecovery = input(false, "Fast Recovery: "),
                 TCPNewReno = input(false, "New Reno: ");
 	   ip: IpModule;
@@ -119,11 +117,23 @@ module Server
 	   comnw.from_compound <-- from_switch;
 endmodule
 
+
+//
+// Part of TCPTester.
+//
 channel connectSwitchStation
 	delay normal (0.000001, 0.00000025) //mean, deviation
 	datarate 10000000 // 10 Mbit/s
 endchannel
 
+
+//
+// Simple test environment for TcpModule: n clients, and a server, connected
+// via a switch. The switch models an unreliable network, and is 
+// able to lose packets randomly. 
+//
+// author V.Boehm, June 19 1999
+//
 module TCPTester
 	parameters:
 	  const num_client;
@@ -155,7 +165,15 @@ module TCPTester
 	  server.from_switch <-- connectSwitchStation <-- dropswitch.out[num_client];
 endmodule
 
-module TCP
+
+//
+// Simple test environment for TcpModule: n clients, and a server, connected
+// via a switch. Here, the switch is reliable so this model can be used
+// to test the case when everything it going right.
+//
+// author V.Boehm, June 19 1999
+//
+module TCPTesterB
 	parameters:
 	  const num_client;
 	submodules:
@@ -183,14 +201,12 @@ module TCP
 endmodule
 
 
-// Networks:
-
 network tcptester: TCPTester
 	parameters:
 		num_client = input(2, "Number of clients: ");
 endnetwork
 
-network tcp: TCP
+network tcptesterb: TCPTesterB
 	  parameters:
              num_client = input(2, "Number of clients: ");
 endnetwork

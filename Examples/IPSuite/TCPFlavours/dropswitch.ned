@@ -1,9 +1,4 @@
 // $Header$
-//-----------------------------------------------------------------------------
-//-- fileName: tcptester.ned
-//--
-//-- Module declaration for a modified switch
-//-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -21,22 +16,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+//
+// Modified switch
+//
 simple DropSwitch
 	parameters:
 	   server_port,
  	   pk_delay,
 	   burst_delete_probability, // prob that a burst will be deleted
 	   error_burst_len,    // number of packets do be dropped in case of burst error
-	   delete_probability, // in precent !!!
+	   delete_probability, // in percent !!!
 	   syn_client_del,
-	   syn_server_del,	
+	   syn_server_del,
 	   ack_client_del,
 	   ack_server_del,
 	   tcp_server_del,
 	   tcp_client_del,
 	   fin_client_del,
 	   fin_server_del;
-	   
 	gates:
 	   in: in[];
 	   out: out[];

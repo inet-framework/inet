@@ -1,9 +1,4 @@
 // $Header$
-//-----------------------------------------------------------------------------
-//-- fileName: ipmodule.ned
-//--
-//-- Module declaration for a simple ip module
-//-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -21,8 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+//
+// IP module
+//
 simple IpModule
-       //parameters:
        gates:
          in: from_tcp, from_comnw;
 	 out: to_tcp, to_comnw;

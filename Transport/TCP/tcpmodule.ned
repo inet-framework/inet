@@ -54,7 +54,6 @@
 // the passive open call. The client issues the active open without
 // a <tt>tcp_conn_id</tt> (i.e. with a dummy one), and will learn the 
 // connection id from the <tt>TCP_I_ESTAB</tt> indication.  
-// 
 // The server is free to use any identifier; it might be handy to
 // use e.g. the module id of the process (dynamically created module)
 // that handles the connection. 

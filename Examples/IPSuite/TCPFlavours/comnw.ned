@@ -1,9 +1,4 @@
 // $Header$
-//-----------------------------------------------------------------------------
-//-- fileName: comnw.ned
-//--
-//-- Module declaration for an simple communication network layer
-//-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -21,6 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+//
+// Simple communication network layer
+//
 simple ComNw
        parameters:
          nw_length;
