@@ -776,12 +776,17 @@ void TcpModule::handleMessage(cMessage *msg)
 
   if (delete_tcb == true)
     {
+      ev << "Deleting connection desctriptor.\n";
       delete tcb_block;
       tcb_block = NULL;
     }
   else
-    tcb_block->st_event.pmsg = NULL; // set pmsg to NULL because it points to msg
+    {
+      tcb_block->st_event.pmsg = NULL; // set pmsg to NULL because it points to msg
 
+      //print TCB status information
+      printStatus(tcb_block, "Connection state after event processing");
+    }
   delete msg;
 }
 
@@ -1203,6 +1208,10 @@ void TcpModule::anaEvent(TcpTcb* tcb_block, cMessage* msg, MsgSource source)
     {
       error ("Could not determine message source in TcpModule::anaEvent()\n");
     }
+    
+  // now print what we learned
+  if (debug) ev << "Received event " << eventName(tcb_block->st_event.event) 
+                << " in state " << stateName((TcpState)tcb_block->fsm.state()) << endl;
 }
 
 
@@ -2437,7 +2446,7 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
   //duplicate retransmission queue created to actually resend the retransmitted data
   cQueue &      dup_retrans_queue = tcb_block->dup_retrans_queue;
   cQueue        resend_data_queue("resend_data_queue");
-  unsigned long retrans_data_sent;
+  //unsigned long retrans_data_sent;
   unsigned long retxn_queue_size;
   unsigned long bytes_to_be_resent;
   unsigned long retrans_queue_size;
@@ -3814,8 +3823,6 @@ void TcpModule::flushTransRetransQ(TcpTcb* tcb_block)
 void TcpModule::printStatus(TcpTcb* tcb_block, const char *label)
 {
   if (debug) ev << "=========== " << label << " ===========\n";
-  if (debug) ev << "Current event: " << (int) tcb_block->st_event.event
-                << " (" << eventName(tcb_block->st_event.event) << ")" << endl;
   if (debug) ev << "Connection ID:  " << (int) tcb_block->tb_conn_id << endl;
   if (debug) ev << "State:          " << (int) tcb_block->fsm.state()
                 << " (" << stateName((TcpState)tcb_block->fsm.state()) << ")" << endl;
@@ -4137,7 +4144,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LISTEN.\n";
 
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -4410,7 +4417,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_RCVD.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -4711,7 +4718,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
    
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_SENT.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -4976,7 +4983,7 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in ESTABLISHED.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5115,7 +5122,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSE_WAIT.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5228,7 +5235,7 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LAST_ACK.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -5354,7 +5361,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_1.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5485,7 +5492,7 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_2.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5610,7 +5617,7 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSING.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -5699,7 +5706,7 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in TIME_WAIT.\n";
-      printStatus(tcb_block, "Connection state");
+      //printStatus(tcb_block, "Connection state");
 
       break;
 
