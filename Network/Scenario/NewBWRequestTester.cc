@@ -30,7 +30,7 @@ class NewBWRequestTester : public cSimpleModule
     virtual void activity();
 };
 
-Define_Module_Like(NewBWRequestTester, NetworkManager);
+Define_Module(NewBWRequestTester);
 
 
 void NewBWRequestTester::initialize()

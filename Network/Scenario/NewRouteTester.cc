@@ -32,7 +32,7 @@ public:
 };
 
 
-Define_Module_Like(NewRouteTester, NetworkManager);
+Define_Module(NewRouteTester);
 
 
 void NewRouteTester::initialize()
