@@ -57,14 +57,14 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 OBJS= 
 
 # subdirectories to recurse into
-SUBDIRS= KIDSNw1 McNetwork2 OldNetwork PerformAnalysis TCPClientServerNet TCPFlavours TCPTester TCPUDPDirectNet UDPSockets
+SUBDIRS=  KIDSNw1_dir McNetwork2_dir OldNetwork_dir PerformAnalysis_dir TCPClientServerNet_dir TCPFlavours_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: KIDSNw1_dir McNetwork2_dir OldNetwork_dir PerformAnalysis_dir TCPClientServerNet_dir TCPFlavours_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
+subdirs: $(SUBDIRS)
 
 KIDSNw1_dir:
 	cd KIDSNw1 && cd && nmake /nologo /f Makefile.vc
@@ -94,13 +94,13 @@ UDPSockets_dir:
 	cd UDPSockets && cd && nmake /nologo /f Makefile.vc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

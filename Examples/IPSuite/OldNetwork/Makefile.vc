@@ -66,7 +66,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= McNetwork_n.obj Peer2Network_n.obj DLStub.obj
+OBJS= McNetwork_n.obj Peer2Network_n.obj DLStub.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -77,7 +77,7 @@ $(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: $(SUBDIRS)
 
 McNetwork_n.obj: McNetwork_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp McNetwork_n.cc
@@ -95,13 +95,13 @@ DLStub.obj: DLStub.cc
 	$(CXX) -c $(COPTS) /Tp DLStub.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

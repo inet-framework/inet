@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj ICMP.obj in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj IPInterfacePacket.obj IPMulticast.obj IPOutputCore.obj IPSendCore.obj IPTunneling.obj LocalDeliverCore.obj PreRoutingCore.obj RoutingCore.obj RoutingTable.obj RoutingTableAccess.obj
+OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj  ICMP.obj  in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj  IPInterfacePacket.obj IPMulticast.obj   IPOutputCore.obj   IPSendCore.obj IPTunneling.obj   LocalDeliverCore.obj  PreRoutingCore.obj  RoutingCore.obj RoutingTable.obj  RoutingTableAccess.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -64,7 +64,7 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: $(SUBDIRS)
 
 ErrorHandling_n.obj: ErrorHandling_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp ErrorHandling_n.cc
@@ -193,13 +193,13 @@ RoutingTableAccess.obj: RoutingTableAccess.cc
 	$(CXX) -c $(COPTS) /Tp RoutingTableAccess.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

@@ -57,14 +57,14 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 OBJS= 
 
 # subdirectories to recurse into
-SUBDIRS= Core QoS QoSStub
+SUBDIRS=  Core_dir QoS_dir QoSStub_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: Core_dir QoS_dir QoSStub_dir
+subdirs: $(SUBDIRS)
 
 Core_dir:
 	cd Core && cd && nmake /nologo /f Makefile.vc
@@ -76,13 +76,13 @@ QoSStub_dir:
 	cd QoSStub && cd && nmake /nologo /f Makefile.vc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

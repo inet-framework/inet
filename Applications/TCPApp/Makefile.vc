@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj procserver.obj TCPClient.obj TCPServer.obj
+OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj  MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj  procserver.obj   TCPClient.obj TCPServer.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -64,7 +64,7 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: $(SUBDIRS)
 
 MyTCPApp_n.obj: MyTCPApp_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp MyTCPApp_n.cc
@@ -109,13 +109,13 @@ TCPServer.obj: TCPServer.cc
 	$(CXX) -c $(COPTS) /Tp TCPServer.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

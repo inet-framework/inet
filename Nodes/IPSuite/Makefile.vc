@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj
+OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj              
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -64,7 +64,7 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: $(SUBDIRS)
 
 BurstHost_n.obj: BurstHost_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp BurstHost_n.cc
@@ -151,13 +151,13 @@ UDPHost_n.cc: UDPHost.ned
 	$(NEDC:/=\) -s _n.cc $(INCLUDE_PATH) UDPHost.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL

@@ -71,7 +71,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= MPLSNet_n.obj MPLSOnly_n.obj
+OBJS= MPLSNet_n.obj MPLSOnly_n.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -82,7 +82,7 @@ $(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs:
+subdirs: $(SUBDIRS)
 
 MPLSNet_n.obj: MPLSNet_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp MPLSNet_n.cc
@@ -97,13 +97,13 @@ MPLSOnly_n.cc: MPLSOnly.ned
 	$(NEDC:/=\) -s _n.cc $(INCLUDE_PATH) MPLSOnly.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	@opp_neddoc -a
+#neddoc:
+#	@opp_neddoc -a
 
-doxy: doxy.cfg
-	@doxygen doxy.cfg
+#doxy: doxy.cfg
+#	@doxygen doxy.cfg
 
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
