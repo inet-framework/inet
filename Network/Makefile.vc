@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= IPv4 IPv4d LDP MPLS RSVP_TE
-SUBDIR_TARGETS=  IPv4_dir IPv4d_dir LDP_dir MPLS_dir RSVP_TE_dir
+SUBDIRS= AutoRouting IPv4 IPv4d LDP MPLS RSVP_TE
+SUBDIR_TARGETS=  AutoRouting_dir IPv4_dir IPv4d_dir LDP_dir MPLS_dir RSVP_TE_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -76,6 +76,9 @@ $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs: $(SUBDIR_TARGETS)
+
+AutoRouting_dir:
+	cd AutoRouting && cd && nmake /nologo /f Makefile.vc
 
 IPv4_dir:
 	cd IPv4 && cd && nmake /nologo /f Makefile.vc

@@ -427,6 +427,8 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
 {
     Enter_Method("addRoutingEntry(...)");
 
+    //FIXME TBD consistency check if interface exists (maybe fill in Ptr)
+
     if (entry->host.isNull())
     {
         delete defaultRoute;

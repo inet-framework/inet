@@ -19,7 +19,6 @@
 #ifndef __FLATNETWORKCONFIGURATOR_H__
 #define __FLATNETWORKCONFIGURATOR_H__
 
-#include <map>
 #include <omnetpp.h>
 
 
@@ -33,17 +32,7 @@
 class FlatNetworkConfigurator : public cSimpleModule
 {
   protected:
-    struct RTEntry {
-        int atAddress;
-        int destAddress;
-
-        bool operator<(const RTEntry& b) const {
-           return atAddress<b.atAddress || (atAddress==b.atAddress && destAddress<b.destAddress);
-        }
-    };
-    typedef std::map<RTEntry,int> RoutingTable; // (addr+destaddr) -> port
-
-    RoutingTable rtable;
+    RoutingTable *findRoutingTable(cModule *ipnode);
 
   public:
     Module_Class_Members(IP, cSimpleModule, 0);

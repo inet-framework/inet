@@ -170,82 +170,51 @@ DummyTCPAlg.obj: DummyTCPAlg.cc \
   TCPConnection.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
-  TCPSegment_m.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h
-TCPCommand_m.obj: TCPCommand_m.cc \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h
 TCPConnectionBase.obj: TCPConnectionBase.cc \
   TCPMain.h \
   TCPConnection.h \
-  TCPSegment_m.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionEventProc.obj: TCPConnectionEventProc.cc \
   TCPMain.h \
   TCPConnection.h \
-  TCPSegment_m.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionRcvSegment.obj: TCPConnectionRcvSegment.cc \
   TCPMain.h \
   TCPConnection.h \
-  TCPSegment_m.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   TCPMain.h \
   TCPConnection.h \
-  TCPSegment_m.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPDump.obj: TCPDump.cc \
   TCPDump.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Network\IPv4/IPDatagram_m.h \
-  TCPSegment_m.h \
   ..\..\Base/ipsuite_defs.h
 TCPMain.obj: TCPMain.cc \
   TCPMain.h \
   TCPConnection.h \
-  TCPSegment_m.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
-TCPSegment_m.obj: TCPSegment_m.cc \
-  TCPSegment_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPSocket.obj: TCPSocket.cc \
   TCPSocket.h \
-  TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPTahoeReno.obj: TCPTahoeReno.cc \
@@ -255,12 +224,10 @@ TCPTahoeReno.obj: TCPTahoeReno.cc \
   TCPConnection.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
-  TCPSegment_m.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h
 TCPVirtualDataRcvQueue.obj: TCPVirtualDataRcvQueue.cc \
   TCPVirtualDataRcvQueue.h \
-  TCPSegment_m.h \
   TCPReceiveQueue.h \
   TCPConnection.h \
   ..\..\Base/ipsuite_defs.h \
@@ -270,7 +237,6 @@ TCPVirtualDataSendQueue.obj: TCPVirtualDataSendQueue.cc \
   TCPVirtualDataSendQueue.h \
   TCPSendQueue.h \
   TCPConnection.h \
-  TCPSegment_m.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h \
   TCPMain.h

@@ -19,9 +19,6 @@
 #include "RoutingTable.h"
 #include "FlatNetworkConfigurator.h"
 
-#pragma warning(disable:4786)
-
-
 
 Define_Module(FlatNetworkConfigurator);
 
@@ -30,30 +27,27 @@ void FlatNetworkConfigurator::initialize(int stage)
 {
     if (stage!=2) return;
 
-    cTopology *topo = new cTopology("topo");
+    cTopology topo("topo");
 
     // FIXME use par("moduleTypesToProcess")
-    topo->extractByModuleType("UDPHost", "Router", NULL);
-    ev << "cTopology found " << topo->nodes() << " nodes\n";
+    topo.extractByModuleType("UDPHost", "Router", NULL);
+    ev << "cTopology found " << topo.nodes() << " nodes\n";
 
     // assign IP addresses
     uint32 networkAddress = IPAddress(par("networkAddress")).getInt();
     uint32 netmask = IPAddress(par("netmask")).getInt();
     int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
-    if (topo->nodes()>maxNodes)
-        error("netmask too large, not enough addresses for all %d nodes", topo->nodes());
+    if (topo.nodes()>maxNodes)
+        error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
 
-    for (int i=0; i<topo->nodes(); i++)
+    for (int i=0; i<topo.nodes(); i++)
     {
         // host part will be simply i+1.
         uint32 addr = networkAddress | uint32(i+1);
 
         // find interface table and assign address to all interfaces with an output port
-        cModule *mod = topo->node(i)->module();
-        cModule *networkLayer = mod->submodule("networkLayer");
-        RoutingTable *rt = !networkLayer ? NULL : dynamic_cast<RoutingTable *>(networkLayer->submodule("routingTable"));
-        if (!rt)
-            error("cannot find module networklayer.routingTable in node '%s'", mod->fullPath());
+        cModule *mod = topo.node(i)->module();
+        RoutingTable *rt = findRoutingTable(mod);
 
         for (int k=0; k<rt->numInterfaces(); k++)
         {
@@ -71,47 +65,48 @@ void FlatNetworkConfigurator::initialize(int stage)
     // note that we do route calculation (call unweightedSingleShortestPathsTo())
     // only n times, while per-node calculation would require n^2 invocations.
     //
-    for (int i=0; i<topo->nodes(); i++)
+    for (int i=0; i<topo.nodes(); i++)
     {
-        RTEntry key;
-        cTopology::Node *destNode = topo->node(i);
-        key.destAddress = destNode->module()->par("address");
+        cTopology::Node *destNode = topo.node(i);
+        uint32 destAddr = networkAddress | uint32(i+1);
 
-        topo->unweightedSingleShortestPathsTo(destNode);
+        topo.unweightedSingleShortestPathsTo(destNode);
 
-        for (int j=0; j<topo->nodes(); j++)
+        for (int j=0; j<topo.nodes(); j++)
         {
             if (i==j) continue;
-            cTopology::Node *atNode = topo->node(j);
+            cTopology::Node *atNode = topo.node(j);
             if (atNode->paths()==0) continue; // not connected
+            uint32 atAddr = networkAddress | uint32(j+1);
 
-            key.atAddress = atNode->module()->par("address");
-            int gateId = atNode->path(0)->localGate()->id();
-            rtable[key] = gateId;
-            ev << "  from " << key.atAddress << " towards " << key.destAddress << " gateId is " << gateId << endl;
+            int outputPort = atNode->path(0)->localGate()->index();
+            ev << "  from " << IPAddress(atAddr) << " towards " << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
+
+            // add route
+            RoutingTable *rt = findRoutingTable(atNode->module());
+            InterfaceEntry *interf = rt->interfaceByPortNo(outputPort);
+
+            RoutingEntry *e = new RoutingEntry();
+            e->host = IPAddress(destAddr);
+            e->netmask = IPAddress(netmask);
+            e->interfaceName = interf->name.c_str();
+            e->interfacePtr = interf;
+            e->type = DIRECT;
+            e->source = MANUAL;
+            //e->metric = 1;
+            rt->addRoutingEntry(e);
         }
     }
-    delete topo;
-
-
-        moduleTypesToProcess: string,
-        networkAddress: string,
-        netmask: string;
-
 }
 
-int FlatNetworkConfigurator::getNextHop(int atAddress, int destAddress)
+RoutingTable *FlatNetworkConfigurator::findRoutingTable(cModule *ipnode)
 {
-    RTEntry key;
-    key.atAddress = atAddress;
-    key.destAddress = destAddress;
-
-    RoutingTable::iterator it = rtable.find(key);
-    if (it==rtable.end())
-        return -1;
-
-    int outGate = (*it).second;
-    return outGate;
+    // TBD could be made more flexible...
+    cModule *networkLayer = ipnode->submodule("networkLayer");
+    RoutingTable *rt = !networkLayer ? NULL : dynamic_cast<RoutingTable *>(networkLayer->submodule("routingTable"));
+    if (!rt)
+        error("cannot find module networklayer.routingTable in node '%s'", ipnode->fullPath());
+    return rt;
 }
 
 void FlatNetworkConfigurator::handleMessage(cMessage *msg)
