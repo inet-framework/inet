@@ -317,6 +317,7 @@ PreRouting.obj: PreRouting.cc \
   ICMPMessage_m.h
 Routing.obj: Routing.cc \
   Routing.h \
+  ..\..\..\Util/watch2.h \
   ..\..\..\Base/QueueWithQoS.h \
   RoutingTableAccess.h \
   RoutingTable.h \

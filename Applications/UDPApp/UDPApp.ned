@@ -16,29 +16,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-simple UDPClient
+
+
+//
+// Peer of UDPServerApp. Sends UDP packets to randomly chosen destinations
+// at random intervals. Destinations are chosen from the dest_addresses parameter.
+//
+simple UDPClientApp
     parameters:
-        nodename : string,
-        local_port : numeric,
-        dest_port : numeric,
-        message_length : numeric, // (bit)
-        message_freq : numeric,
-        routeDestNo : numeric;
+        local_port : numeric const,
+        dest_port : numeric const,
+        message_length : numeric const, // (bits)
+        message_freq : numeric, // should usually be a random value, e.g. exponential(1)
+        dest_addresses: string; // list of IP addresses, separated by spaces
     gates:
         in: from_udp;
         out: to_udp;
 endsimple
 
 
-simple UDPServer
-    parameters: 
-        // FIXME does it really need all these params?????
-        nodename : string,
-        local_port : numeric,
-        dest_port : numeric,
-        message_length : numeric, // (bit)
-        message_freq : numeric,
-        routeDestNo : numeric;
+//
+// Peer of UDPClientApp. At the moment just discards received packets.
+//
+simple UDPServerApp
+    parameters:
+        local_port : numeric const;
     gates:
         in: from_udp;
         out: to_udp;

@@ -1,6 +1,8 @@
-2003-09-30  Andras Varga
+2004-03-18  Andras Varga
 
-	* module TCP renamed to TCPTesterB.
+	* merged TCPFlavours
+
+	* renamed modules: CommNW-->DummyPPP, IpModule-->DummyIP
 
 2000-12-19  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
 

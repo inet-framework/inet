@@ -114,14 +114,6 @@ class LDPpacket: public cPacket
       LDPpacket();
       LDPpacket(int messageType);
       LDPpacket(const LDPpacket& ldp);
-      virtual const char *classname() const {return "LDPpacket";}
-
-      //Override encapsulation and decapsulation for cPacket
-      virtual void encapsulate(cPacket *);
-      virtual cPacket *decapsulate();
-
-
-
 
       //Routing Information
     inline void setSenderAddress(int ipAddr)

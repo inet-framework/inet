@@ -38,8 +38,6 @@ class ConstTrafficGen: public cSimpleModule
 private:
     simtime_t generationTime;
     int packetSize;
-    char nodename[NODE_NAME_SIZE];
-    int nodenr;
     int destctr;
     bool usesTCPProt;
 

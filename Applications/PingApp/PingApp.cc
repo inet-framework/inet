@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 #include <omnetpp.h>
 #include "PingApp.h"
@@ -24,25 +23,19 @@
 #include "ICMP.h"
 
 
-/* Ping Application
-    doesn't do anything so far */
 Define_Module( PingApp );
 
 void PingApp::initialize()
 {
-    strcpy(nodename, par("nodename"));
 }
 
-void PingApp::activity()
+//
+// doesn't do anything so far
+//
+void PingApp::handleMessage(cMessage *msg)
 {
-    cMessage *msg;
-    while(true)
-    {
-        msg = receive();
-        ev << "\n*** " << nodename
-            << " Ping Application: message received.";
-        delete( msg );
-    }
+    ev << "Message received.\n";
+    delete msg;
 }
 
 

@@ -34,7 +34,6 @@ Define_Module( AppIn );
 
 void AppIn::initialize()
 {
-    strcpy(nodename, par("nodename"));
 }
 
 void AppIn::activity()
@@ -61,21 +60,17 @@ void AppIn::processMessage(cMessage *msg)
     bool isRequest = p->hasPar("request")
                 ? p->par("request").boolValue() : false;
     int length = p->length();
-    char src[20], dest[20];
-
-    strcpy( src,  ip->srcAddr().getString());
-    strcpy( dest, ip->destAddr().getString());
 
     // print out Packet info
-    ev  << "\n+++" << nodename << " AppIn: Packet received:"
+    ev  << "AppIn: Packet received:"
         << "\nProt: " << (protocol == IP_PROT_TCP ? "TCP" : "UDP")
         << " Cont: " << content
         << " Bitlen: " << length
         // << (isRequest ? " Request" : " Reply")
         << "   Arrival Time: " << arrivalTime
         << " Simtime: " << simTime()
-        << "\nSrc: " << src
-        << " Dest: " << dest << "\n\n";
+        << "\nSrc: " << ip->srcAddr()
+        << " Dest: " << ip->destAddr() << "\n\n";
 
     delete (ip);
     delete (p);

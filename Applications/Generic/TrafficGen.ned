@@ -20,8 +20,6 @@
 
 
 simple AppIn
-    parameters:
-        nodename : string;
     gates:
         in: in;
 endsimple
@@ -29,8 +27,6 @@ endsimple
 simple GeneratorAppOut
     parameters:
         tcpProtocol : bool,
-        nodename : string,
-        nodenr,
         generationTime,
         generationSize, // (bit)
         burstPackets : numeric const;
@@ -47,8 +43,6 @@ module TrafficGenerator
     parameters:
         GeneratorType: string,
         tcpProtocol : bool,
-        nodename : string,
-        nodenr,
         generationTime,
         generationSize, // (bit)
         burstPackets : numeric const;
@@ -57,13 +51,9 @@ module TrafficGenerator
         out: out;
     submodules:
         appIn: AppIn;
-            parameters:
-                nodename = nodename;
             display: "p=97,98;b=40,24,rect";
         appOut: GeneratorType like GeneratorAppOut;
             parameters:
-                nodename = nodename,
-                nodenr = nodenr,
                 tcpProtocol = tcpProtocol,
                 generationTime = generationTime,
                 generationSize = generationSize,

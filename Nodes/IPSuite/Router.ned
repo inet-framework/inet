@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,20 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-// Definition of an IPNode with transport layers
+//
 
 
 import
-    "NetworkLayers",
-    "PingApp";
+    "LinkLayer",
+    "NetworkLayer";
 
 
 
 module Router
     parameters:
-        nodename : string,
-
-        // Network information
         numOfPorts : numeric,
         routingFile : string;
     gates:
@@ -36,23 +32,27 @@ module Router
         out: out[];
     submodules:
         // control module
-        networkLayers: NetworkLayers;
+        networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
                 IPForward = true,
-                NWIName = "PPPModule",
                 numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
-            display: "b=32,30;p=87,155;i=fork";
+            display: "p=160,60;i=fork";
+        netIf : LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=80,120,row;i=iface";
     connections nocheck:
         // connections to network outside
         for i=0..numOfPorts-1 do
-            in[i] --> networkLayers.physIn[i];
-            out[i] <-- networkLayers.physOut[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
         endfor;
-
 endmodule
 

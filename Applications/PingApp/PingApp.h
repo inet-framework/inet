@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,29 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 
 #ifndef __CONTROLAPP_H__
 #define __CONTROLAPP_H__
 
+#include <string>
 #include <omnetpp.h>
 #include "basic_consts.h"
 #include "IPInterfacePacket.h"
 
 /**
- * Ping Application
+ * Ping application.
  */
 class PingApp: public cSimpleModule
 {
-private:
-    char nodename[NODE_NAME_SIZE];
+  public:
+    Module_Class_Members(PingApp, cSimpleModule, 0);
 
-public:
-    Module_Class_Members(PingApp, cSimpleModule, ACTIVITY_STACK_SIZE);
-
-    void initialize();
-    void activity();
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

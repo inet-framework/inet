@@ -17,6 +17,7 @@
 
 #define __MPLSMODULE_H__
 
+#include <vector>
 #include <omnetpp.h>
 #include "MPLSPacket.h"
 #include "IPDatagram.h"
@@ -24,9 +25,9 @@
 #include "RoutingTableAccess.h"
 #include "RoutingTable.h"
 #include "ConstType.h"
-#include <vector>
 
 
+using namespace std;
 
 #define DEST_CLASSIFIER        1
 #define DEST_SOURCE_CLASSIFIER 2
@@ -39,20 +40,18 @@
 
 struct fec_color_mapping
 {
- int fecId;
- int color;
+    int fecId;
+    int color;
 };
 
-struct fec
+struct FECElem
 {
-    fec(){fecId=-1;src=-1;dest=-1;}
+    FECElem() {fecId=-1;src=-1;dest=-1;}
     int fecId;
     int src;
     int dest;
-
 };
 
-using namespace std;
 
 
 class MPLSModule : public cSimpleModule
@@ -67,11 +66,10 @@ class MPLSModule : public cSimpleModule
       int  classifierType;
       simtime_t delay1;
 
-      vector<fec> fecList;
+      vector<FECElem> fecList;
 
-      cArray ipdataQueue;  // Queue of packets need label from LDP
-      cArray ldpQueue;   // Queue of queries to LDP when the LDP is not ready
-      cArray myQueriesCache; // Cache of queries of this host
+      cArray ipdataQueue;  // Queue of packets need label from LDP -- FIXME should be cQueue!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      cQueue ldpQueue;   // Queue of queries to LDP when the LDP is not ready
 
    public:
       Module_Class_Members(MPLSModule,cSimpleModule,0);
@@ -88,6 +86,9 @@ class MPLSModule : public cSimpleModule
       virtual void processPacketFromL3(cMessage *msg);
       virtual void processPacketFromSignalling(cMessage *msg);
       virtual void processPacketFromL2(cMessage *msg);
+      // FIXME introduce these:
+      //virtual void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
+      //virtual void processIPDatagramFromL2(IPDatagram *ipdata);
       //@}
 
       /**
@@ -95,7 +96,7 @@ class MPLSModule : public cSimpleModule
        * @param IPDatagram The ip packet to be classified
        * @param type Scheme of classification, i.g destination-based or destination and sender-based
        */
-      int classifyPacket(IPDatagram* ipdata, int type);
+      int classifyPacket(IPDatagram *ipdata, int type);
 
 };
 

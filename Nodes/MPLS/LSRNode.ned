@@ -12,15 +12,16 @@
 
 
 import
-    "NetworkLayersWithMPLS",
-    "UDPUpperLayers",
-    "tcp4ip",
+    "LinkLayer",
+    "NetworkLayerWithMPLS",
     "LDPproc",
     "tcp2ldp",
     "MPLSModule",
     "LDPInterface",
     "LIBTable",
     "UDPInterface";
+
+
 
 
 //
@@ -36,7 +37,6 @@ import
 //
 module LSRNode
     parameters:
-
         id : string,
         local_addr : string,
         ldpTimeout : numeric,
@@ -66,28 +66,30 @@ module LSRNode
                 timeout = ldpTimeout,
                 keepAliveTime = ldpKeepAliveTime;
 
-            display: "p=44,117;b=40,24,rect";
+            display: "p=125,117;b=40,24,rect";
         signal_module: LDPproc;
             parameters:
                 peerNo = peerNo,
                 local_addr = local_addr,
                 udpInitTimeout = udpInitTimeout;
-
-            display: "p=102,30;b=40,24";
+            display: "p=186,43;b=40,24";
         udpApp: UDPInterface;
             parameters:
                 local_addr = local_addr;
-            display: "p=233,108;b=40,24,rect";
-        networkLayers: NetworkLayersWithMPLS;
+            display: "p=246,117;b=40,24,rect";
+        networkLayer: NetworkLayerWithMPLS;
             parameters:
                 IPForward = false,
-                NWIName = "MPLS2IP",
                 numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
-            display: "b=32,30;p=143,187;i=fork";
+            display: "b=32,30;p=191,186;i=fork";
+        netIf: LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=87,320,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -99,34 +101,35 @@ module LSRNode
                 toL3[numOfPorts],
                 fromL2[numOfPorts],
                 toL2[numOfPorts];
-            display: "p=133,323;b=72,42";
+            display: "o=#ff8000;p=191,261;b=66,14";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-
-            display: "p=316,282;b=40,24";
+            display: "i=proc2;p=279,207;b=32,30";
     connections nocheck:
         //# transport connections
-        networkLayers.TCPOut --> tcpApp.from_tcp;
-        networkLayers.TCPIn <-- tcpApp.to_tcp;
+        networkLayer.TCPOut --> tcpApp.from_tcp;
+        networkLayer.TCPIn <-- tcpApp.to_tcp;
 
-        networkLayers.UDPOut --> udpApp.from_ip;
-        networkLayers.UDPIn <-- udpApp.to_ip;
+        networkLayer.UDPOut --> udpApp.from_ip;
+        networkLayer.UDPIn <-- udpApp.to_ip;
         signal_module.to_udp_interface --> udpApp.from_appl;
         signal_module.from_udp_interface <-- udpApp.to_appl;
         signal_module.from_tcp_interface <-- tcpApp.to_ldp;
         signal_module.to_tcp_interface --> tcpApp.from_ldp;
         //# ldp.to_mpls_switch --> mplsModule.fromLDP;
 
-        //# connections to network outside
         for i=0..numOfPorts-1 do
-            mplsModule.toL3[i] --> networkLayers.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayers.physOut[i];
-            in[i] --> mplsModule.fromL2[i];
-            out[i] <-- mplsModule.toL2[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+
+            netIf[i].inputQueueOut --> mplsModule.fromL2[i];
+            netIf[i].outputQueueIn <-- mplsModule.toL2[i];
+
+            mplsModule.toL3[i] --> networkLayer.physIn[i];
+            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
         endfor;
-    display: "p=10,10;b=368,393";
 endmodule
 
 

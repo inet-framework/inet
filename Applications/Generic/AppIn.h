@@ -34,8 +34,6 @@
 
 class AppIn: public cSimpleModule
 {
-    char nodename[NODE_NAME_SIZE];
-
     void processMessage(cMessage *);
 public:
     Module_Class_Members(AppIn, cSimpleModule, ACTIVITY_STACK_SIZE);

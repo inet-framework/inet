@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 
 //
@@ -33,7 +33,7 @@ Define_Module( UDPProcessing );
 void UDPProcessing::initialize()
 {
     applTable.size = gateSize("to_application");
-    applTable.port = new int[applTable.size];  // FIXME free it in dtor
+    applTable.port = new int[applTable.size];  // FIXME free it in dtor (or change to std::map)
 
     for (int i=0; i<applTable.size; i++)
     {
@@ -41,6 +41,15 @@ void UDPProcessing::initialize()
         cGate *appgate = gate("to_application",i)->toGate();
         applTable.port[i] = appgate ? appgate->ownerModule()->par("local_port") : -1;
     }
+
+    numSent = 0;
+    numPassedUp = 0;
+    numDroppedWrongPort = 0;
+    numDroppedWrongChecksum = 0;
+    WATCH(numSent);
+    WATCH(numPassedUp);
+    WATCH(numDroppedWrongPort);
+    WATCH(numDroppedWrongChecksum);
 }
 
 void UDPProcessing::handleMessage(cMessage *msg)
@@ -63,16 +72,14 @@ void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
     UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipIfPacket->decapsulate());
 
     // errorcheck, if applicable
-    if (udpPacket->checksumValid())
+    if (!udpPacket->checksumValid())
     {
         // throw packet away if bit error discovered
         // assume checksum found biterror
-        if (udpPacket->hasBitError())
-        {
-            delete ipIfPacket;
-            delete udpPacket;
-            return;
-        }
+        delete ipIfPacket;
+        delete udpPacket;
+        numDroppedWrongChecksum++;
+        return;
     }
 
     // look up app gate
@@ -88,9 +95,10 @@ void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
     }
     if (appGateIndex == -1)
     {
-        // FIXME add counters or something
         delete udpPacket;
         delete ipIfPacket;
+        numDroppedWrongPort++;
+        return;
     }
 
     // wrap payload into UDPInterfacePacket and pass up to application
@@ -107,8 +115,10 @@ void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
     udpIfPacket->setDestPort(udpPacket->destinationPort());
     //udpIfPacket->setKind(udpPacket->msgKind()); // FIXME why ???
     delete ipIfPacket;
+    delete udpPacket;
 
     send(udpIfPacket, "to_application", appGateIndex);
+    numPassedUp++;
 }
 
 void UDPProcessing::processMsgFromApp(UDPInterfacePacket *udpIfPacket)
@@ -134,6 +144,7 @@ void UDPProcessing::processMsgFromApp(UDPInterfacePacket *udpIfPacket)
 
     // send to IP
     send(ipIfPacket,"to_ip");
+    numSent++;
 }
 
 

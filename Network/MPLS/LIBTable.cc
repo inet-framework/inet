@@ -20,15 +20,15 @@
 using namespace std;
 
 
-Define_Module( LIBTable );
+Define_Module(LIBTable);
 
 
-std::ostream& operator<<(std::ostream& os, const prt_type& prt)
+std::ostream & operator<<(std::ostream & os, const prt_type & prt)
 {
-    return os << "Pos:" << prt.pos << "  Fec:" << prt.fecValue.getString();
+    return os << "Pos:" << prt.pos << "  Fec:" << prt.fecValue;
 }
 
-std::ostream& operator<<(std::ostream& os, const lib_type& lib)
+std::ostream & operator<<(std::ostream & os, const lib_type & lib)
 {
     os << "InL:" << lib.inLabel;
     os << "  InIf:" << lib.inInterface.c_str();
@@ -57,149 +57,120 @@ void LIBTable::initialize()
 
 void LIBTable::handleMessage(cMessage *)
 {
-    error("Message arrived -- LIBTable doesn't process messages, it is used via direct method calls");
+    error
+        ("Message arrived -- LIBTable doesn't process messages, it is used via direct method calls");
 }
 
 
 int LIBTable::readLibTableFromFile(const char *filename)
 {
-    ifstream fin(filename);    // create a "pointer" to the file
-    if (!fin)                  // if the file does not exist
-         error("Cannot open file %s", filename);
+    ifstream fin(filename);
+    if (!fin)
+        error("Cannot open file %s", filename);
 
     char line[100];
 
-    string::size_type loc;//unsigned int loc=0;
-    StringTokenizer *tokenizer;
-
-    //Move to the first record
-    while (fin.getline(line,100) && !fin.eof())
+    // Move to the first record
+    while (fin.getline(line, 100) && !fin.eof())
     {
-         string *s=new string(line);
-         loc = s->find( ConstType::libDataMarker, 0 );
+        string s(line);
+        int loc = s.find(ConstType::libDataMarker, 0);
 
-         if( loc != string::npos )
-         {
-              fin.getline(line,100); //Get into the blank line
-              break;
-         }
+        if (loc != string::npos)
+        {
+            fin.getline(line, 100);  // Get into the blank line
+            break;
+        }
     }
 
-    while (fin.getline(line,100) && !fin.eof())
+    while (fin.getline(line, 100) && !fin.eof())
     {
         lib_type record;
-        string *aField;
-        string sline(line);
-        string delimiter(" ,    ");
 
         // Reach the end of table
-        if(sline.size()==0) //If string(sline).empty())
-             break;
+        if (!line[0])
+            break;
 
-        tokenizer =new StringTokenizer(sline, delimiter);
+        StringTokenizer tokenizer(line, ", ");
+        const char *aField;
 
-        //Get the first field - Incoming Label
-        if ((aField=(tokenizer->nextToken()))!=NULL)
-            record.inLabel= atoi(aField->c_str());
+        // Get the first field - Incoming Label
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.inLabel = atoi(aField);
         else
-            record.inLabel= -1;
+            record.inLabel = -1;
 
-        //Get the second field - Incoming Interface
-        if ((aField=(tokenizer->nextToken()))!=NULL)
-            record.inInterface= *aField;
+        // Get the second field - Incoming Interface
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.inInterface = aField;
         else
-            record.inInterface=string(ConstType::UnknownData);
+            record.inInterface = ConstType::UnknownData;
 
-        //Get the third field - Outgoing Label
-        if ((aField=(tokenizer->nextToken()))!=NULL)
-            record.outLabel=atoi(aField->c_str());
+        // Get the third field - Outgoing Label
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.outLabel = atoi(aField);
         else
-            record.outLabel= -1;
+            record.outLabel = -1;
 
-        //Get the fourth field - Outgoing Interface
-        if ((aField=(tokenizer->nextToken()))!=NULL)
-            record.outInterface=*aField;
+        // Get the fourth field - Outgoing Interface
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.outInterface = aField;
         else
-            record.outInterface= string(ConstType::UnknownData);
+            record.outInterface = ConstType::UnknownData;
 
-        //Get the fifth field - Optcode
-        if ((aField=(tokenizer->nextToken()))!=NULL)
-            record.optcode= atoi(aField->c_str());
+        // Get the fifth field - Optcode
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.optcode = atoi(aField);
         else
-            record.optcode= -1;
+            record.optcode = -1;
 
-        //Insert into the vector
+        // Insert into the vector
         lib.push_back(record);
     }
     return 0;
 }
 
-int LIBTable::readPrtTableFromFile(const char* filename)
+int LIBTable::readPrtTableFromFile(const char *filename)
 {
-    ifstream fin(filename);    // create a "pointer" to the file
-    if (!fin)                  // if the file does not exist
+    ifstream fin(filename);
+    if (!fin)
         error("Cannot open file %s", filename);
 
     char line[100];
 
-    string::size_type loc;//unsigned int loc=0;
-
-    //Move to the first record
-    while (fin.getline(line,100) && !fin.eof())
+    // Move to the first record
+    while (fin.getline(line, 100) && !fin.eof())
     {
         string s(line);
-        loc = s.find(ConstType::prtDataMarker, 0);
+        int loc = s.find(ConstType::prtDataMarker, 0);
 
-        if( loc != string::npos )
+        if (loc != string::npos)
         {
-            fin.getline(line,100); //Get into the blank line
+            fin.getline(line, 100);  // Get into the blank line
             break;
         }
     }
 
-    while (fin.getline(line,100) && !fin.eof())
+    while (fin.getline(line, 100) && !fin.eof())
     {
         prt_type record;
 
-        //A field of the table record
-        string *aField;
+        if (!line[0])
+            break;  // Reach the end of table
 
-        //Variable to hold the a record in string form
-        string sline(line);
-        string delimiter(" ,    ");
-
-        if (sline.size()==0)
-            break; //Reach the end of table
-
-        StringTokenizer tokenizer(sline, delimiter);
-        if ((aField=(tokenizer.nextToken()))!=NULL)
-        {
-            //char *cPrefix =new char[aField->length()+1];
-            //aField->copy(cPrefix,string::npos);
-            //Create new prefix,
-
-            IPAddressPrefix *prefixIPAddress =new IPAddressPrefix((aField->c_str()),ConstType::prefixLength);
-            record.fecValue=*prefixIPAddress;
-        }
+        StringTokenizer tokenizer(line, ", ");
+        const char *aField;
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.fecValue = IPAddressPrefix(aField, ConstType::prefixLength);
         else
-        {
-            //New empty prefix,
-            IPAddressPrefix *prefixIPAddress =new IPAddressPrefix("0.0.0.0",ConstType::prefixLength);
-            record.fecValue=*prefixIPAddress;
-        }
-        if ((aField=(tokenizer.nextToken()))!=NULL)
-        {
-            //char *cstring =new char[aField->length()+1];
-            //aField->copy(cstring,string::npos);
-            int x=atoi(aField->c_str());
-            record.pos=x;
-        }
-        else
-        {
-            record.pos=-1;
-        }
+            record.fecValue = IPAddressPrefix("0.0.0.0", ConstType::prefixLength);
 
-        //Add the record
+        if ((aField = tokenizer.nextToken()) != NULL)
+            record.pos = atoi(aField);
+        else
+            record.pos = -1;
+
+        // Add the record
         prt.push_back(record);
     }
     return 0;
@@ -208,78 +179,79 @@ int LIBTable::readPrtTableFromFile(const char* filename)
 
 void LIBTable::printTables()
 {
-     int i;
-     //Print out the LIB table
-     ev << "************LIB TABLE CONTENTS***************** \n";
-     ev <<" InL       InInf        OutL     Outf    Optcode  \n";
-     for(i=0;i< lib.size();i++)
-         ev << lib[i].inLabel << "    "<< lib[i].inInterface.c_str() << " " <<  lib[i].outLabel << "     " << lib[i].outInterface.c_str() << "   " << lib[i].optcode << "\n";
+    int i;
+    // Print out the LIB table
+    ev << "************LIB TABLE CONTENTS***************** \n";
+    ev << " InL       InInf        OutL     Outf    Optcode  \n";
+    for (i = 0; i < lib.size(); i++)
+        ev << lib[i].inLabel << "    " << lib[i].inInterface.c_str() << " " << lib[i].
+            outLabel << "     " << lib[i].outInterface.c_str() << "   " << lib[i].optcode << "\n";
 
-     //Print out the PRT table
-     ev << "*****************PRT TABLE CONTENT**************\n" ;
-     ev << "Pos  Fec \n";
-     for(i=0;i<prt.size();i++)
-         ev << prt[i].pos << "    " << prt[i].fecValue.getString() <<"\n";
+    // Print out the PRT table
+    ev << "*****************PRT TABLE CONTENT**************\n";
+    ev << "Pos  Fec \n";
+    for (i = 0; i < prt.size(); i++)
+        ev << prt[i].pos << "    " << prt[i].fecValue << "\n";
 }
 
 int LIBTable::installNewLabel(int outLabel, string inInterface,
                               string outInterface, int fec, int optcode)
 {
-    lib_type *newLabelEntry = new lib_type;
-    newLabelEntry->inInterface =inInterface;
-    newLabelEntry->outInterface=outInterface;
-    newLabelEntry->optcode = optcode;
+    lib_type newLabelEntry;
+    newLabelEntry.inInterface = inInterface;
+    newLabelEntry.outInterface = outInterface;
+    newLabelEntry.optcode = optcode;
 
-    //Auto generate inLabel
-    newLabelEntry->inLabel =lib.size();
-    newLabelEntry->outLabel =outLabel;
-    lib.push_back(*newLabelEntry);
+    // Auto generate inLabel
+    newLabelEntry.inLabel = lib.size();
+    newLabelEntry.outLabel = outLabel;
+    lib.push_back(newLabelEntry);
 
-    prt_type *aPrt =new prt_type;
-    aPrt->pos=(lib.size()-1);
-    (aPrt->fecValue)= fec;
-    prt.push_back(*aPrt);
+    prt_type aPrt;
+    aPrt.pos = lib.size() - 1;
+    aPrt.fecValue = fec;
+    prt.push_back(aPrt);
     printTables();
 
-    return (newLabelEntry->inLabel);
+    return newLabelEntry.inLabel;
 }
 
 int LIBTable::requestLabelforFec(int fec)
 {
-    //search in the PRT for exact match of the FEC value
-    for(int i=0;i<prt.size();i++)
+    // search in the PRT for exact match of the FEC value
+    for (int i = 0; i < prt.size(); i++)
     {
-        if(prt[i].fecValue.getInt()==fec)
+        if (prt[i].fecValue.getInt() == fec)
         {
             int p = prt[i].pos;
 
-            //Return the outgoing label
+            // Return the outgoing label
             return lib[p].outLabel;
         }
     }
     return -2;
 }
 
-int  LIBTable::findFec(int label, string inInterface)
+int LIBTable::findFec(int label, string inInterface)
 {
     int pos;
 
-    //Search LIB for matching of the incoming interface and label
-    for(int i=0;i<lib.size();i++)
+    // Search LIB for matching of the incoming interface and label
+    for (int i = 0; i < lib.size(); i++)
     {
-        if((lib[i].inInterface == inInterface)&&(lib[i].inLabel==label))
+        if ((lib[i].inInterface == inInterface) && (lib[i].inLabel == label))
         {
-            //Get the position of this match
-            pos=i;
+            // Get the position of this match
+            pos = i;
             break;
         }
-     }
+    }
 
-    //Get the FEC value in PRT tabel
-    for(int k=0;k<prt.size();k++)
+    // Get the FEC value in PRT tabel
+    for (int k = 0; k < prt.size(); k++)
     {
-       if(prt[k].pos == pos )
-           return prt[k].fecValue.getInt();
+        if (prt[k].pos == pos)
+            return prt[k].fecValue.getInt();
     }
     return 0;
 
@@ -287,19 +259,19 @@ int  LIBTable::findFec(int label, string inInterface)
 
 string LIBTable::requestOutgoingInterface(int fec)
 {
-    int pos=-1;
+    int pos = -1;
 
-    //Search in PRT for matching of FEC
-    for(int k=0;k<prt.size();k++)
+    // Search in PRT for matching of FEC
+    for (int k = 0; k < prt.size(); k++)
     {
-        if(prt[k].fecValue.getInt() == fec)
+        if (prt[k].fecValue.getInt() == fec)
         {
             pos = prt[k].pos;
             break;
         }
     }
 
-    if(pos!=-1)
+    if (pos != -1)
         return lib[pos].outInterface;
     else
         return string("X");
@@ -307,35 +279,32 @@ string LIBTable::requestOutgoingInterface(int fec)
 
 string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel)
 {
-    for(int i=0;i< lib.size();i++)
+    for (int i = 0; i < lib.size(); i++)
     {
-        if(senderInterface.compare("X") !=0)
+        if (senderInterface.compare("X") != 0)
         {
-            if((lib[i].inInterface==senderInterface) &&  (lib[i].outLabel==newLabel))
+            if ((lib[i].inInterface == senderInterface) && (lib[i].outLabel == newLabel))
                 return lib[i].outInterface;
         }
-        else
-        if(lib[i].outLabel==newLabel) //LIB of the IR
-                return lib[i].outInterface;
+        else if (lib[i].outLabel == newLabel)  // LIB of the IR
+            return lib[i].outInterface;
     }
     return string("X");
 }
 
 string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, int oldLabel)
 {
-    if(newLabel !=-1)
-       return requestOutgoingInterface(senderInterface, newLabel);
+    if (newLabel != -1)
+        return requestOutgoingInterface(senderInterface, newLabel);
 
-    for(int i=0;i< lib.size();i++)
+    for (int i = 0; i < lib.size(); i++)
     {
-        if(senderInterface.compare("X") !=0)
+        if (senderInterface.compare("X") != 0)
         {
-
-            if((lib[i].inInterface==senderInterface) &&  (lib[i].inLabel==oldLabel) )
+            if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
                 return lib[i].outInterface;
         }
-        else
-        if(lib[i].outLabel==newLabel)
+        else if (lib[i].outLabel == newLabel)
             return lib[i].outInterface;
     }
     return string("X");
@@ -343,18 +312,18 @@ string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, 
 
 int LIBTable::requestNewLabel(string senderInterface, int oldLabel)
 {
-    for(int i=0;i< lib.size();i++)
-     if((lib[i].inInterface==senderInterface) &&  (lib[i].inLabel==oldLabel))
-         return lib[i].outLabel;
+    for (int i = 0; i < lib.size(); i++)
+        if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
+            return lib[i].outLabel;
 
-    return -2; //Fail to allocate new label
+    return -2;  // Fail to allocate new label
 }
 
 int LIBTable::getOptCode(string senderInterface, int oldLabel)
 {
-    for(int i=0;i< lib.size();i++)
-     if((lib[i].inInterface==senderInterface) &&  (lib[i].inLabel==oldLabel))
-         return lib[i].optcode;
+    for (int i = 0; i < lib.size(); i++)
+        if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
+            return lib[i].optcode;
     return -1;
 }
 
@@ -364,7 +333,7 @@ string LIBTable::ini_requestLabelforDest(IPAddressPrefix *dest)
     string label(ConstType::UnknownData);
     for(int i=0;i<prt.size();i++)
     {
-        if(prt[i].fecValue.compareTo(dest, ConstType::prefixLength)) //Mean that the dest find its prefix entry
+        if(prt[i].fecValue.compareTo(dest, ConstType::prefixLength)) // Mean that the dest find its prefix entry
         {
             int p = prt[i].pos;
             label =lib[p].outLabel;
@@ -380,7 +349,7 @@ void LIBTable::updateTable(label_mapping_type *newMapping)
     IPAddressPrefix aFec=newMapping->fec;
     string label =newMapping->label;
 
-    //Update the cross-entry
+    // Update the cross-entry
     for(int i=0;i<lib.size();i++)
     {
         if(lib[i].outLabel.compare(label)==0)
@@ -399,17 +368,17 @@ void LIBTable::updateTable( string inInterface, string outLabel,
 {
     string inLabel = string(label).append(string(lib.size()));
 
-    lib_type *newLabelEntry = new lib_type;
-    newLabelEntry->inInterface =inInterface;
-    newLabelEntry->outInterface=outInterface;
-    newLabelEntry->inLabel =inLabel;
-    newLabelEntry->outLabel =outLabel;
-    lib.push_back(*newLabelEntry);
+    lib_type newLabelEntry;
+    newLabelEntry.inInterface =inInterface;
+    newLabelEntry.outInterface=outInterface;
+    newLabelEntry.inLabel =inLabel;
+    newLabelEntry.outLabel =outLabel;
+    lib.push_back(newLabelEntry);
 
-    prt_type *aPrt;
-    aPrt->pos=(lib.size()-1);
-    (aPrt->fecValue)= fec;
-    prt.push_back(*aPrt);
+    prt_type aPrt;
+    aPrt.pos= lib.size()-1;
+    aPrt.fecValue = fec;
+    prt.push_back(aPrt);
 }
 
 string LIBTable::requestNewLabel(string senderInterface, string oldLabel)
@@ -440,7 +409,7 @@ string LIBTable::requestIncomingInterface(IPAddressPrefix fec)
     string incomingInterface(ConstType::UnknownData);
     for(int i=0;i<prt.size();i++)
     {
-        if(prt[i].fecValue.isEqualTo(fec))
+        if(prt[i].fecValue.equals(fec))
         {
             int p = prt[i].pos;
             incomingInterface =lib[p].inInterface;
@@ -451,4 +420,3 @@ string LIBTable::requestIncomingInterface(IPAddressPrefix fec)
 }
 
 */
-

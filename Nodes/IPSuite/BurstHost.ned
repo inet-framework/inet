@@ -19,8 +19,8 @@
 
 
 import
-    "NetworkLayers",
-    "PingApp",
+    "NetworkLayer",
+    "LinkLayer",
     "TrafficGen";
 
 
@@ -31,13 +31,8 @@ import
 //
 module BurstHost
     parameters:
-
-        nodenr : numeric const,
         burstPackets : numeric const,
         packetSize : numeric const,
-        nodename : string,
-
-        // Network information
         routingFile : string;
     gates:
         in: in[];
@@ -46,35 +41,37 @@ module BurstHost
         burstGenerator: TrafficGenerator;
             parameters:
                 GeneratorType = "BurstGenerator",
-                nodename = nodename,
-                nodenr = nodenr,
                 tcpProtocol = false,
                 burstPackets = burstPackets,
                 generationTime = 0,
                 generationSize = packetSize;
+            display: "b=32,30;p=80,60";
         // control module
-        networkLayers: NetworkLayers;
+        networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
                 IPForward = false,
-                NWIName = "PPPModule",
                 numOfPorts = 1,
                 routingFile = routingFile;
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "b=32,30;p=87,155;i=fork";
+            display: "b=32,30;p=80,120;i=fork";
+        netIf : LinkLayer[1];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=80,180,row;i=iface";
     connections nocheck:
-
-                         // transport connections
-
-        networkLayers.UDPOut --> burstGenerator.in;
-        networkLayers.UDPIn <-- burstGenerator.out;
+        // transport connections
+        networkLayer.UDPOut --> burstGenerator.in;
+        networkLayer.UDPIn <-- burstGenerator.out;
 
         // connections to network outside
         for i=0..0 do
-            in[i] --> networkLayers.physIn[i];
-            out[i] <-- networkLayers.physOut[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
         endfor;
 
 endmodule

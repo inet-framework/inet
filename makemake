@@ -32,10 +32,8 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 
 (cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/McNetwork2 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
-(cd Examples/IPSuite/OldNetwork && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/PerformAnalysis && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/TCPClientServerNet && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
-(cd Examples/IPSuite/TCPFlavours && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/TCPTester && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/TCPUDPDirectNet && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/UDPSockets && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)

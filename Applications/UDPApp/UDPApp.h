@@ -23,6 +23,7 @@
 #ifndef __UDPAPP_H__
 #define __UDPAPP_H__
 
+#include <vector>
 #include <omnetpp.h>
 
 #include "basic_consts.h"
@@ -30,49 +31,41 @@
 
 
 /**
- * Base class for UDPServer and UDPClient
+ * UDP server app. See NED for more info.
  */
-class UDPAppBase: public cSimpleModule
+class UDPServerApp : public cSimpleModule
 {
   protected:
-    opp_string nodeName;
-    int localPort, destPort;
-    int msgLength;
-    simtime_t msgFreq;
-    int destType;
-
+    int numSent;
+    int numReceived;
   public:
-    Module_Class_Members(UDPAppBase, cSimpleModule, 0);
+    Module_Class_Members(UDPServerApp, cSimpleModule, 0);
     virtual void initialize();
-
-};
-
-/**
- * Receives packet, prints out content, reply to request
- */
-class UDPServer: public UDPAppBase
-{
-  public:
-    Module_Class_Members(UDPServer, UDPAppBase, 0);
     virtual void handleMessage(cMessage *msg);
 };
 
 /**
- * FIXME ...
+ * UDP client app. See NED for more info.
  */
-class UDPClient: public UDPAppBase
+class UDPClientApp : public cSimpleModule
 {
   protected:
-    int contCtr;
+    std::string nodeName;
+    int localPort, destPort;
+    int msgLength;
+    std::vector<IPAddress> destAddresses;
+    int counter;
+
+    int numSent;
+    int numReceived;
 
     // chooses random destination address
-    void chooseDestAddr(IPAddress& dest);
+    IPAddress chooseDestAddr();
 
   public:
-    Module_Class_Members(UDPClient, UDPAppBase, ACTIVITY_STACK_SIZE);
+    Module_Class_Members(UDPClientApp, cSimpleModule, 0);
     virtual void initialize();
-    virtual void activity();
-
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

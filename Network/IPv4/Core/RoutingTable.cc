@@ -53,7 +53,7 @@ void InterfaceEntry::info(char *buf)
     out << (!name.empty() ? name.c_str() : "*");
     out << "  e:" << (!encap.empty() ? encap.c_str() : "*");
     out << "  HW:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
-    out << "  ia:" << inetAddr.getString() << "  M:" << mask.getString();
+    out << "  ia:" << inetAddr << "  M:" << mask;
     out << "...";
     strcpy(buf, out.str().c_str());
 }
@@ -67,11 +67,11 @@ std::string InterfaceEntry::detailedInfo() const
     out << "\n";
 
     if (!inetAddr.isNull())
-        out << "inet addr:" << inetAddr.getString();
+        out << "inet addr:" << inetAddr;
     if (!bcastAddr.isNull())
-        out << "\tBcast: " << bcastAddr.getString();
+        out << "\tBcast: " << bcastAddr;
     if (!mask.isNull())
-        out << "\tMask: " << mask.getString();
+        out << "\tMask: " << mask;
     out << "\n";
 
     out << "MTU: " << mtu << " \tMetric: " << metric << "\n";
@@ -79,7 +79,7 @@ std::string InterfaceEntry::detailedInfo() const
     out << "Groups:";
     for (int j=0; j<multicastGroupCtr; j++)
         if (!multicastGroup[j].isNull())
-            out << "  " << multicastGroup[j].getString();
+            out << "  " << multicastGroup[j];
     out << "\n";
 
     if (broadcast) out << "BROADCAST ";
@@ -115,11 +115,11 @@ RoutingEntry::RoutingEntry()
 void RoutingEntry::info(char *buf)
 {
     std::stringstream out;
-    out << (!host.isNull() ? host.getString() : "*") << "  ";
-    out << (!gateway.isNull() ? gateway.getString() : "*") << "  ";
-    out << (!netmask.isNull() ? netmask.getString() : "*") << "  ";
+    if (host.isNull()) out << "*  "; else out << host << "  ";
+    if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
+    if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
     out << ref << "  ";
-    out << (!interfaceName.empty() ? interfaceName.c_str() : "*") << "  ";
+    if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE") << "  ";
     out << (routeInfo ? routeInfo : NULL);
     strcpy(buf, out.str().c_str());
@@ -141,11 +141,11 @@ bool RoutingEntry::correspondTo(const IPAddress& target,
                                 int metric,
                                 const char *dev)
 {
-    if (!target.isNull() && !target.isEqualTo(host))
+    if (!target.isNull() && !target.equals(host))
         return false;
-    if (!nmask.isNull() && !nmask.isEqualTo(netmask))
+    if (!nmask.isNull() && !nmask.equals(netmask))
         return false;
-    if (!gw.isNull() && !gw.isEqualTo(gateway))
+    if (!gw.isNull() && !gw.equals(gateway))
         return false;
     if (metric && metric!=metric)
         return false;
@@ -245,15 +245,15 @@ void RoutingTable::printRoutingTable()
 
 bool RoutingTable::localDeliver(const IPAddress& dest)
 {
-    Enter_Method("localDeliver(%s) y/n", dest.getString());
+    Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
 
     for (int i = 0; i < numIntrfaces; i++) {
-        if (dest.isEqualTo(intrface[i]->inetAddr)) {
+        if (dest.equals(intrface[i]->inetAddr)) {
             return true;
         }
     }
 
-    if (dest.isEqualTo(loopbackInterface->inetAddr)) {
+    if (dest.equals(loopbackInterface->inetAddr)) {
         ev << "LOCAL LOOPBACK INVOKED\n";
         return true;
     }
@@ -263,11 +263,11 @@ bool RoutingTable::localDeliver(const IPAddress& dest)
 
 bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 {
-    Enter_Method("multicastLocalDeliver(%s) y/n", dest.getString());
+    Enter_Method("multicastLocalDeliver(%s) y/n", dest.str().c_str());
 
     for (int i = 0; i < numIntrfaces; i++) {
         for (int j = 0; j < intrface[i]->multicastGroupCtr; j++) {
-            if (dest.isEqualTo(intrface[i]->multicastGroup[j])) {
+            if (dest.equals(intrface[i]->multicastGroup[j])) {
                 return true;
             }
         }
@@ -279,7 +279,7 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 
 int RoutingTable::outputPortNo(const IPAddress& dest)
 {
-    Enter_Method("outputPortNo(%s)=?", dest.getString());
+    Enter_Method("outputPortNo(%s)=?", dest.str().c_str());
 
     RoutingEntry *e;
     for (int i = 0; i < route->items(); i++) {
@@ -309,7 +309,7 @@ int RoutingTable::outputPortNo(const IPAddress& dest)
 
 int RoutingTable::multicastOutputPortNo(const IPAddress& dest, int index)
 {
-    Enter_Method("multicastOutputPortNo(%s, %d)=?", dest.getString(), index);
+    Enter_Method("multicastOutputPortNo(%s, %d)=?", dest.str().c_str(), index);
 
     if (index >= mcRoute->items())
         opp_error("wrong multicast port index");
@@ -378,7 +378,7 @@ int RoutingTable::findInterfaceByName(const char *name)
 
 int RoutingTable::findInterfaceByAddress(const IPAddress& addr)
 {
-    Enter_Method("findInterfaceByAddress(%s)=?", addr.getString());
+    Enter_Method("findInterfaceByAddress(%s)=?", addr.str().c_str());
     if (addr.isNull())
         return -1;
 
@@ -400,7 +400,7 @@ int RoutingTable::findInterfaceByAddress(const IPAddress& addr)
 
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 {
-    Enter_Method("nextGatewayAddress(%s)=?", dest.getString());
+    Enter_Method("nextGatewayAddress(%s)=?", dest.str().c_str());
 
     for (int i = 0; i < route->items(); i++) {
         if (route->get(i)) {

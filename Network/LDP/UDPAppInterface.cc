@@ -18,16 +18,16 @@
 #include "IPInterfacePacket.h"
 #include "IPAddress.h"
 
-class UDPAppInterface: public cSimpleModule
+class UDPAppInterface:public cSimpleModule
 {
-  Module_Class_Members(UDPAppInterface, cSimpleModule, 16384);
+    Module_Class_Members(UDPAppInterface, cSimpleModule, 16384);
 
-  virtual void activity();
-  virtual void initialize();
+    virtual void activity();
+    virtual void initialize();
 
-private:
-  bool debug;
-  const char* local_addr;
+  private:
+      bool debug;
+    const char *local_addr;
 };
 
 Define_Module(UDPAppInterface);
@@ -37,48 +37,46 @@ void UDPAppInterface::initialize()
     local_addr = par("local_addr").stringValue();
 
 }
+
 void UDPAppInterface::activity()
 {
 
 // FIXME THIS WOULDN'T WORK BECAUSE UDP NOW USES UDPInterfacePacket not cPars!!!
 
-        cMessage* msg = receive();
+    cMessage *msg = receive();
 
-        //delete ldpSignal;
+    // delete ldpSignal;
 
-        //Send out a broadcast message
+    // Send out a broadcast message
 
-        //cMessage *msg = new cMessage();
+    // cMessage *msg = new cMessage();
 
-        msg->setLength(1);
-        msg->addPar("content") = 1;
-        msg->addPar("request") = true;
+    msg->setLength(1);
+    msg->addPar("content") = 1;
+    msg->addPar("request") = true;
 
-        IPAddress *address =new IPAddress("224.0.0.0");
+    IPAddress *address = new IPAddress("224.0.0.0");
 
-        msg->addPar("dest_addr")=(address->getString());
-
-        msg->addPar("src_port") = 100;
-
-        msg->addPar("dest_port") = 100;
-
-        msg->addPar("src_addr")=local_addr;
+    msg->addPar("dest_addr") = (address->str().c_str());
+    msg->addPar("src_port") = 100;
+    msg->addPar("dest_port") = 100;
+    msg->addPar("src_addr") = local_addr;
 
 
-        ev << "UDP_APP_INTERFACE DEBUG: Sending upd broadcast\n";
-        send(msg, "to_udp_processing");
+    ev << "UDP_APP_INTERFACE DEBUG: Sending upd broadcast\n";
+    send(msg, "to_udp_processing");
 
-        cMessage* forMe = receive();
-        delete forMe;
+    cMessage *forMe = receive();
+    delete forMe;
 
-        while(true)
-        {
-        cMessage *msg1=receive();
+    while (true)
+    {
+        cMessage *msg1 = receive();
 
         ev << "UDP_APP_INTERFACE DEBUG: " <<
             "Message from " << (msg1->par("src_addr").stringValue()) << "\n";
 
         send(msg1, "toAppl");
-        }
+    }
 
 }

@@ -113,6 +113,7 @@ re-makemake: makefiles
 UDPApp.obj: UDPApp.cc \
   UDPApp.h \
   ..\..\Transport\UDP/UDPInterfacePacket_m.h \
+  ..\..\Util/StringTokenizer.h \
   ..\..\Base/basic_consts.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \

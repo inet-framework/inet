@@ -19,15 +19,12 @@ class BurstGenerator: public cSimpleModule
 private:
     int burstSize;
     int packetSize;
-    char nodename[NODE_NAME_SIZE];
-    int nodenr;
     int destctr;
     bool usesTCPProt;
 
     char *chooseDestAddr(char *);
 public:
-    Module_Class_Members(BurstGenerator, cSimpleModule,
-            ACTIVITY_STACK_SIZE);
+    Module_Class_Members(BurstGenerator, cSimpleModule, ACTIVITY_STACK_SIZE);
 
     void initialize();
     void activity();

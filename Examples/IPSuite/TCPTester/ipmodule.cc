@@ -1,13 +1,4 @@
 //
-//-----------------------------------------------------------------------------
-//-- fileName: ipmodule.cc
-//--
-//-- basic implementation of the internet protocol version 4 (IPv4)
-//--
-//-- V. Boehm, July 12 1999
-//--
-//-----------------------------------------------------------------------------
-//
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -23,117 +14,124 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+//
+// V. Boehm, July 12 1999
+//
 
 #include "ip.h"
 #include "tcp.h"
-#include "omnetpp.h"
+#include <omnetpp.h>
 
-class IpModule : public cSimpleModule
+/**
+ * Dummy implementation of IPv4
+ */
+class DummyIP : public cSimpleModule
 {
-private:
-  void fromTransProcessing(cMessage* segment);
-  void fromComNwProcessing(cMessage* datagram);
-  IpHeader* newIpHeader(void);
+  private:
+    void fromTransProcessing(cMessage * segment);
+    void fromDummyPPPProcessing(cMessage * datagram);
+    IpHeader *newIpHeader(void);
 
-public:
-  Module_Class_Members(IpModule, cSimpleModule, 16384);
-  virtual void activity();
+  public:
+      Module_Class_Members(DummyIP, cSimpleModule, 16384);
+    virtual void activity();
 };
 
 
-Define_Module(IpModule);
+Define_Module(DummyIP);
 
 
-void IpModule::activity()
+void DummyIP::activity()
 {
-  for(;;)
+    for (;;)
     {
-      //arriving message
-      cMessage* msg = receive();
+        //arriving message
+        cMessage *msg = receive();
 
-      if (msg->arrivedOn("from_tcp"))
+        if (msg->arrivedOn("from_tcp"))
         {
-          fromTransProcessing(msg);
+            fromTransProcessing(msg);
         }
-      else if (msg->arrivedOn("from_comnw"))
+        else if (msg->arrivedOn("from_ppp"))
         {
-          fromComNwProcessing(msg);
-        };
-    };
-};
+            fromDummyPPPProcessing(msg);
+        }
+    }
+}
 
 
-//if packet arrives from transport layer, encapsulate
-//the packet and send it to the network layer
-void IpModule::fromTransProcessing(cMessage* segment)
+void DummyIP::fromTransProcessing(cMessage * segment)
 {
-  ev << "IP received segment of " << segment->length() / 8 << " bytes from transport layer.\n";
+    // if packet arrives from transport layer, encapsulate
+    // the packet and send it to the network layer
 
-  //create a new IP datagram
-  cMessage* ip_datagram = new cMessage("IP_DATAGRAM", IP_DATAGRAM);
+    ev << "IP received segment of " << segment->length() / 8 << " bytes from transport layer.\n";
 
-  //create a new IP header
-  IpHeader* ip_header = newIpHeader();
+    // create a new IP datagram
+    cMessage *ip_datagram = new cMessage("IP_DATAGRAM", IP_DATAGRAM);
 
-  //fill in source and destination address
-  ip_header->ip_src = segment->par("src_addr");
-  ip_header->ip_dst = segment->par("dest_addr");
+    // create a new IP header
+    IpHeader *ip_header = newIpHeader();
 
-  //add IP header
-  ip_datagram->addPar("ipheader") = (void*) ip_header;
-  ip_datagram->par("ipheader").configPointer(NULL, NULL, sizeof(IpHeader));
+    // fill in source and destination address
+    ip_header->ip_src = segment->par("src_addr");
+    ip_header->ip_dst = segment->par("dest_addr");
 
-  //set length of the IP header without options (in bits)
-  ip_datagram->setLength(20 * 8);
+    // add IP header
+    ip_datagram->addPar("ipheader") = (void *) ip_header;
+    ip_datagram->par("ipheader").configPointer(NULL, NULL, sizeof(IpHeader));
 
-  //encapsulate segment from transport layer
-  ip_datagram->encapsulate(segment);
+    // set length of the IP header without options (in bits)
+    ip_datagram->setLength(20 * 8);
 
-  //send datagram
-  ev << "Sending IP datagram of " << ip_datagram->length() / 8 << " bytes to destination IP address " << ip_header->ip_dst << ".\n";
-  send(ip_datagram, "to_comnw");
+    // encapsulate segment from transport layer
+    ip_datagram->encapsulate(segment);
+
+    // send datagram
+    ev << "Sending IP datagram of " << ip_datagram->length() /
+        8 << " bytes to destination IP address " << ip_header->ip_dst << ".\n";
+    send(ip_datagram, "to_ppp");
 };
 
 
-//if packet arrives from network layer, decapsulate the
-//IP datagram and send the segment to the transport layer
-void IpModule::fromComNwProcessing(cMessage* datagram)
+void DummyIP::fromDummyPPPProcessing(cMessage * datagram)
 {
-  ev << "IP received datagram of " << datagram->length() / 8 << " bytes from network layer.\n";
+    // if packet arrives from network layer, decapsulate the
+    // IP datagram and send the segment to the transport layer
 
-  //get the segment from the incoming IP datagram
-  cMessage* segment = datagram->decapsulate();
-  delete datagram;
+    ev << "IP received datagram of " << datagram->length() / 8 << " bytes from network layer.\n";
 
-  //send the segment to the transport layer
-  ev << "Sending segment of " << segment->length() / 8 << " bytes to transport layer.\n";
-  send(segment, "to_tcp");
-};
+    //get the segment from the incoming IP datagram
+    cMessage *segment = datagram->decapsulate();
+    delete datagram;
+
+    //send the segment to the transport layer
+    ev << "Sending segment of " << segment->length() / 8 << " bytes to transport layer.\n";
+    send(segment, "to_tcp");
+}
 
 
 //function to create a new IP header
-IpHeader* IpModule::newIpHeader(void)
+IpHeader *DummyIP::newIpHeader()
 {
-  //create new Ip header
-  IpHeader* ip_header = new IpHeader;
+    //create new Ip header
+    IpHeader *ip_header = new IpHeader;
 
-  //fill in header information
-  // - 1 = information not yet available
-  ip_header->ip_v = 4;
-  ip_header->ip_hl = 5;      //no options included
-  ip_header->ip_len = -1;
-  ip_header->ip_id = -1;
-  ip_header->df = IP_F_SET;  //no fragmentation implemented yet
-  ip_header->mf = IP_F_NSET; //no fragmentation implemented yet
-  ip_header->ip_off = -1;
-  ip_header->ip_ttl = -1;    //not implemented yet
-  ip_header->ip_p = 6;       //only TCP included so far
-  ip_header->ip_src = -1;
-  ip_header->ip_dst = -1;
+    //fill in header information
+    // - 1 = information not yet available
+    ip_header->ip_v = 4;
+    ip_header->ip_hl = 5;       //no options included
+    ip_header->ip_len = -1;
+    ip_header->ip_id = -1;
+    ip_header->df = IP_F_SET;   //no fragmentation implemented yet
+    ip_header->mf = IP_F_NSET;  //no fragmentation implemented yet
+    ip_header->ip_off = -1;
+    ip_header->ip_ttl = -1;     //not implemented yet
+    ip_header->ip_p = 6;        //only TCP included so far
+    ip_header->ip_src = -1;
+    ip_header->ip_dst = -1;
 
-  return ip_header;
-};
-
-
-
-
+    return ip_header;
+}

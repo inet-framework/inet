@@ -24,8 +24,6 @@
 // and discards the message.
 //
 simple ErrorHandling
-    parameters:
-        nodename : string;
     gates:
         in: in;
 endsimple

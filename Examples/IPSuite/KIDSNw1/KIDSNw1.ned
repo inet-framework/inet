@@ -20,7 +20,7 @@
 
 
 import
-    "KIDSRouter",
+    "Router",
     "UDPHost";
 
 
@@ -36,43 +36,28 @@ endchannel
 
 module KIDSNw1
     submodules:
-        // *** Hosts ***
         host: UDPHost[3];
             parameters:
                 IPForward = false,
-                numOfPorts = 1,
-                udpRouteDestNo = 2,
-                packetSize = 10000;
+                numOfPorts = 1;
             parameters if index==0:
-                routingFile = "host1.irt",
-                nodenr = 1,
-                packetTime =  0.002 s,
-                nodename = "host 1";
+                routingFile = "host1.irt";
             parameters if index==1:
-                routingFile = "host2.irt",
-                nodenr = 2,
-                packetTime = 0.002 s,
-                nodename = "host 2";
+                routingFile = "host2.irt";
             parameters if index==2:
-                routingFile = "host3.irt",
-                nodenr = 3,
-                packetTime = 0.002 s,
-                nodename = "host 3";
+                routingFile = "host3.irt";
             gatesizes:
                 in[1],
                 out[1];
-
             display: "p=102,209,row;i=pc";
-        // *** Router ****
+
         // First Hop Router
-        fhrouter: KIDSRouter[2];
+        fhrouter: Router[2];
             parameters if index==0:
                 routingFile = "fhrouter1.irt",
-                nodename = "First Hop Router 1",
                 numOfPorts = 3;
             parameters if index==1:
                 routingFile = "fhrouter5.irt",
-                nodename = "First Hop Router 5",
                 numOfPorts = 2;
             gatesizes:
                 in[2],
@@ -80,34 +65,31 @@ module KIDSNw1
             gatesizes if index==0:
                 in[3],
                 out[3];
-
             display: "p=102,153,row;i=ipc";
+
         // InteriorRouter
-        irouter: KIDSRouter;
+        irouter: Router;
             parameters:
                 routingFile = "irouter2.irt",
-                nodename = "Interior Router 2",
                 numOfPorts = 2;
             gatesizes:
                 in[2],
                 out[2];
-
             display: "p=116,116;i=ipc";
+
         // Border Gatgeway Router
-        bgrouter: KIDSRouter[2];
+        bgrouter: Router[2];
             parameters:
                 numOfPorts = 2;
             parameters if index==0:
-                routingFile = "bgrouter3.irt",
-                nodename = "Border Gateway Router 3";
+                routingFile = "bgrouter3.irt";
             parameters if index==1:
-                routingFile = "bgrouter4.irt",
-                nodename = "Border Gateway Router 4";
+                routingFile = "bgrouter4.irt";
             gatesizes:
                 in[2],
                 out[2];
+            display: "p=135,64,row;i=srouter";
 
-            display: "p=135,64,row;i=router";
     connections nocheck:
         // * host connections *
         host[0].out[0] --> ethernet --> fhrouter[0].in[0];

@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= InfoManager.obj ip_address_prefix.obj LIBtable.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
+OBJS= ip_address_prefix.obj LIBtable.obj MPLSModule.obj MPLSPacket.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -77,26 +77,17 @@ $(OBJS) : $(GENERATEDHEADERS)
 
 subdirs: $(SUBDIR_TARGETS)
 
-InfoManager.obj: InfoManager.cc
-	$(CXX) -c $(COPTS) /Tp InfoManager.cc
-
 ip_address_prefix.obj: ip_address_prefix.cc
 	$(CXX) -c $(COPTS) /Tp ip_address_prefix.cc
 
 LIBtable.obj: LIBtable.cc
 	$(CXX) -c $(COPTS) /Tp LIBtable.cc
 
-MPLS2IP.obj: MPLS2IP.cc
-	$(CXX) -c $(COPTS) /Tp MPLS2IP.cc
-
 MPLSModule.obj: MPLSModule.cc
 	$(CXX) -c $(COPTS) /Tp MPLSModule.cc
 
 MPLSPacket.obj: MPLSPacket.cc
 	$(CXX) -c $(COPTS) /Tp MPLSPacket.cc
-
-StringTokenizer.obj: StringTokenizer.cc
-	$(CXX) -c $(COPTS) /Tp StringTokenizer.cc
 
 
 #doc: neddoc doxy
@@ -128,14 +119,13 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-InfoManager.obj: InfoManager.cc \
-  InfoManager.h
 ip_address_prefix.obj: ip_address_prefix.cc \
   ip_address_prefix.h \
   ..\IPv4\Core/IPAddress.h
 LIBtable.obj: LIBtable.cc \
   LIBtable.h \
-  StringTokenizer.h \
+  ..\..\Util/StringTokenizer.h \
+  ..\..\Util/stlwatch.h \
   ..\IPv4\Core/RoutingTableAccess.h \
   ip_address_prefix.h \
   ConstType.h \
@@ -143,11 +133,6 @@ LIBtable.obj: LIBtable.cc \
   ..\IPv4\Core/RoutingTable.h \
   ..\..\Base/ipsuite_defs.h \
   ..\IPv4\Core/IPAddress.h
-MPLS2IP.obj: MPLS2IP.cc \
-  MPLS2IP.h \
-  ..\IPv4\Core/hook_types.h \
-  ..\..\Base/QueueBase.h \
-  ..\..\Base/AbstractQueue.h
 MPLSModule.obj: MPLSModule.cc \
   MPLSModule.h \
   MPLSPacket.h \
@@ -166,5 +151,3 @@ MPLSModule.obj: MPLSModule.cc \
   ..\..\Base/ipsuite_defs.h
 MPLSPacket.obj: MPLSPacket.cc \
   MPLSPacket.h
-StringTokenizer.obj: StringTokenizer.cc \
-  StringTokenizer.h

@@ -125,8 +125,8 @@ void MyTCPServerProc::activity()
 
       msgLng = tcp_mss/4;  //bits
 
-       ev << "MY_TCP_SERVER_PROC DEBUG:  LSR(" << IPAddress(local_addr).getString() << ") received ESTAB from LSR(" <<
-       IPAddress(rem_addr).getString() << ")\n";;
+       ev << "MY_TCP_SERVER_PROC DEBUG:  LSR(" << IPAddress(local_addr) << ") received ESTAB from LSR(" <<
+       IPAddress(rem_addr) << ")\n";;
 
       delete msg;
 
@@ -192,8 +192,8 @@ void MyTCPServerProc::issueTCP_RECEIVE()
           //send "receive" to "TcpModule"
           send(receive_call, "out");
 
-        ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send TCP_C_RECEIVE to " <<
-        IPAddress(rem_addr).getString() << "\n";
+        ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr) << " send TCP_C_RECEIVE to " <<
+        IPAddress(rem_addr) << "\n";
 }
 
 
@@ -225,8 +225,8 @@ void MyTCPServerProc::sendKEEP_ALIVE()
 
       send_call->setTimestamp();
 
-      ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send DATA to " <<
-        IPAddress(rem_addr).getString() << "\n";
+      ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr) << " send DATA to " <<
+        IPAddress(rem_addr) << "\n";
       send(send_call, "out");
 
 
@@ -280,8 +280,8 @@ void MyTCPServerProc::processData(cMessage* msg)
     if ((msg->kind()) == TCP_I_SEG_FWD)
     {
 
-    ev << "MY_TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
-    IPAddress(rem_addr).getString() << "\n";
+    ev << "MY_TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr) << " receives data from " <<
+    IPAddress(rem_addr) << "\n";
 
     delete msg;
 

@@ -40,160 +40,92 @@ endchannel
 
 module McNetwork2
     submodules:
-                // *** Hosts ***
-
-        // Host 1
         host1: UDPHost;
             parameters:
-                // network parameters
                 IPForward = false,
                 numOfPorts = 1,
-                routingFile = "mchost1.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 0.9 s,
-                packetSize = 100000,
-                nodenr = 1,
-                nodename = "host 1";
+                routingFile = "mchost1.mrt";
             gatesizes:
                 in[1],
                 out[1];
             display: "p=62,46;i=pc";
-        // Host 2
         host2: UDPHost;
             parameters:
-                // network parameters
                 IPForward = true,
                 numOfPorts = 2,
-                routingFile = "mchost2.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 0.2 s,
-                packetSize = 10000,
-                nodenr = 2,
-                nodename = "host 2";
+                routingFile = "mchost2.mrt";
             gatesizes:
                 in[2],
                 out[2];
-
-            display: "p=38,198;i=pc";
-        // Host 3
+            display: "p=38,200;i=pc";
         host3: UDPHost;
             parameters:
-                // network parameters
                 IPForward = true,
                 numOfPorts = 2,
-                routingFile = "mchost3.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 0.3 s,
-                packetSize = 20000,
-                nodenr = 3,
-                nodename = "host 3";
+                routingFile = "mchost3.mrt";
             gatesizes:
                 in[2],
                 out[2];
-
-            display: "p=140,197;i=pc";
-        // Host 4
+            display: "p=140,200;i=pc";
         host4: UDPHost;
             parameters:
-                // network parameters
                 IPForward = false,
                 numOfPorts = 1,
-                routingFile = "mchost4.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 0.5 s,
-                packetSize = 30000,
-                nodenr = 4,
-                nodename = "host 4";
+                routingFile = "mchost4.mrt";
             gatesizes:
                 in[1],
                 out[1];
-
-            display: "p=219,269;i=pc";
-        // Host 5
+            display: "p=240,269;i=pc";
         host5: UDPHost;
             parameters:
-                // network parameters
                 IPForward = false,
                 numOfPorts = 1,
-                routingFile = "mchost5.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 0.3 s,
-                packetSize = 20000,
-                nodenr = 5,
-                nodename = "host 5";
+                routingFile = "mchost5.mrt";
             gatesizes:
                 in[1],
                 out[1];
-
             display: "p=344,41;i=pc";
-        // Host 6
         host6: UDPHost;
             parameters:
-                // network parameters
                 IPForward = false,
                 numOfPorts = 1,
-                routingFile = "mchost6.mrt",
-                // UDP Transport parameters
-                udpRouteDestNo = 2,
-                packetTime = 1.1 s,
-                packetSize = 8000,
-                nodenr = 6,
-                nodename = "host 6";
+                routingFile = "mchost6.mrt";
             gatesizes:
                 in[1],
                 out[1];
             display: "p=364,189;i=pc";
-        // *** Router ****
-        // Router 1
         router1: Router;
             parameters:
-                // network parameters
                 numOfPorts = 4,
-                routingFile = "mcrouter1.mrt",
-                nodename = "router 1";
+                routingFile = "mcrouter1.mrt";
             gatesizes:
                 in[4],
                 out[4];
-
-            display: "p=68,115;i=ipc";
-        // Router 2
+            display: "p=68,115;i=srouter";
         router2: Router;
             parameters:
-                // network parameters
                 numOfPorts = 3,
-                routingFile = "mcrouter2.mrt",
-                nodename = "router 2";
+                routingFile = "mcrouter2.mrt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=214,113;i=router";
-        // Router 3
+            display: "p=214,115;i=srouter";
         router3: Router;
             parameters:
-                // network parameters
                 numOfPorts = 2,
-                routingFile = "mcrouter3.mrt",
-                nodename = "router 3";
+                routingFile = "mcrouter3.mrt";
             gatesizes:
                 in[2],
                 out[2];
-            display: "p=212,194;i=pc";
-        // Router 4
+            display: "p=214,194;i=srouter";
         router4: Router;
             parameters:
-                // network parameters
                 numOfPorts = 3,
-                routingFile = "mcrouter4.mrt",
-                nodename = "router 4";
+                routingFile = "mcrouter4.mrt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=299,116;i=ipc";
+            display: "p=300,115;i=srouter";
     connections:
         // * Domain 1 * (172.0.0.x)
         host1.out[0] --> ethernet --> router1.in[0];
@@ -227,8 +159,6 @@ module McNetwork2
 
         router2.out[2] --> fiberrouter --> router4.in[2];
         router2.in[2] <-- fiberrouter <-- router4.out[2];
-
-    display: "p=10,10;b=390,309,rect";
 endmodule
 
 network mcNetwork2 : McNetwork2

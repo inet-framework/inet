@@ -23,14 +23,14 @@ import
     "dropswitch",
     "switch",
     "ipmodule",
-    "comnw";
+    "ppp";
 
 
 //
 // Part of TCPTester.
 //
 module Client
-        parameters:
+    parameters:
       client_name : string,
       l_addr : numeric,
       s_addr : numeric;
@@ -56,8 +56,8 @@ module Client
         TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe): "),
         TCPFastRecovery = input(false, "Fast Recovery: "),
         TCPNewReno = input(false, "New Reno: ");
-      ip: IpModule;
-      comnw: ComNw;
+      ip: DummyIP;
+      ppp: DummyPPP;
        parameters:
         nw_length = input(18, "Number of bytes added by the network layer: ");
     connections:
@@ -65,10 +65,10 @@ module Client
        applclient.in <-- tcp.to_appl,
        tcp.to_ip --> ip.from_tcp,
        tcp.from_ip  <-- ip.to_tcp,
-       ip.to_comnw --> comnw.from_ip,
-       ip.from_comnw <-- comnw.to_ip,
-       comnw.to_compound --> to_switch,
-       comnw.from_compound <-- from_switch;
+       ip.to_ppp --> ppp.from_ip,
+       ip.from_ppp <-- ppp.to_ip,
+       ppp.to_compound --> to_switch,
+       ppp.from_compound <-- from_switch;
 endmodule
 
 
@@ -76,7 +76,7 @@ endmodule
 // Part of TCPTester.
 //
 module Server
-        parameters:
+   parameters:
       server_name : string,
       l_addr : numeric,
       s_addr: numeric;
@@ -102,8 +102,8 @@ module Server
             TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe): "),
             TCPFastRecovery = input(false, "Fast Recovery: "),
             TCPNewReno = input(false, "New Reno: ");
-       ip: IpModule;
-       comnw: ComNw;
+       ip: DummyIP;
+       ppp: DummyPPP;
          parameters:
             nw_length = input(18, "Number of bytes added by the network layer: ");
     connections:
@@ -111,10 +111,10 @@ module Server
        applserver.in <-- tcp.to_appl,
        tcp.to_ip --> ip.from_tcp,
        tcp.from_ip <-- ip.to_tcp,
-       ip.to_comnw --> comnw.from_ip,
-       ip.from_comnw <-- comnw.to_ip,
-       comnw.to_compound --> to_switch,
-       comnw.from_compound <-- from_switch;
+       ip.to_ppp --> ppp.from_ip,
+       ip.from_ppp <-- ppp.to_ip,
+       ppp.to_compound --> to_switch,
+       ppp.from_compound <-- from_switch;
 endmodule
 
 

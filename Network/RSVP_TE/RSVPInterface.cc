@@ -19,14 +19,14 @@
 #include "RSVPInterface.h"
 #include "IPInterfacePacket.h"
 
-Define_Module( RSVPInterface );
+Define_Module(RSVPInterface);
 
 void RSVPInterface::initialize()
 {
 
 }
 
-void RSVPInterface::handleMessage(cMessage *msg)
+void RSVPInterface::handleMessage(cMessage * msg)
 {
     if (strcmp(msg->arrivalGate()->name(), "from_ip") == 0)
     {
@@ -42,60 +42,60 @@ void RSVPInterface::handleMessage(cMessage *msg)
 
 
 
-void RSVPInterface::processMsgFromIp(cMessage *msg)
+void RSVPInterface::processMsgFromIp(cMessage * msg)
 {
-    //int i;
-    //int applicationNo = -1;
-    //int port;
+    // int i;
+    // int applicationNo = -1;
+    // int port;
     PathMessage *pMsg;
     ResvMessage *rMsg;
     PathTearMessage *ptMsg;
     PathErrorMessage *peMsg;
-    //ResvTearMessage *rtMsg;
-    //ResvErrorMessage *reMsg;
+    // ResvTearMessage *rtMsg;
+    // ResvErrorMessage *reMsg;
 
-    IPInterfacePacket *iPacket = check_and_cast<IPInterfacePacket *>(msg);
+    IPInterfacePacket *iPacket = check_and_cast < IPInterfacePacket * >(msg);
 
-    TransportPacket* tpacket = check_and_cast<TransportPacket*>(iPacket->decapsulate());
-    cMessage* rsvpMsg =(cMessage*)( tpacket->par("rsvp_data").objectValue());
+    TransportPacket *tpacket = check_and_cast < TransportPacket * >(iPacket->decapsulate());
+    cMessage *rsvpMsg = (cMessage *) (tpacket->par("rsvp_data").objectValue());
     int msgKind = rsvpMsg->kind();
 
-    int peerInf =0;
+    int peerInf = 0;
 
-    switch(msgKind)
+    switch (msgKind)
     {
     case PATH_MESSAGE:
 
-           pMsg = new PathMessage();
-             pMsg->setContent(check_and_cast<PathMessage*>(rsvpMsg));
+        pMsg = new PathMessage();
+        pMsg->setContent(check_and_cast < PathMessage * >(rsvpMsg));
 
-             if(rsvpMsg->hasPar("peerInf"))
-             {
-                 peerInf = rsvpMsg->par("peerInf").longValue();
-                 pMsg->addPar("peerInf") = peerInf;
-             }
+        if (rsvpMsg->hasPar("peerInf"))
+        {
+            peerInf = rsvpMsg->par("peerInf").longValue();
+            pMsg->addPar("peerInf") = peerInf;
+        }
 
-             send(pMsg, "to_rsvp_app");
+        send(pMsg, "to_rsvp_app");
 
         break;
 
     case RESV_MESSAGE:
         rMsg = new ResvMessage();
-          rMsg->setContent(check_and_cast<ResvMessage*>(rsvpMsg));
-          send(rMsg, "to_rsvp_app");
+        rMsg->setContent(check_and_cast < ResvMessage * >(rsvpMsg));
+        send(rMsg, "to_rsvp_app");
 
         break;
 
     case PTEAR_MESSAGE:
         ptMsg = new PathTearMessage();
-        ptMsg->setContent(check_and_cast<PathTearMessage*>(rsvpMsg));
+        ptMsg->setContent(check_and_cast < PathTearMessage * >(rsvpMsg));
         send(ptMsg, "to_rsvp_app");
 
         break;
 
     case PERROR_MESSAGE:
         peMsg = new PathErrorMessage();
-        peMsg->setContent(check_and_cast<PathErrorMessage*>(rsvpMsg));
+        peMsg->setContent(check_and_cast < PathErrorMessage * >(rsvpMsg));
         send(peMsg, "to_rsvp_app");
         break;
 
@@ -104,11 +104,11 @@ void RSVPInterface::processMsgFromIp(cMessage *msg)
     }
 }
 
-void RSVPInterface::processMsgFromApp(cMessage *msg)
+void RSVPInterface::processMsgFromApp(cMessage * msg)
 {
-    //FIXME was this: TransportPacket* tpacket = new TransportPacket(*msg);
-    TransportPacket* tpacket = new TransportPacket();
-    *(cMessage *)tpacket = *msg;  // copy parameters (not sure this is needed -- Andras)
+    // FIXME was this: TransportPacket* tpacket = new TransportPacket(*msg);
+    TransportPacket *tpacket = new TransportPacket();
+    *(cMessage *) tpacket = *msg;       // copy parameters (not sure this is needed -- Andras)
     tpacket->addPar("rsvp_data") = msg;
 
     IPInterfacePacket *iPacket = new IPInterfacePacket();
@@ -116,18 +116,20 @@ void RSVPInterface::processMsgFromApp(cMessage *msg)
     iPacket->encapsulate(tpacket);
 
     // FIXME eliminate MY_ERROR_IP_ADDRESS? NULL and IPAddress.isNull() should be OK instead
-    IPAddress src_addr = msg->hasPar("src_addr") ? msg->par("src_addr").stringValue() : MY_ERROR_IP_ADDRESS;
-    IPAddress dest_addr = msg->hasPar("dest_addr") ? msg->par("dest_addr").stringValue() : MY_ERROR_IP_ADDRESS;
+    IPAddress src_addr =
+        msg->hasPar("src_addr") ? msg->par("src_addr").stringValue() : MY_ERROR_IP_ADDRESS;
+    IPAddress dest_addr =
+        msg->hasPar("dest_addr") ? msg->par("dest_addr").stringValue() : MY_ERROR_IP_ADDRESS;
 
     // encapsulate udpPacket into an IPInterfacePacket
     iPacket->setDestAddr(dest_addr);
-    if (!src_addr.isEqualTo(MY_ERROR_IP_ADDRESS))
+    if (!src_addr.equals(MY_ERROR_IP_ADDRESS))
     {
         iPacket->setSrcAddr(src_addr);
     }
     iPacket->setProtocol(IP_PROT_RSVP);
 
-    send(iPacket,"to_ip");
+    send(iPacket, "to_ip");
 
 
 }

@@ -20,27 +20,21 @@
 #include <omnetpp.h>
 #include "UDPApp.h"
 #include "UDPInterfacePacket_m.h"
+#include "StringTokenizer.h"
 
 
-// No module definition required, since there's no NED definition
-// Define_Module( UDPAppBase );
+Define_Module(UDPServerApp);
 
-void UDPAppBase::initialize()
+
+void UDPServerApp::initialize()
 {
-    nodeName = par("nodename");
-    localPort = par("local_port");
-    destPort = par("dest_port");
-    msgLength = par("message_length");
-    msgFreq = par("message_freq");
-    destType = par("routeDestNo");
+    numSent = 0;
+    numReceived = 0;
+    WATCH(numSent);
+    WATCH(numReceived);
 }
 
-
-//=====================================================
-
-Define_Module(UDPServer);
-
-void UDPServer::handleMessage(cMessage *msg)
+void UDPServerApp::handleMessage(cMessage *msg)
 {
     UDPInterfacePacket *udpIfPacket = check_and_cast<UDPInterfacePacket *>(msg);
     cMessage *payload = udpIfPacket->decapsulate();
@@ -50,10 +44,12 @@ void UDPServer::handleMessage(cMessage *msg)
     int sentPort = udpIfPacket->getSrcPort();
     int recPort = udpIfPacket->getDestPort();
 
-    ev  << nodeName.c_str() << " UDP Server: Packet received: " << payload << endl;
+    ev  << "Packet received: " << payload << endl;
     ev  << "Payload length: " << (payload->length()/8) << " bytes" << endl;
-    ev  << "Src/Port: " << src.getString() << " / " << sentPort << "  ";
-    ev  << "Dest/Port: " << dest.getString() << " / " << recPort << endl;
+    ev  << "Src/Port: " << src << " / " << sentPort << "  ";
+    ev  << "Dest/Port: " << dest << " / " << recPort << endl;
+
+    numReceived++;
 
     delete udpIfPacket;
     delete payload;
@@ -63,64 +59,64 @@ void UDPServer::handleMessage(cMessage *msg)
 //===============================================
 
 
-Define_Module(UDPClient);
+Define_Module(UDPClientApp);
 
-void UDPClient::initialize()
+void UDPClientApp::initialize()
 {
-    UDPAppBase::initialize();
-    contCtr++;
-}
+    localPort = par("local_port");
+    destPort = par("dest_port");
+    msgLength = par("message_length");
 
-void UDPClient::activity()
-{
-    int contCtr = intrand(100);
+    const char *destAddrs = par("dest_addresses");
+    StringTokenizer tokenizer(destAddrs);
+    const char *token;
+    while ((token = tokenizer.nextToken())!=NULL)
+        destAddresses.push_back(IPAddress(token));
 
-    wait(1);
+    counter = 0;
 
-    while(true)
-    {
-        wait(truncnormal(msgFreq, msgFreq * 0.1));
+    numSent = 0;
+    numReceived = 0;
+    WATCH(numSent);
+    WATCH(numReceived);
 
-        cMessage *payload = new cMessage();
-        payload->setLength(8*(1+intrand(msgLength)));
-
-        UDPInterfacePacket *udpIfPacket = new UDPInterfacePacket();
-        udpIfPacket->encapsulate(payload);
-
-        IPAddress destAddr;
-        chooseDestAddr(destAddr);
-        udpIfPacket->setDestAddr(destAddr);
-        udpIfPacket->setSrcPort(localPort);
-        udpIfPacket->setDestPort(destPort);
-
-        ev << nodeName.c_str() <<" UDP App: Packet sent: " << payload << endl;
-        ev << "Payload length: " << (payload->length()/8) << " bytes" << endl;
-        ev << "Src/Port: unknown / " << localPort << "  ";
-        ev << "Dest/Port: " << destAddr.getString() << " / " << destPort << endl;
-
-        send(udpIfPacket, "to_udp");
-    }
+    cMessage *timer = new cMessage("sendTimer");
+    scheduleAt((double)par("message_freq"), timer);
 }
 
 
-void UDPClient::chooseDestAddr(IPAddress& dest)
+void UDPClientApp::handleMessage(cMessage *msg)
 {
-    // data based on test2.irt
-    int typeCtr = 3;
-    int destCtr[] = {6, 5, 12};
-    char *destAddrArray[][20] = {
-        // MC Network 1
-        { "225.0.0.1", "230.0.0.1", "230.0.1.0", "230.0.1.1", "10.0.1.3", "127.0.0.1"},
-        // TCP/UDP complete netowrk
-        { "10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "127.0.0.1"},
-        // MC Network 2
-        { "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.1.1", "172.0.2.1", "172.0.2.2",
-          "225.0.0.1", "225.0.0.2", "225.0.0.3", "225.0.1.1", "225.0.1.2", "225.0.2.1"}
-    };
+    // reschedule next sending
+    scheduleAt(simTime()+(double)par("message_freq"), msg);
 
-    if (destType >= typeCtr)
-        opp_error("wrong routeDestNo value %d", destType);
+    char msgName[32];
+    sprintf(msgName,"udpAppData-%d", counter++);
 
-    dest = destAddrArray[destType][intrand(destCtr[destType])];
+    cMessage *payload = new cMessage(msgName);
+    payload->setLength(msgLength);
+
+    UDPInterfacePacket *udpIfPacket = new UDPInterfacePacket();
+    udpIfPacket->encapsulate(payload);
+
+    IPAddress destAddr = chooseDestAddr();
+    udpIfPacket->setDestAddr(destAddr);
+    udpIfPacket->setSrcPort(localPort);
+    udpIfPacket->setDestPort(destPort);
+
+    ev << "Packet sent: " << payload << endl;
+    ev << "Payload length: " << (payload->length()/8) << " bytes" << endl;
+    ev << "Src/Port: unknown / " << localPort << "  ";
+    ev << "Dest/Port: " << destAddr << " / " << destPort << endl;
+
+    send(udpIfPacket, "to_udp");
+    numSent++;
+}
+
+
+IPAddress UDPClientApp::chooseDestAddr()
+{
+    int k = intrand(destAddresses.size());
+    return destAddresses[k];
 }
 

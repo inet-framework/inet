@@ -40,11 +40,10 @@ Define_Module(Tcp2Ip);
 
 void Tcp2Ip::handleMessage(cMessage *msg)
 {
-//    IPAddrChar src_addr, dest_addr;
-
     // put the message into a TransportPacket instance
-    //FIXME was this: TransportPacket *tpacket = new TransportPacket(*msg);
     TransportPacket *tpacket = new TransportPacket();
+    (cMessage&)(*tpacket) = *msg;  // copy parameters, length, etc
+
 
     // set kind of the transport packet
     // this comes from tcpmodule and could be ACK_SEG, DATA etc.
@@ -59,12 +58,12 @@ void Tcp2Ip::handleMessage(cMessage *msg)
     // encapsulate tpacket into an IPInterfacePacket
     IPInterfacePacket *ipintpacket = new IPInterfacePacket();
     ipintpacket->encapsulate(tpacket);
-    ipintpacket->setDestAddr(IPAddress((int)msg->par("dest_addr")).getString());
-    ipintpacket->setSrcAddr(IPAddress((int)msg->par("src_addr")).getString());
+    ipintpacket->setDestAddr(IPAddress((int)msg->par("dest_addr")));
+    ipintpacket->setSrcAddr(IPAddress((int)msg->par("src_addr")));
     ipintpacket->setProtocol(IP_PROT_TCP);
 
     // we don't set other values now
-        delete msg;
+    delete msg;
 
     // send ipintpacket out to IP
     send(ipintpacket, "out");

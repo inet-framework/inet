@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= KIDSNw1 McNetwork2 OldNetwork PerformAnalysis TCPClientServerNet TCPFlavours TCPTester TCPUDPDirectNet UDPSockets
-SUBDIR_TARGETS=  KIDSNw1_dir McNetwork2_dir OldNetwork_dir PerformAnalysis_dir TCPClientServerNet_dir TCPFlavours_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
+SUBDIRS= KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
+SUBDIR_TARGETS=  KIDSNw1_dir McNetwork2_dir PerformAnalysis_dir TCPClientServerNet_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
@@ -81,17 +81,11 @@ KIDSNw1_dir:
 McNetwork2_dir:
 	cd McNetwork2 && cd && nmake /nologo /f Makefile.vc
 
-OldNetwork_dir:
-	cd OldNetwork && cd && nmake /nologo /f Makefile.vc
-
 PerformAnalysis_dir:
 	cd PerformAnalysis && cd && nmake /nologo /f Makefile.vc
 
 TCPClientServerNet_dir:
 	cd TCPClientServerNet && cd && nmake /nologo /f Makefile.vc
-
-TCPFlavours_dir:
-	cd TCPFlavours && cd && nmake /nologo /f Makefile.vc
 
 TCPTester_dir:
 	cd TCPTester && cd && nmake /nologo /f Makefile.vc

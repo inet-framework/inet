@@ -16,53 +16,59 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import  
-    "NetworkLayers", 
-    "UDPProcessing", 
-    "SocketApp", 
-    "socketlayer"; 
-                   
+import
+    "LinkLayer",
+    "NetworkLayer",
+    "UDPProcessing",
+    "SocketApp",
+    "socketlayer";
+
 
 // FIXME socketLayer should get a local_port parameter, UDPProcessing needs that (?!?!)
-module UDPSocketHost 
-    parameters: 
-        client_name : string, 
-        numOfPorts : numeric, 
-        routingFile : string; 
-    gates: 
-        in: in[]; 
-        out: out[]; 
-                    
-    submodules: 
-        applClient: client_name like SocketApp; 
-            display: "p=87,30;i=proc1";
-        socketLayer: SocketLayer; 
-            display: "p=87,90;i=prot1";
-        udp: UDPProcessing; 
-            display: "p=87,150;i=prot2";
-        networkLayers: NetworkLayers; 
-            parameters: 
-                IPForward = false, 
-                NWIName = "PPPModule", 
-                numOfPorts = numOfPorts, 
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[numOfPorts], 
-                physOut[numOfPorts]; 
-            display: "p=87,210;i=fork";
-    connections nocheck: 
+module UDPSocketHost
+    parameters:
+        client_name : string,
+        numOfPorts : numeric,
+        routingFile : string;
+    gates:
+        in: in[];
+        out: out[];
+
+    submodules:
+        applClient: client_name like SocketApp;
+            display: "p=80,40;i=proc1";
+        socketLayer: SocketLayer;
+            display: "p=80,100;i=prot1";
+        udp: UDPProcessing;
+            display: "p=80,160;i=prot2";
+        networkLayer: NetworkLayer;
+            parameters:
+                IPForward = false,
+                numOfPorts = numOfPorts,
+                routingFile = routingFile;
+            gatesizes:
+                physIn[numOfPorts],
+                physOut[numOfPorts];
+            display: "p=80,220;i=fork";
+        netIf : LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=80,280,row;i=iface";
+    connections nocheck:
         // transport connections
-        applClient.out --> socketLayer.from_appl[0]; 
-        applClient.in <-- socketLayer.to_appl[0]; 
-        socketLayer.to_udp --> udp.from_application; 
-        socketLayer.from_udp <-- udp.to_application; 
-        networkLayers.UDPOut --> udp.from_ip; 
-        networkLayers.UDPIn <-- udp.to_ip; 
-                                                 
+        applClient.out --> socketLayer.from_appl[0];
+        applClient.in <-- socketLayer.to_appl[0];
+        socketLayer.to_udp --> udp.from_application;
+        socketLayer.from_udp <-- udp.to_application;
+        networkLayer.UDPOut --> udp.from_ip;
+        networkLayer.UDPIn <-- udp.to_ip;
+
         // connections to network outside
-        for i=0..numOfPorts-1 do 
-            in[i] --> networkLayers.physIn[i]; 
-            out[i] <-- networkLayers.physOut[i]; 
-        endfor; 
-endmodule 
+        for i=0..numOfPorts-1 do
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
+        endfor;
+endmodule
 

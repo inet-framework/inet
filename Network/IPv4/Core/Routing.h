@@ -37,6 +37,13 @@ class Routing : public QueueWithQoS
     ICMPAccess icmpAccess;
     bool IPForward;
 
+    // statistics
+    int numMulticast;
+    int numLocalDeliver;
+    int numDropped;
+    int numUnroutable;
+    int numForwarded;
+
   public:
     Module_Class_Members(Routing, QueueWithQoS, 0);
 

@@ -20,8 +20,8 @@
 //
 // IP module
 //
-simple IpModule
+simple DummyIP
        gates:
-         in: from_tcp, from_comnw;
-     out: to_tcp, to_comnw;
+         in: from_tcp, from_ppp;
+     out: to_tcp, to_ppp;
 endsimple

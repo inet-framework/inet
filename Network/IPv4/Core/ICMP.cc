@@ -72,19 +72,14 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
 
     ICMPMessage *errorMessage = new ICMPMessage();
-    IPDatagram *e = (IPDatagram *)origDatagram->dup();
-
     errorMessage->setType(type);
     errorMessage->setCode(code);
     errorMessage->setIsError(true);
-    errorMessage->encapsulate(e);
+    errorMessage->encapsulate(origDatagram);
     // ICMP message length: see above
-    errorMessage->setLength(8 * (4 + e->headerLength() + 8));
+    errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
 
-    // origDatagram should get deleted here, e not
-    delete origDatagram;
-
-    sendInterfacePacket(errorMessage, e->srcAddress());
+    sendInterfacePacket(errorMessage, origDatagram->srcAddress());
 
     // debugging information
     ev << "sending error message: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;

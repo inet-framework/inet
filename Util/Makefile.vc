@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= stlwatch.obj
+OBJS= stlwatch.obj StringTokenizer.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -79,6 +79,9 @@ subdirs: $(SUBDIR_TARGETS)
 
 stlwatch.obj: stlwatch.cc
 	$(CXX) -c $(COPTS) /Tp stlwatch.cc
+
+StringTokenizer.obj: StringTokenizer.cc
+	$(CXX) -c $(COPTS) /Tp StringTokenizer.cc
 
 
 #doc: neddoc doxy
@@ -112,3 +115,5 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 stlwatch.obj: stlwatch.cc \
   stlwatch.h
+StringTokenizer.obj: StringTokenizer.cc \
+  StringTokenizer.h

@@ -17,40 +17,38 @@
 //
 
 
-import  
-    "Router", 
-    "UDPSocketHost"; 
-                     
- 
-module UDPSockets 
-    submodules: 
+import
+    "Router",
+    "UDPSocketHost";
+
+
+module UDPSockets
+    submodules:
         // server
-        server1: UDPSocketHost; 
-            parameters: 
-                client_name = "UDPSocketTestServer", 
-                //nodename = "server 1", 
-                numOfPorts = 1, 
-                routingFile = "server1.irt"; 
-            gatesizes: 
-                in[1], 
-                out[1]; 
+        server1: UDPSocketHost;
+            parameters:
+                client_name = "UDPSocketTestServer",
+                numOfPorts = 1,
+                routingFile = "server1.irt";
+            gatesizes:
+                in[1],
+                out[1];
             display: "p=40,83;i=comp";
         // clients
-        client2: UDPSocketHost; 
-            parameters: 
-                client_name = "UDPSocketTestClient", 
-                //nodename = "client 2", 
-                numOfPorts = 1, 
-                routingFile = "client2.irt"; 
-            gatesizes: 
-                in[1], 
-                out[1]; 
+        client2: UDPSocketHost;
+            parameters:
+                client_name = "UDPSocketTestClient",
+                numOfPorts = 1,
+                routingFile = "client2.irt";
+            gatesizes:
+                in[1],
+                out[1];
             display: "p=200,83;i=comp";
-    connections: 
-        server1.out[0] --> client2.in[0]; 
-        client2.out[0] --> server1.in[0]; 
-endmodule 
+    connections:
+        server1.out[0] --> client2.in[0];
+        client2.out[0] --> server1.in[0];
+endmodule
 
-network udpsockets : UDPSockets 
-endnetwork 
+network udpsockets : UDPSockets
+endnetwork
 

@@ -171,8 +171,8 @@ void MyTCPClient::sendKEEP_ALIVE()
     send_call->addPar("keep_alive") =0;
     send_call->setTimestamp();
 
-    ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " send data to " <<
-    IPAddress(rem_addr).getString() << "\n";
+    ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr) << " send data to " <<
+    IPAddress(rem_addr) << "\n";
     send(send_call, "out");
 }
 
@@ -213,8 +213,8 @@ void MyTCPClient::processData(cMessage* msg)
 {
     if ((msg->kind()) == TCP_I_SEG_FWD)
     {
-        ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
-        IPAddress(rem_addr).getString() << "\n";
+        ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr) << " receives data from " <<
+        IPAddress(rem_addr) << "\n";
         delete msg;
     }
     else

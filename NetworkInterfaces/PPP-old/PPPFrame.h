@@ -83,10 +83,6 @@ public:
     virtual void info(char *buf);
     virtual void writeContents(ostream& os);
 
-
-    // overriding encapsulation-function for cPackets
-    virtual void encapsulate(cPacket *);
-
     // header length functions
     int headerBitLength() { return 8 * PPP_HEADER_LENGTH; }
     int headerByteLength() { return PPP_HEADER_LENGTH; }

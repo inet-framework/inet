@@ -29,12 +29,13 @@
 
 #include <omnetpp.h>
 #include <iostream>
+#include <string>
 
 /**
  * String size to hold an address.
  * This is the size of the string that should be used to
- * initialize the IPAddress class, and it is the size of the string
- * returned by IPAddress::getString()
+ * initialize the IPAddress class, and it is the max length of the string
+ * returned by IPAddress::str()
  */
 const int ADDRESS_STRING_SIZE = 20;
 
@@ -63,14 +64,11 @@ class IPAddress
     // Example for the address 192.24.65.10: addr[0]=192, addr[1]=24 etc.
     unsigned char addr[4];
 
-    // to store the return value for getString()
-    mutable char addrString[ADDRESS_STRING_SIZE];
-
   protected:
     // Only keeps the n first bits of the address, completing it with zeros.
     // Typical usage is when the length of an IP prefix is done and to check
     // the address ends with the right number of 0.
-    virtual void keepFirstBits (unsigned int n);
+    void keepFirstBits (unsigned int n);
 
     // Parses IP address into the given bytes, and returns true if syntax was OK.
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
@@ -103,7 +101,7 @@ class IPAddress
      */
     IPAddress(const IPAddress& obj);
 
-    virtual ~IPAddress() {}
+    ~IPAddress() {}
     //@}
 
     /** name Setting the address */
@@ -127,73 +125,74 @@ class IPAddress
     /**
      * Assignment
      */
-    virtual IPAddress& operator=(const IPAddress& obj);
+    IPAddress& operator=(const IPAddress& obj);
 
     /**
-     * FIXME or is "0.0.0.0" a valid address?
+     * True if all four address bytes are zero. The null value is customarily
+     * used to represent a missing, unspecified or invalid address in the
+     * simulation models.
      */
-    virtual bool isNull() const {return !addr[0] && !addr[1] && !addr[2] && !addr[3];}
+    bool isNull() const {return !addr[0] && !addr[1] && !addr[2] && !addr[3];}
 
     /**
-     * Returns true if the 2 addresses are equal
+     * Returns true if the two addresses are equal
      */
-    virtual bool isEqualTo(const IPAddress& toCmp) const;
+    bool equals(const IPAddress& toCmp) const;
 
     /**
-     * Returns binary AND of the 2 addresses
+     * Returns binary AND of the two addresses
      */
-    virtual IPAddress doAnd(const IPAddress& ip) const;
+    IPAddress doAnd(const IPAddress& ip) const;
 
     /**
-     * Returns pointer to a string (size ADDRESS_STRING_SIZE) representing the address.
+     * Returns the string representation of the address (e.g. "152.66.86.92")
      */
-    // FIXME shouldn't use internal buffer
-    virtual const char *getString() const;
+    std::string str() const;
 
     /**
      * Returns the address as an int.
      */
-    virtual int getInt() const;
+    int getInt() const;
 
     /**
      * Returns the corresponding part of the address specified by the index
      * ("[0].[1].[2].[3]")
      */
-    virtual int getDByte(int i) const {return addr[i];}
+    int getDByte(int i) const {return addr[i];}
 
     /**
      * Returns the network class of the address: char 'A', 'B', 'C', 'D', 'E',
      * or '?' (returned when the address begins with at least five 1 bits.)
      */
-    virtual char getIPClass() const;
+    char getIPClass() const;
 
     /**
      * Returns true if IP class is "D"
      */
-    virtual bool isMulticast() const {return getIPClass()=='D';}
+    bool isMulticast() const {return getIPClass()=='D';}
 
     /**
      * Returns an address with the network part of the address (the bits
      * of the hosts part are to 0). For D and E class addresses,
      * it returns a null address.
      */
-    virtual IPAddress getNetwork() const;
+    IPAddress getNetwork() const;
 
     /**
      * Returns an address with the network mask corresponding to the
      * address class. For D and E class addresses, it returns a null address.
      */
-    virtual IPAddress getNetworkMask() const;
+    IPAddress getNetworkMask() const;
 
     /**
      * Indicates if the address is from the same network
      */
-    virtual bool isNetwork(const IPAddress& toCmp) const;
+    bool isNetwork(const IPAddress& toCmp) const;
 
     /**
      * Compares the first numbits bits of the two addresses.
      */
-    virtual bool prefixMatches(const IPAddress& to_cmp, int numbits) const;
+    bool prefixMatches(const IPAddress& to_cmp, int numbits) const;
 
     /**
      * Indicates how many bits from the to_cmp address, starting counting
@@ -203,7 +202,7 @@ class IPAddress
      *
      * Typical usage for comparing IP prefixes.
      */
-    virtual int numMatchingPrefixBits(const IPAddress& to_cmp) const;
+    int numMatchingPrefixBits(const IPAddress& to_cmp) const;
 
     /**
      * Test if the masked addresses (ie the mask is applied to addr1 and
@@ -215,14 +214,14 @@ class IPAddress
                                    const IPAddress& netmask);
 
     /**
-     * Returns isEqualTo(addr).
+     * Returns equals(addr).
      */
-    bool operator==(const IPAddress& addr1) const {return isEqualTo(addr1);}
+    bool operator==(const IPAddress& addr1) const {return equals(addr1);}
 
     /**
-     * Returns !isEqualTo(addr).
+     * Returns !equals(addr).
      */
-    bool operator!=(const IPAddress& addr1) const {return !isEqualTo(addr1);}
+    bool operator!=(const IPAddress& addr1) const {return !equals(addr1);}
 
     /**
      * Returns true if the format of the string corresponds to an IP address
@@ -238,8 +237,7 @@ class IPAddress
 
 inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
 {
-    os << ip.getString();
-    return os;
+    return os << ip.str();
 }
 
 #endif

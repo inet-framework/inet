@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,14 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 //
 // Modified switch
 //
 simple DropSwitch
     parameters:
+       server_port,
         pk_delay,
+        burst_delete_probability, // prob that a burst will be deleted
+        error_burst_len,    // number of packets do be dropped in case of burst error
         delete_probability, // in percent !!!
         syn_client_del,
         syn_server_del,

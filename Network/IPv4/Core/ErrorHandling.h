@@ -30,9 +30,6 @@
 // FIXME is such thing needed at all???
 class ErrorHandling: public cSimpleModule
 {
-  private:
-    opp_string nodename;
-
   public:
     Module_Class_Members(ErrorHandling, cSimpleModule, 0);
     virtual void initialize();

@@ -69,11 +69,11 @@ void PPPFrame::writeContents(ostream& os)
     assumes that networkPacket->length() is
     length of transport packet in bits
     adds to it the PPP header length in bits */
-void PPPFrame::encapsulate(cPacket *networkPacket)
-{
-    cPacket::encapsulate(networkPacket);
-
-    _protocol = PPP_PROT_IP;
-}
+//void PPPFrame::encapsulate(cPacket *networkPacket)
+//{
+//    cPacket::encapsulate(networkPacket);
+//
+// FIXME add this somewhere in the code:   _protocol = PPP_PROT_IP;
+//}
 
 

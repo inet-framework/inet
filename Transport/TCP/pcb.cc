@@ -70,16 +70,16 @@ void PCB::info(char* buf)
 {
   cObject::info(buf);
   sprintf(buf + strlen(buf), " PCB: Local: %s, %d; Remote: %s, %d",
-          _laddr.getString(), (int) _lport,  _faddr.getString(), (int) _fport);
+          _laddr.str().c_str(), (int) _lport,  _faddr.str().c_str(), (int) _fport);
 }
 
 void PCB::writeContents(ostream& os)
 {
   cObject::writeContents(os);
   os << " PCB:" << endl
-     << "  Local Address:   " << _laddr.getString() << endl
+     << "  Local Address:   " << _laddr << endl
      << "  Local Port:      " << _lport << endl
-     << "  Foreign Address: " << _faddr.getString() << endl
+     << "  Foreign Address: " << _faddr << endl
      << "  Foreign Port:    " << _fport << endl;
 }
 

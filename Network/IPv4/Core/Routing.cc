@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <omnetpp.h>
 #include "Routing.h"
+#include "watch2.h"  // FIXME
 
 
 Define_Module(Routing);
@@ -29,6 +30,15 @@ void Routing::initialize()
 {
     QueueWithQoS::initialize();
     IPForward = par("IPForward").boolValue();
+
+    numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
+
+    WATCH(IPForward);
+    WATCH(numMulticast);
+    WATCH(numLocalDeliver);
+    WATCH(numDropped);
+    WATCH(numUnroutable);
+    WATCH(numForwarded);
 }
 
 void Routing::endService(cMessage *msg)
@@ -40,12 +50,14 @@ void Routing::endService(cMessage *msg)
 
     IPAddress destAddress = datagram->destAddress();
 
-    ev << "Packet destination address is: " << destAddress << "\n";
+    ev << "Packet destination address is: " << destAddress << ", ";
 
     //  multicast check
     RoutingTable *rt = routingTableAccess.get();
     if (destAddress.isMulticast())
     {
+        ev << "sending to multicast\n";
+        numMulticast++;
         send(datagram, "multicastOut");
         return;
     }
@@ -53,6 +65,8 @@ void Routing::endService(cMessage *msg)
     // check for local delivery
     if (rt->localDeliver(destAddress))
     {
+        ev << "sending to localDeliver\n";
+        numLocalDeliver++;
         send(datagram, "localOut");
         return;
     }
@@ -60,6 +74,8 @@ void Routing::endService(cMessage *msg)
     // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
     if (datagram->inputPort()!=-1 && !IPForward)
     {
+        ev << "forwarding off, dropping packet\n";
+        numDropped++;
         delete datagram;
         return;
     }
@@ -69,12 +85,16 @@ void Routing::endService(cMessage *msg)
     int outputPort = rt->outputPortNo(destAddress);
     if (outputPort==-1)
     {
+        ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+        numUnroutable++;
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
         return;
     }
 
     // default: send datagram to fragmentation
     datagram->setOutputPort(outputPort);
+    ev << "output port is " << outputPort << "\n";
+    numForwarded++;
     send(datagram, "fragmentationOut");
 }
 

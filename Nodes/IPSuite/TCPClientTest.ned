@@ -3,7 +3,8 @@
 // Definition of an IPNode with transport layers
 
 import
-    "NetworkLayers",
+    "LinkLayer",
+    "NetworkLayer",
     "mytcp4ip";
 
 
@@ -29,26 +30,30 @@ module TCPClientTest
                 local_addr = local_addr,
                 server_addr = server_addr;
             display: "p=84,69;b=40,24,rect";
-        networkLayers: NetworkLayers;
+        networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
-                NWIName = "MPLS2IP",
                 numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "p=87,155;i=fork";
+        netIf : LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections
-        networkLayers.TCPOut --> tcpApp.in;
-        networkLayers.TCPIn <-- tcpApp.out;
+        networkLayer.TCPOut --> tcpApp.in;
+        networkLayer.TCPIn <-- tcpApp.out;
 
         // connections to network outside
         for i=0..numOfPorts-1 do
-            in[i] --> networkLayers.physIn[i];
-            out[i] <-- networkLayers.physOut[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
         endfor;
-
 endmodule
 

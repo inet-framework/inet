@@ -77,7 +77,6 @@ module ClientServerNetwork
             display: "p=63,161;i=pc";
         router: Router;
             parameters:
-                nodename = "Router",
                 // network parameters
                 numOfPorts = 4,
                 routingFile = "router.irt";

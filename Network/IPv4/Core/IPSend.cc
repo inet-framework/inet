@@ -85,7 +85,7 @@ IPDatagram *IPSend::encapsulate(cMessage *msg)
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->findInterfaceByAddress(src) == -1)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
-                      src.getString(), interfaceMsg->className(), interfaceMsg->fullName());
+                      src.str().c_str(), interfaceMsg->className(), interfaceMsg->fullName());
         datagram->setSrcAddress(src);
     }
     else

@@ -17,86 +17,76 @@
 //
 
 
-
-import
-    "NetworkLayers",
-    "UDPUpperLayers",
-    "tcp4ip",
-    "PingApp";
-
-
+import  
+    "LinkLayer", 
+    "NetworkLayer", 
+    "UDPUpperLayers", 
+    "TCPUpperLayers", 
+    "PingApp"; 
+               
+               
+ 
 //
 // Definition of an IPNode with transport layers.
 //
-module StandardHost
-    parameters:
+module StandardHost 
+    parameters: 
         // TCP information
-        tcpApplType : string,
-        local_addr : numeric,
-        server_addr : numeric,
-
-        // UDP and other application information
-        packetSize : numeric const,  // (bit)
-        packetTime : numeric const,
-        nodename : string,
-        nodenr : numeric const,
-        udpRouteDestNo : numeric const,
-
+        tcpApplType : string, 
+        local_addr : numeric, 
+        server_addr : numeric, 
+                               
         // Network information
-        numOfPorts : numeric,
-        routingFile : string;
-    gates:
-        in: in[];
-        out: out[];
-    submodules:
+        numOfPorts : numeric, 
+        routingFile : string; 
+    gates: 
+        in: in[]; 
+        out: out[]; 
+    submodules: 
         // transport and application layers
-        tcpApp: TCPUpperLayers;
-            parameters:
-                tcpApplType = tcpApplType,
-                local_addr = local_addr,
-                server_addr = server_addr;
-            display: "p=36,93;b=40,24,rect";
-        udpApp: UDPUpperLayers;
-            parameters:
-                nodename = nodename,
-                udpCl1Name = "UDPClient",
-                udpServer1Name = "UDPServer",
-                generationTime = packetTime,
-                generationSize = packetSize,
-                routeDestNo = udpRouteDestNo;
-            display: "p=97,92;b=40,24,rect";
-        pingApp: PingApp;
-            parameters:
-                nodename = nodename,
-                generationTime = packetTime;
-            display: "p=152,89;b=40,24,rect";
-        networkLayers: NetworkLayers;
-            parameters:
-                IPForward = false,
-                NWIName = "PPPModule",
-                numOfPorts = numOfPorts,
-                routingFile = routingFile;
-            gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
-            display: "p=87,155;i=fork";
-    connections nocheck:
+        tcpApp: TCPUpperLayers; 
+            parameters: 
+                tcpApplType = tcpApplType, 
+                local_addr = local_addr, 
+                server_addr = server_addr; 
+            display: "p=60,50;b=40,24,rect";
+        udpApp: UDPUpperLayers; 
+            parameters: 
+                udpClient1Name = "UDPClientApp", 
+                udpServer1Name = "UDPServerApp"; 
+            display: "p=120,50;b=40,24,rect";
+        pingApp: PingApp; 
+            display: "p=180,50;b=40,24,rect";
+        networkLayer: NetworkLayer; 
+            parameters: 
+                IPForward = false, 
+                numOfPorts = numOfPorts, 
+                routingFile = routingFile; 
+            gatesizes: 
+                physIn[numOfPorts], 
+                physOut[numOfPorts]; 
+            display: "p=120,110;i=fork";
+        netIf: LinkLayer[numOfPorts]; 
+            parameters: 
+                NWIName = "PPPModule"; 
+            display: "p=60,180,row;i=iface";
+    connections nocheck: 
         // transport connections
-        networkLayers.TCPOut --> tcpApp.in;
-        networkLayers.TCPIn <-- tcpApp.out;
-
-        networkLayers.UDPOut --> udpApp.from_ip;
-        networkLayers.UDPIn <-- udpApp.to_ip;
-
-
-        networkLayers.pingOut --> pingApp.in;
-        networkLayers.pingIn <-- pingApp.out;
-
+        networkLayer.TCPOut --> tcpApp.in; 
+        networkLayer.TCPIn <-- tcpApp.out; 
+                                           
+        networkLayer.UDPOut --> udpApp.from_ip; 
+        networkLayer.UDPIn <-- udpApp.to_ip; 
+                                             
+        networkLayer.pingOut --> pingApp.in; 
+        networkLayer.pingIn <-- pingApp.out; 
+                                             
         // connections to network outside
-        for i=0..numOfPorts-1 do
-            in[i] --> networkLayers.physIn[i];
-            out[i] <-- networkLayers.physOut[i];
-        endfor;
-
-endmodule
+        for i=0..numOfPorts-1 do 
+            in[i] --> netIf[i].physIn; 
+            out[i] <-- netIf[i].physOut; 
+            netIf[i].inputQueueOut --> networkLayer.physIn[i]; 
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i]; 
+        endfor; 
+endmodule 
 

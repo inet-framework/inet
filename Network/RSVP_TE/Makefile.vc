@@ -168,7 +168,7 @@ RSVPApp.obj: RSVPApp.cc \
   ..\IPv4\Core/RoutingTable.h \
   RSVPTester.h \
   ..\MPLS/MPLSModule.h \
-  ..\MPLS/StringTokenizer.h \
+  ..\..\Util/StringTokenizer.h \
   D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlmemory.h \
   D:/home/tools/libxml2-2.5.4.win32/include/libxml/parser.h \
   ..\..\Transport\TCP/tcp.h \

@@ -37,15 +37,13 @@ Define_Module_Like ( ConstTrafficGen, GeneratorAppOut );
 void ConstTrafficGen::initialize()
 {
     generationTime = par("generationTime");
-    strcpy(nodename, par("nodename"));
-    nodenr = par("nodenr");
     packetSize = par("generationSize");
     usesTCPProt = par("tcpProtocol");
 }
 
 void ConstTrafficGen::activity()
 {
-    int contCtr = nodenr*10000+100;
+    int contCtr = id()*10000+100;
     char dest[20];
     cPacket *transportPacket;
     IPInterfacePacket *iPacket;
@@ -64,13 +62,12 @@ void ConstTrafficGen::activity()
         iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
         send(iPacket, "out");
 
-    ev << "\n*** " << nodename
-        << " Constant Traffic Generator: Packet sent:"
-        << "\nContent: " << int(transportPacket->par("content"))
-        << " Bitlength: " << int(transportPacket->length())
-        << "   Time: " << simTime()
-        << "\nDest: " << iPacket->destAddr()
-        << "\n";
+    ev << "Constant Traffic Generator: Packet sent:"
+       << "\nContent: " << int(transportPacket->par("content"))
+       << " Bitlength: " << int(transportPacket->length())
+       << "   Time: " << simTime()
+       << "\nDest: " << iPacket->destAddr()
+       << "\n";
 
     } // end while
 }

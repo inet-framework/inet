@@ -48,8 +48,13 @@ class UDPProcessing : public cSimpleModule
         int size;
         int *port;  // array: port[index]=local_port
     };
-
+    // FIXME change to std::map<int,int>
     UDPApplicationTable applTable;
+
+    int numSent;
+    int numPassedUp;
+    int numDroppedWrongPort;
+    int numDroppedWrongChecksum;
 
     virtual void processMsgFromIp(IPInterfacePacket *packet);
     virtual void processMsgFromApp(UDPInterfacePacket *packet);

@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= AppIn.obj BurstGenerator.obj ConstTrafficGen.obj SimpleApp.obj
+OBJS= AppIn.obj BurstGenerator.obj ConstTrafficGen.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -85,9 +85,6 @@ BurstGenerator.obj: BurstGenerator.cc
 
 ConstTrafficGen.obj: ConstTrafficGen.cc
 	$(CXX) -c $(COPTS) /Tp ConstTrafficGen.cc
-
-SimpleApp.obj: SimpleApp.cc
-	$(CXX) -c $(COPTS) /Tp SimpleApp.cc
 
 
 #doc: neddoc doxy
@@ -146,23 +143,6 @@ BurstGenerator.obj: BurstGenerator.cc \
   ..\..\Network\IPv4\Core/ICMPMessage_m.h
 ConstTrafficGen.obj: ConstTrafficGen.cc \
   ConstTrafficGen.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
-  ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\..\Network\IPv4\Core/IPDatagram_m.h \
-  ..\..\Base/QueueBase.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/ICMPMessage.h \
-  ..\..\Base/AbstractQueue.h \
-  ..\..\Base/ModuleAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ICMPMessage_m.h
-SimpleApp.obj: SimpleApp.cc \
-  SimpleApp.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket.h \
   ..\..\Network\IPv4\Core/IPDatagram.h \
   ..\..\Network\IPv4\Core/ICMP.h \

@@ -1,13 +1,4 @@
 //
-//-----------------------------------------------------------------------------
-//-- fileName: switch.cc
-//--
-//-- generated to test the TCP-FSM
-//--
-//-- V. Boehm, June 20 1999
-//--
-//-----------------------------------------------------------------------------
-//
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -24,67 +15,71 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+//
+// V. Boehm, June 20 1999
+//
+
+
 #include "nw.h"
 #include "ip.h"
 #include "tcp.h"
-#include "omnetpp.h"
+#include <omnetpp.h>
 
 
-class Switch : public cSimpleModule
+/**
+ * For testing the TCP FSM
+ */
+class Switch:public cSimpleModule
 {
-  Module_Class_Members(Switch, cSimpleModule, 16384);
-  virtual void activity();
+    Module_Class_Members(Switch, cSimpleModule, 16384);
+    virtual void activity();
 };
 
 Define_Module(Switch);
 
 void Switch::activity()
 {
-  double pk_delay = 1.0 / (double) par("pk_rate");
-  for(;;)
+    double pk_delay = 1.0 / (double) par("pk_rate");
+    for (;;)
     {
-      //receive frame, implicit queuing
-      cMessage* rframe = receive();
+        //receive frame, implicit queuing
+        cMessage *rframe = receive();
 
-      if (((simTime() <= 1.19) || (simTime() > 1.201)) && ((simTime() <= 6.49) || (simTime() > 6.6)))
-      //if ((simTime() <= 1.1) || (simTime() > 1.2))
+        if (((simTime() <= 1.19) || (simTime() > 1.201))
+            && ((simTime() <= 6.49) || (simTime() > 6.6)))
+        {
+            // get the datagram from the incoming frame/packet
+            cMessage *datagram = rframe->decapsulate();
 
-    {
-      //get the datagram from the incoming frame/packet
+            // get length of frame after decapsulation
+            int nw_length = rframe->length() / 8;
 
-      cMessage* datagram  = rframe->decapsulate();
+            delete rframe;
 
-      //get length of frame after decapsulation
-      int nw_length = rframe->length() / 8;
+            // get IP header information about the IP destination address
+            IpHeader *ip_header = (IpHeader *) (datagram->par("ipheader").pointerValue());
+            int dest = ip_header->ip_dst;
+            //delete ip_header;
 
-      delete rframe;
+            // create new frame to send to destination
+            cMessage *sframe = new cMessage("NW_FRAME", NW_FRAME);
 
-      //get IP header information about the IP destination address
-      IpHeader* ip_header = (IpHeader*)(datagram->par("ipheader").pointerValue());
-      int dest = ip_header->ip_dst;
-      //delete ip_header;
+            // set length
+            sframe->setLength(nw_length * 8);
 
-      //create new frame to send to destination
-      cMessage* sframe = new cMessage("NW_FRAME", NW_FRAME);
+            // encapsulate datagram
+            sframe->encapsulate(datagram);
 
-      //set length
-      sframe->setLength(nw_length * 8);
+            // processing delay
+            wait(pk_delay);
 
-      //encapsulate datagram
-      sframe->encapsulate(datagram);
-
-      //processing delay
-      wait(pk_delay);
-
-      ev << "Relaying frame to " << dest << " (destination IP address).\n";
-      send(sframe, "out", dest);
-          }
-    else
-      {
-        ev << "Deleting frame\n";
-        delete rframe;
-      }
+            ev << "Relaying frame to " << dest << " (destination IP address).\n";
+            send(sframe, "out", dest);
+        }
+        else
+        {
+            ev << "Deleting frame\n";
+            delete rframe;
+        }
     };
 };
-
-

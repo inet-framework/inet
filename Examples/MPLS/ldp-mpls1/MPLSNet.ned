@@ -35,7 +35,7 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=184,95;i=router";
+            display: "p=184,95;i=srouter";
         LSR2: LSRNode;
             parameters:
                 id = "LSR2",
@@ -46,7 +46,7 @@ module MPLSNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "b=32,32;p=238,247;i=router";
+            display: "p=238,247;i=srouter";
         LSR3: LSRNode;
             parameters:
                 id = "LSR3",
@@ -57,7 +57,7 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=322,95;i=router";
+            display: "p=322,95;i=srouter";
         LSR4: LSRNode;
             parameters:
                 id = "LSR4",
@@ -68,7 +68,7 @@ module MPLSNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "b=32,32;p=398,247;i=router";
+            display: "p=398,247;i=srouter";
         LSR5: LSRNode;
             parameters:
                 id = "LSR5",
@@ -79,25 +79,25 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=500,95;i=router";
+            display: "p=500,95;i=srouter";
         host1: TCPClientTest;
             parameters:
                 start_time = 2,
                 numOfPorts = 1;
-            display: "b=18,16;p=26,98;i=comp_s";
+            display: "p=26,98;i=comp_s";
         host2: TCPClientTest;
             parameters:
                 start_time = 2,
                 numOfPorts = 1;
-            display: "b=18,16;p=26,256;i=comp_s";
+            display: "p=26,256;i=comp_s";
         host3: TCPServerTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=570,88;i=comp_s";
+            display: "p=570,88;i=comp_s";
         host4: TCPServerTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=578,240;i=comp_s";
+            display: "p=578,240;i=comp_s";
     connections nocheck:
         host1.in[0] <-- LSR1.out[0];
         host1.out[0] --> LSR1.in[0];
@@ -133,8 +133,6 @@ module MPLSNet
         LSR5.out[3] --> host4.in[0];
         LSR5.in[3] <-- host4.out[0];
 
-
-    display: "p=10,10;b=736,398";
 endmodule
 
 network mplsTest : MPLSNet

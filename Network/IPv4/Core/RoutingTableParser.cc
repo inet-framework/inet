@@ -372,7 +372,7 @@ void RoutingTableParser::addLocalLoopback()
         }
 
     }
-    ev << "My loopback Address is : " << loopbackIP.getString() << "\n";
+    ev << "My loopback Address is : " << loopbackIP << "\n";
     rt->loopbackInterface->inetAddr = loopbackIP;
     rt->loopbackInterface->mask = IPAddress("255.255.255.255");  // ????? -- Andras
 // ECH

@@ -41,34 +41,24 @@ void PPPModule::endService(cMessage *msg)
 
         send(outFrame, "physicalOut");
         send(nwiIdleMsg, "ipOutputQueueOut");
-
     }
     else // from Network
     {
         PPPFrame *recFrame = check_and_cast<PPPFrame *>(msg);
 
-        // decapsulate IP datagram
-        if (recFrame->protocol() == PPP_PROT_IP)
+        // break off for /all/ bit errors
+        if (recFrame->hasBitError())
         {
-            // break off for /all/ bit errors
-            if (recFrame->hasBitError())
-            {
-                ev << "\n+ PPPLink of " << fullPath()
-                   << " receive error: Error in transmission.\n";
-                delete msg;
-                return;
-            }
-
-            IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(recFrame->decapsulate());
-            delete recFrame;
-
-            send(ipdatagram, "ipInputQueueOut");
+            ev << "Bit error in " << msg << endl;
+            delete msg;
+            return;
         }
-        else // print error message if it's not an IP datagram
-        {
-            // FIXME why should it be always IP protocol???????
-            ev << "\n+ PPPLink of " << fullPath() << " receive error: Not IP protocol.\n";
-        }
+
+        // decapsulate encapsulated packet
+        cMessage *encapMsg = recFrame->decapsulate();
+        delete recFrame;
+
+        send(encapMsg, "ipInputQueueOut");
     }
 }
 

@@ -36,7 +36,7 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=104,95;i=router";
+            display: "p=104,95;i=srouter";
         LSR2: RSVP_LSR_Node;
             parameters:
                 isIR = false,
@@ -45,7 +45,7 @@ module RSVPNet
             gatesizes:
                 in[2],
                 out[2];
-            display: "b=32,32;p=142,271;i=router";
+            display: "p=142,271;i=srouter";
         LSR3: RSVP_LSR_Node;
             parameters:
                 isIR = false,
@@ -54,7 +54,7 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=266,95;i=router";
+            display: "p=266,95;i=srouter";
         LSR4: RSVP_LSR_Node;
             parameters:
                 isIR = false,
@@ -63,7 +63,7 @@ module RSVPNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "b=32,32;p=422,271;i=router";
+            display: "p=422,271;i=srouter";
         LSR5: RSVP_LSR_Node;
             parameters:
                 isIR = false,
@@ -72,23 +72,23 @@ module RSVPNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "b=32,32;p=500,95;i=router";
+            display: "p=500,95;i=srouter";
         host1: TCPClientTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=26,98;i=comp_s";
+            display: "p=26,98;i=comp_s";
         host2: TCPClientTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=26,256;i=comp_s";
+            display: "p=26,256;i=comp_s";
         host3: TCPServerTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=570,88;i=comp_s";
+            display: "p=570,88;i=comp_s";
         host4: TCPServerTest;
             parameters:
                 numOfPorts = 1;
-            display: "b=18,16;p=578,240;i=comp_s";
+            display: "p=578,240;i=comp_s";
         ted: TED;
             display: "p=276,320;b=24,16";
         tester: Tester;
@@ -128,7 +128,6 @@ module RSVPNet
         LSR5.out[3] --> delay 0 error 0 datarate 9000 --> host4.in[0];
         LSR5.in[3] <-- delay 10 error 0 datarate 9000 <-- host4.out[0];
 
-    display: "p=10,10;b=736,398";
 endmodule
 
 network RSVPTest : RSVPNet

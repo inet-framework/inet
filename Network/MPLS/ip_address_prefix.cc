@@ -33,41 +33,40 @@
 // Each constructors calls keepFirstBits, so there isn't to care anymore if
 // there are 0 at the end and most of the functions of IPAddress work right.
 
-IPAddressPrefix::IPAddressPrefix(int ip, unsigned int lp) : IPAddress(ip)
+IPAddressPrefix::IPAddressPrefix(int ip, unsigned int lp):IPAddress(ip)
 {
     length = lp;
     keepFirstBits(length);
 }
 
-IPAddressPrefix::IPAddressPrefix(int i0, int i1, int i2, int i3, unsigned int lp) :
-  IPAddress(i0, i1, i2, i3)
+IPAddressPrefix::IPAddressPrefix(int i0, int i1, int i2, int i3, unsigned int lp):IPAddress(i0, i1,
+                                                                                            i2, i3)
 {
     length = lp;
     keepFirstBits(length);
 }
 
-IPAddressPrefix::IPAddressPrefix(const char *text, unsigned int lp) : IPAddress(text)
+IPAddressPrefix::IPAddressPrefix(const char *text, unsigned int lp):IPAddress(text)
 {
     length = lp;
     keepFirstBits(length);
 }
 
-IPAddressPrefix::IPAddressPrefix(const IPAddress& ip, unsigned int lp) : IPAddress(ip)
+IPAddressPrefix::IPAddressPrefix(const IPAddress & ip, unsigned int lp):IPAddress(ip)
 {
     length = lp;
     keepFirstBits(length);
 }
 
 
-IPAddressPrefix::IPAddressPrefix(const IPAddressPrefix& obj) : IPAddress()
+IPAddressPrefix::IPAddressPrefix(const IPAddressPrefix & obj):IPAddress()
 {
     operator=(obj);
 }
 
-IPAddressPrefix& IPAddressPrefix::operator=(const IPAddressPrefix& obj)
+IPAddressPrefix & IPAddressPrefix::operator=(const IPAddressPrefix & obj)
 {
     IPAddress::operator=(obj);
     length = obj.length;
     return *this;
 }
-

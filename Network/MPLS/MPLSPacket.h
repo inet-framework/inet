@@ -103,17 +103,6 @@ class MPLSPacket: public cPacket
      **/
     virtual void writeContents(ostream& os);
 
-    /*encapsulate:    Encapsulate layer 3 packet
-     *@param:    pck- The body to be encapsulated
-     **/
-    virtual void encapsulate(cMessage* pck){data = pck;}
-
-    /*decapsulate:    Decapsulate the packet
-     *@param: none
-     **/
-    virtual cMessage *decapsulate(){return data;}
-
-
     /*heaaderBitLength: Get the header lenght in bit
      *@param:    none
      **/

@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,14 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 import
-    "NetworkLayers",
-    "UDPUpperLayers",
-    "tcp4ip",
-    "PingApp",
-    "TrafficGen";
+    "LinkLayer",
+    "NetworkLayer",
+    "UDPUpperLayers";
 
 
 
@@ -31,13 +28,6 @@ import
 //
 module UDPHost
     parameters:
-        // other application information
-        packetSize : numeric const, // (bit)
-        packetTime : numeric const,
-        nodename : string,
-        nodenr : numeric const,
-        udpRouteDestNo : numeric const,
-
         // Network information
         IPForward : bool,
         numOfPorts : numeric,
@@ -48,35 +38,34 @@ module UDPHost
     submodules:
         udpApp: UDPUpperLayers;
             parameters:
-                nodename = nodename,
-                udpCl1Name = "UDPClient",
-                udpServer1Name = "UDPServer",
-                generationTime = packetTime,
-                generationSize = packetSize,
-                routeDestNo = udpRouteDestNo;
+                udpClient1Name = "UDPClientApp",
+                udpServer1Name = "UDPServerApp";
             display: "p=89,68;b=40,24,rect";
-        // control module
-        networkLayers: NetworkLayers;
+        networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
                 IPForward = IPForward,
-                NWIName = "PPPModule",
                 numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "p=87,155;i=fork";
+        netIf : LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections
-        networkLayers.UDPOut --> udpApp.from_ip;
-        networkLayers.UDPIn <-- udpApp.to_ip;
+        networkLayer.UDPOut --> udpApp.from_ip;
+        networkLayer.UDPIn <-- udpApp.to_ip;
 
         // connections to network outside
         for i=0..numOfPorts-1 do
-            in[i] --> networkLayers.physIn[i];
-            out[i] <-- networkLayers.physOut[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
         endfor;
-
 endmodule
 

@@ -185,7 +185,7 @@ public:
     //Return outgoing label
     //Return outgoing interface
     //Return incomming interface
-    std::string requestIncommingInterface(int fec);
+    std::string requestIncomingInterface(int fec);
     */
 };
 

@@ -34,19 +34,13 @@ module TCPUDPDirectNet
                 tcpApplType = "TCPServer",
                 local_addr = (10 << 24) + 1,
                 server_addr = (10 << 24) + 0,
-                // UDP parameters
-                packetTime = 0.2 s,
-                packetSize = 1000,
-                nodename = "server 1",
-                nodenr = 1,
-                udpRouteDestNo = 1,
                 // network parameters
                 numOfPorts = 3,
                 routingFile = "server1.irt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=37,79;i=pc";
+            display: "p=40,80;i=pc";
         // clients
         client2: StandardHost;
             parameters:
@@ -54,57 +48,39 @@ module TCPUDPDirectNet
                 tcpApplType = "TCPClient",
                 local_addr = (10 << 24) + 2,
                 server_addr = (10 << 24) + 1,
-                // UDP parameters
-                packetTime = 0.5 s,
-                packetSize = 1000,
-                nodename = "client 2",
-                nodenr = 2,
-                udpRouteDestNo = 1,
                 // network parameters
                 numOfPorts = 3,
                 routingFile = "client2.irt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=202,83;i=comp";
+            display: "p=200,80;i=comp";
         client3: StandardHost;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPClient",
                 local_addr = (10 << 24) + 3,
                 server_addr = (10 << 24) + 1,
-                // UDP parameters
-                packetTime = 0.5 s,
-                packetSize = 200,
-                nodename = "client 3",
-                nodenr = 3,
-                udpRouteDestNo = 1,
                 // network parameters
                 numOfPorts = 3,
                 routingFile = "client3.irt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=42,208;i=bwcomp";
+            display: "p=40,200;i=bwcomp";
         client4: StandardHost;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPClient",
                 local_addr = (10 << 24) + 4,
                 server_addr = (10 << 24) + 1,
-                // UDP parameters
-                packetTime = 3 s,
-                packetSize = 10000,
-                nodename = "client 4",
-                nodenr = 4,
-                udpRouteDestNo = 1,
                 // network parameters
                 numOfPorts = 3,
                 routingFile = "client4.irt";
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=205,207;i=comp";
+            display: "p=200,200;i=comp";
     connections:
         server1.out[0] --> client2.in[0];
         server1.out[1] --> client3.in[0];
@@ -121,9 +97,6 @@ module TCPUDPDirectNet
         client4.out[0] --> server1.in[2];
         client4.out[1] --> client2.in[2];
         client4.out[2] --> client3.in[2];
-
-
-    display: "p=-30,10;b=359,295,rect";
 endmodule
 
 network directnw : TCPUDPDirectNet

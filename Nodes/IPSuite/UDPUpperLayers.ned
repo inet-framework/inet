@@ -22,11 +22,7 @@ import "UDPApp";
 
 module UDPUpperLayers
     parameters:
-        routeDestNo,
-        generationTime,
-        generationSize : numeric const,
-        nodename : string,
-        udpCl1Name : string,
+        udpClient1Name : string,
         udpServer1Name : string;
     gates:
         in: from_ip;
@@ -37,30 +33,16 @@ module UDPUpperLayers
                 from_application[2],
                 to_application[2];
             display: "p=94,105;i=fork";
-        udpCl1: udpCl1Name like UDPApp;
-            parameters:
-                routeDestNo = routeDestNo,
-                nodename = nodename,
-                local_port = 100,
-                dest_port = 200,
-                message_length = generationSize,
-                message_freq = generationTime;
+        udpClient1: udpClient1Name like UDPApp;
             display: "p=134,43;b=48,32,rect";
         udpServer1: udpServer1Name like UDPApp;
-            parameters:
-                routeDestNo = 0,
-                nodename = nodename,
-                local_port = 200,
-                dest_port = 0,
-                message_length = 0,
-                message_freq = 0;
             display: "p=51,42;b=40,24,rect";
     connections nocheck:
         from_ip --> udpProcessing.from_ip;
         to_ip <-- udpProcessing.to_ip;
 
-        udpProcessing.to_application[0] --> udpCl1.from_udp;
-        udpProcessing.from_application[0] <-- udpCl1.to_udp;
+        udpProcessing.to_application[0] --> udpClient1.from_udp;
+        udpProcessing.from_application[0] <-- udpClient1.to_udp;
 
         udpProcessing.to_application[1] --> udpServer1.from_udp;
         udpProcessing.from_application[1] <-- udpServer1.to_udp;

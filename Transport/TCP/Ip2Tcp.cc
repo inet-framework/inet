@@ -22,14 +22,10 @@
 
 #include "IPAddress.h"
 
-//#include "stdlib.h"
-//#include "string.h"
 
 
-class Ip2Tcp: public cSimpleModule {
-//  private:
-//    int setIntAddress(char *saddr);
-
+class Ip2Tcp: public cSimpleModule
+{
   public:
     Module_Class_Members(Ip2Tcp, cSimpleModule, 0);
     virtual void handleMessage(cMessage *msg);
@@ -47,8 +43,8 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     bool ipv6 = !strncmp(ipintpacket->className(), "IPv6InterfacePacket", 4);
 
     // get the source and destination address
-    const char *src_addr = ipintpacket->srcAddr().getString();
-    const char*dest_addr = ipintpacket->destAddr().getString();
+    IPAddress src_addr = ipintpacket->srcAddr();
+    IPAddress dest_addr = ipintpacket->destAddr();
 
     // decapsulate the IPpacket into a transport packet
     tpacket = (TransportPacket *) ipintpacket->decapsulate();
@@ -56,7 +52,6 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     cMessage *tcpmessage = new cMessage (*tpacket);
 
     // from this one we obtain the port numbers
-    // ?
     tcpmessage->addPar("src_port") = tpacket->sourcePort();
     tcpmessage->addPar("dest_port") = tpacket->destinationPort();
 
@@ -64,33 +59,21 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     tcpmessage->setKind(tpacket->msgKind());
 
     if (!ipv6)
-        {
-           tcpmessage->addPar("src_addr") = IPAddress(src_addr).getInt();
-           tcpmessage->addPar("dest_addr") = IPAddress(dest_addr).getInt();
-        }
-        else
-        {
-           tcpmessage->addPar("src_addr") = src_addr;
-           tcpmessage->addPar("dest_addr") = dest_addr;
-        }
+    {
+       tcpmessage->addPar("src_addr") = src_addr.getInt();
+       tcpmessage->addPar("dest_addr") = dest_addr.getInt();
+    }
+    else
+    {
+       tcpmessage->addPar("src_addr") = src_addr.str().c_str();
+       tcpmessage->addPar("dest_addr") = dest_addr.str().c_str();
+    }
 
-        delete tpacket;
-        delete msg;
+    delete tpacket;
+    delete msg;
 
     // send the message to the TCP_layer
     send(tcpmessage, "out");
 }
 
-
-/*  Old way the coding was done
-int Ip2Tcp::setIntAddress(char *saddr)
-{
-    // search the last occurrence of .
-    char *p = strrchr(saddr,'.');
-      // the integer after this . represents the address in our tcp
-    p++;
-    int ia = atoi(p);
-     return ia;
-}
-*/
 

@@ -27,7 +27,6 @@ Define_Module(ErrorHandling);
 
 void ErrorHandling::initialize()
 {
-    nodename = (const char *) par("nodename");
 }
 
 void ErrorHandling::handleMessage(cMessage *msg)
@@ -35,7 +34,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
 
-    ev << "\n*** " << nodename.c_str() << " Error Handler: ICMP message received:\n";
+    ev << "Error Handler: ICMP message received:\n";
     ev << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
        << " Bytelength: " << d->length()/8

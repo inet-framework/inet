@@ -12,16 +12,14 @@
 
 
 import
-    "NetworkLayersWithMPLS",
-    "UDPUpperLayers",
-    "tcp4ip",
+    "LinkLayer",
+    "NetworkLayerWithMPLS",
     "MPLSModule",
     "LIBTable",
     "RSVPInterface",
     "RSVP",
     "OspfTe",
     "RSVPAppl";
-
 
 
 
@@ -42,9 +40,6 @@ import
 // - MPLS Module: Label switching module of MPLS.
 // - LIB Table: The module that handles the mapping of labels, interfaces,
 //   and FECs.
-//
-//# FIXME structure is conceptually wrong here! network interface is still part
-//# of NetworkLayers, so in fact here MPLS is below L2!!!!!!!!!!!!!!!!!
 //
 module RSVP_LSR_Node
     parameters:
@@ -71,29 +66,32 @@ module RSVP_LSR_Node
                 dest_addr = dest_addr,
                 isIR = isIR,
                 isER = isER;
-            display: "o=#8080ff;p=79,75;b=32,30";
+            display: "o=#8080ff;p=80,52;b=32,30";
         rsvp: RSVP;
             parameters:
                 local_addr = local_addr,
                 isIR = isIR,
                 isER = isER;
-            display: "o=#0080c0;p=189,74;b=40,24,rect";
+            display: "o=#0080c0;p=190,51;b=40,24,rect";
         rsvpInterface: RSVPInterface;
-            display: "o=#0080c0;p=190,129;b=58,12";
+            display: "o=#0080c0;p=191,106;b=58,12";
         ospf_te: OspfTe;
             parameters:
                 local_addr = local_addr;
-            display: "o=#008040;p=81,186;b=40,24";
-        networkLayers: NetworkLayersWithMPLS;
+            display: "o=#008040;p=82,163;b=40,24";
+        networkLayer: NetworkLayerWithMPLS;
             parameters:
                 IPForward = true,
-                NWIName = "MPLS2IP",
                 numOfPorts = numOfPorts,
                 routingFile = routingFile;
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
-            display: "b=32,30;p=191,186;i=fork";
+            display: "b=32,30;p=192,163;i=fork";
+        netIf: LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPModule";
+            display: "p=88,297,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -105,31 +103,34 @@ module RSVP_LSR_Node
                 toL3[numOfPorts],
                 fromL2[numOfPorts],
                 toL2[numOfPorts];
-            display: "o=#ff8000;p=191,261;b=66,14";
+            display: "o=#ff8000;p=192,238;b=66,14";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=279,207;b=32,30";
+            display: "i=proc2;p=280,184;b=32,30";
     connections nocheck:
-        networkLayers.RSVPOut --> rsvpInterface.from_ip;
-        networkLayers.RSVPIn <-- rsvpInterface.to_ip;
+        networkLayer.RSVPOut --> rsvpInterface.from_ip;
+        networkLayer.RSVPIn <-- rsvpInterface.to_ip;
 
         rsvp.to_ip --> rsvpInterface.from_rsvp_app;
         rsvp.from_ip <-- rsvpInterface.to_rsvp_app;
 
-        networkLayers.OSPFOut --> ospf_te.from_ip;
-        networkLayers.OSPFIn <-- ospf_te.to_ip;
+        networkLayer.OSPFOut --> ospf_te.from_ip;
+        networkLayer.OSPFIn <-- ospf_te.to_ip;
 
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
 
-        //# connections to network outside
         for i=0..numOfPorts-1 do
-            mplsModule.toL3[i] --> networkLayers.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayers.physOut[i];
-            in[i] --> mplsModule.fromL2[i];
-            out[i] <-- mplsModule.toL2[i];
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+
+            netIf[i].inputQueueOut --> mplsModule.fromL2[i];
+            netIf[i].outputQueueIn <-- mplsModule.toL2[i];
+
+            mplsModule.toL3[i] --> networkLayer.physIn[i];
+            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
         endfor;
 endmodule
 

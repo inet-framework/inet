@@ -1,13 +1,3 @@
-// -*- C++ -*-
-//
-//-----------------------------------------------------------------------------
-//-- fileName: nw.h
-//--
-//--
-//--
-//-- V. Boehm, July 12 1999
-//--
-//-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -25,11 +15,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+//
+// V. Boehm, July 12 1999
+//
+
 #ifndef _NW_H_
 #define _NW_H_
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 
-enum NwKind {NW_FRAME};
+enum NwKind
+{ NW_FRAME };
 
 #endif // _NW_H

@@ -126,14 +126,14 @@ IPAddress& IPAddress::operator=(const IPAddress& obj)
     return *this;
 }
 
-const char *IPAddress::getString() const
+std::string IPAddress::str() const
 {
-    // FIXME why every time sprintf()?
-    sprintf(addrString, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
-    return addrString;
+    char buf[ADDRESS_STRING_SIZE];
+    sprintf(buf, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+    return std::string(buf);
 }
 
-bool IPAddress::isEqualTo(const IPAddress& toCmp) const
+bool IPAddress::equals(const IPAddress& toCmp) const
 {
     return (addr[0] == toCmp.addr[0]) && (addr[1] == toCmp.addr[1]) &&
            (addr[2] == toCmp.addr[2]) && (addr[3] == toCmp.addr[3]);
@@ -287,9 +287,9 @@ bool IPAddress::maskedAddrAreEqual(const IPAddress& addr1,
                                    const IPAddress& netmask)
 {
     if (netmask.isNull())
-        return addr1.isEqualTo(addr2);
+        return addr1.equals(addr2);
 
-    if (addr1.doAnd(netmask).isEqualTo(addr2.doAnd(netmask)))
+    if (addr1.doAnd(netmask).equals(addr2.doAnd(netmask)))
         return true;
 
     return false;

@@ -37,14 +37,6 @@ Base/Sink.ned
 
 
 
-
-
-
-
-
-
-
-
 Network/IPv4/Core/ErrorHandling.ned
 Network/IPv4/Core/ICMP.ned
 Network/IPv4/Core/IPFragmentation.ned
@@ -64,7 +56,6 @@ Network/LDP/tcpclientproc.ned
 Network/LDP/tcpserverproc.ned
 Network/LDP/UDPInterface.ned
 Network/MPLS/DatalinkLayer.ned
-Network/MPLS/InfoManager.ned
 Network/MPLS/LIBTable.ned
 Network/MPLS/MPLSModule.ned
 Network/RSVP_TE/NetworkManager.ned
@@ -78,24 +69,19 @@ NetworkInterfaces/NetworkInterface.ned
 NetworkInterfaces/Queues/InputQueue.ned
 NetworkInterfaces/Queues/OutputQueue.ned
 Nodes/IPSuite/BurstHost.ned
-Nodes/IPSuite/BurstHostNew.ned
-Nodes/IPSuite/FirstHopRouter.ned
-Nodes/IPSuite/IPNode.ned
-Nodes/IPSuite/KIDSRouter.ned
 Nodes/IPSuite/mytcp4ip.ned
-Nodes/IPSuite/NetworkLayers.ned
-Nodes/IPSuite/NetworkLayersNew.ned
+Nodes/IPSuite/NetworkLayer.ned
 Nodes/IPSuite/Router.ned
 Nodes/IPSuite/StandardHost.ned
-Nodes/IPSuite/tcp4ip.ned
 Nodes/IPSuite/TCPClientNode.ned
 Nodes/IPSuite/TCPClientTest.ned
 Nodes/IPSuite/TCPServerNode.ned
 Nodes/IPSuite/TCPServerTest.ned
+Nodes/IPSuite/TCPUpperLayers.ned
 Nodes/IPSuite/UDPHost.ned
 Nodes/IPSuite/UDPUpperLayers.ned
 Nodes/MPLS/LSRNode.ned
-Nodes/MPLS/NetworkLayersWithMPLS.ned
+Nodes/MPLS/NetworkLayerWithMPLS.ned
 Nodes/MPLS/RSVP_LSR_Node.ned
 Tests/MPLS/LDP1/MPLSNet.ned
 Tests/MPLS/LDP1/MPLSOnly.ned

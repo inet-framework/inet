@@ -16,17 +16,14 @@ Define_Module_Like ( BurstGenerator, GeneratorAppOut );
 void BurstGenerator::initialize()
 {
     burstSize = par("burstPackets");
-    strcpy(nodename, par("nodename"));
-    nodenr = par("nodenr");
     packetSize = par("generationSize");
-        usesTCPProt = par("tcpProtocol");
-
+    usesTCPProt = par("tcpProtocol");
 }
 
 void BurstGenerator::activity()
 {
     int packetsSent;
-    int contCtr = nodenr*10000+100;
+    int contCtr = id()*10000+100;
     char dest[20];
     cPacket *transportPacket = NULL;
     IPInterfacePacket *iPacket = NULL;
@@ -49,10 +46,9 @@ void BurstGenerator::activity()
 
     if (burstSize > 0)
     {
-        ev << "\n*** " << nodename 
-            << " Burst Generator: " << burstSize
-            << " packets sent to "<< iPacket->destAddr() 
-            << "\n";
+        ev << "Burst Generator: " << burstSize
+           << " packets sent to "<< iPacket->destAddr()
+           << "\n";
     }
 
 }
@@ -60,7 +56,7 @@ void BurstGenerator::activity()
 /* destination address fixed on nodenr */
 char *BurstGenerator::chooseDestAddr(char *dest)
 {
-    sprintf(dest, "172.0.3.%i", nodenr);
+    //sprintf(dest, "172.0.3.%i", nodenr); // FIXME!!!!!!!!!!!!!!!!
 
     return dest;
 }

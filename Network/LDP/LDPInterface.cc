@@ -16,199 +16,201 @@
 #include "ConstType.h"
 #include "LDPproc.h"
 
-Define_Module( LDPInterface);
+Define_Module(LDPInterface);
 
 void LDPInterface::initialize()
 {
 
-    local_addr   = IPAddress(par("local_addr").stringValue()).getInt();
-    local_port   = ConstType::ldp_port;
-    rem_port     = ConstType::ldp_port;
+    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    local_port = ConstType::ldp_port;
+    rem_port = ConstType::ldp_port;
 
 
-    keepAliveTime = par("keepAliveTime") ;
+    keepAliveTime = par("keepAliveTime");
 
-    timeout      = par("timeout");
+    timeout = par("timeout");
 
-    appl_timeout =  0;// Unused par("appl_timeout").doubleValue();
+    appl_timeout = 0;  // Unused par("appl_timeout").doubleValue();
 
     local_addr = IPAddress(par("local_addr").stringValue()).getInt();
 
-    //rem_addr = IPAddress(par("server_addr").stringValue()).getInt();
+    // rem_addr = IPAddress(par("server_addr").stringValue()).getInt();
 }
 
 
 void LDPInterface::activity()
 {
-  TcpConnId tcp_conn_id;
-  WATCH(tcp_conn_id);
+    TcpConnId tcp_conn_id;
+    WATCH(tcp_conn_id);
 
-  cModule* mod;
-  cMessage* msg;
-  int modID;
-  int i;
+    cModule *mod;
+    cMessage *msg;
+    int modID;
+    int i;
 
-  procserver_type = findModuleType("TCPServerProc");
-  if (!procserver_type)
-      error("Cannot find module type TCPServerProc");
+    procserver_type = findModuleType("TCPServerProc");
+    if (!procserver_type)
+        error("Cannot find module type TCPServerProc");
 
-  procclient_type = findModuleType("TCPClientProc");
-  if (!procclient_type)
-      error("Cannot find module type TCPClientProc");
-
-
-  //Act as a server to accept peer tcp conn requests
-
-  passiveOpen(timeout, procserver_type);
+    procclient_type = findModuleType("TCPClientProc");
+    if (!procclient_type)
+        error("Cannot find module type TCPClientProc");
 
 
-  while(true)
+    // Act as a server to accept peer tcp conn requests
+
+    passiveOpen(timeout, procserver_type);
+
+
+    while (true)
     {
-     cArray* msg_list;
-     int pIP, conID;
+        cArray *msg_list;
+        int pIP, conID;
 
-      msg = receive();
-      int myKind = msg->kind();
-      ev << "LDP INTERFACE DEBUG: Message received kind is " << myKind << "\n";
+        msg = receive();
+        int myKind = msg->kind();
+        ev << "LDP INTERFACE DEBUG: Message received kind is " << myKind << "\n";
 
-      switch(myKind)
+        switch (myKind)
         {
 
-          //PART I: Messages from LDP proc
-      case LDP_CLIENT_CREATE:
-          //LDPproc sends message with peerIP (int)tagged
-           createClient(msg->par("peerIP").longValue());
-           delete msg;
-           break;
+            // PART I: Messages from LDP proc
+        case LDP_CLIENT_CREATE:
+            // LDPproc sends message with peerIP (int)tagged
+            createClient(msg->par("peerIP").longValue());
+            delete msg;
+            break;
 
-      case LABEL_REQUEST:
-          //LDPproc forwards request with peerIP tagged
-            modID= getModidByPeerIP(msg->par("peerIP").longValue());
-            if(modID==id()) //Invalid mod id
+        case LABEL_REQUEST:
+            // LDPproc forwards request with peerIP tagged
+            modID = getModidByPeerIP(msg->par("peerIP").longValue());
+            if (modID == id())  // Invalid mod id
             {
                 ev << "LDP INTERFACE DEBUG: LABEL_REQUEST unhandled in LDPInterface\n";
                 delete msg;
                 break;
             }
-             mod = simulation.module(modID);
+            mod = simulation.module(modID);
             if (!mod)
             {
 
-              ev << "LDP INTERFACE DEBUG: This connection is invalid, deleting msg.\n";
-              delete msg;
-              break;
+                ev << "LDP INTERFACE DEBUG: This connection is invalid, deleting msg.\n";
+                delete msg;
+                break;
             }
-             else
+            else
             {
-              sendDirect(msg, 0.0, mod, "from_ldp");
-              ev << "LDP INTERFACE DEBUG: Dispatch LABEL_REQUEST to client/server components\n";
-              break;
+                sendDirect(msg, 0.0, mod, "from_ldp");
+                ev << "LDP INTERFACE DEBUG: Dispatch LABEL_REQUEST to client/server components\n";
+                break;
             }
 
-      case LABEL_MAPPING:
-            //LDPproc return reply with peerIP tagged
-            modID= getModidByPeerIP(msg->par("peerIP").longValue());
-            if(modID==(this->id()))
+        case LABEL_MAPPING:
+            // LDPproc return reply with peerIP tagged
+            modID = getModidByPeerIP(msg->par("peerIP").longValue());
+            if (modID == (this->id()))
             {
                 ev << "LDP INTERFACE DEBUG: LABEL_MAPPING unhandled in LDPInterface\n";
                 delete msg;
                 break;
             }
-             mod = simulation.module(modID);
+            mod = simulation.module(modID);
             if (!mod)
             {
 
-              ev << "LDP DEBUG: This connection is invalid, deleting msg.\n";
-              delete msg;
-              break;
+                ev << "LDP DEBUG: This connection is invalid, deleting msg.\n";
+                delete msg;
+                break;
             }
-             else
+            else
             {
-              sendDirect(msg, 0.0, mod, "from_ldp");
-              break;
+                sendDirect(msg, 0.0, mod, "from_ldp");
+                break;
             }
 
 
-          //PART II : Messages from TCP layers
+            // PART II : Messages from TCP layers
         case TCP_I_RCVD_SYN:
 
-       modID= msg->par("tcp_conn_id").longValue();// From client to server only
+            modID = msg->par("tcp_conn_id").longValue();  // From client to server only
 
-          mod = simulation.module(modID);
+            mod = simulation.module(modID);
 
-          if (!mod)
+            if (!mod)
             {
-              if (debug)
-                ev << "LDP DEBUG: This ProcServer exited, deleting msg.\n";
-              delete msg;
+                if (debug)
+                    ev << "LDP DEBUG: This ProcServer exited, deleting msg.\n";
+                delete msg;
             }
-          else
+            else
             {
-            pIP = msg->par("src_addr").longValue();
+                pIP = msg->par("src_addr").longValue();
 
-              //Update ldpSession for server entries
-              for(i=0;i< ldpSessions.size(); i++)
-             {
-                 if(ldpSessions[i].mod_id == (int)modID)
-                 {
+                // Update ldpSession for server entries
+                for (i = 0; i < ldpSessions.size(); i++)
+                {
+                    if (ldpSessions[i].mod_id == (int) modID)
+                    {
 
-                     ldpSessions[i].peerAddr = pIP;
+                        ldpSessions[i].peerAddr = pIP;
 
-                     break;
-                 }
+                        break;
+                    }
 
-             }
+                }
 
-              sendDirect(msg, 0.0, mod, "from_tcp");
+                sendDirect(msg, 0.0, mod, "from_tcp");
             }
 
-          passiveOpen(timeout, procserver_type);
+            passiveOpen(timeout, procserver_type);
 
-          break;
+            break;
 
         case TCP_I_ESTAB:
 
-           pIP  = msg->par("src_addr").longValue();
+            pIP = msg->par("src_addr").longValue();
 
-           conID = msg->par("tcp_conn_id");
+            conID = msg->par("tcp_conn_id");
 
-            //TCP established by peer, update client entries
+            // TCP established by peer, update client entries
 
-            for(i=0;i< ldpSessions.size(); i++)
+            for (i = 0; i < ldpSessions.size(); i++)
             {
-                  if(ldpSessions[i].peerAddr == (int)pIP)
-                     {
+                if (ldpSessions[i].peerAddr == (int) pIP)
+                {
 
-                        ldpSessions[i].tcp_conn_id = conID;
-                                 ev << "LDP INTERFACE DEBUG: Update modid-tcpCon-peerIP "<<
-                                 ldpSessions[i].mod_id << "    " << ldpSessions[i].tcp_conn_id << "    " <<
-                                    IPAddress(ldpSessions[i].peerAddr).getString() << "\n";
-                                    modID = ldpSessions[i].mod_id;
-                         break;
-                     }
+                    ldpSessions[i].tcp_conn_id = conID;
+                    ev << "LDP INTERFACE DEBUG: Update modid-tcpCon-peerIP " <<
+                        ldpSessions[i].mod_id << "    " << ldpSessions[i].tcp_conn_id << "    " <<
+                        IPAddress(ldpSessions[i].peerAddr) << "\n";
+                    modID = ldpSessions[i].mod_id;
+                    break;
+                }
 
-             }
-             mod = simulation.module(modID);
+            }
+            mod = simulation.module(modID);
 
-             if(mod == NULL)
-                 error("no module found for TCP_I_ESTAB");
+            if (mod == NULL)
+                error("no module found for TCP_I_ESTAB");
 
-             sendDirect(msg, 0.0, mod, "from_tcp");
-          break;
+            sendDirect(msg, 0.0, mod, "from_tcp");
+            break;
 
 
-         case TCP_I_SEG_FWD:
+        case TCP_I_SEG_FWD:
 
-            msg_list = (cArray*)(msg->parList().get("msg_list"));
-            for (i = 0; i < msg_list->items(); i++)    {
-                if (msg_list->exist(i)) {
+            msg_list = (cArray *) (msg->parList().get("msg_list"));
+            for (i = 0; i < msg_list->items(); i++)
+            {
+                if (msg_list->exist(i))
+                {
 
-                    cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
+                    cMessage *tcp_send_msg = (cMessage *) ((cMessage *) (msg_list->get(i)))->dup();
                     tcp_send_msg->setKind(TCP_I_SEG_FWD);
 
                     modID = getModidByPeerIP(tcp_send_msg->par("src_addr").longValue());
                     mod = simulation.module(modID);
-                    if(mod == NULL)
+                    if (mod == NULL)
                         error("no module found for TCP_I_SEG_FWD");
                     sendDirect(tcp_send_msg, 0.0, mod, "from_tcp");
                 }
@@ -217,31 +219,33 @@ void LDPInterface::activity()
 
             break;
 
-          default:
+        default:
 
-        if(msg->hasPar("src_addr"))
-        modID= getModidByPeerIP(msg->par("src_addr").longValue());
-        else
-          modID= getModidByPeerIP(msg->par("peerIP").longValue());
+            if (msg->hasPar("src_addr"))
+                modID = getModidByPeerIP(msg->par("src_addr").longValue());
+            else
+                modID = getModidByPeerIP(msg->par("peerIP").longValue());
 
-            ev << "LDP INTERFACE DEBUG: Unknown message kind. Redirecting msg to module with TCP connection ID = "
-               <<  modID << "\n";
+            ev <<
+                "LDP INTERFACE DEBUG: Unknown message kind. Redirecting msg to module with TCP connection ID = "
+                << modID << "\n";
 
-          mod         = simulation.module(modID);
-          if (modID==id() || (!mod))
+            mod = simulation.module(modID);
+            if (modID == id() || (!mod))
             {
-              if (debug)
-                ev << "LDP INTERFACE DEBUG:  no module found for an unknown message, deleting msg.\n";
-              delete msg;
+                if (debug)
+                    ev <<
+                        "LDP INTERFACE DEBUG:  no module found for an unknown message, deleting msg.\n";
+                delete msg;
             }
-          else
+            else
             {
-              sendDirect(msg, 0.0, mod, "from_tcp");
+                sendDirect(msg, 0.0, mod, "from_tcp");
             }
 
-      }//End switch
+        }  // End switch
 
-    }//End while
+    }  // End while
 
 
 
@@ -251,114 +255,105 @@ void LDPInterface::activity()
 int LDPInterface::getModidByPeerIP(int peerIP)
 {
     int i;
-    for(i=0;i<ldpSessions.size();i++)
+    for (i = 0; i < ldpSessions.size(); i++)
     {
-        if(peerIP==ldpSessions[i].peerAddr)
+        if (peerIP == ldpSessions[i].peerAddr)
             return ldpSessions[i].mod_id;
     }
-    ev << "LDP PROC DEBUG: Unknown Peer IP: " << IPAddress(peerIP).getString() <<"\n";
+    ev << "LDP PROC DEBUG: Unknown Peer IP: " << IPAddress(peerIP) << "\n";
     return id();  // FIXME is this good??? Andras
 }
 
 void LDPInterface::createClient(int destAddr)
 {
+    cModule *mod;
 
-  cModule* mod;
+    mod = procclient_type->createScheduleInit("tcpclientproc", this);
 
-  mod = procclient_type->createScheduleInit("tcpclientproc", this);
+    ev << "LDP INTERFACE DEBUG: Created TCP Client process, modID = " << mod->id() << "\n";
 
+    // We want to classify imcomming messages only
+    mod->gate("to_tcp")->setTo(gate("to_tcp"));
 
+    mod->gate("to_ldp")->setTo(gate("to_ldp"));
 
-  ev << "LDP INTERFACE DEBUG: Created TCP Client process, modID = " << (mod->id()) << "\n";
+    // The only way to tell this module about how it should communicate to ?
 
-  //We want to classify imcomming messages only
-  mod->gate("to_tcp")->setTo(gate("to_tcp"));
+    cMessage *howMsg = new cMessage();
+    howMsg->addPar("rem_addr") = destAddr;
+    howMsg->addPar("local_addr") = local_addr;
+    howMsg->addPar("timeout") = timeout;
+    howMsg->addPar("appl_timeout") = appl_timeout;
+    howMsg->addPar("keep_alive_time") = keepAliveTime;
+    howMsg->setKind(ConstType::HOW_KIND);
 
-  mod->gate("to_ldp")->setTo(gate("to_ldp"));
+    sendDirect(howMsg, 0.0, mod, "from_tcp");
 
-   //The only way to tell this module about how it should communicate to ?
+    // Record the mod
+    ldp_session_type newSession;
+    newSession.mod_id = mod->id();
+    newSession.peerAddr = destAddr;
+    newSession.tcp_conn_id = -1;  // IS THIS AN INVALID VALUE?
 
-  cMessage* howMsg = new cMessage();
-  howMsg->addPar("rem_addr") = destAddr;
-  howMsg->addPar("local_addr")= local_addr;
-  howMsg->addPar("timeout")= timeout;
-  howMsg->addPar("appl_timeout")= appl_timeout;
-  howMsg->addPar("keep_alive_time")= keepAliveTime;
-  howMsg->setKind(ConstType::HOW_KIND);
-
-  sendDirect(howMsg, 0.0, mod, "from_tcp");
-
-  //Record the mod
-  ldp_session_type* newSession = new ldp_session_type;
-
-  newSession->mod_id = (mod->id());
-  newSession->peerAddr= destAddr;
-  newSession->tcp_conn_id =-1; //IS THIS AN INVALID VALUE?
-
-  this->ldpSessions.push_back(*newSession);
-
-
+    ldpSessions.push_back(newSession);
 }
 
 
 
 
-void LDPInterface::passiveOpen(double timeout, cModuleType* procserver_type)
+void LDPInterface::passiveOpen(double timeout, cModuleType * procserver_type)
 {
-  //server appl. calls
-  cMessage *open_passive;
+    // server appl. calls
+    cMessage *open_passive;
 
-  open_passive                      = new cMessage("TCP_C_OPEN_PASSIVE", TCP_C_OPEN_PASSIVE);
-  open_passive->addPar("src_port")  = local_port;
-  open_passive->addPar("src_addr")  = local_addr;
-  open_passive->addPar("dest_port") = -1;//rem_port;
-  open_passive->addPar("dest_addr") = -1;//rem_addr;
+    open_passive = new cMessage("TCP_C_OPEN_PASSIVE", TCP_C_OPEN_PASSIVE);
+    open_passive->addPar("src_port") = local_port;
+    open_passive->addPar("src_addr") = local_addr;
+    open_passive->addPar("dest_port") = -1;  // rem_port;
+    open_passive->addPar("dest_addr") = -1;  // rem_addr;
 
-  open_passive->addPar("timeout") = 3600*5000;//timeout; //global default is 5 min
+    open_passive->addPar("timeout") = 3600 * 5000;  // timeout; // global default is 5 min
 
-  open_passive->setLength(0);
-  //no data packets to receive
-  open_passive->addPar("rec_pks")     = 0;
+    open_passive->setLength(0);
+    // no data packets to receive
+    open_passive->addPar("rec_pks") = 0;
 
-  //make delay checking possible
-  open_passive->setTimestamp();
+    // make delay checking possible
+    open_passive->setTimestamp();
 
-  //create module "TCPServerProc" dynamically within module "ClientPart"
-  cModule* mod;
+    // create module "TCPServerProc" dynamically within module "ClientPart"
+    cModule *mod;
 
-  mod = procserver_type->createScheduleInit("tcpserverproc", this);
+    mod = procserver_type->createScheduleInit("tcpserverproc", this);
 
-  ev << "LDP INTERFACE DEBUG : Created TCP server process, modID = " << mod->id() << "\n";
+    ev << "LDP INTERFACE DEBUG : Created TCP server process, modID = " << mod->id() << "\n";
 
-  mod->gate("to_tcp")->setTo(gate("to_tcp"));
-  mod->gate("to_ldp")->setTo(gate("to_ldp"));
+    mod->gate("to_tcp")->setTo(gate("to_tcp"));
+    mod->gate("to_ldp")->setTo(gate("to_ldp"));
 
-  //The only way to tell this module about how it should communicate to ?
+    // The only way to tell this module about how it should communicate to ?
 
-  cMessage* howMsg = new cMessage();
-  //howMsg->addPar("rem_addr") = destAddr;
-  howMsg->addPar("local_addr")= local_addr;
-  howMsg->addPar("timeout")= timeout;
-  howMsg->addPar("appl_timeout")= appl_timeout;
-  howMsg->addPar("keep_alive_time")= keepAliveTime;
-  howMsg->setKind(ConstType::HOW_KIND);
+    cMessage *howMsg = new cMessage();
+    // howMsg->addPar("rem_addr") = destAddr;
+    howMsg->addPar("local_addr") = local_addr;
+    howMsg->addPar("timeout") = timeout;
+    howMsg->addPar("appl_timeout") = appl_timeout;
+    howMsg->addPar("keep_alive_time") = keepAliveTime;
+    howMsg->setKind(ConstType::HOW_KIND);
 
-  sendDirect(howMsg, 0.0, mod, "from_tcp");
+    sendDirect(howMsg, 0.0, mod, "from_tcp");
 
-  int modID= mod->id();
+    int modID = mod->id();
 
-  open_passive->addPar("tcp_conn_id") =modID;;
+    open_passive->addPar("tcp_conn_id") = modID;;
 
-  //send "passive open" to "TcpModule"
-  send(open_passive, "to_tcp");
+    // send "passive open" to "TcpModule"
+    send(open_passive, "to_tcp");
 
-  //Record the mod
-  ldp_session_type *newSession = new ldp_session_type;
-
-  newSession->tcp_conn_id = modID;
-  newSession->mod_id =  modID;
-  newSession->peerAddr= -1;
-
-  ldpSessions.push_back(*newSession);
-
+    // Record the mod
+    ldp_session_type newSession;
+    newSession.tcp_conn_id = modID;
+    newSession.mod_id = modID;
+    newSession.peerAddr = -1;
+    ldpSessions.push_back(newSession);
 }
