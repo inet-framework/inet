@@ -877,6 +877,7 @@ void RSVPAppl::updateTED()
 
 bool RSVPAppl::initFromFile(const char *filename)
 {
+    // FIXME rewrite with OMNeT++'s xml config file support
     xmlDocPtr doc;
 
     xmlNodePtr cur;
