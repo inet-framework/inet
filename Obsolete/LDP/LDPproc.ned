@@ -14,7 +14,7 @@
 //
 // Handles and processes LDP messages.
 //
-// The LDP protocol is used by one LSR (Label Switched Router) to inform
+// The LDP protocol is used by one LSR (Label Switched \Router) to inform
 // another LSR of the label bindings it has made. The LSR uses this protocol
 // to establish label switched paths through a network by mapping network layer
 // routing information directly to data-link layer switched paths.

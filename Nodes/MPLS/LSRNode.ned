@@ -25,8 +25,8 @@ import
 //
 // An LDP-capable router.
 //
-// LDP Capable Routers are main building blocks for an LDP MPLS network. The
-// Router ID is assigned as the router local loopback interface.
+// LDP Capable Routers are main building blocks for an LDP MPLS network.
+// RouterID is assigned as the router local loopback interface.
 //
 module LSRNode
     parameters:

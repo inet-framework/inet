@@ -25,7 +25,7 @@
 // will also be created. For hosts, the routerId parameter should be empty (""),
 // in which case the loopback IP address will be set to 127.0.0.1/8.
 // For routers which have a routerId set, the loopback address will be set to
-// routerId. (See also RFC 2072 "Router Renumbering Guide".)
+// routerId. (See also RFC 2072 "\Router Renumbering Guide".)
 //
 // RouterId may also be set to the string <tt>"auto"</tt>, in which case the
 // highest interface address will be chosen as routerId; the loopback address

@@ -28,7 +28,7 @@
 // to MPLS module indicating that it is ready to operate. The MPLS module then
 // sends Label Request for FEC of the queued packets in the buffer. Label
 // mapping and installation are performed by signaling protocols. Once, the
-// Ingress Router receives label mapping, it starts to send out queued
+// Ingress \Router receives label mapping, it starts to send out queued
 // packets.
 //
 // For most of the time, the MPLS module will do the label swapping and

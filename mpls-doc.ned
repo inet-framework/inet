@@ -56,7 +56,7 @@
 //     Step 3: Check the packet type
 //     Alternative 1: The packet is native IP
 //         Step 1: Check the LSR type
-//         Alternative 1: The LSR is an Ingress Router
+//         Alternative 1: The LSR is an Ingress \Router
 //             Step 1: Look up LIB for outgoing label
 //             Alternative 1: Label cannot be found
 //                 Step 1: Check if the label for this FEC is being requested
@@ -70,16 +70,16 @@
 //                 Step 1: Carry out the label operation on the packet
 //                 Step 2: Forward the packet to the outgoing interface found
 //                 Step 3: Return
-//         Alternative 2: The LSR is not an Ingress Router
+//         Alternative 2: The LSR is not an Ingress \Router
 //             Step 1: Print out the error
 //             Step 2: Delete the packet and return
 //     Alternative 2: The packet is MPLS
 //         Step 1: Check the LSR type
-//         Alternative 1: The LSR is an Egress Router
+//         Alternative 1: The LSR is an Egress \Router
 //             Step 1: POP the top label
 //             Step 2: Forward the packet to the outgoing interface found
 //             Step 3: Return
-//         Alternative 2: The LSR is not an Egress Router
+//         Alternative 2: The LSR is not an Egress \Router
 //             Step 1: Look up LIB for outgoing label
 //             Alternative 1: Label cannot be found
 //                 Step 1: Check if the label for this FEC is being requested
@@ -191,7 +191,7 @@
 //
 // CSPF stands for Constraint Shortest Path First.
 // This constraint-based routing is executed online by Ingress
-// Router. The CSPF calculates an optimum explicit route (ER), based on
+// \Router. The CSPF calculates an optimum explicit route (ER), based on
 // specific constraints. CSPF relies on a Traffic Engineering Database (TED)
 // to do those calculations. The resulting route is then used by \RSVP-TE.
 //
