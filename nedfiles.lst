@@ -107,6 +107,7 @@ Tests/MPLS/LDP1/MPLSOnly.ned
 Tests/NewTCP/TcpTest.ned
 Tests/NewTCP/TcpTestClient.ned
 Transport/NewTCP/TCPMain.ned
+Transport/NewTCP/TCPDump.ned
 Transport/RTP/RTCPModule.ned
 Transport/RTP/RTPApplication.ned
 Transport/RTP/RTPHost.ned
