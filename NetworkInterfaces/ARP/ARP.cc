@@ -29,10 +29,10 @@ static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
 
 static std::ostream& operator<< (std::ostream& ev, const ARP::ARPCacheEntry& e)
 {
-    ev << "MAC:" << e.macAddress;
     if (e.pending)
-        ev << "  pending (" << e.numRetries << " retries)";
-    ev << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
+        ev << "pending (" << e.numRetries << " retries)";
+    else
+        ev << "MAC:" << e.macAddress << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
     return ev;
 }
 
