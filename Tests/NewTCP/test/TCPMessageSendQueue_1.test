@@ -7,7 +7,7 @@ Test TCPMessageSendQueue class
 
 void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
 {
-    ev << "enqueue(\"" << msgname << "\", " << numBytes << "):";
+    ev << "enqueue(\"" << msgname << "\", " << numBytes << "): ";
 
     cMessage *msg = new cMessage(msgname);
     msg->setLength(numBytes*8);
@@ -18,17 +18,22 @@ void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
 
 void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, ulong numBytes)
 {
-    ev << "createSegmentWithBytes(" << fromSeq << ", " << numBytes << "):";
+    ev << "createSegmentWithBytes(" << fromSeq << ", " << numBytes << "): ";
     TCPSegment *tcpseg = q->createSegmentWithBytes(fromSeq, numBytes);
 
-    ev << q->info() <<"\n";
+    for (int i=0; i<tcpseg->payloadArraySize(); i++)
+    {
+        TCPPayloadMessage& payload = tcpseg->payload(i);
+        ev << (i?", ":" ") << payload.msg->name() << " .." << payload.endSequenceNo;
+    }
+    ev << "\n";
 
     delete tcpseg;
 }
 
 void discardUpTo(TCPMessageSendQueue *q, uint32 seqNum)
 {
-    ev << "discardUpTo(" << seqNum << "):";
+    ev << "discardUpTo(" << seqNum << "): ";
     q->discardUpTo(seqNum);
 
     ev << q->info() <<"\n";
