@@ -17,7 +17,7 @@
 //
 
 
-//# @titlepage (would conflict with main titlepage)
+//# @-titlepage (would conflict with main titlepage)
 //# <h1>Ethernet Model Documentation</h1>
 //
 // @page eth-index.html, Ethernet Model -- Start Page

@@ -70,10 +70,10 @@ doxy:
 	doxygen doxy.cfg
 
 neddoc:
-	opp_neddoc -o $(DOC_DIR)/neddoc -t $(DOC_DIR)/doxy/doxytags.xml -d ../doxy $(SUBDIRS)
+	opp_neddoc -o $(DOC_DIR)/neddoc -t $(DOC_DIR)/doxy/doxytags.xml -d ../doxy *.ned *.msg $(SUBDIRS)
 
 neddoc-without-doxy:
-	opp_neddoc -o $(DOC_DIR)/neddoc $(SUBDIRS)
+	opp_neddoc -o $(DOC_DIR)/neddoc *.ned *.msg $(SUBDIRS)
 
 #------------------------------------------------------------------------------
 
