@@ -255,7 +255,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         // Decapsulate the message and pass up to L3 since this is LDP packet
         //
         // FIXME this smells like hacking. Or is this an "IPv4 Explicit NULL Label"
-        // (rfc 3032) or something like this? (Andras)
+        // (rfc 3032) or something like that? (Andras)
         ev << ": decapsulating and sending up\n";
 
         IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
@@ -272,9 +272,9 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
     if (found && newLabel!=-1)  // New label found
     {
+        ev << ": ";
         switch (optCode)
         {
-            ev << ": ";
             case PUSH_OPER:
                 ev << "PUSH " << newLabel;
                 mplsPacket->pushLabel(newLabel);

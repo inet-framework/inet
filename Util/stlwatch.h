@@ -82,7 +82,7 @@ class cMapWatcher : public cVectorWatcherBase
 {
   protected:
     map<_K,_V,_C>& m;
-    mutable map<_K,_V,_C>::iterator it;
+    mutable typename map<_K,_V,_C>::iterator it;
     mutable int itPos;
   public:
     cMapWatcher(const char *name, map<_K,_V,_C>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}

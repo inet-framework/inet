@@ -102,7 +102,7 @@ void TcpTestClient::activity()
     bool active = par("active");
     simtime_t tOpen = par("tOpen");
     simtime_t tSend = par("tSend");
-    simtime_t sendBytes = par("sendBytes");
+    long sendBytes = par("sendBytes");
     simtime_t tClose = par("tClose");
 
     const char *script = par("sendScript");
