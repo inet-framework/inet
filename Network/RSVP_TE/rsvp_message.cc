@@ -25,13 +25,13 @@
 
 /********************RSVP PACKET**********************************/
 // constructor
-RSVPPacket::RSVPPacket():TransportPacket()
+RSVPPacket::RSVPPacket() : cMessage() // FIXME was: TransportPacket()
 {
     _hasChecksum = true;
     setRSVPLength(0);
 }
 
-RSVPPacket::RSVPPacket(const RSVPPacket & p):TransportPacket(p)
+RSVPPacket::RSVPPacket(const RSVPPacket & p) : cMessage(p) // FIXME was: TransportPacket(p)
 {
     setName(p.name());
     operator=(p);
@@ -48,7 +48,7 @@ RSVPPacket::RSVPPacket(const cMessage &msg): TransportPacket(msg)
 
 RSVPPacket & RSVPPacket::operator=(const RSVPPacket & p)
 {
-    TransportPacket::operator=(p);
+    cMessage::operator=(p); // FIXME was: TransportPacket::...
     setRSVPLength(p.RSVPLength());
     setChecksumValidity(p.checksumValid());
     return *this;
@@ -56,13 +56,13 @@ RSVPPacket & RSVPPacket::operator=(const RSVPPacket & p)
 
 void RSVPPacket::setLength(int bitlength)
 {
-    TransportPacket::setLength(bitlength);
+    cMessage::setLength(bitlength); // FIXME was: TransportPacket::...
     _rsvpLength = bitlength / 8;
 }
 
 void RSVPPacket::setRSVPLength(int byteLength)
 {
-    TransportPacket::setLength(byteLength * 8);
+    cMessage::setLength(byteLength * 8); // FIXME was: TransportPacket::...
     _rsvpLength = byteLength;
 }
 

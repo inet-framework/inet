@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
-SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir McNetwork2_dir PerformAnalysis_dir TCPClientServerNet_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
+SUBDIRS= FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPUDPDirectNet UDPSockets
+SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir McNetwork2_dir PerformAnalysis_dir TCPClientServerNet_dir TCPUDPDirectNet_dir UDPSockets_dir
 
 # inserted from file 'makefrag.vc':
 
@@ -101,9 +101,6 @@ PerformAnalysis_dir:
 
 TCPClientServerNet_dir:
 	cd TCPClientServerNet && cd && nmake /nologo /f Makefile.vc
-
-TCPTester_dir:
-	cd TCPTester && cd && nmake /nologo /f Makefile.vc
 
 TCPUDPDirectNet_dir:
 	cd TCPUDPDirectNet && cd && nmake /nologo /f Makefile.vc

@@ -54,7 +54,7 @@ void RSVPInterface::processMsgFromIp(cMessage * msg)
     // ResvTearMessage *rtMsg;
     // ResvErrorMessage *reMsg;
 
-    TransportPacket *tpacket = check_and_cast<TransportPacket *>(msg);
+    cMessage *tpacket = msg; //FIXME was: TransportPacket *tpacket = check_and_cast<TransportPacket *>(msg);
 
     cMessage *rsvpMsg = (cMessage *) (tpacket->par("rsvp_data").objectValue());
     int msgKind = rsvpMsg->kind();
@@ -106,9 +106,9 @@ void RSVPInterface::processMsgFromIp(cMessage * msg)
 void RSVPInterface::processMsgFromApp(cMessage * msg)
 {
     // FIXME was this: TransportPacket* tpacket = new TransportPacket(*msg);
-    TransportPacket *tpacket = new TransportPacket();
-    *(cMessage *) tpacket = *msg;       // copy parameters (not sure this is needed -- Andras)
-    tpacket->addPar("rsvp_data") = msg;
+    // FIXME then it was this: TransportPacket *tpacket = new TransportPacket(); *(cMessage *)tpacket = *msg;
+    cMessage *tpacket = new cMessage(*msg);
+    tpacket->addPar("rsvp_data") = msg; // FIXME ???
 
 
     // FIXME eliminate MY_ERROR_IP_ADDRESS? NULL and IPAddress.isNull() should be OK instead

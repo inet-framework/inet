@@ -24,7 +24,7 @@
 
 #include "intserv.h"
 #include "IPAddress.h"
-#include "TransportPacket.h"
+//#include "TransportPacket.h"
 
 #define PATH_MESSAGE 1
 #define RESV_MESSAGE 2
@@ -44,7 +44,7 @@
 *
 ****************************************************************/
 
-class RSVPPacket: public TransportPacket
+class RSVPPacket: public cMessage // FIXME was: TransportPacket
 {
 
 protected:
