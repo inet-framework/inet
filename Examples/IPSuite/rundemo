@@ -18,13 +18,12 @@ exec wish "$0" "$@"
 # columns below: <name> <directory> <unix-command> <windows-command>
 set i 0
 foreach line {
+   {"FaltNet"             "FlatNet"            "./FlatNet"            "FlatNet.exe"}
    {"KIDSNw1"             "KIDSNw1"            "./KIDSNw1"            "KIDSNw1.exe"}
    {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2.exe"}
    {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis.exe"}
    {"TCPClientServerNet"  "TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet.exe"}
-   {"TCPTester"           "TCPTester"          "./TCPTester"          "TCPTester.exe"}
    {"TCPUDPDirectNet"     "TCPUDPDirectNet"    "./TCPUDPDirectNet"    "TCPUDPDirectNet.exe"}
-   {"UDPSockets"          "UDPSockets"         "./UDPSockets"         "UDPSockets.exe"}
 } {
    set name $i
    incr i
