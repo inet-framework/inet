@@ -36,11 +36,11 @@ module PerformanceNetwork
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "i=cogwheel";
+            display: "p=60,160;i=cogwheel";
         sender: BurstHost[nodeNo];
-            parameters:
-                burstPackets = packetNo,
-                packetSize = 1000;
+//            parameters:
+//                burstPackets = packetNo,
+//                packetSize = 1000;
 //            parameters if index==0:
 //                routingFile = "sender0.irt";
 //            parameters if index==1:
@@ -64,12 +64,12 @@ module PerformanceNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=61,205,row;i=comp,yellow,10";
+            display: "p=100,285,row;i=comp,yellow,10";
 
         recip: BurstHost[nodeNo];
-            parameters:
-                burstPackets = 0,
-                packetSize = 10;
+//            parameters:
+//                burstPackets = 0,
+//                packetSize = 10;
 //            parameters if index==0:
 //                routingFile = "recip0.irt";
 //            parameters if index==1:
@@ -93,7 +93,7 @@ module PerformanceNetwork
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=63,68,row;i=comp";
+            display: "p=100,68,row;i=comp";
 
         router: Router;
 //            parameters:
@@ -101,7 +101,7 @@ module PerformanceNetwork
             gatesizes:
                 in[nodeNo*2],
                 out[nodeNo*2];
-            display: "p=146,134;i=srouter";
+            display: "p=172,174;i=srouter";
 
     connections nocheck:
         for i=0..nodeNo-1 do
