@@ -30,7 +30,6 @@ void BurstGenerator::activity()
 	char dest[20];
 	cPacket *transportPacket = NULL;
 	IPInterfacePacket *iPacket = NULL;
-	IPAddrChar src;
 
 	wait(1);
 
