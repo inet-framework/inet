@@ -39,8 +39,6 @@ void IPMulticast::handleMessage(cMessage *msg)
 {
     RoutingTable *rt = routingTableAccess.get();
 
-    // FIXME We should probably handle if IGMP message comes from localIn.
-    // IGMP is not implemented.
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(msg->controlInfo());
     int inputPort = controlInfo->inputPort();
