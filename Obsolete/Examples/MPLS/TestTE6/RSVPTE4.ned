@@ -14,14 +14,10 @@
 import
     "StandardHost",
     "RSVP_LSR",
-    "Tester",
     "TED";
 
 //
-// LSP preemption example.
-//
-// FIXME there's a very similar NED file in the same directry --
-// one of them has to be removed?
+// Network for the LSP preemption example.
 //
 // See the README file in the model directory for scenario description.
 //

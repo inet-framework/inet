@@ -14,7 +14,7 @@
 import
     "StandardHost",
     "RSVP_LSR",
-    "Tester",
+    "NewRouteTester",
     "TED";
 
 
@@ -88,11 +88,10 @@ module RSVPTE4
             parameters:
                moduleTypes = "StandardHost RSVP_LSR";
             display: "p=120,280;i=proc2";
-        tester: Tester;
+        tester: NewRouteTester;
             parameters:
-                testType = "NewRouteTester",
-                timeOut = 100;
-            display: "p=309,300;b=40,24";
+                timeStart = 100;
+            display: "p=309,300;i=cogwheel";
     connections nocheck:
         host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];
         host1.out[0] --> delay 0ms datarate 700 --> LSR1.in[0];

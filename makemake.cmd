@@ -4,7 +4,7 @@ set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 set OPTS=-f -N -b %root% -c %root%\ipsuiteconfig.vc
 
 set ALL_IPSUITE_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/Ethernet -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/INET
-set ALL_MPLS_IPSUITE_INCLUDES=%ALL_IPSUITE_INCLUDES% -I%root%/Network/MPLS -I%root%/Network/LDP -I%root%/Network/RSVP_TE -I%root%/Nodes/MPLS
+set ALL_MPLS_IPSUITE_INCLUDES=%ALL_IPSUITE_INCLUDES% -I%root%/Network/MPLS -I%root%/Network/LDP -I%root%/Network/RSVP_TE -I%root%/Network/Scenario -I%root%/Nodes/MPLS
 
 :set ALL_MODEL_OPTS=%OPTS% -w %ALL_MPLS_IPSUITE_INCLUDES%
 set ALL_MODEL_OPTS=%OPTS% -n
@@ -36,6 +36,7 @@ cd %root%\Network\AutoRouting && %MAKEMAKE% %OPTS% -n -r -I..\IPv4  -I..\..\Base
 cd %root%\Network\MPLS && %MAKEMAKE% %OPTS% -n -r -I..\IPv4 -I..\IPv4d -I..\..\Base -I..\..\Util
 cd %root%\Network\LDP && %MAKEMAKE% %OPTS% -n -r -I..\IPv4 -I..\IPv4d -I..\..\Transport\UDP -I..\..\Transport\TCP -I..\MPLS -I..\..\Base -I..\..\Util
 cd %root%\Network\RSVP_TE && %MAKEMAKE% %OPTS% -n -r -I..\IPv4 -I..\IPv4d -I..\MPLS -I..\..\Base -I..\..\Util
+cd %root%\Network\Scenario && %MAKEMAKE% %OPTS% -n -r -I..\IPv4 -I..\IPv4d -I..\MPLS -I..\RSVP_TE -I..\..\Base -I..\..\Util
 
 cd %root%\NetworkInterfaces\PPP && %MAKEMAKE% %OPTS% -n -r -I..\..\Base -I..\..\Util -I..\..\Network\IPv4
 cd %root%\NetworkInterfaces\_802 && %MAKEMAKE% %OPTS% -n -r -I..\..\Base -I..\..\Util -I..\..\Network\IPv4
@@ -65,14 +66,11 @@ cd %root%\Examples\INET\Multicast && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\INET\RouterPerf && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\INET\BulkTransfer && %MAKEMAKE% %ALL_MODEL_OPTS%
 
-cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -w -o MPLSTester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\MPLS\ldp-mpls1 && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\MPLS\TestTE1 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE2 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE3 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE4 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
-cd %root%\Examples\MPLS\TestTE4Old && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE5 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 cd %root%\Examples\MPLS\TestTE6 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 

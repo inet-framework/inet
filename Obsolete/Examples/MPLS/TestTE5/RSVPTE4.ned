@@ -14,14 +14,11 @@
 import
     "StandardHost",
     "RSVP_LSR",
-    "Tester",
+    "NewBWRequestTester",
     "TED";
 
 //
 // Another example of traffic rerouting.
-//
-// FIXME there's a very similar NED file in the same directry --
-// one of them has to be removed?
 //
 // See the README file in the model directory for scenario description.
 //
@@ -81,11 +78,10 @@ module RSVPTE4
             parameters:
                moduleTypes = "StandardHost RSVP_LSR";
             display: "p=120,280;i=proc2";
-        tester: Tester;
+        tester: NewBWRequestTester;
             parameters:
-                testType = "NewBWRequestTester",
-                timeOut = 100;
-            display: "p=309,300;b=40,24";
+                timeStart = 100;
+            display: "p=309,300;i=cogwheel";
     connections nocheck:
         host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];
         host1.out[0] --> delay 0ms datarate 700 --> LSR1.in[0];
