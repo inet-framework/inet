@@ -1911,7 +1911,7 @@ void TcpModule::applCommandSend(cMessage* msg, TcpTcb* tcb_block)
   if (packet_size == 0)
     {
       //exiting the simulation
-      error("%s", "No data to sent specified in SEND command issued by the application");
+      error( "No data to sent specified in SEND command issued by the application");
     }
   else
     //padding the received data to the nearest byte (packet_size modulo 8)
@@ -2770,7 +2770,7 @@ void TcpModule::sndQueueProcess(TcpTcb* tcb_block)
 
       if (pdata_pkt == NULL)
         {
-          error("%s", "Unable to get data from send queue");
+          error( "Unable to get data from send queue");
         }
 
       //set ACK
@@ -3358,7 +3358,7 @@ void TcpModule::transferQueues(cQueue & from_queue, cQueue & to_queue, unsigned 
 
   if (octet_size_from_queue == 0)
     {
-      error("%s", "No data in source queue. Cannot transfer any octets");
+      error( "No data in source queue. Cannot transfer any octets");
     }
   else if (number_of_octets_to_transfer > octet_size_from_queue)
     {
@@ -3406,7 +3406,7 @@ void TcpModule::copyQueues(cQueue & from_queue, cQueue & to_queue, unsigned long
 
   if (octet_size_from_queue == 0)
     {
-      error("%s", "No data in source queue. Cannot copy any octets");
+      error( "No data in source queue. Cannot copy any octets");
     }
   else if (number_of_octets_to_copy > octet_size_from_queue)
     {
@@ -3936,7 +3936,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       
       if (tcb_block->rem_port == -1 || tcb_block->rem_addr == -1)
         {
-          error("%s", "Error using ACTIVE OPEN: foreign socket unspecified");
+          error( "Error using ACTIVE OPEN: foreign socket unspecified");
         }
 
       tcb_block->timeout = amsg->par("timeout");
@@ -3951,33 +3951,23 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       break;
         
     case TCP_E_SEND:
-      if (debug) ev << "TCP received SEND command from appl. while in CLOSED/INIT.\n";
-      error("%s", "Connection does not exist");
-
+      error ("TCP received SEND command from appl. while in CLOSED/INIT.");
       break;
 
     case TCP_E_RECEIVE:
-      if (debug) ev << "TCP received RECEIVE command from appl. while in CLOSED/INIT.\n";
-      error("%s", "Connection does not exist");
-
+      error ("TCP received RECEIVE command from appl. while in CLOSED/INIT.\n");
       break;
 
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received CLOSE command from appl. while in CLOSED/INIT.\n";
-      error("%s", "Connection does not exist");
-
+      error ("TCP received CLOSE command from appl. while in CLOSED/INIT.\n");
       break;
 
     case TCP_E_ABORT:
-      if (debug) ev << "TCP received ABORT command from appl. while in CLOSED/INIT.\n";
-      error("%s", "Connection does not exist");
-
+      error ("TCP received ABORT command from appl. while in CLOSED/INIT.\n");
       break;
         
     case TCP_E_STATUS:
-      if (debug) ev << "TCP received STATUS command from appl. while in CLOSED/INIT.\n";
-      error("%s", "Connection does not exist");
-
+      error ("TCP received STATUS command from appl. while in CLOSED/INIT.\n");
       break;
 
     case TCP_E_SEG_ARRIVAL:
@@ -4018,7 +4008,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       break;
 
     default:
-      error("%s", "Case not handled in switch statement (INIT)");
+      error( "Case not handled in switch statement (INIT)");
 
       break;
       
@@ -4079,7 +4069,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
 
       if (tcb_block->rem_port==-1 || tcb_block->rem_addr==-1)
         {
-          error("%s", "ACTIVE OPEN: foreign socket unspecified");
+          error( "ACTIVE OPEN: foreign socket unspecified");
         }
 
       tcb_block->timeout = amsg->par("timeout");
@@ -4097,7 +4087,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
 
       if (tcb_block->rem_port==-1 || tcb_block->rem_addr==-1)
         {
-          error("%s", "ACTIVE OPEN: foreign socket unspecified");
+          error( "ACTIVE OPEN: foreign socket unspecified");
         }
 
       tcb_block->timeout = amsg->par("timeout");
@@ -4226,7 +4216,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       break;
 
     default:
-      error("%s", "Case not handled in switch statement (LISTEN)");
+      error( "Case not handled in switch statement (LISTEN)");
         
       break;
        
@@ -4324,16 +4314,12 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
       //if appl active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTICE OPEN command from appl. while in SYN_RCVD.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTICE OPEN command from appl. while in SYN_RCVD.\n");
       break;
 
       //if appl passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in SYN_RCVD.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in SYN_RCVD.\n");
       break;
     
     case TCP_E_TIMEOUT_REXMT:
@@ -4539,8 +4525,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     
 
     default:
-      error("%s", "Case not handled in switch statement (SYN_RCVD)");
-        
+      error( "Case not handled in switch statement (SYN_RCVD)");
       break;
         
     } //end of switch
@@ -4622,16 +4607,12 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in SYN_SENT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in SYN_SENT.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in SYN_SENT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in SYN_SENT.\n");
       break;
     
       // if retransmission timer expired -> double rto, re-send SYN
@@ -4870,8 +4851,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
     default:
       if (debug) ev << "The event was: " << (int)tcb_block->st_event.event << endl;
-      error("%s", "Case not handled in switch statement (SYN_SENT)");
-        
+      error( "Case not handled in switch statement (SYN_SENT)");
       break;
 
     } //end of switch
@@ -4942,16 +4922,12 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in ESTABLISHED.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in ESTABLISHED.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in ESTABLISHED.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in ESTABLISHED.\n");
       break;
 
     case TCP_E_SEND:
@@ -5035,8 +5011,7 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
       break;
 
     default:
-      error("%s", "Case not handled in switch statement (ESTABLISHED)");
-        
+      error( "Case not handled in switch statement (ESTABLISHED)");
       break;
 
     } //end of switch
@@ -5085,16 +5060,12 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in CLOSE_WAIT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in CLOSE_WAIT.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in CLOSE_WAIT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in CLOSE_WAIT.\n");
       break;
 
     case TCP_E_SEND:
@@ -5144,8 +5115,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
       break;
       
     default:
-      error("%s", "Case not handled in switch statement (CLOSE_WAIT)");
-        
+      error( "Case not handled in switch statement (CLOSE_WAIT)");
       break;
 
     } //end of switch
@@ -5214,41 +5184,30 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in LAST_ACK.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in LAST_ACK.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in LAST_ACK.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in LAST_ACK.\n");
       break;
         
     case TCP_E_SEND:
-      if (debug) ev << "TCP received SEND command from appl. while in LAST_ACK.\n";
-      if (debug) ev << "TCP is not servicing this request.\n";
-      error("%s", "Connection closing");
-
+      error("TCP received SEND command from appl. while in LAST_ACK.\n");
       break;
 
     case TCP_E_RECEIVE:
       if (debug) ev << "TCP received RECEIVE command from appl. while in LAST_ACK.\n";
       if (debug) ev << "Ignoring RECEIVE command. Connection closing.\n";
-
       break;
         
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received a CLOSE command from appl. while in LAST_ACK.\n";
-      error("%s", "Connection closing");
-        
+      error ("TCP received a CLOSE command from appl. while in LAST_ACK.\n");
       break;
         
     case TCP_E_ABORT:
       if (debug) ev << "TCP received ABORT command from appl. while in LAST_ACK.\n"; 
       if (debug) ev << "OK.\n";
-      
       break;
         
     case TCP_E_STATUS:
@@ -5285,8 +5244,7 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
           
     default:
-      error("%s", "Case not handled in switch statement (LAST_ACK)");
-
+      error( "Case not handled in switch statement (LAST_ACK)");
       break;
      
     } //end of switch
@@ -5337,23 +5295,17 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in FIN_WAIT_1.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in FIN_WAIT_1.\n");
       break;
 
       //if appl. passive open: error  
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in FIN_WAIT_1.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in FIN_WAIT_1.\n");
       break;
 
     case TCP_E_SEND:
       if (debug) ev << "TCP received SEND command from appl. while in FIN_WAIT_1.\n";
       if (debug) ev << "TCP is not servicing this request.\n";
-      error("%s", "Connection closing");
-
       break;
         
     case TCP_E_RECEIVE:
@@ -5365,9 +5317,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
         
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received a CLOSE command from appl. while in FIN_WAIT_1.\n";
-      error("%s", "Connection closing");
-
+      error ("TCP received a CLOSE command from appl. while in FIN_WAIT_1.\n");
       break;
 
     case TCP_E_ABORT:
@@ -5413,8 +5363,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
 
     default:
-      error("%s", "Case not handled in switch statement (FIN_WAIT_1)");
-        
+      error( "Case not handled in switch statement (FIN_WAIT_1)");
       break;
 
     } //end of switch
@@ -5477,22 +5426,18 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in FIN_WAIT_2.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in FIN_WAIT_2.\n");
       break;
 
       //if appl. passive open: error  
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in FIN_WAIT_2.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in FIN_WAIT_2.\n");
       break;
 
     case TCP_E_SEND:
       if (debug) ev << "TCP received SEND command from appl. while in FIN_WAIT_2.\n";
       if (debug) ev << "TCP is not servicing this request.\n";
-      error("%s", "Connection closing");
+      error( "Connection closing");
 
       break;
         
@@ -5505,9 +5450,7 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
         
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received a CLOSE command from appl. while in FIN_WAIT_2.\n";
-      error("%s", "Connection closing");
-
+      error ("TCP received a CLOSE command from appl. while in FIN_WAIT_2.\n");
       break;
 
     case TCP_E_ABORT:
@@ -5562,16 +5505,14 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_RCV_FIN:
       if (debug) ev << "FIN-Segment arrives while TCP is in FIN_WAIT_2 state.\n";
-
       break;
 
     case TCP_E_TIMEOUT_FIN_WAIT_2:
       if (debug) ev << "FIN_WAIT 2 timer expired. Closing the connection.\n";
-
       break;
+
     default:
-      error("%s", "Case not handled in switch statement (FIN_WAIT_2)");
-        
+      error( "Case not handled in switch statement (FIN_WAIT_2)");
       break;
 
     } //end of switch
@@ -5617,22 +5558,18 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in CLOSING.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in CLOSING.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in CLOSING.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in CLOSING.\n");
       break;
         
     case TCP_E_SEND:
       if (debug) ev << "TCP received SEND command from appl. while in CLOSING.\n";
       if (debug) ev << "TCP is not servicing this request.\n";
-      error("%s", "Connection closing");
+      error( "Connection closing");
 
       break;
 
@@ -5643,9 +5580,7 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       break;
         
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received a CLOSE command from appl. while in CLOSING.\n";
-      error("%s", "Connection closing");
-        
+      error ("TCP received a CLOSE command from appl. while in CLOSING.\n");
       break;
         
     case TCP_E_ABORT:
@@ -5672,8 +5607,7 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       break;
       
     default:
-      error("%s", "Case not handled in switch statement (CLOSING)");
-
+      error( "Case not handled in switch statement (CLOSING)");
       break;
      
     } //end of switch
@@ -5712,22 +5646,18 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     {
       //if appl. active open: error
     case TCP_E_OPEN_ACTIVE:
-      if (debug) ev << "TCP received ACTIVE OPEN command from appl. while in TIME_WAIT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received ACTIVE OPEN command from appl. while in TIME_WAIT.\n");
       break;
 
       //if appl. passive open: error
     case TCP_E_OPEN_PASSIVE:
-      if (debug) ev << "TCP received PASSIVE OPEN command from appl. while in TIME_WAIT.\n";
-      error("%s", "Connection already exists");
-
+      error ("TCP received PASSIVE OPEN command from appl. while in TIME_WAIT.\n");
       break;
         
     case TCP_E_SEND:
       if (debug) ev << "TCP received SEND command from appl. while in TIME_WAIT.\n";
       if (debug) ev << "TCP is not servicing this request.\n";
-      error("%s", "Connection closing");
+      error( "Connection closing");
 
       break;
 
@@ -5738,9 +5668,7 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
         
     case TCP_E_CLOSE:
-      if (debug) ev << "TCP received a CLOSE command from appl. while in TIME_WAIT.\n";
-      error("%s", "Connection closing");
-        
+      error ("TCP received a CLOSE command from appl. while in TIME_WAIT.\n");
       break;
         
     case TCP_E_ABORT:
@@ -5769,12 +5697,10 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_TIMEOUT_TIME_WAIT:
       if (debug) ev << "Time-Wait timeout expired.\n";
-      
       break;
       
     default:
-      error("%s", "Case not handled in switch statement (TIME_WAIT)");
-
+      error( "Case not handled in switch statement (TIME_WAIT)");
       break;
      
     } //end of switch
