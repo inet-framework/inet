@@ -85,29 +85,29 @@ void RSVP::activity()
             {
             case PATH_MESSAGE:
                 inInf = msg->par("peerInf");
-                pm = check_and_cast < PathMessage * >(msg);
+                pm = check_and_cast<PathMessage *>(msg);
                 PathMsgPro(pm, inInf);
                 break;
 
             case RESV_MESSAGE:
-                rm = check_and_cast < ResvMessage * >(msg);
+                rm = check_and_cast<ResvMessage *>(msg);
                 ResvMsgPro(rm);
                 break;
 
             case PTEAR_MESSAGE:
-                ptm = check_and_cast < PathTearMessage * >(msg);
+                ptm = check_and_cast<PathTearMessage *>(msg);
                 PTearMsgPro(ptm);
                 break;
             case RTEAR_MESSAGE:
-                rtm = check_and_cast < ResvTearMessage * >(msg);
+                rtm = check_and_cast<ResvTearMessage *>(msg);
                 RTearMsgPro(rtm);
                 break;
             case PERROR_MESSAGE:
-                pem = check_and_cast < PathErrorMessage * >(msg);
+                pem = check_and_cast<PathErrorMessage *>(msg);
                 PErrorMsgPro(pem);
                 break;
             case RERROR_MESSAGE:
-                rem = check_and_cast < ResvErrorMessage * >(msg);
+                rem = check_and_cast<ResvErrorMessage *>(msg);
                 RErrorMsgPro(rem);
                 break;
             default:

@@ -53,11 +53,17 @@ void RSVPAppl::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
     {
+        // FIXME gate "from_mpls_switch" seems to be unconnected-unused,
+        // so wonder of the following code ever executes:
         processSignalFromMPLSSwitch(msg);
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
     {
         processSignalFromTester(msg);
+    }
+    else
+    {
+        error("Unexpected message received");
     }
 }
 
