@@ -44,7 +44,6 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     struct peer_info
     {
         IPAddress peerIP;
-        string peerID;
         string role;
         string linkInterface;
     };
@@ -93,7 +92,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     string findInterfaceFromPeerAddr(IPAddress peerIP);
 
   public:
-    Module_Class_Members(NewLDP,cSimpleModule,16384);
+    Module_Class_Members(NewLDP,cSimpleModule, 0);
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -101,7 +100,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     void broadcastHello();
     void openTCPConnectionToPeer(IPAddress addr);
 
-    void processLDPHello(cMessage *msg);
+    void processLDPHello(LDPHello *msg);
     void processRequestFromMPLSSwitch(cMessage *msg);
     void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 

@@ -57,11 +57,13 @@ void NewLDP::handleMessage(cMessage *msg)
 {
     if (msg==sendHelloMsg)
     {
+        // periodically send out LDP Hellos
         broadcastHello();
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
     {
-        processLDPHello(msg);
+        // we can only receive LDP Hello from UDP (everything else is over TCP)
+        processLDPHello(check_and_cast<LDPHello *>(msg));
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
     {
@@ -124,51 +126,51 @@ void NewLDP::broadcastHello()
 
     ev << "Broadcasting LDP Hello\n";
 
-    cMessage *msg = new cMessage("ldp-hello");
-    msg->setLength(1);
-    msg->addPar("content") = 1;
-    msg->addPar("request") = true;
+    LDPHello *hello = new LDPHello("ldp-hello");
+    //hello->setHoldTime(...);
+    //hello->setRbit(...);
+    //hello->setTbit(...);
 
     UDPControlInfo *controlInfo = new UDPControlInfo();
     controlInfo->setSrcAddr(local_addr);
     controlInfo->setDestAddr(IPAddress("224.0.0.0"));
     controlInfo->setSrcPort(100);
     controlInfo->setDestPort(100);
-    msg->setControlInfo(controlInfo);
+    hello->setControlInfo(controlInfo);
 
-    send(msg, "to_udp_interface");
+    send(hello, "to_udp_interface");
 
     // schedule next hello in 5 minutes
     scheduleAt(simTime()+300, sendHelloMsg);
 }
 
-void NewLDP::processLDPHello(cMessage *msg)
+void NewLDP::processLDPHello(LDPHello *msg)
 {
-    IPAddress anAddr = IPAddress((msg->par("src_addr").stringValue()));
-    string anID = string(msg->par("peerID").stringValue());
-    string anInterface = this->findInterfaceFromPeerAddr(anAddr);
+    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+
+    IPAddress peerAddr = msg->getSenderAddress();
+    string inInterface = this->findInterfaceFromPeerAddr(peerAddr);
 
     ev << "LSR(" << local_addr << "): " <<
-        "received multicast from " << anAddr << "\n";
+        "received multicast from " << peerAddr << "\n";
 
     // peer already in table?
     PeerVector::iterator i;
     for (i=myPeers.begin(); i!=myPeers.end(); ++i)
-        if (i->peerIP==anAddr)
+        if (i->peerIP==peerAddr)
             break;
     if (i!=myPeers.end())
         return;
 
     // not in table, add it
     peer_info info;
-    info.peerIP = anAddr;
-    info.linkInterface = anInterface;
-    info.peerID = anID;
-    info.role = string(anAddr.getInt()>local_addr.getInt() ? "Client" : "Server");
+    info.peerIP = peerAddr;
+    info.linkInterface = inInterface;
+    info.role = string(peerAddr.getInt()>local_addr.getInt() ? "Client" : "Server");
     myPeers.push_back(info);
 
     // initiate connection to peer
-    openTCPConnectionToPeer(anAddr);
+    openTCPConnectionToPeer(peerAddr);
 }
 
 void NewLDP::openTCPConnectionToPeer(IPAddress addr)
