@@ -13,7 +13,7 @@
 class cVectorWatchDescriptor : public cStructDescriptor
 {
   public:
-    cVectorWatchDescriptor(void *p=NULL);
+    cVectorWatchDescriptor();
     virtual ~cVectorWatchDescriptor();
     cVectorWatchDescriptor& operator=(const cVectorWatchDescriptor& other);
     virtual cObject *dup() const {return new cVectorWatchDescriptor(*this);}
@@ -35,7 +35,7 @@ class cVectorWatchDescriptor : public cStructDescriptor
 
 Register_Class(cVectorWatchDescriptor);
 
-cVectorWatchDescriptor::cVectorWatchDescriptor(void *p) : cStructDescriptor(p)
+cVectorWatchDescriptor::cVectorWatchDescriptor() : cStructDescriptor()
 {
 }
 
