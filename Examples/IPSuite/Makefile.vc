@@ -66,15 +66,25 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
 
+KIDSNw1:
 	cd KIDSNw1 && nmake /nologo /f Makefile.vc
+McNetwork2:
 	cd McNetwork2 && nmake /nologo /f Makefile.vc
+OldNetwork:
 	cd OldNetwork && nmake /nologo /f Makefile.vc
+PerformAnalysis:
 	cd PerformAnalysis && nmake /nologo /f Makefile.vc
+SocketTester:
 	cd SocketTester && nmake /nologo /f Makefile.vc
+TCPClientServerNet:
 	cd TCPClientServerNet && nmake /nologo /f Makefile.vc
+TCPFlavours:
 	cd TCPFlavours && nmake /nologo /f Makefile.vc
+TCPTester:
 	cd TCPTester && nmake /nologo /f Makefile.vc
+TCPUDPDirectNet:
 	cd TCPUDPDirectNet && nmake /nologo /f Makefile.vc
+UDPSockets:
 	cd UDPSockets && nmake /nologo /f Makefile.vc
 
 
@@ -89,7 +99,7 @@ doxy: doxy.cfg
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
 	-del *.vec *.sca 2>NUL
-	-for %%i in ( 0SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc

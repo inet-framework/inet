@@ -448,6 +448,7 @@ print OUT "subdirs: \$(SUBDIRS)\n";
 print OUT "\n"; 
 foreach $i (@subdirs)
 {
+   print OUT "$i:\n";
    print OUT "\tcd $i && $makecommand\n";
 }
 print OUT "\n";
@@ -520,7 +521,7 @@ print OUT "
 clean:
 \t-del *.obj *_n.$ccext *_n.h *_m.$ccext *_m.h \$(TARGET)\$(EXE_SUFFIX) 2>NUL
 \t-del *.vec *.sca 2>NUL
-\t-for %%i in ( $(SUBDIRS) ) do cd %%i && $makecommand clean && cd ..
+\t-for %%i in ( \$(SUBDIRS) ) do cd %%i && $makecommand clean && cd ..
 ";
 
 # makedepend, re-makemake
