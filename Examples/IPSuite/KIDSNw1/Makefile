@@ -60,13 +60,13 @@ KIDSNw1_n.cc: KIDSNw1.ned
 	$(NEDC) $(INCLUDE_PATH) KIDSNw1.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+KIDSNw1_n.o: KIDSNw1_n.cc

@@ -399,8 +399,9 @@ print OUT "OBJS= $objs\n";
 print OUT "\n";
 $subdirs = join(" ", @subdirs);
 print OUT "# subdirectories to recurse into\n";
-print OUT "SUBDIRS= $subdirs\n";
-print OUT "\n";
+print OUT "SUBDIRS= ";
+foreach $i (@subdirs) {print OUT " ${i}_dir";}
+print OUT "\n\n";
 
 # include external Makefile fragments at top, so that they can
 # override the default target if they want
@@ -412,7 +413,7 @@ if (@fragments != ())
         open(FRAG, $frag);
         while(<FRAG>)  {print OUT;}
         close FRAG;
-        print OUT "\n";
+        print OUT "\n\n";
     }
 }
 else
@@ -423,7 +424,7 @@ else
         open(FRAG,"makefrag.vc");
         while(<FRAG>)  {print OUT;}
         close FRAG;
-        print OUT "\n";
+        print OUT "\n\n";
     }
 }
 
@@ -461,8 +462,7 @@ print OUT "\n";
 
 # rules for recursive build
 # simplified because @#$!? microsoft doesn't know about phony targets
-print OUT "subdirs:"; 
-foreach $i (@subdirs) {print OUT " ${i}_dir";}
+print OUT "subdirs: \$(SUBDIRS)"; 
 print OUT "\n\n"; 
 foreach $i (@subdirs)
 {
@@ -523,13 +523,13 @@ foreach $i (glob("*.$ccext"))
 
 # documentation targets
 print OUT "
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-\t\@opp_neddoc -a
+#neddoc:
+#\t\@opp_neddoc -a
 
-doxy: $doxyconf
-\t\@doxygen $doxyconf
+#doxy: $doxyconf
+#\t\@doxygen $doxyconf
 ";
 
 # rule for 'clean'

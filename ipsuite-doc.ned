@@ -17,26 +17,8 @@
 //
 
 
-//
-// @titlepage
-//
-// <center><h1>IPSuite with MPLS</h1></center>
-// <center><h3>2003-09-30</h3></center>
-//
-// IPSuite is an OMNeT++ model suite for the simulation of 
-// <nohtml>TCP/IP</nohtml> protocols and networks. It has been implemented 
-// at the Institut fuer Telematik, University Karlsruhe.
-//
-// Ths browsable documentation has been created by Andras Varga
-// at CTIE, Monash University, Melbourne Australia, by using comments
-// of the original authors (Jochen Reber and others).
-//
-// A few useful starting points for browsing the documentation:
-//  - the <a href="full-usage-diagram.html">Usage Diagram</a> 
-//    includes all modules and networks.
-//  - example models such as ClientServerNetwork, McNetwork2 or Peer2Network.
-//  - protocol implementations: IPv4Processing, TcpModule, ...
-//
-// Related documentation:
-//   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>
+// 
+// @page irt.html  The routing files
+// 
+// to be done
 //

@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= PingApp_n.o  PingApp.o
+OBJS= PingApp_n.o  PingApp.o 
 
 #------------------------------------------------------------------------------
 
@@ -63,13 +63,13 @@ PingApp.o: PingApp.cc
 	$(CXX) -c $(COPTS) PingApp.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -98,3 +98,4 @@ PingApp.o: PingApp.cc \
   ../../Util/ProcessorAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Network/IPv4/Core/ip_address.h
+PingApp_n.o: PingApp_n.cc

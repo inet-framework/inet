@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= McNetwork_n.o Peer2Network_n.o  DLStub.o
+OBJS= McNetwork_n.o Peer2Network_n.o  DLStub.o  
 
 #------------------------------------------------------------------------------
 
@@ -69,13 +69,13 @@ DLStub.o: DLStub.cc
 	$(CXX) -c $(COPTS) DLStub.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -95,3 +95,5 @@ re-makemake-m:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 DLStub.o: DLStub.cc
+McNetwork_n.o: McNetwork_n.cc
+Peer2Network_n.o: Peer2Network_n.cc

@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= BurstHost_n.o FirstHopRouter_n.o IPNode_n.o KIDSRouter_n.o mytcp4ip_n.o NetworkLayers_n.o Router_n.o StandardHost_n.o tcp4ip_n.o TCPClientNode_n.o TCPClientTest_n.o TCPServerNode_n.o TCPServerTest_n.o UDPHost_n.o  
+OBJS= BurstHost_n.o FirstHopRouter_n.o IPNode_n.o KIDSRouter_n.o mytcp4ip_n.o NetworkLayers_n.o Router_n.o StandardHost_n.o tcp4ip_n.o TCPClientNode_n.o TCPClientTest_n.o TCPServerNode_n.o TCPServerTest_n.o UDPHost_n.o               
 
 #------------------------------------------------------------------------------
 
@@ -138,13 +138,13 @@ UDPHost_n.cc: UDPHost.ned
 	$(NEDC) $(INCLUDE_PATH) UDPHost.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -163,4 +163,17 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+BurstHost_n.o: BurstHost_n.cc
+FirstHopRouter_n.o: FirstHopRouter_n.cc
+IPNode_n.o: IPNode_n.cc
+KIDSRouter_n.o: KIDSRouter_n.cc
+mytcp4ip_n.o: mytcp4ip_n.cc
+NetworkLayers_n.o: NetworkLayers_n.cc
+Router_n.o: Router_n.cc
+StandardHost_n.o: StandardHost_n.cc
+tcp4ip_n.o: tcp4ip_n.cc
+TCPClientNode_n.o: TCPClientNode_n.cc
+TCPClientTest_n.o: TCPClientTest_n.cc
+TCPServerNode_n.o: TCPServerNode_n.cc
+TCPServerTest_n.o: TCPServerTest_n.cc
+UDPHost_n.o: UDPHost_n.cc

@@ -39,7 +39,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ProcessorManager_n.o  ProcessorAccess.o ProcessorManager.o
+OBJS= ProcessorManager_n.o  ProcessorAccess.o ProcessorManager.o 
 
 #------------------------------------------------------------------------------
 
@@ -66,13 +66,13 @@ ProcessorManager.o: ProcessorManager.cc
 	$(CXX) -c $(COPTS) ProcessorManager.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -98,3 +98,4 @@ ProcessorAccess.o: ProcessorAccess.cc \
 ProcessorManager.o: ProcessorManager.cc \
   ProcessorManager.h \
   basic_consts.h
+ProcessorManager_n.o: ProcessorManager_n.cc

@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ErrorHandling_n.o ICMP_n.o IPFragmentation_n.o IPMulticast_n.o IPOutput_n.o IPProcessing_n.o IPSend_n.o IPTunneling_n.o LocalDeliver_n.o PreRouting_n.o Routing_n.o RoutingTable_n.o  ErrorHandling.o ICMP.o in_addr.o in_port.o ip_address.o ip_address_prefix.o IPDatagram.o IPFragmentation.o IPInterfacePacket.o IPMulticast.o IPOutputCore.o IPSendCore.o IPTunneling.o LocalDeliverCore.o PreRoutingCore.o RoutingCore.o RoutingTableAccess.o RoutingTable.o
+OBJS= ErrorHandling_n.o ICMP_n.o IPFragmentation_n.o IPMulticast_n.o IPOutput_n.o IPProcessing_n.o IPSend_n.o IPTunneling_n.o LocalDeliver_n.o PreRouting_n.o Routing_n.o RoutingTable_n.o  ErrorHandling.o  ICMP.o  in_addr.o in_port.o ip_address.o ip_address_prefix.o IPDatagram.o IPFragmentation.o  IPInterfacePacket.o IPMulticast.o  IPOutputCore.o   IPSendCore.o  IPTunneling.o  LocalDeliverCore.o  PreRoutingCore.o  RoutingCore.o  RoutingTableAccess.o RoutingTable.o 
 
 #------------------------------------------------------------------------------
 
@@ -180,13 +180,13 @@ RoutingTable.o: RoutingTable.cc
 	$(CXX) -c $(COPTS) RoutingTable.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -215,6 +215,7 @@ ErrorHandling.o: ErrorHandling.cc \
   ../../../Util/ProcessorAccess.h \
   RoutingTable.h \
   ip_address.h
+ErrorHandling_n.o: ErrorHandling_n.cc
 ICMP.o: ICMP.cc \
   ICMP.h \
   ../../../Util/ProcessorManager.h \
@@ -225,6 +226,7 @@ ICMP.o: ICMP.cc \
   ip_address.h \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h
+ICMP_n.o: ICMP_n.cc
 in_addr.o: in_addr.cc \
   in_addr.h \
   ../../../Util/basic_consts.h
@@ -253,6 +255,7 @@ IPFragmentation.o: IPFragmentation.cc \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h \
   ip_address.h
+IPFragmentation_n.o: IPFragmentation_n.cc
 IPInterfacePacket.o: IPInterfacePacket.cc \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h
@@ -265,6 +268,7 @@ IPMulticast.o: IPMulticast.cc \
   ip_address.h \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h
+IPMulticast_n.o: IPMulticast_n.cc
 IPOutputCore.o: IPOutputCore.cc \
   hook_types.h \
   IPOutputCore.h \
@@ -276,6 +280,8 @@ IPOutputCore.o: IPOutputCore.cc \
   RoutingTableAccess.h \
   RoutingTable.h \
   ip_address.h
+IPOutput_n.o: IPOutput_n.cc
+IPProcessing_n.o: IPProcessing_n.cc
 IPSendCore.o: IPSendCore.cc \
   hook_types.h \
   IPSendCore.h \
@@ -286,6 +292,7 @@ IPSendCore.o: IPSendCore.cc \
   ../../../Util/ProcessorAccess.h \
   ../../../Util/basic_consts.h \
   ip_address.h
+IPSend_n.o: IPSend_n.cc
 IPTunneling.o: IPTunneling.cc \
   IPTunneling.h \
   IPInterfacePacket.h \
@@ -293,6 +300,7 @@ IPTunneling.o: IPTunneling.cc \
   IPDatagram.h \
   ../../../Util/ProcessorAccess.h \
   ../../../Util/basic_consts.h
+IPTunneling_n.o: IPTunneling_n.cc
 LocalDeliverCore.o: LocalDeliverCore.cc \
   hook_types.h \
   LocalDeliverCore.h \
@@ -301,6 +309,7 @@ LocalDeliverCore.o: LocalDeliverCore.cc \
   ../../../Util/ProcessorAccess.h \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h
+LocalDeliver_n.o: LocalDeliver_n.cc
 PreRoutingCore.o: PreRoutingCore.cc \
   hook_types.h \
   PreRoutingCore.h \
@@ -313,6 +322,7 @@ PreRoutingCore.o: PreRoutingCore.cc \
   RoutingTableAccess.h \
   RoutingTable.h \
   ip_address.h
+PreRouting_n.o: PreRouting_n.cc
 RoutingCore.o: RoutingCore.cc \
   hook_types.h \
   RoutingCore.h \
@@ -324,6 +334,7 @@ RoutingCore.o: RoutingCore.cc \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h \
   ip_address.h
+Routing_n.o: Routing_n.cc
 RoutingTableAccess.o: RoutingTableAccess.cc \
   RoutingTableAccess.h \
   ../../../Util/ProcessorAccess.h \
@@ -336,3 +347,4 @@ RoutingTable.o: RoutingTable.cc \
   ip_address.h \
   IPInterfacePacket.h \
   ../../../Util/basic_consts.h
+RoutingTable_n.o: RoutingTable_n.cc

@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= SocketApp_n.o UDPSocketHost_n.o UDPSockets_n.o  client.o server.o
+OBJS= SocketApp_n.o UDPSocketHost_n.o UDPSockets_n.o  client.o server.o   
 
 #------------------------------------------------------------------------------
 
@@ -78,13 +78,13 @@ server.o: server.cc
 	$(CXX) -c $(COPTS) server.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -105,3 +105,6 @@ re-makemake-m:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 client.o: client.cc
 server.o: server.cc
+SocketApp_n.o: SocketApp_n.cc
+UDPSocketHost_n.o: UDPSocketHost_n.cc
+UDPSockets_n.o: UDPSockets_n.cc

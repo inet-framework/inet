@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TcpIpInterface_n.o tcpmodule_n.o  Ip2Tcp.o pcb.o Tcp2Ip.o tcpmodule.o TransportInterfacePacket.o TransportPacket.o
+OBJS= TcpIpInterface_n.o tcpmodule_n.o  Ip2Tcp.o pcb.o Tcp2Ip.o  tcpmodule.o  TransportInterfacePacket.o TransportPacket.o
 
 #------------------------------------------------------------------------------
 
@@ -84,13 +84,13 @@ TransportPacket.o: TransportPacket.cc
 	$(CXX) -c $(COPTS) TransportPacket.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -124,8 +124,10 @@ Tcp2Ip.o: Tcp2Ip.cc \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Network/IPv4/Core/ip_address.h \
   ../../Util/basic_consts.h
+TcpIpInterface_n.o: TcpIpInterface_n.cc
 tcpmodule.o: tcpmodule.cc \
   tcp.h
+tcpmodule_n.o: tcpmodule_n.cc
 TransportInterfacePacket.o: TransportInterfacePacket.cc \
   TransportInterfacePacket.h \
   ../../Network/IPv4/Core/in_addr.h \

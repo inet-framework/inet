@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= DatalinkLayer_n.o InfoManager_n.o LIBTable_n.o MPLSModule_n.o  InfoManager.o LIBTableAccess.o LIBtable.o MPLS2IP.o MPLSModule.o MPLSPacket.o StringTokenizer.o
+OBJS= DatalinkLayer_n.o InfoManager_n.o LIBTable_n.o MPLSModule_n.o   InfoManager.o  LIBTableAccess.o LIBtable.o  MPLS2IP.o MPLSModule.o  MPLSPacket.o StringTokenizer.o
 
 #------------------------------------------------------------------------------
 
@@ -99,13 +99,13 @@ StringTokenizer.o: StringTokenizer.cc
 	$(CXX) -c $(COPTS) StringTokenizer.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -124,8 +124,10 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+DatalinkLayer_n.o: DatalinkLayer_n.cc
 InfoManager.o: InfoManager.cc \
   InfoManager.h
+InfoManager_n.o: InfoManager_n.cc
 LIBTableAccess.o: LIBTableAccess.cc \
   LIBTableAccess.h \
   ../../Util/ProcessorAccess.h \
@@ -149,6 +151,7 @@ LIBtable.o: LIBtable.cc \
   ../IPv4/Core/ip_address.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
+LIBTable_n.o: LIBTable_n.cc
 MPLS2IP.o: MPLS2IP.cc \
   ../IPv4/Core/hook_types.h \
   MPLS2IP.h \
@@ -180,6 +183,7 @@ MPLSModule.o: MPLSModule.cc \
   ../IPv4/Core/ip_address_prefix.h \
   StringTokenizer.h \
   ../IPv4/Core/ip_address.h
+MPLSModule_n.o: MPLSModule_n.cc
 MPLSPacket.o: MPLSPacket.cc \
   MPLSPacket.h
 StringTokenizer.o: StringTokenizer.cc \

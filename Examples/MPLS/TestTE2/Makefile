@@ -60,13 +60,13 @@ RSVPNet_n.cc: RSVPNet.ned
 	$(NEDC) $(INCLUDE_PATH) RSVPNet.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+RSVPNet_n.o: RSVPNet_n.cc

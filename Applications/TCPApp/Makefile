@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= MyTCPApp_n.o mytcpserverproc_n.o procserver_n.o tcpapp_n.o  MyTCPClient.o MyTCPServer.o mytcpserverproc.o procserver.o TCPClient.o TCPServer.o
+OBJS= MyTCPApp_n.o mytcpserverproc_n.o procserver_n.o tcpapp_n.o   MyTCPClient.o MyTCPServer.o mytcpserverproc.o  procserver.o   TCPClient.o TCPServer.o
 
 #------------------------------------------------------------------------------
 
@@ -96,13 +96,13 @@ TCPServer.o: TCPServer.cc
 	$(CXX) -c $(COPTS) TCPServer.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -121,6 +121,7 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+MyTCPApp_n.o: MyTCPApp_n.cc
 MyTCPClient.o: MyTCPClient.cc \
   ../../Transport/TCP/tcp.h \
   ../../Network/IPv4/Core/ip_address.h \
@@ -136,8 +137,11 @@ mytcpserverproc.o: mytcpserverproc.cc \
   ../../Network/IPv4/Core/ip_address.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
+mytcpserverproc_n.o: mytcpserverproc_n.cc
 procserver.o: procserver.cc \
   ../../Transport/TCP/tcp.h
+procserver_n.o: procserver_n.cc
+tcpapp_n.o: tcpapp_n.cc
 TCPClient.o: TCPClient.cc \
   ../../Transport/TCP/tcp.h
 TCPServer.o: TCPServer.cc \

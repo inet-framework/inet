@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= MPLSNet_n.o MPLSOnly_n.o  
+OBJS= MPLSNet_n.o MPLSOnly_n.o   
 
 #------------------------------------------------------------------------------
 
@@ -66,13 +66,13 @@ MPLSOnly_n.cc: MPLSOnly.ned
 	$(NEDC) $(INCLUDE_PATH) MPLSOnly.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -91,4 +91,5 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+MPLSNet_n.o: MPLSNet_n.cc
+MPLSOnly_n.o: MPLSOnly_n.cc

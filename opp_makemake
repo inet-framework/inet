@@ -476,13 +476,13 @@ args1=`echo " $args " | sed 's/	/ /g;s/ -f / /g;s/ -m / /g'`
 # documentation targets
 cat <<EOT
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: $doxyconf
-	doxygen $doxyconf
+#doxy: $doxyconf
+#	doxygen $doxyconf
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h \$(TARGET)\$(EXE_SUFFIX)

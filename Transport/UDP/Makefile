@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPModule_n.o UDP_n.o  UDPApp.o UDPModule.o UDPPacket.o UDPProcessing.o
+OBJS= UDPModule_n.o UDP_n.o  UDPApp.o UDPModule.o   UDPPacket.o UDPProcessing.o
 
 #------------------------------------------------------------------------------
 
@@ -78,13 +78,13 @@ UDPProcessing.o: UDPProcessing.cc
 	$(CXX) -c $(COPTS) UDPProcessing.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -114,6 +114,8 @@ UDPModule.o: UDPModule.cc \
   ../../Network/IPv4/Core/in_addr.h \
   ../../Util/basic_consts.h \
   ../TCP/TransportPacket.h
+UDPModule_n.o: UDPModule_n.cc
+UDP_n.o: UDP_n.cc
 UDPPacket.o: UDPPacket.cc \
   UDPPacket.h \
   ../TCP/TransportPacket.h

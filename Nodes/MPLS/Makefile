@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= LSRNode_n.o NetworkLayersWithMPLS_n.o RSVP_LSR_Node_n.o  
+OBJS= LSRNode_n.o NetworkLayersWithMPLS_n.o RSVP_LSR_Node_n.o    
 
 #------------------------------------------------------------------------------
 
@@ -72,13 +72,13 @@ RSVP_LSR_Node_n.cc: RSVP_LSR_Node.ned
 	$(NEDC) $(INCLUDE_PATH) RSVP_LSR_Node.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -97,4 +97,6 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+LSRNode_n.o: LSRNode_n.cc
+NetworkLayersWithMPLS_n.o: NetworkLayersWithMPLS_n.cc
+RSVP_LSR_Node_n.o: RSVP_LSR_Node_n.cc

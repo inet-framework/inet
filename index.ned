@@ -36,21 +36,21 @@
 // The model has been written by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au) 
 // and other students at the University of Technology, Sydney 
 // under supervision of Dr Robin Brown.
-// Project home page: <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" 
-// target="_top">http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/</a>
+// Project home page: 
+// <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" target="_top">
+// http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/</a>
 //
 // A few useful starting points for browsing IPSuite:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a> 
-//    includes all modules and networks.
-//  - example models such as TcpTester, ClientServerNetwork, McNetwork2 or 
-//    Peer2Network.
+//    includes all modules and networks
+//  - example models such as TCPTester, ClientServerNetwork, McNetwork2 or 
+//    Peer2Network
 //  - protocol implementations: IPProcessing, TcpModule, ...
 //
 // Starting points for the MPLS models:
 //  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe
 //  - MPLSNet network model
-//  - <a href="full-usage-diagram.html">usage diagram</a>
-//  - <a href="standards.html">List of implemented standards</a>. 
+//  - <a href="standards.html">list of implemented standards</a>
 // 
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>

@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= Connection_Element_n.o Enqueue_Hook_Trigger_n.o FIFO_Dequeue_n.o FIFO_Enqueue_n.o FIFO_Queue_n.o L2_DequeueHook_n.o L2_EnqueueHook_n.o NF_IP_FORWARD_n.o NF_IP_LOCAL_IN_n.o NF_IP_LOCAL_OUT_n.o NF_IP_POST_ROUTING_n.o NF_IP_PRE_ROUTING_n.o Router_Deq_Hook_Trigger_n.o Router_L2_n.o SetInAdapter_n.o  any_queue.o Connection_Element.o FIFO_Dequeue.o FIFO_Enqueue.o FIFO_Queue.o multiply_element.o packet.o router_deq_hook_trigger.o setinadapter.o simulatedINTERNAL.o
+OBJS= Connection_Element_n.o Enqueue_Hook_Trigger_n.o FIFO_Dequeue_n.o FIFO_Enqueue_n.o FIFO_Queue_n.o L2_DequeueHook_n.o L2_EnqueueHook_n.o NF_IP_FORWARD_n.o NF_IP_LOCAL_IN_n.o NF_IP_LOCAL_OUT_n.o NF_IP_POST_ROUTING_n.o NF_IP_PRE_ROUTING_n.o Router_Deq_Hook_Trigger_n.o Router_L2_n.o SetInAdapter_n.o  any_queue.o Connection_Element.o   FIFO_Dequeue.o  FIFO_Enqueue.o  FIFO_Queue.o    multiply_element.o      packet.o router_deq_hook_trigger.o   setinadapter.o  simulatedINTERNAL.o
 
 #------------------------------------------------------------------------------
 
@@ -174,13 +174,13 @@ simulatedINTERNAL.o: simulatedINTERNAL.cc
 	$(CXX) -c $(COPTS) simulatedINTERNAL.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -209,6 +209,8 @@ Connection_Element.o: Connection_Element.cc \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h \
   any_queue.h
+Connection_Element_n.o: Connection_Element_n.cc
+Enqueue_Hook_Trigger_n.o: Enqueue_Hook_Trigger_n.cc
 FIFO_Dequeue.o: FIFO_Dequeue.cc \
   FIFO_Dequeue.h \
   FIFO_Queue.h \
@@ -216,6 +218,7 @@ FIFO_Dequeue.o: FIFO_Dequeue.cc \
   ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h
+FIFO_Dequeue_n.o: FIFO_Dequeue_n.cc
 FIFO_Enqueue.o: FIFO_Enqueue.cc \
   FIFO_Enqueue.h \
   FIFO_Queue.h \
@@ -223,13 +226,22 @@ FIFO_Enqueue.o: FIFO_Enqueue.cc \
   ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h
+FIFO_Enqueue_n.o: FIFO_Enqueue_n.cc
 FIFO_Queue.o: FIFO_Queue.cc \
   FIFO_Queue.h \
   simulatedINTERNAL.h \
   any_queue.h \
   ../../../Util/basic_consts.h
+FIFO_Queue_n.o: FIFO_Queue_n.cc
+L2_DequeueHook_n.o: L2_DequeueHook_n.cc
+L2_EnqueueHook_n.o: L2_EnqueueHook_n.cc
 multiply_element.o: multiply_element.cc \
   multiply_element.h
+NF_IP_FORWARD_n.o: NF_IP_FORWARD_n.cc
+NF_IP_LOCAL_IN_n.o: NF_IP_LOCAL_IN_n.cc
+NF_IP_LOCAL_OUT_n.o: NF_IP_LOCAL_OUT_n.cc
+NF_IP_POST_ROUTING_n.o: NF_IP_POST_ROUTING_n.cc
+NF_IP_PRE_ROUTING_n.o: NF_IP_PRE_ROUTING_n.cc
 packet.o: packet.cc \
   packet.h \
   ../Core/IPDatagram.h \
@@ -244,11 +256,14 @@ router_deq_hook_trigger.o: router_deq_hook_trigger.cc \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h \
   any_queue.h
+Router_Deq_Hook_Trigger_n.o: Router_Deq_Hook_Trigger_n.cc
+Router_L2_n.o: Router_L2_n.cc
 setinadapter.o: setinadapter.cc \
   setinadapter.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h \
   any_queue.h
+SetInAdapter_n.o: SetInAdapter_n.cc
 simulatedINTERNAL.o: simulatedINTERNAL.cc \
   ../Core/hook_types.h \
   simulatedINTERNAL.h \

@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= LDPInterface_n.o LDPproc_n.o tcp2ldp_n.o tcpclientproc_n.o tcpserverproc_n.o UDPInterface_n.o  LDPInterface.o LDPpacket.o LDPproc.o tcpclientproc.o tcpserverproc.o UDPAppInterface.o
+OBJS= LDPInterface_n.o LDPproc_n.o tcp2ldp_n.o tcpclientproc_n.o tcpserverproc_n.o UDPInterface_n.o  LDPInterface.o  LDPpacket.o LDPproc.o   tcpclientproc.o  tcpserverproc.o  UDPAppInterface.o 
 
 #------------------------------------------------------------------------------
 
@@ -108,13 +108,13 @@ UDPAppInterface.o: UDPAppInterface.cc
 	$(CXX) -c $(COPTS) UDPAppInterface.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -150,6 +150,7 @@ LDPInterface.o: LDPInterface.cc \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
   ../MPLS/StringTokenizer.h
+LDPInterface_n.o: LDPInterface_n.cc
 LDPpacket.o: LDPpacket.cc \
   LDPpacket.h \
   ../IPv4/Core/ip_address.h \
@@ -177,18 +178,22 @@ LDPproc.o: LDPproc.cc \
   ../IPv4/Core/hook_types.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h
+LDPproc_n.o: LDPproc_n.cc
+tcp2ldp_n.o: tcp2ldp_n.cc
 tcpclientproc.o: tcpclientproc.cc \
   ../../Transport/TCP/tcp.h \
   ../IPv4/Core/ip_address.h \
   ../MPLS/ConstType.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
+tcpclientproc_n.o: tcpclientproc_n.cc
 tcpserverproc.o: tcpserverproc.cc \
   ../../Transport/TCP/tcp.h \
   ../MPLS/ConstType.h \
   ../IPv4/Core/ip_address.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
+tcpserverproc_n.o: tcpserverproc_n.cc
 UDPAppInterface.o: UDPAppInterface.cc \
   ../../Transport/TCP/TransportInterfacePacket.h \
   ../../Transport/UDP/UDPPacket.h \
@@ -197,3 +202,4 @@ UDPAppInterface.o: UDPAppInterface.cc \
   ../IPv4/Core/in_addr.h \
   ../../Util/basic_consts.h \
   ../../Transport/TCP/TransportPacket.h
+UDPInterface_n.o: UDPInterface_n.cc

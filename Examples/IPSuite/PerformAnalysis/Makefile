@@ -60,13 +60,13 @@ PerformAnalysis_n.cc: PerformAnalysis.ned
 	$(NEDC) $(INCLUDE_PATH) PerformAnalysis.ned
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+PerformAnalysis_n.o: PerformAnalysis_n.cc

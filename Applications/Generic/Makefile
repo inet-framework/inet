@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TrafficGen_n.o  AppIn.o BurstGenerator.o ConstTrafficGen.o SimpleApp.o
+OBJS= TrafficGen_n.o  AppIn.o BurstGenerator.o ConstTrafficGen.o SimpleApp.o 
 
 #------------------------------------------------------------------------------
 
@@ -72,13 +72,13 @@ SimpleApp.o: SimpleApp.cc
 	$(CXX) -c $(COPTS) SimpleApp.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -137,3 +137,4 @@ SimpleApp.o: SimpleApp.cc \
   ../../Util/ProcessorAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Network/IPv4/Core/ip_address.h
+TrafficGen_n.o: TrafficGen_n.cc

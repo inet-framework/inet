@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= comnw_n.o dropswitch_n.o ipmodule_n.o switch_n.o TCPTester_n.o  comnw.o dropswitch.o ipmodule.o switch.o
+OBJS= comnw_n.o dropswitch_n.o ipmodule_n.o switch_n.o TCPTester_n.o  comnw.o  dropswitch.o  ipmodule.o  switch.o  
 
 #------------------------------------------------------------------------------
 
@@ -96,13 +96,13 @@ switch.o: switch.cc
 	$(CXX) -c $(COPTS) switch.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -124,11 +124,16 @@ re-makemake-m:
 comnw.o: comnw.cc \
   nw.h \
   ip.h
+comnw_n.o: comnw_n.cc
 dropswitch.o: dropswitch.cc \
   nw.h \
   ip.h
+dropswitch_n.o: dropswitch_n.cc
 ipmodule.o: ipmodule.cc \
   ip.h
+ipmodule_n.o: ipmodule_n.cc
 switch.o: switch.cc \
   nw.h \
   ip.h
+switch_n.o: switch_n.cc
+TCPTester_n.o: TCPTester_n.cc

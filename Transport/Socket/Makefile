@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= socketlayer_n.o  SocketInterfacePacket.o socketlayer.o sockets.o
+OBJS= socketlayer_n.o  SocketInterfacePacket.o socketlayer.o  sockets.o
 
 #------------------------------------------------------------------------------
 
@@ -69,13 +69,13 @@ sockets.o: sockets.cc
 	$(CXX) -c $(COPTS) sockets.cc
 
 
-doc: neddoc doxy
+#doc: neddoc doxy
 
-neddoc:
-	opp_neddoc -a
+#neddoc:
+#	opp_neddoc -a
 
-doxy: doxy.cfg
-	doxygen doxy.cfg
+#doxy: doxy.cfg
+#	doxygen doxy.cfg
 
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX)
@@ -114,6 +114,7 @@ socketlayer.o: socketlayer.cc \
   ../../Util/basic_consts.h \
   ../../Network/IPv4/Core/ip_address.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h
+socketlayer_n.o: socketlayer_n.cc
 sockets.o: sockets.cc \
   sockets.h \
   ../TCP/tcpcb.h \
