@@ -77,7 +77,7 @@ module StandardHost
             parameters:
                 proxyARP = false;
             display: "p=240,350,row,90;q=queue;i=block/ifcard";
-    connections:
+    connections nocheck:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
             tcpApp[i].tcpIn <-- tcp.to_appl++;

@@ -51,7 +51,7 @@ module Router
             display: "p=90,240,row,110;q=queue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             display: "p=145,240,row,110;q=queue;i=block/ifcard";
-    connections:
+    connections nocheck:
         // connections to network outside
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
