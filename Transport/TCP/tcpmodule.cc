@@ -145,7 +145,7 @@ private:
 
   void status(TcpTcb* tcb_block);
   const char *stateName(TcpState state);
-  const char *eventName(TcpCommand event);
+  const char *eventName(TcpEvent event);
   
   void procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_header); 
   void procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_header);
@@ -3870,7 +3870,7 @@ void TcpModule::status(TcpTcb* tcb_block)
                 << " (" << stateName(tcb_block->tb_from_state) << ")" << endl;
   if (debug) ev << "TCP-FSM state: " << (int) tcb_block->tb_state
                 << " (" << stateName(tcb_block->tb_state) << ")" << endl;
-  if (debug) ev << "TCP event: " << (int) tcb_block->st_event.event << endl;
+  if (debug) ev << "TCP event: " << (int) tcb_block->st_event.event
                 << " (" << eventName(tcb_block->st_event.event) << ")" << endl;
   if (debug) ev << "Local TCP-port: " << tcb_block->local_port << endl;
   if (debug) ev << "Local IP-address: " << tcb_block->local_addr << endl;
@@ -3929,32 +3929,30 @@ const char *TcpModule::eventName(TcpCommand event)
     const char *s = "unknown";
     switch (event) 
     {
-        CASE(TCP_C_OPEN_ACTIVE);
-        CASE(TCP_C_OPEN_PASSIVE);
-        CASE(TCP_C_SEND);
-        CASE(TCP_C_RECEIVE);
-        CASE(TCP_C_CLOSE);
-        CASE(TCP_C_ABORT);
-        CASE(TCP_C_STATUS);
-
-        CASE(SYN_SEG);
-        CASE(ACK_SEG);
-        CASE(RST_SEG);
-        CASE(FIN_SEG);
-        CASE(TCP_SEG);
-        CASE(SYN_DATA);
-        CASE(ACK_DATA);
-        CASE(RST_DATA);
-        CASE(FIN_DATA);
-        CASE(TCP_DATA);
-
-        CASE(TIMEOUT_TIME_WAIT);
-        CASE(TIMEOUT_REXMT);
-        CASE(TIMEOUT_PERSIST);
-        CASE(TIMEOUT_KEEPALIVE);
-        CASE(TIMEOUT_CONN_ESTAB);
-        CASE(TIMEOUT_FIN_WAIT_2);
-        CASE(TIMEOUT_DELAYED_ACK);
+        CASE(TCP_E_NONE);
+        CASE(TCP_E_OPEN_ACTIVE);
+        CASE(TCP_E_OPEN_PASSIVE);
+        CASE(TCP_E_SEND);
+        CASE(TCP_E_RECEIVE);
+        CASE(TCP_E_CLOSE);
+        CASE(TCP_E_ABORT);
+        CASE(TCP_E_STATUS);
+        CASE(TCP_E_SEG_ARRIVAL);
+        CASE(TCP_E_RCV_SYN);
+        CASE(TCP_E_RCV_SYN_ACK);
+        CASE(TCP_E_RCV_ACK_OF_SYN);
+        CASE(TCP_E_RCV_FIN);
+        CASE(TCP_E_RCV_ACK_OF_FIN);
+        CASE(TCP_E_RCV_FIN_ACK_OF_FIN);
+        CASE(TCP_E_TIMEOUT_TIME_WAIT);
+        CASE(TCP_E_TIMEOUT_REXMT);
+        CASE(TCP_E_TIMEOUT_PERSIST);
+        CASE(TCP_E_TIMEOUT_KEEPALIVE);
+        CASE(TCP_E_TIMEOUT_CONN_ESTAB);
+        CASE(TCP_E_TIMEOUT_FIN_WAIT_2);
+        CASE(TCP_E_TIMEOUT_DELAYED_ACK);
+        CASE(TCP_E_PASSIVE_RESET);
+        CASE(TCP_E_ABORT_NO_RST);
     }
     return s;
 #undef CASE
