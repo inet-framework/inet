@@ -1366,7 +1366,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
                 && rsbEle->Filter_Spec_Object[c].SrcPort == p_iter.Sender_Template_Object.SrcPort
                 && rsbEle->Filter_Spec_Object[c].Lsp_Id == p_iter.Sender_Template_Object.Lsp_Id)
             {
-                flow_descriptor_list[pIndex].Filter_Spec_Object = p_iter.Sender_Template_Object;
+                flow_descriptor_list[pIndex].Filter_Spec_Object = (FilterSpecObj_t&)p_iter.Sender_Template_Object; //TBD eliminate cast... (Andras)
                 // flow_descriptor_list[pIndex].Flowspec_Object = p_iter.Sender_Tspec_Object;
                 flow_descriptor_list[pIndex].label = rsbEle->label[c];
 

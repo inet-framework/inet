@@ -11,6 +11,10 @@
 //
 
 
+//
+// FIXME this should replace intserv.h as soon as opp_msgc supports initializers for structs
+//
+
 cplusplus {{
 #define MAX_ROUTE 10
 #define InLIST_SIZE 5
@@ -49,9 +53,9 @@ struct RsvpHopObj_t
 struct SenderTemplateObj_t
 {
   fields:
-    int SrcAddress; //# = 0;
-    int SrcPort; //# = 0;
-    int Lsp_Id; //# = -1;
+    int SrcAddress = 0;
+    int SrcPort = 0;
+    int Lsp_Id = -1;
 };
 
 
@@ -61,8 +65,8 @@ struct SenderTemplateObj_t
 struct SenderTspecObj_t
 {
   fields:
-    double req_bandwidth; //# = 0;
-    double link_delay; //# = 0;
+    double req_bandwidth = 0;
+    double link_delay = 0;
 };
 
 //
@@ -114,8 +118,8 @@ struct FlowDescriptor_t
 struct EroObj_t
 {
   fields:
-    bool L; //# = false;
-    int node; //# = 0;
+    bool L = false;
+    int node = 0;
 };
 
 
