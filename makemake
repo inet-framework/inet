@@ -52,18 +52,18 @@ $MAKEMAKE $OPTS -n -r
 (cd Examples/bin && $MAKEMAKE $OPTS -w -o INET $ALL_MPLS_IPSUITE_INCLUDES)
 
 (cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r)
-(cd Examples/IPSuite && $MAKEMAKE $OPTS -n -r)
+(cd Examples/INET && $MAKEMAKE $OPTS -n -r)
 (cd Examples/MPLS && $MAKEMAKE $OPTS -n -r)
 
 (cd Examples/Ethernet/ARPTest && $MAKEMAKE $ALL_MODEL_OPTS)
 (cd Examples/Ethernet/LANs && $MAKEMAKE $ALL_MODEL_OPTS)
 
-(cd Examples/IPSuite/NClients && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/FlatNet && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/Multicast && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/RouterPerf && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/BulkTransfer && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/NClients && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/FlatNet && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/KIDSNw1 && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/Multicast && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/RouterPerf && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/INET/BulkTransfer && $MAKEMAKE $ALL_MODEL_OPTS)
 
 (cd Examples/MPLS/Tester && $MAKEMAKE $OPTS -w -o MPLSTester $ALL_MPLS_IPSUITE_INCLUDES)
 (cd Examples/MPLS/demo2 && $MAKEMAKE $ALL_MODEL_OPTS)

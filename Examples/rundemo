@@ -20,15 +20,15 @@ set wantScrollbar 1
 set i 0
 set first ""
 foreach line {
-   {"IPSuite"}
-   {"NClients/Telnet"        "IPSuite/NClients"           "./NClients"           "NClients"}
-   {"NClients/HTTP"          "IPSuite/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
-   {"NClients/file transfer" "IPSuite/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
-   {"FlatNet"                "IPSuite/FlatNet"            "./FlatNet"            "FlatNet"}
-   {"KIDSNw1"                "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
-   {"Multicast"              "IPSuite/Multicast"          "./Multicast"          "Multicast"}
-   {"RouterPerf"             "IPSuite/RouterPerf"         "./RouterPerf"         "RouterPerf"}
-   {"BulkTransfer"           "IPSuite/BulkTransfer"       "./BulkTransfer"       "BulkTransfer"}
+   {"INET"}
+   {"NClients/Telnet"        "INET/NClients"     "./NClients"              "NClients"}
+   {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini" "NClients -f basicHTTP.ini"}
+   {"NClients/file transfer" "INET/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
+   {"FlatNet"                "INET/FlatNet"      "./FlatNet"               "FlatNet"}
+   {"KIDSNw1"                "INET/KIDSNw1"      "./KIDSNw1"               "KIDSNw1"}
+   {"Multicast"              "INET/Multicast"    "./Multicast"             "Multicast"}
+   {"RouterPerf"             "INET/RouterPerf"   "./RouterPerf"            "RouterPerf"}
+   {"BulkTransfer"           "INET/BulkTransfer" "./BulkTransfer"          "BulkTransfer"}
 
    {"Ethernet"}
    {"ARP Test"               "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
@@ -168,9 +168,9 @@ proc createWindow {} {
 }
 
 proc helpAbout {} {
-    tk_messageBox -title {About IPSuite TCP/IP Demo} -type ok -icon info -message \
+    tk_messageBox -title {About} -type ok -icon info -message \
 {\
-IPSuite for OMNeT++
+INET Framework for OMNeT++
 Sample Simulations
 }
 

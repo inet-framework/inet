@@ -52,18 +52,18 @@ cd %root%\Transport\TCP && %MAKEMAKE% %OPTS% -n -I..\..\Network\IPv4 -I..\..\Bas
 cd %root%\Examples\bin && %MAKEMAKE% %OPTS% -w -o INET %ALL_MPLS_IPSUITE_INCLUDES%
 
 cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -n -r
-cd %root%\Examples\IPSuite && %MAKEMAKE% %OPTS% -n -r
+cd %root%\Examples\INET && %MAKEMAKE% %OPTS% -n -r
 cd %root%\Examples\MPLS && %MAKEMAKE% %OPTS% -n -r
 
 cd %root%\Examples\Ethernet\ARPTest && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\Ethernet\LANs && %MAKEMAKE% %ALL_MODEL_OPTS%
 
-cd %root%\Examples\IPSuite\NClients && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\FlatNet && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\Multicast && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\RouterPerf && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\BulkTransfer && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\NClients && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\FlatNet && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\KIDSNw1 && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\Multicast && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\RouterPerf && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\INET\BulkTransfer && %MAKEMAKE% %ALL_MODEL_OPTS%
 
 cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -w -o MPLSTester %ALL_MPLS_IPSUITE_INCLUDES%
 cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %ALL_MODEL_OPTS%

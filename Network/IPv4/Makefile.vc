@@ -160,28 +160,17 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ICMP.obj: ICMP.cc \
-  IPControlInfo_m.h \
   ICMP.h \
-  IPAddress.h \
-  IPDatagram_m.h \
-  ../../Base/INETDefs.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   IPDatagram.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  ICMPMessage_m.h
-ICMPMessage_m.obj: ICMPMessage_m.cc \
-  ICMPMessage_m.h \
-  IPDatagram.h \
-  IPDatagram_m.h \
-  IPAddress.h \
-  ../../Base/INETDefs.h
+  ../../Base/INETDefs.h \
+  IPAddress.h
 IP.obj: IP.cc \
   IP.h \
   IPDatagram.h \
-  IPControlInfo_m.h \
-  ICMPMessage_m.h \
   ../../Base/QueueBase.h \
   RoutingTableAccess.h \
   RoutingTable.h \
@@ -193,8 +182,7 @@ IP.obj: IP.cc \
   ../../Base/INETDefs.h \
   IPAddress.h \
   ICMP.h \
-  ICMPMessage.h \
-  IPDatagram_m.h
+  ICMPMessage.h
 IPAddress.obj: IPAddress.cc \
   IPAddress.h \
   ../../Base/INETDefs.h
@@ -203,27 +191,16 @@ IPAddressResolver.obj: IPAddressResolver.cc \
   RoutingTable.h \
   IPAddress.h \
   ../../Base/INETDefs.h
-IPControlInfo_m.obj: IPControlInfo_m.cc \
-  IPControlInfo_m.h \
-  IPAddress.h \
-  IPDatagram_m.h \
-  ../../Base/INETDefs.h
-IPDatagram_m.obj: IPDatagram_m.cc \
-  IPDatagram_m.h \
-  IPAddress.h \
-  ../../Base/INETDefs.h
 IPFragBuf.obj: IPFragBuf.cc \
   IPFragBuf.h \
   ICMP.h \
   ../../Base/INETDefs.h \
   IPDatagram.h \
-  IPDatagram_m.h \
-  IPAddress.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  ICMPMessage_m.h
+  IPAddress.h
 ProtocolMap.obj: ProtocolMap.cc \
   ProtocolMap.h
 RoutingTable.obj: RoutingTable.cc \
