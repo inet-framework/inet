@@ -23,6 +23,9 @@
 
 #include "Ethernet.h"
 #include "EtherFrame_m.h"
+#include "RoutingTable.h"
+#include "RoutingTableAccess.h"
+
 
 // Self-message kind values
 #define ENDIFG             100
@@ -67,6 +70,11 @@ class EtherMAC : public cSimpleModule
      */
     long queueLength() {return outputbuffer.length();}
 
+    /**
+     * Returns MAC address
+     */
+    MACAddress getMACAddress() {return myaddress;}
+
   private:
     // counter for automatic address generation
     static unsigned int autoAddressCtr;
@@ -92,6 +100,7 @@ class EtherMAC : public cSimpleModule
     bool autoconfigInProgress; // true if autoconfig is currently ongoing
     double lowestTxrateSuggested;
     bool duplexVetoed;
+    InterfaceEntry* interfaceEntry;
 
     // States
     int  transmitState;     // State of the MAC unit transmitting
@@ -153,6 +162,7 @@ class EtherMAC : public cSimpleModule
     void printState();
     void printParameters();
     void calculateParameters();
+    InterfaceEntry* registerInterface(double datarate);
 
     // helpers
     void scheduleEndIFGPeriod();

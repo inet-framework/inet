@@ -31,6 +31,8 @@ module Router
     gates:
         in: in[];
         out: out[];
+        in: ethIn[];
+        out: ethOut[];
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=70,60";
@@ -40,18 +42,27 @@ module Router
                 IPForward = true,
                 routingFile = routingFile;
             gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
+                physIn[sizeof(out)+sizeof(ethOut)],
+                physOut[sizeof(out)+sizeof(ethOut)];
             display: "p=160,60;i=fork";
         ppp : PPPInterface[sizeof(out)];
             display: "p=80,150,row,90;q=queue;i=iface";
-    connections nocheck:
+        eth: EthernetInterface[sizeof(ethOut)];
+            display: "p=125,150,row,90;q=queue;i=iface";
+    connections:
         // connections to network outside
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
             ppp[i].netwOut --> networkLayer.physIn[i];
             ppp[i].netwIn <-- networkLayer.physOut[i];
+        endfor;
+
+        for i=0..sizeof(ethOut)-1 do
+            ethIn[i] --> eth[i].physIn;
+            ethOut[i] <-- eth[i].physOut;
+            eth[i].netwOut --> networkLayer.physIn[sizeof(out)+i];
+            eth[i].netwIn <-- networkLayer.physOut[sizeof(out)+i];
         endfor;
 endmodule
 

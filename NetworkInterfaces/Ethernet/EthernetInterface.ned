@@ -26,11 +26,15 @@ import
 // Ethernet network interface. Corresponds to the prototype NetworkInterface.
 //
 module EthernetInterface
+    parameters:
+        proxyARP: bool;  // sets proxy ARP mode
     gates:
         in: physIn, netwIn;
         out: physOut, netwOut;
     submodules:
         arp: ARP;
+            parameters:
+                proxyARP = proxyARP;
             display: "i=proc2;p=155,60";
         encap: EtherEncap;
             gatesizes:

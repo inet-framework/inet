@@ -25,7 +25,9 @@ import
     "UDPProcessing",
     "UDPApp",
     "NetworkLayer",
-    "PingApp";
+    "PingApp",
+    "PPPInterface",
+    "EthernetInterface";
 
 
 
@@ -43,6 +45,8 @@ module StandardHost2
     gates:
         in: in[];
         out: out[];
+        in: ethIn[];
+        out: ethOut[];
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=56,78";
@@ -61,12 +65,16 @@ module StandardHost2
                 IPForward = IPForward,
                 routingFile = routingFile;
             gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
-            display: "p=212,221;i=fork";
+                physIn[sizeof(out)+sizeof(ethOut)],
+                physOut[sizeof(out)+sizeof(ethOut)];
+            display: "p=210,220;i=fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=170,303,row,90;q=queue;i=iface";
-    connections nocheck:
+            display: "p=170,300,row,90;q=queue;i=iface";
+        eth: EthernetInterface[sizeof(ethOut)];
+            parameters:
+                proxyARP = false;
+            display: "p=205,300,row,90;q=queue;i=iface";
+    connections:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
             tcpApp[i].tcpIn <-- tcp.to_appl++;
@@ -92,6 +100,13 @@ module StandardHost2
             out[i] <-- ppp[i].physOut;
             ppp[i].netwOut --> networkLayer.physIn[i];
             ppp[i].netwIn <-- networkLayer.physOut[i];
+        endfor;
+
+        for i=0..sizeof(ethOut)-1 do
+            ethIn[i] --> eth[i].physIn;
+            ethOut[i] <-- eth[i].physOut;
+            eth[i].netwOut --> networkLayer.physIn[sizeof(out)+i];
+            eth[i].netwIn <-- networkLayer.physOut[sizeof(out)+i];
         endfor;
 endmodule
 

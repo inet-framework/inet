@@ -21,9 +21,6 @@
 // Prototype module for link layer protocols.
 //
 module NetworkInterface
-    parameters:
-        frameCapacity : numeric const,
-        bitCapacity : numeric const;
     gates:
         in: physIn;
         out: physOut;

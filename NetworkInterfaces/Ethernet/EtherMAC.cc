@@ -158,6 +158,8 @@ void EtherMAC::initialize()
     numPauseFramesSentVector.setName("pauseFramesSent");
     numCollisionsVector.setName("collisions");
     numBackoffsVector.setName("backoffs");
+
+    interfaceEntry = registerInterface(txrate);
 }
 
 void EtherMAC::printParameters()
@@ -403,7 +405,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
         if (outputbuffer.length()>=maxQueueSize)
         {
             EV << "Packet " << frame << " arrived from higher layers but queue full, dropping\n";
-    	    numFramesFromHLDropped++;
+            numFramesFromHLDropped++;
             numFramesFromHLDroppedVector.record(numFramesFromHLDropped);
             delete frame;
             return;
@@ -988,6 +990,51 @@ void EtherMAC::finish()
             recordScalar("bits/sec rcvd",   8*numBytesReceivedOK/t);
         }
     }
+}
+
+InterfaceEntry* EtherMAC::registerInterface(double datarate)
+{
+    InterfaceEntry *e = new InterfaceEntry();
+
+    // interface name: NetworkInterface module's name without special characters ([])
+    // --> Emin : Parent module name is used since EtherMAC belongs to EthernetInterface.
+    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *d=interfaceName;
+    for (const char *s=owner()->fullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+
+    e->name = interfaceName;
+    delete [] interfaceName;
+
+    // output port: index of gate where our "physOut" is connected
+    int outputPort = ((cModule*)owner())->gate("physOut")->toGate()->index();  // FIXME use queueIn instead!!!
+    e->outputPort = outputPort;
+
+    // we don't know IP address and netmask, it'll probably come from routing table file
+
+    // MTU is 1500 on Ethernet
+    e->mtu = 1500;
+
+    // we're connected if other end of connection path is an input gate
+    bool connected = gate("physOut")->destinationGate()->type() == 'I';
+
+    // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+    e->metric = connected ? (int)ceil(2e9/datarate) : 100; // use OSPF cost as default
+
+    // capabilities
+    e->multicast = true;
+    e->pointToPoint = false;
+
+    // multicast groups
+    //FIXME
+
+    // add
+    RoutingTableAccess routingTableAccess;
+    routingTableAccess.get()->addInterface(e);
+
+    return e;
 }
 
 

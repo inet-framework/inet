@@ -134,8 +134,3 @@ Transport/UDP/UDPProcessing.ned
 
 
 
-_PATCH_/ARPTest/ARP.ned
-_PATCH_/ARPTest/ARPTest.ned
-_PATCH_/ARPTest/EthernetInterface.ned
-_PATCH_/ARPTest/RouterWithEther.ned
-_PATCH_/ARPTest/StandardHost3.ned

@@ -62,7 +62,7 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 
 (cd NetworkInterfaces/PPP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4)
 (cd NetworkInterfaces/_802 && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4)
-(cd NetworkInterfaces/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../_802)
+(cd NetworkInterfaces/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../_802 -I../../Network/IPv4)
 (cd NetworkInterfaces/ARP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4 -I../_802 -I../Ethernet)
 
 (cd Nodes/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Network/IPv4d -I../../Network/IPv4/QoS -I../../Unsupported/TcpModule -I../../Transport/UDP -I../../NetworkInterfaces/PPP -I../../NetworkInterfaces  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/UDPApp -I../../Applications/PingApp -I../../Base -I../../Util)
