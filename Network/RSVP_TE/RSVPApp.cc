@@ -16,7 +16,7 @@
 #include <omnetpp.h>
 #include "RSVPApp.h"
 #include "RoutingTable.h"
-#include "RSVPTester.h"
+#include "RSVPTesterCommands.h"
 #include "MPLSModule.h"
 #include "IPAddressResolver.h"
 #include "StringTokenizer.h"

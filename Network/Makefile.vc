@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= AutoRouting IPv4 IPv4d LDP MPLS RSVP_TE
-SUBDIR_TARGETS=  AutoRouting_dir IPv4_dir IPv4d_dir LDP_dir MPLS_dir RSVP_TE_dir
+SUBDIRS= AutoRouting IPv4 IPv4d LDP MPLS RSVP_TE Scenario
+SUBDIR_TARGETS=  AutoRouting_dir IPv4_dir IPv4d_dir LDP_dir MPLS_dir RSVP_TE_dir Scenario_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -94,6 +94,9 @@ MPLS_dir:
 
 RSVP_TE_dir:
 	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
+
+Scenario_dir:
+	cd Scenario && cd && nmake /nologo /f Makefile.vc
 
 
 #doc: neddoc doxy

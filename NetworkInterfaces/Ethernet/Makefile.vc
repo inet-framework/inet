@@ -159,46 +159,80 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 EtherBus.obj: EtherBus.cc \
+  EtherFrame_m.h \
   utils.h \
+  Ethernet.h \
+  ../_802/MACAddress.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
+EtherCtrl_m.obj: EtherCtrl_m.cc \
+  EtherCtrl_m.h \
+  Ethernet.h \
+  ../_802/MACAddress.h
 EtherEncap.obj: EtherEncap.cc \
   Ethernet.h \
+  EtherFrame_m.h \
+  EtherCtrl_m.h \
   utils.h \
+  ../_802/MACAddress.h \
+  ../../Base/INETDefs.h
+EtherFrame_m.obj: EtherFrame_m.cc \
+  EtherFrame_m.h \
+  utils.h \
+  Ethernet.h \
+  ../_802/MACAddress.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 EtherHub.obj: EtherHub.cc \
+  EtherFrame_m.h \
   utils.h \
+  Ethernet.h \
+  ../_802/MACAddress.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 EtherLLC.obj: EtherLLC.cc \
   Ethernet.h \
+  EtherFrame_m.h \
   utils.h \
+  ../_802/MACAddress.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 EtherMAC.obj: EtherMAC.cc \
   EtherMAC.h \
   utils.h \
   Ethernet.h \
+  EtherFrame_m.h \
+  ../_802/MACAddress.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 MACRelayUnitBase.obj: MACRelayUnitBase.cc \
   MACRelayUnitBase.h \
   ../_802/MACAddress.h \
+  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../../Util/stlwatch.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 MACRelayUnitNP.obj: MACRelayUnitNP.cc \
   MACRelayUnitNP.h \
+  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
   ../../Util/stlwatch.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 MACRelayUnitPP.obj: MACRelayUnitPP.cc \
   MACRelayUnitPP.h \
+  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
   ../../Util/stlwatch.h \
+  EtherCtrl_m.h \
   ../../Base/INETDefs.h
 utils.obj: utils.cc \
   utils.h \
