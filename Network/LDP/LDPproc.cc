@@ -170,7 +170,7 @@ void LDPproc::activity()
             processRequestFromMPLSSwitch(msg);
         // Data from TCP Interface
         else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
-            processMessageFromTCP(check_and_cast<LDPpacket *>(msg));
+            processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
 
     }
 
@@ -251,47 +251,46 @@ void LDPproc::processRequestFromMPLSSwitch(cMessage *msg)
 }
 
 
-void LDPproc::processMessageFromTCP(LDPpacket *ldpPacket)
+void LDPproc::processLDPPacketFromTCP(LDPpacket *ldpPacket)
 {
-    int msgType = ldpPacket->kind();
-    switch (msgType)
+    switch (ldpPacket->kind())
     {
     case HELLO:
-        // processingHELLO(ldpPacket);
+        // processHELLO(ldpPacket);
         ev << "Received LDP HELLO message\n";  // FIXME so what to do with it? --Andras
         delete ldpPacket;
         break;
 
     case ADDRESS:
-        // processingADDRESS(ldpPacket);
+        // processADDRESS(ldpPacket);
         error("Received LDP ADDRESS message, unsupported in this version");
         break;
 
     case ADDRESS_WITHDRAW:
-        // processingADDRESS_WITHDRAW(ldpPacket);
+        // processADDRESS_WITHDRAW(ldpPacket);
         error("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
         break;
 
     case LABEL_MAPPING:
-        processingLABEL_MAPPING(check_and_cast<LabelMappingMessage *>(ldpPacket));
+        processLABEL_MAPPING(check_and_cast<LabelMappingMessage *>(ldpPacket));
         break;
 
     case LABEL_REQUEST:
-        processingLABEL_REQUEST(check_and_cast<LabelRequestMessage *>(ldpPacket));
+        processLABEL_REQUEST(check_and_cast<LabelRequestMessage *>(ldpPacket));
         break;
 
     case LABEL_WITHDRAW:
-        // processingLABEL_WITHDRAW(ldpPacket);
+        // processLABEL_WITHDRAW(ldpPacket);
         error("LDP PROC DEBUG: Received LDP LABEL_WITHDRAW message, unsupported in this version");
         break;
 
     case LABEL_RELEASE:
-        // processingLABEL_RELEASE(ldpPacket);
+        // processLABEL_RELEASE(ldpPacket);
         error("LDP PROC DEBUG: Received LDP LABEL_RELEASE message, unsupported in this version");
         break;
 
     default:
-        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", msgType);
+        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->kind());
     }
 }
 
@@ -382,7 +381,7 @@ string LDPproc::findInterfaceFromPeerAddr(int peerIP)
 
 }
 
-void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
+void LDPproc::processLABEL_REQUEST(LabelRequestMessage * packet)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -499,7 +498,7 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
     }
 }
 
-void LDPproc::processingLABEL_MAPPING(LabelMappingMessage * packet)
+void LDPproc::processLABEL_MAPPING(LabelMappingMessage * packet)
 {
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();

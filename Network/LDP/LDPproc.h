@@ -108,11 +108,11 @@ private:
 
   virtual void initialize();
 
-  void processingLABEL_MAPPING(LabelMappingMessage *packet);
-  void processingLABEL_REQUEST(LabelRequestMessage *packet);
-
   void processRequestFromMPLSSwitch(cMessage *msg);
-  void processMessageFromTCP(LDPpacket *ldpPacket);
+  void processLDPPacketFromTCP(LDPpacket *ldpPacket);
+
+  void processLABEL_MAPPING(LabelMappingMessage *packet);
+  void processLABEL_REQUEST(LabelRequestMessage *packet);
 
   //void printDebugInfo(string dInfo);
 
