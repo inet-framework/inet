@@ -35,8 +35,8 @@ void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
     std::ostream& out = *outp;
 
     // src/dest
-    out << tcpseg->srcAddress().c_str() << "." << tcpseg->srcPort() << " > ";
-    out << tcpseg->destAddress().c_str() << "." << tcpseg->destPort() << ": ";
+    out << srcAddr.c_str() << "." << tcpseg->srcPort() << " > ";
+    out << destAddr.c_str() << "." << tcpseg->destPort() << ": ";
 
     // flags
     bool flags = false;
@@ -69,3 +69,4 @@ void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
     //...
     out << endl;
 }
+
