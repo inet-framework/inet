@@ -61,7 +61,7 @@ module StandardHost2
                 physOut[sizeof(out)];
             display: "p=212,221;i=fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=170,303,row;i=iface";
+            display: "p=170,303,row;q=queue;i=iface";
     connections nocheck:
         tcpApp.tcpOut --> tcp.from_appl;
         tcpApp.tcpIn <-- tcp.to_appl;

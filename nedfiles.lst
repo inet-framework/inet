@@ -82,7 +82,6 @@ NetworkInterfaces/PPP/PPPInterface.ned
 Nodes/IPSuite/BurstHost.ned
 Nodes/IPSuite/NetworkLayer.ned
 Nodes/IPSuite/Router.ned
-Nodes/IPSuite/StandardHost.ned
 Nodes/IPSuite/StandardHost2.ned
 Nodes/MPLS/LSRNode.ned
 Nodes/MPLS/RSVP_LSR_Node.ned
