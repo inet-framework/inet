@@ -30,12 +30,45 @@
  */
 class IP : public cSimpleModule
 {
-  private:
+  protected:
     RoutingTableAccess routingTableAccess;
+    ICMPAccess icmpAccess;
 
+    // config
+    bool IPForward;
     int defaultTimeToLive;
     int defaultMCTimeToLive;
+
+    // working vars
     long curFragmentId;  // counter, used to assign unique fragmentIds to datagrams
+
+    // statistics
+    int numMulticast;
+    int numLocalDeliver;
+    int numDropped;
+    int numUnroutable;
+    int numForwarded;
+
+  protected:
+    IPDatagram *encapsulate(cMessage *transportPacket);
+
+    /** Handle IPDatagram messages arriving from lower layer */
+    virtual void handlePacketFromNetwork(IPDatagram *dgram);
+
+    /** Handle messages (typically packets to be send in IP) from transport or ICMP */
+    virtual void handleMessageFromHL(cMessage *msg);
+
+    /** Handle multicast packets */
+    virtual void handleMulticastPacket(IPDatagram *dgram);
+
+    /** Send packet to higher layers */
+    virtual void localDeliver(IPDatagram *dgram);
+
+    /** Fragment packet if needed, then send it on selected interface */
+    virtual void fragmentAndSend(IPDatagram *dgram);
+
+    /** Send datagram on selected interface */
+    virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
 
   public:
     Module_Class_Members(IP, cSimpleModule, 0);
@@ -43,7 +76,6 @@ class IP : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    IPDatagram *encapsulate(cMessage *transportPacket);
 };
 
 #endif
