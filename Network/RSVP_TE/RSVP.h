@@ -30,146 +30,134 @@
 #define TABLE_SIZE        10
 
 
-struct PathStateBlock_t{
-
-    /* SESSION object structure */
-  SessionObj_t Session_Object;
-
-    /* SENDER_TEMPLATE structure */
-  SenderTemplateObj_t Sender_Template_Object;
-
-    /* SENDER_TSPEC structure */
-  SenderTspecObj_t Sender_Tspec_Object;
-
-    /* Previous Hop IP address from PHOP object */
-  int  Previous_Hop_Address;
-
-    /* Logical Interface Handle from PHOP object*/
-  int  LIH;
-
-    /* Remaining IP TTL */
-  //int rem_IP_TTL;
-
-    /* To determine EDGE of the RSVP network */
-  int E_Police_Flag;
-
-    /* To determine if the App. is local or not */
-  int Local_Only_Flag;
-
-    /* List of outgoing Interfaces for this
-       (sender, destination)  single entry for unicast case */
-  int  OutInterface_List;//[InLIST_SIZE];
-
-    /* Expected incoming interface, undefined for unicast case */
-  int  IncInterface ;
-  LabelRequestObj_t LabelRequest;
-  bool SAllocated; //Resource has been allocated ?
-
-};
-
-/*
-** Reservation State Block (RSB) structure
-*/
-struct ResvStateBlock_t{
-
-    /* SESSION object structure */
-  SessionObj_t Session_Object;
-
-    /* Next Hop IP address from PHOP object */
-  int  Next_Hop_Address;
-
-    /* Outgoing Interface on which reservation is
-       to be made or has been made*/
-  int  OI;
-
-
-  FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
-  int            label[InLIST_SIZE];
-  int            RRO[InLIST_SIZE][MAX_ROUTE];
-
-    /* STYLE Object structure */
-  //StyleObj_t Style_Object
-  int style;
-
-    /* FLOWSPEC structure */
-  FlowSpecObj_t Flowspec_Object;
-
-    /* SCOPE Object structure */
-  //ScopeObj_t Scope_Object             ;
-
-    /* RESV_CONFIRM Object structure */
-  int Receiver_Address      ;
-
-};
-
-/*
-** Traffic Control State Block
-*/
-struct TrafficControlStateBlock_t{
-
-    /* SESSION object structure */
-  SessionObj_t Session_Object;
-
-    /* Outgoing Interface on which reservation is
-       to be made or has been made*/
-  int  OI;
-
-    /* Newly added when it was known that FF style need to be considered */
-  FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
-
-    /* Effective flowspec (LUB of FLOWSPEC's from matching RSB's) structure */
-  FlowSpecObj_t TC_Flowspec;
-
-    /* Updated object structure to be forwarded after merging */
-  FlowSpecObj_t Fwd_Flowspec;
-
-    /* Effective sender Tspec structure */
-  SenderTspecObj_t TC_Tspec;
-
-    /* Entry Police flags */
-  int E_Police_Flag;
-
-  int Local_Only_Flag;
-
-    /* Reservation Handle */
-  int Rhandle;
-
-    /* Filter handle list */
-  int Fhandle;
-
-    /* RESV_CONFIRM  */
-  int  Receiver_Address;
-
-};
-
-
-struct RHandleType_t{
-    int handle; //Equivalent with TE_Tunnel_id
-    int isfull;
-    int  OI;
-    int holdingPri; //Holding Pri of the tunnel
-    int setupPri; //Setup Pri of the tunnel
-    FlowSpecObj_t TC_Flowspec;
-    SenderTspecObj_t Path_Te;
-} ;
-
-/*
-typedef struct {
-    int isfull;
-    IPAddress OI;
-    int Rhandle;
-    SessionObj session;
-    FilterSpecObj FilterSpecObject;
-} FHandleType;
-*/
-
 void print(RSVPPathMsg *p);
 void print(RSVPPathTear *p);
 void print(RSVPResvMsg *p);
 void print(RSVPResvTear *p);
 
+/**
+ * Implementation of the RSVP module.
+ */
 class RSVP :  public cSimpleModule
 {
+private:
+    struct PathStateBlock_t
+    {
+        // SESSION object structure
+        SessionObj_t Session_Object;
+
+        // SENDER_TEMPLATE structure
+        SenderTemplateObj_t Sender_Template_Object;
+
+        // SENDER_TSPEC structure
+        SenderTspecObj_t Sender_Tspec_Object;
+
+        // Previous Hop IP address from PHOP object
+        int Previous_Hop_Address;
+
+        // Logical Interface Handle from PHOP object
+        int LIH;
+
+        // Remaining IP TTL
+        //int rem_IP_TTL;
+
+        // To determine EDGE of the RSVP network
+        int E_Police_Flag;
+
+        // To determine if the App. is local or not
+        int Local_Only_Flag;
+
+        // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
+        int OutInterface_List;//[InLIST_SIZE];
+
+        // Expected incoming interface, undefined for unicast case
+        int  IncInterface ;
+        LabelRequestObj_t LabelRequest;
+        bool SAllocated; //Resource has been allocated ?
+    };
+
+    /**
+     * Reservation State Block (RSB) structure
+     */
+    struct ResvStateBlock_t
+    {
+        // SESSION object structure
+        SessionObj_t Session_Object;
+
+        // Next Hop IP address from PHOP object
+        int Next_Hop_Address;
+
+        // Outgoing Interface on which reservation is to be made or has been made
+        int OI;
+
+        FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
+        int label[InLIST_SIZE];
+        int RRO[InLIST_SIZE][MAX_ROUTE];
+
+        // STYLE Object structure
+        //StyleObj_t Style_Object
+        int style;
+
+        // FLOWSPEC structure
+        FlowSpecObj_t Flowspec_Object;
+
+        // SCOPE Object structure
+        //ScopeObj_t Scope_Object;
+
+        // RESV_CONFIRM Object structure
+        int Receiver_Address;
+    };
+
+    /**
+     * Traffic Control State Block
+     */
+    struct TrafficControlStateBlock_t
+    {
+        // SESSION object structure
+        SessionObj_t Session_Object;
+
+        // Outgoing Interface on which reservation is to be made or has been made
+        int OI;
+
+        // Newly added when it was known that FF style need to be considered
+        FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
+
+        // Effective flowspec (LUB of FLOWSPEC's from matching RSB's) structure
+        FlowSpecObj_t TC_Flowspec;
+
+        // Updated object structure to be forwarded after merging
+        FlowSpecObj_t Fwd_Flowspec;
+
+        // Effective sender Tspec structure
+        SenderTspecObj_t TC_Tspec;
+
+        // Entry Police flags
+        int E_Police_Flag;
+
+        int Local_Only_Flag;
+
+        // Reservation Handle
+        int Rhandle;
+
+        // Filter handle list
+        int Fhandle;
+
+        // RESV_CONFIRM
+        int Receiver_Address;
+    };
+
+
+    struct RHandleType_t
+    {
+        int handle; //Equivalent with TE_Tunnel_id
+        int isfull;
+        int OI;
+        int holdingPri; //Holding Pri of the tunnel
+        int setupPri; //Setup Pri of the tunnel
+        FlowSpecObj_t TC_Flowspec;
+        SenderTspecObj_t Path_Te;
+    };
+
 private:
     RoutingTableAccess routingTableAccess;
     LIBTableAccess libTableAccess;

@@ -42,35 +42,38 @@
 #define DEFAULT_RECV_DELAY    1
 
 
-
-struct traffic_request_t{
-    int src;
-    int dest;
-    int setupPri;
-    int holdingPri;
-    double delay;
-    double bandwidth;
-    bool isER;
-    EroObj_t route[MAX_ROUTE];
-};
-
-struct lsp_tunnel_t
-{
-    SenderTemplateObj_t Sender_Template;
-    SessionObj_t         Session;
-    bool operating;
-    int inInfIndex;
-};
-
-struct routing_info_t{
-    int lspId;
-    int route[MAX_ROUTE];
-};
-
-
+/**
+ * Implementation of the RSVPAppl module.
+ */
 class RSVPAppl: public cSimpleModule
 {
 private:
+    struct traffic_request_t
+    {
+        int src;
+        int dest;
+        int setupPri;
+        int holdingPri;
+        double delay;
+        double bandwidth;
+        bool isER;
+        EroObj_t route[MAX_ROUTE];
+    };
+
+    struct lsp_tunnel_t
+    {
+        SenderTemplateObj_t Sender_Template;
+        SessionObj_t         Session;
+        bool operating;
+        int inInfIndex;
+    };
+
+    struct routing_info_t
+    {
+        int lspId;
+        int route[MAX_ROUTE];
+    };
+
     RoutingTableAccess routingTableAccess;
     LIBTableAccess libTableAccess;
     OSPFTEAccess ospfteAccess;

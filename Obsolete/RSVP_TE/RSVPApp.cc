@@ -916,7 +916,7 @@ bool RSVPAppl::initFromFile(const cXMLElement *root)
     return true;
 }
 
-traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *connNode)
+RSVPAppl::traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *connNode)
 {
     traffic_request_t aTR;
     for (int c = 0; c < MAX_ROUTE; c++)

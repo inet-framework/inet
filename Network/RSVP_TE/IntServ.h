@@ -35,7 +35,7 @@
  */
 struct SessionObj_t
 {
-    int  DestAddress;
+    int DestAddress;
     int Protocol_Id;
     int DestPort;
     int setupPri;
@@ -49,8 +49,8 @@ struct SessionObj_t
  */
 struct RsvpHopObj_t
 {
-    int  Next_Hop_Address;
-    int  Logical_Interface_Handle;
+    int Next_Hop_Address;
+    int Logical_Interface_Handle;
 };
 
 /**
@@ -59,7 +59,7 @@ struct RsvpHopObj_t
 struct SenderTemplateObj_t
 {
     SenderTemplateObj_t(){SrcAddress =0; SrcPort=0; Lsp_Id =-1;}
-    int  SrcAddress;
+    int SrcAddress;
     int SrcPort;
     int Lsp_Id;
 };
