@@ -20,6 +20,8 @@
 #include <string.h>
 #include <omnetpp.h>
 #include "PPPFrame_m.h"
+#include "RoutingTable.h"
+#include "RoutingTableAccess.h"
 
 
 /**
@@ -35,15 +37,16 @@ class PPPInterface : public cSimpleModule
     cQueue queue;
     cMessage *endTransmissionEvent;
 
+    void registerInterface();
+    void startTransmitting(cMessage *msg);
+    PPPFrame *encapsulate(cMessage *msg);
+    cMessage *decapsulate(PPPFrame *pppFrame);
+
   public:
     Module_Class_Members(PPPInterface, cSimpleModule, 0);
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-
-    void startTransmitting(cMessage *msg);
-    PPPFrame *encapsulate(cMessage *msg);
-    cMessage *decapsulate(PPPFrame *pppFrame);
 };
 
 Define_Module(PPPInterface);
@@ -69,6 +72,52 @@ void PPPInterface::initialize()
     }
     if (!gateToWatch)
         error("gate physicalOut must be connected (directly or indirectly) to a link with data rate");
+
+    // register our interface entry in RoutingTable
+    registerInterface();
+}
+
+void PPPInterface::registerInterface()
+{
+    InterfaceEntry *e = new InterfaceEntry();
+
+    // interface name: our module name without special characters ([])
+    char *interfaceName = new char[strlen(fullName())+1];
+    char *d=interfaceName;
+    for (const char *s=fullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+
+    e->name = interfaceName;
+    delete [] interfaceName;
+
+    // output port: index of gate where our "physOut" is connected
+    int outputPort = gate("physOut")->toGate()->index();
+    e->outputPort = outputPort;
+
+    // we don't know IP address and netmask, it'll probably come from routing table file
+
+    // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
+    // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
+    e->mtu = 4470;
+
+    // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+    // try OSPF cost here.
+    cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
+    double bps = chan->datarate();
+    e->metric = (int)ceil(2e9/bps);
+
+    // capabilities
+    e->multicast = true;
+    e->pointToPoint = true;
+
+    // multicast groups
+    //FIXME
+
+    // add
+    RoutingTableAccess routingTableAccess;
+    routingTableAccess.get()->addInterface(e);
 }
 
 
