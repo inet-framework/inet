@@ -2,7 +2,6 @@
 # Config file for the IPSuite. This is included by every makefile.
 #
 
-ROOT=d:\home\IPSuite-pcvs
 OMNETPP_ROOT=d:\home\omnetpp
 
 !include $(OMNETPP_ROOT)\configuser.vc
