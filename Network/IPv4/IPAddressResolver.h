@@ -33,15 +33,22 @@ class IPAddressResolver
     ~IPAddressResolver() {}
 
     /**
-     * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
-     * or router ("host[2]"), and empty string (""). For the latter, it returns
-     * the null address.
-     * If module name is specified, the module will be looked up using
-     * <tt>simulation.moduleByPath()</tt>, and the address of its
-     * first interface will be returned.
+     * Returns IP address of the given host or router. If different interfaces
+     * of the host/router have different IP addresses, the function throws 
+     * an error.
      *
      * The current implementation assumes that the RoutingTable module is
-     * submodule <tt>"networkLayer.routingTable"</tt> within the .
+     * submodule <tt>"networkLayer.routingTable"</tt> within the host/router
+     * module.
+     */
+    IPAddress addressOf(cModule *host);
+
+    /**
+     * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
+     * or router ("host[2]"), and empty string (""). For the latter, it returns
+     * the null address. If module name is specified, the module will be 
+     * looked up using <tt>simulation.moduleByPath()</tt>, and then
+     * addressOf() will be called to determine its IP address.
      */
     IPAddress resolve(const char *str);
 };

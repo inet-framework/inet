@@ -21,6 +21,39 @@
 #include "IPAddressResolver.h"
 
 
+IPAddress IPAddressResolver::addressOf(cModule *mod)
+{
+    // find RoutingTable
+    cModule *rtmod = mod->moduleByRelativePath("networkLayer.routingTable");
+    if (!rtmod)
+        opp_error("IPAddressResolver: RoutingTable not found as networkLayer.routingTable "
+                  "within host/router module `%s'", mod->fullPath());
+    RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
+
+    // browse interfaces for IP addresses
+    IPAddress addr;
+    if (rt->numInterfaces()==0)
+        opp_error("IPAddressResolver: host/router `%s' has no interface registered "
+                  "(yet? try in a later init stage!)", mod->fullPath());
+
+    for (int i=0; i<rt->numInterfaces(); i++)
+    {
+        InterfaceEntry *e = rt->interfaceByIndex(i);
+        if (!e->inetAddr.isNull())
+        {
+            if (!addr.isNull() && e->inetAddr!=addr)
+                opp_error("IPAddressResolver: different interfaces in host/router `%s' "
+                          "have different IP addresses", mod->fullPath());
+            addr = e->inetAddr;
+        }
+    }
+    if (addr.isNull())
+        opp_error("IPAddressResolver: no interface in host/router `%s' has an IP address "
+                  "assigned (yet? try in a later init stage!)", mod->fullPath());
+
+    return addr;
+}
+
 IPAddress IPAddressResolver::resolve(const char *str)
 {
     // handle empty address and dotted decimal notation
@@ -33,19 +66,8 @@ IPAddress IPAddressResolver::resolve(const char *str)
     cModule *mod = simulation.moduleByPath(str);
     if (!mod)
         opp_error("IPAddressResolver: module `%s' not found", str);
-    cModule *rtmod = mod->moduleByRelativePath("networkLayer.routingTable");
-    if (!rtmod)
-        opp_error("IPAddressResolver: RoutingTable not found as networkLayer.routingTable in module `%s'", str);
-    RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
 
-    InterfaceEntry *e = rt->interfaceByIndex(0);
-    if (!e)
-        opp_error("IPAddressResolver: module `%s' has no interface registered (try in a later init stage!)", str);
-    if (e->inetAddr.isNull())
-        opp_error("IPAddressResolver: first interface of module `%s' has no IP address assigned yet (try in a later init stage!)", str);
-
-    // got it, finally!
-    return e->inetAddr;
+    return addressOf(mod);
 }
 
 
