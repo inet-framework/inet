@@ -3,8 +3,8 @@ ipsuite-doc.ned
 mpls-doc.ned
 Applications/Ethernet/EtherAppCli.ned
 Applications/Ethernet/EtherAppSrv.ned
-Applications/Generic/SinkApp.ned
-Applications/Generic/TrafficGen.ned
+Applications/Generic/IPTrafficGenerator.ned
+Applications/Generic/IPTrafGen.ned
 Applications/PingApp/PingApp.ned
 Applications/TCPApp/TCPApp.ned
 Applications/TCPApp/TCPBasicClientApp.ned

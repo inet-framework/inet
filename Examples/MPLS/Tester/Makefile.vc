@@ -191,4 +191,5 @@ NewRouteTester.obj: NewRouteTester.cc \
   ../../../Network/IPv4/IPAddress.h \
   ../../../Base/ipsuite_defs.h \
   ../../../Base/ModuleAccess.h \
-  ../../../Network/MPLS/LIBtable.h
+  ../../../Network/MPLS/LIBtable.h \
+  ../../../Network/RSVP_TE/IntServ_m.h

@@ -19,17 +19,17 @@
 
 
 //
-// Consumes and prints packets received from the UDP module.
+// Consumes and prints packets received from the IP module.
 //
-simple UDPSink
+simple IPTrafSink
     gates:
-        in: from_udp;
-        out: to_udp;
+        in: from_ip;
+        out: to_ip;
 endsimple
 
 
 //
-// Sends UDP packets to the given \IP address at the given interval.
+// Sends IP datagrams to the given \IP address at the given interval.
 // The interval can be a constant or a random value (e.g. exponential(1)).
 // If the dest_addresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
@@ -37,19 +37,18 @@ endsimple
 // class is used to resolve the address.) To disable the model, set
 // dest_addresses to "".
 //
-// The peer can be UDPSink or another UDPApp (it handles received packets
-// exactly like UDPSink).
+// The peer can be IPTrafSink or another IPTrafGen (it handles received packets
+// exactly like IPTrafSink).
 //
-simple UDPApp
+simple IPTrafGen
     parameters:
-        local_port : numeric const,
-        dest_port : numeric const,
-        message_length : numeric const, // (bits)
-        message_freq : numeric, // should usually be a random value, e.g. exponential(1)
+        protocol: numeric const,
+        message_length : numeric, // (bits)
+        message_freq : numeric, // may be a random value, e.g. exponential(1)
         dest_addresses: string; // list of \IP addresses, separated by spaces
     gates:
-        in: from_udp;
-        out: to_udp;
+        in: from_ip;
+        out: to_ip;
 endsimple
 
 

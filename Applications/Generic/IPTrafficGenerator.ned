@@ -14,16 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-// Simulation of Transport and application level
-// traffic generators for testing purposes
+//
 
 
 //
-// Receives packets from the \IP layer and prints out their contents.
+// Prototype for modules that generate traffic directly over IP.
 //
-// author: Jochen Reber
+// @see IPTrafGen, IPTrafSink
 //
-simple SinkApp
+simple IPTrafficGenerator
     gates:
-        in: in;
+        in: from_ip;
+        out: to_ip;
 endsimple
+

@@ -39,13 +39,13 @@ module BurstHost
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=67,84";
+            display: "p=70,60;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=56,140,row;i=box3";
+            display: "p=70,130;i=box3";
         burstGenerator: TrafficGenerator;
             parameters:
                 GeneratorType = "BurstGenerator",
@@ -53,14 +53,14 @@ module BurstHost
                 burstPackets = burstPackets,
                 generationTime = 0,
                 generationSize = packetSize;
-            display: "i=app;p=132,60";
+            display: "i=app;p=140,60";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "p=132,120;i=fork";
+            display: "p=140,120;i=fork";
         ppp: PPPInterface[1];
-            display: "p=132,200,row,90;q=queue;i=iface";
+            display: "p=140,200,row,90;q=queue;i=iface";
     connections nocheck:
         // transport connections
         networkLayer.UDPOut --> burstGenerator.in;

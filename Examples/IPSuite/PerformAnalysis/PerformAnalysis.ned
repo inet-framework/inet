@@ -21,9 +21,8 @@
 
 import
     "Router",
-    "BurstHost";
-
-
+    "BurstHost",
+    "FlatNetworkConfigurator";
 
 
 module PerformanceNetwork
@@ -31,30 +30,37 @@ module PerformanceNetwork
         packetNo : numeric const,
         nodeNo : numeric const;
     submodules:
+        configurator: FlatNetworkConfigurator;
+            parameters:
+                moduleTypes = "Router BurstHost",
+                nonIPModuleTypes = "",
+                networkAddress = "145.236.0.0",
+                netmask = "255.255.0.0";
+            display: "i=cogwheel";
         sender: BurstHost[nodeNo];
             parameters:
                 burstPackets = packetNo,
                 packetSize = 1000;
-            parameters if index==0:
-                routingFile = "sender0.irt";
-            parameters if index==1:
-                routingFile = "sender1.irt";
-            parameters if index==2:
-                routingFile = "sender2.irt";
-            parameters if index==3:
-                routingFile = "sender3.irt";
-            parameters if index==4:
-                routingFile = "sender4.irt";
-            parameters if index==5:
-                routingFile = "sender5.irt";
-            parameters if index==6:
-                routingFile = "sender6.irt";
-            parameters if index==7:
-                routingFile = "sender7.irt";
-            parameters if index==8:
-                routingFile = "sender8.irt";
-            parameters if index==9:
-                routingFile = "sender9.irt";
+//            parameters if index==0:
+//                routingFile = "sender0.irt";
+//            parameters if index==1:
+//                routingFile = "sender1.irt";
+//            parameters if index==2:
+//                routingFile = "sender2.irt";
+//            parameters if index==3:
+//                routingFile = "sender3.irt";
+//            parameters if index==4:
+//                routingFile = "sender4.irt";
+//            parameters if index==5:
+//                routingFile = "sender5.irt";
+//            parameters if index==6:
+//                routingFile = "sender6.irt";
+//            parameters if index==7:
+//                routingFile = "sender7.irt";
+//            parameters if index==8:
+//                routingFile = "sender8.irt";
+//            parameters if index==9:
+//                routingFile = "sender9.irt";
             gatesizes:
                 in[1],
                 out[1];
@@ -64,34 +70,34 @@ module PerformanceNetwork
             parameters:
                 burstPackets = 0,
                 packetSize = 10;
-            parameters if index==0:
-                routingFile = "recip0.irt";
-            parameters if index==1:
-                routingFile = "recip1.irt";
-            parameters if index==2:
-                routingFile = "recip2.irt";
-            parameters if index==3:
-                routingFile = "recip3.irt";
-            parameters if index==4:
-                routingFile = "recip4.irt";
-            parameters if index==5:
-                routingFile = "recip5.irt";
-            parameters if index==6:
-                routingFile = "recip6.irt";
-            parameters if index==7:
-                routingFile = "recip7.irt";
-            parameters if index==8:
-                routingFile = "recip8.irt";
-            parameters if index==9:
-                routingFile = "recip9.irt";
+//            parameters if index==0:
+//                routingFile = "recip0.irt";
+//            parameters if index==1:
+//                routingFile = "recip1.irt";
+//            parameters if index==2:
+//                routingFile = "recip2.irt";
+//            parameters if index==3:
+//                routingFile = "recip3.irt";
+//            parameters if index==4:
+//                routingFile = "recip4.irt";
+//            parameters if index==5:
+//                routingFile = "recip5.irt";
+//            parameters if index==6:
+//                routingFile = "recip6.irt";
+//            parameters if index==7:
+//                routingFile = "recip7.irt";
+//            parameters if index==8:
+//                routingFile = "recip8.irt";
+//            parameters if index==9:
+//                routingFile = "recip9.irt";
             gatesizes:
                 in[1],
                 out[1];
             display: "p=63,68,row;i=comp";
 
         router: Router;
-            parameters:
-                routingFile = "router.irt";
+//            parameters:
+//                routingFile = "router.irt";
             gatesizes:
                 in[nodeNo*2],
                 out[nodeNo*2];
