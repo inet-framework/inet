@@ -12,112 +12,28 @@
 
 
 cplusplus {{
-#define MAX_ROUTE 10
-#define InLIST_SIZE 5
-#define ON      1
-#define OFF     0
+#include "intserv.h"
 }}
 
-//
-// Intserv/RSVP: Session Structure
-//
-struct SessionObj_t
+struct SessionObj_t;
+struct RsvpHopObj_t;
+struct SenderTemplateObj_t;
+struct SenderTspecObj_t;
+struct FlowSpecObj_t;
+struct FilterSpecObj_t;
+struct LabelRequestObj_t;
+struct SenderDescriptor_t;
+struct FlowDescriptor_t;
+struct EroObj_t;
+
+
+message RSVPPacket
 {
-  fields:
-    int DestAddress;
-    int Protocol_Id;
-    int DestPort;
-    int setupPri;
-    int holdingPri;
-    int Tunnel_Id;
-    int Extended_Tunnel_Id;
+    properties:
+        customize=true;
+    fields:
+        SessionObj_t session;
+        int rsvpLength = 0;
+        bool checksumValid = true;
 };
-
-//
-// Intserv/RSVP: RSVP HOP Structure
-//
-struct RsvpHopObj_t
-{
-  fields:
-    int Next_Hop_Address;
-    int Logical_Interface_Handle;
-};
-
-//
-// Intserv/RSVP: Sender Template Structure
-//
-struct SenderTemplateObj_t
-{
-  fields:
-    int SrcAddress; //# = 0;
-    int SrcPort; //# = 0;
-    int Lsp_Id; //# = -1;
-};
-
-
-//
-// Intserv/RSVP: Sender Tspec Structure
-//
-struct SenderTspecObj_t
-{
-  fields:
-    double req_bandwidth; //# = 0;
-    double link_delay; //# = 0;
-};
-
-//
-// Intserv/RSVP: Sender Tspec Structure
-//
-struct FlowSpecObj_t extends SenderTspecObj_t  {fields:}
-
-//
-// Intserv/RSVP: Sender Template Structure
-//
-struct FilterSpecObj_t extends SenderTemplateObj_t {fields:}
-
-//
-// Intserv/RSVP: Label Request Object Structure
-//
-struct LabelRequestObj_t
-{
-  fields:
-    // request;
-    int prot;
-};
-
-//
-// Intserv/RSVP: Sender Descriptor Structure
-//
-struct SenderDescriptor_t
-{
-  fields:
-    SenderTemplateObj_t Sender_Template_Object;
-    SenderTspecObj_t Sender_Tspec_Object;
-};
-
-
-//
-// Intserv/RSVP: Flow Descriptor Structure
-//
-struct FlowDescriptor_t
-{
-  fields:
-    FlowSpecObj_t Flowspec_Object;
-    FilterSpecObj_t Filter_Spec_Object;
-    int RRO[MAX_ROUTE];
-    int label;
-};
-
-//
-// Intserv/RSVP: Explicit Routing Object Structure
-//
-struct EroObj_t
-{
-  fields:
-    bool L; //# = false;
-    int node; //# = 0;
-};
-
-
-
 

@@ -321,7 +321,7 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
 
     RSVPPathTear *pt = new RSVPPathTear();
     pt->setSenderTemplate(&aTunnel.Sender_Template);
-    pt->setSession(&aTunnel.Session);
+    pt->setSession(aTunnel.Session);
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     rsvp_hop->Logical_Interface_Handle = -1;
     rsvp_hop->Next_Hop_Address = routerId;
@@ -671,7 +671,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     Filter_Spec_Object->Lsp_Id = lspId;
 
     pMsg->setHop(rsvp_hop);
-    pMsg->setSession(s);
+    pMsg->setSession(*s);
     pMsg->setSenderTemplate(static_cast < SenderTemplateObj_t * >(Filter_Spec_Object));
     pMsg->setSenderTspec(static_cast < SenderTspecObj_t * >(Flowspec_Object));
 

@@ -820,7 +820,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
                 ev << "Update traffic control fails\n";
                 Resv_Refresh_Needed_Flag = OFF;
                 RSVPResvError *errorMsg = new RSVPResvError();
-                errorMsg->setSession(&activeRSB->Session_Object);
+                errorMsg->setSession(activeRSB->Session_Object);
                 // errorMsg->addPar("dest_addr") = IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
                 // errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
                 // send(errorMsg, "to_ip");
@@ -1216,7 +1216,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     // Get the destination address
     // int dest = psbEle->Session_Object.DestAddress;
 
-    pm->setSession(&psbEle->Session_Object);
+    pm->setSession(psbEle->Session_Object);
     pm->setLabelRequest(&psbEle->LabelRequest);
     pm->setRTime(5);
 
@@ -1326,7 +1326,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
 
     }
 
-    outRM->setSession(&rsbEle->Session_Object);
+    outRM->setSession(rsbEle->Session_Object);
     outRM->setStyle(rsbEle->style);
 
     outRM->setRTime(5);
@@ -1491,7 +1491,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
 
     outRM->setFlowDescriptor(flow_descriptor_list);
 
-    outRM->setSession(&rsbEle->Session_Object);
+    outRM->setSession(rsbEle->Session_Object);
 
     int peerInf = 0;
 
@@ -2403,7 +2403,7 @@ void RSVP::preemptTunnel(int tunnelId)
             if (PSBList[m].Session_Object.Tunnel_Id == tunnelId)
             {
                 RSVPPathTear *ptMsg = new RSVPPathTear();
-                ptMsg->setSession(&PSBList[m].Session_Object);
+                ptMsg->setSession(PSBList[m].Session_Object);
                 ptMsg->setSenderTemplate(&PSBList[m].Sender_Template_Object);
 
                 locList.push_back(PSBList[m].Previous_Hop_Address);

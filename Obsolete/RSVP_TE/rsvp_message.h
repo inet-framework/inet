@@ -18,6 +18,8 @@
 
 #include "intserv.h"
 #include "IPAddress.h"
+#include "RSVPPacket_m.h"
+
 
 #define PATH_MESSAGE 1
 #define RESV_MESSAGE 2
@@ -34,42 +36,37 @@
 /**
  * RSVP generic packet
  */
-class RSVPPacket: public cMessage
+class RSVPPacket: public RSVPPacket_Base
 {
-protected:
-    SessionObj_t session;
-    int  _rsvpLength;
-    bool _hasChecksum;
+//protected:
+//    SessionObj_t session;
+//    int  _rsvpLength;
+//    bool _checksumValid;
 
 public:
-    RSVPPacket();
-    RSVPPacket(const RSVPPacket &p);
+    RSVPPacket(const char *name=NULL, int kind=0) : RSVPPacket_Base(name,kind) {}
+    RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other.name()) {operator=(other);}
+    RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
+    virtual cObject *dup() {return new RSVPPacket(*this);}
 
-    inline int getDestAddress() {return session.DestAddress;}
-    inline int getProtId() {return session.Protocol_Id;}
-    inline int getDestPort() {return session.DestPort;}
-    inline int getTunnelId() {return session.Tunnel_Id;}
-    inline int getExTunnelId() {return session.Extended_Tunnel_Id;}
-    inline int getSetupPri() {return session.setupPri;}
-    inline int getHoldingPri() {return session.holdingPri;}
-    inline SessionObj_t* getSession() {return &session;}
+    inline int getDestAddress() {return getSession().DestAddress;}
+    inline int getProtId()      {return getSession().Protocol_Id;}
+    inline int getDestPort()    {return getSession().DestPort;}
+    inline int getTunnelId()    {return getSession().Tunnel_Id;}
+    inline int getExTunnelId()  {return getSession().Extended_Tunnel_Id;}
+    inline int getSetupPri()    {return getSession().setupPri;}
+    inline int getHoldingPri()  {return getSession().holdingPri;}
+    //inline SessionObj_t* getSession() {return &session;}
     bool  isInSession(SessionObj_t* s);
-    void  setSession(SessionObj_t* s);
-
-    //assignment operator
-    virtual RSVPPacket& operator=(const RSVPPacket& p);
-    virtual cObject *dup() const {return new RSVPPacket(*this);}
-
-    //Info functions
-    virtual const char* className() const{return "RSVPPacket";}
+    //void  setSession(SessionObj_t* s);
 
     //Overload setLength()
     virtual void setLength(int bitlength);
 
-    bool checksumValid() const {return _hasChecksum;}
-    void setChecksumValidity(bool isValid) {_hasChecksum = isValid;}
-    int RSVPLength() const {return _rsvpLength;}
-    void setRSVPLength(int byteLength);
+    //bool checksumValid() const {return _checksumValid;}
+    //void setChecksumValidity(bool isValid) {_checksumValid = isValid;}
+    //int RSVPLength() const {return _rsvpLength;}
+    //void setRSVPLength(int byteLength);
 };
 
 
