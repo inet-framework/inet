@@ -25,7 +25,7 @@ Define_Module(LIBTable);
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::PRTEntry & prt)
 {
-    return os << "Pos:" << prt.pos << "  Fec:" << prt.fecValue;
+    return os << "Pos:" << prt.libIndex << "  Fec:" << prt.fecValue;
 }
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
@@ -167,9 +167,9 @@ int LIBTable::readPrtTableFromFile(const char *filename)
             record.fecValue = 0;
 
         if ((aField = tokenizer.nextToken()) != NULL)
-            record.pos = atoi(aField);
+            record.libIndex = atoi(aField);
         else
-            record.pos = -1;
+            record.libIndex = -1;
 
         // Add the record
         prt.push_back(record);
@@ -192,7 +192,7 @@ void LIBTable::printTables() const
     ev << "*****************PRT TABLE CONTENT**************\n";
     ev << "Pos  Fec \n";
     for (i = 0; i < prt.size(); i++)
-        ev << prt[i].pos << "    " << prt[i].fecValue << "\n";
+        ev << prt[i].libIndex << "    " << prt[i].fecValue << "\n";
 }
 
 int LIBTable::installNewLabel(int outLabel, string inInterface,
@@ -209,7 +209,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     lib.push_back(newLabelEntry);
 
     PRTEntry aPrt;
-    aPrt.pos = lib.size() - 1;
+    aPrt.libIndex = lib.size() - 1;
     aPrt.fecValue = fec;
     prt.push_back(aPrt);
     printTables();
@@ -217,114 +217,48 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     return newLabelEntry.inLabel;
 }
 
-int LIBTable::findLabelforFec(int fec) const
+bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) const
 {
     // search in the PRT for exact match of the FEC value
-    for (int i = 0; i < prt.size(); i++)
+    for (int i=0; i<prt.size(); i++)
     {
         if (prt[i].fecValue == fec)
         {
-            int p = prt[i].pos;
+            // found
+            int p = prt[i].libIndex;
 
-            // Return the outgoing label
-            return lib[p].outLabel;
+            outLabel = lib[p].outLabel;
+            outInterface = lib[p].outInterface;
+            return true;
         }
     }
-    return -2;
+
+    // not found
+    outLabel = -1;
+    outInterface = "";
+    return false;
 }
 
-int LIBTable::findFec(int label, string inInterface) const
+bool LIBTable::resolveLabel(int inLabel, std::string inInterface, int outOptCode,
+                            int outLabel, std::string& outInterface) const
 {
-    int pos;
-
-    // FIXME HELP!!!!! Linear search????!!!!!! (--Andras)
-    // Search LIB for matching of the incoming interface and label
     for (int i = 0; i < lib.size(); i++)
     {
-        if ((lib[i].inInterface == inInterface) && (lib[i].inLabel == label))
+        if (lib[i].inInterface == inInterface && lib[i].inLabel == inLabel)
         {
-            // Get the position of this match
-            pos = i;
-            break;
+            // found
+            outOptCode = lib[i].optcode;
+            outLabel = lib[i].outLabel;
+            outInterface = lib[i].outInterface;
+            return true;
         }
     }
 
-    // Get the FEC value in PRT tabel
-    for (int k = 0; k < prt.size(); k++)
-    {
-        if (prt[k].pos == pos)
-            return prt[k].fecValue;
-    }
-    return 0;
-
+    // not found
+    outOptCode = -1;
+    outLabel = -1;
+    outInterface = "";
+    return false;
 }
 
-string LIBTable::findOutgoingInterface(int fec) const
-{
-    int pos = -1;
-
-    // Search in PRT for matching of FEC
-    for (int k = 0; k < prt.size(); k++)
-    {
-        if (prt[k].fecValue == fec)
-        {
-            pos = prt[k].pos;
-            break;
-        }
-    }
-
-    if (pos != -1)
-        return lib[pos].outInterface;
-    else
-        return string("X");
-}
-
-string LIBTable::findOutgoingInterface(string senderInterface, int newLabel) const
-{
-    for (int i = 0; i < lib.size(); i++)
-    {
-        if (senderInterface.compare("X") != 0)
-        {
-            if ((lib[i].inInterface == senderInterface) && (lib[i].outLabel == newLabel))
-                return lib[i].outInterface;
-        }
-        else if (lib[i].outLabel == newLabel)  // LIB of the IR
-            return lib[i].outInterface;
-    }
-    return string("X");
-}
-
-string LIBTable::findOutgoingInterface(string senderInterface, int newLabel, int oldLabel) const
-{
-    if (newLabel != -1)
-        return findOutgoingInterface(senderInterface, newLabel);
-
-    for (int i = 0; i < lib.size(); i++)
-    {
-        if (senderInterface.compare("X") != 0)
-        {
-            if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
-                return lib[i].outInterface;
-        }
-        else if (lib[i].outLabel == newLabel)
-            return lib[i].outInterface;
-    }
-    return string("X");
-}
-
-int LIBTable::findNewLabel(string senderInterface, int oldLabel) const
-{
-    for (int i = 0; i < lib.size(); i++)
-        if (lib[i].inInterface == senderInterface && lib[i].inLabel == oldLabel)
-            return lib[i].outLabel;
-    return -2;
-}
-
-int LIBTable::getOptCode(string senderInterface, int oldLabel) const
-{
-    for (int i = 0; i < lib.size(); i++)
-        if (lib[i].inInterface == senderInterface && lib[i].inLabel == oldLabel)
-            return lib[i].optcode;
-    return -1;
-}
 

@@ -134,11 +134,11 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
     dumpFECTable();
 
     // try sending out buffered IP datagrams and MPLS packets which are waiting for this FEC
-    trySendBufferedPackets(returnedFEC, label);
+    trySendBufferedPackets(returnedFEC);
 }
 
 
-void MPLSModule::trySendBufferedPackets(int returnedFEC, int label)
+void MPLSModule::trySendBufferedPackets(int returnedFEC)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -163,7 +163,7 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC, int label)
         else
         {
             gateIndex = mplsPck->par("gateIndex");
-            data = check_and_cast < IPDatagram * >(mplsPck->decapsulate());
+            data = check_and_cast<IPDatagram *>(mplsPck->decapsulate());
         }
 
         InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
@@ -190,16 +190,17 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC, int label)
             ev << " / " << data->owner()->fullPath() << endl;
             newPacket->encapsulate(data);
         }
-        newPacket->pushLabel(label);
 
+        // Find label and outgoing interface
+        int label;
+        string outgoingInterface;
+        bool found = lt->resolveFec(returnedFEC, label, outgoingInterface);
+        ASSERT(found);
+
+        newPacket->pushLabel(label);
         newPacket->setKind(fecID);
 
-        // Find the outgoing interface
-        string outgoingInterface = lt->findOutgoingInterface(senderInterface, label);
-
-        // A check routine will be added later to make sure outgoingInterface !="X"
         int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
-
         send(newPacket, "toL2", outgoingPort);
     }
 }
@@ -261,10 +262,13 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int newLabel = lt->findNewLabel(senderInterface, oldLabel);
-    int optCode = lt->getOptCode(senderInterface, oldLabel);
+    int optCode;
+    int newLabel;
+    string outgoingInterface;
+    bool found = lt->resolveLabel(oldLabel, senderInterface,
+                                  optCode, newLabel, outgoingInterface);
 
-    if (newLabel >= 0)  // New label can be found
+    if (found && newLabel!=-1)  // New label found
     {
         ev << "incoming label=" << oldLabel << ": ";
         switch (optCode)
@@ -284,18 +288,15 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
             default:
                 error("Unknown MPLS OptCode %d", optCode);
         }
-
-        string outgoingInterface = lt->findOutgoingInterface(senderInterface, newLabel);
-        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
-
         ev << ", outgoing interface: " << outgoingInterface << "\n";
 
+        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
         send(mplsPacket, "toL2", outgoingPort);
 
     }
+    // FIXME (!found) case not handled...
     else if (newLabel==-1 && isER)  // ER router and the new label must be native IP
     {
-        string outgoingInterface = lt->findOutgoingInterface(senderInterface, newLabel, oldLabel);
         int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
         mplsPacket->popLabel();
@@ -358,13 +359,15 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         ev << "Message(src, dest, fec)=(" << ipdatagram->srcAddress() << "," <<
             ipdatagram->destAddress() << "," << fecID << ")\n";
 
-        int label = lt->findLabelforFec(fecID);
-        ev << " Label found for this message is label(" << label << ")\n";
+        int label;
+        string outgoingInterface;
+        bool found = lt->resolveFec(fecID, label, outgoingInterface);
 
-        if (label != -2)  // New Label found
+        if (found)  // New Label found
         {
-            // Construct a new MPLS packet
+            ev << " Label found for this message is label(" << label << ")\n";
 
+            // Construct a new MPLS packet
             MPLSPacket *newPacket = NULL;
             newPacket = new MPLSPacket(ipdatagram->name());
             newPacket->encapsulate(ipdatagram);
@@ -377,11 +380,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
             newPacket->pushLabel(label);
 
-            // Find outgoing interface
-
-            // string outgoingInterface= lt->findOutgoingInterface(senderInterface, label);
-            string outgoingInterface = lt->findOutgoingInterface(fecID);
-
+            // Find outgoing port
             int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
             // Send out the packet
@@ -391,6 +390,8 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         }
         else  // Need to make ldp query
         {
+            ev << "Label not found, making LDP query\n";
+
             ipdatagram->addPar("gateIndex") = gateIndex;
             ipdataQueue.add(ipdatagram);
 

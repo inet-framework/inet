@@ -419,12 +419,13 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
         return;  // Do nothing it is repeated request
 
     // Look up table for this fec
-
-    int label = lt->findLabelforFec(fec);
+    int label;
+    string outgoingInterface;
+    bool found = lt->resolveFec(fec, label, outgoingInterface);
 
     ev << "Request from LSR(" << IPAddress(srcAddr) << ") for fec=" << IPAddress(fec) << ")\n";
 
-    if (label != -2)  // Found the label
+    if (found)  // Found the label
     {
         ev << "LSR(" << IPAddress(local_addr) <<
             "): Label =" << label << " found for fec =" << IPAddress(fec) << "\n";

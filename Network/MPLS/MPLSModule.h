@@ -95,7 +95,7 @@ class MPLSModule : public cSimpleModule
       virtual void processIPDatagramFromL2(IPDatagram *ipdatagram);
 
       /** Invoked from processPacketFromSignalling() */
-      virtual void trySendBufferedPackets(int returnedFEC, int label);
+      virtual void trySendBufferedPackets(int returnedFEC);
 
       //@}
 
