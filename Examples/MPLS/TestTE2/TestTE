@@ -1,1 +1,1 @@
-../Tester/MPLSTester $*
+../../bin/INET $*
