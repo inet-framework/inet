@@ -116,8 +116,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
 
     ev << "Message from signalling: label=" << label << ", FEC=" << returnedFEC << "\n";
 
-    std::vector<FECElem>::iterator iterF;
-    FECElem iter;
+    // Try and put returned FEC into the FEC table
     if (!isLDP)
     {
         for (int i = 0; i < fecList.size(); i++)
@@ -143,6 +142,7 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC, int label)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
+
     for (int i = 0; i < ipdataQueue.items(); i++)
     {
         cMessage *queuedmsg = (cMessage *) ipdataQueue[i];
