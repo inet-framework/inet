@@ -45,9 +45,9 @@ module FlatNet
         rte: Router[57];
             display: "i=ball2_vs,gold,100";
         cli: StandardHost2[2];
-            display: "i=comp_s,green,50";
+            display: "i=laptop3";
         srv: StandardHost2;
-            display: "i=comp_s,cyan,50";
+            display: "i=server1";
     connections nocheck:
         cli[0].out++ --> ethernetline --> rte[50].in++;
         cli[0].in++ <-- ethernetline <-- rte[50].out++;

@@ -45,15 +45,15 @@ module NClients
                 netmask = "255.255.0.0";
             display: "i=cogwheel";
         r1: Router;
-            display: "i=ball2_vs,gold,100";
+            display: "i=srouter";
         r2: Router;
-            display: "i=ball2_vs,gold,100";
+            display: "i=srouter";
         r3: Router;
-            display: "i=ball2_vs,gold,100";
+            display: "i=srouter";
         cli: StandardHost2[n];
-            display: "i=comp_s,green,50";
+            display: "i=laptop3";
         srv: StandardHost2;
-            display: "i=comp_s,cyan,50";
+            display: "i=server1";
     connections nocheck:
         for i=0..n-1 do
             cli[i].out++ --> ethernetline --> r1.in++;

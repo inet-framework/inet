@@ -62,7 +62,7 @@ module KIDSNw1
             gatesizes if index==0:
                 in[3],
                 out[3];
-            display: "p=102,153,row;i=ipc";
+            display: "p=120,153,row,130;i=ipc";
 
         // InteriorRouter
         irouter: Router;
