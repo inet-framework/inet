@@ -143,10 +143,15 @@ void TcpTestClient::activity()
 
 void TcpTestClient::finish()
 {
+    int n = 0;
+    int bytes = 0;
     while (!queue.empty())
     {
         cMessage *msg = (cMessage *)queue.pop();
-        ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
+        n++;
+        bytes+=msg->length()/8;
+        //ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
         delete msg;
     }
+    ev << fullPath() << ": received " << bytes << " bytes in " << n << " packets\n";
 }

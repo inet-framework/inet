@@ -83,7 +83,6 @@ class DummyTCPAlg : public TCPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 
-    virtual void dataRetransmitted();
 };
 
 #endif

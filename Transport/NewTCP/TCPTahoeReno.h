@@ -37,7 +37,6 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
     enum {TAHOE,RENO} tcpvariant;  // TCP algorithm
 
     // retransmit count
-    uint32 rexmit_seq;       // the sequence number rexmit_count refers to
     int rexmit_count;        // number of retransmissions (=1 after first rexmit)
     int rexmit_timeout;      // current retransmission timeout (aka RTO)
 
@@ -164,8 +163,6 @@ class TCPTahoeReno : public TCPAlgorithm
     virtual void ackSent();
 
     virtual void dataSent(uint32 fromseq);
-
-    virtual void dataRetransmitted();
 
 };
 

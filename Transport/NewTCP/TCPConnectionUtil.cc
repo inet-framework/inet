@@ -110,7 +110,8 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
-    tcpseg->setLength(8*(TCP_HEADER_OCTETS+tcpseg->payloadLength())); // FIXME account for Options!
+    tcpseg->setLength(8*(TCP_HEADER_OCTETS+tcpseg->payloadLength()));
+    // TBD account for Options (once they get implemented)
 
     IPControlInfo *controlInfo = new IPControlInfo();
     controlInfo->setProtocol(IP_PROT_TCP);
@@ -181,7 +182,7 @@ void TCPConnection::selectInitialSeqNum()
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
     // segment entirely falls in receive window
-    //FIXME not this simple, see old code segAccept() below...
+    //FIXME probably not this simple, see old code segAccept() below...
     return seqGE(tcpseg->sequenceNo(),state->rcv_nxt) &&
            seqLE(tcpseg->sequenceNo()+tcpseg->payloadLength(),state->rcv_nxt+state->rcv_wnd);
 }
@@ -192,8 +193,6 @@ void TCPConnection::sendSyn()
         opp_error("Error processing command OPEN_ACTIVE: foreign socket unspecified");
     if (localPort==-1)
         opp_error("Error processing command OPEN_ACTIVE: local port unspecified");
-
-    // FIXME if we do a retransmission, we just use the one saved before
 
     // create segment
     TCPSegment *tcpseg = new TCPSegment("SYN");
@@ -298,30 +297,35 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendData(bool fullSegments, int maxNumSegments)
+void TCPConnection::sendData(bool fullSegments, int maxNumBytes)
 {
-    // send as much as we can, but at most maxNumSegments; if fullsegments
-    // is set, refuse to send smaller segments than MSS (needed for Nagle's alg)
+    // start sending from snd_max  (FIXME is this the right place to set snd_nxt?)
+    state->snd_nxt = state->snd_max;
+
     bool segSent = false;
     uint32 old_snd_nxt = state->snd_nxt;
-    ulong bytesAvailable = sendQueue->bytesAvailable(state->snd_nxt);
-    for (int segCount=0; segCount<maxNumSegments || maxNumSegments==-1; segCount++)
+
+    ulong win = state->snd_una + state->snd_wnd - state->snd_nxt;
+    if (maxNumBytes!=-1 && (ulong)maxNumBytes<win)
+        win = maxNumBytes;
+    ulong buffered = sendQueue->bytesAvailable(state->snd_nxt);
+    if (win>buffered)
+        win = buffered;
+    if (fullSegments && win<state->snd_mss)
+        return;
+
+    while (win>0)
     {
-        tcpEV << bytesAvailable << " bytes in buffer to send, send window: " << state->snd_wnd << "\n";
-        ulong bytes = Min(state->snd_wnd, Min(bytesAvailable, state->snd_mss));
-        if (bytes==0 || (fullSegments && bytes<state->snd_mss))
-            break;
+        ulong bytes = Min(win, state->snd_mss);
         TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
         tcpseg->setAckNo(state->rcv_nxt);
         tcpseg->setAckBit(true);
         tcpseg->setWindow(state->rcv_wnd);
-
         ASSERT(bytes==tcpseg->payloadLength());
 
-        bytesAvailable -= bytes;
+        win -= bytes;
         state->snd_nxt += bytes;
         state->snd_wnd -= bytes;
-        // FIXME shouldn't we decrease cwnd here as well?
 
         if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
         {
@@ -350,20 +354,19 @@ void TCPConnection::sendData(bool fullSegments, int maxNumSegments)
 
 void TCPConnection::retransmitData()
 {
-    // retransmit one segment at snd_una, and re-set snd_nxt accordingly
-    tcpEV << "Retransmitting segment at snd_una=" << state->snd_una << "\n";
+    // retransmit one segment at snd_una, and set snd_nxt accordingly
+    state->snd_nxt = state->snd_una;
 
-    ulong bytes = Min(state->snd_mss, state->snd_nxt - state->snd_una);
+    ulong bytes = Min(state->snd_mss, state->snd_max - state->snd_nxt);
     ASSERT(bytes!=0);
 
-    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_una, bytes);
+    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
     tcpseg->setWindow(state->rcv_wnd);
-
     ASSERT(bytes==tcpseg->payloadLength());
 
-    state->snd_nxt = state->snd_una+bytes;
+    state->snd_nxt += bytes;
 
     if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
     {
@@ -376,7 +379,6 @@ void TCPConnection::retransmitData()
 
     // notify
     tcpAlgorithm->ackSent();
-    tcpAlgorithm->dataRetransmitted();
 }
 
 

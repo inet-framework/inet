@@ -301,22 +301,27 @@ class TCPConnection
     /** Utility: generates ISS and initializes corresponding state variables */
     void selectInitialSeqNum();
 
-    /** check if segment is acceptable (all bytes are in receive window) */
+    /** Utility: check if segment is acceptable (all bytes are in receive window) */
     bool isSegmentAcceptable(TCPSegment *tcpseg);
 
-    /** Utility: send SYN, SYN+ACK, ACK */
+    /** Utility: send SYN */
     void sendSyn();
+    /** Utility: send SYN+ACK */
     void sendSynAck();
+
   public:
+    /** Utility: send ACK */
     void sendAck();
 
-    /** Utility: Send data from sendQueue, at most maxNumSegments segments
-     * (-1 means no limit). If fullSegments is set, refuse to send smaller
-     * segments than MSS (needed for Nagle's alg)
+    /**
+     * Utility: Send data from sendQueue, at most maxNumBytes (-1 means no limit).
+     * If fullSegments is set, don't send segments smaller than MSS (needed for Nagle)
      */
-    void sendData(bool fullSegments, int maxNumSegments=-1);
+    void sendData(bool fullSegments, int maxNumBytes=-1);
 
-    /** Utility: retransmit everything from snd_una */
+    /**
+     * Utility: retransmit one segment from snd_una
+     */
     void retransmitData();
 
     /** Utility: sends RST */

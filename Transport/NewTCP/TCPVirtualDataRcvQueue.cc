@@ -134,7 +134,7 @@ cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     if (i==regionList.end())
         return NULL;
 
-    ASSERT(i->begin!=i->end); // empty regions cannot exist
+    ASSERT(i->begin<i->end); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))

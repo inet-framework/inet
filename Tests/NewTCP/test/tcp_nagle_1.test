@@ -28,10 +28,8 @@ include ../../defaults.ini
 [2.407 B005] B.2000 > A.1000: . ack 10 win 16384
 
 %contains: stdout
-tcpTest.srv: received data, 1 bytes
-tcpTest.srv: received data, 4 bytes
-tcpTest.srv: received data, 1 bytes
-tcpTest.srv: received data, 3 bytes
+tcpTestNet1.cli: received 0 bytes in 0 packets
+tcpTestNet1.srv: received 9 bytes in 4 packets
 [2.408] tcpdump finished, A:6 B:5 segments
 
 

@@ -27,7 +27,7 @@ Define_Module(TCPMain);
 
 
 bool TCPMain::testing;
-
+bool TCPMain::logverbose;
 
 void TCPMain::initialize()
 {
@@ -38,6 +38,7 @@ void TCPMain::initialize()
 
     cModule *netw = simulation.systemModule();
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
+    logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 }
 
 TCPMain::~TCPMain()

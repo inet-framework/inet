@@ -27,6 +27,27 @@
 
 
 /**
+ * Base class for TCP testing modules.
+ */
+class TCPTesterBase : public cSimpleModule
+{
+  protected:
+    int fromASeq;
+    int fromBSeq;
+
+    TCPDumper tcpdump;
+
+  protected:
+    void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
+
+  public:
+    TCPTesterBase(const char *name, cModule *parent);
+    virtual void initialize();
+    virtual void finish();
+};
+
+
+/**
  * Dumps every packet using the TCPDumper class, and in addition it can delete,
  * delay or duplicate TCP segments, and insert new segments.
  *
@@ -47,7 +68,7 @@
  *      forwards a copy of the segment after the given delays
  *      (<tt>copy 0.5</tt> is the same as <tt>delay 0.5</tt>)
  */
-class TCPTester : public cSimpleModule
+class TCPScriptableTester : public TCPTesterBase
 {
   protected:
     enum {CMD_DELETE,CMD_COPY}; // "delay" is same as "copy"
@@ -62,22 +83,38 @@ class TCPTester : public cSimpleModule
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
 
-    int fromASeq;
-    int fromBSeq;
-
-    TCPDumper tcpdump;
-
   protected:
     void parseScript(const char *script);
-    void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
     void dispatchSegment(TCPSegment *seg);
     void processIncomingSegment(TCPSegment *seg, bool fromA);
 
   public:
-    TCPTester(const char *name, cModule *parent);
+    TCPScriptableTester(const char *name, cModule *parent);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+};
+
+
+/**
+ * Randomly delete, delay etc packets.
+ */
+class TCPRandomTester : public TCPTesterBase
+{
+  protected:
+    double pdelete;
+    double pdelay;
+    double pcopy;
+    cPar *numCopies;
+    cPar *delay;
+
+  protected:
+    void dispatchSegment(TCPSegment *seg);
+    void processIncomingSegment(TCPSegment *seg, bool fromA);
+
+  public:
+    TCPRandomTester(const char *name, cModule *parent);
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

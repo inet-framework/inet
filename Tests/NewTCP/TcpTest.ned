@@ -6,7 +6,7 @@ import
     "TCPDump.ned";
 
 
-module TcpTest
+module TcpTestNet1
     parameters:
         testing: bool;
     submodules:
@@ -18,7 +18,7 @@ module TcpTest
             display: "p=302,178;i=prot2";
         srv: TcpTestClient;
             display: "p=303,96;i=app";
-        tcptester: TCPTester;
+        tcptester: TCPScriptableTester;
             display: "p=198,178;i=ipc";
     connections:
         cli.tcpOut --> tcpcli.from_appl;
@@ -33,5 +33,34 @@ module TcpTest
 endmodule
 
 
-network tcpTest : TcpTest
+module TcpTestNet2
+    parameters:
+        testing: bool;
+    submodules:
+        cli: TcpTestClient;
+            display: "p=95,95;i=app";
+        tcpcli: TCPMain;
+            display: "p=95,178;i=prot2";
+        tcpsrv: TCPMain;
+            display: "p=302,178;i=prot2";
+        srv: TcpTestClient;
+            display: "p=303,96;i=app";
+        tcptester: TCPRandomTester;
+            display: "p=198,178;i=ipc";
+    connections:
+        cli.tcpOut --> tcpcli.from_appl;
+        cli.tcpIn <-- tcpcli.to_appl;
+        srv.tcpOut --> tcpsrv.from_appl;
+        srv.tcpIn <-- tcpsrv.to_appl;
+
+        tcpcli.to_ip --> tcptester.in1;
+        tcpcli.from_ip <-- tcptester.out1;
+        tcptester.out2 --> delay 1ms datarate 1000000 --> tcpsrv.from_ip;
+        tcptester.in2 <-- delay 1ms datarate 1000000 <-- tcpsrv.to_ip;
+endmodule
+
+network tcpTestNet1 : TcpTestNet1
+endnetwork
+
+network tcpTestNet2 : TcpTestNet2
 endnetwork

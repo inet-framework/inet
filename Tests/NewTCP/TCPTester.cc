@@ -20,24 +20,53 @@
 #include "TCPTester.h"
 #include "IPControlInfo_m.h"
 
-
-Define_Module(TCPTester);
-
-TCPTester::TCPTester(const char *name, cModule *parent) :
+TCPTesterBase::TCPTesterBase(const char *name, cModule *parent) :
   cSimpleModule(name, parent, 0), tcpdump(ev)
 {
 }
 
-void TCPTester::initialize()
+void TCPTesterBase::initialize()
 {
     fromASeq = 0;
     fromBSeq = 0;
+}
+
+void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
+{
+    if (ev.disabled()) return;
+
+    char lbl[32];
+    sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
+    tcpdump.dump(lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
+}
+
+void TCPTesterBase::finish()
+{
+    char buf[128];
+    sprintf(buf,"tcpdump finished, A:%d B:%d segments",fromASeq,fromBSeq);
+    tcpdump.dump("", buf);
+}
+
+
+
+//---
+
+Define_Module(TCPScriptableTester);
+
+TCPScriptableTester::TCPScriptableTester(const char *name, cModule *parent) :
+  TCPTesterBase(name, parent)
+{
+}
+
+void TCPScriptableTester::initialize()
+{
+    TCPTesterBase::initialize();
 
     const char *script = par("script");
     parseScript(script);
 }
 
-void TCPTester::parseScript(const char *script)
+void TCPScriptableTester::parseScript(const char *script)
 {
     const char *s = script;
     while (*s)
@@ -101,7 +130,7 @@ void TCPTester::parseScript(const char *script)
     }
 }
 
-void TCPTester::handleMessage(cMessage *msg)
+void TCPScriptableTester::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -116,16 +145,7 @@ void TCPTester::handleMessage(cMessage *msg)
     }
 }
 
-void TCPTester::dump(TCPSegment *seg, bool fromA, const char *comment)
-{
-    if (ev.disabled()) return;
-
-    char lbl[32];
-    sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
-    tcpdump.dump(lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
-}
-
-void TCPTester::dispatchSegment(TCPSegment *seg)
+void TCPScriptableTester::dispatchSegment(TCPSegment *seg)
 {
     Command *cmd = (Command *)seg->contextPointer();
     bool fromA = cmd->fromA;
@@ -134,7 +154,7 @@ void TCPTester::dispatchSegment(TCPSegment *seg)
     send(seg, fromA ? "out2" : "out1");
 }
 
-void TCPTester::processIncomingSegment(TCPSegment *seg, bool fromA)
+void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
 {
     int segno = fromA ? ++fromASeq : ++fromBSeq;
 
@@ -183,14 +203,91 @@ void TCPTester::processIncomingSegment(TCPSegment *seg, bool fromA)
     {
         throw new cException("wrong command code");
     }
-
 }
 
-void TCPTester::finish()
+//------
+
+Define_Module(TCPRandomTester);
+
+TCPRandomTester::TCPRandomTester(const char *name, cModule *parent) :
+  TCPTesterBase(name, parent)
 {
-    char buf[128];
-    sprintf(buf,"tcpdump finished, A:%d B:%d segments",fromASeq,fromBSeq);
-    tcpdump.dump("", buf);
 }
 
+void TCPRandomTester::initialize()
+{
+    TCPTesterBase::initialize();
+
+    pdelete = par("pdelete");
+    pdelay = par("pdelay");
+    pcopy = par("pcopy");
+    numCopies = &par("numCopies");
+    delay = &par("delayValue");
+}
+
+void TCPRandomTester::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+    {
+        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
+        dispatchSegment(seg);
+    }
+    else
+    {
+        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
+        bool fromA = msg->arrivedOn("in1");
+        processIncomingSegment(seg, fromA);
+    }
+}
+
+void TCPRandomTester::dispatchSegment(TCPSegment *seg)
+{
+    bool fromA = (bool)seg->contextPointer();
+    bubble("introducing copy");
+    dump(seg, fromA, "introducing copy");
+    send(seg, fromA ? "out2" : "out1");
+}
+
+void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
+{
+    int segno = fromA ? ++fromASeq : ++fromBSeq;
+
+    // decide what to do
+    double x = dblrand();
+    if (x<=pdelete)
+    {
+        bubble("deleting");
+        dump(seg, fromA, "deleting");
+        delete seg;
+    }
+    else if (x-=pdelete, x<=pdelay)
+    {
+        bubble("delay: removing original");
+        dump(seg, fromA, "delay: removing original");
+        double d = delay->doubleValue();
+        seg->setContextPointer((void*)fromA);
+        scheduleAt(simTime()+d, seg);
+    }
+    else if (x-=pdelay, x<=pcopy)
+    {
+        bubble("copy: removing original");
+        dump(seg, fromA, "copy: removing original");
+        int n = numCopies->longValue();
+        for (int i=0; i<n; i++)
+        {
+            double d = delay->doubleValue();
+            TCPSegment *segcopy = (TCPSegment *)seg->dup();
+            segcopy->setControlInfo(new IPControlInfo(*check_and_cast<IPControlInfo *>(seg->controlInfo())));
+            segcopy->setContextPointer((void *)fromA);
+            scheduleAt(simTime()+d, segcopy);
+        }
+        delete seg;
+    }
+    else
+    {
+        // dump & forward
+        dump(seg, fromA);
+        send(seg, fromA ? "out2" : "out1");
+    }
+}
 

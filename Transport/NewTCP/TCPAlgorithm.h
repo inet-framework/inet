@@ -154,10 +154,6 @@ class TCPAlgorithm : public cPolymorphic
      */
     virtual void dataSent(uint32 fromseq) = 0;
 
-    /**
-     * Called after retransmissions.
-     */
-    virtual void dataRetransmitted() =0;
 };
 
 #endif

@@ -77,13 +77,12 @@ void DummyTCPAlg::receivedDataAck(uint32)
 
 void DummyTCPAlg::receivedDuplicateAck()
 {
+    tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
 void DummyTCPAlg::receivedAckForDataNotYetSent(uint32 seq)
 {
-    // more sophisticated algs whould interpret this specially, but we
-    // just send a "correct" ack
-    tcpEV << "Sending immediate ACK\n";
+    tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
 }
 
@@ -95,7 +94,4 @@ void DummyTCPAlg::dataSent(uint32)
 {
 }
 
-void DummyTCPAlg::dataRetransmitted()
-{
-}
 

@@ -157,7 +157,7 @@ class TCPSocket
     void bind(IPAddress localAddr, int localPort);
 
     //
-    // FIXME add support for these options too!
+    // TBD add support for these options too!
     //  string sendQueueClass;
     //  string receiveQueueClass;
     //  string tcpAlgorithmClass;

@@ -30,4 +30,6 @@ include ../../defaults.ini
 [1.407 B003] B.2000 > A.1000: . ack 3075 win 16384
 
 %contains: stdout
+tcpTestNet1.cli: received 0 bytes in 0 packets
+tcpTestNet1.srv: received 3074 bytes in 5 packets
 [1.408] tcpdump finished, A:7 B:3 segments

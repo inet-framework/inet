@@ -19,12 +19,29 @@
 
 //
 // In addition to providing tcpdump-like functionality, it can delete,
-// delay or duplicate TCP segments, and inject new segments. Such segment 
+// delay or duplicate TCP segments, and inject new segments. Such segment
 // manipulation can be controlled via a script.
 //
-simple TCPTester
+simple TCPScriptableTester
     parameters:
       script: string;
+    gates:
+      in: in1, in2;
+      out: out1, out2;
+endsimple
+
+
+//
+// Complements TCPScriptableTester: instead of working from a script, it
+// executes a "random script".
+//
+simple TCPRandomTester
+    parameters:
+      pdelete: numeric const, // probability of deleting a packet
+      pdelay: numeric const,  // probability of delaying a packet
+      pcopy: numeric const,   // probability of creating several copies of the packet
+      numCopies: numeric,     // related to pcopy: number of copies
+      delayValue: numeric;    // related to pdelay and pcopy: delay introduced
     gates:
       in: in1, in2;
       out: out1, out2;

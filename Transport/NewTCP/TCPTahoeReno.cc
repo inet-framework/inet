@@ -20,9 +20,19 @@
 #include "TCPMain.h"
 
 
+//
+// Some constants below. MIN_REXMIT_TIMEOUT is the minimum allowed retransmit
+// interval.  It is currently one second but e.g. a FreeBSD kernel comment says
+// it "will ultimately be reduced to 3 ticks for algorithmic stability,
+// leaving the 200ms variance to deal with delayed-acks, protocol overheads.
+// A 1 second minimum badly breaks throughput on any network faster then
+// a modem that has minor but continuous packet loss unrelated to congestion,
+// such as on a wireless network."
+//
 #define DELAYED_ACK_TIMEOUT   0.2   // 200ms
 #define MAX_REXMIT_COUNT       12   // 12 retries
-#define MIN_REXMIT_TIMEOUT    0.5   // 500ms (1 "large tick") FIXME is this okay?
+#define MIN_REXMIT_TIMEOUT    1.0   // 1s
+//#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
 #define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC1122)
 
 Register_Class(TCPTahoeReno);
@@ -34,7 +44,6 @@ TCPTahoeRenoStateVariables::TCPTahoeRenoStateVariables()
     nagle_enabled = true;
     tcpvariant = TAHOE;
 
-    rexmit_seq = 0;
     rexmit_count = 0;
     rexmit_timeout = 3.0;
 
@@ -125,9 +134,12 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
     //
     if (++state->rexmit_count > MAX_REXMIT_COUNT)
     {
+        tcpEV << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
         event = TCP_E_ABORT;  // TBD maybe rather introduce a TCP_E_BROKEN event
         return;
     }
+
+    tcpEV << "Performing retransmission #" << state->rexmit_count << "\n";
 
     //
     // Karn's algorithm is implemented below:
@@ -174,7 +186,6 @@ void TCPTahoeReno::startRexmitTimer()
 {
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
-    state->rexmit_seq = state->snd_una;
     state->rexmit_count = 0;
 
     // schedule timer
@@ -231,10 +242,7 @@ void TCPTahoeReno::sendData()
     // Slow start, congestion control etc.: send window is effectively the
     // minimum of the congestion window (cwnd) and the advertised window (snd_wnd).
     //
-    int window = Min(state->snd_cwnd, state->snd_wnd);
-
-    // OK, do it
-    conn->sendData(fullSegmentsOnly, window/state->snd_mss); // FIXME should take bytes rather than numsegments...
+    conn->sendData(fullSegmentsOnly, state->snd_cwnd);
 }
 
 void TCPTahoeReno::sendCommandInvoked()
@@ -292,11 +300,11 @@ void TCPTahoeReno::receivedDataAck(uint32 firstSeqAcked)
     // the timer, else restart the timer with the current RTO value."
     if (state->snd_una==state->snd_max)
     {
-        tcpEV << "All outstanding segments acked\n";
+        tcpEV << "ACK acks all outstanding segments\n";
     }
     else
     {
-        tcpEV << "Some but not all outstanding segments acked, restarting REXMIT timer\n";
+        tcpEV << "ACK acks some but not all outstanding segments, restarting REXMIT timer\n";
         startRexmitTimer();
     }
 
@@ -338,6 +346,8 @@ void TCPTahoeReno::receivedDataAck(uint32 firstSeqAcked)
 
 void TCPTahoeReno::receivedDuplicateAck()
 {
+    tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
+
     if (state->dupacks==3)
     {
         //
@@ -356,16 +366,14 @@ void TCPTahoeReno::receivedDuplicateAck()
 
         tcpEV << "Performing Fast Retransmit, new cwnd=" << state->snd_cwnd << "\n";
 
-
         // cancel round-trip time measurement
         state->t_rtseq_sent = 0;
 
-        // cancel retransmission timer
+        // restart retransmission timer (with rexmit_count=0). RTO is unchanged.
         conn->getTcpMain()->cancelEvent(rexmitTimer);
+        startRexmitTimer();
 
-        // what we don't do: (1) don't give up after 12 retries (2) leave RTO unchanged
-
-        // retransmit missing segment (FIXME just 1 segment!!!!)
+        // retransmit missing segment
         conn->retransmitData();
     }
     else if (state->dupacks > 3)
@@ -376,14 +384,17 @@ void TCPTahoeReno::receivedDuplicateAck()
         // additional segment that has left the network
         //
         if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO)
+        {
             state->snd_cwnd += state->snd_mss;
-        tcpEV << "Reno: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
+            tcpEV << "Reno: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
+        }
+        // FIXME shouldn't we try to transmit, retransmit or something here?
     }
 }
 
 void TCPTahoeReno::receivedAckForDataNotYetSent(uint32 seq)
 {
-    tcpEV << "Sending immediate ACK\n";
+    tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
 }
 
@@ -413,8 +424,5 @@ void TCPTahoeReno::dataSent(uint32 fromseq)
 
 }
 
-void TCPTahoeReno::dataRetransmitted()
-{
-}
 
 

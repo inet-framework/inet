@@ -41,20 +41,6 @@ include ../../defaults.ini
 [2.019 B006] B.2000 > A.1000: . ack 16385 win 16384
 
 %contains: stdout
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
-tcpTest.srv: received data, 1024 bytes
+tcpTestNet1.cli: received 0 bytes in 0 packets
+tcpTestNet1.srv: received 16384 bytes in 16 packets
 [2.020] tcpdump finished, A:18 B:6 segments
