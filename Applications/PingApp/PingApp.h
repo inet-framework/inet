@@ -17,13 +17,13 @@
 //
 
 
-#ifndef __CONTROLAPP_H__
-#define __CONTROLAPP_H__
+#ifndef __PINGAPP_H__
+#define __PINGAPP_H__
 
 #include <string>
 #include <omnetpp.h>
-#include "basic_consts.h"
 #include "IPControlInfo_m.h"
+
 
 /**
  * Ping application.

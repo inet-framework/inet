@@ -132,7 +132,7 @@ re-makemake: makefiles
 ARP.obj: ARP.cc \
   arp.h \
   ../../Util/stlwatch.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   ../../Network/IPv4/IPAddress.h \
   ARPPacket_m.h \
   ../Ethernet/EtherCtrl_m.h \
@@ -151,4 +151,4 @@ ARPPacket_m.obj: ARPPacket_m.cc \
   ARPPacket_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../_802/MACAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h

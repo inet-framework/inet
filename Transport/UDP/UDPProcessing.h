@@ -28,7 +28,6 @@
 
 #include "IPControlInfo_m.h"
 #include "UDPControlInfo_m.h"
-#include "basic_consts.h"
 
 
 const char *ERROR_IP_ADDRESS = "10.0.0.255";

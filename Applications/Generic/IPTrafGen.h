@@ -24,7 +24,6 @@
 #include <vector>
 #include <omnetpp.h>
 
-#include "basic_consts.h"
 #include "IPControlInfo_m.h"
 
 

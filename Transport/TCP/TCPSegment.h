@@ -21,11 +21,11 @@
 #define _TCPSEGMENT_H_
 
 #include <list>
-#include "ipsuite_defs.h"
+#include "INETDefs.h"
 #include "TCPSegment_m.h"
 
 /**
- * Represents a TCP segment. More info in the TCPSegment.msg file 
+ * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
  */
 class TCPSegment : public TCPSegment_Base

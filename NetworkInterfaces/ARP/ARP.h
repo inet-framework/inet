@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 #include <omnetpp.h>
-#include "ipsuite_defs.h"
+#include "INETDefs.h"
 #include "IPAddress.h"
 #include "ARPPacket_m.h"
 #include "EtherCtrl_m.h"

@@ -16,7 +16,6 @@
 #define __RSVP_INTERFACE_H__
 
 #include <omnetpp.h>
-#include "basic_consts.h"
 
 const char *MY_ERROR_IP_ADDRESS = "10.0.0.255";
 

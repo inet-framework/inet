@@ -164,7 +164,7 @@ ICMP.obj: ICMP.cc \
   ICMP.h \
   IPAddress.h \
   IPDatagram_m.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   IPDatagram.h \
@@ -176,7 +176,7 @@ ICMPMessage_m.obj: ICMPMessage_m.cc \
   IPDatagram.h \
   IPDatagram_m.h \
   IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 IP.obj: IP.cc \
   IP.h \
   IPDatagram.h \
@@ -190,32 +190,32 @@ IP.obj: IP.cc \
   ProtocolMap.h \
   ../../Base/AbstractQueue.h \
   ../../Base/ModuleAccess.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   IPAddress.h \
   ICMP.h \
   ICMPMessage.h \
   IPDatagram_m.h
 IPAddress.obj: IPAddress.cc \
   IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 IPAddressResolver.obj: IPAddressResolver.cc \
   IPAddressResolver.h \
   RoutingTable.h \
   IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 IPControlInfo_m.obj: IPControlInfo_m.cc \
   IPControlInfo_m.h \
   IPAddress.h \
   IPDatagram_m.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 IPDatagram_m.obj: IPDatagram_m.cc \
   IPDatagram_m.h \
   IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 IPFragBuf.obj: IPFragBuf.cc \
   IPFragBuf.h \
   ICMP.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   IPDatagram.h \
   IPDatagram_m.h \
   IPAddress.h \
@@ -230,10 +230,10 @@ RoutingTable.obj: RoutingTable.cc \
   ../../Util/stlwatch.h \
   RoutingTable.h \
   RoutingTableParser.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   IPAddress.h
 RoutingTableParser.obj: RoutingTableParser.cc \
   RoutingTableParser.h \
   RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   IPAddress.h

@@ -174,7 +174,7 @@ NewBWRequestTester.obj: NewBWRequestTester.cc \
   ../../../Network/MPLS/ConstType.h \
   ../../../Network/IPv4/IPDatagram_m.h \
   ../../../Network/IPv4/IPAddress.h \
-  ../../../Base/ipsuite_defs.h \
+  ../../../Base/INETDefs.h \
   ../../../Base/ModuleAccess.h \
   ../../../Network/MPLS/LIBtable.h
 NewRouteTester.obj: NewRouteTester.cc \
@@ -189,7 +189,7 @@ NewRouteTester.obj: NewRouteTester.cc \
   ../../../Network/MPLS/ConstType.h \
   ../../../Network/IPv4/IPDatagram_m.h \
   ../../../Network/IPv4/IPAddress.h \
-  ../../../Base/ipsuite_defs.h \
+  ../../../Base/INETDefs.h \
   ../../../Base/ModuleAccess.h \
   ../../../Network/MPLS/LIBtable.h \
   ../../../Network/RSVP_TE/IntServ_m.h

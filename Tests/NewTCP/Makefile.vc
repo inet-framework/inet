@@ -167,7 +167,7 @@ TcpTestClient.obj: TcpTestClient.cc \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 TCPTester.obj: TCPTester.cc \
   TCPTester.h \
   ../../Network/IPv4/IPControlInfo_m.h \
@@ -175,5 +175,5 @@ TCPTester.obj: TCPTester.cc \
   ../../Network/IPv4/IPDatagram_m.h \
   ../../Transport/TCP/TCPSegment.h \
   ../../Transport/TCP/TCPDump.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   ../../Transport/TCP/TCPSegment_m.h

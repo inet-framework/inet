@@ -159,7 +159,7 @@ re-makemake: makefiles
 IntServ_m.obj: IntServ_m.cc \
   IntServ_m.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 OspfTe.obj: OspfTe.cc \
   OspfTe.h \
   ../IPv4/IPAddress.h \
@@ -176,7 +176,7 @@ OspfTe.obj: OspfTe.cc \
   ../IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 RSVP.obj: RSVP.cc \
   RSVP.h \
   ../IPv4/IPAddress.h \
@@ -189,7 +189,7 @@ RSVP.obj: RSVP.cc \
   TED.h \
   OspfTe.h \
   ../MPLS/LIBTableAccess.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   RSVPPathMsg_m.h \
   IntServ_m.h \
   RSVPPacket.h \
@@ -222,7 +222,7 @@ RSVPApp.obj: RSVPApp.cc \
   IntServ_m.h \
   RSVPPacket.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   RSVPPacket_m.h \
   RSVPResvMsg_m.h \
   ../../Base/ModuleAccess.h \
@@ -235,20 +235,20 @@ RSVPPacket_m.obj: RSVPPacket_m.cc \
   RSVPPacket_m.h \
   IntServ_m.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/INETDefs.h
 RSVPPathMsg_m.obj: RSVPPathMsg_m.cc \
   RSVPPathMsg_m.h \
   IntServ_m.h \
   RSVPPacket.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   RSVPPacket_m.h
 RSVPResvMsg_m.obj: RSVPResvMsg_m.cc \
   RSVPResvMsg_m.h \
   IntServ_m.h \
   RSVPPacket.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   RSVPPacket_m.h
 TED.obj: TED.cc \
   TED.h \
@@ -265,6 +265,6 @@ TED.obj: TED.cc \
   ../MPLS/ConstType.h \
   ../IPv4/IPDatagram_m.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
+  ../../Base/INETDefs.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h

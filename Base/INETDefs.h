@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef _IPSUITE_DEFS_H__
-#define _IPSUITE_DEFS_H__
+#ifndef _INETDEFS_H__
+#define _INETDEFS_H__
 
 //
 // General definitions.
@@ -34,7 +34,7 @@ typedef unsigned int uint32;
 // MSVC6.0 gives C1017: invalid integer constant expression
 // GCC: some other weird error
 //# if (sizeof(int)!=4)
-//#  error unsigned int is not 32 bits -- modify uint32 definition in ipsuite_defs.h
+//#  error unsigned int is not 32 bits -- modify uint32's typedef in this file!
 //# endif
 
 
@@ -48,15 +48,15 @@ typedef unsigned int uint32;
 //
 // Macro to protect expressions like gate("out")->toGate()->toGate()
 // from crashing if something in between returns NULL.
-// The above expression should be changed to 
+// The above expression should be changed to
 //    CHK(CHK(gate("out"))->toGate())->toGate()
-// which is uglier but doesn't crash, just stops with a nice 
+// which is uglier but doesn't crash, just stops with a nice
 // error message if something goes wrong.
 //
-template <class T>  
-T *__checknull(T *p, const char *expr, const char *file, int line) 
+template <class T>
+T *__checknull(T *p, const char *expr, const char *file, int line)
 {
-    if (!p) 
+    if (!p)
         opp_error("Expression %s returned NULL at %s:%d",expr,file,line);
     return p;
 }

@@ -21,7 +21,7 @@
 
 #include <map>
 #include <vector>
-#include "ipsuite_defs.h"
+#include "INETDefs.h"
 #include "IPDatagram.h"
 
 

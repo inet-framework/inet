@@ -20,7 +20,7 @@
 #define _ETH_UTILS_H_
 
 #include <stdio.h>
-#include "ipsuite_defs.h"  // for EV
+#include "INETDefs.h"  // for EV
 
 
 #define MAX_LINE 100

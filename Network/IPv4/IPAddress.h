@@ -30,7 +30,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <string>
-#include "ipsuite_defs.h"
+#include "INETDefs.h"
 
 
 /**
@@ -208,7 +208,7 @@ class IPAddress
 
     /**
      * Test if the masked addresses (ie the mask is applied to addr1 and
-     * addr2) are equal. 
+     * addr2) are equal.
      */
     static bool maskedAddrAreEqual(const IPAddress& addr1,
                                    const IPAddress& addr2,

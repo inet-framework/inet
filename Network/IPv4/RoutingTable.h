@@ -31,7 +31,7 @@
 
 #include <vector>
 #include <omnetpp.h>
-#include "ipsuite_defs.h"
+#include "INETDefs.h"
 #include "IPAddress.h"
 
 class RoutingTableParser;
