@@ -14,9 +14,7 @@
 //
 // Manages the label space and label mappings that belong to the current LSR.
 // 
-// Operations
-// 
-// A LIB table has the following columns:
+// The LIB (Label Information Base) table has the following columns:
 // - In-Lbl: Incoming Label
 // - In-Intf: Incoming Interface
 // - Out-Lbl: Outgoing Label
