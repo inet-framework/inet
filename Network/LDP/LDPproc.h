@@ -43,80 +43,77 @@ enum ldp_to_interface
 
 };
 
-typedef struct requestSessionBind
-{
-    int fec;
-    string fromInterface;
-    int fecID;
-} fec_src_bind;
-
-typedef struct peerList
-{
-    int peerIP;
-    string peerID;
-    string role;
-    string linkInterface;
-} peer_info;
-
-
+/**
+ * LDP process.
+ */
 class LDPproc: public cSimpleModule
 {
-private:
-  RoutingTableAccess routingTableAccess;
-  LIBTableAccess libTableAccess;
-  MPLSAccess mplsAccess;
+  private:
+    struct fec_src_bind
+    {
+        int fec;
+        string fromInterface;
+        int fecID;
+    };
 
-  //FecSenderBinds is the collection of all label requests pending on
-  //the current LSR from upstream LSRs and itself.
-  vector<fec_src_bind> FecSenderBinds;
+    struct peer_info
+    {
+        int peerIP;
+        string peerID;
+        string role;
+        string linkInterface;
+    };
 
-  //myPeers is the collection of all HELLO adjacencies.
-  vector<peer_info> myPeers;
+  private:
+    RoutingTableAccess routingTableAccess;
+    LIBTableAccess libTableAccess;
+    MPLSAccess mplsAccess;
 
-  //myOwnFecRequest is the collection of all label requests pending on
-  // the current LSR originated by itself
-  //vector<fec_src_bind> myOwnFecRequest;
+    //FecSenderBinds is the collection of all label requests pending on
+    //the current LSR from upstream LSRs and itself.
+    vector<fec_src_bind> FecSenderBinds;
 
+    //myPeers is the collection of all HELLO adjacencies.
+    vector<peer_info> myPeers;
 
-  int peerNo;
-  int local_addr;
-  string id;
-  double discoveryTimeout;
-  bool isIR;
-  bool isER;
+    //myOwnFecRequest is the collection of all label requests pending on
+    // the current LSR originated by itself
+    //vector<fec_src_bind> myOwnFecRequest;
 
+    int peerNo;
+    int local_addr;
+    string id;
+    double discoveryTimeout;
+    bool isIR;
+    bool isER;
 
-  //This method finds next peer in upstream direction
-  int locateNextHop(int fec);
+    /**
+     * This method finds next peer in upstream direction
+     */
+    int locateNextHop(int fec);
 
-  //This method maps the peerIP with the interface name
-  //in routing table. It is expected that for MPLS host, entries
-  //linked to MPLS peers are available
-  //In case no corresponding peerIP found, a peerIP (not deterministic)
-  //will be returned.
-  int findPeerAddrFromInterface(string interfaceName);
+    /**
+     * This method maps the peerIP with the interface name in routing table.
+     * It is expected that for MPLS host, entries linked to MPLS peers are available.
+     * In case no corresponding peerIP found, a peerIP (not deterministic)
+     * will be returned.
+     */
+    int findPeerAddrFromInterface(string interfaceName);
 
-  //This method is the reserve of above method
-  string findInterfaceFromPeerAddr(int peerIP);
-
+    //This method is the reserve of above method
+    string findInterfaceFromPeerAddr(int peerIP);
 
   public:
+    Module_Class_Members(LDPproc,cSimpleModule,16384);
 
-  Module_Class_Members(LDPproc,cSimpleModule,16384);
+    virtual void initialize();
+    virtual void activity();
 
-  virtual void activity();
+    void processRequestFromMPLSSwitch(cMessage *msg);
+    void processLDPPacketFromTCP(LDPpacket *ldpPacket);
 
-  virtual void initialize();
-
-  void processRequestFromMPLSSwitch(cMessage *msg);
-  void processLDPPacketFromTCP(LDPpacket *ldpPacket);
-
-  void processLABEL_MAPPING(LabelMappingMessage *packet);
-  void processLABEL_REQUEST(LabelRequestMessage *packet);
-
-  //void printDebugInfo(string dInfo);
-
-  //virtual void finish();
+    void processLABEL_MAPPING(LabelMappingMessage *packet);
+    void processLABEL_REQUEST(LabelRequestMessage *packet);
 };
 
 #endif
