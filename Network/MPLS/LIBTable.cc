@@ -178,7 +178,7 @@ int LIBTable::readPrtTableFromFile(const char *filename)
 }
 
 
-void LIBTable::printTables()
+void LIBTable::printTables() const
 {
     int i;
     // Print out the LIB table
@@ -217,7 +217,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     return newLabelEntry.inLabel;
 }
 
-int LIBTable::requestLabelforFec(int fec)
+int LIBTable::requestLabelforFec(int fec) const
 {
     // search in the PRT for exact match of the FEC value
     for (int i = 0; i < prt.size(); i++)
@@ -233,7 +233,7 @@ int LIBTable::requestLabelforFec(int fec)
     return -2;
 }
 
-int LIBTable::findFec(int label, string inInterface)
+int LIBTable::findFec(int label, string inInterface) const
 {
     int pos;
 
@@ -259,7 +259,7 @@ int LIBTable::findFec(int label, string inInterface)
 
 }
 
-string LIBTable::requestOutgoingInterface(int fec)
+string LIBTable::requestOutgoingInterface(int fec) const
 {
     int pos = -1;
 
@@ -279,7 +279,7 @@ string LIBTable::requestOutgoingInterface(int fec)
         return string("X");
 }
 
-string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel)
+string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
     {
@@ -294,7 +294,7 @@ string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel)
     return string("X");
 }
 
-string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, int oldLabel)
+string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, int oldLabel) const
 {
     if (newLabel != -1)
         return requestOutgoingInterface(senderInterface, newLabel);
@@ -312,13 +312,13 @@ string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, 
     return string("X");
 }
 
-int LIBTable::requestNewLabel(string senderInterface, int oldLabel)
+int LIBTable::requestNewLabel(string senderInterface, int oldLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
         if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
             return lib[i].outLabel;
 
-    return -2;  // Fail to allocate new label
+    return -2;
 }
 
 int LIBTable::getOptCode(string senderInterface, int oldLabel) const

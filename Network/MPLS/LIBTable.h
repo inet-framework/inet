@@ -69,7 +69,6 @@ private:
      *
      *  @param filename The lib table file input
      *  @return The successful or unsuccessful code
-     * FIXME apparently never called at the moment (--Andras)
      */
     int readLibTableFromFile(const char* filename);
 
@@ -78,7 +77,6 @@ private:
      *
      * @param filename The prt table file input
      * @return The successfule or unsuccesful code
-     * FIXME apparently never called at the moment (--Andras)
      */
     int readPrtTableFromFile(const char* filename);
 
@@ -100,7 +98,7 @@ public:
     /**
      * Print out the contents of Label Information Base and Partial Routing Table
      */
-    void printTables();
+    void printTables() const;
 
     /**
      * Installs a new label on this Label Switching Router when receiving a label
@@ -123,7 +121,7 @@ public:
      * @param fec   The packet's FEC
      * @return      The outgoing label, or -2 if there is no label found
      */
-    int requestLabelforFec(int fec);
+    int requestLabelforFec(int fec) const;
 
     /**
      * Find the FEC based on corresponding incoming label and incoming interface
@@ -132,7 +130,7 @@ public:
      * @param inInterface  The incoming interface
      * @return             The FEC value, or 0 if the FEC cannot be found
      */
-    int findFec(int label, std::string inInterface);
+    int findFec(int label, std::string inInterface) const;
 
     /**
      * Find the outgoing interface based on the incoming interface and the outgoing label
@@ -143,7 +141,7 @@ public:
      *                         cannot be found
      */
     // FIXME Why "X" ??? (Andras)
-    std::string requestOutgoingInterface(std::string senderInterface,int newLabel);
+    std::string requestOutgoingInterface(std::string senderInterface,int newLabel) const;
 
     /**
      * Find the outgoing interface name based on the FEC.
@@ -151,7 +149,7 @@ public:
      * @param fec   The FEC value
      * @return      The outgoing interface name
      */
-    std::string requestOutgoingInterface(int fec);
+    std::string requestOutgoingInterface(int fec) const;
 
     /**
      * Find the outgoing interface name based on incoming interface,
@@ -164,16 +162,16 @@ public:
      * @param oldLabel        The incoming label
      * @return                The outgoing interface name
      */
-    std::string requestOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel);
+    std::string requestOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel) const;
 
     /**
      * Install new label based on incoming interface and incoming label
      *
      * @param senderInterface The incoming interface
      * @param oldLabel        The incoming label
-     * @return                The value of the new label installed
+     * @return                The value of the new label installed, or -2 on failure
      */
-    int requestNewLabel(std::string senderInterface,int oldLabel);
+    int requestNewLabel(std::string senderInterface,int oldLabel) const;
 
     /**
      * Returns the optcode based on incoming interface and incoming label.
