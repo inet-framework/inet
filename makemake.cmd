@@ -84,7 +84,7 @@ cd %root%\Tests\NewTCP && %MAKEMAKE% %OPTS% -w %ALL_MPLS_INET_INCLUDES%
 
 cd %root%
 dir /s/b *.ned > nedfiles.lst
-perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?IPSuite.*?/||" nedfiles.lst
+perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?INET.*?/||" nedfiles.lst
 perl -i.bak -pe "s|^Examples/.*||" nedfiles.lst
 perl -i.bak -pe "s|^Unsupported/.*||" nedfiles.lst
 perl -i.bak -pe "s|^Tests/.*||" nedfiles.lst
