@@ -4,7 +4,7 @@ outstanding data (everything sent previously has been acked).
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

@@ -4,7 +4,7 @@ Here: packet loss (5%), and packet delays (20%, by mean=1s)
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 network=tcpTestNet2
 
 [Cmdenv]

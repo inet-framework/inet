@@ -66,15 +66,19 @@ class TCPReceiveQueue : public cPolymorphic
     virtual void init(uint32 startSeq) = 0;
 
     /**
-     * Called when a TCP segment arrives. Returns sequence number for ACK.
+     * Called when a TCP segment arrives, it should extract the payload
+     * from the segment and store it in the receive queue. The segment
+     * object should *not* be deleted.
+     *
+     * The method should return the sequence number to be ACKed.
      */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) = 0;
 
     /**
-     * Creates packet to be passed up to the app, up to (but NOT including)
-     * the given sequence no (usually rcv_nxt). Returns NULL if there's
-     * no more data to be passed up, so it may have to be called several times
-     * until it returns NULL.
+     * Should create a packet to be passed up to the app, up to (but NOT
+     * including) the given sequence no (usually rcv_nxt).
+     * It should return NULL if there's no more data to be passed up --
+     * this method is called several times until it returns NULL.
      */
     virtual cMessage *extractBytesUpTo(uint32 seq) = 0;
 

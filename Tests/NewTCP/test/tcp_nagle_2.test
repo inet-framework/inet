@@ -2,12 +2,12 @@
 Test Nagle's algorithm: full segment-sized packets should not be delayed.
 (MSS=1024 should be chosen for this test.)
 
-Output is not fully OK -- every socket write causes sending a new segment 
+Output is not fully OK -- every socket write causes sending a new segment
 which contradicts with the slow start algorithm...
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

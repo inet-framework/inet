@@ -53,13 +53,13 @@ std::string TCPVirtualDataRcvQueue::info() const
 
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
-    merge(tcpseg);
+    merge(tcpseg->sequenceNo(), tcpseg->sequenceNo()+tcpseg->payloadLength());
     if (seqGE(rcv_nxt, regionList.begin()->begin))
         rcv_nxt = regionList.begin()->end;
     return rcv_nxt;
 }
 
-void TCPVirtualDataRcvQueue::merge(TCPSegment *tcpseg)
+void TCPVirtualDataRcvQueue::merge(uint32 segmentBegin, uint32 segmentEnd)
 {
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
@@ -68,8 +68,8 @@ void TCPVirtualDataRcvQueue::merge(TCPSegment *tcpseg)
     // they become overlapping (or touching) after adding tcpseg.
 
     Region seg;
-    seg.begin = tcpseg->sequenceNo();
-    seg.end = tcpseg->sequenceNo()+tcpseg->payloadLength();
+    seg.begin = segmentBegin;
+    seg.end = segmentEnd;
 
     RegionList::iterator i = regionList.begin();
     if (i==regionList.end())
@@ -128,34 +128,42 @@ void TCPVirtualDataRcvQueue::merge(TCPSegment *tcpseg)
 
 cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 {
+    ulong numBytes = extractTo(seq);
+    if (numBytes==0)
+        return NULL;
+
+    cMessage *msg = new cMessage("data");
+    msg->setLength(8*numBytes);
+    return msg;
+}
+
+ulong TCPVirtualDataRcvQueue::extractTo(uint32 seq)
+{
     ASSERT(seqLE(seq,rcv_nxt));
 
     RegionList::iterator i = regionList.begin();
     if (i==regionList.end())
-        return NULL;
+        return 0;
 
     ASSERT(i->begin<i->end); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))
-        return NULL;
+        return 0;
 
-    unsigned int octets;
     if (seqLess(seq,i->end))
     {
         // part of 1st region
-        octets = seq - i->begin;
+        ulong octets = seq - i->begin;
         i->begin = seq;
+        return octets;
     }
     else
     {
         // full 1st region
-        octets = i->end - i->begin;
+        ulong octets = i->end - i->begin;
         regionList.erase(i);
+        return octets;
     }
-
-    cMessage *msg = new cMessage("data");
-    msg->setLength(8*octets);
-    return msg;
 }
 

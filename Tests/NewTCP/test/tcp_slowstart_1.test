@@ -4,7 +4,7 @@ that is, cwnd=1,2,4,8,...
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

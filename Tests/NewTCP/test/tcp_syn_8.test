@@ -1,5 +1,5 @@
 %description:
-Test connection setup: A performs active open, and its ACK of SYN always gets 
+Test connection setup: A performs active open, and its ACK of SYN always gets
 lost.
 
 Test that:
@@ -11,7 +11,7 @@ Test that:
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

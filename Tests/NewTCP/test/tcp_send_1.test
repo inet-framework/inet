@@ -3,7 +3,7 @@ What if the SEND command is issued during connection setup.
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

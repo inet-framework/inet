@@ -43,7 +43,11 @@ class TCPVirtualDataRcvQueue : public TCPReceiveQueue
     typedef std::list<Region> RegionList;
     RegionList regionList;
 
-    void merge(TCPSegment *tcpseg);
+    // merges segment byte range into regionList
+    void merge(uint32 segmentBegin, uint32 segmentEnd);
+
+    // returns number of bytes extracted
+    ulong extractTo(uint32 toSeq);
 
   public:
     /**

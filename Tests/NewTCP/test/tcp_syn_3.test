@@ -1,10 +1,10 @@
 %description:
-Test connection setup: A performs active open and SYN gets lost. 
+Test connection setup: A performs active open and SYN gets lost.
 A must retransmit.
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false

@@ -4,7 +4,7 @@ Here: packet loss only.
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 network=tcpTestNet2
 
 [Cmdenv]

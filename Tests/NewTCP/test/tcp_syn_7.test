@@ -3,7 +3,7 @@ Test connection setup: A performs active open and A's ACK of SYN gets lost.
 
 %inifile: {}.ini
 [General]
-preload-ned-files = *.ned @../../../../nedfiles.lst
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 
 [Cmdenv]
 event-banners=false
