@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,15 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+//
 // Simulation of Transport and application level
 // traffic generators for testing purposes
-
-
-simple AppIn
-    gates:
-        in: in;
-endsimple
-
+//
 simple GeneratorAppOut
     parameters:
         destAddress : string,
@@ -51,7 +48,7 @@ module TrafficGenerator
         in: in;
         out: out;
     submodules:
-        appIn: AppIn;
+        appIn: SinkApp;
             display: "p=97,98;b=40,24,rect";
         appOut: GeneratorType like GeneratorAppOut;
             parameters:

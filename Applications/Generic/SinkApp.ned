@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,31 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// Simulation of Transport and application level
+// traffic generators for testing purposes
 
-/*
-    file: AppIn.h
-    Purpose: receives packets of Traffic generators
-            and prints out their information
-    author: Jochen Reber
-*/
 
-#ifndef __APPIN_H__
-#define __APPIN_H__
-
-#include <omnetpp.h>
-
-#include "basic_consts.h"
-#include "IPControlInfo_m.h"
-
-class AppIn: public cSimpleModule
-{
-    void processMessage(cMessage *);
-public:
-    Module_Class_Members(AppIn, cSimpleModule, ACTIVITY_STACK_SIZE);
-
-    void initialize();
-    void activity();
-
-};
-
-#endif
+//
+// Receives packets from the IP layer and prints out their contents.
+//
+// author: Jochen Reber
+//
+simple SinkApp
+    gates:
+        in: in;
+endsimple

@@ -18,42 +18,29 @@
 
 
 #include <omnetpp.h>
-#include "AppIn.h"
+#include "SinkApp.h"
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 
 
-Define_Module( AppIn );
+Define_Module( SinkApp );
 
-void AppIn::initialize()
+void SinkApp::initialize()
 {
+    numPackets = 0;
+    WATCH(numPackets);
 }
 
-void AppIn::activity()
+void SinkApp::handleMessage(cMessage *msg)
 {
-    while(true)
-    {
-        cMessage *msg = receive();
-        processMessage(msg);
-    }
-}
+    numPackets++;
 
-// private function
-void AppIn::processMessage(cMessage *msg)
-{
-    simtime_t arrivalTime = msg->arrivalTime();
-    int content = msg->hasPar("content") ? (int)msg->par("content") : (int)-1;
-    int length = msg->length();
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
+    int length = msg->length();
 
-    // print out Packet info
-    ev  << "AppIn: Packet received:\n"
-        << " Cont: " << content
-        << " Bitlen: " << length
-        << "   Arrival Time: " << arrivalTime
-        << " Simtime: " << simTime()
-        << "\nSrc: " << controlInfo->srcAddr()
-        << " Dest: " << controlInfo->destAddr() << "\n\n";
+    ev << "Received: (" << msg->className() << ")" << msg->name();
+    ev << " src=" << controlInfo->srcAddr() << " dest=" << controlInfo->destAddr();
+    ev << " len=" << length/8 << "bytes t=" << simTime() << endl;
 
     delete controlInfo;
     delete msg;
