@@ -57,26 +57,26 @@ module StandardHost
                 routingFile = routingFile;
             display: "p=60,150;i=block/table";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
-            display: "p=139,67;i=block/app";
+            display: "p=163,67;i=block/app";
         tcp: TCPMain;
-            display: "p=139,154;i=block/wheelbarrow";
+            display: "p=163,154;i=block/wheelbarrow";
         udpApp: udpAppType[numUdpApps] like UDPApp;
-            display: "i=block/app;p=248,67";
+            display: "i=block/app;p=272,67";
         udp: UDPProcessing;
-            display: "p=248,154;i=block/transport";
+            display: "p=272,154;i=block/transport";
         pingApp: PingApp;
-            display: "i=block/app;p=319,200";
+            display: "i=block/app;p=343,200";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=224,247;i=block/fork;q=queue";
+            display: "p=248,247;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=181,350,row,90;q=queue;i=block/ifcard";
+            display: "p=205,350,row,90;q=queue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             parameters:
                 proxyARP = false;
-            display: "p=216,350,row,90;q=queue;i=block/ifcard";
+            display: "p=240,350,row,90;q=queue;i=block/ifcard";
     connections:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;

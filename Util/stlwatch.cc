@@ -35,7 +35,7 @@ class cVectorWatchDescriptor : public cStructDescriptor
 
 Register_Class(cVectorWatchDescriptor);
 
-cVectorWatchDescriptor::cVectorWatchDescriptor() : cStructDescriptor()
+cVectorWatchDescriptor::cVectorWatchDescriptor() : cStructDescriptor("cObject")
 {
 }
 

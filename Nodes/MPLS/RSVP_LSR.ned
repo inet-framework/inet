@@ -42,20 +42,20 @@ module RSVP_LSR
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "p=270,68;i=block/blackboard";
+            display: "p=70,60;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=270,150;i=block/table";
+            display: "p=70,142;i=block/table";
         ospf_te: OspfTe;
-            display: "i=block/cogwheel;p=60,199;o=#008040";
+            display: "i=block/cogwheel;p=308,207;o=#008040";
         signal_module: RSVPAppl;
             parameters:
                 isIR = isIR,
                 isER = isER;
-            display: "i=block/control;o=#8080ff;p=87,60";
+            display: "i=block/control;o=#8080ff;p=295,60";
         rsvp: RSVP;
             parameters:
                 isIR = isIR,
@@ -82,7 +82,7 @@ module RSVP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=block/table;p=271,232";
+            display: "i=block/table2;p=70,224";
     connections nocheck:
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;

@@ -51,25 +51,25 @@ module LDP_LSR
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=70,140;i=block/table";
+            display: "p=70,142;i=block/table";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
                 helloTimeout = helloTimeout,
                 isER = isER,
                 isIR = isIR;
-            display: "i=block/control;p=206,67";
+            display: "p=222,67;i=block/control";
         tcp: TCPMain;
-            display: "p=161,145;i=block/wheelbarrow";
+            display: "p=177,145;i=block/wheelbarrow";
         udp: UDPProcessing;
-            display: "p=251,145;i=block/transport";
+            display: "p=267,145;i=block/transport";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=208,223;i=block/fork";
+            display: "p=224,223;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=105,380,row,90;q=queue;i=block/ifcard";
+            display: "p=105,388,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -79,12 +79,12 @@ module LDP_LSR
                 toL3[sizeof(out)],
                 fromL2[sizeof(out)],
                 toL2[sizeof(out)];
-            display: "i=block/switch;o=#ff8000;p=208,294";
+            display: "p=224,302;i=block/switch";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=block/table;p=297,251";
+            display: "p=70,224;i=block/table2";
     connections nocheck:
         signal_module.from_tcp_interface <-- tcp.to_appl++;
         signal_module.to_tcp_interface --> tcp.from_appl++;
