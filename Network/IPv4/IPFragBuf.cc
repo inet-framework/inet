@@ -46,10 +46,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
         buf.main.end = buf.main.beg + datagram->payloadLength(); //FIXME
         buf.main.islast = !datagram->moreFragments();
         buf.fragments = NULL;
-        if (datagram->encapsulatedMsg())  // FIXME fix in Fragmentation!!!
-            buf.datagram = datagram;
-        else
-            delete datagram;
+        buf.datagram = datagram;
         buf.lastupdate = now;
 
         bufs[id] = buf;
@@ -66,36 +63,44 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
         ushort beg = datagram->fragmentOffset();
         ushort end = buf.main.beg + datagram->payloadLength(); //FIXME
         merge(buf, beg, end, !datagram->moreFragments());
+
+        // store datagram. Only one fragment carries the actual modelled
+        // content (encapsulatedMsg()), other (empty) ones are only
+        // preserved so that we can send them in ICMP if reassembly times out.
         if (datagram->encapsulatedMsg())
+        {
+            delete buf.datagram;
             buf.datagram = datagram;
+        }
         else
+        {
             delete datagram;
+        }
+
+        // do we have the complete datagram?
         if (buf.main.beg==0 && buf.main.islast)
         {
-            // datagram complete
-            ASSERT(buf.datagram);  // one of the fragments must have contained payload
-
+            // datagram complete: deallocate buffer and return complete datagram
             IPDatagram *ret = buf.datagram;
-
             if (buf.fragments)
                 delete buf.fragments;
             bufs.erase(i);
-
             return ret;
         }
         else
         {
+            // there are still missing fragments
             buf.lastupdate = now;
             return NULL;
         }
     }
-
 }
 
 void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast)
 {
     if (buf.main.end==beg)
     {
+        // most typycal case (<95%): new fragment follows last one
         buf.main.end = end;
         if (islast)
             buf.main.islast = true;
@@ -104,6 +109,7 @@ void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast
     }
     else if (buf.main.beg==end)
     {
+        // new fragment precedes what we already have
         buf.main.beg = beg;
         if (buf.fragments)
             mergeFragments(buf);
@@ -119,14 +125,9 @@ void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast
         r.islast = islast;
         buf.fragments->push_back(r);
     }
-    else if (buf.main.beg==beg && buf.main.end==end)
-    {
-        // duplicate fragment, ignore it
-    }
     else
     {
-        // overlapping but not identical fragment -- this normally cannot happen
-        opp_error("received overlapping but not identical fragments from datagram id=%u", buf.id);
+        // fragment's range already contained in buffer (probably duplicate fragment)
     }
 }
 

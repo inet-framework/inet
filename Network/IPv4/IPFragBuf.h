@@ -40,6 +40,12 @@ class IPFragBuf
 
     typedef std::vector<Region> RegionVector;
 
+Key {
+ id
+ src
+ dest
+};
+
     /**
      * Represents the buffer for assembling one IP datagram from fragments.
      * 99% of time, fragments will arrive in order and none gets lost,
