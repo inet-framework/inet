@@ -96,8 +96,12 @@ void NewLDP::handleMessage(cMessage *msg)
 
 void NewLDP::sendHelloTo(IPAddress dest)
 {
+    RoutingTable *rt = routingTableAccess.get();
+
     LDPHello *hello = new LDPHello("LDP-Hello");
     hello->setType(HELLO);
+    hello->setSenderAddress(rt->getRouterId());
+    //hello->setReceiverAddress(...);
     //hello->setHoldTime(...);
     //hello->setRbit(...);
     //hello->setTbit(...);
@@ -117,7 +121,8 @@ void NewLDP::processLDPHello(LDPHello *msg)
     RoutingTable *rt = routingTableAccess.get();
 
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
-    IPAddress peerAddr = controlInfo->getSrcAddr();
+    IPAddress peerAddr = controlInfo->getSrcAddr(); // FIXME use hello->senderAddress() instead?
+
     int inputPort = controlInfo->getInputPort();
     delete msg;
 
