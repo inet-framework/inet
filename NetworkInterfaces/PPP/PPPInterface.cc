@@ -125,6 +125,8 @@ InterfaceEntry *PPPInterface::registerInterface(double datarate)
 
 void PPPInterface::startTransmitting(cMessage *msg)
 {
+    // if there's any control info, remove it; then encapsulate the packet
+    delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
     if (ev.isGUI()) displayBusy();
 
@@ -174,7 +176,7 @@ void PPPInterface::handleMessage(cMessage *msg)
             send(payload,"netwOut");
         }
     }
-    else // arrived on gate "in"
+    else // arrived on gate "netwIn"
     {
         if (endTransmissionEvent->isScheduled())
         {
