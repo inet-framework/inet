@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= IPv4 LDP MPLS RSVP_TE
-SUBDIR_TARGETS=  IPv4_dir LDP_dir MPLS_dir RSVP_TE_dir
+SUBDIRS= IPv4 IPv4d LDP MPLS RSVP_TE
+SUBDIR_TARGETS=  IPv4_dir IPv4d_dir LDP_dir MPLS_dir RSVP_TE_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -79,6 +79,9 @@ subdirs: $(SUBDIR_TARGETS)
 
 IPv4_dir:
 	cd IPv4 && cd && nmake /nologo /f Makefile.vc
+
+IPv4d_dir:
+	cd IPv4d && cd && nmake /nologo /f Makefile.vc
 
 LDP_dir:
 	cd LDP && cd && nmake /nologo /f Makefile.vc

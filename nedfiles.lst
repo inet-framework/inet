@@ -47,6 +47,7 @@ Network/IPv4/ICMP.ned
 Network/IPv4/IP.ned
 Network/IPv4/RoutingTable.ned
 Network/IPv4d/ErrorHandling.ned
+Network/IPv4d/InputQueue.ned
 Network/IPv4d/IPFragmentation.ned
 Network/IPv4d/IPMulticast.ned
 Network/IPv4d/IPOutput.ned
@@ -86,7 +87,6 @@ NetworkInterfaces/Ethernet/MACRelayUnit.ned
 NetworkInterfaces/Ethernet/MACRelayUnitNP.ned
 NetworkInterfaces/Ethernet/MACRelayUnitPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
-NetworkInterfaces/Queues/InputQueue.ned
 NetworkInterfaces/Queues/OutputQueue.ned
 Nodes/IPSuite/BurstHost.ned
 Nodes/IPSuite/mytcp4ip.ned

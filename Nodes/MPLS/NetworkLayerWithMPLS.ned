@@ -54,7 +54,7 @@ module NetworkLayerWithMPLS
                 numOfTransportProt = 4,
                 timeToLive = 8,
                 multicastTimeToLive = 6,
-                fragmentTimeout = "5s";
+                fragmentTimeout = "5s"; // FIXME !!!!!
             gatesizes:
                 transportIn[4],
                 transportOut[4],
@@ -65,10 +65,6 @@ module NetworkLayerWithMPLS
                 IPForward = IPForward,
                 routingTableFileName = routingFile;
             display: "p=238,64;i=box3";
-        inputQueue: InputQueue;
-            gatesizes:
-                fromNW[numOfPorts];
-            display: "p=39,53;i=queue";
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;
@@ -87,11 +83,10 @@ module NetworkLayerWithMPLS
         ip.ICMPOut --> pingOut;
         ip.ICMPIn <-- pingIn;
 
-        // L2 IP Queues to IP
-        inputQueue.toIP --> ip.queueIn;
+        // L2 interfaces to IP
         for i=0..numOfPorts-1 do
-            physIn[i] --> inputQueue.fromNW[i];
-            ip.queueOut[i] --> physOut[i] display "m=s";
+            physIn[i] --> ip.queueIn[i] display "m=s";
+            physOut[i] <-- ip.queueOut[i] display "m=s";
         endfor;
 endmodule
 

@@ -61,7 +61,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= InputQueue.obj
+OBJS= 
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -75,8 +75,6 @@ $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 .tstamp: $(OBJS)
 	@echo.>.tstamp
 
-$(OBJS) : $(GENERATEDHEADERS)
-
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
@@ -88,9 +86,6 @@ $(EXT_DIR_TSTAMPS):
 	@exit /b 1
 
 subdirs: $(SUBDIR_TARGETS)
-
-InputQueue.obj: InputQueue.cc
-	$(CXX) -c $(COPTS) /Tp InputQueue.cc
 
 
 #doc: neddoc doxy

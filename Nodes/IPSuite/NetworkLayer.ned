@@ -19,8 +19,6 @@
 import
     "IPProcessing",
     "RoutingTable",
-    "InputQueue",
-    "OutputQueue",
     "NetworkInterface";
 
 
@@ -64,10 +62,6 @@ module NetworkLayer
                 IPForward = IPForward,
                 routingTableFileName = routingFile;
             display: "b=32,32;p=185,53,row;i=box3";
-        inputQueue: InputQueue;
-            gatesizes:
-                fromNW[numOfPorts];
-            display: "b=32,30;p=75,123;i=queue";
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;
@@ -80,11 +74,10 @@ module NetworkLayer
         ip.ICMPOut --> pingOut;
         ip.ICMPIn <-- pingIn;
 
-        // L2 IP Queues to IP
-        inputQueue.toIP --> ip.queueIn;
+        // L2 interfaces to IP
         for i=0..numOfPorts-1 do
-            physIn[i] --> inputQueue.fromNW[i];
-            ip.queueOut[i] --> physOut[i] display "m=s";
+            physIn[i] --> ip.queueIn[i] display "m=s";
+            physOut[i] <-- ip.queueOut[i] display "m=s";
         endfor;
 endmodule
 

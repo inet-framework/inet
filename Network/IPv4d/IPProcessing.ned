@@ -26,7 +26,8 @@ import
     "IPSend",
     "IPFragmentation",
     "IPTunneling",
-    "IPOutput";
+    "IPOutput",
+    "InputQueue";
 
 
 
@@ -48,7 +49,7 @@ module IPProcessing
     gates:
         in: ICMPIn; // FIXME should be called pingIn
         in: transportIn[];
-        in: queueIn;
+        in: queueIn[];
         out: ICMPOut; // FIXME should be called pingOut
         out: transportOut[];
         out: queueOut[];
@@ -96,9 +97,19 @@ module IPProcessing
             display: "b=32,30;p=110,304,row;i=prot2";
         errorHandling: ErrorHandling;
             display: "b=16,16;p=313,40;i=box1_s";
+        inputQueue: InputQueue;
+            gatesizes:
+                fromNW[sizeof(QueueIn)];
+            display: "p=39,53;i=queue";
     connections nocheck:
+
+        // L2 input to InputQueue
+        for i=0..numOfPorts-1 do
+            queueIn[i] --> inputQueue.fromNW[i];
+        endfor;
+
         // PreRouting Input
-        queueIn --> preRouting.in[0];
+        inputQueue.toIP --> preRouting.in[0];
 
         // PreRouting Output
         preRouting.routingOut --> routing.in[0];
