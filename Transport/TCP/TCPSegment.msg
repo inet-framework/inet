@@ -92,7 +92,15 @@ message TCPSegment extends cMessage
         // packet at all.
         int payloadLength;
 
-        // FIXME
+        // Message objects (cMessages) that travel in this segment as data.
+        // (This field is used only with TCPMsgBasedSendQueue/RcvQueue and
+        // not with TCPVirtualBytesSendQueue/RcvQueue.)  Every message object
+        // is put into the TCPSegment that would (in real life) carry its
+        // last octet. That is, if message object 'msg' with length=100 bytes
+        // occupies sequence number range 10000..10099, it will travel in the
+        // TCPSegment which carries the octet 10099. This way it is easily achieved
+        // that the receiving TCP passes up the message object to its client
+        // when the last byte of the message has arrived.
         abstract TCPPayloadMessage payload[];
 };
 

@@ -36,26 +36,34 @@ class TCPSegment : public TCPSegment_Base
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.name()) {operator=(other);}
     TCPSegment& operator=(const TCPSegment& other);
-    virtual cObject *dup() {return new TCPSegment(*this);}
+    virtual cObject *dup() const {return new TCPSegment(*this);}
 
     /** Should not be called. */
     virtual void setPayloadArraySize(unsigned int size);
-    /** Returns the number of payload messages in this TCP segment */
-    virtual unsigned int payloadArraySize() const;
-    /** Returns the kth payload message in this TCP segment */
-    virtual TCPPayloadMessage& payload(unsigned int k);
     /** Should not be called. */
     virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var);
 
     /**
-     * FIXME
+     * Returns the number of payload messages in this TCP segment
+     */
+    virtual unsigned int payloadArraySize() const;
+
+    /**
+     * Returns the kth payload message in this TCP segment
+     */
+    virtual TCPPayloadMessage& payload(unsigned int k);
+
+    /**
+     * Adds a message object to the TCP segment. The sequence number+1 of the
+     * last byte of the message should be passed as 2nd argument
      */
     virtual void addPayloadMessage(cMessage *msg, uint32 endSequenceNo);
 
     /**
-     * FIXME
+     * Removes and returns the first message object in this TCP segment.
+     * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
      */
-    virtual cMessage *removeFirstPayloadMessage(uint32& endSequenceNo);
+    virtual cMessage *removeFirstPayloadMessage(uint32& outEndSequenceNo);
 };
 
 #endif
