@@ -1,0 +1,61 @@
+NewTCP
+======
+
+This folder contains new TCP model for OMNeT++. Experiences and some bits of
+the code from the old implementation (tcpmodule.cc in IPSuite) have been
+reused. There were several motivations for reimplementation:
+
+- tcpmodule.cc was written before message definitions (.msg files) got
+  introduced into OMNeT++, and so it uses cPars, C structs carried by
+  pointer-valued cPars and other tricks which have been suppressed by
+  .msg files by now.
+
+- TCP implementations may differ significantly in the presence and
+  flavour of congestion control, fast retransmit/recovery, selective
+  acknowledgement and other schemes. E.g. Linux TCP implements some
+  algorithms differently from RFCs. These variations are hard to
+  account for with tcpmodule.cc.
+
+- another observation is that different simulation scenarios require
+  different approaches regarding transmitted data:
+
+  In one model one might want to transmit a "real" bytes (especially
+  if the application which uses TCP is a ported version of a real
+  socket application)
+
+  In other scenarios, "dummy" transmission will do, that is, simulated
+  TCP segments contain do not need to contain any real data (only the
+  number of bytes they represent suffices) -- you'll want to do this
+  when the app is there solely as a traffic generator (e.g. simulated
+  file transfer or telnet session), but actual data is unimportant.
+
+  Yet again in other models you need to transmit a sequence of cMessage
+  objects, and you want exactly the same cMessage sequence to be reproduced
+  on the receiver side. (Here every cMessage would map onto a sequence
+  number range in the TCP stream, and the object is passed up to the
+  application when its last byte has arrived on the simulated connection.)
+
+- finally, tcpmodule.cc is a single large monolithic class which is
+  quite hard to understand and also to maintain.
+
+The new model, in addition to using .msg files, makes two aspects
+of the TCP model configurable by "plug-in classes":
+
+TCP congestion control, fast retransmit/recovery etc. algorithms
+are encapsulated into a separate object, subclassed from TCPAlgorithm (an
+abstract base class). Thus one can create several classes, all
+subclassed from TCPAlgorithm which provide various TCP behaviours,
+and choose one of them for any particular simulation. Examples of
+such classes can be e.g. Reno, NewReno, LinuxTCP, etc. The particular
+class to be used is selected at runtime (via a module parameter, e.g.
+from omnetpp.ini). This feature should make it easier to experiment
+with various flavours of TCP, test experimental congestion control
+schemes etc.
+
+Second, transmission method ("real" bytes, dummy, cMessage sequence)
+is encapsulated in the classes derived from the TCPSendQueue/
+TCPReceiveQueue abstract base classes. The choice of transmission
+method (class names) can be specified in module parameters, but it is
+also possible for apps to specify it individually for each connection
+(in the active/passive open commands).
+
