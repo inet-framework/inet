@@ -12,7 +12,7 @@
 
 
 cplusplus {{
-#include "intserv.h"
+#include "IntServ_m.h"
 
 #define PATH_MESSAGE   1
 #define RESV_MESSAGE   2

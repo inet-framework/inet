@@ -12,7 +12,7 @@
 
 
 cplusplus {{
-#include "intserv.h"
+#include "IntServ_m.h"
 #include "RSVPPacket.h"
 }}
 

@@ -12,7 +12,7 @@
 
 
 //
-// FIXME this should replace intserv.h as soon as opp_msgc supports initializers for structs
+// This file defines data structures used in IntServ services
 //
 
 cplusplus {{

@@ -20,7 +20,7 @@
 #include <vector>
 #include "ospf_type.h"
 #include "IPAddress.h"
-#include "intserv.h"
+#include "IntServ_m.h"
 #include "TED.h"
 
 
