@@ -36,6 +36,9 @@
 // in. One port can only belong to one app. Packets that don't match
 // any app will be dropped.
 //
+//# FIXME change UDP to dynamic port registration by apps, like TCP! hardcoded 
+//# local_port parameter is not very flexible
+//
 // If there's only one app and without "local_port" parameter, that app
 // will receive all incoming packets regardless of destination port number.
 //

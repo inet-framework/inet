@@ -40,6 +40,8 @@ endsimple
 // The peer can be UDPSink or another UDPApp (it handles received packets
 // exactly like UDPSink).
 //
+//#FIXME change message length to BYTES
+//
 simple UDPApp
     parameters:
         local_port : numeric const,
