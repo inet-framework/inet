@@ -9,6 +9,7 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 
 (cd Applications && $MAKEMAKE -f -n -c ../ipsuiteconfig)
 (cd Examples && $MAKEMAKE -f -n -c ../ipsuiteconfig)
+(cd Tests && $MAKEMAKE -f -n -c ../ipsuiteconfig)
 (cd Network && $MAKEMAKE -f -n -c ../ipsuiteconfig)
 (cd NetworkInterfaces && $MAKEMAKE -f -n -c ../ipsuiteconfig)
 (cd Nodes && $MAKEMAKE -f -n -c ../ipsuiteconfig)
@@ -46,6 +47,9 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 (cd Examples/MPLS/TestTE4Old && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/TestTE5 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/TestTE6 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+
+(cd Tests/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig)
+(cd Tests/MPLS/LDP1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 
 (cd Network/IPv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig )
 (cd Network/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Util)
