@@ -18,13 +18,13 @@ exec wish "$0" "$@"
 set i 0
 foreach line {
 
-   {"MPLS-LDP"               "ldp-mpls1" "./ldp-mpls1"  "ldp-mpls1.exe"}
-   {"CSPF Routing"           "TestTE1"   "./TestTE1"    "TestTE1.exe"}
-   {"Hop-by-Hop Routing"     "TestTE2"   "./TestTE2"    "TestTE2.exe"}
-   {"ER Routing"             "TestTE3"   "./TestTE3"    "TestTE3.exe"}
-   {"Traffic Reroute 1"      "TestTE4"   "./TestTE4"    "TestTE4.exe"}
-   {"Traffic Reroute 2"      "TestTE5"   "./TestTE5"    "TestTE5.exe"}
-   {"Reservation preemption" "TestTE6"   "./TestTE6"    "TestTE6.exe"}
+   {"MPLS-LDP"               "ldp-mpls1" "./ldp-mpls1" "ldp-mpls1"}
+   {"CSPF Routing"           "TestTE1"   "./TestTE"    "TestTE"}
+   {"Hop-by-Hop Routing"     "TestTE2"   "./TestTE"    "TestTE"}
+   {"ER Routing"             "TestTE3"   "./TestTE"    "TestTE"}
+   {"Traffic Reroute 1"      "TestTE4"   "./TestTE"    "TestTE"}
+   {"Traffic Reroute 2"      "TestTE5"   "./TestTE"    "TestTE"}
+   {"Reservation preemption" "TestTE6"   "./TestTE"    "TestTE"}
 } {
    set name $i
    incr i

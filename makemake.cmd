@@ -67,19 +67,19 @@ cd %root%\Examples\IPSuite\McNetwork2 && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\TCPClientServerNet && %MAKEMAKE% %ALL_MODEL_OPTS%
 
-cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -n %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %OPTS% %ALL_MODEL_OPTS%
-cd %root%\Examples\MPLS\ldp-mpls1 && %MAKEMAKE% %OPTS% -w %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE1 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE2 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE3 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE4 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE4Old && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE5 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
-cd %root%\Examples\MPLS\TestTE6 && %MAKEMAKE% %OPTS% -w -I..\Tester %ALL_MPLS_IPSUITE_INCLUDES%
+cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -w -o MPLSTester %ALL_MPLS_IPSUITE_INCLUDES%
+cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\MPLS\ldp-mpls1 && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\MPLS\TestTE1 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE2 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE3 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE4 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE4Old && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE5 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
+cd %root%\Examples\MPLS\TestTE6 && %MAKEMAKE% %ALL_MODEL_OPTS% -I..\Tester
 
 cd %root%\Tests\MPLS && %MAKEMAKE% %OPTS% -n -r
-cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %OPTS% -w %ALL_MPLS_IPSUITE_INCLUDES%
+cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Tests\NewTCP && %MAKEMAKE% %ALL_MODEL_OPTS%
 
 : #--------------------------------------
