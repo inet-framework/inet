@@ -2003,9 +2003,8 @@ void TcpModule::segSend(cMessage* data, TcpTcb* tcb_block, unsigned long seq_no,
       tcp_header->th_flag_psh = TCP_F_SET;
       // Set Push Parameter (if TCP_DATA)
       if(data->kind()==TCP_DATA)
-        ((cMessage*)
-((cArray*)data->parList().get("msg_list"))->get(0))->par("tcp_flag_psh")=(long)1;
-
+        ((cMessage*)((cArray*)data->parList().get("msg_list"))->get(0))->
+           par("tcp_flag_psh")=(long)1;
     }
   
   //if this is a RST segment, set the RST flag
@@ -2276,12 +2275,12 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
                                   // FIXME: MBI
                                   // problems if a packet behind pshd packet
                                   // is in rcv-rec q ????
-                                  if(((long) ((cMessage*)
-                                              ((cArray*)data->parList().get("msg_list"))->get(0))->par("tcp_flag_psh"))==1
-                                     )           {
-                                    //if PSH is set the incoming segment completes a data package
-                                    complete_pkt_rcvd = true;
-                                  }
+                                  if(((long) ((cMessage*)((cArray*)data->parList().get("msg_list"))->get(0))->
+                                        par("tcp_flag_psh"))==1)
+                                    {
+                                      //if PSH is set the incoming segment completes a data package
+                                      complete_pkt_rcvd = true;
+                                    }
 
                                   //drop the overlapping amount
                                   if (remainder > 0)
@@ -2500,7 +2499,9 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
   if (debug) ev << "Number of bits in retransmission queue: " << retrans_queue_size << endl;
   //the following statement is true if a currently received
   //ACK segment frees the retransmission queue
-  if ((retrans_queue_size == 0) && !(tcb_block->snd_fin_valid))
+  // LYBD: the FIN packet is not inserted until tcb_block->snd_nxt == tcb_block->snd_fin_seq
+  if ((retrans_queue_size == 0) && !(tcb_block->snd_fin_valid 
+        && tcb_block->snd_nxt == tcb_block->snd_fin_seq))
     {
       if (debug) ev << "Returning from retransQueueProcess(...) function.\n";
       return;
@@ -2510,9 +2511,10 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
   //FIXME: MBI dup_retrans_queue insert something missing...
   //           and we should remove the msg from the retrans_queue when ACKed
   //           (maybe in the exit code of fin_wait_1 and last_ack)
-  else if ((retrans_queue_size == 0) && (tcb_block->snd_fin_valid))
+  // LYBD: the FIN packet is not inserted until tcb_block->snd_nxt == tcb_block->snd_fin_seq
+  else if ((retrans_queue_size == 0) && (tcb_block->snd_fin_valid)
+      && tcb_block->snd_nxt == tcb_block->snd_fin_seq) 
     {
-      
       cMessage* packet = (cMessage *) tcp_retrans_queue.head();
       dup_retrans_queue.clear();
       insertAtQueueTail(dup_retrans_queue, (cMessage *) packet->dup(), 0);
@@ -2580,7 +2582,15 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
       //account for the possibility that tcp_retrans_queue contains
       //fewer octets than what can be sent
       //FIXME: MBI does TCP send anything from send queue then??
-      bytes_to_be_resent = (bytes_to_be_resent < retxn_queue_size) ? bytes_to_be_resent : retxn_queue_size;
+      //bytes_to_be_resent = (bytes_to_be_resent < retxn_queue_size) ? bytes_to_be_resent : retxn_queue_size;
+
+      // LYBD: do not send any segment from tcp_send_queue
+      // otherwise the sender may receive acks with seqno > SND.MAX
+      // and the retransmission queue will be mixed with the send queue
+      if (bytes_to_be_resent + tcb_block->snd_nxt > tcb_block->snd_max) {
+          bytes_to_be_resent = tcb_block->snd_max - tcb_block->snd_nxt;
+      }
+
       if (bytes_to_be_resent == 0)
         {
           if (debug) ev << "Returning from retransQueueProcess(...) function.\n";
@@ -2589,7 +2599,6 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
 
       // not necessary
       //retrans_data_sent = 0;
-
 
       //get the segment to be resent
       pto_be_sent_seg = removeFromDataQueue(dup_retrans_queue, bytes_to_be_resent * 8);
@@ -3079,7 +3088,9 @@ void TcpModule::finSchedule(TcpTcb* tcb_block)
 
   tcb_block->snd_fin_valid = 1;
  
-  tcb_block->snd_fin_seq = tcb_block->snd_nxt + numBitsInQueue(tcp_send_queue) / 8;
+  // LYBD: account for tcp_retrans_queue?
+  //tcb_block->snd_fin_seq = tcb_block->snd_nxt + numBitsInQueue(tcp_send_queue) / 8;
+  tcb_block->snd_fin_seq = tcb_block->snd_max + numBitsInQueue(tcp_send_queue) / 8;
 
   //put ACK timer management here
 }
@@ -3297,53 +3308,19 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
       // for packets coming from tcp-retrans-queue
       // check if fdata is already packed
 // BCH LYBD
-      //if(fdata_packet->hasPar("msg_list"))
-      //  {
-      //    fdata_packet=(cMessage*) ((cArray*)
-      //     (fdata_packet->parList().get("msg_list")))->get(0);
-      //  }
-      if(fdata_packet->hasPar("msg_list")) // rewritten by LYBD 
+      if(fdata_packet->hasPar("msg_list"))
         {
-          cArray*   msg_list = (cArray*)(fdata_packet->parList().get("msg_list"));
-          for (int k = 0; k < msg_list->items() && number_of_bits_to_remove > 0; k++)
-          {
-              cMessage* pdata_packet = (cMessage *) msg_list->get(k);
-              if (pdata_packet == NULL)
-                  continue;
-              unsigned long pdata_len = pdata_packet->length();
-              if (pdata_len > number_of_bits_to_remove)
-              {
-                  // split packet and save the copy
-                  cMessage* pdata_packet_copy = (cMessage*) pdata_packet->dup();
-                  if (pdata_packet_copy->hasPar("complete_pkt"))
-                      pdata_packet_copy->par("complete_pkt") = 0;
-                  else
-                      pdata_packet_copy->addPar("complete_pkt") = 0;
-                  pdata_packet_copy->setLength(number_of_bits_to_remove);
-                  pdata_packet->addLength(-number_of_bits_to_remove);
-                  fdata_packet->addLength(-number_of_bits_to_remove);
-                  rdp_len += number_of_bits_to_remove;
-                  number_of_bits_to_remove = 0;
-                  // insert into outgoing packet
-                  ((cArray*) (rdata_packet->parList().get("msg_list")))->add(pdata_packet_copy);
-                  break;
-              }
-              else 
-              {
-                  msg_list->remove(k);
-                  fdata_packet->addLength(-pdata_len);
-                  rdp_len += pdata_len;
-                  number_of_bits_to_remove -= pdata_len;
-                  ((cArray*) (rdata_packet->parList().get("msg_list")))->add(pdata_packet);
-              }
-          }
-          if (fdata_packet->length() > 0)
-               from_queue.insertHead(fdata_packet);
-          else
-              delete fdata_packet;
-       }
-      else
-      {
+            // fdata_packet=(cMessage*) ((cArray*)
+            // (fdata_packet->parList().get("msg_list")))->get(0);
+        
+            // rewritten by LYBD
+            cMessage* pdata_packet = (cMessage*)
+                ((cArray*)(fdata_packet->parList().get("msg_list")))->get(0);
+            ((cArray*)(fdata_packet->parList().get("msg_list")))->remove(0);
+            delete fdata_packet;
+            fdata_packet = pdata_packet;
+            fdata_packet->setLength(fdp_len);
+        }
       ((cArray*) (rdata_packet->parList().get("msg_list")))->add(fdata_packet);
       // fdata_packet = (cMessage*) from_queue.remove(from_queue.head());
       //    ((cArray*) (rdata_packet->parList().get("msg_list")))->add(fdata_packet);
@@ -3365,20 +3342,12 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
           //duplicate packet and put one copy back into queue for next retrieval
           cMessage* res_data_packet = (cMessage*) fdata_packet->dup();
           fdata_packet->addPar("complete_pkt") = 0;
-          fdata_packet->setLength(number_of_bits_to_remove); // LYBD
+            fdata_packet->setLength(number_of_bits_to_remove);
           rdp_len += number_of_bits_to_remove;
           res_data_packet->addLength(- number_of_bits_to_remove);
           from_queue.insertHead(res_data_packet);
           number_of_bits_to_remove = 0;
         }
-// BCH LYBD
-      //else if (fdp_len == number_of_bits_to_remove)
-      //  {
-      //    fdata_packet->addPar("complete_pkt") = 1;
-      //    rdp_len += number_of_bits_to_remove;
-      //    number_of_bits_to_remove = 0;
-      //  }
-      //else
 // ECH LYBD
         else // (fdp_len <= number_of_bits_to_remove)
         {
@@ -3386,8 +3355,7 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
           rdp_len += fdp_len;
           number_of_bits_to_remove -= fdp_len;
         }
-        } //if (fdata_packet->hasPar("msg_list"))
-    }//while//
+  }
 
   rdata_packet->setLength(rdp_len);
   return rdata_packet;
@@ -4132,7 +4100,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       break;
 
     case TCP_E_OPEN_ACTIVE:
-      //send SYN segment to remote TCP
+      //send SYN segment
       synSend(tcb_block, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET); 
 
       // set the connection-establishment timer to 75 seconds
@@ -4384,7 +4352,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       break;
       
     case TCP_E_RCV_SYN:
-      //create and send a SYN segment with the ACK flag set to remote TCP
+      //create and send a SYN segment with the ACK flag set
       synSend(tcb_block, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_SET, TCP_F_NSET, TCP_F_NSET); 
       // set the connection-establishment timer to 75 seconds
       tcb_block->timeout_conn_estab_msg = new cMessage("TIMEOUT_CONN_ESTAB",TIMEOUT_CONN_ESTAB);
