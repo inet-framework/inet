@@ -1,6 +1,8 @@
 index.ned
 ipsuite-doc.ned
 mpls-doc.ned
+Applications/Ethernet/EtherAppCli.ned
+Applications/Ethernet/EtherAppSrv.ned
 Applications/Generic/SinkApp.ned
 Applications/Generic/TrafficGen.ned
 Applications/PingApp/PingApp.ned
@@ -17,8 +19,6 @@ Base/Blackboard.ned
 Base/Join.ned
 Base/Nop.ned
 Base/Sink.ned
-
-
 
 
 
@@ -111,6 +111,12 @@ Transport/RTP/RTPProfile.ned
 Transport/TCP/TCPDump.ned
 Transport/TCP/TCPMain.ned
 Transport/UDP/UDPProcessing.ned
+
+
+
+
+
+
 
 
 

@@ -3,7 +3,7 @@ root=`pwd`
 MAKEMAKE=opp_makemake
 OPTS="-f -N -b $root"
 
-ALL_IPSUITE_INCLUDES="-I$root/Network/IPv4 -I$root/Network/IPv4d -I$root/Network/AutoRouting -I$root/Transport/TCP -I$root/Transport/UDP -I$root/NetworkInterfaces -I$root/NetworkInterfaces/_802 -I$root/NetworkInterfaces/ARP -I$root/NetworkInterfaces/Ethernet -I$root/NetworkInterfaces/PPP -I$root/Applications/Generic -I$root/Applications/TCPApp -I$root/Applications/UDPApp -I$root/Applications/PingApp -I$root/Base -I$root/Util -I$root/Nodes/IPSuite"
+ALL_IPSUITE_INCLUDES="-I$root/Network/IPv4 -I$root/Network/IPv4d -I$root/Network/AutoRouting -I$root/Transport/TCP -I$root/Transport/UDP -I$root/NetworkInterfaces -I$root/NetworkInterfaces/_802 -I$root/NetworkInterfaces/ARP -I$root/NetworkInterfaces/Ethernet -I$root/NetworkInterfaces/PPP -I$root/Applications/Generic -I$root/Applications/Ethernet -I$root/Applications/TCPApp -I$root/Applications/UDPApp -I$root/Applications/PingApp -I$root/Base -I$root/Util -I$root/Nodes/IPSuite"
 ALL_MPLS_INCLUDES="$ALL_IPSUITE_INCLUDES -I$root/Network/MPLS -I$root/Network/LDP -I$root/Network/RSVP_TE -I$root/Nodes/MPLS"
 
 : #--------------------------------------
@@ -22,6 +22,7 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Util && $MAKEMAKE $OPTS -n -r -c ../ipsuiteconfig)
 
 (cd Applications/Generic && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Base -I../../Util)
+(cd Applications/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../NetworkInterfaces/Ethernet -I../../NetworkInterfaces/_802 -I../../Base -I../../Util)
 (cd Applications/PingApp && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Base -I../../Util)
 (cd Applications/TCPApp && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Unsupported/TcpModule -I../../Transport/TCP -I../../Base -I../../Util)
 (cd Applications/UDPApp && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Unsupported/TcpModule -I../../Transport/UDP -I../../Base -I../../Util)

@@ -3,7 +3,7 @@ set root=D:\home\IPSuite-pcvs
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 set OPTS=-f -N -b %root%
 
-set ALL_IPSUITE_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/IPSuite
+set ALL_IPSUITE_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/Ethernet -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/IPSuite
 set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I%root%/Network/MPLS -I%root%/Network/LDP -I%root%/Network/RSVP_TE -I%root%/Nodes/MPLS
 
 rem ** Uncomment the following 3 lines if you have omnetpp-3.0a6 which does
@@ -15,6 +15,7 @@ rem set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I$(ROOT)/Network/MPLS -I$(ROOT
 : #--------------------------------------
 
 %MAKEMAKE% %OPTS% -n -r -c ipsuiteconfig.vc
+: %MAKEMAKE% %OPTS% -w -r -c ipsuiteconfig.vc -o bin/IPSuite.exe %ALL_MPLS_INCLUDES%
 
 cd %root%\Applications && %MAKEMAKE% %OPTS% -n -r -c ..\ipsuiteconfig.vc
 cd %root%\Examples && %MAKEMAKE% %OPTS% -n -r -c ..\ipsuiteconfig.vc
@@ -28,6 +29,7 @@ cd %root%\Base && %MAKEMAKE% %OPTS% -n -r -c ..\ipsuiteconfig.vc
 cd %root%\Util && %MAKEMAKE% %OPTS% -n -r -c ..\ipsuiteconfig.vc
 
 cd %root%\Applications\Generic && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Base -I..\..\Util
+cd %root%\Applications\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\NetworkInterfaces\Ethernet -I..\..\NetworkInterfaces\_802 -I..\..\Base -I..\..\Util
 cd %root%\Applications\PingApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Base -I..\..\Util
 cd %root%\Applications\TCPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Unsupported\TcpModule -I..\..\Transport\TCP -I..\..\Base -I..\..\Util
 cd %root%\Applications\UDPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Unsupported\TcpModule -I..\..\Transport\UDP -I..\..\Base -I..\..\Util

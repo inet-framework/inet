@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= Generic PingApp TCPApp UDPApp
-SUBDIR_TARGETS=  Generic_dir PingApp_dir TCPApp_dir UDPApp_dir
+SUBDIRS= Ethernet Generic PingApp TCPApp UDPApp
+SUBDIR_TARGETS=  Ethernet_dir Generic_dir PingApp_dir TCPApp_dir UDPApp_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -76,6 +76,9 @@ $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs: $(SUBDIR_TARGETS)
+
+Ethernet_dir:
+	cd Ethernet && cd && nmake /nologo /f Makefile.vc
 
 Generic_dir:
 	cd Generic && cd && nmake /nologo /f Makefile.vc
