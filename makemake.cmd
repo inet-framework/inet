@@ -36,7 +36,6 @@ cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig
 cd %root%\Examples\IPSuite\McNetwork2 && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\OldNetwork && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
-cd %root%\Examples\IPSuite\SocketTester && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\TCPClientServerNet && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\TCPFlavours && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\TCPTester && %MAKEMAKE% -f -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%

@@ -396,20 +396,20 @@ fi
 
 case "$type" in
 exe)
-    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS)' $subdirs_target 'Makefile'
     echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
     ;;
 so)
-    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS)' $subdirs_target 'Makefile'
     echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS)'
     ;;
 o)
-    echo '$(TARGET): $(OBJS) $subdirs_target Makefile'
+    echo '$(TARGET): $(OBJS)' $subdirs_target 'Makefile'
     echo '	'
     ;;
 esac
 echo
-echo 'purify: $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
+echo 'purify: $(OBJS) $(EXTRA_OBJS)' $subdirs_target 'Makefile'
 echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
 echo
 
