@@ -67,7 +67,7 @@ module NetworkLayer
         igmp: IGMP;
             display: "p=180,190;i=block/cogwheel";
         errorHandling: ErrorHandling;
-            display: "p=120,220;i=box1_s";
+            display: "p=120,220;i=block/process_s";
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;

@@ -52,7 +52,7 @@ module ARPTest
         router1: Router;
             display: "p=182,283;i=abstract/router";
         client: StandardHost;
-            display: "p=54,274;i=device/laptop";
+            display: "p=54,274;i=device/laptop_l";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost EtherBus",

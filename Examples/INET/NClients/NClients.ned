@@ -53,7 +53,7 @@ module NClients
         cli: StandardHost[n];
             display: "i=device/laptop";
         srv: StandardHost;
-            display: "i=device/server3";
+            display: "i=device/server3_l";
     connections nocheck:
         for i=0..n-1 do
             cli[i].out++ --> ethernetline --> r1.in++;
