@@ -30,7 +30,7 @@ class EtherFrame;
  */
 class MACRelayUnitNP : public MACRelayUnitBase
 {
-    Module_Class_Members(MACRelayUnitNP,MACRelayUnitBase,0)
+    Module_Class_Members(MACRelayUnitNP,MACRelayUnitBase,0);
 
   protected:
     // the shared queue
