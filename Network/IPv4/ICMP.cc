@@ -80,7 +80,8 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     errorMessage->setCode(code);
     errorMessage->setIsError(true);
     errorMessage->encapsulate(origDatagram);
-    // ICMP message length: see above
+    // ICMP message length: the internet header plus the first 8 bytes of 
+    // the original datagram's data is returned to the sender
     errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
 
     sendToIP(errorMessage, origDatagram->srcAddress());
