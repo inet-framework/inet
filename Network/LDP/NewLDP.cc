@@ -53,7 +53,7 @@ void NewLDP::initialize()
 
     // schedule first hello
     sendHelloMsg = new cMessage("LDPSendHello");
-    scheduleAt(1, sendHelloMsg);
+    scheduleAt(exponential(0.1), sendHelloMsg); //FIXME
 
     // start listening for incoming conns
     ev << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
@@ -258,11 +258,15 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     RoutingTable *rt = routingTableAccess.get();
 
     int fecId = msg->par("FEC");
-    int fecInt = msg->par("dest_addr"); // FIXME ???
+    IPAddress fecInt = IPAddress(msg->par("dest_addr").longValue());
     int gateIndex = msg->par("gateIndex");
-    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
+    delete msg;
 
+    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
     string fromInterface = string(ientry->name.c_str());
+
+    ev << "Request from MPLS for FEC=" << fecId << "  dest=" << fecInt <<
+          "  inInterface=" << fromInterface << "\n";
 
     // LDP checks if there is any previous pending requests for
     // the same FEC.
@@ -272,48 +276,46 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
         if (fecSenderBinds[i].fec == fecInt)
             break;
 
-    if (i == fecSenderBinds.size())  // There is no previous same requests
+    if (i!=fecSenderBinds.size())
     {
-
-        fec_src_bind newBind;
-        newBind.fec = fecInt;
-        newBind.fromInterface = fromInterface;
-        newBind.fecID = fecId;
-
-        fecSenderBinds.push_back(newBind);
-
-        // Genarate new LABEL REQUEST and send downstream
-
-        LDPLabelRequest *requestMsg = new LDPLabelRequest();
-        requestMsg->setFec(fecInt);
-        requestMsg->addPar("fecId") = fecId;
-
-        // LDP does the simple job of matching L3 routing to L2 routing
-
-        // We need to find which peer (from L2 perspective) corresponds to
-        // IP host of the next-hop.
-
-        IPAddress nextPeerAddr = locateNextHop(fecInt);
-
-        if (!nextPeerAddr.isNull())
-        {
-            requestMsg->setReceiverAddress(nextPeerAddr);
-            requestMsg->setSenderAddress(local_addr);
-
-            ev << "Request for FEC(" << fecInt << ") from outside\n";
-            ev << "forward LABEL REQUEST to LSR(" << nextPeerAddr << ")\n";
-
-            delete msg;
-
-            send(requestMsg, "to_tcp_interface");
-        }
-        else
-        {
-            // Send a NOTIFICATION of NO ROUTE message
-            ev << "NO ROUTE found for FEC(" << fecInt << "\n";
-            delete msg;
-        }
+        // there is a previous similar request
+        ev << "Already issued Label Request for this FEC\n";
+        return;
     }
+
+    // LDP does the simple job of matching L3 routing to L2 routing
+
+    // We need to find which peer (from L2 perspective) corresponds to
+    // IP host of the next-hop.
+
+    IPAddress nextPeerAddr = locateNextHop(fecInt);
+    if (!nextPeerAddr.isNull())
+    {
+        // bad luck
+        ev << "No route found for this dest address\n";
+        return;
+    }
+
+    // add to table
+    fec_src_bind newBind;
+    newBind.fec = fecInt;
+    newBind.fromInterface = fromInterface;
+    newBind.fecId = fecId;
+
+    fecSenderBinds.push_back(newBind);
+
+    // genarate new LABEL REQUEST and send downstream
+    LDPLabelRequest *requestMsg = new LDPLabelRequest();
+    requestMsg->setFec(fecInt.getInt());  // FIXME this is actually the dest IP address!!!
+    requestMsg->addPar("fecId") = fecId; // FIXME!!!
+
+    requestMsg->setReceiverAddress(nextPeerAddr);
+    requestMsg->setSenderAddress(local_addr);
+
+    ev << "Request for FEC(" << fecInt << ") from outside\n";
+    ev << "forward LABEL REQUEST to LSR(" << nextPeerAddr << ")\n";
+
+    send(requestMsg, "to_tcp_interface");
 }
 
 
@@ -360,7 +362,7 @@ void NewLDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
     }
 }
 
-IPAddress NewLDP::locateNextHop(int fec)
+IPAddress NewLDP::locateNextHop(IPAddress dest)
 {
     // Mapping L3 IP-host of next hop to L2 peer address.
     RoutingTable *rt = routingTableAccess.get();
@@ -373,7 +375,7 @@ IPAddress NewLDP::locateNextHop(int fec)
     // No Route Notification message.
     int i;
     for (i=0; i < rt->numRoutingEntries(); i++)
-        if (rt->routingEntry(i)->host.getInt() == fec)
+        if (rt->routingEntry(i)->host == dest)
             break;
 
     if (i == rt->numRoutingEntries())
@@ -590,15 +592,15 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
 
         signalMPLS->addPar("fecInt") = fec;
         signalMPLS->addPar("my_name") = 0;
-        int myfecID = -1;
+        int myfecId = -1;
 
         // Install new label
         for (int k = 0; k < fecSenderBinds.size(); k++)
         {
             if (fecSenderBinds[k].fec == fec)
             {
-                myfecID = fecSenderBinds[k].fecID;
-                signalMPLS->addPar("fec") = myfecID;
+                myfecId = fecSenderBinds[k].fecId;
+                signalMPLS->addPar("fec") = myfecId;
                 inInterface = fecSenderBinds[k].fromInterface;
                 // Remove the item
                 fecSenderBinds.erase(fecSenderBinds.begin() + k);
@@ -607,7 +609,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
             }
         }
 
-        lt->installNewLabel(label, inInterface, outInterface, myfecID, PUSH_OPER);
+        lt->installNewLabel(label, inInterface, outInterface, myfecId, PUSH_OPER);
 
         ev << "Send to my MPLS module\n";
         sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");

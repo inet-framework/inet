@@ -24,7 +24,8 @@ void MPLSModule::initialize()
     classifierType = par("classifier").longValue();
 
     // Signalling component is ready or not
-    isSignallingReady = false;
+    //isSignallingReady = false;
+    isSignallingReady = true; // FIXME
 }
 
 
@@ -421,14 +422,15 @@ void MPLSModule::sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress
     }
     else  // Pending
     {
+        ev << "Signalling not yet ready, queueing up request\n";
         ldpQueue.insert(signalMessage);
     }
 }
 
 int MPLSModule::classifyPacket(IPDatagram *ipdatagram, int type)
 {
-    IPAddress src = ipdatagram->destAddress();
-    IPAddress dest = ipdatagram->srcAddress();
+    IPAddress src = ipdatagram->srcAddress();
+    IPAddress dest = ipdatagram->destAddress();
 
     // find existing FEC based on classifier type
     for (std::vector<FECElem>::iterator it=fecList.begin(); it!=fecList.end(); it++)

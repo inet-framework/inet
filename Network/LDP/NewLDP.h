@@ -36,9 +36,9 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
   private:
     struct fec_src_bind
     {
-        int fec;
+        int fecId;
+        IPAddress fec;  // actually the dest IP address
         string fromInterface;
-        int fecID;
     };
 
     struct peer_info
@@ -86,7 +86,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     /**
      * This method finds next peer in upstream direction
      */
-    IPAddress locateNextHop(int fec);
+    IPAddress locateNextHop(IPAddress dest);
 
     /**
      * This method maps the peerIP with the interface name in routing table.
