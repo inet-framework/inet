@@ -54,7 +54,7 @@ cd %root%\Tests\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
 cd %root%\Tests\NewTCP && %MAKEMAKE% %OPTS% -w -c ..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 
-cd %root%\Network\IPv4 && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
+cd %root%\Network\IPv4 && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -ICore
 cd %root%\Network\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\..\Base -I..\..\Util
 cd %root%\Network\LDP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\MPLS -I..\..\Base -I..\..\Util
 cd %root%\Network\RSVP_TE && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\MPLS -I..\..\Base -I..\..\Util

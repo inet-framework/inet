@@ -26,6 +26,7 @@
 
 #include <omnetpp.h>
 
+typedef unsigned short ushort;
 typedef unsigned long ulong;
 typedef unsigned int uint32;
 
