@@ -74,6 +74,8 @@ private:
   cOutVector *cwnd_size;
   cOutVector *send_seq_no;
   cOutVector *rec_ack_no;
+  cOutVector *rec_seq_no;
+  
 
   //  cMessage *timeout_rexmt_msg;
 
@@ -88,8 +90,12 @@ private:
   void snd_cwnd_size(unsigned long size);
   void seq_no_send(unsigned long sendnumber);
   void ack_no_rec(unsigned long recnumber);
+  void seq_no_rec(unsigned long recnumber);
+
   TcpTcb* getTcb(cMessage* msg);
   TcpHeader* newTcpHeader(void);
+  
+// function to analyze and manage the current event variables
   void anaEvent(TcpTcb* tcb_block, cMessage* msg, MsgSource source);
 
   int seqNoLt(unsigned long a, unsigned long b);
@@ -97,6 +103,7 @@ private:
   int seqNoGt(unsigned long a, unsigned long b);
   int seqNoGeq(unsigned long a, unsigned long b);
 
+  // function to check the acceptance of a segment, returns 1 if acceptable,  0 otherwise
   int segAccept(TcpTcb* tcb_block);
   int checkRst(TcpTcb* tcb_block);
   int checkSyn(TcpTcb* tcb_block);
@@ -112,11 +119,14 @@ private:
   void segSend(cMessage* data, TcpTcb* tcb_block, unsigned long seq_no, TcpFlag fin, TcpFlag syn, TcpFlag rst,TcpFlag ack, TcpFlag urg, TcpFlag psh);
   void segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* tcb_block, TcpFlag fin, TcpFlag syn, TcpFlag rst, TcpFlag ack, TcpFlag urg, TcpFlag psh);
 
+  // function to decide from which queue to send data
   void sndDataProcess(TcpTcb* tcb_block);
   void retransQueueProcess(TcpTcb* tcb_block);
   void sndQueueProcess(TcpTcb* tcb_block);
   unsigned long sndDataSize(TcpTcb* tcb_block);
   unsigned long retransDataSize(TcpTcb* tcb_block, cQueue & retrans_queue);
+
+  // function to process tcp_socket_queue/tcp_data_receive_queue
   void rcvQueueProcess(TcpTcb* tcb_block);
   void finSchedule(TcpTcb* tcb_block);
   void synSend(TcpTcb* tcb_block, TcpFlag fin, TcpFlag syn, TcpFlag rst, TcpFlag ack, TcpFlag urg, TcpFlag psh);
@@ -206,6 +216,7 @@ void TcpModule::initialize()
   cwnd_size = new cOutVector("Cwnd size");
   send_seq_no = new cOutVector("Send No");
   rec_ack_no = new cOutVector("Rec No");
+  rec_seq_no = new cOutVector("Rec Seq No");
 
   // print out list of TCP features:
   if (debug) {
@@ -305,7 +316,7 @@ void TcpModule::handleMessage(cMessage *msg)
       if (msg->arrivedOn("from_appl"))
         {
           tcb_block->passive_rem_addr = msg->par("dest_addr");
-          tcb_block->passive_rem_addr = msg->par("dest_port"); 
+          tcb_block->passive_rem_port = msg->par("dest_port"); 
         }
 
       //handle ABORT
@@ -881,6 +892,11 @@ void TcpModule::ack_no_rec(unsigned long recnumber)
   rec_ack_no->record(double_recnumber);
 }
 
+//Function to save the sequence number of a segment that has been received
+void TcpModule::seq_no_rec(unsigned long recnumber)
+{
+  rec_seq_no->record(recnumber);
+}
 
 // Function to find TCB for current connection
 // tries to find the TCB block specified by the socketpair of msg. There are
@@ -992,7 +1008,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_block->snd_wl2 = 0;
           tcb_block->iss     = 0;
 
-          tcb_block->snd_cwnd = 536;     // 1 segment
+          tcb_block->snd_cwnd = par("mss");     // 1 segment
           tcb_block->ssthresh = 65535;   // RFC 2001
           
           tcb_block->cwnd_cnt = 0;       // counter for setting cwnd when in congestion avoidance
@@ -1000,7 +1016,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_block->snd_fin_seq   = 0; 
           tcb_block->snd_fin_valid = 0;
           tcb_block->snd_up_valid  = 0;
-          tcb_block->snd_mss       = 536; //maximum segment size (here set to the default value, no header options used to change it)
+          tcb_block->snd_mss       = par("mss"); //maximum segment size (here set to the default value, no header options used to change it)
 
           tcb_block->rcv_nxt      = 0;
           //tcb_block->rcv_adv      = 0;
@@ -1499,7 +1515,7 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
 
                   if ((tcb_block->dupacks > 3) && (_feature_fast_rc || _feature_nr))
                     {
-                      tcb_block->snd_cwnd += 536;
+                      tcb_block->snd_cwnd +=  tcb_block->snd_mss;
                       snd_cwnd_size(tcb_block->snd_cwnd);
                     }
                   //Rolf       
@@ -1555,6 +1571,10 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
   
   if (seqNoGt(tcb_block->seg_ack, tcb_block->snd_una))
     {
+      // BCH zipizigi1@hotmail.com
+      unsigned long acked_octets;	  
+      acked_octets = tcb_block->seg_ack - tcb_block->snd_una;
+      // ECH
       tcb_block->rxtshift = 1;
       //Rolf
       bool deflat_window;
@@ -1731,7 +1751,9 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
         {
           if (tcb_block->snd_cwnd <= tcb_block->ssthresh)
             {
-              tcb_block->snd_cwnd += 536;
+              // BCH zipizigi1@hotmail.com
+              tcb_block->snd_cwnd += acked_octets;
+              // ECH
               snd_cwnd_size(tcb_block->snd_cwnd);
               if (debug) ev << "Incrementing the congestion window. New value: " << tcb_block->snd_cwnd << "\n";
             }
@@ -1742,7 +1764,7 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
             }
           else 
             {
-              tcb_block->snd_cwnd += 536;
+              tcb_block->snd_cwnd += tcb_block->snd_mss;
               snd_cwnd_size(tcb_block->snd_cwnd);
               tcb_block->cwnd_cnt = 0; 
               if (debug) ev << "Incrementing the congestion window. New value: " << tcb_block->snd_cwnd << "\n";
@@ -2072,6 +2094,7 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
   unsigned long rcv_queue_end;
   unsigned long seg_up;
   unsigned long num_bytes;
+  unsigned long seq_rec;
   SegRecord*    pseg_rec;
   SegRecord*    pnew_rec;
 
@@ -2162,6 +2185,8 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
 
               //put the data of the segment which is expected next in the tcp_data_receive_queue
               insertAtQueueTail(tcp_data_receive_queue, pdata, 0);
+              seq_rec = tcb_block->seg_seq;
+              seq_no_rec(seq_rec);
 
               //flush the initial octets that have arrived before the current incoming segment
               flushQueue(tcb_block->tcp_data_receive_queue, (tcb_block->rcv_nxt - tcb_block->seg_seq), false); 
@@ -2173,6 +2198,8 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
           else
             {
               insertAtQueueTail(tcp_data_receive_queue, pdata, 0);
+              seq_rec = tcb_block->seg_seq;
+              seq_no_rec(seq_rec);
 
               //update the sequence of the segment which is expected next
               tcb_block->rcv_nxt = tcb_block->rcv_buf_seq + numBitsInQueue(tcp_data_receive_queue) / 8 + numBitsInQueue(tcp_socket_queue) / 8;
@@ -2299,6 +2326,8 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
           if (seqNoGt((tcb_block->seg_seq + tcb_block->seg_len), rcv_queue_end))
             {
               insertAtQueueTail(tcp_resegm_queue, pdata, 0);
+              seq_rec = tcb_block->seg_seq;
+              seq_no_rec(seq_rec);
 
               //clip off the part that does not fit in the queue
               num_bytes = MIN(tcb_block->seg_len, (rcv_queue_end - tcb_block->rcv_nxt));
@@ -2977,7 +3006,9 @@ void TcpModule::rcvQueueProcess(TcpTcb* tcb_block)
       
       //set msg kind of ppkt
       ppkt->setKind(TCP_I_SEG_FWD);
-          ppkt->setName("TCP_I_SEG_FWD");
+      ppkt->setName("TCP_I_SEG_FWD");
+      ppkt->addPar("sequence") = tcb_block->rcv_buf_seq;
+      
 
       if ((tcb_block->num_pks_req == 0 && !tcb_block->rcv_up_valid) || num_pks_avail == 1)
         {
@@ -4043,7 +4074,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       break;
 
     case TCP_E_OPEN_ACTIVE:
-      //send SYN segment
+      //send SYN segment to remote TCP
       synSend(tcb_block, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET); 
 
       // set the connection-establishment timer to 75 seconds
@@ -4295,7 +4326,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       break;
       
     case TCP_E_RCV_SYN:
-      //create and send a SYN segment with the ACK flag set
+      //create and send a SYN segment with the ACK flag set to remote TCP
       synSend(tcb_block, TCP_F_NSET, TCP_F_NSET, TCP_F_NSET, TCP_F_SET, TCP_F_NSET, TCP_F_NSET); 
       // set the connection-establishment timer to 75 seconds
       tcb_block->timeout_conn_estab_msg = new cMessage("TIMEOUT_CONN_ESTAB",TIMEOUT_CONN_ESTAB);

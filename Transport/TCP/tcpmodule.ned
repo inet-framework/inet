@@ -65,12 +65,13 @@
 // 
 simple TcpModule
     parameters:
-      //# the following tow parameters are never used so far.
+      //# the following parameters are not used so far.
       //# TCPSlowStart   : bool,
       TCPDelayedAck  : bool,
       TCPFastRetrans : bool,
       TCPFastRecovery: bool,
-      TCPNewReno     : bool;
+      TCPNewReno     : bool,
+      mss: numeric; // maximum segment size
       //#debug: bool;
     gates:
       in: from_appl, from_ip;

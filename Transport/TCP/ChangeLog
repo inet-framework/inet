@@ -1,3 +1,13 @@
+2003-12-19  Andras Varga
+
+	* tcpmodule.cc: checked in patch from Joung Woong Lee [zipizigi1@hotmail.com]:
+	- bugfix: with delayed ack feature, an ack advanced the window by only 
+	  1 segment even if ack acknowledged several ones.
+	- added "mss" (maximum segment size) module parameter -- before it was
+	  536 hardcoded 
+        - added "cOutVector *rec_seq_no" for check receiver(client)'s data 
+          reception state
+
 2003-09-30  Andras Varga
 
 	* tcpmodule.cc: simplifications, more informative debug output
