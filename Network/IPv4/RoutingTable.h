@@ -208,7 +208,7 @@ class RoutingTable: public cSimpleModule
     typedef std::vector<RoutingEntry *> RouteVector;
     RouteVector routes;          // Unicast route array
     RouteVector multicastRoutes; // Multicast route array
-    RoutingEntry *defaultRoute;  // Default route
+    RoutingEntry *defaultRoute;  // Default route  FIXME REMOVE!!!!! should be a normal routingTable entry!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
   protected:

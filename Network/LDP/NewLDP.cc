@@ -51,9 +51,9 @@ void NewLDP::initialize()
     helloTimeout = par("helloTimeout").doubleValue();
 
     // we'll need routerId for HELLO messages
-    RoutingTable *rt = routingTableAccess.get();
-    routerId = rt->getRouterId();
-    ASSERT(!routerId.isNull());
+    //RoutingTable *rt = routingTableAccess.get();
+    //routerId = rt->getRouterId();
+    //ASSERT(!routerId.isNull());
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecSenderBinds);
@@ -105,7 +105,7 @@ void NewLDP::sendHelloTo(IPAddress dest)
     //hello->setTbit(...);
 
     UDPControlInfo *controlInfo = new UDPControlInfo();
-    //controlInfo->setSrcAddr(routerId);
+    //controlInfo->setSrcAddr(rt->getRouterId());
     controlInfo->setDestAddr(dest);
     controlInfo->setSrcPort(100);
     controlInfo->setDestPort(100);
@@ -125,7 +125,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
 
     ev << "Received LDP Hello from " << peerAddr << ", ";
 
-    if (peerAddr.isNull() || peerAddr==routerId)
+    if (peerAddr.isNull() || peerAddr==rt->getRouterId())
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
         ev << "that's myself, ignore\n";
@@ -144,7 +144,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = rt->interfaceByPortNo(inputPort)->name;
-    info.activeRole = peerAddr.getInt() > routerId.getInt();
+    info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = NULL;
     myPeers.push_back(info);
     int peerIndex = myPeers.size()-1;
@@ -310,7 +310,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     requestMsg->addPar("fecId") = fecId; // FIXME!!!
 
     requestMsg->setReceiverAddress(nextPeerAddr);
-    requestMsg->setSenderAddress(routerId);
+    requestMsg->setSenderAddress(rt->getRouterId());
 
     requestMsg->setLength(30*8); // FIXME find out actual length
 
@@ -512,7 +512,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         // Set dest to the requested upstream LSR
         lmMessage->setReceiverAddress(srcAddr);
-        lmMessage->setSenderAddress(routerId);
+        lmMessage->setSenderAddress(rt->getRouterId());
         lmMessage->addPar("fecId") = fecId;
 
         ev << "Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
@@ -545,7 +545,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         // Set dest to the requested upstream LSR
         lmMessage->setReceiverAddress(srcAddr);
-        lmMessage->setSenderAddress(routerId);
+        lmMessage->setSenderAddress(rt->getRouterId());
         lmMessage->addPar("fecId") = fecId;
 
         ev << "Send Label mapping to " << "LSR(" << srcAddr << ")\n";
@@ -565,7 +565,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         if (!peerIP.isNull())
         {
             packet->setReceiverAddress(peerIP);
-            packet->setSenderAddress(routerId);
+            packet->setSenderAddress(rt->getRouterId());
 
             ev << "Propagating Label Request from LSR(" <<
                 packet->getSenderAddress() << " to " <<
@@ -644,8 +644,10 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         packet->setFec(fec);
         IPAddress addrToSend = findPeerAddrFromInterface(inInterface);
 
+        RoutingTable *rt = routingTableAccess.get();
+
         packet->setReceiverAddress(addrToSend);
-        packet->setSenderAddress(routerId);
+        packet->setSenderAddress(rt->getRouterId());
 
         ev << "Sends Label mapping label=" << inLabel <<
             " for fec =" << IPAddress(fec) << " to " << "LSR(" << addrToSend << ")\n";
