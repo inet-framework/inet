@@ -180,8 +180,8 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
     RoutingTable *rt = routingTableAccess.get();
 
-    // DVMRP: process datagram only if sent locally or arrived on the shortest 
-    // route (provided routing table already contains srcAddr); otherwise 
+    // DVMRP: process datagram only if sent locally or arrived on the shortest
+    // route (provided routing table already contains srcAddr); otherwise
     // discard and continue.
     int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
     int shortestPathInputPort = rt->outputPortNo(datagram->srcAddress());
@@ -249,6 +249,9 @@ void IP::localDeliver(IPDatagram *datagram)
     // Defragmentation. skip defragmentation if datagram is not fragmented
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
+        ev << "Datagram fragment: offset=" << datagram->fragmentOffset()
+           << ", MORE=" << (datagram->moreFragments() ? "true" : "false") << ".\n";
+
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
         if (simTime() >= lastCheckTime + 10)
         {
@@ -258,7 +261,11 @@ void IP::localDeliver(IPDatagram *datagram)
 
         datagram = fragbuf.addFragment(datagram, simTime());
         if (!datagram)
+        {
+            ev << "No complete datagram yet.\n";
             return;
+        }
+        ev << "This fragment completes the datagram.\n";
     }
 
     // decapsulate and send on appropriate output gate
