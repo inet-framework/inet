@@ -82,7 +82,7 @@ class ICMPQuery
 //
 // ICMP message class
 //
-class ICMPMessage extends cPacket
+message ICMPMessage
 {
   fields:
     int type enum(ICMPType);
