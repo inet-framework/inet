@@ -87,6 +87,11 @@ void FlatNetworkConfigurator::initialize(int stage)
     for (i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *node = topo.node(i);
+
+        // skip bus types
+        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(i)->module()->className())!=nonIPTypes.end())
+            continue;
+
         RoutingTable *rt = IPAddressResolver().routingTableOf(node->module());
 
         // count non-loopback interfaces
