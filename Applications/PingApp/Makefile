@@ -100,15 +100,4 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 PingApp.o: PingApp.cc \
   PingApp.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h \
-  ../../Network/IPv4/Core/IPDatagram.h \
-  ../../Network/IPv4/Core/ICMP.h \
-  ../../Base/basic_consts.h \
-  ../../Base/QueueBase.h \
-  ../../Network/IPv4/Core/RoutingTableAccess.h \
-  ../../Network/IPv4/Core/ICMPMessage.h \
-  ../../Base/AbstractQueue.h \
-  ../../Base/ModuleAccess.h \
-  ../../Network/IPv4/Core/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/Core/IPAddress.h
+  ../../Base/basic_consts.h

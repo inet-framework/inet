@@ -37,10 +37,10 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TCPInterfacePacket_m.o TCPSegment_m.o TransportInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o Tcp2Ip.o pcb.o tcpmodule.o
+OBJS= TCPInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o pcb.o Tcp2Ip.o tcpmodule.o
 
 # header files generated (from msg files)
-GENERATEDHEADERS= TCPInterfacePacket_m.h TCPSegment_m.h TransportInterfacePacket_m.h TransportPacket_m.h
+GENERATEDHEADERS= TCPInterfacePacket_m.h TransportPacket_m.h
 
 #------------------------------------------------------------------------------
 
@@ -63,18 +63,6 @@ TCPInterfacePacket_m.o: TCPInterfacePacket_m.cc
 TCPInterfacePacket_m.cc TCPInterfacePacket_m.h: TCPInterfacePacket.msg
 	$(MSGC) $(INCLUDE_PATH) TCPInterfacePacket.msg
 
-TCPSegment_m.o: TCPSegment_m.cc
-	$(CXX) -c $(NEDCOPTS) TCPSegment_m.cc
-
-TCPSegment_m.cc TCPSegment_m.h: TCPSegment.msg
-	$(MSGC) $(INCLUDE_PATH) TCPSegment.msg
-
-TransportInterfacePacket_m.o: TransportInterfacePacket_m.cc
-	$(CXX) -c $(NEDCOPTS) TransportInterfacePacket_m.cc
-
-TransportInterfacePacket_m.cc TransportInterfacePacket_m.h: TransportInterfacePacket.msg
-	$(MSGC) $(INCLUDE_PATH) TransportInterfacePacket.msg
-
 TransportPacket_m.o: TransportPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) TransportPacket_m.cc
 
@@ -84,11 +72,11 @@ TransportPacket_m.cc TransportPacket_m.h: TransportPacket.msg
 Ip2Tcp.o: Ip2Tcp.cc
 	$(CXX) -c $(COPTS) Ip2Tcp.cc
 
-Tcp2Ip.o: Tcp2Ip.cc
-	$(CXX) -c $(COPTS) Tcp2Ip.cc
-
 pcb.o: pcb.cc
 	$(CXX) -c $(COPTS) pcb.cc
+
+Tcp2Ip.o: Tcp2Ip.cc
+	$(CXX) -c $(COPTS) Tcp2Ip.cc
 
 tcpmodule.o: tcpmodule.cc
 	$(CXX) -c $(COPTS) tcpmodule.cc
@@ -133,14 +121,12 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 Ip2Tcp.o: Ip2Tcp.cc \
   TransportPacket.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h \
-  ../../Network/IPv4/Core/IPAddress.h
-Tcp2Ip.o: Tcp2Ip.cc \
-  TransportPacket.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Network/IPv4/Core/IPAddress.h
 pcb.o: pcb.cc \
   pcb.h \
+  ../../Network/IPv4/Core/IPAddress.h
+Tcp2Ip.o: Tcp2Ip.cc \
+  TransportPacket.h \
   ../../Network/IPv4/Core/IPAddress.h
 tcpmodule.o: tcpmodule.cc \
   tcp.h

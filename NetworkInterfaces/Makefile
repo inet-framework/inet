@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  PPP-old Queues
+SUBDIRS=  _802 ARP Ethernet PPP Queues
 
 # object files in this directory
 OBJS=  
@@ -57,8 +57,17 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
-PPP-old:
-	cd PPP-old && $(MAKE)
+_802:
+	cd _802 && $(MAKE)
+
+ARP:
+	cd ARP && $(MAKE)
+
+Ethernet:
+	cd Ethernet && $(MAKE)
+
+PPP:
+	cd PPP && $(MAKE)
 
 Queues:
 	cd Queues && $(MAKE)

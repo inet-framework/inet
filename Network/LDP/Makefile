@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  LDPInterface.o LDPpacket.o LDPproc.o UDPAppInterface.o tcpclientproc.o tcpserverproc.o
+OBJS=  LDPInterface.o LDPpacket.o LDPproc.o tcpclientproc.o tcpserverproc.o UDPAppInterface.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -66,14 +66,14 @@ LDPpacket.o: LDPpacket.cc
 LDPproc.o: LDPproc.cc
 	$(CXX) -c $(COPTS) LDPproc.cc
 
-UDPAppInterface.o: UDPAppInterface.cc
-	$(CXX) -c $(COPTS) UDPAppInterface.cc
-
 tcpclientproc.o: tcpclientproc.cc
 	$(CXX) -c $(COPTS) tcpclientproc.cc
 
 tcpserverproc.o: tcpserverproc.cc
 	$(CXX) -c $(COPTS) tcpserverproc.cc
+
+UDPAppInterface.o: UDPAppInterface.cc
+	$(CXX) -c $(COPTS) UDPAppInterface.cc
 
 
 #doc: neddoc doxy
@@ -153,11 +153,6 @@ LDPproc.o: LDPproc.cc \
   ../../Base/ipsuite_defs.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h
-UDPAppInterface.o: UDPAppInterface.cc \
-  ../../Transport/TCP/TransportInterfacePacket.h \
-  ../../Transport/UDP/UDPPacket.h \
-  ../IPv4/Core/IPInterfacePacket.h \
-  ../IPv4/Core/IPAddress.h
 tcpclientproc.o: tcpclientproc.cc \
   ../../Transport/TCP/tcp.h \
   ../IPv4/Core/IPAddress.h \
@@ -165,4 +160,7 @@ tcpclientproc.o: tcpclientproc.cc \
 tcpserverproc.o: tcpserverproc.cc \
   ../../Transport/TCP/tcp.h \
   ../MPLS/ConstType.h \
+  ../IPv4/Core/IPAddress.h
+UDPAppInterface.o: UDPAppInterface.cc \
+  ../../Transport/UDP/UDPPacket.h \
   ../IPv4/Core/IPAddress.h

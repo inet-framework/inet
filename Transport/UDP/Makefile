@@ -37,10 +37,10 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPInterfacePacket_m.o UDPPacket_m.o UDPProcessing.o
+OBJS= UDPControlInfo_m.o UDPPacket_m.o UDPProcessing.o
 
 # header files generated (from msg files)
-GENERATEDHEADERS= UDPInterfacePacket_m.h UDPPacket_m.h
+GENERATEDHEADERS= UDPControlInfo_m.h UDPPacket_m.h
 
 #------------------------------------------------------------------------------
 
@@ -57,11 +57,11 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
-UDPInterfacePacket_m.o: UDPInterfacePacket_m.cc
-	$(CXX) -c $(NEDCOPTS) UDPInterfacePacket_m.cc
+UDPControlInfo_m.o: UDPControlInfo_m.cc
+	$(CXX) -c $(NEDCOPTS) UDPControlInfo_m.cc
 
-UDPInterfacePacket_m.cc UDPInterfacePacket_m.h: UDPInterfacePacket.msg
-	$(MSGC) $(INCLUDE_PATH) UDPInterfacePacket.msg
+UDPControlInfo_m.cc UDPControlInfo_m.h: UDPControlInfo.msg
+	$(MSGC) $(INCLUDE_PATH) UDPControlInfo.msg
 
 UDPPacket_m.o: UDPPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) UDPPacket_m.cc
@@ -113,5 +113,4 @@ re-makemake-m: makefile-ins
 UDPProcessing.o: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Base/basic_consts.h

@@ -101,5 +101,4 @@ re-makemake-m: makefile-ins
 UDPApp.o: UDPApp.cc \
   UDPApp.h \
   ../../Util/StringTokenizer.h \
-  ../../Base/basic_consts.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h
+  ../../Base/basic_consts.h

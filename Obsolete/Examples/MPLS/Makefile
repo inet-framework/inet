@@ -34,7 +34,7 @@ include ../../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  TestTE1 TestTE2 TestTE3 TestTE4 TestTE4Old TestTE5 TestTE6 Tester demo2 ldp-mpls1 samples
+SUBDIRS=  demo2 ldp-mpls1 Tester TestTE1 TestTE2 TestTE3 TestTE4 TestTE4Old TestTE5 TestTE6
 
 # object files in this directory
 OBJS=  
@@ -65,6 +65,15 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
+demo2:
+	cd demo2 && $(MAKE)
+
+ldp-mpls1:
+	cd ldp-mpls1 && $(MAKE)
+
+Tester:
+	cd Tester && $(MAKE)
+
 TestTE1:
 	cd TestTE1 && $(MAKE)
 
@@ -85,18 +94,6 @@ TestTE5:
 
 TestTE6:
 	cd TestTE6 && $(MAKE)
-
-Tester:
-	cd Tester && $(MAKE)
-
-demo2:
-	cd demo2 && $(MAKE)
-
-ldp-mpls1:
-	cd ldp-mpls1 && $(MAKE)
-
-samples:
-	cd samples && $(MAKE)
 
 
 #doc: neddoc doxy

@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  OspfTe.o RSVP.o RSVPApp.o RSVPInterface.o TED.o rsvp_message.o
+OBJS=  OspfTe.o RSVPApp.o RSVP.o RSVPInterface.o rsvp_message.o TED.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -60,20 +60,20 @@ subdirs: $(SUBDIRS)
 OspfTe.o: OspfTe.cc
 	$(CXX) -c $(COPTS) OspfTe.cc
 
-RSVP.o: RSVP.cc
-	$(CXX) -c $(COPTS) RSVP.cc
-
 RSVPApp.o: RSVPApp.cc
 	$(CXX) -c $(COPTS) RSVPApp.cc
+
+RSVP.o: RSVP.cc
+	$(CXX) -c $(COPTS) RSVP.cc
 
 RSVPInterface.o: RSVPInterface.cc
 	$(CXX) -c $(COPTS) RSVPInterface.cc
 
-TED.o: TED.cc
-	$(CXX) -c $(COPTS) TED.cc
-
 rsvp_message.o: rsvp_message.cc
 	$(CXX) -c $(COPTS) rsvp_message.cc
+
+TED.o: TED.cc
+	$(CXX) -c $(COPTS) TED.cc
 
 
 #doc: neddoc doxy
@@ -120,27 +120,6 @@ OspfTe.o: OspfTe.cc \
   ../../Transport/TCP/tcp.h \
   intserv.h \
   TED.h
-RSVP.o: RSVP.cc \
-  RSVP.h \
-  ../IPv4/Core/IPAddress.h \
-  ../MPLS/MPLSModule.h \
-  ../IPv4/Core/RoutingTable.h \
-  ../../Transport/TCP/tcp.h \
-  intserv.h \
-  rsvp_message.h \
-  TED.h \
-  OspfTe.h \
-  ../MPLS/LIBTableAccess.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Transport/TCP/TransportPacket.h \
-  ospf_type.h \
-  ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h \
-  ../IPv4/Core/RoutingTableAccess.h \
-  ../MPLS/ip_address_prefix.h \
-  ../MPLS/ConstType.h \
-  ../MPLS/MPLSPacket.h \
-  ../IPv4/Core/IPDatagram.h
 RSVPApp.o: RSVPApp.cc \
   RSVPApp.h \
   ../IPv4/Core/RoutingTable.h \
@@ -167,14 +146,39 @@ RSVPApp.o: RSVPApp.cc \
   ../../Base/ipsuite_defs.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h
+RSVP.o: RSVP.cc \
+  RSVP.h \
+  ../IPv4/Core/IPAddress.h \
+  ../MPLS/MPLSModule.h \
+  ../IPv4/Core/RoutingTable.h \
+  ../../Transport/TCP/tcp.h \
+  intserv.h \
+  rsvp_message.h \
+  TED.h \
+  OspfTe.h \
+  ../MPLS/LIBTableAccess.h \
+  ../../Base/ipsuite_defs.h \
+  ../../Transport/TCP/TransportPacket.h \
+  ospf_type.h \
+  ../../Base/ModuleAccess.h \
+  ../MPLS/LIBtable.h \
+  ../IPv4/Core/RoutingTableAccess.h \
+  ../MPLS/ip_address_prefix.h \
+  ../MPLS/ConstType.h \
+  ../MPLS/MPLSPacket.h \
+  ../IPv4/Core/IPDatagram.h
 RSVPInterface.o: RSVPInterface.cc \
   rsvp_message.h \
   RSVPInterface.h \
-  ../IPv4/Core/IPInterfacePacket.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
   ../../Base/basic_consts.h
+rsvp_message.o: rsvp_message.cc \
+  rsvp_message.h \
+  intserv.h \
+  ../IPv4/Core/IPAddress.h \
+  ../../Transport/TCP/TransportPacket.h
 TED.o: TED.cc \
   ../MPLS/MPLSModule.h \
   TED.h \
@@ -190,8 +194,3 @@ TED.o: TED.cc \
   ../MPLS/ip_address_prefix.h \
   ../IPv4/Core/IPAddress.h \
   ../../Base/ipsuite_defs.h
-rsvp_message.o: rsvp_message.cc \
-  rsvp_message.h \
-  intserv.h \
-  ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportPacket.h

@@ -34,12 +34,14 @@ Define_Module( MACRelayUnitNP );
 
 
 
+/*FIXME remove
 static cEnvir& operator<< (cEnvir& ev, const MACAddress& addr)
 {
     char buf[20];
     EV << addr.toHexString(buf);
     return ev;
 }
+*/
 
 static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 {

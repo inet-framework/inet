@@ -37,7 +37,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  StringTokenizer.o stlwatch.o
+OBJS=  stlwatch.o StringTokenizer.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -57,11 +57,11 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
-StringTokenizer.o: StringTokenizer.cc
-	$(CXX) -c $(COPTS) StringTokenizer.cc
-
 stlwatch.o: stlwatch.cc
 	$(CXX) -c $(COPTS) stlwatch.cc
+
+StringTokenizer.o: StringTokenizer.cc
+	$(CXX) -c $(COPTS) StringTokenizer.cc
 
 
 #doc: neddoc doxy
@@ -101,7 +101,7 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-StringTokenizer.o: StringTokenizer.cc \
-  StringTokenizer.h
 stlwatch.o: stlwatch.cc \
   stlwatch.h
+StringTokenizer.o: StringTokenizer.cc \
+  StringTokenizer.h

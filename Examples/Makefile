@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  IPSuite MPLS RTP
+SUBDIRS=  Ethernet IPSuite MPLS RTP
 
 # object files in this directory
 OBJS=  
@@ -66,6 +66,9 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
+
+Ethernet:
+	cd Ethernet && $(MAKE)
 
 IPSuite:
 	cd IPSuite && $(MAKE)

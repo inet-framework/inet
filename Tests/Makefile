@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  MPLS
+SUBDIRS=  MPLS NewTCP
 
 # object files in this directory
 OBJS=  
@@ -59,6 +59,9 @@ subdirs: $(SUBDIRS)
 
 MPLS:
 	cd MPLS && $(MAKE)
+
+NewTCP:
+	cd NewTCP && $(MAKE)
 
 
 #doc: neddoc doxy

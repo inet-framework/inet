@@ -8,7 +8,7 @@
 #
 # Local configuration
 #
-NEDC=/home/andras/omnetpp/bin/nedtool
+NEDC=/home/andras/omnetpp-cvs/bin/nedtool
 MSGC=opp_msgc
 CXX=g++
 CC=gcc
@@ -24,8 +24,8 @@ EXE_SUFFIX=
 WITH_PARSIM=yes
 WITH_NETBUILDER=yes
 
-OMNETPP_INCL_DIR=/home/andras/omnetpp/include
-OMNETPP_LIB_DIR=/home/andras/omnetpp/lib
+OMNETPP_INCL_DIR=/home/andras/omnetpp-cvs/include
+OMNETPP_LIB_DIR=/home/andras/omnetpp-cvs/lib
 
 TK_LIBS=-L/usr/X11R6/lib -lX11 -ltk8.4 -ltcl8.4
 MPI_LIBS=

@@ -37,7 +37,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  AbstractQueue.o Join.o ModuleAccess.o QueueBase.o QueueWithQoS.o Sink.o
+OBJS=  AbstractQueue.o Blackboard.o Join.o ModuleAccess.o QueueBase.o QueueWithQoS.o Sink.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -59,6 +59,9 @@ subdirs: $(SUBDIRS)
 
 AbstractQueue.o: AbstractQueue.cc
 	$(CXX) -c $(COPTS) AbstractQueue.cc
+
+Blackboard.o: Blackboard.cc
+	$(CXX) -c $(COPTS) Blackboard.cc
 
 Join.o: Join.cc
 	$(CXX) -c $(COPTS) Join.cc
@@ -115,6 +118,8 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 AbstractQueue.o: AbstractQueue.cc \
   AbstractQueue.h
+Blackboard.o: Blackboard.cc \
+  Blackboard.h
 Join.o: Join.cc
 ModuleAccess.o: ModuleAccess.cc \
   ModuleAccess.h

@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  LIBtable.o MPLSModule.o MPLSPacket.o ip_address_prefix.o
+OBJS=  ip_address_prefix.o LIBtable.o MPLSModule.o MPLSPacket.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -57,6 +57,9 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
+ip_address_prefix.o: ip_address_prefix.cc
+	$(CXX) -c $(COPTS) ip_address_prefix.cc
+
 LIBtable.o: LIBtable.cc
 	$(CXX) -c $(COPTS) LIBtable.cc
 
@@ -65,9 +68,6 @@ MPLSModule.o: MPLSModule.cc
 
 MPLSPacket.o: MPLSPacket.cc
 	$(CXX) -c $(COPTS) MPLSPacket.cc
-
-ip_address_prefix.o: ip_address_prefix.cc
-	$(CXX) -c $(COPTS) ip_address_prefix.cc
 
 
 #doc: neddoc doxy
@@ -107,6 +107,9 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+ip_address_prefix.o: ip_address_prefix.cc \
+  ip_address_prefix.h \
+  ../IPv4/Core/IPAddress.h
 LIBtable.o: LIBtable.cc \
   LIBtable.h \
   ../../Util/StringTokenizer.h \
@@ -133,6 +136,3 @@ MPLSModule.o: MPLSModule.cc \
   ../../Base/ipsuite_defs.h
 MPLSPacket.o: MPLSPacket.cc \
   MPLSPacket.h
-ip_address_prefix.o: ip_address_prefix.cc \
-  ip_address_prefix.h \
-  ../IPv4/Core/IPAddress.h

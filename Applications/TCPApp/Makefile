@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  MyTCPClient.o MyTCPServer.o TCPClient.o TCPServer.o mytcpserverproc.o procserver.o
+OBJS=  MyTCPClient.o MyTCPServer.o mytcpserverproc.o procserver.o TCPClient.o TCPServer.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -63,17 +63,17 @@ MyTCPClient.o: MyTCPClient.cc
 MyTCPServer.o: MyTCPServer.cc
 	$(CXX) -c $(COPTS) MyTCPServer.cc
 
-TCPClient.o: TCPClient.cc
-	$(CXX) -c $(COPTS) TCPClient.cc
-
-TCPServer.o: TCPServer.cc
-	$(CXX) -c $(COPTS) TCPServer.cc
-
 mytcpserverproc.o: mytcpserverproc.cc
 	$(CXX) -c $(COPTS) mytcpserverproc.cc
 
 procserver.o: procserver.cc
 	$(CXX) -c $(COPTS) procserver.cc
+
+TCPClient.o: TCPClient.cc
+	$(CXX) -c $(COPTS) TCPClient.cc
+
+TCPServer.o: TCPServer.cc
+	$(CXX) -c $(COPTS) TCPServer.cc
 
 
 #doc: neddoc doxy
@@ -119,12 +119,12 @@ MyTCPClient.o: MyTCPClient.cc \
 MyTCPServer.o: MyTCPServer.cc \
   ../../Transport/TCP/tcp.h \
   ../../Network/IPv4/Core/IPAddress.h
-TCPClient.o: TCPClient.cc \
-  ../../Transport/TCP/tcp.h
-TCPServer.o: TCPServer.cc \
-  ../../Transport/TCP/tcp.h
 mytcpserverproc.o: mytcpserverproc.cc \
   ../../Transport/TCP/tcp.h \
   ../../Network/IPv4/Core/IPAddress.h
 procserver.o: procserver.cc \
+  ../../Transport/TCP/tcp.h
+TCPClient.o: TCPClient.cc \
+  ../../Transport/TCP/tcp.h
+TCPServer.o: TCPServer.cc \
   ../../Transport/TCP/tcp.h

@@ -29,12 +29,12 @@
 typedef unsigned long ulong;
 typedef unsigned int uint32;
 
-#ifndef _MSC_VER
-// MSVC6.0 gives C1017: invalid integer constant expression on following line :(
-# if (sizeof(int)!=4)
-#  error unsigned int is not 32 bits -- modify uint32 definition in ipsuite_defs.h
-# endif
-#endif
+//FIXME Check below doesn't work:
+// MSVC6.0 gives C1017: invalid integer constant expression
+// GCC: some other weird error
+//# if (sizeof(int)!=4)
+//#  error unsigned int is not 32 bits -- modify uint32 definition in ipsuite_defs.h
+//# endif
 
 
 //

@@ -49,6 +49,7 @@ enum TcpStatusInd
     TCP_I_CLOSING = 4;          // FIN received
     TCP_I_CLOSED = 5;           // connection in CLOSED
     TCP_I_CONNECTION_RESET = 6; // connection reset
+    TCP_I_STATUS = 7;           // status
 };
 
 

@@ -29,12 +29,15 @@
 #include "Ethernet.h"
 
 
+/*FIXME remove
 static cEnvir& operator<< (cEnvir& ev, const MACAddress& addr)
 {
     char buf[20];
     ev << addr.toHexString(buf);
     return ev;
 }
+*/
+
 static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
 {
     char buf[20];
