@@ -431,10 +431,10 @@ void RSVP::processPathMsg(RSVPPathMsg * pmsg, int InIf)
         {
             ev << "Execute PATH REFRESH SEQUENCE\n";
 
-            if ((pmsg->hasERO()))
-                PathRefresh(cPSB, cPSB->OutInterface_List, ERO);
+            if (pmsg->hasERO())
+                refreshPath(cPSB, cPSB->OutInterface_List, ERO);
             else
-                PathRefresh(cPSB, cPSB->OutInterface_List, NULL);
+                refreshPath(cPSB, cPSB->OutInterface_List, NULL);
 
         }
         /*
@@ -962,7 +962,7 @@ void RSVP::processResvMsg(RSVPResvMsg * rmsg)
                         activeRSB->label[k] = (*fdlist).label;
                 }
 
-                ResvRefresh(activeRSB, Refresh_PHOP_list[i]);
+                refreshResv(activeRSB, Refresh_PHOP_list[i]);
             }
         }
     }
@@ -1245,7 +1245,7 @@ void RSVP::processResvErrorMsg(RSVPResvError * rmsg)
     send(rmsg, "to_ip");
 
 }
-void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
+void RSVP::refreshPath(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 {
     RSVPPathMsg *pm = new RSVPPathMsg("Path");
 
@@ -1334,13 +1334,11 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     }
 
     ev << "Next peer IP " << IPAddress(nextPeerIP) << "\n";
-    pm->addPar("peerInf") = nextPeerInf;  // FIXME ever used?
-    //pm->addPar("dest_addr") = IPAddress(nextPeerIP).str().c_str();
-    //send(pm, "to_ip");
+    pm->addPar("peerInf") = nextPeerInf;
     sendToIP(pm, IPAddress(nextPeerIP));
 }
 
-void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
+void RSVP::refreshResv(ResvStateBlock_t * rsbEle, int PH)
 {
 
     int i;
@@ -2106,7 +2104,7 @@ int RSVP::GetFwdFS(int oi, FlowSpecObj_t * fwdFS)
     return 1;
 }
 
-void RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)        // FIXME change to int& outl
+void RSVP::Mcast_Route_Query(int srcAddr, int iad, int destAddr, int *outl)        // FIXME change to int& outl
 {
     RoutingTable *rt = routingTableAccess.get();
 

@@ -184,9 +184,9 @@ private:
     void processResvErrorMsg(RSVPResvError *rmsg);
 
     bool isLocalAddress(int ip);
-    void PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero ) ;
+    void refreshPath( PathStateBlock_t *psbEle , int OI, EroObj_t* ero ) ;
         //PathRefresh( PathStateBlock_t *psbEle , int OI, int* ero );
-    void ResvRefresh( ResvStateBlock_t *rsbEle, int PH );
+    void refreshResv( ResvStateBlock_t *rsbEle, int PH );
     void RTearFwd(ResvStateBlock_t *rsbEle, int PH);
     int updateTrafficControl(ResvStateBlock_t *activeRSB);
     void removeTrafficControl(ResvStateBlock_t *activeRSB);
@@ -226,7 +226,7 @@ private:
 
     void sendToIP(cMessage *msg, IPAddress destAddr);
 
-    void Mcast_Route_Query(int sa, int iad, int da, int *outl);
+    void Mcast_Route_Query(int srcAddr, int iad, int destAddr, int *outl);
 
  public:
     Module_Class_Members(RSVP, cSimpleModule, 0);
