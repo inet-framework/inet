@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= L2_DequeueHook_n.obj L2_EnqueueHook_n.obj NF_IP_FORWARD_n.obj NF_IP_LOCAL_IN_n.obj NF_IP_LOCAL_OUT_n.obj NF_IP_POST_ROUTING_n.obj NF_IP_PRE_ROUTING_n.obj   L2_Hookstubs.obj Netfilters.obj     
+OBJS= L2_DequeueHook_n.obj L2_EnqueueHook_n.obj NF_IP_FORWARD_n.obj NF_IP_LOCAL_IN_n.obj NF_IP_LOCAL_OUT_n.obj NF_IP_POST_ROUTING_n.obj NF_IP_PRE_ROUTING_n.obj L2_Hookstubs.obj Netfilters.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

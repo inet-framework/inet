@@ -1,9 +1,9 @@
-set root=C:\home\opp-rsvp-te\ipsuite-rearranged
+set root=D:\home\IPSuite
 :set MAKEMAKE=call %root%\opp_nmakemake
 set MAKEMAKE=cmd /c %root%\opp_nmakemake
 
-set ICONV=C:/home/tools/iconv-1.8.win32
-set LIBXML=C:/home/tools/libxml2-2.5.4.win32
+set ICONV=D:/home/tools/iconv-1.8.win32
+set LIBXML=D:/home/tools/libxml2-2.5.4.win32
 
 set LIBXML_INCLUDES=-I%LIBXML%/include -I%ICONV%/include
 set LIBXML_LIBS=%LIBXML%/lib/libxml2.lib %ICONV%/lib/iconv.lib

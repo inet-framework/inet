@@ -2,8 +2,8 @@
 # Config file for the IPSuite. This is included by every makefile.
 #
 
-ROOT=C:\home\opp-rsvp-te\ipsuite-rearranged
+ROOT=d:\home\IPSuite
 
-OMNETPP_ROOT=c:\home\omnetpp
+OMNETPP_ROOT=d:\home\omnetpp
 
 !include $(OMNETPP_ROOT)\configuser.vc

@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ProcessorManager_n.obj ProcessorAccess.obj ProcessorManager.obj 
+OBJS= ProcessorManager_n.obj ProcessorAccess.obj ProcessorManager.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
