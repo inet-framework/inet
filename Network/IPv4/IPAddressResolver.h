@@ -66,8 +66,8 @@ class IPAddressResolver
 
     /**
      * The function tries to look up the RoutingTable module as submodule
-     * <tt>"networkLayer.routingTable"</tt> within the host/router module.
-     * Throws an error if not found.
+     * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
+     * the host/router module. Throws an error if not found.
      */
     RoutingTable *routingTableOf(cModule *host);
     //@}

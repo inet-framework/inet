@@ -73,10 +73,13 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
 RoutingTable *IPAddressResolver::routingTableOf(cModule *host)
 {
     // find RoutingTable
-    cModule *rtmod = host->moduleByRelativePath("networkLayer.routingTable");
+    cModule *rtmod = host->submodule("routingTable");
     if (!rtmod)
-        opp_error("IPAddressResolver: RoutingTable not found as networkLayer.routingTable "
-                  "within host/router module `%s'", host->fullPath());
+        rtmod = host->moduleByRelativePath("networkLayer.routingTable");
+    if (!rtmod)
+        opp_error("IPAddressResolver: RoutingTable not found as `routingTable' or "
+                  "`networkLayer.routingTable' within host/router module `%s'",
+                  host->fullPath());
     return check_and_cast<RoutingTable *>(rtmod);
 }
 

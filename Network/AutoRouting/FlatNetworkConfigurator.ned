@@ -44,7 +44,8 @@
 // \IP nodes, that is, not listed in the nonIPModuleTypes parameter.
 //
 // It is assumed that the routing table (RoutingTable module) is the
-// "networkLayer.routingTable" submodule in all hosts and routers.
+// "routingTable" or "networkLayer.routingTable" submodule in all hosts
+// and routers.
 //
 // To avoid interference with the above algorithm, it's recommended that
 // no host or router should have its address set explicitly, and
@@ -58,7 +59,7 @@
 simple FlatNetworkConfigurator
     parameters:
         moduleTypes: string, // all module types to be considered part of the topology
-        nonIPModuleTypes: string, // module types which don't need \IP configuration 
+        nonIPModuleTypes: string, // module types which don't need \IP configuration
                                   // (e.g. Ethernet hub, switch or bus)
         networkAddress: string, // network part of the address (see netmask parameter)
         netmask: string; // host part of addresses are autoconfigured
