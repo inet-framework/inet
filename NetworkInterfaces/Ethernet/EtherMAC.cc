@@ -42,7 +42,7 @@ unsigned int EtherMAC::autoAddressCtr = 0;
 
 void EtherMAC::initialize()
 {
-    outputbuffer.setName("outputBuffer");
+    queue.setName("queue");
 
     frameBeingReceived = NULL;
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
@@ -279,12 +279,12 @@ void EtherMAC::handleAutoconfigMessage(cMessage *msg)
             char modestr[64];
             sprintf(modestr, "%dMb\n%s", int(txrate/1000000), (duplexMode ? "full duplex" : "half duplex"));
             displayString().setTagArg("t",0,modestr);
-            displayString().setTagArg("t",1,"r");
+            //displayString().setTagArg("t",1,"r");
             sprintf(modestr, "%s: %dMb %s", fullName(), int(txrate/1000000), (duplexMode ? "duplex" : "half duplex"));
             parentModule()->bubble(modestr);
         }
 
-        if (!outputbuffer.empty())
+        if (!queue.empty())
         {
             EV << "Autoconfig period over, starting to send frames\n";
             scheduleEndIFGPeriod();
@@ -360,6 +360,9 @@ void EtherMAC::handleMessage (cMessage *msg)
         }
     }
     printState();
+
+    if (ev.isGUI())
+        updateDisplayString();
 }
 
 
@@ -390,7 +393,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     {
         numFramesFromHL++;
 
-        if (outputbuffer.length()>=maxQueueSize)
+        if (queue.length()>=maxQueueSize)
         {
             EV << "Packet " << frame << " arrived from higher layers but queue full, dropping\n";
             numFramesFromHLDropped++;
@@ -405,17 +408,17 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
         // store frame and possibly begin transmitting
         EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
-        outputbuffer.insert(frame);
+        queue.insert(frame);
     }
     else
     {
         EV << "PAUSE received from higher layer\n";
 
         // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
-        if (!outputbuffer.empty())
-            outputbuffer.insertBefore(outputbuffer.tail(), frame);  // tail() frame is probably being transmitted
+        if (!queue.empty())
+            queue.insertBefore(queue.tail(), frame);  // tail() frame is probably being transmitted
         else
-            outputbuffer.insert(frame);
+            queue.insert(frame);
     }
 
     if (!autoconfigInProgress && (duplexMode || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
@@ -552,11 +555,11 @@ void EtherMAC::handleEndIFGPeriod()
     if (transmitState!=WAIT_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
-    if (outputbuffer.empty())
+    if (queue.empty())
         error("End of IFG and no frame to transmit");
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
-    cMessage *frame = (cMessage *)outputbuffer.tail();
+    cMessage *frame = (cMessage *)queue.tail();
     EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
@@ -580,7 +583,7 @@ void EtherMAC::handleEndIFGPeriod()
 
 void EtherMAC::startFrameTransmission()
 {
-    cMessage *origFrame = (cMessage *)outputbuffer.tail();
+    cMessage *origFrame = (cMessage *)queue.tail();
     EV << "Transmitting a copy of frame " << origFrame << endl;
     cMessage *frame = (cMessage *) origFrame->dup();
 
@@ -636,11 +639,11 @@ void EtherMAC::handleEndTxPeriod()
     if (transmitState!=TRANSMITTING_STATE || (!duplexMode && receiveState!=RX_IDLE_STATE))
         error("End of transmission, and incorrect state detected");
 
-    if (outputbuffer.empty())
+    if (queue.empty())
         error("Frame under transmission cannot be found");
 
     // get frame from buffer
-    cMessage *frame = (cMessage*)outputbuffer.pop();
+    cMessage *frame = (cMessage*)queue.pop();
 
     numFramesSent++;
     numBytesSent += frame->length()/8;
@@ -677,7 +680,7 @@ void EtherMAC::handleEndTxPeriod()
     // Gigabit Ethernet: now decide if we transmit next frame right away (burst) or wait IFG
     // FIXME! this is not entirely correct, there must be IFG between burst frames too
     bool burstFrame=false;
-    if (frameBursting && !outputbuffer.empty())
+    if (frameBursting && !queue.empty())
     {
         // check if max bytes for burst not exceeded
         if (bytesSentInBurst<GIGABIT_MAX_BURST_BYTES)
@@ -716,7 +719,7 @@ void EtherMAC::handleEndRxPeriod()
     receiveState = RX_IDLE_STATE;
     numConcurrentTransmissions = 0;
 
-    if (transmitState==TX_IDLE_STATE && !outputbuffer.empty())
+    if (transmitState==TX_IDLE_STATE && !queue.empty())
     {
         EV << "Receiver now idle, can transmit frames in output buffer after IFG period\n";
         scheduleEndIFGPeriod();
@@ -727,7 +730,7 @@ void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
         error("At end of BACKOFF not in BACKOFF_STATE!");
-    if (outputbuffer.empty())
+    if (queue.empty())
         error("At end of BACKOFF and buffer empty!");
 
     if (receiveState==RX_IDLE_STATE)
@@ -884,7 +887,7 @@ void EtherMAC::handleRetransmission()
     if (++backoffs > MAX_ATTEMPTS)
     {
         EV << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
-        delete outputbuffer.pop();
+        delete queue.pop();
 
         transmitState = TX_IDLE_STATE;
         backoffs = 0;
@@ -924,13 +927,60 @@ void EtherMAC::printState()
     }
     EV << ",  backoffs: " << backoffs;
     EV << ",  numConcurrentTransmissions: " << numConcurrentTransmissions;
-    EV << ",  queueLength: " << outputbuffer.length() << endl;
+    EV << ",  queueLength: " << queue.length() << endl;
 #undef CASE
 }
 
+void EtherMAC::updateDisplayString()
+{
+    const char *color;
+    if (receiveState==RX_COLLISION_STATE)
+        color = "red";
+    else if (transmitState==TRANSMITTING_STATE)
+        color = "yellow";
+    else if (transmitState==JAMMING_STATE)
+        color = "#400000";
+    else if (receiveState==RECEIVING_STATE)
+        color = "#4040ff";
+    else if (transmitState==BACKOFF_STATE)
+        color = "white";
+    else if (transmitState==PAUSE_STATE)
+        color = "gray";
+    else
+        color = "";
+    displayString().setTagArg("i",1,color);
+
+#if 0
+    // this code works but didn't turn out to be very useful
+    const char *txStateName;
+    switch (transmitState) {
+        case TX_IDLE_STATE:      txStateName="IDLE"; break;
+        case WAIT_IFG_STATE:     txStateName="WAIT_IFG"; break;
+        case TRANSMITTING_STATE: txStateName="TX"; break;
+        case JAMMING_STATE:      txStateName="JAM"; break;
+        case BACKOFF_STATE:      txStateName="BACKOFF"; break;
+        case PAUSE_STATE:        txStateName="PAUSE"; break;
+        default: error("wrong tx state");
+    }
+    const char *rxStateName;
+    switch (receiveState) {
+        case RX_IDLE_STATE:      rxStateName="IDLE"; break;
+        case RECEIVING_STATE:    rxStateName="RX"; break;
+        case RX_COLLISION_STATE: rxStateName="COLL"; break;
+        default: error("wrong rx state");
+    }
+
+    char buf[80];
+    sprintf(buf, "tx:%s rx: %s\n#boff:%d #cTx:%d",
+                 txStateName, rxStateName, backoffs, numConcurrentTransmissions);
+    displayString().setTagArg("t",0,buf);
+#endif
+}
+
+
 void EtherMAC::beginSendFrames()
 {
-    if (!outputbuffer.empty())
+    if (!queue.empty())
     {
         // Other frames are queued, therefore wait IFG period and transmit next frame
         EV << "Transmit next frame in output queue, after IFG period\n";

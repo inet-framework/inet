@@ -59,6 +59,8 @@ class EtherLLC : public cSimpleModule
     virtual void handleSendPause(cMessage *msg);
     virtual int findPortForSAP(int sap);
 
+    // utility function
+    void updateDisplayString();
 };
 
 Define_Module(EtherLLC);
@@ -109,6 +111,20 @@ void EtherLLC::handleMessage(cMessage *msg)
         error("received message `%s' with unknown message kind %d",
               msg->name(), msg->kind());
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
+}
+
+void EtherLLC::updateDisplayString()
+{
+    char buf[80];
+    sprintf(buf, "passed up: %d\nsent: %d", totalPassedUp, totalFromHigherLayer);
+    if (droppedUnknownDSAP>0)
+    {
+        sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %d", droppedUnknownDSAP);
+    }
+    displayString().setTagArg("t",0,buf);
 }
 
 void EtherLLC::processPacketFromHigherLayer(cMessage *msg)

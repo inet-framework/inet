@@ -48,7 +48,7 @@ module EtherSwitch
         mac: EtherMAC[sizeof(in)];
             parameters:
                 promiscuous = true;
-            display: "i=queue;p=70,150,row";
+            display: "i=queue;p=70,150,row;q=queue";
     connections:
         for i=0..sizeof(in)-1 do
             mac[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];

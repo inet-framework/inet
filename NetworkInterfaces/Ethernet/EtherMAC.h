@@ -62,11 +62,14 @@ class EtherMAC : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+    // utility function
+    void updateDisplayString();
+
   public:
     /**
      * Public function to query output queue size.
      */
-    long queueLength() {return outputbuffer.length();}
+    long queueLength() {return queue.length();}
 
     /**
      * Returns MAC address
@@ -109,7 +112,7 @@ class EtherMAC : public cSimpleModule
     int  pauseUnitsRequested; // requested pause duration, or zero -- examined at endTx
 
     // Other variables
-    cQueue outputbuffer;    // Output queue
+    cQueue queue;    // Output queue
     EtherFrame *frameBeingReceived;
     cMessage *endTxMsg, *endRxMsg, *endIFGMsg, *endBackoffMsg, *endJammingMsg, *endPauseMsg;
 
