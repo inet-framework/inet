@@ -69,7 +69,7 @@ class SenderReport : public cObject {
 		/*!
 		Writes a short info about this SenderReport into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this SenderReport into the given stream.
@@ -180,7 +180,7 @@ class ReceptionReport : public cObject {
 		/*!
 		Writes a short info about this ReceptionReport into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this ReceptionReport into the given stream.

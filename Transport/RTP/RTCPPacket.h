@@ -93,7 +93,7 @@ class RTCPPacket : public cPacket {
 		/*!
 		Writes a short info about this RTCPPacket into the given buffer.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a detailed report about this RTCPPacket into the given stream.
@@ -202,7 +202,7 @@ class RTCPReceiverReportPacket : public RTCPPacket {
 		/*!
 		Reports a one line info about the RTCPReceiverReportPacket.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a report about the RTCPReceiverReportPacket into the stream.
@@ -291,7 +291,7 @@ class RTCPSenderReportPacket : public RTCPReceiverReportPacket {
 		/*!
 		Writes a one line info about this RTCPSenderReportPacket into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this RTCPSenderReportPacket into the given stream.
@@ -361,7 +361,7 @@ class RTCPSDESPacket : public RTCPPacket {
 		/*!
 		Writes a short info about this RTCPSDESPacket into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer report about this RTCPSDESPacket into the given stream.
@@ -489,7 +489,7 @@ class RTCPCompoundPacket : public cPacket {
 		/*!
 		Writes a short info about this RTCPCompoundPacket into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this RTCPCompoundPacket into the given stream.

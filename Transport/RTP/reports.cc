@@ -71,8 +71,10 @@ const char *SenderReport::className() const {
 };
 
 
-void SenderReport::info(char *buf) const {
-	sprintf(buf, "SenderReport: timeStamp=%i", _rtpTimeStamp);
+std::string SenderReport::info() {
+    std::stringstream out;
+    out << "SenderReport.timeStamp=" << _rtpTimeStamp;
+    return out.str();
 };
 
 
@@ -175,8 +177,10 @@ const char *ReceptionReport::className() const {
 };
 
 
-void ReceptionReport::info(char *buf) const {
-	sprintf(buf, "ReceptionReport: ssrc=%i", _ssrc);
+std::string ReceptionReport::info() {
+    std::stringstream out;
+    out << "ReceptionReport.ssrc=" << _ssrc;
+    return out.str();
 };
 
 

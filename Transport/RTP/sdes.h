@@ -88,7 +88,7 @@ class SDESItem : public cObject {
 		/*!
 		Writes a short info about this SDESItem into the given string.
 		*/
-		virtual void info(char *buf);
+		virtual std::string info();
 
 		/*!
 		Writes an info about this SDESItem into the give output stream.
@@ -170,7 +170,7 @@ class SDESChunk : public cArray {
 		/*!
 		Writes a short info about this SDESChunk into the given string.
 		*/
-		virtual void info(char *buf);
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this SDESChunk into the given stream.

@@ -97,7 +97,7 @@ class RTPInterfacePacket : public cPacket {
 		/*!
 		Writes a one line info about this RTPInterfacePacket into the given string.
 		*/
-		virtual void info(char *buf);
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this RTPInterfacePacket into the given stream.

@@ -82,8 +82,10 @@ cObject *RTCPPacket::dup() const {
 };
 
 
-void RTCPPacket::info(char *buf) const {
-	sprintf(buf, "RTCPPacket: packetType=%i", _packetType);
+std::string RTCPPacket::info() {
+    std::stringstream out;
+    out << "RTCPPacket.packetType=" << _packetType;
+    return out.str();
 };
 
 
@@ -171,8 +173,10 @@ const char *RTCPReceiverReportPacket::className() const {
 };
 
 
-void RTCPReceiverReportPacket::info(char *buf) const {
-	sprintf(buf, "RTCPReceiverReportPacket: number of rr=%i", _count);
+std::string RTCPReceiverReportPacket::info() {
+    std::stringstream out;
+    out << "RTCPReceiverReportPacket #rr=" << _count;
+    return out.str();
 };
 
 
@@ -254,8 +258,10 @@ const char *RTCPSenderReportPacket::className() const {
 };
 
 
-void RTCPSenderReportPacket::info(char *buf) const {
-	sprintf(buf, "RTCPSenderReportPacket: ssrc=%i" , _ssrc);
+std::string RTCPSenderReportPacket::info() {
+    std::stringstream out;
+    out << "RTCPSenderReportPacket.ssrc=" << _ssrc;
+    return out.str();
 };
 
 
@@ -326,8 +332,10 @@ const char *RTCPSDESPacket::className() const {
 };
 
 
-void RTCPSDESPacket::info(char *buf) const {
-	sprintf(buf, "RTCPSDESPacket: number of sdes chunks=%i", _sdesChunks->items());
+std::string RTCPSDESPacket::info() {
+    std::stringstream out;
+    out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->items();
+    return out.str();
 };
 
 
@@ -451,8 +459,10 @@ const char *RTCPCompoundPacket::className() const {
 };
 
 
-void RTCPCompoundPacket::info(char *buf) const {
-	sprintf(buf, "RTCPCompoundPacket: number of rtcp packets=%i", _rtcpPackets->items());
+std::string RTCPCompoundPacket::info() {
+    std::stringstream out;
+    out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->items();
+    return out.str();
 };
 
 

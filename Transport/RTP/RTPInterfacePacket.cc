@@ -78,8 +78,10 @@ const char *RTPInterfacePacket::className() const {
 };
 
 
-void RTPInterfacePacket::info(char *buf) {
-	sprintf(buf, "RTPInterfacePacket: type=%i", _type);
+std::string RTPInterfacePacket::info() {
+    std::stringstream out;
+    out << "RTPInterfacePacket: type=" << _type;
+    return out.str();
 };
 
 

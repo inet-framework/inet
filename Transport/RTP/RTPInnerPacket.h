@@ -97,7 +97,7 @@ class RTPInnerPacket : public cPacket {
 		/*!
 		Writes a short info about this RTPInnerPacket into the given string.
 		*/
-		virtual void info(char *buf) const;
+		virtual std::string info();
 
 		/*!
 		Writes a longer info about this RTPInnerPacket into the given output stream.

@@ -89,8 +89,10 @@ const char *RTPInnerPacket::className() const {
 };
 
 
-void RTPInnerPacket::info(char *buf) const {
-	sprintf(buf, "RTPInnerPacket: type=%i", _type);
+std::string RTPInnerPacket::info() {
+    std::stringstream out;
+    out << "RTPInnerPacket: type=" << _type;
+    return out.str();
 };
 
 

@@ -69,7 +69,7 @@ class RTPPacket : public cPacket {
 		/*!
 		Writes a one line info about this RTPPacket into the given string.
 		*/
-		virtual void info(char *buf);
+		virtual std::string info();
 
 		/*!
 		Writes a longer description about this RTPPacket into the given stream.

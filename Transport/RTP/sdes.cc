@@ -74,8 +74,10 @@ const char *SDESItem::className() const {
 };
 
 
-void SDESItem::info(char *buf) {
-	sprintf(buf, "SDESItem: %s", _content);
+std::string SDESItem::info() {
+    std::stringstream out;
+    out << "SDESItem=" << _content;
+    return out.str();
 };
 
 
@@ -145,8 +147,10 @@ const char *SDESChunk::className() const {
 };
 
 
-void SDESChunk::info(char *buf) {
-	sprintf(buf, "SDESChunk: ssrc=%i, number of sdes items=%i", _ssrc, items());
+std::string SDESChunk::info() {
+    std::stringstream out;
+    out << "SDESChunk.ssrc=" << _ssrc << " items=" << items();
+    return out.str();
 };
 
 
@@ -172,11 +176,11 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
 			};
 		}
 	};
-	
+
 	//sdesItem->setOwner(this);
 	add(sdesItem);
 	_length = _length + (sdesItem->length());
-	
+
 };
 
 
