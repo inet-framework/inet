@@ -21,13 +21,12 @@
 
 import
     "Router",
-    "TCPClientNode",
-    "TCPServerNode";
+    "StandardHost2";
 
 
 module ClientServerNetwork
     submodules:
-        client1: TCPClientNode;
+        client1: StandardHost2;
             parameters:
                 // TCP parameters
                 local_addr = (10 << 24) + 1,
@@ -39,7 +38,7 @@ module ClientServerNetwork
                 out[2];
             display: "p=66,50;i=comp";
         // clients
-        client2: TCPClientNode;
+        client2: StandardHost2;
             parameters:
                 // TCP parameters
                 local_addr = (10 << 24) + 2,
@@ -50,7 +49,7 @@ module ClientServerNetwork
                 in[1],
                 out[1];
             display: "p=201,45;i=comp";
-        client3: TCPClientNode;
+        client3: StandardHost2;
             parameters:
                 // TCP parameters
                 local_addr = (10 << 24) + 3,
@@ -61,7 +60,7 @@ module ClientServerNetwork
                 in[1],
                 out[1];
             display: "p=208,164;i=comp";
-        server4: TCPServerNode;
+        server4: StandardHost2;
             parameters:
                 // TCP parameters
                 local_addr = (10 << 24) + 4,

@@ -19,7 +19,7 @@
 
 import
     "Router",
-    "UDPHost",
+    "StandardHost2",
     "FlatNetworkConfigurator";
 
 
@@ -32,7 +32,7 @@ module FlatNet
     submodules:
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypesToProcess = "Router UDPHost",
+                moduleTypesToProcess = "Router StandardHost2",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
             display: "i=cogwheel";

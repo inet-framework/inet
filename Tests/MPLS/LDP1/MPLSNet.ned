@@ -13,17 +13,13 @@
 
 import
     "LSRNode",
-    "TCPClientTest",
-    "TCPServerTest";
+    "StandardHost2";
 
 
 //
 // FIXME: add documentation here
 //
 module MPLSNet
-    parameters:
-
-
     submodules:
         LSR1: LSRNode;
             parameters:
@@ -75,16 +71,16 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=500,95;i=srouter";
-        host1: TCPClientTest;
+        host1: StandardHost2;  // client
             parameters:
             display: "p=26,98;i=comp_s";
-        host2: TCPClientTest;
+        host2: StandardHost2;  // client
             parameters:
             display: "p=26,256;i=comp_s";
-        host3: TCPServerTest;
+        host3: StandardHost2;  // server
             parameters:
             display: "p=570,88;i=comp_s";
-        host4: TCPServerTest;
+        host4: StandardHost2;  // server
             parameters:
             display: "p=578,240;i=comp_s";
     connections nocheck:

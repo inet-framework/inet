@@ -102,7 +102,6 @@ neddoc:
 neddoc-without-doxy:
 	opp_neddoc -a -o $(DOC_DIR)/neddoc
 
-
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
 .tstamp: $(OBJS)

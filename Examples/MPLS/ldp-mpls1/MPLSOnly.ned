@@ -12,17 +12,12 @@
 
 
 import
-    "LSRNode",
-    "TCPClientTest",
-    "TCPServerTest";
+    "LSRNode";
 
 //
 // A network with LIB tables set up to test MPLSModule only.
 //
 module MPLSNetOnly
-    parameters:
-
-
     submodules:
         LSR1: LSRNode;
             parameters:

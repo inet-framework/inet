@@ -12,18 +12,13 @@
 
 
 import
-    "LSRNode",
-    "TCPClientTest",
-    "TCPServerTest";
+    "LSRNode";
 
 
 //
 // FIXME: add documentation here
 //
 module MPLSNetOnly
-    parameters:
-
-
     submodules:
         LSR1: LSRNode;
             parameters:

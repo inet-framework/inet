@@ -12,8 +12,7 @@
 
 
 import
-    "TCPClientTest",
-    "TCPServerTest",
+    "StandardHost2",
     "RSVP_LSR_Node",
     "Tester",
     "TED";
@@ -27,8 +26,6 @@ import
 // See the README file in the model directory for scenario description.
 //
 module RSVPTE4
-    parameters:
-
     submodules:
         LSR1: RSVP_LSR_Node;
             parameters:
@@ -70,17 +67,17 @@ module RSVPTE4
                 in[3],
                 out[3];
             display: "p=388,159;i=srouter";
-        host1: TCPClientTest;
+        host1: StandardHost2;  // client
             parameters:
                 start_time = 0;
             display: "p=26,98;i=comp_s";
-        host2: TCPClientTest;
+        host2: StandardHost2;  // client
             parameters:
                 start_time = 80;
             display: "p=26,256;i=comp_s";
-        host3: TCPServerTest;
+        host3: StandardHost2;  // server
             display: "p=482,96;i=comp_s";
-        host4: TCPServerTest;
+        host4: StandardHost2;  // server
             display: "p=602,248;i=comp_s";
         ted: TED;
             display: "p=148,376;b=24,16";

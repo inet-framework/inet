@@ -21,14 +21,14 @@
 
 import
     "Router",
-    "StandardHost";
+    "StandardHost2";
 
 
 
 module TCPUDPDirectNet
     submodules:
         // server
-        server1: StandardHost;
+        server1: StandardHost2;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPServer",
@@ -41,7 +41,7 @@ module TCPUDPDirectNet
                 out[3];
             display: "p=40,80;i=pc";
         // clients
-        client2: StandardHost;
+        client2: StandardHost2;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPClient",
@@ -53,7 +53,7 @@ module TCPUDPDirectNet
                 in[3],
                 out[3];
             display: "p=200,80;i=comp";
-        client3: StandardHost;
+        client3: StandardHost2;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPClient",
@@ -65,7 +65,7 @@ module TCPUDPDirectNet
                 in[3],
                 out[3];
             display: "p=40,200;i=bwcomp";
-        client4: StandardHost;
+        client4: StandardHost2;
             parameters:
                 // TCP parameters
                 tcpApplType = "TCPClient",
