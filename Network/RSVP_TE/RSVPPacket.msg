@@ -27,13 +27,15 @@ struct FlowDescriptor_t;
 struct EroObj_t;
 
 
+//
+// RSVP message common part
+//
 message RSVPPacket
 {
     properties:
         customize=true;
     fields:
         SessionObj_t session;
-        int rsvpLength = 0;
         bool checksumValid = true;
 };
 

@@ -32,18 +32,12 @@
 #define SF_STYLE    2
 
 
-
 /**
- * RSVP generic packet
+ * RSVP message common part
  */
 class RSVPPacket: public RSVPPacket_Base
 {
-//protected:
-//    SessionObj_t session;
-//    int  _rsvpLength;
-//    bool _checksumValid;
-
-public:
+  public:
     RSVPPacket(const char *name=NULL, int kind=0) : RSVPPacket_Base(name,kind) {}
     RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other.name()) {operator=(other);}
     RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
@@ -56,17 +50,11 @@ public:
     inline int getExTunnelId()  {return getSession().Extended_Tunnel_Id;}
     inline int getSetupPri()    {return getSession().setupPri;}
     inline int getHoldingPri()  {return getSession().holdingPri;}
-    //inline SessionObj_t* getSession() {return &session;}
-    bool  isInSession(SessionObj_t* s);
-    //void  setSession(SessionObj_t* s);
-
-    //Overload setLength()
-    virtual void setLength(int bitlength);
-
-    //bool checksumValid() const {return _checksumValid;}
-    //void setChecksumValidity(bool isValid) {_checksumValid = isValid;}
-    //int RSVPLength() const {return _rsvpLength;}
-    //void setRSVPLength(int byteLength);
+    inline bool isInSession(SessionObj_t* s) {
+        return getSession().DestAddress==s->DestAddress &&
+               getSession().DestPort==s->DestPort &&
+               getSession().Protocol_Id==s->Protocol_Id;
+    }
 };
 
 

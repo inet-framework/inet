@@ -22,61 +22,7 @@
 #include "rsvp_message.h"
 
 
-
-/********************RSVP PACKET**********************************/
-// constructor
-//RSVPPacket::RSVPPacket() : cMessage() // FIXME was: TransportPacket()
-//{
-//    _checksumValid = true;
-//    setRSVPLength(0);
-//}
-
-//RSVPPacket::RSVPPacket(const RSVPPacket & p) : cMessage(p) // FIXME was: TransportPacket(p)
-//{
-//    setName(p.name());
-//    operator=(p);
-//}
-
-/*
-RSVPPacket::RSVPPacket(const cMessage &msg): TransportPacket(msg)
-{
-    setRSVPLength(msg.length());
-    setChecksumValidity(true);
-
-}
-*/
-
-//RSVPPacket & RSVPPacket::operator=(const RSVPPacket & p)
-//{
-//    cMessage::operator=(p); // FIXME was: TransportPacket::...
-//    setRSVPLength(p.RSVPLength());
-//    setChecksumValidity(p.checksumValid());
-//    return *this;
-//}
-
-void RSVPPacket::setLength(int bitlength)
-{
-    cMessage::setLength(bitlength);
-    setRsvpLength(bitlength / 8);
-}
-
-//void RSVPPacket::setRSVPLength(int byteLength)
-//{
-//    cMessage::setLength(byteLength * 8);
-//    setRsvpLength(byteLength);
-//}
-
-//void RSVPPacket::setSession(SessionObj_t * s)
-//{
-//
-//    session.DestAddress = s->DestAddress;
-//    session.DestPort = s->DestPort;
-//    session.Protocol_Id = s->Protocol_Id;
-//    session.setupPri = s->setupPri;
-//    session.holdingPri = s->holdingPri;
-//    session.Tunnel_Id = s->Tunnel_Id;
-//    session.Extended_Tunnel_Id = s->Extended_Tunnel_Id;
-//}
+//---
 
 bool RSVPPacket::isInSession(SessionObj_t * s)
 {
@@ -91,7 +37,6 @@ RSVPPathMsg::RSVPPathMsg():RSVPPacket()
 {
     setKind(PATH_MESSAGE);
 }
-
 
 
 bool RSVPPathMsg::equalST(SenderTemplateObj_t * s)
