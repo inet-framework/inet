@@ -69,10 +69,10 @@ module RSVPNet
             display: "p=500,95;i=srouter";
         host2: StandardHost2;  // client
             parameters:
-            display: "p=26,256;i=comp_s";
+            display: "p=26,256;i=pc";
         host4: StandardHost2;  // server
             parameters:
-            display: "p=578,240;i=comp_s";
+            display: "p=578,240;i=pc";
         ted: TED;
             display: "p=276,320;b=24,16";
     connections nocheck:

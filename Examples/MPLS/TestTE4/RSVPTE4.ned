@@ -80,9 +80,9 @@ module RSVPTE4
         host1: StandardHost2;  // client
             parameters:
                 start_time = 0;
-            display: "p=26,98;i=comp_s";
+            display: "p=26,98;i=pc";
         host3: StandardHost2;  // server
-            display: "p=482,96;i=comp_s";
+            display: "p=482,96;i=pc";
         ted: TED;
             display: "p=148,376;b=24,16";
         tester: Tester;

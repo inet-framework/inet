@@ -70,22 +70,22 @@ module MPLSNet
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=26,98;i=comp_s";
+            display: "p=26,98;i=pc";
         host2: StandardHost2;  // client
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=26,256;i=comp_s";
+            display: "p=26,256;i=pc";
         host3: StandardHost2;  // server
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=570,88;i=comp_s";
+            display: "p=570,88;i=pc";
         host4: StandardHost2;  // server
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=578,240;i=comp_s";
+            display: "p=578,240;i=pc";
     connections nocheck:
         host1.in[0] <-- datarate 64000 <-- LSR1.out[0];
         host1.out[0] --> datarate 64000 --> LSR1.in[0];

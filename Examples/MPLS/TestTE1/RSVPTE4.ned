@@ -67,13 +67,13 @@ module RSVPTE4
                 out[3];
             display: "p=388,159;i=srouter";
         host1: StandardHost2;  // client
-            display: "p=26,98;i=comp_s";
+            display: "p=26,98;i=pc";
         host2: StandardHost2;  // client
-            display: "p=26,256;i=comp_s";
+            display: "p=26,256;i=pc";
         host3: StandardHost2;  // server
-            display: "p=610,80;i=comp_s";
+            display: "p=610,80;i=pc";
         host4: StandardHost2;  // server
-            display: "p=602,248;i=server_s";
+            display: "p=602,248;i=pc";
         ted: TED;
             parameters:
                moduleTypes = "StandardHost2 RSVP_LSR_Node";
