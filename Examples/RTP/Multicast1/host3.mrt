@@ -1,0 +1,20 @@
+
+# filename: host3.mrt
+
+ifconfig:
+
+# ethernet card 0 to router
+name: eth0		encap: Ethernet		inet_addr: 173.0.0.3
+Groups: 225.0.0.1
+MTU: 1500	Metric: 1  BROADCAST MULTICAST
+
+ifconfigend.
+
+
+route:
+
+225.0.0.1		172.0.0.13		255.0.0.0		G	0	eth0
+default:		173.0.0.13		0.0.0.0			G	0	eth0
+
+routeend.
+

@@ -1,0 +1,12 @@
+README.Multicast3
+
+This is an example to stress your computer if you want.
+The python script creator.py creates a network, consisting of a central
+router, other routers connected to it and hosts connected to the
+routers. You can set the number of routers and number of hosts per router
+in the first lines of creator.py, it is only limited by the ip-suite
+which afaik only allows 30 interfaces per router (but 900 hosts are
+possibly far more than your machine can simulate).
+The script also creates all needed rotuing files (*.mrt), the network
+description (multicast3.ned) and an omnetpp.ini. Recompile it and run
+Multicast3. It may take quite a time until it starts ...
