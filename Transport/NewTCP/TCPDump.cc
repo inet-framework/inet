@@ -48,7 +48,7 @@ void TCPDumper::dump(TCPSegment *tcpseg, const std::string& srcAddr, const std::
     out << " ";
 
     // data-seqno
-    if (tcpseg->payloadLength()>0)
+    if (tcpseg->payloadLength()>0 || tcpseg->synBit())
     {
         out << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength();
         out << "(" << tcpseg->payloadLength() << ") ";
