@@ -22,28 +22,40 @@
 //
 // Receive IP datagram for local delivery:
 // - strip off IP header
-// - buffer fragments for ip_fragmenttime
+// - buffer fragments
 // - wait until all fragments of one fragment number are received
-// - discard without notification if not all fragments arrive in ip_fragmenttime
+// - discard without notification if not all fragments arrives within timeout
 //
 // Once all fragments have arrived:
-// - send Transport packet up to the transport layer
-// - send ICMP packet to ICMP module
-// - send IGMP group management packet to Multicast module
-// - send tunneled IP datagram to PreRouting
+// - send encapsulated IP packet (tunnelling) to preRoutingOut
+// - send other packets on corresponding transportOut[] gate
+//
+// The output gate is determined from the Protocol field in the IP header.
+// The protocol-to-gateindex mapping must be given in the protocolmapping
+// string parameter, in the following format:
+// <pre>
+// protocolnumber:gateindex, protocolnumber:gateindex, ...
+// </pre>
+//
+// The recommended setting is:
+// - TCP (6) : 0
+// - UDP (17) : 1
+// - ICMP (1) : 2
+// - IGMP (2) : 3
+// - RSVP (46) : 4
+// That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
 //
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // Rewrite: Andras Varga, 2004
 //
 simple LocalDeliver
     parameters:
+        protocolMapping : string,
         fragmentTimeout : numeric const;
     gates:
         in: in[];
-        out: multicastOut;
-        out: ICMPOut;
-        out: preRoutingOut;
         out: transportOut[];
+        out: preRoutingOut;
 endsimple
 
 

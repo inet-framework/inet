@@ -32,8 +32,22 @@ void LocalDeliver::initialize()
 {
     fragmentTimeoutTime = par("fragmentTimeout");
     lastCheckTime = 0;
+
+    parseTransportMap(par("protocolMapping"));
 }
 
+void LocalDeliver::parseTransportMap(const char *s)
+{
+    //FIXME ...
+}
+
+int LocalDeliver::outputGateForProtocol(int protocol)
+{
+    for (TransportMap::iterator i=transportMap.begin();i!=transportMap.end();++i)
+        if (i->protocolNumber==protocol)
+            return i->outGateIndex;
+    opp_error("No output gate defined in protocolMapping for protocol number %d", protocol);
+}
 
 void LocalDeliver::handleMessage(cMessage *msg)
 {
@@ -57,32 +71,17 @@ void LocalDeliver::handleMessage(cMessage *msg)
     int protocol = datagram->transportProtocol();
     cMessage *packet = decapsulateIP(datagram);
 
-    switch (protocol)
+    if (protocol==IP_PROT_IP)
     {
-        case IP_PROT_ICMP:
-            send(packet, "ICMPOut");
-            break;
-        case IP_PROT_IGMP:
-            send(packet, "multicastOut");
-            break;
-        case IP_PROT_IP:
-            send(packet, "preRoutingOut");
-            break;
-        case IP_PROT_TCP:
-            send(packet, "transportOut",0);
-            break;
-        case IP_PROT_UDP:
-            send(packet, "transportOut",1);
-            break;
-        case IP_PROT_RSVP:
-            ev << "IP send packet to RSVPInterface\n";
-            send(packet, "transportOut",3);
-            break;
-        default:
-            error("Unknown transport protocol number %d", protocol);
+        // tunnelled IP packets are handled separately
+        send(packet, "preRoutingOut");
+    }
+    else
+    {
+        int gateindex = outputGateForProtocol(protocol);
+        send(packet, "transportOut", gateindex);
     }
 }
-
 
 cMessage *LocalDeliver::decapsulateIP(IPDatagram *datagram)
 {

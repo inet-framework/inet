@@ -24,23 +24,38 @@
 // Rewrite: Andras Varga, 2004
 
 
+#include <vector>
 #include "IPFragBuf.h"
 #include "IPDatagram.h"
 
 
 
 /**
- * Receives IP datagram for local delivery: assemble from fragments
- * and decapsulate.
+ * Receives IP datagram for local delivery: assemble from fragments,
+ * decapsulate and forward to corresponding transport protocol.
  * More info in the NED file.
  */
 class LocalDeliver : public cSimpleModule
 {
   private:
+    // fragmentation reassembly
     IPFragBuf fragbuf;
     simtime_t fragmentTimeoutTime;
     simtime_t lastCheckTime;
 
+    // where to send different transport protocols after encapsulation
+    struct TransportEntry
+    {
+        int protocolNumber;
+        int outGateIndex;
+    };
+    // we use vector because it's probably faster: we'll hit 1st or 2nd entry
+    // (TCP or UDP) in 90% of cases
+    typedef std::vector<TransportEntry> TransportMap;
+    TransportMap transportMap;
+
+    void parseTransportMap(const char *s);
+    int outputGateForProtocol(int protocol);
     cMessage *decapsulateIP(IPDatagram *);
 
   public:
