@@ -134,6 +134,8 @@
 //    connection will spend the remainder of the data transfer in FIN_WAIT_1.
 //    This does not cause any incorrect TCP behaviour, but will be fixed
 //    nevertheless.
+//  - at normal teardown, "connection closed" will only be reported to the 
+//    client after the 2MSL timer has expired (4 minutes)
 //  - no TCP header options (e.g. MSS is currently hardcoded, no SACK)
 //  - requirements for handling segments with SYN+FIN bits set (esp. with data
 //    too) are not clear
