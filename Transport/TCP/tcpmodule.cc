@@ -336,7 +336,7 @@ void TcpModule::handleMessage(cMessage *msg)
       if (debug) ev << "TCP in LISTEN.\n";
 
       //indicate a passive open
-      tcb_block->passive = 1;
+      tcb_block->passive = true;
       //copy address/port
       if (msg->arrivedOn("from_appl"))
         {
@@ -422,7 +422,7 @@ void TcpModule::handleMessage(cMessage *msg)
       tcb_block->ack_send_time = simTime();
 
       //reset passive, since local and remote socket are specified
-      tcb_block->passive = 0;
+      tcb_block->passive = false;
 
       //check if sufficient socket information has been specified
       if ((tcb_block->local_port == -1) || (tcb_block->rem_port == -1) || (tcb_block->rem_addr == -1))
@@ -480,7 +480,7 @@ void TcpModule::handleMessage(cMessage *msg)
           //indicate that both ends of the connection are fully specified
           if (tcb_block->passive)
             {
-              tcb_block->passive = 0;
+              tcb_block->passive = false;
             }
 
           //process buffered and outgoing data
@@ -600,7 +600,7 @@ void TcpModule::handleMessage(cMessage *msg)
           //indicate that both ends of the connection are fully specified
           if (tcb_block->passive)
             {
-              tcb_block->passive = 0;
+              tcb_block->passive = false;
             }
 
           //notify the application if the connection has just became established
@@ -1100,7 +1100,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
 
           tcb_block->conn_estab = 0;
 
-          tcb_block->passive = 0;
+          tcb_block->passive = false;
           tcb_block->passive_rem_addr = -1;
           tcb_block->passive_rem_port = -1;
 
@@ -5134,7 +5134,7 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
           if (tcp_header->th_window != 0 && tcb_block->per_sch)
             {
               if (debug) ev << "Cancelling persist timer" << endl;
-	      delete cancelEvent(tcb_block->timeout_persist_msg);
+	          delete cancelEvent(tcb_block->timeout_persist_msg);
               tcb_block->per_sch = false;
             }
           // activate persist timer
@@ -5149,9 +5149,9 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
                   tcb_block->timeout_persist_msg->addPar("src_addr") = tcb_block->local_addr;
                   tcb_block->timeout_persist_msg->addPar("dest_port") = tcb_block->rem_port;
                   tcb_block->timeout_persist_msg->addPar("dest_addr") = tcb_block->rem_addr;
-		  // <Jeroen>
-		  // FIXME schedule persist timer at now + 1.5 seconds.
-		  // this 1.5 sec. value should be calculated using the rtt and backoff shift!
+		          // <Jeroen>
+		          // FIXME schedule persist timer at now + 1.5 seconds.
+		          // this 1.5 sec. value should be calculated using the rtt and backoff shift!
                   scheduleAt(simTime() + 1.5, tcb_block->timeout_persist_msg);
                   tcb_block->per_sch = true;
                 }
