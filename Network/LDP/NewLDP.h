@@ -68,8 +68,8 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     bool isIR;
     bool isER;
 
-    // holds TCP connections with peers
-    TCPSocketMap socketMap;
+    TCPSocket serverSocket;  // for listening on LDP_PORT
+    TCPSocketMap socketMap;  // holds TCP connections with peers
 
     // hello timeout message
     cMessage *sendHelloMsg;

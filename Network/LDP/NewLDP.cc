@@ -24,6 +24,10 @@
 #include "UDPControlInfo_m.h"
 
 
+#define LDP_PORT  646
+
+
+
 Define_Module(NewLDP);
 
 
@@ -51,6 +55,12 @@ void NewLDP::initialize()
     // schedule first hello
     sendHelloMsg = new cMessage("LDPSendHello");
     scheduleAt(1, sendHelloMsg);
+
+    // start listening for incoming conns
+    ev << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
+    serverSocket.setOutputGate(gate("to_tcp_interface"));
+    serverSocket.bind(local_addr, LDP_PORT);
+    serverSocket.listen(true);
 }
 
 void NewLDP::handleMessage(cMessage *msg)
@@ -147,12 +157,20 @@ void NewLDP::broadcastHello()
 void NewLDP::processLDPHello(LDPHello *msg)
 {
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    IPAddress peerAddr = controlInfo->getSrcAddr();  //msg->getSenderAddress();
+    delete msg;
+    delete controlInfo;
 
-    IPAddress peerAddr = msg->getSenderAddress();
+    ev << "Received LDP Hello from " << peerAddr << ", ";
+
+    if (peerAddr.isNull())
+    {
+        // must be ourselves (we're also in the all-routers multicast group), ignore
+        ev << "ignore\n";
+        return;
+    }
+
     string inInterface = this->findInterfaceFromPeerAddr(peerAddr);
-
-    ev << "LSR(" << local_addr << "): " <<
-        "received multicast from " << peerAddr << "\n";
 
     // peer already in table?
     PeerVector::iterator i;
@@ -160,7 +178,12 @@ void NewLDP::processLDPHello(LDPHello *msg)
         if (i->peerIP==peerAddr)
             break;
     if (i!=myPeers.end())
+    {
+        ev << "already in my peer table\n";
         return;
+    }
+
+    ev << "adding to peer table and establishing session with it\n";
 
     // not in table, add it
     peer_info info;
@@ -175,6 +198,13 @@ void NewLDP::processLDPHello(LDPHello *msg)
 
 void NewLDP::openTCPConnectionToPeer(IPAddress addr)
 {
+    TCPSocket *socket = new TCPSocket();
+    socket->setOutputGate(gate("to_tcp_interface"));
+    socket->setCallbackObject(this);
+    socketMap.addSocket(socket);
+    // FIXME associate with peer table
+
+    socket->connect(addr, LDP_PORT);
 }
 
 void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
