@@ -1,8 +1,0 @@
-This example shows the use of TCP client/server models in an IP based
-network.
-
-The model demostrates automatic IP address assignment and automatic routing
-table setup by FlatNetworkConfigurator. irt and mrt files are not used.
-
-The network consists of four hosts and one router. One of the clients has
-a direct connection to the server; others connect via the router.

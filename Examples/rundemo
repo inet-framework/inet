@@ -28,7 +28,7 @@ foreach line {
    {"KIDSNw1"                "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
    {"Multicast"              "IPSuite/Multicast"          "./Multicast"          "Multicast"}
    {"RouterPerf"             "IPSuite/RouterPerf"         "./RouterPerf"         "RouterPerf"}
-   {"TCPClientServerNet"     "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
+   {"BulkTransfer"           "IPSuite/BulkTransfer"       "./BulkTransfer"       "BulkTransfer"}
 
    {"Ethernet"}
    {"ARP Test"               "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}

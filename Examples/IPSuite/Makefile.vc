@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= FlatNet KIDSNw1 Multicast NClients PerformAnalysis RouterPerf TCPClientServerNet
-SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir Multicast_dir NClients_dir PerformAnalysis_dir RouterPerf_dir TCPClientServerNet_dir
+SUBDIRS= BulkTransfer FlatNet KIDSNw1 Multicast NClients RouterPerf
+SUBDIR_TARGETS=  BulkTransfer_dir FlatNet_dir KIDSNw1_dir Multicast_dir NClients_dir RouterPerf_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -76,6 +76,9 @@ $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs: $(SUBDIR_TARGETS)
+
+BulkTransfer_dir:
+	cd BulkTransfer && cd && nmake /nologo /f Makefile.vc
 
 FlatNet_dir:
 	cd FlatNet && cd && nmake /nologo /f Makefile.vc
@@ -89,14 +92,8 @@ Multicast_dir:
 NClients_dir:
 	cd NClients && cd && nmake /nologo /f Makefile.vc
 
-PerformAnalysis_dir:
-	cd PerformAnalysis && cd && nmake /nologo /f Makefile.vc
-
 RouterPerf_dir:
 	cd RouterPerf && cd && nmake /nologo /f Makefile.vc
-
-TCPClientServerNet_dir:
-	cd TCPClientServerNet && cd && nmake /nologo /f Makefile.vc
 
 
 #doc: neddoc doxy

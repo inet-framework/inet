@@ -23,7 +23,7 @@ import
     "FlatNetworkConfigurator";
 
 
-module ClientServerNetwork
+module BulkTransfer
     submodules:
         client1: StandardHost2;
             display: "p=120,60;i=comp";
@@ -59,6 +59,6 @@ module ClientServerNetwork
         client1.in++ <-- datarate 1000000 <-- server.out++;
 endmodule
 
-network tcpclservnet : ClientServerNetwork
+network bulkTransfer : BulkTransfer
 endnetwork
 
