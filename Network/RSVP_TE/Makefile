@@ -37,7 +37,7 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= IntServ_m.o RSVPPacket_m.o RSVPPathMsg_m.o RSVPResvMsg_m.o  OspfTe.o RSVPApp.o RSVP.o    TED.o
+OBJS= IntServ_m.o RSVPPacket_m.o RSVPPathMsg_m.o RSVPResvMsg_m.o OspfTe.o RSVPApp.o RSVP.o TED.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= IntServ_m.h RSVPPacket_m.h RSVPPathMsg_m.h RSVPResvMsg_m.h
@@ -142,16 +142,11 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-IntServ_m.o: IntServ_m.cc \
-  IntServ_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h
 OspfTe.o: OspfTe.cc \
   OspfTe.h \
   ../IPv4/IPAddress.h \
   ../IPv4/IPAddressResolver.h \
   ../IPv4/RoutingTableAccess.h \
-  IntServ_m.h \
   TED.h \
   ../MPLS/MPLSModule.h \
   ../MPLS/MPLSPacket.h \
@@ -159,7 +154,6 @@ OspfTe.o: OspfTe.cc \
   ../MPLS/LIBTableAccess.h \
   ../IPv4/RoutingTable.h \
   ../MPLS/ConstType.h \
-  ../IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../../Base/INETDefs.h
@@ -179,25 +173,18 @@ RSVPApp.o: RSVPApp.cc \
   ../MPLS/LIBtable.h \
   ../MPLS/LIBTableAccess.h \
   ../MPLS/MPLSAccess.h \
-  RSVPPathMsg_m.h \
-  IntServ_m.h \
-  RSVPPacket.h \
   ../IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
-  RSVPPacket_m.h \
-  RSVPResvMsg_m.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
+  ../IPv4/IPDatagram.h
 RSVP.o: RSVP.cc \
   RSVP.h \
   ../IPv4/IPAddress.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/IPAddressResolver.h \
-  ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTable.h \
   RSVPPathMsg.h \
   RSVPResvMsg.h \
@@ -205,52 +192,25 @@ RSVP.o: RSVP.cc \
   OspfTe.h \
   ../MPLS/LIBTableAccess.h \
   ../../Base/INETDefs.h \
-  RSVPPathMsg_m.h \
-  IntServ_m.h \
-  RSVPPacket.h \
-  RSVPPacket_m.h \
-  RSVPResvMsg_m.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../IPv4/RoutingTableAccess.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
-RSVPPacket_m.o: RSVPPacket_m.cc \
-  RSVPPacket_m.h \
-  IntServ_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h
-RSVPPathMsg_m.o: RSVPPathMsg_m.cc \
-  RSVPPathMsg_m.h \
-  IntServ_m.h \
-  RSVPPacket.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h \
-  RSVPPacket_m.h
-RSVPResvMsg_m.o: RSVPResvMsg_m.cc \
-  RSVPResvMsg_m.h \
-  IntServ_m.h \
-  RSVPPacket.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h \
-  RSVPPacket_m.h
+  ../IPv4/IPDatagram.h
 TED.o: TED.cc \
   TED.h \
   ../../Util/StringTokenizer.h \
   ../IPv4/IPAddressResolver.h \
   ../../Util/stlwatch.h \
   ../MPLS/MPLSModule.h \
-  IntServ_m.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
   ../MPLS/LIBTableAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/RoutingTable.h \
   ../MPLS/ConstType.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h \
   ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h
+  ../MPLS/LIBtable.h \
+  ../../Base/INETDefs.h \
+  ../IPv4/IPAddress.h

@@ -134,10 +134,9 @@ MPLSModule.o: MPLSModule.cc \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/RoutingTable.h \
   ConstType.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/INETDefs.h \
   ../../Base/ModuleAccess.h \
-  LIBtable.h
+  LIBtable.h \
+  ../../Base/INETDefs.h \
+  ../IPv4/IPAddress.h
 MPLSPacket.o: MPLSPacket.cc \
   MPLSPacket.h

@@ -37,7 +37,7 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= EtherApp_m.o EtherAppCli.o  EtherAppSrv.o
+OBJS= EtherApp_m.o EtherAppCli.o EtherAppSrv.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= EtherApp_m.h
@@ -119,18 +119,8 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 EtherAppCli.o: EtherAppCli.cc \
-  ../../NetworkInterfaces/Ethernet/EtherCtrl_m.h \
-  EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
-  ../../NetworkInterfaces/Ethernet/Ethernet.h \
-  ../../NetworkInterfaces/_802/MACAddress.h \
   ../../Base/INETDefs.h
-EtherApp_m.o: EtherApp_m.cc \
-  EtherApp_m.h
 EtherAppSrv.o: EtherAppSrv.cc \
-  ../../NetworkInterfaces/Ethernet/EtherCtrl_m.h \
-  EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
-  ../../NetworkInterfaces/Ethernet/Ethernet.h \
-  ../../NetworkInterfaces/_802/MACAddress.h \
   ../../Base/INETDefs.h

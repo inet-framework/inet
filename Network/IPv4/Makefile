@@ -37,10 +37,10 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ICMP.o  IPAddress.o IPAddressResolver.o IP.o   IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
+OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o IPProtocolId_m.o ICMP.o IPAddress.o IPAddressResolver.o IP.o IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
 
 # header files generated (from msg files)
-GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
+GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h IPProtocolId_m.h
 
 #------------------------------------------------------------------------------
 
@@ -85,6 +85,12 @@ IPDatagram_m.o: IPDatagram_m.cc
 
 IPDatagram_m.cc IPDatagram_m.h: IPDatagram.msg
 	$(MSGC) $(INCLUDE_PATH) IPDatagram.msg
+
+IPProtocolId_m.o: IPProtocolId_m.cc
+	$(CXX) -c $(NEDCOPTS) IPProtocolId_m.cc
+
+IPProtocolId_m.cc IPProtocolId_m.h: IPProtocolId.msg
+	$(MSGC) $(INCLUDE_PATH) IPProtocolId.msg
 
 ICMP.o: ICMP.cc
 	$(CXX) -c $(COPTS) ICMP.cc
@@ -149,23 +155,14 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ICMP.o: ICMP.cc \
-  IPControlInfo_m.h \
   ICMP.h \
-  IPAddress.h \
-  IPDatagram_m.h \
-  ../../Base/INETDefs.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   IPDatagram.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  ICMPMessage_m.h
-ICMPMessage_m.o: ICMPMessage_m.cc \
-  ICMPMessage_m.h \
-  IPDatagram.h \
-  IPDatagram_m.h \
-  IPAddress.h \
-  ../../Base/INETDefs.h
+  ../../Base/INETDefs.h \
+  IPAddress.h
 IPAddress.o: IPAddress.cc \
   IPAddress.h \
   ../../Base/INETDefs.h
@@ -177,8 +174,6 @@ IPAddressResolver.o: IPAddressResolver.cc \
 IP.o: IP.cc \
   IP.h \
   IPDatagram.h \
-  IPControlInfo_m.h \
-  ICMPMessage_m.h \
   ../../Base/QueueBase.h \
   RoutingTableAccess.h \
   RoutingTable.h \
@@ -190,29 +185,17 @@ IP.o: IP.cc \
   ../../Base/INETDefs.h \
   IPAddress.h \
   ICMP.h \
-  ICMPMessage.h \
-  IPDatagram_m.h
-IPControlInfo_m.o: IPControlInfo_m.cc \
-  IPControlInfo_m.h \
-  IPAddress.h \
-  IPDatagram_m.h \
-  ../../Base/INETDefs.h
-IPDatagram_m.o: IPDatagram_m.cc \
-  IPDatagram_m.h \
-  IPAddress.h \
-  ../../Base/INETDefs.h
+  ICMPMessage.h
 IPFragBuf.o: IPFragBuf.cc \
   IPFragBuf.h \
   ICMP.h \
   ../../Base/INETDefs.h \
   IPDatagram.h \
-  IPDatagram_m.h \
-  IPAddress.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  ICMPMessage_m.h
+  IPAddress.h
 ProtocolMap.o: ProtocolMap.cc \
   ProtocolMap.h
 RoutingTable.o: RoutingTable.cc \

@@ -37,7 +37,7 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ARPPacket_m.o ARP.o 
+OBJS= ARPPacket_m.o ARP.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ARPPacket_m.h
@@ -120,21 +120,9 @@ ARP.o: ARP.cc \
   ../../Util/stlwatch.h \
   ../../Base/INETDefs.h \
   ../../Network/IPv4/IPAddress.h \
-  ARPPacket_m.h \
-  ../Ethernet/EtherCtrl_m.h \
-  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
   ../../Network/IPv4/RoutingTable.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../Ethernet/EtherMAC.h \
-  ../_802/MACAddress.h \
-  ../Ethernet/Ethernet.h \
-  ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
-  ../Ethernet/EtherFrame_m.h \
-  ../Ethernet/utils.h
-ARPPacket_m.o: ARPPacket_m.cc \
-  ARPPacket_m.h \
-  ../../Network/IPv4/IPAddress.h \
-  ../_802/MACAddress.h \
-  ../../Base/INETDefs.h
+  ../Ethernet/Ethernet.h
