@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ICMP.o  IPAddress.o IP.o   IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
+OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ICMP.o  IPAddress.o IPAddressResolver.o IP.o   IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
@@ -91,6 +91,9 @@ ICMP.o: ICMP.cc
 
 IPAddress.o: IPAddress.cc
 	$(CXX) -c $(COPTS) IPAddress.cc
+
+IPAddressResolver.o: IPAddressResolver.cc
+	$(CXX) -c $(COPTS) IPAddressResolver.cc
 
 IP.o: IP.cc
 	$(CXX) -c $(COPTS) IP.cc
@@ -166,6 +169,11 @@ ICMPMessage_m.o: ICMPMessage_m.cc \
 IPAddress.o: IPAddress.cc \
   IPAddress.h \
   ../../Base/ipsuite_defs.h
+IPAddressResolver.o: IPAddressResolver.cc \
+  RoutingTable.h \
+  IPAddressResolver.h \
+  ../../Base/ipsuite_defs.h \
+  IPAddress.h
 IP.o: IP.cc \
   IP.h \
   IPDatagram.h \

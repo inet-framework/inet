@@ -126,6 +126,7 @@ TCPEchoApp.o: TCPEchoApp.cc \
   ../../Base/ipsuite_defs.h
 TCPSessionApp.o: TCPSessionApp.cc \
   TCPSessionApp.h \
+  ../../Network/IPv4/IPAddressResolver.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \

@@ -113,6 +113,7 @@ UDPApp.o: UDPApp.cc \
   UDPApp.h \
   ../../Transport/UDP/UDPControlInfo_m.h \
   ../../Util/StringTokenizer.h \
+  ../../Network/IPv4/IPAddressResolver.h \
   ../../Base/basic_consts.h \
   ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
