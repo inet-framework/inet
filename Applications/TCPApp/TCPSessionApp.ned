@@ -18,7 +18,37 @@
 
 
 //
-// Single-connection TCP application.
+// Single-connection TCP application: it opens a connection, sends
+// the given number of bytes, and closes. Sending may be one-off,
+// or may be controlled by a "script" which is a series of
+// (time, number of bytes) pair.
+//
+// <b>Opening the connection</b>
+//
+// Regarding the type of opening the connection, the application may
+// be either a client or a server. When active=false, the application
+// will listen on the given local port, and wait for an incoming connection.
+// When active=true, the application will bind to given local address:port,
+// and connect to the connectAddress:connectPort. To use an ephemeral port
+// as local port, set the port parameter to -1.
+//
+// Even when in server mode (active=false), the application will only
+// serve one incoming connection.
+//
+// The time of opening the connection is in the tOpen parameter.
+//
+// <b>Sending data</b>
+//
+// Regardless of the type of OPEN, the application can be made to send
+// data. One way of specifying sending is via the tSend, sendBytes
+// parameters, the other way is sendScript. With the former, sendBytes
+// bytes will be sent at tSend. With sendScript, the format is
+// "<time> <numBytes>;<time> <numBytes>;..."
+//
+// <b>Closing the connection</b>
+//
+// The application will issue a TCP CLOSE at time tClose. If tClose=0, no
+// CLOSE will be issued.
 //
 simple TCPSessionApp
     parameters:
