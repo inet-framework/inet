@@ -79,7 +79,7 @@ enum TCPErrorCode
 // TCP uses the (app gate index, connId) pair to identify the socket).
 // connId is to be chosen by the application in the open command.
 //
-// @see TCPOpenCommand, TCPStatusInfo, TCPMain
+// @see TcpCommandCode, TcpStatusInd, TCPOpenCommand, TCPStatusInfo, TCPMain
 //
 class TCPCommand
 {

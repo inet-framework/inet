@@ -82,7 +82,7 @@ class TCPSegment;
  *
  * Currently implemented send queue and receive queue classes are
  * TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
- * queues with "virtual" bytes (byte conunts only).
+ * queues with "virtual" bytes (byte counts only).
  *
  * The third object is subclassed from TCPAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"

@@ -78,17 +78,59 @@
 // classes can be written which implement New Reno, Vegas, LinuxTCP or other
 // variants.
 //
+// Note that TCPOpenCommand allows sendQueueClass, receiveQueueClass and
+// tcpAlgorithmClass to be chosen per-connection.
+//
 // The TCP module itself implements the following:
-//  - ...
+//  - all RFC793 TCP states and state transitions
+//  - connection setup and teardown as in RFC793
+//  - generally, RFC793 compliant segment processing
+//  - all socked commands (except RECEIVE) and indications
+//  - receive buffer to cache above-sequence data and data not yet forwarded
+//    to the user
+//  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //
 // The TCPTahoeReno algorithm implements:
-//  - ...
+//  - delayed acks, with 200ms timeout (optional)
+//  - Nagle's algorithm (optional)
+//  - Jacobson's and Karn's algorithms for round-trip time measurement and
+//    adaptive retransmission
+//  - TCP Tahoe (Fast Retransmit), TCP Reno (Fast Retransmit and Fast Recovery)
+//    (variant can be chosen)
+//  - all timeouts are precisely calculated, so "granularity" introduced by
+//    "slow" and "fast" (500ms and 200ms) timers found in many *nix TCP
+//    implementations is not simulated
 //
-// The TCP module doesn't implement:
-//  - ...
+// TCP module issues and missing features:
+//  - URG and PSH bits not handled. Receiver always acts as if PSH was set
+//    on all segments: always forwards data to the app as soon as possible.
+//  - finite receive buffer size is not modelled (always the maximum
+//    window size, currently 16K is advertised)
+//  - no RECEIVE command. Received data are always forwarded to the app as
+//    soon as possible, as if the app issued a very large RECEIVE request
+//    at the beginning. This means there's currently no flow control
+//    between TCP and the app.
+//  - no TCP header options (e.g. MSS is currently hardcoded, no SACK)
+//  - never sends data in SYN and SYN+ACK (though probably no real-life TCP
+//    supports this either)
+//  - requirements for handling segments with SYN+FIN bits set (esp. with data
+//    too) are not clear
+//  - some parameters (like MSS) are presently constants which should better
+//    be configurable (e.g. NED parameter)
 //
-// TCPTahoeReno doesn't implement:
-//  - ...
+// TCPTahoeReno issues and missing features:
+//  - PERSIST timer not implemented (currently no problem, because receiver
+//    never advertises 0 window size)
+//  - KEEPALIVE not implemented (idle connections never time out)
+//  - Nagle's algorithm possibly not precisely implemented
+//  - Fast Recovery not tested very much
+//
+// The above problems are relatively easy to fix, and will be resolved in the
+// next interation. Also, other TCPAlgorithms and send queue/receive queue
+// classes will be added.
+//
+// There are automated test cases (*.test files) for TCP -- see the Test
+// directory in the source distribution.
 //
 simple TCPMain
     parameters:

@@ -25,7 +25,9 @@ EXTRA_OBJS=
 EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
-EXT_DIR_TSTAMPS=
+EXT_DIR_TSTAMPS=..\..\Network\IPv4\Core/.tstamp \
+            ..\..\Base/.tstamp \
+            ..\..\Util/.tstamp
 
 # Additional libraries (-L option -l option)
 LIBS=
@@ -58,7 +60,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPTahoeReno.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
+OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPTahoeReno.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
@@ -77,6 +79,13 @@ $(OBJS) : $(GENERATEDHEADERS)
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
+$(EXT_DIR_TSTAMPS):
+	@echo Error: $(@:/=\) does not exist.
+	@echo This means that at least the above dependency directory has not been built.
+	@echo Maybe you need to do a top-level make?
+	@echo.
+	@exit /b 1
+
 subdirs: $(SUBDIR_TARGETS)
 
 TCPCommand_m.obj: TCPCommand_m.cc
@@ -93,9 +102,6 @@ TCPSegment_m.cc TCPSegment_m.h: TCPSegment.msg
 
 DummyTCPAlg.obj: DummyTCPAlg.cc
 	$(CXX) -c $(COPTS) /Tp DummyTCPAlg.cc
-
-TCPTahoeReno.obj: TCPTahoeReno.cc
-	$(CXX) -c $(COPTS) /Tp TCPTahoeReno.cc
 
 TCPConnectionBase.obj: TCPConnectionBase.cc
 	$(CXX) -c $(COPTS) /Tp TCPConnectionBase.cc
@@ -117,6 +123,9 @@ TCPMain.obj: TCPMain.cc
 
 TCPSocket.obj: TCPSocket.cc
 	$(CXX) -c $(COPTS) /Tp TCPSocket.cc
+
+TCPTahoeReno.obj: TCPTahoeReno.cc
+	$(CXX) -c $(COPTS) /Tp TCPTahoeReno.cc
 
 TCPVirtualDataRcvQueue.obj: TCPVirtualDataRcvQueue.cc
 	$(CXX) -c $(COPTS) /Tp TCPVirtualDataRcvQueue.cc
@@ -156,16 +165,6 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 DummyTCPAlg.obj: DummyTCPAlg.cc \
   DummyTCPAlg.h \
-  TCPMain.h \
-  TCPAlgorithm.h \
-  TCPConnection.h \
-  TCPSendQueue.h \
-  TCPReceiveQueue.h \
-  TCPSegment_m.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/IPAddress.h
-TCPTahoeReno.obj: TCPTahoeReno.cc \
-  TCPTahoeReno.h \
   TCPMain.h \
   TCPAlgorithm.h \
   TCPConnection.h \
@@ -227,6 +226,7 @@ TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   ..\..\Network\IPv4\Core/IPDatagram_m.h
 TCPDump.obj: TCPDump.cc \
   TCPDump.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
   ..\..\Network\IPv4\Core/IPDatagram_m.h \
   TCPSegment_m.h
@@ -244,6 +244,16 @@ TCPSegment_m.obj: TCPSegment_m.cc \
 TCPSocket.obj: TCPSocket.cc \
   TCPSocket.h \
   TCPCommand_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h
+TCPTahoeReno.obj: TCPTahoeReno.cc \
+  TCPTahoeReno.h \
+  TCPMain.h \
+  TCPAlgorithm.h \
+  TCPConnection.h \
+  TCPSendQueue.h \
+  TCPReceiveQueue.h \
+  TCPSegment_m.h \
+  ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 TCPVirtualDataRcvQueue.obj: TCPVirtualDataRcvQueue.cc \
   TCPVirtualDataRcvQueue.h \
