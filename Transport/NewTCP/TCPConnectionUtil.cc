@@ -352,6 +352,8 @@ bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
         tcpseg->setAckNo(state->rcv_nxt);
         tcpseg->setAckBit(true);
         tcpseg->setWindow(state->rcv_wnd);
+        // TBD when to set PSH bit?
+        // TBD set URG bit if needed
         ASSERT(bytes==tcpseg->payloadLength());
 
         win -= bytes;
@@ -396,6 +398,8 @@ void TCPConnection::retransmitData()
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
     tcpseg->setWindow(state->rcv_wnd);
+    // TBD when to set PSH bit?
+    // TBD set URG bit if needed
     ASSERT(bytes==tcpseg->payloadLength());
 
     state->snd_nxt += bytes;

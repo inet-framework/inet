@@ -32,7 +32,7 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
     TCPTahoeRenoStateVariables();
 
     // TCP features
-    bool delayed_acks_enabled; // delayed ACKs enabled/disabled
+    bool delayed_acks_enabled; // delayed ACKs enabled/disabled; FIXME make this a socket option
     bool nagle_enabled;        // Nagle's algorithm (off = NODELAY socket option)
     enum {TAHOE,RENO} tcpvariant;  // TCP algorithm
 

@@ -417,6 +417,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             {
                 // forward data to app
                 //
+                // FIXME observe PSH bit
+                //
                 // FIXME we should implement socket READ command, and pass up only
                 // as many bytes as requested. rcv_wnd should be decreased
                 // accordingly! (right now we *always* advertise win=16386,

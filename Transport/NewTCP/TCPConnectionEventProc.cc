@@ -116,6 +116,8 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 {
     TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommand);
 
+    // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
+    // and set PSH at SEND boundaries
     switch(fsm.state())
     {
         case TCP_S_INIT:
