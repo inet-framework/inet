@@ -18,8 +18,8 @@ INCLUDE_PATH=
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -37,7 +37,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  
+OBJS=  StringTokenizer.o stlwatch.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -56,6 +56,12 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
+
+StringTokenizer.o: StringTokenizer.cc
+	$(CXX) -c $(COPTS) StringTokenizer.cc
+
+stlwatch.o: stlwatch.cc
+	$(CXX) -c $(COPTS) stlwatch.cc
 
 
 #doc: neddoc doxy
@@ -95,4 +101,7 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+StringTokenizer.o: StringTokenizer.cc \
+  StringTokenizer.h
+stlwatch.o: stlwatch.cc \
+  stlwatch.h

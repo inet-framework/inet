@@ -70,7 +70,7 @@ class TCPReceiveQueue : public cPolymorphic
     /**
      * Called when a TCP segment arrives.
      */
-    virtual insertBytesFromSegment(TCPSegment *tcpseg) = 0;
+    virtual void insertBytesFromSegment(TCPSegment *tcpseg) = 0;
 
     /**
      * Returns how many bytes are available in the queue for passing
