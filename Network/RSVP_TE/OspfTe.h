@@ -19,7 +19,6 @@
 #include <omnetpp.h>
 #include <vector>
 #include "ospf_type.h"
-#include "tcp.h"
 #include "IPAddress.h"
 #include "intserv.h"
 #include "TED.h"

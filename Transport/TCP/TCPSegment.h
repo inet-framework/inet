@@ -25,7 +25,8 @@
 #include "TCPSegment_m.h"
 
 /**
- * FIXME
+ * Represents a TCP segment. More info in the TCPSegment.msg file 
+ * (and the documentation generated from it).
  */
 class TCPSegment : public TCPSegment_Base
 {
@@ -38,9 +39,9 @@ class TCPSegment : public TCPSegment_Base
     TCPSegment& operator=(const TCPSegment& other);
     virtual cObject *dup() const {return new TCPSegment(*this);}
 
-    /** Should not be called. */
+    /** Generated but unused method, should not be called. */
     virtual void setPayloadArraySize(unsigned int size);
-    /** Should not be called. */
+    /** Generated but unused method, should not be called. */
     virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var);
 
     /**

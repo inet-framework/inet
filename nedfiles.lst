@@ -83,6 +83,7 @@ NetworkInterfaces/Ethernet/MACRelayUnitPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
 Nodes/IPSuite/BurstHost.ned
 Nodes/IPSuite/NetworkLayer.ned
+Nodes/IPSuite/OSPFRouter.ned
 Nodes/IPSuite/Router.ned
 Nodes/IPSuite/StandardHost2.ned
 Nodes/MPLS/LSRNode.ned

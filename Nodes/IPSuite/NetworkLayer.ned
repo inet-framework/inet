@@ -39,11 +39,13 @@ module NetworkLayer
         in: TCPIn;
         in: UDPIn;
         in: RSVPIn;
+        in: OSPFIn;
         in: pingIn;
         out: physOut[]; // FIXME to be renamed
         out: TCPOut;
         out: UDPOut;
         out: RSVPOut;
+        out: OSPFOut;
         out: pingOut;
 
     submodules:
@@ -53,10 +55,10 @@ module NetworkLayer
                 timeToLive = 32,
                 multicastTimeToLive = 32,
                 fragmentTimeout = 60,
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4";
+                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5";
             gatesizes:
-                transportIn[5],
-                transportOut[5],
+                transportIn[6],
+                transportOut[6],
                 queueIn[sizeof(physIn)],
                 queueOut[sizeof(physOut)];
             display: "p=155,98;i=cogwheel";
@@ -82,6 +84,9 @@ module NetworkLayer
 
         ip.transportOut[4] --> RSVPOut;
         ip.transportIn[4] <-- RSVPIn;
+
+        ip.transportOut[5] --> OSPFOut;
+        ip.transportIn[5] <-- OSPFIn;
 
         // L2 interfaces to IP
         for i=0..sizeof(physOut)-1 do

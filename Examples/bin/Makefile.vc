@@ -138,7 +138,7 @@ generateheaders: $(GENERATEDHEADERS)
 	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
-	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
+	-del $(TARGET)$(EXE_SUFFIX) 2>NUL	-del *.obj *.idb *.pdb .tstamp 2>NUL
 	-del *_n.cc *_n.h *_m.cc *_m.h 2>NUL
 	-del *.vec *.sca 2>NUL
 	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd .. || exit /b 1
