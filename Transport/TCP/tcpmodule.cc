@@ -299,7 +299,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(CLOSED):
 
       if (debug) ev << "TCP in CLOSED.\n";
-      setPhase("CLOSED");
       
       //notify the application that TCP entered CLOSED
       connClosed(tcb_block);
@@ -328,7 +327,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(LISTEN):
 
       if (debug) ev << "TCP in LISTEN.\n";
-      setPhase("LISTEN");
       
       //indicate a passive open
       tcb_block->passive = 1;
@@ -362,7 +360,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(SYN_RCVD):
 
       if (debug) ev << "TCP in SYN_RCVD.\n"; 
-      setPhase("SYN_RCVD");
       
       if ((tcb_block->num_bit_req) == 0 && (addpor.source != FROM_APPL))
         {
@@ -414,7 +411,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(SYN_SENT):
 
       if (debug) ev << "TCP in SYN_SENT.\n";
-      setPhase("SYN_SENT");
       
       tcb_block->ack_send_time = simTime();
 
@@ -450,7 +446,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(ESTABLISHED):
 
       if (debug) ev << "TCP in ESTABLISHED.\n";
-      setPhase("ESTABLISHED");
 
       //notify the application if the connection has just became established
       if (tcb_block->conn_estab == 0)
@@ -502,7 +497,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(CLOSE_WAIT):
 
       if (debug) ev << "TCP in CLOSE_WAIT.\n";
-      setPhase("CLOSE_WAIT");
       
       //notify the application that TCP entered CLOSE_WAIT
       connCloseWait(tcb_block);
@@ -551,7 +545,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(LAST_ACK):
 
       if (debug) ev << "TCP in LAST_ACK.\n";
-      setPhase("LAST_ACK");
       
       if (tcb_block->st_event.event == TCP_E_ABORT || tcb_block->st_event.event == TCP_E_ABORT_NO_RST)
         {
@@ -579,7 +572,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(FIN_WAIT_1):
 
       if (debug) ev << "TCP in FIN_WAIT_1.\n";
-      setPhase("FIN_WAIT_1");
       
       if (tcb_block->st_event.event == TCP_E_ABORT)
         {
@@ -631,7 +623,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(FIN_WAIT_2):
 
       if (debug) ev << "TCP in FIN_WAIT_2.\n";
-      setPhase("FIN_WAIT_2");
       
       // schedule the FIN_WAIT_2 timer. 
       tcb_block->timeout_finwait2_msg = new cMessage("TIMEOUT_FIN_WAIT_2", TIMEOUT_FIN_WAIT_2);
@@ -678,7 +669,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(CLOSING):
 
       if (debug) ev << "TCP in CLOSING.\n";
-      setPhase("CLOSING");
       
       if (tcb_block->st_event.event == TCP_E_ABORT || tcb_block->st_event.event == TCP_E_ABORT_NO_RST)
         {
@@ -706,7 +696,6 @@ void TcpModule::handleMessage(cMessage *msg)
     case FSM_Enter(TIME_WAIT):
 
       if (debug) ev << "TCP in TIME_WAIT.\n";
-      setPhase("TIME_WAIT");
       
       //notify the application that the connection has been closed
       if (tcb_block->tcp_app_notified == false)
@@ -946,6 +935,9 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
     {
       //if fully specified socket pair is found in list
       tcb_block = search->second; //or tcb_list[spair];
+
+      if (debug) ev << "Message/event belongs to connection tcp_conn_id=" 
+                    << tcb_block->tcp_conn_id << ".\n";
     }
   else
     {
@@ -970,8 +962,11 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           //get TCB found
           old_tcb_block = search->second;
 
-          //copy information of old_tcb_block
+          //copy information of old_tcb_block --FIXME what??? this is pointer copy (Andras)
           tcb_block = old_tcb_block;
+
+          if (debug) ev << "Message/event belongs to connection tcp_conn_id=" 
+                        << tcb_block->tcp_conn_id << ", filling out remote addr/port in conn.\n";
 
           //erase old list element
           tcb_list.erase(spair);
@@ -988,9 +983,12 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
 
           //insert TCB in tcb_list together with socket pair
           tcb_list.insert(TcbList::value_type(spair, tcb_block));
+
         }
       else
         {
+          if (debug) ev << "Creating new connection descriptor.\n";
+
           tcb_block = new TcpTcb;
 
           //assign names to TCP-queues

@@ -1,3 +1,9 @@
+2003-09-30  Andras Varga
+
+	* tcpmodule.cc: deleted all setPhase() lines -- they aren't informative
+	since TCPModule services multiple connections;
+	getTcb(): added debug output
+
 2002-07-18  Ulrich Kaage <kaage@int.uni-karlsruhe.de>  <kaage@int.etec.uni-karlsruhe.de>
 
 	* tcpmodule.cc: compile fix for GCC 3.1
