@@ -206,10 +206,16 @@ void PPPInterface::handleMessage(cMessage *msg)
 void PPPInterface::updateDisplayString()
 {
     char buf[80];
-    if (numBitErr>0)
-        sprintf(buf, "r:%ld E:%ld s:%ld", numRcvdOK, numBitErr, numSent);
-    else
+    if (connected)
+    {
         sprintf(buf, "r:%ld s:%ld", numRcvdOK, numSent);
+        if (numBitErr>0 || numDropped>0)
+            sprintf(buf+strlen(buf), "\nE:%ld Dr:%ld", numBitErr, numDropped);
+    }
+    else
+    {
+        sprintf(buf, "not connected\ndropped:%ld", numDropped);
+    }
     displayString().setTagArg("t",0,buf);
 }
 
