@@ -127,13 +127,10 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-PPPFrame_m.obj: PPPFrame_m.cc \
-  PPPFrame_m.h
 PPPInterface.obj: PPPInterface.cc \
   ../../Network/IPv4/RoutingTable.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   PPPInterface.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/IPAddress.h \
-  ../../Base/ModuleAccess.h \
-  PPPFrame_m.h
+  ../../Base/ModuleAccess.h

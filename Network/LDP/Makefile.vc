@@ -65,7 +65,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= LDPInterface.obj LDPpacket.obj LDPproc.obj NewLDP.obj tcpclientproc.obj tcpserverproc.obj UDPAppInterface.obj
+OBJS= LDPpacket.obj NewLDP.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -93,26 +93,11 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
-LDPInterface.obj: LDPInterface.cc
-	$(CXX) -c $(COPTS) /Tp LDPInterface.cc
-
 LDPpacket.obj: LDPpacket.cc
 	$(CXX) -c $(COPTS) /Tp LDPpacket.cc
 
-LDPproc.obj: LDPproc.cc
-	$(CXX) -c $(COPTS) /Tp LDPproc.cc
-
 NewLDP.obj: NewLDP.cc
 	$(CXX) -c $(COPTS) /Tp NewLDP.cc
-
-tcpclientproc.obj: tcpclientproc.cc
-	$(CXX) -c $(COPTS) /Tp tcpclientproc.cc
-
-tcpserverproc.obj: tcpserverproc.cc
-	$(CXX) -c $(COPTS) /Tp tcpserverproc.cc
-
-UDPAppInterface.obj: UDPAppInterface.cc
-	$(CXX) -c $(COPTS) /Tp UDPAppInterface.cc
 
 
 #doc: neddoc doxy
@@ -144,47 +129,10 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-LDPInterface.obj: LDPInterface.cc \
-  LDPInterface.h \
-  ../MPLS/ConstType.h \
-  LDPproc.h \
-  ../IPv4/IPAddressResolver.h \
-  ../../Unsupported/TcpModule/tcp.h \
-  LDPpacket.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  ../IPv4/RoutingTable.h \
-  ../MPLS/LIBTableAccess.h \
-  ../MPLS/MPLSAccess.h \
-  ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h \
-  ../IPv4/RoutingTableAccess.h \
-  ../MPLS/MPLSModule.h \
-  ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
 LDPpacket.obj: LDPpacket.cc \
   LDPpacket.h \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
-LDPproc.obj: LDPproc.cc \
-  ../MPLS/ConstType.h \
-  LDPpacket.h \
-  ../../Unsupported/TcpModule/tcp.h \
-  LDPproc.h \
-  ../IPv4/RoutingTable.h \
-  ../MPLS/MPLSModule.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  LDPInterface.h \
-  ../MPLS/LIBTableAccess.h \
-  ../MPLS/MPLSAccess.h \
-  ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h \
-  ../IPv4/RoutingTableAccess.h \
-  ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
 NewLDP.obj: NewLDP.cc \
   ../MPLS/ConstType.h \
   NewLDP.h \
@@ -201,29 +149,5 @@ NewLDP.obj: NewLDP.cc \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
-tcpclientproc.obj: tcpclientproc.cc \
-  ../../Unsupported/TcpModule/tcp.h \
-  ../IPv4/IPAddress.h \
-  ../MPLS/ConstType.h \
-  ../../Base/ipsuite_defs.h
-tcpserverproc.obj: tcpserverproc.cc \
-  ../../Unsupported/TcpModule/tcp.h \
-  ../MPLS/ConstType.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
-UDPAppInterface.obj: UDPAppInterface.cc \
-  ../../Transport/UDP/UDPPacket.h \
-  ../../Transport/UDP/UDPControlInfo_m.h \
-  ../IPv4/IPControlInfo_m.h \
-  ../IPv4/IPAddress.h \
-  ../IPv4/IPAddressResolver.h \
-  ../IPv4/RoutingTableAccess.h \
-  ../../Transport/UDP/UDPPacket_m.h \
-  ../IPv4/IPDatagram_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../IPv4/RoutingTable.h \
-  ../../Base/ModuleAccess.h
+  ../IPv4/IPDatagram.h
