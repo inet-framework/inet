@@ -223,6 +223,7 @@ InterfaceEntry *RoutingTable::interfaceByName(const char *name)
 InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 {
     Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
+    // FIXME this is rather interfaceBy_Network_Address() -- is this what's intended? --AV
     if (addr.isNull())
         return NULL;
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
