@@ -14,26 +14,20 @@
 import
     "Blackboard",
     "NetworkLayer",
-    "LDPproc",
-    "tcp2ldp",
+    "NewLDP",
+    "TCPMain",
+    "UDPProcessing",
     "MPLSModule",
-    "LDPInterface",
-    "LIBTable",
-    "UDPInterface";
-
-
+    "PPPInterface",
+    "LIBTable";
 
 
 //
 // An LDP-capable router.
 //
 // LDP Capable Routers are main building blocks for an LDP MPLS network. The
-// Router ID is assigned as the router local loopback interface. This is
-// important for the consistency with \RSVP-TE module. In order to add the
-// loopback interface, some modification has been made in the RoutingCore
-// class in \IP suite. This modification can be anticipated for \IP suite
-// development as the local loopback interface is necessary for some link
-// state routing protocols like OSPF.
+// Router ID is assigned as the router local loopback interface.
+//#FIXME remove router id from there
 //
 module LSRNode
     parameters:
@@ -60,24 +54,15 @@ module LSRNode
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=60,100";
-        //# transport and application layers
-        tcpApp: TCP2LDP;
+        signal_module: NewLDP;
             parameters:
-                local_addr = local_addr,
-                timeout = ldpTimeout,
-                keepAliveTime = ldpKeepAliveTime;
-
-            display: "p=125,117;b=40,24,rect";
-        signal_module: LDPproc;
-            parameters:
-                peerNo = peerNo,
                 local_addr = local_addr,
                 udpInitTimeout = udpInitTimeout;
-            display: "p=186,43;b=40,24";
-        udpApp: UDPInterface;
-            parameters:
-                local_addr = local_addr;
-            display: "p=246,117;b=40,24,rect";
+            display: "p=190,45;b=40,24";
+        tcp: TCPMain;
+            display: "p=145,120;i=prot2";
+        udp: UDPProcessing;
+            display: "p=235,120;i=prot1";
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
@@ -85,7 +70,7 @@ module LSRNode
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "b=32,30;p=191,186;i=fork";
+            display: "p=190,186;i=fork";
         ppp: PPPInterface[sizeof(out)];
             display: "p=87,320,row,90;q=queue;i=iface";
         mplsModule: MPLSModule;
@@ -102,19 +87,19 @@ module LSRNode
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=279,207;b=32,30";
+            display: "i=proc2;p=279,207";
     connections nocheck:
-        //# transport connections
-        networkLayer.TCPOut --> tcpApp.from_tcp;
-        networkLayer.TCPIn <-- tcpApp.to_tcp;
+        signal_module.from_tcp_interface <-- tcp.to_appl++;
+        signal_module.to_tcp_interface --> tcp.from_appl++;
 
-        networkLayer.UDPOut --> udpApp.from_ip;
-        networkLayer.UDPIn <-- udpApp.to_ip;
-        signal_module.to_udp_interface --> udpApp.from_appl;
-        signal_module.from_udp_interface <-- udpApp.to_appl;
-        signal_module.from_tcp_interface <-- tcpApp.to_ldp;
-        signal_module.to_tcp_interface --> tcpApp.from_ldp;
-        //# ldp.to_mpls_switch --> mplsModule.fromLDP;
+        signal_module.to_udp_interface --> udp.from_application++;
+        signal_module.from_udp_interface <-- udp.to_application++;
+
+        udp.to_ip --> networkLayer.UDPIn;
+        udp.from_ip <-- networkLayer.UDPOut;
+
+        tcp.to_ip --> networkLayer.TCPIn;
+        tcp.from_ip <-- networkLayer.TCPOut;
 
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;

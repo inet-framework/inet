@@ -60,6 +60,7 @@ Network/IPv4d/IPSend.ned
 Network/IPv4d/IPTunneling.ned
 Network/LDP/LDPInterface.ned
 Network/LDP/LDPproc.ned
+Network/LDP/NewLDP.ned
 Network/LDP/tcp2ldp.ned
 Network/LDP/tcpclientproc.ned
 Network/LDP/tcpserverproc.ned
