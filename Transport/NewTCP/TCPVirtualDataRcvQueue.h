@@ -21,6 +21,7 @@
 
 #include <omnetpp.h>
 #include <list>
+#include <string>
 #include "TCPSegment_m.h"
 #include "TCPReceiveQueue.h"
 
@@ -30,6 +31,8 @@
 class TCPVirtualDataRcvQueue : public TCPReceiveQueue
 {
   protected:
+    uint32 rcv_nxt;
+
     struct Region
     {
         uint32 begin;
@@ -37,6 +40,8 @@ class TCPVirtualDataRcvQueue : public TCPReceiveQueue
     };
     typedef std::list<Region> RegionList;
     RegionList regionList;
+
+    void merge(TCPSegment *tcpseg);
 
   public:
     /**
@@ -48,6 +53,16 @@ class TCPVirtualDataRcvQueue : public TCPReceiveQueue
      * Virtual dtor.
      */
     virtual ~TCPVirtualDataRcvQueue();
+
+    /**
+     * Set initial receive sequence number.
+     */
+    virtual void init(uint32 startSeq);
+
+    /**
+     * Returns a string with region stored.
+     */
+    virtual std::string info() const;
 
     /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.

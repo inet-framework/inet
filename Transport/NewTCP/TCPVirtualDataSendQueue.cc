@@ -36,8 +36,16 @@ void TCPVirtualDataSendQueue::init(uint32 startSeq)
     end = startSeq;
 }
 
+std::string TCPVirtualDataSendQueue::info() const
+{
+    std::stringstream out;
+    out << "[" << begin << ".." << end << ")";
+    return out.str();
+}
+
 void TCPVirtualDataSendQueue::enqueueAppData(cMessage *msg)
 {
+    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << (msg->length()>>3) << ")\n";
     end += msg->length() >> 3;
     delete msg;
 }
@@ -49,6 +57,7 @@ uint32 TCPVirtualDataSendQueue::bufferEndSeq()
 
 TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
+    //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
 
     TCPSegment *tcpseg = new TCPSegment("tcpseg");
@@ -59,6 +68,7 @@ TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulon
 
 void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
 {
+    //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
     ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
     begin = seqNum;
 }

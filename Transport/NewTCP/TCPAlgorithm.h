@@ -101,6 +101,15 @@ class TCPAlgorithm : public cPolymorphic
     virtual void sendCommandInvoked() = 0;
 
     /**
+     * Called after receiving data which are in the window, but not at its
+     * left edge (seq!=rcv_nxt). This indicates that either segments got
+     * re-ordered in the way, or one segment was lost. RFC1122 and RFC2001
+     * recommend sending an immediate ACK here (Fast Retransmit relies on
+     * that).
+     */
+    virtual void receivedOutOfOrderSegment() = 0;
+
+    /**
      * Called after rcv_nxt got advanced, either because we received in-sequence
      * data ("text" in RFC 793 lingo) or a FIN. At this point, rcv_nxt has
      * already been updated. This method should take care to send or schedule
@@ -111,14 +120,18 @@ class TCPAlgorithm : public cPolymorphic
     /**
      * Called after we received an ACK which acked some data (that is,
      * we could advance snd_una). At this point the state variables
-     * (snd_una, snd_wnd) have already been updated.
+     * (snd_una, snd_wnd) have already been updated. The argument firstSeqAcked
+     * is the previous snd_una value, that is, the number of bytes acked is
+     * (snd_una-firstSeqAcked). The dupack counter still reflects the old value
+     * (needed for Reno and NewReno); it'll be reset to 0 after this call returns.
      */
-    virtual void receivedDataAck() = 0;
+    virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
 
     /**
      * Called after we received a duplicate ACK (that is: ackNo==snd_una,
      * no data in segment, segment doesn't carry window update, and also,
-     * we have unacked data).
+     * we have unacked data). The dupack counter got already updated
+     * when calling this method (i.e. dupack==1 on first duplicate ACK.)
      */
     virtual void receivedDuplicateAck() = 0;
 

@@ -69,9 +69,11 @@ class DummyTCPAlg : public TCPAlgorithm
 
     virtual void sendCommandInvoked();
 
+    virtual void receivedOutOfOrderSegment();
+
     virtual void receiveSeqChanged();
 
-    virtual void receivedDataAck();
+    virtual void receivedDataAck(uint32 firstSeqAcked);
 
     virtual void receivedDuplicateAck();
 

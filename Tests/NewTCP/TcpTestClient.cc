@@ -12,21 +12,70 @@
 // Copyright 2004 Andras Varga
 //
 
+#include <vector>
 #include <omnetpp.h>
 #include "TCPSocket.h"
 
 
 class TcpTestClient : public cSimpleModule
 {
-  public:
+  protected:
+    struct Command
+    {
+        simtime_t tSend;
+        int numBytes;
+    };
+    typedef std::vector<Command> CommandVector;
+    CommandVector commands;
+
     cQueue queue;
 
+  protected:
+    void parseScript(const char *script);
+
+  public:
     Module_Class_Members(TcpTestClient, cSimpleModule, 16384);
     virtual void activity();
     virtual void finish();
 };
 
 Define_Module(TcpTestClient);
+
+
+void TcpTestClient::parseScript(const char *script)
+{
+    const char *s = script;
+    while (*s)
+    {
+        Command cmd;
+
+        // parse time
+        while (isspace(*s)) s++;
+        if (!*s || *s==';') break;
+        const char *s0 = s;
+        cmd.tSend = strtod(s,&const_cast<char *&>(s));
+        if (s==s0)
+            throw new cException("syntax error in script: simulation time expected");
+
+        // parse number of bytes
+        while (isspace(*s)) s++;
+        if (!isdigit(*s))
+            throw new cException("syntax error in script: number of bytes expected");
+        cmd.numBytes = atoi(s);
+        while (isdigit(*s)) s++;
+
+        // add command
+        commands.push_back(cmd);
+
+        // skip delimiter
+        while (isspace(*s)) s++;
+        if (!*s) break;
+        if (*s!=';')
+            throw new cException("syntax error in script: separator ';' missing");
+        s++;
+        while (isspace(*s)) s++;
+    }
+}
 
 void TcpTestClient::activity()
 {
@@ -41,6 +90,12 @@ void TcpTestClient::activity()
     simtime_t tSend = par("tSend");
     simtime_t sendBytes = par("sendBytes");
     simtime_t tClose = par("tClose");
+
+    const char *script = par("sendScript");
+    parseScript(script);
+    if (sendBytes>0 && commands.size()>0)
+        throw new cException("cannot use both sendScript and tSend+sendBytes");
+
     TCPSocket socket;
     queue.setName("queue");
 
@@ -61,6 +116,14 @@ void TcpTestClient::activity()
 
         cMessage *msg = new cMessage("data1");
         msg->setLength(8*sendBytes);
+        socket.send(msg);
+    }
+    for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
+    {
+        waitAndEnqueue(i->tSend-simTime(), &queue);
+
+        cMessage *msg = new cMessage("data1");
+        msg->setLength(8*i->numBytes);
         socket.send(msg);
     }
 

@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPCommand_m.obj TCPSegment_m.obj PlainTCP.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
+OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPTahoeReno.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
@@ -67,7 +67,9 @@ GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
 SUBDIRS= 
 SUBDIR_TARGETS= 
 
-$(TARGET): $(OBJS) Makefile.vc 
+$(TARGET): $(OBJS) Makefile.vc  .tstamp
+
+.tstamp: $(OBJS)
 	@echo.>.tstamp
 
 $(OBJS) : $(GENERATEDHEADERS)
@@ -89,8 +91,11 @@ TCPSegment_m.obj: TCPSegment_m.cc
 TCPSegment_m.cc TCPSegment_m.h: TCPSegment.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) TCPSegment.msg
 
-PlainTCP.obj: PlainTCP.cc
-	$(CXX) -c $(COPTS) /Tp PlainTCP.cc
+DummyTCPAlg.obj: DummyTCPAlg.cc
+	$(CXX) -c $(COPTS) /Tp DummyTCPAlg.cc
+
+TCPTahoeReno.obj: TCPTahoeReno.cc
+	$(CXX) -c $(COPTS) /Tp TCPTahoeReno.cc
 
 TCPConnectionBase.obj: TCPConnectionBase.cc
 	$(CXX) -c $(COPTS) /Tp TCPConnectionBase.cc
@@ -149,8 +154,18 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-PlainTCP.obj: PlainTCP.cc \
-  PlainTCP.h \
+DummyTCPAlg.obj: DummyTCPAlg.cc \
+  DummyTCPAlg.h \
+  TCPMain.h \
+  TCPAlgorithm.h \
+  TCPConnection.h \
+  TCPSendQueue.h \
+  TCPReceiveQueue.h \
+  TCPSegment_m.h \
+  ..\..\Base/ipsuite_defs.h \
+  ..\..\Network\IPv4\Core/IPAddress.h
+TCPTahoeReno.obj: TCPTahoeReno.cc \
+  TCPTahoeReno.h \
   TCPMain.h \
   TCPAlgorithm.h \
   TCPConnection.h \

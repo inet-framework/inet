@@ -145,6 +145,7 @@ class TCPStateVariables : public cPolymorphic
 {
   public:
     TCPStateVariables();
+    virtual std::string info() const;
     virtual std::string detailedInfo() const;
   public:
     // set if the connection was initiated by an active open
@@ -169,6 +170,10 @@ class TCPStateVariables : public cPolymorphic
     uint32 rcv_wnd;      // receive window
     uint32 rcv_up;       // receive urgent pointer;
     uint32 irs;          // initial receive sequence number
+
+    // number of consecutive duplicate ACKs (this counter would logically
+    // belong to TCPAlgorithm, but it's a lot easier to manage here)
+    short dupacks;
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

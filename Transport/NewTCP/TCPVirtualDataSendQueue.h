@@ -47,6 +47,11 @@ class TCPVirtualDataSendQueue : public TCPSendQueue
     virtual void init(uint32 startSeq);
 
     /**
+     * Returns a string with the region stored.
+     */
+    virtual std::string info() const;
+
+    /**
      *
      */
     virtual void enqueueAppData(cMessage *msg);

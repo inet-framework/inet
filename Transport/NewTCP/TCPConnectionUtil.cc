@@ -86,16 +86,22 @@ const char *TCPConnection::eventName(int event)
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
+    tcpEV << "." << tcpseg->srcPort() << " > ";
+    tcpEV << "." << tcpseg->destPort() << ": ";
+
     if (tcpseg->synBit())  tcpEV << (tcpseg->ackBit() ? "SYN+ACK " : "SYN ");
     if (tcpseg->finBit())  tcpEV << "FIN(+ACK) ";
     if (tcpseg->rstBit())  tcpEV << (tcpseg->ackBit() ? "RST+ACK " : "RST ");
     if (tcpseg->pshBit())  tcpEV << "PSH ";
 
-    tcpEV << "seq=" << tcpseg->sequenceNo() << " ";
-    tcpEV << "len=" << tcpseg->payloadLength() << " ";
-    if (tcpseg->ackBit())  tcpEV << "ack=" << tcpseg->ackNo() << " ";
-    if (tcpseg->urgBit())  tcpEV << "urg=" << tcpseg->urgentPointer() << " ";
-    tcpEV << "wnd=" << tcpseg->window() << "\n";
+    if (tcpseg->payloadLength()>0 || tcpseg->synBit())
+    {
+        tcpEV << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength();
+        tcpEV << "(" << tcpseg->payloadLength() << ") ";
+    }
+    if (tcpseg->ackBit())  tcpEV << "ack " << tcpseg->ackNo() << " ";
+    tcpEV << "win " << tcpseg->window() << "\n";
+    if (tcpseg->urgBit())  tcpEV << "urg " << tcpseg->urgentPointer() << " ";
 }
 
 
@@ -315,6 +321,7 @@ void TCPConnection::sendData(bool fullSegments, int maxNumSegments)
         bytesAvailable -= bytes;
         state->snd_nxt += bytes;
         state->snd_wnd -= bytes;
+        // FIXME shouldn't we decrease cwnd here as well?
 
         if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
         {

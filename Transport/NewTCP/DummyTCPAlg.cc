@@ -54,6 +54,12 @@ void DummyTCPAlg::sendCommandInvoked()
     conn->sendData(false);
 }
 
+void DummyTCPAlg::receivedOutOfOrderSegment()
+{
+    tcpEV << "out-of-order segment, sending immediate ACK\n";
+    conn->sendAck();
+}
+
 void DummyTCPAlg::receiveSeqChanged()
 {
     // new data received, ACK immediately (more sophisticated algs should
@@ -62,7 +68,7 @@ void DummyTCPAlg::receiveSeqChanged()
     conn->sendAck();
 }
 
-void DummyTCPAlg::receivedDataAck()
+void DummyTCPAlg::receivedDataAck(uint32)
 {
     // ack may have freed up some room in the window, try sending.
     // small segments also OK (Nagle off)

@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "PlainTCP.h"
+#include "TCPTahoeReno.h"
 #include "TCPMain.h"
 
 
@@ -25,13 +25,14 @@
 #define MIN_REXMIT_TIMEOUT    0.5   // 500ms (1 "large tick") FIXME is this okay?
 #define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC1122)
 
-Register_Class(PlainTCP);
+Register_Class(TCPTahoeReno);
 
 
-PlainTCPStateVariables::PlainTCPStateVariables()
+TCPTahoeRenoStateVariables::TCPTahoeRenoStateVariables()
 {
     delayed_acks_enabled = true;
     nagle_enabled = true;
+    tcpvariant = TAHOE;
 
     rexmit_seq = 0;
     rexmit_count = 0;
@@ -39,8 +40,6 @@ PlainTCPStateVariables::PlainTCPStateVariables()
 
     snd_cwnd = 0; // will be set to MSS when connection is established
     ssthresh = 65535;
-
-    dupacks = 0;
 
     rtseq = 0;
     t_rtseq_sent = 0;
@@ -52,13 +51,13 @@ PlainTCPStateVariables::PlainTCPStateVariables()
 }
 
 
-PlainTCP::PlainTCP() : TCPAlgorithm()
+TCPTahoeReno::TCPTahoeReno() : TCPAlgorithm()
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
     state = NULL;
 }
 
-PlainTCP::~PlainTCP()
+TCPTahoeReno::~TCPTahoeReno()
 {
     // Note: don't delete "state" here, it'll be deleted from TCPConnection
 
@@ -70,7 +69,7 @@ PlainTCP::~PlainTCP()
     delete mod->cancelEvent(keepAliveTimer);
 }
 
-void PlainTCP::initialize()
+void TCPTahoeReno::initialize()
 {
     TCPAlgorithm::initialize();
 
@@ -85,19 +84,21 @@ void PlainTCP::initialize()
     keepAliveTimer->setContextPointer(conn);
 }
 
-TCPStateVariables *PlainTCP::createStateVariables()
+TCPStateVariables *TCPTahoeReno::createStateVariables()
 {
     ASSERT(state==NULL);
-    state = new PlainTCPStateVariables();
+    state = new TCPTahoeRenoStateVariables();
     return state;
 }
 
-void PlainTCP::established()
+void TCPTahoeReno::established()
 {
+    // initialize cwnd (we may learn MSS during connection setup --
+    // this (MSS TCP option) is not implemented yet though)
     state->snd_cwnd = state->snd_mss;
 }
 
-void PlainTCP::processTimer(cMessage *timer, TCPEventCode& event)
+void TCPTahoeReno::processTimer(cMessage *timer, TCPEventCode& event)
 {
     if (timer==rexmitTimer)
         processRexmitTimer(event);
@@ -111,7 +112,7 @@ void PlainTCP::processTimer(cMessage *timer, TCPEventCode& event)
         throw new cException(timer, "unrecognized timer");
 }
 
-void PlainTCP::processRexmitTimer(TCPEventCode& event)
+void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
 {
     //"
     // For any state if the retransmission timeout expires on a segment in
@@ -144,9 +145,9 @@ void PlainTCP::processRexmitTimer(TCPEventCode& event)
     state->t_rtseq_sent = 0;
 
     //
-    // Congestion control, etc:
+    // Slow Start, Congestion Control (RFC2001)
     //
-    int flight_size = state->snd_max - state->snd_una; // FIXME ok? ssf says: flight_size = snd_wnd = min(cnwd, rwnd) ???
+    int flight_size = Min(state->snd_cwnd, state->snd_wnd);
     state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
     state->snd_cwnd = state->snd_mss;
 
@@ -154,22 +155,22 @@ void PlainTCP::processRexmitTimer(TCPEventCode& event)
     conn->retransmitData();
 }
 
-void PlainTCP::processPersistTimer(TCPEventCode& event)
+void TCPTahoeReno::processPersistTimer(TCPEventCode& event)
 {
     // FIXME TBD
 }
 
-void PlainTCP::processDelayedAckTimer(TCPEventCode& event)
+void TCPTahoeReno::processDelayedAckTimer(TCPEventCode& event)
 {
     conn->sendAck();
 }
 
-void PlainTCP::processKeepAliveTimer(TCPEventCode& event)
+void TCPTahoeReno::processKeepAliveTimer(TCPEventCode& event)
 {
     // FIXME TBD
 }
 
-void PlainTCP::startRexmitTimer()
+void TCPTahoeReno::startRexmitTimer()
 {
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
@@ -180,7 +181,7 @@ void PlainTCP::startRexmitTimer()
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 }
 
-void PlainTCP::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
+void TCPTahoeReno::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
 {
     //
     // Jacobson's algorithm for estimating RTT and adaptively setting RTO.
@@ -212,7 +213,7 @@ void PlainTCP::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     state->rexmit_timeout = rto;
 }
 
-void PlainTCP::sendData()
+void TCPTahoeReno::sendData()
 {
     //
     // Nagle's algorithm: when a TCP connection has outstanding data that has not
@@ -236,16 +237,25 @@ void PlainTCP::sendData()
     conn->sendData(fullSegmentsOnly, window/state->snd_mss); // FIXME should take bytes rather than numsegments...
 }
 
-void PlainTCP::sendCommandInvoked()
+void TCPTahoeReno::sendCommandInvoked()
 {
+    // FIXME there's a problem with this: it interferes with slow start.
+    // Every time we get a SEND command we send up to cwnd bytes, whether
+    // we received an ack in between or not... See nagle_2.test.
     sendData();
 }
 
-void PlainTCP::receiveSeqChanged()
+void TCPTahoeReno::receivedOutOfOrderSegment()
+{
+    tcpEV << "Out-of-order segment, sending immediate ACK\n";
+    conn->sendAck();
+}
+
+void TCPTahoeReno::receiveSeqChanged()
 {
     if (!state->delayed_acks_enabled)
     {
-        tcpEV << "Sending ACK now (delayed ACKs are disabled)\n";
+        tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", sending ACK now (delayed ACKs are disabled)\n";
         conn->sendAck();
     }
     else
@@ -258,23 +268,10 @@ void PlainTCP::receiveSeqChanged()
     }
 }
 
-void PlainTCP::receivedDataAck()
+void TCPTahoeReno::receivedDataAck(uint32 firstSeqAcked)
 {
-    state->dupacks = 0;
-
-    // handling of retransmission timer: (as in SSFNet):
-    // "if the ACK is for the last segment sent (no data in flight), cancel
-    // the timer, else restart the timer with the current RTO value."
-    if (state->snd_una==state->snd_max)
-    {
-        tcpEV << "All outstanding segments acked, cancelling REXMIT timer (if running)\n";
-        conn->getTcpMain()->cancelEvent(rexmitTimer);
-    }
-    else
-    {
-        tcpEV << "Some but not all outstanding segments acked, restarting REXMIT timer\n";
-        startRexmitTimer();
-    }
+    // first cancel retransmission timer
+    conn->getTcpMain()->cancelEvent(rexmitTimer);
 
     // if round-trip time measurement is running, check if rtseq has been acked
     if (state->t_rtseq_sent!=0 && seqLess(state->rtseq, state->snd_una))
@@ -290,48 +287,114 @@ void PlainTCP::receivedDataAck()
         state->t_rtseq_sent = 0;
     }
 
-    // slow start, congestion avoidance etc.:
-    if (state->snd_cwnd <= state->ssthresh)
+    // handling of retransmission timer: (as in SSFNet):
+    // "if the ACK is for the last segment sent (no data in flight), cancel
+    // the timer, else restart the timer with the current RTO value."
+    if (state->snd_una==state->snd_max)
     {
-        // perform Slow Start
-        state->snd_cwnd += state->snd_mss;
+        tcpEV << "All outstanding segments acked\n";
     }
     else
     {
-        // perform Congestion Avoidance
-        state->snd_cwnd += state->snd_mss * state->snd_mss / state->snd_cwnd;
+        tcpEV << "Some but not all outstanding segments acked, restarting REXMIT timer\n";
+        startRexmitTimer();
+    }
+
+    if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO && state->dupacks>=3)
+    {
+        //
+        // Reno: if we're just after a Fast Retransmission, perform Fast Recovery:
+        // set cwnd to ssthresh (deflating the window).
+        //
+        state->snd_cwnd = state->ssthresh;
+    }
+    else
+    {
+        //
+        // Perform slow start and congestion avoidance. RFC2001: "Slow start has
+        // cwnd begin at one segment, and be incremented by one segment every time
+        // an ACK is received."  NOTE: "every time" means "for every segment
+        // acknowledged!"
+        //
+        int bytesAcked = state->snd_una - firstSeqAcked;
+        int segmentsAcked = Max(1,bytesAcked/state->snd_mss); // probably shouldn't be zero. FIXME is this right?
+
+        if (state->snd_cwnd <= state->ssthresh)
+        {
+            // perform Slow Start
+            state->snd_cwnd += segmentsAcked * state->snd_mss;
+        }
+        else
+        {
+            // perform Congestion Avoidance
+            for (int i=0; i<segmentsAcked; i++)
+                state->snd_cwnd += state->snd_mss * state->snd_mss / state->snd_cwnd;
+        }
     }
 
     // ack may have freed up some room in the window, try sending
     sendData();
 }
 
-void PlainTCP::receivedDuplicateAck()
+void TCPTahoeReno::receivedDuplicateAck()
 {
-    state->dupacks++;    // FIXME move this into TCPConn? if doesn't qualify as dupack, still dupack=0 must be done!
-
-    // perform Fast Retransmission (Tahoe) or Fast Retransmission/Recovery (Reno)
-    if (state->dupacks>=3)
+    if (state->dupacks==3)
     {
-        // FIXME todo
+        //
+        // perform Fast Retransmission (Tahoe) or Fast Retransmission/Recovery (Reno)
+        //
+
+        // Reset ssthresh and cwnd. Note: code is similar to that in processRexmitTimer()
+        int flight_size = Min(state->snd_cwnd, state->snd_wnd);
+        state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
+        if (state->tcpvariant==TCPTahoeRenoStateVariables::TAHOE)
+            state->snd_cwnd = state->snd_mss;
+        else if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO)
+            state->snd_cwnd = 3*state->snd_mss;
+        else
+            ASSERT(0);
+
+        tcpEV << "Performing Fast Retransmit, new cwnd=" << state->snd_cwnd << "\n";
+
+
+        // cancel round-trip time measurement
+        state->t_rtseq_sent = 0;
+
+        // cancel retransmission timer
+        conn->getTcpMain()->cancelEvent(rexmitTimer);
+
+        // what we don't do: (1) don't give up after 12 retries (2) leave RTO unchanged
+
+        // retransmit missing segment (FIXME just 1 segment!!!!)
+        conn->retransmitData();
+    }
+    else if (state->dupacks > 3)
+    {
+        //
+        // Reno: For each additional duplicate ACK received, increment cwnd by MSS.
+        // This artificially inflates the congestion window in order to reflect the
+        // additional segment that has left the network
+        //
+        if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO)
+            state->snd_cwnd += state->snd_mss;
+        tcpEV << "Reno: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
     }
 }
 
-void PlainTCP::receivedAckForDataNotYetSent(uint32 seq)
+void TCPTahoeReno::receivedAckForDataNotYetSent(uint32 seq)
 {
-    state->dupacks = 0;
     tcpEV << "Sending immediate ACK\n";
     conn->sendAck();
 }
 
-void PlainTCP::ackSent()
+void TCPTahoeReno::ackSent()
 {
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
         conn->getTcpMain()->cancelEvent(delayedAckTimer);
 }
 
-void PlainTCP::dataSent(uint32 fromseq)
+void TCPTahoeReno::dataSent(uint32 fromseq)
 {
     // if retransmission timer not running, schedule it
     if (!rexmitTimer->isScheduled())
@@ -350,7 +413,7 @@ void PlainTCP::dataSent(uint32 fromseq)
 
 }
 
-void PlainTCP::dataRetransmitted()
+void TCPTahoeReno::dataRetransmitted()
 {
 }
 

@@ -45,6 +45,7 @@ TCPStateVariables::TCPStateVariables()
     rcv_wnd = 16384; // FIXME make it parameter
     rcv_up = 0;
     irs = 0;
+    dupacks = 0;
 
     fin_ack_rcvd = false;
     send_fin = false;
@@ -52,6 +53,18 @@ TCPStateVariables::TCPStateVariables()
     fin_rcvd = false;
     rcv_fin_seq = 0;
 
+}
+
+std::string TCPStateVariables::info() const
+{
+    std::stringstream out;
+    out <<  "snd_una=" << snd_una;
+    out << " snd_nxt=" << snd_nxt;
+    out << " snd_max=" << snd_max;
+    out << " snd_wnd=" << snd_wnd;
+    out << " rcv_nxt=" << rcv_nxt;
+    out << " rcv_wnd=" << rcv_wnd;
+    return out.str();
 }
 
 std::string TCPStateVariables::detailedInfo() const

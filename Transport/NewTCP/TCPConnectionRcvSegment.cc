@@ -81,6 +81,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPAddress sr
 {
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
+    tcpEV << "TCB: " << state->info() << "\n";
 
     //
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
@@ -399,26 +400,37 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         {
             tcpEV << "Processing segment text in a data transfer state\n";
 
-            // insert into receive buffers. If this segment is contiguous with previously
-            // received ones, rcv_nxt can be increased; otherwise it stays the same but
-            // the data are stored nevertheless (to avoid "Failure to retain above-sequence
-            // data" problem, RFC 2525 section 2.5).
+            // insert into receive buffers. If this segment is contiguous with
+            // previously received ones (seqNo==rcv_nxt), rcv_nxt can be increased;
+            // otherwise it stays the same but the data must be cached nevertheless
+            // (to avoid "Failure to retain above-sequence data" problem, RFC 2525
+            // section 2.5).
+            uint32 old_rcv_nxt = state->rcv_nxt;
             state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpseg);
 
-            // forward data to app
-            cMessage *msg;
-            while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt))!=NULL)
+            // out-of-order segment?
+            if (old_rcv_nxt==state->rcv_nxt)
             {
-                sendToApp(msg);
+                // we'll probably want to send an ACK here
+                tcpAlgorithm->receivedOutOfOrderSegment();
             }
-
-            // if this segment "filled the gap" until the previously arrived segment
-            // that carried a FIN (i.e.rcv_nxt==rcv_fin_seq), we have to advance
-            // rcv_nxt over the FIN.
-            if (state->fin_rcvd && state->rcv_nxt==state->rcv_fin_seq)
+            else
             {
-                tcpEV << "All segments arrived up the FIN segment, advancing rcv_nxt over the FIN\n";
-                state->rcv_nxt = state->rcv_fin_seq+1;
+                // forward data to app
+                cMessage *msg;
+                while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt))!=NULL)
+                {
+                    sendToApp(msg);
+                }
+
+                // if this segment "filled the gap" until the previously arrived segment
+                // that carried a FIN (i.e.rcv_nxt==rcv_fin_seq), we have to advance
+                // rcv_nxt over the FIN.
+                if (state->fin_rcvd && state->rcv_nxt==state->rcv_fin_seq)
+                {
+                    tcpEV << "All segments arrived up the FIN segment, advancing rcv_nxt over the FIN\n";
+                    state->rcv_nxt = state->rcv_fin_seq+1;
+                }
             }
         }
     }
@@ -576,6 +588,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         //"
         state->rcv_nxt = tcpseg->sequenceNo()+1;
         state->irs = tcpseg->sequenceNo();
+        receiveQueue->init(state->rcv_nxt);
         selectInitialSeqNum();
         sendSynAck();
 
@@ -675,6 +688,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         //
         state->rcv_nxt = tcpseg->sequenceNo()+1;
         state->irs = tcpseg->sequenceNo();
+        receiveQueue->init(state->rcv_nxt);
 
         if (tcpseg->ackBit())
         {
@@ -811,22 +825,42 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         // the following apply:
         //    (1) snd_una==ackNo
         //    (2) segment contains no data
-        //    (3) window is the same as last received (not an update)
-        //    (4) there's unacked data (snd_una!=snd_max)
+        //    (3) there's unacked data (snd_una!=snd_max)
         //
-        // If doesn't qualify as duplicate ACK, just ignore it.
+        // Note: ssfnet uses additional constraint "window is the same as last
+        // received (not an update)" -- we don't do that because window updates
+        // are only picked up anyway if either seqNo or ackNo has changed.
         //
         if (state->snd_una==tcpseg->ackNo() && tcpseg->payloadLength()==0 &&
-            state->snd_wnd==tcpseg->window() && state->snd_una!=state->snd_max)
+            state->snd_una!=state->snd_max)
         {
-            tcpEV << "Duplicate ACK.\n";
+            state->dupacks++;
+            tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
             tcpAlgorithm->receivedDuplicateAck();
+        }
+        else
+        {
+            // if doesn't qualify as duplicate ACK, just ignore it.
+            tcpEV << "Segment doesn't qualify as duplicate ACK:";
+            if (state->snd_una!=tcpseg->ackNo())  tcpEV << " ackNo!=snd_una,";
+            if (tcpseg->payloadLength()!=0)       tcpEV << " len!=0,";
+            //if (state->snd_wnd!=tcpseg->window()) tcpEV << " win!=snd_wnd,";
+            if (state->snd_una==state->snd_max)  tcpEV << " no unacked data,";
+            tcpEV << ".\n";
+
+            state->dupacks = 0;
         }
     }
     else if (seqLE(tcpseg->ackNo(), state->snd_max))
     {
         // ack in window.
+        uint32 old_snd_una = state->snd_una;
         state->snd_una = tcpseg->ackNo();
+
+        // after retransmitting a lost segment, we may get an ack well ahead of snd_nxt
+        if (seqLess(state->snd_nxt, state->snd_una))
+            state->snd_nxt = state->snd_una;
+
         uint32 discardUpToSeq = state->snd_una;
 
         // our FIN acked?
@@ -852,7 +886,10 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         }
 
         // notify
-        tcpAlgorithm->receivedDataAck();
+        tcpAlgorithm->receivedDataAck(old_snd_una);
+
+        // in the receivedDataAck we need the old value
+        state->dupacks = 0;
     }
     else
     {
@@ -861,6 +898,7 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         // send an ACK, drop the segment, and return.
         tcpEV << "ACK acks something not yet sent\n";
         tcpAlgorithm->receivedAckForDataNotYetSent(tcpseg->ackNo());
+        state->dupacks = 0;
         // FIXME todo: drop segment & return
     }
 }

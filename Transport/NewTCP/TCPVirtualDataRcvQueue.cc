@@ -31,7 +31,35 @@ TCPVirtualDataRcvQueue::~TCPVirtualDataRcvQueue()
 {
 }
 
+void TCPVirtualDataRcvQueue::init(uint32 startSeq)
+{
+    rcv_nxt = startSeq;
+}
+
+std::string TCPVirtualDataRcvQueue::info() const
+{
+    std::string res;
+    char buf[32];
+    sprintf(buf, "rcv_nxt=%u ", rcv_nxt);
+    res = buf;
+
+    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
+    {
+        sprintf(buf, "[%u..%u) ", i->begin, i->end);
+        res+=buf;
+    }
+    return res;
+}
+
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+{
+    merge(tcpseg);
+    if (seqGE(rcv_nxt, regionList.begin()->begin))
+        rcv_nxt = regionList.begin()->end;
+    return rcv_nxt;
+}
+
+void TCPVirtualDataRcvQueue::merge(TCPSegment *tcpseg)
 {
     // Here we have to update our existing regions with the octet range
     // tcpseg represents. We either have to insert tcpseg as a separate region
@@ -48,14 +76,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     {
         // insert as first and only region
         regionList.insert(regionList.begin(), seg);
-        return seg.end;
-    }
-
-    if (seqLE(seg.end,i->end))
-    {
-        if (seqLess(seg.begin,i->begin))
-            i->begin = seg.begin;
-        return i->end;
+        return;
     }
 
     // skip regions which fall entirely before seg (no overlap or touching)
@@ -68,14 +89,14 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     {
         // seg is entirely past last region: insert as separate region at end
         regionList.insert(regionList.end(), seg);
-        return regionList.begin()->end;
+        return;
     }
 
     if (seqLess(seg.end,i->begin))
     {
         // segment entirely before region "i": insert as separate region before "i"
         regionList.insert(i, seg);
-        return regionList.begin()->end;
+        return;
     }
 
     if (seqLess(seg.begin,i->begin))
@@ -103,12 +124,12 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
             regionList.erase(oldj);
         }
     }
-    // done
-    return regionList.begin()->end;
 }
 
 cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 {
+    ASSERT(seqLE(seq,rcv_nxt));
+
     RegionList::iterator i = regionList.begin();
     if (i==regionList.end())
         return NULL;

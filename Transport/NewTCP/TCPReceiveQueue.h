@@ -61,6 +61,11 @@ class TCPReceiveQueue : public cPolymorphic
     virtual ~TCPReceiveQueue() {}
 
     /**
+     * Set initial receive sequence number.
+     */
+    virtual void init(uint32 startSeq) = 0;
+
+    /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.
      */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) = 0;

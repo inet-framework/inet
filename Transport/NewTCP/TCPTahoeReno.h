@@ -16,24 +16,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __PLAINTCP_H
-#define __PLAINTCP_H
+#ifndef __TCPTAHOERENO_H
+#define __TCPTAHOERENO_H
 
 #include <omnetpp.h>
 #include "TCPAlgorithm.h"
 
 
 /**
- * State variables for PlainTCP.
+ * State variables for TCPTahoeReno.
  */
-class PlainTCPStateVariables : public TCPStateVariables
+class TCPTahoeRenoStateVariables : public TCPStateVariables
 {
   public:
-    PlainTCPStateVariables();
+    TCPTahoeRenoStateVariables();
 
     // TCP features
     bool delayed_acks_enabled; // delayed ACKs enabled/disabled
-    bool nagle_enabled;      // Nagle's algorithm (off = NODELAY socket option)
+    bool nagle_enabled;        // Nagle's algorithm (off = NODELAY socket option)
+    enum {TAHOE,RENO} tcpvariant;  // TCP algorithm
 
     // retransmit count
     uint32 rexmit_seq;       // the sequence number rexmit_count refers to
@@ -52,9 +53,6 @@ class PlainTCPStateVariables : public TCPStateVariables
     simtime_t srtt;          // smoothed round-trip time
     simtime_t rttvar;        // variance of round-trip time
 
-    // duplicate ack counter
-    short dupacks;
-
     // receive variables
     //bool rcv_up_valid;
     //uint32 rcv_buf_seq;
@@ -71,18 +69,23 @@ class PlainTCPStateVariables : public TCPStateVariables
 
 
 /**
- * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,
+ * Includes basic TCP algorithms: adaptive retransmission, persist timer,
  * keep-alive, delayed acks, congestion control.
  *
  * Implements:
  *   - delayed acks
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
  *   - Nagle's algorithm to prevent silly window syndrome
+ *   - Tahoe (Fast Rexmit) or Reno (Fast Rexmit/Fast Recovery)
+ * To be done:
+ *   - persist timer, keepalive timer
  *
  * Note: currently the timers and time calculations are done in double
- * and NOT in Unix (200ms or 500ms) ticks.
+ * and NOT in Unix (200ms or 500ms) ticks. It's possible to write another
+ * TCPAlgorithm which uses ticks (or rather, factor out timer handling to
+ * separate methods, and redefine only those).
  */
-class PlainTCP : public TCPAlgorithm
+class TCPTahoeReno : public TCPAlgorithm
 {
   protected:
     cMessage *rexmitTimer;
@@ -90,7 +93,7 @@ class PlainTCP : public TCPAlgorithm
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
 
-    PlainTCPStateVariables *state;
+    TCPTahoeRenoStateVariables *state;
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -122,12 +125,12 @@ class PlainTCP : public TCPAlgorithm
     /**
      * Ctor.
      */
-    PlainTCP();
+    TCPTahoeReno();
 
     /**
      * Virtual dtor.
      */
-    virtual ~PlainTCP();
+    virtual ~TCPTahoeReno();
 
     /**
      * Create timers, etc.
@@ -135,7 +138,7 @@ class PlainTCP : public TCPAlgorithm
     virtual void initialize();
 
     /**
-     * Create and return a PlainTCPStateVariables object.
+     * Create and return a TCPTahoeRenoStateVariables object.
      */
     virtual TCPStateVariables *createStateVariables();
 
@@ -148,9 +151,11 @@ class PlainTCP : public TCPAlgorithm
 
     virtual void sendCommandInvoked();
 
+    virtual void receivedOutOfOrderSegment();
+
     virtual void receiveSeqChanged();
 
-    virtual void receivedDataAck();
+    virtual void receivedDataAck(uint32 firstSeqAcked);
 
     virtual void receivedDuplicateAck();
 
