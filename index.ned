@@ -27,7 +27,7 @@
 // It also includes an MPLS model with RSVP-TE and LDP signalling.
 // Link-layer models are PPP and Ethernet.</nohtml>
 //
-// The original IPSuite was originally written by Klaus Wehrle, Jochen Reber,
+// The original IPSuite was written by Klaus Wehrle, Jochen Reber,
 // Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage and others at
 // the University of Karlsruhe during 2000-2001. The current codebase is a
 // rewrite by Andras Varga, started in 2003 and still in progress.
@@ -39,12 +39,10 @@
 // The model has been written by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au)
 // and other students at the University of Technology, Sydney
 // under supervision of Dr Robin Brown.
-// See <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/"
-// target="_top">project page</a> (obsolete).
+// See <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" target="_top">project page</a> (obsolete).
 //
 // For up-to-date info, visit the current
-// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPv4Suite"
-// target="_top">IPSuite home page</a>.
+// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPv4Suite" target="_top">IPSuite home page</a>.
 //
 // A few useful starting points for browsing IPSuite:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a>
