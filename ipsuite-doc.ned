@@ -58,16 +58,16 @@
 // <tt>netstat -rn</tt> Unix commands.
 //
 // Accepted interface fields are:
-//    - <tt>name:</tt>
-//    - <tt>encap:</tt>
-//    - <tt>HWaddr:</tt>
-//    - <tt>inet_addr:</tt>
+//    - <tt>name:</tt> - arbitrary interface name (e.g. eth0, ppp0)
+//    - <tt>encap:</tt> - (ignored)
+//    - <tt>HWaddr:</tt> - (ignored)
+//    - <tt>inet_addr:</tt> - IP address
 //    - <tt>Bcast:</tt>
 //    - <tt>Mask:</tt>
 //    - <tt>Groups:</tt> Multicast groups. 224.0.0.1 is added automatically,
 //      and 224.0.0.2 also if the node is a router (IPForward==true).
-//    - <tt>MTU:</tt>
-//    - <tt>Metric:</tt>
+//    - <tt>MTU:</tt> - MTU on the link (e.g. Ethernet: 1500)
+//    - <tt>Metric:</tt> - integer route metric
 //    - flags: <tt>BROADCAST</tt>, <tt>MULTICAST</tt>, <tt>POINTTOPOINT</tt>
 //
 // The route fields are:
