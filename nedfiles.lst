@@ -44,6 +44,7 @@ Base/Sink.ned
 
 
 Network/IPv4/ICMP.ned
+Network/IPv4/IGMP.ned
 Network/IPv4/IP.ned
 Network/IPv4/RoutingTable.ned
 Network/IPv4d/ErrorHandling.ned
@@ -101,7 +102,6 @@ Nodes/IPSuite/TCPUpperLayers.ned
 Nodes/IPSuite/UDPHost.ned
 Nodes/IPSuite/UDPUpperLayers.ned
 Nodes/MPLS/LSRNode.ned
-Nodes/MPLS/NetworkLayerWithMPLS.ned
 Nodes/MPLS/RSVP_LSR_Node.ned
 Tests/IPv4/work/IPFragBuf_1.ned
 Tests/MPLS/LDP1/MPLSNet.ned

@@ -18,15 +18,17 @@
 
 import
     "IPProcessing",
+    "ICMP",
+    "IGMP",
     "RoutingTable",
     "NetworkInterface";
 
 
 //
-// Network layers of the IP Node. Contains: IPProcessing, IP I/O-Queues,
-// Network Interfaces and Routing Table
+// Network layers of an IP node.
 //
-// Interfaces to transport layer: TCP, UDP, echo/ping, error out
+// Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
+// FIXME add ICMP errors
 //
 module NetworkLayer
     parameters:
@@ -37,10 +39,12 @@ module NetworkLayer
         in: physIn[]; // FIXME to be renamed
         in: TCPIn;
         in: UDPIn;
+        in: RSVPIn;
         in: pingIn;
         out: physOut[]; // FIXME to be renamed
         out: TCPOut;
         out: UDPOut;
+        out: RSVPOut;
         out: pingOut;
 
     submodules:
@@ -48,21 +52,28 @@ module NetworkLayer
             parameters:
                 IPForward = IPForward,
                 numOfPorts = numOfPorts,
-                numOfTransportProt = 2,
                 timeToLive = 8,
                 multicastTimeToLive = 6,
-                fragmentTimeout = "5s";
+                fragmentTimeout = 60,
+                protocolMapping = "6:0,17:1,1:2,2:3,46:4";
             gatesizes:
-                transportIn[2],
-                transportOut[2],
+                transportIn[5],
+                transportOut[5],
                 queueIn[numOfPorts],
                 queueOut[numOfPorts];
             display: "b=32,30;p=102,55;i=cogwheel";
+        icmp: ICMP;
+            display: "b=32,30;p=259,78;i=cogwheel";
+        igmp: IGMP;
+            display: "b=32,30;p=259,135;i=cogwheel";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routingTableFileName = routingFile;
             display: "b=32,32;p=185,53,row;i=box3";
+        errorHandling: ErrorHandling;
+            display: "b=16,16;p=330,78;i=box1_s";
+
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;
@@ -71,9 +82,14 @@ module NetworkLayer
         ip.transportOut[1] --> UDPOut;
         ip.transportIn[1] <-- UDPIn;
 
-        // ICMP interface
-        ip.ICMPOut --> pingOut;
-        ip.ICMPIn <-- pingIn;
+        ip.transportOut[2] --> icmp.localIn;
+        ip.transportIn[2] <-- icmp.sendOut;
+
+        ip.transportOut[3] --> igmp.localIn;
+        ip.transportIn[3] <-- igmp.sendOut;
+
+        ip.transportOut[4] --> RSVPOut;
+        ip.transportIn[4] <-- RSVPIn;
 
         // L2 interfaces to IP
         for i=0..numOfPorts-1 do

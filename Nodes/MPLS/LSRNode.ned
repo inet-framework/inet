@@ -14,7 +14,7 @@
 import
     "Blackboard",
     "LinkLayer",
-    "NetworkLayerWithMPLS",
+    "NetworkLayer",
     "LDPproc",
     "tcp2ldp",
     "MPLSModule",
@@ -80,7 +80,7 @@ module LSRNode
             parameters:
                 local_addr = local_addr;
             display: "p=246,117;b=40,24,rect";
-        networkLayer: NetworkLayerWithMPLS;
+        networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
                 numOfPorts = numOfPorts,

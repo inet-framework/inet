@@ -14,7 +14,7 @@
 import
     "Blackboard",
     "LinkLayer",
-    "NetworkLayerWithMPLS",
+    "NetworkLayer",
     "MPLSModule",
     "LIBTable",
     "RSVPInterface",
@@ -82,7 +82,7 @@ module RSVP_LSR_Node
             parameters:
                 local_addr = local_addr;
             display: "o=#008040;p=82,163;b=40,24";
-        networkLayer: NetworkLayerWithMPLS;
+        networkLayer: NetworkLayer;
             parameters:
                 IPForward = true,
                 numOfPorts = numOfPorts,

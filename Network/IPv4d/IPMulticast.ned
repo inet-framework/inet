@@ -29,9 +29,6 @@
 // - if entry in multicast routing table requires tunneling, send to Tunneling
 //   module, otherwise send to Fragmentation module
 //
-// Receive IGMP (Internet Group Management Protocol) message from LocalDeliver:
-// update multicast routing table.
-//
 // author: Jochen Reber
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 //
@@ -39,7 +36,7 @@ simple IPMulticast
     parameters:
         IPForward: bool;
     gates:
-        in: localIn, routingIn; // ProcessorManagerIn;
+        in: routingIn;
         out: localOut, fragmentationOut, tunnelOut;
 endsimple
 

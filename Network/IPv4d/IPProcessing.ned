@@ -22,7 +22,6 @@ import
     "Routing",
     "LocalDeliver",
     "IPMulticast",
-    "ICMP",
     "IPSend",
     "IPFragmentation",
     "IPTunneling",
@@ -34,26 +33,22 @@ import
 //
 // Simulates the IP Protocol of a host or router.
 //
-// author: Jochen Reber
-// date: 2.5.00
+// author: Jochen Reber date: 2.5.00
+// modifications Andras Varga
 //
 module IPProcessing
     parameters:
         timeToLive : numeric,
         multicastTimeToLive : numeric,
         numOfPorts : numeric,
-        numOfTransportProt : numeric const,
         IPForward : bool,
-        fragmentTimeout : string;
-
+        fragmentTimeout : numeric const,
+        protocolMapping: string;
     gates:
-        in: ICMPIn; // FIXME should be called pingIn
         in: transportIn[];
-        in: queueIn[];
-        out: ICMPOut; // FIXME should be called pingOut
         out: transportOut[];
+        in: queueIn[];
         out: queueOut[];
-        out: errorOut;
     submodules:
         preRouting: PreRouting;
             gatesizes:
@@ -67,24 +62,23 @@ module IPProcessing
             display: "b=34,34;p=179,177;i=bwgen";
         localDeliver: LocalDeliver;
             parameters:
-                fragmentTimeout = fragmentTimeout;
+                fragmentTimeout = fragmentTimeout,
+                protocolMapping = protocolMapping;
             gatesizes:
                 in[2],
-                transportOut[numOfTransportProt];
+                transportOut[sizeof(transportOut)];
             display: "b=32,30;p=95,78;i=fork";
         multicast: IPMulticast;
             parameters:
                 IPForward = IPForward;
             display: "b=17,17;p=305,175;i=bwgen_s";
-        icmp: ICMP;
-            display: "b=32,30;p=259,78;i=cogwheel";
         send: IPSend;
             parameters:
                 timeToLive = timeToLive,
                 multicastTimeToLive = multicastTimeToLive;
             gatesizes:
-                in[numOfTransportProt+2];
-            display: "b=32,30;p=372,78;i=prot1";
+                in[sizeof(transportIn)+2];
+            display: "b=32,30;p=250,78;i=prot1";
         fragmentation: IPFragmentation;
             parameters:
                 numOfPorts = numOfPorts;
@@ -95,8 +89,6 @@ module IPProcessing
             display: "b=16,15;p=370,152;i=bwxcon_s";
         output: IPOutput[numOfPorts];
             display: "b=32,30;p=110,304,row;i=prot2";
-        errorHandling: ErrorHandling;
-            display: "b=16,16;p=313,40;i=box1_s";
         inputQueue: InputQueue;
             gatesizes:
                 fromNW[sizeof(queueIn)];
@@ -116,14 +108,12 @@ module IPProcessing
 
         // Routing output
         routing.localOut --> localDeliver.in[0];
-        routing.fragmentationOut --> fragmentation.routingIn;
         routing.multicastOut --> multicast.routingIn;
+        routing.fragmentationOut --> fragmentation.routingIn;
 
         // LocalDeliver output
-        localDeliver.multicastOut --> multicast.localIn;
-        localDeliver.ICMPOut --> icmp.localIn;
         localDeliver.preRoutingOut --> preRouting.in[1];
-        for i=0..numOfTransportProt-1 do
+        for i=0..sizeof(transportOut)-1 do
             localDeliver.transportOut[i] --> transportOut[i];
         endfor;
 
@@ -132,15 +122,9 @@ module IPProcessing
         multicast.fragmentationOut --> fragmentation.multicastIn;
         multicast.tunnelOut --> tunneling.multicastIn;
 
-        // ICMP output, ping input
-        icmp.sendOut --> send.in[0];
-        icmp.pingOut --> ICMPOut;
-        icmp.errorOut --> errorHandling.in;
-        ICMPIn --> icmp.pingIn;
-
         // IP send output, input
         send.routingOut --> routing.in[1];
-        for i=0..numOfTransportProt-1 do
+        for i=0..sizeof(transportIn)-1 do
             transportIn[i] --> send.in[i+2];
         endfor;
 
