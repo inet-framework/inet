@@ -1,0 +1,12 @@
+An example of traffic rerouting
+
+This is to demonstrate the cability of resilience with RSVP-TE when traffic request is changed.
+In the network, there is a link is updated and its status is reported back to the IR. This router
+detects a better path for an existing TE tunnel and reroute the traffic to this new path.
+
+The technique used to reroute the traffic is "make-before-break". A new PATH message is formed in the
+same session, except a new LSP_ID, and sent to the destination in SF style. The destination uses SF method
+to reserve the resource without couting resource on the shared links twice.
+
+
+

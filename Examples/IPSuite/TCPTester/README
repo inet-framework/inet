@@ -1,0 +1,5 @@
+This client/server network is a test environment for the TCP FSM. It
+provides very simple IP and physical layers.
+
+A special switch is used to drop packets of different kinds. This is
+useful for testing all TCP states.

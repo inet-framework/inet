@@ -1,0 +1,30 @@
+2003-09-19  Andras Varga
+
+	* merged changes from MPLS/RSVP-TE model from UT Sydney
+
+2003-09-18  Andras Varga
+
+	* merged patches for compiling with MSVC.
+
+        * module descriptions (comments) added to/rearranged in all NED files 
+        for documentation generation with new opp_neddoc.
+
+	* directory structure rearranged to correspond to IPv6Suite (and also
+	OSI layers). Hopefully everything is now where one would expect.
+
+	* added makemake.cmd for generating Makefile.vc's (using opp_nmakemake)
+	for building with MSVC
+
+	* lots of minor fixes to make the code compile with MSVC. 
+	Note:
+	  1. RETURN TYPE OF dup() should ALWAYS BE cObject* !
+	  2. It is FORBIDDEN to initialize class variables (even const or
+	     static const ones) within the class declaration !!! That violates 
+	     the C++ standard, and not many compilers eat it except gcc!
+
+	* updated for recent OMNeT++ versions: added ",row" to vector module
+	display strings; removed className() methods, etc.
+
+	* FIXME: KIDSRouter was missing from the original IPSuite! KIDSNw1 
+	didn't compile. Temporarily fixed (copied NextHopRouter.)
+

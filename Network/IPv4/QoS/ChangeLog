@@ -1,0 +1,6 @@
+2002-07-18  Ulrich Kaage <kaage@int.uni-karlsruhe.de>  <kaage@int.etec.uni-karlsruhe.de>
+
+	* FIFO_Queue.cc: compile fix for GCC 3.1
+	* any_queue.cc: dito
+	* multiply_element.cc: dito
+

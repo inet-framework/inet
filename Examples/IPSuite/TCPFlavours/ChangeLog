@@ -1,0 +1,6 @@
+2001-08-31  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* this directory is a modified copy of the Network/TCPTester subdirectory
+
+	* TCPTester.ned: commented out TCPSlowStart and TCPDelayedAck
+

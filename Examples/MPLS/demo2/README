@@ -1,0 +1,9 @@
+An example of Hop-by-Hop and Explicit Routing in RSVP-TE
+The network consists of 5 LSRs and 4 hosts. Host1 establishes path simply based on IP routing option.
+Host2 establishes its path based on the input of ROUTE specified by the administrator from an input file called traffic.xml
+The format of input ROUTE is
+<route>firstAddress, LBit, secondAddress, LBit, ...</route>
+
+LBit is 1 if the nexhop is loose hop and other value otherwise.
+
+

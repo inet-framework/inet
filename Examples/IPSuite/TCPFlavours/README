@@ -1,0 +1,6 @@
+This client/server network is a test environment for the TCP congestion control mechanisms.
+It provides very simple IP and physical layers.
+
+A special dropswitch is used to drop packets of different kinds. This is
+useful for testing the congestion control mechanisms.
+
