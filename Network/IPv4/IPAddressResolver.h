@@ -24,8 +24,12 @@
 #define __IPADDRESSRESOLVER_H
 
 #include <omnetpp.h>
+#include "RoutingTable.h"
 #include "IPAddress.h"
 
+/**
+ * Utility class for finding IP address of a host/router.
+ */
 class IPAddressResolver
 {
   public:
@@ -33,24 +37,40 @@ class IPAddressResolver
     ~IPAddressResolver() {}
 
     /**
-     * Returns IP address of the given host or router. If different interfaces
-     * of the host/router have different IP addresses, the function throws 
-     * an error.
-     *
-     * The current implementation assumes that the RoutingTable module is
-     * submodule <tt>"networkLayer.routingTable"</tt> within the host/router
-     * module.
-     */
-    IPAddress addressOf(cModule *host);
-
-    /**
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
      * or router ("host[2]"), and empty string (""). For the latter, it returns
-     * the null address. If module name is specified, the module will be 
+     * the null address. If module name is specified, the module will be
      * looked up using <tt>simulation.moduleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
     IPAddress resolve(const char *str);
+
+    /** @name Utility functions supporting resolve() */
+    //@{
+    /**
+     * Returns IP address of the given host or router. If different interfaces
+     * of the host/router have different IP addresses, the function throws
+     * an error.
+     *
+     * This function uses routingTableOf() to find the RoutingTable module,
+     * then invokes getAddressFrom() to extract the IP address.
+     */
+    IPAddress addressOf(cModule *host);
+
+    /**
+     * Returns the IP address of the given host or router, given its RoutingTable
+     * module. If different interfaces have different IP addresses, the function
+     * throws an error.
+     */
+    IPAddress getAddressFrom(RoutingTable *rt);
+
+    /**
+     * The function tries to look up the RoutingTable module as submodule
+     * <tt>"networkLayer.routingTable"</tt> within the host/router module.
+     * Throws an error if not found.
+     */
+    RoutingTable *routingTableOf(cModule *host);
+    //@}
 };
 
 
