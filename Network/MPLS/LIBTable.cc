@@ -50,8 +50,8 @@ void LIBTable::initialize()
 
    printTables();
 */
-    WATCH_vector(lib);
-    WATCH_vector(prt);
+    WATCH_VECTOR(lib);
+    WATCH_VECTOR(prt);
 
 }
 

@@ -57,7 +57,7 @@ void TED::initialize()
     buildDatabase();
     printDatabase();
 
-    WATCH_vector(ted);
+    WATCH_VECTOR(ted);
 }
 
 

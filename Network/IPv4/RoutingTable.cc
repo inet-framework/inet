@@ -120,6 +120,24 @@ std::string RoutingEntry::detailedInfo() const
 Define_Module( RoutingTable );
 
 
+std::ostream & operator<<(std::ostream & os, const RoutingEntry& e)
+{
+    char buf[1024];
+    const_cast<RoutingEntry&>(e).info(buf);
+    os << buf;
+    //FIXME todo change to: os << e.info();
+    return os;
+};
+
+std::ostream & operator<<(std::ostream & os, const InterfaceEntry& e)
+{
+    char buf[1024];
+    const_cast<InterfaceEntry&>(e).info(buf);
+    os << buf;
+    //FIXME todo change to: os << e.info();
+    return os;
+};
+
 void RoutingTable::initialize()
 {
     IPForward = par("IPForward").boolValue();
@@ -134,9 +152,9 @@ void RoutingTable::initialize()
 
     addLocalLoopback();
 
-    WATCH_vector(interfaces);
-    WATCH_vector(routes);
-    WATCH_vector(multicastRoutes);
+    WATCH_PTRVECTOR(interfaces);
+    WATCH_PTRVECTOR(routes);
+    WATCH_PTRVECTOR(multicastRoutes);
     //FIXME WATCH(defaultRoute)
 
     //printIfconfig();

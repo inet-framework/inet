@@ -53,7 +53,26 @@ template <class T> void createVectorWatcher(const char *varname, vector<T>& v)
     new cVectorWatcher<T>(varname, v);
 }
 
-#define WATCH_vector(v)   createVectorWatcher(#v,(v))
+
+//
+// Internal class
+//
+template<class T>
+class cPointerVectorWatcher : public cVectorWatcher<T>
+{
+  public:
+    cPointerVectorWatcher(const char *name, vector<T>& var) : cVectorWatcher<T>(name, var) {}
+    virtual string at(int i) const {stringstream out; out << *v[i]; return out.str();}
+};
+
+template <class T> void createPointerVectorWatcher(const char *varname, vector<T>& v)
+{
+    new cPointerVectorWatcher<T>(varname, v);
+}
+
+#define WATCH_VECTOR(v)   createVectorWatcher(#v,(v))
+
+#define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
 
 
 #endif
