@@ -31,10 +31,10 @@ void RSVPAppl::initialize()
     isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();
     isER = par("isER").boolValue();
-    const char *trafficFile = par("traffic").stringValue();
+    const char *trafficFile = par("traffic").stringValue(); // FIXME change to xml-typed NED param
 
     if (isIR)
-        initFromFile(trafficFile);
+        initFromFile(ev.getXMLDocument(trafficFile));
 }
 
 
@@ -875,62 +875,20 @@ void RSVPAppl::updateTED()
 }
 
 
-bool RSVPAppl::initFromFile(const char *filename)
+bool RSVPAppl::initFromFile(const cXMLElement *root)
 {
-    // FIXME rewrite with OMNeT++'s xml config file support
-    xmlDocPtr doc;
+    if (!root)
+        throw new cException("No traffic configuration");
+    if (strcmp(root->getTagName(),"traffic"))
+        throw new cException("Traffic configuration: wrong document type, root node is not <traffic>");
 
-    xmlNodePtr cur;
-
-    // Build an XML tree from a the file
-    doc = xmlParseFile(filename);
-    if (doc == NULL)
-        return false;
-
-    // Check the document is of the right kind
-    cur = xmlDocGetRootElement(doc);
-    if (cur == NULL)
-    {
-        ev << "Empty document\n";
-        xmlFreeDoc(doc);
-        return false;
-    }
-    if (xmlStrcmp(cur->name, (const xmlChar *) "traffic"))
-    {
-        ev << "Document of the wrong type, root node != traffic\n";
-        xmlFreeDoc(doc);
-        return false;
-    }
-
-
-    // Walk the tree.
-    cur = cur->xmlChildrenNode;
-    while (cur && xmlIsBlankNode(cur))
-    {
-        cur = cur->next;
-    }
-    if (cur == NULL)
-    {
-        ev << "No records in the document\n";
-        xmlFreeDoc(doc);
-        return false;
-    }
-
-    // cur = cur->xmlChildrenNode;
-    while (cur != NULL)
-    {
-        if (!xmlStrcmp(cur->name, (const xmlChar *) "conn"))
-        {
-            TrafficRequest(doc, cur);
-
-        }
-        cur = cur->next;
-    }
-
+    cXMLElementList list = root->getChildrenByTagName("conn");
+    for (cXMLElementList::iterator i=list.begin(); i!=list.end(); i++)
+        TrafficRequest(*i);
     return true;
 }
 
-void RSVPAppl::TrafficRequest(xmlDocPtr doc, xmlNodePtr cur)
+void RSVPAppl::TrafficRequest(const cXMLElement *connNode)
 {
     traffic_request_t aTR;
     for (int c = 0; c < MAX_ROUTE; c++)
@@ -940,61 +898,47 @@ void RSVPAppl::TrafficRequest(xmlDocPtr doc, xmlNodePtr cur)
     }
     aTR.isER = true;
 
-
     int rCount = 0;
 
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL)
+    for (cXMLElement *child=connNode->getFirstChild(); child; child=child->getNextSibling())
     {
-        if (!xmlStrcmp(cur->name, (const xmlChar *) "src"))
+        if (!strcmp(child->getTagName(),"src"))
         {
-
-            aTR.src =
-                IPAddress((const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1)).
-                getInt();
+            aTR.src = IPAddress(child->getNodeValue()).getInt();
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "dest"))
+        else if (!strcmp(child->getTagName(),"dest"))
         {
-            aTR.dest = IPAddress((const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1)).
-                getInt();
+            aTR.dest = IPAddress(child->getNodeValue()).getInt();
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "setupPri"))
+        else if (!strcmp(child->getTagName(),"setupPri"))
         {
-            aTR.setupPri = strtol((const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1),
-                                  NULL, 0);
+            aTR.setupPri = strtol(child->getNodeValue(), NULL, 0);
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "holdingPri"))
+        else if (!strcmp(child->getTagName(),"holdingPri"))
         {
-            aTR.holdingPri = strtol((const char *)
-                                    xmlNodeListGetString(doc, cur->xmlChildrenNode, 1), NULL, 0);
+            aTR.holdingPri = strtol(child->getNodeValue(), NULL, 0);
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "delay"))
+        else if (!strcmp(child->getTagName(),"delay"))
         {
-            aTR.delay = strtod((const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1),
-                               NULL);
+            aTR.delay = strtod(child->getNodeValue(), NULL);
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "bandwidth"))
+        else if (!strcmp(child->getTagName(),"bandwidth"))
         {
-            aTR.bandwidth = strtod((const char *)
-                                   xmlNodeListGetString(doc, cur->xmlChildrenNode, 1), NULL);
+            aTR.bandwidth = strtod(child->getNodeValue(), NULL);
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "ER"))
+        else if (!strcmp(child->getTagName(),"ER"))
         {
-            const char *ER_Option =
-                (const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            const char *ER_Option = child->getNodeValue();
             ev << "ER Option is " << ER_Option << "\n";
             if ((!strcmp(ER_Option, "false")) || (!strcmp(ER_Option, "no")))
             {
                 ev << "A hop-by-hop request\n";
                 aTR.isER = false;
             }
-
         }
-        else if (!xmlStrcmp(cur->name, (const xmlChar *) "route"))
+        else if (!strcmp(child->getTagName(),"route"))
         {
-
-            // aTR.route[rCount].node= IPAddress(
-            const char *line = (const char *) xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            const char *line = child->getNodeValue();
             StringTokenizer tokenizer(line, ",");
             const char *aField;
             while ((aField = tokenizer.nextToken()) != NULL)
@@ -1011,13 +955,11 @@ void RSVPAppl::TrafficRequest(xmlDocPtr doc, xmlNodePtr cur)
                     break;
             }
         }
-        cur = cur->next;
     }
     ev << "Adding (src, dest, delay, bw) = (" << IPAddress(aTR.src) << "," <<
         IPAddress(aTR.dest) << "," << aTR.delay << "," << aTR.bandwidth << ")\n";
     if (aTR.holdingPri > aTR.setupPri)
-        error
-            ("Holding priority is greater than setup priority (setup priority must be greater than or equal)");
+        error("Holding priority is greater than setup priority (setup priority must be greater than or equal)");
 
     tr.push_back(aTR);
 }

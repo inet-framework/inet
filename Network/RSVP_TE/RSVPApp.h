@@ -15,10 +15,7 @@
 #ifndef __RSVP_HOST_H__
 #define __RSVP_HOST_H__
 
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
 #include <string>
-//#include <list>
 #include <vector>
 #include <omnetpp.h>
 
@@ -87,8 +84,8 @@ private:
     std::vector<lsp_tunnel_t> FecSenderBinds;
     std::vector<routing_info_t> routingInfo;
 
-    bool initFromFile(const char *filename);
-    void TrafficRequest(xmlDocPtr doc, xmlNodePtr cur);
+    bool initFromFile(const cXMLElement *root);
+    void TrafficRequest(const cXMLElement *connNode);
     void addRouteInfo(ResvMessage* rmsg);
     bool hasPath(int lspid, FlowSpecObj_t* newFlowspec);
     double getTotalDelay(std::vector<simple_link_t> *links);
