@@ -16,11 +16,13 @@
 //
 
 cplusplus {{
+#include "IPAddress.h"
+
 #define MAX_ROUTE 10
 #define InLIST_SIZE 5
-#define ON      1
-#define OFF     0
 }}
+
+class noncobject IPAddress;
 
 //
 // Intserv/RSVP: Session Structure

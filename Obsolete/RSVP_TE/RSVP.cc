@@ -221,9 +221,9 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
     PathStateBlock_t *fPSB = NULL;
     PathStateBlock_t *cPSB = NULL;
     ResvStateBlock_t *activeRSB = NULL;
-    int foundFlag = OFF;
-    int Resv_Refresh_Needed_Flag = OFF;
-    int Path_Refresh_Needed_Flag = OFF;
+    bool found = false;
+    bool Resv_Refresh_Needed = false;
+    bool Path_Refresh_Needed = false;
 
     std::vector < PathStateBlock_t >::iterator p_iterI;
     PathStateBlock_t p_iter;
@@ -306,7 +306,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
             if (pmsg->isInSession(&p_iter.Session_Object) &&
                 equal(pmsg->getSenderTemplate(),p_iter.Sender_Template_Object) &&
-                p_iter.Local_Only_Flag == OFF)
+                p_iter.Local_Only_Flag == false)
             {
                 fPSB = &p_iter;
             }
@@ -334,7 +334,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
                 if (pmsg->getNHOP() != p_iter.Previous_Hop_Address || pmsg->getLIH() != p_iter.LIH)
                 {
-                    Resv_Refresh_Needed_Flag = ON;
+                    Resv_Refresh_Needed = true;
                 }
 
                 if (pmsg->getNHOP() != p_iter.Previous_Hop_Address ||
@@ -348,18 +348,18 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
                     p_iter.Sender_Tspec_Object.link_delay = pmsg->getDelay();
                     p_iter.Sender_Tspec_Object.req_bandwidth = pmsg->getBW();
 
-                    Path_Refresh_Needed_Flag = ON;
+                    Path_Refresh_Needed = true;
                 }
 
                 cPSB = &p_iter; // Remember the pointer
-                foundFlag = ON;
+                found = true;
                 break;
 
             }
         }
     }
 
-    if (foundFlag == OFF)
+    if (!found)
     {
         /*
            o    If there was no matching PSB, then:
@@ -407,16 +407,16 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
             ev << "Local Application\n";
             // psbEle->OutInterface_List = pmsg->getSrcAddress();
             psbEle->IncInterface = 0;   // UNDEFINED IP ADDRESS
-            // LocalInFlag = ON;
+            // LocalInFlag = true;
 
-            psbEle->Local_Only_Flag = ON;
+            psbEle->Local_Only_Flag = true;
         }
         else
         {
             ev << "Not Local Application\n";
             psbEle->IncInterface = InIf;
 
-            psbEle->Local_Only_Flag = OFF;
+            psbEle->Local_Only_Flag = false;
         }
 
         // If next hop is strict hop or removeIndex >1
@@ -431,7 +431,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
             cPSB = psbEle;      // PSBList.end();
             ev << "Added new PSB:\n";
             printPSB(psbEle);
-            Path_Refresh_Needed_Flag = ON;
+            Path_Refresh_Needed = true;
         }
 
     }
@@ -441,7 +441,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
         return;
     }
 
-    if (Path_Refresh_Needed_Flag == OFF)
+    if (Path_Refresh_Needed == false)
     {
         ev << "No Path Refresh Needed : Leaving PathMsgPro\n";
         return;
@@ -450,7 +450,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
     else
     {
         int tOutList[InLIST_SIZE];
-        // int olFlag = OFF;
+        // bool olFlag = false;
 
         Mcast_Route_Query(cPSB->Sender_Template_Object.SrcAddress, InIf,
                           cPSB->Session_Object.DestAddress, tOutList);
@@ -539,10 +539,10 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
 
     int *Refresh_PHOP_list = new int[InLIST_SIZE];
 
-    int Resv_Refresh_Needed_Flag = OFF;
+    bool Resv_Refresh_Needed = false;
 
-    int NeworMod = OFF;
-    int psbFoundFlag = OFF;
+    bool NeworMod = false;
+    bool psbFoundFlag = false;
     int inx;
     FlowDescriptor_t *fdlist = NULL;
     FilterSpecObj_t *Filtss = NULL;
@@ -604,10 +604,10 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
 
         if (rmsg->isInSession(&p_iter.Session_Object))
         {
-            psbFoundFlag = ON;
+            psbFoundFlag = true;
         }
     }
-    if (psbFoundFlag == OFF)
+    if (!psbFoundFlag)
     {
         ev << "No Path Infomation\n";
         return;
@@ -750,17 +750,17 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
         for (p_iterI = locList.begin(); p_iterI != locList.end(); p_iterI++)
         {
             p_iter = (PathStateBlock_t) * p_iterI;
-            int flag = OFF;
+            bool flag = false;
 
             for (int i = 0; i < InLIST_SIZE; ++i)
             {
                 if (Refresh_PHOP_list[i] == p_iter.Previous_Hop_Address)
                 {
-                    flag = ON;
+                    flag = true;
                     break;
                 }
             }
-            if (flag == OFF)
+            if (flag == false)
             {
                 Refresh_PHOP_list[count] = p_iter.Previous_Hop_Address;
                 count = count + 1;
@@ -794,7 +794,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
         if (activeRSB == NULL)
         {
 
-            Resv_Refresh_Needed_Flag = ON;
+            Resv_Refresh_Needed = true;
             /* Create a new RSB */
             ev << "Create a new RSB\n";
             activeRSB = new ResvStateBlock_t;
@@ -827,7 +827,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             activeRSB->Flowspec_Object.link_delay = fdlist->Flowspec_Object.link_delay;
             activeRSB->Flowspec_Object.req_bandwidth = fdlist->Flowspec_Object.req_bandwidth;
 
-            NeworMod = ON;
+            NeworMod = true;
             RSBList.push_back(*activeRSB);
 
             ev << "Adding new RSB\n";
@@ -869,7 +869,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
 
                     ev << "RSB found and has been modified\n";
 
-                    NeworMod = ON;
+                    NeworMod = true;
                 }
             }
 
@@ -885,12 +885,12 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             {
                 activeRSB->Flowspec_Object.link_delay = fdlist->Flowspec_Object.link_delay;
                 activeRSB->Flowspec_Object.req_bandwidth = fdlist->Flowspec_Object.req_bandwidth;
-                NeworMod = ON;
+                NeworMod = true;
             }
 
         }
 
-        if (NeworMod == OFF)
+        if (NeworMod == false)
             return;
 
         // ER does not need to update the traffic control as no outlink concerned
@@ -899,7 +899,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             if (UpdateTrafficControl(activeRSB) == -1)
             {
                 ev << "Update traffic control fails\n";
-                Resv_Refresh_Needed_Flag = OFF;
+                Resv_Refresh_Needed = false;
                 RSVPResvError *errorMsg = new RSVPResvError("ResvErr");
                 errorMsg->setSession(activeRSB->Session_Object);
                 // errorMsg->addPar("dest_addr") = IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
@@ -908,12 +908,12 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
                 sendToIP(errorMsg, IPAddress(activeRSB->Session_Object.DestAddress));
             }
             else
-                Resv_Refresh_Needed_Flag = ON;
+                Resv_Refresh_Needed = true;
 
         }
         // else
         // {
-        //    Resv_Refresh_Needed_Flag = ON;
+        //    Resv_Refresh_Needed = true;
         // }
     }
 
@@ -925,7 +925,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
         return;
     }
 
-    if (Resv_Refresh_Needed_Flag == ON)
+    if (Resv_Refresh_Needed == true)
     {
 
         ev << "Sending RESV REFRESH for each PHOP in Refresh_PHOP_list\n";
@@ -1378,8 +1378,8 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     int i;
 
     // int PHOP;
-    int found = OFF;
-    // int B_Merge=OFF;
+    bool found = false;
+    // bool B_Merge = false;
     RSVPResvMsg *outRM = new RSVPResvMsg("Resv");
     FlowSpecObj_t *Tc_Flowspec = new FlowSpecObj_t;
     std::vector < PathStateBlock_t >::iterator p_iterI;
@@ -1475,7 +1475,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
         for (t_iterI = TCSBList.begin(); t_iterI != TCSBList.end(); t_iterI++)
         {
             t_iter = (TrafficControlStateBlock_t) * t_iterI;
-            found = OFF;
+            found = false;
             for (int i = 0; i < InLIST_SIZE; ++i)
             {
                 if ((p_iter.Sender_Template_Object.SrcAddress !=
@@ -1484,24 +1484,24 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
                         t_iter.Filter_Spec_Object[i].SrcPort))
                     continue;
 
-                found = ON;
+                found = true;
                 break;
 
             }
-            if (found == OFF)
+            if (!found)
                 continue;
 
-            found = OFF;
+            found = false;
             if (t_iter.OI == -1)
             {
-                found = ON;
+                found = true;
             }
             else if (p_iter.OutInterface_List == t_iter.OI)
             {
-                found = ON;
+                found = true;
             }
 
-            if (found == ON)
+            if (found)
             {
                 /*
                    3.   If B_Merge flag is off then ignore a blockaded TCSB,
@@ -1514,7 +1514,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
                    with the next TCSB.
                  */
 
-                // if( B_Merge==OFF )
+                // if( B_Merge==false )
 
                 /* Ignore a blockaded TCSB */
                 if (t_iter.Fwd_Flowspec.req_bandwidth > Tc_Flowspec->req_bandwidth)
@@ -1554,8 +1554,8 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
 {
 
     // int PHOP;
-    // int found =OFF;
-    // int B_Merge=OFF;
+    // bool found = false;
+    // bool B_Merge = false;
     RSVPResvTear *outRM = new RSVPResvTear("ResvTear");
     // FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
 
@@ -1670,8 +1670,8 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
     FlowSpecObj_t *Tc_Flowspec = new FlowSpecObj_t;
     Tc_Flowspec->req_bandwidth = 0;
     Tc_Flowspec->link_delay = 0;
-    int TC_E_Police_flag = OFF;
-    int Resv_Refresh_Needed_Flag = OFF;
+    bool TC_E_Police_flag = false;
+    bool Resv_Refresh_Needed = false;
 
     FilterSpecObj_t TC_Filter_Spec[InLIST_SIZE];
     for (int m = 0; m < InLIST_SIZE; m++)
@@ -1683,8 +1683,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
     FlowSpecObj_t *Path_Te = new FlowSpecObj_t;
     Path_Te->req_bandwidth = 0;
     Path_Te->link_delay = 0;
-    int found = OFF;
-    int handle = OFF;
+    bool found = false;
 
     for (p_iterI = PSBList.begin(); p_iterI != PSBList.end(); p_iterI++)
     {
@@ -1703,9 +1702,9 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
 
                 if (p_iter.OutInterface_List == activeRSB->OI)
                 {
-                    if (p_iter.E_Police_Flag == ON)
+                    if (p_iter.E_Police_Flag == true)
                     {
-                        TC_E_Police_flag = ON;
+                        TC_E_Police_flag = true;
                     }
                     Path_Te->req_bandwidth += p_iter.Sender_Tspec_Object.req_bandwidth;
                     Path_Te->link_delay += p_iter.Sender_Tspec_Object.link_delay;
@@ -1718,7 +1717,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
         }
 
     }
-    int Is_Biggest = OFF;
+    bool Is_Biggest = false;
     int inx = 0;
 
     for (r_iterI = RSBList.begin(); r_iterI != RSBList.end(); r_iterI++)
@@ -1777,7 +1776,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
          Tc_Flowspec->req_bandwidth) && (activeRSB->Flowspec_Object.link_delay >
                                          Tc_Flowspec->link_delay))
     {
-        Is_Biggest = ON;
+        Is_Biggest = true;
     }
 
     /*
@@ -1787,7 +1786,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
        If none is found, create a new TCSB.
      */
 
-    found = OFF;
+    found = false;
 
     for (t_iterI = TCSBList.begin(); t_iterI != TCSBList.end(); t_iterI++)
     {
@@ -1802,7 +1801,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
             // t_iter.Filter_Spec_Object[i].SrcPort    == activeRSB->Filter_Spec_Object.SrcPort)
 
             {
-                found = ON;
+                found = true;
                 tEle = &t_iter;
                 break;
             }
@@ -1817,7 +1816,7 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
        police flags into TCSB.
      */
 
-    if (found == OFF)
+    if (!found)
     {
         /* TCSB is new */
         TrafficControlStateBlock_t *newTcsb = new TrafficControlStateBlock_t;
@@ -1830,9 +1829,9 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
         setTCTspecforTCSB(newTcsb, Path_Te);
 
         newTcsb->E_Police_Flag = TC_E_Police_flag;
-        Resv_Refresh_Needed_Flag = ON;
+        Resv_Refresh_Needed = true;
 
-        handle = TC_AddFlowspec(newTcsb->Session_Object.Tunnel_Id,
+        int handle = TC_AddFlowspec(newTcsb->Session_Object.Tunnel_Id,
                                 newTcsb->Session_Object.holdingPri,
                                 newTcsb->Session_Object.setupPri, newTcsb->OI, newTcsb->TC_Flowspec,
                                 newTcsb->TC_Tspec, fwdFS);
@@ -1866,10 +1865,10 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
                 (tEle->TC_Tspec.req_bandwidth == Path_Te->req_bandwidth &&
                  tEle->TC_Tspec.link_delay == Path_Te->link_delay))
             {
-                Resv_Refresh_Needed_Flag = ON;
+                Resv_Refresh_Needed = true;
             }
 
-            handle = TC_ModFlowspec(tEle->Session_Object.Tunnel_Id, tEle->OI,
+            int handle = TC_ModFlowspec(tEle->Session_Object.Tunnel_Id, tEle->OI,
                                     tEle->TC_Flowspec, tEle->TC_Tspec, &tEle->Fwd_Flowspec);
 
             if (handle == -1)
@@ -1877,10 +1876,10 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
         }
         ev << "Finish Found a matching TCSB\n";
     }
-    if (Is_Biggest == ON)
+    if (Is_Biggest)
     {
         tEle->Receiver_Address = activeRSB->Receiver_Address;
-        Resv_Refresh_Needed_Flag = ON;
+        Resv_Refresh_Needed = true;
     }
     else
     {

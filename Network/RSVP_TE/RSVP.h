@@ -62,10 +62,10 @@ private:
         //int rem_IP_TTL;
 
         // To determine EDGE of the RSVP network
-        int E_Police_Flag;
+        bool E_Police_Flag;
 
         // To determine if the App. is local or not
-        int Local_Only_Flag;
+        bool Local_Only_Flag;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
         int OutInterface_List;//[InLIST_SIZE];
@@ -132,9 +132,9 @@ private:
         SenderTspecObj_t TC_Tspec;
 
         // Entry Police flags
-        int E_Police_Flag;
+        bool E_Police_Flag;
 
-        int Local_Only_Flag;
+        bool Local_Only_Flag;
 
         // Reservation Handle
         int Rhandle;
