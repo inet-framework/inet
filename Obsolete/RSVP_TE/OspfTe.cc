@@ -405,8 +405,8 @@ void OspfTe::TEAddCandidates(const simple_link_tVector& links,
 
         // Normal Dijkstra Algorithm for adding candidate
         CSPFVertex vertexW;
-        vertexW.vertexId = (linkstate.linkid);
-        vertexW.distanceToRoot = (vertexV->distanceToRoot) + (linkstate.metric);
+        vertexW.vertexId = linkstate.linkid;
+        vertexW.distanceToRoot = vertexV->distanceToRoot + linkstate.metric;
         vertexW.parent = vertexV;
 
         found = false;
