@@ -28,43 +28,28 @@ cplusplus {{
 
 
 //
-// Adds IP control information to transport packet.
+// Control information for sending/receiving packets over IP.
 //
-//    required fields:
-//            encapsulation of cPacket
-//            protocol: use IPProtocolFieldId as defined above
-//            destAddr
-//    optional fields:
-//            srcAddr: default to first interface address
-//            codepoint: used in DS_Field (RFC 2474), instead of TOS; default: 0
-//            timeToLive: default defined, usually 64
-//            dontFragment: default: false
-//    not implemented IP parameters:
-//            options: IP Options currently not used
-//            buffer length
-//            buffer pointer
-//            Identifier: currently always chosen by IP layer
-//            result: currently no result returned
+// To send a packet over IP, fill in an IPControlInfo object,
+// attach it to the packet with the C++ method setControlInfo(),
+// the send it to the IP module.
 //
-// Send/receive IP call: RFC 791 section 3.3
-// Excerpt:
+// When IP delivers packets to higher layers, it also attaches
+// similar IPControlInfo objects to them.
 //
-// SEND (src, dst, prot, TOS, TTL, BufPTR, len, Id, DF, opt => result)
-// RECV (BufPTR, prot, => result, src, dst, TOS, len, opt)
-//  where:
-//    src = source address
-//    dst = destination address
-//    prot = protocol
-//    TOS = type of service
-//    TTL = time to live
-//    BufPTR = buffer pointer
-//    len = length of buffer
-//    Id  = Identifier
-//    DF = Don't Fragment
-//    opt = option data
-//    result = response
-//      OK = datagram sent/received ok
-//      Error = error in arguments or local network error
+// When sending, the following fields are required:
+// - protocol: a value from IPProtocolFieldId
+// - destAddr
+//
+// Optional fields:
+// - srcAddr: it will be set to the address of the outgoing interface
+// - codepoint: used in DS_Field (RFC 2474) instead of TOS (default: 0)
+// - timeToLive: default defined as module parameter
+// - dontFragment: default: false
+//
+// Not supported:
+// - options: IP Options currently not used
+// - Identifier is currently always chosen by IP layer
 //
 class IPControlInfo
 {
@@ -81,8 +66,8 @@ class IPControlInfo
 
 
 //
-// Control info for routing purposes. OutputPort and nextHopAddr are 
-// filled in by IPRouting.
+// Control info used for routing purposes within IPProcessing.
+// OutputPort and nextHopAddr are filled in by IPRouting.
 //
 // Next hop address is used on a LAN to determine the MAC destination
 // address (and it may be used on other multicast networks for similar
