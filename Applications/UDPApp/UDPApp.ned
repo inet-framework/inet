@@ -32,7 +32,8 @@ endsimple
 // Sends UDP packets to randomly chosen destinations at random intervals.
 // Destination IP addresses are chosen from the dest_addresses parameter.
 // The peer can be UDPSink or another UDPApp (it handles received packets
-// exactly like UDPSink).
+// exactly like UDPSink). To disable the application model, set dest_addresses
+// to "".
 //
 simple UDPApp
     parameters:

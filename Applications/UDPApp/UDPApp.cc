@@ -87,6 +87,9 @@ void UDPApp::initialize()
     numSent = 0;
     WATCH(numSent);
 
+    if (destAddresses.empty())
+        return;
+
     cMessage *timer = new cMessage("sendTimer");
     scheduleAt((double)par("message_freq"), timer);
 }
