@@ -348,12 +348,21 @@ echo
 # include external Makefile fragments here, so that they can override
 # the default target if they want
 if [ ! "$fragments" = "" ]; then
+    echo "# contents of file(s) $fragments:"
     cat $fragments
+    echo
 else
     if [ -f makefrag ]; then
+        echo "# contents of file makefrag:"
         cat makefrag
+        echo
     fi
 fi
+
+cat <<EOT
+#------------------------------------------------------------------------------
+
+EOT
 
 case "$type" in
 exe)
