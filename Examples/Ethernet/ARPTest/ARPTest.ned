@@ -19,13 +19,6 @@ import
     "RTEntryEraser";
 
 
-module RTEntryEraser
-    parameters:
-        modulesToErase: string,
-        modulesToManipulate: string;
-endmodule
-
-
 module ARPTest
     submodules:
         server: StandardHost2;
@@ -67,11 +60,6 @@ module ARPTest
                 networkAddress = "10.0.0.0",
                 netmask = "255.255.0.0";
             display: "p=46,111;i=cogwheel";
-        rtEntryEraser: RTEntryEraser;
-            parameters:
-                modulesToErase = "client server",
-                modulesToManipulate = "router2 router3 router4 router6";
-            display: "p=118,350;i=cogwheel";
     connections:
         server.ethOut++ --> datarate 10e6 --> router8.ethIn++;
         router8.ethOut++ --> datarate 10e6 --> server.ethIn++;

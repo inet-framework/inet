@@ -21,23 +21,23 @@ set i 0
 set first ""
 foreach line {
    {"IPSuite"}
-   {"NClients"            "IPSuite/NClients"           "./NClients"           "NClients"}
-   {"NClients/2"          "IPSuite/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
-   {"NClients/3"          "IPSuite/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
-   {"FlatNet"             "IPSuite/FlatNet"            "./FlatNet"            "FlatNet"}
-   {"KIDSNw1"             "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
-   {"McNetwork2"          "IPSuite/McNetwork2"         "./McNetwork2"         "McNetwork2"}
-   {"PerformAnalysis"     "IPSuite/PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
-   {"TCPClientServerNet"  "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
+   {"NClients/Telnet"        "IPSuite/NClients"           "./NClients"           "NClients"}
+   {"NClients/HTTP"          "IPSuite/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
+   {"NClients/file transfer" "IPSuite/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
+   {"FlatNet"                "IPSuite/FlatNet"            "./FlatNet"            "FlatNet"}
+   {"KIDSNw1"                "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
+   {"McNetwork2"             "IPSuite/McNetwork2"         "./McNetwork2"         "McNetwork2"}
+   {"PerformAnalysis"        "IPSuite/PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
+   {"TCPClientServerNet"     "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
 
    {"Ethernet"}
-   {"ARP Test"             "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
-   {"LANs: mixed Ethernet" "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
-   {"LANs: Ethernet bus"   "Ethernet/LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
-   {"LANs: hub"            "Ethernet/LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
-   {"LANs: switch"         "Ethernet/LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
-   {"LANs: two hosts"      "Ethernet/LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
-   {"LANs: very large LAN" "Ethernet/LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
+   {"ARP Test"               "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
+   {"LANs: mixed Ethernet"   "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
+   {"LANs: Ethernet bus"     "Ethernet/LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
+   {"LANs: hub"              "Ethernet/LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
+   {"LANs: switch"           "Ethernet/LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
+   {"LANs: two hosts"        "Ethernet/LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
+   {"LANs: very large LAN"   "Ethernet/LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
 
    {"MPLS"}
    {"MPLS-LDP"               "MPLS/ldp-mpls1" "./ldp-mpls1" "ldp-mpls1"}
