@@ -589,6 +589,7 @@ void EtherMAC::startFrameTransmission()
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->setLength(frame->length()+8*PREAMBLE_BYTES+8*SFD_BYTES);
+    if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
     send(frame, "physicalOut");
 
     // update burst variables
@@ -765,6 +766,7 @@ void EtherMAC::sendJamSignal()
 {
     cMessage *jam = new cMessage("JAM_SIGNAL", JAM_SIGNAL);
     jam->setLength(8*JAM_SIGNAL_BYTES);
+    if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, "physicalOut");
 
     scheduleAt(simTime()+jamDuration, endJammingMsg);
@@ -933,13 +935,14 @@ void EtherMAC::printState()
 
 void EtherMAC::updateDisplayString()
 {
+    // icon coloring
     const char *color;
     if (receiveState==RX_COLLISION_STATE)
         color = "red";
     else if (transmitState==TRANSMITTING_STATE)
         color = "yellow";
     else if (transmitState==JAMMING_STATE)
-        color = "#400000";
+        color = "red";
     else if (receiveState==RECEIVING_STATE)
         color = "#4040ff";
     else if (transmitState==BACKOFF_STATE)
@@ -949,6 +952,11 @@ void EtherMAC::updateDisplayString()
     else
         color = "";
     displayString().setTagArg("i",1,color);
+    if (!strcmp(parentModule()->className(),"EthernetInterface"))
+        parentModule()->displayString().setTagArg("i",1,color);
+
+    // connection coloring
+    updateConnectionColor(transmitState);
 
 #if 0
     // this code works but didn't turn out to be very useful
@@ -977,6 +985,33 @@ void EtherMAC::updateDisplayString()
 #endif
 }
 
+void EtherMAC::updateConnectionColor(int txState)
+{
+    const char *color;
+    if (txState==TRANSMITTING_STATE)
+        color = "yellow";
+    else if (txState==JAMMING_STATE || txState==BACKOFF_STATE)
+        color = "red";
+    else
+        color = "";
+
+    cGate *g = gate("physicalOut");
+    while (g && g->type()=='O')
+    {
+        g->displayString().setTagArg("o",0,color);
+        g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
+        g = g->toGate();
+    }
+    g = gate("physicalIn");
+    while (g && g->type()=='I')
+    {
+        g = g->fromGate();
+        if (!g)
+            break;
+        g->displayString().setTagArg("o",0,color);
+        g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
+    }
+}
 
 void EtherMAC::beginSendFrames()
 {

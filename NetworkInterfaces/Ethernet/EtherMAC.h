@@ -64,6 +64,7 @@ class EtherMAC : public cSimpleModule
 
     // utility function
     void updateDisplayString();
+    void updateConnectionColor(int txState);
 
   public:
     /**

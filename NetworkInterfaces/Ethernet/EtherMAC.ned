@@ -111,9 +111,6 @@
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// Hints: to get an average throughput (bits/sec) graph in Plove, create
-// an Awk expression filter <tt>8*x/t</tt>.
-//
 simple EtherMAC
     parameters:
         promiscuous : bool,     // if true, all packets are received, otherwise only the
