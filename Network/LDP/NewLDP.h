@@ -21,7 +21,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
-#include "LDPpacket.h"
+#include "LDPPacket_m.h"
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
 #include "RoutingTableAccess.h"
@@ -43,7 +43,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 
     struct peer_info
     {
-        int peerIP;
+        IPAddress peerIP;
         string peerID;
         string role;
         string linkInterface;
@@ -63,7 +63,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     typedef vector<peer_info> PeerVector;
     PeerVector myPeers;
 
-    int local_addr;
+    IPAddress local_addr;
     string id;
     double helloTimeout;  // FIXME obey
     bool isIR;
@@ -79,7 +79,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     /**
      * This method finds next peer in upstream direction
      */
-    int locateNextHop(int fec);
+    IPAddress locateNextHop(int fec);
 
     /**
      * This method maps the peerIP with the interface name in routing table.
@@ -87,10 +87,10 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
      * In case no corresponding peerIP found, a peerIP (not deterministic)
      * will be returned.
      */
-    int findPeerAddrFromInterface(string interfaceName);
+    IPAddress findPeerAddrFromInterface(string interfaceName);
 
     //This method is the reserve of above method
-    string findInterfaceFromPeerAddr(int peerIP);
+    string findInterfaceFromPeerAddr(IPAddress peerIP);
 
   public:
     Module_Class_Members(NewLDP,cSimpleModule,16384);

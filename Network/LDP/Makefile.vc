@@ -65,10 +65,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= LDPpacket.obj NewLDP.obj
+OBJS= LDPPacket_m.obj NewLDP.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= 
+GENERATEDHEADERS= LDPPacket_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -93,8 +93,11 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
-LDPpacket.obj: LDPpacket.cc
-	$(CXX) -c $(COPTS) /Tp LDPpacket.cc
+LDPPacket_m.obj: LDPPacket_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp LDPPacket_m.cc
+
+LDPPacket_m.cc LDPPacket_m.h: LDPPacket.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) LDPPacket.msg
 
 NewLDP.obj: NewLDP.cc
 	$(CXX) -c $(COPTS) /Tp NewLDP.cc
@@ -129,8 +132,8 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-LDPpacket.obj: LDPpacket.cc \
-  LDPpacket.h \
+LDPPacket_m.obj: LDPPacket_m.cc \
+  LDPPacket_m.h \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 NewLDP.obj: NewLDP.cc \
@@ -139,17 +142,17 @@ NewLDP.obj: NewLDP.cc \
   ../MPLS/LIBTable.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/RoutingTable.h \
-  LDPpacket.h \
+  ../../Transport/UDP/UDPControlInfo_m.h \
   ../MPLS/MPLSAccess.h \
   ../MPLS/LIBTableAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../../Transport/TCP/TCPSocketMap.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPCommand_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
   ../IPv4/IPDatagram_m.h
