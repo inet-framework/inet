@@ -103,12 +103,12 @@ public:
     void processMsgFromRSVP(cMessage *msg);
 
     /**
-     * Process signal from MPLS switch to initialise LabelRequest
+     * Process signal from MPLS switch to initiate LabelRequest
      */
-    void processSignalFromMPLSSwitchToInitialiseLabelRequest(cMessage *msg);
+    void processSignalFromMPLSSwitch(cMessage *msg);
 
     /**
-     * Message for testing purpose
+     * Process message from Tester. Invokes various processCommand_xxx() methods.
      */
     void processSignalFromTester(cMessage *msg);
 
@@ -119,6 +119,18 @@ public:
     void processRSVP_RTEAR(cMessage *msg);
     void processRSVP_PATH(cMessage *msg);
     void processRSVP_RESV(cMessage *msg);
+    //@}
+
+    /** @name Process various commands from Tester */
+    //@{
+    void processCommand_NEW_BW_REQUEST(cMessage *msg);
+    void processCommand_NEW_ROUTE_DISCOVER(cMessage *msg);
+    //@}
+
+    /** @name Process various signals from MPLS switch */
+    //@{
+    void processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg);
+    void processSignalFromMPLSSwitch_PATH_REQUEST(cMessage *msg);
     //@}
 
     //void sendPathMessage(SessionObj_t* s, traffic_request_t* t);

@@ -13,9 +13,8 @@
 
 //
 // Reads traffic.xml file (only if Ingress router!) and stores
-// it into a traffic_request_t[] array. Then it enters a huge
-// ugly 500-line activity() function which still needs to be 
-// deciphered and chopped up to smaller parts.
+// it into a traffic_request_t[] array. Then ... 
+//# FIXME
 //
 simple RSVPAppl
     parameters:
