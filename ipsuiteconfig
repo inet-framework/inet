@@ -8,10 +8,9 @@
 
 ROOT=$(HOME)/IPSuite
 
-LIBXML_INCLUDES= -I/windows/D/home/tools/libxml2-2.5.4.win32/include
-LIBXML_LIBS= -L/usr/lib -lxml2
-
 include $(ROOT)/omnetppconfig
 
-INCLUDE_PATH+= $(LIBXML_INCLUDES)
-LIBS+= $(LIBXML_LIBS)
+#INCLUDE_PATH+= ...additional include directories...
+#LIBS+= ...additional libs and lib directories...
+
+
