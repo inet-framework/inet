@@ -185,7 +185,7 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
 
             if (aTunnel.Sender_Template.SrcAddress == 0)
                 continue;
-            lsp_id = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
+            lsp_id = flow_d[k].Filter_Spec_Object.Lsp_Id;
 
             // If the tunnel has been in operating, ignore this Resv Message
             // Otherwise, signal the MPLS module
@@ -223,7 +223,7 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
 
                     for (int c = 0; c < MAX_ROUTE; c++)
                     {
-                        (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
+                        (rInfo->route)[c] = flow_d[k].RRO[c];
                         if (((rInfo->route)[c] == 0) && (!includeMe))
                         {
                             (rInfo->route)[c] = routerId;
@@ -236,7 +236,7 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                     routingInfo.push_back(*rInfo);
 
                     cMessage *signalMPLS = new cMessage("path created");
-                    label = (*(flow_d + k)).label;
+                    label = flow_d[k].label;
                     signalMPLS->addPar("label") = label;
                     signalMPLS->addPar("fecId") = lsp_id;
                     // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
@@ -995,14 +995,14 @@ void RSVPAppl::addRouteInfo(RSVPResvMsg * rmsg)
     FlowDescriptor_t *flow_d = rmsg->getFlowDescriptorList();
     for (int k = 0; k < InLIST_SIZE; k++)
     {
-        if ((*(flow_d + k)).Filter_Spec_Object.SrcAddress != 0)
+        if (flow_d[k].Filter_Spec_Object.SrcAddress != 0)
         {
             routing_info_t *rInfo = new routing_info_t;
-            rInfo->lspId = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
+            rInfo->lspId = flow_d[k].Filter_Spec_Object.Lsp_Id;
 
             for (int c = 0; c < MAX_ROUTE; c++)
             {
-                rInfo->route[c] = (*(flow_d + k)).RRO[c];
+                rInfo->route[c] = flow_d[k].RRO[c];
             }
             routingInfo.push_back(*rInfo);
         }

@@ -660,9 +660,9 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             fdlist = rmsg->getFlowDescriptorList() + inx;
 
             // copy all FilterSpec to Filtss
-            (*(Filtss + inx)).Lsp_Id = fdlist->Filter_Spec_Object.Lsp_Id;
-            (*(Filtss + inx)).SrcAddress = fdlist->Filter_Spec_Object.SrcAddress;
-            (*(Filtss + inx)).SrcPort = fdlist->Filter_Spec_Object.SrcPort;
+            Filtss[inx].Lsp_Id = fdlist->Filter_Spec_Object.Lsp_Id;
+            Filtss[inx].SrcAddress = fdlist->Filter_Spec_Object.SrcAddress;
+            Filtss[inx].SrcPort = fdlist->Filter_Spec_Object.SrcPort;
 
         }
 
@@ -717,8 +717,8 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             {
                 for (int m = 0; m < InLIST_SIZE; m++)
                 {
-                    if (p_iter.Sender_Template_Object.SrcAddress == (*(Filtss + m)).SrcAddress &&
-                        p_iter.Sender_Template_Object.SrcPort == (*(Filtss + m)).SrcPort)
+                    if (p_iter.Sender_Template_Object.SrcAddress == Filtss[m].SrcAddress &&
+                        p_iter.Sender_Template_Object.SrcPort == Filtss[m].SrcPort)
                     {
 
                         if (p_iter.OutInterface_List == OI)
@@ -1346,15 +1346,15 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     if (ero != NULL)
     {
         for (index = 0; index < MAX_ROUTE; index++)
-            if ((*(ero + index)).node == 0)
+            if (ero[index].node == 0)
                 break;
 
         if (index > 0)
-            nextPeerIP = (*(ero + index - 1)).node;
+            nextPeerIP = ero[index-1].node;
         else
             error("Fail to locate resource");
 
-        if ((*(ero + index - 1)).L == false)
+        if (ero[index-1].L == false)
             getPeerInet(nextPeerIP, &nextPeerInf);
     }
 
@@ -2323,9 +2323,9 @@ void RSVP::setFilterSpecforTCSB(TrafficControlStateBlock_t * t, FilterSpecObj_t 
 {
     for (int i = 0; i < InLIST_SIZE; i++)
     {
-        t->Filter_Spec_Object[i].SrcAddress = (*(f + i)).SrcAddress;
-        t->Filter_Spec_Object[i].SrcPort = (*(f + i)).SrcPort;
-        t->Filter_Spec_Object[i].Lsp_Id = (*(f + i)).Lsp_Id;
+        t->Filter_Spec_Object[i].SrcAddress = f[i].SrcAddress;
+        t->Filter_Spec_Object[i].SrcPort = f[i].SrcPort;
+        t->Filter_Spec_Object[i].Lsp_Id = f[i].Lsp_Id;
     }
 }
 
@@ -2363,8 +2363,8 @@ void RSVP::printTCSB(TrafficControlStateBlock_t * t)
     ev << "Filter spec list:\n";
     for (int i = 0; i < InLIST_SIZE; i++)
     {
-        if ((*((t->Filter_Spec_Object) + i)).SrcAddress != 0)
-            printSenderTemplateObject((SenderTemplateObj_t *) ((t->Filter_Spec_Object) + i));
+        if (t->Filter_Spec_Object[i].SrcAddress != 0)
+            printSenderTemplateObject((SenderTemplateObj_t *)&t->Filter_Spec_Object[i]);
     }
     ev << "TC Flowspec:\n";
     printSenderTspecObject(&t->TC_Flowspec);
