@@ -1044,6 +1044,7 @@ void RoutingTable::addLocalLoopback()
 
     for (curmod = parentModule(); curmod != NULL;curmod = curmod->parentModule())
     {
+        // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
         // the following line is a terrible hack. For some unknown reason,
         // the MPLS models use the host's "local_addr" parameter (string) 
         // as loopback address (and also change its netmask to 255.255.255.255).
