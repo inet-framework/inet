@@ -373,10 +373,12 @@ echo
 
 
 echo ".PHONY: subdirs $subdirs" 
-echo "subdirs: $subdirs" 
+echo
+echo 'subdirs: $(SUBDIRS)' 
+echo
 for i in $subdirs; do
      echo "$i:"
-     echo '	cd ' $i ' && $(MAKE)' 
+     echo '	cd' $i '&& $(MAKE)' 
 done
 
 for i in *.ned; do
