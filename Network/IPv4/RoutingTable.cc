@@ -105,10 +105,10 @@ RoutingEntry::RoutingEntry()
 void RoutingEntry::info(char *buf)
 {
     std::stringstream out;
-    out << "dest="; if (host.isNull()) out << "*  "; else out << host << "  ";
-    out << "gw="; if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
-    out << "mask="; if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
-    out << "if="; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
+    out << "dest:"; if (host.isNull()) out << "*  "; else out << host << "  ";
+    out << "gw:"; if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
+    out << "mask:"; if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
+    out << "if:"; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
     strcpy(buf, out.str().c_str());
 }
@@ -192,8 +192,22 @@ void RoutingTable::initialize(int stage)
 
     //printIfconfig();
     //printRoutingTable();
+
+    updateDisplayString();
 }
 
+void RoutingTable::updateDisplayString()
+{
+    if (!ev.isGUI())
+        return;
+
+    char buf[80];
+    if (routerId.isNull())
+        sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
+    else
+        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
+    displayString().setTagArg("t",0,buf);
+}
 
 void RoutingTable::handleMessage(cMessage *msg)
 {
@@ -452,6 +466,8 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
     {
         multicastRoutes.push_back(entry);
     }
+
+    updateDisplayString();
 }
 
 
@@ -464,6 +480,7 @@ bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
     {
         routes.erase(i);
         delete entry;
+        updateDisplayString();
         return true;
     }
     i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
@@ -471,6 +488,7 @@ bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
     {
         multicastRoutes.erase(i);
         delete entry;
+        updateDisplayString();
         return true;
     }
     return false;

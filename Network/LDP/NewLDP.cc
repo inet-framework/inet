@@ -306,7 +306,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     // genarate new LABEL REQUEST and send downstream
     LDPLabelRequest *requestMsg = new LDPLabelRequest("Lb-Req");
     requestMsg->setType(LABEL_REQUEST);
-    requestMsg->setFec(fecInt.getInt());  // FIXME this is actually the dest IP address!!!
+    requestMsg->setFec(fecInt);  // FIXME this is actually the dest IP address!!!
     requestMsg->addPar("fecId") = fecId; // FIXME!!!
 
     requestMsg->setReceiverAddress(nextPeerAddr);
@@ -462,7 +462,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     LIBTable *lt = libTableAccess.get();
 
     // Only accept new requests
-    int fec = packet->getFec();
+    IPAddress fec = packet->getFec();
     IPAddress srcAddr = packet->getSenderAddress();
     int fecId = packet->par("fecId");
 
@@ -470,7 +470,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     string fromInterface = findInterfaceFromPeerAddr(srcAddr);
 
     // This is the outgoing interface if label found
-    string nextInterface = findInterfaceFromPeerAddr(IPAddress(fec));  //FIXME what the holy shit???? --Andras
+    string nextInterface = findInterfaceFromPeerAddr(fec);  //FIXME what the holy shit???? --Andras
 
     int i;
     for (i = 0; i < fecSenderBinds.size(); i++)
@@ -493,7 +493,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     // Look up table for this fec
     int label;
     string outgoingInterface;
-    bool found = lt->resolveFec(fec, label, outgoingInterface);
+    bool found = lt->resolveFec(fec.getInt(), label, outgoingInterface);
 
     ev << "Request from LSR(" << IPAddress(srcAddr) << ") for fec=" << IPAddress(fec) << ")\n";
 
@@ -581,10 +581,10 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();
 
-    int fec = packet->getFec();
+    IPAddress fec = packet->getFec();
     int label = packet->getLabel();
     IPAddress fromIP = packet->getSenderAddress();
-    // int fecId = packet->par("fecId"); -- FIXME was not used (?)
+    int fecId = packet->par("fecId"); // FIXME was not used (?)
 
     ev << "Gets mapping Label =" << label << " for fec =" <<
         IPAddress(fec) << " from LSR(" << IPAddress(fromIP) << ")\n";
@@ -599,7 +599,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
 
         signalMPLS->addPar("label") = label;
 
-        signalMPLS->addPar("fecInt") = fec;
+        signalMPLS->addPar("fecInt") = fec.getInt();
         signalMPLS->addPar("my_name") = 0;
         int myfecId = -1;
 
@@ -639,7 +639,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         }
 
         // Install new label
-        int inLabel = lt->installNewLabel(label, inInterface, outInterface, fec, SWAP_OPER);
+        int inLabel = lt->installNewLabel(label, inInterface, outInterface, fec.getInt(), SWAP_OPER);
         packet->setLabel(inLabel);
         packet->setFec(fec);
         IPAddress addrToSend = findPeerAddrFromInterface(inInterface);

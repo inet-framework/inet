@@ -35,13 +35,13 @@ module Router
         out: ethOut[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=62,60";
+            display: "p=62,60;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
-            display: "p=62,108,row;i=box3";
+            display: "p=62,135;i=box3";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],

@@ -223,6 +223,9 @@ class RoutingTable: public cSimpleModule
     // the routing function
     RoutingEntry *selectBestMatchingRoute(const IPAddress& dest);
 
+    // displays summary above the icon
+    void updateDisplayString();
+
   public:
     Module_Class_Members(RoutingTable, cSimpleModule, 0);
 

@@ -56,7 +56,7 @@ message LDPLabelMapping extends LDPPacket
 {
     fields:
         int label;
-        int fec;
+        IPAddress fec;
 };
 
 
@@ -66,7 +66,7 @@ message LDPLabelMapping extends LDPPacket
 message LDPLabelRequest extends LDPPacket
 {
     fields:
-        int fec;
+        IPAddress fec;
 };
 
 

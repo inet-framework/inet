@@ -140,7 +140,7 @@ string cVectorWatcherBase::detailedInfo() const
     stringstream out;
     int n = size()<=3 ? size() : 3;
     for (int i=0; i<n; i++)
-        out << fullName() << "[" << i << "]=" << at(i) << "\n";
+        out << fullName() << "[" << i << "] = " << at(i) << "\n";
     if (size()>3)
         out << "...\n";
     return out.str();

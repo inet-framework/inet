@@ -49,13 +49,13 @@ module StandardHost2
         out: ethOut[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=56,78";
+            display: "p=60,75;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=56,140,row;i=box3";
+            display: "p=60,150;i=box3";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
             display: "p=125,58;i=app";
         tcp: TCPMain;

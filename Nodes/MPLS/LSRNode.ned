@@ -27,7 +27,6 @@ import
 //
 // LDP Capable Routers are main building blocks for an LDP MPLS network. The
 // Router ID is assigned as the router local loopback interface.
-//#FIXME remove router id from there
 //
 module LSRNode
     parameters:
@@ -45,25 +44,24 @@ module LSRNode
         PrtTableFileName : string;
         //#discoveryAddr: string[];
         //#numOfAddr: int;
-
     gates:
         in: in[];
         out: out[];
 
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,100";
+            display: "p=70,60;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=260,60,row;i=box3";
+            display: "p=70,135;i=box3";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
                 helloTimeout = helloTimeout;
-            display: "p=190,45;b=40,24";
+            display: "p=190,60;b=40,24";
         tcp: TCPMain;
             display: "p=145,120;i=prot2";
         udp: UDPProcessing;
@@ -84,7 +82,7 @@ module LSRNode
                 toL3[sizeof(out)],
                 fromL2[sizeof(out)],
                 toL2[sizeof(out)];
-            display: "o=#ff8000;p=191,261;b=66,14";
+            display: "o=#ff8000;p=190,250;b=66,14";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
