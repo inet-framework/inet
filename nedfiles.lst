@@ -5,6 +5,7 @@ Applications/Generic/SinkApp.ned
 Applications/Generic/TrafficGen.ned
 Applications/PingApp/PingApp.ned
 Applications/TCPApp/TCPApp.ned
+Applications/TCPApp/TCPBasicClientApp.ned
 Applications/TCPApp/TCPEchoApp.ned
 Applications/TCPApp/TCPGenericSrvApp.ned
 Applications/TCPApp/TCPSessionApp.ned

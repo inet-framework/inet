@@ -72,6 +72,8 @@ void TCPGenericCliAppBase::close()
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
 {
+    ev << "sending " << numBytes << ", expecting " << expectedReplyBytes << (serverClose ? " and server should close afterwards\n" : "\n");
+
     GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setLength(8*numBytes);
     msg->setExpectedReplyLength(expectedReplyBytes);

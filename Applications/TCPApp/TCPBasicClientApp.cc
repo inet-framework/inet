@@ -40,11 +40,11 @@ void TCPBasicClientApp::sendRequest()
      ev << "sending request, " << numRequestsToSend-1 << " more to go\n";
 
      long requestLength = par("requestLength");
-     long responseLength = par("responseLength");
+     long replyLength = par("replyLength");
      if (requestLength<1) requestLength=1;
-     if (responseLength<1) responseLength=1;
+     if (replyLength<1) replyLength=1;
 
-     sendPacket(requestLength, responseLength);
+     sendPacket(requestLength, replyLength);
 }
 
 void TCPBasicClientApp::handleTimer(cMessage *msg)
@@ -70,7 +70,7 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     TCPGenericCliAppBase::socketEstablished(connId, ptr);
 
     // determine number of requests in this session
-    numRequestsToSend = (long) par("numRequests");
+    numRequestsToSend = (long) par("numRequestsPerSession");
     if (numRequestsToSend<1) numRequestsToSend=1;
 
     // perform first request (next one will be sent when reply arrives)
@@ -90,7 +90,7 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cMessage *msg, 
     }
     else
     {
-        ev << "closing session\n";
+        ev << "reply to last request arrived, closing session\n";
         close();
     }
 }

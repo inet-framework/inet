@@ -18,17 +18,19 @@
 
 
 //
-// Client for a request-reply protocol over TCP. May be used to
-// model an FTP or HTTP (1.0 or 1.1) user.
+// Client for a generic request-response style protocol over TCP.
+// May be used as a rough model of HTTP or FTP users.
 //
 // The model communicates with the server in sessions. During a session,
 // the client opens a single TCP connection to the server, sends several
 // requests (always waiting for the complete reply to arrive before
 // sending a new request), and closes the connection.
 //
-// The server app should be TCPGenericSrvApp.
+// The server app should be TCPGenericSrvApp; the model sends GenericAppMsg
+// messages.
 //
 // Example settings:
+//
 // FTP:
 // <pre>
 //    numRequestsPerSession = exponential(3)
@@ -41,7 +43,7 @@
 //
 // HTTP:
 // <pre>
-//    numRequestsPerSession = 1  <i>(HTTP 1.0)</i>
+//    numRequestsPerSession = 1 <i>(HTTP 1.0)</i>
 //    numRequestsPerSession = exponential(5) <i>(HTTP 1.1, with keepalive)</i>
 //    requestLength = truncnormal(350,20)
 //    replyLength = exponential(2000)
@@ -51,6 +53,11 @@
 // applets etc, possibly from various servers, and browsers usually download
 // these items in parallel to the main HTML document, this module cannot
 // serve as a realistic web client.
+//
+// Also, with HTTP 1.0 it is the server that closes the connection after
+// sending the response, while in this model it is the client.
+//
+// @see TCPGenericSrvApp, GenericAppMsg, TelnetApp
 //
 simple TCPBasicClientApp
     parameters:
