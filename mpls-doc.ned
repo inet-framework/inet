@@ -18,8 +18,8 @@
 // The implementation follows those RFCs below:
 // - RFC 2702: Requirements for Traffic Engineering Over MPLS
 // - RFC 2205: Resource ReSerVation Protocol
-// - RFC 30301: Multiprotocol Label Switching Architecture
-// - RFC 3033: LDP Specification
+// - RFC 3031: Multiprotocol Label Switching Architecture
+// - RFC 3036: LDP Specification
 // - RFC 3209: \RSVP-TE Extension to \RSVP for LSP tunnels
 // - RFC 2205: \RSVP Version 1 - Functional Specification
 // - RFC 2209: \RSVP Message processing Version 1
