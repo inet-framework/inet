@@ -44,6 +44,7 @@ class cVectorWatcher : public cVectorWatcherBase
     vector<T>& v;
   public:
     cVectorWatcher(const char *name, vector<T>& var) : cVectorWatcherBase(name), v(var) {}
+    const char *className() const {return opp_typename(typeid(v));}
     virtual const char *elemTypeName() const {return opp_typename(typeid(T));}
     virtual int size() const {return v.size();}
     virtual string at(int i) const {stringstream out; out << v[i]; return out.str();}
@@ -83,6 +84,7 @@ class cMapWatcher : public cVectorWatcherBase
     mutable int itPos;
   public:
     cMapWatcher(const char *name, map<_K,_V,_C>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}
+    const char *className() const {return opp_typename(typeid(m));}
     virtual const char *elemTypeName() const {return "struct pair<...,...>";}
     virtual int size() const {return m.size();}
     virtual string at(int i) const {

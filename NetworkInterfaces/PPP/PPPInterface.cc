@@ -27,8 +27,19 @@
 
 Define_Module(PPPInterface);
 
-void PPPInterface::initialize()
+void PPPInterface::initialize(int stage)
 {
+    if (stage==3)
+    {
+        // update display string when addresses have been autoconfigured etc.
+        updateDisplayString();
+        return;
+    }
+
+    // all initialization is done in the first stage
+    if (stage!=0)
+        return;
+
     queue.setName("queue");
     endTransmissionEvent = new cMessage("pppEndTxEvent");
 
@@ -76,7 +87,6 @@ void PPPInterface::initialize()
             displayString().setTagArg("i",1,"#707070");
             displayString().setTagArg("i",2,"100");
         }
-        updateDisplayString();
     }
 }
 
