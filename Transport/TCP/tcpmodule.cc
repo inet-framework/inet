@@ -83,14 +83,14 @@ private:
   typedef TcbList::const_iterator sockpair_iterator;
 
   //member functions
-  AddPor tcpArrivalMsg(cMessage* msg);
+  MsgSource tcpArrivalMsg(cMessage* msg, SockPair& spair);
   void tcpTcpDelay(cMessage* msg);
   void snd_cwnd_size(unsigned long size);
   void seq_no_send(unsigned long sendnumber);
   void ack_no_rec(unsigned long recnumber);
   TcpTcb* getTcb(cMessage* msg);
   TcpHeader* newTcpHeader(void);
-  void anaEvent(TcpTcb* tcb_block, TcpState state, cMessage* msg, MsgSource source);
+  void anaEvent(TcpTcb* tcb_block, cMessage* msg, MsgSource source);
 
   int seqNoLt(unsigned long a, unsigned long b);
   int seqNoLeq(unsigned long a, unsigned long b);
@@ -143,7 +143,7 @@ private:
   void outstSnd(TcpTcb* tcb_block); 
   void flushTransRetransQ(TcpTcb* tcb_block);
 
-  void status(TcpTcb* tcb_block);
+  void printStatus(TcpTcb* tcb_block);
   const char *stateName(TcpState state);
   const char *eventName(TcpEvent event);
   
@@ -163,29 +163,6 @@ public:
   //stack size = 0 to indicate usage of handleMessage
   Module_Class_Members(TcpModule, cSimpleModule, 0);
   
-  //parameters go here
-
-  //FSM and its states, no FSM-Transient(...)-states defined
-  enum FsmStates 
-    {
-      INIT        = 0,
-      CLOSED      = FSM_Steady(1),
-      LISTEN      = FSM_Steady(2),
-      SYN_SENT    = FSM_Steady(3),
-      SYN_RCVD    = FSM_Steady(4),
-      ESTABLISHED = FSM_Steady(5),
-      CLOSE_WAIT  = FSM_Steady(6),
-      LAST_ACK    = FSM_Steady(7),
-      FIN_WAIT_1  = FSM_Steady(8),
-      FIN_WAIT_2  = FSM_Steady(9),
-      CLOSING     = FSM_Steady(10),
-      TIME_WAIT   = FSM_Steady(11)
-    };
-
-  //variables that will be used below
-  //int i;
-  
-    
   //virtual functions to be redefined
   virtual void initialize();
   virtual void handleMessage(cMessage *msg);
@@ -263,9 +240,9 @@ void TcpModule::handleMessage(cMessage *msg)
   
   //find out address and port info. and 
   //if msg. is appl. call, arriving seg. or timeout 
-  AddPor addpor = tcpArrivalMsg(msg);
+  MsgSource eventsource = tcpArrivalMsg(msg, spair);
 
-  if (addpor.source == FROM_IP)
+  if (eventsource == FROM_IP)
     {
       msg_tcp_header = (TcpHeader*)(msg->par("tcpheader").pointerValue());
 
@@ -277,7 +254,7 @@ void TcpModule::handleMessage(cMessage *msg)
   tcb_block = getTcb(msg);
 
   //print TCB status information
-  status(tcb_block);
+  printStatus(tcb_block);
   
   //alias for TCP-FSM
   cFSM & fsm = tcb_block->fsm;
@@ -287,10 +264,10 @@ void TcpModule::handleMessage(cMessage *msg)
   FSM_Switch(fsm)
     {
       //[FSM starting point] (= CLOSED EXIT)
-    case FSM_Exit(INIT):
+    case FSM_Exit(TCP_S_INIT):
 
       //set state, analyze event 
-      anaEvent(tcb_block, TCP_S_CLOSED, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in INIT state 
       procExInit(msg, tcb_block, msg_tcp_header);
@@ -298,23 +275,15 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[end point] TCP-FSM end point, starting point is INIT     
-    case FSM_Enter(CLOSED):
+    case FSM_Enter(TCP_S_CLOSED):
 
       if (debug) ev << "TCP in CLOSED.\n";
       
       //notify the application that TCP entered CLOSED
       connClosed(tcb_block);
       
-      //set state, analyze event
-      //anaEvent(tcb_block, TCP_S_CLOSED, msg, addpor.source);
-      spair.set(tcb_block->local_port,
-                tcb_block->local_addr,
-                tcb_block->rem_port,
-                tcb_block->rem_addr);
-
-      
       //print TCB status information
-      status(tcb_block);
+      printStatus(tcb_block);
 
       //connection closed: delete TCB from list
       if (debug) ev << "Deleting TCB from list.\n";
@@ -326,7 +295,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[passive open]
-    case FSM_Enter(LISTEN):
+    case FSM_Enter(TCP_S_LISTEN):
 
       if (debug) ev << "TCP in LISTEN.\n";
       
@@ -348,10 +317,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(LISTEN):
+    case FSM_Exit(TCP_S_LISTEN):
 
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_LISTEN, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
       
       //processing in LISTEN state
       procExListen(msg, tcb_block, msg_tcp_header);
@@ -359,11 +328,11 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
       
 
-    case FSM_Enter(SYN_RCVD):
+    case FSM_Enter(TCP_S_SYN_RCVD):
 
       if (debug) ev << "TCP in SYN_RCVD.\n"; 
       
-      if ((tcb_block->num_bit_req) == 0 && (addpor.source != FROM_APPL))
+      if ((tcb_block->num_bit_req) == 0 && (eventsource != FROM_APPL))
         {
 // BCH Andras -- code from UTS MPLS model
           if(msg->hasPar("num_bit_req"))
@@ -398,10 +367,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(SYN_RCVD):
+    case FSM_Exit(TCP_S_SYN_RCVD):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_SYN_RCVD, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in SYN_RCVD state
       procExSynRcvd(msg, tcb_block, msg_tcp_header);
@@ -410,7 +379,7 @@ void TcpModule::handleMessage(cMessage *msg)
 
 
       //[active open]
-    case FSM_Enter(SYN_SENT):
+    case FSM_Enter(TCP_S_SYN_SENT):
 
       if (debug) ev << "TCP in SYN_SENT.\n";
       
@@ -434,10 +403,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(SYN_SENT):
+    case FSM_Exit(TCP_S_SYN_SENT):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_SYN_SENT, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in SYN_SENT state
       procExSynSent(msg, tcb_block, msg_tcp_header);
@@ -445,7 +414,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[data transfer state]
-    case FSM_Enter(ESTABLISHED):
+    case FSM_Enter(TCP_S_ESTABLISHED):
 
       if (debug) ev << "TCP in ESTABLISHED.\n";
 
@@ -485,10 +454,10 @@ void TcpModule::handleMessage(cMessage *msg)
 
       break;
 
-    case FSM_Exit(ESTABLISHED):
+    case FSM_Exit(TCP_S_ESTABLISHED):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_ESTABLISHED, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in ESTABLISHED state
       procExEstablished(msg, tcb_block, msg_tcp_header);
@@ -496,7 +465,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[passive close]
-    case FSM_Enter(CLOSE_WAIT):
+    case FSM_Enter(TCP_S_CLOSE_WAIT):
 
       if (debug) ev << "TCP in CLOSE_WAIT.\n";
       
@@ -533,10 +502,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(CLOSE_WAIT):
+    case FSM_Exit(TCP_S_CLOSE_WAIT):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_CLOSE_WAIT, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in CLOSE_WAIT state
       procExCloseWait(msg, tcb_block, msg_tcp_header);
@@ -544,7 +513,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[passive close]
-    case FSM_Enter(LAST_ACK):
+    case FSM_Enter(TCP_S_LAST_ACK):
 
       if (debug) ev << "TCP in LAST_ACK.\n";
       
@@ -560,10 +529,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(LAST_ACK):
+    case FSM_Exit(TCP_S_LAST_ACK):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_LAST_ACK, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in LAST_ACK state
       procExLastAck(msg, tcb_block, msg_tcp_header);
@@ -571,7 +540,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[active close]
-    case FSM_Enter(FIN_WAIT_1):
+    case FSM_Enter(TCP_S_FIN_WAIT_1):
 
       if (debug) ev << "TCP in FIN_WAIT_1.\n";
       
@@ -611,10 +580,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(FIN_WAIT_1):
+    case FSM_Exit(TCP_S_FIN_WAIT_1):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_FIN_WAIT_1, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in FIN_WAIT_1 state
       procExFinWait1(msg, tcb_block, msg_tcp_header);      
@@ -622,7 +591,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[active close]
-    case FSM_Enter(FIN_WAIT_2):
+    case FSM_Enter(TCP_S_FIN_WAIT_2):
 
       if (debug) ev << "TCP in FIN_WAIT_2.\n";
       
@@ -657,10 +626,10 @@ void TcpModule::handleMessage(cMessage *msg)
 
       break;
 
-    case FSM_Exit(FIN_WAIT_2):
+    case FSM_Exit(TCP_S_FIN_WAIT_2):
 
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_FIN_WAIT_2, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in ESTABLISHED state
       procExFinWait2(msg, tcb_block, msg_tcp_header);
@@ -668,7 +637,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[active close], [simultaneous close]
-    case FSM_Enter(CLOSING):
+    case FSM_Enter(TCP_S_CLOSING):
 
       if (debug) ev << "TCP in CLOSING.\n";
       
@@ -684,10 +653,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(CLOSING):
+    case FSM_Exit(TCP_S_CLOSING):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_CLOSING, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in CLOSING sate
       procExClosing(msg, tcb_block, msg_tcp_header);
@@ -695,7 +664,7 @@ void TcpModule::handleMessage(cMessage *msg)
       break;
 
       //[active close]
-    case FSM_Enter(TIME_WAIT):
+    case FSM_Enter(TCP_S_TIME_WAIT):
 
       if (debug) ev << "TCP in TIME_WAIT.\n";
       
@@ -794,10 +763,10 @@ void TcpModule::handleMessage(cMessage *msg)
       
       break;
 
-    case FSM_Exit(TIME_WAIT):
+    case FSM_Exit(TCP_S_TIME_WAIT):
       
       //set state, analyze event
-      anaEvent(tcb_block, TCP_S_TIME_WAIT, msg, addpor.source);
+      anaEvent(tcb_block, msg, eventsource);
 
       //processing in TIME_WAIT state
       procExTimeWait(msg, tcb_block, msg_tcp_header);
@@ -820,31 +789,30 @@ void TcpModule::handleMessage(cMessage *msg)
 // function to determine whether incoming messages are coming from
 // the application, ip module or if the are timeouts
 // fills the AddPor data structure
-AddPor TcpModule::tcpArrivalMsg(cMessage* msg)
+MsgSource TcpModule::tcpArrivalMsg(cMessage* msg, SockPair& spair)
 {
-  AddPor addpor; 
-  
+  MsgSource eventsource;
   //if origin of message is appl. layer use the following address format
   if (msg->arrivedOn("from_appl"))
     {
       //msg created and received at the same host => source and destination
       //parameters are not switched
-      addpor.local_port = msg->par("src_port");
-      addpor.rem_port   = msg->par("dest_port");
-      addpor.local_addr = msg->par("src_addr");
-      addpor.rem_addr   = msg->par("dest_addr");
-      addpor.source     = FROM_APPL;
+      spair.local_port = msg->par("src_port");
+      spair.rem_port   = msg->par("dest_port");
+      spair.local_address = msg->par("src_addr");
+      spair.rem_address = msg->par("dest_addr");
+      eventsource      = FROM_APPL;
     }
   //if message was generated by TCP (segments etc.) use the following address format
   else if (msg->arrivedOn("from_ip"))
     {
       //note that source and destination parameters have to be switched
       TcpHeader* tcpheader = (TcpHeader*) (msg->par("tcpheader").pointerValue());
-      addpor.local_port    = tcpheader->th_dest_port;
-      addpor.rem_port      = tcpheader->th_src_port;
-      addpor.local_addr    = msg->par("dest_addr");
-      addpor.rem_addr      = msg->par("src_addr");
-      addpor.source        = FROM_IP;
+      spair.local_port    = tcpheader->th_dest_port;
+      spair.rem_port      = tcpheader->th_src_port;
+      spair.local_address = msg->par("dest_addr");
+      spair.rem_address   = msg->par("src_addr");
+      eventsource         = FROM_IP;
     }
   else if ((msg->kind() == TIMEOUT_TIME_WAIT) ||
            (msg->kind() == TIMEOUT_REXMT) ||
@@ -856,16 +824,16 @@ AddPor TcpModule::tcpArrivalMsg(cMessage* msg)
     {
       //msg created and received at the same host => source and destination
       //parameters are not switched
-      addpor.local_port = msg->par("src_port");
-      addpor.rem_port   = msg->par("dest_port");
-      addpor.local_addr = msg->par("src_addr");
-      addpor.rem_addr   = msg->par("dest_addr");
-      addpor.source     = FROM_TIMEOUT;
+      spair.local_port = msg->par("src_port");
+      spair.rem_port   = msg->par("dest_port");
+      spair.local_address = msg->par("src_addr");
+      spair.rem_address   = msg->par("dest_addr");
+      eventsource      = FROM_TIMEOUT;
     }
   else
     error("Could not determine origin of message (forgot to add timeout?)\n");
 
-  return addpor;
+  return eventsource;
 }
 
 
@@ -919,17 +887,10 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
 {
   //define TCB and socket pair
   TcpTcb*  tcb_block;
-  TcpTcb*  old_tcb_block;
   SockPair spair;
 
   //address and port mangement function
-  AddPor addpor = tcpArrivalMsg(msg);
-  
-  //set socket pair for mapping purposes below
-  spair.set(addpor.local_port,
-            addpor.local_addr,
-            addpor.rem_port,
-            addpor.rem_addr);
+  tcpArrivalMsg(msg, spair);
   
   //get or create a TCB holding connection state information
   sockpair_iterator search = tcb_list.find(spair);
@@ -947,13 +908,12 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
       //foreign socket might be unspecified due to a passive open
 
       //set socket pair with unspecified remote socket
-      spair.set(addpor.local_port,
-                addpor.local_addr,
-                -1,               //remote port unspecified
-                -1);              //remote addr. unspecified
+      SockPair unspec_spair = spair;
+      unspec_spair.rem_address = -1;     //remote addr. unspecified
+      unspec_spair.rem_port = -1;        //remote port unspecified
 
       //search again for TCB 
-      sockpair_iterator search = tcb_list.find(spair);
+      sockpair_iterator search = tcb_list.find(unspec_spair);
 
       //if TCB not found now, create a new one
       if (search != tcb_list.end())
@@ -962,26 +922,17 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           // we replace it with a fully specified TCB-Block.
 
           //get TCB found
-          old_tcb_block = search->second;
-
-          //copy information of old_tcb_block --FIXME what??? this is pointer copy (Andras)
-          tcb_block = old_tcb_block;
+          tcb_block = search->second;
 
           if (debug) ev << "Message/event belongs to connection tcp_conn_id=" 
                         << tcb_block->tb_conn_id << ", filling out remote addr/port in conn.\n";
 
           //erase old list element
-          tcb_list.erase(spair);
+          tcb_list.erase(unspec_spair);
       
-          //create new socket pair
-          spair.set(addpor.local_port,
-                    addpor.local_addr,
-                    addpor.rem_port,
-                    addpor.rem_addr);
-          
           //fill in remote socket information
-          tcb_block->rem_port = addpor.rem_port; 
-          tcb_block->rem_addr = addpor.rem_addr; 
+          tcb_block->rem_port = spair.rem_port; 
+          tcb_block->rem_addr = spair.rem_address; 
 
           //insert TCB in tcb_list together with socket pair
           tcb_list.insert(TcbList::value_type(spair, tcb_block));
@@ -1003,8 +954,8 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           //fill in tcb_block information;
           //-1 or 0 = information not yet available
           tcb_block->tb_conn_id    = -1;
-          tcb_block->tb_from_state = TCP_S_CLOSED; //correct?
-          tcb_block->tb_state      = TCP_S_CLOSED; //correct?
+          tcb_block->tb_prev_state = TCP_S_INIT;
+          // no need to touch tcb_block->fsm -- it starts from TCP_S_INIT anyway
           
           tcb_block->st_event.event       = TCP_E_NONE;
           //pointer initialized in anaEvent(...)
@@ -1142,14 +1093,13 @@ TcpHeader* TcpModule::newTcpHeader(void)
 
 
 //function to analyze and manage the current event variables
-void TcpModule::anaEvent(TcpTcb* tcb_block, TcpState state, cMessage* msg, MsgSource source)
+void TcpModule::anaEvent(TcpTcb* tcb_block, cMessage* msg, MsgSource source)
 {
   //flags as ints due to casting problem
   int urg, psh;
   
-  //set new state
-  tcb_block->tb_from_state = tcb_block->tb_state;
-  tcb_block->tb_state = state;
+  //save old state
+  tcb_block->tb_prev_state = (TcpState) tcb_block->fsm.state();
 
   if (source == FROM_APPL)
     {
@@ -3861,21 +3811,20 @@ void TcpModule::flushTransRetransQ(TcpTcb* tcb_block)
 
 
 //function to print out TCB status information
-void TcpModule::status(TcpTcb* tcb_block)
+void TcpModule::printStatus(TcpTcb* tcb_block)
 {
-  if (debug) ev << "=============== TCB STATUS INFORMATION ===============\n";
-  if (debug) ev << "TCP connection ID: " << (int) tcb_block->tb_conn_id << endl;
-  if (debug) ev << "Number of bits to be transfered: " << (int) tcb_block->num_bit_req << endl;
-  if (debug) ev << "TCP-FSM 'from-state': " << (int) tcb_block->tb_from_state 
-                << " (" << stateName(tcb_block->tb_from_state) << ")" << endl;
-  if (debug) ev << "TCP-FSM state: " << (int) tcb_block->tb_state
-                << " (" << stateName(tcb_block->tb_state) << ")" << endl;
-  if (debug) ev << "TCP event: " << (int) tcb_block->st_event.event
+  if (debug) ev << "Current event: " << (int) tcb_block->st_event.event
                 << " (" << eventName(tcb_block->st_event.event) << ")" << endl;
-  if (debug) ev << "Local TCP-port: " << tcb_block->local_port << endl;
-  if (debug) ev << "Local IP-address: " << tcb_block->local_addr << endl;
-  if (debug) ev << "Remote TCP-port: " << tcb_block->rem_port << endl;
-  if (debug) ev << "Remote IP-address: " << tcb_block->rem_addr << endl;
+  if (debug) ev << "=============== TCB STATUS INFORMATION ===============\n";
+  if (debug) ev << "Connection ID:  " << (int) tcb_block->tb_conn_id << endl;
+  if (debug) ev << "State:          " << (int) tcb_block->fsm.state()
+                << " (" << stateName((TcpState)tcb_block->fsm.state()) << ")" << endl;
+  if (debug) ev << "Local ip:port:  " << tcb_block->local_addr << ":" << tcb_block->local_port << endl;
+  if (debug) ev << "Remote ip:port: " << tcb_block->rem_addr << ":" << tcb_block->rem_port << endl;
+  if (debug) ev << "Previous state: " << (int) tcb_block->tb_prev_state 
+                << " (" << stateName(tcb_block->tb_prev_state) << ")" << endl;
+  if (debug) ev << endl;
+  if (debug) ev << "Number of bits to be transferred: " << (int) tcb_block->num_bit_req << endl;
   if (debug) ev << "Timeout: " << tcb_block->timeout << " (not implemented)" << endl;
   if (debug) ev << "Send unacknowledged: " << tcb_block->snd_una << endl;
   if (debug) ev << "Send next: " << tcb_block->snd_nxt << endl;
@@ -3906,6 +3855,7 @@ const char *TcpModule::stateName(TcpState state)
     const char *s = "unknown";
     switch (state) 
     {
+        CASE(TCP_S_INIT);
         CASE(TCP_S_CLOSED);
         CASE(TCP_S_LISTEN);
         CASE(TCP_S_SYN_SENT);
@@ -3982,7 +3932,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
         }
 
       //print TCB status information
-      //status(tcb_block);
+      //printStatus(tcb_block);
       
       break;
         
@@ -4080,7 +4030,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
     {
     case TCP_E_OPEN_PASSIVE:
       if (debug) ev << "TCP is going to LISTEN state.\n";
-      FSM_Goto(fsm, LISTEN);
+      FSM_Goto(fsm, TCP_S_LISTEN);
       
       break;
 
@@ -4098,7 +4048,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       scheduleAt(simTime() + CONN_ESTAB_TIMEOUT_VAL, tcb_block->timeout_conn_estab_msg);
           
       if (debug) ev << "TCP is going to SYN_SENT state.\n";
-      FSM_Goto(fsm, SYN_SENT);
+      FSM_Goto(fsm, TCP_S_SYN_SENT);
      
       break;
 
@@ -4186,7 +4136,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LISTEN.\n";
 
-      status(tcb_block);
+      printStatus(tcb_block);
 
       break;
 
@@ -4302,7 +4252,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       
   
       if (debug) ev << "TCP is going to SYN_SENT state.\n";
-      FSM_Goto(fsm, SYN_SENT);
+      FSM_Goto(fsm, TCP_S_SYN_SENT);
 
       break;
 
@@ -4319,19 +4269,19 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       scheduleAt(simTime() + CONN_ESTAB_TIMEOUT_VAL, tcb_block->timeout_conn_estab_msg);
         
       if (debug) ev << "TCP is going to SYN_SENT state.\n";
-      FSM_Goto(fsm, SYN_SENT);
+      FSM_Goto(fsm, TCP_S_SYN_SENT);
 
       break;
 
     case TCP_E_CLOSE:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
 
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
       
@@ -4350,7 +4300,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       
       //go to SYN_RCVD
       if (debug) ev << "TCP is going to state SYN_RCVD.\n";
-      FSM_Goto(fsm, SYN_RCVD);
+      FSM_Goto(fsm, TCP_S_SYN_RCVD);
 
       break;
 
@@ -4458,7 +4408,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_RCVD.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
 
       break;
 
@@ -4502,7 +4452,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
                   tcb_block->st_event.event = TCP_E_ABORT;
 
                   //RFC-793: in the active open case go to CLOSED
-                  //FSM_Goto(fsm, CLOSED);
+                  //FSM_Goto(fsm, TCP_S_CLOSED);
                   //flush retransmission queue
 
                   if (debug) ev << "Returning from TCP_E_SEG_ARRIVAL in SYN_RCVD.\n";
@@ -4599,32 +4549,32 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       finSchedule(tcb_block);
 
       if (debug) ev << "TCP is going to FIN_WAIT_1 state.\n";
-      FSM_Goto(fsm, FIN_WAIT_1);
+      FSM_Goto(fsm, TCP_S_FIN_WAIT_1);
 
       break;
 
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
     
     case TCP_E_TIMEOUT_REXMT:
 
       if (debug) ev << "TCP is staying in SYN_RCVD state.\n";
-      FSM_Goto(fsm, SYN_RCVD);
+      FSM_Goto(fsm, TCP_S_SYN_RCVD);
 
       break;
 
     case TCP_E_TIMEOUT_CONN_ESTAB:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
       
       break;
 
     case TCP_E_PASSIVE_RESET:
       //return to LISTEN
-      FSM_Goto(fsm, LISTEN);
+      FSM_Goto(fsm, TCP_S_LISTEN);
 
       break;
 
@@ -4634,7 +4584,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       delete cancelEvent(tcb_block->timeout_conn_estab_msg);
       if (debug) ev << "Cancelling connection establishment timer.\n";
       
-      FSM_Goto(fsm, ESTABLISHED);
+      FSM_Goto(fsm, TCP_S_ESTABLISHED);
 
       break;
 
@@ -4645,7 +4595,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       ackSchedule(tcb_block, true);
       
       //going to CLOSE_WAIT
-      FSM_Goto(fsm, CLOSE_WAIT);
+      FSM_Goto(fsm, TCP_S_CLOSE_WAIT);
 
       break;
 
@@ -4742,7 +4692,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       outstSnd(tcb_block);
 
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
@@ -4758,7 +4708,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
    
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_SENT.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
         
       break;
 
@@ -4817,7 +4767,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
               tcb_block->st_event.event = TCP_E_ABORT;
               
               //if (debug) ev << "TCP is going to CLOSED state.\n";
-              //FSM_Goto(fsm, CLOSED);
+              //FSM_Goto(fsm, TCP_S_CLOSED);
 
               if (debug) ev << "Returning from TCP_E_SEG_ARRIVAL in state SYN_SENT\n";
               break;
@@ -4922,24 +4872,24 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
     case TCP_E_CLOSE:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
       
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
     
     case TCP_E_TIMEOUT_REXMT:
       if (debug) ev << "TCP is staying in SYN_SENT state.\n";
-      FSM_Goto(fsm,SYN_SENT);
+      FSM_Goto(fsm, TCP_S_SYN_SENT);
       break;
 
     case TCP_E_TIMEOUT_CONN_ESTAB:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
 
@@ -4952,7 +4902,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       // this is done slightly different but it's the same result...
       delete cancelEvent(tcb_block->timeout_conn_estab_msg);
       if (debug) ev << "Cancelling connection establishment timer.\n";
-      FSM_Goto(fsm, ESTABLISHED);
+      FSM_Goto(fsm, TCP_S_ESTABLISHED);
 
       break;
 
@@ -4960,7 +4910,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       timeoutDatalessAck(tcb_block);
               
       if (debug) ev << "TCP is going to SYN_RCVD state.\n";
-      FSM_Goto(fsm, SYN_RCVD);
+      FSM_Goto(fsm, TCP_S_SYN_RCVD);
 
       break;
 
@@ -5023,7 +4973,7 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in ESTABLISHED.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
         
       break;
 
@@ -5085,20 +5035,20 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
       finSchedule(tcb_block);
 
       if (debug) ev << "TCP is going to FIN_WAIT_1 state.\n";
-      FSM_Goto(fsm, FIN_WAIT_1);
+      FSM_Goto(fsm, TCP_S_FIN_WAIT_1);
       
       break;
 
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
     case TCP_E_RCV_FIN:
       if (debug) ev << "TCP received a FIN segment. Scheduling an ACK and going to CLOSE_WAIT.\n";
       ackSchedule(tcb_block, true);
-      FSM_Goto(fsm, CLOSE_WAIT);
+      FSM_Goto(fsm, TCP_S_CLOSE_WAIT);
       
       break;
 
@@ -5161,7 +5111,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSE_WAIT.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
         
       break;
 
@@ -5189,7 +5139,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
       finSchedule(tcb_block);
 
       if (debug) ev << "TCP is going to LAST_ACK state.\n";
-      FSM_Goto(fsm, LAST_ACK);
+      FSM_Goto(fsm, TCP_S_LAST_ACK);
       
       break;
 
@@ -5197,7 +5147,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
 
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
@@ -5273,7 +5223,7 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LAST_ACK.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
 
       break;
 
@@ -5315,19 +5265,19 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
     case TCP_E_TIMEOUT_REXMT:
       if (debug) ev << "Staying in LAST ACK state.\n";
-      FSM_Goto(fsm, LAST_ACK);
+      FSM_Goto(fsm, TCP_S_LAST_ACK);
 
       break;
 
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
 
     case TCP_E_RCV_ACK_OF_FIN:
       if (debug) ev << "TCP received ACK of FIN. Going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
       
       break;
       
@@ -5392,13 +5342,13 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       flushTransRetransQ(tcb_block);
 
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_1.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
         
       break;
 
@@ -5434,12 +5384,12 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     {
     case TCP_E_TIMEOUT_REXMT:
       if (debug) ev << "TCP is staying in FIN_WAIT_1.\n";
-      FSM_Goto(fsm, FIN_WAIT_1);
+      FSM_Goto(fsm, TCP_S_FIN_WAIT_1);
  
       break;
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
@@ -5448,7 +5398,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       if (debug) ev << "TCP received a FIN segment. Scheduling an ACK and going to CLOSING.\n";
       ackSchedule(tcb_block, true);
       
-      FSM_Goto(fsm, CLOSING);
+      FSM_Goto(fsm, TCP_S_CLOSING);
       
       break;
       
@@ -5456,7 +5406,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     case TCP_E_RCV_ACK_OF_FIN:
       if (debug) ev << "TCP received an ACK of the FIN segment previously sent. Going to FIN_WAIT_2.\n";
       
-      FSM_Goto(fsm, FIN_WAIT_2);
+      FSM_Goto(fsm, TCP_S_FIN_WAIT_2);
       
       break;
       
@@ -5464,7 +5414,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     case TCP_E_RCV_FIN_ACK_OF_FIN:
       if (debug) ev << "TCP received a FIN segment. Scheduling an ACK and going to TIME_WAIT.\n";
       ackSchedule(tcb_block, true);
-      FSM_Goto(fsm, TIME_WAIT);
+      FSM_Goto(fsm, TCP_S_TIME_WAIT);
       
       break;
 
@@ -5528,7 +5478,7 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_2.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
         
       break;
 
@@ -5583,7 +5533,7 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     {
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
         
       break;
 
@@ -5591,12 +5541,12 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     case TCP_E_RCV_FIN:
       if (debug) ev << "TCP received a FIN segment. Scheduling an ACK and going to TIME_WAIT.\n";
       ackSchedule(tcb_block, true);
-      FSM_Goto(fsm, TIME_WAIT);
+      FSM_Goto(fsm, TCP_S_TIME_WAIT);
       
       break;
     
     case TCP_E_TIMEOUT_FIN_WAIT_2:
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
       
       break;
 
@@ -5652,7 +5602,7 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSING.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
 
       break;
 
@@ -5678,13 +5628,13 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     {
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
 
     case TCP_E_RCV_ACK_OF_FIN:
       if (debug) ev << "TCP received ACK of FIN. Going to TIME_WAIT state.\n";
-      FSM_Goto(fsm, TIME_WAIT);
+      FSM_Goto(fsm, TCP_S_TIME_WAIT);
       
       break;
       
@@ -5740,7 +5690,7 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in TIME_WAIT.\n";
-      status(tcb_block);
+      printStatus(tcb_block);
 
       break;
 
@@ -5771,13 +5721,13 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
     {
     case TCP_E_ABORT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
 
       break;
 
     case TCP_E_TIMEOUT_TIME_WAIT:
       if (debug) ev << "TCP is going to CLOSED state.\n";
-      FSM_Goto(fsm, CLOSED);
+      FSM_Goto(fsm, TCP_S_CLOSED);
       
       break;
       

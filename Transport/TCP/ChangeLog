@@ -1,8 +1,17 @@
 2003-09-30  Andras Varga
 
-	* tcpmodule.cc: deleted all setPhase() lines -- they aren't informative
-	since TCPModule services multiple connections;
-	getTcb(): added debug output
+	* tcpmodule.cc: simplifications, more informative debug output
+	- deleted all setPhase() lines -- they aren't informative since 
+	  TCPModule services multiple connections;
+	- getTcb(): added debug output;
+	- simplification: AddPor eliminated (replaced by SockPair)
+	- simplification: TcpTcb.tb_state eliminated (state was stored in 
+	  the FSM, and tb_state was never used except in ev<<'s)
+	- status() renamed to printStatus(), order of fields made more logical
+	  (state and src/dest addr/port were brought forward), print name
+	  of state and event type instead of numeric value
+	- there were two enums for TCP state, thrown out one (LISTEN, SYN_RCVD, 
+	  etc.) and kept the TCP_S_xxx ones.
 
 2002-07-18  Ulrich Kaage <kaage@int.uni-karlsruhe.de>  <kaage@int.etec.uni-karlsruhe.de>
 
@@ -11,7 +20,6 @@
 2001-11-02  Rolf Kussaether <ufeq@rz.uni-karlsruhe.de>
 
 	* tcpmodule.cc : Fast Recovery (Reno-TCP), New-Reno-TCP
-
 
 2001-09-05  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
 

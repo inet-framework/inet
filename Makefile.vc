@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= index_n.obj ipsuite-doc_n.obj mpls-doc_n.obj
+OBJS= index_n.obj ipsuite-doc_n.obj mpls-doc_n.obj   
 
 # subdirectories to recurse into
 SUBDIRS=  Applications_dir Documentation_dir Examples_dir Network_dir NetworkInterfaces_dir Nodes_dir PHY_dir Tests_dir Transport_dir Util_dir
@@ -141,7 +141,7 @@ mpls-doc_n.cc: mpls-doc.ned
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
 	-del *.vec *.sca 2>NUL
-	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
+	-for %%i in ( Applications Documentation Examples Network NetworkInterfaces Nodes PHY Tests Transport Util ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc

@@ -48,8 +48,13 @@
 //    <tt>dest_addr</tt> (all as <tt>int</tt>s) 
 //  - <tt>rec_pks</tt>: number of packets the application is ready to receive
 //  - <tt>num_bit_req</tt>: number of bits the application is ready to receive (?) 
-//  - <tt>tcp_conn_id</tt>: identifies the connection
+//  - <tt>tcp_conn_id</tt>: see below
 // 
+// <tt>tcp_conn_id</tt> is an identifier which has the same value on the 
+// client and server side. In fact, it does <b>not</b> identify the connection
+// for Tcpmodule (it uses the src/dest addresses and ports for this purpose, 
+// in every case), so perhaps it was meant for use by the applications.
+//
 // <tt>tcp_conn_id</tt> is assigned by the server application, when issuing
 // the passive open call. The client issues the active open without
 // a <tt>tcp_conn_id</tt> (i.e. with a dummy one), and will learn the 
