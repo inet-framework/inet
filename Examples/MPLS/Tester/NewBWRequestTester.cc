@@ -28,7 +28,6 @@ class NewBWRequestTester : public cSimpleModule
     Module_Class_Members(NewBWRequestTester, cSimpleModule, 16384);
     virtual void initialize();
     virtual void activity();
-    cObject* findObject(char* modName);
 };
 
 Define_Module_Like(NewBWRequestTester, NetworkManager);
@@ -46,9 +45,13 @@ void NewBWRequestTester::activity()
 
     cMessage* msg = receive();
 
+    bubble("NOW! Sending new bandwidth request to LSR1");
+
     //Send command to IR to signal the path recalculation
-    cModule* irNode = (cModule*)findObject("LSR1");
-    cModule* signalMod = (cModule*)(irNode->findObject("signal_module", false));
+    cModule* irNode = simulation.moduleByPath("LSR1");
+    if (!irNode)
+        error("LSR1 module not found");
+    cModule* signalMod = irNode->submodule("signal_module");
     if (!signalMod)
         error("Cannot locate signal module in IR node");
 
@@ -62,19 +65,4 @@ void NewBWRequestTester::activity()
     delete msg;
 }
 
-cObject* NewBWRequestTester::findObject(char* modName)
-{
-    cObject *foundmod =NULL;
-    cModule *curmod = this;
-
-    for (curmod = parentModule(); curmod; curmod = curmod->parentModule())
-    {
-        if ((foundmod = curmod->findObject(modName, false)) != NULL)
-        {
-            ev << "TESTER: Module" << modName << " found\n";
-            return foundmod;
-        }
-    }
-    ev << "TESTER: Failed to find " << modName << "\n";
-}
 

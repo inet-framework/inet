@@ -52,6 +52,9 @@ void NewRouteTester::activity()
     if (!lsr2) error("LSR2 module not found");
     cGate* modifiedGate = lsr2->gate("out", 2);
 
+    bubble("NOW! Changing bandwith of LSR2 --> LSR4 link\n"
+           "and telling LSR1 to recalculate the route");
+
     modifiedGate->setDisplayString("o=yellow");
     cPar* par1 = new cPar();
     cPar* par2 = new cPar();
@@ -61,22 +64,23 @@ void NewRouteTester::activity()
     modifiedGate->setDataRate(par1);
     modifiedGate->setDelay(par2);
 
-    simple_link_t* aLink = new simple_link_t;
-    aLink->advRouter = IPAddress("1.0.0.2").getInt();
-    aLink->id = IPAddress("1.0.0.4").getInt();
+    simple_link_t aLink;
+    aLink.advRouter = IPAddress("1.0.0.2").getInt();
+    aLink.id = IPAddress("1.0.0.4").getInt();
 
-    //myTED->updateLink(aLink, 1, 6000);
     TED *ted = TED::getGlobalInstance();
+    ted->updateLink(&aLink, 1, 6000);
     ted->buildDatabase();
 
-    //Send command to IR to signal the path recalculation
-    cModule* irNode = simulation.moduleByPath("LSR1");
-    if (!irNode) error("LSR1 module not found");
-    cModule* signalMod = (cModule*)(irNode->findObject("signal_module", false));
-    if (signalMod==NULL)
+    // Send command to IR to signal the path recalculation
+    cModule *irNode = simulation.moduleByPath("LSR1");
+    if (!irNode)
+        error("LSR1 module not found");
+    cModule *signalMod = irNode->submodule("signal_module");
+    if (!signalMod)
         error("cannot locate signal module in IR node LSR1");
 
-    cMessage* cmdMsg = new cMessage();
+    cMessage *cmdMsg = new cMessage();
     cmdMsg->addPar("test_command")=NEW_ROUTE_DISCOVER;
     sendDirect(cmdMsg, 0.0, signalMod, "from_tester");
 
