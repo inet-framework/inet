@@ -22,7 +22,7 @@
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
-// <center><h3>snapshot 2004-10-06</h3></center>
+// <center><h3>snapshot 2005-01-02</h3></center>
 //
 // <nohtml>INET Framework contains IPv4, TCP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
@@ -34,6 +34,9 @@
 //
 // For up-to-date info, visit the current
 // <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/INETFramework" target="_top">INET Framework home page</a>.
+//
+// Introductory material:
+//  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //
 // A few useful starting points for browsing the documentation:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a>
@@ -67,11 +70,10 @@
 //
 // @page history.html, History
 //
-// The OMNeT++/OMNEST INET framework is a successor of the IPSuite package.
-//
-// The original IPSuite was written by Klaus Wehrle, Jochen Reber,
-// Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage and others
-// at the University of Karlsruhe during 2000-2001.
+// The predecessor of the INET framework was written by written by Klaus 
+// Wehrle, Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann, 
+// Ulrich Kaage and others at the University of Karlsruhe during 2000-2001,
+// under the name IPSuite.
 //
 // After a period of IPSuite being unmaintained, Andras Varga took over
 // the development in July 2003. Through a series of snapshot releases in
@@ -83,7 +85,7 @@
 // application models, Ethernet implementation and an all-in-one IP model
 // to replace the earlier, modularized one.
 //
-// The package was renamed INET framework in October 2004.
+// The package was renamed INET Framework in October 2004.
 //
 // The MPLS, LDP and \RSVP-TE models were built as an add-on to IPSuite.
 // The package consists of around 10,000 LOCs, and it was written by Xuan
