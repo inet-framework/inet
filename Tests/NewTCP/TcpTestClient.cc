@@ -31,29 +31,28 @@ Define_Module(TcpTestClient);
 void TcpTestClient::activity()
 {
     // parameters
+    const char *address = par("address");
+    int port = par("port");
+    const char *connectAddress = par("connectAddress");
+    int connectPort = par("connectPort");
+
     bool active = par("active");
     simtime_t tOpen = par("tOpen");
     simtime_t tSend = par("tSend");
     simtime_t sendBytes = par("sendBytes");
     simtime_t tClose = par("tClose");
-
     TCPSocket socket;
     queue.setName("queue");
 
     // open
     waitAndEnqueue(tOpen-simTime(), &queue);
 
+    socket.bind(IPAddress(address), port);
+
     if (active)
-    {
-        socket.bind(IPAddress("10.0.0.1"),-1);
-        socket.connect(IPAddress("10.0.0.2"),2000);
-    }
+        socket.connect(IPAddress(connectAddress), connectPort);
     else
-    {
-        socket.bind(IPAddress("10.0.0.2"),2000);
-        //socket.bind(2000);
         socket.accept();
-    }
 
     // send
     if (sendBytes>0)

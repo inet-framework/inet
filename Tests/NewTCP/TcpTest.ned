@@ -6,6 +6,8 @@ import
 
 
 module TcpTest
+    parameters:
+        testing: bool;
     submodules:
         cli: TcpTestClient;
             display: "p=95,95;i=app";
@@ -15,18 +17,18 @@ module TcpTest
             display: "p=302,178;i=prot2";
         srv: TcpTestClient;
             display: "p=303,96;i=app";
-        tcpdump: TCPDump;
-            display: "p=240,178;i=ipc";
+        tcptester: TCPTester;
+            display: "p=198,178;i=ipc";
     connections:
         cli.tcpOut --> tcpcli.from_appl;
         cli.tcpIn <-- tcpcli.to_appl;
         srv.tcpOut --> tcpsrv.from_appl;
         srv.tcpIn <-- tcpsrv.to_appl;
 
-        tcpcli.to_ip --> delay 0.1 datarate 1000000 --> tcpdump.in1;
-        tcpcli.from_ip <-- delay 0.1 datarate 1000000 <-- tcpdump.out1;
-        tcpdump.out2 --> tcpsrv.from_ip;
-        tcpdump.in2 <-- tcpsrv.to_ip;
+        tcpcli.to_ip --> delay 1ms --> tcptester.in1;
+        tcpcli.from_ip <-- delay 1ms <-- tcptester.out1;
+        tcptester.out2 --> delay 1ms --> tcpsrv.from_ip;
+        tcptester.in2 <-- delay 1ms <-- tcpsrv.to_ip;
 endmodule
 
 
