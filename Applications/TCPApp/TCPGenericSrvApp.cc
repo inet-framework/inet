@@ -54,6 +54,7 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg)
 
 void TCPGenericSrvApp::handleMessage(cMessage *msg)
 {
+    // FIXME: handle "close" field of GenericAppMsg!
     if (msg->isSelfMessage())
     {
         msgsSent++;

@@ -18,69 +18,85 @@
 
 Define_Module(TCPGenericCliAppBase);
 
-void TCPGenericCliAppBase::count(cMessage *msg)
-{
-    if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
-    {
-        packetsRcvd++;
-        bytesRcvd+=msg->length()/8;
-    }
-    else
-    {
-        indicationsRcvd++;
-    }
-}
 
-void TCPGenericCliAppBase::waitUntil(simtime_t t)
+void TCPGenericCliAppBase::initialize()
 {
-    if (simTime()>=t)
-        return;
-
-    cMessage *timeoutMsg = new cMessage("timeout");
-    scheduleAt(t, timeoutMsg);
-    cMessage *msg=NULL;
-    while ((msg=receive())!=timeoutMsg)
-    {
-        count(msg);
-        socket.processMessage(msg);
-    }
-    delete timeoutMsg;
-}
-
-void TCPGenericCliAppBase::activity()
-{
-    packetsRcvd = bytesRcvd = indicationsRcvd = 0;
+    packetsRcvd = bytesRcvd = 0;
     WATCH(packetsRcvd);
     WATCH(bytesRcvd);
-    WATCH(indicationsRcvd);
 
     // parameters
     const char *address = par("address");
     int port = par("port");
-    const char *connectAddress = par("connectAddress");
-    int connectPort = par("connectPort");
-
-    bool active = par("active");
-    simtime_t tOpen = par("tOpen");
-    simtime_t tSend = par("tSend");
-    simtime_t sendBytes = par("sendBytes");
-    simtime_t tClose = par("tClose");
-
-    socket.setOutputGate(gate("tcpOut"));
-
-    // open
-    waitUntil(tOpen);
-
     if (!address[0])
         socket.bind(port);
     else
         socket.bind(IPAddress(address), port);
 
-    ev << "issuing OPEN command\n";
-    if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting":"listening");
+    socket.setCallbackObject(this);
+    socket.setOutputGate(gate("tcpOut"));
 
-    if (active)
-        socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
+    if (ev.isGUI()) displayString().setTagArg("t",0, "waiting");
+
+    simtime_t t = getConnectTime(msg);
+    cMessage *timerMsg = new cMessage("timer", TIMER_CONNECT);
+    scheduleAt(t, timerMsg);
+}
+
+void TCPGenericCliAppBase::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        handleTimer(msg);
+    else
+        socket.processMessage(msg);
+}
+
+void TCPGenericCliAppBase::handleTimer(cMessage *msg)
+{
+    switch (msg->kind())
+    {
+        case TIMER_CONNECT: connect(); break;
+        //...
+    }
+}
+
+void TCPGenericCliAppBase::connect()
+{
+    const char *connectAddress = par("connectAddress");
+    int connectPort = par("connectPort");
+
+    ev << "issuing OPEN command\n";
+    if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting");
+
+    socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
+}
+
+void TCPGenericCliAppBase::socketEstablished(int connId, void *yourPtr)
+{
+    // do first sending, or at least schedule it
+}
+
+void TCPGenericCliAppBase::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent)
+{
+}
+
+void TCPGenericCliAppBase::socketPeerClosed(int connId, void *yourPtr)
+{
+}
+
+void TCPGenericCliAppBase::socketClosed(int connId, void *yourPtr)
+{
+}
+
+void TCPGenericCliAppBase::socketFailure(int connId, void *yourPtr, int code)
+{
+}
+
+
+
+
+
+
     else
         socket.listen();
 
@@ -128,4 +144,35 @@ void TCPGenericCliAppBase::finish()
     ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
 
+
+/*
+void TCPGenericCliAppBase::count(cMessage *msg)
+{
+    if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+    {
+        packetsRcvd++;
+        bytesRcvd+=msg->length()/8;
+    }
+    else
+    {
+        indicationsRcvd++;
+    }
+}
+
+void TCPGenericCliAppBase::waitUntil(simtime_t t)
+{
+    if (simTime()>=t)
+        return;
+
+    cMessage *timeoutMsg = new cMessage("timeout");
+    scheduleAt(t, timeoutMsg);
+    cMessage *msg=NULL;
+    while ((msg=receive())!=timeoutMsg)
+    {
+        count(msg);
+        socket.processMessage(msg);
+    }
+    delete timeoutMsg;
+}
+*/
 
