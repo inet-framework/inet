@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -30,7 +31,7 @@ import
 // Network layers of an IP node.
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
-// FIXME add ICMP errors
+//# FIXME add ICMP errors
 //
 module NetworkLayer
     parameters:

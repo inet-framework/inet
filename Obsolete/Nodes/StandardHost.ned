@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -20,60 +19,62 @@
 
 import
     "Blackboard",
-    "TCPSessionApp.ned",
-    "TCPMain.ned",
-    "UDPProcessing",
-    "UDPApp",
     "NetworkLayer",
+    "UDPUpperLayers",
+    "TCPUpperLayers",
     "PingApp";
 
 
 
 //
-// IP host with TCP, UDP layers and applications.
+// Definition of an IPNode with transport layers.
 //
-module StandardHost2
+module StandardHost
     parameters:
-        IPForward : bool,
+        // TCP information
+        tcpApplType : string,
+        local_addr : numeric,
+        server_addr : numeric,
+
+        // Network information
         routingFile : string;
     gates:
         in: in[];
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=56,78";
-        tcpApp: TCPSessionApp;
-            display: "p=125,58;i=app";
-        tcp: TCPMain;
-            display: "p=125,138;i=prot2";
-        udpApp: UDPClientApp;
-            display: "i=app;p=212,58";
-        udp: UDPProcessing;
-            display: "p=212,138;i=prot1";
+            display: "i=proc2;p=60,60";
+        // transport and application layers
+        tcpApp: TCPUpperLayers;
+            parameters:
+                tcpApplType = tcpApplType,
+                local_addr = local_addr,
+                server_addr = server_addr;
+            display: "p=60,50;b=40,24,rect";
+        udpApp: UDPUpperLayers;
+            parameters:
+                udpClient1Name = "UDPClientApp",
+                udpServer1Name = "UDPServerApp";
+            display: "p=120,50;b=40,24,rect";
         pingApp: PingApp;
-            display: "i=app;p=305,58";
+            display: "p=180,50;b=40,24,rect";
         networkLayer: NetworkLayer;
             parameters:
-                IPForward = IPForward,
+                IPForward = false,
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=212,221;i=fork";
+            display: "p=120,110;i=fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=170,303,row;i=iface";
+            display: "p=60,180,row;i=iface";
     connections nocheck:
-        tcpApp.tcpOut --> tcp.from_appl;
-        tcpApp.tcpIn <-- tcp.to_appl;
+        // transport connections
+        networkLayer.TCPOut --> tcpApp.in;
+        networkLayer.TCPIn <-- tcpApp.out;
 
-        tcp.to_ip --> networkLayer.TCPIn;
-        tcp.from_ip <-- networkLayer.TCPOut;
-
-        udpApp.to_udp --> udp.from_application;
-        udpApp.from_udp <-- udp.to_application;
-
-        udp.to_ip --> networkLayer.UDPIn;
-        udp.from_ip <-- networkLayer.UDPOut;
+        networkLayer.UDPOut --> udpApp.from_ip;
+        networkLayer.UDPIn <-- udpApp.to_ip;
 
         networkLayer.pingOut --> pingApp.in;
         networkLayer.pingIn <-- pingApp.out;

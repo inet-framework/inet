@@ -24,9 +24,9 @@ import
 
 
 
-
 //
-// Definition of an IPNode with transport layers.
+// Definition of an IPNode with a transport generator that connects
+// to IP directly, without TCP or UDP.
 //
 module BurstHost
     parameters:

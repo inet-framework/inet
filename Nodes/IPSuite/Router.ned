@@ -22,7 +22,9 @@ import
     "NetworkLayer";
 
 
-
+//
+// IP router.
+//
 module Router
     parameters:
         routingFile : string;
