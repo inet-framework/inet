@@ -333,10 +333,8 @@ NEDCOPTS=\$(CFLAGS) \$(NEDCFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
 EOT
 fi
 
-cat <<EOT
-#------------------------------------------------------------------------------
-
-EOT
+echo "#------------------------------------------------------------------------------"
+echo
 
 echo '# subdirectories to recurse into'
 echo "SUBDIRS= $subdirs"
@@ -348,21 +346,21 @@ echo
 # include external Makefile fragments here, so that they can override
 # the default target if they want
 if [ ! "$fragments" = "" ]; then
+    echo "#------------------------------------------------------------------------------"
     echo "# contents of file(s) $fragments:"
     cat $fragments
     echo
 else
     if [ -f makefrag ]; then
+        echo "#------------------------------------------------------------------------------"
         echo "# contents of file makefrag:"
         cat makefrag
         echo
     fi
 fi
 
-cat <<EOT
-#------------------------------------------------------------------------------
-
-EOT
+echo "#------------------------------------------------------------------------------"
+echo
 
 case "$type" in
 exe)
