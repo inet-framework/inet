@@ -268,12 +268,12 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     // LDP checks if there is any previous pending requests for
     // the same FEC.
 
-    int i;
+    unsigned int i;
     for (i = 0; i < fecSenderBinds.size(); i++)
         if (fecSenderBinds[i].fec == fecInt)
             break;
 
-    if (i!=fecSenderBinds.size())
+    if (i != fecSenderBinds.size())
     {
         // there is a previous similar request
         ev << "Already issued Label Request for this FEC\n";
@@ -406,7 +406,7 @@ IPAddress NewLDP::findPeerAddrFromInterface(string interfaceName)
 
     for (i = 0; i < rt->numRoutingEntries(); i++)
     {
-        for (k = 0; k < myPeers.size(); k++)
+        for (k = 0; k < (int)myPeers.size(); k++)
         {
             anEntry = rt->routingEntry(i);
             if (anEntry->host==myPeers[k].peerIP && anEntry->interfacePtr==interfacep)
@@ -418,7 +418,7 @@ IPAddress NewLDP::findPeerAddrFromInterface(string interfaceName)
     }
 
     // Return any IP which has default route - not in routing table entries
-    for (i = 0; i < myPeers.size(); i++)
+    for (i = 0; i < (int)myPeers.size(); i++)
     {
         for (k = 0; k < rt->numRoutingEntries(); k++)
         {
@@ -465,11 +465,11 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
     ev << "Label Request from LSR " << srcAddr << " for FEC " << fec << "\n";
 
-    int i;
+    unsigned int i;
     for (i=0; i < fecSenderBinds.size(); i++)
         if (fecSenderBinds[i].fec == fec)
             break;
-    if (i!=fecSenderBinds.size())
+    if (i != fecSenderBinds.size())
     {
         // repeated request: do nothing (FIXME is this OK?)
         ev << "Repeated request, ignoring\n";
@@ -582,7 +582,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         int myfecId = -1;
 
         // Install new label
-        for (int k = 0; k < fecSenderBinds.size(); k++)
+        for (unsigned int k = 0; k < fecSenderBinds.size(); k++)
         {
             if (fecSenderBinds[k].fec == fec)
             {
@@ -605,7 +605,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
     else
     {
         // Install new label
-        for (int k = 0; k < fecSenderBinds.size(); k++)
+        for (unsigned int k = 0; k < fecSenderBinds.size(); k++)
         {
             if (fecSenderBinds[k].fec == fec)
             {

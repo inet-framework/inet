@@ -175,7 +175,7 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
     //
     // Slow Start, Congestion Control (RFC2001)
     //
-    int flight_size = Min(state->snd_cwnd, state->snd_wnd);
+    uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
     state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
     state->snd_cwnd = state->snd_mss;
 
@@ -375,7 +375,7 @@ void TCPTahoeReno::receivedDuplicateAck()
         //
 
         // Reset ssthresh and cwnd. Note: code is similar to that in processRexmitTimer()
-        int flight_size = Min(state->snd_cwnd, state->snd_wnd);
+        uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
         state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
         if (state->tcpvariant==TCPTahoeRenoStateVariables::TAHOE)
             state->snd_cwnd = state->snd_mss;

@@ -178,10 +178,10 @@ void TED::updateLink(simple_link_t * aLink, double metric, double bw)
 {
     Enter_Method("updateLink()");
 
-    for (int i = 0; i < ted.size(); i++)
+    for (unsigned int i = 0; i < ted.size(); i++)
     {
-        if ((ted[i].advrouter.getInt() == (aLink->advRouter)) &&
-            (ted[i].linkid.getInt() == (aLink->id)))
+        if (ted[i].advrouter.getInt() == aLink->advRouter &&
+            ted[i].linkid.getInt() == aLink->id)
         {
             ev << "TED update an entry\n";
             ev << "Advrouter=" << ted[i].advrouter << "\n";

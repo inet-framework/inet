@@ -69,7 +69,7 @@ class TCPSocketMap
     /**
      * Returns the number of sockets stored.
      */
-    int size() {return socketMap.size();}
+    unsigned int size() {return socketMap.size();}
 };
 
 #endif

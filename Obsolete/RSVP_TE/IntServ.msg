@@ -21,7 +21,7 @@ cplusplus {{
 #define MAX_ROUTE 10
 #define InLIST_SIZE 5
 
-typedef int IPADDR;  //FIXME this definition should go!!!  IPADDR should be IPAddress
+typedef uint32 IPADDR;  //FIXME this definition should go!!!  IPADDR should be IPAddress
 //typedef IPAddress IPADDR;
 }}
 class noncobject IPADDR;

@@ -101,26 +101,17 @@ bool cVectorWatchDescriptor::getFieldAsString(int field, int i, char *resultbuf,
 
 bool cVectorWatchDescriptor::setFieldAsString(int field, int i, const char *value)
 {
-    cVectorWatcherBase *pp = (cVectorWatcherBase *)p;
-    switch (field) {
-        case 0: return false; // not supported for now
-        default: return false;
-    }
+    return false; // not supported
 }
 
 const char *cVectorWatchDescriptor::getFieldStructName(int field)
 {
-    switch (field) {
-        default: return NULL;
-    }
+    return NULL;
 }
 
 void *cVectorWatchDescriptor::getFieldStructPointer(int field, int i)
 {
-    cVectorWatcherBase *pp = (cVectorWatcherBase *)p;
-    switch (field) {
-        default: return NULL;
-    }
+    return NULL;
 }
 
 sFieldWrapper *cVectorWatchDescriptor::getFieldWrapper(int field, int i)

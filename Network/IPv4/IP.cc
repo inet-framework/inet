@@ -217,7 +217,7 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     else
     {
         // copy original datagram for multiple destinations
-        for (int i=0; i<routes.size(); i++)
+        for (unsigned int i=0; i<routes.size(); i++)
         {
             int outputPort = routes[i].interf->outputPort;
 

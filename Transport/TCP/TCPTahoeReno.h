@@ -41,8 +41,8 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
     simtime_t rexmit_timeout; // current retransmission timeout (aka RTO)
 
     // slow start and congestion avoidance variables (RFC 2001)
-    int snd_cwnd;            // congestion window
-    int ssthresh;            // slow start threshold
+    uint snd_cwnd;            // congestion window
+    uint ssthresh;            // slow start threshold
 
     // performing round-trip time measurements
     uint32 rtseq;            // starting sequence number of timed data

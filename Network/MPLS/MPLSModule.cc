@@ -128,7 +128,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
     // Update FEC table
     if (!isLDP)
     {
-        for (int i = 0; i < fecList.size(); i++)
+        for (unsigned int i = 0; i < fecList.size(); i++)
         {
             // FIXME pending FEC's seem to get an id (2*MAX_LSP_NO-returnedFecId)
             // until they are resolved. Find out why. Should use a bool flag "pending"?

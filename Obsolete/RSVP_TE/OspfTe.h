@@ -38,7 +38,10 @@ struct CSPFVertex
     double DistanceToRoot;
 };
 
-
+typedef std::vector<IPADDR> IPADDRVector;
+typedef std::vector<CSPFVertex> CSPFVertexVector;
+typedef std::vector<TELinkState> TELinkStateVector;
+typedef std::vector<simple_link_t> simple_link_tVector;
 
 /**
  * Implements the constrained shortest path algorithm
@@ -47,30 +50,30 @@ class OspfTe : public cSimpleModule
 {
 private:
 
-    std::vector<CSPFVertex> CShortestPathTree;
-    std::vector<TELinkState> ted;
+    CSPFVertexVector CShortestPathTree;
+    TELinkStateVector ted;
     IPAddress routerId;
 
     void  TEAddCandidates(const FlowSpecObj_t& fspec,
-                          std::vector<CSPFVertex>& CandidatesList);
+                          CSPFVertexVector& CandidatesList);
 
-    std::vector<int>
+    IPADDRVector
     doCalculateERO(const IPAddress& dest,
-                   std::vector<CSPFVertex>& CandidatesList,
+                   CSPFVertexVector& CandidatesList,
                    double& outTotalMetric);
 
     void CspfBuildSPT(const FlowSpecObj_t& fspec,
-                      std::vector<CSPFVertex>& CandidatesList);
+                      CSPFVertexVector& CandidatesList);
 
-    void CspfBuildSPT(const std::vector<simple_link_t>& links,
+    void CspfBuildSPT(const simple_link_tVector& links,
                       const FlowSpecObj_t& old_fspec,
                       const FlowSpecObj_t& new_fspec,
-                      std::vector<CSPFVertex>& CandidatesList);
+                      CSPFVertexVector& CandidatesList);
 
-    void TEAddCandidates(const std::vector<simple_link_t>& links,
+    void TEAddCandidates(const simple_link_tVector& links,
                          const FlowSpecObj_t& old_fspec,
                          const FlowSpecObj_t& new_fspec,
-                         std::vector<CSPFVertex>& CandidatesList);
+                         CSPFVertexVector& CandidatesList);
     void updateTED();
     void printTED();
 
@@ -88,7 +91,7 @@ public:
      * Returned vector contains router IP addresses as int; all hops are
      * to be understood as strict.
      */
-    std::vector<int> CalculateERO(const IPAddress& dest,
+    IPADDRVector CalculateERO(const IPAddress& dest,
                                   const FlowSpecObj_t& fspec,
                                   double& outTotalMetric);
 
@@ -100,8 +103,8 @@ public:
      * Returned vector contains router IP addresses as int; all hops are
      * to be understood as strict.
      */
-    std::vector<int> CalculateERO(const IPAddress& dest,
-                                  const std::vector<simple_link_t>& links,
+    IPADDRVector CalculateERO(const IPAddress& dest,
+                                  const simple_link_tVector& links,
                                   const FlowSpecObj_t& old_fspec,
                                   const FlowSpecObj_t& new_fspec,
                                   double& outTotalDelay);

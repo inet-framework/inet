@@ -154,15 +154,15 @@ class TCPStateVariables : public cPolymorphic
     bool active;         // set if the connection was initiated by an active open
     bool fork;           // if passive and in LISTEN: whether to fork on an incoming connection
 
-    int snd_mss;         // maximum segment size (without headers, i.e. only segment text)
+    uint snd_mss;        // maximum segment size (without headers, i.e. only segment text)
 
     // send sequence number variables (see RFC 793, "3.2. Terminology")
     uint32 snd_una;      // send unacknowledged
     uint32 snd_nxt;      // send next
     uint32 snd_max;      // max seq number sent (needed because snd_nxt is re-set on retransmission)
 
-    int snd_wnd;         // send window
-    int snd_up;          // send urgent pointer
+    uint snd_wnd;        // send window
+    uint32 snd_up;       // send urgent pointer
     uint32 snd_wl1;      // segment sequence number used for last window update
     uint32 snd_wl2;      // segment ack. number used for last window update
     uint32 iss;          // initial sequence number (ISS)

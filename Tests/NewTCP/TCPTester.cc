@@ -180,7 +180,7 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
     {
         bubble("removing original");
         dump(seg, fromA, "removing original");
-        for (int i=0; i<cmd->delays.size(); i++)
+        for (unsigned int i=0; i<cmd->delays.size(); i++)
         {
             double d = cmd->delays[i];
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
@@ -250,7 +250,7 @@ void TCPRandomTester::dispatchSegment(TCPSegment *seg)
 
 void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
 {
-    int segno = fromA ? ++fromASeq : ++fromBSeq;
+    if (fromA) ++fromASeq; else ++fromBSeq;
 
     // decide what to do
     double x = dblrand();

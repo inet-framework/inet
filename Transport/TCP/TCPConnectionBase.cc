@@ -255,6 +255,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
 
     // state machine
     // TBD add handling of connection timeout event (keepalive), with transition to CLOSED
+    // Note: empty "default:" lines are for gcc's benefit which would otherwise spit warnings
     int oldState = fsm.state();
     switch (fsm.state())
     {
@@ -263,6 +264,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
             {
                 case TCP_E_OPEN_PASSIVE:FSM_Goto(fsm, TCP_S_LISTEN); break;
                 case TCP_E_OPEN_ACTIVE: FSM_Goto(fsm, TCP_S_SYN_SENT); break;
+                default:
             }
             break;
 
@@ -274,6 +276,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_CLOSE:       FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_ABORT:       FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD);break;
+                default:
             }
             break;
 
@@ -287,6 +290,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_ACK:     FSM_Goto(fsm, TCP_S_ESTABLISHED); break;
                 case TCP_E_RCV_FIN:     FSM_Goto(fsm, TCP_S_CLOSE_WAIT); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -299,6 +303,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_SYN_ACK: FSM_Goto(fsm, TCP_S_ESTABLISHED); break;
                 case TCP_E_RCV_SYN:     FSM_Goto(fsm, TCP_S_SYN_RCVD); break;
+                default:
             }
             break;
 
@@ -310,6 +315,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_FIN:     FSM_Goto(fsm, TCP_S_CLOSE_WAIT); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -320,6 +326,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_ABORT:       FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -330,6 +337,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_ACK:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -342,6 +350,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_FIN_ACK: FSM_Goto(fsm, TCP_S_TIME_WAIT); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -353,6 +362,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_TIMEOUT_FIN_WAIT_2: FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -363,6 +373,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_RCV_ACK:     FSM_Goto(fsm, TCP_S_TIME_WAIT); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 
@@ -373,6 +384,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
                 case TCP_E_TIMEOUT_2MSL: FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, TCP_S_CLOSED); break;
                 case TCP_E_RCV_UNEXP_SYN: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                default:
             }
             break;
 

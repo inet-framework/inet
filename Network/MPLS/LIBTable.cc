@@ -25,7 +25,7 @@ Define_Module(LIBTable);
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::PRTEntry & prt)
 {
-    return os << "Pos:" << prt.libIndex << "  FEC:" << prt.fec;
+    return os << "FEC:" << prt.fec << "LIBIndex:" << prt.libIndex;
 }
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
@@ -78,7 +78,7 @@ int LIBTable::readLibTableFromFile(const char *filename)
         string s(line);
         int loc = s.find(ConstType::libDataMarker, 0);
 
-        if (loc != string::npos)
+        if (loc != (int)string::npos)
         {
             fin.getline(line, 100);  // Get into the blank line
             break;
@@ -147,7 +147,7 @@ int LIBTable::readPrtTableFromFile(const char *filename)
         string s(line);
         int loc = s.find(ConstType::prtDataMarker, 0);
 
-        if (loc != string::npos)
+        if (loc != (int)string::npos)
         {
             fin.getline(line, 100);  // Get into the blank line
             break;
@@ -182,19 +182,22 @@ int LIBTable::readPrtTableFromFile(const char *filename)
 
 void LIBTable::printTables() const
 {
-    int i;
-    // Print out the LIB table
-    ev << "************LIB TABLE CONTENTS*****************\n";
-    ev << " InL     InInf     OutL     Outf    Optcode\n";
-    for (i = 0; i < lib.size(); i++)
-        ev << lib[i].inLabel << "    " << lib[i].inInterface.c_str() << " " << lib[i].
-            outLabel << "     " << lib[i].outInterface.c_str() << "   " << lib[i].optcode << "\n";
+    unsigned int i;
 
-    // Print out the PRT table
-    ev << "*****************PRT TABLE CONTENT**************\n";
-    ev << "Pos  Fec\n";
+    // print out the LIB table
+    ev << "*** LIB table contents:\n";
+    ev << "  Index  InL     InInf     OutL     Outf    Optcode\n";
+    for (i = 0; i < lib.size(); i++)
+        ev << "  " << i << ":  "
+           << "   " << lib[i].inLabel  << "   " << lib[i].inInterface.c_str()
+           << "   " << lib[i].outLabel << "   " << lib[i].outInterface.c_str()
+           << "   " << lib[i].optcode << "\n";
+
+    // print out the PRT table
+    ev << "*** PRT table contents:\n";
+    ev << "FEC    LIBIndex\n";
     for (i = 0; i < prt.size(); i++)
-        ev << prt[i].libIndex << "    " << prt[i].fec << "\n";
+        ev << "  " << prt[i].fec << "   " << prt[i].libIndex << "\n";
 }
 
 void LIBTable::updateDisplayString()
@@ -213,7 +216,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     // Consistence check: we want to use unified label space for all input interfaces.
     // This means that any given FEC may only map to a single lib entry. So we must
     // check FEC does not already occur in prt.
-    for (int i=0; i<prt.size(); i++)
+    for (unsigned int i = 0; i < prt.size(); i++)
         if (prt[i].fec==fec)
             error("installNewLabel(): FEC %s already in LIB", IPAddress(fec).str().c_str());
 
@@ -239,7 +242,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
 int LIBTable::findInLabel(int fec)
 {
     // search in the PRT for exact match of the FEC value
-    for (int i=0; i<prt.size(); i++)
+    for (unsigned int i = 0; i < prt.size(); i++)
     {
         if (prt[i].fec==fec)
         {
@@ -255,7 +258,7 @@ int LIBTable::findInLabel(int fec)
 bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) const
 {
     // search in the PRT for exact match of the FEC value
-    for (int i=0; i<prt.size(); i++)
+    for (unsigned int i = 0; i < prt.size(); i++)
     {
         if (prt[i].fec == fec)
         {
@@ -278,7 +281,7 @@ bool LIBTable::resolveLabel(int inLabel, std::string inInterface,
                             int& outOptCode, int& outLabel,
                             std::string& outInterface) const
 {
-    for (int i = 0; i < lib.size(); i++)
+    for (unsigned int i = 0; i < lib.size(); i++)
     {
         if (lib[i].inInterface == inInterface && lib[i].inLabel == inLabel)
         {
