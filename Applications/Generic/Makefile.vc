@@ -60,7 +60,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= CBRApp.obj
+OBJS= IPTrafGen.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -88,8 +88,8 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
-CBRApp.obj: CBRApp.cc
-	$(CXX) -c $(COPTS) /Tp CBRApp.cc
+IPTrafGen.obj: IPTrafGen.cc
+	$(CXX) -c $(COPTS) /Tp IPTrafGen.cc
 
 
 #doc: neddoc doxy
@@ -121,8 +121,8 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-CBRApp.obj: CBRApp.cc \
-  CBRApp.h \
+IPTrafGen.obj: IPTrafGen.cc \
+  IPTrafGen.h \
   ../../Network/IPv4/IPControlInfo_m.h \
   ../../Util/StringTokenizer.h \
   ../../Network/IPv4/IPAddressResolver.h \
