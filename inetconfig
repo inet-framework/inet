@@ -7,7 +7,7 @@
 #
 
 # include omnetppconfig from this directory
-ROOT=$(HOME)/IPSuite
+ROOT=$(HOME)/INET
 include $(ROOT)/omnetppconfig
 
 #INCLUDE_PATH+= ...additional include directories...

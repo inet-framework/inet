@@ -1,7 +1,7 @@
 call ..\omnetpp\vcvars32.bat
-set root=D:\home\IPSuite-pcvs
+set root=%~dp0
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
-set OPTS=-f -N -b %root% -c %root%\ipsuiteconfig.vc
+set OPTS=-f -N -b %root% -c %root%\inetconfig.vc
 
 set ALL_IPSUITE_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/Ethernet -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/INET
 set ALL_MPLS_IPSUITE_INCLUDES=%ALL_IPSUITE_INCLUDES% -I%root%/Network/MPLS -I%root%/Network/LDP -I%root%/Network/RSVP_TE -I%root%/Network/Scenario -I%root%/Nodes/MPLS
@@ -11,6 +11,8 @@ set ALL_MODEL_OPTS=%OPTS% -n
 
 : #--------------------------------------
 
+echo on
+echo @%root%@
 %MAKEMAKE% %OPTS% -n -r
 
 cd %root%\Applications && %MAKEMAKE% %OPTS% -n -r
