@@ -990,7 +990,7 @@ InterfaceEntry* EtherMAC::registerInterface(double datarate)
     // --> Emin : Parent module name is used since EtherMAC belongs to EthernetInterface.
     char *interfaceName = new char[strlen(parentModule()->fullName())+1];
     char *d=interfaceName;
-    for (const char *s=owner()->fullName(); *s; s++)
+    for (const char *s=parentModule()->fullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -999,7 +999,7 @@ InterfaceEntry* EtherMAC::registerInterface(double datarate)
     delete [] interfaceName;
 
     // output port: index of gate where our "physOut" is connected
-    int outputPort = ((cModule*)owner())->gate("physOut")->toGate()->index();  // FIXME use queueIn instead!!!
+    int outputPort = parentModule()->gate("physOut")->toGate()->index();  // FIXME use queueIn instead!!!
     e->outputPort = outputPort;
 
     // we don't know IP address and netmask, it'll probably come from routing table file
