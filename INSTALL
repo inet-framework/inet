@@ -5,9 +5,9 @@ The INET framework can be compiled on any platform supported by OMNeT++.
 
 PREREQUISITES
 
-You should have a working OMNeT++ installation. The latest 3.0 alpha
-version (3.0 alpha 7) is required, compiled with dynamic NED loading
-enabled (WITH_NETBUILDER=yes setting).
+You should have a working OMNeT++ installation, version 3.0 or later.
+It must be compiled with dynamic NED loading enabled (WITH_NETBUILDER=yes 
+setting).
 
 LINUX (UNIX)
 
