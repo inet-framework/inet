@@ -19,52 +19,72 @@
 class TcpTestClient : public cSimpleModule
 {
   public:
+    cQueue queue;
+
     Module_Class_Members(TcpTestClient, cSimpleModule, 16384);
     virtual void activity();
+    virtual void finish();
 };
 
 Define_Module(TcpTestClient);
 
 void TcpTestClient::activity()
 {
-    cMessage *msg;
+    // parameters
+    bool active = par("active");
+    simtime_t tOpen = par("tOpen");
+    simtime_t tSend = par("tSend");
+    simtime_t sendBytes = par("sendBytes");
+    simtime_t tClose = par("tClose");
+
     TCPSocket socket;
-    cQueue queue("queue");
+    queue.setName("queue");
 
-    if ((bool)par("active"))
+    // open
+    waitAndEnqueue(tOpen-simTime(), &queue);
+
+    if (active)
     {
-        waitAndEnqueue(1, &queue);
-
         socket.bind(IPAddress("10.0.0.1"),-1);
         socket.connect(IPAddress("10.0.0.2"),2000);
-
-        waitAndEnqueue(1, &queue);
-
-        msg = new cMessage("data1");
-        msg->setLength(8*16*1024);  // 16K
-        socket.send(msg);
-
-        waitAndEnqueue(0.41, &queue);
-
-        socket.close();
     }
     else
     {
         socket.bind(IPAddress("10.0.0.2"),2000);
-        socket.bind(2000);
+        //socket.bind(2000);
         socket.accept();
+    }
 
-        waitAndEnqueue(2.2, &queue);
+    // send
+    if (sendBytes>0)
+    {
+        waitAndEnqueue(tSend-simTime(), &queue);
 
+        cMessage *msg = new cMessage("data1");
+        msg->setLength(8*sendBytes);
+        socket.send(msg);
+    }
+
+    // close
+    if (tClose>=0)
+    {
+        waitAndEnqueue(tClose-simTime(), &queue);
         socket.close();
     }
 
     while (true)
     {
-        cMessage *msg = queue.empty() ? receive() : (cMessage *)queue.pop();
-        ev << "Received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
-        //delete msg; -- preserve them for inspection
+        cMessage *msg = receive();
+        queue.insert(msg);
     }
 }
 
-
+void TcpTestClient::finish()
+{
+    while (!queue.empty())
+    {
+        cMessage *msg = (cMessage *)queue.pop();
+        ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
+        delete msg;
+    }
+}

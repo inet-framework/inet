@@ -94,7 +94,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TestClient.obj
+OBJS= TcpTestClient.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -121,8 +121,8 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
-TestClient.obj: TestClient.cc
-	$(CXX) -c $(COPTS) /Tp TestClient.cc
+TcpTestClient.obj: TcpTestClient.cc
+	$(CXX) -c $(COPTS) /Tp TcpTestClient.cc
 
 
 #doc: neddoc doxy
