@@ -123,4 +123,8 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 UDPProcessing.o: UDPProcessing.cc \
   UDPPacket.h \
-  UDPProcessing.h
+  UDPProcessing.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Base/INETDefs.h

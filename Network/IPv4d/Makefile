@@ -144,38 +144,55 @@ EnqueueWithoutQoS.o: EnqueueWithoutQoS.cc \
   ../../Base/EnqueueHook.h
 ErrorHandling.o: ErrorHandling.cc \
   ErrorHandling.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/IPDatagram.h \
-  ../IPv4/ICMPMessage.h
+  ../IPv4/ICMPMessage.h \
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h \
+  ../../Base/INETDefs.h \
+  ../IPv4/ICMPMessage_m.h
 IPFragmentation.o: IPFragmentation.cc \
   IPFragmentation.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/IPDatagram.h \
   ../IPv4/RoutingTable.h \
   ../IPv4/ICMPAccess.h \
   ../../Base/ModuleAccess.h \
-  ../../Base/INETDefs.h \
+  ../IPv4/IPDatagram_m.h \
   ../IPv4/IPAddress.h \
+  ../../Base/INETDefs.h \
   ../IPv4/ICMP.h \
-  ../IPv4/ICMPMessage.h
+  ../IPv4/ICMPMessage.h \
+  ../IPv4/ICMPMessage_m.h
 IPInputQueue.o: IPInputQueue.cc \
   IPInputQueue.h \
   ../IPv4/IPDatagram.h \
+  ../IPv4/IPControlInfo_m.h \
   ../../Base/QueueBase.h \
-  ../../Base/AbstractQueue.h
+  ../../Base/AbstractQueue.h \
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/INETDefs.h
 IPLocalDeliver.o: IPLocalDeliver.cc \
   IPLocalDeliver.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/IPFragBuf.h \
   ../IPv4/ProtocolMap.h \
   ../IPv4/IPDatagram.h \
-  ../../Base/INETDefs.h
+  ../../Base/INETDefs.h \
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPAddress.h
 IPMulticast.o: IPMulticast.cc \
   IPMulticast.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/IPDatagram.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTable.h \
   ../../Base/INETDefs.h \
-  ../IPv4/IPAddress.h
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h
 IPOutput.o: IPOutput.cc \
   IPOutput.h \
   ../IPv4/IPDatagram.h \
@@ -186,21 +203,29 @@ IPOutput.o: IPOutput.cc \
   ../IPv4/ICMPMessage.h \
   ../IPv4/RoutingTable.h \
   ../../Base/INETDefs.h \
-  ../IPv4/IPAddress.h
+  ../IPv4/IPAddress.h \
+  ../IPv4/ICMPMessage_m.h \
+  ../IPv4/IPDatagram_m.h
 IPPreRouting.o: IPPreRouting.cc \
   IPPreRouting.h \
   ../IPv4/IPDatagram.h \
   ../IPv4/ICMPAccess.h \
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/INETDefs.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/ICMP.h \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/ICMPMessage.h \
   ../IPv4/RoutingTable.h \
-  ../../Base/INETDefs.h \
-  ../IPv4/IPAddress.h
+  ../IPv4/ICMPMessage_m.h
 IPRouting.o: IPRouting.cc \
+  ../IPv4/IPControlInfo_m.h \
   IPRouting.h \
   ../../Util/watch2.h \
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h \
+  ../../Base/INETDefs.h \
   ../../Base/QueueWithQoS.h \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/RoutingTable.h \
@@ -208,19 +233,24 @@ IPRouting.o: IPRouting.cc \
   ../../Base/AbstractQueue.h \
   ../../Base/EnqueueHook.h \
   ../../Base/ModuleAccess.h \
-  ../../Base/INETDefs.h \
-  ../IPv4/IPAddress.h \
   ../IPv4/ICMP.h \
   ../IPv4/ICMPMessage.h \
-  ../IPv4/IPDatagram.h
+  ../IPv4/IPDatagram.h \
+  ../IPv4/ICMPMessage_m.h
 IPSend.o: IPSend.cc \
   IPSend.h \
   ../IPv4/IPDatagram.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTableAccess.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTable.h \
   ../../Base/INETDefs.h \
-  ../IPv4/IPAddress.h
+  ../IPv4/IPAddress.h \
+  ../IPv4/IPDatagram_m.h
 IPTunneling.o: IPTunneling.cc \
   IPTunneling.h \
-  ../IPv4/IPDatagram.h
+  ../IPv4/IPControlInfo_m.h \
+  ../IPv4/IPDatagram.h \
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/INETDefs.h

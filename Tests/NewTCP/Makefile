@@ -117,7 +117,9 @@ TcpTestClient.o: TcpTestClient.cc \
   ../../Base/INETDefs.h
 TCPTester.o: TCPTester.cc \
   TCPTester.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Transport/TCP/TCPSegment.h \
   ../../Transport/TCP/TCPDump.h \
   ../../Base/INETDefs.h
