@@ -18,6 +18,14 @@ import
     "FlatNetworkConfigurator",
     "RTEntryEraser";
 
+
+module RTEntryEraser
+    parameters:
+        modulesToErase: string,
+        modulesToManipulate: string;
+endmodule
+
+
 module ARPTest
     submodules:
         server: StandardHost2;
@@ -89,5 +97,5 @@ module ARPTest
         bus2.out++ --> datarate 10e6 --> router6.in++;
 endmodule
 
-network theARPTest : ARPTest
+network arpTest : ARPTest
 endnetwork
