@@ -72,7 +72,7 @@ void TCPGenericCliAppBase::close()
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
 {
-    GenericAppMsg *msg = new GenericAppMsg();
+    GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setLength(8*numBytes);
     msg->setExpectedReplyLength(expectedReplyBytes);
     msg->setClose(serverClose);

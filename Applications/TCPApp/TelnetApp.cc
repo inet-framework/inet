@@ -58,7 +58,9 @@ void TelnetApp::handleTimer(cMessage *msg)
            else
            {
                ev << "user hits Enter key\n";
-               sendPacket(1, (long)par("commandOutputLength"));
+               // Note: reply length must be at least 2, otherwise we'll think
+               // it's an echo when it comes back!
+               sendPacket(1, 2+(long)par("commandOutputLength"));
                numCharsToType = (long)par("commandLength");
 
                // Note: no scheduleAt(), because user only starts typing next command

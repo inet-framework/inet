@@ -52,6 +52,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
     msgsSent++;
     bytesSent += msg->length()/8;
 
+    ev << "sending \"" << msg->name() << "\" to TCP, " << msg->length()/8 << " bytes\n";
     send(msg, "tcpOut");
 }
 
@@ -65,6 +66,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
+        msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
         sendOrSchedule(msg,delay+maxMsgDelay);
     }
