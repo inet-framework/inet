@@ -17,12 +17,10 @@
 #include "GenericAppMsg_m.h"
 
 
-Define_Module(TCPGenericCliAppBase);
-
 
 void TCPGenericCliAppBase::initialize()
 {
-    numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0
+    numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
     WATCH(numSessions);
     WATCH(numBroken);
     WATCH(packetsSent);

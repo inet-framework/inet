@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= GenericAppMsg_m.obj TCPEchoApp.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj
+OBJS= GenericAppMsg_m.obj TCPEchoApp.obj TCPGenericCliAppBase.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= GenericAppMsg_m.h
@@ -98,6 +98,9 @@ GenericAppMsg_m.cc GenericAppMsg_m.h: GenericAppMsg.msg
 
 TCPEchoApp.obj: TCPEchoApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPEchoApp.cc
+
+TCPGenericCliAppBase.obj: TCPGenericCliAppBase.cc
+	$(CXX) -c $(COPTS) /Tp TCPGenericCliAppBase.cc
 
 TCPGenericSrvApp.obj: TCPGenericSrvApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPGenericSrvApp.cc
@@ -141,30 +144,46 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+GenericAppMsg_m.obj: GenericAppMsg_m.cc \
+  GenericAppMsg_m.h
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
+TCPGenericCliAppBase.obj: TCPGenericCliAppBase.cc \
+  TCPGenericCliAppBase.h \
+  ..\..\Network\IPv4/IPAddressResolver.h \
+  GenericAppMsg_m.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
   TCPGenericSrvApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  GenericAppMsg_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSessionApp.obj: TCPSessionApp.cc \
   TCPSessionApp.h \
   ..\..\Network\IPv4/IPAddressResolver.h \
   ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSinkApp.obj: TCPSinkApp.cc \
   TCPSinkApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSrvHostApp.obj: TCPSrvHostApp.cc \
   TCPSrvHostApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPSocketMap.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
