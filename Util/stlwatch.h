@@ -85,15 +85,15 @@ void createPointerVectorWatcher(const char *varname, std::vector<T>& v)
 //
 // Internal class
 //
-template<class _K, class _V, class _C>
+template<class KeyT, class ValueT, class CmpT>
 class cMapWatcher : public cVectorWatcherBase
 {
   protected:
-    std::map<_K,_V,_C>& m;
-    mutable typename std::map<_K,_V,_C>::iterator it;
+    std::map<KeyT,ValueT,CmpT>& m;
+    mutable typename std::map<KeyT,ValueT,CmpT>::iterator it;
     mutable int itPos;
   public:
-    cMapWatcher(const char *name, std::map<_K,_V,_C>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}
+    cMapWatcher(const char *name, std::map<KeyT,ValueT,CmpT>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}
     const char *className() const {return opp_typename(typeid(m));}
     virtual const char *elemTypeName() const {return "struct pair<...,...>";}
     virtual int size() const {return m.size();}
@@ -122,21 +122,21 @@ class cMapWatcher : public cVectorWatcherBase
     }
 };
 
-template <class _K, class _V, class _C>
-void createMapWatcher(const char *varname, std::map<_K,_V,_C>& m)
+template <class KeyT, class ValueT, class CmpT>
+void createMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
 {
-    new cMapWatcher<_K,_V,_C>(varname, m);
+    new cMapWatcher<KeyT,ValueT,CmpT>(varname, m);
 }
 
 
 //
 // Internal class
 //
-template<class _K, class _V, class _C>
-class cPointerMapWatcher : public cMapWatcher<_K,_V,_C>
+template<class KeyT, class ValueT, class CmpT>
+class cPointerMapWatcher : public cMapWatcher<KeyT,ValueT,CmpT>
 {
   public:
-    cPointerMapWatcher(const char *name, std::map<_K,_V,_C>& var) : cMapWatcher<_K,_V,_C>(name, var) {}
+    cPointerMapWatcher(const char *name, std::map<KeyT,ValueT,CmpT>& var) : cMapWatcher<KeyT,ValueT,CmpT>(name, var) {}
     virtual std::string atIt() const {
         std::stringstream out;
         out << "{" << this->it->first << "}  ==>  {" << *(this->it->second) << "}";
@@ -144,13 +144,13 @@ class cPointerMapWatcher : public cMapWatcher<_K,_V,_C>
     }
 };
 
-template<class _K, class _V, class _C>
-void createPointerMapWatcher(const char *varname, std::map<_K,_V,_C>& m)
+template<class KeyT, class ValueT, class CmpT>
+void createPointerMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
 {
-    new cPointerMapWatcher<_K,_V,_C>(varname, m);
+    new cPointerMapWatcher<KeyT,ValueT,CmpT>(varname, m);
 }
 
-#define WATCH_VECTOR(v)      createVectorWatcher(#v,(v))
+#define WATCHValueTECTOR(v)      createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
 
