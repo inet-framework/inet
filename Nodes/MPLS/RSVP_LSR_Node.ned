@@ -60,7 +60,7 @@ module RSVP_LSR_Node
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=proc2;p=60,100";
         signal_module: RSVPAppl;
             parameters:
                 local_addr = local_addr,

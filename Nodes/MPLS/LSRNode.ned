@@ -59,7 +59,7 @@ module LSRNode
 
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=proc2;p=60,100";
         //# transport and application layers
         tcpApp: TCP2LDP;
             parameters:
