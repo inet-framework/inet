@@ -57,7 +57,10 @@ void DropSwitch::activity()
     cPar & burst_del_prob = par("burst_delete_probability");
     int error_burst_len = par("error_burst_len");
 
-    int server_gate = gate("in", (int) par("server_port"))->id();
+    cGate *server_gate = gate("in", (int) par("server_port"));
+    if (!server_gate) 
+        error("gate in[server_port=%d] doesn't exist",(int) par("server_port"));
+    int server_gate_id = server_gate->id();
 
     bool from_server;
     bool msg_deleted;
@@ -101,7 +104,7 @@ void DropSwitch::activity()
             msg_kind = paket->kind();
             datagram->encapsulate(paket);
 
-            from_server = rframe->arrivedOn(server_gate);
+            from_server = rframe->arrivedOn(server_gate_id);
 
             delete rframe;
 
