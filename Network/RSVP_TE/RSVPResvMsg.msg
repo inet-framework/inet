@@ -22,7 +22,7 @@ class RSVPPacket;
 
 
 //
-// RSVP RESV message
+// \RSVP RESV message
 //
 // <code>
 //  <Resv Message> ::= <Common Header> [ <INTEGRITY> ]
@@ -46,7 +46,7 @@ message RSVPResvMsg extends RSVPPacket
 
 
 //
-// RESV TEAR message
+// \RSVP RESV TEAR message
 //
 // <code>
 // <ResvTear Message> ::= <Common Header> [<INTEGRITY>]
@@ -65,7 +65,7 @@ message RSVPResvTear extends RSVPPacket
 };
 
 //
-// RESV ERROR message
+// \RSVP RESV ERROR message
 //
 // <code>
 //    <ResvErr Message> ::= <Common Header> [ <INTEGRITY> ]

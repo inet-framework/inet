@@ -19,7 +19,10 @@
 #include "RSVPPacket_m.h"
 
 /**
- * RSVP message common part
+ * RSVP message common part.
+ *
+ * This class adds convenient extra get() and set() methods to the generated 
+ * base class.
  */
 class RSVPPacket: public RSVPPacket_Base
 {

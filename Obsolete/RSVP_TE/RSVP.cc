@@ -1697,10 +1697,8 @@ int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
 
         for (int k = 0; k < InLIST_SIZE; k++)
         {
-            if (p_iter.Sender_Template_Object.SrcAddress ==
-                activeRSB->Filter_Spec_Object[k].SrcAddress
-                && p_iter.Sender_Template_Object.SrcPort ==
-                activeRSB->Filter_Spec_Object[k].SrcPort)
+            if (p_iter.Sender_Template_Object.SrcAddress == activeRSB->Filter_Spec_Object[k].SrcAddress
+                && p_iter.Sender_Template_Object.SrcPort == activeRSB->Filter_Spec_Object[k].SrcPort)
             {
 
                 if (p_iter.OutInterface_List == activeRSB->OI)

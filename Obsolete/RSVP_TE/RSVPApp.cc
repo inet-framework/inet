@@ -139,9 +139,7 @@ void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
 
     if (isER)
     {
-        int inLabel =
-            (lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId,
-                                 POP_OPER));
+        int inLabel = lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId, POP_OPER);
         ev << "INSTALL new label:\n";
         ev << "(inL, inInf, outL, outInf,fec)=(," << inLabel << "," << inInfName <<
             "," << "-1," << outInfName << "," << lspId << ")\n";

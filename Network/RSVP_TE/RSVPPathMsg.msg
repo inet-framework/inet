@@ -27,7 +27,7 @@ class RSVPPacket;
 
 
 //
-// RSVP PATH message
+// \RSVP PATH message
 //
 // <code>
 //    <Path Message> ::=       <Common Header> [ <INTEGRITY> ]
@@ -58,7 +58,7 @@ message RSVPPathMsg extends RSVPPacket
 };
 
 //
-// PATH TEAR message
+// \RSVP PATH TEAR message
 //
 // <code>
 //   <PathTear Message> ::= <Common Header> [ <INTEGRITY> ]
@@ -78,7 +78,7 @@ message RSVPPathTear extends RSVPPacket
 
 
 //
-// PATH ERROR message
+// \RSVP PATH ERROR message
 //
 // <code>
 //   <PathErr message> ::= <Common Header> [ <INTEGRITY> ]

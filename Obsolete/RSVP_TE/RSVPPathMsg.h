@@ -21,6 +21,9 @@
 
 /**
  * RSVP PATH message
+ *
+ * This class adds convenient extra get() and set() methods to the generated 
+ * base class.
  */
 class RSVPPathMsg : public RSVPPathMsg_Base
 {
@@ -49,6 +52,9 @@ class RSVPPathMsg : public RSVPPathMsg_Base
 
 /**
  * RSVP PATH TEAR message
+ *
+ * This class adds convenient extra get() and set() methods to the generated 
+ * base class.
  */
 class RSVPPathTear : public RSVPPathTear_Base
 {
@@ -67,6 +73,9 @@ class RSVPPathTear : public RSVPPathTear_Base
 
 /**
  * RSVP PATH ERROR message
+ *
+ * This class adds convenient extra get() and set() methods to the generated 
+ * base class.
  */
 class RSVPPathError : public RSVPPathError_Base
 {
