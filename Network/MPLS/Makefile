@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../IPv4/Core -I../../Transport/TCP -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  InfoManager.o LIBTableAccess.o LIBtable.o MPLS2IP.o MPLSModule.o MPLSPacket.o StringTokenizer.o ip_address_prefix.o
+OBJS=  InfoManager.o LIBtable.o MPLS2IP.o MPLSModule.o MPLSPacket.o StringTokenizer.o ip_address_prefix.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -59,9 +59,6 @@ subdirs: $(SUBDIRS)
 
 InfoManager.o: InfoManager.cc
 	$(CXX) -c $(COPTS) InfoManager.cc
-
-LIBTableAccess.o: LIBTableAccess.cc
-	$(CXX) -c $(COPTS) LIBTableAccess.cc
 
 LIBtable.o: LIBtable.cc
 	$(CXX) -c $(COPTS) LIBtable.cc
@@ -121,22 +118,13 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 InfoManager.o: InfoManager.cc \
   InfoManager.h
-LIBTableAccess.o: LIBTableAccess.cc \
-  LIBTableAccess.h \
-  LIBtable.h \
-  ../IPv4/Core/RoutingTableAccess.h \
-  ip_address_prefix.h \
-  StringTokenizer.h \
-  ConstType.h \
-  ../IPv4/Core/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../IPv4/Core/IPAddress.h
 LIBtable.o: LIBtable.cc \
   LIBtable.h \
+  StringTokenizer.h \
   ../IPv4/Core/RoutingTableAccess.h \
   ip_address_prefix.h \
-  StringTokenizer.h \
   ConstType.h \
+  ../../Base/ModuleAccess.h \
   ../IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
   ../IPv4/Core/IPAddress.h
@@ -144,26 +132,22 @@ MPLS2IP.o: MPLS2IP.cc \
   MPLS2IP.h \
   ../IPv4/Core/hook_types.h \
   ../../Base/QueueBase.h \
-  ../IPv4/Core/RoutingTableAccess.h \
-  ../../Base/AbstractQueue.h \
-  ../IPv4/Core/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../IPv4/Core/IPAddress.h
+  ../../Base/AbstractQueue.h
 MPLSModule.o: MPLSModule.cc \
   MPLSModule.h \
   MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h \
   LIBTableAccess.h \
+  ../IPv4/Core/RoutingTableAccess.h \
   ../IPv4/Core/RoutingTable.h \
   ConstType.h \
   ../IPv4/Core/IPDatagram_m.h \
   ../IPv4/Core/IPAddress.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../IPv4/Core/IPInterfacePacket_m.h \
+  ../../Base/ModuleAccess.h \
   LIBtable.h \
-  ../IPv4/Core/RoutingTableAccess.h \
   ip_address_prefix.h \
-  StringTokenizer.h \
   ../../Base/ipsuite_defs.h
 MPLSPacket.o: MPLSPacket.cc \
   MPLSPacket.h

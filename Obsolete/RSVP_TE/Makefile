@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../IPv4/Core -I../../Transport/TCP -I../MPLS -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -133,12 +133,11 @@ RSVP.o: RSVP.cc \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ospf_type.h \
+  ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
   ../MPLS/ip_address_prefix.h \
-  ../MPLS/StringTokenizer.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h \
@@ -150,19 +149,21 @@ RSVPApp.o: RSVPApp.cc \
   ../IPv4/Core/RoutingTable.h \
   RSVPTester.h \
   ../MPLS/MPLSModule.h \
+  ../MPLS/StringTokenizer.h \
   ../../Transport/TCP/tcp.h \
   rsvp_message.h \
   RSVP.h \
   TED.h \
   OspfTe.h \
+  OSPFTEAccess.h \
   ../MPLS/LIBtable.h \
-  ../MPLS/StringTokenizer.h \
+  ../MPLS/LIBTableAccess.h \
+  ../MPLS/MPLSAccess.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
-  ../MPLS/LIBTableAccess.h \
   ospf_type.h \
+  ../../Base/ModuleAccess.h \
   ../IPv4/Core/RoutingTableAccess.h \
   ../MPLS/ip_address_prefix.h \
   ../MPLS/ConstType.h \
@@ -179,7 +180,6 @@ RSVPInterface.o: RSVPInterface.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ../../Base/basic_consts.h \
   ../IPv4/Core/IPInterfacePacket_m.h
 TED.o: TED.cc \
@@ -188,20 +188,19 @@ TED.o: TED.cc \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h \
   ../MPLS/LIBTableAccess.h \
+  ../IPv4/Core/RoutingTableAccess.h \
   ../IPv4/Core/RoutingTable.h \
   ../MPLS/ConstType.h \
   ../IPv4/Core/IPDatagram_m.h \
   ../IPv4/Core/IPAddress.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../IPv4/Core/IPInterfacePacket_m.h \
+  ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
-  ../IPv4/Core/RoutingTableAccess.h \
   ../MPLS/ip_address_prefix.h \
-  ../MPLS/StringTokenizer.h \
   ../../Base/ipsuite_defs.h
 rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h
+  ../../Transport/TCP/TransportPacket.h

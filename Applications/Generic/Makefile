@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../../Network/IPv4/Core -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -128,6 +128,7 @@ BurstGenerator.o: BurstGenerator.cc \
   ../../Network/IPv4/Core/RoutingTableAccess.h \
   ../../Network/IPv4/Core/ICMPMessage.h \
   ../../Base/AbstractQueue.h \
+  ../../Base/ModuleAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/Core/ICMPMessage_m.h
@@ -144,6 +145,7 @@ ConstTrafficGen.o: ConstTrafficGen.cc \
   ../../Network/IPv4/Core/RoutingTableAccess.h \
   ../../Network/IPv4/Core/ICMPMessage.h \
   ../../Base/AbstractQueue.h \
+  ../../Base/ModuleAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/Core/ICMPMessage_m.h
@@ -160,6 +162,7 @@ SimpleApp.o: SimpleApp.cc \
   ../../Network/IPv4/Core/RoutingTableAccess.h \
   ../../Network/IPv4/Core/ICMPMessage.h \
   ../../Base/AbstractQueue.h \
+  ../../Base/ModuleAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/Core/ICMPMessage_m.h

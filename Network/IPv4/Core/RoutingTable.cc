@@ -22,7 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <strstream>
+#include <sstream>
 
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
@@ -49,18 +49,19 @@ InterfaceEntry::InterfaceEntry()
 
 void InterfaceEntry::info(char *buf)
 {
-    std::ostrstream out(buf, MAX_OBJECTINFO);
-    out << "name:" << (!name.empty() ? name : "*");
-    out << "  encap:" << (!encap.empty() ? encap : "*");
-    out << "  HWaddr:" << (!hwAddrStr.empty() ? hwAddrStr : "*");
+    std::string tmp(buf, MAX_OBJECTINFO);
+    std::stringstream out(tmp);
+    out << "name:" << (!name.empty() ? name.c_str() : "*");
+    out << "  encap:" << (!encap.empty() ? encap.c_str() : "*");
+    out << "  HWaddr:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
 }
 
 opp_string& InterfaceEntry::detailedInfo(opp_string& buf)
 {
-    std::ostrstream out;
-    out << "name:" << (!name.empty() ? name : "*");
-    out << "\tencap:" << (!encap.empty() ? encap : "*");
-    out << "\tHWaddr:" << (!hwAddrStr.empty() ? hwAddrStr : "*");
+    std::stringstream out;
+    out << "name:" << (!name.empty() ? name.c_str() : "*");
+    out << "\tencap:" << (!encap.empty() ? encap.c_str() : "*");
+    out << "\tHWaddr:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
     out << "\n";
 
     if (!inetAddr.isNull())
@@ -85,7 +86,7 @@ opp_string& InterfaceEntry::detailedInfo(opp_string& buf)
     if (loopback) out << "LOOPBACK ";
     out << "\n";
 
-    buf = out.str();
+    buf = out.str().c_str();
     return buf;
 }
 
@@ -113,7 +114,8 @@ RoutingEntry::RoutingEntry()
 
 void RoutingEntry::info(char *buf)
 {
-    std::ostrstream out(buf, MAX_OBJECTINFO);
+    std::string tmp(buf, MAX_OBJECTINFO);
+    std::stringstream out(tmp);
     out << (!host.isNull() ? host.getString() : "*") << "  ";
     out << (!gateway.isNull() ? gateway.getString() : "*") << "  ";
     out << (!netmask.isNull() ? netmask.getString() : "*") << "  ";
