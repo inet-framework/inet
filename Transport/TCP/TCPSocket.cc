@@ -26,7 +26,7 @@ TCPSocket::TCPSocket()
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
     connId = TCPMain::getNewConnId();
-    isBound = false;
+    sockstate = NOT_BOUND;
 
     cb = NULL;
     yourPtr = NULL;
@@ -41,7 +41,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCPMain?)");
 
     connId = ind->connId();
-    isBound = true;
+    sockstate = CONNECTED;
 
     cb = NULL;
     yourPtr = NULL;
@@ -59,21 +59,28 @@ void TCPSocket::sendToTCP(cMessage *msg)
 
 void TCPSocket::bind(int lPort)
 {
+    if (sockstate!=NOT_BOUND)
+        opp_error("TCPSocket::bind(): socket already bound");
+
     localPort = lPort;
-    isBound = true;
+    sockstate = BOUND;
 }
 
 void TCPSocket::bind(IPAddress lAddr, int lPort)
 {
+    if (sockstate!=NOT_BOUND)
+        opp_error("TCPSocket::bind(): socket already bound");
+
     localAddr = lAddr;
     localPort = lPort;
-    isBound = true;
+    sockstate = BOUND;
 }
 
 void TCPSocket::listen(bool fork)
 {
-    if (!isBound)
-        opp_error("TCPSocket: must call bind() before listen()");
+    if (sockstate!=BOUND)
+        opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before listen()"
+                                       : "TCPSocket::listen(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
@@ -85,12 +92,14 @@ void TCPSocket::listen(bool fork)
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
+    sockstate = LISTENING;
 }
 
 void TCPSocket::connect(IPAddress remoteAddr, int remotePort)
 {
-    if (!isBound)
-        opp_error("TCPSocket: must call bind() before connect()");
+    if (sockstate!=BOUND)
+        opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before connect()"
+                                       : "TCPSocket::connect(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
@@ -103,10 +112,14 @@ void TCPSocket::connect(IPAddress remoteAddr, int remotePort)
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
+    sockstate = CONNECTING;
 }
 
 void TCPSocket::send(cMessage *msg)
 {
+    if (sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED)
+        opp_error("TCPSocket::send(): not connected or connecting");
+
     msg->setKind(TCP_C_SEND);
     TCPSendCommand *cmd = new TCPSendCommand();
     cmd->setConnId(connId);
@@ -116,11 +129,15 @@ void TCPSocket::send(cMessage *msg)
 
 void TCPSocket::close()
 {
+    if (sockstate!=CONNECTED && sockstate!=PEER_CLOSED && sockstate!=CONNECTING && sockstate!=LISTENING)
+        opp_error("TCPSocket::close(): not connected or close() already called");
+
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TCPCommand *cmd = new TCPCommand();
     cmd->setConnId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
+    sockstate = sockstate==CONNECTED ? LOCALLY_CLOSED : CLOSED;
 }
 
 void TCPSocket::abort()
@@ -130,6 +147,7 @@ void TCPSocket::abort()
     cmd->setConnId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
+    sockstate = SOCKERROR;
 }
 
 void TCPSocket::requestStatus()
@@ -176,20 +194,24 @@ void TCPSocket::processMessage(cMessage *msg)
              cb->socketDataArrived(connId, yourPtr, msg, true);
              break;
         case TCP_I_ESTABLISHED:
+             sockstate = CONNECTED;
              delete msg;
              cb->socketEstablished(connId, yourPtr);
              break;
         case TCP_I_PEER_CLOSED:
+             sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
              delete msg;
              cb->socketPeerClosed(connId, yourPtr);
              break;
         case TCP_I_CLOSED:
+             sockstate = CLOSED;
              delete msg;
              cb->socketClosed(connId, yourPtr);
              break;
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
+             sockstate = SOCKERROR;
              cb->socketFailure(connId, yourPtr, msg->kind());
              delete msg;
              break;

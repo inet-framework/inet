@@ -125,10 +125,12 @@ class TCPSocket
         virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
     };
 
+    enum State {NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR};
+
   protected:
     int connId;
+    int sockstate;
 
-    bool isBound;
     IPAddress localAddr;
     int localPort;
 
@@ -165,6 +167,13 @@ class TCPSocket
      * (or TCPSocket).
      */
     int connectionId() const  {return connId;}
+
+    /**
+     * Returns the socket state, one of NOT_BOUND, BOUND, LISTENING, CONNECTING,
+     * CONNECTED, etc. Messages received from TCP must be routed through
+     * processMessage() in order to keep socket state up-to-date.
+     */
+    int state()   {return sockstate;}
 
     /** @name Opening and closing connections, sending data */
     //@{
@@ -275,14 +284,15 @@ class TCPSocket
     void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
 
     /**
-     * Examines the message (which should have arrived from TCPMain), and
-     * dispatches to the appropriate method of the callback object
-     * (see setCallbackObject(), class CallbackInterface), with the same
-     * yourPtr that you gave in the setCallbackObject() call.
-     * If no callback object is installed, this method throws an error.
+     * Examines the message (which should have arrived from TCPMain),
+     * updates socket state, and if there is a callback object installed
+     * (see setCallbackObject(), class CallbackInterface), dispatches
+     * to the appropriate method of it with the same yourPtr that
+     * you gave in the setCallbackObject() call.
      *
-     * This method assumes that the message belongs to this socket, i.e.
-     * belongsToSocket(msg) would return true.
+     * IMPORTANT: for performance reasons, this method doesn't check that
+     * the message belongs to this socket, i.e. belongsToSocket(msg) would
+     * return true!
      */
     void processMessage(cMessage *msg);
     //@}
