@@ -74,7 +74,7 @@ cd %root%\Nodes\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\.
 cd %root%\Transport\Socket && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\UDP -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 cd %root%\Transport\TCP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Base -I..\..\Util
 cd %root%\Transport\UDP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
-cd %root%\Transport\RTP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc          -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
+cd %root%\Transport\RTP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 cd %root%\Transport\NewTCP && %MAKEMAKE% %OPTS% -n -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 
 : #--------------------------------------
