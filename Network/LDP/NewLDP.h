@@ -45,6 +45,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     {
         IPAddress peerIP; // IP address of LDP peer
         bool activeRole;  // we're in active or passive role in this session
+        bool connected;   // TCP connection
         string linkInterface;
     };
 
@@ -108,6 +109,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     void openTCPConnectionToPeer(int peerIndex);
 
     void processLDPHello(LDPHello *msg);
+    void processMessageFromTCP(cMessage *msg);
     void processRequestFromMPLSSwitch(cMessage *msg);
     void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 

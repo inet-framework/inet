@@ -396,8 +396,11 @@ class TCPConnection
     /** Utility: sends packet to application */
     void sendToApp(cMessage *msg);
 
-    /** Utility: sends a status indication (TCP_I_xxx) to application */
+    /** Utility: sends status indication (TCP_I_xxx) to application */
     void sendIndicationToApp(int code);
+
+    /** Utility: sends TCP_I_ESTABLISHED indication with TCPConnectInfo to application */
+    void sendEstabIndicationToApp();
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */

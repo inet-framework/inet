@@ -210,6 +210,23 @@ void TCPConnection::sendIndicationToApp(int code)
     tcpMain->send(msg, "to_appl", appGateIndex);
 }
 
+void TCPConnection::sendEstabIndicationToApp()
+{
+    tcpEV << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
+    cMessage *msg = new cMessage(indicationName(TCP_I_ESTABLISHED));
+    msg->setKind(TCP_I_ESTABLISHED);
+
+    TCPConnectInfo *ind = new TCPConnectInfo();
+    ind->setConnId(connId);
+    ind->setLocalAddr(localAddr);
+    ind->setRemoteAddr(remoteAddr);
+    ind->setLocalPort(localPort);
+    ind->setRemotePort(remotePort);
+
+    msg->setControlInfo(ind);
+    tcpMain->send(msg, "to_appl", appGateIndex);
+}
+
 void TCPConnection::sendToApp(cMessage *msg)
 {
     tcpMain->send(msg, "to_appl", appGateIndex);

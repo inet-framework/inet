@@ -419,7 +419,7 @@ void TCPConnection::stateEntered(int state)
             delete cancelEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = NULL;
             // notify
-            sendIndicationToApp(TCP_I_ESTABLISHED);
+            sendEstabIndicationToApp();
             break;
         case TCP_S_CLOSE_WAIT:
         case TCP_S_LAST_ACK:

@@ -111,9 +111,9 @@ class TCPSocket
   public:
     /**
      * Abstract base class for your callback objects. See setCallbackObject()
-     * and processMessage() for more info. 
+     * and processMessage() for more info.
      *
-     * Note: this class is not subclassed from cPolymorphic, because 
+     * Note: this class is not subclassed from cPolymorphic, because
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cPolymorphic.
      */
@@ -136,7 +136,9 @@ class TCPSocket
     int sockstate;
 
     IPAddress localAddr;
-    int localPort;
+    int localPrt;
+    IPAddress remoteAddr;
+    int remotePrt;
 
     CallbackInterface *cb;
     void *yourPtr;
@@ -178,6 +180,14 @@ class TCPSocket
      * processMessage() in order to keep socket state up-to-date.
      */
     int state()   {return sockstate;}
+
+    /** @name Getter functions */
+    //@{
+    IPAddress localAddress() {return localAddr;}
+    int localPort() {return localPrt;}
+    IPAddress remoteAddress() {return remoteAddr;}
+    int remotePort() {return remotePrt;}
+    //@}
 
     /** @name Opening and closing connections, sending data */
     //@{

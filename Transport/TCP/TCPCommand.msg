@@ -158,6 +158,24 @@ class TCPSendCommand extends TCPCommand
 
 
 //
+// Sent with message kind TCP_I_ESTABLISHED, to let the app know
+// about the local and remote IP address and port.
+//
+// @see TcpCommandCode, TCPMain
+//
+class TCPConnectInfo extends TCPCommand
+{
+    properties:
+        omitGetVerb = true;
+    fields:
+        IPAddress localAddr;
+        IPAddress remoteAddr;
+        int localPort;
+        int remotePort;
+};
+
+
+//
 // Sent with message kind TCP_I_STATUS, in response to command TCP_C_STATUS.
 // For explanation of variables, see RFC 793 or TCPStateVariables in
 // TCPConnection.h.

@@ -28,7 +28,7 @@ TCPSocket::TCPSocket()
     connId = TCPMain::getNewConnId();
     sockstate = NOT_BOUND;
 
-    localPort = -1;
+    localPrt = remotePrt = -1;
     cb = NULL;
     yourPtr = NULL;
 
@@ -44,10 +44,25 @@ TCPSocket::TCPSocket(cMessage *msg)
     connId = ind->connId();
     sockstate = CONNECTED;
 
+    localPrt = remotePrt = -1;
     cb = NULL;
     yourPtr = NULL;
 
     gateToTcp = NULL;
+
+    if (msg->kind()==TCP_I_ESTABLISHED)
+    {
+        // management of stockstate is left to processMessage() so we always
+        // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
+        // However, for convenience we extract TCPConnectInfo already here, so that
+        // remote address/port can be read already after the ctor call.
+
+        TCPConnectInfo *connectInfo = dynamic_cast<TCPConnectInfo *>(msg->controlInfo());
+        localAddr = connectInfo->localAddr();
+        remoteAddr = connectInfo->remoteAddr();
+        localPrt = connectInfo->localPort();
+        remotePrt = connectInfo->remotePort();
+    }
 }
 
 void TCPSocket::sendToTCP(cMessage *msg)
@@ -63,7 +78,7 @@ void TCPSocket::bind(int lPort)
     if (sockstate!=NOT_BOUND)
         opp_error("TCPSocket::bind(): socket already bound");
 
-    localPort = lPort;
+    localPrt = lPort;
     sockstate = CLOSED;
 }
 
@@ -73,7 +88,7 @@ void TCPSocket::bind(IPAddress lAddr, int lPort)
         opp_error("TCPSocket::bind(): socket already bound");
 
     localAddr = lAddr;
-    localPort = lPort;
+    localPrt = lPort;
     sockstate = CLOSED;
 }
 
@@ -87,7 +102,7 @@ void TCPSocket::listen(bool fork)
 
     TCPOpenCommand *openCmd = new TCPOpenCommand();
     openCmd->setLocalAddr(localAddr);
-    openCmd->setLocalPort(localPort);
+    openCmd->setLocalPort(localPrt);
     openCmd->setConnId(connId);
     openCmd->setFork(fork);
 
@@ -96,19 +111,22 @@ void TCPSocket::listen(bool fork)
     sockstate = LISTENING;
 }
 
-void TCPSocket::connect(IPAddress remoteAddr, int remotePort)
+void TCPSocket::connect(IPAddress remoteAddress, int remotePort)
 {
     if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
         opp_error( "TCPSocket::connect(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
+    remoteAddr = remoteAddress;
+    remotePrt = remotePort;
+
     TCPOpenCommand *openCmd = new TCPOpenCommand();
     openCmd->setConnId(connId);
     openCmd->setLocalAddr(localAddr);
-    openCmd->setLocalPort(localPort);
+    openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
-    openCmd->setRemotePort(remotePort);
+    openCmd->setRemotePort(remotePrt);
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
@@ -184,6 +202,7 @@ void TCPSocket::processMessage(cMessage *msg)
     ASSERT(belongsToSocket(msg));
 
     TCPStatusInfo *status;
+    TCPConnectInfo *connectInfo;
     switch (msg->kind())
     {
         case TCP_I_DATA:
@@ -200,6 +219,11 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
         case TCP_I_ESTABLISHED:
              sockstate = CONNECTED;
+             connectInfo = dynamic_cast<TCPConnectInfo *>(msg->controlInfo());
+             localAddr = connectInfo->localAddr();
+             remoteAddr = connectInfo->remoteAddr();
+             localPrt = connectInfo->localPort();
+             remotePrt = connectInfo->remotePort();
              delete msg;
              if (cb)
                  cb->socketEstablished(connId, yourPtr);

@@ -71,7 +71,7 @@ void NewLDP::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
     {
-        // we can only receive LDP Hello from UDP (everything else is over TCP)
+        // we can only receive LDP Hello from UDP (everything else goes over TCP)
         processLDPHello(check_and_cast<LDPHello *>(msg));
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
@@ -80,67 +80,8 @@ void NewLDP::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
     {
-        TCPSocket *socket = socketMap.findSocketFor(msg);
-        if (!socket)
-        {
-            // new incoming connection -- create new socket object
-            socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("to_tcp_interface"));
-            socket->setCallbackObject(this, (void *)0);  //FIXME find peer!!!
-            socketMap.addSocket(socket);
-        }
-
-        // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
-        // or socketFailure()
-        socket->processMessage(msg);
+        processMessageFromTCP(msg);
     }
-}
-
-void NewLDP::socketEstablished(int, void *yourPtr)
-{
-    peer_info& peer = myPeers[(int)yourPtr];
-    ev << "TCP connection established with peer " << peer.peerIP << "\n";
-
-    // FIXME start LDP session setup (if we're on the active side?)
-}
-
-void NewLDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
-{
-    peer_info& peer = myPeers[(int)yourPtr];
-    ev << "Message arrived over TCP from peer " << peer.peerIP << "\n";
-
-    processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
-}
-
-void NewLDP::socketPeerClosed(int, void *yourPtr)
-{
-    peer_info& peer = myPeers[(int)yourPtr];
-    ev << "Peer " << peer.peerIP << " closed TCP connection\n";
-
-/*
-    // close the connection (if not already closed)
-    if (socket.state()==TCPSocket::PEER_CLOSED)
-    {
-        ev << "remote TCP closed, closing here as well\n";
-        close();
-    }
-*/
-}
-
-void NewLDP::socketClosed(int, void *yourPtr)
-{
-    peer_info& peer = myPeers[(int)yourPtr];
-    ev << "TCP connection to peer " << peer.peerIP << " closed\n";
-
-    // FIXME what now? reconnect after a delay?
-}
-
-void NewLDP::socketFailure(int, void *yourPtr, int code)
-{
-    peer_info& peer = myPeers[(int)yourPtr];
-    ev << "TCP connection to peer " << peer.peerIP << " broken\n";
-
-    // FIXME what now? reconnect after a delay?
 }
 
 void NewLDP::broadcastHello()
@@ -202,6 +143,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
     info.peerIP = peerAddr;
     info.linkInterface = inInterface;
     info.activeRole = peerAddr.getInt() > local_addr.getInt();
+    info.connected = false;
     myPeers.push_back(info);
     int peerIndex = myPeers.size()-1;
 
@@ -222,10 +164,94 @@ void NewLDP::openTCPConnectionToPeer(int peerIndex)
     socket->setOutputGate(gate("to_tcp_interface"));
     socket->setCallbackObject(this, (void*)peerIndex);
     socketMap.addSocket(socket);
-    // FIXME associate with peer table
 
     socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
 }
+
+void NewLDP::processMessageFromTCP(cMessage *msg)
+{
+    TCPSocket *socket = socketMap.findSocketFor(msg);
+    if (!socket)
+    {
+        // not yet in socketMap, must be new incoming connection.
+        // find which peer it is and register connection
+        socket = new TCPSocket(msg);
+        socket->setOutputGate(gate("to_tcp_interface"));
+        IPAddress peerAddr = socket->remoteAddress();
+
+        PeerVector::iterator i;
+        for (i=myPeers.begin(); i!=myPeers.end(); ++i)
+            if (i->peerIP==peerAddr)
+                break;
+        if (i==myPeers.end() || (i!=myPeers.end() && i->connected))
+        {
+            // nothing known about this guy, or already connected: refuse
+            socket->close(); // FIXME should rather be connection reset!
+            delete socket;
+            delete msg;
+            return;
+        }
+        i->connected = true;
+        int peerIndex = i - myPeers.begin();
+
+        socket->setOutputGate(gate("to_tcp_interface"));
+        socket->setCallbackObject(this, (void *)peerIndex);
+        socketMap.addSocket(socket);
+    }
+
+    // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
+    // or socketFailure()
+    socket->processMessage(msg);
+}
+
+void NewLDP::socketEstablished(int, void *yourPtr)
+{
+    peer_info& peer = myPeers[(int)yourPtr];
+    peer.connected = true;
+    ev << "TCP connection established with peer " << peer.peerIP << "\n";
+
+    // FIXME start LDP session setup (if we're on the active side?)
+}
+
+void NewLDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
+{
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "Message arrived over TCP from peer " << peer.peerIP << "\n";
+
+    processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
+}
+
+void NewLDP::socketPeerClosed(int, void *yourPtr)
+{
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "Peer " << peer.peerIP << " closed TCP connection\n";
+
+/*
+    // close the connection (if not already closed)
+    if (socket.state()==TCPSocket::PEER_CLOSED)
+    {
+        ev << "remote TCP closed, closing here as well\n";
+        close();
+    }
+*/
+}
+
+void NewLDP::socketClosed(int, void *yourPtr)
+{
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "TCP connection to peer " << peer.peerIP << " closed\n";
+
+    // FIXME what now? reconnect after a delay?
+}
+
+void NewLDP::socketFailure(int, void *yourPtr, int code)
+{
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "TCP connection to peer " << peer.peerIP << " broken\n";
+
+    // FIXME what now? reconnect after a delay?
+}
+
 
 void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 {
