@@ -51,6 +51,17 @@ void IP::initialize()
     WATCH(numForwarded);
 }
 
+void IP::updateDisplayString()
+{
+    char buf[80] = "";
+    if (numForwarded>0) sprintf(buf+strlen(buf), "fwd:%d ", numForwarded);
+    if (numLocalDeliver>0) sprintf(buf+strlen(buf), "up:%d ", numLocalDeliver);
+    if (numMulticast>0) sprintf(buf+strlen(buf), "mcast:%d ", numMulticast);
+    if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
+    if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
+    displayString().setTagArg("t",0,buf);
+}
+
 void IP::endService(cMessage *msg)
 {
     if (msg->arrivalGate()->isName("transportIn"))
@@ -62,6 +73,9 @@ void IP::endService(cMessage *msg)
         IPDatagram *dgram = check_and_cast<IPDatagram *>(msg);
         handlePacketFromNetwork(dgram);
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
 }
 
 void IP::handlePacketFromNetwork(IPDatagram *datagram)

@@ -61,6 +61,12 @@ class IP : public QueueBase
     int numForwarded;
 
   protected:
+    // utility: show current statistics above the icon
+    void updateDisplayString();
+
+    /**
+     * Encapsulate packet coming from higher layers into IPDatagram
+     */
     IPDatagram *encapsulate(cMessage *transportPacket);
 
     /**

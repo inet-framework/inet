@@ -42,7 +42,6 @@ const int UDP_HEADER_BYTES = 16;
 class UDPProcessing : public cSimpleModule
 {
   protected:
-
     // if false, all incoming packets are sent up on gate 0
     bool dispatchByPort;
 
@@ -61,8 +60,17 @@ class UDPProcessing : public cSimpleModule
     int numDroppedWrongPort;
     int numDroppedBadChecksum;
 
+  protected:
+    // utility: show current statistics above the icon
+    void updateDisplayString();
+
+    // utility: look up destPort in applTable
     virtual int findAppGateForPort(int destPort);
+
+    // process packets coming from IP
     virtual void processMsgFromIp(UDPPacket *udpPacket);
+
+    // process packets from application
     virtual void processMsgFromApp(cMessage *appData);
 
   public:
