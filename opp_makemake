@@ -249,12 +249,15 @@ EOT
 if [ "$cfgfile" != "" ]; then
   
   # Makefile
+  echo "# Import generic settings from $cfgfile"
   echo "include $cfgfile"
    
 elif [ $makefilein = "n" ]; then
 # Makefile
 cat <<EOT
 
+# Generic definitions. To avoid redundancies across Makefiles, you can
+# import them from a common file -- see opp_makemake -c flag.
 NEDC=nedc
 MSGC=opp_msgc
 CXX=g++
@@ -351,11 +354,11 @@ fi
 
 case "$type" in
 exe)
-    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) Makefile '$subdirsphony
+    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) Makefile subdirs'
     echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
     ;;
 so)
-    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) ' $subdirsphony ' Makefile'
+    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) subdirs Makefile'
     echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS)'
     ;;
 o)
@@ -364,7 +367,7 @@ o)
     ;;
 esac
 echo
-echo 'purify: $(OBJS) $(EXRA_OBJS) ' $subdirsphony ' Makefile'
+echo 'purify: $(OBJS) $(EXRA_OBJS) subdirs Makefile'
 echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
 echo
 
@@ -372,8 +375,8 @@ echo
 echo ".PHONY: subdirs $subdirs" 
 echo "subdirs: $subdirs" 
 for i in $subdirs; do
-     echo "$subdir:"
-     echo '	cd ' $subdir ' && $(MAKE)' 
+     echo "$i:"
+     echo '	cd ' $i ' && $(MAKE)' 
 done
 
 for i in *.ned; do
