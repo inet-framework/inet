@@ -60,7 +60,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     }
 
     // IP data from L3 and requires MPLS processing
-    MPLSPacket *outPacket = new MPLSPacket();
+    MPLSPacket *outPacket = new MPLSPacket(ipdata->name());
     outPacket->encapsulate(ipdata);
 
     // This is native IP
@@ -180,7 +180,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
             }
             else
             {
-                newPacket = new MPLSPacket();
+                newPacket = new MPLSPacket(data->name());
                 ev << "FIXME debug: " << data->fullPath();
                 ev << " / " << data->owner()->fullPath() << endl;
                 newPacket->encapsulate(data);
@@ -361,7 +361,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
                 // Construct a new MPLS packet
 
                 MPLSPacket *newPacket = NULL;
-                newPacket = new MPLSPacket();
+                newPacket = new MPLSPacket(ipdata->name());
                 newPacket->encapsulate(ipdata);
 
                 /*

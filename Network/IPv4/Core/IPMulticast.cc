@@ -1,6 +1,6 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -15,13 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
+//  Cleanup and rewrite: Andras Varga, 2004
 
 #include <stdlib.h>
 #include <omnetpp.h>
 #include <string.h>
 
 #include "IPMulticast.h"
+#include "IPControlInfo_m.h"
 
 Define_Module(IPMulticast);
 
@@ -29,23 +32,24 @@ Define_Module(IPMulticast);
 
 void IPMulticast::initialize()
 {
-    QueueBase::initialize();
     IPForward = par("IPForward").boolValue();
 }
 
-void IPMulticast::endService(cMessage *msg)
+void IPMulticast::handleMessage(cMessage *msg)
 {
     RoutingTable *rt = routingTableAccess.get();
 
     // FIXME We should probably handle if IGMP message comes from localIn.
     // IGMP is not implemented.
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
+    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(msg->controlInfo());
+    int inputPort = controlInfo->inputPort();
 
     IPAddress destAddress = datagram->destAddress();
 
     // DVMRP: process datagram only if sent locally or arrived on
     // the shortest route; otherwise discard and continue.
-    if (datagram->inputPort()!=-1 && datagram->inputPort()!=rt->outputPortNo(datagram->srcAddress()))
+    if (controlInfo->inputPort()!=-1 && controlInfo->inputPort()!=rt->outputPortNo(datagram->srcAddress()))
     {
         /* debugging output
         ev  << "* outputPort (shortest path): "
@@ -61,12 +65,11 @@ void IPMulticast::endService(cMessage *msg)
     if (rt->multicastLocalDeliver(destAddress))
     {
         IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
-
+        // FIXME control info will NOT be present in duplicate packet!
 // BCH Andras -- code from UTS MPLS model  FIXME!!!!!!!!!!!!!!!!!!!!!!!!
         // find "local_addr" module parameter among our parents, and assign it to packet
         cModule *curmod = this;
-        for (curmod = parentModule(); curmod != NULL;
-                    curmod = curmod->parentModule())
+        for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
         {
             if (curmod->hasPar("local_addr"))
             {
@@ -79,16 +82,14 @@ void IPMulticast::endService(cMessage *msg)
     }
 
     // forward datagram only if IPForward is true or sent locally
-    if (datagram->inputPort() != -1 && !IPForward)
+    if (inputPort!=-1 && !IPForward)
     {
         delete datagram;
         return;
     }
 
-    int destNo; // number of destinations for datagram
-    destNo = rt->numMulticastDestinations(destAddress);
-
-    if (destNo == 0)
+    int numDest = rt->numMulticastDestinations(destAddress);
+    if (numDest == 0)
     {
         // no destination: delete datagram
         delete datagram;
@@ -96,16 +97,21 @@ void IPMulticast::endService(cMessage *msg)
     else
     {
         // copy original datagram for multiple destinations
-        for (int i=0; i < destNo; i++)
+        for (int i=0; i<numDest; i++)
         {
             int outputPort = rt->multicastOutputPortNo(destAddress, i);
-            int inputPort = datagram->inputPort();
 
             // don't forward to input port
-            if (outputPort >= 0 && outputPort != inputPort)
+            if (outputPort>=0 && outputPort!=inputPort)
             {
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
-                datagramCopy->setOutputPort(outputPort);
+
+                // add a copy of the control info (OMNeT++ doesn't copy it)
+                IPRoutingDecision *newControlInfo = new IPRoutingDecision();
+                newControlInfo->setOutputPort(outputPort);
+                //newControlInfo->setNextHopAddr(...); FIXME TODO
+                datagramCopy->setControlInfo(newControlInfo);
+
                 send(datagramCopy, "fragmentationOut");
             }
         }

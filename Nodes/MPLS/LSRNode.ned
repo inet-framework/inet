@@ -12,6 +12,7 @@
 
 
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayerWithMPLS",
     "LDPproc",
@@ -59,6 +60,8 @@ module LSRNode
         out: out[];
 
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         //# transport and application layers
         tcpApp: TCP2LDP;
             parameters:
@@ -88,7 +91,7 @@ module LSRNode
             display: "b=32,30;p=191,186;i=fork";
         netIf: LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=87,320,row;i=iface";
         mplsModule: MPLSModule;
             parameters:

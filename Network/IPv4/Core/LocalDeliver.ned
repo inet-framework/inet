@@ -37,8 +37,6 @@
 //
 simple LocalDeliver
     parameters:
-        procdelay: numeric const,
-        qosBehaviorClass: string,
         fragmentTimeout : string;
     gates:
         in: in[];

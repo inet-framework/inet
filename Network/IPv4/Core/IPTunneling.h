@@ -1,7 +1,6 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,12 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 
 #ifndef __IPTUNNELING_H__
 #define __IPTUNNELING_H__
 
-#include "QueueBase.h"
+
 #include "IPDatagram.h"
 
 /**
@@ -29,13 +29,13 @@
  * then sends it to IPSend to be newly encapsulated.
  * More detailed comment in NED file.
  */
-class IPTunneling : public QueueBase
+class IPTunneling : public cSimpleModule
 {
   public:
-    Module_Class_Members(IPTunneling, QueueBase, 0);
+    Module_Class_Members(IPTunneling, cSimpleModule, 0);
 
   protected:
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

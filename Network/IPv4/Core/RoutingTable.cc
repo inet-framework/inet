@@ -17,6 +17,8 @@
 //
 
 
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -291,6 +293,10 @@ int RoutingTable::outputPortNo(const IPAddress& dest)
             // Host and Network (rather than between Host and Gateway),
             // but none is made here.
             // -- Jochen Reber, 27.10.00
+            //
+            // FIXME shouldn't we do *best* match here? This looks like first match.
+            // -- Andras
+            //
             e = (RoutingEntry*)route->get(i);
             if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask)) {
                 return findInterfaceByName(e->interfaceName.c_str());

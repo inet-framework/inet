@@ -38,8 +38,6 @@
 //
 simple IPSend
     parameters:
-        procdelay: numeric const,
-        qosBehaviorClass: string,
         timeToLive: numeric,
         multicastTimeToLive: numeric;
     gates:

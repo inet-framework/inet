@@ -36,17 +36,11 @@ message TCPSegment extends cMessage
     properties:
         omitGetVerb = true;
     fields:
-        // Connection Id. This is a model internal field (not part of the real
-        // TCP header). ConnId is assigned when doing active open, and
-        // used (instead of srcPort+destPort) by both TCP entities to identify
-        // the connection.
-        int connId;
-
         // Source Port
-        int srcPort;
+        short srcPort;
 
         // Destination Port
-        int destPort;
+        short destPort;
 
         // Sequence Number: first sequence number of the first data octet
         // in the respective segment (except if SYN is set; then the the
@@ -77,6 +71,12 @@ message TCPSegment extends cMessage
         // the urgent data. This field is only be interpreted in segments with
         // the URG control bit set.
         unsigned long urgentPointer;
+
+        // Payload length in octets (not actual TCP header field). 
+        // This is not always the same as encapsulatedPacket()->length()*8, 
+        // because e.g. SYN occupies one byte of sequence but SYN packet 
+        // doesn't have an encapsulated message in the model.
+        int payloadLength;
 };
 
 

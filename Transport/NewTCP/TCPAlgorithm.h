@@ -21,10 +21,10 @@
 
 #include <omnetpp.h>
 #include "TCPConnection.h"
+#include "TCPSendQueue.h"
+#include "TCPReceiveQueue.h"
+#include "TCPSegment_m.h"
 
-
-class TCPSegment;
-class TCPInterfacePacket;
 
 
 /**
@@ -36,13 +36,15 @@ class TCPInterfacePacket;
 class TCPAlgorithm : public cPolymorphic   // FIXME let it be TCPBehaviour? or TCPDataTransfer?
 {
   protected:
-    TCPConnection *conn; // TCP connection object
+    TCPConnection *conn; // we belong to this connection
+    TCPSendQueue *sendQueue;
+    TCPReceiveQueue *receiveQueue;
 
   public:
     /**
      * Ctor.
      */
-    TCPAlgorithm(TCPConnection *_conn)  {conn=_conn;}
+    TCPAlgorithm() {conn = NULL; sendQueue = NULL; receiveQueue = NULL;}
 
     /**
      * Virtual dtor.
@@ -50,15 +52,59 @@ class TCPAlgorithm : public cPolymorphic   // FIXME let it be TCPBehaviour? or T
     virtual ~TCPAlgorithm() {}
 
     /**
-     * Process SEND app command.
+     * Assign this object to a TCPConnection. SendQueue and receiveQueue of
+     * TCPConnection must be set already at this time, because we cache
+     * their pointers here.
      */
-    virtual void process_SEND(TCPInterfacePacket *tcpIfPacket) = 0;
+    void setConnection(TCPConnection *_conn)  {
+        conn = _conn;
+        sendQueue = conn->getSendQueue();
+        receiveQueue = conn->getReceiveQueue();
+    }
 
     /**
-     * Process RECEIVE app command. FIXME simplify args to ulong numOctets?
+     * Create state block (TCB) used by this TCP variant. It is expected
+     * that every TCPAlgorithm subclass will have its own state block,
+     * subclassed from TCPStateVariables. This factory method should
+     * create and return a "blank" state block of the appropriate type.
      */
-    virtual void process_RECEIVE(TCPInterfacePacket *tcpIfPacket) = 0;
-    //...
+    virtual TCPStateVariables *createStateVariables() = 0;
+
+    /**
+     * Place to process timers specific to this TCPAlgorithm class.
+     * TCPConnection will invoke this method on any timer (self-message)
+     * it doesn't recognize (that is, any timer other than the 2MSL,
+     * CONN-ESTAB and FIN-WAIT-2 timers).
+     *
+     * Method may also change the event code (by default set to TCP_E_IGNORE)
+     * to cause the state transition of TCP FSM.
+     */
+    virtual void processTimer(cMessage *timer, TCPEventCode& event) = 0;
+
+    /**
+     * Called after user sent TCP_C_SEND command to us.
+     */
+    virtual void sendCommandInvoked() = 0;
+
+    /**
+     * Called after we have received data ("text" in RFC 793 lingo).
+     * At this point the state variables (rcv_nxt) have already been updated.
+     * This method should take care to send ACKs whenever it sees fit.
+     */
+    virtual void receivedSegmentText() = 0;
+
+    /**
+     * Called after we have received an ACK. At this point the state variables
+     * (snd_una, snd_wnd) have already been updated.
+     */
+    virtual void receivedAck() = 0;
+
+    /**
+     * Called after we have received an ACK for some data not yet sent.
+     * According to RFC 793 this function should send an ACK.
+     */
+    virtual void receivedAckForDataNotYetSent(uint32 seq) = 0;
+
 };
 
 #endif

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,13 +17,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-/*
-    Author:     Jochen Reber
-    Date:       18.5.00
-    On Linux:   19.5.00 - 29.5.00
-    Modified by Vincent Oberle
-    Date:       1.2.2001
-*/
+//
+//  Author:     Jochen Reber
+//    Date:       18.5.00
+//    On Linux:   19.5.00 - 29.5.00
+//  Modified by Vincent Oberle
+//    Date:       1.2.2001
+//  Cleanup and rewrite: Andras Varga, 2004
+//
 
 #ifndef __ROUTINGTABLE_H
 #define __ROUTINGTABLE_H
@@ -156,9 +158,9 @@ class RoutingEntry : public cObject // FIXME only cObject so that cArray can by 
 
 
 /**
- * Read in the interfaces and routing table from a file; manages requests
- * to the routing table and the interface table, simulating the "route"
- * and "ifconfig" commands.
+ * Represents the routing table. This object has one instance per host
+ * or router. It has methods to manage the routing table and the interface table,
+ * simulating the "route" and "ifconfig" commands.
  *
  * This is a simple module without gates, it requires function calls to it
  * (message handling does nothing).

@@ -112,18 +112,7 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 PingApp.obj: PingApp.cc \
   PingApp.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPDatagram.h \
-  ..\..\Network\IPv4\Core/ICMP.h \
   ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\..\Network\IPv4\Core/IPDatagram_m.h \
-  ..\..\Base/QueueBase.h \
-  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Network\IPv4\Core/ICMPMessage.h \
-  ..\..\Base/AbstractQueue.h \
-  ..\..\Base/ModuleAccess.h \
-  ..\..\Network\IPv4\Core/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4\Core/ICMPMessage_m.h
+  ..\..\Network\IPv4\Core/IPDatagram_m.h

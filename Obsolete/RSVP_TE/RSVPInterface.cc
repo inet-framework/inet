@@ -17,7 +17,7 @@
 
 #include "rsvp_message.h"
 #include "RSVPInterface.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 Define_Module(RSVPInterface);
 
@@ -54,9 +54,8 @@ void RSVPInterface::processMsgFromIp(cMessage * msg)
     // ResvTearMessage *rtMsg;
     // ResvErrorMessage *reMsg;
 
-    IPInterfacePacket *iPacket = check_and_cast < IPInterfacePacket * >(msg);
+    TransportPacket *tpacket = check_and_cast<TransportPacket *>(msg);
 
-    TransportPacket *tpacket = check_and_cast < TransportPacket * >(iPacket->decapsulate());
     cMessage *rsvpMsg = (cMessage *) (tpacket->par("rsvp_data").objectValue());
     int msgKind = rsvpMsg->kind();
 
@@ -111,9 +110,6 @@ void RSVPInterface::processMsgFromApp(cMessage * msg)
     *(cMessage *) tpacket = *msg;       // copy parameters (not sure this is needed -- Andras)
     tpacket->addPar("rsvp_data") = msg;
 
-    IPInterfacePacket *iPacket = new IPInterfacePacket();
-
-    iPacket->encapsulate(tpacket);
 
     // FIXME eliminate MY_ERROR_IP_ADDRESS? NULL and IPAddress.isNull() should be OK instead
     IPAddress src_addr =
@@ -121,15 +117,14 @@ void RSVPInterface::processMsgFromApp(cMessage * msg)
     IPAddress dest_addr =
         msg->hasPar("dest_addr") ? msg->par("dest_addr").stringValue() : MY_ERROR_IP_ADDRESS;
 
-    // encapsulate udpPacket into an IPInterfacePacket
-    iPacket->setDestAddr(dest_addr);
+    // attach control info to transport packet
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setDestAddr(dest_addr);
     if (!src_addr.equals(MY_ERROR_IP_ADDRESS))
-    {
-        iPacket->setSrcAddr(src_addr);
-    }
-    iPacket->setProtocol(IP_PROT_RSVP);
+        controlInfo->setSrcAddr(src_addr);
+    controlInfo->setProtocol(IP_PROT_RSVP);
 
-    send(iPacket, "to_ip");
+    tpacket->setControlInfo(controlInfo);
 
-
+    send(tpacket, "to_ip");
 }

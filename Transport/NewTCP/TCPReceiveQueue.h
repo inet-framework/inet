@@ -24,7 +24,7 @@
 
 
 class TCPSegment;
-class TCPInterfacePacket;
+class TCPCommand;
 
 
 /**
@@ -53,7 +53,7 @@ class TCPReceiveQueue : public cPolymorphic
     /**
      * Ctor.
      */
-    TCPReceiveQueue(TCPConnection *_conn)  {conn=_conn;}
+    TCPReceiveQueue()  {conn=NULL;}
 
     /**
      * Virtual dtor.
@@ -61,28 +61,17 @@ class TCPReceiveQueue : public cPolymorphic
     virtual ~TCPReceiveQueue() {}
 
     /**
-     * Should be redefined to return whether selective schemes
-     * are supported. (Code can be a lot simpler with the original
-     * commulative retransmission).
+     * Called when a TCP segment arrives. Returns sequence number for ACK.
      */
-    virtual bool supportsSelectiveRetransmission() = 0;
+    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) = 0;
 
     /**
-     * Called when a TCP segment arrives.
+     * Creates packet to be passed up to the app, up to (but NOT including)
+     * the given sequence no (usually rcv_nxt). Returns NULL if there's
+     * no more data to be passed up, so it may have to be called several times
+     * until it returns NULL.
      */
-    virtual void insertBytesFromSegment(TCPSegment *tcpseg) = 0;
-
-    /**
-     * Returns how many bytes are available in the queue for passing
-     * up to the user. (That is, doesn't include bytes past the
-     * first "hole" if selective retransmission is used.)
-     */
-    virtual ulong bytesAvailable() = 0;
-
-    /**
-     * Called on RECEIVE app command. Creates packet to be passed up the app.
-     */
-    virtual TCPInterfacePacket *extractBytes() = 0;
+    virtual cMessage *extractBytesUpTo(uint32 seq) = 0;
 
 };
 

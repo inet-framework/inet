@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,6 +18,7 @@
 //
 
 
+//  Cleanup and rewrite: Andras Varga, 2004
 
 #include <omnetpp.h>
 #include <stdlib.h>
@@ -24,60 +26,45 @@
 
 #include "IPSend.h"
 #include "IPDatagram.h"
+#include "IPControlInfo_m.h"
 
 Define_Module(IPSend);
 
 
 void IPSend::initialize()
 {
-    QueueWithQoS::initialize();
-
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
     curFragmentId = 0;
 }
 
-void IPSend::arrival(cMessage *msg)
+void IPSend::handleMessage(cMessage *msg)
 {
     IPDatagram *dgram = encapsulate(msg);
-    if (!dgram) return;
-    qosHook->enqueue(dgram, queue);
+    send(dgram, "routingOut");
 }
 
-cMessage *IPSend::arrivalWhenIdle(cMessage *msg)
-{
-    IPDatagram *dgram = encapsulate(msg);
-    if (!dgram) return NULL;
-    return qosHook->dropIfNotNeeded(dgram);
-}
-
-void IPSend::endService(cMessage *msg)
-{
-    send(msg, "routingOut");
-}
-
-IPDatagram *IPSend::encapsulate(cMessage *msg)
+IPDatagram *IPSend::encapsulate(cMessage *transportPacket)
 {
     // if no interface exists, do not send datagram
     RoutingTable *rt = routingTableAccess.get();
     if (rt->numInterfaces() == 0)
     {
-        delete msg;
+        ev << "No interfaces exist, dropping packet\n";
+        delete transportPacket;
         return NULL;
     }
 
-    IPInterfacePacket *interfaceMsg = check_and_cast<IPInterfacePacket *>(msg);
+    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
-    cPacket *transportPacket = (cPacket *) interfaceMsg->decapsulate();
-
-    IPDatagram *datagram = new IPDatagram();
+    IPDatagram *datagram = new IPDatagram(transportPacket->name());
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
-    const IPAddress& dest = interfaceMsg->destAddr();
+    IPAddress dest = controlInfo->destAddr();
     datagram->setDestAddress(dest);
 
-    const IPAddress& src = interfaceMsg->srcAddr();
+    IPAddress src = controlInfo->srcAddr();
 
     // when source address given in Interface Message, use it
     if (!src.isNull())
@@ -85,7 +72,7 @@ IPDatagram *IPSend::encapsulate(cMessage *msg)
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->findInterfaceByAddress(src) == -1)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
-                      src.str().c_str(), interfaceMsg->className(), interfaceMsg->fullName());
+                      src.str().c_str(), transportPacket->className(), transportPacket->fullName());
         datagram->setSrcAddress(src);
     }
     else
@@ -95,24 +82,27 @@ IPDatagram *IPSend::encapsulate(cMessage *msg)
     }
 
     // set other fields
-    datagram->setDiffServCodePoint(interfaceMsg->diffServCodePoint());
+    datagram->setDiffServCodePoint(controlInfo->diffServCodePoint());
 
     datagram->setFragmentId(curFragmentId++);
     datagram->setMoreFragments(false);
-    datagram->setDontFragment (interfaceMsg->dontFragment());
+    datagram->setDontFragment (controlInfo->dontFragment());
     datagram->setFragmentOffset(0);
 
     datagram->setTimeToLive(
-           interfaceMsg->timeToLive() > 0 ?
-           interfaceMsg->timeToLive() :
+           controlInfo->timeToLive() > 0 ?
+           controlInfo->timeToLive() :
            (datagram->destAddress().isMulticast() ? defaultMCTimeToLive : defaultTimeToLive)
     );
 
-    datagram->setTransportProtocol ((IPProtocolFieldId)interfaceMsg->protocol());
-    datagram->setInputPort(-1);
+    datagram->setTransportProtocol(controlInfo->protocol());
+    delete controlInfo;
 
-    // setting an option is currently not possible
-    delete interfaceMsg;
+    // add blank RoutingDecision info
+    IPRoutingDecision *routingDecision = new IPRoutingDecision();
+    datagram->setControlInfo(routingDecision);
+
+    // setting IP options is currently not supported
 
     return datagram;
 }

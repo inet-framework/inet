@@ -1,14 +1,29 @@
-This number of people have contributed to the Internet Protocol Suite
 
-Most of the UDP,IP,QoS and MAC stuff: Design, Initial coding
+Most of the UDP and IP stuff: Design, Initial coding, 2000
 * Klaus Wehrle		<wehrle@telematik.informatik.uni-karlsruhe.de>
 * Jochen Reber		<un6b@rz.uni-karlsruhe.de>
 * Dirk Holzhausen	<dholzh@gmx.de>	
 
-The TCP finite state machine: Design, Initial coding
+Old TCP finite state machine: Design, Initial coding, 2000
 * Volker Boehm		<Volker.Boehm@nortelnetworks.com>
 * Verena Kahmann	<kahmann@telematik.informatik.uni-karlsruhe.de>
 * Uli Kaage		<kaage@int.uni-karlsruhe.de>
 
+Bugfixes to old TCP (tcpmodule.cc), 2003, 2004:
+* Donald Liang (LYBD), Virginia Tech
+* Jeroen Idserda, University of Twente
+* Joung Woong Lee (zipizigi), University of Tsukuba
+
 The MPLS, LDP, RSVP-TE models have been contributed by:
 * Xuan Thang Nguyen     <Xuan.T.Nguyen@uts.edu.au>
+
+RTP models (not yet integrated as of April 2004)
+* Matthias Oppitz       <matthias.oppitz@gmx.de>:
+* Arndt Buschmann       <a.buschmann@gmx.de>:
+
+Development and maintenance since July 2003;
+Restructuring, cleanup, neddoc documentation, integration of MPLS models, 2003;
+Cleanup, redesign/partial reimplementation of UDP/IP, 2004;
+TCP reimplementation, 2004:
+* Andras Varga          <andras@whale.hit.bme.hu> 
+

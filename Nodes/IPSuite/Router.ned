@@ -18,6 +18,7 @@
 
 
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayer";
 
@@ -31,7 +32,8 @@ module Router
         in: in[];
         out: out[];
     submodules:
-        // control module
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
@@ -44,7 +46,7 @@ module Router
             display: "p=160,60;i=fork";
         netIf : LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,120,row;i=iface";
     connections nocheck:
         // connections to network outside

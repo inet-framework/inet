@@ -2,6 +2,7 @@
 // Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
 // Institute of Telematics, University of Karlsruhe, Germany.
 // University Comillas, Madrid, Spain.
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,6 +23,7 @@
 //
 //  Author: Vincent Oberle
 //  Date: Jan-March 2001
+//  Cleanup and rewrite: Andras Varga, 2004
 //
 
 #include "IPAddress.h"

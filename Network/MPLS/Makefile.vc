@@ -143,8 +143,6 @@ MPLSModule.obj: MPLSModule.cc \
   ConstType.h \
   ..\IPv4\Core/IPDatagram_m.h \
   ..\IPv4\Core/IPAddress.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h \
   ..\..\Base/ModuleAccess.h \
   LIBtable.h \
   ip_address_prefix.h \

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,7 +21,8 @@
 #ifndef __ICMP_H__
 #define __ICMP_H__
 
-#include "QueueBase.h"
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include "RoutingTableAccess.h"
 #include "ICMPMessage.h"
 #include "IPDatagram.h"
@@ -29,21 +31,20 @@
 /**
  * ICMP module.
  */
-class ICMP : public QueueBase
+class ICMP : public cSimpleModule
 {
   protected:
     RoutingTableAccess routingTableAccess;
 
-    //void processError (cMessage *);
-    void processICMPMessage(IPInterfacePacket *);
+    void processICMPMessage(ICMPMessage *);
     void errorOut(ICMPMessage *);
     void recEchoRequest (ICMPMessage *, const IPAddress& dest);
     void recEchoReply (ICMPMessage *);
     void sendEchoRequest(cMessage *);
-    void sendInterfacePacket(ICMPMessage *, const IPAddress& dest);
+    void sendToIP(ICMPMessage *, const IPAddress& dest);
 
   public:
-    Module_Class_Members(ICMP, QueueBase, 0);
+    Module_Class_Members(ICMP, cSimpleModule, 0);
 
     /**
      * This method can be called from other modules to send an ICMP error packet.
@@ -51,7 +52,7 @@ class ICMP : public QueueBase
     void sendErrorMessage(IPDatagram *datagram, ICMPType type, ICMPCode code);
 
   protected:
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
 };
 

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -16,13 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 #include "socketlayer.h"
-#include "RoutingTable.h"
-#include "SocketInterfacePacket.h"
-#include "TransportInterfacePacket.h"
-#include "tcp.h"
-#include "omnetpp.h"
 
 
 Define_Module(SocketLayer);
@@ -189,7 +183,7 @@ void SocketLayer::handleMessage(cMessage* msg)
     }
   else if (arrivalgate == _from_udp)
     {
-      _handleFromUDP((TransportInterfacePacket*) msg);
+      _handleFromUDP(msg);
     }
   else if (arrivalgate >= _from_appl && arrivalgate <= (_from_appl + _from_appl_size))
     {
@@ -260,7 +254,7 @@ void SocketLayer::_sendDown(cMessage* msg, Socket* socket)
   send(msg, outgate);
 }
 
-void SocketLayer::_handleFromUDP(TransportInterfacePacket* msg)
+void SocketLayer::_handleFromUDP(cMessage *msg)
 {
   cArray* container = NULL;
   int from_appl_id = -1;
@@ -270,9 +264,11 @@ void SocketLayer::_handleFromUDP(TransportInterfacePacket* msg)
   if (debug)
     ev << "Received msg " << msg->name() << " from UDP\n";
 
+  UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+
   Socket* socket = getSocket(Socket::UDP,
-                             msg->destinationAddress(), msg->destinationPort(),
-                             msg->sourceAddress(), msg->sourcePort());
+                             controlInfo->getDestAddr(), controlInfo->getDestPort(),
+                             controlInfo->getSrcAddr(), controlInfo->getSrcPort());
 
   if (socket)
     {
@@ -293,19 +289,21 @@ void SocketLayer::_handleFromUDP(TransportInterfacePacket* msg)
       if (found == false)
         error("No filedescriptor found");
 
-      sockipack->read_ret(filedesc, msg->decapsulate(), msg->sourceAddress(), msg->sourcePort());
+      sockipack->read_ret(filedesc, msg, controlInfo->getSrcAddr(), controlInfo->getSrcPort());
       send(sockipack, _returnGate(from_appl_id));
     }
   else
     {
-      error("No Socket available for UDP Port %d", msg->destinationPort());
+      error("No Socket available for UDP Port %d", controlInfo->getDestPort());
     }
+  delete controlInfo;
 }
 
 
 void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
 {
-  TransportInterfacePacket* tpack = NULL;
+  cMessage *datapacket = NULL;
+  UDPControlInfo *controlInfo = NULL;
   Socket* socket = NULL;
   SocketInterfacePacket* sockipack = NULL;
   Socket::Filedesc filedesc;
@@ -341,7 +339,7 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
       if (msg->lAddr() == IPADDRESS_UNDEF)
         socket->pcb()->setLAddr(_defaultIPAddr());
       else
-    socket->pcb()->setLAddr(msg->lAddr());
+        socket->pcb()->setLAddr(msg->lAddr());
 
 
       // occupy the port
@@ -384,7 +382,7 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
       if (socket->pcb()->lAddr() == IPADDRESS_UNDEF)
         socket->pcb()->setLAddr(_defaultIPAddr());
       else
-    socket->pcb()->setLAddr(msg->lAddr());
+        socket->pcb()->setLAddr(msg->lAddr());
 
       if (socket->pcb()->lPort() == PortNumber(PORT_UNDEF))
         {
@@ -419,17 +417,17 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
       socket = getSocket(msg->filedesc(), true, msg->arrivalGateId());
       ev << "Sending data to transport layer. \n";
 
-      tpack = new TransportInterfacePacket();
-      tpack->setSourceAddress(socket->pcb()->lAddr());
-      tpack->setSourcePort(socket->pcb()->lPort());
-      tpack->setDestinationAddress(socket->pcb()->fAddr());
-      tpack->setDestinationPort(socket->pcb()->fPort());
+      datapacket = msg->decapsulate();
 
-      if (msg->encapsulatedMsg())
-        tpack->encapsulate(msg->decapsulate());
+      controlInfo = new UDPControlInfo();
+      controlInfo->setSrcAddr(socket->pcb()->lAddr());
+      controlInfo->setDestAddr(socket->pcb()->fAddr());
+      controlInfo->setSrcPort(socket->pcb()->lPort());
+      controlInfo->setDestPort(socket->pcb()->fPort());
+      datapacket->setControlInfo(controlInfo);
 
       // send data to transport layer
-      _sendDown(tpack, socket);
+      _sendDown(datapacket, socket);
 
       break;
 

@@ -26,9 +26,6 @@
 // Redesign: Andras Varga, 02.2004
 //
 simple IPOutput
-    parameters:
-        procdelay : numeric const,
-        qosBehaviorClass: string;
     gates:
         in: in;
         out: queueOut;

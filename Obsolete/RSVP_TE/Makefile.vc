@@ -154,9 +154,7 @@ RSVP.obj: RSVP.cc \
   ..\MPLS/ConstType.h \
   ..\MPLS/MPLSPacket.h \
   ..\IPv4\Core/IPDatagram.h \
-  ..\IPv4\Core/IPDatagram_m.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h
 rsvp_message.obj: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
@@ -207,19 +205,17 @@ RSVPApp.obj: RSVPApp.cc \
   ..\..\Base/ipsuite_defs.h \
   ..\MPLS/MPLSPacket.h \
   ..\IPv4\Core/IPDatagram.h \
-  ..\IPv4\Core/IPDatagram_m.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h
 RSVPInterface.obj: RSVPInterface.cc \
   rsvp_message.h \
   RSVPInterface.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\IPv4\Core/IPControlInfo_m.h \
   intserv.h \
   ..\IPv4\Core/IPAddress.h \
   ..\..\Transport\TCP/TransportPacket.h \
   ..\..\Transport\TCP/TransportPacket_m.h \
   ..\..\Base/basic_consts.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h
 TED.obj: TED.cc \
   ..\MPLS/MPLSModule.h \
   TED.h \
@@ -232,8 +228,6 @@ TED.obj: TED.cc \
   ..\MPLS/ConstType.h \
   ..\IPv4\Core/IPDatagram_m.h \
   ..\IPv4\Core/IPAddress.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h \
   ..\..\Base/ModuleAccess.h \
   ..\MPLS/LIBtable.h \
   ..\MPLS/ip_address_prefix.h \

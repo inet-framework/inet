@@ -3,7 +3,7 @@ set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 set OPTS=-f -N
 :set OPTS=-f
 
-set ALL_IPSUITE_INCLUDES=-I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Base -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
+set ALL_IPSUITE_INCLUDES=-I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/NewTCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/_802 -I$(ROOT)/NetworkInterfaces/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Base -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
 set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
 
 : #--------------------------------------
@@ -29,6 +29,8 @@ cd %root%\Applications\UDPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.
 cd %root%\Examples\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Examples\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 
+cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -w -c ..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
+
 cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\McNetwork2 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
@@ -51,6 +53,7 @@ cd %root%\Examples\MPLS\TestTE6 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfi
 
 cd %root%\Tests\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Tests\MPLS\LDP1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
+cd %root%\Tests\NewTCP && %MAKEMAKE% %OPTS% -w -c ..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 
 cd %root%\Network\IPv4 && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Network\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\..\Base -I..\..\Util
@@ -59,17 +62,20 @@ cd %root%\Network\RSVP_TE && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -
 cd %root%\Network\IPv4\Core && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.vc -I..\..\..\NetworkInterfaces -I..\..\..\NetworkInterfaces\Queues -I..\..\..\Base -I..\..\..\Util
 cd %root%\Network\IPv4\QoS && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.vc -I..\Core -I..\..\..\Transport\TCP -I..\..\..\Base -I..\..\..\Util
 
-cd %root%\NetworkInterfaces\PPP-old && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core
+cd %root%\NetworkInterfaces\PPP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util
+cd %root%\NetworkInterfaces\_802 && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core
+cd %root%\NetworkInterfaces\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\_802
+cd %root%\NetworkInterfaces\ARP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core -I..\_802
 cd %root%\NetworkInterfaces\Queues && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS
 
-cd %root%\Nodes\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP-old -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues  -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\UDPApp -I..\..\Applications\PingApp -I..\..\Base -I..\..\Util
-cd %root%\Nodes\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Network\MPLS -I..\..\Network\LDP -I..\..\Network\RSVP_TE -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP-old -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues  -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\PingApp -I..\IPSuite -I..\..\Base -I..\..\Util
+cd %root%\Nodes\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues  -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\UDPApp -I..\..\Applications\PingApp -I..\..\Base -I..\..\Util
+cd %root%\Nodes\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Network\MPLS -I..\..\Network\LDP -I..\..\Network\RSVP_TE -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues  -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\PingApp -I..\IPSuite -I..\..\Base -I..\..\Util
 
-cd %root%\Transport\Socket && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
+cd %root%\Transport\Socket && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\UDP -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 cd %root%\Transport\TCP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Base -I..\..\Util
 cd %root%\Transport\UDP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 cd %root%\Transport\RTP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc          -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
-cd %root%\Transport\NewTCP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
+cd %root%\Transport\NewTCP && %MAKEMAKE% %OPTS% -n -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Base -I..\..\Util
 
 : #--------------------------------------
 

@@ -27,7 +27,7 @@
 #include <omnetpp.h>
 
 #include "basic_consts.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 
 /**
@@ -54,7 +54,8 @@ class UDPClientApp : public cSimpleModule
     int localPort, destPort;
     int msgLength;
     std::vector<IPAddress> destAddresses;
-    int counter;
+
+    static int counter; // counter for generating a global number for each packet
 
     int numSent;
     int numReceived;

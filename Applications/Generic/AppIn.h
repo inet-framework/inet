@@ -30,7 +30,7 @@
 #include <omnetpp.h>
 
 #include "basic_consts.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 class AppIn: public cSimpleModule
 {

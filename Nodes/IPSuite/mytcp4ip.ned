@@ -39,14 +39,13 @@ module MyTCPUpperLayers
                 timeout = 30000s,
                 data_interarrival_time = 10s,
                 start_time = start_time;
-
             display: "p=76,52;b=40,24,rect";
         tcp: TcpModule; 
-        parameters:
-         TCPDelayedAck = true,
-         TCPFastRetrans = false,
-             TCPFastRecovery = false,
-             TCPNewReno = false;
+            parameters:
+                TCPDelayedAck = true,
+                TCPFastRetrans = false,
+                TCPFastRecovery = false,
+                TCPNewReno = false;
             display: "p=79,120;i=prot1";
         tcpipinterface: TcpIpInterface; 
             display: "p=81,202;i=prot3";

@@ -29,7 +29,6 @@
 //
 simple IPFragmentation
     parameters:
-        procdelay : numeric,
         numOfPorts: numeric const;
     gates:
         in: routingIn, multicastIn;

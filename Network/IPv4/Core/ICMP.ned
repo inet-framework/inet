@@ -37,8 +37,6 @@
 // redesign: Andras Varga 1.3.2004
 //
 simple ICMP
-    parameters:
-        procdelay: numeric const;
     gates:
         in: localIn;  // delivered ICMP packets
         in: pingIn;  // ping requests from app

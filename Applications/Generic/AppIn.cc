@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,18 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-/*
-    file: Applications.cc
-        Purpose: receives packets of Traffic generators
-                 and prints out their information
-    author: me
-*/
+//
 
 
 #include <omnetpp.h>
 #include "AppIn.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 
 
@@ -38,45 +31,31 @@ void AppIn::initialize()
 
 void AppIn::activity()
 {
-    cMessage *msg;
-
     while(true)
     {
-        msg = receive();
+        cMessage *msg = receive();
         processMessage(msg);
     }
-
 }
 
 // private function
 void AppIn::processMessage(cMessage *msg)
 {
-    IPInterfacePacket *ip = (IPInterfacePacket *)msg;
-    cPacket *p = (cPacket *)msg->decapsulate();
-    simtime_t arrivalTime = ip->arrivalTime();
-    IPProtocolFieldId protocol = (IPProtocolFieldId)ip->protocol();
-    int content = p->hasPar("content")
-                ? (int)p->par("content") : (int)-1;
-    bool isRequest = p->hasPar("request")
-                ? p->par("request").boolValue() : false;
-    int length = p->length();
+    simtime_t arrivalTime = msg->arrivalTime();
+    int content = msg->hasPar("content") ? (int)msg->par("content") : (int)-1;
+    int length = msg->length();
+    IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
 
     // print out Packet info
-    ev  << "AppIn: Packet received:"
-        << "\nProt: " << (protocol == IP_PROT_TCP ? "TCP" : "UDP")
+    ev  << "AppIn: Packet received:\n"
         << " Cont: " << content
         << " Bitlen: " << length
-        // << (isRequest ? " Request" : " Reply")
         << "   Arrival Time: " << arrivalTime
         << " Simtime: " << simTime()
-        << "\nSrc: " << ip->srcAddr()
-        << " Dest: " << ip->destAddr() << "\n\n";
+        << "\nSrc: " << controlInfo->srcAddr()
+        << " Dest: " << controlInfo->destAddr() << "\n\n";
 
-    delete (ip);
-    delete (p);
-
-    if (!isRequest)
-        return;
-
+    delete controlInfo;
+    delete msg;
 }
 

@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= PPP-old Queues
-SUBDIR_TARGETS=  PPP-old_dir Queues_dir
+SUBDIRS= _802 ARP Ethernet PPP Queues
+SUBDIR_TARGETS=  _802_dir ARP_dir Ethernet_dir PPP_dir Queues_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
@@ -75,8 +75,17 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 
 subdirs: $(SUBDIR_TARGETS)
 
-PPP-old_dir:
-	cd PPP-old && cd && nmake /nologo /f Makefile.vc
+_802_dir:
+	cd _802 && cd && nmake /nologo /f Makefile.vc
+
+ARP_dir:
+	cd ARP && cd && nmake /nologo /f Makefile.vc
+
+Ethernet_dir:
+	cd Ethernet && cd && nmake /nologo /f Makefile.vc
+
+PPP_dir:
+	cd PPP && cd && nmake /nologo /f Makefile.vc
 
 Queues_dir:
 	cd Queues && cd && nmake /nologo /f Makefile.vc

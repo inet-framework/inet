@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,8 +17,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 #ifndef __ROUTING_TABLE_ACCESS_H__
 #define __ROUTING_TABLE_ACCESS_H__
+
+//  Cleanup and rewrite: Andras Varga, 2004
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

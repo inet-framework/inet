@@ -20,107 +20,165 @@
 #include "TCPMain.h"
 #include "TCPConnection.h"
 #include "TCPSegment_m.h"
-#include "TCPInterfacePacket_m.h"
-#include "IPInterfacePacket.h"
+#include "TCPCommand_m.h"
+#include "IPControlInfo_m.h"
 
+Define_Module(TCPMain);
 
-int TCPMain::nextConnId = 1;   // don't issue 0
 
 void TCPMain::initialize()
 {
-    WATCH(nextConnId);
-    // WATH_map(tcpConns);
+    // WATH_map(tcpConnMap);
+    // WATH_map(tcpAppConnMap);
 }
+
+TCPMain::~TCPMain()
+{
+    while (!tcpAppConnMap.empty())
+    {
+        TcpAppConnMap::iterator i = tcpAppConnMap.begin();
+        delete (*i).second;
+        tcpAppConnMap.erase(i);
+    }
+}
+
 
 void TCPMain::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        int connId = (int) msg->contextPointer();
-        TCPConnection *conn = findConnection(connId);
-        if (!conn)
-        {
-            ev << "event " << msg << ": corresponding connId=" << connId <<
-                  " doesn't exist (any longer?), event deleted\n";
-            delete msg;
-            return;
-        }
+        TCPConnection *conn = (TCPConnection *) msg->contextPointer();
         bool ret = conn->processTimer(msg);
         if (!ret)
-            removeConnection(connId,conn);
+            removeConnection(conn);
     }
-    else if (dynamic_cast<IPInterfacePacket *>(msg))
+    else if (msg->arrivedOn("from_ip"))
     {
-        TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg->encapsulatedMsg());
-        int connId = tcpseg->connId();
-        TCPConnection *conn = findConnection(connId);
+        TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
+
+        IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
+        IPAddress srcAddr = controlInfo->srcAddr();
+        IPAddress destAddr = controlInfo->destAddr();
+        delete controlInfo;
+
+        TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
         if (!conn)
         {
-            if (tcpseg->synBit() && !tcpseg->ackBit())
-            {
-                ev << "TCP connection created for incoming SYN " << msg << ", connId=" << connId << "\n";
-                conn = new TCPConnection(connId, this);
-                tcpConns[connId] = conn;
-            }
-            else
-            {
-                ev << "TCP segment " << tcpseg << ": corresponding connId=" << connId <<
-                      " doesn't exist (any longer?), packet dropped\n";
-                // FIXME not good, maybe RST has to be sent etc
-                delete tcpseg;
-                return;
-            }
+            TCPConnection::segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+            delete tcpseg;
+            return;
         }
-        bool ret = conn->processTCPSegment((IPInterfacePacket *)msg);
+        bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
         if (!ret)
-            removeConnection(connId,conn);
+            removeConnection(conn);
     }
-    else if (dynamic_cast<TCPInterfacePacket *>(msg))
+    else // must be from app
     {
-        TCPInterfacePacket *tcpIfPacket = (TCPInterfacePacket *)msg;
-        int connId = tcpIfPacket->getConnId();
-        TCPConnection *conn;
-        if (connId==-1)
-        {
-            ev << "TCP connection created for " << msg << ", connId=" << connId << "\n";
-            conn = new TCPConnection(nextConnId++,this);
-            tcpConns[connId] = conn;
-        }
-        else
-        {
-            conn = findConnection(connId);
-            if (!conn)
-            {
-                error("Wrong connId=%d in TCPInterfacePacket (%s)%s, no such connection",
-                      connId, msg->className(), msg->name());
-            }
-        }
-        bool ret = conn->processAppCommand(tcpIfPacket);
-        if (!ret)
-            removeConnection(connId,conn);
-    }
-    else
-    {
-        error("Wrong message (%s)%s, TCPInterfacePacket or TCPSegment wrapped in IPInterfacePacket expected",
-              msg->className(), msg->name());
-    }
+        TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->controlInfo());
+        int appGateIndex = msg->arrivalGate()->index();
+        int connId = controlInfo->connId();
 
+        TCPConnection *conn = findConnForApp(appGateIndex, connId);
+
+        if (!conn)
+        {
+            conn = new TCPConnection(this,appGateIndex,connId);
+
+            AppConnKey key;
+            key.appGateIndex = appGateIndex;
+            key.connId = connId;
+            tcpAppConnMap[key] = conn;
+
+            ev << "TCP connection created for " << msg << "\n";
+        }
+        bool ret = conn->processAppCommand(msg);
+        if (!ret)
+            removeConnection(conn);
+    }
 }
 
-TCPConnection *TCPMain::findConnection(int connId)
+TCPConnection *TCPMain::findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
 {
-    // here we actually do two lookups, but what the hell...
-    if (tcpConns.find(connId)==tcpConns.end())
-        return NULL;
-    return tcpConns[connId];
+    SockPair key;
+    key.localAddr = destAddr.getInt();
+    key.remoteAddr = srcAddr.getInt();
+    key.localPort = tcpseg->destPort();
+    key.remotePort = tcpseg->srcPort();
+    SockPair save = key;
+
+    // try with fully qualified SockPair
+    TcpConnMap::iterator i;
+    i = tcpConnMap.find(key);
+    if (i!=tcpConnMap.end())
+        return i->second;
+
+    // try with localAddr missing (only localPort specified in passive/active open)
+    key.localAddr = 0;
+    i = tcpConnMap.find(key);
+    if (i!=tcpConnMap.end())
+        return i->second;
+
+    // try fully qualified local socket + blank remote socket (after passive open)
+    key = save;
+    key.remoteAddr = 0;
+    key.remotePort = -1;
+    i = tcpConnMap.find(key);
+    if (i!=tcpConnMap.end())
+        return i->second;
+
+    // try with blank remote socket, and localAddr missing (after passive open)
+    key.localAddr = 0;
+    i = tcpConnMap.find(key);
+    if (i!=tcpConnMap.end())
+        return i->second;
+
+    // given up
+    return NULL;
 }
 
-void TCPMain::removeConnection(int connId, TCPConnection *conn)
+TCPConnection *TCPMain::findConnForApp(int appGateIndex, int connId)
 {
-    ev << "Deleting TCP connection connId=" << connId << "\n";
+    AppConnKey key;
+    key.appGateIndex = appGateIndex;
+    key.connId = connId;
+
+    TcpAppConnMap::iterator i = tcpAppConnMap.find(key);
+    return i==tcpAppConnMap.end() ? NULL : i->second;
+}
+
+void TCPMain::updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort)
+{
+    SockPair key;
+    key.localAddr = conn->localAddr.getInt();
+    key.remoteAddr = conn->remoteAddr.getInt();
+    key.localPort = conn->localPort;
+    key.remotePort = conn->remotePort;
+    tcpConnMap.erase(key);
+
+    key.localAddr = (conn->localAddr = localAddr).getInt();
+    key.remoteAddr = (conn->remoteAddr = remoteAddr).getInt();
+    key.localPort = conn->localPort = localPort;
+    key.remotePort = conn->remotePort = remotePort;
+    tcpConnMap[key] = conn;
+}
+
+void TCPMain::removeConnection(TCPConnection *conn)
+{
+    ev << "Deleting TCP connection\n";
+
+    AppConnKey key;
+    key.appGateIndex = conn->appGateIndex;
+    key.connId = conn->connId;
+    tcpAppConnMap.erase(key);
+
+    SockPair key2;
+    key2.localAddr = conn->localAddr.getInt();
+    key2.remoteAddr = conn->remoteAddr.getInt();
+    key2.localPort = conn->localPort;
+    key2.remotePort = conn->remotePort;
+    tcpConnMap.erase(key2);
+
     delete conn;
-    tcpConns.erase(connId);
 }
-
 
 

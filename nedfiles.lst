@@ -8,9 +8,14 @@ Applications/TCPApp/mytcpserverproc.ned
 Applications/TCPApp/procserver.ned
 Applications/TCPApp/tcpapp.ned
 Applications/UDPApp/UDPApp.ned
+Base/Blackboard.ned
 Base/Join.ned
 Base/Nop.ned
 Base/Sink.ned
+
+
+
+
 
 
 
@@ -66,6 +71,18 @@ Network/RSVP_TE/RSVPInterface.ned
 Network/RSVP_TE/TED.ned
 NetworkInterfaces/LinkLayer.ned
 NetworkInterfaces/NetworkInterface.ned
+NetworkInterfaces/ARP/ARP.ned
+NetworkInterfaces/Ethernet/eth-index.ned
+NetworkInterfaces/Ethernet/EtherBus.ned
+NetworkInterfaces/Ethernet/EtherHub.ned
+NetworkInterfaces/Ethernet/EtherLLC.ned
+NetworkInterfaces/Ethernet/EtherMAC.ned
+NetworkInterfaces/Ethernet/EthernetInterface.ned
+NetworkInterfaces/Ethernet/EtherSwitch.ned
+NetworkInterfaces/Ethernet/MACRelayUnit.ned
+NetworkInterfaces/Ethernet/MACRelayUnitNP.ned
+NetworkInterfaces/Ethernet/MACRelayUnitPP.ned
+NetworkInterfaces/PPP/PPPInterface.ned
 NetworkInterfaces/Queues/InputQueue.ned
 NetworkInterfaces/Queues/OutputQueue.ned
 Nodes/IPSuite/BurstHost.ned
@@ -85,6 +102,9 @@ Nodes/MPLS/NetworkLayerWithMPLS.ned
 Nodes/MPLS/RSVP_LSR_Node.ned
 Tests/MPLS/LDP1/MPLSNet.ned
 Tests/MPLS/LDP1/MPLSOnly.ned
+Tests/NewTCP/TcpTest.ned
+Tests/NewTCP/TcpTestClient.ned
+Transport/NewTCP/TCPMain.ned
 Transport/RTP/RTCPModule.ned
 Transport/RTP/RTPApplication.ned
 Transport/RTP/RTPHost.ned

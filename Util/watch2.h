@@ -54,15 +54,16 @@ class cWatch2_stdstring : public cObject
 };
 
 
-template <class T> void createWatch2(const char *varname, const T& v) {
-    new cWatch2<T>(varname, v);
+template <class T> cObject *createWatch2(const char *varname, const T& v) {
+    return new cWatch2<T>(varname, v);
 }
 
-void createWatch2(const char *varname, const std::string& v) {
-    new cWatch2_stdstring(varname, v);
+cObject *createWatch2(const char *varname, const std::string& v) {
+    return new cWatch2_stdstring(varname, v);
 }
 
 #define WATCH2(v)   createWatch2(#v,(v))
+
 
 #endif
 

@@ -17,8 +17,8 @@
 //
 
 
-
 import
+    "Blackboard",
     "NetworkLayer",
     "LinkLayer",
     "TrafficGen";
@@ -38,6 +38,8 @@ module BurstHost
         in: in[];
         out: out[];
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         burstGenerator: TrafficGenerator;
             parameters:
                 GeneratorType = "BurstGenerator",
@@ -46,7 +48,6 @@ module BurstHost
                 generationTime = 0,
                 generationSize = packetSize;
             display: "b=32,30;p=80,60";
-        // control module
         networkLayer: NetworkLayer;
             parameters:
                 // other Network parameters
@@ -59,7 +60,7 @@ module BurstHost
             display: "b=32,30;p=80,120;i=fork";
         netIf : LinkLayer[1];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,180,row;i=iface";
     connections nocheck:
         // transport connections

@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,7 +19,8 @@
 
 
 //
-// author: Jochen Reber
+// Author: Jochen Reber
+// Cleanup and rewrite: Andras Varga 2004
 //
 
 #include <omnetpp.h>
@@ -26,7 +28,7 @@
 
 #include "UDPPacket.h"
 #include "UDPProcessing.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 Define_Module( UDPProcessing );
 
@@ -70,26 +72,22 @@ void UDPProcessing::handleMessage(cMessage *msg)
     // received from IP layer
     if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
     {
-        processMsgFromIp(check_and_cast<IPInterfacePacket *>(msg));
+        processMsgFromIp(check_and_cast<UDPPacket *>(msg));
     }
     else // received from application layer
     {
-        processMsgFromApp(check_and_cast<UDPInterfacePacket *>(msg));
+        processMsgFromApp(msg);
     }
 }
 
 
-void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
+void UDPProcessing::processMsgFromIp(UDPPacket *udpPacket)
 {
-    // decapsulate UDPPacket from IP
-    UDPPacket *udpPacket = check_and_cast<UDPPacket *>(ipIfPacket->decapsulate());
-
     // errorcheck, if applicable
     if (!udpPacket->checksumValid())
     {
         // throw packet away if bit error discovered
         // assume checksum found biterror
-        delete ipIfPacket;
         delete udpPacket;
         numDroppedBadChecksum++;
         return;
@@ -101,54 +99,51 @@ void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
     if (appGateIndex == -1)
     {
         delete udpPacket;
-        delete ipIfPacket;
         numDroppedWrongPort++;
         return;
     }
 
-    // wrap payload into UDPInterfacePacket and pass up to application
-    UDPInterfacePacket *udpIfPacket = new UDPInterfacePacket();
+    IPControlInfo *ipControlInfo = check_and_cast<IPControlInfo *>(udpPacket->removeControlInfo());
 
     cMessage *payload = udpPacket->decapsulate();
-    if (payload)
-        udpIfPacket->encapsulate(payload);
 
-    udpIfPacket->setSrcAddr(ipIfPacket->srcAddr());
-    udpIfPacket->setDestAddr(ipIfPacket->destAddr());
-    udpIfPacket->setCodePoint(ipIfPacket->diffServCodePoint());
-    udpIfPacket->setSrcPort(udpPacket->sourcePort());
-    udpIfPacket->setDestPort(udpPacket->destinationPort());
-    //udpIfPacket->setKind(udpPacket->msgKind()); // FIXME why ???
-    delete ipIfPacket;
+    // add UDPControlInfo to packet, and it pass up to the application
+    UDPControlInfo *udpControlInfo = new UDPControlInfo();
+    udpControlInfo->setSrcAddr(ipControlInfo->srcAddr());
+    udpControlInfo->setDestAddr(ipControlInfo->destAddr());
+    udpControlInfo->setCodePoint(ipControlInfo->diffServCodePoint());
+    udpControlInfo->setSrcPort(udpPacket->sourcePort());
+    udpControlInfo->setDestPort(udpPacket->destinationPort());
+    payload->setControlInfo(udpControlInfo);
+
+    delete ipControlInfo;
     delete udpPacket;
 
-    send(udpIfPacket, "to_application", appGateIndex);
+    send(payload, "to_application", appGateIndex);
     numPassedUp++;
 }
 
-void UDPProcessing::processMsgFromApp(UDPInterfacePacket *udpIfPacket)
+void UDPProcessing::processMsgFromApp(cMessage *appData)
 {
-    UDPPacket *udpPacket = new UDPPacket();
-    udpPacket->setLength(8*UDP_HEADER_BYTES);
-    //udpPacket->setMsgKind(udpIfPacket->kind()); --FIXME why???
+    UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
 
-    cMessage *payload = udpIfPacket->decapsulate();
-    if (payload)
-        udpPacket->encapsulate(payload);
+    UDPPacket *udpPacket = new UDPPacket(appData->name());
+    udpPacket->setLength(8*UDP_HEADER_BYTES);
+    udpPacket->encapsulate(appData);
 
     // set source and destination port
-    udpPacket->setSourcePort(udpIfPacket->getSrcPort());
-    udpPacket->setDestinationPort(udpIfPacket->getDestPort());
+    udpPacket->setSourcePort(udpControlInfo->getSrcPort());
+    udpPacket->setDestinationPort(udpControlInfo->getDestPort());
 
-    IPInterfacePacket *ipIfPacket = new IPInterfacePacket();
-    ipIfPacket->encapsulate(udpPacket);
-    ipIfPacket->setProtocol(IP_PROT_UDP);
-    ipIfPacket->setSrcAddr(udpIfPacket->getSrcAddr());
-    ipIfPacket->setDestAddr(udpIfPacket->getDestAddr());
-    delete udpIfPacket;
+    IPControlInfo *ipControlInfo = new IPControlInfo();
+    ipControlInfo->setProtocol(IP_PROT_UDP);
+    ipControlInfo->setSrcAddr(udpControlInfo->getSrcAddr());
+    ipControlInfo->setDestAddr(udpControlInfo->getDestAddr());
+    udpPacket->setControlInfo(ipControlInfo);
+    delete udpControlInfo;
 
     // send to IP
-    send(ipIfPacket,"to_ip");
+    send(udpPacket,"to_ip");
     numSent++;
 }
 

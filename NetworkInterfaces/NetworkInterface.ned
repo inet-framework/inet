@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,23 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 
 //
 // Prototype module for Link Layer protocols.
-//# FIXME or at least it appears to be... (Andras)
 //
-// Responsibilities:
-// - stub version for test only,
-// - can be replaced later, possibly by compound module
-// - can be used as a "like"-module
-//
-simple NetworkInterface
+module NetworkInterface
     parameters:
-        procdelay : numeric const;
+        frameCapacity : numeric const,
+        bitCapacity : numeric const;
     gates:
         in: physicalIn, ipOutputQueueIn;
-        out: physicalOut, ipOutputQueueOut, ipInputQueueOut;
-endsimple
+        out: physicalOut, ipOutputQueueOut, 
+             ipInputQueueOut; // FIXME this gate to be removed!
+endmodule
 

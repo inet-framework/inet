@@ -18,19 +18,15 @@
 
 #include <omnetpp.h>
 #include "TransportPacket.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 #include "IPAddress.h"
 
 
 class Tcp2Ip: public cSimpleModule
 {
-//  private:
-//    void setStringAddress(char *saddr, int addr);
-
   public:
     Module_Class_Members(Tcp2Ip, cSimpleModule, 0);
-    virtual void initialize() { }
     virtual void handleMessage(cMessage *msg);
 };
 
@@ -44,49 +40,25 @@ void Tcp2Ip::handleMessage(cMessage *msg)
     TransportPacket *tpacket = new TransportPacket();
     (cMessage&)(*tpacket) = *msg;  // copy parameters, length, etc
 
-
     // set kind of the transport packet
     // this comes from tcpmodule and could be ACK_SEG, DATA etc.
     tpacket->setMsgKind(msg->kind());
 
     // set source and destination port
-    tpacket->setSourcePort(
-        msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
-    tpacket->setDestinationPort(
-        msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
+    tpacket->setSourcePort(msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
+    tpacket->setDestinationPort(msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
 
-    // encapsulate tpacket into an IPInterfacePacket
-    IPInterfacePacket *ipintpacket = new IPInterfacePacket();
-    ipintpacket->encapsulate(tpacket);
-    ipintpacket->setDestAddr(IPAddress((int)msg->par("dest_addr")));
-    ipintpacket->setSrcAddr(IPAddress((int)msg->par("src_addr")));
-    ipintpacket->setProtocol(IP_PROT_TCP);
+    // add control info to tpacket
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setDestAddr(IPAddress((int)msg->par("dest_addr")));
+    controlInfo->setSrcAddr(IPAddress((int)msg->par("src_addr")));
+    controlInfo->setProtocol(IP_PROT_TCP);
+    tpacket->setControlInfo(controlInfo);
 
     // we don't set other values now
     delete msg;
 
-    // send ipintpacket out to IP
-    send(ipintpacket, "out");
+    // send out to IP
+    send(tpacket, "out");
 }
-
-
-/* Old way the coding was done
-void Tcp2Ip::setStringAddress(char *saddr, int addr)
-{
-    char stringdom[]="10.0.0.";
-    char buf[3];
-
-    // no negative addr's allowed:
-    // converted to 255
-    if (addr < 0)
-        addr = 255;
-
-    // put the integer addr into buffer
-    sprintf(buf,"%i",addr);
-
-    // copy stringhost to buf vector
-    strcpy(saddr, stringdom);
-    strcat(saddr, buf);
-}
-*/
 

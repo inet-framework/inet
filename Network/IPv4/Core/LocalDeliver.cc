@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,15 +20,16 @@
 
 #include <omnetpp.h>
 #include "LocalDeliver.h"
+#include "IPControlInfo_m.h"
 
+
+//  Cleanup and rewrite: Andras Varga, 2004
 
 Define_Module(LocalDeliver);
 
 
 void LocalDeliver::initialize()
 {
-    QueueWithQoS::initialize();
-
     fragmentTimeoutTime = strToSimtime(par("fragmentTimeout")); // FIXME why not numeric param?
 
     for (int i=0; i < FRAGMENT_BUFFER_MAXIMUM; i++)
@@ -41,7 +43,7 @@ void LocalDeliver::initialize()
 }
 
 
-void LocalDeliver::endService(cMessage *msg)
+void LocalDeliver::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 
@@ -76,34 +78,34 @@ void LocalDeliver::endService(cMessage *msg)
         removeFragmentFromBuf(datagram->fragmentId());
     }
 
-    IPInterfacePacket *interfacePacket = setInterfacePacket(datagram);
-    delete datagram;
+    int protocol = datagram->transportProtocol();
+    cMessage *packet = decapsulateIP(datagram);
 
-    switch(interfacePacket->protocol())
+    switch (protocol)
     {
         case IP_PROT_ICMP:
-            send(interfacePacket, "ICMPOut");
+            send(packet, "ICMPOut");
             break;
         case IP_PROT_IGMP:
-            send(interfacePacket, "multicastOut");
+            send(packet, "multicastOut");
             break;
         case IP_PROT_IP:
-            send(interfacePacket, "preRoutingOut");
+            send(packet, "preRoutingOut");
             break;
         case IP_PROT_TCP:
-            send(interfacePacket, "transportOut",0);
+            send(packet, "transportOut",0);
             break;
         case IP_PROT_UDP:
-            send(interfacePacket, "transportOut",1);
+            send(packet, "transportOut",1);
             break;
 // BCH Andras: from UTS MPLS model
         case IP_PROT_RSVP:
             ev << "IP send packet to RSVPInterface\n";
-            send(interfacePacket, "transportOut",3);
+            send(packet, "transportOut",3);
             break;
 // ECH
         default:
-            error("Unknown transport protocol %d", (int)(interfacePacket->protocol()));
+            error("Unknown transport protocol number %d", protocol);
     }
 }
 
@@ -112,18 +114,19 @@ void LocalDeliver::endService(cMessage *msg)
 // Private functions
 //----------------------------------------------------------
 
-IPInterfacePacket *LocalDeliver::setInterfacePacket(IPDatagram *datagram)
+cMessage *LocalDeliver::decapsulateIP(IPDatagram *datagram)
 {
     cMessage *packet = datagram->decapsulate();
 
-    IPInterfacePacket *interfacePacket = new IPInterfacePacket;
-    interfacePacket->encapsulate(packet);
-    interfacePacket->setProtocol(datagram->transportProtocol());
-    interfacePacket->setSrcAddr(datagram->srcAddress());
-    interfacePacket->setDestAddr(datagram->destAddress());
-    interfacePacket->setDiffServCodePoint(datagram->diffServCodePoint());
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setProtocol(datagram->transportProtocol());
+    controlInfo->setSrcAddr(datagram->srcAddress());
+    controlInfo->setDestAddr(datagram->destAddress());
+    controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
+    packet->setControlInfo(controlInfo);
+    delete datagram;
 
-    return interfacePacket;
+    return packet;
 }
 
 //----------------------------------------------------------

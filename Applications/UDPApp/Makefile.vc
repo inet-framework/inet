@@ -112,9 +112,9 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 UDPApp.obj: UDPApp.cc \
   UDPApp.h \
-  ..\..\Transport\UDP/UDPInterfacePacket_m.h \
+  ..\..\Transport\UDP/UDPControlInfo_m.h \
   ..\..\Util/StringTokenizer.h \
   ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  ..\..\Network\IPv4\Core/IPDatagram_m.h

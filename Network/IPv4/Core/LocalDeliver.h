@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,11 +17,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 #ifndef __LOCALDELIVERCORE_H__
 #define __LOCALDELIVERCORE_H__
 
+//  Cleanup and rewrite: Andras Varga, 2004
 
-#include "QueueWithQoS.h"
+
 #include "IPDatagram.h"
 
 
@@ -48,7 +51,7 @@ struct FragmentationBufferEntry
  * and decapsulate.
  * More info in the NED file.
  */
-class LocalDeliver : public QueueWithQoS
+class LocalDeliver : public cSimpleModule
 {
   private:
     simtime_t fragmentTimeoutTime;
@@ -57,7 +60,7 @@ class LocalDeliver : public QueueWithQoS
     FragmentationBufferEntry fragmentBuf [FRAGMENT_BUFFER_MAXIMUM];
 
   protected:
-      IPInterfacePacket *setInterfacePacket(IPDatagram *);
+      cMessage *decapsulateIP(IPDatagram *);
 
     // functions to handle Fragmentation Buffer
     void eraseTimeoutFragmentsFromBuf();
@@ -67,10 +70,10 @@ class LocalDeliver : public QueueWithQoS
     void removeFragmentFromBuf(int fragmentId);
 
   public:
-    Module_Class_Members(LocalDeliver, QueueWithQoS, 0);
+    Module_Class_Members(LocalDeliver, cSimpleModule, 0);
 
   protected:
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
     virtual void initialize();
 };
 

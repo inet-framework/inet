@@ -100,10 +100,10 @@ module PerformanceNetwork
 
     connections nocheck:
         for i=0..nodeNo-1 do
-            sender[i].out[0] --> router.in[2*i];
-            sender[i].in[0] <-- router.out[2*i];
-            recip[i].out[0] --> router.in[2*i+1];
-            recip[i].in[0] <-- router.out[2*i+1];
+            sender[i].out[0] --> datarate 1000000 --> router.in[2*i];
+            sender[i].in[0] <-- datarate 1000000 <-- router.out[2*i];
+            recip[i].out[0] --> datarate 1000000 --> router.in[2*i+1];
+            recip[i].in[0] <-- datarate 1000000 <-- router.out[2*i+1];
         endfor;
 
 endmodule

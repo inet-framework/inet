@@ -1,7 +1,6 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,7 +20,9 @@
 #ifndef __IPOUTPUTCORE_H__
 #define __IPOUTPUTCORE_H__
 
-#include "QueueWithQoS.h"
+//  Cleanup and rewrite: Andras Varga, 2004
+
+
 #include "IPDatagram.h"
 #include "ICMPAccess.h"
 
@@ -30,16 +31,16 @@
  * Receives complete IP datagram (from IPFragmentation), and checks hop counter.
  * More detailed info in corresponding NED file.
  */
-class IPOutput : public QueueWithQoS
+class IPOutput : public cSimpleModule
 {
   protected:
     ICMPAccess icmpAccess;
 
   public:
-    Module_Class_Members(IPOutput, QueueWithQoS, 0);
+    Module_Class_Members(IPOutput, cSimpleModule, 0);
 
   protected:
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

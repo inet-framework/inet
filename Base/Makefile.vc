@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= AbstractQueue.obj Join.obj ModuleAccess.obj QueueBase.obj QueueWithQoS.obj Sink.obj
+OBJS= AbstractQueue.obj Blackboard.obj Join.obj ModuleAccess.obj QueueBase.obj QueueWithQoS.obj Sink.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -79,6 +79,9 @@ subdirs: $(SUBDIR_TARGETS)
 
 AbstractQueue.obj: AbstractQueue.cc
 	$(CXX) -c $(COPTS) /Tp AbstractQueue.cc
+
+Blackboard.obj: Blackboard.cc
+	$(CXX) -c $(COPTS) /Tp Blackboard.cc
 
 Join.obj: Join.cc
 	$(CXX) -c $(COPTS) /Tp Join.cc
@@ -127,6 +130,8 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 AbstractQueue.obj: AbstractQueue.cc \
   AbstractQueue.h
+Blackboard.obj: Blackboard.cc \
+  Blackboard.h
 Join.obj: Join.cc
 ModuleAccess.obj: ModuleAccess.cc \
   ModuleAccess.h

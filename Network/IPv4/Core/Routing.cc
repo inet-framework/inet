@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,8 +18,11 @@
 //
 
 
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include <stdlib.h>
 #include <omnetpp.h>
+#include "IPControlInfo_m.h"
 #include "Routing.h"
 #include "watch2.h"  // FIXME
 
@@ -45,6 +49,7 @@ void Routing::endService(cMessage *msg)
 {
     // FIXME may we get ICMP here? what to do with it then?
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
+    IPRoutingDecision *routingDecision = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
 
     // FIXME add option handling code here!
 
@@ -72,7 +77,7 @@ void Routing::endService(cMessage *msg)
     }
 
     // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
-    if (datagram->inputPort()!=-1 && !IPForward)
+    if (routingDecision->inputPort()!=-1 && !IPForward)
     {
         ev << "forwarding off, dropping packet\n";
         numDropped++;
@@ -92,7 +97,9 @@ void Routing::endService(cMessage *msg)
     }
 
     // default: send datagram to fragmentation
-    datagram->setOutputPort(outputPort);
+    routingDecision->setOutputPort(outputPort);
+    //FIXME todo: routingDecision->setNextHopAddr(nextHopAddr);
+
     ev << "output port is " << outputPort << "\n";
     numForwarded++;
     send(datagram, "fragmentationOut");

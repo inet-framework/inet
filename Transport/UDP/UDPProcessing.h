@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,14 +19,15 @@
 
 
 //
-// author: Jochen Reber
+// Author: Jochen Reber
+// Cleanup and rewrite: Andras Varga 2004
 //
 
 #ifndef __UDPPROCESSING_H__
 #define __UDPPROCESSING_H__
 
-#include "IPInterfacePacket.h"
-#include "UDPInterfacePacket_m.h"
+#include "IPControlInfo_m.h"
+#include "UDPControlInfo_m.h"
 #include "basic_consts.h"
 
 
@@ -60,8 +62,8 @@ class UDPProcessing : public cSimpleModule
     int numDroppedBadChecksum;
 
     virtual int findAppGateForPort(int destPort);
-    virtual void processMsgFromIp(IPInterfacePacket *packet);
-    virtual void processMsgFromApp(UDPInterfacePacket *packet);
+    virtual void processMsgFromIp(UDPPacket *udpPacket);
+    virtual void processMsgFromApp(cMessage *appData);
 
   public:
     Module_Class_Members(UDPProcessing, cSimpleModule, 0);

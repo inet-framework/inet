@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -16,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 #ifndef SOCKETLAYER_H
 #define SOCKETLAYER_H
@@ -24,7 +23,7 @@
 #include "sockets.h"
 #include "RoutingTable.h"
 #include "SocketInterfacePacket.h"
-#include "TransportInterfacePacket.h"
+#include "UDPControlInfo_m.h"
 
 class SocketLayer : public cSimpleModule
 {
@@ -79,7 +78,7 @@ class SocketLayer : public cSimpleModule
   void _releasePort(Socket* socket);
 
 
-  void _handleFromUDP(TransportInterfacePacket* msg);
+  void _handleFromUDP(cMessage *msg);
   void _handleFromAppl(SocketInterfacePacket* msg);
   int _returnGate(int arrivalgate);
   void _sendDown(cMessage* msg, Socket* socket);

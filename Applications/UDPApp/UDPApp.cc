@@ -19,7 +19,7 @@
 
 #include <omnetpp.h>
 #include "UDPApp.h"
-#include "UDPInterfacePacket_m.h"
+#include "UDPControlInfo_m.h"
 #include "StringTokenizer.h"
 
 
@@ -36,23 +36,21 @@ void UDPServerApp::initialize()
 
 void UDPServerApp::handleMessage(cMessage *msg)
 {
-    UDPInterfacePacket *udpIfPacket = check_and_cast<UDPInterfacePacket *>(msg);
-    cMessage *payload = udpIfPacket->decapsulate();
+    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    IPAddress src = controlInfo->getSrcAddr();
+    IPAddress dest = controlInfo->getDestAddr();
+    int sentPort = controlInfo->getSrcPort();
+    int recPort = controlInfo->getDestPort();
 
-    IPAddress src = udpIfPacket->getSrcAddr();
-    IPAddress dest = udpIfPacket->getDestAddr();
-    int sentPort = udpIfPacket->getSrcPort();
-    int recPort = udpIfPacket->getDestPort();
-
-    ev  << "Packet received: " << payload << endl;
-    ev  << "Payload length: " << (payload->length()/8) << " bytes" << endl;
+    ev  << "Packet received: " << msg << endl;
+    ev  << "Payload length: " << (msg->length()/8) << " bytes" << endl;
     ev  << "Src/Port: " << src << " / " << sentPort << "  ";
     ev  << "Dest/Port: " << dest << " / " << recPort << endl;
 
     numReceived++;
 
-    delete udpIfPacket;
-    delete payload;
+    delete controlInfo;
+    delete msg;
 }
 
 
@@ -60,6 +58,8 @@ void UDPServerApp::handleMessage(cMessage *msg)
 
 
 Define_Module(UDPClientApp);
+
+int UDPClientApp::counter;
 
 void UDPClientApp::initialize()
 {
@@ -96,20 +96,19 @@ void UDPClientApp::handleMessage(cMessage *msg)
     cMessage *payload = new cMessage(msgName);
     payload->setLength(msgLength);
 
-    UDPInterfacePacket *udpIfPacket = new UDPInterfacePacket();
-    udpIfPacket->encapsulate(payload);
-
+    UDPControlInfo *controlInfo = new UDPControlInfo();
     IPAddress destAddr = chooseDestAddr();
-    udpIfPacket->setDestAddr(destAddr);
-    udpIfPacket->setSrcPort(localPort);
-    udpIfPacket->setDestPort(destPort);
+    controlInfo->setDestAddr(destAddr);
+    controlInfo->setSrcPort(localPort);
+    controlInfo->setDestPort(destPort);
+    payload->setControlInfo(controlInfo);
 
     ev << "Packet sent: " << payload << endl;
     ev << "Payload length: " << (payload->length()/8) << " bytes" << endl;
     ev << "Src/Port: unknown / " << localPort << "  ";
     ev << "Dest/Port: " << destAddr << " / " << destPort << endl;
 
-    send(udpIfPacket, "to_udp");
+    send(payload, "to_udp");
     numSent++;
 }
 

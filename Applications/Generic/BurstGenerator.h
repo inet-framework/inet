@@ -11,7 +11,7 @@
 #include <omnetpp.h>
 
 #include "basic_consts.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 
 class BurstGenerator: public cSimpleModule

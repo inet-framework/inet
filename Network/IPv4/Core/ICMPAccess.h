@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,13 +19,15 @@
 #ifndef __ICMPACCESS_H__
 #define __ICMPACCESS_H__
 
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include <omnetpp.h>
 #include "ModuleAccess.h"
 #include "ICMP.h"
 
 
 /**
- * Gives access to the RoutingTable.
+ * Gives access to ICMP.
  */
 class ICMPAccess : public ModuleAccess<ICMP>
 {

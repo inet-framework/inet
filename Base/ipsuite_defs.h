@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -26,11 +26,23 @@
 
 #include <omnetpp.h>
 
-// provide dummy definition for macros introduced after OMNeT++ 2.3
-#ifndef Enter_Method
-#define Enter_Method         (void)
-#define Enter_Method_Silent  (void)
+typedef unsigned long ulong;
+typedef unsigned int uint32;
+
+#ifndef _MSC_VER
+// MSVC6.0 gives C1017: invalid integer constant expression on following line :(
+# if (sizeof(int)!=4)
+#  error unsigned int is not 32 bits -- modify uint32 definition in ipsuite_defs.h
+# endif
 #endif
 
+
+//
+// Macro to prevent executing ev<< statements in Express mode.
+// Compare ev/sec values with code compiled with #define EV ev.
+// After 3.0a4 change to:
+// #define EV ev.disabled()?ev:ev
+//
+#define EV ev.disable_tracing?ev:ev
 
 #endif

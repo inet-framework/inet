@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,14 +18,15 @@
 //
 
 
-#include <omnetpp.h>
+//  Cleanup and rewrite: Andras Varga, 2004
 
+#include <omnetpp.h>
 #include "PreRouting.h"
 
 Define_Module(PreRouting);
 
 
-void PreRouting::endService(cMessage *msg)
+void PreRouting::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 

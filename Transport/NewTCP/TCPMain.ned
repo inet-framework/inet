@@ -27,7 +27,6 @@
 //  - <tt>TCP_C_OPEN_ACTIVE</tt>: open a connection (server must have already
 //    issued passive open)
 //  - <tt>TCP_C_SEND</tt>
-//  - <tt>TCP_C_RECEIVE</tt>
 //  - <tt>TCP_C_CLOSE</tt>: close connection
 //  - <tt>TCP_C_ABORT</tt>
 //  - <tt>TCP_C_STATUS</tt>
@@ -51,8 +50,8 @@ simple TCPMain
       receiveQueueClass: string,
       tcpAlgorithmClass: string;
     gates:
-      in: from_appl, from_ip;
-      out: to_appl, to_ip;
+      in: from_appl[], from_ip;
+      out: to_appl[], to_ip;
 endsimple
 
 

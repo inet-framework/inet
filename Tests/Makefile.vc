@@ -64,8 +64,9 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= MPLS
-SUBDIR_TARGETS=  MPLS_dir
+SUBDIRS= MPLS NewTCP
+SUBDIR_TARGETS=  MPLS_dir NewTCP_dir
+MPLS_dir : NewTCP_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
@@ -77,6 +78,9 @@ subdirs: $(SUBDIR_TARGETS)
 
 MPLS_dir:
 	cd MPLS && cd && nmake /nologo /f Makefile.vc
+
+NewTCP_dir:
+	cd NewTCP && cd && nmake /nologo /f Makefile.vc
 
 
 #doc: neddoc doxy

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,10 +17,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 #ifndef __IPMULTICAST_H__
 #define __IPMULTICAST_H__
 
-#include "QueueBase.h"
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include "RoutingTableAccess.h"
 #include "IPDatagram.h"
 
@@ -30,18 +33,18 @@
  * using the multicast routing table.
  * More detailed info in the NED file.
  */
-class IPMulticast : public QueueBase
+class IPMulticast : public cSimpleModule
 {
   private:
     RoutingTableAccess routingTableAccess;
     bool IPForward;
 
   public:
-    Module_Class_Members(IPMulticast, QueueBase, 0);
+    Module_Class_Members(IPMulticast, cSimpleModule, 0);
 
   protected:
     virtual void initialize();
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

@@ -52,7 +52,7 @@ module UDPSocketHost
             display: "p=80,220;i=fork";
         netIf : LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,280,row;i=iface";
     connections nocheck:
         // transport connections

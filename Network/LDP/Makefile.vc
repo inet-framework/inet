@@ -143,9 +143,7 @@ LDPInterface.obj: LDPInterface.cc \
   ..\MPLS/MPLSModule.h \
   ..\MPLS/MPLSPacket.h \
   ..\IPv4\Core/IPDatagram.h \
-  ..\IPv4\Core/IPDatagram_m.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h
 LDPpacket.obj: LDPpacket.cc \
   LDPpacket.h \
   ..\IPv4\Core/IPAddress.h \
@@ -168,9 +166,7 @@ LDPproc.obj: LDPproc.cc \
   ..\..\Base/ipsuite_defs.h \
   ..\MPLS/MPLSPacket.h \
   ..\IPv4\Core/IPDatagram.h \
-  ..\IPv4\Core/IPDatagram_m.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h
 tcpclientproc.obj: tcpclientproc.cc \
   ..\..\Transport\TCP/tcp.h \
   ..\IPv4\Core/IPAddress.h \
@@ -180,10 +176,9 @@ tcpserverproc.obj: tcpserverproc.cc \
   ..\MPLS/ConstType.h \
   ..\IPv4\Core/IPAddress.h
 UDPAppInterface.obj: UDPAppInterface.cc \
-  ..\..\Transport\TCP/TransportInterfacePacket.h \
   ..\..\Transport\UDP/UDPPacket.h \
-  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Transport\UDP/UDPControlInfo_m.h \
+  ..\IPv4\Core/IPControlInfo_m.h \
   ..\IPv4\Core/IPAddress.h \
-  ..\..\Transport\TCP/TransportInterfacePacket_m.h \
   ..\..\Transport\UDP/UDPPacket_m.h \
-  ..\IPv4\Core/IPInterfacePacket_m.h
+  ..\IPv4\Core/IPDatagram_m.h

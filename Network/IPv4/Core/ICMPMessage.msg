@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -42,7 +43,9 @@ typedef int ICMPCode;
 
 
 //
-//  length() rules(in bit): ping messages have 8*20 bits length;
+// ICMP packet.
+//
+//  length(): ping messages have 8*20 bits length;
 //            error messages have 8*4 bits ICMP header,
 //            full IP header of error datagram (+options)
 //            + 8*8 bits payload of the error datagram
@@ -50,15 +53,7 @@ typedef int ICMPCode;
 //
 //  author: Jochen Reber
 //
-//
 //  Interface formats:
-//
-//  errorMessage from other modules
-//  (Fragmentation, PreRouting, Routing):
-//  type: cMessage
-//  parameters: "ICMPType" -- ICMPType
-//              "ICMPCode" -- ICMPCode (int)
-//  parList:    "datagram" -- IPDatagram
 //
 //  message format for pingIn/pingOut:
 //  type: cMessage

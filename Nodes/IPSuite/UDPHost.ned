@@ -16,7 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayer",
     "UDPUpperLayers";
@@ -36,6 +38,8 @@ module UDPHost
         in: in[];
         out: out[];
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         udpApp: UDPUpperLayers;
             parameters:
                 udpClient1Name = "UDPClientApp",
@@ -53,7 +57,7 @@ module UDPHost
             display: "p=87,155;i=fork";
         netIf : LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections

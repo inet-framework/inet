@@ -30,7 +30,7 @@
 #include <omnetpp.h>
 
 #include "basic_consts.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 
 class ConstTrafficGen: public cSimpleModule
@@ -41,11 +41,9 @@ private:
     int destctr;
     bool usesTCPProt;
 
-    char *chooseDestAddr(char *);
+    IPAddress chooseDestAddr();
 public:
-    Module_Class_Members(ConstTrafficGen, cSimpleModule,
-            ACTIVITY_STACK_SIZE);
-
+    Module_Class_Members(ConstTrafficGen, cSimpleModule, ACTIVITY_STACK_SIZE);
     void initialize();
     void activity();
 };

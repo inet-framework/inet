@@ -30,9 +30,6 @@
 // Redesign: Andras Varga, 02.2004
 //
 simple PreRouting
-    parameters:
-        procdelay : numeric const,
-        qosBehaviorClass: string;
     gates:
         in: in[];
         out: routingOut;

@@ -77,7 +77,7 @@ class MPLSPacket: public cPacket
 
   public:
     /* constructors*/
-    MPLSPacket();
+    MPLSPacket(const char *name=NULL);
     MPLSPacket(const MPLSPacket &p);
 
     /* assignment operator*/

@@ -86,20 +86,20 @@ module ClientServerNetwork
             display: "p=138,102;i=ipc";
     connections nocheck:
 
-        client1.out[0] --> router.in[0];
-        client1.in[0] <-- router.out[0];
+        client1.out[0] --> datarate 1000000 --> router.in[0];
+        client1.in[0] <-- datarate 1000000 <-- router.out[0];
 
-        client2.out[0] --> router.in[1];
-        client2.in[0] <-- router.out[1];
+        client2.out[0] --> datarate 1000000 --> router.in[1];
+        client2.in[0] <-- datarate 1000000 <-- router.out[1];
 
-        client3.out[0] --> router.in[2];
-        client3.in[0] <-- router.out[2];
+        client3.out[0] --> datarate 1000000 --> router.in[2];
+        client3.in[0] <-- datarate 1000000 <-- router.out[2];
 
-        server4.out[0] --> router.in[3];
-        server4.in[0] <-- router.out[3];
+        server4.out[0] --> datarate 1000000 --> router.in[3];
+        server4.in[0] <-- datarate 1000000 <-- router.out[3];
 
-        client1.out[1] --> server4.in[1];
-        client1.in[1] <-- server4.out[1];
+        client1.out[1] --> datarate 1000000 --> server4.in[1];
+        client1.in[1] <-- datarate 1000000 <-- server4.out[1];
 
 endmodule
 

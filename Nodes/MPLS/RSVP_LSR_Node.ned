@@ -12,6 +12,7 @@
 
 
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayerWithMPLS",
     "MPLSModule",
@@ -60,6 +61,8 @@ module RSVP_LSR_Node
         in: in[];
         out: out[];
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         signal_module: RSVPAppl;
             parameters:
                 local_addr = local_addr,
@@ -90,7 +93,7 @@ module RSVP_LSR_Node
             display: "b=32,30;p=192,163;i=fork";
         netIf: LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=88,297,row;i=iface";
         mplsModule: MPLSModule;
             parameters:

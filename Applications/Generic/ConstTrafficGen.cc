@@ -26,7 +26,7 @@
 
 #include <omnetpp.h>
 #include "ConstTrafficGen.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 #include "ICMP.h"
 
@@ -41,60 +41,54 @@ void ConstTrafficGen::initialize()
     usesTCPProt = par("tcpProtocol");
 }
 
+// FIXME this is nearly the same as BurstGenerator -- KILL one of them!!!!!
 void ConstTrafficGen::activity()
 {
     int contCtr = id()*10000+100;
-    char dest[20];
-    cPacket *transportPacket;
-    IPInterfacePacket *iPacket;
 
     while(true)
     {
         wait(generationTime);
 
-        transportPacket = new cPacket;
+        cPacket *transportPacket = new cPacket("burstgen-pk");
         transportPacket->setLength(packetSize);
         transportPacket->addPar("content") = contCtr++;
 
-        iPacket = new IPInterfacePacket;
-        iPacket->encapsulate(transportPacket);
-        iPacket->setDestAddr(chooseDestAddr(dest));
-        iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
-        send(iPacket, "out");
+        IPAddress destAddr = chooseDestAddr();
 
-    ev << "Constant Traffic Generator: Packet sent:"
-       << "\nContent: " << int(transportPacket->par("content"))
-       << " Bitlength: " << int(transportPacket->length())
-       << "   Time: " << simTime()
-       << "\nDest: " << iPacket->destAddr()
-       << "\n";
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setDestAddr(destAddr);
+        controlInfo->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
+        transportPacket->setControlInfo(controlInfo);
+
+        ev << "Constant Traffic Generator: sending packet:\n"
+           << " Content: " << int(transportPacket->par("content"))
+           << " Bitlength: " << int(transportPacket->length())
+           << "   Time: " << simTime()
+           << "\nDest: " << destAddr
+           << "\n";
+
+        send(transportPacket, "out");
 
     } // end while
 }
 
 /* random destination addresses
     based on test2.irt */
-char *ConstTrafficGen::chooseDestAddr(char *dest)
+IPAddress ConstTrafficGen::chooseDestAddr()
 {
     switch(intrand(2))
     {
         // computer no 1
-        case 0: strcpy(dest, "10.10.0.1");
-                break;
+        case 0: return IPAddress("10.10.0.1");
         // computer no 2
-        case 1: strcpy(dest, "10.10.0.2");
-                break;
+        case 1: return IPAddress("10.10.0.2");
         // DL sink
-        case 2: strcpy(dest, "10.20.0.3");
-                break;
+        case 2: return IPAddress("10.20.0.3");
         // local loopback
-        case 3: strcpy(dest, "127.0.0.1");
-                break;
+        case 3: return IPAddress("127.0.0.1");
         // IP address doesn't exist
-        case 4: strcpy(dest, "10.30.0.5");
-                break;
+        case 4: return IPAddress("10.30.0.5");
     }
-
-    return dest;
 }
 

@@ -58,10 +58,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= UDPInterfacePacket_m.obj UDPPacket_m.obj UDPProcessing.obj
+OBJS= UDPControlInfo_m.obj UDPPacket_m.obj UDPProcessing.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= UDPInterfacePacket_m.h UDPPacket_m.h
+GENERATEDHEADERS= UDPControlInfo_m.h UDPPacket_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -77,11 +77,11 @@ $(OBJS) : $(GENERATEDHEADERS)
 
 subdirs: $(SUBDIR_TARGETS)
 
-UDPInterfacePacket_m.obj: UDPInterfacePacket_m.cc
-	$(CXX) -c $(NEDCOPTS) /Tp UDPInterfacePacket_m.cc
+UDPControlInfo_m.obj: UDPControlInfo_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp UDPControlInfo_m.cc
 
-UDPInterfacePacket_m.cc UDPInterfacePacket_m.h: UDPInterfacePacket.msg
-	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) UDPInterfacePacket.msg
+UDPControlInfo_m.cc UDPControlInfo_m.h: UDPControlInfo.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) UDPControlInfo.msg
 
 UDPPacket_m.obj: UDPPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) /Tp UDPPacket_m.cc
@@ -122,17 +122,17 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-UDPInterfacePacket_m.obj: UDPInterfacePacket_m.cc \
-  UDPInterfacePacket_m.h \
+UDPControlInfo_m.obj: UDPControlInfo_m.cc \
+  UDPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 UDPPacket_m.obj: UDPPacket_m.cc \
   UDPPacket_m.h
 UDPProcessing.obj: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   UDPPacket_m.h \
-  UDPInterfacePacket_m.h \
+  UDPControlInfo_m.h \
   ..\..\Base/basic_consts.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h
+  ..\..\Network\IPv4\Core/IPDatagram_m.h

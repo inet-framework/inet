@@ -21,10 +21,7 @@
 
 #include <omnetpp.h>
 #include "TCPConnection.h"
-
-
-class TCPSegment;
-class TCPInterfacePacket;
+#include "TCPSegment_m.h"
 
 
 /**
@@ -66,17 +63,11 @@ class TCPInterfacePacket;
  */
 class TCPSendQueue : public cPolymorphic
 {
-  protected:
-    TCPConnection *conn; // TCP connection object
-    tcpseq_t startSeq;   // sequence number of the first user data byte inserted
-
   public:
     /**
-     * Ctor. The startSeq parameter tells what sequence number the first
-     * byte of app data should get. This is usually ISS+1 because SYN consumes
-     * one byte in the sequence number space.
+     * Ctor.
      */
-    TCPSendQueue(TCPConnection *_conn, tcpseq_t _startSeq)  {conn=_conn; startSeq=_startSeq;}
+    TCPSendQueue()  {}
 
     /**
      * Virtual dtor.
@@ -84,31 +75,51 @@ class TCPSendQueue : public cPolymorphic
     virtual ~TCPSendQueue() {}
 
     /**
+     * Initialize the object. The startSeq parameter tells what sequence number the first
+     * byte of app data should get. This is usually ISS+1 because SYN consumes
+     * one byte in the sequence number space.
+     *
+     * init() may be called more than once; every call flushes the existing contents
+     * of the queue.
+     */
+    virtual void init(uint32 startSeq) = 0;
+
+    /**
      * Called on SEND app command, it inserts in the queue the data the user
      * wants to send. Implementations of this abstract class will decide
      * what this means: copying actual bytes, just increasing the
      * "last byte queued" variable, or storing cMessage object(s).
      */
-    virtual void enqueueAppData(TCPInterfacePacket *tcpIfPacket) = 0;
+    virtual void enqueueAppData(cMessage *msg) = 0;
 
     /**
-     * Returns how many bytes are available in the queue, from (and including)
-     * the given sequence number.
+     * Returns the sequence number of the last byte stored in the buffer plus one.
+     * (The first byte of the next send operation would get this sequence number.)
      */
-    virtual ulong bytesAvailable(tcpseq_t fromSeq) = 0;
+    virtual uint32 bufferEndSeq() = 0;
+
+    /**
+     * Utility function: returns how many bytes are available in the queue, from
+     * (and including) the given sequence number.
+     */
+    inline ulong bytesAvailable(uint32 fromSeq)
+    {
+        uint32 bufEndSeq = bufferEndSeq();
+        return seqLess(fromSeq, bufEndSeq) ? bufEndSeq-fromSeq : 0;
+    }
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
      * a TCP segment which contains the data from the requested sequence
      * number range.
      */
-    virtual TCPSegment *createSegmentWithBytes(tcpseq_t fromSeq, ulong numBytes) = 0;
+    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
      * transmitted and ACKed, so they can be removed from the queue.
      */
-    virtual void discardUpTo(tcpseq_t seqNum) = 0;
+    virtual void discardUpTo(uint32 seqNum) = 0;
 
 };
 

@@ -27,8 +27,6 @@
 // author: Jochen Reber
 //
 simple IPTunneling
-    parameters:
-        procdelay: numeric const;
     gates:
         in: multicastIn;
         out: sendOut;

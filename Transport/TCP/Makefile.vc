@@ -58,10 +58,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPInterfacePacket_m.obj TCPSegment_m.obj TransportInterfacePacket_m.obj TransportPacket_m.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodule.obj
+OBJS= TCPInterfacePacket_m.obj TransportPacket_m.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodule.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= TCPInterfacePacket_m.h TCPSegment_m.h TransportInterfacePacket_m.h TransportPacket_m.h
+GENERATEDHEADERS= TCPInterfacePacket_m.h TransportPacket_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -82,18 +82,6 @@ TCPInterfacePacket_m.obj: TCPInterfacePacket_m.cc
 
 TCPInterfacePacket_m.cc TCPInterfacePacket_m.h: TCPInterfacePacket.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) TCPInterfacePacket.msg
-
-TCPSegment_m.obj: TCPSegment_m.cc
-	$(CXX) -c $(NEDCOPTS) /Tp TCPSegment_m.cc
-
-TCPSegment_m.cc TCPSegment_m.h: TCPSegment.msg
-	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) TCPSegment.msg
-
-TransportInterfacePacket_m.obj: TransportInterfacePacket_m.cc
-	$(CXX) -c $(NEDCOPTS) /Tp TransportInterfacePacket_m.cc
-
-TransportInterfacePacket_m.cc TransportInterfacePacket_m.h: TransportInterfacePacket.msg
-	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) TransportInterfacePacket.msg
 
 TransportPacket_m.obj: TransportPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) /Tp TransportPacket_m.cc
@@ -145,28 +133,23 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 Ip2Tcp.obj: Ip2Tcp.cc \
   TransportPacket.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
   TransportPacket_m.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h
+  ..\..\Network\IPv4\Core/IPDatagram_m.h
 pcb.obj: pcb.cc \
   pcb.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 Tcp2Ip.obj: Tcp2Ip.cc \
   TransportPacket.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
   TransportPacket_m.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h
+  ..\..\Network\IPv4\Core/IPDatagram_m.h
 TCPInterfacePacket_m.obj: TCPInterfacePacket_m.cc \
   TCPInterfacePacket_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 tcpmodule.obj: tcpmodule.cc \
   tcp.h
-TCPSegment_m.obj: TCPSegment_m.cc \
-  TCPSegment_m.h
-TransportInterfacePacket_m.obj: TransportInterfacePacket_m.cc \
-  TransportInterfacePacket_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h
 TransportPacket_m.obj: TransportPacket_m.cc \
   TransportPacket_m.h

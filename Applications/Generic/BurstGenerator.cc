@@ -7,7 +7,7 @@
 
 #include <omnetpp.h>
 #include "BurstGenerator.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 #include "ICMP.h"
 
@@ -25,31 +25,26 @@ void BurstGenerator::activity()
 {
     int packetsSent;
     int contCtr = id()*10000+100;
-    char dest[20];
-    cPacket *transportPacket = NULL;
-    IPInterfacePacket *iPacket = NULL;
 
     wait(1);
 
     for (packetsSent = 0; packetsSent < burstSize; packetsSent++)
     {
-
-        transportPacket = new cPacket;
+        cPacket *transportPacket = new cPacket("burstgen-pk");
         transportPacket->setLength(packetSize);
         transportPacket->addPar("content") = contCtr++;
 
-        iPacket = new IPInterfacePacket;
-        iPacket->encapsulate(transportPacket);
-        iPacket->setDestAddr(destAddress);
-        iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
-        send(iPacket, "out");
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setDestAddr(destAddress);
+        controlInfo->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
+        transportPacket->setControlInfo(controlInfo);
+
+        send(transportPacket, "out");
     }
 
     if (burstSize > 0)
     {
-        ev << "Burst Generator: " << burstSize
-           << " packets sent to "<< iPacket->destAddr()
-           << "\n";
+        ev << "Burst Generator: " << burstSize << " packets sent to "<< destAddress << "\n";
     }
 
 }

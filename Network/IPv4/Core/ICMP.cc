@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,22 +17,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include <omnetpp.h>
 #include <string.h>
 
+#include "IPControlInfo_m.h"
 #include "ICMP.h"
 
 Define_Module(ICMP);
 
 
-void ICMP::endService(cMessage *msg)
+void ICMP::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->arrivalGate();
 
     // process arriving ICMP message
     if (!strcmp(arrivalGate->name(), "localIn"))
     {
-        processICMPMessage((IPInterfacePacket *)msg);
+        processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
     }
 
@@ -60,7 +64,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
 
     // do not reply with error message to error message
-    if (origDatagram->protocol() == IP_PROT_ICMP)
+    if (origDatagram->transportProtocol() == IP_PROT_ICMP)
     {
         ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->encapsulatedMsg());
         if (recICMPMsg->getIsError())
@@ -71,7 +75,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
         }
     }
 
-    ICMPMessage *errorMessage = new ICMPMessage();
+    ICMPMessage *errorMessage = new ICMPMessage("icmp error");
     errorMessage->setType(type);
     errorMessage->setCode(code);
     errorMessage->setIsError(true);
@@ -79,25 +83,18 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // ICMP message length: see above
     errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
 
-    sendInterfacePacket(errorMessage, origDatagram->srcAddress());
+    sendToIP(errorMessage, origDatagram->srcAddress());
 
     // debugging information
     ev << "sending error message: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
 }
 
-
-//----------------------------------------------------------
-// Private Functions
-//----------------------------------------------------------
-
-// error Messages are simply forwarded to errorOut
-void ICMP::processICMPMessage(IPInterfacePacket *interfacePacket)
+void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
 {
-    ICMPMessage *icmpmsg = check_and_cast<ICMPMessage *>(interfacePacket->decapsulate());
-
+    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(icmpmsg->removeControlInfo());
     // use source of ICMP message as destination for reply
-    IPAddress src = interfacePacket->srcAddr();
-    delete interfacePacket;
+    IPAddress src = controlInfo->srcAddr();
+    delete controlInfo;
 
     switch (icmpmsg->getType())
     {
@@ -158,7 +155,7 @@ void ICMP::recEchoRequest(ICMPMessage *request, const IPAddress& dest)
         reply->getQuery().setTransmitTimestamp(simTime());
     }
 
-    sendInterfacePacket(reply, dest);
+    sendToIP(reply, dest);
 }
 
 void ICMP::recEchoReply (ICMPMessage *reply)
@@ -176,7 +173,7 @@ void ICMP::recEchoReply (ICMPMessage *reply)
 void ICMP::sendEchoRequest(cMessage *msg)
 {
     ICMPMessage *icmpmsg = new ICMPMessage();
-    ICMPQuery *echoInfo = (ICMPQuery *)msg->parList().get("echoInfo");
+    ICMPQuery *echoInfo = (ICMPQuery *)msg->parList().get("echoInfo");  // FIXME cPar!!!
 
     icmpmsg->setType(echoInfo->getIsTimestampValid() ? ICMP_TIMESTAMP_REQUEST : ICMP_ECHO_REQUEST);
     icmpmsg->setCode(0);
@@ -186,18 +183,17 @@ void ICMP::sendEchoRequest(cMessage *msg)
     IPAddress dest = msg->par("destination_address").stringValue();
     delete msg;
 
-    sendInterfacePacket(icmpmsg, dest);
+    sendToIP(icmpmsg, dest);
 }
 
-void ICMP::sendInterfacePacket(ICMPMessage *msg, const IPAddress& dest)
+void ICMP::sendToIP(ICMPMessage *msg, const IPAddress& dest)
 {
-    IPInterfacePacket *interfacePacket = new IPInterfacePacket;
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setDestAddr(dest);
+    controlInfo->setProtocol(IP_PROT_ICMP);
+    msg->setControlInfo(controlInfo);
 
-    interfacePacket->encapsulate(msg);
-    interfacePacket->setDestAddr(dest);
-    interfacePacket->setProtocol(IP_PROT_ICMP);
-
-    send(interfacePacket, "sendOut");
+    send(msg, "sendOut");
 }
 
 

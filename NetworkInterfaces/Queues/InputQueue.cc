@@ -19,16 +19,19 @@
 #include <omnetpp.h>
 #include "InputQueue.h"
 #include "IPDatagram.h"
+#include "IPControlInfo_m.h"
 
 Define_Module(InputQueue);
 
 void InputQueue::endService(cMessage *msg)
 {
-    IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
+    // remember on which port the packet came in
+    IPRoutingDecision *routingDecision = new IPRoutingDecision();
+    routingDecision->setInputPort(msg->arrivalGate()->index());
 
-    // remember on which port it came in
-    datagram->setInputPort(datagram->arrivalGate()->index());
+    delete msg->removeControlInfo();
+    msg->setControlInfo(routingDecision);
 
-    send(datagram, "toIP");
+    send(msg, "toIP");
 }
 

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,14 +20,33 @@
 
 //import "IPInterfacePacket.msg";
 
-enum IPProtocolFieldId;
+//
+// Protocol field: taken from RFC 1700.
+// Replacing old RFC1700 with newer (28/06/01) Protocol Numbers
+//
+enum IPProtocolFieldId
+{
+  IP_PROT_HOPOPT = 0;
+  IP_PROT_ICMP  = 1;
+  IP_PROT_IGMP  = 2;
+  IP_PROT_IP    = 4; // used for IP tunneling. FIXME: RFC1700 specifies =3 (old IPSuite) ???
+  IP_PROT_TCP   = 6;
+  IP_PROT_EGP   = 8;
+  IP_PROT_IGP   = 9;
+  IP_PROT_UDP   = 17;
+  IP_PROT_XTP   = 36;
+  IP_PROT_IPv6  = 41;
+  IP_PROT_RSVP  = 46;
+  IP_PROT_IPv6_ICMP = 58;
+  IP_PROT_NONE = 59;
+  IP_PROT_IPv6_MOBILITY = 62;
+}
 
 class noncobject IPAddress;
 
 cplusplus {{
 
 #include "IPAddress.h"
-#include "IPInterfacePacket.h"   // enum IPProtocolFieldId
 
 // default IP header length: 20 bytes
 const int DEFAULT_HEADER_LENGTH = 20;
@@ -106,15 +126,11 @@ class IPSourceRoutingOption
 //  used existing fields:
 //  length () / setLength(err)  in bits
 //  hasBitError() / setBitError()
-//  protocol() / setProtocol(short p) is always PR_IP
 //  kind() always set to MK_PACKET
 //  timestamp() / setTimestamp (simtime) used in timestamp option
 //
 //  void *context / contextPointer() / setContextPointer (*void)
 //  currently optional
-//
-//  transportProtocol: use of enumeration in protocol.h?
-//    ICMP?
 //
 //  additional length fields defined in this class
 //  use the unit bytes (totalLength()=length()/8 and header_length) or
@@ -122,7 +138,7 @@ class IPSourceRoutingOption
 //
 //# FIXME add method lengthBytes() {return length()/8;} to some base class
 //
-class IPDatagram extends cPacket
+message IPDatagram
 {
     properties:
         omitGetVerb = true;
@@ -131,15 +147,13 @@ class IPDatagram extends cPacket
         short headerLength = DEFAULT_HEADER_LENGTH;  // FIXME set automatically!
         unsigned char diffServCodePoint;
 
-        // FIXME protocol: PR_IP
-
         int fragmentId;
         bool moreFragments;
         bool dontFragment;
         int fragmentOffset;
 
         short timeToLive;
-        int transportProtocol enum(IPProtocolFieldId) = IP_PROT_NONE;  // FIXME needed?
+        int transportProtocol enum(IPProtocolFieldId) = IP_PROT_NONE;
         IPAddress srcAddress;
         IPAddress destAddress;
 
@@ -148,10 +162,6 @@ class IPDatagram extends cPacket
         IPRecordRouteOption recordRoute;
         IPTimestampOption timestampOption;
         IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
-
-        // internal fields
-        int outputPort = -1;
-        int inputPort = -1;
 };
 
 //

@@ -17,76 +17,79 @@
 //
 
 
-import  
-    "LinkLayer", 
-    "NetworkLayer", 
-    "UDPUpperLayers", 
-    "TCPUpperLayers", 
-    "PingApp"; 
-               
-               
- 
+import
+    "Blackboard",
+    "LinkLayer",
+    "NetworkLayer",
+    "UDPUpperLayers",
+    "TCPUpperLayers",
+    "PingApp";
+
+
+
 //
 // Definition of an IPNode with transport layers.
 //
-module StandardHost 
-    parameters: 
+module StandardHost
+    parameters:
         // TCP information
-        tcpApplType : string, 
-        local_addr : numeric, 
-        server_addr : numeric, 
-                               
+        tcpApplType : string,
+        local_addr : numeric,
+        server_addr : numeric,
+
         // Network information
-        numOfPorts : numeric, 
-        routingFile : string; 
-    gates: 
-        in: in[]; 
-        out: out[]; 
-    submodules: 
+        numOfPorts : numeric,
+        routingFile : string;
+    gates:
+        in: in[];
+        out: out[];
+    submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         // transport and application layers
-        tcpApp: TCPUpperLayers; 
-            parameters: 
-                tcpApplType = tcpApplType, 
-                local_addr = local_addr, 
-                server_addr = server_addr; 
+        tcpApp: TCPUpperLayers;
+            parameters:
+                tcpApplType = tcpApplType,
+                local_addr = local_addr,
+                server_addr = server_addr;
             display: "p=60,50;b=40,24,rect";
-        udpApp: UDPUpperLayers; 
-            parameters: 
-                udpClient1Name = "UDPClientApp", 
-                udpServer1Name = "UDPServerApp"; 
+        udpApp: UDPUpperLayers;
+            parameters:
+                udpClient1Name = "UDPClientApp",
+                udpServer1Name = "UDPServerApp";
             display: "p=120,50;b=40,24,rect";
-        pingApp: PingApp; 
+        pingApp: PingApp;
             display: "p=180,50;b=40,24,rect";
-        networkLayer: NetworkLayer; 
-            parameters: 
-                IPForward = false, 
-                numOfPorts = numOfPorts, 
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[numOfPorts], 
-                physOut[numOfPorts]; 
+        networkLayer: NetworkLayer;
+            parameters:
+                IPForward = false,
+                numOfPorts = numOfPorts,
+                routingFile = routingFile;
+            gatesizes:
+                physIn[numOfPorts],
+                physOut[numOfPorts];
             display: "p=120,110;i=fork";
-        netIf: LinkLayer[numOfPorts]; 
-            parameters: 
-                NWIName = "PPPModule"; 
+        netIf: LinkLayer[numOfPorts];
+            parameters:
+                NWIName = "PPPInterface";
             display: "p=60,180,row;i=iface";
-    connections nocheck: 
+    connections nocheck:
         // transport connections
-        networkLayer.TCPOut --> tcpApp.in; 
-        networkLayer.TCPIn <-- tcpApp.out; 
-                                           
-        networkLayer.UDPOut --> udpApp.from_ip; 
-        networkLayer.UDPIn <-- udpApp.to_ip; 
-                                             
-        networkLayer.pingOut --> pingApp.in; 
-        networkLayer.pingIn <-- pingApp.out; 
-                                             
+        networkLayer.TCPOut --> tcpApp.in;
+        networkLayer.TCPIn <-- tcpApp.out;
+
+        networkLayer.UDPOut --> udpApp.from_ip;
+        networkLayer.UDPIn <-- udpApp.to_ip;
+
+        networkLayer.pingOut --> pingApp.in;
+        networkLayer.pingIn <-- pingApp.out;
+
         // connections to network outside
-        for i=0..numOfPorts-1 do 
-            in[i] --> netIf[i].physIn; 
-            out[i] <-- netIf[i].physOut; 
-            netIf[i].inputQueueOut --> networkLayer.physIn[i]; 
-            netIf[i].outputQueueIn <-- networkLayer.physOut[i]; 
-        endfor; 
-endmodule 
+        for i=0..numOfPorts-1 do
+            in[i] --> netIf[i].physIn;
+            out[i] <-- netIf[i].physOut;
+            netIf[i].inputQueueOut --> networkLayer.physIn[i];
+            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
+        endfor;
+endmodule
 

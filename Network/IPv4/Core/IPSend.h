@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,42 +17,36 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-#ifndef __IPSENDCORE_H__
-#define __IPSENDCORE_H__
+#ifndef __IPSEND_H__
+#define __IPSEND_H__
 
-#include "QueueWithQoS.h"
+//  Cleanup and rewrite: Andras Varga, 2004
+
+
 #include "RoutingTableAccess.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 
 
 /**
  * Encapsulate packet in an IP datagram.
  */
-class IPSend : public QueueWithQoS
+class IPSend : public cSimpleModule
 {
   private:
     RoutingTableAccess routingTableAccess;
 
     int defaultTimeToLive;
     int defaultMCTimeToLive;
-    // type and value of curFragmentId is
-    // just incremented per datagram sent out;
-    //  Transport layer cannot give values
-    long curFragmentId;
-
-    void sendDatagram(IPInterfacePacket *);
+    long curFragmentId;  // counter, used to assign unique fragmentIds to datagrams
 
   public:
-    Module_Class_Members(IPSend, QueueWithQoS, 0);
+    Module_Class_Members(IPSend, cSimpleModule, 0);
 
   protected:
-    IPDatagram *encapsulate(cMessage *msg);
-
     virtual void initialize();
-    virtual void arrival(cMessage *msg);
-    virtual cMessage *arrivalWhenIdle(cMessage *msg);
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
+    IPDatagram *encapsulate(cMessage *transportPacket);
 };
 
 #endif

@@ -12,6 +12,7 @@
 //    Donald Liang (LYBD), Virginia Tech
 //    Jeroen Idserda, University of Twente
 //    Joung Woong Lee (zipizigi), University of Tsukuba
+//    Andras Varga
 //
 //-----------------------------------------------------------------------------
 //
@@ -184,6 +185,7 @@ private:
 public:
   //stack size = 0 to indicate usage of handleMessage
   Module_Class_Members(TcpModule, cSimpleModule, 0);
+  ~TcpModule();
 
   //virtual functions to be redefined
   virtual void initialize();
@@ -223,7 +225,7 @@ void TcpModule::initialize()
   if (hasPar("debug")) {
           debug = par("debug");
   } else {
-          debug = false;
+          debug = true; //-false;
   }
 
   // <Jeroen>
@@ -253,9 +255,13 @@ void TcpModule::initialize()
   //WATCH(i); //put all WATCHes in here
 }
 
-// BCH LYBD
 void TcpModule::finish()
 {
+}
+
+TcpModule::~TcpModule()
+{
+// BCH LYBD
   // clear unused TCB or active connections
   TcbList::iterator iter = tcb_list.begin();
   while (iter != tcb_list.end())
@@ -274,8 +280,8 @@ void TcpModule::finish()
   delete send_seq_no;
   delete rec_ack_no;
   delete rec_seq_no;
-}
 // ECH LYBD
+}
 
 void TcpModule::handleMessage(cMessage *msg)
 {
@@ -4625,7 +4631,11 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
                   }
                   // ECH LYBD
 
-                  //cancel all scheduled ACK and retransmission timers here
+                  //FIXME TODO: cancel all scheduled ACK and retransmission timers here
+                  // BCH Andras
+                  delete cancelEvent(tcb_block->timeout_conn_estab_msg);
+                  if (debug) ev << "Cancelling connection establishment timer.\n";
+                  // ECH Andras
 
                   //RFC-793: flush retransmission queue
                 } //end of check passive

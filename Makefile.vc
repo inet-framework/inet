@@ -88,6 +88,7 @@ Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir : Util_
 Transport_dir NetworkInterfaces_dir Applications_dir : Network_dir
 Nodes_dir : Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir
 Examples_dir Tests_dir : Nodes_dir
+Examples_dir : Tests_dir  # this is not important, can be removed
 
 # documentation targets
 DOC_DIR=Documentation

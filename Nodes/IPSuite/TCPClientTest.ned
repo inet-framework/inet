@@ -3,6 +3,7 @@
 // Definition of an IPNode with transport layers
 
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayer",
     "mytcp4ip";
@@ -22,6 +23,8 @@ module TCPClientTest
         in: in[];
         out: out[];
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         // transport and application layers
         tcpApp: MyTCPUpperLayers;
             parameters:
@@ -41,7 +44,7 @@ module TCPClientTest
             display: "p=87,155;i=fork";
         netIf : LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections

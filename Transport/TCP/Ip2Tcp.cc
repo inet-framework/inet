@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 #include "TransportPacket.h"
-#include "IPInterfacePacket.h"
+#include "IPControlInfo_m.h"
 
 #include "IPAddress.h"
 
@@ -37,17 +37,14 @@ Define_Module(Ip2Tcp);
 
 void Ip2Tcp::handleMessage(cMessage *msg)
 {
-    IPInterfacePacket *ipintpacket = (IPInterfacePacket *)msg;
-    TransportPacket *tpacket;
-
-    bool ipv6 = !strncmp(ipintpacket->className(), "IPv6InterfacePacket", 4);
+    TransportPacket *tpacket = check_and_cast<TransportPacket *>(msg);
+    bool ipv6 = false; // FIXME
 
     // get the source and destination address
-    IPAddress src_addr = ipintpacket->srcAddr();
-    IPAddress dest_addr = ipintpacket->destAddr();
-
-    // decapsulate the IPpacket into a transport packet
-    tpacket = (TransportPacket *) ipintpacket->decapsulate();
+    IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->removeControlInfo());
+    IPAddress src_addr = controlInfo->srcAddr();
+    IPAddress dest_addr = controlInfo->destAddr();
+    delete controlInfo;
 
     cMessage *tcpmessage = new cMessage (*tpacket);
 
@@ -70,7 +67,6 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     }
 
     delete tpacket;
-    delete msg;
 
     // send the message to the TCP_layer
     send(tcpmessage, "out");

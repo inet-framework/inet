@@ -82,21 +82,21 @@ module TCPUDPDirectNet
                 out[3];
             display: "p=200,200;i=comp";
     connections:
-        server1.out[0] --> client2.in[0];
-        server1.out[1] --> client3.in[0];
-        server1.out[2] --> client4.in[0];
+        server1.out[0] --> datarate 1000000 --> client2.in[0];
+        server1.out[1] --> datarate 1000000 --> client3.in[0];
+        server1.out[2] --> datarate 1000000 --> client4.in[0];
 
-        client2.out[0] --> server1.in[0];
-        client2.out[1] --> client3.in[1];
-        client2.out[2] --> client4.in[1];
+        client2.out[0] --> datarate 1000000 --> server1.in[0];
+        client2.out[1] --> datarate 1000000 --> client3.in[1];
+        client2.out[2] --> datarate 1000000 --> client4.in[1];
 
-        client3.out[0] --> server1.in[1];
-        client3.out[1] --> client2.in[1];
-        client3.out[2] --> client4.in[2];
+        client3.out[0] --> datarate 1000000 --> server1.in[1];
+        client3.out[1] --> datarate 1000000 --> client2.in[1];
+        client3.out[2] --> datarate 1000000 --> client4.in[2];
 
-        client4.out[0] --> server1.in[2];
-        client4.out[1] --> client2.in[2];
-        client4.out[2] --> client3.in[2];
+        client4.out[0] --> datarate 1000000 --> server1.in[2];
+        client4.out[1] --> datarate 1000000 --> client2.in[2];
+        client4.out[2] --> datarate 1000000 --> client3.in[2];
 endmodule
 
 network directnw : TCPUDPDirectNet

@@ -2,6 +2,7 @@
 // Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
 // Institute of Telematics, University of Karlsruhe, Germany.
 // University Comillas, Madrid, Spain.
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,11 +19,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-/*
- *  Purpose: Represention of an IPv4 address
- *  Author: Vincent Oberle
- *  Date: Jan-March 2001
- */
+//
+// Author: Vincent Oberle, Jan-March 2001
+// Cleanup and rewrite: Andras Varga, 2004
+//
 
 #ifndef __IP_ADDRESS_H
 #define __IP_ADDRESS_H
@@ -222,6 +222,11 @@ class IPAddress
      * Returns !equals(addr).
      */
     bool operator!=(const IPAddress& addr1) const {return !equals(addr1);}
+
+    /**
+     * Compares two IP addresses.
+     */
+    bool operator<(const IPAddress& addr1) const {return getInt()<addr1.getInt();}
 
     /**
      * Returns true if the format of the string corresponds to an IP address

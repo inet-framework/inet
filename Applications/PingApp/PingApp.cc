@@ -18,9 +18,6 @@
 
 #include <omnetpp.h>
 #include "PingApp.h"
-#include "IPInterfacePacket.h"
-#include "IPDatagram.h"
-#include "ICMP.h"
 
 
 Define_Module( PingApp );

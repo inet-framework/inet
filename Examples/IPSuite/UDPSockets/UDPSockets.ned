@@ -45,8 +45,8 @@ module UDPSockets
                 out[1];
             display: "p=200,83;i=comp";
     connections:
-        server1.out[0] --> client2.in[0];
-        client2.out[0] --> server1.in[0];
+        server1.out[0] --> datarate 1000000 --> client2.in[0];
+        client2.out[0] --> datarate 1000000 --> server1.in[0];
 endmodule
 
 network udpsockets : UDPSockets

@@ -17,8 +17,8 @@
 //
 
 
-
 import
+    "Blackboard",
     "LinkLayer",
     "NetworkLayer",
     "TCPUpperLayers";
@@ -38,6 +38,8 @@ module TCPServerNode
         in: in[];
         out: out[];
     submodules:
+        blackboard: Blackboard;
+            display: "i=proc2;p=60,60";
         // transport and application layers
         tcpApp: TCPUpperLayers;
             parameters:
@@ -56,7 +58,7 @@ module TCPServerNode
             display: "p=87,155;i=fork";
         netIf : LinkLayer[numOfPorts];
             parameters:
-                NWIName = "PPPModule";
+                NWIName = "PPPInterface";
             display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections

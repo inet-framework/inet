@@ -37,8 +37,7 @@
 //
 simple IPMulticast
     parameters:
-        IPForward: bool,
-        procdelay: numeric const;
+        IPForward: bool;
     gates:
         in: localIn, routingIn; // ProcessorManagerIn;
         out: localOut, fragmentationOut, tunnelOut;

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,30 +21,32 @@
 #ifndef __IPFRAGMENTATION_H__
 #define __IPFRAGMENTATION_H__
 
-#include "QueueBase.h"
+//  Cleanup and rewrite: Andras Varga, 2004
+
 #include "RoutingTableAccess.h"
 #include "IPDatagram.h"
 #include "RoutingTable.h"
 #include "ICMPAccess.h"
+
 
 /**
  * Fragment datagram if size is bigger than MTU of output port, then
  * send fragments to IPOutput[output port].
  * More detailed info in the NED file.
  */
-class IPFragmentation: public QueueBase
+class IPFragmentation: public cSimpleModule
 {
   private:
     RoutingTableAccess routingTableAccess;
     ICMPAccess icmpAccess;
     int numOfPorts;
 
-    void sendDatagramToOutput(IPDatagram *datagram);
+    void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
 
   public:
-    Module_Class_Members(IPFragmentation, QueueBase, 0);
+    Module_Class_Members(IPFragmentation, cSimpleModule, 0);
     virtual void initialize();
-    virtual void endService(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

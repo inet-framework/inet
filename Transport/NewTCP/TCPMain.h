@@ -19,11 +19,17 @@
 #ifndef __TCPMAIN_H
 #define __TCPMAIN_H
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4786)
+#endif
+
 #include <omnetpp.h>
 #include <map>
+#include "IPAddress.h"
 
 
 class TCPConnection;
+class TCPSegment;
 
 /**
  * Implements the TCP protocol.
@@ -35,16 +41,61 @@ class TCPConnection;
 class TCPMain : public cSimpleModule
 {
   protected:
-    std::map<int,TCPConnection*> tcpConns;  // connId-to-TCPConnection map
-    static int nextConnId;
+    struct AppConnKey
+    {
+        int appGateIndex;
+        int connId;
 
-    TCPConnection *findConnection(int connId);
-    void removeConnection(int connId, TCPConnection *conn);
+        inline bool operator<(const AppConnKey& b) const
+        {
+            if (appGateIndex!=b.appGateIndex)
+                return appGateIndex<b.appGateIndex;
+            else
+                return connId<b.connId;
+        }
+
+    };
+    struct SockPair
+    {
+        int localAddr;
+        int remoteAddr;
+        short localPort;
+        short remotePort;
+
+        inline bool operator<(const SockPair& b) const
+        {
+            if (remoteAddr!=b.remoteAddr)
+                return remoteAddr<b.remoteAddr;
+            else if (localAddr!=b.localAddr)
+                return localAddr<b.localAddr;
+            else if (remotePort!=b.remotePort)
+                return remotePort<b.remotePort;
+            else
+                return localPort<b.localPort;
+        }
+    };
+
+    typedef std::map<AppConnKey,TCPConnection*> TcpAppConnMap;
+    typedef std::map<SockPair,TCPConnection*> TcpConnMap;
+
+    TcpAppConnMap tcpAppConnMap;
+    TcpConnMap tcpConnMap;
+
+    TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
+    TCPConnection *findConnForApp(int appGateIndex, int connId);
+    void removeConnection(TCPConnection *conn);
 
   public:
     Module_Class_Members(TCPMain, cSimpleModule, 0);
+    virtual ~TCPMain();
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+
+    /**
+     * To be called from TCPConnection
+     */
+    void updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort);
+
 };
 
 #endif

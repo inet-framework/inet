@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,9 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
+//  Cleanup and rewrite: Andras Varga, 2004
 
 #include "IPFragmentation.h"
+#include "IPControlInfo_m.h"
+
 
 Define_Module( IPFragmentation );
 
@@ -26,23 +31,23 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
 void IPFragmentation::initialize()
 {
-    QueueBase::initialize();
     numOfPorts = par("numOfPorts");  // FIXME is this the same as gateSize("outputOut")?
 }
 
 // FIXME performance model is not good here!!! we should wait #fragments times delay!!!
-void IPFragmentation::endService(cMessage *msg)
+void IPFragmentation::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram  = check_and_cast<IPDatagram *>(msg);
+    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(msg->controlInfo());
+    int outputPort = controlInfo->outputPort();
 
     RoutingTable *rt = routingTableAccess.get();
-    int mtu = rt->getInterfaceByIndex(datagram->outputPort())->mtu;
+    int mtu = rt->getInterfaceByIndex(outputPort)->mtu;
 
     // check if datagram does not require fragmentation
     if (datagram->length()/8 <= mtu)
     {
-        datagram->addPar("finalFragment").setBoolValue(true);
-        sendDatagramToOutput(datagram);
+        sendDatagramToOutput(datagram, outputPort);
         return;
     }
 
@@ -86,21 +91,15 @@ void IPFragmentation::endService(cMessage *msg)
         }
         fragment->setFragmentOffset( i*(mtu - datagram->headerLength()) );
 
-        sendDatagramToOutput(fragment);
+        sendDatagramToOutput(fragment, outputPort);
     }
 
     delete datagram;
 }
 
 
-
-//----------------------------------------------------------
-// Private Functions
-//----------------------------------------------------------
-
-void IPFragmentation::sendDatagramToOutput(IPDatagram *datagram)
+void IPFragmentation::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
 {
-    int outputPort = datagram->outputPort();
     if (outputPort >= numOfPorts)
         error("Illegal output port %d", outputPort);
 
