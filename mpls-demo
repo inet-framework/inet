@@ -38,7 +38,7 @@ foreach i {
 
 
 proc createWindow {} {
-    global samples dir name fonts colors
+    global samples prog dir name fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
@@ -128,7 +128,7 @@ Dept. of Telecommunications
 }
 
 proc showDemo {id} {
-   global samples dir name colors tcl_platform
+   global samples prog dir name colors tcl_platform
 
    foreach i $samples {
         .sel.$i config -relief raised -bg $colors(unselbutton)
@@ -165,7 +165,7 @@ proc loadFile {t filename} {
 }
 
 proc runSample {id} {
-   global topdir samples dir name
+   global topdir samples prog dir name
 
    if [catch {cd $dir($id); exec ./$prog(id) &; cd $topdir}] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
