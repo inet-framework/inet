@@ -19,37 +19,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "PPPFrame_m.h"
 #include "RoutingTable.h"
 #include "RoutingTableAccess.h"
+#include "PPPInterface.h"
 
 
-/**
- * PPP implementation. Derived from the p-to-p OMNeT++ sample simulation.
- */
-class PPPInterface : public cSimpleModule
-{
-  protected:
-    bool connected;
-
-    long frameCapacity;
-    long bitCapacity;
-    cGate *gateToWatch;
-
-    cQueue queue;
-    cMessage *endTransmissionEvent;
-
-    void registerInterface();
-    void startTransmitting(cMessage *msg);
-    PPPFrame *encapsulate(cMessage *msg);
-    cMessage *decapsulate(PPPFrame *pppFrame);
-
-  public:
-    Module_Class_Members(PPPInterface, cSimpleModule, 0);
-
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-};
 
 Define_Module(PPPInterface);
 
@@ -64,6 +38,7 @@ void PPPInterface::initialize()
     // if we're connected, get the gatee with transmission rate
     gateToWatch = gate("physOut");
     connected = false;
+    double datarate = 0;
     if (gateToWatch->destinationGate()->type()=='I')
     {
         connected = true;
@@ -71,28 +46,40 @@ void PPPInterface::initialize()
         {
             // does this gate have data rate?
             cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
-            if (chan && chan->datarate()>0)
+            if (chan && (datarate=chan->datarate())>0)
                 break;
             // otherwise just check next connection in path
             gateToWatch = gateToWatch->toGate();
         }
         if (!gateToWatch)
-            error("gate physicalOut must be connected (directly or indirectly) to a link with data rate");
+            error("gate physOut must be connected (directly or indirectly) to a link with data rate");
     }
 
     // if not connected, make it gray
-    if (!connected && ev.isGUI())
+    if (ev.isGUI())
     {
-        displayString().setTagArg("i",1,"#707070");
-        displayString().setTagArg("i",2,"100");
-        displayString().setTagArg("t",0,"unconnected");
+        if (connected)
+        {
+            char buf[40];
+            if (datarate>=1e9) sprintf(buf,"%g Gbps", datarate/1e9);
+            else if (datarate>=1e6) sprintf(buf,"%g Mbps", datarate/1e6);
+            else if (datarate>=1e3) sprintf(buf,"%g Kbps", datarate/1e3);
+            else sprintf(buf,"%g bps", datarate);
+            displayString().setTagArg("t",0,buf);
+        }
+        else
+        {
+            displayString().setTagArg("i",1,"#707070");
+            displayString().setTagArg("i",2,"100");
+            displayString().setTagArg("t",0,"unconnected");
+        }
     }
 
     // register our interface entry in RoutingTable
-    registerInterface();
+    registerInterface(datarate);
 }
 
-void PPPInterface::registerInterface()
+void PPPInterface::registerInterface(double datarate)
 {
     InterfaceEntry *e = new InterfaceEntry();
 
@@ -118,13 +105,7 @@ void PPPInterface::registerInterface()
     e->mtu = 4470;
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    e->metric = 100;  // default
-    if (connected)
-    {
-        cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
-        double bps = chan->datarate();
-        e->metric = (int)ceil(2e9/bps); // use OSPF cost as default
-    }
+    e->metric = connected ? (int)ceil(2e9/datarate) : 100; // use OSPF cost as default
 
     // capabilities
     e->multicast = true;
