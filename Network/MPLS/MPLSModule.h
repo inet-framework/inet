@@ -97,7 +97,7 @@ class MPLSModule : public cSimpleModule
       /** Invoked from processPacketFromSignalling() */
       virtual void trySendBufferedPackets(int returnedFEC);
 
-      virtual void requestLDP(int fecID, IPAddress src, IPAddress dest, int gateindex);
+      virtual void sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress dest, int gateindex);
 
       //@}
 

@@ -96,14 +96,14 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
 
         isSignallingReady = true;
 
-        // Start to send out all the pending queries to LDP
-        cModule *ldpMod = parentModule()->submodule("signal_module");  // FIXME maybe use connections instead of direct sending....
-        if (!ldpMod)
+        // Start to send out all the pending queries to signal_module (LDP or RSVP-TE)
+        cModule *signallingMod = parentModule()->submodule("signal_module");  // FIXME maybe use connections instead of direct sending....
+        if (!signallingMod)
             error("Cannot find signal_module");
         while (!ldpQueue.empty())
         {
             cMessage *ldpMsg = (cMessage *) ldpQueue.pop();
-            sendDirect(ldpMsg, 0.0, ldpMod, "from_mpls_switch");
+            sendDirect(ldpMsg, 0.0, signallingMod, "from_mpls_switch");
         }
         delete msg;
         return;
@@ -385,7 +385,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
     }
     else  // Need to make ldp query
     {
-        ev << "FEC not yet in LIB, queueing up " << (makeRequest ? "and doing LDP query\n" : "\n");
+        ev << "FEC not yet in LIB, queueing up\n";
 
         // queue up packet
         ipdatagram->addPar("gateIndex") = gateIndex;
@@ -393,22 +393,22 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
         if (makeRequest)
         {
-            // if FEC just made it into fecList, we haven't asked LDP yet: do it now
-            requestLDP(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
+            // if FEC just made it into fecList, we haven't asked signalling yet: do it now
+            ev << "Sending path request to signalling module\n";
+            sendPathRequestToSignalling(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
         }
     }
 }
 
 
-void MPLSModule::requestLDP(int fecID, IPAddress src, IPAddress dest, int gateIndex)
+void MPLSModule::sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress dest, int gateIndex)
 {
-    cModule *ldpMod = parentModule()->submodule("signal_module");  // FIXME should use connections instead of direct sending....
-    if (!ldpMod)
+    cModule *signallingMod = parentModule()->submodule("signal_module");
+    if (!signallingMod)
         error("Cannot find signal_module");
 
-    // signal the LDP by sending some messages
-    cMessage *signalMessage = new cMessage("toSignallingModule");
-    // signalMessage->setKind(SIGNAL_KIND);
+    // assemble Path Request command
+    cMessage *signalMessage = new cMessage("PATH_REQUEST");
     signalMessage->addPar("FEC") = fecID;
     signalMessage->addPar("dest_addr") = src.getInt();
     signalMessage->addPar("src_addr") = dest.getInt();
@@ -416,8 +416,8 @@ void MPLSModule::requestLDP(int fecID, IPAddress src, IPAddress dest, int gateIn
 
     if (isSignallingReady)
     {
-        // Send to MPLSSwitch
-        sendDirect(signalMessage, 0.0, ldpMod, "from_mpls_switch");
+        // Send to directly to its input gate
+        sendDirect(signalMessage, 0.0, signallingMod, "from_mpls_switch");
     }
     else  // Pending
     {
