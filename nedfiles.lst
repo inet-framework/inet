@@ -99,6 +99,7 @@ Nodes/IPSuite/TCPClientTest.ned
 Nodes/IPSuite/TCPServerNode.ned
 Nodes/IPSuite/TCPServerTest.ned
 Nodes/IPSuite/TCPUpperLayers.ned
+Nodes/IPSuite/TCPUpperLayers2.ned
 Nodes/IPSuite/UDPHost.ned
 Nodes/IPSuite/UDPUpperLayers.ned
 Nodes/MPLS/LSRNode.ned
