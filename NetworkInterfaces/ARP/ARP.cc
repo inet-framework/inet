@@ -152,6 +152,17 @@ void ARP::processOutboundPacket(cMessage *msg)
         EV << "destination address " << nextHopAddr << " (no next-hop address)\n";
     }
 
+    // multicast destinations are passed through without ARP resolution, and
+    // sent to the Broadcast MAC address
+    // FIXME according to RFCs, we should do this: "An IP host group address is mapped to an Ethernet multicast address by placing the low-order 23 bits of the IP address into the low-order 23 bits of the Ethernet multicast address 01-00-5E-00-00-00 (hex). Because there are 28 significant bits in an IP host group address, more than one host group address may map to the same Ethernet multicast address." 
+    if (nextHopAddr.isMulticast())
+    {
+        EV << "destination address is multicast, sending packet to broadcast MAC address\n";
+        static MACAddress broadcastAddr("FFFFFFFFFFFF");
+        sendPacketToMAC(msg, broadcastAddr);
+        return;
+    }
+
     // try look up
     ARPCache::iterator it = arpCache.find(nextHopAddr);
     if (it==arpCache.end())
