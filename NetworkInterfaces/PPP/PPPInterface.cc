@@ -124,7 +124,7 @@ InterfaceEntry *PPPInterface::registerInterface(double datarate)
 void PPPInterface::startTransmitting(cMessage *msg)
 {
     PPPFrame *pppFrame = encapsulate(msg);
-    if (ev.isGUI()) displayString().setTagArg("i",1, queue.length()>=3 ? "red" : "yellow");
+    if (ev.isGUI()) displayBusy();
 
     ev << "Starting transmission of " << pppFrame << endl;
     send(pppFrame, "physOut");
@@ -146,7 +146,8 @@ void PPPInterface::handleMessage(cMessage *msg)
     {
         // Transmission finished, we can start next one.
         ev << "Transmission finished.\n";
-        if (ev.isGUI()) displayString().setTagArg("i",1,"");
+        if (ev.isGUI()) displayIdle();
+
         if (!queue.empty())
         {
             msg = (cMessage *) queue.getTail();
@@ -192,6 +193,20 @@ void PPPInterface::handleMessage(cMessage *msg)
     if (ev.isGUI())
         updateDisplayString();
 
+}
+
+void PPPInterface::displayBusy()
+{
+    displayString().setTagArg("i",1, queue.length()>=3 ? "red" : "yellow");
+    gateToWatch->displayString().setTagArg("o",0,"white");
+    gateToWatch->displayString().setTagArg("o",1,"3");
+}
+
+void PPPInterface::displayIdle()
+{
+    displayString().setTagArg("i",1,"");
+    gateToWatch->displayString().setTagArg("o",0,"black");
+    gateToWatch->displayString().setTagArg("o",1,"1");
 }
 
 void PPPInterface::updateDisplayString()

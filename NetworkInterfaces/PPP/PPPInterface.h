@@ -52,6 +52,8 @@ class PPPInterface : public cSimpleModule
     void startTransmitting(cMessage *msg);
     PPPFrame *encapsulate(cMessage *msg);
     cMessage *decapsulate(PPPFrame *pppFrame);
+    void displayBusy();
+    void displayIdle();
     void updateDisplayString();
 
   public:
