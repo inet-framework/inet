@@ -1,6 +1,8 @@
 #
 # config file for the IPSuite
 #
+ROOT=`pwd`
+
 NEDC=nedc
 MSGC=opp_msgc
 CXX=g++
