@@ -45,7 +45,7 @@ proc createWindow {} {
     wm overrideredirect . 0
     wm resizable . 1 1
     wm deiconify .
-    wm title . "OMNeT++ IP Suite Demo"
+    wm title . "OMNeT++ MPLS Demo"
     wm protocol . WM_DELETE_WINDOW {exit}
 
     #################################
