@@ -20,7 +20,7 @@
 
 import
     "Blackboard",
-    "TCPSessionApp.ned",
+    "TCPApp.ned",
     "TCPMain.ned",
     "UDPProcessing",
     "UDPApp",
@@ -36,6 +36,8 @@ module StandardHost2
     parameters:
         numTcpApps : numeric const,
         numUdpApps : numeric const,
+        tcpAppType: string,
+        udpAppType: string,
         IPForward : bool,
         routingFile : string;
     gates:
@@ -44,11 +46,11 @@ module StandardHost2
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=56,78";
-        tcpApp: TCPSessionApp[numTcpApps];
+        tcpApp: tcpAppType[numTcpApps] like TCPApp;
             display: "p=125,58;i=app";
         tcp: TCPMain;
             display: "p=125,138;i=prot2";
-        udpApp: UDPApp[numUdpApps];
+        udpApp: udpAppType[numUdpApps] like UDPApp;
             display: "i=app;p=234,58";
         udp: UDPProcessing;
             display: "p=234,138;i=prot1";

@@ -78,6 +78,18 @@ void UDPProcessing::handleMessage(cMessage *msg)
     {
         processMsgFromApp(msg);
     }
+
+    if (ev.isGUI())
+    {
+        char buf[80];
+        sprintf(buf, "passed up: %d pks\nsent: %d pks", numPassedUp, numSent);
+        if (numDroppedWrongPort>0)
+        {
+            sprintf(buf+strlen(buf), "\ndropped (no app): %d pks", numDroppedWrongPort);
+            displayString().setTagArg("i",1,"red");
+        }
+        displayString().setTagArg("t",0,buf);
+    }
 }
 
 

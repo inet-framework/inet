@@ -35,6 +35,14 @@ void UDPSink::initialize()
 void UDPSink::handleMessage(cMessage *msg)
 {
     processPacket(msg);
+
+    if (ev.isGUI())
+    {
+        char buf[32];
+        sprintf(buf, "rcvd: %d pks", numReceived);
+        displayString().setTagArg("t",0,buf);
+    }
+
 }
 
 void UDPSink::printPacket(cMessage *msg)
@@ -72,6 +80,8 @@ int UDPApp::counter;
 
 void UDPApp::initialize()
 {
+    UDPSink::initialize();
+
     localPort = par("local_port");
     destPort = par("dest_port");
     msgLength = par("message_length");
@@ -134,6 +144,13 @@ void UDPApp::handleMessage(cMessage *msg)
     {
         // process incoming packet
         processPacket(msg);
+    }
+
+    if (ev.isGUI())
+    {
+        char buf[40];
+        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+        displayString().setTagArg("t",0,buf);
     }
 }
 
