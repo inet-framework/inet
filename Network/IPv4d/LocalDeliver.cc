@@ -77,6 +77,7 @@ int LocalDeliver::outputGateForProtocol(int protocol)
         if (i->protocolNumber==protocol)
             return i->outGateIndex;
     opp_error("No output gate defined in protocolMapping for protocol number %d", protocol);
+    return -1;
 }
 
 void LocalDeliver::handleMessage(cMessage *msg)
@@ -98,6 +99,7 @@ void LocalDeliver::handleMessage(cMessage *msg)
             return;
     }
 
+    // decapsulate and send on appropriate output gate
     int protocol = datagram->transportProtocol();
     cMessage *packet = decapsulateIP(datagram);
 
