@@ -35,7 +35,7 @@
 		send IPDatagram to Network Interface
 		set nwi_idle = false
 		release Kernel
-		
+
 		receive NoPacket-Message from DequeueHook:
 		set queue_empty = true
 		release Kernel
@@ -51,7 +51,7 @@
 #include "basic_consts.h"
 #include "ProcessorAccess.h"
 
-class Dequeue: public ProcessorAccess 
+class Dequeue : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	bool nwi_idle;
@@ -61,7 +61,7 @@ private:
 	void getReplyFromDeqHook();
 	void sendRequest();
 public:
-	Module_Class_Members(Dequeue, ProcessorAccess, ACTIVITY_STACK_SIZE);
+	Module_Class_Members(Dequeue, cSimpleModule, ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();
 	virtual void activity();

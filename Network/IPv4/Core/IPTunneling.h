@@ -38,13 +38,13 @@
 #include "IPDatagram.h"
 #include "ProcessorAccess.h"
 
-class IPTunneling: public ProcessorAccess
+class IPTunneling : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	simtime_t delay;
 
 public:
-	Module_Class_Members(IPTunneling, ProcessorAccess, ACTIVITY_STACK_SIZE);
+	Module_Class_Members(IPTunneling, cSimpleModule, ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();
 	virtual void activity();

@@ -18,10 +18,10 @@
 
 /*
 	file: PreRoutingCore.cc
-	Purpose: Implementation of PreRouting 
-	Responsibilities: 
+	Purpose: Implementation of PreRouting
+	Responsibilities:
 		receive IP datagram
-		check for header error -> 
+		check for header error ->
 		throw away and notify ICMP Module on error
 		hop counter decrement
 		send correct datagram to Routing Module
@@ -30,7 +30,7 @@
 	author: Jochen Reber
 	date: 13.5.00, 15.5.00, 16.6.00
 */
-	
+
 #include <omnetpp.h>
 
 #include "hook_types.h"
@@ -47,15 +47,15 @@ Define_Module( PreRoutingCore );
 
 void PreRoutingCore::initialize()
 {
-    ProcessorAccess::initialize();
-    delay = par("procdelay"); 
+    // ProcessorAccess::initialize();
+    delay = par("procdelay");
     hasHook = (findGate("netfilterOut") != -1);
 }
 
 
 void PreRoutingCore::activity()
 {
-	
+
 	cMessage *dfmsg;
 	IPDatagram *datagram;
 	float relativeHeaderLength;
@@ -63,22 +63,23 @@ void PreRoutingCore::activity()
 	while(true)
 	{
 
-		datagram = (IPDatagram *)receive(); 
+		datagram = (IPDatagram *)receive();
 
 		// notify ProcessorManager
-		claimKernel();
+		// claimKernel();
 
 		// pass Datagram through netfilter if it exists
 		if (hasHook)
 		{
 			send(datagram, "netfilterOut");
-			dfmsg = receiveNewOn("netfilterIn");
+			dfmsg = receive();
+			ASSERT(dfmsg->arrivedOn("netfilterIn"));  // FIXME revise this
 			if (dfmsg->kind() == DISCARD_PACKET)
 			{
 				delete dfmsg;
-				releaseKernel();
+				// releaseKernel();
 				continue;
-			}			
+			}
 			datagram = (IPDatagram *)dfmsg;
 		}
 
@@ -89,8 +90,8 @@ void PreRoutingCore::activity()
 		if (datagram->hasBitError())
 		{
 			/* 	probability of bit error in header =
-				size of header / size of total message */	
-			relativeHeaderLength = 
+				size of header / size of total message */
+			relativeHeaderLength =
 				datagram->headerLength() / datagram->totalLength();
 			if (dblrand() <= relativeHeaderLength)
 			{
@@ -98,7 +99,7 @@ void PreRoutingCore::activity()
 				continue;
 			}
 		}
-	
+
 		// hop counter decrement
 		datagram->setTimeToLive (datagram->timeToLive()-1);
 
@@ -106,9 +107,9 @@ void PreRoutingCore::activity()
 	}
 
 }
-	
+
 // 	private function: send error message to ICMP Module
-void PreRoutingCore::sendErrorMessage(IPDatagram *datagram, 
+void PreRoutingCore::sendErrorMessage(IPDatagram *datagram,
 		ICMPType type, ICMPCode code)
 {
 

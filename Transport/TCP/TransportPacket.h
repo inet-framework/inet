@@ -27,13 +27,15 @@
 #ifndef __TRANSPORTPACKET_H
 #define __TRANSPORTPACKET_H
 
+#include <iostream>
 #include <omnetpp.h>
 
+using std::ostream;
 
 /*  -------------------------------------------------
         Main class: TransportPacket
     -------------------------------------------------
-    
+
     msg_kind stores the kind() argument of the
     original cMessage.
     kind() itself always returns always MK_PACKET
@@ -46,7 +48,7 @@ class TransportPacket: public cPacket
 private:
     int source_port_number;
     int destination_port_number;
-    
+
     int msg_kind;
 
 public:
@@ -59,7 +61,7 @@ public:
     // assignment operator
     virtual TransportPacket& operator=(const TransportPacket& p);
     virtual cObject *dup() const { return new TransportPacket(*this); }
-    
+
     // info functions
     virtual void info(char *buf);
     virtual void writeContents(ostream& os);
@@ -67,10 +69,10 @@ public:
 
     int sourcePort() const { return source_port_number; }
     void setSourcePort(int p) { source_port_number = p; }
-    
+
     int destinationPort() const { return destination_port_number; }
     void setDestinationPort(int p) { destination_port_number = p; }
-    
+
     int msgKind() const { return msg_kind; }
     void setMsgKind(int k) { msg_kind = k; }
 };

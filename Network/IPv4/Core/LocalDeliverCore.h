@@ -21,12 +21,12 @@
 // file: LocalDeliverCore.h
 // header file for the Simple Module LocalDeliverCore
 // ------
-// Responsibilities: 
+// Responsibilities:
 // Receive IP datagram for local delivery
 // strip off IP header
 // buffer fragments for ip_fragmenttime
 // wait until all fragments of one fragment number are received
-// discard without notification if not all fragments arrive in 
+// discard without notification if not all fragments arrive in
 //		ip_fragmenttime
 // Defragment once all fragments have arrived
 // send Transport packet up to the transport layer
@@ -67,7 +67,7 @@ struct FragmentationBufferEntry
         Main Module class: LocalDeliverCore
     -------------------------------------------------	*/
 
-class LocalDeliverCore: public ProcessorAccess
+class LocalDeliverCore : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	simtime_t fragmentTimeoutTime;
@@ -90,7 +90,7 @@ protected:
 
 
 public:
-	Module_Class_Members(LocalDeliverCore, ProcessorAccess, 
+	Module_Class_Members(LocalDeliverCore, cSimpleModule,
 				ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();

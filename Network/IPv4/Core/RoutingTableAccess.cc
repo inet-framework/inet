@@ -33,7 +33,7 @@ void RoutingTableAccess::initialize()
 	cObject *foundmod;
 	cModule *curmod = this;
 
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 
 	// find Routing Table
 	rt = NULL;

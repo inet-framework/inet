@@ -27,14 +27,16 @@
 #ifndef __PPPFRAME_H
 #define __PPPFRAME_H
 
+#include <iostream>
 #include <omnetpp.h>
 
+using std::ostream;
 
 /*  -------------------------------------------------
         Constants
     -------------------------------------------------   */
 
-/* PPP header length: 
+/* PPP header length:
 	2*flag + 1 add + 1 contr + 2 prot = 6 byte */
 const int PPP_HEADER_LENGTH = 6;
 
@@ -59,7 +61,7 @@ enum PPP_ProtocolFieldId
 	constant fields not simulated:
 		flag (0x7e), address (0xff), control (0x03),
 		CRC (biterror)
-    
+
 */
 
 class PPPFrame: public cPacket
@@ -76,11 +78,11 @@ public:
     // assignment operator
     virtual PPPFrame& operator=(const PPPFrame& p);
     virtual cObject *dup() const { return new PPPFrame(*this); }
-    
+
     // info functions
     virtual void info(char *buf);
     virtual void writeContents(ostream& os);
-    
+
 
     // overriding encapsulation-function for cPackets
     virtual void encapsulate(cPacket *);

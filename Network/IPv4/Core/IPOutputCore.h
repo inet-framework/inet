@@ -21,9 +21,9 @@
 	file: IPOutputCore.h
 	Purpose: Header file for IPOutput core module
 	------
-	Responsibilities: 
+	Responsibilities:
 	receive complete datagram from IPFragmentation
-        hop counter check 
+        hop counter check
             -> throw away and notify ICMP if ttl==0
         otherwise  send it on to output queue
 	author: Jochen Reber
@@ -37,7 +37,7 @@
 #include "IPDatagram.h"
 #include "ICMP.h"
 
-class IPOutputCore: public ProcessorAccess
+class IPOutputCore : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	simtime_t delay;
@@ -45,7 +45,7 @@ private:
 
 	void sendErrorMessage( IPDatagram *, ICMPType, ICMPCode);
 public:
-    Module_Class_Members(IPOutputCore, ProcessorAccess, ACTIVITY_STACK_SIZE);
+    Module_Class_Members(IPOutputCore, cSimpleModule, ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();
     virtual void activity();

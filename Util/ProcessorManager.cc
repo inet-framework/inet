@@ -47,6 +47,7 @@ void ProcessorManager::initialize()
 
 void ProcessorManager::activity()
 {
+#if 0
 	int type;
 	cModule *sender;
 	cMessage *message;
@@ -89,8 +90,10 @@ void ProcessorManager::activity()
 			always caught from gate "releaseKernelIn" */
 			
 	} // end while
+#endif
 }
 
+#if 0
 /* 	------------------------------------------------
 		Private functions
 	------------------------------------------------ */
@@ -169,3 +172,4 @@ void ProcessorManager::kernelClaim( cModule *sender, cMessage *msg)
 	} 
 }
 
+#endif

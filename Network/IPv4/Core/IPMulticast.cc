@@ -34,7 +34,7 @@
     receive IGMP message from LocalDeliver
     update multicast routing table
 
-    comment: 
+    comment:
     Tunneling and IGMP not implemented
     author: Jochen Reber
 */
@@ -63,7 +63,7 @@ void IPMulticast::activity()
 	cMessage *msg;
 	IPDatagram *datagram = NULL;
 	// copy of original datagram for multiple destinations
-	IPDatagram *datagramCopy = NULL; 
+	IPDatagram *datagramCopy = NULL;
 	IPAddrChar destAddress;
 	int i;
 	int destNo; // number of destinations for datagram
@@ -73,13 +73,13 @@ void IPMulticast::activity()
         msg = receive();
 
 		wait(delay);
-		
+
 		// check if IGMP message from localIn
 		if (!strcmp(msg->arrivalGate()->name(), "localIn"))
 		{
 			// IGMP not implemented!
 			delete msg;
-			releaseKernel();
+			// releaseKernel();
 
 		} else { // otherwise forward datagram with Multicast address
 
@@ -87,27 +87,27 @@ void IPMulticast::activity()
 			strcpy(destAddress, datagram->destAddress());
 
 			/* debugging output
-			ev << "### incoming mc paket at " 
-				<< rt->getInterfaceByIndex(0).inetAddrStr << ": " 
+			ev << "### incoming mc paket at "
+				<< rt->getInterfaceByIndex(0).inetAddrStr << ": "
 				<< destAddress << "\n";
 			*/
 
             /* DVMRP: process datagram only if sent
 				locally or arrived on the shortest route
 				otherwise, discard and continue. */
-            if ( datagram->inputPort() != -1 && 
-				 datagram->inputPort() != 
+            if ( datagram->inputPort() != -1 &&
+				 datagram->inputPort() !=
 				 rt->outputPortNo(datagram->srcAddress()))
             {
 
 				/* debugging output
-				ev  << "* outputPort (shortest path): " 
+				ev  << "* outputPort (shortest path): "
 				<< rt->outputPortNo(datagram->srcAddress())
 				<< "   inputPort: " << datagram->inputPort() << "\n";
 				*/
 
                 delete(datagram);
-				releaseKernel(); 
+				// releaseKernel();
                 continue;
             } // *endif input port check*
 
@@ -116,7 +116,7 @@ void IPMulticast::activity()
 			if (rt->multicastLocalDeliver(destAddress))
 			{
 				datagramCopy = (IPDatagram *) datagram->dup();
-				
+
 // BCH Andras -- code from UTS MPLS model
                 // find "local_addr" module parameter among our parents, and assign it to packet
                 cModule *curmod = this;
@@ -131,17 +131,17 @@ void IPMulticast::activity()
                     }
                 }
 // ECH
-				claimKernelAgain();
+				// claimKernelAgain();
 				send(datagramCopy, "localOut");
 			} // *endif local deliver*
 
 
-            /* forward datagram only if IPForward is true 
+            /* forward datagram only if IPForward is true
 				or sent locally */
             if ( datagram->inputPort() != -1 && IPForward == false )
             {
                 delete(datagram);
-				releaseKernel(); 
+				// releaseKernel();
                 continue;
             } // *endif IPForward*
 
@@ -162,19 +162,19 @@ void IPMulticast::activity()
 					{
 						datagramCopy = (IPDatagram *) datagram->dup();
 						datagramCopy->setOutputPort(outputPort);
-						claimKernelAgain();
+						// claimKernelAgain();
 						send(datagramCopy, "fragmentationOut");
 					} // *endif*
 				} // *endfor*
 				// only copies sent, original datagram deleted
 				delete(datagram);
 				// each datagram sent out claimed the kernel again once,
-				releaseKernel();
+				// releaseKernel();
 
 			} else // no destination: delete datagram
 			{
 				delete(datagram);
-				releaseKernel(); 
+				// releaseKernel();
 				continue;
 			} // *endif multicast destinations*
 

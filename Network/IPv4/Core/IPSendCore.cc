@@ -20,15 +20,15 @@
     file: IPSendCore.cc
     Purpose: Implementation for IPSendCore
     ------
-	Responsibilities: 
-	receive IPInterfacePacket from Transport layer or ICMP 
+	Responsibilities:
+	receive IPInterfacePacket from Transport layer or ICMP
 	or Tunneling (IP tunneled datagram)
 	encapsulate in IP datagram
 	set version
-	set ds.codepoint 
-	set TTL 
+	set ds.codepoint
+	set TTL
 	choose and set fragmentation identifier
-	set fragment offset = 0, more fragments = 0 
+	set fragment offset = 0, more fragments = 0
 	(fragmentation occurs in IPFragmentation)
 	set 'don't Fragment'-bit to received value (default 0)
 	set Protocol to received value
@@ -74,12 +74,12 @@ void IPSendCore::activity()
     {
         interfaceMsg = (IPInterfacePacket *)receive();
 
-		claimKernel();
+		// claimKernel();
 		sendDatagram(interfaceMsg);
 	}
 
-}		
-		
+}
+
 /*  ----------------------------------------------------------
         Private Functions
     ----------------------------------------------------------  */
@@ -118,7 +118,7 @@ void IPSendCore::sendDatagram(IPInterfacePacket *interfaceMsg)
 			ev << "***IPSend Error of "
 //				<< rt->getInterfaceByIndex(0).inetAddrStr
 				<< rt->getInterfaceByIndex(0)->inetAddr->getString()
-				<< ": Wrong sender address: " 
+				<< ": Wrong sender address: "
 				<< src << "\n";
 			breakpoint("IPSend error!");
 			return;
@@ -131,21 +131,21 @@ void IPSendCore::sendDatagram(IPInterfacePacket *interfaceMsg)
 
 	// set other fields
 	datagram->setCodepoint (interfaceMsg->codepoint());
-	
+
 	datagram->setFragmentId(curFragmentId++);
 	datagram->setMoreFragments(false);
 	datagram->setDontFragment (interfaceMsg->dontFragment());
 	datagram->setFragmentOffset (0);
 
-	datagram->setTimeToLive 
-		(interfaceMsg->timeToLive() > 0 ? 
+	datagram->setTimeToLive
+		(interfaceMsg->timeToLive() > 0 ?
 			interfaceMsg->timeToLive() :
 				(rt->isMulticastAddr(datagram->destAddress())
 						? defaultMCTimeToLive : defaultTimeToLive));
 
 	datagram->setTransportProtocol ((IPProtocolFieldId)interfaceMsg->protocol());
 	datagram->setInputPort(-1);
-	
+
 	// setting an option is currently not possible
 
 
@@ -153,11 +153,12 @@ void IPSendCore::sendDatagram(IPInterfacePacket *interfaceMsg)
 	if (hasHook)
 	{
 		send(datagram, "netfilterOut");
-		dfmsg = receiveNewOn("netfilterIn");
+		dfmsg = receive();
+		ASSERT(dfmsg->arrivedOn("netfilterIn"));  // FIXME revise this
 		if (dfmsg->kind() == DISCARD_PACKET)
 		{
 			delete dfmsg;
-			releaseKernel();
+			// releaseKernel();
 			return;
 		}
 		datagram = (IPDatagram *)dfmsg;

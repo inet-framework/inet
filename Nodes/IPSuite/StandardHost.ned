@@ -18,20 +18,20 @@
 
 
 
-import  
-    "NetworkLayers", 
-    "ProcessorManager", 
+import
+    "NetworkLayers",
+    "ProcessorManager",
     "UDP",
     "tcp4ip",
-    "PingApp", 
-    "ErrorHandling"; 
- 
+    "PingApp",
+    "ErrorHandling";
+
 
 //
 // Definition of an IPNode with transport layers.
 //
 module StandardHost
-    parameters: 
+    parameters:
         // TCP information
         tcpApplType : string,
         local_addr : numeric,
@@ -44,14 +44,14 @@ module StandardHost
         nodenr : numeric const,
         udpRouteDestNo : numeric const,
 
-        // Network information  
+        // Network information
         numOfProcessors : numeric,
-        numOfPorts : numeric, 
-        routingFile : string; 
-    gates: 
-        in: in[]; 
-        out: out[]; 
-    submodules: 
+        numOfPorts : numeric,
+        routingFile : string;
+    gates:
+        in: in[];
+        out: out[];
+    submodules:
         // transport and application layers
         tcpApp: TCPUpperLayers;
             parameters:
@@ -73,12 +73,12 @@ module StandardHost
                 nodename = nodename,
                 generationTime = packetTime;
             display: "p=152,89;b=40,24,rect";
-        errorHandling: ErrorHandling; 
-            parameters: 
-                nodename = routingFile; 
+        errorHandling: ErrorHandling;
+            parameters:
+                nodename = routingFile;
             display: "p=179,158;i=sink";
-        networkLayers: NetworkLayers; 
-            parameters: 
+        networkLayers: NetworkLayers;
+            parameters:
                 // waiting times
                 icmp_delay = 0,
                 fragmentation_delay = 0.2 us,
@@ -93,7 +93,7 @@ module StandardHost
                 dequeue_delay = 0,
                 inputqueue_delay = 0,
                 nwi_delay = 0,
-                
+
                 // hook names
                 preRoutingHookName = "NF_IP_PRE_ROUTING",
                 routingHookName = "NF_IP_FORWARD",
@@ -105,36 +105,33 @@ module StandardHost
 
                 // other network parameters
                 IPForward = false,
-                NWIName = "PPPModule", 
-                numOfPorts = numOfPorts, 
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[numOfPorts], 
-                physOut[numOfPorts]; 
+                NWIName = "PPPModule",
+                numOfPorts = numOfPorts,
+                routingFile = routingFile;
+            gatesizes:
+                physIn[numOfPorts],
+                physOut[numOfPorts];
             display: "p=87,155;i=fork";
-        processorManager: ProcessorManager; 
-            parameters: 
-                numOfProcessors = numOfProcessors; 
-            display: "p=165,43;i=bwgen";
-    connections nocheck: 
+        //# processorManager: ProcessorManager;
+    connections nocheck:
         // transport connections
-        networkLayers.TCPOut --> tcpApp.in; 
-        networkLayers.TCPIn <-- tcpApp.out; 
+        networkLayers.TCPOut --> tcpApp.in;
+        networkLayers.TCPIn <-- tcpApp.out;
 
-        networkLayers.UDPOut --> udpApp.from_ip; 
-        networkLayers.UDPIn <-- udpApp.to_ip; 
-                                            
+        networkLayers.UDPOut --> udpApp.from_ip;
+        networkLayers.UDPIn <-- udpApp.to_ip;
+
 
         networkLayers.pingOut --> pingApp.in;
         networkLayers.pingIn <-- pingApp.out;
 
-        networkLayers.errorOut --> errorHandling.in; 
-                                                     
-        // connections to network outside
-        for i=0..numOfPorts-1 do 
-            in[i] --> networkLayers.physIn[i]; 
-            out[i] <-- networkLayers.physOut[i]; 
-        endfor; 
+        networkLayers.errorOut --> errorHandling.in;
 
-endmodule 
+        // connections to network outside
+        for i=0..numOfPorts-1 do
+            in[i] --> networkLayers.physIn[i];
+            out[i] <-- networkLayers.physOut[i];
+        endfor;
+
+endmodule
 

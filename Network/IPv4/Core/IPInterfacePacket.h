@@ -41,8 +41,11 @@
 #define __IPINTERFACEPACKET_H__
 
 #include <string.h>
+#include <iostream>
 
 #include "basic_consts.h"
+
+using std::ostream;
 
 /** Protocol field: taken from RFC 1700
  *  Replacing old RFC1700 with newer (28/06/01) Protocol Numbers

@@ -51,7 +51,7 @@ Define_Module( Dequeue );
 
 void Dequeue::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 
 	delay = par("procdelay");
 	nwi_idle = true;
@@ -60,12 +60,12 @@ void Dequeue::initialize()
 
 void Dequeue::activity()
 {
-	
+
 	cMessage *msg;
 
 	while(true)
 	{
-		msg = receive(); 
+		msg = receive();
 
 		if (!strcmp(msg->arrivalGate()->name(), "fromNW"))
 		{
@@ -73,7 +73,7 @@ void Dequeue::activity()
 			delete msg;
 			sendRequest();
 			continue;
-		} 
+		}
 
 
 		if (!strcmp(msg->arrivalGate()->name(), "inDirekt"))
@@ -82,7 +82,7 @@ void Dequeue::activity()
 			delete msg;
 			sendRequest();
 			continue;
-		} 
+		}
 
 	}
 }
@@ -96,18 +96,19 @@ void Dequeue::sendRequest()
 		cMessage *requestMsg = new cMessage("Request Message");
 		requestMsg->setKind(REQUEST_PACKET);
 
-		claimKernel();
+		// claimKernel();
 		wait(delay);
 		send(requestMsg, "toDeqHook");
 		getReplyFromDeqHook();
 	}
 
-}		
+}
 
 void Dequeue::getReplyFromDeqHook()
 {
 	cMessage *msg;
-	msg = receiveOn("fromDeqHook");
+	msg = receive();
+	ASSERT(dfmsg->arrivedOn("fromDeqHook"));  // FIXME revise this
 
 	switch(msg->kind())
 	{
@@ -123,7 +124,7 @@ void Dequeue::getReplyFromDeqHook()
 			ev << "Error: invalid Message kind at Dequeue: "
 				<< msg->kind();
 	}
-	releaseKernel();
+	// releaseKernel();
 
 }
 

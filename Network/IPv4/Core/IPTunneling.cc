@@ -47,7 +47,7 @@ Define_Module( IPTunneling );
 
 void IPTunneling::initialize()
 {
-    ProcessorAccess::initialize();
+    // ProcessorAccess::initialize();
 
     delay = par("procdelay");
 }
@@ -75,7 +75,7 @@ void IPTunneling::activity()
 		packet->setProtocol(IP_PROT_IP);
 		packet->setDestAddr(dest);
 		send(packet, "sendOut");
-		releaseKernel();
+		// releaseKernel();
 	}
 }
 

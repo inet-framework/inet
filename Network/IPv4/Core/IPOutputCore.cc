@@ -20,9 +20,9 @@
 	file: IPOutputCore.cc
 	Purpose: Implementation for IPOutput core module
 	------
-	Responsibilities: 
+	Responsibilities:
 	receive complete datagram from IPFragmentation
-	hop counter check 
+	hop counter check
 	-> throw away and notify ICMP if ttl==0
 	otherwise  send it on to output queue
 	author: Jochen Reber
@@ -42,7 +42,7 @@ Define_Module ( IPOutputCore );
 
 void IPOutputCore::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 	delay = par("procdelay");
     hasHook = (findGate("netfilterOut") != -1);
 
@@ -61,11 +61,12 @@ void IPOutputCore::activity()
         if (hasHook)
         {
             send(datagram, "netfilterOut");
-            dfmsg = receiveNewOn("netfilterIn");
+            dfmsg = receive();
+            ASSERT(dfmsg->arrivedOn("netfilterIn"));  // FIXME revise this
             if (dfmsg->kind() == DISCARD_PACKET)
             {
                 delete dfmsg;
-                releaseKernel();
+                // releaseKernel();
                 continue;
             }
             datagram = (IPDatagram *)dfmsg;
@@ -83,12 +84,12 @@ void IPOutputCore::activity()
 
 		send(datagram, "queueOut");
 
-		releaseKernel();
+		// releaseKernel();
 
 	}
 }
 
-   
+
 //  private function: send error message to ICMP Module
 void IPOutputCore::sendErrorMessage(IPDatagram *datagram,
         ICMPType type, ICMPCode code)

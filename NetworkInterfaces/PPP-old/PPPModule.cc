@@ -19,17 +19,17 @@
 /*
 	file: PPPModule.cc
 	Purpose: Implementation of PPPModule
-	Responsibilities: 
+	Responsibilities:
         comment:
         test stub version only, no L2 header or fragment
-        no PPP done, just send raw IPDatagrams over 
+        no PPP done, just send raw IPDatagrams over
         point-to-point link
 	no delay!
 	concurrency allowed!
 
 	author: Jochen Reber
 */
-	
+
 #include <omnetpp.h>
 #include <string.h>
 
@@ -42,7 +42,7 @@ Define_Module_Like( PPPModule, NetworkInterface );
 
 void PPPModule::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 
 	delay = par("procdelay");
 }
@@ -68,7 +68,7 @@ ev << "+ PPPLink of " << fullPath() << ": send datagram.\n";
 			// encapsulate IP datagram in PPP frame
 			PPPFrame *outFrame = new PPPFrame();
 			outFrame->encapsulate((IPDatagram *)msg);
-			
+
 			wait(delay);
 			send(outFrame, "physicalOut");
 			send(nwiIdleMsg, "ipOutputQueueOut");
@@ -77,19 +77,19 @@ ev << "+ PPPLink of " << fullPath() << ": send datagram.\n";
 		{
 			PPPFrame *recFrame = (PPPFrame *)msg;
 
-			// decapsulate IP datagram 
+			// decapsulate IP datagram
 			if (recFrame->protocol() == PPP_PROT_IP)
 			{
 				// break off for /all/ bit errors
 				if (recFrame->hasBitError())
 				{
-					ev << "\n+ PPPLink of " << fullPath() 
+					ev << "\n+ PPPLink of " << fullPath()
 						<< " receive error: Error in transmission.\n";
 					delete msg;
 					continue;
 				}
 
-				IPDatagram *ipdatagram = 
+				IPDatagram *ipdatagram =
 						(IPDatagram *) (recFrame->decapsulate());
 				delete recFrame;
 
@@ -97,7 +97,7 @@ ev << "+ PPPLink of " << fullPath() << ": send datagram.\n";
 				send(ipdatagram, "ipInputQueueOut");
 			} else // print error message if it's not an IP datagram
 			{
-				ev << "\n+ PPPLink of " << fullPath() 
+				ev << "\n+ PPPLink of " << fullPath()
 					<< " receive error: Not IP protocol.\n";
 			}
 		}

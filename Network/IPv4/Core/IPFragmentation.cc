@@ -20,7 +20,7 @@
 	file: IPFragmentation.cc
 	Purpose: Implementation for IPFragmentation
 	------
-	Responsibilities: 
+	Responsibilities:
 	receive valid IP datagram from Routing or Multicast
 	Fragment datagram if size > MTU [output port]
 	send fragments to IPOutput[output port]
@@ -34,7 +34,7 @@
 
 Define_Module( IPFragmentation );
 
-/* ICMP type 2, code 4: fragmentation needed, but 
+/* ICMP type 2, code 4: fragmentation needed, but
 		don't-fragment bit set */
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
@@ -60,10 +60,10 @@ void IPFragmentation::activity()
     while(true)
     {
         datagram = (IPDatagram *)receive();
-		
+
 //		mtu = rt->getInterfaceByIndex(datagram->outputPort()).mtu;
 		mtu = rt->getInterfaceByIndex(datagram->outputPort())->mtu;
-	
+
 		/*
 		ev << "totalLength / MTU: " << datagram->totalLength() << " / "
 		<< mtu << "\n";
@@ -80,8 +80,8 @@ void IPFragmentation::activity()
 
 		headerLength = datagram->headerLength();
 		payload = datagram->totalLength() - headerLength;
-		
-		noOfFragments= 
+
+		noOfFragments=
 			int(ceil((float(payload)/mtu) /
 			(1-float(headerLength)/mtu) ) );
 		/*
@@ -92,8 +92,8 @@ void IPFragmentation::activity()
 			datagram away and send ICMP error message */
 		if (datagram->dontFragment() && noOfFragments > 1)
 		{
-			sendErrorMessage (datagram, 
-				ICMP_DESTINATION_UNREACHABLE, 
+			sendErrorMessage (datagram,
+				ICMP_DESTINATION_UNREACHABLE,
 				ICMP_FRAGMENTATION_ERROR_CODE);
 			continue;
 		}
@@ -104,8 +104,8 @@ void IPFragmentation::activity()
 			IPDatagram *fragment = (IPDatagram *) datagram->dup();
 			// fragment = new IPDatagram;
 			// fragment->operator=(*datagram);
-			
-			/* total_length equal to mtu, except for 
+
+			/* total_length equal to mtu, except for
 				last fragment */
 
 			/* "more Fragments"-bit is unchanged
@@ -113,21 +113,21 @@ void IPFragmentation::activity()
 				true */
 			if (i != noOfFragments-1)
 			{
-				claimKernelAgain();
+				// claimKernelAgain();
 				fragment->setMoreFragments (true);
 				fragment->setTotalLength(mtu);
 			} else
 			{
 				// size of last fragment
-				fragment->setTotalLength 
-					(datagram->totalLength() - 
-					 (noOfFragments-1) * 
+				fragment->setTotalLength
+					(datagram->totalLength() -
+					 (noOfFragments-1) *
 					 (mtu - datagram->headerLength()));
 			}
 			fragment->setFragmentOffset(
 					i*(mtu - datagram->headerLength()) );
 
-	
+
 			wait(delay);
 			sendDatagramToOutput(fragment);
 		} // end for to noOfFragments
@@ -160,7 +160,7 @@ void IPFragmentation::sendErrorMessage(IPDatagram *datagram,
 
 void IPFragmentation::sendDatagramToOutput(IPDatagram *datagram)
 {
-	int outputPort;	
+	int outputPort;
 
 	outputPort = datagram->outputPort();
 	if (outputPort > numOfPorts -1)

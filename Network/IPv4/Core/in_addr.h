@@ -24,14 +24,17 @@
 #define IN_ADDR_H
 
 #include <string.h>
+#include <iostream>
 #include <omnetpp.h>
 #include "basic_consts.h"
+
+using std::ostream;
 
 class IN_Addr : public cObject
 {
  private:
   char _addrstr[NODE_NAME_SIZE];        // something like "127.0.0.1"
-  
+
   void _init();
   void _setaddr(const char* addr);
 

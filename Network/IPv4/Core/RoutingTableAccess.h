@@ -33,7 +33,7 @@
 #include "ProcessorAccess.h"
 #include "RoutingTable.h"
 
-class RoutingTableAccess: public ProcessorAccess
+class RoutingTableAccess : public cSimpleModule   // was ProcessorAccess
 {
 private:
 
@@ -42,10 +42,10 @@ protected:
 	RoutingTable *rt;
 
 public:
-    Module_Class_Members(RoutingTableAccess, ProcessorAccess, 0);
+    Module_Class_Members(RoutingTableAccess, cSimpleModule, 0);
 
 	virtual void initialize();
-	
+
 };
 
 #endif

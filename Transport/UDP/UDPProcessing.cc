@@ -21,7 +21,7 @@
 	Purpose: Implementation of UDP protocoll
 	Initialisation:
 		error check validity initialized as parameter
-	Responsibilities: 
+	Responsibilities:
 		initialize with port-to-application-table
 			read from NED-file
 
@@ -33,7 +33,7 @@
 
 		receive IPInterfacePacket from IP Layer:
 		decapsulate UDPPacket
-		check biterror if checksum enabled 
+		check biterror if checksum enabled
 			-> throw away if biterror found
 		map port to correct application-gate
 		pass UDPPacket to the selected gate
@@ -43,7 +43,7 @@
 
 	author: Jochen Reber
 */
-	
+
 #include <omnetpp.h>
 #include <string.h>
 
@@ -56,14 +56,14 @@ Define_Module( UDPProcessing );
 
 void UDPProcessing::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 
 	int i;
 	applTable.size = gate("to_application")->size();
-	
+
 	for(i=0; i < applTable.size; i++)
 	{
-		applTable.port[i] = 
+		applTable.port[i] =
 			gate("to_application",i)->toGate()->ownerModule()
 			->par("local_port");
 	}
@@ -72,7 +72,7 @@ void UDPProcessing::initialize()
 
 void UDPProcessing::activity()
 {
-	
+
 	cMessage *msg; // the message that will be received
 
 	while(true)
@@ -81,7 +81,7 @@ void UDPProcessing::activity()
 		msg = receive();
 
 		// notify ProcessorManager to begin task
-		claimKernel();
+		// claimKernel();
 
 		// received from IP layer
 		if (strcmp(msg->arrivalGate()->name(), "from_ip") == 0)
@@ -92,9 +92,9 @@ void UDPProcessing::activity()
 		{
 			processMsgFromApp(msg);
 		}
-		
+
 		// notify ProcessorManager to end task
-		releaseKernel();
+		// releaseKernel();
 
 	}
 }
@@ -110,7 +110,7 @@ void UDPProcessing::processMsgFromIp(cMessage *msg)
 
 	IPInterfacePacket *iPacket = (IPInterfacePacket *)msg;
 	UDPPacket *udpPacket = (UDPPacket *) iPacket->decapsulate();
-	cMessage *udpMessage = new cMessage(*((cMessage *)udpPacket)); 
+	cMessage *udpMessage = new cMessage(*((cMessage *)udpPacket));
 
 	// errorcheck, if applicable
 	if (udpPacket->checksumValid())
@@ -125,7 +125,7 @@ void UDPProcessing::processMsgFromIp(cMessage *msg)
 			return;
 		}
 	}
-	
+
 	// check the names of the udpMessage parameters
 	// iffy assignment, please check
 
@@ -156,7 +156,7 @@ void UDPProcessing::processMsgFromIp(cMessage *msg)
 	if (applicationNo != -1)
 	{
 		send(udpMessage, "to_application", applicationNo);
-	} else 
+	} else
 	{
 		delete udpMessage;
 	}
@@ -180,10 +180,10 @@ void UDPProcessing::processMsgFromApp(cMessage *msg)
 
 	strcpy(src_addr,
 		msg->hasPar("src_addr")
-		? msg->par("src_addr").stringValue() 
+		? msg->par("src_addr").stringValue()
 		: ERROR_IP_ADDRESS);
 	strcpy(dest_addr,
-		msg->hasPar("dest_addr") 
+		msg->hasPar("dest_addr")
 		? msg->par("dest_addr").stringValue()
 		: ERROR_IP_ADDRESS);
 

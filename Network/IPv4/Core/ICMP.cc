@@ -42,7 +42,7 @@
 	length() rules(in bit): ping messages have 8*20 bits length;
 			  error messages have 8*4 bits ICMP header,
 			  full IP header of error datagram (+options)
-			  + 8*8 bits payload of the error datagram 
+			  + 8*8 bits payload of the error datagram
 			  (usually transport layer header)
 
     author: Jochen Reber
@@ -64,7 +64,7 @@ Define_Module( ICMP );
 // ICMPQueryType
 ICMPQueryType::ICMPQueryType(const ICMPQueryType& qt) : cObject()
 {
-	setName(qt.name());	
+	setName(qt.name());
 	operator=( qt );
 }
 
@@ -126,7 +126,7 @@ ICMPMessage& ICMPMessage::operator=( const ICMPMessage& msg)
 
 	return *this;
 }
-		
+
 
 /*  ----------------------------------------------------------
         Public Functions
@@ -149,9 +149,9 @@ void ICMP::activity()
 		msg = receive();
 
 		arrivalGate = msg->arrivalGate();
-		
+
 		wait(delay);
-		/* error message from Routing, PreRouting, Fragmentation 
+		/* error message from Routing, PreRouting, Fragmentation
 			or IPOutput: send ICMP message */
 		if (!strcmp(arrivalGate->name(), "preRoutingIn")
 				|| !strcmp(arrivalGate->name(), "routingIn")
@@ -159,7 +159,7 @@ void ICMP::activity()
 				|| !strcmp(arrivalGate->name(), "ipOutputIn"))
 		{
 			processError(msg);
-			releaseKernel();
+			// releaseKernel();
 			continue;
 		}
 
@@ -167,16 +167,16 @@ void ICMP::activity()
 		if (!strcmp(arrivalGate->name(), "localIn"))
 		{
 			processICMPMessage((IPInterfacePacket *)msg);
-			releaseKernel();
+			// releaseKernel();
 			continue;
 		}
 
 		// request from application
 		if (!strcmp(arrivalGate->name(), "pingIn"))
 		{
-			claimKernel();
+			// claimKernel();
 			sendEchoRequest(msg);
-			releaseKernel();
+			// releaseKernel();
 			continue;
 		}
 	} // end while
@@ -190,7 +190,7 @@ void ICMP::processError(cMessage *msg)
 {
 	int type = msg->par("ICMPType");
 	int code = msg->par("ICMPCode");
-	IPDatagram *origDatagram = 
+	IPDatagram *origDatagram =
 				(IPDatagram *) msg->parList().get("datagram");
 
 	// don't send ICMP error messages for multicast messages
@@ -216,20 +216,20 @@ void ICMP::processError(cMessage *msg)
 	// do not reply with error message to error message
 	if (e->protocol() == IP_PROT_ICMP)
 	{
-		ICMPMessage *recICMPMsg = 
+		ICMPMessage *recICMPMsg =
 				(ICMPMessage *)e->encapsulatedMsg();
 		if (recICMPMsg->isErrorMessage)
 		{
 			// deletes errorMessage, e and recICMPMsg
 			delete( errorMessage );
 			return;
-		} 
+		}
 	}
 
 	sendInterfacePacket(errorMessage, e->srcAddress());
 
 	// debugging information
-	ev << "*** ICMP: send error message: " 
+	ev << "*** ICMP: send error message: "
 		<< (int)errorMessage->type << " / "
 		<< errorMessage->code
 		<< "\n";
@@ -241,11 +241,11 @@ void ICMP::processError(cMessage *msg)
 */
 void ICMP::processICMPMessage(IPInterfacePacket *interfacePacket)
 {
-	ICMPMessage	*icmpmsg = 
+	ICMPMessage	*icmpmsg =
 			(ICMPMessage *) interfacePacket->decapsulate();
 	// use source of ICMP message as destination for reply
 	IPAddrChar src;
-	
+
 	strcpy(src, interfacePacket->srcAddr());
 	delete( interfacePacket );
 
@@ -265,10 +265,10 @@ void ICMP::processICMPMessage(IPInterfacePacket *interfacePacket)
 			break;
     	case ICMP_TIME_EXCEEDED:
 			errorOut(icmpmsg);
-			break; 
+			break;
     	case ICMP_PARAMETER_PROBLEM:
 			errorOut(icmpmsg);
-			break; 
+			break;
     	case ICMP_TIMESTAMP_REQUEST:
 			recEchoRequest(icmpmsg, src);
 			break;
@@ -276,7 +276,7 @@ void ICMP::processICMPMessage(IPInterfacePacket *interfacePacket)
 			recEchoReply(icmpmsg);
 			break;
 		default:
-			ev << "*** ICMP: no type found! " 
+			ev << "*** ICMP: no type found! "
 				<< (int)icmpmsg->type << "\n";
 			delete(icmpmsg);
 	}
@@ -289,7 +289,7 @@ void ICMP::errorOut(ICMPMessage *icmpmsg)
 
 
 /*  ----------------------------------------------------------
-       Echo/Timestamp request and reply ICMP messages 
+       Echo/Timestamp request and reply ICMP messages
     ----------------------------------------------------------  */
 void ICMP::recEchoRequest
 	(ICMPMessage *request, const char *dest)
@@ -297,7 +297,7 @@ void ICMP::recEchoRequest
 	ICMPMessage *reply = new ICMPMessage(*request);
 	bool timestampValid = request->query->timestampValid;
 
-	reply->type = timestampValid ? 
+	reply->type = timestampValid ?
 				  ICMP_TIMESTAMP_REPLY : ICMP_ECHO_REPLY;
 	reply->code = 0;
 	reply->query = new ICMPQueryType(*(request->query));
@@ -309,8 +309,8 @@ void ICMP::recEchoRequest
 	{
 		reply->query->receiveTimestamp = simTime();
 		reply->query->transmitTimestamp = simTime();
-	}	
-	
+	}
+
 	sendInterfacePacket(reply, dest);
 }
 
@@ -329,11 +329,11 @@ void ICMP::recEchoReply (ICMPMessage *reply)
 void ICMP::sendEchoRequest(cMessage *msg)
 {
 	ICMPMessage *icmpmsg = new ICMPMessage();
-	ICMPQueryType *echo_info = 
+	ICMPQueryType *echo_info =
 			(ICMPQueryType *)msg->parList().get("echo_info");
 	IPAddrChar dest;
 
-	icmpmsg->type = echo_info->timestampValid ? 
+	icmpmsg->type = echo_info->timestampValid ?
 			ICMP_TIMESTAMP_REQUEST : ICMP_ECHO_REQUEST;
 	icmpmsg->code = 0;
 	icmpmsg->isErrorMessage = false;
@@ -342,14 +342,14 @@ void ICMP::sendEchoRequest(cMessage *msg)
 
 	strcpy(dest, msg->par("destination_address"));
 	delete(msg);
-	
+
 	sendInterfacePacket(icmpmsg, dest);
 }
 
 void ICMP::sendInterfacePacket(ICMPMessage *msg, const char *dest)
 {
 	IPInterfacePacket *interfacePacket = new IPInterfacePacket;
-	
+
 	interfacePacket->encapsulate(msg);
 	interfacePacket->setDestAddr(dest);
 	interfacePacket->setProtocol(IP_PROT_ICMP);

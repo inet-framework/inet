@@ -39,10 +39,10 @@ void ProcessorAccess::initialize()
 
 	processorManager = NULL;
 	// find Processor Manager
-	for (curmod = parentModule(); curmod != NULL; 
+	for (curmod = parentModule(); curmod != NULL;
 				curmod = curmod->parentModule())
 	{
-		if ((foundmod = curmod->findObject("processorManager", false)) 
+		if ((foundmod = curmod->findObject("processorManager", false))
 				!= NULL)
 		{
 			/* debugging output
@@ -53,10 +53,13 @@ void ProcessorAccess::initialize()
 			return;
 		}
 	}
-	ev << "ProcMangr Access init " << fullPath() 
+	ev << "ProcMangr Access init " << fullPath()
 		<< ": ProcMangr Module NOT found.\n";
 
 }
+
+#if 0
+
 /*  ----------------------------------------------------------
         Procted Functions: Processor Manager
     ----------------------------------------------------------  */
@@ -64,8 +67,8 @@ void ProcessorAccess::releaseKernel()
 {
 	if (processorManager != NULL)
 	{
-    	sendDirect( 
-			new cMessage("Release Kernel", PROCMGR_RELEASE_KERNEL), 
+    	sendDirect(
+			new cMessage("Release Kernel", PROCMGR_RELEASE_KERNEL),
 			0, processorManager, "ReleaseKernelIn");
 	} else
 	{
@@ -108,7 +111,7 @@ void ProcessorAccess::releaseProcessor()
 {
 	if (processorManager != NULL)
 	{
-    	sendDirect( 
+    	sendDirect(
 			new cMessage("Release Processor", PROCMGR_RELEASE_PROCESSOR),
 			0, processorManager, "ReleaseProcessorIn");
 	} else
@@ -140,3 +143,4 @@ void ProcessorAccess::writeErrorMessage(const char *methodName)
 			<< methodName << ": ProcMangr Module not found.\n";
 }
 
+#endif

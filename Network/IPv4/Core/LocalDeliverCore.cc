@@ -20,19 +20,19 @@
    file: LocalDeliverCore.cc
    Implementation for the Simple Module LocalDeliverCore
    ------
-   Responsibilities: 
+   Responsibilities:
 		Receive IP datagram for local delivery
 		strip off IP header
 		buffer fragments for ip_fragmenttime
 		wait until all fragments of one fragment number are received
-		discard without notification if not all fragments arrive in 
+		discard without notification if not all fragments arrive in
 		ip_fragmenttime
 		Defragment once all fragments have arrived
 		send Transport packet up to the transport layer
 		send ICMP packet to ICMP module
 		send IGMP group management packet to Multicast module
 		send tunneled IP datagram to PreRouting
-   Notation: 
+   Notation:
 		TCP-Packets --> transportOut[0]
 		UDP-Packets --> transportOut[1]
    Author:      Jochen Reber
@@ -55,7 +55,7 @@ Define_Module( LocalDeliverCore );
 // tbd: include fragmentTimeout in .ned files
 void LocalDeliverCore::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 	fragmentTimeoutTime = strToSimtime(par("fragmentTimeout"));
 	delay = par("procdelay");
     hasHook = (findGate("netfilterOut") != -1);
@@ -82,13 +82,13 @@ void LocalDeliverCore::activity()
 
 	while(true)
   	{
-		
-		// erase timed out fragments in fragmentation buffer	
+
+		// erase timed out fragments in fragmentation buffer
 		// check every 1 second max
 		if (simTime() >= lastCheckTime + 1)
 		{
 			lastCheckTime = simTime();
-			eraseTimeoutFragmentsFromBuf();	
+			eraseTimeoutFragmentsFromBuf();
 		}
 
     	datagram = (IPDatagram *)receive();
@@ -97,11 +97,12 @@ void LocalDeliverCore::activity()
         if (hasHook)
         {
             send(datagram, "netfilterOut");
-            dfmsg = receiveNewOn("netfilterIn");
+            dfmsg = receive();
+            ASSERT(dfmsg->arrivedOn("netfilterIn"));  // FIXME revise this
             if (dfmsg->kind() == DISCARD_PACKET)
             {
                 delete dfmsg;
-                releaseKernel();
+                // releaseKernel();
                 continue;
             }
             datagram = (IPDatagram *)dfmsg;
@@ -109,18 +110,18 @@ void LocalDeliverCore::activity()
 
 		// Defragmentation
 		// skip Degragmentation if single Fragment Datagram
-		if (datagram->fragmentOffset() != 0 
+		if (datagram->fragmentOffset() != 0
 			|| datagram->moreFragments())
 		{
 			insertInFragmentBuf( datagram );
 			if (!datagramComplete(datagram->fragmentId()))
 			{
 				delete(datagram);
-				releaseKernel();
+				// releaseKernel();
 				continue;
-			} 
+			}
 
-			datagram->setLength( datagram->headerLength()*8 + 
+			datagram->setLength( datagram->headerLength()*8 +
 					datagram->encapsulatedMsg()->length() );
 					//getPayloadSizeFromBuf( datagram->fragmentId() ) );
 
@@ -128,12 +129,12 @@ void LocalDeliverCore::activity()
 			ev << "\ndefragment\n";
 			ev << "\nheader length: " << datagram->headerLength()*8
 				<< "  encap length: " << datagram->encapsulatedMsg()->length()
-				<< "  new length: " << datagram->length() << "\n"; 
+				<< "  new length: " << datagram->length() << "\n";
 			*/
 
 			removeFragmentFromBuf(datagram->fragmentId());
 		}
-	
+
 		interfacePacket = setInterfacePacket(datagram);
 		delete(datagram);
 
@@ -148,21 +149,21 @@ void LocalDeliverCore::activity()
 				break;
 			case IP_PROT_IP:
 				send(interfacePacket, "preRoutingOut");
-				releaseKernel();
+				// releaseKernel();
 				break;
 			case IP_PROT_TCP:
 				send(interfacePacket, "transportOut",0);
-				releaseKernel();
+				// releaseKernel();
 				break;
-			case IP_PROT_UDP: 	
+			case IP_PROT_UDP:
 				send(interfacePacket, "transportOut",1);
-				releaseKernel();
+				// releaseKernel();
 				break;
 // BCH Andras: from UTS MPLS model
 			case IP_PROT_RSVP:
 				ev << "IP send packet to RSVPInterface\n";
 				send(interfacePacket, "transportOut",3);
-				releaseKernel();
+				// releaseKernel();
 				break;
 // ECH
 			default:
@@ -171,7 +172,7 @@ void LocalDeliverCore::activity()
 					<< (int)(interfacePacket->protocol())
 					<< "\n";
 				delete(interfacePacket);
-				releaseKernel();
+				// releaseKernel();
 				break;
 		} // end switch
 	} // end while
@@ -235,7 +236,7 @@ void LocalDeliverCore::insertInFragmentBuf(IPDatagram *d)
 		if (fragmentBuf[i].isFree == true)
 		{
 			break;
-		} 
+		}
 	} // end for
 
 	// if no free place found, increase Buffersize to append entry
@@ -267,7 +268,7 @@ bool LocalDeliverCore::datagramComplete(int fragmentId)
 					fragmentId == fragmentBuf[i].fragmentId &&
 					nextFragmentOffset == fragmentBuf[i].fragmentOffset)
 			{
-				newFragmentFound = true;	
+				newFragmentFound = true;
 				nextFragmentOffset += fragmentBuf[i].length;
 				// Datagram complete if last Fragment found
 				if (!fragmentBuf[i].moreFragments)

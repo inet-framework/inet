@@ -24,7 +24,10 @@
 #define IN_PORT_H
 
 #include <string.h>
+#include <iostream>
 #include <omnetpp.h>
+
+using std::ostream;
 
 class IN_Port : public cObject
 {
@@ -36,7 +39,7 @@ class IN_Port : public cObject
 
   enum {PORT_UNDEF = 0 };
   enum {PORT_MAX = 0x7fff };
-  
+
   // creation, duplication, destruction
   IN_Port(const IN_Port& port);
   IN_Port(unsigned short port);
@@ -50,7 +53,7 @@ class IN_Port : public cObject
   virtual cObject* dup() const {return new IN_Port(*this);}
   const IN_Port& operator=(const IN_Port& port);
   const IN_Port& operator=(const unsigned short port);
-  
+
   // new member functions
   bool operator==(const IN_Port& port) const
   {return (_port == port.port());}

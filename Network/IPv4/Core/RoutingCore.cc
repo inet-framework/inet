@@ -20,19 +20,19 @@
   file: RoutingCore.cc
   Purpose: Implementation of static Routing, based on Routing file
 
-  Responsibilities: 
+  Responsibilities:
   Receive correct IP datagram
   send datagram with Multicast addr. to Multicast module
   if source routing option is on, use next source addr. as dest. addr.
   map IP address on output port, use static routing table
-  if destination address is not in routing table, 
+  if destination address is not in routing table,
   throw datagram away and notify ICMP
   process record route and timestamp options, if applicable
-  send to local Deliver if dest. addr. = 127.0.0.1 
+  send to local Deliver if dest. addr. = 127.0.0.1
   or dest. addr. = NetworkCardAddr.[]
   otherwise, send to Fragmentation module
 
-  comments: 
+  comments:
   IP options should be handled here, but are currently not
   implemented (20.5.00)
 
@@ -76,21 +76,22 @@ void RoutingCore::activity()
       message = receive();
 
       /* 	IP datagrams are treated differently
-                than ICMP messages 
+                than ICMP messages
       */
       if (message->kind() == MK_PACKET) // IP datagram
         {
-          datagram = (IPDatagram *)message; 
+          datagram = (IPDatagram *)message;
 
           // pass Datagram through netfilter
-          if (hasHook) 
+          if (hasHook)
             {
               send(datagram, "netfilterOut");
-              dfmsg = receiveNewOn("netfilterIn");
+              dfmsg = receive();
+              ASSERT(dfmsg->arrivedOn("netfilterIn"));  // FIXME revise this
               if (dfmsg->kind() == DISCARD_PACKET)
             	{
                   delete dfmsg;
-                  releaseKernel();
+                  // releaseKernel();
                   continue;
             	}
               datagram = (IPDatagram *)dfmsg;
@@ -100,7 +101,7 @@ void RoutingCore::activity()
           wait(delay);
 
           // FIXME add option handling code here!
-			
+
           strcpy(destAddress, datagram->destAddress());
 // BCH Andras -- code from UTS MPLS model
           ev << "Packet destination address is: " << destAddress << "\n";
@@ -111,22 +112,22 @@ void RoutingCore::activity()
             {
               send(datagram, "multicastOut");
               continue;
-            } 
-	
+            }
+
           // check for local delivery
           if (rt->localDeliver(destAddress))
             {
               send(datagram, "localOut");
               continue;
             }
-	
+
           /* delete datagram and continue,
-             if datagram arrived from input gate 
+             if datagram arrived from input gate
              and IP_FORWARD is off */
           if (datagram->inputPort() != -1 && IPForward == false)
             {
               delete(datagram);
-              releaseKernel();
+              // releaseKernel();
               continue;
             }
 
@@ -138,8 +139,8 @@ void RoutingCore::activity()
           outputPort = rt->outputPortNo(destAddress);
 
           /* debug message for routing check
-             ev << "*" << fullPath() 
-             << " routing: " << destAddress 
+             ev << "*" << fullPath()
+             << " routing: " << destAddress
              << " -> " << outputPort
              << "\n";
           */
@@ -149,20 +150,20 @@ void RoutingCore::activity()
               sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
               continue;
             }
-	
+
           // default: send datagram to fragmentation
           datagram->setOutputPort(outputPort);
           send(datagram, "fragmentationOut");
-	
+
         } else // ICMP message
           {
             /* ICMP messages currently not handled
                possibly no need */
 
-            releaseKernel();
+            // releaseKernel();
             delete(message);
-	
-          } // end else 
+
+          } // end else
     } // end while
 
 }
@@ -172,7 +173,7 @@ void RoutingCore::activity()
 	----------------------------------------------------------	*/
 
 // send error message to ICMP Module
-void RoutingCore::sendErrorMessage(IPDatagram *datagram, 
+void RoutingCore::sendErrorMessage(IPDatagram *datagram,
                                    ICMPType type, ICMPCode code)
 {
   // format of message: see ICMP.h

@@ -18,12 +18,12 @@
 
 
 
-import  
-    "NetworkLayers", 
-    "ProcessorManager", 
-    "PingApp", 
+import
+    "NetworkLayers",
+    "ProcessorManager",
+    "PingApp",
     "ErrorHandling";
- 
+
 //
 // Definition of a First Hop Router.
 //
@@ -34,21 +34,21 @@ module FirstHopRouter
         enqueueHookName: string,
         nodename: string,
 
-        // Network information  
+        // Network information
         numOfProcessors: numeric,
-        numOfPorts : numeric, 
+        numOfPorts : numeric,
         routingFile : string;
-    gates: 
-        in: in[]; 
-        out: out[]; 
-    submodules: 
-        errorHandling: ErrorHandling; 
-            parameters: 
-                nodename = nodename; 
+    gates:
+        in: in[];
+        out: out[];
+    submodules:
+        errorHandling: ErrorHandling;
+            parameters:
+                nodename = nodename;
             display: "p=179,158;i=sink";
         // control module
-        networkLayers: NetworkLayers; 
-            parameters: 
+        networkLayers: NetworkLayers;
+            parameters:
                 // processing delay times
                 ipoutput_delay = 0.1 us,
                 fragmentation_delay = 0.1 us,
@@ -56,14 +56,14 @@ module FirstHopRouter
                 localdeliver_delay = 0,
                 prerouting_delay = 0,
                 routing_delay = 0.2 us,
-                icmp_delay = 0, 
-                iptunneling_delay = 0, 
+                icmp_delay = 0,
+                iptunneling_delay = 0,
                 multicast_delay = 0,
 
                 enqueue_delay = 0.1 us,
-                dequeue_delay = 0, 
+                dequeue_delay = 0,
                 inputqueue_delay = 0.1 us,
-                nwi_delay = 0, 
+                nwi_delay = 0,
 
                 // hook names
                 preRoutingHookName = "NF_IP_PRE_ROUTING",
@@ -76,25 +76,22 @@ module FirstHopRouter
 
                 // other Network parameters
                 IPForward = true,
-                NWIName = "PPPModule", 
-                numOfPorts = numOfPorts, 
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[numOfPorts], 
-                physOut[numOfPorts]; 
+                NWIName = "PPPModule",
+                numOfPorts = numOfPorts,
+                routingFile = routingFile;
+            gatesizes:
+                physIn[numOfPorts],
+                physOut[numOfPorts];
             display: "p=87,155;i=fork";
-        processorManager: ProcessorManager; 
-            parameters: 
-                numOfProcessors = numOfProcessors;
-            display: "p=165,43;i=bwgen";
-    connections nocheck: 
-        networkLayers.errorOut --> errorHandling.in; 
-                                                     
-        // connections to network outside
-        for i=0..numOfPorts-1 do 
-            in[i] --> networkLayers.physIn[i]; 
-            out[i] <-- networkLayers.physOut[i]; 
-        endfor; 
+        //# processorManager: ProcessorManager;
+    connections nocheck:
+        networkLayers.errorOut --> errorHandling.in;
 
-endmodule 
+        // connections to network outside
+        for i=0..numOfPorts-1 do
+            in[i] --> networkLayers.physIn[i];
+            out[i] <-- networkLayers.physOut[i];
+        endfor;
+
+endmodule
 

@@ -21,12 +21,12 @@
 	file: UDPProcessing.h
 	Purpose: Header file for UDP Layer
 	------
-	Responsibilities: 
+	Responsibilities:
 		see .cc file
 	author: Jochen Reber
 	------------------------------------------------- 	*/
 
-#ifndef __UDPPROCESSING_H__ 
+#ifndef __UDPPROCESSING_H__
 #define __UDPPROCESSING_H__
 
 #include "basic_consts.h"
@@ -48,9 +48,9 @@ struct UDPApplicationTable
 };
 
 /* 	-------------------------------------------------
-		main Module: UDPProcessing	
+		main Module: UDPProcessing
 	------------------------------------------------- 	*/
-class UDPProcessing: public ProcessorAccess
+class UDPProcessing : public cSimpleModule   // was ProcessorAccess
 {
 private:
 
@@ -59,7 +59,7 @@ private:
 	void processMsgFromIp(cMessage *);
 	void processMsgFromApp(cMessage *);
 public:
-    Module_Class_Members(UDPProcessing, ProcessorAccess, 
+    Module_Class_Members(UDPProcessing, cSimpleModule,
 				ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();

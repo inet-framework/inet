@@ -21,7 +21,7 @@
 	file: InputQueue.h
 	Purpose: Header file for InputQueue
 	Responsibilities:
-		Demultiplex incoming packets from all network interfaces to 
+		Demultiplex incoming packets from all network interfaces to
 		one Queue for IP
 		arrange the queue in the right order
 
@@ -36,14 +36,14 @@
 #include "basic_consts.h"
 #include "ProcessorAccess.h"
 
-class InputQueue: public ProcessorAccess
+class InputQueue : public cSimpleModule   // was ProcessorAccess
 {
 private:
 
 	simtime_t delay;
 
 public:
-	Module_Class_Members(InputQueue, ProcessorAccess, ACTIVITY_STACK_SIZE);
+	Module_Class_Members(InputQueue, cSimpleModule, ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();
 	virtual void activity();

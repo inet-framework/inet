@@ -19,10 +19,10 @@
 /*
 	file: InputQueue.cc
 	Purpose: Implementation of L2 InputQueue
-	Responsibilities: 
+	Responsibilities:
 	author: Jochen Reber
 */
-	
+
 #include <omnetpp.h>
 
 #include "InputQueue.h"
@@ -33,31 +33,31 @@ Define_Module( InputQueue );
 
 void InputQueue::initialize()
 {
-	ProcessorAccess::initialize();
+	// ProcessorAccess::initialize();
 
 	delay = 0; //par("procdelay");
 }
 
 void InputQueue::activity()
 {
-	
+
 	IPDatagram *datagram;
 
 	while(true)
 	{
 		/* receive packets from all network
 			interfaces */
-		datagram = (IPDatagram *) receive(); 
+		datagram = (IPDatagram *) receive();
 
-		claimKernel();
+		// claimKernel();
 		wait(delay);
 		// gates to processor Manager and IP layer come first
 		// count switches from starting at 1 to starting at 0
 		//datagram->setInputPort(datagram->arrivalGate()->id() - 3);
 		datagram->setInputPort(datagram->arrivalGate()->index());
-			
+
 		send(datagram, "toIP");
-		releaseKernel();
+		// releaseKernel();
 	}
 }
 

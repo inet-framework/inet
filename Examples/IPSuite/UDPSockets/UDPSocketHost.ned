@@ -20,10 +20,10 @@ import
   "NetworkLayers",
   "ProcessorManager",
   "UDP",
-  "ErrorHandling", 
+  "ErrorHandling",
   "SocketApp",
   "UDPModule",
-  "socketlayer"; 
+  "socketlayer";
 
 module UDPSocketHost
        parameters:
@@ -52,11 +52,11 @@ module UDPSocketHost
         nodename = nodename;
           display: "p=87,150;i=prot2";
 
-     errorHandling: ErrorHandling; 
-           parameters: 
-             nodename = routingFile; 
+     errorHandling: ErrorHandling;
+           parameters:
+             nodename = routingFile;
            display: "p=180,210;i=sink";
-         networkLayers: NetworkLayers; 
+         networkLayers: NetworkLayers;
            parameters:
          // waiting times
          icmp_delay = 0,
@@ -72,7 +72,7 @@ module UDPSocketHost
          dequeue_delay = 0,
          inputqueue_delay = 0,
          nwi_delay = 0,
-                
+
          // hook names
          preRoutingHookName = "NF_IP_PRE_ROUTING",
              routingHookName = "NF_IP_FORWARD",
@@ -84,31 +84,27 @@ module UDPSocketHost
 
          // other network parameters
          IPForward = false,
-             NWIName = "PPPModule", 
-             numOfPorts = numOfPorts, 
-             routingFile = routingFile; 
-           gatesizes: 
-             physIn[numOfPorts], 
-             physOut[numOfPorts]; 
+             NWIName = "PPPModule",
+             numOfPorts = numOfPorts,
+             routingFile = routingFile;
+           gatesizes:
+             physIn[numOfPorts],
+             physOut[numOfPorts];
            display: "p=87,210;i=fork";
-     processorManager: ProcessorManager; 
-           parameters: 
-             numOfProcessors = numOfProcessors; 
-           display: "p=180,90;i=bwgen";
-
-    connections nocheck: 
+     //# processorManager: ProcessorManager;
+    connections nocheck:
       // transport connections
     applClient.out --> socketLayer.from_appl[0];
     applClient.in  <-- socketLayer.to_appl[0];
     socketLayer.to_udp --> udpModule.from_socket;
     socketLayer.from_udp <-- udpModule.to_socket;
-      networkLayers.UDPOut --> udpModule.from_ip; 
-      networkLayers.UDPIn <-- udpModule.to_ip; 
-      networkLayers.errorOut --> errorHandling.in; 
+      networkLayers.UDPOut --> udpModule.from_ip;
+      networkLayers.UDPIn <-- udpModule.to_ip;
+      networkLayers.errorOut --> errorHandling.in;
 
       // connections to network outside
-          for i=0..numOfPorts-1 do 
-            in[i] --> networkLayers.physIn[i]; 
-            out[i] <-- networkLayers.physOut[i]; 
-          endfor; 
+          for i=0..numOfPorts-1 do
+            in[i] --> networkLayers.physIn[i];
+            out[i] <-- networkLayers.physOut[i];
+          endfor;
 endmodule

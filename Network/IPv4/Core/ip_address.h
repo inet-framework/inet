@@ -36,7 +36,7 @@
  * Replaces the old IPAddrChar definitions which is deprecated.
  *
  * All public functions are const: when an address is created,
- * it always stays the same, and to modify it, 
+ * it always stays the same, and to modify it,
  * you have to create a new one.
  */
 class IPAddress : public cObject {
@@ -53,7 +53,7 @@ class IPAddress : public cObject {
 	// Only keeps the n first bits of the address, completing it
 	// with zeros.
 	virtual void keepFirstBits (unsigned int n);
-	
+
   public:
 	IPAddress() { addr[0] = addr[1] = addr[2] = addr[3] = 0; }
 
@@ -71,7 +71,7 @@ class IPAddress : public cObject {
 	virtual bool isEqualTo(const IPAddress& toCmp) const;
 
 	virtual IPAddress doAnd(const IPAddress& ip) const;
-	
+
 	// Returns a string (size ADDRESS_STRING_SIZE) representing the address
         // The returned string is NOT allocated dynamically
 	virtual const char *getString() const;
@@ -83,13 +83,13 @@ class IPAddress : public cObject {
 	// Returns the network class of the address in the form of a
 	// char 'A', 'B', 'C', 'D' or 'E' (case sensitive)
 	virtual char getIPClass() const;
-	
+
 	virtual bool isMulticast() const { return (getIPClass() == 'D'); }
-	
+
 	// Returns a new address with the network part of the address
 	// (the bits of the hosts part are to 0)
 	virtual IPAddress* getNetwork() const;
-	
+
 	// Returns the network mask corresponding to the address class.
 	virtual IPAddress* getNetworkMask() const;
 
@@ -108,7 +108,7 @@ class IPAddress : public cObject {
 	// addr2) are equal. Warning: netmask == NULL is treated as all 1,
 	// ie (*addr1 == *addr2) is returned.
 	static bool maskedAddrAreEqual (const IPAddress *addr1,
-									const IPAddress *addr2, 
+									const IPAddress *addr2,
 									const IPAddress *netmask);
 
 	friend ostream& operator<<(ostream& os, const IPAddress& obj);
@@ -129,7 +129,7 @@ inline ostream& operator<<(ostream& os, const IPAddress& obj) {
 	return os;
 }
 inline cEnvir& operator<<(cEnvir& ev, const IPAddress& obj) {
-	ev.printf("%d.%d.%d.%d", obj.addr[0], obj.addr[1], obj.addr[2], obj.addr[3]);
+	ev.printf("%d.%d.%d.%d", obj.getDByte(0), obj.getDByte(1), obj.getDByte(2), obj.getDByte(3));
 	return ev;
 }
 

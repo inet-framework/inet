@@ -9,19 +9,19 @@ Define_Module( MPLSModule );
 void MPLSModule::initialize()
 {
 
-	//ProcessorAccess::initialize();	
+	// ProcessorAccess::initialize();
 
     LIBTableAccess::initialize();
-	
+
 	//Get the process delay setting
 	delay1 = par("procdelay");
-	
+
 	//Is this LSR an Ingress Router
 	isIR = par("isIR");
-	
+
 	//Is this ER an Egress Router
 	isER = par("isER");
-	
+
 	//Which FEC classification scheme is used
 	classifierType = par("classifier").longValue();
 
@@ -52,7 +52,7 @@ void MPLSModule::findRoutingTable()
 
 		}
 
-	}	
+	}
 
 	if(rt==NULL)
 		ev << "Fail to find routing table" << "\n";
@@ -70,32 +70,32 @@ void MPLSModule::activity()
 	while(true)
 	{
 	  msg = receive();
-	  MPLSPacket* mplsPacket =dynamic_cast<MPLSPacket*>(msg);	
+	  MPLSPacket* mplsPacket =dynamic_cast<MPLSPacket*>(msg);
 	  IPDatagram *ipdata=dynamic_cast<IPDatagram *>(msg);
 
 	  if (!strcmp(msg->arrivalGate()->name(), "fromL3")) //Message from L3
-	  {		
+	  {
 		    //If this is not ip data,then no further process is carried out
 			if(ipdata==NULL)
 				continue;
 
 			 int gateID=msg->arrivalGateId();
-	    	 int gateIndex=gateID-(gate("fromL3",0)->id());	    	
-			 
+	    	 int gateIndex=gateID-(gate("fromL3",0)->id());
+
 			 //If the MPLS processing is not on, then simply passing the packet
 	    	 if(ipdata->hasPar("trans"))
 	    	 {
 	    		send(ipdata, "toL2", gateIndex);
 	    	 }
-	    	 else if(ipdata !=NULL)	
+	    	 else if(ipdata !=NULL)
 			 {
 				//IP data from L3 and requires MPLS processing
 				 MPLSPacket* outPacket =new MPLSPacket();
 				 outPacket->encapsulate(ipdata);
 				 //outPacket->encapsulate(msg);
-		
+
 				 //This is native IP
-				 outPacket->pushLabel(-1); 
+				 outPacket->pushLabel(-1);
 				 send(outPacket, "toL2", gateIndex);
 
 				 //delete msg;
@@ -130,10 +130,10 @@ void MPLSModule::activity()
                // cPacket* qMsg =(cPacket*)discardItem->dup();
                  sendDirect(discardItem, 0.0, ldpMod, "from_mpls_switch");
                 // delete discardItem;
-                
+
 		  	 }
 
-		  	continue;	  	
+		  	continue;
 
 		}
 
@@ -149,7 +149,7 @@ void MPLSModule::activity()
 
 	std::vector<fec>::iterator iterF;
 	fec iter;
-	
+
 	if(!isLDP)
 	{
 	for(int i=0;i< fecList.size();i++)
@@ -173,7 +173,7 @@ void MPLSModule::activity()
 		}
 	}
 	*/
-		
+
 	//Update LSP id
 	for(iterF = fecList.begin(); iterF!=fecList.end();iterF++)
 	{
@@ -194,7 +194,7 @@ void MPLSModule::activity()
 		if(data==NULL && mplsPck ==NULL)
 			continue;
 
-			
+
 		//Incoming interface
 		int gateIndex;
 		if(data!=NULL)
@@ -206,11 +206,11 @@ void MPLSModule::activity()
 			data =(IPDatagram *) (mplsPck->decapsulate());
 
 		}
-			
+
 
 		InterfaceEntry* ientry= rt->getInterfaceByIndex(gateIndex);
 		string senderInterface =string(ientry->name);
-		int fecID = this->classifyPacket(data, classifierType);         
+		int fecID = this->classifyPacket(data, classifierType);
 
 		if(fecID ==returnedFEC)
 		{
@@ -240,7 +240,7 @@ void MPLSModule::activity()
 
 					*/
 
-			//Construct a new MPLS packet	
+			//Construct a new MPLS packet
 
 			MPLSPacket* newPacket = NULL;
 			if(mplsPck !=NULL)
@@ -250,7 +250,7 @@ void MPLSModule::activity()
 				newPacket = new MPLSPacket();
 				newPacket->encapsulate((IPDatagram*)ipdataQueue[i]);
 			}
-			newPacket->pushLabel(label);				
+			newPacket->pushLabel(label);
 
 			//if(iterF != pathColor.end())
 
@@ -294,7 +294,7 @@ void MPLSModule::activity()
 
 			if(oldLabel !=-1) // This is not IP native packet
 			{
-				int newLabel = lt->requestNewLabel(senderInterface, oldLabel);	
+				int newLabel = lt->requestNewLabel(senderInterface, oldLabel);
 				int optCode  = lt->getOptCode(senderInterface, oldLabel);
 
 				if(newLabel >=0) //New label can be found
@@ -304,7 +304,7 @@ void MPLSModule::activity()
 					case PUSH_OPER:
 						mplsPacket->pushLabel(newLabel);
 						break;
-						
+
 					case SWAP_OPER:
 						mplsPacket->swapLabel(newLabel);
 						break;
@@ -319,7 +319,7 @@ void MPLSModule::activity()
 				string outgoingInterface= lt->requestOutgoingInterface(senderInterface, newLabel);
 
 				int outgoingPort =rt->interfaceNameToNo(outgoingInterface.c_str());
-				
+
 				if(optCode == SWAP_OPER)
 					ev << " Swap label(" << oldLabel << ") by label(" << newLabel << ")\n";
 				else if(optCode == PUSH_OPER)
@@ -328,14 +328,14 @@ void MPLSModule::activity()
 					ev << "Pop label " << oldLabel << "\n";
 
 
-	
+
 				ev << " Sending the packet to inteface "<< outgoingInterface.c_str() <<"\n";
 
 				send(mplsPacket, "toL2", outgoingPort);
 
 				}
 				else if(isER && (newLabel==-1)) // ER router and the new label must be native IP
-				{   				
+				{
 
 					string outgoingInterface= lt->requestOutgoingInterface(senderInterface, newLabel, oldLabel);
 
@@ -347,17 +347,17 @@ void MPLSModule::activity()
 					{
 						IPDatagram *nativeIP= (IPDatagram*)mplsPacket->decapsulate();
 						cMessage* dupIPDatagram = (cMessage *) nativeIP->dup();
-		
+
 						ev << " Swap label(" << oldLabel << ") by label(" << newLabel << ")\n";
 
-						ev << " Sending the packet to inteface "<< outgoingInterface.c_str() <<"\n";		
+						ev << " Sending the packet to inteface "<< outgoingInterface.c_str() <<"\n";
 						send(dupIPDatagram, "toL2", outgoingPort);
 
-						delete nativeIP;				
+						delete nativeIP;
 
 					}
 					else    //Message is out of the tunnel
-					{	
+					{
 
 						ev << " Swap label(" << oldLabel << ") by label(" << newLabel << ")\n";
 						ev << " Sending the packet to inteface "<< outgoingInterface.c_str() <<"\n";
@@ -375,15 +375,15 @@ void MPLSModule::activity()
 
 				}
 
-	
+
 
 			}
 			else //Decapsulate the message and pass up to L3 since this is LDP packet
-			{				
+			{
 
 				IPDatagram *ipdatagram =
 
-						(IPDatagram *) (mplsPacket->decapsulate());			
+						(IPDatagram *) (mplsPacket->decapsulate());
 
 				IPDatagram *dupPack = (IPDatagram *) ipdatagram->dup();
 
@@ -397,7 +397,7 @@ void MPLSModule::activity()
 
 		 }
 		 else if(isIR) //Data from outside for IR host
-		 {	
+		 {
 
 		 	if(ipdata->hasPar("trans"))
 
@@ -422,9 +422,9 @@ void MPLSModule::activity()
 				{
 					ipdata = (IPDatagram*)(mplsPacket->decapsulate());
 
-				}		
+				}
 
-				//Add color for this fec path		
+				//Add color for this fec path
 
 				//std::list<fec_color_mapping>::iterator iterF;
 
@@ -482,7 +482,7 @@ void MPLSModule::activity()
 
 				 */
 
-			
+
 
 			ev << "Message(src, dest, fec)=(" << ipdata->srcAddress() << "," <<
 
@@ -491,13 +491,13 @@ void MPLSModule::activity()
 			int label = lt->requestLabelforFec(fecID);
 			ev << " Label found for this message is label(" << label << ")\n";
 
-			
+
 			if(label!=-2) //New Label found
 			{
 
 					//Construct a new MPLS packet
 
-					MPLSPacket* newPacket=NULL;	
+					MPLSPacket* newPacket=NULL;
 
 					if(mplsPacket == NULL)
 					{
@@ -506,7 +506,7 @@ void MPLSModule::activity()
 					}
 					else
 						newPacket = mplsPacket;
-					
+
 					//consistent in packet color
 					if(fecID < MAX_LSP_NO)
 						newPacket->setKind(fecID);
@@ -532,7 +532,7 @@ void MPLSModule::activity()
 
 			}
 
-			
+
 
 			else //Need to make ldp query
 			{
@@ -554,18 +554,18 @@ void MPLSModule::activity()
 
 				}
 
-				
 
-				
+
+
 
 				//Whether I made requests for this FEC
 
-				
+
 
 				if(!makeRequest)
 					continue; //Do nothing since I have made a previous request pending
 
-			
+
 				//signal the LDP by sending some messages
 
 				cMessage *signalMessage =new cMessage("toSignallingModule");
@@ -578,9 +578,9 @@ void MPLSModule::activity()
 
 				signalMessage->addPar("src_addr") = IPAddress(ipdata->srcAddress()).getInt();
 
-				signalMessage->addPar("gateIndex") = gateIndex; 
+				signalMessage->addPar("gateIndex") = gateIndex;
 
-				
+
                 if(isSignallingReady)
                 {
 
@@ -591,11 +591,11 @@ void MPLSModule::activity()
 				 }
 				else //Pending
 
-				ldpQueue.add(signalMessage);	
+				ldpQueue.add(signalMessage);
 
 				}//End query making
 
-			}//End data is not transperancy			
+			}//End data is not transperancy
 
 
 		 }
@@ -642,7 +642,7 @@ void MPLSModule::findSignallingModule()
 
 	}
 
-	
+
 
 	if(ldpMod==NULL)
 		ev << " Error occurs - Fail to find  my signalling module" << "\n" <<

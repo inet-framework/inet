@@ -34,7 +34,7 @@
 #include "IPDatagram.h"
 #include "ICMP.h"
 
-class PreRoutingCore: public ProcessorAccess
+class PreRoutingCore : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	simtime_t delay;
@@ -42,7 +42,7 @@ private:
 
 	void sendErrorMessage (IPDatagram *, ICMPType, ICMPCode);
 public:
-	Module_Class_Members(PreRoutingCore, ProcessorAccess,
+	Module_Class_Members(PreRoutingCore, cSimpleModule,
 			ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();

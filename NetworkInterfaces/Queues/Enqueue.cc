@@ -33,7 +33,7 @@
     author: Jochen Reber
 */
 
-	
+
 #include "hook_types.h"
 #include "Enqueue.h"
 
@@ -42,26 +42,27 @@ Define_Module( Enqueue );
 
 void Enqueue::initialize()
 {
-    ProcessorAccess::initialize();
+    // ProcessorAccess::initialize();
     delay = par("procdelay");
 }
 
 
 void Enqueue::activity()
 {
-	
+
 	cMessage *msg;
 
 	while(true)
 	{
-		msg = receive(); 
+		msg = receive();
 
-		claimKernel();
+		// claimKernel();
 		send(msg, "toEnqHook");
 
 		wait(delay);
 
-		msg = receiveOn("fromEnqHook");
+		msg = receive();
+		ASSERT(dfmsg->arrivedOn("fromEnqHook"));  // FIXME revise this
 		switch(msg->kind())
 		{
 			case PACKET_ENQUEUED:
@@ -74,7 +75,7 @@ void Enqueue::activity()
 					<< msg->kind();
 		} // end switch
 		delete msg;
-		releaseKernel();
+		// releaseKernel();
 
 	} // end while
 }
@@ -88,10 +89,10 @@ void Enqueue::activity()
 void Enqueue::sendWakeupCall()
 {
 	cMessage *wakeupMsg = new cMessage();
-	cSimpleModule *dequeueModule = 
+	cSimpleModule *dequeueModule =
 		(cSimpleModule *)parentModule()->findObject("deq");
 
-	wakeupMsg->setKind(WAKEUP_PACKET);	
+	wakeupMsg->setKind(WAKEUP_PACKET);
 	sendDirect(wakeupMsg, 0, dequeueModule, "inDirekt");
 }
 

@@ -18,32 +18,32 @@
 
 
 
-import  
-    "NetworkLayers", 
-    "ProcessorManager", 
-    "PingApp", 
-    "ErrorHandling", 
-    "TrafficGen"; 
-                  
-                  
- 
+import
+    "NetworkLayers",
+    "ProcessorManager",
+    "PingApp",
+    "ErrorHandling",
+    "TrafficGen";
+
+
+
 //
 // Definition of an IPNode with transport layers.
 //
 module BurstHost
-    parameters: 
-                
+    parameters:
+
         nodenr          : numeric const,
         burstPackets    : numeric const,
         packetSize      : numeric const,
         nodename        : string,
 
-        // Network information  
-        routingFile     : string; 
-    gates: 
-        in: in[]; 
-        out: out[]; 
-    submodules: 
+        // Network information
+        routingFile     : string;
+    gates:
+        in: in[];
+        out: out[];
+    submodules:
         burstGenerator: TrafficGenerator
             parameters:
                 GeneratorType = "BurstGenerator",
@@ -53,66 +53,63 @@ module BurstHost
                 burstPackets = burstPackets,
                 generationTime = 0,
                 generationSize = packetSize;
-        errorHandling: ErrorHandling; 
-            parameters: 
-                nodename = nodename; 
+        errorHandling: ErrorHandling;
+            parameters:
+                nodename = nodename;
             display: "p=179,158;i=sink";
         // control module
-        networkLayers: NetworkLayers; 
-            parameters: 
+        networkLayers: NetworkLayers;
+            parameters:
                 // processing delay times
-                ipoutput_delay = 0.2 us, 
-                fragmentation_delay = 0.1 us, 
-                ipsend_delay = 0.5 us, 
-                localdeliver_delay = 1 us, 
-                prerouting_delay = 0, 
-                routing_delay = 0.2 us, 
-                icmp_delay = 0, 
-                iptunneling_delay = 0, 
-                multicast_delay = 0, 
+                ipoutput_delay = 0.2 us,
+                fragmentation_delay = 0.1 us,
+                ipsend_delay = 0.5 us,
+                localdeliver_delay = 1 us,
+                prerouting_delay = 0,
+                routing_delay = 0.2 us,
+                icmp_delay = 0,
+                iptunneling_delay = 0,
+                multicast_delay = 0,
 
-                enqueue_delay = 0.3 us, 
-                dequeue_delay = 0, 
-                inputqueue_delay = 0.1 us, 
-                nwi_delay = 0, 
-                               
-                                     
+                enqueue_delay = 0.3 us,
+                dequeue_delay = 0,
+                inputqueue_delay = 0.1 us,
+                nwi_delay = 0,
+
+
                 // hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING", 
-                routingHookName = "NF_IP_FORWARD", 
-                localDeliverHookName = "NF_IP_LOCAL_IN", 
-                ipSendHookName = "NF_IP_LOCAL_OUT", 
-                ipOutputHookName = "NF_IP_POST_ROUTING", 
-                enqueueHookName = "L2_EnqueueHook", 
-                dequeueHookName = "L2_DequeueHook", 
+                preRoutingHookName = "NF_IP_PRE_ROUTING",
+                routingHookName = "NF_IP_FORWARD",
+                localDeliverHookName = "NF_IP_LOCAL_IN",
+                ipSendHookName = "NF_IP_LOCAL_OUT",
+                ipOutputHookName = "NF_IP_POST_ROUTING",
+                enqueueHookName = "L2_EnqueueHook",
+                dequeueHookName = "L2_DequeueHook",
 
                 // other Network parameters
                 IPForward = false,
-                NWIName = "PPPModule", 
+                NWIName = "PPPModule",
                 numOfPorts = 1,
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[1], 
-                physOut[1]; 
+                routingFile = routingFile;
+            gatesizes:
+                physIn[1],
+                physOut[1];
             display: "p=87,155;i=fork";
-        processorManager: ProcessorManager; 
-            parameters: 
-                numOfProcessors = 1; 
-            display: "p=165,43;i=bwgen";
-    connections nocheck: 
+        //# processorManager: ProcessorManager;
+    connections nocheck:
 
         // transport connections
-                         
+
         networkLayers.UDPOut --> burstGenerator.in;
         networkLayers.UDPIn <-- burstGenerator.out;
-                                              
-        networkLayers.errorOut --> errorHandling.in; 
-                                                     
-        // connections to network outside
-        for i=0..0 do 
-            in[i] --> networkLayers.physIn[i]; 
-            out[i] <-- networkLayers.physOut[i]; 
-        endfor; 
 
-endmodule 
+        networkLayers.errorOut --> errorHandling.in;
+
+        // connections to network outside
+        for i=0..0 do
+            in[i] --> networkLayers.physIn[i];
+            out[i] <-- networkLayers.physOut[i];
+        endfor;
+
+endmodule
 

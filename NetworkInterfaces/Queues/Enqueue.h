@@ -27,7 +27,7 @@
 
 		receive IPDatagram or Discard_Packet-Message from EnqueueHook:
 		ignore Discard_Packet-Message
-		on IPDatagram: notify Dequeue directly with 
+		on IPDatagram: notify Dequeue directly with
 				WakeUp_Queue-Message
 		release Kernel
 
@@ -42,14 +42,14 @@
 #include "basic_consts.h"
 #include "ProcessorAccess.h"
 
-class Enqueue: public ProcessorAccess
+class Enqueue : public cSimpleModule   // was ProcessorAccess
 {
 private:
 	simtime_t delay;
 
 	void sendWakeupCall();
 public:
-	Module_Class_Members(Enqueue, ProcessorAccess, ACTIVITY_STACK_SIZE);
+	Module_Class_Members(Enqueue, cSimpleModule, ACTIVITY_STACK_SIZE);
 
 	virtual void initialize();
 	virtual void activity();
