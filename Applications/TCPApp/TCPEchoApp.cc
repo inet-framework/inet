@@ -71,11 +71,18 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         }
         else
         {
-            // modify length and send back
+            // reverse direction, modify length, and send it back
             msg->setKind(TCP_C_SEND);
+            TCPCommand *ind = check_and_cast<TCPCommand *>(msg->removeControlInfo());
+            TCPSendCommand *cmd = new TCPSendCommand();
+            cmd->setConnId(ind->connId());
+            msg->setControlInfo(cmd);
+            delete ind;
+
             long len = long(msg->length()*echoFactor) & ~7U;
             if (len<8) len=8;
             msg->setLength(len);
+
             sendOrSchedule(msg);
         }
     }
