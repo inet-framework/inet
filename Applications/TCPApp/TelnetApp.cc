@@ -12,10 +12,7 @@
 //
 
 
-#include "TCPGenericCliAppBase.h"
-#include "IPAddressResolver.h"
-#include "GenericAppMsg_m.h"
-
+#include "TelnetApp.h"
 
 
 /** Redefined to schedule a connect(). */

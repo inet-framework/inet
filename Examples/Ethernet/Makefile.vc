@@ -159,9 +159,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-EtherAppCli.obj: EtherAppCli.cc \
-  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/utils.h \
-  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h
-EtherAppSrv.obj: EtherAppSrv.cc \
-  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/utils.h \
-  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h
+

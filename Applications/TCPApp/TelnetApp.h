@@ -14,7 +14,6 @@
 #ifndef __TELNETAPP_H_
 #define __TELNETAPP_H_
 
-#include <vector>
 #include <omnetpp.h>
 #include "TCPGenericCliAppBase.h"
 

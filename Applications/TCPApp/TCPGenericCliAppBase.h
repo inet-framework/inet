@@ -14,7 +14,6 @@
 #ifndef __TCPGENERICCLIAPPBASE_H_
 #define __TCPGENERICCLIAPPBASE_H_
 
-#include <vector>
 #include <omnetpp.h>
 #include "TCPSocket.h"
 

@@ -127,29 +127,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-BurstGenerator.obj: BurstGenerator.cc \
-  BurstGenerator.h \
-  ..\..\Network\IPv4/IPDatagram.h \
-  ..\..\Network\IPv4/ICMP.h \
-  ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4/RoutingTableAccess.h \
-  ..\..\Network\IPv4/ICMPMessage.h \
-  ..\..\Base/ModuleAccess.h \
-  ..\..\Network\IPv4/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPAddress.h
-ConstTrafficGen.obj: ConstTrafficGen.cc \
-  ConstTrafficGen.h \
-  ..\..\Network\IPv4/IPDatagram.h \
-  ..\..\Network\IPv4/ICMP.h \
-  ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4/RoutingTableAccess.h \
-  ..\..\Network\IPv4/ICMPMessage.h \
-  ..\..\Base/ModuleAccess.h \
-  ..\..\Network\IPv4/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPAddress.h
-SinkApp.obj: SinkApp.cc \
-  SinkApp.h \
-  ..\..\Network\IPv4/IPDatagram.h \
-  ..\..\Base/basic_consts.h
+

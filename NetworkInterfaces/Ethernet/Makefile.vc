@@ -157,45 +157,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-EtherBus.obj: EtherBus.cc \
-  utils.h \
-  ..\..\Base/ipsuite_defs.h
-EtherEncap.obj: EtherEncap.cc \
-  Ethernet.h \
-  utils.h \
-  ..\..\Base/ipsuite_defs.h
-EtherHub.obj: EtherHub.cc \
-  utils.h \
-  ..\..\Base/ipsuite_defs.h
-EtherLLC.obj: EtherLLC.cc \
-  Ethernet.h \
-  utils.h \
-  ..\..\Base/ipsuite_defs.h
-EtherMAC.obj: EtherMAC.cc \
-  EtherMAC.h \
-  utils.h \
-  Ethernet.h \
-  ..\..\Base/ipsuite_defs.h
-MACRelayUnitBase.obj: MACRelayUnitBase.cc \
-  MACRelayUnitBase.h \
-  ..\_802/MACAddress.h \
-  utils.h \
-  Ethernet.h \
-  ..\..\Base/ipsuite_defs.h
-MACRelayUnitNP.obj: MACRelayUnitNP.cc \
-  MACRelayUnitNP.h \
-  utils.h \
-  Ethernet.h \
-  ..\_802/MACAddress.h \
-  MACRelayUnitBase.h \
-  ..\..\Base/ipsuite_defs.h
-MACRelayUnitPP.obj: MACRelayUnitPP.cc \
-  MACRelayUnitPP.h \
-  utils.h \
-  Ethernet.h \
-  ..\_802/MACAddress.h \
-  MACRelayUnitBase.h \
-  ..\..\Base/ipsuite_defs.h
-utils.obj: utils.cc \
-  utils.h \
-  ..\..\Base/ipsuite_defs.h
+

@@ -121,8 +121,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-FlatNetworkConfigurator.obj: FlatNetworkConfigurator.cc \
-  ..\IPv4/RoutingTable.h \
-  FlatNetworkConfigurator.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\IPv4/IPAddress.h
+
