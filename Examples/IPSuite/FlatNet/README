@@ -1,4 +1,4 @@
 Demonstrates automatic IP address assignment and automatic routing
-table setup using the FlatNetworkConfigurator module. (For another model
-that uses it, see TCPClientServerNet.
+table setup using the FlatNetworkConfigurator module. (For other models
+that use it, see NClients and TCPClientServerNet.)
 
