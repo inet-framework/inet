@@ -191,7 +191,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
             newPacket->setKind(fecID);
 
             // Find the outgoing interface
-            string outgoingInterface = lt->requestOutgoingInterface(senderInterface, label);
+            string outgoingInterface = lt->findOutgoingInterface(senderInterface, label);
 
             // A check routine will be added later to make sure outgoingInterface !="X"
             int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
@@ -228,7 +228,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
 
         if (oldLabel != -1)  // This is not IP native packet
         {
-            int newLabel = lt->requestNewLabel(senderInterface, oldLabel);
+            int newLabel = lt->findNewLabel(senderInterface, oldLabel);
             int optCode = lt->getOptCode(senderInterface, oldLabel);
 
             if (newLabel >= 0)  // New label can be found
@@ -248,7 +248,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
                     error("Unknown MPLS OptCode %d", optCode);
                 }
 
-                string outgoingInterface = lt->requestOutgoingInterface(senderInterface, newLabel);
+                string outgoingInterface = lt->findOutgoingInterface(senderInterface, newLabel);
 
                 int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
@@ -267,7 +267,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
             else if (isER && newLabel == -1)  // ER router and the new label must be native IP
             {
                 string outgoingInterface =
-                    lt->requestOutgoingInterface(senderInterface, newLabel, oldLabel);
+                    lt->findOutgoingInterface(senderInterface, newLabel, oldLabel);
                 int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 
                 mplsPacket->popLabel();
@@ -353,7 +353,7 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
             ev << "Message(src, dest, fec)=(" << ipdata->srcAddress() << "," <<
                 ipdata->destAddress() << "," << fecID << ")\n";
 
-            int label = lt->requestLabelforFec(fecID);
+            int label = lt->findLabelforFec(fecID);
             ev << " Label found for this message is label(" << label << ")\n";
 
             if (label != -2)  // New Label found
@@ -384,8 +384,8 @@ void MPLSModule::processPacketFromL2(cMessage * msg)
 
                 // Find outgoing interface
 
-                // string outgoingInterface= lt->requestOutgoingInterface(senderInterface, label);
-                string outgoingInterface = lt->requestOutgoingInterface(fecID);
+                // string outgoingInterface= lt->findOutgoingInterface(senderInterface, label);
+                string outgoingInterface = lt->findOutgoingInterface(fecID);
 
                 int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
 

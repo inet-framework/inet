@@ -13,21 +13,6 @@
 #include "ConstType.h"
 
 
-struct prt_type
-{
-    int pos;
-    IPAddressPrefix fecValue; //Support prefix only, e.g 128.2.0.0
-};
-
-struct lib_type
-{
-    int inLabel;
-    int outLabel;
-    std::string inInterface;
-    std::string outInterface;
-    int optcode;
-};
-
 
 /**
  * Manages the label space and label mappings that belong to the current LSR.
@@ -58,11 +43,26 @@ struct lib_type
  */
 class LIBTable: public cSimpleModule
 {
+public:
+
+    struct PRTEntry
+    {
+        int pos;
+        IPAddressPrefix fecValue; //Support prefix only, e.g 128.2.0.0
+    };
+
+    struct LIBEntry
+    {
+        int inLabel;
+        int outLabel;
+        std::string inInterface;
+        std::string outInterface;
+        int optcode;
+    };
 
 private:
-
-    std::vector<lib_type> lib;
-    std::vector<prt_type> prt;
+    std::vector<LIBEntry> lib;
+    std::vector<PRTEntry> prt;
 
     /**
      * Load the label information table from files
@@ -121,7 +121,7 @@ public:
      * @param fec   The packet's FEC
      * @return      The outgoing label, or -2 if there is no label found
      */
-    int requestLabelforFec(int fec) const;
+    int findLabelforFec(int fec) const;
 
     /**
      * Find the FEC based on corresponding incoming label and incoming interface
@@ -130,6 +130,7 @@ public:
      * @param inInterface  The incoming interface
      * @return             The FEC value, or 0 if the FEC cannot be found
      */
+    //FIXME unused
     int findFec(int label, std::string inInterface) const;
 
     /**
@@ -141,7 +142,7 @@ public:
      *                         cannot be found
      */
     // FIXME Why "X" ??? (Andras)
-    std::string requestOutgoingInterface(std::string senderInterface,int newLabel) const;
+    std::string findOutgoingInterface(std::string senderInterface,int newLabel) const;
 
     /**
      * Find the outgoing interface name based on the FEC.
@@ -149,29 +150,29 @@ public:
      * @param fec   The FEC value
      * @return      The outgoing interface name
      */
-    std::string requestOutgoingInterface(int fec) const;
+    std::string findOutgoingInterface(int fec) const;
 
     /**
      * Find the outgoing interface name based on incoming interface,
      * outgoing label and incoming label.
      * If the new label is not -1 (native IP), this function is the same
-     * as requestOutgoingInterface(string senderInterface, int newLabel).
+     * as findOutgoingInterface(string senderInterface, int newLabel).
      *
      * @param senderInterface The incoming interface
      * @param newLabel        The outgoing label
      * @param oldLabel        The incoming label
      * @return                The outgoing interface name
      */
-    std::string requestOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel) const;
+    std::string findOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel) const;
 
     /**
-     * Install new label based on incoming interface and incoming label
+     * Returns new label based on incoming interface and incoming label
      *
      * @param senderInterface The incoming interface
      * @param oldLabel        The incoming label
-     * @return                The value of the new label installed, or -2 on failure
+     * @return                The value of the new label, or -2 if not found
      */
-    int requestNewLabel(std::string senderInterface,int oldLabel) const;
+    int findNewLabel(std::string senderInterface,int oldLabel) const;
 
     /**
      * Returns the optcode based on incoming interface and incoming label.
@@ -183,8 +184,8 @@ public:
     int getOptCode(std::string senderInterface, int oldLabel) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const prt_type& prt);
-std::ostream& operator<<(std::ostream& os, const lib_type& lib);
+std::ostream& operator<<(std::ostream& os, const LIBTable::PRTEntry& prt);
+std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib);
 
 #endif
 

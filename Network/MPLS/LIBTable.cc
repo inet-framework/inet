@@ -23,12 +23,12 @@ using namespace std;
 Define_Module(LIBTable);
 
 
-std::ostream & operator<<(std::ostream & os, const prt_type & prt)
+std::ostream & operator<<(std::ostream & os, const LIBTable::PRTEntry & prt)
 {
     return os << "Pos:" << prt.pos << "  Fec:" << prt.fecValue;
 }
 
-std::ostream & operator<<(std::ostream & os, const lib_type & lib)
+std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
 {
     os << "InL:" << lib.inLabel;
     os << "  InIf:" << lib.inInterface.c_str();
@@ -86,7 +86,7 @@ int LIBTable::readLibTableFromFile(const char *filename)
 
     while (fin.getline(line, 100) && !fin.eof())
     {
-        lib_type record;
+        LIBEntry record;
 
         // Reach the end of table
         if (!line[0])
@@ -154,7 +154,7 @@ int LIBTable::readPrtTableFromFile(const char *filename)
 
     while (fin.getline(line, 100) && !fin.eof())
     {
-        prt_type record;
+        PRTEntry record;
 
         if (!line[0])
             break;  // Reach the end of table
@@ -198,7 +198,7 @@ void LIBTable::printTables() const
 int LIBTable::installNewLabel(int outLabel, string inInterface,
                               string outInterface, int fec, int optcode)
 {
-    lib_type newLabelEntry;
+    LIBEntry newLabelEntry;
     newLabelEntry.inInterface = inInterface;
     newLabelEntry.outInterface = outInterface;
     newLabelEntry.optcode = optcode;
@@ -208,7 +208,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     newLabelEntry.outLabel = outLabel;
     lib.push_back(newLabelEntry);
 
-    prt_type aPrt;
+    PRTEntry aPrt;
     aPrt.pos = lib.size() - 1;
     aPrt.fecValue = fec;
     prt.push_back(aPrt);
@@ -217,7 +217,7 @@ int LIBTable::installNewLabel(int outLabel, string inInterface,
     return newLabelEntry.inLabel;
 }
 
-int LIBTable::requestLabelforFec(int fec) const
+int LIBTable::findLabelforFec(int fec) const
 {
     // search in the PRT for exact match of the FEC value
     for (int i = 0; i < prt.size(); i++)
@@ -259,7 +259,7 @@ int LIBTable::findFec(int label, string inInterface) const
 
 }
 
-string LIBTable::requestOutgoingInterface(int fec) const
+string LIBTable::findOutgoingInterface(int fec) const
 {
     int pos = -1;
 
@@ -279,7 +279,7 @@ string LIBTable::requestOutgoingInterface(int fec) const
         return string("X");
 }
 
-string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel) const
+string LIBTable::findOutgoingInterface(string senderInterface, int newLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
     {
@@ -294,10 +294,10 @@ string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel) 
     return string("X");
 }
 
-string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, int oldLabel) const
+string LIBTable::findOutgoingInterface(string senderInterface, int newLabel, int oldLabel) const
 {
     if (newLabel != -1)
-        return requestOutgoingInterface(senderInterface, newLabel);
+        return findOutgoingInterface(senderInterface, newLabel);
 
     for (int i = 0; i < lib.size(); i++)
     {
@@ -312,7 +312,7 @@ string LIBTable::requestOutgoingInterface(string senderInterface, int newLabel, 
     return string("X");
 }
 
-int LIBTable::requestNewLabel(string senderInterface, int oldLabel) const
+int LIBTable::findNewLabel(string senderInterface, int oldLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
         if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
