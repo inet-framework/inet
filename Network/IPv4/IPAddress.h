@@ -239,7 +239,6 @@ class IPAddress
      * error if the string has invalid format.)
      */
     static bool isWellFormed(const char *text);
-    //@}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
