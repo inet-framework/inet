@@ -43,10 +43,9 @@
 // A few useful starting points for browsing IPSuite:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a> 
 //    includes all modules and networks
-//  - example models such as TCPTester, ClientServerNetwork, McNetwork2 or 
-//    Peer2Network
-//  - protocol implementations: IPProcessing, TcpModule, ...
-//  - <b>new TCP model (alpha): TCPMain</b>
+//  - example models such as ClientServerNetwork or McNetwork2
+//  - hosts and routers: StandardHost2, Router
+//  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing, etc.
 //
 // Starting points for the MPLS models:
 //  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe
