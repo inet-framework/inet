@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet
-SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir McNetwork2_dir PerformAnalysis_dir TCPClientServerNet_dir
+SUBDIRS= FlatNet KIDSNw1 McNetwork2 NClients PerformAnalysis TCPClientServerNet
+SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir McNetwork2_dir NClients_dir PerformAnalysis_dir TCPClientServerNet_dir
 
 # inserted from file 'makefrag.vc':
 
@@ -95,6 +95,9 @@ KIDSNw1_dir:
 
 McNetwork2_dir:
 	cd McNetwork2 && cd && nmake /nologo /f Makefile.vc
+
+NClients_dir:
+	cd NClients && cd && nmake /nologo /f Makefile.vc
 
 PerformAnalysis_dir:
 	cd PerformAnalysis && cd && nmake /nologo /f Makefile.vc
