@@ -26,7 +26,7 @@ using namespace std;
 typedef queue<int,list<int> > IQueue;
 
 // FIXME length should be adjusted when length of label stack changes
-class MPLSPacket: public cPacket
+class MPLSPacket: public cMessage
 {
   private:
     IQueue label;
