@@ -12,6 +12,7 @@ struct Frag
     long dest;
     ushort offset;
     ushort bytes;
+    bool islast;
 };
 
 typedef std::vector<Frag> FragVector;
@@ -23,6 +24,7 @@ bool insertFragment(IPFragBuf& fragbuf, Frag& f)
     frag->setSrcAddress(IPAddress(f.src));
     frag->setDestAddress(IPAddress(f.dest));
     frag->setFragmentOffset(f.offset);
+    frag->setMoreFragments(!f.islast);
     frag->setHeaderLength(24);
     frag->setLength(8*(24+f.bytes));
 
@@ -44,6 +46,7 @@ for (f.src=1024; f.src<1026; f.src++) {
             int n = f.id/10+2;
             f.bytes=100;
             for (f.offset=0; f.offset<100*n; f.offset+=100) {
+                f.islast = (f.offset==(n-1)*100);
                 v.push_back(f);
             }
         }
