@@ -337,12 +337,13 @@ bool ARP::addressRecognized(IPAddress destAddr)
     if (destAddr==myIPAddress)
         return true;
 
-    // respond to Proxy ARP request: if we can route this packet, say yes
+    // respond to Proxy ARP request: if we can route this packet (and the
+    // output port is different from this one), say yes
     if (!doProxyARP)
         return false;
     RoutingTable *rt = routingTableAccess.get();
-    bool routable = (rt->outputPortNo(destAddr)!=-1);
-    return routable;
+    int outputPort = rt->outputPortNo(destAddr);
+    return outputPort!=-1 && outputPort!=interfaceEntry->outputPort;
 }
 
 void ARP::dumpARPPacket(ARPPacket *arp)
