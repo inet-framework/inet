@@ -58,21 +58,21 @@ foreach line {
 } {
    lappend samples $i
    if {[llength $line]==0} {
-       set type($i) "spacer"
+       set db($i,type) "spacer"
    } elseif {[llength $line]==1} {
-       set type($i) "heading"
-       set title($i) [lindex $line 0]
+       set db($i,type) "heading"
+       set db($i,title) [lindex $line 0]
    } elseif {[llength $line]==2} {
-       set type($i) "readme"
-       set title($i) [lindex $line 0]
-       set readme($i)   [lindex $line 1]
+       set db($i,type) "readme"
+       set db($i,title) [lindex $line 0]
+       set db($i,readme) [lindex $line 1]
        if {$first==""} {set first $i}
    } elseif {[llength $line]==4} {
-       set type($i) "program"
-       set title($i) [lindex $line 0]
-       set dir($i)   [lindex $line 1]
-       set uprog($i) [lindex $line 2]
-       set wprog($i) [lindex $line 3]
+       set db($i,type) "program"
+       set db($i,title) [lindex $line 0]
+       set db($i,dir)   [lindex $line 1]
+       set db($i,uprog) [lindex $line 2]
+       set db($i,wprog) [lindex $line 3]
        if {$first==""} {set first $i}
    } else {
        tk_messageBox -title {Error} -type ok -icon error -message "Error in table: wrong #items in {$line}"
@@ -83,7 +83,7 @@ foreach line {
 
 
 proc createWindow {} {
-    global wantScrollbar samples first type title dir uprog wprog fonts colors
+    global wantScrollbar samples first db fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
@@ -92,6 +92,7 @@ proc createWindow {} {
     wm deiconify .
     wm title . "OMNeT++ Demo Simulations"
     wm protocol . WM_DELETE_WINDOW {exit}
+    wm geometry . "650x400"
 
     #################################
     # Menu bar
@@ -164,15 +165,18 @@ proc createWindow {} {
     #label $f.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
     #pack $f.banner -fill x -side top
     foreach i $samples {
-        if {$type($i)=="spacer"} {
+        if {$db($i,type)=="spacer"} {
             frame $f.$i -relief flat
             pack $f.$i -fill x -side top -pady 5
-        } elseif {$type($i)=="heading"} {
-            label $f.$i -text $title($i) -bg $colors(banner) -relief groove  -font $fonts(bold)
+        } elseif {$db($i,type)=="heading"} {
+            label $f.$i -text $db($i,title) -bg $colors(banner) -relief groove  -font $fonts(bold)
             pack $f.$i -fill x -side top -padx 5 -pady 5
-        } else {
-            button $f.$i -text $title($i) -bd 1 -command "showDemo $i"
+        } elseif {$db($i,type)=="readme" || $db($i,type)=="program"} {
+            button $f.$i -text $db($i,title) -bd 1 -command "showDemo $i"
             pack $f.$i -fill x -side top -padx 5 -pady 2
+        } else {
+            tk_messageBox -title {Error} -type ok -icon error -message "internal error: wrong type '$db($i,type)'"
+            exit
         }
     }
 
@@ -192,26 +196,41 @@ Sample Simulations
 }
 
 proc showDemo {sample} {
-   global samples type title dir uprog wprog colors tcl_platform
+   global samples db colors tcl_platform
 
    set f .sel.c.f
    foreach i $samples {
-        if {$type($i)=="program"} {
+        if {$db($i,type)=="readme" ||$db($i,type)=="program"} {
             $f.$i config -relief raised -bg $colors(unselbutton)
         }
    }
+
    $f.$sample config -relief sunken -bg $colors(selbutton)
 
-   if {$tcl_platform(platform) == "unix"} {
-     set cmd "cd $dir($sample); $uprog($sample)"
-   } else {
-     set cmd "cd $dir($sample); $wprog($sample)"
-   }
-   .main.up.banner config -text "$title($sample) README"
-   .main.lo.start config -text "Launch $title($sample)\n($cmd)"
-   .main.lo.start config -command "runSample $sample"
+   if {$db($sample,type)=="readme"} {
+       .main.up.banner config -text "$db($sample,title)"
+       pack forget .main.lo
 
-   loadFile .main.mid.text "$dir($sample)/README"
+       loadFile .main.mid.text $db($sample,readme)
+
+   } elseif {$db($sample,type)=="program"} {
+
+       if {$tcl_platform(platform)=="unix"} {
+         set cmd "cd $db($sample,dir); $db($sample,uprog)"
+       } else {
+         set cmd "cd $db($sample,dir); $db($sample,wprog)"
+       }
+       .main.up.banner config -text "$db($sample,title) README"
+       .main.lo.start config -text "Launch $db($sample,title)\n($cmd)"
+       .main.lo.start config -command "runSample $sample"
+       pack forget .main.lo
+       pack .main.lo -expand 0 -fill x -side bottom -before .main.mid
+
+       loadFile .main.mid.text "$db($sample,dir)/README"
+   } else {
+       tk_messageBox -title {Error} -type ok -icon error -message "internal error: wrong type '$db($sample,type)'"
+       exit
+   }
 }
 
 proc loadFile {t filename} {
@@ -231,17 +250,17 @@ proc loadFile {t filename} {
 }
 
 proc runSample {sample} {
-   global samples type title dir uprog wprog tcl_platform
+   global samples db tcl_platform
 
    if {$tcl_platform(platform) == "unix"} {
-     set prog $uprog($sample)
+     set prog $db($sample,uprog)
    } else {
-     set prog $wprog($sample)
+     set prog $db($sample,wprog)
    }
 
    set pwd [pwd]
    if [catch {
-      cd $dir($sample);
+      cd $db($sample,dir)
       #exec $prog &
       #exec [lindex $prog 0] [lindex $prog 1] [lrange $prog 2 end] &
       eval exec $prog &
