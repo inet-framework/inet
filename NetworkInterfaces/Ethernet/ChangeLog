@@ -1,0 +1,8 @@
+2004-01-20  Andras Varga
+
+	* Various fixes on the switch model:
+	- address table reading was broken
+	- fixed bug in MACRelayUnitNP and PP (referencing a deleted message)
+	- fixed crash at removing aged entries from table
+	- zero addressTableSize to mean unlimited table
+	- table management: if table full, throw out oldest entry

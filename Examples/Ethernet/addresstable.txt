@@ -1,0 +1,18 @@
+#
+# Initial MAC address table for MACRelayUnit.
+# 
+# Format:
+#   <hex-address>  <portnumber>
+#
+# where <hex-address> in MAC address in hexadecimal representation,
+# and <portnumber> is the corresponding gate index of the switch.
+#
+# Example:
+#  ffffffff    1
+#  ffffeed1    2
+#  aabcdeff    3
+#
+
+ab123486cd20	0  # FIXME true?
+ab1234efcd20	7  # wrong port
+
