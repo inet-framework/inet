@@ -59,7 +59,7 @@ IPAddress SocketLayer::_defaultIPAddr()
   if (_rt)
     return( (const char*) (_rt->getInterfaceByIndex(0)->inetAddr->getString()));
   else
-    return(IPADDRESS_UNDEF);
+    return IPADDRESS_UNDEF;
 }
 
 Socket::Filedesc SocketLayer::_newSocket(Socket::Domain dom, Socket::Type type,

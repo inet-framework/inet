@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../../Network/IPv4/Core -I../../Applications/TCPApp -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TCPInterfacePacket_m.o TCPSegment_m.o TransportInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o Tcp2Ip.o pcb.o tcpmodule.o
+OBJS= TCPInterfacePacket_m.o TCPSegment_m.o TransportInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o   Tcp2Ip.o   pcb.o tcpmodule.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPInterfacePacket_m.h TCPSegment_m.h TransportInterfacePacket_m.h TransportPacket_m.h
@@ -135,12 +135,24 @@ Ip2Tcp.o: Ip2Tcp.cc \
   TransportPacket.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Network/IPv4/Core/IPAddress.h \
+  TransportPacket_m.h \
   ../../Network/IPv4/Core/IPInterfacePacket_m.h
+TCPInterfacePacket_m.o: TCPInterfacePacket_m.cc \
+  TCPInterfacePacket_m.h \
+  ../../Network/IPv4/Core/IPAddress.h
+TCPSegment_m.o: TCPSegment_m.cc \
+  TCPSegment_m.h
 Tcp2Ip.o: Tcp2Ip.cc \
   TransportPacket.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Network/IPv4/Core/IPAddress.h \
+  TransportPacket_m.h \
   ../../Network/IPv4/Core/IPInterfacePacket_m.h
+TransportInterfacePacket_m.o: TransportInterfacePacket_m.cc \
+  TransportInterfacePacket_m.h \
+  ../../Network/IPv4/Core/IPAddress.h
+TransportPacket_m.o: TransportPacket_m.cc \
+  TransportPacket_m.h
 pcb.o: pcb.cc \
   pcb.h \
   ../../Network/IPv4/Core/IPAddress.h

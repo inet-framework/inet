@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../IPv4/Core -I../../Transport/TCP -I../MPLS -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -133,6 +133,7 @@ RSVP.o: RSVP.cc \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
   ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ospf_type.h \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
@@ -159,6 +160,7 @@ RSVPApp.o: RSVPApp.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ../MPLS/LIBTableAccess.h \
   ospf_type.h \
   ../IPv4/Core/RoutingTableAccess.h \
@@ -177,6 +179,7 @@ RSVPInterface.o: RSVPInterface.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ../../Base/basic_consts.h \
   ../IPv4/Core/IPInterfacePacket_m.h
 TED.o: TED.cc \
@@ -200,4 +203,5 @@ rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportPacket.h
+  ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h
