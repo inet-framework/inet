@@ -44,10 +44,12 @@ void RSVPAppl::initialize(int stage)
     {
         initFromFile(ev.getXMLDocument(trafficFile));
 
-        // FIXME what the hell is this? --Andras
+        /*
+        // "tell MPLS we're ready" -- FIXME remove this code
         MPLSModule *mplsMod = mplsAccess.get();
         cMessage *readyMsg = new cMessage();
         sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
+        */
     }
 }
 

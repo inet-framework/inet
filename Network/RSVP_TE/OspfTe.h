@@ -76,7 +76,7 @@ private:
 public:
     Module_Class_Members(OspfTe, cSimpleModule, 0);
     void initialize(int stage);
-    int numInitStages() { return 2; }
+    int numInitStages() const  {return 2;}
     virtual void handleMessage(cMessage *msg);
 
     /**

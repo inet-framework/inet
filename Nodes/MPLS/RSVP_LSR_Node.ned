@@ -49,13 +49,17 @@ module RSVP_LSR_Node
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,100";
+            display: "p=260,60;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=260,60,row;i=box3";
+            display: "p=60,130;i=box3";
+        ospf_te: OspfTe;
+            parameters:
+                routerId = routerId;
+            display: "p=60,190;b=40,24;o=#008040";
         signal_module: RSVPAppl;
             parameters:
                 routerId = routerId,
@@ -71,10 +75,6 @@ module RSVP_LSR_Node
             display: "o=#0080c0;p=190,51;b=40,24,rect";
         rsvpInterface: RSVPInterface;
             display: "o=#0080c0;p=191,106;b=58,12";
-        ospf_te: OspfTe;
-            parameters:
-                routerId = routerId;
-            display: "o=#008040;p=82,163;b=40,24";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
