@@ -22,7 +22,7 @@
 // Protocol field: taken from RFC 1700.
 // Replacing old RFC1700 with newer (28/06/01) Protocol Numbers
 //
-enum IPProtocolFieldId
+enum IPProtocolId
 {
   IP_PROT_HOPOPT = 0;
   IP_PROT_ICMP  = 1;
@@ -145,7 +145,7 @@ message IPDatagram
         IPAddress srcAddress;
         IPAddress destAddress;
 
-        int transportProtocol enum(IPProtocolFieldId) = IP_PROT_NONE;
+        int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
         short timeToLive;
         int identification;
         bool moreFragments;

@@ -18,7 +18,7 @@
 //
 
 
-enum IPProtocolFieldId;
+enum IPProtocolId;
 class noncobject IPAddress;
 
 cplusplus {{
@@ -38,7 +38,7 @@ cplusplus {{
 // similar IPControlInfo objects to them.
 //
 // When sending, the following fields are required:
-// - protocol: a value from IPProtocolFieldId
+// - protocol: a value from IPProtocolId
 // - destAddr
 //
 // Optional fields:
@@ -62,7 +62,7 @@ class IPControlInfo
         IPAddress destAddr;  // destination IP address
         IPAddress srcAddr;   // source IP address
         int inputPort;       // port number of interface on which the datagram was received
-        short protocol enum(IPProtocolFieldId);  // encapsulated protocol
+        short protocol enum(IPProtocolId);  // encapsulated protocol
         unsigned char diffServCodePoint;  // for QoS
         short timeToLive;   // maximum hop count
         bool dontFragment;  // "don't fragment" bit
