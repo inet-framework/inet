@@ -1,0 +1,530 @@
+#!/bin/sh
+# opp_makemake (formerly jar_mkmk)
+#
+#  Creates a makefile for a given OMNeT++ model.
+#  Assumes that .ned, .msg, .cc and .h files are in one directory.
+#  The name of the program defaults to the name of the directory ('myproject').
+#
+#  Original script written by Jan Heijmans et al.
+#
+#  --VA
+#
+
+#
+# process command line args
+#
+args="$*"
+
+MAKEDEPEND="opp_makedep -Y --objdirtree"
+
+userif=TKENV
+outfile=`pwd | sed "s/\/$//;s/.*\///"`
+type="exe"
+includes=""
+libpath=""
+libs=""
+dirs=""
+xobjs=""
+fragments=""
+makefilein=n
+doxyconf=doxy.cfg
+nedfiles=""
+msgfiles=""
+cfgfile=""
+
+while [ ! $# = 0 ] ; do
+    case "$1" in
+
+        -h | --help)
+        cat <<EOT
+opp_makemake: write OMNeT++ Makefile based on source files in current directory
+
+opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
+        [-c configfile] [-p] [-Idir] [-Llibrary-path] [-llibrary] 
+        [-i makefile-fragment-file] [directories, library and object files]...
+    -h, --help            This help text
+    -f, --force           Force overwriting existing Makefile
+    -m, --makefile-in     Create Makefile.in instead of Makefile
+    -c, --configfile      Omit variable definitions from generated Makefile, 
+                          and let the Makefile include the given config file
+                          instead.
+    -o, --outputfile      Name of simulation executable/library
+    -n, --nolink          Produce object files but do not create executable or
+                          library. Useful for models with parts in several dirs.
+    -s, --make-so         Make shared library. Useful if you want to load the
+                          model dynamically (Cmdenv/Tkenv -l so-file switch).
+    -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv
+    -M, --mpi             Link executable with MPI
+    -p, --pvm             Link executable with PVM
+    -Idir                 Additional NED and C++ include directory
+    -Llibrary-path        Additional library path
+    -llibrary             Additional library to link against
+    -i, --includefragment Append file to near end of Makefile. The file makefrag
+                          is appended implicitly if no -i options are given.
+    directory             Recursive make in that dir. Makemake will need
+                          to call make there to see what object files to
+                          include in the Makefile.
+    library or object     Link with that file
+
+With the -n and -s options, -u, -p and -l have no effect.
+If you have a source tree instead of a single directory, run opp_makemake -n
+in the subdirs and then opp_makemake dir1 dir2 etc. in your top-level directory.
+The -i option is useful if a source file (.ned, .msg or .cc) is to be generated
+from other files.
+EOT
+        exit
+        ;;
+
+        -f | --force)
+        force=y
+        ;;
+
+        -c | --configfile)
+        shift
+        cfgfile=$1
+        ;;
+
+        -o | --outputfile)
+        shift
+        outfile=$1
+        ;;
+
+        -n | --nolink)
+        type="o"
+        ;;
+
+        -s | --make-so)
+        type="so"
+        ;;
+
+        -m | --makefile-in)
+        makefilein=y
+        ;;
+
+        -u | --userinterface)
+        shift
+        userif=`echo $1 | tr [a-z] [A-Z]`
+        case "$userif" in
+            CMDENV | TKENV)
+            ;;
+            *)
+            echo "opp_makemake: -u: valid user interface names are Cmdenv or Tkenv" 1>&2
+            exit
+            ;;
+        esac
+        ;;
+
+        -M | --mpi)
+        mpi=y
+        ;;
+
+        -p | --pvm)
+        pvm=y
+        ;;
+
+        -i | --includefragment)
+        shift
+        fragments="$fragments $1"
+        ;;
+
+        -I*)
+        includes="$includes $1"
+        ;;
+
+      -L*)
+        libpath="$libpath $1"
+        ;;
+
+        -l*)
+        libs="$libs $1"
+        ;;
+
+        *)
+        if [ -d $1 ]; then
+            dirs="$dirs $1"
+        else
+            if [ ! -f $1 ]; then
+                echo "opp_makemake: $1 is neither an existing file/dir nor a valid option" 1>&2
+                exit
+            fi
+            xobjs="$xobjs $1"
+        fi
+        ;;
+
+    esac
+    shift
+done
+
+if [ $makefilein = "y" ]; then
+    outputfile="Makefile.in"
+else
+    outputfile="Makefile"
+fi
+
+if [ -f $outputfile ]; then
+    if [ ! -s $outputfile ]; then
+        echo "opp_makemake: synopsis changed (no longer needs >$outputfile), type opp_makemake -h" 1>&2
+        rm $outputfile
+        exit
+    fi
+    if [ ! "$force" = "y" ]; then
+        echo "opp_makemake: use -f to force overwriting existing $outputfile" 1>&2
+        exit
+    fi
+fi
+
+# warning for obsolete subclassing syntax
+for i in *.ned; do
+    if [ "$i" = "*.ned" ]; then break; fi;
+    grep '^//--subclassing--' $i >/dev/null
+    if [ "$?" = "0" ]; then
+        imsg=`echo $i | sed 's/\.ned$/.msg/'`
+        echo "Warning: $i contains experimental message subclassing header line:"
+        echo "       //--subclassing--"
+        echo "   Handling of msg files has changed: these files should have .msg suffix,"
+        echo "   and they will be compiled by opp_msgc into _m.h and _m.cc files."
+        echo "   Rename $i to $imsg and re-run opp_makemake;"
+        echo "   the '//--subclassing--' line will no longer be needed."
+    fi
+done
+
+sobjs=""
+
+for i in $dirs; do
+    echo "*** Running make in $i to see object and ned file names"
+    if (cd $i && make); then
+        o=`echo $i/*.o`
+        if [ "$o" = "$i/*.o" ]; then
+            echo "opp_makemake: warning: no object files in $i" 1>&2
+        else
+            sobjs="$sobjs $o"
+        fi
+
+        # collect ned files of subdirectory for target neddoc.html.
+        nedf=`echo $i/*.ned`
+        if [ ! "$nedf" = "$i/*.ned" ]; then
+            nedfiles="$nedfiles $nedf"
+        fi
+        ## collect msg files of subdirectory for target neddoc.html.
+        #msgf=`echo $i/*.msg`
+        #if [ ! "$msgf" = "$i/*.msg" ]; then
+        #    msgfiles="$msgfiles $msgf"
+        #fi
+    else
+        echo "opp_makemake: make in $i failed, exiting" 1>&2
+        exit
+    fi
+done
+
+objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
+
+#
+# now the Makefile creation
+#
+(
+
+cat <<EOT
+#
+#  Makefile for $outfile
+#
+#  ** This file was automatically generated by the command:
+#  opp_makemake $args
+#
+EOT
+
+suffix=''
+if [ "$type" = "so" ]; then
+    suffix='.so'
+fi
+if [ "$type" = "o" ]; then
+    suffix=''
+fi
+
+case "$userif" in
+    CMDENV)
+    c_cmd=''; c_tk='# '; ;;
+    TKENV)
+    c_cmd='# '; c_tk=''; ;;
+esac
+
+c_std=''; c_pvm='# '; c_mpi='# ';
+
+if [ "$pvm" = "y" ]; then
+    c_std='# '; c_pvm=''; c_mpi='#';
+fi
+
+if [ "$mpi" = "y" ]; then
+    c_std='# '; c_pvm='#'; c_mpi='';
+fi
+
+cat <<EOT
+
+# Name of target to be created (-o option)
+TARGET = $outfile$suffix
+
+# User interface (uncomment one) (-u option)
+${c_cmd}USERIF_LIBS=\$(CMDENV_LIBS)
+${c_tk}USERIF_LIBS=\$(TKENV_LIBS)
+
+# uncomment 1 of the 3 lines to support either serial or parallel operation
+${c_std}KERNEL_LIBS=\$(STD_KERNEL_LIBS)
+${c_pvm}KERNEL_LIBS=\$(PVM_KERNEL_LIBS)
+${c_mpi}KERNEL_LIBS=\$(MPI_KERNEL_LIBS)
+
+# .ned or .h include paths with -I
+INCLUDE_PATH=$includes
+
+# misc additional object and library files to link
+EXRA_OBJS=$xobjs
+
+# object files in subdirectories
+SUBDIR_OBJS=$sobjs
+
+# Additional libraries (-L option -l option)
+LIBS=$libpath$libs
+
+#------------------------------------------------------------------------------
+EOT
+
+if [ "$cfgfile" != "" ]; then
+  
+  # Makefile
+  echo "include $cfgfile"
+   
+elif [ $makefilein = "n" ]; then
+# Makefile
+cat <<EOT
+
+NEDC=nedc
+MSGC=opp_msgc
+CXX=g++
+CC=gcc
+AR=ar cr
+SHLIB_LD=g++ -shared -fPIC
+MAKEDEPEND=opp_makedep -Y --objdirtree
+
+CFLAGS=-O3 -DNDEBUG=1  -fPIC
+NEDCFLAGS=-Wno-unused
+LDFLAGS=
+EXE_SUFFIX=
+
+OMNETPP_INCL_DIR=/home/andras/omnetpp/include
+OMNETPP_LIB_DIR=/home/andras/omnetpp/lib
+
+TK_LIBS=-L/usr/X11R6/lib -lX11 -ltk8.3 -ltcl8.3
+MPI_LIBS=
+PVM_LIBS=-L/usr/share/pvm3//lib -lgpvm3 -lpvm3
+SYS_LIBS=-ldl -lstdc++ 
+SYS_LIBS_PURE=-ldl -lsocket -lnsl -lm \$(shell \$(CXX) -print-file-name=libstdc++.a)
+EOT
+
+else
+
+# Makefile.in
+null=
+cat <<EOT
+
+NEDC=@${null}NEDC@
+MSGC=@${null}MSGC@
+CXX=@${null}CXX@
+CC=@${null}CC@
+AR=@${null}AR@
+SHLIB_LD=@${null}SHLIB_LD@
+MAKEDEPEND=@${null}MAKEDEPEND@
+
+CFLAGS=@${null}CFLAGS@
+NEDCFLAGS=@${null}NEDCFLAGS@
+LDFLAGS=@${null}LDFLAGS@
+EXE_SUFFIX=@${null}EXE_SUFFIX@
+
+OMNETPP_INCL_DIR=@${null}OMNETPP_INCL_DIR@
+OMNETPP_LIB_DIR=@${null}OMNETPP_LIB_DIR@
+
+TK_LIBS=@${null}TK_LIBS@
+MPI_LIBS=@${null}MPI_LIBS@
+PVM_LIBS=@${null}PVM_LIBS@
+SYS_LIBS=@${null}SYS_LIBS@
+SYS_LIBS_PURE=-lm \$(shell \$(CXX) -print-file-name=libstdc++.a)
+EOT
+
+fi
+
+if [ "$cfgfile" = "" ]; then
+cat <<EOT
+
+# User interface libs
+CMDENV_LIBS=-lenvir -lcmdenv
+TKENV_LIBS=-lenvir -ltkenv \$(TK_LIBS)
+
+# Simulation kernel
+STD_KERNEL_LIBS=-lsim_std
+MPI_KERNEL_LIBS=-lsim_mpi \$(MPI_LIBS)
+PVM_KERNEL_LIBS=-lsim_pvm \$(PVM_LIBS)
+
+# Simulation kernel and user interface libraries
+OMNETPP_LIBS=-L\$(OMNETPP_LIB_DIR) \$(USERIF_LIBS) \$(KERNEL_LIBS) \$(SYS_LIBS)
+
+COPTS=\$(CFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
+NEDCOPTS=\$(CFLAGS) \$(NEDCFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
+
+#------------------------------------------------------------------------------
+
+EOT
+fi
+
+if [ "$dirs" != "" ]; then
+    subdirsphony=subdirs-phony
+else
+    subdirsphony=""
+fi
+
+echo '# Object files from this directory to link'
+echo "OBJS= $objs"
+echo
+
+# include external Makefile fragments here, so that they can override
+# the default target if they want
+if [ ! "$fragments" = "" ]; then
+    cat $fragments
+else
+    if [ -f makefrag ]; then
+        cat makefrag
+    fi
+fi
+
+case "$type" in
+exe)
+    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) Makefile '$subdirsphony
+    echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
+    ;;
+so)
+    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) ' $subdirsphony ' Makefile'
+    echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS)'
+    ;;
+o)
+    echo '$(TARGET): $(OBJS) Makefile'
+    echo '	'
+    ;;
+esac
+echo
+echo 'purify: $(OBJS) $(EXRA_OBJS) ' $subdirsphony ' Makefile'
+echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
+echo
+
+if [ "$type" != "o" ]; then
+    if [ "$dirs" != "" ]; then
+        echo 'subdirs-phony:'
+        for i in $dirs
+        do
+           echo "	(cd $i && make)"
+        done
+        echo
+    fi
+fi
+
+for i in *.ned
+do
+        if [ "$i" = "*.ned" ]; then break; fi;
+
+        # extend list for target neddoc.html
+        nedfiles="$nedfiles $i"
+
+        obj=`echo $i | sed 's/\.ned/_n.o/g'`
+        c=`echo $i | sed 's/\.ned/_n.cc/g'`
+
+        echo "$obj: $c"
+        echo '	$(CXX) -c $(NEDCOPTS) '$c
+        echo
+
+        echo "$c: $i"
+        echo '	$(NEDC) $(INCLUDE_PATH) '$i
+        echo
+done
+
+for i in *.msg
+do
+        if [ "$i" = "*.msg" ]; then break; fi;
+
+        ## extend list for target neddoc.html
+        #msgfiles="$msgfiles $i"
+
+        obj=`echo $i | sed 's/\.msg/_m.o/g'`
+        c=`echo $i | sed 's/\.msg/_m.cc/g'`
+        h=`echo $i | sed 's/\.msg/_m.h/g'`
+
+        echo "$obj: $c"
+        echo '	$(CXX) -c $(NEDCOPTS) '$c
+        echo
+
+        echo "$c $h: $i"
+        echo '	$(MSGC) $(INCLUDE_PATH) '$i
+        echo
+done
+
+for i in `echo *.cc | sed 's/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g'`
+do
+        if [ "$i" = "*.cc" ]; then break; fi;
+
+        obj=`echo $i | sed 's/\.cc/.o/g'`
+        echo "$obj: $i"
+        echo '	$(CXX) -c $(COPTS) '$i
+        echo
+done
+
+args1=`echo " $args " | sed 's/	/ /g;s/ -f / /g;s/ -m / /g'`
+
+cat <<EOT
+
+doc: neddoc.html htmldocs
+
+neddoc.html: $nedfiles
+	@opp_neddoc $nedfiles > neddoc.html
+	@echo File neddoc.html generated.
+
+htmldocs:
+	@doxygen -g- | sed "s/^PROJECT_NAME.*/PROJECT_NAME = $outfile/;\\
+	s|^INPUT *=.*|INPUT = . $dirs|;\\
+	s/^EXTRACT_ALL *=.*/EXTRACT_ALL = yes/;\\
+	s/^EXTRACT_PRIVATE *=.*/EXTRACT_PRIVATE = yes/;\\
+	s/^EXCLUDE_PATTERNS *=.*/EXCLUDE_PATTERNS = *_n.cc *_n.h/;\\
+	s/^ALPHABETICAL_INDEX *=.*/ALPHABETICAL_INDEX = yes/;\\
+	s/^HTML_OUTPUT *=.*/HTML_OUTPUT = htmldoc/;\\
+	s/^GENERATE_LATEX *=.*/GENERATE_LATEX = no/;\\
+	s/^GENERATE_TREEVIEW *=.*/GENERATE_TREEVIEW = yes/;\\
+	s/^HIDE_UNDOC_RELATIONS *=.*/HIDE_UNDOC_RELATIONS = no/;\\
+	s|^TAGFILES *=.*|TAGFILES = /home/andras/omnetpp/doc/api/opptags.xml=/home/andras/omnetpp/doc/api|;\\
+	s|^GENERATE_TAGFILE *=.*|GENERATE_TAGFILE = htmldoc/tags.xml|;\\
+	s/^QUIET *=.*/QUIET = yes/" > $doxyconf
+	@doxygen $doxyconf
+	@echo Code documentation generated. Now, point your web browser to ./htmldoc/index.html.
+
+clean:
+	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h \$(TARGET)\$(EXE_SUFFIX)
+	rm -f *.vec *.sca
+	rm -rf neddoc.html htmldoc
+
+depend:
+	\$(MAKEDEPEND) \$(INCLUDE_PATH) -- *.cc
+	# \$(MAKEDEPEND) \$(INCLUDE_PATH) -fMakefile.in -- *.cc
+
+re-makemake:
+	opp_makemake -f $args1  #recreate Makefile
+
+re-makemake-m:
+	opp_makemake -f -m $args1  #recreate Makefile.in
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+EOT
+
+) > $outputfile
+
+echo "$outputfile created, adding dependencies..."
+
+if ! $MAKEDEPEND $includes -f$outputfile -- *.cc; then
+    echo "Error: command '$MAKEDEPEND $includes -f$outputfile -- *.cc' returned nonzero exit code"
+else
+    echo "Done."
+fi
+

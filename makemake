@@ -1,5 +1,4 @@
-#ICONV=C:/home/tools/iconv-1.8.win32
-#LIBXML=C:/home/tools/libxml2-2.5.4.win32
+LIBXML_INCLUDES=
 
 opp_makemake -f -n -c ipsuiteconfig Network Applications Transport NetworkInterfaces PHY Util Nodes
 (cd Applications && opp_makemake -f -n -c ../ipsuiteconfig)
@@ -28,7 +27,7 @@ opp_makemake -f -n -c ipsuiteconfig Network Applications Transport NetworkInterf
 (cd Network/IPv4 && opp_makemake -f -n -c ../../ipsuiteconfig )
 (cd Network/MPLS && opp_makemake -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Util)
 (cd Network/LDP && opp_makemake -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../MPLS -I../../Util)
-(cd Network/RSVP_TE && opp_makemake -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../MPLS -I../../Util -I%LIBXML%/include -I%ICONV%/include)
+(cd Network/RSVP_TE && opp_makemake -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../MPLS -I../../Util $LIBXML_INCLUDES)
 (cd Network/IPv4/Core && opp_makemake -f -n -c ../../../ipsuiteconfig -I../QoSStub -I../../../NetworkInterfaces -I../../../NetworkInterfaces/Queues -I../../../Util)
 (cd Network/IPv4/QoS && opp_makemake -f -n -c ../../../ipsuiteconfig -I../QoSStub -I../Core -I../../../Transport/TCPv4 -I../../../Util)
 (cd Network/IPv4/QoSStub && opp_makemake -f -n -c ../../../ipsuiteconfig -I../Core -I../../../Util)
