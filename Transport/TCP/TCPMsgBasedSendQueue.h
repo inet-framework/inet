@@ -25,7 +25,7 @@
 /**
  * Send queue that manages messages.
  *
- * @see TCPVirtualDataRcvQueue
+ * @see TCPMsgBasedRcvQueue
  */
 class TCPMsgBasedSendQueue : public TCPSendQueue
 {

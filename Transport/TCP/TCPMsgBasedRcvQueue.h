@@ -28,7 +28,7 @@
 /**
  * FIXME
  *
- * @see TCPVirtualDataSendQueue
+ * @see TCPMsgBasedSendQueue
  */
 class TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
 {
