@@ -50,9 +50,12 @@ class cVectorWatcher : public cVectorWatcherBase
 {
   protected:
     std::vector<T>& v;
+    std::string classname;
   public:
-    cVectorWatcher(const char *name, std::vector<T>& var) : cVectorWatcherBase(name), v(var) {}
-    const char *className() const {return opp_typename(typeid(v));}
+    cVectorWatcher(const char *name, std::vector<T>& var) : cVectorWatcherBase(name), v(var) {
+        classname = std::string("std::vector<")+opp_typename(typeid(T))+">";
+    }
+    const char *className() const {return classname.c_str();}
     virtual const char *elemTypeName() const {return opp_typename(typeid(T));}
     virtual int size() const {return v.size();}
     virtual std::string at(int i) const {std::stringstream out; out << v[i]; return out.str();}
@@ -92,10 +95,14 @@ class cMapWatcher : public cVectorWatcherBase
     std::map<KeyT,ValueT,CmpT>& m;
     mutable typename std::map<KeyT,ValueT,CmpT>::iterator it;
     mutable int itPos;
+    std::string classname;
   public:
-    cMapWatcher(const char *name, std::map<KeyT,ValueT,CmpT>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}
-    const char *className() const {return opp_typename(typeid(m));}
-    virtual const char *elemTypeName() const {return "struct pair<...,...>";}
+    cMapWatcher(const char *name, std::map<KeyT,ValueT,CmpT>& var) : cVectorWatcherBase(name), m(var) {
+        itPos=-1;
+        classname = std::string("std::map<")+opp_typename(typeid(KeyT))+","+opp_typename(typeid(ValueT))+">";
+    }
+    const char *className() const {return classname.c_str();}
+    virtual const char *elemTypeName() const {return "struct pair<*,*>";}
     virtual int size() const {return m.size();}
     virtual std::string at(int i) const {
         // std::map doesn't support random access iterator and iteration is slow,
@@ -150,7 +157,7 @@ void createPointerMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
     new cPointerMapWatcher<KeyT,ValueT,CmpT>(varname, m);
 }
 
-#define WATCHValueTECTOR(v)      createVectorWatcher(#v,(v))
+#define WATCH_VECTOR(v)      createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
 
