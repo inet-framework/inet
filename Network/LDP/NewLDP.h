@@ -21,7 +21,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
-#include "LDPPacket.h"
+#include "LDPpacket.h"
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
 #include "RoutingTableAccess.h"

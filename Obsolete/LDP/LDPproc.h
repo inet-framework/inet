@@ -23,7 +23,7 @@
 #include <vector>
 #include "tcp.h"
 #include "RoutingTable.h"
-#include "LDPPacket.h"
+#include "LDPpacket.h"
 #include "LDPInterface.h"
 #include "LIBTableAccess.h"
 #include "MPLSAccess.h"

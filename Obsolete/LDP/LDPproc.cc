@@ -16,7 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include "ConstType.h"
-#include "LDPPacket.h"
+#include "LDPpacket.h"
 #include "tcp.h"
 #include "LDPproc.h"
 #include "RoutingTable.h"
