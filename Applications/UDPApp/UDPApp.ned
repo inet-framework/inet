@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -17,12 +18,23 @@
 //
 
 
+//
+// Consumes and prints packets received from the UDP module.
+//
+simple UDPSink
+    gates:
+        in: from_udp;
+        out: to_udp;
+endsimple
+
 
 //
-// Peer of UDPServerApp. Sends UDP packets to randomly chosen destinations
-// at random intervals. Destinations are chosen from the dest_addresses parameter.
+// Sends UDP packets to randomly chosen destinations at random intervals.
+// Destination IP addresses are chosen from the dest_addresses parameter.
+// The peer can be UDPSink or another UDPApp (it handles received packets
+// exactly like UDPSink).
 //
-simple UDPClientApp
+simple UDPApp
     parameters:
         local_port : numeric const,
         dest_port : numeric const,
@@ -35,14 +47,4 @@ simple UDPClientApp
 endsimple
 
 
-//
-// Peer of UDPClientApp. At the moment just discards received packets.
-//
-simple UDPServerApp
-    parameters:
-        local_port : numeric const;
-    gates:
-        in: from_udp;
-        out: to_udp;
-endsimple
 

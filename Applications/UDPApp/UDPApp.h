@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -16,9 +17,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-/*
-    author: Jochen Reber
-*/
 
 #ifndef __UDPAPP_H__
 #define __UDPAPP_H__
@@ -31,23 +29,27 @@
 
 
 /**
- * UDP server app. See NED for more info.
+ * Consumes and prints packets received from the UDP module. See NED for more info.
  */
-class UDPServerApp : public cSimpleModule
+class UDPSink : public cSimpleModule
 {
   protected:
-    int numSent;
     int numReceived;
+
+    virtual void printPacket(cMessage *msg);
+    virtual void processPacket(cMessage *msg);
+
   public:
-    Module_Class_Members(UDPServerApp, cSimpleModule, 0);
+    Module_Class_Members(UDPSink, cSimpleModule, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
 
+
 /**
- * UDP client app. See NED for more info.
+ * UDP application. See NED for more info.
  */
-class UDPClientApp : public cSimpleModule
+class UDPApp : public UDPSink
 {
   protected:
     std::string nodeName;
@@ -58,13 +60,13 @@ class UDPClientApp : public cSimpleModule
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
-    int numReceived;
 
     // chooses random destination address
-    IPAddress chooseDestAddr();
+    virtual IPAddress chooseDestAddr();
+    virtual void sendPacket();
 
   public:
-    Module_Class_Members(UDPClientApp, cSimpleModule, 0);
+    Module_Class_Members(UDPApp, UDPSink, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

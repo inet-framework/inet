@@ -23,45 +23,54 @@
 #include "StringTokenizer.h"
 
 
-Define_Module(UDPServerApp);
+Define_Module(UDPSink);
 
 
-void UDPServerApp::initialize()
+void UDPSink::initialize()
 {
-    numSent = 0;
     numReceived = 0;
-    WATCH(numSent);
     WATCH(numReceived);
 }
 
-void UDPServerApp::handleMessage(cMessage *msg)
+void UDPSink::handleMessage(cMessage *msg)
 {
-    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    processPacket(msg);
+}
+
+void UDPSink::printPacket(cMessage *msg)
+{
+    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
+
     IPAddress src = controlInfo->getSrcAddr();
     IPAddress dest = controlInfo->getDestAddr();
     int sentPort = controlInfo->getSrcPort();
     int recPort = controlInfo->getDestPort();
 
-    ev  << "Packet received: " << msg << endl;
+    ev  << msg << endl;
     ev  << "Payload length: " << (msg->length()/8) << " bytes" << endl;
-    ev  << "Src/Port: " << src << " / " << sentPort << "  ";
-    ev  << "Dest/Port: " << dest << " / " << recPort << endl;
+    ev  << "Src/Port: " << src << " :" << sentPort << "  ";
+    ev  << "Dest/Port: " << dest << ":" << recPort << endl;
+}
+
+void UDPSink::processPacket(cMessage *msg)
+{
+    ev << "Received packet: ";
+    printPacket(msg);
+    delete msg;
 
     numReceived++;
-
-    delete controlInfo;
-    delete msg;
 }
+
 
 
 //===============================================
 
 
-Define_Module(UDPClientApp);
+Define_Module(UDPApp);
 
-int UDPClientApp::counter;
+int UDPApp::counter;
 
-void UDPClientApp::initialize()
+void UDPApp::initialize()
 {
     localPort = par("local_port");
     destPort = par("dest_port");
@@ -76,20 +85,20 @@ void UDPClientApp::initialize()
     counter = 0;
 
     numSent = 0;
-    numReceived = 0;
     WATCH(numSent);
-    WATCH(numReceived);
 
     cMessage *timer = new cMessage("sendTimer");
     scheduleAt((double)par("message_freq"), timer);
 }
 
-
-void UDPClientApp::handleMessage(cMessage *msg)
+IPAddress UDPApp::chooseDestAddr()
 {
-    // reschedule next sending
-    scheduleAt(simTime()+(double)par("message_freq"), msg);
+    int k = intrand(destAddresses.size());
+    return destAddresses[k];
+}
 
+void UDPApp::sendPacket()
+{
     char msgName[32];
     sprintf(msgName,"udpAppData-%d", counter++);
 
@@ -103,19 +112,24 @@ void UDPClientApp::handleMessage(cMessage *msg)
     controlInfo->setDestPort(destPort);
     payload->setControlInfo(controlInfo);
 
-    ev << "Packet sent: " << payload << endl;
-    ev << "Payload length: " << (payload->length()/8) << " bytes" << endl;
-    ev << "Src/Port: unknown / " << localPort << "  ";
-    ev << "Dest/Port: " << destAddr << " / " << destPort << endl;
+    ev << "Sending packet: ";
+    printPacket(payload);
 
     send(payload, "to_udp");
     numSent++;
 }
 
-
-IPAddress UDPClientApp::chooseDestAddr()
+void UDPApp::handleMessage(cMessage *msg)
 {
-    int k = intrand(destAddresses.size());
-    return destAddresses[k];
+    if (msg->isSelfMessage())
+    {
+        // reschedule next sending
+        scheduleAt(simTime()+(double)par("message_freq"), msg);
+    }
+    else
+    {
+        processPacket(msg);
+    }
 }
+
 
