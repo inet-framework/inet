@@ -1,5 +1,5 @@
 #
-# Config file for the IPSuite. This is included by every makefile.
+# Config file for the INET framework. This is included by every makefile.
 #
 
 OMNETPP_ROOT=d:\home\omnetpp

@@ -3,10 +3,10 @@ root=`pwd`
 MAKEMAKE=opp_makemake
 OPTS="-f -N -b $root -c $root/inetconfig"
 
-ALL_IPSUITE_INCLUDES="-I$root/Network/IPv4 -I$root/Network/IPv4d -I$root/Network/AutoRouting -I$root/Transport/TCP -I$root/Transport/UDP -I$root/NetworkInterfaces -I$root/NetworkInterfaces/_802 -I$root/NetworkInterfaces/ARP -I$root/NetworkInterfaces/Ethernet -I$root/NetworkInterfaces/PPP -I$root/Applications/Generic -I$root/Applications/Ethernet -I$root/Applications/TCPApp -I$root/Applications/UDPApp -I$root/Applications/PingApp -I$root/Base -I$root/Util -I$root/Nodes/INET"
-ALL_MPLS_IPSUITE_INCLUDES="$ALL_IPSUITE_INCLUDES -I$root/Network/MPLS -I$root/Network/LDP -I$root/Network/RSVP_TE -I$root/Network/Scenario -I$root/Nodes/MPLS"
+ALL_INET_INCLUDES="-I$root/Network/IPv4 -I$root/Network/IPv4d -I$root/Network/AutoRouting -I$root/Transport/TCP -I$root/Transport/UDP -I$root/NetworkInterfaces -I$root/NetworkInterfaces/_802 -I$root/NetworkInterfaces/ARP -I$root/NetworkInterfaces/Ethernet -I$root/NetworkInterfaces/PPP -I$root/Applications/Generic -I$root/Applications/Ethernet -I$root/Applications/TCPApp -I$root/Applications/UDPApp -I$root/Applications/PingApp -I$root/Base -I$root/Util -I$root/Nodes/INET"
+ALL_MPLS_INET_INCLUDES="$ALL_INET_INCLUDES -I$root/Network/MPLS -I$root/Network/LDP -I$root/Network/RSVP_TE -I$root/Network/Scenario -I$root/Nodes/MPLS"
 
-# ALL_MODEL_OPTS="$OPTS -w $ALL_MPLS_IPSUITE_INCLUDES"
+# ALL_MODEL_OPTS="$OPTS -w $ALL_MPLS_INET_INCLUDES"
 ALL_MODEL_OPTS="$OPTS -n"
 
 : #--------------------------------------
@@ -50,7 +50,7 @@ $MAKEMAKE $OPTS -n -r
 (cd Transport/RTP && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Base -I../../Util)
 (cd Transport/TCP && $MAKEMAKE $OPTS -n -I../../Network/IPv4 -I../../Base -I../../Util)
 
-(cd Examples/bin && $MAKEMAKE $OPTS -w -o INET $ALL_MPLS_IPSUITE_INCLUDES)
+(cd Examples/bin && $MAKEMAKE $OPTS -w -o INET $ALL_MPLS_INET_INCLUDES)
 
 (cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r)
 (cd Examples/INET && $MAKEMAKE $OPTS -n -r)
@@ -75,6 +75,6 @@ $MAKEMAKE $OPTS -n -r
 (cd Examples/MPLS/TestTE6 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
 
 (cd Tests/MPLS && $MAKEMAKE $OPTS -n -r)
-(cd Tests/MPLS/LDP1 && $MAKEMAKE $OPTS -w $ALL_MPLS_IPSUITE_INCLUDES)
-(cd Tests/NewTCP && $MAKEMAKE $OPTS -w $ALL_MPLS_IPSUITE_INCLUDES)
+(cd Tests/MPLS/LDP1 && $MAKEMAKE $OPTS -w $ALL_MPLS_INET_INCLUDES)
+(cd Tests/NewTCP && $MAKEMAKE $OPTS -w $ALL_MPLS_INET_INCLUDES)
 

@@ -1,8 +1,8 @@
 #
-# Config file for the IPSuite. This is included by every makefile.
+# Config file for the INET framework. This is included by every makefile.
 #
 # !!! IMPORTANT !!!
-# Please re-generate omnetppconfig before trying to build IPSuite!
+# Please re-generate omnetppconfig before trying to build INET!
 # The command is:  opp_makemake -f --genconfig omnetppconfig
 #
 

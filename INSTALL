@@ -14,7 +14,7 @@ LINUX (UNIX)
 1. Make sure you OMNeT++ installation works OK (e.g. try running the samples)
    and it is in the path (try "which nedtool").
 
-2. Change to the INET framework directory and edit the ipsuiteconfig file
+2. Change to the INET framework directory and edit the inetconfig file
    to make sure it contains the right settings. You'll probably
    need to adjust ROOT.
 
@@ -47,7 +47,7 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
    and MSVC should be in the PATH (you can verify this by typing "nedtool"
    and "nmake" at the cmd prompt.)
 
-2. Change to the INET framework directory. Edit the ipsuiteconfig.vc file and
+2. Change to the INET framework directory. Edit the inetconfig.vc file and
    adjust the OMNETPP_ROOT setting to suit your installation.
 
 3. Type "nmake -f Makefile.vc" to build everything.
