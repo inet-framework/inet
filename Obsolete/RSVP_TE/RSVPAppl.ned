@@ -22,12 +22,8 @@ simple RSVPAppl
         isIR : bool,
         isER : bool;
     gates:
-        //# FIXME seems to be redundant: in: from_tcp;
         in: from_rsvp;
+        out: to_rsvp;
         in: from_mpls_switch; // for receiving path request commands from MPLSModule via sendDirect()
         in: from_tester; // for receiveing commands from Tester via sendDirect()
-        //# FIXME seems to be redundant: out: to_tcp;
-        out: to_rsvp;
-        //# FIXME seems to be unused: out: to_mpls_switch;
-
 endsimple

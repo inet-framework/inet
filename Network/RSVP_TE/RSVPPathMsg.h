@@ -33,8 +33,8 @@ class RSVPPathMsg : public RSVPPathMsg_Base
     inline int getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
     inline int getSrcPort() {return getSender_descriptor().Sender_Template_Object.SrcPort;}
     inline int getLspId() {return getSender_descriptor().Sender_Template_Object.Lsp_Id;}
-    inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
-    inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
+    inline int getNHOP() {return getHop().Next_Hop_Address;}
+    inline int getLIH() {return getHop().Logical_Interface_Handle;}
     inline double getDelay() {return getSender_descriptor().Sender_Tspec_Object.link_delay;}
     inline double getBW() {return getSender_descriptor().Sender_Tspec_Object.req_bandwidth;}
     inline bool hasERO() {return getHasERO();}
@@ -58,8 +58,8 @@ class RSVPPathTear : public RSVPPathTear_Base
     RSVPPathTear& operator=(const RSVPPathTear& other) {RSVPPathTear_Base::operator=(other); return *this;}
     virtual cObject *dup() {return new RSVPPathTear(*this);}
 
-    inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
-    inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
+    inline int getNHOP() {return getHop().Next_Hop_Address;}
+    inline int getLIH() {return getHop().Logical_Interface_Handle;}
     inline int getSrcAddress() {return getSenderTemplate().SrcAddress;}
     inline int getSrcPort() {return getSenderTemplate().SrcPort;}
 };

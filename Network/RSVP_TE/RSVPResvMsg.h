@@ -30,8 +30,8 @@ class RSVPResvMsg : public RSVPResvMsg_Base
     RSVPResvMsg& operator=(const RSVPResvMsg& other) {RSVPResvMsg_Base::operator=(other); return *this;}
     virtual cObject *dup() {return new RSVPResvMsg(*this);}
 
-    inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
-    inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
+    inline int getNHOP() {return getHop().Next_Hop_Address;}
+    inline int getLIH() {return getHop().Logical_Interface_Handle;}
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list_var;} //FIXME
     inline void setFlowDescriptor(FlowDescriptor_t* f) {for(int i=0; i<InLIST_SIZE; i++) setFlow_descriptor_list(i,f[i]);} // FIXME
 };
@@ -48,8 +48,8 @@ class RSVPResvTear : public RSVPResvTear_Base
     RSVPResvTear& operator=(const RSVPResvTear& other) {RSVPResvTear_Base::operator=(other); return *this;}
     virtual cObject *dup() {return new RSVPResvTear(*this);}
 
-    inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
-    inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
+    inline int getNHOP() {return getHop().Next_Hop_Address;}
+    inline int getLIH() {return getHop().Logical_Interface_Handle;}
 
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list_var;} //FIXME
     inline void setFlowDescriptor(FlowDescriptor_t* f) {for(int i=0; i<InLIST_SIZE; i++) setFlow_descriptor_list(i,f[i]);}
@@ -67,8 +67,8 @@ class RSVPResvError : public RSVPResvError_Base
     RSVPResvError& operator=(const RSVPResvError& other) {RSVPResvError_Base::operator=(other); return *this;}
     virtual cObject *dup() {return new RSVPResvError(*this);}
 
-    inline int getNHOP() {return getRsvp_hop().Next_Hop_Address;}
-    inline int getLIH() {return getRsvp_hop().Logical_Interface_Handle;}
+    inline int getNHOP() {return getHop().Next_Hop_Address;}
+    inline int getLIH() {return getHop().Logical_Interface_Handle;}
 };
 
 #endif

@@ -49,8 +49,8 @@ message RSVPPathMsg extends RSVPPacket
     properties:
         customize=true;
     fields:
-        RsvpHopObj_t rsvp_hop;
-        double refresh_time;
+        RsvpHopObj_t hop;
+        double refreshTime;
         EroObj_t ERO[MAX_ROUTE];
         LabelRequestObj_t label_request;
         SenderDescriptor_t sender_descriptor;
@@ -71,7 +71,7 @@ message RSVPPathTear extends RSVPPacket
     properties:
         customize=true;
     fields:
-        RsvpHopObj_t rsvp_hop;
+        RsvpHopObj_t hop;
         SenderTemplateObj_t senderTemplate;
         //SenderDescriptor_t sender_descriptor;
 };

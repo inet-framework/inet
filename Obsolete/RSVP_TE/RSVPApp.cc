@@ -96,10 +96,10 @@ void RSVPAppl::processRSVP_PERROR(RSVPPathError *pe)
     pt->setSession(pe->getSession());
 
     // Setup PHOP
-    RsvpHopObj_t rsvp_hop;
-    rsvp_hop.Logical_Interface_Handle = -1;
-    rsvp_hop.Next_Hop_Address = routerId;
-    pt->setRsvp_hop(rsvp_hop);
+    RsvpHopObj_t hop;
+    hop.Logical_Interface_Handle = -1;
+    hop.Next_Hop_Address = routerId;
+    pt->setHop(hop);
     send(pt, "to_rsvp");
 
     delete pe;
@@ -274,10 +274,10 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                         pt->setSenderTemplate(sTemplate);
                         pt->setSession(rMessage->getSession());
                         // Setup PHOP
-                        RsvpHopObj_t rsvp_hop;
-                        rsvp_hop.Logical_Interface_Handle = -1;
-                        rsvp_hop.Next_Hop_Address = routerId;
-                        pt->setRsvp_hop(rsvp_hop);
+                        RsvpHopObj_t hop;
+                        hop.Logical_Interface_Handle = -1;
+                        hop.Next_Hop_Address = routerId;
+                        pt->setHop(hop);
                         send(pt, "to_rsvp");
                     }
                 }
@@ -320,10 +320,10 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
     RSVPPathTear *pt = new RSVPPathTear();
     pt->setSenderTemplate(aTunnel.Sender_Template);
     pt->setSession(aTunnel.Session);
-    RsvpHopObj_t rsvp_hop;
-    rsvp_hop.Logical_Interface_Handle = -1;
-    rsvp_hop.Next_Hop_Address = routerId;
-    pt->setRsvp_hop(rsvp_hop);
+    RsvpHopObj_t hop;
+    hop.Logical_Interface_Handle = -1;
+    hop.Next_Hop_Address = routerId;
+    pt->setHop(hop);
     send(pt, "to_rsvp");
 
     delete msg;
@@ -623,7 +623,7 @@ void RSVPAppl::sendResvMessage(RSVPPathMsg * pMsg, int inLabel)
     }
 
     rMsg->setFlowDescriptor(flow_descriptor_list);
-    rMsg->setRsvp_hop(*rsvp_hop);
+    rMsg->setHop(*rsvp_hop);
     rMsg->setSession(pMsg->getSession());
 
     rMsg->setStyle(SF_STYLE);
@@ -668,7 +668,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     Filter_Spec_Object->SrcPort = DEFAULT_SRC_PORT;
     Filter_Spec_Object->Lsp_Id = lspId;
 
-    pMsg->setRsvp_hop(*rsvp_hop);
+    pMsg->setHop(*rsvp_hop);
     pMsg->setSession(*s);
     pMsg->setSenderTemplate(* static_cast < SenderTemplateObj_t * >(Filter_Spec_Object));
     pMsg->setSenderTspec(* static_cast < SenderTspecObj_t * >(Flowspec_Object));

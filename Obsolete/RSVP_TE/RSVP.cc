@@ -1298,7 +1298,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 
     pm->setSession(psbEle->Session_Object);
     pm->setLabel_request(psbEle->LabelRequest);
-    pm->setRefresh_time(5);
+    pm->setRefreshTime(5);
 
     pm->setSenderTemplate(psbEle->Sender_Template_Object);
     pm->setSenderTspec(psbEle->Sender_Tspec_Object);
@@ -1319,8 +1319,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     RsvpHopObj_t hop;
     hop.Logical_Interface_Handle = OI;
     hop.Next_Hop_Address = routerId;
-
-    pm->setRsvp_hop(hop);
+    pm->setHop(hop);
 
     if (ero != NULL)
     {
@@ -1409,7 +1408,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     outRM->setSession(rsbEle->Session_Object);
     outRM->setStyle(rsbEle->style);
 
-    outRM->setRefresh_time(5);
+    outRM->setRefreshTime(5);
 
     int peerInf = 0;
 
@@ -1418,7 +1417,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     RsvpHopObj_t hop;
     hop.Logical_Interface_Handle = peerInf;
     hop.Next_Hop_Address = PH;
-    outRM->setRsvp_hop(hop);
+    outRM->setHop(hop);
 
     /*
        o    Select each sender PSB whose PHOP has address PH.  Set the
@@ -1580,7 +1579,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     RsvpHopObj_t hop;
     hop.Logical_Interface_Handle = peerInf;
     hop.Next_Hop_Address = PH;
-    outRM->setRsvp_hop(hop);
+    outRM->setHop(hop);
     ev << "Send RESV TEAR message to " << IPAddress(PH) << "\n";
     ev << "RESV TEAR content is: \n";
     print(outRM);

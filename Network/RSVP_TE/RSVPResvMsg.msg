@@ -38,8 +38,8 @@ message RSVPResvMsg extends RSVPPacket
     properties:
         customize=true;
     fields:
-        RsvpHopObj_t rsvp_hop;
-        double refresh_time;
+        RsvpHopObj_t hop;
+        double refreshTime;
         int style; //Support FF style only
         FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
 }
@@ -60,7 +60,7 @@ message RSVPResvTear extends RSVPPacket
     properties:
         customize=true;
     fields:
-        RsvpHopObj_t rsvp_hop;
+        RsvpHopObj_t hop;
         FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
 };
 
@@ -80,7 +80,7 @@ message RSVPResvError extends RSVPPacket
     properties:
         customize=true;
     fields:
-        RsvpHopObj_t rsvp_hop;
+        RsvpHopObj_t hop;
         int errorNode;
         int errorCode;
 };
