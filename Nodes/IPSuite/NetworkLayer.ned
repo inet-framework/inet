@@ -53,8 +53,8 @@ module NetworkLayer
         //ip: IPProcessing;
         ip: IP;
             parameters:
-                timeToLive = 8,
-                multicastTimeToLive = 6,
+                timeToLive = 32,
+                multicastTimeToLive = 32,
                 fragmentTimeout = 60,
                 protocolMapping = "6:0,17:1,1:2,2:3,46:4";
             gatesizes:

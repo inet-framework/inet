@@ -257,12 +257,13 @@ InterfaceEntry *RoutingTable::interfaceByName(const char *name)
 
 InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 {
+    // This used to check the network part of the interface IP address.
+    // No clue what it was good for, but screwed up routing for me. --Andras
     Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
-    // FIXME this is rather interfaceBy_Network_Address() -- is this what's intended? --AV
     if (addr.isNull())
         return NULL;
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (IPAddress::maskedAddrAreEqual(addr,(*i)->inetAddr,(*i)->mask))
+        if ((*i)->inetAddr==addr)
             return *i;
     return NULL;
 }

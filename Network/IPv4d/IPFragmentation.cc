@@ -63,6 +63,7 @@ void IPFragmentation::handleMessage(cMessage *msg)
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->dontFragment() && noOfFragments>1)
     {
+        ev << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
                                                      ICMP_FRAGMENTATION_ERROR_CODE);
         return;

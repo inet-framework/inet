@@ -56,7 +56,7 @@ void FlatNetworkConfigurator::initialize(int stage)
             if (e->outputPort!=-1)
             {
                 e->inetAddr = IPAddress(addr);
-                e->mask = IPAddress(255,255,255,255); // full match needed
+                e->mask = IPAddress(netmask);
             }
         }
     }
@@ -87,7 +87,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
             RoutingEntry *e = new RoutingEntry();
             e->host = IPAddress(destAddr);
-            e->netmask = IPAddress(netmask);
+            e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = interf->name.c_str();
             e->interfacePtr = interf;
             e->type = RoutingEntry::DIRECT;

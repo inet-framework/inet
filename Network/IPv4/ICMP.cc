@@ -58,6 +58,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // don't send ICMP error messages for multicast messages
     if (origDatagram->destAddress().isMulticast())
     {
+        // FIXME why? src address is probably not multicast. --Andras
         ev << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
         return;
@@ -69,7 +70,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
         ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->encapsulatedMsg());
         if (recICMPMsg->getIsError())
         {
-            ev << "do not reply with error message to error message" << endl;
+            ev << "ICMP error received -- do not reply to it" << endl;
             delete origDatagram;
             return;
         }
@@ -80,14 +81,14 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     errorMessage->setCode(code);
     errorMessage->setIsError(true);
     errorMessage->encapsulate(origDatagram);
-    // ICMP message length: the internet header plus the first 8 bytes of 
+    // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
     errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
 
     sendToIP(errorMessage, origDatagram->srcAddress());
 
     // debugging information
-    ev << "sending error message: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
+    ev << "sending ICMP error: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
 }
 
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)

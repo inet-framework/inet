@@ -207,6 +207,7 @@ void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
         if (buf.lastupdate < lastupdate)
         {
             // send ICMP error
+            ev << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
             icmpModule->sendErrorMessage(buf.datagram, ICMP_TIME_EXCEEDED, 0);
 
             // delete

@@ -36,6 +36,7 @@ void IPOutput::handleMessage(cMessage *msg)
     if (datagram->timeToLive() <= 0)
     {
         // drop datagram, destruction responsibility in ICMP
+        ev << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
         return;
     }

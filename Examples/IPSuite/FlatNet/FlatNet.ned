@@ -39,23 +39,19 @@ module FlatNet
         rte: Router[57];
             display: "i=ball2_vs,gold,100";
         cli: StandardHost2[3];
-            display: "i=comp_s";
-        srv1: StandardHost2;
-            display: "i=comp_s,cyan";
-        srv2: StandardHost2;
+            display: "i=comp_s,green";
+        srv: StandardHost2;
             display: "i=comp_s,cyan";
     connections nocheck:
-        cli[0].out++ --> fiberrouterline --> rte[5].in++;
-        cli[0].in++ <-- fiberrouterline <-- rte[5].out++;
+        cli[0].out++ --> fiberrouterline --> rte[50].in++;
+        cli[0].in++ <-- fiberrouterline <-- rte[50].out++;
         cli[1].out++ --> fiberrouterline --> rte[8].in++;
         cli[1].in++ <-- fiberrouterline <-- rte[8].out++;
         cli[2].out++ --> fiberrouterline --> rte[30].in++;
         cli[2].in++ <-- fiberrouterline <-- rte[30].out++;
 
-        srv1.out++ --> fiberrouterline --> rte[21].in++;
-        srv1.in++ <-- fiberrouterline <-- rte[21].out++;
-        srv2.out++ --> fiberrouterline --> rte[45].in++;
-        srv2.in++ <-- fiberrouterline <-- rte[45].out++;
+        srv.out++ --> fiberrouterline --> rte[18].in++;
+        srv.in++ <-- fiberrouterline <-- rte[18].out++;
 
         rte[0].out++ --> fiberrouterline --> rte[1].in++;
         rte[0].in++ <-- fiberrouterline <-- rte[1].out++;

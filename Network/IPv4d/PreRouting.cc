@@ -37,6 +37,7 @@ void PreRouting::handleMessage(cMessage *msg)
         double relativeHeaderLength = datagram->headerLength() / (double)datagram->length()/8;
         if (dblrand() <= relativeHeaderLength)
         {
+            ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }

@@ -75,6 +75,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
         double relativeHeaderLength = datagram->headerLength() / (double)datagram->length()/8;
         if (dblrand() <= relativeHeaderLength)
         {
+            ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
@@ -304,6 +305,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->dontFragment() && noOfFragments>1)
     {
+        ev << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
                                                      ICMP_FRAGMENTATION_ERROR_CODE);
         return;
@@ -404,6 +406,7 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
     if (datagram->timeToLive() <= 0)
     {
         // drop datagram, destruction responsibility in ICMP
+        ev << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
         return;
     }
