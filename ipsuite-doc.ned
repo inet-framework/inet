@@ -20,6 +20,23 @@
 //
 // @page irt.html, The routing files
 //
+// Routing files are files with <tt>.irt</tt> or <tt>.mrt</tt> extension,
+// and their names are passed in the routingFileName parameter
+// to RoutingTable modules. RoutingTables are present in all
+// <nohtml>IP</nohtml> nodes (hosts and routers).
+//
+// Routing files may contain network interface configuration and static
+// routes. Both are optional. Network interface entries in the file
+// configure existing interfaces; static routes are added to the route table.
+//
+// Interfaces themselves are represented in the simulation by modules
+// (such as PPPModule). Modules automatically register themselves
+// with appropriate defaults in the RoutingTable, and entries in the
+// routing file refine (overwrite) these settings.
+// Interfaces are identified by names (e.g. ppp0, ppp1, eth0) which
+// are normally derived from the module's name: a module called
+// <tt>"ppp[2]"</tt> in the NED file registers itself as interface ppp2.
+//
 // An example routing file (copied here from one of the IPSuite example
 // simulations:
 //
@@ -49,24 +66,32 @@
 // routeend.
 // </pre>
 //
-// The file consists of two parts: <tt>ifconfig...ifconfigend.</tt>
-// which lists the interfaces, and <tt>route..routeend.</tt> which
-// contains statically configured routes. The format of these sections
-// roughly corresponds to the output of the <tt>ifconfig</tt> and
-// <tt>netstat -rn</tt> Unix commands.
+// The <tt>ifconfig...ifconfigend.</tt> part configures interfaces,
+// and <tt>route..routeend.</tt> part contains static routes.
+// The format of these sections roughly corresponds to the output
+// of the <tt>ifconfig</tt> and <tt>netstat -rn</tt> Unix commands.
+//
+// An interface entry begins with a <tt>name:</tt> field, and lasts until
+// the next <tt>name:</tt> (or until <tt>ifconfigend.</tt>). It may
+// be broken into several lines.
 //
 // Accepted interface fields are:
 //    - <tt>name:</tt> - arbitrary interface name (e.g. eth0, ppp0)
-//    - <tt>encap:</tt> - (ignored)
-//    - <tt>HWaddr:</tt> - (ignored)
 //    - <tt>inet_addr:</tt> - IP address
-//    - <tt>Bcast:</tt>
-//    - <tt>Mask:</tt>
+//    - <tt>Mask:</tt> - netmask
 //    - <tt>Groups:</tt> Multicast groups. 224.0.0.1 is added automatically,
 //      and 224.0.0.2 also if the node is a router (IPForward==true).
 //    - <tt>MTU:</tt> - MTU on the link (e.g. Ethernet: 1500)
 //    - <tt>Metric:</tt> - integer route metric
 //    - flags: <tt>BROADCAST</tt>, <tt>MULTICAST</tt>, <tt>POINTTOPOINT</tt>
+//
+// The following fields are parsed but ignored: <tt>Bcast</tt>,<tt>encap</tt>,
+// <tt>HWaddr</tt>.
+//
+// Interface modules set a good default for MTU, Metric (as 1e9/bitrate) and
+// flags, but leave inet_addr and Mask empty. inet_addr and mask should
+// be set either from the routing file or by a dynamic network configuration
+// module.
 //
 // The route fields are:
 //
@@ -86,5 +111,4 @@
 // The <i>References</i> field is currently ignored.
 //
 // <i>Interface</i> is the interface name, e.g. <tt>eth0</tt>.
-//
 //
