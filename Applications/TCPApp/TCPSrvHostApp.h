@@ -24,7 +24,7 @@
  */
 class TCPServerProcess : public cSimpleModule, public TCPSocket::CallbackInterface
 {
-  private:
+  protected:
     TCPSocket *socket; // ptr into socketMap managed by TCPSrvHostApp
   public:
     Module_Class_Members(TCPServerProcess,cSimpleModule,0);
