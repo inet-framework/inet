@@ -190,8 +190,8 @@
 // @page cspf-algorithm.html, The CSPF Algorithm
 //
 // CSPF stands for Constraint Shortest Path First.
-// This constraint-based routing is executed online by Ingress
-// \Router. The CSPF calculates an optimum explicit route (ER), based on
+// This constraint-based routing is executed online by Ingress \Router.
+// The CSPF calculates an optimum explicit route (ER), based on
 // specific constraints. CSPF relies on a Traffic Engineering Database (TED)
 // to do those calculations. The resulting route is then used by \RSVP-TE.
 //

@@ -12,43 +12,38 @@
 
 
 //
-// Manages the label space and label mappings that belong to the current LSR.
+// Manages the label space and label mappings that belong to a Label Switched
+// \Router (LSR). Every LSR model must contain a LIBTable module with the name
+// libTable.
 //
 // The LIB (Label Information Base) table has the following columns:
-// - In-Lbl: Incoming Label
-// - In-Intf: Incoming Interface
-// - Out-Lbl: Outgoing Label
-// - Out-Intf: Outgoing Interface
-// - Opt: Operation code (PUSH=1, POP=2, or SWAP=3)
+//   - In-Lbl: Incoming Label
+//   - In-Intf: Incoming Interface
+//   - Out-Lbl: Outgoing Label
+//   - Out-Intf: Outgoing Interface
+//   - Opt: Operation code (PUSH=1, POP=2, or SWAP=3)
 //
 // For Edge routers, the incoming interface (Ingress \Router) or the outgoing interface
 // (Egress \Router) might not be defined.
 //
-// In the simulation, LIB was built as a simple module. Each LSR has an LIB as a part
-// of its system. When the LIB is first started up, it will load all of Label Switching
-// Information from a local file. The name of this file is supplied as a parameter for LSR
-// module.
+// Upon startup, the module initializes the table from the optional LIB and PRT
+// table files. The formats of these files are described on the page
+// <a href="lib-table-file.html">LIB table file format</a>.
 //
-// If the LIB file cannot be found, the LIB table is initialized empty. During the process
-// of label requests and responses, new labels will be installed and added into this LIB.
-// LIB TABLE module provides a set of utilities to manipulate and extract information
-// from the LIB. Some examples are to get the outgoing Interface name and label pair
-// for an incoming Interface and Label pair, and to install a new label when a Label
-// Mapping message is received from upstream LSRs.
+// During the process of label requests and responses, new labels will be installed
+// and added into this LIB. This module exposes C++ methods to manipulate the LIB
+// and extract information from it. Some examples are getting the (outgoing interface,
+// label) pair for an (incoming Interface, label) pair, and installing a new label
+// when a Label Mapping message is received from upstream LSRs.
 //
 // Collaborations
 //
-// LIB module's collaborators are LDP and MPLS modules.
-// The interaction between LIB and these modules are not through message exchange
-// but the pointer to LIB module can be retried from the LDP and MPLS modules.
-//
-// Usages
-//
-// See <a href="lib-table-file.html">LIB table file format</a>.
+// LIB is accessed from MPLSModule and signalling (NewLDP, RSVPAppl) modules,
+// by calling its public C++ methods.
 //
 simple LIBTable
     parameters:
-        LibTableFileName : string,
-        PrtTableFileName : string;
+        LibTableFileName : string, // file name or ""
+        PrtTableFileName : string; // file name or ""
 endsimple
 

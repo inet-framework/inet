@@ -20,19 +20,12 @@
 //
 // Operations
 //
-// Generally, the operation of MPLS module is as following: When first
-// starting up, the MPLS module stores all the incoming packets (which the
-// labels cannot be found from the LIB) from \IP nodes outside in a buffer as
-// long as the signaling protocol has not been initialized yet. Once the
-// signaling component finishes its initialization phase, it sends a message
-// to MPLS module indicating that it is ready to operate. The MPLS module then
-// sends Label Request for FEC of the queued packets in the buffer. Label
-// mapping and installation are performed by signaling protocols. Once, the
-// Ingress \Router receives label mapping, it starts to send out queued
-// packets.
+// MPLS packets are represented by the message class MPLSPacket.
+// The local LIB (Label Information Base) is stored in a LIBTable module
+// in the LSR.
 //
 // For most of the time, the MPLS module will do the label swapping and
-// message forwarding. Upon receiving a labeled packet from another LSR, the
+// message forwarding. Upon receiving a labelled packet from another LSR, the
 // MPLS first extract the incoming interface and incoming label pair, and then
 // look up the local LIB table. If an outgoing label and an outgoing interface
 // can be found, the module will perform appropriate label operations (PUSH,

@@ -12,40 +12,20 @@
 
 
 //
-// Implements \RSVP-TE. The module processes \RSVP-TE messages, installs
-// labels and does the reservation along LSP paths.
+// Implements \RSVP-TE, a signalling protocol for MPLS. The module
+// processes \RSVP-TE messages, installs labels and does the reservation
+// along LSP paths.
 //
 // Operations
 //
-// Message formats and message processing can be referred at section 7.4 and
-// 7.5 of this report. FIXME resolve ref!
+// All RSVP messages are subclassed from RSVPPacket, and include
+// RSVPPathMsg, RSVPPathTear, RSVPPathError, RSVPResvMsg, RSVPResvTear
+// and RSVPResvError.
 //
 // Collaborations
 //
-// \RSVP-TE is expected to communicate with different components in the system.
-// These components are RSVPInterface module, TED module, OSPF-TE module, and
-// MPLS module.
-//
-// Being a signaling protocol like LDPProc, \RSVP-TE is implemented as a simple
-// module. It has buffers to store Label Request messages when finding the
-// paths for FEC in these messages. \RSVP-TE communicates directly with MPLS
-// Module without via any transmission links. There are three types of
-// messages exchanged between these two modules:
-// - Messages of label request for unknown FEC from MPLS module to
-//   \RSVP-TE module
-// - Messages of label replied for a particular FEC from \RSVP-TE module to
-//   MPLS module
-// - Messages of ready state signaling from \RSVP-TE module to MPLS module to
-//   signal the MPLS module that the singalling protocol has passed the
-//   initialization stage.
-//
-// Usages
-//
-// \RSVP-TE module needs the input of the LSR loopback address. In addition,
-// for TE application, it requires inputs stored in an XML file name
-// "traffic.xml", see <a href="traffic-xml-file.html">The traffic.xml File</a>.
-// The file must be in the same folder as the executable network
-// simulation file.
+// \RSVP-TE communicates with several components in the system:
+// RSVPAppl, TED, OspfTe, and MPLSModule.
 //
 simple RSVP
     parameters:

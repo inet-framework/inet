@@ -23,6 +23,9 @@
 //
 // Operations
 //
+// All LDP message types are subclassed from LDPPacket, and include
+// LDPHello, LDPLabelMapping, LDPLabelRequest, LDPIni and LDPAddress.
+//
 // Message processing in NewLDP module is explained in
 // <a href="ldp-processing.html">LDP Message Processing</a>
 //
@@ -30,17 +33,13 @@
 //
 // NewLDP is implemented as a simple module. It has buffers to store Label
 // Request messages when finding the paths for FEC in these messages. NewLDP
-// can communicate directly with MPLSModule. There are three types of
-// messages exchanged between these two modules:
-// - Messages of label request for unknown FEC from MPLS module to NewLDP
-//   module
-// - Messages of label replied for a particular FEC from NewLDP module to
-//   MPLSModule
-// - Messages of ready state signaling from NewLDP module to MPLSModule to
-//   signal the MPLSModule that the signalling protocol has passed the
-//   initialization stage.
+// can communicate directly with MPLSModule. The following messages are
+// exchanged between these two modules:
 //
-// @author Andras Varga
+// - label requests for unknown FECs from MPLSModule to NewLDP
+// - label replies for particular FECs from NewLDP module to MPLSModule
+//
+// @author Andras Varga, based on original implementation LDPproc
 //
 simple NewLDP
 

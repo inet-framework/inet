@@ -14,7 +14,8 @@
 //
 // Reads traffic.xml file (only if Ingress router!) and stores
 // it into a traffic_request_t[] array. Then ...
-//# FIXME
+//
+// See <a href="traffic-xml-file.html">The traffic.xml File</a>.
 //
 simple RSVPAppl
     parameters:
