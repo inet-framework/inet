@@ -152,47 +152,24 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
             continue;
 
         // Release packets in queue
-        // FIXME only IPDatagrams can occur here, or??
-        IPDatagram *data = dynamic_cast<IPDatagram *>(queuedmsg);
-        MPLSPacket *mplsPck = dynamic_cast<MPLSPacket *>(queuedmsg);
-        ASSERT(data || mplsPck);
+        IPDatagram *datagram = check_and_cast<IPDatagram *>(queuedmsg);
 
-        // Incoming interface
-        int gateIndex;
-        if (data)
-        {
-            gateIndex = data->par("gateIndex");
-        }
-        else
-        {
-            gateIndex = mplsPck->par("gateIndex");
-            data = check_and_cast<IPDatagram *>(mplsPck->decapsulate());
-        }
-
-        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-        string senderInterface = string(ientry->name.c_str());
-        int fecID = classifyPacket(data, classifierType);
-
-        // FIXME khmmm --- we already decapsulated here, can't prentend nothing happened!@!!!@!!!! Andras
+        // Is it the FEC we just resolved?
+        int fecID = classifyPacket(datagram, classifierType);
         if (fecID!=returnedFEC)
             continue;
 
         // Remove the message
         ipdataQueue.remove(i);
 
+        // Incoming interface
+        int gateIndex = datagram->par("gateIndex");
+        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
+        string senderInterface = string(ientry->name.c_str());
+
         // Construct a new MPLS packet
-        MPLSPacket *newPacket = NULL;
-        if (mplsPck != NULL)
-        {
-            newPacket = mplsPck;
-        }
-        else
-        {
-            newPacket = new MPLSPacket(data->name());
-            ev << "FIXME debug: " << data->fullPath();
-            ev << " / " << data->owner()->fullPath() << endl;
-            newPacket->encapsulate(data);
-        }
+        MPLSPacket *newPacket = new MPLSPacket(datagram->name());
+        newPacket->encapsulate(datagram);
 
         // Find label and outgoing interface
         int label;
@@ -202,6 +179,9 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
 
         newPacket->pushLabel(label);
         newPacket->setKind(fecID);
+
+        ev << "Encapsulating buffered packet " << datagram << " into MPLS with label=" <<
+              label << ", sending to " << outgoingInterface << "\n";
 
         int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
         send(newPacket, "toL2", outgoingPort);
@@ -213,7 +193,11 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
     IPDatagram *ipdatagram = dynamic_cast<IPDatagram *>(msg);
     MPLSPacket *mplsPacket = dynamic_cast<MPLSPacket *>(msg);
 
-    if (ipdatagram)
+    if (mplsPacket)
+    {
+        processMPLSPacketFromL2(mplsPacket);
+    }
+    else if (ipdatagram)
     {
         if (ipdatagram->hasPar("trans")) // FIXME this can never happen, peer won't set "trans"...
         {
@@ -236,10 +220,6 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
             // and add an MPLS header
             processIPDatagramFromL2(ipdatagram);
         }
-    }
-    else if (mplsPacket)
-    {
-        processMPLSPacketFromL2(mplsPacket);
     }
     else
     {
@@ -272,8 +252,8 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int optCode=-1;
-    int newLabel=-1;
+    int optCode;
+    int newLabel;
     string outgoingInterface;
     bool found = lt->resolveLabel(oldLabel, senderInterface,
                                   optCode, newLabel, outgoingInterface);
@@ -360,7 +340,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
           ", dest=" << ipdatagram->destAddress() <<
           " --> FEC=" << fecID << "\n";
 
-    int label=-1;
+    int label;
     string outgoingInterface;
     bool found = lt->resolveFec(fecID, label, outgoingInterface);
 
@@ -435,13 +415,17 @@ int MPLSModule::classifyPacket(IPDatagram *ipdatagram, int type)
     // find existing FEC based on classifier type
     for (std::vector<FECElem>::iterator it=fecList.begin(); it!=fecList.end(); it++)
     {
-        // FEC determined by Destination only
-        if (type==DEST_CLASSIFIER && dest==it->destAddr)
-            return it->fecId;
-
-        // FEC determined by Destination and Source
-        if (type==SRC_AND_DEST_CLASSIFIER && dest==it->destAddr && src==it->srcAddr)
-            return it->fecId;
+        switch (type)
+        {
+            case DEST_CLASSIFIER:
+                if (dest==it->destAddr) return it->fecId;
+                break;
+            case SRC_AND_DEST_CLASSIFIER:
+                if (dest==it->destAddr && src==it->srcAddr) return it->fecId;
+                break;
+            default:
+                error("Unknown classifier %d", type);
+        }
     }
     return -1;
 }
