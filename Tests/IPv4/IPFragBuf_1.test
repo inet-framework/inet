@@ -52,6 +52,14 @@ for (f.src=1024; f.src<1026; f.src++) {
         }
     }
 }
+
+// dump
+for (int j=0; j<v.size(); j++)
+{
+    Frag& f = v[j];
+    ev << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
+}
+
 ev << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
