@@ -26,6 +26,20 @@
 class TCPSegment;
 class TCPInterfacePacket;
 class IPInterfacePacket;
+class TCPSendQueue;
+class TCPReceiveQueue;
+
+
+/**
+ * TCP sequence number
+ */
+typedef unsigned long tcpseq_t;
+
+
+/**
+ * Shorthand for unsigned long
+ */
+typedef unsigned long ulong;
 
 
 //
@@ -52,63 +66,96 @@ enum TcpState
 // Event, strictly for the FSM state transition purposes.
 // DO NOT USE outside performStateTransition()!
 //
-typedef int TCPEvent;
+enum TCPEvent
+{
+    // app commands
+    TCP_E_OPEN_ACTIVE,
+    TCP_E_OPEN_PASSIVE,
+    TCP_E_SEND,
+    TCP_E_RECEIVE,
+    TCP_E_CLOSE,
+    TCP_E_ABORT,
+    TCP_E_STATUS,
+
+    // TPDU types
+    TCP_E_RCV_DATA,
+    TCP_E_RCV_ACK,
+    TCP_E_RCV_SYN,
+    TCP_E_RCV_SYN_ACK,
+    TCP_E_RCV_FIN,
+    TCP_E_RCV_FIN_ACK,
+    TCP_E_RCV_RST,  // covers RST+ACK too
+
+    // timers
+    TCP_E_TIMEOUT_TIME_WAIT,
+    TCP_E_TIMEOUT_REXMT,
+    TCP_E_TIMEOUT_PERSIST,
+    TCP_E_TIMEOUT_KEEPALIVE,
+    TCP_E_TIMEOUT_CONN_ESTAB,
+    TCP_E_TIMEOUT_FIN_WAIT_2,
+    TCP_E_TIMEOUT_DELAYED_ACK,
+};
+
+
 
 //
 // State variables for TCP
 //
 struct TCPStateVariables
 {
+    // set if the connection was initiated by a passive open
+    bool passive;
+
     // number of bits requested by a client TCP
     unsigned long num_bit_req;
 
     // send sequence number variables (RFC 793)
-    unsigned long snd_una;      // send unacknowledged
-    unsigned long snd_nxt;      // send next
-    unsigned long savenext;     // save-variable for snd_nxt in fast rexmt
-    unsigned long snd_up;       // send urgent pointer
-    unsigned long snd_wnd;      // send window
-    unsigned long snd_wl1;      // segment sequence number used for last window update
-    unsigned long snd_wl2;      // segment ack. number used for last window update
-    unsigned long iss;          // initial sequence number (ISS)
+    tcpseq_t snd_una;      // send unacknowledged
+    tcpseq_t snd_nxt;      // send next
+    tcpseq_t savenext;     // save-variable for snd_nxt in fast rexmt
+    int snd_up;            // send urgent pointer
+    int snd_wnd;           // send window
+    tcpseq_t snd_wl1;      // segment sequence number used for last window update
+    tcpseq_t snd_wl2;      // segment ack. number used for last window update
+    tcpseq_t iss;          // initial sequence number (ISS)
 
-    unsigned long snd_fin_seq;  // last seq. no.
-    int snd_fin_valid;          // FIN flag set?
-    int snd_up_valid;           // urgent pointer valid/URG flag set?
-    unsigned long snd_mss;      // maximum segment size
+    tcpseq_t snd_fin_seq;  // last seq. no.
+    int snd_fin_valid;     // FIN flag set?
+    int snd_up_valid;      // urgent pointer valid/URG flag set?
+    int snd_mss;           // maximum segment size
 
     // slow start and congestion avoidance variables (RFC 2001)
-    unsigned long snd_cwnd;     // congestion window
-    unsigned long ssthresh;     // slow start threshold
+    int snd_cwnd;          // congestion window
+    int ssthresh;          // slow start threshold
     int cwnd_cnt;
 
     // receive sequence number variables
-    unsigned long rcv_nxt;      // receive next
-    unsigned long rcv_wnd;      // receive window
-    unsigned long rcv_wnd_last; // last receive window
-    unsigned long rcv_up;       // receive urgent pointer;
-    unsigned long irs;          // initial receive sequence number
+    tcpseq_t rcv_nxt;      // receive next
+    tcpseq_t rcv_wnd;      // receive window
+    tcpseq_t rcv_wnd_last; // last receive window
+    tcpseq_t rcv_up;       // receive urgent pointer;
+    tcpseq_t irs;          // initial receive sequence number
 
     // receive variables
-    unsigned long rcv_fin_seq;
-    int rcv_fin_valid;
-    int rcv_up_valid;
-    unsigned long rcv_buf_seq;
-    unsigned long rcv_buff;
+    tcpseq_t rcv_fin_seq;
+    bool rcv_fin_valid;
+    bool rcv_up_valid;
+    tcpseq_t rcv_buf_seq;
+    unsigned long rcv_buff; //???
     double  rcv_buf_usage_thresh;
 
     // retransmit variables
-    unsigned long snd_max;      // highest sequence number sent; used to recognize retransmits
-    unsigned long max_retrans_seq; // sequence number of a retransmitted segment
+    tcpseq_t snd_max;      // highest sequence number sent; used to recognize retransmits
+    tcpseq_t max_retrans_seq; // sequence number of a retransmitted segment
 
     // segment variables
-    unsigned long seg_len;      // segment length
-    unsigned long seg_seq;      // segment sequence number
-    unsigned long seg_ack;      // segment acknoledgement number
+    tcpseq_t seg_len;      // segment length
+    tcpseq_t seg_seq;      // segment sequence number
+    tcpseq_t seg_ack;      // segment acknoledgement number
 
     // timing information (round-trip)
     short t_rtt;                // round-trip time
-    unsigned long rtseq;        // starting sequence number of timed data
+    tcpseq_t rtseq;        // starting sequence number of timed data
     short rttmin;
     short srtt;                 // smoothed round-trip time
     short rttvar;               // variance of round-trip time
@@ -171,8 +218,13 @@ class TCPConnection
     // variables associated with TCP state
     TCPStateVariables state;
 
+    // TCP queues
+    TCPSendQueue *sendQueue;
+    TCPReceiveQueue *receiveQueue;
+
     // timers
     //...
+
   protected:
     /**
      * Utility: encapsulates segment into IPInterfacePacket and sends it to IP.
@@ -184,57 +236,6 @@ class TCPConnection
      */
     void sendToApp(TCPInterfacePacket *tcpIfPacket);
 
-    /** @name Processing events in different states -- 12 states times 3 kinds of event */
-    //@{
-    void processTCPSegmentInInit(TCPSegment *tcpseg);
-    void processTimerInInit(cMessage *event);
-    void processAppCommandInInit(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInClosed(TCPSegment *tcpseg);
-    void processTimerInClosed(cMessage *event);
-    void processAppCommandInClosed(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInListen(TCPSegment *tcpseg);
-    void processTimerInListen(cMessage *event);
-    void processAppCommandInListen(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInSynRcvd(TCPSegment *tcpseg);
-    void processTimerInSynRcvd(cMessage *event);
-    void processAppCommandInSynRcvd(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInSynSent(TCPSegment *tcpseg);
-    void processTimerInSynSent(cMessage *event);
-    void processAppCommandInSynSent(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInEstablished(TCPSegment *tcpseg);
-    void processTimerInEstablished(cMessage *event);
-    void processAppCommandInEstablished(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInCloseWait(TCPSegment *tcpseg);
-    void processTimerInCloseWait(cMessage *event);
-    void processAppCommandInCloseWait(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInLastAck(TCPSegment *tcpseg);
-    void processTimerInLastAck(cMessage *event);
-    void processAppCommandInLastAck(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInFinWait1(TCPSegment *tcpseg);
-    void processTimerInFinWait1(cMessage *event);
-    void processAppCommandInFinWait1(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInFinWait2(TCPSegment *tcpseg);
-    void processTimerInFinWait2(cMessage *event);
-    void processAppCommandInFinWait2(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInClosing(TCPSegment *tcpseg);
-    void processTimerInClosing(cMessage *event);
-    void processAppCommandInClosing(TCPInterfacePacket *tcpIfPacket);
-
-    void processTCPSegmentInTimeWait(TCPSegment *tcpseg);
-    void processTimerInTimeWait(cMessage *event);
-    void processAppCommandInTimeWait(TCPInterfacePacket *tcpIfPacket);
-    //@}
-
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
     TCPEvent analyseTCPSegmentEvent(TCPSegment *tcpseg);
@@ -243,11 +244,48 @@ class TCPConnection
     bool performStateTransition(const TCPEvent& event);
     //@}
 
+    /** @name Processing app commands */
+    //@{
+    void process_OPEN_ACTIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_OPEN_PASSIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_SEND(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_RECEIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_CLOSE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_ABORT(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_STATUS(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    //@}
+
+    /** @name Processing TCP segment arrivals */
+    //@{
+    void process_RCV_DATA(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_SYN(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_SYN_ACK(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_FIN(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_FIN_ACK(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_RST(TCPEvent event, TCPSegment *tcpseg);
+    //@}
+
+    /** @name Processing timeouts */
+    //@{
+    void process_TIMEOUT_TIME_WAIT(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_REXMT(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_PERSIST(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_KEEPALIVE(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_CONN_ESTAB(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_FIN_WAIT_2(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_DELAYED_ACK(TCPEvent event, cMessage *msg);
+    //@}
+
   public:
     /**
      * Ctor.
      */
     TCPConnection(int connId, cSimpleModule *mod);
+
+    /**
+     * Dtor.
+     */
+    ~TCPConnection();
 
     /**
      * Process self-messages (timers).

@@ -25,7 +25,21 @@ class noncobject IPAddress;
 
 
 //
-// TCP connection status information (TCP -> Application)
+// TCP commands, from application to TCP
+//
+enum TcpCommand
+{
+    TCP_C_OPEN_ACTIVE = 1;
+    TCP_C_OPEN_PASSIVE = 2;
+    TCP_C_SEND = 3;
+    TCP_C_RECEIVE = 4;
+    TCP_C_CLOSE = 5;
+    TCP_C_ABORT = 6;
+    TCP_C_STATUS = 7;
+};
+
+//
+// TCP connection status, from TCP to application
 //
 enum TcpStatusInd
 {
@@ -41,14 +55,23 @@ enum TcpStatusInd
 //
 // Control info for TCP connections. Travels between application and TCP.
 //
-message TCPInterfacePacket
+message TCPInterfacePacket  // FIXME rename to TCPCommand and TCPIndication ?
 {
     fields:
         int connId;
-        IPAddress srcAddr;
-        IPAddress destAddr;
-        int srcPort;
-        int destPort;
-        //...
+};
+
+//
+// Control info to be used for active or passive TCP open.
+//
+message TCPOpenCommand extends TCPInterfacePacket
+{
+    fields:
+        IPAddress localAddr;
+        IPAddress remoteAddr;
+        int localPort;
+        int remotePort;
+        string sendQueueClass;
+        string receiveQueueClass;
 };
 

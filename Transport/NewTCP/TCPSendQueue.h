@@ -1,0 +1,117 @@
+//
+// Copyright (C) 2004 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+#ifndef __TCPSENDQUEUE_H
+#define __TCPSENDQUEUE_H
+
+#include <omnetpp.h>
+#include "TCPConnection.h"
+
+
+class TCPSegment;
+class TCPInterfacePacket;
+
+
+/**
+ * Abstract base class for TCP send queues. In fact a single object
+ * represents both the send queue and the retransmission queue
+ * (no need to separate them). The TCPConnection object knows
+ * which data in the queue have already been transmitted ("retransmission
+ * queue") and which not ("send queue"). This class is not interested
+ * in where's the boundary.
+ *
+ * This class is polymorphic because depending on where and how you
+ * use the TCP model you might have different ideas about "sending data"
+ * on a simulated connection.
+ *
+ * You might want to:
+ *
+ * - transmit a real bytes, especially if the application which uses TCP
+ *   is a ported version of a real socket application.
+ *
+ * - simulate a "dummy" connection, that is, simulated TCP segments
+ *   contain do not contain any real data, only the number of bytes they
+ *   represent.  You'll want to do this when the app is there solely
+ *   as a traffic generator (e.g. simulated file transfer or telnet session),
+ *   but actual data is unimportant.
+ *
+ * - transmit a sequence of cMessage objects, and you want exactly the
+ *   same cMessage sequence to be reproduced on the receiver side.
+ *   Here every cMessage maps to a sequence number range in the TCP
+ *   stream, and the object is passed up to the application on the
+ *   receiving side when its last byte has arrived on the simulated
+ *   connection.
+ *
+ * Different TCPSendQueue subclasses can be written to accomodate
+ * different needs.
+ *
+ * This class goes hand-in-hand with TCPReceiveQueue.
+ *
+ * @see TCPReceiveQueue
+ */
+class TCPSendQueue : public cPolymorphic
+{
+  protected:
+    TCPConnection *conn; // TCP connection object
+    tcpseq_t startSeq;   // sequence number of the first user data byte inserted
+
+  public:
+    /**
+     * Ctor. The startSeq parameter tells what sequence number the first
+     * byte of app data should get. This is usually ISS+1 because SYN consumes
+     * one byte in the sequence number space.
+     */
+    TCPSendQueue(TCPConnection *_conn, tcpseq_t _startSeq)  {conn=_conn; startSeq=_startSeq;}
+
+    /**
+     * Virtual dtor.
+     */
+    virtual ~TCPSendQueue() {}
+
+    /**
+     * Called on SEND app command, it inserts in the queue the data the user
+     * wants to send. Implementations of this abstract class will decide
+     * what this means: copying actual bytes, just increasing the
+     * "last byte queued" variable, or storing cMessage object(s).
+     */
+    virtual void enqueueAppData(TCPInterfacePacket *tcpIfPacket) = 0;
+
+    /**
+     * Returns how many bytes are available in the queue, from (and including)
+     * the given sequence number.
+     */
+    virtual ulong bytesAvailable(tcpseq_t fromSeq) = 0;
+
+    /**
+     * Called when the TCP wants to send or retransmit data, it constructs
+     * a TCP segment which contains the data from the requested sequence
+     * number range.
+     */
+    virtual TCPSegment *createSegmentWithBytes(tcpseq_t fromSeq, ulong numBytes) = 0;
+
+    /**
+     * Tells the queue that bytes up to (but NOT including) seqNum have been
+     * transmitted and ACKed, so they can be removed from the queue.
+     */
+    virtual void discardUpTo(tcpseq_t seqNum) = 0;
+
+};
+
+#endif
+
+
