@@ -397,7 +397,7 @@ class TCPConnection
     /** Utility: sends a status indication (TCP_I_xxx) to application */
     void sendIndicationToApp(int code);
 
-  protected:
+  public:
     static void printSegmentBrief(TCPSegment *tcpseg);
     static const char *stateName(int state);
     static const char *eventName(int event);

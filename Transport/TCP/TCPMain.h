@@ -144,6 +144,7 @@ class TCPMain : public cSimpleModule
     TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
     TCPConnection *findConnForApp(int appGateIndex, int connId);
     void removeConnection(TCPConnection *conn);
+    void updateDisplayString();
 
   public:
     static bool testing;    // switches between tcpEV and testingEV

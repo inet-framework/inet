@@ -104,6 +104,63 @@ void TCPMain::handleMessage(cMessage *msg)
         if (!ret)
             removeConnection(conn);
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
+}
+
+void TCPMain::updateDisplayString()
+{
+    if (ev.disabled())
+    {
+        // in express mode, we don't bother to update the display
+        displayString().setTagArg("t",0,"");
+        return;
+    }
+
+    //char buf[40];
+    //sprintf(buf,"%d conns", tcpAppConnMap.size());
+    //displayString().setTagArg("t",0,buf);
+
+    int numINIT=0, numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
+        numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
+        numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
+
+    // std::map's iteration is inefficient if map is large
+    for (TcpAppConnMap::iterator i=tcpAppConnMap.begin(); i!=tcpAppConnMap.end(); ++i)
+    {
+        int state = (*i).second->getFsmState();
+        switch(state)
+        {
+           case TCP_S_INIT:        numINIT++; break;
+           case TCP_S_CLOSED:      numCLOSED++; break;
+           case TCP_S_LISTEN:      numLISTEN++; break;
+           case TCP_S_SYN_SENT:    numSYN_SENT++; break;
+           case TCP_S_SYN_RCVD:    numSYN_RCVD++; break;
+           case TCP_S_ESTABLISHED: numESTABLISHED++; break;
+           case TCP_S_CLOSE_WAIT:  numCLOSE_WAIT++; break;
+           case TCP_S_LAST_ACK:    numLAST_ACK++; break;
+           case TCP_S_FIN_WAIT_1:  numFIN_WAIT_1++; break;
+           case TCP_S_FIN_WAIT_2:  numFIN_WAIT_2++; break;
+           case TCP_S_CLOSING:     numCLOSING++; break;
+           case TCP_S_TIME_WAIT:   numTIME_WAIT++; break;
+        }
+    }
+    char buf2[200];
+    buf2[0] = '\0';
+    if (numINIT>0)       sprintf(buf2+strlen(buf2), "INIT:%d ", numINIT);
+    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "CLOSED:%d ", numCLOSED);
+    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "LISTEN:%d ", numLISTEN);
+    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "SYN_SENT:%d ", numSYN_SENT);
+    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "SYN_RCVD:%d ", numSYN_RCVD);
+    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2), "ESTAB:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "CLOSE_WAIT:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "LAST_ACK:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "FIN_WAIT_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "FIN_WAIT_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "CLOSING:%d ", numCLOSING);
+    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "TIME_WAIT:%d ", numTIME_WAIT);
+    displayString().setTagArg("t",0,buf2);
 }
 
 TCPConnection *TCPMain::findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
