@@ -23,12 +23,12 @@
 //
 simple TcpModule
     parameters:
-    // the following tow parameters are never used so far.
-    // TCPSlowStart   : bool,
-        // TCPDelayedAck  : bool,
+      //# the following tow parameters are never used so far.
+      //# TCPSlowStart   : bool,
+      TCPDelayedAck  : bool,
       TCPFastRetrans : bool,
-          TCPFastRecovery: bool,
-          TCPNewReno     : bool;
+      TCPFastRecovery: bool,
+      TCPNewReno     : bool;
     gates:
       in: from_appl, from_ip;
       out: to_appl, to_ip;

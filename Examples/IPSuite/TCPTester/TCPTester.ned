@@ -42,8 +42,8 @@ module Client
       in: from_switch;
       out: to_switch;
     submodules:
-       applclient: client_name like TCPApp
-         parameters:
+      applclient: client_name like TCPApp
+       parameters:
         debug = input(false, "Enable debugging output (false/true)?"),
         local_addr = l_addr,
         server_addr = s_addr,
@@ -54,15 +54,16 @@ module Client
         msg_ia_time = input(0.5s, "Data message interarrival time: "),
         processing_time = 0,
         message_length = input(8000, "Number of bits to be received: "); 
-       tcp: TcpModule
-            parameters:
-            TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe)"),
+      tcp: TcpModule
+       parameters:
+        TCPDelayedAck = input(true, "Delayed Acknowledge"),
+        TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe)"),
         TCPFastRecovery = input(false, "Fast Recovery: "),
-            TCPNewReno = input(false, "New Reno: ");
-       ip: IpModule;
-       comnw: ComNw;
-         parameters:
-            nw_length = input(18, "Number of bytes added by the network layer: ");
+        TCPNewReno = input(false, "New Reno: ");
+      ip: IpModule;
+      comnw: ComNw;
+       parameters:
+        nw_length = input(18, "Number of bytes added by the network layer: ");
     connections:
        applclient.out --> tcp.from_appl,
        applclient.in <-- tcp.to_appl,
