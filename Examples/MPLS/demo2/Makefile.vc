@@ -70,15 +70,15 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= RSVPNet_n.obj
+OBJS= RSVPNet_n.obj 
 
 # subdirectories to recurse into
 SUBDIRS= 
 
-$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+$(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) /out:$(TARGET)
 
-# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs:

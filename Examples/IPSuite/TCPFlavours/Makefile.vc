@@ -66,15 +66,15 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= comnw_n.obj dropswitch_n.obj ipmodule_n.obj switch_n.obj TCPTester_n.obj comnw.obj dropswitch.obj ipmodule.obj switch.obj
+OBJS= comnw_n.obj dropswitch_n.obj ipmodule_n.obj switch_n.obj TCPTester_n.obj comnw.obj  dropswitch.obj  ipmodule.obj  switch.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 
 
-$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+$(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) /out:$(TARGET)
 
-# purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
+# purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs:

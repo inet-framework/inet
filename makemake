@@ -7,25 +7,25 @@ ALL_MPLS_INCLUDES=$ALL_IPSUITE_INCLUDES' -I$(ROOT)/Network/MPLS -I$(ROOT)/Networ
 
 :#--------------------------------------
 
-$MAKEMAKE -f -n -c ipsuiteconfig
+$MAKEMAKE -f -n -r -c ipsuiteconfig
 
-(cd Applications && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Examples && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Tests && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Network && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd NetworkInterfaces && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Nodes && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd PHY && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Transport && $MAKEMAKE -f -n -c ../ipsuiteconfig)
-(cd Util && $MAKEMAKE -f -n -c ../ipsuiteconfig)
+(cd Applications && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Examples && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Tests && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Network && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd NetworkInterfaces && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Nodes && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd PHY && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Transport && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
+(cd Util && $MAKEMAKE -f -n -r -c ../ipsuiteconfig)
 
-(cd Applications/Generic && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Util)
-(cd Applications/PingApp && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Util)
-(cd Applications/TCPApp && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Transport/TCPv4 -I../../Util)
-(cd Applications/TCPExample && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../TCPApp -I../../Network/IPv4/Core -I../../Transport/TCPv4 -I../../Network/MPLS -I../../Network/LDP -I../../Util) #FIXME includes MPLS/LDP stuff???!!
+(cd Applications/Generic && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Util)
+(cd Applications/PingApp && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Util)
+(cd Applications/TCPApp && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Transport/TCPv4 -I../../Util)
+(cd Applications/TCPExample && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../TCPApp -I../../Network/IPv4/Core -I../../Transport/TCPv4 -I../../Network/MPLS -I../../Network/LDP -I../../Util) #FIXME includes MPLS/LDP stuff???!!
 
-(cd Examples/IPSuite && $MAKEMAKE -f -n -c ../../ipsuiteconfig)
-(cd Examples/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig)
+(cd Examples/IPSuite && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig)
+(cd Examples/MPLS && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig)
 
 (cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/McNetwork2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
@@ -38,10 +38,10 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 (cd Examples/IPSuite/TCPUDPDirectNet && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/UDPSockets && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
-(cd Examples/MPLS/Tester && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
+(cd Examples/MPLS/Tester && $MAKEMAKE -f -n -r -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
 (cd Examples/MPLS/demo2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
-(cd Examples/MPLS/samples && $MAKEMAKE -f -n -c ../../../ipsuiteconfig)
+(cd Examples/MPLS/samples && $MAKEMAKE -f -n -r -c ../../../ipsuiteconfig)
 (cd Examples/MPLS/TestTE1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/TestTE2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/TestTE3 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
@@ -50,24 +50,24 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 (cd Examples/MPLS/TestTE5 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/TestTE6 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 
-(cd Tests/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig)
+(cd Tests/MPLS && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig)
 (cd Tests/MPLS/LDP1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 
-(cd Network/IPv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig )
-(cd Network/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Util)
-(cd Network/LDP && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../MPLS -I../../Util)
-(cd Network/RSVP_TE && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../MPLS -I../../Util $LIBXML_INCLUDES)
-(cd Network/IPv4/Core && $MAKEMAKE -f -n -c ../../../ipsuiteconfig -I../QoSStub -I../../../NetworkInterfaces -I../../../NetworkInterfaces/Queues -I../../../Util)
-(cd Network/IPv4/QoS && $MAKEMAKE -f -n -c ../../../ipsuiteconfig -I../QoSStub -I../Core -I../../../Transport/TCPv4 -I../../../Util)
-(cd Network/IPv4/QoSStub && $MAKEMAKE -f -n -c ../../../ipsuiteconfig -I../Core -I../../../Util)
+(cd Network/IPv4 && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig )
+(cd Network/MPLS && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Util)
+(cd Network/LDP && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../MPLS -I../../Util)
+(cd Network/RSVP_TE && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../MPLS -I../../Util $LIBXML_INCLUDES)
+(cd Network/IPv4/Core && $MAKEMAKE -f -n -r -c ../../../ipsuiteconfig -I../QoSStub -I../../../NetworkInterfaces -I../../../NetworkInterfaces/Queues -I../../../Util)
+(cd Network/IPv4/QoS && $MAKEMAKE -f -n -r -c ../../../ipsuiteconfig -I../QoSStub -I../Core -I../../../Transport/TCPv4 -I../../../Util)
+(cd Network/IPv4/QoSStub && $MAKEMAKE -f -n -r -c ../../../ipsuiteconfig -I../Core -I../../../Util)
 
-(cd NetworkInterfaces/PPP-old && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Util -I../../Network/IPv4/Core)
-(cd NetworkInterfaces/Queues && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Util -I../../Network/IPv4/Core -I../../Network/IPv4/QoS)
+(cd NetworkInterfaces/PPP-old && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Util -I../../Network/IPv4/Core)
+(cd NetworkInterfaces/Queues && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Util -I../../Network/IPv4/Core -I../../Network/IPv4/QoS)
 
-(cd Nodes/IPSuite && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Network/IPv4/QoS -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../../NetworkInterfaces/PPP-old -I../../NetworkInterfaces -I../../NetworkInterfaces/Queues  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/PingApp -I../../Util)
-(cd Nodes/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Network/IPv4/QoS -I../../Network/MPLS -I../../Network/LDP -I../../Network/RSVP_TE -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../../NetworkInterfaces/PPP-old -I../../NetworkInterfaces -I../../NetworkInterfaces/Queues  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/PingApp -I../IPSuite -I../../Util)
+(cd Nodes/IPSuite && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Network/IPv4/QoS -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../../NetworkInterfaces/PPP-old -I../../NetworkInterfaces -I../../NetworkInterfaces/Queues  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/PingApp -I../../Util)
+(cd Nodes/MPLS && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Network/IPv4/QoS -I../../Network/MPLS -I../../Network/LDP -I../../Network/RSVP_TE -I../../Transport/TCPv4 -I../../Transport/UDPv4 -I../../NetworkInterfaces/PPP-old -I../../NetworkInterfaces -I../../NetworkInterfaces/Queues  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/PingApp -I../IPSuite -I../../Util)
 
-(cd Transport/Socketv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../TCPv4 -I../../Network/IPv4/Core -I../../Util)
-(cd Transport/TCPv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Applications/TCPApp -I../../Util)  #FIXME includes TCPApp???!!
-(cd Transport/UDPv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../TCPv4 -I../../Network/IPv4/Core -I../../Util)
+(cd Transport/Socketv4 && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../TCPv4 -I../../Network/IPv4/Core -I../../Util)
+(cd Transport/TCPv4 && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Applications/TCPApp -I../../Util)  #FIXME includes TCPApp???!!
+(cd Transport/UDPv4 && $MAKEMAKE -f -n -r -c ../../ipsuiteconfig -I../TCPv4 -I../../Network/IPv4/Core -I../../Util)
 

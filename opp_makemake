@@ -19,6 +19,7 @@ MAKEDEPEND="opp_makedep -Y --objdirtree"
 
 userif=TKENV
 outfile=`pwd | sed "s/\/$//;s/.*\///"`
+recursive=n
 type="exe"
 includes=""
 libpath=""
@@ -38,7 +39,7 @@ while [ ! $# = 0 ] ; do
         cat <<EOT
 opp_makemake: generate OMNeT++ Makefile based on contents of current directory 
 
-opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
+opp_makemake [-h] [-f] [-m] [-o make-target] [-r] [-n] [-s] [-u userinterface]
         [-c configfile] [-p] [-Idir] [-Llibrary-path] [-llibrary] 
         [-i makefile-fragment-file] [directories, library and object files]...
     -h, --help            This help text
@@ -48,14 +49,18 @@ opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
                           and let the Makefile include the given config file
                           instead.
     -o, --outputfile      Name of simulation executable/library
+    -r, --recurse         Call make recursively in all subdirectories. If you 
+                          need to maintain a specific order, declare dependen-
+                          cies in the makefrag file. 
     -n, --nolink          Produce object files but do not create executable or
                           library. Useful for models with parts in several dirs.
     -s, --make-so         Make shared library. Useful if you want to load the
                           model dynamically (Cmdenv/Tkenv -l so-file switch).
     -w, --withobjects     Link with all object files found in -I directories,
                           or include them if library is created. Ignored when
-                          -n option is present. Dependencies between 
-                          directories have to be added manually.
+                          -n option is present. Dependencies between directo-
+                          ries have be handled in high Makefiles (see -r 
+                          option).
     -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv.
     -M, --mpi             Link executable with MPI
     -p, --pvm             Link executable with PVM
@@ -89,6 +94,10 @@ EOT
         -o | --outputfile)
         shift
         outfile=$1
+        ;;
+
+        -r | --recurse)
+        recursive=y
         ;;
 
         -n | --nolink)
@@ -379,22 +388,28 @@ fi
 echo "#------------------------------------------------------------------------------"
 echo
 
+if [ $recursive = "y" ]; then
+    subdirs_target='subdirs'
+else
+    subdirs_target=
+fi
+
 case "$type" in
 exe)
-    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
     echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
     ;;
 so)
-    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
     echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS)'
     ;;
 o)
-    echo '$(TARGET): $(OBJS) subdirs Makefile'
+    echo '$(TARGET): $(OBJS) $subdirs_target Makefile'
     echo '	'
     ;;
 esac
 echo
-echo 'purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+echo 'purify: $(OBJS) $(EXTRA_OBJS) $subdirs_target Makefile'
 echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
 echo
 
