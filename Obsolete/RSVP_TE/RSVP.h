@@ -16,20 +16,18 @@
 #ifndef __RSVP__H__
 #define __RSVP__H__
 
+#include <vector>
 #include <omnetpp.h>
 #include "RoutingTable.h"
-//#include "tcp.h"
 #include "intserv.h"
 #include "rsvp_message.h"
 #include "TED.h"
-//#include <list>
-#include <vector>
 #include "OspfTe.h"
 #include "LIBTableAccess.h"
 
+
 #define InLIST_SIZE        5
 #define TABLE_SIZE        10
-
 
 
 
@@ -177,7 +175,7 @@ private:
     std::vector<TrafficControlStateBlock_t> TCSBList; //Traffic Control State Block
     std::vector<TELinkState>  ted;
 
-    int my_id;
+    int routerId;  // FIXME change to IPAddress
     int NoOfLinks;
     int LocalAddress[InLIST_SIZE ];
     bool IsIR;
@@ -246,15 +244,6 @@ private:
 
 };
 
-
-
-
-
-
-
-
-
-
-
-
 #endif
+
+

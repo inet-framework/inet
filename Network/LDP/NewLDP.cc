@@ -50,21 +50,11 @@ void NewLDP::initialize()
 {
     helloTimeout = par("helloTimeout").doubleValue();
 
-    // Find its own address, this is important since it needs to notify all neigbour
-    // this information in HELLO message.
-    cModule *curmod = this;
-    for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
-    {
-        if (curmod->hasPar("routerId"))  // FIXME!!!!
-        {
-            routerId = curmod->par("routerId").stringValue();
-            isIR = curmod->par("isIR");
-            isER = curmod->par("isER");
-            break;
-        }
-    }
+    // we'll need routerId for HELLO messages
+    RoutingTable *rt = routingTableAccess.get();
+    routerId = rt->getRouterId();
     if (routerId.isNull())
-        error("Cannot find routerId parameter");
+        error("routerId is not set");
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecSenderBinds);

@@ -61,20 +61,12 @@ void IPMulticast::handleMessage(cMessage *msg)
     // check for local delivery
     if (rt->multicastLocalDeliver(destAddress))
     {
-        IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
         // FIXME control info will NOT be present in duplicate packet!
-// BCH Andras -- code from UTS MPLS model  FIXME!!!!!!!!!!!!!!!!!!!!!!!!
-        // find "routerId" module parameter among our parents, and assign it to packet
-        cModule *curmod = this;
-        for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
-        {
-            if (curmod->hasPar("routerId"))
-            {
-                datagramCopy->setDestAddress(IPAddress(curmod->par("routerId").stringValue()));
-                break;
-            }
-        }
-// ECH
+        IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
+
+        // FIXME code from the MPLS model: set packet dest address to routerId (???)
+        datagramCopy->setDestAddress(rt->getRouterId());
+
         send(datagramCopy, "localOut");
     }
 

@@ -32,8 +32,7 @@ void RSVPAppl::initialize(int stage)
         return;
 
     // Get router IP Address
-    routerId = IPAddress(par("routerId").stringValue()).getInt();
-    //routerId = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
+    routerId = RoutingTableAccess().get()->getRouterId().getInt();
 
     isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();

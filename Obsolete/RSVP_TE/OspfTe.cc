@@ -15,6 +15,7 @@
 #include "OspfTe.h"
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
+#include "RoutingTableAccess.h"
 
 
 Define_Module(OspfTe);
@@ -24,8 +25,7 @@ void OspfTe::initialize(int stage)
 {
     if (stage==1)
     {
-        routerId = IPAddress(par("routerId").stringValue()).getInt();
-        //routerId = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
+        routerId = RoutingTableAccess().get()->getRouterId().getInt();
 
         // to invoke handleMessage() when we start  FIXME what?????? Andras
         scheduleAt(simTime(), new cMessage());

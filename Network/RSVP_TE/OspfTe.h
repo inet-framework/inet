@@ -49,7 +49,7 @@ private:
 
     std::vector<CSPFVertex> CShortestPathTree;
     std::vector<TELinkState> ted;
-    int routerId;
+    int routerId;  //FIXME make it IPAddress, or at least uint32
 
     void  TEAddCandidates(const FlowSpecObj_t& fspec,
                           std::vector<CSPFVertex>& CandidatesList);

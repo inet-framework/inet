@@ -76,7 +76,7 @@ private:
     OSPFTEAccess ospfteAccess;
     MPLSAccess mplsAccess;
 
-    int routerId, dest_addr;
+    int routerId, dest_addr;  // FIXME make them IPAddress
     double BW, delay;
     bool isSender, isER, isIR;
     std::vector<TELinkState>  ted;

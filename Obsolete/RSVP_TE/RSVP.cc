@@ -28,9 +28,8 @@ void RSVP::initialize(int stage)
 
     RoutingTable *rt = routingTableAccess.get();
 
-    // Get router ID
-    my_id = IPAddress(par("routerId").stringValue()).getInt();
-    //my_id = IPAddressResolver().getAddressFrom(rt).getInt();
+    // Get routerId
+    routerId = rt->getRouterId().getInt();
 
     IsIR = par("isIR").boolValue();
     IsER = par("isER").boolValue();
@@ -62,7 +61,7 @@ void RSVP::activity()
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState& linkstate = *tedIter;
-        if (linkstate.advrouter.getInt() == my_id)
+        if (linkstate.advrouter.getInt() == routerId)
         {
             LocalAddress[linkNo] = linkstate.local.getInt();
             linkNo++;
@@ -751,7 +750,7 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
             printRSB(activeRSB);
 
             // for(int i =0; i< InLIST_SIZE;i++)
-            // if((rmsg->getFlowDescriptorList())[i].Filter_Spec_Object.SrcAddress == my_id)
+            // if((rmsg->getFlowDescriptorList())[i].Filter_Spec_Object.SrcAddress == routerId)
             if (IsIR)
             {
                 // cMessage* msg = new cMessage();
@@ -821,7 +820,7 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
                 errorMsg->setSession(&activeRSB->Session_Object);
                 errorMsg->addPar("dest_addr") =
                     IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
-                errorMsg->addPar("src_addr") = IPAddress(my_id).str().c_str();
+                errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
                 send(errorMsg, "to_ip");
 
             }
@@ -962,7 +961,7 @@ void RSVP::PTearMsgPro(PathTearMessage * pmsg)
                     int peerIP = 0;
                     getPeerIPAddress(fPSB->OutInterface_List, &peerIP);
                     ptm->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
-                    ptm->addPar("src_addr") = IPAddress(my_id).str().c_str();
+                    ptm->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
                     send(ptm, "to_ip");
@@ -1183,7 +1182,7 @@ void RSVP::PErrorMsgPro(PathErrorMessage * pmsg)
         // delete pmsg;
         // return;
     }
-    pmsg->addPar("src_addr") = IPAddress(my_id).str().c_str();
+    pmsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
     pmsg->addPar("dest_addr") = IPAddress(p_iter.Previous_Hop_Address).str().c_str();
     ev << "Propagate PATH_ERROR back to " << IPAddress(p_iter.Previous_Hop_Address).str() << "\n";
     send(pmsg, "to_ip");
@@ -1237,7 +1236,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 
     RsvpHopObj_t *hop = new RsvpHopObj_t;
     hop->Logical_Interface_Handle = OI;
-    hop->Next_Hop_Address = my_id;
+    hop->Next_Hop_Address = routerId;
 
     pm->setHop(hop);
 
@@ -1255,7 +1254,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 
     // pm->setLength(1); // Other small value so no fragmentation, 1-dummy value
 
-    pm->addPar("src_addr") = IPAddress(my_id).str().c_str();
+    pm->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
     int finalAddr = pm->getDestAddress();
     ev << "Final address " << IPAddress(finalAddr) << "\n";
@@ -1379,7 +1378,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
                 for (d = 0; d < MAX_ROUTE; d++)
                     if (flow_descriptor_list[pIndex].RRO[d] == 0)
                     {
-                        flow_descriptor_list[pIndex].RRO[d] = my_id;
+                        flow_descriptor_list[pIndex].RRO[d] = routerId;
                         break;
                     }
                 // End record RRO
@@ -1922,7 +1921,7 @@ bool RSVP::AllocateResource(int tunnelId, int holdingPri, int setupPri, int oi, 
 
     for (int i = 0; i < ted.size(); i++)
     {
-        if (ted[i].local.getInt() == oi && ted[i].advrouter.getInt() == my_id)
+        if (ted[i].local.getInt() == oi && ted[i].advrouter.getInt() == routerId)
         {
             // Note: UnRB[7] <= UnRW[setupPri] <= UnRW[holdingPri] <= BW[0]
             // UnRW[7] is the actual BW left on the link
@@ -2067,7 +2066,7 @@ void RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)        // FIXME
 {
     RoutingTable *rt = routingTableAccess.get();
 
-    if (da == my_id)
+    if (da == routerId)
     {
         (*outl) = -1;
         return;
@@ -2105,7 +2104,7 @@ void RSVP::getPeerIPAddress(int peerInf, int *peerIP)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.local.getInt() == peerInf && linkstate.advrouter.getInt() == my_id)
+        if (linkstate.local.getInt() == peerInf && linkstate.advrouter.getInt() == routerId)
         {
             (*peerIP) = linkstate.linkid.getInt();
             break;
@@ -2121,7 +2120,7 @@ void RSVP::getPeerInet(int peerIP, int *peerInf)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if ((linkstate.linkid.getInt() == peerIP) && (linkstate.advrouter.getInt() == my_id))
+        if ((linkstate.linkid.getInt() == peerIP) && (linkstate.advrouter.getInt() == routerId))
         {
             (*peerInf) = linkstate.remote.getInt();
             break;
@@ -2137,7 +2136,7 @@ void RSVP::getIncInet(int peerIP, int *incInet)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.linkid.getInt() == peerIP && linkstate.advrouter.getInt() == my_id)
+        if (linkstate.linkid.getInt() == peerIP && linkstate.advrouter.getInt() == routerId)
         {
             (*incInet) = linkstate.local.getInt();
             break;
@@ -2155,7 +2154,7 @@ void RSVP::getPeerIPAddress(int dest, int *peerIP, int *peerInf)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if ((linkstate.local.getInt() == outl) && (linkstate.advrouter.getInt() == my_id))
+        if ((linkstate.local.getInt() == outl) && (linkstate.advrouter.getInt() == routerId))
         {
             *peerIP = linkstate.linkid.getInt();
             *peerInf = linkstate.remote.getInt();
@@ -2346,7 +2345,7 @@ bool RSVP::doCACCheck(PathMessage * pmsg, int OI)
     for (int k = 0; k < ted.size(); k++)
     {
 
-        if (ted[k].local.getInt() == OI && ted[k].advrouter.getInt() == my_id)
+        if (ted[k].local.getInt() == OI && ted[k].advrouter.getInt() == routerId)
         {
             ev << "Check reserve BW = " << requestBW << "for link(" <<
                 ted[k].advrouter << "," << ted[k].linkid << ")\n";
@@ -2366,11 +2365,11 @@ bool RSVP::doCACCheck(PathMessage * pmsg, int OI)
                 // Contruct new PATH ERROR and send back
                 PathErrorMessage *pe = new PathErrorMessage();
                 pe->setErrorCode(1);    // Admission Control Error
-                pe->setErrorNode(my_id);
+                pe->setErrorNode(routerId);
                 pe->setSession(pmsg->getSession());
                 pe->setSenderTemplate(pmsg->getSenderTemplate());
                 pe->setSenderTspec(pmsg->getSenderTspec());
-                pe->addPar("src_addr") = IPAddress(my_id).str().c_str();
+                pe->addPar("src_addr") = IPAddress(routerId).str().c_str();
                 pe->addPar("dest_addr") = IPAddress(pmsg->getNHOP()).str().c_str();
 
                 ev << "Propagate PATH ERROR to " << IPAddress(pmsg->getNHOP()) << "\n";
@@ -2414,7 +2413,7 @@ void RSVP::preemptTunnel(int tunnelId)
                     int peerIP = 0;
                     getPeerIPAddress(PSBList[m].OutInterface_List, &peerIP);
                     ptMsg->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
-                    ptMsg->addPar("src_addr") = IPAddress(my_id).str().c_str();
+                    ptMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
                     send(ptMsg, "to_ip");

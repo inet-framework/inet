@@ -41,7 +41,6 @@ module StandardHost2
         tcpAppType: string,
         udpAppType: string,
         IPForward : bool,
-        routerId : string, //FIXME this is only needed for MPLS - TO BE REMOVED!
         routingFile : string;
     gates:
         in: in[];
