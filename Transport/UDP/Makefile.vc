@@ -58,10 +58,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= UDPPacket_m.obj UDPModule.obj UDPProcessing.obj
+OBJS= UDPInterfacePacket_m.obj UDPPacket_m.obj UDPProcessing.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= UDPPacket_m.h
+GENERATEDHEADERS= UDPInterfacePacket_m.h UDPPacket_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -77,14 +77,17 @@ $(OBJS) : $(GENERATEDHEADERS)
 
 subdirs: $(SUBDIR_TARGETS)
 
+UDPInterfacePacket_m.obj: UDPInterfacePacket_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp UDPInterfacePacket_m.cc
+
+UDPInterfacePacket_m.cc UDPInterfacePacket_m.h: UDPInterfacePacket.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) UDPInterfacePacket.msg
+
 UDPPacket_m.obj: UDPPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) /Tp UDPPacket_m.cc
 
 UDPPacket_m.cc UDPPacket_m.h: UDPPacket.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) UDPPacket.msg
-
-UDPModule.obj: UDPModule.cc
-	$(CXX) -c $(COPTS) /Tp UDPModule.cc
 
 UDPProcessing.obj: UDPProcessing.cc
 	$(CXX) -c $(COPTS) /Tp UDPProcessing.cc
@@ -99,7 +102,7 @@ UDPProcessing.obj: UDPProcessing.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -119,23 +122,17 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-UDPModule.obj: UDPModule.cc \
-  ..\TCP/TransportInterfacePacket.h \
-  UDPPacket.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
-  UDPPacket_m.h \
-  ..\TCP/TransportPacket.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \
+UDPInterfacePacket_m.obj: UDPInterfacePacket_m.cc \
+  UDPInterfacePacket_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 UDPPacket_m.obj: UDPPacket_m.cc \
-  UDPPacket_m.h \
-  ..\TCP/TransportPacket.h
+  UDPPacket_m.h
 UDPProcessing.obj: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket.h \
   UDPPacket_m.h \
-  ..\TCP/TransportPacket.h \
+  UDPInterfacePacket_m.h \
   ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket_m.h

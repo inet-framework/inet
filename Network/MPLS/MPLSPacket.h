@@ -1,12 +1,12 @@
 /***************************************************************************
 *
-*    This library is free software, you can redistribute it and/or modify 
-*    it under  the terms of the GNU Lesser General Public License 
-*    as published by the Free Software Foundation; 
+*    This library is free software, you can redistribute it and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
 *    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful, 
+*    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -50,7 +50,7 @@ struct mpls_hdr
   int        cos;    //class of service - reserved bits
   int        ttl;    //time to live
   int        s;        //stack bit
-  
+
 };
 
 /*Packet routing info*/
@@ -66,16 +66,16 @@ struct PktInfo
 
 class MPLSPacket: public cPacket
 {
-    private:
+  private:
     MPLS_ProtocolFieldId _protocol;
-        IQueue label;
+    IQueue label;
     int cos;
     int ttl;
     bool s;
     cMessage* data;
 
 
-    public:
+  public:
     /* constructors*/
     MPLSPacket();
     MPLSPacket(const MPLSPacket &p);
@@ -87,7 +87,7 @@ class MPLSPacket: public cPacket
      *@param: none
      **/
     virtual cObject *dup() const { return new MPLSPacket(*this); }
-    
+
     /*className: get class name
      *@param: none
      **/
@@ -98,7 +98,7 @@ class MPLSPacket: public cPacket
      **/
     virtual void info(char *buf);
 
-    /*writeContents: Write out the packet content 
+    /*writeContents: Write out the packet content
      *@param: os - The ostream
      **/
     virtual void writeContents(ostream& os);
@@ -112,7 +112,7 @@ class MPLSPacket: public cPacket
      *@param: none
      **/
     virtual cMessage *decapsulate(){return data;}
-    
+
 
     /*heaaderBitLength: Get the header lenght in bit
      *@param:    none
@@ -133,7 +133,7 @@ class MPLSPacket: public cPacket
      *@param: none
      **/
     void setProtocol( MPLS_ProtocolFieldId p ) { _protocol = p; }
-    
+
     /*swapLabel:    Swap Label operation
      *@param: newLabel - The new Label to use
      **/
@@ -187,7 +187,7 @@ class MPLSPacket: public cPacket
      *@param newS - Th new S bit
      **/
     inline void setSbit(bool newS) {s = newS;}
-      
+
 
 };
 

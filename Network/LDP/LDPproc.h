@@ -1,14 +1,13 @@
 /*******************************************************************
 *
-*    This library is free software, you can redistribute it 
-*    and/or modify 
-*    it under  the terms of the GNU Lesser General Public License 
-*    as published by the Free Software Foundation; 
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
 *    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful, 
+*    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -18,17 +17,16 @@
 
 
 
-#include "tcp.h"
-#include "omnetpp.h"
 #include <string>
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
+#include "tcp.h"
 #include "RoutingTable.h"
 #include "LDPpacket.h"
 #include "LDPInterface.h"
 #include "LIBTableAccess.h"
-#include "InfoManager.h"
+#include "MPLSAccess.h"
 
 
 //Parameter
@@ -37,7 +35,7 @@
 
 //Make sure the following does not overlapped with TCP kinds
 enum ldp_to_interface
-{    
+{
     LDP_CLIENT_CREATE=20,
     LDP_FORWARD_REQUEST,
     LDP_RETURN_REPLY,
@@ -61,12 +59,14 @@ typedef struct peerList
 } peer_info;
 
 
-class LDPproc: public LIBTableAccess
+class LDPproc: public cSimpleModule
 {
 private:
- 
+  RoutingTableAccess routingTableAccess;
+  LIBTableAccess libTableAccess;
+  MPLSAccess mplsAccess;
 
-  //FecSenderBinds is the collection of all label requests pending on 
+  //FecSenderBinds is the collection of all label requests pending on
   //the current LSR from upstream LSRs and itself.
   vector<fec_src_bind> FecSenderBinds;
 
@@ -85,12 +85,8 @@ private:
   bool isIR;
   bool isER;
 
-  RoutingTable *rt;
-  cModule *mplsMod;
-  InfoManager *infoManager;
 
-
-  //This method finds next peer in upstream direction 
+  //This method finds next peer in upstream direction
   int locateNextHop(int fec);
 
   //This method maps the peerIP with the interface name
@@ -106,28 +102,18 @@ private:
 
   public:
 
-     Module_Class_Members(LDPproc,LIBTableAccess,16384);
+     Module_Class_Members(LDPproc,cSimpleModule,16384);
 
   virtual void activity();
 
   virtual void initialize();
 
-  void findRoutingTable();
-  void findInfoManager();
-
-  void findMyMPLS();
-
- 
-
   void processingLABEL_MAPPING(LabelMappingMessage *packet);
   void processingLABEL_REQUEST(LabelRequestMessage *packet);
-    
+
   //void printDebugInfo(string dInfo);
 
   //virtual void finish();
-
-
-  ~LDPproc(){}
 };
 
 #endif

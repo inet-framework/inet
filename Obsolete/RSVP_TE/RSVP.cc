@@ -8,7 +8,6 @@
 *    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
 *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -17,23 +16,22 @@
 #include "IPAddress.h"
 #include "MPLSModule.h"
 
-Define_Module( RSVP);
+
+Define_Module(RSVP);
+
 
 void RSVP::initialize()
 {
-     LIBTableAccess::initialize();
+    RoutingTable *rt = routingTableAccess.get();
+
     //Get router ID
-    my_id   = IPAddress(par("local_addr").stringValue()).getInt();
-    findRoutingTable();
-    findOSPFTE();
+    my_id = IPAddress(par("local_addr").stringValue()).getInt();
 
     IsIR = par("isIR").boolValue();
     IsER = par("isER").boolValue();
 
-
     //Initialize interface address list
     NoOfLinks = rt->numInterfaces();
-
 }
 
 
@@ -58,24 +56,23 @@ void RSVP::activity()
     std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
 
-        for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
-        {
+    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    {
         ted_iter = (telinkstate)*ted_iterI;
         if(ted_iter.advrouter.getInt() == my_id)
         {
              LocalAddress[linkNo] = ted_iter.local.getInt();
              linkNo = linkNo+1;
-
         }
-         }
-         for(i=linkNo+1; i<InLIST_SIZE ;i++)
+    }
+    for(i=linkNo+1; i<InLIST_SIZE ;i++)
     {
-    LocalAddress[i] =0;
+        LocalAddress[i] =0;
     }
 
     //Debug:
     for(i=0; i< InLIST_SIZE;i++)
-    ev << IPAddress(LocalAddress[i]).getString() << "\n";
+        ev << IPAddress(LocalAddress[i]).getString() << "\n";
 
 
 
@@ -94,29 +91,29 @@ void RSVP::activity()
       {
       case PATH_MESSAGE:
           inInf = msg->par("peerInf");
-          pm = (PathMessage*)msg;
+          pm = check_and_cast<PathMessage*>(msg);
           PathMsgPro( pm, inInf );
           break;
 
       case RESV_MESSAGE:
-          rm = (ResvMessage*)msg;
+          rm = check_and_cast<ResvMessage*>(msg);
           ResvMsgPro(rm);
           break;
 
       case PTEAR_MESSAGE:
-          ptm =(PathTearMessage*)msg;
+          ptm =check_and_cast<PathTearMessage*>(msg);
           PTearMsgPro(ptm);
           break;
       case RTEAR_MESSAGE:
-          rtm = (ResvTearMessage*)msg;
+          rtm = check_and_cast<ResvTearMessage*>(msg);
           RTearMsgPro(rtm);
           break;
       case PERROR_MESSAGE:
-          pem =(PathErrorMessage*)msg;
+          pem =check_and_cast<PathErrorMessage*>(msg);
           PErrorMsgPro(pem);
           break;
       case RERROR_MESSAGE:
-          rem =(ResvErrorMessage*)msg;
+          rem =check_and_cast<ResvErrorMessage*>(msg);
           RErrorMsgPro(rem);
           break;
       default:
@@ -155,24 +152,18 @@ void RSVP::PathMsgPro(PathMessage *pmsg, int InIf)
         ev << "Received PATH MESSAGE\n";
         pmsg->print();
 
-
-
         EroObj_t* ERO ;
 
         if(pmsg->hasERO())
             ERO = pmsg->getERO();
 
-
-
         int removeIndex =0;
         if(pmsg->hasERO())
         {
-
             for(int k=0; k < MAX_ROUTE;k++)
             {
               ev << "ROUTE: " << IPAddress(ERO[k].node).getString() << "\n";
             }
-
 
             for(removeIndex =0; removeIndex < MAX_ROUTE; removeIndex++)
             if(ERO[removeIndex].node ==0 && removeIndex >0)
@@ -208,8 +199,8 @@ void RSVP::PathMsgPro(PathMessage *pmsg, int InIf)
                p_iter.Session_Object.DestPort != pmsg->getDestPort ()      &&
               (p_iter.Session_Object.DestPort == 0 || pmsg->getDestPort() == 0 ))
                {
-                ev << "Send Path Error Message : Conflicting Destination Port\n";
-                return;
+                  error("Send Path Error Message : Conflicting Destination Port");
+                  //return;
                }
 
           /*
@@ -223,8 +214,8 @@ void RSVP::PathMsgPro(PathMessage *pmsg, int InIf)
                  p_iter.Sender_Template_Object.SrcPort != pmsg->getSrcPort() )&&
                ( p_iter.Sender_Template_Object.SrcPort == 0 ||pmsg->getSrcPort()==0 ))
                 {
-                ev << "Send Path Error Message : Ambiguous Path\n";
-                return;
+                   error("Send Path Error Message : Ambiguous Path");
+                   //return;
                }
 
 
@@ -451,10 +442,7 @@ void RSVP::PathMsgPro(PathMessage *pmsg, int InIf)
             }
             ev << "Leaving PathMsgPro\n";
             return;
-
         }
-
-
 }
 
 
@@ -470,6 +458,8 @@ RSVP::ResvMsgPro(ResvMessage *rmsg)
     }
     */
 
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
 
     ResvStateBlock_t * activeRSB;
     std::vector<PathStateBlock_t> locList;
@@ -515,10 +505,10 @@ RSVP::ResvMsgPro(ResvMessage *rmsg)
 
     if(PSBList.empty())
     {
-    ev << " Error - No session PSB found\n";
-    return;
-
-    }       /*
+        error("No session PSB found");
+        //return;
+    }
+           /*
             2.   If a PSB is found with a matching sender host but the
                   SrcPorts differ and one of the SrcPorts is zero, then
                   build and send an "Ambiguous Path" PERR message, drop
@@ -904,19 +894,19 @@ RSVP::ResvMsgPro(ResvMessage *rmsg)
                         {
 
                             int outInf = rmsg->getLIH();
-                            int outInfIndex = rt->interfaceAddressToNo(IPAddress(outInf));
+                            int outInfIndex = rt->findInterfaceByAddress(IPAddress(outInf));
                             int inInf=0;
                             getIncInet(Refresh_PHOP_list[i], &inInf);
 
-                            int inInfIndex = rt->interfaceAddressToNo(IPAddress(inInf));
+                            int inInfIndex = rt->findInterfaceByAddress(IPAddress(inInf));
                             int label = (*fdlist).label;
 
                             if(label !=-1)
                             {
                                 int lsp_id = (*fdlist).Filter_Spec_Object.Lsp_Id;
 
-                                char* outInfName = (rt->getInterfaceByIndex(outInfIndex))->name;
-                                char* inInfName =  (rt->getInterfaceByIndex(inInfIndex))->name;
+                                const char* outInfName = (rt->getInterfaceByIndex(outInfIndex))->name.c_str();
+                                const char* inInfName =  (rt->getInterfaceByIndex(inInfIndex))->name.c_str();
 
                                 int inLabel =-2;
 
@@ -1246,9 +1236,9 @@ ev << "************************ENTER PATH ERROR MESSAGE PRO*********************
      }
      if(p_iterI == PSBList.end())
      {
-         ev << "Error cannot find path for PathErrorMessage\n";
-         delete pmsg;
-         return;
+         error("Cannot find path for PathErrorMessage");
+         //delete pmsg;
+         //return;
      }
      pmsg->addPar("src_addr") = IPAddress(my_id).getString();
      pmsg->addPar("dest_addr") = IPAddress(p_iter.Previous_Hop_Address).getString();
@@ -1340,15 +1330,13 @@ RSVP::PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero )
     {
         for(index =0; index< MAX_ROUTE;index++)
         if((*(ero+index)).node==0)
-        break;
+            break;
 
         if(index >0)
-        nextPeerIP = (*(ero+index-1)).node;
+            nextPeerIP = (*(ero+index-1)).node;
         else
-        {
-            ev << "Fail to locate resource\n";
-            return;
-        }
+            error("Fail to locate resource");
+
         if((*(ero+index-1)).L ==false)
         getPeerInet(nextPeerIP, &nextPeerInf);
     }
@@ -2204,8 +2192,9 @@ RSVP::GetFwdFS(int oi, FlowSpecObj_t *fwdFS)
 
 
 void
-RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)
+RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl) // FIXME change to int& outl
 {
+    RoutingTable *rt = routingTableAccess.get();
 
     if(da == my_id)
     {
@@ -2217,50 +2206,11 @@ RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)
     //int j=0;
 
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); // FIXME why not return???
+    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr.getInt(); // FIXME why not return???
 
     return;
 }
 
-
-void RSVP::findRoutingTable()
-
-{
-
-      cObject *foundmod;
-
-    cModule *curmod = this;
-
-
-    // find LIB Table
-
-    rt = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-            curmod = curmod->parentModule())
-    {
-
-        if ((foundmod = curmod->findObject("routingTable", false)) != NULL)
-        {
-
-            rt = (RoutingTable *)foundmod;
-
-            break;
-
-        }
-
-    }
-
-
-
-    if(rt==NULL)
-    ev << "Error occurs - Fail to find routing table" << "\n";
-
-    else
-
-    ev << "Routing Table found succesfully" << "\n";
-
-}
 
 bool RSVP::IsLocalAddress(int addr)
 {
@@ -2268,84 +2218,69 @@ bool RSVP::IsLocalAddress(int addr)
         if(LocalAddress[i] ==addr)
             return true;
 
-        return false;
+    return false;
 }
 
 
 void RSVP::updateTED()
 {
-
-    // find TED
-
-    cTopology topo;
-    topo.extractByModuleType( "TED", NULL );
-
-    sTopoNode *node = topo.node(0);
-    TED *module = (TED*)(node->module());
-    ted = *(module->getTED());
-
+    // copy the full table
+    // FIXME why? why not just remember the pointer?
+    ted = TED::getGlobalInstance()->getTED();
 }
 
 void RSVP::getPeerIPAddress(int peerInf, int* peerIP)
 {
- std::vector<telinkstate>::iterator ted_iterI;
+    std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
-
 
     updateTED();
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.local.getInt() == peerInf) &&
-                (ted_iter.advrouter.getInt()==my_id))
-                {
-    (*peerIP) = ted_iter.linkid.getInt();
-    break;
+        if((ted_iter.local.getInt() == peerInf) &&
+                    (ted_iter.advrouter.getInt()==my_id))
+        {
+            (*peerIP) = ted_iter.linkid.getInt();
+            break;
+        }
     }
-
-
-     }
 }
 
 void RSVP::getPeerInet(int peerIP, int* peerInf)
-{    std::vector<telinkstate>::iterator ted_iterI;
+{
+    std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
-
 
     updateTED();
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.linkid.getInt() == peerIP) &&
-                (ted_iter.advrouter.getInt()==my_id))
-                {
-    (*peerInf) = ted_iter.remote.getInt();
-    break;
+        if((ted_iter.linkid.getInt() == peerIP) &&
+                    (ted_iter.advrouter.getInt()==my_id))
+        {
+            (*peerInf) = ted_iter.remote.getInt();
+            break;
+        }
     }
-
-
-     }
 }
 
 void RSVP::getIncInet(int peerIP, int* incInet)
 {
-   std::vector<telinkstate>::iterator ted_iterI;
+    std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
-
 
     updateTED();
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.linkid.getInt() == peerIP) &&
-                (ted_iter.advrouter.getInt()==my_id))
-                {
-    (*incInet) = ted_iter.local.getInt();
-    break;
+        if((ted_iter.linkid.getInt() == peerIP) &&
+           (ted_iter.advrouter.getInt()==my_id))
+        {
+            (*incInet) = ted_iter.local.getInt();
+            break;
+        }
     }
-
-
-     }
 }
 void RSVP::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
 {
@@ -2358,18 +2293,13 @@ void RSVP::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.local.getInt() == outl) && (ted_iter.advrouter.getInt()==my_id))
+        if((ted_iter.local.getInt() == outl) && (ted_iter.advrouter.getInt()==my_id))
         {
              *peerIP=ted_iter.linkid.getInt();
              *peerInf = ted_iter.remote.getInt();
              break;
-
         }
-     }
-
-
-
-
+    }
 }
 
 
@@ -2377,7 +2307,7 @@ void RSVP::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
 
 void RSVP::printSessionObject(SessionObj_t* s)
 {
-ev << "Session: (destAddr, prot_id, destPort, setupPri, holdingPri, Tunnel_Id, XTunnel_Id) = ("<<
+    ev << "Session: (destAddr, prot_id, destPort, setupPri, holdingPri, Tunnel_Id, XTunnel_Id) = ("<<
         IPAddress(s->DestAddress).getString() << "," <<
          s->Protocol_Id << "," << s->DestPort <<
         "," << s->setupPri << "," << s->holdingPri <<
@@ -2387,9 +2317,9 @@ ev << "Session: (destAddr, prot_id, destPort, setupPri, holdingPri, Tunnel_Id, X
 
 void RSVP::printRSVPHopObject(RsvpHopObj_t* r)
 {
-ev << "RSVP HOP: (NextHopAddress, LogicalInterfaceHandle) = (" <<
-    IPAddress(r->Next_Hop_Address).getString() << "," <<
-    IPAddress(r->Logical_Interface_Handle) << ")\n";
+    ev << "RSVP HOP: (NextHopAddress, LogicalInterfaceHandle) = (" <<
+        IPAddress(r->Next_Hop_Address).getString() << "," <<
+        IPAddress(r->Logical_Interface_Handle) << ")\n";
 }
 
 void RSVP::printSenderTemplateObject(SenderTemplateObj_t* s)
@@ -2405,15 +2335,14 @@ void RSVP::printSenderTemplateObject(SenderTemplateObj_t* s)
 
 void RSVP::printSenderTspecObject(SenderTspecObj_t* s)
 {
-ev << "SenderTspec: (req_bandwidth, link_delay)= (" <<
-s->req_bandwidth << "," << s->link_delay << ")\n";
-
+    ev << "SenderTspec: (req_bandwidth, link_delay)= (" <<
+          s->req_bandwidth << "," << s->link_delay << ")\n";
 }
 
 void RSVP::printSenderDescriptorObject(SenderDescriptor_t* s)
 {
-printSenderTemplateObject(&s->Sender_Template_Object);
-printSenderTspecObject(&s->Sender_Tspec_Object);
+    printSenderTemplateObject(&s->Sender_Template_Object);
+    printSenderTspecObject(&s->Sender_Tspec_Object);
 }
 
 void RSVP::printFlowDescriptorListObject(FlowDescriptor_t* f)
@@ -2423,31 +2352,25 @@ void RSVP::printFlowDescriptorListObject(FlowDescriptor_t* f)
 
 void RSVP::printPSB(PathStateBlock_t* p)
 {
-  printSessionObject(&p->Session_Object);
-  printSenderTemplateObject(&p->Sender_Template_Object);
-  printSenderTspecObject(&p->Sender_Tspec_Object);
-  ev << "Previous Hop Address = " <<
-  IPAddress(p->Previous_Hop_Address).getString() << "\n";
-  ev << "Logical Interface Handle=" <<
-  IPAddress(p->LIH).getString() << "\n";
-  ev << "Out Interface List = " <<
-  IPAddress(p->OutInterface_List) << "\n";
-
-
-
+    printSessionObject(&p->Session_Object);
+    printSenderTemplateObject(&p->Sender_Template_Object);
+    printSenderTspecObject(&p->Sender_Tspec_Object);
+    ev << "Previous Hop Address = " <<
+    IPAddress(p->Previous_Hop_Address).getString() << "\n";
+    ev << "Logical Interface Handle=" <<
+    IPAddress(p->LIH).getString() << "\n";
+    ev << "Out Interface List = " <<
+    IPAddress(p->OutInterface_List) << "\n";
 }
 
 void RSVP::printRSB(ResvStateBlock_t* r)
 {
-      printSessionObject(&r->Session_Object);
-      ev << "Next Hop Address=" <<IPAddress(r->Next_Hop_Address).getString() <<
-    "\n";
-      ev << "OI = " << IPAddress(r->OI).getString() << "\n";
+    printSessionObject(&r->Session_Object);
+    ev << "Next Hop Address=" <<IPAddress(r->Next_Hop_Address).getString() << "\n";
+    ev << "OI = " << IPAddress(r->OI).getString() << "\n";
 
-
-printSenderTemplateObject((SenderTemplateObj_t*)(&r->Filter_Spec_Object));
-printSenderTspecObject((SenderTspecObj_t*)(&r->Flowspec_Object));
-
+    printSenderTemplateObject((SenderTemplateObj_t*)(&r->Filter_Spec_Object));
+    printSenderTspecObject((SenderTspecObj_t*)(&r->Flowspec_Object));
 }
 
 
@@ -2466,30 +2389,25 @@ void RSVP::setSessionforTCSB(TrafficControlStateBlock_t* t, SessionObj_t* s)
 
 }
 
-void RSVP::setFilterSpecforTCSB(TrafficControlStateBlock_t* t,
-                         FilterSpecObj_t *f)
+void RSVP::setFilterSpecforTCSB(TrafficControlStateBlock_t* t, FilterSpecObj_t *f)
 {
-
-for(int i=0; i<InLIST_SIZE;i++)
+    for(int i=0; i<InLIST_SIZE;i++)
     {
-    t->Filter_Spec_Object[i].SrcAddress = (*(f+i)).SrcAddress;
-    t->Filter_Spec_Object[i].SrcPort =(*(f+i)).SrcPort;
-    t->Filter_Spec_Object[i].Lsp_Id =(*(f+i)).Lsp_Id;
+        t->Filter_Spec_Object[i].SrcAddress = (*(f+i)).SrcAddress;
+        t->Filter_Spec_Object[i].SrcPort =(*(f+i)).SrcPort;
+        t->Filter_Spec_Object[i].Lsp_Id =(*(f+i)).Lsp_Id;
     }
-
 }
 
 
 void RSVP::setTCFlowSpecforTCSB(TrafficControlStateBlock_t* t,
                 FlowSpecObj_t *f)
 {
+    FlowSpecObj_t* nF = new FlowSpecObj_t;
+    nF->req_bandwidth = f->req_bandwidth;
+    nF->link_delay = f->link_delay;
 
-FlowSpecObj_t* nF = new FlowSpecObj_t;
-nF->req_bandwidth = f->req_bandwidth;
-nF->link_delay = f->link_delay;
-
-t->TC_Flowspec = *nF;
-
+    t->TC_Flowspec = *nF;
 }
 
 void  RSVP::setFwdFlowSpecforTCSB(TrafficControlStateBlock_t* t,
@@ -2500,7 +2418,6 @@ void  RSVP::setFwdFlowSpecforTCSB(TrafficControlStateBlock_t* t,
     nF->link_delay = f->link_delay;
 
     t->Fwd_Flowspec = *nF;
-
 }
 
 void RSVP::setTCTspecforTCSB(TrafficControlStateBlock_t* t,
@@ -2529,48 +2446,11 @@ void RSVP::printTCSB(TrafficControlStateBlock_t* t)
     printSenderTspecObject(&t->Fwd_Flowspec);
 
     printSenderTspecObject(&t->TC_Tspec);
-
-
 }
 
-
-void RSVP::findOSPFTE()
-{
-  cObject *foundmod;
-
-    cModule *curmod = this;
-
-    ospfte = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-            curmod = curmod->parentModule())
-    {
-
-        if ((foundmod = curmod->findObject("ospf_te", false)) != NULL)
-        {
-
-            ospfte = (OspfTe *)foundmod;
-
-            break;
-
-        }
-
-    }
-
-
-
-    if(ospfte==NULL)
-    ev << "Error occurs - Fail to find OSPFTE" << "\n";
-
-    else
-    ev << "OSPFTE found succesfully" << "\n";
-
-}
 
 bool RSVP::doCACCheck(PathMessage* pmsg, int OI)
 {
-
-
 //    if(PSBList.empty())
 //    {
 //        ev << "First PATH reservation. Successful\n";
@@ -2656,75 +2536,70 @@ bool RSVP::doCACCheck(PathMessage* pmsg, int OI)
         }
     }
 
-     return true;
-
+    return true;
 }
 
 void RSVP::preemptTunnel(int tunnelId)
 {
-ev << "*******************ENTER PREEMPT TUNNEL ************************************\n";
-//Send PATH TEAR and RESV TEAR to both directions to tear off the current reservation
+    ev << "*******************ENTER PREEMPT TUNNEL ************************************\n";
+    //Send PATH TEAR and RESV TEAR to both directions to tear off the current reservation
 
-//PATH TEAR
-//std::vector<PathStateBlock_t>::iterator p_iterI;
-PathStateBlock_t p_iter;
+    //PATH TEAR
+    //std::vector<PathStateBlock_t>::iterator p_iterI;
+    PathStateBlock_t p_iter;
 
-//std::vector<ResvStateBlock_t>::iterator r_iterI;
-ResvStateBlock_t r_iter;
+    //std::vector<ResvStateBlock_t>::iterator r_iterI;
+    ResvStateBlock_t r_iter;
 
-std::vector<int> locList;
+    std::vector<int> locList;
 
-   if(!PSBList.empty())
-   {
-      for(int m=0; m< PSBList.size();m++)
-      {
-        if(PSBList[m].Session_Object.Tunnel_Id == tunnelId)
-        {
-            PathTearMessage* ptMsg = new PathTearMessage();
-            ptMsg->setSession(&PSBList[m].Session_Object);
-            ptMsg->setSenderTemplate(&PSBList[m].Sender_Template_Object);
-
-            locList.push_back(PSBList[m].Previous_Hop_Address);
-
-            if(!IsER)
-            {
-                int peerIP =0;
-                getPeerIPAddress(PSBList[m].OutInterface_List, &peerIP);
-                ptMsg->addPar("dest_addr") = IPAddress(peerIP).getString();
-                ptMsg->addPar("src_addr") = IPAddress(my_id).getString();
-
-                ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP).getString();
-                send(ptMsg, "to_ip");
-            }
-
-            //PSBList.erase(p_iterI); //This line is very unsafe !!!!
-            PSBList[m].Session_Object.DestAddress =0;
-            PSBList[m].Session_Object.DestPort =0;
-
-        }
-      }
-   }
-
-
-
-//RESV TEAR
-   if(!RSBList.empty())
-   {
+    if(!PSBList.empty())
+    {
        for(int m=0; m< PSBList.size();m++)
        {
-           if(PSBList[m].Session_Object.Tunnel_Id == tunnelId)
-           {
-               for(int i=0;i< locList.size();i++)
-                   RTearFwd(&r_iter, locList[i]);
-               //RSBList.erase(r_iterI);//This line is very unsafe !!!!
-               PSBList[m].Session_Object.DestAddress =0;
-               PSBList[m].Session_Object.DestPort =0;
+         if(PSBList[m].Session_Object.Tunnel_Id == tunnelId)
+         {
+             PathTearMessage* ptMsg = new PathTearMessage();
+             ptMsg->setSession(&PSBList[m].Session_Object);
+             ptMsg->setSenderTemplate(&PSBList[m].Sender_Template_Object);
 
-           }
+             locList.push_back(PSBList[m].Previous_Hop_Address);
+
+             if(!IsER)
+             {
+                 int peerIP =0;
+                 getPeerIPAddress(PSBList[m].OutInterface_List, &peerIP);
+                 ptMsg->addPar("dest_addr") = IPAddress(peerIP).getString();
+                 ptMsg->addPar("src_addr") = IPAddress(my_id).getString();
+
+                 ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP).getString();
+                 send(ptMsg, "to_ip");
+             }
+
+             //PSBList.erase(p_iterI); //This line is very unsafe !!!!
+             PSBList[m].Session_Object.DestAddress =0;
+             PSBList[m].Session_Object.DestPort =0;
+
+         }
        }
-   }
+    }
 
+    //RESV TEAR
+    if(!RSBList.empty())
+    {
+        for(int m=0; m< PSBList.size();m++)
+        {
+            if(PSBList[m].Session_Object.Tunnel_Id == tunnelId)
+            {
+                for(int i=0;i< locList.size();i++)
+                    RTearFwd(&r_iter, locList[i]);
+                //RSBList.erase(r_iterI);//This line is very unsafe !!!!
+                PSBList[m].Session_Object.DestAddress =0;
+                PSBList[m].Session_Object.DestPort =0;
 
+            }
+        }
+    }
 }
 
 
@@ -2732,40 +2607,7 @@ std::vector<int> locList;
 //an alternative for the routing table to convergece over the network
 void RSVP::propagateTEDchanges()
 {
-        // find TED
-    cTopology topo;
-    topo.extractByModuleType( "TED", NULL );
-    TED* myTED;
-
-    sTopoNode *node = topo.node(0);
-    myTED = (TED*)(node->module());
-    if(myTED == NULL)
-    {
-        ev << "Tester Error: Fail to locate TED\n";
-        return;
-    }
-    std::vector<telinkstate>    *originalTED;
-    originalTED = myTED->getTED();
-
-    originalTED->clear();
-
-    for(int i=0; i< ted.size();i++)
-    {
-        originalTED->push_back(ted[i]);
-
-    }
-
+    TED::getGlobalInstance()->getTED() = ted;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -11,18 +11,20 @@
 //
 
 
-import
-    "NetworkLayersWithMPLS",
-    "UDPUpperLayers",
-    "tcp4ip",
-    "MPLSModule",
-    "LIBTable",
-    "RSVPInterface",
-    "RSVP",
-    "OspfTe",
-    "RSVPAppl";
-
-
+import  
+    "NetworkLayersWithMPLS", 
+    "UDPUpperLayers", 
+    "tcp4ip", 
+    "MPLSModule", 
+    "LIBTable", 
+    "RSVPInterface", 
+    "RSVP", 
+    "OspfTe", 
+    "RSVPAppl"; 
+                
+                
+                
+ 
 //
 // An RSVP-TE capable router.
 //
@@ -41,94 +43,96 @@ import
 // - LIB Table: The module that handles the mapping of labels, interfaces,
 //   and FECs.
 //
-module RSVP_LSR_Node
-    parameters:
-        local_addr : string,
-        dest_addr : string,
-        isIR : bool,
-        isER : bool,
-
+//# FIXME structure is conceptually wrong here! network interface is still part
+//# of NetworkLayers, so in fact here MPLS is below L2!!!!!!!!!!!!!!!!!
+//
+module RSVP_LSR_Node 
+    parameters: 
+        local_addr : string, 
+        dest_addr : string, 
+        isIR : bool, 
+        isER : bool, 
+                     
         //# Network information
-        numOfPorts : numeric,
-        routingFile : string,
-        LibTableFileName : string,
-        PrtTableFileName : string;
-        //# discoveryAddr: string[];
-        //# numOfAddr: int;
-
-    gates:
-        in: in[];
-        out: out[];
-    submodules:
-        signal_module: RSVPAppl;
-            parameters:
-                local_addr = local_addr,
-                dest_addr = dest_addr,
-                isIR = isIR,
-                isER = isER;
-            display: "p=142,114;b=72,48";
-        rsvp: RSVP;
-            parameters:
-                local_addr = local_addr,
-                isIR = isIR,
-                isER = isER;
-            display: "p=145,108;b=40,24,rect";
-        rsvpInterface: RSVPInterface;
-            display: "p=144,171;b=72,24";
-        ospf_te: OspfTe;
-            parameters:
-                local_addr = local_addr;
-            display: "p=45,220;b=40,24";
-        networkLayers: NetworkLayersWithMPLS;
-            parameters:
-                IPForward = true,
-                NWIName = "MPLS2IP",
-                numOfPorts = numOfPorts,
-                routingFile = routingFile;
-            gatesizes:
-                physIn[numOfPorts],
-                physOut[numOfPorts];
-            display: "b=32,30;p=143,227;i=fork";
-        mplsModule: MPLSModule;
-            parameters:
-                isIR = isIR,
-                isER = isER,
-                numOfPorts = numOfPorts,
-                procdelay = 1;
-            gatesizes:
-                fromL3[numOfPorts],
-                toL3[numOfPorts],
-                fromL2[numOfPorts],
-                toL2[numOfPorts];
-            display: "p=141,315;b=72,42";
-        libTable: LIBTable;
-            parameters:
-                LibTableFileName = LibTableFileName,
-                PrtTableFileName = PrtTableFileName;
-
-            display: "p=140,314;b=40,24";
-    connections nocheck:
-        networkLayers.RSVPOut --> rsvpInterface.from_ip;
-        networkLayers.RSVPIn <-- rsvpInterface.to_ip;
-
-        rsvp.to_ip --> rsvpInterface.from_rsvp_app;
-        rsvp.from_ip <-- rsvpInterface.to_rsvp_app;
-
-        networkLayers.OSPFOut --> ospf_te.from_ip;
-        networkLayers.OSPFIn <-- ospf_te.to_ip;
-
-        signal_module.to_rsvp --> rsvp.from_rsvp_app;
-        signal_module.from_rsvp <-- rsvp.to_rsvp_app;
-
+        numOfPorts : numeric, 
+        routingFile : string, 
+        LibTableFileName : string, 
+        PrtTableFileName : string; 
+                                   //# discoveryAddr: string[];
+                                   //# numOfAddr: int;
+                                   
+    gates: 
+        in: in[]; 
+        out: out[]; 
+    submodules: 
+        signal_module: RSVPAppl; 
+            parameters: 
+                local_addr = local_addr, 
+                dest_addr = dest_addr, 
+                isIR = isIR, 
+                isER = isER; 
+            display: "o=#8080ff;p=79,75;b=32,30";
+        rsvp: RSVP; 
+            parameters: 
+                local_addr = local_addr, 
+                isIR = isIR, 
+                isER = isER; 
+            display: "o=#0080c0;p=189,74;b=40,24,rect";
+        rsvpInterface: RSVPInterface; 
+            display: "o=#0080c0;p=190,129;b=58,12";
+        ospf_te: OspfTe; 
+            parameters: 
+                local_addr = local_addr; 
+            display: "o=#008040;p=81,186;b=40,24";
+        networkLayers: NetworkLayersWithMPLS; 
+            parameters: 
+                IPForward = true, 
+                NWIName = "MPLS2IP", 
+                numOfPorts = numOfPorts, 
+                routingFile = routingFile; 
+            gatesizes: 
+                physIn[numOfPorts], 
+                physOut[numOfPorts]; 
+            display: "b=32,30;p=191,186;i=fork";
+        mplsModule: MPLSModule; 
+            parameters: 
+                isIR = isIR, 
+                isER = isER, 
+                numOfPorts = numOfPorts, 
+                procdelay = 1; 
+            gatesizes: 
+                fromL3[numOfPorts], 
+                toL3[numOfPorts], 
+                fromL2[numOfPorts], 
+                toL2[numOfPorts]; 
+            display: "o=#ff8000;p=191,261;b=66,14";
+        libTable: LIBTable; 
+            parameters: 
+                LibTableFileName = LibTableFileName, 
+                PrtTableFileName = PrtTableFileName; 
+                                                     
+            display: "i=proc2;p=279,207;b=32,30";
+    connections nocheck: 
+        networkLayers.RSVPOut --> rsvpInterface.from_ip; 
+        networkLayers.RSVPIn <-- rsvpInterface.to_ip; 
+                                                      
+        rsvp.to_ip --> rsvpInterface.from_rsvp_app; 
+        rsvp.from_ip <-- rsvpInterface.to_rsvp_app; 
+                                                    
+        networkLayers.OSPFOut --> ospf_te.from_ip; 
+        networkLayers.OSPFIn <-- ospf_te.to_ip; 
+                                                
+        signal_module.to_rsvp --> rsvp.from_rsvp_app; 
+        signal_module.from_rsvp <-- rsvp.to_rsvp_app; 
+                                                      
         //# connections to network outside
-        for i=0..numOfPorts-1 do
-            mplsModule.toL3[i] --> networkLayers.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayers.physOut[i];
-            in[i] --> mplsModule.fromL2[i];
-            out[i] <-- mplsModule.toL2[i];
-        endfor;
-    display: "p=10,10;b=368,393";
-endmodule
+        for i=0..numOfPorts-1 do 
+            mplsModule.toL3[i] --> networkLayers.physIn[i]; 
+            mplsModule.fromL3[i] <-- networkLayers.physOut[i]; 
+            in[i] --> mplsModule.fromL2[i]; 
+            out[i] <-- mplsModule.toL2[i]; 
+        endfor; 
+endmodule 
 
 
 

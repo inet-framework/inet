@@ -63,17 +63,17 @@ module UDPInterface
         out: to_ip;
         out: to_appl;
     submodules:
-        udpProcessing: UDPProcessing;
-            gatesizes:
-                from_application[1],
-                to_application[1];
-            display: "p=94,105;i=fork";
         udpAppInterface: UDPAppInterface;
             parameters:
                 local_addr = local_addr;
             parameters:
                 local_port = 100;
             display: "p=91,50;b=40,24,rect";
+        udpProcessing: UDPProcessing;
+            gatesizes:
+                from_application[1],
+                to_application[1];
+            display: "p=94,105;i=fork";
     connections nocheck:
         from_ip --> udpProcessing.from_ip;
         to_ip <-- udpProcessing.to_ip;
@@ -82,6 +82,4 @@ module UDPInterface
 
         udpProcessing.to_application[0] --> udpAppInterface.from_udp_processing;
         udpProcessing.from_application[0] <-- udpAppInterface.to_udp_processing;
-
-    display: "p=10,10;b=157,140,rect";
 endmodule

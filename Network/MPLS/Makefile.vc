@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= InfoManager.obj ip_address_prefix.obj LIBtable.obj LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
+OBJS= InfoManager.obj ip_address_prefix.obj LIBtable.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -86,9 +86,6 @@ ip_address_prefix.obj: ip_address_prefix.cc
 LIBtable.obj: LIBtable.cc
 	$(CXX) -c $(COPTS) /Tp LIBtable.cc
 
-LIBTableAccess.obj: LIBTableAccess.cc
-	$(CXX) -c $(COPTS) /Tp LIBTableAccess.cc
-
 MPLS2IP.obj: MPLS2IP.cc
 	$(CXX) -c $(COPTS) /Tp MPLS2IP.cc
 
@@ -111,7 +108,7 @@ StringTokenizer.obj: StringTokenizer.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -142,16 +139,7 @@ LIBtable.obj: LIBtable.cc \
   ip_address_prefix.h \
   StringTokenizer.h \
   ConstType.h \
-  ..\IPv4\Core/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\IPv4\Core/IPAddress.h
-LIBTableAccess.obj: LIBTableAccess.cc \
-  LIBTableAccess.h \
-  LIBtable.h \
-  ..\IPv4\Core/RoutingTableAccess.h \
-  ip_address_prefix.h \
-  StringTokenizer.h \
-  ConstType.h \
+  ..\..\Base/ModuleAccess.h \
   ..\IPv4\Core/RoutingTable.h \
   ..\..\Base/ipsuite_defs.h \
   ..\IPv4\Core/IPAddress.h
@@ -159,24 +147,21 @@ MPLS2IP.obj: MPLS2IP.cc \
   MPLS2IP.h \
   ..\IPv4\Core/hook_types.h \
   ..\..\Base/QueueBase.h \
-  ..\IPv4\Core/RoutingTableAccess.h \
-  ..\..\Base/AbstractQueue.h \
-  ..\IPv4\Core/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\IPv4\Core/IPAddress.h
+  ..\..\Base/AbstractQueue.h
 MPLSModule.obj: MPLSModule.cc \
   MPLSModule.h \
   MPLSPacket.h \
   ..\IPv4\Core/IPDatagram.h \
   LIBTableAccess.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
   ..\IPv4\Core/RoutingTable.h \
   ConstType.h \
   ..\IPv4\Core/IPDatagram_m.h \
   ..\IPv4\Core/IPAddress.h \
   ..\IPv4\Core/IPInterfacePacket.h \
   ..\IPv4\Core/IPInterfacePacket_m.h \
+  ..\..\Base/ModuleAccess.h \
   LIBtable.h \
-  ..\IPv4\Core/RoutingTableAccess.h \
   ip_address_prefix.h \
   StringTokenizer.h \
   ..\..\Base/ipsuite_defs.h

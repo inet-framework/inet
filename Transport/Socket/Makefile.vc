@@ -96,7 +96,7 @@ sockets.obj: sockets.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -130,7 +130,8 @@ socketlayer.obj: socketlayer.cc \
   sockets.h \
   ..\TCP/pcb.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h
+  ..\..\Base/ipsuite_defs.h \
+  ..\TCP/TransportInterfacePacket_m.h
 sockets.obj: sockets.cc \
   sockets.h \
   ..\TCP/tcpcb.h \

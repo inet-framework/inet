@@ -7,7 +7,6 @@
 #
 
 ROOT=$(HOME)/IPSuite
-#ROOT=/cygdrive/d/home/IPSuite
 
 LIBXML_INCLUDES= -I/windows/D/home/tools/libxml2-2.5.4.win32/include
 LIBXML_LIBS= -L/usr/lib -lxml2

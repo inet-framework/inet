@@ -17,19 +17,16 @@
 //
 
 
-cplusplus {{
-#include "TransportPacket.h"
-}}
-
-class TransportPacket;
-
-
 //
-// UDPPacket
+// Represents an UDP packet.
 //
-message UDPPacket extends TransportPacket
+message UDPPacket
 {
+    properties:
+        omitGetVerb = true;
     fields:
+        int sourcePort = -1;
+        int destinationPort = -1;
         bool checksumValid = true;
 };
 

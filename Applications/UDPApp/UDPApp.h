@@ -35,12 +35,11 @@
 class UDPAppBase: public cSimpleModule
 {
   protected:
-    char _nodename[NODE_NAME_SIZE];
-    // IPAddress _local_addr, _dest_addr;
-    int _local_port, _dest_port;
-    int _msg_length;
-    simtime_t _msg_freq;
-    int _destType;
+    opp_string nodeName;
+    int localPort, destPort;
+    int msgLength;
+    simtime_t msgFreq;
+    int destType;
 
   public:
     Module_Class_Members(UDPAppBase, cSimpleModule, 0);
@@ -49,7 +48,7 @@ class UDPAppBase: public cSimpleModule
 };
 
 /**
- * Receives packet, prints out content, reply to request 
+ * Receives packet, prints out content, reply to request
  */
 class UDPServer: public UDPAppBase
 {
@@ -77,3 +76,5 @@ class UDPClient: public UDPAppBase
 };
 
 #endif
+
+

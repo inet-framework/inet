@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 #include <omnetpp.h>
 #include "ErrorHandling.h"
@@ -36,9 +35,8 @@ void ErrorHandling::handleMessage(cMessage *msg)
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
 
-    ev << "\n*** " << (const char *) nodename
-       << " Error Handler: ICMP message received:"
-       << "\nType: " << (int)icmpMsg->getType()
+    ev << "\n*** " << nodename.c_str() << " Error Handler: ICMP message received:\n";
+    ev << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
        << " Bytelength: " << d->length()/8
        << " Src: " << d->srcAddress()

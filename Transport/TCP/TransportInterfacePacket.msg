@@ -26,7 +26,7 @@ class noncobject IPAddress;
 
 //
 // Transport interface packet
-//# FIXME better comment!
+//# FIXME must DIE!!!
 //
 message TransportInterfacePacket extends cPacket
 {

@@ -20,20 +20,17 @@
 #define __ICMPACCESS_H__
 
 #include <omnetpp.h>
+#include "ModuleAccess.h"
 #include "ICMP.h"
 
 
 /**
- * Gives access to the ICMP module.
+ * Gives access to the RoutingTable.
  */
-class ICMPAccess
+class ICMPAccess : public ModuleAccess<ICMP>
 {
-  private:
-    ICMP *icmp;
-
-  public:
-    ICMPAccess() {icmp=NULL;}
-    ICMP *get();
+    public:
+        ICMPAccess() : ModuleAccess<ICMP>("icmp") {}
 };
 
 #endif

@@ -62,13 +62,13 @@ module NetworkLayersWithMPLS
                 queueOut[numOfPorts];
             display: "b=32,30;p=172,66;i=cogwheel";
         outputQueue: OutputQueue[numOfPorts];
-            display: "b=32,30;p=130,127;i=queue";
+            display: "b=32,30;p=130,127,row;i=queue";
         inputQueue: InputQueue;
             gatesizes:
                 fromNW[numOfPorts];
             display: "p=39,53;i=queue";
         networkInterface: NWIName[numOfPorts] like NetworkInterface;
-            display: "p=55,181;i=bwxconn";
+            display: "p=55,181,row;i=bwxconn";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,

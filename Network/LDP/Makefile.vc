@@ -105,7 +105,7 @@ UDPAppInterface.obj: UDPAppInterface.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -135,11 +135,18 @@ LDPInterface.obj: LDPInterface.cc \
   ..\MPLS/ip_address_prefix.h \
   ..\IPv4\Core/RoutingTable.h \
   ..\MPLS/LIBTableAccess.h \
-  ..\MPLS/InfoManager.h \
+  ..\MPLS/MPLSAccess.h \
   ..\..\Base/ipsuite_defs.h \
+  ..\..\Base/ModuleAccess.h \
   ..\MPLS/LIBtable.h \
   ..\IPv4\Core/RoutingTableAccess.h \
-  ..\MPLS/StringTokenizer.h
+  ..\MPLS/StringTokenizer.h \
+  ..\MPLS/MPLSModule.h \
+  ..\MPLS/MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h \
+  ..\IPv4\Core/IPDatagram_m.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\IPv4\Core/IPInterfacePacket_m.h
 LDPpacket.obj: LDPpacket.cc \
   LDPpacket.h \
   ..\IPv4\Core/IPAddress.h \
@@ -150,12 +157,13 @@ LDPproc.obj: LDPproc.cc \
   ..\..\Transport\TCP/tcp.h \
   LDPproc.h \
   ..\IPv4\Core/RoutingTable.h \
-  ..\MPLS/InfoManager.h \
   ..\MPLS/MPLSModule.h \
   ..\IPv4\Core/IPAddress.h \
   ..\MPLS/ip_address_prefix.h \
   LDPInterface.h \
   ..\MPLS/LIBTableAccess.h \
+  ..\MPLS/MPLSAccess.h \
+  ..\..\Base/ModuleAccess.h \
   ..\MPLS/LIBtable.h \
   ..\IPv4\Core/RoutingTableAccess.h \
   ..\MPLS/StringTokenizer.h \
@@ -178,6 +186,6 @@ UDPAppInterface.obj: UDPAppInterface.cc \
   ..\..\Transport\UDP/UDPPacket.h \
   ..\IPv4\Core/IPInterfacePacket.h \
   ..\IPv4\Core/IPAddress.h \
+  ..\..\Transport\TCP/TransportInterfacePacket_m.h \
   ..\..\Transport\UDP/UDPPacket_m.h \
-  ..\..\Transport\TCP/TransportPacket.h \
   ..\IPv4\Core/IPInterfacePacket_m.h

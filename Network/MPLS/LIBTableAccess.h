@@ -12,26 +12,22 @@
 *
 *
 *********************************************************************/
+
 #ifndef __LIB_TABLE_ACCESS_H__
 #define __LIB_TABLE_ACCESS_H__
 
 #include <omnetpp.h>
-
+#include "ModuleAccess.h"
 #include "LIBtable.h"
 
-class LIBTableAccess: public cSimpleModule
+
+/**
+ * Gives access to the LIBTable.
+ */
+class LIBTableAccess : public ModuleAccess<LIBTable>
 {
-private:
-
-protected:
-
-    LIBTable *lt;
-
-public:
-    Module_Class_Members(LIBTableAccess, cSimpleModule, 16384);
-
-    virtual void initialize();
-
+    public:
+        LIBTableAccess() : ModuleAccess<LIBTable>("libTable") {}
 };
 
 #endif

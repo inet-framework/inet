@@ -19,7 +19,6 @@
 #include <omnetpp.h>
 
 #include "QueueBase.h"
-#include "RoutingTableAccess.h"
 
 
 /**

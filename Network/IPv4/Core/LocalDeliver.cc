@@ -103,12 +103,7 @@ void LocalDeliver::endService(cMessage *msg)
             break;
 // ECH
         default:
-            ev << "LocalDeliver Error: "
-                << "Transport protocol invalid: "
-                << (int)(interfacePacket->protocol())
-                << "\n";
-            delete interfacePacket;
-            break;
+            error("Unknown transport protocol %d", (int)(interfacePacket->protocol()));
     }
 }
 

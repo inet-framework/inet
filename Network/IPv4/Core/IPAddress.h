@@ -173,29 +173,27 @@ class IPAddress
     virtual bool isMulticast() const {return getIPClass()=='D';}
 
     /**
-     * Returns a dynamically allocated new address with the network part of
-     * the address (the bits of the hosts part are to 0)
+     * Returns an address with the network part of the address (the bits
+     * of the hosts part are to 0). For D and E class addresses,
+     * it returns a null address.
      */
-    // FIXME why not a new IPAddress by value?
-    virtual IPAddress* getNetwork() const;
+    virtual IPAddress getNetwork() const;
 
     /**
-     * Returns a dynamically allocated new address with the network mask
-     * corresponding to the address class.
+     * Returns an address with the network mask corresponding to the
+     * address class. For D and E class addresses, it returns a null address.
      */
-    // FIXME why not a new IPAddress by value?
-    virtual IPAddress* getNetworkMask() const;
+    virtual IPAddress getNetworkMask() const;
 
     /**
      * Indicates if the address is from the same network
      */
-    virtual bool isNetwork(IPAddress *toCmp) const;
+    virtual bool isNetwork(const IPAddress& toCmp) const;
 
     /**
-     * Compares the first nbbits of the two addresses.
+     * Compares the first numbits bits of the two addresses.
      */
-    // FIXME name not very good
-    virtual bool compareTo(IPAddress *to_cmp, unsigned int nbbits) const;
+    virtual bool prefixMatches(const IPAddress& to_cmp, int numbits) const;
 
     /**
      * Indicates how many bits from the to_cmp address, starting counting
@@ -205,17 +203,16 @@ class IPAddress
      *
      * Typical usage for comparing IP prefixes.
      */
-    virtual int nbBitsMatching(IPAddress *to_cmp) const;
+    virtual int numMatchingPrefixBits(const IPAddress& to_cmp) const;
 
     /**
      * Test if the masked addresses (ie the mask is applied to addr1 and
-     * addr2) are equal. Warning: netmask == NULL is treated as all 1,
-     * ie (*addr1 == *addr2) is returned.
+     * addr2) are equal. Warning: a null netmask is treated as all 1,
+     * ie (addr1 == addr2) is returned.
      */
-    // FIXME why static?
-    static bool maskedAddrAreEqual (const IPAddress *addr1,
-                                    const IPAddress *addr2,
-                                    const IPAddress *netmask);
+    static bool maskedAddrAreEqual(const IPAddress& addr1,
+                                   const IPAddress& addr2,
+                                   const IPAddress& netmask);
 
     friend std::ostream& operator<<(std::ostream& os, const IPAddress& obj);
     friend cEnvir& operator<<(cEnvir& ev, const IPAddress& obj);

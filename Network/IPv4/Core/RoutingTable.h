@@ -33,10 +33,12 @@
 // required for IPAddress typdef
 #include "IPAddress.h"
 
+class RoutingTableParser;
 
-/*  ----------------------------------------------------------
-        Constants
-    ----------------------------------------------------------  */
+
+/*
+ * Constants
+ */
 const int   MAX_FILESIZE = 5000;
 const int   MAX_INTERFACE_NO = 30;
 const int   MAX_ENTRY_STRING_SIZE = 20;
@@ -66,51 +68,55 @@ enum RouteSource
 /**
  * Interface entry for the interface table.
  */
-class InterfaceEntry : public cObject // FIXME why cObject
+class InterfaceEntry : public cObject // FIXME only cObject so that cArray can by used
 {
   public:
     int mtu;
     int metric;
-    char *name;
-    char *encap;
-    char *hwAddrStr;
-    IPAddress *inetAddr;
-    IPAddress *bcastAddr;
-    IPAddress *mask;
+    opp_string name;
+    opp_string encap;
+    opp_string hwAddrStr;
+    IPAddress inetAddr;
+    IPAddress bcastAddr;
+    IPAddress mask;
     bool broadcast, multicast, pointToPoint, loopback;
 
-    int multicastGroupCtr;
-    IPAddress **multicastGroup;
+    int multicastGroupCtr; // table size
+    IPAddress *multicastGroup;  // dynamically allocated IPAddress table
 
   public:
     InterfaceEntry();
+    virtual ~InterfaceEntry() {}
+    virtual void info(char *buf);
+    virtual opp_string& detailedInfo(opp_string& buf);
 
+    // copy not supported: declare the following but leave them undefined
     InterfaceEntry(const InterfaceEntry& obj);
-    virtual ~InterfaceEntry() { }
     InterfaceEntry& operator=(const InterfaceEntry& obj);
 
     void print();
 };
 
+
 /**
  * Routing entry.
  */
-class RoutingEntry : public cObject // FIXME why cObject
+class RoutingEntry : public cObject // FIXME only cObject so that cArray can by used
 {
   public:
     int ref; // TO DEPRECATE
 
     // Destination
-    IPAddress *host;
+    IPAddress host;
 
     // Route mask (replace it with a prefix?)
-    IPAddress *netmask;
+    IPAddress netmask;
 
     // Next hop
-    IPAddress *gateway;
+    IPAddress gateway;
 
     // Interface name and nb
-    char *interfaceName;
+    opp_string interfaceName;
     int interfaceNo;
 
     // Route type: Direct or Remote
@@ -128,19 +134,24 @@ class RoutingEntry : public cObject // FIXME why cObject
     int age;
 
     // Miscellaneaous route information
-    void *info;
+    void *routeInfo;
 
   public:
     RoutingEntry();
+    virtual ~RoutingEntry() {}
+    virtual void info(char *buf);
+    virtual opp_string& detailedInfo(opp_string& buf);
 
+    // copy not supported: declare the following but leave them undefined
     RoutingEntry(const RoutingEntry& obj);
-    virtual ~RoutingEntry() { }
     RoutingEntry& operator=(const RoutingEntry& obj);
 
     void print();
 
-    bool correspondTo(IPAddress *target, IPAddress *netmask,
-                      IPAddress *gw, int metric, char *dev);
+    // Indicates if a routing entry corresponds to the other parameters
+    // (which can be null).
+    bool correspondTo(const IPAddress& target, const IPAddress& netmask,
+                      const IPAddress& gw, int metric, const char *dev);
 };
 
 
@@ -151,73 +162,41 @@ class RoutingEntry : public cObject // FIXME why cObject
  *
  * This is a simple module without gates, it requires function calls to it
  * (message handling does nothing).
+ *
+ * Uses RoutingTableParser to read routing files (.irt, .mrt).
  */
 class RoutingTable: public cSimpleModule
 {
   private:
+    friend class RoutingTableParser;   // FIXME a bit ugly, we should have enough public functions...
 
+    //
     // Interfaces:
+    //
 
     // Number of interfaces
-    int ifEntryCtr;
+    int numIntrfaces;
+
     // Interface array
-    InterfaceEntry **intrface;
+    InterfaceEntry **intrface;   // FIXME replace with std::vector
+
     // Loopback interface
     InterfaceEntry *loopbackInterface;
 
+    //
     // Routes:
+    //
 
     // Unicast route array
-    cArray *route;
+    cArray *route;           // FIXME replace with std::vector
+
     // Default route
     RoutingEntry *defaultRoute;
+
     // Multicast route array
-    cArray *mcRoute;
+    cArray *mcRoute;        // FIXME replace with std::vector
 
     bool IPForward;
-
-  private:
-    // Parsing functions
-
-    // Read Routing Table file; return 0 on success, -1 on error
-    int readRoutingTableFromFile (const char *filename);
-
-    // Used to create specific "files" char arrays without comments or blanks
-    // from original file.
-    char *createFilteredFile (char *file,
-                              int &charpointer,
-                              const char *endtoken);
-
-    // Go through the ifconfigFile char array, parse all entries and
-    // write them into the interface table.
-    // Loopback interface is not part of the file.
-    void parseInterfaces(char *ifconfigFile);
-
-    // Go through the routeFile char array, parse all entries line by line and
-    // write them into the routing table.
-    void parseRouting(char *routeFile);
-
-    // Add the entry of the local loopback interface automatically
-    void addLocalLoopback();
-
-    char *parseInterfaceEntry (char *ifconfigFile,
-                               const char *tokenStr,
-                               int &charpointer,
-                               char* destStr);
-
-    // Convert string separated by ':' into dynamic string array.
-    void parseMulticastGroups (char *groupStr, InterfaceEntry*);
-
-    // Return 1 if beginning of str1 and str2 is equal up to str2-len,
-    // otherwise 0.
-    static int streq(const char *str1, const char *str2);
-
-    // Skip blanks in string
-    static void skipBlanks (char *str, int &charptr);
-
-    // Copies the first word of src up to a space-char into dest
-    // and appends \0, returns position of next space-char in src
-    static int strcpyword (char *dest, const char *src);
 
   public:
     Module_Class_Members(RoutingTable, cSimpleModule, 0);
@@ -232,52 +211,51 @@ class RoutingTable: public cSimpleModule
     void printIfconfig();
     void printRoutingTable();
 
-    /** name Access interface/routing table */
+    /** @name Accessing the interfaces and the routing table */
     //@{
 
     /**
-     * Look if the address is a local one, ie one of the host.
+     * Checks if the address is a local one, i.e. one of the host's.
      */
     bool localDeliver(const IPAddress& dest);
 
     /**
-     * Return the port nb to send the packets with dest as
+     * Returns the port number to send the packets with dest as
      * destination address, or -1 if destination is not in routing table.
      */
     int outputPortNo(const IPAddress& dest);
 
     /**
-     * Return the InterfaceEntry specified by its index.
-     * Take care, returns a pointer to InterfaceEntry now!
+     * Returns the InterfaceEntry specified by its index.
      */
     InterfaceEntry *getInterfaceByIndex(int index);
 
     /**
-     * Search the index of an interface given by its name.
+     * Returns the index of an interface given by its name.
      * Return -1 on error.
      */
-    int interfaceNameToNo(const char *name);
+    int findInterfaceByName(const char *name);
 
     /**
-     * Search the index of an interface given by its address.
-     * Return -1 on error.
+     * Returns the index of an interface given by its address.
+     * Returns -1 on error.
      */
-    int interfaceAddressToNo(const IPAddress& address);
+    int findInterfaceByAddress(const IPAddress& address);
 
     /**
      * Returns the gateway to send the destination,
-     * NULL if the destination is not in routing table or there is
+     * address if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    IPAddress* nextGateway(const IPAddress *dest);
+    IPAddress nextGatewayAddress(const IPAddress& dest);
 
     /**
-     * Return the number of interfaces.
+     * Returns the number of interfaces.
      */
-    int numInterfaces()  {return ifEntryCtr;}
+    int numInterfaces()  {return numIntrfaces;}
     //@}
 
-    /** name Route table manipulation functions */
+    /** @name Route table manipulation functions */
     //@{
 
     /**
@@ -313,9 +291,9 @@ class RoutingTable: public cSimpleModule
      *          If NULL, the device will be tried to be determined alone
      *          (looking the existing interface and routing table).
      */
-    bool add(IPAddress *target = NULL,
-             IPAddress *netmask = NULL,
-             IPAddress *gw = NULL,
+    bool add(const IPAddress& target,
+             const IPAddress& netmask,
+             const IPAddress& gw,
              int metric = 0,
              char *dev = NULL);
 
@@ -331,40 +309,40 @@ class RoutingTable: public cSimpleModule
      * If additional parameters are given, they are used to distinct the route
      * with the right target to delete.
      */
-    bool del(IPAddress *target = NULL,
-             IPAddress *netmask = NULL,
-             IPAddress *gw = NULL,
+    bool del(const IPAddress& target,
+             const IPAddress& netmask,
+             const IPAddress& gw,
              int metric = 0,
              char *dev = NULL);
 
     /**
-     * Returns the unicast route array
+     * Returns the unicast route array.
      */
     cArray *getRouteTable()  {return route;}
 
     /**
-     * Return the default route entry
+     * Returns the default route entry.
      */
     RoutingEntry *getDefaultRoute()  {return defaultRoute;}
     //@}
 
-    /** name Multicast functions */
+    /** @name Multicast functions */
     //@{
 
     /**
-     * Look if the address is in one of the local multicast group
+     * Checks if the address is in one of the local multicast group
      * address list.
      */
     bool multicastLocalDeliver(const IPAddress& dest);
 
     /**
-     * Return the port nb to send the packets with dest as
+     * Returns the port number to send the packets with dest as
      * multicast destination address, or -1 if destination is not in routing table.
      */
     int multicastOutputPortNo(const IPAddress& dest, int index);
 
     /**
-     * Return the number of multicast destinations.
+     * Returns the number of multicast destinations.
      */
     int numMulticastDestinations(const IPAddress& dest);
     //@}

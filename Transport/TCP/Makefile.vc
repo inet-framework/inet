@@ -123,7 +123,7 @@ tcpmodule.obj: tcpmodule.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -147,6 +147,7 @@ Ip2Tcp.obj: Ip2Tcp.cc \
   TransportPacket.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
+  TransportPacket_m.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket_m.h
 pcb.obj: pcb.cc \
   pcb.h \
@@ -155,6 +156,17 @@ Tcp2Ip.obj: Tcp2Ip.cc \
   TransportPacket.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
+  TransportPacket_m.h \
   ..\..\Network\IPv4\Core/IPInterfacePacket_m.h
+TCPInterfacePacket_m.obj: TCPInterfacePacket_m.cc \
+  TCPInterfacePacket_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h
 tcpmodule.obj: tcpmodule.cc \
   tcp.h
+TCPSegment_m.obj: TCPSegment_m.cc \
+  TCPSegment_m.h
+TransportInterfacePacket_m.obj: TransportInterfacePacket_m.cc \
+  TransportInterfacePacket_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h
+TransportPacket_m.obj: TransportPacket_m.cc \
+  TransportPacket_m.h

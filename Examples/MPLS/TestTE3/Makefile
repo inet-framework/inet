@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../Tester -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard  ../Tester/*.o $(ROOT)/Network/IPv4/Core/*.o $(ROOT)/Network/IPv4/QoS/*.o $(ROOT)/Transport/TCP/*.o $(ROOT)/Transport/UDP/*.o $(ROOT)/Transport/Socket/*.o $(ROOT)/NetworkInterfaces/*.o $(ROOT)/NetworkInterfaces/PPP-old/*.o $(ROOT)/NetworkInterfaces/Queues/*.o $(ROOT)/Applications/Generic/*.o $(ROOT)/Applications/TCPApp/*.o $(ROOT)/Applications/UDPApp/*.o $(ROOT)/Applications/PingApp/*.o $(ROOT)/Base/*.o $(ROOT)/Util/*.o $(ROOT)/Nodes/IPSuite/*.o $(ROOT)/Network/MPLS/*.o $(ROOT)/Network/LDP/*.o $(ROOT)/Network/RSVP_TE/*.o $(ROOT)/Nodes/MPLS/*.o)
+# object files from other directories to link with
+EXT_DIR_OBJS= ../Tester/*.o $(ROOT)/Network/IPv4/Core/*.o $(ROOT)/Network/IPv4/QoS/*.o $(ROOT)/Transport/TCP/*.o $(ROOT)/Transport/UDP/*.o $(ROOT)/Transport/Socket/*.o $(ROOT)/NetworkInterfaces/*.o $(ROOT)/NetworkInterfaces/PPP-old/*.o $(ROOT)/NetworkInterfaces/Queues/*.o $(ROOT)/Applications/Generic/*.o $(ROOT)/Applications/TCPApp/*.o $(ROOT)/Applications/UDPApp/*.o $(ROOT)/Applications/PingApp/*.o $(ROOT)/Base/*.o $(ROOT)/Util/*.o $(ROOT)/Nodes/IPSuite/*.o $(ROOT)/Network/MPLS/*.o $(ROOT)/Network/LDP/*.o $(ROOT)/Network/RSVP_TE/*.o $(ROOT)/Nodes/MPLS/*.o
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../Tester/.tstamp $(ROOT)/Network/IPv4/Core/.tstamp $(ROOT)/Network/IPv4/QoS/.tstamp $(ROOT)/Transport/TCP/.tstamp $(ROOT)/Transport/UDP/.tstamp $(ROOT)/Transport/Socket/.tstamp $(ROOT)/NetworkInterfaces/.tstamp $(ROOT)/NetworkInterfaces/PPP-old/.tstamp $(ROOT)/NetworkInterfaces/Queues/.tstamp $(ROOT)/Applications/Generic/.tstamp $(ROOT)/Applications/TCPApp/.tstamp $(ROOT)/Applications/UDPApp/.tstamp $(ROOT)/Applications/PingApp/.tstamp $(ROOT)/Base/.tstamp $(ROOT)/Util/.tstamp $(ROOT)/Nodes/IPSuite/.tstamp $(ROOT)/Network/MPLS/.tstamp $(ROOT)/Network/LDP/.tstamp $(ROOT)/Network/RSVP_TE/.tstamp $(ROOT)/Nodes/MPLS/.tstamp

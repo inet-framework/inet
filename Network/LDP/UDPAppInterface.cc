@@ -40,6 +40,7 @@ void UDPAppInterface::initialize()
 void UDPAppInterface::activity()
 {
 
+// FIXME THIS WOULDN'T WORK BECAUSE UDP NOW USES UDPInterfacePacket not cPars!!!
 
         cMessage* msg = receive();
 

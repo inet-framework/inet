@@ -71,7 +71,9 @@ cd %root%\Transport\Socket && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc 
 cd %root%\Transport\TCP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Base
 cd %root%\Transport\UDP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\..\Network\IPv4\Core -I..\..\Base
 
-cd %root%
-dir /s/b *.ned > allnedfiles.lst
-perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?IPSuite-local/||" allnedfiles.lst
+: #--------------------------------------
 
+cd %root%
+dir /s/b *.ned > nedfiles.lst
+perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?IPSuite-local/||" nedfiles.lst
+perl -i.bak -pe "s|^Examples/.*||" nedfiles.lst

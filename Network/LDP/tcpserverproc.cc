@@ -18,7 +18,7 @@
 #include "IPAddress.h"
 
 
-/*
+/**
  * This module are dynamically instantiated by LDPInterface.
  * FIXME should be renamed to LDPConnHandler or something like this!!!
  *
@@ -107,7 +107,7 @@ void TCPServerProc::activity()
         }
         else
         {
-            ev << "TCP_SERVER_PROC DEBUG: Error occurs - No message of peer address\n";
+            error("No message of peer address");
         }
         delete whoMsg;
 

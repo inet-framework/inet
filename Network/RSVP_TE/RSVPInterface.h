@@ -12,14 +12,6 @@
 *
 *
 *********************************************************************/
-
-
-/*
-*    File Name RSVPInterface.h
-*    RSVP-TE library
-*    This file defines RSVPInterface class
-**/
-
 #ifndef __RSVP_INTERFACE_H__
 #define __RSVP_INTERFACE_H__
 
@@ -29,20 +21,15 @@
 const char *MY_ERROR_IP_ADDRESS = "10.0.0.255";
 
 
-class RSVPInterface : public cSimpleModule   // was ProcessorAccess
+class RSVPInterface : public cSimpleModule
 {
-private:
-
-
+  private:
     void processMsgFromIp(cMessage *);
     void processMsgFromApp(cMessage *);
-public:
-    Module_Class_Members(RSVPInterface, cSimpleModule,
-                ACTIVITY_STACK_SIZE);
-
+  public:
+    Module_Class_Members(RSVPInterface, cSimpleModule, 0);
     virtual void initialize();
-    virtual void activity();
-
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

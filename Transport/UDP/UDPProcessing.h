@@ -18,26 +18,20 @@
 
 
 //
-//    author: Jochen Reber
+// author: Jochen Reber
 //
 
 #ifndef __UDPPROCESSING_H__
 #define __UDPPROCESSING_H__
 
+#include "IPInterfacePacket.h"
+#include "UDPInterfacePacket_m.h"
 #include "basic_consts.h"
 
 
-const int MAXUDPAPPS = 20;
 const char *ERROR_IP_ADDRESS = "10.0.0.255";
+const int UDP_HEADER_BYTES = 16;
 
-/**
- * Additional Structures
- */
-struct UDPApplicationTable
-{
-    int size;
-    int port[MAXUDPAPPS];
-};
 
 /**
  * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
@@ -46,10 +40,19 @@ struct UDPApplicationTable
 class UDPProcessing : public cSimpleModule
 {
   protected:
+
+    // Maps "from_application" input gate indices to "local_port" parameters of the
+    // modules (applications) that are connected there.
+    struct UDPApplicationTable
+    {
+        int size;
+        int *port;  // array: port[index]=local_port
+    };
+
     UDPApplicationTable applTable;
 
-    virtual void processMsgFromIp(cMessage *);
-    virtual void processMsgFromApp(cMessage *);
+    virtual void processMsgFromIp(IPInterfacePacket *packet);
+    virtual void processMsgFromApp(UDPInterfacePacket *packet);
 
   public:
     Module_Class_Members(UDPProcessing, cSimpleModule, 0);

@@ -1,13 +1,13 @@
 /*******************************************************************
 *
-*    This library is free software, you can redistribute it 
-*    and/or modify 
-*    it under  the terms of the GNU Lesser General Public License 
-*    as published by the Free Software Foundation; 
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
 *    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful, 
+*    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -28,9 +28,11 @@
 #include "RSVP.h"
 #include "TED.h"
 #include "OspfTe.h"
+#include "OSPFTEAccess.h"
 #include "LIBtable.h"
+#include "LIBTableAccess.h"
 #include "MPLSModule.h"
-#include "StringTokenizer.h"
+#include "MPLSAccess.h"
 
 
 
@@ -45,17 +47,16 @@
 
 
 struct traffic_request_t{
-int src;
-int dest;
-int setupPri;
-int holdingPri;
-double delay;
-double bandwidth;
-bool isER;
-EroObj_t route[MAX_ROUTE];
-
+    int src;
+    int dest;
+    int setupPri;
+    int holdingPri;
+    double delay;
+    double bandwidth;
+    bool isER;
+    EroObj_t route[MAX_ROUTE];
 };
- 
+
 struct lsp_tunnel_t
 {
     SenderTemplateObj_t Sender_Template;
@@ -73,22 +74,21 @@ struct routing_info_t{
 class RSVPAppl: public cSimpleModule
 {
 private:
+    RoutingTableAccess routingTableAccess;
+    LIBTableAccess libTableAccess;
+    OSPFTEAccess ospfteAccess;
+    MPLSAccess mplsAccess;
+
     int local_addr, dest_addr;
     double BW, delay;
-    RoutingTable *rt;
-    LIBTable *lt;
-    OspfTe *ospfte;
-    cModule *mplsMod;
     bool isSender, isER, isIR;
-    std::vector<telinkstate>    ted;
+    std::vector<telinkstate>  ted;
     std::vector<traffic_request_t> tr;
     std::vector<lsp_tunnel_t> FecSenderBinds;
     std::vector<routing_info_t> routingInfo;
 
     bool initFromFile(const char *filename);
     void TrafficRequest(xmlDocPtr doc, xmlNodePtr cur);
-    void findMyMPLS();
-    void findLIB();
     void addRouteInfo(ResvMessage* rmsg);
     bool hasPath(int lspid, FlowSpecObj_t* newFlowspec);
     double getTotalDelay(std::vector<simple_link_t> *links);
@@ -98,6 +98,7 @@ public:
 
     virtual void initialize();
     virtual void activity();
+
     //void sendPathMessage(SessionObj_t* s, traffic_request_t* t);
     void sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId);
     void sendResvMessage(PathMessage* pMsg, int inLabel);
@@ -108,10 +109,8 @@ public:
     void getPeerIPAddress(int peerInf, int* peerIP);
     void getPeerInet(int peerIP, int* peerInf);
     void getIncInet(int remoteInet, int* incInet);
-    void updateTED();
-    void findRoutingTable();
-    void findOSPFTE();
 
+    void updateTED();
 };
 
 #endif

@@ -97,4 +97,3 @@ class ICMPMessage extends cPacket
                       // encapsulated errorDatagram exists only if isError==true
 };
 
-

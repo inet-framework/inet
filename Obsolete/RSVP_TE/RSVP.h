@@ -1,14 +1,14 @@
 
 /*******************************************************************
 *
-*    This library is free software, you can redistribute it 
-*    and/or modify 
-*    it under  the terms of the GNU Lesser General Public License 
-*    as published by the Free Software Foundation; 
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
 *    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful, 
+*    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -36,32 +36,32 @@
 struct PathStateBlock_t{
 
     /* SESSION object structure */
-  SessionObj_t Session_Object;          
+  SessionObj_t Session_Object;
 
     /* SENDER_TEMPLATE structure */
-  SenderTemplateObj_t Sender_Template_Object;  
+  SenderTemplateObj_t Sender_Template_Object;
 
     /* SENDER_TSPEC structure */
-  SenderTspecObj_t Sender_Tspec_Object;     
+  SenderTspecObj_t Sender_Tspec_Object;
 
     /* Previous Hop IP address from PHOP object */
-  int  Previous_Hop_Address;       
+  int  Previous_Hop_Address;
 
     /* Logical Interface Handle from PHOP object*/
-  int  LIH;                     
+  int  LIH;
 
     /* Remaining IP TTL */
-  //int rem_IP_TTL;                 
+  //int rem_IP_TTL;
 
     /* To determine EDGE of the RSVP network */
-  int E_Police_Flag;              
+  int E_Police_Flag;
 
     /* To determine if the App. is local or not */
-  int Local_Only_Flag;            
+  int Local_Only_Flag;
 
-    /* List of outgoing Interfaces for this 
+    /* List of outgoing Interfaces for this
        (sender, destination)  single entry for unicast case */
-  int  OutInterface_List;//[InLIST_SIZE];        
+  int  OutInterface_List;//[InLIST_SIZE];
 
     /* Expected incoming interface, undefined for unicast case */
   int  IncInterface ;
@@ -71,19 +71,19 @@ struct PathStateBlock_t{
 };
 
 /*
-** Reservation State Block (RSB) structure 
+** Reservation State Block (RSB) structure
 */
 struct ResvStateBlock_t{
 
     /* SESSION object structure */
-  SessionObj_t Session_Object;          
+  SessionObj_t Session_Object;
 
     /* Next Hop IP address from PHOP object */
-  int  Next_Hop_Address;           
+  int  Next_Hop_Address;
 
-    /* Outgoing Interface on which reservation is 
+    /* Outgoing Interface on which reservation is
        to be made or has been made*/
-  int  OI;                      
+  int  OI;
 
 
   FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
@@ -95,7 +95,7 @@ struct ResvStateBlock_t{
   int style;
 
     /* FLOWSPEC structure */
-  FlowSpecObj_t Flowspec_Object;         
+  FlowSpecObj_t Flowspec_Object;
 
     /* SCOPE Object structure */
   //ScopeObj_t Scope_Object             ;
@@ -105,40 +105,40 @@ struct ResvStateBlock_t{
 
 };
 
-/* 
-** Traffic Control State Block 
+/*
+** Traffic Control State Block
 */
 struct TrafficControlStateBlock_t{
 
     /* SESSION object structure */
-  SessionObj_t Session_Object;          
+  SessionObj_t Session_Object;
 
-    /* Outgoing Interface on which reservation is 
+    /* Outgoing Interface on which reservation is
        to be made or has been made*/
-  int  OI;                      
+  int  OI;
 
     /* Newly added when it was known that FF style need to be considered */
-  FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];  
+  FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
 
     /* Effective flowspec (LUB of FLOWSPEC's from matching RSB's) structure */
-  FlowSpecObj_t TC_Flowspec;        
+  FlowSpecObj_t TC_Flowspec;
 
     /* Updated object structure to be forwarded after merging */
-  FlowSpecObj_t Fwd_Flowspec;       
+  FlowSpecObj_t Fwd_Flowspec;
 
     /* Effective sender Tspec structure */
-  SenderTspecObj_t TC_Tspec;        
+  SenderTspecObj_t TC_Tspec;
 
     /* Entry Police flags */
-  int E_Police_Flag;         
-  
-  int Local_Only_Flag;        
+  int E_Police_Flag;
+
+  int Local_Only_Flag;
 
     /* Reservation Handle */
-  int Rhandle;                    
+  int Rhandle;
 
     /* Filter handle list */
-  int Fhandle;            
+  int Fhandle;
 
     /* RESV_CONFIRM  */
   int  Receiver_Address;
@@ -166,9 +166,12 @@ typedef struct {
 } FHandleType;
 */
 
-class RSVP :  public LIBTableAccess
+class RSVP :  public cSimpleModule
 {
 private:
+    RoutingTableAccess routingTableAccess;
+    LIBTableAccess libTableAccess;
+
     std::vector<PathStateBlock_t> PSBList; //Path State Block
     std::vector<ResvStateBlock_t> RSBList;    //Resv State Block
     std::vector<TrafficControlStateBlock_t> TCSBList; //Traffic Control State Block
@@ -177,17 +180,13 @@ private:
 
     int my_id;
     int NoOfLinks;
-    int LocalAddress[InLIST_SIZE ]; 
+    int LocalAddress[InLIST_SIZE ];
     bool IsIR;
     bool IsER;
 
 
     //RHandleType_t FlowTable[TABLE_SIZE];
     std::vector<RHandleType_t> FlowTable;
-
-    RoutingTable *rt;
-
-    void findRoutingTable();
 
     /*Message Processing */
     void PathMsgPro(PathMessage *pmsg, int InIf);
@@ -207,10 +206,10 @@ private:
     void RemoveTrafficControl(ResvStateBlock_t *activeRSB);
     int TC_AddFlowspec( int tunnelId, int holdingPri, int setupPri, int OI,
                         FlowSpecObj_t fs, SenderTspecObj_t ts, FlowSpecObj_t *fwdFS);
-    int TC_ModFlowspec( int tunnelId, int OI, 
+    int TC_ModFlowspec( int tunnelId, int OI,
                         FlowSpecObj_t fs, SenderTspecObj_t ts, FlowSpecObj_t *fwdFS);
     int GetFwdFS(int oi, FlowSpecObj_t *fwdFS);
-    bool AllocateResource(int tunnelId, int holdingPri, int setupPri, 
+    bool AllocateResource(int tunnelId, int holdingPri, int setupPri,
                     int oi, FlowSpecObj_t fs);
 
     void updateTED();
@@ -240,22 +239,21 @@ void setTCTspecforTCSB(TrafficControlStateBlock_t* t,
                 SenderTspecObj_t* s);
 void printTCSB(TrafficControlStateBlock_t* t);
 
-    void findOSPFTE();
     bool doCACCheck(PathMessage* pmsg, int OI);
     void preemptTunnel(int tunnelId);
     void propagateTEDchanges();
-            
+
  public:
-    
-    Module_Class_Members(RSVP, LIBTableAccess, 16384);
+
+    Module_Class_Members(RSVP, cSimpleModule, 16384);
 
     virtual void initialize();
     virtual void activity();
     void Mcast_Route_Query(int sa, int iad, int da, int *outl);
 
-    
-    
-    
+
+
+
 };
 
 

@@ -16,14 +16,13 @@
 #define __OSPF_TE__H__
 
 
-#include "ospf_type.h"
 #include <omnetpp.h>
+#include <vector>
+#include "ospf_type.h"
 #include "tcp.h"
 #include "IPAddress.h"
 #include "intserv.h"
 #include "TED.h"
-//#include <list>
-#include <vector>
 
 
 /*******************************************************************************
@@ -44,12 +43,12 @@ class OspfTe : public cSimpleModule
 private:
 
     std::vector<CSPFVertex_Struct> CShortestPathTree;
-    std::vector<telinkstate>    ted;
+    std::vector<telinkstate> ted;
     int local_addr;
 
     void
     TEAddCandidates(FlowSpecObj_t* fspec,
-                                                    std::vector<CSPFVertex_Struct> *CandidatesList );
+                    std::vector<CSPFVertex_Struct> *CandidatesList );
 
     std::vector<int>
     CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *CandidatesList, double* totalMetric );
@@ -57,28 +56,26 @@ private:
 
     void CspfBuildSPT( FlowSpecObj_t* fspec, std::vector<CSPFVertex_Struct> *CandidatesList );
     void CspfBuildSPT(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                          FlowSpecObj_t *new_fspec,
-                          std::vector<CSPFVertex_Struct> *CandidatesList );
+                      FlowSpecObj_t *new_fspec,
+                      std::vector<CSPFVertex_Struct> *CandidatesList );
     void TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                          FlowSpecObj_t *new_fspec,
-                          std::vector<CSPFVertex_Struct> *CandidatesList );
+                         FlowSpecObj_t *new_fspec,
+                         std::vector<CSPFVertex_Struct> *CandidatesList );
     void updateTED();
 
+    void printTED();
+
 public:
-    Module_Class_Members(OspfTe, cSimpleModule, 16384);
+    Module_Class_Members(OspfTe, cSimpleModule, 0);
     void initialize(int stage);
     int numInitStages() { return 2; }
-    virtual void activity();
+    virtual void handleMessage(cMessage *msg);
+
     std::vector<int> CalculateERO(IPAddress* dest, FlowSpecObj_t* fspec, double* totalMetric);
     std::vector<int> CalculateERO(IPAddress* dest, std::vector<simple_link_t> *links,
-                                FlowSpecObj_t* old_fspec, FlowSpecObj_t* new_fspec, double* totalDelay);
-
-
-
-
-
-
-
+                                  FlowSpecObj_t* old_fspec, FlowSpecObj_t* new_fspec, double* totalDelay);
 };
 
 #endif
+
+

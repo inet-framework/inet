@@ -57,7 +57,7 @@ void SocketLayer::_findRoutingTable()
 IPAddress SocketLayer::_defaultIPAddr()
 {
   if (_rt)
-    return( (const char*) (_rt->getInterfaceByIndex(0)->inetAddr->getString()));
+    return _rt->getInterfaceByIndex(0)->inetAddr;
   else
     return IPADDRESS_UNDEF;
 }

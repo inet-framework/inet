@@ -18,6 +18,7 @@
 
 //
 // Base class for UDPPacket and TCPPacket
+//# FIXME must die!!! we don't need common base class for these two!
 //
 message TransportPacket extends cPacket
 {

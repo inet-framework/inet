@@ -18,16 +18,15 @@
 
 import  
     "NetworkLayers", 
-    "UDPUpperLayers", 
+    "UDPProcessing", 
     "SocketApp", 
-    "UDPModule", 
     "socketlayer"; 
                    
- 
+
+// FIXME socketLayer should get a local_port parameter, UDPProcessing needs that (?!?!)
 module UDPSocketHost 
     parameters: 
         client_name : string, 
-        nodename : string, 
         numOfPorts : numeric, 
         routingFile : string; 
     gates: 
@@ -39,9 +38,7 @@ module UDPSocketHost
             display: "p=87,30;i=proc1";
         socketLayer: SocketLayer; 
             display: "p=87,90;i=prot1";
-        udpModule: UDPModule; 
-            parameters: 
-                nodename = nodename; 
+        udp: UDPProcessing; 
             display: "p=87,150;i=prot2";
         networkLayers: NetworkLayers; 
             parameters: 
@@ -57,10 +54,10 @@ module UDPSocketHost
         // transport connections
         applClient.out --> socketLayer.from_appl[0]; 
         applClient.in <-- socketLayer.to_appl[0]; 
-        socketLayer.to_udp --> udpModule.from_socket; 
-        socketLayer.from_udp <-- udpModule.to_socket; 
-        networkLayers.UDPOut --> udpModule.from_ip; 
-        networkLayers.UDPIn <-- udpModule.to_ip; 
+        socketLayer.to_udp --> udp.from_application; 
+        socketLayer.from_udp <-- udp.to_application; 
+        networkLayers.UDPOut --> udp.from_ip; 
+        networkLayers.UDPIn <-- udp.to_ip; 
                                                  
         // connections to network outside
         for i=0..numOfPorts-1 do 

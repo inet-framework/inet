@@ -16,6 +16,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
+
+//
+// UDP protocol implementation.
+//
+//# FIXME edit comment!
+//
+// Initialisation:
+//   error check validity initialized as parameter
+//
+// Responsibilities:
+//   initialize with port-to-application-table
+//
+//   receive message with encoded ports and IP addresses as parameters from application:
+//   create UDPPacket from it.
+//   encapsulate it into IPInterfacePacket
+//   pass it on to the IP layer
+//
+//   receive IPInterfacePacket from IP Layer:
+//   decapsulate UDPPacket
+//   check biterror if checksum enabled
+//       -> throw away if biterror found
+//   map port to correct application-gate
+//   create UDPInterfacePacket containing address/port info
+//   pass UDPInterfacePacket to the selected gate
+//
 simple UDPProcessing
     gates:
         in: from_application[];
@@ -23,3 +49,5 @@ simple UDPProcessing
         out: to_application[];
         out: to_ip;
 endsimple
+
+

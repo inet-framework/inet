@@ -7,80 +7,63 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
 #include "RoutingTableAccess.h"
 #include "ip_address_prefix.h"
-#include "StringTokenizer.h"
 #include "ConstType.h"
 
-/*
 
-Table examples:
-
-LIB TABLE:
-
-
-
-In-lbl      In-intfÂ Out-lblÂ   Out-intf Optcode
-
-L1            ppp0    L2            ppp3       1
-
-L3            ppp1    L2            ppp4       1
-
-
-
-PRT TABLE:
-
-Fec        Pointer
-
-F1        3
-
-F3        5
-
-
-
-Prefix TABLE:
-
-Prefix        FEC
-
-124.3.0.0    F1
-
-135.6.1.0    F2
-
-
-
-*/
-
-struct prt_type{
-
+struct prt_type
+{
     int pos;
-
     IPAddressPrefix fecValue; //Support prefix only, e.g 128.2.0.0
-
 };
 
-using namespace std;
-
-struct lib_type{
-
+struct lib_type
+{
     int inLabel;
-
     int outLabel;
-
-    string inInterface;
-
-    string outInterface;
+    std::string inInterface;
+    std::string outInterface;
     int optcode;
-
 };
 
+
+/**
+ * Manages the label space and label mappings that belong to the current LSR.
+ * For more info see the NED file.
+ *
+ * Table examples:
+ *
+ * LIB TABLE:
+ * <pre>
+ * In-lbl  In-intf  Out-lbl   Out-intf Optcode
+ *    L1      ppp0     L2        ppp3     1
+ *    L3      ppp1     L2        ppp4     1
+ * </pre>
+ *
+ * PRT TABLE:
+ * <pre>
+ *  Fec   Pointer
+ *    F1    3
+ *    F3    5
+ * </pre>
+ *
+ * Prefix TABLE:
+ * <pre>
+ *  Prefix        FEC
+ *   124.3.0.0     F1
+ *   135.6.1.0     F2
+ * </pre>
+ */
 class LIBTable: public cSimpleModule
 {
 
 private:
 
-    vector<lib_type> lib;
-    vector<prt_type> prt;
-    
+    std::vector<lib_type> lib;
+    std::vector<prt_type> prt;
+
     /**
      * Load the label information table from files
      * @param filename The lib table file input
@@ -100,12 +83,12 @@ public:
 
     Module_Class_Members(LIBTable, cSimpleModule, 0);
     /**
-     * Initilize all the parameters for Lable Information Base processing 
+     * Initilize all the parameters for Label Information Base processing
      * @param void
      * @return void
      */
     void initialize();
-    
+
     /**
      * Handle message from other module
      * @param msg Message received
@@ -127,58 +110,60 @@ public:
               outInterface The name of the outgoing interface that new lable mapping will be forwarded
               fec The Forward Equivalent Class of the label
               optcode The optcode used in this Label Switching Router
-     * @return the value of the new label installed 
+     * @return the value of the new label installed
      */
-    int installNewLabel(int outLabel, string inInterface, 
-                        string outInterface, int fec, int optcode);
-    
+    int installNewLabel(int outLabel, std::string inInterface,
+                        std::string outInterface, int fec, int optcode);
+
     /**
      * Find outgoing label for a packet based on the packet's Forward Equivalent Class
      * @param fec The packet's FEC
      * @return The outgoing label or -2 if there is no label found
      */
-    int  requestLabelforFec(int fec);
-    
+    int requestLabelforFec(int fec);
+
     /**
      * Find the FEC based on corresponding incoming label and incoming interface
      * @param label The incoming label
      *        inInterface The incoming interface
      * @return the FEC value or 0 if the FEC cannot be found
      */
-    int  findFec(int label, string inInterface);
+    int findFec(int label, std::string inInterface);
 
-    /** Find the outgoing interface based on the incoming interface and the outgoing label
+    /**
+     * Find the outgoing interface based on the incoming interface and the outgoing label
      * @param senderInterface The incoming interface name
               newLabel The outgoing label
 
      * @return The outgoing interface name or "X" if the outgoing interface cannot be found
      */
-    string requestOutgoingInterface(string senderInterface,int newLabel);
+    std::string requestOutgoingInterface(std::string senderInterface,int newLabel);
 
-    /** Find the outgoing interface name based on the FEC
+    /**
+     * Find the outgoing interface name based on the FEC
      * @param fec The FEC value
      * @return the outgoing interface name
      */
-    string requestOutgoingInterface(int fec);
+    std::string requestOutgoingInterface(int fec);
 
     /**
      * Find the outgoing interface name based on incoming interface,outgoing label and incoming label
-     * If the new label is different to -1 (native ip), the function is the same with 
+     * If the new label is different to -1 (native ip), the function is the same with
      * requestOutgoingInterface(string senderInterface, int newLabel)
      * @param senderInterface The incoming interface
-              newLabel The outgoing label
-              oldLabel The incoming label
+     *        newLabel The outgoing label
+     *        oldLabel The incoming label
      * @return The outgoing interface name
      */
-    string requestOutgoingInterface(string senderInterface, int newLabel, int oldLabel);
+    std::string requestOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel);
 
     /**
      * Install new label based on incoming interface and incoming label
      * @param senderInterface The incoming interface
      *        oldLabel The incoming label
-     * @return The value of the new label installed 
+     * @return The value of the new label installed
      */
-    int requestNewLabel(string senderInterface,int oldLabel);
+    int requestNewLabel(std::string senderInterface,int oldLabel);
 
     /**
      * Get the optcode based on incoming interface and incoming label
@@ -186,40 +171,22 @@ public:
      *        oldLabel The incoming label
      * @return The operation code
      */
-    int getOptCode(string senderInterface, int oldLabel);
-
-    
+    int getOptCode(std::string senderInterface, int oldLabel);
 
     /*
-
     //Return incomming label
-
     //Return outgoing label
-
     int ini_requestLabelforDest(IPAddressPrefix *dest);
 
-
-
     void updateTable(label_mapping_type *newMapping);
-
     //bool isMapPrefix(IPAddressPrefix *prefixAddress, IPAddress *ipAddress);
-
-    void updateTable(int inLabel, string inInterface,
-
-        string outInterface, int fec);
-
-    //Return outgoing label 
-
+    void updateTable(int inLabel, std::string inInterface,
+                     std::string outInterface, int fec);
+    //Return outgoing label
     //Return outgoing interface
-
-    //Return incomming interface 
-
-    string requestIncommingInterface(int fec);
-
+    //Return incomming interface
+    std::string requestIncommingInterface(int fec);
     */
-
-
-
 };
 
 

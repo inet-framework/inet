@@ -25,8 +25,8 @@ void QueueWithQoS::initialize()
     AbstractQueue::initialize();
 
     delay = par("procdelay");
-    // FIXME introduce cPolymorphic and turn this into check_and_cast<>:
-    qosHook = (EnqueueHook *) createOne(par("qosBehaviorClass"));
+    qosHook = check_and_cast<EnqueueHook *>(createOne(par("qosBehaviorClass")));
+    qosHook->setModule(this);
 }
 
 

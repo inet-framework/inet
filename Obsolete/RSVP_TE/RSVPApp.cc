@@ -18,14 +18,13 @@
 #include "RoutingTable.h"
 #include "RSVPTester.h"
 #include "MPLSModule.h"
+#include "StringTokenizer.h"
 
 Define_Module( RSVPAppl);
 
 
 void RSVPAppl::initialize()
 {
-   //LIBTableAccess::initialize();
-
     //Get router IP Address
 
     local_addr   = IPAddress(par("local_addr").stringValue()).getInt();
@@ -36,29 +35,26 @@ void RSVPAppl::initialize()
     isER = par("isER").boolValue();
     const char* trafficFile = par("traffic").stringValue();
 
-    findRoutingTable();
-    findLIB();
-    findOSPFTE();
-    findMyMPLS();
     if(isIR)
-    initFromFile(trafficFile);
-
-
+        initFromFile(trafficFile);
 }
 
 
 
 void RSVPAppl::activity()
 {
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
+    MPLSModule *mplsMod = mplsAccess.get();
+
     cMessage *msg;
 
     if(isIR)
     {
-    cMessage* readyMsg = new cMessage();
-    sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
-
+        cMessage* readyMsg = new cMessage();
+        sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
     }
-         /*
+    /*
     if(isSender)
     {
         cMessage* sendMsg = new cMessage();
@@ -66,7 +62,7 @@ void RSVPAppl::activity()
         sendMsg->addPar("src_addr") = IPAddress(local_addr).getString();
         send(sendMsg, "to_ip");
     }
-     */
+    */
 
     while(true)
     {
@@ -80,7 +76,7 @@ void RSVPAppl::activity()
 
           if(msg->kind() == PERROR_MESSAGE)
           {
-              PathErrorMessage* pe = (PathErrorMessage*)msg;
+              PathErrorMessage* pe = check_and_cast<PathErrorMessage*>(msg);
 
               //create new PATH TEAR
               PathTearMessage* pt = new PathTearMessage();
@@ -108,15 +104,7 @@ void RSVPAppl::activity()
           if(msg->kind() == PATH_MESSAGE)
           {
 
-              PathMessage* pMessage = (PathMessage*)msg;
-              if(pMessage == NULL)
-              {
-                  ev << "Error in RSVPApp: Receive wrong type of msg\n";
-                  //delete msg;
-                  continue;
-              }
-
-
+              PathMessage* pMessage = check_and_cast<PathMessage*>(msg);
 
               int receiverIP = pMessage->getDestAddress();
               int lspId = pMessage->getLspId();
@@ -127,11 +115,11 @@ void RSVPAppl::activity()
               Unicast_Route_Query(receiverIP, &outInf);
 
               //Convert to name
-              int outInfIndex=rt->interfaceAddressToNo(IPAddress(outInf));
-              int inInfIndex= rt->interfaceAddressToNo(IPAddress(inInf));
+              int outInfIndex=rt->findInterfaceByAddress(IPAddress(outInf));
+              int inInfIndex= rt->findInterfaceByAddress(IPAddress(inInf));
 
-              char* outInfName = rt->getInterfaceByIndex(outInfIndex)->name;
-              char* inInfName = rt->getInterfaceByIndex(inInfIndex)->name;
+              const char* outInfName = rt->getInterfaceByIndex(outInfIndex)->name.c_str();
+              const char* inInfName = rt->getInterfaceByIndex(inInfIndex)->name.c_str();
 
               if(isER)
               {
@@ -148,14 +136,7 @@ void RSVPAppl::activity()
           }
           else if(msg->kind() == RESV_MESSAGE)
           {
-              ResvMessage* rMessage = (ResvMessage*)msg;
-
-              if(rMessage == NULL)
-              {
-                  ev << "Error in RSVPApp: Receive wrong type of msg\n";
-                  delete msg;
-                  continue;
-              }
+              ResvMessage* rMessage = check_and_cast<ResvMessage*>(msg);
               if(isIR )
               {
                   std::vector<lsp_tunnel_t>::iterator iterF;
@@ -232,9 +213,9 @@ void RSVPAppl::activity()
                                     //signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
                                     //Install new label
                                     int outInf = rMessage->getLIH();
-                                    int outInfIndex = rt->interfaceAddressToNo(IPAddress(outInf));
-                                    char* outInfName = (rt->getInterfaceByIndex(outInfIndex))->name;
-                                    char* inInfName =  (rt->getInterfaceByIndex(aTunnel.inInfIndex))->name;
+                                    int outInfIndex = rt->findInterfaceByAddress(IPAddress(outInf));
+                                    const char* outInfName = (rt->getInterfaceByIndex(outInfIndex))->name.c_str();
+                                    const char* inInfName =  (rt->getInterfaceByIndex(aTunnel.inInfIndex))->name.c_str();
 
                                     ev << "INSTALL new label \n";
                                     ev << "src=" <<   IPAddress(aTunnel.Sender_Template.SrcAddress).getString()<<"\n";
@@ -321,8 +302,7 @@ void RSVPAppl::activity()
                }
                if(iterF == FecSenderBinds.end())
                {
-                   ev << "Error, cannot find the session to teardown\n";
-                   delete msg;
+                   error("Cannot find the session to teardown");
                }
                else
                {
@@ -531,10 +511,7 @@ void RSVPAppl::activity()
                       break;
               }
               if(iterF == FecSenderBinds.end())
-              {
-                  ev << "Error, cannot locate the tunnel\n";
-                  continue;
-              }
+                  error("cannot locate the tunnel");
 
               std::vector<traffic_request_t>::iterator iterT;
               traffic_request_t trafficR;
@@ -671,6 +648,7 @@ void RSVPAppl::sendResvMessage(PathMessage* pMsg, int inLabel)
 
 void RSVPAppl::sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId)
 {
+        OspfTe *ospfte = ospfteAccess.get();
 
         PathMessage* pMsg = new PathMessage();
         RsvpHopObj_t* rsvp_hop = new RsvpHopObj_t;
@@ -698,8 +676,8 @@ void RSVPAppl::sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId)
 
         pMsg->setHop(rsvp_hop);
         pMsg->setSession(s);
-        pMsg->setSenderTemplate((SenderTemplateObj_t*)Filter_Spec_Object);
-        pMsg->setSenderTspec((SenderTspecObj_t*)Flowspec_Object);
+        pMsg->setSenderTemplate(static_cast<SenderTemplateObj_t*>(Filter_Spec_Object));
+        pMsg->setSenderTspec(static_cast<SenderTspecObj_t*>(Flowspec_Object));
 
         //Setup routing information
         pMsg->addPar("src_addr") = IPAddress(local_addr).getString();
@@ -841,10 +819,11 @@ void RSVPAppl::sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId)
 void
 RSVPAppl::Unicast_Route_Query(int da, int* outl)
 {
+    RoutingTable *rt = routingTableAccess.get();
     int foundIndex;
     //int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); //FIXME why not return outl???
+    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr.getInt(); //FIXME why not return outl???
 
     return;
 
@@ -853,55 +832,50 @@ RSVPAppl::Unicast_Route_Query(int da, int* outl)
 void
 RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
 {
+    RoutingTable *rt = routingTableAccess.get();
 
     int foundIndex;
     //int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr->getInt(); //FIXME why not return outl???
+    (*outl) = rt->getInterfaceByIndex(foundIndex)->inetAddr.getInt(); //FIXME why not return outl???
 
     return;
 }
 
 void RSVPAppl::getPeerInet(int peerIP, int* peerInf)
-{    std::vector<telinkstate>::iterator ted_iterI;
+{
+    std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
-
-
     updateTED();
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.linkid.getInt() == peerIP) &&
-                (ted_iter.advrouter.getInt()==local_addr))
-    {
-    (*peerInf) = ted_iter.remote.getInt();
-    break;
+        if (ted_iter.linkid.getInt()==peerIP &&
+            ted_iter.advrouter.getInt()==local_addr)
+        {
+            (*peerInf) = ted_iter.remote.getInt();
+            break;
+        }
     }
-
-
-     }
 }
 
 void RSVPAppl::getIncInet(int remoteInet, int* incInet)
 {
-   std::vector<telinkstate>::iterator ted_iterI;
+    std::vector<telinkstate>::iterator ted_iterI;
     telinkstate ted_iter;
 
-     ev << "Find incoming inf for peerOutgoinglink=" << IPAddress(remoteInet).getString() << "\n";
+    ev << "Find incoming inf for peerOutgoinglink=" << IPAddress(remoteInet).getString() << "\n";
     updateTED();
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
         ted_iter = (telinkstate)*ted_iterI;
-    if((ted_iter.remote.getInt() == remoteInet) &&
-                (ted_iter.advrouter.getInt()==local_addr))
-    {
-    (*incInet) = ted_iter.local.getInt();
-    break;
+        if (ted_iter.remote.getInt() == remoteInet &&
+            ted_iter.advrouter.getInt()==local_addr)
+        {
+            (*incInet) = ted_iter.local.getInt();
+            break;
+        }
     }
-
-
-     }
-
 }
 
 void RSVPAppl::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
@@ -923,9 +897,6 @@ void RSVPAppl::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
             break;
         }
     }
-
-
-
 }
 
 void RSVPAppl::getPeerIPAddress(int peerInf, int* peerIP)
@@ -940,107 +911,16 @@ void RSVPAppl::getPeerIPAddress(int peerInf, int* peerIP)
         if(ted_iter.local.getInt() == peerInf &&
                           ted_iter.advrouter.getInt() ==local_addr)
         {
-
             *peerIP = ted_iter.linkid.getInt();
             break;
         }
     }
 }
-void RSVPAppl::findOSPFTE()
-{
-  cObject *foundmod;
 
-    cModule *curmod = this;
-
-    ospfte = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-
-            curmod = curmod->parentModule())
-
-    {
-
-        if ((foundmod = curmod->findObject("ospf_te", false)) != NULL)
-
-        {
-
-            ospfte = (OspfTe *)foundmod;
-
-            break;
-
-        }
-
-    }
-
-
-
-    if(ospfte==NULL)
-
-    ev << "Error occurs - Fail to find OSPFTE" << "\n";
-
-    else
-
-    ev << "OSPFTE found succesfully" << "\n";
-
-}
-
-void RSVPAppl::findRoutingTable()
-
-{
-
-      cObject *foundmod;
-
-    cModule *curmod = this;
-
-
-
-
-
-    // find LIB Table
-
-    rt = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-
-            curmod = curmod->parentModule())
-
-    {
-
-        if ((foundmod = curmod->findObject("routingTable", false)) != NULL)
-
-        {
-
-            rt = (RoutingTable *)foundmod;
-
-            break;
-
-        }
-
-    }
-
-
-
-    if(rt==NULL)
-
-    ev << "Error occurs - Fail to find routing table" << "\n";
-
-    else
-
-    ev << "Routing Table found succesfully" << "\n";
-
-}
 void RSVPAppl::updateTED()
 {
-
-    // find TED
-
-    cTopology topo;
-    topo.extractByModuleType( "TED", NULL );
-
-    sTopoNode *node = topo.node(0);
-    TED *module = (TED*)(node->module());
-    ted = *(module->getTED());
-
+    // copy the full table
+    ted = TED::getGlobalInstance()->getTED();
 }
 
 
@@ -1094,7 +974,6 @@ bool RSVPAppl::initFromFile(const char *filename)
 
 void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
 {
-
     traffic_request_t* aTR = new traffic_request_t;
     for(int c=0;c< MAX_ROUTE;c++)
     {
@@ -1148,15 +1027,15 @@ void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
             //aTR->route[rCount].node= IPAddress(
             const char* line=(const char*)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string s(line);
-             StringTokenizer* tokenizer =new StringTokenizer(s, string(","));
-             int node;
-             int lBit;
-             string* aField;
+            StringTokenizer tokenizer(s, string(","));
+            int node;
+            int lBit;
+            string* aField;
 
-              while ((aField=(tokenizer->nextToken()))!=NULL)
-              {
+            while ((aField=(tokenizer.nextToken()))!=NULL)
+            {
                   node = IPAddress(aField->c_str()).getInt();
-                  if((aField = tokenizer->nextToken()) !=NULL)
+                  if((aField = tokenizer.nextToken()) !=NULL)
                   lBit = atoi(aField->c_str());
 
                   aTR->route[rCount].node = node;
@@ -1166,13 +1045,8 @@ void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
                   rCount = rCount+1;
                   if(rCount > MAX_ROUTE)
                   break;
-              }
-
-
+            }
         }
-
-
-
         cur = cur->next;
     }
     ev << "Adding (src, dest, delay, bw) = (" << IPAddress(aTR->src).getString() << "," <<
@@ -1181,67 +1055,12 @@ void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
                              aTR->bandwidth << ")\n";
     if(aTR->holdingPri > aTR->setupPri)
     {
-        ev << "Waning setup priority is higher than holding priority\n";
-        ev << "The number of setup priority must be greater than or equal the number of holding priority\n";
-        ev << "Reset holding Priority\n";
-
-        aTR->setupPri = aTR->holdingPri;
+        error("Holding priority is greater than setup priority (setup priority must be greater than or equal)");
     }
     tr.push_back(*aTR);
 }
 
-void RSVPAppl::findMyMPLS()
-{
 
-      cObject *foundmod;
-    cModule *curmod = this;
-    mplsMod = NULL;
-    for (curmod = parentModule(); curmod != NULL;curmod = curmod->parentModule())
-    {
-
-    foundmod =   (curmod->findObject("mplsModule", false));
-
-        if (foundmod != NULL)
-        {
-            mplsMod = (cModule *)foundmod;
-
-            break;
-        }
-
-    }
-
-    if(mplsMod==NULL)
-    ev << "Error occurs - Fail to find  my MPLS" << "\n" <<
-
-    "Check again module name, supposed to be mplsModule\n";
-
-    else
-    ev << "MPLS module found succesfully" << "\n";
-}
-
-void RSVPAppl::findLIB()
-{
-cObject *foundmod;
-    cModule *curmod = this;
-
-
-    // find LIB Table
-    lt = NULL;
-    for (curmod = parentModule(); curmod != NULL;
-            curmod = curmod->parentModule())
-    {
-        if ((foundmod = curmod->findObject("libTable", false)) != NULL)
-        {
-            lt = (LIBTable *)foundmod;
-            ev << "LIBTABLE DEBUG: Lib table found successfully\n";
-            break;
-        }
-    }
-
-    if(lt==NULL)
-    ev << "LIBTABLE DEBUG: Error, cannot find lib table\n";
-
-}
 
 void RSVPAppl::addRouteInfo(ResvMessage* rmsg)
 {
@@ -1268,6 +1087,8 @@ void RSVPAppl::addRouteInfo(ResvMessage* rmsg)
 
 bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t* newFlowspec)
 {
+        OspfTe *ospfte = ospfteAccess.get();
+
           std::vector<lsp_tunnel_t>::iterator iterF;
           lsp_tunnel_t aTunnel;
 

@@ -102,11 +102,7 @@ void IPFragmentation::sendDatagramToOutput(IPDatagram *datagram)
 {
     int outputPort = datagram->outputPort();
     if (outputPort >= numOfPorts)
-    {
-        ev << "Error in IPFragmentation: illegal output port " << outputPort << endl;
-        delete datagram;
-        return;
-    }
+        error("Illegal output port %d", outputPort);
 
     send(datagram, "outputOut", outputPort);
 }

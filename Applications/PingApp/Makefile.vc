@@ -90,7 +90,7 @@ PingApp.obj: PingApp.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -123,6 +123,7 @@ PingApp.obj: PingApp.cc \
   ..\..\Network\IPv4\Core/RoutingTableAccess.h \
   ..\..\Network\IPv4\Core/ICMPMessage.h \
   ..\..\Base/AbstractQueue.h \
+  ..\..\Base/ModuleAccess.h \
   ..\..\Network\IPv4\Core/RoutingTable.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4\Core/ICMPMessage_m.h

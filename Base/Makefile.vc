@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= AbstractQueue.obj Join.obj QueueBase.obj QueueWithQoS.obj Sink.obj
+OBJS= AbstractQueue.obj Join.obj ModuleAccess.obj QueueBase.obj QueueWithQoS.obj Sink.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -83,6 +83,9 @@ AbstractQueue.obj: AbstractQueue.cc
 Join.obj: Join.cc
 	$(CXX) -c $(COPTS) /Tp Join.cc
 
+ModuleAccess.obj: ModuleAccess.cc
+	$(CXX) -c $(COPTS) /Tp ModuleAccess.cc
+
 QueueBase.obj: QueueBase.cc
 	$(CXX) -c $(COPTS) /Tp QueueBase.cc
 
@@ -102,7 +105,7 @@ Sink.obj: Sink.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -125,6 +128,8 @@ re-makemake: makefiles
 AbstractQueue.obj: AbstractQueue.cc \
   AbstractQueue.h
 Join.obj: Join.cc
+ModuleAccess.obj: ModuleAccess.cc \
+  ModuleAccess.h
 QueueBase.obj: QueueBase.cc \
   QueueBase.h \
   AbstractQueue.h

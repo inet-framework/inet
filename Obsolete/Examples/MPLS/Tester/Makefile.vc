@@ -93,7 +93,7 @@ NewRouteTester.obj: NewRouteTester.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -119,14 +119,15 @@ NewBWRequestTester.obj: NewBWRequestTester.cc \
   d:\home\IPSuite-local/Network/MPLS/MPLSPacket.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPDatagram.h \
   d:\home\IPSuite-local/Network/MPLS/LIBTableAccess.h \
+  d:\home\IPSuite-local/Network/IPv4/Core/RoutingTableAccess.h \
   d:\home\IPSuite-local/Network/IPv4/Core/RoutingTable.h \
   d:\home\IPSuite-local/Network/MPLS/ConstType.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPDatagram_m.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPAddress.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPInterfacePacket.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPInterfacePacket_m.h \
+  d:\home\IPSuite-local/Base/ModuleAccess.h \
   d:\home\IPSuite-local/Network/MPLS/LIBtable.h \
-  d:\home\IPSuite-local/Network/IPv4/Core/RoutingTableAccess.h \
   d:\home\IPSuite-local/Network/MPLS/ip_address_prefix.h \
   d:\home\IPSuite-local/Network/MPLS/StringTokenizer.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h
@@ -137,14 +138,15 @@ NewRouteTester.obj: NewRouteTester.cc \
   d:\home\IPSuite-local/Network/MPLS/MPLSPacket.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPDatagram.h \
   d:\home\IPSuite-local/Network/MPLS/LIBTableAccess.h \
+  d:\home\IPSuite-local/Network/IPv4/Core/RoutingTableAccess.h \
   d:\home\IPSuite-local/Network/IPv4/Core/RoutingTable.h \
   d:\home\IPSuite-local/Network/MPLS/ConstType.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPDatagram_m.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPAddress.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPInterfacePacket.h \
   d:\home\IPSuite-local/Network/IPv4/Core/IPInterfacePacket_m.h \
+  d:\home\IPSuite-local/Base/ModuleAccess.h \
   d:\home\IPSuite-local/Network/MPLS/LIBtable.h \
-  d:\home\IPSuite-local/Network/IPv4/Core/RoutingTableAccess.h \
   d:\home\IPSuite-local/Network/MPLS/ip_address_prefix.h \
   d:\home\IPSuite-local/Network/MPLS/StringTokenizer.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h

@@ -3,12 +3,11 @@
 
 
 
-#include "tcp.h"
-#include "omnetpp.h"
 #include <string>
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
+#include "tcp.h"
 #include "LDPpacket.h"
 #include "LDPproc.h"
 

@@ -8,7 +8,6 @@
 *    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
 *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
 *    See the GNU Lesser General Public License for more details.
 *
 *
@@ -21,99 +20,38 @@
 #include "tcp.h"
 #include "LDPproc.h"
 #include "RoutingTable.h"
-#include "InfoManager.h"
 #include "MPLSModule.h"
 
- //Define_Module( LDPProc );
 
-Define_Module( LDPproc);
+Define_Module(LDPproc);
 
 
 
 void LDPproc::initialize()
 {
-
-   LIBTableAccess::initialize();
-
-  //Get number of peers, we don't want to rely on intialisation time period only
-
-   //This is an assumption
-
-  peerNo=(int)par("peerNo").longValue();
-
-  discoveryTimeout =par("udpInitTimeout").doubleValue();
-
-}
-
-
-
-void LDPproc::findRoutingTable()
-{
-
-      cObject *foundmod;
-
-    cModule *curmod = this;
-
-
-
-
-
-    // find LIB Table
-
-    rt = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-
-            curmod = curmod->parentModule())
-    {
-        if ((foundmod = curmod->findObject("routingTable", false)) != NULL)
-        {
-
-            rt = (RoutingTable *)foundmod;
-
-            break;
-
-        }
-
-    }
-
-
-
-    if(rt==NULL)
-        ev << "Error occurs - Fail to find routing table" << "\n";
-
-    else
-
-    ev << "Routing Table found succesfully" << "\n";
-
+    //Get number of peers, we don't want to rely on intialisation time period only
+    //This is an assumption
+    peerNo=(int)par("peerNo").longValue();
+    discoveryTimeout =par("udpInitTimeout").doubleValue();
 }
 
 
 
 void LDPproc::activity()
-
 {
-     int i;
+    RoutingTable *rt = routingTableAccess.get();
+    MPLSModule *mplsMod = mplsAccess.get();
 
 /********************************************************************************
-*                                                                                *
-*                                PARAMETERS INTIALISED                            *
-*                                                                                *
+*                                                                               *
+*                                PARAMETERS INTIALISED                          *
+*                                                                               *
 *********************************************************************************/
-
-    //Initialize routing table and find its own mpls module.
-
-    findRoutingTable();
-
-    findMyMPLS();
-
-
 
     // Find its own address, this is important since it needs to notify all neigbour
     // this information in HELLO message.
 
     cModule *curmod = this;
-
     for (curmod = parentModule(); curmod != NULL;
             curmod = curmod->parentModule())
     {
@@ -132,18 +70,15 @@ void LDPproc::activity()
 
     }
 
-
-
     ev << "*************"<<id.c_str() << " LDP daemon starts*************\n" ;
 
     if(local_addr == -1)
-
         ev << "Warning - Cannot find my address - Set to 0\n";
 
 /********************************************************************************
-*                                                                                *
-*                                PHASE 1: DISCOVERY                               *
-*                                                                                *
+*                                                                               *
+*                                PHASE 1: DISCOVERY                             *
+*                                                                               *
 *********************************************************************************/
 
 
@@ -152,7 +87,7 @@ void LDPproc::activity()
     // Each LDP capable router sends HELLO messages to a multicast address to all
     // of routers in the sub-network
 
-    cMessage* helloMsg =new cMessage();
+    cMessage* helloMsg =new cMessage("ldp-broadcast-request");
 
     helloMsg->setKind(LDP_BROADCAST_REQUEST);
     helloMsg->addPar("peerID")=id.c_str();
@@ -160,63 +95,42 @@ void LDPproc::activity()
     send(helloMsg, "to_udp_interface");
 
     //Wait for all replies from peers - MESSAGES from UDP interface
-
+    int i;
     for(i=0;i<peerNo;i++)
     {
-
         cMessage* msg =receive();
-
         if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
         {
+            int anAddr = IPAddress((msg->par("src_addr").stringValue())).getInt();
+            string anID = string(msg->par("peerID").stringValue());
+            string anInterface = this->findInterfaceFromPeerAddr(anAddr);
 
-            if(msg!=NULL)
-            {
-
-                int anAddr = IPAddress((msg->par("src_addr").stringValue())).getInt();
-                string anID = string(msg->par("peerID").stringValue());
-                string anInterface = this->findInterfaceFromPeerAddr(anAddr);
-
-                ev << "LSR(" << IPAddress(local_addr).getString() << "): " <<
-                    "get multicast from " <<
-                    (IPAddress(anAddr).getString()) << "\n";
+            ev << "LSR(" << IPAddress(local_addr).getString() << "): " <<
+                "get multicast from " <<
+                (IPAddress(anAddr).getString()) << "\n";
 
 
-                peer_info *info = new peer_info;
+            peer_info *info = new peer_info;
 
-                info->peerIP = anAddr;
-                info->linkInterface=anInterface;
-                info->peerID=anID;
+            info->peerIP = anAddr;
+            info->linkInterface=anInterface;
+            info->peerID=anID;
 
 
-                if(anAddr > local_addr)
-                    info->role = string("Client");
-                else
-                    info->role = string("Server");
-
-                //Initialize the table of Hello adjacencies.
-
-                myPeers.push_back(*info);
-
-            }
-
+            if(anAddr > local_addr)
+                info->role = string("Client");
             else
-            {
+                info->role = string("Server");
 
-            }
+            //Initialize the table of Hello adjacencies.
 
+            myPeers.push_back(*info);
         }
-
         else
         {
-
-            ev << "Receive non-UDP messages during initialisation, deleting\n";
-
+            ev << "Received non-UDP messages during initialisation, deleting\n";
             delete msg;
-
         }
-
-
-
     }
 
 /********************************************************************************
@@ -259,30 +173,10 @@ void LDPproc::activity()
 
     }
 
-
-
     //Signal the MPLS that it can start making queries
-
-    if(mplsMod !=NULL)
-    {
-
-        cMessage* signalMsg = new cMessage();
-
-        ev << "Finish LDP sessions setup with peers\n";
-
-        sendDirect(signalMsg, 0.0, mplsMod, "fromSignalModule");
-
-    }
-    else
-
-    {
-
-        ev << "Error occurs, my MPLS module not found\n";
-
-    }
-
-
-
+    cMessage* signalMsg = new cMessage();
+    ev << "Finish LDP sessions setup with peers\n";
+    sendDirect(signalMsg, 0.0, mplsMod, "fromSignalModule");
 
 /********************************************************************************
 *                                                                                *
@@ -312,7 +206,7 @@ void LDPproc::activity()
           int gateIndex =msg->par("gateIndex");
           InterfaceEntry* ientry= rt->getInterfaceByIndex(gateIndex);
 
-          string fromInterface =string(ientry->name);
+          string fromInterface =string(ientry->name.c_str());
 
           //LDP checks if there is any previous pending requests for
           //the same FEC.
@@ -383,141 +277,60 @@ void LDPproc::activity()
               }
 
           }
-
-
       }//End if
-
       //Data from TCP Interface
-
-       else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
-       {
-
-       LDPpacket* ldpPacket;
-
-
-       //We process ldp packet only
-
-       ldpPacket = (LDPpacket*)msg;
-
-       if(ldpPacket == NULL)
-
-       {
-
-
-           ev << "Received non-LDP packet from TCP Interface layer, deleting message\n";
-
-           delete msg;
-
-           continue;
-
-       }
-
-
-       int msgType=ldpPacket->kind();
-
-            switch (msgType)
-
-            {
-
-               case HELLO:
-
-                    //processingHELLO(ldpPacket);
-
-                   ev << "Received LDP HELLO message\n";
-
-                    break;
-
-
-               case  ADDRESS:
-
-                    //processingADDRESS(ldpPacket);
-
-                    ev << "Received LDP ADDRESS message\n" <<
-
-                                    "Unsupported in this version\n";
-
-                    delete msg;
-
-
-                    break;
-
-
-
-               case ADDRESS_WITHDRAW:
-
-                    //processingADDRESS_WITHDRAW(ldpPacket);
-
-                    ev << "LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message\n" <<
-
-                                    "Unsupported in this version\n";
-
-                    delete msg;
-
-                    break;
-
-
-
-               case LABEL_MAPPING:
-
-                    processingLABEL_MAPPING((LabelMappingMessage*)ldpPacket);
-
-                    break;
-
-
-
-               case LABEL_REQUEST:
-
-                   processingLABEL_REQUEST((LabelRequestMessage*)ldpPacket);
-
-                   break;
-
-
-
-               case LABEL_WITHDRAW:
-
-                   //processingLABEL_WITHDRAW(ldpPacket);
-
-                    ev << "LDP PROC DEBUG: Received LDP LABEL_WITHDRAW message\n" <<
-
-                                    "Unsupported in this version\n";
-
-                    delete msg;
-
-                   break;
-
-               case LABEL_RELEASE:
-
-                   //processingLABEL_RELEASE(ldpPacket);
-
-                    ev << "LDP PROC DEBUG: Received LDP LABEL_RELEASE message\n" <<
-
-                                    "Unsupported in this version\n";
-
-                    delete msg;
-
-                   break;
-
-               default:
-
-                    ev << "LDP PROC DEBUG: Unrecognized LDP Message Type, type is " <<
-
-                    msgType << " deleting the message\n";
-
-                    delete msg;
-
-
-
-            }
-
-
-
-
-
+      else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
+      {
+          //We process ldp packet only
+          LDPpacket *ldpPacket = check_and_cast<LDPpacket*>(msg);
+
+          int msgType=ldpPacket->kind();
+          switch (msgType)
+          {
+             case HELLO:
+                  //processingHELLO(ldpPacket);
+                  ev << "Received LDP HELLO message\n"; // FIXME so what to do with it? --Andras
+                  break;
+
+             case  ADDRESS:
+                  //processingADDRESS(ldpPacket);
+                  error("Received LDP ADDRESS message, unsupported in this version");
+                  //delete msg;
+                  //break;
+
+             case ADDRESS_WITHDRAW:
+                  //processingADDRESS_WITHDRAW(ldpPacket);
+                  error("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
+                  //delete msg;
+                  //break;
+
+             case LABEL_MAPPING:
+                  processingLABEL_MAPPING(check_and_cast<LabelMappingMessage*>(ldpPacket));
+                  break;
+
+             case LABEL_REQUEST:
+                  processingLABEL_REQUEST(check_and_cast<LabelRequestMessage*>(ldpPacket));
+                  break;
+
+             case LABEL_WITHDRAW:
+                  //processingLABEL_WITHDRAW(ldpPacket);
+                  error("LDP PROC DEBUG: Received LDP LABEL_WITHDRAW message, unsupported in this version");
+                  //delete msg;
+                  //break;
+
+             case LABEL_RELEASE:
+                  //processingLABEL_RELEASE(ldpPacket);
+                  error("LDP PROC DEBUG: Received LDP LABEL_RELEASE message, unsupported in this version");
+                  //delete msg;
+                  //break;
+
+             default:
+                  error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", msgType);
+                  delete msg;
+        }
       }//End else if
 
     }//End for
-
-
 
 }//End activity method
 
@@ -529,6 +342,7 @@ void LDPproc::activity()
 int LDPproc::locateNextHop(int fec)
 
 {
+    RoutingTable *rt = routingTableAccess.get();
 
     // Lookup the routing table, rfc3036
     //When the FEC for which a label is requested is a Prefix FEC Element or
@@ -544,7 +358,7 @@ int LDPproc::locateNextHop(int fec)
     for(i=0;i<routes->items();i++)
     {
         e    = (RoutingEntry*)(routes->get(i));
-        if((e->host->getInt()) == fec)
+        if((e->host.getInt()) == fec)
         break;
 
     }
@@ -554,7 +368,7 @@ int LDPproc::locateNextHop(int fec)
 
     //Find out the IP of the other end LSR
 
-    string iName = string(e->interfaceName);
+    string iName = string(e->interfaceName.c_str());
 
     return findPeerAddrFromInterface(iName);
 
@@ -566,6 +380,7 @@ int LDPproc::locateNextHop(int fec)
 
 int LDPproc::findPeerAddrFromInterface(string interfaceName)
 {
+    RoutingTable *rt = routingTableAccess.get();
 
     //vector<IPAddress> *addresses;
 
@@ -573,19 +388,20 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
     int k=0;
 
-    int interfaceIndex = rt->interfaceNameToNo(interfaceName.c_str());
+    int interfaceIndex = rt->findInterfaceByName(interfaceName.c_str());
 
     cArray* routeTable = rt->getRouteTable();
 
     RoutingEntry* anEntry;
 
     for(i=0;i< (routeTable->items());i++)
+    {
 
         for(k=0;k<myPeers.size();k++)
         {
             anEntry= (RoutingEntry*)(routeTable->get(i));
 
-            if((anEntry->host->getInt())
+            if((anEntry->host.getInt())
 
                 == (myPeers[k].peerIP) &&
 
@@ -595,7 +411,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
                 //addresses->push_back(peerIP[k]);
         }
-
+    }
 
     //Return any IP which has default route - not in routing table entries
 
@@ -605,7 +421,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
             anEntry= (RoutingEntry*)(routeTable->get(i));
 
-            if((anEntry->host->getInt())
+            if((anEntry->host.getInt())
 
                 == (myPeers[i].peerIP))
 
@@ -617,7 +433,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 
     }
 
-        return myPeers[i].peerIP;
+    return myPeers[i].peerIP;
 
 }
 
@@ -625,6 +441,7 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
 //Pre-condition: myPeers vector is finalized
 string LDPproc::findInterfaceFromPeerAddr(int peerIP)
 {
+    RoutingTable *rt = routingTableAccess.get();
 /*
     int i;
     for(int i=0;i<myPeers.size();i++)
@@ -636,13 +453,15 @@ string LDPproc::findInterfaceFromPeerAddr(int peerIP)
 */
 //    Rely on port index to find the interface name
     int index = rt->outputPortNo(IPAddress(peerIP));
-    return string(rt->getInterfaceByIndex(index)->name);
+    return string(rt->getInterfaceByIndex(index)->name.c_str());
 
 }
 
 
 void LDPproc::processingLABEL_REQUEST(LabelRequestMessage *packet)
 {
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
 
         //Only accept new requests
           int fec = packet->getFec();
@@ -755,27 +574,26 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage *packet)
          else //Propagate downstream
          {
              ev << "Cannot find label for the fec " <<
-
-                 IPAddress(fec).getString() << "\n";
+             IPAddress(fec).getString() << "\n";
 
 
              //Set paramters allowed to send downstream
 
              int peerIP =locateNextHop(fec);
 
-            if(peerIP !=0)
-            {
-                packet->setReceiverAddress(peerIP);
-                packet->setSenderAddress(local_addr);
+             if(peerIP !=0)
+             {
+                 packet->setReceiverAddress(peerIP);
+                 packet->setSenderAddress(local_addr);
 
-                 ev << "Propagating Label Request from LSR(" <<
+                  ev << "Propagating Label Request from LSR(" <<
 
-                     IPAddress(packet->getSenderAddress()).getString() << " to " <<
+                      IPAddress(packet->getSenderAddress()).getString() << " to " <<
 
-                     IPAddress(packet->getReceiverAddress()).getString() << ")\n";
+                      IPAddress(packet->getReceiverAddress()).getString() << ")\n";
 
-                  send(packet,"to_tcp_interface");
-            }
+                   send(packet,"to_tcp_interface");
+             }
 
          }
 
@@ -785,187 +603,104 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage *packet)
 
 void LDPproc::processingLABEL_MAPPING(LabelMappingMessage *packet)
 {
+    LIBTable *lt = libTableAccess.get();
+    MPLSModule *mplsMod = mplsAccess.get();
 
-            int fec = packet->getFec();
-            int label = packet->getLabel();
-            int fromIP = packet->getSenderAddress();
-            // int fecId = packet->par("fecId"); -- FIXME was not used (?)
+    int fec = packet->getFec();
+    int label = packet->getLabel();
+    int fromIP = packet->getSenderAddress();
+    // int fecId = packet->par("fecId"); -- FIXME was not used (?)
 
-            ev << "LSR("<<IPAddress(local_addr).getString() << ") gets mapping Label =" << label << " for fec =" <<
+    ev << "LSR("<<IPAddress(local_addr).getString() << ") gets mapping Label =" << label << " for fec =" <<
 
-                          IPAddress(fec).getString() << " from LSR(" << IPAddress(fromIP).getString() <<
+                  IPAddress(fec).getString() << " from LSR(" << IPAddress(fromIP).getString() <<
 
-                          ")\n";
-
-
-
-            //This is the outgoing interface for the FEC
-            string outInterface = findInterfaceFromPeerAddr(fromIP);
-            string inInterface;
-
-
-            if(isIR )
-            {
-
-                cMessage* signalMPLS = new cMessage();
-
-                signalMPLS->addPar("label") = label;
-
-                signalMPLS->addPar("fecInt")= fec;
-                signalMPLS->addPar("my_name") = 0;
-                int myfecID =-1;
-
-                //Install new label
-                for(int k=0;k<FecSenderBinds.size();k++)
-                {
-                    if(FecSenderBinds[k].fec==fec)
-                    {
-                        myfecID =   FecSenderBinds[k].fecID;
-                        signalMPLS->addPar("fec") = myfecID;
-                        inInterface = FecSenderBinds[k].fromInterface;
-                        //Remove the item
-                        FecSenderBinds.erase(FecSenderBinds.begin()+k);
-
-                        break;
-                    }
-
-                }
-
-                lt->installNewLabel(label, inInterface, outInterface,myfecID, PUSH_OPER);
-
-                if(mplsMod !=NULL)
-                {
-
-                    ev << "Send to my MPLS module\n";
-
-                    sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
-
-                }
-
-                else
-                {
-
-                    ev << "Error occurs, get mapping label for " <<
-
-                        "my MPLS but unable to locate the this module\n";
-
-                }
-                delete packet;
-
-            }
-
-            else
-            {
-
-                //Install new label
-                for(int k=0;k<FecSenderBinds.size();k++)
-                {
-                    if(FecSenderBinds[k].fec==fec)
-                    {
-                        inInterface = FecSenderBinds[k].fromInterface;
-                        //Remove the item
-                        FecSenderBinds.erase(FecSenderBinds.begin()+k);
-
-                        break;
-                    }
-
-                }
+                  ")\n";
 
 
 
-                //Install new label
-                int inLabel = lt->installNewLabel(label, inInterface, outInterface,fec, SWAP_OPER);
-                packet->setMapping(inLabel, fec);
-                int addrToSend =this->findPeerAddrFromInterface(inInterface);
-
-                packet->setReceiverAddress(addrToSend);
-                packet->setSenderAddress(local_addr);
+    //This is the outgoing interface for the FEC
+    string outInterface = findInterfaceFromPeerAddr(fromIP);
+    string inInterface;
 
 
-                ev << "LSR("<<IPAddress(local_addr).getString() << ") sends Label mapping label=" << inLabel <<
-                    " for fec =" << IPAddress(fec).getString() << " to " <<
-
-                    "LSR(" << IPAddress(addrToSend).getString() << ")\n";
-
-                send(packet,"to_tcp_interface");
-
-                //delete packet;
-
-            }
-
-
-
-}
-
-
-
-
-void LDPproc::findMyMPLS()
-{
-
-      cObject *foundmod;
-
-    cModule *curmod = this;
-
-
-    mplsMod = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-
-            curmod = curmod->parentModule())
+    if(isIR )
     {
 
-    foundmod =   (curmod->findObject("mplsModule", false));
+        cMessage* signalMPLS = new cMessage();
 
-        if (foundmod != NULL)
+        signalMPLS->addPar("label") = label;
+
+        signalMPLS->addPar("fecInt")= fec;
+        signalMPLS->addPar("my_name") = 0;
+        int myfecID =-1;
+
+        //Install new label
+        for(int k=0;k<FecSenderBinds.size();k++)
         {
-            mplsMod = (cModule *)foundmod;
+            if(FecSenderBinds[k].fec==fec)
+            {
+                myfecID =   FecSenderBinds[k].fecID;
+                signalMPLS->addPar("fec") = myfecID;
+                inInterface = FecSenderBinds[k].fromInterface;
+                //Remove the item
+                FecSenderBinds.erase(FecSenderBinds.begin()+k);
 
-            break;
+                break;
+            }
+
         }
 
+        lt->installNewLabel(label, inInterface, outInterface,myfecID, PUSH_OPER);
+
+        ev << "Send to my MPLS module\n";
+        sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
+        delete packet;
+
     }
-
-    if(mplsMod==NULL)
-    ev << "Error occurs - Fail to find  my MPLS" << "\n" <<
-
-    "Check again module name, supposed to be mplsModule\n";
 
     else
-    ev << "MPLS module found succesfully" << "\n";
-}
-
-void LDPproc::findInfoManager()
-{
-
-      cObject *foundmod;
-
-    cModule *curmod = this;
-
-
-    infoManager = NULL;
-
-    for (curmod = parentModule(); curmod != NULL;
-
-            curmod = curmod->parentModule())
     {
 
-    foundmod =   (curmod->findObject("infoManager", false));
-
-        if (foundmod != NULL)
+        //Install new label
+        for(int k=0;k<FecSenderBinds.size();k++)
         {
-            infoManager = (InfoManager *)foundmod;
+            if(FecSenderBinds[k].fec==fec)
+            {
+                inInterface = FecSenderBinds[k].fromInterface;
+                //Remove the item
+                FecSenderBinds.erase(FecSenderBinds.begin()+k);
 
-            break;
+                break;
+            }
+
         }
+
+
+
+        //Install new label
+        int inLabel = lt->installNewLabel(label, inInterface, outInterface,fec, SWAP_OPER);
+        packet->setMapping(inLabel, fec);
+        int addrToSend =this->findPeerAddrFromInterface(inInterface);
+
+        packet->setReceiverAddress(addrToSend);
+        packet->setSenderAddress(local_addr);
+
+
+        ev << "LSR("<<IPAddress(local_addr).getString() << ") sends Label mapping label=" << inLabel <<
+            " for fec =" << IPAddress(fec).getString() << " to " <<
+
+            "LSR(" << IPAddress(addrToSend).getString() << ")\n";
+
+        send(packet,"to_tcp_interface");
+
+        //delete packet;
 
     }
 
 
+
 }
-
-
-
 
 
 

@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= IPSuite MPLS
-SUBDIR_TARGETS=  IPSuite_dir MPLS_dir
+SUBDIRS= MPLS IPSuite 
+SUBDIR_TARGETS=  MPLS_dir IPSuite_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
@@ -91,7 +91,7 @@ MPLS_dir:
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL

@@ -16,23 +16,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __RROUTING_TABLE_ACCESS_H__
-#define __RROUTING_TABLE_ACCESS_H__
+#ifndef __ROUTING_TABLE_ACCESS_H__
+#define __ROUTING_TABLE_ACCESS_H__
 
 #include <omnetpp.h>
+#include "ModuleAccess.h"
 #include "RoutingTable.h"
+
 
 /**
  * Gives access to the RoutingTable.
  */
-class RoutingTableAccess
+class RoutingTableAccess : public ModuleAccess<RoutingTable>
 {
-  private:
-    RoutingTable *rt;
-
-  public:
-    RoutingTableAccess() {rt=NULL;}
-    RoutingTable *get();
+    public:
+        RoutingTableAccess() : ModuleAccess<RoutingTable>("routingTable") {}
 };
 
 #endif

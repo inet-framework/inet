@@ -19,20 +19,20 @@
 
 #include <omnetpp.h>
 #include "UDPApp.h"
+#include "UDPInterfacePacket_m.h"
 
-// UDPApp: generic UDP application baseclass
 
 // No module definition required, since there's no NED definition
 // Define_Module( UDPAppBase );
 
 void UDPAppBase::initialize()
 {
-    strcpy(_nodename, par("nodename"));
-    _local_port = par("local_port");
-    _dest_port = par("dest_port");
-    _msg_length = par("message_length");
-    _msg_freq = par("message_freq");
-    _destType = par("routeDestNo");
+    nodeName = par("nodename");
+    localPort = par("local_port");
+    destPort = par("dest_port");
+    msgLength = par("message_length");
+    msgFreq = par("message_freq");
+    destType = par("routeDestNo");
 }
 
 
@@ -42,40 +42,21 @@ Define_Module(UDPServer);
 
 void UDPServer::handleMessage(cMessage *msg)
 {
-    simtime_t arrivalTime = msg->arrivalTime();
-    int sent_port = msg->par("src_port");
-    int rec_port = msg->par("dest_port");
-    int content = msg->par("content");
-    bool isRequest = msg->par("request");
-    int length = msg->length();
+    UDPInterfacePacket *udpIfPacket = check_and_cast<UDPInterfacePacket *>(msg);
+    cMessage *payload = udpIfPacket->decapsulate();
 
-    IPAddress src = msg->par("src_addr").stringValue();
-    IPAddress dest = msg->par("dest_addr").stringValue();
+    IPAddress src = udpIfPacket->getSrcAddr();
+    IPAddress dest = udpIfPacket->getDestAddr();
+    int sentPort = udpIfPacket->getSrcPort();
+    int recPort = udpIfPacket->getDestPort();
 
-    // print out Packet info
-    ev  << "\n+++" << _nodename << " UDP Server: Packet received:";
-    ev  << "Cont: " << content
-        << (isRequest ? " Request" : " Reply")
-        << " BitLength: " << length
-        << " Arr. Time: " << arrivalTime
-        << " Simtime: " << simTime() << endl;
-    ev  << "Src/Port: " << src.getString() << " / " << sent_port << "  ";
-    ev  << "Dest/Port: " << dest.getString() << " / " << rec_port << endl;
+    ev  << nodeName.c_str() << " UDP Server: Packet received: " << payload << endl;
+    ev  << "Payload length: " << (payload->length()/8) << " bytes" << endl;
+    ev  << "Src/Port: " << src.getString() << " / " << sentPort << "  ";
+    ev  << "Dest/Port: " << dest.getString() << " / " << recPort << endl;
 
-    delete (msg);
-
-    if (!isRequest)
-        return;
-
-    // send reply, reverse src and dest
-    /* problem: no out gate!!!
-    cPacket *np = p->dup();
-    np->addPar("request") = false;
-    IPInterface *nip = new IPInterface(np, src);
-    nip->setSrcAddr(dest);
-    nip->setProtocol(protocol);
-    send(nip, "to_udp");
-    */
+    delete udpIfPacket;
+    delete payload;
 }
 
 
@@ -98,32 +79,26 @@ void UDPClient::activity()
 
     while(true)
     {
-        cMessage *msg = new cMessage();
-        wait(truncnormal(_msg_freq, _msg_freq * 0.1));
+        wait(truncnormal(msgFreq, msgFreq * 0.1));
 
-        msg->setLength(1 + intrand(_msg_length));
-        msg->addPar("content") = contCtr++;
-        msg->addPar("request") = true;
+        cMessage *payload = new cMessage();
+        payload->setLength(8*(1+intrand(msgLength)));
 
-        IPAddress _dest_addr;
-        chooseDestAddr(_dest_addr);
-        msg->addPar("dest_addr").setStringValue( _dest_addr.getString() );
-        msg->addPar("src_port") = _local_port;
-        msg->addPar("dest_port") = _dest_port;
+        UDPInterfacePacket *udpIfPacket = new UDPInterfacePacket();
+        udpIfPacket->encapsulate(payload);
 
+        IPAddress destAddr;
+        chooseDestAddr(destAddr);
+        udpIfPacket->setDestAddr(destAddr);
+        udpIfPacket->setSrcPort(localPort);
+        udpIfPacket->setDestPort(destPort);
 
-        ev << "\n*** " << _nodename
-            << " UDP App: Packet sent:"
-            << "\nContent: " << int(msg->par("content"))
-            << " Bitlength: " << int(msg->length())
-            << "    Simtime: " << simTime()
-            << "\nSrc: " << "unknown"
-            << " / " << _local_port
-            << "   Dest: " << _dest_addr.getString()
-            << " / " << _dest_port
-            << "\n";
-        send(msg, "to_udp");
+        ev << nodeName.c_str() <<" UDP App: Packet sent: " << payload << endl;
+        ev << "Payload length: " << (payload->length()/8) << " bytes" << endl;
+        ev << "Src/Port: unknown / " << localPort << "  ";
+        ev << "Dest/Port: " << destAddr.getString() << " / " << destPort << endl;
 
+        send(udpIfPacket, "to_udp");
     }
 }
 
@@ -143,9 +118,9 @@ void UDPClient::chooseDestAddr(IPAddress& dest)
           "225.0.0.1", "225.0.0.2", "225.0.0.3", "225.0.1.1", "225.0.1.2", "225.0.2.1"}
     };
 
-    if (_destType >= typeCtr)
-        opp_error("wrong routeDestNo value %d", _destType);
+    if (destType >= typeCtr)
+        opp_error("wrong routeDestNo value %d", destType);
 
-    dest = destAddrArray[_destType][intrand(destCtr[_destType])];
+    dest = destAddrArray[destType][intrand(destCtr[destType])];
 }
 

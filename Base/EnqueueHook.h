@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 
 #ifndef __ENQUEUEHOOK_H__
@@ -27,6 +28,14 @@
 class EnqueueHook : public cPolymorphic
 {
   public:
+    /**
+     * Called with the "this" pointer from the module which installs
+     * this object. Subclasses may use the pointer to get access to
+     * module pointers, etc. Note that this class doesn't store the pointer
+     * but subclasses may well decide to do so.
+     */
+    virtual void setModule(cSimpleModule *) {}
+
     /**
      * Called when a packet arrives and the queue is not empty. 
      * Implementation of this function should enqueue the packet -- 

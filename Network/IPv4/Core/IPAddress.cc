@@ -162,61 +162,62 @@ char IPAddress::getIPClass() const
         return '?';
 }
 
-IPAddress *IPAddress::getNetwork() const
+IPAddress IPAddress::getNetwork() const
 {
     switch (getIPClass())
     {
     case 'A':
         // Class A: network = 7 bits
-        return new IPAddress(addr[0], 0, 0, 0);
+        return IPAddress(addr[0], 0, 0, 0);
     case 'B':
         // Class B: network = 14 bits
-        return new IPAddress(addr[0], addr[1], 0, 0);
+        return IPAddress(addr[0], addr[1], 0, 0);
     case 'C':
         // Class C: network = 21 bits
-        return new IPAddress(addr[0], addr[1], addr[2], 0);
+        return IPAddress(addr[0], addr[1], addr[2], 0);
     default:
         // Class D or E
-        return NULL;
+        return IPAddress();
     }
 }
 
-IPAddress* IPAddress::getNetworkMask() const
+IPAddress IPAddress::getNetworkMask() const
 {
     switch (getIPClass())
     {
     case 'A':
         // Class A: network = 7 bits
-        return new IPAddress(255, 0, 0, 0);
+        return IPAddress(255, 0, 0, 0);
     case 'B':
         // Class B: network = 14 bits
-        return new IPAddress(255, 255, 0, 0);
+        return IPAddress(255, 255, 0, 0);
     case 'C':
         // Class C: network = 21 bits
-        return new IPAddress(255, 255, 255, 0);
+        return IPAddress(255, 255, 255, 0);
     default:
-        // Class D or E
-        return NULL;
+        // Class D or E: return null address
+        return IPAddress();
     }
 }
 
 
-bool IPAddress::isNetwork(IPAddress *toCmp) const
+bool IPAddress::isNetwork(const IPAddress& toCmp) const
 {
-    switch (getIPClass()) {
+    switch (getIPClass())
+    {
     case 'A':
-        if (addr[0] == toCmp->addr[0])
+        if (addr[0] == toCmp.addr[0])
             return true;
         break;
     case 'B':
-        if ((addr[0] == toCmp->addr[0]) &&
-            (addr[1] == toCmp->addr[1]))
+        if ((addr[0] == toCmp.addr[0]) &&
+            (addr[1] == toCmp.addr[1]))
             return true;
         break;
     case 'C':
-        if ((addr[0] == toCmp->addr[0]) &&
-            (addr[1] == toCmp->addr[1]) &&
-            (addr[2] == toCmp->addr[2]))
+        if ((addr[0] == toCmp.addr[0]) &&
+            (addr[1] == toCmp.addr[1]) &&
+            (addr[2] == toCmp.addr[2]))
             return true;
         break;
     default:
@@ -228,28 +229,28 @@ bool IPAddress::isNetwork(IPAddress *toCmp) const
 }
 
 
-bool IPAddress::compareTo(IPAddress *to_cmp, unsigned int nbbits) const
+bool IPAddress::prefixMatches(const IPAddress& to_cmp, int numbits) const
 {
-    if (nbbits < 1)
+    if (numbits<1)
         return true;
 
     int addr1 = getInt();
-    int addr2 = to_cmp->getInt();
+    int addr2 = to_cmp.getInt();
 
-    if (nbbits > 31)
-        return (addr1 == addr2);
+    if (numbits > 31)
+        return addr1==addr2;
 
     // The right shift on an unsigned int produces 0 on the left
     unsigned int mask = 0xFFFFFFFF;
-    mask = ~(mask >> nbbits);
+    mask = ~(mask >> numbits);
 
-    return ((addr1 & mask) == (addr2 & mask));
+    return (addr1 & mask) == (addr2 & mask);
 }
 
-int IPAddress::nbBitsMatching(IPAddress *to_cmp) const
+int IPAddress::numMatchingPrefixBits(const IPAddress& to_cmp) const
 {
     int addr1 = getInt();
-    int addr2 = to_cmp->getInt();
+    int addr2 = to_cmp.getInt();
 
     int res = addr1 ^ addr2;
     // If the bits are equal, there is a 0, so counting
@@ -281,21 +282,14 @@ void IPAddress::keepFirstBits (unsigned int n)
 }
 
 
-/*
- * Test if the masked addresses (ie the mask is applied to addr1 and
- * addr2) are equal.
- * Warning: netmask == NULL is treated as all 1, ie (*addr1 == *addr2) is returned.
- *
- * NB: Used in routing. Static function.
- */
-bool IPAddress::maskedAddrAreEqual (const IPAddress *addr1,
-                                    const IPAddress *addr2,
-                                    const IPAddress *netmask)
+bool IPAddress::maskedAddrAreEqual(const IPAddress& addr1,
+                                   const IPAddress& addr2,
+                                   const IPAddress& netmask)
 {
-    if (!netmask)
-        return addr1->isEqualTo(*addr2);
+    if (netmask.isNull())
+        return addr1.isEqualTo(addr2);
 
-    if (addr1->doAnd(*netmask).isEqualTo(addr2->doAnd(*netmask)))
+    if (addr1.doAnd(netmask).isEqualTo(addr2.doAnd(netmask)))
         return true;
 
     return false;

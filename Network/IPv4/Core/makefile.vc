@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ICMPMessage_m.obj IPDatagram_m.obj IPInterfacePacket_m.obj ErrorHandling.obj ICMP.obj ICMPAccess.obj IPAddress.obj IPFragmentation.obj IPMulticast.obj IPOutput.obj IPSend.obj IPTunneling.obj LocalDeliver.obj PreRouting.obj Routing.obj RoutingTable.obj RoutingTableAccess.obj
+OBJS= ICMPMessage_m.obj IPDatagram_m.obj IPInterfacePacket_m.obj ErrorHandling.obj ICMP.obj IPAddress.obj IPFragmentation.obj IPMulticast.obj IPOutput.obj IPSend.obj IPTunneling.obj LocalDeliver.obj PreRouting.obj Routing.obj RoutingTable.obj RoutingTableParser.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ICMPMessage_m.h IPDatagram_m.h IPInterfacePacket_m.h
@@ -109,9 +109,6 @@ ErrorHandling.obj: ErrorHandling.cc
 ICMP.obj: ICMP.cc
 	$(CXX) -c $(COPTS) /Tp ICMP.cc
 
-ICMPAccess.obj: ICMPAccess.cc
-	$(CXX) -c $(COPTS) /Tp ICMPAccess.cc
-
 IPAddress.obj: IPAddress.cc
 	$(CXX) -c $(COPTS) /Tp IPAddress.cc
 
@@ -142,8 +139,8 @@ Routing.obj: Routing.cc
 RoutingTable.obj: RoutingTable.cc
 	$(CXX) -c $(COPTS) /Tp RoutingTable.cc
 
-RoutingTableAccess.obj: RoutingTableAccess.cc
-	$(CXX) -c $(COPTS) /Tp RoutingTableAccess.cc
+RoutingTableParser.obj: RoutingTableParser.cc
+	$(CXX) -c $(COPTS) /Tp RoutingTableParser.cc
 
 
 #doc: neddoc doxy
@@ -155,7 +152,7 @@ RoutingTableAccess.obj: RoutingTableAccess.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb $(TARGET)$(EXE_SUFFIX) .tstamp 2>NUL
@@ -191,21 +188,7 @@ ICMP.obj: ICMP.cc \
   ICMPMessage.h \
   IPDatagram.h \
   ..\..\..\Base/AbstractQueue.h \
-  RoutingTable.h \
-  ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h \
-  ICMPMessage_m.h \
-  IPDatagram_m.h \
-  IPInterfacePacket.h \
-  IPInterfacePacket_m.h
-ICMPAccess.obj: ICMPAccess.cc \
-  ICMPAccess.h \
-  ICMP.h \
-  ..\..\..\Base/QueueBase.h \
-  RoutingTableAccess.h \
-  ICMPMessage.h \
-  IPDatagram.h \
-  ..\..\..\Base/AbstractQueue.h \
+  ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h \
@@ -235,6 +218,7 @@ IPFragmentation.obj: IPFragmentation.cc \
   RoutingTable.h \
   ICMPAccess.h \
   ..\..\..\Base/AbstractQueue.h \
+  ..\..\..\Base/ModuleAccess.h \
   IPDatagram_m.h \
   IPAddress.h \
   IPInterfacePacket.h \
@@ -252,6 +236,7 @@ IPMulticast.obj: IPMulticast.cc \
   RoutingTableAccess.h \
   IPDatagram.h \
   ..\..\..\Base/AbstractQueue.h \
+  ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h \
@@ -266,6 +251,7 @@ IPOutput.obj: IPOutput.cc \
   ICMPAccess.h \
   ..\..\..\Base/AbstractQueue.h \
   ..\..\..\Base/EnqueueHook.h \
+  ..\..\..\Base/ModuleAccess.h \
   ICMP.h \
   ..\..\..\Base/QueueBase.h \
   RoutingTableAccess.h \
@@ -285,6 +271,7 @@ IPSend.obj: IPSend.cc \
   IPInterfacePacket.h \
   ..\..\..\Base/AbstractQueue.h \
   ..\..\..\Base/EnqueueHook.h \
+  ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h \
@@ -320,6 +307,7 @@ PreRouting.obj: PreRouting.cc \
   IPAddress.h \
   IPInterfacePacket.h \
   IPInterfacePacket_m.h \
+  ..\..\..\Base/ModuleAccess.h \
   ICMP.h \
   ..\..\..\Base/QueueBase.h \
   RoutingTableAccess.h \
@@ -335,6 +323,7 @@ Routing.obj: Routing.cc \
   ICMPAccess.h \
   ..\..\..\Base/AbstractQueue.h \
   ..\..\..\Base/EnqueueHook.h \
+  ..\..\..\Base/ModuleAccess.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h \
   ICMP.h \
@@ -347,10 +336,11 @@ Routing.obj: Routing.cc \
   IPInterfacePacket_m.h
 RoutingTable.obj: RoutingTable.cc \
   RoutingTable.h \
+  RoutingTableParser.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h
-RoutingTableAccess.obj: RoutingTableAccess.cc \
-  RoutingTableAccess.h \
+RoutingTableParser.obj: RoutingTableParser.cc \
+  RoutingTableParser.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
   IPAddress.h

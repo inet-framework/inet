@@ -21,62 +21,45 @@ Define_Module( OspfTe);
 
 void OspfTe::initialize(int stage)
 {
-
-
-switch(stage)
-{
-case 0:
-
-
-
-    ev << "OSPF Enter Stage 1\n";
-
-    //Get the local address
-    //Get the ted
-    //Get the IP Routing component
-    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-
-        break;
-
-
-
-
-case 1:
-    ev << "OSPF Enter Stage 2\n";
-    break;
-default:
-    ev << "OSPF : Omnetpp is so fo\n";
-    break;
-
-}
-
-}
-
-void OspfTe::activity()
-{
-bool IsIR =false;
-cModule* curmod = this;
-ev << "OSPF TE: I am starting \n";
-
-
-   for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
+    ev << "OSPF enters init stage " << stage << endl;
+    switch(stage)
     {
+        case 0:
+            //Get the local address
+            //Get the ted
+            //Get the IP Routing component
+            local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+            break;
+    }
+    
+    // to invoke handleMessage() when we start -- 
+    scheduleAt(simTime(), new cMessage());
+}
 
-        if (curmod->hasPar("isIR"))
+void OspfTe::handleMessage(cMessage *msg)
+{
+    // one-shot handleMessage()
+    // FIXME should really be done from another init stage
+    if (!msg->isSelfMessage())
+        error("Message arrived -- OSPF/TE doesn't process messages, it is used via direct method calls");
+    delete msg;
+
+    ev << "OSPF/TE: I am starting\n";
+
+    bool IsIR =false;
+    cModule* curmod = this;
+    for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
+    {
+        if (curmod->hasPar("isIR"))  // FIXME why not use ancestor par of *this* module? Andras
         {
             IsIR = curmod->par("isIR").boolValue();
             break;
-
-
         }
-
     }
-    if(IsIR)
+
+    if (IsIR)
     {
-
         updateTED();
-
-
     }
 }
 
@@ -87,10 +70,10 @@ ev << "OSPF TE: I am starting \n";
 *******************************************************************************/
 void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
                              std::vector<CSPFVertex_Struct>  *CandidatesList )
- {
+{
 
- //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
- CSPFVertex_Struct* VertexV = &CShortestPathTree.back();
+    //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
+    CSPFVertex_Struct* VertexV = &CShortestPathTree.back();
 
     CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
     std::vector<telinkstate>::iterator ted_iterI;
@@ -111,11 +94,11 @@ void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
         for(spt_iterI = CShortestPathTree.begin();spt_iterI !=CShortestPathTree.end();spt_iterI++)
         {
             spt_iter = (CSPFVertex_Struct)*spt_iterI;
-                if(ted_iter.linkid == spt_iter.VertexId)
-                {
-                      IsFound = true;
-                      break;
-                }
+            if(ted_iter.linkid == spt_iter.VertexId)
+            {
+               IsFound = true;
+               break;
+            }
         }
         if(IsFound)
              continue;
@@ -132,38 +115,35 @@ void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
         IsFound = false;
         if( !(CandidatesList->empty()) )
         {
-                for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
-                {
-                    spt_iter = (CSPFVertex_Struct)*spt_iterI;
+            for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
+            {
+               spt_iter = (CSPFVertex_Struct)*spt_iterI;
 
-                    if( spt_iter.VertexId == VertexW->VertexId)
-                     {
-                          IsFound = true;
-                           break;
-                     }
+               if( spt_iter.VertexId == VertexW->VertexId)
+               {
+                   IsFound = true;
+                   break;
+               }
+            }
+        }
 
-                 }
-          }
-
-          //Relaxation
-          if(IsFound)
-          {
-                 if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
-                 {
-                      spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
-                      spt_iter.Parent = VertexV;
-                      //TECalculateNextHops( VertexW, VertexV, *ted_iter);
-                 }
-          }
-          else
-          CandidatesList->push_back(*VertexW);
-
-
+        //Relaxation
+        if(IsFound)
+        {
+            if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
+            {
+                spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
+                spt_iter.Parent = VertexV;
+                //TECalculateNextHops( VertexW, VertexV, *ted_iter);
+            }
+        }
+        else
+        {
+            CandidatesList->push_back(*VertexW);
+        }
     }
 
     CspfBuildSPT(fspec, CandidatesList);
-
-
 }
 
 std::vector<int>
@@ -175,41 +155,34 @@ OspfTe::CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *Candidates
     CSPFVertex_Struct* curVertex;
 
     if( !(CandidatesList->empty()) )
+    {
+        for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
         {
-            for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
-            {
-                spt_iter = (CSPFVertex_Struct)*spt_iterI;
-
+            spt_iter = (CSPFVertex_Struct)*spt_iterI;
             if(spt_iter.VertexId == (*dest))
                 break;
-
-            }
-
-            curVertex = &spt_iter;
-
-            (*totalMetric) = curVertex->DistanceToRoot;
-
-            while(curVertex !=NULL)
-            {
-                 EROList.push_back(curVertex->VertexId.getInt());
-                 curVertex = curVertex->Parent;
-            }
-
         }
-        return EROList;
 
+        curVertex = &spt_iter;
+
+        (*totalMetric) = curVertex->DistanceToRoot;
+
+        while(curVertex !=NULL)
+        {
+             EROList.push_back(curVertex->VertexId.getInt()); // FIXME crash point...
+             curVertex = curVertex->Parent;
+        }
+    }
+    return EROList;
 }
 
 
 
 void OspfTe::CspfBuildSPT(FlowSpecObj_t* fspec, std::vector<CSPFVertex_Struct> *CandidatesList )
 {
-    //int Inx, i;
     CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
 
     double shortestDist = OSPFType::LSInfinity;
-
-   // CSPFVertex_Struct* tmpCandidateEle;
 
     if( !(CandidatesList->empty()) )
     {
@@ -273,39 +246,22 @@ std::vector<int> OspfTe::CalculateERO(IPAddress* dest, FlowSpecObj_t* fspec, dou
 ******************************************************************************/
 void OspfTe::updateTED()
 {
+    // copy the full table
+    ted = TED::getGlobalInstance()->getTED();
+}
 
-    // find TED
-   ev << "************************OSPF TE *******************\n" ;
-    cTopology topo;
-    topo.extractByModuleType( "TED", NULL );
-
-    sTopoNode *node = topo.node(0);
-    TED *module = (TED*)(node->module());
-    if(module == NULL)
-    {
-    ev << "OSPF Error: Fail to locate TED";
-    return;
-    }
-
-    ted = *(module->getTED());
-
-
-     //std::vector<telinkstate>::iterator t_iterI;
-     //telinkstate             t_iter;
-
-     /*
-     for(t_iterI = ted.begin(); t_iterI != ted.end(); t_iterI++)
+void OspfTe::printTED()
+{
+     std::vector<telinkstate>::iterator i;
+     for (i = ted.begin(); i!=ted.end(); i++)
      {
-         t_iter = *t_iterI;
-         ev << "*****************OSPF TED INITIAL*****************\n";
-         ev << "Adv Router: " << t_iter.advrouter.getString() << "\n";
-         ev << "Link Id (neighbour IP): " << t_iter.linkid.getString() << "\n";
-         ev << "Max Bandwidth: " << t_iter.MaxBandwith << "\n";
-         ev << "Metric: " << t_iter.metric << "\n\n";
+         telinkstate& ls = *i;
+         ev << "*****************OSPF TED *****************\n";
+         ev << "Adv Router: " << ls.advrouter.getString() << "\n";
+         ev << "Link Id (neighbour IP): " << ls.linkid.getString() << "\n";
+         ev << "Max Bandwidth: " << ls.MaxBandwith << "\n";
+         ev << "Metric: " << ls.metric << "\n\n";
      }
-    */
-
-
 }
 
 std::vector<int> OspfTe::CalculateERO(IPAddress* dest, std::vector<simple_link_t> *links,
@@ -379,7 +335,7 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
                           FlowSpecObj_t *new_fspec,
                           std::vector<CSPFVertex_Struct> *CandidatesList )
 {
-     //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
+    //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
     CSPFVertex_Struct* VertexV = &CShortestPathTree.back();
 
     CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
@@ -389,7 +345,6 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
     CSPFVertex_Struct spt_iter;
     std::vector<simple_link_t>::iterator iterS;
     simple_link_t aLink;
-
 
     for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
     {
@@ -403,11 +358,11 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
         for(spt_iterI = CShortestPathTree.begin();spt_iterI !=CShortestPathTree.end();spt_iterI++)
         {
             spt_iter = (CSPFVertex_Struct)*spt_iterI;
-                if(ted_iter.linkid == spt_iter.VertexId)
-                {
-                      IsFound = true;
-                      break;
-                }
+            if(ted_iter.linkid == spt_iter.VertexId)
+            {
+                IsFound = true;
+                break;
+            }
         }
         if(IsFound)
              continue;
@@ -433,7 +388,7 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
         else
         {
             if((ted_iter.UnResvBandwith[0]) < (new_fspec->req_bandwidth))
-             continue;
+                continue;
         }
 
         //Normal Dijkstra Algorithm for adding candidate
@@ -444,37 +399,35 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
         IsFound = false;
         if( !(CandidatesList->empty()) )
         {
-                for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
+            for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
+            {
+                spt_iter = (CSPFVertex_Struct)*spt_iterI;
+
+                if( spt_iter.VertexId == VertexW->VertexId)
                 {
-                    spt_iter = (CSPFVertex_Struct)*spt_iterI;
+                    IsFound = true;
+                    break;
+                }
+            }
+        }
 
-                    if( spt_iter.VertexId == VertexW->VertexId)
-                     {
-                          IsFound = true;
-                           break;
-                     }
-
-                 }
-          }
-
-          //Relaxation
-          if(IsFound)
-          {
-                 if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
-                 {
-                      spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
-                      spt_iter.Parent = VertexV;
-                      //TECalculateNextHops( VertexW, VertexV, *ted_iter);
-                 }
-          }
-          else
-          CandidatesList->push_back(*VertexW);
-
-
+        //Relaxation
+        if(IsFound)
+        {
+            if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
+            {
+                 spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
+                 spt_iter.Parent = VertexV;
+                 //TECalculateNextHops( VertexW, VertexV, *ted_iter);
+            }
+        }
+        else
+        {
+            CandidatesList->push_back(*VertexW);
+        }
     }
 
     CspfBuildSPT(links, old_fspec,new_fspec, CandidatesList);
-
 
 }
 
