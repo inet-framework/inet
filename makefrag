@@ -24,7 +24,7 @@ doxy:
 	doxygen doxy.cfg
 
 neddoc:
-	opp_neddoc -a -o $(DOC_DIR)/neddoc -t $(DOC_DIR)/doxy/doxytags.xml -d ../doxy
+	opp_neddoc -o $(DOC_DIR)/neddoc -t $(DOC_DIR)/doxy/doxytags.xml -d ../doxy $(SUBDIRS)
 
 neddoc-without-doxy:
-	opp_neddoc -a -o $(DOC_DIR)/neddoc
+	opp_neddoc -o $(DOC_DIR)/neddoc $(SUBDIRS)

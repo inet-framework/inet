@@ -31,7 +31,9 @@ import
 
 
 //
-// Simulates the IP Protocol of a host or router.
+// Simulates the IP protocol of a host or router. This module
+// communicates with higher and upper layers in the same way
+// as the IP module.
 //
 // author: Jochen Reber date: 2.5.00
 // modifications Andras Varga
