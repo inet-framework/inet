@@ -16,46 +16,36 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#if 0
-//#ifndef __TCPMESSAGERCVQUEUE_H
+#ifndef __TCPMESSAGERCVQUEUE_H
 #define __TCPMESSAGERCVQUEUE_H
 
 #include <omnetpp.h>
-#include <list>
+#include <map>
 #include <string>
 #include "TCPSegment.h"
-#include "TCPReceiveQueue.h"
+#include "TCPVirtualDataRcvQueue.h"
 
 /**
- * Receive queue that manages "virtual bytes", that is, byte counts only.
+ * FIXME
  *
  * @see TCPVirtualDataSendQueue
  */
-class TCPVirtualDataRcvQueue : public TCPReceiveQueue
+class TCPMessageRcvQueue : public TCPVirtualDataRcvQueue
 {
   protected:
-    uint32 rcv_nxt;
-
-    struct Region
-    {
-        uint32 begin;
-        uint32 end;
-    };
-    typedef std::list<Region> RegionList;
-    RegionList regionList;
-
-    void merge(TCPSegment *tcpseg);
+    typedef std::map<uint32, cMessage *> PayloadList;
+    PayloadList payloadList;
 
   public:
     /**
      * Ctor.
      */
-    TCPVirtualDataRcvQueue();
+    TCPMessageRcvQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPVirtualDataRcvQueue();
+    virtual ~TCPMessageRcvQueue();
 
     /**
      * Set initial receive sequence number.

@@ -17,26 +17,25 @@
 //
 
 
-#include "TCPVirtualDataRcvQueue.h"
-#if 0
+#include "TCPMessageRcvQueue.h"
 
-Register_Class(TCPVirtualDataRcvQueue);
+Register_Class(TCPMessageRcvQueue);
 
 
-TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() : TCPReceiveQueue()
+TCPMessageRcvQueue::TCPMessageRcvQueue() : TCPVirtualDataRcvQueue()
 {
 }
 
-TCPVirtualDataRcvQueue::~TCPVirtualDataRcvQueue()
+TCPMessageRcvQueue::~TCPMessageRcvQueue()
 {
 }
 
-void TCPVirtualDataRcvQueue::init(uint32 startSeq)
+void TCPMessageRcvQueue::init(uint32 startSeq)
 {
-    rcv_nxt = startSeq;
+    TCPVirtualDataRcvQueue::init(startSeq);
 }
 
-std::string TCPVirtualDataRcvQueue::info() const
+std::string TCPMessageRcvQueue::info() const
 {
     std::string res;
     char buf[32];
@@ -48,114 +47,39 @@ std::string TCPVirtualDataRcvQueue::info() const
         sprintf(buf, "[%u..%u) ", i->begin, i->end);
         res+=buf;
     }
+    sprintf(buf, "%u msgs", payloadList.size());
+    res+=buf;
+
     return res;
 }
 
-uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+uint32 TCPMessageRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
-    merge(tcpseg);
-    if (seqGE(rcv_nxt, regionList.begin()->begin))
-        rcv_nxt = regionList.begin()->end;
+    TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
+
+    cMessage *msg;
+    uint32 endSeqNo;
+    while ((msg=tcpseg->removeFirstPayloadMessage(endSeqNo))!=NULL)
+    {
+        // insert, avoiding duplicates
+        PayloadList::iterator i = payloadList.find(endSeqNo);
+        if (i!=payloadList.end()) {delete msg; continue;}
+        payloadList[endSeqNo] = msg;
+    }
+
     return rcv_nxt;
 }
 
-void TCPVirtualDataRcvQueue::merge(TCPSegment *tcpseg)
+cMessage *TCPMessageRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    // Here we have to update our existing regions with the octet range
-    // tcpseg represents. We either have to insert tcpseg as a separate region
-    // somewhere, or (if it overlaps with an existing region) extend
-    // existing regions; we also may have to merge existing regions if
-    // they become overlapping (or touching) after adding tcpseg.
+    extractTo(seq);
 
-    Region seg;
-    seg.begin = tcpseg->sequenceNo();
-    seg.end = tcpseg->sequenceNo()+tcpseg->payloadLength();
-
-    RegionList::iterator i = regionList.begin();
-    if (i==regionList.end())
-    {
-        // insert as first and only region
-        regionList.insert(regionList.begin(), seg);
-        return;
-    }
-
-    // skip regions which fall entirely before seg (no overlap or touching)
-    while (i!=regionList.end() && seqLess(i->end,seg.begin))
-    {
-        ++i;
-    }
-
-    if (i==regionList.end())
-    {
-        // seg is entirely past last region: insert as separate region at end
-        regionList.insert(regionList.end(), seg);
-        return;
-    }
-
-    if (seqLess(seg.end,i->begin))
-    {
-        // segment entirely before region "i": insert as separate region before "i"
-        regionList.insert(i, seg);
-        return;
-    }
-
-    if (seqLess(seg.begin,i->begin))
-    {
-        // segment starts before region "i": extend region
-        i->begin = seg.begin;
-    }
-
-    if (seqLess(i->end,seg.end))
-    {
-        // segment ends past end of region "i": extend region
-        i->end = seg.end;
-
-        // maybe we have to merge region "i" with next one(s)
-        RegionList::iterator j = i;
-        ++j;
-        while (j!=regionList.end() && seqGE(i->end,j->begin)) // while there's overlap
-        {
-            // if "j" is longer: extend "i"
-            if (seqLess(i->end,j->end))
-                i->end = j->end;
-
-            // erase "j" (it was merged into "i")
-            RegionList::iterator oldj = j++;
-            regionList.erase(oldj);
-        }
-    }
-}
-
-cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
-{
-    ASSERT(seqLE(seq,rcv_nxt));
-
-    RegionList::iterator i = regionList.begin();
-    if (i==regionList.end())
+    // pass up payload messages, in sequence number order
+    if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
         return NULL;
 
-    ASSERT(i->begin<i->end); // empty regions cannot exist
-
-    // seq below 1st region
-    if (seqLE(seq,i->begin))
-        return NULL;
-
-    unsigned int octets;
-    if (seqLess(seq,i->end))
-    {
-        // part of 1st region
-        octets = seq - i->begin;
-        i->begin = seq;
-    }
-    else
-    {
-        // full 1st region
-        octets = i->end - i->begin;
-        regionList.erase(i);
-    }
-
-    cMessage *msg = new cMessage("data");
-    msg->setLength(8*octets);
+    cMessage *msg = payloadList.begin()->second;
+    payloadList.erase(payloadList.begin());
     return msg;
 }
-#endif
+
