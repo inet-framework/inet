@@ -157,7 +157,7 @@ void RoutingTable::initialize(int stage)
 
     // read routing table file (and interface configuration)
     RoutingTableParser parser(this);
-    if (parser.readRoutingTableFromFile(filename) == -1)
+    if (*filename && parser.readRoutingTableFromFile(filename)==-1)
         error("Error reading routing table file %s", filename);
 
     WATCH_PTRVECTOR(interfaces);

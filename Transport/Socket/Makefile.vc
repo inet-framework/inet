@@ -140,6 +140,7 @@ socketlayer.obj: socketlayer.cc \
   sockets.h \
   ..\..\Network\IPv4/RoutingTable.h \
   SocketInterfacePacket.h \
+  ..\UDP/UDPControlInfo_m.h \
   ..\TCP/pcb.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h

@@ -91,7 +91,6 @@ module PerformanceNetwork
 
         router: Router;
             parameters:
-                numOfPorts = nodeNo*2,
                 routingFile = "router.irt";
             gatesizes:
                 in[nodeNo*2],
