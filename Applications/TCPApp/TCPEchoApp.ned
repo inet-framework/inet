@@ -20,15 +20,15 @@
 //
 // Accepts any number of incoming TCP connections, and sends back whatever
 // message arrives on them. The reply can be delayed by a constant time.
-// The length of the reply message will be set to replyLength.
-// To leave the length unchanged, set replyLength to 0.
+// The amount of data sent back is constant times the amount of received data.
+// If echoFactor=1.3, then 30% more bytes will be sent back.
 //
 simple TCPEchoApp
     parameters:
-        address: string, // may be left empty ("")
+        address: string, // local address; may be left empty ("")
         port: numeric const, // port number to listen on
-        replyLength: numeric, // in bytes; 0 means "unchanged"
-        replyDelay: numeric const;
+        echoFactor: numeric const,
+        echoDelay: numeric const;
     gates:
         in: tcpIn;
         out: tcpOut;

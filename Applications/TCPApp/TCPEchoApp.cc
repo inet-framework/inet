@@ -23,7 +23,8 @@ void TCPEchoApp::initialize()
 {
     const char *address = par("address");
     int port = par("port");
-    double delay = par("replyDelay");
+    delay = par("echoDelay");
+    echoFactor = par("echoFactor");
 
     bytesRcvd = bytesSent = 0;
     WATCH(bytesRcvd);
@@ -64,11 +65,19 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
         bytesRcvd += msg->length()/8;
-        msg->setKind(TCP_C_SEND);
-        long len = par("replyLength");
-        if (len>0)
-            msg->setLength(8*len);
-        sendOrSchedule(msg);
+        if (echoFactor==0)
+        {
+            delete msg;
+        }
+        else
+        {
+            // modify length and send back
+            msg->setKind(TCP_C_SEND);
+            long len = long(msg->length()*echoFactor) & ~7U;
+            if (len<8) len=8;
+            msg->setLength(len);
+            sendOrSchedule(msg);
+        }
     }
     else
     {

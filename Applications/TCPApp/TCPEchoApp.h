@@ -26,6 +26,7 @@ class TCPEchoApp : public cSimpleModule
 {
   protected:
     double delay;
+    double echoFactor;
 
     long bytesRcvd;
     long bytesSent;
