@@ -181,9 +181,6 @@ for i in *; do
     fi
 done
 
-
-objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
-
 extdirobjs=
 if [ "$linkwithobjects" = "y" ]; then
     for i in $includes; do
@@ -191,6 +188,12 @@ if [ "$linkwithobjects" = "y" ]; then
         extdirobjs="$extdirobjs $dir/*.o"
     done
 fi
+
+for i in $linkdirs; do
+    extdirobjs="$extdirobjs $i/*.o"
+done
+
+objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
 
 #
 # now the Makefile creation
@@ -396,7 +399,8 @@ echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L
 echo
 
 
-echo ".PHONY: subdirs $subdirs" 
+# rules for recursive build
+echo ".PHONY: subdirs \$(SUBDIRS)" 
 echo
 echo 'subdirs: $(SUBDIRS)' 
 echo
@@ -405,6 +409,7 @@ for i in $subdirs; do
      echo '	cd' $i '&& $(MAKE)' 
 done
 
+# rules for ned files
 for i in *.ned; do
         if [ "$i" = "*.ned" ]; then break; fi;
 
@@ -420,6 +425,7 @@ for i in *.ned; do
         echo
 done
 
+# rules for msg files
 for i in *.msg; do
         if [ "$i" = "*.msg" ]; then break; fi;
 
@@ -436,6 +442,7 @@ for i in *.msg; do
         echo
 done
 
+# rules for normal (not generated) C++ files
 for i in `echo *.cc | sed 's/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g'`
 do
         if [ "$i" = "*.cc" ]; then break; fi;
@@ -448,6 +455,7 @@ done
 
 args1=`echo " $args " | sed 's/	/ /g;s/ -f / /g;s/ -m / /g'`
 
+# documentation targets
 cat <<EOT
 
 doc: neddoc doxy
