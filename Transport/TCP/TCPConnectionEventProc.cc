@@ -20,7 +20,7 @@
 #include <string.h>
 #include "TCPMain.h"
 #include "TCPConnection.h"
-#include "TCPSegment_m.h"
+#include "TCPSegment.h"
 #include "TCPCommand_m.h"
 #include "IPControlInfo_m.h"
 #include "TCPSendQueue.h"

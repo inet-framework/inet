@@ -39,7 +39,7 @@ void TCPMessageSendQueue::init(uint32 startSeq)
 std::string TCPMessageSendQueue::info() const
 {
     std::stringstream out;
-    out << "[" << begin << ".." << end << "), " << payloadQueue.length() << " packets";
+    out << "[" << begin << ".." << end << "), " << payloadQueue.size() << " packets";
     return out.str();
 }
 
@@ -51,7 +51,7 @@ void TCPMessageSendQueue::enqueueAppData(cMessage *msg)
     Payload payload;
     payload.endSequenceNo = end;
     payload.msg = msg;
-    payloadQueue.push_back(msg);
+    payloadQueue.push_back(payload);
 }
 
 uint32 TCPMessageSendQueue::bufferEndSeq()
@@ -75,7 +75,7 @@ TCPSegment *TCPMessageSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong nu
     uint32 toSeq = fromSeq+numBytes;
     while (i!=payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
     {
-        tcpseg->addPayloadMessage(i->msg, i->endSequenceNo);
+        tcpseg->addPayloadMessage((cMessage *)i->msg->dup(), i->endSequenceNo);
         ++i;
     }
 

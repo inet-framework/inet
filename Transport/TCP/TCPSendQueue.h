@@ -21,7 +21,7 @@
 
 #include <omnetpp.h>
 #include "TCPConnection.h"
-#include "TCPSegment_m.h"
+#include "TCPSegment.h"
 
 
 /**

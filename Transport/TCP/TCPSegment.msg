@@ -23,11 +23,11 @@ typedef cMessage *cMessagePtr;
 
 struct cMessagePtr;
 
-struct TCPPayload
+struct TCPPayloadMessage
 {
     fields:
         unsigned int endSequenceNo;
-        cMessagePtr payload;
+        cMessagePtr msg;
 };
 
 //
@@ -92,7 +92,8 @@ message TCPSegment extends cMessage
         // packet at all.
         int payloadLength;
 
-        abstract TCPPayload payload[];
+        // FIXME
+        abstract TCPPayloadMessage payload[];
 };
 
 

@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 #include "IPAddress.h"
 #include "IPDatagram_m.h"
-#include "TCPSegment_m.h"
+#include "TCPSegment.h"
 
 
 /**

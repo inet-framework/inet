@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 #include <list>
 #include <string>
-#include "TCPSegment_m.h"
+#include "TCPSegment.h"
 #include "TCPReceiveQueue.h"
 
 /**
