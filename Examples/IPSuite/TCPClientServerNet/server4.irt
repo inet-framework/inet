@@ -15,7 +15,7 @@ name: ppp1  inet_addr: 10.0.0.12    MTU: 1500   Metric: 1
 ifconfigend.
 
 route:
-10.0.0.1        *               255.255.255.255 H   0   ppp1
+10.0.0.11       *               255.255.255.255 H   0   ppp1
 default:        10.0.1.4        0.0.0.0         G   0   ppp0
 
 routeend.

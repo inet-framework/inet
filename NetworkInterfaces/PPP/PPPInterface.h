@@ -40,6 +40,7 @@ class PPPInterface : public cSimpleModule
     cMessage *endTransmissionEvent;
 
     InterfaceEntry *interfaceEntry;  // points into RoutingTable
+    double datarate;  // only cached for the display string
 
     // statistics
     long numSent;

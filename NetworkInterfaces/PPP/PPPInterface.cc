@@ -46,7 +46,7 @@ void PPPInterface::initialize()
     // if we're connected, get the gatee with transmission rate
     gateToWatch = gate("physOut");
     connected = false;
-    double datarate = 0;
+    datarate = 0;
     if (gateToWatch->destinationGate()->type()=='I')
     {
         connected = true;
@@ -63,28 +63,19 @@ void PPPInterface::initialize()
             error("gate physOut must be connected (directly or indirectly) to a link with data rate");
     }
 
+    // register our interface entry in RoutingTable
+    interfaceEntry = registerInterface(datarate);
+
     // if not connected, make it gray
     if (ev.isGUI())
     {
-        if (connected)
-        {
-            char buf[40];
-            if (datarate>=1e9) sprintf(buf,"%g Gbps", datarate/1e9);
-            else if (datarate>=1e6) sprintf(buf,"%g Mbps", datarate/1e6);
-            else if (datarate>=1e3) sprintf(buf,"%g Kbps", datarate/1e3);
-            else sprintf(buf,"%g bps", datarate);
-            displayString().setTagArg("t",0,buf);
-        }
-        else
+        if (!connected)
         {
             displayString().setTagArg("i",1,"#707070");
             displayString().setTagArg("i",2,"100");
-            displayString().setTagArg("t",0,"unconnected");
         }
+        updateDisplayString();
     }
-
-    // register our interface entry in RoutingTable
-    interfaceEntry = registerInterface(datarate);
 }
 
 InterfaceEntry *PPPInterface::registerInterface(double datarate)
@@ -206,17 +197,33 @@ void PPPInterface::handleMessage(cMessage *msg)
 void PPPInterface::updateDisplayString()
 {
     char buf[80];
-    if (connected)
+    if (ev.disabled())
     {
-        sprintf(buf, "r:%ld s:%ld", numRcvdOK, numSent);
+        // speed up things
+        displayString().setTagArg("t",0,"");
+    }
+    else if (connected)
+    {
+        char drate[40];
+        if (datarate>=1e9) sprintf(drate,"%gG", datarate/1e9);
+        else if (datarate>=1e6) sprintf(drate,"%gM", datarate/1e6);
+        else if (datarate>=1e3) sprintf(drate,"%gK", datarate/1e3);
+        else sprintf(drate,"%gb", datarate);
+
+        IPAddress addr = interfaceEntry->inetAddr;
+
+        sprintf(buf, "%s %s\nrcv:%ld snt:%ld", addr.isNull()?"":addr.str().c_str(), drate, numRcvdOK, numSent);
+
         if (numBitErr>0 || numDropped>0)
-            sprintf(buf+strlen(buf), "\nE:%ld Dr:%ld", numBitErr, numDropped);
+            sprintf(buf+strlen(buf), "\nerr:%ld drop:%ld", numBitErr, numDropped);
+
+        displayString().setTagArg("t",0,buf);
     }
     else
     {
         sprintf(buf, "not connected\ndropped:%ld", numDropped);
+        displayString().setTagArg("t",0,buf);
     }
-    displayString().setTagArg("t",0,buf);
 }
 
 PPPFrame *PPPInterface::encapsulate(cMessage *msg)
