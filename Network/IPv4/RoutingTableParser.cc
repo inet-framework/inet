@@ -168,7 +168,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
                                              new char[MAX_ENTRY_STRING_SIZE]);
             e = rt->interfaceByName(name);
             if (!e)
-                opp_error("Error in routing file: interface `%s' not registered by any L2 module", name);
+                opp_error("Error in routing file: interface name `%s' not registered by any L2 module", name);
             delete [] name;
             continue;
         }
