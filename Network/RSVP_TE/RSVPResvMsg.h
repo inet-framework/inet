@@ -22,8 +22,8 @@
 /**
  * RSVP RESV message
  *
- * This class adds convenient extra get() and set() methods to the generated 
- * base class.
+ * This class adds convenience get() and set() methods to the generated
+ * base class, but no extra data.
  */
 class RSVPResvMsg : public RSVPResvMsg_Base
 {
@@ -43,8 +43,8 @@ class RSVPResvMsg : public RSVPResvMsg_Base
 /**
  * RESV TEAR message
  *
- * This class adds convenient extra get() and set() methods to the generated 
- * base class.
+ * This class adds convenience get() and set() methods to the generated
+ * base class, but no extra data.
  */
 class RSVPResvTear : public RSVPResvTear_Base
 {
@@ -65,8 +65,8 @@ class RSVPResvTear : public RSVPResvTear_Base
 /**
  * RESV ERROR message
  *
- * This class adds convenient extra get() and set() methods to the generated 
- * base class.
+ * This class adds convenience get() and set() methods to the generated
+ * base class, but no extra data.
  */
 class RSVPResvError : public RSVPResvError_Base
 {

@@ -21,8 +21,8 @@
 /**
  * RSVP message common part.
  *
- * This class adds convenient extra get() and set() methods to the generated 
- * base class.
+ * This class adds convenience get() and set() methods to the generated
+ * base class, but no extra data.
  */
 class RSVPPacket: public RSVPPacket_Base
 {
