@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= LSRNode_n.obj NetworkLayersWithMPLS_n.obj RSVP_LSR_Node_n.obj
+OBJS= LSRNode_n.obj NetworkLayersWithMPLS_n.obj RSVP_LSR_Node_n.obj   
 
 # subdirectories to recurse into
 SUBDIRS= 

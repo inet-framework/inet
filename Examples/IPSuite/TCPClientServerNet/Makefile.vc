@@ -27,7 +27,19 @@ INCLUDE_PATH= -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/T
 EXTRA_OBJS=
 
 # object files from other directories to link with
-EXT_DIR_OBJS= /*.obj
+EXT_DIR_OBJS=$(ROOT)/Network/IPv4/Core/*.obj \
+            $(ROOT)/Network/IPv4/QoS/*.obj \
+            $(ROOT)/Transport/TCPv4/*.obj \
+            $(ROOT)/Transport/UDPv4/*.obj \
+            $(ROOT)/Transport/Socketv4/*.obj \
+            $(ROOT)/NetworkInterfaces/*.obj \
+            $(ROOT)/NetworkInterfaces/PPP-old/*.obj \
+            $(ROOT)/NetworkInterfaces/Queues/*.obj \
+            $(ROOT)/Applications/Generic/*.obj \
+            $(ROOT)/Applications/TCPApp/*.obj \
+            $(ROOT)/Applications/PingApp/*.obj \
+            $(ROOT)/Util/*.obj \
+            $(ROOT)/Nodes/IPSuite/*.obj
 
 # Additional libraries (-L option -l option)
 LIBS=

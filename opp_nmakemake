@@ -244,7 +244,7 @@ foreach $i (glob("*"))
 @extdirobjs = ();
 if ($linkwithobjects eq 'y') 
 {
-    foreach $i (split($includes,' '))
+    foreach $i (split(' ',$includes))
     {
         $i =~ s/^-I//;
         push(@extdirobjs, "$i/*.obj");

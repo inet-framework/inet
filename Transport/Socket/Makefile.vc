@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= socketlayer_n.obj SocketInterfacePacket.obj socketlayer.obj sockets.obj
+OBJS= socketlayer_n.obj SocketInterfacePacket.obj socketlayer.obj  sockets.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
