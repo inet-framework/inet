@@ -254,7 +254,8 @@ proc loadFile {t filename} {
     $t delete 1.0 end
 
     if [catch {
-       set f [open $filename r]
+       # try with ".txt" suffix as well
+       if [catch {set f [open $filename r]}] {set f [open "$filename.txt" r]}
        set contents [read $f]
        close $f
     } err] {
