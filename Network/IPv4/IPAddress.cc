@@ -287,9 +287,6 @@ bool IPAddress::maskedAddrAreEqual(const IPAddress& addr1,
                                    const IPAddress& addr2,
                                    const IPAddress& netmask)
 {
-    if (netmask.isNull())
-        return addr1.equals(addr2);
-
     if (addr1.doAnd(netmask).equals(addr2.doAnd(netmask)))
         return true;
 

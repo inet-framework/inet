@@ -207,8 +207,6 @@ class RoutingTable: public cSimpleModule
     typedef std::vector<RoutingEntry *> RouteVector;
     RouteVector routes;          // Unicast route array
     RouteVector multicastRoutes; // Multicast route array
-    RoutingEntry *defaultRoute;  // Default route  FIXME REMOVE!!!!! should be a normal routingTable entry!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
   protected:
     // Add the entry of the local loopback interface
@@ -351,11 +349,6 @@ class RoutingTable: public cSimpleModule
                                    const IPAddress& gw,
                                    int metric = 0,
                                    char *dev = NULL);
-
-    /**
-     * Returns the default route entry.
-     */
-    RoutingEntry *getDefaultRoute()  {return defaultRoute;}
 
     /**
      * Adds a route to the routing table.

@@ -130,7 +130,7 @@ std::ostream& operator<<(std::ostream& os, const RoutingEntry& e)
     char buf[1024];
     const_cast<RoutingEntry&>(e).info(buf);
     os << buf;
-    //FIXME todo change to: os << e.info();
+    //TBD change to: os << e.info();
     return os;
 };
 
@@ -139,7 +139,7 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
     char buf[1024];
     const_cast<InterfaceEntry&>(e).info(buf);
     os << buf;
-    //FIXME todo change to: os << e.info();
+    //TBD change to: os << e.info();
     return os;
 };
 
@@ -153,7 +153,6 @@ void RoutingTable::initialize(int stage)
 
     IPForward = par("IPForward").boolValue();
     const char *filename = par("routingFile");
-    defaultRoute = NULL;
 
     // At this point, all L2 modules have registered themselves (added their
     // interface entries). Add one extra interface, the loopback here.
@@ -190,7 +189,6 @@ void RoutingTable::initialize(int stage)
     WATCH_PTRVECTOR(routes);
     WATCH_PTRVECTOR(multicastRoutes);
     //WATCH(routerId);
-    //FIXME WATCH(defaultRoute);
 
     //printIfconfig();
     //printRoutingTable();
@@ -346,19 +344,20 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 RoutingEntry *RoutingTable::selectBestMatchingRoute(const IPAddress& dest)
 {
     // find best match (one with longest prefix)
+    // default route has zero prefix length, so (if exists) it'll be selected as last resort
     RoutingEntry *bestRoute = NULL;
     uint32 longestNetmask = 0;
     for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
     {
         RoutingEntry *e = *i;
         if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask) &&  // match
-            e->netmask.getInt()>longestNetmask)  // longest so far
+            (!bestRoute || e->netmask.getInt()>longestNetmask))  // longest so far
         {
             bestRoute = e;
             longestNetmask = e->netmask.getInt();
         }
     }
-    return bestRoute ? bestRoute : defaultRoute;
+    return bestRoute;
 }
 
 int RoutingTable::outputPortNo(const IPAddress& dest)
@@ -405,14 +404,11 @@ MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
 
 int RoutingTable::numRoutingEntries()
 {
-    return routes.size()+multicastRoutes.size()+(defaultRoute?1:0);
+    return routes.size()+multicastRoutes.size();
 }
 
 RoutingEntry *RoutingTable::routingEntry(int k)
 {
-    if (k==0 && defaultRoute)
-        return defaultRoute;
-    k -= (defaultRoute?1:0);
     if (k < routes.size())
         return routes[k];
     k -= routes.size();
@@ -438,14 +434,18 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
 {
     Enter_Method("addRoutingEntry(...)");
 
-    //FIXME TBD consistency check if interface exists (maybe fill in Ptr)
+    // check for null address and default route
+    if ((entry->host.isNull() || entry->netmask.isNull()) &&
+        (!entry->host.isNull() || !entry->netmask.isNull()))
+        error("addRoutingEntry(): to add a default route, set both host and netmask to zero");
 
-    if (entry->host.isNull())
-    {
-        delete defaultRoute;
-        defaultRoute = entry;
-    }
-    else if (!entry->host.isMulticast())
+    // fill in interface ptr from interface name
+    entry->interfacePtr = interfaceByName(entry->interfaceName.c_str());
+    if (!entry->interfacePtr)
+        error("addRoutingEntry(): interface `%s' doesn't exist", entry->interfaceName.c_str());
+
+    // add to tables
+    if (!entry->host.isMulticast())
     {
         routes.push_back(entry);
     }
@@ -472,12 +472,6 @@ bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
     {
         multicastRoutes.erase(i);
         delete entry;
-        return true;
-    }
-    if (entry==defaultRoute)
-    {
-        delete defaultRoute;
-        defaultRoute = NULL;
         return true;
     }
     return false;

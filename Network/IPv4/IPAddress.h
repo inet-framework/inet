@@ -208,8 +208,7 @@ class IPAddress
 
     /**
      * Test if the masked addresses (ie the mask is applied to addr1 and
-     * addr2) are equal. Warning: a null netmask is treated as all 1,
-     * ie (addr1 == addr2) is returned.
+     * addr2) are equal. 
      */
     static bool maskedAddrAreEqual(const IPAddress& addr1,
                                    const IPAddress& addr2,
