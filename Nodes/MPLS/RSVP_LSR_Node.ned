@@ -31,7 +31,7 @@ import
 // OSPF-TE has been built to replace the static routing available in IP-suite.
 //
 // An LSR consists of the following modules:
-// - \RSVP-TE: The signaling module.
+// - \RSVP-TE: The signalling module.
 // - \RSVP Interface: This one plays the role of an adapter between layer 3
 //   and layer 4 protocols. It is also to address the mismatch between the
 //   two methods of representing an \IP addresses.
@@ -44,7 +44,7 @@ import
 module RSVP_LSR_Node
     parameters:
         local_addr : string,
-        dest_addr : string,
+        dest_addr : string, //# FIXME what's this?
         isIR : bool,
         isER : bool,
 

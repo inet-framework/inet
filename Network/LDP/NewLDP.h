@@ -49,9 +49,15 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     };
 
   private:
-    RoutingTableAccess routingTableAccess;
-    LIBTableAccess libTableAccess;
-    MPLSAccess mplsAccess;
+    // configuration
+    IPAddress local_addr;
+    bool isIR;
+    bool isER;
+    double helloTimeout;  // FIXME obey
+
+    //
+    // state variables:
+    //
 
     // the collection of all label requests pending on the current LSR
     // from upstream LSRs and itself.
@@ -62,11 +68,12 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     typedef vector<peer_info> PeerVector;
     PeerVector myPeers;
 
-    IPAddress local_addr;
-    string id;
-    double helloTimeout;  // FIXME obey
-    bool isIR;
-    bool isER;
+    //
+    // other variables:
+    //
+    RoutingTableAccess routingTableAccess;
+    LIBTableAccess libTableAccess;
+    MPLSAccess mplsAccess;
 
     TCPSocket serverSocket;  // for listening on LDP_PORT
     TCPSocketMap socketMap;  // holds TCP connections with peers
@@ -98,7 +105,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     virtual void handleMessage(cMessage *msg);
 
     void broadcastHello();
-    void openTCPConnectionToPeer(IPAddress addr);
+    void openTCPConnectionToPeer(int peerIndex);
 
     void processLDPHello(LDPHello *msg);
     void processRequestFromMPLSSwitch(cMessage *msg);

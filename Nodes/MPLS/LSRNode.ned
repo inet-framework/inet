@@ -31,7 +31,6 @@ import
 //
 module LSRNode
     parameters:
-        id : string,
         local_addr : string,
         ldpTimeout : numeric,
         ldpKeepAliveTime : numeric,

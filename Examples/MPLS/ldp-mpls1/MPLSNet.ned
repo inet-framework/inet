@@ -23,7 +23,6 @@ module MPLSNet
     submodules:
         LSR1: LSRNode;
             parameters:
-                id = "LSR1",
                 isIR = true,
                 isER = false,
                 peerNo = 2;
@@ -33,7 +32,6 @@ module MPLSNet
             display: "p=184,95;i=srouter";
         LSR2: LSRNode;
             parameters:
-                id = "LSR2",
                 isIR = false,
                 isER = false,
                 peerNo = 3;
@@ -43,7 +41,6 @@ module MPLSNet
             display: "p=238,247;i=srouter";
         LSR3: LSRNode;
             parameters:
-                id = "LSR3",
                 isIR = false,
                 isER = false,
                 peerNo = 4;
@@ -53,7 +50,6 @@ module MPLSNet
             display: "p=322,95;i=srouter";
         LSR4: LSRNode;
             parameters:
-                id = "LSR4",
                 isIR = false,
                 isER = false,
                 peerNo = 3;
@@ -63,7 +59,6 @@ module MPLSNet
             display: "p=398,247;i=srouter";
         LSR5: LSRNode;
             parameters:
-                id = "LSR5",
                 isIR = false,
                 isER = true,
                 peerNo = 2;

@@ -43,7 +43,6 @@ void NewLDP::initialize()
         if (curmod->hasPar("local_addr"))  // FIXME!!!!
         {
             local_addr = curmod->par("local_addr").stringValue();
-            id = string(curmod->par("id").stringValue());
             isIR = curmod->par("isIR");
             isER = curmod->par("isER");
             break;
@@ -87,10 +86,8 @@ void NewLDP::handleMessage(cMessage *msg)
             // new incoming connection -- create new socket object
             socket = new TCPSocket(msg);
             socket->setOutputGate(gate("to_tcp_interface"));
-            socket->setCallbackObject(this);
+            socket->setCallbackObject(this, (void *)0);  //FIXME find peer!!!
             socketMap.addSocket(socket);
-            // FIXME passive open must be issued sometime
-            // FIXME associate with peer table
         }
 
         // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
@@ -99,18 +96,27 @@ void NewLDP::handleMessage(cMessage *msg)
     }
 }
 
-void NewLDP::socketEstablished(int connId, void *yourPtr)
+void NewLDP::socketEstablished(int, void *yourPtr)
 {
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "TCP connection established with peer " << peer.peerIP << "\n";
+
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void NewLDP::socketDataArrived(int, void *, cMessage *msg, bool)
+void NewLDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
 {
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "Message arrived over TCP from peer " << peer.peerIP << "\n";
+
     processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
 }
 
-void NewLDP::socketPeerClosed(int, void *)
+void NewLDP::socketPeerClosed(int, void *yourPtr)
 {
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "Peer " << peer.peerIP << " closed TCP connection\n";
+
 /*
     // close the connection (if not already closed)
     if (socket.state()==TCPSocket::PEER_CLOSED)
@@ -121,15 +127,20 @@ void NewLDP::socketPeerClosed(int, void *)
 */
 }
 
-void NewLDP::socketClosed(int, void *)
+void NewLDP::socketClosed(int, void *yourPtr)
 {
-    ev << "connection closed\n";
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "TCP connection to peer " << peer.peerIP << " closed\n";
+
+    // FIXME what now? reconnect after a delay?
 }
 
-void NewLDP::socketFailure(int, void *, int code)
+void NewLDP::socketFailure(int, void *yourPtr, int code)
 {
-    ev << "connection broken\n";
-    // reconnect after a delay?
+    peer_info& peer = myPeers[(int)yourPtr];
+    ev << "TCP connection to peer " << peer.peerIP << " broken\n";
+
+    // FIXME what now? reconnect after a delay?
 }
 
 void NewLDP::broadcastHello()
@@ -160,7 +171,7 @@ void NewLDP::broadcastHello()
 void NewLDP::processLDPHello(LDPHello *msg)
 {
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
-    IPAddress peerAddr = controlInfo->getSrcAddr();  //msg->getSenderAddress();
+    IPAddress peerAddr = controlInfo->getSrcAddr();
     delete msg;
     delete controlInfo;
 
@@ -192,6 +203,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
     info.linkInterface = inInterface;
     info.activeRole = peerAddr.getInt() > local_addr.getInt();
     myPeers.push_back(info);
+    int peerIndex = myPeers.size()-1;
 
     ev << "added to peer table\n";
     ev << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
@@ -200,19 +212,19 @@ void NewLDP::processLDPHello(LDPHello *msg)
     if (info.activeRole)
     {
         ev << "Establishing session with it\n";
-        openTCPConnectionToPeer(peerAddr);
+        openTCPConnectionToPeer(peerIndex);
     }
 }
 
-void NewLDP::openTCPConnectionToPeer(IPAddress addr)
+void NewLDP::openTCPConnectionToPeer(int peerIndex)
 {
     TCPSocket *socket = new TCPSocket();
     socket->setOutputGate(gate("to_tcp_interface"));
-    socket->setCallbackObject(this);
+    socket->setCallbackObject(this, (void*)peerIndex);
     socketMap.addSocket(socket);
     // FIXME associate with peer table
 
-    socket->connect(addr, LDP_PORT);
+    socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
 }
 
 void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
