@@ -14,6 +14,7 @@
 
 #include "TCPGenericCliAppBase.h"
 #include "IPAddressResolver.h"
+#include "GenericAppMsg_m.h"
 
 
 Define_Module(TCPGenericCliAppBase);
@@ -21,8 +22,12 @@ Define_Module(TCPGenericCliAppBase);
 
 void TCPGenericCliAppBase::initialize()
 {
-    packetsRcvd = bytesRcvd = 0;
+    numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0
+    WATCH(numSessions);
+    WATCH(numBroken);
+    WATCH(packetsSent);
     WATCH(packetsRcvd);
+    WATCH(bytesSent);
     WATCH(bytesRcvd);
 
     // parameters
@@ -36,11 +41,7 @@ void TCPGenericCliAppBase::initialize()
     socket.setCallbackObject(this);
     socket.setOutputGate(gate("tcpOut"));
 
-    if (ev.isGUI()) displayString().setTagArg("t",0, "waiting");
-
-    simtime_t t = getConnectTime(msg);
-    cMessage *timerMsg = new cMessage("timer", TIMER_CONNECT);
-    scheduleAt(t, timerMsg);
+    setStatusString("waiting");
 }
 
 void TCPGenericCliAppBase::handleMessage(cMessage *msg)
@@ -51,59 +52,93 @@ void TCPGenericCliAppBase::handleMessage(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void TCPGenericCliAppBase::handleTimer(cMessage *msg)
-{
-    switch (msg->kind())
-    {
-        case TIMER_CONNECT: connect(); break;
-        //...
-    }
-}
-
 void TCPGenericCliAppBase::connect()
 {
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
 
     ev << "issuing OPEN command\n";
-    if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting");
+    setStatusString("connecting");
 
     socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
+
+    numSessions++;
 }
 
-void TCPGenericCliAppBase::socketEstablished(int connId, void *yourPtr)
+void TCPGenericCliAppBase::close()
 {
-    // do first sending, or at least schedule it
-    if (ev.isGUI()) displayString().setTagArg("t",0, "connected");
-}
-
-void TCPGenericCliAppBase::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent)
-{
-    packetsRcvd++;
-    bytesRcvd+=msg->length()/8;
-}
-
-void TCPGenericCliAppBase::socketPeerClosed(int connId, void *yourPtr)
-{
-    // we probably want to close too
+    setStatusString("closing");
+    ev << "issuing CLOSE command\n";
     socket.close();
 }
 
-void TCPGenericCliAppBase::socketClosed(int connId, void *yourPtr)
+void TCPGenericCliAppBase::sendData(int numBytes, int expectedReplyBytes, bool serverClose)
 {
-    // subclasses may override this function, and add code to start another session etc.
-    if (ev.isGUI()) displayString().setTagArg("t",0, "closed");
+    GenericAppMsg *msg = new GenericAppMsg();
+    msg->setLength(8*numBytes);
+    msg->setExpectedReplyLength(expectedReplyBytes);
+    msg->setClose(serverClose);
+
+    socket.send(msg);
+
+    packetsSent++;
+    bytesSent+=numBytes;
 }
 
-void TCPGenericCliAppBase::socketFailure(int connId, void *yourPtr, int code)
+void TCPGenericCliAppBase::setStatusString(const char *s)
+{
+    if (ev.isGUI()) displayString().setTagArg("t", 0, s);
+}
+
+void TCPGenericCliAppBase::socketEstablished(int, void *)
+{
+    // *redefine* to perform or schedule first sending
+    ev << "connected\n";
+    setStatusString("connected");
+}
+
+void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
+{
+    // *redefine* to perform or schedule next sending
+    packetsRcvd++;
+    bytesRcvd+=msg->length()/8;
+
+    delete msg;
+}
+
+void TCPGenericCliAppBase::socketPeerClosed(int, void *)
+{
+    // we probably want to close too
+    close();
+}
+
+void TCPGenericCliAppBase::socketClosed(int, void *)
+{
+    // *redefine* to start another session etc.
+    ev << "connection closed\n";
+    setStatusString("closed");
+}
+
+void TCPGenericCliAppBase::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
-    if (ev.isGUI()) displayString().setTagArg("t",0, "broken");
+    ev << "connection broken\n";
+    setStatusString("broken");
+
+    numBroken++;
 }
 
 void TCPGenericCliAppBase::finish()
 {
+    ev << fullPath() << ": opened " << numSessions << " sessions\n";
+    ev << fullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+
+    recordScalar("number of sessions", numSessions);
+    recordScalar("packets sent", packetsSent);
+    recordScalar("packets rcvd", packetsRcvd);
+    recordScalar("bytes sent", bytesSent);
+    recordScalar("bytes rcvd", bytesRcvd);
 }
 
 

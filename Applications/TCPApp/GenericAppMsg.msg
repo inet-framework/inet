@@ -26,7 +26,7 @@
 // e.g. HTTP, SMB, database protocol) needs only to be present in
 // the client, and the server model can be kept simple and dumb.
 //
-// @see TCPGenericSrvApp
+// @see TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
 //
 message GenericAppMsg
 {

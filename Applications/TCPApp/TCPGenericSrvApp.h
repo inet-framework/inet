@@ -20,7 +20,9 @@
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
- * request messages.
+ * request messages. Clients are usually subclassed from TCPGenericCliAppBase.
+ *
+ * @see GenericAppMsg, TCPGenericCliAppBase
  */
 class TCPGenericSrvApp : public cSimpleModule
 {
