@@ -76,7 +76,7 @@ module RSVPTE4
         ted: TED;
             parameters:
                moduleTypes = "StandardHost2 RSVP_LSR_Node";
-            display: "p=148,376;b=24,16";
+            display: "p=320,300;i=proc2";
     connections nocheck:
         host1.in++ <-- delay 0ms datarate 700 <-- LSR1.out++;
         host1.out++ --> delay 0ms datarate 700 --> LSR1.in++;

@@ -20,7 +20,7 @@ LBit is 1 if the nexthop is loose hop and 0 if strict.
   <bandwidth>0</bandwidth>
   <delay>0</delay>
   <ER>true</ER>
-  <route>1.0.0.1,0,1.0.0.3,0,1.0.0.4,0,1.0.0.5,0,10.0.1.2,0</route>
+  <route>1.0.0.1,0, 1.0.0.3,0, 1.0.0.4,0, 1.0.0.5,0, 10.0.1.2,0</route>
 </conn>
 
 </traffic>

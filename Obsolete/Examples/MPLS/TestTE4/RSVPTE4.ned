@@ -87,12 +87,12 @@ module RSVPTE4
         ted: TED;
             parameters:
                moduleTypes = "StandardHost2 RSVP_LSR_Node";
-            display: "p=148,376;b=24,16";
+            display: "p=120,280;i=proc2";
         tester: Tester;
             parameters:
                 testType = "NewRouteTester",
                 timeOut = 100;
-            display: "p=309,363;b=40,24";
+            display: "p=309,300;b=40,24";
     connections nocheck:
         host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];
         host1.out[0] --> delay 0ms datarate 700 --> LSR1.in[0];
