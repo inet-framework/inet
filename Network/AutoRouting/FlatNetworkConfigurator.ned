@@ -40,7 +40,7 @@
 // no routes are set up manually. Practically, routing files (.irt, .mrt)
 // should be missing or empty.
 //
-// All the above is executed in initialization stage 2. (In stage 0,
+// All the above takes place in initialization stage 2. (In stage 0,
 // interfaces register themselves in the RoutingTable modules, and
 // in stage 1, routing files are read.)
 //
