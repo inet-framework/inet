@@ -30,6 +30,8 @@
 class PPPInterface : public cSimpleModule
 {
   protected:
+    bool connected;
+
     long frameCapacity;
     long bitCapacity;
     cGate *gateToWatch;
@@ -59,19 +61,32 @@ void PPPInterface::initialize()
     frameCapacity = par("frameCapacity");
     bitCapacity = par("bitCapacity");
 
-    // get the 1st one with transmission rate
+    // if we're connected, get the gatee with transmission rate
     gateToWatch = gate("physOut");
-    while (gateToWatch)
+    connected = false;
+    if (gateToWatch->destinationGate()->type()=='I')
     {
-        // does this gate have data rate?
-        cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
-        if (chan && chan->datarate()>0)
-            break;
-        // otherwise just check next connection in path
-        gateToWatch = gateToWatch->toGate();
+        connected = true;
+        while (gateToWatch)
+        {
+            // does this gate have data rate?
+            cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
+            if (chan && chan->datarate()>0)
+                break;
+            // otherwise just check next connection in path
+            gateToWatch = gateToWatch->toGate();
+        }
+        if (!gateToWatch)
+            error("gate physicalOut must be connected (directly or indirectly) to a link with data rate");
     }
-    if (!gateToWatch)
-        error("gate physicalOut must be connected (directly or indirectly) to a link with data rate");
+
+    // if not connected, make it gray
+    if (!connected && ev.isGUI())
+    {
+        displayString().setTagArg("i",1,"#707070");
+        displayString().setTagArg("i",2,"100");
+        displayString().setTagArg("t",0,"unconnected");
+    }
 
     // register our interface entry in RoutingTable
     registerInterface();
@@ -93,7 +108,7 @@ void PPPInterface::registerInterface()
     delete [] interfaceName;
 
     // output port: index of gate where our "physOut" is connected
-    int outputPort = gate("physOut")->toGate()->index();
+    int outputPort = gate("physOut")->toGate()->index();  // FIXME use queueIn instead!!!
     e->outputPort = outputPort;
 
     // we don't know IP address and netmask, it'll probably come from routing table file
@@ -103,10 +118,13 @@ void PPPInterface::registerInterface()
     e->mtu = 4470;
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    // try OSPF cost here.
-    cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
-    double bps = chan->datarate();
-    e->metric = (int)ceil(2e9/bps);
+    e->metric = 100;  // default
+    if (connected)
+    {
+        cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(gateToWatch->channel());
+        double bps = chan->datarate();
+        e->metric = (int)ceil(2e9/bps); // use OSPF cost as default
+    }
 
     // capabilities
     e->multicast = true;
@@ -136,6 +154,13 @@ void PPPInterface::startTransmitting(cMessage *msg)
 
 void PPPInterface::handleMessage(cMessage *msg)
 {
+    if (!connected)
+    {
+        ev << "Interface is not connected, dropping packet " << msg << endl;
+        delete msg;
+        return;
+    }
+
     if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
