@@ -461,7 +461,7 @@ doxy: $doxyconf
 clean:
 	rm -f *.o *_n.cc *_n.h *_m.cc *_m.h \$(TARGET)\$(EXE_SUFFIX)
 	rm -f *.vec *.sca
-	for i in \$(subdirs); do cd \$i && \$(MAKE) clean; done 
+	for i in \$(SUBDIRS); do (cd \$\$i && \$(MAKE) clean); done 
 
 depend:
 	\$(MAKEDEPEND) \$(INCLUDE_PATH) -- *.cc
