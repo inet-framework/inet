@@ -60,7 +60,10 @@ TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulon
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
 
-    TCPSegment *tcpseg = new TCPSegment("tcpseg");
+    char msgname[32];
+    sprintf(msgname, "tcpseg(%db)", numBytes);
+
+    TCPSegment *tcpseg = new TCPSegment(msgname);
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
     return tcpseg;
