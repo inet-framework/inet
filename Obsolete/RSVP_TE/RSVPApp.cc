@@ -115,8 +115,8 @@ void RSVPAppl::activity()
                 // Convert to name
                 InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
                 InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
-                if (!outInfP) error("no interface with address %s",IPAddress(outInf).str().c_str());
-                if (!inInfP) error("no interface with address %s",IPAddress(inInf).str().c_str());
+                if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
+                if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
 
                 const char *outInfName = outInfP->name.c_str();
                 const char *inInfName = inInfP->name.c_str();
