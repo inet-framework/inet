@@ -44,7 +44,7 @@
 simple Routing
     parameters:
         procdelay : numeric const,
-        qosBehaviorClass: string,
+        qosBehaviorClass: string;
     gates:
         in: in[];
         out: localOut;

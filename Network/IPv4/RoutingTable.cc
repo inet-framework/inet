@@ -127,12 +127,12 @@ void RoutingTable::initialize()
 
     defaultRoute = NULL;
 
-    // FIXME todo: add loopback interface
-
     // Read routing table file
     RoutingTableParser parser(this);
     if (parser.readRoutingTableFromFile(filename) == -1)
         error("Error reading routing table file %s", filename);
+
+    addLocalLoopback();
 
     WATCH_vector(interfaces);
     WATCH_vector(routes);
@@ -181,6 +181,7 @@ InterfaceEntry *RoutingTable::interfaceByIndex(int index)
 void RoutingTable::addInterface(InterfaceEntry *entry)
 {
     entry->index = interfaces.size();
+    entry->outputPort = entry->index; // FIXME this is a hack!!!!!!!
     interfaces.push_back(entry);
 }
 
