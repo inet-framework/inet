@@ -112,7 +112,6 @@ class TCPSocket
     {
       public:
         virtual ~CallBackInterface() {}
-        //FIXME re-think!!! virtual void socketAccepted(int connId, void *yourPtr, int listenConnId) {}
         virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) = 0;
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
@@ -175,9 +174,13 @@ class TCPSocket
     //
 
     /**
-     * Initiates passive OPEN.
+     * Initiates passive OPEN. If fork=true, you'll have to create a new
+     * TCPSocket object for each incoming connection, and this socket
+     * will keep listening on the port. If fork=false, the first incoming
+     * connection will be accepted, and TCP will refuse subsequent ones.
+     * See TCPOpenCommand documentation (neddoc) for more info.
      */
-    void listen();
+    void listen(bool fork=false);
 
     /**
      * Active OPEN to the given remote socket.
@@ -252,12 +255,14 @@ class TCPSocket
     void setCallbackObject(CallBackInterface *cb, void *yourPtr=NULL);
 
     /**
-     * Checks if the message belongs to this socket (see belongsToSocket()),
-     * and if so, processes it; otherwise it does nothing.
-     * "Processing" means that the appropriate method of the callback object
-     * (see setCallbackObject(), class CallBackInterface) will get called,
-     * with the same yourPtr that you gave in the setCallbackObject() call.
+     * Examines the message (which should have arrived from TCPMain), and
+     * dispatches to the appropriate method of the callback object
+     * (see setCallbackObject(), class CallBackInterface), with the same
+     * yourPtr that you gave in the setCallbackObject() call.
      * If no callback object is installed, this method throws an error.
+     *
+     * This method assumes that the message belongs to this socket, i.e.
+     * belongsToSocket(msg) would return true.
      */
     void processMessage(cMessage *msg);
     //@}

@@ -50,7 +50,7 @@ void TCPSocket::bind(IPAddress lAddr, int lPort)
     isBound = true;
 }
 
-void TCPSocket::listen()
+void TCPSocket::listen(bool fork)
 {
     if (!isBound)
         opp_error("TCPSocket: must call bind() before listen()");
@@ -61,6 +61,7 @@ void TCPSocket::listen()
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPort);
     openCmd->setConnId(connId);
+    openCmd->setFork(fork);
 
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
@@ -142,8 +143,8 @@ void TCPSocket::processMessage(cMessage *msg)
     if (!cb)
         opp_error("TCPSocket: callback object must be set via setCallbackObject() "
                   "before processMessage() can be invoked");
-    if (!belongsToSocket(msg))
-        return;
+
+    ASSERT(belongsToSocket(msg));
 
     TCPStatusInfo *status;
     switch (msg->kind())
