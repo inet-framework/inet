@@ -92,7 +92,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
 
 void IP::handleMessageFromHL(cMessage *msg)
 {
-    IPDatagram *datagram = encapsulate(msg);
+    IPDatagram *datagram = encapsulate(msg); //FIXME should get ip address of output interface as src address!!!
     routePacket(datagram);
 }
 

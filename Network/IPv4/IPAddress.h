@@ -167,9 +167,9 @@ class IPAddress
     char getIPClass() const;
 
     /**
-     * Returns true if IP class is "D"
+     * Returns true if this is a class D address.
      */
-    bool isMulticast() const {return getIPClass()=='D';}
+    bool isMulticast() const {return (addr[0] & 0xF0)==0xE0;}
 
     /**
      * Returns an address with the network part of the address (the bits
