@@ -24,11 +24,11 @@ class cWatch2 : public cObject
     {
         return opp_typename(typeid(T));
     }
-    virtual void info(char *buf)
+    virtual std::string info()
     {
         std::stringstream out;
         out << className() << " " << name() << " = " << r;
-        strcpy(buf,out.str().c_str());
+        return out.str();
     }
     //virtual cStructDescriptor *createDescriptor();
 };
@@ -45,11 +45,11 @@ class cWatch2_stdstring : public cObject
     {
         return "std::string";
     }
-    void info(char *buf)
+    virtual std::string info()
     {
         std::stringstream out;
         out << className() << " " << name() << " = \"" << r << "\"";
-        strcpy(buf,out.str().c_str());
+        return out.str();
     }
 };
 
