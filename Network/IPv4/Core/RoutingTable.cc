@@ -499,6 +499,9 @@ int RoutingTable::interfaceAddressToNoNew(const IPAddress& addr)
 	}
 
 // BCH Andras -- code from UTS MPLS model
+    // FIXME this seems to be a bloody hack. Why do we return 0 when intrface[0]
+    // is obviously NOT what we were looking for???  --Andras
+    
     // Add number for loopback
     if((loopbackInterface->inetAddr->getInt()) == (addr.getInt()))
         return 0;
@@ -1032,27 +1035,34 @@ void RoutingTable::addLocalLoopback()
 
 	loopbackInterface->name = "lo";
 	loopbackInterface->encap = "Local Loopback";
+	
 	//loopbackInterface->inetAddr = new IPAddress("127.0.0.1");
 	//loopbackInterface->mask = new IPAddress("255.0.0.0");
-	
 // BCH Andras -- code from UTS MPLS model
     cModule *curmod = this;
     IPAddress* loopbackIP = new IPAddress("127.0.0.1");
 
     for (curmod = parentModule(); curmod != NULL;curmod = curmod->parentModule())
     {
-        if (curmod->hasPar("local_addr"))
+        // the following line is a terrible hack. For some unknown reason,
+        // the MPLS models use the host's "local_addr" parameter (string) 
+        // as loopback address (and also change its netmask to 255.255.255.255).
+        // But this conflicts with the IPSuite which also has "local_addr" parameters,
+        // numeric and not intended for use as loopback address. So until we
+        // figure out why exactly the MPLS models do this, we just patch up
+        // the thing and only regard "local_addr" parameters that are strings....
+        // Horrible hacking.  --Andras 
+        if (curmod->hasPar("local_addr") && curmod->par("local_addr").type()=='S')
         {
             delete loopbackIP;
-            loopbackIP = new IPAddress(curmod->par("local_addr").longValue());
+            loopbackIP = new IPAddress(curmod->par("local_addr").stringValue());
             break;
         }
 
     }
     ev << "My loopback Address is : " << loopbackIP->getString() << "\n";
-    
     loopbackInterface->inetAddr = loopbackIP;
-    loopbackInterface->mask = new IPAddress("255.255.255.255");
+    loopbackInterface->mask = new IPAddress("255.255.255.255");  // ????? -- Andras
 // ECH
 	
 	loopbackInterface->mtu = 3924;
