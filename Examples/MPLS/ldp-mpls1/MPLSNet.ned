@@ -73,11 +73,11 @@ module MPLSNet
             display: "p=500,95;i=srouter";
         host1: StandardHost2;  // client
             parameters:
-                start_time = 2,
+                start_time = 2;
             display: "p=26,98;i=comp_s";
         host2: StandardHost2;  // client
             parameters:
-                start_time = 2,
+                start_time = 2;
             display: "p=26,256;i=comp_s";
         host3: StandardHost2;  // server
             parameters:
