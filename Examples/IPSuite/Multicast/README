@@ -1,0 +1,16 @@
+Multicast Routing Example
+
+This network consists of four router and six hosts. It shows routing behavior
+with preconfigured static routes for unicast and multicast datagrams. 
+Multicast datagrams are duplicated by the router only if there is a group 
+member in the subnet. Therefore, there is no generation of redundant or 
+unnecessary data packets.
+
+The hosts run a simple application which sends UDP packets to randomly
+chosen hosts or multicast groups.
+
+Connections between router and hosts are configured as 10Mb ethernet,
+connections between the router are fast fibre optic cables. Host 2 is
+connected to host 3 with a serial modem connection which is used only
+for direct communication between them both - all other packets are
+directly forwarded to router 1.

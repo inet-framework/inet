@@ -1,0 +1,49 @@
+
+# filename: mcrouter1.mrt
+# routing table for router 1 of multicast network 2
+# connected to host 1,2,3 and router 2
+# author: Jochen Reber
+
+
+ifconfig:
+
+# ethernet card (modelled by point-to-point link) 0 to host 1
+name: ppp0  inet_addr: 172.0.0.11   MTU: 1500   Metric: 1  BROADCAST MULTICAST
+
+# ethernet card (modelled by point-to-point link) 1 to host 2
+name: ppp1  inet_addr: 172.0.0.12   MTU: 1500   Metric: 1  BROADCAST MULTICAST
+
+# ethernet card (modelled by point-to-point link) 2 to host 3
+name: ppp2  inet_addr: 172.0.0.13   MTU: 1500   Metric: 1  BROADCAST MULTICAST
+
+# PPP link to router 2
+name: ppp3  inet_addr: 172.1.0.0    MTU: 512000     Metric: 1
+
+ifconfigend.
+
+route:
+172.0.0.1       *               255.255.255.255 H   0   ppp0
+172.0.0.2       *               255.255.255.255 H   0   ppp1
+172.0.0.3       *               255.255.255.255 H   0   ppp2
+default:        172.1.0.1       0.0.0.0         G   0   ppp3
+
+225.0.0.1       *               255.255.255.255 H   0   ppp0
+225.0.0.1       *               255.255.255.255 H   0   ppp1
+225.0.0.1       *               255.255.255.255 H   0   ppp2
+
+225.0.0.2       172.1.0.1       255.255.255.255 G   0   ppp3
+225.0.0.3       172.1.0.1       255.255.255.255 G   0   ppp3
+
+225.0.1.1       *               255.255.255.255 H   0   ppp0
+225.0.1.1       172.1.0.1       255.255.255.255 G   0   ppp3
+
+225.0.1.2       *               255.255.255.255 H   0   ppp1
+225.0.1.2       *               255.255.255.255 H   0   ppp2
+225.0.1.2       172.1.0.1       255.255.255.255 G   0   ppp3
+
+225.0.2.1       *               255.255.255.255 H   0   ppp1
+225.0.2.1       *               255.255.255.255 H   0   ppp2
+225.0.2.1       172.1.0.1       255.255.255.255 G   0   ppp3
+
+routeend.
+
