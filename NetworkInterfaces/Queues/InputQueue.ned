@@ -24,10 +24,10 @@
 // author: Jochen Reber
 //
 simple InputQueue
-	parameters:
-		procdelay: numeric const;
-	gates:
-		in: fromNW[], processorManagerIn;
-		out: toIP;
+    parameters:
+        procdelay: numeric const;
+    gates:
+        in: fromNW[]; // processorManagerIn;
+        out: toIP;
 endsimple
 

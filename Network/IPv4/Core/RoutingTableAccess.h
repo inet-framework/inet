@@ -30,7 +30,7 @@
 
 #include <omnetpp.h>
 
-#include "ProcessorAccess.h"
+//#include "ProcessorAccess.h"
 #include "RoutingTable.h"
 
 class RoutingTableAccess : public cSimpleModule   // was ProcessorAccess

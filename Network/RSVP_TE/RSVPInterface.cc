@@ -1,13 +1,13 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
+*	This library is free software, you can redistribute it
+*	and/or modify
+*	it under  the terms of the GNU Lesser General Public License
+*	as published by the Free Software Foundation;
 *	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
+*	The library is distributed in the hope that it will be useful,
 *	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *	See the GNU Lesser General Public License for more details.
 *
 *
@@ -25,7 +25,7 @@
 
 #include "rsvp_message.h"
 #include "RSVPInterface.h"
-#include "ProcessorManager.h"
+//#include "ProcessorManager.h"
 #include "IPInterfacePacket.h"
 
 Define_Module( RSVPInterface );
@@ -37,7 +37,7 @@ void RSVPInterface::initialize()
 
 void RSVPInterface::activity()
 {
-	
+
 	cMessage *msg; // the message that will be received
 
 	while(true)
@@ -57,7 +57,7 @@ void RSVPInterface::activity()
 		{
 			processMsgFromApp(msg);
 		}
-		
+
 		// notify ProcessorManager to end task
 		//releaseKernel();
 
@@ -77,9 +77,9 @@ void RSVPInterface::processMsgFromIp(cMessage *msg)
 	PathErrorMessage *peMsg;
 	//ResvTearMessage *rtMsg;
 	//ResvErrorMessage *reMsg;
-	
+
 	IPInterfacePacket *iPacket = (IPInterfacePacket *)msg;
-	
+
 	TransportPacket* tpacket = (TransportPacket*)(iPacket->decapsulate());
 	cMessage* rsvpMsg =(cMessage*)( tpacket->par("rsvp_data").objectValue());
 	int msgKind = rsvpMsg->kind();
@@ -92,13 +92,13 @@ void RSVPInterface::processMsgFromIp(cMessage *msg)
 
 		   pMsg = new PathMessage();
   		   pMsg->setContent((PathMessage*)rsvpMsg);
-  		   
+
   		   if(rsvpMsg->hasPar("peerInf"))
   		   {
   		   	peerInf = rsvpMsg->par("peerInf").longValue();
   		   	pMsg->addPar("peerInf") = peerInf;
   		   }
-  		
+
   		   send(pMsg, "to_rsvp_app");
 
 		break;
@@ -129,11 +129,11 @@ void RSVPInterface::processMsgFromIp(cMessage *msg)
 		break;
 
 	}
- 	
-  
-	
-	
-	
+
+
+
+
+
 }
 
 void RSVPInterface::processMsgFromApp(cMessage *msg)
@@ -141,17 +141,17 @@ void RSVPInterface::processMsgFromApp(cMessage *msg)
 	IPAddrChar src_addr, dest_addr;
 	TransportPacket* tpacket = new TransportPacket(*msg);
 	tpacket->addPar("rsvp_data") = msg;
-	
+
 	IPInterfacePacket *iPacket = new IPInterfacePacket();
-	
+
 	iPacket->encapsulate(tpacket);
-	
+
 	strcpy(src_addr,
 		msg->hasPar("src_addr")
-		? msg->par("src_addr").stringValue() 
+		? msg->par("src_addr").stringValue()
 		: MY_ERROR_IP_ADDRESS);
 	strcpy(dest_addr,
-		msg->hasPar("dest_addr") 
+		msg->hasPar("dest_addr")
 		? msg->par("dest_addr").stringValue()
 		: MY_ERROR_IP_ADDRESS);
 
@@ -164,6 +164,6 @@ void RSVPInterface::processMsgFromApp(cMessage *msg)
 	iPacket->setProtocol(IP_PROT_RSVP);
 
 	send(iPacket,"to_ip");
-	
+
 
 }

@@ -32,7 +32,7 @@
 // Receive error message from Routing, PreRouting or IPOutput:
 // - create error message with given type and code and send to IPSend
 //
-// Receive echo/timestamp message from pingIn: encapsulate in ICMP header 
+// Receive echo/timestamp message from pingIn: encapsulate in ICMP header
 // and send to IPSend
 //
 // author: Jochen Reber
@@ -42,8 +42,8 @@ simple ICMP
     parameters:
         procdelay: numeric const;
     gates:
-        in: preRoutingIn, routingIn, localIn, 
-            pingIn, fragmentationIn, processorManagerIn;
+        in: preRoutingIn, routingIn, localIn,
+            pingIn, fragmentationIn; // processorManagerIn;
         in: ipOutputIn[];
         out: pingOut, sendOut, errorOut;
 endsimple

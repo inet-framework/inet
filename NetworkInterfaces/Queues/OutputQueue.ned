@@ -18,11 +18,11 @@
 
 
 
-import   
-    "L2_EnqueueHook", 
-    "L2_DequeueHook"; 
-                      
- 
+import
+    "L2_EnqueueHook",
+    "L2_DequeueHook";
+
+
 
 //
 // Enqueue Module of the Output Queue
@@ -33,15 +33,15 @@ import
 //   ignores Discard_Packet-Message
 // - on IPDatagram: notify Dequeue directly with WakeUp_Queue message
 //
-simple Enqueue 
+simple Enqueue
     parameters:
         procdelay : numeric const;
-    gates: 
-        in: fromIP; 
-        in: fromEnqHook; 
-        in: processorManagerIn;
-        out: toEnqHook; 
-endsimple 
+    gates:
+        in: fromIP;
+        in: fromEnqHook;
+        //in: processorManagerIn;
+        out: toEnqHook;
+endsimple
 
 
 //
@@ -63,54 +63,54 @@ endsimple
 //
 //  release Kernel
 //
-simple Dequeue 
+simple Dequeue
     parameters:
         procdelay : numeric const;
-    gates: 
-        in: fromNW; 
-        in: fromDeqHook; 
-        in: processorManagerIn;
-        in: inDirekt; 
-        out: toNW; 
-        out: toDeqHook; 
-endsimple 
+    gates:
+        in: fromNW;
+        in: fromDeqHook;
+        //in: processorManagerIn;
+        in: inDirekt;
+        out: toNW;
+        out: toDeqHook;
+endsimple
 
 //
 // author: Jochen Reber
 //
-module OutputQueue 
+module OutputQueue
     parameters:
         enqueueHookName : string,
         dequeueHookName : string,
         enqueue_delay : numeric,
         dequeue_delay : numeric const;
-    gates: 
-        in: fromIP; 
-        in: fromNW; 
-        out: toNW; 
-    submodules: 
-        enq: Enqueue; 
+    gates:
+        in: fromIP;
+        in: fromNW;
+        out: toNW;
+    submodules:
+        enq: Enqueue;
             parameters:
                 procdelay = enqueue_delay;
             display: "p=57,46;b=40,24,rect";
-        deq: Dequeue; 
+        deq: Dequeue;
             parameters:
                 procdelay = dequeue_delay;
             display: "p=58,118;b=40,24,rect";
-        enqHook: enqueueHookName like L2_EnqueueHook; 
+        enqHook: enqueueHookName like L2_EnqueueHook;
             display: "p=167,39;b=40,24,rect";
-        deqHook: dequeueHookName like L2_DequeueHook; 
+        deqHook: dequeueHookName like L2_DequeueHook;
             display: "p=167,116;b=40,24,rect";
-    connections nocheck: 
-        fromIP --> enq.fromIP; 
-                               
-        fromNW --> deq.fromNW; 
-        toNW <-- deq.toNW; 
-                           
-        enq.toEnqHook --> enqHook.fromEnqueue; 
-        enq.fromEnqHook <-- enqHook.toEnqueue; 
-                                               
-        deq.toDeqHook --> deqHook.fromDequeue; 
-        deq.fromDeqHook <-- deqHook.toDequeue; 
+    connections nocheck:
+        fromIP --> enq.fromIP;
+
+        fromNW --> deq.fromNW;
+        toNW <-- deq.toNW;
+
+        enq.toEnqHook --> enqHook.fromEnqueue;
+        enq.fromEnqHook <-- enqHook.toEnqueue;
+
+        deq.toDeqHook --> deqHook.fromDequeue;
+        deq.fromDeqHook <-- deqHook.toDequeue;
     display: "p=10,10;b=205,135,rect";
-endmodule 
+endmodule

@@ -35,7 +35,7 @@
 
 #include "hook_types.h"
 #include "PreRoutingCore.h"
-#include "ProcessorManager.h"
+//#include "ProcessorManager.h"
 
 Define_Module( PreRoutingCore );
 

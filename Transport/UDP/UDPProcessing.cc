@@ -49,7 +49,7 @@
 
 #include "UDPPacket.h"
 #include "UDPProcessing.h"
-#include "ProcessorManager.h"
+//#include "ProcessorManager.h"
 #include "IPInterfacePacket.h"
 
 Define_Module( UDPProcessing );

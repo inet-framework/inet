@@ -33,7 +33,7 @@
 #define __IPOUTPUTCORE_H__
 
 #include "basic_consts.h"
-#include "ProcessorAccess.h"
+//#include "ProcessorAccess.h"
 #include "IPDatagram.h"
 #include "ICMP.h"
 

@@ -24,11 +24,11 @@
 // Receive datagram with multicast address from Routing:
 // - duplicate datagram if it is sent to more than one output port
 //   (to map multicast address on output port, uses multicast routing table)
-// - send copy to local deliver, if NetworkCardAddr.[] is part of multicast 
+// - send copy to local deliver, if NetworkCardAddr.[] is part of multicast
 //    address
-// - if entry in multicast routing table requires tunneling, send to Tunneling 
+// - if entry in multicast routing table requires tunneling, send to Tunneling
 //   module, otherwise send to Fragmentation module
-// 
+//
 // Receive IGMP (Internet Group Management Protocol) message from LocalDeliver:
 // update multicast routing table.
 //
@@ -40,7 +40,7 @@ simple IPMulticast
         IPForward: bool,
         procdelay: numeric const;
     gates:
-        in: localIn, routingIn, ProcessorManagerIn;
+        in: localIn, routingIn; // ProcessorManagerIn;
         out: localOut, fragmentationOut, tunnelOut;
 endsimple
 

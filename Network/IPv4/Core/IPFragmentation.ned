@@ -32,7 +32,7 @@ simple IPFragmentation
         procdelay : numeric,
         numOfPorts: numeric const;
     gates:
-        in: routingIn, multicastIn, processorManagerIn;
-        out: errorOut, outputOut []; 
+        in: routingIn, multicastIn; // processorManagerIn;
+        out: errorOut, outputOut [];
 endsimple
 

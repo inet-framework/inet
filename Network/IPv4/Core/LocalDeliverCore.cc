@@ -43,7 +43,7 @@
 
 #include "hook_types.h"
 #include "LocalDeliverCore.h"
-#include "ProcessorManager.h"
+//#include "ProcessorManager.h"
 
 Define_Module( LocalDeliverCore );
 

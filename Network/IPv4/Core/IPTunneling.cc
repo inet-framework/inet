@@ -36,7 +36,7 @@
 
 #include "IPTunneling.h"
 #include "IPInterfacePacket.h"
-#include "ProcessorManager.h"
+//#include "ProcessorManager.h"
 
 Define_Module( IPTunneling );
 

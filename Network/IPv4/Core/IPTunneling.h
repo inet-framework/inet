@@ -36,7 +36,7 @@
 #define __IPTUNNELING_H__
 
 #include "IPDatagram.h"
-#include "ProcessorAccess.h"
+//#include "ProcessorAccess.h"
 
 class IPTunneling : public cSimpleModule   // was ProcessorAccess
 {

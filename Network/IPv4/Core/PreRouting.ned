@@ -23,27 +23,27 @@ import "NF_IP_PRE_ROUTING";
 
 //
 // Pre-routing handling of IP datagram: check for errors and decrement TTL.
-// 
+//
 // Handling:
 // - receive IP datagram
 // - check for header error -> throw away and notify ICMP Module on error
-// - decrement hop counter 
+// - decrement hop counter
 // - send correct datagram to Routing Module
 //
 // author: Jochen Reber
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 //
-module PreRouting 
-    parameters: 
+module PreRouting
+    parameters:
         hookName : string,
         procdelay : numeric const;
-    gates: 
-        in: queueIn; 
-        in: localDeliverIn; 
-        in: processorManagerIn;
-        out: routingOut; 
-        out: errorOut; 
-    submodules: 
+    gates:
+        in: queueIn;
+        in: localDeliverIn;
+        //in: processorManagerIn;
+        out: routingOut;
+        out: errorOut;
+    submodules:
         core: PreRoutingCore;
             parameters:
                 procdelay = procdelay;
@@ -51,25 +51,25 @@ module PreRouting
         queueHook: hookName like NF_IP_PRE_ROUTING;
             display: "p=169,96;b=48,50,rect";
     connections nocheck:
-        queueIn --> core.inputQueueIn; 
-        localDeliverIn --> core.localDeliverIn; 
-        core.routingOut --> routingOut; 
-        core.errorOut --> errorOut; 
-                                    
-        core.netfilterOut --> queueHook.in; 
-        queueHook.out --> core.netfilterIn; 
-endmodule 
+        queueIn --> core.inputQueueIn;
+        localDeliverIn --> core.localDeliverIn;
+        core.routingOut --> routingOut;
+        core.errorOut --> errorOut;
 
-simple PreRoutingCore 
+        core.netfilterOut --> queueHook.in;
+        queueHook.out --> core.netfilterIn;
+endmodule
+
+simple PreRoutingCore
     parameters:
         procdelay : numeric const;
-    gates: 
-        in: inputQueueIn; 
-        in: localDeliverIn; 
-        in: netfilterIn; 
-        in: processorManagerIn;
-        out: errorOut; 
-        out: netfilterOut; 
-        out: routingOut; 
-endsimple 
+    gates:
+        in: inputQueueIn;
+        in: localDeliverIn;
+        in: netfilterIn;
+        //in: processorManagerIn;
+        out: errorOut;
+        out: netfilterOut;
+        out: routingOut;
+endsimple
 

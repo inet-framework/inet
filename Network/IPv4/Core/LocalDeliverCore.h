@@ -40,7 +40,7 @@
 #define __LOCALDELIVERCORE_H__
 
 #include "IPDatagram.h"
-#include "ProcessorAccess.h"
+//#include "ProcessorAccess.h"
 
 /*  -------------------------------------------------
         Constants

@@ -17,73 +17,73 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-simple UDPApp 
-    parameters: 
-        nodename : string, 
-        local_port : numeric, 
-        dest_port : numeric, 
+simple UDPApp
+    parameters:
+        nodename : string,
+        local_port : numeric,
+        dest_port : numeric,
         message_length : numeric, // (bit)
         message_freq : numeric,
-		routeDestNo : numeric;
-    gates: 
-        in: from_udp; 
-        out: to_udp; 
-endsimple 
+        routeDestNo : numeric;
+    gates:
+        in: from_udp;
+        out: to_udp;
+endsimple
 
-simple UDPProcessing 
+simple UDPProcessing
     // parameters:
-    gates: 
-        in: from_application[]; 
-        in: from_ip; 
-		in: processorManagerIn;
-        out: to_application[]; 
-        out: to_ip; 
-endsimple 
+    gates:
+        in: from_application[];
+        in: from_ip;
+        //in: processorManagerIn;
+        out: to_application[];
+        out: to_ip;
+endsimple
 
-module UDPUpperLayers 
-    parameters: 
-		routeDestNo,
-		generationTime,
-		generationSize : numeric const,
+module UDPUpperLayers
+    parameters:
+        routeDestNo,
+        generationTime,
+        generationSize : numeric const,
         nodename : string,
         udpCl1Name : string,
-        udpServer1Name : string; 
-    gates: 
-        in: from_ip; 
-        out: to_ip; 
-    submodules: 
-        udpProcessing: UDPProcessing; 
-            gatesizes: 
-                from_application[2], 
-                to_application[2]; 
+        udpServer1Name : string;
+    gates:
+        in: from_ip;
+        out: to_ip;
+    submodules:
+        udpProcessing: UDPProcessing;
+            gatesizes:
+                from_application[2],
+                to_application[2];
             display: "p=94,105;i=fork";
-        udpCl1: udpCl1Name like UDPApp; 
-            parameters: 
-				routeDestNo = routeDestNo,
-                nodename = nodename, 
-                local_port = 100, 
-                dest_port = 200, 
-				message_length = generationSize,
-				message_freq = generationTime;
+        udpCl1: udpCl1Name like UDPApp;
+            parameters:
+                routeDestNo = routeDestNo,
+                nodename = nodename,
+                local_port = 100,
+                dest_port = 200,
+                message_length = generationSize,
+                message_freq = generationTime;
             display: "p=134,43;b=48,32,rect";
-        udpServer1: udpServer1Name like UDPApp; 
-            parameters: 
-				routeDestNo = 0,
-                nodename = nodename, 
-                local_port = 200, 
-                dest_port = 0, 
+        udpServer1: udpServer1Name like UDPApp;
+            parameters:
+                routeDestNo = 0,
+                nodename = nodename,
+                local_port = 200,
+                dest_port = 0,
                 message_length = 0,
-                message_freq = 0; 
+                message_freq = 0;
             display: "p=51,42;b=40,24,rect";
-    connections nocheck: 
-        from_ip --> udpProcessing.from_ip; 
-        to_ip <-- udpProcessing.to_ip; 
-                                       
-        udpProcessing.to_application[0] --> udpCl1.from_udp; 
-        udpProcessing.from_application[0] <-- udpCl1.to_udp; 
-                                                             
-        udpProcessing.to_application[1] --> udpServer1.from_udp; 
-        udpProcessing.from_application[1] <-- udpServer1.to_udp; 
+    connections nocheck:
+        from_ip --> udpProcessing.from_ip;
+        to_ip <-- udpProcessing.to_ip;
+
+        udpProcessing.to_application[0] --> udpCl1.from_udp;
+        udpProcessing.from_application[0] <-- udpCl1.to_udp;
+
+        udpProcessing.to_application[1] --> udpServer1.from_udp;
+        udpProcessing.from_application[1] <-- udpServer1.to_udp;
     display: "p=10,10;b=157,140,rect";
-endmodule 
+endmodule
 

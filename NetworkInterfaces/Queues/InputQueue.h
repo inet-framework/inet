@@ -34,7 +34,7 @@
 #include <omnetpp.h>
 
 #include "basic_consts.h"
-#include "ProcessorAccess.h"
+//#include "ProcessorAccess.h"
 
 class InputQueue : public cSimpleModule   // was ProcessorAccess
 {

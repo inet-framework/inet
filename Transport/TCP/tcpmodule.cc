@@ -264,6 +264,12 @@ void TcpModule::handleMessage(cMessage *msg)
   //find TCB for current connection
   tcb_block = getTcb(msg);
 
+  // LYBD: some timeout messages may arrive after TCB is deleted
+  if (tcb_block == NULL) {
+    delete msg;
+    return;
+  }
+
   //print TCB status information
   printStatus(tcb_block, "Connection state before event processing");
   
@@ -787,7 +793,7 @@ void TcpModule::handleMessage(cMessage *msg)
 
   if (delete_tcb == true)
     {
-      ev << "Deleting connection desctriptor.\n";
+      if (debug) ev << "Deleting connection desctriptor.\n";
       delete tcb_block;
       tcb_block = NULL;
     }
@@ -907,11 +913,11 @@ void TcpModule::seq_no_rec(unsigned long recnumber)
 TcpTcb* TcpModule::getTcb(cMessage* msg)
 {
   //define TCB and socket pair
-  TcpTcb*  tcb_block;
+  TcpTcb*  tcb_block = NULL;
   SockPair spair;
 
   //address and port mangement function
-  tcpArrivalMsg(msg, spair);
+  MsgSource eventsource = tcpArrivalMsg(msg, spair);
   
   //get or create a TCB holding connection state information
   sockpair_iterator search = tcb_list.find(spair);
@@ -959,7 +965,9 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_list.insert(TcbList::value_type(spair, tcb_block));
 
         }
-      else
+      // LYBD: some timeout messages may arrive after TCB is deleted,
+      // should not create new TCB for these timeout messages
+      else if (eventsource != FROM_TIMEOUT)
         {
           if (debug) ev << "Creating new connection descriptor.\n";
 
@@ -1081,6 +1089,10 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
       
           //insert TCB in tcb_list together with socket pair
           tcb_list.insert(TcbList::value_type(spair, tcb_block));
+        }
+      else
+        {
+          error("unexpected state"); // FIXME what to do here?
         }
     }
   
@@ -2168,6 +2180,7 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
   if (pdata->length() == 0)
     {
       if (debug) ev << "Encapsulated data packet of the incoming segment contains no octets.\n";
+      delete pdata; // LYBD: fix memory leaks!
     }
   else
     {
@@ -2195,7 +2208,7 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
               tcb_block->rcv_nxt = tcb_block->rcv_buf_seq + numBitsInQueue(tcp_data_receive_queue) / 8 + numBitsInQueue(tcp_socket_queue) / 8;
             }
           //there is no overlapping data 
-          else
+          else // seg_seg == rcv_nxt
             {
               insertAtQueueTail(tcp_data_receive_queue, pdata, 0);
               seq_rec = tcb_block->seg_seq;
@@ -2270,7 +2283,6 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
                                     complete_pkt_rcvd = true;
                                   }
 
-                                    
                                   //drop the overlapping amount
                                   if (remainder > 0)
                                     {
@@ -2482,8 +2494,6 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
   unsigned long segment_size;
   cMessage*     pseg;
   cMessage*     pto_be_sent_seg;
-
- 
 
   //determine the size of the retransmission queue
   retrans_queue_size = numBitsInQueue(tcp_retrans_queue);
@@ -3013,12 +3023,14 @@ void TcpModule::rcvQueueProcess(TcpTcb* tcb_block)
       if ((tcb_block->num_pks_req == 0 && !tcb_block->rcv_up_valid) || num_pks_avail == 1)
         {
           ppkt->addPar("urgent") = urgent;
+          ppkt->addPar("tcp_conn_id") = tcb_block->tb_conn_id; // LYBD
           //forward data packet to the application
           send(ppkt, "to_appl");
         }
       else
         {
           //forward data packet to the application
+          ppkt->addPar("tcp_conn_id") = tcb_block->tb_conn_id; // LYBD
           send(ppkt, "to_appl");
         }
 
@@ -3254,14 +3266,12 @@ void TcpModule::connClosed(TcpTcb* tcb_block)
 //function to remove a specified number of bits from a queue and put them into a data packet
 cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long number_of_bits_to_remove)
 {
-  cMessage*     fdata_packet        = new cMessage;
+  cMessage*     fdata_packet        = NULL; // LYBD: fix memory leaks
   cMessage*     rdata_packet        = new cMessage;
   unsigned long bit_size_from_queue = numBitsInQueue(from_queue);
   unsigned long fdp_len;
   unsigned long rdp_len             = 0;
 
-
-  
   if (bit_size_from_queue == 0)
     {
       if (debug) ev << "No data available in the queue specified. Returning NULL-pointer.\n";
@@ -3286,11 +3296,54 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
       // code added by Sebastian Klapp
       // for packets coming from tcp-retrans-queue
       // check if fdata is already packed
-      if(fdata_packet->hasPar("msg_list"))
+// BCH LYBD
+      //if(fdata_packet->hasPar("msg_list"))
+      //  {
+      //    fdata_packet=(cMessage*) ((cArray*)
+      //     (fdata_packet->parList().get("msg_list")))->get(0);
+      //  }
+      if(fdata_packet->hasPar("msg_list")) // rewritten by LYBD 
         {
-          fdata_packet=(cMessage*) ((cArray*)
-           (fdata_packet->parList().get("msg_list")))->get(0);
-        }
+          cArray*   msg_list = (cArray*)(fdata_packet->parList().get("msg_list"));
+          for (int k = 0; k < msg_list->items() && number_of_bits_to_remove > 0; k++)
+          {
+              cMessage* pdata_packet = (cMessage *) msg_list->get(k);
+              if (pdata_packet == NULL)
+                  continue;
+              unsigned long pdata_len = pdata_packet->length();
+              if (pdata_len > number_of_bits_to_remove)
+              {
+                  // split packet and save the copy
+                  cMessage* pdata_packet_copy = (cMessage*) pdata_packet->dup();
+                  if (pdata_packet_copy->hasPar("complete_pkt"))
+                      pdata_packet_copy->par("complete_pkt") = 0;
+                  else
+                      pdata_packet_copy->addPar("complete_pkt") = 0;
+                  pdata_packet_copy->setLength(number_of_bits_to_remove);
+                  pdata_packet->addLength(-number_of_bits_to_remove);
+                  fdata_packet->addLength(-number_of_bits_to_remove);
+                  rdp_len += number_of_bits_to_remove;
+                  number_of_bits_to_remove = 0;
+                  // insert into outgoing packet
+                  ((cArray*) (rdata_packet->parList().get("msg_list")))->add(pdata_packet_copy);
+                  break;
+              }
+              else 
+              {
+                  msg_list->remove(k);
+                  fdata_packet->addLength(-pdata_len);
+                  rdp_len += pdata_len;
+                  number_of_bits_to_remove -= pdata_len;
+                  ((cArray*) (rdata_packet->parList().get("msg_list")))->add(pdata_packet);
+              }
+          }
+          if (fdata_packet->length() > 0)
+               from_queue.insertHead(fdata_packet);
+          else
+              delete fdata_packet;
+       }
+      else
+      {
       ((cArray*) (rdata_packet->parList().get("msg_list")))->add(fdata_packet);
       // fdata_packet = (cMessage*) from_queue.remove(from_queue.head());
       //    ((cArray*) (rdata_packet->parList().get("msg_list")))->add(fdata_packet);
@@ -3312,24 +3365,29 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
           //duplicate packet and put one copy back into queue for next retrieval
           cMessage* res_data_packet = (cMessage*) fdata_packet->dup();
           fdata_packet->addPar("complete_pkt") = 0;
+          fdata_packet->setLength(number_of_bits_to_remove); // LYBD
           rdp_len += number_of_bits_to_remove;
           res_data_packet->addLength(- number_of_bits_to_remove);
           from_queue.insertHead(res_data_packet);
           number_of_bits_to_remove = 0;
         }
-      else if (fdp_len == number_of_bits_to_remove)
-        {
-          fdata_packet->addPar("complete_pkt") = 1;
-          rdp_len += number_of_bits_to_remove;
-          number_of_bits_to_remove = 0;
-        }
-      else
+// BCH LYBD
+      //else if (fdp_len == number_of_bits_to_remove)
+      //  {
+      //    fdata_packet->addPar("complete_pkt") = 1;
+      //    rdp_len += number_of_bits_to_remove;
+      //    number_of_bits_to_remove = 0;
+      //  }
+      //else
+// ECH LYBD
+        else // (fdp_len <= number_of_bits_to_remove)
         {
           fdata_packet->addPar("complete_pkt") = 1;
           rdp_len += fdp_len;
           number_of_bits_to_remove -= fdp_len;
         }
-    }
+        } //if (fdata_packet->hasPar("msg_list"))
+    }//while//
 
   rdata_packet->setLength(rdp_len);
   return rdata_packet;
@@ -3511,7 +3569,7 @@ void TcpModule::insertListElement(cLinkedList & ilist, SegRecord* ielement, unsi
       unsigned long counter = 1;
       cLinkedListIterator literator(ilist, 1);
       //move to the desired position in the list
-      while(counter <= position)
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
@@ -3552,7 +3610,7 @@ void TcpModule::removeListElement(cLinkedList & list_to_inspect, unsigned long p
       unsigned long counter = 1; 
       cLinkedListIterator literator(list_to_inspect, 1);
       //move to the desired position in the list
-      while(counter <= position)
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
@@ -3588,7 +3646,7 @@ SegRecord* TcpModule::accessListElement(cLinkedList & list_to_inspect, unsigned 
       unsigned long counter = 1;
       cLinkedListIterator literator(list_to_inspect, 1);
       //move to the desired position in the list
-      while(counter <= position)
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
