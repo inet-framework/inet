@@ -377,6 +377,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 arp->setSrcIPAddress(myIPAddress);
                 arp->setSrcMACAddress(myMACAddress);
                 arp->setOpcode(ARP_REPLY);
+                delete arp->removeControlInfo();
                 sendPacketToMAC(arp, srcMACAddress);
                 numRepliesSent++;
             }
