@@ -19,25 +19,25 @@
 
 import
     "Router",
-    "StandardHost2",
+    "StandardHost",
     "FlatNetworkConfigurator";
 
 
 module BulkTransfer
     submodules:
-        client1: StandardHost2;
+        client1: StandardHost;
             display: "p=120,60;i=comp";
-        client2: StandardHost2;
+        client2: StandardHost;
             display: "p=260,60;i=comp";
-        client3: StandardHost2;
+        client3: StandardHost;
             display: "p=260,160;i=comp";
-        server: StandardHost2;
+        server: StandardHost;
             display: "p=120,160;i=pc";
         router: Router;
             display: "p=190,102;i=ipc";
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "Router StandardHost2",
+                moduleTypes = "Router StandardHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";

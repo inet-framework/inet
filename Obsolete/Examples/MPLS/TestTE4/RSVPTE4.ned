@@ -12,8 +12,8 @@
 
 
 import
-    "StandardHost2",
-    "RSVP_LSR_Node",
+    "StandardHost",
+    "RSVP_LSR",
     "Tester",
     "TED";
 
@@ -34,7 +34,7 @@ import
 //
 module RSVPTE4
     submodules:
-        LSR1: RSVP_LSR_Node;
+        LSR1: RSVP_LSR;
             parameters:
                 isIR = true,
                 isER = false;
@@ -42,7 +42,7 @@ module RSVPTE4
                 in[4],
                 out[4];
             display: "p=112,175;i=srouter";
-        LSR2: RSVP_LSR_Node;
+        LSR2: RSVP_LSR;
             parameters:
                 isIR = false,
                 isER = false;
@@ -50,7 +50,7 @@ module RSVPTE4
                 in[3],
                 out[3];
             display: "p=206,263;i=srouter";
-        LSR3: RSVP_LSR_Node;
+        LSR3: RSVP_LSR;
             parameters:
                 isIR = false,
                 isER = false;
@@ -58,7 +58,7 @@ module RSVPTE4
                 in[2],
                 out[2];
             display: "p=186,95;i=srouter";
-        LSR4: RSVP_LSR_Node;
+        LSR4: RSVP_LSR;
             parameters:
                 isIR = false,
                 isER = false;
@@ -66,7 +66,7 @@ module RSVPTE4
                 in[3],
                 out[3];
             display: "p=286,159;i=srouter";
-        LSR5: RSVP_LSR_Node;
+        LSR5: RSVP_LSR;
             parameters:
                 isIR = false,
                 isER = true;
@@ -74,19 +74,19 @@ module RSVPTE4
                 in[3],
                 out[3];
             display: "p=388,159;i=srouter";
-        host1: StandardHost2;  // client
+        host1: StandardHost;  // client
             gatesizes:
                 in[1],
                 out[1];
             display: "p=26,98;i=pc";
-        host3: StandardHost2;  // server
+        host3: StandardHost;  // server
             gatesizes:
                 in[1],
                 out[1];
             display: "p=482,96;i=server1";
         ted: TED;
             parameters:
-               moduleTypes = "StandardHost2 RSVP_LSR_Node";
+               moduleTypes = "StandardHost RSVP_LSR";
             display: "p=120,280;i=proc2";
         tester: Tester;
             parameters:

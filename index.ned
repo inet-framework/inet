@@ -40,7 +40,7 @@
 //    includes all modules and networks
 //  - example networks: NClients, BulkTransfer, MulticastNetwork,
 //    ARPTest, MixedLAN, etc.
-//  - hosts, routers, switches: StandardHost2, Router, EtherSwitch, EtherHub,
+//  - hosts, routers, switches: StandardHost, Router, EtherSwitch, EtherHub,
 //    etc.
 //  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing,
 //    PPPInterface, ARP, EtherMAC, etc.
@@ -58,7 +58,7 @@
 //
 // Starting points for the MPLS models:
 //  - the core modules: MPLSModule, LIBTable, NewLDP, RSVP, TED, OspfTe
-//  - MPLS-enabled routers: LSRNode, RSVP_LSR_Node
+//  - MPLS-enabled routers: LDP_LSR, RSVP_LSR
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>
 //

@@ -19,7 +19,7 @@
 
 import
     "Router",
-    "StandardHost2",
+    "StandardHost",
     "FlatNetworkConfigurator";
 
 
@@ -39,7 +39,7 @@ module NClients
     submodules:
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "Router StandardHost2",
+                moduleTypes = "Router StandardHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
@@ -50,9 +50,9 @@ module NClients
             display: "i=srouter";
         r3: Router;
             display: "i=srouter";
-        cli: StandardHost2[n];
+        cli: StandardHost[n];
             display: "i=laptop3";
-        srv: StandardHost2;
+        srv: StandardHost;
             display: "i=server1";
     connections nocheck:
         for i=0..n-1 do

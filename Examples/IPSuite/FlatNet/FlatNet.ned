@@ -19,7 +19,7 @@
 
 import
     "Router",
-    "StandardHost2",
+    "StandardHost",
     "FlatNetworkConfigurator";
 
 
@@ -37,16 +37,16 @@ module FlatNet
     submodules:
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "Router StandardHost2",
+                moduleTypes = "Router StandardHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
             display: "i=cogwheel";
         rte: Router[57];
             display: "i=ball2_vs,gold,100";
-        cli: StandardHost2[2];
+        cli: StandardHost[2];
             display: "i=laptop3";
-        srv: StandardHost2;
+        srv: StandardHost;
             display: "i=server1";
     connections nocheck:
         cli[0].out++ --> ethernetline --> rte[50].in++;

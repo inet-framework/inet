@@ -78,13 +78,12 @@ NetworkInterfaces/Ethernet/MACRelayUnit.ned
 NetworkInterfaces/Ethernet/MACRelayUnitNP.ned
 NetworkInterfaces/Ethernet/MACRelayUnitPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
-Nodes/IPSuite/BurstHost.ned
-Nodes/IPSuite/NetworkLayer.ned
-Nodes/IPSuite/OSPFRouter.ned
-Nodes/IPSuite/Router.ned
-Nodes/IPSuite/StandardHost2.ned
-Nodes/MPLS/LSRNode.ned
-Nodes/MPLS/RSVP_LSR_Node.ned
+Nodes/INET/BurstHost.ned
+Nodes/INET/NetworkLayer.ned
+Nodes/INET/Router.ned
+Nodes/INET/StandardHost.ned
+Nodes/MPLS/LDP_LSR.ned
+Nodes/MPLS/RSVP_LSR.ned
 
 
 

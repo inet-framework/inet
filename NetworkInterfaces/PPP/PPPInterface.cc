@@ -241,7 +241,7 @@ void PPPInterface::updateDisplayString()
         if (datarate>=1e9) sprintf(drate,"%gG", datarate/1e9);
         else if (datarate>=1e6) sprintf(drate,"%gM", datarate/1e6);
         else if (datarate>=1e3) sprintf(drate,"%gK", datarate/1e3);
-        else sprintf(drate,"%gb", datarate);
+        else sprintf(drate,"%gbps", datarate);
 
         IPAddress addr = interfaceEntry->inetAddr;
 

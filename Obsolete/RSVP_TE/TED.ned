@@ -42,7 +42,7 @@
 // Usages
 //
 // The TED module detects the links between modules of types listed in the
-// moduleTypes parameter; it should be set to e.g. "RSVP_LSR_Node StandardHost2".
+// moduleTypes parameter; it should be set to e.g. "RSVP_LSR StandardHost".
 //
 simple TED
    parameters:

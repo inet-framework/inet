@@ -12,8 +12,8 @@
 
 
 import
-    "LSRNode",
-    "StandardHost2";
+    "LDP_LSR",
+    "StandardHost";
 
 
 //
@@ -21,7 +21,7 @@ import
 //
 module MPLSNet
     submodules:
-        LSR1: LSRNode;
+        LSR1: LDP_LSR;
             parameters:
                 id = "LSR1",
                 isIR = true,
@@ -31,7 +31,7 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=184,95;i=srouter";
-        LSR2: LSRNode;
+        LSR2: LDP_LSR;
             parameters:
                 id = "LSR2",
                 isIR = false,
@@ -41,7 +41,7 @@ module MPLSNet
                 in[3],
                 out[3];
             display: "p=238,247;i=srouter";
-        LSR3: LSRNode;
+        LSR3: LDP_LSR;
             parameters:
                 id = "LSR3",
                 isIR = false,
@@ -51,7 +51,7 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=322,95;i=srouter";
-        LSR4: LSRNode;
+        LSR4: LDP_LSR;
             parameters:
                 id = "LSR4",
                 isIR = false,
@@ -61,7 +61,7 @@ module MPLSNet
                 in[3],
                 out[3];
             display: "p=398,247;i=srouter";
-        LSR5: LSRNode;
+        LSR5: LDP_LSR;
             parameters:
                 id = "LSR5",
                 isIR = false,
@@ -71,16 +71,16 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=500,95;i=srouter";
-        host1: StandardHost2;  // client
+        host1: StandardHost;  // client
             parameters:
             display: "p=26,98;i=comp_s";
-        host2: StandardHost2;  // client
+        host2: StandardHost;  // client
             parameters:
             display: "p=26,256;i=comp_s";
-        host3: StandardHost2;  // server
+        host3: StandardHost;  // server
             parameters:
             display: "p=570,88;i=comp_s";
-        host4: StandardHost2;  // server
+        host4: StandardHost;  // server
             parameters:
             display: "p=578,240;i=comp_s";
     connections nocheck:

@@ -14,24 +14,26 @@
 import
     "Blackboard",
     "NetworkLayer",
+    "NewLDP",
+    "TCPMain",
+    "UDPProcessing",
     "MPLSModule",
-    "LIBTable",
-    "RSVP",
-    "OspfTe",
-    "RSVPAppl";
-
+    "PPPInterface",
+    "LIBTable";
 
 
 //
-// An \RSVP-TE capable router.
+// An LDP-capable router.
 //
-// \RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. \RSVP uses transport protocols to route packets. OSPF-TE is used
-// to calculate shortest paths.
+// LDP Capable Routers are main building blocks for an LDP MPLS network.
 //
-module RSVP_LSR_Node
+module LDP_LSR
     parameters:
         routerId : string,
+        ldpTimeout : numeric,
+        ldpKeepAliveTime : numeric,
+        helloTimeout : numeric,
+        peerNo : numeric,
         isIR : bool,
         isER : bool,
         routingFile : string,
@@ -40,34 +42,34 @@ module RSVP_LSR_Node
     gates:
         in: in[];
         out: out[];
+
     submodules:
         blackboard: Blackboard;
-            display: "p=260,60;i=proc2";
+            display: "p=70,60;i=proc2";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=60,130;i=box3";
-        ospf_te: OspfTe;
-            display: "p=60,190;b=40,24;o=#008040";
-        signal_module: RSVPAppl;
+            display: "p=70,135;i=box3";
+        signal_module: NewLDP;
             parameters:
-                isIR = isIR,
-                isER = isER;
-            display: "o=#8080ff;p=80,52;b=32,30";
-        rsvp: RSVP;
-            parameters:
-                isIR = isIR,
-                isER = isER;
-            display: "o=#0080c0;p=190,51;b=40,24,rect";
+                routerId = routerId,
+                helloTimeout = helloTimeout,
+                isER = isER,
+                isIR = isIR;
+            display: "p=190,60;b=40,24";
+        tcp: TCPMain;
+            display: "p=145,120;i=prot2";
+        udp: UDPProcessing;
+            display: "p=235,120;i=prot1";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=192,163;i=fork";
+            display: "p=190,186;i=fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=88,297,row,90;q=queue;i=iface";
+            display: "p=87,320,row,90;q=queue;i=iface";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -77,18 +79,24 @@ module RSVP_LSR_Node
                 toL3[sizeof(out)],
                 fromL2[sizeof(out)],
                 toL2[sizeof(out)];
-            display: "o=#ff8000;p=192,238;b=66,14";
+            display: "o=#ff8000;p=190,250;b=66,14";
         libTable: LIBTable;
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=280,184;b=32,30";
+            display: "i=proc2;p=279,207";
     connections nocheck:
-        signal_module.to_rsvp --> rsvp.from_rsvp_app;
-        signal_module.from_rsvp <-- rsvp.to_rsvp_app;
+        signal_module.from_tcp_interface <-- tcp.to_appl++;
+        signal_module.to_tcp_interface --> tcp.from_appl++;
 
-        rsvp.to_ip --> networkLayer.RSVPIn;
-        rsvp.from_ip <-- networkLayer.RSVPOut;
+        signal_module.to_udp_interface --> udp.from_application++;
+        signal_module.from_udp_interface <-- udp.to_application++;
+
+        udp.to_ip --> networkLayer.UDPIn;
+        udp.from_ip <-- networkLayer.UDPOut;
+
+        tcp.to_ip --> networkLayer.TCPIn;
+        tcp.from_ip <-- networkLayer.TCPOut;
 
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;

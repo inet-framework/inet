@@ -12,8 +12,8 @@
 
 
 import
-    "LSRNode",
-    "StandardHost2";
+    "LDP_LSR",
+    "StandardHost";
 
 
 //
@@ -21,7 +21,7 @@ import
 //
 module MPLSNet
     submodules:
-        LSR1: LSRNode;
+        LSR1: LDP_LSR;
             parameters:
                 isIR = true,
                 isER = false,
@@ -30,7 +30,7 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=184,95;i=srouter";
-        LSR2: LSRNode;
+        LSR2: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -39,7 +39,7 @@ module MPLSNet
                 in[3],
                 out[3];
             display: "p=238,247;i=srouter";
-        LSR3: LSRNode;
+        LSR3: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -48,7 +48,7 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=322,95;i=srouter";
-        LSR4: LSRNode;
+        LSR4: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -57,7 +57,7 @@ module MPLSNet
                 in[3],
                 out[3];
             display: "p=398,247;i=srouter";
-        LSR5: LSRNode;
+        LSR5: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = true,
@@ -66,22 +66,22 @@ module MPLSNet
                 in[4],
                 out[4];
             display: "p=500,95;i=srouter";
-        host1: StandardHost2;  // client
+        host1: StandardHost;  // client
             gatesizes:
                 in[1],
                 out[1];
             display: "p=26,98;i=pc";
-        host2: StandardHost2;  // client
+        host2: StandardHost;  // client
             gatesizes:
                 in[1],
                 out[1];
             display: "p=26,256;i=pc";
-        host3: StandardHost2;  // server
+        host3: StandardHost;  // server
             gatesizes:
                 in[1],
                 out[1];
             display: "p=570,88;i=pc";
-        host4: StandardHost2;  // server
+        host4: StandardHost;  // server
             gatesizes:
                 in[1],
                 out[1];

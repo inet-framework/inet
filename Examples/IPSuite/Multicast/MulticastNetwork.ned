@@ -21,7 +21,7 @@
 
 import
     "Router",
-    "StandardHost2";
+    "StandardHost";
 
 channel ethernet
     delay normal(0.00015,0.00005);
@@ -40,7 +40,7 @@ endchannel
 
 module MulticastNetwork
     submodules:
-        host1: StandardHost2;
+        host1: StandardHost;
             parameters:
                 IPForward = false,
                 routingFile = "mchost1.mrt";
@@ -48,7 +48,7 @@ module MulticastNetwork
                 in[1],
                 out[1];
             display: "p=62,46;i=pc";
-        host2: StandardHost2;
+        host2: StandardHost;
             parameters:
                 IPForward = true,
                 routingFile = "mchost2.mrt";
@@ -56,7 +56,7 @@ module MulticastNetwork
                 in[2],
                 out[2];
             display: "p=38,200;i=pc";
-        host3: StandardHost2;
+        host3: StandardHost;
             parameters:
                 IPForward = true,
                 routingFile = "mchost3.mrt";
@@ -64,7 +64,7 @@ module MulticastNetwork
                 in[2],
                 out[2];
             display: "p=140,200;i=pc";
-        host4: StandardHost2;
+        host4: StandardHost;
             parameters:
                 IPForward = false,
                 routingFile = "mchost4.mrt";
@@ -72,7 +72,7 @@ module MulticastNetwork
                 in[1],
                 out[1];
             display: "p=240,269;i=pc";
-        host5: StandardHost2;
+        host5: StandardHost;
             parameters:
                 IPForward = false,
                 routingFile = "mchost5.mrt";
@@ -80,7 +80,7 @@ module MulticastNetwork
                 in[1],
                 out[1];
             display: "p=344,41;i=pc";
-        host6: StandardHost2;
+        host6: StandardHost;
             parameters:
                 IPForward = false,
                 routingFile = "mchost6.mrt";

@@ -21,7 +21,7 @@
 
 import
     "Router",
-    "StandardHost2";
+    "StandardHost";
 
 
 channel ethernet
@@ -36,7 +36,7 @@ endchannel
 
 module KIDSNw1
     submodules:
-        host: StandardHost2[3];
+        host: StandardHost[3];
             parameters:
                 IPForward = false;
             parameters if index==0:

@@ -12,7 +12,7 @@
 
 
 import
-    "LSRNode";
+    "LDP_LSR";
 
 
 //
@@ -20,7 +20,7 @@ import
 //
 module MPLSNetOnly
     submodules:
-        LSR1: LSRNode;
+        LSR1: LDP_LSR;
             parameters:
                 isIR = true,
                 isER = false,
@@ -29,7 +29,7 @@ module MPLSNetOnly
                 in[4],
                 out[4];
             display: "p=184,95;i=srouter";
-        LSR2: LSRNode;
+        LSR2: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -38,7 +38,7 @@ module MPLSNetOnly
                 in[3],
                 out[3];
             display: "p=238,247;i=srouter";
-        LSR3: LSRNode;
+        LSR3: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -47,7 +47,7 @@ module MPLSNetOnly
                 in[4],
                 out[4];
             display: "p=322,95;i=srouter";
-        LSR4: LSRNode;
+        LSR4: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = false,
@@ -56,7 +56,7 @@ module MPLSNetOnly
                 in[3],
                 out[3];
             display: "p=398,247;i=srouter";
-        LSR5: LSRNode;
+        LSR5: LDP_LSR;
             parameters:
                 isIR = false,
                 isER = true,

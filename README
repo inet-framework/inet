@@ -44,12 +44,12 @@ Bottom-up:
 Further directories are:
 
  Nodes/                protocol stacks, host and router models
-   IPSuite/            IP-based components
+   INET/               IP-based components
    MPLS/               router models with MPLS/LDP/RSVP-TE
 
  Examples/             example networks
    Ethernet/           example Ethernet networks
-   IPSuite/            IP-based example networks
+   INET/               IP-based example networks
    MPLS/               example networks for MPLS/LDP/RSVP-TE
    RTP/                RTP examples (not yet integrated)
 

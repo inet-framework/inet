@@ -13,7 +13,7 @@
 
 import
     "Router",
-    "StandardHost2",
+    "StandardHost",
     "EtherBus",
     "FlatNetworkConfigurator",
     "RTEntryEraser";
@@ -21,7 +21,7 @@ import
 
 module ARPTest
     submodules:
-        server: StandardHost2;
+        server: StandardHost;
             display: "p=480,198;i=server1_l";
         router8: Router;
             display: "p=478,100;i=srouter";
@@ -51,11 +51,11 @@ module ARPTest
             display: "p=247,240;i=srouter";
         router1: Router;
             display: "p=182,283;i=srouter";
-        client: StandardHost2;
+        client: StandardHost;
             display: "p=54,274;i=laptop2_l";
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "Router StandardHost2 EtherBus",
+                moduleTypes = "Router StandardHost EtherBus",
                 nonIPModuleTypes = "EtherBus",
                 networkAddress = "10.0.0.0",
                 netmask = "255.255.0.0";
