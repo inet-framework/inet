@@ -92,6 +92,7 @@ class TCPMain : public cSimpleModule
     virtual ~TCPMain();
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 
     /**
      * To be called from TCPConnection when socket pair (key for TcpConnMap) changes

@@ -111,7 +111,7 @@ void TCPDump::finish()
     sprintf(buf,"[%.3f] ", simulation.simTime());
     ev << buf;
 
-    ev << "finished\n";
+    ev << "tcpdump finished\n";
 }
 
 

@@ -196,4 +196,7 @@ void TCPMain::removeConnection(TCPConnection *conn)
     delete conn;
 }
 
-
+void TCPMain::finish()
+{
+    ev << fullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+}
