@@ -16,18 +16,10 @@ exec wish "$0" "$@"
 
 
 # columns below: <name> <directory> <unix-command> <windows-command>
+set wantScrollbar 1
 set i 0
 set first ""
 foreach line {
-   {"Ethernet"}
-   {"LANs: mixed Ethernet" "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
-   {"LANs: Ethernet bus"   "Ethernet/LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
-   {"LANs: hub"            "Ethernet/LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
-   {"LANs: switch"         "Ethernet/LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
-   {"LANs: two hosts"      "Ethernet/LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
-   {"LANs: very large LAN" "Ethernet/LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
-   {"ARP Test"             "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
-
    {"IPSuite"}
    {"NClients"            "IPSuite/NClients"           "./NClients"           "NClients"}
    {"NClients/2"          "IPSuite/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
@@ -37,6 +29,15 @@ foreach line {
    {"McNetwork2"          "IPSuite/McNetwork2"         "./McNetwork2"         "McNetwork2"}
    {"PerformAnalysis"     "IPSuite/PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
    {"TCPClientServerNet"  "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
+
+   {"Ethernet"}
+   {"ARP Test"             "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
+   {"LANs: mixed Ethernet" "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
+   {"LANs: Ethernet bus"   "Ethernet/LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
+   {"LANs: hub"            "Ethernet/LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
+   {"LANs: switch"         "Ethernet/LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
+   {"LANs: two hosts"      "Ethernet/LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
+   {"LANs: very large LAN" "Ethernet/LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
 
    {"MPLS"}
    {"MPLS-LDP"               "MPLS/ldp-mpls1" "./ldp-mpls1" "ldp-mpls1"}
@@ -67,7 +68,7 @@ foreach line {
 
 
 proc createWindow {} {
-    global samples first type title dir uprog wprog fonts colors
+    global wantScrollbar samples first type title dir uprog wprog fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
@@ -134,20 +135,35 @@ proc createWindow {} {
     button .main.lo.start -font $fonts(bold) -bg $colors(startbutton)
     pack .main.lo.start -expand 1 -fill x  -padx 10 -pady 6
 
-    #label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
-    #pack .sel.banner -fill x -side top
+    canvas .sel.c -width 200
+    pack .sel.c -side left -expand yes -fill both
+    if {$wantScrollbar} {
+        .sel.c config -yscrollcommand ".sel.s set"
+        scrollbar .sel.s -command ".sel.c yview"
+        pack .sel.s -side right -fill y
+    }
+    frame .sel.c.f
+    .sel.c create window 0 0 -anchor nw -window .sel.c.f
+    set f .sel.c.f
+
+    #label $f.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
+    #pack $f.banner -fill x -side top
     foreach i $samples {
         if {$type($i)=="spacer"} {
-            frame .sel.$i -relief flat
-            pack .sel.$i -fill x -side top -pady 5
+            frame $f.$i -relief flat
+            pack $f.$i -fill x -side top -pady 5
         } elseif {$type($i)=="heading"} {
-            label .sel.$i -text $title($i) -bg $colors(banner) -relief groove  -font $fonts(bold)
-            pack .sel.$i -fill x -side top -padx 5 -pady 5
+            label $f.$i -text $title($i) -bg $colors(banner) -relief groove  -font $fonts(bold)
+            pack $f.$i -fill x -side top -padx 5 -pady 5
         } else {
-            button .sel.$i -text $title($i) -command "showDemo $i"
-            pack .sel.$i -fill x -side top -padx 5 -pady 2
+            button $f.$i -text $title($i) -bd 1 -command "showDemo $i"
+            pack $f.$i -fill x -side top -padx 5 -pady 2
         }
     }
+
+    update
+    .sel.c config -width [winfo width .sel.c.f]
+    .sel.c config -scrollregion "0 0 0 [winfo height .sel.c.f]"
     showDemo $first
 }
 
@@ -163,12 +179,13 @@ Sample Simulations
 proc showDemo {sample} {
    global samples type title dir uprog wprog colors tcl_platform
 
+   set f .sel.c.f
    foreach i $samples {
         if {$type($i)=="program"} {
-            .sel.$i config -relief raised -bg $colors(unselbutton)
+            $f.$i config -relief raised -bg $colors(unselbutton)
         }
    }
-   .sel.$sample config -relief sunken -bg $colors(selbutton)
+   $f.$sample config -relief sunken -bg $colors(selbutton)
 
    if {$tcl_platform(platform) == "unix"} {
      set cmd "cd $dir($sample); $uprog($sample)"
