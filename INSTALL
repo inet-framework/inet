@@ -26,6 +26,10 @@ LINUX (UNIX)
 Finally, you can try running the demo simulations. cd to either
 Examples/IPSuite or Examples/MPLS, and type "./rundemo".
 
+As of now, this is still work in progress and not everything will work.
+Notably, most MPLS examples will fail with TCP runtime error, and crash
+on exit. We're working on the solution.
+
 If you change something (add/remove files or directories), you'll need to
 recreate the makefiles by typing "./makemake".
 
@@ -49,6 +53,10 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
 
 Finally, you can try running the demo simulations. cd to either
 Examples/IPSuite or Examples/MPLS, and type "rundemo.bat".
+
+As of now, this is still work in progress and not everything will work.
+Notably, most MPLS examples will fail with TCP runtime error, and crash
+on exit. We're working on the solution.
 
 If you change something (add/remove files or directories), you'll need to
 recreate the makefiles typing "./makemake".
