@@ -39,9 +39,9 @@
 //
 // If you can't wait to see the model, start here:
 //  - the MixedLAN model contains hosts, switch, hub and bus;
-//  - the <a href="largenet.html"><nohtml>LargeNet</nohtml> model</a>
-//    contains about 8000 computers and 900 switches and hubs, and mixes
-//    all kinds of Ethernet technologies;
+//  - the <a href="largenet.html">\LargeNet model</a> contains hundreds of 
+/     computers, switches and hubs (numbers depend on model configuration in 
+//    largenet.ini), and mixes all kinds of Ethernet technologies;
 //  - EtherHost is a sample node with an Ethernet NIC;
 //  - EtherSwitch, EtherBus, EtherHub model switching hub, repeating hub and
 //    the old coxial cable;

@@ -23,7 +23,7 @@
 // Routing files are files with <tt>.irt</tt> or <tt>.mrt</tt> extension,
 // and their names are passed in the routingFileName parameter
 // to RoutingTable modules. RoutingTables are present in all
-// <nohtml>IP</nohtml> nodes (hosts and routers).
+// \IP nodes (hosts and routers).
 //
 // Routing files may contain network interface configuration and static
 // routes. Both are optional. Network interface entries in the file
@@ -37,8 +37,7 @@
 // are normally derived from the module's name: a module called
 // <tt>"ppp[2]"</tt> in the NED file registers itself as interface ppp2.
 //
-// An example routing file (copied here from one of the IPSuite example
-// simulations:
+// An example routing file (copied here from one of the example simulations):
 //
 // <pre>
 // ifconfig:

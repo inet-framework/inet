@@ -147,7 +147,7 @@ module LargeLAN
 endmodule
 
 //
-// A large Ethernet LAN -- see model description 
+// A large Ethernet LAN -- see model description
 // <a href="largenet.html">here</a>.
 //
 module LargeNet
@@ -160,7 +160,7 @@ module LargeNet
         ds, dm, dl: numeric const; // number of small/medium/large LANs on switch D
     submodules:
         switchBB: EtherSwitch[n];
-            display: "i=switch2";
+            display: "i=ball2_s";
         slanBB: SmallLAN[n*bbs];
             display: "i=cloud_s";
         mlanBB: MediumLAN[n*bbm];
@@ -169,9 +169,9 @@ module LargeNet
             display: "i=cloud";
 
         switchA: EtherSwitch;
-            display: "i=switch2";
+            display: "i=ball2_s";
         serverA: EtherHost;
-            display: "i=server1";
+            display: "i=pc_s";
         slanA: SmallLAN[as];
             display: "i=cloud_s";
         mlanA: MediumLAN[am];
@@ -180,9 +180,9 @@ module LargeNet
             display: "i=cloud";
 
         switchB: EtherSwitch;
-            display: "i=switch2";
+            display: "i=ball2_s";
         serverB: EtherHost;
-            display: "i=server1";
+            display: "i=pc_s";
         slanB: SmallLAN[bs];
             display: "i=cloud_s";
         mlanB: MediumLAN[bm];
@@ -191,9 +191,9 @@ module LargeNet
             display: "i=cloud";
 
         switchC: EtherSwitch;
-            display: "i=switch2";
+            display: "i=ball2_s";
         serverC: EtherHost;
-            display: "i=server1";
+            display: "i=pc_s";
         slanC: SmallLAN[cs];
             display: "i=cloud_s";
         mlanC: MediumLAN[cm];
@@ -202,9 +202,9 @@ module LargeNet
             display: "i=cloud";
 
         switchD: EtherSwitch;
-            display: "i=switch2";
+            display: "i=ball2_s";
         serverD: EtherHost;
-            display: "i=server1";
+            display: "i=pc_s";
         slanD: SmallLAN[ds];
             display: "i=cloud_s";
         mlanD: MediumLAN[dm];
