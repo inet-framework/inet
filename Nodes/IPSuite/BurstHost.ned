@@ -32,6 +32,7 @@ module BurstHost
     parameters:
         burstPackets : numeric const,
         packetSize : numeric const,
+        IPForward : bool,
         routingFile : string;
     gates:
         in: in[];
