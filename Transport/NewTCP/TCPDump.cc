@@ -48,13 +48,24 @@ void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
     out << " ";
 
     // data-seqno
-    out << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength()-1;
-    out << "(" << tcpseg->payloadLength() << ") ";
+    if (tcpseg->payloadLength()>0)
+    {
+        out << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength();
+        out << "(" << tcpseg->payloadLength() << ") ";
+    }
 
     // ack
-    out << tcpseg->ackNo() << " ";
+    if (tcpseg->ackBit())
+        out << "ack " << tcpseg->ackNo() << " ";
 
     // window
+    out << "win " << tcpseg->window() << " ";
+
     // urgent
+    if (tcpseg->urgBit())
+        out << "urg " << tcpseg->urgentPointer() << " ";
+
     // options
+    //...
+    out << endl;
 }
