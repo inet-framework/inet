@@ -63,7 +63,7 @@ class cPointerVectorWatcher : public cVectorWatcher<T>
 {
   public:
     cPointerVectorWatcher(const char *name, std::vector<T>& var) : cVectorWatcher<T>(name, var) {}
-    virtual std::string at(int i) const {std::stringstream out; out << *v[i]; return out.str();}
+    virtual std::string at(int i) const {std::stringstream out; out << *(this->v[i]); return out.str();}
 };
 
 template <class T>
@@ -129,7 +129,7 @@ class cPointerMapWatcher : public cMapWatcher<_K,_V,_C>
     cPointerMapWatcher(const char *name, std::map<_K,_V,_C>& var) : cMapWatcher<_K,_V,_C>(name, var) {}
     virtual std::string atIt() const {
         std::stringstream out;
-        out << "{" << it->first << "}  ==>  {" << *(it->second) << "}";
+        out << "{" << this->it->first << "}  ==>  {" << *(this->it->second) << "}";
         return out.str();
     }
 };
