@@ -216,7 +216,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
 
     if (event==TCP_E_IGNORE)  // e.g. discarded segment
     {
-        ev << "No FSM event, staying in state " << stateName(fsm.state()) << "\n";
+        ev << "Staying in state: " << stateName(fsm.state()) << " (no FSM event)\n";
         return true;
     }
 

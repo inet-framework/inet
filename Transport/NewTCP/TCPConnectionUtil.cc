@@ -101,8 +101,10 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg)
 {
+    // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
+    tcpseg->setLength(8*(TCP_HEADER_OCTETS+tcpseg->payloadLength())); // FIXME account for Options!
 
     IPControlInfo *controlInfo = new IPControlInfo();
     controlInfo->setProtocol(IP_PROT_TCP);
@@ -305,8 +307,6 @@ void TCPConnection::sendData(int maxNumSegments)
             ev << "Setting FIN on segment and advancing snd_nxt over FIN\n";
             tcpseg->setFinBit(true);
             state->snd_nxt = state->snd_fin_seq+1;
-            // FIXME here we should go from ESTABLISHED to FIN_WAIT1 on event CLOSE;
-            //  (or from CLOSE_WAIT to LAST_ACK).  How the hell??????????????
         }
 
         sendToIP(tcpseg);

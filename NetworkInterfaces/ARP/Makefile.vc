@@ -119,18 +119,7 @@ re-makemake: makefiles
 ARP.obj: ARP.cc \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4\Core/IPAddress.h \
-  ARPPacket_m.h \
-  ..\_802/_802Ctrl_m.h \
-  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
   ..\..\Network\IPv4\Core/IPDatagram.h \
   ..\..\Network\IPv4\Core/RoutingTableAccess.h \
-  ..\_802/MACAddress.h \
-  ..\_802/MACAddress_m.h \
-  ..\..\Network\IPv4\Core/IPDatagram_m.h \
   ..\..\Base/ModuleAccess.h \
   ..\..\Network\IPv4\Core/RoutingTable.h
-ARPPacket_m.obj: ARPPacket_m.cc \
-  ARPPacket_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\_802/MACAddress.h \
-  ..\_802/MACAddress_m.h

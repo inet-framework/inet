@@ -17,25 +17,42 @@
 //
 
 #include "PlainTCP.h"
+#include "TCPMain.h"
 
 Register_Class(PlainTCP);
 
 PlainTCP::PlainTCP() : TCPAlgorithm()
 {
-    rexmitTimer = NULL;
-    persistTimer = NULL;
-    delayedAckTimer = NULL;
-    keepAliveTimer = NULL;
+    rexmitTimer = new cMessage("REXMIT");;
+    persistTimer = new cMessage("PERSIST");;
+    delayedAckTimer = new cMessage("D-ACK");;
+    keepAliveTimer = new cMessage("KEEPALIVE");;
+
+    rexmitTimer->setContextPointer(conn);
+    persistTimer->setContextPointer(conn);
+    delayedAckTimer->setContextPointer(conn);
+    keepAliveTimer->setContextPointer(conn);
+
+    state = NULL;
 }
 
 PlainTCP::~PlainTCP()
 {
-    // FIXME cancel & delete timers
+    // Note: don't delete "state" here, it'll be deleted from TCPConnection
+
+    // Delete timers
+    TCPMain *mod = conn->getTcpMain();
+    delete mod->cancelEvent(rexmitTimer);
+    delete mod->cancelEvent(persistTimer);
+    delete mod->cancelEvent(delayedAckTimer);
+    delete mod->cancelEvent(keepAliveTimer);
 }
 
 TCPStateVariables *PlainTCP::createStateVariables()
 {
-    return new PlainTCPStateVariables();
+    ASSERT(state==NULL);
+    state = new PlainTCPStateVariables();
+    return state;
 }
 
 void PlainTCP::processTimer(cMessage *timer, TCPEventCode& event)
@@ -62,10 +79,10 @@ void PlainTCP::sendCommandInvoked()
     conn->sendData();
 }
 
-void PlainTCP::receivedSegmentText()
+void PlainTCP::receiveSeqChanged()
 {
     //FIXME: dummy stuff only for testing:
-    // immediate ACK:
+    ev << "rcv_nxt changed to " << state->rcv_nxt << ", sending immediate ACK\n";
     conn->sendAck();
 }
 

@@ -19,8 +19,8 @@ module TcpTest
         cli.tcpIn <-- tcpcli.to_appl; 
         srv.tcpOut --> tcpsrv.from_appl; 
         srv.tcpIn <-- tcpsrv.to_appl; 
-        tcpcli.to_ip --> delay 0.1 --> tcpsrv.from_ip; 
-        tcpcli.from_ip <-- delay 0.1 <-- tcpsrv.to_ip; 
+        tcpcli.to_ip --> delay 0.1 datarate 1000000 --> tcpsrv.from_ip; 
+        tcpcli.from_ip <-- delay 0.1 datarate 1000000 <-- tcpsrv.to_ip; 
 endmodule 
 
 

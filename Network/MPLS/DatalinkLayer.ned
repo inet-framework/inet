@@ -12,7 +12,7 @@
 
 
 //
-// FIXME: add documentation here
+// FIXME: probably redundant
 //
 module DatalinkLayer
                

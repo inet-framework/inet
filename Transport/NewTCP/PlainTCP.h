@@ -44,6 +44,9 @@ class PlainTCP : public TCPAlgorithm
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
+
+    PlainTCPStateVariables *state;
+
   public:
     /**
      * Ctor.
@@ -67,7 +70,7 @@ class PlainTCP : public TCPAlgorithm
 
     virtual void sendCommandInvoked();
 
-    virtual void receivedSegmentText();
+    virtual void receiveSeqChanged();
 
     virtual void receivedAck();
 

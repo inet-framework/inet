@@ -33,7 +33,7 @@
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above these algorithms.
  */
-class TCPAlgorithm : public cPolymorphic   // FIXME let it be TCPBehaviour? or TCPDataTransfer?
+class TCPAlgorithm : public cPolymorphic
 {
   protected:
     TCPConnection *conn; // we belong to this connection
@@ -87,11 +87,12 @@ class TCPAlgorithm : public cPolymorphic   // FIXME let it be TCPBehaviour? or T
     virtual void sendCommandInvoked() = 0;
 
     /**
-     * Called after we have received data ("text" in RFC 793 lingo).
-     * At this point the state variables (rcv_nxt) have already been updated.
-     * This method should take care to send ACKs whenever it sees fit.
+     * Called when rcv_nxt has advanced, either because we received in-sequence
+     * data ("text" in RFC 793 lingo) or a FIN. At this point, rcv_nxt has
+     * already been updated. This method should take care to send or schedule
+     * an ACK some time.
      */
-    virtual void receivedSegmentText() = 0;
+    virtual void receiveSeqChanged() = 0;
 
     /**
      * Called after we have received an ACK. At this point the state variables

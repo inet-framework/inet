@@ -72,10 +72,10 @@ message TCPSegment extends cMessage
         // the URG control bit set.
         unsigned long urgentPointer;
 
-        // Payload length in octets (not actual TCP header field). 
-        // This is not always the same as encapsulatedPacket()->length()*8, 
-        // because e.g. SYN occupies one byte of sequence but SYN packet 
-        // doesn't have an encapsulated message in the model.
+        // Payload length in octets (not an actual TCP header field).
+        // This may not always be the same as encapsulatedPacket()->length()*8;
+        // e.g. when simulating a virtual data stream there's no encapsulated
+        // packet at all.
         int payloadLength;
 };
 

@@ -248,6 +248,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         tcpMain->cancelEvent(connEstabTimer);
     }
 
+    uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
     if (fsm.state()==TCP_S_SYN_RCVD || fsm.state()==TCP_S_ESTABLISHED ||
         fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2 ||
         fsm.state()==TCP_S_CLOSE_WAIT || fsm.state()==TCP_S_CLOSING)
@@ -312,7 +313,10 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // otherwise ignore the segment.
         //"
         if (state->fin_ack_rcvd)
+        {
+            ev << "Our FIN acked -- can go to TIME_WAIT now\n";
             event = TCP_E_RCV_ACK;  // will trigger transition to TIME-WAIT
+        }
     }
 
     if (fsm.state()==TCP_S_LAST_ACK)
@@ -359,6 +363,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: seventh, process the segment text,
     //
+    uint32 old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
     if (fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2)
     {
         //"
@@ -411,11 +416,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 ev << "All segments arrived up the FIN segment, advancing rcv_nxt over the FIN\n";
                 state->rcv_nxt = state->rcv_fin_seq+1;
             }
-
-            // tcpAlgorithm decides when and how to do ACKs
-            tcpAlgorithm->receivedSegmentText();
         }
-
     }
 
     //
@@ -441,14 +442,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             // advance rcv_nxt over FIN now
             ev << "FIN arrived, advancing rcv_nxt over the FIN\n";
             state->rcv_nxt++;
-
-            // if segment contained no segment text, no ACK sending was scheduled
-            // in section "Processing segment text" above, so we have to do it now.
-            if (tcpseg->payloadLength()==0)
-            {
-                // tcpAlgorithm decides when and how to do ACKs
-                tcpAlgorithm->receivedSegmentText(); // FIXME rename function to scheduleACK (?)
-            }
         }
         else
         {
@@ -486,6 +479,28 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 break;
         }
     }
+
+    if (old_rcv_nxt!=state->rcv_nxt)
+    {
+        // if rcv_nxt changed, either because we received segment text or we
+        // received a FIN that needs to be acked (or both), we need to send or
+        // schedule an ACK.
+
+        // tcpAlgorithm decides when and how to do ACKs
+        tcpAlgorithm->receiveSeqChanged();
+    }
+
+    if (fsm.state()==TCP_S_CLOSE_WAIT && state->send_fin &&
+        state->snd_nxt==state->snd_fin_seq+1 && old_snd_nxt!=state->snd_nxt)
+    {
+        // if we're in CLOSE_WAIT and we just got to sent our long-pending FIN,
+        // we simulate a CLOSE command now (we had to defer it at that time because
+        // we still had data in the send queue.) This CLOSE will take us into the
+        // LAST_ACK state.
+        ev << "Now we can do the CLOSE which was deferred a while ago\n";
+        event = TCP_E_CLOSE;
+    }
+
     delete tcpseg;
     return event;
 }

@@ -19,7 +19,10 @@ Bottom-up:
  PHY/                  physical layer models (none yet)
 
  NetworkInterfaces/    L2 (data link layer) protocols
-   PPP-old/            PPP implementation
+   _802/               common IEEE 802 stuff
+   Ethernet/           Ethernet model
+   PPP                 new PPP implementation (replaces old one)
+   ARP/                ARP protocol
    Queues/             input/output queues
 
  Network/              L3 (network layer) protocols

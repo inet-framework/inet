@@ -35,6 +35,8 @@
 void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
+    IPAddress localAddr, remoteAddr;
+    short localPort, remotePort;
 
     switch(fsm.state())
     {
@@ -44,11 +46,23 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
         case TCP_S_LISTEN:
             // store local/remote socket
             state->active = true;
-            if (openCmd->getLocalAddr().isNull() || openCmd->getRemoteAddr().isNull() || openCmd->getLocalPort()==-1)
-                opp_error("Error processing command OPEN_ACTIVE: at least remote addr+port and local port must be specified");
+            localAddr = openCmd->getLocalAddr();
+            remoteAddr = openCmd->getRemoteAddr();
+            localPort = openCmd->getLocalPort();
+            remotePort = openCmd->getRemotePort();
 
-            tcpMain->updateSockPair(this, openCmd->getLocalAddr(), openCmd->getRemoteAddr(),
-                                          openCmd->getLocalPort(), openCmd->getRemotePort());
+            if (remoteAddr.isNull() || remotePort==-1)
+                opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+
+            if (localPort==-1)
+            {
+                localPort = tcpMain->getEphemeralPort();
+                ev << "Assigned ephemeral port " << localPort << "\n";
+            }
+
+            ev << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
+
+            tcpMain->updateSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
             // send initial SYN
             selectInitialSeqNum();
@@ -67,6 +81,8 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
 void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
+    IPAddress localAddr;
+    short localPort;
 
     switch(fsm.state())
     {
@@ -76,10 +92,15 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
         case TCP_S_LISTEN:
             // store local/remote socket
             state->active = false;
-            if (openCmd->getLocalPort()==-1)
-                opp_error("Error processing command OPEN_PASSIVE: at least local port must be specified");
-            tcpMain->updateSockPair(this, openCmd->getLocalAddr(), openCmd->getRemoteAddr(),
-                                          openCmd->getLocalPort(), openCmd->getRemotePort());
+            localAddr = openCmd->getLocalAddr();
+            localPort = openCmd->getLocalPort();
+
+            if (localPort==-1)
+                opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
+
+            ev << "Listening on: " << localAddr << ":" << localPort << "\n";
+
+            tcpMain->updateSockPair(this, localAddr, IPAddress(), localPort, -1);
             break;
 
         default:
@@ -170,12 +191,17 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             {
                 ev << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_nxt) <<
                       " bytes pending, deferring sending of FIN\n";
-                // if we are in ESTABLISHED, go to FIN_WAIT_1 right away, no need
-                // to defer that to the time we actually send the FIN. (Actually,
-                // deferring the transition would cause endless complications on the code.)
+
+                // Although the RFC says above that ESTABLISHED->FIN_WAIT_1 should
+                // be deferred until FIN gets sent, we rather do the transition
+                // right away. (The CLOSE event will do it for us.) This apparently
+                // does no harm. Same for the SYN_RCVD->FIN_WAIT_1 transition.
+                //
+                // BUT: we *do* defer the CLOSE_WAIT->LAST_ACK transition to the time
+                // when the FIN actually gets sent.
+                //
                 if (fsm.state()==TCP_S_CLOSE_WAIT)
-                    event = TCP_E_IGNORE;  // this will defer transition to CLOSE_WAIT
-                                           // FIXME even this might be unnecessary!!!
+                    event = TCP_E_IGNORE;    // pretend we didn't get a CLOSE this time
             }
             state->send_fin = true;
             state->snd_fin_seq = sendQueue->bufferEndSeq();

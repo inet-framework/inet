@@ -112,7 +112,4 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 PingApp.obj: PingApp.cc \
   PingApp.h \
-  ..\..\Base/basic_consts.h \
-  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
-  ..\..\Network\IPv4\Core/IPAddress.h \
-  ..\..\Network\IPv4\Core/IPDatagram_m.h
+  ..\..\Base/basic_consts.h

@@ -32,10 +32,17 @@
 //  - <tt>TCP_C_STATUS</tt>
 //
 // The following indications are sent from TcpModule to the application:
-//  - FIXME write it
+//  - <tt>TCP_I_NONE</tt>
+//  - <tt>TCP_I_SEG_FWD</tt>
+//  - <tt>TCP_I_RCVD_SYN</tt>
+//  - <tt>TCP_I_ESTAB</tt>
+//  - <tt>TCP_I_CLOSE_WAIT</tt>
+//  - <tt>TCP_I_CLOSED</tt>
+//  - <tt>TCP_I_ABORTED</tt>
 //
-// The commands and indications are represented by the message kind 
-// and control info class TCPCommand and subclasses.
+// The commands and indications are represented by messages of class 
+// TCPInterfacePacket, with the message kind set to one of the above enum 
+// values.
 //
 simple TCPMain
     parameters:

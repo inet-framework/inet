@@ -37,16 +37,37 @@ class BlackboardAccess;
  *
  * Blackboard makes it possible for several modules (representing e.g. protocol
  * layers) to share information, in a publish-subscribe fashion.
- * Participating modules or classes have to implement the BlackboardAccess
- * interface (=have this abstract class as base class).
  *
- * Anyone can publish data items on the blackboard. In order to allow for some
- * type safety via dynamic_cast, items have to be subclassed from cPolymorphic.
+ * Anyone can publish data items on the blackboard. Every item is published with
+ * a unique string label. The Blackboard makes no assumption about the format
+ * of the label, but it's generally a good idea to make it structured,
+ * e.g. with a dotted format ("nic1.linkstatus"). The label can be used by
+ * subscribers to identify an item ("I want to subscribe to nic1.linkstatus").
+ * There are other ways to subscribe too, not only by label, e.g. one can
+ * browse through all Blackboard items, examine each (its label, C++ class,
+ * actual contents etc.) and decide individually whether to subscribe to it
+ * or not.
  *
- * Clients may browse blackboard contents and subscribe to items. After subscription,
- * clients will receive notifications via BlackboardAccess callbacks whenever
- * the subscribed item changes. Clients may also subscribe to get notified whenever
+ * Labels are only used when publishing or subscribing to items. After that,
+ * items can be referred to using BBItemRefs. (BBItemRefs are sort of "handles"
+ * to blackboard items; think of file handles (fd's) or FILE* variables in Unix
+ * and C programming, or window handles (HWND) in the Windows API.)
+ * BBItemRefs allow very efficient (constant-time) access to Blackboard items.
+ *
+ * Blackboard items have to be subclassed from cPolymorphic, in order to
+ * allow for some type safety via dynamic_cast.
+ *
+ * Clients may browse blackboard contents and subscribe to items. After
+ * subscription, clients will receive notifications whenever the subscribed
+ * item changes. Clients may also subscribe to get notified whenever
  * items are published to or withdrawn from the blackboard.
+ *
+ * Notifications are done with callback-like mechanism. Participating modules
+ * or classes have to subclass from the abstract base class BlackboardAccess
+ * and implement its methods (in Java, one would say clients should implement
+ * the BlackboardAccess interface.) This usually means multiple inheritance,
+ * but without the problems of multiple inheritance (Multiple inheritance
+ * is sometimes considered "evil", but never if used to do "mixins" as here.)
  *
  * Some examples for usage. The first one, Foo demonstrates subscribe-by-name,
  * the second one, Bar shows subscribe-when-published, and the third one,
@@ -153,7 +174,9 @@ class Blackboard : public cSimpleModule
 
   public:
     /**
-     * "Handle" to blackboard items.
+     * "Handle" to blackboard items. To get the data or the label, write
+     * bbref->data() and bbref->label(), respectively. BBItemRefs become
+     * stale when the item gets withdrawn (unpublished) from the blackboard.
      */
     typedef BBItem *BBItemRef;
 

@@ -32,6 +32,20 @@
  * queue") and which not ("send queue"). This class is not interested
  * in where's the boundary.
  *
+ * There is another particularity about this class: as a retransmission queue,
+ * it stores bytes and not segments. TCP is a bytestream oriented protocol
+ * (sequence numbers refer to bytes and not to TPDUs as e.g. in ISO TP4),
+ * and the protocol doesn't rely on retransmitted segments having the
+ * same segment boundaries as the original segments. Some implementations
+ * store segments on the retransmission queue, and others store only the data
+ * bytes; RFCs explicitly allow both.
+ *
+ * To simulate a TCP that retains segment boundaries in retransmissions,
+ * the appropriate TCPAlgorithm class should remember where the segment
+ * boundaries were at the original transmission, and it should form identical
+ * segments when retransmitting. The createSegmentWithBytes() send queue
+ * method makes this possible.
+ *
  * This class is polymorphic because depending on where and how you
  * use the TCP model you might have different ideas about "sending data"
  * on a simulated connection.

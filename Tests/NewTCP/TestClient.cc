@@ -35,7 +35,7 @@ void TcpTestClient::activity()
     {
         waitAndEnqueue(1, &queue);
 
-        socket.bind(IPAddress("10.0.0.1"),1000);
+        socket.bind(IPAddress("10.0.0.1"),-1);
         socket.connect(IPAddress("10.0.0.2"),2000);
 
         waitAndEnqueue(1, &queue);
@@ -44,17 +44,17 @@ void TcpTestClient::activity()
         msg->setLength(8*16*1024);  // 16K
         socket.send(msg);
 
-        //waitAndEnqueue(10, &queue);
+        waitAndEnqueue(0.41, &queue);
 
         socket.close();
     }
     else
     {
-        //socket.bind(IPAddress("10.0.0.2"),2000);
+        socket.bind(IPAddress("10.0.0.2"),2000);
         socket.bind(2000);
         socket.accept();
 
-        waitAndEnqueue(20, &queue);
+        waitAndEnqueue(2.2, &queue);
 
         socket.close();
     }

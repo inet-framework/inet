@@ -28,7 +28,7 @@
 #include "ipsuite_defs.h"
 #include "IPAddress.h"
 #include "ARPPacket_m.h"
-#include "_802Ctrl_m.h"
+#include "EtherCtrl_m.h"
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 #include "RoutingTableAccess.h"
@@ -157,7 +157,7 @@ void ARP::handleMessage(cMessage *msg)
 void ARP::processInboundPacket(cMessage *msg)
 {
     // remove control info from packet, and send it up
-    _802Ctrl *controlInfo = check_and_cast<_802Ctrl*>(msg->removeControlInfo());
+    EtherCtrl *controlInfo = check_and_cast<EtherCtrl*>(msg->removeControlInfo());
     delete controlInfo;
     send(msg,"hlOut");
 }
@@ -232,7 +232,7 @@ void ARP::initiateARPResolution(IPAddress nextHopAddr, ARPCacheEntry *entry)
 void ARP::sendPacketToMAC(cMessage *msg, const MACAddress& macAddress)
 {
     // add control info with MAC address
-    _802Ctrl *controlInfo = new _802Ctrl();
+    EtherCtrl *controlInfo = new EtherCtrl();
     controlInfo->setDest(macAddress);
     msg->setControlInfo(controlInfo);
 

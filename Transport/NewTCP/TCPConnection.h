@@ -108,6 +108,9 @@ enum TCPEventCode
 };
 
 
+#define TCP_HEADER_OCTETS  20    // without options
+
+
 /** @name Timeout values */
 //@{
 #define TCP_TIMEOUT_CONN_ESTAB    75    // 75 seconds
@@ -243,10 +246,14 @@ class TCPStateVariables : public cPolymorphic
  * timers (2MSL, CONN-ESTAB, FIN-WAIT-2) and events (OPEN, SEND, etc)
  * associated with TCP state changes.
  *
- * It delegates all details of the TCP data transfer (in ESTABLISHED,
- * etc. state) to a TCPAlgorithm subclass. This covers handling timers
- * such as REXMIT, PERSIST, KEEPALIVE, DELAYED-ACK; window management,
- * congestion control schemes, SACK, etc. The concrete TCPAlgorithm
+ * The implementation (e.g. the method process_RCV_SEGMENT()) largely follows
+ * the functional specification at the end of RFC 793 which should facilitate
+ * understanding.
+ *
+ * TCPConnection delegates all details of the TCP data transfer (in ESTABLISHED,
+ * etc. state) to an object subclassed from  TCPAlgorithm. This covers
+ * handling timers such as REXMIT, PERSIST, KEEPALIVE, DELAYED-ACK; window
+ * management, congestion control schemes, SACK, etc. The concrete TCPAlgorithm
  * class to use can be chosen per connection (in OPEN) or in a module
  * parameter. Delegation to TCPAlgorithm facilitates experimenting with
  * various TCP features.
@@ -254,10 +261,9 @@ class TCPStateVariables : public cPolymorphic
  * TCPConnection also delegates the handling of send and receive buffers
  * to instances of TCPSendQueue and TCPReceiveQueue subclasses. This
  * makes it possible to easily accomodate need for various types of
- * simulated data transfer: transmitting a real byte stream, a "dummy"
- * transfer (no actual bytes transmitted in the model, only octet counts),
- * and transmitting a sequence of cMessage objects (where every message
- * object is mapped to a TCP sequence number range).
+ * simulated data transfer: real byte stream, "virtual" bytes (byte counts
+ * only), and sequence of cMessage objects (where every message object is
+ * mapped to a TCP sequence number range).
  *
  * TCPConnections are not used alone -- they are instantiated and managed by
  * a TCPMain module.
@@ -410,6 +416,7 @@ class TCPConnection
     TCPSendQueue *getSendQueue() {return sendQueue;}
     TCPReceiveQueue *getReceiveQueue() {return receiveQueue;}
     TCPAlgorithm *getTcpAlgorithm() {return tcpAlgorithm;}
+    TCPMain *getTcpMain() {return tcpMain;}
     //@}
 
     /**

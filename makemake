@@ -30,7 +30,7 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Examples/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/MPLS && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 
-(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
+(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig) $ALL_IPSUITE_INCLUDES)
 
 (cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/McNetwork2 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
@@ -66,7 +66,7 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd NetworkInterfaces/PPP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util)
 (cd NetworkInterfaces/_802 && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4/Core)
 (cd NetworkInterfaces/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../_802)
-(cd NetworkInterfaces/ARP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4/Core -I../_802)
+(cd NetworkInterfaces/ARP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4/Core -I../_802 -I../Ethernet)
 (cd NetworkInterfaces/Queues && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Base -I../../Util -I../../Network/IPv4/Core -I../../Network/IPv4/QoS)
 
 (cd Nodes/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Network/IPv4/QoS -I../../Transport/TCP -I../../Transport/UDP -I../../NetworkInterfaces/PPP-old -I../../NetworkInterfaces -I../../NetworkInterfaces/Queues  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/UDPApp -I../../Applications/PingApp -I../../Base -I../../Util)

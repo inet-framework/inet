@@ -65,7 +65,7 @@ cd %root%\Network\IPv4\QoS && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.
 cd %root%\NetworkInterfaces\PPP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util
 cd %root%\NetworkInterfaces\_802 && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core
 cd %root%\NetworkInterfaces\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\_802
-cd %root%\NetworkInterfaces\ARP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core -I..\_802
+cd %root%\NetworkInterfaces\ARP && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core -I..\_802 -I..\Ethernet
 cd %root%\NetworkInterfaces\Queues && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Base -I..\..\Util -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS
 
 cd %root%\Nodes\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues  -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\UDPApp -I..\..\Applications\PingApp -I..\..\Base -I..\..\Util

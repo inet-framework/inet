@@ -28,6 +28,8 @@ Define_Module(TCPMain);
 
 void TCPMain::initialize()
 {
+    nextEphemeralPort = 1024;
+
     // WATH_map(tcpConnMap);
     // WATH_map(tcpAppConnMap);
 }
@@ -118,7 +120,7 @@ TCPConnection *TCPMain::findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr
     if (i!=tcpConnMap.end())
         return i->second;
 
-    // try fully qualified local socket + blank remote socket (after passive open)
+    // try fully qualified local socket + blank remote socket (for incoming SYN)
     key = save;
     key.remoteAddr = 0;
     key.remotePort = -1;
@@ -126,7 +128,7 @@ TCPConnection *TCPMain::findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr
     if (i!=tcpConnMap.end())
         return i->second;
 
-    // try with blank remote socket, and localAddr missing (after passive open)
+    // try with blank remote socket, and localAddr missing (for incoming SYN)
     key.localAddr = 0;
     i = tcpConnMap.find(key);
     if (i!=tcpConnMap.end())
@@ -146,6 +148,14 @@ TCPConnection *TCPMain::findConnForApp(int appGateIndex, int connId)
     return i==tcpAppConnMap.end() ? NULL : i->second;
 }
 
+short TCPMain::getEphemeralPort()
+{
+    if (nextEphemeralPort==5000)
+        error("Ephemeral port range 1024..4999 exhausted (email TCP model "
+              "author that he should implement reuse of ephemeral ports!!!)");
+    return nextEphemeralPort++;
+}
+
 void TCPMain::updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort)
 {
     SockPair key;
@@ -153,7 +163,12 @@ void TCPMain::updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress
     key.remoteAddr = conn->remoteAddr.getInt();
     key.localPort = conn->localPort;
     key.remotePort = conn->remotePort;
-    tcpConnMap.erase(key);
+    TcpConnMap::iterator i = tcpConnMap.find(key);
+    if (i!=tcpConnMap.end())
+    {
+        ASSERT(i->second==conn);
+        tcpConnMap.erase(i);
+    }
 
     key.localAddr = (conn->localAddr = localAddr).getInt();
     key.remoteAddr = (conn->remoteAddr = remoteAddr).getInt();

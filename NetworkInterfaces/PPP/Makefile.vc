@@ -116,7 +116,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-PPPFrame_m.obj: PPPFrame_m.cc \
-  PPPFrame_m.h
-PPPInterface.obj: PPPInterface.cc \
-  PPPFrame_m.h
+PPPInterface.obj: PPPInterface.cc

@@ -81,6 +81,8 @@ class TCPMain : public cSimpleModule
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
+    short nextEphemeralPort;
+
     TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
     TCPConnection *findConnForApp(int appGateIndex, int connId);
     void removeConnection(TCPConnection *conn);
@@ -92,9 +94,15 @@ class TCPMain : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 
     /**
-     * To be called from TCPConnection
+     * To be called from TCPConnection when socket pair (key for TcpConnMap) changes
+     * (e.g. becomes fully qualified).
      */
     void updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort);
+
+    /**
+     * To be called from TCPConnection: reserves an ephemeral port for the connection.
+     */
+    short getEphemeralPort();
 
 };
 
