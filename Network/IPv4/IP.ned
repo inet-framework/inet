@@ -40,7 +40,7 @@
 //
 // @author Andras Varga
 //
-module IPProcessing
+simple IP
     parameters:
         timeToLive : numeric const,
         multicastTimeToLive : numeric const,
@@ -52,5 +52,5 @@ module IPProcessing
         out: transportOut[];
         in: queueIn[];
         out: queueOut[];
-endmodule
+endsimple
 

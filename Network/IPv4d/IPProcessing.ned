@@ -40,7 +40,6 @@ module IPProcessing
     parameters:
         timeToLive : numeric,
         multicastTimeToLive : numeric,
-        numOfPorts : numeric,
         IPForward : bool,
         fragmentTimeout : numeric const,
         protocolMapping: string;
@@ -80,14 +79,12 @@ module IPProcessing
                 in[sizeof(transportIn)+2];
             display: "b=32,30;p=250,78;i=prot1";
         fragmentation: IPFragmentation;
-            parameters:
-                numOfPorts = numOfPorts;
             gatesizes:
-                outputOut[numOfPorts];
+                outputOut[sizeof(queueOut)];
             display: "b=32,30;p=231,249;i=bwxconn";
         tunneling: IPTunneling;
             display: "b=16,15;p=370,152;i=bwxcon_s";
-        output: IPOutput[numOfPorts];
+        output: IPOutput[sizeof(queueOut)];
             display: "b=32,30;p=110,304,row;i=prot2";
         inputQueue: InputQueue;
             gatesizes:
@@ -96,7 +93,7 @@ module IPProcessing
     connections nocheck:
 
         // L2 input to InputQueue
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(queueIn)-1 do
             queueIn[i] --> inputQueue.fromNW[i];
         endfor;
 
@@ -132,7 +129,7 @@ module IPProcessing
         tunneling.sendOut --> send.in[1];
 
         // Output ports
-        for i=0..numOfPorts-1 do
+        for i=0..sizeof(queueOut)-1 do
             fragmentation.outputOut[i] --> output[i].in;
             output[i].queueOut --> queueOut[i];
         endfor;

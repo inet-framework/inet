@@ -31,7 +31,7 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
 void IPFragmentation::initialize()
 {
-    numOfPorts = par("numOfPorts");  // FIXME is this the same as gateSize("outputOut")?
+    numOfPorts = gate("outputOut")->size();
 }
 
 // FIXME performance model is not good here!!! we should wait #fragments times delay!!!

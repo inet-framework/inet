@@ -28,10 +28,8 @@
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 //
 simple IPFragmentation
-    parameters:
-        numOfPorts: numeric const;
     gates:
         in: routingIn, multicastIn;
-        out: outputOut [];
+        out: outputOut[];
 endsimple
 
