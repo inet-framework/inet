@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj InfoManager.obj LIBtable.obj LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
+OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj  InfoManager.obj  LIBtable.obj  LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj  MPLSPacket.obj StringTokenizer.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

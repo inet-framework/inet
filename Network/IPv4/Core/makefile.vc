@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj ICMP.obj in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj IPInterfacePacket.obj IPMulticast.obj IPOutputCore.obj IPSendCore.obj IPTunneling.obj LocalDeliverCore.obj PreRoutingCore.obj RoutingCore.obj RoutingTable.obj RoutingTableAccess.obj
+OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj  ICMP.obj  in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj  IPInterfacePacket.obj IPMulticast.obj   IPOutputCore.obj   IPSendCore.obj IPTunneling.obj   LocalDeliverCore.obj  PreRoutingCore.obj  RoutingCore.obj RoutingTable.obj  RoutingTableAccess.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

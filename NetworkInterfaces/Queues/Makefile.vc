@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= InputQueue_n.obj OutputQueue_n.obj Dequeue.obj Enqueue.obj InputQueue.obj
+OBJS= InputQueue_n.obj OutputQueue_n.obj Dequeue.obj Enqueue.obj InputQueue.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 

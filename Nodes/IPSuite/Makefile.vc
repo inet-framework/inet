@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj
+OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj              
 
 # subdirectories to recurse into
 SUBDIRS= 

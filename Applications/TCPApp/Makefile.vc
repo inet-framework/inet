@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj procserver.obj TCPClient.obj TCPServer.obj
+OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj  MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj  procserver.obj   TCPClient.obj TCPServer.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

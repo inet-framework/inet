@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= PingApp_n.obj PingApp.obj
+OBJS= PingApp_n.obj PingApp.obj 
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= UDP_n.obj UDPModule_n.obj UDPApp.obj UDPModule.obj UDPPacket.obj UDPProcessing.obj
+OBJS= UDP_n.obj UDPModule_n.obj  UDPApp.obj UDPModule.obj  UDPPacket.obj UDPProcessing.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= NetworkInterface_n.obj
+OBJS= NetworkInterface_n.obj 
 
 # subdirectories to recurse into
 SUBDIRS= PPP-old Queues

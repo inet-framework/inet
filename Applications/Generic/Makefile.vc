@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TrafficGen_n.obj AppIn.obj BurstGenerator.obj ConstTrafficGen.obj SimpleApp.obj
+OBJS= TrafficGen_n.obj AppIn.obj BurstGenerator.obj ConstTrafficGen.obj SimpleApp.obj 
 
 # subdirectories to recurse into
 SUBDIRS= 

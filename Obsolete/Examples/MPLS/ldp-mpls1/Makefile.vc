@@ -72,7 +72,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= MPLSNet_n.obj MPLSOnly_n.obj
+OBJS= MPLSNet_n.obj MPLSOnly_n.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -67,7 +67,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= SocketApp_n.obj UDPSocketHost_n.obj UDPSockets_n.obj client.obj server.obj
+OBJS= SocketApp_n.obj UDPSocketHost_n.obj UDPSockets_n.obj client.obj server.obj   
 
 # subdirectories to recurse into
 SUBDIRS= 

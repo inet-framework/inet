@@ -67,7 +67,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ClientServerNetwork_n.obj
+OBJS= ClientServerNetwork_n.obj 
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -67,7 +67,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= comnw_n.obj dropswitch_n.obj ipmodule_n.obj switch_n.obj TCPTester_n.obj comnw.obj dropswitch.obj ipmodule.obj switch.obj
+OBJS= comnw_n.obj dropswitch_n.obj ipmodule_n.obj switch_n.obj TCPTester_n.obj comnw.obj  dropswitch.obj  ipmodule.obj  switch.obj  
 
 # subdirectories to recurse into
 SUBDIRS= 

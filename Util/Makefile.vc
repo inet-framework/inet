@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ProcessorManager_n.obj ProcessorAccess.obj ProcessorManager.obj 
+OBJS= 
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -67,18 +67,6 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs: $(SUBDIR_TARGETS)
-
-ProcessorManager_n.obj: ProcessorManager_n.cc
-	$(CXX) -c $(NEDCOPTS) /Tp ProcessorManager_n.cc
-
-ProcessorManager_n.cc: ProcessorManager.ned
-	$(NEDC:/=\) -s _n.cc $(INCLUDE_PATH) ProcessorManager.ned
-
-ProcessorAccess.obj: ProcessorAccess.cc
-	$(CXX) -c $(COPTS) /Tp ProcessorAccess.cc
-
-ProcessorManager.obj: ProcessorManager.cc
-	$(CXX) -c $(COPTS) /Tp ProcessorManager.cc
 
 
 #doc: neddoc doxy
