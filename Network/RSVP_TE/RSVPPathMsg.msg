@@ -51,10 +51,10 @@ message RSVPPathMsg extends RSVPPacket
     fields:
         RsvpHopObj_t hop;
         double refreshTime;
-        EroObj_t ERO[MAX_ROUTE];
         LabelRequestObj_t label_request;
         SenderDescriptor_t sender_descriptor;
         bool hasERO;
+        EroObj_t ERO[MAX_ROUTE];
 };
 
 //
