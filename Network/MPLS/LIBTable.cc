@@ -58,13 +58,13 @@ void LIBTable::initialize()
 
 void LIBTable::handleMessage(cMessage *)
 {
-    error
-        ("Message arrived -- LIBTable doesn't process messages, it is used via direct method calls");
+    error("Message arrived -- LIBTable doesn't process messages, it is used via direct method calls");
 }
 
 
 int LIBTable::readLibTableFromFile(const char *filename)
 {
+    //FIXME revise file format!
     ifstream fin(filename);
     if (!fin)
         error("Cannot open file %s", filename);
@@ -133,6 +133,7 @@ int LIBTable::readLibTableFromFile(const char *filename)
 
 int LIBTable::readPrtTableFromFile(const char *filename)
 {
+    //FIXME revise file format!
     ifstream fin(filename);
     if (!fin)
         error("Cannot open file %s", filename);
