@@ -98,7 +98,7 @@ class TCPSegment;
  */
 class TCPMain : public cSimpleModule
 {
-  protected:
+  public:
     struct AppConnKey
     {
         int appGateIndex;
@@ -133,6 +133,7 @@ class TCPMain : public cSimpleModule
         }
     };
 
+  protected:
     typedef std::map<AppConnKey,TCPConnection*> TcpAppConnMap;
     typedef std::map<SockPair,TCPConnection*> TcpConnMap;
 

@@ -433,7 +433,7 @@ class TCPConnection
 
     /* @name Various getters */
     //@{
-    int getFsmState() {return fsm.state();}
+    int getFsmState() const {return fsm.state();}
     TCPStateVariables *getState() {return state;}
     TCPSendQueue *getSendQueue() {return sendQueue;}
     TCPReceiveQueue *getReceiveQueue() {return receiveQueue;}

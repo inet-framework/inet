@@ -22,6 +22,7 @@
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 #include "IPControlInfo_m.h"
+#include "stlwatch.h"
 
 Define_Module(TCPMain);
 
@@ -32,12 +33,33 @@ bool TCPMain::logverbose;
 int TCPMain::nextConnId = 0;
 
 
+static std::ostream & operator<<(std::ostream & os, const TCPMain::SockPair& sp)
+{
+    os << "loc=" << IPAddress(sp.localAddr) << ":" << sp.localPort << " "
+       << "rem=" << IPAddress(sp.remoteAddr) << ":" << sp.remotePort;
+    return os;
+}
+
+static std::ostream & operator<<(std::ostream & os, const TCPMain::AppConnKey& app)
+{
+    os << "connId=" << app.connId << " appGateIndex=" << app.appGateIndex;
+    return os;
+}
+
+static std::ostream & operator<<(std::ostream & os, const TCPConnection& conn)
+{
+    os << "connId=" << conn.connId << " " << TCPConnection::stateName(conn.getFsmState())
+       << " state={" << const_cast<TCPConnection&>(conn).getState()->info() << "}";
+    return os;
+}
+
+
 void TCPMain::initialize()
 {
     nextEphemeralPort = 1024;
 
-    // WATH_map(tcpConnMap);
-    // WATH_map(tcpAppConnMap);
+    WATCH_PTRMAP(tcpConnMap);
+    WATCH_PTRMAP(tcpAppConnMap);
 
     cModule *netw = simulation.systemModule();
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
