@@ -35,6 +35,7 @@
 #define __ROUTINGTABLE_H
 
 #include <omnetpp.h>
+#include "ipsuite_defs.h"
 
 // required for IPAddress typdef
 #include "ip_address.h"

@@ -312,6 +312,7 @@ void RoutingTable::printRoutingTable()
  */
 bool RoutingTable::localDeliverNew(const IPAddress& dest)
 {
+	Enter_Method("localDeliver()");
 	for (int i = 0; i < ifEntryCtr; i++) {
 		if (dest.isEqualTo(*(intrface[i]->inetAddr))) {
 			return true;
@@ -355,6 +356,7 @@ bool RoutingTable::multicastLocalDeliverNew(const IPAddress& dest)
  */
 int RoutingTable::outputPortNoNew(const IPAddress& dest)
 {
+	Enter_Method("outputPortNoNew()");
 	RoutingEntry *e;
 
 	for (int i = 0; i < route->items(); i++) {
@@ -487,6 +489,7 @@ int RoutingTable::interfaceNameToNo(const char *name)
  */
 int RoutingTable::interfaceAddressToNoNew(const IPAddress& addr)
 {
+	Enter_Method("outputPortNoNew()");
 	if (&addr == NULL) return -1;
 
 	for (int i = 0; i < ifEntryCtr; i++) {
@@ -565,6 +568,8 @@ bool RoutingTable::add(IPAddress *target,
 					   int metric,
 					   char *dev)
 {
+	Enter_Method("add()");
+	
 	RoutingEntry *e = new RoutingEntry();
 	int dev_nb;
 
@@ -672,6 +677,7 @@ bool RoutingTable::del(IPAddress *target,
 					   int metric,
 					   char *dev)
 {
+	Enter_Method("del()");
 	bool res = false;
 
 	if (target) {
