@@ -36,7 +36,7 @@ const char  *IFCONFIG_START_TOKEN = "ifconfig:",
             *ROUTE_START_TOKEN = "route:",
             *ROUTE_END_TOKEN = "routeend.";
 
-
+/*
 RoutingTableParser::RoutingTableParser(RoutingTable *r)
 {
     rt = r;
@@ -479,4 +479,4 @@ void RoutingTableParser::parseRouting(char *routeFile)
                       "interface name not `%s'", e->interfaceName.c_str());
     }
 }
-
+*/

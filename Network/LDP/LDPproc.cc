@@ -308,23 +308,16 @@ int LDPproc::locateNextHop(int fec)
     // its response. Unless its routing table includes an entry that exactly matches
     // the requested Prefix or Host Address, the LSR must respond with a
     // No Route Notification message.
-    cArray *routes = rt->getRouteTable();
-
     int i;
-    RoutingEntry *e;
-
-    for (i = 0; i < routes->items(); i++)
-    {
-        e = (RoutingEntry *) (routes->get(i));
-        if ((e->host.getInt()) == fec)
+    for (i=0; i < rt->numRoutingEntries(); i++)
+        if (rt->routingEntry(i)->host.getInt() == fec)
             break;
-    }
 
-    if (i == (routes->items()))
+    if (i == rt->numRoutingEntries())
         return 0;  // Signal an NOTIFICATION of NO ROUTE
 
     // Find out the IP of the other end LSR
-    string iName = string(e->interfaceName.c_str());
+    string iName = string(rt->routingEntry(i)->interfaceName.c_str());
 
     return findPeerAddrFromInterface(iName);
 
@@ -339,15 +332,14 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
     int i = 0;
     int k = 0;
     int interfaceIndex = rt->interfaceByName(interfaceName.c_str())->index;
-    cArray *routeTable = rt->getRouteTable();
 
     RoutingEntry *anEntry;
 
-    for (i = 0; i < (routeTable->items()); i++)
+    for (i = 0; i < rt->numRoutingEntries(); i++)
     {
         for (k = 0; k < myPeers.size(); k++)
         {
-            anEntry = (RoutingEntry *) (routeTable->get(i));
+            anEntry = rt->routingEntry(i);
             if (anEntry->host.getInt()==myPeers[k].peerIP && anEntry->interfaceNo==interfaceIndex)
             {
                 return myPeers[k].peerIP;
@@ -359,13 +351,13 @@ int LDPproc::findPeerAddrFromInterface(string interfaceName)
     // Return any IP which has default route - not in routing table entries
     for (i = 0; i < myPeers.size(); i++)
     {
-        for (k = 0; k < routeTable->items(); k++)
+        for (k = 0; k < rt->numRoutingEntries(); k++)
         {
-            anEntry = (RoutingEntry *) (routeTable->get(i));
+            anEntry = rt->routingEntry(i);
             if ((anEntry->host.getInt()) == (myPeers[i].peerIP))
                 break;
         }
-        if (k == (routeTable->items()))
+        if (k == rt->numRoutingEntries())
             break;
     }
 
@@ -387,8 +379,8 @@ string LDPproc::findInterfaceFromPeerAddr(int peerIP)
     return string("X");
 */
 //    Rely on port index to find the interface name
-    int index = rt->outputPortNo(IPAddress(peerIP));
-    return rt->interfaceByPortNo(index)->name;
+    int portNo = rt->outputPortNo(IPAddress(peerIP));
+    return string(rt->interfaceByPortNo(portNo)->name.c_str());
 
 }
 

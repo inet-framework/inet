@@ -156,7 +156,7 @@ void RoutingTable::printIfconfig()
 {
     ev << "---- IF config ----\n";
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        ev << i->detailedInfo() << "\n";
+        ev << (*i)->detailedInfo() << "\n";
     ev << "\n";
 }
 
@@ -196,7 +196,7 @@ bool RoutingTable::deleteInterface(InterfaceEntry *entry)
     delete entry;
 
     for (i=interfaces.begin(); i!=interfaces.end(); ++i)
-        i->index = i-interfaces.begin();
+        (*i)->index = i-interfaces.begin();
     return true;
 }
 
@@ -204,30 +204,31 @@ InterfaceEntry *RoutingTable::interfaceByPortNo(int portNo)
 {
     // TBD change this to a port-to-interface table (more efficient)
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (i->outputPort==portNo)
+        if ((*i)->outputPort==portNo)
             return *i;
+    return NULL;
 }
 
 InterfaceEntry *RoutingTable::interfaceByName(const char *name)
 {
     Enter_Method("interfaceByName(%s)=?", name);
     if (!name)
-        return -1;
+        return NULL;
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (!strcmp(name, i->name.c_str()))
-            return i-interfaces.begin();
-    return -1;
+        if (!strcmp(name, (*i)->name.c_str()))
+            return *i;
+    return NULL;
 }
 
 InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 {
     Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
     if (addr.isNull())
-        return -1;
+        return NULL;
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (IPAddress::maskedAddrAreEqual(addr,i->inetAddr,i->mask))
-            return i-interfaces.begin();
-    return -1;
+        if (IPAddress::maskedAddrAreEqual(addr,(*i)->inetAddr,(*i)->mask))
+            return *i;
+    return NULL;
 }
 
 //---
@@ -235,32 +236,17 @@ InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 bool RoutingTable::localDeliver(const IPAddress& dest)
 {
     Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
-
-    for (int i = 0; i < numIntrfaces; i++) {
-        if (dest.equals(intrface[i]->inetAddr)) {
-            return true;
-        }
-    }
-
-    if (dest.equals(loopbackInterface->inetAddr)) {
-        return true;
-    }
-
-    return false;
+    return interfaceByAddress(dest)!=NULL;
 }
 
 bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 {
     Enter_Method("multicastLocalDeliver(%s) y/n", dest.str().c_str());
 
-    for (int i = 0; i < numIntrfaces; i++) {
-        for (int j = 0; j < intrface[i]->multicastGroupCtr; j++) {
-            if (dest.equals(intrface[i]->multicastGroup[j])) {
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        for (int j=0; j < (*i)->multicastGroupCtr; j++)
+            if (dest.equals((*i)->multicastGroup[j]))
                 return true;
-            }
-        }
-    }
-
     return false;
 }
 
@@ -392,6 +378,7 @@ RoutingEntry *RoutingTable::findRoutingEntry(const IPAddress& target,
     for (int i=0; i<n; i++)
         if (routingEntryMatches(routingEntry(i), target, netmask, gw, metric, dev))
             return routingEntry(i);
+    return NULL;
 }
 
 void RoutingTable::addRoutingEntry(RoutingEntry *entry)

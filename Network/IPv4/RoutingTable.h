@@ -51,7 +51,7 @@ const int   MAX_GROUP_STRING_SIZE = 160;
 class InterfaceEntry : public cPolymorphic
 {
   public:
-    int id;  // index in interfaces[] (!= outputPort!!!)
+    int index;  // index in interfaces[] (!= outputPort!!!)
     int outputPort;  // FIXME fill this in!!!!
     int mtu;
     int metric;
@@ -114,6 +114,7 @@ class RoutingEntry : public cPolymorphic
     IPAddress gateway;
 
     // Interface name and nb
+    opp_string interfaceName;
     int interfaceNo;
 
     // Route type: Direct or Remote
