@@ -24,6 +24,9 @@
 #include "IPDatagram.h"
 
 
+class ICMP;
+
+
 /**
  * Reassembly buffer for fragmented IP datagrams.
  */
@@ -40,11 +43,13 @@ class IPFragBuf
 
     typedef std::vector<Region> RegionVector;
 
-Key {
+/*
+FIXME Key {
  id
  src
  dest
 };
+*/
 
     /**
      * Represents the buffer for assembling one IP datagram from fragments.
@@ -65,10 +70,13 @@ Key {
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<ushort FIXME!!!!!!,ReassemblyBuffer> Buffers;
+    typedef std::map<ushort,ReassemblyBuffer> Buffers;
 
     // the reassembly buffers
     Buffers bufs;
+
+    // needed for TIME_EXCEEDED errors
+    ICMP *icmpModule;
 
   protected:
     void merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast);
@@ -83,6 +91,12 @@ Key {
      * Dtor.
      */
     ~IPFragBuf();
+
+    /**
+     * Initialize fragmentation buffer. ICMP module is needed for sending
+     * TIME_EXCEEDED ICMP message in purgeStaleFragments().
+     */
+    void init(ICMP *icmp);
 
     /**
      * Takes a fragment and inserts it into the reassembly buffer.

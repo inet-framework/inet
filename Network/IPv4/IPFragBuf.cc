@@ -22,15 +22,22 @@
 #include <string.h>
 
 #include "IPFragBuf.h"
+#include "ICMP.h"
 
 
 IPFragBuf::IPFragBuf()
 {
+    icmpModule = NULL;
 }
 
 IPFragBuf::~IPFragBuf()
 {
     // FIXME delete "fragments" pointers and datagrams.
+}
+
+void IPFragBuf::init(ICMP *icmp)
+{
+    icmpModule = icmp;
 }
 
 IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
@@ -139,25 +146,39 @@ void IPFragBuf::mergeFragments(ReassemblyBuffer& buf)
     do
     {
         oncemore = false;
-        for (RegionVector::iterator i=frags.begin(); i!=frags.end(); ++i)
+        for (RegionVector::iterator i=frags.begin(); i!=frags.end(); )
         {
+            bool deleteit = false;
             Region& frag = *i;
             if (buf.main.end==frag.beg)
             {
                 buf.main.end = frag.end;
                 if (frag.islast)
                     buf.main.islast = true;
-                // delete this frag!!!!!!!!!!
+                deleteit = true;
             }
             else if (buf.main.beg==end)
             {
                 buf.main.beg = frag.beg;
-                // delete this frag
+                deleteit = true;
             }
             else if (buf.main.beg<=frag.beg && buf.main.end>=frag.end)
             {
                 // we already have this region (duplicate fragment), delete it
-                //delete!!!!!!!!!!
+                deleteit = true;
+            }
+
+            if (deleteit)
+            {
+                // deletion is tricky because erase() invalidates iterator
+                int pos = i - frags.begin();
+                frags.erase(i);
+                i = frags.begin() + pos;
+                oncemore = true;
+            }
+            else
+            {
+                ++i;
             }
         }
     }
@@ -166,13 +187,28 @@ void IPFragBuf::mergeFragments(ReassemblyBuffer& buf)
 
 void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
 {
-    for (Buffers::iterator i=bufs.begin(); i!=bufs.end(); ++i)
+    // this method shouldn't be called too often because iteration on
+    // an std::map is *very* slow...
+
+    ASSERT(icmpModule);
+
+    for (Buffers::iterator i=bufs.begin(); i!=bufs.end(); )
     {
+        // if too old, remove it
         if (i->lastupdate < lastupdate)
         {
-            // send ICMP!!!
+            // send ICMP error
+            icmpModule->sendErrorMessage(i->datagram, ICMP_TIME_EXCEEDED, 0);
 
-            //delete!!!!
+            // delete
+            if (i->fragments)
+                delete i->fragments;
+            Buffers::iterator oldi = i++;
+            bufs.erase(oldi);
+        }
+        else
+        {
+            ++i;
         }
     }
 }
