@@ -266,6 +266,8 @@ void TCPTahoeReno::sendCommandInvoked()
     // FIXME there's a problem with this: it interferes with slow start.
     // Every time we get a SEND command we send up to cwnd bytes, whether
     // we received an ack in between or not... See nagle_2.test.
+
+    // TBD perhaps this should be invoked only if sendQueue was previously empty?
     sendData();
 }
 
