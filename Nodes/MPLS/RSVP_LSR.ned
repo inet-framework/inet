@@ -48,7 +48,7 @@ module RSVP_LSR
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=271,141;i=block/table";
+            display: "p=270,150;i=block/table";
         ospf_te: OspfTe;
             display: "i=block/cogwheel;p=60,199;o=#008040";
         signal_module: RSVPAppl;
@@ -67,7 +67,7 @@ module RSVP_LSR
                 physOut[sizeof(out)];
             display: "p=192,155;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=88,306,row,90;q=queue;i=block/ifcard";
+            display: "p=88,330,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,

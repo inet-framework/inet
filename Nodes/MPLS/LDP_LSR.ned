@@ -51,7 +51,7 @@ module LDP_LSR
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=70,135;i=block/table";
+            display: "p=70,140;i=block/table";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
@@ -69,7 +69,7 @@ module LDP_LSR
                 physOut[sizeof(out)];
             display: "p=208,223;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=105,364,row,90;q=queue;i=block/ifcard";
+            display: "p=105,380,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
