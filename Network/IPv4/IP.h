@@ -57,22 +57,46 @@ class IP : public cSimpleModule
   protected:
     IPDatagram *encapsulate(cMessage *transportPacket);
 
-    /** Handle IPDatagram messages arriving from lower layer */
+    /**
+     * Handle IPDatagram messages arriving from lower layer.
+     * Decrements TTL, then invokes routePacket().
+     */
     virtual void handlePacketFromNetwork(IPDatagram *dgram);
 
-    /** Handle messages (typically packets to be send in IP) from transport or ICMP */
+    /**
+     * Handle messages (typically packets to be send in IP) from transport or ICMP.
+     * Invokes encapsulate(), then routePacket().
+     */
     virtual void handleMessageFromHL(cMessage *msg);
 
-    /** Handle multicast packets */
+    /**
+     * Performs routing. Based on the routing decision, it dispatches to
+     * localDeliver() for local packets, to fragmentAndSend() for forwarded packets,
+     * to handleMulticastPacket() for multicast packets, or drops the packet if
+     * it's unroutable or forwarding is off.
+     */
+    virtual void routePacket(IPDatagram *datagram);
+
+    /**
+     * Forwards packets to all multicast destinations, using fragmentAndSend().
+     */
     virtual void handleMulticastPacket(IPDatagram *dgram);
 
-    /** Send packet to higher layers */
+    /**
+     * Send packet to higher layers. Also performs reassembly of fragmented
+     * datagrams. Packet is sent to higher layer identified by its "protocol" field.
+     */
     virtual void localDeliver(IPDatagram *dgram);
 
-    /** Fragment packet if needed, then send it on selected interface */
+    /**
+     * Fragment packet if needed, then send it to the selected interface using
+     * sendDatagramToOutput().
+     */
     virtual void fragmentAndSend(IPDatagram *dgram);
 
-    /** Send datagram on selected interface */
+    /**
+     * Last TTL check, then send datagram on the given interface.
+     */
     virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
 
   public:

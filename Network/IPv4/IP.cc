@@ -17,8 +17,6 @@
 //
 
 
-//  Cleanup and rewrite: Andras Varga, 2004
-
 #include <omnetpp.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,9 +82,19 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     // hop counter decrement
     datagram->setTimeToLive (datagram->timeToLive()-1);
 
-    //
-    // "Routing"
-    //
+    // routepacket
+    routePacket(datagram);
+}
+
+void IP::handleMessageFromHL(cMessage *msg)
+{
+    IPDatagram *datagram = encapsulate(msg);
+    routePacket(datagram);
+}
+
+void IP::routePacket(IPDatagram *datagram)
+{
+    // FIXME eliminate routingdecision!
     IPRoutingDecision *routingDecision = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
 
     // FIXME add option handling code here!
@@ -145,13 +153,6 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     // "Fragmentation" and "IPOutput"
     //
     fragmentAndSend(datagram);
-}
-
-void IP::handleMessageFromHL(cMessage *msg)
-{
-    IPDatagram *dgram = encapsulate(msg);
-    //FIXME...
-    //send(dgram, "routingOut");
 }
 
 void IP::handleMulticastPacket(IPDatagram *datagram)
