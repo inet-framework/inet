@@ -26,12 +26,18 @@
 Define_Module(TCPMain);
 
 
+bool TCPMain::testing;
+
+
 void TCPMain::initialize()
 {
     nextEphemeralPort = 1024;
 
     // WATH_map(tcpConnMap);
     // WATH_map(tcpAppConnMap);
+
+    cModule *netw = simulation.systemModule();
+    testing = netw->hasPar("testing") && netw->par("testing").boolValue();
 }
 
 TCPMain::~TCPMain()
@@ -91,7 +97,7 @@ void TCPMain::handleMessage(cMessage *msg)
             key.connId = connId;
             tcpAppConnMap[key] = conn;
 
-            ev << "TCP connection created for " << msg << "\n";
+            tcpEV << "TCP connection created for " << msg << "\n";
         }
         bool ret = conn->processAppCommand(msg);
         if (!ret)
@@ -179,7 +185,7 @@ void TCPMain::updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress
 
 void TCPMain::removeConnection(TCPConnection *conn)
 {
-    ev << "Deleting TCP connection\n";
+    tcpEV << "Deleting TCP connection\n";
 
     AppConnKey key;
     key.appGateIndex = conn->appGateIndex;
@@ -198,5 +204,5 @@ void TCPMain::removeConnection(TCPConnection *conn)
 
 void TCPMain::finish()
 {
-    ev << fullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+    tcpEV << fullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }

@@ -38,7 +38,8 @@
  * and the protocol doesn't rely on retransmitted segments having the
  * same segment boundaries as the original segments. Some implementations
  * store segments on the retransmission queue, and others store only the data
- * bytes; RFCs explicitly allow both.
+ * bytes; RFCs explicitly allow both. (See e.g. RFC1122 p90, section 4.2.2.15,
+ * "IMPLEMENTATION" note).
  *
  * To simulate a TCP that retains segment boundaries in retransmissions,
  * the appropriate TCPAlgorithm class should remember where the segment
@@ -125,9 +126,11 @@ class TCPSendQueue : public cPolymorphic
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
      * a TCP segment which contains the data from the requested sequence
-     * number range.
+     * number range. The actually returned segment may contain less then
+     * maxNumBytes bytes if the subclass wants to reproduce the original
+     * segment boundaries when retransmitting.
      */
-    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) = 0;
+    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong maxNumBytes) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been

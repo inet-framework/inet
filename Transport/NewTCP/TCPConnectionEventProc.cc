@@ -57,10 +57,10 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             if (localPort==-1)
             {
                 localPort = tcpMain->getEphemeralPort();
-                ev << "Assigned ephemeral port " << localPort << "\n";
+                tcpEV << "Assigned ephemeral port " << localPort << "\n";
             }
 
-            ev << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
+            tcpEV << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
 
             tcpMain->updateSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
@@ -98,7 +98,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             if (localPort==-1)
                 opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
 
-            ev << "Listening on: " << localAddr << ":" << localPort << "\n";
+            tcpEV << "Listening on: " << localAddr << ":" << localPort << "\n";
 
             tcpMain->updateSockPair(this, localAddr, IPAddress(), localPort, -1);
             break;
@@ -182,14 +182,14 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             //"
             if (state->snd_nxt==sendQueue->bufferEndSeq())
             {
-                ev << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
+                tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 sendFin();
                 state->snd_nxt++;
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
             else
             {
-                ev << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_nxt) <<
+                tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_nxt) <<
                       " bytes pending, deferring sending of FIN\n";
 
                 // Although the RFC says above that ESTABLISHED->FIN_WAIT_1 should

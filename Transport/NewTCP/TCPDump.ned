@@ -27,6 +27,17 @@ simple TCPDump
 endsimple
 
 
-
+//
+// In addition to providing tcpdump-like functionality, it can delete,
+// delay or duplicate TCP segments, and inject new segments. Such segment 
+// manipulation can be controlled via a script.
+//
+simple TCPTester
+    parameters:
+      script: string;
+    gates:
+      in: in1, in2;
+      out: out1, out2;
+endsimple
 
 

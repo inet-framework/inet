@@ -123,6 +123,8 @@ TCPConnection::~TCPConnection()
 
 bool TCPConnection::processTimer(cMessage *msg)
 {
+    tcpEV << msg->name() << " timer expired\n";
+
     // first do actions
     TCPEventCode event;
     if (msg==the2MSLTimer)
@@ -178,7 +180,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
     // first do actions
     TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
     TCPEventCode event = preanalyseAppCommandEvent(msg->kind());
-    ev << "App command: " << eventName(event) << "\n";
+    tcpEV << "App command: " << eventName(event) << "\n";
     switch (event)
     {
         case TCP_E_OPEN_ACTIVE: process_OPEN_ACTIVE(event, tcpCommand, msg); break;
@@ -216,7 +218,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
 
     if (event==TCP_E_IGNORE)  // e.g. discarded segment
     {
-        ev << "Staying in state: " << stateName(fsm.state()) << " (no FSM event)\n";
+        tcpEV << "Staying in state: " << stateName(fsm.state()) << " (no FSM event)\n";
         return true;
     }
 
@@ -348,9 +350,14 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     }
 
     if (oldState!=fsm.state())
-        ev << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (event was: " << eventName(event) << ")\n";
+    {
+        tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (event was: " << eventName(event) << ")\n";
+        testingEV << tcpMain->name() << ": " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (on " << eventName(event) << ")\n";
+    }
     else
-        ev << "Staying in state: " << stateName(fsm.state()) << " (event was: " << eventName(event) << ")\n";
+    {
+        tcpEV << "Staying in state: " << stateName(fsm.state()) << " (event was: " << eventName(event) << ")\n";
+    }
 
     return fsm.state()!=TCP_S_CLOSED;
 }

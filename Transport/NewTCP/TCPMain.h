@@ -31,6 +31,12 @@
 class TCPConnection;
 class TCPSegment;
 
+// macro for normal ev<< loggging
+#define tcpEV (ev.disable_tracing||TCPMain::testing)?ev:ev
+
+// testingEV writes log that automated test cases can check (*.test files)
+#define testingEV (ev.disable_tracing||!TCPMain::testing)?ev:ev
+
 /**
  * Implements the TCP protocol.
  *
@@ -86,6 +92,9 @@ class TCPMain : public cSimpleModule
     TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
     TCPConnection *findConnForApp(int appGateIndex, int connId);
     void removeConnection(TCPConnection *conn);
+
+  public:
+    static bool testing; // switches between tcpEV and testingEV
 
   public:
     Module_Class_Members(TCPMain, cSimpleModule, 0);

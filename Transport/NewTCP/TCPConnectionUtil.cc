@@ -86,16 +86,16 @@ const char *TCPConnection::eventName(int event)
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
-    if (tcpseg->synBit())  ev << (tcpseg->ackBit() ? "SYN+ACK " : "SYN ");
-    if (tcpseg->finBit())  ev << "FIN(+ACK) ";
-    if (tcpseg->rstBit())  ev << (tcpseg->ackBit() ? "RST+ACK " : "RST ");
-    if (tcpseg->pshBit())  ev << "PSH ";
+    if (tcpseg->synBit())  tcpEV << (tcpseg->ackBit() ? "SYN+ACK " : "SYN ");
+    if (tcpseg->finBit())  tcpEV << "FIN(+ACK) ";
+    if (tcpseg->rstBit())  tcpEV << (tcpseg->ackBit() ? "RST+ACK " : "RST ");
+    if (tcpseg->pshBit())  tcpEV << "PSH ";
 
-    ev << "seq=" << tcpseg->sequenceNo() << " ";
-    ev << "len=" << tcpseg->payloadLength() << " ";
-    if (tcpseg->ackBit())  ev << "ack=" << tcpseg->ackNo() << " ";
-    if (tcpseg->urgBit())  ev << "urg=" << tcpseg->urgentPointer() << " ";
-    ev << "wnd=" << tcpseg->window() << "\n";
+    tcpEV << "seq=" << tcpseg->sequenceNo() << " ";
+    tcpEV << "len=" << tcpseg->payloadLength() << " ";
+    if (tcpseg->ackBit())  tcpEV << "ack=" << tcpseg->ackNo() << " ";
+    if (tcpseg->urgBit())  tcpEV << "urg=" << tcpseg->urgentPointer() << " ";
+    tcpEV << "wnd=" << tcpseg->window() << "\n";
 }
 
 
@@ -112,7 +112,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     controlInfo->setDestAddr(remoteAddr);
     tcpseg->setControlInfo(controlInfo);
 
-    ev << "Send: ";
+    tcpEV << "Send: ";
     printSegmentBrief(tcpseg);
 
     tcpMain->send(tcpseg,"to_ip");
@@ -126,7 +126,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest)
     controlInfo->setDestAddr(dest);
     tcpseg->setControlInfo(controlInfo);
 
-    ev << "Send: ";
+    tcpEV << "Send: ";
     printSegmentBrief(tcpseg);
 
     check_and_cast<TCPMain *>(simulation.contextModule())->send(tcpseg,"to_ip");
@@ -156,6 +156,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
     tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
     tcpAlgorithm->setConnection(this);
+    tcpAlgorithm->initialize();
 
     // create state block
     state = tcpAlgorithm->createStateVariables();
@@ -172,9 +173,11 @@ void TCPConnection::selectInitialSeqNum()
     sendQueue->init(state->iss+1); // +1 is for SYN
 }
 
-bool TCPConnection::checkSegmentSeqNum(TCPSegment *tcpseg)
+bool TCPConnection::isSegmentInWindow(TCPSegment *tcpseg)
 {
-    return true; // FIXME
+    // segment entirely falls in receive window
+    return seqGE(tcpseg->sequenceNo(),state->rcv_nxt) &&
+           seqLE(tcpseg->sequenceNo()+tcpseg->payloadLength(),state->rcv_nxt+state->rcv_wnd);
 }
 
 void TCPConnection::sendSyn()
@@ -264,6 +267,9 @@ void TCPConnection::sendAck()
 
     // send it
     sendToIP(tcpseg);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendFin()
@@ -280,16 +286,20 @@ void TCPConnection::sendFin()
 
     // send it
     sendToIP(tcpseg);
+
+    // notify
+    tcpAlgorithm->ackSent();
 }
 
 
 void TCPConnection::sendData(int maxNumSegments)
 {
     // send as much as we can, but at most maxNumSegments
+    bool segSent = false;
     ulong bytesAvailable = sendQueue->bytesAvailable(state->snd_nxt);
     for (int segCount=0; segCount<maxNumSegments || maxNumSegments==-1; segCount++)
     {
-        ev << bytesAvailable << " bytes in buffer to send, send window: " << state->snd_wnd << "\n";
+        tcpEV << bytesAvailable << " bytes in buffer to send, send window: " << state->snd_wnd << "\n";
         ulong bytes = Min(state->snd_wnd, Min(bytesAvailable, state->snd_mss));
         if (bytes==0)
             break;
@@ -298,21 +308,61 @@ void TCPConnection::sendData(int maxNumSegments)
         tcpseg->setAckNo(state->rcv_nxt);
         tcpseg->setAckBit(true);
 
+        ASSERT(bytes==tcpseg->payloadLength());
+
         bytesAvailable -= bytes;
         state->snd_nxt += bytes;
         state->snd_wnd -= bytes;
 
         if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
         {
-            ev << "Setting FIN on segment and advancing snd_nxt over FIN\n";
+            tcpEV << "Setting FIN on segment and advancing snd_nxt over FIN\n";
             tcpseg->setFinBit(true);
             state->snd_nxt = state->snd_fin_seq+1;
         }
 
         sendToIP(tcpseg);
+        segSent = true;
+    }
+
+    if (segSent)
+    {
+        // notify (once is enough)
+        tcpAlgorithm->ackSent();
+        tcpAlgorithm->dataSent();
     }
 }
 
+
+void TCPConnection::retransmitData()
+{
+    // retransmit one segment at snd_una, and re-set snd_nxt accordingly
+    tcpEV << "Retransmitting segment at snd_una=" << state->snd_una << "\n";
+
+    ulong bytes = Min(state->snd_mss, state->snd_nxt - state->snd_una);
+    ASSERT(bytes!=0);
+
+    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_una, bytes);
+    tcpseg->setAckNo(state->rcv_nxt);
+    tcpseg->setAckBit(true);
+
+    ASSERT(bytes==tcpseg->payloadLength());
+
+    state->snd_nxt = state->snd_una+bytes;
+
+    if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
+    {
+        tcpEV << "Setting FIN on retransmitted segment\n";
+        tcpseg->setFinBit(true);
+        state->snd_nxt = state->snd_fin_seq+1;
+    }
+
+    sendToIP(tcpseg);
+
+    // notify
+    tcpAlgorithm->ackSent();
+    tcpAlgorithm->dataRetransmitted();
+}
 
 
 /*

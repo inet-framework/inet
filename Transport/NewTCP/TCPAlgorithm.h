@@ -63,6 +63,13 @@ class TCPAlgorithm : public cPolymorphic
     }
 
     /**
+     * Should be redefined to initialize the object: create timers, etc.
+     * This method is necessary because the TCPConnection ptr is not
+     * available in the constructor yet.
+     */
+    virtual void initialize() {}
+
+    /**
      * Create state block (TCB) used by this TCP variant. It is expected
      * that every TCPAlgorithm subclass will have its own state block,
      * subclassed from TCPStateVariables. This factory method should
@@ -98,7 +105,7 @@ class TCPAlgorithm : public cPolymorphic
      * Called after we have received an ACK. At this point the state variables
      * (snd_una, snd_wnd) have already been updated.
      */
-    virtual void receivedAck() = 0;
+    virtual void receivedAck(bool duplicate) = 0;
 
     /**
      * Called after we have received an ACK for some data not yet sent.
@@ -106,6 +113,22 @@ class TCPAlgorithm : public cPolymorphic
      */
     virtual void receivedAckForDataNotYetSent(uint32 seq) = 0;
 
+    /**
+     * Called after we have sent an ACK. This hook can be used to cancel
+     * the delayed-ACK timer.
+     */
+    virtual void ackSent() = 0;
+
+    /**
+     * Called after we have sent data. This hook can be used to schedule
+     * the retransmission timer.
+     */
+    virtual void dataSent() = 0;
+
+    /**
+     * Called after retransmissions.
+     */
+    virtual void dataRetransmitted() =0;
 };
 
 #endif

@@ -178,64 +178,6 @@ class TCPStateVariables : public cPolymorphic
 
     bool fin_rcvd;       // whether FIN received or not (FIXME probably redundant? state contains this too)
     uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN (FIXME really needed?)
-
-    //
-    // Rest is commented out for now -- probably should go to specific
-    // TCPAlgorithm classes.
-    //
-
-    //uint32 snd_fin_seq;  // last seq. no.
-    // slow start and congestion avoidance variables (RFC 2001)
-    //int snd_cwnd;          // congestion window
-    //int ssthresh;          // slow start threshold
-
-    // receive variables
-    //uint32 rcv_fin_seq;
-    //bool rcv_fin_valid;
-    //bool rcv_up_valid;
-    //uint32 rcv_buf_seq;
-    //unsigned long rcv_buff;
-    //double  rcv_buf_usage_thresh;
-
-    // retransmit variables
-    //uint32 snd_max;      // highest sequence number sent; used to recognize retransmits
-    //uint32 max_retrans_seq; // sequence number of a retransmitted segment
-
-    // timing information (round-trip)
-    //short t_rtt;                // round-trip time
-    //uint32 rtseq;             // starting sequence number of timed data
-    //short rttmin;
-    //short srtt;                 // smoothed round-trip time
-    //short rttvar;               // variance of round-trip time
-    //double last_timed_data;     // timestamp for measurement
-
-    // retransmission timeout
-    //short rxtcur;
-    // backoff for rto
-    //short rxtshift;
-    //bool rexmt_sch;
-
-    // duplicate ack counter
-    //short dupacks;
-
-    // max. ack. delay
-    //double max_del_ack;
-    // bool to handle delayed ACKs
-    //bool ack_sch;
-
-    // number of bits requested by the application
-    //long num_pks_req;
-
-    // last time a segment was send
-    //double last_snd_time;
-
-    // ACK times
-    //double ack_send_time;
-    //double ack_rcv_time;
-
-    // bool to handle the time wait timer
-    //bool time_wait_sch;
-    //bool finwait2_sch;
 };
 
 
@@ -276,7 +218,7 @@ class TCPConnection
   public:
     // connection identification by apps: appgateIndex+connId
     int appGateIndex; // application gate index
-    int connId;
+    int connId;       // identifies connection within the app
 
     // socket pair
     IPAddress localAddr;
@@ -297,7 +239,7 @@ class TCPConnection
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
 
-    // TCP behavior is data transfer state
+    // TCP behavior in data transfer state
     TCPAlgorithm *tcpAlgorithm;
 
     // timers
@@ -352,8 +294,8 @@ class TCPConnection
     /** Utility: generates ISS and initializes corresponding state variables */
     void selectInitialSeqNum();
 
-    /** check if segment is acceptable (seq num is in valid range) */
-    bool checkSegmentSeqNum(TCPSegment *tcpseg);
+    /** check if segment is acceptable (all bytes are in receive window) */
+    bool isSegmentInWindow(TCPSegment *tcpseg);
 
     /** Utility: send SYN, SYN+ACK, ACK */
     void sendSyn();
@@ -364,6 +306,9 @@ class TCPConnection
     /** Utility: send data from sendQueue, at most this many segments (-1 means no limit) */
     void sendData(int maxNumSegments=-1);
 
+    /** Utility: retransmit everything from snd_una */
+    void retransmitData();
+
     /** Utility: sends RST */
     void sendRst(uint32 seqNo);
     static void sendRst(uint32 seq, IPAddress src, IPAddress dest, int srcPort, int destPort);
@@ -373,19 +318,19 @@ class TCPConnection
     void sendFin();
 
     /** Utility: adds control info to segment and sends it to IP */
-  public:
     void sendToIP(TCPSegment *tcpseg);
-  protected:
-    static void sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
-
-    /** Utility: sends packet to application */
-    void sendToApp(cMessage *msg);
 
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, simtime_t timeout) {
         tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);
     }
 
+  protected:
+    /** Utility: send IP packet */
+    static void sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
+
+    /** Utility: sends packet to application */
+    void sendToApp(cMessage *msg);
 
   protected:
     static void printSegmentBrief(TCPSegment *tcpseg);

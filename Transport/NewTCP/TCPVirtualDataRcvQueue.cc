@@ -17,7 +17,6 @@
 //
 
 
-#include <assert.h>
 #include "TCPVirtualDataRcvQueue.h"
 
 
@@ -54,7 +53,8 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
     if (seqLE(seg.end,i->end))
     {
-        // tcpseg represents no new data -- nothing to do
+        if (seqLess(seg.begin,i->begin))
+            i->begin = seg.begin;
         return i->end;
     }
 
@@ -113,7 +113,7 @@ cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     if (i==regionList.end())
         return NULL;
 
-    assert(i->begin!=i->end); // empty regions cannot exist
+    ASSERT(i->begin!=i->end); // empty regions cannot exist
 
     // seq below 1st region
     if (seqLE(seq,i->begin))

@@ -29,7 +29,51 @@
 class PlainTCPStateVariables : public TCPStateVariables
 {
   public:
-    //...
+    PlainTCPStateVariables();
+
+    // retransmit count
+    uint32 rexmit_seq;      // sequence number retransmitted
+    int rexmit_count;       // number of retransmissions (=1 after first rexmit)
+    int rexmit_timeout;     // current retransmission timeout
+
+    // slow start and congestion avoidance variables (RFC 2001)
+    //int snd_cwnd;          // congestion window
+    //int ssthresh;          // slow start threshold
+
+    // receive variables
+    //uint32 rcv_fin_seq;
+    //bool rcv_fin_valid;
+    //bool rcv_up_valid;
+    //uint32 rcv_buf_seq;
+    //unsigned long rcv_buff;
+    //double  rcv_buf_usage_thresh;
+
+    // retransmit variables
+    //uint32 snd_max;      // highest sequence number sent; used to recognize retransmits
+    //uint32 max_retrans_seq; // sequence number of a retransmitted segment
+
+    // timing information (round-trip)
+    //short t_rtt;                // round-trip time
+    //uint32 rtseq;             // starting sequence number of timed data
+    //short rttmin;
+    //short srtt;                 // smoothed round-trip time
+    //short rttvar;               // variance of round-trip time
+    //double last_timed_data;     // timestamp for measurement
+
+    // retransmission timeout
+    //short rxtcur;
+    // backoff for rto
+    //short rxtshift;
+
+    // duplicate ack counter
+    short dupacks;
+
+    // last time a segment was send
+    //double last_snd_time;
+
+    // ACK times
+    //double ack_send_time;
+    //double ack_rcv_time;
 };
 
 
@@ -47,6 +91,14 @@ class PlainTCP : public TCPAlgorithm
 
     PlainTCPStateVariables *state;
 
+  protected:
+    /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
+    //@{
+    virtual void processRexmitTimer(TCPEventCode& event);
+    virtual void processPersistTimer(TCPEventCode& event);
+    virtual void processDelayedAckTimer(TCPEventCode& event);
+    virtual void processKeepAliveTimer(TCPEventCode& event);
+    //@}
   public:
     /**
      * Ctor.
@@ -57,6 +109,11 @@ class PlainTCP : public TCPAlgorithm
      * Virtual dtor.
      */
     virtual ~PlainTCP();
+
+    /**
+     * Create timers, etc.
+     */
+    virtual void initialize();
 
     /**
      * Create and return a PlainTCPStateVariables object.
@@ -72,9 +129,15 @@ class PlainTCP : public TCPAlgorithm
 
     virtual void receiveSeqChanged();
 
-    virtual void receivedAck();
+    virtual void receivedAck(bool duplicate);
 
     virtual void receivedAckForDataNotYetSent(uint32 seq);
+
+    virtual void ackSent();
+
+    virtual void dataSent();
+
+    virtual void dataRetransmitted();
 
 };
 
