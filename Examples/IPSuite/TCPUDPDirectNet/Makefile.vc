@@ -15,11 +15,6 @@ TARGET = TCPUDPDirectNet.exe
 # USERIF_LIBS=$(CMDENV_LIBS)
 USERIF_LIBS=$(TKENV_LIBS)
 
-# uncomment 1 of the 3 lines to support either serial or parallel operation
-KERNEL_LIBS=$(STD_KERNEL_LIBS)
-# KERNEL_LIBS=$(PVM_KERNEL_LIBS)
-# KERNEL_LIBS=$(MPI_KERNEL_LIBS)
-
 # .ned or .h include paths with -I
 INCLUDE_PATH= -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
 
@@ -54,9 +49,15 @@ CMDENV_LIBS=envir.lib cmdenv.lib
 TKENV_LIBS=envir.lib tkenv.lib $(TK_LIBS)
 
 # Simulation kernel
-STD_KERNEL_LIBS=sim_std.lib
-MPI_KERNEL_LIBS=sim_mpi.lib $(MPI_LIBS)
-PVM_KERNEL_LIBS=sim_pvm.lib $(PVM_LIBS)
+KERNEL_LIBS=sim_std.lib
+
+!if "$(WITH_NETBUILDER)"=="yes"
+KERNEL_LIBS= $(KERNEL_LIBS) nedxml.lib $(XML_LIBS)
+!endif
+
+!if "$(WITH_PARSIM)"=="yes"
+KERNEL_LIBS= $(KERNEL_LIBS) $(MPI_LIBS)
+!endif
 
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
@@ -70,6 +71,7 @@ OBJS= TCPUDPDirectNet_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
+SUBDIR_TARGETS= 
 
 $(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) /out:$(TARGET)
@@ -77,7 +79,7 @@ $(TARGET): $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: $(SUBDIRS)
+subdirs: $(SUBDIR_TARGETS)
 
 TCPUDPDirectNet_n.obj: TCPUDPDirectNet_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp TCPUDPDirectNet_n.cc
@@ -97,13 +99,13 @@ TCPUDPDirectNet_n.cc: TCPUDPDirectNet.ned
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
 	-del *.vec *.sca 2>NUL
-	-for %%i in (  ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
 
 re-makemake:
-	opp_nmakemake_vc -f   #recreate Makefile
+	opp_nmakemake -f -f -w -c ..\..\..\ipsuiteconfig.vc -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

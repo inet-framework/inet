@@ -1757,7 +1757,7 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
               snd_cwnd_size(tcb_block->snd_cwnd);
               if (debug) ev << "Incrementing the congestion window. New value: " << tcb_block->snd_cwnd << "\n";
             }
-          else if (tcb_block->cwnd_cnt < (short) (tcb_block->snd_cwnd / 536))
+          else if (tcb_block->cwnd_cnt < (short) (tcb_block->snd_cwnd / tcb_block->snd_mss))
             {
               tcb_block->cwnd_cnt++;
               if (debug) ev << "Incrementing the Counter for congestion avoidance. New value: " << tcb_block->cwnd_cnt << "\n"; 

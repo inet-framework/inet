@@ -10,3 +10,17 @@ all: $(TARGET)
 Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir : Util_dir 
 Nodes_dir : Network_dir Transport_dir NetworkInterfaces_dir PHY_dir Applications_dir 
 Examples_dir Tests_dir : Nodes_dir
+
+# documentation targets
+DOC_DIR=Documentation
+
+docs: doxy neddoc
+
+doxy:
+	doxygen doxy.cfg
+
+neddoc: 
+	opp_neddoc -a -o $(DOC_DIR)/neddoc -t $(DOC_DIR)/doxy/doxytags.xml -d ../doxy
+
+neddoc-without-doxy:
+	opp_neddoc -a -o $(DOC_DIR)/neddoc

@@ -15,11 +15,6 @@ TARGET = TCP
 # USERIF_LIBS=$(CMDENV_LIBS)
 USERIF_LIBS=$(TKENV_LIBS)
 
-# uncomment 1 of the 3 lines to support either serial or parallel operation
-KERNEL_LIBS=$(STD_KERNEL_LIBS)
-# KERNEL_LIBS=$(PVM_KERNEL_LIBS)
-# KERNEL_LIBS=$(MPI_KERNEL_LIBS)
-
 # .ned or .h include paths with -I
 INCLUDE_PATH= -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Util
 
@@ -42,9 +37,15 @@ CMDENV_LIBS=envir.lib cmdenv.lib
 TKENV_LIBS=envir.lib tkenv.lib $(TK_LIBS)
 
 # Simulation kernel
-STD_KERNEL_LIBS=sim_std.lib
-MPI_KERNEL_LIBS=sim_mpi.lib $(MPI_LIBS)
-PVM_KERNEL_LIBS=sim_pvm.lib $(PVM_LIBS)
+KERNEL_LIBS=sim_std.lib
+
+!if "$(WITH_NETBUILDER)"=="yes"
+KERNEL_LIBS= $(KERNEL_LIBS) nedxml.lib $(XML_LIBS)
+!endif
+
+!if "$(WITH_PARSIM)"=="yes"
+KERNEL_LIBS= $(KERNEL_LIBS) $(MPI_LIBS)
+!endif
 
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
@@ -58,13 +59,14 @@ OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodu
 
 # subdirectories to recurse into
 SUBDIRS= 
+SUBDIR_TARGETS= 
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: $(SUBDIRS)
+subdirs: $(SUBDIR_TARGETS)
 
 TcpIpInterface_n.obj: TcpIpInterface_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp TcpIpInterface_n.cc
@@ -108,13 +110,13 @@ TransportPacket.obj: TransportPacket.cc
 clean:
 	-del *.obj *_n.cc *_n.h *_m.cc *_m.h $(TARGET)$(EXE_SUFFIX) 2>NUL
 	-del *.vec *.sca 2>NUL
-	-for %%i in (  ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc clean && cd ..
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
 
 re-makemake:
-	opp_nmakemake_vc -f   #recreate Makefile
+	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
