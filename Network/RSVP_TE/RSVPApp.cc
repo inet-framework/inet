@@ -178,7 +178,7 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
     int lsp_id;
     int label;
 
-    FlowDescriptor_t *flow_d = rMessage->getFlowDescriptor();
+    FlowDescriptor_t *flow_d = rMessage->getFlowDescriptorList();
     for (int k = 0; k < InLIST_SIZE; k++)
     {
         for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
@@ -625,7 +625,7 @@ void RSVPAppl::sendResvMessage(RSVPPathMsg * pMsg, int inLabel)
     }
 
     rMsg->setFlowDescriptor(flow_descriptor_list);
-    rMsg->setHop(rsvp_hop);
+    rMsg->setRsvp_hop(*rsvp_hop);
     rMsg->setSession(pMsg->getSession());
 
     rMsg->setStyle(SF_STYLE);
@@ -998,7 +998,7 @@ traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *connNode)
 
 void RSVPAppl::addRouteInfo(RSVPResvMsg * rmsg)
 {
-    FlowDescriptor_t *flow_d = rmsg->getFlowDescriptor();
+    FlowDescriptor_t *flow_d = rmsg->getFlowDescriptorList();
     for (int k = 0; k < InLIST_SIZE; k++)
     {
         if ((*(flow_d + k)).Filter_Spec_Object.SrcAddress != 0)

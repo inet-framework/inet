@@ -20,48 +20,8 @@
 #include "IPAddress.h"
 #include "RSVPPacket.h"
 #include "RSVPPathMsg.h"
+#include "RSVPResvMsg.h"
 
-
-/**
- * RSVP RESV packet
- *
- * <code>
- *  <Resv Message> ::= <Common Header> [ <INTEGRITY> ]
- *                             <SESSION>  <RSVP_HOP>
- *                             <TIME_VALUES>
- *                             [ <RESV_CONFIRM> ]  [ <SCOPE> ]
- *                             [ <POLICY_DATA> ... ]
- *                             <STYLE> <flow descriptor list>
- * </code>
- */
-class RSVPResvMsg : public RSVPPacket
-{
-protected:
-    RsvpHopObj_t rsvp_hop;
-    double refresh_time;
-    int resv_style; //Support FF style only
-    FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
-
-public:
-    RSVPResvMsg();
-    inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list;}
-
-    inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
-    inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
-    inline int getStyle() {return resv_style;}
-    inline void setStyle(int style) {resv_style = style;}
-    inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
-    inline FlowDescriptor_t* getFlowDescriptor() {return flow_descriptor_list;}
-    inline void setRefresh_time(double t) {refresh_time = t;}
-    inline void setFlowDescriptor(FlowDescriptor_t* f)
-    {
-        for(int i=0; i< InLIST_SIZE; i++)
-            flow_descriptor_list[i] = f[i];
-    }
-
-    void setHop(RsvpHopObj_t* h);
-    void print();
-};
 
 
 
@@ -89,7 +49,6 @@ public:
     inline int getSrcAddress() {return senderTemplate.SrcAddress;}
     inline int getSrcPort() {return senderTemplate.SrcPort;}
 
-    inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
     inline SenderTemplateObj_t* getSenderTemplate() {return &senderTemplate;}
 
     void setSenderTemplate(SenderTemplateObj_t* s);
@@ -123,7 +82,6 @@ public:
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
     inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
 
-    inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
     inline FlowDescriptor_t* getFlowDescriptor() {return flow_descriptor_list;}
 
     inline void setFlowDescriptor(FlowDescriptor_t* f)
@@ -198,7 +156,6 @@ public:
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
     inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
 
-    inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
     inline int getErrorNode() {return errorNode;}
     inline void setErrorNode(int i) {errorNode =i;}
     inline int getErrorCode() {return errorCode;}

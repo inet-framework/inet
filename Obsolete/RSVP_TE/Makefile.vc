@@ -62,10 +62,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= RSVPPacket_m.obj RSVPPathMsg_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
+OBJS= RSVPPacket_m.obj RSVPPathMsg_m.obj RSVPResvMsg_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= RSVPPacket_m.h RSVPPathMsg_m.h
+GENERATEDHEADERS= RSVPPacket_m.h RSVPPathMsg_m.h RSVPResvMsg_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -101,6 +101,12 @@ RSVPPathMsg_m.obj: RSVPPathMsg_m.cc
 
 RSVPPathMsg_m.cc RSVPPathMsg_m.h: RSVPPathMsg.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) RSVPPathMsg.msg
+
+RSVPResvMsg_m.obj: RSVPResvMsg_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp RSVPResvMsg_m.cc
+
+RSVPResvMsg_m.cc RSVPResvMsg_m.h: RSVPResvMsg.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) RSVPResvMsg.msg
 
 OspfTe.obj: OspfTe.cc
 	$(CXX) -c $(COPTS) /Tp OspfTe.cc

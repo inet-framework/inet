@@ -25,48 +25,6 @@
 
 /********************************RESERVATION MESSAGE*************************/
 
-RSVPResvMsg::RSVPResvMsg():RSVPPacket()
-{
-    setKind(RESV_MESSAGE);
-}
-
-
-
-void RSVPResvMsg::setHop(RsvpHopObj_t * h)
-{
-    rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
-    rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
-}
-
-void RSVPResvMsg::print()
-{
-    int sIP = 0;
-    ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
-        "ProtId   = " << getProtId() << "\n" <<
-        "DestPort = " << getDestPort() << "\n" <<
-        "Next Hop = " << IPAddress(getNHOP()) << "\n" <<
-        "LIH      = " << IPAddress(getLIH()) << "\n";
-
-    for (int i = 0; i < InLIST_SIZE; i++)
-        if ((flow_descriptor_list + i) != NULL)
-            if ((sIP = flow_descriptor_list[i].Filter_Spec_Object.SrcAddress) != 0)
-            {
-                ev << "Receiver =" << IPAddress(sIP) <<
-                    ",OutLabel=" << flow_descriptor_list[i].label <<
-                    ", BW=" << flow_descriptor_list[i].Flowspec_Object.req_bandwidth <<
-                    ", Delay=" << flow_descriptor_list[i].Flowspec_Object.link_delay << "\n";
-                ev << "RRO={";
-                for (int c = 0; c < MAX_ROUTE; c++)
-                {
-                    int rroEle = flow_descriptor_list[i].RRO[c];
-                    if (rroEle != 0)
-                        ev << IPAddress(rroEle) << ",";
-                }
-                ev << "}\n";
-            }
-
-
-}
 
 /********************************PATH TEAR MESSAGE*************************/
 RSVPPathTear::RSVPPathTear():RSVPPacket()

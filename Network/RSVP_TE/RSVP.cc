@@ -1333,10 +1333,10 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
 
     getPeerInet(PH, &peerInf);
 
-    RsvpHopObj_t *hop = new RsvpHopObj_t;
-    hop->Logical_Interface_Handle = peerInf;
-    hop->Next_Hop_Address = PH;
-    outRM->setHop(hop);
+    RsvpHopObj_t hop;
+    hop.Logical_Interface_Handle = peerInf;
+    hop.Next_Hop_Address = PH;
+    outRM->setRsvp_hop(hop);
 
     /*
        o    Select each sender PSB whose PHOP has address PH.  Set the

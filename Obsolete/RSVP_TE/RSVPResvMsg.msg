@@ -1,0 +1,54 @@
+//
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
+// either version 2 of the License, or any later version.
+// The library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
+
+
+cplusplus {{
+#include "intserv.h"
+#include "RSVPPacket.h"
+}}
+
+struct SessionObj_t;
+struct RsvpHopObj_t;
+struct SenderTemplateObj_t;
+struct SenderTspecObj_t;
+struct FlowSpecObj_t;
+struct FilterSpecObj_t;
+struct LabelRequestObj_t;
+struct SenderDescriptor_t;
+struct FlowDescriptor_t;
+struct EroObj_t;
+class RSVPPacket;
+
+
+//
+// RSVP RESV packet
+//
+// <code>
+//  <Resv Message> ::= <Common Header> [ <INTEGRITY> ]
+//                             <SESSION>  <RSVP_HOP>
+//                             <TIME_VALUES>
+//                             [ <RESV_CONFIRM> ]  [ <SCOPE> ]
+//                             [ <POLICY_DATA> ... ]
+//                             <STYLE> <flow descriptor list>
+// </code>
+//
+message RSVPResvMsg extends RSVPPacket
+{
+    properties:
+        customize=true;
+    fields:
+        RsvpHopObj_t rsvp_hop;
+        double refresh_time;
+        int style; //Support FF style only
+        FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
+}
+
