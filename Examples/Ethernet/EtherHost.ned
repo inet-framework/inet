@@ -17,8 +17,8 @@
 //
 
 import
-    "EtherTrafGen",
-    "Sink",
+    "EtherAppCli",
+    "EtherAppSrv",
     "EtherMAC",
     "EtherLLC";
 
@@ -28,34 +28,33 @@ import
 // to create traffic in the test network.
 //
 module EtherHost
-    parameters:
-        numApps : numeric;  // number of "applications"
-
     gates:
         in: in;
         out: out;
 
     submodules:
-        gen: EtherTrafGen[numApps];
+        cli: EtherAppCli;
             display: "p=60,60,col";
-        sink: EtherTrafSink[numApps];
+        srv: EtherAppSrv;
             display: "p=250,60,col";
         llc: EtherLLC;
             gatesizes:
-                UpperLayer_in[numApps],
-                UpperLayer_out[numApps];
+                upperLayerIn[2],
+                upperLayerOut[2];
             display: "i=fork;p=155,120";
         mac: EtherMAC;
             display: "i=queue;p=155,200";
     connections:
-        llc.LowerLayer_in <-- mac.UpperLayer_out;
-        llc.LowerLayer_out --> mac.UpperLayer_in;
-        mac.LowerLayer_in <-- in;
-        mac.LowerLayer_out --> out;
+        llc.lowerLayerIn <-- mac.upperLayerOut;
+        llc.lowerLayerOut --> mac.upperLayerIn;
 
-        for i=0..numApps-1 do
-            gen[i].out --> llc.UpperLayer_in[i];
-            sink[i].in <-- llc.UpperLayer_out[i];
-        endfor;
+        mac.physicalIn <-- in;
+        mac.physicalOut --> out;
+
+        cli.out --> llc.upperLayerIn[0];
+        cli.in <-- llc.upperLayerOut[0];
+
+        srv.out --> llc.upperLayerIn[1];
+        srv.in <-- llc.upperLayerOut[1];
 endmodule
 

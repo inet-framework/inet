@@ -20,7 +20,7 @@
 
 //
 // A MACRelayUnit implementation which models one CPU assigned to each
-// incoming port, working with shared memory but separate queues. 
+// incoming port, working with shared memory but separate queues.
 //
 // It also models fixed delay for precessing each frame.
 // Finite memory is taken into account by dropping frames if
@@ -40,10 +40,11 @@ simple MACRelayUnitPP
         processingTime : numeric,   // processing time of one frame
         bufferSize : numeric,       // memory (bytes)
         highWatermark : numeric,    // buffer usage threshold to send PAUSE frame (bytes)
-        pauseUnits : numeric;       // time to put in PAUSE frames (in units of 512 bit times) 
+        pauseUnits : numeric,       // time to put in PAUSE frames (in units of 512 bit times)
+        writeScalars: bool;         // enable/disable recording statistics in omnetpp.sca
 
     gates:
-        in:  LowerLayer_in[];       // see MACRelayUnit
-        out: LowerLayer_out[];      // see MACRelayUnit
+        in:  lowerLayerIn[];       // see MACRelayUnit
+        out: lowerLayerOut[];      // see MACRelayUnit
 endsimple
 

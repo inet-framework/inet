@@ -29,15 +29,8 @@
 #include "Ethernet.h"
 
 
-/*FIXME remove
-static cEnvir& operator<< (cEnvir& ev, const MACAddress& addr)
-{
-    char buf[20];
-    ev << addr.toHexString(buf);
-    return ev;
-}
-*/
 
+// FIXME to ostream
 static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
 {
     char buf[20];
@@ -55,9 +48,9 @@ static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 void MACRelayUnitBase::initialize()
 {
     // number of ports
-    numPorts = gate("LowerLayer_out",0)->size();
-    if (gate("LowerLayer_in",0)->size()!=numPorts)
-        error("the sizes of the LowerLayer_in[] and LowerLayer_out[] gate vectors must be the same");
+    numPorts = gate("lowerLayerOut",0)->size();
+    if (gate("lowerLayerIn",0)->size()!=numPorts)
+        error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
 
     // other parameters
     addressTableSize = par("addressTableSize");
@@ -89,11 +82,18 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
 
     // Finds output port of destination address and sends to output port
     // if not found then broadcasts to all other ports instead
-    int outputPort = getPortForAddress(frame->getDest());
-    if (outputPort>=0)
+    int outputport = getPortForAddress(frame->getDest());
+    if (inputport==outputport)
     {
-        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputPort << endl;
-        send(frame, "LowerLayer_out", outputPort);
+        EV << "Output port is same as input port, " << frame->fullName() << 
+              " dest " << frame->getDest() << ", discarding frame\n";
+        delete frame;
+        return;
+    }
+    if (outputport>=0)
+    {
+        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
+        send(frame, "lowerLayerOut", outputport);
     }
     else
     {
@@ -106,7 +106,7 @@ void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 {
     for (int i=0; i<numPorts; ++i)
         if (i!=inputport)
-            send((EtherFrame*)frame->dup(), "LowerLayer_out", i);
+            send((EtherFrame*)frame->dup(), "lowerLayerOut", i);
     delete frame;
 }
 
@@ -268,18 +268,14 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 
     // create Ethernet frame
     char framename[40];
-    sprintf(framename, "etherpauseframe-%d-%d", id(), seqNum++);
+    sprintf(framename, "pause-%d-%d", id(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
-
-    frame->setControl(1);
-    frame->setSsap(0);
-    frame->setDsap(0);
     frame->setPauseTime(pauseUnits);
 
-    frame->setLength(8*(ETHERFRAME_BYTES+2));
+    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES));
     if (frame->length() < 8*MIN_ETHERNET_FRAME)
         frame->setLength(8*MIN_ETHERNET_FRAME);
 
-    send(frame, "LowerLayer_out", portno);
+    send(frame, "lowerLayerOut", portno);
 }
 

@@ -22,6 +22,7 @@
 
 #include <omnetpp.h>
 #include <vector>
+#include "EtherFrame_m.h"  // for EtherAutoconfig only
 #include "utils.h"
 
 // Direction of frame travel on bus; also used as selfmessage kind
@@ -38,7 +39,7 @@ struct BusTap
     simtime_t propagationDelay[2];  // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
 };
 
-/*
+/**
  * Implements the bus which connects hosts, switches and other LAN entities on an Ethernet LAN.
  */
 class EtherBus : public cSimpleModule
@@ -53,12 +54,10 @@ class EtherBus : public cSimpleModule
     void tokenize(const char *str, std::vector<double>& array);
 
 private:
-    // Parameters controlling operating speeds of the bus
-    double  propagationSpeed;  // propagation of electrical/optical signals through copper/optical fibre
+    double  propagationSpeed;  // propagation speed of electrical signals through copper
 
-    // Array of BusTaps and value indicating the number of taps
-    BusTap *tap;               // Physical locations of where the hosts is connected to the bus
-    int taps;                  // Total number of tap points on the bus
+    BusTap *tap;  // physical locations of where the hosts is connected to the bus
+    int taps;     // number of tap points on the bus
 
     long numMessages;             // number of messages handled
 };
@@ -86,22 +85,31 @@ void EtherBus::initialize()
     // read positions and check if positions are defined in order (we're lazy to sort...)
     std::vector<double> pos;
     tokenize(par("positions").stringValue(), pos);
-    if (pos.size()!=taps)
-        error("number of items in the `positions' parameter must match number of gates");
+    int numPos = pos.size();
+    if (numPos>taps)
+        ev << "Note: `positions' parameter contains more values ("<< numPos << ") than "
+              "the number of taps (" << taps << "), ignoring excess values.\n";
+    else if (numPos<taps && numPos>=2)
+        ev << "Note: `positions' parameter contains less values ("<< numPos << ") than "
+              "the number of taps (" << taps << "), repeating distance between last 2 positions.\n";
+    else if (numPos<taps && numPos<2)
+        ev << "Note: `positions' parameter contains too few values, using 5m distances.\n";
 
     tap = new BusTap[taps];
 
     int i;
+    double distance = numPos>=2 ? pos[numPos-1]-pos[numPos-2] : 5;
     for (i=0; i<taps; i++)
     {
         tap[i].id = i;
-        tap[i].position = pos[i];
+        tap[i].position = i<numPos ? pos[i] : i==0 ? 5 : tap[i-1].position+distance;
     }
     for (i=0; i<taps-1; i++)
     {
         if (tap[i].position > tap[i+1].position)
             error("Tap positions must be ordered in ascending fashion, modify 'positions' parameter and rerun\n");
     }
+
     // Calculate propagation of delays between tap points on the bus
     for (i=0; i<taps; i++)
     {
@@ -130,6 +138,16 @@ void EtherBus::initialize()
               "  downstream delay: " << tap[i].propagationDelay[DOWNSTREAM] << endl;
     }
     EV << "\n";
+
+    // autoconfig: tell everyone that bus supports only 10Mb half-duplex
+    EV << "Autoconfig: advertising that we only support 10Mb half-duplex operation\n";
+    for (i=0; i<taps; i++)
+    {
+        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-10Mb-halfduplex");
+        autoconf->setHalfDuplex(true);
+        autoconf->setTxrate(10000000); // 10Mb
+        send(autoconf,"out",i);
+    }
 }
 
 void EtherBus::handleMessage (cMessage *msg)
@@ -210,9 +228,12 @@ void EtherBus::tokenize(const char *str, std::vector<double>& array)
 
 void EtherBus::finish ()
 {
-    double t = simTime();
-    recordScalar("simulated time", t);
-    recordScalar("messages handled", numMessages);
-    if (t>0)
-        recordScalar("messages/sec", numMessages/t);
+    if (par("writeScalars").boolValue())
+    {
+        double t = simTime();
+        recordScalar("simulated time", t);
+        recordScalar("messages handled", numMessages);
+        if (t>0)
+            recordScalar("messages/sec", numMessages/t);
+    }
 }

@@ -19,19 +19,21 @@
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
+// Doesn't do encapsulation/decapsulation; see EtherLLC and EtherEncap for
+// that.
 //
 // Supported variations:
 // - 10Mb Ethernet bus or twisted pair
 // - 100Mb Ethernet duplex or half-duplex
 // - 1Gb Ethernet
 //
-// IEEE 802.3 frame type is assumed. (Frames contain SSDAP/DSAP bytes
-// instead of Ethernet-II's 2-byte Ethertype field).
+// Supports all three Ethernet frame types. (It handles EtherFrame message class;
+// specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
 // RAW mode (only used by the IPX protocol) is not supported.
 //
 // Expected environment:
-// - LowerLayer_in and LowerLayer_out should be connected to the "network"
-// - UpperLayer_in and UpperLayer_out are usually connected to EtherLLC (in hosts)
+// - physicalIn and physicalOut should be connected to the "network"
+// - upperLayerIn and upperLayerOut are usually connected to EtherLLC (in hosts)
 //   or MACRelayUnitPP (in a switch)
 //
 // <b>Operation</b>
@@ -66,15 +68,21 @@
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.
 //
+// <b>Autoconfiguration</b>
+//
+// A very short period at the beginning of the simulation is spent on
+// all EtherMAC's exchanging autoconfiguration messages, during which
+// the selection of transmission rate and full duplex/half duplex mode
+// takes place.
+//
+// For more info see <a href="ether-overview.html">Ethernet Model Overview</a>.
+//
 // <b>Disabling and disconnecting</b>
 //
-// There is no explicit support for <i>disabling</i> an EtherMAC, mainly
-// because there is no need for such functionality. For example, if
-// an Ethernet switch wants to "disable" a port, the MACRelayUnit should
-// simply not forward frames to that EtherMAC, and discard frames
-// arriving from that EtherMAC.
-//
-// Disconnecting and reconnecting the EtherMAC is not yet supported.
+// If the EtherMAC is not connected to the network ("cable unplugged"), it will
+// start up in "disabled" mode. A disabled MAC simply discards any messages
+// it receives. It is currently not supported to dynamically connect/disconnect
+// an EtherMAC.
 //
 // <b>Physical layer messaging</b>
 //
@@ -109,19 +117,22 @@ simple EtherMAC
         promiscuous : bool,     // if true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
         address : string,       // MAC address as hex string (12 hex digits), or
-                                // "auto". "auto" values will be replaced by 
+                                // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        frameBursting : bool,   // enables transmitting frame bursts (Gigabit Ethernet only)
-        txrate : numeric,       // data rate (bit/s)
-        duplexChannel : bool,   // channel connecting to MAC is full duplex or not;
-                                // can only be be turned on when connecting to
-                                // a switch, but not with shared media like bus or hub
-        maxQueueSize : numeric; // maximum number of frames queued up for transmission;
+        txrate : numeric,       // maximum data rate supported by this station (bit/s);
+                                // actually chosen speed may be lower due to auto-
+                                // configuration. 0 means fully auto-configured.
+        duplexEnabled : bool,   // whether duplex mode can be enabled or not; whether
+                                // MAC will actually use duplex mode depends on the result
+                                // of the auto-configuration process (duplex is only
+                                // possible with DTE-to-DTE connection).
+        maxQueueSize : numeric, // maximum number of frames queued up for transmission;
                                 // additional frames are dropped
+        writeScalars: bool;     // enable/disable recording statistics in omnetpp.sca
     gates:
-        in: LowerLayer_in;    // to physical layer or the network
-        out: LowerLayer_out;  // to physical layer or the network
-        in: UpperLayer_in;    // to EtherLLC or MACRelayUnitPP
-        out: UpperLayer_out;  // to EtherLLC or MACRelayUnitPP
+        in: physicalIn;      // to physical layer or the network
+        out: physicalOut;    // to physical layer or the network
+        in: upperLayerIn;    // to EtherLLC or MACRelayUnitPP
+        out: upperLayerOut;  // to EtherLLC or MACRelayUnitPP
 endsimple
 

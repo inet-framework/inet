@@ -26,7 +26,7 @@ import
 //
 // Sample Ethernet LAN containing eight hosts, a switch and a bus.
 //
-module LANNetwork
+module MixedLAN
     submodules:
         bus: EtherBus;
             parameters:
@@ -45,7 +45,7 @@ module LANNetwork
         busHostD: EtherHost;
             display: "p=426,238;i=pc";
         switchHostA: EtherHost;
-            display: "p=82,300;i=pc";
+            display: "p=82,300;i=server1";
         switchHostB: EtherHost;
             display: "p=162,300;i=pc";
         switchHostC: EtherHost;
@@ -53,8 +53,6 @@ module LANNetwork
         switchHostD: EtherHost;
             display: "p=306,300;i=pc";
         switch: EtherSwitch;
-            parameters:
-                ports = 5;
             gatesizes:
                 in[5],
                 out[5];
@@ -111,7 +109,7 @@ endmodule
 // Sample Ethernet LAN: two hosts directly connected to each other
 // via twisted pair.
 //
-module HostNetwork
+module TwoHosts
     submodules:
         hostA: EtherHost;
             display: "p=60,160;i=pc";
@@ -126,10 +124,10 @@ endmodule
 //
 // Sample Ethernet LAN: four hosts connected to a switch.
 //
-module SwitchedNetwork
+module SwitchedLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=pc";
+            display: "p=161,55;i=server1";
         hostB: EtherHost;
             display: "p=253,125;i=pc";
         hostC: EtherHost;
@@ -137,8 +135,6 @@ module SwitchedNetwork
         hostD: EtherHost;
             display: "p=59,127;i=pc";
         switch: EtherSwitch;
-            parameters:
-                ports = 4;
             gatesizes:
                 in[4],
                 out[4];
@@ -158,10 +154,10 @@ endmodule
 //
 // Sample Ethernet LAN: four hosts connected by a hub.
 //
-module HubNetwork
+module HubLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=pc";
+            display: "p=161,55;i=server1";
         hostB: EtherHost;
             display: "p=253,125;i=pc";
         hostC: EtherHost;
@@ -184,13 +180,14 @@ module HubNetwork
         hub.in[3] <-- delay 0.2us <-- hostD.out;
 endmodule
 
+
 //
 // Sample Ethernet LAN: four hosts on a bus.
 //
-module BusNetwork
+module BusLAN
     submodules:
         hostA: EtherHost;
-            display: "p=100,150;i=pc";
+            display: "p=100,150;i=server1";
         hostB: EtherHost;
             display: "p=200,150;i=pc";
         hostC: EtherHost;
@@ -216,17 +213,19 @@ module BusNetwork
         bus.out[3] --> hostD.in;
 endmodule
 
-network LANNet : LANNetwork
+network mixedLAN : MixedLAN
 endnetwork
 
-network HostNet : HostNetwork
+network twoHosts : TwoHosts
 endnetwork
 
-network SwitchedNet : SwitchedNetwork
+network switchedLAN : SwitchedLAN
 endnetwork
 
-network BusNet : BusNetwork
+network hubLAN : HubLAN
 endnetwork
 
-network HubNet : HubNetwork
+network busLAN : BusLAN
 endnetwork
+
+

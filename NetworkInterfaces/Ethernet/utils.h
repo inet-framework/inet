@@ -32,5 +32,52 @@
 // then that line will not be read in, hence must terminate file with unused line.
 extern char* fgetline(FILE *fp);
 
+
+class MessageId;
+
+/**
+ * Experimental class to help tracing messages.
+ */
+class MessageTracer
+{
+  protected:
+    static MessageTracer trc;
+    FILE *f;
+    MessageId *lastId;
+    void open();
+  public:
+    static inline MessageTracer *instance() {return &trc;}
+    MessageTracer();
+    ~MessageTracer();
+    void created(MessageId *m);
+    void cloned(MessageId *m);
+    void assigned(MessageId *m);
+    void deleted(MessageId *m);
+};
+
+
+/**
+ * Experimental class to help tracing messages.
+ */
+class MessageId
+{
+  public:
+    static unsigned int nextId;
+    static unsigned int nextTreeId;
+    unsigned int id;
+    unsigned int treeId;
+    unsigned int parentId;
+  public:
+    MessageId() {id=++nextId; treeId=++nextTreeId; parentId=0; MessageTracer::instance()->created(this);}
+    MessageId(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::instance()->cloned(this);}
+    ~MessageId() {MessageTracer::instance()->deleted(this);}
+    MessageId& operator=(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::instance()->assigned(this); return *this;}
+};
+
+inline std::ostream& operator<<(std::ostream& out, const MessageId& m)
+{
+    out << "Id:" << m.id << " TreeId: " << m.treeId << " ParentId:" << m.parentId; return out;
+}
+
 #endif
 

@@ -6,39 +6,7 @@ in 2003 by David Wu and Andras Varga.
 
 See doc/index.html for documentation.
 
-omnetpp.ini contains several network configurations. You can selecting
-them by either running the program with the -r <runnumber> option, or
-clicking the "Select Run" icon on the Tkenv toolbar.
-
-
-Communication between modules:
-------------------------------
-higher layer (HL) --> LLC
-   dummy-cMessage with kind()=ETHCTRL_REGISTER_DSAP and contextPointer() pointing to an EtherCtrl
-   dummy-cMessage with kind()=ETHCTRL_DEREGISTER_DSAP and contextPointer() pointing to an EtherCtrl
-   cMessage-to-be-sent with kind()=ETHCTRL_DATA and contextPointer() pointing to an EtherCtrl
-
-HL <-- LLC
-   decapsulated cMessage with kind()=ETHCTRL_DATA
-
-LLC --> MAC
-   EtherFrame with kind()=ETH_FRAME
-
-LLC <-- MAC
-   EtherFrame with kind()=ETH_FRAME
-
-MAC --> network
-   EtherFrame with kind()=(unchanged)
-
-MAC <-- network
-   EtherFrame with kind()=(unchanged)
-
-MAC --> MACRelayUnit
-   EtherFrame with kind()=(unchanged)
-
-MAC <-- MACRelayUnit
-   EtherFrame with kind()=ETH_FRAME
-   EtherPauseFrame with kind()=ETH_PAUSE
-
+omnetpp.ini contains one large network (about 8000 computers). Check the
+test/ directory to find smaller models.
 
 

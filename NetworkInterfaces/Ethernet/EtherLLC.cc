@@ -26,7 +26,6 @@
 
 #include "Ethernet.h"
 #include "EtherFrame_m.h"
-#include "_802Ctrl_m.h"
 #include "utils.h"
 
 
@@ -37,11 +36,14 @@ class EtherLLC : public cSimpleModule
 {
   protected:
     int seqNum;
+    std::map<int,int> dsapToPort;  // DSAP registration table
 
     // statistics
+    long dsapsRegistered;       // number DSAPs (higher layers) registered
     long totalFromHigherLayer;  // total number of packets received from higher layer
     long totalFromMAC;          // total number of frames received from MAC
-    long totalPauseSent;        // total number of PAUSE frames sent
+    long totalPassedUp;         // total number of packets passed up to higher layer
+    long droppedUnknownDSAP;    // frames dropped because no such DSAP was registered here
 
   public:
     Module_Class_Members(EtherLLC,cSimpleModule,0);
@@ -51,8 +53,11 @@ class EtherLLC : public cSimpleModule
     virtual void finish();
 
     virtual void processPacketFromHigherLayer(cMessage *msg);
-    virtual void processFrameFromMAC(EtherFrame *msg);
+    virtual void processFrameFromMAC(EtherFrameWithLLC *msg);
+    virtual void handleRegisterSAP(cMessage *msg);
+    virtual void handleDeregisterSAP(cMessage *msg);
     virtual void handleSendPause(cMessage *msg);
+    virtual int findPortForSAP(int sap);
 
 };
 
@@ -63,43 +68,53 @@ void EtherLLC::initialize()
     seqNum = 0;
     WATCH(seqNum);
 
-    totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
+    dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
+    WATCH(dsapsRegistered);
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
-    WATCH(totalPauseSent);
+    WATCH(totalPassedUp);
+    WATCH(droppedUnknownDSAP);
 }
 
 void EtherLLC::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("LowerLayer_in"))
+    switch (msg->kind())
     {
-        processFrameFromMAC((EtherFrame *)msg);
-    }
-    else
-    {
-        // from higher layer
-        switch(msg->kind())
-        {
-            case 0:  //FIXME
-            case ETHCTRL_DATA:
-              processPacketFromHigherLayer(msg);
-              break;
+      case ETHCTRL_DATA:
+        // data received from higher layer
+        processPacketFromHigherLayer(msg);
+        break;
 
-            case ETHCTRL_SENDPAUSE:
-              // higher layer want MAC to send PAUSE frame
-              handleSendPause(msg);
-              break;
+      case ETH_FRAME:
+        // frame received from lower layer
+        processFrameFromMAC(check_and_cast<EtherFrameWithLLC *>(msg));
+        break;
 
-            default:
-              error("received message `%s' with unknown message kind %d", msg->name(), msg->kind());
-        }
+      case ETHCTRL_REGISTER_DSAP:
+        // higher layer registers itself
+        handleRegisterSAP(msg);
+        break;
+
+      case ETHCTRL_DEREGISTER_DSAP:
+        // higher layer deregisters itself
+        handleDeregisterSAP(msg);
+        break;
+
+      case ETHCTRL_SENDPAUSE:
+        // higher layer want MAC to send PAUSE frame
+        handleSendPause(msg);
+        break;
+
+      default:
+        error("received message `%s' with unknown message kind %d",
+              msg->name(), msg->kind());
     }
 }
 
 void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
 {
-    if (msg->length()>=8*MAX_ETHERNET_DATA)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet data (%d)", msg->length()/8, MAX_ETHERNET_DATA);
+    if (msg->length()>8*(MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
+        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", msg->length()/8, MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
 
@@ -110,75 +125,134 @@ void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
     EV << "Encapsulating higher layer packet `" << msg->name() <<"' for MAC\n";
     EV << "Sent from " << simulation.module(msg->senderModuleId())->fullPath() << " at " << msg->sendingTime() << " and was created " << msg->creationTime() <<  "\n";
 
-    _802Ctrl *etherctrl = check_and_cast<_802Ctrl*>(msg->removeControlInfo());
-    EtherFrame *frame = new EtherFrame(msg->name(), ETH_FRAME);
+    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    if (!etherctrl)
+        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+
+    EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->name(), ETH_FRAME);
 
     frame->setControl(0);
-    frame->setSrc(etherctrl->getSrc());  // if blank, will be filled in by MAC
-    frame->setDest(etherctrl->getDest());
     frame->setSsap(etherctrl->getSsap());
     frame->setDsap(etherctrl->getDsap());
-    frame->setLength(8*ETHERFRAME_BYTES);
+    frame->setDest(etherctrl->getDest()); // src address is filled in by MAC
+    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_LLC_HEADER_LENGTH));
     delete etherctrl;
 
     frame->encapsulate(msg);
     if (frame->length() < 8*MIN_ETHERNET_FRAME)
         frame->setLength(8*MIN_ETHERNET_FRAME);
 
-    send(frame, "LowerLayer_out");
+    send(frame, "lowerLayerOut");
 }
 
-void EtherLLC::processFrameFromMAC(EtherFrame *frame)
+void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 {
     totalFromMAC++;
 
-    // decapsulate and attach control info
+    // decapsulate it and pass up to higher layers.
+    int sap = frame->getDsap();
+    int port = findPortForSAP(sap);
+    if (port<0)
+    {
+        EV << "No higher layer registered for DSAP="<< sap <<", discarding frame `" << frame->name() <<"'\n";
+        droppedUnknownDSAP++;
+        delete frame;
+        return;
+    }
+
     cMessage *higherlayermsg = frame->decapsulate();
-    _802Ctrl *etherctrl = new _802Ctrl();
-    etherctrl->setSrc(frame->getSrc());
-    etherctrl->setDest(frame->getDest());
+
+    EtherCtrl *etherctrl = new EtherCtrl();
     etherctrl->setSsap(frame->getSsap());
     etherctrl->setDsap(frame->getDsap());
+    etherctrl->setSrc(frame->getSrc());
+    etherctrl->setDest(frame->getDest());
     higherlayermsg->setControlInfo(etherctrl);
 
-    EV << "Decapsulating frame `" << frame->name() <<"', passing up contained "
-          "packet `" << higherlayermsg->name() << "' to higher layer\n";
+    EV << "Decapsulating frame `" << frame->name() <<"', "
+          "passing up contained packet `" << higherlayermsg->name() << "' "
+          "to higher layer " << port << "\n";
 
-    // pass up to higher layers.
-    send(higherlayermsg, "UpperLayer_out");
+    send(higherlayermsg, "upperLayerOut", port);
+    totalPassedUp++;
     delete frame;
 }
 
+int EtherLLC::findPortForSAP(int dsap)
+{
+    // here we actually do two lookups, but what the hell...
+    if (dsapToPort.find(dsap)==dsapToPort.end())
+        return -1;
+    return dsapToPort[dsap];
+}
+
+void EtherLLC::handleRegisterSAP(cMessage *msg)
+{
+    int port = msg->arrivalGate()->index();
+    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    if (!etherctrl)
+        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+    int dsap = etherctrl->getDsap();
+
+    EV << "Registering higher layer with DSAP=" << dsap << " on port=" << port << "\n";
+
+    if (dsapToPort.find(dsap)!=dsapToPort.end())
+        error("DSAP=%d already registered with port=%d", dsap, dsapToPort[dsap]);
+
+    dsapToPort[dsap] = port;
+    dsapsRegistered = dsapToPort.size();
+    delete msg;
+}
+
+void EtherLLC::handleDeregisterSAP(cMessage *msg)
+{
+    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    if (!etherctrl)
+        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+    int dsap = etherctrl->getDsap();
+
+    EV << "Deregistering higher layer with DSAP=" << dsap << "\n";
+
+    // delete from table (don't care if it's not in there)
+    dsapToPort.erase(dsapToPort.find(dsap));
+    dsapsRegistered = dsapToPort.size();
+    delete msg;
+}
+
+
 void EtherLLC::handleSendPause(cMessage *msg)
 {
-    _802Ctrl *etherctrl = check_and_cast<_802Ctrl*>(msg->removeControlInfo());
-    int pauseUnits = etherctrl->getPauseUnits();
-    delete etherctrl;
+    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    if (!etherctrl)
+        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
 
+    int pauseUnits = etherctrl->getPauseUnits();
     EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";
 
     // create Ethernet frame
     char framename[30];
-    sprintf(framename, "etherpauseframe-%d-%d", id(), seqNum++);
+    sprintf(framename, "pause-%d-%d", id(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
-
-    frame->setControl(1);
-    frame->setSsap(0);
-    frame->setDsap(0);
-    frame->setDest(0); // leave address blank -- pause frames are point-to-point
     frame->setPauseTime(pauseUnits);
 
-    frame->setLength(8*(ETHERFRAME_BYTES+2));
+    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES));
     if (frame->length() < 8*MIN_ETHERNET_FRAME)
         frame->setLength(8*MIN_ETHERNET_FRAME);
 
-    send(frame, "LowerLayer_out");
-    delete msg;
+    send(frame, "lowerLayerOut");
 
-    totalPauseSent++;
+    delete msg;
 }
 
 void EtherLLC::finish()
 {
+    if (par("writeScalars").boolValue())
+    {
+        recordScalar("dsaps registered", dsapsRegistered);
+        recordScalar("packets from higher layer", totalFromHigherLayer);
+        recordScalar("frames from MAC", totalFromMAC);
+        recordScalar("packets passed up", totalPassedUp);
+        recordScalar("packets dropped - unknown DSAP", droppedUnknownDSAP);
+    }
 }
 

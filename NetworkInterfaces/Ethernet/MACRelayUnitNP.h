@@ -25,7 +25,7 @@
 class EtherFrame;
 
 /**
- * An implementation of the MAC Relay Unit that assumes a shared memory and 
+ * An implementation of the MAC Relay Unit that assumes a shared memory and
  * N CPUs in the switch. The CPUs process frames from a single shared queue.
  */
 class MACRelayUnitNP : public MACRelayUnitBase
@@ -40,13 +40,15 @@ class MACRelayUnitNP : public MACRelayUnitBase
     int numCPUs;                // number of processors
     simtime_t processingTime;   // Time taken to switch and process a frame
     int bufferSize;             // Max size of the buffer
-    long highWatermark;
-    int pauseUnits;
+    long highWatermark;         // if buffer goes above this level, send PAUSE frames
+    int pauseUnits;             // "units" field in PAUSE frames
+    simtime_t pauseInterval;    // min time between sending PAUSE frames
 
     // Other variables
     int bufferUsed;             // Amount of buffer used to store frames
     cMessage **endProcEvents;   // self-messages, one for each processor
-    
+    simtime_t pauseLastSent;
+
     // Parameters for statistics collection
     long numProcessedFrames;
     long numDroppedFrames;
@@ -58,19 +60,19 @@ class MACRelayUnitNP : public MACRelayUnitBase
     virtual void initialize();
 
     /**
-     * Calls handleIncomingFrame() for frames arrived from outside, 
+     * Calls handleIncomingFrame() for frames arrived from outside,
      * and processFrame() for self messages.
      */
     virtual void handleMessage(cMessage *msg);
-    
+
     /**
      * Writes statistics.
      */
     virtual void finish();
     //@}
-    
+
     /**
-     * Handle incoming Ethernet frame: if buffer full discard it, otherwise, insert 
+     * Handle incoming Ethernet frame: if buffer full discard it, otherwise, insert
      * it into buffer and start processing if a processor is free.
      */
     void handleIncomingFrame(EtherFrame *msg);

@@ -17,19 +17,23 @@
 //
 
 //
-// Simple traffic generator for the Ethernet model.
+// Simple traffic generator for the Ethernet model; generates EtherAppReq
+// packets.
+//
 // Destination may be given with OMNeT++ path name or MAC address.
 //
-simple EtherTrafGen
+simple EtherAppCli
     parameters:
         destStation: string,  // module path name of destination station
                               // (must be blank if destAddress is given)
         destAddress: string,  // destination MAC address
                               // (must be blank if destStation is given)
-        protocolId: numeric,  // value for SSAP/DSAP in Ethernet frame
-        waitMean: numeric,    // mean for exponential interarrival times
-        dataLength: numeric;  // length of data packets (bytes); may be random value
+        waitTime: numeric,    // interarrival time between sending requests; may be random value
+        reqLength: numeric,   // length of request packets (bytes); may be random value
+        respLength: numeric,  // length of response packets (bytes); may be random value
+        writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
 
     gates:
+        in: in;
         out: out;
 endsimple

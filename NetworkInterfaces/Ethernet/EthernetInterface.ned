@@ -34,7 +34,7 @@ module EthernetInterface
     submodules:
         arp: ARP;
             display: "i=proc2;p=155,60";
-        llc: EtherLLC;
+        encap: EtherEncap;
             gatesizes:
                 UpperLayer_in[1],
                 UpperLayer_out[1];
@@ -44,11 +44,10 @@ module EthernetInterface
     connections:
         ipInputQueueOut <-- arp.hlOut;
         ipOutputQueueIn --> arp.hlIn;
-        arp.hwOut --> llc.UpperLayer_in;
-        arp.hwIn <-- llc.UpperLayer_out;
-        llc.LowerLayer_out --> mac.UpperLayer_in;
-        llc.LowerLayer_in <-- mac.UpperLayer_out;
-        llc.LowerLayer_out --> mac.UpperLayer_in;
+        arp.hwOut --> encap.UpperLayer_in;
+        arp.hwIn <-- encap.UpperLayer_out;
+        encap.LowerLayer_out --> mac.UpperLayer_in;
+        encap.LowerLayer_in <-- mac.UpperLayer_out;
         mac.LowerLayer_in <-- physicalIn;
         mac.LowerLayer_out --> physicalOut;
 endmodule

@@ -33,7 +33,6 @@ import
 //
 module EtherSwitch
     parameters:
-        ports : numeric, // number of ports
         relayUnitType: string; // type of the MACRelayUnit; currently possible
                                // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
@@ -43,19 +42,19 @@ module EtherSwitch
     submodules:
         relayUnit: relayUnitType like MACRelayUnit;
             gatesizes:
-                LowerLayer_in[ports],
-                LowerLayer_out[ports];
+                lowerLayerIn[sizeof(in)],
+                lowerLayerOut[sizeof(in)];
             display: "i=greenbox;p=200,50";
-        mac: EtherMAC[ports];
+        mac: EtherMAC[sizeof(in)];
             parameters:
                 promiscuous = true;
             display: "i=queue;p=70,150,row";
     connections:
-        for i=0..ports-1 do
-            mac[i].UpperLayer_in <-- relayUnit.LowerLayer_out[i];
-            mac[i].UpperLayer_out --> relayUnit.LowerLayer_in[i];
-            mac[i].LowerLayer_in <-- in[i];
-            mac[i].LowerLayer_out --> out[i];
+        for i=0..sizeof(in)-1 do
+            mac[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
+            mac[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
+            mac[i].physicalIn <-- in[i];
+            mac[i].physicalOut --> out[i];
         endfor;
 endmodule
 

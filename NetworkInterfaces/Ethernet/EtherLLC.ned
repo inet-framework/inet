@@ -17,12 +17,14 @@
 //
 
 //
-// Ethernet LLC layer.
+// Provides Ethernet 802.3 encapsulation/decapsulation and dispatching
+// to the appropriate higher layer by DSAP values.
 //
 // Expected environment:
-// - LowerLayer_in, LowerLayer_out gates should be connected to Ethernet EtherMAC
-// - UpperLayer_in, UpperLayer_out gates should be connected to higher layer
-//   protocol or application
+// - lowerLayerIn, lowerLayerOut gates should be connected
+//   to Ethernet EtherMAC
+// - upperLayerIn[], upperLayerOut[] gates should be connected to
+//   higher layer protocols or applications
 //
 // Functionality:
 //
@@ -30,21 +32,31 @@
 // <a href="llc-app.html">Communication between LLC and higher layers</a>.
 // The following commands are supported:
 // - ETHCTRL_DATA: send a frame.
-//   Encapsulates packets received from upper layers. This includes assigning
-//   dest address, ssap and dsap from the control info acompanying
+//   Encapsulates packet into EtherFrameWithLLC. This includes assigning
+//   dest address, ssap and dsap from the EtherCtrl structure acompanying
 //   the message. Src address will be filled in by EtherMAC.
+// - ETHCTRL_REGISTER_DSAP: register application in LLC, as described in
+//   <a href="appreg.html">Application registration</a>.
+// - ETHCTRL_DEREGISTER_DSAP: deregister application, as described in
+//   <a href="appreg.html">Application registration</a>.
 // - ETHCTRL_SENDPAUSE: send PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
 //
 // Processing of packets received from the lower layers:
 // - decapsulate frames received from EtherMAC
-// - send up received frame to higher layer
+// - sends received frames to corresponding application, based on dsap.
+// - only servicetype=0 is implemented (connectionless)
+// - reception of non-EtherFrameWithLLC objects (e.g. EthernetIIFrame,
+//   EtherFrameWithSNAP) will cause a runtime error.
 //
 simple EtherLLC
+    parameters:
+        writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
+
     gates:
-        in: UpperLayer_in;   // higher layer
-        out: UpperLayer_out; // higher layer
-        in: LowerLayer_in;     // to Ethernet MAC
-        out: LowerLayer_out;   // to Ethernet MAC
+        in: upperLayerIn[];   // higher layer protocols or applications
+        out: upperLayerOut[]; // higher layer protocols or applications
+        in: lowerLayerIn;     // to Ethernet MAC
+        out: lowerLayerOut;   // to Ethernet MAC
 endsimple
 

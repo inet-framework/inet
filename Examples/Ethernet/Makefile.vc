@@ -94,10 +94,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= EtherTrafGen.obj EtherTrafSink.obj
+OBJS= EtherApp_m.obj EtherAppCli.obj EtherAppSrv.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= 
+GENERATEDHEADERS= EtherApp_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -121,11 +121,17 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIR_TARGETS)
 
-EtherTrafGen.obj: EtherTrafGen.cc
-	$(CXX) -c $(COPTS) /Tp EtherTrafGen.cc
+EtherApp_m.obj: EtherApp_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp EtherApp_m.cc
 
-EtherTrafSink.obj: EtherTrafSink.cc
-	$(CXX) -c $(COPTS) /Tp EtherTrafSink.cc
+EtherApp_m.cc EtherApp_m.h: EtherApp.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) EtherApp.msg
+
+EtherAppCli.obj: EtherAppCli.cc
+	$(CXX) -c $(COPTS) /Tp EtherAppCli.cc
+
+EtherAppSrv.obj: EtherAppSrv.cc
+	$(CXX) -c $(COPTS) /Tp EtherAppSrv.cc
 
 
 #doc: neddoc doxy
@@ -157,14 +163,17 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-EtherTrafGen.obj: EtherTrafGen.cc \
-  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/Ethernet.h \
-  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/EtherFrame_m.h \
-  d:\home\IPSuite-local/NetworkInterfaces/_802/_802Ctrl_m.h \
+EtherAppCli.obj: EtherAppCli.cc \
+  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   d:\home\IPSuite-local/NetworkInterfaces/Ethernet/utils.h \
+  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/Ethernet.h \
   d:\home\IPSuite-local/NetworkInterfaces/_802/MACAddress.h \
   d:\home\IPSuite-local/NetworkInterfaces/_802/MACAddress_m.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h
-EtherTrafSink.obj: EtherTrafSink.cc \
+EtherAppSrv.obj: EtherAppSrv.cc \
+  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   d:\home\IPSuite-local/NetworkInterfaces/Ethernet/utils.h \
+  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/Ethernet.h \
+  d:\home\IPSuite-local/NetworkInterfaces/_802/MACAddress.h \
+  d:\home\IPSuite-local/NetworkInterfaces/_802/MACAddress_m.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h

@@ -17,6 +17,7 @@
 */
 
 #include <string.h>
+#include <omnetpp.h>
 #include "utils.h"
 
 char *fgetline (FILE *fp)
@@ -34,4 +35,59 @@ char *fgetline (FILE *fp)
 
     return line;
 }
+
+//---
+
+MessageTracer MessageTracer::trc;
+unsigned int MessageId::nextId;
+unsigned int MessageId::nextTreeId;
+
+MessageTracer::MessageTracer()
+{
+    f = NULL;
+    lastId = NULL;
+}
+
+MessageTracer::~MessageTracer()
+{
+    if (f)
+        fclose(f);
+}
+
+void MessageTracer::open()
+{
+    f = fopen("msgtrace.out","w");
+}
+
+void MessageTracer::created(MessageId *m)
+{
+    if (!f) open();
+    if (lastId) fprintf(f,"C I:%d T:%d P:%d E:%ld %s\n", lastId->id, lastId->treeId, lastId->parentId,
+                        simulation.eventNumber(), simulation.contextModule()->fullPath());
+    lastId = m;
+}
+
+void MessageTracer::cloned(MessageId *m)
+{
+    if (!f) open();
+    fprintf(f,"L I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
+            simulation.eventNumber(), simulation.contextModule()->fullPath());
+}
+
+void MessageTracer::assigned(MessageId *m)
+{
+    if (!f) open();
+    fprintf(f,"A I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
+            simulation.eventNumber(), simulation.contextModule()->fullPath());
+    if (m==lastId) lastId = NULL;
+}
+
+void MessageTracer::deleted(MessageId *m)
+{
+    fprintf(f,"D I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
+            simulation.eventNumber(), simulation.contextModule()->fullPath());
+}
+
+
+
 

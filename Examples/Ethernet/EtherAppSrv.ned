@@ -16,10 +16,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 //
-// Simple traffic sink for the Ethernet model.
+// Server side of the EtherCli model -- generates EtherAppResp packets
+// with the number of bytes requested by the client in EtherAppReq.
 //
-simple EtherTrafSink
+simple EtherAppSrv
+    parameters:
+        writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
     gates:
         in: in;
+        out: out;
 endsimple

@@ -16,14 +16,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef _ETHERNETDEFS
-#define _ETHERNETDEFS
+#ifndef _ETHERNETDEFS_H
+#define _ETHERNETDEFS_H
 
 
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST          13
 #define GIGABIT_MAX_BURST_BYTES  8192  /* don't start new frame after 8192 or more bytes already transmitted */
-#define MAX_ETHERNET_DATA        1500
+#define MAX_ETHERNET_DATA        1500  /* including LLC, SNAP etc headers */
 #define MAX_ETHERNET_FRAME       1518  /* excludes preamble and SFD */
 #define MIN_ETHERNET_FRAME       64    /* excludes preamble and SFD */
 #define GIGABIT_MIN_FRAME_WITH_EXT 512 /* excludes preamble and SFD, but includes 448 byte extension */
@@ -39,8 +39,11 @@
 #define PREAMBLE_BYTES           7
 #define SFD_BYTES                1
 #define PAUSE_BITTIME            512 /* pause is in 512-bit-time units */
-#define ETHERFRAME_BYTES         (6+6+2+3+4) /* src(6)+dest(6)+length/type(2)+LLChdr(3)+FCS(4) */
 
+#define ETHER_MAC_FRAME_BYTES    (6+6+2+4) /* src(6)+dest(6)+length/type(2)+FCS(4) */
+#define ETHER_LLC_HEADER_LENGTH  (3) /* ssap(1)+dsap(1)+control(1) */
+#define ETHER_SNAP_HEADER_LENGTH (5) /* org(3)+local(2) */
+#define ETHER_PAUSE_COMMAND_BYTES (6) /* FIXME verify */
 
 #endif
 

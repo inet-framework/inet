@@ -18,33 +18,29 @@
 
 
 cplusplus {{
+#include "utils.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
+#include "EtherCtrl_m.h" // for enums
 }};
 
 class noncobject MACAddress;
+class noncobject MessageId;
+
+enum EtherMessageKind;
+enum EtherType;
+enum SAPCode;
 
 
 //
-// Message kind values used with the Ethernet model
+// Common base class for classes representing Ethernet II and 802.3 frame types,
+// containing their common header fields.
 //
-enum EtherMessageKind
-{
-    JAM_SIGNAL =   2000;   // jam signal on the Ethernet bus
-
-    ETH_FRAME =    2001;   // Ethernet frame
-    ETH_PAUSE =    2002;   // Ethernet PAUSE frame
-
-    ETHCTRL_DATA =      2003;  // data to/from higher layer
-    ETHCTRL_SENDPAUSE = 2006;  // higher layer wants MAC to send PAUSE frame
-};
-
-
+// This class should never be instantiated by the models, only specific
+// subclasses: EthernetIIFrame, EtherFrameWithLLC and EtherFrameWithSNAP.
 //
-// Ethernet frame.
-//
-// Header fields like source and destination MAC address are stored
-// in message members. Other fields include:
+// Source and destination MAC address are stored in data members.
+// Other fields include:
 //  - preamble: not stored (only contributes length)
 //  - length: stored in cMessage::length(), not stored explicitly
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
@@ -55,10 +51,53 @@ message EtherFrame
     fields:
         MACAddress dest;
         MACAddress src;
-        int control;
+        //MessageId id; -- uncomment for tracing frames
+};
+
+
+//
+// Ethernet II headers contain a 16-bit EtherType to identify
+// the encapsulated protocol.
+//
+// Header length: src(6)+dest(6)+etherType(2) = 14 bytes
+//
+message EthernetIIFrame extends EtherFrame
+{
+    fields:
+        int etherType;
+};
+
+
+//
+// Ethernet frame with 802.3 LLC header.
+//
+// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes
+//
+message EtherFrameWithLLC extends EtherFrame
+{
+    fields:
         int ssap;
         int dsap;
+        int control;
 };
+
+
+//
+// Ethernet frame with 802.3 LLC and SNAP headers.
+//
+// The fields ssap, dsap and control are not included in the class because
+// they are always set to fixed values: 0xAA, 0xAA, 0x03.
+//
+// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1)+
+// orgCode(3)+localCode(2) = 22 bytes
+//
+message EtherFrameWithSNAP extends EtherFrame
+{
+    fields:
+        long orgCode;  // SNAP organization code, 0 for IP and ARP
+        int localcode; // SNAP local code (stores EtherType for IP and ARP)
+};
+
 
 //
 // Ethernet frame used by the PAUSE protocol
@@ -68,4 +107,29 @@ message EtherPauseFrame extends EtherFrame
     fields:
         int pauseTime; // in 512 bit-time units
 }
+
+
+//
+// Ethernet model components (EtherMAC, EtherHub and EtherBus) send this
+// message at the beginning of the simulation, so that "auto"-valued "txrate"
+// and "duplex" parameters of EtherMAC can be initialized. The purpose is
+// similar to Ethernet Auto-Negotiation; however this is NOT meant to be
+// the model of that Ethernet feature. (For example, EtherBus also sends
+// an EtherAutoconfig message in the model, which obviously does not happen in
+// a real Ethernet.)
+//
+// - txrate: EtherMAC with non-auto txrate send configured txrate value;
+//   EtherBus sends 10Mbps (0 means not set). Lowest value will be chosen by
+//   all EtherMACs, or if no txrate was advertised (all were 0), 100Mbps is chosen.
+// - halfDuplex: EtherHub, EtherBus, plus EtherMAC with duplexEnabled=false setting
+//   send true. Duplex operation only chosen by a MAC if nobody vetoed it by sending
+//   halfDuplex=true.
+//
+message EtherAutoconfig
+{
+    fields:
+        double txrate = 0;
+        bool halfDuplex = false;
+};
+
 

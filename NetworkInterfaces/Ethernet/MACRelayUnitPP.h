@@ -25,9 +25,9 @@
 class EtherFrame;
 
 /**
- * An implementation of the MAC Relay Unit that assumes 
+ * An implementation of the MAC Relay Unit that assumes
  * one processor assigned to each incoming port, with
- * separate queues. 
+ * separate queues.
  */
 class MACRelayUnitPP : public MACRelayUnitBase
 {
@@ -45,12 +45,14 @@ class MACRelayUnitPP : public MACRelayUnitBase
     // Parameters controlling how the switch operates
     simtime_t processingTime;   // Time taken to switch and process a frame
     int bufferSize;             // Max size of the buffer
-    long highWatermark;
-    int pauseUnits;
-    
+    long highWatermark;         // if buffer goes above this level, send PAUSE frames
+    int pauseUnits;             // "units" field in PAUSE frames
+    simtime_t pauseInterval;    // min time between sending PAUSE frames
+
     // Other variables
     int bufferUsed;             // Amount of buffer used to store payload
     PortBuffer *buffer;         // Buffers containing Ethernet payloads
+    simtime_t pauseLastSent;
 
     // Parameters for statistics collection
     long numProcessedFrames;
@@ -63,19 +65,19 @@ class MACRelayUnitPP : public MACRelayUnitBase
     virtual void initialize();
 
     /**
-     * Calls handleIncomingFrame() for frames arrived from outside, 
+     * Calls handleIncomingFrame() for frames arrived from outside,
      * and processFrame() for self messages.
      */
     virtual void handleMessage(cMessage *msg);
-    
+
     /**
      * Writes statistics.
      */
     virtual void finish();
     //@}
-    
+
     /**
-     * Handle incoming Ethernet frame: if buffer full discard it, otherwise, insert 
+     * Handle incoming Ethernet frame: if buffer full discard it, otherwise, insert
      * it into buffer and start processing if processor is free.
      */
     void handleIncomingFrame(EtherFrame *msg);

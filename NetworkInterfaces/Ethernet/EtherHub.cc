@@ -21,7 +21,7 @@
 #endif
 
 #include <omnetpp.h>
-#include <vector>
+#include "EtherFrame_m.h"  // for EtherAutoconfig only
 #include "utils.h"
 
 
@@ -60,6 +60,16 @@ void EtherHub::initialize()
     ports = gate("in",0)->size();
     if (gate("out",0)->size()!=ports)
         error("the sizes of the in[] and out[] gate vectors must be the same");
+
+
+    // autoconfig: tell everyone that full duplex is not possible over shared media
+    EV << "Autoconfig: advertising that we only support half-duplex operation\n";
+    for (int i=0; i<ports; i++)
+    {
+        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf-halfduplex");
+        autoconf->setHalfDuplex(true);
+        send(autoconf,"out",i);
+    }
 }
 
 void EtherHub::handleMessage(cMessage *msg)
@@ -88,9 +98,13 @@ void EtherHub::handleMessage(cMessage *msg)
 
 void EtherHub::finish ()
 {
-    double t = simTime();
-    recordScalar("simulated time", t);
-    recordScalar("messages handled", numMessages);
-    if (t>0)
-        recordScalar("messages/sec", numMessages/t);
+    if (par("writeScalars").boolValue())
+    {
+        double t = simTime();
+        recordScalar("simulated time", t);
+        recordScalar("messages handled", numMessages);
+        if (t>0)
+            recordScalar("messages/sec", numMessages/t);
+    }
 }
+

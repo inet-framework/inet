@@ -51,7 +51,7 @@ simple MACRelayUnit
                                     // (if expires, entry is removed from the table)
 
     gates:
-        in:  LowerLayer_in[];
-        out: LowerLayer_out[];
+        in:  lowerLayerIn[];
+        out: lowerLayerOut[];
 endsimple
 

@@ -29,20 +29,12 @@
 
 
 
+// FIXME to ostream
 static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 {
     ev.printf("(%s)%s",msg->className(),msg->fullName());
     return ev;
 }
-
-/*FIXME remove
-static cEnvir& operator<< (cEnvir& ev, const MACAddress& addr)
-{
-    char buf[20];
-    ev << addr.toHexString(buf);
-    return ev;
-}
-*/
 
 static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
 {
@@ -93,32 +85,29 @@ void EtherMAC::initialize()
     promiscuous = par("promiscuous");
     maxQueueSize = par("maxQueueSize");
 
-    txrate = par("txrate");
-    if (txrate!=ETHERNET_TXRATE && txrate!=FAST_ETHERNET_TXRATE && txrate!=GIGABIT_ETHERNET_TXRATE)
+    disabled = !gate("physicalOut")->destinationGate()->isConnected();
+    if (disabled)
+        EV << "MAC not connected to a network, disabling.\n";
+    // Note: it is currently not supported to enable a disabled MAC at runtime.
+    // Difficulties: (1) autoconfig (2) how to pick up channel state (free, tx, collision etc)
+    WATCH(disabled);
+
+    // launch autoconfig process
+    bool performAutoconfig = true;
+    if (!disabled && performAutoconfig)
     {
-        error("nonstandard txrate, must be %ld, %ld or %ld bit/sec", ETHERNET_TXRATE,
-              FAST_ETHERNET_TXRATE, GIGABIT_ETHERNET_TXRATE);
+        startAutoconfig();
     }
-    bitTime = 1/(double)txrate;
-
-    duplexChannel = par("duplexChannel");
-
-    // Only if Gigabit Ethernet
-    carrierExtension = (txrate==GIGABIT_ETHERNET_TXRATE && !duplexChannel);
-    frameBursting = par("frameBursting");
-    if (frameBursting && txrate<GIGABIT_ETHERNET_TXRATE)
-        error("frameBursting can only be enabled with Gigabit Ethernet");
-
-    // set slot time
-    if (txrate==ETHERNET_TXRATE || txrate==FAST_ETHERNET_TXRATE)
-        slotTime = SLOT_TIME;
     else
-        slotTime = GIGABIT_SLOT_TIME;
+    {
+        autoconfigInProgress = false;
+        txrate = par("txrate");
+        duplexMode = par("duplexEnabled");
+        calculateParameters();
+    }
+    WATCH(autoconfigInProgress);
 
-    interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
-    jamDuration = 8*JAM_SIGNAL_BYTES*bitTime;
-    shortestFrameDuration = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
-
+    // initialize state info
     transmitState = TX_IDLE_STATE;
     receiveState = RX_IDLE_STATE;
     backoffs = 0;
@@ -139,14 +128,16 @@ void EtherMAC::initialize()
     totalCollisionTime = 0.0;
     totalSuccessfulRxTxTime = 0.0;
     numFramesSent = numFramesReceivedOK = numBytesSent = numBytesReceivedOK = 0;
-    numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = numDroppedQueueFull = 0;
+    numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
+    numFramesFromHL = numFramesFromHLDropped = 0;
     numPauseFramesRcvd = numPauseFramesSent = numCollisions = numBackoffs = 0;
 
     WATCH(numFramesSent);
     WATCH(numFramesReceivedOK);
     WATCH(numBytesSent);
     WATCH(numBytesReceivedOK);
-    WATCH(numDroppedQueueFull);
+    WATCH(numFramesFromHL);
+    WATCH(numFramesFromHLDropped);
     WATCH(numDroppedBitError);
     WATCH(numDroppedNotForUs);
     WATCH(numFramesPassedToHL);
@@ -159,7 +150,7 @@ void EtherMAC::initialize()
     numFramesReceivedOKVector.setName("framesReceivedOK");
     numBytesSentVector.setName("bytesSent");
     numBytesReceivedOKVector.setName("bytesReceivedOK");
-    numDroppedQueueFullVector.setName("framesDroppedQueueFull");
+    numFramesFromHLDroppedVector.setName("framesFromHLDropped");
     numDroppedBitErrorVector.setName("framesDroppedBitError");
     numDroppedNotForUsVector.setName("framesDroppedNotForUs");
     numFramesPassedToHLVector.setName("framesPassedToHL");
@@ -167,35 +158,175 @@ void EtherMAC::initialize()
     numPauseFramesSentVector.setName("pauseFramesSent");
     numCollisionsVector.setName("collisions");
     numBackoffsVector.setName("backoffs");
+}
 
+void EtherMAC::printParameters()
+{
     // Dump parameters
-    EV << "Parameters of (" << className() << ") " << fullPath() << "\n";
-    EV << "myaddress: " << myaddress << endl;
-    EV << "promiscuous: " << promiscuous << endl;
-    EV << "txrate: " << txrate << endl;
+    EV << "MAC address: " << myaddress << (promiscuous ? ", promiscuous mode" : "") << endl;
+    EV << "txrate: " << txrate << ", " << (duplexMode ? "duplex" : "half-duplex") << endl;
+#if 0
     EV << "bitTime: " << bitTime << endl;
     EV << "carrierExtension: " << carrierExtension << endl;
     EV << "frameBursting: " << frameBursting << endl;
     EV << "slotTime: " << slotTime << endl;
     EV << "interFrameGap: " << interFrameGap << endl;
     EV << "\n";
+#endif
 }
 
+void EtherMAC::calculateParameters()
+{
+    if (disabled)
+    {
+        bitTime = slotTime = interFrameGap = jamDuration = shortestFrameDuration = 0;
+        carrierExtension = frameBursting = false;
+        return;
+    }
+
+    // calculate other parameters from txrate and duplexMode
+    if (txrate!=ETHERNET_TXRATE && txrate!=FAST_ETHERNET_TXRATE && txrate!=GIGABIT_ETHERNET_TXRATE)
+    {
+        error("nonstandard txrate, must be %ld, %ld or %ld bit/sec", ETHERNET_TXRATE,
+              FAST_ETHERNET_TXRATE, GIGABIT_ETHERNET_TXRATE);
+    }
+    bitTime = 1/(double)txrate;
+
+    // Only if Gigabit Ethernet
+    carrierExtension = (txrate==GIGABIT_ETHERNET_TXRATE && !duplexMode);
+    frameBursting = (txrate==GIGABIT_ETHERNET_TXRATE);
+
+    // set slot time
+    if (txrate==ETHERNET_TXRATE || txrate==FAST_ETHERNET_TXRATE)
+        slotTime = SLOT_TIME;
+    else
+        slotTime = GIGABIT_SLOT_TIME;
+
+    interFrameGap = INTERFRAME_GAP_BITS/(double)txrate;
+    jamDuration = 8*JAM_SIGNAL_BYTES*bitTime;
+    shortestFrameDuration = carrierExtension ? GIGABIT_MIN_FRAME_WITH_EXT : MIN_ETHERNET_FRAME;
+}
+
+void EtherMAC::startAutoconfig()
+{
+    autoconfigInProgress = true;
+    lowestTxrateSuggested = 0;  // none suggested
+    duplexVetoed = false;
+
+    double initialTxrate = par("txrate");
+    bool duplexEnabled = par("duplexEnabled");
+    txrate = 0;
+    duplexMode = duplexEnabled;
+    if (!duplexEnabled || initialTxrate>0)
+    {
+        EV << "Autoconfig: advertising our settings: " << initialTxrate/1000000 << "Mb, "
+           << (duplexMode ? "duplex" : "half-duplex") << endl;
+
+        EtherAutoconfig *autoconf = new EtherAutoconfig("autoconf");
+        if (!duplexEnabled)
+            autoconf->setHalfDuplex(true);
+        if (initialTxrate>0)
+            autoconf->setTxrate(initialTxrate);
+        send(autoconf, "physicalOut");
+    }
+    scheduleAt(simTime()+AUTOCONFIG_PERIOD, new cMessage("EndAutoconfig",ENDAUTOCONFIG));
+}
+
+void EtherMAC::handleAutoconfigMessage(cMessage *msg)
+{
+    if (!msg->isSelfMessage())
+    {
+        if (msg->arrivalGate() == gate("upperLayerIn"))
+        {
+            // from upper layer
+            EV << "Received frame from upper layer during autoconfig period: " << msg << endl;
+            processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
+        }
+        else
+        {
+            // from network: must be autoconfig message
+            EV << "Message from network during autoconfig period: " << msg << endl;
+            EtherAutoconfig *autoconf = check_and_cast<EtherAutoconfig *>(msg);
+            double acTxrate = autoconf->getTxrate();
+
+            EV << "Autoconfig message: ";
+            if (acTxrate>0)
+                EV << acTxrate/1000000 << "Mb ";
+            if (autoconf->getHalfDuplex())
+                EV << "non-duplex";
+            EV << "\n";
+
+            if (acTxrate>0 && (acTxrate<lowestTxrateSuggested || lowestTxrateSuggested==0))
+                lowestTxrateSuggested = acTxrate;
+            if (!duplexVetoed && autoconf->getHalfDuplex())
+                duplexVetoed = true;
+            delete msg;
+        }
+    }
+    else
+    {
+        // self-message signals end of autoconfig period
+        EV << "Self-message during autoconfig period: " << msg << endl;
+
+        delete msg;
+        autoconfigInProgress = false;
+
+        double initialTxrate = par("txrate");
+        bool duplexEnabled = par("duplexEnabled");
+
+        txrate = (initialTxrate==0 && lowestTxrateSuggested==0) ? 100000000 /* 100 Mb */:
+                 (initialTxrate==0) ? lowestTxrateSuggested :
+                 (lowestTxrateSuggested==0) ? initialTxrate :
+                 (lowestTxrateSuggested<initialTxrate) ? lowestTxrateSuggested : initialTxrate;
+        duplexMode = (duplexEnabled && !duplexVetoed);
+        calculateParameters();
+
+        EV << "Parameters after autoconfig: txrate=" << txrate/1000000 << "Mb, " << (duplexMode ? "duplex" : "half-duplex") << endl;
+
+        if (ev.isGUI())
+        {
+            char modestr[64];
+            sprintf(modestr, "%dMb\n%s", int(txrate/1000000), (duplexMode ? "full duplex" : "half duplex"));
+            displayString().setTagArg("t",0,modestr);
+            displayString().setTagArg("t",1,"r");
+            sprintf(modestr, "%s: %dMb %s", fullName(), int(txrate/1000000), (duplexMode ? "duplex" : "half duplex"));
+            parentModule()->bubble(modestr);
+        }
+
+        if (!outputbuffer.empty())
+        {
+            EV << "Autoconfig period over, starting to send frames\n";
+            scheduleEndIFGPeriod();
+        }
+    }
+}
 
 void EtherMAC::handleMessage (cMessage *msg)
 {
+    if (disabled)
+    {
+        EV << "MAC is disabled -- dropping message " << msg << "\n";
+        delete msg;
+        return;
+    }
+    if (autoconfigInProgress)
+    {
+        handleAutoconfigMessage(msg);
+        return;
+    }
+
     printState();
     // some consistency check
-    if (!duplexChannel && transmitState==TRANSMITTING_STATE && receiveState!=RX_IDLE_STATE)
+    if (!duplexMode && transmitState==TRANSMITTING_STATE && receiveState!=RX_IDLE_STATE)
         error("Inconsistent state -- transmitting and receiving at the same time");
 
     if (!msg->isSelfMessage())
     {
         // either frame from upper layer, or frame/jam signal from the network
-        if (msg->arrivalGate() == gate("UpperLayer_in"))
+        if (msg->arrivalGate() == gate("upperLayerIn"))
         {
             EV << "Received frame from upper layer: " << msg << endl;
-            processFrameFromUpperLayer((EtherFrame *)msg);
+            processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         }
         else
         {
@@ -243,34 +374,61 @@ void EtherMAC::handleMessage (cMessage *msg)
 
 void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
+    // note: this method may be called during autoconfig period too, but we really
+    // shouldn't start transmission at that time, only queue up the frame.
+
     // check message kind
     if (frame->kind()!=ETH_FRAME && frame->kind()!=ETH_PAUSE)
         error("message with unexpected message kind %d arrived from higher layer", frame->kind());
 
-    if (frame->length()>=8*MAX_ETHERNET_FRAME)
+    // pause frames must be EtherPauseFrame AND kind==ETH_PAUSE
+    ASSERT((frame->kind()==ETH_PAUSE) == (dynamic_cast<EtherPauseFrame *>(frame)!=NULL));
+
+    if (frame->getDest().equals(myaddress))
+    {
+        char buf[20];
+        error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
+              frame->fullName(), frame->getDest().toHexString(buf));
+    }
+
+    if (frame->length()>8*MAX_ETHERNET_FRAME)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->length()/8, MAX_ETHERNET_FRAME);
 
     // must be ETH_FRAME (or ETH_PAUSE) from upper layer
-    if (outputbuffer.length() >= maxQueueSize)
+    bool isPauseFrame = (frame->kind()==ETH_PAUSE);
+    if (!isPauseFrame)
     {
-        EV << "Packet " << frame << " arrived from higher layers but queue full, dropping\n";
-        numDroppedQueueFull++;
-        numDroppedQueueFullVector.record(numDroppedQueueFull);
-        delete frame;
-        return;
+        numFramesFromHL++;
+
+        if (outputbuffer.length()>=maxQueueSize)
+        {
+            EV << "Packet " << frame << " arrived from higher layers but queue full, dropping\n";
+    	    numFramesFromHLDropped++;
+            numFramesFromHLDroppedVector.record(numFramesFromHLDropped);
+            delete frame;
+            return;
+        }
+
+        // fill in src address if not set
+        if (frame->getSrc().isEmpty())
+            frame->setSrc(myaddress);
+
+        // store frame and possibly begin transmitting
+        EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
+        outputbuffer.insert(frame);
+    }
+    else
+    {
+        EV << "PAUSE received from higher layer\n";
+
+        // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
+        if (!outputbuffer.empty())
+            outputbuffer.insertBefore(outputbuffer.tail(), frame);  // tail() frame is probably being transmitted
+        else
+            outputbuffer.insert(frame);
     }
 
-    // store frame and possibly begin transmitting
-    EV << "Packet " << frame << " arrived from higher layers, enqueueing\n";
-    if (frame->getSrc().isEmpty())
-    {
-        EV << "Filling in source address\n";
-        frame->setSrc(myaddress);
-    }
-
-    outputbuffer.insert(frame);
-
-    if ((duplexChannel || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
+    if (!autoconfigInProgress && (duplexMode || receiveState==RX_IDLE_STATE) && transmitState==TX_IDLE_STATE)
     {
         EV << "No incoming carrier signals detected, frame clear to send, wait IFG first\n";
         scheduleEndIFGPeriod();
@@ -285,7 +443,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
         error("message with unexpected message kind %d arrived from network", msg->kind());
 
     // detect cable length violation in half-duplex mode
-    if (!duplexChannel && simTime()-msg->sendingTime()>=shortestFrameDuration)
+    if (!duplexMode && simTime()-msg->sendingTime()>=shortestFrameDuration)
         error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
               "(%lgs corresponds to an approx. %lgm cable)",
               simTime()-msg->sendingTime(),
@@ -293,7 +451,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
 
     simtime_t endRxTime = simTime() + msg->length()*bitTime;
 
-    if (!duplexChannel && transmitState==TRANSMITTING_STATE)
+    if (!duplexMode && transmitState==TRANSMITTING_STATE)
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
         if (msg->kind()==JAM_SIGNAL)
@@ -407,7 +565,7 @@ void EtherMAC::handleEndIFGPeriod()
     if (outputbuffer.empty())
         error("End of IFG and no frame to transmit");
 
-    // End of IFG period, okay to transmit, if Rx idle OR duplexChannel
+    // End of IFG period, okay to transmit, if Rx idle OR duplexMode
     cMessage *frame = (cMessage *)outputbuffer.tail();
     EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
 
@@ -438,14 +596,17 @@ void EtherMAC::startFrameTransmission()
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->setLength(frame->length()+8*PREAMBLE_BYTES+8*SFD_BYTES);
-    send(frame, "LowerLayer_out");
+    send(frame, "physicalOut");
 
     // update burst variables
-    bytesSentInBurst = frame->length()/8;
-    framesSentInBurst++;
+    if (frameBursting)
+    {
+        bytesSentInBurst = frame->length()/8;
+        framesSentInBurst++;
+    }
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
-    if (!duplexChannel && receiveState!=RX_IDLE_STATE)
+    if (!duplexMode && receiveState!=RX_IDLE_STATE)
     {
         // During the IFG period the hardware cannot listen to the channel,
         // so it might happen that receptions have begun during the IFG,
@@ -474,7 +635,7 @@ void EtherMAC::startFrameTransmission()
         scheduleEndTxPeriod(frame);
 
         // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
-        if (!duplexChannel)
+        if (!duplexMode)
             channelBusySince = simTime();
     }
 }
@@ -482,7 +643,7 @@ void EtherMAC::startFrameTransmission()
 void EtherMAC::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully, without collision
-    if (transmitState!=TRANSMITTING_STATE || (!duplexChannel && receiveState!=RX_IDLE_STATE))
+    if (transmitState!=TRANSMITTING_STATE || (!duplexMode && receiveState!=RX_IDLE_STATE))
         error("End of transmission, and incorrect state detected");
 
     if (outputbuffer.empty())
@@ -503,7 +664,7 @@ void EtherMAC::handleEndTxPeriod()
     }
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
-    if (!duplexChannel)
+    if (!duplexMode)
     {
         simtime_t dt = simTime()-channelBusySince;
         totalSuccessfulRxTxTime += dt;
@@ -524,7 +685,7 @@ void EtherMAC::handleEndTxPeriod()
     }
 
     // Gigabit Ethernet: now decide if we transmit next frame right away (burst) or wait IFG
-    // FIXME this is not entirely correct, there must be IFG between burst frames too
+    // FIXME! this is not entirely correct, there must be IFG between burst frames too
     bool burstFrame=false;
     if (frameBursting && !outputbuffer.empty())
     {
@@ -611,7 +772,7 @@ void EtherMAC::sendJamSignal()
 {
     cMessage *jam = new cMessage("JAM_SIGNAL", JAM_SIGNAL);
     jam->setLength(8*JAM_SIGNAL_BYTES);
-    send(jam, "LowerLayer_out");
+    send(jam, "physicalOut");
 
     scheduleAt(simTime()+jamDuration, endJammingMsg);
     transmitState = JAMMING_STATE;
@@ -701,7 +862,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHLVector.record(numFramesPassedToHL);
 
     // pass up to upper layer
-    send(frame, "UpperLayer_out");
+    send(frame, "upperLayerOut");
 }
 
 void EtherMAC::processPauseCommand(int pauseUnits)
@@ -795,31 +956,37 @@ void EtherMAC::beginSendFrames()
 
 void EtherMAC::finish()
 {
-    double t = simTime();
-    simtime_t totalChannelIdleTime = t - totalSuccessfulRxTxTime - totalCollisionTime;
-    recordScalar("simulated time", t);
-    recordScalar("rx channel idle (%)", 100*totalChannelIdleTime/t);
-    recordScalar("rx channel utilization (%)", 100*totalSuccessfulRxTxTime/t);
-    recordScalar("rx channel collision (%)", 100*totalCollisionTime);
-    recordScalar("frames sent",    numFramesSent);
-    recordScalar("frames rcvd",    numFramesReceivedOK);
-    recordScalar("bytes sent",     numBytesSent);
-    recordScalar("bytes rcvd",     numBytesReceivedOK);
-    recordScalar("frames from LLC dropped (queue full)", numDroppedQueueFull);
-    recordScalar("frames dropped (bit error)",  numDroppedBitError);
-    recordScalar("frames dropped (not for us)", numDroppedNotForUs);
-    recordScalar("frames passed up to HL", numFramesPassedToHL);
-    recordScalar("PAUSE frames sent",  numPauseFramesSent);
-    recordScalar("PAUSE frames rcvd",  numPauseFramesRcvd);
-    recordScalar("collisions",     numCollisions);
-    recordScalar("backoffs",       numBackoffs);
-
-    if (t>0)
+    if (!disabled && par("writeScalars").boolValue())
     {
-        recordScalar("frames/sec sent", numFramesSent/t);
-        recordScalar("frames/sec rcvd", numFramesReceivedOK/t);
-        recordScalar("bits/sec sent",   8*numBytesSent/t);
-        recordScalar("bits/sec rcvd",   8*numBytesReceivedOK/t);
+        double t = simTime();
+        simtime_t totalChannelIdleTime = t - totalSuccessfulRxTxTime - totalCollisionTime;
+        recordScalar("simulated time", t);
+        recordScalar("txrate (Mb)", txrate/1000000);
+        recordScalar("full duplex", duplexMode);
+        recordScalar("rx channel idle (%)", 100*totalChannelIdleTime/t);
+        recordScalar("rx channel utilization (%)", 100*totalSuccessfulRxTxTime/t);
+        recordScalar("rx channel collision (%)", 100*totalCollisionTime);
+        recordScalar("frames sent",    numFramesSent);
+        recordScalar("frames rcvd",    numFramesReceivedOK);
+        recordScalar("bytes sent",     numBytesSent);
+        recordScalar("bytes rcvd",     numBytesReceivedOK);
+        recordScalar("frames from higher layer", numFramesFromHL);
+        recordScalar("frames from higher layer dropped (queue full)", numFramesFromHLDropped);
+        recordScalar("frames dropped (bit error)",  numDroppedBitError);
+        recordScalar("frames dropped (not for us)", numDroppedNotForUs);
+        recordScalar("frames passed up to HL", numFramesPassedToHL);
+        recordScalar("PAUSE frames sent",  numPauseFramesSent);
+        recordScalar("PAUSE frames rcvd",  numPauseFramesRcvd);
+        recordScalar("collisions",     numCollisions);
+        recordScalar("backoffs",       numBackoffs);
+
+        if (t>0)
+        {
+            recordScalar("frames/sec sent", numFramesSent/t);
+            recordScalar("frames/sec rcvd", numFramesReceivedOK/t);
+            recordScalar("bits/sec sent",   8*numBytesSent/t);
+            recordScalar("bits/sec rcvd",   8*numBytesReceivedOK/t);
+        }
     }
 }
 

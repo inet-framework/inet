@@ -25,12 +25,13 @@
 #include "EtherFrame_m.h"
 
 // Self-message kind values
-#define ENDIFG             0
-#define ENDRECEPTION       1
-#define ENDBACKOFF         2
-#define ENDTRANSMISSION    3
-#define ENDJAMMING         4
-#define ENDPAUSE           5
+#define ENDIFG             100
+#define ENDRECEPTION       101
+#define ENDBACKOFF         102
+#define ENDTRANSMISSION    103
+#define ENDJAMMING         104
+#define ENDPAUSE           105
+#define ENDAUTOCONFIG      106
 
 // MAC transmit state
 #define TX_IDLE_STATE      1
@@ -44,6 +45,9 @@
 #define RX_IDLE_STATE      1
 #define RECEIVING_STATE    2
 #define RX_COLLISION_STATE 3
+
+// Length of autoconfig period: should be larger than delays
+#define AUTOCONFIG_PERIOD  0.001  /* well more than 4096 bit times at 10Mb */
 
 
 /**
@@ -68,11 +72,12 @@ class EtherMAC : public cSimpleModule
     static unsigned int autoAddressCtr;
 
     // MAC operation modes and parameters
-    MACAddress myaddress;
-    bool promiscuous;
-    bool duplexChannel;     // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
-    bool carrierExtension;  // Determines whether carrier extension i.e. when it is Gigabit Ethernet
-    bool frameBursting;     // Determines whether frame bursting has been set
+    bool disabled;          // true if not connected to a network
+    MACAddress myaddress;   // own MAC address
+    bool promiscuous;       // if true, passes up all received frames
+    bool duplexMode;        // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
+    bool carrierExtension;  // carrier extension on/off (Gigabit Ethernet)
+    bool frameBursting;     // frame bursting on/off (Gigabit Ethernet)
     int maxQueueSize;       // max queue length
 
     // MAC transmission characteristics
@@ -82,6 +87,11 @@ class EtherMAC : public cSimpleModule
     double interFrameGap;   // IFG
     double jamDuration;     // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
     double shortestFrameDuration;  // precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+
+    // parameters for autoconfig
+    bool autoconfigInProgress; // true if autoconfig is currently ongoing
+    double lowestTxrateSuggested;
+    bool duplexVetoed;
 
     // States
     int  transmitState;     // State of the MAC unit transmitting
@@ -105,7 +115,8 @@ class EtherMAC : public cSimpleModule
     unsigned long numFramesReceivedOK;
     unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
     unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
-    unsigned long numDroppedQueueFull;
+    unsigned long numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
+    unsigned long numFramesFromHLDropped; // packets from higher layer dropped because queue was full
     unsigned long numDroppedBitError;  // frames dropped because of bit errors
     unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
     unsigned long numFramesPassedToHL; // frames passed to higher layer
@@ -117,7 +128,7 @@ class EtherMAC : public cSimpleModule
     cOutVector numFramesReceivedOKVector;
     cOutVector numBytesSentVector;
     cOutVector numBytesReceivedOKVector;
-    cOutVector numDroppedQueueFullVector;
+    cOutVector numFramesFromHLDroppedVector;
     cOutVector numDroppedBitErrorVector;
     cOutVector numDroppedNotForUsVector;
     cOutVector numFramesPassedToHLVector;
@@ -136,6 +147,13 @@ class EtherMAC : public cSimpleModule
     void handleEndJammingPeriod();
     void handleEndPausePeriod();
 
+    // setup, autoconfig
+    void startAutoconfig();
+    void handleAutoconfigMessage(cMessage *msg);
+    void printState();
+    void printParameters();
+    void calculateParameters();
+
     // helpers
     void scheduleEndIFGPeriod();
     void scheduleEndTxPeriod(cMessage*);
@@ -143,7 +161,6 @@ class EtherMAC : public cSimpleModule
     void scheduleEndPausePeriod(int pauseUnits);
     void sendJamSignal();
     void handleRetransmission();
-    void printState();
     void beginSendFrames();
     void frameReceptionComplete(EtherFrame *frame);
     void processReceivedDataFrame(EtherFrame *frame);

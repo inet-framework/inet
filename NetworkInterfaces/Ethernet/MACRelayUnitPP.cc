@@ -34,15 +34,8 @@ Define_Module( MACRelayUnitPP );
 
 
 
-/*FIXME remove
-static cEnvir& operator<< (cEnvir& ev, const MACAddress& addr)
-{
-    char buf[20];
-    EV << addr.toHexString(buf);
-    return ev;
-}
-*/
 
+// FIXME to ostream
 static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 {
     ev.printf("(%s)%s",msg->className(),msg->fullName());
@@ -64,6 +57,13 @@ void MACRelayUnitPP::initialize()
     bufferSize = par("bufferSize");
     highWatermark = par("highWatermark");
     pauseUnits = par("pauseUnits");
+
+    // 1 pause unit is 512 bit times; we assume 100Mb MACs here.
+    // We send a pause again when previous one is about to expire.
+    pauseInterval = pauseUnits*512.0/100000.0;
+
+    pauseLastSent = 0;
+    WATCH(pauseLastSent);
 
     bufferUsed = 0;
     WATCH(bufferUsed);
@@ -120,11 +120,12 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
         bufferUsed += length;
 
         // send PAUSE if above watermark
-        if (pauseUnits>0 && highWatermark>0 && bufferUsed >= highWatermark)
+        if (pauseUnits>0 && highWatermark>0 && bufferUsed>=highWatermark && pauseLastSent-simTime()>pauseInterval)
         {
             // send PAUSE on all ports
             for (int i=0; i<numPorts; i++)
                 sendPauseFrame(i, pauseUnits);
+            pauseLastSent = simTime();
         }
 
         if (buffer[inputport].cpuBusy)
@@ -186,7 +187,10 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
 
 void MACRelayUnitPP::finish()
 {
-    recordScalar("processed frames", numProcessedFrames);
-    recordScalar("dropped frames", numDroppedFrames);
+    if (par("writeScalars").boolValue())
+    {
+        recordScalar("processed frames", numProcessedFrames);
+        recordScalar("dropped frames", numDroppedFrames);
+    }
 }
 

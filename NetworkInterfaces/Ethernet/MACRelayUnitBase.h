@@ -30,8 +30,8 @@ class EtherFrame;
 
 /**
  * Implements base switching functionality of Ethernet switches. Note that
- * neither activity() nor handleMessage() is redefined here -- active 
- * behavior (incl. queueing and performance aspects) must be addressed 
+ * neither activity() nor handleMessage() is redefined here -- active
+ * behavior (incl. queueing and performance aspects) must be addressed
  * in subclasses.
  */
 class MACRelayUnitBase : public cSimpleModule
@@ -48,12 +48,11 @@ class MACRelayUnitBase : public cSimpleModule
 
     struct MAC_compare
     {
-        bool operator()(const MACAddress& u1, const MACAddress& u2) const 
+        bool operator()(const MACAddress& u1, const MACAddress& u2) const
             {return u1.compareTo(u2) < 0;}
     };
 
     typedef std::map<MACAddress, AddressEntry, MAC_compare> AddressTable;
-
 
     // Parameters controlling how the switch operates
     int numPorts;               // Number of ports of the switch
@@ -63,7 +62,7 @@ class MACRelayUnitBase : public cSimpleModule
     AddressTable addresstable;  // Address Lookup Table
 
     int seqNum;                 // counter for PAUSE frames
-      
+
   protected:
     /**
      * Read parameters parameters.
@@ -71,7 +70,7 @@ class MACRelayUnitBase : public cSimpleModule
     void initialize();
 
     /**
-     * Updates address table with source address, determines output port 
+     * Updates address table with source address, determines output port
      * and sends out (or broadcasts) frame on ports. Includes calls to
      * updateTableWithAddress() and getPortForAddress().
      *
@@ -90,7 +89,7 @@ class MACRelayUnitBase : public cSimpleModule
      */
     void readAddressTable(const char* fileName);
 
-    /** 
+    /**
      * Enters address into table.
      */
     void updateTableWithAddress(MACAddress& address, int portno);
@@ -116,7 +115,7 @@ class MACRelayUnitBase : public cSimpleModule
     void removeOldestTableEntry();
 
     /**
-     * Utility function (for use by subclasses) to send a flow control 
+     * Utility function (for use by subclasses) to send a flow control
      * PAUSE frame on the given port.
      */
     void sendPauseFrame(int portno, int pauseUnits);

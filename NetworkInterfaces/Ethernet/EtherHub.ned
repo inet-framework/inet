@@ -32,6 +32,9 @@
 // end (or abortion) of transmission.
 //
 simple EtherHub
+    parameters:
+        writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
+
     gates:
         in: in[];    // to stations; each in[k], out[k] pair represents a port
         out: out[];  // to stations; each in[k], out[k] pair represents a port

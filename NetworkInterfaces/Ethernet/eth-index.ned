@@ -28,10 +28,7 @@
 // as a bus (EtherBus, for modelling coaxial cable) and a hub (EtherHub) model.
 // A switch model (EtherSwitch) is also provided.
 //
-// A few useful starting points for browsing the documentation:
-//  - LANNetwork demonstrates switch, hub and bus
-//  - see the EtherMAC, EtherLLC module types, the EtherFrame message type
-//    and the MACAddress class
+// A few useful topics:
 //  - <a href="ether-overview.html">model overview</a>
 //  - <a href="standards.html">implemented standards</a>
 //  - <a href="llc-app.html">communication between LLC and higher layers</a>
@@ -39,35 +36,87 @@
 //  - <a href="physical.html">physical layer messaging</a>
 //  - click <i>selected topics</i> in the navigation frame to see more topics
 //
+// If you can't wait to see the model, start here:
+//  - the MixedLAN model contains hosts, switch, hub and bus;
+//  - the <a href="largenet.html"><nohtml>LargeNet</nohtml> model</a>
+//    contains about 8000 computers and 900 switches and hubs, and mixes
+//    all kinds of Ethernet technologies;
+//  - EtherHost is a sample node with an Ethernet NIC;
+//  - EtherSwitch, EtherBus, EtherHub model switching hub, repeating hub and
+//    the old coxial cable;
+//  - basic compnents of the model: EtherMAC, EtherLLC/EtherEncap module types,
+//    MACRelayUnit (MACRelayUnitNP and MACRelayUnitPP), EtherFrame message type,
+//    MACAddress class
+//
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation</a>
 //
 //
 //
-// @page ether-overview.html, Overview
+// @page ether-overview.html, Ethernet Model Overview
 //
-// <h3>Data packets</h3>
+// <h3>Data packets and Ethernet frames</h3>
 //
 // Ethernet frames carry data packets as encapsulated cMessage objects.
-// Data packets can be of any message type (cMessage or anything subclassed from that).
+// Data packets can be of any message type (cMessage or cMessage subclass).
 //
 // The model encapsulates data packets in Ethernet frames using the <tt>encapsulate()</tt>
 // method of cMessage. Encapsulate() updates the length of the Ethernet frame too,
 // so the model doesn't have to take care of that.
 //
-// <h3>MAC and LLC</h3>
+// The models supports various Ethernet frame types: Ethernet II, 803.2 with
+// LLC header, and 803.3 with LLC and SNAP headers. The corresponding classes are:
+// EthernetIIFrame, EtherFrameWithLLC and EtherFrameWithSNAP. They all class
+// from EtherFrame which only represents the basic MAC frame with source and
+// destination addresses. EtherMAC only deals with EtherFrames, and does not
+// care about the specific subclass.
 //
-// MAC and LLC are implemented in two different modules (EtherMAC and EtherLLC)
-// because encapsulation/decapsulation functionality (done in EtherLLC)
-// is not always needed (e.g. switches need only MAC). In switches,
-// EtherMAC MAC is used with MACRelayUnit.
 //
-// <h3>LLC and higher layers</h3>
+// <h3>Autoconfiguration</h3>
+//
+// In order to facilitate building large models, EtherMAC and other Ethernet model
+// components provide some degree of auto-configuration. Specifically, transmission
+// rate and half duplex/full duplex mode can be chosen automatically so that
+// connecting Ethernet MACs have matching settings. The purpose is similar to
+// Ethernet Auto-Negotiation; however the mechanism is NOT a model of
+// Auto-Negotiation (e.g. EtherBus and EtherHub also actively participate,
+// which obviously does not happen in a real Ethernet.)
+//
+// What it does:
+//  - the txrate parameters of EtherMAC represent the highest speed supported
+//    by that station, or 0 for full autoconfiguration. Autoconfig will choose
+//    the largest common denominator (the speed of the slowest station in the
+//    collision domain) for all stations. If all stations are set to auto
+//    txrate, 100Mb will be chosen, or 10Mb if there's a bus (EtherBus) in
+//    the collision domain.
+//  - the duplexEnabled parameter of EtherMAC means whether the station supports
+//    duplex operation. However, duplex operation will actually be chosen only
+//    if it's a DTE-to-DTE direct connection (there's no shared media like
+//    EtherHub or EtherBus) and both sides have duplexEnabled=true set.
+//
+// How it works:
+//
+// Auto-configuration occurs at the beginning of the simulation, by
+// Ethernet model components (EtherMAC, EtherHub and EtherBus) exchanging
+// EtherAutoconfig messages with each other. See description of EtherAutoconfig
+// for more info.
+//
+// <h3>MAC and higher layers</h3>
+//
+// MAC and LLC are implemented as separate modules (EtherMAC and
+// EtherLLC/EtherEncap) because encapsulation/decapsulation functionality
+// is not always needed. (Switches don't do encapsulation/decapsulation.)
+// In switches, EtherMAC is used with MACRelayUnit.
+//
+//
+// <h3>EtherLLC and higher layers</h3>
 //
 // The EtherLLC module can serve several applications (higher layer protocols),
 // and dispatch data to them. Higher layers are identified by DSAP.
+// See <a href="appreg.html">Application registration</a> for more info.
 //
-//
+// EtherEncap doesn't have the functionality to dispatch to different
+// higher layers because in practice it'll always be used with IP.
 //
 // @page standards.html, Standards
 //
@@ -94,19 +143,19 @@
 // (send PAUSE frame) -- see EtherLLC for a more complete list.
 //
 // The arguments to the command are NOT inside the data packet but
-// in a "control" data structure (EtherCtrl class) kept
-// by the higher layer module, and the packet refers back to it via
-// the <b><tt>contextPointer()</tt></b> of cMessage.
+// in a "control info" data structure of class EtherCtrl, attached to
+// the packet. See controlInfo() method of cMessage (OMNeT++ 3.0).
 //
 // For example, to send a packet to a given MAC address and protocol
 // identifier, the application sets the data packet's message kind
 // to ETH_DATA ("please send this data packet" command),
 // fills in the EtherCtrl structure with the destination MAC address and
-// the protocol identifier, sets the data packet's context pointer
-// to the EtherCtrl structure, then sends the packet to EtherLLC.
+// the protocol identifier, adds the control info to the message, then sends
+// the packet to EtherLLC.
 //
-// When the command doesn't involve a data packet (e.g. ETHCTRL_(DE)REGISTER_DSAP,
-// ETHCTRL_SENDPAUSE), a dummy packet (empty cMessage) is used.
+// When the command doesn't involve a data packet (e.g.
+// ETHCTRL_(DE)REGISTER_DSAP, ETHCTRL_SENDPAUSE), a dummy packet
+// (empty cMessage) is used.
 //
 // <h3>Rationale</h3>
 //
@@ -126,30 +175,6 @@
 // It may also appear to be more intuitive in Tkenv because one can observe
 // data packets travelling between the higher layer and Ethernet
 // modules -- as opposed to "interface" packets.
-//
-// The main disadvantage of the contextPointer() approach is
-// that special care has to be taken not to overwrite the contents of
-// the control structure prematurely, i.e. before Ethernet had a chance to
-// look at it. However, in most cases the control structure doesn't
-// need to be changed after creation for the following reasons:
-//
-// If we talk about an application session directly talking to the Ethernet
-// layer, that application usually has a session peer which it talks to
-// (and the protocol identifier is constant), so the contents
-// of the control structure would stay the same for all ETH_DATA commands.
-// If several the protocol identifiers or several peers are in use,
-// it is usually not inpractical to keep as many control structures
-// within the application.
-//
-// If we talk about higher layer protocols: in the TCP/IP suite the
-// destination is usually specified as an IP address in the first place,
-// and it is mapped to MAC address in the ARP cache. For our purpose, the model of
-// the ARP cache might just be programmed so that the entries in the cache
-// are represented by (contain) Ethernet control structures, and so the
-// data packets sent from IP to Ethernet may safely point back to the control
-// structures in the ARP cache. Care needs to be taken when deleting control
-// structures.
-//
 //
 // @page appreg.html, Application registration
 //
@@ -217,4 +242,73 @@
 // http://www.computer.org/proceedings/lcn/0309/03090160abs.htm,
 // http://www.nwfusion.com/netresources/0913flow.html, and
 // http://www.nwfusion.com/netresources/0913flow2.html.
+//
+
+
+//
+// @page largenet.html, LargeNet model description
+//
+// The LargeNet model demonstrates how one can put together models of large
+// LANs with little effort, making use of MAC auto-configuration.
+//
+// LargeNet models a large Ethernet campus backbone. As configured in the
+// default omnetpp.ini, it contains altogether about 8000 computers
+// and 900 switches and hubs. This results in about 165MB process size
+// on my (32-bit) linux box when I run the simulation.
+// The model mixes all kinds of Ethernet technology: Gigabit Ethernet,
+// 100Mb full duplex, 100Mb half duplex, 10Mb UTP, 10Mb bus ("thin Ethernet"),
+// switched hubs, repeating hubs.
+//
+// The topology is in LargeNet.ned, and it looks like this: there's chain
+// of n=15 large "backbone" switches (switchBB[]) as well as four more
+// large switches (switchA, switchB, switchC, switchD) connected to
+// somewhere the middle of the backbone (switchBB[4]). These 15+4 switches
+// make up the backbone; the n=15 number is configurable in omnetpp.ini.
+//
+// Then there're several smaller LANs hanging off each backbone switch.
+// There're three types of LANs: small, medium and large (represented by
+// compound module types SmallLAN, MediumLAN, LargeLAN). A small LAN
+// consists of a few computers on a hub (100Mb half duplex); a medium
+// LAN consists of a smaller switch with a hub on one of its port
+// (and computers on both); the large one also has a switch and a hub,
+// plus an Ethernet bus hanging of one port of the hub (there's still hubs
+// around with one BNC connector besides the UTP ones).
+// By default there're 5..15 LANs of each type hanging off each backbone
+// switch. (These numbers are also omnetpp.ini parameters like the length
+// of the backbone.)
+//
+// The application model which generates load on the simulated LAN is
+// simple yet powerful. It can be used as a rough model for any
+// request-response based protocol such as SMB/CIFS (the Windows file
+// sharing protocol), HTTP, or a database client-server protocol.
+//
+// Every computer runs a client application (EtherAppCli) which connects
+// to one of the servers. There's one server attached to switches A, B,
+// C and D each: serverA, serverB, serverC and serverD -- server selection
+// is configured in omnetpp.ini). The servers run EtherAppSrv.
+// Clients periodically send a request to the server, and the request
+// packet contains how many bytes the client wants the server to send back
+// (this can mean one or more Ethernet frames, depending on the byte count).
+//  Currently the request and reply lengths are configured in omnetpp.ini
+// as intuniform(50,1400) and truncnormal(5000,5000).
+//
+// The volume of the traffic can most easily be controlled with the
+// time period between sending requests; this is currently
+// set in omnetpp.ini to exponential(0.50) (that is, average 2
+// requests per second). This already causes frames to be dropped
+// in some of the backbone switches, so the network is a bit
+// overloaded with the current settings.
+//
+// The model generates extensive statistics. All MACs (and most other
+// modules too) write statistics into omnetpp.sca at the end
+// of the simulation: number of frames sent, received, dropped, etc.
+// These are only basic statistics, however it still makes the
+// omnetpp.sca file to be about 28 Meg in size. You can use the Scalars
+// program introduced in OMNeT++ 3.0a4 to analyse this file.
+// (If the file size is too big, writing statistics can be disabled
+// per module, with the "writeScalars" bool parameter. The model
+// can also record output vectors (omnetpp.sca), but this is
+// currently disabled in omnetpp.ini because the generated file
+// can easily reach gigabyte sizes.
+//
 //
