@@ -87,9 +87,11 @@ void IPTrafGen::initialize(int stage)
     IPTrafSink::initialize();
 
     protocol = par("protocol");
-    msgLength = par("message_length");
+    msgLength = par("packetLength");
+    numPackets = par("numPackets");
+    simtime_t startTime = par("startTime");
 
-    const char *destAddrs = par("dest_addresses");
+    const char *destAddrs = par("destAddresses");
     StringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
@@ -104,7 +106,7 @@ void IPTrafGen::initialize(int stage)
         return;
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("message_freq"), timer);
+    scheduleAt(startTime, timer);
 }
 
 IPAddress IPTrafGen::chooseDestAddr()
@@ -140,7 +142,9 @@ void IPTrafGen::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("message_freq"), msg);
+
+        if (numSent<numPackets)
+            scheduleAt(simTime()+(double)par("packetInterval"), msg);
     }
     else
     {

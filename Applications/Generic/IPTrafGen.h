@@ -55,6 +55,7 @@ class IPTrafGen : public IPTrafSink
     std::string nodeName;
     int protocol;
     int msgLength;
+    int numPackets;
     std::vector<IPAddress> destAddresses;
 
     static int counter; // counter for generating a global number for each packet

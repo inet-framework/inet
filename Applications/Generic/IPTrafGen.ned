@@ -31,21 +31,23 @@ endsimple
 //
 // Sends IP datagrams to the given \IP address at the given interval.
 // The interval can be a constant or a random value (e.g. exponential(1)).
-// If the dest_addresses parameter contains more than one address, one
+// If the destAddresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
 // dotted decimal notation, or with the module name. (The IPAddressResolver
 // class is used to resolve the address.) To disable the model, set
-// dest_addresses to "".
+// destAddresses to "".
 //
 // The peer can be IPTrafSink or another IPTrafGen (it handles received packets
 // exactly like IPTrafSink).
 //
 simple IPTrafGen
     parameters:
-        protocol: numeric const,
-        message_length : numeric, // (bits)
-        message_freq : numeric, // may be a random value, e.g. exponential(1)
-        dest_addresses: string; // list of \IP addresses, separated by spaces
+        startTime: numeric, // the time application generates first packet
+        packetInterval : numeric, // may be a random value, e.g. exponential(1)
+        numPackets: numeric const, // max number of packets to generate
+        protocol: numeric const, // value for IPDatagram protocol field
+        packetLength : numeric, // (bits)
+        destAddresses: string; // list of \IP addresses, separated by spaces
     gates:
         in: from_ip;
         out: to_ip;
