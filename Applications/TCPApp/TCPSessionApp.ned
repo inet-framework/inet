@@ -21,7 +21,7 @@
 // Single-connection TCP application: it opens a connection, sends
 // the given number of bytes, and closes. Sending may be one-off,
 // or may be controlled by a "script" which is a series of
-// (time, number of bytes) pairs.
+// (time, number of bytes) pairs. May act either as client or as server.
 //
 // <b>Opening the connection</b>
 //
@@ -33,7 +33,8 @@
 // as local port, set the port parameter to -1.
 //
 // Even when in server mode (active=false), the application will only
-// serve one incoming connection.
+// serve one incoming connection. Further connect attempts will be
+// refused by TCP (it will send RST) for lack of LISTENing connections.
 //
 // The time of opening the connection is in the tOpen parameter.
 //
