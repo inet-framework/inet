@@ -52,7 +52,6 @@ class UDPProcessing : public cSimpleModule
         int size;
         int *port;  // array: port[index]=local_port
     };
-    // FIXME change to std::map<int,int>
     UDPApplicationTable applTable;
 
     int numSent;
