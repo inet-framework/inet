@@ -116,6 +116,7 @@ void NewRouteTester::findTED()
  
 }
 
+//FIXME should be replaced by call to submodule() or submoduleByRelativePath()
 cObject* NewRouteTester::findObject(char* modName)
 {
 
