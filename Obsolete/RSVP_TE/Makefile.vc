@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= RSVPPacket_m.obj RSVPPathMsg_m.obj RSVPResvMsg_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
+OBJS= RSVPPacket_m.obj RSVPPathMsg_m.obj RSVPResvMsg_m.obj OspfTe.obj RSVP.obj RSVPApp.obj TED.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= RSVPPacket_m.h RSVPPathMsg_m.h RSVPResvMsg_m.h
@@ -113,9 +113,6 @@ OspfTe.obj: OspfTe.cc
 
 RSVP.obj: RSVP.cc
 	$(CXX) -c $(COPTS) /Tp RSVP.cc
-
-rsvp_message.obj: rsvp_message.cc
-	$(CXX) -c $(COPTS) /Tp rsvp_message.cc
 
 RSVPApp.obj: RSVPApp.cc
 	$(CXX) -c $(COPTS) /Tp RSVPApp.cc
@@ -178,17 +175,16 @@ RSVP.obj: RSVP.cc \
   ../IPv4/IPAddressResolver.h \
   ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTable.h \
-  intserv.h \
-  rsvp_message.h \
+  RSVPPathMsg.h \
+  RSVPResvMsg.h \
   TED.h \
   OspfTe.h \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
-  RSVPPacket.h \
-  RSVPPathMsg.h \
-  RSVPResvMsg.h \
-  RSVPPacket_m.h \
   RSVPPathMsg_m.h \
+  intserv.h \
+  RSVPPacket.h \
+  RSVPPacket_m.h \
   RSVPResvMsg_m.h \
   ospf_type.h \
   ../../Base/ModuleAccess.h \
@@ -198,17 +194,6 @@ RSVP.obj: RSVP.cc \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
   ../IPv4/IPDatagram_m.h
-rsvp_message.obj: rsvp_message.cc \
-  rsvp_message.h \
-  intserv.h \
-  ../IPv4/IPAddress.h \
-  RSVPPacket.h \
-  RSVPPathMsg.h \
-  RSVPResvMsg.h \
-  ../../Base/ipsuite_defs.h \
-  RSVPPacket_m.h \
-  RSVPPathMsg_m.h \
-  RSVPResvMsg_m.h
 RSVPApp.obj: RSVPApp.cc \
   RSVPApp.h \
   ../IPv4/RoutingTable.h \
@@ -216,7 +201,8 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/MPLSModule.h \
   ../IPv4/IPAddressResolver.h \
   ../../Util/StringTokenizer.h \
-  rsvp_message.h \
+  RSVPPathMsg.h \
+  RSVPResvMsg.h \
   RSVP.h \
   TED.h \
   OspfTe.h \
@@ -224,16 +210,14 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/LIBtable.h \
   ../MPLS/LIBTableAccess.h \
   ../MPLS/MPLSAccess.h \
-  intserv.h \
-  ../IPv4/IPAddress.h \
-  RSVPPacket.h \
-  RSVPPathMsg.h \
-  RSVPResvMsg.h \
-  ../../Base/ipsuite_defs.h \
-  RSVPPacket_m.h \
   RSVPPathMsg_m.h \
+  intserv.h \
+  RSVPPacket.h \
+  RSVPPacket_m.h \
   RSVPResvMsg_m.h \
   ospf_type.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../MPLS/ConstType.h \

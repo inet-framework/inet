@@ -19,8 +19,8 @@
 #include <vector>
 #include <omnetpp.h>
 #include "RoutingTable.h"
-#include "intserv.h"
-#include "rsvp_message.h"
+#include "RSVPPathMsg.h"
+#include "RSVPResvMsg.h"
 #include "TED.h"
 #include "OspfTe.h"
 #include "LIBTableAccess.h"

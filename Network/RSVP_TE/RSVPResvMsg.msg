@@ -52,3 +52,45 @@ message RSVPResvMsg extends RSVPPacket
         FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
 }
 
+
+//
+// RESV TEAR packet
+//
+// <code>
+// <ResvTear Message> ::= <Common Header> [<INTEGRITY>]
+//                        <SESSION> <RSVP_HOP>
+//                        [ <SCOPE> ] <STYLE>
+//                        <flow descriptor list>
+// </code>
+//
+message RSVPResvTear extends RSVPPacket
+{
+    properties:
+        customize=true;
+    fields:
+        RsvpHopObj_t rsvp_hop;
+        FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
+};
+
+//
+// RESV ERROR packet
+//
+// <code>
+//    <ResvErr Message> ::= <Common Header> [ <INTEGRITY> ]
+//                          <SESSION>  <RSVP_HOP>
+//                          <ERROR_SPEC>  [ <SCOPE> ]
+//                          [ <POLICY_DATA> ...]
+//                          <STYLE> [ <error flow descriptor>
+// </code>
+//
+message RSVPResvError extends RSVPPacket
+{
+    properties:
+        customize=true;
+    fields:
+        RsvpHopObj_t rsvp_hop;
+        int errorNode;
+        int errorCode;
+};
+
+
