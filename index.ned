@@ -21,27 +21,33 @@
 // @titlepage
 //
 // <center><h1>IPSuite with MPLS</h1></center>
-// <center><h3>2003-09-30</h3></center>
+// <center><h3>2004-08-12</h3></center>
 //
-// IPSuite is an OMNeT++ model suite for the simulation of 
-// <nohtml>TCP/IP</nohtml> protocols and networks. It has been implemented 
-// at the Institut fuer Telematik, University Karlsruhe
-// by Ulrich Kaage, Klaus Wehrle, Jochen Reber, Verena Kahmann, Volker Boehm
-// and others; see the CREDITS file for a complete list.
+// <nohtml>IPSuite contains IPv4, TCP, UDP models and support for QoS.
+// It also includes an MPLS model with RSVP-TE and LDP signalling.
+// Link-layer models are PPP and Ethernet.</nohtml>
 //
-// The MPLS model builds on top of the IPSuite, and implements the MPLS, LDP, 
-// and <nohtml>RSVP-TE</nohtml> protocols. It also implements the routing 
-// algorithm used in OSPF-TE. Its uses bandwidth as the major resource 
+// The original IPSuite was originally written by Klaus Wehrle, Jochen Reber,
+// Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage and others at
+// the University of Karlsruhe during 2000-2001. The current codebase is a
+// rewrite by Andras Varga, started in 2003 and still in progress.
+//
+// The MPLS model builds on top of the IPSuite, and implements the MPLS, LDP,
+// and <nohtml>RSVP-TE</nohtml> protocols. It also implements the routing
+// algorithm used in OSPF-TE. Its uses bandwidth as the major resource
 // constraint. The software has been built around 10,000 LOCs.
-// The model has been written by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au) 
-// and other students at the University of Technology, Sydney 
+// The model has been written by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au)
+// and other students at the University of Technology, Sydney
 // under supervision of Dr Robin Brown.
-// Project home page: 
-// <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" target="_top">
-// http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/</a>
+// See <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/"
+// target="_top">project page</a> (obsolete).
+//
+// For up-to-date info, visit the current
+// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPv4Suite"
+// target="_top">IPSuite home page</a>.
 //
 // A few useful starting points for browsing IPSuite:
-//  - the <a href="full-usage-diagram.html">Usage Diagram</a> 
+//  - the <a href="full-usage-diagram.html">Usage Diagram</a>
 //    includes all modules and networks
 //  - example models such as ClientServerNetwork or McNetwork2
 //  - hosts and routers: StandardHost2, Router
@@ -51,7 +57,7 @@
 //  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>
-// 
+//
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>
 //
