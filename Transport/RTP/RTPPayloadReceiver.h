@@ -35,62 +35,62 @@ processing incoming rtp data packets.
 */
 class RTPPayloadReceiver : public cSimpleModule {
 
-	Module_Class_Members(RTPPayloadReceiver, cSimpleModule, 0);
+    Module_Class_Members(RTPPayloadReceiver, cSimpleModule, 0);
 
-	/*!
-	Destructor. Disposes the queue object and closes the output file.
-	*/
-	virtual ~RTPPayloadReceiver();
+    /*!
+    Destructor. Disposes the queue object and closes the output file.
+    */
+    virtual ~RTPPayloadReceiver();
 
-	/*!
-	Initializes the receiver module, opens the output file and creates
-	a queue for incoming packets.
-	Subclasses must overwrite it (but should call this method too)
-	to set the payload type of the data the module receives.
-	*/
-	virtual void initialize();
+    /*!
+    Initializes the receiver module, opens the output file and creates
+    a queue for incoming packets.
+    Subclasses must overwrite it (but should call this method too)
+    to set the payload type of the data the module receives.
+    */
+    virtual void initialize();
 
-	/*!
-	Method for handling incoming packets. At the moment only RTPInnerPackets
-	containing an encapsulated RTPPacket are handled.
-	*/
-	virtual void handleMessage(cMessage *msg);
+    /*!
+    Method for handling incoming packets. At the moment only RTPInnerPackets
+    containing an encapsulated RTPPacket are handled.
+    */
+    virtual void handleMessage(cMessage *msg);
 
-	protected:
+    protected:
 
-		/*!
-		The output file stream.
-		*/
-		ofstream _outputFileStream;
+        /*!
+        The output file stream.
+        */
+        ofstream _outputFileStream;
 
-		/*!
-		The payload type this RTPPayloadReceiver module processes.
-		*/
-		int _payloadType;
+        /*!
+        The payload type this RTPPayloadReceiver module processes.
+        */
+        int _payloadType;
 
-		/*!
-		An output vector used to store arrival of rtp data packets.
-		*/
-		cOutVector *_packetArrival;
+        /*!
+        An output vector used to store arrival of rtp data packets.
+        */
+        cOutVector *_packetArrival;
 
-		/*!
-		Writes contents of this RTPPacket into the output file. Must be overwritten
-		by subclasses.
-		*/
-		virtual void processPacket(RTPPacket *packet);
+        /*!
+        Writes contents of this RTPPacket into the output file. Must be overwritten
+        by subclasses.
+        */
+        virtual void processPacket(RTPPacket *packet);
 
-		/*!
-		This method is called by initialize and opens the output file stream.
-		For most payload receivers this method works well, only when using
-		a library for a payload type which provides an own open method it must
-		be overwritten.
-		*/
-		virtual void openOutputFile(const char *fileName);
+        /*!
+        This method is called by initialize and opens the output file stream.
+        For most payload receivers this method works well, only when using
+        a library for a payload type which provides an own open method it must
+        be overwritten.
+        */
+        virtual void openOutputFile(const char *fileName);
 
-		/*!
-		Closes the output file stream.
-		*/
-		virtual void closeOutputFile();
+        /*!
+        Closes the output file stream.
+        */
+        virtual void closeOutputFile();
 };
 
 #endif

@@ -39,177 +39,177 @@ It also communicates with the application.
 */
 class RTPEndsystemModule : public cSimpleModule {
 
-	Module_Class_Members(RTPEndsystemModule, cSimpleModule, 0);
+    Module_Class_Members(RTPEndsystemModule, cSimpleModule, 0);
 
-	/*!
-	Initializes variables.
-	*/
-	virtual void initialize();
+    /*!
+    Initializes variables.
+    */
+    virtual void initialize();
 
-	/*!
-	Handles incoming messages.
-	*/
-	virtual void handleMessage(cMessage *msg);
+    /*!
+    Handles incoming messages.
+    */
+    virtual void handleMessage(cMessage *msg);
 
-	protected:
+    protected:
 
-		/*!
-		Handles messages received from the applicaiton.
-		*/
-		virtual void handleMessageFromApp(cMessage *msg);
+        /*!
+        Handles messages received from the applicaiton.
+        */
+        virtual void handleMessageFromApp(cMessage *msg);
 
-		/*!
-		Handles messages received from the profile module.
-		*/
-		virtual void handleMessageFromProfile(cMessage *msg);
+        /*!
+        Handles messages received from the profile module.
+        */
+        virtual void handleMessageFromProfile(cMessage *msg);
 
-		/*!
-		Handles messages received from the rtcp module.
-		*/
-		virtual void handleMessageFromRTCP(cMessage *msg);
+        /*!
+        Handles messages received from the rtcp module.
+        */
+        virtual void handleMessageFromRTCP(cMessage *msg);
 
-		/*!
-		Handles messages received from the socket layer.
-		*/
-		virtual void handleMessageFromSocketLayer(cMessage *msg);
+        /*!
+        Handles messages received from the socket layer.
+        */
+        virtual void handleMessageFromSocketLayer(cMessage *msg);
 
-		/*!
-		Creates the profile module and initializes it.
-		*/
-		virtual void enterSession(RTPInterfacePacket *rifp);
+        /*!
+        Creates the profile module and initializes it.
+        */
+        virtual void enterSession(RTPInterfacePacket *rifp);
 
-		/*!
-		Destroys the profile module and orders the rtcp module
-		to send an rtcp bye packet.
-		*/
-		virtual void leaveSession(RTPInterfacePacket *rifp);
+        /*!
+        Destroys the profile module and orders the rtcp module
+        to send an rtcp bye packet.
+        */
+        virtual void leaveSession(RTPInterfacePacket *rifp);
 
-		virtual void createSenderModule(RTPInterfacePacket *rifp);
-		virtual void deleteSenderModule(RTPInterfacePacket *rifp);
-		virtual void senderModuleControl(RTPInterfacePacket *rifp);
-
-
-		/*!
-		Called when the profile module is initialized.
-		*/
-		virtual void profileInitialized(RTPInnerPacket *rinp);
-
-		virtual void senderModuleCreated(RTPInnerPacket *rinp);
-		virtual void senderModuleDeleted(RTPInnerPacket *rinp);
-		virtual void senderModuleInitialized(RTPInnerPacket *rinp);
-		virtual void senderModuleStatus(RTPInnerPacket *rinp);
-
-		/*!
-		Sends a rtp data packet to the socket layer and a copy
-		of it to the rtcp module.
-		*/
-		virtual void dataOut(RTPInnerPacket *rinp);
-
-		/*!
-		Informs the application that the session is entered.
-		*/
-		virtual void rtcpInitialized(RTPInnerPacket *rinp);
-
-		/*!
-		Informs the application that this end system
-		has left the rtp session.
-		*/
-		virtual void sessionLeft(RTPInnerPacket *rinp);
+        virtual void createSenderModule(RTPInterfacePacket *rifp);
+        virtual void deleteSenderModule(RTPInterfacePacket *rifp);
+        virtual void senderModuleControl(RTPInterfacePacket *rifp);
 
 
-	private:
-		/*!
-		The CNAME of this end system.
-		*/
-		const char *_commonName;
+        /*!
+        Called when the profile module is initialized.
+        */
+        virtual void profileInitialized(RTPInnerPacket *rinp);
 
-		/*!
-		The name of the profile used in this session.
-		*/
-		const char *_profileName;
+        virtual void senderModuleCreated(RTPInnerPacket *rinp);
+        virtual void senderModuleDeleted(RTPInnerPacket *rinp);
+        virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+        virtual void senderModuleStatus(RTPInnerPacket *rinp);
 
-		/*!
-		The available bandwidth for this session.
-		*/
-		int _bandwidth;
+        /*!
+        Sends a rtp data packet to the socket layer and a copy
+        of it to the rtcp module.
+        */
+        virtual void dataOut(RTPInnerPacket *rinp);
 
-		/*!
-		The destination address.
-		*/
-		IN_Addr _destinationAddress;
+        /*!
+        Informs the application that the session is entered.
+        */
+        virtual void rtcpInitialized(RTPInnerPacket *rinp);
 
-		/*!
-		The rtp port.
-		*/
-		IN_Port _port;
+        /*!
+        Informs the application that this end system
+        has left the rtp session.
+        */
+        virtual void sessionLeft(RTPInnerPacket *rinp);
 
-		/*!
-		The maximum size of a packet.
-		*/
-		int _mtu;
 
-		/*!
-		The percentage of the bandwidth used for rtcp.
-		*/
-		int _rtcpPercentage;
+    private:
+        /*!
+        The CNAME of this end system.
+        */
+        const char *_commonName;
 
-		/*!
-		The rtp server socket file descriptor.
-		*/
-		Socket::Filedesc _socketFdIn;
+        /*!
+        The name of the profile used in this session.
+        */
+        const char *_profileName;
 
-		/*!
-		The rtp client socket file descriptor.
-		*/
-		Socket::Filedesc _socketFdOut;
+        /*!
+        The available bandwidth for this session.
+        */
+        int _bandwidth;
 
-		/*
-		Creates the profile module.
-		*/
-		virtual void createProfile();
+        /*!
+        The destination address.
+        */
+        IN_Addr _destinationAddress;
 
-		/*!
-		Requests a server socket from the socket layer.
-		*/
-		virtual void createServerSocket();
+        /*!
+        The rtp port.
+        */
+        IN_Port _port;
 
-		/*!
-		Requests a client socket from the socket layer.
-		*/
-		virtual void createClientSocket();
+        /*!
+        The maximum size of a packet.
+        */
+        int _mtu;
 
-		/*!
-		Called when the socket layer returns a socket.
-		*/
-		virtual void socketRet(SocketInterfacePacket *sifp);
+        /*!
+        The percentage of the bandwidth used for rtcp.
+        */
+        int _rtcpPercentage;
 
-		/*!
-		Called when the socket layer has connected a socket.
-		*/
-		virtual void connectRet(SocketInterfacePacket *sifp);
+        /*!
+        The rtp server socket file descriptor.
+        */
+        Socket::Filedesc _socketFdIn;
 
-		/*!
-		Called when data from the socket layer has been received.
-		*/
-		virtual void readRet(SocketInterfacePacket *sifp);
+        /*!
+        The rtp client socket file descriptor.
+        */
+        Socket::Filedesc _socketFdOut;
 
-		/*!
-		Initializes the profile module.
-		*/
-		virtual void initializeProfile();
+        /*
+        Creates the profile module.
+        */
+        virtual void createProfile();
 
-		/*!
-		Initializes the rtcp module-.
-		*/
-		virtual void initializeRTCP();
+        /*!
+        Requests a server socket from the socket layer.
+        */
+        virtual void createServerSocket();
 
-		/*!
-		Determines the maximum transmission unit that can be uses for
-		rtp. This implementation assumes that we use an ethernet with
-		1500 bytes mtu. The returned value is 1500 bytes minus header
-		sizes for ip and udp.
-		*/
-		virtual int resolveMTU();
+        /*!
+        Requests a client socket from the socket layer.
+        */
+        virtual void createClientSocket();
+
+        /*!
+        Called when the socket layer returns a socket.
+        */
+        virtual void socketRet(SocketInterfacePacket *sifp);
+
+        /*!
+        Called when the socket layer has connected a socket.
+        */
+        virtual void connectRet(SocketInterfacePacket *sifp);
+
+        /*!
+        Called when data from the socket layer has been received.
+        */
+        virtual void readRet(SocketInterfacePacket *sifp);
+
+        /*!
+        Initializes the profile module.
+        */
+        virtual void initializeProfile();
+
+        /*!
+        Initializes the rtcp module-.
+        */
+        virtual void initializeRTCP();
+
+        /*!
+        Determines the maximum transmission unit that can be uses for
+        rtp. This implementation assumes that we use an ethernet with
+        1500 bytes mtu. The returned value is 1500 bytes minus header
+        sizes for ip and udp.
+        */
+        virtual int resolveMTU();
 };
 
 #endif

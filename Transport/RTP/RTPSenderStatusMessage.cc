@@ -19,13 +19,13 @@
 #include "types.h"
 
 RTPSenderStatusMessage::RTPSenderStatusMessage(const char *name = NULL) {
-	_status = "";
+    _status = "";
 };
 
 
 RTPSenderStatusMessage::RTPSenderStatusMessage(const RTPSenderStatusMessage& message) {
-	setName(message.name());
-	operator=(message);
+    setName(message.name());
+    operator=(message);
 };
 
 
@@ -34,34 +34,34 @@ RTPSenderStatusMessage::~RTPSenderStatusMessage(){
 
 
 RTPSenderStatusMessage& RTPSenderStatusMessage::operator=(const RTPSenderStatusMessage& message) {
-	cMessage::operator=(message);
-	_status = message.status();
+    cMessage::operator=(message);
+    _status = message.status();
 };
 
 
 cObject *RTPSenderStatusMessage::dup() const {
-	return new RTPSenderStatusMessage(*this);
+    return new RTPSenderStatusMessage(*this);
 };
 
 
 const char *RTPSenderStatusMessage::className() const {
-	return "RTPSenderStatusMessage";
+    return "RTPSenderStatusMessage";
 };
 
 
 const char *RTPSenderStatusMessage::status() const {
-	return opp_strdup(_status);
+    return opp_strdup(_status);
 };
 
 const u_int32 RTPSenderStatusMessage::timeStamp() {
-	return _timeStamp;
-}	
+    return _timeStamp;
+}
 
 void RTPSenderStatusMessage::setStatus(const char *status) {
-	_status = status;
+    _status = status;
 }
 
 void RTPSenderStatusMessage::setTimeStamp(const u_int32 timeStamp) {
-	_timeStamp = timeStamp;
+    _timeStamp = timeStamp;
 }
 

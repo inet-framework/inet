@@ -2,7 +2,7 @@
                           RTPSenderStatusMessage.h  -  description
                              -------------------
     begin                : Sat Aug 17 2002
-    copyright            : (C) 2002 by Matthias Oppitz, Arndt Buschmann 
+    copyright            : (C) 2002 by Matthias Oppitz, Arndt Buschmann
     email                : <matthias.oppitz@gmx.de> <a.buschmann@gmx.de>
  ***************************************************************************/
 
@@ -31,60 +31,60 @@ defining this parameter can derived.
 */
 class RTPSenderStatusMessage : public cMessage  {
 public:
- 
-	/*!
-	Default constructor.
-	*/
-	RTPSenderStatusMessage(const char *name = NULL);
 
-	/*!
-	Copy constructor.
-	*/
-	RTPSenderStatusMessage(const RTPSenderStatusMessage& message);
+    /*!
+    Default constructor.
+    */
+    RTPSenderStatusMessage(const char *name = NULL);
 
-	/*!
-	Destructor.
-	*/
-	~RTPSenderStatusMessage();
+    /*!
+    Copy constructor.
+    */
+    RTPSenderStatusMessage(const RTPSenderStatusMessage& message);
 
-	/*!
-	Assignment operator.
-	*/
-	RTPSenderStatusMessage& operator=(const RTPSenderStatusMessage& message);
+    /*!
+    Destructor.
+    */
+    ~RTPSenderStatusMessage();
 
-	/*!
-	Duplicates the object.
-	*/
-	cObject *dup() const;
+    /*!
+    Assignment operator.
+    */
+    RTPSenderStatusMessage& operator=(const RTPSenderStatusMessage& message);
 
-	/*!
-	Returns the class name "RTPSenderStatusMessage".
-	*/
-	const char *className() const;
+    /*!
+    Duplicates the object.
+    */
+    cObject *dup() const;
 
-	/*!
-	Returns the status string stored in this message.
-	*/
-	virtual const char *status() const;
+    /*!
+    Returns the class name "RTPSenderStatusMessage".
+    */
+    const char *className() const;
 
-	/*!
-	Sets the status string to be stored in this message.
-	*/
-	virtual void setStatus(const char *status);
+    /*!
+    Returns the status string stored in this message.
+    */
+    virtual const char *status() const;
 
-	virtual void setTimeStamp(const u_int32 timestamp);
+    /*!
+    Sets the status string to be stored in this message.
+    */
+    virtual void setStatus(const char *status);
 
-	virtual const u_int32 timeStamp(); 
+    virtual void setTimeStamp(const u_int32 timestamp);
+
+    virtual const u_int32 timeStamp();
 
 private:
 
-	/*!
-	The status string.
-	*/
-	const char *_status;
-	
-	u_int32 _timeStamp;
-	
+    /*!
+    The status string.
+    */
+    const char *_status;
+
+    u_int32 _timeStamp;
+
 };
 
 #endif

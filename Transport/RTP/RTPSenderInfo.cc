@@ -29,19 +29,19 @@ This file contains the implementation of member functions of the class RTPSender
 Register_Class(RTPSenderInfo);
 
 RTPSenderInfo::RTPSenderInfo(u_int32 ssrc = 0) : RTPParticipantInfo(ssrc) {
-	_startTime = 0.0;
-	_clockRate = 0;
-	_timeStampBase = 0;
-	_sequenceNumberBase = 0;
-	_packetsSent = 0;
-	_bytesSent = 0;
+    _startTime = 0.0;
+    _clockRate = 0;
+    _timeStampBase = 0;
+    _sequenceNumberBase = 0;
+    _packetsSent = 0;
+    _bytesSent = 0;
 
 };
 
 
 RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo() {
-	setName(senderInfo.name());
-	operator=(senderInfo);
+    setName(senderInfo.name());
+    operator=(senderInfo);
 };
 
 
@@ -51,83 +51,83 @@ RTPSenderInfo::~RTPSenderInfo() {
 
 
 RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo) {
-	RTPParticipantInfo::operator=(senderInfo);
-	_startTime = senderInfo._startTime;
-	_clockRate = senderInfo._clockRate;
-	_timeStampBase = senderInfo._timeStampBase;
-	_sequenceNumberBase = senderInfo._sequenceNumberBase;
-	_packetsSent = senderInfo._packetsSent;
-	_bytesSent = senderInfo._bytesSent;
-	return *this;
+    RTPParticipantInfo::operator=(senderInfo);
+    _startTime = senderInfo._startTime;
+    _clockRate = senderInfo._clockRate;
+    _timeStampBase = senderInfo._timeStampBase;
+    _sequenceNumberBase = senderInfo._sequenceNumberBase;
+    _packetsSent = senderInfo._packetsSent;
+    _bytesSent = senderInfo._bytesSent;
+    return *this;
 };
 
 
 cObject *RTPSenderInfo::dup() const {
-	return new RTPSenderInfo(*this);
+    return new RTPSenderInfo(*this);
 };
 
 
 const char *RTPSenderInfo::className() const {
-	return "RTPSenderInfo";
+    return "RTPSenderInfo";
 };
 
 
 void RTPSenderInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime) {
-	_packetsSent++;
-	_bytesSent = _bytesSent + packet->payloadLength();
+    _packetsSent++;
+    _bytesSent = _bytesSent + packet->payloadLength();
 
-	// call corresponding method of superclass
-	// for setting _silentIntervals
-	// it deletes the packet !!!
-	RTPParticipantInfo::processRTPPacket(packet, arrivalTime);
+    // call corresponding method of superclass
+    // for setting _silentIntervals
+    // it deletes the packet !!!
+    RTPParticipantInfo::processRTPPacket(packet, arrivalTime);
 };
 
 
 void RTPSenderInfo::processReceptionReport(ReceptionReport *report, simtime_t arrivalTime) {
-	delete report;
+    delete report;
 };
 
 
 SenderReport *RTPSenderInfo::senderReport(simtime_t now) {
-	if (isSender()) {
-		SenderReport *senderReport = new SenderReport("SenderReport");
-		// ntp time stamp is 64 bit integer
+    if (isSender()) {
+        SenderReport *senderReport = new SenderReport("SenderReport");
+        // ntp time stamp is 64 bit integer
 
-		u_int64 ntpSeconds = (u_int64)now;
-		u_int64 ntpFraction = (u_int64)((now - (simtime_t)ntpSeconds) * 65536.0 * 65536.0);
+        u_int64 ntpSeconds = (u_int64)now;
+        u_int64 ntpFraction = (u_int64)((now - (simtime_t)ntpSeconds) * 65536.0 * 65536.0);
 
-		senderReport->setNTPTimeStamp((u_int64)(ntpSeconds << 32) + ntpFraction);
-		senderReport->setRTPTimeStamp((now - _startTime) * _clockRate);
-		senderReport->setPacketCount(_packetsSent);
-		senderReport->setByteCount(_bytesSent);
-		return senderReport;
-	}
-	else {
-		return NULL;
-	};
+        senderReport->setNTPTimeStamp((u_int64)(ntpSeconds << 32) + ntpFraction);
+        senderReport->setRTPTimeStamp((now - _startTime) * _clockRate);
+        senderReport->setPacketCount(_packetsSent);
+        senderReport->setByteCount(_bytesSent);
+        return senderReport;
+    }
+    else {
+        return NULL;
+    };
 };
 
 
 void RTPSenderInfo::setStartTime(simtime_t startTime) {
-	_startTime = startTime;
+    _startTime = startTime;
 };
 
 
 void RTPSenderInfo::setClockRate(int clockRate) {
-	_clockRate = clockRate;
+    _clockRate = clockRate;
 };
 
 
 void RTPSenderInfo::setTimeStampBase(u_int32 timeStampBase) {
-	_timeStampBase = timeStampBase;
+    _timeStampBase = timeStampBase;
 };
 
 
 void RTPSenderInfo::setSequenceNumberBase(u_int16 sequenceNumberBase) {
-	_sequenceNumberBase = sequenceNumberBase;
+    _sequenceNumberBase = sequenceNumberBase;
 };
 
 
 bool RTPSenderInfo::toBeDeleted(simtime_t now) {
-	return false;
+    return false;
 }

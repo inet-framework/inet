@@ -29,55 +29,55 @@ Register_Class(RTPPacket);
 
 
 RTPPacket::RTPPacket(const char *name = NULL) : cPacket(name) {
-	_version = 2;
-	_padding = 0;
-	_extension = 0;
-	_csrcCount = 0;
-	_marker = 0;
-	_payloadType = 0;
-	_sequenceNumber = 0;
-	_timeStamp = 0;
-	_ssrc = 0;
+    _version = 2;
+    _padding = 0;
+    _extension = 0;
+    _csrcCount = 0;
+    _marker = 0;
+    _payloadType = 0;
+    _sequenceNumber = 0;
+    _timeStamp = 0;
+    _ssrc = 0;
 
-	// a standard rtp packet without csrcs and data has a length of 12 bytes
-	setLength(fixedHeaderLength());
+    // a standard rtp packet without csrcs and data has a length of 12 bytes
+    setLength(fixedHeaderLength());
 };
 
 
 RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket() {
-	setName(packet.name());
-	operator=(packet);
+    setName(packet.name());
+    operator=(packet);
 };
 
 
 RTPPacket::~RTPPacket() {
-	// when csrcList is implemented this
-	// should free the memory used for it
+    // when csrcList is implemented this
+    // should free the memory used for it
 };
 
 
 cObject *RTPPacket::dup() const {
-	return new RTPPacket(*this);
+    return new RTPPacket(*this);
 };
 
 
 RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
-	cPacket::operator=(packet);
-	_version = packet._version;
-	_padding = packet._padding;
-	_extension = packet._extension;
-	_csrcCount = packet._csrcCount;
-	_marker = packet._marker;
-	_payloadType = packet._payloadType;
-	_sequenceNumber = packet._sequenceNumber;
-	_timeStamp = packet._timeStamp;
-	_ssrc = packet._ssrc;
-	return *this;
+    cPacket::operator=(packet);
+    _version = packet._version;
+    _padding = packet._padding;
+    _extension = packet._extension;
+    _csrcCount = packet._csrcCount;
+    _marker = packet._marker;
+    _payloadType = packet._payloadType;
+    _sequenceNumber = packet._sequenceNumber;
+    _timeStamp = packet._timeStamp;
+    _ssrc = packet._ssrc;
+    return *this;
 };
 
 
 const char *RTPPacket::className() const {
-	return "RTPPacket";
+    return "RTPPacket";
 };
 
 
@@ -89,79 +89,79 @@ std::string RTPPacket::info() {
 
 
 void RTPPacket::writeContents(ostream& os) {
-	os << "RTPPacket:" << endl;
-	os << "  payloadType = " << _payloadType << endl;
-	os << "  sequenceNumber = " << _sequenceNumber << endl;
-	os << "  timeStamp = " << _timeStamp << endl;
-	os << "  payloadLength = " << payloadLength() << endl;
+    os << "RTPPacket:" << endl;
+    os << "  payloadType = " << _payloadType << endl;
+    os << "  sequenceNumber = " << _sequenceNumber << endl;
+    os << "  timeStamp = " << _timeStamp << endl;
+    os << "  payloadLength = " << payloadLength() << endl;
 };
 
 
 int RTPPacket::marker() {
-	return _marker;
+    return _marker;
 };
 
 
 void RTPPacket::setMarker(int marker) {
-	_marker = marker;
+    _marker = marker;
 };
 
 
 int RTPPacket::payloadType() {
-	return _payloadType;
+    return _payloadType;
 };
 
 
 void RTPPacket::setPayloadType(int payloadType) {
-	_payloadType = payloadType;
+    _payloadType = payloadType;
 };
 
 
 u_int16 RTPPacket::sequenceNumber() {
-	return _sequenceNumber;
+    return _sequenceNumber;
 };
 
 
 void RTPPacket::setSequenceNumber(u_int16 sequenceNumber) {
-	_sequenceNumber = sequenceNumber;
+    _sequenceNumber = sequenceNumber;
 };
 
 
 u_int32 RTPPacket::timeStamp() {
-	return _timeStamp;
+    return _timeStamp;
 };
 
 
 void RTPPacket::setTimeStamp(u_int32 timeStamp) {
-	_timeStamp = timeStamp;
+    _timeStamp = timeStamp;
 };
 
 
 u_int32 RTPPacket::ssrc() {
-	return _ssrc;
+    return _ssrc;
 };
 
 
 void RTPPacket::setSSRC(u_int32 ssrc) {
-	_ssrc = ssrc;
+    _ssrc = ssrc;
 };
 
 int RTPPacket::fixedHeaderLength() {
-	return 12;
+    return 12;
 };
 
 int RTPPacket::headerLength() {
-	// fixed header is 12 bytes long,
-	// add 4 bytes for every csrc identifier
-	return(fixedHeaderLength() + 4 * _csrcCount);
+    // fixed header is 12 bytes long,
+    // add 4 bytes for every csrc identifier
+    return(fixedHeaderLength() + 4 * _csrcCount);
 };
 
 
 int RTPPacket::payloadLength() {
-	return(length() - headerLength());
+    return(length() - headerLength());
 };
 
 
 int RTPPacket::compareFunction(cObject *packet1, cObject *packet2) {
-	return ((RTPPacket *)packet1)->sequenceNumber() - ((RTPPacket *)packet2)->sequenceNumber();
+    return ((RTPPacket *)packet1)->sequenceNumber() - ((RTPPacket *)packet2)->sequenceNumber();
 };

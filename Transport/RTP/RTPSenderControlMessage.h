@@ -47,61 +47,61 @@ go to data byte (not allowed while playing)
 class RTPSenderControlMessage : public cMessage  {
 
 public:
-          
-		/*!
-		Default constructor.
-		*/
-		RTPSenderControlMessage(const char *name = NULL);
 
-		/*!
-		Copy constructor.
-		*/
-		RTPSenderControlMessage(const RTPSenderControlMessage& message);
+        /*!
+        Default constructor.
+        */
+        RTPSenderControlMessage(const char *name = NULL);
 
-		/*!
-		Destructor.
-		*/
-		virtual ~RTPSenderControlMessage();
+        /*!
+        Copy constructor.
+        */
+        RTPSenderControlMessage(const RTPSenderControlMessage& message);
 
-		/*!
-		Assignment operator.
-		*/
-		RTPSenderControlMessage& operator=(const RTPSenderControlMessage& message);
+        /*!
+        Destructor.
+        */
+        virtual ~RTPSenderControlMessage();
 
-		/*!
-		Duplicates the object.
-		*/
-		virtual cObject *dup() const;
+        /*!
+        Assignment operator.
+        */
+        RTPSenderControlMessage& operator=(const RTPSenderControlMessage& message);
 
-		/*!
-		Returns the class name "RTPSenderControlMessage".
-		*/
-		virtual const char *className() const;
+        /*!
+        Duplicates the object.
+        */
+        virtual cObject *dup() const;
 
-		/*!
-		Returns the command string in this message.
-		*/
-		virtual const char *command() const;
+        /*!
+        Returns the class name "RTPSenderControlMessage".
+        */
+        virtual const char *className() const;
 
-		/*!
-		Set the command string this message transports to the sender module.
-		*/
-		virtual void setCommand(const char *command);
-        
-		virtual void setCommand(const char *command, float commandParameter1);
-		virtual void setCommand(const char *command, float commandParameter1, float commandParameter2);
+        /*!
+        Returns the command string in this message.
+        */
+        virtual const char *command() const;
 
-		virtual float commandParameter1();
-		virtual float commandParameter2();
+        /*!
+        Set the command string this message transports to the sender module.
+        */
+        virtual void setCommand(const char *command);
+
+        virtual void setCommand(const char *command, float commandParameter1);
+        virtual void setCommand(const char *command, float commandParameter1, float commandParameter2);
+
+        virtual float commandParameter1();
+        virtual float commandParameter2();
 
 private:
 
-		/*!
-		The command string stored in the message.
-		*/
-		const char *_command;
+        /*!
+        The command string stored in the message.
+        */
+        const char *_command;
 
-		float _commandParameter1, _commandParameter2;
+        float _commandParameter1, _commandParameter2;
 
 };
 

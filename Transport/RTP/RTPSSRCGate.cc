@@ -30,14 +30,14 @@ This file contains the implementation of member functions of the class RTPSSRCGa
 Register_Class(RTPSSRCGate);
 
 RTPSSRCGate::RTPSSRCGate(u_int32 ssrc = 0) : cObject() {
-	_ssrc = ssrc;
-	setName(RTPParticipantInfo::ssrcToName(_ssrc));
+    _ssrc = ssrc;
+    setName(RTPParticipantInfo::ssrcToName(_ssrc));
 };
 
 
 RTPSSRCGate::RTPSSRCGate(const RTPSSRCGate& rtpSSRCGate) {
-	cObject::operator=(rtpSSRCGate);
-	_ssrc = rtpSSRCGate._ssrc;
+    cObject::operator=(rtpSSRCGate);
+    _ssrc = rtpSSRCGate._ssrc;
 };
 
 
@@ -47,20 +47,20 @@ RTPSSRCGate::~RTPSSRCGate() {
 
 
 u_int32 RTPSSRCGate::ssrc() {
-	return _ssrc;
+    return _ssrc;
 };
 
 
 void RTPSSRCGate::setSSRC(u_int32 ssrc) {
-	_ssrc = ssrc;
+    _ssrc = ssrc;
 };
 
 
 int RTPSSRCGate::gateId() {
-	return _gateId;
+    return _gateId;
 };
 
 
 void RTPSSRCGate::setGateId(int gateId) {
-	_gateId = gateId;
+    _gateId = gateId;
 };

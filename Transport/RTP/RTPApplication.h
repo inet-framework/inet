@@ -32,78 +32,78 @@ a receiver if the parameter is empty.
 */
 class RTPApplication : public cSimpleModule {
 
-	Module_Class_Members(RTPApplication, cSimpleModule, 16384);
+    Module_Class_Members(RTPApplication, cSimpleModule, 16384);
 
 
-	public:
+    public:
 
-		/*!
-		Reads the omnet parameters.
-		*/
-		virtual void initialize();
+        /*!
+        Reads the omnet parameters.
+        */
+        virtual void initialize();
 
-		/*!
-		RTPApplication uses activity for message handling.
-		The behaviour is controlled by omnet parameters.
-		*/
-		virtual void activity();
+        /*!
+        RTPApplication uses activity for message handling.
+        The behaviour is controlled by omnet parameters.
+        */
+        virtual void activity();
 
-	private:
+    private:
 
-		/*!
-		The CNAME of this participant.
-		*/
-		const char *_commonName;
+        /*!
+        The CNAME of this participant.
+        */
+        const char *_commonName;
 
-		/*!
-		The name of the used profile.
-		*/
-		const char *_profileName;
+        /*!
+        The name of the used profile.
+        */
+        const char *_profileName;
 
-		/*!
-		The reserved bandwidth for rtp/rtcp in bytes/second.
-		*/
-		int _bandwidth;
+        /*!
+        The reserved bandwidth for rtp/rtcp in bytes/second.
+        */
+        int _bandwidth;
 
-		/*!
-		The address of the unicast peer or of the multicast group.
-		*/
-		IN_Addr _destinationAddress;
+        /*!
+        The address of the unicast peer or of the multicast group.
+        */
+        IN_Addr _destinationAddress;
 
-		/*!
-		One of the udp port used.
-		*/
-		IN_Port _port;
+        /*!
+        One of the udp port used.
+        */
+        IN_Port _port;
 
-		/*!
-		The name of the file to be transmitted.
-		*/
-		const char *_fileName;
+        /*!
+        The name of the file to be transmitted.
+        */
+        const char *_fileName;
 
-		/*!
-		The payload type of the data in the file.
-		*/
-		int _payloadType;
+        /*!
+        The payload type of the data in the file.
+        */
+        int _payloadType;
 
-		/*!
-		The delay after the application enters the session,
-		*/
-		simtime_t _sessionEnterDelay;
+        /*!
+        The delay after the application enters the session,
+        */
+        simtime_t _sessionEnterDelay;
 
-		/*!
-		The delay after the application starts the transmission.
-		*/
-		simtime_t _transmissionStartDelay;
+        /*!
+        The delay after the application starts the transmission.
+        */
+        simtime_t _transmissionStartDelay;
 
-		/*!
-		The delay after the application stops the transmission.
-		*/
-		simtime_t _transmissionStopDelay;
+        /*!
+        The delay after the application stops the transmission.
+        */
+        simtime_t _transmissionStopDelay;
 
-		/*!
-		The delay after the application leaves the session.
-		*/
-		simtime_t _sessionLeaveDelay;
+        /*!
+        The delay after the application leaves the session.
+        */
+        simtime_t _sessionLeaveDelay;
 
 };
 

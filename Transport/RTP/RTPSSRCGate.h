@@ -38,53 +38,53 @@ which leads to the RTPPayloadReceiver module.
 
 class RTPSSRCGate : public cObject {
 
-	public:
+    public:
 
-		/*!
-		Default constructor.
-		*/
-		RTPSSRCGate(u_int ssrc = 0);
+        /*!
+        Default constructor.
+        */
+        RTPSSRCGate(u_int ssrc = 0);
 
-		/*!
-		Copy constructor.
-		*/
-		RTPSSRCGate(const RTPSSRCGate& rtpSSRCGate);
+        /*!
+        Copy constructor.
+        */
+        RTPSSRCGate(const RTPSSRCGate& rtpSSRCGate);
 
-		/*!
-		Destructor.
-		*/
-		virtual ~RTPSSRCGate();
+        /*!
+        Destructor.
+        */
+        virtual ~RTPSSRCGate();
 
-		/*!
-		Returns the ssrc identifier.
-		*/
-		virtual u_int32 ssrc();
+        /*!
+        Returns the ssrc identifier.
+        */
+        virtual u_int32 ssrc();
 
-		/*!
-		Sets the ssrc identifier.
-		*/
-		virtual void setSSRC(u_int32 ssrc);
+        /*!
+        Sets the ssrc identifier.
+        */
+        virtual void setSSRC(u_int32 ssrc);
 
-		/*!
-		Returns the id of the gate.
-		*/
-		virtual int gateId();
+        /*!
+        Returns the id of the gate.
+        */
+        virtual int gateId();
 
-		/*!
-		Sets the id of the gate.
-		*/
-		virtual void setGateId(int gateId);
+        /*!
+        Sets the id of the gate.
+        */
+        virtual void setGateId(int gateId);
 
-	protected:
-		/*!
-		The ssrc identifier.
-		*/
-		u_int32 _ssrc;
+    protected:
+        /*!
+        The ssrc identifier.
+        */
+        u_int32 _ssrc;
 
-		/*!
-		The gate id.
-		*/
-		int _gateId;
+        /*!
+        The gate id.
+        */
+        int _gateId;
 };
 
 #endif
