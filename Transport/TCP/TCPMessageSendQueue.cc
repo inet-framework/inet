@@ -89,7 +89,7 @@ void TCPMessageSendQueue::discardUpTo(uint32 seqNum)
     begin = seqNum;
 
     // remove payload messages whose endSequenceNo is below seqNum
-    while (seqLE(payloadQueue.front().endSequenceNo, seqNum))
+    while (!payloadQueue.empty() && seqLE(payloadQueue.front().endSequenceNo, seqNum))
     {
         delete payloadQueue.front().msg;
         payloadQueue.pop_front();
