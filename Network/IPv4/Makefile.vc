@@ -59,7 +59,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj ICMP.obj IP.obj IPAddress.obj IPFragBuf.obj ProtocolMap.obj RoutingTable.obj RoutingTableParser.obj
+OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj ICMP.obj IP.obj IPAddress.obj IPAddressResolver.obj IPFragBuf.obj ProtocolMap.obj RoutingTable.obj RoutingTableParser.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
@@ -113,6 +113,9 @@ IP.obj: IP.cc
 
 IPAddress.obj: IPAddress.cc
 	$(CXX) -c $(COPTS) /Tp IPAddress.cc
+
+IPAddressResolver.obj: IPAddressResolver.cc
+	$(CXX) -c $(COPTS) /Tp IPAddressResolver.cc
 
 IPFragBuf.obj: IPFragBuf.cc
 	$(CXX) -c $(COPTS) /Tp IPFragBuf.cc
@@ -193,6 +196,11 @@ IP.obj: IP.cc \
 IPAddress.obj: IPAddress.cc \
   IPAddress.h \
   ..\..\Base/ipsuite_defs.h
+IPAddressResolver.obj: IPAddressResolver.cc \
+  RoutingTable.h \
+  IPAddressResolver.h \
+  ..\..\Base/ipsuite_defs.h \
+  IPAddress.h
 IPControlInfo_m.obj: IPControlInfo_m.cc \
   IPControlInfo_m.h \
   IPAddress.h \

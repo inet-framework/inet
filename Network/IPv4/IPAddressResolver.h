@@ -26,6 +26,25 @@
 #include <omnetpp.h>
 #include "IPAddress.h"
 
+class IPAddressResolver
+{
+  public:
+    IPAddressResolver() {}
+    ~IPAddressResolver() {}
+
+    /**
+     * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
+     * or router ("host[2]"), and empty string (""). For the latter, it returns
+     * the null address.
+     * If module name is specified, the module will be looked up using
+     * <tt>simulation.moduleByPath()</tt>, and the address of its
+     * first interface will be returned.
+     *
+     * The current implementation assumes that the RoutingTable module is
+     * submodule <tt>"networkLayer.routingTable"</tt> within the .
+     */
+    IPAddress resolve(const char *str);
+};
 
 
 #endif

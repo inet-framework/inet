@@ -114,6 +114,7 @@ void IP::routePacket(IPDatagram *datagram)
     }
 
     // check for local delivery
+    // FIXME I don't think that local loopback (127.0.0.1) works correctly... (Andras)
     if (rt->localDeliver(destAddress))
     {
         ev << "sending to localDeliver\n";
@@ -137,6 +138,7 @@ void IP::routePacket(IPDatagram *datagram)
     int outputPort = rt->outputPortNo(destAddress);
     if (outputPort==-1)
     {
+        //FIXME what to do if src=0.0.0.0, i.e. we're still in the src node?? sure don't send icmp to ourselves? (Andras)
         ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
         numUnroutable++;
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
