@@ -6,7 +6,7 @@ IPSuite can be compiled on all platforms that are supported by OMNeT++.
 PREREQUISITES
 
 You should have a working OMNeT++ installation. The latest 3.0 alpha
-version (3.0 alpha 3) required, compiled with dynamic NED loading
+version (3.0 alpha 7) is required, compiled with dynamic NED loading
 enabled (WITH_NETBUILDER=yes setting).
 
 LINUX (UNIX)
@@ -19,20 +19,19 @@ LINUX (UNIX)
    need to adjust ROOT.
 
 3. Re-generate the omnetppconfig file to get the local OMNeT++ configuration
-   by typing "opp_makemake --genconfig omnetppconfig"
+   by typing "opp_makemake -f --genconfig omnetppconfig"
 
 4. Type "make" to build everything. That should be it.
 
 5. If there's a Makefile-related error, or if you change add/remove files, 
    try recreating the makefiles by typing "./makemake".
-   If you add/remove/rename directories, you'll need to modify makemake.
+   If you add/remove/rename directories, you'll need to modify "makemake".
 
-Finally, you can try running the demo simulations. cd to either
-Examples/IPSuite or Examples/MPLS, and type "./rundemo".
+Finally, try running the demo simulations. Change into Examples/ and type 
+"./rundemo".
 
-As of now, this is still work in progress and not everything will work.
-Notably, most MPLS examples will fail with TCP runtime error, and crash
-on exit. We're working on the solution.
+As of now, IPSuite is still work in progress and not everything will work.
+Notably, MPLS is being revised and does not work.
 
 
 
@@ -49,25 +48,22 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
    and "nmake" at the cmd prompt.)
 
 2. Change to the IPSuite directory. Edit the ipsuiteconfig.vc file and
-   adjust the variables in it: ROOT, OMNETPP_ROOT.
+   adjust the OMNETPP_ROOT setting to suit your installation.
 
-3. Type "nmake -f Makefile.vc" to build everything.
+3. Type "nmake -f Makefile.vc" to build everything. Hint: creating an "m.bat"
+   file with the content "nmake -f Makefile.vc %*" may save you quite some 
+   typing.
 
 4. If there's a Makefile-related error, or if you change add/remove files, 
    try recreating the makefiles by typing "makemake", then
    "nmake -f makefile.vc depend".
-   If you add/remove/rename directories, you'll need to modify makemake.cmd.
+   If you add/remove/rename directories, you'll need to modify "makemake.cmd".
 
-Finally, you can try running the demo simulations. cd to either
-Examples/IPSuite or Examples/MPLS, and type "rundemo.bat".
+Finally, try running the demo simulations. Change to Examples/ and type
+"rundemo.bat".
 
-As of now, this is still work in progress and not everything will work.
-Notably, most MPLS examples will fail with TCP runtime error, and crash
-on exit. We're working on the solution.
-
-Hint: creating an "m.bat" file with the content "nmake -f makefile.vc %*"
-may save you quite some typing...
-
+As of now, IPSuite is still work in progress and not everything will work.
+Notably, MPLS is being revised and does not work.
 
 Have fun.
 Andras
