@@ -1,4 +1,5 @@
 
+ROOT=C:\home\opp-rsvp-te\ipsuite-rearranged
 OMNETPP_ROOT=c:\home\omnetpp
 
 !include $(OMNETPP_ROOT)\configuser.vc
