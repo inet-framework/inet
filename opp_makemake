@@ -27,8 +27,9 @@ linkdirs=""
 xobjs=""
 fragments=""
 makefilein=n
-doxyconf=doxy.cfg
+doxyconf="doxy.cfg"
 cfgfile=""
+linkwithobjects=n
 
 while [ ! $# = 0 ] ; do
     case "$1" in
@@ -51,7 +52,10 @@ opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
                           library. Useful for models with parts in several dirs.
     -s, --make-so         Make shared library. Useful if you want to load the
                           model dynamically (Cmdenv/Tkenv -l so-file switch).
-    -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv
+    -w, --withobjects     Link with all object files found in -I directories,
+                          or include them if library is created. Ignored when
+                          -n option is present.
+    -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv.
     -M, --mpi             Link executable with MPI
     -p, --pvm             Link executable with PVM
     -Idir                 Additional NED and C++ include directory
@@ -93,6 +97,10 @@ EOT
 
         -s | --make-so)
         type="so"
+        ;;
+
+        -w | --withobjects)
+        linkwithobjects=y
         ;;
 
         -m | --makefile-in)
@@ -167,16 +175,22 @@ if [ -f $outputfile ]; then
 fi
 
 subdirs=
-sobjs=
 for i in *; do
     if [ -d $i -a $i != "CVS" -a $i != "backups" -a $i != "." -a $i != ".." ]; then
         subdirs="$subdirs $i"
-        sobjs="$sobjs $i/*.o"
     fi
 done
 
 
 objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
+
+extdirobjs=
+if [ ! "$linkwithobjects" = "y" ]; then
+    for i in $includes; do
+        dir=`echo $i | sed 's/^-I//'`
+        extdirobjs="$extdirobjs/*.o"
+    done
+fi
 
 #
 # now the Makefile creation
@@ -235,10 +249,10 @@ ${c_mpi}KERNEL_LIBS=\$(MPI_KERNEL_LIBS)
 INCLUDE_PATH=$includes
 
 # misc additional object and library files to link
-EXRA_OBJS=$xobjs
+EXTRA_OBJS=$xobjs
 
-# object files in subdirectories
-SUBDIR_OBJS=$sobjs
+# object files from other directories to link with
+EXT_DIR_OBJS=$extdirobjs
 
 # Additional libraries (-L option -l option)
 LIBS=$libpath$libs
@@ -364,12 +378,12 @@ echo
 
 case "$type" in
 exe)
-    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) subdirs Makefile'
-    echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+    echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
     ;;
 so)
-    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) subdirs Makefile'
-    echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS)'
+    echo '$(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+    echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS)'
     ;;
 o)
     echo '$(TARGET): $(OBJS) subdirs Makefile'
@@ -377,8 +391,8 @@ o)
     ;;
 esac
 echo
-echo 'purify: $(OBJS) $(EXRA_OBJS) subdirs Makefile'
-echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
+echo 'purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile'
+echo '	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure'
 echo
 
 
