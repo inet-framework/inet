@@ -76,6 +76,19 @@ void EtherMAC::initialize()
     promiscuous = par("promiscuous");
     maxQueueSize = par("maxQueueSize");
 
+    // check: datarate is forbidden with EtherMAC -- module's txrate must be used
+    cGate *g = gate("physicalOut");
+    while (g)
+    {
+        cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(g->channel());
+        if (chan && chan->datarate()>0)
+            error("connection on gate %s has data rate set: using data rate with EtherMAC "
+                  "is forbidden, module's txrate parameter must be used instead",
+                  g->fullPath());
+        g = g->toGate();
+    }
+
+    // check if connected
     disabled = !gate("physicalOut")->destinationGate()->isConnected();
     if (disabled)
         EV << "MAC not connected to a network, disabling.\n";
