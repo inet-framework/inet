@@ -358,8 +358,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         ev << "FEC found in LIB: outLabel=" << label << ", outInterface=" << outgoingInterface << "\n";
 
         // Construct a new MPLS packet
-        MPLSPacket *newPacket = NULL;
-        newPacket = new MPLSPacket(ipdatagram->name());
+        MPLSPacket *newPacket = new MPLSPacket(ipdatagram->name());
         newPacket->encapsulate(ipdatagram);
 
         // consistent in packet color
