@@ -356,9 +356,10 @@ class TCPConnection
 
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, simtime_t timeout)
-    {
-        tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);
-    }
+        {tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);}
+
+    /** Utility: cancel a timer */
+    cMessage *cancelEvent(cMessage *msg)  {return tcpMain->cancelEvent(msg);}
 
   protected:
     /** Utility: send IP packet */

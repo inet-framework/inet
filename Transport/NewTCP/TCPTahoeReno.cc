@@ -70,16 +70,11 @@ TCPTahoeReno::~TCPTahoeReno()
 {
     // Note: don't delete "state" here, it'll be deleted from TCPConnection
 
-    // Delete timers
-    ASSERT(rexmitTimer && !rexmitTimer->isScheduled());
-    ASSERT(persistTimer && !persistTimer->isScheduled());
-    ASSERT(delayedAckTimer && !delayedAckTimer->isScheduled());
-    ASSERT(keepAliveTimer && !keepAliveTimer->isScheduled());
-
-    delete rexmitTimer;
-    delete persistTimer;
-    delete delayedAckTimer;
-    delete keepAliveTimer;
+    // cancel and delete timers
+    if (rexmitTimer)     delete cancelEvent(rexmitTimer);
+    if (persistTimer)    delete cancelEvent(persistTimer);
+    if (delayedAckTimer) delete cancelEvent(delayedAckTimer);
+    if (keepAliveTimer)  delete cancelEvent(keepAliveTimer);
 }
 
 void TCPTahoeReno::initialize()
@@ -121,11 +116,10 @@ void TCPTahoeReno::established(bool active)
 
 void TCPTahoeReno::connectionClosed()
 {
-    TCPMain *mod = conn->getTcpMain();
-    mod->cancelEvent(rexmitTimer);
-    mod->cancelEvent(persistTimer);
-    mod->cancelEvent(delayedAckTimer);
-    mod->cancelEvent(keepAliveTimer);
+    cancelEvent(rexmitTimer);
+    cancelEvent(persistTimer);
+    cancelEvent(delayedAckTimer);
+    cancelEvent(keepAliveTimer);
 }
 
 void TCPTahoeReno::processTimer(cMessage *timer, TCPEventCode& event)
@@ -300,7 +294,7 @@ void TCPTahoeReno::receiveSeqChanged()
 void TCPTahoeReno::receivedDataAck(uint32 firstSeqAcked)
 {
     // first cancel retransmission timer
-    conn->getTcpMain()->cancelEvent(rexmitTimer);
+    cancelEvent(rexmitTimer);
 
     // if round-trip time measurement is running, check if rtseq has been acked
     if (state->t_rtseq_sent!=0 && seqLess(state->rtseq, state->snd_una))
@@ -391,7 +385,7 @@ void TCPTahoeReno::receivedDuplicateAck()
         state->t_rtseq_sent = 0;
 
         // restart retransmission timer (with rexmit_count=0). RTO is unchanged.
-        conn->getTcpMain()->cancelEvent(rexmitTimer);
+        cancelEvent(rexmitTimer);
         startRexmitTimer();
 
         // retransmit missing segment
@@ -423,7 +417,7 @@ void TCPTahoeReno::ackSent()
 {
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
-        conn->getTcpMain()->cancelEvent(delayedAckTimer);
+        cancelEvent(delayedAckTimer);
 }
 
 void TCPTahoeReno::dataSent(uint32 fromseq)

@@ -120,6 +120,9 @@ class TCPTahoeReno : public TCPAlgorithm
      */
     virtual bool sendData();
 
+    /** Utility function */
+    cMessage *cancelEvent(cMessage *msg)  {return conn->getTcpMain()->cancelEvent(msg);}
+
   public:
     /**
      * Ctor.

@@ -18,6 +18,7 @@
 
 
 #include <string.h>
+#include <assert.h>
 #include "TCPMain.h"
 #include "TCPConnection.h"
 #include "TCPSegment_m.h"
@@ -132,19 +133,13 @@ TCPConnection::~TCPConnection()
 {
     delete sendQueue;
     delete receiveQueue;
-
     delete tcpAlgorithm;
     delete state;
 
-    ASSERT(!the2MSLTimer || !the2MSLTimer->isScheduled());
-    ASSERT(!connEstabTimer || !connEstabTimer->isScheduled());
-    ASSERT(!finWait2Timer || !finWait2Timer->isScheduled());
-    ASSERT(!synRexmitTimer || !synRexmitTimer->isScheduled());
-
-    delete the2MSLTimer;
-    delete connEstabTimer;
-    delete finWait2Timer;
-    delete synRexmitTimer;
+    if (the2MSLTimer)   delete cancelEvent(the2MSLTimer);
+    if (connEstabTimer) delete cancelEvent(connEstabTimer);
+    if (finWait2Timer)  delete cancelEvent(finWait2Timer);
+    if (synRexmitTimer) delete cancelEvent(synRexmitTimer);
 }
 
 bool TCPConnection::processTimer(cMessage *msg)
@@ -407,8 +402,8 @@ void TCPConnection::stateEntered(int state)
         case TCP_S_LISTEN:
             // we may get back to LISTEN from SYN_RCVD
             ASSERT(connEstabTimer && synRexmitTimer);
-            tcpMain->cancelEvent(connEstabTimer);
-            tcpMain->cancelEvent(synRexmitTimer);
+            cancelEvent(connEstabTimer);
+            cancelEvent(synRexmitTimer);
             break;
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
@@ -422,15 +417,15 @@ void TCPConnection::stateEntered(int state)
         case TCP_S_TIME_WAIT:
             // whether connection setup succeeded (ESTABLISHED) or not (others),
             // cancel these timers
-            if (connEstabTimer) tcpMain->cancelEvent(connEstabTimer);
-            if (synRexmitTimer) tcpMain->cancelEvent(synRexmitTimer);
+            if (connEstabTimer) cancelEvent(connEstabTimer);
+            if (synRexmitTimer) cancelEvent(synRexmitTimer);
             break;
         case TCP_S_CLOSED:
             // all timers need to be cancelled
-            if (the2MSLTimer) tcpMain->cancelEvent(the2MSLTimer);
-            if (connEstabTimer) tcpMain->cancelEvent(connEstabTimer);
-            if (finWait2Timer) tcpMain->cancelEvent(finWait2Timer);
-            if (synRexmitTimer) tcpMain->cancelEvent(synRexmitTimer);
+            if (the2MSLTimer)   cancelEvent(the2MSLTimer);
+            if (connEstabTimer) cancelEvent(connEstabTimer);
+            if (finWait2Timer)  cancelEvent(finWait2Timer);
+            if (synRexmitTimer) cancelEvent(synRexmitTimer);
             tcpAlgorithm->connectionClosed();
             break;
     }

@@ -246,8 +246,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         event = TCP_E_RCV_ACK; // will trigger transition to ESTABLISHED
 
         // we're in ESTABLISHED, these timers are no longer needed
-        delete tcpMain->cancelEvent(connEstabTimer);
-        delete tcpMain->cancelEvent(synRexmitTimer);
+        delete cancelEvent(connEstabTimer);
+        delete cancelEvent(synRexmitTimer);
         connEstabTimer = synRexmitTimer = NULL;
 
         // notify
@@ -486,17 +486,17 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     event = TCP_E_RCV_FIN_ACK;
                     // start the time-wait timer, turn off the other timers;
                     scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
-                    tcpMain->cancelEvent(finWait2Timer);
+                    cancelEvent(finWait2Timer);
                 }
                 break;
             case TCP_S_FIN_WAIT_2:
                 // Start the time-wait timer, turn off the other timers.
                 scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
-                tcpMain->cancelEvent(finWait2Timer);
+                cancelEvent(finWait2Timer);
                 break;
             case TCP_S_TIME_WAIT:
                 // Restart the 2 MSL time-wait timeout.
-                tcpMain->cancelEvent(the2MSLTimer);
+                cancelEvent(the2MSLTimer);
                 scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
                 break;
         }
@@ -728,8 +728,8 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
             tcpEV << "SYN+ACK bits set\n";
 
             // we're in ESTABLISHED, these timers are no longer needed
-            delete tcpMain->cancelEvent(connEstabTimer);
-            delete tcpMain->cancelEvent(synRexmitTimer);
+            delete cancelEvent(connEstabTimer);
+            delete cancelEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = NULL;
 
             // notify
@@ -988,7 +988,7 @@ void TCPConnection::startSynRexmitTimer()
     state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
 
     if (synRexmitTimer->isScheduled())
-        tcpMain->cancelEvent(synRexmitTimer);
+        cancelEvent(synRexmitTimer);
     scheduleTimeout(synRexmitTimer, state->syn_rexmit_timeout);
 }
 
