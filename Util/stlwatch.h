@@ -109,7 +109,7 @@ class cMapWatcher : public cVectorWatcherBase
     }
     virtual string atIt() const {
         stringstream out;
-        out << "KEY {" << it->first << "}  VALUE {" << it->second << "}";
+        out << "{" << it->first << "}  ==>  {" << it->second << "}";
         return out.str();
     }
 };
@@ -131,7 +131,7 @@ class cPointerMapWatcher : public cMapWatcher<_K,_V,_C>
     cPointerMapWatcher(const char *name, map<_K,_V,_C>& var) : cMapWatcher<_K,_V,_C>(name, var) {}
     virtual string atIt() const {
         stringstream out;
-        out << "KEY {" << it->first << "}  VALUE {" << *(it->second) << "}";
+        out << "{" << it->first << "}  ==>  {" << *(it->second) << "}";
         return out.str();
     }
 };
