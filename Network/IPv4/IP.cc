@@ -90,7 +90,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
 
 void IP::handleMessageFromHL(cMessage *msg)
 {
-    IPDatagram *datagram = encapsulate(msg); //FIXME should get ip address of output interface as src address!!!
+    IPDatagram *datagram = encapsulate(msg);
     routePacket(datagram);
 }
 
@@ -141,6 +141,10 @@ void IP::routePacket(IPDatagram *datagram)
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
         return;
     }
+
+    // set datagram source address if not yet set
+    if (datagram->srcAddress().isNull())
+        datagram->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
 
     // default: send datagram to fragmentation
     ev << "output port is " << outputPort << "\n";
@@ -212,6 +216,12 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
             if (outputPort>=0 && outputPort!=inputPort)
             {
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
+
+                // set datagram source address if not yet set
+                if (datagramCopy->srcAddress().isNull())
+                    datagramCopy->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
+
+                // send
                 fragmentAndSend(datagramCopy, outputPort);
             }
         }
@@ -352,6 +362,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     IPAddress src = controlInfo->srcAddr();
 
     // when source address given in Interface Message, use it
+    // (otherwise it'll get the address of the outgoing interface after routing)
     if (!src.isNull())
     {
         // if interface parameter does not match existing interface, do not send datagram
@@ -359,12 +370,6 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->className(), transportPacket->fullName());
         datagram->setSrcAddress(src);
-    }
-    else
-    {
-        // otherwise, just use the first
-        // FIXME this is shit
-        datagram->setSrcAddress(rt->interfaceByPortNo(0)->inetAddr);
     }
 
     // set other fields

@@ -94,6 +94,10 @@ void Routing::endService(cMessage *msg)
         return;
     }
 
+    // set datagram source address if not yet set
+    if (datagram->srcAddress().isNull())
+        datagram->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
+
     // default: send datagram to fragmentation
     routingDecision->setOutputPort(outputPort);
     //FIXME todo: routingDecision->setNextHopAddr(nextHopAddr);

@@ -67,6 +67,7 @@ IPDatagram *IPSend::encapsulate(cMessage *transportPacket)
     IPAddress src = controlInfo->srcAddr();
 
     // when source address given in Interface Message, use it
+    // (otherwise it'll get the address of the outgoing interface after routing)
     if (!src.isNull())
     {
         // if interface parameter does not match existing interface, do not send datagram
@@ -74,12 +75,6 @@ IPDatagram *IPSend::encapsulate(cMessage *transportPacket)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->className(), transportPacket->fullName());
         datagram->setSrcAddress(src);
-    }
-    else
-    {
-        // otherwise, just use the first
-        // FIXME this is shit
-        datagram->setSrcAddress(rt->interfaceByPortNo(0)->inetAddr);
     }
 
     // set other fields
