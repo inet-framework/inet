@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  IPv4 LDP MPLS RSVP_TE
+SUBDIRS=  AutoRouting IPv4 IPv4d LDP MPLS RSVP_TE
 
 # object files in this directory
 OBJS=  
@@ -60,8 +60,14 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
+AutoRouting:
+	cd AutoRouting && $(MAKE)
+
 IPv4:
 	cd IPv4 && $(MAKE)
+
+IPv4d:
+	cd IPv4d && $(MAKE)
 
 LDP:
 	cd LDP && $(MAKE)

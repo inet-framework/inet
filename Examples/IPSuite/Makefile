@@ -34,7 +34,7 @@ include ../../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
+SUBDIRS=  FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
 
 # object files in this directory
 OBJS=  
@@ -59,6 +59,9 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
+
+FlatNet:
+	cd FlatNet && $(MAKE)
 
 KIDSNw1:
 	cd KIDSNw1 && $(MAKE)

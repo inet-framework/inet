@@ -146,88 +146,44 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 EtherBus.o: EtherBus.cc \
-  EtherFrame_m.h \
   utils.h \
-  Ethernet.h \
-  ../_802/MACAddress.h \
-  EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
-EtherCtrl_m.o: EtherCtrl_m.cc \
-  EtherCtrl_m.h \
-  Ethernet.h \
-  ../_802/MACAddress.h \
-  ../_802/MACAddress_m.h
 EtherEncap.o: EtherEncap.cc \
   Ethernet.h \
-  EtherFrame_m.h \
-  EtherCtrl_m.h \
   utils.h \
-  ../_802/MACAddress.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
-EtherFrame_m.o: EtherFrame_m.cc \
-  EtherFrame_m.h \
-  utils.h \
-  Ethernet.h \
-  ../_802/MACAddress.h \
-  EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
 EtherHub.o: EtherHub.cc \
-  EtherFrame_m.h \
   utils.h \
-  Ethernet.h \
-  ../_802/MACAddress.h \
-  EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherLLC.o: EtherLLC.cc \
   Ethernet.h \
-  EtherFrame_m.h \
   utils.h \
-  ../_802/MACAddress.h \
-  EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherMAC.o: EtherMAC.cc \
   EtherMAC.h \
   utils.h \
   Ethernet.h \
-  EtherFrame_m.h \
-  ../_802/MACAddress.h \
-  EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 MACRelayUnitBase.o: MACRelayUnitBase.cc \
   MACRelayUnitBase.h \
   ../_802/MACAddress.h \
-  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
-  ../_802/MACAddress_m.h \
-  EtherCtrl_m.h \
   ../../Base/ipsuite_defs.h
 MACRelayUnitNP.o: MACRelayUnitNP.cc \
   MACRelayUnitNP.h \
-  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
-  EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
+  ../../Base/ipsuite_defs.h
 MACRelayUnitPP.o: MACRelayUnitPP.cc \
   MACRelayUnitPP.h \
-  EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
-  EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
+  ../../Base/ipsuite_defs.h
 utils.o: utils.cc \
   utils.h \
   ../../Base/ipsuite_defs.h
