@@ -60,7 +60,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPTahoeReno.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
+OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPSocket.obj TCPSocketMap.obj TCPTahoeReno.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
@@ -123,6 +123,9 @@ TCPMain.obj: TCPMain.cc
 
 TCPSocket.obj: TCPSocket.cc
 	$(CXX) -c $(COPTS) /Tp TCPSocket.cc
+
+TCPSocketMap.obj: TCPSocketMap.cc
+	$(CXX) -c $(COPTS) /Tp TCPSocketMap.cc
 
 TCPTahoeReno.obj: TCPTahoeReno.cc
 	$(CXX) -c $(COPTS) /Tp TCPTahoeReno.cc
@@ -244,6 +247,13 @@ TCPMain.obj: TCPMain.cc \
 TCPSegment_m.obj: TCPSegment_m.cc \
   TCPSegment_m.h
 TCPSocket.obj: TCPSocket.cc \
+  TCPSocket.h \
+  TCPMain.h \
+  TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
+TCPSocketMap.obj: TCPSocketMap.cc \
+  TCPSocketMap.h \
   TCPSocket.h \
   TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \

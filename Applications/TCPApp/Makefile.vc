@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPSessionApp.obj
+OBJS= TCPServerApp.obj TCPSessionApp.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -89,6 +89,9 @@ $(EXT_DIR_TSTAMPS):
 	@exit /b 1
 
 subdirs: $(SUBDIR_TARGETS)
+
+TCPServerApp.obj: TCPServerApp.cc
+	$(CXX) -c $(COPTS) /Tp TCPServerApp.cc
 
 TCPSessionApp.obj: TCPSessionApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPSessionApp.cc
@@ -123,7 +126,15 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+TCPServerApp.obj: TCPServerApp.cc \
+  TCPServerApp.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPSocketMap.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 TCPSessionApp.obj: TCPSessionApp.cc \
+  TCPSessionApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
