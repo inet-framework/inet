@@ -73,14 +73,20 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     while (i!=payloadQueue.end() && seqLess(i->endSequenceNo, fromSeq))
         ++i;
     uint32 toSeq = fromSeq+numBytes;
+    const char *payloadName = NULL;
     while (i!=payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
     {
+        if (!payloadName) payloadName = i->msg->name();
         tcpseg->addPayloadMessage((cMessage *)i->msg->dup(), i->endSequenceNo);
         ++i;
     }
 
-    char msgname[32];
-    sprintf(msgname, "tcpseg(l=%d,%dmsg)", numBytes, tcpseg->payloadArraySize());
+    // give segment a name
+    char msgname[80];
+    if (!payloadName)
+        sprintf(msgname, "tcpseg(l=%d,%dmsg)", numBytes, tcpseg->payloadArraySize());
+    else
+        sprintf(msgname, "%.10s(l=%d,%dmsg)", payloadName, numBytes, tcpseg->payloadArraySize());
     tcpseg->setName(msgname);
 
     return tcpseg;

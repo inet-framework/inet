@@ -109,7 +109,7 @@ void NewLDP::handleMessage(cMessage *msg)
 
 void NewLDP::sendHelloTo(IPAddress dest)
 {
-    LDPHello *hello = new LDPHello("ldp-hello");
+    LDPHello *hello = new LDPHello("LDP-Hello");
     hello->setType(HELLO);
     //hello->setHoldTime(...);
     //hello->setRbit(...);
@@ -315,7 +315,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     fecSenderBinds.push_back(newBind);
 
     // genarate new LABEL REQUEST and send downstream
-    LDPLabelRequest *requestMsg = new LDPLabelRequest();
+    LDPLabelRequest *requestMsg = new LDPLabelRequest("Lb-Req");
     requestMsg->setType(LABEL_REQUEST);
     requestMsg->setFec(fecInt.getInt());  // FIXME this is actually the dest IP address!!!
     requestMsg->addPar("fecId") = fecId; // FIXME!!!
@@ -515,7 +515,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         // Construct a label mapping message
 
-        LDPLabelMapping *lmMessage = new LDPLabelMapping();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
         lmMessage->setType(LABEL_MAPPING);
         lmMessage->setLength(30*8); // FIXME find out actual length
 
@@ -550,7 +550,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         int inLabel = (lt->installNewLabel(-1, fromInterface, nextInterface, fecId, POP_OPER)); // fec));
 
         // Send LABEL MAPPING upstream
-        LDPLabelMapping *lmMessage = new LDPLabelMapping();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
         lmMessage->setType(LABEL_MAPPING);
         lmMessage->setLength(30*8); // FIXME find out actual length
 
