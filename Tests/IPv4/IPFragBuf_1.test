@@ -1,0 +1,23 @@
+%description:
+Test the IP fragmentation reassembly buffer (IPFragBuf class)
+
+%global:
+#include "IPFragBuf.h"
+
+void insertFragment(IPFragBuf *fragbuf, ushort beg, ushort len)
+{
+    IPDatagram *frag = new IPDatagram();
+
+    tcpseg->setIdentification(beg);
+    tcpseg->setPayloadLength(end-beg);
+    uint32 rcv_nxt = q->insertBytesFromSegment(tcpseg);
+    delete tcpseg;
+
+    ev << "insertSeg [" << beg << ".." << end << ") --> " << q->info() <<"\n";
+}
+
+%activity:
+IPFragBuf fragbuf;
+
+%contains: stdout
+sdasdsada
