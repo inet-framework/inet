@@ -13,11 +13,17 @@
 
 //
 // Handles and processes LDP messages.
+//
+// The LDP protocol is used by one LSR (Label Switched Router) to inform
+// another LSR of the label bindings it has made. The LSR uses this protocol 
+// to establish label switched paths through a network by mapping network layer
+// routing information directly to data-link layer switched paths. 
 // 
 // In contrast to other common static modules, LDPproc modules are dynamically created. 
 // Each time there is a LDP session requested to be established from a peer, 
 // the LSR will spawn a new LDPproc to process LDP messages exchanged between 
 // that peer and itself.
+//#FIXME this is probably false...
 // 
 // Operations
 // 
