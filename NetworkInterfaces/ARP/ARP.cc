@@ -197,10 +197,14 @@ void ARP::processOutboundPacket(cMessage *msg)
 {
     EV << "Packet " << msg << " arrived from higher layer\n";
 
-    // get control info from packet
-    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(msg->removeControlInfo());
-    IPAddress nextHopAddr = controlInfo->nextHopAddr();
-    delete controlInfo;
+    // get next hop address from optional control info in packet
+    IPAddress nextHopAddr;
+    if (msg->controlInfo())
+    {
+        IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(msg->removeControlInfo());
+        nextHopAddr = controlInfo->nextHopAddr();
+        delete controlInfo;
+    }
 
     if (nextHopAddr.isNull())
     {
@@ -282,7 +286,7 @@ void ARP::sendPacketToMAC(cMessage *msg, const MACAddress& macAddress)
 void ARP::sendARPRequest(IPAddress ipAddress)
 {
     // fill out everything except dest MAC address
-    ARPPacket *arp = new ARPPacket(opp_concat("arp-",ipAddress.str().c_str()));
+    ARPPacket *arp = new ARPPacket("arpREQ");
     arp->setOpcode(ARP_REQUEST);
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
@@ -430,6 +434,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 EV << "Packet was ARP REQUEST, sending REPLY\n";
 
                 // "Swap hardware and protocol fields", etc.
+                arp->setName("arpREPLY");
                 IPAddress origDestAddress = arp->getDestIPAddress();
                 arp->setDestIPAddress(srcIPAddress);
                 arp->setDestMACAddress(srcMACAddress);
