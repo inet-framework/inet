@@ -20,7 +20,9 @@
 import
     "Blackboard",
     "NetworkLayer",
-    "TrafficGen";
+    "IPTrafficGenerator",
+    "PPPInterface",
+    "RoutingTable";
 
 
 
@@ -30,8 +32,7 @@ import
 //
 module BurstHost
     parameters:
-        burstPackets : numeric const,
-        packetSize : numeric const,
+        trafGenType : string,
         IPForward : bool,
         routingFile : string;
     gates:
@@ -46,13 +47,7 @@ module BurstHost
                 routerId = "",
                 routingFile = routingFile;
             display: "p=70,130;i=box3";
-        burstGenerator: TrafficGenerator;
-            parameters:
-                GeneratorType = "BurstGenerator",
-                tcpProtocol = false,
-                burstPackets = burstPackets,
-                generationTime = 0,
-                generationSize = packetSize;
+        trafGen: trafGenType like IPTrafficGenerator;
             display: "i=app;p=140,60";
         networkLayer: NetworkLayer;
             gatesizes:
@@ -63,8 +58,8 @@ module BurstHost
             display: "p=140,200,row,90;q=queue;i=iface";
     connections nocheck:
         // transport connections
-        networkLayer.UDPOut --> burstGenerator.in;
-        networkLayer.UDPIn <-- burstGenerator.out;
+        networkLayer.UDPOut --> trafGen.to_ip;
+        networkLayer.UDPIn <-- trafGen.from_ip;
 
         // connections to network outside
         for i=0..0 do

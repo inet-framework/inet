@@ -25,10 +25,10 @@
 class StringTokenizer
 {
   private:
-    char *str;
+    char *str; // copy of full string
+    char *rest; // rest of string (to be tokenized)
+    char *strend; // points to terminating zero of str
     std::string delimiter;
-    bool atFirstToken;
-    static bool active;
   public:
     StringTokenizer(const char *s, const char *delim=" ");
     ~StringTokenizer();

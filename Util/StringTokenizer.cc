@@ -13,26 +13,26 @@
 *
 *********************************************************************/
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4786)
+#endif
+
 #include <assert.h>
 #include <stdlib.h>
 #include "StringTokenizer.h"
 
 
-bool StringTokenizer::active = false;
-
 StringTokenizer::StringTokenizer(const char *s, const char *delim)
 {
-    assert(!active);
-    active = true;
     delimiter = delim;
-    bool atFirstToken = true;
     str = new char[strlen(s)+1];
     strcpy(str,s);
+    strend = str+strlen(str);
+    rest = str;
 }
 
 StringTokenizer::~StringTokenizer()
 {
-    active = false;
     delete str;
 }
 
@@ -43,12 +43,14 @@ void StringTokenizer::setDelimiter(const char *delim)
 
 const char *StringTokenizer::nextToken()
 {
-    if (atFirstToken)
-    {
-        atFirstToken = false;
-        return strtok(str, delimiter.c_str());
-    }
-    return strtok(NULL, delimiter.c_str());
+    if (!rest)
+        return NULL;
+    char *token = strtok(rest, delimiter.c_str());
+    rest = token ? token+strlen(token)+1 : NULL;
+    if (rest && rest>=strend)
+        rest = NULL;
+    return token;
+
 }
 
 std::vector<std::string> StringTokenizer::asVector()

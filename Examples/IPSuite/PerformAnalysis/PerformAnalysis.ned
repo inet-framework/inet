@@ -27,7 +27,6 @@ import
 
 module PerformanceNetwork
     parameters:
-        packetNo : numeric const,
         nodeNo : numeric const;
     submodules:
         configurator: FlatNetworkConfigurator;
