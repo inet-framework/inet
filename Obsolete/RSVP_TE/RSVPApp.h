@@ -85,7 +85,7 @@ private:
     std::vector<routing_info_t> routingInfo;
 
     bool initFromFile(const cXMLElement *root);
-    void TrafficRequest(const cXMLElement *connNode);
+    traffic_request_t parseTrafficRequest(const cXMLElement *connNode);
     void addRouteInfo(ResvMessage* rmsg);
     bool hasPath(int lspid, FlowSpecObj_t* newFlowspec);
     double getTotalDelay(std::vector<simple_link_t> *links);

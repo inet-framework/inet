@@ -64,7 +64,6 @@ Network/LDP/tcp2ldp.ned
 Network/LDP/tcpclientproc.ned
 Network/LDP/tcpserverproc.ned
 Network/LDP/UDPInterface.ned
-Network/MPLS/DatalinkLayer.ned
 Network/MPLS/LIBTable.ned
 Network/MPLS/MPLSModule.ned
 Network/RSVP_TE/NetworkManager.ned

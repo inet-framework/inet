@@ -886,11 +886,14 @@ bool RSVPAppl::initFromFile(const cXMLElement *root)
 
     cXMLElementList list = root->getChildrenByTagName("conn");
     for (cXMLElementList::iterator i=list.begin(); i!=list.end(); i++)
-        TrafficRequest(*i);
+    {
+        traffic_request_t aTR = parseTrafficRequest(*i);
+        tr.push_back(aTR);
+    }
     return true;
 }
 
-void RSVPAppl::TrafficRequest(const cXMLElement *connNode)
+traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *connNode)
 {
     traffic_request_t aTR;
     for (int c = 0; c < MAX_ROUTE; c++)
@@ -963,7 +966,7 @@ void RSVPAppl::TrafficRequest(const cXMLElement *connNode)
     if (aTR.holdingPri > aTR.setupPri)
         error("Holding priority is greater than setup priority (setup priority must be greater than or equal)");
 
-    tr.push_back(aTR);
+    return aTR;
 }
 
 

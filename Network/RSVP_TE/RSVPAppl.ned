@@ -12,13 +12,16 @@
 
 
 //
-// FIXME: add documentation here
+// Reads traffic.xml file (only if Ingress router!) and stores
+// it into a traffic_request_t[] array. Then it enters a huge
+// ugly 500-line activity() function which still needs to be 
+// deciphered and chopped up to smaller parts.
 //
 simple RSVPAppl
     parameters:
         local_addr : string,
         dest_addr : string,
-        traffic : string,
+        traffic : string, // traffic XML file
         isIR : bool,
         isER : bool,
         isSender : bool;

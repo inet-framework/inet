@@ -12,8 +12,10 @@
 *
 *
 *********************************************************************/
+
 #include "MPLSModule.h"
 #include "TED.h"
+#include "StringTokenizer.h"
 
 #include "stlwatch.h"
 
@@ -86,8 +88,8 @@ void TED::buildDatabase()
     cTopology topo;
     const char *moduleTypes = par("moduleTypes").stringValue();
 
-    //FIXME todo use moduleTypes parameter!!!!!
-    topo.extractByModuleType("RSVP_LSR_Node", "StandardHost2", NULL);
+    std::vector<std::string> types = StringTokenizer(par("moduleTypes"), " ").asVector();
+    topo.extractByModuleType(types);
     ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
 
     for (int i = 0; i < topo.nodes(); i++)

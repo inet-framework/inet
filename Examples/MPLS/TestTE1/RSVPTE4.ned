@@ -67,48 +67,46 @@ module RSVPTE4
                 out[3];
             display: "p=388,159;i=srouter";
         host1: StandardHost2;  // client
-            parameters:
-                start_time = 0;
             display: "p=26,98;i=comp_s";
         host2: StandardHost2;  // client
-            parameters:
-                start_time = 0;
             display: "p=26,256;i=comp_s";
         host3: StandardHost2;  // server
             display: "p=610,80;i=comp_s";
         host4: StandardHost2;  // server
-            display: "p=602,248;i=comp_s";
+            display: "p=602,248;i=server_s";
         ted: TED;
+            parameters:
+               moduleTypes = "StandardHost2 RSVP_LSR_Node";
             display: "p=148,376;b=24,16";
     connections nocheck:
-        host1.in[0] <-- delay 0 error 0 datarate 700 <-- LSR1.out[0];
-        host1.out[0] --> delay 0 error 0 datarate 700 --> LSR1.in[0];
+        host1.in++ <-- delay 0 error 0 datarate 700 <-- LSR1.out++;
+        host1.out++ --> delay 0 error 0 datarate 700 --> LSR1.in++;
 
-        host2.in[0] <-- delay 0 error 0 datarate 700 <-- LSR1.out[1];
-        host2.out[0] --> delay 0 error 0 datarate 700 --> LSR1.in[1];
+        host2.in++ <-- delay 0 error 0 datarate 700 <-- LSR1.out++;
+        host2.out++ --> delay 0 error 0 datarate 700 --> LSR1.in++;
 
-        LSR1.out[2] --> delay 15 error 0 datarate 600 --> LSR2.in[0];
-        LSR1.in[2] <-- delay 15 error 0 datarate 600 <-- LSR2.out[0];
+        LSR1.out++ --> delay 15 error 0 datarate 600 --> LSR2.in++;
+        LSR1.in++ <-- delay 15 error 0 datarate 600 <-- LSR2.out++;
 
-        LSR1.out[3] --> delay 5 error 0 datarate 120 --> LSR3.in[0];
-        LSR1.in[3] <-- delay 5 error 0 datarate 120 <-- LSR3.out[0];
+        LSR1.out++ --> delay 5 error 0 datarate 120 --> LSR3.in++;
+        LSR1.in++ <-- delay 5 error 0 datarate 120 <-- LSR3.out++;
 
-        LSR2.out[1] --> delay 5 error 0 datarate 600 --> LSR4.in[0];
-        LSR2.in[1] <-- delay 5 error 0 datarate 600 <-- LSR4.out[0];
-
-
-        LSR3.out[1] --> delay 5 error 0 datarate 200 --> LSR4.in[1];
-        LSR3.in[1] <-- delay 5 error 0 datarate 200 <-- LSR4.out[1];
-
-        LSR4.out[2] --> delay 5 error 0 datarate 700 --> LSR5.in[0];
-        LSR4.in[2] <-- delay 5 error 0 datarate 700 <-- LSR5.out[0];
+        LSR2.out++ --> delay 5 error 0 datarate 600 --> LSR4.in++;
+        LSR2.in++ <-- delay 5 error 0 datarate 600 <-- LSR4.out++;
 
 
-        LSR5.out[2] --> delay 0 error 0 datarate 600 --> host3.in[0];
-        LSR5.in[2] <-- delay 10 error 0 datarate 600 <-- host3.out[0];
+        LSR3.out++ --> delay 5 error 0 datarate 200 --> LSR4.in++;
+        LSR3.in++ <-- delay 5 error 0 datarate 200 <-- LSR4.out++;
 
-        LSR5.out[1] --> delay 0 error 0 datarate 600 --> host4.in[0];
-        LSR5.in[1] <-- delay 10 error 0 datarate 600 <-- host4.out[0];
+        LSR4.out++ --> delay 5 error 0 datarate 700 --> LSR5.in++;
+        LSR4.in++ <-- delay 5 error 0 datarate 700 <-- LSR5.out++;
+
+
+        LSR5.out++ --> delay 0 error 0 datarate 600 --> host3.in++;
+        LSR5.in++ <-- delay 10 error 0 datarate 600 <-- host3.out++;
+
+        LSR5.out++ --> delay 0 error 0 datarate 600 --> host4.in++;
+        LSR5.in++ <-- delay 10 error 0 datarate 600 <-- host4.out++;
 
 endmodule
 
