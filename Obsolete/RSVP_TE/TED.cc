@@ -84,7 +84,10 @@ void TED::buildDatabase()
     TELinkState *entry = new TELinkState;
 
     cTopology topo;
-    topo.extractByModuleType("TCPClientTest", "TCPServerTest", "RSVP_LSR_Node", NULL);
+    const char *moduleTypes = par("moduleTypes").stringValue();
+
+    //FIXME todo use moduleTypes parameter!!!!!
+    topo.extractByModuleType("RSVP_LSR_Node", "StandardHost2", NULL);
     ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
 
     for (int i = 0; i < topo.nodes(); i++)
