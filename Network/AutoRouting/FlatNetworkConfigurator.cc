@@ -32,9 +32,39 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     cTopology *topo = new cTopology("topo");
 
-    // this can probably be made more flexible
-    topo->extractByModuleType(par("nodeType"), NULL);
+    // FIXME use par("moduleTypesToProcess")
+    topo->extractByModuleType("UDPHost", "Router", NULL);
     ev << "cTopology found " << topo->nodes() << " nodes\n";
+
+    // assign IP addresses
+    uint32 networkAddress = IPAddress(par("networkAddress")).getInt();
+    uint32 netmask = IPAddress(par("netmask")).getInt();
+    int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
+    if (topo->nodes()>maxNodes)
+        error("netmask too large, not enough addresses for all %d nodes", topo->nodes());
+
+    for (int i=0; i<topo->nodes(); i++)
+    {
+        // host part will be simply i+1.
+        uint32 addr = networkAddress | uint32(i+1);
+
+        // find interface table and assign address to all interfaces with an output port
+        cModule *mod = topo->node(i)->module();
+        cModule *networkLayer = mod->submodule("networkLayer");
+        RoutingTable *rt = !networkLayer ? NULL : dynamic_cast<RoutingTable *>(networkLayer->submodule("routingTable"));
+        if (!rt)
+            error("cannot find module networklayer.routingTable in node '%s'", mod->fullPath());
+
+        for (int k=0; k<rt->numInterfaces(); k++)
+        {
+            InterfaceEntry *e = rt->interfaceByIndex(k);
+            if (e->outputPort!=-1)
+            {
+                e->inetAddr = IPAddress(addr);
+                e->mask = IPAddress(netmask);
+            }
+        }
+    }
 
     // find and store next hops
     //
@@ -62,6 +92,12 @@ void FlatNetworkConfigurator::initialize(int stage)
         }
     }
     delete topo;
+
+
+        moduleTypesToProcess: string,
+        networkAddress: string,
+        netmask: string;
+
 }
 
 int FlatNetworkConfigurator::getNextHop(int atAddress, int destAddress)

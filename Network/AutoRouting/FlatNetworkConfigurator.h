@@ -26,29 +26,9 @@
 /**
  * Configures IP addresses and routing tables for a "flat" network,
  * "flat" meaning that all hosts and routers will have the same
- * network address and will only differ in the host part.
+ * network address.
  *
- * This module does't connect to any other modules (it has no gates),
- * and should have only one instance in the whole model. The module
- * will only run once, at the beginning of the simulation.
- * When it runs, it will:
- *    - #. assign IP addresses to hosts and routers. All hosts and
- *      routes will be in the same network (same network address).
- *      For simplicity, it will assign the same address to all interfaces
- *      of a router;
- *    - #. then it'll discover the topology of the network (using OMNeT++'s
- *      cTopology class), and calculate shortest paths;
- *    - #. finally, it will add routes which correspond to the shortest
- *      paths to the routing tables (see RoutingTable::addRoutingEntry()).
- *
- * To avoid interference with the above algorithm, it's recommended that
- * no host or router should have its address set explicitly, and
- * no routes are set up manually. Practically, routing files (.irt, .mrt)
- * should be missing or empty.
- *
- * All the above is executed in initialization stage 2. (In stage 0,
- * interfaces register themselves in the RoutingTable modules, and
- * in stage 1, routing files are read.)
+ * For more info please see the NED file.
  */
 class FlatNetworkConfigurator : public cSimpleModule
 {
