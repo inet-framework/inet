@@ -34,7 +34,7 @@ include ../../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  Core QoS
+SUBDIRS= 
 
 # object files in this directory
 OBJS=  ICMP.o IPAddress.o IP.o IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
@@ -67,12 +67,6 @@ $(EXT_DIR_TSTAMPS):
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
-
-Core:
-	cd Core && $(MAKE)
-
-QoS:
-	cd QoS && $(MAKE)
 
 ICMP.o: ICMP.cc
 	$(CXX) -c $(COPTS) ICMP.cc

@@ -34,7 +34,7 @@ include ../../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
+SUBDIRS=  FlatNet KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPUDPDirectNet
 
 # object files in this directory
 OBJS=  
@@ -75,14 +75,8 @@ PerformAnalysis:
 TCPClientServerNet:
 	cd TCPClientServerNet && $(MAKE)
 
-TCPTester:
-	cd TCPTester && $(MAKE)
-
 TCPUDPDirectNet:
 	cd TCPUDPDirectNet && $(MAKE)
-
-UDPSockets:
-	cd UDPSockets && $(MAKE)
 
 
 #doc: neddoc doxy

@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  NewTCP RTP Socket TCP UDP
+SUBDIRS=  RTP TCP UDP
 
 # object files in this directory
 OBJS=  
@@ -70,14 +70,8 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
-NewTCP:
-	cd NewTCP && $(MAKE)
-
 RTP:
 	cd RTP && $(MAKE)
-
-Socket:
-	cd Socket && $(MAKE)
 
 TCP:
 	cd TCP && $(MAKE)

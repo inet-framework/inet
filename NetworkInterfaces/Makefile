@@ -34,7 +34,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  _802 ARP Ethernet PPP Queues
+SUBDIRS=  _802 ARP Ethernet PPP
 
 # object files in this directory
 OBJS=  
@@ -71,9 +71,6 @@ Ethernet:
 
 PPP:
 	cd PPP && $(MAKE)
-
-Queues:
-	cd Queues && $(MAKE)
 
 
 #doc: neddoc doxy
