@@ -99,8 +99,8 @@ module IPProcessing
             display: "b=16,16;p=313,40;i=box1_s";
         inputQueue: InputQueue;
             gatesizes:
-                fromNW[sizeof(QueueIn)];
-            display: "p=39,53;i=queue";
+                fromNW[sizeof(queueIn)];
+            display: "p=50,304;i=queue";
     connections nocheck:
 
         // L2 input to InputQueue

@@ -30,15 +30,7 @@ Define_Module(LocalDeliver);
 
 void LocalDeliver::initialize()
 {
-    fragmentTimeoutTime = strToSimtime(par("fragmentTimeout")); // FIXME why not numeric param?
-
-    for (int i=0; i < FRAGMENT_BUFFER_MAXIMUM; i++)
-    {
-        fragmentBuf[i].isFree = true;
-        fragmentBuf[i].fragmentId = -1;
-    }
-
-    fragmentBufSize = 0;
+    fragmentTimeoutTime = par("fragmentTimeout");
     lastCheckTime = 0;
 }
 
@@ -47,35 +39,19 @@ void LocalDeliver::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 
-    // erase timed out fragments in fragmentation buffer; check every 1 second max
-    if (simTime() >= lastCheckTime + 1)
+    // erase timed out fragments in fragmentation buffer; check every 10 seconds max
+    if (simTime() >= lastCheckTime + 10)
     {
         lastCheckTime = simTime();
-        eraseTimeoutFragmentsFromBuf();
+        fragbuf.purgeStaleFragments(simTime()-fragmentTimeoutTime);
     }
 
-    // Defragmentation
-    // skip Degragmentation if single Fragment Datagram
+    // Defragmentation. skip defragmentation if datagram is not fragmented
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
-        insertInFragmentBuf( datagram );
-        if (!datagramComplete(datagram->identification()))
-        {
-            delete datagram;
+        datagram = fragbuf.addFragment(datagram, simTime());
+        if (!datagram)
             return;
-        }
-
-        datagram->setLength( datagram->headerLength()*8 +
-                             datagram->encapsulatedMsg()->length() );
-
-        /*
-        ev << "\ndefragment\n";
-        ev << "\nheader length: " << datagram->headerLength()*8
-            << "  encap length: " << datagram->encapsulatedMsg()->length()
-            << "  new length: " << datagram->length() << "\n";
-        */
-
-        removeFragmentFromBuf(datagram->identification());
     }
 
     int protocol = datagram->transportProtocol();
@@ -98,21 +74,15 @@ void LocalDeliver::handleMessage(cMessage *msg)
         case IP_PROT_UDP:
             send(packet, "transportOut",1);
             break;
-// BCH Andras: from UTS MPLS model
         case IP_PROT_RSVP:
             ev << "IP send packet to RSVPInterface\n";
             send(packet, "transportOut",3);
             break;
-// ECH
         default:
             error("Unknown transport protocol number %d", protocol);
     }
 }
 
-
-//----------------------------------------------------------
-// Private functions
-//----------------------------------------------------------
 
 cMessage *LocalDeliver::decapsulateIP(IPDatagram *datagram)
 {
@@ -127,121 +97,5 @@ cMessage *LocalDeliver::decapsulateIP(IPDatagram *datagram)
     delete datagram;
 
     return packet;
-}
-
-//----------------------------------------------------------
-// Private functions: Fragmentation Buffer management
-//----------------------------------------------------------
-
-// erase those fragments from the buffer that have timed out
-void LocalDeliver::eraseTimeoutFragmentsFromBuf()
-{
-    int i;
-    simtime_t curTime = simTime();
-
-    for (i=0; i < fragmentBufSize; i++)
-    {
-        if (!fragmentBuf[i].isFree &&
-            curTime > fragmentBuf[i].timeout)
-        {
-            /* debugging output
-            ev << "++++ fragment kicked out: "
-                << i << " :: "
-                << fragmentBuf[i].fragmentId << " / "
-                << fragmentBuf[i].fragmentOffset << " : "
-                << fragmentBuf[i].timeout << "\n";
-            */
-            fragmentBuf[i].isFree = true;
-        } // end if
-    } // end for
-}
-
-void LocalDeliver::insertInFragmentBuf(IPDatagram *d)
-{
-    int i;
-    FragmentationBufferEntry *e;
-
-    for (i=0; i < fragmentBufSize; i++)
-    {
-        if (fragmentBuf[i].isFree == true)
-        {
-            break;
-        }
-    } // end for
-
-    // if no free place found, increase Buffersize to append entry
-    if (i == fragmentBufSize)
-        fragmentBufSize++;
-
-    e = &fragmentBuf[i];
-    e->isFree = false;
-    e->fragmentId = d->identification();
-    e->fragmentOffset = d->fragmentOffset();
-    e->moreFragments = d->moreFragments();
-    e->length = d->length()/8 - d->headerLength();
-    e->timeout= simTime() + fragmentTimeoutTime;
-
-}
-
-bool LocalDeliver::datagramComplete(int fragmentId)
-{
-    int nextFragmentOffset = 0; // unit: 8 bytes
-    bool newFragmentFound = true;
-    int i;
-
-    while(newFragmentFound)
-    {
-        newFragmentFound = false;
-        for (i=0; i < fragmentBufSize; i++)
-        {
-            if (!fragmentBuf[i].isFree &&
-                    fragmentId == fragmentBuf[i].fragmentId &&
-                    nextFragmentOffset == fragmentBuf[i].fragmentOffset)
-            {
-                newFragmentFound = true;
-                nextFragmentOffset += fragmentBuf[i].length;
-                // Datagram complete if last Fragment found
-                if (!fragmentBuf[i].moreFragments)
-                {
-                    return true;
-                }
-                // reset i to beginning of buffer
-            } // end if
-        } // end for
-    } // end while
-
-    // when no new Fragment found, Datagram is not complete
-    return false;
-}
-
-int LocalDeliver::getPayloadSizeFromBuf(int fragmentId)
-{
-    int i;
-    int payload = 0;
-
-    for (i=0; i < fragmentBufSize; i++)
-    {
-            if (!fragmentBuf[i].isFree &&
-            fragmentBuf[i].fragmentId == fragmentId)
-        {
-            payload += fragmentBuf[i].length;
-        } // end if
-    } // end for
-    return payload;
-}
-
-void LocalDeliver::removeFragmentFromBuf(int fragmentId)
-{
-    int i;
-
-    for (i=0; i < fragmentBufSize; i++)
-    {
-        if (!fragmentBuf[i].isFree &&
-            fragmentBuf[i].fragmentId == fragmentId)
-        {
-            fragmentBuf[i].fragmentId = -1;
-            fragmentBuf[i].isFree = true;
-        } // end if
-    } // end for
 }
 

@@ -33,11 +33,11 @@
 // - send tunneled IP datagram to PreRouting
 //
 // Author: Jochen Reber, date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
-// Redesign: Andras Varga, 02.2004
+// Rewrite: Andras Varga, 2004
 //
 simple LocalDeliver
     parameters:
-        fragmentTimeout : string;
+        fragmentTimeout : numeric const;
     gates:
         in: in[];
         out: multicastOut;

@@ -21,29 +21,12 @@
 #ifndef __LOCALDELIVERCORE_H__
 #define __LOCALDELIVERCORE_H__
 
-//  Cleanup and rewrite: Andras Varga, 2004
+// Rewrite: Andras Varga, 2004
 
 
+#include "IPFragBuf.h"
 #include "IPDatagram.h"
 
-
-const int FRAGMENT_BUFFER_MAXIMUM = 1000;
-
-
-/**
- * Segmentation buffer entry. Belongs to LocalDeliver.
- */
-struct FragmentationBufferEntry
-{
-    bool isFree;
-
-    int fragmentId;
-    int fragmentOffset; // unit: 8 bytes
-    bool moreFragments;
-    int length; // length of fragment excluding header, in byte
-
-    simtime_t timeout;
-};
 
 
 /**
@@ -54,27 +37,18 @@ struct FragmentationBufferEntry
 class LocalDeliver : public cSimpleModule
 {
   private:
+    IPFragBuf fragbuf;
     simtime_t fragmentTimeoutTime;
     simtime_t lastCheckTime;
-    int fragmentBufSize;
-    FragmentationBufferEntry fragmentBuf [FRAGMENT_BUFFER_MAXIMUM];
 
-  protected:
-      cMessage *decapsulateIP(IPDatagram *);
-
-    // functions to handle Fragmentation Buffer
-    void eraseTimeoutFragmentsFromBuf();
-    void insertInFragmentBuf(IPDatagram *d);
-    int getPayloadSizeFromBuf(int fragmentId);
-    bool datagramComplete(int fragmentId);
-    void removeFragmentFromBuf(int fragmentId);
+    cMessage *decapsulateIP(IPDatagram *);
 
   public:
     Module_Class_Members(LocalDeliver, cSimpleModule, 0);
 
   protected:
-    virtual void handleMessage(cMessage *msg);
     virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif
