@@ -1,6 +1,7 @@
 %description:
 Test using a long transmission and lossy channel (TCPRandomTester).
-Here: packet loss (5%), and packet delays (20%, by mean=1s)
+Here: packet loss (5% of packets), and packet delays (20% of packets, by 
+mean=1s)
 
 %inifile: {}.ini
 [General]
