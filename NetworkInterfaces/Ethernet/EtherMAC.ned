@@ -20,7 +20,8 @@
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // Doesn't do encapsulation/decapsulation; see EtherLLC and EtherEncap for
-// that.
+// that. Also does not perform interface registration in RoutingTable -- that
+// is delegated to ARP.
 //
 // Supported variations:
 // - 10Mb Ethernet bus or twisted pair

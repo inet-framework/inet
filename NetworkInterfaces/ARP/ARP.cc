@@ -31,6 +31,7 @@
 #include "EtherCtrl_m.h"
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
+#include "RoutingTable.h"
 #include "RoutingTableAccess.h"
 #include "EtherMAC.h"
 
@@ -84,6 +85,8 @@ class ARP : public cSimpleModule
 
     RoutingTableAccess routingTableAccess; // for Proxy ARP
 
+    InterfaceEntry *interfaceEntry;
+
   public:
     Module_Class_Members(ARP,cSimpleModule,0);
     ~ARP();
@@ -92,6 +95,8 @@ class ARP : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    InterfaceEntry *registerInterface(double datarate);
 
     void processInboundPacket(cMessage *msg);
     void processOutboundPacket(cMessage *msg);
@@ -103,13 +108,22 @@ class ARP : public cSimpleModule
     bool addressRecognized(IPAddress destAddr);
     void processARPPacket(ARPPacket *arp);
     void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
+
+    void dumpARPPacket(ARPPacket *arp);
 };
 
 Define_Module (ARP);
 
 void ARP::initialize(int stage)
 {
-    // we have to wait until interfaces are registered and address auto-assignment takes place
+    if (stage==0)
+    {
+        // register interface in 1st stage
+        interfaceEntry = registerInterface(100000); // FIXME hardcoded 100 Mbps
+        return;
+    }
+
+    // with the rest we have to wait until address auto-assignment takes place
     if (stage!=3)
         return;
 
@@ -120,18 +134,8 @@ void ARP::initialize(int stage)
 
     pendingQueue.setName("pendingQueue");
 
-    // fill in myIPAddress
-    // TBD find out something more elegant
-    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
-    char *d=interfaceName;
-    for (const char *s=owner()->fullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-    myIPAddress = routingTableAccess.get()->interfaceByName(interfaceName)->inetAddr;
-    delete [] interfaceName;
-
-    // fill in myMACAddress
+    // fill in myIPAddress and myMACAddress
+    myIPAddress = interfaceEntry->inetAddr;
     myMACAddress = ((EtherMAC *)parentModule()->submodule("mac"))->getMACAddress();
 
     // init statistics
@@ -337,9 +341,18 @@ bool ARP::addressRecognized(IPAddress destAddr)
     return routable;
 }
 
+void ARP::dumpARPPacket(ARPPacket *arp)
+{
+    EV << (arp->getOpcode()==ARP_REQUEST ? "ARP_REQ" : arp->getOpcode()==ARP_REPLY ? "ARP_REPLY" : "unknown type")
+       << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()
+       << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
+}
+
+
 void ARP::processARPPacket(ARPPacket *arp)
 {
-    EV << "ARP packet " << arp << " arrived\n";
+    EV << "ARP packet " << arp << " arrived:\n";
+    dumpARPPacket(arp);
 
     //
     // Recipe a'la RFC 826:
@@ -430,7 +443,7 @@ void ARP::processARPPacket(ARPPacket *arp)
             }
             case ARP_REPLY:
             {
-                EV << "Packet was ARP REPLY, discarding it\n";
+                EV << "Discarding packet\n";
                 delete arp;
                 break;
             }
@@ -475,4 +488,44 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     }
 }
 
+InterfaceEntry *ARP::registerInterface(double datarate)
+{
+    InterfaceEntry *e = new InterfaceEntry();
 
+    // interface name: NetworkInterface module's name without special characters ([])
+    // --> Emin : Parent module name is used since EtherMAC belongs to EthernetInterface.
+    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *d=interfaceName;
+    for (const char *s=parentModule()->fullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+
+    e->name = interfaceName;
+    delete [] interfaceName;
+
+    // port: index of gate where parent module's "netwIn" is connected (in IP)
+    int outputPort = parentModule()->gate("netwIn")->sourceGate()->index();
+    e->outputPort = outputPort;
+
+    // we don't know IP address and netmask, it'll probably come from routing table file
+
+    // MTU is 1500 on Ethernet
+    e->mtu = 1500;
+
+    // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+    e->metric = (int)ceil(2e9/datarate); // use OSPF cost as default
+
+    // capabilities
+    e->multicast = true;
+    e->pointToPoint = false;
+
+    // multicast groups
+    //FIXME
+
+    // add
+    RoutingTableAccess routingTableAccess;
+    routingTableAccess.get()->addInterface(e);
+
+    return e;
+}

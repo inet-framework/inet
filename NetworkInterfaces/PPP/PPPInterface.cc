@@ -95,8 +95,8 @@ InterfaceEntry *PPPInterface::registerInterface(double datarate)
     e->name = interfaceName;
     delete [] interfaceName;
 
-    // output port: index of gate where our "physOut" is connected
-    int outputPort = gate("physOut")->toGate()->index();  // FIXME use queueIn instead!!!
+    // port: index of gate where our "netwIn" is connected (in IP)
+    int outputPort = gate("netwIn")->sourceGate()->index();
     e->outputPort = outputPort;
 
     // we don't know IP address and netmask, it'll probably come from routing table file

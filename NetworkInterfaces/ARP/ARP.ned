@@ -17,7 +17,7 @@
 //
 
 //
-// ARP implementation
+// ARP implementation. Performs interface registration in RoutingTable as well.
 //
 simple ARP
     parameters:
