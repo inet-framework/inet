@@ -237,6 +237,7 @@ int LIBTable::findFec(int label, string inInterface)
 {
     int pos;
 
+    // FIXME HELP!!!!! Linear search????!!!!!! (--Andras)
     // Search LIB for matching of the incoming interface and label
     for (int i = 0; i < lib.size(); i++)
     {
