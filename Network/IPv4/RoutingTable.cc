@@ -24,14 +24,11 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <algorithm>
 #include <sstream>
 
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
-
-
-//#define PRINTF  printf
-#define PRINTF  ev.printf
 
 
 
@@ -93,17 +90,10 @@ std::string InterfaceEntry::detailedInfo() const
     return out.str();
 }
 
-void InterfaceEntry::print()
-{
-    PRINTF("%s", detailedInfo().c_str());
-}
-
 //================================================================
 
 RoutingEntry::RoutingEntry()
 {
-    ref = 0;
-
     interfaceNo = -1;
 
     metric = 0;
@@ -111,7 +101,6 @@ RoutingEntry::RoutingEntry()
     source = MANUAL;
 
     age = -1;
-    routeInfo = NULL;
 }
 
 void RoutingEntry::info(char *buf)
@@ -120,10 +109,8 @@ void RoutingEntry::info(char *buf)
     if (host.isNull()) out << "*  "; else out << host << "  ";
     if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
     if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
-    out << ref << "  ";
     if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
-    out << (type==DIRECT ? "DIRECT" : "REMOTE") << "  ";
-    out << (routeInfo ? routeInfo : NULL);
+    out << (type==DIRECT ? "DIRECT" : "REMOTE");
     strcpy(buf, out.str().c_str());
 }
 
@@ -146,9 +133,6 @@ void RoutingTable::initialize()
 
     numIntrfaces = 0;
     intrface = new InterfaceEntry *[MAX_INTERFACE_NO];
-
-    route = new cArray("routes");
-    mcRoute = new cArray("multicast routes");
 
     defaultRoute = NULL;
     loopbackInterface = NULL;
@@ -178,41 +162,25 @@ void RoutingTable::printIfconfig()
 {
     InterfaceEntry *e;
 
-    PRINTF("\n---- IF config ----");
-    for (int i = -1; i < numIntrfaces; i++) {
+    ev.printf("\n---- IF config ----\n");
+    for (int i = -1; i < numIntrfaces; i++)
+    {
         // trick to add loopback interface in front
         e = (i == -1) ? loopbackInterface : (InterfaceEntry*)(intrface[i]);
-        PRINTF("\n%d\t", i);
-        e->print();
+        ev << i << "\t" << e->detailedInfo() << "\n";
     }
-    PRINTF("\n");
+    ev << "\n";
 }
 
 void RoutingTable::printRoutingTable()
 {
-    int i;
+    ev.printf("\n-- Routing table --\n");
+    ev.printf("%-16s %-16s %-16s %-3s %s\n",
+           "Destination", "Gateway", "Netmask", "Iface");
 
-    PRINTF("\n-- Routing table --");
-    PRINTF("\n%-16s %-16s %-16s %-3s %s",
-           "Destination", "Gateway", "Genmask", "Ref", "Iface");
-    for (i = 0; i < route->items(); i++) {
-        if (route->get(i)) {
-            ((RoutingEntry*)route->get(i))->print();
-        }
-    }
-
-    if (defaultRoute) {
-        defaultRoute->print();
-    }
-
-    PRINTF("\n");
-
-    for (i = 0; i < mcRoute->items(); i++) {
-        if (mcRoute->get(i)) {
-            ((RoutingEntry*)mcRoute->get(i))->print();
-        }
-    }
-    PRINTF("\n");
+    for (int i=0; i<numRoutingEntries(); i++)
+        ev << routingEntry(i)->detailedInfo() << "\n";
+    ev << "\n";
 }
 
 
@@ -255,12 +223,14 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 }
 
 
+/*FIXME
 int RoutingTable::outputPortNo(const IPAddress& dest)
 {
     Enter_Method("outputPortNo(%s)=?", dest.str().c_str());
 
     RoutingEntry *e;
-    for (int i = 0; i < route->items(); i++) {
+    for (int i=0; i < route->items(); i++)
+    {
         if (route->get(i)) {
             // The destination in the datagram should /always/ be
             // compared against the destination-address of the interface,
@@ -331,7 +301,7 @@ int RoutingTable::numMulticastDestinations(const IPAddress& dest)
     }
     return mcDestCtr;
 }
-
+*/
 
 InterfaceEntry *RoutingTable::getInterfaceByIndex(int index)
 {
@@ -380,6 +350,7 @@ int RoutingTable::findInterfaceByAddress(const IPAddress& addr)
 }
 
 
+/*
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 {
     Enter_Method("nextGatewayAddress(%s)=?", dest.str().c_str());
@@ -398,20 +369,21 @@ IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 
     return IPAddress();
 }
+*/
 
 int RoutingTable::numRoutingEntries()
 {
     return routes.size()+multicastRoutes.size()+(defaultRoute?1:0);
 }
 
-RoutingEntry *routingEntry(int k)
+RoutingEntry *RoutingTable::routingEntry(int k)
 {
     if (k==0 && defaultRoute)
         return defaultRoute;
     k -= (defaultRoute?1:0);
     if (k < routes.size())
         return routes[k];
-    k -= routes.size()
+    k -= routes.size();
     if (k < multicastRoutes.size())
         return multicastRoutes[k];
     return NULL;
@@ -420,8 +392,8 @@ RoutingEntry *routingEntry(int k)
 RoutingEntry *RoutingTable::findRoutingEntry(const IPAddress& target,
                                              const IPAddress& netmask,
                                              const IPAddress& gw,
-                                             int metric = 0,
-                                             char *dev = NULL)
+                                             int metric,
+                                             char *dev)
 {
     int n = numRoutingEntries();
     for (int i=0; i<n; i++)
@@ -433,12 +405,12 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
 {
     Enter_Method("addRoutingEntry(...)");
 
-    if (target.isNull())
+    if (entry->host.isNull())
     {
         delete defaultRoute;
         defaultRoute = entry;
     }
-    else if (!e->host.isMulticast())
+    else if (!entry->host.isMulticast())
     {
         routes.push_back(entry);
     }
@@ -453,14 +425,14 @@ bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
 {
     Enter_Method("deleteRoutingEntry(...)");
 
-    RouteVector::iterator i = find(routes.begin(), routes.end(), entry);
+    RouteVector::iterator i = std::find(routes.begin(), routes.end(), entry);
     if (i!=routes.end())
     {
         routes.erase(i);
         delete entry;
         return true;
     }
-    i = find(multicastRoutes.begin(), multicastRoutes.end(), entry);
+    i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
     if (i!=multicastRoutes.end())
     {
         multicastRoutes.erase(i);

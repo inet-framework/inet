@@ -75,8 +75,6 @@ class InterfaceEntry : public cObject // FIXME only cObject so that cArray can b
     // copy not supported: declare the following but leave them undefined
     InterfaceEntry(const InterfaceEntry& obj);
     InterfaceEntry& operator=(const InterfaceEntry& obj);
-
-    void print();
 };
 
 
