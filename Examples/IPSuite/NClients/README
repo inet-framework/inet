@@ -1,4 +1,7 @@
-Demonstrates automatic IP address assignment and automatic routing
+This simulation demonstrates Telnet sessions, using the TelnetApp and 
+TCPGenericSrvApp modules.
+
+Also demonstrates automatic IP address assignment and automatic routing
 table setup using the FlatNetworkConfigurator module. (For another model
 that uses it, see FlatNet and TCPClientServerNet.)
 
