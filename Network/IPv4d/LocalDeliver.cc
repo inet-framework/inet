@@ -33,67 +33,23 @@ void LocalDeliver::initialize()
     fragmentTimeoutTime = par("fragmentTimeout");
     lastCheckTime = 0;
 
-    parseTransportMap(par("protocolMapping"));
-}
-
-void LocalDeliver::parseTransportMap(const char *s)
-{
-    while (isspace(*s)) s++;
-
-    while (*s)
-    {
-        TransportEntry entry;
-
-        if (!isdigit(*s))
-            throw new cException("syntax error: protocol number expected");
-        entry.protocolNumber = atoi(s);
-        while (isdigit(*s)) s++;
-
-        if (*s++!=':')
-            throw new cException("syntax error: colon expected");
-
-        while (isspace(*s)) s++;
-        if (!isdigit(*s))
-            throw new cException("syntax error in script: output gate index expected");
-        entry.outGateIndex = atoi(s);
-        while (isdigit(*s)) s++;
-
-        // add
-        transportMap.push_back(entry);
-
-        // skip delimiter
-        while (isspace(*s)) s++;
-        if (!*s) break;
-        if (*s++!=',')
-            throw new cException("syntax error: comma expected");
-        while (isspace(*s)) s++;
-    }
-
-}
-
-int LocalDeliver::outputGateForProtocol(int protocol)
-{
-    for (TransportMap::iterator i=transportMap.begin();i!=transportMap.end();++i)
-        if (i->protocolNumber==protocol)
-            return i->outGateIndex;
-    opp_error("No output gate defined in protocolMapping for protocol number %d", protocol);
-    return -1;
+    mapping.parseProtocolMapping(par("protocolMapping"));
 }
 
 void LocalDeliver::handleMessage(cMessage *msg)
 {
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 
-    // erase timed out fragments in fragmentation buffer; check every 10 seconds max
-    if (simTime() >= lastCheckTime + 10)
-    {
-        lastCheckTime = simTime();
-        fragbuf.purgeStaleFragments(simTime()-fragmentTimeoutTime);
-    }
-
     // Defragmentation. skip defragmentation if datagram is not fragmented
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
+        // erase timed out fragments in fragmentation buffer; check every 10 seconds max
+        if (simTime() >= lastCheckTime + 10)
+        {
+            lastCheckTime = simTime();
+            fragbuf.purgeStaleFragments(simTime()-fragmentTimeoutTime);
+        }
+
         datagram = fragbuf.addFragment(datagram, simTime());
         if (!datagram)
             return;
@@ -110,7 +66,7 @@ void LocalDeliver::handleMessage(cMessage *msg)
     }
     else
     {
-        int gateindex = outputGateForProtocol(protocol);
+        int gateindex = mapping.outputGateForProtocol(protocol);
         send(packet, "transportOut", gateindex);
     }
 }

@@ -24,8 +24,8 @@
 // Rewrite: Andras Varga, 2004
 
 
-#include <vector>
 #include "IPFragBuf.h"
+#include "ProtocolMap.h"
 #include "IPDatagram.h"
 
 
@@ -44,24 +44,13 @@ class LocalDeliver : public cSimpleModule
     simtime_t lastCheckTime;
 
     // where to send different transport protocols after encapsulation
-    struct TransportEntry
-    {
-        int protocolNumber;
-        int outGateIndex;
-    };
-    // we use vector because it's probably faster: we'll hit 1st or 2nd entry
-    // (TCP or UDP) in 90% of cases
-    typedef std::vector<TransportEntry> TransportMap;
-    TransportMap transportMap;
+    ProtocolMapping mapping;
 
-    void parseTransportMap(const char *s);
-    int outputGateForProtocol(int protocol);
+  private:
     cMessage *decapsulateIP(IPDatagram *);
 
   public:
     Module_Class_Members(LocalDeliver, cSimpleModule, 0);
-
-  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

@@ -34,8 +34,11 @@ void IP::initialize()
     IPForward = par("IPForward").boolValue();
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
+    fragmentTimeoutTime = par("fragmentTimeout");
+    mapping.parseProtocolMapping(par("protocolMapping"));
 
     curFragmentId = 0;
+    lastCheckTime = 0;
     fragbuf.init(icmpAccess.get());
 
     numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
@@ -240,25 +243,35 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
 
 void IP::localDeliver(IPDatagram *datagram)
 {
-    if (datagram->fragmentOffset()==0 && !datagram->moreFragments())
+    // Defragmentation. skip defragmentation if datagram is not fragmented
+    if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
-        sendToHL(datagram);
-        return;
+        // erase timed out fragments in fragmentation buffer; check every 10 seconds max
+        if (simTime() >= lastCheckTime + 10)
+        {
+            lastCheckTime = simTime();
+            fragbuf.purgeStaleFragments(simTime()-fragmentTimeoutTime);
+        }
+
+        datagram = fragbuf.addFragment(datagram, simTime());
+        if (!datagram)
+            return;
     }
 
-    IPDatagram *completeDatagram = fragbuf.addFragment(datagram, simTime());
-    if (completeDatagram)
+    // decapsulate and send on appropriate output gate
+    int protocol = datagram->transportProtocol();
+    cMessage *packet = decapsulateIP(datagram);
+
+    if (protocol==IP_PROT_IP)
     {
-        sendToHL(completeDatagram);
+        // tunnelled IP packets are handled separately
+        send(packet, "preRoutingOut");
     }
-}
-
-// FIXME todo call fragbuf.purgeStaleFragments() from time to time
-
-void IP::sendToHL(IPDatagram *datagram)
-{
-    // FIXME select transport gate index and send there
-    send(datagram, "transportOut", 0);
+    else
+    {
+        int gateindex = mapping.outputGateForProtocol(protocol);
+        send(packet, "transportOut", gateindex);
+    }
 }
 
 void IP::fragmentAndSend(IPDatagram *datagram)
@@ -396,7 +409,7 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
         return;
     }
 
-    int numOfPorts = 8; //FIXME
+    int numOfPorts = gate("queueOut")->size();
     if (outputPort >= numOfPorts)
         error("Illegal output port %d", outputPort);
 

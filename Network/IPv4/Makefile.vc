@@ -61,7 +61,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj ICMP.obj IP.obj IPAddress.obj IPFragBuf.obj RoutingTable.obj RoutingTableParser.obj
+OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj ICMP.obj IP.obj IPAddress.obj IPFragBuf.obj ProtocolMap.obj RoutingTable.obj RoutingTableParser.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
@@ -118,6 +118,9 @@ IPAddress.obj: IPAddress.cc
 
 IPFragBuf.obj: IPFragBuf.cc
 	$(CXX) -c $(COPTS) /Tp IPFragBuf.cc
+
+ProtocolMap.obj: ProtocolMap.cc
+	$(CXX) -c $(COPTS) /Tp ProtocolMap.cc
 
 RoutingTable.obj: RoutingTable.cc
 	$(CXX) -c $(COPTS) /Tp RoutingTable.cc
@@ -181,6 +184,7 @@ IP.obj: IP.cc \
   RoutingTable.h \
   ICMPAccess.h \
   IPFragBuf.h \
+  ProtocolMap.h \
   ..\..\Base/ModuleAccess.h \
   ..\..\Base/ipsuite_defs.h \
   IPAddress.h \
@@ -208,6 +212,8 @@ IPFragBuf.obj: IPFragBuf.cc \
   ..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ICMPMessage_m.h
+ProtocolMap.obj: ProtocolMap.cc \
+  ProtocolMap.h
 RoutingTable.obj: RoutingTable.cc \
   RoutingTable.h \
   RoutingTableParser.h \

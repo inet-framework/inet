@@ -18,17 +18,35 @@
 
 
 //
-// Implements the IP protocol.
+// Implements the IP protocol. This is the all-in-one version of IPProcessing.
+//
+// When delivering packets to higher (transport) layers, the output gate
+// is determined from the Protocol field in the IP header.
+// The protocol-to-gateindex mapping must be given in the protocolmapping
+// string parameter, in the following format:
+// <pre>
+// protocolnumber:gateindex, protocolnumber:gateindex, ...
+// </pre>
+//
+// The recommended setting is:
+// - TCP (6) : 0
+// - UDP (17) : 1
+// - ICMP (1) : 2
+// - IGMP (2) : 3
+// - RSVP (46) : 4
+// That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
+//
+// @see IPProcessing
 //
 // @author Andras Varga
-// @see IPProcessing
 //
 module IPProcessing
     parameters:
         timeToLive : numeric const,
         multicastTimeToLive : numeric const,
         IPForward : bool,
-        fragmentTimeout : string;
+        protocolMapping : string,
+        fragmentTimeout : numeric const;
     gates:
         in: transportIn[];
         out: transportOut[];
