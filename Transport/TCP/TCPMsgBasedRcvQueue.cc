@@ -17,25 +17,25 @@
 //
 
 
-#include "TCPMessageRcvQueue.h"
+#include "TCPMsgBasedRcvQueue.h"
 
-Register_Class(TCPMessageRcvQueue);
+Register_Class(TCPMsgBasedRcvQueue);
 
 
-TCPMessageRcvQueue::TCPMessageRcvQueue() : TCPVirtualDataRcvQueue()
+TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 {
 }
 
-TCPMessageRcvQueue::~TCPMessageRcvQueue()
+TCPMsgBasedRcvQueue::~TCPMsgBasedRcvQueue()
 {
 }
 
-void TCPMessageRcvQueue::init(uint32 startSeq)
+void TCPMsgBasedRcvQueue::init(uint32 startSeq)
 {
     TCPVirtualDataRcvQueue::init(startSeq);
 }
 
-std::string TCPMessageRcvQueue::info() const
+std::string TCPMsgBasedRcvQueue::info() const
 {
     std::string res;
     char buf[32];
@@ -53,7 +53,7 @@ std::string TCPMessageRcvQueue::info() const
     return res;
 }
 
-uint32 TCPMessageRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 
@@ -70,7 +70,7 @@ uint32 TCPMessageRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     return rcv_nxt;
 }
 
-cMessage *TCPMessageRcvQueue::extractBytesUpTo(uint32 seq)
+cMessage *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 {
     extractTo(seq);
 

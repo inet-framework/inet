@@ -60,7 +60,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPMessageRcvQueue.obj TCPMessageSendQueue.obj TCPSegment.obj TCPSocket.obj TCPSocketMap.obj TCPTahoeReno.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
+OBJS= TCPCommand_m.obj TCPSegment_m.obj DummyTCPAlg.obj TCPConnectionBase.obj TCPConnectionEventProc.obj TCPConnectionRcvSegment.obj TCPConnectionUtil.obj TCPDump.obj TCPMain.obj TCPMsgBasedRcvQueue.obj TCPMsgBasedSendQueue.obj TCPSegment.obj TCPSocket.obj TCPSocketMap.obj TCPTahoeReno.obj TCPVirtualDataRcvQueue.obj TCPVirtualDataSendQueue.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPCommand_m.h TCPSegment_m.h
@@ -121,11 +121,11 @@ TCPDump.obj: TCPDump.cc
 TCPMain.obj: TCPMain.cc
 	$(CXX) -c $(COPTS) /Tp TCPMain.cc
 
-TCPMessageRcvQueue.obj: TCPMessageRcvQueue.cc
-	$(CXX) -c $(COPTS) /Tp TCPMessageRcvQueue.cc
+TCPMsgBasedRcvQueue.obj: TCPMsgBasedRcvQueue.cc
+	$(CXX) -c $(COPTS) /Tp TCPMsgBasedRcvQueue.cc
 
-TCPMessageSendQueue.obj: TCPMessageSendQueue.cc
-	$(CXX) -c $(COPTS) /Tp TCPMessageSendQueue.cc
+TCPMsgBasedSendQueue.obj: TCPMsgBasedSendQueue.cc
+	$(CXX) -c $(COPTS) /Tp TCPMsgBasedSendQueue.cc
 
 TCPSegment.obj: TCPSegment.cc
 	$(CXX) -c $(COPTS) /Tp TCPSegment.cc
@@ -184,117 +184,82 @@ DummyTCPAlg.obj: DummyTCPAlg.cc \
   TCPReceiveQueue.h \
   TCPSegment.h \
   ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPAddress.h \
-  TCPSegment_m.h
-TCPCommand_m.obj: TCPCommand_m.cc \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h
+  ..\..\Network\IPv4/IPAddress.h
 TCPConnectionBase.obj: TCPConnectionBase.cc \
   TCPMain.h \
   TCPConnection.h \
   TCPSegment.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionEventProc.obj: TCPConnectionEventProc.cc \
   TCPMain.h \
   TCPConnection.h \
   TCPSegment.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionRcvSegment.obj: TCPConnectionRcvSegment.cc \
   TCPMain.h \
   TCPConnection.h \
   TCPSegment.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   TCPMain.h \
   TCPConnection.h \
   TCPSegment.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   TCPSendQueue.h \
   TCPReceiveQueue.h \
   TCPAlgorithm.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPDump.obj: TCPDump.cc \
   TCPDump.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Network\IPv4/IPDatagram_m.h \
   TCPSegment.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPMain.obj: TCPMain.cc \
   TCPMain.h \
   TCPConnection.h \
   TCPSegment.h \
-  TCPCommand_m.h \
-  ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
-TCPMessageRcvQueue.obj: TCPMessageRcvQueue.cc \
-  TCPMessageRcvQueue.h \
+  ..\..\Base/ipsuite_defs.h
+TCPMsgBasedRcvQueue.obj: TCPMsgBasedRcvQueue.cc \
+  TCPMsgBasedRcvQueue.h \
   TCPSegment.h \
   TCPVirtualDataRcvQueue.h \
   ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
   TCPReceiveQueue.h \
   TCPConnection.h \
   ..\..\Network\IPv4/IPAddress.h \
   TCPMain.h
-TCPMessageSendQueue.obj: TCPMessageSendQueue.cc \
-  TCPMessageSendQueue.h \
+TCPMsgBasedSendQueue.obj: TCPMsgBasedSendQueue.cc \
+  TCPMsgBasedSendQueue.h \
   TCPSendQueue.h \
   TCPConnection.h \
   TCPSegment.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h \
-  TCPMain.h \
-  TCPSegment_m.h
+  TCPMain.h
 TCPSegment.obj: TCPSegment.cc \
   TCPSegment.h \
-  ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h
-TCPSegment_m.obj: TCPSegment_m.cc \
-  TCPSegment_m.h
+  ..\..\Base/ipsuite_defs.h
 TCPSocket.obj: TCPSocket.cc \
   TCPSocket.h \
   TCPMain.h \
-  TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSocketMap.obj: TCPSocketMap.cc \
   TCPSocketMap.h \
   TCPSocket.h \
-  TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPTahoeReno.obj: TCPTahoeReno.cc \
@@ -306,14 +271,12 @@ TCPTahoeReno.obj: TCPTahoeReno.cc \
   TCPReceiveQueue.h \
   TCPSegment.h \
   ..\..\Base/ipsuite_defs.h \
-  ..\..\Network\IPv4/IPAddress.h \
-  TCPSegment_m.h
+  ..\..\Network\IPv4/IPAddress.h
 TCPVirtualDataRcvQueue.obj: TCPVirtualDataRcvQueue.cc \
   TCPVirtualDataRcvQueue.h \
   TCPSegment.h \
   TCPReceiveQueue.h \
   ..\..\Base/ipsuite_defs.h \
-  TCPSegment_m.h \
   TCPConnection.h \
   ..\..\Network\IPv4/IPAddress.h \
   TCPMain.h
@@ -324,5 +287,4 @@ TCPVirtualDataSendQueue.obj: TCPVirtualDataSendQueue.cc \
   TCPSegment.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h \
-  TCPMain.h \
-  TCPSegment_m.h
+  TCPMain.h

@@ -22,7 +22,7 @@
 // protocols or applications.
 //
 // Requires message object preserving sendQueue/receiveQueue classes
-// to be used with TCP (that is, TCPMessageSendQueue and TCPMessageRcvQueue;
+// to be used with TCP (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
 // TCPVirtualBytesSendQueue and TCPVirtualBytesRcvQueue are not good).
 //
 // The module accepts any number of incoming TCP connections, and expects

@@ -155,15 +155,11 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TcpTestClient.obj: TcpTestClient.cc \
   d:\home\IPSuite-pcvs/Transport/TCP/TCPSocket.h \
-  d:\home\IPSuite-pcvs/Transport/TCP/TCPCommand_m.h \
   d:\home\IPSuite-pcvs/Network/IPv4/IPAddress.h \
   d:\home\IPSuite-pcvs/Base/ipsuite_defs.h
 TCPTester.obj: TCPTester.cc \
   TCPTester.h \
-  d:\home\IPSuite-pcvs/Network/IPv4/IPControlInfo_m.h \
   d:\home\IPSuite-pcvs/Network/IPv4/IPAddress.h \
-  d:\home\IPSuite-pcvs/Network/IPv4/IPDatagram_m.h \
   d:\home\IPSuite-pcvs/Transport/TCP/TCPSegment.h \
   d:\home\IPSuite-pcvs/Transport/TCP/TCPDump.h \
-  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h \
-  d:\home\IPSuite-pcvs/Transport/TCP/TCPSegment_m.h
+  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h

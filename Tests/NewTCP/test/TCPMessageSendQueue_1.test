@@ -1,11 +1,11 @@
 %description:
-Test TCPMessageSendQueue class
+Test TCPMsgBasedSendQueue class
 
 %global:
-#include "TCPMessageSendQueue.h"
+#include "TCPMsgBasedSendQueue.h"
 
 
-void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
+void enqueue(TCPMsgBasedSendQueue *q, const char *msgname, ulong numBytes)
 {
     ev << "enqueue(\"" << msgname << "\", " << numBytes << "): ";
 
@@ -16,7 +16,7 @@ void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
     ev << q->info() <<"\n";
 }
 
-void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, uint32 toSeq)
+void createSegmentWithBytes(TCPMsgBasedSendQueue *q, uint32 fromSeq, uint32 toSeq)
 {
     ev << "createSegmentWithBytes(" << fromSeq << ", " << toSeq << "): ";
 
@@ -33,7 +33,7 @@ void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, uint32 toSeq
     delete tcpseg;
 }
 
-void discardUpTo(TCPMessageSendQueue *q, uint32 seqNum)
+void discardUpTo(TCPMsgBasedSendQueue *q, uint32 seqNum)
 {
     ev << "discardUpTo(" << seqNum << "): ";
     q->discardUpTo(seqNum);
@@ -42,8 +42,8 @@ void discardUpTo(TCPMessageSendQueue *q, uint32 seqNum)
 }
 
 %activity:
-TCPMessageSendQueue sendQueue;
-TCPMessageSendQueue *q = &sendQueue;
+TCPMsgBasedSendQueue sendQueue;
+TCPMsgBasedSendQueue *q = &sendQueue;
 
 q->init(1000);
 ev << q->info() <<"\n";

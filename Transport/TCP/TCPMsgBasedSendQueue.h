@@ -16,58 +16,73 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPMESSAGERCVQUEUE_H
-#define __TCPMESSAGERCVQUEUE_H
+#ifndef __TCPMESSAGESENDQUEUE_H
+#define __TCPMESSAGESENDQUEUE_H
 
-#include <omnetpp.h>
-#include <map>
-#include <string>
-#include "TCPSegment.h"
-#include "TCPVirtualDataRcvQueue.h"
+#include <list>
+#include "TCPSendQueue.h"
 
 /**
- * FIXME
+ * Send queue that manages messages.
  *
- * @see TCPVirtualDataSendQueue
+ * @see TCPVirtualDataRcvQueue
  */
-class TCPMessageRcvQueue : public TCPVirtualDataRcvQueue
+class TCPMsgBasedSendQueue : public TCPSendQueue
 {
   protected:
-    typedef std::map<uint32, cMessage *> PayloadList;
-    PayloadList payloadList;
+    struct Payload
+    {
+        unsigned int endSequenceNo;
+        cMessage *msg;
+    };
+    typedef std::list<Payload> PayloadQueue;
+    PayloadQueue payloadQueue;
+
+    uint32 begin;  // 1st sequence number stored
+    uint32 end;    // last sequence number stored +1
 
   public:
     /**
-     * Ctor.
+     * Ctor
      */
-    TCPMessageRcvQueue();
+    TCPMsgBasedSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPMessageRcvQueue();
-
-    /**
-     * Set initial receive sequence number.
-     */
-    virtual void init(uint32 startSeq);
-
-    /**
-     * Returns a string with region stored.
-     */
-    virtual std::string info() const;
-
-    /**
-     * Called when a TCP segment arrives. Returns sequence number for ACK.
-     */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
+    virtual ~TCPMsgBasedSendQueue();
 
     /**
      *
      */
-    virtual cMessage *extractBytesUpTo(uint32 seq);
+    virtual void init(uint32 startSeq);
 
+    /**
+     * Returns a string with the region stored.
+     */
+    virtual std::string info() const;
+
+    /**
+     *
+     */
+    virtual void enqueueAppData(cMessage *msg);
+
+    /**
+     *
+     */
+    virtual uint32 bufferEndSeq();
+
+    /**
+     *
+     */
+    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes);
+
+    /**
+     *
+     */
+    virtual void discardUpTo(uint32 seqNum);
 };
 
 #endif
+
 

@@ -1,5 +1,5 @@
 %description:
-Test TCPMessageSendQueue/TCPMessageRcvQueue using a long transmission
+Test TCPMsgBasedSendQueue/TCPMsgBasedRcvQueue using a long transmission
 and lossy channel (TCPRandomTester).
 Here: packet loss (5%), packet delays (20%, by mean=1s), packet duplication
 (20%, original packet is lost, mean=3 copies created with delay mean=1s)
@@ -28,8 +28,8 @@ express-mode=true
 *.tcptester.delayValue=exponential(1)
 
 # override tcp settings in defaults.ini
-*.tcp*.sendQueueClass="TCPMessageSendQueue"
-*.tcp*.receiveQueueClass="TCPMessageRcvQueue"
+*.tcp*.sendQueueClass="TCPMsgBasedSendQueue"
+*.tcp*.receiveQueueClass="TCPMsgBasedRcvQueue"
 
 include ../../defaults.ini
 

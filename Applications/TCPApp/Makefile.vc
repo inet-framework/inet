@@ -144,32 +144,27 @@ re-makemake: makefiles
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
-  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
   TCPGenericSrvApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
-  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSessionApp.obj: TCPSessionApp.cc \
   TCPSessionApp.h \
   ..\..\Network\IPv4/IPAddressResolver.h \
   ..\..\Transport\TCP/TCPSocket.h \
-  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSinkApp.obj: TCPSinkApp.cc \
   TCPSinkApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
-  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSrvHostApp.obj: TCPSrvHostApp.cc \
   TCPSrvHostApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPSocketMap.h \
-  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h

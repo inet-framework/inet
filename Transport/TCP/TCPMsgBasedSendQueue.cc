@@ -17,33 +17,33 @@
 //
 
 
-#include "TCPMessageSendQueue.h"
+#include "TCPMsgBasedSendQueue.h"
 
-Register_Class(TCPMessageSendQueue);
+Register_Class(TCPMsgBasedSendQueue);
 
-TCPMessageSendQueue::TCPMessageSendQueue() : TCPSendQueue()
+TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
 {
     begin = end = 0;
 }
 
-TCPMessageSendQueue::~TCPMessageSendQueue()
+TCPMsgBasedSendQueue::~TCPMsgBasedSendQueue()
 {
 }
 
-void TCPMessageSendQueue::init(uint32 startSeq)
+void TCPMsgBasedSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
 }
 
-std::string TCPMessageSendQueue::info() const
+std::string TCPMsgBasedSendQueue::info() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << "), " << payloadQueue.size() << " packets";
     return out.str();
 }
 
-void TCPMessageSendQueue::enqueueAppData(cMessage *msg)
+void TCPMsgBasedSendQueue::enqueueAppData(cMessage *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << (msg->length()>>3) << ")\n";
     end += msg->length() >> 3;
@@ -54,12 +54,12 @@ void TCPMessageSendQueue::enqueueAppData(cMessage *msg)
     payloadQueue.push_back(payload);
 }
 
-uint32 TCPMessageSendQueue::bufferEndSeq()
+uint32 TCPMsgBasedSendQueue::bufferEndSeq()
 {
     return end;
 }
 
-TCPSegment *TCPMessageSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
@@ -82,7 +82,7 @@ TCPSegment *TCPMessageSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong nu
     return tcpseg;
 }
 
-void TCPMessageSendQueue::discardUpTo(uint32 seqNum)
+void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
     ASSERT(seqLE(begin,seqNum) && seqLE(seqNum,end));
