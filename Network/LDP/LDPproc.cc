@@ -49,7 +49,7 @@ void LDPproc::activity()
     cModule *curmod = this;
     for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
     {
-        if (curmod->hasPar("local_addr"))
+        if (curmod->hasPar("local_addr"))  // FIXME!!!!
         {
             local_addr = IPAddress(curmod->par("local_addr").stringValue()).getInt();
             id = string(curmod->par("id").stringValue());

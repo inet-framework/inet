@@ -27,10 +27,10 @@
 // It also includes an MPLS model with \RSVP-TE and LDP signalling.
 // Link-layer models are PPP and Ethernet.</nohtml>
 //
-// The original IPSuite was written by Klaus Wehrle, Jochen Reber,
-// Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage and others at
-// the University of Karlsruhe during 2000-2001. The current codebase is a
-// rewrite by Andras Varga, started in 2003 and still in progress.
+// The current codebase is a rewrite (by Andras Varga, started in 2003), 
+// which vaguely resembles the original IPSuite written by Klaus Wehrle, 
+// Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann, Ulrich Kaage 
+// and others at the University of Karlsruhe during 2000-2001.
 //
 // The MPLS model builds on top of the IPSuite, and implements the MPLS, LDP,
 // and \RSVP-TE protocols. It also implements the routing

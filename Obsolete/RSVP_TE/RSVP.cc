@@ -15,15 +15,22 @@
 #include "RSVP.h"
 #include "IPAddress.h"
 #include "MPLSModule.h"
+#include "IPAddressResolver.h"
 
 Define_Module(RSVP);
 
-void RSVP::initialize()
+void RSVP::initialize(int stage)
 {
+    // we have to wait for stage 2 until interfaces get registered (stage 0)
+    // and get their auto-assigned IP addresses (stage 2)
+    if (stage!=3)
+        return;
+
     RoutingTable *rt = routingTableAccess.get();
 
     // Get router ID
-    my_id = IPAddress(par("local_addr").stringValue()).getInt();
+    //my_id = IPAddress(par("local_addr").stringValue()).getInt();
+    my_id = IPAddressResolver().getAddressFrom(rt).getInt();
 
     IsIR = par("isIR").boolValue();
     IsER = par("isER").boolValue();
@@ -50,11 +57,11 @@ void RSVP::activity()
     // Buid the link table
     int linkNo = 0;
     updateTED();
-    std::vector < TELinkState >::iterator tedIter;
 
+    std::vector<TELinkState>::iterator tedIter;
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        const TELinkState & linkstate = *tedIter;
+        const TELinkState& linkstate = *tedIter;
         if (linkstate.advrouter.getInt() == my_id)
         {
             LocalAddress[linkNo] = linkstate.local.getInt();
@@ -67,6 +74,7 @@ void RSVP::activity()
     }
 
     // Debug:
+    ev << "LocalAddress array:\n";
     for (i = 0; i < InLIST_SIZE; i++)
         ev << IPAddress(LocalAddress[i]) << "\n";
 

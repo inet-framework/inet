@@ -15,13 +15,15 @@
 #include "LDPInterface.h"
 #include "ConstType.h"
 #include "LDPproc.h"
+#include "IPAddressResolver.h"
 
 Define_Module(LDPInterface);
 
 void LDPInterface::initialize()
 {
+    //local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
-    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
     local_port = ConstType::ldp_port;
     rem_port = ConstType::ldp_port;
 
@@ -30,9 +32,7 @@ void LDPInterface::initialize()
 
     timeout = par("timeout");
 
-    appl_timeout = 0;  // Unused par("appl_timeout").doubleValue();
-
-    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    appl_timeout = 0;  // FIXME Unused par("appl_timeout").doubleValue();
 
     // rem_addr = IPAddress(par("server_addr").stringValue()).getInt();
 }

@@ -13,9 +13,9 @@
 *
 *********************************************************************/
 
-#include "MPLSModule.h"
 #include "TED.h"
 #include "StringTokenizer.h"
+#include "IPAddressResolver.h"
 
 #include "stlwatch.h"
 
@@ -50,10 +50,16 @@ TED *TED::getGlobalInstance()
 }
 
 
-void TED::initialize()
+void TED::initialize(int stage)
 {
-    if (dynamic_cast < TED * >(simulation.module(tedModuleId)) != NULL)
+    // we have to wait for stage 2 until interfaces get registered (stage 0)
+    // and get their auto-assigned IP addresses (stage 2)
+    if (stage!=3)
+        return;
+
+    if (dynamic_cast<TED *>(simulation.module(tedModuleId)) != NULL)
         opp_error("A TED module already exists in the network -- there should be only one");
+
     tedModuleId = id();
 
     buildDatabase();
@@ -96,30 +102,28 @@ void TED::buildDatabase()
     {
         sTopoNode *node = topo.node(i);
         cModule *module = node->module();
-        // Get the MPLS componet  FIXME
-        RoutingTable *myRT =
-            (RoutingTable *) (module->submodule("networkLayer")->submodule("routingTable"));
 
-        // Get the RoutingTable component - Todo: Set it public
-        entry->advrouter = IPAddress(module->par("local_addr").stringValue());
+        IPAddress modAddr = IPAddressResolver().addressOf(module);
+        entry->advrouter = modAddr;
 
-        // *(myRT->getLoopbackAddress()); // Todo: Add this function to rt
+        RoutingTable *myRT = IPAddressResolver().routingTableOf(module);
+
+        // *(myRT->getLoopbackAddress()); // Todo: Add this function to rt  FIXME why?
 
         for (int j = 0; j < node->outLinks(); j++)
         {
 
             cModule *neighbour = node->out(j)->remoteNode()->module();
-
-            RoutingTable *neighbourRT =
-                check_and_cast <
-                RoutingTable * >(neighbour->submodule("networkLayer")->submodule("routingTable"));
+            IPAddress neighbourAddr = IPAddressResolver().addressOf(neighbour);
 
             // For each link
             // Get linkId
-            entry->linkid = IPAddress(neighbour->par("local_addr").stringValue());
+            entry->linkid = neighbourAddr;
 
             int local_gateIndex = node->out(j)->localGate()->index();
             int remote_gateIndex = node->out(j)->remoteGate()->index();
+
+            RoutingTable *neighbourRT = IPAddressResolver().routingTableOf(neighbour);
 
             // Get local address
             entry->local = myRT->interfaceByPortNo(local_gateIndex)->inetAddr;

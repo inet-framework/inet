@@ -67,16 +67,6 @@ GENERATEDHEADERS=
 SUBDIRS= FlatNet KIDSNw1 McNetwork2 NClients PerformAnalysis TCPClientServerNet
 SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir McNetwork2_dir NClients_dir PerformAnalysis_dir TCPClientServerNet_dir
 
-# inserted from file 'makefrag.vc':
-
-WISH=wish84
-
-all : $(TARGET) rundemo.bat
-
-rundemo.bat:
-	echo @$(WISH:/=\) -f ^%~dpn0 ^%* > rundemo.bat
-
-
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
 .tstamp: $(OBJS)

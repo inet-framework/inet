@@ -18,15 +18,22 @@
 #include "RoutingTable.h"
 #include "RSVPTester.h"
 #include "MPLSModule.h"
+#include "IPAddressResolver.h"
 #include "StringTokenizer.h"
 
 Define_Module(RSVPAppl);
 
 
-void RSVPAppl::initialize()
+void RSVPAppl::initialize(int stage)
 {
+    // we have to wait for stage 2 until interfaces get registered (stage 0)
+    // and get their auto-assigned IP addresses (stage 2)
+    if (stage!=3)
+        return;
+
     // Get router IP Address
-    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    //local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
     isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();

@@ -14,6 +14,7 @@
 *********************************************************************/
 #include "OspfTe.h"
 #include "IPAddress.h"
+#include "IPAddressResolver.h"
 
 
 Define_Module(OspfTe);
@@ -21,19 +22,14 @@ Define_Module(OspfTe);
 
 void OspfTe::initialize(int stage)
 {
-    ev << "OSPF enters init stage " << stage << endl;
-    switch (stage)
+    if (stage==1)
     {
-    case 0:
-        //Get the local address
-        //Get the ted
-        //Get the IP Routing component
-        local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-        break;
-    }
+        //local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+        local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
-    // to invoke handleMessage() when we start --
-    scheduleAt(simTime(), new cMessage());
+        // to invoke handleMessage() when we start  FIXME what?????? Andras
+        scheduleAt(simTime(), new cMessage());
+    }
 }
 
 void OspfTe::handleMessage(cMessage * msg)
@@ -41,8 +37,7 @@ void OspfTe::handleMessage(cMessage * msg)
     // one-shot handleMessage()
     // FIXME should really be done from another init stage
     if (!msg->isSelfMessage())
-        error
-            ("Message arrived -- OSPF/TE doesn't process messages, it is used via direct method calls");
+        error("Message arrived -- OSPF/TE doesn't process messages, it is used via direct method calls");
     delete msg;
 
     ev << "OSPF/TE: I am starting\n";

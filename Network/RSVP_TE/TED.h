@@ -17,6 +17,7 @@
 
 //#include "OspfTe.h"
 #include <vector>
+#include "MPLSModule.h"
 
 
 /**
@@ -58,7 +59,9 @@ public:
     static TED *getGlobalInstance();
 
     Module_Class_Members(TED, cSimpleModule, 0);
-    virtual void initialize();
+
+    virtual int numInitStages() const  {return 4;}
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *);
 
     /**
