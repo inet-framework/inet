@@ -27,10 +27,12 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Applications/TCPApp && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Unsupported/TcpModule -I../../Transport/TCP -I../../Base -I../../Util)
 (cd Applications/UDPApp && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4 -I../../Unsupported/TcpModule -I../../Transport/UDP -I../../Base -I../../Util)
 
+(cd Examples/bin && $MAKEMAKE $OPTS -w -c ../../ipsuiteconfig -o IPSuite $ALL_MPLS_INCLUDES)
+
+(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/MPLS && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 
-(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/Ethernet/ARPTest && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/Ethernet/LANs && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 

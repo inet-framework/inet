@@ -18,14 +18,14 @@ exec wish "$0" "$@"
 # columns below: <name> <directory> <unix-command> <windows-command>
 set i 0
 foreach line {
-   {"NClients"            "NClients"           "./NClients"           "NClients.exe"}
-   {"NClients/2"          "NClients"  "./NClients -f basicHTTP.ini"      "NClients.exe -f basicHTTP.ini"}
-   {"NClients/3"          "NClients"  "./NClients -f filetransfer.ini"   "NClients.exe -f filetransfer.ini"}
-   {"FlatNet"             "FlatNet"            "./FlatNet"            "FlatNet.exe"}
-   {"KIDSNw1"             "KIDSNw1"            "./KIDSNw1"            "KIDSNw1.exe"}
-   {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2.exe"}
-   {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis.exe"}
-   {"TCPClientServerNet"  "TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet.exe"}
+   {"NClients"            "NClients"           "./NClients"           "NClients"}
+   {"NClients/2"          "NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
+   {"NClients/3"          "NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
+   {"FlatNet"             "FlatNet"            "./FlatNet"            "FlatNet"}
+   {"KIDSNw1"             "KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
+   {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2"}
+   {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis"}
+   {"TCPClientServerNet"  "TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
 } {
    set name $i
    incr i

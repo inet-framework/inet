@@ -34,10 +34,12 @@ cd %root%\Applications\PingApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig
 cd %root%\Applications\TCPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Unsupported\TcpModule -I..\..\Transport\TCP -I..\..\Base -I..\..\Util
 cd %root%\Applications\UDPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4 -I..\..\Unsupported\TcpModule -I..\..\Transport\UDP -I..\..\Base -I..\..\Util
 
+cd %root%\Examples\bin && %MAKEMAKE% %OPTS% -w -c ..\..\ipsuiteconfig.vc -o IPSuite %ALL_MPLS_INCLUDES%
+
+cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Examples\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Examples\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 
-cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Examples\Ethernet\ARPTest && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\Ethernet\LANs && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 
