@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../TCP -I../../Network/IPv4/Core -I../../Base
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+# object files from other directories to link with
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -37,10 +37,10 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPInterfacePacket_m.o UDPPacket_m.o UDPModule.o UDPProcessing.o
+OBJS= UDPPacket_m.o UDPModule.o  UDPProcessing.o
 
 # header files generated (from msg files)
-GENERATEDHEADERS= UDPInterfacePacket_m.h UDPPacket_m.h
+GENERATEDHEADERS= UDPPacket_m.h
 
 #------------------------------------------------------------------------------
 
@@ -56,12 +56,6 @@ purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
-
-UDPInterfacePacket_m.o: UDPInterfacePacket_m.cc
-	$(CXX) -c $(NEDCOPTS) UDPInterfacePacket_m.cc
-
-UDPInterfacePacket_m.cc UDPInterfacePacket_m.h: UDPInterfacePacket.msg
-	$(MSGC) $(INCLUDE_PATH) UDPInterfacePacket.msg
 
 UDPPacket_m.o: UDPPacket_m.cc
 	$(CXX) -c $(NEDCOPTS) UDPPacket_m.cc
@@ -116,9 +110,24 @@ re-makemake-m: makefile-ins
 UDPModule.o: UDPModule.cc \
   ../TCP/TransportInterfacePacket.h \
   UDPPacket.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h
+  ../../Network/IPv4/Core/IPInterfacePacket.h \
+  ../TCP/TransportInterfacePacket_m.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  UDPPacket_m.h \
+  ../TCP/TransportPacket.h \
+  ../TCP/TransportPacket_m.h \
+  ../../Network/IPv4/Core/IPInterfacePacket_m.h
+UDPPacket_m.o: UDPPacket_m.cc \
+  UDPPacket_m.h \
+  ../TCP/TransportPacket.h \
+  ../TCP/TransportPacket_m.h
 UDPProcessing.o: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
-  ../../Base/basic_consts.h
+  UDPPacket_m.h \
+  ../TCP/TransportPacket.h \
+  ../TCP/TransportPacket_m.h \
+  ../../Base/basic_consts.h \
+  ../../Network/IPv4/Core/IPInterfacePacket_m.h \
+  ../../Network/IPv4/Core/IPAddress.h

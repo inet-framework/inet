@@ -189,6 +189,8 @@ public:
     */
 };
 
+std::ostream& operator<<(std::ostream& os, const prt_type& prt);
+std::ostream& operator<<(std::ostream& os, const lib_type& lib);
 
 #endif
 

@@ -129,7 +129,6 @@ NewBWRequestTester.obj: NewBWRequestTester.cc \
   d:\home\IPSuite-local/Base/ModuleAccess.h \
   d:\home\IPSuite-local/Network/MPLS/LIBtable.h \
   d:\home\IPSuite-local/Network/MPLS/ip_address_prefix.h \
-  d:\home\IPSuite-local/Network/MPLS/StringTokenizer.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h
 NewRouteTester.obj: NewRouteTester.cc \
   d:\home\IPSuite-local/Network/MPLS/MPLSModule.h \
@@ -148,5 +147,4 @@ NewRouteTester.obj: NewRouteTester.cc \
   d:\home\IPSuite-local/Base/ModuleAccess.h \
   d:\home\IPSuite-local/Network/MPLS/LIBtable.h \
   d:\home\IPSuite-local/Network/MPLS/ip_address_prefix.h \
-  d:\home\IPSuite-local/Network/MPLS/StringTokenizer.h \
   d:\home\IPSuite-local/Base/ipsuite_defs.h

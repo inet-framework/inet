@@ -53,16 +53,15 @@ void RSVP::activity()
     //Buid the link table
     int linkNo= 0;
     updateTED();
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
+    std::vector<TELinkState>::iterator tedIter;
 
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if(ted_iter.advrouter.getInt() == my_id)
+        const TELinkState& linkstate = *tedIter;
+        if(linkstate.advrouter.getInt() == my_id)
         {
-             LocalAddress[linkNo] = ted_iter.local.getInt();
-             linkNo = linkNo+1;
+             LocalAddress[linkNo] = linkstate.local.getInt();
+             linkNo++;
         }
     }
     for(i=linkNo+1; i<InLIST_SIZE ;i++)
@@ -1651,7 +1650,6 @@ void RSVP::RemoveTrafficControl(ResvStateBlock_t *activeRSB)
 
         if(handleFound)
             FlowTable[m].handle =-1;
-
     }
 
     if(found)
@@ -1662,9 +1660,7 @@ void RSVP::RemoveTrafficControl(ResvStateBlock_t *activeRSB)
         //FlowSpecObj_t *fwdFS = new FlowSpecObj_t;
         //Release the resource to TED
         //GetFwdFS(activeRSB->OI, fwdFS) ;
-
     }
-
 }
 
 int
@@ -1672,9 +1668,9 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
 {
     std::vector<PathStateBlock_t>::iterator p_iterI;
     PathStateBlock_t p_iter;
-        std::vector<ResvStateBlock_t>::iterator r_iterI;
+    std::vector<ResvStateBlock_t>::iterator r_iterI;
     ResvStateBlock_t r_iter;
-        std::vector<TrafficControlStateBlock_t>::iterator t_iterI;
+    std::vector<TrafficControlStateBlock_t>::iterator t_iterI;
     TrafficControlStateBlock_t t_iter;
     TrafficControlStateBlock_t* tEle;
     FlowSpecObj_t*    fwdFS = new FlowSpecObj_t;
@@ -1687,13 +1683,11 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
     int TC_E_Police_flag = OFF;
     int Resv_Refresh_Needed_Flag=OFF;
 
-
-
     FilterSpecObj_t TC_Filter_Spec[InLIST_SIZE];
     for(int m =0; m<InLIST_SIZE;m++)
     {
-    TC_Filter_Spec[m].SrcAddress =0;
-    TC_Filter_Spec[m].SrcPort =0;
+        TC_Filter_Spec[m].SrcAddress =0;
+        TC_Filter_Spec[m].SrcPort =0;
     }
 
     FlowSpecObj_t* Path_Te = new FlowSpecObj_t;
@@ -1821,7 +1815,6 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
                 //if(t_iter.Filter_Spec_Object[i].SrcAddress == activeRSB->Filter_Spec_Object.SrcAddress &&
                    //t_iter.Filter_Spec_Object[i].SrcPort    == activeRSB->Filter_Spec_Object.SrcPort)
 
-
                 {
                     found=ON;
                     tEle = &t_iter;
@@ -1831,15 +1824,13 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
         }
 
 
-    }                       /*
-
-
+    }
+    /*
       o    If TCSB is new:
 
              1.   Store TC_Flowspec, TC_Filter_Spec*, Path_Te, and the
-                  police flags into TCSB.*/
-
-
+                  police flags into TCSB.
+    */
 
     if( found==OFF )
     {
@@ -1901,8 +1892,6 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
             if(handle ==-1)
                 return -1;
         }
-
-
         ev << "Finish Found a matching TCSB\n";
     }
     if ( Is_Biggest == ON )
@@ -1915,8 +1904,6 @@ RSVP::UpdateTrafficControl(ResvStateBlock_t *activeRSB)
         /* Create and send a ResvConf message to the address */
     }
     return 0;
-
-
 }
 
 int
@@ -2165,28 +2152,17 @@ bool RSVP::AllocateResource(int tunnelId, int holdingPri, int setupPri, int oi, 
 int
 RSVP::GetFwdFS(int oi, FlowSpecObj_t *fwdFS)
 {
-
     std::vector<RHandleType_t>::iterator iterR;
     RHandleType_t iter;
-     std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-    //double req_BW=0;
-
-
     for(iterR = FlowTable.begin(); iterR != FlowTable.end(); iterR++)
     {
-    iter = (RHandleType_t)*iterR;
-    if(iter.OI ==oi)
-      {
-      fwdFS->req_bandwidth += iter.TC_Flowspec.req_bandwidth;
-      fwdFS->link_delay += iter.TC_Flowspec.link_delay;
-      }
-
+        iter = (RHandleType_t)*iterR;
+        if(iter.OI ==oi)
+        {
+            fwdFS->req_bandwidth += iter.TC_Flowspec.req_bandwidth;
+            fwdFS->link_delay += iter.TC_Flowspec.link_delay;
+        }
     }
-
-
-
-
     return 1;
 }
 
@@ -2231,17 +2207,15 @@ void RSVP::updateTED()
 
 void RSVP::getPeerIPAddress(int peerInf, int* peerIP)
 {
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if((ted_iter.local.getInt() == peerInf) &&
-                    (ted_iter.advrouter.getInt()==my_id))
+        const TELinkState& linkstate = *tedIter;
+        if (linkstate.local.getInt()==peerInf &&
+            linkstate.advrouter.getInt()==my_id)
         {
-            (*peerIP) = ted_iter.linkid.getInt();
+            (*peerIP) = linkstate.linkid.getInt();
             break;
         }
     }
@@ -2249,17 +2223,16 @@ void RSVP::getPeerIPAddress(int peerInf, int* peerIP)
 
 void RSVP::getPeerInet(int peerIP, int* peerInf)
 {
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if((ted_iter.linkid.getInt() == peerIP) &&
-                    (ted_iter.advrouter.getInt()==my_id))
+        const TELinkState& linkstate = *tedIter;
+        if ((linkstate.linkid.getInt() == peerIP) &&
+                    (linkstate.advrouter.getInt()==my_id))
         {
-            (*peerInf) = ted_iter.remote.getInt();
+            (*peerInf) = linkstate.remote.getInt();
             break;
         }
     }
@@ -2267,36 +2240,35 @@ void RSVP::getPeerInet(int peerIP, int* peerInf)
 
 void RSVP::getIncInet(int peerIP, int* incInet)
 {
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if((ted_iter.linkid.getInt() == peerIP) &&
-           (ted_iter.advrouter.getInt()==my_id))
+        const TELinkState& linkstate = *tedIter;
+        if (linkstate.linkid.getInt() == peerIP &&
+            linkstate.advrouter.getInt()==my_id)
         {
-            (*incInet) = ted_iter.local.getInt();
+            (*incInet) = linkstate.local.getInt();
             break;
         }
     }
 }
+
 void RSVP::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
 {
     int outl=0;
     Mcast_Route_Query(0, 0, dest, &outl);
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if((ted_iter.local.getInt() == outl) && (ted_iter.advrouter.getInt()==my_id))
+        const TELinkState& linkstate = *tedIter;
+        if ((linkstate.local.getInt() == outl) && (linkstate.advrouter.getInt()==my_id))
         {
-             *peerIP=ted_iter.linkid.getInt();
-             *peerInf = ted_iter.remote.getInt();
+             *peerIP=linkstate.linkid.getInt();
+             *peerInf = linkstate.remote.getInt();
              break;
         }
     }
@@ -2607,7 +2579,7 @@ void RSVP::preemptTunnel(int tunnelId)
 //an alternative for the routing table to convergece over the network
 void RSVP::propagateTEDchanges()
 {
-    TED::getGlobalInstance()->getTED() = ted;
+    TED::getGlobalInstance()->updateTED(ted);
 }
 
 

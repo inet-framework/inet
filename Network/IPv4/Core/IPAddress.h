@@ -214,12 +214,15 @@ class IPAddress
                                    const IPAddress& addr2,
                                    const IPAddress& netmask);
 
-    friend std::ostream& operator<<(std::ostream& os, const IPAddress& obj);
-    friend cEnvir& operator<<(cEnvir& ev, const IPAddress& obj);
-    bool operator==(const IPAddress& toCmp) const {return isEqualTo(toCmp);}
-    bool operator!=(const IPAddress& toCmp) const {return !isEqualTo(toCmp);}
+    /**
+     * Returns isEqualTo(addr).
+     */
+    bool operator==(const IPAddress& addr1) const {return isEqualTo(addr1);}
 
-    operator const char *() const  { return getString(); }
+    /**
+     * Returns !isEqualTo(addr).
+     */
+    bool operator!=(const IPAddress& addr1) const {return !isEqualTo(addr1);}
 
     /**
      * Returns true if the format of the string corresponds to an IP address
@@ -237,12 +240,6 @@ inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
 {
     os << ip.getString();
     return os;
-}
-
-inline cEnvir& operator<<(cEnvir& ev, const IPAddress& ip)
-{
-    ev << ip.getString();
-    return ev;
 }
 
 #endif

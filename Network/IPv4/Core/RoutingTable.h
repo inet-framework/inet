@@ -88,7 +88,7 @@ class InterfaceEntry : public cObject // FIXME only cObject so that cArray can b
     InterfaceEntry();
     virtual ~InterfaceEntry() {}
     virtual void info(char *buf);
-    virtual opp_string& detailedInfo(opp_string& buf);
+    virtual std::string detailedInfo() const;
 
     // copy not supported: declare the following but leave them undefined
     InterfaceEntry(const InterfaceEntry& obj);
@@ -140,7 +140,7 @@ class RoutingEntry : public cObject // FIXME only cObject so that cArray can by 
     RoutingEntry();
     virtual ~RoutingEntry() {}
     virtual void info(char *buf);
-    virtual opp_string& detailedInfo(opp_string& buf);
+    virtual std::string detailedInfo() const;
 
     // copy not supported: declare the following but leave them undefined
     RoutingEntry(const RoutingEntry& obj);

@@ -63,8 +63,8 @@ void AppIn::processMessage(cMessage *msg)
     int length = p->length();
     char src[20], dest[20];
 
-    strcpy( src,  ip->srcAddr());
-    strcpy( dest, ip->destAddr());
+    strcpy( src,  ip->srcAddr().getString());
+    strcpy( dest, ip->destAddr().getString());
 
     // print out Packet info
     ev  << "\n+++" << nodename << " AppIn: Packet received:"

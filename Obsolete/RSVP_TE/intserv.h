@@ -1,18 +1,17 @@
 /*******************************************************************
 *
-*    This library is free software, you can redistribute it 
-*    and/or modify 
-*    it under  the terms of the GNU Lesser General Public License 
-*    as published by the Free Software Foundation; 
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
 *    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful, 
+*    The library is distributed in the hope that it will be useful,
 *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 *    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
-
 
 /*
 *    File Name IntServ.h
@@ -30,8 +29,11 @@
 #define ON     1
 #define OFF     0
 
-/*Session Structure*/
-struct SessionObj_t{
+/**
+ * Intserv/RSVP: Session Structure
+ */
+struct SessionObj_t
+{
     int  DestAddress;
     int Protocol_Id;
     int DestPort;
@@ -39,72 +41,87 @@ struct SessionObj_t{
     int holdingPri;
     int Tunnel_Id;
     int Extended_Tunnel_Id;
-} ;
+};
 
-/*RSVP HOP Structure*/
-struct RsvpHopObj_t{
-
+/**
+ * Intserv/RSVP: RSVP HOP Structure
+ */
+struct RsvpHopObj_t
+{
     int  Next_Hop_Address;
     int  Logical_Interface_Handle;
-} ;
+};
 
-/*Sender Template Structure*/
-struct SenderTemplateObj_t{
+/**
+ * Intserv/RSVP: Sender Template Structure
+ */
+struct SenderTemplateObj_t
+{
     SenderTemplateObj_t(){SrcAddress =0; SrcPort=0; Lsp_Id =-1;}
     int  SrcAddress;
     int SrcPort;
     int Lsp_Id;
-} ;
+};
 
 
-/*Sender Tspec Structure*/
-struct SenderTspecObj_t{
+/**
+ * Intserv/RSVP: Sender Tspec Structure
+ */
+struct SenderTspecObj_t
+{
     SenderTspecObj_t(){req_bandwidth =0; link_delay=0;}
     double req_bandwidth;
     double link_delay;
-} ;
+};
 
-/*Sender Tspec Structure*/
+/**
+ * Intserv/RSVP: Sender Tspec Structure
+ */
 typedef SenderTspecObj_t FlowSpecObj_t;
 
-/*Sender Template Structure*/
+/**
+ * Intserv/RSVP: Sender Template Structure
+ */
 typedef SenderTemplateObj_t FilterSpecObj_t;
 
-/*Label Request Object Structure*/
-struct LabelRequestObj_t{
+/**
+ * Intserv/RSVP: Label Request Object Structure
+ */
+struct LabelRequestObj_t
+{
     // request;
     int prot;
 };
 
-/*Sender Descriptor Structure*/
-struct SenderDescriptor_t{
-
-  SenderTemplateObj_t Sender_Template_Object; 
-
-  SenderTspecObj_t Sender_Tspec_Object;     
-
+/**
+ * Intserv/RSVP: Sender Descriptor Structure
+ */
+struct SenderDescriptor_t
+{
+  SenderTemplateObj_t Sender_Template_Object;
+  SenderTspecObj_t Sender_Tspec_Object;
 };
 
 
-/*Flow Descriptor Structure*/
-struct FlowDescriptor_t{
-
-  FlowSpecObj_t Flowspec_Object;         
-
-  FilterSpecObj_t Filter_Spec_Object; 
-  
+/**
+ * Intserv/RSVP: Flow Descriptor Structure
+ */
+struct FlowDescriptor_t
+{
+  FlowSpecObj_t Flowspec_Object;
+  FilterSpecObj_t Filter_Spec_Object;
   int RRO[MAX_ROUTE];
-  
   int label;
-
 };
 
-/*Explicit Routing Object Structure*/
-struct EroObj_t{
+/**
+ * Intserv/RSVP: Explicit Routing Object Structure
+ */
+struct EroObj_t
+{
     EroObj_t(){L=false;node =0;}
     bool L;
     int node;
-
 };
 
 #endif

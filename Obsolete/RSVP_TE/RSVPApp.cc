@@ -26,16 +26,14 @@ Define_Module( RSVPAppl);
 void RSVPAppl::initialize()
 {
     //Get router IP Address
-
     local_addr   = IPAddress(par("local_addr").stringValue()).getInt();
-    //dest_addr   = IPAddress(par("dest_addr").stringValue()).getInt();
 
     isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();
     isER = par("isER").boolValue();
     const char* trafficFile = par("traffic").stringValue();
 
-    if(isIR)
+    if (isIR)
         initFromFile(trafficFile);
 }
 
@@ -49,13 +47,13 @@ void RSVPAppl::activity()
 
     cMessage *msg;
 
-    if(isIR)
+    if (isIR)
     {
         cMessage* readyMsg = new cMessage();
         sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
     }
     /*
-    if(isSender)
+    if (isSender)
     {
         cMessage* sendMsg = new cMessage();
         sendMsg->addPar("dest_addr") = IPAddress(dest_addr).getString();
@@ -121,7 +119,7 @@ void RSVPAppl::activity()
               const char* outInfName = rt->getInterfaceByIndex(outInfIndex)->name.c_str();
               const char* inInfName = rt->getInterfaceByIndex(inInfIndex)->name.c_str();
 
-              if(isER)
+              if (isER)
               {
                 int inLabel= (lt->installNewLabel(-1, string(inInfName),string(outInfName),lspId, POP_OPER));
                 ev << "INSTALL new label:\n";
@@ -137,7 +135,7 @@ void RSVPAppl::activity()
           else if(msg->kind() == RESV_MESSAGE)
           {
               ResvMessage* rMessage = check_and_cast<ResvMessage*>(msg);
-              if(isIR )
+              if (isIR )
               {
                   std::vector<lsp_tunnel_t>::iterator iterF;
                   lsp_tunnel_t aTunnel;
@@ -179,7 +177,7 @@ void RSVPAppl::activity()
                                       }
 
                                   }
-                                  if(iterR != routingInfo.end())
+                                  if (iterR != routingInfo.end())
                                       routingInfo.erase(iterR);
 
                                     //Add new record
@@ -244,25 +242,16 @@ void RSVPAppl::activity()
                                         pt->setHop(rsvp_hop);
                                         send(pt, "to_rsvp");
                                     }
-
                               }
                           }
-
-
-
-
 
                       }
                   }
 
-
               }
 
           }
-
-
-        delete msg;
-
+          delete msg;
       }
 
       /***********************************************************************
@@ -300,7 +289,7 @@ void RSVPAppl::activity()
 
                    }
                }
-               if(iterF == FecSenderBinds.end())
+               if (iterF == FecSenderBinds.end())
                {
                    error("Cannot find the session to teardown");
                }
@@ -358,7 +347,7 @@ void RSVPAppl::activity()
           }
 
 
-          if(iterF==FecSenderBinds.end())//There is no previous same requests
+          if (iterF==FecSenderBinds.end())//There is no previous same requests
           {
 
               newTunnel = new lsp_tunnel_t;
@@ -394,7 +383,7 @@ void RSVPAppl::activity()
 
               FecSenderBinds.push_back(*newTunnel);
 
-              if(iterT != tr.end())
+              if (iterT != tr.end())
                 sendPathMessage(&newTunnel->Session, &trafficR, lspId);
               else
               {
@@ -446,14 +435,12 @@ void RSVPAppl::activity()
                   if(tr[k].src == rSrc && tr[k].dest == rDest)
                   {
                       tr[k].bandwidth = bw;
-
-            ev << "New Bandwidth request = "  << bw << " \n";
+                      ev << "New Bandwidth request = "  << bw << " \n";
                       break;
-
                   }
 
               }
-              if(k == tr.size()   )
+              if(k == tr.size())
                   continue;
 
               for(n =0 ;n<FecSenderBinds.size();n++)
@@ -469,13 +456,11 @@ void RSVPAppl::activity()
               if(n == FecSenderBinds.size())
                   continue;
 
-             newLsp_id= 2*MAX_LSP_NO - newLsp_id;
+              newLsp_id= 2*MAX_LSP_NO - newLsp_id;
 
               sendPathMessage(&FecSenderBinds[n].Session, &tr[k], newLsp_id);
-
-
-
           }
+
           if(command ==NEW_ROUTE_DISCOVER)
           {
 
@@ -493,16 +478,11 @@ void RSVPAppl::activity()
 
                           break;
                       }
-
               }
 
-
-
-                std::vector<lsp_tunnel_t>::iterator iterF;
+              std::vector<lsp_tunnel_t>::iterator iterF;
               lsp_tunnel_t aTunnel;
               int newLspId = 2*MAX_LSP_NO - rInfo.lspId;
-
-
 
               for(iterF=FecSenderBinds.begin();iterF!= FecSenderBinds.end();iterF++)
               {
@@ -510,7 +490,7 @@ void RSVPAppl::activity()
                   if(aTunnel.Sender_Template.Lsp_Id ==rInfo.lspId)
                       break;
               }
-              if(iterF == FecSenderBinds.end())
+              if (iterF == FecSenderBinds.end())
                   error("cannot locate the tunnel");
 
               std::vector<traffic_request_t>::iterator iterT;
@@ -527,7 +507,7 @@ void RSVPAppl::activity()
 
               }
 
-              if(iterT == tr.end())
+              if (iterT == tr.end())
               {
                   ev << "No traffic spec required for the LSP\n";
                   continue;
@@ -537,281 +517,249 @@ void RSVPAppl::activity()
               ev << "Sending Path message for the new discovered route\n";
               sendPathMessage(&aTunnel.Session, &trafficR, newLspId);
 
-
-
           } //End NEW ROUTE command
-
-
-
-
       }
-
-
     }//End while
-
-
 }
 
 void RSVPAppl::sendResvMessage(PathMessage* pMsg, int inLabel)
 {
-        ev << "Generate a Resv Message\n";
-        ResvMessage* rMsg = new ResvMessage();
-        RsvpHopObj_t* rsvp_hop = new RsvpHopObj_t;
-        FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
-        FilterSpecObj_t* Filter_Spec_Object = new FilterSpecObj_t;
-        FlowSpecObj_t* Flowspec_Object_Default = new FlowSpecObj_t;
-        FilterSpecObj_t* Filter_Spec_Object_Default = new FilterSpecObj_t;
+    ev << "Generate a Resv Message\n";
+    ResvMessage* rMsg = new ResvMessage();
+    RsvpHopObj_t* rsvp_hop = new RsvpHopObj_t;
+    FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
+    FilterSpecObj_t* Filter_Spec_Object = new FilterSpecObj_t;
+    FlowSpecObj_t* Flowspec_Object_Default = new FlowSpecObj_t;
+    FilterSpecObj_t* Filter_Spec_Object_Default = new FilterSpecObj_t;
 
-       //Setup  rsvp hop
-        rsvp_hop->Logical_Interface_Handle = -1;//pMsg->getLIH();
-        rsvp_hop->Next_Hop_Address = pMsg->getNHOP();
-
-
-        /*
-        Note this assume that the request bw = sender bw
-        Need to make it more generic later
-        */
-        //Setup flowspec
-        Flowspec_Object->link_delay = pMsg->getDelay();
-        Flowspec_Object->req_bandwidth = pMsg->getBW();
-
-        Flowspec_Object_Default->link_delay =pMsg->getDelay();
-        Flowspec_Object_Default->req_bandwidth =pMsg->getBW();
-
-        //Setup Filterspec
-        Filter_Spec_Object->SrcAddress = pMsg->getSrcAddress();
-        Filter_Spec_Object->SrcPort    = pMsg->getSrcPort();
-        Filter_Spec_Object->Lsp_Id     = pMsg->getLspId();
-
-        Filter_Spec_Object_Default->SrcAddress =0;
-        Filter_Spec_Object_Default->SrcPort=0;
-        Filter_Spec_Object_Default->Lsp_Id =-1;
+    //Setup  rsvp hop
+    rsvp_hop->Logical_Interface_Handle = -1;//pMsg->getLIH();
+    rsvp_hop->Next_Hop_Address = pMsg->getNHOP();
 
 
-        FlowDescriptor_t* flow_descriptor_list = new FlowDescriptor_t[InLIST_SIZE];
-        flow_descriptor_list[0].Filter_Spec_Object = (*Filter_Spec_Object);
-        flow_descriptor_list[0].Flowspec_Object =(*Flowspec_Object);
+    /*
+    Note this assume that the request bw = sender bw
+    Need to make it more generic later
+    */
+    //Setup flowspec
+    Flowspec_Object->link_delay = pMsg->getDelay();
+    Flowspec_Object->req_bandwidth = pMsg->getBW();
 
-        //flow_descriptor_list[0].RRO[0] = local_addr;
-        for(int c=0;c<MAX_ROUTE;c++)
-            flow_descriptor_list[0].RRO[c] =0;
+    Flowspec_Object_Default->link_delay =pMsg->getDelay();
+    Flowspec_Object_Default->req_bandwidth =pMsg->getBW();
 
-        flow_descriptor_list[0].label =inLabel;
+    //Setup Filterspec
+    Filter_Spec_Object->SrcAddress = pMsg->getSrcAddress();
+    Filter_Spec_Object->SrcPort    = pMsg->getSrcPort();
+    Filter_Spec_Object->Lsp_Id     = pMsg->getLspId();
 
-        for(int i=1;i<InLIST_SIZE;i++)
-        {
+    Filter_Spec_Object_Default->SrcAddress =0;
+    Filter_Spec_Object_Default->SrcPort=0;
+    Filter_Spec_Object_Default->Lsp_Id =-1;
+
+
+    FlowDescriptor_t* flow_descriptor_list = new FlowDescriptor_t[InLIST_SIZE];
+    flow_descriptor_list[0].Filter_Spec_Object = (*Filter_Spec_Object);
+    flow_descriptor_list[0].Flowspec_Object =(*Flowspec_Object);
+
+    //flow_descriptor_list[0].RRO[0] = local_addr;
+    for(int c=0;c<MAX_ROUTE;c++)
+        flow_descriptor_list[0].RRO[c] =0;
+
+    flow_descriptor_list[0].label =inLabel;
+
+    for(int i=1;i<InLIST_SIZE;i++)
+    {
         flow_descriptor_list[i].Filter_Spec_Object = (*Filter_Spec_Object_Default);
         flow_descriptor_list[i].Flowspec_Object =(*Flowspec_Object_Default);
         flow_descriptor_list[i].label =-1;
-        }
+    }
 
-        //Check if this one is equivalent to reroute request
-        if((pMsg->getLspId()) > MAX_LSP_NO)
-        {
-            int old_lsp_id = 2*MAX_LSP_NO -(pMsg->getLspId());
-            Filter_Spec_Object->Lsp_Id = old_lsp_id;
-            flow_descriptor_list[1].Filter_Spec_Object = (*Filter_Spec_Object);
-            flow_descriptor_list[1].Flowspec_Object =(*Flowspec_Object);
-            for(int c=0;c<MAX_ROUTE;c++)
-            flow_descriptor_list[1].RRO[c] =0;
+    //Check if this one is equivalent to reroute request
+    if((pMsg->getLspId()) > MAX_LSP_NO)
+    {
+        int old_lsp_id = 2*MAX_LSP_NO -(pMsg->getLspId());
+        Filter_Spec_Object->Lsp_Id = old_lsp_id;
+        flow_descriptor_list[1].Filter_Spec_Object = (*Filter_Spec_Object);
+        flow_descriptor_list[1].Flowspec_Object =(*Flowspec_Object);
+        for(int c=0;c<MAX_ROUTE;c++)
+        flow_descriptor_list[1].RRO[c] =0;
+    }
 
+    rMsg->setFlowDescriptor(flow_descriptor_list);
+    rMsg->setHop(rsvp_hop);
+    rMsg->setSession(pMsg->getSession());
 
+    rMsg->setStyle(SF_STYLE);
 
-        }
+    //int peerIp=0;
+    //getPeerIPAddress(inInf, &peerIp);
 
-
-
-
-        rMsg->setFlowDescriptor(flow_descriptor_list);
-        rMsg->setHop(rsvp_hop);
-        rMsg->setSession(pMsg->getSession());
-
-        rMsg->setStyle(SF_STYLE);
-
-
-
-
-        //int peerIp=0;
-        //getPeerIPAddress(inInf, &peerIp);
-
-        rMsg->addPar("dest_addr")= IPAddress(pMsg->getNHOP()).getString();
-        ev << "Next peer " <<  IPAddress(pMsg->getNHOP()).getString();
-        ev << "RESV MESSAGE content: \n";
-        rMsg->print();
-        send(rMsg, "to_rsvp");
-
-
-
+    rMsg->addPar("dest_addr")= IPAddress(pMsg->getNHOP()).getString();
+    ev << "Next peer " <<  IPAddress(pMsg->getNHOP()).getString();
+    ev << "RESV MESSAGE content: \n";
+    rMsg->print();
+    send(rMsg, "to_rsvp");
 }
 
 
 
 void RSVPAppl::sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId)
 {
-        OspfTe *ospfte = ospfteAccess.get();
+    OspfTe *ospfte = ospfteAccess.get();
 
-        PathMessage* pMsg = new PathMessage();
-        RsvpHopObj_t* rsvp_hop = new RsvpHopObj_t;
-        FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
+    PathMessage* pMsg = new PathMessage();
+    RsvpHopObj_t* rsvp_hop = new RsvpHopObj_t;
+    FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
 
-        FilterSpecObj_t* Filter_Spec_Object= new FilterSpecObj_t;
+    FilterSpecObj_t* Filter_Spec_Object= new FilterSpecObj_t;
 
-        //Setup PHOP
-        rsvp_hop->Logical_Interface_Handle =-1;
-        rsvp_hop->Next_Hop_Address = local_addr;
-        int destAddr = s->DestAddress;
-        int outInterface;
+    //Setup PHOP
+    rsvp_hop->Logical_Interface_Handle =-1;
+    rsvp_hop->Next_Hop_Address = local_addr;
+    int destAddr = s->DestAddress;
+    int outInterface;
 
-        Unicast_Route_Query( destAddr, &outInterface );
+    Unicast_Route_Query( destAddr, &outInterface );
 
-        rsvp_hop->Logical_Interface_Handle = outInterface;
+    rsvp_hop->Logical_Interface_Handle = outInterface;
 
-        //Setup Sender Descriptor
-        Flowspec_Object->link_delay = t->delay;
-        Flowspec_Object->req_bandwidth = t->bandwidth;
+    //Setup Sender Descriptor
+    Flowspec_Object->link_delay = t->delay;
+    Flowspec_Object->req_bandwidth = t->bandwidth;
 
-        Filter_Spec_Object->SrcAddress = t->src;
-        Filter_Spec_Object->SrcPort = DEFAULT_SRC_PORT;
-        Filter_Spec_Object->Lsp_Id = lspId;
+    Filter_Spec_Object->SrcAddress = t->src;
+    Filter_Spec_Object->SrcPort = DEFAULT_SRC_PORT;
+    Filter_Spec_Object->Lsp_Id = lspId;
 
-        pMsg->setHop(rsvp_hop);
-        pMsg->setSession(s);
-        pMsg->setSenderTemplate(static_cast<SenderTemplateObj_t*>(Filter_Spec_Object));
-        pMsg->setSenderTspec(static_cast<SenderTspecObj_t*>(Flowspec_Object));
+    pMsg->setHop(rsvp_hop);
+    pMsg->setSession(s);
+    pMsg->setSenderTemplate(static_cast<SenderTemplateObj_t*>(Filter_Spec_Object));
+    pMsg->setSenderTspec(static_cast<SenderTspecObj_t*>(Flowspec_Object));
 
-        //Setup routing information
-        pMsg->addPar("src_addr") = IPAddress(local_addr).getString();
+    //Setup routing information
+    pMsg->addPar("src_addr") = IPAddress(local_addr).getString();
 
-        int peerIP =0;
-        int peerInf=0;
-        //Normal way to get the peerIP
-        getPeerIPAddress(destAddr, &peerIP, &peerInf);
-
-
-        pMsg->addPar("dest_addr") = IPAddress(peerIP).getString();
-        pMsg->addPar("peerInf") = peerInf;
+    int peerIP =0;
+    int peerInf=0;
+    //Normal way to get the peerIP
+    getPeerIPAddress(destAddr, &peerIP, &peerInf);
 
 
-        /**************************************************************
-        More control options of ERO here
-        ***************************************************************/
+    pMsg->addPar("dest_addr") = IPAddress(peerIP).getString();
+    pMsg->addPar("peerInf") = peerInf;
 
 
-        //Calculate ERO
+    /**************************************************************
+    More control options of ERO here
+    ***************************************************************/
 
-        EroObj_t ERO[MAX_ROUTE];
-        for(int m=0; m< MAX_ROUTE;m++)
+
+    //Calculate ERO
+
+    EroObj_t ERO[MAX_ROUTE];
+    for(int m=0; m< MAX_ROUTE;m++)
+    {
+    ERO[m].node =0;
+    ERO[m].L =false;
+    }
+    //If the option of ER is on
+    if(t->isER)
+    {
+        if (isIR)
         {
-        ERO[m].node =0;
-        ERO[m].L =false;
-        }
-        //If the option of ER is on
-        if(t->isER)
-        {
-            if(isIR)
+            if(t->route[0].node ==0)
             {
-                if(t->route[0].node ==0)
+                //No input ER from the administrator for this path
+                //Find ER based on CSPF routing algorithm
+                ev<< "OSPF PATH calculation: from " << IPAddress(local_addr).getString() <<
+                " to " << IPAddress(destAddr).getString() << "\n";
+
+                double delayTime=0;
+                std::vector<int> ero =ospfte->CalculateERO(destAddr, *Flowspec_Object, delayTime);
+                if (ero.back() == 0)    //Unknow reason
                 {
-                    //No input ER from the administrator for this path
-                    //Find ER based on CSPF routing algorithm
-                    ev<< "OSPF PATH calculation: from " << IPAddress(local_addr).getString() <<
-                    " to " << IPAddress(destAddr).getString() << "\n";
-
-                    double delayTime=0;
-
-                    std::vector<int> ero =ospfte->CalculateERO(new
-                    IPAddress(destAddr),Flowspec_Object, &delayTime);
-                    if(ero.back() == 0)    //Unknow reason
-                    {
                     ero.pop_back();
                     ero.push_back(local_addr);
-                    }
-
-
-
-                    //std::vector<int>::iterator ero_iterI;
-                    int hopCount =0;
-
-                        for (int n=0; n< ero.size(); n++)
-                        {
-                            ev << IPAddress(ero[n]).getString() << "\n";
-                            ERO[hopCount].node  = ero[n];
-                            ERO[hopCount].L =false;
-                            hopCount=hopCount+1;
-                        }
-                        /*
-                        if(hopCount>0)
-                        {
-                            for( ; hopCount-1 < MAX_ROUTE; hopCount++)
-                            {
-                                ERO[hopCount].node =0;
-                                ERO[hopCount].L =false;
-                            }
-                        }
-
-                        else
-                        */
-                        if(hopCount == 0)
-                        {
-                            ev << "No resource available\n";
-                            //delete pmsg;
-                            return;
-                        }
-
-                    //pMsg->setERO(ERO);
                 }
-                else //Use the input from admin
-                {
-                    int lastIndex =0;
-                    int index =0;
-                    for(lastIndex =0; lastIndex < MAX_ROUTE; lastIndex++)
-                        if(t->route[lastIndex].node ==0)
-                            break;
-                    lastIndex--;
-                    for(; lastIndex >=0; lastIndex--)
-                    {
-                        ERO[index].L = t->route[lastIndex].L;
-                        ERO[index].node = t->route[lastIndex].node;
-                        index++;
 
+                // copy returned path into ERO structure
+                int hopCount =0;
+                for (int n=0; n<ero.size(); n++)
+                {
+                    ev << IPAddress(ero[n]).getString() << "\n";
+                    ERO[hopCount].node  = ero[n];
+                    ERO[hopCount].L =false;
+                    hopCount++;
+                }
+                /*
+                if(hopCount>0)
+                {
+                    for( ; hopCount-1 < MAX_ROUTE; hopCount++)
+                    {
+                        ERO[hopCount].node =0;
+                        ERO[hopCount].L =false;
                     }
+                }
+                else
+                */
+                if (hopCount == 0)
+                {
+                    ev << "No resource available\n";
+                    //delete pmsg;
+                    return;
+                }
+
+                //pMsg->setERO(ERO);
+            }
+            else //Use the input from admin
+            {
+                int lastIndex =0;
+                int index =0;
+                for(lastIndex =0; lastIndex < MAX_ROUTE; lastIndex++)
+                    if(t->route[lastIndex].node ==0)
+                        break;
+                lastIndex--;
+                for(; lastIndex >=0; lastIndex--)
+                {
+                    ERO[index].L = t->route[lastIndex].L;
+                    ERO[index].node = t->route[lastIndex].node;
+                    index++;
+
                 }
             }
-            pMsg->addERO(true);
-            pMsg->setERO(ERO);
         }
-        else //Hop-by-Hop routing
-        {
-            pMsg->addERO(false);
+        pMsg->addERO(true);
+        pMsg->setERO(ERO);
+    }
+    else //Hop-by-Hop routing
+    {
+        pMsg->addERO(false);
 
-        }
+    }
 
-        /*
-        routing_info_t* rInfo = new routing_info_t;
-        rInfo->lspId = lspId;
-        for(int c=0;c<MAX_ROUTE;c++)
-            (rInfo->route)[c]= ERO[c].node;
-        routingInfo.push_back(*rInfo);
-        */
-
-
-
-        //delete [] ERO;
-
-
-        //Finish buidling packet, send it off
-        ev << "Final Dest Address is : " << IPAddress(destAddr).getString() << "\n";
-        ev << "Set Dest Address to: " << IPAddress(peerIP).getString() << "\n";
-
-
-        ev << "PATH message content sent:\n";
-        pMsg->print();
-
-        send(pMsg, "to_rsvp");
+    /*
+    routing_info_t* rInfo = new routing_info_t;
+    rInfo->lspId = lspId;
+    for(int c=0;c<MAX_ROUTE;c++)
+        (rInfo->route)[c]= ERO[c].node;
+    routingInfo.push_back(*rInfo);
+    */
 
 
 
+    //delete [] ERO;
 
+
+    //Finish buidling packet, send it off
+    ev << "Final Dest Address is : " << IPAddress(destAddr).getString() << "\n";
+    ev << "Set Dest Address to: " << IPAddress(peerIP).getString() << "\n";
+
+
+    ev << "PATH message content sent:\n";
+    pMsg->print();
+
+    send(pMsg, "to_rsvp");
 }
 
 
@@ -844,16 +792,16 @@ RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
 
 void RSVPAppl::getPeerInet(int peerIP, int* peerInf)
 {
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if (ted_iter.linkid.getInt()==peerIP &&
-            ted_iter.advrouter.getInt()==local_addr)
+        const TELinkState& linkstate = *tedIter;
+        if (linkstate.linkid.getInt()==peerIP &&
+            linkstate.advrouter.getInt()==local_addr)
         {
-            (*peerInf) = ted_iter.remote.getInt();
+            (*peerInf) = linkstate.remote.getInt();
             break;
         }
     }
@@ -861,18 +809,17 @@ void RSVPAppl::getPeerInet(int peerIP, int* peerInf)
 
 void RSVPAppl::getIncInet(int remoteInet, int* incInet)
 {
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
+    std::vector<TELinkState>::iterator tedIter;
 
     ev << "Find incoming inf for peerOutgoinglink=" << IPAddress(remoteInet).getString() << "\n";
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if (ted_iter.remote.getInt() == remoteInet &&
-            ted_iter.advrouter.getInt()==local_addr)
+        const TELinkState& linkstate = *tedIter;
+        if (linkstate.remote.getInt() == remoteInet &&
+            linkstate.advrouter.getInt()==local_addr)
         {
-            (*incInet) = ted_iter.local.getInt();
+            (*incInet) = linkstate.local.getInt();
             break;
         }
     }
@@ -882,18 +829,17 @@ void RSVPAppl::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
 {
     int outl=0;
     Mcast_Route_Query(0, 0, dest, &outl);
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-
     updateTED();
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if(ted_iter.local.getInt() == outl &&
-                          ted_iter.advrouter.getInt() ==local_addr)
+        const TELinkState& linkstate = *tedIter;
+        if(linkstate.local.getInt() == outl &&
+                          linkstate.advrouter.getInt() ==local_addr)
         {
-            *peerIP = ted_iter.linkid.getInt();
-            *peerInf = ted_iter.remote.getInt();
+            *peerIP = linkstate.linkid.getInt();
+            *peerInf = linkstate.remote.getInt();
             break;
         }
     }
@@ -901,17 +847,16 @@ void RSVPAppl::getPeerIPAddress(int dest, int* peerIP, int* peerInf)
 
 void RSVPAppl::getPeerIPAddress(int peerInf, int* peerIP)
 {
-  updateTED();
-  std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
+    updateTED();
 
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
-        if(ted_iter.local.getInt() == peerInf &&
-                          ted_iter.advrouter.getInt() ==local_addr)
+        const TELinkState& linkstate = *tedIter;
+        if(linkstate.local.getInt() == peerInf &&
+                          linkstate.advrouter.getInt() ==local_addr)
         {
-            *peerIP = ted_iter.linkid.getInt();
+            *peerIP = linkstate.linkid.getInt();
             break;
         }
     }
@@ -1050,9 +995,9 @@ void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
         cur = cur->next;
     }
     ev << "Adding (src, dest, delay, bw) = (" << IPAddress(aTR->src).getString() << "," <<
-                             IPAddress(aTR->dest).getString() << "," <<
-                             aTR->delay << "," <<
-                             aTR->bandwidth << ")\n";
+          IPAddress(aTR->dest).getString() << "," <<
+          aTR->delay << "," <<
+          aTR->bandwidth << ")\n";
     if(aTR->holdingPri > aTR->setupPri)
     {
         error("Holding priority is greater than setup priority (setup priority must be greater than or equal)");
@@ -1064,209 +1009,192 @@ void RSVPAppl::TrafficRequest (xmlDocPtr doc, xmlNodePtr cur)
 
 void RSVPAppl::addRouteInfo(ResvMessage* rmsg)
 {
-          FlowDescriptor_t* flow_d = rmsg->getFlowDescriptor();
-           for(int k=0;k<InLIST_SIZE;k++)
-           {
-               if((*(flow_d+k)).Filter_Spec_Object.SrcAddress !=0)
-               {
-                   routing_info_t* rInfo = new routing_info_t;
-                   rInfo->lspId = (*(flow_d+k)).Filter_Spec_Object.Lsp_Id;
+    FlowDescriptor_t* flow_d = rmsg->getFlowDescriptor();
+    for(int k=0;k<InLIST_SIZE;k++)
+    {
+        if((*(flow_d+k)).Filter_Spec_Object.SrcAddress !=0)
+        {
+            routing_info_t* rInfo = new routing_info_t;
+            rInfo->lspId = (*(flow_d+k)).Filter_Spec_Object.Lsp_Id;
 
-                   for(int c=0;c< MAX_ROUTE;c++)
-                   {
-                   rInfo->route[c] = (*(flow_d+k)).RRO[c];
-                   }
-                   routingInfo.push_back(*rInfo);
-
-
-               }
-           }
-
-
+            for(int c=0;c< MAX_ROUTE;c++)
+            {
+            rInfo->route[c] = (*(flow_d+k)).RRO[c];
+            }
+            routingInfo.push_back(*rInfo);
+        }
+    }
 }
 
 bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t* newFlowspec)
 {
-        OspfTe *ospfte = ospfteAccess.get();
+    OspfTe *ospfte = ospfteAccess.get();
 
-          std::vector<lsp_tunnel_t>::iterator iterF;
-          lsp_tunnel_t aTunnel;
+    std::vector<lsp_tunnel_t>::iterator iterF;
+    lsp_tunnel_t aTunnel;
 
-          for(iterF=FecSenderBinds.begin();iterF!= FecSenderBinds.end();iterF++)
-          {
-              aTunnel = (lsp_tunnel_t)(*iterF);
-              if(aTunnel.Sender_Template.Lsp_Id ==lspid)
-                  break;
-          }
-          if(iterF == FecSenderBinds.end())
-          {
-              ev << "No LSP with id =" << lspid << "\n";
-              return false;
-          }
+    for(iterF=FecSenderBinds.begin();iterF!= FecSenderBinds.end();iterF++)
+    {
+        aTunnel = (lsp_tunnel_t)(*iterF);
+        if(aTunnel.Sender_Template.Lsp_Id ==lspid)
+            break;
+    }
+    if (iterF == FecSenderBinds.end())
+    {
+        ev << "No LSP with id =" << lspid << "\n";
+        return false;
+    }
 
-          std::vector<traffic_request_t>::iterator iterT;
-          traffic_request_t trafficR;
+    std::vector<traffic_request_t>::iterator iterT;
+    traffic_request_t trafficR;
 
-          for(iterT = tr.begin(); iterT != tr.end(); iterT++)
-          {
-              trafficR = (traffic_request_t)*iterT;
-              if(trafficR.dest == aTunnel.Session.DestAddress &&
-                  trafficR.src == aTunnel.Sender_Template.SrcAddress)
-              {
-                break;
-              }
+    for(iterT = tr.begin(); iterT != tr.end(); iterT++)
+    {
+        trafficR = (traffic_request_t)*iterT;
+        if(trafficR.dest == aTunnel.Session.DestAddress &&
+            trafficR.src == aTunnel.Sender_Template.SrcAddress)
+        {
+          break;
+        }
+    }
 
-          }
+    if (iterT == tr.end())
+    {
+        ev << "No traffic spec required for LSP with id =" << lspid << "\n";
+        return false;
+    }
 
-          if(iterT == tr.end())
-          {
-              ev << "No traffic spec required for LSP with id =" << lspid << "\n";
-              return false;
-          }
+    //Locate the current used route
+    std::vector<routing_info_t>::iterator iterR;
+    routing_info_t rInfo;
 
-          //Locate the current used route
-          std::vector<routing_info_t>::iterator iterR;
-          routing_info_t rInfo;
+    for(iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
+    {
+        rInfo = (routing_info_t)*iterR;
+        if(rInfo.lspId == lspid)
+            break;
 
-          for(iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
-          {
-              rInfo = (routing_info_t)*iterR;
-              if(rInfo.lspId == lspid)
-                  break;
+    }
+    if (iterR == routingInfo.end())
+        ev << "Warning, no recorded path found\n";
 
-          }
-          if(iterR == routingInfo.end())
-              ev << "Warning, no recorded path found\n";
+    if (iterR == routingInfo.end())
+    {
+        ev << "No route currently used for LSP with id =" << lspid << "\n";
+        return false;
+    }
 
-          if(iterR == routingInfo.end())
-          {
-              ev << "No route currently used for LSP with id =" << lspid << "\n";
-              return false;
-          }
+    //Get destination
+    int destAddr = aTunnel.Session.DestAddress;
 
-          //Get destination
-          int destAddr = aTunnel.Session.DestAddress;
+    //Get old flowspec
+    FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
+    Flowspec_Object->link_delay = trafficR.delay;
+    Flowspec_Object->req_bandwidth = trafficR.bandwidth;
 
-          //Get old flowspec
-          FlowSpecObj_t* Flowspec_Object = new FlowSpecObj_t;
-          Flowspec_Object->link_delay = trafficR.delay;
-          Flowspec_Object->req_bandwidth = trafficR.bandwidth;
+    //Get links used
+    std::vector<simple_link_t> linksInUse;
+    for(int c=0;c< (MAX_ROUTE-1);c++)
+    {
+        simple_link_t* aLink = new simple_link_t;
+        if((rInfo.route[c] !=0) && (rInfo.route[c+1]!=0))
+        {
+            aLink->advRouter= rInfo.route[c+1];
+            aLink->id =rInfo.route[c];
+            linksInUse.push_back(*aLink);
 
-          //Get links used
-          std::vector<simple_link_t> linksInUse;
-          for(int c=0;c< (MAX_ROUTE-1);c++)
-          {
-              simple_link_t* aLink = new simple_link_t;
-              if((rInfo.route[c] !=0) && (rInfo.route[c+1]!=0))
-              {
-                  aLink->advRouter= rInfo.route[c+1];
-                  aLink->id =rInfo.route[c];
-                  linksInUse.push_back(*aLink);
+        }
+    }
 
-              }
-          }
+    double currentTotalDelay = getTotalDelay(&linksInUse);
+    ev << "Current total path metric: " << currentTotalDelay << "\n";
+        //Calculate ERO
 
-
-          double currentTotalDelay = getTotalDelay(&linksInUse);
-          ev << "Current total path metric: " << currentTotalDelay << "\n";
-              //Calculate ERO
-
-          ev<< "OSPF PATH calculation: from " << IPAddress(local_addr).getString() <<
+    ev << "OSPF PATH calculation: from " << IPAddress(local_addr).getString() <<
           " to " << IPAddress(destAddr).getString() << "\n";
 
-          std::vector<int> ero;
-          double totalDelay =0;
-          if(newFlowspec ==NULL)
-          {
+    std::vector<int> ero;
+    double totalDelay =0;
+    if (newFlowspec==NULL)
+    {
 
-              ero = ospfte->CalculateERO(new IPAddress(destAddr),&linksInUse,Flowspec_Object, Flowspec_Object, &totalDelay);
+        ero = ospfte->CalculateERO(destAddr,linksInUse, *Flowspec_Object, *Flowspec_Object, totalDelay);
 
-              if(currentTotalDelay < totalDelay)
-              {
-                  ev << "The metric for new route is " << totalDelay << "\n";
-                  ev << "No better route detected for LSP with id=" << lspid << "\n";
-                  return false;
-              }
-              else
-                  ev << "New route discovered with metric=" << totalDelay <<
-                  " < current metric=" <<currentTotalDelay<<"\n";
-          }
-          else
-            ero = ospfte->CalculateERO(new IPAddress(destAddr),&linksInUse,Flowspec_Object, newFlowspec, &totalDelay);
+        if(currentTotalDelay < totalDelay)
+        {
+            ev << "The metric for new route is " << totalDelay << "\n";
+            ev << "No better route detected for LSP with id=" << lspid << "\n";
+            return false;
+        }
+        else
+        {
+            ev << "New route discovered with metric=" << totalDelay <<
+            " < current metric=" <<currentTotalDelay<<"\n";
+        }
+    }
+    else
+    {
+        ero = ospfte->CalculateERO(destAddr,linksInUse, *Flowspec_Object, *newFlowspec, totalDelay);
+    }
 
+    std::vector<int>::iterator ero_iterI;
 
-          std::vector<int>::iterator ero_iterI;
+    int inx = 0;
 
-          int inx = 0;
+    //compare the old route an new route, to the ER only
+    for (ero_iterI=ero.begin(); ero_iterI != ero.end(); ero_iterI++)
+    {
+        if((*ero_iterI) == rInfo.route[0])
+            break;
+    }
 
-          //compare the old route an new route, to the ER only
-          for (ero_iterI=ero.begin(); ero_iterI != ero.end(); ero_iterI++)
-                {
-                if((*ero_iterI) == rInfo.route[0])
-                    break;
-                }
+    for (; ero_iterI != ero.end(); ero_iterI++)
+    {
+        if(rInfo.route[inx]!=(*ero_iterI))
+            break;
+        inx =inx+1;
+    }
 
-          for (; ero_iterI != ero.end(); ero_iterI++)
-                {
+    if (ero_iterI == ero.end())
+          return false;
 
-                    if(rInfo.route[inx]!=(*ero_iterI))
-                        break;
-                    inx =inx+1;
+    // print old route and new route for debugging
+    ev << "Old route for LSP with id=" << lspid << " was:\n";
+    for(int k=0;k<MAX_ROUTE;k++)
+        ev << IPAddress(rInfo.route[k]).getString() << " ";
+    ev << "\n";
 
-                }
-            if(ero_iterI == ero.end())
-                return false;
-            else
-            {
-                ev << "Old route for LSP with id=" << lspid << " was:\n";
-                for(int c=0;c<MAX_ROUTE;c++)
-                    ev << IPAddress(rInfo.route[c]).getString() << " ";
-                ev << "\n";
-                ev << "New route for this LSP is :\n";
-                for (ero_iterI=ero.begin(); ero_iterI != ero.end(); ero_iterI++)
-                {
-                    ev << IPAddress((*ero_iterI)).getString() << " ";
-
-                }
-                ev << "\n";
-
-                return true;
-            }
-
-
-
-
-
+    ev << "New route for this LSP is :\n";
+    for (ero_iterI=ero.begin(); ero_iterI != ero.end(); ero_iterI++)
+    {
+        ev << IPAddress((*ero_iterI)).getString() << " ";
+    }
+    ev << "\n";
+    return true;
 }
 
 double RSVPAppl::getTotalDelay(std::vector<simple_link_t> *links)
 {
     double totalDelay=0;
 
-    std::vector<telinkstate>::iterator ted_iterI;
     std::vector<simple_link_t>::iterator iterS;
-    telinkstate ted_iter;
     simple_link_t aLink;
 
     for(iterS = (*links).begin(); iterS != (*links).end(); iterS++)
     {
         aLink = (simple_link_t)(*iterS);
 
-        for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+        std::vector<TELinkState>::iterator tedIter;
+        for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
         {
-            ted_iter = (telinkstate)*ted_iterI;
-            if((ted_iter.linkid.getInt() == aLink.id) &&
-                (ted_iter.advrouter.getInt()==aLink.advRouter))
-                {
-                    totalDelay = totalDelay + ted_iter.metric;
-
-                }
-
-
+            const TELinkState& linkstate = *tedIter;
+            if((linkstate.linkid.getInt() == aLink.id) &&
+                (linkstate.advrouter.getInt()==aLink.advRouter))
+            {
+                totalDelay = totalDelay + linkstate.metric;
+            }
         }
     }
     return totalDelay;
-
-
 }
 

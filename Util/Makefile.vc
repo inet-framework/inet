@@ -58,7 +58,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= 
+OBJS= stlwatch.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -70,10 +70,15 @@ SUBDIR_TARGETS=
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
 
+$(OBJS) : $(GENERATEDHEADERS)
+
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
 subdirs: $(SUBDIR_TARGETS)
+
+stlwatch.obj: stlwatch.cc
+	$(CXX) -c $(COPTS) /Tp stlwatch.cc
 
 
 #doc: neddoc doxy
@@ -105,4 +110,5 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+stlwatch.obj: stlwatch.cc \
+  stlwatch.h

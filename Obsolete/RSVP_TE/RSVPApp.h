@@ -82,7 +82,7 @@ private:
     int local_addr, dest_addr;
     double BW, delay;
     bool isSender, isER, isIR;
-    std::vector<telinkstate>  ted;
+    std::vector<TELinkState>  ted;
     std::vector<traffic_request_t> tr;
     std::vector<lsp_tunnel_t> FecSenderBinds;
     std::vector<routing_info_t> routingInfo;

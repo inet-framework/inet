@@ -412,9 +412,6 @@ public:
 
     void  setHop(RsvpHopObj_t* h);
     void  setContent(ResvErrorMessage* pMsg);
-
-
-
 };
 
 

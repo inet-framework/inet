@@ -15,12 +15,29 @@
 #include "MPLSModule.h"
 #include "TED.h"
 
+#include "stlwatch.h"
+
 
 Define_Module(TED);
 
 
 int TED::tedModuleId;
 
+
+std::ostream& operator<<(std::ostream& os, const TELinkState& linkstate)
+{
+    os << "AdvRte:" << linkstate.advrouter.getString();
+    os << "  t:" << linkstate.type;
+    os << "  id:" << linkstate.linkid.getString();
+    os << "  loc:" << linkstate.local.getString();
+    os << "  rem:" << linkstate.remote.getString();
+    os << "  M:" << linkstate.metric;
+    os << "  BW:" << linkstate.MaxBandwith;
+    os << "  rBW:" << linkstate.MaxResvBandwith;
+    os << "  urBW[0]:" << linkstate.UnResvBandwith[0];
+    os << "  AdmGrp:" << linkstate.AdminGrp;
+    return os;
+};
 
 TED *TED::getGlobalInstance()
 {
@@ -39,7 +56,24 @@ void TED::initialize()
 
     buildDatabase();
     printDatabase();
+
+    WATCH_vector(ted);
 }
+
+
+const std::vector<TELinkState>& TED::getTED()
+{
+    Enter_Method("getTED()");
+    return ted;
+}
+
+
+void TED::updateTED(const std::vector<TELinkState>& copy)
+{
+    Enter_Method("updateTED()");
+    ted = copy;
+}
+
 
 
 void TED::buildDatabase()
@@ -47,7 +81,7 @@ void TED::buildDatabase()
     if(!(ted.empty()))
         ted.clear();
 
-    telinkstate* entry = new telinkstate;
+    TELinkState* entry = new TELinkState;
 
     cTopology topo;
     topo.extractByModuleType( "TCPClientTest","TCPServerTest","RSVP_LSR_Node", NULL );
@@ -71,7 +105,7 @@ void TED::buildDatabase()
 
             cModule *neighbour = node->out(j)->remoteNode()->module();
 
-            RoutingTable* neighbourRT =(RoutingTable*)(neighbour->submodule("networkLayers")->submodule("routingTable") ) ;
+            RoutingTable *neighbourRT = check_and_cast<RoutingTable*>(neighbour->submodule("networkLayers")->submodule("routingTable"));
 
             //For each link
             //Get linkId
@@ -81,9 +115,9 @@ void TED::buildDatabase()
             int remote_gateIndex = node->out(j)->remoteGate()->index();
 
             //Get local address
-            entry->local = *(myRT->getInterfaceByIndex(local_gateIndex)->inetAddr);
+            entry->local = myRT->getInterfaceByIndex(local_gateIndex)->inetAddr;
             //Get remote address
-            entry->remote= *(neighbourRT->getInterfaceByIndex(remote_gateIndex)->inetAddr);
+            entry->remote= neighbourRT->getInterfaceByIndex(remote_gateIndex)->inetAddr;
 
             double BW =node->out(j)->localGate()->datarate()->doubleValue();
             double delay = node->out(j)->localGate()->delay()->doubleValue();
@@ -111,23 +145,23 @@ void TED::handleMessage(cMessage *)
 
 void TED::printDatabase()
 {
-     std::vector<telinkstate>::iterator t_iterI;
-     telinkstate t_iter;
-        ev << "*************TED DATABASE*******************\n";
-     for(t_iterI = ted.begin(); t_iterI != ted.end(); t_iterI++)
-     {
-         t_iter = *t_iterI;
-
-         ev << "Adv Router: " << t_iter.advrouter.getString() << "\n";
-         ev << "Link Id (neighbour IP): " << t_iter.linkid.getString() << "\n";
-         ev << "Max Bandwidth: " << t_iter.MaxBandwith << "\n";
-         ev << "Metrix: " << t_iter.metric << "\n\n";
-     }
+    ev << "*************TED DATABASE*******************\n";
+    std::vector<TELinkState>::iterator i;
+    for (i=ted.begin(); i!=ted.end(); i++)
+    {
+        const TELinkState& linkstate = *i;
+        ev << "Adv Router: " << linkstate.advrouter.getString() << "\n";
+        ev << "Link Id (neighbour IP): " << linkstate.linkid.getString() << "\n";
+        ev << "Max Bandwidth: " << linkstate.MaxBandwith << "\n";
+        ev << "Metric: " << linkstate.metric << "\n\n";
+    }
 }
 
 
 void TED::updateLink(simple_link_t *aLink, double metric, double bw)
 {
+    Enter_Method("updateLink()");
+
     for(int i=0; i< ted.size(); i++)
     {
         if((ted[i].advrouter.getInt() == (aLink->advRouter)) &&
@@ -137,16 +171,16 @@ void TED::updateLink(simple_link_t *aLink, double metric, double bw)
             ev << "Advrouter=" <<ted[i].advrouter.getString() << "\n";
             ev << "linkId=" << ted[i].linkid.getString() << "\n";
             double bwIncrease = bw - (ted[i].MaxBandwith);
-           ted[i].MaxBandwith = ted[i].MaxBandwith + bwIncrease;
-           ted[i].MaxResvBandwith = ted[i].MaxResvBandwith+ bwIncrease;
-           ev << "Old metric= " << ted[i].metric << "\n";
+            ted[i].MaxBandwith = ted[i].MaxBandwith + bwIncrease;
+            ted[i].MaxResvBandwith = ted[i].MaxResvBandwith+ bwIncrease;
+            ev << "Old metric= " << ted[i].metric << "\n";
 
-           ted[i].metric = metric;
-           ev << "New metric= " << ted[i].metric << "\n";
+            ted[i].metric = metric;
+            ev << "New metric= " << ted[i].metric << "\n";
 
-           for(int j=0;j<8;j++)
-           ted[i].UnResvBandwith[j] = ted[i].UnResvBandwith[j] +bwIncrease;
-           break;
+            for(int j=0;j<8;j++)
+            ted[i].UnResvBandwith[j] = ted[i].UnResvBandwith[j] +bwIncrease;
+            break;
         }
     }
     printDatabase();

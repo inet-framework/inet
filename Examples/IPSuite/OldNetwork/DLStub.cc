@@ -12,7 +12,6 @@ class DLStub: public cSimpleModule
 {
 public:
     Module_Class_Members(DLStub, cSimpleModule, 0);
-
     void handleMessage(cMessage *);
 };
 
@@ -22,21 +21,14 @@ Define_Module( DLStub );
 void DLStub::handleMessage(cMessage *msg)
 {
     IPDatagram *d = (IPDatagram *)msg;
-    simtime_t arrivalTime = d->arrivalTime();
-    int length = d->length()/8;
-    int outputPort = d->outputPort();
-    char src[20], dest[20];
-
-    strcpy (src, d->srcAddress());
-    strcpy (dest, d->destAddress());
 
     ev << "*** Datagram arrived at DLStub:\n"
-        << " Time:" << arrivalTime
-        << " Port: " << outputPort
-        << " Len: " << length
-        << " Src: " << src
-        << " Dest: " << dest << "\n";
+        << " Time:" << d->arrivalTime()
+        << " Port: " << d->outputPort()
+        << " Len: " << d->length()/8
+        << " Src: " << d->srcAddress().getString()
+        << " Dest: " << d->destAddress().getString() << "\n";
 
-    delete(d);
+    delete d;
 }
 

@@ -18,8 +18,8 @@ INCLUDE_PATH=
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+# object files from other directories to link with
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -37,7 +37,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  AbstractQueue.o Join.o ModuleAccess.o QueueBase.o QueueWithQoS.o Sink.o
+OBJS=  AbstractQueue.o Join.o QueueBase.o QueueWithQoS.o Sink.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -62,9 +62,6 @@ AbstractQueue.o: AbstractQueue.cc
 
 Join.o: Join.cc
 	$(CXX) -c $(COPTS) Join.cc
-
-ModuleAccess.o: ModuleAccess.cc
-	$(CXX) -c $(COPTS) ModuleAccess.cc
 
 QueueBase.o: QueueBase.cc
 	$(CXX) -c $(COPTS) QueueBase.cc
@@ -116,8 +113,6 @@ re-makemake-m: makefile-ins
 AbstractQueue.o: AbstractQueue.cc \
   AbstractQueue.h
 Join.o: Join.cc
-ModuleAccess.o: ModuleAccess.cc \
-  ModuleAccess.h
 QueueBase.o: QueueBase.cc \
   QueueBase.h \
   AbstractQueue.h

@@ -25,44 +25,53 @@
 #include "TED.h"
 
 
-/*******************************************************************************
-*                                 OSPF TE TYPES
-*******************************************************************************/
 
-struct CSPFVertex_Struct{
+/**
+ * Graph vertex used by CSPF algorithm in OspfTe
+ */
+struct CSPFVertex
+{
     IPAddress VertexId;
-    struct CSPFVertex_Struct * Parent;
+    CSPFVertex *Parent;  // FIXME pointer is a bad idea here! as std::vector reallocates,
+                         // every Vertex in it moves to a new pointer address...
+                         // --> dereferencing the ptr will CRASH!
     double DistanceToRoot;
 };
 
 
 
-
+/**
+ * Implements the constrained shortest path algorithm
+ */
 class OspfTe : public cSimpleModule
 {
 private:
 
-    std::vector<CSPFVertex_Struct> CShortestPathTree;
-    std::vector<telinkstate> ted;
+    std::vector<CSPFVertex> CShortestPathTree;
+    std::vector<TELinkState> ted;
     int local_addr;
 
-    void
-    TEAddCandidates(FlowSpecObj_t* fspec,
-                    std::vector<CSPFVertex_Struct> *CandidatesList );
+    void  TEAddCandidates(const FlowSpecObj_t& fspec,
+                          std::vector<CSPFVertex>& CandidatesList);
 
     std::vector<int>
-    CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *CandidatesList, double* totalMetric );
+    doCalculateERO(const IPAddress& dest,
+                   std::vector<CSPFVertex>& CandidatesList,
+                   double& outTotalMetric);
 
+    void CspfBuildSPT(const FlowSpecObj_t& fspec,
+                      std::vector<CSPFVertex>& CandidatesList);
 
-    void CspfBuildSPT( FlowSpecObj_t* fspec, std::vector<CSPFVertex_Struct> *CandidatesList );
-    void CspfBuildSPT(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                      FlowSpecObj_t *new_fspec,
-                      std::vector<CSPFVertex_Struct> *CandidatesList );
-    void TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                         FlowSpecObj_t *new_fspec,
-                         std::vector<CSPFVertex_Struct> *CandidatesList );
+    void CspfBuildSPT(const std::vector<simple_link_t>& links,
+                      const FlowSpecObj_t& old_fspec,
+                      const FlowSpecObj_t& new_fspec,
+                      std::vector<CSPFVertex>& CandidatesList);
+
+    void TEAddCandidates(const std::vector<simple_link_t>& links,
+                         const FlowSpecObj_t& old_fspec,
+                         const FlowSpecObj_t& new_fspec,
+                         std::vector<CSPFVertex>& CandidatesList);
     void updateTED();
-
     void printTED();
 
 public:
@@ -71,9 +80,31 @@ public:
     int numInitStages() { return 2; }
     virtual void handleMessage(cMessage *msg);
 
-    std::vector<int> CalculateERO(IPAddress* dest, FlowSpecObj_t* fspec, double* totalMetric);
-    std::vector<int> CalculateERO(IPAddress* dest, std::vector<simple_link_t> *links,
-                                  FlowSpecObj_t* old_fspec, FlowSpecObj_t* new_fspec, double* totalDelay);
+    /**
+     * Calculates and returns ERO (Explicit Route Object) from local_addr
+     * to destination using the given flow spec (required bandwidth+link delay),
+     * and also returns total metric of the resulting route.
+     *
+     * Returned vector contains router IP addresses as int; all hops are
+     * to be understood as strict.
+     */
+    std::vector<int> CalculateERO(const IPAddress& dest,
+                                  const FlowSpecObj_t& fspec,
+                                  double& outTotalMetric);
+
+    /**
+     * Calculates and returns ERO (Explicit Route Object) from local_addr to destination
+     * on the given links, using the given flow spec (required bandwidth+link delay),
+     * and also returns total metric of the resulting route.
+     *
+     * Returned vector contains router IP addresses as int; all hops are
+     * to be understood as strict.
+     */
+    std::vector<int> CalculateERO(const IPAddress& dest,
+                                  const std::vector<simple_link_t>& links,
+                                  const FlowSpecObj_t& old_fspec,
+                                  const FlowSpecObj_t& new_fspec,
+                                  double& outTotalDelay);
 };
 
 #endif

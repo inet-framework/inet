@@ -69,9 +69,9 @@ simple OspfTe
         local_addr : string;
     
     gates:
-        in: from_ip;        
+        in: from_ip; // module gates are currently unused
         in: from_rsvp_app;
-        out: to_ip;        
+        out: to_ip; 
         out: to_rsvp_app;
 
 endsimple

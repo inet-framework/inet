@@ -15,12 +15,28 @@
 #include <iostream>
 #include "LIBtable.h"
 #include "StringTokenizer.h"
+#include "stlwatch.h"
 
 using namespace std;
 
 
 Define_Module( LIBTable );
 
+
+std::ostream& operator<<(std::ostream& os, const prt_type& prt)
+{
+    return os << "Pos:" << prt.pos << "  Fec:" << prt.fecValue.getString();
+}
+
+std::ostream& operator<<(std::ostream& os, const lib_type& lib)
+{
+    os << "InL:" << lib.inLabel;
+    os << "  InIf:" << lib.inInterface.c_str();
+    os << "  OutL:" << lib.outLabel;
+    os << "  OutIf:" << lib.outInterface.c_str();
+    os << "  Optcode:" << lib.optcode;
+    return os;
+}
 
 void LIBTable::initialize()
 {
@@ -34,12 +50,16 @@ void LIBTable::initialize()
 
    printTables();
 */
+    WATCH_vector(lib);
+    WATCH_vector(prt);
+
 }
 
 void LIBTable::handleMessage(cMessage *)
 {
     error("Message arrived -- LIBTable doesn't process messages, it is used via direct method calls");
 }
+
 
 int LIBTable::readLibTableFromFile(const char *filename)
 {
@@ -185,6 +205,7 @@ int LIBTable::readPrtTableFromFile(const char* filename)
     return 0;
 }
 
+
 void LIBTable::printTables()
 {
      int i;
@@ -198,7 +219,7 @@ void LIBTable::printTables()
      ev << "*****************PRT TABLE CONTENT**************\n" ;
      ev << "Pos  Fec \n";
      for(i=0;i<prt.size();i++)
-         ev << prt[i].pos << "    " << prt[i].fecValue <<"\n";
+         ev << prt[i].pos << "    " << prt[i].fecValue.getString() <<"\n";
 }
 
 int LIBTable::installNewLabel(int outLabel, string inInterface,

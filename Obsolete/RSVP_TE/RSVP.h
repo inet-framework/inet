@@ -172,11 +172,10 @@ private:
     RoutingTableAccess routingTableAccess;
     LIBTableAccess libTableAccess;
 
-    std::vector<PathStateBlock_t> PSBList; //Path State Block
-    std::vector<ResvStateBlock_t> RSBList;    //Resv State Block
+    std::vector<PathStateBlock_t> PSBList;  //Path State Block
+    std::vector<ResvStateBlock_t> RSBList;  //Resv State Block
     std::vector<TrafficControlStateBlock_t> TCSBList; //Traffic Control State Block
-    std::vector<telinkstate>    ted;
-    OspfTe *ospfte;
+    std::vector<TELinkState>  ted;
 
     int my_id;
     int NoOfLinks;
@@ -184,8 +183,6 @@ private:
     bool IsIR;
     bool IsER;
 
-
-    //RHandleType_t FlowTable[TABLE_SIZE];
     std::vector<RHandleType_t> FlowTable;
 
     /*Message Processing */
@@ -217,27 +214,22 @@ private:
     void getPeerInet(int peerIP, int* peerInf);
     void getIncInet(int peerIP, int* incInet);
     void getPeerIPAddress(int peerInf, int* peerIP);
-     void printSessionObject(SessionObj_t* s);
-        void printRSVPHopObject(RsvpHopObj_t* r);
-        void printSenderTemplateObject(SenderTemplateObj_t* s);
-        void printSenderTspecObject(SenderTspecObj_t* s);
-        void printSenderDescriptorObject(SenderDescriptor_t* s);
+
+    void printSessionObject(SessionObj_t* s);
+    void printRSVPHopObject(RsvpHopObj_t* r);
+    void printSenderTemplateObject(SenderTemplateObj_t* s);
+    void printSenderTspecObject(SenderTspecObj_t* s);
+    void printSenderDescriptorObject(SenderDescriptor_t* s);
     void printFlowDescriptorListObject(FlowDescriptor_t* f);
-      void printPSB(PathStateBlock_t* p);
-      void printRSB(ResvStateBlock_t* r);
-      void setSessionforTCSB(TrafficControlStateBlock_t* t, SessionObj_t* s);
- void setFilterSpecforTCSB(TrafficControlStateBlock_t* t,
-                         FilterSpecObj_t *f);
+    void printPSB(PathStateBlock_t* p);
+    void printRSB(ResvStateBlock_t* r);
 
-void setTCFlowSpecforTCSB(TrafficControlStateBlock_t* t,
-                FlowSpecObj_t *f);
-
-void  setFwdFlowSpecforTCSB(TrafficControlStateBlock_t* t,
-                FlowSpecObj_t* f);
-
-void setTCTspecforTCSB(TrafficControlStateBlock_t* t,
-                SenderTspecObj_t* s);
-void printTCSB(TrafficControlStateBlock_t* t);
+    void setSessionforTCSB(TrafficControlStateBlock_t* t, SessionObj_t* s);
+    void setFilterSpecforTCSB(TrafficControlStateBlock_t* t, FilterSpecObj_t *f);
+    void setTCFlowSpecforTCSB(TrafficControlStateBlock_t* t, FlowSpecObj_t *f);
+    void setFwdFlowSpecforTCSB(TrafficControlStateBlock_t* t, FlowSpecObj_t* f);
+    void setTCTspecforTCSB(TrafficControlStateBlock_t* t, SenderTspecObj_t* s);
+    void printTCSB(TrafficControlStateBlock_t* t);
 
     bool doCACCheck(PathMessage* pmsg, int OI);
     void preemptTunnel(int tunnelId);
@@ -250,9 +242,6 @@ void printTCSB(TrafficControlStateBlock_t* t);
     virtual void initialize();
     virtual void activity();
     void Mcast_Route_Query(int sa, int iad, int da, int *outl);
-
-
-
 
 };
 

@@ -47,12 +47,6 @@
 // network with TED.
 //
 simple TED
-    gates:
-        in: from_tcp;        
-        in: from_rsvp;
-        out: to_tcp;        
-        out: to_rsvp;
-
 endsimple
 
 

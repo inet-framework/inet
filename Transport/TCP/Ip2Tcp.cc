@@ -1,5 +1,4 @@
 //
-//
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -15,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
 #include <omnetpp.h>
 #include "TransportPacket.h"
@@ -47,8 +47,8 @@ void Ip2Tcp::handleMessage(cMessage *msg)
     bool ipv6 = !strncmp(ipintpacket->className(), "IPv6InterfacePacket", 4);
 
     // get the source and destination address
-    const char *src_addr = ipintpacket->srcAddr();
-        const char*dest_addr = ipintpacket->destAddr();
+    const char *src_addr = ipintpacket->srcAddr().getString();
+    const char*dest_addr = ipintpacket->destAddr().getString();
 
     // decapsulate the IPpacket into a transport packet
     tpacket = (TransportPacket *) ipintpacket->decapsulate();

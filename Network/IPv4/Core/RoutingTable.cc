@@ -49,14 +49,16 @@ InterfaceEntry::InterfaceEntry()
 
 void InterfaceEntry::info(char *buf)
 {
-    std::string tmp(buf, MAX_OBJECTINFO);
-    std::stringstream out(tmp);
-    out << "name:" << (!name.empty() ? name.c_str() : "*");
-    out << "  encap:" << (!encap.empty() ? encap.c_str() : "*");
-    out << "  HWaddr:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
+    std::stringstream out;
+    out << (!name.empty() ? name.c_str() : "*");
+    out << "  e:" << (!encap.empty() ? encap.c_str() : "*");
+    out << "  HW:" << (!hwAddrStr.empty() ? hwAddrStr.c_str() : "*");
+    out << "  ia:" << inetAddr.getString() << "  M:" << mask.getString();
+    out << "...";
+    strcpy(buf, out.str().c_str());
 }
 
-opp_string& InterfaceEntry::detailedInfo(opp_string& buf)
+std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
     out << "name:" << (!name.empty() ? name.c_str() : "*");
@@ -86,14 +88,12 @@ opp_string& InterfaceEntry::detailedInfo(opp_string& buf)
     if (loopback) out << "LOOPBACK ";
     out << "\n";
 
-    buf = out.str().c_str();
-    return buf;
+    return out.str();
 }
 
 void InterfaceEntry::print()
 {
-    opp_string buf;
-    PRINTF("%s", detailedInfo(buf).c_str());
+    PRINTF("%s", detailedInfo().c_str());
 }
 
 //================================================================
@@ -114,8 +114,7 @@ RoutingEntry::RoutingEntry()
 
 void RoutingEntry::info(char *buf)
 {
-    std::string tmp(buf, MAX_OBJECTINFO);
-    std::stringstream out(tmp);
+    std::stringstream out;
     out << (!host.isNull() ? host.getString() : "*") << "  ";
     out << (!gateway.isNull() ? gateway.getString() : "*") << "  ";
     out << (!netmask.isNull() ? netmask.getString() : "*") << "  ";
@@ -123,17 +122,17 @@ void RoutingEntry::info(char *buf)
     out << (!interfaceName.empty() ? interfaceName.c_str() : "*") << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE") << "  ";
     out << (routeInfo ? routeInfo : NULL);
+    strcpy(buf, out.str().c_str());
 }
 
-opp_string& RoutingEntry::detailedInfo(opp_string& buf)
+std::string RoutingEntry::detailedInfo() const
 {
-    return buf;
+    return std::string();
 }
 
 void RoutingEntry::print()
 {
-    opp_string buf;
-    PRINTF("%s", detailedInfo(buf).c_str());
+    PRINTF("%s", detailedInfo().c_str());
 }
 
 bool RoutingEntry::correspondTo(const IPAddress& target,
@@ -523,7 +522,7 @@ bool RoutingTable::del(const IPAddress& target,
     Enter_Method("del(...)");
     bool res = false;
 
-    if (target) {
+    if (!target.isNull()) {
         // A target is given => not default route
         RoutingEntry *e;
         for (int i = 0; i < route->items(); i++) {

@@ -18,8 +18,8 @@ INCLUDE_PATH= -I../IPv4/Core -I../../Transport/TCP -I../../Transport/UDP -I../MP
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+# object files from other directories to link with
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -123,17 +123,11 @@ LDPInterface.o: LDPInterface.cc \
   ../MPLS/ip_address_prefix.h \
   ../IPv4/Core/RoutingTable.h \
   ../MPLS/LIBTableAccess.h \
-  ../MPLS/MPLSAccess.h \
+  ../MPLS/InfoManager.h \
   ../../Base/ipsuite_defs.h \
-  ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
-  ../MPLS/MPLSModule.h \
-  ../MPLS/MPLSPacket.h \
-  ../IPv4/Core/IPDatagram.h \
-  ../IPv4/Core/IPDatagram_m.h \
-  ../IPv4/Core/IPInterfacePacket.h \
-  ../IPv4/Core/IPInterfacePacket_m.h
+  ../MPLS/StringTokenizer.h
 LDPpacket.o: LDPpacket.cc \
   LDPpacket.h \
   ../IPv4/Core/IPAddress.h \
@@ -144,15 +138,15 @@ LDPproc.o: LDPproc.cc \
   ../../Transport/TCP/tcp.h \
   LDPproc.h \
   ../IPv4/Core/RoutingTable.h \
+  ../MPLS/InfoManager.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/Core/IPAddress.h \
   ../MPLS/ip_address_prefix.h \
   LDPInterface.h \
   ../MPLS/LIBTableAccess.h \
-  ../MPLS/MPLSAccess.h \
-  ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
+  ../MPLS/StringTokenizer.h \
   ../../Base/ipsuite_defs.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h \
@@ -164,6 +158,10 @@ UDPAppInterface.o: UDPAppInterface.cc \
   ../../Transport/UDP/UDPPacket.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../IPv4/Core/IPAddress.h \
+  ../../Transport/TCP/TransportInterfacePacket_m.h \
+  ../../Transport/UDP/UDPPacket_m.h \
+  ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ../IPv4/Core/IPInterfacePacket_m.h
 tcpclientproc.o: tcpclientproc.cc \
   ../../Transport/TCP/tcp.h \

@@ -91,7 +91,7 @@ IPDatagram *IPSend::encapsulate(cMessage *msg)
     else
     {
         // otherwise, just use the first
-        datagram->setSrcAddress(*(rt->getInterfaceByIndex(0)->inetAddr));
+        datagram->setSrcAddress(rt->getInterfaceByIndex(0)->inetAddr);
     }
 
     // set other fields

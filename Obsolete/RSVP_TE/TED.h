@@ -19,7 +19,11 @@
 #include <vector>
 
 
-struct telinkstate{
+/**
+ * Link state structure in TED
+ */
+struct TELinkState
+{
     IPAddress advrouter;
     int type;
     IPAddress linkid;
@@ -32,30 +36,58 @@ struct telinkstate{
     int AdminGrp;
 };
 
-struct simple_link_t{
-
+struct simple_link_t
+{
     int advRouter;
     int id;
 };
 
+/**
+ * Traffic Engineering Database.
+ */
 class TED : public cSimpleModule
 {
 private:
     static int tedModuleId;
-    std::vector<telinkstate> ted;
+    std::vector<TELinkState> ted;
 
 public:
+    /**
+     * Access to TED instance.
+     */
     static TED *getGlobalInstance();
 
     Module_Class_Members(TED, cSimpleModule, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *);
 
+    /**
+     * Extracts model topology using cTopology, and completely
+     * rebuilds link database.
+     */
     void buildDatabase();
-    std::vector<telinkstate>& getTED()  {return ted;}
+
+    /**
+     * Access TED database (readonly)
+     */
+    const std::vector<TELinkState>& getTED();
+
+    /**
+     * Replace TED database with an updated one.
+     */
+    void updateTED(const std::vector<TELinkState>& copy);
+
+    /**
+     * Utility function
+     */
     void printDatabase();
+
+    /**
+     * Currently not used.
+     */
     void updateLink(simple_link_t* aLink, double metric, double bw);
 };
 
+std::ostream& operator<<(std::ostream& os, const TELinkState& linkstate);
 
 #endif

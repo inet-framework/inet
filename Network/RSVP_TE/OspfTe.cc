@@ -16,7 +16,7 @@
 #include "IPAddress.h"
 
 
-Define_Module( OspfTe);
+Define_Module(OspfTe);
 
 
 void OspfTe::initialize(int stage)
@@ -31,8 +31,8 @@ void OspfTe::initialize(int stage)
             local_addr = IPAddress(par("local_addr").stringValue()).getInt();
             break;
     }
-    
-    // to invoke handleMessage() when we start -- 
+
+    // to invoke handleMessage() when we start --
     scheduleAt(simTime(), new cMessage());
 }
 
@@ -68,58 +68,61 @@ void OspfTe::handleMessage(cMessage *msg)
 *                           OSPF-TE (CSPF)ROUTING
 *
 *******************************************************************************/
-void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
-                             std::vector<CSPFVertex_Struct>  *CandidatesList )
+void OspfTe::TEAddCandidates(const FlowSpecObj_t& fspec,
+                             std::vector<CSPFVertex>& CandidatesList)
 {
+    //CSPFVertex VertexVV = *(CShortestPathTree.back());
+    CSPFVertex* VertexV = &CShortestPathTree.back();
 
-    //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
-    CSPFVertex_Struct* VertexV = &CShortestPathTree.back();
+    // FIXME this is a workaround -- vertices in CandidatesList will have
+    // pointers to each other so we have to prevent reallocation.
+    // Here we just reserve enough so that realloc is never necessary.
+    CandidatesList.reserve(ted.size());
 
-    CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-    std::vector<CSPFVertex_Struct>::iterator spt_iterI;
-    CSPFVertex_Struct spt_iter;
-
-
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    // for each link
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter!=ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
+        const TELinkState& linkstate = (*tedIter);
+
         //Other ends of the links to V only
-        if(ted_iter.advrouter!= VertexV->VertexId)
+        if (linkstate.advrouter!= VertexV->VertexId)
             continue;
 
         //Not in the ConstrainedShortestPathTree only
         bool IsFound =false;
-        for(spt_iterI = CShortestPathTree.begin();spt_iterI !=CShortestPathTree.end();spt_iterI++)
+        std::vector<CSPFVertex>::iterator sptIter;
+        CSPFVertex sptVertex;
+        for (sptIter = CShortestPathTree.begin();sptIter !=CShortestPathTree.end();sptIter++)
         {
-            spt_iter = (CSPFVertex_Struct)*spt_iterI;
-            if(ted_iter.linkid == spt_iter.VertexId)
+            sptVertex = (*sptIter);
+            if (linkstate.linkid == sptVertex.VertexId)
             {
                IsFound = true;
                break;
             }
         }
-        if(IsFound)
+        if (IsFound)
              continue;
 
         //Satisfy the resource constraint of BW only
-        if((ted_iter.UnResvBandwith[0]) < (fspec->req_bandwidth))
+        if ((linkstate.UnResvBandwith[0]) < (fspec.req_bandwidth))
              continue;
 
         //Normal Dijkstra Algorithm for adding candidate
-        VertexW->VertexId = (ted_iter.linkid);
-        VertexW->DistanceToRoot = (VertexV->DistanceToRoot) + (ted_iter.metric);
-        VertexW->Parent = VertexV;
+        CSPFVertex VertexW;
+        VertexW.VertexId = (linkstate.linkid);
+        VertexW.DistanceToRoot = (VertexV->DistanceToRoot) + (linkstate.metric);
+        VertexW.Parent = VertexV;
 
         IsFound = false;
-        if( !(CandidatesList->empty()) )
+        if (!CandidatesList.empty())
         {
-            for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
+            for (sptIter=CandidatesList.begin(); sptIter != CandidatesList.end(); sptIter++)
             {
-               spt_iter = (CSPFVertex_Struct)*spt_iterI;
+               sptVertex = (*sptIter);
 
-               if( spt_iter.VertexId == VertexW->VertexId)
+               if (sptVertex.VertexId == VertexW.VertexId)
                {
                    IsFound = true;
                    break;
@@ -128,18 +131,18 @@ void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
         }
 
         //Relaxation
-        if(IsFound)
+        if (IsFound)
         {
-            if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
+            if (sptVertex.DistanceToRoot > VertexW.DistanceToRoot)
             {
-                spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
-                spt_iter.Parent = VertexV;
-                //TECalculateNextHops( VertexW, VertexV, *ted_iter);
+                sptVertex.DistanceToRoot = VertexW.DistanceToRoot;
+                sptVertex.Parent = VertexV;
+                //TECalculateNextHops( VertexW, VertexV, *linkstate);
             }
         }
         else
         {
-            CandidatesList->push_back(*VertexW);
+            CandidatesList.push_back(VertexW);
         }
     }
 
@@ -147,30 +150,32 @@ void OspfTe::TEAddCandidates(FlowSpecObj_t* fspec,
 }
 
 std::vector<int>
-OspfTe::CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *CandidatesList, double* totalMetric )
+OspfTe::doCalculateERO(const IPAddress& dest,
+                       std::vector<CSPFVertex>& CandidatesList,
+                       double& outTotalMetric)
 {
     std::vector<int> EROList;
-    std::vector<CSPFVertex_Struct>::iterator spt_iterI;
-    CSPFVertex_Struct spt_iter;
-    CSPFVertex_Struct* curVertex;
-
-    if( !(CandidatesList->empty()) )
+    if (!CandidatesList.empty())
     {
-        for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
-        {
-            spt_iter = (CSPFVertex_Struct)*spt_iterI;
-            if(spt_iter.VertexId == (*dest))
+        // find dest among candidates
+        std::vector<CSPFVertex>::iterator i;
+        for (i=CandidatesList.begin(); i!=CandidatesList.end(); i++)
+            if ((*i).VertexId.isEqualTo(dest))
                 break;
-        }
 
-        curVertex = &spt_iter;
+        // if not found -- do what??? FIXME
+        if (i==CandidatesList.end())
+            error("doCalculateERO(): %s not found", dest.getString());
 
-        (*totalMetric) = curVertex->DistanceToRoot;
+        // totalMetric is its distance to root
+        outTotalMetric = (*i).DistanceToRoot;
 
-        while(curVertex !=NULL)
+        // insert all parents up to the root into EROList
+        CSPFVertex *curVertex = &(*i);
+        while (curVertex!=NULL)
         {
-             EROList.push_back(curVertex->VertexId.getInt()); // FIXME crash point...
-             curVertex = curVertex->Parent;
+            EROList.push_back(curVertex->VertexId.getInt());
+            curVertex = curVertex->Parent;
         }
     }
     return EROList;
@@ -178,66 +183,70 @@ OspfTe::CalculateERO(IPAddress* dest, std::vector<CSPFVertex_Struct> *Candidates
 
 
 
-void OspfTe::CspfBuildSPT(FlowSpecObj_t* fspec, std::vector<CSPFVertex_Struct> *CandidatesList )
+void OspfTe::CspfBuildSPT(const FlowSpecObj_t& fspec,
+                          std::vector<CSPFVertex>& CandidatesList)
 {
-    CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
-
     double shortestDist = OSPFType::LSInfinity;
 
-    if( !(CandidatesList->empty()) )
+    if (!CandidatesList.empty())
     {
-         std::vector<CSPFVertex_Struct>::iterator iterI;
-         CSPFVertex_Struct iter;
-
-         for (iterI=CandidatesList->begin(); iterI != CandidatesList->end(); iterI++)
+         // Find shortest distance to root, then find which vertex has it (2nd loop)
+         // FIXME could be done in one step!
+         std::vector<CSPFVertex>::iterator vertexIter;
+         CSPFVertex vertex;
+         for (vertexIter=CandidatesList.begin(); vertexIter!=CandidatesList.end(); vertexIter++)
          {
-             iter=(CSPFVertex_Struct)*iterI;
-             if(iter.DistanceToRoot < shortestDist)
-                 shortestDist = iter.DistanceToRoot;
+             vertex = (*vertexIter);
+             if (vertex.DistanceToRoot < shortestDist)
+                 shortestDist = vertex.DistanceToRoot;
          }
-
-         for (iterI=CandidatesList->begin(); iterI != CandidatesList->end(); iterI++)
+         for (vertexIter=CandidatesList.begin(); vertexIter!=CandidatesList.end(); vertexIter++)
          {
-             iter=(CSPFVertex_Struct)*iterI;
-             if(iter.DistanceToRoot == shortestDist)
+             vertex = (*vertexIter);
+             if (vertex.DistanceToRoot == shortestDist)
                  break;
          }
+
          //Add to Tree
+         CSPFVertex VertexW;
+         VertexW.DistanceToRoot = shortestDist;
+         VertexW.Parent = vertex.Parent;
+         VertexW.VertexId = vertex.VertexId;
+         CShortestPathTree.push_back(VertexW);
 
-         VertexW->DistanceToRoot = shortestDist;
-         VertexW->Parent = iter.Parent;
-         VertexW->VertexId = iter.VertexId;
-
-         //CShortestPathTree.push_back(*VertexW);
-
-         //ev << "OSPF add " << VertexW->VertexId.getString() << "\n";
-         CShortestPathTree.push_back(*VertexW);
-         CandidatesList->erase(iterI);
+         CandidatesList.erase(vertexIter);
 
          TEAddCandidates(fspec, CandidatesList);
-
     }
 }
 
 
-std::vector<int> OspfTe::CalculateERO(IPAddress* dest, FlowSpecObj_t* fspec, double* metric)
+std::vector<int> OspfTe::CalculateERO(const IPAddress& dest,
+                                      const FlowSpecObj_t& fspec,
+                                      double& outMetric)
 {
-    std::vector<CSPFVertex_Struct> candidates;
+    Enter_Method("CalculateERO()");
+
     //Get Latest TED
     updateTED();
 
     //Reset the Constraint Shortest Path Tree
     CShortestPathTree.clear();
-    CSPFVertex_Struct* RootVertex = new CSPFVertex_Struct;
-    RootVertex->DistanceToRoot =0;
-    RootVertex->Parent = NULL;
-    RootVertex->VertexId = IPAddress(local_addr);
 
-    candidates.push_back(*RootVertex);
-    CspfBuildSPT(fspec, &candidates );
-    return CalculateERO(dest, &CShortestPathTree, metric );
+    // FIXME this is a workaround -- vertices in CandidatesList will have
+    // pointers to each other so we have to prevent reallocation.
+    // Here we just reserve enough so that realloc is never necessary.
+    CShortestPathTree.reserve(ted.size());
 
+    std::vector<CSPFVertex> candidates;
+    CSPFVertex rootVertex;
+    rootVertex.DistanceToRoot =0;
+    rootVertex.Parent = NULL;
+    rootVertex.VertexId = IPAddress(local_addr);
+    candidates.push_back(rootVertex);
 
+    CspfBuildSPT(fspec, candidates);
+    return doCalculateERO(dest, CShortestPathTree, outMetric);
 }
 
 /******************************************************************************
@@ -252,158 +261,170 @@ void OspfTe::updateTED()
 
 void OspfTe::printTED()
 {
-     std::vector<telinkstate>::iterator i;
-     for (i = ted.begin(); i!=ted.end(); i++)
-     {
-         telinkstate& ls = *i;
-         ev << "*****************OSPF TED *****************\n";
-         ev << "Adv Router: " << ls.advrouter.getString() << "\n";
-         ev << "Link Id (neighbour IP): " << ls.linkid.getString() << "\n";
-         ev << "Max Bandwidth: " << ls.MaxBandwith << "\n";
-         ev << "Metric: " << ls.metric << "\n\n";
-     }
+    ev << "*****************OSPF TED *****************\n";
+    std::vector<TELinkState>::iterator i;
+    for (i=ted.begin(); i!=ted.end(); i++)
+    {
+         const TELinkState& linkstate = *i;
+         ev << "Adv Router: " << linkstate.advrouter.getString() << "\n";
+         ev << "Link Id (neighbour IP): " << linkstate.linkid.getString() << "\n";
+         ev << "Max Bandwidth: " << linkstate.MaxBandwith << "\n";
+         ev << "Metric: " << linkstate.metric << "\n\n";
+    }
 }
 
-std::vector<int> OspfTe::CalculateERO(IPAddress* dest, std::vector<simple_link_t> *links,
-                                FlowSpecObj_t* old_fspec, FlowSpecObj_t* new_fspec, double* totalDelay)
+std::vector<int> OspfTe::CalculateERO(const IPAddress& dest,
+                                      const std::vector<simple_link_t>& links,
+                                      const FlowSpecObj_t& old_fspec,
+                                      const FlowSpecObj_t& new_fspec,
+                                      double& outTotalDelay)
 {
-    std::vector<CSPFVertex_Struct> candidates;
+    Enter_Method("CalculateERO()");
+
     //Get Latest TED
     updateTED();
 
     //Reset the Constraint Shortest Path Tree
     CShortestPathTree.clear();
-    CSPFVertex_Struct* RootVertex = new CSPFVertex_Struct;
-    RootVertex->DistanceToRoot =0;
-    RootVertex->Parent = NULL;
-    RootVertex->VertexId = IPAddress(local_addr);
 
-    candidates.push_back(*RootVertex);
-    CspfBuildSPT(links, old_fspec,new_fspec, &candidates );
-    return CalculateERO(dest, &CShortestPathTree, totalDelay );
+    // FIXME this is a workaround -- vertices in CandidatesList will have
+    // pointers to each other so we have to prevent reallocation.
+    // Here we just reserve enough so that realloc is never necessary.
+    CShortestPathTree.reserve(ted.size());
 
+    std::vector<CSPFVertex> candidates;
+    CSPFVertex rootVertex;
+    rootVertex.DistanceToRoot =0;
+    rootVertex.Parent = NULL;
+    rootVertex.VertexId = IPAddress(local_addr);
+    candidates.push_back(rootVertex);
+
+    CspfBuildSPT(links, old_fspec, new_fspec, candidates);
+    return doCalculateERO(dest, CShortestPathTree, outTotalDelay);
 }
-void OspfTe::CspfBuildSPT(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                          FlowSpecObj_t *new_fspec,
-                          std::vector<CSPFVertex_Struct> *CandidatesList )
+
+void OspfTe::CspfBuildSPT(const std::vector<simple_link_t>& links,
+                          const FlowSpecObj_t& old_fspec,
+                          const FlowSpecObj_t& new_fspec,
+                          std::vector<CSPFVertex>& CandidatesList)
 {
-
-    // int Inx, i;
-    CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
-
+    // FIXME this function seems to be exactly the same as the other similar one,
+    // except for the TEAddCandidates() call at the end!!! eliminate!
     double shortestDist = OSPFType::LSInfinity;
 
-   // CSPFVertex_Struct* tmpCandidateEle;
-
-    if( !(CandidatesList->empty()) )
+    if (!CandidatesList.empty())
     {
-         std::vector<CSPFVertex_Struct>::iterator iterI;
-         CSPFVertex_Struct iter;
+         std::vector<CSPFVertex>::iterator vertexIter;
+         CSPFVertex vertex;
 
-         for (iterI=CandidatesList->begin(); iterI != CandidatesList->end(); iterI++)
+         // Find shortest distance to root, then find which vertex has it (2nd loop)
+         // FIXME could be done in one step! FIXME same code as in similar function...
+         for (vertexIter=CandidatesList.begin(); vertexIter != CandidatesList.end(); vertexIter++)
          {
-             iter=(CSPFVertex_Struct)*iterI;
-             if(iter.DistanceToRoot < shortestDist)
-                 shortestDist = iter.DistanceToRoot;
+             vertex = (*vertexIter);
+             if (vertex.DistanceToRoot < shortestDist)
+                 shortestDist = vertex.DistanceToRoot;
          }
 
-         for (iterI=CandidatesList->begin(); iterI != CandidatesList->end(); iterI++)
+         for (vertexIter=CandidatesList.begin(); vertexIter != CandidatesList.end(); vertexIter++)
          {
-             iter=(CSPFVertex_Struct)*iterI;
-             if(iter.DistanceToRoot == shortestDist)
+             vertex = (*vertexIter);
+             if (vertex.DistanceToRoot == shortestDist)
                  break;
          }
+
          //Add to Tree
+         CSPFVertex VertexW;
+         VertexW.DistanceToRoot = shortestDist;
+         VertexW.Parent = vertex.Parent;
+         VertexW.VertexId = vertex.VertexId;
 
-         VertexW->DistanceToRoot = shortestDist;
-         VertexW->Parent = iter.Parent;
-         VertexW->VertexId = iter.VertexId;
-
-         //CShortestPathTree.push_back(*VertexW);
-
-         //ev << "OSPF add " << VertexW->VertexId.getString() << "\n";
-         CShortestPathTree.push_back(*VertexW);
-         CandidatesList->erase(iterI);
+         CShortestPathTree.push_back(VertexW);
+         CandidatesList.erase(vertexIter);
 
          TEAddCandidates(links, old_fspec, new_fspec, CandidatesList);
-
     }
-
 }
 
-void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *old_fspec,
-                          FlowSpecObj_t *new_fspec,
-                          std::vector<CSPFVertex_Struct> *CandidatesList )
+void OspfTe::TEAddCandidates(const std::vector<simple_link_t>& links,
+                             const FlowSpecObj_t& old_fspec,
+                             const FlowSpecObj_t& new_fspec,
+                             std::vector<CSPFVertex>& CandidatesList)
 {
-    //CSPFVertex_Struct VertexVV = *(CShortestPathTree.back());
-    CSPFVertex_Struct* VertexV = &CShortestPathTree.back();
+    //CSPFVertex VertexVV = *(CShortestPathTree.back());
+    CSPFVertex* VertexV = &CShortestPathTree.back();
 
-    CSPFVertex_Struct* VertexW = new CSPFVertex_Struct;
-    std::vector<telinkstate>::iterator ted_iterI;
-    telinkstate ted_iter;
-    std::vector<CSPFVertex_Struct>::iterator spt_iterI;
-    CSPFVertex_Struct spt_iter;
-    std::vector<simple_link_t>::iterator iterS;
-    simple_link_t aLink;
+    // FIXME this is a workaround -- vertices in CandidatesList will have
+    // pointers to each other so we have to prevent reallocation.
+    // Here we just reserve enough so that realloc is never necessary.
+    CandidatesList.reserve(ted.size());
 
-    for (ted_iterI=ted.begin(); ted_iterI != ted.end(); ted_iterI++)
+    std::vector<TELinkState>::iterator tedIter;
+    for (tedIter=ted.begin(); tedIter != ted.end(); tedIter++)
     {
-        ted_iter = (telinkstate)*ted_iterI;
+        const TELinkState& linkstate = (*tedIter);
+
+        CSPFVertex sptVertex;
+
         //Other ends of the links to V only
-        if(ted_iter.advrouter!= VertexV->VertexId)
+        if (linkstate.advrouter!= VertexV->VertexId)
             continue;
 
-        //Not in the ConstrainedShortestPathTree only
+        //Skip if it's in ConstrainedShortestPathTree already
         bool IsFound =false;
-        for(spt_iterI = CShortestPathTree.begin();spt_iterI !=CShortestPathTree.end();spt_iterI++)
+        std::vector<CSPFVertex>::iterator sptIter;
+        for (sptIter = CShortestPathTree.begin(); sptIter!=CShortestPathTree.end(); sptIter++)
         {
-            spt_iter = (CSPFVertex_Struct)*spt_iterI;
-            if(ted_iter.linkid == spt_iter.VertexId)
+            sptVertex = (*sptIter);
+            if (linkstate.linkid == sptVertex.VertexId)
             {
                 IsFound = true;
                 break;
             }
         }
-        if(IsFound)
+        if (IsFound)
              continue;
 
         //Satisfy the resource constraint of BW only
         bool sharedLink= false;
-        for(iterS= links->begin(); iterS != links->end();iterS++)
+        std::vector<simple_link_t>::const_iterator iterS;
+        for (iterS = links.begin(); iterS!=links.end();iterS++)
         {
-            aLink =(simple_link_t)(*iterS);
-            if(aLink.advRouter == ted_iter.advrouter.getInt() &&
-                aLink.id == ted_iter.linkid.getInt())
+            simple_link_t aLink;
+            aLink = (*iterS);
+            if (aLink.advRouter == linkstate.advrouter.getInt() &&
+                aLink.id == linkstate.linkid.getInt())
             {
                 sharedLink =true;
                 break;
             }
 
         }
-        if(sharedLink)
+        if (sharedLink)
         {
-            if((ted_iter.UnResvBandwith[0]) + (old_fspec->req_bandwidth) < (new_fspec->req_bandwidth))
+            if (linkstate.UnResvBandwith[0]+old_fspec.req_bandwidth < new_fspec.req_bandwidth)
                 continue;
         }
         else
         {
-            if((ted_iter.UnResvBandwith[0]) < (new_fspec->req_bandwidth))
+            if (linkstate.UnResvBandwith[0] < new_fspec.req_bandwidth)
                 continue;
         }
 
         //Normal Dijkstra Algorithm for adding candidate
-        VertexW->VertexId = (ted_iter.linkid);
-        VertexW->DistanceToRoot = (VertexV->DistanceToRoot) + (ted_iter.metric);
-        VertexW->Parent = VertexV;
+        CSPFVertex VertexW;
+        VertexW.VertexId = (linkstate.linkid);
+        VertexW.DistanceToRoot = (VertexV->DistanceToRoot) + (linkstate.metric);
+        VertexW.Parent = VertexV;
 
         IsFound = false;
-        if( !(CandidatesList->empty()) )
+        if (!CandidatesList.empty())
         {
-            for (spt_iterI=CandidatesList->begin(); spt_iterI != CandidatesList->end(); spt_iterI++)
+            for (sptIter=CandidatesList.begin(); sptIter != CandidatesList.end(); sptIter++)
             {
-                spt_iter = (CSPFVertex_Struct)*spt_iterI;
+                sptVertex = (*sptIter);
 
-                if( spt_iter.VertexId == VertexW->VertexId)
+                if (sptVertex.VertexId == VertexW.VertexId)
                 {
                     IsFound = true;
                     break;
@@ -412,18 +433,18 @@ void OspfTe::TEAddCandidates(std::vector<simple_link_t> *links, FlowSpecObj_t *o
         }
 
         //Relaxation
-        if(IsFound)
+        if (IsFound)
         {
-            if(spt_iter.DistanceToRoot > VertexW->DistanceToRoot )
+            if (sptVertex.DistanceToRoot > VertexW.DistanceToRoot )
             {
-                 spt_iter.DistanceToRoot = VertexW->DistanceToRoot;
-                 spt_iter.Parent = VertexV;
-                 //TECalculateNextHops( VertexW, VertexV, *ted_iter);
+                 sptVertex.DistanceToRoot = VertexW.DistanceToRoot;
+                 sptVertex.Parent = VertexV;
+                 //TECalculateNextHops( VertexW, VertexV, *linkstate);
             }
         }
         else
         {
-            CandidatesList->push_back(*VertexW);
+            CandidatesList.push_back(VertexW);
         }
     }
 
