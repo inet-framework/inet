@@ -28,8 +28,8 @@ cplusplus {{
 // default IP header length: 20 bytes
 const int DEFAULT_HEADER_LENGTH = 20;
 
-// maximum IP header length: 64 bytes (TO BE CHECKED)
-const int MAX_HEADER_LENGTH = 64;
+// maximum IP header length: 60 = 4 * 15 bytes
+const int MAX_HEADER_LENGTH = 60;
 
 // option entry number
 const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;

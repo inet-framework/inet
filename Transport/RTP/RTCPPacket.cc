@@ -82,7 +82,7 @@ cObject *RTCPPacket::dup() const {
 };
 
 
-std::string RTCPPacket::info() {
+std::string RTCPPacket::info() const {
     std::stringstream out;
     out << "RTCPPacket.packetType=" << _packetType;
     return out.str();
@@ -173,7 +173,7 @@ const char *RTCPReceiverReportPacket::className() const {
 };
 
 
-std::string RTCPReceiverReportPacket::info() {
+std::string RTCPReceiverReportPacket::info() const {
     std::stringstream out;
     out << "RTCPReceiverReportPacket #rr=" << _count;
     return out.str();
@@ -258,7 +258,7 @@ const char *RTCPSenderReportPacket::className() const {
 };
 
 
-std::string RTCPSenderReportPacket::info() {
+std::string RTCPSenderReportPacket::info() const {
     std::stringstream out;
     out << "RTCPSenderReportPacket.ssrc=" << _ssrc;
     return out.str();
@@ -332,7 +332,7 @@ const char *RTCPSDESPacket::className() const {
 };
 
 
-std::string RTCPSDESPacket::info() {
+std::string RTCPSDESPacket::info() const {
     std::stringstream out;
     out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->items();
     return out.str();
@@ -459,7 +459,7 @@ const char *RTCPCompoundPacket::className() const {
 };
 
 
-std::string RTCPCompoundPacket::info() {
+std::string RTCPCompoundPacket::info() const {
     std::stringstream out;
     out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->items();
     return out.str();

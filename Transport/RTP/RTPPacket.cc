@@ -81,7 +81,7 @@ const char *RTPPacket::className() const {
 };
 
 
-std::string RTPPacket::info() {
+std::string RTPPacket::info() const {
     std::stringstream out;
     out << "RTPPacket: payloadType=" << _payloadType << " payloadLength=" << payloadLength();
     return out.str();

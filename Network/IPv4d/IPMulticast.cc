@@ -94,17 +94,19 @@ void IPMulticast::handleMessage(cMessage *msg)
             if (outputPort>=0 && outputPort!=inputPort)
             {
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
+                IPAddress nextHopAddr = routes[i].gateway;
 
                 // add a copy of the control info (OMNeT++ doesn't copy it) --FIXME needed?
                 IPRoutingDecision *newControlInfo = new IPRoutingDecision();
                 newControlInfo->setOutputPort(outputPort);
-                //newControlInfo->setNextHopAddr(...); TBD
+                newControlInfo->setNextHopAddr(nextHopAddr);
                 datagramCopy->setControlInfo(newControlInfo);
 
                 // set datagram source address if not yet set
                 if (datagramCopy->srcAddress().isNull())
                     datagramCopy->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
 
+                // send
                 send(datagramCopy, "fragmentationOut");
             }
         }

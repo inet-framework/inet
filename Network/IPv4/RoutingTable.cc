@@ -227,6 +227,15 @@ void RoutingTable::printRoutingTable()
     ev << "\n";
 }
 
+std::vector<IPAddress> RoutingTable::gatherAddresses()
+{
+    std::vector<IPAddress> addressvector;
+
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        addressvector.push_back((*i)->inetAddr);
+    return addressvector;
+}
+
 //---
 
 InterfaceEntry *RoutingTable::interfaceById(int id)

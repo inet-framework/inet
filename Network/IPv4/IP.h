@@ -109,12 +109,12 @@ class IP : public QueueBase
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(IPDatagram *datagram, int outputPort);
+    virtual void fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
 
     /**
      * Last TTL check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
+    virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
 
   public:
     Module_Class_Members(IP, QueueBase, 0);

@@ -24,19 +24,20 @@
 //
 enum IPProtocolId
 {
-  IP_PROT_HOPOPT = 0;
-  IP_PROT_ICMP  = 1;
-  IP_PROT_IGMP  = 2;
-  IP_PROT_IP    = 4; // used for IP tunneling. FIXME: RFC1700 specifies =3 (old IPSuite) ???
-  IP_PROT_TCP   = 6;
-  IP_PROT_EGP   = 8;
-  IP_PROT_IGP   = 9;
-  IP_PROT_UDP   = 17;
-  IP_PROT_XTP   = 36;
-  IP_PROT_IPv6  = 41;
-  IP_PROT_RSVP  = 46;
+  IP_PROT_HOPOPT    = 0;
+  IP_PROT_ICMP      = 1;
+  IP_PROT_IGMP      = 2;
+  IP_PROT_IP        = 4; // used for IP tunneling. FIXME: RFC1700 specifies =3 (old IPSuite) ???
+  IP_PROT_TCP       = 6;
+  IP_PROT_EGP       = 8;
+  IP_PROT_IGP       = 9;
+  IP_PROT_UDP       = 17;
+  IP_PROT_XTP       = 36;
+  IP_PROT_IPv6      = 41;
+  IP_PROT_RSVP      = 46;
   IP_PROT_IPv6_ICMP = 58;
-  IP_PROT_NONE = 59;
+  IP_PROT_NONE      = 59;
   IP_PROT_IPv6_MOBILITY = 62;
-  IP_PROT_OSPF = 89;
+  IP_PROT_OSPF      = 89;
+  IP_PROT_SCTP      = 132;
 }

@@ -16,7 +16,6 @@ set ALL_MODEL_OPTS=%OPTS% -n
 : #--------------------------------------
 
 echo on
-echo @%root%@
 %MAKEMAKE% %OPTS% -n -r
 
 cd %root%\Applications && %MAKEMAKE% %OPTS% -n -r

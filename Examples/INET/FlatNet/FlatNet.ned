@@ -43,11 +43,11 @@ module FlatNet
                 netmask = "255.255.0.0";
             display: "i=block/cogwheel";
         rte: Router[57];
-            display: "i=place/circle_vs,green4";
+            display: "i=misc/node_vs,green4";
         cli: StandardHost[2];
-            display: "i=device/laptop";
+            display: "i=device/laptop_s";
         srv: StandardHost;
-            display: "i=device/server";
+            display: "i=device/server_s";
     connections nocheck:
         cli[0].out++ --> ethernetline --> rte[50].in++;
         cli[0].in++ <-- ethernetline <-- rte[50].out++;

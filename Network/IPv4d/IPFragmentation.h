@@ -41,7 +41,7 @@ class IPFragmentation: public cSimpleModule
     ICMPAccess icmpAccess;
     int numOfPorts;
 
-    void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
+    void sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
 
   public:
     Module_Class_Members(IPFragmentation, cSimpleModule, 0);

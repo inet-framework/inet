@@ -154,25 +154,27 @@ void IP::routePacket(IPDatagram *datagram)
     int outputPort = rt->outputPortNo(destAddress);
     if (outputPort==-1)
     {
-        //FIXME what to do if src=0.0.0.0, i.e. we're still in the src node?? sure don't send icmp to ourselves? (Andras)
         ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
         numUnroutable++;
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
         return;
     }
 
+    // get next-hop address (TBD: merge with outputPortNo())
+    IPAddress nextHopAddr = rt->nextGatewayAddress(destAddress);
+
     // set datagram source address if not yet set
     if (datagram->srcAddress().isNull())
         datagram->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
 
     // default: send datagram to fragmentation
-    ev << "output port is " << outputPort << "\n";
+    ev << "output port is " << outputPort << ", next-hop address: " << nextHopAddr << "\n";
     numForwarded++;
 
     //
     // "Fragmentation" and "IPOutput"
     //
-    fragmentAndSend(datagram, outputPort);
+    fragmentAndSend(datagram, outputPort, nextHopAddr);
 }
 
 void IP::handleMulticastPacket(IPDatagram *datagram)
@@ -235,7 +237,8 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
                     datagramCopy->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
 
                 // send
-                fragmentAndSend(datagramCopy, outputPort);
+                IPAddress nextHopAddr = routes[i].gateway;
+                fragmentAndSend(datagramCopy, outputPort, nextHopAddr);
             }
         }
 
@@ -302,7 +305,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
 }
 
 
-void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
+void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr)
 {
     RoutingTable *rt = routingTableAccess.get();
     int mtu = rt->interfaceByPortNo(outputPort)->mtu;
@@ -310,7 +313,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
     // check if datagram does not require fragmentation
     if (datagram->length()/8 <= mtu)
     {
-        sendDatagramToOutput(datagram, outputPort);
+        sendDatagramToOutput(datagram, outputPort, nextHopAddr);
         return;
     }
 
@@ -354,7 +357,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
         }
         fragment->setFragmentOffset( i*(mtu - datagram->headerLength()) );
 
-        sendDatagramToOutput(fragment, outputPort);
+        sendDatagramToOutput(fragment, outputPort, nextHopAddr);
     }
 
     delete datagram;
@@ -383,8 +386,8 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
 
     IPAddress src = controlInfo->srcAddr();
 
-    // when source address given in Interface Message, use it
-    // (otherwise it'll get the address of the outgoing interface after routing)
+    // when source address was given, use it; otherwise it'll get the address
+    // of the outgoing interface after routing
     if (!src.isNull())
     {
         // if interface parameter does not match existing interface, do not send datagram
@@ -416,7 +419,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     return datagram;
 }
 
-void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
+void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr)
 {
     // hop counter check
     if (datagram->timeToLive() <= 0)
@@ -427,9 +430,18 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
         return;
     }
 
+    // check port
     int numOfPorts = gate("queueOut")->size();
     if (outputPort >= numOfPorts)
         error("Illegal output port %d", outputPort);
+
+    // attach next hop address if needed
+    if (!nextHopAddr.isNull())
+    {
+        IPRoutingDecision *routingDecision = new IPRoutingDecision();
+        routingDecision->setNextHopAddr(nextHopAddr);
+        datagram->setControlInfo(routingDecision);
+    }
 
     send(datagram, "queueOut", outputPort);
 }

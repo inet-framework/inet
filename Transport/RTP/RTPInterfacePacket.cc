@@ -78,7 +78,7 @@ const char *RTPInterfacePacket::className() const {
 };
 
 
-std::string RTPInterfacePacket::info() {
+std::string RTPInterfacePacket::info() const {
     std::stringstream out;
     out << "RTPInterfacePacket: type=" << _type;
     return out.str();

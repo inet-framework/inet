@@ -71,7 +71,7 @@ const char *SenderReport::className() const {
 };
 
 
-std::string SenderReport::info() {
+std::string SenderReport::info() const {
     std::stringstream out;
     out << "SenderReport.timeStamp=" << _rtpTimeStamp;
     return out.str();
@@ -177,7 +177,7 @@ const char *ReceptionReport::className() const {
 };
 
 
-std::string ReceptionReport::info() {
+std::string ReceptionReport::info() const {
     std::stringstream out;
     out << "ReceptionReport.ssrc=" << _ssrc;
     return out.str();

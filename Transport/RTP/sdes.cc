@@ -74,7 +74,7 @@ const char *SDESItem::className() const {
 };
 
 
-std::string SDESItem::info() {
+std::string SDESItem::info() const {
     std::stringstream out;
     out << "SDESItem=" << _content;
     return out.str();
@@ -147,7 +147,7 @@ const char *SDESChunk::className() const {
 };
 
 
-std::string SDESChunk::info() {
+std::string SDESChunk::info() const {
     std::stringstream out;
     out << "SDESChunk.ssrc=" << _ssrc << " items=" << items();
     return out.str();

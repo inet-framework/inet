@@ -89,7 +89,7 @@ const char *RTPInnerPacket::className() const {
 };
 
 
-std::string RTPInnerPacket::info() {
+std::string RTPInnerPacket::info() const {
     std::stringstream out;
     out << "RTPInnerPacket: type=" << _type;
     return out.str();

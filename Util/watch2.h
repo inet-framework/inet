@@ -1,7 +1,17 @@
-//
-//......
-//
-
+/*******************************************************************
+*
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*    See the GNU Lesser General Public License for more details.
+*
+*
+*********************************************************************/
 
 #ifndef _WATCH2_H__
 #define _WATCH2_H__
@@ -24,7 +34,7 @@ class cWatch2 : public cObject
     {
         return opp_typename(typeid(T));
     }
-    virtual std::string info()
+    virtual std::string info() const
     {
         std::stringstream out;
         out << className() << " " << name() << " = " << r;
@@ -45,7 +55,7 @@ class cWatch2_stdstring : public cObject
     {
         return "std::string";
     }
-    virtual std::string info()
+    virtual std::string info() const
     {
         std::stringstream out;
         out << className() << " " << name() << " = \"" << r << "\"";

@@ -365,6 +365,11 @@ class RoutingTable: public cSimpleModule
      * not in the routing table.
      */
     bool deleteRoutingEntry(RoutingEntry *entry);
+
+    /**
+     * Utility function: Returns a vector of all addresses of the node.
+     */
+    std::vector<IPAddress> gatherAddresses();
     //@}
 
 };

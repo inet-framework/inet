@@ -58,7 +58,6 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // don't send ICMP error messages for multicast messages
     if (origDatagram->destAddress().isMulticast())
     {
-        // FIXME why? src address is probably not multicast. --Andras
         ev << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
         return;
@@ -85,7 +84,23 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // the original datagram's data is returned to the sender
     errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
 
-    sendToIP(errorMessage, origDatagram->srcAddress());
+    // if srcAddr is not filled in, we're still in the src node, so we just
+    // process the ICMP message locally, right away
+    if (origDatagram->srcAddress().isNull())
+    {
+        // pretend it came from the IP layer
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setSrcAddr(IPAddress("127.0.0.1")); // FIXME maybe use configured loopback address
+        controlInfo->setProtocol(IP_PROT_ICMP);
+        errorMessage->setControlInfo(controlInfo);
+
+        // then process it locally
+        processICMPMessage(errorMessage);
+    }
+    else
+    {
+        sendToIP(errorMessage, origDatagram->srcAddress());
+    }
 
     // debugging information
     ev << "sending ICMP error: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
@@ -133,11 +148,6 @@ void ICMP::errorOut(ICMPMessage *icmpmsg)
 {
     send(icmpmsg, "errorOut");
 }
-
-
-//----------------------------------------------------------
-// Echo/Timestamp request and reply ICMP messages
-//----------------------------------------------------------
 
 void ICMP::recEchoRequest(ICMPMessage *request, const IPAddress& dest)
 {
