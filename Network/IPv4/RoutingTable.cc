@@ -237,7 +237,7 @@ void RoutingTable::printRoutingTable()
 
 InterfaceEntry *RoutingTable::interfaceById(int id)
 {
-    if (id<0 || id>=interfaces.size())
+    if (id<0 || id>=(int)interfaces.size())
         opp_error("interfaceById(): nonexistent interface %d", id);
     return interfaces[id];
 }
@@ -422,10 +422,10 @@ int RoutingTable::numRoutingEntries()
 
 RoutingEntry *RoutingTable::routingEntry(int k)
 {
-    if (k < routes.size())
+    if (k < (int)routes.size())
         return routes[k];
     k -= routes.size();
-    if (k < multicastRoutes.size())
+    if (k < (int)multicastRoutes.size())
         return multicastRoutes[k];
     return NULL;
 }

@@ -92,9 +92,6 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
 
 void MPLSModule::processPacketFromSignalling(cMessage * msg)
 {
-    RoutingTable *rt = routingTableAccess.get();
-    LIBTable *lt = libTableAccess.get();
-
     if (!isSignallingReady)
     {
         // This is message from LDP saying that it is ready.
