@@ -279,7 +279,7 @@ void TCPServerProc::processSIGNAL_DATA(cMessage * msg)
 void TCPServerProc::processMessage(cMessage * msg)
 {
 
-    // LDPpacket* ldpPacket = dynamic_cast<LDPpacket*>msg;
+    // LDPPacket* ldpPacket = dynamic_cast<LDPPacket*>msg;
     int msgKind = msg->kind();
 
     if (msg->isSelfMessage())

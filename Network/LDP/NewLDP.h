@@ -21,7 +21,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
-#include "LDPpacket.h"
+#include "LDPPacket.h"
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
 #include "RoutingTableAccess.h"
@@ -29,7 +29,7 @@
 
 
 /**
- * LDP protocol implementation.
+ * LDP (rfc 3036) protocol implementation.
  */
 class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 {
@@ -101,12 +101,12 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     void broadcastHello();
     void openTCPConnectionToPeer(IPAddress addr);
 
-    void processLDPHelloReply(cMessage *msg);
+    void processLDPHello(cMessage *msg);
     void processRequestFromMPLSSwitch(cMessage *msg);
-    void processLDPPacketFromTCP(LDPpacket *ldpPacket);
+    void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 
-    void processLABEL_MAPPING(LabelMappingMessage *packet);
-    void processLABEL_REQUEST(LabelRequestMessage *packet);
+    void processLABEL_MAPPING(LDPLabelMapping *packet);
+    void processLABEL_REQUEST(LDPLabelRequest *packet);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{

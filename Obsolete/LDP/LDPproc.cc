@@ -16,7 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include "ConstType.h"
-#include "LDPpacket.h"
+#include "LDPPacket.h"
 #include "tcp.h"
 #include "LDPproc.h"
 #include "RoutingTable.h"
@@ -169,7 +169,7 @@ void LDPproc::activity()
         }
         else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
         {
-            processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
+            processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
         }
     }
 
@@ -211,7 +211,7 @@ void LDPproc::processRequestFromMPLSSwitch(cMessage *msg)
 
         // Genarate new LABEL REQUEST and send downstream
 
-        LabelRequestMessage *requestMsg = new LabelRequestMessage();
+        LDPLabelRequest *requestMsg = new LDPLabelRequest();
         requestMsg->setFec(fecInt);
         requestMsg->addPar("fecId") = fecId;
 
@@ -250,7 +250,7 @@ void LDPproc::processRequestFromMPLSSwitch(cMessage *msg)
 }
 
 
-void LDPproc::processLDPPacketFromTCP(LDPpacket *ldpPacket)
+void LDPproc::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 {
     switch (ldpPacket->kind())
     {
@@ -271,11 +271,11 @@ void LDPproc::processLDPPacketFromTCP(LDPpacket *ldpPacket)
         break;
 
     case LABEL_MAPPING:
-        processLABEL_MAPPING(check_and_cast<LabelMappingMessage *>(ldpPacket));
+        processLABEL_MAPPING(check_and_cast<LDPLabelMapping *>(ldpPacket));
         break;
 
     case LABEL_REQUEST:
-        processLABEL_REQUEST(check_and_cast<LabelRequestMessage *>(ldpPacket));
+        processLABEL_REQUEST(check_and_cast<LDPLabelRequest *>(ldpPacket));
         break;
 
     case LABEL_WITHDRAW:
@@ -380,7 +380,7 @@ string LDPproc::findInterfaceFromPeerAddr(int peerIP)
 
 }
 
-void LDPproc::processLABEL_REQUEST(LabelRequestMessage * packet)
+void LDPproc::processLABEL_REQUEST(LDPLabelRequest * packet)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -428,7 +428,7 @@ void LDPproc::processLABEL_REQUEST(LabelRequestMessage * packet)
 
         // Construct a label mapping message
 
-        LabelMappingMessage *lmMessage = new LabelMappingMessage();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping();
 
         lmMessage->setMapping(label, fec);
 
@@ -460,7 +460,7 @@ void LDPproc::processLABEL_REQUEST(LabelRequestMessage * packet)
 
         // Send LABEL MAPPING upstream
 
-        LabelMappingMessage *lmMessage = new LabelMappingMessage();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping();
 
         lmMessage->setMapping(inLabel, fec);
 
@@ -497,7 +497,7 @@ void LDPproc::processLABEL_REQUEST(LabelRequestMessage * packet)
     }
 }
 
-void LDPproc::processLABEL_MAPPING(LabelMappingMessage * packet)
+void LDPproc::processLABEL_MAPPING(LDPLabelMapping * packet)
 {
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();

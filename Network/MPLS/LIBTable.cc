@@ -240,8 +240,9 @@ bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) con
     return false;
 }
 
-bool LIBTable::resolveLabel(int inLabel, std::string inInterface, int outOptCode,
-                            int outLabel, std::string& outInterface) const
+bool LIBTable::resolveLabel(int inLabel, std::string inInterface, 
+                            int& outOptCode, int& outLabel, 
+                            std::string& outInterface) const
 {
     for (int i = 0; i < lib.size(); i++)
     {

@@ -140,7 +140,7 @@ public:
      * was not found in the table.
      */
     bool resolveLabel(int inLabel, std::string inInterface,
-                      int outOptCode, int outNewLabel, std::string& outInterface) const;
+                      int& outOptCode, int& outNewLabel, std::string& outInterface) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const LIBTable::PRTEntry& prt);

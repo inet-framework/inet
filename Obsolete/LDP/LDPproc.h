@@ -23,7 +23,7 @@
 #include <vector>
 #include "tcp.h"
 #include "RoutingTable.h"
-#include "LDPpacket.h"
+#include "LDPPacket.h"
 #include "LDPInterface.h"
 #include "LIBTableAccess.h"
 #include "MPLSAccess.h"
@@ -110,10 +110,10 @@ class LDPproc: public cSimpleModule
     virtual void activity();
 
     void processRequestFromMPLSSwitch(cMessage *msg);
-    void processLDPPacketFromTCP(LDPpacket *ldpPacket);
+    void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 
-    void processLABEL_MAPPING(LabelMappingMessage *packet);
-    void processLABEL_REQUEST(LabelRequestMessage *packet);
+    void processLABEL_MAPPING(LDPLabelMapping *packet);
+    void processLABEL_REQUEST(LDPLabelRequest *packet);
 };
 
 #endif

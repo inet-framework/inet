@@ -21,6 +21,7 @@
 #include "LIBTable.h"
 #include "MPLSModule.h"
 #include "RoutingTable.h"
+#include "UDPControlInfo_m.h"
 
 
 Define_Module(NewLDP);
@@ -61,7 +62,7 @@ void NewLDP::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
     {
-        processLDPHelloReply(msg);
+        processLDPHello(msg);
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
     {
@@ -91,7 +92,7 @@ void NewLDP::socketEstablished(int connId, void *yourPtr)
 
 void NewLDP::socketDataArrived(int, void *, cMessage *msg, bool)
 {
-    processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
+    processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
 }
 
 void NewLDP::socketPeerClosed(int, void *)
@@ -119,22 +120,30 @@ void NewLDP::socketFailure(int, void *, int code)
 
 void NewLDP::broadcastHello()
 {
-    // send LDP Hello on every output interface
-
     // Each LDP capable router sends HELLO messages to a multicast address to all
     // of routers in the sub-network
-// FIXME to ALL interfaces!!!!
-    cMessage *helloMsg = new cMessage("ldp-broadcast-request");
-    helloMsg->setKind(0);
-    helloMsg->addPar("peerID") = id.c_str();
-    send(helloMsg, "to_udp_interface");
 
+    ev << "Broadcasting LDP Hello\n";
+
+    cMessage *msg = new cMessage("ldp-hello");
+    msg->setLength(1);
+    msg->addPar("content") = 1;
+    msg->addPar("request") = true;
+
+    UDPControlInfo *controlInfo = new UDPControlInfo();
+    controlInfo->setSrcAddr(local_addr);
+    controlInfo->setDestAddr(IPAddress("224.0.0.0"));
+    controlInfo->setSrcPort(100);
+    controlInfo->setDestPort(100);
+    msg->setControlInfo(controlInfo);
+
+    send(msg, "to_udp_interface");
 
     // schedule next hello in 5 minutes
     scheduleAt(simTime()+300, sendHelloMsg);
 }
 
-void NewLDP::processLDPHelloReply(cMessage *msg)
+void NewLDP::processLDPHello(cMessage *msg)
 {
     int anAddr = IPAddress((msg->par("src_addr").stringValue())).getInt();
     string anID = string(msg->par("peerID").stringValue());
@@ -202,7 +211,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 
         // Genarate new LABEL REQUEST and send downstream
 
-        LabelRequestMessage *requestMsg = new LabelRequestMessage();
+        LDPLabelRequest *requestMsg = new LDPLabelRequest();
         requestMsg->setFec(fecInt);
         requestMsg->addPar("fecId") = fecId;
 
@@ -241,7 +250,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 }
 
 
-void NewLDP::processLDPPacketFromTCP(LDPpacket *ldpPacket)
+void NewLDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 {
     switch (ldpPacket->kind())
     {
@@ -262,11 +271,11 @@ void NewLDP::processLDPPacketFromTCP(LDPpacket *ldpPacket)
         break;
 
     case LABEL_MAPPING:
-        processLABEL_MAPPING(check_and_cast<LabelMappingMessage *>(ldpPacket));
+        processLABEL_MAPPING(check_and_cast<LDPLabelMapping *>(ldpPacket));
         break;
 
     case LABEL_REQUEST:
-        processLABEL_REQUEST(check_and_cast<LabelRequestMessage *>(ldpPacket));
+        processLABEL_REQUEST(check_and_cast<LDPLabelRequest *>(ldpPacket));
         break;
 
     case LABEL_WITHDRAW:
@@ -371,7 +380,7 @@ string NewLDP::findInterfaceFromPeerAddr(int peerIP)
 
 }
 
-void NewLDP::processLABEL_REQUEST(LabelRequestMessage * packet)
+void NewLDP::processLABEL_REQUEST(LDPLabelRequest * packet)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -419,7 +428,7 @@ void NewLDP::processLABEL_REQUEST(LabelRequestMessage * packet)
 
         // Construct a label mapping message
 
-        LabelMappingMessage *lmMessage = new LabelMappingMessage();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping();
 
         lmMessage->setMapping(label, fec);
 
@@ -451,7 +460,7 @@ void NewLDP::processLABEL_REQUEST(LabelRequestMessage * packet)
 
         // Send LABEL MAPPING upstream
 
-        LabelMappingMessage *lmMessage = new LabelMappingMessage();
+        LDPLabelMapping *lmMessage = new LDPLabelMapping();
 
         lmMessage->setMapping(inLabel, fec);
 
@@ -488,7 +497,7 @@ void NewLDP::processLABEL_REQUEST(LabelRequestMessage * packet)
     }
 }
 
-void NewLDP::processLABEL_MAPPING(LabelMappingMessage * packet)
+void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
 {
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();

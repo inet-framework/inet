@@ -14,52 +14,42 @@
 *********************************************************************/
 
 
-#include "LDPpacket.h"
+#include "LDPPacket.h"
 
-/********************************************************************************
-*                                                                                *
-*                                LDP GENERIC PACKET                                *
-*                                                                                *
-*********************************************************************************/
+//---
 
-LDPpacket::LDPpacket():cPacket()
+LDPPacket::LDPPacket() : cMessage()
 {
     type = UNKNOWN;
 }
 
-LDPpacket::LDPpacket(int messageType):cPacket()
+LDPPacket::LDPPacket(int messageType) : cMessage()
 {
     type = messageType;
 }
 
 // copy constructor
-LDPpacket::LDPpacket(const LDPpacket & ldp):cPacket()
+LDPPacket::LDPPacket(const LDPPacket& ldp) : cMessage()
 {
     setName("LDP");
     operator=(ldp);
 }
 
+//----
 
-
-/********************************************************************************
-*                                                                                *
-*                                LDP MAPPING MESSAGE                                *
-*                                                                                *
-*********************************************************************************/
-
-LabelMappingMessage::LabelMappingMessage():LDPpacket()
+LDPLabelMapping::LDPLabelMapping() : LDPPacket()
 {
     type = LABEL_MAPPING;
     setKind(type);
 }
 
 
-int LabelMappingMessage::getType()
+int LDPLabelMapping::getType()
 {
     return LABEL_MAPPING;
 }
 
-void LabelMappingMessage::printInfo(ostream & os)
+void LDPLabelMapping::printInfo(ostream & os)
 {
 
     os << "LDP LABEL MAPPING MESSAGE " << "\n";
@@ -68,54 +58,36 @@ void LabelMappingMessage::printInfo(ostream & os)
 
 }
 
+//---
 
-
-/********************************************************************************
-*                                                                                *
-*                                LDP LABEL REQUEST                                *
-*                                                                                *
-*********************************************************************************/
-
-
-LabelRequestMessage::LabelRequestMessage():LDPpacket()
+LDPLabelRequest::LDPLabelRequest():LDPPacket()
 {
     type = LABEL_REQUEST;
     setKind(type);
 }
 
-
-void LabelRequestMessage::printInfo(ostream & os)
+void LDPLabelRequest::printInfo(ostream & os)
 {
 
     os << "LDP LABEL REQUEST MESSAGE " << "\n";
     os << "FEC: " << getFec() << "\n";
 }
 
-
-
-int LabelRequestMessage::getType()
+int LDPLabelRequest::getType()
 {
     return LABEL_REQUEST;
 }
 
+//---
 
-
-
-
-/********************************************************************************
-*                                                                                *
-*                                LDP HELLO MESSAGE                                *
-*                                                                                *
-*********************************************************************************/
-
-HelloMessage::HelloMessage()
+LDPHello::LDPHello()
 {
     type = HELLO;
     setKind(type);
 }
 
 
-HelloMessage::HelloMessage(double time, bool tbit, bool rbit)
+LDPHello::LDPHello(double time, bool tbit, bool rbit)
 {
     holdTime = time;
     Tbit = tbit;
@@ -123,22 +95,24 @@ HelloMessage::HelloMessage(double time, bool tbit, bool rbit)
     type = HELLO;
 }
 
-int HelloMessage::getType()
+int LDPHello::getType()
 {
     return HELLO;
 }
 
-void HelloMessage::printInfo(ostream & os)
+void LDPHello::printInfo(ostream & os)
 {
     os << "LDP HELLO MESSAGE" << " T=" << Tbit << "R=" << Rbit;
 }
 
-IniMessage::IniMessage():LDPpacket()
+//---
+
+LDPIni::LDPIni():LDPPacket()
 {
     type = INITIALIZATION;
 }
 
-IniMessage::IniMessage(double time, bool abit, bool dbit, int pvlim, string r_ldp_id)
+LDPIni::LDPIni(double time, bool abit, bool dbit, int pvlim, string r_ldp_id)
 {
     type = INITIALIZATION;
     KeepAliveTime = time;
@@ -149,24 +123,26 @@ IniMessage::IniMessage(double time, bool abit, bool dbit, int pvlim, string r_ld
 
 }
 
-void IniMessage::printInfo(ostream & os)
+void LDPIni::printInfo(ostream & os)
 {
     os << "LDP INITIALIZATION MESSAGE" << "A=" << Abit <<
         "D=" << Dbit << " PL limit=" << PVLim << " Receiver ID=" << Receiver_LDP_Identifier;
 
 }
 
-int IniMessage::getType()
+int LDPIni::getType()
 {
     return INITIALIZATION;
 }
 
-AddressMessage::AddressMessage():LDPpacket()
+//---
+
+LDPAddress::LDPAddress():LDPPacket()
 {
     type = ADDRESS;
 }
 
-AddressMessage::AddressMessage(bool iswithdraw, string addFamily, vector < string > *addressList)
+LDPAddress::LDPAddress(bool iswithdraw, string addFamily, vector < string > *addressList)
 {
     type = ADDRESS;
     isWithdraw = iswithdraw;
@@ -175,7 +151,7 @@ AddressMessage::AddressMessage(bool iswithdraw, string addFamily, vector < strin
 
 }
 
-void AddressMessage::printInfo(ostream & os)
+void LDPAddress::printInfo(ostream & os)
 {
     os << "LDP ADDRESS MESSAGE " << "\n";
     for (int i = 0; i < addresses->size(); i++)
@@ -183,7 +159,7 @@ void AddressMessage::printInfo(ostream & os)
 
 }
 
-int AddressMessage::getType()
+int LDPAddress::getType()
 {
     return ADDRESS;
 }

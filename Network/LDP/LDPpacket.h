@@ -85,14 +85,14 @@ enum LDP_MESSAGE_TYPES
 /**
  * Base class for LDP packets
  */
-class LDPpacket : public cPacket
+class LDPPacket : public cMessage
 {
-  public: //FIXME!!!!
+  protected:
     int type;
   public:
-    LDPpacket();
-    LDPpacket(int messageType);
-    LDPpacket(const LDPpacket& ldp);
+    LDPPacket();
+    LDPPacket(int messageType);
+    LDPPacket(const LDPPacket& ldp);
 
     //Routing Information
     inline void setSenderAddress(int ipAddr)
@@ -123,11 +123,11 @@ class LDPpacket : public cPacket
 /**
  * LDP Label Mapping Message
  */
-class LabelMappingMessage : public LDPpacket
+class LDPLabelMapping : public LDPPacket
 {
   public:
-    LabelMappingMessage();
-    ~LabelMappingMessage() {}
+    LDPLabelMapping();
+    ~LDPLabelMapping() {}
 
     inline void setMapping(int label, int fec)
     {
@@ -153,11 +153,11 @@ class LabelMappingMessage : public LDPpacket
 /**
  * LDP Label Request Message
  */
-class LabelRequestMessage : public LDPpacket
+class LDPLabelRequest : public LDPPacket
 {
   public:
-    LabelRequestMessage();
-    ~LabelRequestMessage() {}
+    LDPLabelRequest();
+    ~LDPLabelRequest() {}
 
     inline void setFec(int fec)
     {
@@ -177,7 +177,7 @@ class LabelRequestMessage : public LDPpacket
 /**
  * LDP Hello Message
  */
-class HelloMessage : public LDPpacket
+class LDPHello : public LDPPacket
 {
    protected:
      double holdTime;
@@ -185,9 +185,9 @@ class HelloMessage : public LDPpacket
      bool Rbit;
 
    public:
-     HelloMessage();
-     HelloMessage(double time, bool tbit, bool rbit);
-     ~HelloMessage() {}
+     LDPHello();
+     LDPHello(double time, bool tbit, bool rbit);
+     ~LDPHello() {}
 
      void printInfo(ostream & os);
 
@@ -204,7 +204,8 @@ class HelloMessage : public LDPpacket
 /**
  * LDP Ini Message
  */
-class IniMessage : public LDPpacket
+// FIXME currently unused
+class LDPIni : public LDPPacket
 {
   protected:
      double KeepAliveTime;
@@ -214,9 +215,9 @@ class IniMessage : public LDPpacket
      string Receiver_LDP_Identifier;
 
   public:
-     IniMessage();
-     IniMessage(double time, bool abit, bool dbit, int pvlim, string r_ldp_id);
-     ~IniMessage() {}
+     LDPIni();
+     LDPIni(double time, bool abit, bool dbit, int pvlim, string r_ldp_id);
+     ~LDPIni() {}
 
      inline double getKeepAliveTime(){return KeepAliveTime;}
      inline bool getAbit(){return Abit;}
@@ -229,7 +230,8 @@ class IniMessage : public LDPpacket
 /**
  * LDP Address Message
  */
-class AddressMessage : public LDPpacket
+// FIXME currently unused
+class LDPAddress : public LDPPacket
 {
   protected:
      bool isWithdraw;
@@ -237,9 +239,9 @@ class AddressMessage : public LDPpacket
      vector<string> *addresses;
 
   public:
-     AddressMessage();
-     AddressMessage(bool iswithdraw, string addFamily, vector<string> *addressList);
-     ~AddressMessage(){delete addresses;}
+     LDPAddress();
+     LDPAddress(bool iswithdraw, string addFamily, vector<string> *addressList);
+     ~LDPAddress() {delete addresses;}
 
      inline vector<string> *getAddresses(){return addresses;}
      void printInfo(ostream& os);

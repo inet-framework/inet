@@ -288,7 +288,7 @@ void TCPClientProc::processSIGNAL_DATA(cMessage * msg)
 void TCPClientProc::processMessage(cMessage * msg)
 {
 
-    // LDPpacket* ldpPacket = dynamic_cast <LDPpacket*> msg;
+    // LDPPacket* ldpPacket = dynamic_cast <LDPPacket*> msg;
     /*
        LDP_CLIEN_CREATE=10,
        LDP_FORWARD_REQUEST,
