@@ -21,8 +21,8 @@ Define_Module(LDPInterface);
 
 void LDPInterface::initialize()
 {
-    //local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-    local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
+    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    //local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
     local_port = ConstType::ldp_port;
     rem_port = ConstType::ldp_port;

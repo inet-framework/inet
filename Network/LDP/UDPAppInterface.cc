@@ -36,8 +36,8 @@ Define_Module(UDPAppInterface);
 
 void UDPAppInterface::initialize()
 {
-    //local_addr = par("local_addr").stringValue();
-    local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get());
+    local_addr = par("local_addr").stringValue();
+    //local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get());
 }
 
 void UDPAppInterface::activity()

@@ -99,7 +99,8 @@ void TED::buildDatabase()
         sTopoNode *node = topo.node(i);
         cModule *module = node->module();
 
-        IPAddress modAddr = IPAddressResolver().addressOf(module);
+        IPAddress modAddr = IPAddress(module->par("local_addr").stringValue());
+        //IPAddress modAddr = IPAddressResolver().addressOf(module);
 
         RoutingTable *myRT = IPAddressResolver().routingTableOf(module);
 
@@ -108,7 +109,9 @@ void TED::buildDatabase()
         for (int j = 0; j < node->outLinks(); j++)
         {
             cModule *neighbour = node->out(j)->remoteNode()->module();
-            IPAddress neighbourAddr = IPAddressResolver().addressOf(neighbour);
+
+            IPAddress neighbourAddr = IPAddress(neighbour->par("local_addr").stringValue());
+            //IPAddress neighbourAddr = IPAddressResolver().addressOf(neighbour);
 
             // For each link
             // Get linkId

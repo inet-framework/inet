@@ -214,19 +214,26 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
 
     if (ipdatagram)
     {
-        if (isIR)
+        if (ipdatagram->hasPar("trans")) // FIXME this can never happen, peer won't set "trans"...
         {
-            // IP datagram, from outside for IR host. We'll try to classify it
-            // and add an MPLS header
-            processIPDatagramFromL2(ipdatagram);
+            ev << "'trans' param set on message, sending up\n";
+            int gateIndex = msg->arrivalGate()->index();
+            send(ipdatagram, "toL3", gateIndex);
         }
-        else
+        else if (!isIR)
         {
             // if we are not an Ingress Router and still get an IP packet,
             // then just pass it through to L3
+            ev << "setting 'trans' param on message and sending up\n";
             ipdatagram->addPar("trans") = 0;
             int gateIndex = msg->arrivalGate()->index();
             send(ipdatagram, "toL3", gateIndex);
+        }
+        else
+        {
+            // IP datagram arrives at Ingress router. We'll try to classify it
+            // and add an MPLS header
+            processIPDatagramFromL2(ipdatagram);
         }
     }
     else if (mplsPacket)
@@ -335,69 +342,59 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
     int gateIndex = ipdatagram->arrivalGate()->index();
 
-    if (ipdatagram->hasPar("trans")) // FIXME this can never happen, peer won't set "trans"...
+    // Incoming interface
+    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
+    string senderInterface = string(ientry->name.c_str());
+    ev << "Message from outside to Ingress node\n";
+
+    bool makeRequest = false;
+    int fecID = classifyPacket(ipdatagram, classifierType);
+    if (fecID == -1)
     {
-        send(ipdatagram, "toL3", gateIndex);
+        makeRequest = true;
+        fecID = addFEC(ipdatagram, classifierType);
+        ev << "Registered new FEC=" << fecID << "\n";
     }
-    else
+    ev << "Packet src=" << ipdatagram->srcAddress() <<
+          ", dest=" << ipdatagram->destAddress() <<
+          " --> FEC=" << fecID << "\n";
+
+    int label=-1;
+    string outgoingInterface;
+    bool found = lt->resolveFec(fecID, label, outgoingInterface);
+
+    if (found)  // New Label found
     {
-        // Incoming interface
-        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-        string senderInterface = string(ientry->name.c_str());
-        ev << " Message from outside to Ingress node" << "\n";
+        ev << "FEC found in LIB: outLabel=" << label << ", outInterface=" << outgoingInterface << "\n";
 
-        bool makeRequest = false;
-        int fecID = classifyPacket(ipdatagram, classifierType);
-        if (fecID == -1)
+        // Construct a new MPLS packet
+        MPLSPacket *newPacket = NULL;
+        newPacket = new MPLSPacket(ipdatagram->name());
+        newPacket->encapsulate(ipdatagram);
+
+        // consistent in packet color
+        if (fecID < MAX_LSP_NO)
+            newPacket->setKind(fecID);
+        else
+            newPacket->setKind(2 * MAX_LSP_NO - fecID);
+
+        newPacket->pushLabel(label);
+
+        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
+        send(newPacket, "toL2", outgoingPort);
+    }
+    else  // Need to make ldp query
+    {
+        ev << "FEC not yet in LIB, queueing up " << (makeRequest ? "and doing LDP query\n" : "\n");
+
+        // queue up packet
+        ipdatagram->addPar("gateIndex") = gateIndex;
+        ipdataQueue.add(ipdatagram);
+
+        if (makeRequest)
         {
-            makeRequest = true;
-            fecID = classifyPacket(ipdatagram, classifierType);
-            ev << "My LSP id mapping is " << fecID << "\n";
-        }
-        ev << "Message(src, dest, fec)=(" << ipdatagram->srcAddress() << "," <<
-            ipdatagram->destAddress() << "," << fecID << ")\n";
-
-        int label=-1;
-        string outgoingInterface;
-        bool found = lt->resolveFec(fecID, label, outgoingInterface);
-
-        if (found)  // New Label found
-        {
-            ev << "FEC found in LIB, label=" << label << "\n";
-
-            // Construct a new MPLS packet
-            MPLSPacket *newPacket = NULL;
-            newPacket = new MPLSPacket(ipdatagram->name());
-            newPacket->encapsulate(ipdatagram);
-
-            // consistent in packet color
-            if (fecID < MAX_LSP_NO)
-                newPacket->setKind(fecID);
-            else
-                newPacket->setKind(2 * MAX_LSP_NO - fecID);
-
-            newPacket->pushLabel(label);
-
-            // Find outgoing port
-            int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
-
-            // Send out the packet
-            ev << " Ingress Node push new label and sending this packet\n";
-            send(newPacket, "toL2", outgoingPort);
-        }
-        else  // Need to make ldp query
-        {
-            ev << "FEC not in LIB, making LDP query\n";
-
-            // queue up packet
-            ipdatagram->addPar("gateIndex") = gateIndex;
-            ipdataQueue.add(ipdatagram);
-
-            if (makeRequest)
-            {
-                // if FEC just made it into fecList, we haven't asked LDP yet: do it now
-                requestLDP(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
-            }
+            // if FEC just made it into fecList, we haven't asked LDP yet: do it now
+            requestLDP(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
         }
     }
 }
@@ -444,14 +441,17 @@ int MPLSModule::classifyPacket(IPDatagram *ipdatagram, int type)
         if (type==SRC_AND_DEST_CLASSIFIER && dest==it->destAddr && src==it->srcAddr)
             return it->fecId;
     }
+    return -1;
+}
 
-    // if no existing FEC is found: add a new one, but return -1
+int MPLSModule::addFEC(IPDatagram *ipdatagram, int type)
+{
     FECElem newEle;
-    newEle.destAddr = dest;
-    newEle.srcAddr = src;
+    newEle.destAddr = ipdatagram->destAddress();
+    newEle.srcAddr = ipdatagram->srcAddress();
     newEle.fecId = ++maxFecId;
     fecList.push_back(newEle);
-    return -1;
+    return newEle.fecId;
 }
 
 

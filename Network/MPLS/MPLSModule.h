@@ -101,15 +101,22 @@ class MPLSModule : public cSimpleModule
 
       //@}
 
+      /** @name Packet classification and FEC list mgmt */
+      //@{
       /**
-       * Classify FEC for packet. If FEC already exists, return its fecId.
-       * If no existing FEC is found: add a new one, and return -1.
-       *
-       * @param type Scheme of classification, i.g destination-based or
-       * destination and sender-based (DEST_CLASSIFIER, SRC_AND_DEST_CLASSIFIER).
+       * Classify FEC for packet. If FEC already exists, returns its fecId,
+       * otherwise returns -1. Type parameter denotes scheme of classification,
+       * e.g destination-based or destination and sender-based (constants
+       * DEST_CLASSIFIER, SRC_AND_DEST_CLASSIFIER).
        */
-      int classifyPacket(IPDatagram *ipdata, int type);
+      int classifyPacket(IPDatagram *ipdatagram, int type);
 
+      /**
+       * Complements classifyPacket(): adds a new FEC based on the packet
+       * content and returns the FEC value.
+       */
+      int addFEC(IPDatagram *ipdatagram, int type);
+      //@}
 };
 
 

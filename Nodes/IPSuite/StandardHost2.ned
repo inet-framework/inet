@@ -41,6 +41,7 @@ module StandardHost2
         tcpAppType: string,
         udpAppType: string,
         IPForward : bool,
+        local_addr : string, //FIXME this is only needed for MPLS - TO BE REMOVED!
         routingFile : string;
     gates:
         in: in[];

@@ -24,8 +24,8 @@ void OspfTe::initialize(int stage)
 {
     if (stage==1)
     {
-        //local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-        local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
+        local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+        //local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
         // to invoke handleMessage() when we start  FIXME what?????? Andras
         scheduleAt(simTime(), new cMessage());
