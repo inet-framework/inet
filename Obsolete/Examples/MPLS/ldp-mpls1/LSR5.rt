@@ -30,7 +30,7 @@ route:
 224.7.0.0   *   255.193.0.0         H   0   ppp2
 224.5.0.0   *   255.193.0.0         H   0   ppp3
 
-default:    1.0.0.3     0.0.0.0     G   0   ppp0
+#default:    1.0.0.3     0.0.0.0     G   0   ppp0
 
 routeend.
 

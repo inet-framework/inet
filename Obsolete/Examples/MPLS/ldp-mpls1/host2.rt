@@ -8,8 +8,7 @@ ifconfigend.
 
 
 route:
-11.0.1.2    *       255.255.255.255     H   0   ppp0
-default:    1.0.0.1     0.0.0.0         G   0   ppp0
+default:    *      0.0.0.0         G   0   ppp0
 
 routeend.
 
