@@ -66,7 +66,7 @@ simple TcpModule
       TCPDelayedAck  : bool,
       TCPFastRetrans : bool,
       TCPFastRecovery: bool,
-      TCPNewReno     : bool,
+      TCPNewReno     : bool;
       //#debug: bool;
     gates:
       in: from_appl, from_ip;
