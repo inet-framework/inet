@@ -236,10 +236,10 @@ void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
 
                     routingInfo.push_back(*rInfo);
 
-                    cMessage *signalMPLS = new cMessage();
+                    cMessage *signalMPLS = new cMessage("path created");
                     label = (*(flow_d + k)).label;
                     signalMPLS->addPar("label") = label;
-                    signalMPLS->addPar("fec") = lsp_id;
+                    signalMPLS->addPar("fecId") = lsp_id;
                     // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
                     // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
                     // Install new label
@@ -335,10 +335,9 @@ void RSVPAppl::processSignalFromMPLSSwitch_PATH_REQUEST(cMessage *msg)
     ev << "Handling PATH REQUEST\n";
 
     int index = msg->par("gateIndex");
-
     int dest = msg->par("dest_addr");
     int src = msg->par("src_addr");
-    int fecInt = msg->par("FEC");
+    int fecInt = msg->par("fecId");
 
     int lspId = fecInt;
 

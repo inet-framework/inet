@@ -93,6 +93,9 @@ private:
      */
     int readPrtTableFromFile(const char *filename);
 
+    // display LIB and PRT table sizes above icon
+    void updateDisplayString();
+
 public:
 
     Module_Class_Members(LIBTable, cSimpleModule, 0);
@@ -126,6 +129,15 @@ public:
      */
     int installNewLabel(int outLabel, std::string inInterface,
                         std::string outInterface, int fec, int optcode);
+
+    /**
+     * Returns inLabel (if exists) for a FEC (inInterface is irrelevant because
+     * we want to use unified label space for all input interfaces).
+     * Used by signalling protocols (e.g. LDP) to determine if a Label Request
+     * already has a corresponding entry in LIB, or it should be created.
+     * Returns -1 if there's no such entry in LIB.
+     */
+    int findInLabel(int fec);
 
     /**
      * Given a FEC, it returns (outLabel, outInterface) in the last two

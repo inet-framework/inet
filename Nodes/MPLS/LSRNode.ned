@@ -60,7 +60,9 @@ module LSRNode
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
-                helloTimeout = helloTimeout;
+                helloTimeout = helloTimeout,
+                isER = isER,
+                isIR = isIR;
             display: "p=190,60;b=40,24";
         tcp: TCPMain;
             display: "p=145,120;i=prot2";

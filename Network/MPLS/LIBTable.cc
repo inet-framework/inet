@@ -54,6 +54,7 @@ void LIBTable::initialize()
     WATCH_VECTOR(lib);
     WATCH_VECTOR(prt);
 
+    updateDisplayString();
 }
 
 void LIBTable::handleMessage(cMessage *)
@@ -183,39 +184,72 @@ void LIBTable::printTables() const
 {
     int i;
     // Print out the LIB table
-    ev << "************LIB TABLE CONTENTS***************** \n";
-    ev << " InL       InInf        OutL     Outf    Optcode  \n";
+    ev << "************LIB TABLE CONTENTS*****************\n";
+    ev << " InL     InInf     OutL     Outf    Optcode\n";
     for (i = 0; i < lib.size(); i++)
         ev << lib[i].inLabel << "    " << lib[i].inInterface.c_str() << " " << lib[i].
             outLabel << "     " << lib[i].outInterface.c_str() << "   " << lib[i].optcode << "\n";
 
     // Print out the PRT table
     ev << "*****************PRT TABLE CONTENT**************\n";
-    ev << "Pos  Fec \n";
+    ev << "Pos  Fec\n";
     for (i = 0; i < prt.size(); i++)
         ev << prt[i].libIndex << "    " << prt[i].fec << "\n";
+}
+
+void LIBTable::updateDisplayString()
+{
+    if (!ev.isGUI())
+        return;
+
+    char buf[80];
+    sprintf(buf, "%d LIB entries\nfor %d FECs", lib.size(), prt.size());
+    displayString().setTagArg("t",0,buf);
 }
 
 int LIBTable::installNewLabel(int outLabel, string inInterface,
                               string outInterface, int fec, int optcode)
 {
+    // Consistence check: we want to use unified label space for all input interfaces.
+    // This means that any given FEC may only map to a single lib entry. So we must
+    // check FEC does not already occur in prt.
+    for (int i=0; i<prt.size(); i++)
+        if (prt[i].fec==fec)
+            error("installNewLabel(): FEC %s already in LIB", IPAddress(fec).str().c_str());
+
     LIBEntry newLabelEntry;
     newLabelEntry.inInterface = inInterface;
     newLabelEntry.outInterface = outInterface;
     newLabelEntry.optcode = optcode;
-
-    // Auto generate inLabel
-    newLabelEntry.inLabel = lib.size();
+    newLabelEntry.inLabel = lib.size();  // Auto generate inLabel
     newLabelEntry.outLabel = outLabel;
     lib.push_back(newLabelEntry);
 
     PRTEntry aPrt;
-    aPrt.libIndex = lib.size() - 1;
+    aPrt.libIndex = lib.size()-1;
     aPrt.fec = fec;
     prt.push_back(aPrt);
+
     printTables();
+    updateDisplayString();
 
     return newLabelEntry.inLabel;
+}
+
+int LIBTable::findInLabel(int fec)
+{
+    // search in the PRT for exact match of the FEC value
+    for (int i=0; i<prt.size(); i++)
+    {
+        if (prt[i].fec==fec)
+        {
+            int p = prt[i].libIndex;
+            return lib[p].inLabel;
+        }
+    }
+
+    // not found
+    return -1;
 }
 
 bool LIBTable::resolveFec(int fec, int& outLabel, std::string& outInterface) const

@@ -401,7 +401,7 @@ void MPLSModule::sendPathRequestToSignalling(int fecId, IPAddress src, IPAddress
         error("Cannot find signal_module");
 
     // assemble Path Request command
-    cMessage *signalMessage = new cMessage("PATH_REQUEST");
+    cMessage *signalMessage = new cMessage("path request");
     signalMessage->addPar("fecId") = fecId;
     signalMessage->addPar("src_addr") = src.getInt();
     signalMessage->addPar("dest_addr") = dest.getInt();

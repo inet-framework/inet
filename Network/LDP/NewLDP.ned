@@ -46,7 +46,9 @@ simple NewLDP
 
     parameters:
         routerId : string,
-        helloTimeout : numeric;
+        helloTimeout : numeric,
+        isIR: bool,
+        isER: bool;
 
     gates:
         in: from_mpls_switch;  // receives messages here by direct sending

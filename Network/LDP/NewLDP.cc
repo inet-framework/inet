@@ -50,10 +50,8 @@ void NewLDP::initialize()
 {
     helloTimeout = par("helloTimeout").doubleValue();
 
-    // we'll need routerId for HELLO messages
-    //RoutingTable *rt = routingTableAccess.get();
-    //routerId = rt->getRouterId();
-    //ASSERT(!routerId.isNull());
+    isIR = par("isIR"); // TBD we shouldn't need these params; see comments at isIR/isER usage in the code
+    isER = par("isER");
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecSenderBinds);
@@ -300,7 +298,6 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     newBind.fec = fecInt;
     newBind.fromInterface = fromInterface;
     newBind.fecId = fecId;
-
     fecSenderBinds.push_back(newBind);
 
     // genarate new LABEL REQUEST and send downstream
@@ -466,7 +463,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     IPAddress srcAddr = packet->getSenderAddress();
     int fecId = packet->getFecId();
 
-    ev << "Request from LSR " << IPAddress(srcAddr) << " for FEC " << fec << "\n";
+    ev << "Label Request from LSR " << srcAddr << " for FEC " << fec << "\n";
 
     int i;
     for (i=0; i < fecSenderBinds.size(); i++)
@@ -474,31 +471,29 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
             break;
     if (i!=fecSenderBinds.size())
     {
-        // repeated request: do nothing
+        // repeated request: do nothing (FIXME is this OK?)
         ev << "Repeated request, ignoring\n";
         delete packet;
         return;
     }
 
     // This is the incoming interface if label found
-    string fromInterface = findInterfaceFromPeerAddr(srcAddr);
+    string inInterface = findInterfaceFromPeerAddr(srcAddr);
 
     // Add new request to table
     fec_src_bind newBind;
     newBind.fec = fec;
-    newBind.fromInterface = fromInterface;
+    newBind.fromInterface = inInterface;
     fecSenderBinds.push_back(newBind);
 
     // Look up FEC in our LIB table
-    int label;
-    string outgoingInterface;
-    bool found = lt->resolveFec(fec.getInt(), label, outgoingInterface);
+    int inLabel = lt->findInLabel(fec.getInt());
 
-    if (found)
+    if (inLabel!=-1)
     {
         // We already have a mapping for this FEC, let our upstream peer know
         // about it by sending back a Label Mapping message
-        ev << "FEC " << fec << " found in LIB: outLabel=" << label << ", outIf=" << outgoingInterface << "\n";
+        ev << "FEC " << fec << " found in LIB: inLabel=" << inLabel << "\n";
         ev << "Sending back a Label Mapping message about it\n";
 
         // Send LABEL MAPPING upstream
@@ -507,7 +502,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         lmMessage->setLength(30*8); // FIXME find out actual length
         lmMessage->setReceiverAddress(srcAddr);
         lmMessage->setSenderAddress(rt->getRouterId());
-        lmMessage->setLabel(label);
+        lmMessage->setLabel(inLabel);
         lmMessage->setFec(fec);
         lmMessage->setFecId(fecId);
 
@@ -515,17 +510,21 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         peerSocket(srcAddr)->send(lmMessage);
         delete packet;
     }
-    else if (isER)
+    else if (isER) // FIXME this condition is not convincing. Rather, we should check if we're
+                   // ER for *this* FEC; that is, next hop is NOT an LSR (not in our peer table)
     {
         // Note this is the ER router, we must base on rt to find the next hop
         // Rely on port index to find the to-outside interface name
         int portNo = rt->outputPortNo(fec);
+        if (portNo==-1)
+            error("FEC %s is unroutable", fec.str().c_str());
         string outInterface = string(rt->interfaceByPortNo(portNo)->name);
 
-        int inLabel = lt->installNewLabel(-1, fromInterface, outInterface, fecId, POP_OPER);
+        int inLabel = lt->installNewLabel(-1, inInterface, outInterface, fecId, POP_OPER);
 
-        ev << "Egress router reached. FEC " << fec << "wi\n";
-        ev << "Send Label mapping to " << "LSR(" << srcAddr << ")\n";
+        ev << "Egress router reached. Assigned inLabel=" << inLabel << " to FEC " << fec <<
+              ", outInterface=" << outInterface << "\n";
+        ev << "Sending back a Label Mapping message about it\n";
 
         // Send LABEL MAPPING upstream
         LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
@@ -543,23 +542,16 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     }
     else  // Propagate downstream
     {
-        ev << "Cannot find label for the fec " << IPAddress(fec) << "\n"; // FIXME what???
+        ev << "FEC " << fec << " not in our LIB, propagating Label Request downstream\n";
 
         // Set parameters allowed to send downstream
-
         IPAddress peerIP = locateNextHop(fec);
+        if (peerIP.isNull())
+            opp_error("Cannot find downstream neighbor for FEC %s", fec.str().c_str());
 
-        if (!peerIP.isNull())
-        {
-            packet->setReceiverAddress(peerIP);
-            packet->setSenderAddress(rt->getRouterId());
-
-            ev << "Propagating Label Request from LSR(" <<
-                packet->getSenderAddress() << " to " <<
-                packet->getReceiverAddress() << ")\n";
-
-            peerSocket(peerIP)->send(packet);
-        }
+        packet->setReceiverAddress(peerIP);
+        packet->setSenderAddress(rt->getRouterId());
+        peerSocket(peerIP)->send(packet);
     }
 }
 
@@ -580,12 +572,11 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
     string outInterface = findInterfaceFromPeerAddr(fromIP);
     string inInterface;
 
-    if (isIR)
+    if (isIR)  // FIXME rather, we should check if we're IR for *this* FEC, that is, we haven't received Label Request from upstream peer for this FEC
     {
-        cMessage *signalMPLS = new cMessage();
+        cMessage *signalMPLS = new cMessage("path created");
 
         signalMPLS->addPar("label") = label;
-
         signalMPLS->addPar("fecInt") = fec.getInt();
         signalMPLS->addPar("my_name") = 0;
         int myfecId = -1;
