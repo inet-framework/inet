@@ -102,7 +102,7 @@ UDPApp.obj: UDPApp.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -129,6 +129,6 @@ UDPApp.obj: UDPApp.cc \
   ../../Network/IPv4/IPAddressResolver.h \
   ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
-  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Network/IPv4/IPProtocolId_m.h \
   ../../Base/INETDefs.h \
   ../../Network/IPv4/RoutingTable.h

@@ -31,7 +31,7 @@ class RSVPPathMsg : public RSVPPathMsg_Base
     RSVPPathMsg(const char *name=NULL, int kind=PATH_MESSAGE) : RSVPPathMsg_Base(name,kind) {}
     RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other.name()) {operator=(other);}
     RSVPPathMsg& operator=(const RSVPPathMsg& other) {RSVPPathMsg_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPPathMsg(*this);}
+    virtual cObject *dup() const {return new RSVPPathMsg(*this);}
 
     inline IPADDR getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
     inline int getSrcPort() {return getSender_descriptor().Sender_Template_Object.SrcPort;}
@@ -62,7 +62,7 @@ class RSVPPathTear : public RSVPPathTear_Base
     RSVPPathTear(const char *name=NULL, int kind=PTEAR_MESSAGE) : RSVPPathTear_Base(name,kind) {}
     RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other.name()) {operator=(other);}
     RSVPPathTear& operator=(const RSVPPathTear& other) {RSVPPathTear_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPPathTear(*this);}
+    virtual cObject *dup() const {return new RSVPPathTear(*this);}
 
     inline IPADDR getNHOP() {return getHop().Next_Hop_Address;}
     inline int getLIH() {return getHop().Logical_Interface_Handle;}
@@ -83,7 +83,7 @@ class RSVPPathError : public RSVPPathError_Base
     RSVPPathError(const char *name=NULL, int kind=PERROR_MESSAGE) : RSVPPathError_Base(name,kind) {}
     RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other.name()) {operator=(other);}
     RSVPPathError& operator=(const RSVPPathError& other) {RSVPPathError_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPPathError(*this);}
+    virtual cObject *dup() const {return new RSVPPathError(*this);}
 
     inline IPADDR getSrcAddress() {return getSender_descriptor().Sender_Template_Object.SrcAddress;}
     inline int getSrcPort() {return getSender_descriptor().Sender_Template_Object.SrcPort;}

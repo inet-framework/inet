@@ -31,7 +31,7 @@ class RSVPResvMsg : public RSVPResvMsg_Base
     RSVPResvMsg(const char *name=NULL, int kind=RESV_MESSAGE) : RSVPResvMsg_Base(name,kind) {}
     RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other.name()) {operator=(other);}
     RSVPResvMsg& operator=(const RSVPResvMsg& other) {RSVPResvMsg_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPResvMsg(*this);}
+    virtual cObject *dup() const {return new RSVPResvMsg(*this);}
 
     inline IPADDR getNHOP() {return getHop().Next_Hop_Address;}
     inline int getLIH() {return getHop().Logical_Interface_Handle;}
@@ -52,7 +52,7 @@ class RSVPResvTear : public RSVPResvTear_Base
     RSVPResvTear(const char *name=NULL, int kind=RTEAR_MESSAGE) : RSVPResvTear_Base(name,kind) {}
     RSVPResvTear(const RSVPResvTear& other) : RSVPResvTear_Base(other.name()) {operator=(other);}
     RSVPResvTear& operator=(const RSVPResvTear& other) {RSVPResvTear_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPResvTear(*this);}
+    virtual cObject *dup() const {return new RSVPResvTear(*this);}
 
     inline IPADDR getNHOP() {return getHop().Next_Hop_Address;}
     inline int getLIH() {return getHop().Logical_Interface_Handle;}
@@ -74,7 +74,7 @@ class RSVPResvError : public RSVPResvError_Base
     RSVPResvError(const char *name=NULL, int kind=RERROR_MESSAGE) : RSVPResvError_Base(name,kind) {}
     RSVPResvError(const RSVPResvError& other) : RSVPResvError_Base(other.name()) {operator=(other);}
     RSVPResvError& operator=(const RSVPResvError& other) {RSVPResvError_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPResvError(*this);}
+    virtual cObject *dup() const {return new RSVPResvError(*this);}
 
     inline IPADDR getNHOP() {return getHop().Next_Hop_Address;}
     inline int getLIH() {return getHop().Logical_Interface_Handle;}

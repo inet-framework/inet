@@ -155,7 +155,7 @@ TCPVirtualDataSendQueue.obj: TCPVirtualDataSendQueue.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -202,7 +202,7 @@ TCPConnectionBase.obj: TCPConnectionBase.cc \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   TCPSegment_m.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Network/IPv4/IPProtocolId_m.h
 TCPConnectionEventProc.obj: TCPConnectionEventProc.cc \
   TCPMain.h \
   TCPConnection.h \
@@ -215,7 +215,7 @@ TCPConnectionEventProc.obj: TCPConnectionEventProc.cc \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   TCPSegment_m.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Network/IPv4/IPProtocolId_m.h
 TCPConnectionRcvSegment.obj: TCPConnectionRcvSegment.cc \
   TCPMain.h \
   TCPConnection.h \
@@ -228,7 +228,7 @@ TCPConnectionRcvSegment.obj: TCPConnectionRcvSegment.cc \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   TCPSegment_m.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Network/IPv4/IPProtocolId_m.h
 TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   TCPMain.h \
   TCPConnection.h \
@@ -241,7 +241,7 @@ TCPConnectionUtil.obj: TCPConnectionUtil.cc \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   TCPSegment_m.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Network/IPv4/IPProtocolId_m.h
 TCPDump.obj: TCPDump.cc \
   TCPDump.h \
   ../../Network/IPv4/IPControlInfo_m.h \
@@ -249,6 +249,7 @@ TCPDump.obj: TCPDump.cc \
   ../../Network/IPv4/IPDatagram_m.h \
   TCPSegment.h \
   ../../Base/INETDefs.h \
+  ../../Network/IPv4/IPProtocolId_m.h \
   TCPSegment_m.h
 TCPMain.obj: TCPMain.cc \
   TCPMain.h \
@@ -260,7 +261,7 @@ TCPMain.obj: TCPMain.cc \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   TCPSegment_m.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Network/IPv4/IPProtocolId_m.h
 TCPMsgBasedRcvQueue.obj: TCPMsgBasedRcvQueue.cc \
   TCPMsgBasedRcvQueue.h \
   TCPSegment.h \

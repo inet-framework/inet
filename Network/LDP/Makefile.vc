@@ -111,7 +111,7 @@ NewLDP.obj: NewLDP.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -155,4 +155,5 @@ NewLDP.obj: NewLDP.cc \
   ../../Transport/TCP/TCPCommand_m.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
+  ../IPv4/IPDatagram_m.h \
+  ../IPv4/IPProtocolId_m.h

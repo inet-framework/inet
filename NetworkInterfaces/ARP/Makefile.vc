@@ -109,7 +109,7 @@ ARP.obj: ARP.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -143,6 +143,7 @@ ARP.obj: ARP.cc \
   ../Ethernet/EtherMAC.h \
   ../_802/MACAddress.h \
   ../Ethernet/Ethernet.h \
+  ../../Network/IPv4/IPProtocolId_m.h \
   ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
   ../Ethernet/EtherFrame_m.h \
