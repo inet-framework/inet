@@ -84,6 +84,7 @@ void RSVP::activity()
     while (true)
     {
         msg = receive();
+        delete msg->removeControlInfo();
 
         // if (!(strcmp(msg->arrivalGate()->name(), "from_rsvp_app")))
         //     send(msg, "to_ip");

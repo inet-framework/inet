@@ -65,7 +65,7 @@ module RSVP_LSR_Node
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "b=32,30;p=192,163;i=fork";
+            display: "p=192,163;i=fork";
         ppp: PPPInterface[sizeof(out)];
             display: "p=88,297,row,90;q=queue;i=iface";
         mplsModule: MPLSModule;

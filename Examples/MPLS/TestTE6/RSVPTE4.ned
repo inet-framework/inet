@@ -81,12 +81,12 @@ module RSVPTE4
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=482,96;i=server1";
+            display: "p=500,96;i=server1";
         host4: StandardHost2;  // server
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=602,248;i=server1";
+            display: "p=500,248;i=server1";
         ted: TED;
             parameters:
                moduleTypes = "StandardHost2 RSVP_LSR_Node";

@@ -37,13 +37,9 @@ module LSRNode
         peerNo : numeric,
         isIR : bool,
         isER : bool,
-
-        //# Network information
         routingFile : string,
         LibTableFileName : string,
         PrtTableFileName : string;
-        //#discoveryAddr: string[];
-        //#numOfAddr: int;
     gates:
         in: in[];
         out: out[];
