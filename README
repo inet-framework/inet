@@ -8,9 +8,34 @@ Ethernet, PPP and MPLS with LDP and RSVP-TE signalling. See the CREDITS file
 for the names of people involved in the development.
 
 
+GETTING STARTED
+---------------
+You may start by downloading and installing the INET demo on Windows.
+
+Then you can gather initial experience by following the INET tutorial. After
+that, you can learn the NED language from the OMNeT++ manual & sample
+simulations.
+
+After that, you may write your own topologies using the NED language. You may
+assign some of the submodule parameters in NED files. You may leave some of
+them unassigned.
+
+Then, you may assign unassigned module parameters in omnetpp.ini of your
+simulation. (You can refer to sample simulations & manual for the content of
+omnetpp.ini)
+
+Finally, you will be ready to run your simulation. As you see, you may use
+the INET framework without writing any C++ code, as long as you use the
+available modules.
+
+Finally, to implement new protocols or modify existing ones, you'll need to
+download the INET source, compile it yourself, then start adding/modifying
+source files yourself.
+
+
 Directory structure
 -------------------
-Directories are arranged roughly along the OSI layers.
+Directories of INET framework source are arranged roughly along the OSI layers.
 
 Bottom-up:
 
