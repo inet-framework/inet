@@ -36,7 +36,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  Socketv4 TCPv4 UDPv4
+SUBDIRS=  Socket TCP UDP
 
 # object files in this directory
 OBJS=   
@@ -53,14 +53,14 @@ purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile
 
 subdirs: $(SUBDIRS)
 
-Socketv4:
-	cd Socketv4 && $(MAKE)
+Socket:
+	cd Socket && $(MAKE)
 
-TCPv4:
-	cd TCPv4 && $(MAKE)
+TCP:
+	cd TCP && $(MAKE)
 
-UDPv4:
-	cd UDPv4 && $(MAKE)
+UDP:
+	cd UDP && $(MAKE)
 
 
 doc: neddoc doxy

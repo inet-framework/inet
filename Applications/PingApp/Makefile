@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= PingApp_n.o  PingApp.o 
+OBJS= PingApp_n.o  PingApp.o
 
 #------------------------------------------------------------------------------
 
@@ -98,4 +98,3 @@ PingApp.o: PingApp.cc \
   ../../Util/ProcessorAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Network/IPv4/Core/ip_address.h
-PingApp_n.o: PingApp_n.cc

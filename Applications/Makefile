@@ -36,7 +36,7 @@ include ../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  Generic PingApp TCPApp TCPExample
+SUBDIRS=  Generic PingApp TCPApp
 
 # object files in this directory
 OBJS=   
@@ -61,9 +61,6 @@ PingApp:
 
 TCPApp:
 	cd TCPApp && $(MAKE)
-
-TCPExample:
-	cd TCPExample && $(MAKE)
 
 
 doc: neddoc doxy

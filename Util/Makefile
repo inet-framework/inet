@@ -39,7 +39,7 @@ include ../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ProcessorManager_n.o  ProcessorAccess.o ProcessorManager.o 
+OBJS= ProcessorManager_n.o  ProcessorAccess.o ProcessorManager.o
 
 #------------------------------------------------------------------------------
 
@@ -98,4 +98,3 @@ ProcessorAccess.o: ProcessorAccess.cc \
 ProcessorManager.o: ProcessorManager.cc \
   ProcessorManager.h \
   basic_consts.h
-ProcessorManager_n.o: ProcessorManager_n.cc

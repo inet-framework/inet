@@ -57,23 +57,23 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 OBJS= 
 
 # subdirectories to recurse into
-SUBDIRS= Socketv4 TCPv4 UDPv4
+SUBDIRS= Socket TCP UDP
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: Socketv4_dir TCPv4_dir UDPv4_dir
+subdirs: Socket_dir TCP_dir UDP_dir
 
-Socketv4_dir:
-	cd Socketv4 && cd && nmake /nologo /f Makefile.vc
+Socket_dir:
+	cd Socket && cd && nmake /nologo /f Makefile.vc
 
-TCPv4_dir:
-	cd TCPv4 && cd && nmake /nologo /f Makefile.vc
+TCP_dir:
+	cd TCP && cd && nmake /nologo /f Makefile.vc
 
-UDPv4_dir:
-	cd UDPv4 && cd && nmake /nologo /f Makefile.vc
+UDP_dir:
+	cd UDP && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy

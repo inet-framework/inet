@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TrafficGen_n.o  AppIn.o BurstGenerator.o ConstTrafficGen.o SimpleApp.o 
+OBJS= TrafficGen_n.o  AppIn.o BurstGenerator.o ConstTrafficGen.o SimpleApp.o
 
 #------------------------------------------------------------------------------
 
@@ -137,4 +137,3 @@ SimpleApp.o: SimpleApp.cc \
   ../../Util/ProcessorAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Network/IPv4/Core/ip_address.h
-TrafficGen_n.o: TrafficGen_n.cc

@@ -57,14 +57,14 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 OBJS= 
 
 # subdirectories to recurse into
-SUBDIRS= Generic PingApp TCPApp TCPExample
+SUBDIRS= Generic PingApp TCPApp
 
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: Generic_dir PingApp_dir TCPApp_dir TCPExample_dir
+subdirs: Generic_dir PingApp_dir TCPApp_dir
 
 Generic_dir:
 	cd Generic && cd && nmake /nologo /f Makefile.vc
@@ -74,9 +74,6 @@ PingApp_dir:
 
 TCPApp_dir:
 	cd TCPApp && cd && nmake /nologo /f Makefile.vc
-
-TCPExample_dir:
-	cd TCPExample && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy
