@@ -616,6 +616,13 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         state->irs = tcpseg->sequenceNo();
         receiveQueue->init(state->rcv_nxt);   // FIXME may init twice...
         selectInitialSeqNum();
+
+        // although not mentioned in RFC 793, seems like we have to pick up
+        // initial snd_wnd from the segment here.
+        state->snd_wnd = tcpseg->window();
+        state->snd_wl1 = tcpseg->sequenceNo();
+        state->snd_wl2 = state->iss;
+
         sendSynAck();
         startSynRexmitTimer();
         if (!connEstabTimer->isScheduled())
@@ -728,9 +735,8 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
             state->snd_una = tcpseg->ackNo();
             sendQueue->discardUpTo(state->snd_una);
 
-            // although not mentioned in RFC 793, seems like we have to update
-            // our snd_wnd from the segment here.
-            tcpEV << "Updating send window from SYN+ACK segment: wnd="<< tcpseg->window() << "\n";
+            // although not mentioned in RFC 793, seems like we have to pick up
+            // initial snd_wnd from the segment here.
             state->snd_wnd = tcpseg->window();
             state->snd_wl1 = tcpseg->sequenceNo();
             state->snd_wl2 = tcpseg->ackNo();
