@@ -55,14 +55,14 @@ const int DEFAULT_HEADER_LENGTH = 20;
 const int MAX_HEADER_LENGTH = 64;
 
 // option entry number
-const int MAX_IPADDR_OPTION_ENTRIES = 9;
-const int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
+const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;
+const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 }};
 
 
 //
-// IP options. Beware: these are not the "official" codes!!!
+// IP options. Beware: these are not the "official" (RFC) codes!
 //
 enum IPOption
 {
