@@ -53,17 +53,36 @@ void NewLDP::initialize()
     scheduleAt(1, sendHelloMsg);
 }
 
+void NewLDP::handleMessage(cMessage *msg)
+{
+    if (msg==sendHelloMsg)
+    {
+        broadcastHello();
+    }
+    else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
+    {
+        processLDPHelloReply(msg);
+    }
+    else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+    {
+        processRequestFromMPLSSwitch(msg);
+    }
+    else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
+    {
+        processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
+    }
+}
+
 void NewLDP::broadcastHello()
 {
     // send LDP Hello on every output interface
 
     // Each LDP capable router sends HELLO messages to a multicast address to all
     // of routers in the sub-network
+// FIXME to ALL interfaces!!!!
     cMessage *helloMsg = new cMessage("ldp-broadcast-request");
-
     helloMsg->setKind(0);
     helloMsg->addPar("peerID") = id.c_str();
-
     send(helloMsg, "to_udp_interface");
 
 
@@ -81,18 +100,20 @@ void NewLDP::processLDPHelloReply(cMessage *msg)
     ev << "LSR(" << IPAddress(local_addr) << "): " <<
         "received multicast from " << IPAddress(anAddr) << "\n";
 
-    peer_info info;
+    // peer already in table?
+    PeerVector::iterator i;
+    for (i=myPeers.begin(); i!=myPeers.end(); ++i)
+        if (i->peerIP==anAddr)
+            break;
+    if (i!=myPeers.end())
+        return;
 
+    // not in table, add it
+    peer_info info;
     info.peerIP = anAddr;
     info.linkInterface = anInterface;
     info.peerID = anID;
-
-    if (anAddr > local_addr)
-        info.role = string("Client");
-    else
-        info.role = string("Server");
-
-    // add to peer table
+    info.role = string(anAddr>local_addr ? "Client" : "Server");
     myPeers.push_back(info);
 
     // initiate connection to peer
@@ -102,23 +123,6 @@ void NewLDP::processLDPHelloReply(cMessage *msg)
 void NewLDP::openTCPConnectionToPeer(IPAddress addr)
 {
 }
-
-void NewLDP::handleMessage(cMessage *msg)
-{
-    if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
-    {
-        processLDPHelloReply(msg);
-    }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
-    {
-        processRequestFromMPLSSwitch(msg);
-    }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
-    {
-        processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
-    }
-}
-
 
 void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 {
@@ -137,13 +141,13 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     // the same FEC.
 
     int i;
-    for (i = 0; i < FecSenderBinds.size(); i++)
+    for (i = 0; i < fecSenderBinds.size(); i++)
     {
-        if (FecSenderBinds[i].fec == fecInt)
+        if (fecSenderBinds[i].fec == fecInt)
             break;
     }
 
-    if (i == FecSenderBinds.size())  // There is no previous same requests
+    if (i == fecSenderBinds.size())  // There is no previous same requests
     {
 
         fec_src_bind newBind;
@@ -151,7 +155,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
         newBind.fromInterface = fromInterface;
         newBind.fecID = fecId;
 
-        FecSenderBinds.push_back(newBind);
+        fecSenderBinds.push_back(newBind);
 
         // Genarate new LABEL REQUEST and send downstream
 
@@ -341,19 +345,19 @@ void NewLDP::processLABEL_REQUEST(LabelRequestMessage * packet)
     string nextInterface = findInterfaceFromPeerAddr(fec);
 
     int i;
-    for (i = 0; i < FecSenderBinds.size(); i++)
+    for (i = 0; i < fecSenderBinds.size(); i++)
     {
-        if (FecSenderBinds[i].fec == fec)
+        if (fecSenderBinds[i].fec == fec)
             break;
     }
 
-    if (i == FecSenderBinds.size())
+    if (i == fecSenderBinds.size())
     {
         // New request
         fec_src_bind newBind;
         newBind.fec = fec;
         newBind.fromInterface = fromInterface;
-        FecSenderBinds.push_back(newBind);
+        fecSenderBinds.push_back(newBind);
     }
     else
         return;  // Do nothing it is repeated request
@@ -469,15 +473,15 @@ void NewLDP::processLABEL_MAPPING(LabelMappingMessage * packet)
         int myfecID = -1;
 
         // Install new label
-        for (int k = 0; k < FecSenderBinds.size(); k++)
+        for (int k = 0; k < fecSenderBinds.size(); k++)
         {
-            if (FecSenderBinds[k].fec == fec)
+            if (fecSenderBinds[k].fec == fec)
             {
-                myfecID = FecSenderBinds[k].fecID;
+                myfecID = fecSenderBinds[k].fecID;
                 signalMPLS->addPar("fec") = myfecID;
-                inInterface = FecSenderBinds[k].fromInterface;
+                inInterface = fecSenderBinds[k].fromInterface;
                 // Remove the item
-                FecSenderBinds.erase(FecSenderBinds.begin() + k);
+                fecSenderBinds.erase(fecSenderBinds.begin() + k);
 
                 break;
             }
@@ -492,13 +496,13 @@ void NewLDP::processLABEL_MAPPING(LabelMappingMessage * packet)
     else
     {
         // Install new label
-        for (int k = 0; k < FecSenderBinds.size(); k++)
+        for (int k = 0; k < fecSenderBinds.size(); k++)
         {
-            if (FecSenderBinds[k].fec == fec)
+            if (fecSenderBinds[k].fec == fec)
             {
-                inInterface = FecSenderBinds[k].fromInterface;
+                inInterface = fecSenderBinds[k].fromInterface;
                 // Remove the item
-                FecSenderBinds.erase(FecSenderBinds.begin() + k);
+                fecSenderBinds.erase(fecSenderBinds.begin() + k);
                 break;
             }
         }

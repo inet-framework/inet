@@ -25,6 +25,7 @@
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
 #include "RoutingTableAccess.h"
+#include "TCPSocketMap.h"
 
 
 /**
@@ -55,17 +56,23 @@ class NewLDP: public cSimpleModule
 
     // the collection of all label requests pending on the current LSR
     // from upstream LSRs and itself.
-    vector<fec_src_bind> FecSenderBinds;
+    typedef vector<fec_src_bind> FecSenderBindVector;
+    FecSenderBindVector fecSenderBinds;
 
     // the collection of all HELLO adjacencies.
-    vector<peer_info> myPeers;
+    typedef vector<peer_info> PeerVector;
+    PeerVector myPeers;
 
     int local_addr;
     string id;
-    double helloTimeout;
+    double helloTimeout;  // FIXME obey
     bool isIR;
     bool isER;
 
+    // holds TCP connections with peers
+    TCPSocketMap socketMap;
+
+    // hello timeout message
     cMessage *sendHelloMsg;
 
   private:

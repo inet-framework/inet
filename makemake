@@ -34,7 +34,7 @@ $MAKEMAKE $OPTS -n -r
 (cd Network/IPv4d && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../../Base -I../../Util)
 (cd Network/AutoRouting && $MAKEMAKE $OPTS -n -r -I../IPv4  -I../../Base -I../../Util)
 (cd Network/MPLS && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Unsupported/TcpModule -I../../Base -I../../Util)
-(cd Network/LDP && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Unsupported/TcpModule -I../../Transport/UDP -I../MPLS -I../../Base -I../../Util)
+(cd Network/LDP && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Unsupported/TcpModule -I../../Transport/UDP -I../../Transport/TCP -I../MPLS -I../../Base -I../../Util)
 (cd Network/RSVP_TE && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Unsupported/TcpModule -I../MPLS -I../../Base -I../../Util)
 
 (cd NetworkInterfaces/PPP && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util -I../../Network/IPv4)
