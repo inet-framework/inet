@@ -28,6 +28,7 @@ TCPSocket::TCPSocket()
     connId = TCPMain::getNewConnId();
     sockstate = NOT_BOUND;
 
+    localPort = -1;
     cb = NULL;
     yourPtr = NULL;
 
@@ -97,9 +98,8 @@ void TCPSocket::listen(bool fork)
 
 void TCPSocket::connect(IPAddress remoteAddr, int remotePort)
 {
-    if (sockstate!=CLOSED)
-        opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before connect()"
-                                       : "TCPSocket::connect(): connect() or listen() already called");
+    if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
+        opp_error( "TCPSocket::connect(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
