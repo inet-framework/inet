@@ -83,7 +83,7 @@ class LDPproc: public cSimpleModule
     int peerNo;
     int local_addr;
     string id;
-    double discoveryTimeout;
+    double helloTimeout;
     bool isIR;
     bool isER;
 

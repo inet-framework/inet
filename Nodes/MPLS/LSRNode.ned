@@ -35,7 +35,7 @@ module LSRNode
         local_addr : string,
         ldpTimeout : numeric,
         ldpKeepAliveTime : numeric,
-        udpInitTimeout : numeric,
+        helloTimeout : numeric,
         peerNo : numeric,
         isIR : bool,
         isER : bool,
@@ -57,7 +57,7 @@ module LSRNode
         signal_module: NewLDP;
             parameters:
                 local_addr = local_addr,
-                udpInitTimeout = udpInitTimeout;
+                helloTimeout = helloTimeout;
             display: "p=190,45;b=40,24";
         tcp: TCPMain;
             display: "p=145,120;i=prot2";

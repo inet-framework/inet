@@ -12,35 +12,27 @@
 *
 *
 *********************************************************************/
+
 #include <omnetpp.h>
 #include <iostream>
 #include <fstream>
 #include "ConstType.h"
-#include "LDPpacket.h"
-#include "tcp.h"
 #include "NewLDP.h"
-#include "RoutingTable.h"
+#include "LIBTable.h"
 #include "MPLSModule.h"
+#include "RoutingTable.h"
+
 
 Define_Module(NewLDP);
 
+
 void NewLDP::initialize()
 {
-    discoveryTimeout = par("udpInitTimeout").doubleValue();
-}
-
-void NewLDP::activity()
-{
-
-/********************************************************************************
-*                                                                               *
-*                                PARAMETERS INTIALISED                          *
-*                                                                               *
-*********************************************************************************/
+    helloTimeout = par("helloTimeout").doubleValue();
 
     // Find its own address, this is important since it needs to notify all neigbour
     // this information in HELLO message.
-
+    local_addr = -1;
     cModule *curmod = this;
     for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
     {
@@ -53,23 +45,20 @@ void NewLDP::activity()
             break;
         }
     }
+    if (local_addr==-1)
+        error("Cannot find local_address");
 
-    ev << "*************" << id.c_str() << " LDP daemon starts*************\n";
+    // schedule first hello
+    sendHelloMsg = new cMessage("LDPSendHello");
+    scheduleAt(1, sendHelloMsg);
+}
 
-    if (local_addr == -1)
-        ev << "Warning - Cannot find my address - Set to 0\n";
-
-/********************************************************************************
-*                                                                               *
-*                                PHASE 1: DISCOVERY                             *
-*                                                                               *
-*********************************************************************************/
-
-    // Discovery - signal UDP
+void NewLDP::broadcastHello()
+{
+    // send LDP Hello on every output interface
 
     // Each LDP capable router sends HELLO messages to a multicast address to all
     // of routers in the sub-network
-
     cMessage *helloMsg = new cMessage("ldp-broadcast-request");
 
     helloMsg->setKind(0);
@@ -77,99 +66,57 @@ void NewLDP::activity()
 
     send(helloMsg, "to_udp_interface");
 
-    // Wait for all replies from peers - MESSAGES from UDP interface
-    int i;
-    for (i = 0; i < peerNo; i++)
+
+    // schedule next hello in 5 minutes
+    scheduleAt(simTime()+300, sendHelloMsg);
+}
+
+
+void NewLDP::processLDPHelloReply(cMessage *msg)
+{
+    int anAddr = IPAddress((msg->par("src_addr").stringValue())).getInt();
+    string anID = string(msg->par("peerID").stringValue());
+    string anInterface = this->findInterfaceFromPeerAddr(anAddr);
+
+    ev << "LSR(" << IPAddress(local_addr) << "): " <<
+        "received multicast from " << IPAddress(anAddr) << "\n";
+
+    peer_info info;
+
+    info.peerIP = anAddr;
+    info.linkInterface = anInterface;
+    info.peerID = anID;
+
+    if (anAddr > local_addr)
+        info.role = string("Client");
+    else
+        info.role = string("Server");
+
+    // add to peer table
+    myPeers.push_back(info);
+
+    // initiate connection to peer
+    openTCPConnectionToPeer(anAddr);
+}
+
+void NewLDP::openTCPConnectionToPeer(IPAddress addr)
+{
+}
+
+void NewLDP::handleMessage(cMessage *msg)
+{
+    if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
     {
-        cMessage *msg = receive();
-        if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
-        {
-            int anAddr = IPAddress((msg->par("src_addr").stringValue())).getInt();
-            string anID = string(msg->par("peerID").stringValue());
-            string anInterface = this->findInterfaceFromPeerAddr(anAddr);
-
-            ev << "LSR(" << IPAddress(local_addr) << "): " <<
-                "get multicast from " << IPAddress(anAddr) << "\n";
-
-            peer_info info;
-
-            info.peerIP = anAddr;
-            info.linkInterface = anInterface;
-            info.peerID = anID;
-
-            if (anAddr > local_addr)
-                info.role = string("Client");
-            else
-                info.role = string("Server");
-
-            // Initialize the table of Hello adjacencies.
-
-            myPeers.push_back(info);
-        }
-        else
-        {
-            ev << "Received non-UDP messages during initialisation, deleting\n";
-            delete msg;
-        }
+        processLDPHelloReply(msg);
     }
-
-/********************************************************************************
-*                                                                                *
-*                                PHASE 2: LDP INIT                                  *
-*                                                                                *
-*********************************************************************************/
-
-    // Problems:  Still looking for away to yeal running priority to other modules. Does
-    // Omnet++ allows any ways to do this ?
-
-    // PHASE 2: Initialisation - Establish LDP/TCP connections
-
-    for (i = 0; i < myPeers.size(); i++)
+    else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
     {
-        int destIP = myPeers[i].peerIP;
-        // signal TCP
-        if (destIP > local_addr)
-        {
-            cMessage *kickOffTCP = new cMessage();
-            kickOffTCP->setKind(0); //LDP_CLIENT_CREATE
-            kickOffTCP->addPar("peerIP") = destIP;
-            // wait(1); // Smooth the sending
-            send(kickOffTCP, "to_tcp_interface");
-        }
-        ev << "LSR(" << IPAddress(local_addr) << "): " <<
-            "opens TCP connection to LSR(" << IPAddress(destIP) << ")\n";
+        processRequestFromMPLSSwitch(msg);
     }
-
-    // Signal the MPLS that it can start making queries
-    ev << "Finished LDP session setup with peers\n";
-    MPLSModule *mplsMod = mplsAccess.get();
-    cMessage *signalMsg = new cMessage();
-    sendDirect(signalMsg, 0.0, mplsMod, "fromSignalModule");
-
-/********************************************************************************
-*                                                                                *
-*                                PHASE 3: LDP OPERATION                          *
-*                                                                                *
-*********************************************************************************/
-
-    // Operation - Exchange and process LDP packets
-
-    // Expect outer host sends packets after the system has been initialised
-
-    for (;;)
+    else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
     {
-        cMessage *msg = receive();
-
-        if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
-        {
-            processRequestFromMPLSSwitch(msg);
-        }
-        else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
-        {
-            processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
-        }
+        processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
     }
-
 }
 
 

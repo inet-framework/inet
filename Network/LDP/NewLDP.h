@@ -21,12 +21,10 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
-#include "tcp.h"
-#include "RoutingTable.h"
 #include "LDPpacket.h"
-#include "LDPInterface.h"
-#include "LIBTableAccess.h"
 #include "MPLSAccess.h"
+#include "LIBTableAccess.h"
+#include "RoutingTableAccess.h"
 
 
 /**
@@ -55,24 +53,22 @@ class NewLDP: public cSimpleModule
     LIBTableAccess libTableAccess;
     MPLSAccess mplsAccess;
 
-    //FecSenderBinds is the collection of all label requests pending on
-    //the current LSR from upstream LSRs and itself.
+    // the collection of all label requests pending on the current LSR
+    // from upstream LSRs and itself.
     vector<fec_src_bind> FecSenderBinds;
 
-    //myPeers is the collection of all HELLO adjacencies.
+    // the collection of all HELLO adjacencies.
     vector<peer_info> myPeers;
 
-    //myOwnFecRequest is the collection of all label requests pending on
-    // the current LSR originated by itself
-    //vector<fec_src_bind> myOwnFecRequest;
-
-    int peerNo;
     int local_addr;
     string id;
-    double discoveryTimeout;
+    double helloTimeout;
     bool isIR;
     bool isER;
 
+    cMessage *sendHelloMsg;
+
+  private:
     /**
      * This method finds next peer in upstream direction
      */
@@ -93,8 +89,12 @@ class NewLDP: public cSimpleModule
     Module_Class_Members(NewLDP,cSimpleModule,16384);
 
     virtual void initialize();
-    virtual void activity();
+    virtual void handleMessage(cMessage *msg);
 
+    void broadcastHello();
+    void openTCPConnectionToPeer(IPAddress addr);
+
+    void processLDPHelloReply(cMessage *msg);
     void processRequestFromMPLSSwitch(cMessage *msg);
     void processLDPPacketFromTCP(LDPpacket *ldpPacket);
 

@@ -42,7 +42,7 @@ simple LDPproc
 
     parameters:
         local_addr : string,
-        udpInitTimeout : numeric,
+        helloTimeout : numeric,
         peerNo : numeric;
 
     gates:

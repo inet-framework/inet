@@ -46,7 +46,7 @@ simple NewLDP
 
     parameters:
         local_addr : string,
-        udpInitTimeout : numeric;
+        helloTimeout : numeric;
 
     gates:
         in: from_mpls_switch;  // receives messages here by direct sending
