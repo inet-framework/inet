@@ -152,15 +152,36 @@ void ARP::processOutboundPacket(cMessage *msg)
         EV << "destination address " << nextHopAddr << " (no next-hop address)\n";
     }
 
-    // multicast destinations are passed through without ARP resolution, and
-    // sent to the Broadcast MAC address
-    // FIXME according to RFCs, we should do this: "An IP host group address is mapped to an Ethernet multicast address by placing the low-order 23 bits of the IP address into the low-order 23 bits of the Ethernet multicast address 01-00-5E-00-00-00 (hex). Because there are 28 significant bits in an IP host group address, more than one host group address may map to the same Ethernet multicast address." 
+    //
+    // Handle multicast IP addresses. RFC 1112, section 6.4 says:
+    // "An IP host group address is mapped to an Ethernet multicast address
+    // by placing the low-order 23 bits of the IP address into the low-order
+    // 23 bits of the Ethernet multicast address 01-00-5E-00-00-00 (hex).
+    // Because there are 28 significant bits in an IP host group address,
+    // more than one host group address may map to the same Ethernet multicast
+    // address."
+    //
     if (nextHopAddr.isMulticast())
     {
+        // FIXME: we do a simpler solution right now: send to the Broadcast MAC address
         EV << "destination address is multicast, sending packet to broadcast MAC address\n";
-        static MACAddress broadcastAddr("FFFFFFFFFFFF");
+        static MACAddress broadcastAddr("FF:FF:FF:FF:FF:FF");
         sendPacketToMAC(msg, broadcastAddr);
         return;
+#if 0
+        // experimental RFC 1112 code:
+        unsigned char macBytes[6];
+        macBytes[0] = 0x01;
+        macBytes[1] = 0x00;
+        macBytes[2] = 0x5e;
+        macBytes[3] = nextHopAddr.getDByte(1) & 0x7f;
+        macBytes[4] = nextHopAddr.getDByte(2);
+        macBytes[5] = nextHopAddr.getDByte(3);
+        MACAddress multicastMacAddr;
+        multicastMacAddr.setAddressBytes(bytes);
+        sendPacketToMAC(msg, multicastMacAddr);
+        return;
+#endif
     }
 
     // try look up
