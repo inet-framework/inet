@@ -6,7 +6,7 @@
 # The command is:  opp_makemake -f --genconfig omnetppconfig
 #
 
-ROOT=$(HOME)/IPSuite-cvs
+ROOT=$(HOME)/IPSuite
 
 include $(ROOT)/omnetppconfig
 

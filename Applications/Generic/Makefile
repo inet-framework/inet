@@ -117,27 +117,37 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 BurstGenerator.o: BurstGenerator.cc \
   BurstGenerator.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
   ../../Network/IPv4/ICMP.h \
   ../../Base/basic_consts.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../../Network/IPv4/ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/IPAddress.h
+  ../../Network/IPv4/ICMPMessage_m.h
 ConstTrafficGen.o: ConstTrafficGen.cc \
   ConstTrafficGen.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
   ../../Network/IPv4/ICMP.h \
   ../../Base/basic_consts.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../../Network/IPv4/ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/IPAddress.h
+  ../../Network/IPv4/ICMPMessage_m.h
 SinkApp.o: SinkApp.cc \
   SinkApp.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
-  ../../Base/basic_consts.h
+  ../../Base/basic_consts.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Base/ipsuite_defs.h

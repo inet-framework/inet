@@ -130,8 +130,10 @@ UDPPacket_m.o: UDPPacket_m.cc \
 UDPProcessing.o: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   UDPPacket_m.h \
   UDPControlInfo_m.h \
   ../../Base/basic_consts.h \
   ../../Network/IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/ipsuite_defs.h \
+  ../../Network/IPv4/IPDatagram_m.h

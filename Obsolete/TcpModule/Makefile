@@ -132,7 +132,9 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 Ip2Tcp.o: Ip2Tcp.cc \
   TransportPacket.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ipsuite_defs.h
 pcb.o: pcb.cc \
   pcb.h \
@@ -140,7 +142,9 @@ pcb.o: pcb.cc \
   ../../Base/ipsuite_defs.h
 Tcp2Ip.o: Tcp2Ip.cc \
   TransportPacket.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ipsuite_defs.h
 tcpmodule.o: tcpmodule.cc \
   tcp.h

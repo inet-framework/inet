@@ -43,6 +43,12 @@ OBJS=
 GENERATEDHEADERS= 
 
 #------------------------------------------------------------------------------
+# contents of file makefrag:
+
+all : $(TARGET)
+	chmod +x rundemo
+
+#------------------------------------------------------------------------------
 
 $(TARGET): $(OBJS) subdirs Makefile .tstamp
 	@# do nothing

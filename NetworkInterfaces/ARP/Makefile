@@ -120,11 +120,13 @@ ARP.o: ARP.cc \
   ../../Network/IPv4/IPAddress.h \
   ARPPacket_m.h \
   ../Ethernet/EtherCtrl_m.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPDatagram.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../_802/MACAddress.h \
   ../_802/MACAddress_m.h \
   ../Ethernet/Ethernet.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/RoutingTable.h
 ARPPacket_m.o: ARPPacket_m.cc \

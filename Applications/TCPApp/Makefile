@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  TCPSessionApp.o
+OBJS=  TCPEchoApp.o TCPSessionApp.o TCPSinkApp.o TCPSrvHostApp.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -68,8 +68,17 @@ $(EXT_DIR_TSTAMPS):
 
 subdirs: $(SUBDIRS)
 
+TCPEchoApp.o: TCPEchoApp.cc
+	$(CXX) -c $(COPTS) TCPEchoApp.cc
+
 TCPSessionApp.o: TCPSessionApp.cc
 	$(CXX) -c $(COPTS) TCPSessionApp.cc
+
+TCPSinkApp.o: TCPSinkApp.cc
+	$(CXX) -c $(COPTS) TCPSinkApp.cc
+
+TCPSrvHostApp.o: TCPSrvHostApp.cc
+	$(CXX) -c $(COPTS) TCPSrvHostApp.cc
 
 
 #doc: neddoc doxy
@@ -109,8 +118,28 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-TCPSessionApp.o: TCPSessionApp.cc \
+TCPEchoApp.o: TCPEchoApp.cc \
+  TCPEchoApp.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h
+TCPSessionApp.o: TCPSessionApp.cc \
+  TCPSessionApp.h \
+  ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h
+TCPSinkApp.o: TCPSinkApp.cc \
+  TCPSinkApp.h \
+  ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h
+TCPSrvHostApp.o: TCPSrvHostApp.cc \
+  TCPSrvHostApp.h \
+  ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPSocketMap.h \
   ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
