@@ -13,6 +13,8 @@
 
 
 #include "TCPEchoApp.h"
+#include "TCPSocket.h"
+#include "TCPCommand_m.h"
 
 
 Define_Module(TCPEchoApp);

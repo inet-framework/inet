@@ -28,7 +28,7 @@ void TCPServerApp::initialize()
         error("module type serverProcess=`%s' not found", serverProcTypeName);
 
     serverSocket.setOutputGate(gate("tcpOut"));
-    socket.bind(address[0] ? IPAddress(address) : IPAddress(), port);
+    serverSocket.bind(address[0] ? IPAddress(address) : IPAddress(), port);
     serverSocket.listen(true);
 }
 

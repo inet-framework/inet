@@ -30,6 +30,8 @@ class TCPEchoApp : public cSimpleModule
     long bytesRcvd;
     long bytesSent;
 
+    void sendOrSchedule(cMessage *msg);
+
   public:
     Module_Class_Members(TCPEchoApp, cSimpleModule, 0);
     virtual void initialize();

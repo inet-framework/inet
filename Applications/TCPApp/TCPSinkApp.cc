@@ -13,6 +13,8 @@
 
 
 #include "TCPSinkApp.h"
+#include "TCPSocket.h"
+#include "TCPCommand_m.h"
 
 
 Define_Module(TCPSinkApp);
