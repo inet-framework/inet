@@ -26,6 +26,7 @@
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
+//
 //    1. assign \IP addresses to hosts and routers. All hosts and
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces

@@ -123,20 +123,17 @@ class IPSourceRoutingOption
 
 
 //
-//  used existing fields:
-//  length () / setLength(err)  in bits
-//  hasBitError() / setBitError()
-//  kind() always set to MK_PACKET
-//  timestamp() / setTimestamp (simtime) used in timestamp option
+// Represents an IP datagram.
 //
-//  void *context / contextPointer() / setContextPointer (*void)
-//  currently optional
+// Uses the following cMessage fields:
+//    - length () / setLength(err)  in bits
+//    - hasBitError() / setBitError()
+//    - timestamp() / setTimestamp (simtime) used in timestamp option
 //
-//  additional length fields defined in this class
-//  use the unit bytes (totalLength()=length()/8 and header_length) or
-//  8 bytes (fragment_offset)
+// Additional length fields defined in this class are in bytes
+// (totalLength()=length()/8 and header_length), or 8 bytes (fragment_offset).
 //
-//# FIXME add method lengthBytes() {return length()/8;} to some base class
+// Only only one of the option fields can exist at a time.
 //
 message IPDatagram
 {
@@ -144,7 +141,7 @@ message IPDatagram
         omitGetVerb = true;
     fields:
         short version = 4;
-        short headerLength = DEFAULT_HEADER_LENGTH;  // FIXME set automatically!
+        short headerLength = DEFAULT_HEADER_LENGTH;
         unsigned char diffServCodePoint;
 
         int identification;
@@ -157,8 +154,7 @@ message IPDatagram
         IPAddress srcAddress;
         IPAddress destAddress;
 
-        // option fields in IP header -- FIXME only one of the option fields can exist at a time
-        int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  // FIXME modify header length when options are present
+        int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
         IPRecordRouteOption recordRoute;
         IPTimestampOption timestampOption;
         IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
@@ -187,9 +183,9 @@ message IPDatagram
 //void IPDatagram::setOptionHeaderLength()
 //{
 //
-//	// HeaderLength is set automatically to maximum with option
-//	setLength(length() - headerLength()*8);
-//	header_length = MAX_HEADER_LENGTH;
-//	setLength(length() + headerLength()*8);
+//      // HeaderLength is set automatically to maximum with option
+//      setLength(length() - headerLength()*8);
+//      header_length = MAX_HEADER_LENGTH;
+//      setLength(length() + headerLength()*8);
 //}
 //

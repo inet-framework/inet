@@ -43,6 +43,7 @@
 // - ICMP (1) : 2
 // - IGMP (2) : 3
 // - \RSVP (46) : 4
+//
 // That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
 //
 // @see IPProcessing

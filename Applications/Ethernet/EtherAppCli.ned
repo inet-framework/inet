@@ -18,7 +18,7 @@
 
 //
 // Simple traffic generator for the Ethernet model; generates EtherAppReq
-// packets.
+// packets. It should be connected directly to EtherLLC.
 //
 // Destination may be given with OMNeT++ path name or MAC address.
 //
