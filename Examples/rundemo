@@ -209,7 +209,7 @@ proc showDemo {sample} {
 
    set f .sel.c.f
    foreach i $samples {
-        if {$db($i,type)=="readme" ||$db($i,type)=="program"} {
+        if {$db($i,type)=="readme" || $db($i,type)=="docu" || $db($i,type)=="program"} {
             $f.$i config -relief raised -bg $colors(unselbutton)
         }
    }
