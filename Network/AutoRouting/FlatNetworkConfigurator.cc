@@ -56,14 +56,14 @@ void FlatNetworkConfigurator::initialize(int stage)
     nodeAddresses.resize(topo.nodes());
 
     int i;
-    int hostCtr = 0;
+    int numIPNodes = 0;
     for (i=0; i<topo.nodes(); i++)
     {
         // skip bus types
         if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(i)->module()->className())!=nonIPTypes.end())
             continue;
 
-        uint32 addr = networkAddress | uint32(++hostCtr);
+        uint32 addr = networkAddress | uint32(++numIPNodes);
         nodeAddresses[i] = addr;
 
         // find interface table and assign address to all (non-loopback) interfaces
@@ -170,6 +170,11 @@ void FlatNetworkConfigurator::initialize(int stage)
             rt->addRoutingEntry(e);
         }
     }
+
+    // update display string
+    char buf[80];
+    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.nodes()-numIPNodes);
+    displayString().setTagArg("t",0,buf);
 
 }
 

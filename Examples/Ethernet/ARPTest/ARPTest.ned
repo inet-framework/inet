@@ -22,7 +22,7 @@ import
 module ARPTest
     submodules:
         server: StandardHost2;
-            display: "p=480,198;i=server1";
+            display: "p=480,198;i=server1_l";
         router8: Router;
             display: "p=478,100;i=srouter";
         router7: Router;

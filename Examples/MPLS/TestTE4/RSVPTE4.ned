@@ -94,28 +94,27 @@ module RSVPTE4
                 timeOut = 100;
             display: "p=309,363;b=40,24";
     connections nocheck:
-        host1.in[0] <-- delay 0 error 0 datarate 700 <-- LSR1.out[0];
-        host1.out[0] --> delay 0 error 0 datarate 700 --> LSR1.in[0];
+        host1.in[0] <-- delay 0ms datarate 700 <-- LSR1.out[0];
+        host1.out[0] --> delay 0ms datarate 700 --> LSR1.in[0];
 
-        LSR1.out[2] --> delay 5 error 0 datarate 600 --> LSR2.in[0];
-        LSR1.in[2] <-- delay 5 error 0 datarate 600 <-- LSR2.out[0];
+        LSR1.out[2] --> delay 5ms datarate 600 --> LSR2.in[0];
+        LSR1.in[2] <-- delay 5ms datarate 600 <-- LSR2.out[0];
 
-        LSR1.out[3] --> delay 25 error 0 datarate 120 --> LSR3.in[0];
-        LSR1.in[3] <-- delay 25 error 0 datarate 120 <-- LSR3.out[0];
+        LSR1.out[3] --> delay 25ms datarate 120 --> LSR3.in[0];
+        LSR1.in[3] <-- delay 25ms datarate 120 <-- LSR3.out[0];
 
-        LSR2.out[2] --> delay 5 error 0 datarate 60 --> LSR4.in[0];
-        LSR2.in[2] <-- delay 5 error 0 datarate 60 <-- LSR4.out[0];
+        LSR2.out[2] --> delay 5ms datarate 60 --> LSR4.in[0];
+        LSR2.in[2] <-- delay 5ms datarate 60 <-- LSR4.out[0];
+
+        LSR3.out[1] --> delay 5ms datarate 200 --> LSR4.in[1];
+        LSR3.in[1] <-- delay 5ms datarate 200 <-- LSR4.out[1];
+
+        LSR4.out[2] --> delay 5ms datarate 150 --> LSR5.in[0];
+        LSR4.in[2] <-- delay 5ms datarate 150 <-- LSR5.out[0];
 
 
-        LSR3.out[1] --> delay 5 error 0 datarate 200 --> LSR4.in[1];
-        LSR3.in[1] <-- delay 5 error 0 datarate 200 <-- LSR4.out[1];
-
-        LSR4.out[2] --> delay 5 error 0 datarate 150 --> LSR5.in[0];
-        LSR4.in[2] <-- delay 5 error 0 datarate 150 <-- LSR5.out[0];
-
-
-        LSR5.out[1] --> delay 0 error 0 datarate 600 --> host3.in[0];
-        LSR5.in[1] <-- delay 10 error 0 datarate 600 <-- host3.out[0];
+        LSR5.out[1] --> delay 0ms datarate 600 --> host3.in[0];
+        LSR5.in[1] <-- delay 10ms datarate 600 <-- host3.out[0];
 
 
 endmodule

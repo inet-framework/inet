@@ -62,6 +62,7 @@ public:
     static TED *getGlobalInstance();
 
     Module_Class_Members(TED, cSimpleModule, 0);
+    virtual ~TED();
 
     virtual int numInitStages() const  {return 4;}
     virtual void initialize(int stage);
@@ -89,7 +90,7 @@ public:
     void printDatabase();
 
     /**
-     * Currently not used.
+     * Dynamically change link bandwidth. Used by testing scenarios.
      */
     void updateLink(simple_link_t* aLink, double metric, double bw);
 };

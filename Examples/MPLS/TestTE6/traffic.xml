@@ -10,7 +10,7 @@
     <setupPri>7</setupPri>
     <holdingPri>7</holdingPri>
     <bandwidth>100</bandwidth>
-    <delay>5</delay>
+    <delay>0.005</delay>
 </conn>
 
 <conn>
@@ -19,10 +19,8 @@
     <setupPri>5</setupPri>
     <holdingPri>6</holdingPri>
     <bandwidth>130</bandwidth>
-    <delay>5</delay>
+    <delay>0.005</delay>
 </conn>
-
-
 
 </traffic>
 

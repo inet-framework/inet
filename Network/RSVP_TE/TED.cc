@@ -43,11 +43,10 @@ std::ostream & operator<<(std::ostream & os, const TELinkState & linkstate)
 TED *TED::getGlobalInstance()
 {
     cModule *m;
-    if (tedModuleId == 0 || dynamic_cast < TED * >(m = simulation.module(tedModuleId)) == NULL)
+    if (tedModuleId==0 || dynamic_cast<TED *>(m = simulation.module(tedModuleId)) == NULL)
         opp_error("TED::getGlobalInstance(): TED module not yet initialized");
     return (TED *) m;
 }
-
 
 void TED::initialize(int stage)
 {
@@ -67,6 +66,10 @@ void TED::initialize(int stage)
     WATCH_VECTOR(ted);
 }
 
+TED::~TED()
+{
+    tedModuleId = 0;
+}
 
 const std::vector < TELinkState > &TED::getTED()
 {
@@ -144,6 +147,10 @@ void TED::buildDatabase()
 
     printDatabase();
 
+    // update display string
+    char buf[80];
+    sprintf(buf, "%d nodes\n%d directed links", topo.nodes(), ted.size());
+    displayString().setTagArg("t",0,buf);
 }
 
 void TED::handleMessage(cMessage *)

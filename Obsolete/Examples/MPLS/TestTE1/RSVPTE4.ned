@@ -78,34 +78,34 @@ module RSVPTE4
                moduleTypes = "StandardHost2 RSVP_LSR_Node";
             display: "p=148,376;b=24,16";
     connections nocheck:
-        host1.in++ <-- delay 0 error 0 datarate 700 <-- LSR1.out++;
-        host1.out++ --> delay 0 error 0 datarate 700 --> LSR1.in++;
+        host1.in++ <-- delay 0ms datarate 700 <-- LSR1.out++;
+        host1.out++ --> delay 0ms datarate 700 --> LSR1.in++;
 
-        host2.in++ <-- delay 0 error 0 datarate 700 <-- LSR1.out++;
-        host2.out++ --> delay 0 error 0 datarate 700 --> LSR1.in++;
+        host2.in++ <-- delay 0ms datarate 700 <-- LSR1.out++;
+        host2.out++ --> delay 0ms datarate 700 --> LSR1.in++;
 
-        LSR1.out++ --> delay 15 error 0 datarate 600 --> LSR2.in++;
-        LSR1.in++ <-- delay 15 error 0 datarate 600 <-- LSR2.out++;
+        LSR1.out++ --> delay 15ms datarate 600 --> LSR2.in++;
+        LSR1.in++ <-- delay 15ms datarate 600 <-- LSR2.out++;
 
-        LSR1.out++ --> delay 5 error 0 datarate 120 --> LSR3.in++;
-        LSR1.in++ <-- delay 5 error 0 datarate 120 <-- LSR3.out++;
+        LSR1.out++ --> delay 5ms datarate 120 --> LSR3.in++;
+        LSR1.in++ <-- delay 5ms datarate 120 <-- LSR3.out++;
 
-        LSR2.out++ --> delay 5 error 0 datarate 600 --> LSR4.in++;
-        LSR2.in++ <-- delay 5 error 0 datarate 600 <-- LSR4.out++;
-
-
-        LSR3.out++ --> delay 5 error 0 datarate 200 --> LSR4.in++;
-        LSR3.in++ <-- delay 5 error 0 datarate 200 <-- LSR4.out++;
-
-        LSR4.out++ --> delay 5 error 0 datarate 700 --> LSR5.in++;
-        LSR4.in++ <-- delay 5 error 0 datarate 700 <-- LSR5.out++;
+        LSR2.out++ --> delay 5ms datarate 600 --> LSR4.in++;
+        LSR2.in++ <-- delay 5ms datarate 600 <-- LSR4.out++;
 
 
-        LSR5.out++ --> delay 0 error 0 datarate 600 --> host3.in++;
-        LSR5.in++ <-- delay 10 error 0 datarate 600 <-- host3.out++;
+        LSR3.out++ --> delay 5ms datarate 200 --> LSR4.in++;
+        LSR3.in++ <-- delay 5ms datarate 200 <-- LSR4.out++;
 
-        LSR5.out++ --> delay 0 error 0 datarate 600 --> host4.in++;
-        LSR5.in++ <-- delay 10 error 0 datarate 600 <-- host4.out++;
+        LSR4.out++ --> delay 5ms datarate 700 --> LSR5.in++;
+        LSR4.in++ <-- delay 5ms datarate 700 <-- LSR5.out++;
+
+
+        LSR5.out++ --> delay 0ms datarate 600 --> host3.in++;
+        LSR5.in++ <-- delay 10ms datarate 600 <-- host3.out++;
+
+        LSR5.out++ --> delay 0ms datarate 600 --> host4.in++;
+        LSR5.in++ <-- delay 10ms datarate 600 <-- host4.out++;
 
 endmodule
 
