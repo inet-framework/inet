@@ -15,30 +15,68 @@
 #include "TelnetApp.h"
 
 
-/** Redefined to schedule a connect(). */
+#define MSGKIND_CONNECT  0
+#define MSGKIND_SEND     1
+#define MSGKIND_CLOSE    2
+
+
 void TelnetApp::initialize()
 {
+    TCPGenericCliAppBase::initialize();
+
+    timeoutMsg = new cMessage("timer");
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt(10, timeoutMsg);
 }
 
 void TelnetApp::handleTimer(cMessage *msg)
 {
+    switch (msg->kind())
+    {
+        case MSGKIND_CONNECT:
+            connect();
+            break;
+        case MSGKIND_SEND:
+           sendPacket(1,1); // type a character and expect to be echoed
+           scheduleAt(simTime()+10, timeoutMsg);
+           break;
+        case MSGKIND_CLOSE:
+           close();
+           break;
+    }
 }
 
-void TelnetApp::socketEstablished(int, void *)
+void TelnetApp::socketEstablished(int connId, void *ptr)
 {
+    TCPGenericCliAppBase::socketEstablished(connId, ptr);
+
+    timeoutMsg->setKind(MSGKIND_SEND);
+    scheduleAt(simTime()+10, timeoutMsg);
 }
 
-void TelnetApp::socketDataArrived(int, void *, cMessage *msg, bool urgent)
+void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 {
+    TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
+
+    timeoutMsg->setKind(MSGKIND_SEND);
+    scheduleAt(simTime()+10, timeoutMsg);
 }
 
-/** Redefined to start another session after a delay. */
-void TelnetApp::socketClosed(int, void *)
+void TelnetApp::socketClosed(int connId, void *ptr)
 {
+    TCPGenericCliAppBase::socketClosed(connId, ptr);
+
+    // start another session after a delay
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt(simTime()+10, timeoutMsg);
 }
 
-/** Redefined to reconnect after a delay. */
-void TelnetApp::socketFailure(int, void *, int)
+void TelnetApp::socketFailure(int connId, void *ptr, int code)
 {
+    TCPGenericCliAppBase::socketFailure(connId, ptr, code);
+
+    // reconnect after a delay
+    timeoutMsg->setKind(MSGKIND_CONNECT);
+    scheduleAt(simTime()+10, timeoutMsg);
 }
 

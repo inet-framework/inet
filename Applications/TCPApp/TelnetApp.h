@@ -23,6 +23,9 @@
  */
 class TelnetApp : public TCPGenericCliAppBase
 {
+  protected:
+    cMessage *timeoutMsg;
+
   public:
     Module_Class_Members(TelnetApp, TCPGenericCliAppBase, 0);
 
