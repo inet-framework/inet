@@ -28,8 +28,10 @@ simple PPPInterface
         frameCapacity: numeric,
         bitCapacity: numeric;
     gates:
-        in: physicalIn, ipOutputQueueIn;
-        out: physicalOut, ipOutputQueueOut, ipInputQueueOut;
+        in: physIn;
+        out: physOut;
+        in: netwIn;
+        out: netwOut;
 endsimple
 
 

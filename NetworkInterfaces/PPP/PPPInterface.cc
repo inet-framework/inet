@@ -57,7 +57,7 @@ void PPPInterface::initialize()
     bitCapacity = par("bitCapacity");
 
     // get the 1st one with transmission rate
-    gateToWatch = gate("physicalOut");
+    gateToWatch = gate("physOut");
     while (gateToWatch)
     {
         // does this gate have data rate?
@@ -78,7 +78,7 @@ void PPPInterface::startTransmitting(cMessage *msg)
     if (ev.isGUI()) displayString().setTagArg("i",1, queue.length()>=3 ? "red" : "yellow");
 
     ev << "Starting transmission of " << pppFrame << endl;
-    send(pppFrame, "physicalOut");
+    send(pppFrame, "physOut");
 
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmission = gateToWatch->transmissionFinishes();
@@ -98,7 +98,7 @@ void PPPInterface::handleMessage(cMessage *msg)
             startTransmitting(msg);
         }
     }
-    else if (msg->arrivedOn("physicalIn"))
+    else if (msg->arrivedOn("physIn"))
     {
         // check for bit errors
         if (msg->hasBitError())
@@ -110,7 +110,7 @@ void PPPInterface::handleMessage(cMessage *msg)
 
         // pass up payload
         cMessage *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
-        send(payload,"ipInputQueueOut");
+        send(payload,"netwOut");
     }
     else // arrived on gate "in"
     {

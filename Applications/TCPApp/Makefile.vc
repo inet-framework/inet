@@ -139,13 +139,16 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 MyTCPClient.obj: MyTCPClient.cc \
   ..\..\Transport\TCP/tcp.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 MyTCPServer.obj: MyTCPServer.cc \
   ..\..\Transport\TCP/tcp.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 mytcpserverproc.obj: mytcpserverproc.cc \
   ..\..\Transport\TCP/tcp.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 procserver.obj: procserver.cc \
   ..\..\Transport\TCP/tcp.h
 TCPClient.obj: TCPClient.cc \

@@ -13,7 +13,6 @@
 
 import
     "Blackboard",
-    "LinkLayer",
     "NetworkLayer",
     "MPLSModule",
     "LIBTable",
@@ -91,9 +90,7 @@ module RSVP_LSR_Node
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "b=32,30;p=192,163;i=fork";
-        netIf: LinkLayer[numOfPorts];
-            parameters:
-                NWIName = "PPPInterface";
+        ppp: LinkLayer[numOfPorts];
             display: "p=88,297,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
@@ -126,11 +123,11 @@ module RSVP_LSR_Node
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
 
         for i=0..numOfPorts-1 do
-            in[i] --> netIf[i].physIn;
-            out[i] <-- netIf[i].physOut;
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
 
-            netIf[i].inputQueueOut --> mplsModule.fromL2[i];
-            netIf[i].outputQueueIn <-- mplsModule.toL2[i];
+            ppp[i].netwOut --> mplsModule.fromL2[i];
+            ppp[i].netwIn <-- mplsModule.toL2[i];
 
             mplsModule.toL3[i] --> networkLayer.physIn[i];
             mplsModule.fromL3[i] <-- networkLayer.physOut[i];

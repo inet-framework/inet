@@ -134,7 +134,8 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ip_address_prefix.obj: ip_address_prefix.cc \
   ip_address_prefix.h \
-  ..\IPv4/IPAddress.h
+  ..\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 LIBtable.obj: LIBtable.cc \
   LIBtable.h \
   ..\..\Util/StringTokenizer.h \
@@ -156,9 +157,9 @@ MPLSModule.obj: MPLSModule.cc \
   ConstType.h \
   ..\IPv4/IPDatagram_m.h \
   ..\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h \
   ..\..\Base/ModuleAccess.h \
   LIBtable.h \
-  ip_address_prefix.h \
-  ..\..\Base/ipsuite_defs.h
+  ip_address_prefix.h
 MPLSPacket.obj: MPLSPacket.cc \
   MPLSPacket.h

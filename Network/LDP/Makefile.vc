@@ -148,10 +148,10 @@ LDPInterface.obj: LDPInterface.cc \
   LDPpacket.h \
   ..\IPv4/IPAddress.h \
   ..\MPLS/ip_address_prefix.h \
+  ..\..\Base/ipsuite_defs.h \
   ..\IPv4/RoutingTable.h \
   ..\MPLS/LIBTableAccess.h \
   ..\MPLS/MPLSAccess.h \
-  ..\..\Base/ipsuite_defs.h \
   ..\..\Base/ModuleAccess.h \
   ..\MPLS/LIBtable.h \
   ..\IPv4/RoutingTableAccess.h \
@@ -162,7 +162,8 @@ LDPInterface.obj: LDPInterface.cc \
 LDPpacket.obj: LDPpacket.cc \
   LDPpacket.h \
   ..\IPv4/IPAddress.h \
-  ..\MPLS/ip_address_prefix.h
+  ..\MPLS/ip_address_prefix.h \
+  ..\..\Base/ipsuite_defs.h
 LDPproc.obj: LDPproc.cc \
   ..\MPLS/ConstType.h \
   LDPpacket.h \
@@ -172,28 +173,31 @@ LDPproc.obj: LDPproc.cc \
   ..\MPLS/MPLSModule.h \
   ..\IPv4/IPAddress.h \
   ..\MPLS/ip_address_prefix.h \
+  ..\..\Base/ipsuite_defs.h \
   LDPInterface.h \
   ..\MPLS/LIBTableAccess.h \
   ..\MPLS/MPLSAccess.h \
   ..\..\Base/ModuleAccess.h \
   ..\MPLS/LIBtable.h \
   ..\IPv4/RoutingTableAccess.h \
-  ..\..\Base/ipsuite_defs.h \
   ..\MPLS/MPLSPacket.h \
   ..\IPv4/IPDatagram.h \
   ..\IPv4/IPDatagram_m.h
 tcpclientproc.obj: tcpclientproc.cc \
   ..\..\Transport\TCP/tcp.h \
   ..\IPv4/IPAddress.h \
-  ..\MPLS/ConstType.h
+  ..\MPLS/ConstType.h \
+  ..\..\Base/ipsuite_defs.h
 tcpserverproc.obj: tcpserverproc.cc \
   ..\..\Transport\TCP/tcp.h \
   ..\MPLS/ConstType.h \
-  ..\IPv4/IPAddress.h
+  ..\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 UDPAppInterface.obj: UDPAppInterface.cc \
   ..\..\Transport\UDP/UDPPacket.h \
   ..\..\Transport\UDP/UDPControlInfo_m.h \
   ..\IPv4/IPControlInfo_m.h \
   ..\IPv4/IPAddress.h \
   ..\..\Transport\UDP/UDPPacket_m.h \
-  ..\IPv4/IPDatagram_m.h
+  ..\IPv4/IPDatagram_m.h \
+  ..\..\Base/ipsuite_defs.h

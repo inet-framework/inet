@@ -1,7 +1,6 @@
 // the original file was included in the UDP sockets example
 
 import
-    "LinkLayer",
     "NetworkLayer",
     "UDP",
     "UDPModule",
@@ -64,9 +63,7 @@ module RTPHost
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "b=32,30;p=87,242;i=fork";
-        netIf : LinkLayer[numOfPorts];
-            parameters:
-                NWIName = "PPPModule";
+        ppp : PPPInterface[numOfPorts];
             display: "p=80,300,row;b=38,24";
     connections nocheck:
         // transport connections
@@ -83,10 +80,10 @@ module RTPHost
 
         // connections to network outside
         for i=0..numOfPorts-1 do
-            in[i] --> netIf[i].physIn;
-            out[i] <-- netIf[i].physOut;
-            netIf[i].inputQueueOut --> networkLayer.physIn[i];
-            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
+            ppp[i].netwOut --> networkLayer.physIn[i];
+            ppp[i].netwIn <-- networkLayer.physOut[i];
         endfor;
 endmodule
 

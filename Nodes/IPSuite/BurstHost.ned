@@ -20,7 +20,6 @@
 import
     "Blackboard",
     "NetworkLayer",
-    "LinkLayer",
     "TrafficGen";
 
 
@@ -58,9 +57,7 @@ module BurstHost
                 physIn[1],
                 physOut[1];
             display: "b=32,30;p=80,120;i=fork";
-        netIf : LinkLayer[1];
-            parameters:
-                NWIName = "PPPInterface";
+        ppp : PPPInterface[1];
             display: "p=80,180,row;i=iface";
     connections nocheck:
         // transport connections
@@ -69,10 +66,10 @@ module BurstHost
 
         // connections to network outside
         for i=0..0 do
-            in[i] --> netIf[i].physIn;
-            out[i] <-- netIf[i].physOut;
-            netIf[i].inputQueueOut --> networkLayer.physIn[i];
-            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
+            ppp[i].netwOut --> networkLayer.physIn[i];
+            ppp[i].netwIn <-- networkLayer.physOut[i];
         endfor;
 
 endmodule

@@ -147,4 +147,5 @@ ARPPacket_m.obj: ARPPacket_m.cc \
   ARPPacket_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\_802/MACAddress.h \
+  ..\..\Base/ipsuite_defs.h \
   ..\_802/MACAddress_m.h

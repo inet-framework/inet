@@ -18,15 +18,16 @@
 
 
 //
-// Prototype module for Link Layer protocols.
+// Prototype module for link layer protocols.
 //
 module NetworkInterface
     parameters:
         frameCapacity : numeric const,
         bitCapacity : numeric const;
     gates:
-        in: physicalIn, ipOutputQueueIn;
-        out: physicalOut, ipOutputQueueOut, 
-             ipInputQueueOut; // FIXME this gate to be removed!
+        in: physIn;
+        out: physOut;
+        in: netwIn;
+        out: netwOut;
 endmodule
 

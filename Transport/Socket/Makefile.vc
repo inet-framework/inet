@@ -133,7 +133,8 @@ SocketInterfacePacket.obj: SocketInterfacePacket.cc \
   SocketInterfacePacket.h \
   sockets.h \
   ..\TCP/pcb.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 socketlayer.obj: socketlayer.cc \
   socketlayer.h \
   sockets.h \
@@ -148,4 +149,5 @@ sockets.obj: sockets.cc \
   ..\TCP/tcpcb.h \
   ..\TCP/pcb.h \
   ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h \
   ..\TCP/tcp.h

@@ -130,4 +130,5 @@ UDPApp.obj: UDPApp.cc \
   ..\..\Base/basic_consts.h \
   ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Network\IPv4/IPDatagram_m.h \
+  ..\..\Base/ipsuite_defs.h

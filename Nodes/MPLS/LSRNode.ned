@@ -13,7 +13,6 @@
 
 import
     "Blackboard",
-    "LinkLayer",
     "NetworkLayer",
     "LDPproc",
     "tcp2ldp",
@@ -89,9 +88,7 @@ module LSRNode
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "b=32,30;p=191,186;i=fork";
-        netIf: LinkLayer[numOfPorts];
-            parameters:
-                NWIName = "PPPInterface";
+        ppp: LinkLayer[numOfPorts];
             display: "p=87,320,row;i=iface";
         mplsModule: MPLSModule;
             parameters:
@@ -124,11 +121,11 @@ module LSRNode
         //# ldp.to_mpls_switch --> mplsModule.fromLDP;
 
         for i=0..numOfPorts-1 do
-            in[i] --> netIf[i].physIn;
-            out[i] <-- netIf[i].physOut;
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
 
-            netIf[i].inputQueueOut --> mplsModule.fromL2[i];
-            netIf[i].outputQueueIn <-- mplsModule.toL2[i];
+            ppp[i].netwOut --> mplsModule.fromL2[i];
+            ppp[i].netwIn <-- mplsModule.toL2[i];
 
             mplsModule.toL3[i] --> networkLayer.physIn[i];
             mplsModule.fromL3[i] <-- networkLayer.physOut[i];

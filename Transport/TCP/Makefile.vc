@@ -148,19 +148,23 @@ Ip2Tcp.obj: Ip2Tcp.cc \
   ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   TransportPacket_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Network\IPv4/IPDatagram_m.h \
+  ..\..\Base/ipsuite_defs.h
 pcb.obj: pcb.cc \
   pcb.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 Tcp2Ip.obj: Tcp2Ip.cc \
   TransportPacket.h \
   ..\..\Network\IPv4/IPControlInfo_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   TransportPacket_m.h \
-  ..\..\Network\IPv4/IPDatagram_m.h
+  ..\..\Network\IPv4/IPDatagram_m.h \
+  ..\..\Base/ipsuite_defs.h
 TCPInterfacePacket_m.obj: TCPInterfacePacket_m.cc \
   TCPInterfacePacket_m.h \
-  ..\..\Network\IPv4/IPAddress.h
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 tcpmodule.obj: tcpmodule.cc \
   tcp.h
 TransportPacket_m.obj: TransportPacket_m.cc \

@@ -19,7 +19,6 @@
 
 import
     "Blackboard",
-    "LinkLayer",
     "NetworkLayer",
     "UDPUpperLayers";
 
@@ -55,9 +54,7 @@ module UDPHost
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "p=87,155;i=fork";
-        netIf : LinkLayer[numOfPorts];
-            parameters:
-                NWIName = "PPPInterface";
+        ppp : PPPInterface[numOfPorts];
             display: "p=80,220,row;i=iface";
     connections nocheck:
         // transport connections
@@ -66,10 +63,10 @@ module UDPHost
 
         // connections to network outside
         for i=0..numOfPorts-1 do
-            in[i] --> netIf[i].physIn;
-            out[i] <-- netIf[i].physOut;
-            netIf[i].inputQueueOut --> networkLayer.physIn[i];
-            netIf[i].outputQueueIn <-- networkLayer.physOut[i];
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
+            ppp[i].netwOut --> networkLayer.physIn[i];
+            ppp[i].netwIn <-- networkLayer.physOut[i];
         endfor;
 endmodule
 
