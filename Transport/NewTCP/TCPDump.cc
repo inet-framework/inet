@@ -19,6 +19,7 @@
 
 #include "TCPDump.h"
 
+
 TCPDumper::TCPDumper(std::ostream& out)
 {
     outp = &out;
@@ -33,6 +34,11 @@ void TCPDumper::dump(IPDatagram *dgram)
 void TCPDumper::dump(TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr)
 {
     std::ostream& out = *outp;
+
+    // time (not part of the tcpdump format)
+    char buf[30];
+    sprintf(buf,"[%.3f] ", simulation.simTime());
+    out << buf;
 
     // src/dest
     out << srcAddr << "." << tcpseg->srcPort() << " > ";
@@ -97,4 +103,15 @@ void TCPDump::handleMessage(cMessage *msg)
     // forward
     send(msg, msg->arrivedOn("in1") ? "out2" : "out1");
 }
+
+void TCPDump::finish()
+{
+    // time (not part of the tcpdump format)
+    char buf[30];
+    sprintf(buf,"[%.3f] ", simulation.simTime());
+    ev << buf;
+
+    ev << "finished\n";
+}
+
 

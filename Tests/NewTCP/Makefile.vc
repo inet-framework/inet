@@ -12,8 +12,8 @@
 TARGET = NewTCP.exe
 
 # User interface (uncomment one) (-u option)
-# USERIF_LIBS=$(CMDENV_LIBS)
-USERIF_LIBS=$(TKENV_LIBS)
+USERIF_LIBS=$(CMDENV_LIBS)
+#USERIF_LIBS=$(TKENV_LIBS)
 
 # .ned or .h include paths with -I
 INCLUDE_PATH= -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/NewTCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/_802 -I$(ROOT)/NetworkInterfaces/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Base -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite

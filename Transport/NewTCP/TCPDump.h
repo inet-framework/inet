@@ -48,6 +48,7 @@ class TCPDump : public cSimpleModule
   public:
     TCPDump(const char *name, cModule *parent);
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 };
 
 #endif
