@@ -33,8 +33,9 @@ class IPFragBuf
     // stores an offset range
     struct Region
     {
-        ushort begin;  // first offset stored
-        ushort end;    // last+1 offset stored
+        ushort beg;   // first offset stored
+        ushort end;   // last+1 offset stored
+        bool islast;  // if this region represents the last bytes of the datagram
     };
 
     typedef std::vector<Region> RegionVector;
@@ -44,14 +45,13 @@ class IPFragBuf
      * 99% of time, fragments will arrive in order and none gets lost,
      * so we have to handle this case very efficiently. For this purpose
      * we'll store the offset of the first and last+1 byte we have
-     * (main.begin, main.end variables), and keep extending this range
+     * (main.beg, main.end variables), and keep extending this range
      * as new fragments arrive. If we receive non-connecting fragments,
      * put them aside into buf until new fragments come and fill the gap.
      */
     struct ReassemblyBuffer
     {
         ushort id;     // "Identification" field from IP header
-        ushort length; // total length of datagram (without header)
         Region main;   // offset range we already have
         RegionVector *fragments;  // only used if we receive disjoint fragments
         IPDatagram *datagram;  // the actual datagram
@@ -59,7 +59,13 @@ class IPFragBuf
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<ushort,ReassemblyBuffer> FragmentationMap;
+    typedef std::map<ushort FIXME!!!!!!,ReassemblyBuffer> Buffers;
+
+    // the reassembly buffers
+    Buffers bufs;
+
+  protected:
+    void merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast);
 
   public:
     /**

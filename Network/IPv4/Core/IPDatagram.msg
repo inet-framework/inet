@@ -147,7 +147,7 @@ message IPDatagram
         short headerLength = DEFAULT_HEADER_LENGTH;  // FIXME set automatically!
         unsigned char diffServCodePoint;
 
-        int fragmentId;
+        int identification;
         bool moreFragments;
         bool dontFragment;
         int fragmentOffset;

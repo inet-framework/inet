@@ -24,38 +24,6 @@
 #include "IPFragBuf.h"
 
 
-    // stores an offset range
-    struct Region
-    {
-        ushort begin;  // first offset stored
-        ushort end;    // last+1 offset stored
-    };
-
-    typedef std::vector<Region> RegionVector;
-
-    /**
-     * Represents the buffer for assembling one IP datagram from fragments.
-     * 99% of time, fragments will arrive in order and none gets lost,
-     * so we have to handle this case very efficiently. For this purpose
-     * we'll store the offset of the first and last+1 byte we have
-     * (main.begin, main.end variables), and keep extending this range
-     * as new fragments arrive. If we receive non-connecting fragments,
-     * put them aside into buf until new fragments come and fill the gap.
-     */
-    struct ReassemblyBuffer
-    {
-        ushort id;     // "Identification" field from IP header
-        ushort length; // total length of datagram (without header)
-        Region main;   // offset range we already have
-        RegionVector *fragments;  // only used if we receive disjoint fragments
-        IPDatagram *datagram;  // the actual datagram
-        simtime_t lastupdate;  // last time a new fragment arrived
-    };
-
-    // we use std::map for fast lookup by datagram Id
-    typedef std::map<ushort,ReassemblyBuffer> FragmentationMap;
-
-
 IPFragBuf::IPFragBuf()
 {
 }
@@ -67,6 +35,132 @@ IPFragBuf::~IPFragBuf()
 
 IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
 {
+    ushort id = datagram->identification();
+    Buffers::iterator i = bufs.find(id);
+    if (i==bufs.end())
+    {
+        // this is the first fragment of that datagram, create reassembly buffer for it
+        ReassemblyBuffer buf;
+        buf.id = id;
+        buf.main.beg = datagram->fragmentOffset();
+        buf.main.end = buf.main.beg + datagram->payloadLength(); //FIXME
+        buf.main.islast = !datagram->moreFragments();
+        buf.fragments = NULL;
+        if (datagram->encapsulatedMsg())  // FIXME fix in Fragmentation!!!
+            buf.datagram = datagram;
+        else
+            delete datagram;
+        buf.lastupdate = now;
+
+        bufs[id] = buf;
+
+        // if datagram is not fragmented, we shouldn't have been called!
+        ASSERT(buf.main.beg!=0 || !buf.main.islast);
+
+        return NULL;
+    }
+    else
+    {
+        // merge this fragment into reassembly buffer
+        ReassemblyBuffer& buf = *i;
+        ushort beg = datagram->fragmentOffset();
+        ushort end = buf.main.beg + datagram->payloadLength(); //FIXME
+        merge(buf, beg, end, !datagram->moreFragments());
+        if (datagram->encapsulatedMsg())
+            buf.datagram = datagram;
+        else
+            delete datagram;
+        if (buf.main.beg==0 && buf.main.islast)
+        {
+            // datagram complete
+            ASSERT(buf.datagram);  // one of the fragments must have contained payload
+
+            IPDatagram *ret = buf.datagram;
+
+            if (buf.fragments)
+                delete buf.fragments;
+            bufs.erase(i);
+
+            return ret;
+        }
+        else
+        {
+            buf.lastupdate = now;
+            return NULL;
+        }
+    }
+
+}
+
+void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast)
+{
+    if (buf.main.end==beg)
+    {
+        buf.main.end = end;
+        if (islast)
+            buf.main.islast = true;
+        if (buf.fragments)
+            mergeFragments(buf);
+    }
+    else if (buf.main.beg==end)
+    {
+        buf.main.beg = beg;
+        if (buf.fragments)
+            mergeFragments(buf);
+    }
+    else if (buf.main.end<beg || buf.main.beg>end)
+    {
+        // disjoint fragment, store it until another fragment fills in the gap
+        if (!buf.fragments)
+            buf.fragments = new RegionVector();
+        Region r;
+        r.beg = beg;
+        r.end = end;
+        r.islast = islast;
+        buf.fragments->push_back(r);
+    }
+    else if (buf.main.beg==beg && buf.main.end==end)
+    {
+        // duplicate fragment, ignore it
+    }
+    else
+    {
+        // overlapping but not identical fragment -- this normally cannot happen
+        opp_error("received overlapping but not identical fragments from datagram id=%u", buf.id);
+    }
+}
+
+void IPFragBuf::mergeFragments(ReassemblyBuffer& buf)
+{
+    RegionVector& frags = *(buf.fragments);
+
+    bool oncemore;
+    do
+    {
+        oncemore = false;
+        for (RegionVector::iterator i=frags.begin(); i!=frags.end(); ++i)
+        {
+            Region& frag = *i;
+            if (buf.main.end==frag.beg)
+            {
+                buf.main.end = frag.end;
+                if (frag.islast)
+                    buf.main.islast = true;
+                // delete this frag!!!!!!!!!!
+            }
+            else if (buf.main.beg==end)
+            {
+                buf.main.beg = frag.beg;
+                // delete this frag
+            }
+            else if (buf.main.beg<=frag.beg && buf.main.end>=frag.end)
+            {
+                // we already have this region (duplicate fragment), delete it
+                //delete!!!!!!!!!!
+            }
+        }
+    }
+    while (oncemore);
 }
 
 void IPFragBuf::purgeStaleFragments(simtime_t lastTouched)
