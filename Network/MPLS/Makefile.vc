@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ip_address_prefix.obj LIBtable.obj MPLSModule.obj MPLSPacket.obj
+OBJS= LIBtable.obj MPLSModule.obj MPLSPacket.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -89,9 +89,6 @@ $(EXT_DIR_TSTAMPS):
 	@exit /b 1
 
 subdirs: $(SUBDIR_TARGETS)
-
-ip_address_prefix.obj: ip_address_prefix.cc
-	$(CXX) -c $(COPTS) /Tp ip_address_prefix.cc
 
 LIBtable.obj: LIBtable.cc
 	$(CXX) -c $(COPTS) /Tp LIBtable.cc
@@ -132,16 +129,11 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-ip_address_prefix.obj: ip_address_prefix.cc \
-  ip_address_prefix.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
 LIBtable.obj: LIBtable.cc \
   LIBtable.h \
   ../../Util/StringTokenizer.h \
   ../../Util/stlwatch.h \
   ../IPv4/RoutingTableAccess.h \
-  ip_address_prefix.h \
   ConstType.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTable.h \
@@ -155,11 +147,9 @@ MPLSModule.obj: MPLSModule.cc \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/RoutingTable.h \
   ConstType.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
   LIBtable.h \
-  ip_address_prefix.h
+  ../../Base/ipsuite_defs.h \
+  ../IPv4/IPAddress.h
 MPLSPacket.obj: MPLSPacket.cc \
   MPLSPacket.h

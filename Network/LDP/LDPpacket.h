@@ -6,7 +6,6 @@
 #include <iostream>
 #include <vector>
 #include "IPAddress.h"
-#include "ip_address_prefix.h"
 
 using namespace std;
 
@@ -73,7 +72,7 @@ typedef struct LABEL_MAPPING
 
 typedef struct MAPPING
 {
-    IPAddressPrefix fec;
+    int fec; //IPAddressPrefix fec;
     int label;
 } label_mapping_type;
 

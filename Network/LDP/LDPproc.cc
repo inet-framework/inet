@@ -217,7 +217,7 @@ void LDPproc::activity()
                     requestMsg->setSenderAddress(local_addr);
 
                     ev << "LSR(" << IPAddress(local_addr) <<
-                        "):Request for FEC(" << IPAddressPrefix(fecInt) << ") from outside \n";
+                        "):Request for FEC(" << fecInt << ") from outside \n";
 
                     ev << "LSR(" << IPAddress(local_addr) <<
                         ")  forward LABEL REQUEST to " <<
@@ -231,7 +231,7 @@ void LDPproc::activity()
                 {
                     // Send a NOTIFICATION of NO ROUTE message
                     ev << "LSR(" << IPAddress(local_addr) <<
-                        "): NO ROUTE found for FEC(" << IPAddressPrefix(fecInt) << "\n";
+                        "): NO ROUTE found for FEC(" << fecInt << "\n";
 
                     delete msg;
                 }

@@ -9,7 +9,6 @@
 #include <vector>
 #include <string>
 #include "RoutingTableAccess.h"
-#include "ip_address_prefix.h"
 #include "ConstType.h"
 
 
@@ -48,7 +47,7 @@ public:
     struct PRTEntry
     {
         int pos;
-        IPAddressPrefix fecValue; //Support prefix only, e.g 128.2.0.0
+        int fecValue;
     };
 
     struct LIBEntry

@@ -162,9 +162,9 @@ int LIBTable::readPrtTableFromFile(const char *filename)
         StringTokenizer tokenizer(line, ", ");
         const char *aField;
         if ((aField = tokenizer.nextToken()) != NULL)
-            record.fecValue = IPAddressPrefix(aField, ConstType::prefixLength);
+            record.fecValue = IPAddress(aField).getInt(); // FIXME probably whole PRT table is broken (Andras)
         else
-            record.fecValue = IPAddressPrefix("0.0.0.0", ConstType::prefixLength);
+            record.fecValue = 0;
 
         if ((aField = tokenizer.nextToken()) != NULL)
             record.pos = atoi(aField);
@@ -222,7 +222,7 @@ int LIBTable::findLabelforFec(int fec) const
     // search in the PRT for exact match of the FEC value
     for (int i = 0; i < prt.size(); i++)
     {
-        if (prt[i].fecValue.getInt() == fec)
+        if (prt[i].fecValue == fec)
         {
             int p = prt[i].pos;
 
@@ -253,7 +253,7 @@ int LIBTable::findFec(int label, string inInterface) const
     for (int k = 0; k < prt.size(); k++)
     {
         if (prt[k].pos == pos)
-            return prt[k].fecValue.getInt();
+            return prt[k].fecValue;
     }
     return 0;
 
@@ -266,7 +266,7 @@ string LIBTable::findOutgoingInterface(int fec) const
     // Search in PRT for matching of FEC
     for (int k = 0; k < prt.size(); k++)
     {
-        if (prt[k].fecValue.getInt() == fec)
+        if (prt[k].fecValue == fec)
         {
             pos = prt[k].pos;
             break;
