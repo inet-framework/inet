@@ -17,6 +17,12 @@
 
 Define_Module(TCPSrvHostApp);
 
+
+void TCPServerThread::removeSocket()
+{
+    // FIXME TBD
+}
+
 void TCPSrvHostApp::initialize()
 {
     const char *address = par("address");
@@ -53,12 +59,5 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
 
 void TCPSrvHostApp::finish()
 {
-}
-
-//---
-
-void TCPServerProcess::removeSocket()
-{
-    // FIXME TBD
 }
 

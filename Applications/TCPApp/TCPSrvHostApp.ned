@@ -38,7 +38,7 @@ simple TCPSrvHostApp
     parameters:
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on
-        serverProcess : string; // type (class name) of modules to launch on incoming connections
+        serverThread : string; // type (class name) of modules to launch on incoming connections
     gates:
         in: tcpIn;
         out: tcpOut;

@@ -22,15 +22,18 @@
 /**
  * Abstract base class for server processes to be used with TCPSrvHostApp.
  */
-class TCPServerProcess : public cSimpleModule, public TCPSocket::CallbackInterface
+class TCPServerThread : public cSimpleModule, public TCPSocket::CallbackInterface
 {
-  protected:
-    TCPSocket *socket; // ptr into socketMap managed by TCPSrvHostApp
+  private:
+    TCPSocket *sock; // ptr into socketMap managed by TCPSrvHostApp
   public:
     Module_Class_Members(TCPServerProcess,cSimpleModule,0);
 
     /** Called by TCPSrvHostApp after creating this module */
     void setSocket(TCPSocket *sock) {socket=sock;}
+
+    /** Returns the socket object */
+    TCPSocket *socket() {return sock;}
 
     /** To be called when the server process has finished */
     void removeSocket();
