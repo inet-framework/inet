@@ -78,6 +78,8 @@ void TCPGenericCliAppBase::socketEstablished(int connId, void *yourPtr)
 
 void TCPGenericCliAppBase::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent)
 {
+        packetsRcvd++;
+        bytesRcvd+=msg->length()/8;
 }
 
 void TCPGenericCliAppBase::socketPeerClosed(int connId, void *yourPtr)
@@ -92,87 +94,9 @@ void TCPGenericCliAppBase::socketFailure(int connId, void *yourPtr, int code)
 {
 }
 
-
-
-
-
-
-    else
-        socket.listen();
-
-    // wait until connection gets established
-    while (socket.state()!=TCPSocket::CONNECTED)
-    {
-        socket.processMessage(receive());
-        if (socket.state()==TCPSocket::SOCKERROR)
-            return;
-    }
-
-    ev << "connection established, starting sending\n";
-    if (ev.isGUI()) displayString().setTagArg("t",0,"connected");
-
-    // send
-    if (sendBytes>0)
-    {
-        waitUntil(tSend);
-        ev << "sending " << sendBytes << " bytes\n";
-        cMessage *msg = new cMessage("data1");
-        msg->setLength(8*sendBytes);
-        socket.send(msg);
-    }
-
-    // close
-    if (tClose>=0)
-    {
-        waitUntil(tClose);
-        ev << "issuing CLOSE command\n";
-        if (ev.isGUI()) displayString().setTagArg("t",0,"closing");
-        socket.close();
-    }
-
-    // wait until peer closes too and all data arrive
-    for (;;)
-    {
-        cMessage *msg = receive();
-        count(msg);
-        socket.processMessage(msg);
-    }
-}
-
 void TCPGenericCliAppBase::finish()
 {
     ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
 
-
-/*
-void TCPGenericCliAppBase::count(cMessage *msg)
-{
-    if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
-    {
-        packetsRcvd++;
-        bytesRcvd+=msg->length()/8;
-    }
-    else
-    {
-        indicationsRcvd++;
-    }
-}
-
-void TCPGenericCliAppBase::waitUntil(simtime_t t)
-{
-    if (simTime()>=t)
-        return;
-
-    cMessage *timeoutMsg = new cMessage("timeout");
-    scheduleAt(t, timeoutMsg);
-    cMessage *msg=NULL;
-    while ((msg=receive())!=timeoutMsg)
-    {
-        count(msg);
-        socket.processMessage(msg);
-    }
-    delete timeoutMsg;
-}
-*/
 
