@@ -55,14 +55,14 @@ InterfaceEntry::InterfaceEntry()
     multicastGroup = NULL;
 }
 
-void InterfaceEntry::info(char *buf)
+std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (!name.empty() ? name.c_str() : "*");
     out << "  outputPort:" << outputPort;
     out << "  addr:" << inetAddr << "  mask:" << mask;
     out << "  MTU:" << mtu << "  Metric:" << metric;
-    strcpy(buf, out.str().c_str());
+    return out.str();
 }
 
 std::string InterfaceEntry::detailedInfo() const
@@ -102,7 +102,7 @@ RoutingEntry::RoutingEntry()
     age = -1;
 }
 
-void RoutingEntry::info(char *buf)
+std::string RoutingEntry::info() const
 {
     std::stringstream out;
     out << "dest:"; if (host.isNull()) out << "*  "; else out << host << "  ";
@@ -110,7 +110,7 @@ void RoutingEntry::info(char *buf)
     out << "mask:"; if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
     out << "if:"; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
-    strcpy(buf, out.str().c_str());
+    return out.str();
 }
 
 std::string RoutingEntry::detailedInfo() const
@@ -127,19 +127,13 @@ Define_Module( RoutingTable );
 
 std::ostream& operator<<(std::ostream& os, const RoutingEntry& e)
 {
-    char buf[1024];
-    const_cast<RoutingEntry&>(e).info(buf);
-    os << buf;
-    //TBD change to: os << e.info();
+    os << e.info();
     return os;
 };
 
 std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 {
-    char buf[1024];
-    const_cast<InterfaceEntry&>(e).info(buf);
-    os << buf;
-    //TBD change to: os << e.info();
+    os << e.info();
     return os;
 };
 

@@ -75,7 +75,7 @@ class InterfaceEntry : public cPolymorphic
   public:
     InterfaceEntry();
     virtual ~InterfaceEntry() {}
-    virtual void info(char *buf);
+    virtual std::string info() const;
     virtual std::string detailedInfo() const;
 };
 
@@ -143,7 +143,7 @@ class RoutingEntry : public cPolymorphic
   public:
     RoutingEntry();
     virtual ~RoutingEntry() {}
-    virtual void info(char *buf);
+    virtual std::string info() const;
     virtual std::string detailedInfo() const;
 };
 

@@ -84,7 +84,7 @@ void EtherMAC::initialize()
         if (chan && chan->datarate()>0)
             error("connection on gate %s has data rate set: using data rate with EtherMAC "
                   "is forbidden, module's txrate parameter must be used instead",
-                  g->fullPath());
+                  g->fullPath().c_str());
         g = g->toGate();
     }
 

@@ -121,14 +121,18 @@ sFieldWrapper *cVectorWatchDescriptor::getFieldWrapper(int field, int i)
 
 //--------------------------------
 
-void cVectorWatcherBase::info(char *buf)
+std::string cVectorWatcherBase::info() const
 {
-    sprintf(buf,"size=%d", size());
+    if (size()==0)
+        return std::string("empty");
+    std::stringstream out;
+    out << "size=" << size();
+    return out.str();
 }
 
-string cVectorWatcherBase::detailedInfo() const
+std::string cVectorWatcherBase::detailedInfo() const
 {
-    stringstream out;
+    std::stringstream out;
     int n = size()<=3 ? size() : 3;
     for (int i=0; i<n; i++)
         out << fullName() << "[" << i << "] = " << at(i) << "\n";

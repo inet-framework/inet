@@ -48,7 +48,7 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
     IPAddress addr;
     if (rt->numInterfaces()==0)
         opp_error("IPAddressResolver: routing table `%s' has no interface registered "
-                  "(yet? try in a later init stage!)", rt->fullPath());
+                  "(yet? try in a later init stage!)", rt->fullPath().c_str());
 
     for (int i=0; i<rt->numInterfaces(); i++)
     {
@@ -58,14 +58,14 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
             if (!addr.isNull() && e->inetAddr!=addr)
                 opp_error("IPAddressResolver: IP address is ambiguous: different "
                           "interfaces in `%s' have different IP addresses",
-                          rt->fullPath());
+                          rt->fullPath().c_str());
             addr = e->inetAddr;
         }
     }
 
     if (addr.isNull())
         opp_error("IPAddressResolver: no interface in `%s' has an IP address "
-                  "assigned (yet? try in a later init stage!)", rt->fullPath());
+                  "assigned (yet? try in a later init stage!)", rt->fullPath().c_str());
 
     return addr;
 }
@@ -79,7 +79,7 @@ RoutingTable *IPAddressResolver::routingTableOf(cModule *host)
     if (!rtmod)
         opp_error("IPAddressResolver: RoutingTable not found as `routingTable' or "
                   "`networkLayer.routingTable' within host/router module `%s'",
-                  host->fullPath());
+                  host->fullPath().c_str());
     return check_and_cast<RoutingTable *>(rtmod);
 }
 
