@@ -82,7 +82,7 @@ module RSVP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=280,184;b=32,30";
+            display: "i=proc2;p=280,184";
     connections nocheck:
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
