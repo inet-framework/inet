@@ -347,7 +347,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     // set other fields
     datagram->setDiffServCodePoint(controlInfo->diffServCodePoint());
 
-    datagram->setFragmentId(curFragmentId++);
+    datagram->setIdentification(curFragmentId++);
     datagram->setMoreFragments(false);
     datagram->setDontFragment (controlInfo->dontFragment());
     datagram->setFragmentOffset(0);

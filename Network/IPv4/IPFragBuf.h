@@ -21,6 +21,7 @@
 
 #include <map>
 #include <vector>
+#include "ipsuite_defs.h"
 #include "IPDatagram.h"
 
 
@@ -80,6 +81,7 @@ FIXME Key {
 
   protected:
     void merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast);
+    void mergeFragments(ReassemblyBuffer& buf);
 
   public:
     /**

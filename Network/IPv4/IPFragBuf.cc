@@ -66,7 +66,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     else
     {
         // merge this fragment into reassembly buffer
-        ReassemblyBuffer& buf = *i;
+        ReassemblyBuffer& buf = i->second;
         ushort beg = datagram->fragmentOffset();
         ushort end = buf.main.beg + datagram->payloadLength(); //FIXME
         merge(buf, beg, end, !datagram->moreFragments());
@@ -157,7 +157,7 @@ void IPFragBuf::mergeFragments(ReassemblyBuffer& buf)
                     buf.main.islast = true;
                 deleteit = true;
             }
-            else if (buf.main.beg==end)
+            else if (buf.main.beg==frag.end)
             {
                 buf.main.beg = frag.beg;
                 deleteit = true;
@@ -195,14 +195,15 @@ void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
     for (Buffers::iterator i=bufs.begin(); i!=bufs.end(); )
     {
         // if too old, remove it
-        if (i->lastupdate < lastupdate)
+        ReassemblyBuffer& buf = i->second;
+        if (buf.lastupdate < lastupdate)
         {
             // send ICMP error
-            icmpModule->sendErrorMessage(i->datagram, ICMP_TIME_EXCEEDED, 0);
+            icmpModule->sendErrorMessage(buf.datagram, ICMP_TIME_EXCEEDED, 0);
 
             // delete
-            if (i->fragments)
-                delete i->fragments;
+            if (buf.fragments)
+                delete buf.fragments;
             Buffers::iterator oldi = i++;
             bufs.erase(oldi);
         }
