@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "RoutingTable.h"
 #include "StringTokenizer.h"
+#include "IPAddressResolver.h"
 #include "FlatNetworkConfigurator.h"
 
 
@@ -58,7 +59,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
         // find interface table and assign address to all interfaces with an output port
         cModule *mod = topo.node(i)->module();
-        RoutingTable *rt = findRoutingTable(mod);
+        RoutingTable *rt = IPAddressResolver().routingTableOf(mod);
 
         for (int k=0; k<rt->numInterfaces(); k++)
         {
@@ -66,7 +67,7 @@ void FlatNetworkConfigurator::initialize(int stage)
             if (e->outputPort!=-1)
             {
                 e->inetAddr = IPAddress(addr);
-                e->mask = IPAddress(netmask);
+                e->mask = IPAddress("255.255.255.255"); // full address must match for local delivery
             }
         }
     }
@@ -101,7 +102,7 @@ void FlatNetworkConfigurator::initialize(int stage)
             ev << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
 
             // add route
-            RoutingTable *rt = findRoutingTable(atNode->module());
+            RoutingTable *rt = IPAddressResolver().routingTableOf(atNode->module());
             InterfaceEntry *interf = rt->interfaceByPortNo(outputPort);
 
             RoutingEntry *e = new RoutingEntry();
@@ -115,16 +116,6 @@ void FlatNetworkConfigurator::initialize(int stage)
             rt->addRoutingEntry(e);
         }
     }
-}
-
-RoutingTable *FlatNetworkConfigurator::findRoutingTable(cModule *ipnode)
-{
-    // TBD this could be made more flexible...
-    cModule *networkLayer = ipnode->submodule("networkLayer");
-    RoutingTable *rt = !networkLayer ? NULL : dynamic_cast<RoutingTable *>(networkLayer->submodule("routingTable"));
-    if (!rt)
-        error("cannot find module networklayer.routingTable in node '%s'", ipnode->fullPath());
-    return rt;
 }
 
 void FlatNetworkConfigurator::handleMessage(cMessage *msg)

@@ -31,9 +31,6 @@
  */
 class FlatNetworkConfigurator : public cSimpleModule
 {
-  protected:
-    RoutingTable *findRoutingTable(cModule *ipnode);
-
   public:
     Module_Class_Members(FlatNetworkConfigurator, cSimpleModule, 0);
 
