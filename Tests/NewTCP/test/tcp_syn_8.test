@@ -1,0 +1,64 @@
+%description:
+Test connection setup: A performs active open, and its ACK of SYN always gets 
+lost.
+
+Test that:
+- initial RTO is 3s
+- it doubles with each retransmission
+- for A, after some time CONN-ESTAB timer goes off, and game over
+- for B, it retries SYN+ACK a number of times, then gives up
+
+%inifile: {}.ini
+[General]
+preload-ned-files = *.ned @../../../../nedfiles.lst
+
+[Cmdenv]
+event-banners=false
+
+[Parameters]
+*.testing=true
+
+*.cli.tOpen=0
+*.srv.tOpen=0
+
+# delete ACK of SYN multiple times
+*.tcptester.script="a2 delete;a3 delete;a4 delete;a5 delete;a6 delete;a7 delete;a8 delete;a9 delete;a10 delete;a11 delete;a12 delete;a13 delete;a14 delete;a15 delete"
+
+include ../../defaults.ini
+
+%contains: stdout
+tcpcli: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+tcpsrv: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+tcpsrv: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+tcpcli: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[3.003 B002] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[3.005 A003] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[9.003 B003] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[9.005 A004] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[21.003 B004] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[21.005 A005] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[45.003 B005] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[45.005 A006] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[93.003 B006] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[93.005 A007] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[189.003 B007] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[189.005 A008] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[381.003 B008] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[381.005 A009] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[621.003 B009] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[621.005 A010] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[861.003 B010] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[861.005 A011] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[1101.003 B011] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[1101.005 A012] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[1341.003 B012] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[1341.005 A013] A.1000 > B.2000: . ack 501 win 16384 # deleting
+[1581.003 B013] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+[1581.005 A014] A.1000 > B.2000: . ack 501 win 16384 # deleting
+tcpsrv: SYN_RCVD --> CLOSED  (on ABORT)
+
+%contains: stdout
+[1821.002] tcpdump finished, A:14 B:13 segments

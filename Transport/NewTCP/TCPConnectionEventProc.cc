@@ -67,6 +67,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             // send initial SYN
             selectInitialSeqNum();
             sendSyn();
+            startSynRexmitTimer();
             scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
             break;
 
@@ -125,6 +126,8 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             state->active = true;
             selectInitialSeqNum();
             sendSyn();
+            startSynRexmitTimer();
+            scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
             sendQueue->enqueueAppData(msg);  // queue up for later
             break;
 

@@ -171,7 +171,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 
 void TCPConnection::selectInitialSeqNum()
 {
-    // set the initial send sequence number and the send sequence variables
+    // set the initial send sequence number
     state->iss = (unsigned long)(fmod(tcpMain->simTime()*250000.0, 1.0+(double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
@@ -196,14 +196,11 @@ void TCPConnection::sendSyn()
 
     // create segment
     TCPSegment *tcpseg = new TCPSegment("SYN");
-    tcpseg->setSequenceNo(state->snd_nxt);
+    tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
     tcpseg->setWindow(state->rcv_wnd);
 
-    state->snd_nxt++;
-    state->snd_max = state->snd_nxt;
-
-    // FIXME arrange for retransmission
+    state->snd_max = state->snd_nxt = state->iss+1;
 
     // send it
     sendToIP(tcpseg);
@@ -213,15 +210,13 @@ void TCPConnection::sendSynAck()
 {
     // create segment
     TCPSegment *tcpseg = new TCPSegment("SYN+ACK");
-    tcpseg->setSequenceNo(state->snd_nxt);
+    tcpseg->setSequenceNo(state->iss);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
     tcpseg->setAckBit(true);
     tcpseg->setWindow(state->rcv_wnd);
 
-    state->snd_nxt++;
-    state->snd_max = state->snd_nxt;
-    // FIXME arrange for retransmission
+    state->snd_max = state->snd_nxt = state->iss+1;
 
     // send it
     sendToIP(tcpseg);

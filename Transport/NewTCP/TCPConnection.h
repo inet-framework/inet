@@ -116,8 +116,11 @@ enum TCPEventCode
 #define TCP_TIMEOUT_CONN_ESTAB    75    // 75 seconds
 #define TCP_TIMEOUT_FIN_WAIT_2   600    // 10 minutes
 #define TCP_TIMEOUT_2MSL         240    // 2 * 2 minutes
+#define TCP_TIMEOUT_SYN_REXMIT     3    // initially 3 seconds
+#define TCP_TIMEOUT_SYN_REXMIT_MAX 240  // 4 mins (will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner)
 //@}
 
+#define MAX_SYN_REXMIT_COUNT     12     // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 
 /** @name Comparing sequence numbers */
 //@{
@@ -174,6 +177,11 @@ class TCPStateVariables : public cPolymorphic
     // number of consecutive duplicate ACKs (this counter would logically
     // belong to TCPAlgorithm, but it's a lot easier to manage here)
     short dupacks;
+
+    // SYN, SYN+ACK retransmission variables (handled separately
+    // because normal rexmit belongs to TCPAlgorithm)
+    int syn_rexmit_count;   // number of retransmissions (=1 after first rexmit)
+    simtime_t syn_rexmit_timeout; // current retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code
@@ -253,6 +261,7 @@ class TCPConnection
     cMessage *the2MSLTimer;
     cMessage *connEstabTimer;
     cMessage *finWait2Timer;
+    cMessage *synRexmitTimer;  // for retransmitting SYN and SYN+ACK
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -293,6 +302,8 @@ class TCPConnection
     void process_TIMEOUT_2MSL();
     void process_TIMEOUT_CONN_ESTAB();
     void process_TIMEOUT_FIN_WAIT_2();
+    void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
+
     //@}
 
     /** Utility: creates send/receive queues and tcpAlgorithm */
@@ -335,8 +346,12 @@ class TCPConnection
     /** Utility: adds control info to segment and sends it to IP */
     void sendToIP(TCPSegment *tcpseg);
 
+    /** Utility: start SYN-REXMIT timer */
+    void startSynRexmitTimer();
+
     /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout) {
+    void scheduleTimeout(cMessage *msg, simtime_t timeout)
+    {
         tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);
     }
 

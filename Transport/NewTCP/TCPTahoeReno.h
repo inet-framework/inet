@@ -37,8 +37,8 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
     enum {TAHOE,RENO} tcpvariant;  // TCP algorithm
 
     // retransmit count
-    int rexmit_count;        // number of retransmissions (=1 after first rexmit)
-    int rexmit_timeout;      // current retransmission timeout (aka RTO)
+    int rexmit_count;         // number of retransmissions (=1 after first rexmit)
+    simtime_t rexmit_timeout; // current retransmission timeout (aka RTO)
 
     // slow start and congestion avoidance variables (RFC 2001)
     int snd_cwnd;            // congestion window

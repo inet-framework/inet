@@ -45,7 +45,11 @@ TCPStateVariables::TCPStateVariables()
     rcv_wnd = 16384; // FIXME make it parameter
     rcv_up = 0;
     irs = 0;
+
     dupacks = 0;
+
+    syn_rexmit_count = 0;
+    syn_rexmit_timeout = 0;
 
     fin_ack_rcvd = false;
     send_fin = false;
@@ -116,10 +120,12 @@ TCPConnection::TCPConnection(TCPMain *_mod, int _appGateIndex, int _connId)
     the2MSLTimer = new cMessage("2MSL");
     connEstabTimer = new cMessage("CONN-ESTAB");
     finWait2Timer = new cMessage("FIN-WAIT-2");
+    synRexmitTimer = new cMessage("SYN-REXMIT");
 
     the2MSLTimer->setContextPointer(this);
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
+    synRexmitTimer->setContextPointer(this);
 }
 
 TCPConnection::~TCPConnection()
@@ -130,9 +136,10 @@ TCPConnection::~TCPConnection()
     delete tcpAlgorithm;
     delete state;
 
-    delete tcpMain->cancelEvent(the2MSLTimer);
-    delete tcpMain->cancelEvent(connEstabTimer);
-    delete tcpMain->cancelEvent(finWait2Timer);
+    if (the2MSLTimer) delete tcpMain->cancelEvent(the2MSLTimer);
+    if (connEstabTimer) delete tcpMain->cancelEvent(connEstabTimer);
+    if (finWait2Timer) delete tcpMain->cancelEvent(finWait2Timer);
+    if (synRexmitTimer) delete tcpMain->cancelEvent(synRexmitTimer);
 }
 
 bool TCPConnection::processTimer(cMessage *msg)
@@ -155,6 +162,11 @@ bool TCPConnection::processTimer(cMessage *msg)
     {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
         process_TIMEOUT_FIN_WAIT_2();
+    }
+    else if (msg==synRexmitTimer)
+    {
+        event = TCP_E_IGNORE;
+        process_TIMEOUT_SYN_REXMIT(event);
     }
     else
     {
