@@ -26,6 +26,7 @@ void TCPServerApp::initialize()
     if (!srvProcType)
         error("module type serverProcess=`%s' not found", serverProcTypeName);
 
+    serverSocket.setOutputGate(gate("tcpOut"));
     serverSocket.bind(port);
     serverSocket.listen(true);
 }

@@ -100,6 +100,7 @@ void TcpTestClient::activity()
         throw new cException("cannot use both sendScript and tSend+sendBytes");
 
     TCPSocket socket;
+    socket.setOutputGate(gate("tcpOut"));
     queue.setName("queue");
 
     // open
