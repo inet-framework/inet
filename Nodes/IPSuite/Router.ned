@@ -35,22 +35,22 @@ module Router
         out: ethOut[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=70,60";
+            display: "i=proc2;p=62,60";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
-            display: "p=260,60,row;i=box3";
+            display: "p=62,108,row;i=box3";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=160,60;i=fork";
-        ppp : PPPInterface[sizeof(out)];
-            display: "p=80,150,row,90;q=queue;i=iface";
+            display: "p=160,124;i=fork";
+        ppp: PPPInterface[sizeof(out)];
+            display: "p=80,214,row,90;q=queue;i=iface";
         eth: EthernetInterface[sizeof(ethOut)];
-            display: "p=125,150,row,90;q=queue;i=iface";
+            display: "p=125,214,row,90;q=queue;i=iface";
     connections:
         // connections to network outside
         for i=0..sizeof(out)-1 do

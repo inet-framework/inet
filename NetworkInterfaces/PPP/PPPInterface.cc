@@ -202,8 +202,10 @@ void PPPInterface::handleMessage(cMessage *msg)
 void PPPInterface::displayBusy()
 {
     displayString().setTagArg("i",1, queue.length()>=3 ? "red" : "yellow");
-    gateToWatch->displayString().setTagArg("o",0,"white");
+    gateToWatch->displayString().setTagArg("o",0,"yellow");
     gateToWatch->displayString().setTagArg("o",1,"3");
+    gate("physOut")->displayString().setTagArg("o",0,"yellow");
+    gate("physOut")->displayString().setTagArg("o",1,"3");
 }
 
 void PPPInterface::displayIdle()
@@ -211,6 +213,8 @@ void PPPInterface::displayIdle()
     displayString().setTagArg("i",1,"");
     gateToWatch->displayString().setTagArg("o",0,"black");
     gateToWatch->displayString().setTagArg("o",1,"1");
+    gate("physOut")->displayString().setTagArg("o",0,"black");
+    gate("physOut")->displayString().setTagArg("o",1,"1");
 }
 
 void PPPInterface::updateDisplayString()

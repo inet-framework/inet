@@ -17,7 +17,7 @@ ifconfigend.
 
 route:
 172.1.2.0       *               255.255.255.255 G   0   ppp0
-default:        172.1.1.0       255.0.0.0       G   0   ppp1
+default:        172.1.1.0       0.0.0.0         G   0   ppp1
 
 routeend.
 

@@ -105,10 +105,10 @@ RoutingEntry::RoutingEntry()
 void RoutingEntry::info(char *buf)
 {
     std::stringstream out;
-    if (host.isNull()) out << "*  "; else out << host << "  ";
-    if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
-    if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
-    if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
+    out << "dest="; if (host.isNull()) out << "*  "; else out << host << "  ";
+    out << "gw="; if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
+    out << "mask="; if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
+    out << "if="; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
     strcpy(buf, out.str().c_str());
 }
