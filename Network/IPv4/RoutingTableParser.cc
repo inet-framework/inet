@@ -163,11 +163,13 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
     {
         // name entry
         if (streq(ifconfigFile + charpointer, "name:")) {
-            // FIXME find existing one instead of adding a new one
-            e = new InterfaceEntry();
-            e->name = parseInterfaceEntry(ifconfigFile, "name:", charpointer,
-                                          new char[MAX_ENTRY_STRING_SIZE]);
-            rt->addInterface(e);
+            // find existing interface with this name
+            char *name = parseInterfaceEntry(ifconfigFile, "name:", charpointer,
+                                             new char[MAX_ENTRY_STRING_SIZE]);
+            e = rt->interfaceByName(name);
+            if (!e)
+                opp_error("Error in routing file: interface `%s' not registered by any L2 module", name);
+            delete [] name;
             continue;
         }
 

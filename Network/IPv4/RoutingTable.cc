@@ -56,6 +56,7 @@ void InterfaceEntry::info(char *buf)
 {
     std::stringstream out;
     out << (!name.empty() ? name.c_str() : "*");
+    out << "  outputPort:" << outputPort;
     out << "  addr:" << inetAddr << "  mask:" << mask;
     out << "  MTU:" << mtu << "  Metric:" << metric;
     strcpy(buf, out.str().c_str());
@@ -64,8 +65,9 @@ void InterfaceEntry::info(char *buf)
 std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
-    out << "name:" << (!name.empty() ? name.c_str() : "*");
-    out << "\tinet addr:" << inetAddr << "\tMask: " << mask << "\n";
+    out << "name:" << (!name.empty() ? name.c_str() : "*")
+        << "\toutputPort:" << outputPort << "\n";
+    out << "inet addr:" << inetAddr << "\tMask: " << mask << "\n";
 
     out << "MTU: " << mtu << " \tMetric: " << metric << "\n";
 
@@ -138,19 +140,25 @@ std::ostream & operator<<(std::ostream & os, const InterfaceEntry& e)
     return os;
 };
 
-void RoutingTable::initialize()
+void RoutingTable::initialize(int stage)
 {
+    // L2 modules register themselves in stage 0, so we can only configure
+    // the interfaces in stage 1. So we'll just do the whole initialize()
+    // stuff in stage 1.
+    if (stage!=1)
+        return;
+
     IPForward = par("IPForward").boolValue();
     const char *filename = par("routingTableFileName");
-
     defaultRoute = NULL;
 
-    // Read routing table file
+    // add one additional interface, the loopback
+    addLocalLoopback();
+
+    // read routing table file (and interface configuration)
     RoutingTableParser parser(this);
     if (parser.readRoutingTableFromFile(filename) == -1)
         error("Error reading routing table file %s", filename);
-
-    addLocalLoopback();
 
     WATCH_PTRVECTOR(interfaces);
     WATCH_PTRVECTOR(routes);
@@ -166,7 +174,6 @@ void RoutingTable::handleMessage(cMessage *msg)
 {
     opp_error("This module doesn't process messages");
 }
-
 
 void RoutingTable::printIfconfig()
 {
@@ -198,8 +205,14 @@ InterfaceEntry *RoutingTable::interfaceByIndex(int index)
 
 void RoutingTable::addInterface(InterfaceEntry *entry)
 {
+    // check name and outputPort are unique
+    if (interfaceByName(entry->name.c_str())!=NULL)
+        opp_error("addInterface(): interface '%s' already registered", entry->name.c_str());
+    if (entry->outputPort!=-1 && interfaceByPortNo(entry->outputPort)!=NULL)
+        opp_error("addInterface(): interface with output=%d already registered", entry->outputPort);
+
+    // insert
     entry->index = interfaces.size();
-    entry->outputPort = entry->index; // FIXME this is a hack!!!!!!!
     interfaces.push_back(entry);
 }
 

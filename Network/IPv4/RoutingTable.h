@@ -223,7 +223,8 @@ class RoutingTable: public cSimpleModule
   public:
     Module_Class_Members(RoutingTable, cSimpleModule, 0);
 
-    void initialize();
+    int numInitStages() const  {return 2;}
+    void initialize(int stage);
 
     /**
      * Raises an error.
