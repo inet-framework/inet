@@ -174,7 +174,7 @@ public:
     int getOptCode(std::string senderInterface, int oldLabel);
 
     /*
-    //Return incomming label
+    //Return incoming label
     //Return outgoing label
     int ini_requestLabelforDest(IPAddressPrefix *dest);
 
@@ -184,7 +184,7 @@ public:
                      std::string outInterface, int fec);
     //Return outgoing label
     //Return outgoing interface
-    //Return incomming interface
+    //Return incoming interface
     std::string requestIncomingInterface(int fec);
     */
 };

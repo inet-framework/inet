@@ -17,19 +17,16 @@
 #define __MPLSPacket_H
 
 #include <omnetpp.h>
-#include <list>
-#include <queue>
+#include <stack>
 
 using namespace std;
-
-// label stack
-typedef queue<int,list<int> > IQueue;
 
 // FIXME length should be adjusted when length of label stack changes
 class MPLSPacket: public cMessage
 {
   private:
-    IQueue label;
+    typedef stack<int> LabelStack;
+    LabelStack labels;
 
   public:
     /* constructors*/
@@ -44,27 +41,30 @@ class MPLSPacket: public cMessage
      */
     virtual cObject *dup() const { return new MPLSPacket(*this); }
 
-    /*swapLabel:    Swap Label operation
-     *@param: newLabel - The new Label to use
-     **/
-    inline void swapLabel(int newLabel){label.pop();label.push(newLabel);}
+    /**
+     * Swap Label operation
+     */
+    inline void swapLabel(int newLabel)  {labels.top()=newLabel;}
 
-    /*pushLabel:    Push new label
-     **/
-    inline void pushLabel(int newLabel){label.push(newLabel);}
+    /**
+     * Pushes new label on the label stack
+     */
+    inline void pushLabel(int newLabel)  {labels.push(newLabel);}
 
-    /*popLabel:    Pop out top label
-     **/
-    inline void popLabel(){label.pop();}
+    /**
+     * Pops the top label
+     */
+    inline void popLabel()  {labels.pop();}
 
-    /*noLabel:    Empty the label stack
-     **/
-    inline bool noLabel(){return label.empty(); }
+    /**
+     * Returns true if the label stack is empty
+     */
+    inline bool noLabel()  {return labels.empty(); }
 
-    /*getLabel:    Get the top label
-     *@param: none
-     **/
-    inline int getLabel(){return label.front();}
+    /**
+     * Returns the top label
+     */
+    inline int getLabel()  {return labels.top();}
 };
 
 #endif
