@@ -13,6 +13,7 @@
 
 
 #include "TCPGenericSrvThread.h"
+#include "GenericAppMsg_m.h"
 
 
 Define_Module(TCPGenericSrvThread);
@@ -73,6 +74,6 @@ void TCPGenericSrvThread::socketDataArrived(int, void *, cMessage *msg, bool urg
 void TCPGenericSrvThread::socketPeerClosed(int, void *)
 {
     // we close too
-    socket().close();
+    socket()->close();
 }
 

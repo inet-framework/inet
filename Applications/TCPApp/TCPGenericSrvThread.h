@@ -24,13 +24,13 @@
 class TCPGenericSrvThread : public TCPServerThread
 {
   public:
-    Module_Class_Members(TCPServerProcess,TCPServerThread,0);
+    Module_Class_Members(TCPGenericSrvThread,TCPServerThread,0);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) =0;
-    virtual void socketEstablished(int connId, void *yourPtr) = 0;
-    virtual void socketPeerClosed(int connId, void *yourPtr) = 0;
+    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketPeerClosed(int connId, void *yourPtr);
     //@}
 };
 

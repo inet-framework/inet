@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= GenericAppMsg_m.obj TCPBasicClientApp.obj TCPEchoApp.obj TCPGenericCliAppBase.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj TelnetApp.obj
+OBJS= GenericAppMsg_m.obj TCPBasicClientApp.obj TCPEchoApp.obj TCPGenericCliAppBase.obj TCPGenericSrvApp.obj TCPGenericSrvThread.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj TelnetApp.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= GenericAppMsg_m.h
@@ -108,6 +108,9 @@ TCPGenericCliAppBase.obj: TCPGenericCliAppBase.cc
 TCPGenericSrvApp.obj: TCPGenericSrvApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPGenericSrvApp.cc
 
+TCPGenericSrvThread.obj: TCPGenericSrvThread.cc
+	$(CXX) -c $(COPTS) /Tp TCPGenericSrvThread.cc
+
 TCPSessionApp.obj: TCPSessionApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPSessionApp.cc
 
@@ -152,7 +155,13 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 GenericAppMsg_m.obj: GenericAppMsg_m.cc \
   GenericAppMsg_m.h
-TCPBasicClientApp.obj: TCPBasicClientApp.cc
+TCPBasicClientApp.obj: TCPBasicClientApp.cc \
+  TCPBasicClientApp.h \
+  TCPGenericCliAppBase.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
@@ -172,6 +181,14 @@ TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPCommand_m.h \
   GenericAppMsg_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
+TCPGenericSrvThread.obj: TCPGenericSrvThread.cc \
+  TCPGenericSrvThread.h \
+  TCPSrvHostApp.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPSocketMap.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSessionApp.obj: TCPSessionApp.cc \

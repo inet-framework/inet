@@ -27,10 +27,10 @@ class TCPServerThread : public cSimpleModule, public TCPSocket::CallbackInterfac
   private:
     TCPSocket *sock; // ptr into socketMap managed by TCPSrvHostApp
   public:
-    Module_Class_Members(TCPServerProcess,cSimpleModule,0);
+    Module_Class_Members(TCPServerThread,cSimpleModule,0);
 
     /** Called by TCPSrvHostApp after creating this module */
-    void setSocket(TCPSocket *sock) {socket=sock;}
+    void setSocket(TCPSocket *socket) {sock=socket;}
 
     /** Returns the socket object */
     TCPSocket *socket() {return sock;}
