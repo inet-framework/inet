@@ -7,10 +7,10 @@
 ifconfig:
 
 # ethernet card 4 to router 2
-name: eth0		encap: Ethernet		HWaddr: 00:90:27:CB:BC:4	
-inet_addr: 10.0.1.2 	Bcast: 10.10.255.255 	Mask: 255.255.255.0	
+name: eth0	HWaddr: 00:90:27:CB:BC:4
+inet_addr: 10.0.1.2 	Bcast: 10.10.255.255 	Mask: 255.255.255.0
 Groups: 230.0.0.1:230.0.1.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 ifconfigend.
 

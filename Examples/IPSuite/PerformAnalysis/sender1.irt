@@ -7,8 +7,7 @@
 ifconfig:
 
 # PPP link 0 to Router
-name: ppp0 encap: Point-to-Point 	inet_addr: 172.0.0.1
-MTU: 1500	Metric: 1 
+name: ppp0	inet_addr: 172.0.0.1	MTU: 1500	Metric: 1
 
 ifconfigend.
 

@@ -7,9 +7,9 @@
 ifconfig:
 
 # ethernet card 0 to router
-name: eth0		encap: Ethernet		inet_addr: 172.0.2.1
+name: eth0	inet_addr: 172.0.2.1
 Groups: 225.0.0.3:225.0.1.1:225.0.2.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 ifconfigend.
 

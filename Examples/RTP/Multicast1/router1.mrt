@@ -5,22 +5,22 @@
 ifconfig:
 
 # ethernet card 0 to host 1
-name: eth0		encap: Ethernet 	inet_addr: 171.0.0.11
+name: eth0	inet_addr: 171.0.0.11
 #Groups:	225.0.0.1
 MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # ethernet card 1 to host 2
-name: eth1		encap: Ethernet 	inet_addr: 172.0.0.12
+name: eth1	inet_addr: 172.0.0.12
 #Groups:	225.0.0.1
 MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # ethernet card 2 to host 3
-name: eth2		encap: Ethernet 	inet_addr: 173.0.0.13
+name: eth2	inet_addr: 173.0.0.13
 #Groups:	225.0.0.1
 MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # ethernet card 3 to host 4
-name: eth3		encap: Ethernet 	inet_addr: 174.0.0.14
+name: eth3	inet_addr: 174.0.0.14
 #Groups:	225.0.0.1
 MTU: 1500	Metric: 1  BROADCAST MULTICAST
 

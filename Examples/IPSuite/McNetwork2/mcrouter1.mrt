@@ -8,20 +8,16 @@
 ifconfig:
 
 # ethernet card 0 to host 1
-name: eth0		encap: Ethernet 	inet_addr: 172.0.0.11
-MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+name: eth0	inet_addr: 172.0.0.11	MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # ethernet card 1 to host 2
-name: eth1		encap: Ethernet 	inet_addr: 172.0.0.12
-MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+name: eth1	inet_addr: 172.0.0.12	MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # ethernet card 2 to host 3
-name: eth2		encap: Ethernet 	inet_addr: 172.0.0.13
-MTU: 1500	Metric: 1  BROADCAST MULTICAST 
+name: eth2	inet_addr: 172.0.0.13	MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 # PPP link to router 2
-name: ppp0		encap: PPP 			inet_addr: 172.1.0.0
-MTU: 512000		Metric: 1
+name: ppp0	inet_addr: 172.1.0.0	MTU: 512000		Metric: 1
 
 ifconfigend.
 

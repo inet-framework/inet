@@ -7,16 +7,13 @@
 ifconfig:
 
 # ethernet card 0 to client 2
-name: ppp0 encap: Point-to-Point 	inet_addr: 10.0.0.1 	
-MTU: 1500	Metric: 1 
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
 
 # ethernet card 1 to client 3
-name: ppp1		encap: Point-to-Point		inet_addr: 10.0.0.5 	
-MTU: 1500	Metric: 1 
+name: ppp1	inet_addr: 10.0.0.5	MTU: 1500	Metric: 1
 
 # ethernet card 2 to client 3
-name: ppp2		encap: Point-to-Point		inet_addr: 10.0.0.9 	
-MTU: 1500	Metric: 1 
+name: ppp2	inet_addr: 10.0.0.9	MTU: 1500	Metric: 1
 
 ifconfigend.
 
