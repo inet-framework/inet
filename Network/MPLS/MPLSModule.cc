@@ -66,7 +66,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     int gateIndex = msg->arrivalGate()->index();
 
     // If the MPLS processing is not on, then simply passing the packet
-    if (ipdatagram->hasPar("trans"))  // FIXME put this field into IPDatagram!
+    if (ipdatagram->hasPar("trans"))  // FIXME do we need this field?
     {
         send(ipdatagram, "toL2", gateIndex);
         return;
@@ -91,6 +91,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
     {
         // This is message from LDP saying that it is ready.
         // FIXME some assert() to make sure it's really that?
+        // FIXME why should *we* buffer messages? Why can't we send them to LDP and let *it* buffer them until it gets ready???
         ev << "LDP says it is ready, sending out buffered LDP queries to it\n";
 
         isSignallingReady = true;
@@ -116,7 +117,7 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
 
     ev << "Message from signalling: label=" << label << ", FEC=" << returnedFEC << "\n";
 
-    // Try and put returned FEC into the FEC table
+    // Update FEC table
     if (!isLDP)
     {
         for (int i = 0; i < fecList.size(); i++)
@@ -150,6 +151,7 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
             continue;
 
         // Release packets in queue
+        // FIXME only IPDatagrams can occur here, or??
         IPDatagram *data = dynamic_cast<IPDatagram *>(queuedmsg);
         MPLSPacket *mplsPck = dynamic_cast<MPLSPacket *>(queuedmsg);
         ASSERT(data || mplsPck);
@@ -262,8 +264,8 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int optCode;
-    int newLabel;
+    int optCode=-1;
+    int newLabel=-1;
     string outgoingInterface;
     bool found = lt->resolveLabel(oldLabel, senderInterface,
                                   optCode, newLabel, outgoingInterface);
@@ -330,9 +332,6 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
-    cModule *ldpMod = parentModule()->submodule("signal_module");  // FIXME should use connections instead of direct sending....
-    if (!ldpMod)
-        error("Cannot find signal_module");
 
     int gateIndex = ipdatagram->arrivalGate()->index();
 
@@ -349,7 +348,6 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
         bool makeRequest = false;
         int fecID = classifyPacket(ipdatagram, classifierType);
-        // int myColor =0;
         if (fecID == -1)
         {
             makeRequest = true;
@@ -365,7 +363,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
         if (found)  // New Label found
         {
-            ev << " Label found for this message is label(" << label << ")\n";
+            ev << "FEC found in LIB, label=" << label << "\n";
 
             // Construct a new MPLS packet
             MPLSPacket *newPacket = NULL;
@@ -386,41 +384,49 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
             // Send out the packet
             ev << " Ingress Node push new label and sending this packet\n";
             send(newPacket, "toL2", outgoingPort);
-            // delete msg;
         }
         else  // Need to make ldp query
         {
-            ev << "Label not found, making LDP query\n";
+            ev << "FEC not in LIB, making LDP query\n";
 
+            // queue up packet
             ipdatagram->addPar("gateIndex") = gateIndex;
             ipdataQueue.add(ipdatagram);
 
-            // Whether I made requests for this FEC
-            if (!makeRequest)
-                return;  // Do nothing since I have made a previous request pending
-
-            // signal the LDP by sending some messages
-            cMessage *signalMessage = new cMessage("toSignallingModule");
-            // signalMessage->setKind(SIGNAL_KIND);
-            signalMessage->addPar("FEC") = fecID;
-            signalMessage->addPar("dest_addr") = IPAddress(ipdatagram->destAddress()).getInt();
-            signalMessage->addPar("src_addr") = IPAddress(ipdatagram->srcAddress()).getInt();
-            signalMessage->addPar("gateIndex") = gateIndex;
-
-            if (isSignallingReady)
+            if (makeRequest)
             {
-                // Send to MPLSSwitch
-                sendDirect(signalMessage, 0.0, ldpMod, "from_mpls_switch");
+                // if FEC just made it into fecList, we haven't asked LDP yet: do it now
+                requestLabelFor(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
             }
-            else  // Pending
-            {
-                ldpQueue.insert(signalMessage);
-            }
-        }  // End query making
-
-    }  // End data is not transparency
+        }
+    }
 }
 
+
+void MPLSModule::requestLabelFor(int fecID, IPAddress src, IPAddress dest, int gateIndex)
+{
+    cModule *ldpMod = parentModule()->submodule("signal_module");  // FIXME should use connections instead of direct sending....
+    if (!ldpMod)
+        error("Cannot find signal_module");
+
+    // signal the LDP by sending some messages
+    cMessage *signalMessage = new cMessage("toSignallingModule");
+    // signalMessage->setKind(SIGNAL_KIND);
+    signalMessage->addPar("FEC") = fecID;
+    signalMessage->addPar("dest_addr") = src.getInt();
+    signalMessage->addPar("src_addr") = dest.getInt();
+    signalMessage->addPar("gateIndex") = gateIndex;
+
+    if (isSignallingReady)
+    {
+        // Send to MPLSSwitch
+        sendDirect(signalMessage, 0.0, ldpMod, "from_mpls_switch");
+    }
+    else  // Pending
+    {
+        ldpQueue.insert(signalMessage);
+    }
+}
 
 int MPLSModule::classifyPacket(IPDatagram *ipdatagram, int type)
 {
