@@ -91,7 +91,7 @@ public:
  *                             [ <RECORD_ROUTE> ]
  * </code>
  */
-class PathMessage: public RSVPPacket
+class RSVPPathMsg : public RSVPPacket
 {
 protected:
     RsvpHopObj_t rsvp_hop;
@@ -102,7 +102,7 @@ protected:
     bool useERO;
 
 public:
-    PathMessage();
+    RSVPPathMsg();
 
     inline int getSrcAddress() {return sender_descriptor.Sender_Template_Object.SrcAddress;}
     inline int getSrcPort() {return sender_descriptor.Sender_Template_Object.SrcPort;}
@@ -138,7 +138,7 @@ public:
     void setSenderTemplate(SenderTemplateObj_t* s);
     void setSenderTspec(SenderTspecObj_t* s);
     void print();
-    void setContent(PathMessage* pMsg);
+    void setContent(RSVPPathMsg* pMsg);
 };
 
 
@@ -154,7 +154,7 @@ public:
  *                             <STYLE> <flow descriptor list>
  * </code>
  */
-class ResvMessage: public RSVPPacket
+class RSVPResvMsg : public RSVPPacket
 {
 protected:
     RsvpHopObj_t rsvp_hop;
@@ -163,7 +163,7 @@ protected:
     FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
 
 public:
-    ResvMessage();
+    RSVPResvMsg();
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list;}
 
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
@@ -180,7 +180,7 @@ public:
     }
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(ResvMessage* rMsg);
+    void setContent(RSVPResvMsg* rMsg);
     void print();
 };
 
@@ -195,7 +195,7 @@ public:
  *                           [ <sender descriptor> ]
  * </code>
  */
-class PathTearMessage: public RSVPPacket
+class RSVPPathTear : public RSVPPacket
 {
 protected:
     RsvpHopObj_t rsvp_hop;
@@ -203,7 +203,7 @@ protected:
     //SenderDescriptor_t sender_descriptor;
 
 public:
-    PathTearMessage();
+    RSVPPathTear();
 
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
     inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
@@ -217,7 +217,7 @@ public:
     bool equalST(SenderTemplateObj_t* s);
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(PathTearMessage* pMsg);
+    void setContent(RSVPPathTear* pMsg);
     void print();
 };
 
@@ -232,14 +232,14 @@ public:
  *                                        <flow descriptor list>
  * </code>
  */
-class ResvTearMessage: public RSVPPacket
+class RSVPResvTear : public RSVPPacket
 {
 protected:
     RsvpHopObj_t rsvp_hop;
     FlowDescriptor_t flow_descriptor_list[InLIST_SIZE];
 
 public:
-    ResvTearMessage();
+    RSVPResvTear();
     inline FlowDescriptor_t* getFlowDescriptorList() {return flow_descriptor_list;}
 
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
@@ -255,7 +255,7 @@ public:
     }
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(ResvTearMessage* rMsg);
+    void setContent(RSVPResvTear* rMsg);
     void print();
 };
 
@@ -270,7 +270,7 @@ public:
  *                                     [ <sender descriptor> ]
  * </code>
  */
-class PathErrorMessage: public RSVPPacket
+class RSVPPathError : public RSVPPacket
 {
 protected:
     int errorNode;
@@ -278,7 +278,7 @@ protected:
     SenderDescriptor_t sender_descriptor;
 
 public:
-    PathErrorMessage();
+    RSVPPathError();
 
     inline int getErrorNode() {return errorNode;}
     inline void setErrorNode(int i) {errorNode =i;}
@@ -295,7 +295,7 @@ public:
     bool equalSD(SenderDescriptor_t* s);
     void setSenderTemplate(SenderTemplateObj_t* s);
     void setSenderTspec(SenderTspecObj_t* s);
-    void setContent(PathErrorMessage* pMsg);
+    void setContent(RSVPPathError* pMsg);
 };
 
 
@@ -310,7 +310,7 @@ public:
  *                              <STYLE> [ <error flow descriptor>
  * </code>
  */
-class ResvErrorMessage: public RSVPPacket
+class RSVPResvError : public RSVPPacket
 {
 protected:
     RsvpHopObj_t rsvp_hop;
@@ -318,7 +318,7 @@ protected:
     int errorCode;
 
 public:
-    ResvErrorMessage();
+    RSVPResvError();
     inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
     inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
 
@@ -329,7 +329,7 @@ public:
     inline void setErrorCode(int i) {errorCode =i;}
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(ResvErrorMessage* pMsg);
+    void setContent(RSVPResvError* pMsg);
 };
 
 #endif

@@ -210,6 +210,8 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
   ../IPv4/IPDatagram_m.h
+RSVPPacket_m.obj: RSVPPacket_m.cc \
+  RSVPPacket_m.h
 TED.obj: TED.cc \
   TED.h \
   ../../Util/StringTokenizer.h \

@@ -88,14 +88,14 @@ bool RSVPPacket::isInSession(SessionObj_t * s)
 
 /*******************************PATH MESSAGE***************************/
 
-PathMessage::PathMessage():RSVPPacket()
+RSVPPathMsg::RSVPPathMsg():RSVPPacket()
 {
     setKind(PATH_MESSAGE);
 }
 
 
 
-bool PathMessage::equalST(SenderTemplateObj_t * s)
+bool RSVPPathMsg::equalST(SenderTemplateObj_t * s)
 {
     if (sender_descriptor.Sender_Template_Object.SrcAddress ==
         s->SrcAddress &&
@@ -106,7 +106,7 @@ bool PathMessage::equalST(SenderTemplateObj_t * s)
 
 }
 
-bool PathMessage::equalSD(SenderDescriptor_t * s)
+bool RSVPPathMsg::equalSD(SenderDescriptor_t * s)
 {
     if (sender_descriptor.Sender_Template_Object.SrcAddress ==
         s->Sender_Template_Object.SrcAddress &&
@@ -124,26 +124,26 @@ bool PathMessage::equalSD(SenderDescriptor_t * s)
 
 
 
-void PathMessage::setHop(RsvpHopObj_t * h)
+void RSVPPathMsg::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 }
 
-void PathMessage::setSenderTspec(SenderTspecObj_t * s)
+void RSVPPathMsg::setSenderTspec(SenderTspecObj_t * s)
 {
     sender_descriptor.Sender_Tspec_Object.link_delay = s->link_delay;
     sender_descriptor.Sender_Tspec_Object.req_bandwidth = s->req_bandwidth;
 }
 
-void PathMessage::setSenderTemplate(SenderTemplateObj_t * s)
+void RSVPPathMsg::setSenderTemplate(SenderTemplateObj_t * s)
 {
     sender_descriptor.Sender_Template_Object.SrcAddress = s->SrcAddress;
     sender_descriptor.Sender_Template_Object.SrcPort = s->SrcPort;
     sender_descriptor.Sender_Template_Object.Lsp_Id = s->Lsp_Id;
 }
 
-void PathMessage::print()
+void RSVPPathMsg::print()
 {
     ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
         "ProtId   = " << getProtId() << "\n" <<
@@ -157,7 +157,7 @@ void PathMessage::print()
 
 }
 
-void PathMessage::setContent(PathMessage * pMsg)
+void RSVPPathMsg::setContent(RSVPPathMsg * pMsg)
 {
     setSession(pMsg->getSession());
     setHop(pMsg->getHop());
@@ -171,20 +171,20 @@ void PathMessage::setContent(PathMessage * pMsg)
 
 /********************************RESERVATION MESSAGE*************************/
 
-ResvMessage::ResvMessage():RSVPPacket()
+RSVPResvMsg::RSVPResvMsg():RSVPPacket()
 {
     setKind(RESV_MESSAGE);
 }
 
 
 
-void ResvMessage::setHop(RsvpHopObj_t * h)
+void RSVPResvMsg::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 }
 
-void ResvMessage::setContent(ResvMessage * rMsg)
+void RSVPResvMsg::setContent(RSVPResvMsg * rMsg)
 {
     setSession(rMsg->getSession());
     setHop(rMsg->getHop());
@@ -193,7 +193,7 @@ void ResvMessage::setContent(ResvMessage * rMsg)
 }
 
 
-void ResvMessage::print()
+void RSVPResvMsg::print()
 {
     int sIP = 0;
     ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
@@ -224,19 +224,19 @@ void ResvMessage::print()
 }
 
 /********************************PATH TEAR MESSAGE*************************/
-PathTearMessage::PathTearMessage():RSVPPacket()
+RSVPPathTear::RSVPPathTear():RSVPPacket()
 {
     setKind(PTEAR_MESSAGE);
 }
 
-void PathTearMessage::setHop(RsvpHopObj_t * h)
+void RSVPPathTear::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 
 }
 
-void PathTearMessage::setContent(PathTearMessage * pMsg)
+void RSVPPathTear::setContent(RSVPPathTear * pMsg)
 {
     setSession(pMsg->getSession());
     setHop(pMsg->getHop());
@@ -247,14 +247,14 @@ void PathTearMessage::setContent(PathTearMessage * pMsg)
 
 }
 
-void PathTearMessage::setSenderTemplate(SenderTemplateObj_t * s)
+void RSVPPathTear::setSenderTemplate(SenderTemplateObj_t * s)
 {
     senderTemplate.SrcAddress = s->SrcAddress;
     senderTemplate.SrcPort = s->SrcPort;
 }
 
 
-bool PathTearMessage::equalST(SenderTemplateObj_t * s)
+bool RSVPPathTear::equalST(SenderTemplateObj_t * s)
 {
     if (senderTemplate.SrcAddress == s->SrcAddress && senderTemplate.SrcPort == s->SrcPort)
         return true;
@@ -263,7 +263,7 @@ bool PathTearMessage::equalST(SenderTemplateObj_t * s)
 }
 
 
-void PathTearMessage::print()
+void RSVPPathTear::print()
 {
     ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
         "ProtId   = " << getProtId() << "\n" <<
@@ -277,26 +277,26 @@ void PathTearMessage::print()
 }
 
 /********************************RESV TEAR MESSAGE*************************/
-ResvTearMessage::ResvTearMessage():RSVPPacket()
+RSVPResvTear::RSVPResvTear():RSVPPacket()
 {
     setKind(RTEAR_MESSAGE);
 }
 
-void ResvTearMessage::setHop(RsvpHopObj_t * h)
+void RSVPResvTear::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 
 }
 
-void ResvTearMessage::setContent(ResvTearMessage * rMsg)
+void RSVPResvTear::setContent(RSVPResvTear * rMsg)
 {
     setSession(rMsg->getSession());
     setHop(rMsg->getHop());
     setFlowDescriptor(rMsg->getFlowDescriptor());
 }
 
-void ResvTearMessage::print()
+void RSVPResvTear::print()
 {
     int sIP = 0;
     ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
@@ -319,13 +319,13 @@ void ResvTearMessage::print()
 
 /********************************PATH ERROR MESSAGE*************************/
 
-PathErrorMessage::PathErrorMessage():RSVPPacket()
+RSVPPathError::RSVPPathError():RSVPPacket()
 {
     setKind(PERROR_MESSAGE);
 
 }
 
-void PathErrorMessage::setContent(PathErrorMessage * pMsg)
+void RSVPPathError::setContent(RSVPPathError * pMsg)
 {
     setSession(pMsg->getSession());
     setErrorCode(pMsg->getErrorCode());
@@ -335,7 +335,7 @@ void PathErrorMessage::setContent(PathErrorMessage * pMsg)
 
 }
 
-bool PathErrorMessage::equalST(SenderTemplateObj_t * s)
+bool RSVPPathError::equalST(SenderTemplateObj_t * s)
 {
     if (sender_descriptor.Sender_Template_Object.SrcAddress ==
         s->SrcAddress && sender_descriptor.Sender_Template_Object.SrcPort == s->SrcPort)
@@ -344,7 +344,7 @@ bool PathErrorMessage::equalST(SenderTemplateObj_t * s)
 
 }
 
-bool PathErrorMessage::equalSD(SenderDescriptor_t * s)
+bool RSVPPathError::equalSD(SenderDescriptor_t * s)
 {
     if (sender_descriptor.Sender_Template_Object.SrcAddress ==
         s->Sender_Template_Object.SrcAddress &&
@@ -357,13 +357,13 @@ bool PathErrorMessage::equalSD(SenderDescriptor_t * s)
     return false;
 }
 
-void PathErrorMessage::setSenderTspec(SenderTspecObj_t * s)
+void RSVPPathError::setSenderTspec(SenderTspecObj_t * s)
 {
     sender_descriptor.Sender_Tspec_Object.link_delay = s->link_delay;
     sender_descriptor.Sender_Tspec_Object.req_bandwidth = s->req_bandwidth;
 }
 
-void PathErrorMessage::setSenderTemplate(SenderTemplateObj_t * s)
+void RSVPPathError::setSenderTemplate(SenderTemplateObj_t * s)
 {
     sender_descriptor.Sender_Template_Object.SrcAddress = s->SrcAddress;
     sender_descriptor.Sender_Template_Object.SrcPort = s->SrcPort;
@@ -372,19 +372,19 @@ void PathErrorMessage::setSenderTemplate(SenderTemplateObj_t * s)
 
 /********************************RESV ERROR MESSAGE*************************/
 
-ResvErrorMessage::ResvErrorMessage():RSVPPacket()
+RSVPResvError::RSVPResvError():RSVPPacket()
 {
     setKind(RERROR_MESSAGE);
 }
 
-void ResvErrorMessage::setHop(RsvpHopObj_t * h)
+void RSVPResvError::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 
 }
 
-void ResvErrorMessage::setContent(ResvErrorMessage * rMsg)
+void RSVPResvError::setContent(RSVPResvError * rMsg)
 {
     setSession(rMsg->getSession());
     setHop(rMsg->getHop());

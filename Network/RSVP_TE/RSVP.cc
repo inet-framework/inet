@@ -43,14 +43,14 @@ void RSVP::initialize(int stage)
 void RSVP::activity()
 {
     cMessage *msg;
-    PathMessage *pm;
-    ResvMessage *rm;
-    PathTearMessage *ptm;
-    ResvTearMessage *rtm;
-    PathErrorMessage *pem;
-    ResvErrorMessage *rem;
+    RSVPPathMsg *pm;
+    RSVPResvMsg *rm;
+    RSVPPathTear *ptm;
+    RSVPResvTear *rtm;
+    RSVPPathError *pem;
+    RSVPResvError *rem;
 
-    // PathTearMessage *ptm;
+    // RSVPPathTear *ptm;
     int inInf;
     int i;
 
@@ -94,29 +94,29 @@ void RSVP::activity()
             {
             case PATH_MESSAGE:
                 inInf = msg->par("peerInf");
-                pm = check_and_cast<PathMessage *>(msg);
+                pm = check_and_cast<RSVPPathMsg *>(msg);
                 PathMsgPro(pm, inInf);
                 break;
 
             case RESV_MESSAGE:
-                rm = check_and_cast<ResvMessage *>(msg);
+                rm = check_and_cast<RSVPResvMsg *>(msg);
                 ResvMsgPro(rm);
                 break;
 
             case PTEAR_MESSAGE:
-                ptm = check_and_cast<PathTearMessage *>(msg);
+                ptm = check_and_cast<RSVPPathTear *>(msg);
                 PTearMsgPro(ptm);
                 break;
             case RTEAR_MESSAGE:
-                rtm = check_and_cast<ResvTearMessage *>(msg);
+                rtm = check_and_cast<RSVPResvTear *>(msg);
                 RTearMsgPro(rtm);
                 break;
             case PERROR_MESSAGE:
-                pem = check_and_cast<PathErrorMessage *>(msg);
+                pem = check_and_cast<RSVPPathError *>(msg);
                 PErrorMsgPro(pem);
                 break;
             case RERROR_MESSAGE:
-                rem = check_and_cast<ResvErrorMessage *>(msg);
+                rem = check_and_cast<RSVPResvError *>(msg);
                 RErrorMsgPro(rem);
                 break;
             default:
@@ -128,7 +128,7 @@ void RSVP::activity()
     }
 }
 
-void RSVP::PathMsgPro(PathMessage * pmsg, int InIf)
+void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 {
     /*
        if(IsER)
@@ -432,7 +432,7 @@ void RSVP::PathMsgPro(PathMessage * pmsg, int InIf)
     }
 }
 
-void RSVP::ResvMsgPro(ResvMessage * rmsg)
+void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
 {
     /*
        if(IsER)
@@ -590,7 +590,7 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
     {
         fdlist = rmsg->getFlowDescriptorList() + inx;
 
-        ev << "Process FilterSpec in ResvMessage with style = " << ResvStyle << "\n";
+        ev << "Process FilterSpec in RSVPResvMsg with style = " << ResvStyle << "\n";
 
         // If the style is FF, we need to process each FilterSpec
         if (ResvStyle == FF_STYLE)
@@ -818,7 +818,7 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
             {
                 ev << "Update traffic control fails\n";
                 Resv_Refresh_Needed_Flag = OFF;
-                ResvErrorMessage *errorMsg = new ResvErrorMessage();
+                RSVPResvError *errorMsg = new RSVPResvError();
                 errorMsg->setSession(&activeRSB->Session_Object);
                 // errorMsg->addPar("dest_addr") = IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
                 // errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
@@ -926,7 +926,7 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
     return;
 }
 
-void RSVP::PTearMsgPro(PathTearMessage * pmsg)
+void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
 {
     ev << "********Enter Path Tear Message Pro******************\n";
 
@@ -954,7 +954,7 @@ void RSVP::PTearMsgPro(PathTearMessage * pmsg)
                    interface listed in OutInterface_list of the PSB.
                  */
 
-                PathTearMessage *ptm = new PathTearMessage;
+                RSVPPathTear *ptm = new RSVPPathTear;
                 ptm->setContent(pmsg);
 
                 if (!IsER)
@@ -1045,7 +1045,7 @@ void RSVP::PTearMsgPro(PathTearMessage * pmsg)
 
 }
 
-void RSVP::RTearMsgPro(ResvTearMessage * rmsg)
+void RSVP::RTearMsgPro(RSVPResvTear * rmsg)
 {
 
     ev << "***************************ENTER RERSV TEAR MSG PRO*****************************\n";
@@ -1154,7 +1154,7 @@ void RSVP::RTearMsgPro(ResvTearMessage * rmsg)
 
 }
 
-void RSVP::PErrorMsgPro(PathErrorMessage * pmsg)
+void RSVP::PErrorMsgPro(RSVPPathError * pmsg)
 {
 
     ev << "************************ENTER PATH ERROR MESSAGE PRO***************************\n";
@@ -1179,7 +1179,7 @@ void RSVP::PErrorMsgPro(PathErrorMessage * pmsg)
     }
     if (p_iterI == PSBList.end())
     {
-        error("Cannot find path for PathErrorMessage");
+        error("Cannot find path for RSVPPathError");
         // delete pmsg;
         // return;
     }
@@ -1190,7 +1190,7 @@ void RSVP::PErrorMsgPro(PathErrorMessage * pmsg)
     sendToIP(pmsg, IPAddress(p_iter.Previous_Hop_Address));
 }
 
-void RSVP::RErrorMsgPro(ResvErrorMessage * rmsg)
+void RSVP::RErrorMsgPro(RSVPResvError * rmsg)
 {
     // Simple way
     send(rmsg, "to_ip");
@@ -1198,7 +1198,7 @@ void RSVP::RErrorMsgPro(ResvErrorMessage * rmsg)
 }
 void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 {
-    PathMessage *pm = new PathMessage;
+    RSVPPathMsg *pm = new RSVPPathMsg;
 
     /*
        o    Insert TIME_VALUES object into the PATH message being
@@ -1300,7 +1300,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     // int PHOP;
     int found = OFF;
     // int B_Merge=OFF;
-    ResvMessage *outRM = new ResvMessage;
+    RSVPResvMsg *outRM = new RSVPResvMsg;
     FlowSpecObj_t *Tc_Flowspec = new FlowSpecObj_t;
     std::vector < PathStateBlock_t >::iterator p_iterI;
     PathStateBlock_t p_iter;
@@ -1476,7 +1476,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     // int PHOP;
     // int found =OFF;
     // int B_Merge=OFF;
-    ResvTearMessage *outRM = new ResvTearMessage;
+    RSVPResvTear *outRM = new RSVPResvTear;
     // FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
 
     // int resv_style; // Support FF style only
@@ -2294,7 +2294,7 @@ void RSVP::printTCSB(TrafficControlStateBlock_t * t)
     printSenderTspecObject(&t->TC_Tspec);
 }
 
-bool RSVP::doCACCheck(PathMessage * pmsg, int OI)
+bool RSVP::doCACCheck(RSVPPathMsg * pmsg, int OI)
 {
     // if(PSBList.empty())
     // {
@@ -2362,7 +2362,7 @@ bool RSVP::doCACCheck(PathMessage * pmsg, int OI)
             {
                 ev << "Admission Control fails for PATH message\n";
                 // Contruct new PATH ERROR and send back
-                PathErrorMessage *pe = new PathErrorMessage();
+                RSVPPathError *pe = new RSVPPathError();
                 pe->setErrorCode(1);    // Admission Control Error
                 pe->setErrorNode(routerId);
                 pe->setSession(pmsg->getSession());
@@ -2401,7 +2401,7 @@ void RSVP::preemptTunnel(int tunnelId)
         {
             if (PSBList[m].Session_Object.Tunnel_Id == tunnelId)
             {
-                PathTearMessage *ptMsg = new PathTearMessage();
+                RSVPPathTear *ptMsg = new RSVPPathTear();
                 ptMsg->setSession(&PSBList[m].Session_Object);
                 ptMsg->setSenderTemplate(&PSBList[m].Sender_Template_Object);
 

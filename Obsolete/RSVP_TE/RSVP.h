@@ -184,12 +184,12 @@ private:
     std::vector<RHandleType_t> FlowTable;
 
     /*Message Processing */
-    void PathMsgPro(PathMessage *pmsg, int InIf);
-    void ResvMsgPro(ResvMessage *rmsg);
-    void PTearMsgPro(PathTearMessage *pmsg);
-    void RTearMsgPro(ResvTearMessage *rmsg);
-    void PErrorMsgPro(PathErrorMessage *pmsg);
-    void RErrorMsgPro(ResvErrorMessage *rmsg);
+    void PathMsgPro(RSVPPathMsg *pmsg, int InIf);
+    void ResvMsgPro(RSVPResvMsg *rmsg);
+    void PTearMsgPro(RSVPPathTear *pmsg);
+    void RTearMsgPro(RSVPResvTear *rmsg);
+    void PErrorMsgPro(RSVPPathError *pmsg);
+    void RErrorMsgPro(RSVPResvError *rmsg);
 
 
     bool IsLocalAddress(int ip);
@@ -229,7 +229,7 @@ private:
     void setTCTspecforTCSB(TrafficControlStateBlock_t* t, SenderTspecObj_t* s);
     void printTCSB(TrafficControlStateBlock_t* t);
 
-    bool doCACCheck(PathMessage* pmsg, int OI);
+    bool doCACCheck(RSVPPathMsg* pmsg, int OI);
     void preemptTunnel(int tunnelId);
     void propagateTEDchanges();
 

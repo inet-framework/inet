@@ -79,19 +79,19 @@ void RSVPAppl::processMsgFromRSVP(cMessage *msg)
 {
     switch(msg->kind())
     {
-        case PERROR_MESSAGE: processRSVP_PERROR(check_and_cast<PathErrorMessage *>(msg)); break;
+        case PERROR_MESSAGE: processRSVP_PERROR(check_and_cast<RSVPPathError *>(msg)); break;
         case PTEAR_MESSAGE:  processRSVP_PTEAR(msg); break;
         case RTEAR_MESSAGE:  processRSVP_RTEAR(msg); break;
-        case PATH_MESSAGE:   processRSVP_PATH(check_and_cast<PathMessage *>(msg)); break;
-        case RESV_MESSAGE:   processRSVP_RESV(check_and_cast<ResvMessage *>(msg)); break;
+        case PATH_MESSAGE:   processRSVP_PATH(check_and_cast<RSVPPathMsg *>(msg)); break;
+        case RESV_MESSAGE:   processRSVP_RESV(check_and_cast<RSVPResvMsg *>(msg)); break;
         default: error("unrecognised RSVP message, kind=%d", msg->kind());
     }
 }
 
-void RSVPAppl::processRSVP_PERROR(PathErrorMessage *pe)
+void RSVPAppl::processRSVP_PERROR(RSVPPathError *pe)
 {
     // create new PATH TEAR
-    PathTearMessage *pt = new PathTearMessage();
+    RSVPPathTear *pt = new RSVPPathTear();
     pt->setSenderTemplate(pe->getSenderTemplate());
     pt->setSession(pe->getSession());
 
@@ -117,7 +117,7 @@ void RSVPAppl::processRSVP_RTEAR(cMessage *msg)
     delete msg;
 }
 
-void RSVPAppl::processRSVP_PATH(PathMessage *pMessage)
+void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -158,7 +158,7 @@ void RSVPAppl::processRSVP_PATH(PathMessage *pMessage)
 }
 
 
-void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
+void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
@@ -265,7 +265,7 @@ void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
                     **************************************************/
                     if (lsp_id > MAX_LSP_NO)
                     {
-                        PathTearMessage *pt = new PathTearMessage();
+                        RSVPPathTear *pt = new RSVPPathTear();
                         SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
                         sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
                         sTemplate->SrcAddress =
@@ -319,7 +319,7 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
     if (iterF == FecSenderBinds.end())
         error("Cannot find the session to teardown");
 
-    PathTearMessage *pt = new PathTearMessage();
+    RSVPPathTear *pt = new RSVPPathTear();
     pt->setSenderTemplate(&aTunnel.Sender_Template);
     pt->setSession(&aTunnel.Session);
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
@@ -560,10 +560,10 @@ void RSVPAppl::processCommand_NEW_ROUTE_DISCOVER(cMessage *msg)
 }
 
 
-void RSVPAppl::sendResvMessage(PathMessage * pMsg, int inLabel)
+void RSVPAppl::sendResvMessage(RSVPPathMsg * pMsg, int inLabel)
 {
     ev << "Generate a Resv Message\n";
-    ResvMessage *rMsg = new ResvMessage();
+    RSVPResvMsg *rMsg = new RSVPResvMsg();
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     FlowSpecObj_t *Flowspec_Object = new FlowSpecObj_t;
     FilterSpecObj_t *Filter_Spec_Object = new FilterSpecObj_t;
@@ -646,7 +646,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 {
     OspfTe *ospfte = ospfteAccess.get();
 
-    PathMessage *pMsg = new PathMessage();
+    RSVPPathMsg *pMsg = new RSVPPathMsg();
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     FlowSpecObj_t *Flowspec_Object = new FlowSpecObj_t;
 
@@ -996,7 +996,7 @@ traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *connNode)
 
 
 
-void RSVPAppl::addRouteInfo(ResvMessage * rmsg)
+void RSVPAppl::addRouteInfo(RSVPResvMsg * rmsg)
 {
     FlowDescriptor_t *flow_d = rmsg->getFlowDescriptor();
     for (int k = 0; k < InLIST_SIZE; k++)

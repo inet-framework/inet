@@ -21,7 +21,7 @@
 #ifndef __intserv_h__
 #define __intserv_h__
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include <string.h>
 
 #define MAX_ROUTE 10

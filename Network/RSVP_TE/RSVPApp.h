@@ -85,7 +85,7 @@ private:
 
     bool initFromFile(const cXMLElement *root);
     traffic_request_t parseTrafficRequest(const cXMLElement *connNode);
-    void addRouteInfo(ResvMessage* rmsg);
+    void addRouteInfo(RSVPResvMsg* rmsg);
     bool hasPath(int lspid, FlowSpecObj_t* newFlowspec);
     double getTotalDelay(std::vector<simple_link_t> *links);
 
@@ -114,11 +114,11 @@ public:
 
     /** @name Process various RSVP message types */
     //@{
-    void processRSVP_PERROR(PathErrorMessage *pe);
+    void processRSVP_PERROR(RSVPPathError *pe);
     void processRSVP_PTEAR(cMessage *msg);
     void processRSVP_RTEAR(cMessage *msg);
-    void processRSVP_PATH(PathMessage *pMessage);
-    void processRSVP_RESV(ResvMessage *rMessage);
+    void processRSVP_PATH(RSVPPathMsg *pMessage);
+    void processRSVP_RESV(RSVPResvMsg *rMessage);
     //@}
 
     /** @name Process various commands from Tester */
@@ -135,7 +135,7 @@ public:
 
     //void sendPathMessage(SessionObj_t* s, traffic_request_t* t);
     void sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId);
-    void sendResvMessage(PathMessage* pMsg, int inLabel);
+    void sendResvMessage(RSVPPathMsg* pMsg, int inLabel);
 
     void Mcast_Route_Query(int sa, int iad, int da, int *outl);
     void Unicast_Route_Query(int da, int* outl);
