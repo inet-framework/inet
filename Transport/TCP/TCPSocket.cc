@@ -63,7 +63,7 @@ void TCPSocket::bind(int lPort)
         opp_error("TCPSocket::bind(): socket already bound");
 
     localPort = lPort;
-    sockstate = BOUND;
+    sockstate = CLOSED;
 }
 
 void TCPSocket::bind(IPAddress lAddr, int lPort)
@@ -73,12 +73,12 @@ void TCPSocket::bind(IPAddress lAddr, int lPort)
 
     localAddr = lAddr;
     localPort = lPort;
-    sockstate = BOUND;
+    sockstate = CLOSED;
 }
 
 void TCPSocket::listen(bool fork)
 {
-    if (sockstate!=BOUND)
+    if (sockstate!=CLOSED)
         opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before listen()"
                                        : "TCPSocket::listen(): connect() or listen() already called");
 
@@ -97,7 +97,7 @@ void TCPSocket::listen(bool fork)
 
 void TCPSocket::connect(IPAddress remoteAddr, int remotePort)
 {
-    if (sockstate!=BOUND)
+    if (sockstate!=CLOSED)
         opp_error(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before connect()"
                                        : "TCPSocket::connect(): connect() or listen() already called");
 
@@ -142,7 +142,7 @@ void TCPSocket::close()
 
 void TCPSocket::abort()
 {
-    if (sockstate!=NOT_BOUND && sockstate!=BOUND && sockstate!=CLOSED && sockstate!=SOCKERROR)
+    if (sockstate!=NOT_BOUND && sockstate!=CLOSED && sockstate!=SOCKERROR)
     {
         cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
         TCPCommand *cmd = new TCPCommand();

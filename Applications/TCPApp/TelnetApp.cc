@@ -42,14 +42,15 @@ void TelnetApp::handleTimer(cMessage *msg)
     switch (msg->kind())
     {
         case MSGKIND_CONNECT:
+            ev << "user fires up telnet program\n";
             connect();
             break;
 
         case MSGKIND_SEND:
-           if (numCharsToType>1)
+           if (numCharsToType>0)
            {
                // user types a character and expects it to be echoed
-               ev << "user types one character, " << numCharsToType-1 << " to go\n";
+               ev << "user types one character, " << numCharsToType-1 << " more to go\n";
                sendPacket(1,1);
                scheduleAt(simTime()+(simtime_t)par("keyPressDelay"), timeoutMsg);
                numCharsToType--;
@@ -66,6 +67,7 @@ void TelnetApp::handleTimer(cMessage *msg)
            break;
 
         case MSGKIND_CLOSE:
+           ev << "user exits telnet program\n";
            close();
            break;
     }
@@ -78,7 +80,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
     // schedule first sending
     numLinesToType = (long) par("numCommands");
     numCharsToType = (long) par("commandLength");
-    timeoutMsg->setKind(MSGKIND_SEND);
+    timeoutMsg->setKind(numLinesToType>0 ? MSGKIND_SEND : MSGKIND_CLOSE);
     scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
 }
 
@@ -95,7 +97,7 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
     else
     {
         // output from last typed command arrived.
-        ev << "received output of last command typed\n";
+        ev << "received output of command typed\n";
 
         // If user has finished working, she closes the connection, otherwise
         // starts typing again after a delay
@@ -103,8 +105,9 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
 
         if (numLinesToType==0)
         {
-            ev << "user finished session, closing TCP connection\n";
-            close();
+            ev << "user has no more commands to type\n";
+            timeoutMsg->setKind(MSGKIND_CLOSE);
+            scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
         }
         else
         {

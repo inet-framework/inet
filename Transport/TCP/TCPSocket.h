@@ -125,7 +125,7 @@ class TCPSocket
         virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
     };
 
-    enum State {NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR};
+    enum State {NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR};
 
   protected:
     int connId;
@@ -169,7 +169,7 @@ class TCPSocket
     int connectionId() const  {return connId;}
 
     /**
-     * Returns the socket state, one of NOT_BOUND, BOUND, LISTENING, CONNECTING,
+     * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from TCP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */

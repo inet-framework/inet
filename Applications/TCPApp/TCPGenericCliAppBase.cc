@@ -106,8 +106,12 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
 
 void TCPGenericCliAppBase::socketPeerClosed(int, void *)
 {
-    // we probably want to close too
-    close();
+    // close the connection (if not already closed)
+    if (socket.state()==TCPSocket::PEER_CLOSED)
+    {
+        ev << "remote TCP closed, closing here as well\n";
+        close();
+    }
 }
 
 void TCPGenericCliAppBase::socketClosed(int, void *)

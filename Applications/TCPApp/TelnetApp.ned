@@ -36,7 +36,7 @@ simple TelnetApp
         connectPort: numeric const, // port number to connect to
         startTime: numeric, // time first session begins
         numCommands: numeric, // user types this many commands in a session
-        commandLength: numeric, // commands are this many characters (incl. Enter)
+        commandLength: numeric, // commands are this many characters (plus Enter)
         keyPressDelay: numeric, // delay between keypresses
         commandOutputLength: numeric, // commands produces this much output (bytes)
         thinkTime: numeric, // user waits this much before starting to type new command
