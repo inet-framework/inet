@@ -99,7 +99,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             if (localPort==-1)
                 opp_error("Error processing command OPEN_PASSIVE: local port must be specified");
 
-            tcpEV << "Listening on: " << localAddr << ":" << localPort << "\n";
+            tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
             tcpMain->updateSockPair(this, localAddr, IPAddress(), localPort, -1);
             break;
@@ -122,7 +122,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             opp_error("Error processing command SEND: connection not open");
 
         case TCP_S_LISTEN:
-            // this turns passive open into active open, send initial SYN
+            tcpEV << "SEND command turns passive open into active open, sending initial SYN\n";
             state->active = true;
             selectInitialSeqNum();
             sendSyn();
@@ -133,6 +133,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
+            tcpEV << "Queueing up data for sending later.\n";
             sendQueue->enqueueAppData(msg); // queue up for later
             break;
 

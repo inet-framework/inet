@@ -23,5 +23,6 @@ express-mode=true
 include ../../defaults.ini
 
 %contains: stdout
+tcpTestNet2.cli: received 0 bytes in 0 packets
 tcpTestNet2.srv: received 655360 bytes in 287 packets
-[39.213] tcpdump finished, A:687 B:408 segments
+[47.927] tcpdump finished, A:687 B:408 segments

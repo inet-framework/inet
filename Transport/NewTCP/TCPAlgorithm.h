@@ -80,9 +80,16 @@ class TCPAlgorithm : public cPolymorphic
     /**
      * Called when the connection is going to ESTABLISHED from SYN_SENT or
      * SYN_RCVD. This is a place to initialize some variables (e.g. set
-     * cwnd to the MSS learned during connection setup).
+     * cwnd to the MSS learned during connection setup). If we are on the
+     * active side, here we also have to finish the 3-way connection setup
+     * procedure by sending an ACK, possibly piggybacked on data.
      */
-    virtual void established() = 0;
+    virtual void established(bool active) = 0;
+
+    /**
+     * Called when the connection closes, it should cancel all running timers.
+     */
+    virtual void connectionClosed() = 0;
 
     /**
      * Place to process timers specific to this TCPAlgorithm class.

@@ -136,10 +136,15 @@ TCPConnection::~TCPConnection()
     delete tcpAlgorithm;
     delete state;
 
-    if (the2MSLTimer) delete tcpMain->cancelEvent(the2MSLTimer);
-    if (connEstabTimer) delete tcpMain->cancelEvent(connEstabTimer);
-    if (finWait2Timer) delete tcpMain->cancelEvent(finWait2Timer);
-    if (synRexmitTimer) delete tcpMain->cancelEvent(synRexmitTimer);
+    ASSERT(!the2MSLTimer || !the2MSLTimer->isScheduled());
+    ASSERT(!connEstabTimer || !connEstabTimer->isScheduled());
+    ASSERT(!finWait2Timer || !finWait2Timer->isScheduled());
+    ASSERT(!synRexmitTimer || !synRexmitTimer->isScheduled());
+
+    delete the2MSLTimer;
+    delete connEstabTimer;
+    delete finWait2Timer;
+    delete synRexmitTimer;
 }
 
 bool TCPConnection::processTimer(cMessage *msg)
@@ -379,6 +384,9 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     {
         tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (event was: " << eventName(event) << ")\n";
         testingEV << tcpMain->name() << ": " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (on " << eventName(event) << ")\n";
+
+        // cancel timers, etc.
+        stateEntered(fsm.state());
     }
     else
     {
@@ -388,5 +396,44 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     return fsm.state()!=TCP_S_CLOSED;
 }
 
+void TCPConnection::stateEntered(int state)
+{
+    // cancel timers
+    switch (state)
+    {
+        case TCP_S_INIT:
+            // we'll never get back to INIT
+            break;
+        case TCP_S_LISTEN:
+            // we may get back to LISTEN from SYN_RCVD
+            ASSERT(connEstabTimer && synRexmitTimer);
+            tcpMain->cancelEvent(connEstabTimer);
+            tcpMain->cancelEvent(synRexmitTimer);
+            break;
+        case TCP_S_SYN_RCVD:
+        case TCP_S_SYN_SENT:
+            break;
+        case TCP_S_ESTABLISHED:
+        case TCP_S_CLOSE_WAIT:
+        case TCP_S_LAST_ACK:
+        case TCP_S_FIN_WAIT_1:
+        case TCP_S_FIN_WAIT_2:
+        case TCP_S_CLOSING:
+        case TCP_S_TIME_WAIT:
+            // whether connection setup succeeded (ESTABLISHED) or not (others),
+            // cancel these timers
+            if (connEstabTimer) tcpMain->cancelEvent(connEstabTimer);
+            if (synRexmitTimer) tcpMain->cancelEvent(synRexmitTimer);
+            break;
+        case TCP_S_CLOSED:
+            // all timers need to be cancelled
+            if (the2MSLTimer) tcpMain->cancelEvent(the2MSLTimer);
+            if (connEstabTimer) tcpMain->cancelEvent(connEstabTimer);
+            if (finWait2Timer) tcpMain->cancelEvent(finWait2Timer);
+            if (synRexmitTimer) tcpMain->cancelEvent(synRexmitTimer);
+            tcpAlgorithm->connectionClosed();
+            break;
+    }
+}
 
 

@@ -71,11 +71,15 @@ TCPTahoeReno::~TCPTahoeReno()
     // Note: don't delete "state" here, it'll be deleted from TCPConnection
 
     // Delete timers
-    TCPMain *mod = conn->getTcpMain();
-    delete mod->cancelEvent(rexmitTimer);
-    delete mod->cancelEvent(persistTimer);
-    delete mod->cancelEvent(delayedAckTimer);
-    delete mod->cancelEvent(keepAliveTimer);
+    ASSERT(rexmitTimer && !rexmitTimer->isScheduled());
+    ASSERT(persistTimer && !persistTimer->isScheduled());
+    ASSERT(delayedAckTimer && !delayedAckTimer->isScheduled());
+    ASSERT(keepAliveTimer && !keepAliveTimer->isScheduled());
+
+    delete rexmitTimer;
+    delete persistTimer;
+    delete delayedAckTimer;
+    delete keepAliveTimer;
 }
 
 void TCPTahoeReno::initialize()
@@ -100,11 +104,28 @@ TCPStateVariables *TCPTahoeReno::createStateVariables()
     return state;
 }
 
-void TCPTahoeReno::established()
+void TCPTahoeReno::established(bool active)
 {
     // initialize cwnd (we may learn MSS during connection setup --
     // this (MSS TCP option) is not implemented yet though)
     state->snd_cwnd = state->snd_mss;
+
+    if (active)
+    {
+        // finish connection setup with ACK (possibly piggybacked on data)
+        tcpEV << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
+        if (!sendData())
+            conn->sendAck();
+    }
+}
+
+void TCPTahoeReno::connectionClosed()
+{
+    TCPMain *mod = conn->getTcpMain();
+    mod->cancelEvent(rexmitTimer);
+    mod->cancelEvent(persistTimer);
+    mod->cancelEvent(delayedAckTimer);
+    mod->cancelEvent(keepAliveTimer);
 }
 
 void TCPTahoeReno::processTimer(cMessage *timer, TCPEventCode& event)
@@ -224,7 +245,7 @@ void TCPTahoeReno::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     state->rexmit_timeout = rto;
 }
 
-void TCPTahoeReno::sendData()
+bool TCPTahoeReno::sendData()
 {
     //
     // Nagle's algorithm: when a TCP connection has outstanding data that has not
@@ -242,7 +263,7 @@ void TCPTahoeReno::sendData()
     // Slow start, congestion control etc.: send window is effectively the
     // minimum of the congestion window (cwnd) and the advertised window (snd_wnd).
     //
-    conn->sendData(fullSegmentsOnly, state->snd_cwnd);
+    return conn->sendData(fullSegmentsOnly, state->snd_cwnd);
 }
 
 void TCPTahoeReno::sendCommandInvoked()

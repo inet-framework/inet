@@ -63,7 +63,9 @@ class DummyTCPAlg : public TCPAlgorithm
      */
     virtual TCPStateVariables *createStateVariables();
 
-    virtual void established();
+    virtual void established(bool active);
+
+    virtual void connectionClosed();
 
     virtual void processTimer(cMessage *timer, TCPEventCode& event);
 

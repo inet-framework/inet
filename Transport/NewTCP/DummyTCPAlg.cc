@@ -39,7 +39,18 @@ TCPStateVariables *DummyTCPAlg::createStateVariables()
     return state;
 }
 
-void DummyTCPAlg::established()
+void DummyTCPAlg::established(bool active)
+{
+    if (active)
+    {
+        // finish connection setup with ACK (possibly piggybacked on data)
+        tcpEV << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
+        if (!conn->sendData(false))
+            conn->sendAck();
+    }
+}
+
+void DummyTCPAlg::connectionClosed()
 {
 }
 
@@ -50,13 +61,13 @@ void DummyTCPAlg::processTimer(cMessage *timer, TCPEventCode& event)
 
 void DummyTCPAlg::sendCommandInvoked()
 {
-    // start sending as much as possible, small segments also OK (Nagle off)
+    // start sending
     conn->sendData(false);
 }
 
 void DummyTCPAlg::receivedOutOfOrderSegment()
 {
-    tcpEV << "out-of-order segment, sending immediate ACK\n";
+    tcpEV << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
 }
 

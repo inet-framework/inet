@@ -116,9 +116,9 @@ class TCPTahoeReno : public TCPAlgorithm
     virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
 
     /**
-     * Send data, observing Nagle's algorithm
+     * Send data, observing Nagle's algorithm and congestion window
      */
-    virtual void sendData();
+    virtual bool sendData();
 
   public:
     /**
@@ -141,7 +141,9 @@ class TCPTahoeReno : public TCPAlgorithm
      */
     virtual TCPStateVariables *createStateVariables();
 
-    virtual void established();
+    virtual void established(bool active);
+
+    virtual void connectionClosed();
 
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.

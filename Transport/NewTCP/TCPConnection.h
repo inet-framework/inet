@@ -266,8 +266,12 @@ class TCPConnection
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
+    /** Maps app command codes (msg kind of app command msgs) to TCP_E_xxx event codes */
     TCPEventCode preanalyseAppCommandEvent(int commandCode);
+    /** Implemements the pure TCP state machine */
     bool performStateTransition(const TCPEventCode& event);
+    /** Perform cleanup necessary when entering a new state, e.g. cancelling timers */
+    void stateEntered(int state);
     //@}
 
     /** @name Processing app commands (may override event code) */
@@ -326,9 +330,10 @@ class TCPConnection
 
     /**
      * Utility: Send data from sendQueue, at most maxNumBytes (-1 means no limit).
-     * If fullSegments is set, don't send segments smaller than MSS (needed for Nagle)
+     * If fullSegments is set, don't send segments smaller than MSS (needed for Nagle).
+     * Returns true if some data was actually sent.
      */
-    void sendData(bool fullSegments, int maxNumBytes=-1);
+    bool sendData(bool fullSegments, int maxNumBytes=-1);
 
     /**
      * Utility: retransmit one segment from snd_una

@@ -29,5 +29,5 @@ include ../../defaults.ini
 
 %contains: stdout
 tcpTestNet2.cli: received 0 bytes in 0 packets
-tcpTestNet2.srv: received 655360 bytes in 134 packets
-[161.527] tcpdump finished, A:760 B:915 segments
+tcpTestNet2.srv: received 655360 bytes in 135 packets
+[330.531] tcpdump finished, A:763 B:941 segments

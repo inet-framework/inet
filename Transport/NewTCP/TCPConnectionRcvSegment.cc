@@ -251,7 +251,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         connEstabTimer = synRexmitTimer = NULL;
 
         // notify
-        tcpAlgorithm->established();
+        tcpAlgorithm->established(false);
     }
 
     uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
@@ -598,7 +598,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         selectInitialSeqNum();
         sendSynAck();
         startSynRexmitTimer();
-        // FIXME conn-estab timer?
+        scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
 
         //"
         // Note that any other incoming control or data (combined with SYN)
@@ -724,8 +724,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         //"
         if (seqGreater(state->snd_una, state->iss))
         {
-            tcpEV << "SYN bit set: sending ACK\n";
-            sendAck(); // Note: we never send data in SYN+ACK.
+            tcpEV << "SYN+ACK bits set\n";
 
             // we're in ESTABLISHED, these timers are no longer needed
             delete tcpMain->cancelEvent(connEstabTimer);
@@ -733,7 +732,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
             connEstabTimer = synRexmitTimer = NULL;
 
             // notify
-            tcpAlgorithm->established();
+            tcpAlgorithm->established(true);
 
             // FIXME should continue processing at the sixth step below where the URG bit is checked
 
@@ -788,10 +787,7 @@ TCPEventCode TCPConnection::processRstInSynReceived(TCPSegment *tcpseg)
         // FIXME TBD: signal "connection refused"
     }
 
-    // cancel timers
-    tcpMain->cancelEvent(connEstabTimer);
-    tcpMain->cancelEvent(synRexmitTimer);
-    // FIXME may need to cancel other (tcpAlgorithm's) timers as well (cf. doConnectionReset())
+    // FIXME cf. doConnectionReset()
 
     // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
     return TCP_E_RCV_RST;
@@ -805,11 +801,7 @@ void TCPConnection::doConnectionReset()
     // unsolicited general "connection reset" signal.
     //"
 
-    tcpMain->cancelEvent(connEstabTimer);
-    tcpMain->cancelEvent(synRexmitTimer);
-    // FIXME may need to cancel other (tcpAlgorithm's) timers as well
-
-    // FIXME notify user. nothing else to do.
+    // FIXME notify user. nothing else to do. (timers will be cancelled in stateEntered()
 }
 
 void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
@@ -930,7 +922,7 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 void TCPConnection::processUrgInEstabEtc(TCPSegment *tcpseg)
 {
     tcpEV2 << "Processing URG in a data transfer state\n";
-    tcpEV2 << "FIXME not implemented yet\n";
+    // FIXME not implemented yet
 }
 
 void TCPConnection::processSegmentTextInEstabEtc(TCPSegment *tcpseg)
@@ -947,9 +939,8 @@ void TCPConnection::process_TIMEOUT_CONN_ESTAB()
     {
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
-            // cancel SYN-REXMIT timer
-            tcpMain->cancelEvent(synRexmitTimer);
-            // Note: TIMEOUT_CONN_ESTAB event will automatically take the connection to CLOSED.
+            // Note: TIMEOUT_CONN_ESTAB event will automatically take the connection
+            // to CLOSED, and cancel SYN-REXMIT timer.
             break;
         default:
             // We should not receive this timeout in this state.
@@ -1005,10 +996,8 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
     if (++state->syn_rexmit_count>MAX_SYN_REXMIT_COUNT)
     {
         tcpEV << "Retransmission count during connection setup exceeds " << MAX_SYN_REXMIT_COUNT << ", giving up\n";
-        tcpMain->cancelEvent(connEstabTimer);
-        // FIXME we should rather put all these timer cancellations into "entry code" of CLOSED, LISTEN and ESTAB states!!!!!
-
-        event = TCP_E_ABORT;  // FIXME maybe rather introduce a TCP_E_BROKEN event
+        // Note ABORT will take the connection to closed, and cancel CONN-ESTAB timer as well
+        event = TCP_E_ABORT;
         return;
     }
 
@@ -1017,8 +1006,8 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
     // resend what's needed
     switch(fsm.state())
     {
-        case TCP_S_SYN_SENT:  sendSyn(); break;
-        case TCP_S_SYN_RCVD:  sendSynAck(); break;
+        case TCP_S_SYN_SENT: sendSyn(); break;
+        case TCP_S_SYN_RCVD: sendSynAck(); break;
         default:  opp_error("Internal error: SYN-REXMIT timer expired while in state %s", stateName(fsm.state()));
     }
 

@@ -292,7 +292,7 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendData(bool fullSegments, int maxNumBytes)
+bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
 {
     // start sending from snd_max  (FIXME is this the right place to set snd_nxt?)
     state->snd_nxt = state->snd_max;
@@ -307,7 +307,7 @@ void TCPConnection::sendData(bool fullSegments, int maxNumBytes)
     if (win>buffered)
         win = buffered;
     if (fullSegments && win<state->snd_mss)
-        return;
+        return false;
 
     while (win>0)
     {
@@ -344,6 +344,7 @@ void TCPConnection::sendData(bool fullSegments, int maxNumBytes)
         tcpAlgorithm->ackSent();
         tcpAlgorithm->dataSent(old_snd_nxt);
     }
+    return segSent;
 }
 
 
