@@ -8,31 +8,31 @@
 ifconfig:
 
 # ethernet card 0 to host 4
-name: eth0	inet_addr: 172.0.1.2	MTU: 1500		Metric: 1  BROADCAST MULTICAST
+name: eth0  inet_addr: 172.0.1.2    MTU: 1500       Metric: 1  BROADCAST MULTICAST
 
 # PPP link to router 2
-name:ppp0	inet_addr: 172.1.0.3	MTU: 512000		Metric: 1
+name:ppp0   inet_addr: 172.1.0.3    MTU: 512000     Metric: 1
 
 ifconfigend.
 
 route:
 
-172.0.1.1		*				255.255.255.255 H	0	eth0
-default:		172.1.0.2		0.0.0.0			G	0	ppp0
+172.0.1.1       *               255.255.255.255 H   0   eth0
+default:        172.1.0.2       0.0.0.0         G   0   ppp0
 
 #multicast
 
-225.0.0.2		*				255.255.255.255 H	0	eth0
+225.0.0.2       *               255.255.255.255 H   0   eth0
 
-225.0.0.1		172.1.0.2		255.255.255.255 G	0	ppp0
-225.0.0.3		172.1.0.2		255.255.255.255 G	0	ppp0
+225.0.0.1       172.1.0.2       255.255.255.255 G   0   ppp0
+225.0.0.3       172.1.0.2       255.255.255.255 G   0   ppp0
 
-225.0.1.1		172.1.0.2		255.255.255.255 G	0	ppp0
+225.0.1.1       172.1.0.2       255.255.255.255 G   0   ppp0
 
-225.0.1.2		172.1.0.2		255.255.255.255 G	0	ppp0
+225.0.1.2       172.1.0.2       255.255.255.255 G   0   ppp0
 
-225.0.1.2		*				255.255.255.255 H	0	eth0
-225.0.1.2		172.1.0.2		255.255.255.255 G	0	ppp0
+225.0.1.2       *               255.255.255.255 H   0   eth0
+225.0.1.2       172.1.0.2       255.255.255.255 G   0   ppp0
 
 routeend.
 

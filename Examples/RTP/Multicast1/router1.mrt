@@ -5,38 +5,33 @@
 ifconfig:
 
 # ethernet card 0 to host 1
-name: eth0	inet_addr: 171.0.0.11
-#Groups:	225.0.0.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST
+name: eth0  inet_addr: 171.0.0.11  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+#Groups:    225.0.0.1
 
 # ethernet card 1 to host 2
-name: eth1	inet_addr: 172.0.0.12
-#Groups:	225.0.0.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST
+name: eth1  inet_addr: 172.0.0.12  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+#Groups:    225.0.0.1
 
 # ethernet card 2 to host 3
-name: eth2	inet_addr: 173.0.0.13
-#Groups:	225.0.0.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST
+name: eth2  inet_addr: 173.0.0.13  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+#Groups:    225.0.0.1
 
 # ethernet card 3 to host 4
-name: eth3	inet_addr: 174.0.0.14
-#Groups:	225.0.0.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST
-
+name: eth3  inet_addr: 174.0.0.14  MTU: 1500   Metric: 1  BROADCAST MULTICAST
+#Groups:    225.0.0.1
 
 ifconfigend.
 
 route:
-171.0.0.1		*				255.255.255.255 H	0	eth0
-172.0.0.2		*				255.255.255.255 H	0	eth1
-173.0.0.3		*				255.255.255.255 H	0	eth2
-174.0.0.4		*				255.255.255.255 H	0	eth3
+171.0.0.1       *               255.255.255.255 H   0   eth0
+172.0.0.2       *               255.255.255.255 H   0   eth1
+173.0.0.3       *               255.255.255.255 H   0   eth2
+174.0.0.4       *               255.255.255.255 H   0   eth3
 
-225.0.0.1		*				255.255.255.255 H	0	eth0
-225.0.0.1		*				255.255.255.255 H	0	eth1
-225.0.0.1		*				255.255.255.255 H	0	eth2
-225.0.0.1		*				255.255.255.255 H	0	eth3
+225.0.0.1       *               255.255.255.255 H   0   eth0
+225.0.0.1       *               255.255.255.255 H   0   eth1
+225.0.0.1       *               255.255.255.255 H   0   eth2
+225.0.0.1       *               255.255.255.255 H   0   eth3
 
 routeend.
 

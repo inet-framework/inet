@@ -4,17 +4,16 @@
 ifconfig:
 
 # ethernet card 0 to router
-name: eth0	inet_addr: 172.0.0.2
+name: eth0  inet_addr: 172.0.0.2   MTU: 1500   Metric: 1  BROADCAST MULTICAST
 Groups: 225.0.0.1
-MTU: 1500	Metric: 1  BROADCAST MULTICAST
 
 ifconfigend.
 
 
 route:
 
-225.0.0.1		172.0.0.12		255.0.0.0		G	0	eth0
-default:		172.0.0.12		0.0.0.0			G	0	eth0
+225.0.0.1       172.0.0.12      255.0.0.0       G   0   eth0
+default:        172.0.0.12      0.0.0.0         G   0   eth0
 
 routeend.
 

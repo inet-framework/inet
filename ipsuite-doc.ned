@@ -21,19 +21,17 @@
 // @page irt.html, The routing files
 //
 // An example routing file (copied here from one of the IPSuite example
-// simulations: <tt>McNetwork2/mchost3.mrt</tt>):
+// simulations:
 //
 // <pre>
 // ifconfig:
 //
 // # ethernet card 0 to router
-// name: eth0    encap: Ethernet   inet_addr: 172.0.0.3
+// name: eth0   inet_addr: 172.0.0.3   MTU: 1500   Metric: 1  BROADCAST MULTICAST
 // Groups: 225.0.0.1:225.0.1.2:225.0.2.1
-// MTU: 1500    Metric: 1  BROADCAST MULTICAST
 //
 // # Point to Point link 1 to Host 1
-// name: ppp0    encap: PPP        inet_addr: 172.0.0.4
-// MTU: 200 Metric: 1
+// name: ppp0   inet_addr: 172.0.0.4   MTU: 576   Metric: 1
 //
 // ifconfigend.
 //
