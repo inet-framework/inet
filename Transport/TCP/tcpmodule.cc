@@ -143,7 +143,7 @@ private:
   void outstSnd(TcpTcb* tcb_block); 
   void flushTransRetransQ(TcpTcb* tcb_block);
 
-  void printStatus(TcpTcb* tcb_block);
+  void printStatus(TcpTcb* tcb_block, const char *label);
   const char *stateName(TcpState state);
   const char *eventName(TcpEvent event);
   
@@ -254,7 +254,7 @@ void TcpModule::handleMessage(cMessage *msg)
   tcb_block = getTcb(msg);
 
   //print TCB status information
-  printStatus(tcb_block);
+  printStatus(tcb_block, "Connection state before event processing");
   
   //alias for TCP-FSM
   cFSM & fsm = tcb_block->fsm;
@@ -283,7 +283,7 @@ void TcpModule::handleMessage(cMessage *msg)
       connClosed(tcb_block);
       
       //print TCB status information
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state after event processing");
 
       //connection closed: delete TCB from list
       if (debug) ev << "Deleting TCB from list.\n";
@@ -3811,11 +3811,11 @@ void TcpModule::flushTransRetransQ(TcpTcb* tcb_block)
 
 
 //function to print out TCB status information
-void TcpModule::printStatus(TcpTcb* tcb_block)
+void TcpModule::printStatus(TcpTcb* tcb_block, const char *label)
 {
+  if (debug) ev << "=========== " << label << " ===========\n";
   if (debug) ev << "Current event: " << (int) tcb_block->st_event.event
                 << " (" << eventName(tcb_block->st_event.event) << ")" << endl;
-  if (debug) ev << "=============== TCB STATUS INFORMATION ===============\n";
   if (debug) ev << "Connection ID:  " << (int) tcb_block->tb_conn_id << endl;
   if (debug) ev << "State:          " << (int) tcb_block->fsm.state()
                 << " (" << stateName((TcpState)tcb_block->fsm.state()) << ")" << endl;
@@ -3845,7 +3845,7 @@ void TcpModule::printStatus(TcpTcb* tcb_block)
   if (debug) ev << "Smoothed RTT (ticks*8): " << tcb_block->srtt << endl;
   if (debug) ev << "Smoothed mdev of RTT (ticks*4): " << tcb_block->rttvar << endl;
   if (debug) ev << "RTO value : " << tcb_block->rxtcur << endl;
-  if (debug) ev << "======================================================\n";
+  if (debug) ev << "================\n";
 }
 
 // produce readable name
@@ -3932,7 +3932,7 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
         }
 
       //print TCB status information
-      //printStatus(tcb_block);
+      //printStatus(tcb_block, "Connection state");
       
       break;
         
@@ -4019,7 +4019,8 @@ void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_hea
       break;
 
     default:
-      error( "Case not handled in switch statement (INIT)");
+      //error( "Case not handled in switch statement (INIT)");
+      error("Event %s not handled in INIT state switch statement", eventName(tcb_block->st_event.event));
 
       break;
       
@@ -4136,7 +4137,7 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LISTEN.\n";
 
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -4227,7 +4228,8 @@ void TcpModule::procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_h
       break;
 
     default:
-      error( "Case not handled in switch statement (LISTEN)");
+      //error( "Case not handled in switch statement (LISTEN)");
+      error("Event %s not handled in LISTEN state switch statement", eventName(tcb_block->st_event.event));
         
       break;
        
@@ -4408,7 +4410,7 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_RCVD.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -4536,7 +4538,8 @@ void TcpModule::procExSynRcvd(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
     
 
     default:
-      error( "Case not handled in switch statement (SYN_RCVD)");
+      //error( "Case not handled in switch statement (SYN_RCVD)");
+      error("Event %s not handled in SYN_RCVD state switch statement", eventName(tcb_block->st_event.event));
       break;
         
     } //end of switch
@@ -4708,7 +4711,7 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
    
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in SYN_SENT.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -4861,8 +4864,8 @@ void TcpModule::procExSynSent(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       break;
 
     default:
-      if (debug) ev << "The event was: " << (int)tcb_block->st_event.event << endl;
-      error( "Case not handled in switch statement (SYN_SENT)");
+      //error( "Case not handled in switch statement (SYN_SENT)");
+      error("Event %s not handled in SYN_SENT state switch statement", eventName(tcb_block->st_event.event));
       break;
 
     } //end of switch
@@ -4973,7 +4976,7 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in ESTABLISHED.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5022,7 +5025,8 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
       break;
 
     default:
-      error( "Case not handled in switch statement (ESTABLISHED)");
+      //error( "Case not handled in switch statement (ESTABLISHED)");
+      error("Event %s not handled in ESTABLISHED state switch statement", eventName(tcb_block->st_event.event));
       break;
 
     } //end of switch
@@ -5111,7 +5115,7 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSE_WAIT.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5126,7 +5130,8 @@ void TcpModule::procExCloseWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tc
       break;
       
     default:
-      error( "Case not handled in switch statement (CLOSE_WAIT)");
+      //error( "Case not handled in switch statement (CLOSE_WAIT)");
+      error("Event %s not handled in CLOSE_WAIT state switch statement", eventName(tcb_block->st_event.event));
       break;
 
     } //end of switch
@@ -5223,7 +5228,7 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in LAST_ACK.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -5255,7 +5260,8 @@ void TcpModule::procExLastAck(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
 
           
     default:
-      error( "Case not handled in switch statement (LAST_ACK)");
+      //error( "Case not handled in switch statement (LAST_ACK)");
+      error("Event %s not handled in LAST_ACK state switch statement", eventName(tcb_block->st_event.event));
       break;
      
     } //end of switch
@@ -5348,7 +5354,7 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_1.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5374,7 +5380,8 @@ void TcpModule::procExFinWait1(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
 
     default:
-      error( "Case not handled in switch statement (FIN_WAIT_1)");
+      //error( "Case not handled in switch statement (FIN_WAIT_1)");
+      error("Event %s not handled in FIN_WAIT_1 state switch statement", eventName(tcb_block->st_event.event));
       break;
 
     } //end of switch
@@ -5478,7 +5485,7 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in FIN_WAIT_2.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
         
       break;
 
@@ -5523,7 +5530,8 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
 
     default:
-      error( "Case not handled in switch statement (FIN_WAIT_2)");
+      //error( "Case not handled in switch statement (FIN_WAIT_2)");
+      error("Event %s not handled in FIN_WAIT_2 state switch statement", eventName(tcb_block->st_event.event));
       break;
 
     } //end of switch
@@ -5602,7 +5610,7 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in CLOSING.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -5618,7 +5626,8 @@ void TcpModule::procExClosing(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_
       break;
       
     default:
-      error( "Case not handled in switch statement (CLOSING)");
+      //error( "Case not handled in switch statement (CLOSING)");
+      error("Event %s not handled in CLOSING state switch statement", eventName(tcb_block->st_event.event));
       break;
      
     } //end of switch
@@ -5690,7 +5699,7 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
         
     case TCP_E_STATUS:
       if (debug) ev << "TCP received STATUS command from appl. while in TIME_WAIT.\n";
-      printStatus(tcb_block);
+      printStatus(tcb_block, "Connection state");
 
       break;
 
@@ -5711,7 +5720,8 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       break;
       
     default:
-      error( "Case not handled in switch statement (TIME_WAIT)");
+      //error( "Case not handled in switch statement (TIME_WAIT)");
+      error("Event %s not handled in TIME_WAIT state switch statement", eventName(tcb_block->st_event.event));
       break;
      
     } //end of switch
