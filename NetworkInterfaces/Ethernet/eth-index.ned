@@ -17,20 +17,21 @@
 //
 
 
-//#FIXME titlepage conflicts with main titlepage
-// @titlepage
-// <h1>Ethernet Model Documentation</h1>
+//# @titlepage (would conflict with main titlepage)
+//# <h1>Ethernet Model Documentation</h1>
 //
-// This documents the Ethernet model created by David Wu and refined by Andras
-// Varga at CTIE, Monash University, Melbourne, Australia.
+// @page eth-index.html, Ethernet Model -- Start Page
 //
-// The model contains a MAC model (EtherMAC), LLC model (EtherLLC) as well
+//# This documents the Ethernet model created by David Wu and refined by Andras
+//# Varga at CTIE, Monash University, Melbourne, Australia.
+//
+// The Ethernet model contains a MAC model (EtherMAC), LLC model (EtherLLC) as well
 // as a bus (EtherBus, for modelling coaxial cable) and a hub (EtherHub) model.
 // A switch model (EtherSwitch) is also provided.
 //
 // A few useful topics:
 //  - <a href="ether-overview.html">model overview</a>
-//  - <a href="standards.html">implemented standards</a>
+//  - <a href="eth-standards.html">implemented standards</a>
 //  - <a href="llc-app.html">communication between LLC and higher layers</a>
 //  - <a href="appreg.html">application registration</a>
 //  - <a href="physical.html">physical layer messaging</a>
@@ -118,17 +119,20 @@
 // EtherEncap doesn't have the functionality to dispatch to different
 // higher layers because in practice it'll always be used with IP.
 //
-// @page standards.html, Standards
 //
-// The models operate according to the following standards:
+// @page eth-standards.html, Ethernet: Implemented Standards
+//
+// The Ethernet model operates according to the following standards:
 // - Gigabit Ethernet: IEEE 802.3z-1998
 // - Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
 // - Fast Ethernet: IEEE 802.3u-1995
 // - Ethernet: IEEE 802.3-1998
 //
+// Note: switches don't implement the Spanning Tree Protocol. You need to
+// avoid cycles in the LAN topology.
 //
 //
-// @page llc-app.html, Communication between LLC and higher layers
+// @page llc-app.html, Ethernet: Communication between LLC and Higher Layers
 //
 // Higher layers (applications or protocols) talk to the EtherLLC module.
 //
@@ -176,9 +180,10 @@
 // data packets travelling between the higher layer and Ethernet
 // modules -- as opposed to "interface" packets.
 //
-// @page appreg.html, Application registration
 //
-// The Ethernet model also supports multiple applications or higher layer
+// @page appreg.html, EtherLLC: SAP Registration
+//
+// The Ethernet model supports multiple applications or higher layer
 // protocols.
 //
 // So that data arriving from the network can be dispatched to the
@@ -193,7 +198,7 @@
 // dsap field in the EtherCtrl structure.
 //
 //
-// @page physical.html, Messaging on the physical layer
+// @page physical.html, Ethernet: Messaging on the Physical Layer
 //
 // Messages sent by EtherMAC mark the beginning of a transmission.
 // The end of a transmission is not explicitly represented by a message,
@@ -217,7 +222,7 @@
 //
 //
 //
-// @page ether-pause.html, PAUSE handling
+// @page ether-pause.html, Ethernet: PAUSE handling
 //
 // The 802.3x standard supports PAUSE frames as a means of flow
 // control. The frame contains a timer value, expressed as a multiple
