@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj  tcpmodule.obj  TransportInterfacePacket.obj TransportPacket.obj
+OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodule.obj TransportInterfacePacket.obj TransportPacket.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -114,9 +114,32 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Applications\TCPApp -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+Ip2Tcp.obj: Ip2Tcp.cc \
+  TransportPacket.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Util/basic_consts.h
+pcb.obj: pcb.cc \
+  pcb.h \
+  ..\..\Network\IPv4\Core/in_addr.h \
+  ..\..\Network\IPv4\Core/in_port.h \
+  ..\..\Util/basic_consts.h
+Tcp2Ip.obj: Tcp2Ip.cc \
+  TransportPacket.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Util/basic_consts.h
+tcpmodule.obj: tcpmodule.cc \
+  tcp.h
+TransportInterfacePacket.obj: TransportInterfacePacket.cc \
+  TransportInterfacePacket.h \
+  ..\..\Network\IPv4\Core/in_addr.h \
+  ..\..\Util/basic_consts.h
+TransportPacket.obj: TransportPacket.cc \
+  TransportPacket.h

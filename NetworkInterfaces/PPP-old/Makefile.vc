@@ -90,9 +90,22 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Util -I..\..\Network\IPv4\Core  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+PPPFrame.obj: PPPFrame.cc \
+  PPPFrame.h
+PPPModule.obj: PPPModule.cc \
+  ..\..\Network\IPv4\Core/hook_types.h \
+  PPPModule.h \
+  PPPFrame.h \
+  ..\..\Network\IPv4\Core/IPDatagram.h \
+  ..\..\Util/basic_consts.h \
+  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
+  ..\..\Network\IPv4\Core/RoutingTable.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= NetworkInterface_n.obj 
+OBJS= NetworkInterface_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= PPP-old Queues
@@ -96,6 +96,7 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\ipsuiteconfig.vc  #recreate Makefile

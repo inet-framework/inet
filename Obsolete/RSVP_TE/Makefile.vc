@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= NetworkManager_n.obj OspfTe_n.obj RSVP_n.obj RSVPAppl_n.obj RSVPInterface_n.obj TED_n.obj  OspfTe.obj  RSVP.obj rsvp_message.obj  RSVPApp.obj  RSVPInterface.obj  TED.obj 
+OBJS= NetworkManager_n.obj OspfTe_n.obj RSVP_n.obj RSVPAppl_n.obj RSVPInterface_n.obj TED_n.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj RSVPInterface.obj TED.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -138,9 +138,117 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\MPLS -I..\..\Util -ID:/home/tools/libxml2-2.5.4.win32/include -ID:/home/tools/iconv-1.8.win32/include  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+OspfTe.obj: OspfTe.cc \
+  OspfTe.h \
+  ..\IPv4\Core/ip_address.h \
+  ospf_type.h \
+  ..\..\Transport\TCP/tcp.h \
+  intserv.h \
+  TED.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+RSVP.obj: RSVP.cc \
+  RSVP.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\MPLS/MPLSModule.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\..\Transport\TCP/tcp.h \
+  intserv.h \
+  rsvp_message.h \
+  TED.h \
+  OspfTe.h \
+  ..\MPLS/LIBTableAccess.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\..\Transport\TCP/TransportPacket.h \
+  ospf_type.h \
+  ..\MPLS/LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\MPLS/StringTokenizer.h \
+  ..\MPLS/ConstType.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  ..\IPv4\Core/hook_types.h \
+  ..\MPLS/MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h
+rsvp_message.obj: rsvp_message.cc \
+  rsvp_message.h \
+  intserv.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\..\Transport\TCP/TransportPacket.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+RSVPApp.obj: RSVPApp.cc \
+  RSVPApp.h \
+  ..\IPv4\Core/RoutingTable.h \
+  RSVPTester.h \
+  ..\MPLS/MPLSModule.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlmemory.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/parser.h \
+  ..\..\Transport\TCP/tcp.h \
+  rsvp_message.h \
+  RSVP.h \
+  TED.h \
+  OspfTe.h \
+  ..\MPLS/LIBtable.h \
+  ..\MPLS/StringTokenizer.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlversion.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/threads.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/globals.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlerror.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/SAX.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xlink.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/tree.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlregexp.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/valid.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/entities.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/encoding.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlIO.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/list.h \
+  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlautomata.h \
+  D:/home/tools/iconv-1.8.win32/include/iconv.h \
+  intserv.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\..\Transport\TCP/TransportPacket.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  ..\MPLS/LIBTableAccess.h \
+  ospf_type.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\MPLS/ConstType.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\IPv4\Core/hook_types.h \
+  ..\MPLS/MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h
+RSVPInterface.obj: RSVPInterface.cc \
+  rsvp_message.h \
+  RSVPInterface.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  intserv.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\..\Transport\TCP/TransportPacket.h \
+  ..\..\Util/basic_consts.h
+TED.obj: TED.cc \
+  ..\MPLS/MPLSModule.h \
+  TED.h \
+  ..\IPv4\Core/hook_types.h \
+  ..\MPLS/MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h \
+  ..\MPLS/LIBTableAccess.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\MPLS/ConstType.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  ..\MPLS/LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\MPLS/StringTokenizer.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\..\Util/ipsuite_defs.h

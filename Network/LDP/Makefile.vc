@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= LDPInterface_n.obj LDPproc_n.obj tcp2ldp_n.obj tcpclientproc_n.obj tcpserverproc_n.obj UDPInterface_n.obj LDPInterface.obj  LDPpacket.obj LDPproc.obj   tcpclientproc.obj  tcpserverproc.obj  UDPAppInterface.obj 
+OBJS= LDPInterface_n.obj LDPproc_n.obj tcp2ldp_n.obj tcpclientproc_n.obj tcpserverproc_n.obj UDPInterface_n.obj LDPInterface.obj LDPpacket.obj LDPproc.obj tcpclientproc.obj tcpserverproc.obj UDPAppInterface.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -138,9 +138,73 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\MPLS -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+LDPInterface.obj: LDPInterface.cc \
+  LDPInterface.h \
+  ..\MPLS/ConstType.h \
+  LDPproc.h \
+  ..\..\Transport\TCP/tcp.h \
+  LDPpacket.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\MPLS/LIBTableAccess.h \
+  ..\MPLS/InfoManager.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\MPLS/LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\MPLS/StringTokenizer.h
+LDPpacket.obj: LDPpacket.cc \
+  LDPpacket.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+LDPproc.obj: LDPproc.cc \
+  ..\MPLS/ConstType.h \
+  LDPpacket.h \
+  ..\..\Transport\TCP/tcp.h \
+  LDPproc.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\MPLS/InfoManager.h \
+  ..\MPLS/MPLSModule.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  LDPInterface.h \
+  ..\MPLS/LIBTableAccess.h \
+  ..\MPLS/LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\MPLS/StringTokenizer.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\IPv4\Core/hook_types.h \
+  ..\MPLS/MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h
+tcpclientproc.obj: tcpclientproc.cc \
+  ..\..\Transport\TCP/tcp.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\MPLS/ConstType.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+tcpserverproc.obj: tcpserverproc.cc \
+  ..\..\Transport\TCP/tcp.h \
+  ..\MPLS/ConstType.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+UDPAppInterface.obj: UDPAppInterface.cc \
+  ..\..\Transport\TCP/TransportInterfacePacket.h \
+  ..\..\Transport\UDP/UDPPacket.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/in_addr.h \
+  ..\..\Util/basic_consts.h \
+  ..\..\Transport\TCP/TransportPacket.h

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj  MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj  procserver.obj   TCPClient.obj TCPServer.obj
+OBJS= MyTCPApp_n.obj mytcpserverproc_n.obj procserver_n.obj tcpapp_n.obj MyTCPClient.obj MyTCPServer.obj mytcpserverproc.obj procserver.obj TCPClient.obj TCPServer.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -126,9 +126,30 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Transport\TCP -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+MyTCPClient.obj: MyTCPClient.cc \
+  ..\..\Transport\TCP/tcp.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+MyTCPServer.obj: MyTCPServer.cc \
+  ..\..\Transport\TCP/tcp.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+mytcpserverproc.obj: mytcpserverproc.cc \
+  ..\..\Transport\TCP/tcp.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+procserver.obj: procserver.cc \
+  ..\..\Transport\TCP/tcp.h
+TCPClient.obj: TCPClient.cc \
+  ..\..\Transport\TCP/tcp.h
+TCPServer.obj: TCPServer.cc \
+  ..\..\Transport\TCP/tcp.h

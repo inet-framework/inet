@@ -23,22 +23,8 @@ import     "NF_IP_LOCAL_OUT";
 
 //
 // Receives packet from Transport layer, ICMP or Tunneling (IP tunneled
-// datagram) and encapsulates it into an IP datagram.
-//
-// Handling:
-// - set version
-// - set TOS (currently  constant 0!!!)
-// - set TTL to constant value
-// - choose and set fragmentation identifier
-// - set fragment offset = 0, more fragments = 0
-//   (fragmentation occurs in IPFragmentation)
-// - set "don't Fragment" bit to received value (default 0)
-// - set Protocol to received value
-// - set destination address to received value
-// - send datagram to Routing
-//
-// author: Jochen Reber
-// date: 5.00, 6.00
+// datagram) and encapsulates it into an IP datagram. Just encapsulates
+// IPSendCore plus a queue hook.
 //
 module IPSend
     parameters:
@@ -76,9 +62,28 @@ module IPSend
         queueHook.out --> core.netfilterIn;
 endmodule
 
+
+//
+// Receives packet from Transport layer, ICMP or Tunneling (IP tunneled
+// datagram) and encapsulates it into an IP datagram.
+//  - set version
+//  - set TOS (currently  constant 0!!!)
+//  - set ds.codepoint
+//  - set TTL
+//  - choose and set fragmentation identifier
+//  - set fragment offset = 0, more fragments = 0 (fragmentation occurs in IPFragmentation)
+//  - set 'don't Fragment'-bit to received value (default 0)
+//  - set Protocol to received value
+//  - set destination address to received value
+//  - send datagram to Routing
+//  - if IPInterfacePacket is invalid (e.g. invalid source address), it is thrown away
+//    without feedback
+//
+// Author: Jochen Reber
+//
 simple IPSendCore
     parameters:
-        procdelay : numeric,
+        procdelay : numeric, // FIXME currently ignored!
         timeToLive : numeric,
         multicastTimeToLive : numeric,
         numOfTransportProt : numeric const;
@@ -87,7 +92,9 @@ simple IPSendCore
         in: tunnelIn;
         in: transportIn[];
         in: netfilterIn;
-        //in: processorManagerIn;
+        //#in: processorManagerIn;
         out: routingOut;
         out: netfilterOut;
 endsimple
+
+

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj  InfoManager.obj  LIBtable.obj  LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj  MPLSPacket.obj StringTokenizer.obj
+OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj InfoManager.obj LIBtable.obj LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -129,9 +129,69 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\IPv4\Core -I..\..\Transport\TCP -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+InfoManager.obj: InfoManager.cc \
+  InfoManager.h
+LIBtable.obj: LIBtable.cc \
+  LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  StringTokenizer.h \
+  ConstType.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+LIBTableAccess.obj: LIBTableAccess.cc \
+  LIBTableAccess.h \
+  LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  StringTokenizer.h \
+  ConstType.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h
+MPLS2IP.obj: MPLS2IP.cc \
+  ..\IPv4\Core/hook_types.h \
+  MPLS2IP.h \
+  ..\IPv4\Core/IPDatagram.h \
+  LIBTableAccess.h \
+  ConstType.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  LIBtable.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  StringTokenizer.h
+MPLSModule.obj: MPLSModule.cc \
+  MPLSModule.h \
+  ..\IPv4\Core/hook_types.h \
+  MPLSPacket.h \
+  ..\IPv4\Core/IPDatagram.h \
+  LIBTableAccess.h \
+  ..\IPv4\Core/RoutingTable.h \
+  ConstType.h \
+  ..\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Util/basic_consts.h \
+  LIBtable.h \
+  ..\IPv4\Core/RoutingTableAccess.h \
+  ..\IPv4\Core/ip_address_prefix.h \
+  StringTokenizer.h \
+  ..\IPv4\Core/ip_address.h \
+  ..\..\Util/ipsuite_defs.h
+MPLSPacket.obj: MPLSPacket.cc \
+  MPLSPacket.h
+StringTokenizer.obj: StringTokenizer.cc \
+  StringTokenizer.h

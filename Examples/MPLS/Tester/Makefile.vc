@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= Tester_n.obj NewBWRequestTester.obj NewRouteTester.obj 
+OBJS= Tester_n.obj NewBWRequestTester.obj NewRouteTester.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -96,9 +96,44 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\..\ipsuiteconfig.vc -I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/Transport/Socket -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+NewBWRequestTester.obj: NewBWRequestTester.cc \
+  d:\home\IPSuite/Network/MPLS/MPLSModule.h \
+  d:\home\IPSuite/Network/RSVP_TE/RSVPTester.h \
+  d:\home\IPSuite/Network/IPv4/Core/hook_types.h \
+  d:\home\IPSuite/Network/MPLS/MPLSPacket.h \
+  d:\home\IPSuite/Network/IPv4/Core/IPDatagram.h \
+  d:\home\IPSuite/Network/MPLS/LIBTableAccess.h \
+  d:\home\IPSuite/Network/IPv4/Core/RoutingTable.h \
+  d:\home\IPSuite/Network/MPLS/ConstType.h \
+  d:\home\IPSuite/Network/IPv4/Core/IPInterfacePacket.h \
+  d:\home\IPSuite/Util/basic_consts.h \
+  d:\home\IPSuite/Network/MPLS/LIBtable.h \
+  d:\home\IPSuite/Network/IPv4/Core/RoutingTableAccess.h \
+  d:\home\IPSuite/Network/IPv4/Core/ip_address_prefix.h \
+  d:\home\IPSuite/Network/MPLS/StringTokenizer.h \
+  d:\home\IPSuite/Network/IPv4/Core/ip_address.h \
+  d:\home\IPSuite/Util/ipsuite_defs.h
+NewRouteTester.obj: NewRouteTester.cc \
+  d:\home\IPSuite/Network/MPLS/MPLSModule.h \
+  d:\home\IPSuite/Network/RSVP_TE/RSVPTester.h \
+  d:\home\IPSuite/Network/RSVP_TE/TED.h \
+  d:\home\IPSuite/Network/IPv4/Core/hook_types.h \
+  d:\home\IPSuite/Network/MPLS/MPLSPacket.h \
+  d:\home\IPSuite/Network/IPv4/Core/IPDatagram.h \
+  d:\home\IPSuite/Network/MPLS/LIBTableAccess.h \
+  d:\home\IPSuite/Network/IPv4/Core/RoutingTable.h \
+  d:\home\IPSuite/Network/MPLS/ConstType.h \
+  d:\home\IPSuite/Network/IPv4/Core/IPInterfacePacket.h \
+  d:\home\IPSuite/Util/basic_consts.h \
+  d:\home\IPSuite/Network/MPLS/LIBtable.h \
+  d:\home\IPSuite/Network/IPv4/Core/RoutingTableAccess.h \
+  d:\home\IPSuite/Network/IPv4/Core/ip_address_prefix.h \
+  d:\home\IPSuite/Network/MPLS/StringTokenizer.h \
+  d:\home\IPSuite/Network/IPv4/Core/ip_address.h \
+  d:\home\IPSuite/Util/ipsuite_defs.h

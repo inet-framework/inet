@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= InputQueue_n.obj OutputQueue_n.obj Dequeue.obj Enqueue.obj InputQueue.obj  
+OBJS= InputQueue_n.obj OutputQueue_n.obj Dequeue.obj Enqueue.obj InputQueue.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -105,9 +105,22 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Util -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+Dequeue.obj: Dequeue.cc \
+  ..\..\Network\IPv4\Core/hook_types.h \
+  Dequeue.h \
+  ..\..\Util/basic_consts.h
+Enqueue.obj: Enqueue.cc \
+  ..\..\Network\IPv4\Core/hook_types.h \
+  Enqueue.h \
+  ..\..\Util/basic_consts.h
+InputQueue.obj: InputQueue.cc \
+  InputQueue.h \
+  ..\..\Network\IPv4\Core/IPDatagram.h \
+  ..\..\Util/basic_consts.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h

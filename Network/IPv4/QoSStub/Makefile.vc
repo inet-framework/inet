@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= L2_DequeueHook_n.obj L2_EnqueueHook_n.obj NF_IP_FORWARD_n.obj NF_IP_LOCAL_IN_n.obj NF_IP_LOCAL_OUT_n.obj NF_IP_POST_ROUTING_n.obj NF_IP_PRE_ROUTING_n.obj   L2_Hookstubs.obj Netfilters.obj     
+OBJS= L2_DequeueHook_n.obj L2_EnqueueHook_n.obj NF_IP_FORWARD_n.obj NF_IP_LOCAL_IN_n.obj NF_IP_LOCAL_OUT_n.obj NF_IP_POST_ROUTING_n.obj NF_IP_PRE_ROUTING_n.obj L2_Hookstubs.obj Netfilters.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -132,9 +132,16 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\..\ipsuiteconfig.vc -I..\Core -I..\..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+L2_Hookstubs.obj: L2_Hookstubs.cc \
+  ..\Core/hook_types.h \
+  L2_Hookstubs.h \
+  ..\..\..\Util/basic_consts.h
+Netfilters.obj: Netfilters.cc \
+  Netfilters.h \
+  ..\..\..\Util/basic_consts.h

@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= socketlayer_n.obj SocketInterfacePacket.obj socketlayer.obj  sockets.obj
+OBJS= socketlayer_n.obj SocketInterfacePacket.obj socketlayer.obj sockets.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -99,9 +99,38 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\TCP -I..\..\Network\IPv4\Core -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+SocketInterfacePacket.obj: SocketInterfacePacket.cc \
+  SocketInterfacePacket.h \
+  sockets.h \
+  ..\TCP/pcb.h \
+  ..\..\Network\IPv4\Core/in_addr.h \
+  ..\..\Network\IPv4\Core/in_port.h \
+  ..\..\Util/basic_consts.h
+socketlayer.obj: socketlayer.cc \
+  socketlayer.h \
+  ..\..\Network\IPv4\Core/RoutingTable.h \
+  SocketInterfacePacket.h \
+  ..\TCP/TransportInterfacePacket.h \
+  ..\TCP/tcp.h \
+  sockets.h \
+  ..\TCP/pcb.h \
+  ..\..\Network\IPv4\Core/in_addr.h \
+  ..\..\Network\IPv4\Core/in_port.h \
+  ..\..\Util/basic_consts.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\..\Network\IPv4\Core/ip_address.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h
+sockets.obj: sockets.cc \
+  sockets.h \
+  ..\TCP/tcpcb.h \
+  ..\TCP/pcb.h \
+  ..\..\Network\IPv4\Core/in_addr.h \
+  ..\..\Network\IPv4\Core/in_port.h \
+  ..\..\Util/basic_consts.h \
+  ..\TCP/tcp.h

@@ -1,6 +1,6 @@
 set root=D:\home\IPSuite
 :set MAKEMAKE=call %root%\opp_nmakemake
-set MAKEMAKE=cmd /c opp_nmakemake
+set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 
 set ICONV=D:/home/tools/iconv-1.8.win32
 set LIBXML=D:/home/tools/libxml2-2.5.4.win32

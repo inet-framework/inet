@@ -58,7 +58,7 @@ module IPProcessing
         ipOutputHookName : string, 
                                    
                                    
-                                   // other parameters
+        // other parameters
         timeToLive : numeric, 
         multicastTimeToLive : numeric, 
         numOfPorts : numeric, 
@@ -109,7 +109,7 @@ module IPProcessing
         send: IPSend; 
             parameters: 
                 hookName = ipSendHookName, 
-                procdelay = ipsend_delay, 
+                procdelay = ipsend_delay,
                 timeToLive = timeToLive, 
                 multicastTimeToLive = multicastTimeToLive, 
                 numOfTransportProt = numOfTransportProt; 

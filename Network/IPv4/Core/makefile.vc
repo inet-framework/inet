@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj  ICMP.obj  in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj  IPInterfacePacket.obj IPMulticast.obj   IPOutputCore.obj   IPSendCore.obj IPTunneling.obj   LocalDeliverCore.obj  PreRoutingCore.obj  RoutingCore.obj RoutingTable.obj  RoutingTableAccess.obj
+OBJS= ErrorHandling_n.obj ICMP_n.obj IPFragmentation_n.obj IPMulticast_n.obj IPOutput_n.obj IPProcessing_n.obj IPSend_n.obj IPTunneling_n.obj LocalDeliver_n.obj PreRouting_n.obj Routing_n.obj RoutingTable_n.obj ErrorHandling.obj ICMP.obj in_addr.obj in_port.obj ip_address.obj ip_address_prefix.obj IPDatagram.obj IPFragmentation.obj IPInterfacePacket.obj IPMulticast.obj IPOutputCore.obj IPSendCore.obj IPTunneling.obj LocalDeliverCore.obj PreRoutingCore.obj RoutingCore.obj RoutingTable.obj RoutingTableAccess.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -210,9 +210,135 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\..\ipsuiteconfig.vc -I..\QoSStub -I..\..\..\NetworkInterfaces -I..\..\..\NetworkInterfaces\Queues -I..\..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+ErrorHandling.obj: ErrorHandling.cc \
+  ErrorHandling.h \
+  IPInterfacePacket.h \
+  IPDatagram.h \
+  ICMP.h \
+  ..\..\..\Util/basic_consts.h \
+  RoutingTableAccess.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+ICMP.obj: ICMP.cc \
+  ICMP.h \
+  RoutingTableAccess.h \
+  IPDatagram.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+in_addr.obj: in_addr.cc \
+  in_addr.h \
+  ..\..\..\Util/basic_consts.h
+in_port.obj: in_port.cc \
+  in_port.h
+ip_address.obj: ip_address.cc \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+ip_address_prefix.obj: ip_address_prefix.cc \
+  ip_address_prefix.h \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+IPDatagram.obj: IPDatagram.cc \
+  IPDatagram.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+IPFragmentation.obj: IPFragmentation.cc \
+  IPFragmentation.h \
+  RoutingTableAccess.h \
+  IPDatagram.h \
+  RoutingTable.h \
+  ICMP.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+IPInterfacePacket.obj: IPInterfacePacket.cc \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+IPMulticast.obj: IPMulticast.cc \
+  IPMulticast.h \
+  RoutingTableAccess.h \
+  IPDatagram.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+IPOutputCore.obj: IPOutputCore.cc \
+  hook_types.h \
+  IPOutputCore.h \
+  ICMP.h \
+  ..\..\..\Util/basic_consts.h \
+  IPDatagram.h \
+  IPInterfacePacket.h \
+  RoutingTableAccess.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+IPSendCore.obj: IPSendCore.cc \
+  hook_types.h \
+  IPSendCore.h \
+  IPDatagram.h \
+  RoutingTableAccess.h \
+  IPInterfacePacket.h \
+  RoutingTable.h \
+  ..\..\..\Util/basic_consts.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+IPTunneling.obj: IPTunneling.cc \
+  IPTunneling.h \
+  IPInterfacePacket.h \
+  IPDatagram.h \
+  ..\..\..\Util/basic_consts.h
+LocalDeliverCore.obj: LocalDeliverCore.cc \
+  hook_types.h \
+  LocalDeliverCore.h \
+  IPDatagram.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+PreRoutingCore.obj: PreRoutingCore.cc \
+  hook_types.h \
+  PreRoutingCore.h \
+  IPDatagram.h \
+  ICMP.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h \
+  RoutingTableAccess.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+RoutingCore.obj: RoutingCore.cc \
+  hook_types.h \
+  RoutingCore.h \
+  RoutingTable.h \
+  RoutingTableAccess.h \
+  ICMP.h \
+  IPDatagram.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h
+RoutingTable.obj: RoutingTable.cc \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h
+RoutingTableAccess.obj: RoutingTableAccess.cc \
+  RoutingTableAccess.h \
+  RoutingTable.h \
+  ..\..\..\Util/ipsuite_defs.h \
+  ip_address.h \
+  IPInterfacePacket.h \
+  ..\..\..\Util/basic_consts.h

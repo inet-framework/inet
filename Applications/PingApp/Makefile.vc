@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= PingApp_n.obj PingApp.obj 
+OBJS= PingApp_n.obj PingApp.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -93,9 +93,19 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Util  #recreate Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
+PingApp.obj: PingApp.cc \
+  PingApp.h \
+  ..\..\Network\IPv4\Core/IPInterfacePacket.h \
+  ..\..\Network\IPv4\Core/IPDatagram.h \
+  ..\..\Network\IPv4\Core/ICMP.h \
+  ..\..\Util/basic_consts.h \
+  ..\..\Network\IPv4\Core/RoutingTableAccess.h \
+  ..\..\Network\IPv4\Core/RoutingTable.h \
+  ..\..\Util/ipsuite_defs.h \
+  ..\..\Network\IPv4\Core/ip_address.h

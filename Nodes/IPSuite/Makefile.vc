@@ -55,7 +55,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj              
+OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4ip_n.obj NetworkLayers_n.obj Router_n.obj StandardHost_n.obj tcp4ip_n.obj TCPClientNode_n.obj TCPClientTest_n.obj TCPServerNode_n.obj TCPServerTest_n.obj UDPHost_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -168,6 +168,7 @@ clean:
 
 depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile.vc -- *.cc
+	-for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc depend && cd ..
 
 re-makemake:
 	opp_nmakemake -f -f -n -r -c ..\..\ipsuiteconfig.vc -I..\..\Network\IPv4\Core -I..\..\Network\IPv4\QoS -I..\..\Transport\TCP -I..\..\Transport\UDP -I..\..\NetworkInterfaces\PPP-old -I..\..\NetworkInterfaces -I..\..\NetworkInterfaces\Queues -I..\..\Applications\Generic -I..\..\Applications\TCPApp -I..\..\Applications\PingApp -I..\..\Util  #recreate Makefile
