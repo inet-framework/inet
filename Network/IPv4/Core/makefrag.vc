@@ -1,5 +1,0 @@
-#FIXME this has to be added to opp_makemake!!!
-all : $(TARGET)
-
-MSG_CCFILES = ICMPMessage_m.cc IPDatagram_m.cc IPInterfacePacket_m.cc
-$(OBJS) : $(MSG_CCFILES)
