@@ -271,6 +271,9 @@ foreach $i (@objs)
 #
 # now the Makefile creation
 #
+$dir=cwd;
+print "Creating $makefile in $dir...\n";
+
 open(OUT, ">$makefile");
 
 print OUT "#
