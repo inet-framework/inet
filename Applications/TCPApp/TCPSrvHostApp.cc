@@ -18,20 +18,10 @@
 Define_Module(TCPSrvHostApp);
 
 
-void TCPServerThread::removeSocket()
-{
-    // FIXME TBD
-}
-
 void TCPSrvHostApp::initialize()
 {
     const char *address = par("address");
     int port = par("port");
-
-    const char *serverProcTypeName = par("serverProcess");
-    srvProcType = findModuleType(serverProcTypeName);
-    if (!srvProcType)
-        error("module type serverProcess=`%s' not found", serverProcTypeName);
 
     serverSocket.setOutputGate(gate("tcpOut"));
     serverSocket.bind(address[0] ? IPAddress(address) : IPAddress(), port);
@@ -40,24 +30,43 @@ void TCPSrvHostApp::initialize()
 
 void TCPSrvHostApp::handleMessage(cMessage *msg)
 {
-    TCPSocket *socket = socketMap.findSocketFor(msg);
-    if (!socket)
+    if (msg->isSelfMessage())
     {
-        // new connection -- create new socket object and server process
-        socket = new TCPSocket(msg);
-        socket->setOutputGate(gate("tcpOut"));
-
-        cModule *mod = srvProcType->createScheduleInit("serverproc",this);
-        TCPServerProcess *proc = check_and_cast<TCPServerProcess *>(mod);
-        socket->setCallbackObject(proc);
-        proc->setSocket(socket);
-
-        socketMap.addSocket(socket);
+        TCPServerThreadBase *thread = (TCPServerThreadBase *)msg->contextPointer();
+        thread->timerExpired(msg);
     }
-    socket->processMessage(msg);
+    else
+    {
+        TCPSocket *socket = socketMap.findSocketFor(msg);
+        if (!socket)
+        {
+            // new connection -- create new socket object and server process
+            socket = new TCPSocket(msg);
+            socket->setOutputGate(gate("tcpOut"));
+
+            const char *serverProcTypeName = par("serverProcess");
+            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(createOne(serverProcTypeName));
+
+            socket->setCallbackObject(proc);
+            proc->init(this, socket);
+
+            socketMap.addSocket(socket);
+        }
+        socket->processMessage(msg);
+    }
 }
 
 void TCPSrvHostApp::finish()
 {
 }
+
+void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
+{
+    // remove socket
+    socketMap.removeSocket(thread->socket());
+
+    // remove thread object
+    delete thread;
+}
+
 

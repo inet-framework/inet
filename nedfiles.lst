@@ -8,7 +8,6 @@ Applications/TCPApp/TCPApp.ned
 Applications/TCPApp/TCPBasicClientApp.ned
 Applications/TCPApp/TCPEchoApp.ned
 Applications/TCPApp/TCPGenericSrvApp.ned
-Applications/TCPApp/TCPGenericSrvThread.ned
 Applications/TCPApp/TCPSessionApp.ned
 Applications/TCPApp/TCPSinkApp.ned
 Applications/TCPApp/TCPSrvHostApp.ned

@@ -21,17 +21,17 @@
 /**
  * Example server thread, to be used with TCPSrvHostApp.
  */
-class TCPGenericSrvThread : public TCPServerThread
+class TCPGenericSrvThread : public TCPServerThreadBase
 {
-  public:
-    Module_Class_Members(TCPGenericSrvThread,TCPServerThread,0);
+  protected:
+    simtime_t maxMsgDelay;
 
-    /** @name TCPSocket::CallbackInterface callback methods */
-    //@{
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    //@}
+  public:
+    TCPGenericSrvThread() {}
+
+    virtual void established();
+    virtual void dataArrived(cMessage *msg, bool urgent);
+    virtual void timerExpired(cMessage *timer);
 };
 
 

@@ -16,23 +16,24 @@
 #include "GenericAppMsg_m.h"
 
 
-Define_Module(TCPGenericSrvThread);
+Register_Class(TCPGenericSrvThread);
 
 
-void TCPGenericSrvThread::socketEstablished(int, void *)
+void TCPGenericSrvThread::established()
 {
-    // nothing to do here
+    // some initialization
+    maxMsgDelay = 0;
 }
 
-void TCPGenericSrvThread::socketDataArrived(int, void *, cMessage *msg, bool urgent)
+void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 {
     GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
     if (!appmsg)
-        error("Message (%s)%s is not a GenericAppMsg -- "
-              "probably wrong client app, or wrong setting of TCP's "
-              "sendQueueClass/receiveQueueClass parameters "
-              "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
-              msg->className(), msg->name());
+        opp_error("Message (%s)%s is not a GenericAppMsg -- "
+                  "probably wrong client app, or wrong setting of TCP's "
+                  "sendQueueClass/receiveQueueClass parameters "
+                  "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
+                  msg->className(), msg->name());
 
     long requestedBytes = appmsg->expectedReplyLength();
 
@@ -41,7 +42,6 @@ void TCPGenericSrvThread::socketDataArrived(int, void *, cMessage *msg, bool urg
         maxMsgDelay = msgDelay;
 
     bool doClose = appmsg->close();
-    int connId = check_and_cast<TCPCommand *>(msg->controlInfo())->connId();
 
     if (requestedBytes==0)
     {
@@ -49,31 +49,19 @@ void TCPGenericSrvThread::socketDataArrived(int, void *, cMessage *msg, bool urg
     }
     else
     {
-        delete msg->removeControlInfo();
-        TCPSendCommand *cmd = new TCPSendCommand();
-        cmd->setConnId(connId);
-        msg->setControlInfo(cmd);
-
-        // set length and send it back
-        msg->setKind(TCP_C_SEND);
         msg->setLength(requestedBytes*8);
-        sendOrSchedule(msg, delay+msgDelay);
+//        sendOrSchedule(msg, delay+msgDelay);
     }
 
     if (doClose)
     {
-        cMessage *msg = new cMessage("close");
-        msg->setKind(TCP_C_CLOSE);
-        TCPCommand *cmd = new TCPCommand();
-        cmd->setConnId(connId);
-        msg->setControlInfo(cmd);
-        sendOrSchedule(msg, delay+maxMsgDelay);
+        socket()->close();
+        //sendOrSchedule(msg, delay+maxMsgDelay);
     }
 }
 
-void TCPGenericSrvThread::socketPeerClosed(int, void *)
+void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
-    // we close too
-    socket()->close();
 }
+
 

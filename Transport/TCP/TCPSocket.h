@@ -111,7 +111,11 @@ class TCPSocket
   public:
     /**
      * Abstract base class for your callback objects. See setCallbackObject()
-     * and processMessage() for more info.
+     * and processMessage() for more info. 
+     *
+     * Note: this class is not subclassed from cPolymorphic, because 
+     * classes may have both this class and cSimpleModule as base class,
+     * and cSimpleModule is already a cPolymorphic.
      */
     class CallbackInterface
     {

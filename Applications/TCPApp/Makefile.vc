@@ -185,6 +185,7 @@ TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
   ..\..\Base/ipsuite_defs.h
 TCPGenericSrvThread.obj: TCPGenericSrvThread.cc \
   TCPGenericSrvThread.h \
+  GenericAppMsg_m.h \
   TCPSrvHostApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
   ..\..\Transport\TCP/TCPSocketMap.h \
