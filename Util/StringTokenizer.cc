@@ -51,5 +51,13 @@ const char *StringTokenizer::nextToken()
     return strtok(NULL, delimiter.c_str());
 }
 
+std::vector<std::string> StringTokenizer::asVector()
+{
+    const char *s;
+    std::vector<std::string> v;
+    while ((s=nextToken())!=NULL)
+        v.push_back(std::string(s));
+    return v;
+}
 
 

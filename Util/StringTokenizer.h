@@ -17,6 +17,7 @@
 #define __STRING_TOKENIZER_H__
 
 #include <string>
+#include <vector>
 
 /**
  * String tokenizer class, based on strtok()
@@ -33,6 +34,7 @@ class StringTokenizer
     ~StringTokenizer();
     void setDelimiter(const char *s);
     const char *nextToken();
+    std::vector<std::string> asVector();
 };
 
 #endif
