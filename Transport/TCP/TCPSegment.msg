@@ -17,6 +17,19 @@
 //
 
 
+cplusplus {{
+typedef cMessage *cMessagePtr;
+}};
+
+struct cMessagePtr;
+
+struct TCPPayload
+{
+    fields:
+        unsigned int endSequenceNo;
+        cMessagePtr payload;
+};
+
 //
 // Represents a TCP segment.
 //
@@ -35,6 +48,7 @@ message TCPSegment extends cMessage
 {
     properties:
         omitGetVerb = true;
+        customize=true;
     fields:
         // Source Port
         short srcPort;
@@ -77,6 +91,8 @@ message TCPSegment extends cMessage
         // e.g. when simulating a virtual data stream there's no encapsulated
         // packet at all.
         int payloadLength;
+
+        abstract TCPPayload payload[];
 };
 
 
