@@ -247,11 +247,11 @@ LIBS=$libpath$libs
 EOT
 
 if [ "$cfgfile" != "" ]; then
-  
-  # Makefile
+
   echo "# Import generic settings from $cfgfile"
   echo "include $cfgfile"
-   
+  echo   
+
 elif [ $makefilein = "n" ]; then
 # Makefile
 cat <<EOT
@@ -330,10 +330,13 @@ OMNETPP_LIBS=-L\$(OMNETPP_LIB_DIR) \$(USERIF_LIBS) \$(KERNEL_LIBS) \$(SYS_LIBS)
 COPTS=\$(CFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
 NEDCOPTS=\$(CFLAGS) \$(NEDCFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
 
+EOT
+fi
+
+cat <<EOT
 #------------------------------------------------------------------------------
 
 EOT
-fi
 
 echo '# subdirectories to recurse into'
 echo "SUBDIRS= $subdirs"
@@ -354,7 +357,7 @@ fi
 
 case "$type" in
 exe)
-    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) Makefile subdirs'
+    echo '$(TARGET): $(OBJS) $(EXRA_OBJS) subdirs Makefile'
     echo '	$(CXX) $(LDFLAGS) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS) $(LIBS) $(OMNETPP_LIBS) -o $(TARGET)'
     ;;
 so)
@@ -362,7 +365,7 @@ so)
     echo '	$(SHLIB_LD) -o $(TARGET) $(OBJS) $(EXRA_OBJS) $(SUBDIR_OBJS)'
     ;;
 o)
-    echo '$(TARGET): $(OBJS) Makefile'
+    echo '$(TARGET): $(OBJS) subdirs Makefile'
     echo '	'
     ;;
 esac
