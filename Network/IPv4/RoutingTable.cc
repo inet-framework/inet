@@ -132,30 +132,6 @@ std::string RoutingEntry::detailedInfo() const
     return std::string();
 }
 
-void RoutingEntry::print()
-{
-    PRINTF("%s", detailedInfo().c_str());
-}
-
-bool RoutingEntry::correspondTo(const IPAddress& target,
-                                const IPAddress& nmask,
-                                const IPAddress& gw,
-                                int metric,
-                                const char *dev)
-{
-    if (!target.isNull() && !target.equals(host))
-        return false;
-    if (!nmask.isNull() && !nmask.equals(netmask))
-        return false;
-    if (!gw.isNull() && !gw.equals(gateway))
-        return false;
-    if (metric && metric!=metric)
-        return false;
-    if (dev && strcmp(dev, interfaceName.c_str()))
-        return false;
-
-    return true;
-}
 
 //==============================================================
 
@@ -423,136 +399,102 @@ IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
     return IPAddress();
 }
 
-
-bool RoutingTable::add(const IPAddress& target,
-                       const IPAddress& netmask,
-                       const IPAddress& gw,
-                       int metric,
-                       char *dev)
+int RoutingTable::numRoutingEntries()
 {
-    Enter_Method("add(...)");
+    return routes.size()+multicastRoutes.size()+(defaultRoute?1:0);
+}
 
-    RoutingEntry *e = new RoutingEntry();
-    int dev_nb;
+RoutingEntry *routingEntry(int k)
+{
+    if (k==0 && defaultRoute)
+        return defaultRoute;
+    k -= (defaultRoute?1:0);
+    if (k < routes.size())
+        return routes[k];
+    k -= routes.size()
+    if (k < multicastRoutes.size())
+        return multicastRoutes[k];
+    return NULL;
+}
 
-    e->host = target;
-    // We add at the end, if everything is alright
+RoutingEntry *RoutingTable::findRoutingEntry(const IPAddress& target,
+                                             const IPAddress& netmask,
+                                             const IPAddress& gw,
+                                             int metric = 0,
+                                             char *dev = NULL)
+{
+    int n = numRoutingEntries();
+    for (int i=0; i<n; i++)
+        if (routingEntryMatches(routingEntry(i), target, netmask, gw, metric, dev))
+            return routingEntry(i);
+}
 
-    if (!netmask.isNull()) {
-        e->netmask = netmask;
-    } else {
-        // If class D or E, the netmask is NULL here
-        e->netmask = target.getNetworkMask();
+void RoutingTable::addRoutingEntry(RoutingEntry *entry)
+{
+    Enter_Method("addRoutingEntry(...)");
+
+    if (target.isNull())
+    {
+        delete defaultRoute;
+        defaultRoute = entry;
     }
-
-    if (!gw.isNull()) {
-        e->gateway = gw;
-        e->type = REMOTE;
-    } else {
-        e->gateway = IPAddress();
-        e->type = DIRECT;
+    else if (!e->host.isMulticast())
+    {
+        routes.push_back(entry);
     }
-
-    e->metric = metric;
-
-    if (dev) {
-        dev_nb = findInterfaceByName(dev);
-        if (dev_nb != -1) {
-            // The interface exists
-            e->interfaceName = dev;
-            e->interfaceNo = dev_nb;
-        } else {
-            // The interface doesn't exist
-            opp_error("Adding a route failed: nonexistent interface");
-        }
-    } else {
-        // Trying to find the interface
-        if (e->type == REMOTE) {
-            // If it's a gateway entry, looking in the routing table
-            // for existing route for the gateway value
-            dev_nb = outputPortNo(gw);
-            if (dev_nb != -1) {
-                // Route for the gateway exists
-                e->interfaceNo = dev_nb;
-                e->interfaceName = intrface[dev_nb]->name;
-            } else {
-                // No route for the gateway, looking in the interface table
-                dev_nb = findInterfaceByAddress(gw);
-                if (dev_nb != -1) {
-                    // The interface for the gateway address exists
-                    e->interfaceNo = dev_nb;
-                    e->interfaceName = intrface[dev_nb]->name;
-                } else {
-                    // The interface doesn't exist
-                    opp_error("Adding a route failed: nonexistent interface");
-                }
-            }
-        } else {
-            // If it's a host entry, looking in the interface table
-            // for the target address
-            dev_nb = findInterfaceByAddress(e->host);
-            if (dev_nb != -1) {
-                // The interface for the gateway address exists
-                e->interfaceNo = dev_nb;
-                e->interfaceName = intrface[dev_nb]->name;
-            } else {
-                // The interface doesn't exist
-                opp_error("Adding a route failed: no interface found");
-            }
-        }
+    else
+    {
+        multicastRoutes.push_back(entry);
     }
+}
 
-    // Adding...
-    // If not the default route
-    if (!target.isNull()) {
-        // Check if entry is for multicast address
-        if (e->host.isMulticast()) {
-            route->add(e);
-        } else {
-            mcRoute->add(e);
-        }
-    } else {
-        defaultRoute = e;
+
+bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
+{
+    Enter_Method("deleteRoutingEntry(...)");
+
+    RouteVector::iterator i = find(routes.begin(), routes.end(), entry);
+    if (i!=routes.end())
+    {
+        routes.erase(i);
+        delete entry;
+        return true;
     }
+    i = find(multicastRoutes.begin(), multicastRoutes.end(), entry);
+    if (i!=multicastRoutes.end())
+    {
+        multicastRoutes.erase(i);
+        delete entry;
+        return true;
+    }
+    if (entry==defaultRoute)
+    {
+        delete defaultRoute;
+        defaultRoute = NULL;
+        return true;
+    }
+    return false;
+}
+
+
+bool RoutingTable::routingEntryMatches(RoutingEntry *entry,
+                                const IPAddress& target,
+                                const IPAddress& nmask,
+                                const IPAddress& gw,
+                                int metric,
+                                const char *dev)
+{
+    if (!target.isNull() && !target.equals(entry->host))
+        return false;
+    if (!nmask.isNull() && !nmask.equals(entry->netmask))
+        return false;
+    if (!gw.isNull() && !gw.equals(entry->gateway))
+        return false;
+    if (metric && metric!=entry->metric)
+        return false;
+    if (dev && strcmp(dev, entry->interfaceName.c_str()))
+        return false;
 
     return true;
 }
-
-
-bool RoutingTable::del(const IPAddress& target,
-                       const IPAddress& netmask,
-                       const IPAddress& gw,
-                       int metric,
-                       char *dev)
-{
-    Enter_Method("del(...)");
-    bool res = false;
-
-    if (!target.isNull()) {
-        // A target is given => not default route
-        RoutingEntry *e;
-        for (int i = 0; i < route->items(); i++) {
-            if (route->get(i)) {
-                e = (RoutingEntry*)route->get(i);
-                if (e->correspondTo(target, netmask, gw, metric, dev)) {
-                    if (e->host.isMulticast()) {
-                        route->remove(e);
-                    } else {
-                        mcRoute->remove(e);
-                    }
-                    res = true;
-                }
-            }
-        }
-    } else {
-        // Delete default entry
-        if (defaultRoute->correspondTo(target, netmask, gw, metric, dev)) {
-            defaultRoute = NULL;
-            res = true;
-        }
-    }
-
-    return res;
-}
-
 
