@@ -38,501 +38,489 @@ void RSVPAppl::initialize()
 }
 
 
-
 void RSVPAppl::activity()
+{
+    if (isIR)
+    {
+        MPLSModule *mplsMod = mplsAccess.get();
+        cMessage *readyMsg = new cMessage();
+        sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
+    }
+
+    while (true)
+    {
+        cMessage *msg = receive();
+
+        if (!strcmp(msg->arrivalGate()->name(), "from_rsvp"))
+            processMsgFromRSVP(msg);
+        else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+            processSignalFromMPLSSwitchToInitialiseLabelRequest(msg);
+        else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
+            processSignalFromTester(msg);
+    }
+}
+
+void RSVPAppl::processMsgFromRSVP(cMessage *msg)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();
 
-    cMessage *msg;
-
-    if (isIR)
+    if (msg->kind() == PERROR_MESSAGE)
     {
-        cMessage *readyMsg = new cMessage();
-        sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
+        PathErrorMessage *pe = check_and_cast < PathErrorMessage * >(msg);
+
+        // create new PATH TEAR
+        PathTearMessage *pt = new PathTearMessage();
+        pt->setSenderTemplate(pe->getSenderTemplate());
+        pt->setSession(pe->getSession());
+        // Setup PHOP
+        RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
+        rsvp_hop->Logical_Interface_Handle = -1;
+        rsvp_hop->Next_Hop_Address = local_addr;
+        pt->setHop(rsvp_hop);
+        send(pt, "to_rsvp");
+
+
     }
-    /*
-       if (isSender)
-       {
-       cMessage* sendMsg = new cMessage();
-       sendMsg->addPar("dest_addr") = IPAddress(dest_addr).str().c_str();
-       sendMsg->addPar("src_addr") = IPAddress(local_addr).str().c_str();
-       send(sendMsg, "to_ip");
-       }
-     */
-
-    while (true)
+    if (msg->kind() == PTEAR_MESSAGE)
     {
-        msg = receive();
+        ev << "Successfully receive the PTEAR at ER\n";
+        // delete msg;
+    }
+    if (msg->kind() == RTEAR_MESSAGE)
+    {
+        ev << "Successfully receive the RTEAR at IR\n";
+        // delete msg;
+    }
+    if (msg->kind() == PATH_MESSAGE)
+    {
 
-/******************************************************************************
-            Process packets from RSVP deamon
-*******************************************************************************/
-        if (!strcmp(msg->arrivalGate()->name(), "from_rsvp"))
+        PathMessage *pMessage = check_and_cast < PathMessage * >(msg);
+
+        int receiverIP = pMessage->getDestAddress();
+        int lspId = pMessage->getLspId();
+        int outInf = 0;
+        int inInf = 0;
+
+        getIncInet(pMessage->getLIH(), &inInf);
+        Unicast_Route_Query(receiverIP, &outInf);
+
+        // Convert to name
+        InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
+        InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
+        if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
+        if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
+
+        const char *outInfName = outInfP->name.c_str();
+        const char *inInfName = inInfP->name.c_str();
+
+        if (isER)
         {
+            int inLabel =
+                (lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId,
+                                     POP_OPER));
+            ev << "INSTALL new label:\n";
+            ev << "(inL, inInf, outL, outInf,fec)=(," << inLabel << "," << inInfName <<
+                "," << "-1," << outInfName << "," << lspId << ")\n";
 
-            if (msg->kind() == PERROR_MESSAGE)
-            {
-                PathErrorMessage *pe = check_and_cast < PathErrorMessage * >(msg);
-
-                // create new PATH TEAR
-                PathTearMessage *pt = new PathTearMessage();
-                pt->setSenderTemplate(pe->getSenderTemplate());
-                pt->setSession(pe->getSession());
-                // Setup PHOP
-                RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-                rsvp_hop->Logical_Interface_Handle = -1;
-                rsvp_hop->Next_Hop_Address = local_addr;
-                pt->setHop(rsvp_hop);
-                send(pt, "to_rsvp");
+            // Send LABEL MAPPING upstream
+            sendResvMessage(pMessage, inLabel);
 
 
-            }
-            if (msg->kind() == PTEAR_MESSAGE)
-            {
-                ev << "Successfully receive the PTEAR at ER\n";
-                // delete msg;
-            }
-            if (msg->kind() == RTEAR_MESSAGE)
-            {
-                ev << "Successfully receive the RTEAR at IR\n";
-                // delete msg;
-            }
-            if (msg->kind() == PATH_MESSAGE)
+        }
+    }
+    else if (msg->kind() == RESV_MESSAGE)
+    {
+        ResvMessage *rMessage = check_and_cast < ResvMessage * >(msg);
+        if (isIR)
+        {
+            std::vector < lsp_tunnel_t >::iterator iterF;
+            lsp_tunnel_t aTunnel;
+            int lsp_id;
+            int label;
+
+            FlowDescriptor_t *flow_d = rMessage->getFlowDescriptor();
+            for (int k = 0; k < InLIST_SIZE; k++)
             {
 
-                PathMessage *pMessage = check_and_cast < PathMessage * >(msg);
-
-                int receiverIP = pMessage->getDestAddress();
-                int lspId = pMessage->getLspId();
-                int outInf = 0;
-                int inInf = 0;
-
-                getIncInet(pMessage->getLIH(), &inInf);
-                Unicast_Route_Query(receiverIP, &outInf);
-
-                // Convert to name
-                InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
-                InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
-                if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
-                if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
-
-                const char *outInfName = outInfP->name.c_str();
-                const char *inInfName = inInfP->name.c_str();
-
-                if (isER)
+                for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
                 {
-                    int inLabel =
-                        (lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId,
-                                             POP_OPER));
-                    ev << "INSTALL new label:\n";
-                    ev << "(inL, inInf, outL, outInf,fec)=(," << inLabel << "," << inInfName <<
-                        "," << "-1," << outInfName << "," << lspId << ")\n";
+                    aTunnel = (lsp_tunnel_t) (*iterF);
 
-                    // Send LABEL MAPPING upstream
-                    sendResvMessage(pMessage, inLabel);
+                    if (aTunnel.Sender_Template.SrcAddress == 0)
+                        continue;
+                    lsp_id = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
 
-
-                }
-            }
-            else if (msg->kind() == RESV_MESSAGE)
-            {
-                ResvMessage *rMessage = check_and_cast < ResvMessage * >(msg);
-                if (isIR)
-                {
-                    std::vector < lsp_tunnel_t >::iterator iterF;
-                    lsp_tunnel_t aTunnel;
-                    int lsp_id;
-                    int label;
-
-                    FlowDescriptor_t *flow_d = rMessage->getFlowDescriptor();
-                    for (int k = 0; k < InLIST_SIZE; k++)
+                    // If the tunnel has been in operating, ignore this Resv Message
+                    // Otherwise, signal the MPLS module
+                    // If the Resv Message is to re-route, signal the MPLS module as well
+                    if (lsp_id == aTunnel.Sender_Template.Lsp_Id ||
+                        (2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id)
                     {
-
-                        for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
+                        if ((!aTunnel.operating) ||
+                            ((2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id))
                         {
-                            aTunnel = (lsp_tunnel_t) (*iterF);
 
-                            if (aTunnel.Sender_Template.SrcAddress == 0)
-                                continue;
-                            lsp_id = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
+                            // Delete all invalid record before
+                            std::vector < routing_info_t >::iterator iterR;
+                            routing_info_t rEle;
 
-                            // If the tunnel has been in operating, ignore this Resv Message
-                            // Otherwise, signal the MPLS module
-                            // If the Resv Message is to re-route, signal the MPLS module as well
-                            if (lsp_id == aTunnel.Sender_Template.Lsp_Id ||
-                                (2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id)
+                            for (iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
                             {
-                                if ((!aTunnel.operating) ||
-                                    ((2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id))
+                                rEle = (routing_info_t) * iterR;
+                                if ((rEle.lspId == lsp_id) || (rEle.lspId == (2 * MAX_LSP_NO - lsp_id)))
                                 {
-
-                                    // Delete all invalid record before
-                                    std::vector < routing_info_t >::iterator iterR;
-                                    routing_info_t rEle;
-
-                                    for (iterR = routingInfo.begin(); iterR != routingInfo.end();
-                                         iterR++)
-                                    {
-                                        rEle = (routing_info_t) * iterR;
-                                        if ((rEle.lspId == lsp_id)
-                                            || (rEle.lspId == (2 * MAX_LSP_NO - lsp_id)))
-                                        {
-                                            break;
-                                        }
-
-                                    }
-                                    if (iterR != routingInfo.end())
-                                        routingInfo.erase(iterR);
-
-                                    // Add new record
-
-                                    bool includeMe = false;
-                                    routing_info_t *rInfo = new routing_info_t;
-                                    rInfo->lspId = lsp_id;
-                                    ev << "Record route for LSP with id=" << lsp_id << "\n";
-                                    ev << "Route ={ ";
-
-                                    for (int c = 0; c < MAX_ROUTE; c++)
-                                    {
-                                        (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
-                                        if (((rInfo->route)[c] == 0) && (!includeMe))
-                                        {
-                                            (rInfo->route)[c] = local_addr;
-                                            includeMe = true;
-                                        }
-                                        ev << IPAddress((rInfo->route)[c]) << " ";
-                                    }
-                                    ev << "\n";
-
-
-                                    routingInfo.push_back(*rInfo);
-
-                                    cMessage *signalMPLS = new cMessage();
-                                    label = (*(flow_d + k)).label;
-                                    signalMPLS->addPar("label") = label;
-                                    signalMPLS->addPar("fec") = lsp_id;
-                                    // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
-                                    // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
-                                    // Install new label
-                                    int outInf = rMessage->getLIH();
-                                    int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
-                                    const char *outInfName =
-                                        (rt->interfaceByPortNo(outInfIndex))->name.c_str();
-                                    const char *inInfName =
-                                        (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
-
-                                    ev << "INSTALL new label \n";
-                                    ev << "src=" << IPAddress(aTunnel.Sender_Template.
-                                                              SrcAddress) << "\n";
-                                    lt->installNewLabel(label, string(inInfName),
-                                                        string(outInfName), lsp_id, PUSH_OPER);
-
-                                    aTunnel.operating = true;
-                                    sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
-
-                                    /*************************************************
-                                    Sending Path Tear Message
-                                    **************************************************/
-                                    if (lsp_id > MAX_LSP_NO)
-                                    {
-                                        PathTearMessage *pt = new PathTearMessage();
-                                        SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
-                                        sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
-                                        sTemplate->SrcAddress =
-                                            (*(flow_d + k)).Filter_Spec_Object.SrcAddress;
-                                        sTemplate->SrcPort =
-                                            (*(flow_d + k)).Filter_Spec_Object.SrcPort;
-
-                                        pt->setSenderTemplate(sTemplate);
-                                        pt->setSession(rMessage->getSession());
-                                        // Setup PHOP
-                                        RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-                                        rsvp_hop->Logical_Interface_Handle = -1;
-                                        rsvp_hop->Next_Hop_Address = local_addr;
-                                        pt->setHop(rsvp_hop);
-                                        send(pt, "to_rsvp");
-                                    }
+                                    break;
                                 }
-                            }
 
+                            }
+                            if (iterR != routingInfo.end())
+                                routingInfo.erase(iterR);
+
+                            // Add new record
+
+                            bool includeMe = false;
+                            routing_info_t *rInfo = new routing_info_t;
+                            rInfo->lspId = lsp_id;
+                            ev << "Record route for LSP with id=" << lsp_id << "\n";
+                            ev << "Route ={ ";
+
+                            for (int c = 0; c < MAX_ROUTE; c++)
+                            {
+                                (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
+                                if (((rInfo->route)[c] == 0) && (!includeMe))
+                                {
+                                    (rInfo->route)[c] = local_addr;
+                                    includeMe = true;
+                                }
+                                ev << IPAddress((rInfo->route)[c]) << " ";
+                            }
+                            ev << "\n";
+
+
+                            routingInfo.push_back(*rInfo);
+
+                            cMessage *signalMPLS = new cMessage();
+                            label = (*(flow_d + k)).label;
+                            signalMPLS->addPar("label") = label;
+                            signalMPLS->addPar("fec") = lsp_id;
+                            // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
+                            // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
+                            // Install new label
+                            int outInf = rMessage->getLIH();
+                            int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                            const char *outInfName =
+                                (rt->interfaceByPortNo(outInfIndex))->name.c_str();
+                            const char *inInfName =
+                                (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
+
+                            ev << "INSTALL new label \n";
+                            ev << "src=" << IPAddress(aTunnel.Sender_Template.
+                                                      SrcAddress) << "\n";
+                            lt->installNewLabel(label, string(inInfName),
+                                                string(outInfName), lsp_id, PUSH_OPER);
+
+                            aTunnel.operating = true;
+                            sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
+
+                            /*************************************************
+                            Sending Path Tear Message
+                            **************************************************/
+                            if (lsp_id > MAX_LSP_NO)
+                            {
+                                PathTearMessage *pt = new PathTearMessage();
+                                SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
+                                sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
+                                sTemplate->SrcAddress =
+                                    (*(flow_d + k)).Filter_Spec_Object.SrcAddress;
+                                sTemplate->SrcPort =
+                                    (*(flow_d + k)).Filter_Spec_Object.SrcPort;
+
+                                pt->setSenderTemplate(sTemplate);
+                                pt->setSession(rMessage->getSession());
+                                // Setup PHOP
+                                RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
+                                rsvp_hop->Logical_Interface_Handle = -1;
+                                rsvp_hop->Next_Hop_Address = local_addr;
+                                pt->setHop(rsvp_hop);
+                                send(pt, "to_rsvp");
+                            }
                         }
                     }
 
                 }
-
             }
-            delete msg;
+
         }
 
-      /***********************************************************************
-         Signal from MPLS switch - Initialise Lable Request
-        ***********************************************************************/
+    }
+    delete msg;
+}
 
-        else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+void RSVPAppl::processSignalFromMPLSSwitchToInitialiseLabelRequest(cMessage *msg)
+{
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
+
+    // This is a request for new label finding
+    std::vector < lsp_tunnel_t >::iterator iterF;
+    lsp_tunnel_t aTunnel;
+    lsp_tunnel_t *newTunnel = NULL;
+    int tunnelId = 0;
+    int ex_tunnelId = 0;
+    bool foundSession = false;
+
+    int fecInt = msg->par("FEC");
+    int dest = msg->par("dest_addr");
+    int src = msg->par("src_addr");
+
+    int lspId = fecInt;
+
+    // TEAR DOWN HANDLING
+    if (msg->hasPar("teardown"))
+    {
+        ev << "Tear down request\n";
+        PathTearMessage *pt = new PathTearMessage();
+        for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
         {
-            // This is a request for new label finding
-            std::vector < lsp_tunnel_t >::iterator iterF;
-            lsp_tunnel_t aTunnel;
-            lsp_tunnel_t *newTunnel = NULL;
-            int tunnelId = 0;
-            int ex_tunnelId = 0;
-            bool foundSession = false;
-
-            int fecInt = msg->par("FEC");
-            int dest = msg->par("dest_addr");
-            int src = msg->par("src_addr");
-
-            int lspId = fecInt;
-
-            // TEAR DOWN HANDLING
-            if (msg->hasPar("teardown"))
+            aTunnel = (lsp_tunnel_t) (*iterF);
+            if (aTunnel.Session.DestAddress == dest &&
+                aTunnel.Sender_Template.SrcAddress == src)
             {
-                ev << "Tear down request\n";
-                PathTearMessage *pt = new PathTearMessage();
-                for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
-                {
-                    aTunnel = (lsp_tunnel_t) (*iterF);
-                    if (aTunnel.Session.DestAddress == dest &&
-                        aTunnel.Sender_Template.SrcAddress == src)
-                    {
-                        break;
-
-                    }
-                }
-                if (iterF == FecSenderBinds.end())
-                {
-                    error("Cannot find the session to teardown");
-                }
-                else
-                {
-                    pt->setSenderTemplate(&aTunnel.Sender_Template);
-                    pt->setSession(&aTunnel.Session);
-                    RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-                    rsvp_hop->Logical_Interface_Handle = -1;
-                    rsvp_hop->Next_Hop_Address = local_addr;
-                    pt->setHop(rsvp_hop);
-                    send(pt, "to_rsvp");
-
-                }
-
-                continue;
-            }
-
-            // PATH REQUEST HANDLING
-
-            int index = msg->par("gateIndex");
-
-            // check if any similar previous requests
-
-            /*
-               Check whether the request had been recorded.
-               Initiliaze new TE-Tunnel Id, and lsp id with new values if not found
-             */
-
-            for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
-            {
-                aTunnel = (lsp_tunnel_t) (*iterF);
-                if (aTunnel.Session.DestAddress == dest)
-                {
-                    tunnelId = aTunnel.Session.Tunnel_Id;
-                    ex_tunnelId = aTunnel.Session.Extended_Tunnel_Id;
-                    foundSession = true;
-
-                    if (aTunnel.Sender_Template.SrcAddress == src)
-                    {
-                        newTunnel = &aTunnel;
-                        break;
-                    }
-                }
-                if (!foundSession)
-                {
-                    if (tunnelId < aTunnel.Session.Tunnel_Id)
-                        tunnelId = aTunnel.Session.Tunnel_Id + 1;
-
-                    if (ex_tunnelId < aTunnel.Session.Extended_Tunnel_Id)
-                        ex_tunnelId = aTunnel.Session.Extended_Tunnel_Id + 1;
-                }
-
+                break;
 
             }
-
-
-            if (iterF == FecSenderBinds.end())  // There is no previous same requests
-            {
-
-                newTunnel = new lsp_tunnel_t;
-                newTunnel->operating = false;
-                newTunnel->Sender_Template.Lsp_Id = lspId;
-                newTunnel->Sender_Template.SrcAddress = src;
-                newTunnel->Sender_Template.SrcPort = DEFAULT_SRC_PORT;
-                newTunnel->Session.DestAddress = dest;
-                newTunnel->Session.DestPort = DEFAULT_DEST_PORT;
-                newTunnel->Session.Protocol_Id = 1;
-                newTunnel->Session.holdingPri = 7;      // Lowest
-                newTunnel->Session.setupPri = 7;
-
-                newTunnel->Session.Extended_Tunnel_Id = ex_tunnelId;
-                newTunnel->Session.Tunnel_Id = tunnelId;
-                newTunnel->inInfIndex = index;
-
-                // Genarate new PATH message and send downstream
-                std::vector < traffic_request_t >::iterator iterT;
-                traffic_request_t trafficR;
-
-                for (iterT = tr.begin(); iterT != tr.end(); iterT++)
-                {
-                    trafficR = (traffic_request_t) * iterT;
-                    if (trafficR.dest == dest && trafficR.src == src)
-                    {
-                        newTunnel->Session.holdingPri = trafficR.holdingPri;
-                        newTunnel->Session.setupPri = trafficR.setupPri;
-                        break;
-                    }
-
-                }
-
-                FecSenderBinds.push_back(*newTunnel);
-
-                if (iterT != tr.end())
-                    sendPathMessage(&newTunnel->Session, &trafficR, lspId);
-                else
-                {
-                    traffic_request_t *aTR = new traffic_request_t;
-                    aTR->bandwidth = 0;
-                    aTR->delay = 0;
-                    aTR->dest = dest;
-                    aTR->holdingPri = 7;
-                    aTR->setupPri = 7;
-                    aTR->src = src;
-                    aTR->isER = false;
-
-                    sendPathMessage(&newTunnel->Session, aTR, lspId);
-                }
-
-
-            }
-            delete msg;
-
-
-        }                       // End if
-/************************************************************************************
-                Message for testing purpose
-************************************************************************************/
-        else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
-        {
-            ev << "Receive msg from Tester\n";
-
-            if (!(msg->hasPar("test_command")))
-            {
-                ev << "Unrecognized test command\n";
-                delete msg;
-                continue;
-            }
-
-            // Process the test command
-            int command = msg->par("test_command").longValue();
-            if (command == NEW_BW_REQUEST)
-            {
-                int rSrc = IPAddress(msg->par("src").stringValue()).getInt();
-                int rDest = IPAddress(msg->par("dest").stringValue()).getInt();
-                double bw = msg->par("bandwidth").doubleValue();
-
-                int k = 0;
-                int n = 0;
-                int newLsp_id = -1;
-                for (k = 0; k < tr.size(); k++)
-                {
-                    if (tr[k].src == rSrc && tr[k].dest == rDest)
-                    {
-                        tr[k].bandwidth = bw;
-                        ev << "New Bandwidth request = " << bw << " \n";
-                        break;
-                    }
-
-                }
-                if (k == tr.size())
-                    continue;
-
-                for (n = 0; n < FecSenderBinds.size(); n++)
-                {
-                    if (tr[k].dest == FecSenderBinds[n].Session.DestAddress &&
-                        tr[k].src == FecSenderBinds[n].Sender_Template.SrcAddress)
-                    {
-                        newLsp_id = FecSenderBinds[n].Sender_Template.Lsp_Id;
-                        break;
-                    }
-                }
-
-                if (n == FecSenderBinds.size())
-                    continue;
-
-                newLsp_id = 2 * MAX_LSP_NO - newLsp_id;
-
-                sendPathMessage(&FecSenderBinds[n].Session, &tr[k], newLsp_id);
-            }
-
-            if (command == NEW_ROUTE_DISCOVER)
-            {
-
-                std::vector < routing_info_t >::iterator iterR;
-                routing_info_t rInfo;
-
-                for (iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
-                {
-                    rInfo = (routing_info_t) * iterR;
-                    // Try to find new route
-                    ev << "CSPF calculates to find new path for LSP with id =" << rInfo.
-                        lspId << "\n";
-                    if (hasPath(rInfo.lspId, NULL))
-                    {
-                        ev << "Going to install new path\n";
-
-                        break;
-                    }
-                }
-
-                std::vector < lsp_tunnel_t >::iterator iterF;
-                lsp_tunnel_t aTunnel;
-                int newLspId = 2 * MAX_LSP_NO - rInfo.lspId;
-
-                for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
-                {
-                    aTunnel = (lsp_tunnel_t) (*iterF);
-                    if (aTunnel.Sender_Template.Lsp_Id == rInfo.lspId)
-                        break;
-                }
-                if (iterF == FecSenderBinds.end())
-                    error("cannot locate the tunnel");
-
-                std::vector < traffic_request_t >::iterator iterT;
-                traffic_request_t trafficR;
-
-                for (iterT = tr.begin(); iterT != tr.end(); iterT++)
-                {
-                    trafficR = (traffic_request_t) * iterT;
-                    if (trafficR.dest == aTunnel.Session.DestAddress &&
-                        trafficR.src == aTunnel.Sender_Template.SrcAddress)
-                    {
-                        break;
-                    }
-
-                }
-
-                if (iterT == tr.end())
-                {
-                    ev << "No traffic spec required for the LSP\n";
-                    continue;
-                }
-
-                // Create new Path message and send out
-                ev << "Sending Path message for the new discovered route\n";
-                sendPathMessage(&aTunnel.Session, &trafficR, newLspId);
-
-            }                   // End NEW ROUTE command
         }
-    }                           // End while
+        if (iterF == FecSenderBinds.end())
+        {
+            error("Cannot find the session to teardown");
+        }
+        else
+        {
+            pt->setSenderTemplate(&aTunnel.Sender_Template);
+            pt->setSession(&aTunnel.Session);
+            RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
+            rsvp_hop->Logical_Interface_Handle = -1;
+            rsvp_hop->Next_Hop_Address = local_addr;
+            pt->setHop(rsvp_hop);
+            send(pt, "to_rsvp");
+
+        }
+
+        return; // was: continue;
+    }
+
+    // PATH REQUEST HANDLING
+
+    int index = msg->par("gateIndex");
+
+    // check if any similar previous requests
+
+    /*
+       Check whether the request had been recorded.
+       Initiliaze new TE-Tunnel Id, and lsp id with new values if not found
+     */
+
+    for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
+    {
+        aTunnel = (lsp_tunnel_t) (*iterF);
+        if (aTunnel.Session.DestAddress == dest)
+        {
+            tunnelId = aTunnel.Session.Tunnel_Id;
+            ex_tunnelId = aTunnel.Session.Extended_Tunnel_Id;
+            foundSession = true;
+
+            if (aTunnel.Sender_Template.SrcAddress == src)
+            {
+                newTunnel = &aTunnel;
+                break;
+            }
+        }
+        if (!foundSession)
+        {
+            if (tunnelId < aTunnel.Session.Tunnel_Id)
+                tunnelId = aTunnel.Session.Tunnel_Id + 1;
+
+            if (ex_tunnelId < aTunnel.Session.Extended_Tunnel_Id)
+                ex_tunnelId = aTunnel.Session.Extended_Tunnel_Id + 1;
+        }
+
+
+    }
+
+
+    if (iterF == FecSenderBinds.end())  // There is no previous same requests
+    {
+
+        newTunnel = new lsp_tunnel_t;
+        newTunnel->operating = false;
+        newTunnel->Sender_Template.Lsp_Id = lspId;
+        newTunnel->Sender_Template.SrcAddress = src;
+        newTunnel->Sender_Template.SrcPort = DEFAULT_SRC_PORT;
+        newTunnel->Session.DestAddress = dest;
+        newTunnel->Session.DestPort = DEFAULT_DEST_PORT;
+        newTunnel->Session.Protocol_Id = 1;
+        newTunnel->Session.holdingPri = 7;      // Lowest
+        newTunnel->Session.setupPri = 7;
+
+        newTunnel->Session.Extended_Tunnel_Id = ex_tunnelId;
+        newTunnel->Session.Tunnel_Id = tunnelId;
+        newTunnel->inInfIndex = index;
+
+        // Genarate new PATH message and send downstream
+        std::vector < traffic_request_t >::iterator iterT;
+        traffic_request_t trafficR;
+
+        for (iterT = tr.begin(); iterT != tr.end(); iterT++)
+        {
+            trafficR = (traffic_request_t) * iterT;
+            if (trafficR.dest == dest && trafficR.src == src)
+            {
+                newTunnel->Session.holdingPri = trafficR.holdingPri;
+                newTunnel->Session.setupPri = trafficR.setupPri;
+                break;
+            }
+
+        }
+
+        FecSenderBinds.push_back(*newTunnel);
+
+        if (iterT != tr.end())
+            sendPathMessage(&newTunnel->Session, &trafficR, lspId);
+        else
+        {
+            traffic_request_t *aTR = new traffic_request_t;
+            aTR->bandwidth = 0;
+            aTR->delay = 0;
+            aTR->dest = dest;
+            aTR->holdingPri = 7;
+            aTR->setupPri = 7;
+            aTR->src = src;
+            aTR->isER = false;
+
+            sendPathMessage(&newTunnel->Session, aTR, lspId);
+        }
+
+
+    }
+    delete msg;
+}
+
+void RSVPAppl::processSignalFromTester(cMessage *msg)
+{
+    ev << "Received msg from Tester\n";
+
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
+
+    if (!(msg->hasPar("test_command")))
+    {
+        ev << "Unrecognized test command\n";
+        delete msg;
+        return; // was: continue;
+    }
+
+    // Process the test command
+    int command = msg->par("test_command").longValue();
+    if (command == NEW_BW_REQUEST)
+    {
+        int rSrc = IPAddress(msg->par("src").stringValue()).getInt();
+        int rDest = IPAddress(msg->par("dest").stringValue()).getInt();
+        double bw = msg->par("bandwidth").doubleValue();
+
+        int k = 0;
+        int n = 0;
+        int newLsp_id = -1;
+        for (k = 0; k < tr.size(); k++)
+        {
+            if (tr[k].src == rSrc && tr[k].dest == rDest)
+            {
+                tr[k].bandwidth = bw;
+                ev << "New Bandwidth request = " << bw << " \n";
+                break;
+            }
+
+        }
+        if (k == tr.size())
+            return; // was: continue;
+
+        for (n = 0; n < FecSenderBinds.size(); n++)
+        {
+            if (tr[k].dest == FecSenderBinds[n].Session.DestAddress &&
+                tr[k].src == FecSenderBinds[n].Sender_Template.SrcAddress)
+            {
+                newLsp_id = FecSenderBinds[n].Sender_Template.Lsp_Id;
+                break;
+            }
+        }
+
+        if (n == FecSenderBinds.size())
+            return; // was: continue;
+
+        newLsp_id = 2 * MAX_LSP_NO - newLsp_id;
+
+        sendPathMessage(&FecSenderBinds[n].Session, &tr[k], newLsp_id);
+    }
+
+    if (command == NEW_ROUTE_DISCOVER)
+    {
+
+        std::vector < routing_info_t >::iterator iterR;
+        routing_info_t rInfo;
+
+        for (iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
+        {
+            rInfo = (routing_info_t) * iterR;
+            // Try to find new route
+            ev << "CSPF calculates to find new path for LSP with id =" << rInfo.
+                lspId << "\n";
+            if (hasPath(rInfo.lspId, NULL))
+            {
+                ev << "Going to install new path\n";
+
+                break;
+            }
+        }
+
+        std::vector < lsp_tunnel_t >::iterator iterF;
+        lsp_tunnel_t aTunnel;
+        int newLspId = 2 * MAX_LSP_NO - rInfo.lspId;
+
+        for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
+        {
+            aTunnel = (lsp_tunnel_t) (*iterF);
+            if (aTunnel.Sender_Template.Lsp_Id == rInfo.lspId)
+                break;
+        }
+        if (iterF == FecSenderBinds.end())
+            error("cannot locate the tunnel");
+
+        std::vector < traffic_request_t >::iterator iterT;
+        traffic_request_t trafficR;
+
+        for (iterT = tr.begin(); iterT != tr.end(); iterT++)
+        {
+            trafficR = (traffic_request_t) * iterT;
+            if (trafficR.dest == aTunnel.Session.DestAddress &&
+                trafficR.src == aTunnel.Sender_Template.SrcAddress)
+            {
+                break;
+            }
+
+        }
+
+        if (iterT == tr.end())
+        {
+            ev << "No traffic spec required for the LSP\n";
+            return; // was: continue;
+        }
+
+        // Create new Path message and send out
+        ev << "Sending Path message for the new discovered route\n";
+        sendPathMessage(&aTunnel.Session, &trafficR, newLspId);
+
+    }  // End NEW ROUTE command
 }
 
 void RSVPAppl::sendResvMessage(PathMessage * pMsg, int inLabel)

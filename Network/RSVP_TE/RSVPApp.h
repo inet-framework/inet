@@ -96,6 +96,21 @@ public:
     virtual void initialize();
     virtual void activity();
 
+    /**
+     * Process packets from RSVP daemon
+     */
+    void processMsgFromRSVP(cMessage *msg);
+
+    /**
+     * Process signal from MPLS switch to initialise LabelRequest
+     */
+    void processSignalFromMPLSSwitchToInitialiseLabelRequest(cMessage *msg);
+
+    /**
+     * Message for testing purpose
+     */
+    void processSignalFromTester(cMessage *msg);
+
     //void sendPathMessage(SessionObj_t* s, traffic_request_t* t);
     void sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId);
     void sendResvMessage(PathMessage* pMsg, int inLabel);
