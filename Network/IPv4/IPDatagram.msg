@@ -40,6 +40,7 @@ enum IPProtocolFieldId
   IP_PROT_IPv6_ICMP = 58;
   IP_PROT_NONE = 59;
   IP_PROT_IPv6_MOBILITY = 62;
+  IP_PROT_OSPF = 89;
 }
 
 class noncobject IPAddress;

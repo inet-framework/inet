@@ -68,8 +68,8 @@ int RoutingTableParser::readRoutingTableFromFile (const char *filename)
     FILE *fp;
     int charpointer;
     char *file = new char[MAX_FILESIZE];
-    char *ifconfigFile;
-    char *routeFile;
+    char *ifconfigFile = NULL;
+    char *routeFile = NULL;
 
     fp = fopen(filename, "r");
     if (fp == NULL)
@@ -115,8 +115,10 @@ int RoutingTableParser::readRoutingTableFromFile (const char *filename)
     delete file;
 
     // parse filtered files
-    parseInterfaces(ifconfigFile);
-    parseRouting(routeFile);
+    if (ifconfigFile)
+        parseInterfaces(ifconfigFile);
+    if (routeFile)
+        parseRouting(routeFile);
 
     delete ifconfigFile;
     delete routeFile;
@@ -135,6 +137,7 @@ char *RoutingTableParser::createFilteredFile (char *file,
 
     while(true) {
         // skip blank lines and comments
+        // FIXME TBD consider this: while ( !isalnum(file[charpointer]) && !isspace(file[charpointer]) ) {
         while ( !isalnum(file[charpointer]) ) {
             while (file[charpointer++] != '\n') ;
         }

@@ -180,11 +180,15 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
     RoutingTable *rt = routingTableAccess.get();
 
-    // DVMRP: process datagram only if sent locally or arrived on
-    // the shortest route; otherwise discard and continue.
+    // DVMRP: process datagram only if sent locally or arrived on the shortest 
+    // route (provided routing table already contains srcAddr); otherwise 
+    // discard and continue.
     int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    if (inputPort!=-1 && inputPort!=rt->outputPortNo(datagram->srcAddress()))
+    int shortestPathInputPort = rt->outputPortNo(datagram->srcAddress());
+    if (inputPort!=-1 && shortestPathInputPort!=-1 && inputPort!=shortestPathInputPort)
     {
+        // FIXME count dropped
+        ev << "Packet dropped.\n";
         delete datagram;
         return;
     }
