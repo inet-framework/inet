@@ -83,18 +83,14 @@ void TED::updateTED(const std::vector < TELinkState > &copy)
 }
 
 
-
 void TED::buildDatabase()
 {
     if (!(ted.empty()))
         ted.clear();
 
-    TELinkState *entry = new TELinkState;
-
     cTopology topo;
     const char *moduleTypes = par("moduleTypes").stringValue();
-
-    std::vector<std::string> types = StringTokenizer(par("moduleTypes"), " ").asVector();
+    std::vector<std::string> types = StringTokenizer(moduleTypes, " ").asVector();
     topo.extractByModuleType(types);
     ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
 
@@ -104,7 +100,6 @@ void TED::buildDatabase()
         cModule *module = node->module();
 
         IPAddress modAddr = IPAddressResolver().addressOf(module);
-        entry->advrouter = modAddr;
 
         RoutingTable *myRT = IPAddressResolver().routingTableOf(module);
 
@@ -112,13 +107,15 @@ void TED::buildDatabase()
 
         for (int j = 0; j < node->outLinks(); j++)
         {
-
             cModule *neighbour = node->out(j)->remoteNode()->module();
             IPAddress neighbourAddr = IPAddressResolver().addressOf(neighbour);
 
             // For each link
             // Get linkId
-            entry->linkid = neighbourAddr;
+            TELinkState entry;
+
+            entry.advrouter = modAddr;
+            entry.linkid = neighbourAddr;
 
             int local_gateIndex = node->out(j)->localGate()->index();
             int remote_gateIndex = node->out(j)->remoteGate()->index();
@@ -126,21 +123,22 @@ void TED::buildDatabase()
             RoutingTable *neighbourRT = IPAddressResolver().routingTableOf(neighbour);
 
             // Get local address
-            entry->local = myRT->interfaceByPortNo(local_gateIndex)->inetAddr;
+            entry.local = myRT->interfaceByPortNo(local_gateIndex)->inetAddr;
             // Get remote address
-            entry->remote = neighbourRT->interfaceByPortNo(remote_gateIndex)->inetAddr;
+            entry.remote = neighbourRT->interfaceByPortNo(remote_gateIndex)->inetAddr;
 
             double BW = node->out(j)->localGate()->datarate()->doubleValue();
             double delay = node->out(j)->localGate()->delay()->doubleValue();
-            entry->MaxBandwith = BW;
-            entry->MaxResvBandwith = BW;
-            entry->metric = delay;
+            entry.MaxBandwith = BW;
+            entry.MaxResvBandwith = BW;
+            entry.metric = delay;
             for (int k = 0; k < 8; k++)
-                entry->UnResvBandwith[k] = BW;
-            entry->type = 1;
+                entry.UnResvBandwith[k] = BW;
+            entry.type = 1;
 
+            entry.AdminGrp = 0;
 
-            ted.push_back(*entry);
+            ted.push_back(entry);
         }
     }
 
@@ -150,8 +148,7 @@ void TED::buildDatabase()
 
 void TED::handleMessage(cMessage *)
 {
-    error
-        ("Message arrived to TED -- it doesn't process messages, it is used via direct method calls");
+    error("Message arrived to TED -- it doesn't process messages, it is used via direct method calls");
 }
 
 

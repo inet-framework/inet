@@ -56,8 +56,9 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
         if (!e->inetAddr.isNull())
         {
             if (!addr.isNull() && e->inetAddr!=addr)
-                opp_error("IPAddressResolver: different interfaces in `%s' "
-                          "have different IP addresses", rt->fullPath());
+                opp_error("IPAddressResolver: IP address is ambiguous: different "
+                          "interfaces in `%s' have different IP addresses",
+                          rt->fullPath());
             addr = e->inetAddr;
         }
     }
