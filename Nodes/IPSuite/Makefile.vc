@@ -58,6 +58,7 @@ OBJS= BurstHost_n.obj FirstHopRouter_n.obj IPNode_n.obj KIDSRouter_n.obj mytcp4i
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

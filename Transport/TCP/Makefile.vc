@@ -58,6 +58,7 @@ OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodu
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

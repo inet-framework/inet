@@ -58,6 +58,7 @@ OBJS= MyTCPApp_n.obj procserver_n.obj tcpapp_n.obj  MyTCPClient.obj MyTCPServer.
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

@@ -54,25 +54,17 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj InfoManager.obj LIBtable.obj LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj MPLSPacket.obj StringTokenizer.obj
+OBJS= DatalinkLayer_n.obj InfoManager_n.obj LIBTable_n.obj MPLSModule_n.obj  InfoManager.obj  LIBtable.obj  LIBTableAccess.obj MPLS2IP.obj MPLSModule.obj  MPLSPacket.obj StringTokenizer.obj
 
 # subdirectories to recurse into
-SUBDIRS= Core LDP RSVP_TE
+SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-subdirs: Core_dir LDP_dir RSVP_TE_dir
-
-Core_dir:
-	cd Core && cd && nmake /nologo /f Makefile.vc
-
-LDP_dir:
-	cd LDP && cd && nmake /nologo /f Makefile.vc
-
-RSVP_TE_dir:
-	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
+subdirs:
 
 DatalinkLayer_n.obj: DatalinkLayer_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp DatalinkLayer_n.cc

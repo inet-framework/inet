@@ -58,6 +58,7 @@ OBJS= MPLSNet_n.obj MPLSOnly_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_LIBS) /out:$(TARGET)
 

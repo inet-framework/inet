@@ -58,6 +58,7 @@ OBJS= NetworkManager_n.obj OspfTe_n.obj RSVP_n.obj RSVPAppl_n.obj RSVPInterface_
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

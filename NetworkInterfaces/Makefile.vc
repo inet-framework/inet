@@ -58,6 +58,7 @@ OBJS= NetworkInterface_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= PPP-old Queues
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

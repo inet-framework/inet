@@ -58,6 +58,7 @@ OBJS= LSRNode_n.obj NetworkLayersWithMPLS_n.obj RSVP_LSR_Node_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

@@ -58,6 +58,7 @@ OBJS= TrafficGen_n.obj AppIn.obj BurstGenerator.obj ConstTrafficGen.obj SimpleAp
 
 # subdirectories to recurse into
 SUBDIRS= 
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

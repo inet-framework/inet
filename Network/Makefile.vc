@@ -58,6 +58,7 @@ OBJS=
 
 # subdirectories to recurse into
 SUBDIRS= IPv4 LDP MPLS RSVP_TE
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

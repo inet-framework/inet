@@ -58,6 +58,7 @@ OBJS=
 
 # subdirectories to recurse into
 SUBDIRS= KIDSNw1 McNetwork2 OldNetwork PerformAnalysis SocketTester TCPClientServerNet TCPFlavours TCPTester TCPUDPDirectNet UDPSockets
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
