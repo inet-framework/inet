@@ -70,3 +70,21 @@ void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
     out << endl;
 }
 
+//----
+
+TCPDumpModule::TCPDumpModule(const char *name, cModule *parent) :
+  cSimpleModule(name, parent), tcpdump(ev)
+{
+}
+
+void TCPDumpModule::handleMessage(cMessage *msg)
+{
+    // dump
+    IPDatagram *dgram = check_and_cast<IPDatagram *>(msg);
+    tcpdump.dump(dgram);
+
+    // forward
+    int ingateindex = msg->arrivalGate()->index();
+    send(msg, "out", 1-ingateindex);
+}
+

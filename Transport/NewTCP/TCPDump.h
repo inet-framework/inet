@@ -38,6 +38,18 @@ class TCPDump
     void dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
 };
 
+/**
+ *
+ */
+class TCPDumpModule : public cSimpleModule
+{
+  protected:
+    TCPDump tcpdump;
+  public:
+    TCPDumpModule(const char *name, cModule *parent);
+    virtual void handleMessage(cMessage *msg);
+};
+
 #endif
 
 
