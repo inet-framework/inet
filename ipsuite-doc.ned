@@ -88,7 +88,7 @@
 // The following fields are parsed but ignored: <tt>Bcast</tt>,<tt>encap</tt>,
 // <tt>HWaddr</tt>.
 //
-// Interface modules set a good default for MTU, Metric (as 1e9/bitrate) and
+// Interface modules set a good default for MTU, Metric (as 2e9/bitrate) and
 // flags, but leave inet_addr and Mask empty. inet_addr and mask should
 // be set either from the routing file or by a dynamic network configuration
 // module.
