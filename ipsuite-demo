@@ -3,7 +3,7 @@
 exec wish "$0" "$@"
 
 #==========================================================================
-#  IP SUITE DEMO
+#  
 #==========================================================================
 
 #----------------------------------------------------------------#
@@ -20,6 +20,7 @@ exec wish "$0" "$@"
 
 set topdir [exec pwd]
 
+set id 0
 foreach i {
    {TCPClientServerNet Examples/IPSuite/TCPClientServerNet tcp}
    {TCPTester Examples/IPSuite/TCPTester tcptester}
@@ -28,15 +29,16 @@ foreach i {
    {McNetwork2 Examples/IPSuite/McNetwork2 multicast}
    {PerformAnalysis Examples/IPSuite/PerformAnalysis performance}
 } {
-   set sample [lindex $i 0]
-   lappend samples $sample
-   set dir($sample) [lindex $i 1]
-   set name($sample) [lindex $i 2]
+   lappend samples $id
+   set prog($id) [lindex $i 0]
+   set dir($id) [lindex $i 1]
+   set name($id) [lindex $i 2]
+   incr id
 }
 
 
 proc createWindow {} {
-    global samples dir name fonts colors
+    global samples prog dir name fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
@@ -106,8 +108,8 @@ proc createWindow {} {
     label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
     pack .sel.banner -fill x -side top
     foreach i $samples {
-        button .sel.$name($i) -text $name($i) -command "showDemo $i"
-        pack .sel.$name($i) -fill x -side top -padx 5 -pady 2
+        button .sel.$i -text $name($i) -command "showDemo $i"
+        pack .sel.$i -fill x -side top -padx 5 -pady 2
     }
     showDemo [lindex $samples 0]
 }
@@ -125,31 +127,31 @@ Dept. of Telecommunications
 
 }
 
-proc showDemo {sample} {
-   global samples dir name colors tcl_platform
+proc showDemo {id} {
+   global samples prog dir name colors tcl_platform
 
    foreach i $samples {
-        .sel.$name($i) config -relief raised -bg $colors(unselbutton)
+        .sel.$i config -relief raised -bg $colors(unselbutton)
    }
-   .sel.$name($sample) config -relief sunken -bg $colors(selbutton)
+   .sel.$id config -relief sunken -bg $colors(selbutton)
 
     if {$tcl_platform(platform) == "unix"} {
-      set runprog "./$sample &"
+      set runprog "./$prog($id) &"
     } else {
-      set runprog "start $sample" 
+      set runprog "start $prog($id)" 
     }
-    set cmd "cd $dir($sample); $runprog"
+    set cmd "cd $dir($id); $runprog"
 
-   .main.up.banner config -text "$name($sample) README"
-   .main.lo.start config -text "Launch $name($sample)  (command: $cmd)"
-   .main.lo.start config -command "runSample $sample"
+   .main.up.banner config -text "$name($id) README"
+   .main.lo.start config -text "Launch $name($id)  (command: $cmd)"
+   .main.lo.start config -command "runSample $id"
 
-   loadFile .main.mid.text "$dir($sample)/README"
+   loadFile .main.mid.text "$dir($id)/README"
 }
 
 proc loadFile {t filename} {
     if [catch {open $filename r} f] {
-       tk_messageBox {Error} "Error: $f" info ok
+       tk_messageBox -title {OMNeT++ Demo} -message "Error reading file $filename: $f" -icon error -type ok
        return
     }
     set contents [read $f]
@@ -162,13 +164,17 @@ proc loadFile {t filename} {
     $t see insert
 }
 
-proc runSample {sample} {
-   global topdir samples dir name
+proc runSample {id} {
+   global topdir samples prog dir name
 
-   if [catch {cd $dir($sample); exec ./$sample &; cd $topdir}] {
+   if [catch {
+          cd $dir($id)
+          exec ./$prog($id) &
+   }] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
                     -message {Error running the simulation program.}
    }
+   cd $topdir
 }
 
 #===================================================================

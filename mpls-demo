@@ -21,7 +21,7 @@ set topdir [exec pwd]
 
 set id 0
 foreach i {
-   {ldp-mlps1 Examples/MPLS/ldp-mpls1 "MPLS-LDP"}
+   {ldp-mpls1 Examples/MPLS/ldp-mpls1 "MPLS-LDP"}
    {TestTE1 Examples/MPLS/TestTE1  "CSPF Routing"}
    {TestTE2 Examples/MPLS/TestTE2  "Hop-by-Hop Routing"}
    {TestTE3 Examples/MPLS/TestTE3  "ER Routing"}
@@ -136,9 +136,9 @@ proc showDemo {id} {
    .sel.$id config -relief sunken -bg $colors(selbutton)
 
     if {$tcl_platform(platform) == "unix"} {
-      set runprog "./$prog(id) &"
+      set runprog "./$prog($id) &"
     } else {
-      set runprog "start $prog(id)" 
+      set runprog "start $prog($id)" 
     }
     set cmd "cd $dir($id); $runprog"
 
@@ -151,7 +151,7 @@ proc showDemo {id} {
 
 proc loadFile {t filename} {
     if [catch {open $filename r} f] {
-       tk_messageBox {Error} "Error: $f" info ok
+       tk_messageBox -title {OMNeT++ Demo} -message "Error reading file $filename: $f" -icon error -type ok
        return
     }
     set contents [read $f]
@@ -167,10 +167,14 @@ proc loadFile {t filename} {
 proc runSample {id} {
    global topdir samples prog dir name
 
-   if [catch {cd $dir($id); exec ./$prog(id) &; cd $topdir}] {
+   if [catch {
+          cd $dir($id)
+          exec ./$prog($id) &
+   }] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
                     -message {Error running the simulation program.}
    }
+   cd $topdir
 }
 
 #===================================================================
