@@ -65,7 +65,6 @@ Network/RSVP_TE/NetworkManager.ned
 Network/RSVP_TE/OspfTe.ned
 Network/RSVP_TE/RSVP.ned
 Network/RSVP_TE/RSVPAppl.ned
-Network/RSVP_TE/RSVPInterface.ned
 Network/RSVP_TE/TED.ned
 NetworkInterfaces/NetworkInterface.ned
 NetworkInterfaces/ARP/ARP.ned
@@ -106,6 +105,7 @@ Transport/RTP/RTPProfile.ned
 Transport/TCP/TCPDump.ned
 Transport/TCP/TCPMain.ned
 Transport/UDP/UDPProcessing.ned
+
 
 
 

@@ -233,8 +233,9 @@ private:
     void preemptTunnel(int tunnelId);
     void propagateTEDchanges();
 
- public:
+    void sendToIP(cMessage *msg, IPAddress destAddr, IPAddress srcAddr=IPAddress());
 
+ public:
     Module_Class_Members(RSVP, cSimpleModule, 16384);
 
     virtual int numInitStages() const  {return 4;}

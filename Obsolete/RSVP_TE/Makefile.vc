@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj RSVPInterface.obj TED.obj
+OBJS= OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -101,9 +101,6 @@ rsvp_message.obj: rsvp_message.cc
 
 RSVPApp.obj: RSVPApp.cc
 	$(CXX) -c $(COPTS) /Tp RSVPApp.cc
-
-RSVPInterface.obj: RSVPInterface.cc
-	$(CXX) -c $(COPTS) /Tp RSVPInterface.cc
 
 TED.obj: TED.cc
 	$(CXX) -c $(COPTS) /Tp TED.cc
@@ -161,6 +158,7 @@ RSVP.obj: RSVP.cc \
   ../IPv4/IPAddress.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/IPAddressResolver.h \
+  ../IPv4/IPControlInfo_m.h \
   ../IPv4/RoutingTable.h \
   intserv.h \
   rsvp_message.h \
@@ -205,15 +203,6 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
-RSVPInterface.obj: RSVPInterface.cc \
-  rsvp_message.h \
-  RSVPInterface.h \
-  ../IPv4/IPControlInfo_m.h \
-  intserv.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Base/basic_consts.h \
   ../IPv4/IPDatagram_m.h
 TED.obj: TED.cc \
   TED.h \

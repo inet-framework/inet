@@ -16,6 +16,7 @@
 #include "IPAddress.h"
 #include "MPLSModule.h"
 #include "IPAddressResolver.h"
+#include "IPControlInfo_m.h"
 
 Define_Module(RSVP);
 
@@ -819,11 +820,10 @@ void RSVP::ResvMsgPro(ResvMessage * rmsg)
                 Resv_Refresh_Needed_Flag = OFF;
                 ResvErrorMessage *errorMsg = new ResvErrorMessage();
                 errorMsg->setSession(&activeRSB->Session_Object);
-                errorMsg->addPar("dest_addr") =
-                    IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
-                errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
-                send(errorMsg, "to_ip");
-
+                // errorMsg->addPar("dest_addr") = IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
+                // errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
+                // send(errorMsg, "to_ip");
+                sendToIP(errorMsg, IPAddress(activeRSB->Session_Object.DestAddress));
             }
             else
                 Resv_Refresh_Needed_Flag = ON;
@@ -961,11 +961,11 @@ void RSVP::PTearMsgPro(PathTearMessage * pmsg)
                 {
                     int peerIP = 0;
                     getPeerIPAddress(fPSB->OutInterface_List, &peerIP);
-                    ptm->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
-                    ptm->addPar("src_addr") = IPAddress(routerId).str().c_str();
-
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
-                    send(ptm, "to_ip");
+                    //ptm->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
+                    //ptm->addPar("src_addr") = IPAddress(routerId).str().c_str();
+                    //send(ptm, "to_ip");
+                    sendToIP(ptm, IPAddress(peerIP));
                 }
 
                 /*
@@ -1183,11 +1183,11 @@ void RSVP::PErrorMsgPro(PathErrorMessage * pmsg)
         // delete pmsg;
         // return;
     }
-    pmsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
-    pmsg->addPar("dest_addr") = IPAddress(p_iter.Previous_Hop_Address).str().c_str();
-    ev << "Propagate PATH_ERROR back to " << IPAddress(p_iter.Previous_Hop_Address).str() << "\n";
-    send(pmsg, "to_ip");
-
+    ev << "Propagate PATH_ERROR back to " << IPAddress(p_iter.Previous_Hop_Address) << "\n";
+    //pmsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
+    //pmsg->addPar("dest_addr") = IPAddress(p_iter.Previous_Hop_Address).str().c_str();
+    //send(pmsg, "to_ip");
+    sendToIP(pmsg, IPAddress(p_iter.Previous_Hop_Address));
 }
 
 void RSVP::RErrorMsgPro(ResvErrorMessage * rmsg)
@@ -1255,7 +1255,7 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 
     // pm->setLength(1); // Other small value so no fragmentation, 1-dummy value
 
-    pm->addPar("src_addr") = IPAddress(routerId).str().c_str();
+    //pm->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
     int finalAddr = pm->getDestAddress();
     ev << "Final address " << IPAddress(finalAddr) << "\n";
@@ -1285,12 +1285,11 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
         getPeerIPAddress(nextPeerInf, &nextPeerIP);
     }
 
-    pm->addPar("dest_addr") = IPAddress(nextPeerIP).str().c_str();
-    pm->addPar("peerInf") = nextPeerInf;
     ev << "Next peer IP " << IPAddress(nextPeerIP) << "\n";
-
-    send(pm, "to_ip");
-
+    pm->addPar("peerInf") = nextPeerInf;  // FIXME ever used?
+    //pm->addPar("dest_addr") = IPAddress(nextPeerIP).str().c_str();
+    //send(pm, "to_ip");
+    sendToIP(pm, IPAddress(nextPeerIP));
 }
 
 void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
@@ -1465,11 +1464,10 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     ev << "Send RESV message to " << IPAddress(PH) << "\n";
     ev << "RESV content is: \n";
     outRM->print();
-    outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
-
-    // resvMsg->addPar("src_addr")=IPAddress(outRM->Rsvp_Hop_Object.Next_Hop_Address).str().c_str();
-
-    send(outRM, "to_ip");
+    //outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
+    //resvMsg->addPar("src_addr")=IPAddress(outRM->Rsvp_Hop_Object.Next_Hop_Address).str().c_str();
+    //send(outRM, "to_ip");
+    sendToIP(outRM, IPAddress(PH));
 }
 
 void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
@@ -1505,9 +1503,9 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     ev << "Send RESV TEAR message to " << IPAddress(PH) << "\n";
     ev << "RESV TEAR content is: \n";
     outRM->print();
-    outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
-
-    send(outRM, "to_ip");
+    //outRM->addPar("dest_addr") = IPAddress(PH).str().c_str();
+    //send(outRM, "to_ip");
+    sendToIP(outRM, IPAddress(PH));
 }
 
 void RSVP::RemoveTrafficControl(ResvStateBlock_t * activeRSB)
@@ -2370,11 +2368,11 @@ bool RSVP::doCACCheck(PathMessage * pmsg, int OI)
                 pe->setSession(pmsg->getSession());
                 pe->setSenderTemplate(pmsg->getSenderTemplate());
                 pe->setSenderTspec(pmsg->getSenderTspec());
-                pe->addPar("src_addr") = IPAddress(routerId).str().c_str();
-                pe->addPar("dest_addr") = IPAddress(pmsg->getNHOP()).str().c_str();
-
                 ev << "Propagate PATH ERROR to " << IPAddress(pmsg->getNHOP()) << "\n";
-                send(pe, "to_ip");
+                //pe->addPar("src_addr") = IPAddress(routerId).str().c_str();
+                //pe->addPar("dest_addr") = IPAddress(pmsg->getNHOP()).str().c_str();
+                //send(pe, "to_ip");
+                sendToIP(pe, IPAddress(pmsg->getNHOP()));
                 return false;
             }
         }
@@ -2413,11 +2411,11 @@ void RSVP::preemptTunnel(int tunnelId)
                 {
                     int peerIP = 0;
                     getPeerIPAddress(PSBList[m].OutInterface_List, &peerIP);
-                    ptMsg->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
-                    ptMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
-
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
-                    send(ptMsg, "to_ip");
+                    //ptMsg->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
+                    //ptMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
+                    //send(ptMsg, "to_ip");
+                    sendToIP(ptMsg, IPAddress(peerIP));
                 }
 
                 // PSBList.erase(p_iterI); // This line is very unsafe !!!!
@@ -2452,3 +2450,16 @@ void RSVP::propagateTEDchanges()
 {
     TED::getGlobalInstance()->updateTED(ted);
 }
+
+void RSVP::sendToIP(cMessage *msg, IPAddress destAddr, IPAddress srcAddr)
+{
+    // attach control info to packet
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setDestAddr(destAddr);
+    controlInfo->setSrcAddr(srcAddr);
+    controlInfo->setProtocol(IP_PROT_RSVP);
+    msg->setControlInfo(controlInfo);
+
+    send(msg, "to_ip");
+}
+

@@ -16,7 +16,6 @@ import
     "NetworkLayer",
     "MPLSModule",
     "LIBTable",
-    "RSVPInterface",
     "RSVP",
     "OspfTe",
     "RSVPAppl";
@@ -36,14 +35,9 @@ module RSVP_LSR_Node
         dest_addr : string, //# FIXME what's this?
         isIR : bool,
         isER : bool,
-
-        //# Network information
         routingFile : string,
         LibTableFileName : string,
         PrtTableFileName : string;
-        //# discoveryAddr: string[];
-        //# numOfAddr: int;
-
     gates:
         in: in[];
         out: out[];
@@ -73,8 +67,6 @@ module RSVP_LSR_Node
                 isIR = isIR,
                 isER = isER;
             display: "o=#0080c0;p=190,51;b=40,24,rect";
-        rsvpInterface: RSVPInterface;
-            display: "o=#0080c0;p=191,106;b=58,12";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
@@ -98,14 +90,11 @@ module RSVP_LSR_Node
                 PrtTableFileName = PrtTableFileName;
             display: "i=proc2;p=280,184;b=32,30";
     connections nocheck:
-        networkLayer.RSVPOut --> rsvpInterface.from_ip;
-        networkLayer.RSVPIn <-- rsvpInterface.to_ip;
-
-        rsvp.to_ip --> rsvpInterface.from_rsvp_app;
-        rsvp.from_ip <-- rsvpInterface.to_rsvp_app;
-
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
+
+        rsvp.to_ip --> networkLayer.RSVPIn;
+        rsvp.from_ip <-- networkLayer.RSVPOut;
 
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
