@@ -22,8 +22,8 @@
 // protocols or applications.
 //
 // Requires message object preserving sendQueue/receiveQueue classes
-// to be used with TCP (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
-// TCPVirtualBytesSendQueue and TCPVirtualBytesRcvQueue are not good).
+// to be used with TCPMain (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
+// TCPVirtualBytesSendQueue/RcvQueue are not good).
 //
 // The module accepts any number of incoming TCP connections, and expects
 // to receive messages of class GenericAppMsg on them. A message should

@@ -78,13 +78,18 @@
 //
 // The module parameters sendQueueClass and receiveQueueClass should be
 // set the names of classes that manage the actual send and receive queues.
-// Currently they have to be set to "TCPVirtualDataSendQueue" and
-// "TCPVirtualDataRcvQueue" -- these classes manage "virtual bytes",
-// that is, only byte counts are transmitted over the TCP connection
-// and no actual data. (cMessage contents, and even message boundaries
-// are not preserved with these classes.) In the future, other send queue
-// and receive queue classes will be implemented which will allow actual
-// raw bytes and (with different queue classes) cMessages to be transmitted.
+// Currently you have two choices:
+//
+//   -# set them to "TCPVirtualDataSendQueue" and "TCPVirtualDataRcvQueue".
+//      These classes manage "virtual bytes", that is, only byte counts are
+//      transmitted over the TCP connection and no actual data. (cMessage
+//      contents, and even message boundaries are not preserved with these
+//      classes.)
+//   -# use "TCPMsgBasedSendQueue" and "TCPMsgBasedRcvQueue".
+//
+//
+// In the future, other send queue and receive queue classes may be
+// implemented, e.g. to allow transmission of "raw bytes" (actual byte arrays).
 //
 // The TCP flavour supported depends on the value of the tcpAlgorithmClass
 // module parameters. Currently it has to be set to "TCPTahoeReno", which
@@ -134,7 +139,7 @@
 //    connection will spend the remainder of the data transfer in FIN_WAIT_1.
 //    This does not cause any incorrect TCP behaviour, but will be fixed
 //    nevertheless.
-//  - at normal teardown, "connection closed" will only be reported to the 
+//  - at normal teardown, "connection closed" will only be reported to the
 //    client after the 2MSL timer has expired (4 minutes)
 //  - no TCP header options (e.g. MSS is currently hardcoded, no SACK)
 //  - requirements for handling segments with SYN+FIN bits set (esp. with data
