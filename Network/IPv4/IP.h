@@ -67,7 +67,7 @@ class IP : public cSimpleModule
      * Handle IPDatagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
-    virtual void handlePacketFromNetwork(IPDatagram *dgram);
+    virtual void handlePacketFromNetwork(IPDatagram *datagram);
 
     /**
      * Handle messages (typically packets to be send in IP) from transport or ICMP.
@@ -86,19 +86,24 @@ class IP : public cSimpleModule
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void handleMulticastPacket(IPDatagram *dgram);
+    virtual void handleMulticastPacket(IPDatagram *datagram);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void localDeliver(IPDatagram *dgram);
+    virtual void localDeliver(IPDatagram *datagram);
+
+    /**
+     * Decapsulate and return encapsulated packet after attaching IPControlInfo.
+     */
+    virtual cMessage *decapsulateIP(IPDatagram *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(IPDatagram *dgram);
+    virtual void fragmentAndSend(IPDatagram *datagram, int outputPort);
 
     /**
      * Last TTL check, then send datagram on the given interface.

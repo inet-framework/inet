@@ -98,16 +98,13 @@ void IP::handleMessageFromHL(cMessage *msg)
 
 void IP::routePacket(IPDatagram *datagram)
 {
-    // FIXME eliminate routingdecision!
-    IPRoutingDecision *routingDecision = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
-
     // FIXME add option handling code here!
 
     IPAddress destAddress = datagram->destAddress();
 
     ev << "Packet destination address is: " << destAddress << ", ";
 
-    //  multicast check
+    // multicast check
     RoutingTable *rt = routingTableAccess.get();
     if (destAddress.isMulticast())
     {
@@ -127,7 +124,8 @@ void IP::routePacket(IPDatagram *datagram)
     }
 
     // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
-    if (routingDecision->inputPort()!=-1 && !IPForward)
+    int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
+    if (inputPort!=-1 && !IPForward)
     {
         ev << "forwarding off, dropping packet\n";
         numDropped++;
@@ -147,34 +145,24 @@ void IP::routePacket(IPDatagram *datagram)
     }
 
     // default: send datagram to fragmentation
-    routingDecision->setOutputPort(outputPort);
-    //FIXME todo: routingDecision->setNextHopAddr(nextHopAddr);
-
     ev << "output port is " << outputPort << "\n";
     numForwarded++;
 
     //
     // "Fragmentation" and "IPOutput"
     //
-    fragmentAndSend(datagram);
+    fragmentAndSend(datagram, outputPort);
 }
 
 void IP::handleMulticastPacket(IPDatagram *datagram)
 {
     // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
-
     RoutingTable *rt = routingTableAccess.get();
-
-    // FIXME We should probably handle if IGMP message comes from localIn.
-    // IGMP is not implemented.
-    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
-    int inputPort = controlInfo->inputPort();
-
-    IPAddress destAddress = datagram->destAddress();
 
     // DVMRP: process datagram only if sent locally or arrived on
     // the shortest route; otherwise discard and continue.
-    if (controlInfo->inputPort()!=-1 && controlInfo->inputPort()!=rt->outputPortNo(datagram->srcAddress()))
+    int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
+    if (inputPort!=-1 && inputPort!=rt->outputPortNo(datagram->srcAddress()))
     {
         // FIXME count dropped
         delete datagram;
@@ -182,10 +170,10 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     }
 
     // check for local delivery
+    IPAddress destAddress = datagram->destAddress();
     if (rt->multicastLocalDeliver(destAddress))
     {
         IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
-        // FIXME control info will NOT be present in duplicate packet!
 // BCH Andras -- code from UTS MPLS model  FIXME!!!!!!!!!!!!!!!!!!!!!!!!
         // find "local_addr" module parameter among our parents, and assign it to packet
         cModule *curmod = this;
@@ -225,14 +213,7 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
             if (outputPort>=0 && outputPort!=inputPort)
             {
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
-
-                // add a copy of the control info (OMNeT++ doesn't copy it)
-                IPRoutingDecision *newControlInfo = new IPRoutingDecision();
-                newControlInfo->setOutputPort(outputPort);
-                //newControlInfo->setNextHopAddr(...); FIXME TODO
-                datagramCopy->setControlInfo(newControlInfo);
-
-                fragmentAndSend(datagramCopy);
+                fragmentAndSend(datagramCopy, outputPort);
             }
         }
 
@@ -274,11 +255,24 @@ void IP::localDeliver(IPDatagram *datagram)
     }
 }
 
-void IP::fragmentAndSend(IPDatagram *datagram)
+cMessage *IP::decapsulateIP(IPDatagram *datagram)
 {
-    IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
-    int outputPort = controlInfo->outputPort();
+    cMessage *packet = datagram->decapsulate();
 
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setProtocol(datagram->transportProtocol());
+    controlInfo->setSrcAddr(datagram->srcAddress());
+    controlInfo->setDestAddr(datagram->destAddress());
+    controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
+    packet->setControlInfo(controlInfo);
+    delete datagram;
+
+    return packet;
+}
+
+
+void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
+{
     RoutingTable *rt = routingTableAccess.get();
     int mtu = rt->getInterfaceByIndex(outputPort)->mtu;
 
@@ -415,4 +409,5 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort)
 
     send(datagram, "queueOut", outputPort);
 }
+
 
