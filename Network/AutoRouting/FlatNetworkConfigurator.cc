@@ -66,14 +66,14 @@ void FlatNetworkConfigurator::initialize(int stage)
         uint32 addr = networkAddress | uint32(++hostCtr);
         nodeAddresses[i] = addr;
 
-        // find interface table and assign address to all interfaces with an output port
+        // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.node(i)->module();
         RoutingTable *rt = IPAddressResolver().routingTableOf(mod);
 
         for (int k=0; k<rt->numInterfaces(); k++)
         {
             InterfaceEntry *e = rt->interfaceById(k);
-            if (e->outputPort!=-1)
+            if (!e->loopback)
             {
                 e->inetAddr = IPAddress(addr);
                 e->mask = IPAddress("255.255.255.255"); // full address must match for local delivery
