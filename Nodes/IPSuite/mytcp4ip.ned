@@ -28,7 +28,7 @@ module MyTCPUpperLayers
             display: "p=76,52;b=40,24,rect";
         tcp: TcpModule; 
 	    parameters:
-	     //TCPDelayedAck = true,
+	     TCPDelayedAck = true,
 	     TCPFastRetrans = false,
              TCPFastRecovery = false,
              TCPNewReno = false;

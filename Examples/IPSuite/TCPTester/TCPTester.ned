@@ -56,8 +56,8 @@ module Client
         message_length = input(8000, "Number of bits to be received: "); 
       tcp: TcpModule
        parameters:
-        TCPDelayedAck = input(true, "Delayed Acknowledge"),
-        TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe)"),
+        TCPDelayedAck = input(true, "Delayed Acknowledge: "),
+        TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe): "),
         TCPFastRecovery = input(false, "Fast Recovery: "),
         TCPNewReno = input(false, "New Reno: ");
       ip: IpModule;
@@ -98,7 +98,8 @@ module Server
          message_length = 0;
        tcp: TcpModule
          parameters:
-            TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe)"),
+            TCPDelayedAck = input(true, "Delayed Acknowledge: "),
+            TCPFastRetrans = input(true, "Fast Retransmission (TCP-Tahoe): "),
             TCPFastRecovery = input(false, "Fast Recovery: "),
             TCPNewReno = input(false, "New Reno: ");
        ip: IpModule;

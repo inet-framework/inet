@@ -100,7 +100,7 @@ module Server
 	   tcp: TcpModule
 	     parameters:
 		//TCPSlowStart = input(true, "Slow Start / Congestion Avoidance: "),
-	        //TCPDelayedAck = input(true, "Delayed Acknowledgements: "),	
+	        TCPDelayedAck = input(true, "Delayed Acknowledgements: "),	
 		TCPFastRetrans = input(false, "Fast Retransmission (TCP-Tahoe): "),
 		TCPFastRecovery = input(false, "Fast Recovery: "),
                 TCPNewReno = input(false, "New Reno: ");
