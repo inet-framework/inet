@@ -1,7 +1,0 @@
-
-WISH=wish84
-
-all : $(TARGET) rundemo.bat
-
-rundemo.bat:
-	echo @$(WISH:/=\) -f ^%~dpn0 ^%* > rundemo.bat
