@@ -4,6 +4,7 @@ mpls-doc.ned
 Applications/Generic/SinkApp.ned
 Applications/Generic/TrafficGen.ned
 Applications/PingApp/PingApp.ned
+Applications/TCPApp/TCPServerApp.ned 
 Applications/TCPApp/TCPSessionApp.ned
 Applications/UDPApp/UDPApp.ned
 Base/Blackboard.ned

@@ -100,7 +100,7 @@ class TCPStatusInfo;
  * }
  * </pre>
  *
- * If you need to manage a large number of sockets (e.g. in a server 
+ * If you need to manage a large number of sockets (e.g. in a server
  * application which handles multiple incoming connections), the TCPSocketMap
  * class may be useful.
  *
@@ -146,6 +146,13 @@ class TCPSocket
      * constructor call.
      */
     TCPSocket();
+
+    /**
+     * Constructor, to be used with forked sockets (see listen()).
+     * The connId will be picked up from the message: it should have arrived
+     * from TCPMain and contain TCPCommmand control info.
+     */
+    TCPSocket(cMessage *msg);
 
     /**
      * Destructor

@@ -34,12 +34,27 @@ TCPSocket::TCPSocket()
     gateToTcp = NULL;
 }
 
+TCPSocket::TCPSocket(cMessage *msg)
+{
+    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->controlInfo());
+    if (!ind)
+        opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCPMain?)");
+
+    connId = ind->connId();
+    isBound = true;
+
+    cb = NULL;
+    yourPtr = NULL;
+
+    gateToTcp = NULL;
+}
+
 void TCPSocket::sendToTCP(cMessage *msg)
 {
     if (!gateToTcp)
         opp_error("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
-    gateToTcp->ownerModule()->send(msg, gateToTcp);
+    check_and_cast<cSimpleModule *>(gateToTcp->ownerModule())->send(msg, gateToTcp);
 }
 
 void TCPSocket::bind(int lPort)

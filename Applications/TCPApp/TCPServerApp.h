@@ -19,30 +19,45 @@
 #include "TCPSocketMap.h"
 
 
+/**
+ * Abstract base class for server processes to be used with TCPServerApp.
+ */
 class TCPServerProcess : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   private:
     TCPSocket *socket; // ptr into socketMap managed by TCPServerApp
   public:
+    Module_Class_Members(TCPServerProcess,cSimpleModule,0);
+
+    /** Called by TCPServerApp after creating this module */
+    void setSocket(TCPSocket *sock) {socket=sock;}
+
+    /** To be called when the server process has finished */
     void removeSocket();
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
+
+    /** @name TCPSocket::CallbackInterface callback methods, to be redefined */
+    //@{
+    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) =0;
+    virtual void socketEstablished(int connId, void *yourPtr) = 0;
+    virtual void socketPeerClosed(int connId, void *yourPtr) = 0;
     virtual void socketClosed(int connId, void *yourPtr) {removeSocket();}
     virtual void socketFailure(int connId, void *yourPtr, int code) {removeSocket();}
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
-
+    //@}
 };
 
 
 /**
- * Hosts a server application.
+ * Hosts a server application, to be subclassed from TCPServerProcess (which
+ * is a sSimpleModule). Creates one instance (using dynamic module creation)
+ * for each incoming connection. More info in the corresponding NED file.
  */
 class TCPServerApp : public cSimpleModule
 {
   protected:
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
+    cModuleType *srvProcType;
 
   public:
     Module_Class_Members(TCPServerApp, cSimpleModule, 0);

@@ -39,7 +39,7 @@ void TCPSocketMap::addSocket(TCPSocket *socket)
 TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
 {
     SocketMap::iterator i = socketMap.find(socket->connectionId());
-    if (i=!socketMap.end())
+    if (i!=socketMap.end())
         socketMap.erase(i);
     return socket;
 }

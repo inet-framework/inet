@@ -21,6 +21,11 @@ void TCPServerApp::initialize()
 {
     int port = par("port");
 
+    const char *serverProcTypeName = par("serverProcess");
+    srvProcType = findModuleType(serverProcTypeName);
+    if (!srvProcType)
+        error("module type serverProcess=`%s' not found", serverProcTypeName);
+
     serverSocket.bind(port);
     serverSocket.listen(true);
 }
@@ -30,12 +35,16 @@ void TCPServerApp::handleMessage(cMessage *msg)
     TCPSocket *socket = socketMap.findSocketFor(msg);
     if (!socket)
     {
-            socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
+        // new connection -- create new socket object and server process
+        socket = new TCPSocket(msg);
+        socket->setOutputGate(gate("tcpOut"));
 
-            TCPServerProcess *proc = NULL;//FIXME
-            socket->setCallbackObject(proc);
-            socketMap.addSocket(socket);
+        cModule *mod = srvProcType->createScheduleInit("serverproc",this);
+        TCPServerProcess *proc = check_and_cast<TCPServerProcess *>(mod);
+        socket->setCallbackObject(proc);
+        proc->setSocket(socket);
+
+        socketMap.addSocket(socket);
     }
     socket->processMessage(msg);
 }
@@ -44,11 +53,10 @@ void TCPServerApp::finish()
 {
 }
 
-/*
-void TCPServerApp::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
-void TCPServerApp::socketEstablished(int connId, void *yourPtr);
-void TCPServerApp::socketPeerClosed(int connId, void *yourPtr);
-void TCPServerApp::socketClosed(int connId, void *yourPtr);
-void TCPServerApp::socketFailure(int connId, void *yourPtr, int code);
-void TCPServerApp::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
-*/
+//---
+
+void TCPServerProcess::removeSocket()
+{
+    // FIXME TBD
+}
+
