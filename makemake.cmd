@@ -37,7 +37,9 @@ cd %root%\Applications\UDPApp && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.
 cd %root%\Examples\IPSuite && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 cd %root%\Examples\MPLS && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
 
-cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -w -c ..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
+cd %root%\Examples\Ethernet && %MAKEMAKE% %OPTS% -n -r -c ..\..\ipsuiteconfig.vc
+cd %root%\Examples\Ethernet\ARPTest && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
+cd %root%\Examples\Ethernet\LANs && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 
 cd %root%\Examples\IPSuite\NClients && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%
 cd %root%\Examples\IPSuite\FlatNet && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_IPSUITE_INCLUDES%

@@ -30,7 +30,9 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Examples/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/MPLS && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 
-(cd Examples/Ethernet && $MAKEMAKE $OPTS -w -c ../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
+(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
+(cd Examples/Ethernet/ARPTest && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
+(cd Examples/Ethernet/LANs && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
 (cd Examples/IPSuite/NClients && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/FlatNet && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
