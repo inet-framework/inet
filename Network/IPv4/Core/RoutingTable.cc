@@ -1043,9 +1043,8 @@ void RoutingTable::addLocalLoopback()
     {
         if (curmod->hasPar("local_addr"))
         {
-                 loopbackIP = new
-                IPAddress(curmod->par("local_addr").stringValue());
-
+            delete loopbackIP;
+            loopbackIP = new IPAddress(curmod->par("local_addr").longValue());
             break;
         }
 
