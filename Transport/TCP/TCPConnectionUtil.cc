@@ -365,24 +365,32 @@ void TCPConnection::sendFin()
 
 bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
 {
-
-tcpEV<<"DBG: sendData (" << fullSegments << ", " << maxNumBytes << "\n"; //FIXME
-
     // start sending from snd_max
     state->snd_nxt = state->snd_max;
 
-    bool segSent = false;
-    uint32 old_snd_nxt = state->snd_nxt;
-
+    // check how much we can sent
+    ulong buffered = sendQueue->bytesAvailable(state->snd_nxt);
+    if (buffered==0)
+        return false;
     ulong win = state->snd_una + state->snd_wnd - state->snd_nxt;
     if (maxNumBytes!=-1 && (ulong)maxNumBytes<win)
         win = maxNumBytes;
-    ulong buffered = sendQueue->bytesAvailable(state->snd_nxt);
     if (win>buffered)
         win = buffered;
-    if (fullSegments && win<state->snd_mss)
+    if (win==0)
+    {
+        tcpEV << (maxNumBytes==0 ? "Cannot send, congestion window closed\n" : "Cannot send, send window closed (snd_una+snd_wnd-snd_max=0)\n");
         return false;
+    }
+    if (fullSegments && win<state->snd_mss)
+    {
+        tcpEV << "Cannot send, don't have a full segment (snd_mss=" << state->snd_mss << ")\n";
+        return false;
+    }
 
+    // start sending 'win' bytes
+    uint32 old_snd_nxt = state->snd_nxt;
+    ASSERT(win>0);
     while (win>0)
     {
         ulong bytes = Min(win, state->snd_mss);
@@ -406,21 +414,18 @@ tcpEV<<"DBG: sendData (" << fullSegments << ", " << maxNumBytes << "\n"; //FIXME
         }
 
         sendToIP(tcpseg);
-        segSent = true;
     }
 
-    if (segSent)
-    {
-        // remember highest seq sent (snd_nxt may be set back on retransmission,
-        // but we'll need snd_max to check validity of ACKs -- they must ack
-        // something we really sent)
-        state->snd_max = state->snd_nxt;
+    // remember highest seq sent (snd_nxt may be set back on retransmission,
+    // but we'll need snd_max to check validity of ACKs -- they must ack
+    // something we really sent)
+    state->snd_max = state->snd_nxt;
 
-        // notify (once is enough)
-        tcpAlgorithm->ackSent();
-        tcpAlgorithm->dataSent(old_snd_nxt);
-    }
-    return segSent;
+    // notify (once is enough)
+    tcpAlgorithm->ackSent();
+    tcpAlgorithm->dataSent(old_snd_nxt);
+
+    return true;
 }
 
 
