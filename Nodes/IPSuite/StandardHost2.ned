@@ -30,7 +30,7 @@ import
 
 
 //
-// IP host with TCP, UDP layers and applications.
+// \IP host with TCP, UDP layers and applications.
 //
 module StandardHost2
     parameters:

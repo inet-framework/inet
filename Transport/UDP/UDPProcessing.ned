@@ -28,7 +28,7 @@
 // The module can (should) be connected to several applications.
 // For sending an UDP packet, the application should attach an UDPControlInfo
 // object to the payload, and send it to UDPProcessing.
-// UDPProcessing will also attach an UDPControlInfo object to any payload 
+// UDPProcessing will also attach an UDPControlInfo object to any payload
 // message in sends up to the application.
 //
 // For receiving UDP packets, the connected applications should have
@@ -39,7 +39,7 @@
 // If there's only one app and without "local_port" parameter, that app
 // will receive all incoming packets regardless of destination port number.
 //
-// <b>Communication with the IP layer</b>
+// <b>Communication with the \IP layer</b>
 //
 // The UDP model relies on sending and receiving IPControlInfo objects
 // attached to UDPPacket objects as control info

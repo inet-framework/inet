@@ -34,7 +34,7 @@ import
 // - \RSVP-TE: The signaling module.
 // - \RSVP Interface: This one plays the role of an adapter between layer 3
 //   and layer 4 protocols. It is also to address the mismatch between the
-//   two methods of representing an IP addresses.
+//   two methods of representing an \IP addresses.
 // - Network Layers: The core of IP-suite.
 // - OSPF-TE: The transport module of OSPF-TE protocol.
 // - MPLS Module: Label switching module of MPLS.

@@ -18,9 +18,9 @@
 
 
 //
-// Implements the IP protocol. This is the all-in-one version of IPProcessing.
+// Implements the \IP protocol. This is the all-in-one version of IPProcessing.
 //
-// The IP protocol header is represented by the IPDatagram message class.
+// The \IP protocol header is represented by the IPDatagram message class.
 //
 // To send a packet over IP, fill in an IPControlInfo object,
 // attach it to the packet with the C++ method setControlInfo(),
@@ -30,7 +30,7 @@
 // up to the higher layers.
 //
 // IP can serve several higher-layer protocols. When delivering packets
-// to them, the output gate is determined from the Protocol field in the IP header.
+// to them, the output gate is determined from the Protocol field in the \IP header.
 // The protocol-to-gateindex mapping must be given in the protocolmapping
 // string parameter, in the following format:
 // <pre>

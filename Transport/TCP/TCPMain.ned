@@ -68,7 +68,7 @@
 // command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
 // the task of dealing with packets and notification messages coming from TCP.
 //
-// <b>Communication with the IP layer</b>
+// <b>Communication with the \IP layer</b>
 //
 // The TCP model relies on sending and receiving IPControlInfo objects
 // attached to TCP segment objects as control info
@@ -126,13 +126,13 @@
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control
 //    between TCP and the app.
-//  - if you do active OPEN, then send data and close before the connection 
+//  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is probably not what
 //    you'd expect.
-//  - if you close while there are still data in the send buffer, the 
+//  - if you close while there are still data in the send buffer, the
 //    connection will spend the remainder of the data transfer in FIN_WAIT_1.
-//    This does not cause any incorrect TCP behaviour, but will be fixed 
+//    This does not cause any incorrect TCP behaviour, but will be fixed
 //    nevertheless.
 //  - no TCP header options (e.g. MSS is currently hardcoded, no SACK)
 //  - requirements for handling segments with SYN+FIN bits set (esp. with data
@@ -140,8 +140,8 @@
 //  - some parameters (like MSS) are presently constants which should better
 //    be configurable via NED or TCPCommand parameters
 //  - never sends data in SYN and SYN+ACK; this somewhat contradicts RFC793,
-//    but is probably consistent with existing real-life TCPs, at least 
-//    I have never seen or heard of data sent in SYN. The 3rd message of the 
+//    but is probably consistent with existing real-life TCPs, at least
+//    I have never seen or heard of data sent in SYN. The 3rd message of the
 //    connection setup, ACK will however be piggybacked on data if possible.
 //
 // TCPTahoeReno issues and missing features:

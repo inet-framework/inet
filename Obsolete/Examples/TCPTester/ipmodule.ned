@@ -18,7 +18,7 @@
 
 
 //
-// IP module
+// \IP module
 //
 simple DummyIP
        gates:

@@ -16,7 +16,7 @@
 // Engineering supported. The LSPs are setup based on paths selected by OSPF-TE
 // protocol.
 //
-// To address the problem of constrained routing in IP networks, several
+// To address the problem of constrained routing in \IP networks, several
 // solutions have been proposed by researchers. Their studies indicate that
 // constraint should be applied to flows and not on a per packet basis.
 // Bandwidth and delay are two constrained keys, in which delay jitter is less
@@ -32,7 +32,7 @@
 //
 // OSPF-TE distributes new information about each link. This information includes:
 // - Link type and link id
-// - Local and remote IP addresses
+// - Local and remote \IP addresses
 // - Traffic engineering metric
 // - Maximum bandwidth
 // - Maximum reservable bandwidth

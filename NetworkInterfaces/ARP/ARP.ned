@@ -21,8 +21,8 @@
 //
 simple ARP
     parameters:
-        retryTimeout: numeric, // number seconds ARP waits between retries to resolve an IP address
-        retryCount: numeric,   // number of times ARP will attempt to resolve an IP address
+        retryTimeout: numeric, // number seconds ARP waits between retries to resolve an \IP address
+        retryCount: numeric,   // number of times ARP will attempt to resolve an \IP address
         cacheTimeout: numeric; // number seconds unused entries in the cache will time out
     gates:
         in: hwIn;

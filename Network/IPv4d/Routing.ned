@@ -24,9 +24,9 @@
 // invoking functions in the RoutingTable module.
 //
 // Detailed operation:
-// - receive correct IP datagram, then:
+// - receive correct \IP datagram, then:
 // - if source routing option is on, use next source addr. as dest. addr.
-// - map IP address on output port, use static routing table
+// - map \IP address on output port, use static routing table
 // - if destination address is not in routing table,
 //   throw datagram away and notify ICMP
 // - process record route and timestamp options, if applicable

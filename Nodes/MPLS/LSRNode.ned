@@ -31,7 +31,7 @@ import
 // Router ID is assigned as the router local loopback interface. This is
 // important for the consistency with \RSVP-TE module. In order to add the
 // loopback interface, some modification has been made in the RoutingCore
-// class in IP suite. This modification can be anticipated for IP suite
+// class in \IP suite. This modification can be anticipated for \IP suite
 // development as the local loopback interface is necessary for some link
 // state routing protocols like OSPF.
 //

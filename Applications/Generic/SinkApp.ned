@@ -19,7 +19,7 @@
 
 
 //
-// Receives packets from the IP layer and prints out their contents.
+// Receives packets from the \IP layer and prints out their contents.
 //
 // author: Jochen Reber
 //

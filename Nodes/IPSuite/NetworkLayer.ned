@@ -28,7 +28,7 @@ import
 
 
 //
-// Network layers of an IP node.
+// Network layers of an \IP node.
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //# FIXME add ICMP errors

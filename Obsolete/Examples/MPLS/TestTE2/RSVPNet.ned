@@ -19,7 +19,7 @@ import
 
 //
 // An example of Hop-by-Hop routing. The network consists of 5 LSRs and
-// 2 hosts. Host1 establishes path simply based on IP routing.
+// 2 hosts. Host1 establishes path simply based on \IP routing.
 //
 // See the README file in the model directory for scenario description.
 //

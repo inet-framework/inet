@@ -19,7 +19,7 @@
 
 
 //
-// IP Tunnelling.
+// \IP Tunnelling.
 //
 // - set Tunnel destination address
 // - send new datagram to IPSend to be newly encapsulated

@@ -19,7 +19,7 @@
 
 
 //
-// Handles IP multicasts.
+// Handles \IP multicasts.
 //
 // Receive datagram with multicast address from Routing:
 // - duplicate datagram if it is sent to more than one output port

@@ -22,7 +22,7 @@
 //
 // Generally, the operation of MPLS module is as following: When first
 // starting up, the MPLS module stores all the incoming packets (which the
-// labels cannot be found from the LIB) from IP nodes outside in a buffer as
+// labels cannot be found from the LIB) from \IP nodes outside in a buffer as
 // long as the signaling protocol has not been initialized yet. Once the
 // signaling component finishes its initialization phase, it sends a message
 // to MPLS module indicating that it is ready to operate. The MPLS module then
@@ -57,8 +57,8 @@
 // Layer) in the OSI model. In addition, it needs to obtain label information
 // from the LIB component and label query result from the LDP module. Messages
 // the model communicates with L2 and Network Layers are L2 packets (PPP,
-// Frame Relay, ATM, Ethernet, etc.), and IP native packets. Specifically,
-// MPLS module encapsulates IP packet and is encapsulated in L2 packet.
+// Frame Relay, ATM, Ethernet, etc.), and \IP native packets. Specifically,
+// MPLS module encapsulates \IP packet and is encapsulated in L2 packet.
 // Different L2 protocols may require different methods of encapsulation to
 // inherit the L2’s QoS. This implementation follows a generic approach; it
 // assumes no information of QoS from the link layer.

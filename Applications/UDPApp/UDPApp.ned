@@ -29,8 +29,8 @@ endsimple
 
 
 //
-// Sends UDP packets to a randomly chosen destination (or to a single 
-// destination) at possibly random intervals. Destination IP addresses 
+// Sends UDP packets to a randomly chosen destination (or to a single
+// destination) at possibly random intervals. Destination \IP addresses
 // are chosen from the dest_addresses parameter.
 // The peer can be UDPSink or another UDPApp (it handles received packets
 // exactly like UDPSink). To disable the application model, set dest_addresses
@@ -42,7 +42,7 @@ simple UDPApp
         dest_port : numeric const,
         message_length : numeric const, // (bits)
         message_freq : numeric, // should usually be a random value, e.g. exponential(1)
-        dest_addresses: string; // list of IP addresses, separated by spaces
+        dest_addresses: string; // list of \IP addresses, separated by spaces
     gates:
         in: from_udp;
         out: to_udp;

@@ -249,8 +249,8 @@
 // - <Traffic></Traffic> is the root element. It may contain one or more <Conn>
 //   elements.
 // - <Conn></Conn> specifies an \RSVP session. It may contain the following elements.
-// - <src></src> specifies sender IP address
-// - <dest></dest> specifies receiver IP address
+// - <src></src> specifies sender \IP address
+// - <dest></dest> specifies receiver \IP address
 // - <setupPri></setupPri> specifies LSP setup priority
 // - <holdingPri></holdingPri> specifies LSP holding priority
 // - <bandwidth></bandwidth> specifies the requested BW.

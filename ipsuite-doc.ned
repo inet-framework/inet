@@ -77,7 +77,7 @@
 //
 // Accepted interface fields are:
 //    - <tt>name:</tt> - arbitrary interface name (e.g. eth0, ppp0)
-//    - <tt>inet_addr:</tt> - IP address
+//    - <tt>inet_addr:</tt> - \IP address
 //    - <tt>Mask:</tt> - netmask
 //    - <tt>Groups:</tt> Multicast groups. 224.0.0.1 is added automatically,
 //      and 224.0.0.2 also if the node is a router (IPForward==true).
@@ -100,7 +100,7 @@
 // </pre>
 //
 // <i>Destination, Gateway</i> and <i>Netmask</i> have the usual meaning.
-// The <i>Destination</i> field should either be an IP address or "default:"
+// The <i>Destination</i> field should either be an \IP address or "default:"
 // (to designate the default route). For <i>Gateway</i>, <tt>*</tt> is also
 // accepted with the meaning <tt>0.0.0.0</tt>.
 //

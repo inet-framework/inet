@@ -18,19 +18,19 @@
 
 
 //
-// Handles local delivery of IP datagrams, the main task being defragmentation.
+// Handles local delivery of \IP datagrams, the main task being defragmentation.
 //
-// Receive IP datagram for local delivery:
-// - strip off IP header
+// Receive \IP datagram for local delivery:
+// - strip off \IP header
 // - buffer fragments
 // - wait until all fragments of one fragment number are received
 // - discard without notification if not all fragments arrives within timeout
 //
 // Once all fragments have arrived:
-// - send encapsulated IP packet (tunnelling) to preRoutingOut
+// - send encapsulated \IP packet (tunnelling) to preRoutingOut
 // - send other packets on corresponding transportOut[] gate
 //
-// The output gate is determined from the Protocol field in the IP header.
+// The output gate is determined from the Protocol field in the \IP header.
 // The protocol-to-gateindex mapping must be given in the protocolmapping
 // string parameter, in the following format:
 // <pre>
