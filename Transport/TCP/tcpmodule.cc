@@ -937,7 +937,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
       tcb_block = search->second; //or tcb_list[spair];
 
       if (debug) ev << "Message/event belongs to connection tcp_conn_id=" 
-                    << tcb_block->tcp_conn_id << ".\n";
+                    << tcb_block->tb_conn_id << ".\n";
     }
   else
     {
@@ -966,7 +966,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_block = old_tcb_block;
 
           if (debug) ev << "Message/event belongs to connection tcp_conn_id=" 
-                        << tcb_block->tcp_conn_id << ", filling out remote addr/port in conn.\n";
+                        << tcb_block->tb_conn_id << ", filling out remote addr/port in conn.\n";
 
           //erase old list element
           tcb_list.erase(spair);
