@@ -137,7 +137,7 @@ bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
     return dynamic_cast<TCPCommand *>(msg->controlInfo());
 }
 
-void TCPSocket::setCallbackObject(CallBackInterface *callback, void *yourPointer)
+void TCPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
 {
     cb = callback;
     yourPtr = yourPointer;

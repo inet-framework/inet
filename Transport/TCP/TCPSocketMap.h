@@ -33,7 +33,7 @@
 class TCPSocketMap
 {
   protected:
-    typedef std::map<TCPSocket*> SocketMap;
+    typedef std::map<int,TCPSocket*> SocketMap;
     SocketMap socketMap;
   public:
     /**

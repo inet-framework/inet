@@ -59,14 +59,14 @@ class TCPStatusInfo;
  * messages yourself, or let TCPSocket do part of the job. For the latter,
  * you give TCPSocket a callback object on which it'll invoke the appropriate
  * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of TCPSocket::CallBackInterface).,
+ * socketPeerClosed(), etc (these are methods of TCPSocket::CallbackInterface).,
  * The callback object can be your simple module class too.
  *
  * This code skeleton example shows how to set up a TCPSocket to use the module
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TCPSocket::CallBackInterface
+ * class MyModule : public cSimpleModule, public TCPSocket::CallbackInterface
  * {
  *    TCPSocket socket;
  *    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
@@ -113,10 +113,10 @@ class TCPSocket
      * Abstract base class for your callback objects. See setCallbackObject()
      * and processMessage() for more info.
      */
-    class CallBackInterface
+    class CallbackInterface
     {
       public:
-        virtual ~CallBackInterface() {}
+        virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) = 0;
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
@@ -132,7 +132,7 @@ class TCPSocket
     IPAddress localAddr;
     int localPort;
 
-    CallBackInterface *cb;
+    CallbackInterface *cb;
     void *yourPtr;
 
     cGate *gateToTcp;
@@ -247,10 +247,10 @@ class TCPSocket
     /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
-     * multiply inherits from CallBackInterface too, that is you
+     * multiply inherits from CallbackInterface too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TCPSocket::CallBackInterface
+     * class MyAppModule : public cSimpleModule, public TCPSocket::CallbackInterface
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
@@ -260,17 +260,17 @@ class TCPSocket
      *
      * YourPtr is an optional pointer. It may contain any value you wish --
      * TCPSocket will not look at it or do anything with it except passing
-     * it back to you in the CallBackInterface calls. You may find it
+     * it back to you in the CallbackInterface calls. You may find it
      * useful if you maintain additional per-connection information:
      * in that case you don't have to look it up by connId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallBackInterface *cb, void *yourPtr=NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr=NULL);
 
     /**
      * Examines the message (which should have arrived from TCPMain), and
      * dispatches to the appropriate method of the callback object
-     * (see setCallbackObject(), class CallBackInterface), with the same
+     * (see setCallbackObject(), class CallbackInterface), with the same
      * yourPtr that you gave in the setCallbackObject() call.
      * If no callback object is installed, this method throws an error.
      *
@@ -280,52 +280,6 @@ class TCPSocket
     void processMessage(cMessage *msg);
     //@}
 };
-
-
-
-// FIXME into separate file
-
-#include <map>
-
-/**
- * Small utility class for managing a large number of sockets.
- */
-class TCPSocketMap
-{
-  protected:
-    typedef std::map<TCPSocket*> SocketMap;
-    SocketMap socketMap;
-  public:
-    TCPSocketMap() {}
-    ~TCPSocketMap() {}
-    TCPSocket *findSocketFor(cMessage *msg);
-    void addSocket(TCPSocket *socket);
-    TCPSocket *removeSocket(TCPSocket *socket);
-};
-
-TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
-{
-    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->controlInfo());
-    if (!ind)
-        opp_error("TCPSocketMap: findSocketFor(): no TCPCommand control info in message (not from TCPMain?)");
-    int connId = ind->connId();
-    SocketMap::iterator i = socketMap.find(connId);
-    return (i==socketMap.end()) ? NULL : i->second;
-}
-
-void TCPSocketMap::addSocket(TCPSocket *socket)
-{
-    ASSERT(socketMap.find(socket->connectionId())==socketMap.end());
-    socketMap[socket->connectionId()] = socket;
-}
-
-TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
-{
-    SocketMap::iterator i = socketMap.find(socket->connectionId());
-    if (i=!socketMap.end())
-        socketMap.erase(i);
-    return socket;
-}
 
 #endif
 

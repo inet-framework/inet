@@ -19,7 +19,7 @@ Define_Module(TCPServerApp);
 
 void TCPServerApp::initialize()
 {
-    port = par("port");
+    int port = par("port");
 
     serverSocket.bind(port);
     serverSocket.listen(true);
