@@ -21,6 +21,7 @@
 #include "UDPApp.h"
 #include "UDPControlInfo_m.h"
 #include "StringTokenizer.h"
+#include "IPAddressResolver.h"
 
 
 Define_Module(UDPSink);
@@ -78,8 +79,13 @@ Define_Module(UDPApp);
 
 int UDPApp::counter;
 
-void UDPApp::initialize()
+void UDPApp::initialize(int stage)
 {
+    // because of IPAddressResolver, we need to wait until interfaces are registered,
+    // address auto-assignment takes place etc.
+    if (stage!=3)
+        return;
+
     UDPSink::initialize();
 
     localPort = par("local_port");
@@ -90,7 +96,7 @@ void UDPApp::initialize()
     StringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(IPAddress(token));
+        destAddresses.push_back(IPAddressResolver().resolve(token));
 
     counter = 0;
 

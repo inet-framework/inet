@@ -227,7 +227,7 @@ void PPPInterface::updateDisplayString()
 
         IPAddress addr = interfaceEntry->inetAddr;
 
-        sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isNull()?"":addr.str().c_str(), drate, numRcvdOK, numSent);
+        sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isNull()?"-":addr.str().c_str(), drate, numRcvdOK, numSent);
 
         if (numBitErr>0 || numDropped>0)
             sprintf(buf+strlen(buf), "\nerr:%ld drop:%ld", numBitErr, numDropped);

@@ -13,6 +13,7 @@
 
 
 #include "TCPSessionApp.h"
+#include "IPAddressResolver.h"
 
 
 Define_Module(TCPSessionApp);
@@ -120,7 +121,7 @@ void TCPSessionApp::activity()
     if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting":"listening");
 
     if (active)
-        socket.connect(IPAddress(connectAddress), connectPort);
+        socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
     else
         socket.listen();
 

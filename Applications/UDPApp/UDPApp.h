@@ -67,7 +67,8 @@ class UDPApp : public UDPSink
 
   public:
     Module_Class_Members(UDPApp, UDPSink, 0);
-    virtual void initialize();
+    virtual int numInitStages() const {return 4;}
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
 
