@@ -80,5 +80,5 @@ cd %root%\Transport\NewTCP && %MAKEMAKE% %OPTS% -n -c ..\..\ipsuiteconfig.vc -I.
 
 cd %root%
 dir /s/b *.ned > nedfiles.lst
-perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?IPSuite-local/||" nedfiles.lst
+perl -i.bak -pe "s/.*[^d]\n$//;s|\\|/|g;s|.*?IPSuite.*?/||" nedfiles.lst
 perl -i.bak -pe "s|^Examples/.*||" nedfiles.lst

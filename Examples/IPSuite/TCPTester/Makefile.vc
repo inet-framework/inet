@@ -166,15 +166,15 @@ re-makemake: makefiles
 dropswitch.obj: dropswitch.cc \
   nw.h \
   ip.h \
-  d:\home\IPSuite-local/Transport/TCP/tcp.h
+  d:\home\IPSuite-pcvs/Transport/TCP/tcp.h
 ipmodule.obj: ipmodule.cc \
   ip.h \
-  d:\home\IPSuite-local/Transport/TCP/tcp.h
+  d:\home\IPSuite-pcvs/Transport/TCP/tcp.h
 ppp.obj: ppp.cc \
   nw.h \
   ip.h \
-  d:\home\IPSuite-local/Transport/TCP/tcp.h
+  d:\home\IPSuite-pcvs/Transport/TCP/tcp.h
 switch.obj: switch.cc \
   nw.h \
   ip.h \
-  d:\home\IPSuite-local/Transport/TCP/tcp.h
+  d:\home\IPSuite-pcvs/Transport/TCP/tcp.h

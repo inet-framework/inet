@@ -166,10 +166,18 @@ re-makemake: makefiles
 EtherApp_m.obj: EtherApp_m.cc \
   EtherApp_m.h
 EtherAppCli.obj: EtherAppCli.cc \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   EtherApp_m.h \
-  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/utils.h \
-  d:\home\IPSuite-local/Base/ipsuite_defs.h
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/utils.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/Ethernet.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/_802/MACAddress.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/_802/MACAddress_m.h \
+  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h
 EtherAppSrv.obj: EtherAppSrv.cc \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   EtherApp_m.h \
-  d:\home\IPSuite-local/NetworkInterfaces/Ethernet/utils.h \
-  d:\home\IPSuite-local/Base/ipsuite_defs.h
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/utils.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/Ethernet/Ethernet.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/_802/MACAddress.h \
+  d:\home\IPSuite-pcvs/NetworkInterfaces/_802/MACAddress_m.h \
+  d:\home\IPSuite-pcvs/Base/ipsuite_defs.h

@@ -158,12 +158,12 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 client.obj: client.cc \
-  d:\home\IPSuite-local/Transport/Socket/SocketInterfacePacket.h \
-  d:\home\IPSuite-local/Transport/Socket/sockets.h \
-  d:\home\IPSuite-local/Transport/TCP/pcb.h \
-  d:\home\IPSuite-local/Network/IPv4/Core/IPAddress.h
+  d:\home\IPSuite-pcvs/Transport/Socket/SocketInterfacePacket.h \
+  d:\home\IPSuite-pcvs/Transport/Socket/sockets.h \
+  d:\home\IPSuite-pcvs/Transport/TCP/pcb.h \
+  d:\home\IPSuite-pcvs/Network/IPv4/Core/IPAddress.h
 server.obj: server.cc \
-  d:\home\IPSuite-local/Transport/Socket/SocketInterfacePacket.h \
-  d:\home\IPSuite-local/Transport/Socket/sockets.h \
-  d:\home\IPSuite-local/Transport/TCP/pcb.h \
-  d:\home\IPSuite-local/Network/IPv4/Core/IPAddress.h
+  d:\home\IPSuite-pcvs/Transport/Socket/SocketInterfacePacket.h \
+  d:\home\IPSuite-pcvs/Transport/Socket/sockets.h \
+  d:\home\IPSuite-pcvs/Transport/TCP/pcb.h \
+  d:\home\IPSuite-pcvs/Network/IPv4/Core/IPAddress.h

@@ -155,5 +155,5 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TestClient.obj: TestClient.cc \
-  d:\home\IPSuite-local/Transport/NewTCP/TCPSocket.h \
-  d:\home\IPSuite-local/Network/IPv4/Core/IPAddress.h
+  d:\home\IPSuite-pcvs/Transport/NewTCP/TCPSocket.h \
+  d:\home\IPSuite-pcvs/Network/IPv4/Core/IPAddress.h
