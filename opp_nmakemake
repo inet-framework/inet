@@ -71,7 +71,8 @@ opp_nmakemake [-h] [-f] [-e ext] [-o make-target] [-n] [-u user-interface]
                           no effect.
     -w, --withobjects     Link with all object files found in -I directories,
                           or include them if library is created. Ignored when
-                          -n option is present.
+                          -n option is present. Dependencies between 
+                          directories have to be added manually.
     -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv
     -M, --mpi             Link executable with MPI
     -p, --pvm             Link executable with PVM
@@ -85,18 +86,17 @@ opp_nmakemake [-h] [-f] [-e ext] [-o make-target] [-n] [-u user-interface]
                           if no -i options are given. This option is useful
                           if a source file (.ned, .msg or .cc) is to be
                           generated from other files.
-    directory             Link with files in that directory. Makemake will need to
-                          call "make" there to determine the list of object
-                          files to be added to the Makefile.
+    directory             Link with object files in that directory. Dependencies
+                          between directories have to be added manually. See also
+                          -w option.
     library or object     Link with that file
 
 Default output is Makefile.vc, which you can invoke by typing
   nmake -f Makefile.vc
-If your model is in multiple directories instead of a single directory, run
-  opp_nmakemake -n
-in the subdirectories, and then
-  opp_nmakemake dir1 dir2 ...
-in your top-level directory.
+With the -n and -s options, -u, -p and -l have no effect. makefrag.vc (and the 
+-i option) is useful when a source file (.ned, .msg or .cc) is to be generated
+from other files, or when you want to add extra dependencies that opp_makemake
+could not figure out.
 ';
         exit(1);
     }

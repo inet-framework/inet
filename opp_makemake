@@ -54,7 +54,8 @@ opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
                           model dynamically (Cmdenv/Tkenv -l so-file switch).
     -w, --withobjects     Link with all object files found in -I directories,
                           or include them if library is created. Ignored when
-                          -n option is present.
+                          -n option is present. Dependencies between 
+                          directories have to be added manually.
     -u, --userinterface   Use Cmdenv or Tkenv. Defaults to Tkenv.
     -M, --mpi             Link executable with MPI
     -p, --pvm             Link executable with PVM
@@ -63,16 +64,15 @@ opp_makemake [-h] [-f] [-m] [-o make-target] [-n] [-s] [-u user-interface]
     -llibrary             Additional library to link against
     -i, --includefragment Append file to near end of Makefile. The file makefrag
                           is appended implicitly if no -i options are given.
-    directory             Recursive make in that dir. Makemake will need
-                          to call make there to see what object files to
-                          include in the Makefile.
+    directory             Link with object files in that directory. Dependencies
+                          between directories have to be added manually. See also
+                          -w option.
     library or object     Link with that file
 
-With the -n and -s options, -u, -p and -l have no effect.
-If you have a source tree instead of a single directory, run opp_makemake -n
-in the subdirs and then opp_makemake dir1 dir2 etc. in your top-level directory.
-The -i option is useful if a source file (.ned, .msg or .cc) is to be generated
-from other files.
+With the -n and -s options, -u, -p and -l have no effect. makefrag (and the 
+-i option) is useful when a source file (.ned, .msg or .cc) is to be generated
+from other files, or when you want to add extra dependencies that opp_makemake
+could not figure out.
 EOT
         exit
         ;;
