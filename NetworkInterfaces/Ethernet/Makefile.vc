@@ -211,6 +211,7 @@ MACRelayUnitBase.obj: MACRelayUnitBase.cc \
   EtherFrame_m.h \
   utils.h \
   Ethernet.h \
+  ../../Util/stlwatch.h \
   EtherCtrl_m.h \
   ../../Base/ipsuite_defs.h
 MACRelayUnitNP.obj: MACRelayUnitNP.cc \
@@ -220,6 +221,7 @@ MACRelayUnitNP.obj: MACRelayUnitNP.cc \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
+  ../../Util/stlwatch.h \
   EtherCtrl_m.h \
   ../../Base/ipsuite_defs.h
 MACRelayUnitPP.obj: MACRelayUnitPP.cc \
@@ -229,6 +231,7 @@ MACRelayUnitPP.obj: MACRelayUnitPP.cc \
   Ethernet.h \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
+  ../../Util/stlwatch.h \
   EtherCtrl_m.h \
   ../../Base/ipsuite_defs.h
 utils.obj: utils.cc \

@@ -138,7 +138,7 @@ LDPPacket_m.obj: LDPPacket_m.cc \
 NewLDP.obj: NewLDP.cc \
   ../MPLS/ConstType.h \
   NewLDP.h \
-  ../MPLS/LIBTable.h \
+  ../MPLS/LIBtable.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/RoutingTable.h \
   ../../Transport/UDP/UDPControlInfo_m.h \
@@ -151,7 +151,6 @@ NewLDP.obj: NewLDP.cc \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPCommand_m.h \
   ../MPLS/MPLSPacket.h \

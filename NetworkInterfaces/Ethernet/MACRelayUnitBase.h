@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include "MACAddress.h"
+#include "stlwatch.h"
 
 class EtherFrame;
 
@@ -38,7 +39,7 @@ class MACRelayUnitBase : public cSimpleModule
 {
     Module_Class_Members(MACRelayUnitBase,cSimpleModule,0);
 
-  protected:
+  public:
     // An entry of the Address Lookup Table
     struct AddressEntry
     {
@@ -46,6 +47,7 @@ class MACRelayUnitBase : public cSimpleModule
         double insertionTime;   // Arrival time of Lookup Address Table entry
     };
 
+  protected:
     struct MAC_compare
     {
         bool operator()(const MACAddress& u1, const MACAddress& u2) const

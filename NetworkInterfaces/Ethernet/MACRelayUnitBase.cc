@@ -36,6 +36,12 @@ static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
     return ev;
 }
 
+static std::ostream& operator<< (std::ostream& os, const MACRelayUnitBase::AddressEntry& e)
+{
+    os << "port=" << e.portno << " insTime=" << e.insertionTime;
+    return os;
+}
+
 
 void MACRelayUnitBase::initialize()
 {
@@ -57,6 +63,8 @@ void MACRelayUnitBase::initialize()
         readAddressTable(addressTableFile);
 
     seqNum = 0;
+
+    WATCH_MAP(addresstable);
 }
 
 void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)

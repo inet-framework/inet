@@ -8,6 +8,7 @@
 
 #include <omnetpp.h>
 #include <vector>
+#include <map>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -70,10 +71,53 @@ template <class T> void createPointerVectorWatcher(const char *varname, vector<T
     new cPointerVectorWatcher<T>(varname, v);
 }
 
+//
+// Internal class
+//
+template<class _K, class _V, class _C>
+class cMapWatcher : public cVectorWatcherBase
+{
+  protected:
+    map<_K,_V,_C>& m;
+    mutable map<_K,_V,_C>::iterator it;
+    mutable int itPos;
+  public:
+    cMapWatcher(const char *name, map<_K,_V,_C>& var) : cVectorWatcherBase(name), m(var) {itPos=-1;}
+    virtual const char *elemTypeName() const {return "struct pair<...,...>";}
+    virtual int size() const {return m.size();}
+    virtual string at(int i) const {
+        // std::map doesn't support random access iterator and iteration is slow,
+        // so we have to use a trick, knowing that Tkenv will call this function with
+        // i=0, i=1, etc...
+        if (i==0) {
+            it=m.begin(); itPos=0;
+        } else if (i==itPos+1 && it!=m.end()) {
+            ++it; ++itPos;
+        } else {
+            it=m.begin();
+            for (int k=0; k<i && it!=m.end(); k++) ++it;
+            itPos=i;
+        }
+        if (it==m.end()) {
+            return string("out of bounds");
+        }
+        stringstream out;
+        out << "KEY {" << it->first << "}  VALUE {" << it->second << "}";
+        return out.str();
+    }
+};
+
+template <class _K, class _V, class _C> void createMapWatcher(const char *varname, map<_K,_V,_C>& m)
+{
+    new cMapWatcher<_K,_V,_C>(varname, m);
+}
+
+
 #define WATCH_VECTOR(v)   createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
 
+#define WATCH_MAP(m)   createMapWatcher(#m,(m))
 
 #endif
 
