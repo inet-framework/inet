@@ -10,7 +10,7 @@ set LIBXML_LIBS=%LIBXML%/lib/libxml2.lib %ICONV%/lib/iconv.lib
 set ALL_IPSUITE_INCLUDES=-I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCPv4 -I$(ROOT)/Transport/UDPv4 -I$(ROOT)/Transport/Socketv4 -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
 set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
 
-:#--------------------------------------
+: #--------------------------------------
 
 %MAKEMAKE% -f -n -r -c ipsuiteconfig.vc
 

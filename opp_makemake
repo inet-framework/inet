@@ -388,6 +388,8 @@ fi
 echo "#------------------------------------------------------------------------------"
 echo
 
+# note: if "subdirs" were always among the target dependencies, it would cause
+# the executable to re-link every time (which is not good).
 if [ $recursive = "y" ]; then
     subdirs_target='subdirs'
 else

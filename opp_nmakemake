@@ -426,6 +426,8 @@ else
     }
 }
 
+# note: if "subdirs" were always among the target dependencies, it would cause
+# the executable to re-link every time (which is not good).
 if ($recursive eq 'y')
 {
     $subdirs_target='subdirs';
