@@ -411,8 +411,8 @@ void MPLSModule::sendPathRequestToSignalling(int fecID, IPAddress src, IPAddress
     // assemble Path Request command
     cMessage *signalMessage = new cMessage("PATH_REQUEST");
     signalMessage->addPar("FEC") = fecID;
-    signalMessage->addPar("dest_addr") = src.getInt();
-    signalMessage->addPar("src_addr") = dest.getInt();
+    signalMessage->addPar("src_addr") = src.getInt();
+    signalMessage->addPar("dest_addr") = dest.getInt();
     signalMessage->addPar("gateIndex") = gateIndex;
 
     if (isSignallingReady)

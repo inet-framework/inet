@@ -66,8 +66,13 @@ void NewLDP::handleMessage(cMessage *msg)
 {
     if (msg==sendHelloMsg)
     {
-        // periodically send out LDP Hellos
-        broadcastHello();
+        // every LDP capable router periodically sends HELLO messages to the
+        // "all routers in the sub-network" multicast address
+        ev << "Broadcasting LDP Hello\n";
+        sendHelloTo(IPAddress("224.0.0.0"));
+
+        // schedule next hello in 5 minutes
+        scheduleAt(simTime()+300, sendHelloMsg);
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
     {
@@ -84,29 +89,22 @@ void NewLDP::handleMessage(cMessage *msg)
     }
 }
 
-void NewLDP::broadcastHello()
+void NewLDP::sendHelloTo(IPAddress dest)
 {
-    // Each LDP capable router sends HELLO messages to a multicast address to all
-    // of routers in the sub-network
-
-    ev << "Broadcasting LDP Hello\n";
-
     LDPHello *hello = new LDPHello("ldp-hello");
+    hello->setType(HELLO);
     //hello->setHoldTime(...);
     //hello->setRbit(...);
     //hello->setTbit(...);
 
     UDPControlInfo *controlInfo = new UDPControlInfo();
     controlInfo->setSrcAddr(local_addr);
-    controlInfo->setDestAddr(IPAddress("224.0.0.0"));
+    controlInfo->setDestAddr(dest);
     controlInfo->setSrcPort(100);
     controlInfo->setDestPort(100);
     hello->setControlInfo(controlInfo);
 
     send(hello, "to_udp_interface");
-
-    // schedule next hello in 5 minutes
-    scheduleAt(simTime()+300, sendHelloMsg);
 }
 
 void NewLDP::processLDPHello(LDPHello *msg)
@@ -120,18 +118,13 @@ void NewLDP::processLDPHello(LDPHello *msg)
     if (peerAddr.isNull() || peerAddr==local_addr)
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
-        ev << "ignore\n";
+        ev << "that's myself, ignore\n";
         return;
     }
 
-    string inInterface = this->findInterfaceFromPeerAddr(peerAddr);
-
     // peer already in table?
-    PeerVector::iterator i;
-    for (i=myPeers.begin(); i!=myPeers.end(); ++i)
-        if (i->peerIP==peerAddr)
-            break;
-    if (i!=myPeers.end())
+    int i = findPeer(peerAddr);
+    if (i!=-1)
     {
         ev << "already in my peer table\n";
         return;
@@ -140,16 +133,17 @@ void NewLDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = inInterface;
+    info.linkInterface = findInterfaceFromPeerAddr(peerAddr);
     info.activeRole = peerAddr.getInt() > local_addr.getInt();
-    info.connected = false;
+    info.socket = NULL;
     myPeers.push_back(info);
     int peerIndex = myPeers.size()-1;
 
     ev << "added to peer table\n";
     ev << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
 
-    // initiate connection to peer
+    // introduce ourselves with a Hello, then connect if we're in ACTIVE role
+    sendHelloTo(peerAddr);
     if (info.activeRole)
     {
         ev << "Establishing session with it\n";
@@ -163,6 +157,7 @@ void NewLDP::openTCPConnectionToPeer(int peerIndex)
     socket->setOutputGate(gate("to_tcp_interface"));
     socket->setCallbackObject(this, (void*)peerIndex);
     socketMap.addSocket(socket);
+    myPeers[peerIndex].socket = socket;
 
     socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
 }
@@ -179,22 +174,17 @@ void NewLDP::processMessageFromTCP(cMessage *msg)
 
         IPAddress peerAddr = socket->remoteAddress();
 
-        PeerVector::iterator i;
-        for (i=myPeers.begin(); i!=myPeers.end(); ++i)
-            if (i->peerIP==peerAddr)
-                break;
-        if (i==myPeers.end() || (i!=myPeers.end() && i->connected))
+        int i = findPeer(peerAddr);
+        if (i==-1 || myPeers[i].socket)
         {
             // nothing known about this guy, or already connected: refuse
-            socket->close(); // FIXME should rather be connection reset!
+            socket->close(); // FIXME: PEER_CLOSED and CLOSED notifications will come back to us, handle!!!
             delete socket;
             delete msg;
             return;
         }
-        i->connected = true;
-        int peerIndex = i - myPeers.begin();
-
-        socket->setCallbackObject(this, (void *)peerIndex);
+        myPeers[i].socket = socket;
+        socket->setCallbackObject(this, (void *)i);
         socketMap.addSocket(socket);
     }
 
@@ -206,7 +196,6 @@ void NewLDP::processMessageFromTCP(cMessage *msg)
 void NewLDP::socketEstablished(int, void *yourPtr)
 {
     peer_info& peer = myPeers[(int)yourPtr];
-    peer.connected = true;
     ev << "TCP connection established with peer " << peer.peerIP << "\n";
 
     // FIXME start LDP session setup (if we're on the active side?)
@@ -217,6 +206,7 @@ void NewLDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
     peer_info& peer = myPeers[(int)yourPtr];
     ev << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
+    delete msg->removeControlInfo();
     processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
 }
 
@@ -250,7 +240,6 @@ void NewLDP::socketFailure(int, void *yourPtr, int code)
 
     // FIXME what now? reconnect after a delay?
 }
-
 
 void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 {
@@ -289,7 +278,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     // IP host of the next-hop.
 
     IPAddress nextPeerAddr = locateNextHop(fecInt);
-    if (!nextPeerAddr.isNull())
+    if (nextPeerAddr.isNull())
     {
         // bad luck
         ev << "No route found for this dest address\n";
@@ -306,28 +295,29 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 
     // genarate new LABEL REQUEST and send downstream
     LDPLabelRequest *requestMsg = new LDPLabelRequest();
+    requestMsg->setType(LABEL_REQUEST);
     requestMsg->setFec(fecInt.getInt());  // FIXME this is actually the dest IP address!!!
     requestMsg->addPar("fecId") = fecId; // FIXME!!!
 
     requestMsg->setReceiverAddress(nextPeerAddr);
     requestMsg->setSenderAddress(local_addr);
 
+    requestMsg->setLength(30*8); // FIXME find out actual length
+
     ev << "Request for FEC(" << fecInt << ") from outside\n";
     ev << "forward LABEL REQUEST to LSR(" << nextPeerAddr << ")\n";
 
-    send(requestMsg, "to_tcp_interface");
+    // send msg to peer over TCP
+    peerSocket(nextPeerAddr)->send(requestMsg);
 }
 
 
 void NewLDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 {
-    switch (ldpPacket->kind())
+    switch (ldpPacket->getType())
     {
     case HELLO:
-        // processHELLO(ldpPacket);
-        ev << "Received LDP HELLO message\n";  // FIXME so what to do with it? --Andras
-        delete ldpPacket;
-        break;
+        error("Received LDP HELLO over TCP (should arrive over UDP)");
 
     case ADDRESS:
         // processADDRESS(ldpPacket);
@@ -368,22 +358,30 @@ IPAddress NewLDP::locateNextHop(IPAddress dest)
     RoutingTable *rt = routingTableAccess.get();
 
     // Lookup the routing table, rfc3036
-    // When the FEC for which a label is requested is a Prefix FEC Element or
-    // a Host Address FEC Element, the receiving LSR uses its routing table to determine
-    // its response. Unless its routing table includes an entry that exactly matches
-    // the requested Prefix or Host Address, the LSR must respond with a
-    // No Route Notification message.
-    int i;
-    for (i=0; i < rt->numRoutingEntries(); i++)
-        if (rt->routingEntry(i)->host == dest)
-            break;
+    // "When the FEC for which a label is requested is a Prefix FEC Element or
+    //  a Host Address FEC Element, the receiving LSR uses its routing table to determine
+    //  its response. Unless its routing table includes an entry that exactly matches
+    //  the requested Prefix or Host Address, the LSR must respond with a
+    //  No Route Notification message."
+    //
+    // FIXME the code below (though seems like that's what the RFC refers to) doesn't work
+    // -- we can't reasonably expect the destination host to be exaplicitly in an
+    // LSR's routing table!!! Use simple IP routing instead. --Andras
+    //
+    // Wrong code:
+    //int i;
+    //for (i=0; i < rt->numRoutingEntries(); i++)
+    //    if (rt->routingEntry(i)->host == dest)
+    //        break;
+    //
+    //if (i == rt->numRoutingEntries())
+    //    return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
+    //
+    int portNo = rt->outputPortNo(dest);
+    if (portNo==-1)
+        return IPAddress();  // no route
 
-    if (i == rt->numRoutingEntries())
-        return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
-
-    // Find out the IP of the other end LSR
-    string iName = string(rt->routingEntry(i)->interfaceName.c_str());
-
+    string iName = rt->interfaceByPortNo(portNo)->name.c_str();
     return findPeerAddrFromInterface(iName);
 }
 
@@ -497,6 +495,8 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         // Construct a label mapping message
 
         LDPLabelMapping *lmMessage = new LDPLabelMapping();
+        lmMessage->setType(LABEL_MAPPING);
+        lmMessage->setLength(30*8); // FIXME find out actual length
 
         lmMessage->setLabel(label);
         lmMessage->setFec(fec);
@@ -510,7 +510,8 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
             "): Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
             "LSR(" << IPAddress(srcAddr) << ")\n";
 
-        send(lmMessage, "to_tcp_interface");
+        // send msg to peer over TCP
+        peerSocket(srcAddr)->send(lmMessage);
 
         delete packet;
 
@@ -528,8 +529,9 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         int inLabel = (lt->installNewLabel(-1, fromInterface, nextInterface, fecId, POP_OPER)); // fec));
 
         // Send LABEL MAPPING upstream
-
         LDPLabelMapping *lmMessage = new LDPLabelMapping();
+        lmMessage->setType(LABEL_MAPPING);
+        lmMessage->setLength(30*8); // FIXME find out actual length
 
         lmMessage->setLabel(inLabel);
         lmMessage->setFec(fec);
@@ -541,7 +543,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         ev << "Send Label mapping to " << "LSR(" << srcAddr << ")\n";
 
-        send(lmMessage, "to_tcp_interface");
+        peerSocket(srcAddr)->send(lmMessage);
 
         delete packet;
     }
@@ -562,7 +564,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
                 packet->getSenderAddress() << " to " <<
                 packet->getReceiverAddress() << ")\n";
 
-            send(packet, "to_tcp_interface");
+            peerSocket(peerIP)->send(packet);
         }
     }
 }
@@ -641,10 +643,29 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         ev << "LSR(" << local_addr << ") sends Label mapping label=" << inLabel <<
             " for fec =" << IPAddress(fec) << " to " << "LSR(" << addrToSend << ")\n";
 
-        send(packet, "to_tcp_interface");
+        peerSocket(addrToSend)->send(packet);
 
         // delete packet;
     }
 }
 
+int NewLDP::findPeer(IPAddress peerAddr)
+{
+    for (PeerVector::iterator i=myPeers.begin(); i!=myPeers.end(); ++i)
+        if (i->peerIP==peerAddr)
+            return i-myPeers.begin();
+    return -1;
+}
 
+TCPSocket *NewLDP::peerSocket(IPAddress peerAddr)
+{
+    // find peer in table and return its socket
+    int i = findPeer(peerAddr);
+    if (i==-1 || !(myPeers[i].socket) || myPeers[i].socket->state()!=TCPSocket::CONNECTED)
+    {
+        // we don't have an LDP session to this peer
+        //FIXME perhaps we should queue up this request and try it later?
+        error("No LDP session to peer %s yet", peerAddr.str().c_str());
+    }
+    return myPeers[i].socket;
+}

@@ -43,9 +43,9 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 
     struct peer_info
     {
-        IPAddress peerIP; // IP address of LDP peer
-        bool activeRole;  // we're in active or passive role in this session
-        bool connected;   // TCP connection
+        IPAddress peerIP;   // IP address of LDP peer
+        bool activeRole;    // we're in active or passive role in this session
+        TCPSocket *socket;  // TCP socket
         string linkInterface;
     };
 
@@ -99,13 +99,19 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     //This method is the reserve of above method
     string findInterfaceFromPeerAddr(IPAddress peerIP);
 
+    /** Utility: return peer's index in myPeers table, or -1 if not found */
+    int findPeer(IPAddress peerAddr);
+
+    /** Utility: return socket for given peer. Throws error if there's no TCP connection */
+    TCPSocket *peerSocket(IPAddress peerAddr);
+
   public:
     Module_Class_Members(NewLDP,cSimpleModule, 0);
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-    void broadcastHello();
+    void sendHelloTo(IPAddress dest);
     void openTCPConnectionToPeer(int peerIndex);
 
     void processLDPHello(LDPHello *msg);
