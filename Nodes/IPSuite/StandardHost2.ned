@@ -50,6 +50,12 @@ module StandardHost2
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=56,78";
+        routingTable: RoutingTable;
+            parameters:
+                IPForward = IPForward,
+                routerId = "",
+                routingFile = routingFile;
+            display: "p=56,140,row;i=box3";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
             display: "p=125,58;i=app";
         tcp: TCPMain;
@@ -61,10 +67,6 @@ module StandardHost2
         pingApp: PingApp;
             display: "i=app;p=291,193";
         networkLayer: NetworkLayer;
-            parameters:
-                IPForward = IPForward,
-                routerId = "",
-                routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];

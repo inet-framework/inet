@@ -39,6 +39,12 @@ module BurstHost
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=67,84";
+        routingTable: RoutingTable;
+            parameters:
+                IPForward = IPForward,
+                routerId = "",
+                routingFile = routingFile;
+            display: "p=56,140,row;i=box3";
         burstGenerator: TrafficGenerator;
             parameters:
                 GeneratorType = "BurstGenerator",
@@ -48,10 +54,6 @@ module BurstHost
                 generationSize = packetSize;
             display: "i=app;p=132,60";
         networkLayer: NetworkLayer;
-            parameters:
-                // other Network parameters
-                IPForward = false,
-                routingFile = routingFile;
             gatesizes:
                 physIn[1],
                 physOut[1];

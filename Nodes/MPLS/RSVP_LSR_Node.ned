@@ -27,19 +27,8 @@ import
 // An \RSVP-TE capable router.
 //
 // \RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. \RSVP uses transport protocols to route packets. In the simulation,
-// OSPF-TE has been built to replace the static routing available in IP-suite.
-//
-// An LSR consists of the following modules:
-// - \RSVP-TE: The signalling module.
-// - \RSVP Interface: This one plays the role of an adapter between layer 3
-//   and layer 4 protocols. It is also to address the mismatch between the
-//   two methods of representing an \IP addresses.
-// - Network Layers: The core of IP-suite.
-// - OSPF-TE: The transport module of OSPF-TE protocol.
-// - MPLS Module: Label switching module of MPLS.
-// - LIB Table: The module that handles the mapping of labels, interfaces,
-//   and FECs.
+// itself. \RSVP uses transport protocols to route packets. OSPF-TE is used
+// to calculate shortest paths.
 //
 module RSVP_LSR_Node
     parameters:
@@ -61,6 +50,12 @@ module RSVP_LSR_Node
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=60,100";
+        routingTable: RoutingTable;
+            parameters:
+                IPForward = true,
+                routerId = routerId,
+                routingFile = routingFile;
+            display: "p=260,60,row;i=box3";
         signal_module: RSVPAppl;
             parameters:
                 routerId = routerId,
@@ -81,10 +76,6 @@ module RSVP_LSR_Node
                 routerId = routerId;
             display: "o=#008040;p=82,163;b=40,24";
         networkLayer: NetworkLayer;
-            parameters:
-                IPForward = true,
-                routerId = routerId,
-                routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];

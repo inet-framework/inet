@@ -34,10 +34,6 @@ import
 //# FIXME add ICMP errors
 //
 module NetworkLayer
-    parameters:
-        IPForward : bool,
-        routerId: string,
-        routingFile : string;
     gates:
         in: physIn[]; // FIXME to be renamed
         in: TCPIn;
@@ -68,12 +64,6 @@ module NetworkLayer
             display: "p=259,78;i=cogwheel";
         igmp: IGMP;
             display: "p=258,133;i=cogwheel";
-        routingTable: RoutingTable;
-            parameters:
-                IPForward = IPForward,
-                routerId = routerId,
-                routingFile = routingFile;
-            display: "p=66,67,row;i=box3";
         errorHandling: ErrorHandling;
             display: "p=330,78;i=box1_s";
     connections nocheck:

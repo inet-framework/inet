@@ -53,6 +53,12 @@ module LSRNode
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=60,100";
+        routingTable: RoutingTable;
+            parameters:
+                IPForward = true,
+                routerId = routerId,
+                routingFile = routingFile;
+            display: "p=260,60,row;i=box3";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
@@ -63,10 +69,6 @@ module LSRNode
         udp: UDPProcessing;
             display: "p=235,120;i=prot1";
         networkLayer: NetworkLayer;
-            parameters:
-                IPForward = true,
-                routerId = routerId,
-                routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];

@@ -36,12 +36,13 @@ module Router
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=70,60";
-        networkLayer: NetworkLayer;
+        routingTable: RoutingTable;
             parameters:
-                // other Network parameters
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
+            display: "p=260,60,row;i=box3";
+        networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
