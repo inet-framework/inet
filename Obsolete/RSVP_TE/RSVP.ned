@@ -48,12 +48,9 @@
 // simulation file.
 //
 simple RSVP
-
     parameters:
-        routerId : string,
         isIR : bool,
         isER : bool;
-
     gates:
         in: from_ip;
         in: from_rsvp_app;

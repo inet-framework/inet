@@ -18,10 +18,9 @@
 //
 simple RSVPAppl
     parameters:
-        routerId : string,
         traffic : string, // traffic XML file
         isIR : bool,
-        isER : bool,
+        isER : bool;
     gates:
         //# FIXME seems to be redundant: in: from_tcp;
         in: from_rsvp;

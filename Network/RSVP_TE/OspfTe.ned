@@ -64,6 +64,4 @@
 // OPSF-TE requires a global (at network scope) TED module to operate correctly.
 //
 simple OspfTe
-    parameters:
-        routerId : string;
 endsimple

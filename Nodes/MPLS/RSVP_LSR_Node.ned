@@ -50,18 +50,14 @@ module RSVP_LSR_Node
                 routingFile = routingFile;
             display: "p=60,130;i=box3";
         ospf_te: OspfTe;
-            parameters:
-                routerId = routerId;
             display: "p=60,190;b=40,24;o=#008040";
         signal_module: RSVPAppl;
             parameters:
-                routerId = routerId,
                 isIR = isIR,
                 isER = isER;
             display: "o=#8080ff;p=80,52;b=32,30";
         rsvp: RSVP;
             parameters:
-                routerId = routerId,
                 isIR = isIR,
                 isER = isER;
             display: "o=#0080c0;p=190,51;b=40,24,rect";
