@@ -17,16 +17,16 @@
 //
 
 
-import
-    "IPPreRouting",
-    "IPRouting",
-    "IPLocalDeliver",
-    "IPMulticast",
-    "IPSend",
-    "IPFragmentation",
-    "IPTunneling",
-    "IPOutput",
-    "IPInputQueue";
+import  
+    "IPPreRouting", 
+    "IPRouting", 
+    "IPLocalDeliver", 
+    "IPMulticast", 
+    "IPSend", 
+    "IPFragmentation", 
+    "IPTunneling", 
+    "IPOutput", 
+    "IPInputQueue"; 
 
 
 
@@ -38,98 +38,98 @@ import
 // author: Jochen Reber date: 2.5.00
 // modifications Andras Varga
 //
-module IPProcessing
-    parameters:
-        timeToLive : numeric,
-        multicastTimeToLive : numeric,
-        IPForward : bool,
-        fragmentTimeout : numeric const,
-        protocolMapping: string;
-    gates:
-        in: transportIn[];
-        out: transportOut[];
-        in: queueIn[];
-        out: queueOut[];
-    submodules:
-        preRouting: IPPreRouting;
-            gatesizes:
-                in[2];
-            display: "b=32,30;p=95,177;i=prot3";
-        routing: IPRouting;
-            gatesizes:
-                in[2];
-            display: "b=34,34;p=179,177;i=bwgen";
-        localDeliver: IPLocalDeliver;
-            parameters:
-                fragmentTimeout = fragmentTimeout,
-                protocolMapping = protocolMapping;
-            gatesizes:
-                in[2],
-                transportOut[sizeof(transportOut)];
-            display: "b=32,30;p=95,78;i=block/fork";
-        multicast: IPMulticast;
-            display: "b=17,17;p=305,175;i=bwgen_s";
-        send: IPSend;
-            parameters:
-                timeToLive = timeToLive,
-                multicastTimeToLive = multicastTimeToLive;
-            gatesizes:
-                in[sizeof(transportIn)+2];
-            display: "b=32,30;p=250,78;i=prot1";
-        fragmentation: IPFragmentation;
-            gatesizes:
-                outputOut[sizeof(queueOut)];
-            display: "b=32,30;p=231,249;i=bwxconn";
-        tunneling: IPTunneling;
-            display: "b=16,15;p=370,152;i=bwxcon_s";
-        output: IPOutput[sizeof(queueOut)];
-            display: "b=32,30;p=110,304,row;i=prot2";
-        inputQueue: IPInputQueue;
-            gatesizes:
-                fromNW[sizeof(queueIn)];
+module IPProcessing 
+    parameters: 
+        timeToLive : numeric, 
+        multicastTimeToLive : numeric, 
+        IPForward : bool, 
+        fragmentTimeout : numeric const, 
+        protocolMapping : string; 
+    gates: 
+        in: transportIn[]; 
+        out: transportOut[]; 
+        in: queueIn[]; 
+        out: queueOut[]; 
+    submodules: 
+        preRouting: IPPreRouting; 
+            gatesizes: 
+                in[2]; 
+            display: "p=95,177;i=block/routing_s";
+        routing: IPRouting; 
+            gatesizes: 
+                in[2]; 
+            display: "p=179,177;i=block/routing";
+        localDeliver: IPLocalDeliver; 
+            parameters: 
+                fragmentTimeout = fragmentTimeout, 
+                protocolMapping = protocolMapping; 
+            gatesizes: 
+                in[2], 
+                transportOut[sizeof(transportOut)]; 
+            display: "p=95,78;i=block/fork";
+        multicast: IPMulticast; 
+            display: "p=305,175;i=block/broadcast_s";
+        send: IPSend; 
+            parameters: 
+                timeToLive = timeToLive, 
+                multicastTimeToLive = multicastTimeToLive; 
+            gatesizes: 
+                in[sizeof(transportIn)+2]; 
+            display: "p=250,78;i=block/join";
+        fragmentation: IPFragmentation; 
+            gatesizes: 
+                outputOut[sizeof(queueOut)]; 
+            display: "p=231,249;i=block/segm";
+        tunneling: IPTunneling; 
+            display: "p=370,152;i=block/tunnel_s";
+        output: IPOutput[sizeof(queueOut)]; 
+            display: "p=110,304,row;i=block/queue";
+        inputQueue: IPInputQueue; 
+            gatesizes: 
+                fromNW[sizeof(queueIn)]; 
             display: "p=50,304;i=block/queue";
-    connections nocheck:
-
+    connections nocheck: 
+                         
         // L2 input to IPInputQueue
-        for i=0..sizeof(queueIn)-1 do
-            queueIn[i] --> inputQueue.fromNW[i];
-        endfor;
+        for i=0..sizeof(queueIn)-1 do 
+            queueIn[i] --> inputQueue.fromNW[i]; 
+        endfor; 
 
         // IPPreRouting Input
-        inputQueue.toIP --> preRouting.in[0];
-
+        inputQueue.toIP --> preRouting.in[0]; 
+                                              
         // IPPreRouting Output
-        preRouting.routingOut --> routing.in[0];
-
+        preRouting.routingOut --> routing.in[0]; 
+                                                 
         // IPRouting output
-        routing.localOut --> localDeliver.in[0];
-        routing.multicastOut --> multicast.routingIn;
-        routing.fragmentationOut --> fragmentation.routingIn;
-
+        routing.localOut --> localDeliver.in[0]; 
+        routing.multicastOut --> multicast.routingIn; 
+        routing.fragmentationOut --> fragmentation.routingIn; 
+                                                              
         // IPLocalDeliver output
-        localDeliver.preRoutingOut --> preRouting.in[1];
-        for i=0..sizeof(transportOut)-1 do
-            localDeliver.transportOut[i] --> transportOut[i];
-        endfor;
+        localDeliver.preRoutingOut --> preRouting.in[1]; 
+        for i=0..sizeof(transportOut)-1 do 
+            localDeliver.transportOut[i] --> transportOut[i]; 
+        endfor; 
 
         // Multicast output
-        multicast.localOut --> localDeliver.in[1];
-        multicast.fragmentationOut --> fragmentation.multicastIn;
-        multicast.tunnelOut --> tunneling.multicastIn;
-
+        multicast.localOut --> localDeliver.in[1]; 
+        multicast.fragmentationOut --> fragmentation.multicastIn; 
+        multicast.tunnelOut --> tunneling.multicastIn; 
+                                                       
         // IP send output, input
-        send.routingOut --> routing.in[1];
-        for i=0..sizeof(transportIn)-1 do
-            transportIn[i] --> send.in[i+2];
-        endfor;
+        send.routingOut --> routing.in[1]; 
+        for i=0..sizeof(transportIn)-1 do 
+            transportIn[i] --> send.in[i+2]; 
+        endfor; 
 
         // IP Tunnel output
-        tunneling.sendOut --> send.in[1];
-
+        tunneling.sendOut --> send.in[1]; 
+                                          
         // Output ports
-        for i=0..sizeof(queueOut)-1 do
-            fragmentation.outputOut[i] --> output[i].in;
-            output[i].queueOut --> queueOut[i];
-        endfor;
-endmodule
+        for i=0..sizeof(queueOut)-1 do 
+            fragmentation.outputOut[i] --> output[i].in; 
+            output[i].queueOut --> queueOut[i]; 
+        endfor; 
+endmodule 
 
