@@ -31,11 +31,11 @@
  */
 struct CSPFVertex
 {
-    IPAddress VertexId;
-    CSPFVertex *Parent;  // FIXME pointer is a bad idea here! as std::vector reallocates,
+    IPAddress vertexId;
+    CSPFVertex *parent;  // FIXME pointer is a bad idea here! as std::vector reallocates,
                          // every Vertex in it moves to a new pointer address...
                          // --> dereferencing the ptr will CRASH!
-    double DistanceToRoot;
+    double distanceToRoot;
 };
 
 typedef std::vector<IPADDR> IPADDRVector;
@@ -50,30 +50,29 @@ class OspfTe : public cSimpleModule
 {
 private:
 
-    CSPFVertexVector CShortestPathTree;
+    CSPFVertexVector cshortestPathTree;
     TELinkStateVector ted;
     IPAddress routerId;
 
     void  TEAddCandidates(const FlowSpecObj_t& fspec,
-                          CSPFVertexVector& CandidatesList);
+                          CSPFVertexVector& candidatesList);
 
-    IPADDRVector
-    doCalculateERO(const IPAddress& dest,
-                   CSPFVertexVector& CandidatesList,
-                   double& outTotalMetric);
+    IPADDRVector doCalculateERO(const IPAddress& dest,
+                                CSPFVertexVector& candidatesList,
+                                double& outTotalMetric);
 
     void CspfBuildSPT(const FlowSpecObj_t& fspec,
-                      CSPFVertexVector& CandidatesList);
+                      CSPFVertexVector& candidatesList);
 
     void CspfBuildSPT(const simple_link_tVector& links,
                       const FlowSpecObj_t& old_fspec,
                       const FlowSpecObj_t& new_fspec,
-                      CSPFVertexVector& CandidatesList);
+                      CSPFVertexVector& candidatesList);
 
     void TEAddCandidates(const simple_link_tVector& links,
                          const FlowSpecObj_t& old_fspec,
                          const FlowSpecObj_t& new_fspec,
-                         CSPFVertexVector& CandidatesList);
+                         CSPFVertexVector& candidatesList);
     void updateTED();
     void printTED();
 
@@ -92,8 +91,8 @@ public:
      * to be understood as strict.
      */
     IPADDRVector CalculateERO(const IPAddress& dest,
-                                  const FlowSpecObj_t& fspec,
-                                  double& outTotalMetric);
+                              const FlowSpecObj_t& fspec,
+                              double& outTotalMetric);
 
     /**
      * Calculates and returns ERO (Explicit Route Object) from routerId to destination
@@ -104,10 +103,10 @@ public:
      * to be understood as strict.
      */
     IPADDRVector CalculateERO(const IPAddress& dest,
-                                  const simple_link_tVector& links,
-                                  const FlowSpecObj_t& old_fspec,
-                                  const FlowSpecObj_t& new_fspec,
-                                  double& outTotalDelay);
+                              const simple_link_tVector& links,
+                              const FlowSpecObj_t& old_fspec,
+                              const FlowSpecObj_t& new_fspec,
+                              double& outTotalDelay);
 };
 
 #endif
