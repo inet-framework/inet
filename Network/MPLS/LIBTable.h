@@ -174,21 +174,6 @@ public:
      * @return The operation code
      */
     int getOptCode(std::string senderInterface, int oldLabel);
-
-    /*
-    //Return incoming label
-    //Return outgoing label
-    int ini_requestLabelforDest(IPAddressPrefix *dest);
-
-    void updateTable(label_mapping_type *newMapping);
-    //bool isMapPrefix(IPAddressPrefix *prefixAddress, IPAddress *ipAddress);
-    void updateTable(int inLabel, std::string inInterface,
-                     std::string outInterface, int fec);
-    //Return outgoing label
-    //Return outgoing interface
-    //Return incoming interface
-    std::string requestIncomingInterface(int fec);
-    */
 };
 
 std::ostream& operator<<(std::ostream& os, const prt_type& prt);
