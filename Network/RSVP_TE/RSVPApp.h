@@ -76,7 +76,7 @@ private:
     OSPFTEAccess ospfteAccess;
     MPLSAccess mplsAccess;
 
-    int local_addr, dest_addr;
+    int routerId, dest_addr;
     double BW, delay;
     bool isSender, isER, isIR;
     std::vector<TELinkState>  ted;

@@ -49,7 +49,7 @@ private:
 
     std::vector<CSPFVertex> CShortestPathTree;
     std::vector<TELinkState> ted;
-    int local_addr;
+    int routerId;
 
     void  TEAddCandidates(const FlowSpecObj_t& fspec,
                           std::vector<CSPFVertex>& CandidatesList);
@@ -81,7 +81,7 @@ public:
     virtual void handleMessage(cMessage *msg);
 
     /**
-     * Calculates and returns ERO (Explicit Route Object) from local_addr
+     * Calculates and returns ERO (Explicit Route Object) from routerId
      * to destination using the given flow spec (required bandwidth+link delay),
      * and also returns total metric of the resulting route.
      *
@@ -93,7 +93,7 @@ public:
                                   double& outTotalMetric);
 
     /**
-     * Calculates and returns ERO (Explicit Route Object) from local_addr to destination
+     * Calculates and returns ERO (Explicit Route Object) from routerId to destination
      * on the given links, using the given flow spec (required bandwidth+link delay),
      * and also returns total metric of the resulting route.
      *

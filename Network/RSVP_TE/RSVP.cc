@@ -29,7 +29,7 @@ void RSVP::initialize(int stage)
     RoutingTable *rt = routingTableAccess.get();
 
     // Get router ID
-    my_id = IPAddress(par("local_addr").stringValue()).getInt();
+    my_id = IPAddress(par("routerId").stringValue()).getInt();
     //my_id = IPAddressResolver().getAddressFrom(rt).getInt();
 
     IsIR = par("isIR").boolValue();

@@ -282,16 +282,16 @@ void RoutingTable::addLocalLoopback()
     {
         // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
         // the following line is a terrible hack. For some unknown reason,
-        // the MPLS models use the host's "local_addr" parameter (string)
+        // the MPLS models use the host's "routerId" parameter (string)
         // as loopback address (and also change its netmask to 255.255.255.255).
-        // But this conflicts with the IPSuite which also has "local_addr" parameters,
+        // But this conflicts with the IPSuite which also has "routerId" parameters,
         // numeric and not intended for use as loopback address. So until we
         // figure out why exactly the MPLS models do this, we just patch up
-        // the thing and only regard "local_addr" parameters that are strings....
+        // the thing and only regard "routerId" parameters that are strings....
         // Horrible hacking.  --Andras
-        if (curmod->hasPar("local_addr") && curmod->par("local_addr").type()=='S')
+        if (curmod->hasPar("routerId") && curmod->par("routerId").type()=='S')
         {
-            loopbackIP = IPAddress(curmod->par("local_addr").stringValue());
+            loopbackIP = IPAddress(curmod->par("routerId").stringValue());
             break;
         }
 

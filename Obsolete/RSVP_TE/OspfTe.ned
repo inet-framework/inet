@@ -65,5 +65,5 @@
 //
 simple OspfTe
     parameters:
-        local_addr : string;
+        routerId : string;
 endsimple

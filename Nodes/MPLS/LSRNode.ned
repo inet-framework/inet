@@ -31,7 +31,7 @@ import
 //
 module LSRNode
     parameters:
-        local_addr : string,
+        routerId : string,
         ldpTimeout : numeric,
         ldpKeepAliveTime : numeric,
         helloTimeout : numeric,
@@ -55,7 +55,7 @@ module LSRNode
             display: "i=proc2;p=60,100";
         signal_module: NewLDP;
             parameters:
-                local_addr = local_addr,
+                routerId = routerId,
                 helloTimeout = helloTimeout;
             display: "p=190,45;b=40,24";
         tcp: TCPMain;

@@ -55,16 +55,16 @@ void NewLDP::initialize()
     cModule *curmod = this;
     for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
     {
-        if (curmod->hasPar("local_addr"))  // FIXME!!!!
+        if (curmod->hasPar("routerId"))  // FIXME!!!!
         {
-            local_addr = curmod->par("local_addr").stringValue();
+            routerId = curmod->par("routerId").stringValue();
             isIR = curmod->par("isIR");
             isER = curmod->par("isER");
             break;
         }
     }
-    if (local_addr.isNull())
-        error("Cannot find local_address");
+    if (routerId.isNull())
+        error("Cannot find routerId parameter");
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecSenderBinds);
@@ -116,7 +116,7 @@ void NewLDP::sendHelloTo(IPAddress dest)
     //hello->setTbit(...);
 
     UDPControlInfo *controlInfo = new UDPControlInfo();
-    //controlInfo->setSrcAddr(local_addr);
+    //controlInfo->setSrcAddr(routerId);
     controlInfo->setDestAddr(dest);
     controlInfo->setSrcPort(100);
     controlInfo->setDestPort(100);
@@ -136,7 +136,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
 
     ev << "Received LDP Hello from " << peerAddr << ", ";
 
-    if (peerAddr.isNull() || peerAddr==local_addr)
+    if (peerAddr.isNull() || peerAddr==routerId)
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
         ev << "that's myself, ignore\n";
@@ -155,7 +155,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = rt->interfaceByPortNo(inputPort)->name;
-    info.activeRole = peerAddr.getInt() > local_addr.getInt();
+    info.activeRole = peerAddr.getInt() > routerId.getInt();
     info.socket = NULL;
     myPeers.push_back(info);
     int peerIndex = myPeers.size()-1;
@@ -321,7 +321,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     requestMsg->addPar("fecId") = fecId; // FIXME!!!
 
     requestMsg->setReceiverAddress(nextPeerAddr);
-    requestMsg->setSenderAddress(local_addr);
+    requestMsg->setSenderAddress(routerId);
 
     requestMsg->setLength(30*8); // FIXME find out actual length
 
@@ -523,7 +523,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         // Set dest to the requested upstream LSR
         lmMessage->setReceiverAddress(srcAddr);
-        lmMessage->setSenderAddress(local_addr);
+        lmMessage->setSenderAddress(routerId);
         lmMessage->addPar("fecId") = fecId;
 
         ev << "Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
@@ -556,7 +556,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         // Set dest to the requested upstream LSR
         lmMessage->setReceiverAddress(srcAddr);
-        lmMessage->setSenderAddress(local_addr);
+        lmMessage->setSenderAddress(routerId);
         lmMessage->addPar("fecId") = fecId;
 
         ev << "Send Label mapping to " << "LSR(" << srcAddr << ")\n";
@@ -576,7 +576,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         if (!peerIP.isNull())
         {
             packet->setReceiverAddress(peerIP);
-            packet->setSenderAddress(local_addr);
+            packet->setSenderAddress(routerId);
 
             ev << "Propagating Label Request from LSR(" <<
                 packet->getSenderAddress() << " to " <<
@@ -656,7 +656,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         IPAddress addrToSend = findPeerAddrFromInterface(inInterface);
 
         packet->setReceiverAddress(addrToSend);
-        packet->setSenderAddress(local_addr);
+        packet->setSenderAddress(routerId);
 
         ev << "Sends Label mapping label=" << inLabel <<
             " for fec =" << IPAddress(fec) << " to " << "LSR(" << addrToSend << ")\n";

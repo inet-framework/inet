@@ -51,7 +51,7 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 
   private:
     // configuration
-    IPAddress local_addr;
+    IPAddress routerId;
     bool isIR;
     bool isER;
     double helloTimeout;  // FIXME obey

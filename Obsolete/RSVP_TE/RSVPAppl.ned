@@ -18,7 +18,7 @@
 //
 simple RSVPAppl
     parameters:
-        local_addr : string,
+        routerId : string,
         dest_addr : string,
         traffic : string, // traffic XML file
         isIR : bool,

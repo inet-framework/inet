@@ -45,7 +45,7 @@
 simple NewLDP
 
     parameters:
-        local_addr : string,
+        routerId : string,
         helloTimeout : numeric;
 
     gates:

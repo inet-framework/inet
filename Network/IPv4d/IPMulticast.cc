@@ -64,13 +64,13 @@ void IPMulticast::handleMessage(cMessage *msg)
         IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
         // FIXME control info will NOT be present in duplicate packet!
 // BCH Andras -- code from UTS MPLS model  FIXME!!!!!!!!!!!!!!!!!!!!!!!!
-        // find "local_addr" module parameter among our parents, and assign it to packet
+        // find "routerId" module parameter among our parents, and assign it to packet
         cModule *curmod = this;
         for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
         {
-            if (curmod->hasPar("local_addr"))
+            if (curmod->hasPar("routerId"))
             {
-                datagramCopy->setDestAddress(IPAddress(curmod->par("local_addr").stringValue()));
+                datagramCopy->setDestAddress(IPAddress(curmod->par("routerId").stringValue()));
                 break;
             }
         }

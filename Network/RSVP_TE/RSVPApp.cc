@@ -32,8 +32,8 @@ void RSVPAppl::initialize(int stage)
         return;
 
     // Get router IP Address
-    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-    //local_addr = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
+    routerId = IPAddress(par("routerId").stringValue()).getInt();
+    //routerId = IPAddressResolver().getAddressFrom(RoutingTableAccess().get()).getInt();
 
     isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();
@@ -97,7 +97,7 @@ void RSVPAppl::processRSVP_PERROR(PathErrorMessage *pe)
     // Setup PHOP
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     rsvp_hop->Logical_Interface_Handle = -1;
-    rsvp_hop->Next_Hop_Address = local_addr;
+    rsvp_hop->Next_Hop_Address = routerId;
     pt->setHop(rsvp_hop);
     send(pt, "to_rsvp");
 
@@ -227,7 +227,7 @@ void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
                         (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
                         if (((rInfo->route)[c] == 0) && (!includeMe))
                         {
-                            (rInfo->route)[c] = local_addr;
+                            (rInfo->route)[c] = routerId;
                             includeMe = true;
                         }
                         ev << IPAddress((rInfo->route)[c]) << " ";
@@ -277,7 +277,7 @@ void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
                         // Setup PHOP
                         RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
                         rsvp_hop->Logical_Interface_Handle = -1;
-                        rsvp_hop->Next_Hop_Address = local_addr;
+                        rsvp_hop->Next_Hop_Address = routerId;
                         pt->setHop(rsvp_hop);
                         send(pt, "to_rsvp");
                     }
@@ -323,7 +323,7 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
     pt->setSession(&aTunnel.Session);
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     rsvp_hop->Logical_Interface_Handle = -1;
-    rsvp_hop->Next_Hop_Address = local_addr;
+    rsvp_hop->Next_Hop_Address = routerId;
     pt->setHop(rsvp_hop);
     send(pt, "to_rsvp");
 
@@ -600,7 +600,7 @@ void RSVPAppl::sendResvMessage(PathMessage * pMsg, int inLabel)
     flow_descriptor_list[0].Filter_Spec_Object = (*Filter_Spec_Object);
     flow_descriptor_list[0].Flowspec_Object = (*Flowspec_Object);
 
-    // flow_descriptor_list[0].RRO[0] = local_addr;
+    // flow_descriptor_list[0].RRO[0] = routerId;
     for (int c = 0; c < MAX_ROUTE; c++)
         flow_descriptor_list[0].RRO[c] = 0;
 
@@ -654,7 +654,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 
     // Setup PHOP
     rsvp_hop->Logical_Interface_Handle = -1;
-    rsvp_hop->Next_Hop_Address = local_addr;
+    rsvp_hop->Next_Hop_Address = routerId;
     int destAddr = s->DestAddress;
     int outInterface;
 
@@ -676,7 +676,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     pMsg->setSenderTspec(static_cast < SenderTspecObj_t * >(Flowspec_Object));
 
     // Setup routing information
-    pMsg->addPar("src_addr") = IPAddress(local_addr).str().c_str();
+    pMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
     int peerIP = 0;
     int peerInf = 0;
@@ -710,7 +710,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
             {
                 // No input ER from the administrator for this path
                 // Find ER based on CSPF routing algorithm
-                ev << "OSPF PATH calculation: from " << IPAddress(local_addr) <<
+                ev << "OSPF PATH calculation: from " << IPAddress(routerId) <<
                     " to " << IPAddress(destAddr) << "\n";
 
                 double delayTime = 0;
@@ -719,7 +719,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
                 if (ero.back() == 0)    // Unknow reason
                 {
                     ero.pop_back();
-                    ero.push_back(local_addr);
+                    ero.push_back(routerId);
                 }
 
                 // copy returned path into ERO structure
@@ -835,7 +835,7 @@ void RSVPAppl::getPeerInet(int peerIP, int *peerInf)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.linkid.getInt() == peerIP && linkstate.advrouter.getInt() == local_addr)
+        if (linkstate.linkid.getInt() == peerIP && linkstate.advrouter.getInt() == routerId)
         {
             (*peerInf) = linkstate.remote.getInt();
             break;
@@ -852,7 +852,7 @@ void RSVPAppl::getIncInet(int remoteInet, int *incInet)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.remote.getInt() == remoteInet && linkstate.advrouter.getInt() == local_addr)
+        if (linkstate.remote.getInt() == remoteInet && linkstate.advrouter.getInt() == routerId)
         {
             (*incInet) = linkstate.local.getInt();
             break;
@@ -870,7 +870,7 @@ void RSVPAppl::getPeerIPAddress(int dest, int *peerIP, int *peerInf)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.local.getInt() == outl && linkstate.advrouter.getInt() == local_addr)
+        if (linkstate.local.getInt() == outl && linkstate.advrouter.getInt() == routerId)
         {
             *peerIP = linkstate.linkid.getInt();
             *peerInf = linkstate.remote.getInt();
@@ -887,7 +887,7 @@ void RSVPAppl::getPeerIPAddress(int peerInf, int *peerIP)
     for (tedIter = ted.begin(); tedIter != ted.end(); tedIter++)
     {
         const TELinkState & linkstate = *tedIter;
-        if (linkstate.local.getInt() == peerInf && linkstate.advrouter.getInt() == local_addr)
+        if (linkstate.local.getInt() == peerInf && linkstate.advrouter.getInt() == routerId)
         {
             *peerIP = linkstate.linkid.getInt();
             break;
@@ -1099,7 +1099,7 @@ bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t * newFlowspec)
     ev << "Current total path metric: " << currentTotalDelay << "\n";
     // Calculate ERO
 
-    ev << "OSPF PATH calculation: from " << IPAddress(local_addr) <<
+    ev << "OSPF PATH calculation: from " << IPAddress(routerId) <<
         " to " << IPAddress(destAddr) << "\n";
 
     std::vector < int >ero;

@@ -43,7 +43,7 @@ import
 //
 module RSVP_LSR_Node
     parameters:
-        local_addr : string,
+        routerId : string,
         dest_addr : string, //# FIXME what's this?
         isIR : bool,
         isER : bool,
@@ -63,14 +63,14 @@ module RSVP_LSR_Node
             display: "i=proc2;p=60,100";
         signal_module: RSVPAppl;
             parameters:
-                local_addr = local_addr,
+                routerId = routerId,
                 dest_addr = dest_addr,
                 isIR = isIR,
                 isER = isER;
             display: "o=#8080ff;p=80,52;b=32,30";
         rsvp: RSVP;
             parameters:
-                local_addr = local_addr,
+                routerId = routerId,
                 isIR = isIR,
                 isER = isER;
             display: "o=#0080c0;p=190,51;b=40,24,rect";
@@ -78,7 +78,7 @@ module RSVP_LSR_Node
             display: "o=#0080c0;p=191,106;b=58,12";
         ospf_te: OspfTe;
             parameters:
-                local_addr = local_addr;
+                routerId = routerId;
             display: "o=#008040;p=82,163;b=40,24";
         networkLayer: NetworkLayer;
             parameters:

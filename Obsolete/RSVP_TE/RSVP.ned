@@ -50,7 +50,7 @@
 simple RSVP
 
     parameters:
-        local_addr : string,
+        routerId : string,
         isIR : bool,
         isER : bool;
 
