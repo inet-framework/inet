@@ -19,7 +19,7 @@ INCLUDE_PATH= -I../../NetworkInterfaces/Ethernet -I../../NetworkInterfaces/_802 
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../../NetworkInterfaces/Ethernet/.tstamp ../../NetworkInterfaces/_802/.tstamp ../../Base/.tstamp ../../Util/.tstamp
@@ -37,7 +37,7 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= EtherApp_m.o EtherAppCli.o EtherAppSrv.o
+OBJS= EtherApp_m.o EtherAppCli.o  EtherAppSrv.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= EtherApp_m.h
@@ -119,8 +119,12 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 EtherAppCli.o: EtherAppCli.cc \
+  EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
   ../../Base/INETDefs.h
+EtherApp_m.o: EtherApp_m.cc \
+  EtherApp_m.h
 EtherAppSrv.o: EtherAppSrv.cc \
+  EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
   ../../Base/INETDefs.h

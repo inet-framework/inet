@@ -19,7 +19,7 @@ INCLUDE_PATH= -I../../Base -I../../Util -I../../Network/IPv4 -I../_802 -I../Ethe
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../../Base/.tstamp ../../Util/.tstamp ../../Network/IPv4/.tstamp ../_802/.tstamp ../Ethernet/.tstamp
@@ -116,4 +116,13 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ARP.o: ARP.cc \
-  ../../Util/stlwatch.h
+  ARP.h \
+  ../../Util/stlwatch.h \
+  ../../Base/INETDefs.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram.h \
+  ../../Network/IPv4/RoutingTable.h \
+  ../../Network/IPv4/RoutingTableAccess.h \
+  ../Ethernet/EtherMAC.h \
+  ../../Base/ModuleAccess.h \
+  ../Ethernet/Ethernet.h

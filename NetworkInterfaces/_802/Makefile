@@ -19,7 +19,7 @@ INCLUDE_PATH= -I../../Base -I../../Util -I../../Network/IPv4
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../../Base/.tstamp ../../Util/.tstamp ../../Network/IPv4/.tstamp

@@ -19,7 +19,7 @@ INCLUDE_PATH=
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -34,7 +34,7 @@ include inetconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  Applications Base Documentation Examples Network NetworkInterfaces Nodes PHY Tests Transport Unsupported Util
+SUBDIRS=  Applications Base Documentation Etc Examples Network NetworkInterfaces Nodes PHY Tests Transport Unsupported Util
 
 # object files in this directory
 OBJS=  
@@ -102,6 +102,9 @@ Base:
 
 Documentation:
 	cd Documentation && $(MAKE)
+
+Etc:
+	cd Etc && $(MAKE)
 
 Examples:
 	cd Examples && $(MAKE)

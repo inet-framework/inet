@@ -19,7 +19,7 @@ INCLUDE_PATH= -I../../Network/IPv4 -I../../Network/IPv4d -I../../Network/IPv4/Qo
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../../Network/IPv4/.tstamp ../../Network/IPv4d/.tstamp ../../Network/IPv4/QoS/.tstamp ../../Transport/UDP/.tstamp ../../NetworkInterfaces/PPP/.tstamp ../../NetworkInterfaces/.tstamp ../../Applications/Generic/.tstamp ../../Applications/TCPApp/.tstamp ../../Applications/UDPApp/.tstamp ../../Applications/PingApp/.tstamp ../../Base/.tstamp ../../Util/.tstamp

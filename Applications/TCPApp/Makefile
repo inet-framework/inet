@@ -19,7 +19,7 @@ INCLUDE_PATH= -I../../Network/IPv4 -I../../Transport/TCP -I../../Base -I../../Ut
 EXTRA_OBJS=
 
 # object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
-EXT_DIR_OBJS=$(wildcard )
+EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS= ../../Network/IPv4/.tstamp ../../Transport/TCP/.tstamp ../../Base/.tstamp ../../Util/.tstamp
@@ -37,7 +37,7 @@ include ../../inetconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= GenericAppMsg_m.o TCPBasicClientApp.o TCPEchoApp.o TCPGenericCliAppBase.o TCPGenericSrvApp.o TCPGenericSrvThread.o TCPSessionApp.o TCPSinkApp.o TCPSrvHostApp.o TelnetApp.o
+OBJS= GenericAppMsg_m.o  TCPBasicClientApp.o TCPEchoApp.o TCPGenericCliAppBase.o TCPGenericSrvApp.o TCPGenericSrvThread.o TCPSessionApp.o TCPSinkApp.o TCPSrvHostApp.o TelnetApp.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= GenericAppMsg_m.h
@@ -139,6 +139,8 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+GenericAppMsg_m.o: GenericAppMsg_m.cc \
+  GenericAppMsg_m.h
 TCPBasicClientApp.o: TCPBasicClientApp.cc \
   TCPBasicClientApp.h \
   TCPGenericCliAppBase.h \
@@ -153,6 +155,7 @@ TCPEchoApp.o: TCPEchoApp.cc \
 TCPGenericCliAppBase.o: TCPGenericCliAppBase.cc \
   TCPGenericCliAppBase.h \
   ../../Network/IPv4/IPAddressResolver.h \
+  GenericAppMsg_m.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
@@ -160,10 +163,12 @@ TCPGenericCliAppBase.o: TCPGenericCliAppBase.cc \
 TCPGenericSrvApp.o: TCPGenericSrvApp.cc \
   TCPGenericSrvApp.h \
   ../../Transport/TCP/TCPSocket.h \
+  GenericAppMsg_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPGenericSrvThread.o: TCPGenericSrvThread.cc \
   TCPGenericSrvThread.h \
+  GenericAppMsg_m.h \
   TCPSrvHostApp.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPSocketMap.h \
