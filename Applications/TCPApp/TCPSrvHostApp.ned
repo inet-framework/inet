@@ -29,6 +29,11 @@
 // and can send messages via the TCPSocket send method. The OMNeT++ send()
 // method is not used.
 //
+// IMPORTANT: Before you try to use this module, make sure you actually need it!
+// In most cases, TCPGenericSrvApp and GenericAppMsg will be completely 
+// enough, and they are a lot easier to handle. You'll want to subclass your
+// client from TCPGenericCliAppBase then.
+//
 simple TCPSrvHostApp
     parameters:
         address: string, // may be left empty ("")
