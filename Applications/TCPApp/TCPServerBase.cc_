@@ -1,0 +1,59 @@
+//
+// Copyright 2004 Andras Varga
+//
+// This library is free software, you can redistribute it and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
+// either version 2 of the License, or any later version.
+// The library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
+
+
+#include "TCPSessionApp.h"
+
+
+Define_Module(TCPServerBase);
+
+
+void TCPServerBase::initialize()
+{
+    port = par("port");
+    createSocket();
+}
+
+void TCPServerBase::handleMessage(cMessage *msg)
+{
+    if (TCPSocket::belongsToAnyTCPSocket(msg))
+    {
+        int connId = static_cast<TCPCommand*>(msg->controlInfo())->connId();
+        SocketMap::iterator i = socketMap.find(connId);
+        if (i==socketMap.end())
+            error("TCPSocket belonging to connId=%d not found", connId);
+        TCPSocket *socket = (*i)->second;
+        socket->processMessage(msg);
+    }
+}
+
+void TCPServerBase::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+void TCPServerBase::socketEstablished(int connId, void *yourPtr);
+void TCPServerBase::socketPeerClosed(int connId, void *yourPtr);
+void TCPServerBase::socketClosed(int connId, void *yourPtr);
+void TCPServerBase::socketFailure(int connId, void *yourPtr, int code);
+void TCPServerBase::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
+
+void TCPServerBase::createSocket()
+{
+    TCPSocket *socket = new TCPSocket();
+    int connId = socket->connectionId();
+    socketMap[connId] = socket;
+
+    socket->bind(port);
+    socket->listen();
+}
+
+void TCPServerBase::finish()
+{
+}
