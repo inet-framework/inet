@@ -29,6 +29,7 @@
 /**
  * Small utility class for managing a large number of TCPSocket objects.
  */
+//TBD: need for lookup could be eliminated by adding a void *yourPtr into TCPConnection and TCPCommand
 class TCPSocketMap
 {
   protected:
