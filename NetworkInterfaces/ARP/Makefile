@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ARPPacket_m.o ARP.o
+OBJS= ARPPacket_m.o ARP.o 
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ARPPacket_m.h
@@ -118,7 +118,18 @@ re-makemake-m: makefile-ins
 ARP.o: ARP.cc \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/IPAddress.h \
+  ARPPacket_m.h \
+  ../Ethernet/EtherCtrl_m.h \
   ../../Network/IPv4/IPDatagram.h \
   ../../Network/IPv4/RoutingTableAccess.h \
+  ../_802/MACAddress.h \
+  ../_802/MACAddress_m.h \
+  ../Ethernet/Ethernet.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/RoutingTable.h
+ARPPacket_m.o: ARPPacket_m.cc \
+  ARPPacket_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../_802/MACAddress.h \
+  ../../Base/ipsuite_defs.h \
+  ../_802/MACAddress_m.h

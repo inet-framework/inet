@@ -37,10 +37,10 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  ICMP.o IPAddress.o IP.o IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
+OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ICMP.o IPAddress.o IP.o IPFragBuf.o ProtocolMap.o RoutingTable.o RoutingTableParser.o
 
 # header files generated (from msg files)
-GENERATEDHEADERS= 
+GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
 
 #------------------------------------------------------------------------------
 
@@ -67,6 +67,24 @@ $(EXT_DIR_TSTAMPS):
 .PHONY: subdirs $(SUBDIRS)
 
 subdirs: $(SUBDIRS)
+
+ICMPMessage_m.o: ICMPMessage_m.cc
+	$(CXX) -c $(NEDCOPTS) ICMPMessage_m.cc
+
+ICMPMessage_m.cc ICMPMessage_m.h: ICMPMessage.msg
+	$(MSGC) $(INCLUDE_PATH) ICMPMessage.msg
+
+IPControlInfo_m.o: IPControlInfo_m.cc
+	$(CXX) -c $(NEDCOPTS) IPControlInfo_m.cc
+
+IPControlInfo_m.cc IPControlInfo_m.h: IPControlInfo.msg
+	$(MSGC) $(INCLUDE_PATH) IPControlInfo.msg
+
+IPDatagram_m.o: IPDatagram_m.cc
+	$(CXX) -c $(NEDCOPTS) IPDatagram_m.cc
+
+IPDatagram_m.cc IPDatagram_m.h: IPDatagram.msg
+	$(MSGC) $(INCLUDE_PATH) IPDatagram.msg
 
 ICMP.o: ICMP.cc
 	$(CXX) -c $(COPTS) ICMP.cc

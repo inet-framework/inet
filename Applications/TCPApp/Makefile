@@ -111,5 +111,6 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TCPSessionApp.o: TCPSessionApp.cc \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h

@@ -372,7 +372,7 @@ IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
 
 MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
 {
-    Enter_Method("multicastOutputPortNo(%s, %d)=?", dest.str().c_str(), index);
+    Enter_Method("multicastRoutesFor(%s)=?", dest.str().c_str());
 
     MulticastRoutes res;
     res.reserve(16);

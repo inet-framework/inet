@@ -177,5 +177,7 @@ tcpserverproc.o: tcpserverproc.cc \
   ../../Base/ipsuite_defs.h
 UDPAppInterface.o: UDPAppInterface.cc \
   ../../Transport/UDP/UDPPacket.h \
+  ../../Transport/UDP/UDPControlInfo_m.h \
   ../IPv4/IPAddress.h \
+  ../../Transport/UDP/UDPPacket_m.h \
   ../../Base/ipsuite_defs.h

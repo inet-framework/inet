@@ -111,5 +111,8 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 UDPApp.o: UDPApp.cc \
   UDPApp.h \
+  ../../Transport/UDP/UDPControlInfo_m.h \
   ../../Util/StringTokenizer.h \
-  ../../Base/basic_consts.h
+  ../../Base/basic_consts.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h

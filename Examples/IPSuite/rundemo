@@ -18,7 +18,7 @@ exec wish "$0" "$@"
 # columns below: <name> <directory> <unix-command> <windows-command>
 set i 0
 foreach line {
-   {"FaltNet"             "FlatNet"            "./FlatNet"            "FlatNet.exe"}
+   {"FlatNet"             "FlatNet"            "./FlatNet"            "FlatNet.exe"}
    {"KIDSNw1"             "KIDSNw1"            "./KIDSNw1"            "KIDSNw1.exe"}
    {"McNetwork2"          "McNetwork2"         "./McNetwork2"         "McNetwork2.exe"}
    {"PerformAnalysis"     "PerformAnalysis"    "./PerformAnalysis"    "PerformAnalysis.exe"}
