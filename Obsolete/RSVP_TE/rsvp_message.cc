@@ -22,15 +22,6 @@
 #include "rsvp_message.h"
 
 
-//---
-
-bool RSVPPacket::isInSession(SessionObj_t * s)
-{
-    return getSession().DestAddress == s->DestAddress &&
-           getSession().DestPort == s->DestPort &&
-           getSession().Protocol_Id == s->Protocol_Id;
-}
-
 /*******************************PATH MESSAGE***************************/
 
 RSVPPathMsg::RSVPPathMsg():RSVPPacket()
