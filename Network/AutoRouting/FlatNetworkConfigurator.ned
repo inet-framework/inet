@@ -47,6 +47,7 @@
 simple FlatNetworkConfigurator
     parameters:
         moduleTypesToProcess: string,
+        busTypes: string,
         networkAddress: string,
         netmask: string;
 endsimple

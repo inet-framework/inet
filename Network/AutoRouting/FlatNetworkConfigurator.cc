@@ -16,7 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>
 #include "RoutingTable.h"
+#include "StringTokenizer.h"
 #include "FlatNetworkConfigurator.h"
 
 
@@ -29,9 +31,13 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     cTopology topo("topo");
 
-    // FIXME use par("moduleTypesToProcess")
-    topo.extractByModuleType("StandardHost2", "Router", NULL);
+    std::vector<std::string> types = StringTokenizer(par("moduleTypesToProcess"), " ").asVector();
+    topo.extractByModuleType(types);
     ev << "cTopology found " << topo.nodes() << " nodes\n";
+
+    // Although bus types are not auto-configured, FNC must still know them
+    // since topology may depend on them.
+    std::vector<std::string> busTypes = StringTokenizer(par("busTypes"), " ").asVector();
 
     // assign IP addresses
     uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
@@ -41,10 +47,14 @@ void FlatNetworkConfigurator::initialize(int stage)
         error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
 
     int i;
+    int hostAddr = 0;
     for (i=0; i<topo.nodes(); i++)
     {
-        // host part will be simply i+1.
-        uint32 addr = networkAddress | uint32(i+1);
+        // skip bus types
+        if (std::find(busTypes.begin(), busTypes.end(), topo.node(i)->module()->className())!=busTypes.end())
+            continue;
+
+        uint32 addr = networkAddress | uint32(++hostAddr);
 
         // find interface table and assign address to all interfaces with an output port
         cModule *mod = topo.node(i)->module();
@@ -62,20 +72,28 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 
     // find and store next hops
+    hostAddr=0;
     for (i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *destNode = topo.node(i);
-        uint32 destAddr = networkAddress | uint32(i+1);
+        if (std::find(busTypes.begin(), busTypes.end(), destNode->module()->className())!=busTypes.end())
+            continue;
+
+        uint32 destAddr = networkAddress | uint32(++hostAddr);
         std::string destModName = destNode->module()->fullName();
 
         topo.unweightedSingleShortestPathsTo(destNode);
 
+        int hostAddr2 = 0;
         for (int j=0; j<topo.nodes(); j++)
         {
             if (i==j) continue;
+            if (std::find(busTypes.begin(), busTypes.end(), topo.node(j)->module()->className())!=busTypes.end())
+                continue;
+
             cTopology::Node *atNode = topo.node(j);
             if (atNode->paths()==0) continue; // not connected
-            uint32 atAddr = networkAddress | uint32(j+1);
+            uint32 atAddr = networkAddress | uint32(++hostAddr2);
 
             int outputPort = atNode->path(0)->localGate()->index();
             ev << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
