@@ -146,9 +146,9 @@ void Blackboard::unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem)
     vec.erase(k);
 }
 
-void Blackboard::subscribeToAddRemove(BlackboardAccess *bbClient)
+void Blackboard::registerClient(BlackboardAccess *bbClient)
 {
-    Enter_Method("subscribeToAddRemove(this)");
+    Enter_Method("registerClient(this)");
 
     // check if already subscribed
     SubscriberVector& vec = addRemoveSubscribers;
@@ -159,9 +159,9 @@ void Blackboard::subscribeToAddRemove(BlackboardAccess *bbClient)
     vec.push_back(bbClient);
 }
 
-void Blackboard::unsubscribeFromAddRemove(BlackboardAccess *bbClient)
+void Blackboard::deregisterClient(BlackboardAccess *bbClient)
 {
-    Enter_Method("unsubscribeFromAddRemove(this)");
+    Enter_Method("deregisterClient(this)");
 
     // check if subscribed
     SubscriberVector& vec = addRemoveSubscribers;

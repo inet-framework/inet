@@ -105,7 +105,7 @@ class BlackboardAccess;
  *
  * void Bar::initialize()
  * {
- *     blackboard()->subscribeToAddRemove(this);
+ *     blackboard()->registerClient(this);
  *     // make sure we get what's already on the blackboard
  *     blackboard()->invokePublishedForAllBBItems(this);
  * }
@@ -255,15 +255,15 @@ class Blackboard : public cSimpleModule
     void unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
 
     /**
-     * Generally subscribe to notifications about items being published
+     * Start to receive notifications about items being published
      * to/withdrawn from BB.
      */
-    void subscribeToAddRemove(BlackboardAccess *bbClient);
+    void registerClient(BlackboardAccess *bbClient);
 
     /**
-     * Cancel subscription initiated by subscribeToAddRemove().
+     * The pair of registerClient().
      */
-    void unsubscribeFromAddRemove(BlackboardAccess *bbClient);
+    void deregisterClient(BlackboardAccess *bbClient);
 
     /**
      * Utility function: the client gets immediate notification with
