@@ -26,30 +26,27 @@ import
 // Ethernet network interface. Corresponds to the prototype NetworkInterface.
 //
 module EthernetInterface
-    parameters:
-        procdelay : numeric const;
     gates:
-        in: physicalIn, ipOutputQueueIn;
-        out: physicalOut, ipOutputQueueOut, ipInputQueueOut;
+        in: physIn, netwIn;
+        out: physOut, netwOut;
     submodules:
         arp: ARP;
             display: "i=proc2;p=155,60";
         encap: EtherEncap;
             gatesizes:
-                UpperLayer_in[1],
-                UpperLayer_out[1];
+                upperLayerIn[1],
+                upperLayerOut[1];
             display: "i=fork;p=155,120";
         mac: EtherMAC;
             display: "i=queue;p=155,180";
     connections:
-        ipInputQueueOut <-- arp.hlOut;
-        ipOutputQueueIn --> arp.hlIn;
-        arp.hwOut --> encap.UpperLayer_in;
-        arp.hwIn <-- encap.UpperLayer_out;
-        encap.LowerLayer_out --> mac.UpperLayer_in;
-        encap.LowerLayer_in <-- mac.UpperLayer_out;
-        mac.LowerLayer_in <-- physicalIn;
-        mac.LowerLayer_out --> physicalOut;
+        netwOut <-- arp.hlOut;
+        netwIn --> arp.hlIn;
+        arp.hwOut --> encap.upperLayerIn;
+        arp.hwIn <-- encap.upperLayerOut;
+        encap.lowerLayerOut --> mac.upperLayerIn;
+        encap.lowerLayerIn <-- mac.upperLayerOut;
+        mac.physicalIn <-- physIn;
+        mac.physicalOut --> physOut;
 endmodule
-
 
