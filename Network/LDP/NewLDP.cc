@@ -73,6 +73,11 @@ void NewLDP::handleMessage(cMessage *msg)
     {
         // every LDP capable router periodically sends HELLO messages to the
         // "all routers in the sub-network" multicast address
+
+        // FIXME something is seriously wrong here. Only neighbours should become peers, 
+        // and looks like currently *all* routers are peers! probably 224.0.0.0 should 
+        // not be routable in IP???
+
         ev << "Broadcasting LDP Hello\n";
         sendHelloTo(IPAddress("224.0.0.0"));
 
