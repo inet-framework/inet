@@ -10,7 +10,7 @@
 //    V. Kahmann, -> Sept 2000
 //
 //  Bugfixes, improvements (2003-):
-//    Donald Liang (LYBD)
+//    Donald Liang (LYBD), Virginia Tech
 //    Jeroen Idserda, University of Twente
 //    Joung Woong Lee (zipizigi), University of Tsukuba
 //
@@ -1070,7 +1070,6 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_block->seg_seq = 0;
           tcb_block->seg_ack = 0;
 
-          tcb_block->t_rtt = -1;
           tcb_block->srtt = 0;     // smoothed rtt init 0 s
           tcb_block->rttvar = 24;  // smoothed mean dev. init 3 s
           tcb_block->rxtcur = 12;  // current rto init = 6 s
@@ -1708,7 +1707,7 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
       // per send-window
       // and none for retransmissions
       // we convert the double value into ticks (1 tick = 500 ms)
-      if ((tcb_block->last_timed_data != -1) && (seqNoGt(tcb_block->seg_ack, tcb_block->rtseq)))
+      if ((tcb_block->last_timed_data != -1) && (seqNoGeq(tcb_block->seg_ack, tcb_block->rtseq))) // fixed by LYBD
         {
           sim_time_ticks = (short) floor( (double) simTime()*2);
           sent_time_ticks = (short) floor( (double) tcb_block->last_timed_data*2);
@@ -2790,12 +2789,27 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
 
       //Deflate the congestion window by the amount of new data acknowledged, then add back one mss
       //and send a new segment if permitted by the new value of snd_cwnd
-      tcb_block->snd_cwnd = tcb_block->savecwnd;
-      tcb_block->snd_cwnd = tcb_block->snd_cwnd - tcb_block->new_ack;
-      if (tcb_block->snd_cwnd < 0)
+
+      // BCH LYBD
+      //tcb_block->snd_cwnd = tcb_block->savecwnd;
+      //	  
+      //tcb_block->snd_cwnd = tcb_block->snd_cwnd - tcb_block->new_ack;
+      //if (tcb_block->snd_cwnd < 0)
+      //  {
+      //    tcb_block->snd_cwnd = 0;
+      //  }
+
+      // tcb_block->snd_cwnd is unsigned integer !!!
+      if (tcb_block->savecwnd > tcb_block->new_ack) 
+        {
+          tcb_block->snd_cwnd = tcb_block->savecwnd - tcb_block->new_ack;
+        }
+      else 
         {
           tcb_block->snd_cwnd = 0;
         }
+      // ECH LYBD
+
       tcb_block->snd_cwnd += tcb_block->snd_mss;
       snd_cwnd_size(tcb_block->snd_cwnd);
       //reset save-variable
