@@ -44,10 +44,11 @@ void PPPInterface::initialize()
     WATCH(numDropped);
 
     // we're connected if other end of connection path is an input gate
-    connected = gateToWatch->destinationGate()->type()=='I';
+    cGate *physOut = gate("physOut");
+    connected = physOut->destinationGate()->type()=='I';
 
     // if we're connected, get the gate with transmission rate
-    gateToWatch = gate("physOut");
+    gateToWatch = physOut;
     datarate = 0;
     if (connected)
     {
