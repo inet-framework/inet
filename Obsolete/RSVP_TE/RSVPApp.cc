@@ -89,7 +89,7 @@ void RSVPAppl::processMsgFromRSVP(cMessage *msg)
 void RSVPAppl::processRSVP_PERROR(RSVPPathError *pe)
 {
     // create new PATH TEAR
-    RSVPPathTear *pt = new RSVPPathTear();
+    RSVPPathTear *pt = new RSVPPathTear("PathTear");
     pt->setSenderTemplate(pe->getSenderTemplate());
     pt->setSession(pe->getSession());
 
@@ -259,7 +259,7 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                     **************************************************/
                     if (lsp_id > MAX_LSP_NO)
                     {
-                        RSVPPathTear *pt = new RSVPPathTear();
+                        RSVPPathTear *pt = new RSVPPathTear("PathTear");
                         SenderTemplateObj_t sTemplate;
                         sTemplate.Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
                         sTemplate.SrcAddress = flow_d[k].Filter_Spec_Object.SrcAddress;
@@ -311,7 +311,7 @@ void RSVPAppl::processSignalFromMPLSSwitch_TEAR_DOWN(cMessage *msg)
     if (iterF == FecSenderBinds.end())
         error("Cannot find the session to teardown");
 
-    RSVPPathTear *pt = new RSVPPathTear();
+    RSVPPathTear *pt = new RSVPPathTear("PathTear");
     pt->setSenderTemplate(aTunnel.Sender_Template);
     pt->setSession(aTunnel.Session);
     RsvpHopObj_t hop;
@@ -555,7 +555,7 @@ void RSVPAppl::processCommand_NEW_ROUTE_DISCOVER(cMessage *msg)
 void RSVPAppl::sendResvMessage(RSVPPathMsg * pMsg, int inLabel)
 {
     ev << "Generate a Resv Message\n";
-    RSVPResvMsg *rMsg = new RSVPResvMsg();
+    RSVPResvMsg *rMsg = new RSVPResvMsg("Resv");
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     FlowSpecObj_t *Flowspec_Object = new FlowSpecObj_t;
     FilterSpecObj_t *Filter_Spec_Object = new FilterSpecObj_t;
@@ -638,7 +638,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 {
     OspfTe *ospfte = ospfteAccess.get();
 
-    RSVPPathMsg *pMsg = new RSVPPathMsg();
+    RSVPPathMsg *pMsg = new RSVPPathMsg("Path");
     RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
     FlowSpecObj_t *Flowspec_Object = new FlowSpecObj_t;
 

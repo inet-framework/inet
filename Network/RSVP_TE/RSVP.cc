@@ -900,7 +900,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
             {
                 ev << "Update traffic control fails\n";
                 Resv_Refresh_Needed_Flag = OFF;
-                RSVPResvError *errorMsg = new RSVPResvError();
+                RSVPResvError *errorMsg = new RSVPResvError("ResvErr");
                 errorMsg->setSession(activeRSB->Session_Object);
                 // errorMsg->addPar("dest_addr") = IPAddress(activeRSB->Session_Object.DestAddress).str().c_str();
                 // errorMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
@@ -1279,7 +1279,7 @@ void RSVP::RErrorMsgPro(RSVPResvError * rmsg)
 }
 void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 {
-    RSVPPathMsg *pm = new RSVPPathMsg;
+    RSVPPathMsg *pm = new RSVPPathMsg("Path");
 
     /*
        o    Insert TIME_VALUES object into the PATH message being
@@ -1380,7 +1380,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     // int PHOP;
     int found = OFF;
     // int B_Merge=OFF;
-    RSVPResvMsg *outRM = new RSVPResvMsg;
+    RSVPResvMsg *outRM = new RSVPResvMsg("Resv");
     FlowSpecObj_t *Tc_Flowspec = new FlowSpecObj_t;
     std::vector < PathStateBlock_t >::iterator p_iterI;
     PathStateBlock_t p_iter;
@@ -1556,7 +1556,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     // int PHOP;
     // int found =OFF;
     // int B_Merge=OFF;
-    RSVPResvTear *outRM = new RSVPResvTear;
+    RSVPResvTear *outRM = new RSVPResvTear("ResvTear");
     // FlowSpecObj_t* Tc_Flowspec = new FlowSpecObj_t;
 
     // int resv_style; // Support FF style only
@@ -2440,7 +2440,7 @@ bool RSVP::doCACCheck(RSVPPathMsg * pmsg, int OI)
             {
                 ev << "Admission Control fails for PATH message\n";
                 // Contruct new PATH ERROR and send back
-                RSVPPathError *pe = new RSVPPathError();
+                RSVPPathError *pe = new RSVPPathError("PathErr");
                 pe->setErrorCode(1);    // Admission Control Error
                 pe->setErrorNode(routerId);
                 pe->setSession(pmsg->getSession());
@@ -2479,7 +2479,7 @@ void RSVP::preemptTunnel(int tunnelId)
         {
             if (PSBList[m].Session_Object.Tunnel_Id == tunnelId)
             {
-                RSVPPathTear *ptMsg = new RSVPPathTear();
+                RSVPPathTear *ptMsg = new RSVPPathTear("PathTear");
                 ptMsg->setSession(PSBList[m].Session_Object);
                 ptMsg->setSenderTemplate(PSBList[m].Sender_Template_Object);
 
