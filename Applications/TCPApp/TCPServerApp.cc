@@ -19,6 +19,7 @@ Define_Module(TCPServerApp);
 
 void TCPServerApp::initialize()
 {
+    const char *address = par("address");
     int port = par("port");
 
     const char *serverProcTypeName = par("serverProcess");
@@ -27,7 +28,7 @@ void TCPServerApp::initialize()
         error("module type serverProcess=`%s' not found", serverProcTypeName);
 
     serverSocket.setOutputGate(gate("tcpOut"));
-    serverSocket.bind(port);
+    socket.bind(address[0] ? IPAddress(address) : IPAddress(), port);
     serverSocket.listen(true);
 }
 
