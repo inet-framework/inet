@@ -23,6 +23,10 @@ LINUX (UNIX)
 
 4. Type "make" to build everything. That should be it.
 
+5. If there's a Makefile-related error or if you change add/remove files, 
+   you'll need to recreate the makefiles by typing "./makemake".
+   If you add/remove/rename directories, you'll need to modify makemake.
+
 Finally, you can try running the demo simulations. cd to either
 Examples/IPSuite or Examples/MPLS, and type "./rundemo".
 
@@ -30,8 +34,6 @@ As of now, this is still work in progress and not everything will work.
 Notably, most MPLS examples will fail with TCP runtime error, and crash
 on exit. We're working on the solution.
 
-If you change something (add/remove files or directories), you'll need to
-recreate the makefiles by typing "./makemake".
 
 
 WINDOWS
@@ -51,19 +53,17 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
 
 3. Type "nmake -f Makefile.vc" to build everything.
 
+4. If there's a Makefile-related error or if you change add/remove files, 
+   you'll need to recreate the makefiles by typing "makemake", then
+   "nmake -f makefile.vc depend".
+   If you add/remove/rename directories, you'll need to modify makemake.cmd.
+
 Finally, you can try running the demo simulations. cd to either
 Examples/IPSuite or Examples/MPLS, and type "rundemo.bat".
 
 As of now, this is still work in progress and not everything will work.
 Notably, most MPLS examples will fail with TCP runtime error, and crash
 on exit. We're working on the solution.
-
-If you change something (add/remove files or directories), you'll need to
-recreate the makefiles typing "./makemake".
-
-If you change something (add/remove files or directories), you'll need to
-recreate the makefiles by running "makemake.cmd" and then
-"nmake -f makefile.vc depend".
 
 Hint: creating an "m.bat" file with the content "nmake -f makefile.vc %*"
 may save you quite some typing...
