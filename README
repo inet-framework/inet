@@ -1,10 +1,11 @@
-INET Framework for OMNeT++
-==========================
+INET Framework for OMNEST/OMNeT++
+=================================
 
-The OMNeT++ INET Framework contains numerous internet protocols. Beyond IP
-there is TCP, UDP, Ethernet, PPP. MPLS, LDP and RSVP-TE models have also
-been contributed. See the CREDITS file for the names of people involved
-in the development.
+The INET framework is an open-source communication networks simulation
+package, written for the OMNEST/OMNeT++ simulation system. The INET framework
+contains models for several Internet protocols: beyond TCP and IP there is UDP,
+Ethernet, PPP and MPLS with LDP and RSVP-TE signalling. See the CREDITS file
+for the names of people involved in the development.
 
 
 Directory structure
