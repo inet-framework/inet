@@ -144,6 +144,8 @@ private:
   void flushTransRetransQ(TcpTcb* tcb_block);
 
   void status(TcpTcb* tcb_block);
+  const char *stateName(TcpState state);
+  const char *eventName(TcpCommand event);
   
   void procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_header); 
   void procExListen(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_header);
@@ -3864,9 +3866,12 @@ void TcpModule::status(TcpTcb* tcb_block)
   if (debug) ev << "=============== TCB STATUS INFORMATION ===============\n";
   if (debug) ev << "TCP connection ID: " << (int) tcb_block->tb_conn_id << endl;
   if (debug) ev << "Number of bits to be transfered: " << (int) tcb_block->num_bit_req << endl;
-  if (debug) ev << "TCP-FSM 'from-state': " << (int) tcb_block->tb_from_state << endl;
-  if (debug) ev << "TCP-FSM state: " << (int) tcb_block->tb_state << endl;
+  if (debug) ev << "TCP-FSM 'from-state': " << (int) tcb_block->tb_from_state 
+                << " (" << stateName(tcb_block->tb_from_state) << ")" << endl;
+  if (debug) ev << "TCP-FSM state: " << (int) tcb_block->tb_state
+                << " (" << stateName(tcb_block->tb_state) << ")" << endl;
   if (debug) ev << "TCP event: " << (int) tcb_block->st_event.event << endl;
+                << " (" << eventName(tcb_block->st_event.event) << ")" << endl;
   if (debug) ev << "Local TCP-port: " << tcb_block->local_port << endl;
   if (debug) ev << "Local IP-address: " << tcb_block->local_addr << endl;
   if (debug) ev << "Remote TCP-port: " << tcb_block->rem_port << endl;
@@ -3894,6 +3899,66 @@ void TcpModule::status(TcpTcb* tcb_block)
   if (debug) ev << "======================================================\n";
 }
 
+// produce readable name
+const char *TcpModule::stateName(TcpState state)
+{
+#define CASE(x) case x: s=#x; break
+    const char *s = "unknown";
+    switch (state) 
+    {
+        CASE(TCP_S_CLOSED);
+        CASE(TCP_S_LISTEN);
+        CASE(TCP_S_SYN_SENT);
+        CASE(TCP_S_SYN_RCVD);
+        CASE(TCP_S_ESTABLISHED);
+        CASE(TCP_S_CLOSE_WAIT);
+        CASE(TCP_S_LAST_ACK);
+        CASE(TCP_S_FIN_WAIT_1);
+        CASE(TCP_S_FIN_WAIT_2);
+        CASE(TCP_S_CLOSING);
+        CASE(TCP_S_TIME_WAIT);
+    }
+    return s;
+#undef CASE
+}
+
+// produce readable name
+const char *TcpModule::eventName(TcpCommand event)
+{
+#define CASE(x) case x: s=#x; break
+    const char *s = "unknown";
+    switch (event) 
+    {
+        CASE(TCP_C_OPEN_ACTIVE);
+        CASE(TCP_C_OPEN_PASSIVE);
+        CASE(TCP_C_SEND);
+        CASE(TCP_C_RECEIVE);
+        CASE(TCP_C_CLOSE);
+        CASE(TCP_C_ABORT);
+        CASE(TCP_C_STATUS);
+
+        CASE(SYN_SEG);
+        CASE(ACK_SEG);
+        CASE(RST_SEG);
+        CASE(FIN_SEG);
+        CASE(TCP_SEG);
+        CASE(SYN_DATA);
+        CASE(ACK_DATA);
+        CASE(RST_DATA);
+        CASE(FIN_DATA);
+        CASE(TCP_DATA);
+
+        CASE(TIMEOUT_TIME_WAIT);
+        CASE(TIMEOUT_REXMT);
+        CASE(TIMEOUT_PERSIST);
+        CASE(TIMEOUT_KEEPALIVE);
+        CASE(TIMEOUT_CONN_ESTAB);
+        CASE(TIMEOUT_FIN_WAIT_2);
+        CASE(TIMEOUT_DELAYED_ACK);
+    }
+    return s;
+#undef CASE
+}
 
 //function to do exit INIT state processing 
 void TcpModule::procExInit(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp_header)
