@@ -2,22 +2,87 @@
 Test the IP fragmentation reassembly buffer (IPFragBuf class)
 
 %global:
+#include <vector>
 #include "IPFragBuf.h"
 
-void insertFragment(IPFragBuf *fragbuf, ushort beg, ushort len)
+struct Frag
+{
+    ushort id;
+    long src;
+    long dest;
+    ushort offset;
+    ushort bytes;
+};
+
+typedef std::vector<Frag> FragVector;
+
+bool insertFragment(IPFragBuf& fragbuf, Frag& f)
 {
     IPDatagram *frag = new IPDatagram();
+    frag->setIdentification(f.id);
+    frag->setSrcAddress(IPAddress(f.src));
+    frag->setDestAddress(IPAddress(f.dest));
+    frag->setFragmentOffset(f.offset);
+    frag->setHeaderLength(24);
+    frag->setLength(8*(24+f.bytes));
 
-    tcpseg->setIdentification(beg);
-    tcpseg->setPayloadLength(end-beg);
-    uint32 rcv_nxt = q->insertBytesFromSegment(tcpseg);
-    delete tcpseg;
-
-    ev << "insertSeg [" << beg << ".." << end << ") --> " << q->info() <<"\n";
+    IPDatagram *dgram = fragbuf.addFragment(frag, 0);
+    delete dgram;
+    return dgram!=NULL;
 }
 
 %activity:
-IPFragBuf fragbuf;
+
+// create a number of fragmented datagrams
+FragVector v;
+Frag f;
+int numdatagrams = 0;
+for (f.src=1024; f.src<1026; f.src++) {
+    for (f.dest=1024; f.dest<1026; f.dest++) {
+        for (f.id=0; f.id<80; f.id++) {
+            numdatagrams++;
+            int n = f.id/10+2;
+            f.bytes=100;
+            for (f.offset=0; f.offset<100*n; f.offset+=100) {
+                v.push_back(f);
+            }
+        }
+    }
+}
+ev << numdatagrams << " datagrams in " << v.size() << " fragments\n";
+
+// try assemble them, fragments in original order
+IPFragBuf fragbuf1;
+int i, num;
+for (i=0, num=0; i<v.size(); i++)
+    if (insertFragment(fragbuf1, v[i]))
+        num++;
+ev << "assembled in original order: " << num << "\n";
+
+// try assemble fragments in reverse order
+IPFragBuf fragbuf2;
+for (i=v.size()-1, num=0; i>=0; i--)
+    if (insertFragment(fragbuf2, v[i]))
+        num++;
+ev << "assembled in reverse order: " << num << "\n";
+
+// shuffle fragments
+for (i=0; i<100000; i++)
+{
+    int a = intrand(v.size());
+    int b = intrand(v.size());
+    f = v[a]; v[a] = v[b]; v[b] = f;
+}
+
+// try assemble shuffled fragments
+IPFragBuf fragbuf3;
+for (i=0, num=0; i<v.size(); i++)
+    if (insertFragment(fragbuf3, v[i]))
+        num++;
+ev << "assembled in random order: " << num << "\n";
+
 
 %contains: stdout
-sdasdsada
+320 datagrams in 1760 fragments
+reassembled: 320
+
