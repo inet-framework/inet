@@ -1,4 +1,5 @@
 LIBXML_INCLUDES='-I/usr/include/libxml2'
+LIBXML_LIBS='-lxml2'
 MAKEMAKE=`pwd`/opp_makemake
 ALL_IPSUITE_INCLUDES='-I$(ROOT)/Network/IPv4/Core -I$(ROOT)/Network/IPv4/QoS -I$(ROOT)/Transport/TCPv4 -I$(ROOT)/Transport/UDPv4 -I$(ROOT)/Transport/Socketv4 -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/PPP-old -I$(ROOT)/NetworkInterfaces/Queues -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite'
 ALL_MPLS_INCLUDES=$ALL_IPSUITE_INCLUDES' -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS'
@@ -33,17 +34,17 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 (cd Examples/IPSuite/TCPUDPDirectNet && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/UDPSockets && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
-(cd Examples/MPLS/demo2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/samples && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/Tester && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE3 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE4 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE4Old && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE5 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/TestTE6 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
+(cd Examples/MPLS/Tester && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
+(cd Examples/MPLS/demo2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/samples && $MAKEMAKE -f -n -c ../../../ipsuiteconfig)
+(cd Examples/MPLS/TestTE1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE3 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE4 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE4Old && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE5 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/TestTE6 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 
 (cd Network/IPv4 && $MAKEMAKE -f -n -c ../../ipsuiteconfig )
 (cd Network/MPLS && $MAKEMAKE -f -n -c ../../ipsuiteconfig -I../IPv4/Core -I../../Transport/TCPv4 -I../../Util)
