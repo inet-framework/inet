@@ -18,11 +18,12 @@
 
 #include <omnetpp.h>
 #include <vector>
-#include "ospf_type.h"
 #include "IPAddress.h"
 #include "IntServ_m.h"
 #include "TED.h"
 
+
+#define LS_INFINITY   100000
 
 
 /**

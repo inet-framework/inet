@@ -163,7 +163,6 @@ OspfTe.obj: OspfTe.cc \
   ../IPv4/IPAddress.h \
   ../IPv4/IPAddressResolver.h \
   ../IPv4/RoutingTableAccess.h \
-  ospf_type.h \
   IntServ_m.h \
   TED.h \
   ../MPLS/MPLSModule.h \
@@ -190,11 +189,10 @@ RSVP.obj: RSVP.cc \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
   RSVPPathMsg_m.h \
+  IntServ_m.h \
   RSVPPacket.h \
   RSVPPacket_m.h \
   RSVPResvMsg_m.h \
-  ospf_type.h \
-  IntServ_m.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../IPv4/RoutingTableAccess.h \
@@ -219,12 +217,11 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/LIBTableAccess.h \
   ../MPLS/MPLSAccess.h \
   RSVPPathMsg_m.h \
+  IntServ_m.h \
   RSVPPacket.h \
   RSVPPacket_m.h \
   RSVPResvMsg_m.h \
-  ospf_type.h \
   ../IPv4/IPAddress.h \
-  IntServ_m.h \
   ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTableAccess.h \
@@ -233,13 +230,16 @@ RSVPApp.obj: RSVPApp.cc \
   ../IPv4/IPDatagram.h \
   ../IPv4/IPDatagram_m.h
 RSVPPacket_m.obj: RSVPPacket_m.cc \
-  RSVPPacket_m.h
+  RSVPPacket_m.h \
+  IntServ_m.h
 RSVPPathMsg_m.obj: RSVPPathMsg_m.cc \
   RSVPPathMsg_m.h \
+  IntServ_m.h \
   RSVPPacket.h \
   RSVPPacket_m.h
 RSVPResvMsg_m.obj: RSVPResvMsg_m.cc \
   RSVPResvMsg_m.h \
+  IntServ_m.h \
   RSVPPacket.h \
   RSVPPacket_m.h
 TED.obj: TED.cc \

@@ -181,7 +181,7 @@ std::vector<int> OspfTe::doCalculateERO(const IPAddress& dest,
 
 void OspfTe::CspfBuildSPT(const FlowSpecObj_t& fspec, std::vector<CSPFVertex> &CandidatesList)
 {
-    double shortestDist = OSPFType::LSInfinity;
+    double shortestDist = LS_INFINITY;
 
     if (!CandidatesList.empty())
     {
@@ -304,7 +304,7 @@ void OspfTe::CspfBuildSPT(const std::vector<simple_link_t>& links,
 {
     // FIXME this function seems to be exactly the same as the other similar one,
     // except for the TEAddCandidates() call at the end!!! eliminate!
-    double shortestDist = OSPFType::LSInfinity;
+    double shortestDist = LS_INFINITY;
 
     if (!CandidatesList.empty())
     {
