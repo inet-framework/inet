@@ -94,7 +94,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 
     if (ev.isGUI())
     {
-        char buf[32];
+        char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
         displayString().setTagArg("t",0,buf);
     }
