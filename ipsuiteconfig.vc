@@ -2,7 +2,7 @@
 # Config file for the IPSuite. This is included by every makefile.
 #
 
-ROOT=d:\home\IPSuite-local
+ROOT=d:\home\IPSuite-pcvs
 OMNETPP_ROOT=d:\home\omnetpp
 
 ICONV_DIR=D:/home/tools/iconv-1.8.win32
