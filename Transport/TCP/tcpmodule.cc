@@ -3923,7 +3923,7 @@ const char *TcpModule::stateName(TcpState state)
 }
 
 // produce readable name
-const char *TcpModule::eventName(TcpCommand event)
+const char *TcpModule::eventName(TcpEvent event)
 {
 #define CASE(x) case x: s=#x; break
     const char *s = "unknown";
