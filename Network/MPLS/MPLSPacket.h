@@ -21,6 +21,9 @@
 
 using namespace std;
 
+/**
+ * Represents a packet with MPLS headers
+ */
 // FIXME length should be adjusted when length of label stack changes
 class MPLSPacket: public cMessage
 {
