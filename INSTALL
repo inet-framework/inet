@@ -1,7 +1,7 @@
 INSTALLATION INSTRUCTIONS
 =========================
 
-IPSuite can be compiled on all platforms that are supported by OMNeT++.
+The INET framework can be compiled on any platform supported by OMNeT++.
 
 PREREQUISITES
 
@@ -14,7 +14,7 @@ LINUX (UNIX)
 1. Make sure you OMNeT++ installation works OK (e.g. try running the samples)
    and it is in the path (try "which nedtool").
 
-2. Change to the IPSuite directory and edit the ipsuiteconfig file
+2. Change to the INET framework directory and edit the ipsuiteconfig file
    to make sure it contains the right settings. You'll probably
    need to adjust ROOT.
 
@@ -23,15 +23,15 @@ LINUX (UNIX)
 
 4. Type "make" to build everything. That should be it.
 
-5. If there's a Makefile-related error, or if you change add/remove files, 
+5. If there's a Makefile-related error, or if you change add/remove files,
    try recreating the makefiles by typing "./makemake".
    If you add/remove/rename directories, you'll need to modify "makemake".
 
-Finally, try running the demo simulations. Change into Examples/ and type 
+Finally, try running the demo simulations. Change into Examples/ and type
 "./rundemo".
 
-As of now, IPSuite is still work in progress and not everything will work.
-Notably, MPLS is being revised and does not work.
+The INET framework is still work in progress, and thus, not everything will work.
+Notably, MPLS is being revised, and RTP hasn't been integrated yet.
 
 
 
@@ -47,14 +47,14 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
    and MSVC should be in the PATH (you can verify this by typing "nedtool"
    and "nmake" at the cmd prompt.)
 
-2. Change to the IPSuite directory. Edit the ipsuiteconfig.vc file and
+2. Change to the INET framework directory. Edit the ipsuiteconfig.vc file and
    adjust the OMNETPP_ROOT setting to suit your installation.
 
-3. Type "nmake -f Makefile.vc" to build everything. Hint: creating an "m.bat"
-   file with the content "nmake -f Makefile.vc %*" may save you quite some 
-   typing.
+3. Type "nmake -f Makefile.vc" to build everything.
+      HINT: Create an "m.bat" file with the content "nmake -f Makefile.vc %*".
+      It will save you a lot of typing!
 
-4. If there's a Makefile-related error, or if you change add/remove files, 
+4. If there's a Makefile-related error, or if you change add/remove files,
    try recreating the makefiles by typing "makemake", then
    "nmake -f makefile.vc depend".
    If you add/remove/rename directories, you'll need to modify "makemake.cmd".
@@ -62,8 +62,8 @@ If you're using Microsoft Visual C++ (6.0 or .NET):
 Finally, try running the demo simulations. Change to Examples/ and type
 "rundemo.bat".
 
-As of now, IPSuite is still work in progress and not everything will work.
-Notably, MPLS is being revised and does not work.
+The INET framework is still work in progress, and thus, not everything will work.
+Notably, MPLS is being revised, and RTP hasn't been integrated yet.
 
 Have fun.
 Andras

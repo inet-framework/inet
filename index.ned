@@ -84,7 +84,7 @@
 // the development in July 2003. Through a series of snapshot releases in
 // 2003-2004, modules got completely reorganized, documented, and many of them
 // rewritten from scratch. A complete change log is available
-// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPSuiteLogOfChanges">here</a>.
+// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPSuiteLogOfChanges" target="_top">here</a>.
 // Most notable additions are a new, modular and extensible TCP implementation,
 // application models, Ethernet implementation and an all-in-one IP model
 // to replace the earlier, modularized one.
