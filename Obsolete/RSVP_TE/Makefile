@@ -156,8 +156,7 @@ RSVPApp.o: RSVPApp.cc \
   ../MPLS/ip_address_prefix.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
+  ../IPv4/IPDatagram.h
 RSVP.o: RSVP.cc \
   RSVP.h \
   ../IPv4/IPAddress.h \
@@ -177,17 +176,14 @@ RSVP.o: RSVP.cc \
   ../MPLS/ip_address_prefix.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h \
-  ../IPv4/IPDatagram_m.h
+  ../IPv4/IPDatagram.h
 RSVPInterface.o: RSVPInterface.cc \
   rsvp_message.h \
   RSVPInterface.h \
-  ../IPv4/IPControlInfo_m.h \
   intserv.h \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h \
-  ../../Base/basic_consts.h \
-  ../IPv4/IPDatagram_m.h
+  ../../Base/basic_consts.h
 rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
@@ -203,9 +199,8 @@ TED.o: TED.cc \
   ../IPv4/RoutingTableAccess.h \
   ../IPv4/RoutingTable.h \
   ../MPLS/ConstType.h \
-  ../IPv4/IPDatagram_m.h \
-  ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
-  ../MPLS/ip_address_prefix.h
+  ../MPLS/ip_address_prefix.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h

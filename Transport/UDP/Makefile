@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPControlInfo_m.o UDPPacket_m.o   UDPProcessing.o
+OBJS= UDPControlInfo_m.o UDPPacket_m.o UDPProcessing.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= UDPControlInfo_m.h UDPPacket_m.h
@@ -121,19 +121,7 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-UDPControlInfo_m.o: UDPControlInfo_m.cc \
-  UDPControlInfo_m.h \
-  ../../Network/IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
-UDPPacket_m.o: UDPPacket_m.cc \
-  UDPPacket_m.h
 UDPProcessing.o: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
-  ../../Network/IPv4/IPControlInfo_m.h \
-  UDPPacket_m.h \
-  UDPControlInfo_m.h \
-  ../../Base/basic_consts.h \
-  ../../Network/IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/IPDatagram_m.h
+  ../../Base/basic_consts.h
