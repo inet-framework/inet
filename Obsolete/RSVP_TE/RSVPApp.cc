@@ -61,8 +61,6 @@ void RSVPAppl::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
     {
-        // FIXME gate "from_mpls_switch" seems to be unconnected-unused,
-        // so wonder of the following code ever executes:
         processSignalFromMPLSSwitch(msg);
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
@@ -246,10 +244,8 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                     // Install new label
                     int outInf = rMessage->getLIH();
                     int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
-                    const char *outInfName =
-                        (rt->interfaceByPortNo(outInfIndex))->name.c_str();
-                    const char *inInfName =
-                        (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
+                    const char *outInfName = (rt->interfaceByPortNo(outInfIndex))->name.c_str();
+                    const char *inInfName = (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
 
                     ev << "INSTALL new label \n";
                     ev << "src=" << IPAddress(aTunnel.Sender_Template.
