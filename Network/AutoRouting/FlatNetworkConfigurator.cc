@@ -34,13 +34,14 @@ void FlatNetworkConfigurator::initialize(int stage)
     ev << "cTopology found " << topo.nodes() << " nodes\n";
 
     // assign IP addresses
-    uint32 networkAddress = IPAddress(par("networkAddress")).getInt();
-    uint32 netmask = IPAddress(par("netmask")).getInt();
+    uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
+    uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
     if (topo.nodes()>maxNodes)
         error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
 
-    for (int i=0; i<topo.nodes(); i++)
+    int i;
+    for (i=0; i<topo.nodes(); i++)
     {
         // host part will be simply i+1.
         uint32 addr = networkAddress | uint32(i+1);
@@ -61,11 +62,7 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 
     // find and store next hops
-    //
-    // note that we do route calculation (call unweightedSingleShortestPathsTo())
-    // only n times, while per-node calculation would require n^2 invocations.
-    //
-    for (int i=0; i<topo.nodes(); i++)
+    for (i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *destNode = topo.node(i);
         uint32 destAddr = networkAddress | uint32(i+1);
@@ -91,8 +88,8 @@ void FlatNetworkConfigurator::initialize(int stage)
             e->netmask = IPAddress(netmask);
             e->interfaceName = interf->name.c_str();
             e->interfacePtr = interf;
-            e->type = DIRECT;
-            e->source = MANUAL;
+            e->type = RoutingEntry::DIRECT;
+            e->source = RoutingEntry::MANUAL;
             //e->metric = 1;
             rt->addRoutingEntry(e);
         }

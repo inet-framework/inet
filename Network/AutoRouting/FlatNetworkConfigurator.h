@@ -35,10 +35,10 @@ class FlatNetworkConfigurator : public cSimpleModule
     RoutingTable *findRoutingTable(cModule *ipnode);
 
   public:
-    Module_Class_Members(IP, cSimpleModule, 0);
+    Module_Class_Members(FlatNetworkConfigurator, cSimpleModule, 0);
 
   protected:
-    virtual void numInitStages() const  {return 3;}
+    virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
