@@ -280,7 +280,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
                 mplsPacket->pushLabel(newLabel);
                 break;
             case SWAP_OPER:
-                ev << "SWAP with " << newLabel;
+                ev << "SWAP by " << newLabel;
                 mplsPacket->swapLabel(newLabel);
                 break;
             case POP_OPER:
@@ -335,7 +335,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
     int gateIndex = ipdatagram->arrivalGate()->index();
 
-    if (ipdatagram->hasPar("trans"))
+    if (ipdatagram->hasPar("trans")) // FIXME this can never happen, peer won't set "trans"...
     {
         send(ipdatagram, "toL3", gateIndex);
     }
@@ -357,7 +357,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
         ev << "Message(src, dest, fec)=(" << ipdatagram->srcAddress() << "," <<
             ipdatagram->destAddress() << "," << fecID << ")\n";
 
-        int label;
+        int label=-1;
         string outgoingInterface;
         bool found = lt->resolveFec(fecID, label, outgoingInterface);
 
@@ -396,14 +396,14 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
             if (makeRequest)
             {
                 // if FEC just made it into fecList, we haven't asked LDP yet: do it now
-                requestLabelFor(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
+                requestLDP(fecID, ipdatagram->srcAddress(), ipdatagram->destAddress(), gateIndex);
             }
         }
     }
 }
 
 
-void MPLSModule::requestLabelFor(int fecID, IPAddress src, IPAddress dest, int gateIndex)
+void MPLSModule::requestLDP(int fecID, IPAddress src, IPAddress dest, int gateIndex)
 {
     cModule *ldpMod = parentModule()->submodule("signal_module");  // FIXME should use connections instead of direct sending....
     if (!ldpMod)
