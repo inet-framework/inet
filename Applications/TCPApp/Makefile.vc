@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TCPEchoApp.obj TCPServerApp.obj TCPSessionApp.obj TCPSinkApp.obj
+OBJS= TCPEchoApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -93,14 +93,14 @@ subdirs: $(SUBDIR_TARGETS)
 TCPEchoApp.obj: TCPEchoApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPEchoApp.cc
 
-TCPServerApp.obj: TCPServerApp.cc
-	$(CXX) -c $(COPTS) /Tp TCPServerApp.cc
-
 TCPSessionApp.obj: TCPSessionApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPSessionApp.cc
 
 TCPSinkApp.obj: TCPSinkApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPSinkApp.cc
+
+TCPSrvHostApp.obj: TCPSrvHostApp.cc
+	$(CXX) -c $(COPTS) /Tp TCPSrvHostApp.cc
 
 
 #doc: neddoc doxy
@@ -133,11 +133,8 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TCPEchoApp.obj: TCPEchoApp.cc \
-  TCPEchoApp.h
-TCPServerApp.obj: TCPServerApp.cc \
-  TCPServerApp.h \
+  TCPEchoApp.h \
   ..\..\Transport\TCP/TCPSocket.h \
-  ..\..\Transport\TCP/TCPSocketMap.h \
   ..\..\Transport\TCP/TCPCommand_m.h \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
@@ -148,4 +145,15 @@ TCPSessionApp.obj: TCPSessionApp.cc \
   ..\..\Network\IPv4/IPAddress.h \
   ..\..\Base/ipsuite_defs.h
 TCPSinkApp.obj: TCPSinkApp.cc \
-  TCPSinkApp.h
+  TCPSinkApp.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h
+TCPSrvHostApp.obj: TCPSrvHostApp.cc \
+  TCPSrvHostApp.h \
+  ..\..\Transport\TCP/TCPSocket.h \
+  ..\..\Transport\TCP/TCPSocketMap.h \
+  ..\..\Transport\TCP/TCPCommand_m.h \
+  ..\..\Network\IPv4/IPAddress.h \
+  ..\..\Base/ipsuite_defs.h

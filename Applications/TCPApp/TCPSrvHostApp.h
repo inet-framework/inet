@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPSERVERAPP_H_
-#define __TCPSERVERAPP_H_
+#ifndef __TCPSRVHOSTAPP_H_
+#define __TCPSRVHOSTAPP_H_
 
 #include <omnetpp.h>
 #include "TCPSocket.h"
@@ -20,16 +20,16 @@
 
 
 /**
- * Abstract base class for server processes to be used with TCPServerApp.
+ * Abstract base class for server processes to be used with TCPSrvHostApp.
  */
 class TCPServerProcess : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   private:
-    TCPSocket *socket; // ptr into socketMap managed by TCPServerApp
+    TCPSocket *socket; // ptr into socketMap managed by TCPSrvHostApp
   public:
     Module_Class_Members(TCPServerProcess,cSimpleModule,0);
 
-    /** Called by TCPServerApp after creating this module */
+    /** Called by TCPSrvHostApp after creating this module */
     void setSocket(TCPSocket *sock) {socket=sock;}
 
     /** To be called when the server process has finished */
@@ -52,7 +52,7 @@ class TCPServerProcess : public cSimpleModule, public TCPSocket::CallbackInterfa
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class TCPServerApp : public cSimpleModule
+class TCPSrvHostApp : public cSimpleModule
 {
   protected:
     TCPSocket serverSocket;
@@ -60,7 +60,7 @@ class TCPServerApp : public cSimpleModule
     cModuleType *srvProcType;
 
   public:
-    Module_Class_Members(TCPServerApp, cSimpleModule, 0);
+    Module_Class_Members(TCPSrvHostApp, cSimpleModule, 0);
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

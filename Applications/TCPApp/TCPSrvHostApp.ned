@@ -29,7 +29,7 @@
 // and can send messages via the TCPSocket send method. The OMNeT++ send()
 // method is not used.
 //
-simple TCPServerApp
+simple TCPSrvHostApp
     parameters:
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on

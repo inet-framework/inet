@@ -12,12 +12,12 @@
 //
 
 
-#include "TCPServerApp.h"
+#include "TCPSrvHostApp.h"
 
 
-Define_Module(TCPServerApp);
+Define_Module(TCPSrvHostApp);
 
-void TCPServerApp::initialize()
+void TCPSrvHostApp::initialize()
 {
     const char *address = par("address");
     int port = par("port");
@@ -32,7 +32,7 @@ void TCPServerApp::initialize()
     serverSocket.listen(true);
 }
 
-void TCPServerApp::handleMessage(cMessage *msg)
+void TCPSrvHostApp::handleMessage(cMessage *msg)
 {
     TCPSocket *socket = socketMap.findSocketFor(msg);
     if (!socket)
@@ -51,7 +51,7 @@ void TCPServerApp::handleMessage(cMessage *msg)
     socket->processMessage(msg);
 }
 
-void TCPServerApp::finish()
+void TCPSrvHostApp::finish()
 {
 }
 
