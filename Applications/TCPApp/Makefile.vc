@@ -62,7 +62,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= GenericAppMsg_m.obj TCPEchoApp.obj TCPGenericCliAppBase.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj TelnetApp.obj
+OBJS= GenericAppMsg_m.obj TCPBasicClientApp.obj TCPEchoApp.obj TCPGenericCliAppBase.obj TCPGenericSrvApp.obj TCPSessionApp.obj TCPSinkApp.obj TCPSrvHostApp.obj TelnetApp.obj
 
 # header files generated (from msg files)
 GENERATEDHEADERS= GenericAppMsg_m.h
@@ -95,6 +95,9 @@ GenericAppMsg_m.obj: GenericAppMsg_m.cc
 
 GenericAppMsg_m.cc GenericAppMsg_m.h: GenericAppMsg.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) GenericAppMsg.msg
+
+TCPBasicClientApp.obj: TCPBasicClientApp.cc
+	$(CXX) -c $(COPTS) /Tp TCPBasicClientApp.cc
 
 TCPEchoApp.obj: TCPEchoApp.cc
 	$(CXX) -c $(COPTS) /Tp TCPEchoApp.cc
@@ -149,6 +152,7 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 GenericAppMsg_m.obj: GenericAppMsg_m.cc \
   GenericAppMsg_m.h
+TCPBasicClientApp.obj: TCPBasicClientApp.cc
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
   ..\..\Transport\TCP/TCPSocket.h \

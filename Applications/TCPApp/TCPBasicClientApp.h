@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __REQUESTRESPONSEAPP_H_
-#define __REQUESTRESPONSEAPP_H_
+#ifndef __TCPBASICCLIENTAPP_H_
+#define __TCPBASICCLIENTAPP_H_
 
 #include <omnetpp.h>
 #include "TCPGenericCliAppBase.h"
@@ -21,14 +21,17 @@
 /**
  * An example request-reply based client application.
  */
-class RequestResponseApp : public TCPGenericCliAppBase
+class TCPBasicClientApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;
     int numRequestsToSend; // requests to send in this session
 
+    /** Utility: sends a request to the server */
+    void sendRequest();
+
   public:
-    Module_Class_Members(RequestResponseApp, TCPGenericCliAppBase, 0);
+    Module_Class_Members(TCPBasicClientApp, TCPGenericCliAppBase, 0);
 
     /** Redefined to schedule a connect(). */
     virtual void initialize();

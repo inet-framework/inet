@@ -12,17 +12,17 @@
 //
 
 
-#include "RequestResponseApp.h"
+#include "TCPBasicClientApp.h"
 
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
 
 
-Define_Module(RequestResponseApp);
+Define_Module(TCPBasicClientApp);
 
 
-void RequestResponseApp::initialize()
+void TCPBasicClientApp::initialize()
 {
     TCPGenericCliAppBase::initialize();
 
@@ -35,7 +35,7 @@ void RequestResponseApp::initialize()
     scheduleAt((simtime_t)par("startTime"), timeoutMsg);
 }
 
-void RequestResponseApp::sendRequest()
+void TCPBasicClientApp::sendRequest()
 {
      ev << "sending request, " << numRequestsToSend-1 << " more to go\n";
 
@@ -47,7 +47,7 @@ void RequestResponseApp::sendRequest()
      sendPacket(requestLength, responseLength);
 }
 
-void RequestResponseApp::handleTimer(cMessage *msg)
+void TCPBasicClientApp::handleTimer(cMessage *msg)
 {
     switch (msg->kind())
     {
@@ -65,7 +65,7 @@ void RequestResponseApp::handleTimer(cMessage *msg)
     }
 }
 
-void RequestResponseApp::socketEstablished(int connId, void *ptr)
+void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketEstablished(connId, ptr);
 
@@ -78,7 +78,7 @@ void RequestResponseApp::socketEstablished(int connId, void *ptr)
     numRequestsToSend--;
 }
 
-void RequestResponseApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
+void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
@@ -95,7 +95,7 @@ void RequestResponseApp::socketDataArrived(int connId, void *ptr, cMessage *msg,
     }
 }
 
-void RequestResponseApp::socketClosed(int connId, void *ptr)
+void TCPBasicClientApp::socketClosed(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketClosed(connId, ptr);
 
@@ -104,7 +104,7 @@ void RequestResponseApp::socketClosed(int connId, void *ptr)
     scheduleAt(simTime()+(simtime_t)par("idleInterval"), timeoutMsg);
 }
 
-void RequestResponseApp::socketFailure(int connId, void *ptr, int code)
+void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
 {
     TCPGenericCliAppBase::socketFailure(connId, ptr, code);
 

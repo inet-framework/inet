@@ -28,17 +28,31 @@
 //
 // The server app should be TCPGenericSrvApp.
 //
-// When modelling FTP: note that this module doesn't open separate TCP
-// connections for commands and data transfer.
+// Example settings:
+// FTP:
+// <pre>
+//    numRequestsPerSession = exponential(3)
+//    requestLength = truncnormal(20,5)
+//    replyLength = exponential(1000000)
+// </pre>
 //
-// To model an HTTP/1.0 user, set numRequestsPerSession=1;
-// for HTTP/1.1 with keep-alive, numRequestsPerSession can be >1.
+// Note that this module doesn't open separate TCP connections for commands
+// and data transfer as the FTP protocol.
+//
+// HTTP:
+// <pre>
+//    numRequestsPerSession = 1  <i>(HTTP 1.0)</i>
+//    numRequestsPerSession = exponential(5) <i>(HTTP 1.1, with keepalive)</i>
+//    requestLength = truncnormal(350,20)
+//    replyLength = exponential(2000)
+// </pre>
+//
 // Note that since most web pages contain images and may contain frames,
 // applets etc, possibly from various servers, and browsers usually download
 // these items in parallel to the main HTML document, this module cannot
 // serve as a realistic web client.
 //
-simple RequestResponseApp
+simple TCPBasicClientApp
     parameters:
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on
