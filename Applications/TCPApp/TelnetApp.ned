@@ -18,8 +18,9 @@
 
 
 //
-// An example Telnet client application. The server app should be
-// TCPGenericSrvApp.
+// Models Telnet sessions with a specific user behaviour.
+//
+// The server app should be TCPGenericSrvApp.
 //
 // NOTE: This module emulates a very specific user behaviour, and as such,
 // it should be viewed as an example rather than a generic Telnet model.
@@ -31,8 +32,16 @@ simple TelnetApp
     parameters:
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on
-        connectAddress: string,
-        connectPort: numeric const;
+        connectAddress: string,  // server address (may be symbolic)
+        connectPort: numeric const, // port number to connect to
+        startTime: numeric, // time first session begins
+        numCommands: numeric, // user types this many commands in a session
+        commandLength: numeric, // commands are this many characters (incl. Enter)
+        keyPressDelay: numeric, // delay between keypresses
+        commandOutputLength: numeric, // commands produces this much output (bytes)
+        thinkTime: numeric, // user waits this much before starting to type new command
+        idleInterval: numeric, // time gap between sessions
+        reconnectInterval;  // if connection breaks, user waits this much before trying to reconnect
     gates:
         in: tcpIn;
         out: tcpOut;
