@@ -114,11 +114,11 @@ public:
 
     /** @name Process various RSVP message types */
     //@{
-    void processRSVP_PERROR(cMessage *msg);
+    void processRSVP_PERROR(PathErrorMessage *pe);
     void processRSVP_PTEAR(cMessage *msg);
     void processRSVP_RTEAR(cMessage *msg);
-    void processRSVP_PATH(cMessage *msg);
-    void processRSVP_RESV(cMessage *msg);
+    void processRSVP_PATH(PathMessage *pMessage);
+    void processRSVP_RESV(ResvMessage *rMessage);
     //@}
 
     /** @name Process various commands from Tester */

@@ -65,19 +65,17 @@ void RSVPAppl::processMsgFromRSVP(cMessage *msg)
 {
     switch(msg->kind())
     {
-        case PERROR_MESSAGE: processRSVP_PERROR(msg); break;
+        case PERROR_MESSAGE: processRSVP_PERROR(check_and_cast<PathErrorMessage *>(msg)); break;
         case PTEAR_MESSAGE:  processRSVP_PTEAR(msg); break;
         case RTEAR_MESSAGE:  processRSVP_RTEAR(msg); break;
-        case PATH_MESSAGE:   processRSVP_PATH(msg); break;
-        case RESV_MESSAGE:   processRSVP_RESV(msg); break;
+        case PATH_MESSAGE:   processRSVP_PATH(check_and_cast<PathMessage *>(msg)); break;
+        case RESV_MESSAGE:   processRSVP_RESV(check_and_cast<ResvMessage *>(msg)); break;
         default: error("unrecognised RSVP message, kind=%d", msg->kind());
     }
 }
 
-void RSVPAppl::processRSVP_PERROR(cMessage *msg)
+void RSVPAppl::processRSVP_PERROR(PathErrorMessage *pe)
 {
-    PathErrorMessage *pe = check_and_cast<PathErrorMessage *>(msg);
-
     // create new PATH TEAR
     PathTearMessage *pt = new PathTearMessage();
     pt->setSenderTemplate(pe->getSenderTemplate());
@@ -90,7 +88,7 @@ void RSVPAppl::processRSVP_PERROR(cMessage *msg)
     pt->setHop(rsvp_hop);
     send(pt, "to_rsvp");
 
-    delete msg;
+    delete pe;
 }
 
 void RSVPAppl::processRSVP_PTEAR(cMessage *msg)
@@ -105,12 +103,10 @@ void RSVPAppl::processRSVP_RTEAR(cMessage *msg)
     delete msg;
 }
 
-void RSVPAppl::processRSVP_PATH(cMessage *msg)
+void RSVPAppl::processRSVP_PATH(PathMessage *pMessage)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
-
-    PathMessage *pMessage = check_and_cast<PathMessage *>(msg);
 
     int receiverIP = pMessage->getDestAddress();
     int lspId = pMessage->getLspId();
@@ -141,22 +137,23 @@ void RSVPAppl::processRSVP_PATH(cMessage *msg)
         // Send LABEL MAPPING upstream
         sendResvMessage(pMessage, inLabel);
     }
-    delete msg;
+    else
+    {
+        delete pMessage;
+    }
 }
 
 
-void RSVPAppl::processRSVP_RESV(cMessage *msg)
+void RSVPAppl::processRSVP_RESV(ResvMessage *rMessage)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();
 
-    ResvMessage *rMessage = check_and_cast<ResvMessage *>(msg);
-
     if (!isIR)
     {
         ev << "We're not ingress router, ignoring message\n";
-        delete msg;
+        delete rMessage;
         return;
     }
 
@@ -275,13 +272,12 @@ void RSVPAppl::processRSVP_RESV(cMessage *msg)
             }
         }
     }
-    delete msg;
+    delete rMessage;
 }
 
 
 void RSVPAppl::processSignalFromMPLSSwitch(cMessage *msg)
 {
-    // This is a request for new label finding
     if (msg->hasPar("teardown"))
         processSignalFromMPLSSwitch_TEAR_DOWN(msg);
     else
