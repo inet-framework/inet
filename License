@@ -1,12 +1,3 @@
-
 OMNeT++ Internet Protocol Suite is composed of several parts, each of which
 has its own license. As a rule, every source file should contain the
-appropriate copyright and license.
-
-The IP+TCP+UDP part comes from the "original IPSuite", copyright (C) 1999,2000
-University of Karlsruhe and falls under the General Public License (GPL).
-
-The MPLS+LDP+RSVP part was written by Xuan Thang Nguyen at University of
-Technology, Sydney and is covered by the Lesser General Public License (LGPL).
-
-
+appropriate copyright notice and license condition.
