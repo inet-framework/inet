@@ -16,24 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
 
-#include <stdio.h>
-#include <string.h>
-#include <vector>
-#include <map>
-#include <omnetpp.h>
-#include "ipsuite_defs.h"
-#include "IPAddress.h"
-#include "ARPPacket_m.h"
-#include "EtherCtrl_m.h"
-#include "IPControlInfo_m.h"
-#include "IPDatagram.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
-#include "EtherMAC.h"
+#include "arp.h"
+#include "stlwatch.h"
 
 
 static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
@@ -42,75 +27,15 @@ static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
     return ev;
 }
 
-
-/**
- * ARP implementation.
- */
-class ARP : public cSimpleModule
+static std::ostream& operator<< (std::ostream& ev, const ARP::ARPCacheEntry& e)
 {
-  protected:
-    simtime_t retryTimeout;
-    int retryCount;
-    simtime_t cacheTimeout;
-    bool doProxyARP;
+    ev << "MAC=" << e.macAddress;
+    if (e.pending)
+        ev << " pending," << e.numRetries << " retries";
+    ev << " age:" << simulation.simTime()-e.lastUpdate;
+    return ev;
+}
 
-    IPAddress myIPAddress;
-    MACAddress myMACAddress;
-
-    long numResolutions;
-    long numFailedResolutions;
-    long numRequestsSent;
-    long numRepliesSent;
-
-    struct ARPCacheEntry;
-    typedef std::map<IPAddress, ARPCacheEntry*> ARPCache;
-    typedef std::vector<cMessage*> MsgPtrVector;
-
-    // IPAddress -> MACAddress table
-    struct ARPCacheEntry
-    {
-        bool pending; // true if resolution is pending
-        MACAddress macAddress;  // MAC address
-        simtime_t lastUpdate;  // entries should time out after cacheTimeout
-        int numRetries; // if pending==true: 0 after first ARP request, 1 after second, etc.
-        cMessage *timer;  // if pending==true: request timeout msg
-        MsgPtrVector pendingPackets;  // if pending==true: ptrs to packets waiting for resolution
-                                      // (packets are owned by pendingQueue)
-        ARPCache::iterator myIter;  // iterator pointing to this entry
-    };
-
-    ARPCache arpCache;
-
-    cQueue pendingQueue; // outbound packets waiting for ARP resolution
-
-    RoutingTableAccess routingTableAccess; // for Proxy ARP
-
-    InterfaceEntry *interfaceEntry;
-
-  public:
-    Module_Class_Members(ARP,cSimpleModule,0);
-    ~ARP();
-
-    virtual int numInitStages() const {return 4;}
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
-    InterfaceEntry *registerInterface(double datarate);
-
-    void processInboundPacket(cMessage *msg);
-    void processOutboundPacket(cMessage *msg);
-    void sendPacketToMAC(cMessage *msg, const MACAddress& macAddress);
-
-    void initiateARPResolution(IPAddress nextHopAddr, ARPCacheEntry *entry);
-    void sendARPRequest(IPAddress ipAddress);
-    void requestTimedOut(cMessage *selfmsg);
-    bool addressRecognized(IPAddress destAddr);
-    void processARPPacket(ARPPacket *arp);
-    void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
-
-    void dumpARPPacket(ARPPacket *arp);
-};
 
 Define_Module (ARP);
 
@@ -145,6 +70,8 @@ void ARP::initialize(int stage)
     WATCH(numRepliesSent);
     WATCH(numResolutions);
     WATCH(numFailedResolutions);
+
+    WATCH_MAP(arpCache);
 }
 
 void ARP::finish()
