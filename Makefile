@@ -77,9 +77,12 @@ neddoc-without-doxy:
 
 #------------------------------------------------------------------------------
 
-$(TARGET): $(OBJS) subdirs Makefile
+$(TARGET): $(OBJS) subdirs Makefile .tstamp
+	@# do nothing
+
+.tstamp: $(OBJS)
 	echo>.tstamp
-	
+
 $(OBJS) : $(GENERATEDHEADERS)
 
 

@@ -52,9 +52,12 @@ demo2 ldp-mpls1 TestTE1 TestTE2 TestTE3 TestTE4 TestTE4Old TestTE5 TestTE6 : Tes
 
 #------------------------------------------------------------------------------
 
-$(TARGET): $(OBJS) subdirs Makefile
+$(TARGET): $(OBJS) subdirs Makefile .tstamp
+	@# do nothing
+
+.tstamp: $(OBJS)
 	echo>.tstamp
-	
+
 $(OBJS) : $(GENERATEDHEADERS)
 
 

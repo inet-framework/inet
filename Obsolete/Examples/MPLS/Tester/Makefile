@@ -22,7 +22,7 @@ EXTRA_OBJS=
 EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
-EXT_DIR_TSTAMPS=
+EXT_DIR_TSTAMPS= $(ROOT)/Network/IPv4/Core/.tstamp $(ROOT)/Network/IPv4/QoS/.tstamp $(ROOT)/Transport/TCP/.tstamp $(ROOT)/Transport/NewTCP/.tstamp $(ROOT)/Transport/UDP/.tstamp $(ROOT)/Transport/Socket/.tstamp $(ROOT)/NetworkInterfaces/.tstamp $(ROOT)/NetworkInterfaces/_802/.tstamp $(ROOT)/NetworkInterfaces/ARP/.tstamp $(ROOT)/NetworkInterfaces/Ethernet/.tstamp $(ROOT)/NetworkInterfaces/PPP/.tstamp $(ROOT)/NetworkInterfaces/Queues/.tstamp $(ROOT)/Applications/Generic/.tstamp $(ROOT)/Applications/TCPApp/.tstamp $(ROOT)/Applications/UDPApp/.tstamp $(ROOT)/Applications/PingApp/.tstamp $(ROOT)/Base/.tstamp $(ROOT)/Util/.tstamp $(ROOT)/Nodes/IPSuite/.tstamp $(ROOT)/Network/MPLS/.tstamp $(ROOT)/Network/LDP/.tstamp $(ROOT)/Network/RSVP_TE/.tstamp $(ROOT)/Nodes/MPLS/.tstamp
 
 # Additional libraries (-L option -l option)
 LIBS=
@@ -44,14 +44,25 @@ GENERATEDHEADERS=
 
 #------------------------------------------------------------------------------
 
-$(TARGET): $(OBJS) subdirs Makefile
+$(TARGET): $(OBJS) subdirs Makefile .tstamp
+	@# do nothing
+
+.tstamp: $(OBJS)
 	echo>.tstamp
-	
+
 $(OBJS) : $(GENERATEDHEADERS)
 
 
 purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+
+$(EXT_DIR_TSTAMPS):
+	@echo
+	@echo Error: $@ does not exist.
+	@echo This means that at least the above dependency directory has not been built.
+	@echo Maybe you need to do a top-level make?
+	@echo
+	@exit 1
 
 .PHONY: subdirs $(SUBDIRS)
 

@@ -22,7 +22,7 @@ EXTRA_OBJS=
 EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
-EXT_DIR_TSTAMPS=
+EXT_DIR_TSTAMPS= ../../Base/.tstamp ../../Util/.tstamp ../../Network/IPv4/Core/.tstamp
 
 # Additional libraries (-L option -l option)
 LIBS=
@@ -44,14 +44,25 @@ GENERATEDHEADERS= _802Ctrl_m.h MACAddress_m.h
 
 #------------------------------------------------------------------------------
 
-$(TARGET): $(OBJS) subdirs Makefile
+$(TARGET): $(OBJS) subdirs Makefile .tstamp
+	@# do nothing
+
+.tstamp: $(OBJS)
 	echo>.tstamp
-	
+
 $(OBJS) : $(GENERATEDHEADERS)
 
 
 purify: $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS) subdirs Makefile
 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+
+$(EXT_DIR_TSTAMPS):
+	@echo
+	@echo Error: $@ does not exist.
+	@echo This means that at least the above dependency directory has not been built.
+	@echo Maybe you need to do a top-level make?
+	@echo
+	@exit 1
 
 .PHONY: subdirs $(SUBDIRS)
 
