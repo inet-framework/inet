@@ -46,6 +46,7 @@
 //  - example models such as TCPTester, ClientServerNetwork, McNetwork2 or 
 //    Peer2Network
 //  - protocol implementations: IPProcessing, TcpModule, ...
+//  - <b>new TCP model (alpha): TCPMain</b>
 //
 // Starting points for the MPLS models:
 //  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe

@@ -67,7 +67,9 @@ GENERATEDHEADERS=
 SUBDIRS= LDP1
 SUBDIR_TARGETS=  LDP1_dir
 
-$(TARGET): $(OBJS) Makefile.vc subdirs
+$(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
+
+.tstamp: $(OBJS)
 	@echo.>.tstamp
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

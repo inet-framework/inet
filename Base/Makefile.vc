@@ -67,7 +67,9 @@ GENERATEDHEADERS=
 SUBDIRS= 
 SUBDIR_TARGETS= 
 
-$(TARGET): $(OBJS) Makefile.vc subdirs
+$(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
+
+.tstamp: $(OBJS)
 	@echo.>.tstamp
 
 $(OBJS) : $(GENERATEDHEADERS)

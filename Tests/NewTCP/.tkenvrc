@@ -35,7 +35,7 @@ config editor-case-sensitive	{0}
 config editor-whole-words	{0}
 config filtobjlist-order	{Class}
 inspector "tcpTest" "TcpTest" "2" "401x340+312+16"
-inspector "tcpTest.tcpsrv" "TCPMain" "3" "503x253+509+155"
 inspector "tcpTest.tcpdump" "TCPDump" "3" "503x253+275+442"
+inspector "tcpTest.tcpsrv" "TCPMain" "3" "503x253+509+155"
 inspector "tcpTest.tcpcli" "TCPMain" "3" "503x253+-3+155"
 

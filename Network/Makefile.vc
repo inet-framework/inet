@@ -67,7 +67,9 @@ GENERATEDHEADERS=
 SUBDIRS= IPv4 LDP MPLS RSVP_TE
 SUBDIR_TARGETS=  IPv4_dir LDP_dir MPLS_dir RSVP_TE_dir
 
-$(TARGET): $(OBJS) Makefile.vc subdirs
+$(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
+
+.tstamp: $(OBJS)
 	@echo.>.tstamp
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc

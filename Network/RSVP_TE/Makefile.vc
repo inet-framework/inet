@@ -25,7 +25,11 @@ EXTRA_OBJS=
 EXT_DIR_OBJS=
 
 # time stamps of other directories (used as dependency)
-EXT_DIR_TSTAMPS=
+EXT_DIR_TSTAMPS=..\IPv4\Core/.tstamp \
+            ..\..\Transport\TCP/.tstamp \
+            ..\MPLS/.tstamp \
+            ..\..\Base/.tstamp \
+            ..\..\Util/.tstamp
 
 # Additional libraries (-L option -l option)
 LIBS=
@@ -67,13 +71,22 @@ GENERATEDHEADERS=
 SUBDIRS= 
 SUBDIR_TARGETS= 
 
-$(TARGET): $(OBJS) Makefile.vc subdirs
+$(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
+
+.tstamp: $(OBJS)
 	@echo.>.tstamp
 
 $(OBJS) : $(GENERATEDHEADERS)
 
 # purify: $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
+
+$(EXT_DIR_TSTAMPS):
+	@echo Error: $(@:/=\) does not exist.
+	@echo This means that at least the above dependency directory has not been built.
+	@echo Maybe you need to do a top-level make?
+	@echo.
+	@exit /b 1
 
 subdirs: $(SUBDIR_TARGETS)
 
@@ -167,8 +180,6 @@ RSVPApp.obj: RSVPApp.cc \
   RSVPTester.h \
   ..\MPLS/MPLSModule.h \
   ..\..\Util/StringTokenizer.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlmemory.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/parser.h \
   ..\..\Transport\TCP/tcp.h \
   rsvp_message.h \
   RSVP.h \
@@ -178,21 +189,6 @@ RSVPApp.obj: RSVPApp.cc \
   ..\MPLS/LIBtable.h \
   ..\MPLS/LIBTableAccess.h \
   ..\MPLS/MPLSAccess.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlversion.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/threads.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/globals.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlerror.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/SAX.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xlink.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/tree.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlregexp.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/valid.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/entities.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/encoding.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlIO.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/list.h \
-  D:/home/tools/libxml2-2.5.4.win32/include/libxml/xmlautomata.h \
-  D:/home/tools/iconv-1.8.win32/include/iconv.h \
   intserv.h \
   ..\IPv4\Core/IPAddress.h \
   ..\..\Transport\TCP/TransportPacket.h \
