@@ -11,35 +11,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include <vector>
-#include <omnetpp.h>
-#include "TCPSocket.h"
 
+#include "TCPSessionApp.h"
 
-/**
- * Single-connection TCP application.
- */
-class TCPSessionApp : public cSimpleModule
-{
-  protected:
-    struct Command
-    {
-        simtime_t tSend;
-        int numBytes;
-    };
-    typedef std::vector<Command> CommandVector;
-    CommandVector commands;
-
-    cQueue queue;
-
-  protected:
-    void parseScript(const char *script);
-
-  public:
-    Module_Class_Members(TCPSessionApp, cSimpleModule, 16384);
-    virtual void activity();
-    virtual void finish();
-};
 
 Define_Module(TCPSessionApp);
 
