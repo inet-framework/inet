@@ -45,6 +45,8 @@ class TCPSrvHostApp : public cSimpleModule
 /**
  * Abstract base class for server processes to be used with TCPSrvHostApp.
  * Subclasses need to be registered using the Register_Class() macro.
+ *
+ * @see TCPSrvHostApp
  */
 class TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInterface
 {
@@ -70,6 +72,9 @@ class TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInter
     /** Returns the socket object */
     TCPSocket *socket() {return sock;}
 
+    /** Returns pointer to the host module */
+    TCPSrvHostApp *hostModule() {return hostmod;}
+
     /**
      * Schedule an event. Do not use contextPointer() of cMessage, because
      * TCPServerThreadBase uses it for its own purposes.
@@ -78,6 +83,9 @@ class TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInter
 
     /** Cancel an event */
     void cancelEvent(cMessage *msg)  {hostmod->cancelEvent(msg);}
+
+    /** Returns simulation time */
+    simtime_t simTime() {return hostmod->simTime();}
 
     /** @name Callback methods, called on different socket events. */
     //@{

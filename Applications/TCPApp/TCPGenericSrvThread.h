@@ -23,9 +23,6 @@
  */
 class TCPGenericSrvThread : public TCPServerThreadBase
 {
-  protected:
-    simtime_t maxMsgDelay;
-
   public:
     TCPGenericSrvThread() {}
 

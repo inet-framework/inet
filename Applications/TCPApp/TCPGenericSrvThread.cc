@@ -16,13 +16,13 @@
 #include "GenericAppMsg_m.h"
 
 
+
 Register_Class(TCPGenericSrvThread);
 
 
 void TCPGenericSrvThread::established()
 {
-    // some initialization
-    maxMsgDelay = 0;
+    // no initialization needed
 }
 
 void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
@@ -34,13 +34,14 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
                   "sendQueueClass/receiveQueueClass parameters "
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
                   msg->className(), msg->name());
+    if (appmsg->replyDelay()>0)
+        opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"
+                  " of GenericAppMsg, try to use TCPGenericSrvApp instead",
+                  msg->className(), msg->name(), className());
 
+    // process message: send back requested number of bytes, then close
+    // connection if that was requested too
     long requestedBytes = appmsg->expectedReplyLength();
-
-    simtime_t msgDelay = appmsg->replyDelay();
-    if (msgDelay>maxMsgDelay)
-        maxMsgDelay = msgDelay;
-
     bool doClose = appmsg->close();
 
     if (requestedBytes==0)
@@ -50,18 +51,18 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     else
     {
         msg->setLength(requestedBytes*8);
-//        sendOrSchedule(msg, delay+msgDelay);
+        socket()->send(msg);
     }
 
     if (doClose)
     {
         socket()->close();
-        //sendOrSchedule(msg, delay+maxMsgDelay);
     }
 }
 
 void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
+    // no timers in this serverThread
 }
 
 
