@@ -20,6 +20,9 @@
 #define MSGKIND_CLOSE    2
 
 
+Define_Module(TelnetApp);
+
+
 void TelnetApp::initialize()
 {
     TCPGenericCliAppBase::initialize();
@@ -45,12 +48,15 @@ void TelnetApp::handleTimer(cMessage *msg)
         case MSGKIND_SEND:
            if (numCharsToType>1)
            {
-               sendPacket(1,1);  // user types a character and expects it to be echoed
+               // user types a character and expects it to be echoed
+               ev << "user types one character, " << numCharsToType-1 << " to go\n";
+               sendPacket(1,1);
                scheduleAt(simTime()+0.1, timeoutMsg);
                numCharsToType--;
            }
            else
            {
+               ev << "user hits Enter key\n";
                sendPacket(1,50); // user hits Enter, and waits for type command's output
                numCharsToType = 15;
 
@@ -84,20 +90,25 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
     if (len==1)
     {
         // this is an echo, ignore
+        ev << "received echo\n";
     }
     else
     {
         // output from last typed command arrived.
+        ev << "received output of last command typed\n";
+
         // If user has finished working, she closes the connection, otherwise
         // starts typing again after a delay
         numLinesToType--;
 
         if (numLinesToType==0)
         {
+            ev << "user finished session, closing TCP connection\n";
             close();
         }
         else
         {
+            ev << "user looks at output, then starts typing next command\n";
             timeoutMsg->setKind(MSGKIND_SEND);
             scheduleAt(simTime()+3, timeoutMsg);
         }

@@ -35,7 +35,7 @@ class TelnetApp : public TCPGenericCliAppBase
     virtual void initialize();
 
     /** Redefined. */
-    virtual void handleTimer(cMessage *msg) = 0;
+    virtual void handleTimer(cMessage *msg);
 
     /** Redefined. */
     virtual void socketEstablished(int connId, void *yourPtr);

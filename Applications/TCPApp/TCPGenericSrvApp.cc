@@ -71,7 +71,15 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         msgsRcvd++;
         bytesRcvd += msg->length()/8;
-        GenericAppMsg *appmsg = check_and_cast<GenericAppMsg *>(msg);
+
+        GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
+        if (!appmsg)
+            error("Message (%s)%s is not a GenericAppMsg -- "
+                  "probably wrong client app, or wrong setting of TCP's "
+                  "sendQueueClass/receiveQueueClass parameters "
+                  "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
+                  msg->className(), msg->name());
+
         long requestedBytes = appmsg->expectedReplyLength();
 
         if (requestedBytes==0)
@@ -102,7 +110,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     if (ev.isGUI())
     {
         char buf[64];
-        sprintf(buf, "rcvd: %ld / %ld bytes\nsent: %ld / %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
+        sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
         displayString().setTagArg("t",0,buf);
     }
 }
