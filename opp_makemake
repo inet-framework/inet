@@ -185,7 +185,7 @@ done
 objs=`echo *.ned *.msg *.cc | sed 's/\*[^ ]*//g; s/[^ ]*_n\.cc//g; s/[^ ]*_m\.cc//g; s/\.ned/_n.o/g; s/\.msg/_m.o/g; s/\.cc/.o/g'`
 
 extdirobjs=
-if [ ! "$linkwithobjects" = "y" ]; then
+if [ "$linkwithobjects" = "y" ]; then
     for i in $includes; do
         dir=`echo $i | sed 's/^-I//'`
         extdirobjs="$extdirobjs $dir/*.o"
