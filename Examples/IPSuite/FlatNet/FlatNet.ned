@@ -38,17 +38,15 @@ module FlatNet
             display: "i=cogwheel";
         rte: Router[57];
             display: "i=ball2_vs,gold,100";
-        cli: StandardHost2[3];
-            display: "i=comp_s,green";
+        cli: StandardHost2[2];
+            display: "i=comp_s,green,50";
         srv: StandardHost2;
-            display: "i=comp_s,cyan";
+            display: "i=comp_s,cyan,50";
     connections nocheck:
         cli[0].out++ --> fiberrouterline --> rte[50].in++;
         cli[0].in++ <-- fiberrouterline <-- rte[50].out++;
         cli[1].out++ --> fiberrouterline --> rte[8].in++;
         cli[1].in++ <-- fiberrouterline <-- rte[8].out++;
-        cli[2].out++ --> fiberrouterline --> rte[30].in++;
-        cli[2].in++ <-- fiberrouterline <-- rte[30].out++;
 
         srv.out++ --> fiberrouterline --> rte[18].in++;
         srv.in++ <-- fiberrouterline <-- rte[18].out++;
