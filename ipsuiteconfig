@@ -1,7 +1,7 @@
 #
 # config file for the IPSuite
 #
-ROOT:=$(shell pwd)
+ROOT:=$(HOME)/opp-rsvp-te/ipsuite-rearranged
 
 NEDC=nedc
 MSGC=opp_msgc
