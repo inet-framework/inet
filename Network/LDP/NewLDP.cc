@@ -76,7 +76,7 @@ void NewLDP::initialize()
     // start listening for incoming conns
     ev << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
     serverSocket.setOutputGate(gate("to_tcp_interface"));
-    serverSocket.bind(local_addr, LDP_PORT);
+    serverSocket.bind(LDP_PORT);
     serverSocket.listen(true);
 }
 
@@ -116,7 +116,7 @@ void NewLDP::sendHelloTo(IPAddress dest)
     //hello->setTbit(...);
 
     UDPControlInfo *controlInfo = new UDPControlInfo();
-    controlInfo->setSrcAddr(local_addr);
+    //controlInfo->setSrcAddr(local_addr);
     controlInfo->setDestAddr(dest);
     controlInfo->setSrcPort(100);
     controlInfo->setDestPort(100);
@@ -510,8 +510,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
     if (found)  // Found the label
     {
-        ev << "LSR(" << local_addr <<
-            "): Label =" << label << " found for fec =" << IPAddress(fec) << "\n";
+        ev << "Label =" << label << " found for fec =" << IPAddress(fec) << "\n";
 
         // Construct a label mapping message
 
@@ -527,8 +526,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         lmMessage->setSenderAddress(local_addr);
         lmMessage->addPar("fecId") = fecId;
 
-        ev << "LSR(" << local_addr <<
-            "): Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
+        ev << "Send Label mapping(fec=" << IPAddress(fec) << ",label=" << label << ")to " <<
             "LSR(" << IPAddress(srcAddr) << ")\n";
 
         // send msg to peer over TCP
@@ -539,8 +537,7 @@ void NewLDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     }
     else if (isER)
     {
-        ev << "LSR(" << local_addr <<
-            "): Generates new label for the fec " << IPAddress(fec) << "\n";
+        ev << "Generates new label for the fec " << IPAddress(fec) << "\n";
 
         // Install new labels
         // Note this is the ER router, we must base on rt to find the next hop
@@ -600,7 +597,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
     IPAddress fromIP = packet->getSenderAddress();
     // int fecId = packet->par("fecId"); -- FIXME was not used (?)
 
-    ev << "LSR(" << local_addr << ") gets mapping Label =" << label << " for fec =" <<
+    ev << "Gets mapping Label =" << label << " for fec =" <<
         IPAddress(fec) << " from LSR(" << IPAddress(fromIP) << ")\n";
 
     // This is the outgoing interface for the FEC
@@ -661,7 +658,7 @@ void NewLDP::processLABEL_MAPPING(LDPLabelMapping * packet)
         packet->setReceiverAddress(addrToSend);
         packet->setSenderAddress(local_addr);
 
-        ev << "LSR(" << local_addr << ") sends Label mapping label=" << inLabel <<
+        ev << "Sends Label mapping label=" << inLabel <<
             " for fec =" << IPAddress(fec) << " to " << "LSR(" << addrToSend << ")\n";
 
         peerSocket(addrToSend)->send(packet);

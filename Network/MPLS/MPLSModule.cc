@@ -41,12 +41,8 @@ void MPLSModule::initialize()
 void MPLSModule::dumpFECTable()
 {
     ev << "Current FEC table:\n";
-    for (std::vector<FECElem>::iterator it = fecList.begin(); it != fecList.end(); it++)
-    {
-        ev << "FECid=" << it->fecId
-           << "  dest=" << it->destAddr
-           << "  src =" << it->srcAddr << "\n";
-    }
+    for (std::vector<FECElem>::iterator it=fecList.begin(); it!=fecList.end(); it++)
+        ev << "  " << *it << "\n";
 }
 
 

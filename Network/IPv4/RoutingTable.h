@@ -184,8 +184,10 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
  *
+ *
  * @see InterfaceEntry, RoutingEntry
  */
+//FIXME see RFC 2072, Router Renumbering Guide for guidelines on router id
 class RoutingTable: public cSimpleModule
 {
   private:
