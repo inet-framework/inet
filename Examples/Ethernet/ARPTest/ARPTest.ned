@@ -35,13 +35,13 @@ module ARPTest
         router7: Router;
             display: "p=329,100;i=srouter";
         router6: Router;
-            display: "p=254,98;i=srouter";
+            display: "p=254,100;i=srouter";
         bus2: EtherBus;
             parameters:
                 positions = "",
                 propagationSpeed = 2e8,
                 writeScalars = false;
-            display: "p=277,23";
+            display: "p=260,40;b=260,10";
         router5: Router;
             display: "p=187,98;i=srouter";
         bus1: EtherBus;
@@ -49,11 +49,11 @@ module ARPTest
                 positions = "",
                 propagationSpeed = 2e8,
                 writeScalars = false;
-            display: "p=284,171;b=252,16";
+            display: "p=280,170;b=260,10";
         router4: Router;
-            display: "p=386,235;i=srouter";
+            display: "p=386,240;i=srouter";
         router3: Router;
-            display: "p=320,237;i=srouter";
+            display: "p=320,240;i=srouter";
         router2: Router;
             display: "p=247,240;i=srouter";
         router1: Router;
@@ -73,28 +73,37 @@ module ARPTest
                 modulesToManipulate = "router2 router3 router4 router6";
             display: "p=118,350;i=cogwheel";
     connections:
-        server.out --> datarate 10e6 --> router8.in++;
-        router8.out++ --> datarate 10e6 --> server.in;
-        router7.out++ --> datarate 10e6 --> bus2.in++;
-        bus2.out++ --> datarate 10e6 --> router7.in++;
-        router8.out++ --> datarate 10e6 --> router7.in++;
-        router7.out++ --> datarate 10e6 --> router8.in++;
-        router5.out++ --> datarate 10e6 --> bus2.in++;
-        bus2.out++ --> datarate 10e6 --> router5.in++;
-        router5.out++ --> datarate 10e6 --> bus1.in++;
-        bus1.out --> datarate 10e6 --> router5.in++;
-        bus1.out++ --> datarate 10e6 --> router4.in;
-        router4.out --> datarate 10e6 --> bus1.in++;
-        bus1.out++ --> datarate 10e6 --> router3.in;
-        router3.out --> datarate 10e6 --> bus1.in++;
-        bus1.out++ --> datarate 10e6 --> router2.in;
-        router2.out --> datarate 10e6 --> bus1.in++;
-        bus1.out++ --> datarate 10e6 --> router1.in;
-        router1.out --> datarate 10e6 --> bus1.in++;
-        client.out --> datarate 10e6 --> router1.in++;
-        router1.out++ --> datarate 10e6 --> client.in;
-        router6.out++ --> datarate 10e6 --> bus2.in++;
-        bus2.out++ --> datarate 10e6 --> router6.in++;
+        server.ethOut++ --> datarate 10e6 --> router8.ethIn++;
+        router8.ethOut++ --> datarate 10e6 --> server.ethIn++;
+
+        router7.ethOut++ --> datarate 10e6 --> bus2.in++;
+        bus2.out++ --> datarate 10e6 --> router7.ethIn++;
+
+        router8.ethOut++ --> datarate 10e6 --> router7.ethIn++;
+        router7.ethOut++ --> datarate 10e6 --> router8.ethIn++;
+
+        router5.ethOut++ --> datarate 10e6 --> bus2.in++;
+        bus2.out++ --> datarate 10e6 --> router5.ethIn++;
+
+        router5.ethOut++ --> datarate 10e6 --> bus1.in++;
+        bus1.out++ --> datarate 10e6 --> router5.ethIn++;
+
+        bus1.out++ --> datarate 10e6 --> router4.ethIn++;
+        router4.ethOut++ --> datarate 10e6 --> bus1.in++;
+
+        bus1.out++ --> datarate 10e6 --> router3.ethIn++;
+        router3.ethOut++ --> datarate 10e6 --> bus1.in++;
+
+        bus1.out++ --> datarate 10e6 --> router2.ethIn++;
+        router2.ethOut++ --> datarate 10e6 --> bus1.in++;
+
+        bus1.out++ --> datarate 10e6 --> router1.ethIn++;
+        router1.ethOut++ --> datarate 10e6 --> bus1.in++;
+
+        client.ethOut++ --> datarate 10e6 --> router1.ethIn++;
+        router1.ethOut++ --> datarate 10e6 --> client.ethIn++;
+        router6.ethOut++ --> datarate 10e6 --> bus2.in++;
+        bus2.out++ --> datarate 10e6 --> router6.ethIn++;
 endmodule
 
 network arpTest : ARPTest

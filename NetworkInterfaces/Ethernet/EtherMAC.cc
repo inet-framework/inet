@@ -1017,11 +1017,8 @@ InterfaceEntry* EtherMAC::registerInterface(double datarate)
     // MTU is 1500 on Ethernet
     e->mtu = 1500;
 
-    // we're connected if other end of connection path is an input gate
-    bool connected = gate("physOut")->destinationGate()->type() == 'I';
-
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    e->metric = connected ? (int)ceil(2e9/datarate) : 100; // use OSPF cost as default
+    e->metric = disabled ? 100 : (int)ceil(2e9/datarate); // use OSPF cost as default
 
     // capabilities
     e->multicast = true;
