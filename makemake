@@ -62,7 +62,7 @@ $MAKEMAKE $OPTS -n -r
 (cd Examples/IPSuite/FlatNet && $MAKEMAKE $ALL_MODEL_OPTS)
 (cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE $ALL_MODEL_OPTS)
 (cd Examples/IPSuite/Multicast && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/IPSuite/PerformAnalysis && $MAKEMAKE $ALL_MODEL_OPTS)
+(cd Examples/IPSuite/RouterPerf && $MAKEMAKE $ALL_MODEL_OPTS)
 (cd Examples/IPSuite/TCPClientServerNet && $MAKEMAKE $ALL_MODEL_OPTS)
 
 (cd Examples/MPLS/Tester && $MAKEMAKE $OPTS -w -o MPLSTester $ALL_MPLS_IPSUITE_INCLUDES)

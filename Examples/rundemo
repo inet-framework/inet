@@ -27,7 +27,7 @@ foreach line {
    {"FlatNet"                "IPSuite/FlatNet"            "./FlatNet"            "FlatNet"}
    {"KIDSNw1"                "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
    {"Multicast"              "IPSuite/Multicast"          "./Multicast"          "Multicast"}
-   {"PerformAnalysis"        "IPSuite/PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
+   {"RouterPerf"             "IPSuite/RouterPerf"         "./RouterPerf"         "RouterPerf"}
    {"TCPClientServerNet"     "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
 
    {"Ethernet"}

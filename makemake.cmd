@@ -62,7 +62,7 @@ cd %root%\Examples\IPSuite\NClients && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\FlatNet && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\Multicast && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\IPSuite\RouterPerf && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\TCPClientServerNet && %MAKEMAKE% %ALL_MODEL_OPTS%
 
 cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -w -o MPLSTester %ALL_MPLS_IPSUITE_INCLUDES%

@@ -163,33 +163,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-NewBWRequestTester.obj: NewBWRequestTester.cc \
-  ../../../Network/MPLS/MPLSModule.h \
-  ../../../Network/RSVP_TE/RSVPTester.h \
-  ../../../Network/MPLS/MPLSPacket.h \
-  ../../../Network/IPv4/IPDatagram.h \
-  ../../../Network/MPLS/LIBTableAccess.h \
-  ../../../Network/IPv4/RoutingTableAccess.h \
-  ../../../Network/IPv4/RoutingTable.h \
-  ../../../Network/MPLS/ConstType.h \
-  ../../../Network/IPv4/IPDatagram_m.h \
-  ../../../Network/IPv4/IPAddress.h \
-  ../../../Base/ipsuite_defs.h \
-  ../../../Base/ModuleAccess.h \
-  ../../../Network/MPLS/LIBtable.h
-NewRouteTester.obj: NewRouteTester.cc \
-  ../../../Network/MPLS/MPLSModule.h \
-  ../../../Network/RSVP_TE/RSVPTester.h \
-  ../../../Network/RSVP_TE/TED.h \
-  ../../../Network/MPLS/MPLSPacket.h \
-  ../../../Network/IPv4/IPDatagram.h \
-  ../../../Network/MPLS/LIBTableAccess.h \
-  ../../../Network/IPv4/RoutingTableAccess.h \
-  ../../../Network/IPv4/RoutingTable.h \
-  ../../../Network/MPLS/ConstType.h \
-  ../../../Network/IPv4/IPDatagram_m.h \
-  ../../../Network/IPv4/IPAddress.h \
-  ../../../Base/ipsuite_defs.h \
-  ../../../Base/ModuleAccess.h \
-  ../../../Network/MPLS/LIBtable.h \
-  ../../../Network/RSVP_TE/IntServ_m.h
+

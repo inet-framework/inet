@@ -64,8 +64,8 @@ OBJS=
 GENERATEDHEADERS= 
 
 # subdirectories to recurse into
-SUBDIRS= FlatNet KIDSNw1 Multicast NClients PerformAnalysis TCPClientServerNet
-SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir Multicast_dir NClients_dir PerformAnalysis_dir TCPClientServerNet_dir
+SUBDIRS= FlatNet KIDSNw1 Multicast NClients PerformAnalysis RouterPerf TCPClientServerNet
+SUBDIR_TARGETS=  FlatNet_dir KIDSNw1_dir Multicast_dir NClients_dir PerformAnalysis_dir RouterPerf_dir TCPClientServerNet_dir
 
 $(TARGET): $(OBJS) Makefile.vc subdirs .tstamp
 
@@ -91,6 +91,9 @@ NClients_dir:
 
 PerformAnalysis_dir:
 	cd PerformAnalysis && cd && nmake /nologo /f Makefile.vc
+
+RouterPerf_dir:
+	cd RouterPerf && cd && nmake /nologo /f Makefile.vc
 
 TCPClientServerNet_dir:
 	cd TCPClientServerNet && cd && nmake /nologo /f Makefile.vc

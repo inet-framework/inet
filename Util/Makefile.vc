@@ -115,7 +115,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-stlwatch.obj: stlwatch.cc \
-  stlwatch.h
-StringTokenizer.obj: StringTokenizer.cc \
-  StringTokenizer.h
+
