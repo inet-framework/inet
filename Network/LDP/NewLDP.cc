@@ -92,6 +92,9 @@ void NewLDP::handleMessage(cMessage *msg)
             // FIXME passive open must be issued sometime
             // FIXME associate with peer table
         }
+
+        // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
+        // or socketFailure()
         socket->processMessage(msg);
     }
 }
@@ -163,7 +166,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
 
     ev << "Received LDP Hello from " << peerAddr << ", ";
 
-    if (peerAddr.isNull())
+    if (peerAddr.isNull() || peerAddr==local_addr)
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
         ev << "ignore\n";
@@ -183,17 +186,22 @@ void NewLDP::processLDPHello(LDPHello *msg)
         return;
     }
 
-    ev << "adding to peer table and establishing session with it\n";
-
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = inInterface;
-    info.role = string(peerAddr.getInt()>local_addr.getInt() ? "Client" : "Server");
+    info.activeRole = peerAddr.getInt() > local_addr.getInt();
     myPeers.push_back(info);
 
+    ev << "added to peer table\n";
+    ev << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
+
     // initiate connection to peer
-    openTCPConnectionToPeer(peerAddr);
+    if (info.activeRole)
+    {
+        ev << "Establishing session with it\n";
+        openTCPConnectionToPeer(peerAddr);
+    }
 }
 
 void NewLDP::openTCPConnectionToPeer(IPAddress addr)

@@ -73,58 +73,58 @@ module MPLSNet
             display: "p=500,95;i=srouter";
         host1: StandardHost2;  // client
             gatesizes:
-                in[1], 
+                in[1],
                 out[1];
             display: "p=26,98;i=comp_s";
         host2: StandardHost2;  // client
             gatesizes:
-                in[1], 
+                in[1],
                 out[1];
             display: "p=26,256;i=comp_s";
         host3: StandardHost2;  // server
             gatesizes:
-                in[1], 
+                in[1],
                 out[1];
             display: "p=570,88;i=comp_s";
         host4: StandardHost2;  // server
             gatesizes:
-                in[1], 
+                in[1],
                 out[1];
             display: "p=578,240;i=comp_s";
     connections nocheck:
-        host1.in[0] <-- LSR1.out[0];
-        host1.out[0] --> LSR1.in[0];
+        host1.in[0] <-- datarate 64000 <-- LSR1.out[0];
+        host1.out[0] --> datarate 64000 --> LSR1.in[0];
 
-        host2.in[0] <-- LSR1.out[1];
-        host2.out[0] --> LSR1.in[1];
+        host2.in[0] <-- datarate 64000 <-- LSR1.out[1];
+        host2.out[0] --> datarate 64000 --> LSR1.in[1];
 
-        LSR1.out[2] --> LSR2.in[0];
-        LSR1.in[2] <-- LSR2.out[0];
+        LSR1.out[2] --> datarate 64000 --> LSR2.in[0];
+        LSR1.in[2] <-- datarate 64000 <-- LSR2.out[0];
 
-        LSR1.out[3] --> LSR3.in[0];
-        LSR1.in[3] <-- LSR3.out[0];
+        LSR1.out[3] --> datarate 64000 --> LSR3.in[0];
+        LSR1.in[3] <-- datarate 64000 <-- LSR3.out[0];
 
-        LSR2.out[1] --> LSR3.in[1];
-        LSR2.in[1] <-- LSR3.out[1];
+        LSR2.out[1] --> datarate 64000 --> LSR3.in[1];
+        LSR2.in[1] <-- datarate 64000 <-- LSR3.out[1];
 
-        LSR2.out[2] --> LSR4.in[0];
-        LSR2.in[2] <-- LSR4.out[0];
+        LSR2.out[2] --> datarate 64000 --> LSR4.in[0];
+        LSR2.in[2] <-- datarate 64000 <-- LSR4.out[0];
 
-        LSR3.out[2] --> LSR4.in[1];
-        LSR3.in[2] <-- LSR4.out[1];
+        LSR3.out[2] --> datarate 64000 --> LSR4.in[1];
+        LSR3.in[2] <-- datarate 64000 <-- LSR4.out[1];
 
-        LSR3.out[3] --> LSR5.in[0];
-        LSR3.in[3] <-- LSR5.out[0];
+        LSR3.out[3] --> datarate 64000 --> LSR5.in[0];
+        LSR3.in[3] <-- datarate 64000 <-- LSR5.out[0];
 
-        LSR4.out[2] --> LSR5.in[1];
-        LSR4.in[2] <-- LSR5.out[1];
+        LSR4.out[2] --> datarate 64000 --> LSR5.in[1];
+        LSR4.in[2] <-- datarate 64000 <-- LSR5.out[1];
 
 
-        LSR5.out[2] --> host3.in[0];
-        LSR5.in[2] <-- host3.out[0];
+        LSR5.out[2] --> datarate 64000 --> host3.in[0];
+        LSR5.in[2] <-- datarate 64000 <-- host3.out[0];
 
-        LSR5.out[3] --> host4.in[0];
-        LSR5.in[3] <-- host4.out[0];
+        LSR5.out[3] --> datarate 64000 --> host4.in[0];
+        LSR5.in[3] <-- datarate 64000 <-- host4.out[0];
 
 endmodule
 

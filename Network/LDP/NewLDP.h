@@ -43,8 +43,8 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 
     struct peer_info
     {
-        IPAddress peerIP;
-        string role;
+        IPAddress peerIP; // IP address of LDP peer
+        bool activeRole;  // we're in active or passive role in this session
         string linkInterface;
     };
 
