@@ -51,6 +51,7 @@ class ARP : public cSimpleModule
     simtime_t retryTimeout;
     int retryCount;
     simtime_t cacheTimeout;
+    bool doProxyARP;
 
     IPAddress myIPAddress;
     MACAddress myMACAddress;
@@ -115,6 +116,7 @@ void ARP::initialize(int stage)
     retryTimeout = par("retryTimeout");
     retryCount = par("retryCount");
     cacheTimeout = par("cacheTimeout");
+    doProxyARP = par("proxyARP");
 
     pendingQueue.setName("pendingQueue");
 
@@ -276,9 +278,8 @@ void ARP::sendPacketToMAC(cMessage *msg, const MACAddress& macAddress)
 void ARP::sendARPRequest(IPAddress ipAddress)
 {
     // fill out everything except dest MAC address
-    ARPPacket *arp = new ARPPacket();
+    ARPPacket *arp = new ARPPacket(opp_concat("arp-",ipAddress.str().c_str()));
     arp->setOpcode(ARP_REQUEST);
-    // arp->setHardwareType();
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
     arp->setDestIPAddress(ipAddress);
@@ -329,6 +330,8 @@ bool ARP::addressRecognized(IPAddress destAddr)
         return true;
 
     // respond to Proxy ARP request: if we can route this packet, say yes
+    if (!doProxyARP)
+        return false;
     RoutingTable *rt = routingTableAccess.get();
     bool routable = (rt->outputPortNo(destAddr)!=-1);
     return routable;
@@ -381,6 +384,7 @@ void ARP::processARPPacket(ARPPacket *arp)
     }
 
     // "?Am I the target protocol address?"
+    // if Proxy ARP is enabled, we also have to reply if we're a router to the dest IP address
     if (addressRecognized(arp->getDestIPAddress()))
     {
         // "If Merge_flag is false, add the triplet protocol type, sender
@@ -411,10 +415,12 @@ void ARP::processARPPacket(ARPPacket *arp)
             case ARP_REQUEST:
             {
                 EV << "Packet was ARP REQUEST, sending REPLY\n";
+
                 // "Swap hardware and protocol fields", etc.
+                IPAddress origDestAddress = arp->getDestIPAddress();
                 arp->setDestIPAddress(srcIPAddress);
                 arp->setDestMACAddress(srcMACAddress);
-                arp->setSrcIPAddress(myIPAddress);
+                arp->setSrcIPAddress(origDestAddress);
                 arp->setSrcMACAddress(myMACAddress);
                 arp->setOpcode(ARP_REPLY);
                 delete arp->removeControlInfo();

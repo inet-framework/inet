@@ -107,7 +107,6 @@ void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
 
     // create Ethernet frame, fill it in from EtherCtrl and encapsulate msg in it
     EV << "Encapsulating higher layer packet `" << msg->name() <<"' for MAC\n";
-    EV << "Sent from " << simulation.module(msg->senderModuleId())->fullPath() << " at " << msg->sendingTime() << " and was created " << msg->creationTime() <<  "\n";
 
     EtherCtrl *etherctrl = check_and_cast<EtherCtrl*>(msg->removeControlInfo());
     EthernetIIFrame *frame = new EthernetIIFrame(msg->name(), ETH_FRAME);
