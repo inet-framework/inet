@@ -46,7 +46,7 @@ module StandardHost2
             display: "p=125,58;i=app";
         tcp: TCPMain;
             display: "p=125,138;i=prot2";
-        udpApp: UDPClientApp;
+        udpApp: UDPApp;
             display: "i=app;p=212,58";
         udp: UDPProcessing;
             display: "p=212,138;i=prot1";

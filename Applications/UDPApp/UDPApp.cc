@@ -123,11 +123,13 @@ void UDPApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        // reschedule next sending
+        // send, then reschedule next sending
+        sendPacket();
         scheduleAt(simTime()+(double)par("message_freq"), msg);
     }
     else
     {
+        // process incoming packet
         processPacket(msg);
     }
 }

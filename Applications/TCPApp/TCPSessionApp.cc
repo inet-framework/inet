@@ -105,7 +105,10 @@ void TCPSessionApp::activity()
     // open
     waitAndEnqueue(tOpen-simTime(), &queue);
 
-    socket.bind(IPAddress(address), port);
+    if (!address[0])
+        socket.bind(port);
+    else
+        socket.bind(IPAddress(address), port);
 
     if (active)
         socket.connect(IPAddress(connectAddress), connectPort);
