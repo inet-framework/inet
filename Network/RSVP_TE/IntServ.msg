@@ -20,7 +20,11 @@ cplusplus {{
 
 #define MAX_ROUTE 10
 #define InLIST_SIZE 5
+
+typedef int IPADDR;  //FIXME this definition should go!!!  IPADDR should be IPAddress
+//typedef IPAddress IPADDR;
 }}
+class noncobject IPADDR;
 
 class noncobject IPAddress;
 
@@ -30,7 +34,7 @@ class noncobject IPAddress;
 struct SessionObj_t
 {
   fields:
-    int DestAddress;
+    IPADDR DestAddress;
     int Protocol_Id;
     int DestPort;
     int setupPri;
@@ -45,7 +49,7 @@ struct SessionObj_t
 struct RsvpHopObj_t
 {
   fields:
-    int Next_Hop_Address;
+    IPADDR Next_Hop_Address;
     int Logical_Interface_Handle;
 };
 
@@ -55,7 +59,7 @@ struct RsvpHopObj_t
 struct SenderTemplateObj_t
 {
   fields:
-    int SrcAddress = 0;
+    IPADDR SrcAddress; //= 0; FIXME
     int SrcPort = 0;
     int Lsp_Id = -1;
 };
@@ -110,7 +114,7 @@ struct FlowDescriptor_t
   fields:
     FlowSpecObj_t Flowspec_Object;
     FilterSpecObj_t Filter_Spec_Object;
-    int RRO[MAX_ROUTE];
+    IPADDR RRO[MAX_ROUTE];
     int label;
 };
 

@@ -18,6 +18,8 @@ cplusplus {{
 
 struct RsvpHopObj_t;
 struct FlowDescriptor_t;
+class noncobject IPADDR;
+
 class RSVPPacket;
 
 
@@ -81,7 +83,7 @@ message RSVPResvError extends RSVPPacket
         customize=true;
     fields:
         RsvpHopObj_t hop;
-        int errorNode;
+        IPADDR errorNode;
         int errorCode;
 };
 

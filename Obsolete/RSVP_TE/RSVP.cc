@@ -70,7 +70,7 @@ void print(RSVPResvMsg *p)
             ev << "RRO={";
             for (int c = 0; c < MAX_ROUTE; c++)
             {
-                int rroEle = p->getFlow_descriptor_list(i).RRO[c];
+                IPADDR rroEle = p->getFlow_descriptor_list(i).RRO[c];
                 if (rroEle != 0)
                     ev << IPAddress(rroEle) << ",";
             }
@@ -505,7 +505,7 @@ void RSVP::processResvMsg(RSVPResvMsg * rmsg)
     int OI = rmsg->getLIH();
     int count = 0;
 
-    int *Refresh_PHOP_list = new int[InLIST_SIZE];
+    IPADDR Refresh_PHOP_list[InLIST_SIZE];
 
     bool Resv_Refresh_Needed = false;
 
@@ -1008,7 +1008,7 @@ void RSVP::processPathTearMsg(RSVPPathTear * pmsg)
 
                 if (!IsER)
                 {
-                    int peerIP = 0;
+                    IPADDR peerIP = 0;
                     getPeerIPAddress(fPSB->OutInterface_List, &peerIP);
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
                     //ptm->addPar("dest_addr") = IPAddress(peerIP).str().c_str();
@@ -1102,7 +1102,7 @@ void RSVP::processResvTearMsg(RSVPResvTear * rmsg)
     ResvStateBlock_t *activeRSB;
     std::vector < PathStateBlock_t > locList;
 
-    int nexthop;
+    IPADDR nexthop;
     FlowDescriptor_t *fdlist = NULL;
     int n, m;
 
@@ -1305,9 +1305,9 @@ void RSVP::refreshPath(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
 
     //pm->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
-    int finalAddr = pm->getDestAddress();
+    IPADDR finalAddr = pm->getDestAddress();
     ev << "Final address " << IPAddress(finalAddr) << "\n";
-    int nextPeerIP = 0;
+    IPADDR nextPeerIP = 0;
     int nextPeerInf = 0;
     int index = 0;
 
@@ -1338,7 +1338,7 @@ void RSVP::refreshPath(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     sendToIP(pm, IPAddress(nextPeerIP));
 }
 
-void RSVP::refreshResv(ResvStateBlock_t * rsbEle, int PH)
+void RSVP::refreshResv(ResvStateBlock_t * rsbEle, IPADDR PH)
 {
 
     int i;
@@ -1516,7 +1516,7 @@ void RSVP::refreshResv(ResvStateBlock_t * rsbEle, int PH)
     sendToIP(outRM, IPAddress(PH));
 }
 
-void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
+void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, IPADDR PH)
 {
 
     // int PHOP;
@@ -2104,11 +2104,11 @@ int RSVP::GetFwdFS(int oi, FlowSpecObj_t * fwdFS)
     return 1;
 }
 
-void RSVP::Mcast_Route_Query(int srcAddr, int iad, int destAddr, int *outl)        // FIXME change to int& outl
+void RSVP::Mcast_Route_Query(IPADDR srcAddr, int iad, IPADDR destAddr, int *outl)        // FIXME change to int& outl
 {
     RoutingTable *rt = routingTableAccess.get();
 
-    if (da == routerId)
+    if (destAddr == routerId)
     {
         (*outl) = -1;
         return;
@@ -2117,13 +2117,13 @@ void RSVP::Mcast_Route_Query(int srcAddr, int iad, int destAddr, int *outl)     
     int foundIndex;
     // int j=0;
 
-    foundIndex = rt->outputPortNo(IPAddress(da));
+    foundIndex = rt->outputPortNo(IPAddress(destAddr));
     (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return???
 
     return;
 }
 
-bool RSVP::isLocalAddress(int addr)
+bool RSVP::isLocalAddress(IPADDR addr)
 {
     for (int i = 0; i < InLIST_SIZE; i++)
         if (LocalAddress[i] == addr)
@@ -2139,7 +2139,7 @@ void RSVP::updateTED()
     ted = TED::getGlobalInstance()->getTED();
 }
 
-void RSVP::getPeerIPAddress(int peerInf, int *peerIP)
+void RSVP::getPeerIPAddress(int peerInf, IPADDR *peerIP)
 {
     updateTED();
     std::vector < TELinkState >::iterator tedIter;
@@ -2154,7 +2154,7 @@ void RSVP::getPeerIPAddress(int peerInf, int *peerIP)
     }
 }
 
-void RSVP::getPeerInet(int peerIP, int *peerInf)
+void RSVP::getPeerInet(IPADDR peerIP, int *peerInf)
 {
     updateTED();
 
@@ -2170,7 +2170,7 @@ void RSVP::getPeerInet(int peerIP, int *peerInf)
     }
 }
 
-void RSVP::getIncInet(int peerIP, int *incInet)
+void RSVP::getIncInet(IPADDR peerIP, int *incInet)
 {
     updateTED();
 
@@ -2186,7 +2186,7 @@ void RSVP::getIncInet(int peerIP, int *incInet)
     }
 }
 
-void RSVP::getPeerIPAddress(int dest, int *peerIP, int *peerInf)
+void RSVP::getPeerIPAddress(IPADDR dest, IPADDR *peerIP, int *peerInf)
 {
     int outl = 0;
     Mcast_Route_Query(0, 0, dest, &outl);
@@ -2436,7 +2436,7 @@ void RSVP::preemptTunnel(int tunnelId)
     // std::vector<ResvStateBlock_t>::iterator r_iterI;
     ResvStateBlock_t r_iter;
 
-    std::vector < int >locList;
+    std::vector<IPADDR> locList;
 
     if (!PSBList.empty())
     {
@@ -2452,7 +2452,7 @@ void RSVP::preemptTunnel(int tunnelId)
 
                 if (!IsER)
                 {
-                    int peerIP = 0;
+                    IPADDR peerIP = 0;
                     getPeerIPAddress(PSBList[m].OutInterface_List, &peerIP);
                     ev << "Sending PATH TEAR MESSAGE to " << IPAddress(peerIP);
                     //ptMsg->addPar("dest_addr") = IPAddress(peerIP).str().c_str();

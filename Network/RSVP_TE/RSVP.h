@@ -53,7 +53,7 @@ private:
         SenderTspecObj_t Sender_Tspec_Object;
 
         // Previous Hop IP address from PHOP object
-        int Previous_Hop_Address;
+        IPADDR Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
         int LIH;
@@ -71,7 +71,7 @@ private:
         int OutInterface_List;//[InLIST_SIZE];
 
         // Expected incoming interface, undefined for unicast case
-        int  IncInterface ;
+        int  IncInterface;
         LabelRequestObj_t LabelRequest;
         bool SAllocated; //Resource has been allocated ?
     };
@@ -85,14 +85,14 @@ private:
         SessionObj_t Session_Object;
 
         // Next Hop IP address from PHOP object
-        int Next_Hop_Address;
+        IPADDR Next_Hop_Address;
 
         // Outgoing Interface on which reservation is to be made or has been made
         int OI;
 
         FilterSpecObj_t Filter_Spec_Object[InLIST_SIZE];
         int label[InLIST_SIZE];
-        int RRO[InLIST_SIZE][MAX_ROUTE];
+        IPADDR RRO[InLIST_SIZE][MAX_ROUTE];
 
         // STYLE Object structure
         //StyleObj_t Style_Object
@@ -105,7 +105,7 @@ private:
         //ScopeObj_t Scope_Object;
 
         // RESV_CONFIRM Object structure
-        int Receiver_Address;
+        IPADDR Receiver_Address;
     };
 
     /**
@@ -143,7 +143,7 @@ private:
         int Fhandle;
 
         // RESV_CONFIRM
-        int Receiver_Address;
+        IPADDR Receiver_Address;
     };
 
 
@@ -167,9 +167,9 @@ private:
     std::vector<TrafficControlStateBlock_t> TCSBList; //Traffic Control State Block
     std::vector<TELinkState>  ted;
 
-    int routerId;  // FIXME change to IPAddress
+    IPADDR routerId;  // FIXME change to IPAddress
     int NoOfLinks;
-    int LocalAddress[InLIST_SIZE];
+    IPADDR LocalAddress[InLIST_SIZE];
     bool IsIR;
     bool IsER;
 
@@ -183,11 +183,11 @@ private:
     void processPathErrorMsg(RSVPPathError *pmsg);
     void processResvErrorMsg(RSVPResvError *rmsg);
 
-    bool isLocalAddress(int ip);
+    bool isLocalAddress(IPADDR ip);
     void refreshPath( PathStateBlock_t *psbEle , int OI, EroObj_t* ero ) ;
         //PathRefresh( PathStateBlock_t *psbEle , int OI, int* ero );
-    void refreshResv( ResvStateBlock_t *rsbEle, int PH );
-    void RTearFwd(ResvStateBlock_t *rsbEle, int PH);
+    void refreshResv( ResvStateBlock_t *rsbEle, IPADDR PH );
+    void RTearFwd(ResvStateBlock_t *rsbEle, IPADDR PH);
     int updateTrafficControl(ResvStateBlock_t *activeRSB);
     void removeTrafficControl(ResvStateBlock_t *activeRSB);
     int TC_AddFlowspec( int tunnelId, int holdingPri, int setupPri, int OI,
@@ -199,10 +199,10 @@ private:
                     int oi, FlowSpecObj_t fs);
 
     void updateTED();
-    void getPeerIPAddress(int dest, int* peerIP, int* peerInf);
-    void getPeerInet(int peerIP, int* peerInf);
-    void getIncInet(int peerIP, int* incInet);
-    void getPeerIPAddress(int peerInf, int* peerIP);
+    void getPeerIPAddress(IPADDR dest, IPADDR* peerIP, int* peerInf);
+    void getPeerInet(IPADDR peerIP, int* peerInf);
+    void getIncInet(IPADDR peerIP, int* incInet);
+    void getPeerIPAddress(int peerInf, IPADDR* peerIP);
 
     void printSessionObject(SessionObj_t* s);
     void printRSVPHopObject(RsvpHopObj_t* r);
@@ -226,7 +226,7 @@ private:
 
     void sendToIP(cMessage *msg, IPAddress destAddr);
 
-    void Mcast_Route_Query(int srcAddr, int iad, int destAddr, int *outl);
+    void Mcast_Route_Query(IPADDR srcAddr, int iad, IPADDR destAddr, int *outl);
 
  public:
     Module_Class_Members(RSVP, cSimpleModule, 0);

@@ -22,6 +22,7 @@ struct LabelRequestObj_t;
 struct SenderDescriptor_t;
 struct FlowDescriptor_t;
 struct EroObj_t;
+class noncobject IPADDR;
 
 class RSVPPacket;
 
@@ -92,7 +93,7 @@ message RSVPPathError extends RSVPPacket
     properties:
         customize=true;
     fields:
-        int errorNode;
+        IPADDR errorNode;
         int errorCode;
         SenderDescriptor_t sender_descriptor;
 };

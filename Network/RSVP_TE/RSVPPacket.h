@@ -32,7 +32,7 @@ class RSVPPacket: public RSVPPacket_Base
     RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
     virtual cObject *dup() {return new RSVPPacket(*this);}
 
-    inline int getDestAddress() {return getSession().DestAddress;}
+    inline IPADDR getDestAddress() {return getSession().DestAddress;}
     inline int getProtId()      {return getSession().Protocol_Id;}
     inline int getDestPort()    {return getSession().DestPort;}
     inline int getTunnelId()    {return getSession().Tunnel_Id;}
