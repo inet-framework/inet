@@ -10,7 +10,9 @@ Compilation instructions for Unix:
   1. You need a working OMNeT++ installation, version 2.3 or newer.
 
   2. Change to the IPSuite directory. Edit the ipsuiteconfig file
-     and adjust the ROOT variable in it.  
+     and adjust the ROOT variable in it as well as OMNETPP_INCL_DIR
+     and OMNETPP_LIB_DIR.
+
      
   3. Type "make" to build everything.
 

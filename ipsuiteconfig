@@ -1,42 +1,7 @@
 #
-# config file for the IPSuite
+# Config file for the IPSuite. This is included by every makefile.
 #
-ROOT:=$(HOME)/opp-rsvp-te/ipsuite-rearranged
 
-NEDC=nedc
-MSGC=opp_msgc
-CXX=g++
-CC=gcc
-AR=ar cr
-SHLIB_LD=g++ -shared -fPIC
-MAKEDEPEND=opp_makedep -Y --objdirtree
+ROOT=$(HOME)/opp-rsvp-te/ipsuite-rearranged
 
-CFLAGS=-O3 -DNDEBUG=1  -fPIC
-NEDCFLAGS=-Wno-unused
-LDFLAGS=
-EXE_SUFFIX=
-
-OMNETPP_INCL_DIR=/home/andras/omnetpp/include
-OMNETPP_LIB_DIR=/home/andras/omnetpp/lib
-
-TK_LIBS=-L/usr/X11R6/lib -lX11 -ltk8.3 -ltcl8.3
-MPI_LIBS=
-PVM_LIBS=-L/usr/share/pvm3//lib -lgpvm3 -lpvm3
-SYS_LIBS=-ldl -lstdc++ 
-SYS_LIBS_PURE=-ldl -lsocket -lnsl -lm $(shell $(CXX) -print-file-name=libstdc++.a)
-
-# User interface libs
-CMDENV_LIBS=-lenvir -lcmdenv
-TKENV_LIBS=-lenvir -ltkenv $(TK_LIBS)
-
-# Simulation kernel
-STD_KERNEL_LIBS=-lsim_std
-MPI_KERNEL_LIBS=-lsim_mpi $(MPI_LIBS)
-PVM_KERNEL_LIBS=-lsim_pvm $(PVM_LIBS)
-
-# Simulation kernel and user interface libraries
-OMNETPP_LIBS=-L$(OMNETPP_LIB_DIR) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-
-COPTS=$(CFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
-NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
-
+include $(ROOT)/omnetppconfig
