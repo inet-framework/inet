@@ -41,6 +41,7 @@ std::ostream & operator<<(std::ostream & os, const lib_type & lib)
 void LIBTable::initialize()
 {
 /*
+//FIXME why is it commented out? --Andras
    // Read routing table file
    const char *libFilename = par("LibTableFileName").stringValue();
    const char *prtFilename = par("PrtTableFileName").stringValue();

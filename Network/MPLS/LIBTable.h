@@ -68,6 +68,7 @@ private:
      * Load the label information table from files
      * @param filename The lib table file input
      * @return The successful or unsuccessful code
+     * FIXME apparently never called at the moment (--Andras)
      */
     int readLibTableFromFile(const char* filename);
 
@@ -75,6 +76,7 @@ private:
      * Load the Partial Routing Information from files
      * @param filename The prt table file input
      * @return The successfule or unsuccesful code
+     * FIXME apparently never called at the moment (--Andras)
      */
     int readPrtTableFromFile(const char* filename);
 
