@@ -15,11 +15,18 @@ exec wish "$0" "$@"
 #--------------------------------------------------------------
 
 
-# columns below: <name> <directory> <unix-command> <windows-command>
+#
+# title line:   {"title"}
+# program line: {"name" "directory" "unix-command" "windows-command"}
+# readme line:  {"name" "readme-file"}
+# separator:    {}
+#
 set wantScrollbar 1
 set i 0
 set first ""
 foreach line {
+   {"INET Framework"}
+   {"About..."               "README.txt"}
    {"INET"}
    {"NClients/Telnet"        "INET/NClients"     "./NClients"              "NClients"}
    {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini" "NClients -f basicHTTP.ini"}
@@ -55,13 +62,21 @@ foreach line {
    } elseif {[llength $line]==1} {
        set type($i) "heading"
        set title($i) [lindex $line 0]
-   } else {
+   } elseif {[llength $line]==2} {
+       set type($i) "readme"
+       set title($i) [lindex $line 0]
+       set readme($i)   [lindex $line 1]
+       if {$first==""} {set first $i}
+   } elseif {[llength $line]==4} {
        set type($i) "program"
        set title($i) [lindex $line 0]
        set dir($i)   [lindex $line 1]
        set uprog($i) [lindex $line 2]
        set wprog($i) [lindex $line 3]
        if {$first==""} {set first $i}
+   } else {
+       tk_messageBox -title {Error} -type ok -icon error -message "Error in table: wrong #items in {$line}"
+       exit
    }
    incr i
 }
