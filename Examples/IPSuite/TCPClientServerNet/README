@@ -1,10 +1,8 @@
 This example shows the use of TCP client/server models in an IP based
 network.
 
-The TCP Client/Server net consists of four hosts and one router. The
-hosts named Client1-3 act as TCP clients and host Server4 as a TCP
-server. The latter accepts TCP connections and tansmits data to the
-clients.
+The model demostrates automatic IP address assignment and automatic routing
+table setup by FlatNetworkConfigurator. irt and mrt files are not used.
 
-The hosts are connected to a router each. Additionally, Client1 has a
-direct connection to Server1.
+The network consists of four hosts and one router. One of the clients has
+a direct connection to the server; others connect via the router.

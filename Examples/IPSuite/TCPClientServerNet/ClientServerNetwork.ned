@@ -17,72 +17,45 @@
 //
 
 
-
-
 import
     "Router",
-    "StandardHost2";
+    "StandardHost2",
+    "FlatNetworkConfigurator";
 
 
 module ClientServerNetwork
     submodules:
         client1: StandardHost2;
-            parameters:
-                IPForward = false,
-                routingFile = "client1.irt";
-            gatesizes:
-                in[2],
-                out[2];
             display: "p=66,50;i=comp";
-        // clients
         client2: StandardHost2;
-            parameters:
-                IPForward = false,
-                routingFile = "client2.irt";
-            gatesizes:
-                in[1],
-                out[1];
             display: "p=201,45;i=comp";
         client3: StandardHost2;
-            parameters:
-                IPForward = false,
-                routingFile = "client3.irt";
-            gatesizes:
-                in[1],
-                out[1];
             display: "p=208,164;i=comp";
-        server4: StandardHost2;
-            parameters:
-                IPForward = false,
-                routingFile = "server4.irt";
-            gatesizes:
-                in[2],
-                out[2];
+        server: StandardHost2;
             display: "p=63,161;i=pc";
         router: Router;
-            parameters:
-                routingFile = "router.irt";
-            gatesizes:
-                in[4],
-                out[4];
             display: "p=138,102;i=ipc";
-    connections nocheck:
+        configurator: FlatNetworkConfigurator;
+            parameters:
+                moduleTypesToProcess = "Router StandardHost2",
+                networkAddress = "145.236.0.0",
+                netmask = "255.255.0.0";
+            display: "p=60,100;i=cogwheel";
+    connections:
+        client1.out++ --> datarate 1000000 --> router.in++;
+        client1.in++ <-- datarate 1000000 <-- router.out++;
 
-        client1.out[0] --> datarate 1000000 --> router.in[0];
-        client1.in[0] <-- datarate 1000000 <-- router.out[0];
+        client2.out++ --> datarate 1000000 --> router.in++;
+        client2.in++ <-- datarate 1000000 <-- router.out++;
 
-        client2.out[0] --> datarate 1000000 --> router.in[1];
-        client2.in[0] <-- datarate 1000000 <-- router.out[1];
+        client3.out++ --> datarate 1000000 --> router.in++;
+        client3.in++ <-- datarate 1000000 <-- router.out++;
 
-        client3.out[0] --> datarate 1000000 --> router.in[2];
-        client3.in[0] <-- datarate 1000000 <-- router.out[2];
+        server.out++ --> datarate 1000000 --> router.in++;
+        server.in++ <-- datarate 1000000 <-- router.out++;
 
-        server4.out[0] --> datarate 1000000 --> router.in[3];
-        server4.in[0] <-- datarate 1000000 <-- router.out[3];
-
-        client1.out[1] --> datarate 1000000 --> server4.in[1];
-        client1.in[1] <-- datarate 1000000 <-- server4.out[1];
-
+        client1.out++ --> datarate 1000000 --> server.in++;
+        client1.in++ <-- datarate 1000000 <-- server.out++;
 endmodule
 
 network tcpclservnet : ClientServerNetwork
