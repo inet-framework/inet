@@ -123,14 +123,7 @@ void RSVP::initialize(int stage)
 void RSVP::activity()
 {
     cMessage *msg;
-    RSVPPathMsg *pm;
-    RSVPResvMsg *rm;
-    RSVPPathTear *ptm;
-    RSVPResvTear *rtm;
-    RSVPPathError *pem;
-    RSVPResvError *rem;
 
-    // RSVPPathTear *ptm;
     int inInf;
     int i;
 
@@ -175,30 +168,25 @@ void RSVP::activity()
             {
             case PATH_MESSAGE:
                 inInf = msg->par("peerInf");
-                pm = check_and_cast<RSVPPathMsg *>(msg);
-                PathMsgPro(pm, inInf);
+                processPathMsg(check_and_cast<RSVPPathMsg *>(msg), inInf);
                 break;
 
             case RESV_MESSAGE:
-                rm = check_and_cast<RSVPResvMsg *>(msg);
-                ResvMsgPro(rm);
+                processResvMsg(check_and_cast<RSVPResvMsg *>(msg));
                 break;
 
             case PTEAR_MESSAGE:
-                ptm = check_and_cast<RSVPPathTear *>(msg);
-                PTearMsgPro(ptm);
+                processPathTearMsg(check_and_cast<RSVPPathTear *>(msg));
                 break;
             case RTEAR_MESSAGE:
-                rtm = check_and_cast<RSVPResvTear *>(msg);
-                RTearMsgPro(rtm);
+                processResvTearMsg(check_and_cast<RSVPResvTear *>(msg));
                 break;
             case PERROR_MESSAGE:
-                pem = check_and_cast<RSVPPathError *>(msg);
-                PErrorMsgPro(pem);
+                processPathErrorMsg(check_and_cast<RSVPPathError *>(msg));
                 break;
             case RERROR_MESSAGE:
-                rem = check_and_cast<RSVPResvError *>(msg);
-                RErrorMsgPro(rem);
+                rem = ;
+                processResvErrorMsg(check_and_cast<RSVPResvError *>(msg));
                 break;
             default:
                 error("Unrecognized RSVP packet format");
@@ -208,7 +196,7 @@ void RSVP::activity()
     }
 }
 
-void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
+void RSVP::processPathMsg(RSVPPathMsg * pmsg, int InIf)
 {
     /*
        if(IsER)
@@ -402,7 +390,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
             return;
         }
 
-        if (IsLocalAddress(pmsg->getSrcAddress()))
+        if (isLocalAddress(pmsg->getSrcAddress()))
         {
             ev << "Local Application\n";
             // psbEle->OutInterface_List = pmsg->getSrcAddress();
@@ -443,7 +431,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
     if (Path_Refresh_Needed == false)
     {
-        ev << "No Path Refresh Needed : Leaving PathMsgPro\n";
+        ev << "No Path Refresh Needed : Leaving processPathMsg\n";
         return;
     }
 
@@ -503,18 +491,18 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
         if (activeRSB)
         {
-            UpdateTrafficControl(activeRSB);
+            updateTrafficControl(activeRSB);
         }
         else
         {
             ev << "No active RSB found\n";
         }
-        ev << "Leaving PathMsgPro\n";
+        ev << "Leaving processPathMsg\n";
         return;
     }
 }
 
-void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
+void RSVP::processResvMsg(RSVPResvMsg * rmsg)
 {
     /*
        if(IsER)
@@ -547,7 +535,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
     FlowDescriptor_t *fdlist = NULL;
     FilterSpecObj_t *Filtss = NULL;
 
-    ev << "Entered ResvMsgPro ";
+    ev << "Entered processResvMsg ";
     ev << "Process RESV message with content\n";
     print(rmsg);
 
@@ -896,7 +884,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
         // ER does not need to update the traffic control as no outlink concerned
         // if(!IsER)
         {
-            if (UpdateTrafficControl(activeRSB) == -1)
+            if (updateTrafficControl(activeRSB) == -1)
             {
                 ev << "Update traffic control fails\n";
                 Resv_Refresh_Needed = false;
@@ -1008,7 +996,7 @@ void RSVP::ResvMsgPro(RSVPResvMsg * rmsg)
     return;
 }
 
-void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
+void RSVP::processPathTearMsg(RSVPPathTear * pmsg)
 {
     ev << "********Enter Path Tear Message Pro******************\n";
 
@@ -1080,7 +1068,7 @@ void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
 
                         mRSB = &RSBList[n];
 
-                        UpdateTrafficControl(mRSB);
+                        updateTrafficControl(mRSB);
 
                         break;
 
@@ -1094,7 +1082,7 @@ void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
 
                 if (count == InLIST_SIZE)
                 {
-                    RemoveTrafficControl(mRSB);
+                    removeTrafficControl(mRSB);
                     // RSBList.erase(r_iterI);
                     RSBList[n].Session_Object.DestAddress = 0;
                     RSBList[n].Session_Object.DestPort = 0;
@@ -1126,7 +1114,7 @@ void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
 
 }
 
-void RSVP::RTearMsgPro(RSVPResvTear * rmsg)
+void RSVP::processResvTearMsg(RSVPResvTear * rmsg)
 {
 
     ev << "***************************ENTER RERSV TEAR MSG PRO*****************************\n";
@@ -1226,8 +1214,8 @@ void RSVP::RTearMsgPro(RSVPResvTear * rmsg)
             send(rmsg, "to_rsvp_app");
 
         activeRSB->Flowspec_Object.req_bandwidth = 0;
-        UpdateTrafficControl(activeRSB);
-        // RemoveTrafficControl(activeRSB);
+        updateTrafficControl(activeRSB);
+        // removeTrafficControl(activeRSB);
         RSBList[n].Session_Object.DestAddress = 0;
         RSBList[n].Session_Object.DestPort = 0;
 
@@ -1235,7 +1223,7 @@ void RSVP::RTearMsgPro(RSVPResvTear * rmsg)
 
 }
 
-void RSVP::PErrorMsgPro(RSVPPathError * pmsg)
+void RSVP::processPathErrorMsg(RSVPPathError * pmsg)
 {
 
     ev << "************************ENTER PATH ERROR MESSAGE PRO***************************\n";
@@ -1271,7 +1259,7 @@ void RSVP::PErrorMsgPro(RSVPPathError * pmsg)
     sendToIP(pmsg, IPAddress(p_iter.Previous_Hop_Address));
 }
 
-void RSVP::RErrorMsgPro(RSVPResvError * rmsg)
+void RSVP::processResvErrorMsg(RSVPResvError * rmsg)
 {
     // Simple way
     send(rmsg, "to_ip");
@@ -1588,7 +1576,7 @@ void RSVP::RTearFwd(ResvStateBlock_t * rsbEle, int PH)
     sendToIP(outRM, IPAddress(PH));
 }
 
-void RSVP::RemoveTrafficControl(ResvStateBlock_t * activeRSB)
+void RSVP::removeTrafficControl(ResvStateBlock_t * activeRSB)
 {
     std::vector < TrafficControlStateBlock_t >::iterator t_iterI;
     TrafficControlStateBlock_t t_iter;
@@ -1654,7 +1642,7 @@ void RSVP::RemoveTrafficControl(ResvStateBlock_t * activeRSB)
     }
 }
 
-int RSVP::UpdateTrafficControl(ResvStateBlock_t * activeRSB)
+int RSVP::updateTrafficControl(ResvStateBlock_t * activeRSB)
 {
     std::vector < PathStateBlock_t >::iterator p_iterI;
     PathStateBlock_t p_iter;
@@ -1903,7 +1891,7 @@ int RSVP::TC_AddFlowspec(int tunnelId, int holdingPri, int setupPri, int OI,
         addFs->req_bandwidth = fs.req_bandwidth;
     addFs->link_delay = fs.link_delay;
 
-    if (AllocateResource(tunnelId, holdingPri, setupPri, OI, *addFs))
+    if (allocateResource(tunnelId, holdingPri, setupPri, OI, *addFs))
     {
 
         RHandleType_t *rHandle = new RHandleType_t;
@@ -1954,7 +1942,7 @@ int RSVP::TC_ModFlowspec(int tunnelId, int OI, FlowSpecObj_t fs, SenderTspecObj_
 
             addFs->req_bandwidth = (addFs->req_bandwidth) - oldBWRequest;
 
-            if (AllocateResource
+            if (allocateResource
                 (tunnelId, FlowTable[i].holdingPri, FlowTable[i].setupPri, OI, *addFs))
             {
 
@@ -1983,7 +1971,7 @@ int RSVP::TC_ModFlowspec(int tunnelId, int OI, FlowSpecObj_t fs, SenderTspecObj_
     return 0;
 }
 
-bool RSVP::AllocateResource(int tunnelId, int holdingPri, int setupPri, int oi, FlowSpecObj_t fs)
+bool RSVP::allocateResource(int tunnelId, int holdingPri, int setupPri, int oi, FlowSpecObj_t fs)
 {
     // Check if this fs is permissible
     ev << "********************ENTER ALLOCATE RESOURCE*******************************\n";
@@ -2157,7 +2145,7 @@ void RSVP::Mcast_Route_Query(int sa, int iad, int da, int *outl)        // FIXME
     return;
 }
 
-bool RSVP::IsLocalAddress(int addr)
+bool RSVP::isLocalAddress(int addr)
 {
     for (int i = 0; i < InLIST_SIZE; i++)
         if (LocalAddress[i] == addr)

@@ -176,27 +176,27 @@ private:
     std::vector<RHandleType_t> FlowTable;
 
     /*Message Processing */
-    void PathMsgPro(RSVPPathMsg *pmsg, int InIf);
-    void ResvMsgPro(RSVPResvMsg *rmsg);
-    void PTearMsgPro(RSVPPathTear *pmsg);
-    void RTearMsgPro(RSVPResvTear *rmsg);
-    void PErrorMsgPro(RSVPPathError *pmsg);
-    void RErrorMsgPro(RSVPResvError *rmsg);
+    void processPathMsg(RSVPPathMsg *pmsg, int InIf);
+    void processResvMsg(RSVPResvMsg *rmsg);
+    void processPathTearMsg(RSVPPathTear *pmsg);
+    void processResvTearMsg(RSVPResvTear *rmsg);
+    void processPathErrorMsg(RSVPPathError *pmsg);
+    void processResvErrorMsg(RSVPResvError *rmsg);
 
 
-    bool IsLocalAddress(int ip);
+    bool isLocalAddress(int ip);
     void PathRefresh( PathStateBlock_t *psbEle , int OI, EroObj_t* ero ) ;
         //PathRefresh( PathStateBlock_t *psbEle , int OI, int* ero );
     void ResvRefresh( ResvStateBlock_t *rsbEle, int PH );
     void RTearFwd(ResvStateBlock_t *rsbEle, int PH);
-    int UpdateTrafficControl(ResvStateBlock_t *activeRSB);
-    void RemoveTrafficControl(ResvStateBlock_t *activeRSB);
+    int updateTrafficControl(ResvStateBlock_t *activeRSB);
+    void removeTrafficControl(ResvStateBlock_t *activeRSB);
     int TC_AddFlowspec( int tunnelId, int holdingPri, int setupPri, int OI,
                         FlowSpecObj_t fs, SenderTspecObj_t ts, FlowSpecObj_t *fwdFS);
     int TC_ModFlowspec( int tunnelId, int OI,
                         FlowSpecObj_t fs, SenderTspecObj_t ts, FlowSpecObj_t *fwdFS);
     int GetFwdFS(int oi, FlowSpecObj_t *fwdFS);
-    bool AllocateResource(int tunnelId, int holdingPri, int setupPri,
+    bool allocateResource(int tunnelId, int holdingPri, int setupPri,
                     int oi, FlowSpecObj_t fs);
 
     void updateTED();
