@@ -29,10 +29,10 @@ foreach i {
    {TestTE5 Examples/MPLS/TestTE5  "Traffic Reroute 2"}
    {TestTE6 Examples/MPLS/TestTE6  "Reservation preemption"}
 } {
-   lappend samples $sample
-   set prog($sample) [lindex $i 0]
-   set dir($sample) [lindex $i 1]
-   set name($sample) [lindex $i 2]
+   lappend samples $id
+   set prog($id) [lindex $i 0]
+   set dir($id) [lindex $i 1]
+   set name($id) [lindex $i 2]
    incr id
 }
 
@@ -133,20 +133,20 @@ proc showDemo {id} {
    foreach i $samples {
         .sel.$i config -relief raised -bg $colors(unselbutton)
    }
-   .sel.$sample config -relief sunken -bg $colors(selbutton)
+   .sel.$id config -relief sunken -bg $colors(selbutton)
 
     if {$tcl_platform(platform) == "unix"} {
       set runprog "./$prog(id) &"
     } else {
       set runprog "start $prog(id)" 
     }
-    set cmd "cd $dir($sample); $runprog"
+    set cmd "cd $dir($id); $runprog"
 
-   .main.up.banner config -text "$name($sample) README"
-   .main.lo.start config -text "Launch $name($sample)  (command: $cmd)"
-   .main.lo.start config -command "runSample $sample"
+   .main.up.banner config -text "$name($id) README"
+   .main.lo.start config -text "Launch $name($id)  (command: $cmd)"
+   .main.lo.start config -command "runSample $id"
 
-   loadFile .main.mid.text "$dir($sample)/README"
+   loadFile .main.mid.text "$dir($id)/README"
 }
 
 proc loadFile {t filename} {
@@ -167,7 +167,7 @@ proc loadFile {t filename} {
 proc runSample {id} {
    global topdir samples dir name
 
-   if [catch {cd $dir($sample); exec ./$prog(id) &; cd $topdir}] {
+   if [catch {cd $dir($id); exec ./$prog(id) &; cd $topdir}] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
                     -message {Error running the simulation program.}
    }
