@@ -13,7 +13,7 @@ Traffic file:
   <setupPri>7</setupPri>
   <holdingPri>7</holdingPri>
   <bandwidth>100</bandwidth>
-  <delay>5</delay>
+  <delay>0.005</delay>
 </conn>
 
 </traffic>

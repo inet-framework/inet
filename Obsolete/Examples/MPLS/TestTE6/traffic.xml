@@ -17,7 +17,7 @@
     <src>11.0.0.1</src>
     <dest>11.0.1.2</dest>
     <setupPri>5</setupPri>
-    <holdingPri>6</holdingPri>
+    <holdingPri>5</holdingPri>
     <bandwidth>130</bandwidth>
     <delay>0.005</delay>
 </conn>
