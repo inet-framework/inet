@@ -18,7 +18,7 @@
 #include <fstream>
 #include "ConstType.h"
 #include "NewLDP.h"
-#include "LIBTable.h"
+#include "LIBtable.h"
 #include "MPLSModule.h"
 #include "RoutingTable.h"
 #include "UDPControlInfo_m.h"
