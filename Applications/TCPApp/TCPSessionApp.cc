@@ -86,7 +86,7 @@ void TCPSessionApp::activity()
     if (active)
         socket.connect(IPAddress(connectAddress), connectPort);
     else
-        socket.accept();
+        socket.listen();
 
     // send
     if (sendBytes>0)

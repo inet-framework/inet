@@ -20,19 +20,15 @@
 #include "TCPSocket.h"
 
 
-int TCPSocket::nextConnId = 0;
-
-
 TCPSocket::TCPSocket()
 {
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
-    connId = ++nextConnId;
+    connId = TCPMain::getNewConnId();
     isBound = false;
 
     cb = NULL;
     yourPtr = NULL;
-
 }
 
 void TCPSocket::sendToTCP(cMessage *msg)
@@ -53,10 +49,10 @@ void TCPSocket::bind(IPAddress lAddr, int lPort)
     isBound = true;
 }
 
-void TCPSocket::accept()
+void TCPSocket::listen()
 {
     if (!isBound)
-        opp_error("TCPSocket: must call bind() before accept()");
+        opp_error("TCPSocket: must call bind() before listen()");
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 

@@ -139,6 +139,8 @@ class TCPMain : public cSimpleModule
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
+    static int nextConnId;
+
     short nextEphemeralPort;
 
     TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr);
@@ -168,6 +170,11 @@ class TCPMain : public cSimpleModule
      */
     short getEphemeralPort();
 
+    /**
+     * Generates a new integer, to be used as connId. (connId is part of the key
+     * which associates connections with their apps).
+     */
+    static int getNewConnId() {return ++nextConnId;}
 };
 
 #endif

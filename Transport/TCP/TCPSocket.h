@@ -32,7 +32,7 @@ class TCPStatusInfo;
  * TCPSocket is a convenience class, to make it easier to manage TCP connections
  * from your application models. You'd have one (or more) TCPSocket object(s)
  * in your application simple module class, and call its member functions
- * (bind(), accept(), connect(), etc.) to open, close or abort a TCP connection.
+ * (bind(), listen(), connect(), etc.) to open, close or abort a TCP connection.
  *
  * TCPSocket chooses and remembers the connId for you, assembles and sends command
  * packets (such as OPEN_ACTIVE, OPEN_PASSIVE, CLOSE, ABORT, etc.) to TCP,
@@ -112,6 +112,7 @@ class TCPSocket
     {
       public:
         virtual ~CallBackInterface() {}
+        //FIXME re-think!!! virtual void socketAccepted(int connId, void *yourPtr, int listenConnId) {}
         virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) = 0;
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
@@ -121,7 +122,6 @@ class TCPSocket
     };
 
   protected:
-    static int nextConnId;
     int connId;
 
     bool isBound;
@@ -136,9 +136,14 @@ class TCPSocket
 
   public:
     /**
-     * Constructor. Doesn't do much more than choose a unique connId.
+     * Constructor. The connectionId() method returns a valid Id right after
+     * constructor call.
      */
     TCPSocket();
+
+    /**
+     * Destructor
+     */
     ~TCPSocket() {}
 
     /**
@@ -172,7 +177,7 @@ class TCPSocket
     /**
      * Initiates passive OPEN.
      */
-    void accept();
+    void listen();
 
     /**
      * Active OPEN to the given remote socket.

@@ -29,6 +29,9 @@ Define_Module(TCPMain);
 bool TCPMain::testing;
 bool TCPMain::logverbose;
 
+int TCPMain::nextConnId = 0;
+
+
 void TCPMain::initialize()
 {
     nextEphemeralPort = 1024;
