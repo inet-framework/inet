@@ -17,6 +17,7 @@ exec wish "$0" "$@"
 
 # columns below: <name> <directory> <unix-command> <windows-command>
 set i 0
+set first ""
 foreach line {
    {"Ethernet"}
    {"LANs: mixed Ethernet" "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
@@ -47,21 +48,26 @@ foreach line {
    {"Reservation preemption" "MPLS/TestTE6"   "./TestTE"    "TestTE"}
 
 } {
-   if {[llength $line]<4} {
-       # 
+   lappend samples $i
+   if {[llength $line]==0} {
+       set type($i) "spacer"
+   } elseif {[llength $line]==1} {
+       set type($i) "heading"
+       set title($i) [lindex $line 0]
    } else {
-       lappend samples $i
+       set type($i) "program"
        set title($i) [lindex $line 0]
        set dir($i)   [lindex $line 1]
        set uprog($i) [lindex $line 2]
        set wprog($i) [lindex $line 3]
-       incr i
+       if {$first==""} {set first $i}
    }
+   incr i
 }
 
 
 proc createWindow {} {
-    global samples title dir uprog wprog fonts colors
+    global samples first type title dir uprog wprog fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
@@ -128,19 +134,21 @@ proc createWindow {} {
     button .main.lo.start -font $fonts(bold) -bg $colors(startbutton)
     pack .main.lo.start -expand 1 -fill x  -padx 10 -pady 6
 
-    label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
-    pack .sel.banner -fill x -side top
+    #label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
+    #pack .sel.banner -fill x -side top
     foreach i $samples {
-        if {$i==""} {
-            # FIXME
-            label .sel.$i -text $title($i) -command "showDemo $i"
+        if {$type($i)=="spacer"} {
+            label .sel.$i -relief flat
+            pack .sel.$i -fill x -side top -padx 5 -pady 2
+        } elseif {$type($i)=="heading"} {
+            label .sel.$i -text $title($i) -bg $colors(banner) -relief groove  -font $fonts(bold)
             pack .sel.$i -fill x -side top -padx 5 -pady 2
         } else {
             button .sel.$i -text $title($i) -command "showDemo $i"
             pack .sel.$i -fill x -side top -padx 5 -pady 2
         }
     }
-    showDemo [lindex $samples 0]
+    showDemo $first
 }
 
 proc helpAbout {} {
@@ -153,10 +161,12 @@ Sample Simulations
 }
 
 proc showDemo {sample} {
-   global samples title dir uprog wprog colors tcl_platform
+   global samples type title dir uprog wprog colors tcl_platform
 
    foreach i $samples {
-        .sel.$i config -relief raised -bg $colors(unselbutton)
+        if {$type($i)=="program"} {
+            .sel.$i config -relief raised -bg $colors(unselbutton)
+        }
    }
    .sel.$sample config -relief sunken -bg $colors(selbutton)
 
@@ -189,7 +199,7 @@ proc loadFile {t filename} {
 }
 
 proc runSample {sample} {
-   global samples title dir uprog wprog tcl_platform
+   global samples type title dir uprog wprog tcl_platform
 
    if {$tcl_platform(platform) == "unix"} {
      set prog $uprog($sample)
