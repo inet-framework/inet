@@ -5,12 +5,12 @@
 <traffic>
 
 <conn>
-<src>10.0.0.1</src>
-<dest>10.0.1.2</dest>
-<setupPri>7</setupPri>
-<holdingPri>7</holdingPri>
-<bandwidth>100</bandwidth>
-<delay>5</delay>
+    <src>10.0.0.1</src>
+    <dest>10.0.1.2</dest>
+    <setupPri>7</setupPri>
+    <holdingPri>7</holdingPri>
+    <bandwidth>100</bandwidth>
+    <delay>5</delay>
 </conn>
 
 </traffic>
