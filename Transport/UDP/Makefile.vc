@@ -122,7 +122,17 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+UDPControlInfo_m.obj: UDPControlInfo_m.cc \
+  UDPControlInfo_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h
+UDPPacket_m.obj: UDPPacket_m.cc \
+  UDPPacket_m.h
 UDPProcessing.obj: UDPProcessing.cc \
   UDPPacket.h \
   UDPProcessing.h \
-  ..\..\Base/basic_consts.h
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
+  UDPPacket_m.h \
+  UDPControlInfo_m.h \
+  ..\..\Base/basic_consts.h \
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  ..\..\Network\IPv4\Core/IPDatagram_m.h

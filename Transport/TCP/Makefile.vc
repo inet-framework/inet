@@ -133,12 +133,23 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 Ip2Tcp.obj: Ip2Tcp.cc \
   TransportPacket.h \
-  ..\..\Network\IPv4\Core/IPAddress.h
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  TransportPacket_m.h \
+  ..\..\Network\IPv4\Core/IPDatagram_m.h
 pcb.obj: pcb.cc \
   pcb.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 Tcp2Ip.obj: Tcp2Ip.cc \
   TransportPacket.h \
+  ..\..\Network\IPv4\Core/IPControlInfo_m.h \
+  ..\..\Network\IPv4\Core/IPAddress.h \
+  TransportPacket_m.h \
+  ..\..\Network\IPv4\Core/IPDatagram_m.h
+TCPInterfacePacket_m.obj: TCPInterfacePacket_m.cc \
+  TCPInterfacePacket_m.h \
   ..\..\Network\IPv4\Core/IPAddress.h
 tcpmodule.obj: tcpmodule.cc \
   tcp.h
+TransportPacket_m.obj: TransportPacket_m.cc \
+  TransportPacket_m.h

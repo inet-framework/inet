@@ -166,38 +166,62 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ErrorHandling.obj: ErrorHandling.cc \
   ErrorHandling.h \
+  IPControlInfo_m.h \
   IPDatagram.h \
-  ICMPMessage.h
+  ICMPMessage.h \
+  IPAddress.h \
+  IPDatagram_m.h \
+  ICMPMessage_m.h
 ICMP.obj: ICMP.cc \
+  IPControlInfo_m.h \
   ICMP.h \
+  IPAddress.h \
+  IPDatagram_m.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   IPDatagram.h \
   ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
+  ICMPMessage_m.h
+ICMPMessage_m.obj: ICMPMessage_m.cc \
+  ICMPMessage_m.h \
+  IPDatagram.h \
+  IPDatagram_m.h \
   IPAddress.h
 IPAddress.obj: IPAddress.cc \
   IPAddress.h
+IPControlInfo_m.obj: IPControlInfo_m.cc \
+  IPControlInfo_m.h \
+  IPAddress.h \
+  IPDatagram_m.h
+IPDatagram_m.obj: IPDatagram_m.cc \
+  IPDatagram_m.h \
+  IPAddress.h
 IPFragmentation.obj: IPFragmentation.cc \
   IPFragmentation.h \
+  IPControlInfo_m.h \
   RoutingTableAccess.h \
   IPDatagram.h \
   RoutingTable.h \
   ICMPAccess.h \
   ..\..\..\Base/ModuleAccess.h \
-  ..\..\..\Base/ipsuite_defs.h \
+  IPDatagram_m.h \
   IPAddress.h \
+  ..\..\..\Base/ipsuite_defs.h \
   ICMP.h \
-  ICMPMessage.h
+  ICMPMessage.h \
+  ICMPMessage_m.h
 IPMulticast.obj: IPMulticast.cc \
   IPMulticast.h \
+  IPControlInfo_m.h \
   RoutingTableAccess.h \
   IPDatagram.h \
   ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h
+  IPAddress.h \
+  IPDatagram_m.h
 IPOutput.obj: IPOutput.cc \
   IPOutput.h \
   ..\..\..\Base/basic_consts.h \
@@ -209,35 +233,50 @@ IPOutput.obj: IPOutput.cc \
   ICMPMessage.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h
+  IPAddress.h \
+  ICMPMessage_m.h \
+  IPDatagram_m.h
 IPSend.obj: IPSend.cc \
   IPSend.h \
   IPDatagram.h \
+  IPControlInfo_m.h \
   RoutingTableAccess.h \
   ..\..\..\Base/ModuleAccess.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h
+  IPAddress.h \
+  IPDatagram_m.h
 IPTunneling.obj: IPTunneling.cc \
   IPTunneling.h \
-  IPDatagram.h
+  IPControlInfo_m.h \
+  IPDatagram.h \
+  IPDatagram_m.h \
+  IPAddress.h
 LocalDeliver.obj: LocalDeliver.cc \
   LocalDeliver.h \
-  IPDatagram.h
+  IPControlInfo_m.h \
+  IPDatagram.h \
+  IPDatagram_m.h \
+  IPAddress.h
 PreRouting.obj: PreRouting.cc \
   PreRouting.h \
   IPDatagram.h \
   ICMPAccess.h \
+  IPDatagram_m.h \
+  IPAddress.h \
   ..\..\..\Base/ModuleAccess.h \
   ICMP.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   RoutingTable.h \
   ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h
+  ICMPMessage_m.h
 Routing.obj: Routing.cc \
+  IPControlInfo_m.h \
   Routing.h \
   ..\..\..\Util/watch2.h \
+  IPAddress.h \
+  IPDatagram_m.h \
   ..\..\..\Base/QueueWithQoS.h \
   RoutingTableAccess.h \
   RoutingTable.h \
@@ -246,10 +285,10 @@ Routing.obj: Routing.cc \
   ..\..\..\Base/EnqueueHook.h \
   ..\..\..\Base/ModuleAccess.h \
   ..\..\..\Base/ipsuite_defs.h \
-  IPAddress.h \
   ICMP.h \
   ICMPMessage.h \
-  IPDatagram.h
+  IPDatagram.h \
+  ICMPMessage_m.h
 RoutingTable.obj: RoutingTable.cc \
   RoutingTable.h \
   RoutingTableParser.h \
