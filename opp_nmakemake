@@ -337,6 +337,7 @@ if ($mpi eq "y")
 
 
 $sobjs = join( " \\\n            ", @sobj_list);
+$xobjs = join( " \\\n            ", @xobjs);
 $extdirobjs = join( " \\\n            ", @extdirobjs);
 
 print OUT "
