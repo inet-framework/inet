@@ -74,7 +74,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     // If the MPLS processing is not on, then simply passing the packet
     if (ipdatagram->hasPar("trans"))  // FIXME do we need this field?
     {
-        ev << "'trans' param set, passing through";
+        ev << "'trans' param set, passing through\n";
         send(ipdatagram, "toL2", gateIndex);
         return;
     }
