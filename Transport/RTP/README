@@ -1,0 +1,20 @@
+A model of the real-time transport protocol (RTP) for OMNeT++
+
+overview:
+- implements subset of rtp v2 (rfc 1889)
+- based on ip-suite
+- uses socket layer
+- unicast and multicast support
+- no rtp intermediate systems yet
+- provided profile: audio/video profile with minimal control (rfc 1890)
+- provided packetization scheme: simulated mpeg video (rfc 2250)
+- provided packetization scheme: uncompressed audio (payload type 10
+  of rfc 1890: 16 bit, 2 channels, 44100 Hz)
+
+more info:
+- source code documented with doxygen
+- see README files in networks directories
+- http://cvs-int.etec.uni-karlsruhe.de/omnetpp/
+
+Requirements
+- libaudiofile http://oss.sgi.com/projects/audiofile/

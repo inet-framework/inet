@@ -1,9 +1,4 @@
 //
-//-----------------------------------------------------------------------------
-//-- fileName: switch.ned
-//--
-//-- Module declaration for an simple network switch
-//-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -21,10 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-simple Switch
-    parameters:
-       pk_rate;
-    gates:
-       in: in[];
-       out: out[];
+
+//
+// Simple communication network layer
+//
+simple DummyPPP
+       parameters:
+         nw_length;
+       gates:
+         in: from_ip, from_compound;
+         out: to_ip, to_compound;
 endsimple
