@@ -58,8 +58,6 @@ void IPFragmentation::handleMessage(cMessage *msg)
         int(ceil((float(payload)/mtu) /
         (1-float(headerLength)/mtu) ) ); // FIXME ???
 
-    // ev << "No of Fragments: " << noOfFragments << endl;
-
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->dontFragment() && noOfFragments>1)
     {
@@ -70,6 +68,7 @@ void IPFragmentation::handleMessage(cMessage *msg)
     }
 
     // create and send fragments
+    ev << "Breaking datagram into " << noOfFragments << " fragments\n";
     // FIXME revise this!
     for (int i=0; i<noOfFragments; i++)
     {

@@ -98,7 +98,7 @@ void IPMulticast::handleMessage(cMessage *msg)
                 // add a copy of the control info (OMNeT++ doesn't copy it) --FIXME needed?
                 IPRoutingDecision *newControlInfo = new IPRoutingDecision();
                 newControlInfo->setOutputPort(outputPort);
-                //newControlInfo->setNextHopAddr(...); FIXME TODO
+                //newControlInfo->setNextHopAddr(...); TBD
                 datagramCopy->setControlInfo(newControlInfo);
 
                 // set datagram source address if not yet set

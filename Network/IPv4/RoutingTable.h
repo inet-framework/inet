@@ -132,7 +132,7 @@ class RoutingEntry : public cPolymorphic
     int metric;
 
     /// Route age (in seconds, since the route was last updated)
-    //FIXME not implemented
+    //TBD not implemented yet
     int age;
 
   private:
@@ -310,7 +310,8 @@ class RoutingTable: public cSimpleModule
      * address if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    IPAddress nextGatewayAddress(const IPAddress& dest); //FIXME join with outputPortNo()
+    // TBD maybe join with outputPortNo()
+    IPAddress nextGatewayAddress(const IPAddress& dest);
     //@}
 
     /** @name Multicast routing functions */

@@ -72,6 +72,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     if (datagram->hasBitError())
     {
         // probability of bit error in header = size of header / size of total message
+        // (ignore bit error if in payload)
         double relativeHeaderLength = datagram->headerLength() / (double)datagram->length()/8;
         if (dblrand() <= relativeHeaderLength)
         {
@@ -79,7 +80,6 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
-        // FIXME ignore bit error if in payload?
     }
 
     // hop counter decrement
@@ -97,7 +97,7 @@ void IP::handleMessageFromHL(cMessage *msg)
 
 void IP::routePacket(IPDatagram *datagram)
 {
-    // FIXME add option handling code here!
+    // TBD add option handling code here
 
     IPAddress destAddress = datagram->destAddress();
 
@@ -153,12 +153,6 @@ void IP::routePacket(IPDatagram *datagram)
     ev << "output port is " << outputPort << "\n";
     numForwarded++;
 
-    // FIXME TBD: if there's a next hop address in the routing table, add RoutingDecision with nextHopAddress
-    // (and of course Fragmentation should copy it for every fragment)
-    //IPRoutingDecision *routingDecision = new IPRoutingDecision();
-    //routingDecision->setNextHopAddr(nextHopAddr);
-    //datagram->setControlInfo(routingDecision);
-
     //
     // "Fragmentation" and "IPOutput"
     //
@@ -175,7 +169,6 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
     if (inputPort!=-1 && inputPort!=rt->outputPortNo(datagram->srcAddress()))
     {
-        // FIXME count dropped
         delete datagram;
         return;
     }
@@ -301,8 +294,6 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
         int(ceil((float(payload)/mtu) /
         (1-float(headerLength)/mtu) ) ); // FIXME ???
 
-    // ev << "No of Fragments: " << noOfFragments << endl;
-
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->dontFragment() && noOfFragments>1)
     {
@@ -313,6 +304,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort)
     }
 
     // create and send fragments
+    ev << "Breaking datagram into " << noOfFragments << " fragments\n";
     // FIXME revise this!
     for (int i=0; i<noOfFragments; i++)
     {

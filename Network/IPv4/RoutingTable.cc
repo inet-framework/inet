@@ -364,10 +364,9 @@ int RoutingTable::outputPortNo(const IPAddress& dest)
 {
     Enter_Method("outputPortNo(%s)=?", dest.str().c_str());
 
-    // FIXME join with the next function...
     RoutingEntry *e = selectBestMatchingRoute(dest);
     if (!e) return -1;
-    return interfaceByName(e->interfaceName.c_str())->outputPort; // Ughhhh
+    return e->interfacePtr->outputPort;
 }
 
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)

@@ -24,7 +24,7 @@
 #include <omnetpp.h>
 #include "IPControlInfo_m.h"
 #include "IPRouting.h"
-#include "watch2.h"  // FIXME
+#include "watch2.h"
 
 
 Define_Module(IPRouting);
@@ -49,7 +49,7 @@ void IPRouting::endService(cMessage *msg)
     IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
     IPRoutingDecision *routingDecision = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
 
-    // FIXME add option handling code here!
+    // TBD add option handling code here!
 
     IPAddress destAddress = datagram->destAddress();
 
@@ -100,7 +100,7 @@ void IPRouting::endService(cMessage *msg)
 
     // default: send datagram to fragmentation
     routingDecision->setOutputPort(outputPort);
-    //FIXME todo: routingDecision->setNextHopAddr(nextHopAddr);
+    //TBD: routingDecision->setNextHopAddr(nextHopAddr);
 
     ev << "output port is " << outputPort << "\n";
     numForwarded++;
