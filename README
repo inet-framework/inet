@@ -1,62 +1,63 @@
+IPSuite
+=======
+
 The OMNeT++ Internet Protocol Suite contains numerous internet
 protocols. Beyond IP there is TCP, UDP and support for QoS.
 MPLS, LDP and RSVP-TE models have also been contributed.
 See the CREDITS file for the names of people involved in the
-development. 
-
-Compilation instructions for Unix:
-----------------------------------
-
-  1. You need a working OMNeT++ installation, version 2.3 or newer.
-
-  2. Change to the IPSuite directory. Edit the ipsuiteconfig file
-     and adjust the ROOT variable in it as well as OMNETPP_INCL_DIR
-     and OMNETPP_LIB_DIR.
-
-     
-  3. Type "make" to build everything.
-
-  4. Finally, you can have a look at the example networks by launching a
-     simple demo front end:
-
-     $ ./ipsuite-demo
-           or 
-     $ ./mpls-demo
-
-Should you ever need to re-build the makefiles (only if you add/remove
-files or directories), use the following command:
-
-   $ ./makemake 
+development.
 
 
-Compilation instructions for Windows:
--------------------------------------
+IPSuite directory structure
+===========================
 
-If you're using Cygwin or MinGW, see instructions for Unix.
- 
-If you're using Microsoft Visual C++:
+Compared to the original IPSuite, the directories have been rearranged
+roughly according to OSI layers.
 
-  1. You need a working OMNeT++ installation, version 2.3 or newer.
+Bottom-up:
 
-  2. Change to the IPSuite directory. Edit the ipsuiteconfig.vc file
-     and adjust the ROOT and OMNETPP_ROOT variables in it.  
-     
-  3. Type "nmake -f Makefile.vc" to build everything.
+ PHY/                  physical layer models (none yet)
 
-  4. Finally, you can have a look at the example networks by launching a
-     simple demo front end:
+ NetworkInterfaces/    L2 (data link layer) protocols
+   PPP-old/            PPP implementation
+   Queues/             input/output queues
 
-     wish84 ipsuite-demo
-           or 
-     wish84 mpls-demo
+ Network/              L3 (network layer) protocols
+   IPv4/               IPv4 and associated protocols
+     Core/             IPv4, ICMP, etc. modules
+     QoS/              Support for Quality of Service
+   MPLS/               MPLS implementation
+   LDP/                LDP signalling protocol for MPLS
+   RSVP_TE/            RSVP-TE signalling protocol for MPLS
 
-Where wish84 is the wish shell from the Tcl/Tk distribution. You may
-have to specify its directory too, if it's not in the PATH. 
+ Transport/            transport layer protocols
+   TCP/                TCP protocol
+   UDP/                UDP protocol
+   Socket/             experimental socket layer over TCP and UDP
+   MiniTCP/            minimal TCP implementation from zipizigi, not
+                       integrated yet
+   NewTCP/             new TCP model, implementation underway
+   RTP/                Realtime Transport Protocol, not yet integrated
 
-Should you ever need to re-build the makefiles (only if you add/remove
-files or directories), use the following command:
+ Applications/         application layer
+   Generic/            traffic generators (directly for IP?)
+   PingApp/            ping application (incomplete)
+   TCPApp/             simple TCP client-server application
+   TCPExample/         simple TCP client-server application
 
-   makemake.cmd 
+Further directories are:
 
-Have fun.
+ Util/                 constants and classes for the whole IPSuite
+
+ Nodes/                protocol stacks, host and router models
+   IPSuite/            using IPSuite components only
+   MPLS/               router models with MPLS/LDP/RSVP-TE
+
+ Examples/             example networks
+   IPSuite/            example networks based on IPSuite
+   MPLS/               example networks for MPLS/LDP/RSVP-TE
+
+ Tests/                test suite
+   IPSuite/            for IPSuite (none yet)
+   MPLS/               for the MPLS models
 

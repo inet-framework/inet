@@ -1,25 +1,12 @@
-OMNeT++ Internet Protocol Suite
 
-Copyright (C) 1999,2000 University of Karlsruhe
+OMNeT++ Internet Protocol Suite is composed of several parts, each of which
+has its own license. As a rule, every source file should contain the
+appropriate copyright and license.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+The IP+TCP+UDP part comes from the "original IPSuite", copyright (C) 1999,2000
+University of Karlsruhe and falls under the General Public License (GPL).
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+The MPLS+LDP+RSVP part was written by Xuan Thang Nguyen at University of
+Technology, Sydney and is covered by the Lesser General Public License (LGPL).
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-If you use the OMNeT++ Internet Protocol Suite or simulation results
-of it in any work, the resulting document(s) (report, paper, article,
-book, etc.) should contain a reference to the Software and its
-authors.
-
-The authors can be contacted via e-mail at:
-ip-suite-authors@cvs-int.etec.uni-karlsruhe.de

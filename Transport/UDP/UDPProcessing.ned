@@ -21,26 +21,21 @@
 //
 // UDP protocol implementation.
 //
-//# FIXME edit comment!
+// The module can (should) be connected to several applications.
+// For sending an UDP packet, the application should encapsulate the payload
+// message into an UDPInterfacePacket, and send it to UDPProcessing.
+// UDPProcessing will encapsulate the payload message into an UDPPacket
+// and send it via IP using an IPInterfacePacket.
 //
-// Initialisation:
-//   error check validity initialized as parameter
+// For receiving UDP packets, the connected applications should have
+// "local_port" parameters which specify the port number they're interested
+// in. One port can only belong to one app. Packets that don't match
+// any app will be dropped.
 //
-// Responsibilities:
-//   initialize with port-to-application-table
+// If there's only one app and without "local_port" parameter, that app
+// will receive all incoming packets regardless of destination port number.
 //
-//   receive message with encoded ports and IP addresses as parameters from application:
-//   create UDPPacket from it.
-//   encapsulate it into IPInterfacePacket
-//   pass it on to the IP layer
-//
-//   receive IPInterfacePacket from IP Layer:
-//   decapsulate UDPPacket
-//   check biterror if checksum enabled
-//       -> throw away if biterror found
-//   map port to correct application-gate
-//   create UDPInterfacePacket containing address/port info
-//   pass UDPInterfacePacket to the selected gate
+// Applications receive data encapsulated in UDPInterfacePacket messages.
 //
 simple UDPProcessing
     gates:

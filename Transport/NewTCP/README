@@ -1,26 +1,28 @@
 NewTCP
 ======
 
-This folder contains new TCP model for OMNeT++. Experiences and some bits of
+!!! UNDER CONSTRUCTION !!!
+
+This folder contains a new TCP model for OMNeT++. Experiences and some bits of
 the code from the old implementation (tcpmodule.cc in IPSuite) have been
-reused. There were several motivations for reimplementation:
+reused. Motivation was:
 
 - tcpmodule.cc was written before message definitions (.msg files) got
-  introduced into OMNeT++, and so it uses cPars, C structs carried by
-  pointer-valued cPars and other tricks which have been suppressed by
-  .msg files by now.
+  introduced into OMNeT++. It uses cPars, C structs carried by pointer-valued 
+  cPars and other tricks which have been suppressed by .msg files by now.
 
 - TCP implementations may differ significantly in the presence and
   flavour of congestion control, fast retransmit/recovery, selective
   acknowledgement and other schemes. E.g. Linux TCP implements some
-  algorithms differently from RFCs. These variations are hard to
-  account for with tcpmodule.cc.
+  algorithms differently from RFCs. These variations are hard to incorporate
+  in tcpmodule.cc in a flexible way.
 
-- another observation is that different simulation scenarios require
-  different approaches regarding transmitted data:
+- different simulation scenarios require different approaches regarding 
+  transmitted data (see below), and this is also difficult to do with
+  tcpmodule.cc.
 
-  In one model one might want to transmit a "real" bytes (especially
-  if the application which uses TCP is a ported version of a real
+  For example. in one model one might want to transmit a "real" bytes 
+  (especially if the application which uses TCP is a ported version of a real
   socket application)
 
   In other scenarios, "dummy" transmission will do, that is, simulated
@@ -35,8 +37,8 @@ reused. There were several motivations for reimplementation:
   number range in the TCP stream, and the object is passed up to the
   application when its last byte has arrived on the simulated connection.)
 
-- finally, tcpmodule.cc is a single large monolithic class which is
-  quite hard to understand and also to maintain.
+- finally, tcpmodule.cc is a single large class which is rather hard to 
+  understand and to maintain.
 
 The new model, in addition to using .msg files, makes two aspects
 of the TCP model configurable by "plug-in classes":

@@ -66,6 +66,7 @@ void TCPMain::handleMessage(cMessage *msg)
             {
                 ev << "TCP segment " << tcpseg << ": corresponding connId=" << connId <<
                       " doesn't exist (any longer?), packet dropped\n";
+                // FIXME not good, maybe RST has to be sent etc
                 delete tcpseg;
                 return;
             }

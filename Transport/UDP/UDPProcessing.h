@@ -41,6 +41,9 @@ class UDPProcessing : public cSimpleModule
 {
   protected:
 
+    // if false, all incoming packets are sent up on gate 0
+    bool dispatchByPort;
+
     // Maps "from_application" input gate indices to "local_port" parameters of the
     // modules (applications) that are connected there.
     struct UDPApplicationTable
@@ -54,8 +57,9 @@ class UDPProcessing : public cSimpleModule
     int numSent;
     int numPassedUp;
     int numDroppedWrongPort;
-    int numDroppedWrongChecksum;
+    int numDroppedBadChecksum;
 
+    virtual int findAppGateForPort(int destPort);
     virtual void processMsgFromIp(IPInterfacePacket *packet);
     virtual void processMsgFromApp(UDPInterfacePacket *packet);
 

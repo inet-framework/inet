@@ -41,24 +41,24 @@ Define_Module(DropSwitch);
 
 void DropSwitch::activity()
 {
-    cPar & pk_delay = par("pk_delay");
+    cPar& pk_delay = par("pk_delay");
 
-    cPar & syn_client_del = par("syn_client_del");
-    cPar & syn_server_del = par("syn_server_del");
-    cPar & ack_client_del = par("ack_client_del");
-    cPar & ack_server_del = par("ack_server_del");
-    cPar & tcp_client_del = par("tcp_client_del");
-    cPar & tcp_server_del = par("tcp_server_del");
-    cPar & fin_client_del = par("fin_client_del");
-    cPar & fin_server_del = par("fin_server_del");
+    cPar& syn_client_del = par("syn_client_del");
+    cPar& syn_server_del = par("syn_server_del");
+    cPar& ack_client_del = par("ack_client_del");
+    cPar& ack_server_del = par("ack_server_del");
+    cPar& tcp_client_del = par("tcp_client_del");
+    cPar& tcp_server_del = par("tcp_server_del");
+    cPar& fin_client_del = par("fin_client_del");
+    cPar& fin_server_del = par("fin_server_del");
 
-    cPar & del_prob = par("delete_probability");
+    cPar& del_prob = par("delete_probability");
 
-    cPar & burst_del_prob = par("burst_delete_probability");
+    cPar& burst_del_prob = par("burst_delete_probability");
     int error_burst_len = par("error_burst_len");
 
     cGate *server_gate = gate("in", (int) par("server_port"));
-    if (!server_gate) 
+    if (!server_gate)
         error("gate in[server_port=%d] doesn't exist",(int) par("server_port"));
     int server_gate_id = server_gate->id();
 
@@ -67,11 +67,12 @@ void DropSwitch::activity()
     int msg_kind;
     int burst_error_cnt = 0;
 
+    cQueue queue("queue");
+
     for (;;)
     {
         //receive frame, implicit queuing
-        cMessage *rframe = receive();
-
+        cMessage *rframe = queue.empty() ? receive() : (cMessage *)queue.pop();
 
         // delete frame with errors
         if (rframe->hasBitError())
@@ -117,8 +118,7 @@ void DropSwitch::activity()
             //encapsulate datagram
             sframe->encapsulate(datagram);
 
-
-            wait(pk_delay);
+            waitAndEnqueue(pk_delay, &queue);
 
             if (from_server)
             {
@@ -145,7 +145,7 @@ void DropSwitch::activity()
                 }
                 else
                 {
-                    // datagram from server 
+                    // datagram from server
                     // check if datagram should be deleted or send
                     switch (msg_kind)
                     {

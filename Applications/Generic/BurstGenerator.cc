@@ -11,13 +11,14 @@
 #include "IPDatagram.h"
 #include "ICMP.h"
 
-Define_Module_Like ( BurstGenerator, GeneratorAppOut );
+Define_Module_Like(BurstGenerator, GeneratorAppOut);
 
 void BurstGenerator::initialize()
 {
     burstSize = par("burstPackets");
     packetSize = par("generationSize");
     usesTCPProt = par("tcpProtocol");
+    destAddress = par("destAddress").stringValue();
 }
 
 void BurstGenerator::activity()
@@ -39,10 +40,10 @@ void BurstGenerator::activity()
 
         iPacket = new IPInterfacePacket;
         iPacket->encapsulate(transportPacket);
-        iPacket->setDestAddr(chooseDestAddr(dest));
-            iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
+        iPacket->setDestAddr(destAddress);
+        iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
         send(iPacket, "out");
-    } // * end for*
+    }
 
     if (burstSize > 0)
     {
@@ -51,13 +52,5 @@ void BurstGenerator::activity()
            << "\n";
     }
 
-}
-
-/* destination address fixed on nodenr */
-char *BurstGenerator::chooseDestAddr(char *dest)
-{
-    //sprintf(dest, "172.0.3.%i", nodenr); // FIXME!!!!!!!!!!!!!!!!
-
-    return dest;
 }
 

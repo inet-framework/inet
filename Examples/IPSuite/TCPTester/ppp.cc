@@ -26,7 +26,7 @@
 
 
 /**
- * Implementation of a "dummy" communication network protocol
+ * Implementation of a "dummy" L2 protocol
  */
 class DummyPPP : public cSimpleModule
 {

@@ -25,10 +25,11 @@
 
 class TCPSegment;
 class TCPInterfacePacket;
+class TCPOpenCommand;
 class IPInterfacePacket;
 class TCPSendQueue;
 class TCPReceiveQueue;
-
+class TCPAlgorithm;
 
 /**
  * TCP sequence number
@@ -87,13 +88,13 @@ enum TCPEvent
     TCP_E_RCV_RST,  // covers RST+ACK too
 
     // timers
-    TCP_E_TIMEOUT_TIME_WAIT,
-    TCP_E_TIMEOUT_REXMT,
-    TCP_E_TIMEOUT_PERSIST,
-    TCP_E_TIMEOUT_KEEPALIVE,
-    TCP_E_TIMEOUT_CONN_ESTAB,
-    TCP_E_TIMEOUT_FIN_WAIT_2,
-    TCP_E_TIMEOUT_DELAYED_ACK,
+    TCP_E_TIMEOUT_TIME_WAIT,    // rfc793
+    TCP_E_TIMEOUT_REXMT,        // rfc793
+    TCP_E_TIMEOUT_PERSIST,      //???
+    TCP_E_TIMEOUT_KEEPALIVE,    //???
+    TCP_E_TIMEOUT_CONN_ESTAB,   //???
+    TCP_E_TIMEOUT_FIN_WAIT_2,   //???
+    TCP_E_TIMEOUT_DELAYED_ACK,  //???
 };
 
 
@@ -103,8 +104,8 @@ enum TCPEvent
 //
 struct TCPStateVariables
 {
-    // set if the connection was initiated by a passive open
-    bool passive;
+    // set if the connection was initiated by an active open
+    bool active;
 
     // number of bits requested by a client TCP
     unsigned long num_bit_req;
@@ -112,9 +113,11 @@ struct TCPStateVariables
     // send sequence number variables (RFC 793)
     tcpseq_t snd_una;      // send unacknowledged
     tcpseq_t snd_nxt;      // send next
-    tcpseq_t savenext;     // save-variable for snd_nxt in fast rexmt
+
     int snd_up;            // send urgent pointer
     int snd_wnd;           // send window
+
+    tcpseq_t savenext;     // save-variable for snd_nxt in fast rexmt
     tcpseq_t snd_wl1;      // segment sequence number used for last window update
     tcpseq_t snd_wl2;      // segment ack. number used for last window update
     tcpseq_t iss;          // initial sequence number (ISS)
@@ -155,7 +158,7 @@ struct TCPStateVariables
 
     // timing information (round-trip)
     short t_rtt;                // round-trip time
-    tcpseq_t rtseq;        // starting sequence number of timed data
+    tcpseq_t rtseq;             // starting sequence number of timed data
     short rttmin;
     short srtt;                 // smoothed round-trip time
     short rttvar;               // variance of round-trip time
@@ -222,20 +225,13 @@ class TCPConnection
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
 
+    // TCP behavior is data transfer state
+    TCPAlgorithm *tcpAlgorithm;
+
     // timers
     //...
 
   protected:
-    /**
-     * Utility: encapsulates segment into IPInterfacePacket and sends it to IP.
-     */
-    void sendToIP(TCPSegment *tcpseg);
-
-    /**
-     * Utility: sends packet to application.
-     */
-    void sendToApp(TCPInterfacePacket *tcpIfPacket);
-
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
     TCPEvent analyseTCPSegmentEvent(TCPSegment *tcpseg);
@@ -246,35 +242,55 @@ class TCPConnection
 
     /** @name Processing app commands */
     //@{
-    void process_OPEN_ACTIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_OPEN_PASSIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_SEND(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_RECEIVE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_CLOSE(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_ABORT(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
-    void process_STATUS(TCPEvent event, TCPInterfacePacket *tcpIfPacket);
+    void process_OPEN_ACTIVE(TCPInterfacePacket *tcpIfPacket);
+    void process_OPEN_PASSIVE(TCPInterfacePacket *tcpIfPacket);
+    void process_SEND(TCPInterfacePacket *tcpIfPacket);
+    void process_RECEIVE(TCPInterfacePacket *tcpIfPacket);
+    void process_CLOSE(TCPInterfacePacket *tcpIfPacket);
+    void process_ABORT(TCPInterfacePacket *tcpIfPacket);
+    void process_STATUS(TCPInterfacePacket *tcpIfPacket);
     //@}
 
     /** @name Processing TCP segment arrivals */
     //@{
-    void process_RCV_DATA(TCPEvent event, TCPSegment *tcpseg);
-    void process_RCV_SYN(TCPEvent event, TCPSegment *tcpseg);
-    void process_RCV_SYN_ACK(TCPEvent event, TCPSegment *tcpseg);
-    void process_RCV_FIN(TCPEvent event, TCPSegment *tcpseg);
-    void process_RCV_FIN_ACK(TCPEvent event, TCPSegment *tcpseg);
-    void process_RCV_RST(TCPEvent event, TCPSegment *tcpseg);
+    void process_RCV_DATA(TCPSegment *tcpseg);
+    void process_RCV_SYN(TCPSegment *tcpseg);
+    void process_RCV_SYN_ACK(TCPSegment *tcpseg);
+    void process_RCV_FIN(TCPSegment *tcpseg);
+    void process_RCV_FIN_ACK(TCPSegment *tcpseg);
+    void process_RCV_RST(TCPSegment *tcpseg);
     //@}
 
     /** @name Processing timeouts */
     //@{
-    void process_TIMEOUT_TIME_WAIT(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_REXMT(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_PERSIST(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_KEEPALIVE(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_CONN_ESTAB(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_FIN_WAIT_2(TCPEvent event, cMessage *msg);
-    void process_TIMEOUT_DELAYED_ACK(TCPEvent event, cMessage *msg);
+    void process_TIMEOUT_TIME_WAIT(cMessage *msg);
+    void process_TIMEOUT_REXMT(cMessage *msg);
+    void process_TIMEOUT_PERSIST(cMessage *msg);
+    void process_TIMEOUT_KEEPALIVE(cMessage *msg);
+    void process_TIMEOUT_CONN_ESTAB(cMessage *msg);
+    void process_TIMEOUT_FIN_WAIT_2(cMessage *msg);
+    void process_TIMEOUT_DELAYED_ACK(cMessage *msg);
     //@}
+
+    /** @name Comparing sequence numbers */
+    //@{
+    bool seqNoLt(tcpseq_t a, tcpseq_t b) {return a!=b && b-a<(1UL<<31);}
+    bool seqNoLeq(tcpseq_t a, tcpseq_t b) {return b-a<(1UL<<31);}
+    bool seqNoGt(tcpseq_t a, tcpseq_t b) {return a!=b && a-b<(1UL<<31);}
+    bool seqNoGeq(tcpseq_t a, tcpseq_t b) {return a-b<(1UL<<31);}
+    //@}
+
+    /** Utility: creates send/receive queues and tcpAlgorithm */
+    void initConnection(TCPOpenCommand *openCmd);
+
+    /** Utility: generates ISS and sends initial SYN */
+    void sendSyn();
+
+    /** Utility: encapsulates segment into IPInterfacePacket and sends it to IP */
+    void sendToIP(TCPSegment *tcpseg);
+
+    /** Utility: sends packet to application */
+    void sendToApp(TCPInterfacePacket *tcpIfPacket);
 
   public:
     /**

@@ -21,8 +21,7 @@ private:
     int packetSize;
     int destctr;
     bool usesTCPProt;
-
-    char *chooseDestAddr(char *);
+    IPAddress destAddress;
 public:
     Module_Class_Members(BurstGenerator, cSimpleModule, ACTIVITY_STACK_SIZE);
 

@@ -35,21 +35,34 @@ void UDPProcessing::initialize()
     applTable.size = gateSize("to_application");
     applTable.port = new int[applTable.size];  // FIXME free it in dtor (or change to std::map)
 
-    for (int i=0; i<applTable.size; i++)
+    // if there's only one app and without "local_port" parameter, don't dispatch
+    // incoming packets by port number.
+    if (applTable.size==1 && gate("to_application",0)->toGate() &&
+        gate("to_application",0)->toGate()->ownerModule()->hasPar("local_port")==false)
     {
-        // "local_port" parameter of connected app module
-        cGate *appgate = gate("to_application",i)->toGate();
-        applTable.port[i] = appgate ? appgate->ownerModule()->par("local_port") : -1;
+        dispatchByPort = false;
     }
+    else
+    {
+        dispatchByPort = true;
+        for (int i=0; i<applTable.size; i++)
+        {
+            // "local_port" parameter of connected app module
+            cGate *appgate = gate("to_application",i)->toGate();
+            applTable.port[i] = appgate ? appgate->ownerModule()->par("local_port") : -1;
+        }
+    }
+
+    WATCH(dispatchByPort);
 
     numSent = 0;
     numPassedUp = 0;
     numDroppedWrongPort = 0;
-    numDroppedWrongChecksum = 0;
+    numDroppedBadChecksum = 0;
     WATCH(numSent);
     WATCH(numPassedUp);
     WATCH(numDroppedWrongPort);
-    WATCH(numDroppedWrongChecksum);
+    WATCH(numDroppedBadChecksum);
 }
 
 void UDPProcessing::handleMessage(cMessage *msg)
@@ -78,21 +91,13 @@ void UDPProcessing::processMsgFromIp(IPInterfacePacket *ipIfPacket)
         // assume checksum found biterror
         delete ipIfPacket;
         delete udpPacket;
-        numDroppedWrongChecksum++;
+        numDroppedBadChecksum++;
         return;
     }
 
     // look up app gate
     int destPort = udpPacket->destinationPort();
-    int appGateIndex = -1;
-    for (int i=0; i<applTable.size; i++)
-    {
-        if (applTable.port[i]==destPort)
-        {
-            appGateIndex = i;
-            break;
-        }
-    }
+    int appGateIndex = findAppGateForPort(destPort);
     if (appGateIndex == -1)
     {
         delete udpPacket;
@@ -147,4 +152,14 @@ void UDPProcessing::processMsgFromApp(UDPInterfacePacket *udpIfPacket)
     numSent++;
 }
 
+int UDPProcessing::findAppGateForPort(int destPort)
+{
+    if (!dispatchByPort)
+        return 0;
+
+    for (int i=0; i<applTable.size; i++)
+        if (applTable.port[i]==destPort)
+            return i;
+    return -1;
+}
 

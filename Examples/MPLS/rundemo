@@ -1,51 +1,50 @@
 #!/bin/sh
-# the next line restarts using wish \
+# the next line restarts using wish (on cygwin, use wish84 or the like) \
 exec wish "$0" "$@"
 
 #==========================================================================
-#  
+#  DEMO
 #==========================================================================
 
-#----------------------------------------------------------------#
-#  Copyright (C) 1992,99 Andras Varga
-#  Technical University of Budapest, Dept. of Telecommunications,
-#  Stoczek u.2, H-1111 Budapest, Hungary.
+#--------------------------------------------------------------
+#  Copyright (C) 1992-2003 Andras Varga
 #
 #  This file is distributed WITHOUT ANY WARRANTY. See the file
 #  `license' for details on this and other legal matters.
-#
-#  Adapted for the OMNeT++ IP Suite by U.Kaage, 2000
-#  adapted for ip without qos by V. Kahmann, 2001 (deleted 1 network)
-#----------------------------------------------------------------#
+#--------------------------------------------------------------
 
-set topdir [pwd]
 
-set id 0
-foreach i {
-   {TCPClientServerNet Examples/IPSuite/TCPClientServerNet tcp}
-   {TCPTester Examples/IPSuite/TCPTester tcptester}
-   {TCPFlavours Examples/IPSuite/TCPFlavours tcpflavours}
-   {TCPUDPDirectNet Examples/IPSuite/TCPUDPDirectNet tcp/udp}
-   {McNetwork2 Examples/IPSuite/McNetwork2 multicast}
-   {PerformAnalysis Examples/IPSuite/PerformAnalysis performance}
+# columns below: <name> <directory> <unix-command> <windows-command>
+set i 0
+foreach line {
+
+   {"MPLS-LDP"               "ldp-mpls1" "./ldp-mpls1"  "ldp-mpls1.exe"}
+   {"CSPF Routing"           "TestTE1"   "./TestTE1"    "TestTE1.exe"}
+   {"Hop-by-Hop Routing"     "TestTE2"   "./TestTE2"    "TestTE2.exe"}
+   {"ER Routing"             "TestTE3"   "./TestTE3"    "TestTE3.exe"}
+   {"Traffic Reroute 1"      "TestTE4"   "./TestTE4"    "TestTE4.exe"}
+   {"Traffic Reroute 2"      "TestTE5"   "./TestTE5"    "TestTE5.exe"}
+   {"Reservation preemption" "TestTE6"   "./TestTE6"    "TestTE6.exe"}
 } {
-   lappend samples $id
-   set prog($id) [lindex $i 0]
-   set dir($id) [lindex $i 1]
-   set name($id) [lindex $i 2]
-   incr id
+   set name $i
+   incr i
+   lappend samples $name
+   set title($name) [lindex $line 0]
+   set dir($name) [lindex $line 1]
+   set uprog($name) [lindex $line 2]
+   set wprog($name) [lindex $line 3]
 }
 
 
 proc createWindow {} {
-    global samples prog dir name fonts colors
+    global samples title dir uprog wprog fonts colors
 
     wm focusmodel . passive
     wm minsize . 1 1
     wm overrideredirect . 0
     wm resizable . 1 1
     wm deiconify .
-    wm title . "OMNeT++ IP Suite Demo"
+    wm title . "OMNeT++ Demo Simulations"
     wm protocol . WM_DELETE_WINDOW {exit}
 
     #################################
@@ -97,84 +96,85 @@ proc createWindow {} {
     label .main.up.banner -bg $colors(banner) -relief groove  -font $fonts(bold)
     pack .main.up.banner -fill x -side top
 
-    text .main.mid.text -yscrollcommand ".main.mid.sb set" -width 74 -height 20  -wrap none
+    text .main.mid.text -yscrollcommand ".main.mid.sb set" -width 80 -height 20  -wrap none
     scrollbar .main.mid.sb -command ".main.mid.text yview"
     pack .main.mid.sb -anchor center -expand 0 -fill y  -side right
     pack .main.mid.text -anchor center -expand 1 -fill both -side left
 
-    button .main.lo.start -bg $colors(startbutton) -font $fonts(bold)
+    button .main.lo.start -font $fonts(bold) -bg $colors(startbutton)
     pack .main.lo.start -expand 1 -fill x  -padx 10 -pady 6
 
     label .sel.banner -text "Sample simulations:" -bg $colors(banner) -relief groove -font $fonts(bold)
     pack .sel.banner -fill x -side top
     foreach i $samples {
-        button .sel.$i -text $name($i) -command "showDemo $i"
+        button .sel.$i -text $title($i) -command "showDemo $i"
         pack .sel.$i -fill x -side top -padx 5 -pady 2
     }
     showDemo [lindex $samples 0]
 }
 
 proc helpAbout {} {
-    tk_messageBox -title {About OMNeT++ Demo} -type ok -icon info -message \
+    tk_messageBox -title {About IPSuite MPLS Demo} -type ok -icon info -message \
 {\
-OMNeT++ Discrete Event Simulation System
+IPSuite for OMNeT++, MPLS models
 Sample Simulations
-
-(c) Andras Varga, 1992-99
-Technical University of Budapest
-Dept. of Telecommunications
 }
 
 }
 
-proc showDemo {id} {
-   global samples prog dir name colors tcl_platform
+proc showDemo {sample} {
+   global samples title dir uprog wprog colors tcl_platform
 
    foreach i $samples {
         .sel.$i config -relief raised -bg $colors(unselbutton)
    }
-   .sel.$id config -relief sunken -bg $colors(selbutton)
+   .sel.$sample config -relief sunken -bg $colors(selbutton)
 
-    if {$tcl_platform(platform) == "unix"} {
-      set runprog "./$prog($id) &"
-    } else {
-      set runprog "start $prog($id)" 
-    }
-    set cmd "cd $dir($id); $runprog"
+   if {$tcl_platform(platform) == "unix"} {
+     set cmd "cd $dir($sample); $uprog($sample)"
+   } else {
+     set cmd "cd $dir($sample); $wprog($sample)"
+   }
+   .main.up.banner config -text "$title($sample) README"
+   .main.lo.start config -text "Launch $title($sample)\n($cmd)"
+   .main.lo.start config -command "runSample $sample"
 
-   .main.up.banner config -text "$name($id) README"
-   .main.lo.start config -text "Launch $name($id)  (command: $cmd)"
-   .main.lo.start config -command "runSample $id"
-
-   loadFile .main.mid.text "$dir($id)/README"
+   loadFile .main.mid.text "$dir($sample)/README"
 }
 
 proc loadFile {t filename} {
-    if [catch {open $filename r} f] {
-       tk_messageBox -title {OMNeT++ Demo} -message "Error reading file $filename: $f" -icon error -type ok
+    $t delete 1.0 end
+
+    if [catch {
+       set f [open $filename r]
+       set contents [read $f]
+       close $f
+    } err] {
+       #tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Cannot display README: $err"
        return
     }
-    set contents [read $f]
-    close $f
 
-    set curpos [$t index insert]
-    $t delete 1.0 end
     $t insert end $contents
-    catch {$t mark set insert $curpos}
-    $t see insert
+    $t mark set insert 1.0
 }
 
-proc runSample {id} {
-   global topdir samples prog dir name
+proc runSample {sample} {
+   global samples title dir uprog wprog tcl_platform
 
-   if [catch {
-          cd $dir($id)
-          exec ./$prog($id) &
-   }] {
-      tk_messageBox -title {OMNeT++ Demo} -type ok -icon error \
-                    -message {Error running the simulation program.}
+   if {$tcl_platform(platform) == "unix"} {
+     set prog $uprog($sample)
+   } else {
+     set prog $wprog($sample)
    }
-   cd $topdir
+
+   set pwd [pwd]
+   if [catch {
+      cd $dir($sample);
+      exec $prog &
+    } err] {
+      tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"
+   }
+   cd $pwd
 }
 
 #===================================================================
@@ -263,6 +263,8 @@ proc checkVersion {} {
    }
 }
 
+set tk_strictMotif 1
+cd [file dirname [info script]]
 checkVersion
 generic_bindings
 font_bindings

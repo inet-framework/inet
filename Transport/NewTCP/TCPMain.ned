@@ -47,8 +47,9 @@
 //
 simple TCPMain
     parameters:
-      sendQueue: string;
-      receiveQueue: string;
+      sendQueueClass: string,
+      receiveQueueClass: string,
+      tcpAlgorithmClass: string;
     gates:
       in: from_appl, from_ip;
       out: to_appl, to_ip;

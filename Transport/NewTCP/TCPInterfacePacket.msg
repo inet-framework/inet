@@ -73,5 +73,6 @@ message TCPOpenCommand extends TCPInterfacePacket
         int remotePort;
         string sendQueueClass;
         string receiveQueueClass;
+        string tcpAlgorithmClass;
 };
 

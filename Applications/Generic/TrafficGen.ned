@@ -26,6 +26,7 @@ endsimple
 
 simple GeneratorAppOut
     parameters:
+        destAddress : string,
         tcpProtocol : bool,
         generationTime,
         generationSize, // (bit)

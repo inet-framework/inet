@@ -1,3 +1,8 @@
+2004-03-22  Andras Varga
+
+	* thorough revision with tons of code change -- see log at 
+        http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/IPSuiteLogOfChanges
+
 2004-02-04  Andras Varga
 
 	* got it compiled with omnetpp-3.0pre1. changes:

@@ -69,4 +69,5 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Transport/Socket && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../TCP -I../../Network/IPv4/Core -I../../Base -I../../Util)
 (cd Transport/TCP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Applications/TCPApp -I../../Base -I../../Util)
 (cd Transport/UDP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../TCP -I../../Network/IPv4/Core -I../../Base -I../../Util)
+(cd Transport/NewTCP && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig -I../../Network/IPv4/Core -I../../Base -I../../Util)
 

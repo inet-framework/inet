@@ -67,6 +67,16 @@ GENERATEDHEADERS=
 SUBDIRS= KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
 SUBDIR_TARGETS=  KIDSNw1_dir McNetwork2_dir PerformAnalysis_dir TCPClientServerNet_dir TCPTester_dir TCPUDPDirectNet_dir UDPSockets_dir
 
+# inserted from file 'makefrag.vc':
+
+WISH=wish84
+
+all : $(TARGET) rundemo.bat
+
+rundemo.bat:
+	echo @$(WISH:/=\) -f ^%~dpn0 ^%* > rundemo.bat
+
+
 $(TARGET): $(OBJS) Makefile.vc subdirs
 	@echo.>.tstamp
 

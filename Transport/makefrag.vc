@@ -2,7 +2,7 @@
 
 # override SUBDIRS: leave out MiniTCP and RTP from the build for now
 SUBDIRS= UDP TCP Socket
-SUBDIR_TARGETS= UDP_dir TCP_dir Socket_dir
+SUBDIR_TARGETS= UDP_dir TCP_dir Socket_dir NewTCP_dir
 
 # preserve default target
 all: $(TARGET)
