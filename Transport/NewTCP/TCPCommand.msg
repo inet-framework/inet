@@ -78,7 +78,7 @@ class TCPErrorInfo extends TCPCommand
         omitGetVerb = true;
     fields:
         int errorCode enum(TCPErrorCode);
-        string message;
+        string messageText;
 };
 
 //
