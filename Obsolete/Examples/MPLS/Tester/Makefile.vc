@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= Tester_n.obj NewBWRequestTester.obj NewRouteTester.obj 
+OBJS= Tester_n.obj NewBWRequestTester.obj NewRouteTester.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -77,7 +77,6 @@ void LocalDeliverCore::activity()
     cMessage *dfmsg;
 	IPDatagram *datagram;
 	IPInterfacePacket *interfacePacket;
-	int payloadLength; // in bytes
 
 	lastCheckTime = simTime();
 

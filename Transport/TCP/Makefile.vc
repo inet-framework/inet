@@ -54,7 +54,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj  tcpmodule.obj  TransportInterfacePacket.obj TransportPacket.obj
+OBJS= TcpIpInterface_n.obj tcpmodule_n.obj Ip2Tcp.obj pcb.obj Tcp2Ip.obj tcpmodule.obj TransportInterfacePacket.obj TransportPacket.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -66,7 +66,7 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= McNetwork2_n.obj 
+OBJS= McNetwork2_n.obj
 
 # subdirectories to recurse into
 SUBDIRS= 

@@ -19,7 +19,7 @@ void BurstGenerator::initialize()
 	strcpy(nodename, par("nodename"));
 	nodenr = par("nodenr");
 	packetSize = par("generationSize");
-    bool usesTCPProt = par("tcpProtocol");
+        usesTCPProt = par("tcpProtocol");
 
 }
 
