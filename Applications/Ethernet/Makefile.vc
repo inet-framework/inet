@@ -134,16 +134,10 @@ re-makemake: makefiles
 EtherApp_m.obj: EtherApp_m.cc \
   EtherApp_m.h
 EtherAppCli.obj: EtherAppCli.cc \
-  ../../NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
-  ../../NetworkInterfaces/Ethernet/Ethernet.h \
-  ../../NetworkInterfaces/_802/MACAddress.h \
   ../../Base/INETDefs.h
 EtherAppSrv.obj: EtherAppSrv.cc \
-  ../../NetworkInterfaces/Ethernet/EtherCtrl_m.h \
   EtherApp_m.h \
   ../../NetworkInterfaces/Ethernet/utils.h \
-  ../../NetworkInterfaces/Ethernet/Ethernet.h \
-  ../../NetworkInterfaces/_802/MACAddress.h \
   ../../Base/INETDefs.h

@@ -158,13 +158,11 @@ TCPBasicClientApp.obj: TCPBasicClientApp.cc \
   TCPBasicClientApp.h \
   TCPGenericCliAppBase.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPEchoApp.obj: TCPEchoApp.cc \
   TCPEchoApp.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPGenericCliAppBase.obj: TCPGenericCliAppBase.cc \
@@ -172,14 +170,12 @@ TCPGenericCliAppBase.obj: TCPGenericCliAppBase.cc \
   ../../Network/IPv4/IPAddressResolver.h \
   GenericAppMsg_m.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   ../../Network/IPv4/RoutingTable.h
 TCPGenericSrvApp.obj: TCPGenericSrvApp.cc \
   TCPGenericSrvApp.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   GenericAppMsg_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
@@ -189,34 +185,29 @@ TCPGenericSrvThread.obj: TCPGenericSrvThread.cc \
   TCPSrvHostApp.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPSocketMap.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPSessionApp.obj: TCPSessionApp.cc \
   TCPSessionApp.h \
   ../../Network/IPv4/IPAddressResolver.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
   ../../Network/IPv4/RoutingTable.h
 TCPSinkApp.obj: TCPSinkApp.cc \
   TCPSinkApp.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPSrvHostApp.obj: TCPSrvHostApp.cc \
   TCPSrvHostApp.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPSocketMap.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TelnetApp.obj: TelnetApp.cc \
   TelnetApp.h \
   TCPGenericCliAppBase.h \
   ../../Transport/TCP/TCPSocket.h \
-  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
