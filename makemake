@@ -33,7 +33,7 @@ $MAKEMAKE -f -n -c ipsuiteconfig Network Applications Transport NetworkInterface
 (cd Examples/IPSuite/TCPUDPDirectNet && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/UDPSockets && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
-(cd Examples/MPLS/demo2 && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
+(cd Examples/MPLS/demo2 && $MAKEMAKE -f -n -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES)
 (cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
 (cd Examples/MPLS/samples && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
 (cd Examples/MPLS/Tester && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
