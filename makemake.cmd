@@ -1,6 +1,10 @@
+:rem *** ADOPT THE NEXT TWO LINES ACCORDING TO YOUR OMNET++ INSTALLATION ***
 call ..\omnetpp\vcvars32.bat
-set root=%~dp0
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
+
+: #--------------------------------------
+
+set root=%~dp0
 set OPTS=-f -N -b %root% -c %root%\inetconfig.vc
 
 set ALL_INET_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/Ethernet -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/INET
