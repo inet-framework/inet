@@ -21,6 +21,7 @@
 
 #include <vector>
 #include "MPLSModule.h"
+#include "IntServ_m.h" // FIXME only for IPADDR -- remove after the transition!
 
 
 /**
@@ -42,8 +43,8 @@ struct TELinkState
 
 struct simple_link_t
 {
-    int advRouter;
-    int id;
+    IPADDR advRouter;
+    IPADDR id;
 };
 
 /**

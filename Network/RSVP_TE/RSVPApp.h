@@ -50,8 +50,8 @@ class RSVPAppl: public cSimpleModule
 private:
     struct traffic_request_t
     {
-        int src;
-        int dest;
+        IPADDR src;
+        IPADDR dest;
         int setupPri;
         int holdingPri;
         double delay;
@@ -63,7 +63,7 @@ private:
     struct lsp_tunnel_t
     {
         SenderTemplateObj_t Sender_Template;
-        SessionObj_t         Session;
+        SessionObj_t Session;
         bool operating;
         int inInfIndex;
     };
@@ -71,7 +71,7 @@ private:
     struct routing_info_t
     {
         int lspId;
-        int route[MAX_ROUTE];
+        IPADDR route[MAX_ROUTE];
     };
 
     RoutingTableAccess routingTableAccess;
@@ -79,10 +79,10 @@ private:
     OSPFTEAccess ospfteAccess;
     MPLSAccess mplsAccess;
 
-    int routerId, dest_addr;  // FIXME make them IPAddress
+    IPADDR routerId;
     double BW, delay;
     bool isER, isIR;
-    std::vector<TELinkState>  ted;
+    std::vector<TELinkState> ted;
     std::vector<traffic_request_t> tr;
     std::vector<lsp_tunnel_t> FecSenderBinds;
     std::vector<routing_info_t> routingInfo;
@@ -119,8 +119,8 @@ public:
     /** @name Process various RSVP message types */
     //@{
     void processRSVP_PERROR(RSVPPathError *pe);
-    void processRSVP_PTEAR(cMessage *msg);
-    void processRSVP_RTEAR(cMessage *msg);
+    void processRSVP_PTEAR(RSVPPathTear *msg);
+    void processRSVP_RTEAR(RSVPResvTear *msg);
     void processRSVP_PATH(RSVPPathMsg *pMessage);
     void processRSVP_RESV(RSVPResvMsg *rMessage);
     //@}
@@ -141,11 +141,12 @@ public:
     void sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId);
     void sendResvMessage(RSVPPathMsg* pMsg, int inLabel);
 
-    void Mcast_Route_Query(int sa, int iad, int da, int *outl);
-    void Unicast_Route_Query(int da, int* outl);
-    void getPeerIPAddress(int dest, int* peerIP, int* peerInf);
-    void getPeerIPAddress(int peerInf, int* peerIP);
-    void getPeerInet(int peerIP, int* peerInf);
+    // FIXME these seem to be the same as in RSVP.h/cc
+    void Mcast_Route_Query(IPADDR sa, int iad, IPADDR da, int *outl);
+    void Unicast_Route_Query(IPADDR da, int *outl);
+    void getPeerIPAddress(IPADDR dest, IPADDR *peerIP, int* peerInf);
+    void getPeerIPAddress(int peerInf, IPADDR *peerIP);
+    void getPeerInet(IPADDR peerIP, int* peerInf);
     void getIncInet(int remoteInet, int* incInet);
 
     void updateTED();

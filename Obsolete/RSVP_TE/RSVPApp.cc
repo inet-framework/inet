@@ -78,8 +78,8 @@ void RSVPAppl::processMsgFromRSVP(cMessage *msg)
     switch(msg->kind())
     {
         case PERROR_MESSAGE: processRSVP_PERROR(check_and_cast<RSVPPathError *>(msg)); break;
-        case PTEAR_MESSAGE:  processRSVP_PTEAR(msg); break;
-        case RTEAR_MESSAGE:  processRSVP_RTEAR(msg); break;
+        case PTEAR_MESSAGE:  processRSVP_PTEAR(check_and_cast<RSVPPathTear *>(msg)); break;
+        case RTEAR_MESSAGE:  processRSVP_RTEAR(check_and_cast<RSVPResvTear *>(msg)); break;
         case PATH_MESSAGE:   processRSVP_PATH(check_and_cast<RSVPPathMsg *>(msg)); break;
         case RESV_MESSAGE:   processRSVP_RESV(check_and_cast<RSVPResvMsg *>(msg)); break;
         default: error("unrecognised RSVP message, kind=%d", msg->kind());
@@ -103,13 +103,13 @@ void RSVPAppl::processRSVP_PERROR(RSVPPathError *pe)
     delete pe;
 }
 
-void RSVPAppl::processRSVP_PTEAR(cMessage *msg)
+void RSVPAppl::processRSVP_PTEAR(RSVPPathTear *msg)
 {
     ev << "Successfully received the PTEAR at ER\n";
     delete msg;
 }
 
-void RSVPAppl::processRSVP_RTEAR(cMessage *msg)
+void RSVPAppl::processRSVP_RTEAR(RSVPResvTear *msg)
 {
     ev << "Successfully received the RTEAR at IR\n";
     delete msg;
@@ -120,7 +120,7 @@ void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
-    int receiverIP = pMessage->getDestAddress();
+    IPADDR receiverIP = pMessage->getDestAddress();
     int lspId = pMessage->getLspId();
     int outInf = 0;
     int inInf = 0;
@@ -647,7 +647,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     // Setup PHOP
     rsvp_hop->Logical_Interface_Handle = -1;
     rsvp_hop->Next_Hop_Address = routerId;
-    int destAddr = s->DestAddress;
+    IPADDR destAddr = s->DestAddress;
     int outInterface;
 
     Unicast_Route_Query(destAddr, &outInterface);
@@ -670,7 +670,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     // Setup routing information
     pMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
 
-    int peerIP = 0;
+    IPADDR peerIP = 0;
     int peerInf = 0;
     // Normal way to get the peerIP
     getPeerIPAddress(destAddr, &peerIP, &peerInf);
@@ -706,8 +706,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
                     " to " << IPAddress(destAddr) << "\n";
 
                 double delayTime = 0;
-                std::vector < int >ero =
-                    ospfte->CalculateERO(destAddr, *Flowspec_Object, delayTime);
+                std::vector<IPADDR> ero = ospfte->CalculateERO(destAddr, *Flowspec_Object, delayTime);
                 if (ero.back() == 0)    // Unknow reason
                 {
                     ero.pop_back();
@@ -795,7 +794,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 
 
 
-void RSVPAppl::Unicast_Route_Query(int da, int *outl)
+void RSVPAppl::Unicast_Route_Query(IPADDR da, int *outl)
 {
     RoutingTable *rt = routingTableAccess.get();
     int foundIndex;
@@ -807,7 +806,7 @@ void RSVPAppl::Unicast_Route_Query(int da, int *outl)
 
 }
 
-void RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
+void RSVPAppl::Mcast_Route_Query(IPADDR sa, int iad, IPADDR da, int *outl)
 {
     RoutingTable *rt = routingTableAccess.get();
 
@@ -819,7 +818,7 @@ void RSVPAppl::Mcast_Route_Query(int sa, int iad, int da, int *outl)
     return;
 }
 
-void RSVPAppl::getPeerInet(int peerIP, int *peerInf)
+void RSVPAppl::getPeerInet(IPADDR peerIP, int *peerInf)
 {
     updateTED();
 
@@ -852,7 +851,7 @@ void RSVPAppl::getIncInet(int remoteInet, int *incInet)
     }
 }
 
-void RSVPAppl::getPeerIPAddress(int dest, int *peerIP, int *peerInf)
+void RSVPAppl::getPeerIPAddress(IPADDR dest, IPADDR *peerIP, int *peerInf)
 {
     int outl = 0;
     Mcast_Route_Query(0, 0, dest, &outl);
@@ -871,7 +870,7 @@ void RSVPAppl::getPeerIPAddress(int dest, int *peerIP, int *peerInf)
     }
 }
 
-void RSVPAppl::getPeerIPAddress(int peerInf, int *peerIP)
+void RSVPAppl::getPeerIPAddress(int peerInf, IPADDR *peerIP)
 {
     updateTED();
 
@@ -1066,7 +1065,7 @@ bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t * newFlowspec)
     }
 
     // Get destination
-    int destAddr = aTunnel.Session.DestAddress;
+    IPADDR destAddr = aTunnel.Session.DestAddress;
 
     // Get old flowspec
     FlowSpecObj_t *Flowspec_Object = new FlowSpecObj_t;
@@ -1094,14 +1093,12 @@ bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t * newFlowspec)
     ev << "OSPF PATH calculation: from " << IPAddress(routerId) <<
         " to " << IPAddress(destAddr) << "\n";
 
-    std::vector < int >ero;
+    std::vector<IPADDR> ero;
     double totalDelay = 0;
     if (newFlowspec == NULL)
     {
 
-        ero =
-            ospfte->CalculateERO(destAddr, linksInUse, *Flowspec_Object, *Flowspec_Object,
-                                 totalDelay);
+        ero = ospfte->CalculateERO(destAddr, linksInUse, *Flowspec_Object, *Flowspec_Object, totalDelay);
 
         if (currentTotalDelay < totalDelay)
         {
@@ -1117,11 +1114,10 @@ bool RSVPAppl::hasPath(int lspid, FlowSpecObj_t * newFlowspec)
     }
     else
     {
-        ero =
-            ospfte->CalculateERO(destAddr, linksInUse, *Flowspec_Object, *newFlowspec, totalDelay);
+        ero = ospfte->CalculateERO(destAddr, linksInUse, *Flowspec_Object, *newFlowspec, totalDelay);
     }
 
-    std::vector < int >::iterator ero_iterI;
+    std::vector<IPADDR>::iterator ero_iterI;
 
     int inx = 0;
 

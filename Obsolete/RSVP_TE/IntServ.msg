@@ -125,7 +125,7 @@ struct EroObj_t
 {
   fields:
     bool L = false;
-    int node = 0;
+    IPADDR node; // = 0;FIXME
 };
 
 
