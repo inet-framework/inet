@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= LDPPacket_m.o NewLDP.o
+OBJS= LDPPacket_m.o  NewLDP.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= LDPPacket_m.h
@@ -115,20 +115,28 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+LDPPacket_m.o: LDPPacket_m.cc \
+  LDPPacket_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/ipsuite_defs.h
 NewLDP.o: NewLDP.cc \
   ../MPLS/ConstType.h \
   NewLDP.h \
+  ../MPLS/LIBtable.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/RoutingTable.h \
+  ../../Transport/UDP/UDPControlInfo_m.h \
   ../../Util/stlwatch.h \
+  LDPPacket_m.h \
   ../MPLS/MPLSAccess.h \
   ../MPLS/LIBTableAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../../Transport/TCP/TCPSocketMap.h \
-  ../../Base/ModuleAccess.h \
-  ../MPLS/LIBtable.h \
-  ../../Transport/TCP/TCPSocket.h \
   ../IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h \
+  ../../Base/ModuleAccess.h \
+  ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h
+  ../IPv4/IPDatagram.h \
+  ../IPv4/IPDatagram_m.h

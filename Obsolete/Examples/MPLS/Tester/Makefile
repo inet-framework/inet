@@ -120,10 +120,11 @@ NewBWRequestTester.o: NewBWRequestTester.cc \
   ../../../Network/IPv4/RoutingTableAccess.h \
   ../../../Network/IPv4/RoutingTable.h \
   ../../../Network/MPLS/ConstType.h \
-  ../../../Base/ModuleAccess.h \
-  ../../../Network/MPLS/LIBtable.h \
+  ../../../Network/IPv4/IPDatagram_m.h \
+  ../../../Network/IPv4/IPAddress.h \
   ../../../Base/ipsuite_defs.h \
-  ../../../Network/IPv4/IPAddress.h
+  ../../../Base/ModuleAccess.h \
+  ../../../Network/MPLS/LIBtable.h
 NewRouteTester.o: NewRouteTester.cc \
   ../../../Network/MPLS/MPLSModule.h \
   ../../../Network/RSVP_TE/RSVPTester.h \
@@ -134,7 +135,8 @@ NewRouteTester.o: NewRouteTester.cc \
   ../../../Network/IPv4/RoutingTableAccess.h \
   ../../../Network/IPv4/RoutingTable.h \
   ../../../Network/MPLS/ConstType.h \
-  ../../../Base/ModuleAccess.h \
-  ../../../Network/MPLS/LIBtable.h \
+  ../../../Network/IPv4/IPDatagram_m.h \
+  ../../../Network/IPv4/IPAddress.h \
   ../../../Base/ipsuite_defs.h \
-  ../../../Network/IPv4/IPAddress.h
+  ../../../Base/ModuleAccess.h \
+  ../../../Network/MPLS/LIBtable.h

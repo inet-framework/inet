@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= _802Ctrl_m.o MACAddress.o
+OBJS= _802Ctrl_m.o  MACAddress.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= _802Ctrl_m.h
@@ -115,5 +115,8 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+_802Ctrl_m.o: _802Ctrl_m.cc \
+  _802Ctrl_m.h \
+  MACAddress.h
 MACAddress.o: MACAddress.cc \
   MACAddress.h

@@ -113,11 +113,15 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TcpTestClient.o: TcpTestClient.cc \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPTester.o: TCPTester.cc \
   TCPTester.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Transport/TCP/TCPSegment.h \
   ../../Transport/TCP/TCPDump.h \
-  ../../Base/ipsuite_defs.h
+  ../../Base/ipsuite_defs.h \
+  ../../Transport/TCP/TCPSegment_m.h

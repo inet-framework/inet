@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= GenericAppMsg_m.o TCPBasicClientApp.o TCPEchoApp.o TCPGenericCliAppBase.o TCPGenericSrvApp.o TCPGenericSrvThread.o TCPSessionApp.o TCPSinkApp.o TCPSrvHostApp.o TelnetApp.o
+OBJS= GenericAppMsg_m.o  TCPBasicClientApp.o TCPEchoApp.o TCPGenericCliAppBase.o TCPGenericSrvApp.o TCPGenericSrvThread.o TCPSessionApp.o TCPSinkApp.o TCPSrvHostApp.o TelnetApp.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= GenericAppMsg_m.h
@@ -139,57 +139,71 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+GenericAppMsg_m.o: GenericAppMsg_m.cc \
+  GenericAppMsg_m.h
 TCPBasicClientApp.o: TCPBasicClientApp.cc \
   TCPBasicClientApp.h \
   TCPGenericCliAppBase.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPEchoApp.o: TCPEchoApp.cc \
   TCPEchoApp.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPGenericCliAppBase.o: TCPGenericCliAppBase.cc \
   TCPGenericCliAppBase.h \
   ../../Network/IPv4/IPAddressResolver.h \
+  GenericAppMsg_m.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/RoutingTable.h
 TCPGenericSrvApp.o: TCPGenericSrvApp.cc \
   TCPGenericSrvApp.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
+  GenericAppMsg_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPGenericSrvThread.o: TCPGenericSrvThread.cc \
   TCPGenericSrvThread.h \
+  GenericAppMsg_m.h \
   TCPSrvHostApp.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPSocketMap.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPSessionApp.o: TCPSessionApp.cc \
   TCPSessionApp.h \
   ../../Network/IPv4/IPAddressResolver.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/RoutingTable.h
 TCPSinkApp.o: TCPSinkApp.cc \
   TCPSinkApp.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TCPSrvHostApp.o: TCPSrvHostApp.cc \
   TCPSrvHostApp.h \
   ../../Transport/TCP/TCPSocket.h \
   ../../Transport/TCP/TCPSocketMap.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
 TelnetApp.o: TelnetApp.cc \
   TelnetApp.h \
   TCPGenericCliAppBase.h \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ipsuite_defs.h
