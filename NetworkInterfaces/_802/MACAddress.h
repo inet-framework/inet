@@ -19,8 +19,8 @@
 #ifndef MACADDRESS_H_
 #define MACADDRESS_H_
 
+#include <string>
 #include <omnetpp.h>
-#include "MACAddress_m.h"
 
 
 #define MAC_ADDRESS_BYTES    6
@@ -29,7 +29,7 @@
 /**
  * Stores an IEEE 802 MAC address (6 octets = 48 bits).
  */
-class MACAddress : public MACAddress_Base
+class MACAddress
 {
   private:
     unsigned char address[6];
@@ -39,71 +39,94 @@ class MACAddress : public MACAddress_Base
      * Default constructor initializes address bytes to zero.
      */
     MACAddress();
+
     /**
      * Constructor which accepts hex string or the string "auto".
      */
     MACAddress(const char *hexstr);
+
     /**
      * Copy constructor.
      */
-    MACAddress(const MACAddress& other) : MACAddress_Base() {operator=(other);}
+    MACAddress(const MACAddress& other) {operator=(other);}
+
     /**
      * Assignment.
      */
     MACAddress& operator=(const MACAddress& other);
+
     /**
      * Returns 6.
      */
     virtual unsigned int getAddressArraySize() const;
+
     /**
      * Returns the kth byte of the address.
      */
     virtual unsigned char getAddress(unsigned int k) const;
+
     /**
      * Sets the kth byte of the address.
      */
     virtual void setAddress(unsigned int k, unsigned char addrbyte);
+
     /**
      * Converts address value from hex string. The string "auto" is also
      * accepted, it'll generate a unique address starting with "A0 00".
      */
     void setAddress(const char *hexstr);
+
     /**
      * Returns pointer to internal binary representation of address (array of 6 unsigned chars).
      */
     unsigned char *getAddressBytes() {return address;}
+
     /**
      * Sets address bytes. The argument should point to an array of 6 unsigned chars.
      */
     void setAddressBytes(unsigned char *addrbytes);
+
     /**
      * Sets the address to the broadcast address (hex ff:ff:ff:ff:ff:ff).
      */
     void setBroadcast();
+
     /**
      * Returns true this is the broadcast address (hex ff:ff:ff:ff:ff:ff).
      */
     bool isBroadcast() const;
+
     /**
      * Returns true this is a multicast logical address (starts with bit 1).
      */
     bool isMulticast() const  {return address[0]&0x80;};
+
     /**
      * Returns true if all address bytes are zero.
      */
     bool isEmpty() const;
+
     /**
-     * Converts address to hext string and places result into passed buffer.
+     * Converts address to a hex string.
      */
-    const char *toHexString(char *buf) const;
+    std::string str() const;
+
     /**
      * Returns true if 2 addresses are equal.
      */
     bool equals(const MACAddress& other) const;
+
     /**
      * Returns -1, 0 or 1 as result of comparison of 2 addresses.
      */
     int compareTo(const MACAddress& other) const;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
+{
+    return os << mac.str();
+}
+
 #endif
+
+

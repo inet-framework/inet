@@ -164,20 +164,17 @@ EtherBus.obj: EtherBus.cc \
   Ethernet.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherCtrl_m.obj: EtherCtrl_m.cc \
   EtherCtrl_m.h \
   Ethernet.h \
-  ../_802/MACAddress.h \
-  ../_802/MACAddress_m.h
+  ../_802/MACAddress.h
 EtherEncap.obj: EtherEncap.cc \
   Ethernet.h \
   EtherFrame_m.h \
   EtherCtrl_m.h \
   utils.h \
   ../_802/MACAddress.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherFrame_m.obj: EtherFrame_m.cc \
   EtherFrame_m.h \
@@ -185,15 +182,13 @@ EtherFrame_m.obj: EtherFrame_m.cc \
   Ethernet.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
+  ../../Base/ipsuite_defs.h
 EtherHub.obj: EtherHub.cc \
   EtherFrame_m.h \
   utils.h \
   Ethernet.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherLLC.obj: EtherLLC.cc \
   Ethernet.h \
@@ -201,7 +196,6 @@ EtherLLC.obj: EtherLLC.cc \
   utils.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherMAC.obj: EtherMAC.cc \
   EtherMAC.h \
@@ -212,7 +206,6 @@ EtherMAC.obj: EtherMAC.cc \
   ../../Network/IPv4/RoutingTableAccess.h \
   ../_802/MACAddress.h \
   EtherCtrl_m.h \
-  ../_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/ModuleAccess.h
@@ -222,7 +215,6 @@ MACRelayUnitBase.obj: MACRelayUnitBase.cc \
   EtherFrame_m.h \
   utils.h \
   Ethernet.h \
-  ../_802/MACAddress_m.h \
   EtherCtrl_m.h \
   ../../Base/ipsuite_defs.h
 MACRelayUnitNP.obj: MACRelayUnitNP.cc \
@@ -233,8 +225,7 @@ MACRelayUnitNP.obj: MACRelayUnitNP.cc \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
   EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
+  ../../Base/ipsuite_defs.h
 MACRelayUnitPP.obj: MACRelayUnitPP.cc \
   MACRelayUnitPP.h \
   EtherFrame_m.h \
@@ -243,8 +234,7 @@ MACRelayUnitPP.obj: MACRelayUnitPP.cc \
   ../_802/MACAddress.h \
   MACRelayUnitBase.h \
   EtherCtrl_m.h \
-  ../../Base/ipsuite_defs.h \
-  ../_802/MACAddress_m.h
+  ../../Base/ipsuite_defs.h
 utils.obj: utils.cc \
   utils.h \
   ../../Base/ipsuite_defs.h

@@ -63,19 +63,18 @@ static int hextobin(const char *hexstr, unsigned char *destbuf, int size)
 }
 
 
-MACAddress::MACAddress() : MACAddress_Base()
+MACAddress::MACAddress()
 {
     address[0]=address[1]=address[2]=address[3]=address[4]=address[5]=0;
 }
 
-MACAddress::MACAddress(const char *hexstr) : MACAddress_Base()
+MACAddress::MACAddress(const char *hexstr)
 {
     setAddress(hexstr);
 }
 
 MACAddress& MACAddress::operator=(const MACAddress& other)
 {
-    MACAddress_Base::operator=(other);
     memcpy(address, other.address, MAC_ADDRESS_BYTES);
     return *this;
 }
@@ -117,8 +116,7 @@ void MACAddress::setBroadcast()
 
 bool MACAddress::isBroadcast() const
 {
-    return address[0]==0xff && address[1]==0xff && address[2]==0xff && address[3]==0xff &&
-           address[4]==0xff && address[5]==0xff;
+    return (address[0]&address[1]&address[2]&address[3]&address[4]&address[5])==0xff;
 }
 
 bool MACAddress::isEmpty() const
@@ -126,13 +124,14 @@ bool MACAddress::isEmpty() const
     return !(address[0] || address[1] || address[2] || address[3] || address[4] || address[5]);
 }
 
-const char *MACAddress::toHexString(char *buf) const
+std::string MACAddress::str() const
 {
+    char buf[20];
     char *s = buf;
     for (int i=0; i<MAC_ADDRESS_BYTES; i++, s+=3)
         sprintf(s,"%2.2X-",address[i]);
     *(s-1)='\0';
-    return buf;
+    return std::string(buf);
 }
 
 bool MACAddress::equals(const MACAddress& other) const

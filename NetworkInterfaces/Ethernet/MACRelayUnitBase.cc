@@ -30,14 +30,6 @@
 
 
 
-// FIXME to ostream
-static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
-{
-    char buf[20];
-    ev << addr.toHexString(buf);
-    return ev;
-}
-
 static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 {
     ev.printf("(%s)%s",msg->className(),msg->fullName());
@@ -85,7 +77,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     int outputport = getPortForAddress(frame->getDest());
     if (inputport==outputport)
     {
-        EV << "Output port is same as input port, " << frame->fullName() << 
+        EV << "Output port is same as input port, " << frame->fullName() <<
               " dest " << frame->getDest() << ", discarding frame\n";
         delete frame;
         return;

@@ -60,10 +60,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= _802Ctrl_m.obj MACAddress_m.obj MACAddress.obj
+OBJS= _802Ctrl_m.obj MACAddress.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= _802Ctrl_m.h MACAddress_m.h
+GENERATEDHEADERS= _802Ctrl_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -93,12 +93,6 @@ _802Ctrl_m.obj: _802Ctrl_m.cc
 
 _802Ctrl_m.cc _802Ctrl_m.h: _802Ctrl.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) _802Ctrl.msg
-
-MACAddress_m.obj: MACAddress_m.cc
-	$(CXX) -c $(NEDCOPTS) /Tp MACAddress_m.cc
-
-MACAddress_m.cc MACAddress_m.h: MACAddress.msg
-	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) MACAddress.msg
 
 MACAddress.obj: MACAddress.cc
 	$(CXX) -c $(COPTS) /Tp MACAddress.cc
@@ -135,10 +129,8 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 _802Ctrl_m.obj: _802Ctrl_m.cc \
   _802Ctrl_m.h \
-  MACAddress.h \
-  MACAddress_m.h
+  MACAddress.h
 MACAddress.obj: MACAddress.cc \
-  MACAddress.h \
-  MACAddress_m.h
+  MACAddress.h
 MACAddress_m.obj: MACAddress_m.cc \
   MACAddress_m.h

@@ -167,7 +167,6 @@ EtherAppCli.obj: EtherAppCli.cc \
   ../../NetworkInterfaces/Ethernet/utils.h \
   ../../NetworkInterfaces/Ethernet/Ethernet.h \
   ../../NetworkInterfaces/_802/MACAddress.h \
-  ../../NetworkInterfaces/_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h
 EtherAppSrv.obj: EtherAppSrv.cc \
   ../../NetworkInterfaces/Ethernet/EtherCtrl_m.h \
@@ -175,5 +174,4 @@ EtherAppSrv.obj: EtherAppSrv.cc \
   ../../NetworkInterfaces/Ethernet/utils.h \
   ../../NetworkInterfaces/Ethernet/Ethernet.h \
   ../../NetworkInterfaces/_802/MACAddress.h \
-  ../../NetworkInterfaces/_802/MACAddress_m.h \
   ../../Base/ipsuite_defs.h

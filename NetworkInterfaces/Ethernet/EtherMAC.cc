@@ -35,13 +35,6 @@ static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
     return ev;
 }
 
-static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
-{
-    char buf[20];
-    ev << addr.toHexString(buf);
-    return ev;
-}
-
 
 Define_Module( EtherMAC );
 
@@ -74,8 +67,7 @@ void EtherMAC::initialize()
         myaddress.setAddressBytes(addrbytes);
 
         // change module parameter from "auto" to concrete address
-        char buf[20];
-        par("address").setStringValue(myaddress.toHexString(buf));
+        par("address").setStringValue(myaddress.str().c_str());
     }
     else
     {
@@ -387,9 +379,8 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(myaddress))
     {
-        char buf[20];
         error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
-              frame->fullName(), frame->getDest().toHexString(buf));
+              frame->fullName(), frame->getDest().str().c_str());
     }
 
     if (frame->length()>8*MAX_ETHERNET_FRAME)

@@ -32,19 +32,12 @@
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 #include "RoutingTableAccess.h"
-
+#include "EtherMAC.h"
 
 
 static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
 {
     ev << "(" << msg->className() << ")" << msg->fullName();
-    return ev;
-}
-
-static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
-{
-    char buf[20];
-    ev << addr.toHexString(buf);
     return ev;
 }
 
@@ -94,7 +87,8 @@ class ARP : public cSimpleModule
     Module_Class_Members(ARP,cSimpleModule,0);
     ~ARP();
 
-    virtual void initialize();
+    virtual int numInitStages() const {return 4;}
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -112,17 +106,33 @@ class ARP : public cSimpleModule
 
 Define_Module (ARP);
 
-void ARP::initialize()
+void ARP::initialize(int stage)
 {
+    // we have to wait until interfaces are registered and address auto-assignment takes place
+    if (stage!=3)
+        return;
+
     retryTimeout = par("retryTimeout");
     retryCount = par("retryCount");
     cacheTimeout = par("cacheTimeout");
 
-    //myIPAddress = ...;  FIXME
-    //myMACAddress = ...;
-
     pendingQueue.setName("pendingQueue");
 
+    // fill in myIPAddress
+    // TBD find out something more elegant
+    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *d=interfaceName;
+    for (const char *s=owner()->fullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+    myIPAddress = routingTableAccess.get()->interfaceByName(interfaceName)->inetAddr;
+    delete [] interfaceName;
+
+    // fill in myMACAddress
+    myMACAddress = ((EtherMAC *)parentModule()->submodule("mac"))->getMACAddress();
+
+    // init statistics
     numRequestsSent = numRepliesSent = 0;
     numResolutions = numFailedResolutions = 0;
     WATCH(numRequestsSent);
@@ -326,7 +336,7 @@ bool ARP::addressRecognized(IPAddress destAddr)
 
 void ARP::processARPPacket(ARPPacket *arp)
 {
-    EV << "ARP packet " << arp << "arrived\n";
+    EV << "ARP packet " << arp << " arrived\n";
 
     //
     // Recipe a'la RFC 826:
@@ -360,7 +370,7 @@ void ARP::processARPPacket(ARPPacket *arp)
     IPAddress srcIPAddress = arp->getSrcIPAddress();
 
     bool mergeFlag = false;
-    // "If the pair <...> is already in my translation table"
+    // "If ... sender protocol address is already in my translation table"
     ARPCache::iterator it = arpCache.find(srcIPAddress);
     if (it!=arpCache.end())
     {
@@ -371,10 +381,10 @@ void ARP::processARPPacket(ARPPacket *arp)
     }
 
     // "?Am I the target protocol address?"
-    // FIXME we also have to reply if we're a router to the dest IP address
     if (addressRecognized(arp->getDestIPAddress()))
     {
-        // "If Merge_flag is false, add the triplet...to the translation table"
+        // "If Merge_flag is false, add the triplet protocol type, sender
+        // protocol address, sender hardware address to the translation table"
         if (!mergeFlag)
         {
             ARPCacheEntry *entry;
