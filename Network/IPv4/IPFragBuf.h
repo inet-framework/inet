@@ -86,10 +86,15 @@ class IPFragBuf
     IPDatagram *addFragment(IPDatagram *datagram, simtime_t now);
 
     /**
-     * Throws out all fragments which are incomplete but no fragment
-     * arrived for them since "lastTouched".
+     * Throws out all fragments which are incomplete and their
+     * last update (last fragment arrival) was before "lastupdate",
+     * and sends ICMP TIME EXCEEDED message about them.
+     *
+     * Timeout should be between 60 seconds and 120 seconds (RFC1122).
+     * This method should be called more frequently, maybe every
+     * 10..30 seconds or so.
      */
-    void purgeStaleFragments(simtime_t lastTouched);
+    void purgeStaleFragments(simtime_t lastupdate);
 };
 
 #endif

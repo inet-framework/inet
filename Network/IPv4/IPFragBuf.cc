@@ -163,7 +163,16 @@ void IPFragBuf::mergeFragments(ReassemblyBuffer& buf)
     while (oncemore);
 }
 
-void IPFragBuf::purgeStaleFragments(simtime_t lastTouched)
+void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
 {
+    for (Buffers::iterator i=bufs.begin(); i!=bufs.end(); ++i)
+    {
+        if (i->lastupdate < lastupdate)
+        {
+            // send ICMP!!!
+
+            //delete!!!!
+        }
+    }
 }
 
