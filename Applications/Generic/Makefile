@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS=  AppIn.o BurstGenerator.o ConstTrafficGen.o SimpleApp.o
+OBJS=  AppIn.o BurstGenerator.o ConstTrafficGen.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= 
@@ -65,9 +65,6 @@ BurstGenerator.o: BurstGenerator.cc
 
 ConstTrafficGen.o: ConstTrafficGen.cc
 	$(CXX) -c $(COPTS) ConstTrafficGen.cc
-
-SimpleApp.o: SimpleApp.cc
-	$(CXX) -c $(COPTS) SimpleApp.cc
 
 
 #doc: neddoc doxy
@@ -134,23 +131,6 @@ BurstGenerator.o: BurstGenerator.cc \
   ../../Network/IPv4/Core/ICMPMessage_m.h
 ConstTrafficGen.o: ConstTrafficGen.cc \
   ConstTrafficGen.h \
-  ../../Network/IPv4/Core/IPInterfacePacket.h \
-  ../../Network/IPv4/Core/IPDatagram.h \
-  ../../Network/IPv4/Core/ICMP.h \
-  ../../Base/basic_consts.h \
-  ../../Network/IPv4/Core/IPInterfacePacket_m.h \
-  ../../Network/IPv4/Core/IPAddress.h \
-  ../../Network/IPv4/Core/IPDatagram_m.h \
-  ../../Base/QueueBase.h \
-  ../../Network/IPv4/Core/RoutingTableAccess.h \
-  ../../Network/IPv4/Core/ICMPMessage.h \
-  ../../Base/AbstractQueue.h \
-  ../../Base/ModuleAccess.h \
-  ../../Network/IPv4/Core/RoutingTable.h \
-  ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/Core/ICMPMessage_m.h
-SimpleApp.o: SimpleApp.cc \
-  SimpleApp.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h \
   ../../Network/IPv4/Core/IPDatagram.h \
   ../../Network/IPv4/Core/ICMP.h \

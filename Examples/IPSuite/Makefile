@@ -18,8 +18,8 @@ INCLUDE_PATH=
 # misc additional object and library files to link
 EXTRA_OBJS=
 
-# object files from other directories to link with
-EXT_DIR_OBJS=
+# object files from other directories to link with (wildcard needed to prevent "no such file *.o" errors)
+EXT_DIR_OBJS=$(wildcard )
 
 # time stamps of other directories (used as dependency)
 EXT_DIR_TSTAMPS=
@@ -34,7 +34,7 @@ include ../../ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  KIDSNw1 McNetwork2 OldNetwork PerformAnalysis TCPClientServerNet TCPFlavours TCPTester TCPUDPDirectNet UDPSockets
+SUBDIRS=  KIDSNw1 McNetwork2 PerformAnalysis TCPClientServerNet TCPTester TCPUDPDirectNet UDPSockets
 
 # object files in this directory
 OBJS=  
@@ -63,17 +63,11 @@ KIDSNw1:
 McNetwork2:
 	cd McNetwork2 && $(MAKE)
 
-OldNetwork:
-	cd OldNetwork && $(MAKE)
-
 PerformAnalysis:
 	cd PerformAnalysis && $(MAKE)
 
 TCPClientServerNet:
 	cd TCPClientServerNet && $(MAKE)
-
-TCPFlavours:
-	cd TCPFlavours && $(MAKE)
 
 TCPTester:
 	cd TCPTester && $(MAKE)
