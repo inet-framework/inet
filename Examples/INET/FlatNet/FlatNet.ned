@@ -43,7 +43,7 @@ module FlatNet
                 netmask = "255.255.0.0";
             display: "i=block/cogwheel";
         rte: Router[57];
-            display: "i=place/circle_vs,gold";
+            display: "i=place/circle_vs";
         cli: StandardHost[2];
             display: "i=device/laptop";
         srv: StandardHost;
