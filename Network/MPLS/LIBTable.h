@@ -55,8 +55,8 @@
 class LIBTable: public cSimpleModule
 {
 public:
-
-    // PRT (Prefix Table) entry. Maps FEC to a LIB entry.
+    // PRT (Prefix Table) entry. The PRT table maps one or more FECs
+    // to a single LIB entry.
     struct PRTEntry
     {
         int fecValue;
