@@ -153,6 +153,12 @@ void IP::routePacket(IPDatagram *datagram)
     ev << "output port is " << outputPort << "\n";
     numForwarded++;
 
+    // FIXME TBD: if there's a next hop address in the routing table, add RoutingDecision with nextHopAddress
+    // (and of course Fragmentation should copy it for every fragment)
+    //IPRoutingDecision *routingDecision = new IPRoutingDecision();
+    //routingDecision->setNextHopAddr(nextHopAddr);
+    //datagram->setControlInfo(routingDecision);
+
     //
     // "Fragmentation" and "IPOutput"
     //
@@ -392,10 +398,6 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
 
     datagram->setTransportProtocol(controlInfo->protocol());
     delete controlInfo;
-
-    // add blank RoutingDecision info
-    IPRoutingDecision *routingDecision = new IPRoutingDecision();
-    datagram->setControlInfo(routingDecision);
 
     // setting IP options is currently not supported
 

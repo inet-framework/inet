@@ -22,17 +22,20 @@
 //
 // The \IP protocol header is represented by the IPDatagram message class.
 //
-// To send a packet over IP, fill in an IPControlInfo object,
-// attach it to the packet with the C++ method setControlInfo(),
-// the send it to the IP module.
+// <b>Interfacing with higher layer protocols</b>
 //
-// Similarly, IP will attach IPControlInfo to the packets it sends
-// up to the higher layers.
+// To send a packet over IP from a higher layer protocol, the module should
+// fill in an IPControlInfo object, attach it to the packet with cMessage's
+// setControlInfo() method, the send it to the IP module.
+//
+// When IP sends up a packet to a higher layer protocol, it will also attach
+// an IPControlInfo to the packet, with the source and destination IP address,
+// etc. of the IP datagram in which the packet arrived.
 //
 // IP can serve several higher-layer protocols. When delivering packets
-// to them, the output gate is determined from the Protocol field in the \IP header.
-// The protocol-to-gateindex mapping must be given in the protocolmapping
-// string parameter, in the following format:
+// to them, the output gate is determined from the Protocol field in the
+// \IP header. The protocol-to-gateindex mapping must be given in the
+// protocolMapping string parameter, in the following format:
 // <pre>
 // protocolnumber:gateindex, protocolnumber:gateindex, ...
 // </pre>
@@ -40,13 +43,29 @@
 // The recommended setting is:
 // - TCP (6) : 0
 // - UDP (17) : 1
-// - ICMP (1) : 2
-// - IGMP (2) : 3
+// - \ICMP (1) : 2
+// - \IGMP (2) : 3
 // - \RSVP (46) : 4
 //
 // That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
 //
-// @see IPProcessing
+// <b>Routing and interfacing with lower layers</b>
+//
+// The routing table is stored in the module RoutingTable. When a datagram
+// needs to be routed, IP queries RoutingTable for the output interface
+// (or "port") and next hop address of the packet. This is done by directly
+// calling C++ methods (such as outputPortNo(destAddress)) of RoutingTable.
+// No message exchange with RoutingTable takes place.
+//
+// A routed datagram will be sent to the given interface, either without
+// control info or with an IPRoutingDecision attached; if the route entry
+// contained a next hop address, it will be passed to the interface
+// in the attached IPRoutingDecision.
+//
+// Routing protocol implementations (e.g. OSPF and ISIS) can also query
+// and manipulate the route table by calling RoutingTable's methods in C++.
+//
+// @see RoutingTable, IPProcessing, IPControlInfo, IPRoutingDecision
 //
 // @author Andras Varga
 //
