@@ -117,6 +117,15 @@ class TCPErrorInfo extends TCPCommand
 // and TCPAlgorithm, respectively. If not set, module parameters with
 // similar names are used.
 //
+// The fork parameter is used with passive open, and controls what happens
+// when an incoming connection is received. With fork=true, it emulates
+// the Unix accept(2) syscall semantics: a new connection structure
+// is created for the connection (with a new connId, see in TCPCommand),
+// and the connection structure with the old connId remains listening.
+// With fork=false, all the above does not happen: the first connection
+// is accepted (with the original connId), and further incoming connections
+// will be refused by TCP by sending an RST segment.
+//
 // @see TcpCommandCode, TCPMain
 //
 class TCPOpenCommand extends TCPCommand
@@ -128,6 +137,7 @@ class TCPOpenCommand extends TCPCommand
         IPAddress remoteAddr;     // required for active open
         int localPort = -1;       // required for passive open
         int remotePort = -1;      // required for active open
+        bool fork = false;        // used only for passive open
         string sendQueueClass;    // may be left empty
         string receiveQueueClass; // may be left empty
         string tcpAlgorithmClass; // may be left empty

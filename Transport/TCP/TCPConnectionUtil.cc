@@ -124,6 +124,32 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
     if (tcpseg->urgBit())  tcpEV << "urg " << tcpseg->urgentPointer() << " ";
 }
 
+TCPConnection *TCPConnection::cloneListeningConnection()
+{
+    TCPConnection *conn = new TCPConnection(tcpMain,appGateIndex,connId);
+
+    conn->state->active = false;
+    conn->state->fork = true;
+    conn->localAddr = localAddr;
+    conn->localPort = localPort;
+    FSM_Goto(conn->fsm, TCP_S_LISTEN);
+
+    // following code to be kept consistent with initConnection()
+    const char *sendQueueClass = sendQueue->className();
+    conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
+
+    const char *receiveQueueClass = receiveQueue->className();
+    conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
+
+    const char *tcpAlgorithmClass = tcpAlgorithm->className();
+    conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
+    conn->tcpAlgorithm->setConnection(this);
+    conn->tcpAlgorithm->initialize();
+
+    conn->state = conn->tcpAlgorithm->createStateVariables();
+
+    return conn;
+}
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg)
 {

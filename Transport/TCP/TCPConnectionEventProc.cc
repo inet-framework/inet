@@ -93,6 +93,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
         case TCP_S_LISTEN:
             // store local/remote socket
             state->active = false;
+            state->fork = openCmd->fork();
             localAddr = openCmd->localAddr();
             localPort = openCmd->localPort();
 

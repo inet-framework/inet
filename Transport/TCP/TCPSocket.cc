@@ -18,6 +18,7 @@
 
 #include <omnetpp.h>
 #include "TCPSocket.h"
+#include "TCPMain.h"
 
 
 TCPSocket::TCPSocket()

@@ -96,6 +96,8 @@ void TCPMain::handleMessage(cMessage *msg)
         {
             conn = new TCPConnection(this,appGateIndex,connId);
 
+            // add into appConnMap here; it'll be added to connMap during processing
+            // the OPEN command in TCPConnection's processAppCommand().
             AppConnKey key;
             key.appGateIndex = appGateIndex;
             key.connId = connId;
@@ -242,6 +244,26 @@ void TCPMain::updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress
     key.localPort = conn->localPort = localPort;
     key.remotePort = conn->remotePort = remotePort;
     tcpConnMap[key] = conn;
+}
+
+void TCPMain::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort)
+{
+    // update conn's socket pair, and register newConn (which'll keep LISTENing)
+    updateSockPair(conn, localAddr, remoteAddr, localPort, remotePort);
+    updateSockPair(newConn, newConn->localAddr, newConn->remoteAddr, newConn->localPort, newConn->remotePort);
+
+    // conn will get a new connId...
+    AppConnKey key;
+    key.appGateIndex = conn->appGateIndex;
+    key.connId = conn->connId;
+    tcpAppConnMap.erase(key);
+    key.connId = conn->connId = getNewConnId();
+    tcpAppConnMap[key] = conn;
+
+    // ...and newConn will live on with the old connId
+    key.appGateIndex = newConn->appGateIndex;
+    key.connId = newConn->connId;
+    tcpAppConnMap[key] = newConn;
 }
 
 void TCPMain::removeConnection(TCPConnection *conn)

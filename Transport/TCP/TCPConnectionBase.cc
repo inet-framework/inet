@@ -32,7 +32,8 @@
 TCPStateVariables::TCPStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
-    bool active = false;
+    active = false;
+    fork = false;
     snd_mss = 1024;  // FIXME make it parameter
     snd_una = 0;
     snd_nxt = 0;

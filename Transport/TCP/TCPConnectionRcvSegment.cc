@@ -586,7 +586,19 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         // If the listen was not fully specified (i.e., the foreign socket was not
         // fully specified), then the unspecified fields should be filled in now.
         //"
-        tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+        //
+        // Also, we may need to fork, in order to leave another connection
+        // LISTENing on the port. Note: forking will change our connId.
+        //
+        if (state->fork)
+        {
+            TCPConnection *conn = cloneListeningConnection(); // this will stay LISTENing
+            tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+        }
+        else
+        {
+            tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+        }
 
         //"
         //  Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ and any other

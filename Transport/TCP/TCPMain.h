@@ -166,6 +166,12 @@ class TCPMain : public cSimpleModule
     void updateSockPair(TCPConnection *conn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort);
 
     /**
+     * Update conn's socket pair, and register newConn (which'll keep LISTENing).
+     * Also, conn will get a new connId (and newConn will live on with its old connId).
+     */
+    void addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPAddress localAddr, IPAddress remoteAddr, int localPort, int remotePort);
+
+    /**
      * To be called from TCPConnection: reserves an ephemeral port for the connection.
      */
     short getEphemeralPort();

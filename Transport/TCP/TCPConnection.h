@@ -151,11 +151,10 @@ class TCPStateVariables : public cPolymorphic
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
   public:
-    // set if the connection was initiated by an active open
-    bool active;
+    bool active;         // set if the connection was initiated by an active open
+    bool fork;           // if passive and in LISTEN: whether to fork on an incoming connection
 
-    // maximum segment size (without headers, i.e. only segment text)
-    int snd_mss;
+    int snd_mss;         // maximum segment size (without headers, i.e. only segment text)
 
     // send sequence number variables (see RFC 793, "3.2. Terminology")
     uint32 snd_una;      // send unacknowledged
@@ -180,8 +179,8 @@ class TCPStateVariables : public cPolymorphic
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TCPAlgorithm)
-    int syn_rexmit_count;   // number of retransmissions (=1 after first rexmit)
-    simtime_t syn_rexmit_timeout; // current retransmission timeout
+    int syn_rexmit_count;   // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
+    simtime_t syn_rexmit_timeout; // current SYN/SYN+ACK retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code
@@ -332,6 +331,9 @@ class TCPConnection
     void process_TIMEOUT_FIN_WAIT_2();
     void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
     //@}
+
+    /** Utility: clone a listening connection. Used for forking. */
+    TCPConnection *cloneListeningConnection();
 
     /** Utility: creates send/receive queues and tcpAlgorithm */
     void initConnection(TCPOpenCommand *openCmd);

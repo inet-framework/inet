@@ -32,7 +32,9 @@
 // TCP_C_OPEN_ACTIVE as message kind and a TCPOpenCommand object filled in
 // and attached to it as control info. (The peer TCP will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
-// message kind.)
+// message kind.) With passive open, there's a possibility to cause the connection
+// "fork" on an incoming connection, leaving the original connection LISTENing
+// on the port (see the fork field in TCPOpenCommand).
 //
 // The client app can send data by assigning the TCP_C_SEND message kind
 // and attaching a TCPSendCommand control info object to the data packet,
