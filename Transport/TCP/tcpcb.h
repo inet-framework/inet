@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: tcpcb.h
 //--
@@ -40,13 +40,13 @@
 class TCPCB : public PCB
 {
  private:
-  
+
   // statistics
   cOutVector stat_seq_no;
   cOutVector stat_swnd;
   cOutVector stat_cwnd;
   cOutVector stat_ssthresh;
-  
+
   //TCP finite state machine
   cFSM fsm;
 
@@ -56,7 +56,7 @@ class TCPCB : public PCB
   cQueue tcp_data_receive_queue;     //to queue the data of incoming segments
   cQueue tcp_socket_queue;           //socket buffer
   cLinkedList tcp_rcv_rec_list;      //receive record list
-  
+
   //application and connection identification information
   TcpConnId tb_conn_id;
   TcpState tb_state;
@@ -67,7 +67,7 @@ class TCPCB : public PCB
 
   //status information
   TcpStatusInfo status_info;
-  
+
   // FIXME: OBSOLETE
   //socket information
   //   int local_port; //local TCP-port
@@ -91,7 +91,7 @@ class TCPCB : public PCB
   unsigned long snd_wl2;     //segment ack. number used for last window update
   unsigned long iss;         //initial sequence number (ISS)
 
-  unsigned long snd_fin_seq;   //last seq. no. 
+  unsigned long snd_fin_seq;   //last seq. no.
   int snd_fin_valid;           //FIN flag set?
   int snd_up_valid;            //urgent pointer valid/URG flag set?
   unsigned long snd_mss;       //maximum segment size
@@ -115,9 +115,9 @@ class TCPCB : public PCB
   unsigned long rcv_buf_seq;
   unsigned long rcv_buff;
   double  rcv_buf_usage_thresh;
-  
-  //retransmit variables 
-  unsigned long snd_max;         //highest sequence number sent; used to recognize retransmits 
+
+  //retransmit variables
+  unsigned long snd_max;         //highest sequence number sent; used to recognize retransmits
   unsigned long max_retrans_seq; //sequence number of a retransmitted segment
 
   //segment variables
@@ -134,11 +134,11 @@ class TCPCB : public PCB
   double last_timed_data; //timestamp for measurement
 
   // retransmission timeout
-  short rxtcur;    
+  short rxtcur;
   // backoff for rto
   short rxtshift;
   bool rexmt_sch;
- 
+
 
   // duplicate ack counter
   short dupacks;
@@ -150,9 +150,9 @@ class TCPCB : public PCB
   cMessage *timeout_keepalive_msg;
   cMessage *timeout_finwait2_msg;
   cMessage *timeout_delayed_ack_msg;
-  
+
   //max. ack. delay
-  double max_del_ack; 
+  double max_del_ack;
   //bool to handle delayed ACKs
   bool ack_sch;
 
@@ -197,7 +197,7 @@ class TCPCB : public PCB
  public:
 
   TCPCB(const TCPCB& tcpcb);
-  TCPCB(IN_Addr laddr, IN_Port lport, IN_Addr faddr, IN_Port fport);
+  TCPCB(IPAddress laddr, PortNumber lport, IPAddress faddr, PortNumber fport);
   TCPCB();
   TCPCB(const char* name);
   virtual ~TCPCB();

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,55 +14,47 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
-/* 	-------------------------------------------------
-	file: UDPProcessing.h
-	Purpose: Header file for UDP Layer
-	------
-	Responsibilities:
-		see .cc file
-	author: Jochen Reber
-	------------------------------------------------- 	*/
+
+//
+//    author: Jochen Reber
+//
 
 #ifndef __UDPPROCESSING_H__
 #define __UDPPROCESSING_H__
 
 #include "basic_consts.h"
-////#include "ProcessorAccess.h"
 
-/* 	-------------------------------------------------
-		Constants
-	------------------------------------------------- 	*/
+
 const int MAXUDPAPPS = 20;
 const char *ERROR_IP_ADDRESS = "10.0.0.255";
 
-/* 	-------------------------------------------------
-		Additional Structures
-	------------------------------------------------- 	*/
+/**
+ * Additional Structures
+ */
 struct UDPApplicationTable
 {
-	int size;
-	int port[MAXUDPAPPS];
+    int size;
+    int port[MAXUDPAPPS];
 };
 
-/* 	-------------------------------------------------
-		main Module: UDPProcessing
-	------------------------------------------------- 	*/
-class UDPProcessing : public cSimpleModule   // was ProcessorAccess
+/**
+ * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
+ * More info in the NED file.
+ */
+class UDPProcessing : public cSimpleModule
 {
-private:
+  protected:
+    UDPApplicationTable applTable;
 
-	UDPApplicationTable applTable;
+    virtual void processMsgFromIp(cMessage *);
+    virtual void processMsgFromApp(cMessage *);
 
-	void processMsgFromIp(cMessage *);
-	void processMsgFromApp(cMessage *);
-public:
-    Module_Class_Members(UDPProcessing, cSimpleModule,
-				ACTIVITY_STACK_SIZE);
-
-	virtual void initialize();
-    virtual void activity();
-
+  public:
+    Module_Class_Members(UDPProcessing, cSimpleModule, 0);
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

@@ -1,8 +1,8 @@
 /*
-	file: DLStub.cc
-	Purpose: Test thingie for Data link stub
-		doesn't do much
-	author: me
+    file: DLStub.cc
+    Purpose: Test thingie for Data link stub
+        doesn't do much
+    author: me
 */
 
 #include <omnetpp.h>
@@ -23,7 +23,7 @@ void DLStub::handleMessage(cMessage *msg)
 {
     IPDatagram *d = (IPDatagram *)msg;
     simtime_t arrivalTime = d->arrivalTime();
-    int length = d->totalLength();
+    int length = d->length()/8;
     int outputPort = d->outputPort();
     char src[20], dest[20];
 
@@ -37,6 +37,6 @@ void DLStub::handleMessage(cMessage *msg)
         << " Src: " << src
         << " Dest: " << dest << "\n";
 
-	delete(d);
+    delete(d);
 }
 

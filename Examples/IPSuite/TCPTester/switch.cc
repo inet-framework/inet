@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: switch.cc
 //--
@@ -47,16 +47,16 @@ void Switch::activity()
       cMessage* rframe = receive();
 
       if (((simTime() <= 1.19) || (simTime() > 1.201)) && ((simTime() <= 6.49) || (simTime() > 6.6)))
-      //if ((simTime() <= 1.1) || (simTime() > 1.2)) 
-      
-	{
+      //if ((simTime() <= 1.1) || (simTime() > 1.2))
+
+    {
       //get the datagram from the incoming frame/packet
-	
+
       cMessage* datagram  = rframe->decapsulate();
-     
+
       //get length of frame after decapsulation
       int nw_length = rframe->length() / 8;
-      
+
       delete rframe;
 
       //get IP header information about the IP destination address
@@ -75,15 +75,15 @@ void Switch::activity()
 
       //processing delay
       wait(pk_delay);
-      
+
       ev << "Relaying frame to " << dest << " (destination IP address).\n";
       send(sframe, "out", dest);
-      	}
-	else
-	  {
-	    ev << "Deleting frame\n";
-	    delete rframe;
-	  } 
+          }
+    else
+      {
+        ev << "Deleting frame\n";
+        delete rframe;
+      }
     };
 };
 

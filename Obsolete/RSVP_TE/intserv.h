@@ -1,23 +1,23 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
 
 
 /*
-*	File Name IntServ.h
-*	RSVP-TE library
-*	This file defines data structures used in IntServ services
+*    File Name IntServ.h
+*    RSVP-TE library
+*    This file defines data structures used in IntServ services
 **/
 #ifndef __intserv_h__
 #define __intserv_h__
@@ -27,41 +27,41 @@
 
 #define MAX_ROUTE 10
 #define InLIST_SIZE 5
-#define ON 	1
-#define OFF 	0
+#define ON     1
+#define OFF     0
 
 /*Session Structure*/
 struct SessionObj_t{
-	int  DestAddress;
-	int Protocol_Id;
-	int DestPort;
-	int setupPri;
-	int holdingPri;
-	int Tunnel_Id;
-	int Extended_Tunnel_Id;
+    int  DestAddress;
+    int Protocol_Id;
+    int DestPort;
+    int setupPri;
+    int holdingPri;
+    int Tunnel_Id;
+    int Extended_Tunnel_Id;
 } ;
 
 /*RSVP HOP Structure*/
 struct RsvpHopObj_t{
 
-	int  Next_Hop_Address;
-	int  Logical_Interface_Handle;
+    int  Next_Hop_Address;
+    int  Logical_Interface_Handle;
 } ;
 
 /*Sender Template Structure*/
 struct SenderTemplateObj_t{
-	SenderTemplateObj_t(){SrcAddress =0; SrcPort=0; Lsp_Id =-1;}
-	int  SrcAddress;
-	int SrcPort;
-	int Lsp_Id;
+    SenderTemplateObj_t(){SrcAddress =0; SrcPort=0; Lsp_Id =-1;}
+    int  SrcAddress;
+    int SrcPort;
+    int Lsp_Id;
 } ;
 
 
 /*Sender Tspec Structure*/
 struct SenderTspecObj_t{
-	SenderTspecObj_t(){req_bandwidth =0; link_delay=0;}
-	double req_bandwidth;
-	double link_delay;
+    SenderTspecObj_t(){req_bandwidth =0; link_delay=0;}
+    double req_bandwidth;
+    double link_delay;
 } ;
 
 /*Sender Tspec Structure*/
@@ -101,9 +101,9 @@ struct FlowDescriptor_t{
 
 /*Explicit Routing Object Structure*/
 struct EroObj_t{
-	EroObj_t(){L=false;node =0;}
-	bool L;
-	int node;
+    EroObj_t(){L=false;node =0;}
+    bool L;
+    int node;
 
 };
 

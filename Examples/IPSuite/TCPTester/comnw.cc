@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: comnw.cc
 //--
@@ -54,7 +54,7 @@ void ComNw::activity()
     {
       //arriving datagram or frame/packet
       cMessage* msg = receive();
-      
+
       if (msg->arrivedOn("from_ip"))
         {
           fromIp(msg, nw_length);
@@ -70,31 +70,31 @@ void ComNw::activity()
 void ComNw::fromIp(cMessage* datagram, int nw_length)
 {
   ev << "Communication network layer received datagram of " << datagram->length() / 8 << " bytes from IP layer.\n";
-  
+
   //create a new network layer frame/packet
   cMessage* nw_frame = new cMessage("NW_FRAME", NW_FRAME);
 
   //set length
   nw_frame->setLength(nw_length * 8);
-  
+
   //encapsulate datagram from IP layer
   nw_frame->encapsulate(datagram);
 
   //send frame/packet
-  ev << "Sending network frame  of " << nw_frame->length() / 8 << " bytes to switch.\n"; 
+  ev << "Sending network frame  of " << nw_frame->length() / 8 << " bytes to switch.\n";
   send(nw_frame, "to_compound");
 };
 
 
 void ComNw::fromSwitch(cMessage* frame)
 {
-  ev << "Network layer received frame of " << frame->length() / 8 << " bytes from switch.\n"; 
-  
+  ev << "Network layer received frame of " << frame->length() / 8 << " bytes from switch.\n";
+
   //get the datagram from the incoming frame/packet
   cMessage* datagram  = frame->decapsulate();
   delete frame;
 
   //send the datagram to the IP layer
-  ev << "Sending datagram of " << datagram->length() / 8 << " bytes to IP layer.\n"; 
-  send(datagram, "to_ip"); 
+  ev << "Sending datagram of " << datagram->length() / 8 << " bytes to IP layer.\n";
+  send(datagram, "to_ip");
 };

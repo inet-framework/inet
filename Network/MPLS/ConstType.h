@@ -1,14 +1,14 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
@@ -18,17 +18,17 @@
 
 enum messageKind{
 
-	MPLS_KIND,
-	LDP_KIND,
-	SIGNAL_KIND
+    MPLS_KIND,
+    LDP_KIND,
+    SIGNAL_KIND
 };
 
 
 namespace ConstType// : cSimpleModule
 {
 
-const  char libDataMarker[]="In-lbl       In-intf 	Out-lbl   	Out-intf";
-const  char prtDataMarker[]="Prefix			Pointer";
+const  char libDataMarker[]="In-lbl       In-intf     Out-lbl       Out-intf";
+const  char prtDataMarker[]="Prefix            Pointer";
 const  int prefixLength=32;
 
 const char  UnknownData[]="UNDEFINED";

@@ -1,9 +1,9 @@
 // -*- C++ -*-
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: ip.h
 //--
-//-- 
+//--
 //--
 //-- V. Boehm, July 12 1999
 //--
@@ -45,7 +45,7 @@ struct IpHeader
 
   //internet header length in 32 bit words (4 bits)
   //since no options have been implemented yet,
-  //this should be 5 
+  //this should be 5
   unsigned int ip_hl;
 
   //type of service, not implemneted (8 bits)

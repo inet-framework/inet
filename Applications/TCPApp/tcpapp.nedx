@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -24,18 +24,18 @@
 //
 // author J.Reber, Sept. 2000
 //
-simple TCPApp 
-    parameters: 
+simple TCPApp
+    parameters:
     debug       : bool,
-        local_addr  : numeric, 
-        server_addr : numeric, 
-        processing_time : numeric, 
-        timeout     : numeric, 
-        appl_timeout    : numeric, 
-        conn_ia_time    : numeric, 
-        msg_ia_time : numeric, 
+        local_addr  : numeric,
+        server_addr : numeric,
+        processing_time : numeric,
+        timeout     : numeric,
+        appl_timeout    : numeric,
+        conn_ia_time    : numeric,
+        msg_ia_time : numeric,
         message_length  : numeric;
-    gates: 
-        in: in; 
-        out: out; 
-endsimple 
+    gates:
+        in: in;
+        out: out;
+endsimple

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -17,31 +17,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: UDPProcessing.cc
-	Purpose: Implementation of UDP protocoll
-	Initialisation:
-		error check validity initialized as parameter
-	Responsibilities:
-		initialize with port-to-application-table
-			read from NED-file
+    file: UDPProcessing.cc
+    Purpose: Implementation of UDP protocoll
+    Initialisation:
+        error check validity initialized as parameter
+    Responsibilities:
+        initialize with port-to-application-table
+            read from NED-file
 
-		receive message with encoded ports and IP addresses as parameters
-			from application:
-		create UDPPacket from it.
-		encapsulate it into IPInterfacePacket
-		pass it on to the IP layer
+        receive message with encoded ports and IP addresses as parameters
+            from application:
+        create UDPPacket from it.
+        encapsulate it into IPInterfacePacket
+        pass it on to the IP layer
 
-		receive IPInterfacePacket from IP Layer:
-		decapsulate UDPPacket
-		check biterror if checksum enabled
-			-> throw away if biterror found
-		map port to correct application-gate
-		pass UDPPacket to the selected gate
+        receive IPInterfacePacket from IP Layer:
+        decapsulate UDPPacket
+        check biterror if checksum enabled
+            -> throw away if biterror found
+        map port to correct application-gate
+        pass UDPPacket to the selected gate
 
-		claim Kernel at the beginning of processing,
-			release Kernel at the end
+        claim Kernel at the beginning of processing,
+            release Kernel at the end
 
-	author: Jochen Reber
+    author: Jochen Reber
 */
 
 #include <omnetpp.h>
@@ -49,158 +49,135 @@
 
 #include "UDPPacket.h"
 #include "UDPProcessing.h"
-//#include "ProcessorManager.h"
 #include "IPInterfacePacket.h"
 
 Define_Module( UDPProcessing );
 
 void UDPProcessing::initialize()
 {
-	// ProcessorAccess::initialize();
+    applTable.size = gateSize("to_application");
 
-	int i;
-	applTable.size = gate("to_application")->size();
-
-	for(i=0; i < applTable.size; i++)
-	{
-		applTable.port[i] =
-			gate("to_application",i)->toGate()->ownerModule()
-			->par("local_port");
-	}
+    for (int i=0; i<applTable.size; i++)
+    {
+        // FIXME what the hell?????????????????
+        applTable.port[i] = gate("to_application",i)->toGate()->ownerModule()->par("local_port");
+    }
 
 }
 
-void UDPProcessing::activity()
+void UDPProcessing::handleMessage(cMessage *msg)
 {
-
-	cMessage *msg; // the message that will be received
-
-	while(true)
-	{
-
-		msg = receive();
-
-		// notify ProcessorManager to begin task
-		// claimKernel();
-
-		// received from IP layer
-		if (strcmp(msg->arrivalGate()->name(), "from_ip") == 0)
-		{
-			processMsgFromIp(msg);
-
-		}  else // received from application layer
-		{
-			processMsgFromApp(msg);
-		}
-
-		// notify ProcessorManager to end task
-		// releaseKernel();
-
-	}
+    // received from IP layer
+    if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
+    {
+        processMsgFromIp(msg);
+    }
+    else // received from application layer
+    {
+        processMsgFromApp(msg);
+    }
 }
 
-// private processing functions
 
 void UDPProcessing::processMsgFromIp(cMessage *msg)
 {
-	int i;
-	int applicationNo = -1;
-	int port;
-	// udpMessage is to be sent to application
+    int i;
+    int applicationNo = -1;
+    int port;
+    // udpMessage is to be sent to application
 
-	IPInterfacePacket *iPacket = (IPInterfacePacket *)msg;
-	UDPPacket *udpPacket = (UDPPacket *) iPacket->decapsulate();
-	cMessage *udpMessage = new cMessage(*((cMessage *)udpPacket));
+    IPInterfacePacket *iPacket = (IPInterfacePacket *)msg;
+    UDPPacket *udpPacket = (UDPPacket *) iPacket->decapsulate();
+    cMessage *udpMessage = new cMessage(*((cMessage *)udpPacket)); // FIXME what's this?????????????
 
-	// errorcheck, if applicable
-	if (udpPacket->checksumValid())
-	{
-		// throw packet away if bit error discovered
-		// assume checksum found biterror
-		if (udpPacket->hasBitError())
-		{
-			delete iPacket;
-			delete udpPacket;
-			delete udpMessage;
-			return;
-		}
-	}
+    // errorcheck, if applicable
+    if (udpPacket->getChecksumValid())
+    {
+        // throw packet away if bit error discovered
+        // assume checksum found biterror
+        if (udpPacket->hasBitError())
+        {
+            delete iPacket;
+            delete udpPacket;
+            delete udpMessage;
+            return;
+        }
+    }
 
-	// check the names of the udpMessage parameters
-	// iffy assignment, please check
+    // check the names of the udpMessage parameters
+    // iffy assignment, please check
 
-	udpMessage->addPar("src_addr").
-			setStringValue(iPacket->srcAddr());
-	udpMessage->addPar("dest_addr").
-			setStringValue(iPacket->destAddr());
+    // FIXME should be some UDPInterfacePacket or something
+    udpMessage->addPar("src_addr").setStringValue(iPacket->srcAddr());
+    udpMessage->addPar("dest_addr").setStringValue(iPacket->destAddr());
 
-	udpMessage->addPar("codepoint") = iPacket->codepoint();
-	udpMessage->addPar("src_port") = udpPacket->sourcePort();
-	port = udpMessage->addPar("dest_port") = udpPacket->destinationPort();
-	udpMessage->setKind(udpPacket->msgKind());
-	udpMessage->setLength(udpPacket->length());
+    udpMessage->addPar("codepoint") = iPacket->diffServCodePoint();
+    udpMessage->addPar("src_port") = udpPacket->sourcePort();
+    port = udpMessage->addPar("dest_port") = udpPacket->destinationPort();
+    udpMessage->setKind(udpPacket->msgKind());
+    udpMessage->setLength(udpPacket->length());
 
-	delete iPacket;
-	delete udpPacket;
+    delete iPacket;
+    delete udpPacket;
 
-	// lookup end gate
-	for (i=0; i < applTable.size; i++)
-	{
-		if (port == applTable.port[i])
-		{
-			applicationNo = i;
-		}
-	}
+    // lookup end gate
+    for (i=0; i < applTable.size; i++)
+    {
+        if (port == applTable.port[i])
+        {
+            applicationNo = i;
+        }
+    }
 
-	// send only if gate to application is found
-	if (applicationNo != -1)
-	{
-		send(udpMessage, "to_application", applicationNo);
-	} else
-	{
-		delete udpMessage;
-	}
+    // send only if gate to application is found
+    if (applicationNo != -1)
+    {
+        send(udpMessage, "to_application", applicationNo);
+    } else
+    {
+        delete udpMessage;
+    }
 }
 
 void UDPProcessing::processMsgFromApp(cMessage *msg)
 {
-	IPAddrChar src_addr, dest_addr;
-	IPInterfacePacket *iPacket = new IPInterfacePacket();
-	// *msg NEEDS to be included in constructor. Correct later
-	UDPPacket *udpPacket = new UDPPacket(*msg);
+    // FIXME *msg NEEDS to be included in constructor. Correct later
+    UDPPacket *udpPacket = new UDPPacket();
 
-	udpPacket->setLength(msg->length());
-	udpPacket->setMsgKind(msg->kind());
+    udpPacket->setLength(msg->length());
+    udpPacket->setMsgKind(msg->kind());
 
-	// set source and destination port
-	udpPacket->setSourcePort(
-		msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
-	udpPacket->setDestinationPort(
-		msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
+    // set source and destination port
+    udpPacket->setSourcePort(msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
+    udpPacket->setDestinationPort(msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
 
-	strcpy(src_addr,
-		msg->hasPar("src_addr")
-		? msg->par("src_addr").stringValue()
-		: ERROR_IP_ADDRESS);
-	strcpy(dest_addr,
-		msg->hasPar("dest_addr")
-		? msg->par("dest_addr").stringValue()
-		: ERROR_IP_ADDRESS);
+    IPInterfacePacket *iPacket = new IPInterfacePacket();
+    iPacket->encapsulate(udpPacket);
+    iPacket->setProtocol(IP_PROT_UDP);
 
-	// encapsulate udpPacket into an IPInterfacePacket
-	iPacket->encapsulate(udpPacket);
-	iPacket->setDestAddr(dest_addr);
-	if (strcmp(ERROR_IP_ADDRESS, src_addr))
-	{
-		iPacket->setSrcAddr(src_addr);
-	}
-	iPacket->setProtocol(IP_PROT_UDP);
+    if (msg->hasPar("src_addr"))
+    {
+        IPAddress src_addr =  msg->par("src_addr").stringValue();
+        iPacket->setSrcAddr(src_addr);
+    }
 
-	// we don't set other values now
+    if (msg->hasPar("dest_addr"))
+    {
+        IPAddress dest_addr =  msg->par("dest_addr").stringValue();
+        iPacket->setDestAddr(dest_addr);
+    }
+    else
+    {
+        opp_error("processMsgFromApp(): no dest_addr in message");
+    }
 
-	// send ipintpacket out to IP
-	send(iPacket,"to_ip");
+    // we don't set other values now
 
-	delete msg;
+    // send to IP
+    send(iPacket,"to_ip");
+
+    delete msg;
 
 }
+
+

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-#ifndef __CONTROLAPP_H__
-#define __CONTROLAPP_H__
+#ifndef __ERRORHANDLING_H__
+#define __ERRORHANDLING_H__
 
 #include <omnetpp.h>
 
@@ -29,16 +27,17 @@
 /**
  * Error Handling: print out received error
  */
+// FIXME is such thing needed at all???
 class ErrorHandling: public cSimpleModule
 {
-private:
-	char nodename[NODE_NAME_SIZE];
+  private:
+    opp_string nodename;
 
-public:
-    Module_Class_Members(ErrorHandling, cSimpleModule, ACTIVITY_STACK_SIZE);
-
-	void initialize();
-    void activity();
+  public:
+    Module_Class_Members(ErrorHandling, cSimpleModule, 0);
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif
+

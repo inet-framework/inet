@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -18,10 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: SocketInterfacePacket.h
-	Purpose:
-	Usage:
-	author: Ulrich Kaage
+    file: SocketInterfacePacket.h
+    Purpose:
+    Usage:
+    author: Ulrich Kaage
 */
 
 #ifndef __SOCKETINTERFACEPACKET_H__
@@ -29,7 +29,7 @@
 
 #include <omnetpp.h>
 #include <string.h>
-
+#include <iostream>
 
 #include "sockets.h"
 
@@ -40,7 +40,7 @@
 class SocketInterfacePacket: public cMessage
 {
 public:
-  
+
   enum SockAction
     {
       SA_SOCKET,
@@ -63,12 +63,12 @@ public:
 private:
 
   SockAction _action;   // identifies the current action
-      
+
   // address info
-  IN_Addr _laddr;       // local
-  IN_Port _lport;
-  IN_Addr _faddr;       // foreign
-  IN_Port _fport;
+  IPAddress _laddr;       // local
+  PortNumber _lport;
+  IPAddress _faddr;       // foreign
+  PortNumber _fport;
 
   // socket info
   Socket::Domain   _domain;
@@ -95,7 +95,7 @@ public:
   virtual cObject *dup() const  { return new SocketInterfacePacket(*this); }
 
   virtual void info(char *buf);
-  virtual void writeContents(ostream& os);
+  virtual void writeContents(std::ostream& os);
 
   //
   // API  Application --> SocketLayer
@@ -124,18 +124,18 @@ public:
   // bind() is used to associate a previously created socket with a local
   // network transport address. This needs to be done by a server application to
   // specify the local address/port for connection admission.
-  void bind(Socket::Filedesc desc, IN_Addr addr, IN_Port port);
+  void bind(Socket::Filedesc desc, IPAddress addr, PortNumber port);
 
   // listen() makes the transport layer accept connection requests by remote applications
   // (TCP passive open)
   void listen(Socket::Filedesc desc, int backlog = -1);
 
-  // accept() accepts an incoming connection request. 
+  // accept() accepts an incoming connection request.
   void accept(Socket::Filedesc desc);
 
   // connect() initiates a connection request to a remote application (TCP
   // active open)
-  void connect(Socket::Filedesc desc, IN_Addr faddr, IN_Port fport);
+  void connect(Socket::Filedesc desc, IPAddress faddr, PortNumber fport);
 
   // read/write calls
   void write(Socket::Filedesc desc, cMessage* msg);
@@ -149,25 +149,25 @@ public:
   // API SocketLayer --> Application
   //
 
-  void setSockPair(const IN_Addr& laddr, IN_Port& lport, const IN_Addr& faddr, IN_Port& fport);
+  void setSockPair(const IPAddress& laddr, PortNumber& lport, const IPAddress& faddr, PortNumber& fport);
   void setFiledesc(Socket::Filedesc desc) {_filedesc = desc;}
 
   void socket_ret(Socket::Filedesc desc);
-  void accept_ret(Socket::Filedesc desc, const IN_Addr& fadd, IN_Port& fport);
+  void accept_ret(Socket::Filedesc desc, const IPAddress& fadd, PortNumber& fport);
   void connect_ret(Socket::Filedesc desc);
 
-  void read_ret(Socket::Filedesc desc, cMessage* msg, IN_Addr faddr, IN_Port fport);
-  
+  void read_ret(Socket::Filedesc desc, cMessage* msg, IPAddress faddr, PortNumber fport);
+
   //
   // general
-  // 
+  //
   // accessing private data (mainly by the SocketLayer)
 
   SockAction action() const {return _action;}
-  const IN_Addr& lAddr() const {return _laddr;}
-  const IN_Port& lPort() const {return _lport;}
-  const IN_Addr& fAddr() const {return _faddr;}
-  const IN_Port& fPort() const {return _fport;}
+  const IPAddress& lAddr() const {return _laddr;}
+  const PortNumber& lPort() const {return _lport;}
+  const IPAddress& fAddr() const {return _faddr;}
+  const PortNumber& fPort() const {return _fport;}
 
   Socket::Domain domain() const {return _domain;}
   Socket::Type type()   const {return _type;}

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -20,55 +20,24 @@
 
 import
     "NetworkLayers",
-    //"ProcessorManager",
-    "PingApp",
-    "ErrorHandling";
+    "PingApp";
+
 
 
 module Router
     parameters:
-        nodename: string,
+        nodename : string,
 
         // Network information
-        numOfProcessors: numeric,
         numOfPorts : numeric,
         routingFile : string;
     gates:
         in: in[];
         out: out[];
     submodules:
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = nodename;
-            display: "p=179,158;i=sink";
         // control module
         networkLayers: NetworkLayers;
             parameters:
-                // processing delay times
-                ipoutput_delay = 0.1 us,
-                fragmentation_delay = 0.1 us,
-                ipsend_delay = 0,
-                localdeliver_delay = 0,
-                prerouting_delay = 0,
-                routing_delay = 0.2 us,
-                icmp_delay = 0,
-                iptunneling_delay = 0,
-                multicast_delay = 0,
-
-                enqueue_delay = 0.1 us,
-                dequeue_delay = 0,
-                inputqueue_delay = 0.1 us,
-                nwi_delay = 0,
-
-                // hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING",
-                routingHookName = "NF_IP_FORWARD",
-                localDeliverHookName = "NF_IP_LOCAL_IN",
-                ipSendHookName = "NF_IP_LOCAL_OUT",
-                ipOutputHookName = "NF_IP_POST_ROUTING",
-                enqueueHookName = "L2_EnqueueHook",
-                dequeueHookName = "L2_DequeueHook",
-
                 // other Network parameters
                 IPForward = true,
                 NWIName = "PPPModule",
@@ -77,11 +46,8 @@ module Router
             gatesizes:
                 physIn[numOfPorts],
                 physOut[numOfPorts];
-            display: "p=87,155;i=fork";
-        //# processorManager: ProcessorManager;
+            display: "b=32,30;p=87,155;i=fork";
     connections nocheck:
-        networkLayers.errorOut --> errorHandling.in;
-
         // connections to network outside
         for i=0..numOfPorts-1 do
             in[i] --> networkLayers.physIn[i];

@@ -1,14 +1,14 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
@@ -21,18 +21,18 @@ Define_Module( LDPInterface);
 void LDPInterface::initialize()
 {
 
-	local_addr   = IPAddress(par("local_addr").stringValue()).getInt();
-	local_port   = ConstType::ldp_port;
-	rem_port	 = ConstType::ldp_port;
-	
+    local_addr   = IPAddress(par("local_addr").stringValue()).getInt();
+    local_port   = ConstType::ldp_port;
+    rem_port     = ConstType::ldp_port;
+    
 
-	keepAliveTime = par("keepAliveTime") ;
+    keepAliveTime = par("keepAliveTime") ;
 
-	timeout      = par("timeout");
+    timeout      = par("timeout");
 
-	appl_timeout =  0;// Unused par("appl_timeout").doubleValue();
+    appl_timeout =  0;// Unused par("appl_timeout").doubleValue();
 
-	local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
 
     //rem_addr = IPAddress(par("server_addr").stringValue()).getInt();
 }
@@ -71,68 +71,68 @@ void LDPInterface::activity()
       int myKind = msg->kind();
       ev << "LDP INTERFACE DEBUG: Message received kind is " << myKind << "\n";
 
-	  switch(myKind)
+      switch(myKind)
         {
-			
-		  //PART I: Messages from LDP proc
-	  case LDP_CLIENT_CREATE:
-		  //LDPproc sends message with peerIP (int)tagged
-		   createClient(msg->par("peerIP").longValue());
-		   delete msg;
-		   break;
+            
+          //PART I: Messages from LDP proc
+      case LDP_CLIENT_CREATE:
+          //LDPproc sends message with peerIP (int)tagged
+           createClient(msg->par("peerIP").longValue());
+           delete msg;
+           break;
 
-	  case LABEL_REQUEST:
-		  //LDPproc forwards request with peerIP tagged
-			modID= getModidByPeerIP(msg->par("peerIP").longValue());
-			if(modID==id()) //Invalid mod id
-			{
-				ev << "LDP INTERFACE DEBUG: LABEL_REQUEST unhandled in LDPInterface\n";
-				delete msg;
-				break;
-			}
-			 mod = simulation.module(modID);
-			if (!mod)
+      case LABEL_REQUEST:
+          //LDPproc forwards request with peerIP tagged
+            modID= getModidByPeerIP(msg->par("peerIP").longValue());
+            if(modID==id()) //Invalid mod id
+            {
+                ev << "LDP INTERFACE DEBUG: LABEL_REQUEST unhandled in LDPInterface\n";
+                delete msg;
+                break;
+            }
+             mod = simulation.module(modID);
+            if (!mod)
             {
           
               ev << "LDP INTERFACE DEBUG: This connection is invalid, deleting msg.\n";
               delete msg;
-			  break;
+              break;
             }
-			 else
+             else
             {
               sendDirect(msg, 0.0, mod, "from_ldp");
               ev << "LDP INTERFACE DEBUG: Dispatch LABEL_REQUEST to client/server components\n";
-			  break;
+              break;
             }
-		
-	  case LABEL_MAPPING:
-			//LDPproc return reply with peerIP tagged
-			modID= getModidByPeerIP(msg->par("peerIP").longValue());
-			if(modID==(this->id()))
-			{
-				ev << "LDP INTERFACE DEBUG: LABEL_MAPPING unhandled in LDPInterface\n";
-				delete msg;
-				break;
-			}
-			 mod = simulation.module(modID);
-			if (!mod)
+        
+      case LABEL_MAPPING:
+            //LDPproc return reply with peerIP tagged
+            modID= getModidByPeerIP(msg->par("peerIP").longValue());
+            if(modID==(this->id()))
+            {
+                ev << "LDP INTERFACE DEBUG: LABEL_MAPPING unhandled in LDPInterface\n";
+                delete msg;
+                break;
+            }
+             mod = simulation.module(modID);
+            if (!mod)
             {
           
               ev << "LDP DEBUG: This connection is invalid, deleting msg.\n";
               delete msg;
-			  break;
+              break;
             }
-			 else
+             else
             {
               sendDirect(msg, 0.0, mod, "from_ldp");
-			  break;
+              break;
             }
-		
+        
 
-		  //PART II : Messages from TCP layers
+          //PART II : Messages from TCP layers
         case TCP_I_RCVD_SYN:
 
-	   modID= msg->par("tcp_conn_id").longValue();// From client to server only
+       modID= msg->par("tcp_conn_id").longValue();// From client to server only
          
           mod = simulation.module(modID);
 
@@ -148,16 +148,16 @@ void LDPInterface::activity()
 
               //Update ldpSession for server entries
               for(i=0;i< ldpSessions.size(); i++)
-			 {
-				 if(ldpSessions[i].mod_id == (int)modID)
-				 {
+             {
+                 if(ldpSessions[i].mod_id == (int)modID)
+                 {
 
-					 ldpSessions[i].peerAddr = pIP;
+                     ldpSessions[i].peerAddr = pIP;
 
-					 break;
-				 }
-					
-			 }
+                     break;
+                 }
+                    
+             }
 
               sendDirect(msg, 0.0, mod, "from_tcp");
             }
@@ -174,66 +174,66 @@ void LDPInterface::activity()
 
             //TCP established by peer, update client entries
          
-		for(i=0;i< ldpSessions.size(); i++)
-		{
-			  if(ldpSessions[i].peerAddr == (int)pIP)
-				 {
+        for(i=0;i< ldpSessions.size(); i++)
+        {
+              if(ldpSessions[i].peerAddr == (int)pIP)
+                 {
 
-					ldpSessions[i].tcp_conn_id = conID;
-     				        ev << "LDP INTERFACE DEBUG: Update modid-tcpCon-peerIP "<<
-     				        ldpSessions[i].mod_id << "	" << ldpSessions[i].tcp_conn_id << "	" <<
-		                        IPAddress(ldpSessions[i].peerAddr).getString() << "\n";
-		                        modID = ldpSessions[i].mod_id;
-					 break;
-				 }
-					
-		 }
-		
+                    ldpSessions[i].tcp_conn_id = conID;
+                             ev << "LDP INTERFACE DEBUG: Update modid-tcpCon-peerIP "<<
+                             ldpSessions[i].mod_id << "    " << ldpSessions[i].tcp_conn_id << "    " <<
+                                IPAddress(ldpSessions[i].peerAddr).getString() << "\n";
+                                modID = ldpSessions[i].mod_id;
+                     break;
+                 }
+                    
+         }
+        
                  mod = simulation.module(modID);
 
                  if(mod != NULL)
                  {
-		          sendDirect(msg, 0.0, mod, "from_tcp");
-		 }
-		  else
-		  {
-			 ev << "LDP INTERFACE DEBUG: Error occurs, no module found for TCP_I_ESTAB\n";
-			 delete msg;
-		  }
+                  sendDirect(msg, 0.0, mod, "from_tcp");
+         }
+          else
+          {
+             ev << "LDP INTERFACE DEBUG: Error occurs, no module found for TCP_I_ESTAB\n";
+             delete msg;
+          }
           break;
 
 
          case TCP_I_SEG_FWD:
 
           msg_list = (cArray*)(msg->parList().get("msg_list"));
-			for (i = 0; i < msg_list->items(); i++)	{
-				if (msg_list->exist(i)) {
-					
-					cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
-					tcp_send_msg->setKind(TCP_I_SEG_FWD);
-					
+            for (i = 0; i < msg_list->items(); i++)    {
+                if (msg_list->exist(i)) {
+                    
+                    cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
+                    tcp_send_msg->setKind(TCP_I_SEG_FWD);
+                    
                     modID = getModidByPeerIP(tcp_send_msg->par("src_addr").longValue());
 
-					mod = simulation.module(modID);
+                    mod = simulation.module(modID);
 
-					if(mod != NULL)
-					sendDirect(tcp_send_msg, 0.0, mod, "from_tcp");
-					else
-						ev << "LDP INTERFACE DEBUG: Error occurs, no module found for TCP_I_SEG_FWD\n";
+                    if(mod != NULL)
+                    sendDirect(tcp_send_msg, 0.0, mod, "from_tcp");
+                    else
+                        ev << "LDP INTERFACE DEBUG: Error occurs, no module found for TCP_I_SEG_FWD\n";
 
-				}
-			}
-			delete msg;
+                }
+            }
+            delete msg;
 
             break;
-		  
+          
           default:
            
-		if(msg->hasPar("src_addr"))
-		modID= getModidByPeerIP(msg->par("src_addr").longValue());
-		else
-		  modID= getModidByPeerIP(msg->par("peerIP").longValue());
-			
+        if(msg->hasPar("src_addr"))
+        modID= getModidByPeerIP(msg->par("src_addr").longValue());
+        else
+          modID= getModidByPeerIP(msg->par("peerIP").longValue());
+            
             ev << "LDP INTERFACE DEBUG: Unknown message kind. Redirecting msg to module with TCP connection ID = "
                <<  modID << "\n";
 
@@ -249,9 +249,9 @@ void LDPInterface::activity()
               sendDirect(msg, 0.0, mod, "from_tcp");
             }
 
-	  }//End switch
-	 
-	}//End while
+      }//End switch
+     
+    }//End while
 
 
 
@@ -260,14 +260,14 @@ void LDPInterface::activity()
 
 int LDPInterface::getModidByPeerIP(int peerIP)
 {
-	int i;
-	for(i=0;i<ldpSessions.size();i++)
-	{
-		if(peerIP==ldpSessions[i].peerAddr)
-			return ldpSessions[i].mod_id;
-	}
-	ev << "LDP PROC DEBUG: Unknown Peer IP: " << IPAddress(peerIP).getString() <<"\n";
-	return id();  // FIXME is this good??? Andras 
+    int i;
+    for(i=0;i<ldpSessions.size();i++)
+    {
+        if(peerIP==ldpSessions[i].peerAddr)
+            return ldpSessions[i].mod_id;
+    }
+    ev << "LDP PROC DEBUG: Unknown Peer IP: " << IPAddress(peerIP).getString() <<"\n";
+    return id();  // FIXME is this good??? Andras 
 }
 
 void LDPInterface::createClient(int destAddr)

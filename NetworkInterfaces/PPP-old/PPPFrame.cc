@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -31,49 +31,49 @@
 // constructors
 PPPFrame::PPPFrame(): cPacket()
 {
-	setLength(8 * PPP_HEADER_LENGTH);
-	_protocol = PPP_PROT_UNDEF;
+    setLength(8 * PPP_HEADER_LENGTH);
+    _protocol = PPP_PROT_UNDEF;
 }
 
 PPPFrame::PPPFrame(const PPPFrame& p)
 {
-	setName( p.name() );
-	operator=(p);
+    setName( p.name() );
+    operator=(p);
 }
 
 // assignment operator
 PPPFrame& PPPFrame::operator=(const PPPFrame& p)
 {
-	cPacket::operator=(p);
-	_protocol = p._protocol;
-	return *this;
+    cPacket::operator=(p);
+    _protocol = p._protocol;
+    return *this;
 }
-    
+
 // information functions
 void PPPFrame::info(char *buf)
 {
-	cPacket::info( buf );
-	sprintf( buf+strlen(buf), " Protocol: %x",
-			_protocol);
+    cPacket::info( buf );
+    sprintf( buf+strlen(buf), " Protocol: %x",
+            _protocol);
 }
 
 void PPPFrame::writeContents(ostream& os)
 {
-	os << "PPPFrame: "
-		<< "\nProtocol " << (int)_protocol
-		<< "\n";
+    os << "PPPFrame: "
+        << "\nProtocol " << (int)_protocol
+        << "\n";
 }
 
 /* encapsulate a packet of type cPacket of the Network Layer;
-	protocol set by default to IP;
-    assumes that networkPacket->length() is 
-    length of transport packet in bits 
-	adds to it the PPP header length in bits */
+    protocol set by default to IP;
+    assumes that networkPacket->length() is
+    length of transport packet in bits
+    adds to it the PPP header length in bits */
 void PPPFrame::encapsulate(cPacket *networkPacket)
 {
     cPacket::encapsulate(networkPacket);
-	
-	_protocol = PPP_PROT_IP;
+
+    _protocol = PPP_PROT_IP;
 }
 
 

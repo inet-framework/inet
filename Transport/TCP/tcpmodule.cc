@@ -1,19 +1,12 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
-// fileName: tcpmodule.cc
-//
-//  Implementation of the TCP-FSM (finite state machine) according to RFC 793;
-//  slow start, congestion avoidance and fast retransmit like in 4.3BSD tahoe
-//
-//  Authors:
-//    V. Boehm, June 15 1999
-//    V. Kahmann, -> Sept 2000
-//
-//  Bugfixes, improvements (2003-):
-//    Donald Liang (LYBD), Virginia Tech
-//    Jeroen Idserda, University of Twente
-//    Joung Woong Lee (zipizigi), University of Tsukuba
-//
+//-- fileName: tcpmodule.cc
+//--
+//-- implementation of the TCP-FSM (finite state machine) according to RFC 793;
+//-- slow start, congestion avoidance and fast retransmit like in 4.3BSD tahoe
+//-- release
+//-- V. Boehm, June 15 1999
+//-- V. Kahmann, -> Sept 2000
 //-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
@@ -38,8 +31,7 @@
 
 #include <math.h>
 #include <map>
-#include <iostream>
-#include <fstream>
+
 
 using std::map;
 
@@ -84,10 +76,6 @@ private:
   cOutVector *rec_ack_no;
   cOutVector *rec_seq_no;
 
-  // <Jeroen>
-  int cnt_packet_delack;
-  int seqnr_outorder_exp;
-  // </Jeroen>
 
   //  cMessage *timeout_rexmt_msg;
 
@@ -123,7 +111,6 @@ private:
 
   void calcRetransTimer(TcpTcb* tcb_block, short m);
 
-  void timeoutPersistTimer(TcpTcb* tcb_block);
   void timeoutRetransTimer(TcpTcb* tcb_block);
   void timeoutDatalessAck(TcpTcb* tcb_block);
 
@@ -223,14 +210,8 @@ void TcpModule::initialize()
   if (hasPar("debug")) {
           debug = par("debug");
   } else {
-          debug = false;
+          debug = true;
   }
-
-  // <Jeroen>
-  cnt_packet_delack = 0;
-  seqnr_outorder_exp = -1;
-  // </Jeroen>
-
   tcpdelay = new cOutVector("TCP delay");
   cwnd_size = new cOutVector("Cwnd size");
   send_seq_no = new cOutVector("Send No");
@@ -336,7 +317,7 @@ void TcpModule::handleMessage(cMessage *msg)
       if (debug) ev << "TCP in LISTEN.\n";
 
       //indicate a passive open
-      tcb_block->passive = true;
+      tcb_block->passive = 1;
       //copy address/port
       if (msg->arrivedOn("from_appl"))
         {
@@ -422,7 +403,7 @@ void TcpModule::handleMessage(cMessage *msg)
       tcb_block->ack_send_time = simTime();
 
       //reset passive, since local and remote socket are specified
-      tcb_block->passive = false;
+      tcb_block->passive = 0;
 
       //check if sufficient socket information has been specified
       if ((tcb_block->local_port == -1) || (tcb_block->rem_port == -1) || (tcb_block->rem_addr == -1))
@@ -480,7 +461,7 @@ void TcpModule::handleMessage(cMessage *msg)
           //indicate that both ends of the connection are fully specified
           if (tcb_block->passive)
             {
-              tcb_block->passive = false;
+              tcb_block->passive = 0;
             }
 
           //process buffered and outgoing data
@@ -600,7 +581,7 @@ void TcpModule::handleMessage(cMessage *msg)
           //indicate that both ends of the connection are fully specified
           if (tcb_block->passive)
             {
-              tcb_block->passive = false;
+              tcb_block->passive = 0;
             }
 
           //notify the application if the connection has just became established
@@ -1070,6 +1051,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
           tcb_block->seg_seq = 0;
           tcb_block->seg_ack = 0;
 
+          tcb_block->t_rtt = -1;
           tcb_block->srtt = 0;     // smoothed rtt init 0 s
           tcb_block->rttvar = 24;  // smoothed mean dev. init 3 s
           tcb_block->rxtcur = 12;  // current rto init = 6 s
@@ -1079,8 +1061,6 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
 
           tcb_block->max_del_ack = 0.2; //max. ack. delay set to 0 (no ack. timer implemented yet)
           tcb_block->ack_sch     = false;
-
-          tcb_block->per_sch	 = false;
 
           tcb_block->num_pks_req = 0;
 
@@ -1099,7 +1079,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
 
           tcb_block->conn_estab = 0;
 
-          tcb_block->passive = false;
+          tcb_block->passive = 0;
           tcb_block->passive_rem_addr = -1;
           tcb_block->passive_rem_port = -1;
 
@@ -1112,9 +1092,7 @@ TcpTcb* TcpModule::getTcb(cMessage* msg)
         }
       else
         {
-          // LYBD: ignore timeout messages without TCB info,
-          // the messsage will be deleted in handleMessage()
-          if (debug) ev << "Timeout message arrive without associated TCB block.";
+          error("unexpected state"); // FIXME what to do here?
         }
     }
 
@@ -1707,7 +1685,7 @@ int TcpModule::checkAck(TcpTcb* tcb_block)
       // per send-window
       // and none for retransmissions
       // we convert the double value into ticks (1 tick = 500 ms)
-      if ((tcb_block->last_timed_data != -1) && (seqNoGeq(tcb_block->seg_ack, tcb_block->rtseq))) // fixed by LYBD
+      if ((tcb_block->last_timed_data != -1) && (seqNoGt(tcb_block->seg_ack, tcb_block->rtseq)))
         {
           sim_time_ticks = (short) floor( (double) simTime()*2);
           sent_time_ticks = (short) floor( (double) tcb_block->last_timed_data*2);
@@ -1847,11 +1825,6 @@ void TcpModule::calcRetransTimer(TcpTcb* tcb_block, short m)
   if (debug) ev << "Smoothed RTT (8*ticks): " << tcb_block->srtt << endl;
   if (debug) ev << "Smoothed mean deviation of RTT (4*ticks): " << tcb_block->rttvar << endl;
   if (debug) ev << "RTO value: " << tcb_block->rxtcur << endl;
-}
-
-void TcpModule::timeoutPersistTimer(TcpTcb* tcb_block) {
-   if (debug) ev << simTime() << " Persist Time expired" << endl;
-   tcb_block->snd_wnd = 1;
 }
 
 //function for retransmission timer expiry
@@ -2161,12 +2134,6 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
   bool          segment_exists    = false;
   bool          complete_pkt_rcvd = false;
 
-  // <Jeroen>
-  cnt_packet_delack++; // to see if 2 packets have been received without sending an ack
-  // </Jeroen>
-
-  int ackno = pseg_tcp_header->th_ack_no;
-
   //starting value for RCV.NXT
   rcv_nxt_old = tcb_block->rcv_nxt;
 
@@ -2294,10 +2261,6 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
                               cMessage* data = pseg_rec->pdata;
                               pkt_size = data->length() / 8;
                               if (debug) ev << "The packet size is " << pkt_size << endl;
-
-                              // LYBD: there may be overlapping segments in the out-of-order queue
-                              // calculate and take out the overlapping portions for each segment
-                              remainder = tcb_block->rcv_nxt - pseg_rec->seq;
 
                               //if length of retransmission >= pkt_size ==> drop the duplicate segment
                               if (remainder >= pkt_size)
@@ -2446,13 +2409,6 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
 
             } // of if
           ackSchedule(tcb_block, true);
-
-          // <Jeroen>
-          // we're sending an ack with the expected seq nr rcv_next
-          // store this seqnr in case we receive this segment, so we can send an immediate ack
-          seqnr_outorder_exp = tcb_block->rcv_nxt;
-          // </Jeroen>
-
         } // of else (out of order processing)
     } //of else (length > 0)
 
@@ -2466,13 +2422,6 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
     {
       tcb_block->rcv_wnd = 0;
       if (debug) ev << "Setting rcv_wnd to 0 because it's smaller or equal to "<< tcb_block->rcv_nxt - rcv_nxt_old << " octets.\n";
-    }
-
-  // RdM: complete SWA according to RFC-1122, p.97
-  if (tcb_block->rcv_buff - rcv_queue_usage - tcb_block->rcv_wnd >= MIN(tcb_block->rcv_buf_usage_thresh * tcb_block->rcv_buff, tcb_block->snd_mss))
-    {
-      tcb_block->rcv_wnd = tcb_block->rcv_buff - (unsigned long)rcv_queue_usage;
-      if (debug) ev << "SWA: rcv_wnd = " << tcb_block->rcv_wnd << "\n";
     }
 
   //FIN processing, if FIN flag has been received
@@ -2496,15 +2445,12 @@ void TcpModule::segReceive(cMessage* pseg, TcpHeader* pseg_tcp_header, TcpTcb* t
       if (seqNoGt(tcb_block->rcv_nxt, rcv_nxt_old))
         {
           if (debug) ev << "RCV.NXT: " << tcb_block->rcv_nxt << ", old RCV.NXT: " << rcv_nxt_old << "\n";
-	  if (_feature_delayed_ack && cnt_packet_delack < 2 && seqnr_outorder_exp != tcb_block->seg_seq)
+          if (_feature_delayed_ack == true)
             {
               ackSchedule(tcb_block, false);
             }
           else
             {
-              // <Jeroen>
-              if (debug) if (cnt_packet_delack == 2) ev << "Received 2 unacknowledged packets, sending Ack!" << endl;
-              // </Jeroen>
               ackSchedule(tcb_block, true);
             }
         }
@@ -2744,6 +2690,7 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
       //update send variable
       //retrans_data_sent += segment_size;
 
+
     } //end of while
 
   //clear the re-send data queue
@@ -2789,27 +2736,12 @@ void TcpModule::retransQueueProcess(TcpTcb* tcb_block)
 
       //Deflate the congestion window by the amount of new data acknowledged, then add back one mss
       //and send a new segment if permitted by the new value of snd_cwnd
-
-      // BCH LYBD
-      //tcb_block->snd_cwnd = tcb_block->savecwnd;
-      //	  
-      //tcb_block->snd_cwnd = tcb_block->snd_cwnd - tcb_block->new_ack;
-      //if (tcb_block->snd_cwnd < 0)
-      //  {
-      //    tcb_block->snd_cwnd = 0;
-      //  }
-
-      // tcb_block->snd_cwnd is unsigned integer !!!
-      if (tcb_block->savecwnd > tcb_block->new_ack) 
-        {
-          tcb_block->snd_cwnd = tcb_block->savecwnd - tcb_block->new_ack;
-        }
-      else 
+      tcb_block->snd_cwnd = tcb_block->savecwnd;
+      tcb_block->snd_cwnd = tcb_block->snd_cwnd - tcb_block->new_ack;
+      if (tcb_block->snd_cwnd < 0)
         {
           tcb_block->snd_cwnd = 0;
         }
-      // ECH LYBD
-
       tcb_block->snd_cwnd += tcb_block->snd_mss;
       snd_cwnd_size(tcb_block->snd_cwnd);
       //reset save-variable
@@ -2952,18 +2884,6 @@ unsigned long TcpModule::sndDataSize(TcpTcb* tcb_block)
   //total_wnd = tcb_block->snd_wnd;
   //send only the minimum of send and congestion window for slow start
   total_wnd = MIN(tcb_block->snd_wnd,tcb_block->snd_cwnd);
-
-
-  // BCH LYBD
-  // FIXME Quick hack for the deadlock problem as follows: Ack arrives and
-  // clear the retransmission queue when the advertised receiver window is
-  // zero, resulting in no further reading from the send_queue.
-  if (tcb_block->snd_wnd == 0 && tcb_block->snd_una == tcb_block->snd_max)
-    {
-      if (debug) ev << "Receiver window is zero, send one byte to avoid deadlock.\n";
-      total_wnd = 1;
-    }
-  // ECH LYBD
 
   //available window = total window - amount of data already sent in this window
   if ((tcb_block->snd_una + total_wnd) > tcb_block->snd_nxt)
@@ -3108,6 +3028,7 @@ void TcpModule::rcvQueueProcess(TcpTcb* tcb_block)
       ppkt->setName("TCP_I_SEG_FWD");
       ppkt->addPar("sequence") = tcb_block->rcv_buf_seq;
 
+
       if ((tcb_block->num_pks_req == 0 && !tcb_block->rcv_up_valid) || num_pks_avail == 1)
         {
           ppkt->addPar("urgent") = urgent;
@@ -3139,26 +3060,15 @@ void TcpModule::rcvQueueProcess(TcpTcb* tcb_block)
       rcv_queue_free = tcb_block->rcv_buff - rcv_user;
       if (rcv_queue_free >= tcb_block->rcv_wnd + MIN((tcb_block->rcv_buff / 2), tcb_block->snd_mss))
         {
-          // <Jeroen>
-          // if receive window is 0, and there is space in the buffer now, send an ack (window update)
-          if (tcb_block->rcv_wnd == 0 && rcv_queue_free != 0)
-            {
-              tcb_block->rcv_wnd = rcv_queue_free;
-              if (debug) ev << "SWA: Set the rcv_wnd to the free space in buffer (" << rcv_queue_free << " octets).\n";
-              ackSchedule(tcb_block, true);
-            }
-          else
-            {
-              tcb_block->rcv_wnd = rcv_queue_free;
-              if (debug) ev << "SWA: Set the rcv_wnd to the free space in buffer (" << rcv_queue_free << " octets).\n";
-            }
+          tcb_block->rcv_wnd = rcv_queue_free;
+          if (debug) ev << "SWA: Set the rcv_wnd to the free space in buffer (" << rcv_queue_free << " octets).\n";
         }
-      //else if (tcp_socket_queue.empty())
+      //  else if (tcp_socket_queue.empty())
       //  {
       //    tcb_block->rcv_wnd = tcb_block->snd_mss;
       //    if (debug) ev << "SWA: Set the rcv_wnd to maxsegsize.\n";
       //  }
-      //else
+      //    else
       //  {
       //    tcb_block->rcv_wnd = 0;
       //    if (debug) ev << "SWA: Set the rcv_wnd to 0.\n";
@@ -3400,16 +3310,16 @@ cMessage* TcpModule::removeFromDataQueue(cQueue & from_queue,  unsigned long num
 // BCH LYBD
       if(fdata_packet->hasPar("msg_list"))
         {
-          // fdata_packet=(cMessage*) ((cArray*)
-          // (fdata_packet->parList().get("msg_list")))->get(0);
+            // fdata_packet=(cMessage*) ((cArray*)
+            // (fdata_packet->parList().get("msg_list")))->get(0);
 
-          // rewritten by LYBD
-          cMessage* pdata_packet = (cMessage*)
+            // rewritten by LYBD
+            cMessage* pdata_packet = (cMessage*)
                 ((cArray*)(fdata_packet->parList().get("msg_list")))->get(0);
-          ((cArray*)(fdata_packet->parList().get("msg_list")))->remove(0);
-          delete fdata_packet;
-          fdata_packet = pdata_packet;
-          fdata_packet->setLength(fdp_len);
+            ((cArray*)(fdata_packet->parList().get("msg_list")))->remove(0);
+            delete fdata_packet;
+            fdata_packet = pdata_packet;
+            fdata_packet->setLength(fdp_len);
         }
       ((cArray*) (rdata_packet->parList().get("msg_list")))->add(fdata_packet);
       // fdata_packet = (cMessage*) from_queue.remove(from_queue.head());
@@ -3596,7 +3506,7 @@ void TcpModule::insertListElement(cLinkedList & ilist, SegRecord* ielement, unsi
   unsigned long ilist_len = ilist.length();
 
   if (position == 1) //FIXME: MBI but needed for length of list == 0
-    {
+  {
       if (debug) ev << "Specified position is 1. Inserting element at head.\n";
       ilist.insertHead(ielement);
     }
@@ -3627,7 +3537,7 @@ void TcpModule::insertListElement(cLinkedList & ilist, SegRecord* ielement, unsi
       unsigned long counter = 1;
       cLinkedListIterator literator(ilist, 1);
       //move to the desired position in the list
-      while(counter < position) // fixed by LYBD
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
@@ -3668,7 +3578,7 @@ void TcpModule::removeListElement(cLinkedList & list_to_inspect, unsigned long p
       unsigned long counter = 1;
       cLinkedListIterator literator(list_to_inspect, 1);
       //move to the desired position in the list
-      while(counter < position) // fixed by LYBD
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
@@ -3704,7 +3614,7 @@ SegRecord* TcpModule::accessListElement(cLinkedList & list_to_inspect, unsigned 
       unsigned long counter = 1;
       cLinkedListIterator literator(list_to_inspect, 1);
       //move to the desired position in the list
-      while(counter < position) // fixed by LYBD
+      while(counter < position) // LYBD fixed it: while(counter <= position)
         {
           literator++;
           counter++;
@@ -3860,11 +3770,6 @@ void TcpModule::ackSchedule(TcpTcb* tcb_block, bool immediate)
 
       if (immediate == true)
         {
-	  // <Jeroen>
-          // reset delack packet counter
-          cnt_packet_delack = 0;
-	  // </Jeroen>
-
           //create a data-less segment and send it at once
           cMessage* msg = new cMessage("ACK_DATA", ACK_DATA);
           msg->setLength(0);
@@ -5145,32 +5050,6 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
       //check sequence number (check if segment is acceptable), check RST, SYN, ACK
       if (segAccept(tcb_block) &&  checkRst(tcb_block) && checkSyn(tcb_block) && checkAck(tcb_block))
         {
-          if (tcp_header->th_window != 0 && tcb_block->per_sch)
-            {
-              if (debug) ev << "Cancelling persist timer" << endl;
-	          delete cancelEvent(tcb_block->timeout_persist_msg);
-              tcb_block->per_sch = false;
-            }
-          // activate persist timer
-          if (tcp_header->th_window == 0)
-            {
-              ev << "Receive window receiver is ZERO" << endl;
-              if (!tcb_block->per_sch)
-                {
-                  tcb_block->timeout_persist_msg = new cMessage("TIMEOUT_PERSIST",TIMEOUT_PERSIST);
-                  //add parameters for function tcpArrivalMsg(...) here
-                  tcb_block->timeout_persist_msg->addPar("src_port") = tcb_block->local_port;
-                  tcb_block->timeout_persist_msg->addPar("src_addr") = tcb_block->local_addr;
-                  tcb_block->timeout_persist_msg->addPar("dest_port") = tcb_block->rem_port;
-                  tcb_block->timeout_persist_msg->addPar("dest_addr") = tcb_block->rem_addr;
-		          // <Jeroen>
-		          // FIXME schedule persist timer at now + 1.5 seconds.
-		          // this 1.5 sec. value should be calculated using the rtt and backoff shift!
-                  scheduleAt(simTime() + 1.5, tcb_block->timeout_persist_msg);
-                  tcb_block->per_sch = true;
-                }
-            }
-
           if (tcb_block->seg_len > 0)
             {
               TcpFlag fin = tcb_block->st_event.th_flag_fin;
@@ -5185,14 +5064,6 @@ void TcpModule::procExEstablished(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* 
             }
         }
       break;
-
-    // <Jeroen>
-    case TCP_E_TIMEOUT_PERSIST:
-        // we should send 1 byte of data now
-        ev << "Timeout persist" << endl;
-        timeoutPersistTimer(tcb_block);
-        break;
-    // </Jeroen>
 
     case TCP_E_TIMEOUT_REXMT:
 
@@ -5722,11 +5593,6 @@ void TcpModule::procExFinWait2(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
       if (debug) ev << "FIN_WAIT 2 timer expired. Closing the connection.\n";
       break;
 
-    case TCP_E_TIMEOUT_DELAYED_ACK:
-      tcb_block->ack_sch = false;
-      ackSchedule(tcb_block, true);
-      break;
-
     default:
       //error( "Case not handled in switch statement (FIN_WAIT_2)");
       error("Event %s not handled in FIN_WAIT_2 state switch statement", eventName(tcb_block->st_event.event));
@@ -5946,4 +5812,8 @@ void TcpModule::procExTimeWait(cMessage* amsg, TcpTcb* tcb_block, TcpHeader* tcp
 
     } //end of switch
 }
+
+
+
+
 

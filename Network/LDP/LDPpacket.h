@@ -5,7 +5,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
-#include "ip_address.h"
+#include "IPAddress.h"
 #include "ip_address_prefix.h"
 
 using namespace std;
@@ -73,8 +73,8 @@ typedef struct LABEL_MAPPING
 
 typedef struct MAPPING
 {
-	IPAddressPrefix fec;
-	int label;
+    IPAddressPrefix fec;
+    int label;
 } label_mapping_type;
 
 /*
@@ -94,23 +94,23 @@ enum LDP_MESSAGE_TYPES
        LABEL_REQUEST,
        LABEL_WITHDRAW,
        LABEL_RELEASE,
-	   UNKNOWN
+       UNKNOWN
 };
 
 
 
-	
+
 /********************************************************************************
-*																				*
-*					            LDP GENERIC PACKET	    						*
-*																				*
+*                                                                                *
+*                                LDP GENERIC PACKET                                *
+*                                                                                *
 *********************************************************************************/
 
 class LDPpacket: public cPacket
-{   
-	public:
+{
+    public:
 
-	  int type;
+      int type;
       LDPpacket();
       LDPpacket(int messageType);
       LDPpacket(const LDPpacket& ldp);
@@ -121,75 +121,75 @@ class LDPpacket: public cPacket
       virtual cPacket *decapsulate();
 
 
-	
-	
-	  //Routing Information
-	inline void setSenderAddress(int ipAddr)
+
+
+      //Routing Information
+    inline void setSenderAddress(int ipAddr)
 {
-		  if(!hasPar("src_lsr_addr"))
-		  addPar("src_lsr_addr") = ipAddr;
-		  else
-			  par("src_lsr_addr")=ipAddr;
+          if(!hasPar("src_lsr_addr"))
+          addPar("src_lsr_addr") = ipAddr;
+          else
+              par("src_lsr_addr")=ipAddr;
 }
 
 inline void setReceiverAddress(int ipAddr)
 {
-	if(!hasPar("peerIP"))
-		  addPar("peerIP")=ipAddr;
-	  else
-	  par("peerIP")=ipAddr;
+    if(!hasPar("peerIP"))
+          addPar("peerIP")=ipAddr;
+      else
+      par("peerIP")=ipAddr;
 }
-	
+
 
       inline int getSenderAddress()
-								{return par("src_lsr_addr").longValue();}
+                                {return par("src_lsr_addr").longValue();}
 
       inline int getReceiverAddress()
-								{return par("peerIP").longValue();}
-    
-    
-    
+                                {return par("peerIP").longValue();}
+
+
+
       virtual void printInfo(ostream& os)=0;
-	  virtual int getType()=0;
+      virtual int getType()=0;
 
 };
 
 
-	
+
 /********************************************************************************
-*																				*
-*					            LABEL MAPPING MESSAGE   						*
-*																				*
+*                                                                                *
+*                                LABEL MAPPING MESSAGE                           *
+*                                                                                *
 *********************************************************************************/
 
 class LabelMappingMessage: public LDPpacket
 {
-   
+
     public:
     LabelMappingMessage();
-   
-	inline void setMapping(int label, int fec)
-	{
-		if(!hasPar("mlabel"))					
-			addPar("mlabel")=label;
-		else
-			par("mlabel")=label;
 
-		if(!hasPar("mfec"))
-			addPar("mfec")=fec;
-		else
-			par("mfec")=fec;
-	}
+    inline void setMapping(int label, int fec)
+    {
+        if(!hasPar("mlabel"))
+            addPar("mlabel")=label;
+        else
+            par("mlabel")=label;
+
+        if(!hasPar("mfec"))
+            addPar("mfec")=fec;
+        else
+            par("mfec")=fec;
+    }
 
     inline int  getLabel()
-						{return par("mlabel").longValue();}
+                        {return par("mlabel").longValue();}
 
-	inline int getFec()
-						{return par("mfec").longValue();}
+    inline int getFec()
+                        {return par("mfec").longValue();}
 
     void printInfo(ostream& os);
-    
-	int getType();
+
+    int getType();
 
     ~LabelMappingMessage(){}
 
@@ -197,26 +197,26 @@ class LabelMappingMessage: public LDPpacket
 
 
 
-	
+
 /********************************************************************************
-*																				*
-*					            LABEL REQUEST MESSAGE   						*
-*																				*
+*                                                                                *
+*                                LABEL REQUEST MESSAGE                           *
+*                                                                                *
 *********************************************************************************/
 
 class LabelRequestMessage: public LDPpacket
 {
- 
+
     public:
     LabelRequestMessage();
 
-	inline void setFec(int fec){
-		if(!hasPar("fec"))
-		addPar("fec")=fec;
-	else
-		par("fec")=fec;}
+    inline void setFec(int fec){
+        if(!hasPar("fec"))
+        addPar("fec")=fec;
+    else
+        par("fec")=fec;}
 
-	inline int getFec(){return par("fec").longValue();}
+    inline int getFec(){return par("fec").longValue();}
 
     void printInfo(ostream& os);
 
@@ -228,11 +228,11 @@ class LabelRequestMessage: public LDPpacket
 
 
 
-	
+
 /********************************************************************************
-*																				*
-*					            HELLO MESSAGE           						*
-*																				*
+*                                                                                *
+*                                HELLO MESSAGE                                   *
+*                                                                                *
 *********************************************************************************/
 class HelloMessage: public LDPpacket
 {

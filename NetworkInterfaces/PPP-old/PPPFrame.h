@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -37,7 +37,7 @@ using std::ostream;
     -------------------------------------------------   */
 
 /* PPP header length:
-	2*flag + 1 add + 1 contr + 2 prot = 6 byte */
+    2*flag + 1 add + 1 contr + 2 prot = 6 byte */
 const int PPP_HEADER_LENGTH = 6;
 
 
@@ -47,27 +47,27 @@ const int PPP_HEADER_LENGTH = 6;
 
 enum PPP_ProtocolFieldId
 {
-	PPP_PROT_UNDEF	= 0x0,
-	PPP_PROT_IP 	= 0x0021,
-	PPP_PROT_LCD	= 0xc021,
-	PPP_PROT_NCD	= 0x8021
+    PPP_PROT_UNDEF    = 0x0,
+    PPP_PROT_IP     = 0x0021,
+    PPP_PROT_LCD    = 0xc021,
+    PPP_PROT_NCD    = 0x8021
 };
 
 /*  -------------------------------------------------
         Main class: PPPFrame
     -------------------------------------------------
-	field simulated:
-		protocol
-	constant fields not simulated:
-		flag (0x7e), address (0xff), control (0x03),
-		CRC (biterror)
+    field simulated:
+        protocol
+    constant fields not simulated:
+        flag (0x7e), address (0xff), control (0x03),
+        CRC (biterror)
 
 */
 
 class PPPFrame: public cPacket
 {
 private:
-	PPP_ProtocolFieldId _protocol;
+    PPP_ProtocolFieldId _protocol;
 
 public:
 
@@ -87,13 +87,13 @@ public:
     // overriding encapsulation-function for cPackets
     virtual void encapsulate(cPacket *);
 
-	// header length functions
-	int headerBitLength() { return 8 * PPP_HEADER_LENGTH; }
-	int headerByteLength() { return PPP_HEADER_LENGTH; }
+    // header length functions
+    int headerBitLength() { return 8 * PPP_HEADER_LENGTH; }
+    int headerByteLength() { return PPP_HEADER_LENGTH; }
 
-	// PPP fields
-	PPP_ProtocolFieldId protocol() { return _protocol; }
-	void setProtocol( PPP_ProtocolFieldId p ) { _protocol = p; }
+    // PPP fields
+    PPP_ProtocolFieldId protocol() { return _protocol; }
+    void setProtocol( PPP_ProtocolFieldId p ) { _protocol = p; }
 
 };
 

@@ -20,7 +20,7 @@ ifconfigend.
 route:
 
 172.0.1.1		*				255.255.255.255 H	0	eth0
-default			172.1.0.2		0.0.0.0			G	0	ppp0
+default:		172.1.0.2		0.0.0.0			G	0	ppp0
 
 #multicast
 

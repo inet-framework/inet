@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: procserver.cc
 //--
@@ -49,7 +49,7 @@ void ProcServer::activity()
   //cPar& msg_length = parentModule()->par("msg_length");
 
   unsigned long msg_length;
-  
+
   //server appl. calls
   cMessage* payload_msg = NULL;
   cMessage* send_call   = NULL;
@@ -93,7 +93,7 @@ void ProcServer::activity()
 
   // get the number of bits requested by the client
   msg_length = msg->par("num_bit_req");
-  
+
   delete msg;
 
 
@@ -123,7 +123,7 @@ void ProcServer::activity()
     }
   else if (debug)
     ev << "received TCP_I_ESTAB\n";
-  
+
   //address and port management
   rem_port = msg->par("src_port"); //client TCP-port at remote client side
   rem_addr = msg->par("src_addr"); //client IP-address at remote client side
@@ -140,13 +140,13 @@ void ProcServer::activity()
   payload_msg = new cMessage("APPL_PAYLOAD");
   payload_msg->setLength((long) msg_length); // number of Bits
   send_call->addPar("APPL_PAYLOAD") = payload_msg;
-  
+
   send_call->addPar("tcp_conn_id")  = id();
   send_call->addPar("src_port")     = local_port;
   send_call->addPar("src_addr")     = local_addr;
   send_call->addPar("dest_port")    = rem_port;
   send_call->addPar("dest_addr")    = rem_addr;
-      
+
   send_call->addPar("tcp_flag_psh") = (int) tcp_flag_psh;
   send_call->addPar("tcp_flag_urg") = (int) tcp_flag_urg;
   send_call->addPar("timeout")      = (int) timeout;
@@ -158,10 +158,10 @@ void ProcServer::activity()
   // FIXME: Was macht das?
   //no data packets to receive
   send_call->addPar("rec_pks") = 0;
-      
+
   //make delay checking possible
   send_call->setTimestamp();
-      
+
   //send "send" to TCP
   if (debug)
     ev << "sending SEND call/data bits to TCP.\n";
@@ -181,13 +181,13 @@ void ProcServer::activity()
     {
       goto closed;
     }
-  
+
   if (msg->kind() == TCP_I_CLOSE_WAIT)
     {
       if (debug)
         ev << "TCP entered CLOSE_WAIT. Closing connection by sending CLOSE.\n";
       close = new cMessage("TCP_CLOSE", TCP_C_CLOSE);
-      close->addPar("src_port") = local_port; 
+      close->addPar("src_port") = local_port;
       close->addPar("src_addr") = local_addr;
       close->addPar("dest_port") = rem_port;
       close->addPar("dest_addr") = rem_addr;
@@ -198,7 +198,7 @@ void ProcServer::activity()
       //close->addPar("send_bits") = 0;
       //no data bytes to receive
       close->addPar("rec_pks") = 0;
-      
+
       //make delay checking possible
       close->setTimestamp();
 
@@ -235,7 +235,7 @@ void ProcServer::activity()
         ev << "received something other than TCP_I_CLOSE_WAIT - broken\n";
       goto broken;
     }
-         
+
  broken:
   if (debug)
     ev << "TCP connection broken due to timeout or protocol error (ABORT etc.)!\n";

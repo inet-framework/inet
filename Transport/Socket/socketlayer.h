@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -48,12 +48,12 @@ class SocketLayer : public cSimpleModule
   int _from_appl_size;
   int _to_appl;
   int _to_appl_size;
-  
+
   RoutingTable* _rt; // needed to determine the local address
 
   cArray _sockar;       // all sockets are stored here. The array index of a socket
                         // denotes the file descriptor number. Note, that this
-                        // array is shared by all application layers being 
+                        // array is shared by all application layers being
                         // connected to the socket layer
 
   enum {WK_PORTS = 1024 };
@@ -67,7 +67,7 @@ class SocketLayer : public cSimpleModule
 
   void _init();
   void _findRoutingTable();
-  IN_Addr _defaultIPAddr();
+  IPAddress _defaultIPAddr();
   Socket::Filedesc _newSocket(Socket::Domain dom, Socket::Type type,
                               Socket::Protocol proto, int from_appl_gate);
   void _deleteSocket(Socket::Filedesc desc);
@@ -75,7 +75,7 @@ class SocketLayer : public cSimpleModule
   // _bindPort() tries to bind to the specified port. if the specified port is
   // already bound an error message is generates. If port is undefined the next
   // free ephemeral port is bound starting from port WK_PORTS.
-  IN_Port _bindPort(IN_Port port, Socket* socket);
+  PortNumber _bindPort(PortNumber port, Socket* socket);
   void _releasePort(Socket* socket);
 
 
@@ -83,7 +83,7 @@ class SocketLayer : public cSimpleModule
   void _handleFromAppl(SocketInterfacePacket* msg);
   int _returnGate(int arrivalgate);
   void _sendDown(cMessage* msg, Socket* socket);
-  
+
  public:
   Module_Class_Members(SocketLayer, cSimpleModule, 0);
 
@@ -109,7 +109,7 @@ class SocketLayer : public cSimpleModule
   Socket* getSocket(Socket::Filedesc desc, bool fullyspecified = false, int from_appl_gate_id = -1) const;
 
   // getSocket() - retrieve a socket by its address fields
-  Socket* getSocket(Socket::Protocol proto, IN_Addr laddr, IN_Port lport, IN_Addr faddr, IN_Port fport);
+  Socket* getSocket(Socket::Protocol proto, IPAddress laddr, PortNumber lport, IPAddress faddr, PortNumber fport);
 
 
 };

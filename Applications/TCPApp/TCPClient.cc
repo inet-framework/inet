@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: TCPClient.cc
 //--
@@ -6,7 +6,7 @@
 //--
 //-- V. Boehm, June 19 1999
 //--
-//-- modified by J. Reber for IP architecture, October 2000 
+//-- modified by J. Reber for IP architecture, October 2000
 //-----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
@@ -47,13 +47,13 @@ void TCPClient::activity()
   cPar&  conn_ia_time   = par("conn_ia_time");
   cPar&  msg_ia_time    = par("msg_ia_time");
   //cPar& num_message   = par("num_message");                           // ((!!))
-  //cPar& rec_pks       = par("rec_pks");  
+  //cPar& rec_pks       = par("rec_pks");
   cPar&  message_length = par("message_length");
-  
-  //client appl. calls 
+
+  //client appl. calls
   cMessage *open_active, *receive_call, *close, *abort;
   //messages received from TCP
-  cMessage *e_msg, *r_msg, *c_msg;  
+  cMessage *e_msg, *r_msg, *c_msg;
 
   //misc. variable defs
   double    dact_num_message = 0;
@@ -63,41 +63,41 @@ void TCPClient::activity()
   WATCH(tcp_conn_id);
 
   for(;;)
-    { 
+    {
       //address and port management (local and remote socket)
-      //Usually the client doesn't care much about its local port number. 
+      //Usually the client doesn't care much about its local port number.
       //These so called "ephemeral ports" are usually allocated between
-      //1024 and 5000. 
+      //1024 and 5000.
       //Because we have here only one application connected to "TcpModule" on
-      //the client side, the local port number will be 0. 
+      //the client side, the local port number will be 0.
       int local_port = gate("out")->toGate()->index();
       if (debug)
         ev << "Local port: " << local_port << endl;
       //The destination port on the server side is chosen according to the
-      //service requested by the client, e.g. the remote port will be set to 
+      //service requested by the client, e.g. the remote port will be set to
       //80 for HTTP.
-      //Since the server provides only one service (there is only one 
+      //Since the server provides only one service (there is only one
       //TCPServer module running on the server side) the remote port will be
       //set to 0 in this test environment.
       int rem_port   = 0;
       if (debug)
         ev << "Remote port: " << rem_port << endl;
-      //If a server provides more than one service chose rem_port at random: 
+      //If a server provides more than one service chose rem_port at random:
       //int rem_port = intrand(num_services); //rem_port=0...num_services-1
-      
+
       //As IP-addresses we simply use the gate number of the compound modules
       //"Client" and "Server" connected to the Switch.
       //int local_addr  = parentModule()->gate("to_switch")->toGate()->index(); //->findGate("to_switch")-1;
 
-	  // changed to parameter
-	  int local_addr = par("local_addr");
+      // changed to parameter
+      int local_addr = par("local_addr");
 
       ev << "Local address: " << local_addr << endl;
       //if only one server is in the network use the next line
 
       // int rem_addr    = parentModule()->gate("to_switch")->toGate()->size()-1; //->findGate("to_switch");
-	  int rem_addr = par("server_addr");
-		
+      int rem_addr = par("server_addr");
+
       //If there is more than one server chose rem_addr at random:
       //(this only works if all clients are connected to the switch gates
       //0 ... number of clients)
@@ -107,20 +107,20 @@ void TCPClient::activity()
       //int pos       = par_size - par_index;
       //int rem_addr  = parentModule()->findGate("to_switch") + pos + adest;
       if (debug)
-        ev << "Remote address: " << rem_addr << endl; 
-      
+        ev << "Remote address: " << rem_addr << endl;
+
       //intervall between subsequent connections
       wait((double) conn_ia_time);
 
-      //send "active open" (client) call to "TcpModule" 
+      //send "active open" (client) call to "TcpModule"
       open_active = new cMessage("TCP_C_OPEN_ACTIVE", TCP_C_OPEN_ACTIVE);
 
-      open_active->addPar("src_port")  = local_port; 
+      open_active->addPar("src_port")  = local_port;
       open_active->addPar("src_addr")  = local_addr;
       open_active->addPar("dest_port") = rem_port;
       open_active->addPar("dest_addr") = rem_addr;
 
-      open_active->addPar("timeout") = timeout; //global default is 5min; here 5sec 
+      open_active->addPar("timeout") = timeout; //global default is 5min; here 5sec
 
       //precedence, security/compartment and options are not included here
 
@@ -134,8 +134,8 @@ void TCPClient::activity()
       open_active->addPar("num_bit_req") = (unsigned long) message_length;
       unsigned long msg_leng             = open_active->par("num_bit_req"); //(unsigned long) open_active->par("num_bit_req")
       if (debug)
-        ev << "Number of bits requested by the client application: " << msg_leng << "\n"; 
-      
+        ev << "Number of bits requested by the client application: " << msg_leng << "\n";
+
       //make delay checking possible
       open_active->setTimestamp();
 
@@ -159,7 +159,7 @@ void TCPClient::activity()
           if (debug)
             ev << "Client received TCP_I_CLOSED.\n";
           delete e_msg;
-          e_msg = 0;          
+          e_msg = 0;
           continue;
         }
       else if (e_msg->kind() != TCP_I_ESTAB)
@@ -176,19 +176,19 @@ void TCPClient::activity()
 
       //get maximum segment size from TCP (TCP-MSS)
       tcp_mss = e_msg->par("mss");
-      
+
       delete e_msg;             //((!!))
-      e_msg = 0;      
-      
+      e_msg = 0;
+
       //communication after TCP entered state "ESTABLISHED"
       //issue receive calls to receive data from TCP
-      
+
       //message_length  = (long) message_length;
       //act_num_message = (long) num_message; //number of receive calls issued ((!!))
       if (debug)
         {
           ev << "Length of message requested (number of bits requested): " << msg_leng << "\n";
-          ev << "TCP is using a MSS of " << tcp_mss << " bytes.\n";          
+          ev << "TCP is using a MSS of " << tcp_mss << " bytes.\n";
           //ev << "leng/mss " << (double) msg_leng / tcp_mss << "\n";
         }
       dact_num_message  = (double) msg_leng / 8 / tcp_mss;
@@ -196,35 +196,35 @@ void TCPClient::activity()
       act_num_message   = (long) ceil(dact_num_message);
       if (debug)
         ev << "Client application will issue " << act_num_message << " RECEIVE commands.\n";
-      
+
       for (i=0; i<act_num_message; i++) //((!!))
-	{
+    {
           if (debug)
             ev << "Client appl. is requesting data (RECEIVE call) from TCP.\n";
-	  receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
+      receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
 
-          receive_call->addPar("src_port")  = local_port; 
-	  receive_call->addPar("src_addr")  = local_addr;
+          receive_call->addPar("src_port")  = local_port;
+      receive_call->addPar("src_addr")  = local_addr;
           receive_call->addPar("dest_port") = rem_port;
           receive_call->addPar("dest_addr") = rem_addr;
-	  
-	  receive_call->addPar("tcp_conn_id") = tcp_conn_id;
+
+      receive_call->addPar("tcp_conn_id") = tcp_conn_id;
 
           //no data bits to send
           receive_call->setLength(0);
           //receive_call->addPar("send_bits") = 0;
           //number of data packets the appl. is ready to receive
-	  receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
-          
-          //make delay checking possible
-	  receive_call->setTimestamp();
+      receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
 
-	  //send "receive" to "TcpModule"
-	  send(receive_call, "out");
+          //make delay checking possible
+      receive_call->setTimestamp();
+
+      //send "receive" to "TcpModule"
+      send(receive_call, "out");
 
           if (debug)
             ev << "Client appl. waiting for data from TCP.\n";
-	  r_msg = receive(appl_timeout);
+      r_msg = receive(appl_timeout);
           while (r_msg == NULL)
             {
               if (debug)
@@ -232,7 +232,7 @@ void TCPClient::activity()
                    << "s while waiting for  TCP_I_SEG_FWD\n";
               r_msg = receive(appl_timeout);
             }
-	  if (r_msg->kind() != TCP_I_SEG_FWD) //((!!))
+      if (r_msg->kind() != TCP_I_SEG_FWD) //((!!))
             {
               if (debug)
                 ev << "Client app received something other than TCP_I_SEG_FWD - broken\n";
@@ -241,19 +241,19 @@ void TCPClient::activity()
           if (debug)
             ev << "Received data of " << r_msg->length() / 8
                << " bytes. Deleting data message.\n";
-	  delete r_msg;
-      r_msg = 0;      
+      delete r_msg;
+      r_msg = 0;
 
-	  //time to wait between receive calls
-	  wait((double) msg_ia_time);	  
-        } 
+      //time to wait between receive calls
+      wait((double) msg_ia_time);
+        }
 
       //send "close" to teardown TCP connection
       if (debug)
         ev << "Client appl. is sending CLOSE to TCP.\n";
       close = new cMessage("TCP_CLOSE", TCP_C_CLOSE);
 
-      close->addPar("src_port")  = local_port; 
+      close->addPar("src_port")  = local_port;
       close->addPar("src_addr")  = local_addr;
       close->addPar("dest_port") = rem_port;
       close->addPar("dest_addr") = rem_addr;
@@ -291,22 +291,22 @@ void TCPClient::activity()
       ev << "TCP connection CLOSED.\n";
       delete c_msg;
       c_msg = 0;
-      
+
       //ignore "broken"
       continue;
 
     broken:
       if (debug)
         {
-          ev << "TCP connection broken due to timeout or protocol error (ABORT etc.)!\n";   
-          //Send ABORT to TCP ??? 
+          ev << "TCP connection broken due to timeout or protocol error (ABORT etc.)!\n";
+          //Send ABORT to TCP ???
           // yes! please... anything...
           //send "close" to teardown TCP connection
           ev << "Client appl. is sending CLOSE to TCP.\n";
         }
       abort = new cMessage("TCP_ABORT", TCP_C_ABORT);
 
-      abort->addPar("src_port")  = local_port; 
+      abort->addPar("src_port")  = local_port;
       abort->addPar("src_addr")  = local_addr;
       abort->addPar("dest_port") = rem_port;
       abort->addPar("dest_addr") = rem_addr;
@@ -329,8 +329,8 @@ void TCPClient::activity()
       delete c_msg;
       delete r_msg;
       delete e_msg;
-      c_msg = r_msg = e_msg = 0;      
-      
+      c_msg = r_msg = e_msg = 0;
+
       if (debug)
         ev << "Client appl. is waiting for CLOSED indicated by TCP.\n";
       c_msg = receive(appl_timeout); //(appl_timeout);
@@ -346,6 +346,6 @@ void TCPClient::activity()
           ev << "TCP connection CLOSED.\n";
 
       delete c_msg;
-      c_msg = 0;      
+      c_msg = 0;
     }
 }

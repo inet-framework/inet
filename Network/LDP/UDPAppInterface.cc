@@ -1,22 +1,22 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it
+*    and/or modify
+*    it under  the terms of the GNU Lesser General Public License
+*    as published by the Free Software Foundation;
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "TransportInterfacePacket.h"
 #include "UDPPacket.h"
 #include "IPInterfacePacket.h"
-#include "ip_address.h"
+#include "IPAddress.h"
 
 class UDPAppInterface: public cSimpleModule
 {
@@ -34,50 +34,50 @@ Define_Module(UDPAppInterface);
 
 void UDPAppInterface::initialize()
 {
-	local_addr = par("local_addr").stringValue();
+    local_addr = par("local_addr").stringValue();
 
 }
 void UDPAppInterface::activity()
 {
 
-		
-		cMessage* msg = receive();
 
-		//delete ldpSignal;
+        cMessage* msg = receive();
 
-		//Send out a broadcast message
-      
-    	//cMessage *msg = new cMessage();
-    		
-		msg->setLength(1);
-		msg->addPar("content") = 1;
-		msg->addPar("request") = true;
-	
-		IPAddress *address =new IPAddress("224.0.0.0");
+        //delete ldpSignal;
 
-		msg->addPar("dest_addr")=(address->getString());
+        //Send out a broadcast message
 
-		msg->addPar("src_port") = 100;
+        //cMessage *msg = new cMessage();
 
-		msg->addPar("dest_port") = 100;
+        msg->setLength(1);
+        msg->addPar("content") = 1;
+        msg->addPar("request") = true;
 
-		msg->addPar("src_addr")=local_addr;
+        IPAddress *address =new IPAddress("224.0.0.0");
+
+        msg->addPar("dest_addr")=(address->getString());
+
+        msg->addPar("src_port") = 100;
+
+        msg->addPar("dest_port") = 100;
+
+        msg->addPar("src_addr")=local_addr;
 
 
-		ev << "UDP_APP_INTERFACE DEBUG: Sending upd broadcast\n";
-		send(msg, "to_udp_processing");
-		
-		cMessage* forMe = receive();
-		delete forMe;
-		
-		while(true)
-		{
-		cMessage *msg1=receive();
-		
-		ev << "UDP_APP_INTERFACE DEBUG: " <<
-			"Message from " << (msg1->par("src_addr").stringValue()) << "\n";
-		
-		send(msg1, "toAppl");
-		}
+        ev << "UDP_APP_INTERFACE DEBUG: Sending upd broadcast\n";
+        send(msg, "to_udp_processing");
+
+        cMessage* forMe = receive();
+        delete forMe;
+
+        while(true)
+        {
+        cMessage *msg1=receive();
+
+        ev << "UDP_APP_INTERFACE DEBUG: " <<
+            "Message from " << (msg1->par("src_addr").stringValue()) << "\n";
+
+        send(msg1, "toAppl");
+        }
 
 }

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -29,22 +29,21 @@
 // - parameter problem: ignore ?
 // - redirect ?
 //
-// Receive error message from Routing, PreRouting or IPOutput:
-// - create error message with given type and code and send to IPSend
-//
 // Receive echo/timestamp message from pingIn: encapsulate in ICMP header
 // and send to IPSend
 //
 // author: Jochen Reber
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
+// redesign: Andras Varga 1.3.2004
 //
 simple ICMP
     parameters:
         procdelay: numeric const;
     gates:
-        in: preRoutingIn, routingIn, localIn,
-            pingIn, fragmentationIn; // processorManagerIn;
-        in: ipOutputIn[];
-        out: pingOut, sendOut, errorOut;
+        in: localIn;  // delivered ICMP packets
+        in: pingIn;  // ping requests from app
+        out: pingOut;  // result of ping
+        out: sendOut;  // towards network
+        out: errorOut;  // errors
 endsimple
 

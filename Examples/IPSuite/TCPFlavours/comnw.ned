@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -25,6 +25,6 @@ simple ComNw
          nw_length;
        gates:
          in: from_ip, from_compound;
-	 out: to_ip, to_compound; 
+     out: to_ip, to_compound;
 
 endsimple

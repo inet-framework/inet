@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -22,9 +22,9 @@
 // Simple network switch
 //
 simple Switch
-	parameters:
- 	   pk_rate;
-	gates:
-	   in: in[];
-	   out: out[];
+    parameters:
+       pk_rate;
+    gates:
+       in: in[];
+       out: out[];
 endsimple

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,45 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-/*
-	file: IPMulticast.h
-	Purpose: Header file for IP Multicast
-
-	Responsibilities:
-	receive datagram with Multicast address from Routing
-	duplicate datagram if it is sent to more than one output port
-	map multicast address on output port, use multicast routing table
-	send copy to  local deliver, if
-	NetworkCardAddr.[] is part of multicast address
-	if entry in multicast routing table requires tunneling,
-	send to Tunneling module
-	otherwise send to Fragmentation module
-
-	receive IGMP message from LocalDeliver
-	update multicast routing table
-
-	author: Jochen Reber
-*/
+//
 
 #ifndef __IPMULTICAST_H__
 #define __IPMULTICAST_H__
 
+#include "QueueBase.h"
 #include "RoutingTableAccess.h"
 #include "IPDatagram.h"
 
-class IPMulticast: public RoutingTableAccess
+
+/**
+ * Receive datagram with multicast address, duplicate it if it is sent
+ * to more than one output ports, then send it to appropriate direction
+ * using the multicast routing table.
+ * More detailed info in the NED file.
+ */
+class IPMulticast : public QueueBase
 {
-private:
-	bool IPForward;
-	simtime_t delay;
+  private:
+    RoutingTableAccess routingTableAccess;
+    bool IPForward;
 
-public:
-	Module_Class_Members(IPMulticast, RoutingTableAccess, 
-				ACTIVITY_STACK_SIZE);
+  public:
+    Module_Class_Members(IPMulticast, QueueBase, 0);
 
-	virtual void initialize();
-	virtual void activity();
+  protected:
+    virtual void initialize();
+    virtual void endService(cMessage *msg);
 };
 
 #endif

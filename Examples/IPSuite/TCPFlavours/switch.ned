@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: switch.ned
 //--
@@ -22,9 +22,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 simple Switch
-	parameters:
- 	   pk_rate;
-	gates:
-	   in: in[];
-	   out: out[];
+    parameters:
+       pk_rate;
+    gates:
+       in: in[];
+       out: out[];
 endsimple

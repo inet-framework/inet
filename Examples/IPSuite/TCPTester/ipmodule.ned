@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -23,5 +23,5 @@
 simple IpModule
        gates:
          in: from_tcp, from_comnw;
-	 out: to_tcp, to_comnw;
+     out: to_tcp, to_comnw;
 endsimple

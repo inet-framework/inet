@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,49 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-/*
-	file: InputQueue.cc
-	Purpose: Implementation of L2 InputQueue
-	Responsibilities:
-	author: Jochen Reber
-*/
+//
 
 #include <omnetpp.h>
-
 #include "InputQueue.h"
 #include "IPDatagram.h"
 
-Define_Module( InputQueue );
+Define_Module(InputQueue);
 
-
-void InputQueue::initialize()
+void InputQueue::endService(cMessage *msg)
 {
-	// ProcessorAccess::initialize();
+    IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
 
-	delay = 0; //par("procdelay");
-}
+    // remember on which port it came in
+    datagram->setInputPort(datagram->arrivalGate()->index());
 
-void InputQueue::activity()
-{
-
-	IPDatagram *datagram;
-
-	while(true)
-	{
-		/* receive packets from all network
-			interfaces */
-		datagram = (IPDatagram *) receive();
-
-		// claimKernel();
-		wait(delay);
-		// gates to processor Manager and IP layer come first
-		// count switches from starting at 1 to starting at 0
-		//datagram->setInputPort(datagram->arrivalGate()->id() - 3);
-		datagram->setInputPort(datagram->arrivalGate()->index());
-
-		send(datagram, "toIP");
-		// releaseKernel();
-	}
+    send(datagram, "toIP");
 }
 

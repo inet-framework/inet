@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,37 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
-/*
-	file: InputQueue.h
-	Purpose: Header file for InputQueue
-	Responsibilities:
-		Demultiplex incoming packets from all network interfaces to
-		one Queue for IP
-		arrange the queue in the right order
-
-	author: Jochen Reber
-*/
 
 #ifndef __INPUT_QUEUE_H__
 #define __INPUT_QUEUE_H__
 
 #include <omnetpp.h>
+#include "QueueBase.h"
 
-#include "basic_consts.h"
-//#include "ProcessorAccess.h"
-
-class InputQueue : public cSimpleModule   // was ProcessorAccess
+/**
+ * Demultiplex incoming packets from all network interfaces into
+ * one queue for the network layer.
+ */
+class InputQueue : public QueueBase
 {
-private:
+  public:
+    Module_Class_Members(InputQueue, QueueBase, 0);
 
-	simtime_t delay;
-
-public:
-	Module_Class_Members(InputQueue, cSimpleModule, ACTIVITY_STACK_SIZE);
-
-	virtual void initialize();
-	virtual void activity();
+  protected:
+    virtual void endService(cMessage *msg);
 };
 
 #endif

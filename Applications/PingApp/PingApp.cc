@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -25,24 +25,24 @@
 
 
 /* Ping Application
-	doesn't do anything so far */
+    doesn't do anything so far */
 Define_Module( PingApp );
 
 void PingApp::initialize()
 {
-	strcpy(nodename, par("nodename"));
+    strcpy(nodename, par("nodename"));
 }
 
 void PingApp::activity()
 {
-	cMessage *msg;
-	while(true)
-	{
-		msg = receive();
-		ev << "\n*** " << nodename 
-			<< " Ping Application: message received.";
-		delete( msg );
-	}
+    cMessage *msg;
+    while(true)
+    {
+        msg = receive();
+        ev << "\n*** " << nodename
+            << " Ping Application: message received.";
+        delete( msg );
+    }
 }
 
 

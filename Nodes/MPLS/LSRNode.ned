@@ -13,10 +13,8 @@
 
 import
     "NetworkLayersWithMPLS",
-    //"ProcessorManager",
-    "UDP",
+    "UDPUpperLayers",
     "tcp4ip",
-    "ErrorHandling",
     "LDPproc",
     "tcp2ldp",
     "MPLSModule",
@@ -49,7 +47,6 @@ module LSRNode
         isER : bool,
 
         //# Network information
-        numOfProcessors : numeric,
         numOfPorts : numeric,
         routingFile : string,
         LibTableFileName : string,
@@ -81,37 +78,8 @@ module LSRNode
             parameters:
                 local_addr = local_addr;
             display: "p=233,108;b=40,24,rect";
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = routingFile;
-            display: "b=32,30;p=275,206;i=sink";
         networkLayers: NetworkLayersWithMPLS;
             parameters:
-                //# waiting times
-                icmp_delay = 0,
-                fragmentation_delay = 0.2 us,
-                multicast_delay = 0.5 us,
-                ipoutput_delay = 0,
-                ipsend_delay = 0,
-                iptunneling_delay = 0,
-                localdeliver_delay = 0,
-                prerouting_delay = 0.2 us,
-                routing_delay = 1 us,
-                enqueue_delay = 0,
-                dequeue_delay = 0,
-                inputqueue_delay = 0,
-                nwi_delay = 0,
-
-                //# hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING",
-                routingHookName = "NF_IP_FORWARD",
-                localDeliverHookName = "NF_IP_LOCAL_IN",
-                ipSendHookName = "NF_IP_LOCAL_OUT",
-                ipOutputHookName = "NF_IP_POST_ROUTING",
-                enqueueHookName = "L2_EnqueueHook",
-                dequeueHookName = "L2_DequeueHook",
-
-                //# other network parameters
                 IPForward = false,
                 NWIName = "MPLS2IP",
                 numOfPorts = numOfPorts,
@@ -138,7 +106,6 @@ module LSRNode
                 PrtTableFileName = PrtTableFileName;
 
             display: "p=316,282;b=40,24";
-        //# processorManager: ProcessorManager;
     connections nocheck:
         //# transport connections
         networkLayers.TCPOut --> tcpApp.from_tcp;
@@ -151,7 +118,6 @@ module LSRNode
         signal_module.from_tcp_interface <-- tcpApp.to_ldp;
         signal_module.to_tcp_interface --> tcpApp.from_ldp;
         //# ldp.to_mpls_switch --> mplsModule.fromLDP;
-        networkLayers.errorOut --> errorHandling.in;
 
         //# connections to network outside
         for i=0..numOfPorts-1 do

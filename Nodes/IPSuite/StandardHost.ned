@@ -20,11 +20,9 @@
 
 import
     "NetworkLayers",
-    //"ProcessorManager",
-    "UDP",
+    "UDPUpperLayers",
     "tcp4ip",
-    "PingApp",
-    "ErrorHandling";
+    "PingApp";
 
 
 //
@@ -45,7 +43,6 @@ module StandardHost
         udpRouteDestNo : numeric const,
 
         // Network information
-        numOfProcessors : numeric,
         numOfPorts : numeric,
         routingFile : string;
     gates:
@@ -73,37 +70,8 @@ module StandardHost
                 nodename = nodename,
                 generationTime = packetTime;
             display: "p=152,89;b=40,24,rect";
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = routingFile;
-            display: "p=179,158;i=sink";
         networkLayers: NetworkLayers;
             parameters:
-                // waiting times
-                icmp_delay = 0,
-                fragmentation_delay = 0.2 us,
-                multicast_delay = 0.5 us,
-                ipoutput_delay = 0,
-                ipsend_delay = 0,
-                iptunneling_delay = 0,
-                localdeliver_delay = 0,
-                prerouting_delay = 0.2 us,
-                routing_delay = 1 us,
-                enqueue_delay = 0,
-                dequeue_delay = 0,
-                inputqueue_delay = 0,
-                nwi_delay = 0,
-
-                // hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING",
-                routingHookName = "NF_IP_FORWARD",
-                localDeliverHookName = "NF_IP_LOCAL_IN",
-                ipSendHookName = "NF_IP_LOCAL_OUT",
-                ipOutputHookName = "NF_IP_POST_ROUTING",
-                enqueueHookName = "L2_EnqueueHook",
-                dequeueHookName = "L2_DequeueHook",
-
-                // other network parameters
                 IPForward = false,
                 NWIName = "PPPModule",
                 numOfPorts = numOfPorts,
@@ -112,7 +80,6 @@ module StandardHost
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "p=87,155;i=fork";
-        //# processorManager: ProcessorManager;
     connections nocheck:
         // transport connections
         networkLayers.TCPOut --> tcpApp.in;
@@ -124,8 +91,6 @@ module StandardHost
 
         networkLayers.pingOut --> pingApp.in;
         networkLayers.pingIn <-- pingApp.out;
-
-        networkLayers.errorOut --> errorHandling.in;
 
         // connections to network outside
         for i=0..numOfPorts-1 do

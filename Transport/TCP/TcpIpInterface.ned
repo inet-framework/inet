@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -23,7 +23,7 @@
 //
 simple Tcp2Ip
       //parameters:
-      gates: 
+      gates:
         in: in;
     out: out;
 endsimple

@@ -13,10 +13,8 @@
 
 import
     "NetworkLayersWithMPLS",
-    //"ProcessorManager",
-    "UDP",
+    "UDPUpperLayers",
     "tcp4ip",
-    "ErrorHandling",
     "MPLSModule",
     "LIBTable",
     "RSVPInterface",
@@ -51,7 +49,6 @@ module RSVP_LSR_Node
         isER : bool,
 
         //# Network information
-        numOfProcessors : numeric,
         numOfPorts : numeric,
         routingFile : string,
         LibTableFileName : string,
@@ -82,37 +79,8 @@ module RSVP_LSR_Node
             parameters:
                 local_addr = local_addr;
             display: "p=45,220;b=40,24";
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = routingFile;
-            display: "b=32,30;p=267,222;i=sink";
         networkLayers: NetworkLayersWithMPLS;
             parameters:
-                //# waiting times
-                icmp_delay = 0,
-                fragmentation_delay = 0.2 us,
-                multicast_delay = 0.5 us,
-                ipoutput_delay = 0,
-                ipsend_delay = 0,
-                iptunneling_delay = 0,
-                localdeliver_delay = 0,
-                prerouting_delay = 0.2 us,
-                routing_delay = 1 us,
-                enqueue_delay = 0,
-                dequeue_delay = 0,
-                inputqueue_delay = 0,
-                nwi_delay = 0,
-
-                //# hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING",
-                routingHookName = "NF_IP_FORWARD",
-                localDeliverHookName = "NF_IP_LOCAL_IN",
-                ipSendHookName = "NF_IP_LOCAL_OUT",
-                ipOutputHookName = "NF_IP_POST_ROUTING",
-                enqueueHookName = "L2_EnqueueHook",
-                dequeueHookName = "L2_DequeueHook",
-
-                //# other network parameters
                 IPForward = true,
                 NWIName = "MPLS2IP",
                 numOfPorts = numOfPorts,
@@ -139,7 +107,6 @@ module RSVP_LSR_Node
                 PrtTableFileName = PrtTableFileName;
 
             display: "p=140,314;b=40,24";
-        //# processorManager: ProcessorManager;
     connections nocheck:
         networkLayers.RSVPOut --> rsvpInterface.from_ip;
         networkLayers.RSVPIn <-- rsvpInterface.to_ip;
@@ -152,11 +119,6 @@ module RSVP_LSR_Node
 
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
-
-
-
-
-        networkLayers.errorOut --> errorHandling.in;
 
         //# connections to network outside
         for i=0..numOfPorts-1 do

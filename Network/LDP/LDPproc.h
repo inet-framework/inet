@@ -1,15 +1,15 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 
-*	See the GNU Lesser General Public License for more details.
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
@@ -37,27 +37,27 @@
 
 //Make sure the following does not overlapped with TCP kinds
 enum ldp_to_interface
-{	
-	LDP_CLIENT_CREATE=20,
-	LDP_FORWARD_REQUEST,
-	LDP_RETURN_REPLY,
-	LDP_BROADCAST_REQUEST
+{    
+    LDP_CLIENT_CREATE=20,
+    LDP_FORWARD_REQUEST,
+    LDP_RETURN_REPLY,
+    LDP_BROADCAST_REQUEST
 
 };
 
 typedef struct requestSessionBind
 {
-	int fec;
-	string fromInterface;
-	int fecID;
+    int fec;
+    string fromInterface;
+    int fecID;
 } fec_src_bind;
 
 typedef struct peerList
 {
-	int peerIP;
-	string peerID;
-	string role;
-	string linkInterface;
+    int peerIP;
+    string peerID;
+    string role;
+    string linkInterface;
 } peer_info;
 
 

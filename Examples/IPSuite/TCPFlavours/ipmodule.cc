@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: ipmodule.cc
 //--
@@ -50,7 +50,7 @@ void IpModule::activity()
     {
       //arriving message
       cMessage* msg = receive();
-      
+
       if (msg->arrivedOn("from_tcp"))
         {
           fromTransProcessing(msg);
@@ -68,7 +68,7 @@ void IpModule::activity()
 void IpModule::fromTransProcessing(cMessage* segment)
 {
   ev << "IP received segment of " << segment->length() / 8 << " bytes from transport layer.\n";
-  
+
   //create a new IP datagram
   cMessage* ip_datagram = new cMessage("IP_DATAGRAM", IP_DATAGRAM);
 
@@ -90,7 +90,7 @@ void IpModule::fromTransProcessing(cMessage* segment)
   ip_datagram->encapsulate(segment);
 
   //send datagram
-  ev << "Sending IP datagram of " << ip_datagram->length() / 8 << " bytes to destination IP address " << ip_header->ip_dst << ".\n"; 
+  ev << "Sending IP datagram of " << ip_datagram->length() / 8 << " bytes to destination IP address " << ip_header->ip_dst << ".\n";
   send(ip_datagram, "to_comnw");
 };
 
@@ -99,14 +99,14 @@ void IpModule::fromTransProcessing(cMessage* segment)
 //IP datagram and send the segment to the transport layer
 void IpModule::fromComNwProcessing(cMessage* datagram)
 {
-  ev << "IP received datagram of " << datagram->length() / 8 << " bytes from network layer.\n"; 
-  
+  ev << "IP received datagram of " << datagram->length() / 8 << " bytes from network layer.\n";
+
   //get the segment from the incoming IP datagram
   cMessage* segment = datagram->decapsulate();
   delete datagram;
 
   //send the segment to the transport layer
-  ev << "Sending segment of " << segment->length() / 8 << " bytes to transport layer.\n"; 
+  ev << "Sending segment of " << segment->length() / 8 << " bytes to transport layer.\n";
   send(segment, "to_tcp");
 };
 

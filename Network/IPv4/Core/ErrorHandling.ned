@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -23,10 +23,10 @@
 // Errors arrive in messages; this implementation just prints a report
 // and discards the message.
 //
-simple ErrorHandling 
+simple ErrorHandling
     parameters:
         nodename : string;
-    gates: 
-        in: in; 
-endsimple 
+    gates:
+        in: in;
+endsimple
 

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -44,12 +44,12 @@ module Client
         local_addr = l_addr,
         server_addr = s_addr,
         //default timeout according to RFC 793 5min (here 5s)
-        timeout =  input(5m, "Timeout: "),  
+        timeout =  input(5m, "Timeout: "),
         appl_timeout = input(10m, "Application timeout: "),
         conn_ia_time = input(1s, "Connection interarrival time: "),
         msg_ia_time = input(0.5s, "Data message interarrival time: "),
         processing_time = 0,
-        message_length = input(8000, "Number of bits to be received: "); 
+        message_length = input(8000, "Number of bits to be received: ");
       tcp: TcpModule
        parameters:
         TCPDelayedAck = input(true, "Delayed Acknowledge: "),
@@ -129,8 +129,8 @@ endchannel
 
 //
 // Simple test environment for TcpModule: n clients, and a server, connected
-// via a switch. The switch models an unreliable network, and is 
-// able to lose packets randomly. 
+// via a switch. The switch models an unreliable network, and is
+// able to lose packets randomly.
 //
 // author V.Boehm, June 19 1999
 //
@@ -210,5 +210,5 @@ network tcptesterb: TCPTesterB
       parameters:
              num_client = input(2, "Number of clients: ");
 endnetwork
-      
+
 

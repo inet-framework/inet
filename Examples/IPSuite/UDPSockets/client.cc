@@ -1,12 +1,3 @@
-// $Header$
-//-----------------------------------------------------------------------------
-//-- fileName: client.cc
-//--
-//-- generated to test the UDP socket layer
-//--
-//-- 11,09,2001
-//--
-//-- -----------------------------------------------------------------------------
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -23,165 +14,125 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "SocketInterfacePacket.h"
-//#include "tcp.h"
 
-class Client: public cSimpleModule
+/**
+ * For testing the UDP socket layer
+ */
+class UDPSocketTestClient: public cSimpleModule
 {
-  Module_Class_Members(Client, cSimpleModule, 16384);
-  virtual void activity();
+    Module_Class_Members(UDPSocketTestClient, cSimpleModule, 16384);
+    virtual void activity();
 };
 
-Define_Module_Like( Client, SocketApp);
+Define_Module_Like( UDPSocketTestClient, SocketApp);
 
-void Client::activity()
+void UDPSocketTestClient::activity()
 {
-  //module parameters
-  bool   debug        = par("debug");
+    SocketInterfacePacket* sockipack = NULL;
+    cMessage* datapack = NULL;
+    Socket::Filedesc filedesc;
+    SocketInterfacePacket::SockAction action;
+    cQueue garbage("garbage"); // FIXME check what it collects...
 
-  SocketInterfacePacket* sockipack = NULL;
-  cMessage* datapack = NULL;
-  Socket::Filedesc filedesc;
-  SocketInterfacePacket:: SockAction action;
+    // wait till server is in listen state
+    waitAndEnqueue(10, &garbage);
 
-  // wait till server is in listen state
-  wait(10);
+    //
+    // SOCKET
+    //
 
+    sockipack = new SocketInterfacePacket("SocketCall");
 
-  //
-  // SOCKET
-  //
+    ev << "Calling function socket()\n";
 
-  sockipack = new SocketInterfacePacket("SocketCall");
+    sockipack->socket(Socket::SOCKET_AF_INET, Socket::SOCKET_DGRAM, Socket::UDP);
 
-  if (debug)
-    {
-      ev << "Calling function socket()\n";
-    }
+    ev << "Sending message to Socketlayer\n";
+    send(sockipack, "out");
 
-  sockipack->socket(Socket::SOCKET_AF_INET, Socket::SOCKET_DGRAM, Socket::UDP);
+    ev << "Waiting for message from Socketlayer\n";
 
+    sockipack = (SocketInterfacePacket*) receive();
 
-  if (debug)
-    {
-      ev << "Sending message to Socketlayer\n";
-    }
-  send(sockipack, "out");
+    filedesc = sockipack->filedesc();
 
-  if (debug)
-    {
-      ev << "Waiting for message from Socketlayer\n";
-    }
+    ev << "Received message from Socketlayer\n";
+    ev << "Value of Filedescriptor: " << filedesc << endl;
 
+    delete sockipack;
 
-  sockipack = (SocketInterfacePacket*) receive();
+    //
+    // CONNECT
+    //
 
-  filedesc = sockipack->filedesc();
-  if (debug)
-    {
-      ev << "Received message from Socketlayer\n";
-      ev << "Value of Filedescriptor: " << filedesc << endl;
-    }
+    sockipack = new SocketInterfacePacket("ConnectCall");
 
-  delete sockipack;
+    ev <<"Calling function connect()\n";
+    sockipack->connect(filedesc, "10.0.0.1", 30);
 
-  //
-  // CONNECT
-  //
-      
-  sockipack = new SocketInterfacePacket("ConnectCall");
-
-
-  if (debug)
-    {
-      ev <<"Calling function connect()\n";
-    }
-  sockipack->connect(filedesc, "10.0.0.1", 30);
-
-  if (debug)
-    {
-      ev << "Sending message to Socketlayer\n";
-    }
-  send(sockipack, "out");
-  {
+    ev << "Sending message to Socketlayer\n";
+    send(sockipack, "out");
     ev <<"Waiting for Socketlayer to establish connection\n";
-  }
+    sockipack = (SocketInterfacePacket*) receive();
 
+    action = sockipack->action();
+    ev <<"Received message from Socketlayer\n";
+    ev <<"Status of Client: " << action << endl;
 
-  sockipack = (SocketInterfacePacket*) receive();
+    if (action == SocketInterfacePacket::SA_CONNECT_RET)
+        ev <<"Status of Client: SA_CONNECT_RET, Connection OK\n" ;
+    else
+        error ("Connection failed");
 
-  action = sockipack->action();
-  ev <<"Received message from Socketlayer\n";
-  ev <<"Status of Client: " << action << endl;
+    delete sockipack;
 
-  if (action == SocketInterfacePacket::SA_CONNECT_RET)
-    {
-      ev <<"Status of Client: SA_CONNECT_RET, Connection OK\n" ;
-    }
+    //
+    // WRITE
+    //
 
-  else
-    {
-      error ("Connection failed");
-    }
+    sockipack = new SocketInterfacePacket("WriteCall");
+    datapack = new cMessage("ApplData");
+    datapack->addPar("Message") = "Hallo Du Da";
 
-  delete sockipack;
+    datapack->addPar("Index") = idx;
 
-  //
-  // WRITE
-  //
+    ev <<"Calling function write()\n";
 
-  sockipack = new SocketInterfacePacket("WriteCall");
-  datapack = new cMessage("ApplData");
-  datapack->addPar("Message") = "Hallo Du Da";
+    sockipack->write(filedesc, datapack);
 
-  datapack->addPar("Index") = idx;
-      
-  if (debug)
-    {
-      ev <<"Calling function write()\n";
-    }
-      
-  sockipack->write(filedesc, datapack);
-      
-  if (debug)
-    {
-      ev << "Sending message to Socketlayer\n";
-    }
-  send(sockipack, "out");
-  wait(1);
+    ev << "Sending message to Socketlayer\n";
 
-  //
-  // READ
-  //
+    send(sockipack, "out");
+    waitAndEnqueue(1, &garbage);
 
-  sockipack = (SocketInterfacePacket*) receive();
+    //
+    // READ
+    //
 
-  datapack = sockipack->decapsulate();
+    sockipack = (SocketInterfacePacket*) receive();
 
-  ev << "Message received from Server: " << datapack->par("Message") << endl;
-      
-  delete datapack;
-  delete sockipack;
-      
-  //
-  // CLOSE
-  //
+    datapack = sockipack->decapsulate();
 
-  wait (200);
+    ev << "Message received from Server: " << datapack->par("Message") << endl;
 
-  sockipack = new SocketInterfacePacket("CloseCall");
+    delete datapack;
+    delete sockipack;
 
-  if (debug)
-    {
-      ev <<"Calling function close()\n";
-    }
-  sockipack->close(filedesc);
-  send(sockipack, "out");
-  ev <<"Connection is closed\n";
+    //
+    // CLOSE
+    //
 
-  wait(200);
+    wait (200);
 
-  //  endSimulation();
+    sockipack = new SocketInterfacePacket("CloseCall");
+
+    ev <<"Calling function close()\n";
+
+    sockipack->close(filedesc);
+    send(sockipack, "out");
+    ev <<"Connection is closed\n";
 }

@@ -1,4 +1,4 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: socketlayer.ned
 //--
@@ -23,17 +23,17 @@
 
 simple SocketLayer
        parameters:
-	 debug		: bool;
+     debug      : bool;
        gates:
          in:
-	     from_ip,
-	     from_tcp,
-	     from_udp,
-	     from_appl[];
+         from_ip,
+         from_tcp,
+         from_udp,
+         from_appl[];
 
-	 out:
-	     to_ip,
-	     to_tcp,
-	     to_udp,
-	     to_appl[];
+     out:
+         to_ip,
+         to_tcp,
+         to_udp,
+         to_appl[];
 endsimple

@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,52 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-
-import     "NF_IP_LOCAL_OUT";
-
-
-
 //
-// Receives packet from Transport layer, ICMP or Tunneling (IP tunneled
-// datagram) and encapsulates it into an IP datagram. Just encapsulates
-// IPSendCore plus a queue hook.
-//
-module IPSend
-    parameters:
-        hookName : string,
-        procdelay : numeric,
-        timeToLive : numeric,
-        multicastTimeToLive : numeric,
-        numOfTransportProt : numeric const;
-    gates:
-        in: ICMPIn;
-        in: tunnelIn;
-        in: transportIn[];
-        out: routingOut;
-    submodules:
-        core: IPSendCore;
-            parameters:
-                procdelay = procdelay,
-                timeToLive = timeToLive,
-                multicastTimeToLive = multicastTimeToLive,
-                numOfTransportProt = numOfTransportProt;
-            gatesizes:
-                transportIn[numOfTransportProt];
-            display: "p=125,212;b=40,24,rect";
-        queueHook: hookName like NF_IP_LOCAL_OUT;
-            display: "p=122,128;b=40,24,rect";
-    connections nocheck:
-        ICMPIn --> core.ICMPIn;
-        tunnelIn --> core.tunnelIn;
-        for i=0..numOfTransportProt-1 do
-            transportIn[i] --> core.transportIn[i];
-        endfor;
-        core.routingOut --> routingOut;
-
-        core.netfilterOut --> queueHook.in;
-        queueHook.out --> core.netfilterIn;
-endmodule
 
 
 //
@@ -80,21 +34,17 @@ endmodule
 //    without feedback
 //
 // Author: Jochen Reber
+// Redesign: Andras Varga, 02.2004
 //
-simple IPSendCore
+simple IPSend
     parameters:
-        procdelay : numeric, // FIXME currently ignored!
-        timeToLive : numeric,
-        multicastTimeToLive : numeric,
-        numOfTransportProt : numeric const;
+        procdelay: numeric const,
+        qosBehaviorClass: string,
+        timeToLive: numeric,
+        multicastTimeToLive: numeric;
     gates:
-        in: ICMPIn;
-        in: tunnelIn;
-        in: transportIn[];
-        in: netfilterIn;
-        //#in: processorManagerIn;
+        in: in[];
         out: routingOut;
-        out: netfilterOut;
 endsimple
 
 

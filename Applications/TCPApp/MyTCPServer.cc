@@ -1,8 +1,8 @@
 // from MPLS models  --- FIXME merge or eliminate!
 
 #include "tcp.h"
-#include "omnetpp.h"
-#include "ip_address.h"
+#include <omnetpp.h>
+#include "IPAddress.h"
 
 class MyTCPServer: public cSimpleModule
 {
@@ -23,13 +23,13 @@ void MyTCPServer::activity()
 
   cModule* mod;
   cArray* msg_list;
-  
+
 
   double       timeout         = par("timeout");
   int i;
-  
+
   cModuleType *procserver_type = findModuleType("MyTCPServerProc");
-  if (!procserver_type) 
+  if (!procserver_type)
       error("Cannot find module type MyTCPServerProc");
 
   passiveOpen(timeout, procserver_type);
@@ -77,26 +77,26 @@ void MyTCPServer::activity()
           case TCP_I_SEG_FWD:
 
           msg_list = (cArray*)(msg->parList().get("msg_list"));
-			for (i = 0; i < msg_list->items(); i++)	{
-				if (msg_list->exist(i)) {
-					
-					cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
-					tcp_send_msg->setKind(TCP_I_SEG_FWD);
-					
-     			                tcp_conn_id = tcp_send_msg->par("tcp_conn_id");
-					mod = simulation.module(tcp_conn_id);
+            for (i = 0; i < msg_list->items(); i++)    {
+                if (msg_list->exist(i)) {
 
-					if(mod != NULL)
-					sendDirect(tcp_send_msg, 0.0, mod, "in");
-					else
-						ev << "MY TCP SERVER DEBUG: Error occurs, no module found for TCP_I_SEG_FWD\n";
+                    cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
+                    tcp_send_msg->setKind(TCP_I_SEG_FWD);
 
-				}
-			}
-			delete msg;
+                                 tcp_conn_id = tcp_send_msg->par("tcp_conn_id");
+                    mod = simulation.module(tcp_conn_id);
+
+                    if(mod != NULL)
+                    sendDirect(tcp_send_msg, 0.0, mod, "in");
+                    else
+                        ev << "MY TCP SERVER DEBUG: Error occurs, no module found for TCP_I_SEG_FWD\n";
+
+                }
+            }
+            delete msg;
 
             break;
-		
+
 
 
         default:

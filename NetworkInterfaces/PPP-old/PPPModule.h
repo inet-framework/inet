@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,14 +16,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: PPPModule.h
-	Purpose: Header file for PPPModule
-	Responsibilities:
-	comment: test stub version only, no L2 header or fragment
-		 no PPP done, just send raw IPDatagrams over
-		 point-to-point link
+    file: PPPModule.h
+    Purpose: Header file for PPPModule
+    Responsibilities:
+    comment: test stub version only, no L2 header or fragment
+         no PPP done, just send raw IPDatagrams over
+         point-to-point link
 
-	author: Jochen Reber
+    author: Jochen Reber
 */
 
 #ifndef __PPP_MODULE_H__
@@ -33,22 +31,25 @@
 
 #include <omnetpp.h>
 
-#include "basic_consts.h"
+#include "QueueBase.h"
 #include "RoutingTableAccess.h"
 
-
-// note: RoutingTableAccess needed later, because of Routing Table
-// (or not really, since PPP doesn't require L2-addies)
-class PPPModule: public RoutingTableAccess
+/**
+ * Test stub version only, no L2 header or fragment, no PPP done,
+ * just send raw IPDatagrams over point-to-point link.
+ *
+ * FIXME Concurrency allowed!
+ */
+class PPPModule : public QueueBase
 {
-private:
-	simtime_t delay;
+  private:
+    RoutingTableAccess routingTableAccess;
 
-public:
-	Module_Class_Members(PPPModule, RoutingTableAccess, ACTIVITY_STACK_SIZE);
+  public:
+    Module_Class_Members(PPPModule, QueueBase, 0);
 
-	virtual void initialize();
-	virtual void activity();
+  protected:
+    virtual void endService(cMessage *msg);
 };
 
 #endif

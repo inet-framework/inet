@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,52 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-
-import "NF_IP_POST_ROUTING";
-
-
 //
-// IPOutput.
+
+
 //
 // Receive complete datagram from IPFragmentation:
-// - throw away if ttl==0, otherwise send to IP OutputQueue
+// - throw away if ttl==0
+// - otherwise send to IP OutputQueue
 //
-// author: Jochen Reber
+// Author: Jochen Reber, 2000
+// Redesign: Andras Varga, 02.2004
 //
-module IPOutput 
-    parameters: 
-        hookName : string,
-        procdelay : numeric const;
-    gates: 
-        in: fragmentationIn; 
-        out: queueOut; 
-        out: errorOut;
-    submodules: 
-        core: IPOutputCore; 
-            parameters:
-                procdelay = procdelay;
-            display: "p=154,169;b=40,24,rect";
-        queueHook: hookName like NF_IP_POST_ROUTING
-            display: "p=152,82;b=40,24,rect";
-    connections: 
-        fragmentationIn --> core.fragmentationIn; 
-        core.queueOut --> queueOut; 
-        core.errorOut --> errorOut;
-                                    
-        core.netfilterOut --> queueHook.in; 
-        queueHook.out --> core.netfilterIn; 
-    display: "p=10,10;b=274,224,rect";
-endmodule 
-
-simple IPOutputCore 
-    parameters: 
-        procdelay: numeric const;
-    gates: 
-        in: fragmentationIn; 
-        in: netfilterIn; 
-        out: queueOut; 
-        out: netfilterOut; 
-        out: errorOut;
-endsimple 
+simple IPOutput
+    parameters:
+        procdelay : numeric const,
+        qosBehaviorClass: string;
+    gates:
+        in: in;
+        out: queueOut;
+endsimple
 

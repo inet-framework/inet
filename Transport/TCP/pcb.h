@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -31,54 +29,55 @@
 // - IP header prototype
 // - IP options to use for this end point
 // - pointer to routing table
-
+//
 
 #ifndef PCB_H
 #define PCB_H
 
 #include <omnetpp.h>
+#include <iostream>
 
-#include "in_addr.h"
-#include "in_port.h"
+#include "IPAddress.h"
+
 
 class PCB : public cObject
 {
  private:
 
-  IN_Addr _faddr;       // foreign address
-  IN_Port _fport;       // foreign port
-  IN_Addr _laddr;       // local address
-  IN_Port _lport;       // local port
+  IPAddress _faddr;       // foreign address
+  PortNumber _fport;       // foreign port
+  IPAddress _laddr;       // local address
+  PortNumber _lport;       // local port
 
   // private member functions
   void _init();
-  
+
  public:
-  
+
   // creation, duplication, destruction
   PCB(const PCB& pcb);
-  PCB(IN_Addr laddr, IN_Port lport, IN_Addr faddr, IN_Port fport);
+  PCB(IPAddress laddr, PortNumber lport, IPAddress faddr, PortNumber fport);
   PCB();
   explicit PCB(const char* name);
   //PCB(const char* name, cOjbect* ownerobj);
   virtual ~PCB();
   virtual cObject* dup() const {return new PCB(*this);}
   virtual void info(char* buf);
-  virtual void writeContents(ostream& os);
+  virtual void writeContents(std::ostream& os);
   PCB& operator=(const PCB& pcb);
-  
+
   // new member functions
-  const IN_Addr& fAddr() const {return _faddr;}
-  const IN_Addr& lAddr() const {return _laddr;}
+  const IPAddress& fAddr() const {return _faddr;}
+  const IPAddress& lAddr() const {return _laddr;}
 
-  const IN_Port& fPort() const {return _fport;}
-  const IN_Port& lPort() const {return _lport;}
+  const PortNumber& fPort() const {return _fport;}
+  const PortNumber& lPort() const {return _lport;}
 
-  void setFAddr(const IN_Addr& addr) {_faddr = addr;}
-  void setLAddr(const IN_Addr& addr) {_laddr = addr;}
+  void setFAddr(const IPAddress& addr) {_faddr = addr;}
+  void setLAddr(const IPAddress& addr) {_laddr = addr;}
 
-  void setFPort(const IN_Port& port) {_fport = port;}
-  void setLPort(const IN_Port& port) {_lport = port;}
+  void setFPort(const PortNumber& port) {_fport = port;}
+  void setLPort(const PortNumber& port) {_lport = port;}
 
 };
 

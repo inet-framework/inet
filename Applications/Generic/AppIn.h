@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,10 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: AppIn.h
-	Purpose: receives packets of Traffic generators
-			and prints out their information
-	author: Jochen Reber
+    file: AppIn.h
+    Purpose: receives packets of Traffic generators
+            and prints out their information
+    author: Jochen Reber
 */
 
 #ifndef __APPIN_H__
@@ -29,18 +29,19 @@
 
 #include <omnetpp.h>
 
+#include "basic_consts.h"
 #include "IPInterfacePacket.h"
 
 class AppIn: public cSimpleModule
 {
-	char nodename[NODE_NAME_SIZE];
+    char nodename[NODE_NAME_SIZE];
 
     void processMessage(cMessage *);
 public:
     Module_Class_Members(AppIn, cSimpleModule, ACTIVITY_STACK_SIZE);
 
-	void initialize();
-	void activity();
+    void initialize();
+    void activity();
 
 };
 

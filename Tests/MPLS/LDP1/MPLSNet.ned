@@ -1,152 +1,143 @@
 //
-// This library is free software, you can redistribute it 
-// and/or modify 
-// it under  the terms of the GNU Lesser General Public License 
-// as published by the Free Software Foundation; 
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
 // either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful, 
+// The library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
 
 
-import   
-    "LSRNode", 
-    "TCPClientTest", 
-    "TCPServerTest"; 
-                     
-                     
+import
+    "LSRNode",
+    "TCPClientTest",
+    "TCPServerTest";
+
+
 //
 // FIXME: add documentation here
 //
-module MPLSNet 
-    parameters: 
-                
-                
-    submodules: 
-        LSR1: LSRNode; 
-            parameters: 
-                id = "LSR1", 
-                isIR = true, 
+module MPLSNet
+    parameters:
+
+
+    submodules:
+        LSR1: LSRNode;
+            parameters:
+                id = "LSR1",
+                isIR = true,
                 isER = false,
-                peerNo = 2, 
-                numOfProcessors = 1, 
-                numOfPorts = 4; 
-            gatesizes: 
-                in[4], 
-                out[4]; 
+                peerNo = 2,
+                numOfPorts = 4;
+            gatesizes:
+                in[4],
+                out[4];
             display: "b=32,32;p=184,95;i=router";
-        LSR2: LSRNode; 
-            parameters: 
-                id = "LSR2", 
-                isIR = false, 
-                isER = false, 
-                peerNo = 3, 
-                numOfProcessors = 1, 
-                numOfPorts = 3; 
-            gatesizes: 
-                in[3], 
-                out[3]; 
+        LSR2: LSRNode;
+            parameters:
+                id = "LSR2",
+                isIR = false,
+                isER = false,
+                peerNo = 3,
+                numOfPorts = 3;
+            gatesizes:
+                in[3],
+                out[3];
             display: "b=32,32;p=238,247;i=router";
-        LSR3: LSRNode; 
-            parameters: 
-                id = "LSR3", 
-                isIR = false, 
-                isER = false, 
-                peerNo = 4, 
-                numOfProcessors = 1, 
-                numOfPorts = 4; 
-            gatesizes: 
-                in[4], 
-                out[4]; 
+        LSR3: LSRNode;
+            parameters:
+                id = "LSR3",
+                isIR = false,
+                isER = false,
+                peerNo = 4,
+                numOfPorts = 4;
+            gatesizes:
+                in[4],
+                out[4];
             display: "b=32,32;p=322,95;i=router";
-        LSR4: LSRNode; 
-            parameters: 
-                id = "LSR4", 
-                isIR = false, 
-                isER = false, 
-                peerNo = 3, 
-                numOfProcessors = 1, 
-                numOfPorts = 3; 
-            gatesizes: 
-                in[3], 
-                out[3]; 
+        LSR4: LSRNode;
+            parameters:
+                id = "LSR4",
+                isIR = false,
+                isER = false,
+                peerNo = 3,
+                numOfPorts = 3;
+            gatesizes:
+                in[3],
+                out[3];
             display: "b=32,32;p=398,247;i=router";
-        LSR5: LSRNode; 
-            parameters: 
-                id = "LSR5", 
+        LSR5: LSRNode;
+            parameters:
+                id = "LSR5",
                 isIR = false,
                 isER = true,
-                peerNo = 2, 
-                numOfProcessors = 1, 
-                numOfPorts = 4; 
-            gatesizes: 
-                in[4], 
-                out[4]; 
+                peerNo = 2,
+                numOfPorts = 4;
+            gatesizes:
+                in[4],
+                out[4];
             display: "b=32,32;p=500,95;i=router";
-        host1: TCPClientTest; 
-            parameters: 
-                numOfPorts = 1, 
-                numOfProcessors = 1; 
+        host1: TCPClientTest;
+            parameters:
+                numOfPorts = 1;
             display: "b=18,16;p=26,98;i=comp_s";
-        host2: TCPClientTest; 
-            parameters: 
-                numOfPorts = 1, 
-                numOfProcessors = 1; 
+        host2: TCPClientTest;
+            parameters:
+                numOfPorts = 1;
             display: "b=18,16;p=26,256;i=comp_s";
-        host3: TCPServerTest; 
-            parameters: 
-                numOfPorts = 1, 
-                numOfProcessors = 1; 
+        host3: TCPServerTest;
+            parameters:
+                numOfPorts = 1;
             display: "b=18,16;p=570,88;i=comp_s";
-        host4: TCPServerTest; 
-            parameters: 
-                numOfPorts = 1, 
-                numOfProcessors = 1; 
+        host4: TCPServerTest;
+            parameters:
+                numOfPorts = 1;
             display: "b=18,16;p=578,240;i=comp_s";
-    connections nocheck: 
-        host1.in[0] <-- LSR1.out[0]; 
-        host1.out[0] --> LSR1.in[0]; 
-                                     
-        host2.in[0] <-- LSR1.out[1]; 
-        host2.out[0] --> LSR1.in[1]; 
-                                     
-        LSR1.out[2] --> LSR2.in[0]; 
-        LSR1.in[2] <-- LSR2.out[0]; 
-                                    
-        LSR1.out[3] --> LSR3.in[0]; 
-        LSR1.in[3] <-- LSR3.out[0]; 
-                                    
-        LSR2.out[1] --> LSR3.in[1]; 
-        LSR2.in[1] <-- LSR3.out[1]; 
-                                    
-        LSR2.out[2] --> LSR4.in[0]; 
-        LSR2.in[2] <-- LSR4.out[0]; 
-                                    
-        LSR3.out[2] --> LSR4.in[1]; 
-        LSR3.in[2] <-- LSR4.out[1]; 
-                                    
-        LSR3.out[3] --> LSR5.in[0]; 
-        LSR3.in[3] <-- LSR5.out[0]; 
-                                    
-        LSR4.out[2] --> LSR5.in[1]; 
-        LSR4.in[2] <-- LSR5.out[1]; 
-                                    
-                                    
-        LSR5.out[2] --> host3.in[0]; 
-        LSR5.in[2] <-- host3.out[0]; 
-                                     
-        LSR5.out[3] --> host4.in[0]; 
-        LSR5.in[3] <-- host4.out[0]; 
-                                     
-                                     
+    connections nocheck:
+        host1.in[0] <-- LSR1.out[0];
+        host1.out[0] --> LSR1.in[0];
+
+        host2.in[0] <-- LSR1.out[1];
+        host2.out[0] --> LSR1.in[1];
+
+        LSR1.out[2] --> LSR2.in[0];
+        LSR1.in[2] <-- LSR2.out[0];
+
+        LSR1.out[3] --> LSR3.in[0];
+        LSR1.in[3] <-- LSR3.out[0];
+
+        LSR2.out[1] --> LSR3.in[1];
+        LSR2.in[1] <-- LSR3.out[1];
+
+        LSR2.out[2] --> LSR4.in[0];
+        LSR2.in[2] <-- LSR4.out[0];
+
+        LSR3.out[2] --> LSR4.in[1];
+        LSR3.in[2] <-- LSR4.out[1];
+
+        LSR3.out[3] --> LSR5.in[0];
+        LSR3.in[3] <-- LSR5.out[0];
+
+        LSR4.out[2] --> LSR5.in[1];
+        LSR4.in[2] <-- LSR5.out[1];
+
+
+        LSR5.out[2] --> host3.in[0];
+        LSR5.in[2] <-- host3.out[0];
+
+        LSR5.out[3] --> host4.in[0];
+        LSR5.in[3] <-- host4.out[0];
+
+
     display: "p=10,10;b=736,398";
-endmodule 
+endmodule
 
 
 //
 // FIXME: add documentation here
 //
-network mplsTest : MPLSNet 
-endnetwork 
+network mplsTest : MPLSNet
+endnetwork

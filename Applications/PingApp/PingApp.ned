@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -20,12 +20,12 @@
 //
 // Ping application interfaces directly with ICMP.
 //
-simple PingApp 
-    parameters: 
+simple PingApp
+    parameters:
         nodename : string,
         generationTime : numeric const;
-    gates: 
-        in: in; 
-        out: out; 
-endsimple 
+    gates:
+        in: in;
+        out: out;
+endsimple
 

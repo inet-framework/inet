@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -22,16 +22,16 @@
 // TCP protocol implementation.
 //
 // The application can send the following commands to TcpModule:
-//  - <tt>TCP_C_OPEN_PASSIVE</tt>: server app ready to accept incoming connection 
+//  - <tt>TCP_C_OPEN_PASSIVE</tt>: server app ready to accept incoming connection
 //    (like LISTEN)
-//  - <tt>TCP_C_OPEN_ACTIVE</tt>: open a connection (server must have already 
+//  - <tt>TCP_C_OPEN_ACTIVE</tt>: open a connection (server must have already
 //    issued passive open)
-//  - <tt>TCP_C_SEND</tt> 
+//  - <tt>TCP_C_SEND</tt>
 //  - <tt>TCP_C_RECEIVE</tt>
 //  - <tt>TCP_C_CLOSE</tt>: close connection
-//  - <tt>TCP_C_ABORT</tt>                  
+//  - <tt>TCP_C_ABORT</tt>
 //  - <tt>TCP_C_STATUS</tt>
-// 
+//
 // The following indications are sent from TcpModule to the application:
 //  - <tt>TCP_I_NONE</tt>
 //  - <tt>TCP_I_SEG_FWD</tt>
@@ -40,29 +40,29 @@
 //  - <tt>TCP_I_CLOSE_WAIT</tt>
 //  - <tt>TCP_I_CLOSED</tt>
 //  - <tt>TCP_I_ABORTED</tt>
-// 
-// The commands and indications are represented by messages, with the 
-// message kind set to one of the above enum values. Additional parameters 
-// (added via <tt>cPar</tt>s): 
-//  - <tt>src_port</tt>, <tt>src_addr</tt>, <tt>dest_port</tt>, 
-//    <tt>dest_addr</tt> (all as <tt>int</tt>s) 
+//
+// The commands and indications are represented by messages, with the
+// message kind set to one of the above enum values. Additional parameters
+// (added via <tt>cPar</tt>s):
+//  - <tt>src_port</tt>, <tt>src_addr</tt>, <tt>dest_port</tt>,
+//    <tt>dest_addr</tt> (all as <tt>int</tt>s)
 //  - <tt>rec_pks</tt>: number of packets the application is ready to receive
-//  - <tt>num_bit_req</tt>: number of bits the application is ready to receive (?) 
+//  - <tt>num_bit_req</tt>: number of bits the application is ready to receive (?)
 //  - <tt>tcp_conn_id</tt>: see below
-// 
-// <tt>tcp_conn_id</tt> is an identifier which has the same value on the 
+//
+// <tt>tcp_conn_id</tt> is an identifier which has the same value on the
 // client and server side. In fact, it does <b>not</b> identify the connection
-// for Tcpmodule (it uses the src/dest addresses and ports for this purpose, 
+// for Tcpmodule (it uses the src/dest addresses and ports for this purpose,
 // in every case), so perhaps it was meant for use by the applications.
 //
 // <tt>tcp_conn_id</tt> is assigned by the server application, when issuing
 // the passive open call. The client issues the active open without
-// a <tt>tcp_conn_id</tt> (i.e. with a dummy one), and will learn the 
-// connection id from the <tt>TCP_I_ESTAB</tt> indication.  
+// a <tt>tcp_conn_id</tt> (i.e. with a dummy one), and will learn the
+// connection id from the <tt>TCP_I_ESTAB</tt> indication.
 // The server is free to use any identifier; it might be handy to
 // use e.g. the module id of the process (dynamically created module)
-// that handles the connection. 
-// 
+// that handles the connection.
+//
 simple TcpModule
     parameters:
       //# the following parameters are not used so far.

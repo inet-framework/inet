@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -20,57 +20,58 @@
 
 
 simple AppIn
-    parameters: 
+    parameters:
         nodename : string;
-    gates: 
-        in: in; 
-endsimple 
+    gates:
+        in: in;
+endsimple
 
 simple GeneratorAppOut
-    parameters: 
-        tcpProtocol : bool, 
+    parameters:
+        tcpProtocol : bool,
         nodename : string,
-        nodenr, 
+        nodenr,
         generationTime,
         generationSize, // (bit)
         burstPackets : numeric const;
-    gates: 
-        out: out; 
-endsimple 
+    gates:
+        out: out;
+endsimple
+
 
 
 //
 // Transport Application with Protocol set
 //
 module TrafficGenerator
-    parameters: 
+    parameters:
         GeneratorType: string,
-        tcpProtocol : bool, 
+        tcpProtocol : bool,
         nodename : string,
-        nodenr, 
-        generationTime, 
+        nodenr,
+        generationTime,
         generationSize, // (bit)
         burstPackets : numeric const;
-    gates: 
-        in: in; 
-        out: out; 
-    submodules: 
-        appIn: AppIn; 
-            parameters: 
+    gates:
+        in: in;
+        out: out;
+    submodules:
+        appIn: AppIn;
+            parameters:
                 nodename = nodename;
             display: "p=97,98;b=40,24,rect";
-        appOut: GeneratorType like GeneratorAppOut; 
-            parameters: 
+        appOut: GeneratorType like GeneratorAppOut;
+            parameters:
                 nodename = nodename,
                 nodenr = nodenr,
-                tcpProtocol = tcpProtocol, 
-                generationTime = generationTime, 
+                tcpProtocol = tcpProtocol,
+                generationTime = generationTime,
                 generationSize = generationSize,
                 burstPackets = burstPackets;
             display: "p=145,100;b=40,24,rect";
-    connections: 
-        in --> appIn.in; 
-        appOut.out --> out; 
+    connections:
+        in --> appIn.in;
+        appOut.out --> out;
     display: "p=10,10;b=203,147,rect";
-endmodule 
+endmodule
 

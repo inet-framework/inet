@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -30,13 +30,13 @@
 class Socket : public cObject
 {
 public:
-  
+
   enum Domain {
       SOCKET_AF_UNIX,  // file system pathnames not used
       SOCKET_AF_INET,   // internet address
       SOCKET_AF_UNDEF
     };
-  
+
   static const char* const domain_string[]; // defined in sockets.cc
 
   enum Type {
@@ -51,7 +51,7 @@ public:
                         // connection-mode transmission path for records.
       SOCKET_UNDEF
     };
-  
+
   static const char* const type_string[]; // defined in sockets.cc
 
   enum Protocol
@@ -65,7 +65,7 @@ public:
     };
 
   static const char* const protocol_string[]; // defined in sockets.cc
-  
+
   enum ConnectionState
     {
       CONN_LISTEN,
@@ -73,9 +73,9 @@ public:
       CONN_ESTAB,
       CONN_UNDEF
     };
-  
+
   static const char* const connstate_string[]; // defined in sockets.cc
-  
+
   // SO_* names clashed with some Windows stuff, that's why they were renamed to SOPT_*
   // FIXME: Document which options are used
   struct Options
@@ -111,7 +111,7 @@ public:
                                          // received before the most recent
                                          // out-of-band data was received
   };
-  
+
   typedef int Filedesc; // file descriptor
 
   enum {FILEDESC_UNDEF = -1};
@@ -129,7 +129,7 @@ private:
                                       // attached to the listening socket
   bool _pending_accept; // for listening sockets, if an accept() has already
                         // been issued by the application
-  
+
   PCB*             _pcb; // Pointer to Protocol Control Block class
   cQueue           _sockqueue; // queue for incoming data packets
 
@@ -137,7 +137,7 @@ private:
   void _initState();
   void _init();
 public:
-    
+
 
   // creation, destruction, copying
   Socket(const Socket& socket);
@@ -148,7 +148,7 @@ public:
   virtual ~Socket();
   virtual cObject* dup() const {return new Socket(*this);}
   virtual void info(char* buf);
-  virtual void writeContents(ostream& os);
+  virtual void writeContents(std::ostream& os);
   Socket& operator=(const Socket& socket);
 
   // new member functions

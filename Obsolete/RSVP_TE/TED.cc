@@ -1,14 +1,14 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
@@ -27,14 +27,14 @@ void TED::initialize()
 
 void TED::buildDatabase()
 {
-	if(!(ted.empty()))
-		ted.clear();
+    if(!(ted.empty()))
+        ted.clear();
 
     telinkstate* entry = new telinkstate;
     
     cTopology topo;
     topo.extractByModuleType( "TCPClientTest","TCPServerTest","RSVP_LSR_Node", NULL );
-	ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
+    ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
     
     for (int i=0; i<topo.nodes(); i++)
     {
@@ -49,7 +49,7 @@ void TED::buildDatabase()
        //Get the RoutingTable component - Todo: Set it public
        entry->advrouter = IPAddress(module->par("local_addr").stringValue());
 
-		   //*(myRT->getLoopbackAddress()); //Todo: Add this function to rt
+           //*(myRT->getLoopbackAddress()); //Todo: Add this function to rt
        
        for (int j=0; j<node->outLinks(); j++)
        {
@@ -84,7 +84,7 @@ void TED::buildDatabase()
        }
     }
 
-	printDatabase();
+    printDatabase();
 
 }
 
@@ -98,49 +98,49 @@ void TED::activity()
 
 void TED::printDatabase()
 {
-	 std::vector<telinkstate>::iterator t_iterI;
-	 telinkstate					  t_iter;
+     std::vector<telinkstate>::iterator t_iterI;
+     telinkstate                      t_iter;
         ev << "*************TED DATABASE*******************\n";
-	 for(t_iterI = ted.begin(); t_iterI != ted.end(); t_iterI++)
-	 {
-		 t_iter = *t_iterI;
-	
-		 ev << "Adv Router: " << t_iter.advrouter.getString() << "\n";
-		 ev << "Link Id (neighbour IP): " << t_iter.linkid.getString() << "\n";
-		 ev << "Max Bandwidth: " << t_iter.MaxBandwith << "\n";
-		 ev << "Metrix: " << t_iter.metric << "\n\n";
-	 }
+     for(t_iterI = ted.begin(); t_iterI != ted.end(); t_iterI++)
+     {
+         t_iter = *t_iterI;
+    
+         ev << "Adv Router: " << t_iter.advrouter.getString() << "\n";
+         ev << "Link Id (neighbour IP): " << t_iter.linkid.getString() << "\n";
+         ev << "Max Bandwidth: " << t_iter.MaxBandwith << "\n";
+         ev << "Metrix: " << t_iter.metric << "\n\n";
+     }
 
 
 }
 
 void TED::updateLink(simple_link_t *aLink, double metric, double bw)
 {
-	   
-	 for(int i=0; i< ted.size(); i++)
-	 {
-		 if((ted[i].advrouter.getInt() == (aLink->advRouter)) &&
-			(ted[i].linkid.getInt() ==(aLink->id)))
-		 {
-			 ev << "TED update an entry\n";
-			 ev << "Advrouter=" <<ted[i].advrouter.getString() << "\n";
-			 ev << "linkId=" << ted[i].linkid.getString() << "\n";
-			 double bwIncrease = bw - (ted[i].MaxBandwith);
-			ted[i].MaxBandwith = ted[i].MaxBandwith + bwIncrease;
-			ted[i].MaxResvBandwith = ted[i].MaxResvBandwith+ bwIncrease;
-			ev << "Old metric= " << ted[i].metric << "\n";
+       
+     for(int i=0; i< ted.size(); i++)
+     {
+         if((ted[i].advrouter.getInt() == (aLink->advRouter)) &&
+            (ted[i].linkid.getInt() ==(aLink->id)))
+         {
+             ev << "TED update an entry\n";
+             ev << "Advrouter=" <<ted[i].advrouter.getString() << "\n";
+             ev << "linkId=" << ted[i].linkid.getString() << "\n";
+             double bwIncrease = bw - (ted[i].MaxBandwith);
+            ted[i].MaxBandwith = ted[i].MaxBandwith + bwIncrease;
+            ted[i].MaxResvBandwith = ted[i].MaxResvBandwith+ bwIncrease;
+            ev << "Old metric= " << ted[i].metric << "\n";
 
-			ted[i].metric = metric;
-			ev << "New metric= " << ted[i].metric << "\n";
+            ted[i].metric = metric;
+            ev << "New metric= " << ted[i].metric << "\n";
 
-			for(int j=0;j<8;j++)
-			ted[i].UnResvBandwith[j] = ted[i].UnResvBandwith[j] +bwIncrease;
-			break;
-		 }
-	
-	
-	 }
-	 printDatabase();
+            for(int j=0;j<8;j++)
+            ted[i].UnResvBandwith[j] = ted[i].UnResvBandwith[j] +bwIncrease;
+            break;
+         }
+    
+    
+     }
+     printDatabase();
 
 }
 

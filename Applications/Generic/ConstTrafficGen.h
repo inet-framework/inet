@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,10 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: ConstTrafficGen.h
-	Purpose: Traffic Generator that sends out 
-		constant packets in constant time intervals
-	author: Jochen Reber
+    file: ConstTrafficGen.h
+    Purpose: Traffic Generator that sends out
+        constant packets in constant time intervals
+    author: Jochen Reber
 */
 
 #ifndef __CONSTTRAFFIGGEN_H__
@@ -29,25 +29,26 @@
 
 #include <omnetpp.h>
 
+#include "basic_consts.h"
 #include "IPInterfacePacket.h"
 
 
 class ConstTrafficGen: public cSimpleModule
 {
 private:
-	simtime_t generationTime;
-	int packetSize;
-	char nodename[NODE_NAME_SIZE];
-	int nodenr;
-	int destctr;
-	bool usesTCPProt;
+    simtime_t generationTime;
+    int packetSize;
+    char nodename[NODE_NAME_SIZE];
+    int nodenr;
+    int destctr;
+    bool usesTCPProt;
 
-	char *chooseDestAddr(char *);
+    char *chooseDestAddr(char *);
 public:
-    Module_Class_Members(ConstTrafficGen, cSimpleModule, 
-			ACTIVITY_STACK_SIZE);
+    Module_Class_Members(ConstTrafficGen, cSimpleModule,
+            ACTIVITY_STACK_SIZE);
 
-	void initialize();
+    void initialize();
     void activity();
 };
 

@@ -1,128 +1,123 @@
 //
-// This library is free software, you can redistribute it 
-// and/or modify 
-// it under  the terms of the GNU Lesser General Public License 
-// as published by the Free Software Foundation; 
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
 // either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful, 
+// The library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
 
 
-import   
-    "LSRNode", 
-    "TCPClientTest", 
-    "TCPServerTest"; 
-                     
+import
+    "LSRNode",
+    "TCPClientTest",
+    "TCPServerTest";
+
 //
 // A network with LIB tables set up to test MPLSModule only.
 //
-module MPLSNetOnly 
-    parameters: 
-                
-                
-    submodules: 
+module MPLSNetOnly
+    parameters:
+
+
+    submodules:
         LSR1: LSRNode;
             parameters:
                 isIR = true,
                 isER = false,
                 peerNo = 2,
-                numOfProcessors = 1,
                 numOfPorts = 4;
             gatesizes:
-                in[4], 
-                out[4]; 
+                in[4],
+                out[4];
             display: "b=32,32;p=184,95;i=router";
         LSR2: LSRNode;
             parameters:
                 isIR = false,
                 isER = false,
                 peerNo = 3,
-                numOfProcessors = 1,
-                numOfPorts = 3; 
-            gatesizes: 
-                in[3], 
-                out[3]; 
+                numOfPorts = 3;
+            gatesizes:
+                in[3],
+                out[3];
             display: "b=32,32;p=238,247;i=router";
         LSR3: LSRNode;
-            parameters: 
+            parameters:
                 isIR = false,
                 isER = false,
                 peerNo = 4,
-                numOfProcessors = 1,
-                numOfPorts = 4; 
-            gatesizes: 
-                in[4], 
-                out[4]; 
+                numOfPorts = 4;
+            gatesizes:
+                in[4],
+                out[4];
             display: "b=32,32;p=322,95;i=router";
         LSR4: LSRNode;
             parameters:
                 isIR = false,
                 isER = false,
                 peerNo = 3,
-                numOfProcessors = 1,
-                numOfPorts = 3; 
-            gatesizes: 
-                in[3], 
-                out[3]; 
+                numOfPorts = 3;
+            gatesizes:
+                in[3],
+                out[3];
             display: "b=32,32;p=398,247;i=router";
         LSR5: LSRNode;
             parameters:
                 isIR = false,
                 isER = true,
                 peerNo = 2,
-                numOfProcessors = 1,
                 numOfPorts = 4;
             gatesizes:
                 in[4],
                 out[4];
             display: "b=32,32;p=500,95;i=router";
     connections nocheck:
-//        host1.in[0] <-- LSR1.out[0]; 
-//        host1.out[0] --> LSR1.in[0]; 
-                                     
-//        host2.in[0] <-- LSR1.out[1]; 
-//        host2.out[0] --> LSR1.in[1]; 
-                                     
+//        host1.in[0] <-- LSR1.out[0];
+//        host1.out[0] --> LSR1.in[0];
+
+//        host2.in[0] <-- LSR1.out[1];
+//        host2.out[0] --> LSR1.in[1];
+
         LSR1.out[2] --> LSR2.in[0];
         LSR1.in[2] <-- LSR2.out[0];
-                                    
+
         LSR1.out[3] --> LSR3.in[0];
         LSR1.in[3] <-- LSR3.out[0];
-                                    
-        LSR2.out[1] --> LSR3.in[1]; 
-        LSR2.in[1] <-- LSR3.out[1]; 
-                                    
-        LSR2.out[2] --> LSR4.in[0]; 
-        LSR2.in[2] <-- LSR4.out[0]; 
-                                    
-        LSR3.out[2] --> LSR4.in[1]; 
-        LSR3.in[2] <-- LSR4.out[1]; 
-                                    
-        LSR3.out[3] --> LSR5.in[0]; 
-        LSR3.in[3] <-- LSR5.out[0]; 
-                                    
-        LSR4.out[2] --> LSR5.in[1]; 
-        LSR4.in[2] <-- LSR5.out[1]; 
-                                    
-                                    
- //       LSR5.out[2] --> host3.in[0]; 
- //       LSR5.in[2] <-- host3.out[0]; 
-                                     
- //       LSR5.out[3] --> host4.in[0]; 
- //       LSR5.in[3] <-- host4.out[0]; 
-                                     
-                                     
+
+        LSR2.out[1] --> LSR3.in[1];
+        LSR2.in[1] <-- LSR3.out[1];
+
+        LSR2.out[2] --> LSR4.in[0];
+        LSR2.in[2] <-- LSR4.out[0];
+
+        LSR3.out[2] --> LSR4.in[1];
+        LSR3.in[2] <-- LSR4.out[1];
+
+        LSR3.out[3] --> LSR5.in[0];
+        LSR3.in[3] <-- LSR5.out[0];
+
+        LSR4.out[2] --> LSR5.in[1];
+        LSR4.in[2] <-- LSR5.out[1];
+
+
+ //       LSR5.out[2] --> host3.in[0];
+ //       LSR5.in[2] <-- host3.out[0];
+
+ //       LSR5.out[3] --> host4.in[0];
+ //       LSR5.in[3] <-- host4.out[0];
+
+
     display: "p=10,10;b=736,398";
-endmodule 
+endmodule
 
 
 //
 // A network with LIB tables set up to test MPLSModule only.
 //
-network mplsOnlyTest : MPLSNetOnly 
-endnetwork 
+network mplsOnlyTest : MPLSNetOnly
+endnetwork
 
-                                    
+

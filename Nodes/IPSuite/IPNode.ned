@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,15 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+//
 
 import
     "NetworkLayers",
-    //"ProcessorManager",
-    "UDP",
+    "UDPUpperLayers",
     "tcp4ip",
     "PingApp",
-    "ErrorHandling",
     "TrafficGen";
 
 
@@ -32,7 +29,6 @@ import
 //
 module IPNode
     parameters:
-
         // TCP information
         tcpApplType : string,
         local_addr : numeric,
@@ -45,33 +41,7 @@ module IPNode
         nodenr : numeric const,
         udpRouteDestNo : numeric const,
 
-
-        // Network delay times
-        fragmentation_delay,
-        ipoutput_delay,
-        ipsend_delay,
-        localdeliver_delay,
-        prerouting_delay,
-        routing_delay,
-        multicast_delay,
-        icmp_delay,
-        iptunneling_delay,
-        dequeue_delay,
-        enqueue_delay,
-        inputqueue_delay,
-        nwi_delay : numeric const,
-
-        // Hook-names
-        preRoutingHookName : string,
-        routingHookName : string,
-        localDeliverHookName : string,
-        ipSendHookName : string,
-        ipOutputHookName : string,
-        enqueueHookName : string,
-        dequeueHookName : string,
-
         // Network information
-        numOfProcessors: numeric,
         numOfPorts : numeric,
         routingFile : string;
     gates:
@@ -109,40 +79,8 @@ module IPNode
                 nodename = nodename,
                 generationTime = packetTime;
             display: "p=152,89;b=40,24,rect";
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = nodename;
-            display: "p=179,158;i=sink";
-        // control module
-
         networkLayers: NetworkLayers;
             parameters:
-                // processing delay times
-                ipoutput_delay = ipoutput_delay,
-                fragmentation_delay = fragmentation_delay,
-                ipsend_delay = ipsend_delay,
-                localdeliver_delay = localdeliver_delay,
-                prerouting_delay = prerouting_delay,
-                routing_delay = routing_delay,
-                icmp_delay = icmp_delay,
-                iptunneling_delay =  iptunneling_delay,
-                multicast_delay =  multicast_delay,
-
-                enqueue_delay = enqueue_delay,
-                dequeue_delay =  dequeue_delay,
-                inputqueue_delay = inputqueue_delay,
-                nwi_delay = nwi_delay,
-
-                // hook names
-                preRoutingHookName = preRoutingHookName,
-                routingHookName = routingHookName,
-                localDeliverHookName = localDeliverHookName,
-                ipSendHookName = ipSendHookName,
-                ipOutputHookName = ipOutputHookName,
-                enqueueHookName = enqueueHookName,
-                dequeueHookName = dequeueHookName,
-
-                // other Network parameters
                 IPForward = true,
                 NWIName = "PPPModule",
                 numOfPorts = numOfPorts,
@@ -151,7 +89,6 @@ module IPNode
                 physIn[numOfPorts],
                 physOut[numOfPorts];
             display: "p=87,155;i=fork";
-        //# processorManager: ProcessorManager;
     connections nocheck:
         // transport connections
         networkLayers.TCPOut --> tcpApp.in;
@@ -162,8 +99,6 @@ module IPNode
 
         networkLayers.pingOut --> pingApp.in;
         networkLayers.pingIn <-- pingApp.out;
-
-        networkLayers.errorOut --> errorHandling.in;
 
         // connections to network outside
         for i=0..numOfPorts-1 do

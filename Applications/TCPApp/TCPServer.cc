@@ -1,11 +1,11 @@
-// $Header$
+//
 //-----------------------------------------------------------------------------
 //-- fileName: TCPServer.cc
 //--
 //-- generated to test the TCP-FSM
 //--
 //-- V. Boehm, June 20 1999
-//-- 
+//--
 //-- modified by J. Reber for IP architecture, October 2000
 //--
 //-----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void TCPServer::activity()
   WATCH(tcp_conn_id);
 
   cModule* mod;
-  
+
   //module parameters
   debug = par("debug");
 
@@ -55,11 +55,11 @@ void TCPServer::activity()
   double       appl_timeout    = par("appl_timeout"); // FIXME not used
 
   cModuleType *procserver_type = findModuleType("ProcServer");
-  if (!procserver_type) 
+  if (!procserver_type)
       error("Cannot find module type ProcServer");
 
   passiveOpen(timeout, procserver_type);
-  
+
   for(;;)
     {
       cMessage *msg = receive(); // no application timeout here
@@ -88,7 +88,7 @@ void TCPServer::activity()
           passiveOpen(timeout, procserver_type);
 
           break;
-          
+
         case TCP_I_ESTAB:
           tcp_conn_id = msg->par("tcp_conn_id");
           if(debug)
@@ -136,11 +136,11 @@ void TCPServer::activity()
 
 void TCPServer::passiveOpen(double timeout, cModuleType* procserver_type)
 {
-  //server appl. calls 
+  //server appl. calls
   cMessage *open_passive;
-  
+
   //address and port management (local socket only)
-  //An unspecified foreign socket is used. Thus, any connection request 
+  //An unspecified foreign socket is used. Thus, any connection request
   //by any client is accepted (if the foreign socket is also specified the
   //server will accept a connection request by the specified client only).
   int local_port                    = gate("out")->toGate()->index();
@@ -152,21 +152,21 @@ void TCPServer::passiveOpen(double timeout, cModuleType* procserver_type)
 
   if (debug)
     {
-      ev << "Local port: " << local_port << endl; 
-      ev << "Local address: " << local_addr << endl; 
-      ev << "Remote port: " << rem_port << endl; 
+      ev << "Local port: " << local_port << endl;
+      ev << "Local address: " << local_addr << endl;
+      ev << "Remote port: " << rem_port << endl;
       ev << "Remote address: " << rem_addr << endl;
     }
   //send "passive open" to TCP to indicate that the server appl. is
   //ready, processing continues if TCP indicates that it entered the
   //ESTABLISHED state
   open_passive                      = new cMessage("TCP_C_OPEN_PASSIVE", TCP_C_OPEN_PASSIVE);
-  open_passive->addPar("src_port")  = local_port; 
+  open_passive->addPar("src_port")  = local_port;
   open_passive->addPar("src_addr")  = local_addr;
-  open_passive->addPar("dest_port") = rem_port; 
+  open_passive->addPar("dest_port") = rem_port;
   open_passive->addPar("dest_addr") = rem_addr;
-      
-  open_passive->addPar("timeout") = timeout; //global default is 5 min; here 5 sec 
+
+  open_passive->addPar("timeout") = timeout; //global default is 5 min; here 5 sec
   //precedence, security/compartment and options are not included here
 
   //no data bits to send
@@ -174,7 +174,7 @@ void TCPServer::passiveOpen(double timeout, cModuleType* procserver_type)
   open_passive->setLength(0);
   //no data packets to receive
   open_passive->addPar("rec_pks")     = 0;
-      
+
   //make delay checking possible
   open_passive->setTimestamp();
 

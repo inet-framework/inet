@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -17,37 +17,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-/*
-	file: IPTunneling.h
-	Purpose: Header file for IP Tunneling
-	------
-	Responsibilities:
-	receive message from IPMulticast
-	set Tunnel destination address
-	set Protocol field
-	send new IPInterfacePacket to IPSend to be newly encapsulated
-
-	author: Jochen Reber
-
-	comment: interface from IPMulticast still needs doc
-*/
 
 #ifndef __IPTUNNELING_H__
 #define __IPTUNNELING_H__
 
+#include "QueueBase.h"
 #include "IPDatagram.h"
-//#include "ProcessorAccess.h"
 
-class IPTunneling : public cSimpleModule   // was ProcessorAccess
+/**
+ * Receives an IP datagram, set tunnel destination address and Protocol fields,
+ * then sends it to IPSend to be newly encapsulated.
+ * More detailed comment in NED file.
+ */
+class IPTunneling : public QueueBase
 {
-private:
-	simtime_t delay;
+  public:
+    Module_Class_Members(IPTunneling, QueueBase, 0);
 
-public:
-	Module_Class_Members(IPTunneling, cSimpleModule, ACTIVITY_STACK_SIZE);
-
-	virtual void initialize();
-	virtual void activity();
+  protected:
+    virtual void endService(cMessage *msg);
 };
 
 #endif

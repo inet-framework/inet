@@ -1,8 +1,8 @@
 // from MPLS models  --- FIXME merge or eliminate!
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "tcp.h"
-#include "ip_address.h"
+#include "IPAddress.h"
 
 
 class MyTCPClient: public cSimpleModule
@@ -61,17 +61,17 @@ Define_Module_Like( MyTCPClient, MyTCPApp);
 void MyTCPClient::initialize()
 {
 
-	tcp_conn_id=0;
+    tcp_conn_id=0;
 
-	tcp_flag_psh = TCP_F_SET;
+    tcp_flag_psh = TCP_F_SET;
 
-	tcp_flag_urg = TCP_F_NSET;
+    tcp_flag_urg = TCP_F_NSET;
 
-	local_port = 1;  //Any port !=-1
-	
-	rem_port = 1;     //Any port   !=-1
+    local_port = 1;  //Any port !=-1
 
-	
+    rem_port = 1;     //Any port   !=-1
+
+
 
 }
 
@@ -80,15 +80,15 @@ void MyTCPClient::activity()
 
 #ifndef _WIN32  /* FIXME bloody MSVC6.0 says "internal error" on this file */
 
-	local_addr = IPAddress(par("local_addr").stringValue()).getInt();
-	rem_addr= IPAddress(par("server_addr").stringValue()).getInt();
-	keepAliveTime = par("data_interarrival_time");
-	timeout = par("timeout");;
-	double startTime = par("start_time");
-		
-	
-	//Sleep sometime for LDP to complete
-	wait(startTime);
+    local_addr = IPAddress(par("local_addr").stringValue()).getInt();
+    rem_addr= IPAddress(par("server_addr").stringValue()).getInt();
+    keepAliveTime = par("data_interarrival_time");
+    timeout = par("timeout");;
+    double startTime = par("start_time");
+
+
+    //Sleep sometime for LDP to complete
+    wait(startTime);
 
 
      WATCH(tcp_conn_id);
@@ -99,45 +99,45 @@ void MyTCPClient::activity()
 
 
       //Waiting for ESTAB message
-	  //we ignore timeout or other possible errors
+      //we ignore timeout or other possible errors
 
-	cMessage* e_msg;
-	
+    cMessage* e_msg;
+
 
         e_msg = receive();
 
         while((e_msg->kind() == TCP_I_CLOSED) || (e_msg->kind() != TCP_I_ESTAB))
         {
-        	if (e_msg->kind() == TCP_I_CLOSED)
-        	{
-        	
-        	delete e_msg;
-        	
-        	wait(2 * startTime);
-        	
-        	sendOpenActive();
-        	
-        	e_msg = receive();
-        	
-        	continue;
-          	
-        	}
+            if (e_msg->kind() == TCP_I_CLOSED)
+            {
 
-        	if(e_msg->kind() != TCP_I_ESTAB)
-        	{
-        	delete e_msg;
-        	
-        	sendBroken();
-        	
-        	wait(2*startTime);
-        	
-        	sendOpenActive();
-        	
-        	e_msg= receive();
-        	
-        	continue;
-        	
-        	}
+            delete e_msg;
+
+            wait(2 * startTime);
+
+            sendOpenActive();
+
+            e_msg = receive();
+
+            continue;
+
+            }
+
+            if(e_msg->kind() != TCP_I_ESTAB)
+            {
+            delete e_msg;
+
+            sendBroken();
+
+            wait(2*startTime);
+
+            sendOpenActive();
+
+            e_msg= receive();
+
+            continue;
+
+            }
 
         }
 
@@ -153,30 +153,30 @@ void MyTCPClient::activity()
 
       delete e_msg;
 
-	  //Start to operate as peer
-	
-	  //Start the self keep alive cycle
+      //Start to operate as peer
 
-	  cMessage* ka_msg =new cMessage();
+      //Start the self keep alive cycle
 
-	  scheduleAt(simTime() + keepAliveTime, ka_msg);
+      cMessage* ka_msg =new cMessage();
 
-	  //Send KEEP ALIVE to peer
-	  sendKEEP_ALIVE();
+      scheduleAt(simTime() + keepAliveTime, ka_msg);
 
-	  while(true)
-	  {
+      //Send KEEP ALIVE to peer
+      sendKEEP_ALIVE();
 
-		   sendNo=0;
+      while(true)
+      {
 
-		  //Issue a TCP_RECEIVE, possible data from peer
-		  issueTCP_RECEIVE();
+           sendNo=0;
 
-		  cMessage* msg = receive();
+          //Issue a TCP_RECEIVE, possible data from peer
+          issueTCP_RECEIVE();
 
-		  //Process one and only one message from peer
-		  processMessage(msg);
-	  }
+          cMessage* msg = receive();
+
+          //Process one and only one message from peer
+          processMessage(msg);
+      }
 
 #endif
 
@@ -185,108 +185,108 @@ void MyTCPClient::activity()
 
 void MyTCPClient::issueTCP_RECEIVE()
 {
-		cMessage* receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
+        cMessage* receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
 
-        	receive_call->addPar("src_port")  = local_port;
+            receive_call->addPar("src_port")  = local_port;
 
-		receive_call->addPar("src_addr")  = local_addr;
+        receive_call->addPar("src_addr")  = local_addr;
 
-         	receive_call->addPar("dest_port") = rem_port;
+             receive_call->addPar("dest_port") = rem_port;
 
-	  	receive_call->addPar("dest_addr") = rem_addr;
-	
-	  	receive_call->addPar("tcp_conn_id") = tcp_conn_id;
+          receive_call->addPar("dest_addr") = rem_addr;
 
-        	receive_call->setLength(0);
+          receive_call->addPar("tcp_conn_id") = tcp_conn_id;
 
-	  	receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
+            receive_call->setLength(0);
 
-	  	receive_call->setTimestamp();
+          receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
 
-	  	//send "receive" to "TcpModule"
-	  	send(receive_call, "out");
+          receive_call->setTimestamp();
+
+          //send "receive" to "TcpModule"
+          send(receive_call, "out");
 
 }
 
 
 void MyTCPClient::sendKEEP_ALIVE()
 {
-	  cMessage *send_call = new cMessage("TCP_C_SEND", TCP_C_SEND);
+      cMessage *send_call = new cMessage("TCP_C_SEND", TCP_C_SEND);
 
-	  send_call->addPar("tcp_conn_id")  =  tcp_conn_id;
+      send_call->addPar("tcp_conn_id")  =  tcp_conn_id;
 
-	  send_call->addPar("src_port")     = local_port;
+      send_call->addPar("src_port")     = local_port;
 
-	  send_call->addPar("src_addr")     = local_addr;
+      send_call->addPar("src_addr")     = local_addr;
 
-	  send_call->addPar("dest_port")    = rem_port;
+      send_call->addPar("dest_port")    = rem_port;
 
-	  send_call->addPar("dest_addr")    = rem_addr;
+      send_call->addPar("dest_addr")    = rem_addr;
 
-	  send_call->addPar("tcp_flag_psh") = (int) tcp_flag_psh;
+      send_call->addPar("tcp_flag_psh") = (int) tcp_flag_psh;
 
-	  send_call->addPar("tcp_flag_urg") = (int) tcp_flag_urg;
+      send_call->addPar("tcp_flag_urg") = (int) tcp_flag_urg;
 
-	  send_call->addPar("timeout")      = (int) timeout;
+      send_call->addPar("timeout")      = (int) timeout;
 
-	  send_call->setLength(msgLng); //(tcp_mss * 8/4);
+      send_call->setLength(msgLng); //(tcp_mss * 8/4);
 
-	  send_call->addPar("rec_pks") = 0;
+      send_call->addPar("rec_pks") = 0;
 
-	  send_call->addPar("keep_alive") =0;
+      send_call->addPar("keep_alive") =0;
 
-	  send_call->setTimestamp();
+      send_call->setTimestamp();
 
-	
-	  ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " send data to " <<
-	  IPAddress(rem_addr).getString() << "\n";
-	  send(send_call, "out");
+
+      ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " send data to " <<
+      IPAddress(rem_addr).getString() << "\n";
+      send(send_call, "out");
 
 
 }
 
-	
+
 
 void MyTCPClient::processSELF_KEEP_ALIVE(cMessage* msg)
 {
 
-	
+
      if(sendNo == 0)
      {
-        	sendKEEP_ALIVE();
-        	sendNo = 1;
+            sendKEEP_ALIVE();
+            sendNo = 1;
      }
-	
-  	scheduleAt(simTime()+ keepAliveTime, msg);
 
- 	cMessage *msgN= receive();
+      scheduleAt(simTime()+ keepAliveTime, msg);
 
- 	//Iterate of processMessage till we get message from peer
-  	processMessage(msgN);
-  		
+     cMessage *msgN= receive();
+
+     //Iterate of processMessage till we get message from peer
+      processMessage(msgN);
+
 
 }
 
-	
+
 
 void MyTCPClient::processMessage(cMessage* msg)
 {
 
-	
-	if(msg->isSelfMessage())
-	{
-  			  				
-		processSELF_KEEP_ALIVE(msg);
 
-  		
-	  }
-	
+    if(msg->isSelfMessage())
+    {
 
-	else  //Message is data from peer
-	{
-		processData(msg);
-  		
-	}
+        processSELF_KEEP_ALIVE(msg);
+
+
+      }
+
+
+    else  //Message is data from peer
+    {
+        processData(msg);
+
+    }
 }
 
 
@@ -294,17 +294,17 @@ void MyTCPClient::processMessage(cMessage* msg)
 void MyTCPClient::processData(cMessage* msg)
 {
     if ((msg->kind()) == TCP_I_SEG_FWD)
-	{
-	ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
-	IPAddress(rem_addr).getString() << "\n";
-	delete msg;
-		
-  	}
-  	
+    {
+    ev << "MY TCP CLIENT DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
+    IPAddress(rem_addr).getString() << "\n";
+    delete msg;
+
+      }
+
    else
    {
-	  delete msg;
-	  	
+      delete msg;
+
    }
 }
 

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -17,10 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: Applications.cc
+    file: Applications.cc
         Purpose: receives packets of Traffic generators
                  and prints out their information
-	author: me
+    author: me
 */
 
 
@@ -28,62 +28,60 @@
 #include "AppIn.h"
 #include "IPInterfacePacket.h"
 #include "IPDatagram.h"
-#include "ICMP.h"
 
 
 Define_Module( AppIn );
 
 void AppIn::initialize()
 {
-	strcpy(nodename, par("nodename"));
+    strcpy(nodename, par("nodename"));
 }
-	
+
 void AppIn::activity()
 {
-	cMessage *msg;
+    cMessage *msg;
 
-	while(true)
-	{
-		msg = receive();
-		processMessage(msg);
-		breakpoint("AppIn receive");
-	}
+    while(true)
+    {
+        msg = receive();
+        processMessage(msg);
+    }
 
 }
 
 // private function
 void AppIn::processMessage(cMessage *msg)
 {
-	IPInterfacePacket *ip = (IPInterfacePacket *)msg;
-	cPacket *p = (cPacket *)msg->decapsulate();
-	simtime_t arrivalTime = ip->arrivalTime();
-	IPProtocolFieldId protocol = (IPProtocolFieldId)ip->protocol();
-	int content = p->hasPar("content") 
-				? (int)p->par("content") : (int)-1;
-	bool isRequest = p->hasPar("request") 
-				? p->par("request").boolValue() : false;
-	int length = p->length();
-	char src[20], dest[20];
+    IPInterfacePacket *ip = (IPInterfacePacket *)msg;
+    cPacket *p = (cPacket *)msg->decapsulate();
+    simtime_t arrivalTime = ip->arrivalTime();
+    IPProtocolFieldId protocol = (IPProtocolFieldId)ip->protocol();
+    int content = p->hasPar("content")
+                ? (int)p->par("content") : (int)-1;
+    bool isRequest = p->hasPar("request")
+                ? p->par("request").boolValue() : false;
+    int length = p->length();
+    char src[20], dest[20];
 
-	strcpy( src,  ip->srcAddr());
-	strcpy( dest, ip->destAddr());
+    strcpy( src,  ip->srcAddr());
+    strcpy( dest, ip->destAddr());
 
-	// print out Packet info
-	ev  << "\n+++" << nodename << " AppIn: Packet received:"
-		<< "\nProt: " << (protocol == IP_PROT_TCP ? "TCP" : "UDP")
-		<< " Cont: " << content 
-		<< " Bitlen: " << length
-		// << (isRequest ? " Request" : " Reply")
-		<< "   Arrival Time: " << arrivalTime
-		<< " Simtime: " << simTime()
-		<< "\nSrc: " << src 
-		<< " Dest: " << dest << "\n\n";
-		
-	delete (ip);
-	delete (p);
+    // print out Packet info
+    ev  << "\n+++" << nodename << " AppIn: Packet received:"
+        << "\nProt: " << (protocol == IP_PROT_TCP ? "TCP" : "UDP")
+        << " Cont: " << content
+        << " Bitlen: " << length
+        // << (isRequest ? " Request" : " Reply")
+        << "   Arrival Time: " << arrivalTime
+        << " Simtime: " << simTime()
+        << "\nSrc: " << src
+        << " Dest: " << dest << "\n\n";
 
-	if (!isRequest)
-		return;
+    delete (ip);
+    delete (p);
+
+    if (!isRequest)
+        return;
 
 }
 

@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,7 +18,7 @@
 
 /*
     file: Socketinterfacepacket.cc
-    Purpose: 
+    Purpose:
     Usage:
 */
 
@@ -28,6 +28,8 @@
 #include <stdio.h>
 
 #include "SocketInterfacePacket.h"
+
+using std::ostream;
 
 // constructors
 SocketInterfacePacket::SocketInterfacePacket(): cMessage()
@@ -41,8 +43,8 @@ SocketInterfacePacket::SocketInterfacePacket(const char* name): cMessage(name)
 }
 
 // copy constructor
-SocketInterfacePacket::SocketInterfacePacket( const SocketInterfacePacket& sockp) 
-		: cMessage()
+SocketInterfacePacket::SocketInterfacePacket( const SocketInterfacePacket& sockp)
+        : cMessage()
 {
   setName ( sockp.name() );
   operator=( sockp );
@@ -53,8 +55,8 @@ void SocketInterfacePacket::_init()
 {
   _action = SocketInterfacePacket::SA_UNDEF;
 
-  _laddr = _faddr = IN_Addr::ADDR_UNDEF;
-  _lport = _fport = IN_Port::PORT_UNDEF;
+  _laddr = _faddr = IPADDRESS_UNDEF;
+  _lport = _fport = PORT_UNDEF;
 
   //_domain   = Socket::AF_UNDEF;
   //_type     = Socket::SOCK_UNDEF;
@@ -77,33 +79,33 @@ void SocketInterfacePacket::_check()
 
 // assignment operator
 SocketInterfacePacket& SocketInterfacePacket::operator=
-		(const SocketInterfacePacket& sockp)
+        (const SocketInterfacePacket& sockp)
 {
-	cMessage::operator=(sockp);
+    cMessage::operator=(sockp);
 
-	_init();
+    _init();
         _action = sockp._action;
 
-	return *this;
+    return *this;
 }
 
 // // encapsulation
 // void SocketInterfacePacket::encapsulate(cPacket *p)
 // {
-// 	cPacket::encapsulate(p);
+//     cPacket::encapsulate(p);
 // }
 
 // // decapsulation: convert to cPacket *
 // cPacket *SocketInterfacePacket::decapsulate()
 // {
-// 	return (cPacket *)(cPacket::decapsulate());
+//     return (cPacket *)(cPacket::decapsulate());
 // }
 
 // output functions
 void SocketInterfacePacket::info( char *buf )
 {
-	cMessage::info( buf );
-        sprintf(buf + strlen(buf), "  _action = %d ", (int) _action);
+    cMessage::info( buf );
+        sprintf(buf+strlen(buf), "  _action = %d ", (int) _action);
 }
 
 void SocketInterfacePacket::writeContents(ostream& os)
@@ -115,13 +117,13 @@ void SocketInterfacePacket::socket(Socket::Domain domain, Socket::Type type, Soc
 {
   _check();
   _action = SA_SOCKET;
-  
+
   _domain = domain;
   _type   = type;
   _proto  = proto;
 }
 
-void SocketInterfacePacket::bind(Socket::Filedesc desc, IN_Addr addr, IN_Port port)
+void SocketInterfacePacket::bind(Socket::Filedesc desc, IPAddress addr, PortNumber port)
 {
   _check();
   _action = SA_BIND;
@@ -149,7 +151,7 @@ void SocketInterfacePacket::accept(Socket::Filedesc desc)
 }
 
 // client interface functions
-void SocketInterfacePacket::connect(Socket::Filedesc desc, IN_Addr faddr, IN_Port fport)
+void SocketInterfacePacket::connect(Socket::Filedesc desc, IPAddress faddr, PortNumber fport)
 {
   _check();
   _action = SA_CONNECT;
@@ -195,7 +197,7 @@ void SocketInterfacePacket::close(Socket::Filedesc desc)
 
 }
 
-void SocketInterfacePacket::setSockPair(const IN_Addr& laddr, IN_Port& lport, const IN_Addr& faddr, IN_Port& fport)
+void SocketInterfacePacket::setSockPair(const IPAddress& laddr, PortNumber& lport, const IPAddress& faddr, PortNumber& fport)
 {
   _laddr = laddr;
   _lport = lport;
@@ -210,7 +212,7 @@ void SocketInterfacePacket::socket_ret(Socket::Filedesc desc)
   setFiledesc(desc);
 }
 
-void SocketInterfacePacket::accept_ret(Socket::Filedesc desc, const IN_Addr& fadd, IN_Port& fport)
+void SocketInterfacePacket::accept_ret(Socket::Filedesc desc, const IPAddress& fadd, PortNumber& fport)
 {
   _check();
   _action = SA_ACCEPT_RET;
@@ -226,7 +228,7 @@ void SocketInterfacePacket::connect_ret(Socket::Filedesc desc)
   setFiledesc(desc);
 }
 
-void SocketInterfacePacket::read_ret(Socket::Filedesc desc, cMessage* msg, IN_Addr faddr, IN_Port fport)
+void SocketInterfacePacket::read_ret(Socket::Filedesc desc, cMessage* msg, IPAddress faddr, PortNumber fport)
 {
   _check();
   _filedesc   = desc;
@@ -238,5 +240,5 @@ void SocketInterfacePacket::read_ret(Socket::Filedesc desc, cMessage* msg, IN_Ad
      << "Value of fport: " << _fport << endl;
 
   encapsulate(msg);
-  
+
 }

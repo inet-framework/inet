@@ -18,7 +18,7 @@ exec wish "$0" "$@"
 #  adapted for ip without qos by V. Kahmann, 2001 (deleted 1 network)
 #----------------------------------------------------------------#
 
-set topdir [exec pwd]
+set topdir [pwd]
 
 set id 0
 foreach i {

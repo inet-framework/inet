@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -20,19 +20,18 @@
 #include "TransportPacket.h"
 #include "IPInterfacePacket.h"
 
-#include "ip_address.h"
+#include "IPAddress.h"
 
-//#include <stdio.h>
-//#include <string.h>
 
-class Tcp2Ip: public cSimpleModule {
+class Tcp2Ip: public cSimpleModule
+{
 //  private:
-//	void setStringAddress(char *saddr, int addr);
+//    void setStringAddress(char *saddr, int addr);
 
-  public: 
-	Module_Class_Members(Tcp2Ip, cSimpleModule, 0);
-	virtual void initialize() { }
-	virtual void handleMessage(cMessage *msg);
+  public:
+    Module_Class_Members(Tcp2Ip, cSimpleModule, 0);
+    virtual void initialize() { }
+    virtual void handleMessage(cMessage *msg);
 };
 
 
@@ -41,59 +40,54 @@ Define_Module(Tcp2Ip);
 
 void Tcp2Ip::handleMessage(cMessage *msg)
 {
-//	IPAddrChar src_addr, dest_addr;
+//    IPAddrChar src_addr, dest_addr;
 
-	// put the message into a TransportPacket instance
-	TransportPacket *tpacket = new TransportPacket(*msg);
+    // put the message into a TransportPacket instance
+    //FIXME was this: TransportPacket *tpacket = new TransportPacket(*msg);
+    TransportPacket *tpacket = new TransportPacket();
 
-	// set kind of the transport packet 
-	// this comes from tcpmodule and could be ACK_SEG, DATA etc.
-	tpacket->setMsgKind(msg->kind());
+    // set kind of the transport packet
+    // this comes from tcpmodule and could be ACK_SEG, DATA etc.
+    tpacket->setMsgKind(msg->kind());
 
-	// set source and destination port
-	tpacket->setSourcePort(
-		msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
-	tpacket->setDestinationPort(
-		msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
+    // set source and destination port
+    tpacket->setSourcePort(
+        msg->hasPar("src_port") ? (int)msg->par("src_port") : 255);
+    tpacket->setDestinationPort(
+        msg->hasPar("dest_port") ? (int)msg->par("dest_port") : 255);
 
-//	//put the addresses into a string format
-//	setStringAddress(src_addr, 
-//					 msg->hasPar("src_addr") ? (int)msg->par("src_addr") : 255);
-//	setStringAddress(dest_addr, 
-//					 msg->hasPar("dest_addr") ? (int)msg->par("dest_addr") : 255);
+    // encapsulate tpacket into an IPInterfacePacket
+    IPInterfacePacket *ipintpacket = new IPInterfacePacket();
+    ipintpacket->encapsulate(tpacket);
+    ipintpacket->setDestAddr(IPAddress((int)msg->par("dest_addr")).getString());
+    ipintpacket->setSrcAddr(IPAddress((int)msg->par("src_addr")).getString());
+    ipintpacket->setProtocol(IP_PROT_TCP);
 
-	// encapsulate tpacket into an IPInterfacePacket
-	IPInterfacePacket *ipintpacket = new IPInterfacePacket();
-	ipintpacket->encapsulate(tpacket);
-	ipintpacket->setDestAddr(IPAddress((int)msg->par("dest_addr")).getString());
-	ipintpacket->setSrcAddr(IPAddress((int)msg->par("src_addr")).getString());
-	ipintpacket->setProtocol(IP_PROT_TCP);
-
-	// we don't set other values now
+    // we don't set other values now
         delete msg;
 
-	// send ipintpacket out to IP
-	send(ipintpacket, "out");
+    // send ipintpacket out to IP
+    send(ipintpacket, "out");
 }
 
 
 /* Old way the coding was done
 void Tcp2Ip::setStringAddress(char *saddr, int addr)
 {
-	char stringdom[]="10.0.0.";
-	char buf[3];
+    char stringdom[]="10.0.0.";
+    char buf[3];
 
-	// no negative addr's allowed:
-	// converted to 255
-	if (addr < 0) 
-		addr = 255;
+    // no negative addr's allowed:
+    // converted to 255
+    if (addr < 0)
+        addr = 255;
 
-	// put the integer addr into buffer
-	sprintf(buf,"%i",addr);
-	
-	// copy stringhost to buf vector
-	strcpy(saddr, stringdom);
-	strcat(saddr, buf);
+    // put the integer addr into buffer
+    sprintf(buf,"%i",addr);
+
+    // copy stringhost to buf vector
+    strcpy(saddr, stringdom);
+    strcat(saddr, buf);
 }
 */
 

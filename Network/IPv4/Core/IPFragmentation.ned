@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -32,7 +32,7 @@ simple IPFragmentation
         procdelay : numeric,
         numOfPorts: numeric const;
     gates:
-        in: routingIn, multicastIn; // processorManagerIn;
-        out: errorOut, outputOut [];
+        in: routingIn, multicastIn;
+        out: outputOut [];
 endsimple
 

@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,92 +14,61 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-/*
-	file: PPPModule.cc
-	Purpose: Implementation of PPPModule
-	Responsibilities:
-        comment:
-        test stub version only, no L2 header or fragment
-        no PPP done, just send raw IPDatagrams over
-        point-to-point link
-	no delay!
-	concurrency allowed!
-
-	author: Jochen Reber
-*/
+//
 
 #include <omnetpp.h>
 #include <string.h>
 
-#include "hook_types.h"
 #include "PPPModule.h"
 #include "PPPFrame.h"
 #include "IPDatagram.h"
+#include "hook_types.h"   // NWI_IDLE -- FIXME what the heck's this?
 
-Define_Module_Like( PPPModule, NetworkInterface );
 
-void PPPModule::initialize()
+Define_Module_Like(PPPModule, NetworkInterface);
+
+
+void PPPModule::endService(cMessage *msg)
 {
-	// ProcessorAccess::initialize();
+    if (!strcmp(msg->arrivalGate()->name(), "ipOutputQueueIn"))
+    {
+        cMessage *nwiIdleMsg = new cMessage();
+        nwiIdleMsg->setKind(NWI_IDLE);
 
-	delay = par("procdelay");
-}
+        // encapsulate IP datagram in PPP frame
+        PPPFrame *outFrame = new PPPFrame();
+        outFrame->encapsulate((IPDatagram *)msg);
 
-void PPPModule::activity()
-{
-	cMessage *msg;
+        send(outFrame, "physicalOut");
+        send(nwiIdleMsg, "ipOutputQueueOut");
 
-	while(true)
-	{
+    }
+    else // from Network
+    {
+        PPPFrame *recFrame = check_and_cast<PPPFrame *>(msg);
 
-		msg = receive();
+        // decapsulate IP datagram
+        if (recFrame->protocol() == PPP_PROT_IP)
+        {
+            // break off for /all/ bit errors
+            if (recFrame->hasBitError())
+            {
+                ev << "\n+ PPPLink of " << fullPath()
+                   << " receive error: Error in transmission.\n";
+                delete msg;
+                return;
+            }
 
-		if (!strcmp(msg->arrivalGate()->name(), "ipOutputQueueIn"))
-		{
-			cMessage *nwiIdleMsg = new cMessage();
-			nwiIdleMsg->setKind(NWI_IDLE);
+            IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(recFrame->decapsulate());
+            delete recFrame;
 
-/* debug output
-ev << "+ PPPLink of " << fullPath() << ": send datagram.\n";
-*/
-
-			// encapsulate IP datagram in PPP frame
-			PPPFrame *outFrame = new PPPFrame();
-			outFrame->encapsulate((IPDatagram *)msg);
-
-			wait(delay);
-			send(outFrame, "physicalOut");
-			send(nwiIdleMsg, "ipOutputQueueOut");
-
-		} else // from Network
-		{
-			PPPFrame *recFrame = (PPPFrame *)msg;
-
-			// decapsulate IP datagram
-			if (recFrame->protocol() == PPP_PROT_IP)
-			{
-				// break off for /all/ bit errors
-				if (recFrame->hasBitError())
-				{
-					ev << "\n+ PPPLink of " << fullPath()
-						<< " receive error: Error in transmission.\n";
-					delete msg;
-					continue;
-				}
-
-				IPDatagram *ipdatagram =
-						(IPDatagram *) (recFrame->decapsulate());
-				delete recFrame;
-
-				wait(delay);
-				send(ipdatagram, "ipInputQueueOut");
-			} else // print error message if it's not an IP datagram
-			{
-				ev << "\n+ PPPLink of " << fullPath()
-					<< " receive error: Not IP protocol.\n";
-			}
-		}
-	}
+            send(ipdatagram, "ipInputQueueOut");
+        }
+        else // print error message if it's not an IP datagram
+        {
+            // FIXME why should it be always IP protocol???????
+            ev << "\n+ PPPLink of " << fullPath() << " receive error: Not IP protocol.\n";
+        }
+    }
 }
 

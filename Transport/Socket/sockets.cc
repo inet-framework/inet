@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -18,8 +18,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "sockets.h"
-
 #include "tcpcb.h"
+
+using std::ostream;
 
 Register_Class(Socket);
 
@@ -108,7 +109,7 @@ Socket::~Socket()
 void Socket::info(char* buf)
 {
   cObject::info(buf);
-  sprintf(buf + strlen(buf), " Socket: %s, %s, %s, %s ", domain_string[_domain], type_string[_type], protocol_string[_proto], connstate_string[_connstate]);
+  sprintf(buf+strlen(buf), " Socket: %s, %s, %s, %s ", domain_string[_domain], type_string[_type], protocol_string[_proto], connstate_string[_connstate]);
   if (_pcb)
     _pcb->info(buf + strlen(buf));
 }
@@ -138,10 +139,10 @@ Socket& Socket::operator=(const Socket& socket)
 
 bool Socket::isFullySpecified()
 {
-  return (_pcb->fAddr() != IN_Addr(IN_Addr::ADDR_UNDEF) &&
-          _pcb->fPort() != IN_Port(IN_Port::PORT_UNDEF) &&
-          _pcb->lAddr() != IN_Addr(IN_Addr::ADDR_UNDEF) &&
-          _pcb->lPort() != IN_Port(IN_Port::PORT_UNDEF));
+  return (_pcb->fAddr() != IPADDRESS_UNDEF &&
+          _pcb->fPort() != PortNumber(PORT_UNDEF) &&
+          _pcb->lAddr() != IPADDRESS_UNDEF &&
+          _pcb->lPort() != PortNumber(PORT_UNDEF));
 }
 
 // helper functions
@@ -149,7 +150,7 @@ bool Socket::isFullySpecified()
 PCB* _createPCB(Socket::Protocol proto)
 {
   PCB* pcb = NULL;
-  
+
   switch(proto)
     {
     case Socket::TCP:
@@ -161,7 +162,7 @@ PCB* _createPCB(Socket::Protocol proto)
       // UDP in fact uses the standard PCB
       pcb = new PCB("UDP_PCB");
       break;
-      
+
     case Socket::ICMP:
     case Socket::IGMP:
     case Socket::ROUTE:

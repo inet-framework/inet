@@ -1,4 +1,4 @@
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -21,8 +21,8 @@
 // Procserver (application layer)
 //
 simple ProcServer
-	//parameters:
-	gates: 
-	  in: in;
-	  out: out;
+    //parameters:
+    gates:
+      in: in;
+      out: out;
 endsimple

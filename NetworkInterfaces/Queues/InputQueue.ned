@@ -27,7 +27,7 @@ simple InputQueue
     parameters:
         procdelay: numeric const;
     gates:
-        in: fromNW[]; // processorManagerIn;
+        in: fromNW[];
         out: toIP;
 endsimple
 

@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -23,7 +23,7 @@
 #define __CONTROLAPP_H__
 
 #include <omnetpp.h>
-
+#include "basic_consts.h"
 #include "IPInterfacePacket.h"
 
 /**
@@ -32,13 +32,13 @@
 class PingApp: public cSimpleModule
 {
 private:
-	char nodename[NODE_NAME_SIZE];
+    char nodename[NODE_NAME_SIZE];
 
 public:
     Module_Class_Members(PingApp, cSimpleModule, ACTIVITY_STACK_SIZE);
 
-	void initialize();
+    void initialize();
     void activity();
 };
-	
+
 #endif

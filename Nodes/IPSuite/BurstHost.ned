@@ -20,10 +20,9 @@
 
 import
     "NetworkLayers",
-    //"ProcessorManager",
     "PingApp",
-    "ErrorHandling",
     "TrafficGen";
+
 
 
 
@@ -33,18 +32,18 @@ import
 module BurstHost
     parameters:
 
-        nodenr          : numeric const,
-        burstPackets    : numeric const,
-        packetSize      : numeric const,
-        nodename        : string,
+        nodenr : numeric const,
+        burstPackets : numeric const,
+        packetSize : numeric const,
+        nodename : string,
 
         // Network information
-        routingFile     : string;
+        routingFile : string;
     gates:
         in: in[];
         out: out[];
     submodules:
-        burstGenerator: TrafficGenerator
+        burstGenerator: TrafficGenerator;
             parameters:
                 GeneratorType = "BurstGenerator",
                 nodename = nodename,
@@ -53,39 +52,9 @@ module BurstHost
                 burstPackets = burstPackets,
                 generationTime = 0,
                 generationSize = packetSize;
-        errorHandling: ErrorHandling;
-            parameters:
-                nodename = nodename;
-            display: "p=179,158;i=sink";
         // control module
         networkLayers: NetworkLayers;
             parameters:
-                // processing delay times
-                ipoutput_delay = 0.2 us,
-                fragmentation_delay = 0.1 us,
-                ipsend_delay = 0.5 us,
-                localdeliver_delay = 1 us,
-                prerouting_delay = 0,
-                routing_delay = 0.2 us,
-                icmp_delay = 0,
-                iptunneling_delay = 0,
-                multicast_delay = 0,
-
-                enqueue_delay = 0.3 us,
-                dequeue_delay = 0,
-                inputqueue_delay = 0.1 us,
-                nwi_delay = 0,
-
-
-                // hook names
-                preRoutingHookName = "NF_IP_PRE_ROUTING",
-                routingHookName = "NF_IP_FORWARD",
-                localDeliverHookName = "NF_IP_LOCAL_IN",
-                ipSendHookName = "NF_IP_LOCAL_OUT",
-                ipOutputHookName = "NF_IP_POST_ROUTING",
-                enqueueHookName = "L2_EnqueueHook",
-                dequeueHookName = "L2_DequeueHook",
-
                 // other Network parameters
                 IPForward = false,
                 NWIName = "PPPModule",
@@ -94,16 +63,13 @@ module BurstHost
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "p=87,155;i=fork";
-        //# processorManager: ProcessorManager;
+            display: "b=32,30;p=87,155;i=fork";
     connections nocheck:
 
-        // transport connections
+                         // transport connections
 
         networkLayers.UDPOut --> burstGenerator.in;
         networkLayers.UDPIn <-- burstGenerator.out;
-
-        networkLayers.errorOut --> errorHandling.in;
 
         // connections to network outside
         for i=0..0 do

@@ -1,30 +1,30 @@
 /*******************************************************************
 *
-*	This library is free software, you can redistribute it 
-*	and/or modify 
-*	it under  the terms of the GNU Lesser General Public License 
-*	as published by the Free Software Foundation; 
-*	either version 2 of the License, or any later version.
-*	The library is distributed in the hope that it will be useful, 
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-*	See the GNU Lesser General Public License for more details.
+*    This library is free software, you can redistribute it 
+*    and/or modify 
+*    it under  the terms of the GNU Lesser General Public License 
+*    as published by the Free Software Foundation; 
+*    either version 2 of the License, or any later version.
+*    The library is distributed in the hope that it will be useful, 
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+*    See the GNU Lesser General Public License for more details.
 *
 *
 *********************************************************************/
 
 
 #include "LDPpacket.h"
-	
+    
 /********************************************************************************
-*																				*
-*					            LDP GENERIC PACKET	    						*
-*																				*
+*                                                                                *
+*                                LDP GENERIC PACKET                                *
+*                                                                                *
 *********************************************************************************/
 
 LDPpacket::LDPpacket(): cPacket()
 {
-	type =UNKNOWN;
+    type =UNKNOWN;
 }
 
 LDPpacket::LDPpacket(int messageType): cPacket()
@@ -53,23 +53,23 @@ cPacket *LDPpacket::decapsulate()
 }
 
 
-	
+    
 /********************************************************************************
-*																				*
-*					            LDP MAPPING MESSAGE	    						*
-*																				*
+*                                                                                *
+*                                LDP MAPPING MESSAGE                                *
+*                                                                                *
 *********************************************************************************/
 
 LabelMappingMessage::LabelMappingMessage():LDPpacket()
 {
       type=LABEL_MAPPING;
-	  setKind(type);
+      setKind(type);
 }
 
 
 int LabelMappingMessage::getType()
 {
-	return LABEL_MAPPING;
+    return LABEL_MAPPING;
 }
 
 void LabelMappingMessage::printInfo(ostream& os)
@@ -83,49 +83,49 @@ os << "FEC: " << getFec() <<
 }
 
 
-	
+    
 /********************************************************************************
-*																				*
-*					            LDP LABEL REQUEST	    						*
-*																				*
+*                                                                                *
+*                                LDP LABEL REQUEST                                *
+*                                                                                *
 *********************************************************************************/
 
 
 LabelRequestMessage::LabelRequestMessage(): LDPpacket()
 {
     type=LABEL_REQUEST;
-	setKind(type);
+    setKind(type);
 }
 
 
 void LabelRequestMessage::printInfo(ostream& os)
 {
   
-	os << "LDP LABEL REQUEST MESSAGE " << "\n";
-	os << "FEC: " << getFec() << "\n";
+    os << "LDP LABEL REQUEST MESSAGE " << "\n";
+    os << "FEC: " << getFec() << "\n";
 }
 
 
 
 int LabelRequestMessage::getType()
 {
-	return LABEL_REQUEST;
+    return LABEL_REQUEST;
 }
 
 
 
 
-	
+    
 /********************************************************************************
-*																				*
-*					            LDP HELLO MESSAGE	    						*
-*																				*
+*                                                                                *
+*                                LDP HELLO MESSAGE                                *
+*                                                                                *
 *********************************************************************************/
 
 HelloMessage::HelloMessage()
 {
          type=  HELLO;
-		 setKind(type);
+         setKind(type);
 }
 
 
@@ -139,7 +139,7 @@ HelloMessage::HelloMessage(double time, bool tbit, bool rbit)
 
 int HelloMessage::getType()
 {
-	return HELLO;
+    return HELLO;
 }
 void HelloMessage::printInfo(ostream& os)
 {
@@ -172,7 +172,7 @@ void IniMessage::printInfo(ostream& os)
 
 int IniMessage::getType()
 {
-	return INITIALIZATION;
+    return INITIALIZATION;
 }
 
 AddressMessage::AddressMessage(): LDPpacket()
@@ -199,7 +199,7 @@ void AddressMessage::printInfo(ostream& os)
 
 int AddressMessage::getType()
 {
-	return ADDRESS;
+    return ADDRESS;
 }
 
 

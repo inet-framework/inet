@@ -2,6 +2,13 @@
 # Config file for the IPSuite. This is included by every makefile.
 #
 
-ROOT=$(HOME)/opp-rsvp-te/ipsuite-rearranged
+#ROOT=$(HOME)/ipsuite
+ROOT=/cygdrive/d/home/IPSuite-local
+
+LIBXML_INCLUDES= -I/usr/include/libxml2
+LIBXML_LIBS= -lxml2
 
 include $(ROOT)/omnetppconfig
+
+INCLUDE_PATH+= $(LIBXML_INCLUDES)
+LIBS+= $(LIBXML_LIBS)

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,42 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
-/* -------------------------------------------------
-	file: IPFragmentation.h
-	Purpose: Header file for IPFragmentation
-	------
-	Responsibilities: 
-	receive valid IP datagram from Routing or Multicast
-	Fragment datagram if size > MTU [output port]
-	send fragments to IPOutput[output port]
-	author: Jochen Reber
-	------------------------------------------------- */
 
 #ifndef __IPFRAGMENTATION_H__
 #define __IPFRAGMENTATION_H__
 
+#include "QueueBase.h"
 #include "RoutingTableAccess.h"
 #include "IPDatagram.h"
 #include "RoutingTable.h"
-#include "ICMP.h"
+#include "ICMPAccess.h"
 
-class IPFragmentation: public RoutingTableAccess
+/**
+ * Fragment datagram if size is bigger than MTU of output port, then
+ * send fragments to IPOutput[output port].
+ * More detailed info in the NED file.
+ */
+class IPFragmentation: public QueueBase
 {
-private:
-	int numOfPorts;
-	simtime_t delay;
+  private:
+    RoutingTableAccess routingTableAccess;
+    ICMPAccess icmpAccess;
+    int numOfPorts;
 
-	void sendErrorMessage 
-			(IPDatagram *, ICMPType type, ICMPCode code);
-	void sendDatagramToOutput(IPDatagram *datagram);
+    void sendDatagramToOutput(IPDatagram *datagram);
 
-public:
-    Module_Class_Members(IPFragmentation, RoutingTableAccess, 
-				ACTIVITY_STACK_SIZE);
-
-	virtual void initialize();
-	virtual void activity();
+  public:
+    Module_Class_Members(IPFragmentation, QueueBase, 0);
+    virtual void initialize();
+    virtual void endService(cMessage *msg);
 };
 
 #endif

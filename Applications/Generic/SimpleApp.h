@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -18,10 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: SimpleApp.h
-	Purpose: Traffic Generator that can send simple
-		TCP or UDP packets at random stastical intervals
-	author: Jochen Reber
+    file: SimpleApp.h
+    Purpose: Traffic Generator that can send simple
+        TCP or UDP packets at random stastical intervals
+    author: Jochen Reber
 */
 
 #ifndef __SIMPLEAPP_H__
@@ -29,22 +29,23 @@
 
 #include <omnetpp.h>
 
+#include "basic_consts.h"
 #include "IPInterfacePacket.h"
 
 class SimpleApp: public cSimpleModule
 {
 private:
-	IPProtocolFieldId prot;
-	simtime_t generationTime;
-	int packetSize;
-	int nodenr;
-	char nodename[NODE_NAME_SIZE];
+    IPProtocolFieldId prot;
+    simtime_t generationTime;
+    int packetSize;
+    int nodenr;
+    char nodename[NODE_NAME_SIZE];
 
-	char *chooseDestAddr(char *);
+    char *chooseDestAddr(char *);
 public:
     Module_Class_Members(SimpleApp, cSimpleModule, ACTIVITY_STACK_SIZE);
 
-	void initialize();
+    void initialize();
     void activity();
 };
 

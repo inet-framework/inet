@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -54,12 +54,12 @@ void SocketLayer::_findRoutingTable()
     error("Module routingTable not found!");
 }
 
-IN_Addr SocketLayer::_defaultIPAddr()
+IPAddress SocketLayer::_defaultIPAddr()
 {
   if (_rt)
     return( (const char*) (_rt->getInterfaceByIndex(0)->inetAddr->getString()));
   else
-    return(IN_Addr::ADDR_UNDEF);
+    return(IPADDRESS_UNDEF);
 }
 
 Socket::Filedesc SocketLayer::_newSocket(Socket::Domain dom, Socket::Type type,
@@ -79,7 +79,7 @@ Socket::Filedesc SocketLayer::_newSocket(Socket::Domain dom, Socket::Type type,
   container->addAt(FROM_APPL_ID, from_appl_id);
 
   desc = _sockar.add(container);
-  
+
   if (debug)
     {
       ev << "created new socket with filedescriptor no. " << (int) desc << endl
@@ -87,7 +87,7 @@ Socket::Filedesc SocketLayer::_newSocket(Socket::Domain dom, Socket::Type type,
       socket->info(&buf[0]);
       ev << &buf[0] << endl;
     }
-  
+
   return desc;
 }
 
@@ -109,31 +109,31 @@ void SocketLayer::_deleteSocket(Socket::Filedesc desc)
   delete container;
 }
 
-IN_Port SocketLayer::_bindPort(IN_Port port, Socket* socket)
+PortNumber SocketLayer::_bindPort(PortNumber port, Socket* socket)
 {
   cArray* container = new cArray("Socket-Container");
   container->takeOwnership(false); // Sockets inserted here are owned
-				   // by _sockar instead;
+                   // by _sockar instead;
   container->add(socket);
 
-  if (port == IN_Port(IN_Port::PORT_UNDEF))
+  if (port == PortNumber(PORT_UNDEF))
     {
       // bind to a ephemeral port
-      for (int idx = WK_PORTS; (port == IN_Port(IN_Port::PORT_UNDEF)) && (port < IN_Port(IN_Port::PORT_MAX)); idx++)
+      for (int idx = WK_PORTS; (port == PortNumber(PORT_UNDEF)) && (port < PortNumber(PORT_MAX)); idx++)
         {
           if (!_portar.exist(idx))
             port = idx;
         }
     }
 
-  if (port == IN_Port(IN_Port::PORT_MAX))
+  if (port == PortNumber(PORT_MAX))
     error("No more ports available");
 
   if (debug)
     ev << "Binding to port " << (int) port << endl;
-  
+
   return _portar.addAt(port, container);
-  
+
 }
 
 void SocketLayer::_releasePort(Socket* socket)
@@ -141,7 +141,7 @@ void SocketLayer::_releasePort(Socket* socket)
   cArray* container = NULL;
   int ctr_idx;
   bool found = false;
-  
+
   for(int idx = 0; (idx < _portar.items()) && (found == false); idx++)
     {
       if ((container = (cArray*) _portar.get(idx)) != NULL)
@@ -160,7 +160,7 @@ void SocketLayer::initialize()
   _init();
   // get module parameters
   debug = par("debug");
-  
+
   // initialize gate cache
   _from_ip        = gate("from_ip")->id();
   _to_ip          = gate("to_ip")->id();
@@ -172,7 +172,7 @@ void SocketLayer::initialize()
   _from_appl_size = gate(_from_appl)->size();
   _to_appl        = gate("to_appl")->id();
   _to_appl_size   = gate(_to_appl)->size();
-  
+
   // find the routing table module
   _findRoutingTable();
 }
@@ -204,7 +204,7 @@ void SocketLayer::handleMessage(cMessage* msg)
 int SocketLayer::_returnGate(int arrivalgate)
 {
   int outgate;
-  
+
   if (arrivalgate == _from_ip)
     outgate = _to_ip;
   else if (arrivalgate == _from_tcp)
@@ -225,7 +225,7 @@ void SocketLayer::_sendDown(cMessage* msg, Socket* socket)
 {
   char* name = NULL;
   int outgate;
-  
+
   switch(socket->protocol())
     {
     case Socket::UDP:
@@ -253,10 +253,10 @@ void SocketLayer::_sendDown(cMessage* msg, Socket* socket)
       break;
     }
   msg->setName(name);
-  
+
   if (debug)
     ev << "Sending " << name << "-msg to gate nr. " << outgate << endl;
-  
+
   send(msg, outgate);
 }
 
@@ -266,7 +266,7 @@ void SocketLayer::_handleFromUDP(TransportInterfacePacket* msg)
   int from_appl_id = -1;
   Socket::Filedesc filedesc;
   bool found = false;
-  
+
   if (debug)
     ev << "Received msg " << msg->name() << " from UDP\n";
 
@@ -292,7 +292,7 @@ void SocketLayer::_handleFromUDP(TransportInterfacePacket* msg)
 
       if (found == false)
         error("No filedescriptor found");
-      
+
       sockipack->read_ret(filedesc, msg->decapsulate(), msg->sourceAddress(), msg->sourcePort());
       send(sockipack, _returnGate(from_appl_id));
     }
@@ -338,10 +338,10 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
 
       socket = getSocket(msg->filedesc(), false, msg->arrivalGateId());
 
-      if (msg->lAddr() == IN_Addr(IN_Addr::ADDR_UNDEF))
+      if (msg->lAddr() == IPADDRESS_UNDEF)
         socket->pcb()->setLAddr(_defaultIPAddr());
       else
-	socket->pcb()->setLAddr(msg->lAddr());
+    socket->pcb()->setLAddr(msg->lAddr());
 
 
       // occupy the port
@@ -356,7 +356,7 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
 
       //socket->setSOPT_ACCEPTCONN();
       socket->setConnState(Socket::CONN_LISTEN);
-      
+
       if (debug)
         ev << "Server Socket sending PASSIVE OPEN to UDP.\n";
 
@@ -381,20 +381,20 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
 
       socket = getSocket(msg->filedesc(), false, msg->arrivalGateId());
 
-      if (socket->pcb()->lAddr() == IN_Addr(IN_Addr::ADDR_UNDEF))
+      if (socket->pcb()->lAddr() == IPADDRESS_UNDEF)
         socket->pcb()->setLAddr(_defaultIPAddr());
       else
-	socket->pcb()->setLAddr(msg->lAddr());
+    socket->pcb()->setLAddr(msg->lAddr());
 
-      if (socket->pcb()->lPort() == IN_Port(IN_Port::PORT_UNDEF))
+      if (socket->pcb()->lPort() == PortNumber(PORT_UNDEF))
         {
           // get a new ephemeral local port
           socket->pcb()->setLPort(_bindPort(msg->lPort(), socket));
         }
 
-      if (msg->fAddr() == IN_Addr(IN_Addr::ADDR_UNDEF))
+      if (msg->fAddr() == IPADDRESS_UNDEF)
         error("No Address defined");
-      if (msg->fPort() == IN_Port(IN_Port::PORT_UNDEF))
+      if (msg->fPort() == PortNumber(PORT_UNDEF))
         error("No Port defined");
 
       socket->pcb()->setFAddr(msg->fAddr());
@@ -409,10 +409,10 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
       socket->setConnState(Socket::CONN_ESTAB);
 
       // TCP: send active open
-      
+
       break;
 
-    
+
 
     case SocketInterfacePacket::SA_WRITE:
 
@@ -457,7 +457,7 @@ void SocketLayer::_handleFromAppl(SocketInterfacePacket* msg)
 
       // FIXME: A timer should be set to delete the socket and port after some
       // time to be able to handle packages that arrive too late.
-      
+
       // Delete Socket
       _releasePort(socket);
       _deleteSocket(msg->filedesc());
@@ -473,7 +473,7 @@ Socket* SocketLayer::getSocket(Socket::Filedesc desc, bool fullyspecified, int f
   cArray* container = (cArray*) _sockar[desc];
 
   // checking if the socket was created by a message coming from the same gate.
-  if (from_appl_gate_id != -1) 
+  if (from_appl_gate_id != -1)
     {
       if (debug)
         ev << "checking for gate correctness... ";
@@ -487,9 +487,9 @@ Socket* SocketLayer::getSocket(Socket::Filedesc desc, bool fullyspecified, int f
       else if (debug)
         ev << " passed\n";
     }
-  
+
   Socket* socket = (Socket*) (*container)[SOCKET_ID];
-  
+
   if (socket == NULL)
     error("No socket associated with Filedescriptor %d", desc);
 
@@ -499,16 +499,16 @@ Socket* SocketLayer::getSocket(Socket::Filedesc desc, bool fullyspecified, int f
 
   if (debug)
     ev << "Retrieving Socket with file descriptor " << desc << endl;
-  
+
   return socket;
 }
 
-Socket* SocketLayer::getSocket(Socket::Protocol proto, IN_Addr laddr, IN_Port lport, IN_Addr faddr, IN_Port fport)
+Socket* SocketLayer::getSocket(Socket::Protocol proto, IPAddress laddr, PortNumber lport, IPAddress faddr, PortNumber fport)
 {
   Socket* socket      = NULL;
   Socket* sock_listen = NULL;   // a socket in listen mode
   Socket* sock_full   = NULL;   // a full estabilshed socket
-  
+
   cArray* container = (cArray*) _portar.get(lport);
 
   if (container == NULL)

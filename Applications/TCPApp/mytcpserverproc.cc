@@ -1,7 +1,7 @@
 
 #include <omnetpp.h>
 #include "tcp.h"
-#include "ip_address.h"
+#include "IPAddress.h"
 
 class MyTCPServerProc : public cSimpleModule
 {
@@ -52,17 +52,17 @@ void MyTCPServerProc::initialize()
 {
 
 
-    	rem_addr = -1;
+        rem_addr = -1;
 
-	tcp_conn_id=0;
+    tcp_conn_id=0;
 
-	tcp_flag_psh = TCP_F_SET;
+    tcp_flag_psh = TCP_F_SET;
 
-	tcp_flag_urg = TCP_F_NSET;
+    tcp_flag_urg = TCP_F_NSET;
 
-	local_port = 1;//ConstType::ldp_port;
-	
-	rem_port = 1;//ConstType::ldp_port;
+    local_port = 1;//ConstType::ldp_port;
+
+    rem_port = 1;//ConstType::ldp_port;
 
 }
 
@@ -70,164 +70,164 @@ void MyTCPServerProc::initialize()
 void MyTCPServerProc::activity()
 {
 
-		
-	cModule* mod = parentModule();
-	
-	local_addr	=  IPAddress(mod->par("local_addr").stringValue()).getInt();
-	
-	timeout = mod->par("timeout");
-		
-	keepAliveTime   =  mod->par("data_interarrival_time") ;
-	
+
+    cModule* mod = parentModule();
+
+    local_addr    =  IPAddress(mod->par("local_addr").stringValue()).getInt();
+
+    timeout = mod->par("timeout");
+
+    keepAliveTime   =  mod->par("data_interarrival_time") ;
 
 
-	  //Expect SYN message
 
-	  cMessage* msg = receive(); // no timeout here
-	
-	
-	  if ((msg->kind() == TCP_I_CLOSED) || (msg->kind() !=TCP_I_RCVD_SYN))
-	  {
-    		delete msg;
-    		
-    		doClose();
+      //Expect SYN message
+
+      cMessage* msg = receive(); // no timeout here
+
+
+      if ((msg->kind() == TCP_I_CLOSED) || (msg->kind() !=TCP_I_RCVD_SYN))
+      {
+            delete msg;
+
+            doClose();
            }
 
-	  rem_port = msg->par("src_port"); //client TCP-port at remote client side
+      rem_port = msg->par("src_port"); //client TCP-port at remote client side
 
-	  rem_addr = msg->par("src_addr"); //client IP-address at remote client side
+      rem_addr = msg->par("src_addr"); //client IP-address at remote client side
 
-	  local_port = msg->par("dest_port"); //own server TCP-port
+      local_port = msg->par("dest_port"); //own server TCP-port
 
-	  local_addr = msg->par("dest_addr"); //own server IP-address
-
-	
-	
-	  delete msg;
+      local_addr = msg->par("dest_addr"); //own server IP-address
 
 
-	  //Expect ESTAB message
 
-	  msg = receive();
+      delete msg;
 
-	  rem_port = msg->par("src_port"); //client TCP-port at remote client side
 
-	  rem_addr = msg->par("src_addr"); //client IP-address at remote client side
+      //Expect ESTAB message
 
-	  local_port = msg->par("dest_port"); //own server TCP-port
+      msg = receive();
 
-	  local_addr = msg->par("dest_addr"); //own server IP-address
+      rem_port = msg->par("src_port"); //client TCP-port at remote client side
 
-	  if(msg->hasPar("mss"))
+      rem_addr = msg->par("src_addr"); //client IP-address at remote client side
+
+      local_port = msg->par("dest_port"); //own server TCP-port
+
+      local_addr = msg->par("dest_addr"); //own server IP-address
+
+      if(msg->hasPar("mss"))
               tcp_mss   = 8*((msg->par("mss")).longValue());   //bits
-          else 
+          else
               tcp_mss = 8; //Length is not important as this stage, dummy value
 
-	  msgLng = tcp_mss/4;  //bits
+      msgLng = tcp_mss/4;  //bits
 
-	   ev << "MY_TCP_SERVER_PROC DEBUG:  LSR(" << IPAddress(local_addr).getString() << ") received ESTAB from LSR(" <<
-	   IPAddress(rem_addr).getString() << ")\n";;
-	
-	  delete msg;
+       ev << "MY_TCP_SERVER_PROC DEBUG:  LSR(" << IPAddress(local_addr).getString() << ") received ESTAB from LSR(" <<
+       IPAddress(rem_addr).getString() << ")\n";;
 
-	
-	  tcp_conn_id = id();
-
-	  //Start to operate as peer
+      delete msg;
 
 
-	  //Start the self KEEP ALIVE cycle
+      tcp_conn_id = id();
 
-	  cMessage* ka_msg =new cMessage();
+      //Start to operate as peer
 
-	  scheduleAt(simTime() + keepAliveTime, ka_msg);
 
-	  //Send KEEP ALIVE to peer
-	
-	  sendKEEP_ALIVE();
+      //Start the self KEEP ALIVE cycle
 
-	  // following while(true) line was changed to while(this!=0) [which is equally true]
-	  // because the former crashed MSVC6.0sp5 (!!) with:
-	  //   fatal error C1001: INTERNAL COMPILER ERROR
+      cMessage* ka_msg =new cMessage();
+
+      scheduleAt(simTime() + keepAliveTime, ka_msg);
+
+      //Send KEEP ALIVE to peer
+
+      sendKEEP_ALIVE();
+
+      // following while(true) line was changed to while(this!=0) [which is equally true]
+      // because the former crashed MSVC6.0sp5 (!!) with:
+      //   fatal error C1001: INTERNAL COMPILER ERROR
       //     (compiler file 'E:\8966\vc98\p2\src\P2\main.c', line 494)
-	  //while(true)
-	  while(this!=0)
-	  {
+      //while(true)
+      while(this!=0)
+      {
 
-		   sendNo=0;
+           sendNo=0;
 
-		  //Issue a TCP_RECEIVE, possible data from peer
-		  issueTCP_RECEIVE();
+          //Issue a TCP_RECEIVE, possible data from peer
+          issueTCP_RECEIVE();
 
-		  cMessage* msg = receive();
+          cMessage* msg = receive();
 
-		  processMessage(msg);
-		
-		
-	  }
+          processMessage(msg);
+
+
+      }
 
 }
 
 
 void MyTCPServerProc::issueTCP_RECEIVE()
 {
-		cMessage* receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
+        cMessage* receive_call = new cMessage("TCP_C_RECEIVE", TCP_C_RECEIVE);
 
-        	receive_call->addPar("src_port")  = local_port;
+            receive_call->addPar("src_port")  = local_port;
 
-		receive_call->addPar("src_addr")  = local_addr;
+        receive_call->addPar("src_addr")  = local_addr;
 
-         	receive_call->addPar("dest_port") = rem_port;
+             receive_call->addPar("dest_port") = rem_port;
 
-	  	receive_call->addPar("dest_addr") = rem_addr;
-	
-	  	receive_call->addPar("tcp_conn_id") = tcp_conn_id;
+          receive_call->addPar("dest_addr") = rem_addr;
 
-        	receive_call->setLength(0);
+          receive_call->addPar("tcp_conn_id") = tcp_conn_id;
 
-	  	receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
+            receive_call->setLength(0);
 
-	  	receive_call->setTimestamp();
+          receive_call->addPar("rec_pks")     = 1; //(long) rec_pks;
 
-	  	//send "receive" to "TcpModule"
-	  	send(receive_call, "out");
+          receive_call->setTimestamp();
 
-		ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send TCP_C_RECEIVE to " <<
-		IPAddress(rem_addr).getString() << "\n";
+          //send "receive" to "TcpModule"
+          send(receive_call, "out");
+
+        ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send TCP_C_RECEIVE to " <<
+        IPAddress(rem_addr).getString() << "\n";
 }
 
 
 void MyTCPServerProc::sendKEEP_ALIVE()
 {
-	  cMessage *send_call = new cMessage("TCP_C_SEND", TCP_C_SEND);
+      cMessage *send_call = new cMessage("TCP_C_SEND", TCP_C_SEND);
 
-	  send_call->addPar("tcp_conn_id")  =  tcp_conn_id;
+      send_call->addPar("tcp_conn_id")  =  tcp_conn_id;
 
-	  send_call->addPar("src_port")     = local_port;
+      send_call->addPar("src_port")     = local_port;
 
-	  send_call->addPar("src_addr")     = local_addr;
+      send_call->addPar("src_addr")     = local_addr;
 
-	  send_call->addPar("dest_port")    = rem_port;
+      send_call->addPar("dest_port")    = rem_port;
 
-	  send_call->addPar("dest_addr")    = rem_addr;
+      send_call->addPar("dest_addr")    = rem_addr;
 
-	  send_call->addPar("tcp_flag_psh") = (int) tcp_flag_psh;
+      send_call->addPar("tcp_flag_psh") = (int) tcp_flag_psh;
 
-	  send_call->addPar("tcp_flag_urg") = (int) tcp_flag_urg;
+      send_call->addPar("tcp_flag_urg") = (int) tcp_flag_urg;
 
-	  send_call->addPar("timeout")      = (int) timeout;
+      send_call->addPar("timeout")      = (int) timeout;
 
-	  send_call->setLength(msgLng); //(tcp_mss * 8/4);
+      send_call->setLength(msgLng); //(tcp_mss * 8/4);
 
-	  send_call->addPar("rec_pks") = 0;
+      send_call->addPar("rec_pks") = 0;
 
-	  send_call->addPar("keep_alive") =0;
+      send_call->addPar("keep_alive") =0;
 
-	  send_call->setTimestamp();
+      send_call->setTimestamp();
 
-	  ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send DATA to " <<
-		IPAddress(rem_addr).getString() << "\n";
-	  send(send_call, "out");
+      ev << "TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " send DATA to " <<
+        IPAddress(rem_addr).getString() << "\n";
+      send(send_call, "out");
 
 
 }
@@ -238,20 +238,20 @@ void MyTCPServerProc::processSELF_KEEP_ALIVE(cMessage* msg)
 {
 
 
-	
+
      if(sendNo==0)
      {
-        	sendKEEP_ALIVE();
-        	sendNo=1;
+            sendKEEP_ALIVE();
+            sendNo=1;
      }
-	
-  	scheduleAt(simTime()+ keepAliveTime, msg);
 
- 	cMessage *msgN= receive();
+      scheduleAt(simTime()+ keepAliveTime, msg);
 
- 	//Iterate of processMessage till we get message from peer
-  	processMessage(msgN);
-  		
+     cMessage *msgN= receive();
+
+     //Iterate of processMessage till we get message from peer
+      processMessage(msgN);
+
 
 }
 
@@ -261,16 +261,16 @@ void MyTCPServerProc::processMessage(cMessage* msg)
 {
 
         if(msg->isSelfMessage())
-	{		
-		processSELF_KEEP_ALIVE(msg);
-  		
-	  }
+    {
+        processSELF_KEEP_ALIVE(msg);
 
-	else  //Message is data from peer
-	{
-		processData(msg);
-  		
-	}
+      }
+
+    else  //Message is data from peer
+    {
+        processData(msg);
+
+    }
 }
 
 
@@ -278,20 +278,20 @@ void MyTCPServerProc::processMessage(cMessage* msg)
 void MyTCPServerProc::processData(cMessage* msg)
 {
     if ((msg->kind()) == TCP_I_SEG_FWD)
-	{
-		
-	ev << "MY_TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
-	IPAddress(rem_addr).getString() << "\n";
-	
-	delete msg;
-	
-  	}
-  	
+    {
+
+    ev << "MY_TCP_SERVER_PROC DEBUG: " << IPAddress(local_addr).getString() << " receives data from " <<
+    IPAddress(rem_addr).getString() << "\n";
+
+    delete msg;
+
+      }
+
    else
    {
-  	
-	  delete msg;
-	  	
+
+      delete msg;
+
    }
 }
 

@@ -1,5 +1,5 @@
 
-#include "omnetpp.h"
+#include <omnetpp.h>
 #include "TransportInterfacePacket.h"
 #include "UDPPacket.h"
 #include "IPInterfacePacket.h"
@@ -29,23 +29,23 @@ void UDPModule::handleMessage(cMessage* msg)
   if (strcmp(msg->arrivalGate()->name(), "from_ip") == 0)
     {
       if (debug)
-	ev << "from IP layer" << endl;
+    ev << "from IP layer" << endl;
 
       IPInterfacePacket* ippack = (IPInterfacePacket*) msg;
       UDPPacket* udppack = (UDPPacket*) ippack->decapsulate();
       TransportInterfacePacket* tpack = new TransportInterfacePacket;
       tpack->setSourcePort(udppack->sourcePort());
-      tpack->setSourceAddress(ippack->srcAddr());
+      tpack->setSourceAddress(ippack->srcAddr().getString());
       tpack->setDestinationPort(udppack->destinationPort());
-      tpack->setDestinationAddress(ippack->destAddr());
+      tpack->setDestinationAddress(ippack->destAddr().getString());
       tpack->encapsulate(udppack->decapsulate());
-      
+
       send(tpack, "to_socket");
     }
   else // received from application layer
     {
       if (debug)
-	ev << "from Socket layer" << endl;
+    ev << "from Socket layer" << endl;
 
       TransportInterfacePacket* tpack = (TransportInterfacePacket*) msg;
       IPInterfacePacket* ippack = new IPInterfacePacket();

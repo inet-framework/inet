@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Header$
+//
 //
 // Copyright (C) 2001 Institut fuer Nachrichtentechnik, Universitaet Karlsruhe
 //
@@ -22,14 +22,16 @@
 
 #include "pcb.h"
 
+using std::ostream;
+
 Register_Class(PCB);
 
 void PCB::_init()
 {
-  _faddr = IN_Addr::ADDR_UNDEF;
-  _fport = IN_Port::PORT_UNDEF;
-  _faddr = IN_Addr::ADDR_UNDEF;
-  _fport = IN_Port::PORT_UNDEF;
+  //_faddr = IPADDRESS_UNDEF;
+  _fport = PORT_UNDEF;
+  //_faddr = IPADDRESS_UNDEF;
+  _fport = PORT_UNDEF;
 }
 
 
@@ -39,10 +41,10 @@ PCB::PCB(const PCB& pcb) : cObject()
   operator=(pcb);
 }
 
-PCB::PCB(IN_Addr laddr, IN_Port lport, IN_Addr faddr, IN_Port fport) : cObject()
+PCB::PCB(IPAddress laddr, PortNumber lport, IPAddress faddr, PortNumber fport) : cObject()
 {
   _init();
-  
+
   _faddr = faddr;
   _fport = fport;
   _laddr = laddr;

@@ -18,28 +18,28 @@
 
 typedef struct
 {
-	int tcp_conn_id;
-	int mod_id;
-	int peerAddr;
+    int tcp_conn_id;
+    int mod_id;
+    int peerAddr;
 } ldp_session_type;
 
 /*
 class ldp_session_type
 {
-	public:
-		int tcp_conn_id;
-		int mod_id;
-		int peerAddr;
-		ldp_session_type(){tcp_conn_id=0; mod_id=0; peerAddr=0;}
-		~ldp_session_type(){}
+    public:
+        int tcp_conn_id;
+        int mod_id;
+        int peerAddr;
+        ldp_session_type(){tcp_conn_id=0; mod_id=0; peerAddr=0;}
+        ~ldp_session_type(){}
 }
 
 */
 /*
 typedef struct requestSessionBind
 {
-	IPAddressPrefix fec;
-	int mod_id;
+    IPAddressPrefix fec;
+    int mod_id;
 } fec_session_bind;
 
 */
@@ -59,7 +59,7 @@ private:
   cModuleType *procclient_type;
 
   void passiveOpen(double timeout, cModuleType* procserver_type);
-  void createClient(int destAddr);	
+  void createClient(int destAddr);    
   void createServer();
   int getModidByPeerIP(int peerIP);
 

@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -16,162 +15,100 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-/* -------------------------------------------------
-	file: IPFragmentation.cc
-	Purpose: Implementation for IPFragmentation
-	------
-	Responsibilities:
-	receive valid IP datagram from Routing or Multicast
-	Fragment datagram if size > MTU [output port]
-	send fragments to IPOutput[output port]
-
-	comment: par("numOfPorts") not used at all
-
-	author: Jochen Reber
-	------------------------------------------------- */
 
 #include "IPFragmentation.h"
 
 Define_Module( IPFragmentation );
 
-/* ICMP type 2, code 4: fragmentation needed, but
-		don't-fragment bit set */
+// ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
-/*  ----------------------------------------------------------
-        Public Functions
-    ----------------------------------------------------------  */
 
 void IPFragmentation::initialize()
 {
-	RoutingTableAccess::initialize();
-
-	numOfPorts = par("numOfPorts");
-	delay = par("procdelay");
+    QueueBase::initialize();
+    numOfPorts = par("numOfPorts");  // FIXME is this the same as gateSize("outputOut")?
 }
 
-void IPFragmentation::activity()
+// FIXME performance model is not good here!!! we should wait #fragments times delay!!!
+void IPFragmentation::endService(cMessage *msg)
 {
-    IPDatagram *datagram;
-	int mtu, headerLength, payload;
-	int noOfFragments;
-	int i;
+    IPDatagram *datagram  = check_and_cast<IPDatagram *>(msg);
 
-    while(true)
+    RoutingTable *rt = routingTableAccess.get();
+    int mtu = rt->getInterfaceByIndex(datagram->outputPort())->mtu;
+
+    // check if datagram does not require fragmentation
+    if (datagram->length()/8 <= mtu)
     {
-        datagram = (IPDatagram *)receive();
+        datagram->addPar("finalFragment").setBoolValue(true);
+        sendDatagramToOutput(datagram);
+        return;
+    }
 
-//		mtu = rt->getInterfaceByIndex(datagram->outputPort()).mtu;
-		mtu = rt->getInterfaceByIndex(datagram->outputPort())->mtu;
+    int headerLength = datagram->headerLength();
+    int payload = datagram->length()/8 - headerLength;
 
-		/*
-		ev << "totalLength / MTU: " << datagram->totalLength() << " / "
-		<< mtu << "\n";
-		*/
+    int noOfFragments =
+        int(ceil((float(payload)/mtu) /
+        (1-float(headerLength)/mtu) ) ); // FIXME ???
 
-		// check if datagram does not require fragmentation
-		if (datagram->totalLength() <= mtu)
-		{
-			datagram->addPar("finalFragment").setBoolValue(true);
-			wait(delay);
-			sendDatagramToOutput(datagram);
-			continue;
-		}
+    // ev << "No of Fragments: " << noOfFragments << endl;
 
-		headerLength = datagram->headerLength();
-		payload = datagram->totalLength() - headerLength;
+    // if "don't fragment" bit is set, throw datagram away and send ICMP error message
+    if (datagram->dontFragment() && noOfFragments>1)
+    {
+        icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
+                                                     ICMP_FRAGMENTATION_ERROR_CODE);
+        return;
+    }
 
-		noOfFragments=
-			int(ceil((float(payload)/mtu) /
-			(1-float(headerLength)/mtu) ) );
-		/*
-		ev << "No of Fragments: " << noOfFragments << "\n";
-		*/
+    // create and send fragments
+    // FIXME revise this!
+    for (int i=0; i<noOfFragments; i++)
+    {
+        // FIXME is it ok that full encapsulated packet travels in every datagram fragment?
+        // should better travel in the last fragment only. Cf. with reassembly code!
+        IPDatagram *fragment = (IPDatagram *) datagram->dup();
 
-		/* if "don't Fragment"-bit is set, throw
-			datagram away and send ICMP error message */
-		if (datagram->dontFragment() && noOfFragments > 1)
-		{
-			sendErrorMessage (datagram,
-				ICMP_DESTINATION_UNREACHABLE,
-				ICMP_FRAGMENTATION_ERROR_CODE);
-			continue;
-		}
+        // total_length equal to mtu, except for last fragment;
+        // "more fragments" bit is unchanged in the last fragment, otherwise true
+        if (i != noOfFragments-1)
+        {
+            fragment->setMoreFragments(true);
+            fragment->setLength(8*mtu);
+        }
+        else
+        {
+            // size of last fragment
+            int bytes = datagram->length()/8 - (noOfFragments-1) * (mtu - datagram->headerLength());
+            fragment->setLength(8*bytes);
+        }
+        fragment->setFragmentOffset( i*(mtu - datagram->headerLength()) );
 
-		for (i=0; i<noOfFragments; i++)
-		{
+        sendDatagramToOutput(fragment);
+    }
 
-			IPDatagram *fragment = (IPDatagram *) datagram->dup();
-			// fragment = new IPDatagram;
-			// fragment->operator=(*datagram);
-
-			/* total_length equal to mtu, except for
-				last fragment */
-
-			/* "more Fragments"-bit is unchanged
-				in the last fragment, otherwise
-				true */
-			if (i != noOfFragments-1)
-			{
-				// claimKernelAgain();
-				fragment->setMoreFragments (true);
-				fragment->setTotalLength(mtu);
-			} else
-			{
-				// size of last fragment
-				fragment->setTotalLength
-					(datagram->totalLength() -
-					 (noOfFragments-1) *
-					 (mtu - datagram->headerLength()));
-			}
-			fragment->setFragmentOffset(
-					i*(mtu - datagram->headerLength()) );
-
-
-			wait(delay);
-			sendDatagramToOutput(fragment);
-		} // end for to noOfFragments
-		delete( datagram );
-
-	} // end while
+    delete datagram;
 }
 
 
 
-/*  ----------------------------------------------------------
-        Private Functions
-    ----------------------------------------------------------  */
-
-//  send error message to ICMP Module
-void IPFragmentation::sendErrorMessage(IPDatagram *datagram,
-        ICMPType type, ICMPCode code)
-{
-	// format in ICMP.h
-    cMessage *icmpNotification = new cMessage();
-
-    datagram->setName("datagram");
-    icmpNotification->addPar("ICMPType") = (long)type;
-    icmpNotification->addPar("ICMPCode") = code;
-    icmpNotification->parList().add(datagram);
-
-    send(icmpNotification, "errorOut");
-}
-
+//----------------------------------------------------------
+// Private Functions
+//----------------------------------------------------------
 
 void IPFragmentation::sendDatagramToOutput(IPDatagram *datagram)
 {
-	int outputPort;
+    int outputPort = datagram->outputPort();
+    if (outputPort >= numOfPorts)
+    {
+        ev << "Error in IPFragmentation: illegal output port " << outputPort << endl;
+        delete datagram;
+        return;
+    }
 
-	outputPort = datagram->outputPort();
-	if (outputPort > numOfPorts -1)
-	{
-		ev << "Error in IPFragmentation: "
-			<< "illegal output port: " << outputPort << "\n";
-		delete( datagram );
-		return;
-	}
-
-	send(datagram, "outputOut", outputPort);
+    send(datagram, "outputOut", outputPort);
 }
 
 

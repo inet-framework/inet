@@ -1,4 +1,3 @@
-// $Header$
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -15,154 +14,93 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-
-
-import   
-    "IPProcessing", 
-    "RoutingTable", 
-    "InputQueue", 
-    "OutputQueue", 
-    "NetworkInterface"; 
-                        
-                        
 //
-// Network layers of the IP Node. Contains: IPProcessing, IP I/O-Queues, 
+
+import
+    "IPProcessing",
+    "RoutingTable",
+    "InputQueue",
+    "OutputQueue",
+    "NetworkInterface";
+
+//
+// Network layers of the IP Node. Contains: IPProcessing, IP I/O-Queues,
 // Network Interfaces and Routing Table
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, error out
 //
-module NetworkLayers 
-    parameters: 
-    // processing delay times
-        icmp_delay : numeric,
-        fragmentation_delay : numeric,
-        multicast_delay : numeric,
-        ipoutput_delay : numeric,
-        ipsend_delay : numeric,
-        iptunneling_delay : numeric,
-        localdeliver_delay : numeric,
-        prerouting_delay : numeric,
-        routing_delay : numeric,
-        enqueue_delay : numeric,
-        dequeue_delay : numeric,
-        inputqueue_delay : numeric,
-        nwi_delay : numeric const,
-
-    // hook Names
-        preRoutingHookName : string,
-        routingHookName : string,
-        localDeliverHookName : string,
-        ipSendHookName : string,
-        ipOutputHookName : string,
-        enqueueHookName : string,   
-        dequeueHookName : string,
-
-    // other network parameters
-        routingFile : string, 
+module NetworkLayers
+    parameters:
         IPForward : bool,
-        NWIName : string, 
-        numOfPorts : numeric;
-    gates: 
-        in: physIn[]; 
-        in: TCPIn; 
-        in: UDPIn; 
-        in: pingIn; 
-        out: physOut[]; 
-        out: TCPOut; 
-        out: UDPOut; 
-        out: pingOut; 
-        out: errorOut; 
+        NWIName : string,
+        numOfPorts : numeric,
+        routingFile : string;
+    gates:
+        in: physIn[];
+        in: TCPIn;
+        in: UDPIn;
+        in: pingIn;
+        out: physOut[];
+        out: TCPOut;
+        out: UDPOut;
+        out: pingOut;
 
-    submodules: 
-        proc: IPProcessing; 
-            parameters: 
-        // delay times
-                icmp_delay = icmp_delay,
-                fragmentation_delay = fragmentation_delay,
-                multicast_delay = multicast_delay,
-                ipoutput_delay = ipoutput_delay,
-                ipsend_delay = ipsend_delay,
-                iptunneling_delay = iptunneling_delay,
-                localdeliver_delay = localdeliver_delay,
-                prerouting_delay = prerouting_delay,
-                routing_delay = routing_delay,
-
-                // hook names
-                preRoutingHookName = preRoutingHookName, 
-                routingHookName = routingHookName,  
-                localDeliverHookName = localDeliverHookName, 
-                ipSendHookName = ipSendHookName,  
-                ipOutputHookName = ipOutputHookName, 
-
-                // other parameters
-                IPForward = IPForward, 
-                numOfPorts = numOfPorts, 
-                numOfTransportProt = 2, 
-                timeToLive = 8, 
+    submodules:
+        ip: IPProcessing;
+            parameters:
+                IPForward = IPForward,
+                numOfPorts = numOfPorts,
+                numOfTransportProt = 2,
+                timeToLive = 8,
                 multicastTimeToLive = 6,
                 fragmentTimeout = "5s";
-            gatesizes: 
-                transportIn[2], 
-                transportOut[2], 
-                queueOut[numOfPorts]; 
-            display: "p=124,50;i=cogwheel";
-        outputQueue: OutputQueue[numOfPorts]; 
+            gatesizes:
+                transportIn[2],
+                transportOut[2],
+                queueOut[numOfPorts];
+            display: "b=32,30;p=90,55;i=cogwheel";
+        routingTable: RoutingTable;
             parameters:
-                enqueueHookName = enqueueHookName,
-                dequeueHookName = dequeueHookName,
-                enqueue_delay = enqueue_delay,
-                dequeue_delay = dequeue_delay;
-            display: "p=90,111,row;i=queue";
-        inputQueue: InputQueue; 
-            parameters:
-                procdelay = inputqueue_delay;
-            gatesizes: 
-                fromNW[numOfPorts]; 
-            display: "p=39,53;i=queue";
-        networkInterface: NWIName[numOfPorts] like NetworkInterface;
-            parameters:
-                procdelay = nwi_delay;
-            display: "p=55,181;i=bwxconn";
-        routingTable: RoutingTable; 
-            parameters: 
                 IPForward = IPForward,
                 routingTableFileName = routingFile;
-            display: "p=238,64,row;i=box3";
-
-    connections nocheck: 
+            display: "b=32,32;p=185,53,row;i=box3";
+        inputQueue: InputQueue;
+            gatesizes:
+                fromNW[numOfPorts];
+            display: "b=32,30;p=46,116;i=queue";
+        outputQueue: OutputQueue[numOfPorts];
+            display: "b=32,30;p=139,115,row;i=queue";
+        networkInterface: NWIName[numOfPorts] like NetworkInterface;
+            display: "b=32,30;p=139,176,row;i=bwxconn";
+    connections nocheck:
         // transport Layer
-        proc.transportOut[0] --> TCPOut; 
-        proc.transportIn[0] <-- TCPIn; 
-                                       
-        proc.transportOut[1] --> UDPOut; 
-        proc.transportIn[1] <-- UDPIn; 
-                                       
+        ip.transportOut[0] --> TCPOut;
+        ip.transportIn[0] <-- TCPIn;
+
+        ip.transportOut[1] --> UDPOut;
+        ip.transportIn[1] <-- UDPIn;
+
         // ICMP interface
-        proc.ICMPOut --> pingOut; 
-        proc.ICMPIn <-- pingIn; 
-                                
-        proc.errorOut --> errorOut; 
-                                    
+        ip.ICMPOut --> pingOut;
+        ip.ICMPIn <-- pingIn;
+
         // L2 IP Queues to IP
-        inputQueue.toIP --> proc.queueIn; 
-        for i=0..numOfPorts-1 do 
-            proc.queueOut[i] --> outputQueue[i].fromIP; 
-        endfor; 
+        inputQueue.toIP --> ip.queueIn;
+        for i=0..numOfPorts-1 do
+            ip.queueOut[i] --> outputQueue[i].fromIP;
+        endfor;
 
         // Network interfaces to L2 IP Queue
-        for i=0..numOfPorts-1 do 
-            networkInterface[i].ipInputQueueOut --> inputQueue.fromNW[i]; 
-            networkInterface[i].ipOutputQueueOut --> outputQueue[i].fromNW; 
-            networkInterface[i].ipOutputQueueIn <-- outputQueue[i].toNW; 
-        endfor; 
+        for i=0..numOfPorts-1 do
+            networkInterface[i].ipInputQueueOut --> inputQueue.fromNW[i];
+            networkInterface[i].ipOutputQueueOut --> outputQueue[i].fromNW;
+            networkInterface[i].ipOutputQueueIn <-- outputQueue[i].toNW;
+        endfor;
 
         // Network interfaces to physical layer
-        for i=0..numOfPorts-1 do 
-            networkInterface[i].physicalOut --> physOut[i]; 
-            networkInterface[i].physicalIn <-- physIn[i]; 
-        endfor; 
-
-    display: "p=10,10;b=541,211,rect";
-endmodule 
+        for i=0..numOfPorts-1 do
+            networkInterface[i].physicalOut --> physOut[i];
+            networkInterface[i].physicalIn <-- physIn[i];
+        endfor;
+endmodule
 
