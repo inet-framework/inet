@@ -1,5 +1,5 @@
 //
-//
+// Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -20,14 +20,16 @@
 //
 // Keeps the table of all routing and interface information.
 //
-// Reads interfaces and routing table from a file;
-// manages requests to the routing table and the interface table
-// (simulating the "route" and "ifconfig" commands).
+// Interfaces are dynamically registered. The routing table is read
+// from a file (parameter routingTableFileName); the file can also fill in 
+// or overwrite interface settings.
+// The file format is documented <a href="irt.html">here</a>.
 //
 // It has no gates; all functionality can be accessed via member functions
-// of the C++ module class.
+// of the C++ module class. For detailed info please see the C++ documentation 
+// of the class (Doxygen).
 //
-// author: Jochen Reber
+// @author: Jochen Reber, Andras Varga
 //
 simple RoutingTable
     parameters:
