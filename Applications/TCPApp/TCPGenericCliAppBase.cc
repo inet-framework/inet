@@ -74,24 +74,31 @@ void TCPGenericCliAppBase::connect()
 void TCPGenericCliAppBase::socketEstablished(int connId, void *yourPtr)
 {
     // do first sending, or at least schedule it
+    if (ev.isGUI()) displayString().setTagArg("t",0, "connected");
 }
 
 void TCPGenericCliAppBase::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent)
 {
-        packetsRcvd++;
-        bytesRcvd+=msg->length()/8;
+    packetsRcvd++;
+    bytesRcvd+=msg->length()/8;
 }
 
 void TCPGenericCliAppBase::socketPeerClosed(int connId, void *yourPtr)
 {
+    // we probably want to close too
+    socket.close();
 }
 
 void TCPGenericCliAppBase::socketClosed(int connId, void *yourPtr)
 {
+    // subclasses may override this function, and add code to start another session etc.
+    if (ev.isGUI()) displayString().setTagArg("t",0, "closed");
 }
 
 void TCPGenericCliAppBase::socketFailure(int connId, void *yourPtr, int code)
 {
+    // subclasses may override this function, and add code try to reconnect after a delay.
+    if (ev.isGUI()) displayString().setTagArg("t",0, "broken");
 }
 
 void TCPGenericCliAppBase::finish()
