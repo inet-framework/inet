@@ -8,7 +8,7 @@
 #
 # Local configuration
 #
-NEDC=d:/home/omnetpp/bin/nedtool
+NEDC=/home/andras/omnetpp/bin/nedtool
 MSGC=opp_msgc
 CXX=g++
 CC=gcc
@@ -16,21 +16,21 @@ AR=ar cr
 SHLIB_LD=g++ -shared -fPIC
 MAKEDEPEND=opp_makedep -Y --objdirtree
 
-CFLAGS=-O3 -DNDEBUG=1  -DWITH_NETBUILDER
+CFLAGS=-g -DWITH_PARSIM -DWITH_NETBUILDER
 NEDCFLAGS=-Wno-unused
-LDFLAGS= -s -Xlinker --stack -Xlinker 134217728
-EXE_SUFFIX=.exe
+LDFLAGS=
+EXE_SUFFIX=
 
-WITH_PARSIM=no
+WITH_PARSIM=yes
 WITH_NETBUILDER=yes
 
-OMNETPP_INCL_DIR=d:/home/omnetpp/include
-OMNETPP_LIB_DIR=d:/home/omnetpp/lib
+OMNETPP_INCL_DIR=/home/andras/omnetpp/include
+OMNETPP_LIB_DIR=/home/andras/omnetpp/lib
 
-TK_LIBS= -lcygtk83 -lcygtcl83
+TK_LIBS=-L/usr/X11R6/lib -lX11 -ltk8.4 -ltcl8.4
 MPI_LIBS=
 XML_LIBS=-lexpat
-SYS_LIBS=-lstdc++
+SYS_LIBS=-ldl -lstdc++ 
 SYS_LIBS_PURE=-ldl -lsocket -lnsl -lm $(shell $(CXX) -print-file-name=libstdc++.a)
 
 #

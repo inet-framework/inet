@@ -158,10 +158,6 @@ UDPAppInterface.o: UDPAppInterface.cc \
   ../../Transport/UDP/UDPPacket.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportInterfacePacket_m.h \
-  ../../Transport/UDP/UDPPacket_m.h \
-  ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ../IPv4/Core/IPInterfacePacket_m.h
 tcpclientproc.o: tcpclientproc.cc \
   ../../Transport/TCP/tcp.h \

@@ -1,9 +1,13 @@
 #
 # Config file for the IPSuite. This is included by every makefile.
 #
+# !!! IMPORTANT !!!
+# Please re-generate omnetppconfig before trying to build IPSuite!
+# The command is:  opp_makemake -f --genconfig omnetppconfig
+#
 
-#ROOT=$(HOME)/ipsuite
-ROOT=/cygdrive/d/home/IPSuite-local
+ROOT=$(HOME)/IPSuite
+#ROOT=/cygdrive/d/home/IPSuite
 
 LIBXML_INCLUDES= -I/usr/include/libxml2
 LIBXML_LIBS= -lxml2

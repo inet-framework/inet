@@ -133,7 +133,6 @@ RSVP.o: RSVP.cc \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ospf_type.h \
   ../MPLS/LIBtable.h \
   ../IPv4/Core/RoutingTableAccess.h \
@@ -160,7 +159,6 @@ RSVPApp.o: RSVPApp.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ../MPLS/LIBTableAccess.h \
   ospf_type.h \
   ../IPv4/Core/RoutingTableAccess.h \
@@ -179,7 +177,6 @@ RSVPInterface.o: RSVPInterface.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h \
   ../../Base/basic_consts.h \
   ../IPv4/Core/IPInterfacePacket_m.h
 TED.o: TED.cc \
@@ -203,5 +200,4 @@ rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportPacket.h \
-  ../../Transport/TCP/TransportPacket_m.h
+  ../../Transport/TCP/TransportPacket.h

@@ -118,8 +118,7 @@ socketlayer.o: socketlayer.cc \
   sockets.h \
   ../TCP/pcb.h \
   ../../Network/IPv4/Core/IPAddress.h \
-  ../../Base/ipsuite_defs.h \
-  ../TCP/TransportInterfacePacket_m.h
+  ../../Base/ipsuite_defs.h
 sockets.o: sockets.cc \
   sockets.h \
   ../TCP/tcpcb.h \
