@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= McNetwork_n.o Peer2Network_n.o  DLStub.o  
+OBJS= McNetwork_n.o Peer2Network_n.o  DLStub.o
 
 #------------------------------------------------------------------------------
 
@@ -95,5 +95,3 @@ re-makemake-m:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 DLStub.o: DLStub.cc
-McNetwork_n.o: McNetwork_n.cc
-Peer2Network_n.o: Peer2Network_n.cc

@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= RSVPTE4_n.o   
+OBJS= RSVPTE4_n.o  
 
 #------------------------------------------------------------------------------
 
@@ -85,5 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-RSVPTE4_n.o: RSVPTE4_n.cc
-RSVPTE_n.o: RSVPTE_n.cc
+

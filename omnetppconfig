@@ -15,7 +15,7 @@ AR=ar cr
 SHLIB_LD=g++ -shared -fPIC
 MAKEDEPEND=opp_makedep -Y --objdirtree
 
-CFLAGS=-O3 -DNDEBUG=1  -fPIC
+CFLAGS=-g -Wall  -fPIC
 NEDCFLAGS=-Wno-unused
 LDFLAGS=
 EXE_SUFFIX=

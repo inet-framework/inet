@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= socketlayer_n.o  SocketInterfacePacket.o socketlayer.o  sockets.o
+OBJS= socketlayer_n.o  SocketInterfacePacket.o socketlayer.o sockets.o
 
 #------------------------------------------------------------------------------
 
@@ -114,7 +114,6 @@ socketlayer.o: socketlayer.cc \
   ../../Util/basic_consts.h \
   ../../Network/IPv4/Core/ip_address.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h
-socketlayer_n.o: socketlayer_n.cc
 sockets.o: sockets.cc \
   sockets.h \
   ../TCPv4/tcpcb.h \

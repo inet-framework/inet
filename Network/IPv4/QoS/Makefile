@@ -201,7 +201,7 @@ re-makemake-m:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 any_queue.o: any_queue.cc \
   any_queue.h \
-  hook_types.h \
+  ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h
 Connection_Element.o: Connection_Element.cc \
@@ -215,7 +215,7 @@ FIFO_Dequeue.o: FIFO_Dequeue.cc \
   FIFO_Dequeue.h \
   FIFO_Queue.h \
   any_queue.h \
-  hook_types.h \
+  ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h
 FIFO_Dequeue_n.o: FIFO_Dequeue_n.cc
@@ -223,7 +223,7 @@ FIFO_Enqueue.o: FIFO_Enqueue.cc \
   FIFO_Enqueue.h \
   FIFO_Queue.h \
   any_queue.h \
-  hook_types.h \
+  ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h
 FIFO_Enqueue_n.o: FIFO_Enqueue_n.cc
@@ -252,7 +252,7 @@ packet.o: packet.cc \
   any_queue.h
 router_deq_hook_trigger.o: router_deq_hook_trigger.cc \
   router_deq_hook_trigger.h \
-  hook_types.h \
+  ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h \
   any_queue.h
@@ -265,7 +265,7 @@ setinadapter.o: setinadapter.cc \
   any_queue.h
 SetInAdapter_n.o: SetInAdapter_n.cc
 simulatedINTERNAL.o: simulatedINTERNAL.cc \
-  hook_types.h \
+  ../Core/hook_types.h \
   simulatedINTERNAL.h \
   ../../../Util/basic_consts.h \
   any_queue.h

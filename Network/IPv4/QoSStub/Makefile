@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= L2_DequeueHook_n.o L2_EnqueueHook_n.o NF_IP_FORWARD_n.o NF_IP_LOCAL_IN_n.o NF_IP_LOCAL_OUT_n.o NF_IP_POST_ROUTING_n.o NF_IP_PRE_ROUTING_n.o    L2_Hookstubs.o Netfilters.o     
+OBJS= L2_DequeueHook_n.o L2_EnqueueHook_n.o NF_IP_FORWARD_n.o NF_IP_LOCAL_IN_n.o NF_IP_LOCAL_OUT_n.o NF_IP_POST_ROUTING_n.o NF_IP_PRE_ROUTING_n.o  L2_Hookstubs.o Netfilters.o
 
 #------------------------------------------------------------------------------
 
@@ -127,8 +127,6 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-L2_DequeueHook_n.o: L2_DequeueHook_n.cc
-L2_EnqueueHook_n.o: L2_EnqueueHook_n.cc
 L2_Hookstubs.o: L2_Hookstubs.cc \
   ../Core/hook_types.h \
   L2_Hookstubs.h \
@@ -136,8 +134,3 @@ L2_Hookstubs.o: L2_Hookstubs.cc \
 Netfilters.o: Netfilters.cc \
   Netfilters.h \
   ../../../Util/basic_consts.h
-NF_IP_FORWARD_n.o: NF_IP_FORWARD_n.cc
-NF_IP_LOCAL_IN_n.o: NF_IP_LOCAL_IN_n.cc
-NF_IP_LOCAL_OUT_n.o: NF_IP_LOCAL_OUT_n.cc
-NF_IP_POST_ROUTING_n.o: NF_IP_POST_ROUTING_n.cc
-NF_IP_PRE_ROUTING_n.o: NF_IP_PRE_ROUTING_n.cc

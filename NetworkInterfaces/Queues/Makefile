@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= InputQueue_n.o OutputQueue_n.o  Dequeue.o Enqueue.o InputQueue.o  
+OBJS= InputQueue_n.o OutputQueue_n.o  Dequeue.o Enqueue.o InputQueue.o
 
 #------------------------------------------------------------------------------
 
@@ -116,5 +116,3 @@ InputQueue.o: InputQueue.cc \
   ../../Util/basic_consts.h \
   ../../Util/ProcessorAccess.h \
   ../../Network/IPv4/Core/IPInterfacePacket.h
-InputQueue_n.o: InputQueue_n.cc
-OutputQueue_n.o: OutputQueue_n.cc

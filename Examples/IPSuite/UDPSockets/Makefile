@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= SocketApp_n.o UDPSocketHost_n.o UDPSockets_n.o  client.o server.o   
+OBJS= SocketApp_n.o UDPSocketHost_n.o UDPSockets_n.o  client.o server.o
 
 #------------------------------------------------------------------------------
 
@@ -105,6 +105,3 @@ re-makemake-m:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 client.o: client.cc
 server.o: server.cc
-SocketApp_n.o: SocketApp_n.cc
-UDPSocketHost_n.o: UDPSocketHost_n.cc
-UDPSockets_n.o: UDPSockets_n.cc

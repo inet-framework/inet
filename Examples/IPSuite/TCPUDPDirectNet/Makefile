@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-TCPUDPDirectNet_n.o: TCPUDPDirectNet_n.cc
+

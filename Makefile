@@ -36,7 +36,7 @@ include ipsuiteconfig
 #------------------------------------------------------------------------------
 
 # subdirectories to recurse into
-SUBDIRS=  Applications Examples Network NetworkInterfaces Nodes PHY Tests Transport Util
+SUBDIRS=  Applications Examples Network NetworkInterfaces Nodes PHY Tests tmp Transport Util
 
 # object files in this directory
 OBJS=   
@@ -82,6 +82,9 @@ PHY:
 
 Tests:
 	cd Tests && $(MAKE)
+
+tmp:
+	cd tmp && $(MAKE)
 
 Transport:
 	cd Transport && $(MAKE)

@@ -54,6 +54,8 @@ void TCPServer::activity()
   double       timeout         = par("timeout");
   double       appl_timeout    = par("appl_timeout");
   cModuleType *procserver_type = findModuleType("ProcServer");
+  if (!procserver_type) 
+      error("Cannot find module type ProcServer");
 
   passiveOpen(timeout, procserver_type);
   

@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-McNetwork2_n.o: McNetwork2_n.cc
+

@@ -49,8 +49,12 @@ void LDPInterface::activity()
   int i;  
   
   procserver_type = findModuleType("TCPServerProc");
+  if (!procserver_type) 
+      error("Cannot found module type TCPServerProc");
 
   procclient_type = findModuleType("TCPClientProc");
+  if (!procclient_type) 
+      error("Cannot found module type TCPClientProc");
 
  
   //Act as a server to accept peer tcp conn requests

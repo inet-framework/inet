@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= Tester_n.o  NewBWRequestTester.o NewRouteTester.o 
+OBJS= Tester_n.o  NewBWRequestTester.o NewRouteTester.o
 
 #------------------------------------------------------------------------------
 
@@ -93,4 +93,3 @@ re-makemake-m:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 NewBWRequestTester.o: NewBWRequestTester.cc
 NewRouteTester.o: NewRouteTester.cc
-Tester_n.o: Tester_n.cc

@@ -39,7 +39,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= MPLSNet_n.o MPLSOnly_n.o   
+OBJS= MPLSNet_n.o MPLSOnly_n.o  
 
 #------------------------------------------------------------------------------
 
@@ -91,5 +91,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-MPLSNet_n.o: MPLSNet_n.cc
-MPLSOnly_n.o: MPLSOnly_n.cc
+

@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= NetworkManager_n.o OspfTe_n.o RSVPAppl_n.o RSVPInterface_n.o RSVP_n.o TED_n.o   OspfTe.o  RSVPApp.o  RSVP.o RSVPInterface.o  rsvp_message.o  TED.o 
+OBJS= NetworkManager_n.o OspfTe_n.o RSVPAppl_n.o RSVPInterface_n.o RSVP_n.o TED_n.o  OspfTe.o RSVPApp.o RSVP.o RSVPInterface.o rsvp_message.o TED.o
 
 #------------------------------------------------------------------------------
 
@@ -133,7 +133,6 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-NetworkManager_n.o: NetworkManager_n.cc
 OspfTe.o: OspfTe.cc \
   OspfTe.h \
   ../IPv4/Core/ip_address.h \
@@ -143,7 +142,6 @@ OspfTe.o: OspfTe.cc \
   TED.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
-OspfTe_n.o: OspfTe_n.cc
 RSVPApp.o: RSVPApp.cc \
   RSVPApp.h \
   ../IPv4/Core/RoutingTable.h \
@@ -186,7 +184,6 @@ RSVPApp.o: RSVPApp.cc \
   ../IPv4/Core/hook_types.h \
   ../MPLS/MPLSPacket.h \
   ../IPv4/Core/IPDatagram.h
-RSVPAppl_n.o: RSVPAppl_n.cc
 RSVP.o: RSVP.cc \
   RSVP.h \
   ../IPv4/Core/ip_address.h \
@@ -221,7 +218,6 @@ RSVPInterface.o: RSVPInterface.cc \
   ../../Transport/TCPv4/TransportPacket.h \
   ../../Util/basic_consts.h \
   ../../Util/ProcessorAccess.h
-RSVPInterface_n.o: RSVPInterface_n.cc
 rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
@@ -229,7 +225,6 @@ rsvp_message.o: rsvp_message.cc \
   ../../Transport/TCPv4/TransportPacket.h \
   ../IPv4/Core/IPInterfacePacket.h \
   ../../Util/basic_consts.h
-RSVP_n.o: RSVP_n.cc
 TED.o: TED.cc \
   ../MPLS/MPLSModule.h \
   TED.h \
@@ -247,4 +242,3 @@ TED.o: TED.cc \
   ../IPv4/Core/ip_address_prefix.h \
   ../MPLS/StringTokenizer.h \
   ../IPv4/Core/ip_address.h
-TED_n.o: TED_n.cc

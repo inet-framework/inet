@@ -65,8 +65,8 @@ void Ip2Tcp::handleMessage(cMessage *msg)
 
 	if (!ipv6)
         {
-           tcpmessage->addPar("src_addr") = IPAddress(src_addr)->getInt();
-           tcpmessage->addPar("dest_addr") = IPAddress(dest_addr)->getInt();
+           tcpmessage->addPar("src_addr") = IPAddress(src_addr).getInt();
+           tcpmessage->addPar("dest_addr") = IPAddress(dest_addr).getInt();
         }
         else
         { 

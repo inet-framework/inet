@@ -85,4 +85,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-KIDSNw1_n.o: KIDSNw1_n.cc
+

@@ -29,6 +29,8 @@ void MyTCPServer::activity()
   int i;
   
   cModuleType *procserver_type = findModuleType("MyTCPServerProc");
+  if (!procserver_type) 
+      error("Cannot find module type MyTCPServerProc");
 
   passiveOpen(timeout, procserver_type);
 

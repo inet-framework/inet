@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPModule_n.o UDP_n.o  UDPApp.o UDPModule.o   UDPPacket.o UDPProcessing.o
+OBJS= UDPModule_n.o UDP_n.o  UDPApp.o UDPModule.o UDPPacket.o UDPProcessing.o
 
 #------------------------------------------------------------------------------
 
@@ -114,8 +114,6 @@ UDPModule.o: UDPModule.cc \
   ../../Network/IPv4/Core/in_addr.h \
   ../../Util/basic_consts.h \
   ../TCPv4/TransportPacket.h
-UDPModule_n.o: UDPModule_n.cc
-UDP_n.o: UDP_n.cc
 UDPPacket.o: UDPPacket.cc \
   UDPPacket.h \
   ../TCPv4/TransportPacket.h

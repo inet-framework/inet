@@ -39,7 +39,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= LSRNode_n.o NetworkLayersWithMPLS_n.o RSVP_LSR_Node_n.o    
+OBJS= LSRNode_n.o NetworkLayersWithMPLS_n.o RSVP_LSR_Node_n.o  
 
 #------------------------------------------------------------------------------
 
@@ -97,6 +97,4 @@ re-makemake-m:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-LSRNode_n.o: LSRNode_n.cc
-NetworkLayersWithMPLS_n.o: NetworkLayersWithMPLS_n.cc
-RSVP_LSR_Node_n.o: RSVP_LSR_Node_n.cc
+
