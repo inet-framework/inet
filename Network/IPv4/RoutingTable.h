@@ -53,7 +53,7 @@ class InterfaceEntry : public cPolymorphic
 {
   public:
     int id;             //< identifies the interface (not the same as outputPort!)
-    opp_string name;    //< interface name (must be unique)
+    std::string name;   //< interface name (must be unique)
     IPAddress inetAddr; //< IP address of interface
     IPAddress mask;     //< netmask
     int outputPort;     //< output gate index (-1 if unused, e.g. loopback interface)

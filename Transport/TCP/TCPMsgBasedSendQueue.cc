@@ -80,7 +80,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     }
 
     char msgname[32];
-    sprintf(msgname, "tcpseg(%db,%dm)", numBytes, tcpseg->payloadArraySize());
+    sprintf(msgname, "tcpseg(l=%d,%dmsg)", numBytes, tcpseg->payloadArraySize());
     tcpseg->setName(msgname);
 
     return tcpseg;

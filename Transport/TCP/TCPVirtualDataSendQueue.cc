@@ -61,7 +61,7 @@ TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulon
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end));
 
     char msgname[32];
-    sprintf(msgname, "tcpseg(%db)", numBytes);
+    sprintf(msgname, "tcpseg(l=%d)", numBytes);
 
     TCPSegment *tcpseg = new TCPSegment(msgname);
     tcpseg->setSequenceNo(fromSeq);

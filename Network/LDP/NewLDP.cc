@@ -127,8 +127,11 @@ void NewLDP::sendHelloTo(IPAddress dest)
 
 void NewLDP::processLDPHello(LDPHello *msg)
 {
+    RoutingTable *rt = routingTableAccess.get();
+
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
     IPAddress peerAddr = controlInfo->getSrcAddr();
+    int inputPort = controlInfo->getInputPort();
     delete msg;
 
     ev << "Received LDP Hello from " << peerAddr << ", ";
@@ -151,7 +154,7 @@ void NewLDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = findInterfaceFromPeerAddr(peerAddr);
+    info.linkInterface = rt->interfaceByPortNo(inputPort)->name;
     info.activeRole = peerAddr.getInt() > local_addr.getInt();
     info.socket = NULL;
     myPeers.push_back(info);
@@ -270,7 +273,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     delete msg;
 
     InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-    string fromInterface = string(ientry->name.c_str());
+    string fromInterface = ientry->name;
 
     ev << "Request from MPLS for FEC=" << fecId << "  dest=" << fecInt <<
           "  inInterface=" << fromInterface << "\n";
@@ -399,7 +402,7 @@ IPAddress NewLDP::locateNextHop(IPAddress dest)
     if (portNo==-1)
         return IPAddress();  // no route
 
-    string iName = rt->interfaceByPortNo(portNo)->name.c_str();
+    string iName = rt->interfaceByPortNo(portNo)->name;
     return findPeerAddrFromInterface(iName);
 }
 
@@ -460,7 +463,7 @@ string NewLDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 */
 //    Rely on port index to find the interface name
     int portNo = rt->outputPortNo(peerIP);
-    return string(rt->interfaceByPortNo(portNo)->name.c_str());
+    return rt->interfaceByPortNo(portNo)->name;
 
 }
 

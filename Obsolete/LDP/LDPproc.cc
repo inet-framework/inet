@@ -187,7 +187,7 @@ void LDPproc::processRequestFromMPLSSwitch(cMessage *msg)
     int gateIndex = msg->par("gateIndex");
     InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
 
-    string fromInterface = string(ientry->name.c_str());
+    string fromInterface = ientry->name;
 
     // LDP checks if there is any previous pending requests for
     // the same FEC.

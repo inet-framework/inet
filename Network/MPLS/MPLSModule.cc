@@ -174,7 +174,7 @@ void MPLSModule::trySendBufferedPackets(int returnedFEC)
         // Incoming interface
         int gateIndex = datagram->par("gateIndex");
         InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-        string senderInterface = string(ientry->name.c_str());
+        string senderInterface = ientry->name;
 
         // Construct a new MPLS packet
         MPLSPacket *newPacket = new MPLSPacket(datagram->name());
@@ -246,7 +246,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
     // Here we process MPLS packets
     InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-    string senderInterface = string(ientry->name.c_str());
+    string senderInterface = ientry->name;
     int oldLabel = mplsPacket->topLabel();
 
     if (oldLabel==-1)
@@ -334,7 +334,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
     // Incoming interface
     InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-    string senderInterface = string(ientry->name.c_str());
+    string senderInterface = ientry->name;
     ev << "Message from outside to Ingress node\n";
 
     bool makeRequest = false;
