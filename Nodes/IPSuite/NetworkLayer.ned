@@ -36,6 +36,7 @@ import
 module NetworkLayer
     parameters:
         IPForward : bool,
+        routerId: string,
         routingFile : string;
     gates:
         in: physIn[]; // FIXME to be renamed
@@ -70,7 +71,8 @@ module NetworkLayer
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
-                routingTableFileName = routingFile;
+                routerId = routerId,
+                routingFile = routingFile;
             display: "p=66,67,row;i=box3";
         errorHandling: ErrorHandling;
             display: "p=330,78;i=box1_s";

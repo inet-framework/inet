@@ -40,6 +40,7 @@ module Router
             parameters:
                 // other Network parameters
                 IPForward = true,
+                routerId = "auto",
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],

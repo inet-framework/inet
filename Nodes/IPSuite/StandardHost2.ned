@@ -64,6 +64,7 @@ module StandardHost2
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = IPForward,
+                routerId = "",
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],

@@ -83,6 +83,7 @@ module RSVP_LSR_Node
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = true,
+                routerId = routerId,
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],

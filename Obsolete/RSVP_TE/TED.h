@@ -15,7 +15,10 @@
 #ifndef __OSPF_TED____H
 #define __OSPF_TED____H
 
-//#include "OspfTe.h"
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#endif
+
 #include <vector>
 #include "MPLSModule.h"
 

@@ -65,6 +65,7 @@ module LSRNode
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = true,
+                routerId = routerId,
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],

@@ -163,6 +163,8 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  * or router. It has methods to manage the route table and the interface table,
  * so one can active functionality similar to the "route" and "ifconfig" commands.
  *
+ * See the NED documentation for general overview.
+ *
  * This is a simple module without gates, it requires function calls to it
  * (message handling does nothing). Methods are provided for reading and
  * updating the interface table and the route table, as well as for unicast
@@ -187,15 +189,18 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  *
  * @see InterfaceEntry, RoutingEntry
  */
-//FIXME see RFC 2072, Router Renumbering Guide for guidelines on router id
 class RoutingTable: public cSimpleModule
 {
   private:
+
     //
     // Interfaces:
     //
     typedef std::vector<InterfaceEntry *> InterfaceVector;
     InterfaceVector interfaces;
+
+    IPAddress routerId;
+    bool IPForward;
 
     //
     // Routes:
@@ -205,11 +210,10 @@ class RoutingTable: public cSimpleModule
     RouteVector multicastRoutes; // Multicast route array
     RoutingEntry *defaultRoute;  // Default route
 
-    bool IPForward;
 
   protected:
-    // Add the entry of the local loopback interface automatically
-    void addLocalLoopback();
+    // Add the entry of the local loopback interface
+    InterfaceEntry *addLocalLoopback();
 
     // check if a route table entry corresponds to the following parameters
     bool routingEntryMatches(RoutingEntry *entry,
@@ -281,10 +285,18 @@ class RoutingTable: public cSimpleModule
     InterfaceEntry *interfaceByAddress(const IPAddress& address);
     //@}
 
-    /** @name Routing functions (query the route table) */
-    //@{
+    /**
+     * IP forwarding on/off
+     */
     bool ipForward()  {return IPForward;}
 
+    /**
+     * Returns routerId.
+     */
+    IPAddress getRouterId()  {return routerId;}
+
+    /** @name Routing functions (query the route table) */
+    //@{
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */

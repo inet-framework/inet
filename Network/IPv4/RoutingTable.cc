@@ -122,7 +122,7 @@ std::string RoutingEntry::detailedInfo() const
 Define_Module( RoutingTable );
 
 
-std::ostream & operator<<(std::ostream & os, const RoutingEntry& e)
+std::ostream& operator<<(std::ostream& os, const RoutingEntry& e)
 {
     char buf[1024];
     const_cast<RoutingEntry&>(e).info(buf);
@@ -131,7 +131,7 @@ std::ostream & operator<<(std::ostream & os, const RoutingEntry& e)
     return os;
 };
 
-std::ostream & operator<<(std::ostream & os, const InterfaceEntry& e)
+std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 {
     char buf[1024];
     const_cast<InterfaceEntry&>(e).info(buf);
@@ -149,21 +149,45 @@ void RoutingTable::initialize(int stage)
         return;
 
     IPForward = par("IPForward").boolValue();
-    const char *filename = par("routingTableFileName");
+    const char *filename = par("routingFile");
     defaultRoute = NULL;
 
-    // add one additional interface, the loopback
-    addLocalLoopback();
+    // At this point, all L2 modules have registered themselves (added their
+    // interface entries). Add one extra interface, the loopback here.
+    InterfaceEntry *lo0 = addLocalLoopback();
 
     // read routing table file (and interface configuration)
     RoutingTableParser parser(this);
     if (*filename && parser.readRoutingTableFromFile(filename)==-1)
         error("Error reading routing table file %s", filename);
 
+    const char *routerIdStr = par("routerId").stringValue();
+    if (!strcmp(routerIdStr, ""))
+    {
+        routerId = IPAddress();
+    }
+    else if (!strcmp(routerIdStr, "auto"))
+    {
+        // choose highest interface address as routerId
+        routerId = IPAddress();
+        for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+            if (!(*i)->loopback && (*i)->inetAddr.getInt() > routerId.getInt())
+                routerId = (*i)->inetAddr;
+    }
+    else
+    {
+        // use routerId both as routerId and loopback address
+        routerId = IPAddress(routerIdStr);
+
+        lo0->inetAddr = routerId;
+        lo0->mask = IPAddress("255.255.255.255");
+    }
+
     WATCH_PTRVECTOR(interfaces);
     WATCH_PTRVECTOR(routes);
     WATCH_PTRVECTOR(multicastRoutes);
-    //FIXME WATCH(defaultRoute)
+    //WATCH(routerId);
+    //FIXME WATCH(defaultRoute);
 
     //printIfconfig();
     //printRoutingTable();
@@ -268,37 +292,15 @@ InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
     return NULL;
 }
 
-void RoutingTable::addLocalLoopback()
+InterfaceEntry *RoutingTable::addLocalLoopback()
 {
     InterfaceEntry *loopbackInterface = new InterfaceEntry();
 
     loopbackInterface->name = "lo0";
 
-    //loopbackInterface->inetAddr = IPAddress("127.0.0.1");
-    //loopbackInterface->mask = IPAddress("255.0.0.0");
-// BCH Andras -- code from UTS MPLS model
-    IPAddress loopbackIP = IPAddress("127.0.0.1");
-    for (cModule *curmod=parentModule(); curmod != NULL;curmod = curmod->parentModule())
-    {
-        // FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
-        // the following line is a terrible hack. For some unknown reason,
-        // the MPLS models use the host's "routerId" parameter (string)
-        // as loopback address (and also change its netmask to 255.255.255.255).
-        // But this conflicts with the IPSuite which also has "routerId" parameters,
-        // numeric and not intended for use as loopback address. So until we
-        // figure out why exactly the MPLS models do this, we just patch up
-        // the thing and only regard "routerId" parameters that are strings....
-        // Horrible hacking.  --Andras
-        if (curmod->hasPar("routerId") && curmod->par("routerId").type()=='S')
-        {
-            loopbackIP = IPAddress(curmod->par("routerId").stringValue());
-            break;
-        }
-
-    }
-    loopbackInterface->inetAddr = loopbackIP;
-    loopbackInterface->mask = IPAddress("255.255.255.255");  // ????? -- Andras
-// ECH
+    // 127.0.0.1/8 by default -- we may reconfigure later it to be the routerId
+    loopbackInterface->inetAddr = IPAddress("127.0.0.1");
+    loopbackInterface->mask = IPAddress("255.0.0.0");
 
     loopbackInterface->mtu = 3924;
     loopbackInterface->metric = 1;
@@ -309,6 +311,8 @@ void RoutingTable::addLocalLoopback()
 
     // add interface to table
     addInterface(loopbackInterface);
+
+    return loopbackInterface;
 }
 
 //---

@@ -185,18 +185,10 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
     if (rt->multicastLocalDeliver(destAddress))
     {
         IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
-// BCH Andras -- code from UTS MPLS model  FIXME!!!!!!!!!!!!!!!!!!!!!!!!
-        // find "routerId" module parameter among our parents, and assign it to packet
-        cModule *curmod = this;
-        for (curmod = parentModule(); curmod != NULL; curmod = curmod->parentModule())
-        {
-            if (curmod->hasPar("routerId"))
-            {
-                datagramCopy->setDestAddress(IPAddress(curmod->par("routerId").stringValue()));
-                break;
-            }
-        }
-// ECH
+
+        // FIXME code from the MPLS model: set packet dest address to routerId (???)
+        datagramCopy->setDestAddress(rt->getRouterId());
+
         localDeliver(datagramCopy);
     }
 
@@ -206,7 +198,6 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
         delete datagram;
         return;
     }
-
 
     MulticastRoutes routes = rt->multicastRoutesFor(destAddress);
     if (routes.size()==0)
