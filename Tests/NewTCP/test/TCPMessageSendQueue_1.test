@@ -1,0 +1,62 @@
+%description:
+Test TCPMessageSendQueue class
+
+%global:
+#include "TCPMessageSendQueue.h"
+
+
+void enqueue(TCPMessageSendQueue *q, const char *msgname, ulong numBytes)
+{
+    ev << "enqueue(\"" << msgname << "\", " << numBytes << "):";
+
+    cMessage *msg = new cMessage(msgname);
+    msg->setLength(numBytes*8);
+    q->enqueueAppData(msg);
+
+    ev << q->info() <<"\n";
+}
+
+void createSegmentWithBytes(TCPMessageSendQueue *q, uint32 fromSeq, ulong numBytes)
+{
+    ev << "createSegmentWithBytes(" << fromSeq << ", " << numBytes << "):";
+    TCPSegment *tcpseg = q->createSegmentWithBytes(fromSeq, numBytes);
+
+    ev << q->info() <<"\n";
+
+    delete tcpseg;
+}
+
+void discardUpTo(TCPMessageSendQueue *q, uint32 seqNum)
+{
+    ev << "discardUpTo(" << seqNum << "):";
+    q->discardUpTo(seqNum);
+
+    ev << q->info() <<"\n";
+}
+
+%activity:
+TCPMessageSendQueue sendQueue;
+TCPMessageSendQueue *q = &sendQueue;
+
+q->init(1000);
+ev << q->info() <<"\n";
+
+enqueue(q, "msg1", 100); // 1000..1100
+enqueue(q, "msg2", 400); // 1100..1500
+enqueue(q, "msg3", 600); // 1500..2100
+enqueue(q, "msg4", 200); // 2100..2300
+
+createSegmentWithBytes(q, 1000, 1099);
+createSegmentWithBytes(q, 1000, 1100);
+createSegmentWithBytes(q, 1000, 2099);
+createSegmentWithBytes(q, 1000, 2100);
+createSegmentWithBytes(q, 2000, 2099);
+createSegmentWithBytes(q, 2000, 2100);
+
+discardUpTo(q, 2000);
+
+createSegmentWithBytes(q, 2000, 2100);
+
+
+%contains: stdout
+dfsdfgsd

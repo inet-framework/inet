@@ -8,7 +8,7 @@ if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
 if [ ! -d work ];  then mkdir work; fi
 opp_test -g -v $TESTFILES || exit 1
 echo
-(cd work; root=../../../..; opp_makemake -f -N -w -u cmdenv -c $root/ipsuiteconfig -I../.. -I$root/Transport/NewTCP -I$root/Network/IPv4/Core -I$root/Base -I$root/Util; make) || exit 1
+(cd work; root=../../../..; opp_makemake -f -N -w -u cmdenv -c $root/ipsuiteconfig -I../.. -I$root/Transport/TCP -I$root/Network/IPv4 -I$root/Base -I$root/Util; make) || exit 1
 echo
 opp_test -r -v $TESTFILES || exit 1
 echo

@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 #include "IPAddress.h"
 #include "IPDatagram_m.h"
-#include "TCPSegment_m.h"
+#include "TCPSegment.h"
 #include "TCPDump.h"
 
 
@@ -50,7 +50,7 @@ class TCPTesterBase : public cSimpleModule
 /**
  * Dumps every packet using the TCPDumper class, and in addition it can delete,
  * delay or duplicate TCP segments, and insert new segments.
- * 
+ *
  * Script format: see NED documentation.
  */
 class TCPScriptableTester : public TCPTesterBase

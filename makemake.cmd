@@ -1,3 +1,4 @@
+call ..\omnetpp\vcvars32.bat
 set root=D:\home\IPSuite-pcvs
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 set OPTS=-f -N

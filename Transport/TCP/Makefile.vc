@@ -272,9 +272,9 @@ TCPMessageSendQueue.obj: TCPMessageSendQueue.cc \
   TCPSegment_m.h
 TCPSegment.obj: TCPSegment.cc \
   TCPSegment.h \
+  ..\..\Base/ipsuite_defs.h \
   TCPSegment_m.h
 TCPSegment_m.obj: TCPSegment_m.cc \
-  TCPSegment.h \
   TCPSegment_m.h
 TCPSocket.obj: TCPSocket.cc \
   TCPSocket.h \
@@ -303,9 +303,9 @@ TCPVirtualDataRcvQueue.obj: TCPVirtualDataRcvQueue.cc \
   TCPVirtualDataRcvQueue.h \
   TCPSegment.h \
   TCPReceiveQueue.h \
+  ..\..\Base/ipsuite_defs.h \
   TCPSegment_m.h \
   TCPConnection.h \
-  ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h \
   TCPMain.h
 TCPVirtualDataSendQueue.obj: TCPVirtualDataSendQueue.cc \

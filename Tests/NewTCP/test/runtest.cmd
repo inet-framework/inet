@@ -16,7 +16,7 @@ call opp_test -g -v %TESTFILES% || goto end
 
 cd work || goto end
 set root=..\..\..\..
-call opp_nmakemake -f -N -w -u cmdenv -c %root%\ipsuiteconfig.vc -I..\.. -I%root%\Transport\NewTCP -I%root%\Network\IPv4\Core -I%root%\Base -I%root%\Util || goto end
+call opp_nmakemake -f -N -w -u cmdenv -c %root%\ipsuiteconfig.vc -I..\.. -I%root%\Transport\TCP -I%root%\Network\IPv4 -I%root%\Base -I%root%\Util || goto end
 nmake -f makefile.vc || cd .. && goto end
 cd .. || goto end
 
