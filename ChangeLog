@@ -1,3 +1,24 @@
+
+2005-04-04  ------ INET-20050404 released ------
+
+2005-04-03  Andras Varga
+
+	* updated to omnetpp-3.1
+
+	* patches from Michael Tuexen
+
+2005-01-02  ------ INET-20050102 released ------
+
+2004-01-01  Andras Varga
+
+	* updated to omnetpp-3.0
+
+2004-10-07  ------ INET-20041007 released ------
+
+        * package renamed to INET Framework
+
+2004-10-07  ------ IPSuite-20041007 released ------
+
 03/2004 through 10/2004  Andras Varga
 
         * practically, complete rewrite. See change log at 
