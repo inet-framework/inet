@@ -37,7 +37,8 @@ module ClientServerNetwork
             display: "p=190,102;i=ipc";
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypesToProcess = "Router StandardHost2",
+                moduleTypes = "Router StandardHost2",
+                nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
             display: "p=50,70;i=cogwheel";

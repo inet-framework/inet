@@ -27,13 +27,23 @@
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //    1. assign \IP addresses to hosts and routers. All hosts and
-//       routes will be in the same network (same network address).
+//       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
 //    2. then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //    3. finally, it will add routes which correspond to the shortest
 //       paths to the routing tables (see RoutingTable::addRoutingEntry()).
+//
+// How does it know which modules are routers, hosts, et.c that need to
+// be configured, and what is the network topology? The configurator
+// picks all modules of types listed in the moduleTypes parameter and
+// their connections, and builds a graph from it. Then it runs Dijstra's
+// shortest path algorithm on it, and configures all modules which are
+// IP nodes, that is, not listed in the nonIPModuleTypes parameter.
+//
+// It is assumed that the routing table (RoutingTable module) is the
+// "networkLayer.routingTable" submodule in all hosts and routers.
 //
 // To avoid interference with the above algorithm, it's recommended that
 // no host or router should have its address set explicitly, and
@@ -46,9 +56,9 @@
 //
 simple FlatNetworkConfigurator
     parameters:
-        moduleTypesToProcess: string,
-        busTypes: string,
-        networkAddress: string,
-        netmask: string;
+        moduleTypes: string, // all module types to be considered part of the topology
+        nonIPModuleTypes: string, // module types which don't need IP configuration (e.g. Ethernet hub, switch or bus)
+        networkAddress: string, // network part of the address (see netmask parameter)
+        netmask: string;  // host part of addresses are autoconfigured
 endsimple
 

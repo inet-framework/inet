@@ -31,13 +31,13 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     cTopology topo("topo");
 
-    std::vector<std::string> types = StringTokenizer(par("moduleTypesToProcess"), " ").asVector();
+    std::vector<std::string> types = StringTokenizer(par("moduleTypes"), " ").asVector();
     topo.extractByModuleType(types);
     ev << "cTopology found " << topo.nodes() << " nodes\n";
 
     // Although bus types are not auto-configured, FNC must still know them
     // since topology may depend on them.
-    std::vector<std::string> busTypes = StringTokenizer(par("busTypes"), " ").asVector();
+    std::vector<std::string> nonIPTypes = StringTokenizer(par("nonIPModuleTypes"), " ").asVector();
 
     // assign IP addresses
     uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
@@ -47,14 +47,14 @@ void FlatNetworkConfigurator::initialize(int stage)
         error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
 
     int i;
-    int hostAddr = 0;
+    int hostCtr = 0;
     for (i=0; i<topo.nodes(); i++)
     {
         // skip bus types
-        if (std::find(busTypes.begin(), busTypes.end(), topo.node(i)->module()->className())!=busTypes.end())
+        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(i)->module()->className())!=nonIPTypes.end())
             continue;
 
-        uint32 addr = networkAddress | uint32(++hostAddr);
+        uint32 addr = networkAddress | uint32(++hostCtr);
 
         // find interface table and assign address to all interfaces with an output port
         cModule *mod = topo.node(i)->module();
@@ -72,28 +72,29 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 
     // find and store next hops
-    hostAddr=0;
+    hostCtr=0;
     for (i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *destNode = topo.node(i);
-        if (std::find(busTypes.begin(), busTypes.end(), destNode->module()->className())!=busTypes.end())
+        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), destNode->module()->className())!=nonIPTypes.end())
             continue;
 
-        uint32 destAddr = networkAddress | uint32(++hostAddr);
+        uint32 destAddr = networkAddress | uint32(++hostCtr);
         std::string destModName = destNode->module()->fullName();
 
         topo.unweightedSingleShortestPathsTo(destNode);
 
-        int hostAddr2 = 0;
+        int hostCtr2 = 0;
         for (int j=0; j<topo.nodes(); j++)
         {
             if (i==j) continue;
-            if (std::find(busTypes.begin(), busTypes.end(), topo.node(j)->module()->className())!=busTypes.end())
+            if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(j)->module()->className())!=nonIPTypes.end())
                 continue;
 
             cTopology::Node *atNode = topo.node(j);
-            if (atNode->paths()==0) continue; // not connected
-            uint32 atAddr = networkAddress | uint32(++hostAddr2);
+            if (atNode->paths()==0)
+                continue; // not connected
+            uint32 atAddr = networkAddress | uint32(++hostCtr2);
 
             int outputPort = atNode->path(0)->localGate()->index();
             ev << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
@@ -118,7 +119,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
 RoutingTable *FlatNetworkConfigurator::findRoutingTable(cModule *ipnode)
 {
-    // TBD could be made more flexible...
+    // TBD this could be made more flexible...
     cModule *networkLayer = ipnode->submodule("networkLayer");
     RoutingTable *rt = !networkLayer ? NULL : dynamic_cast<RoutingTable *>(networkLayer->submodule("routingTable"));
     if (!rt)
