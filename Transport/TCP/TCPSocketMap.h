@@ -65,6 +65,11 @@ class TCPSocketMap
      * Removes the given socket from the data structure.
      */
     TCPSocket *removeSocket(TCPSocket *socket);
+
+    /**
+     * Returns the number of sockets stored.
+     */
+    int size() {return socketMap.size();}
 };
 
 #endif

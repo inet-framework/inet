@@ -33,6 +33,8 @@ class TCPSrvHostApp : public cSimpleModule
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
 
+    void updateDisplay();
+
   public:
     Module_Class_Members(TCPSrvHostApp, cSimpleModule, 0);
     virtual void initialize();

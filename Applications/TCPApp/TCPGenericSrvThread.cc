@@ -51,6 +51,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     else
     {
         msg->setLength(requestedBytes*8);
+        delete msg->removeControlInfo();
         socket()->send(msg);
     }
 

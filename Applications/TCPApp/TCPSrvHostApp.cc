@@ -28,6 +28,15 @@ void TCPSrvHostApp::initialize()
     serverSocket.listen(true);
 }
 
+void TCPSrvHostApp::updateDisplay()
+{
+    if (!ev.isGUI()) return;
+
+    char buf[32];
+    sprintf(buf, "%d threads", socketMap.size());
+    displayString().setTagArg("t", 0, buf);
+}
+
 void TCPSrvHostApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
@@ -51,6 +60,8 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
             proc->init(this, socket);
 
             socketMap.addSocket(socket);
+
+            updateDisplay();
         }
         socket->processMessage(msg);
     }
@@ -67,6 +78,8 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     // remove thread object
     delete thread;
+
+    updateDisplay();
 }
 
 
