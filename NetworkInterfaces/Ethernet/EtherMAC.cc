@@ -29,10 +29,9 @@
 
 
 
-// FIXME to ostream
-static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
+static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
 {
-    ev.printf("(%s)%s",msg->className(),msg->fullName());
+    ev << "(" << msg->className() << ")" << msg->fullName();
     return ev;
 }
 

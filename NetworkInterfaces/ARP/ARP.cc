@@ -34,6 +34,21 @@
 #include "RoutingTableAccess.h"
 
 
+
+static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
+{
+    ev << "(" << msg->className() << ")" << msg->fullName();
+    return ev;
+}
+
+static std::ostream& operator<< (std::ostream& ev, const MACAddress& addr)
+{
+    char buf[20];
+    ev << addr.toHexString(buf);
+    return ev;
+}
+
+
 /**
  * ARP implementation.
  */
@@ -157,13 +172,15 @@ void ARP::handleMessage(cMessage *msg)
 void ARP::processInboundPacket(cMessage *msg)
 {
     // remove control info from packet, and send it up
-    EtherCtrl *controlInfo = check_and_cast<EtherCtrl*>(msg->removeControlInfo());
-    delete controlInfo;
+    EV << "Packet " << msg << " arrived from network, sending up\n";
+    delete msg->removeControlInfo();
     send(msg,"hlOut");
 }
 
 void ARP::processOutboundPacket(cMessage *msg)
 {
+    EV << "Packet " << msg << " arrived from higher layer\n";
+
     // get control info from packet
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(msg->removeControlInfo());
     IPAddress nextHopAddr = controlInfo->nextHopAddr();
@@ -172,6 +189,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     if (nextHopAddr.isNull())
     {
         // try proxy ARP
+        EV << "No next hop address, trying Proxy ARP\n";
         IPDatagram *datagram = check_and_cast<IPDatagram *>(msg);
         nextHopAddr = datagram->destAddress();
     }
@@ -185,6 +203,7 @@ void ARP::processOutboundPacket(cMessage *msg)
         ARPCache::iterator where = arpCache.insert(arpCache.begin(), std::make_pair(nextHopAddr,entry));
         entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
 
+        EV << "Starting ARP resolution for " << nextHopAddr << "\n";
         initiateARPResolution(nextHopAddr,entry);
 
         // and queue up packet
@@ -194,11 +213,14 @@ void ARP::processOutboundPacket(cMessage *msg)
     else if ((*it).second->pending)
     {
         // an ARP request is already pending for this address -- just queue up packet
+        EV << "ARP resolution for " << nextHopAddr << " is pending, queueing up packet\n";
         (*it).second->pendingPackets.push_back(msg);
         pendingQueue.insert(msg);
     }
     else if ((*it).second->lastUpdate+cacheTimeout<simTime())
     {
+        EV << "ARP cache entry for " << nextHopAddr << " expired, starting new ARP resolution\n";
+
         // cache entry stale, send new ARP request
         ARPCacheEntry *entry = (*it).second;
         initiateARPResolution(nextHopAddr,entry);
@@ -210,6 +232,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     else
     {
         // valid ARP cache entry found, flag msg with MAC address and send it out
+        EV << "MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
         sendPacketToMAC(msg, (*it).second->macAddress);
     }
 }
@@ -262,15 +285,19 @@ void ARP::requestTimedOut(cMessage *selfmsg)
     if (entry->numRetries < retryCount)
     {
         // retry
-        scheduleAt(simTime()+retryTimeout, selfmsg);
         IPAddress nextHopAddr = entry->myIter->first;
+        EV << "ARP request for " << nextHopAddr << " timed out, resending\n";
         sendARPRequest(nextHopAddr);
+        scheduleAt(simTime()+retryTimeout, selfmsg);
         return;
     }
 
     // max retry count reached: ARP failure.
     // throw out entry from cache, delete pending messages
     MsgPtrVector& pendingPackets = entry->pendingPackets;
+    EV << "ARP timeout, max retry count " << retryCount << " for "
+       << entry->myIter->first << " reached. Dropping " << pendingPackets.size()
+       << " waiting packets from the queue\n";
     while (!pendingPackets.empty())
     {
         MsgPtrVector::iterator i = pendingPackets.begin();
@@ -299,6 +326,8 @@ bool ARP::addressRecognized(IPAddress destAddr)
 
 void ARP::processARPPacket(ARPPacket *arp)
 {
+    EV << "ARP packet " << arp << "arrived\n";
+
     //
     // Recipe a'la RFC 826:
     //
@@ -389,12 +418,16 @@ void ARP::processARPPacket(ARPPacket *arp)
     }
     else
     {
+        // address not recognized
+        EV << "IP address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
         delete arp;
     }
 }
 
 void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
 {
+    EV << "Updating ARP cache entry: " << entry->myIter->first << " --> " << macAddress << "\n";
+
     // update entry
     if (entry->pending)
     {
