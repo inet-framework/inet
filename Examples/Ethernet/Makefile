@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= EtherApp_m.o EtherAppCli.o  EtherAppSrv.o
+OBJS= EtherApp_m.o EtherAppCli.o EtherAppSrv.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= EtherApp_m.h
@@ -119,8 +119,20 @@ re-makemake-m: makefile-ins
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 EtherAppCli.o: EtherAppCli.cc \
-  EtherApp_m.h
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
+  EtherApp_m.h \
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/utils.h \
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/Ethernet.h \
+  /home/andras/IPSuite/NetworkInterfaces/_802/MACAddress.h \
+  /home/andras/IPSuite/NetworkInterfaces/_802/MACAddress_m.h \
+  /home/andras/IPSuite/Base/ipsuite_defs.h
 EtherApp_m.o: EtherApp_m.cc \
   EtherApp_m.h
 EtherAppSrv.o: EtherAppSrv.cc \
-  EtherApp_m.h
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/EtherCtrl_m.h \
+  EtherApp_m.h \
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/utils.h \
+  /home/andras/IPSuite/NetworkInterfaces/Ethernet/Ethernet.h \
+  /home/andras/IPSuite/NetworkInterfaces/_802/MACAddress.h \
+  /home/andras/IPSuite/NetworkInterfaces/_802/MACAddress_m.h \
+  /home/andras/IPSuite/Base/ipsuite_defs.h

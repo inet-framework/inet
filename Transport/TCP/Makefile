@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TCPInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o pcb.o Tcp2Ip.o  tcpmodule.o 
+OBJS= TCPInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o pcb.o Tcp2Ip.o tcpmodule.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPInterfacePacket_m.h TransportPacket_m.h

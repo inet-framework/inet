@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ARPPacket_m.o ARP.o 
+OBJS= ARPPacket_m.o ARP.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ARPPacket_m.h

@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= _802Ctrl_m.o MACAddress_m.o  MACAddress.o 
+OBJS= _802Ctrl_m.o MACAddress_m.o MACAddress.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= _802Ctrl_m.h MACAddress_m.h

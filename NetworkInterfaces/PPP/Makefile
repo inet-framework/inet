@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= PPPFrame_m.o  PPPInterface.o
+OBJS= PPPFrame_m.o PPPInterface.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= PPPFrame_m.h

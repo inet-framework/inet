@@ -110,5 +110,13 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-client.o: client.cc
-server.o: server.cc
+client.o: client.cc \
+  /home/andras/IPSuite/Transport/Socket/SocketInterfacePacket.h \
+  /home/andras/IPSuite/Transport/Socket/sockets.h \
+  /home/andras/IPSuite/Transport/TCP/pcb.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPAddress.h
+server.o: server.cc \
+  /home/andras/IPSuite/Transport/Socket/SocketInterfacePacket.h \
+  /home/andras/IPSuite/Transport/Socket/sockets.h \
+  /home/andras/IPSuite/Transport/TCP/pcb.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPAddress.h

@@ -112,5 +112,34 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-NewBWRequestTester.o: NewBWRequestTester.cc
-NewRouteTester.o: NewRouteTester.cc
+NewBWRequestTester.o: NewBWRequestTester.cc \
+  /home/andras/IPSuite/Network/MPLS/MPLSModule.h \
+  /home/andras/IPSuite/Network/RSVP_TE/RSVPTester.h \
+  /home/andras/IPSuite/Network/MPLS/MPLSPacket.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPDatagram.h \
+  /home/andras/IPSuite/Network/MPLS/LIBTableAccess.h \
+  /home/andras/IPSuite/Network/IPv4/Core/RoutingTableAccess.h \
+  /home/andras/IPSuite/Network/IPv4/Core/RoutingTable.h \
+  /home/andras/IPSuite/Network/MPLS/ConstType.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPDatagram_m.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPAddress.h \
+  /home/andras/IPSuite/Base/ModuleAccess.h \
+  /home/andras/IPSuite/Network/MPLS/LIBtable.h \
+  /home/andras/IPSuite/Network/MPLS/ip_address_prefix.h \
+  /home/andras/IPSuite/Base/ipsuite_defs.h
+NewRouteTester.o: NewRouteTester.cc \
+  /home/andras/IPSuite/Network/MPLS/MPLSModule.h \
+  /home/andras/IPSuite/Network/RSVP_TE/RSVPTester.h \
+  /home/andras/IPSuite/Network/RSVP_TE/TED.h \
+  /home/andras/IPSuite/Network/MPLS/MPLSPacket.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPDatagram.h \
+  /home/andras/IPSuite/Network/MPLS/LIBTableAccess.h \
+  /home/andras/IPSuite/Network/IPv4/Core/RoutingTableAccess.h \
+  /home/andras/IPSuite/Network/IPv4/Core/RoutingTable.h \
+  /home/andras/IPSuite/Network/MPLS/ConstType.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPDatagram_m.h \
+  /home/andras/IPSuite/Network/IPv4/Core/IPAddress.h \
+  /home/andras/IPSuite/Base/ModuleAccess.h \
+  /home/andras/IPSuite/Network/MPLS/LIBtable.h \
+  /home/andras/IPSuite/Network/MPLS/ip_address_prefix.h \
+  /home/andras/IPSuite/Base/ipsuite_defs.h

@@ -37,7 +37,7 @@ include ../../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ErrorHandling.o ICMP.o  IPAddress.o   IPFragmentation.o IPMulticast.o IPOutput.o IPSend.o IPTunneling.o LocalDeliver.o PreRouting.o Routing.o RoutingTable.o RoutingTableParser.o
+OBJS= ICMPMessage_m.o IPControlInfo_m.o IPDatagram_m.o ErrorHandling.o ICMP.o IPAddress.o IPFragmentation.o IPMulticast.o IPOutput.o IPSend.o IPTunneling.o LocalDeliver.o PreRouting.o Routing.o RoutingTable.o RoutingTableParser.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h

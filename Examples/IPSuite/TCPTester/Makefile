@@ -118,12 +118,16 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 dropswitch.o: dropswitch.cc \
   nw.h \
-  ip.h
+  ip.h \
+  /home/andras/IPSuite/Transport/TCP/tcp.h
 ipmodule.o: ipmodule.cc \
-  ip.h
+  ip.h \
+  /home/andras/IPSuite/Transport/TCP/tcp.h
 ppp.o: ppp.cc \
   nw.h \
-  ip.h
+  ip.h \
+  /home/andras/IPSuite/Transport/TCP/tcp.h
 switch.o: switch.cc \
   nw.h \
-  ip.h
+  ip.h \
+  /home/andras/IPSuite/Transport/TCP/tcp.h

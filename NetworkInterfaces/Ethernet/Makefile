@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= EtherCtrl_m.o EtherFrame_m.o EtherBus.o  EtherEncap.o  EtherHub.o EtherLLC.o EtherMAC.o MACRelayUnitBase.o MACRelayUnitNP.o MACRelayUnitPP.o utils.o
+OBJS= EtherCtrl_m.o EtherFrame_m.o EtherBus.o EtherEncap.o EtherHub.o EtherLLC.o EtherMAC.o MACRelayUnitBase.o MACRelayUnitNP.o MACRelayUnitPP.o utils.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= EtherCtrl_m.h EtherFrame_m.h

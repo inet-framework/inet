@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= UDPControlInfo_m.o UDPPacket_m.o   UDPProcessing.o
+OBJS= UDPControlInfo_m.o UDPPacket_m.o UDPProcessing.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= UDPControlInfo_m.h UDPPacket_m.h
