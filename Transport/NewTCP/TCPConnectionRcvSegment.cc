@@ -87,22 +87,22 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPAddress sr
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
     // Processing", subsection "SEGMENT ARRIVES".
     //
-
+    TCPEventCode event;
     if (fsm.state()==TCP_S_LISTEN)
     {
-        return processSegmentInListen(tcpseg, src, dest);
+        event = processSegmentInListen(tcpseg, src, dest);
     }
-    if (fsm.state()==TCP_S_SYN_SENT)
+    else if (fsm.state()==TCP_S_SYN_SENT)
     {
-        return processSegmentInSynSent(tcpseg, src, dest);
+        event = processSegmentInSynSent(tcpseg, src, dest);
     }
     else
     {
-        //
         // RFC 793 steps "first check sequence number", "second check the RST bit", etc
-        //
-        return processSegment1stThru8th(tcpseg);
+        event = processSegment1stThru8th(tcpseg);
     }
+    delete tcpseg;
+    return event;
 }
 
 TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
@@ -129,7 +129,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             tcpEV << "Segment seqNum not acceptable, sending ACK with current receive seq\n";
             sendAck();
         }
-        delete tcpseg;
         return TCP_E_IGNORE;
     }
 
@@ -168,8 +167,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // Enter the CLOSED state, delete the TCB, and return.
                 //"
                 tcpEV << "RST: performing connection reset, closing connection\n";
-                doConnectionReset();
-                delete tcpseg;
+                sendIndicationToApp(TCP_I_CONNECTION_RESET);
                 return TCP_E_RCV_RST;  // this will trigger state transition
 
             case TCP_S_CLOSING:
@@ -179,7 +177,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // enter the CLOSED state, delete the TCB, and return.
                 //"
                 tcpEV << "RST: closing connection\n";
-                delete tcpseg;
+                sendIndicationToApp(TCP_I_CLOSED);
                 return TCP_E_RCV_RST; // this will trigger state transition
 
             default: ASSERT(0);
@@ -208,7 +206,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
         ASSERT(isSegmentAcceptable(tcpseg));  // assert SYN is in the window
         tcpEV << "SYN is in the window: performing connection reset, closing connection\n";
-        doConnectionReset();
+        sendIndicationToApp(TCP_I_CONNECTION_RESET);
         return TCP_E_RCV_UNEXP_SYN;
     }
 
@@ -219,7 +217,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     {
         // if the ACK bit is off drop the segment and return
         tcpEV << "ACK not set, dropping segment\n";
-        delete tcpseg;
         return TCP_E_IGNORE;
     }
 
@@ -243,15 +240,13 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             sendRst(tcpseg->ackNo());
             return TCP_E_IGNORE;
         }
-        event = TCP_E_RCV_ACK; // will trigger transition to ESTABLISHED
-
-        // we're in ESTABLISHED, these timers are no longer needed
-        delete cancelEvent(connEstabTimer);
-        delete cancelEvent(synRexmitTimer);
-        connEstabTimer = synRexmitTimer = NULL;
 
         // notify
         tcpAlgorithm->established(false);
+
+        // This will trigger transition to ESTABLISHED. Timers and notifying
+        // app will be taken care of in stateEntered().
+        event = TCP_E_RCV_ACK;
     }
 
     uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
@@ -283,7 +278,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         //  the last segment used to update SND.WND.  The check here
         //  prevents using old segments to update the window.
         //"
-        processAckInEstabEtc(tcpseg);
+        bool ok = processAckInEstabEtc(tcpseg);
+        if (!ok)
+            return TCP_E_IGNORE;  // if acks something not yet sent, drop it
     }
 
     if ((fsm.state()==TCP_S_FIN_WAIT_1 && state->fin_ack_rcvd) || fsm.state()==TCP_S_FIN_WAIT_2)
@@ -299,16 +296,12 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         //  the retransmission queue is empty, the user's CLOSE can be
         //  acknowledged ("ok") but do not delete the TCB.
         //"
-
+        //
+        // Note: we won't acknowledge the the user's close (i.e. send TCP_I_CLOSED)
+        // until we really reach the CLOSED state.
+        //
         if (fsm.state()==TCP_S_FIN_WAIT_1)
             event = TCP_E_RCV_ACK;  // will trigger transition to FIN-WAIT-2
-
-        // if the retransmission queue is empty, the user's CLOSE can be
-        // acknowledged ("ok")
-
-        //FIXME tbd
-        //if (sendQueue->bytesAvailable(...))
-        //     indicate Closed to user
     }
 
     if (fsm.state()==TCP_S_CLOSING)
@@ -336,7 +329,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         if (state->send_fin && tcpseg->ackNo()==state->snd_fin_seq+1)
         {
             tcpEV << "Last ACK arrived\n";
-            return TCP_E_RCV_ACK;
+            sendIndicationToApp(TCP_I_CLOSED);
+            return TCP_E_RCV_ACK; // will trigger transition to CLOSED
         }
     }
 
@@ -347,7 +341,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // retransmission of the remote FIN.  Acknowledge it, and restart
         // the 2 MSL timeout.
         //"
-        //FIXME tbd
+        sendAck();
+        cancelEvent(the2MSLTimer);
+        scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
     }
 
     //
@@ -364,7 +360,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // mode") for this continuous sequence of urgent data, do not
         // signal the user again.
         //"
-        processUrgInEstabEtc(tcpseg);
+
+        // TBD: URG currently not supported
     }
 
     //
@@ -420,14 +417,20 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             {
                 // forward data to app
                 //
-                // FIXME should implement socket READ command, and pass up only
+                // FIXME we should implement socket READ command, and pass up only
                 // as many bytes as requested. rcv_wnd should be decreased
                 // accordingly! (right now we *always* advertise win=16386,
                 // that is, there's practically no receiver-imposed flow control!)
                 //
                 cMessage *msg;
                 while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt))!=NULL)
+                {
+                    msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
+                    TCPCommand *cmd = new TCPCommand();
+                    cmd->setConnId(connId);
+                    msg->setControlInfo(cmd);
                     sendToApp(msg);
+                }
 
                 // if this segment "filled the gap" until the previously arrived segment
                 // that carried a FIN (i.e.rcv_nxt==rcv_fin_seq), we have to advance
@@ -436,6 +439,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 {
                     tcpEV << "All segments arrived up to the FIN segment, advancing rcv_nxt over the FIN\n";
                     state->rcv_nxt = state->rcv_fin_seq+1;
+                    sendIndicationToApp(TCP_I_PEER_CLOSED);
                 }
             }
         }
@@ -464,6 +468,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             // advance rcv_nxt over FIN now
             tcpEV << "FIN arrived, advancing rcv_nxt over the FIN\n";
             state->rcv_nxt++;
+            sendIndicationToApp(TCP_I_PEER_CLOSED);
         }
         else
         {
@@ -473,7 +478,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             state->rcv_fin_seq = fin_seq;
         }
 
-        // FIXME do PUSH stuff
+        // TBD do PUSH stuff
 
         // state transitions will be done in the state machine, here we just set
         // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)
@@ -523,7 +528,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         event = TCP_E_CLOSE;
     }
 
-    delete tcpseg;
     return event;
 }
 
@@ -594,7 +598,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         //"
         state->rcv_nxt = tcpseg->sequenceNo()+1;
         state->irs = tcpseg->sequenceNo();
-        receiveQueue->init(state->rcv_nxt);   //FIXME may init twice...
+        receiveQueue->init(state->rcv_nxt);   // FIXME may init twice...
         selectInitialSeqNum();
         sendSynAck();
         startSynRexmitTimer();
@@ -606,12 +610,16 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         // will be processed in the SYN-RECEIVED state, but processing of SYN
         // and ACK should not be repeated.
         //"
+        // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
+        // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
+        // so there's only URG and PSH left to handle.
+        //
+        if (tcpseg->payloadLength()>0)
+            receiveQueue->insertBytesFromSegment(tcpseg);
+        if (tcpseg->urgBit() || tcpseg->pshBit())
+            tcpEV << "Ignoring URG and PSH bits in SYN\n"; // TBD
 
-        // FIXME it is not clear what exactly is there left to do: RST, SYN, ACK
-        // got processed already; About FIN processing see above. URG bit and
-        // segment text are not processed in SYN_RCVD yet -- queue them up?
-
-        return TCP_E_RCV_SYN;
+        return TCP_E_RCV_SYN;  // this will take us to SYN_RCVD
     }
 
     //"
@@ -666,7 +674,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         if (tcpseg->ackBit())
         {
             tcpEV << "RST+ACK: performing connection reset\n";
-            doConnectionReset();
+            sendIndicationToApp(TCP_I_CONNECTION_RESET);
             return TCP_E_RCV_RST;
         }
         else
@@ -725,19 +733,27 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         //"
         if (seqGreater(state->snd_una, state->iss))
         {
-            tcpEV << "SYN+ACK bits set\n";
+            tcpEV << "SYN+ACK bits set, connection established.\n";
 
-            // we're in ESTABLISHED, these timers are no longer needed
-            delete cancelEvent(connEstabTimer);
-            delete cancelEvent(synRexmitTimer);
-            connEstabTimer = synRexmitTimer = NULL;
+            // RFC says "continue processing at the sixth step below where
+            // the URG bit is checked". Those steps deal with: URG, segment text
+            // (and PSH), and FIN.
+            // Now: URG and PSH we don't support yet; in SYN+FIN we ignore FIN;
+            // with segment text we just take it easy and put it in the receiveQueue
+            // -- we'll forward it to the user when more data arrives.
+            if (tcpseg->finBit())
+                tcpEV << "SYN+ACK+FIN received: ignoring FIN\n";
+            if (tcpseg->payloadLength()>0)
+                state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpseg); // TBD forward to app, etc.
+            if (tcpseg->urgBit() || tcpseg->pshBit())
+                tcpEV << "Ignoring URG and PSH bits in SYN+ACK\n"; // TBD
 
-            // notify
+            // notify tcpAlgorithm (it has to send ACK of SYN)
             tcpAlgorithm->established(true);
 
-            // FIXME should continue processing at the sixth step below where the URG bit is checked
-
-            return TCP_E_RCV_SYN_ACK; // this will trigger transition to ESTABLISHED
+            // This will trigger transition to ESTABLISHED. Timers and notifying
+            // app will be taken care of in stateEntered().
+            return TCP_E_RCV_SYN_ACK;
         }
 
         //"
@@ -753,8 +769,20 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         state->snd_max = state->snd_nxt = state->iss;
         sendSynAck();
         startSynRexmitTimer();
-        // FIXME TBD: If there are other controls or text in the segment, queue them
-        // for processing after the ESTABLISHED state has been reached
+
+        // Note: code below is similar to processing SYN in LISTEN.
+
+        // For consistency with that code, we ignore SYN+FIN here
+        if (tcpseg->finBit())
+            tcpEV << "SYN+FIN received: ignoring FIN\n";
+
+        // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
+        // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
+        // so there's only URG and PSH left to handle.
+        if (tcpseg->payloadLength()>0)
+            receiveQueue->insertBytesFromSegment(tcpseg);
+        if (tcpseg->urgBit() || tcpseg->pshBit())
+            tcpEV << "Ignoring URG and PSH bits in SYN\n"; // TBD
         return TCP_E_RCV_SYN;
     }
 
@@ -785,27 +813,15 @@ TCPEventCode TCPConnection::processRstInSynReceived(TCPSegment *tcpseg)
 
     if (state->active)
     {
-        // FIXME TBD: signal "connection refused"
+        // signal "connection refused"
+        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
     }
-
-    // FIXME cf. doConnectionReset()
 
     // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
     return TCP_E_RCV_RST;
 }
 
-void TCPConnection::doConnectionReset()
-{
-    //"
-    // Any outstanding RECEIVEs and SEND should receive "reset" responses.
-    // All segment queues should be flushed.  Users should also receive an
-    // unsolicited general "connection reset" signal.
-    //"
-
-    // FIXME notify user. nothing else to do. (timers will be cancelled in stateEntered()
-}
-
-void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
+bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 {
     tcpEV2 << "Processing ACK in a data transfer state\n";
 
@@ -915,21 +931,9 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         // send an ACK, drop the segment, and return.
         tcpAlgorithm->receivedAckForDataNotYetSent(tcpseg->ackNo());
         state->dupacks = 0;
-        // FIXME todo: drop segment & return
+        return false;  // means "drop"
     }
-}
-
-
-void TCPConnection::processUrgInEstabEtc(TCPSegment *tcpseg)
-{
-    tcpEV2 << "Processing URG in a data transfer state\n";
-    // FIXME not implemented yet
-}
-
-void TCPConnection::processSegmentTextInEstabEtc(TCPSegment *tcpseg)
-{
-    tcpEV2 << "Processing segment text in a data transfer state\n";
-    // FIXME this function not used currently
+    return true;
 }
 
 //----
@@ -940,8 +944,13 @@ void TCPConnection::process_TIMEOUT_CONN_ESTAB()
     {
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
-            // Note: TIMEOUT_CONN_ESTAB event will automatically take the connection
-            // to CLOSED, and cancel SYN-REXMIT timer.
+            // Nothing to do here. TIMEOUT_CONN_ESTAB event will automatically
+            // take the connection to LISTEN or CLOSED, and cancel SYN-REXMIT timer.
+            if (state->active)
+            {
+                // notify user if we're on the active side
+                sendIndicationToApp(TCP_I_TIMED_OUT);
+            }
             break;
         default:
             // We should not receive this timeout in this state.
@@ -960,6 +969,7 @@ void TCPConnection::process_TIMEOUT_2MSL()
         case TCP_S_TIME_WAIT:
             // Nothing to do here. The TIMEOUT_2MSL event will automatically take
             // the connection to CLOSED.
+            sendIndicationToApp(TCP_I_CLOSED);
             break;
         default:
             // We should not receive this timeout in this state.
@@ -975,6 +985,7 @@ void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
         case TCP_S_FIN_WAIT_2:
             // Nothing to do here. The TIMEOUT_FIN_WAIT_2 event will automatically take
             // the connection to CLOSED.
+            sendIndicationToApp(TCP_I_CLOSED);
             break;
         default:
             // We should not receive this timeout in this state.

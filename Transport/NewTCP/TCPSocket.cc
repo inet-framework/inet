@@ -18,8 +18,6 @@
 
 #include <omnetpp.h>
 #include "TCPSocket.h"
-#include "TCPCommand_m.h"
-
 
 
 int TCPSocket::nextConnId = 0;
@@ -150,15 +148,40 @@ void TCPSocket::processMessage(cMessage *msg)
     if (!belongsToSocket(msg))
         return;
 
+    TCPStatusInfo *status;
     switch (msg->kind())
     {
-        case TCP_I_DATA: break; // FIXME complete this...
-        case TCP_I_URGENT_DATA: break;
-        case TCP_I_ESTABLISHED: break;
-        case TCP_I_CLOSING: break;
-        case TCP_I_CLOSED: break;
-        case TCP_I_CONNECTION_RESET: break;
-        case TCP_I_STATUS: break;
+        case TCP_I_DATA:
+             cb->socketDataArrived(connId, yourPtr, msg, false);
+             break;
+        case TCP_I_URGENT_DATA:
+             cb->socketDataArrived(connId, yourPtr, msg, true);
+             break;
+        case TCP_I_ESTABLISHED:
+             delete msg;
+             cb->socketEstablished(connId, yourPtr);
+             break;
+        case TCP_I_PEER_CLOSED:
+             delete msg;
+             cb->socketPeerClosed(connId, yourPtr);
+             break;
+        case TCP_I_CLOSED:
+             delete msg;
+             cb->socketClosed(connId, yourPtr);
+             break;
+        case TCP_I_CONNECTION_REFUSED:
+        case TCP_I_CONNECTION_RESET:
+        case TCP_I_TIMED_OUT:
+             cb->socketFailure(connId, yourPtr, msg->kind());
+             delete msg;
+             break;
+        case TCP_I_STATUS:
+             status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
+             delete msg;
+             cb->socketStatusArrived(connId, yourPtr, status);
+             break;
+        default:
+             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->kind());
     }
 }
 

@@ -43,13 +43,15 @@ enum TcpCommandCode
 //
 enum TcpStatusInd
 {
-    TCP_I_DATA = 1;             // data packet
-    TCP_I_URGENT_DATA = 2;      // urgent data
-    TCP_I_ESTABLISHED = 3;      // connection established
-    TCP_I_CLOSING = 4;          // FIN received
-    TCP_I_CLOSED = 5;           // connection in CLOSED
-    TCP_I_CONNECTION_RESET = 6; // connection reset
-    TCP_I_STATUS = 7;           // status
+    TCP_I_DATA = 1;              // data packet
+    TCP_I_URGENT_DATA = 2;       // urgent data
+    TCP_I_ESTABLISHED = 3;       // connection established
+    TCP_I_PEER_CLOSED = 4;       // FIN received from remote TCP
+    TCP_I_CLOSED = 5;            // connection closed normally (via FIN exchange)
+    TCP_I_CONNECTION_REFUSED = 6; // connection refused
+    TCP_I_CONNECTION_RESET = 7;  // connection reset
+    TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
+    TCP_I_STATUS = 9;            // status
 };
 
 

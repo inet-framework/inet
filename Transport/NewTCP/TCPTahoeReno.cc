@@ -150,7 +150,8 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
     if (++state->rexmit_count > MAX_REXMIT_COUNT)
     {
         tcpEV << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
-        event = TCP_E_ABORT;  // TBD maybe rather introduce a TCP_E_BROKEN event
+        conn->signalConnectionTimeout();
+        event = TCP_E_ABORT;  // TBD maybe rather introduce a TCP_E_TIMEDOUT event
         return;
     }
 
@@ -403,7 +404,7 @@ void TCPTahoeReno::receivedDuplicateAck()
             state->snd_cwnd += state->snd_mss;
             tcpEV << "Reno: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
         }
-        // FIXME shouldn't we try to transmit, retransmit or something here?
+        // FIXME shouldn't we try to transmit, retransmit or something like that here?
     }
 }
 

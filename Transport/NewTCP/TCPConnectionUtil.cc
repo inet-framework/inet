@@ -84,6 +84,26 @@ const char *TCPConnection::eventName(int event)
 #undef CASE
 }
 
+const char *TCPConnection::indicationName(int code)
+{
+#define CASE(x) case x: s=#x+6; break
+    const char *s = "unknown";
+    switch (code)
+    {
+        CASE(TCP_I_DATA);
+        CASE(TCP_I_URGENT_DATA);
+        CASE(TCP_I_ESTABLISHED);
+        CASE(TCP_I_PEER_CLOSED);
+        CASE(TCP_I_CLOSED);
+        CASE(TCP_I_CONNECTION_REFUSED);
+        CASE(TCP_I_CONNECTION_RESET);
+        CASE(TCP_I_TIMED_OUT);
+        CASE(TCP_I_STATUS);
+    }
+    return s;
+#undef CASE
+}
+
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
     tcpEV << "." << tcpseg->srcPort() << " > ";
@@ -139,9 +159,25 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest)
     check_and_cast<TCPMain *>(simulation.contextModule())->send(tcpseg,"to_ip");
 }
 
+void TCPConnection::signalConnectionTimeout()
+{
+    sendIndicationToApp(TCP_I_TIMED_OUT);
+}
+
+void TCPConnection::sendIndicationToApp(int code)
+{
+    tcpEV << "Notifying app: " << indicationName(code) << "\n";
+    cMessage *msg = new cMessage(indicationName(code));
+    msg->setKind(code);
+    TCPCommand *ind = new TCPCommand();
+    ind->setConnId(connId);
+    msg->setControlInfo(ind);
+    tcpMain->send(msg, "to_appl", appGateIndex);
+}
+
 void TCPConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->send(msg,"to_appl");
+    tcpMain->send(msg, "to_appl", appGateIndex);
 }
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
@@ -294,7 +330,7 @@ void TCPConnection::sendFin()
 
 bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
 {
-    // start sending from snd_max  (FIXME is this the right place to set snd_nxt?)
+    // start sending from snd_max
     state->snd_nxt = state->snd_max;
 
     bool segSent = false;

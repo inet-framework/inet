@@ -249,7 +249,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     }
 
     // state machine
-    // FIXME add handling of connection timeout event (keepalive), with transition to closed (?)
+    // TBD add handling of connection timeout event (keepalive), with transition to CLOSED
     int oldState = fsm.state();
     switch (fsm.state())
     {
@@ -277,7 +277,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
             {
                 case TCP_E_CLOSE:       FSM_Goto(fsm, TCP_S_FIN_WAIT_1); break;
                 case TCP_E_ABORT:       FSM_Goto(fsm, TCP_S_CLOSED); break;
-                case TCP_E_TIMEOUT_CONN_ESTAB: FSM_Goto(fsm, TCP_S_CLOSED); break;
+                case TCP_E_TIMEOUT_CONN_ESTAB: FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN); break;
                 case TCP_E_RCV_RST:     FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN); break;
                 case TCP_E_RCV_ACK:     FSM_Goto(fsm, TCP_S_ESTABLISHED); break;
                 case TCP_E_RCV_FIN:     FSM_Goto(fsm, TCP_S_CLOSE_WAIT); break;
@@ -409,6 +409,13 @@ void TCPConnection::stateEntered(int state)
         case TCP_S_SYN_SENT:
             break;
         case TCP_S_ESTABLISHED:
+            // we're in ESTABLISHED, these timers are no longer needed
+            delete cancelEvent(connEstabTimer);
+            delete cancelEvent(synRexmitTimer);
+            connEstabTimer = synRexmitTimer = NULL;
+            // notify
+            sendIndicationToApp(TCP_I_ESTABLISHED);
+            break;
         case TCP_S_CLOSE_WAIT:
         case TCP_S_LAST_ACK:
         case TCP_S_FIN_WAIT_1:

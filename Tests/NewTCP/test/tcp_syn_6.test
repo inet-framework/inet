@@ -45,7 +45,7 @@ tcpsrv: LISTEN --> SYN_RCVD  (on RCV_SYN)
 [45.003 B008] B.2000 > A.1000: S 500:500(0) ack 1 win 16384 # deleting
 [45.003 B009] B.2000 > A.1000: . ack 1 win 16384 # deleting
 tcpcli: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
-tcpsrv: SYN_RCVD --> CLOSED  (on TIMEOUT_CONN_ESTAB)
+tcpsrv: SYN_RCVD --> LISTEN  (on TIMEOUT_CONN_ESTAB)
 
 %contains: stdout
 tcpTestNet1.cli: received 0 bytes in 0 packets

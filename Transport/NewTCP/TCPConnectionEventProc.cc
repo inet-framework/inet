@@ -151,8 +151,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             opp_error("Error processing command SEND: connection closing");
     }
 
-    delete sendCommand;
-    // FIXME who deletes msg?
+    delete sendCommand; // msg itself has been taken by the sendQueue
 }
 
 void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
@@ -184,18 +183,18 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_nxt==sendQueue->bufferEndSeq()) // FIXME ok? not snd_max?
+            if (state->snd_max==sendQueue->bufferEndSeq())
             {
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
+                state->snd_nxt = state->snd_max;
                 sendFin();
-                state->snd_nxt++;
-                state->snd_max = state->snd_nxt;
+                state->snd_max = ++state->snd_nxt;
 
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
             else
             {
-                tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_nxt) <<
+                tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_max) <<
                       " bytes pending, deferring sending of FIN\n";
 
                 // Although the RFC says above that ESTABLISHED->FIN_WAIT_1 should
@@ -231,7 +230,8 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
 
     //
     // The ABORT event will automatically take the connection to the CLOSED
-    // state, flush queues etc -- no need to do it here.
+    // state, flush queues etc -- no need to do it here. Also, we don't need to
+    // send notification to the user, they know what's going on.
     //
     switch(fsm.state())
     {

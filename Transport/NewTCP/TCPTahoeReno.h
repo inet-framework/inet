@@ -52,12 +52,6 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
     simtime_t srtt;          // smoothed round-trip time
     simtime_t rttvar;        // variance of round-trip time
 
-    // receive variables
-    //bool rcv_up_valid;
-    //uint32 rcv_buf_seq;
-    //unsigned long rcv_buff;
-    //double  rcv_buf_usage_thresh;
-
     // last time a segment was sent
     //double last_snd_time;
 

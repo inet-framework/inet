@@ -22,6 +22,7 @@
 
 
 #include <omnetpp.h>
+#include "TCPCommand_m.h"
 #include "IPAddress.h"
 
 class TCPStatusInfo;
@@ -68,8 +69,8 @@ class TCPStatusInfo;
  * <pre>
  * class MyModule : public cSimpleModule, public TCPSocket::CallBackInterface {
  *    TCPSocket socket;
- *    virtual void socketDataArrived(void *yourPtr, cMessage *msg, bool urgent);
- *    virtual void socketConnectionReset(void *yourPtr);
+ *    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+ *    virtual void socketFailure(int connId, void *yourPtr, int code);
  *    ...
  * };
  *
@@ -84,13 +85,18 @@ class TCPStatusInfo;
  *       ...
  * }
  *
- * void MyModule::socketDataArrived(void *, cMessage *msg, bool) {
+ * void MyModule::socketDataArrived(int, void *, cMessage *msg, bool) {
  *     ev << "Received TCP data, " << msg->length()/8 << " bytes\n";
  *     delete msg;
  * }
  *
- * void MyModule::socketConnectionReset(void *) {
- *     ev << "Connection Reset!!!\n";
+ * void MyModule::socketFailure(int, void *, int code) {
+ *     if (code==TCP_I_CONNECTION_RESET)
+ *         ev << "Connection reset!\n";
+ *     else if (code==TCP_I_CONNECTION_REFUSED)
+ *         ev << "Connection refused!\n";
+ *     else if (code==TCP_I_TIMEOUT)
+ *         ev << "Connection timed out!\n";
  * }
  * </pre>
  *
@@ -106,12 +112,12 @@ class TCPSocket
     {
       public:
         virtual ~CallBackInterface() {}
-        virtual void socketDataArrived(void *yourPtr, cMessage *msg, bool urgent) = 0;
-        virtual void socketEstablished(void *yourPtr) {}
-        virtual void socketRemoteTCPClosed(void *yourPtr) {}
-        virtual void socketClosed(void *yourPtr) {}
-        virtual void socketConnectionReset(void *yourPtr) {}
-        virtual void socketStatusArrived(void *yourPtr, TCPStatusInfo *status) {delete status;}
+        virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) = 0;
+        virtual void socketEstablished(int connId, void *yourPtr) {}
+        virtual void socketPeerClosed(int connId, void *yourPtr) {}
+        virtual void socketClosed(int connId, void *yourPtr) {}
+        virtual void socketFailure(int connId, void *yourPtr, int code) {}
+        virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
     };
 
   protected:

@@ -188,11 +188,16 @@ class TCPStateVariables : public cPolymorphic
     // TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK).
     bool fin_ack_rcvd;
 
-    bool send_fin;       // true if a user CLOSE command has been "queued" (FIXME probably redundant? state contains this too)
+    bool send_fin;       // true if a user CLOSE command has been "queued"
     uint32 snd_fin_seq;  // if send_fin==true: FIN should be sent just before this sequence number
 
-    bool fin_rcvd;       // whether FIN received or not (FIXME probably redundant? state contains this too)
-    uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN (FIXME really needed?)
+    bool fin_rcvd;       // whether FIN received or not
+    uint32 rcv_fin_seq;  // if fin_rcvd: sequence number of received FIN
+
+    //bool rcv_up_valid;
+    //uint32 rcv_buf_seq;
+    //unsigned long rcv_buff;
+    //double  rcv_buf_usage_thresh;
 };
 
 
@@ -295,10 +300,7 @@ class TCPConnection
     TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
     TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
     TCPEventCode processRstInSynReceived(TCPSegment *tcpseg);
-    void processAckInEstabEtc(TCPSegment *tcpseg);
-    void processUrgInEstabEtc(TCPSegment *tcpseg);
-    void processSegmentTextInEstabEtc(TCPSegment *tcpseg);
-    void doConnectionReset();
+    bool processAckInEstabEtc(TCPSegment *tcpseg);
     //@}
 
     /** @name Processing timeouts (may override event code) */
@@ -354,24 +356,31 @@ class TCPConnection
     /** Utility: start SYN-REXMIT timer */
     void startSynRexmitTimer();
 
+    /** Utility: signal to user that connection timed out */
+    void signalConnectionTimeout();
+
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, simtime_t timeout)
         {tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);}
 
+  protected:
     /** Utility: cancel a timer */
     cMessage *cancelEvent(cMessage *msg)  {return tcpMain->cancelEvent(msg);}
 
-  protected:
     /** Utility: send IP packet */
     static void sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest);
 
     /** Utility: sends packet to application */
     void sendToApp(cMessage *msg);
 
+    /** Utility: sends a status indication (TCP_I_xxx) to application */
+    void sendIndicationToApp(int code);
+
   protected:
     static void printSegmentBrief(TCPSegment *tcpseg);
     static const char *stateName(int state);
     static const char *eventName(int event);
+    static const char *indicationName(int code);
 
   public:
     /**

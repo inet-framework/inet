@@ -104,6 +104,8 @@ class TCPSendQueue : public cPolymorphic
      * wants to send. Implementations of this abstract class will decide
      * what this means: copying actual bytes, just increasing the
      * "last byte queued" variable, or storing cMessage object(s).
+     * The msg object should not be referenced after this point (sendQueue may
+     * delete it.)
      */
     virtual void enqueueAppData(cMessage *msg) = 0;
 
