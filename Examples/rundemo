@@ -16,17 +16,25 @@ exec wish "$0" "$@"
 
 
 #
+# Configuration
+#
+set wantScrollbar 1
+set unixbrowser "netscape"
+#set unixbrowser "mozilla"
+#set unixbrowser "konqueror"
+
+#
 # title line:   {"title"}
 # program line: {"name" "directory" "unix-command" "windows-command"}
 # readme line:  {"name" "readme-file"}
+# docu line:    {"name" "readme-file"  "html-file"}
 # separator:    {}
 #
-set wantScrollbar 1
 set i 0
 set first ""
 foreach line {
    {"INET Framework"}
-   {"About..."               "README.txt"}
+   {"About..."               "README.txt"      "../Documentation/index.html"}
    {"INET"}
    {"NClients/Telnet"        "INET/NClients"     "./NClients"              "NClients"}
    {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini" "NClients -f basicHTTP.ini"}
@@ -66,6 +74,12 @@ foreach line {
        set db($i,type) "readme"
        set db($i,title) [lindex $line 0]
        set db($i,readme) [lindex $line 1]
+       if {$first==""} {set first $i}
+   } elseif {[llength $line]==3} {
+       set db($i,type) "docu"
+       set db($i,title) [lindex $line 0]
+       set db($i,readme) [lindex $line 1]
+       set db($i,docu) [lindex $line 2]
        if {$first==""} {set first $i}
    } elseif {[llength $line]==4} {
        set db($i,type) "program"
@@ -171,7 +185,7 @@ proc createWindow {} {
         } elseif {$db($i,type)=="heading"} {
             label $f.$i -text $db($i,title) -bg $colors(banner) -relief groove  -font $fonts(bold)
             pack $f.$i -fill x -side top -padx 5 -pady 5
-        } elseif {$db($i,type)=="readme" || $db($i,type)=="program"} {
+        } elseif {$db($i,type)=="readme" || $db($i,type)=="docu" || $db($i,type)=="program"} {
             button $f.$i -text $db($i,title) -bd 1 -command "showDemo $i"
             pack $f.$i -fill x -side top -padx 5 -pady 2
         } else {
@@ -187,12 +201,7 @@ proc createWindow {} {
 }
 
 proc helpAbout {} {
-    tk_messageBox -title {About} -type ok -icon info -message \
-{\
-INET Framework for OMNeT++
-Sample Simulations
-}
-
+    tk_messageBox -title {About} -type ok -icon info -message {Demo simulations for OMNEST/OMNeT++.}
 }
 
 proc showDemo {sample} {
@@ -208,9 +217,17 @@ proc showDemo {sample} {
    $f.$sample config -relief sunken -bg $colors(selbutton)
 
    if {$db($sample,type)=="readme"} {
+
        .main.up.banner config -text "$db($sample,title)"
        pack forget .main.lo
+       loadFile .main.mid.text $db($sample,readme)
 
+   } elseif {$db($sample,type)=="docu"} {
+       .main.up.banner config -text "$db($sample,title)"
+       .main.lo.start config -text "Open documentation\n($db($sample,docu))"
+       .main.lo.start config -command "openDocu $sample"
+       pack forget .main.lo
+       pack .main.lo -expand 0 -fill x -side bottom -before .main.mid
        loadFile .main.mid.text $db($sample,readme)
 
    } elseif {$db($sample,type)=="program"} {
@@ -225,8 +242,8 @@ proc showDemo {sample} {
        .main.lo.start config -command "runSample $sample"
        pack forget .main.lo
        pack .main.lo -expand 0 -fill x -side bottom -before .main.mid
-
        loadFile .main.mid.text "$db($sample,dir)/README"
+
    } else {
        tk_messageBox -title {Error} -type ok -icon error -message "internal error: wrong type '$db($sample,type)'"
        exit
@@ -250,24 +267,38 @@ proc loadFile {t filename} {
 }
 
 proc runSample {sample} {
-   global samples db tcl_platform
+    global samples db tcl_platform
 
-   if {$tcl_platform(platform) == "unix"} {
-     set prog $db($sample,uprog)
-   } else {
-     set prog $db($sample,wprog)
-   }
+    if {$tcl_platform(platform) == "unix"} {
+      set prog $db($sample,uprog)
+    } else {
+      set prog $db($sample,wprog)
+    }
 
-   set pwd [pwd]
-   if [catch {
-      cd $db($sample,dir)
-      #exec $prog &
-      #exec [lindex $prog 0] [lindex $prog 1] [lrange $prog 2 end] &
-      eval exec $prog &
-    } err] {
-      tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"
-   }
-   cd $pwd
+    set pwd [pwd]
+    if [catch {
+       cd $db($sample,dir)
+       #exec $prog &
+       #exec [lindex $prog 0] [lindex $prog 1] [lrange $prog 2 end] &
+       eval exec $prog &
+     } err] {
+       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"
+    }
+    cd $pwd
+}
+
+proc openDocu {sample} {
+    global samples db tcl_platform unixbrowser
+
+    if [catch {
+       if {$tcl_platform(platform) == "windows"} {
+           exec cmd.exe /c start $db($sample,docu)
+       } else {
+           exec $unixbrowser $db($sample,docu) &
+       }
+     } err] {
+       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"
+    }
 }
 
 #===================================================================
