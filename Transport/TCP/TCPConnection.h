@@ -400,9 +400,15 @@ class TCPConnection
     void sendIndicationToApp(int code);
 
   public:
+    /** Utility: prints local/remote addr/port and app gate index/connId */
+    void printConnBrief();
+    /** Utility: prints important header fields */
     static void printSegmentBrief(TCPSegment *tcpseg);
+    /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
+    /** Utility: returns name of TCP_E_xxx constants */
     static const char *eventName(int event);
+    /** Utility: returns name of TCP_I_xxx constants */
     static const char *indicationName(int code);
 
   public:

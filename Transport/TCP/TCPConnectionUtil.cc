@@ -104,6 +104,14 @@ const char *TCPConnection::indicationName(int code)
 #undef CASE
 }
 
+void TCPConnection::printConnBrief()
+{
+    tcpEV << "Connection " << this << " ";
+    tcpEV << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
+    tcpEV << "  on app[" << appGateIndex << "],connId=" << connId;
+    tcpEV << "  in " << stateName(fsm.state()) << "\n";
+}
+
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
     tcpEV << "." << tcpseg->srcPort() << " > ";
@@ -137,7 +145,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 
     const char *tcpAlgorithmClass = tcpAlgorithm->className();
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
-    conn->tcpAlgorithm->setConnection(this);
+    conn->tcpAlgorithm->setConnection(conn);
     conn->tcpAlgorithm->initialize();
 
     conn->state = conn->tcpAlgorithm->createStateVariables();

@@ -145,6 +145,7 @@ TCPConnection::~TCPConnection()
 
 bool TCPConnection::processTimer(cMessage *msg)
 {
+    printConnBrief();
     tcpEV << msg->name() << " timer expired\n";
 
     // first do actions
@@ -181,6 +182,7 @@ bool TCPConnection::processTimer(cMessage *msg)
 
 bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPAddress segSrcAddr, IPAddress segDestAddr)
 {
+    printConnBrief();
     if (!localAddr.isNull())
     {
         ASSERT(localAddr==segDestAddr);
@@ -204,6 +206,8 @@ bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPAddress segSrcAddr, 
 
 bool TCPConnection::processAppCommand(cMessage *msg)
 {
+    printConnBrief();
+
     // first do actions
     TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
     TCPEventCode event = preanalyseAppCommandEvent(msg->kind());

@@ -119,6 +119,7 @@ void TCPMain::updateDisplayString()
     if (ev.disabled())
     {
         // in express mode, we don't bother to update the display
+        // (std::map's iteration is not very fast if map is large)
         displayString().setTagArg("t",0,"");
         return;
     }
@@ -131,7 +132,6 @@ void TCPMain::updateDisplayString()
         numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
         numFIN_WAIT_2=0, numCLOSING=0, numTIME_WAIT=0;
 
-    // std::map's iteration is inefficient if map is large
     for (TcpAppConnMap::iterator i=tcpAppConnMap.begin(); i!=tcpAppConnMap.end(); ++i)
     {
         int state = (*i).second->getFsmState();
@@ -153,18 +153,18 @@ void TCPMain::updateDisplayString()
     }
     char buf2[200];
     buf2[0] = '\0';
-    if (numINIT>0)       sprintf(buf2+strlen(buf2), "INIT:%d ", numINIT);
-    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "CLOSED:%d ", numCLOSED);
-    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "LISTEN:%d ", numLISTEN);
-    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "SYN_SENT:%d ", numSYN_SENT);
-    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "SYN_RCVD:%d ", numSYN_RCVD);
-    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2), "ESTAB:%d ", numESTABLISHED);
-    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "CLOSE_WAIT:%d ", numCLOSE_WAIT);
-    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "LAST_ACK:%d ", numLAST_ACK);
-    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "FIN_WAIT_1:%d ", numFIN_WAIT_1);
-    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "FIN_WAIT_2:%d ", numFIN_WAIT_2);
-    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "CLOSING:%d ", numCLOSING);
-    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "TIME_WAIT:%d ", numTIME_WAIT);
+    if (numINIT>0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
+    if (numCLOSED>0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN>0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT>0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD>0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED>0) sprintf(buf2+strlen(buf2),"estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT>0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK>0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1>0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
     displayString().setTagArg("t",0,buf2);
 }
 

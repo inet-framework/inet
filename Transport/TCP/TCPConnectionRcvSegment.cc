@@ -594,6 +594,8 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         {
             TCPConnection *conn = cloneListeningConnection(); // this will stay LISTENing
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+            tcpEV << "Connection forked: this connection got new connId=" << connId << ", "
+                     "spinoff keeps LISTENing with connId=" << conn->connId << "\n";
         }
         else
         {
