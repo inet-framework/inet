@@ -32,7 +32,7 @@ module UDPUpperLayers
             gatesizes:
                 from_application[2],
                 to_application[2];
-            display: "p=94,105;i=fork";
+            display: "p=94,105;i=block/fork";
         udpClient1: udpClient1Name like UDPApp;
             display: "p=134,43;b=48,32,rect";
         udpServer1: udpServer1Name like UDPApp;

@@ -37,7 +37,7 @@ module UDPHost
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=block/blackboard;p=60,60";
         udpApp: UDPUpperLayers;
             parameters:
                 udpClient1Name = "UDPClientApp",
@@ -51,9 +51,9 @@ module UDPHost
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=87,155;i=fork";
+            display: "p=87,155;i=block/fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,220,row;q=queue;i=iface";
+            display: "p=80,220,row;q=queue;i=block/ifcard";
     connections nocheck:
         // transport connections
         networkLayer.UDPOut --> udpApp.from_ip;

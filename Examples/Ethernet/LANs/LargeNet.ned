@@ -38,9 +38,9 @@ module SmallLAN
         out: out;
     submodules:
         hub: EtherHub;
-            display: "i=switch1";
+            display: "i=device/switch";
         host: EtherHost[h];
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
     connections:
         for i=0..h-1 do
             hub.out++ --> cable --> host[i].in;
@@ -65,11 +65,11 @@ module MediumLAN
         switch: EtherSwitch;
             display: "i=switch2";
         host: EtherHost[n];
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         hub: EtherHub;
-            display: "i=switch1";
+            display: "i=device/switch";
         hhost: EtherHost[h];
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
     connections:
         for i=0..n-1 do
             switch.out++ --> cable --> host[i].in;
@@ -106,18 +106,18 @@ module LargeLAN
         switch: EtherSwitch;
             display: "i=switch2";
         host: EtherHost[n];
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         hub: EtherHub;
-            display: "i=switch1";
+            display: "i=device/switch";
         hhost: EtherHost[h];
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         bus: EtherBus;
             parameters:
                 positions = "5 10 15", // every 5 meters
                 propagationSpeed = 200000000;  // 1us = 200m
             display: "b=424,6;o=#408060";
         bhost: EtherHost[b];
-            display: "p=,,r;i=pc_s";
+            display: "p=,,r;i=device/pc2_s";
 
     connections:
         for i=0..n-1 do
@@ -171,7 +171,7 @@ module LargeNet
         switchA: EtherSwitch;
             display: "i=ball2_s";
         serverA: EtherHost;
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         slanA: SmallLAN[as];
             display: "i=cloud_s";
         mlanA: MediumLAN[am];
@@ -182,7 +182,7 @@ module LargeNet
         switchB: EtherSwitch;
             display: "i=ball2_s";
         serverB: EtherHost;
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         slanB: SmallLAN[bs];
             display: "i=cloud_s";
         mlanB: MediumLAN[bm];
@@ -193,7 +193,7 @@ module LargeNet
         switchC: EtherSwitch;
             display: "i=ball2_s";
         serverC: EtherHost;
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         slanC: SmallLAN[cs];
             display: "i=cloud_s";
         mlanC: MediumLAN[cm];
@@ -204,7 +204,7 @@ module LargeNet
         switchD: EtherSwitch;
             display: "i=ball2_s";
         serverD: EtherHost;
-            display: "i=pc_s";
+            display: "i=device/pc2_s";
         slanD: SmallLAN[ds];
             display: "i=cloud_s";
         mlanD: MediumLAN[dm];

@@ -43,7 +43,7 @@ module StandardHost
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=block/blackboard;p=60,60";
         // transport and application layers
         tcpApp: TCPUpperLayers;
             parameters:
@@ -65,9 +65,9 @@ module StandardHost
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=120,110;i=fork";
+            display: "p=120,110;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=60,180,row;i=iface";
+            display: "p=60,180,row;i=block/ifcard";
     connections nocheck:
         // transport connections
         networkLayer.TCPOut --> tcpApp.in;

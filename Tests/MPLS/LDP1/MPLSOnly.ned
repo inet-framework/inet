@@ -28,7 +28,7 @@ module MPLSNetOnly
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=184,95;i=srouter";
+            display: "p=184,95;i=abstract/router";
         LSR2: LDP_LSR;
             parameters:
                 isIR = false,
@@ -37,7 +37,7 @@ module MPLSNetOnly
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=238,247;i=srouter";
+            display: "p=238,247;i=abstract/router";
         LSR3: LDP_LSR;
             parameters:
                 isIR = false,
@@ -46,7 +46,7 @@ module MPLSNetOnly
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=322,95;i=srouter";
+            display: "p=322,95;i=abstract/router";
         LSR4: LDP_LSR;
             parameters:
                 isIR = false,
@@ -55,7 +55,7 @@ module MPLSNetOnly
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=398,247;i=srouter";
+            display: "p=398,247;i=abstract/router";
         LSR5: LDP_LSR;
             parameters:
                 isIR = false,
@@ -64,7 +64,7 @@ module MPLSNetOnly
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=500,95;i=srouter";
+            display: "p=500,95;i=abstract/router";
     connections nocheck:
         LSR1.out[2] --> LSR2.in[0];
         LSR1.in[2] <-- LSR2.out[0];

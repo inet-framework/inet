@@ -66,7 +66,7 @@ module IPProcessing
             gatesizes:
                 in[2],
                 transportOut[sizeof(transportOut)];
-            display: "b=32,30;p=95,78;i=fork";
+            display: "b=32,30;p=95,78;i=block/fork";
         multicast: IPMulticast;
             display: "b=17,17;p=305,175;i=bwgen_s";
         send: IPSend;
@@ -87,7 +87,7 @@ module IPProcessing
         inputQueue: IPInputQueue;
             gatesizes:
                 fromNW[sizeof(queueIn)];
-            display: "p=50,304;i=queue";
+            display: "p=50,304;i=block/queue";
     connections nocheck:
 
         // L2 input to IPInputQueue

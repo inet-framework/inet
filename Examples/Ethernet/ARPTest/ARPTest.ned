@@ -22,13 +22,13 @@ import
 module ARPTest
     submodules:
         server: StandardHost;
-            display: "p=480,198;i=server1_l";
+            display: "p=480,198;i=device/server3_l";
         router8: Router;
-            display: "p=478,100;i=srouter";
+            display: "p=478,100;i=abstract/router";
         router7: Router;
-            display: "p=329,100;i=srouter";
+            display: "p=329,100;i=abstract/router";
         router6: Router;
-            display: "p=254,100;i=srouter";
+            display: "p=254,100;i=abstract/router";
         bus2: EtherBus;
             parameters:
                 positions = "",
@@ -36,7 +36,7 @@ module ARPTest
                 writeScalars = false;
             display: "p=260,40;b=260,10";
         router5: Router;
-            display: "p=187,98;i=srouter";
+            display: "p=187,98;i=abstract/router";
         bus1: EtherBus;
             parameters:
                 positions = "",
@@ -44,22 +44,22 @@ module ARPTest
                 writeScalars = false;
             display: "p=280,170;b=260,10";
         router4: Router;
-            display: "p=386,240;i=srouter";
+            display: "p=386,240;i=abstract/router";
         router3: Router;
-            display: "p=320,240;i=srouter";
+            display: "p=320,240;i=abstract/router";
         router2: Router;
-            display: "p=247,240;i=srouter";
+            display: "p=247,240;i=abstract/router";
         router1: Router;
-            display: "p=182,283;i=srouter";
+            display: "p=182,283;i=abstract/router";
         client: StandardHost;
-            display: "p=54,274;i=laptop2_l";
+            display: "p=54,274;i=device/laptop";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost EtherBus",
                 nonIPModuleTypes = "EtherBus",
                 networkAddress = "10.0.0.0",
                 netmask = "255.255.0.0";
-            display: "p=46,111;i=cogwheel";
+            display: "p=46,111;i=block/cogwheel";
     connections:
         server.ethOut++ --> router8.ethIn++;
         router8.ethOut++ --> server.ethIn++;

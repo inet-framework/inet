@@ -11,15 +11,15 @@ module TcpTestNet1
         testing: bool;
     submodules:
         cli: TcpTestClient;
-            display: "p=95,95;i=app";
+            display: "p=95,95;i=block/app";
         tcpcli: TCPMain;
-            display: "p=95,178;i=prot2";
+            display: "p=95,178;i=block/wheelbarrow";
         tcpsrv: TCPMain;
-            display: "p=302,178;i=prot2";
+            display: "p=302,178;i=block/wheelbarrow";
         srv: TcpTestClient;
-            display: "p=303,96;i=app";
+            display: "p=303,96;i=block/app";
         tcptester: TCPScriptableTester;
-            display: "p=198,178;i=ipc";
+            display: "p=198,178;i=device/router";
     connections:
         cli.tcpOut --> tcpcli.from_appl;
         cli.tcpIn <-- tcpcli.to_appl;
@@ -38,15 +38,15 @@ module TcpTestNet2
         testing: bool;
     submodules:
         cli: TcpTestClient;
-            display: "p=95,95;i=app";
+            display: "p=95,95;i=block/app";
         tcpcli: TCPMain;
-            display: "p=95,178;i=prot2";
+            display: "p=95,178;i=block/wheelbarrow";
         tcpsrv: TCPMain;
-            display: "p=302,178;i=prot2";
+            display: "p=302,178;i=block/wheelbarrow";
         srv: TcpTestClient;
-            display: "p=303,96;i=app";
+            display: "p=303,96;i=block/app";
         tcptester: TCPRandomTester;
-            display: "p=198,178;i=ipc";
+            display: "p=198,178;i=device/router";
     connections:
         cli.tcpOut --> tcpcli.from_appl;
         cli.tcpIn <-- tcpcli.to_appl;

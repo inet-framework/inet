@@ -26,7 +26,7 @@ module RTPMulticast1
                 bandwidth = 8000,
                 numOfProcessors = 1,
                 routingFile = "host1.mrt";
-            display: "p=150,50;i=pc";
+            display: "p=150,50;i=device/pc2";
         host2: RTPHost;
             parameters:
                 debug = debug,
@@ -36,7 +36,7 @@ module RTPMulticast1
                 bandwidth = 8000,
                 numOfProcessors = 1,
                 routingFile = "host2.mrt";
-            display: "p=250,150;i=pc";
+            display: "p=250,150;i=device/pc2";
         host3: RTPHost;
             parameters:
                 debug = debug,
@@ -46,7 +46,7 @@ module RTPMulticast1
                 bandwidth = 8000,
                 numOfProcessors = 1,
                 routingFile = "host3.mrt";
-            display: "p=150,250;i=pc";
+            display: "p=150,250;i=device/pc2";
         host4: RTPHost;
             parameters:
                 debug = debug,
@@ -56,7 +56,7 @@ module RTPMulticast1
                 bandwidth = 8000,
                 numOfProcessors = 1,
                 routingFile = "host4.mrt";
-            display: "p=50,150;i=pc";
+            display: "p=50,150;i=device/pc2";
         router1: Router;
             parameters:
                 routingFile = "router1.mrt",
@@ -65,7 +65,7 @@ module RTPMulticast1
                 in[4],
                 out[4];
 
-            display: "p=150,150;i=srouter";
+            display: "p=150,150;i=abstract/router";
     connections:
         host1.out[0] --> ethernet --> router1.in[0];
         host1.in[0] <-- ethernet <-- router1.out[0];

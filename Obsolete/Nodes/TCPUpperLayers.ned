@@ -69,7 +69,7 @@ module TCPUpperLayers
          TCPFastRetrans = false,
              TCPFastRecovery = false,
              TCPNewReno = false;
-            display: "p=79,120;i=prot1";
+            display: "p=79,120;i=block/wheelbarrow";
         tcpipinterface: TcpIpInterface;
             display: "p=81,202;i=prot3";
     connections:

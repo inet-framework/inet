@@ -49,34 +49,34 @@ module StandardHost
         out: ethOut[];
     submodules:
         blackboard: Blackboard;
-            display: "p=60,75;i=proc2";
+            display: "p=60,75;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=60,150;i=box3";
+            display: "p=60,150;i=block/table";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
-            display: "p=125,58;i=app";
+            display: "p=125,58;i=block/app";
         tcp: TCPMain;
-            display: "p=125,138;i=prot2";
+            display: "p=125,138;i=block/wheelbarrow";
         udpApp: udpAppType[numUdpApps] like UDPApp;
-            display: "i=app;p=234,58";
+            display: "i=block/app;p=234,58";
         udp: UDPProcessing;
-            display: "p=234,138;i=prot1";
+            display: "p=234,138;i=block/transport";
         pingApp: PingApp;
-            display: "i=app;p=291,193";
+            display: "i=block/app;p=291,193";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=210,220;i=fork;q=queue";
+            display: "p=210,220;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=170,300,row,90;q=queue;i=iface";
+            display: "p=170,300,row,90;q=queue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             parameters:
                 proxyARP = false;
-            display: "p=205,300,row,90;q=queue;i=iface";
+            display: "p=205,300,row,90;q=queue;i=block/ifcard";
     connections:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;

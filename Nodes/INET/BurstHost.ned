@@ -40,22 +40,22 @@ module BurstHost
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "p=70,60;i=proc2";
+            display: "p=70,60;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=70,130;i=box3";
+            display: "p=70,130;i=block/table";
         trafGen: trafGenType like IPTrafficGenerator;
-            display: "i=app;p=140,60";
+            display: "i=block/app;p=140,60";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "p=140,120;i=fork;q=queue";
+            display: "p=140,120;i=block/fork;q=queue";
         ppp: PPPInterface[1];
-            display: "p=140,200,row,90;q=queue;i=iface";
+            display: "p=140,200,row,90;q=queue;i=block/ifcard";
     connections nocheck:
         // transport connections
         networkLayer.UDPOut --> trafGen.from_ip;

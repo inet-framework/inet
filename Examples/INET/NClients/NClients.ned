@@ -43,17 +43,17 @@ module NClients
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "i=cogwheel";
+            display: "i=block/cogwheel";
         r1: Router;
-            display: "i=srouter";
+            display: "i=abstract/router";
         r2: Router;
-            display: "i=srouter";
+            display: "i=abstract/router";
         r3: Router;
-            display: "i=srouter";
+            display: "i=abstract/router";
         cli: StandardHost[n];
-            display: "i=laptop3";
+            display: "i=device/laptop";
         srv: StandardHost;
-            display: "i=server1";
+            display: "i=device/server3";
     connections nocheck:
         for i=0..n-1 do
             cli[i].out++ --> ethernetline --> r1.in++;

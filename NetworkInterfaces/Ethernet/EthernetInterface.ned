@@ -35,14 +35,14 @@ module EthernetInterface
         arp: ARP;
             parameters:
                 proxyARP = proxyARP;
-            display: "p=100,80;i=proc2;q=pendingQueue";
+            display: "p=100,80;i=block/layer;q=pendingQueue";
         encap: EtherEncap;
             gatesizes:
                 upperLayerIn[1],
                 upperLayerOut[1];
-            display: "i=fork;p=100,160";
+            display: "i=block/fork;p=100,160";
         mac: EtherMAC;
-            display: "i=queue;p=100,240;q=queue";
+            display: "i=block/queue;p=100,240;q=queue";
     connections:
         netwOut <-- arp.hlOut;
         netwIn --> arp.hlIn;

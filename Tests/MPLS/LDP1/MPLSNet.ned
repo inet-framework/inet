@@ -30,7 +30,7 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=184,95;i=srouter";
+            display: "p=184,95;i=abstract/router";
         LSR2: LDP_LSR;
             parameters:
                 id = "LSR2",
@@ -40,7 +40,7 @@ module MPLSNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=238,247;i=srouter";
+            display: "p=238,247;i=abstract/router";
         LSR3: LDP_LSR;
             parameters:
                 id = "LSR3",
@@ -50,7 +50,7 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=322,95;i=srouter";
+            display: "p=322,95;i=abstract/router";
         LSR4: LDP_LSR;
             parameters:
                 id = "LSR4",
@@ -60,7 +60,7 @@ module MPLSNet
             gatesizes:
                 in[3],
                 out[3];
-            display: "p=398,247;i=srouter";
+            display: "p=398,247;i=abstract/router";
         LSR5: LDP_LSR;
             parameters:
                 id = "LSR5",
@@ -70,19 +70,19 @@ module MPLSNet
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=500,95;i=srouter";
+            display: "p=500,95;i=abstract/router";
         host1: StandardHost;  // client
             parameters:
-            display: "p=26,98;i=comp_s";
+            display: "p=26,98;i=device/pc3_s";
         host2: StandardHost;  // client
             parameters:
-            display: "p=26,256;i=comp_s";
+            display: "p=26,256;i=device/pc3_s";
         host3: StandardHost;  // server
             parameters:
-            display: "p=570,88;i=comp_s";
+            display: "p=570,88;i=device/pc3_s";
         host4: StandardHost;  // server
             parameters:
-            display: "p=578,240;i=comp_s";
+            display: "p=578,240;i=device/pc3_s";
     connections nocheck:
         host1.in[0] <-- LSR1.out[0];
         host1.out[0] --> LSR1.in[0];

@@ -39,7 +39,7 @@ module TCPClientNode
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "i=proc2;p=60,60";
+            display: "i=block/blackboard;p=60,60";
         // transport and application layers
         tcpApp: TCPUpperLayers;
             parameters:
@@ -54,9 +54,9 @@ module TCPClientNode
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=87,155;i=fork";
+            display: "p=87,155;i=block/fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,220,row;q=queue;i=iface";
+            display: "p=80,220,row;q=queue;i=block/ifcard";
     connections nocheck:
         // transport connections
         networkLayer.TCPOut --> tcpApp.in;

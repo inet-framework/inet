@@ -41,13 +41,13 @@ module FlatNet
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "i=cogwheel";
+            display: "i=block/cogwheel";
         rte: Router[57];
-            display: "i=ball2_vs,gold,100";
+            display: "i=places/circle_vs,gold,100";
         cli: StandardHost[2];
-            display: "i=laptop3";
+            display: "i=device/laptop";
         srv: StandardHost;
-            display: "i=server1";
+            display: "i=device/server3";
     connections nocheck:
         cli[0].out++ --> ethernetline --> rte[50].in++;
         cli[0].in++ <-- ethernetline <-- rte[50].out++;

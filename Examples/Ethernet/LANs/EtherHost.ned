@@ -41,9 +41,9 @@ module EtherHost
             gatesizes:
                 upperLayerIn[2],
                 upperLayerOut[2];
-            display: "p=155,120;i=fork";
+            display: "p=155,120;i=block/fork";
         mac: EtherMAC;
-            display: "p=155,200;i=queue;q=queue";
+            display: "p=155,200;i=block/queue;q=queue";
     connections:
         llc.lowerLayerIn <-- mac.upperLayerOut;
         llc.lowerLayerOut --> mac.upperLayerIn;

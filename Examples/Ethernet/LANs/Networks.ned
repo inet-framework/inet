@@ -37,37 +37,37 @@ module MixedLAN
                 out[6];
             display: "p=277,182;b=424,6;o=#408060";
         busHostA: EtherHost;
-            display: "p=122,118;i=pc";
+            display: "p=122,118;i=device/pc2";
         busHostB: EtherHost;
-            display: "p=210,118;i=pc";
+            display: "p=210,118;i=device/pc2";
         busHostC: EtherHost;
-            display: "p=338,238;i=pc";
+            display: "p=338,238;i=device/pc2";
         busHostD: EtherHost;
-            display: "p=426,238;i=pc";
+            display: "p=426,238;i=device/pc2";
         switchHostA: EtherHost;
-            display: "p=82,300;i=server1";
+            display: "p=82,300;i=device/server3";
         switchHostB: EtherHost;
-            display: "p=162,300;i=pc";
+            display: "p=162,300;i=device/pc2";
         switchHostC: EtherHost;
-            display: "p=234,300;i=pc";
+            display: "p=234,300;i=device/pc2";
         switchHostD: EtherHost;
-            display: "p=306,300;i=pc";
+            display: "p=306,300;i=device/pc2";
         switch: EtherSwitch;
             gatesizes:
                 in[5],
                 out[5];
             display: "p=194,236;i=switch2";
         hubHostA: EtherHost;
-            display: "p=297,55;i=pc";
+            display: "p=297,55;i=device/pc2";
         hubHostB: EtherHost;
-            display: "p=365,55;i=pc";
+            display: "p=365,55;i=device/pc2";
         hubHostC: EtherHost;
-            display: "p=430,55;i=pc";
+            display: "p=430,55;i=device/pc2";
         hub: EtherHub;
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=362,132;i=switch1";
+            display: "p=362,132;i=device/switch";
     connections:
         bus.in[0] <-- busHostA.out;
         bus.out[0] --> busHostA.in;
@@ -112,9 +112,9 @@ endmodule
 module TwoHosts
     submodules:
         hostA: EtherHost;
-            display: "p=60,160;i=pc";
+            display: "p=60,160;i=device/pc2";
         hostB: EtherHost;
-            display: "p=200,140;i=pc";
+            display: "p=200,140;i=device/pc2";
     connections:
         hostA.out --> delay 0.5us --> hostB.in;
         hostB.out --> delay 0.5us --> hostA.in;
@@ -127,13 +127,13 @@ endmodule
 module SwitchedLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=server1";
+            display: "p=161,55;i=device/server3";
         hostB: EtherHost;
-            display: "p=253,125;i=pc";
+            display: "p=253,125;i=device/pc2";
         hostC: EtherHost;
-            display: "p=158,199;i=pc";
+            display: "p=158,199;i=device/pc2";
         hostD: EtherHost;
-            display: "p=59,127;i=pc";
+            display: "p=59,127;i=device/pc2";
         switch: EtherSwitch;
             gatesizes:
                 in[4],
@@ -157,18 +157,18 @@ endmodule
 module HubLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=server1";
+            display: "p=161,55;i=device/server3";
         hostB: EtherHost;
-            display: "p=253,125;i=pc";
+            display: "p=253,125;i=device/pc2";
         hostC: EtherHost;
-            display: "p=158,199;i=pc";
+            display: "p=158,199;i=device/pc2";
         hostD: EtherHost;
-            display: "p=59,127;i=pc";
+            display: "p=59,127;i=device/pc2";
         hub: EtherHub;
             gatesizes:
                 in[4],
                 out[4];
-            display: "p=162,124;i=switch1";
+            display: "p=162,124;i=device/switch";
     connections:
         hub.out[0] --> delay 0.1us --> hostA.in;
         hub.in[0] <-- delay 0.1us <-- hostA.out;
@@ -187,13 +187,13 @@ endmodule
 module BusLAN
     submodules:
         hostA: EtherHost;
-            display: "p=100,150;i=server1";
+            display: "p=100,150;i=device/server3";
         hostB: EtherHost;
-            display: "p=200,150;i=pc";
+            display: "p=200,150;i=device/pc2";
         hostC: EtherHost;
-            display: "p=300,150;i=pc";
+            display: "p=300,150;i=device/pc2";
         hostD: EtherHost;
-            display: "p=400,150;i=pc";
+            display: "p=400,150;i=device/pc2";
         bus: EtherBus;
             parameters:
                 positions = "0 10 20 30",

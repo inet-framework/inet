@@ -32,7 +32,7 @@ module UDPSockets
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=40,83;i=comp";
+            display: "p=40,83;i=device/pc3";
         // clients
         client2: UDPSocketHost;
             parameters:
@@ -41,7 +41,7 @@ module UDPSockets
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=200,83;i=comp";
+            display: "p=200,83;i=device/pc3";
     connections:
         server1.out[0] --> datarate 1000000 --> client2.in[0];
         client2.out[0] --> datarate 1000000 --> server1.in[0];

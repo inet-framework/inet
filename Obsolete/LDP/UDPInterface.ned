@@ -73,7 +73,7 @@ module UDPInterface
             gatesizes:
                 from_application[1],
                 to_application[1];
-            display: "p=94,105;i=fork";
+            display: "p=94,105;i=block/fork";
     connections nocheck:
         from_ip --> udpProcessing.from_ip;
         to_ip <-- udpProcessing.to_ip;

@@ -45,13 +45,13 @@ module LDP_LSR
 
     submodules:
         blackboard: Blackboard;
-            display: "p=70,60;i=proc2";
+            display: "p=70,60;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=70,135;i=box3";
+            display: "p=70,135;i=block/table";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
@@ -60,16 +60,16 @@ module LDP_LSR
                 isIR = isIR;
             display: "p=190,60;b=40,24";
         tcp: TCPMain;
-            display: "p=145,120;i=prot2";
+            display: "p=145,120;i=block/wheelbarrow";
         udp: UDPProcessing;
-            display: "p=235,120;i=prot1";
+            display: "p=235,120;i=block/transport";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=190,186;i=fork";
+            display: "p=190,186;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=87,320,row,90;q=queue;i=iface";
+            display: "p=87,320,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -84,7 +84,7 @@ module LDP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=279,207";
+            display: "i=block/table;p=279,207";
     connections nocheck:
         signal_module.from_tcp_interface <-- tcp.to_appl++;
         signal_module.to_tcp_interface --> tcp.from_appl++;

@@ -36,9 +36,9 @@ module UDPSocketHost
         applClient: client_name like SocketApp;
             display: "p=80,40;i=proc1";
         socketLayer: SocketLayer;
-            display: "p=80,100;i=prot1";
+            display: "p=80,100;i=block/wheelbarrow";
         udp: UDPProcessing;
-            display: "p=80,160;i=prot2";
+            display: "p=80,160;i=block/transport";
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
@@ -46,9 +46,9 @@ module UDPSocketHost
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=80,220;i=fork";
+            display: "p=80,220;i=block/fork";
         ppp : PPPInterface[sizeof(out)];
-            display: "p=80,280,row;q=queue;i=iface";
+            display: "p=80,280,row;q=queue;i=block/ifcard";
     connections nocheck:
         // transport connections
         applClient.out --> socketLayer.from_appl[0];

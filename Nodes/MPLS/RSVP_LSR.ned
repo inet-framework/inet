@@ -42,13 +42,13 @@ module RSVP_LSR
         out: out[];
     submodules:
         blackboard: Blackboard;
-            display: "p=260,60;i=proc2";
+            display: "p=260,60;i=block/blackboard";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=60,130;i=box3";
+            display: "p=60,130;i=block/table";
         ospf_te: OspfTe;
             display: "p=60,190;b=40,24;o=#008040";
         signal_module: RSVPAppl;
@@ -65,9 +65,9 @@ module RSVP_LSR
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "p=192,163;i=fork";
+            display: "p=192,163;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=88,297,row,90;q=queue;i=iface";
+            display: "p=88,297,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 isIR = isIR,
@@ -82,7 +82,7 @@ module RSVP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=proc2;p=280,184";
+            display: "i=block/table;p=280,184";
     connections nocheck:
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;
