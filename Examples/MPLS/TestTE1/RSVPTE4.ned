@@ -70,9 +70,9 @@ module RSVPTE4
         host2: StandardHost; // client
             display: "p=72,253;i=device/pc2";
         host3: StandardHost; // server
-            display: "p=570,88;i=device/server3";
+            display: "p=570,88;i=device/server";
         host4: StandardHost; // server
-            display: "p=562,256;i=device/server3";
+            display: "p=562,256;i=device/server";
         ted: TED;
             parameters:
                 moduleTypes = "StandardHost RSVP_LSR";

@@ -47,7 +47,7 @@ module FlatNet
         cli: StandardHost[2];
             display: "i=device/laptop";
         srv: StandardHost;
-            display: "i=device/server3";
+            display: "i=device/server";
     connections nocheck:
         cli[0].out++ --> ethernetline --> rte[50].in++;
         cli[0].in++ <-- ethernetline <-- rte[50].out++;

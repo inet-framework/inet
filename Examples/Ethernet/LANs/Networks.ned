@@ -45,7 +45,7 @@ module MixedLAN
         busHostD: EtherHost;
             display: "p=426,238;i=device/pc2";
         switchHostA: EtherHost;
-            display: "p=82,300;i=device/server3";
+            display: "p=82,300;i=device/server";
         switchHostB: EtherHost;
             display: "p=162,300;i=device/pc2";
         switchHostC: EtherHost;
@@ -127,7 +127,7 @@ endmodule
 module SwitchedLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=device/server3";
+            display: "p=161,55;i=device/server";
         hostB: EtherHost;
             display: "p=253,125;i=device/pc2";
         hostC: EtherHost;
@@ -157,7 +157,7 @@ endmodule
 module HubLAN
     submodules:
         hostA: EtherHost;
-            display: "p=161,55;i=device/server3";
+            display: "p=161,55;i=device/server";
         hostB: EtherHost;
             display: "p=253,125;i=device/pc2";
         hostC: EtherHost;
@@ -187,7 +187,7 @@ endmodule
 module BusLAN
     submodules:
         hostA: EtherHost;
-            display: "p=100,150;i=device/server3";
+            display: "p=100,150;i=device/server";
         hostB: EtherHost;
             display: "p=200,150;i=device/pc2";
         hostC: EtherHost;

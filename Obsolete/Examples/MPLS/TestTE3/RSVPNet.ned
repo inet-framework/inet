@@ -75,7 +75,7 @@ module RSVPNet
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=643,155;i=device/server3";
+            display: "p=643,155;i=device/server";
         ted: TED;
             parameters:
                 moduleTypes = "StandardHost RSVP_LSR";

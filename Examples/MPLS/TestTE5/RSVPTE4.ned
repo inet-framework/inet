@@ -73,7 +73,7 @@ module RSVPTE4
             gatesizes:
                 in[1],
                 out[1];
-            display: "p=523,125;i=device/server3";
+            display: "p=523,125;i=device/server";
         ted: TED;
             parameters:
                 moduleTypes = "StandardHost RSVP_LSR";
