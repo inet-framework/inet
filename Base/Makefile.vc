@@ -130,18 +130,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-AbstractQueue.obj: AbstractQueue.cc \
-  AbstractQueue.h
-Blackboard.obj: Blackboard.cc \
-  Blackboard.h
-Join.obj: Join.cc
-ModuleAccess.obj: ModuleAccess.cc \
-  ModuleAccess.h
-QueueBase.obj: QueueBase.cc \
-  QueueBase.h \
-  AbstractQueue.h
-QueueWithQoS.obj: QueueWithQoS.cc \
-  QueueWithQoS.h \
-  AbstractQueue.h \
-  EnqueueHook.h
-Sink.obj: Sink.cc
+

@@ -130,9 +130,10 @@ re-makemake: makefiles
 PPPFrame_m.obj: PPPFrame_m.cc \
   PPPFrame_m.h
 PPPInterface.obj: PPPInterface.cc \
-  PPPFrame_m.h \
   ..\..\Network\IPv4/RoutingTable.h \
   ..\..\Network\IPv4/RoutingTableAccess.h \
+  PPPInterface.h \
   ..\..\Base/ipsuite_defs.h \
   ..\..\Network\IPv4/IPAddress.h \
-  ..\..\Base/ModuleAccess.h
+  ..\..\Base/ModuleAccess.h \
+  PPPFrame_m.h

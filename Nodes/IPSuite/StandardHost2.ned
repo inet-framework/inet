@@ -18,72 +18,72 @@
 //
 
 
-import  
-    "Blackboard", 
-    "TcpTestClient.ned", 
-    "TCPMain.ned", 
-    "UDPProcessing", 
-    "UDPApp", 
-    "NetworkLayer", 
-    "PingApp"; 
-                
-               
- 
+import
+    "Blackboard",
+    "TcpTestClient.ned",
+    "TCPMain.ned",
+    "UDPProcessing",
+    "UDPApp",
+    "NetworkLayer",
+    "PingApp";
+
+
+
 //
 // Definition of an IPNode with transport layers.
 //
-module StandardHost 
-    parameters: 
-        // Network information
-        routingFile : string; 
-    gates: 
-        in: in[]; 
-        out: out[]; 
-    submodules: 
-        blackboard: Blackboard; 
+module StandardHost2
+    parameters:
+        IPForward : bool,
+        routingFile : string;
+    gates:
+        in: in[];
+        out: out[];
+    submodules:
+        blackboard: Blackboard;
             display: "i=proc2;p=56,78";
-        tcpApp: TcpTestClient; 
+        tcpApp: TcpTestClient;
             display: "p=125,58;i=app";
-        tcp: TCPMain; 
+        tcp: TCPMain;
             display: "p=125,138;i=prot2";
-        udpApp: udpClient1Name like UDPApp; 
+        udpApp: udpClient1Name like UDPApp;
             display: "i=app;p=212,58";
-        udp: UDPProcessing; 
+        udp: UDPProcessing;
             display: "p=212,138;i=prot1";
-        pingApp: PingApp; 
+        pingApp: PingApp;
             display: "i=app;p=305,58";
-        networkLayer: NetworkLayer; 
-            parameters: 
-                IPForward = false, 
-                routingFile = routingFile; 
-            gatesizes: 
-                physIn[sizeof(out)], 
-                physOut[sizeof(out)]; 
+        networkLayer: NetworkLayer;
+            parameters:
+                IPForward = IPForward,
+                routingFile = routingFile;
+            gatesizes:
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
             display: "p=212,221;i=fork";
-        ppp: LinkLayer[sizeof(out)]; 
+        ppp: LinkLayer[sizeof(out)];
             display: "p=170,303,row;i=iface";
-    connections nocheck: 
-        tcpApp.tcpOut --> tcp.from_appl; 
-        tcpApp.tcpIn <-- tcp.to_appl; 
-                                      
-        tcp.to_ip --> networkLayer.TCPIn; 
-        tcp.from_ip <-- networkLayer.TCPOut; 
-                                             
-        udpApp.udpOut --> udp.from_appl; 
-        udpApp.udpIn <-- udp.to_appl; 
-                                      
-        udp.to_ip --> networkLayer.UDPIn; 
-        udp.from_ip <-- networkLayer.UDPOut; 
-                                             
-        networkLayer.pingOut --> pingApp.in; 
-        networkLayer.pingIn <-- pingApp.out; 
-                                             
+    connections nocheck:
+        tcpApp.tcpOut --> tcp.from_appl;
+        tcpApp.tcpIn <-- tcp.to_appl;
+
+        tcp.to_ip --> networkLayer.TCPIn;
+        tcp.from_ip <-- networkLayer.TCPOut;
+
+        udpApp.udpOut --> udp.from_appl;
+        udpApp.udpIn <-- udp.to_appl;
+
+        udp.to_ip --> networkLayer.UDPIn;
+        udp.from_ip <-- networkLayer.UDPOut;
+
+        networkLayer.pingOut --> pingApp.in;
+        networkLayer.pingIn <-- pingApp.out;
+
         // connections to network outside
-        for i=0..sizeof(out)-1 do 
-            in[i] --> ppp[i].physIn; 
-            out[i] <-- ppp[i].physOut; 
-            ppp[i].netwOut --> networkLayer.physIn[i]; 
-            ppp[i].netwIn <-- networkLayer.physOut[i]; 
-        endfor; 
-endmodule 
+        for i=0..sizeof(out)-1 do
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
+            ppp[i].netwOut --> networkLayer.physIn[i];
+            ppp[i].netwIn <-- networkLayer.physOut[i];
+        endfor;
+endmodule
 

@@ -7,6 +7,7 @@ Applications/TCPApp/MyTCPApp.ned
 Applications/TCPApp/mytcpserverproc.ned
 Applications/TCPApp/procserver.ned
 Applications/TCPApp/tcpapp.ned
+Applications/TCPApp/TCPSessionApp.ned
 Applications/UDPApp/UDPApp.ned
 Base/Blackboard.ned
 Base/Join.ned
@@ -94,12 +95,12 @@ Nodes/IPSuite/mytcp4ip.ned
 Nodes/IPSuite/NetworkLayer.ned
 Nodes/IPSuite/Router.ned
 Nodes/IPSuite/StandardHost.ned
+Nodes/IPSuite/StandardHost2.ned
 Nodes/IPSuite/TCPClientNode.ned
 Nodes/IPSuite/TCPClientTest.ned
 Nodes/IPSuite/TCPServerNode.ned
 Nodes/IPSuite/TCPServerTest.ned
 Nodes/IPSuite/TCPUpperLayers.ned
-Nodes/IPSuite/TCPUpperLayers2.ned
 Nodes/IPSuite/UDPHost.ned
 Nodes/IPSuite/UDPUpperLayers.ned
 Nodes/MPLS/LSRNode.ned
