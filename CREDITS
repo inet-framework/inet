@@ -1,0 +1,12 @@
+This number of people have contributed to the Internet Protocol Suite
+
+Most of the UDP,IP,QoS and MAC stuff: Design, Initial coding
+* Klaus Wehrle		<wehrle@telematik.informatik.uni-karlsruhe.de>
+* Jochen Reber		<un6b@rz.uni-karlsruhe.de>
+* Dirk Holzhausen	<dholzh@gmx.de>	
+
+The TCP finite state machine: Design, Initial coding
+* Volker Boehm		<Volker.Boehm@nortelnetworks.com>
+* Verena Kahmann	<kahmann@telematik.informatik.uni-karlsruhe.de>
+* Uli Kaage		<kaage@int.uni-karlsruhe.de>
+

@@ -1,6 +1,11 @@
 2003-09-19  Andras Varga
 
-	* merged changes from MPLS/RSVP-TE model from UT Sydney
+	* added the MPLS/LDP/RSVP-TE models created by Xuan Thang Nguyen
+	(Xuan.T.Nguyen@uts.edu.au) at UTS (University of Technology, Sydney). 
+	See http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/
+
+	* did IPsuite modifications necessary fo MPLS. Modularity is preserved:
+	it is still possible to build IPSuite without the MPLS models.
 
 2003-09-18  Andras Varga
 
@@ -9,22 +14,68 @@
         * module descriptions (comments) added to/rearranged in all NED files 
         for documentation generation with new opp_neddoc.
 
-	* directory structure rearranged to correspond to IPv6Suite (and also
-	OSI layers). Hopefully everything is now where one would expect.
+	* DIRECTORY STRUCTURE WAS REARRANGED along the lines of the OSI layers,
+	and also to make it consistent with the IPv6Suite. Hopefully every file
+	is now where one would expect to find it.
 
 	* added makemake.cmd for generating Makefile.vc's (using opp_nmakemake)
-	for building with MSVC
+	for building with MSVC, and makemake for generating Unix makefiles
 
 	* lots of minor fixes to make the code compile with MSVC. 
-	Note:
-	  1. RETURN TYPE OF dup() should ALWAYS BE cObject* !
-	  2. It is FORBIDDEN to initialize class variables (even const or
-	     static const ones) within the class declaration !!! That violates 
-	     the C++ standard, and not many compilers eat it except gcc!
+	Note: for compatibility with MSVC6.0,
+	  1. return type of dup() should ALWAYS be cObject* (and cannot be the
+  	     actual class name)
+	  2. class variables cannot be initialized (even const or
+	     static const ones) within the class declaration.
 
 	* updated for recent OMNeT++ versions: added ",row" to vector module
 	display strings; removed className() methods, etc.
 
 	* FIXME: KIDSRouter was missing from the original IPSuite! KIDSNw1 
-	didn't compile. Temporarily fixed (copied NextHopRouter.)
+	didn't compile. I temporarily substituted a copy of NextHopRouter.
+
+2003-09-17  Andras Varga
+
+	* taken ipsuite-20021124-src.tgz and started improving it.
+
+  ------------------------------------------------------------
+
+2001-12-10  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* Global changes for OMNeT++ 2.2 conformance:
+	copy constructor -> const argument
+	virtual long length(const ) -> virtual long length(const) const
+	virtual int numInitStages() -> virtual int numInitStages () const
+	virtual char *className() -> virtual const char* className() const
+	virtual cObject *dup() -> virtual cObject *dup() const
+	cObject& operator=(cObject& o) -> cObject& operator=(const cObject& o)
+	
+2001-08-31  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* CVS-Tag da-kussaether: Work on TCP by Rolf Kussaether;
+	implementation of TCP flavours Reno (fast recovery) and New Reno.
+
+2001-03-19 Verena Kahmann <kahmann@telematik.informatik.uni-karlsruhe.de>
+	* deleted all queues and behaviors except FIFO* and the basic behaviors.
+	Maybe we have to apply some extra cleaning still.
+2000-12-19  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* recent (standalone) TCP model is merged into the ip-suite. The
+	simple test network is now located in ./Networks/TCPTester
+
+2000-12-13  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* makeipsuite: replaced by top level Makefile
+
+	* rundemo: front end for launching all available simulations
+
+	* Makefile: Top level makefile to create Makefiles from Makefile.in
+	in all subdirectories
+
+	* removed mmake in subdirectories and replaced them by Makefile.in
+	
+2000-11-22  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* CREDITS: Put your name here if you have contributed to the
+	OMNeT++ Internet Protocol Suite
 

@@ -1,0 +1,38 @@
+The OMNeT++ Internet Protocol Suite contains numerous internet
+protocols. Beyond IP there is TCP, UDP and support for QoS.
+
+Compilation instructions for Unix:
+----------------------------------
+
+1. you need a recent working OMNeT++ installation that must be newer
+   than 2.1. This means you need to get a OMNeT++ snapshot version
+   from here (follow step 2. or 3. from the Download&Build Instructions):
+   http://cvs-int.etec.uni-karlsruhe.de/omnetpp/model-doc/omnetpp.html
+
+   Sorry for this inconvenience but we had to make the IP-Suite const
+   save. Only recent OMNeT++ development versions support this as will
+   upcoming stable releases.
+   
+
+2. If you have a recent working OMNeT++ installation newer than 2.1,
+   you need to build all Makefiles in the ip-suite sub directories:
+
+   $ make Makefiles
+
+   This may take a while because OMNeT++ already starts compiling some
+   subdirectories in this stage.
+
+3. Build all examples:
+
+   $ make all
+
+4. Finally, you can have a look at the example networks by launching a
+   simple demo front end:
+
+   $ rundemo
+
+Compilation instructions for Windows:
+-------------------------------------
+
+Since I'm not using Windows, this is left as an exercise for the
+interested user :-)

@@ -1,0 +1,94 @@
+-*- text -*-
+
+Contents: Description of the directory structure
+
+Subdirectories:
+---------------
+
+- Networks
+  Example networks with the corresponding ned files
+
+- IPNode
+  * ProcessorAccess and ProcessManager base classes
+  * ned files for a generic IPNode and for specialized preconfigured
+    StandardHost, TCPServerNode, TCPClientNode, UDPHost and Router
+
+- MAC_LLC
+  * routing table implementation and RoutingTableAccess base class
+  * IP input and output queue modules: InputQueue, OutputQueue,
+    Enqueue, Dequeue
+  * MAC modules: PPPModule
+  * NetworkLayers.ned file containing the network layer and IP
+    processing
+
+- IPProcessing
+  * NED structure of IPProcessing and all included submodules like
+    PreRouting, Routing, LocalDeliver, IPMulticast, IPTunneling, ICMP,
+    IPFragmentation, IPSend and IPOutput. The core modules implement
+    the IP mechanisms respectively.
+  * the ICMP header file is separated and placed into the Interface
+    directory because its definitions are needed outside of
+    IPProcessing, too.
+
+- Qos
+  * Support for QoS
+
+- TCP
+  * transport layer: tcpmodule, Tcp2Ip, Ip2Tcp
+  * application layer: TcpClient, TcpServer and the NED file tcp4ip
+
+- UDP
+  * transport layer: UDP, UDPProcessing
+  * application layer: UDPApp - a generic UDP traffic generator
+
+- ControlApps
+  * module ControlApps that contains the implementation of an ICMP
+    error output module and a ping module
+
+- TrafficGen
+  * The SimpleApp module generates randomly sized packets at random
+    time intervals
+  * ConstTrafficGen module generates constant sized packets at
+    constant time intervals
+  * TrafficGenerator NED file that implements a generic structure of a
+    traffic generator
+
+- Interface
+  * interface classes and definitions needed by different modules,
+    e.g.
+    + packet definitions: IPDatagram, IPInterfacePacket, Transport
+      Packet, PPPFrame
+    + type and constant definitions: hook_types, basic_defs and ICMP
+
+
+The next picture describes the directory structure hierarchically:
+
+    
+                            ------------
+                            | Networks |
+                            ------------
+                                 |
+                                 |
+                                 |
+                             ----------
+                             | IPNode |
+                             ----------
+                                 |
+      ----------------------------------------------------------
+      |            |          |             |                  |
+ -----------    -------    -------    --------------    ---------------
+ | MAC_LLC |    | TCP |    | UDP |    | TrafficGen |    | ControlApps |
+ -----------    -------    -------    --------------    ---------------
+      |
+      --------------
+         |         |
+ ----------------  |
+ | IPProcessing |  |
+ ----------------  |
+         |         |
+         |      -------
+         -------| QoS |
+                -------
+                           --------------
+                           | Interfaces |
+                           --------------
