@@ -36,6 +36,7 @@ void IP::initialize()
     defaultMCTimeToLive = par("multicastTimeToLive");
 
     curFragmentId = 0;
+    fragbuf.init(icmpAccess.get());
 
     numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -239,8 +240,23 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
 
 void IP::localDeliver(IPDatagram *datagram)
 {
-    // FIXME defragment, etc...
+    if (datagram->fragmentOffset()==0 && !datagram->moreFragments())
+    {
+        sendToHL(datagram);
+        return;
+    }
 
+    IPDatagram *completeDatagram = fragbuf.addFragment(datagram, simTime());
+    if (completeDatagram)
+    {
+        sendToHL(completeDatagram);
+    }
+}
+
+// FIXME todo call fragbuf.purgeStaleFragments() from time to time
+
+void IP::sendToHL(IPDatagram *datagram)
+{
     // FIXME select transport gate index and send there
     send(datagram, "transportOut", 0);
 }

@@ -24,6 +24,7 @@
 #include "ICMPAccess.h"
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
+#include "IPFragBuf.h"
 
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
@@ -45,7 +46,8 @@ class IP : public cSimpleModule
     int defaultMCTimeToLive;
 
     // working vars
-    long curFragmentId;  // counter, used to assign unique fragmentIds to datagrams
+    long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
+    IPFragBuf fragbuf;  // fragmentation reassembly buffer
 
     // statistics
     int numMulticast;
@@ -83,10 +85,15 @@ class IP : public cSimpleModule
     virtual void handleMulticastPacket(IPDatagram *dgram);
 
     /**
-     * Send packet to higher layers. Also performs reassembly of fragmented
-     * datagrams. Packet is sent to higher layer identified by its "protocol" field.
+     * Perform reassembly of fragmented datagrams, then send them up to the
+     * higher layers using sendToHL().
      */
     virtual void localDeliver(IPDatagram *dgram);
+
+    /**
+     * Send packet to higher layer identified by its "protocol" field.
+     */
+    virtual void sendToHL(IPDatagram *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
