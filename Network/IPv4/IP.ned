@@ -32,7 +32,7 @@ module IPProcessing
     gates:
         in: transportIn[];
         out: transportOut[];
-        in: queueIn;
+        in: queueIn[];
         out: queueOut[];
 endmodule
 
