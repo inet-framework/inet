@@ -20,7 +20,7 @@
 
 import
     "Blackboard",
-    "TcpTestClient.ned",
+    "TCPSessionApp.ned",
     "TCPMain.ned",
     "UDPProcessing",
     "UDPApp",
@@ -42,11 +42,11 @@ module StandardHost2
     submodules:
         blackboard: Blackboard;
             display: "i=proc2;p=56,78";
-        tcpApp: TcpTestClient;
+        tcpApp: TCPSessionApp;
             display: "p=125,58;i=app";
         tcp: TCPMain;
             display: "p=125,138;i=prot2";
-        udpApp: udpClient1Name like UDPApp;
+        udpApp: UDPClientApp;
             display: "i=app;p=212,58";
         udp: UDPProcessing;
             display: "p=212,138;i=prot1";
@@ -60,7 +60,7 @@ module StandardHost2
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
             display: "p=212,221;i=fork";
-        ppp: LinkLayer[sizeof(out)];
+        ppp: PPPInterface[sizeof(out)];
             display: "p=170,303,row;i=iface";
     connections nocheck:
         tcpApp.tcpOut --> tcp.from_appl;
@@ -69,8 +69,8 @@ module StandardHost2
         tcp.to_ip --> networkLayer.TCPIn;
         tcp.from_ip <-- networkLayer.TCPOut;
 
-        udpApp.udpOut --> udp.from_appl;
-        udpApp.udpIn <-- udp.to_appl;
+        udpApp.to_udp --> udp.from_application;
+        udpApp.from_udp <-- udp.to_application;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

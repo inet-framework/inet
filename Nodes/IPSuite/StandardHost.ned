@@ -66,7 +66,7 @@ module StandardHost
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
             display: "p=120,110;i=fork";
-        ppp: LinkLayer[sizeof(out)];
+        ppp: PPPInterface[sizeof(out)];
             display: "p=60,180,row;i=iface";
     connections nocheck:
         // transport connections
