@@ -1,29 +1,37 @@
 
-Most of the UDP and IP stuff: Design, Initial coding, 2000
-* Klaus Wehrle		<wehrle@telematik.informatik.uni-karlsruhe.de>
-* Jochen Reber		<un6b@rz.uni-karlsruhe.de>
-* Dirk Holzhausen	<dholzh@gmx.de>	
+Development and maintenance since July 2003; full restructuring and cleanup
+of whole IPSuite; reimplementation of UDP, IP and PPP; neddoc documentation;
+integration of Ethernet and MPLS models; new TCP model and TCPSocket;
+ARP model; app models for TCP and Ethernet; network configurators; 2003-2004:
+* Andras Varga          <andras@whale.hit.bme.hu>
 
-Old TCP finite state machine: Design, Initial coding, 2000
-* Volker Boehm		<Volker.Boehm@nortelnetworks.com>
-* Verena Kahmann	<kahmann@telematik.informatik.uni-karlsruhe.de>
-* Uli Kaage		<kaage@int.uni-karlsruhe.de>
+Ethernet model (2003):
+* David Wu              <davidwu@eng.monash.edu.au>
+* Andras Varga          <andras@whale.hit.bme.hu>
 
-Bugfixes to old TCP (tcpmodule.cc), 2003, 2004:
+Design and coding of original IPSuite (UDP, IP, PPP), 2000:
+* Klaus Wehrle          <wehrle@telematik.informatik.uni-karlsruhe.de>
+* Jochen Reber          <un6b@rz.uni-karlsruhe.de>
+* Dirk Holzhausen       <dholzh@gmx.de>
+
+Old TCP (tcpmodule.cc, obsoleted by new TCP) design and initial coding, 2000:
+* Volker Boehm          <Volker.Boehm@nortelnetworks.com>
+* Verena Kahmann        <kahmann@telematik.informatik.uni-karlsruhe.de>
+* Uli Kaage             <kaage@int.uni-karlsruhe.de>
+
+Bugfixes to old TCP (tcpmodule.cc, obsoleted by new TCP), 2003, 2004:
 * Donald Liang (LYBD), Virginia Tech
 * Jeroen Idserda, University of Twente
 * Joung Woong Lee (zipizigi), University of Tsukuba
 
-The MPLS, LDP, RSVP-TE models have been contributed by:
+MPLS, LDP, RSVP-TE models, 2003:
 * Xuan Thang Nguyen     <Xuan.T.Nguyen@uts.edu.au>
 
-RTP models (not yet integrated as of April 2004)
-* Matthias Oppitz       <matthias.oppitz@gmx.de>:
-* Arndt Buschmann       <a.buschmann@gmx.de>:
+RTP models (not yet integrated as of April 2004):
+* Matthias Oppitz       <matthias.oppitz@gmx.de>
+* Arndt Buschmann       <a.buschmann@gmx.de>
 
-Development and maintenance since July 2003;
-Restructuring, cleanup, neddoc documentation, integration of MPLS models, 2003;
-Cleanup, redesign/partial reimplementation of UDP/IP, 2004;
-TCP reimplementation, 2004:
-* Andras Varga          <andras@whale.hit.bme.hu> 
+Patch for getting Ethernet and ARP working with IP; ARPTest example; 2004:
+* Emin Ilker Cetinbas   <niw3@yahoo.com>
+
 
