@@ -1,0 +1,4 @@
+ifconfig:
+# setting smaller MTU on r2-->r3 link, to test IP fragmentation/reassembly.
+name: ppp1  MTU: 500
+ifconfigend.
