@@ -40,13 +40,14 @@ FragVector v;
 Frag f;
 int numdatagrams = 0;
 for (f.src=1024; f.src<1026; f.src++) {
-    for (f.dest=1024; f.dest<1026; f.dest++) {
+    for (f.dest=2048; f.dest<2050; f.dest++) {
         for (f.id=0; f.id<80; f.id++) {
             numdatagrams++;
             int n = f.id/10+2;
-            f.bytes=100;
-            for (f.offset=0; f.offset<100*n; f.offset+=100) {
-                f.islast = (f.offset==(n-1)*100);
+            for (int i=0; i<n; i++) {
+                f.offset=i*100;
+                f.bytes=100;
+                f.islast = (i==n-1);
                 v.push_back(f);
             }
         }
