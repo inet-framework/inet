@@ -32,10 +32,11 @@ class noncobject IPAddress;
 class UDPControlInfo
 {
     fields:
-        IPAddress srcAddr;
-        IPAddress destAddr;
-        int codePoint;
-        int srcPort;
-        int destPort;
+        IPAddress srcAddr;  // source IP address
+        IPAddress destAddr; // destination IP address
+        int codePoint; // QoS field
+        int srcPort;   // UDP source port in packet
+        int destPort;  // UDP destination port in packet
+        int inputPort; // port number (gate index) of interface on which the packet was received
 };
 

@@ -52,7 +52,7 @@ IPAddress IPAddressResolver::getAddressFrom(RoutingTable *rt)
 
     for (int i=0; i<rt->numInterfaces(); i++)
     {
-        InterfaceEntry *e = rt->interfaceByIndex(i);
+        InterfaceEntry *e = rt->interfaceById(i);
         if (!e->inetAddr.isNull() && !e->loopback)
         {
             if (!addr.isNull() && e->inetAddr!=addr)

@@ -33,7 +33,7 @@
  */
 class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 {
-  private:
+  public:
     struct fec_src_bind
     {
         int fecId;

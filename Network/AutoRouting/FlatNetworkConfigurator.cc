@@ -62,7 +62,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
         for (int k=0; k<rt->numInterfaces(); k++)
         {
-            InterfaceEntry *e = rt->interfaceByIndex(k);
+            InterfaceEntry *e = rt->interfaceById(k);
             if (e->outputPort!=-1)
             {
                 e->inetAddr = IPAddress(addr);

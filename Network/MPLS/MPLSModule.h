@@ -43,7 +43,7 @@
  */
 class MPLSModule : public cSimpleModule
 {
-   private:
+   public:
      /**
       * Element in the FEC (Forwarding Equivalence Class) table.
       * SrcAddr and destAddr are criteria for the IP packet used in classification,

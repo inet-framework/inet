@@ -40,10 +40,9 @@ class RoutingTableParser;
 /*
  * Constants
  */
-const int   MAX_FILESIZE = 5000;
-const int   MAX_INTERFACE_NO = 30;
-const int   MAX_ENTRY_STRING_SIZE = 20;
-const int   MAX_GROUP_STRING_SIZE = 160;
+const int MAX_FILESIZE = 5000;
+const int MAX_ENTRY_STRING_SIZE = 20;
+const int MAX_GROUP_STRING_SIZE = 160;
 
 /**
  * Interface entry for the interface table in RoutingTable.
@@ -53,11 +52,11 @@ const int   MAX_GROUP_STRING_SIZE = 160;
 class InterfaceEntry : public cPolymorphic
 {
   public:
-    int index;          //< index in interfaces[]
+    int id;             //< identifies the interface (not the same as outputPort!)
     opp_string name;    //< interface name (must be unique)
     IPAddress inetAddr; //< IP address of interface
     IPAddress mask;     //< netmask
-    int outputPort;     //< output gate index (-1 if unused)
+    int outputPort;     //< output gate index (-1 if unused, e.g. loopback interface)
     int mtu;            //< Maximum Transmission Unit (e.g. 1500 on Ethernet)
     int metric;         //< link "cost"; see e.g. MS KB article Q299540
     bool broadcast;     //< interface supports broadcast
@@ -112,13 +111,14 @@ class RoutingEntry : public cPolymorphic
     /// Destination
     IPAddress host;
 
-    /// Route mask (replace it with a prefix?)
+    /// Route mask
+    //FIXME replace it with a prefix?
     IPAddress netmask;
 
     /// Next hop
     IPAddress gateway;
 
-    /// Interface name and nb
+    /// Interface name and pointer
     opp_string interfaceName;
     InterfaceEntry *interfacePtr;
 
@@ -240,14 +240,15 @@ class RoutingTable: public cSimpleModule
     /** @name Interfaces */
     //@{
     /**
-     * Returns the number of interfaces.
+     * Returns the number of interfaces. Interface ids are in range
+     * 0..numInterfaces()-1.
      */
     int numInterfaces()  {return interfaces.size();}
 
     /**
-     * Returns the InterfaceEntry specified by its index (0..numInterfaces-1).
+     * Returns the InterfaceEntry specified by its id (0..numInterfaces-1).
      */
-    InterfaceEntry *interfaceByIndex(int index);
+    InterfaceEntry *interfaceById(int id);
 
     /**
      * Add an interface.
@@ -262,7 +263,8 @@ class RoutingTable: public cSimpleModule
 
     /**
      * Returns an interface given by its port number (gate index).
-     * Returns NULL if not found.
+     * Returns NULL if not found (e.g. the loopback interface has no
+     * port number).
      */
     InterfaceEntry *interfaceByPortNo(int portNo);
 

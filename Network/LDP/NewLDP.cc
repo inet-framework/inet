@@ -22,6 +22,7 @@
 #include "MPLSModule.h"
 #include "RoutingTable.h"
 #include "UDPControlInfo_m.h"
+#include "stlwatch.h"
 
 
 #define LDP_PORT  646
@@ -30,6 +31,20 @@
 
 Define_Module(NewLDP);
 
+
+std::ostream& operator<<(std::ostream& os, const NewLDP::fec_src_bind& f)
+{
+    os << "fecId=" << f.fecId << "  fec=" << f.fec << "  fromInterface=" << f.fromInterface;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const NewLDP::peer_info& p)
+{
+    os << "peerIP=" << p.peerIP << "  interface=" << p.linkInterface <<
+          "  activeRole=" << (p.activeRole ? "true" : "false") <<
+          "  socket=" << (p.socket ? TCPSocket::stateName(p.socket->state()) : "NULL");
+    return os;
+}
 
 void NewLDP::initialize()
 {
@@ -50,6 +65,9 @@ void NewLDP::initialize()
     }
     if (local_addr.isNull())
         error("Cannot find local_address");
+
+    WATCH_VECTOR(myPeers);
+    WATCH_VECTOR(fecSenderBinds);
 
     // schedule first hello
     sendHelloMsg = new cMessage("LDPSendHello");

@@ -282,6 +282,8 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
+    int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
+    controlInfo->setInputPort(inputPort);
     packet->setControlInfo(controlInfo);
     delete datagram;
 

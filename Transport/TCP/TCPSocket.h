@@ -181,6 +181,11 @@ class TCPSocket
      */
     int state()   {return sockstate;}
 
+    /**
+     * Returns name of socket state code returned by state().
+     */
+    static const char *stateName(int state);
+
     /** @name Getter functions */
     //@{
     IPAddress localAddress() {return localAddr;}

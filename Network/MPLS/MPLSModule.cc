@@ -1,12 +1,19 @@
 #include <omnetpp.h>
 #include <string.h>
 #include "MPLSModule.h"
+#include "stlwatch.h"
 
 
 using namespace std;
 
 Define_Module(MPLSModule);
 
+
+std::ostream& operator<<(std::ostream& os, const MPLSModule::FECElem& fec)
+{
+    os << "FECid=" << fec.fecId << "  dest=" << fec.destAddr << "  src =" << fec.srcAddr;
+    return os;
+}
 
 void MPLSModule::initialize()
 {
@@ -26,6 +33,8 @@ void MPLSModule::initialize()
     // Signalling component is ready or not
     //isSignallingReady = false;
     isSignallingReady = true; // FIXME
+
+    WATCH_VECTOR(fecList);
 }
 
 

@@ -126,6 +126,7 @@ void UDPProcessing::processMsgFromIp(UDPPacket *udpPacket)
     udpControlInfo->setCodePoint(ipControlInfo->diffServCodePoint());
     udpControlInfo->setSrcPort(udpPacket->sourcePort());
     udpControlInfo->setDestPort(udpPacket->destinationPort());
+    udpControlInfo->setInputPort(ipControlInfo->inputPort());
     payload->setControlInfo(udpControlInfo);
 
     delete ipControlInfo;

@@ -36,7 +36,7 @@
 
 InterfaceEntry::InterfaceEntry()
 {
-    index = -1;
+    id = -1;
     outputPort = -1;
 
     mtu = 0;
@@ -196,11 +196,11 @@ void RoutingTable::printRoutingTable()
 
 //---
 
-InterfaceEntry *RoutingTable::interfaceByIndex(int index)
+InterfaceEntry *RoutingTable::interfaceById(int id)
 {
-    if (index<0 || index>=interfaces.size())
-        opp_error("interfaceById(): nonexistent interface %d", index);
-    return interfaces[index];
+    if (id<0 || id>=interfaces.size())
+        opp_error("interfaceById(): nonexistent interface %d", id);
+    return interfaces[id];
 }
 
 void RoutingTable::addInterface(InterfaceEntry *entry)
@@ -212,7 +212,7 @@ void RoutingTable::addInterface(InterfaceEntry *entry)
         opp_error("addInterface(): interface with output=%d already registered", entry->outputPort);
 
     // insert
-    entry->index = interfaces.size();
+    entry->id = interfaces.size();
     interfaces.push_back(entry);
 }
 
@@ -232,7 +232,7 @@ void RoutingTable::deleteInterface(InterfaceEntry *entry)
 
     // renumber other interfaces
     for (i=interfaces.begin(); i!=interfaces.end(); ++i)
-        (*i)->index = i-interfaces.begin();
+        (*i)->id = i-interfaces.begin();
 }
 
 InterfaceEntry *RoutingTable::interfaceByPortNo(int portNo)

@@ -65,6 +65,25 @@ TCPSocket::TCPSocket(cMessage *msg)
     }
 }
 
+const char *TCPSocket::stateName(int state)
+{
+#define CASE(x) case x: s=#x; break
+    const char *s = "unknown";
+    switch (state)
+    {
+        CASE(NOT_BOUND);
+        CASE(CLOSED);
+        CASE(LISTENING);
+        CASE(CONNECTING);
+        CASE(CONNECTED);
+        CASE(PEER_CLOSED);
+        CASE(LOCALLY_CLOSED);
+        CASE(SOCKERROR);
+    }
+    return s;
+#undef CASE
+}
+
 void TCPSocket::sendToTCP(cMessage *msg)
 {
     if (!gateToTcp)

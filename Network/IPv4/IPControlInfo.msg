@@ -28,9 +28,9 @@ cplusplus {{
 
 
 //
-// Control information for sending/receiving packets over IP.
+// Control information for sending/receiving packets over \IP.
 //
-// To send a packet over IP, fill in an IPControlInfo object,
+// To send a packet over \IP, fill in an IPControlInfo object,
 // attach it to the packet with the C++ method setControlInfo(),
 // the send it to the IP module.
 //
@@ -43,25 +43,29 @@ cplusplus {{
 //
 // Optional fields:
 // - srcAddr: it will be set to the address of the outgoing interface
-// - codepoint: used in DS_Field (RFC 2474) instead of TOS (default: 0)
+// - diffServCodePoint: used in DS_Field (RFC 2474) instead of TOS (default: 0)
 // - timeToLive: default defined as module parameter
 // - dontFragment: default: false
 //
+// interfaceId is set by the \IP module when passing up data packets;
+// it does not affect on which port the \IP packet is transmitted.
+//
 // Not supported:
-// - options: IP Options currently not used
-// - Identifier is currently always chosen by IP layer
+// - options: \IP Options currently not used
+// - Identifier is currently always chosen by the \IP layer
 //
 class IPControlInfo
 {
     properties:
         omitGetVerb = true;
     fields:
-        IPAddress destAddr;
-        IPAddress srcAddr;
-        short protocol enum(IPProtocolFieldId);
-        unsigned char diffServCodePoint;
-        short timeToLive;
-        bool dontFragment;
+        IPAddress destAddr;  // destination IP address
+        IPAddress srcAddr;   // source IP address
+        int inputPort;       // port number of interface on which the datagram was received
+        short protocol enum(IPProtocolFieldId);  // encapsulated protocol
+        unsigned char diffServCodePoint;  // for QoS
+        short timeToLive;   // maximum hop count
+        bool dontFragment;  // "don't fragment" bit
 };
 
 

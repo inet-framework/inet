@@ -75,11 +75,15 @@ cMessage *IPLocalDeliver::decapsulateIP(IPDatagram *datagram)
 {
     cMessage *packet = datagram->decapsulate();
 
+    IPRoutingDecision *routingDecision = check_and_cast<IPRoutingDecision *>(datagram->controlInfo());
+    int inputPort = routingDecision->inputPort();
+
     IPControlInfo *controlInfo = new IPControlInfo();
     controlInfo->setProtocol(datagram->transportProtocol());
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
+    controlInfo->setInputPort(inputPort);
     packet->setControlInfo(controlInfo);
     delete datagram;
 
