@@ -30,6 +30,7 @@ void RSVP::initialize(int stage)
 
     // Get routerId
     routerId = rt->getRouterId().getInt();
+    ASSERT(routerId!=0);
 
     IsIR = par("isIR").boolValue();
     IsER = par("isER").boolValue();

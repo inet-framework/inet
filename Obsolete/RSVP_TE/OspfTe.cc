@@ -26,6 +26,7 @@ void OspfTe::initialize(int stage)
     if (stage==1)
     {
         routerId = RoutingTableAccess().get()->getRouterId().getInt();
+        ASSERT(!routerId.isNull());
 
         // to invoke handleMessage() when we start  FIXME what?????? Andras
         scheduleAt(simTime(), new cMessage());
@@ -235,7 +236,7 @@ std::vector<int> OspfTe::CalculateERO(const IPAddress& dest,
     CSPFVertex rootVertex;
     rootVertex.DistanceToRoot = 0;
     rootVertex.Parent = NULL;
-    rootVertex.VertexId = IPAddress(routerId);
+    rootVertex.VertexId = routerId;
     candidates.push_back(rootVertex);
 
     CspfBuildSPT(fspec, candidates);
@@ -289,7 +290,7 @@ std::vector<int> OspfTe::CalculateERO(const IPAddress& dest,
     CSPFVertex rootVertex;
     rootVertex.DistanceToRoot = 0;
     rootVertex.Parent = NULL;
-    rootVertex.VertexId = IPAddress(routerId);
+    rootVertex.VertexId = routerId;
     candidates.push_back(rootVertex);
 
     CspfBuildSPT(links, old_fspec, new_fspec, candidates);

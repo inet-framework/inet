@@ -53,8 +53,7 @@ void NewLDP::initialize()
     // we'll need routerId for HELLO messages
     RoutingTable *rt = routingTableAccess.get();
     routerId = rt->getRouterId();
-    if (routerId.isNull())
-        error("routerId is not set");
+    ASSERT(!routerId.isNull());
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecSenderBinds);
