@@ -43,7 +43,7 @@ void BurstGenerator::activity()
 		iPacket = new IPInterfacePacket;
 		iPacket->encapsulate(transportPacket);
 		iPacket->setDestAddr(chooseDestAddr(dest));
-        iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
+        	iPacket->setProtocol(usesTCPProt ? IP_PROT_TCP : IP_PROT_UDP);
 		send(iPacket, "out");
 	} // * end for*
 
