@@ -44,8 +44,8 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
             socket = new TCPSocket(msg);
             socket->setOutputGate(gate("tcpOut"));
 
-            const char *serverProcTypeName = par("serverProcess");
-            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(createOne(serverProcTypeName));
+            const char *serverThreadClass = par("serverThreadClass");
+            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
 
             socket->setCallbackObject(proc);
             proc->init(this, socket);

@@ -19,26 +19,27 @@
 
 //
 // This module hosts TCP-based server applications. It dynamically creates
-// and launches a new module for each incoming connection.
+// and launches a new "thread" object for each incoming connection.
 //
-// The type of modules to create should be specified in the serverProcess
-// parameter. The module type to be used should be subclassed from the
-// TCPServerProcess C++ class.
-//
-// The module will get messages from TCP via the TCPSocket callback interface,
-// and can send messages via the TCPSocket send method. The OMNeT++ send()
-// method is not used.
+// Server threads should be subclassed from the TCPServerThreadBase
+// C++ class, registered in the C++ code using the Register_Class() macro,
+// and the class name should be specified in the serverThreadClass
+// parameter of TCPSrvHostApp. The thread object will receive events
+// via a callback interface (methods like established(), dataArrived(),
+// peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
+// method.
 //
 // IMPORTANT: Before you try to use this module, make sure you actually need it!
-// In most cases, TCPGenericSrvApp and GenericAppMsg will be completely 
+// In most cases, TCPGenericSrvApp and GenericAppMsg will be completely
 // enough, and they are a lot easier to handle. You'll want to subclass your
-// client from TCPGenericCliAppBase then.
+// client from TCPGenericCliAppBase then; check TelnetApp and TCPBasicClientApp
+// for examples.
 //
 simple TCPSrvHostApp
     parameters:
         address: string, // may be left empty ("")
         port: numeric const, // port number to listen on
-        serverThread : string; // type (class name) of modules to launch on incoming connections
+        serverThreadClass : string; // class name of "thread" objects to launch on incoming connections
     gates:
         in: tcpIn;
         out: tcpOut;
