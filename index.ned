@@ -28,8 +28,8 @@
 // Link-layer models are PPP and Ethernet.</nohtml>
 //
 // The current codebase is the result of a complete rewrite of the original
-// IPSuite by Andras Varga, started in 2003. The original IPSuite was written by 
-// Klaus Wehrle, Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann, 
+// IPSuite by Andras Varga, started in 2003. The original IPSuite was written by
+// Klaus Wehrle, Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann,
 // Ulrich Kaage and others at the University of Karlsruhe during 2000-2001.
 //
 // The MPLS model builds on top of the IPSuite, and implements the MPLS, LDP,
@@ -47,22 +47,22 @@
 // A few useful starting points for browsing IPSuite:
 //  - the <a href="full-usage-diagram.html">Usage Diagram</a>
 //    includes all modules and networks
-//  - example networks: NClients, ClientServerNetwork, McNetwork2, 
+//  - example networks: NClients, ClientServerNetwork, Multicast,
 //    ARPTest, MixedLAN, etc.
-//  - hosts, routers, switches: StandardHost2, Router, EtherSwitch, EtherHub, 
+//  - hosts, routers, switches: StandardHost2, Router, EtherSwitch, EtherHub,
 //    etc.
-//  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing, 
+//  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing,
 //    PPPInterface, ARP, EtherMAC, etc.
-//  - a central module which holds the interface table and the route table: 
+//  - a central module which holds the interface table and the route table:
 //    RoutingTable
-//  - if you don't want to manually set up \IP addresses and routing: 
+//  - if you don't want to manually set up \IP addresses and routing:
 //    FlatNetworkConfigurator
-//  - message classes: IPDatagram, TCPSegment, UDPPacket, EthernetIIFrame, 
+//  - message classes: IPDatagram, TCPSegment, UDPPacket, EthernetIIFrame,
 //    ARPPacket, PPPFrame, GenericAppMsg, EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
 //    IPControlInfo, TCPCommand, UDPControlInfo, EtherCtrl, etc.
-//  - application models: UDPApp, TCPSessionApp, TCPBasicClientApp, 
-//    TCPGenericSrvApp, TCPSinkApp, TCPSrvHostApp, EtherAppCli, EtherAppSrv, 
+//  - application models: UDPApp, TCPSessionApp, TCPBasicClientApp,
+//    TCPGenericSrvApp, TCPSinkApp, TCPSrvHostApp, EtherAppCli, EtherAppSrv,
 //    etc.
 //
 // Starting points for the MPLS models:

@@ -61,7 +61,7 @@ cd %root%\Examples\Ethernet\LANs && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\NClients && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\FlatNet && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\KIDSNw1 && %MAKEMAKE% %ALL_MODEL_OPTS%
-cd %root%\Examples\IPSuite\McNetwork2 && %MAKEMAKE% %ALL_MODEL_OPTS%
+cd %root%\Examples\IPSuite\Multicast && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\PerformAnalysis && %MAKEMAKE% %ALL_MODEL_OPTS%
 cd %root%\Examples\IPSuite\TCPClientServerNet && %MAKEMAKE% %ALL_MODEL_OPTS%
 

@@ -26,7 +26,7 @@ foreach line {
    {"NClients/file transfer" "IPSuite/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
    {"FlatNet"                "IPSuite/FlatNet"            "./FlatNet"            "FlatNet"}
    {"KIDSNw1"                "IPSuite/KIDSNw1"            "./KIDSNw1"            "KIDSNw1"}
-   {"McNetwork2"             "IPSuite/McNetwork2"         "./McNetwork2"         "McNetwork2"}
+   {"Multicast"              "IPSuite/Multicast"          "./Multicast"          "Multicast"}
    {"PerformAnalysis"        "IPSuite/PerformAnalysis"    "./UDPLoadTest"        "UDPLoadTest"}
    {"TCPClientServerNet"     "IPSuite/TCPClientServerNet" "./TCPClientServerNet" "TCPClientServerNet"}
 
