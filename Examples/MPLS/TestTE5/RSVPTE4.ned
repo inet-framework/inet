@@ -68,12 +68,18 @@ module RSVPTE4
                 out[3];
             display: "p=388,159;i=srouter";
         host1: StandardHost2;  // client
-            parameters:
-                start_time = 0;
+            gatesizes:
+                in[1],
+                out[1];
             display: "p=26,98;i=pc";
         host3: StandardHost2;  // server
-            display: "p=482,96;i=pc";
+            gatesizes:
+                in[1],
+                out[1];
+            display: "p=482,96;i=server1";
         ted: TED;
+            parameters:
+               moduleTypes = "StandardHost2 RSVP_LSR_Node";
             display: "p=148,376;b=24,16";
         tester: Tester;
             parameters:

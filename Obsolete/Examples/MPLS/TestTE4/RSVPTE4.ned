@@ -30,9 +30,6 @@ import
 // This is an example of "make-before-break" technique used in \RSVP-TE for
 // traffic rerouting.
 //
-// FIXME there's a very similar NED file in the same directory --
-// one of them has to be removed?
-//
 // See the README file in the model directory for scenario description.
 //
 module RSVPTE4
@@ -78,12 +75,18 @@ module RSVPTE4
                 out[3];
             display: "p=388,159;i=srouter";
         host1: StandardHost2;  // client
-            parameters:
-                start_time = 0;
+            gatesizes:
+                in[1],
+                out[1];
             display: "p=26,98;i=pc";
         host3: StandardHost2;  // server
-            display: "p=482,96;i=pc";
+            gatesizes:
+                in[1],
+                out[1];
+            display: "p=482,96;i=server1";
         ted: TED;
+            parameters:
+               moduleTypes = "StandardHost2 RSVP_LSR_Node";
             display: "p=148,376;b=24,16";
         tester: Tester;
             parameters:

@@ -14,7 +14,6 @@
 import
     "StandardHost2",
     "RSVP_LSR_Node",
-    "Tester",
     "TED";
 
 //
@@ -71,9 +70,9 @@ module RSVPTE4
         host2: StandardHost2;  // client
             display: "p=26,256;i=pc";
         host3: StandardHost2;  // server
-            display: "p=610,80;i=pc";
+            display: "p=610,80;i=server1";
         host4: StandardHost2;  // server
-            display: "p=602,248;i=pc";
+            display: "p=602,248;i=server1";
         ted: TED;
             parameters:
                moduleTypes = "StandardHost2 RSVP_LSR_Node";

@@ -14,7 +14,6 @@
 import
     "StandardHost2",
     "RSVP_LSR_Node",
-    "Tester",
     "TED";
 
 //
@@ -66,12 +65,18 @@ module RSVPNet
                 out[4];
             display: "p=500,95;i=srouter";
         host1: StandardHost2;  // client
-            parameters:
+            gatesizes:
+                in[1],
+                out[1];
             display: "p=26,98;i=pc";
         host3: StandardHost2;  // server
-            parameters:
-            display: "p=570,88;i=pc";
+            gatesizes:
+                in[1],
+                out[1];
+            display: "p=570,88;i=server1";
         ted: TED;
+            parameters:
+               moduleTypes = "StandardHost2 RSVP_LSR_Node";
             display: "p=276,320;b=24,16";
     connections nocheck:
         host1.in[0] <-- delay 0 error 0 datarate 9000 <-- LSR1.out[0];
