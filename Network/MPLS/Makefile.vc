@@ -131,33 +131,4 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-ip_address_prefix.obj: ip_address_prefix.cc \
-  ip_address_prefix.h \
-  ..\IPv4\Core/IPAddress.h
-LIBtable.obj: LIBtable.cc \
-  LIBtable.h \
-  ..\..\Util/StringTokenizer.h \
-  ..\..\Util/stlwatch.h \
-  ..\IPv4\Core/RoutingTableAccess.h \
-  ip_address_prefix.h \
-  ConstType.h \
-  ..\..\Base/ModuleAccess.h \
-  ..\IPv4\Core/RoutingTable.h \
-  ..\..\Base/ipsuite_defs.h \
-  ..\IPv4\Core/IPAddress.h
-MPLSModule.obj: MPLSModule.cc \
-  MPLSModule.h \
-  MPLSPacket.h \
-  ..\IPv4\Core/IPDatagram.h \
-  LIBTableAccess.h \
-  ..\IPv4\Core/RoutingTableAccess.h \
-  ..\IPv4\Core/RoutingTable.h \
-  ConstType.h \
-  ..\IPv4\Core/IPDatagram_m.h \
-  ..\IPv4\Core/IPAddress.h \
-  ..\..\Base/ModuleAccess.h \
-  LIBtable.h \
-  ip_address_prefix.h \
-  ..\..\Base/ipsuite_defs.h
-MPLSPacket.obj: MPLSPacket.cc \
-  MPLSPacket.h
+

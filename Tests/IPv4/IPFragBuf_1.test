@@ -58,7 +58,7 @@ for (f.src=1024; f.src<1026; f.src++) {
 for (int j=0; j<v.size(); j++)
 {
     Frag& f = v[j];
-    ev << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
+    //ev << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
 }
 
 ev << numdatagrams << " datagrams in " << v.size() << " fragments\n";
@@ -96,5 +96,7 @@ ev << "assembled in random order: " << num << "\n";
 
 %contains: stdout
 320 datagrams in 1760 fragments
-reassembled: 320
+assembled in original order: 320
+assembled in reverse order: 320
+assembled in random order: 320
 

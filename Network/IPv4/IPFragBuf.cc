@@ -74,7 +74,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
         // merge this fragment into reassembly buffer
         ReassemblyBuffer& buf = i->second;
         ushort beg = datagram->fragmentOffset();
-        ushort end = buf.main.beg + bytes;
+        ushort end = beg + bytes;
         merge(buf, beg, end, !datagram->moreFragments());
 
         // store datagram. Only one fragment carries the actual modelled
@@ -113,7 +113,7 @@ void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast
 {
     if (buf.main.end==beg)
     {
-        // most typycal case (<95%): new fragment follows last one
+        // most typical case (<95%): new fragment follows last one
         buf.main.end = end;
         if (islast)
             buf.main.islast = true;
@@ -140,6 +140,7 @@ void IPFragBuf::merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast
     }
     else
     {
+        // overlapping is not possible;
         // fragment's range already contained in buffer (probably duplicate fragment)
     }
 }
