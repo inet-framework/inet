@@ -34,30 +34,25 @@ void RSVPAppl::initialize()
     const char *trafficFile = par("traffic").stringValue(); // FIXME change to xml-typed NED param
 
     if (isIR)
-        initFromFile(ev.getXMLDocument(trafficFile));
-}
-
-
-void RSVPAppl::activity()
-{
-    if (isIR)
     {
+        initFromFile(ev.getXMLDocument(trafficFile));
+
+        // FIXME what the hell is this? --Andras
         MPLSModule *mplsMod = mplsAccess.get();
         cMessage *readyMsg = new cMessage();
         sendDirect(readyMsg, 0.0, mplsMod, "fromSignalModule");
     }
+}
 
-    while (true)
-    {
-        cMessage *msg = receive();
 
-        if (!strcmp(msg->arrivalGate()->name(), "from_rsvp"))
-            processMsgFromRSVP(msg);
-        else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
-            processSignalFromMPLSSwitchToInitialiseLabelRequest(msg);
-        else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
-            processSignalFromTester(msg);
-    }
+void RSVPAppl::handleMessage(cMessage *msg)
+{
+    if (!strcmp(msg->arrivalGate()->name(), "from_rsvp"))
+        processMsgFromRSVP(msg);
+    else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+        processSignalFromMPLSSwitchToInitialiseLabelRequest(msg);
+    else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
+        processSignalFromTester(msg);
 }
 
 void RSVPAppl::processMsgFromRSVP(cMessage *msg)

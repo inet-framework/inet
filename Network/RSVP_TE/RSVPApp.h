@@ -91,10 +91,10 @@ private:
     double getTotalDelay(std::vector<simple_link_t> *links);
 
 public:
-    Module_Class_Members(RSVPAppl, cSimpleModule, 16384);
+    Module_Class_Members(RSVPAppl, cSimpleModule, 0);
 
     virtual void initialize();
-    virtual void activity();
+    virtual void handleMessage(cMessage *msg);
 
     /**
      * Process packets from RSVP daemon
