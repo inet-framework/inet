@@ -1,3 +1,7 @@
+2003-09-30  Andras Varga
+
+	* module TCP renamed to TCPTesterB.
+
 2000-12-19  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
 
 	* TCP-Model merged into ip-suite. From now on, you will find the
