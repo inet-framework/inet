@@ -1,8 +1,8 @@
 NewTCP
 ======
 
-This folder contains a new TCP model for OMNeT++. Experience from the old 
-implementation (tcpmodule.cc in IPSuite) have been reused. Motivation was:
+This folder contains a new TCP model for OMNeT++, partially based on the
+experience from the old tcpmodule.cc. Motivation for writing a new TCP was:
 
 - tcpmodule.cc was written before message definitions (.msg files) got
   introduced into OMNeT++. It uses cPars, C structs carried by pointer-valued 

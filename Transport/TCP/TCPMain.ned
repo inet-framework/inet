@@ -22,6 +22,8 @@
 //
 // A TCP segment is represented by the class TCPSegment.
 //
+// <b>Communication with clients</b>
+//
 // For communication between client applications and TCP, the TcpCommandCode
 // and TcpStatusInd enums are used as message kinds, and TCPCommand
 // and its subclasses are used as control info.
@@ -57,10 +59,20 @@
 // connection is identified by the (application port index, connId) pair,
 // where connId is assigned by the application in the OPEN call.
 //
+// <b>Sockets</b>
+//
 // The TCPSocket C++ class is provided to simplify managing TCP connections
 // from applications. TCPSocket handles the job of assembling and sending
 // command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
 // the task of dealing with packets and notification messages coming from TCP.
+//
+// <b>Communication with the IP layer</b>
+//
+// The TCP model relies on sending and receiving IPControlInfo objects
+// attached to TCP segment objects as control info
+// (see cMessage::setControlInfo()).
+//
+// <b>Configuring TCP</b>
 //
 // The module parameters sendQueueClass and receiveQueueClass should be
 // set the names of classes that manage the actual send and receive queues.
@@ -80,6 +92,8 @@
 //
 // Note that TCPOpenCommand allows sendQueueClass, receiveQueueClass and
 // tcpAlgorithmClass to be chosen per-connection.
+//
+// <b>Standards</b>
 //
 // The TCP module itself implements the following:
 //  - all RFC793 TCP states and state transitions
@@ -128,6 +142,8 @@
 // The above problems are relatively easy to fix, and will be resolved in the
 // next interation. Also, other TCPAlgorithms and send queue/receive queue
 // classes will be added.
+//
+// <b>Tests</b>
 //
 // There are automated test cases (*.test files) for TCP -- see the Test
 // directory in the source distribution.
