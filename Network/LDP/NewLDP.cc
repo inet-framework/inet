@@ -111,10 +111,9 @@ void NewLDP::broadcastHello()
 
 void NewLDP::processLDPHello(LDPHello *msg)
 {
-    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
     IPAddress peerAddr = controlInfo->getSrcAddr();
     delete msg;
-    delete controlInfo;
 
     ev << "Received LDP Hello from " << peerAddr << ", ";
 
@@ -177,6 +176,7 @@ void NewLDP::processMessageFromTCP(cMessage *msg)
         // find which peer it is and register connection
         socket = new TCPSocket(msg);
         socket->setOutputGate(gate("to_tcp_interface"));
+
         IPAddress peerAddr = socket->remoteAddress();
 
         PeerVector::iterator i;
@@ -194,7 +194,6 @@ void NewLDP::processMessageFromTCP(cMessage *msg)
         i->connected = true;
         int peerIndex = i - myPeers.begin();
 
-        socket->setOutputGate(gate("to_tcp_interface"));
         socket->setCallbackObject(this, (void *)peerIndex);
         socketMap.addSocket(socket);
     }
@@ -259,8 +258,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
     RoutingTable *rt = routingTableAccess.get();
 
     int fecId = msg->par("FEC");
-    int fecInt = msg->par("dest_addr");
-    // int dest =msg->par("dest_addr"); FIXME was not used (?)
+    int fecInt = msg->par("dest_addr"); // FIXME ???
     int gateIndex = msg->par("gateIndex");
     InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
 
@@ -271,10 +269,8 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
 
     int i;
     for (i = 0; i < fecSenderBinds.size(); i++)
-    {
         if (fecSenderBinds[i].fec == fecInt)
             break;
-    }
 
     if (i == fecSenderBinds.size())  // There is no previous same requests
     {
@@ -304,12 +300,8 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
             requestMsg->setReceiverAddress(nextPeerAddr);
             requestMsg->setSenderAddress(local_addr);
 
-            ev << "LSR(" << local_addr <<
-                "):Request for FEC(" << fecInt << ") from outside \n";
-
-            ev << "LSR(" << local_addr <<
-                ")  forward LABEL REQUEST to " <<
-                "LSR(" << nextPeerAddr << ")\n";
+            ev << "Request for FEC(" << fecInt << ") from outside\n";
+            ev << "forward LABEL REQUEST to LSR(" << nextPeerAddr << ")\n";
 
             delete msg;
 
@@ -318,9 +310,7 @@ void NewLDP::processRequestFromMPLSSwitch(cMessage *msg)
         else
         {
             // Send a NOTIFICATION of NO ROUTE message
-            ev << "LSR(" << local_addr <<
-                "): NO ROUTE found for FEC(" << fecInt << "\n";
-
+            ev << "NO ROUTE found for FEC(" << fecInt << "\n";
             delete msg;
         }
     }
@@ -372,7 +362,7 @@ void NewLDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 
 IPAddress NewLDP::locateNextHop(int fec)
 {
-    // Mapping L3 IP-host of next hop  to L2 peer address.
+    // Mapping L3 IP-host of next hop to L2 peer address.
     RoutingTable *rt = routingTableAccess.get();
 
     // Lookup the routing table, rfc3036
