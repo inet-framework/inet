@@ -100,6 +100,11 @@ class TCPStatusInfo;
  * }
  * </pre>
  *
+ * If you need to manage a large number of sockets (e.g. in a server 
+ * application which handles multiple incoming connections), the TCPSocketMap
+ * class may be useful.
+ *
+ * @see TCPSocketMap
  */
 class TCPSocket
 {
@@ -130,6 +135,8 @@ class TCPSocket
     CallBackInterface *cb;
     void *yourPtr;
 
+    cGate *gateToTcp;
+
   protected:
     void sendToTCP(cMessage *msg);
 
@@ -154,6 +161,12 @@ class TCPSocket
 
     /** @name Opening and closing connections, sending data */
     //@{
+
+    /**
+     * Sets the gate on which to send to TCP. Must be invoked before socket
+     * can be used. Example: <tt>socket.setOutputGate(gate("tcpOut"));</tt>
+     */
+    void setOutputGate(cGate *toTcp)  {gateToTcp = toTcp;}
 
     /**
      * Bind the socket to a local port number.
@@ -267,6 +280,52 @@ class TCPSocket
     void processMessage(cMessage *msg);
     //@}
 };
+
+
+
+// FIXME into separate file
+
+#include <map>
+
+/**
+ * Small utility class for managing a large number of sockets.
+ */
+class TCPSocketMap
+{
+  protected:
+    typedef std::map<TCPSocket*> SocketMap;
+    SocketMap socketMap;
+  public:
+    TCPSocketMap() {}
+    ~TCPSocketMap() {}
+    TCPSocket *findSocketFor(cMessage *msg);
+    void addSocket(TCPSocket *socket);
+    TCPSocket *removeSocket(TCPSocket *socket);
+};
+
+TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
+{
+    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->controlInfo());
+    if (!ind)
+        opp_error("TCPSocketMap: findSocketFor(): no TCPCommand control info in message (not from TCPMain?)");
+    int connId = ind->connId();
+    SocketMap::iterator i = socketMap.find(connId);
+    return (i==socketMap.end()) ? NULL : i->second;
+}
+
+void TCPSocketMap::addSocket(TCPSocket *socket)
+{
+    ASSERT(socketMap.find(socket->connectionId())==socketMap.end());
+    socketMap[socket->connectionId()] = socket;
+}
+
+TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
+{
+    SocketMap::iterator i = socketMap.find(socket->connectionId());
+    if (i=!socketMap.end())
+        socketMap.erase(i);
+    return socket;
+}
 
 #endif
 

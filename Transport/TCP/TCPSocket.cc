@@ -30,11 +30,16 @@ TCPSocket::TCPSocket()
 
     cb = NULL;
     yourPtr = NULL;
+
+    gateToTcp = NULL;
 }
 
 void TCPSocket::sendToTCP(cMessage *msg)
 {
-    check_and_cast<cSimpleModule *>(simulation.contextModule())->send(msg,"tcpOut");
+    if (!gateToTcp)
+        opp_error("TCPSocket: setOutputGate() must be invoked before socket can be used");
+
+    gateToTcp->ownerModule()->send(msg, gateToTcp);
 }
 
 void TCPSocket::bind(int lPort)
