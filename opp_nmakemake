@@ -382,10 +382,6 @@ NEDCOPTS=\$(CFLAGS) \$(NEDCFLAGS) \$(INCLUDE_PATH) -I\$(OMNETPP_INCL_DIR)
 #------------------------------------------------------------------------------
 ";
 
-$subdirsphony = (@subdirs!=()) ? "subdirs-phony" : "";
-$linkdirsphony = (@linkdirs!=()) ? "linkdirs-phony" : "";
-
-
 # rules for $(TARGET)
 $objs = join(" ", @objs);
 print OUT "# object files in this directory\n";
@@ -443,13 +439,11 @@ print OUT "# \tpurify \$(CXX) \$(LDFLAGS) \$(OBJS) \$(EXTRA_OBJS) \$(SUBDIR_OBJS
 print OUT "\n";
 
 # rules for recursive build
-print OUT ".PHONY: subdirs \$(SUBDIRS)\n"; 
-print OUT "subdirs: \$(SUBDIRS)\n"; 
-print OUT "\n"; 
+# simplified because @#$!? microsoft doesn't know about phony targets
+print OUT "subdirs:\n"; 
 foreach $i (@subdirs)
 {
-   print OUT "$i:\n";
-   print OUT "\tcd $i && $makecommand\n";
+   print OUT "\tcd $i && cd && $makecommand\n";
 }
 print OUT "\n";
 

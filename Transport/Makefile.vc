@@ -63,15 +63,10 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-Socketv4:
-	cd Socketv4 && nmake /nologo /f Makefile.vc
-TCPv4:
-	cd TCPv4 && nmake /nologo /f Makefile.vc
-UDPv4:
-	cd UDPv4 && nmake /nologo /f Makefile.vc
+subdirs:
+	cd Socketv4 && cd && nmake /nologo /f Makefile.vc
+	cd TCPv4 && cd && nmake /nologo /f Makefile.vc
+	cd UDPv4 && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy

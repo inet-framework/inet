@@ -63,17 +63,11 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-IPv4:
-	cd IPv4 && nmake /nologo /f Makefile.vc
-LDP:
-	cd LDP && nmake /nologo /f Makefile.vc
-MPLS:
-	cd MPLS && nmake /nologo /f Makefile.vc
-RSVP_TE:
-	cd RSVP_TE && nmake /nologo /f Makefile.vc
+subdirs:
+	cd IPv4 && cd && nmake /nologo /f Makefile.vc
+	cd LDP && cd && nmake /nologo /f Makefile.vc
+	cd MPLS && cd && nmake /nologo /f Makefile.vc
+	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy

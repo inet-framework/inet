@@ -63,27 +63,16 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-Applications:
-	cd Applications && nmake /nologo /f Makefile.vc
-Examples:
-	cd Examples && nmake /nologo /f Makefile.vc
-Network:
-	cd Network && nmake /nologo /f Makefile.vc
-NetworkInterfaces:
-	cd NetworkInterfaces && nmake /nologo /f Makefile.vc
-Nodes:
-	cd Nodes && nmake /nologo /f Makefile.vc
-PHY:
-	cd PHY && nmake /nologo /f Makefile.vc
-Tests:
-	cd Tests && nmake /nologo /f Makefile.vc
-Transport:
-	cd Transport && nmake /nologo /f Makefile.vc
-Util:
-	cd Util && nmake /nologo /f Makefile.vc
+subdirs:
+	cd Applications && cd && nmake /nologo /f Makefile.vc
+	cd Examples && cd && nmake /nologo /f Makefile.vc
+	cd Network && cd && nmake /nologo /f Makefile.vc
+	cd NetworkInterfaces && cd && nmake /nologo /f Makefile.vc
+	cd Nodes && cd && nmake /nologo /f Makefile.vc
+	cd PHY && cd && nmake /nologo /f Makefile.vc
+	cd Tests && cd && nmake /nologo /f Makefile.vc
+	cd Transport && cd && nmake /nologo /f Makefile.vc
+	cd Util && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy

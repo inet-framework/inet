@@ -63,29 +63,17 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-KIDSNw1:
-	cd KIDSNw1 && nmake /nologo /f Makefile.vc
-McNetwork2:
-	cd McNetwork2 && nmake /nologo /f Makefile.vc
-OldNetwork:
-	cd OldNetwork && nmake /nologo /f Makefile.vc
-PerformAnalysis:
-	cd PerformAnalysis && nmake /nologo /f Makefile.vc
-SocketTester:
-	cd SocketTester && nmake /nologo /f Makefile.vc
-TCPClientServerNet:
-	cd TCPClientServerNet && nmake /nologo /f Makefile.vc
-TCPFlavours:
-	cd TCPFlavours && nmake /nologo /f Makefile.vc
-TCPTester:
-	cd TCPTester && nmake /nologo /f Makefile.vc
-TCPUDPDirectNet:
-	cd TCPUDPDirectNet && nmake /nologo /f Makefile.vc
-UDPSockets:
-	cd UDPSockets && nmake /nologo /f Makefile.vc
+subdirs:
+	cd KIDSNw1 && cd && nmake /nologo /f Makefile.vc
+	cd McNetwork2 && cd && nmake /nologo /f Makefile.vc
+	cd OldNetwork && cd && nmake /nologo /f Makefile.vc
+	cd PerformAnalysis && cd && nmake /nologo /f Makefile.vc
+	cd SocketTester && cd && nmake /nologo /f Makefile.vc
+	cd TCPClientServerNet && cd && nmake /nologo /f Makefile.vc
+	cd TCPFlavours && cd && nmake /nologo /f Makefile.vc
+	cd TCPTester && cd && nmake /nologo /f Makefile.vc
+	cd TCPUDPDirectNet && cd && nmake /nologo /f Makefile.vc
+	cd UDPSockets && cd && nmake /nologo /f Makefile.vc
 
 
 doc: neddoc doxy

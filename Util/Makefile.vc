@@ -63,9 +63,7 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
+subdirs:
 
 ProcessorManager_n.obj: ProcessorManager_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp ProcessorManager_n.cc

@@ -64,9 +64,7 @@ $(TARGET): $(OBJS) $(EXTRA_OBJS) subdirs Makefile.vc
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
+subdirs:
 
 McNetwork2_n.obj: McNetwork2_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp McNetwork2_n.cc

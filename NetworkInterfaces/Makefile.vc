@@ -63,13 +63,9 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-PPP-old:
-	cd PPP-old && nmake /nologo /f Makefile.vc
-Queues:
-	cd Queues && nmake /nologo /f Makefile.vc
+subdirs:
+	cd PPP-old && cd && nmake /nologo /f Makefile.vc
+	cd Queues && cd && nmake /nologo /f Makefile.vc
 
 NetworkInterface_n.obj: NetworkInterface_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp NetworkInterface_n.cc

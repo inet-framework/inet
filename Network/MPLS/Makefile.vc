@@ -63,15 +63,10 @@ $(TARGET): $(OBJS) Makefile.vc subdirs
 # purify: $(OBJS) $(EXTRA_OBJS)  Makefile.vc
 # 	purify $(CXX) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(SUBDIR_OBJS) $(LIBS) -L$(OMNETPP_LIB_DIR) $(KERNEL_LIBS) $(USERIF_LIBS) $(SYS_LIBS_PURE) -o $(TARGET).pure
 
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
-
-Core:
-	cd Core && nmake /nologo /f Makefile.vc
-LDP:
-	cd LDP && nmake /nologo /f Makefile.vc
-RSVP_TE:
-	cd RSVP_TE && nmake /nologo /f Makefile.vc
+subdirs:
+	cd Core && cd && nmake /nologo /f Makefile.vc
+	cd LDP && cd && nmake /nologo /f Makefile.vc
+	cd RSVP_TE && cd && nmake /nologo /f Makefile.vc
 
 DatalinkLayer_n.obj: DatalinkLayer_n.cc
 	$(CXX) -c $(NEDCOPTS) /Tp DatalinkLayer_n.cc

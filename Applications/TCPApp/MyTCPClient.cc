@@ -78,6 +78,7 @@ void MyTCPClient::initialize()
 void MyTCPClient::activity()
 {
 
+#ifndef _WIN32  /* FIXME bloody MSVC6.0 says "internal error" on this file */
 
 	local_addr = IPAddress(par("local_addr").stringValue()).getInt();
 	rem_addr= IPAddress(par("server_addr").stringValue()).getInt();
@@ -176,6 +177,8 @@ void MyTCPClient::activity()
 		  //Process one and only one message from peer
 		  processMessage(msg);
 	  }
+
+#endif
 
 }
 

@@ -23,10 +23,11 @@ void MyTCPServer::activity()
 
   cModule* mod;
   cArray* msg_list;
-
+  
 
   double       timeout         = par("timeout");
-
+  int i;
+  
   cModuleType *procserver_type = findModuleType("MyTCPServerProc");
 
   passiveOpen(timeout, procserver_type);
@@ -74,7 +75,7 @@ void MyTCPServer::activity()
           case TCP_I_SEG_FWD:
 
           msg_list = (cArray*)(msg->parList().get("msg_list"));
-			for (int i = 0; i < msg_list->items(); i++)	{
+			for (i = 0; i < msg_list->items(); i++)	{
 				if (msg_list->exist(i)) {
 					
 					cMessage* tcp_send_msg = (cMessage*) ((cMessage*)(msg_list->get(i)))->dup();
