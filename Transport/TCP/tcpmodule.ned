@@ -19,8 +19,46 @@
 
 
 //
-// TCP layer.
+// TCP protocol implementation.
 //
+// The application can send the following commands to TcpModule:
+//  - <tt>TCP_C_OPEN_PASSIVE</tt>: server app ready to accept incoming connection 
+//    (like LISTEN)
+//  - <tt>TCP_C_OPEN_ACTIVE</tt>: open a connection (server must have already 
+//    issued passive open)
+//  - <tt>TCP_C_SEND</tt> 
+//  - <tt>TCP_C_RECEIVE</tt>
+//  - <tt>TCP_C_CLOSE</tt>: close connection
+//  - <tt>TCP_C_ABORT</tt>                  
+//  - <tt>TCP_C_STATUS</tt>
+// 
+// The following indications are sent from TcpModule to the application:
+//  - <tt>TCP_I_NONE</tt>
+//  - <tt>TCP_I_SEG_FWD</tt>
+//  - <tt>TCP_I_RCVD_SYN</tt>
+//  - <tt>TCP_I_ESTAB</tt>
+//  - <tt>TCP_I_CLOSE_WAIT</tt>
+//  - <tt>TCP_I_CLOSED</tt>
+//  - <tt>TCP_I_ABORTED</tt>
+// 
+// The commands and indications are represented by messages, with the 
+// message kind set to one of the above enum values. Additional parameters 
+// (added via <tt>cPar</tt>s): 
+//  - <tt>src_port</tt>, <tt>src_addr</tt>, <tt>dest_port</tt>, 
+//    <tt>dest_addr</tt> (all as <tt>int</tt>s) 
+//  - <tt>rec_pks</tt>: number of packets the application is ready to receive
+//  - <tt>num_bit_req</tt>: number of bits the application is ready to receive (?) 
+//  - <tt>tcp_conn_id</tt>: identifies the connection
+// 
+// <tt>tcp_conn_id</tt> is assigned by the server application, when issuing
+// the passive open call. The client issues the active open without
+// a <tt>tcp_conn_id</tt> (i.e. with a dummy one), and will learn the 
+// connection id from the <tt>TCP_I_ESTAB</tt> indication.  
+// 
+// The server is free to use any identifier; it might be handy to
+// use e.g. the module id of the process (dynamically created module)
+// that handles the connection. 
+// 
 simple TcpModule
     parameters:
       //# the following tow parameters are never used so far.
@@ -28,7 +66,8 @@ simple TcpModule
       TCPDelayedAck  : bool,
       TCPFastRetrans : bool,
       TCPFastRecovery: bool,
-      TCPNewReno     : bool;
+      TCPNewReno     : bool,
+      //#debug: bool;
     gates:
       in: from_appl, from_ip;
       out: to_appl, to_ip;
