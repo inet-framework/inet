@@ -4,6 +4,7 @@ exec wish "$0" "$@"
 
 #==========================================================================
 #  DEMO
+#  part of OMNeT++
 #==========================================================================
 
 #--------------------------------------------------------------
@@ -17,14 +18,13 @@ exec wish "$0" "$@"
 # columns below: <name> <directory> <unix-command> <windows-command>
 set i 0
 foreach line {
-
-   {"MPLS-LDP"               "ldp-mpls1" "./ldp-mpls1" "ldp-mpls1"}
-   {"CSPF Routing"           "TestTE1"   "./TestTE"    "TestTE"}
-   {"Hop-by-Hop Routing"     "TestTE2"   "./TestTE"    "TestTE"}
-   {"ER Routing"             "TestTE3"   "./TestTE"    "TestTE"}
-   {"Traffic Reroute 1"      "TestTE4"   "./TestTE"    "TestTE"}
-   {"Traffic Reroute 2"      "TestTE5"   "./TestTE"    "TestTE"}
-   {"Reservation preemption" "TestTE6"   "./TestTE"    "TestTE"}
+   {"LANs: mixed Ethernet" "LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
+   {"LANs: Ethernet bus"   "LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
+   {"LANs: hub"            "LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
+   {"LANs: switch"         "LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
+   {"LANs: two hosts"      "LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
+   {"LANs: very large LAN" "LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
+   {"ARP Test"             "ARPTest"  "./ARPTest"               "ARPTest"}
 } {
    set name $i
    incr i
@@ -114,9 +114,9 @@ proc createWindow {} {
 }
 
 proc helpAbout {} {
-    tk_messageBox -title {About IPSuite MPLS Demo} -type ok -icon info -message \
+    tk_messageBox -title {About IPSuite TCP/IP Demo} -type ok -icon info -message \
 {\
-IPSuite for OMNeT++, MPLS models
+IPSuite for OMNeT++
 Sample Simulations
 }
 
@@ -170,6 +170,8 @@ proc runSample {sample} {
    set pwd [pwd]
    if [catch {
       cd $dir($sample);
+      #exec $prog &
+      #exec [lindex $prog 0] [lindex $prog 1] [lrange $prog 2 end] &
       eval exec $prog &
     } err] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"

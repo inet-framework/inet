@@ -171,7 +171,7 @@ proc runSample {sample} {
    set pwd [pwd]
    if [catch {
       cd $dir($sample);
-      exec $prog &
+      eval exec $prog &
     } err] {
       tk_messageBox -title {OMNeT++ Demo} -type ok -icon error -message "Error running the simulation program: $err"
    }
