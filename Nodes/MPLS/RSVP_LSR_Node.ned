@@ -32,7 +32,6 @@ import
 module RSVP_LSR_Node
     parameters:
         routerId : string,
-        dest_addr : string, //# FIXME what's this?
         isIR : bool,
         isER : bool,
         routingFile : string,
@@ -57,7 +56,6 @@ module RSVP_LSR_Node
         signal_module: RSVPAppl;
             parameters:
                 routerId = routerId,
-                dest_addr = dest_addr,
                 isIR = isIR,
                 isER = isER;
             display: "o=#8080ff;p=80,52;b=32,30";

@@ -77,7 +77,7 @@ private:
 
     int routerId, dest_addr;  // FIXME make them IPAddress
     double BW, delay;
-    bool isSender, isER, isIR;
+    bool isER, isIR;
     std::vector<TELinkState>  ted;
     std::vector<traffic_request_t> tr;
     std::vector<lsp_tunnel_t> FecSenderBinds;

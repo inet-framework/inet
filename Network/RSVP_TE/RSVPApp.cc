@@ -35,7 +35,6 @@ void RSVPAppl::initialize(int stage)
     routerId = RoutingTableAccess().get()->getRouterId().getInt();
     ASSERT(routerId!=0);
 
-    isSender = par("isSender").boolValue();
     isIR = par("isIR").boolValue();
     isER = par("isER").boolValue();
     const char *trafficFile = par("traffic").stringValue(); // FIXME change to xml-typed NED param
