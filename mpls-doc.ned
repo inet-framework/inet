@@ -13,10 +13,6 @@
 
 
 //
-//# we need the funky <nohtml>...</nohtml> stuff to prevent hyperlinking
-//# the word "RSVP" to the RSVP module... maybe one could rename RSVP module
-//# to RSVP_TE or something like this.
-//
 // @page standards.html, Implemented Standards
 //
 // The implementation follows those RFCs below:
@@ -24,9 +20,9 @@
 // - RFC 2205: Resource ReSerVation Protocol
 // - RFC 30301: Multiprotocol Label Switching Architecture
 // - RFC 3033: LDP Specification
-// - RFC 3209: <nohtml>RSVP-TE</nohtml> Extension to RSVP for LSP tunnels
-// - RFC 2205: RSVP Version 1- Functional Specification
-// - RFC 2209: RSVP Message processing Version 1
+// - RFC 3209: \RSVP-TE Extension to \RSVP for LSP tunnels
+// - RFC 2205: \RSVP Version 1 - Functional Specification
+// - RFC 2209: \RSVP Message processing Version 1
 //
 //#------------------------------------------------------------------------
 // @page mpls-pseudocode.html, MPLS Operation
@@ -197,7 +193,7 @@
 // This constraint-based routing is executed online by Ingress
 // Router. The CSPF calculates an optimum explicit route (ER), based on
 // specific constraints. CSPF relies on a Traffic Engineering Database (TED)
-// to do those calculations. The resulting route is then used by <nohtml>RSVP-TE</nohtml>.
+// to do those calculations. The resulting route is then used by \RSVP-TE.
 //
 // The CSPF in particular and any constraint based routing process requires following
 // inputs:
@@ -245,14 +241,14 @@
 //#------------------------------------------------------------------------
 // @page traffic-xml-file.html, The traffic.xml file
 //
-// The traffic.xml file is read by the <nohtml>RSVP-TE</nohtml> module (RSVP).
+// The traffic.xml file is read by the \RSVP-TE module (\RSVP).
 // The file must be in the same folder as the executable
 // network simulation file.
 //
 // The XML elements used in the "traffic.xml" file:
 // - <Traffic></Traffic> is the root element. It may contain one or more <Conn>
 //   elements.
-// - <Conn></Conn> specifies an RSVP session. It may contain the following elements.
+// - <Conn></Conn> specifies an \RSVP session. It may contain the following elements.
 // - <src></src> specifies sender IP address
 // - <dest></dest> specifies receiver IP address
 // - <setupPri></setupPri> specifies LSP setup priority
@@ -288,11 +284,11 @@
 // </traffic>
 // </pre>
 //
-// An example of using <nohtml>RSVP-TE</nohtml> as signaling protocol can be found in
+// An example of using \RSVP-TE as signaling protocol can be found in
 // ExplicitRouting folder distributed with the simulation. In this
 // example, a network similar to the network in LDP-MPLS example is
 // setup. Instead of using LDP, "signaling" parameter is set to 2 (value
-// of <nohtml>RSVP-TE</nohtml> handler). The following xml file is used for traffic
+// of \RSVP-TE handler). The following xml file is used for traffic
 // control. Note the explicit routes specified in the second connection.
 // It indicates that the route is a strict one since the values of every
 // hop types are 0. The route defined is 10.0.0.1 -> 1.0.0.1 ->

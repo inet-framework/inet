@@ -19,7 +19,7 @@ import
 
 
 //
-// An example of Explicit Routing in RSVP-TE. The network consists of
+// An example of Explicit Routing in \RSVP-TE. The network consists of
 // 5 LSRs and 2 hosts. Host2 establishes its path based on the input
 // of ROUTE specified in the traffic.xml file.
 //

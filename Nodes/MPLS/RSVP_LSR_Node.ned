@@ -24,15 +24,15 @@ import
 
 
 //
-// An RSVP-TE capable router.
+// An \RSVP-TE capable router.
 //
-// RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. RSVP uses transport protocols to route packets. In the simulation,
+// \RSVP occupies the Transport layer; however, it is not a transport protocol
+// itself. \RSVP uses transport protocols to route packets. In the simulation,
 // OSPF-TE has been built to replace the static routing available in IP-suite.
 //
 // An LSR consists of the following modules:
-// - RSVP-TE: The signaling module.
-// - RSVP Interface: This one plays the role of an adapter between layer 3
+// - \RSVP-TE: The signaling module.
+// - \RSVP Interface: This one plays the role of an adapter between layer 3
 //   and layer 4 protocols. It is also to address the mismatch between the
 //   two methods of representing an IP addresses.
 // - Network Layers: The core of IP-suite.

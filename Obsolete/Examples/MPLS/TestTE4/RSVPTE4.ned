@@ -27,7 +27,7 @@ import
 // A new LSP path is setup and traffic is rerouted from the old LSP
 // path to the new LSP path.
 //
-// This is an example of "make-before-break" technique used in RSVP-TE for
+// This is an example of "make-before-break" technique used in \RSVP-TE for
 // traffic rerouting.
 //
 // FIXME there's a very similar NED file in the same directory --

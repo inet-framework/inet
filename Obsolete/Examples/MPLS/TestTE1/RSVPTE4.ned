@@ -18,7 +18,7 @@ import
     "TED";
 
 //
-// Example network to demonstrate CSPF algorithm used in RSVP-TE.
+// Example network to demonstrate CSPF algorithm used in \RSVP-TE.
 // The network consists of 5 LSR and 4 hosts. Host 1 and 2 have
 // different requests of bandwidth level.
 //

@@ -394,7 +394,7 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
     int srcAddr = packet->getSenderAddress();
     int fecId = packet->par("fecId");
 
-    // This is the incomming interface if label found
+    // This is the incoming interface if label found
     string fromInterface = findInterfaceFromPeerAddr(srcAddr);
 
     // This is the outgoing interface if label found
@@ -420,7 +420,7 @@ void LDPproc::processingLABEL_REQUEST(LabelRequestMessage * packet)
 
     // Look up table for this fec
 
-    int label = lt->requestLabelforFec(fec);
+    int label = lt->findLabelforFec(fec);
 
     ev << "Request from LSR(" << IPAddress(srcAddr) << ") for fec=" << IPAddress(fec) << ")\n";
 

@@ -1,12 +1,12 @@
 //
-// This library is free software, you can redistribute it 
-// and/or modify 
-// it under  the terms of the GNU Lesser General Public License 
-// as published by the Free Software Foundation; 
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
 // either version 2 of the License, or any later version.
-// The library is distributed in the hope that it will be useful, 
+// The library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
 
@@ -14,77 +14,77 @@
 //
 // Implements the MPLS protocol.
 //
-// MPLS module is added between layer 2 and 3 in the OSI model for fast packet 
-// switching. MPLS should be transparent to signaling protocols. Two signaling 
-// protocols currently implemented in this simulation are RSVP-TE and LDP.
+// MPLS module is added between layer 2 and 3 in the OSI model for fast packet
+// switching. MPLS should be transparent to signaling protocols. Two signaling
+// protocols currently implemented in this simulation are \RSVP-TE and LDP.
 //
 // Operations
 //
-// Generally, the operation of MPLS module is as following: When first 
-// starting up, the MPLS module stores all the incoming packets (which the 
-// labels cannot be found from the LIB) from IP nodes outside in a buffer as 
-// long as the signaling protocol has not been initialized yet. Once the 
-// signaling component finishes its initialization phase, it sends a message 
-// to MPLS module indicating that it is ready to operate. The MPLS module then 
-// sends Label Request for FEC of the queued packets in the buffer. Label 
-// mapping and installation are performed by signaling protocols. Once, the 
-// Ingress Router receives label mapping, it starts to send out queued 
+// Generally, the operation of MPLS module is as following: When first
+// starting up, the MPLS module stores all the incoming packets (which the
+// labels cannot be found from the LIB) from IP nodes outside in a buffer as
+// long as the signaling protocol has not been initialized yet. Once the
+// signaling component finishes its initialization phase, it sends a message
+// to MPLS module indicating that it is ready to operate. The MPLS module then
+// sends Label Request for FEC of the queued packets in the buffer. Label
+// mapping and installation are performed by signaling protocols. Once, the
+// Ingress Router receives label mapping, it starts to send out queued
 // packets.
 //
-// For most of the time, the MPLS module will do the label swapping and 
-// message forwarding. Upon receiving a labeled packet from another LSR, the 
-// MPLS first extract the incoming interface and incoming label pair, and then 
-// look up the local LIB table. If an outgoing label and an outgoing interface 
-// can be found, the module will perform appropriate label operations (PUSH, 
-// POP, SWAP) based on the "opcode" presented in the LIB. Otherwise, it makes 
+// For most of the time, the MPLS module will do the label swapping and
+// message forwarding. Upon receiving a labeled packet from another LSR, the
+// MPLS first extract the incoming interface and incoming label pair, and then
+// look up the local LIB table. If an outgoing label and an outgoing interface
+// can be found, the module will perform appropriate label operations (PUSH,
+// POP, SWAP) based on the "opcode" presented in the LIB. Otherwise, it makes
 // a query of label mapping to the LDP component of the parent LSR.
 //
 // Algorithm
 //
-// Upon receiving a packet (not signalling message), the MPLS module, based on 
-// the packet types, calls appropriate methods to process the packet. 
+// Upon receiving a packet (not signalling message), the MPLS module, based on
+// the packet types, calls appropriate methods to process the packet.
 // See <a href="mpls-pseudocode.html">MPLS Operation</a> for details.
 //
-// Upon receiving a replied message from the signalling module, the MPLS 
-// module will locate all queued packets which generated the request message 
-// for this replied message and encapsulate them in MPLS packets with label 
-// taken from the replied message. These MPLS packets are then forwarded to an 
+// Upon receiving a replied message from the signalling module, the MPLS
+// module will locate all queued packets which generated the request message
+// for this replied message and encapsulate them in MPLS packets with label
+// taken from the replied message. These MPLS packets are then forwarded to an
 // appropriate next hop.
 //
 // Collaborations
 //
-// MPLS module is required to interact with L2 (Link Layer) and L3 (Network 
-// Layer) in the OSI model. In addition, it needs to obtain label information 
-// from the LIB component and label query result from the LDP module. Messages 
-// the model communicates with L2 and Network Layers are L2 packets (PPP, 
-// Frame Relay, ATM, Ethernet, etc.), and IP native packets. Specifically, 
-// MPLS module encapsulates IP packet and is encapsulated in L2 packet. 
-// Different L2 protocols may require different methods of encapsulation to 
-// inherit the L2’s QoS. This implementation follows a generic approach; it 
+// MPLS module is required to interact with L2 (Link Layer) and L3 (Network
+// Layer) in the OSI model. In addition, it needs to obtain label information
+// from the LIB component and label query result from the LDP module. Messages
+// the model communicates with L2 and Network Layers are L2 packets (PPP,
+// Frame Relay, ATM, Ethernet, etc.), and IP native packets. Specifically,
+// MPLS module encapsulates IP packet and is encapsulated in L2 packet.
+// Different L2 protocols may require different methods of encapsulation to
+// inherit the L2’s QoS. This implementation follows a generic approach; it
 // assumes no information of QoS from the link layer.
 //
 // Usages
 //
-// Values of IsIR and IsER must be input though LSR composite module for the 
-// MPLS to operate correctly. Both of them should be set to true if 
-// bidirectional LSPs (in this context, it means LSPs are setup from the 
-// sender to receiver and in opposite directions, these LSPs might be 
+// Values of IsIR and IsER must be input though LSR composite module for the
+// MPLS to operate correctly. Both of them should be set to true if
+// bidirectional LSPs (in this context, it means LSPs are setup from the
+// sender to receiver and in opposite directions, these LSPs might be
 // different) are desired.
 //
-simple MPLSModule 
-    parameters: 
+simple MPLSModule
+    parameters:
         numOfPorts : numeric,
         classifier : numeric,
         isER : bool,
         isIR : bool,
         procdelay : numeric;
-    
-    gates: 
-        in: fromL3[]; 
-        out: toL3[]; 
-        in: fromL2[]; 
-        out: toL2[]; 
+
+    gates:
+        in: fromL3[];
+        out: toL3[];
+        in: fromL2[];
+        out: toL2[];
         in: fromSignalModule;
         out: toSignalModule;
-                     
-endsimple 
+
+endsimple

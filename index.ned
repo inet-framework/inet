@@ -24,7 +24,7 @@
 // <center><h3>2004-08-12</h3></center>
 //
 // <nohtml>IPSuite contains IPv4, TCP, UDP models and support for QoS.
-// It also includes an MPLS model with RSVP-TE and LDP signalling.
+// It also includes an MPLS model with \RSVP-TE and LDP signalling.
 // Link-layer models are PPP and Ethernet.</nohtml>
 //
 // The original IPSuite was written by Klaus Wehrle, Jochen Reber,
@@ -33,7 +33,7 @@
 // rewrite by Andras Varga, started in 2003 and still in progress.
 //
 // The MPLS model builds on top of the IPSuite, and implements the MPLS, LDP,
-// and <nohtml>RSVP-TE</nohtml> protocols. It also implements the routing
+// and \RSVP-TE protocols. It also implements the routing
 // algorithm used in OSPF-TE. Its uses bandwidth as the major resource
 // constraint. The software has been built around 10,000 LOCs.
 // The model has been written by Xuan Thang Nguyen (Xuan.T.Nguyen@uts.edu.au)
@@ -52,7 +52,7 @@
 //  - protocol implementations: IP, IPProcessing, TCPMain, UDPProcessing, etc.
 //
 // Starting points for the MPLS models:
-//  - the core modules: MPLSModule, LIBTable, LDPproc, RSVP, TED, OspfTe
+//  - the core modules: MPLSModule, LIBTable, LDPproc, \RSVP, TED, OspfTe
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>
 //

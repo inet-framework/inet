@@ -12,20 +12,20 @@
 
 
 //
-// Acts as an adapter between RSVP layer and network layer.
+// Acts as an adapter between \RSVP layer and network layer.
 // It hides the encapsulation/decapsulation complexity from message
 // processing.
 //
 // Operations
 //
-// RSVPInterface encapsulates packets passed from RSVP layer and creates new
+// RSVPInterface encapsulates packets passed from \RSVP layer and creates new
 // packets which are consistent with Transport packet format. On the opposite
 // way, the network packets are decapsulated into appropriate types of RSVP
 // packets.
 //
 // Collaborations
 //
-// RSVP-TE and network layer module are the module's collaborators. As
+// \RSVP-TE and network layer module are the module's collaborators. As
 // mentioned above, the interactions focus on packet encapsulation and
 // decapsulation.
 //

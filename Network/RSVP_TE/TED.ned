@@ -30,7 +30,7 @@
 // different when the convergence has not been completed. In the simulation,
 // these local copies are exactly the same as they share the same pointer.
 //
-// The modules that will extract information from TED are OSPF-TE and RSVP-TE
+// The modules that will extract information from TED are OSPF-TE and \RSVP-TE
 // modules. As mentioned above, an important property of TED is that, as is
 // true with the link state database, the TED has a consistent view from all
 // the routers in the same area. Since the message processing has not been
@@ -41,7 +41,7 @@
 //
 // Usages
 //
-// The TED module detects the links between modules of types listed in the 
+// The TED module detects the links between modules of types listed in the
 // moduleTypes parameter; it should be set to e.g. "RSVP_LSR_Node StandardHost2".
 //
 simple TED
