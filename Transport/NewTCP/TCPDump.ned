@@ -16,40 +16,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPDUMP_H
-#define __TCPDUMP_H
 
-#include <omnetpp.h>
-#include "IPAddress.h"
-#include "IPDatagram_m.h"
-#include "TCPSegment_m.h"
+//
+// Provides tcpdump-like functionality
+//
+simple TCPDump
+    gates:
+      in: in1, in2;
+      out: out1, out2;
+endsimple
 
 
-/**
- * Dumps TCP packets in tcpdump format.
- */
-class TCPDumper
-{
-  protected:
-    std::ostream *outp;
-  public:
-    TCPDumper(std::ostream& o);
-    void dump(IPDatagram *dgram);
-    void dump(TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr);
-};
 
-/**
- *
- */
-class TCPDump : public cSimpleModule
-{
-  protected:
-    TCPDumper tcpdump;
-  public:
-    TCPDump(const char *name, cModule *parent);
-    virtual void handleMessage(cMessage *msg);
-};
-
-#endif
 
 

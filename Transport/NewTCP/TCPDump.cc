@@ -19,24 +19,24 @@
 
 #include "TCPDump.h"
 
-TCPDump::TCPDump(std::ostream& out)
+TCPDumper::TCPDumper(std::ostream& out)
 {
     outp = &out;
 }
 
-void TCPDump::dump(IPDatagram *dgram)
+void TCPDumper::dump(IPDatagram *dgram)
 {
     TCPSegment *tcpseg = check_and_cast<TCPSegment *>(dgram->encapsulatedMsg());
-    dump(tcpseg, dgram->srcAddress(), dgram->destAddress());
+    dump(tcpseg, dgram->srcAddress().str(), dgram->destAddress().str());
 }
 
-void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
+void TCPDumper::dump(TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr)
 {
     std::ostream& out = *outp;
 
     // src/dest
-    out << srcAddr.str() << "." << tcpseg->srcPort() << " > ";
-    out << destAddr.str() << "." << tcpseg->destPort() << ": ";
+    out << srcAddr << "." << tcpseg->srcPort() << " > ";
+    out << destAddr << "." << tcpseg->destPort() << ": ";
 
     // flags
     bool flags = false;
@@ -72,19 +72,29 @@ void TCPDump::dump(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
 
 //----
 
-TCPDumpModule::TCPDumpModule(const char *name, cModule *parent) :
+Define_Module(TCPDump);
+
+TCPDump::TCPDump(const char *name, cModule *parent) :
   cSimpleModule(name, parent, 0), tcpdump(ev)
 {
 }
 
-void TCPDumpModule::handleMessage(cMessage *msg)
+void TCPDump::handleMessage(cMessage *msg)
 {
     // dump
-    IPDatagram *dgram = check_and_cast<IPDatagram *>(msg);
-    tcpdump.dump(dgram);
+    if (dynamic_cast<IPDatagram *>(msg))
+    {
+        tcpdump.dump((IPDatagram *)msg);
+    }
+    else if (dynamic_cast<TCPSegment *>(msg))
+    {
+        bool dir = msg->arrivedOn("in1");
+        tcpdump.dump((TCPSegment *)msg, std::string(dir ? "first" : "second"),
+                                        std::string(dir ? "second" : "first")
+                    );
+    }
 
     // forward
-    int ingateindex = msg->arrivalGate()->index();
-    send(msg, "out", 1-ingateindex);
+    send(msg, msg->arrivedOn("in1") ? "out2" : "out1");
 }
 
