@@ -101,5 +101,8 @@ re-makemake-m: makefile-ins
 InputQueue.o: InputQueue.cc \
   InputQueue.h \
   ../../Network/IPv4/Core/IPDatagram.h \
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
   ../../Base/QueueBase.h \
-  ../../Base/AbstractQueue.h
+  ../../Base/AbstractQueue.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h \
+  ../../Network/IPv4/Core/IPAddress.h

@@ -30,7 +30,7 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Examples/IPSuite && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 (cd Examples/MPLS && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig)
 
-(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r -c ../../ipsuiteconfig) $ALL_IPSUITE_INCLUDES)
+(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -c ../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
 (cd Examples/IPSuite/KIDSNw1 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 (cd Examples/IPSuite/McNetwork2 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
@@ -43,7 +43,6 @@ $MAKEMAKE $OPTS -n -r -c ipsuiteconfig
 (cd Examples/MPLS/Tester && $MAKEMAKE $OPTS -n -r -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
 (cd Examples/MPLS/demo2 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES )
 (cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES )
-(cd Examples/MPLS/samples && $MAKEMAKE $OPTS -n -r -c ../../../ipsuiteconfig)
 (cd Examples/MPLS/TestTE1 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES )
 (cd Examples/MPLS/TestTE2 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES )
 (cd Examples/MPLS/TestTE3 && $MAKEMAKE $OPTS -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES )

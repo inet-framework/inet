@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= PPPFrame_m.o PPPInterface.o
+OBJS= PPPFrame_m.o  PPPInterface.o
 
 # header files generated (from msg files)
 GENERATEDHEADERS= PPPFrame_m.h
@@ -104,4 +104,7 @@ re-makemake-m: makefile-ins
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-PPPInterface.o: PPPInterface.cc
+PPPFrame_m.o: PPPFrame_m.cc \
+  PPPFrame_m.h
+PPPInterface.o: PPPInterface.cc \
+  PPPFrame_m.h

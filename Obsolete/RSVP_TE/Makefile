@@ -138,6 +138,7 @@ RSVPApp.o: RSVPApp.cc \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ospf_type.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/Core/RoutingTableAccess.h \
@@ -145,7 +146,8 @@ RSVPApp.o: RSVPApp.cc \
   ../MPLS/ConstType.h \
   ../../Base/ipsuite_defs.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/Core/IPDatagram.h
+  ../IPv4/Core/IPDatagram.h \
+  ../IPv4/Core/IPDatagram_m.h
 RSVP.o: RSVP.cc \
   RSVP.h \
   ../IPv4/Core/IPAddress.h \
@@ -159,6 +161,7 @@ RSVP.o: RSVP.cc \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
   ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h \
   ospf_type.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
@@ -166,19 +169,24 @@ RSVP.o: RSVP.cc \
   ../MPLS/ip_address_prefix.h \
   ../MPLS/ConstType.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/Core/IPDatagram.h
+  ../IPv4/Core/IPDatagram.h \
+  ../IPv4/Core/IPDatagram_m.h
 RSVPInterface.o: RSVPInterface.cc \
   rsvp_message.h \
   RSVPInterface.h \
+  ../IPv4/Core/IPControlInfo_m.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
   ../../Transport/TCP/TransportPacket.h \
-  ../../Base/basic_consts.h
+  ../../Transport/TCP/TransportPacket_m.h \
+  ../../Base/basic_consts.h \
+  ../IPv4/Core/IPDatagram_m.h
 rsvp_message.o: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
   ../IPv4/Core/IPAddress.h \
-  ../../Transport/TCP/TransportPacket.h
+  ../../Transport/TCP/TransportPacket.h \
+  ../../Transport/TCP/TransportPacket_m.h
 TED.o: TED.cc \
   ../MPLS/MPLSModule.h \
   TED.h \
@@ -189,8 +197,9 @@ TED.o: TED.cc \
   ../IPv4/Core/RoutingTableAccess.h \
   ../IPv4/Core/RoutingTable.h \
   ../MPLS/ConstType.h \
+  ../IPv4/Core/IPDatagram_m.h \
+  ../IPv4/Core/IPAddress.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
   ../MPLS/ip_address_prefix.h \
-  ../IPv4/Core/IPAddress.h \
   ../../Base/ipsuite_defs.h

@@ -37,7 +37,7 @@ include ../../ipsuiteconfig
 SUBDIRS= 
 
 # object files in this directory
-OBJS= TCPInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o pcb.o Tcp2Ip.o tcpmodule.o
+OBJS= TCPInterfacePacket_m.o TransportPacket_m.o Ip2Tcp.o pcb.o Tcp2Ip.o  tcpmodule.o 
 
 # header files generated (from msg files)
 GENERATEDHEADERS= TCPInterfacePacket_m.h TransportPacket_m.h
@@ -121,12 +121,23 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 Ip2Tcp.o: Ip2Tcp.cc \
   TransportPacket.h \
-  ../../Network/IPv4/Core/IPAddress.h
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  TransportPacket_m.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h
 pcb.o: pcb.cc \
   pcb.h \
   ../../Network/IPv4/Core/IPAddress.h
 Tcp2Ip.o: Tcp2Ip.cc \
   TransportPacket.h \
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  TransportPacket_m.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h
+TCPInterfacePacket_m.o: TCPInterfacePacket_m.cc \
+  TCPInterfacePacket_m.h \
   ../../Network/IPv4/Core/IPAddress.h
 tcpmodule.o: tcpmodule.cc \
   tcp.h
+TransportPacket_m.o: TransportPacket_m.cc \
+  TransportPacket_m.h

@@ -42,7 +42,6 @@ cd %root%\Examples\IPSuite\UDPSockets && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuit
 cd %root%\Examples\MPLS\Tester && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
 cd %root%\Examples\MPLS\demo2 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
 cd %root%\Examples\MPLS\ldp-mpls1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc %ALL_MPLS_INCLUDES%
-cd %root%\Examples\MPLS\samples && %MAKEMAKE% %OPTS% -n -r -c ..\..\..\ipsuiteconfig.vc
 cd %root%\Examples\MPLS\TestTE1 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc -I..\Tester %ALL_MPLS_INCLUDES%
 cd %root%\Examples\MPLS\TestTE2 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc -I..\Tester %ALL_MPLS_INCLUDES%
 cd %root%\Examples\MPLS\TestTE3 && %MAKEMAKE% %OPTS% -w -c ..\..\..\ipsuiteconfig.vc -I..\Tester %ALL_MPLS_INCLUDES%

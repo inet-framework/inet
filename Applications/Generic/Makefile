@@ -106,27 +106,36 @@ re-makemake-m: makefile-ins
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 AppIn.o: AppIn.cc \
   AppIn.h \
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
   ../../Network/IPv4/Core/IPDatagram.h \
-  ../../Base/basic_consts.h
+  ../../Base/basic_consts.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h
 BurstGenerator.o: BurstGenerator.cc \
   BurstGenerator.h \
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
   ../../Network/IPv4/Core/IPDatagram.h \
   ../../Network/IPv4/Core/ICMP.h \
   ../../Base/basic_consts.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h \
   ../../Network/IPv4/Core/RoutingTableAccess.h \
   ../../Network/IPv4/Core/ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/Core/IPAddress.h
+  ../../Network/IPv4/Core/ICMPMessage_m.h
 ConstTrafficGen.o: ConstTrafficGen.cc \
   ConstTrafficGen.h \
+  ../../Network/IPv4/Core/IPControlInfo_m.h \
   ../../Network/IPv4/Core/IPDatagram.h \
   ../../Network/IPv4/Core/ICMP.h \
   ../../Base/basic_consts.h \
+  ../../Network/IPv4/Core/IPAddress.h \
+  ../../Network/IPv4/Core/IPDatagram_m.h \
   ../../Network/IPv4/Core/RoutingTableAccess.h \
   ../../Network/IPv4/Core/ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   ../../Base/ipsuite_defs.h \
-  ../../Network/IPv4/Core/IPAddress.h
+  ../../Network/IPv4/Core/ICMPMessage_m.h

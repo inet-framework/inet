@@ -114,6 +114,7 @@ socketlayer.o: socketlayer.cc \
   sockets.h \
   ../../Network/IPv4/Core/RoutingTable.h \
   SocketInterfacePacket.h \
+  ../UDP/UDPControlInfo_m.h \
   ../TCP/pcb.h \
   ../../Network/IPv4/Core/IPAddress.h \
   ../../Base/ipsuite_defs.h
