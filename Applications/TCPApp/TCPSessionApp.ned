@@ -47,7 +47,7 @@
 //
 // <b>Closing the connection</b>
 //
-// The application will issue a TCP CLOSE at time tClose. If tClose=0, no
+// The application will issue a TCP CLOSE at time tClose. If tClose=-1, no
 // CLOSE will be issued.
 //
 simple TCPSessionApp

@@ -91,7 +91,8 @@ void TCPSessionApp::activity()
     // send
     if (sendBytes>0)
     {
-        waitAndEnqueue(tSend-simTime(), &queue);
+        if (tSend>simTime())
+            waitAndEnqueue(tSend-simTime(), &queue);
 
         cMessage *msg = new cMessage("data1");
         msg->setLength(8*sendBytes);
@@ -99,7 +100,8 @@ void TCPSessionApp::activity()
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
     {
-        waitAndEnqueue(i->tSend-simTime(), &queue);
+        if (i->tSend>simTime())
+            waitAndEnqueue(i->tSend-simTime(), &queue);
 
         cMessage *msg = new cMessage("data1");
         msg->setLength(8*i->numBytes);
@@ -109,7 +111,8 @@ void TCPSessionApp::activity()
     // close
     if (tClose>=0)
     {
-        waitAndEnqueue(tClose-simTime(), &queue);
+        if (tClose>simTime())
+            waitAndEnqueue(tClose-simTime(), &queue);
         socket.close();
     }
 
