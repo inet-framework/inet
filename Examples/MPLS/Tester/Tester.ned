@@ -16,7 +16,7 @@ import
 
 
 //
-// FIXME: add documentation here
+// Sort of scenario manager for MPLS test cases
 //
 module Tester
     parameters: 

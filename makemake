@@ -35,7 +35,7 @@ $MAKEMAKE -f -n -c ipsuiteconfig
 (cd Examples/IPSuite/UDPSockets && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_IPSUITE_INCLUDES)
 
 (cd Examples/MPLS/Tester && $MAKEMAKE -f -n -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES)
-(cd Examples/MPLS/demo2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)
+(cd Examples/MPLS/demo2 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig $ALL_MPLS_INCLUDES $LIBXML_LIBS)
 (cd Examples/MPLS/samples && $MAKEMAKE -f -n -c ../../../ipsuiteconfig)
 (cd Examples/MPLS/TestTE1 && $MAKEMAKE -f -w -c ../../../ipsuiteconfig -I../Tester $ALL_MPLS_INCLUDES $LIBXML_LIBS)

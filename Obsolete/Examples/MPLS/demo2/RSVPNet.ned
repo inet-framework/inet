@@ -15,7 +15,6 @@ import
     "TCPClientTest", 
     "TCPServerTest",
     "RSVP_LSR_Node",
-    "Tester",
     "TED"; 
 
            
