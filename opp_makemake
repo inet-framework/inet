@@ -188,7 +188,7 @@ extdirobjs=
 if [ ! "$linkwithobjects" = "y" ]; then
     for i in $includes; do
         dir=`echo $i | sed 's/^-I//'`
-        extdirobjs="$extdirobjs/*.o"
+        extdirobjs="$extdirobjs $dir/*.o"
     done
 fi
 

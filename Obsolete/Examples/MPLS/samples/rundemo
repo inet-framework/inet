@@ -1,1 +1,1 @@
-wish -f /root/MPLS-TE/src/demo/samples/rundemo.tcl 
+@WISH@ -f @OMNETPP_SAMPLES_DIR@/demo/rundemo.tcl 
