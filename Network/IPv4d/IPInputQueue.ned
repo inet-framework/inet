@@ -24,7 +24,7 @@
 //
 simple IPInputQueue
     parameters:
-        procdelay: numeric const;
+        procDelay: numeric const;
     gates:
         in: fromNW[];
         out: toIP;

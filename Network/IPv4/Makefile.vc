@@ -182,11 +182,13 @@ IP.obj: IP.cc \
   IPDatagram.h \
   IPControlInfo_m.h \
   ICMPMessage_m.h \
+  ../../Base/QueueBase.h \
   RoutingTableAccess.h \
   RoutingTable.h \
   ICMPAccess.h \
   IPFragBuf.h \
   ProtocolMap.h \
+  ../../Base/AbstractQueue.h \
   ../../Base/ModuleAccess.h \
   ../../Base/ipsuite_defs.h \
   IPAddress.h \

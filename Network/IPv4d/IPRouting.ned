@@ -42,7 +42,7 @@
 //
 simple IPRouting
     parameters:
-        procdelay : numeric const,
+        procDelay : numeric const,
         qosBehaviorClass: string;
     gates:
         in: in[];

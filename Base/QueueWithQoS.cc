@@ -24,7 +24,7 @@ void QueueWithQoS::initialize()
 {
     AbstractQueue::initialize();
 
-    delay = par("procdelay");
+    delay = par("procDelay");
     qosHook = check_and_cast<EnqueueHook *>(createOne(par("qosBehaviorClass")));
     qosHook->setModule(this);
 }

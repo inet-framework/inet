@@ -23,7 +23,7 @@
 void QueueBase::initialize()
 {
     AbstractQueue::initialize();
-    delay = par("procdelay");
+    delay = par("procDelay");
 }
 
 void QueueBase::arrival(cMessage *msg)

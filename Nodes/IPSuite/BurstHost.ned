@@ -53,7 +53,7 @@ module BurstHost
             gatesizes:
                 physIn[1],
                 physOut[1];
-            display: "p=140,120;i=fork";
+            display: "p=140,120;i=fork;q=queue";
         ppp: PPPInterface[1];
             display: "p=140,200,row,90;q=queue;i=iface";
     connections nocheck:

@@ -31,6 +31,8 @@ Define_Module(IP);
 
 void IP::initialize()
 {
+    QueueBase::initialize();
+
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
     fragmentTimeoutTime = par("fragmentTimeout");
@@ -49,7 +51,7 @@ void IP::initialize()
     WATCH(numForwarded);
 }
 
-void IP::handleMessage(cMessage *msg)
+void IP::endService(cMessage *msg)
 {
     if (msg->arrivalGate()->isName("transportIn"))
     {

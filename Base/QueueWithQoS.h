@@ -26,7 +26,7 @@
 
 /**
  * Queue with constant processing time, with integrated QoS behaviour.
- * Processing time is taken from the "delay" module parameter,
+ * Processing time is taken from the "procDelay" module parameter,
  * and QoS class from the "qosBehaviourClass" module parameter.
  *
  * Leaves the endService(cMessage *msg) method of AbstractQueue undefined.

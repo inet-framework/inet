@@ -65,12 +65,29 @@
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling RoutingTable's methods in C++.
 //
+// <b>Performance model, QoS</b>
+//
+// In the current form, IP contains a FIFO which queues up \IP datagrams;
+// datagrams are processed in order. The processing time is determined by the
+// procDelay module parameter. 
+//
+// The current performance model comes from the QueueBase C++ base class.
+// If you need a more sophisticated performance model, you may change the 
+// module implementation (the IP class), and: (1) override the startService() 
+// method which determines processing time for a packet, or (2) use a
+// different base class. Or, if you want to implement QoS, you may try the
+// QueueWithQoS base class, which allows you to extract forwarding behaviour
+// in a separate "qosBehaviorClass", subclassed from the EnqueueHook class.
+// QueueWithQoS allows you to switch between different EnqueueHook classes
+// from omnetpp.ini.
+//
 // @see RoutingTable, IPProcessing, IPControlInfo, IPRoutingDecision
 //
 // @author Andras Varga
 //
 simple IP
     parameters:
+        procDelay : numeric const,
         timeToLive : numeric const,
         multicastTimeToLive : numeric const,
         protocolMapping : string,

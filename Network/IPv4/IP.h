@@ -19,6 +19,7 @@
 #ifndef __IP_H__
 #define __IP_H__
 
+#include "QueueBase.h"
 #include "RoutingTableAccess.h"
 #include "RoutingTable.h"
 #include "ICMPAccess.h"
@@ -35,7 +36,7 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 /**
  * Implements the IP protocol.
  */
-class IP : public cSimpleModule
+class IP : public QueueBase
 {
   protected:
     RoutingTableAccess routingTableAccess;
@@ -110,11 +111,19 @@ class IP : public cSimpleModule
     virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort);
 
   public:
-    Module_Class_Members(IP, cSimpleModule, 0);
+    Module_Class_Members(IP, QueueBase, 0);
 
   protected:
+    /**
+     * Initialization
+     */
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+
+    /**
+     * Processing of IP datagrams. Called when a datagram reaches the front
+     * of the queue.
+     */
+    virtual void endService(cMessage *msg);
 };
 
 #endif

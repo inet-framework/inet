@@ -46,7 +46,7 @@ module Router
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=160,124;i=fork";
+            display: "p=160,124;i=fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
             display: "p=80,214,row,90;q=queue;i=iface";
         eth: EthernetInterface[sizeof(ethOut)];

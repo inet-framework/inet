@@ -70,7 +70,7 @@ module StandardHost2
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=210,220;i=fork";
+            display: "p=210,220;i=fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
             display: "p=170,300,row,90;q=queue;i=iface";
         eth: EthernetInterface[sizeof(ethOut)];
