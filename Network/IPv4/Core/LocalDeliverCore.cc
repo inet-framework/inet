@@ -254,7 +254,6 @@ void LocalDeliverCore::insertInFragmentBuf(IPDatagram *d)
 
 bool LocalDeliverCore::datagramComplete(int fragmentId)
 {
-	bool isComplete = false;
 	int nextFragmentOffset = 0; // unit: 8 bytes
 	bool newFragmentFound = true;
 	int i;

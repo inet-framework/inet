@@ -40,7 +40,7 @@ void ConstTrafficGen::initialize()
 	strcpy(nodename, par("nodename"));
 	nodenr = par("nodenr");
 	packetSize = par("generationSize");
-	bool usesTCPProt = par("tcpProtocol");
+	usesTCPProt = par("tcpProtocol");
 }
 
 void ConstTrafficGen::activity()
@@ -49,7 +49,6 @@ void ConstTrafficGen::activity()
 	char dest[20];
 	cPacket *transportPacket;
 	IPInterfacePacket *iPacket;
-	IPAddrChar src;
 
 	while(true)
 	{

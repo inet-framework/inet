@@ -100,11 +100,7 @@ Socket::Socket(Socket::Domain domain, Socket::Type type, Socket::Protocol proto)
   _pcb = _createPCB(proto);
 }
 
-// Socket::Socket(const char* name, cOjbect* ownerobj)
-// {
-// }
-
-Socket::~Socket() // : ~cObject()
+Socket::~Socket()
 {
   delete _pcb;
 }
@@ -120,7 +116,7 @@ void Socket::info(char* buf)
 void Socket::writeContents(ostream& os)
 {
   cObject::writeContents(os);
-  os << " Socket:" << endl
+  os << " Socket:\n"
      << "  Domain:   " << domain_string[_domain] << '\n'
      << "  Type:     " << type_string[_type] << '\n'
      << "  Protocol: " << protocol_string[_proto] << '\n'

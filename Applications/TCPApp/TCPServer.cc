@@ -52,7 +52,8 @@ void TCPServer::activity()
   debug = par("debug");
 
   double       timeout         = par("timeout");
-  double       appl_timeout    = par("appl_timeout");
+  double       appl_timeout    = par("appl_timeout"); // FIXME not used
+
   cModuleType *procserver_type = findModuleType("ProcServer");
   if (!procserver_type) 
       error("Cannot find module type ProcServer");

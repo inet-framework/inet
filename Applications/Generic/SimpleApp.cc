@@ -51,7 +51,6 @@ void SimpleApp::activity()
 	char dest[20];
 	cPacket *transportPacket;
 	IPInterfacePacket *iPacket;
-	IPAddrChar src;
 
 	while(true)
 	{
@@ -72,7 +71,7 @@ void SimpleApp::activity()
 		}	
 		send(iPacket, "out");
 
-	ev << "\n*** " << nodename 
+		ev << "\n*** " << nodename 
 		<< " Simple Application: Packet sent:"
 		<< "\nProt: " << (prot == IP_PROT_TCP ? "TCP" : "UDP")
 		<< " Content: " << int(transportPacket->par("content"))
@@ -81,7 +80,7 @@ void SimpleApp::activity()
 		<< "   Time: " << simTime() 
 		<< "\nDest: " << iPacket->destAddr() 
 		<< "\n";
-	breakpoint("AppOut send");
+		breakpoint("AppOut send");
 
 	} // end while
 }
