@@ -62,10 +62,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
+OBJS= RSVPPacket_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= 
+GENERATEDHEADERS= RSVPPacket_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -89,6 +89,12 @@ $(EXT_DIR_TSTAMPS):
 	@exit /b 1
 
 subdirs: $(SUBDIR_TARGETS)
+
+RSVPPacket_m.obj: RSVPPacket_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp RSVPPacket_m.cc
+
+RSVPPacket_m.cc RSVPPacket_m.h: RSVPPacket.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) RSVPPacket.msg
 
 OspfTe.obj: OspfTe.cc
 	$(CXX) -c $(COPTS) /Tp OspfTe.cc
