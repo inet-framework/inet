@@ -24,13 +24,13 @@
 // Receive datagram with multicast address from IPRouting:
 // - duplicate datagram if it is sent to more than one output port
 //   (to map multicast address on output port, uses multicast routing table)
-// - send copy to local deliver, if NetworkCardAddr.[] is part of multicast
-//    address
-// - if entry in multicast routing table requires tunneling, send to Tunneling
-//   module, otherwise send to Fragmentation module
+// - send copy to local deliver, if multicast address contains address of
+//   one of our network interfaces
+// - if entry in multicast routing table requires tunneling, send to
+//   IPTunneling module, otherwise send to IPFragmentation module
 //
-// author: Jochen Reber
-// date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
+// @author: Jochen Reber
+// @date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 //
 simple IPMulticast
     gates:

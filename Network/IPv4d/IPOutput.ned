@@ -20,7 +20,7 @@
 //
 // Receive complete datagram from IPFragmentation:
 // - throw away if ttl==0
-// - otherwise send to \IP OutputQueue
+// - otherwise send to the network interface on gate queueOut
 //
 // Author: Jochen Reber, 2000
 // Redesign: Andras Varga, 02.2004

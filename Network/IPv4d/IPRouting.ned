@@ -24,16 +24,16 @@
 // invoking functions in the RoutingTable module.
 //
 // Detailed operation:
-// - receive correct \IP datagram, then:
+// - receive correct IPDatagram, then:
 // - if source routing option is on, use next source addr. as dest. addr.
 // - map \IP address on output port, use static routing table
 // - if destination address is not in routing table,
 //   throw datagram away and notify ICMP
 // - process record route and timestamp options, if applicable
-// - send to local Deliver if dest. addr. = 127.0.0.1
-//   or dest. addr. = NetworkCardAddr.[]
-// - send datagram with Multicast addr. to Multicast module
-// - otherwise, send to Fragmentation module
+// - send to IPLocalDeliver if destination address is 127.0.0.1 (local
+//   loopback) or the address of one of the network interfaces
+// - send datagram with multicast address to IPMulticast
+// - otherwise, send to IPFragmentation
 //
 // @see RoutingTable
 //
