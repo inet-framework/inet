@@ -1,18 +1,15 @@
-IPSuite
-=======
+INET Framework for OMNeT++
+==========================
 
-The OMNeT++ Internet Protocol Suite contains numerous internet
-protocols. Beyond IP there is TCP, UDP and support for QoS.
-MPLS, LDP and RSVP-TE models have also been contributed.
-See the CREDITS file for the names of people involved in the
-development.
+The OMNeT++ INET Framework contains numerous internet protocols. Beyond IP
+there is TCP, UDP, Ethernet, PPP. MPLS, LDP and RSVP-TE models have also
+been contributed. See the CREDITS file for the names of people involved
+in the development.
 
 
-IPSuite directory structure
-===========================
-
-Compared to the original IPSuite, the directories have been rearranged
-roughly according to OSI layers.
+Directory structure
+-------------------
+Directories are arranged roughly along the OSI layers.
 
 Bottom-up:
 
@@ -21,14 +18,13 @@ Bottom-up:
  NetworkInterfaces/    L2 (data link layer) protocols
    _802/               common IEEE 802 stuff
    Ethernet/           Ethernet model
-   PPP                 new PPP implementation (replaces old one)
+   PPP                 new PPP implementation
    ARP/                ARP protocol
-   Queues/             input/output queues
 
  Network/              L3 (network layer) protocols
    IPv4/               IPv4 and associated protocols
-     Core/             IPv4, ICMP, etc. modules
-     QoS/              Support for Quality of Service
+   IPv4d/              modularized IPv4 implementation
+   AutoRouting/        autoconfiguration of static routes
    MPLS/               MPLS implementation
    LDP/                LDP signalling protocol for MPLS
    RSVP_TE/            RSVP-TE signalling protocol for MPLS
@@ -36,31 +32,36 @@ Bottom-up:
  Transport/            transport layer protocols
    TCP/                TCP protocol
    UDP/                UDP protocol
-   Socket/             experimental socket layer over TCP and UDP
-   MiniTCP/            minimal TCP implementation from zipizigi, not
-                       integrated yet
-   NewTCP/             new TCP model, implementation underway
-   RTP/                Realtime Transport Protocol, not yet integrated
+   RTP/                Realtime Transport Protocol (not yet integrated)
 
  Applications/         application layer
-   Generic/            traffic generators (directly for IP?)
+   TCPApp/             TCP application models
+   UDPApp/             UDP application models
+   Generic/            traffic generators (directly for IP)
+   Ethernet/           traffic generators (directly for Ethernet)
    PingApp/            ping application (incomplete)
-   TCPApp/             simple TCP client-server application
-   TCPExample/         simple TCP client-server application
 
 Further directories are:
 
- Util/                 constants and classes for the whole IPSuite
-
  Nodes/                protocol stacks, host and router models
-   IPSuite/            using IPSuite components only
+   IPSuite/            IP-based components
    MPLS/               router models with MPLS/LDP/RSVP-TE
 
  Examples/             example networks
-   IPSuite/            example networks based on IPSuite
+   Ethernet/           example Ethernet networks
+   IPSuite/            IP-based example networks
    MPLS/               example networks for MPLS/LDP/RSVP-TE
+   RTP/                RTP examples (not yet integrated)
+
+ Base/                 common header files, base classes
+ Util/                 utility classes
+
+ Documentation/        documentation
 
  Tests/                test suite
-   IPSuite/            for IPSuite (none yet)
+   IPv4/               for IP components
    MPLS/               for the MPLS models
+   NewTCP/             for the TCP model
+
+ Unsupported/          obsolete, unmaintained stuff
 
