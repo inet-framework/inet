@@ -66,14 +66,16 @@ private:
 
     /**
      * Load the label information table from files
-     * @param filename The lib table file input
-     * @return The successful or unsuccessful code
+     *
+     *  @param filename The lib table file input
+     *  @return The successful or unsuccessful code
      * FIXME apparently never called at the moment (--Andras)
      */
     int readLibTableFromFile(const char* filename);
 
     /**
      * Load the Partial Routing Information from files
+     *
      * @param filename The prt table file input
      * @return The successfule or unsuccesful code
      * FIXME apparently never called at the moment (--Andras)
@@ -84,96 +86,103 @@ private:
 public:
 
     Module_Class_Members(LIBTable, cSimpleModule, 0);
+
     /**
-     * Initilize all the parameters for Label Information Base processing
-     * @param void
-     * @return void
+     * Initializes all the parameters.
      */
     void initialize();
 
     /**
-     * Handle message from other module
-     * @param msg Message received
-     * @return void
+     * Handles message from other modules
      */
     void handleMessage(cMessage *msg);
 
     /**
      * Print out the contents of Label Information Base and Partial Routing Table
-     * @param void
-     * @return void
      */
     void printTables();
 
     /**
-     * Install a new label on this Label Switching Router when receiving a label mapping from peers
-     * @param outLabel The label returned from peers
-              inInterface The name of the incoming interface of the label mapping
-              outInterface The name of the outgoing interface that new lable mapping will be forwarded
-              fec The Forward Equivalent Class of the label
-              optcode The optcode used in this Label Switching Router
-     * @return the value of the new label installed
+     * Installs a new label on this Label Switching Router when receiving a label
+     * mapping from peers.
+     *
+     * @param outLabel     The label returned from peers
+     * @param inInterface  The name of the incoming interface of the label mapping
+     * @param outInterface The name of the outgoing interface that new label mapping
+     *                     will be forwarded
+     * @param fec          The Forward Equivalent Class of the label
+     * @param optcode      The optcode used in this Label Switching Router
+     * @return             The value of the new label installed
      */
     int installNewLabel(int outLabel, std::string inInterface,
                         std::string outInterface, int fec, int optcode);
 
     /**
      * Find outgoing label for a packet based on the packet's Forward Equivalent Class
-     * @param fec The packet's FEC
-     * @return The outgoing label or -2 if there is no label found
+     *
+     * @param fec   The packet's FEC
+     * @return      The outgoing label, or -2 if there is no label found
      */
     int requestLabelforFec(int fec);
 
     /**
      * Find the FEC based on corresponding incoming label and incoming interface
-     * @param label The incoming label
-     *        inInterface The incoming interface
-     * @return the FEC value or 0 if the FEC cannot be found
+     *
+     * @param label        The incoming label
+     * @param inInterface  The incoming interface
+     * @return             The FEC value, or 0 if the FEC cannot be found
      */
     int findFec(int label, std::string inInterface);
 
     /**
      * Find the outgoing interface based on the incoming interface and the outgoing label
-     * @param senderInterface The incoming interface name
-              newLabel The outgoing label
-
-     * @return The outgoing interface name or "X" if the outgoing interface cannot be found
+     *
+     * @param senderInterface  The incoming interface name
+     * @param newLabel         The outgoing label
+     * @return                 The outgoing interface name or "X" if the outgoing interface
+     *                         cannot be found
      */
+    // FIXME Why "X" ??? (Andras)
     std::string requestOutgoingInterface(std::string senderInterface,int newLabel);
 
     /**
-     * Find the outgoing interface name based on the FEC
-     * @param fec The FEC value
-     * @return the outgoing interface name
+     * Find the outgoing interface name based on the FEC.
+     *
+     * @param fec   The FEC value
+     * @return      The outgoing interface name
      */
     std::string requestOutgoingInterface(int fec);
 
     /**
-     * Find the outgoing interface name based on incoming interface,outgoing label and incoming label
-     * If the new label is different to -1 (native ip), the function is the same with
-     * requestOutgoingInterface(string senderInterface, int newLabel)
+     * Find the outgoing interface name based on incoming interface,
+     * outgoing label and incoming label.
+     * If the new label is not -1 (native IP), this function is the same
+     * as requestOutgoingInterface(string senderInterface, int newLabel).
+     *
      * @param senderInterface The incoming interface
-     *        newLabel The outgoing label
-     *        oldLabel The incoming label
-     * @return The outgoing interface name
+     * @param newLabel        The outgoing label
+     * @param oldLabel        The incoming label
+     * @return                The outgoing interface name
      */
     std::string requestOutgoingInterface(std::string senderInterface, int newLabel, int oldLabel);
 
     /**
      * Install new label based on incoming interface and incoming label
+     *
      * @param senderInterface The incoming interface
-     *        oldLabel The incoming label
-     * @return The value of the new label installed
+     * @param oldLabel        The incoming label
+     * @return                The value of the new label installed
      */
     int requestNewLabel(std::string senderInterface,int oldLabel);
 
     /**
-     * Get the optcode based on incoming interface and incoming label
+     * Returns the optcode based on incoming interface and incoming label.
+     *
      * @param senderInterface The incoming interface name
-     *        oldLabel The incoming label
-     * @return The operation code
+     * @param oldLabel        The incoming label
+     * @return                The operation code
      */
-    int getOptCode(std::string senderInterface, int oldLabel);
+    int getOptCode(std::string senderInterface, int oldLabel) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const prt_type& prt);

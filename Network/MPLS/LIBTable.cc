@@ -321,7 +321,7 @@ int LIBTable::requestNewLabel(string senderInterface, int oldLabel)
     return -2;  // Fail to allocate new label
 }
 
-int LIBTable::getOptCode(string senderInterface, int oldLabel)
+int LIBTable::getOptCode(string senderInterface, int oldLabel) const
 {
     for (int i = 0; i < lib.size(); i++)
         if ((lib[i].inInterface == senderInterface) && (lib[i].inLabel == oldLabel))
