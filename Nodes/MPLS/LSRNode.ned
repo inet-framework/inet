@@ -64,7 +64,7 @@ module LSRNode
             display: "p=235,120;i=prot1";
         networkLayer: NetworkLayer;
             parameters:
-                IPForward = false,
+                IPForward = true,
                 routingFile = routingFile;
             gatesizes:
                 physIn[sizeof(out)],

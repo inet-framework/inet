@@ -78,6 +78,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     // If the MPLS processing is not on, then simply passing the packet
     if (ipdatagram->hasPar("trans"))  // FIXME do we need this field?
     {
+        ev << "'trans' param set, passing through";
         send(ipdatagram, "toL2", gateIndex);
         return;
     }
@@ -87,6 +88,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     outPacket->encapsulate(ipdatagram);
 
     // This is native IP
+    ev << "Encapsulating into MPLS with label=-1 (\"native IP\")\n";
     outPacket->pushLabel(-1);
     send(outPacket, "toL2", gateIndex);
 }
@@ -249,6 +251,8 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     string senderInterface = ientry->name;
     int oldLabel = mplsPacket->topLabel();
 
+    ev << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inIntf=" << senderInterface;
+
     if (oldLabel==-1)
     {
         // This is not IP native packet
@@ -256,7 +260,10 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         //
         // FIXME this smells like hacking. Or is this an "IPv4 Explicit NULL Label"
         // (rfc 3032) or something like this? (Andras)
+        ev << ": decapsulating and sending up\n";
+
         IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
+        delete mplsPacket;
         send(ipdatagram, "toL3", gateIndex);
         return;
     }
@@ -269,9 +276,9 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
     if (found && newLabel!=-1)  // New label found
     {
-        ev << "incoming label=" << oldLabel << ": ";
         switch (optCode)
         {
+            ev << ": ";
             case PUSH_OPER:
                 ev << "PUSH " << newLabel;
                 mplsPacket->pushLabel(newLabel);
