@@ -59,10 +59,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj ICMP.obj IP.obj IPAddress.obj IPAddressResolver.obj IPFragBuf.obj ProtocolMap.obj RoutingTable.obj RoutingTableParser.obj
+OBJS= ICMPMessage_m.obj IPControlInfo_m.obj IPDatagram_m.obj IPProtocolId_m.obj ICMP.obj IP.obj IPAddress.obj IPAddressResolver.obj IPFragBuf.obj ProtocolMap.obj RoutingTable.obj RoutingTableParser.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h
+GENERATEDHEADERS= ICMPMessage_m.h IPControlInfo_m.h IPDatagram_m.h IPProtocolId_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -105,6 +105,12 @@ IPDatagram_m.obj: IPDatagram_m.cc
 IPDatagram_m.cc IPDatagram_m.h: IPDatagram.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) IPDatagram.msg
 
+IPProtocolId_m.obj: IPProtocolId_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp IPProtocolId_m.cc
+
+IPProtocolId_m.cc IPProtocolId_m.h: IPProtocolId.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) IPProtocolId.msg
+
 ICMP.obj: ICMP.cc
 	$(CXX) -c $(COPTS) /Tp ICMP.cc
 
@@ -139,7 +145,7 @@ RoutingTableParser.obj: RoutingTableParser.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -160,17 +166,28 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 ICMP.obj: ICMP.cc \
+  IPControlInfo_m.h \
   ICMP.h \
+  IPAddress.h \
+  IPDatagram_m.h \
+  ../../Base/INETDefs.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   IPDatagram.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  ../../Base/INETDefs.h \
-  IPAddress.h
+  ICMPMessage_m.h
+ICMPMessage_m.obj: ICMPMessage_m.cc \
+  ICMPMessage_m.h \
+  IPDatagram.h \
+  IPDatagram_m.h \
+  IPAddress.h \
+  ../../Base/INETDefs.h
 IP.obj: IP.cc \
   IP.h \
   IPDatagram.h \
+  IPControlInfo_m.h \
+  ICMPMessage_m.h \
   ../../Base/QueueBase.h \
   RoutingTableAccess.h \
   RoutingTable.h \
@@ -182,7 +199,8 @@ IP.obj: IP.cc \
   ../../Base/INETDefs.h \
   IPAddress.h \
   ICMP.h \
-  ICMPMessage.h
+  ICMPMessage.h \
+  IPDatagram_m.h
 IPAddress.obj: IPAddress.cc \
   IPAddress.h \
   ../../Base/INETDefs.h
@@ -191,16 +209,27 @@ IPAddressResolver.obj: IPAddressResolver.cc \
   RoutingTable.h \
   IPAddress.h \
   ../../Base/INETDefs.h
+IPControlInfo_m.obj: IPControlInfo_m.cc \
+  IPControlInfo_m.h \
+  IPAddress.h \
+  IPDatagram_m.h \
+  ../../Base/INETDefs.h
+IPDatagram_m.obj: IPDatagram_m.cc \
+  IPDatagram_m.h \
+  IPAddress.h \
+  ../../Base/INETDefs.h
 IPFragBuf.obj: IPFragBuf.cc \
   IPFragBuf.h \
   ICMP.h \
   ../../Base/INETDefs.h \
   IPDatagram.h \
+  IPDatagram_m.h \
+  IPAddress.h \
   RoutingTableAccess.h \
   ICMPMessage.h \
   ../../Base/ModuleAccess.h \
   RoutingTable.h \
-  IPAddress.h
+  ICMPMessage_m.h
 ProtocolMap.obj: ProtocolMap.cc \
   ProtocolMap.h
 RoutingTable.obj: RoutingTable.cc \

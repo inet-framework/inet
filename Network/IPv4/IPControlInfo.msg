@@ -23,7 +23,7 @@ class noncobject IPAddress;
 
 cplusplus {{
 #include "IPAddress.h"
-#include "IPDatagram_m.h"
+#include "IPProtocolId_m.h"
 }}
 
 

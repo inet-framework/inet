@@ -1,5 +1,5 @@
 :rem *** ADOPT THE NEXT TWO LINES ACCORDING TO YOUR OMNET++ INSTALLATION ***
-call ..\omnetpp\vcvars32.bat
+call ..\omnetpp\setenv-vc71.bat
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
 
 : #--------------------------------------

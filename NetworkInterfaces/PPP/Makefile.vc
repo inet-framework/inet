@@ -107,7 +107,7 @@ PPPInterface.obj: PPPInterface.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -127,10 +127,13 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+PPPFrame_m.obj: PPPFrame_m.cc \
+  PPPFrame_m.h
 PPPInterface.obj: PPPInterface.cc \
   ../../Network/IPv4/RoutingTable.h \
   ../../Network/IPv4/RoutingTableAccess.h \
   PPPInterface.h \
   ../../Base/INETDefs.h \
   ../../Network/IPv4/IPAddress.h \
-  ../../Base/ModuleAccess.h
+  ../../Base/ModuleAccess.h \
+  PPPFrame_m.h

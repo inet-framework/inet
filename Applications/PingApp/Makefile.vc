@@ -101,7 +101,7 @@ PingApp.obj: PingApp.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -122,4 +122,8 @@ re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 PingApp.obj: PingApp.cc \
-  PingApp.h
+  PingApp.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
+  ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
+  ../../Base/INETDefs.h

@@ -111,7 +111,7 @@ NewLDP.obj: NewLDP.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -131,20 +131,28 @@ makefiles:
 re-makemake: makefiles
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+LDPPacket_m.obj: LDPPacket_m.cc \
+  LDPPacket_m.h \
+  ../IPv4/IPAddress.h \
+  ../../Base/INETDefs.h
 NewLDP.obj: NewLDP.cc \
   ../MPLS/ConstType.h \
   NewLDP.h \
   ../MPLS/LIBtable.h \
   ../MPLS/MPLSModule.h \
   ../IPv4/RoutingTable.h \
+  ../../Transport/UDP/UDPControlInfo_m.h \
   ../../Util/stlwatch.h \
+  LDPPacket_m.h \
   ../MPLS/MPLSAccess.h \
   ../MPLS/LIBTableAccess.h \
   ../IPv4/RoutingTableAccess.h \
   ../../Transport/TCP/TCPSocketMap.h \
-  ../../Base/ModuleAccess.h \
-  ../../Transport/TCP/TCPSocket.h \
   ../IPv4/IPAddress.h \
   ../../Base/INETDefs.h \
+  ../../Base/ModuleAccess.h \
+  ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../MPLS/MPLSPacket.h \
-  ../IPv4/IPDatagram.h
+  ../IPv4/IPDatagram.h \
+  ../IPv4/IPDatagram_m.h

@@ -145,7 +145,7 @@ TCPTester.obj: TCPTester.cc
 #	@doxygen doxy.cfg
 
 generateheaders: $(GENERATEDHEADERS)
-	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do @cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
+	@if not "$(SUBDIRS)"=="" for %%i in ( $(SUBDIRS) ) do cd %%i && nmake /nologo /f Makefile.vc generateheaders && cd .. || exit /b 1
 
 clean:
 	-del $(TARGET)$(EXE_SUFFIX) 2>NUL	-del *.obj *.idb *.pdb .tstamp 2>NUL
@@ -167,11 +167,15 @@ re-makemake: makefiles
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 TcpTestClient.obj: TcpTestClient.cc \
   ../../Transport/TCP/TCPSocket.h \
+  ../../Transport/TCP/TCPCommand_m.h \
   ../../Network/IPv4/IPAddress.h \
   ../../Base/INETDefs.h
 TCPTester.obj: TCPTester.cc \
   TCPTester.h \
+  ../../Network/IPv4/IPControlInfo_m.h \
   ../../Network/IPv4/IPAddress.h \
+  ../../Network/IPv4/IPDatagram_m.h \
   ../../Transport/TCP/TCPSegment.h \
   ../../Transport/TCP/TCPDump.h \
-  ../../Base/INETDefs.h
+  ../../Base/INETDefs.h \
+  ../../Transport/TCP/TCPSegment_m.h
