@@ -1,11 +1,16 @@
 call ..\omnetpp\vcvars32.bat
 set root=D:\home\IPSuite-pcvs
 set MAKEMAKE=cmd /c d:\home\omnetpp\bin\opp_nmakemake
-set OPTS=-f -N
-:set OPTS=-f
+set OPTS=-f -N -b %root%
 
-set ALL_IPSUITE_INCLUDES=-I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/IPv4d -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/_802 -I$(ROOT)/NetworkInterfaces/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Base -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
-set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
+set ALL_IPSUITE_INCLUDES=-I%root%/Network/IPv4 -I%root%/Network/IPv4d -I%root%/Network/AutoRouting -I%root%/Transport/TCP -I%root%/Transport/UDP -I%root%/NetworkInterfaces -I%root%/NetworkInterfaces/_802 -I%root%/NetworkInterfaces/ARP -I%root%/NetworkInterfaces/Ethernet -I%root%/NetworkInterfaces/PPP -I%root%/Applications/Generic -I%root%/Applications/TCPApp -I%root%/Applications/UDPApp -I%root%/Applications/PingApp -I%root%/Base -I%root%/Util -I%root%/Nodes/IPSuite
+set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I%root%/Network/MPLS -I%root%/Network/LDP -I%root%/Network/RSVP_TE -I%root%/Nodes/MPLS
+
+rem ** Uncomment the following 3 lines if you have omnetpp-3.0a6 which does
+rem ** not yet support "opp_nmakemake -b"!
+rem set OPTS=-f -N
+rem set ALL_IPSUITE_INCLUDES=-I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/IPv4d -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/NetworkInterfaces/_802 -I$(ROOT)/NetworkInterfaces/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Base -I$(ROOT)/Util -I$(ROOT)/Nodes/IPSuite
+rem set ALL_MPLS_INCLUDES=%ALL_IPSUITE_INCLUDES% -I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
 
 : #--------------------------------------
 
