@@ -97,7 +97,8 @@ public:
     virtual void handleMessage(cMessage *msg);
 
     /**
-     * Process packets from RSVP daemon
+     * Process packets from RSVP daemon. Dispatches to various
+     * processRSVP_xxx() methods, based in the RSVP message type.
      */
     void processMsgFromRSVP(cMessage *msg);
 
@@ -110,6 +111,15 @@ public:
      * Message for testing purpose
      */
     void processSignalFromTester(cMessage *msg);
+
+    /** @name Process various RSVP message types */
+    //@{
+    void processRSVP_PERROR(cMessage *msg);
+    void processRSVP_PTEAR(cMessage *msg);
+    void processRSVP_RTEAR(cMessage *msg);
+    void processRSVP_PATH(cMessage *msg);
+    void processRSVP_RESV(cMessage *msg);
+    //@}
 
     //void sendPathMessage(SessionObj_t* s, traffic_request_t* t);
     void sendPathMessage(SessionObj_t* s, traffic_request_t* t, int lspId);

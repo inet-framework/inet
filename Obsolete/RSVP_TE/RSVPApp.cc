@@ -48,210 +48,237 @@ void RSVPAppl::initialize()
 void RSVPAppl::handleMessage(cMessage *msg)
 {
     if (!strcmp(msg->arrivalGate()->name(), "from_rsvp"))
+    {
         processMsgFromRSVP(msg);
+    }
     else if (!strcmp(msg->arrivalGate()->name(), "from_mpls_switch"))
+    {
         processSignalFromMPLSSwitchToInitialiseLabelRequest(msg);
+    }
     else if (!strcmp(msg->arrivalGate()->name(), "from_tester"))
+    {
         processSignalFromTester(msg);
+    }
 }
 
 void RSVPAppl::processMsgFromRSVP(cMessage *msg)
+{
+    switch(msg->kind())
+    {
+        case PERROR_MESSAGE: processRSVP_PERROR(msg); break;
+        case PTEAR_MESSAGE:  processRSVP_PTEAR(msg); break;
+        case RTEAR_MESSAGE:  processRSVP_RTEAR(msg); break;
+        case PATH_MESSAGE:   processRSVP_PATH(msg); break;
+        case RESV_MESSAGE:   processRSVP_RESV(msg); break;
+        default: error("unrecognised RSVP message, kind=%d", msg->kind());
+    }
+}
+
+void RSVPAppl::processRSVP_PERROR(cMessage *msg)
+{
+    PathErrorMessage *pe = check_and_cast<PathErrorMessage *>(msg);
+
+    // create new PATH TEAR
+    PathTearMessage *pt = new PathTearMessage();
+    pt->setSenderTemplate(pe->getSenderTemplate());
+    pt->setSession(pe->getSession());
+
+    // Setup PHOP
+    RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
+    rsvp_hop->Logical_Interface_Handle = -1;
+    rsvp_hop->Next_Hop_Address = local_addr;
+    pt->setHop(rsvp_hop);
+    send(pt, "to_rsvp");
+
+    delete msg;
+}
+
+void RSVPAppl::processRSVP_PTEAR(cMessage *msg)
+{
+    ev << "Successfully received the PTEAR at ER\n";
+    delete msg;
+}
+
+void RSVPAppl::processRSVP_RTEAR(cMessage *msg)
+{
+    ev << "Successfully received the RTEAR at IR\n";
+    delete msg;
+}
+
+void RSVPAppl::processRSVP_PATH(cMessage *msg)
+{
+    RoutingTable *rt = routingTableAccess.get();
+    LIBTable *lt = libTableAccess.get();
+
+    PathMessage *pMessage = check_and_cast<PathMessage *>(msg);
+
+    int receiverIP = pMessage->getDestAddress();
+    int lspId = pMessage->getLspId();
+    int outInf = 0;
+    int inInf = 0;
+
+    getIncInet(pMessage->getLIH(), &inInf);
+    Unicast_Route_Query(receiverIP, &outInf);
+
+    // Convert to name
+    InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
+    InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
+    if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
+    if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
+
+    const char *outInfName = outInfP->name.c_str();
+    const char *inInfName = inInfP->name.c_str();
+
+    if (isER)
+    {
+        int inLabel =
+            (lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId,
+                                 POP_OPER));
+        ev << "INSTALL new label:\n";
+        ev << "(inL, inInf, outL, outInf,fec)=(," << inLabel << "," << inInfName <<
+            "," << "-1," << outInfName << "," << lspId << ")\n";
+
+        // Send LABEL MAPPING upstream
+        sendResvMessage(pMessage, inLabel);
+    }
+    delete msg;
+}
+
+
+void RSVPAppl::processRSVP_RESV(cMessage *msg)
 {
     RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();
 
-    if (msg->kind() == PERROR_MESSAGE)
+    ResvMessage *rMessage = check_and_cast<ResvMessage *>(msg);
+
+    if (!isIR)
     {
-        PathErrorMessage *pe = check_and_cast < PathErrorMessage * >(msg);
-
-        // create new PATH TEAR
-        PathTearMessage *pt = new PathTearMessage();
-        pt->setSenderTemplate(pe->getSenderTemplate());
-        pt->setSession(pe->getSession());
-        // Setup PHOP
-        RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-        rsvp_hop->Logical_Interface_Handle = -1;
-        rsvp_hop->Next_Hop_Address = local_addr;
-        pt->setHop(rsvp_hop);
-        send(pt, "to_rsvp");
-
-
+        ev << "We're not ingress router, ignoring message\n";
+        delete msg;
+        return;
     }
-    if (msg->kind() == PTEAR_MESSAGE)
+
+    ev << "Processing RESV message\n";
+
+    std::vector<lsp_tunnel_t>::iterator iterF;
+    lsp_tunnel_t aTunnel;
+    int lsp_id;
+    int label;
+
+    FlowDescriptor_t *flow_d = rMessage->getFlowDescriptor();
+    for (int k = 0; k < InLIST_SIZE; k++)
     {
-        ev << "Successfully receive the PTEAR at ER\n";
-        // delete msg;
-    }
-    if (msg->kind() == RTEAR_MESSAGE)
-    {
-        ev << "Successfully receive the RTEAR at IR\n";
-        // delete msg;
-    }
-    if (msg->kind() == PATH_MESSAGE)
-    {
-
-        PathMessage *pMessage = check_and_cast < PathMessage * >(msg);
-
-        int receiverIP = pMessage->getDestAddress();
-        int lspId = pMessage->getLspId();
-        int outInf = 0;
-        int inInf = 0;
-
-        getIncInet(pMessage->getLIH(), &inInf);
-        Unicast_Route_Query(receiverIP, &outInf);
-
-        // Convert to name
-        InterfaceEntry *outInfP = rt->interfaceByAddress(IPAddress(outInf));
-        InterfaceEntry *inInfP = rt->interfaceByAddress(IPAddress(inInf));
-        if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
-        if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
-
-        const char *outInfName = outInfP->name.c_str();
-        const char *inInfName = inInfP->name.c_str();
-
-        if (isER)
+        for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
         {
-            int inLabel =
-                (lt->installNewLabel(-1, string(inInfName), string(outInfName), lspId,
-                                     POP_OPER));
-            ev << "INSTALL new label:\n";
-            ev << "(inL, inInf, outL, outInf,fec)=(," << inLabel << "," << inInfName <<
-                "," << "-1," << outInfName << "," << lspId << ")\n";
+            aTunnel = (lsp_tunnel_t) (*iterF);
 
-            // Send LABEL MAPPING upstream
-            sendResvMessage(pMessage, inLabel);
+            if (aTunnel.Sender_Template.SrcAddress == 0)
+                continue;
+            lsp_id = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
 
-
-        }
-    }
-    else if (msg->kind() == RESV_MESSAGE)
-    {
-        ResvMessage *rMessage = check_and_cast < ResvMessage * >(msg);
-        if (isIR)
-        {
-            std::vector < lsp_tunnel_t >::iterator iterF;
-            lsp_tunnel_t aTunnel;
-            int lsp_id;
-            int label;
-
-            FlowDescriptor_t *flow_d = rMessage->getFlowDescriptor();
-            for (int k = 0; k < InLIST_SIZE; k++)
+            // If the tunnel has been in operating, ignore this Resv Message
+            // Otherwise, signal the MPLS module
+            // If the Resv Message is to re-route, signal the MPLS module as well
+            if (lsp_id == aTunnel.Sender_Template.Lsp_Id ||
+                (2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id)
             {
-
-                for (iterF = FecSenderBinds.begin(); iterF != FecSenderBinds.end(); iterF++)
+                if ((!aTunnel.operating) ||
+                    ((2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id))
                 {
-                    aTunnel = (lsp_tunnel_t) (*iterF);
 
-                    if (aTunnel.Sender_Template.SrcAddress == 0)
-                        continue;
-                    lsp_id = (*(flow_d + k)).Filter_Spec_Object.Lsp_Id;
+                    // Delete all invalid record before
+                    std::vector < routing_info_t >::iterator iterR;
+                    routing_info_t rEle;
 
-                    // If the tunnel has been in operating, ignore this Resv Message
-                    // Otherwise, signal the MPLS module
-                    // If the Resv Message is to re-route, signal the MPLS module as well
-                    if (lsp_id == aTunnel.Sender_Template.Lsp_Id ||
-                        (2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id)
+                    for (iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
                     {
-                        if ((!aTunnel.operating) ||
-                            ((2 * MAX_LSP_NO - lsp_id) == aTunnel.Sender_Template.Lsp_Id))
+                        rEle = (routing_info_t) * iterR;
+                        if ((rEle.lspId == lsp_id) || (rEle.lspId == (2 * MAX_LSP_NO - lsp_id)))
                         {
-
-                            // Delete all invalid record before
-                            std::vector < routing_info_t >::iterator iterR;
-                            routing_info_t rEle;
-
-                            for (iterR = routingInfo.begin(); iterR != routingInfo.end(); iterR++)
-                            {
-                                rEle = (routing_info_t) * iterR;
-                                if ((rEle.lspId == lsp_id) || (rEle.lspId == (2 * MAX_LSP_NO - lsp_id)))
-                                {
-                                    break;
-                                }
-
-                            }
-                            if (iterR != routingInfo.end())
-                                routingInfo.erase(iterR);
-
-                            // Add new record
-
-                            bool includeMe = false;
-                            routing_info_t *rInfo = new routing_info_t;
-                            rInfo->lspId = lsp_id;
-                            ev << "Record route for LSP with id=" << lsp_id << "\n";
-                            ev << "Route ={ ";
-
-                            for (int c = 0; c < MAX_ROUTE; c++)
-                            {
-                                (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
-                                if (((rInfo->route)[c] == 0) && (!includeMe))
-                                {
-                                    (rInfo->route)[c] = local_addr;
-                                    includeMe = true;
-                                }
-                                ev << IPAddress((rInfo->route)[c]) << " ";
-                            }
-                            ev << "\n";
-
-
-                            routingInfo.push_back(*rInfo);
-
-                            cMessage *signalMPLS = new cMessage();
-                            label = (*(flow_d + k)).label;
-                            signalMPLS->addPar("label") = label;
-                            signalMPLS->addPar("fec") = lsp_id;
-                            // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
-                            // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
-                            // Install new label
-                            int outInf = rMessage->getLIH();
-                            int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
-                            const char *outInfName =
-                                (rt->interfaceByPortNo(outInfIndex))->name.c_str();
-                            const char *inInfName =
-                                (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
-
-                            ev << "INSTALL new label \n";
-                            ev << "src=" << IPAddress(aTunnel.Sender_Template.
-                                                      SrcAddress) << "\n";
-                            lt->installNewLabel(label, string(inInfName),
-                                                string(outInfName), lsp_id, PUSH_OPER);
-
-                            aTunnel.operating = true;
-                            sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
-
-                            /*************************************************
-                            Sending Path Tear Message
-                            **************************************************/
-                            if (lsp_id > MAX_LSP_NO)
-                            {
-                                PathTearMessage *pt = new PathTearMessage();
-                                SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
-                                sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
-                                sTemplate->SrcAddress =
-                                    (*(flow_d + k)).Filter_Spec_Object.SrcAddress;
-                                sTemplate->SrcPort =
-                                    (*(flow_d + k)).Filter_Spec_Object.SrcPort;
-
-                                pt->setSenderTemplate(sTemplate);
-                                pt->setSession(rMessage->getSession());
-                                // Setup PHOP
-                                RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
-                                rsvp_hop->Logical_Interface_Handle = -1;
-                                rsvp_hop->Next_Hop_Address = local_addr;
-                                pt->setHop(rsvp_hop);
-                                send(pt, "to_rsvp");
-                            }
+                            break;
                         }
-                    }
 
+                    }
+                    if (iterR != routingInfo.end())
+                        routingInfo.erase(iterR);
+
+                    // Add new record
+
+                    bool includeMe = false;
+                    routing_info_t *rInfo = new routing_info_t;
+                    rInfo->lspId = lsp_id;
+                    ev << "Record route for LSP with id=" << lsp_id << "\n";
+                    ev << "Route ={ ";
+
+                    for (int c = 0; c < MAX_ROUTE; c++)
+                    {
+                        (rInfo->route)[c] = (*(flow_d + k)).RRO[c];
+                        if (((rInfo->route)[c] == 0) && (!includeMe))
+                        {
+                            (rInfo->route)[c] = local_addr;
+                            includeMe = true;
+                        }
+                        ev << IPAddress((rInfo->route)[c]) << " ";
+                    }
+                    ev << "\n";
+
+                    routingInfo.push_back(*rInfo);
+
+                    cMessage *signalMPLS = new cMessage();
+                    label = (*(flow_d + k)).label;
+                    signalMPLS->addPar("label") = label;
+                    signalMPLS->addPar("fec") = lsp_id;
+                    // signalMPLS->addPar("src") = aTunnel.Sender_Template.SrcAddress;
+                    // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
+                    // Install new label
+                    int outInf = rMessage->getLIH();
+                    int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                    const char *outInfName =
+                        (rt->interfaceByPortNo(outInfIndex))->name.c_str();
+                    const char *inInfName =
+                        (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
+
+                    ev << "INSTALL new label \n";
+                    ev << "src=" << IPAddress(aTunnel.Sender_Template.
+                                              SrcAddress) << "\n";
+                    lt->installNewLabel(label, string(inInfName),
+                                        string(outInfName), lsp_id, PUSH_OPER);
+
+                    aTunnel.operating = true;
+                    sendDirect(signalMPLS, 0.0, mplsMod, "fromSignalModule");
+
+                    /*************************************************
+                    Sending Path Tear Message
+                    **************************************************/
+                    if (lsp_id > MAX_LSP_NO)
+                    {
+                        PathTearMessage *pt = new PathTearMessage();
+                        SenderTemplateObj_t *sTemplate = new SenderTemplateObj_t;
+                        sTemplate->Lsp_Id = 2 * MAX_LSP_NO - lsp_id;
+                        sTemplate->SrcAddress =
+                            (*(flow_d + k)).Filter_Spec_Object.SrcAddress;
+                        sTemplate->SrcPort =
+                            (*(flow_d + k)).Filter_Spec_Object.SrcPort;
+
+                        pt->setSenderTemplate(sTemplate);
+                        pt->setSession(rMessage->getSession());
+                        // Setup PHOP
+                        RsvpHopObj_t *rsvp_hop = new RsvpHopObj_t;
+                        rsvp_hop->Logical_Interface_Handle = -1;
+                        rsvp_hop->Next_Hop_Address = local_addr;
+                        pt->setHop(rsvp_hop);
+                        send(pt, "to_rsvp");
+                    }
                 }
             }
-
         }
-
     }
     delete msg;
 }
+
+
 
 void RSVPAppl::processSignalFromMPLSSwitchToInitialiseLabelRequest(cMessage *msg)
 {
