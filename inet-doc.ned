@@ -104,8 +104,8 @@
 // accepted with the meaning <tt>0.0.0.0</tt>.
 //
 // <i>Flags</i> denotes route type:
-//    - <i>G</i> direct route (directly attached to the router), and
-//    - <i>H</i> remote route (reached through another router)
+//    - <i>H</i> "host": direct route (directly attached to the router), and
+//    - <i>G</i> "gateway": remote route (reached through another router)
 //
 // The <i>References</i> field is currently ignored.
 //
