@@ -527,7 +527,7 @@ InterfaceEntry *ARP::registerInterface(double datarate)
     e->pointToPoint = false;
 
     // multicast groups
-    //FIXME
+    // TBD
 
     // add
     RoutingTableAccess routingTableAccess;

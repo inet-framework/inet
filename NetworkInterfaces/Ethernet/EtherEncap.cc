@@ -53,6 +53,7 @@ class EtherEncap : public cSimpleModule
     virtual void processFrameFromMAC(EtherFrame *msg);
     virtual void handleSendPause(cMessage *msg);
 
+    virtual void updateDisplayString();
 };
 
 Define_Module(EtherEncap);
@@ -79,8 +80,8 @@ void EtherEncap::handleMessage(cMessage *msg)
         // from higher layer
         switch(msg->kind())
         {
-            case 0:  //FIXME
             case ETHCTRL_DATA:
+            case 0: // default message kind (0) is also accepted
               processPacketFromHigherLayer(msg);
               break;
 
@@ -93,6 +94,16 @@ void EtherEncap::handleMessage(cMessage *msg)
               error("received message `%s' with unknown message kind %d", msg->name(), msg->kind());
         }
     }
+
+    if (ev.isGUI())
+        updateDisplayString();
+}
+
+void EtherEncap::updateDisplayString()
+{
+    char buf[80];
+    sprintf(buf, "passed up: %d\nsent: %d", totalFromMAC, totalFromHigherLayer);
+    displayString().setTagArg("t",0,buf);
 }
 
 void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
