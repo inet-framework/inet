@@ -31,7 +31,7 @@
 /**
  * LDP protocol implementation.
  */
-class NewLDP: public cSimpleModule
+class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 {
   private:
     struct fec_src_bind
@@ -107,6 +107,16 @@ class NewLDP: public cSimpleModule
 
     void processLABEL_MAPPING(LabelMappingMessage *packet);
     void processLABEL_REQUEST(LabelRequestMessage *packet);
+
+    /** @name TCPSocket::CallbackInterface callback methods */
+    //@{
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+    virtual void socketPeerClosed(int connId, void *yourPtr);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
+    //@}
 };
 
 #endif

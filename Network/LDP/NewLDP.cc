@@ -69,8 +69,52 @@ void NewLDP::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
     {
-        processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
+        TCPSocket *socket = socketMap.findSocketFor(msg);
+        if (!socket)
+        {
+            // new incoming connection -- create new socket object
+            socket = new TCPSocket(msg);
+            socket->setOutputGate(gate("to_tcp_interface"));
+            socket->setCallbackObject(this);
+            socketMap.addSocket(socket);
+            // FIXME passive open must be issued sometime
+            // FIXME associate with peer table
+        }
+        socket->processMessage(msg);
     }
+}
+
+void NewLDP::socketEstablished(int connId, void *yourPtr)
+{
+    // FIXME start LDP session setup (if we're on the active side?)
+}
+
+void NewLDP::socketDataArrived(int, void *, cMessage *msg, bool)
+{
+    processLDPPacketFromTCP(check_and_cast<LDPpacket *>(msg));
+}
+
+void NewLDP::socketPeerClosed(int, void *)
+{
+/*
+    // close the connection (if not already closed)
+    if (socket.state()==TCPSocket::PEER_CLOSED)
+    {
+        ev << "remote TCP closed, closing here as well\n";
+        close();
+    }
+*/
+}
+
+void NewLDP::socketClosed(int, void *)
+{
+    ev << "connection closed\n";
+}
+
+void NewLDP::socketFailure(int, void *, int code)
+{
+    ev << "connection broken\n";
+    // reconnect after a delay?
 }
 
 void NewLDP::broadcastHello()
@@ -89,7 +133,6 @@ void NewLDP::broadcastHello()
     // schedule next hello in 5 minutes
     scheduleAt(simTime()+300, sendHelloMsg);
 }
-
 
 void NewLDP::processLDPHelloReply(cMessage *msg)
 {
@@ -523,3 +566,5 @@ void NewLDP::processLABEL_MAPPING(LabelMappingMessage * packet)
         // delete packet;
     }
 }
+
+
