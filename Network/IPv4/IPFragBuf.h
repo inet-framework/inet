@@ -44,13 +44,19 @@ class IPFragBuf
 
     typedef std::vector<Region> RegionVector;
 
-/*
-FIXME Key {
- id
- src
- dest
-};
-*/
+    /**
+     * Key for finding the reassembly buffer for a datagram.
+     */
+    struct Key
+    {
+        ushort id;
+        IPAddress src;
+        IPAddress dest;
+
+        inline bool operator<(const Key& b) const {
+            return (id!=b.id) ? (id<b.id) : (src!=b.src) ? (src<b.src) : (dest<b.dest);
+        }
+    };
 
     /**
      * Represents the buffer for assembling one IP datagram from fragments.
@@ -63,7 +69,6 @@ FIXME Key {
      */
     struct ReassemblyBuffer
     {
-        ushort id;     // "Identification" field from IP header
         Region main;   // offset range we already have
         RegionVector *fragments;  // only used if we receive disjoint fragments
         IPDatagram *datagram;  // the actual datagram
@@ -71,7 +76,7 @@ FIXME Key {
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<ushort,ReassemblyBuffer> Buffers;
+    typedef std::map<Key,ReassemblyBuffer> Buffers;
 
     // the reassembly buffers
     Buffers bufs;

@@ -42,21 +42,27 @@ void IPFragBuf::init(ICMP *icmp)
 
 IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
 {
-    ushort id = datagram->identification();
-    Buffers::iterator i = bufs.find(id);
+    Key key;
+    key.id = datagram->identification();
+    key.src = datagram->srcAddress();
+    key.dest = datagram->destAddress();
+
+    Buffers::iterator i = bufs.find(key);
+
+    int bytes = datagram->length()/8 - datagram->headerLength();
+
     if (i==bufs.end())
     {
         // this is the first fragment of that datagram, create reassembly buffer for it
         ReassemblyBuffer buf;
-        buf.id = id;
         buf.main.beg = datagram->fragmentOffset();
-        buf.main.end = buf.main.beg + datagram->payloadLength(); //FIXME
+        buf.main.end = buf.main.beg + bytes;
         buf.main.islast = !datagram->moreFragments();
         buf.fragments = NULL;
         buf.datagram = datagram;
         buf.lastupdate = now;
 
-        bufs[id] = buf;
+        bufs[key] = buf;
 
         // if datagram is not fragmented, we shouldn't have been called!
         ASSERT(buf.main.beg!=0 || !buf.main.islast);
@@ -68,7 +74,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
         // merge this fragment into reassembly buffer
         ReassemblyBuffer& buf = i->second;
         ushort beg = datagram->fragmentOffset();
-        ushort end = buf.main.beg + datagram->payloadLength(); //FIXME
+        ushort end = buf.main.beg + bytes;
         merge(buf, beg, end, !datagram->moreFragments());
 
         // store datagram. Only one fragment carries the actual modelled

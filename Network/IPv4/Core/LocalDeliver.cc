@@ -59,7 +59,7 @@ void LocalDeliver::handleMessage(cMessage *msg)
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
         insertInFragmentBuf( datagram );
-        if (!datagramComplete(datagram->fragmentId()))
+        if (!datagramComplete(datagram->identification()))
         {
             delete datagram;
             return;
@@ -75,7 +75,7 @@ void LocalDeliver::handleMessage(cMessage *msg)
             << "  new length: " << datagram->length() << "\n";
         */
 
-        removeFragmentFromBuf(datagram->fragmentId());
+        removeFragmentFromBuf(datagram->identification());
     }
 
     int protocol = datagram->transportProtocol();
@@ -175,7 +175,7 @@ void LocalDeliver::insertInFragmentBuf(IPDatagram *d)
 
     e = &fragmentBuf[i];
     e->isFree = false;
-    e->fragmentId = d->fragmentId();
+    e->fragmentId = d->identification();
     e->fragmentOffset = d->fragmentOffset();
     e->moreFragments = d->moreFragments();
     e->length = d->length()/8 - d->headerLength();
