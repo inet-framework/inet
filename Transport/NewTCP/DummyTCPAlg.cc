@@ -39,6 +39,10 @@ TCPStateVariables *DummyTCPAlg::createStateVariables()
     return state;
 }
 
+void DummyTCPAlg::established()
+{
+}
+
 void DummyTCPAlg::processTimer(cMessage *timer, TCPEventCode& event)
 {
     // no extra timers in this TCP variant
@@ -46,8 +50,8 @@ void DummyTCPAlg::processTimer(cMessage *timer, TCPEventCode& event)
 
 void DummyTCPAlg::sendCommandInvoked()
 {
-    // start sending as much as possible
-    conn->sendData();
+    // start sending as much as possible, small segments also OK (Nagle off)
+    conn->sendData(false);
 }
 
 void DummyTCPAlg::receiveSeqChanged()
@@ -58,11 +62,15 @@ void DummyTCPAlg::receiveSeqChanged()
     conn->sendAck();
 }
 
-void DummyTCPAlg::receivedAck(bool duplicate)
+void DummyTCPAlg::receivedDataAck()
 {
-    // ack may have freed up some room in the window, try sending
-    if (!duplicate)
-        conn->sendData();
+    // ack may have freed up some room in the window, try sending.
+    // small segments also OK (Nagle off)
+    conn->sendData(false);
+}
+
+void DummyTCPAlg::receivedDuplicateAck()
+{
 }
 
 void DummyTCPAlg::receivedAckForDataNotYetSent(uint32 seq)
@@ -77,7 +85,7 @@ void DummyTCPAlg::ackSent()
 {
 }
 
-void DummyTCPAlg::dataSent()
+void DummyTCPAlg::dataSent(uint32)
 {
 }
 

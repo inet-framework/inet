@@ -78,6 +78,13 @@ class TCPAlgorithm : public cPolymorphic
     virtual TCPStateVariables *createStateVariables() = 0;
 
     /**
+     * Called when the connection is going to ESTABLISHED from SYN_SENT or
+     * SYN_RCVD. This is a place to initialize some variables (e.g. set
+     * cwnd to the MSS learned during connection setup).
+     */
+    virtual void established() = 0;
+
+    /**
      * Place to process timers specific to this TCPAlgorithm class.
      * TCPConnection will invoke this method on any timer (self-message)
      * it doesn't recognize (that is, any timer other than the 2MSL,
@@ -94,7 +101,7 @@ class TCPAlgorithm : public cPolymorphic
     virtual void sendCommandInvoked() = 0;
 
     /**
-     * Called when rcv_nxt has advanced, either because we received in-sequence
+     * Called after rcv_nxt got advanced, either because we received in-sequence
      * data ("text" in RFC 793 lingo) or a FIN. At this point, rcv_nxt has
      * already been updated. This method should take care to send or schedule
      * an ACK some time.
@@ -102,28 +109,37 @@ class TCPAlgorithm : public cPolymorphic
     virtual void receiveSeqChanged() = 0;
 
     /**
-     * Called after we have received an ACK. At this point the state variables
+     * Called after we received an ACK which acked some data (that is,
+     * we could advance snd_una). At this point the state variables
      * (snd_una, snd_wnd) have already been updated.
      */
-    virtual void receivedAck(bool duplicate) = 0;
+    virtual void receivedDataAck() = 0;
 
     /**
-     * Called after we have received an ACK for some data not yet sent.
+     * Called after we received a duplicate ACK (that is: ackNo==snd_una,
+     * no data in segment, segment doesn't carry window update, and also,
+     * we have unacked data).
+     */
+    virtual void receivedDuplicateAck() = 0;
+
+    /**
+     * Called after we received an ACK for data not yet sent.
      * According to RFC 793 this function should send an ACK.
      */
     virtual void receivedAckForDataNotYetSent(uint32 seq) = 0;
 
     /**
-     * Called after we have sent an ACK. This hook can be used to cancel
+     * Called after we sent an ACK. This hook can be used to cancel
      * the delayed-ACK timer.
      */
     virtual void ackSent() = 0;
 
     /**
-     * Called after we have sent data. This hook can be used to schedule
-     * the retransmission timer.
+     * Called after we sent data. This hook can be used to schedule the
+     * retransmission timer, to start round-trip time measurement, etc.
+     * The argument is the seqno of the first byte sent.
      */
-    virtual void dataSent() = 0;
+    virtual void dataSent(uint32 fromseq) = 0;
 
     /**
      * Called after retransmissions.

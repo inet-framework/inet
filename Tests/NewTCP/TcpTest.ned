@@ -1,6 +1,7 @@
 
 import
     "TcpTestClient.ned",
+    "TCPTester.ned",
     "TCPMain.ned",
     "TCPDump.ned";
 

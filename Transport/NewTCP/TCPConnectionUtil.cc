@@ -167,15 +167,15 @@ void TCPConnection::selectInitialSeqNum()
     // set the initial send sequence number and the send sequence variables
     state->iss = (unsigned long)(fmod(tcpMain->simTime()*250000.0, 1.0+(double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
 
-    state->snd_una = state->iss;
-    state->snd_nxt = state->iss;
+    state->snd_una = state->snd_nxt = state->snd_max = state->iss;
 
     sendQueue->init(state->iss+1); // +1 is for SYN
 }
 
-bool TCPConnection::isSegmentInWindow(TCPSegment *tcpseg)
+bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
     // segment entirely falls in receive window
+    //FIXME not this simple, see old code segAccept() below...
     return seqGE(tcpseg->sequenceNo(),state->rcv_nxt) &&
            seqLE(tcpseg->sequenceNo()+tcpseg->payloadLength(),state->rcv_nxt+state->rcv_wnd);
 }
@@ -196,6 +196,7 @@ void TCPConnection::sendSyn()
     tcpseg->setWindow(state->rcv_wnd);
 
     state->snd_nxt++;
+    state->snd_max = state->snd_nxt;
 
     // FIXME arrange for retransmission
 
@@ -214,7 +215,7 @@ void TCPConnection::sendSynAck()
     tcpseg->setWindow(state->rcv_wnd);
 
     state->snd_nxt++;
-
+    state->snd_max = state->snd_nxt;
     // FIXME arrange for retransmission
 
     // send it
@@ -291,22 +292,23 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-
-void TCPConnection::sendData(int maxNumSegments)
+void TCPConnection::sendData(bool fullSegments, int maxNumSegments)
 {
-    // send as much as we can, but at most maxNumSegments
+    // send as much as we can, but at most maxNumSegments; if fullsegments
+    // is set, refuse to send smaller segments than MSS (needed for Nagle's alg)
     bool segSent = false;
+    uint32 old_snd_nxt = state->snd_nxt;
     ulong bytesAvailable = sendQueue->bytesAvailable(state->snd_nxt);
     for (int segCount=0; segCount<maxNumSegments || maxNumSegments==-1; segCount++)
     {
         tcpEV << bytesAvailable << " bytes in buffer to send, send window: " << state->snd_wnd << "\n";
         ulong bytes = Min(state->snd_wnd, Min(bytesAvailable, state->snd_mss));
-        if (bytes==0)
+        if (bytes==0 || (fullSegments && bytes<state->snd_mss))
             break;
-
         TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
         tcpseg->setAckNo(state->rcv_nxt);
         tcpseg->setAckBit(true);
+        tcpseg->setWindow(state->rcv_wnd);
 
         ASSERT(bytes==tcpseg->payloadLength());
 
@@ -327,9 +329,14 @@ void TCPConnection::sendData(int maxNumSegments)
 
     if (segSent)
     {
+        // remember highest seq sent (snd_nxt may be set back on retransmission,
+        // but we'll need snd_max to check validity of ACKs -- they must ack
+        // something we really sent)
+        state->snd_max = state->snd_nxt;
+
         // notify (once is enough)
         tcpAlgorithm->ackSent();
-        tcpAlgorithm->dataSent();
+        tcpAlgorithm->dataSent(old_snd_nxt);
     }
 }
 
@@ -345,6 +352,7 @@ void TCPConnection::retransmitData()
     TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_una, bytes);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
+    tcpseg->setWindow(state->rcv_wnd);
 
     ASSERT(bytes==tcpseg->payloadLength());
 

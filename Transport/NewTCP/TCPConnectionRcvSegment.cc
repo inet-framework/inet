@@ -109,8 +109,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: first check sequence number
     //
-    bool isSegmentAcceptable = isSegmentInWindow(tcpseg);
-    if (!isSegmentAcceptable)
+    bool acceptable = isSegmentAcceptable(tcpseg);
+    if (!acceptable)
     {
         //"
         // If an incoming segment is not acceptable, an acknowledgment
@@ -207,7 +207,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // number check).
         //"
 
-        ASSERT(tcpseg->sequenceNo()==state->rcv_nxt);  // assert SYN is in window (MBI)
+        ASSERT(isSegmentAcceptable(tcpseg));  // assert SYN is in the window
         tcpEV << "SYN is in the window: performing connection reset, closing connection\n";
         doConnectionReset();
         return TCP_E_RCV_UNEXP_SYN;
@@ -246,6 +246,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         }
         event = TCP_E_RCV_ACK; // will trigger transition to ESTABLISHED
         tcpMain->cancelEvent(connEstabTimer);
+
+        // notify
+        tcpAlgorithm->established();
     }
 
     uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
@@ -548,7 +551,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
         if (tcpseg->finBit())
         {
             // Looks like implementations vary on how to react to SYN+FIN.
-            // Some treat it as plain SYN (and replay with SYN+ACK), some send RST+ACK.
+            // Some treat it as plain SYN (and reply with SYN+ACK), some send RST+ACK.
             // Let's just do the former here.
             tcpEV << "SYN+FIN received: ignoring FIN\n";
         }
@@ -700,9 +703,13 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         if (seqGreater(state->snd_una, state->iss))
         {
             tcpEV << "SYN bit set: sending ACK\n";
-            sendAck();   // FIXME may include data!
+            sendAck();   // FIXME we may include data!
             // FIXME continue processing at the sixth step below where the URG bit is checked
             tcpMain->cancelEvent(connEstabTimer);
+
+            // notify
+            tcpAlgorithm->established();
+
             return TCP_E_RCV_SYN_ACK; // this will trigger transition to ESTABLISHED
         }
 
@@ -716,7 +723,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
         //   has been reached, return.
         //"
         tcpEV << "SYN bit set: sending SYN+ACK\n";
-        state->snd_nxt = state->iss;  // FIXME is this OK?
+        state->snd_max = state->snd_nxt = state->iss;
         sendSynAck();
         // FIXME TBD: If there are other controls or text in the segment, queue them
         // for processing after the ESTABLISHED state has been reached
@@ -795,30 +802,44 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
     //  the last segment used to update SND.WND.  The check here
     //  prevents using old segments to update the window.
     //"
-    if (seqLess(state->snd_una, tcpseg->ackNo()) && seqLE(tcpseg->ackNo(), state->snd_nxt))
+    // Note: should use SND.MAX instead of SND.NXT in above checks
+    //
+    if (seqGE(state->snd_una, tcpseg->ackNo()))
+    {
+        //
+        // duplicate ACK? A received TCP segment is a duplicate ACK if all of
+        // the following apply:
+        //    (1) snd_una==ackNo
+        //    (2) segment contains no data
+        //    (3) window is the same as last received (not an update)
+        //    (4) there's unacked data (snd_una!=snd_max)
+        //
+        // If doesn't qualify as duplicate ACK, just ignore it.
+        //
+        if (state->snd_una==tcpseg->ackNo() && tcpseg->payloadLength()==0 &&
+            state->snd_wnd==tcpseg->window() && state->snd_una!=state->snd_max)
+        {
+            tcpEV << "Duplicate ACK.\n";
+            tcpAlgorithm->receivedDuplicateAck();
+        }
+    }
+    else if (seqLE(tcpseg->ackNo(), state->snd_max))
     {
         // ack in window.
+        state->snd_una = tcpseg->ackNo();
+        uint32 discardUpToSeq = state->snd_una;
 
-        // duplicate ACK?
-        bool duplicate = state->snd_una==tcpseg->ackNo();
-        if (duplicate) tcpEV << "Duplicate ACK.\n";
-
-        if (!duplicate)
+        // our FIN acked?
+        if (state->send_fin && tcpseg->ackNo()==state->snd_fin_seq+1)
         {
-            state->snd_una = tcpseg->ackNo();
-            uint32 discardUpToSeq = state->snd_una;
-
-            // our FIN acked?
-            if (state->send_fin && tcpseg->ackNo()==state->snd_fin_seq+1)
-            {
-                // set flag that our FIN has been acked
-                tcpEV << "ACK acks our FIN\n";
-                state->fin_ack_rcvd = true;
-                discardUpToSeq--; // the FIN sequence number is not real data
-            }
-
-            sendQueue->discardUpTo(discardUpToSeq);
+            // set flag that our FIN has been acked
+            tcpEV << "ACK acks our FIN\n";
+            state->fin_ack_rcvd = true;
+            discardUpToSeq--; // the FIN sequence number is not real data
         }
+
+        // acked data no longer needed in send queue
+        sendQueue->discardUpTo(discardUpToSeq);
 
         if (seqLess(state->snd_wl1, tcpseg->sequenceNo()) ||
             (state->snd_wl1==tcpseg->sequenceNo() && seqLE(state->snd_wl2, tcpseg->ackNo())))
@@ -831,10 +852,12 @@ void TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         }
 
         // notify
-        tcpAlgorithm->receivedAck(duplicate);
+        tcpAlgorithm->receivedDataAck();
     }
-    else if (seqGreater(tcpseg->ackNo(), state->snd_nxt))
+    else
     {
+        ASSERT(seqGreater(tcpseg->ackNo(), state->snd_max)); // from if-ladder
+
         // send an ACK, drop the segment, and return.
         tcpEV << "ACK acks something not yet sent\n";
         tcpAlgorithm->receivedAckForDataNotYetSent(tcpseg->ackNo());

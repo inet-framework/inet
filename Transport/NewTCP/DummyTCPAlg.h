@@ -63,19 +63,23 @@ class DummyTCPAlg : public TCPAlgorithm
      */
     virtual TCPStateVariables *createStateVariables();
 
+    virtual void established();
+
     virtual void processTimer(cMessage *timer, TCPEventCode& event);
 
     virtual void sendCommandInvoked();
 
     virtual void receiveSeqChanged();
 
-    virtual void receivedAck(bool duplicate);
+    virtual void receivedDataAck();
+
+    virtual void receivedDuplicateAck();
 
     virtual void receivedAckForDataNotYetSent(uint32 seq);
 
     virtual void ackSent();
 
-    virtual void dataSent();
+    virtual void dataSent(uint32 fromseq);
 
     virtual void dataRetransmitted();
 };

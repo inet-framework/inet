@@ -32,17 +32,17 @@ TCPStateVariables::TCPStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
     bool active = false;
-    snd_mss = 512;
+    snd_mss = 1024;  // FIXME make it parameter
     snd_una = 0;
     snd_nxt = 0;
+    snd_max = 0;
     snd_wnd = 0;
     snd_up = 0;
     snd_wl1 = 0;
     snd_wl2 = 0;
     iss = 0;
     rcv_nxt = 0;
-    //rcv_wnd = 65536;
-    rcv_wnd = 2048; // FIXME for testing only
+    rcv_wnd = 16384; // FIXME make it parameter
     rcv_up = 0;
     irs = 0;
 
@@ -61,6 +61,7 @@ std::string TCPStateVariables::detailedInfo() const
     out << "snd_mss = " << snd_mss << "\n";
     out << "snd_una = " << snd_una << "\n";
     out << "snd_nxt = " << snd_nxt << "\n";
+    out << "snd_max = " << snd_max << "\n";
     out << "snd_wnd = " << snd_wnd << "\n";
     out << "snd_up = " << snd_up << "\n";
     out << "snd_wl1 = " << snd_wl1 << "\n";

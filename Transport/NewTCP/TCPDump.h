@@ -43,7 +43,7 @@ class TCPDumper
 
 
 /**
- * Dumps every packet using TCPDumper
+ * Dumps every packet using the TCPDumper class
  */
 class TCPDump : public cSimpleModule
 {
@@ -51,61 +51,6 @@ class TCPDump : public cSimpleModule
     TCPDumper tcpdump;
   public:
     TCPDump(const char *name, cModule *parent);
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-};
-
-
-/**
- * Dumps every packet using TCPDumper, and in addition it can delete,
- * delay or duplicate TCP segments, and insert new segments.
- *
- * Script format:
- *
- * <i><segment><operation><args>; <segment><operation><args>; ...</i>
- *
- * e.g.:
- *
- * <tt>A2 delete; B3 delete; A3 delay 0.2; A4 copy 1.0,1.2; ...</tt>
- *
- * Where:
- * - <i><segment></i>: A10 means 10th segment arriving from A
- * - <i><operation></i> can be <tt>delete</tt>, <tt>delay</tt> or <tt>copy</tt>:
- *    - <tt>delete</tt>: removes (doesn't copy) segment
- *    - <tt>delay</tt> <i><delay></i>: forwards segment after a delay
- *    - <tt>copy</tt> <i><delay1>,<delay2>,<delay3>,...</i>:
- *      forwards a copy of the segment after the given delays
- *      (<tt>copy 0.5</tt> is the same as <tt>delay 0.5</tt>)
- */
-class TCPTester : public cSimpleModule
-{
-  protected:
-    enum {CMD_DELETE,CMD_COPY}; // "delay" is same as "copy"
-    typedef std::vector<simtime_t> DelayVector;
-    struct Command
-    {
-        bool fromA;  // direction
-        int segno;   // segment number
-        int command; // CMD_DELETE, CMD_COPY
-        DelayVector delays;  // arg list
-    };
-    typedef std::vector<Command> CommandVector;
-    CommandVector commands;
-
-    int fromASeq;
-    int fromBSeq;
-
-    TCPDumper tcpdump;
-
-  protected:
-    void parseScript(const char *script);
-    void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
-    void dispatchSegment(TCPSegment *seg);
-    void processIncomingSegment(TCPSegment *seg, bool fromA);
-
-  public:
-    TCPTester(const char *name, cModule *parent);
-    virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };

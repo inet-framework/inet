@@ -156,6 +156,8 @@ class TCPStateVariables : public cPolymorphic
     // send sequence number variables (see RFC 793, "3.2. Terminology")
     uint32 snd_una;      // send unacknowledged
     uint32 snd_nxt;      // send next
+    uint32 snd_max;      // max seq number sent (needed because snd_nxt is re-set on retransmission)
+
     int snd_wnd;         // send window
     int snd_up;          // send urgent pointer
     uint32 snd_wl1;      // segment sequence number used for last window update
@@ -189,8 +191,8 @@ class TCPStateVariables : public cPolymorphic
  * associated with TCP state changes.
  *
  * The implementation (e.g. the method process_RCV_SEGMENT()) largely follows
- * the functional specification at the end of RFC 793 which should facilitate
- * understanding.
+ * the functional specification at the end of RFC 793. Code comments extensively
+ * quote RFC 793 to make it easier to understand.
  *
  * TCPConnection delegates all details of the TCP data transfer (in ESTABLISHED,
  * etc. state) to an object subclassed from  TCPAlgorithm. This covers
@@ -295,7 +297,7 @@ class TCPConnection
     void selectInitialSeqNum();
 
     /** check if segment is acceptable (all bytes are in receive window) */
-    bool isSegmentInWindow(TCPSegment *tcpseg);
+    bool isSegmentAcceptable(TCPSegment *tcpseg);
 
     /** Utility: send SYN, SYN+ACK, ACK */
     void sendSyn();
@@ -303,8 +305,11 @@ class TCPConnection
   public:
     void sendAck();
 
-    /** Utility: send data from sendQueue, at most this many segments (-1 means no limit) */
-    void sendData(int maxNumSegments=-1);
+    /** Utility: Send data from sendQueue, at most maxNumSegments segments
+     * (-1 means no limit). If fullSegments is set, refuse to send smaller
+     * segments than MSS (needed for Nagle's alg)
+     */
+    void sendData(bool fullSegments, int maxNumSegments=-1);
 
     /** Utility: retransmit everything from snd_una */
     void retransmitData();

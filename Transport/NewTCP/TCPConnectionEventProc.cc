@@ -180,11 +180,13 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_nxt==sendQueue->bufferEndSeq())
+            if (state->snd_nxt==sendQueue->bufferEndSeq()) // FIXME ok? not snd_max?
             {
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 sendFin();
                 state->snd_nxt++;
+                state->snd_max = state->snd_nxt;
+
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
             else

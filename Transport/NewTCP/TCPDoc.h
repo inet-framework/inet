@@ -28,16 +28,20 @@
  * dispatches segments and user commands to the appropriate TCPConnection
  * object.
  *
- * TCPConnection stores the state vars (TCB), sends/receives SYN, FIN, RST
- * segments and manages all state transitions (LISTEN->SYN_SENT etc).
+ * TCPConnection manages the connection, with the help of other objects.
+ * TCPConnection itself implements the basic TCP "machinery": takes care 
+ * of the state machine, stores the state variables (TCB), sends/receives 
+ * SYN, FIN, RST, ACKs, etc.
+ *
  * TCPConnection internally relies on 3 objects, subclassed from TCPSendQueue,
  * TCPReceiveQueue and TCPAlgorithm, respectively. The first two manage
  * the actual data (bytes, "virtual" bytes, message objects etc) so
- * TCPConnection only needs to work with sequence number variables.
- * Managing ACKs, retransmissions, etc are "outsourced" from TCPConnection
- * into TCPAlgorithm, so things like slow start, fast rexmit, SACK etc can
- * be conveniently implemented in TCPAlgorithm subclasses, without further
- * littering the basic protocol implementation in TCPConnection.
+ * TCPConnection only needs to work with sequence number variables but not the
+ * actual data stream. Control of retransmissions, congestion control, 
+ * ACK sending etc are "outsourced" from TCPConnection into TCPAlgorithm:
+ * algorithms like delayed acks, slow start, fast rexmit, SACK etc are all 
+ * implemented in TCPAlgorithm subclasses, without making code of the basic 
+ * protocol implementation in TCPConnection even more complex.
  *
  * A TCP segment is represented by the class TCPSegment (defined in a .msg file).
  * TCPCommand is the control info base class used for communication between

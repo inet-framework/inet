@@ -31,44 +31,37 @@ class PlainTCPStateVariables : public TCPStateVariables
   public:
     PlainTCPStateVariables();
 
+    // TCP features
+    bool delayed_acks_enabled; // delayed ACKs enabled/disabled
+    bool nagle_enabled;      // Nagle's algorithm (off = NODELAY socket option)
+
     // retransmit count
-    uint32 rexmit_seq;      // sequence number retransmitted
-    int rexmit_count;       // number of retransmissions (=1 after first rexmit)
-    int rexmit_timeout;     // current retransmission timeout
+    uint32 rexmit_seq;       // the sequence number rexmit_count refers to
+    int rexmit_count;        // number of retransmissions (=1 after first rexmit)
+    int rexmit_timeout;      // current retransmission timeout (aka RTO)
 
     // slow start and congestion avoidance variables (RFC 2001)
-    //int snd_cwnd;          // congestion window
-    //int ssthresh;          // slow start threshold
+    int snd_cwnd;            // congestion window
+    int ssthresh;            // slow start threshold
+
+    // performing round-trip time measurements
+    uint32 rtseq;            // starting sequence number of timed data
+    simtime_t t_rtseq_sent;  // time when rtseq was sent (0 if RTT measurement is not running)
+
+    // round-trip time estimation (Jacobson's algorithm)
+    simtime_t srtt;          // smoothed round-trip time
+    simtime_t rttvar;        // variance of round-trip time
+
+    // duplicate ack counter
+    short dupacks;
 
     // receive variables
-    //uint32 rcv_fin_seq;
-    //bool rcv_fin_valid;
     //bool rcv_up_valid;
     //uint32 rcv_buf_seq;
     //unsigned long rcv_buff;
     //double  rcv_buf_usage_thresh;
 
-    // retransmit variables
-    //uint32 snd_max;      // highest sequence number sent; used to recognize retransmits
-    //uint32 max_retrans_seq; // sequence number of a retransmitted segment
-
-    // timing information (round-trip)
-    //short t_rtt;                // round-trip time
-    //uint32 rtseq;             // starting sequence number of timed data
-    //short rttmin;
-    //short srtt;                 // smoothed round-trip time
-    //short rttvar;               // variance of round-trip time
-    //double last_timed_data;     // timestamp for measurement
-
-    // retransmission timeout
-    //short rxtcur;
-    // backoff for rto
-    //short rxtshift;
-
-    // duplicate ack counter
-    short dupacks;
-
-    // last time a segment was send
+    // last time a segment was sent
     //double last_snd_time;
 
     // ACK times
@@ -78,8 +71,16 @@ class PlainTCPStateVariables : public TCPStateVariables
 
 
 /**
- * Includes basic TCP algorithms: retransmission, PERSIST timer, keep-alive,
- * delayed acknowledge.
+ * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,
+ * keep-alive, delayed acks, congestion control.
+ *
+ * Implements:
+ *   - delayed acks
+ *   - Jacobson's and Karn's algorithms for adaptive retransmission
+ *   - Nagle's algorithm to prevent silly window syndrome
+ *
+ * Note: currently the timers and time calculations are done in double
+ * and NOT in Unix (200ms or 500ms) ticks.
  */
 class PlainTCP : public TCPAlgorithm
 {
@@ -99,6 +100,24 @@ class PlainTCP : public TCPAlgorithm
     virtual void processDelayedAckTimer(TCPEventCode& event);
     virtual void processKeepAliveTimer(TCPEventCode& event);
     //@}
+
+    /**
+     * Start REXMIT timer and initialize retransmission variables
+     */
+    virtual void startRexmitTimer();
+
+    /**
+     * Update state vars with new measured RTT value. Passing two simtime_t's
+     * will allow rttMeasurementComplete() to do calculations in double or
+     * in 200ms/500ms ticks, as needed)
+     */
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+
+    /**
+     * Send data, observing Nagle's algorithm
+     */
+    virtual void sendData();
+
   public:
     /**
      * Ctor.
@@ -120,6 +139,8 @@ class PlainTCP : public TCPAlgorithm
      */
     virtual TCPStateVariables *createStateVariables();
 
+    virtual void established();
+
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.
      */
@@ -129,13 +150,15 @@ class PlainTCP : public TCPAlgorithm
 
     virtual void receiveSeqChanged();
 
-    virtual void receivedAck(bool duplicate);
+    virtual void receivedDataAck();
+
+    virtual void receivedDuplicateAck();
 
     virtual void receivedAckForDataNotYetSent(uint32 seq);
 
     virtual void ackSent();
 
-    virtual void dataSent();
+    virtual void dataSent(uint32 fromseq);
 
     virtual void dataRetransmitted();
 
