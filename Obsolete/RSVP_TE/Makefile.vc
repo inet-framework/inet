@@ -62,10 +62,10 @@ NEDCOPTS=$(CFLAGS) $(NEDCFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 
 #------------------------------------------------------------------------------
 # object files in this directory
-OBJS= RSVPPacket_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
+OBJS= RSVPPacket_m.obj RSVPPathMsg_m.obj OspfTe.obj RSVP.obj rsvp_message.obj RSVPApp.obj TED.obj
 
 # header files generated (from msg files)
-GENERATEDHEADERS= RSVPPacket_m.h
+GENERATEDHEADERS= RSVPPacket_m.h RSVPPathMsg_m.h
 
 # subdirectories to recurse into
 SUBDIRS= 
@@ -95,6 +95,12 @@ RSVPPacket_m.obj: RSVPPacket_m.cc
 
 RSVPPacket_m.cc RSVPPacket_m.h: RSVPPacket.msg
 	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) RSVPPacket.msg
+
+RSVPPathMsg_m.obj: RSVPPathMsg_m.cc
+	$(CXX) -c $(NEDCOPTS) /Tp RSVPPathMsg_m.cc
+
+RSVPPathMsg_m.cc RSVPPathMsg_m.h: RSVPPathMsg.msg
+	$(MSGC:/=\) -s _m.cc $(INCLUDE_PATH) RSVPPathMsg.msg
 
 OspfTe.obj: OspfTe.cc
 	$(CXX) -c $(COPTS) /Tp OspfTe.cc
@@ -172,6 +178,10 @@ RSVP.obj: RSVP.cc \
   OspfTe.h \
   ../MPLS/LIBTableAccess.h \
   ../../Base/ipsuite_defs.h \
+  RSVPPacket.h \
+  RSVPPathMsg.h \
+  RSVPPacket_m.h \
+  RSVPPathMsg_m.h \
   ospf_type.h \
   ../../Base/ModuleAccess.h \
   ../MPLS/LIBtable.h \
@@ -184,7 +194,11 @@ rsvp_message.obj: rsvp_message.cc \
   rsvp_message.h \
   intserv.h \
   ../IPv4/IPAddress.h \
-  ../../Base/ipsuite_defs.h
+  RSVPPacket.h \
+  RSVPPathMsg.h \
+  ../../Base/ipsuite_defs.h \
+  RSVPPacket_m.h \
+  RSVPPathMsg_m.h
 RSVPApp.obj: RSVPApp.cc \
   RSVPApp.h \
   ../IPv4/RoutingTable.h \
@@ -202,7 +216,11 @@ RSVPApp.obj: RSVPApp.cc \
   ../MPLS/MPLSAccess.h \
   intserv.h \
   ../IPv4/IPAddress.h \
+  RSVPPacket.h \
+  RSVPPathMsg.h \
   ../../Base/ipsuite_defs.h \
+  RSVPPacket_m.h \
+  RSVPPathMsg_m.h \
   ospf_type.h \
   ../../Base/ModuleAccess.h \
   ../IPv4/RoutingTableAccess.h \
@@ -211,6 +229,12 @@ RSVPApp.obj: RSVPApp.cc \
   ../IPv4/IPDatagram.h \
   ../IPv4/IPDatagram_m.h
 RSVPPacket_m.obj: RSVPPacket_m.cc \
+  RSVPPacket_m.h \
+  intserv.h
+RSVPPathMsg_m.obj: RSVPPathMsg_m.cc \
+  RSVPPathMsg_m.h \
+  intserv.h \
+  RSVPPacket.h \
   RSVPPacket_m.h
 TED.obj: TED.cc \
   TED.h \

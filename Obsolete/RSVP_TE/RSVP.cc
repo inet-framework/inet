@@ -121,8 +121,7 @@ void RSVP::activity()
                 RErrorMsgPro(rem);
                 break;
             default:
-                ev << "Unrecognized RSVP packet format\n";
-                delete msg;
+                error("Unrecognized RSVP packet format");
             }
 
         }
@@ -157,7 +156,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
     EroObj_t *ERO;
 
     if (pmsg->hasERO())
-        ERO = pmsg->getERO();
+        ERO = pmsg->getEROArrayPtr();
 
     int removeIndex = 0;
     if (pmsg->hasERO())
@@ -306,7 +305,7 @@ void RSVP::PathMsgPro(RSVPPathMsg * pmsg, int InIf)
 
         psbEle->Previous_Hop_Address = pmsg->getNHOP();
         psbEle->LIH = pmsg->getLIH();
-        psbEle->LabelRequest = *(pmsg->getLabelRequest());
+        psbEle->LabelRequest = pmsg->getLabel_request();
         psbEle->SAllocated = false;
 
         if (IsER)
@@ -955,8 +954,7 @@ void RSVP::PTearMsgPro(RSVPPathTear * pmsg)
                    interface listed in OutInterface_list of the PSB.
                  */
 
-                RSVPPathTear *ptm = new RSVPPathTear;
-                ptm->setContent(pmsg);
+                RSVPPathTear *ptm = (RSVPPathTear *)pmsg->dup();
 
                 if (!IsER)
                 {
@@ -1217,11 +1215,11 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
     // int dest = psbEle->Session_Object.DestAddress;
 
     pm->setSession(psbEle->Session_Object);
-    pm->setLabelRequest(&psbEle->LabelRequest);
-    pm->setRTime(5);
+    pm->setLabel_request(psbEle->LabelRequest);
+    pm->setRefresh_time(5);
 
-    pm->setSenderTemplate(&psbEle->Sender_Template_Object);
-    pm->setSenderTspec(&psbEle->Sender_Tspec_Object);
+    pm->setSenderTemplate(psbEle->Sender_Template_Object);
+    pm->setSenderTspec(psbEle->Sender_Tspec_Object);
 
     /*
 
@@ -1236,19 +1234,19 @@ void RSVP::PathRefresh(PathStateBlock_t * psbEle, int OI, EroObj_t * ero)
        the LIH for the interface.
      */
 
-    RsvpHopObj_t *hop = new RsvpHopObj_t;
-    hop->Logical_Interface_Handle = OI;
-    hop->Next_Hop_Address = routerId;
+    RsvpHopObj_t hop;
+    hop.Logical_Interface_Handle = OI;
+    hop.Next_Hop_Address = routerId;
 
-    pm->setHop(hop);
+    pm->setRsvp_hop(hop);
 
     if (ero != NULL)
     {
-        pm->setERO(ero);
-        pm->addERO(true);
+        pm->setEROArray(ero);
+        pm->setHasERO(true);
     }
     else
-        pm->addERO(false);
+        pm->setHasERO(false);
 
     // ev << "CHECK ERO\n";
     // for(int j=0;j< MAX_ROUTE;j++)
@@ -1329,7 +1327,7 @@ void RSVP::ResvRefresh(ResvStateBlock_t * rsbEle, int PH)
     outRM->setSession(rsbEle->Session_Object);
     outRM->setStyle(rsbEle->style);
 
-    outRM->setRTime(5);
+    outRM->setRefresh_time(5);
 
     int peerInf = 0;
 

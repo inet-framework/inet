@@ -670,10 +670,10 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
     Filter_Spec_Object->SrcPort = DEFAULT_SRC_PORT;
     Filter_Spec_Object->Lsp_Id = lspId;
 
-    pMsg->setHop(rsvp_hop);
+    pMsg->setRsvp_hop(*rsvp_hop);
     pMsg->setSession(*s);
-    pMsg->setSenderTemplate(static_cast < SenderTemplateObj_t * >(Filter_Spec_Object));
-    pMsg->setSenderTspec(static_cast < SenderTspecObj_t * >(Flowspec_Object));
+    pMsg->setSenderTemplate(* static_cast < SenderTemplateObj_t * >(Filter_Spec_Object));
+    pMsg->setSenderTspec(* static_cast < SenderTspecObj_t * >(Flowspec_Object));
 
     // Setup routing information
     pMsg->addPar("src_addr") = IPAddress(routerId).str().c_str();
@@ -768,12 +768,12 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
                 }
             }
         }
-        pMsg->addERO(true);
-        pMsg->setERO(ERO);
+        pMsg->setHasERO(true);
+        pMsg->setEROArray(ERO);
     }
     else                        // Hop-by-Hop routing
     {
-        pMsg->addERO(false);
+        pMsg->setHasERO(false);
 
     }
 

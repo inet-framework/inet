@@ -13,6 +13,16 @@
 
 cplusplus {{
 #include "intserv.h"
+
+#define PATH_MESSAGE   1
+#define RESV_MESSAGE   2
+#define PTEAR_MESSAGE  3
+#define RTEAR_MESSAGE  4
+#define PERROR_MESSAGE 5
+#define RERROR_MESSAGE 6
+
+#define FF_STYLE    1
+#define SF_STYLE    2
 }}
 
 struct SessionObj_t;
@@ -38,4 +48,3 @@ message RSVPPacket
         SessionObj_t session;
         bool checksumValid = true;
 };
-

@@ -18,113 +18,8 @@
 
 #include "intserv.h"
 #include "IPAddress.h"
-#include "RSVPPacket_m.h"
-
-
-#define PATH_MESSAGE 1
-#define RESV_MESSAGE 2
-#define PTEAR_MESSAGE 3
-#define RTEAR_MESSAGE 4
-#define PERROR_MESSAGE 5
-#define RERROR_MESSAGE 6
-
-#define FF_STYLE    1
-#define SF_STYLE    2
-
-
-/**
- * RSVP message common part
- */
-class RSVPPacket: public RSVPPacket_Base
-{
-  public:
-    RSVPPacket(const char *name=NULL, int kind=0) : RSVPPacket_Base(name,kind) {}
-    RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other.name()) {operator=(other);}
-    RSVPPacket& operator=(const RSVPPacket& other) {RSVPPacket_Base::operator=(other); return *this;}
-    virtual cObject *dup() {return new RSVPPacket(*this);}
-
-    inline int getDestAddress() {return getSession().DestAddress;}
-    inline int getProtId()      {return getSession().Protocol_Id;}
-    inline int getDestPort()    {return getSession().DestPort;}
-    inline int getTunnelId()    {return getSession().Tunnel_Id;}
-    inline int getExTunnelId()  {return getSession().Extended_Tunnel_Id;}
-    inline int getSetupPri()    {return getSession().setupPri;}
-    inline int getHoldingPri()  {return getSession().holdingPri;}
-    inline bool isInSession(SessionObj_t* s) {
-        return getSession().DestAddress==s->DestAddress &&
-               getSession().DestPort==s->DestPort &&
-               getSession().Protocol_Id==s->Protocol_Id;
-    }
-};
-
-
-/**
- * RSVP PATH message
- *
- * <code>
- *    <Path Message> ::=       <Common Header> [ <INTEGRITY> ]
- *                             <SESSION> <RSVP_HOP>
- *                             <TIME_VALUES>
- *                             [ <EXPLICIT_ROUTE> ]
- *                             <LABEL_REQUEST>
- *                             [ <SESSION_ATTRIBUTE> ]
- *                             [ <POLICY_DATA> ... ]
- *                             <sender descriptor>
- *
- *    <sender descriptor> ::=  <SENDER_TEMPLATE> <SENDER_TSPEC>
- *                             [ <ADSPEC> ]
- *                             [ <RECORD_ROUTE> ]
- * </code>
- */
-class RSVPPathMsg : public RSVPPacket
-{
-protected:
-    RsvpHopObj_t rsvp_hop;
-    double refresh_time;
-    EroObj_t ERO[MAX_ROUTE];
-    LabelRequestObj_t label_request;
-    SenderDescriptor_t sender_descriptor;
-    bool useERO;
-
-public:
-    RSVPPathMsg();
-
-    inline int getSrcAddress() {return sender_descriptor.Sender_Template_Object.SrcAddress;}
-    inline int getSrcPort() {return sender_descriptor.Sender_Template_Object.SrcPort;}
-    inline int getLspId() {return sender_descriptor.Sender_Template_Object.Lsp_Id;}
-    inline int getNHOP() {return rsvp_hop.Next_Hop_Address;}
-    inline int getLIH() {return rsvp_hop.Logical_Interface_Handle;}
-    inline double getDelay() {return sender_descriptor.Sender_Tspec_Object.link_delay;}
-    inline double getBW() {return sender_descriptor.Sender_Tspec_Object.req_bandwidth;}
-    inline bool hasERO() {return useERO;}
-    inline void addERO(bool b) {useERO = b;}
-    inline void setLabelRequest(LabelRequestObj_t* l) {label_request.prot = l->prot;}
-    inline LabelRequestObj_t* getLabelRequest() {return &label_request;}
-
-    inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
-    inline SenderTemplateObj_t* getSenderTemplate() {return &sender_descriptor.Sender_Template_Object;}
-    inline SenderTspecObj_t* getSenderTspec() {return &sender_descriptor.Sender_Tspec_Object;}
-    inline EroObj_t* getERO() {return ERO;}
-    inline void setERO(EroObj_t* ero)
-    {
-      for(int i=0; i< MAX_ROUTE; i++)
-      {
-            ERO[i].L= (*(ero+i)).L;
-            ERO[i].node =(*(ero+i)).node;
-      }
-    }
-
-    inline void setRTime(double t) {refresh_time=t;}
-
-    bool equalST(SenderTemplateObj_t* s);
-    bool equalSD(SenderDescriptor_t* s);
-
-    void setHop(RsvpHopObj_t* h);
-    void setSenderTemplate(SenderTemplateObj_t* s);
-    void setSenderTspec(SenderTspecObj_t* s);
-    void print();
-    void setContent(RSVPPathMsg* pMsg);
-};
+#include "RSVPPacket.h"
+#include "RSVPPathMsg.h"
 
 
 /**
@@ -157,15 +52,14 @@ public:
     inline void setStyle(int style) {resv_style = style;}
     inline RsvpHopObj_t* getHop() {return &rsvp_hop;}
     inline FlowDescriptor_t* getFlowDescriptor() {return flow_descriptor_list;}
-    inline void setRTime(double t) {refresh_time = t;}
+    inline void setRefresh_time(double t) {refresh_time = t;}
     inline void setFlowDescriptor(FlowDescriptor_t* f)
     {
         for(int i=0; i< InLIST_SIZE; i++)
-            flow_descriptor_list[i]= *(f+i);
+            flow_descriptor_list[i] = f[i];
     }
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(RSVPResvMsg* rMsg);
     void print();
 };
 
@@ -202,7 +96,6 @@ public:
     bool equalST(SenderTemplateObj_t* s);
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(RSVPPathTear* pMsg);
     void print();
 };
 
@@ -240,7 +133,6 @@ public:
     }
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(RSVPResvTear* rMsg);
     void print();
 };
 
@@ -280,7 +172,6 @@ public:
     bool equalSD(SenderDescriptor_t* s);
     void setSenderTemplate(SenderTemplateObj_t* s);
     void setSenderTspec(SenderTspecObj_t* s);
-    void setContent(RSVPPathError* pMsg);
 };
 
 
@@ -314,7 +205,6 @@ public:
     inline void setErrorCode(int i) {errorCode =i;}
 
     void setHop(RsvpHopObj_t* h);
-    void setContent(RSVPResvError* pMsg);
 };
 
 #endif

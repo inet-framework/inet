@@ -19,90 +19,9 @@
 *    RSVP-TE library
 *    This file defines rsvp_message class
 **/
+
 #include "rsvp_message.h"
 
-
-/*******************************PATH MESSAGE***************************/
-
-RSVPPathMsg::RSVPPathMsg():RSVPPacket()
-{
-    setKind(PATH_MESSAGE);
-}
-
-
-bool RSVPPathMsg::equalST(SenderTemplateObj_t * s)
-{
-    if (sender_descriptor.Sender_Template_Object.SrcAddress ==
-        s->SrcAddress &&
-        sender_descriptor.Sender_Template_Object.SrcPort ==
-        s->SrcPort && sender_descriptor.Sender_Template_Object.Lsp_Id == s->Lsp_Id)
-        return true;
-    return false;
-
-}
-
-bool RSVPPathMsg::equalSD(SenderDescriptor_t * s)
-{
-    if (sender_descriptor.Sender_Template_Object.SrcAddress ==
-        s->Sender_Template_Object.SrcAddress &&
-        sender_descriptor.Sender_Template_Object.SrcPort ==
-        s->Sender_Template_Object.SrcPort &&
-        sender_descriptor.Sender_Template_Object.Lsp_Id ==
-        s->Sender_Template_Object.Lsp_Id &&
-        sender_descriptor.Sender_Tspec_Object.link_delay ==
-        s->Sender_Tspec_Object.link_delay &&
-        sender_descriptor.Sender_Tspec_Object.req_bandwidth == s->Sender_Tspec_Object.req_bandwidth)
-        return true;
-    return false;
-}
-
-
-
-
-void RSVPPathMsg::setHop(RsvpHopObj_t * h)
-{
-    rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
-    rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
-}
-
-void RSVPPathMsg::setSenderTspec(SenderTspecObj_t * s)
-{
-    sender_descriptor.Sender_Tspec_Object.link_delay = s->link_delay;
-    sender_descriptor.Sender_Tspec_Object.req_bandwidth = s->req_bandwidth;
-}
-
-void RSVPPathMsg::setSenderTemplate(SenderTemplateObj_t * s)
-{
-    sender_descriptor.Sender_Template_Object.SrcAddress = s->SrcAddress;
-    sender_descriptor.Sender_Template_Object.SrcPort = s->SrcPort;
-    sender_descriptor.Sender_Template_Object.Lsp_Id = s->Lsp_Id;
-}
-
-void RSVPPathMsg::print()
-{
-    ev << "DestAddr = " << IPAddress(getDestAddress()) << "\n" <<
-        "ProtId   = " << getProtId() << "\n" <<
-        "DestPort = " << getDestPort() << "\n" <<
-        "SrcAddr  = " << IPAddress(getSrcAddress()) << "\n" <<
-        "SrcPort  = " << getSrcPort() << "\n" <<
-        "Lsp_Id = " << getLspId() << "\n" <<
-        "Next Hop = " << IPAddress(getNHOP()) << "\n" <<
-        "LIH      = " << IPAddress(getLIH()) << "\n" <<
-        "Delay    = " << getDelay() << "\n" << "Bandwidth= " << getBW() << "\n";
-
-}
-
-void RSVPPathMsg::setContent(RSVPPathMsg * pMsg)
-{
-    setSession(pMsg->getSession());
-    setHop(pMsg->getHop());
-    setSenderTemplate(pMsg->getSenderTemplate());
-    setSenderTspec(pMsg->getSenderTspec());
-    setERO(pMsg->getERO());
-    addERO(pMsg->hasERO());
-    setLabelRequest(pMsg->getLabelRequest());
-
-}
 
 /********************************RESERVATION MESSAGE*************************/
 
@@ -118,15 +37,6 @@ void RSVPResvMsg::setHop(RsvpHopObj_t * h)
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
 }
-
-void RSVPResvMsg::setContent(RSVPResvMsg * rMsg)
-{
-    setSession(rMsg->getSession());
-    setHop(rMsg->getHop());
-    setFlowDescriptor(rMsg->getFlowDescriptor());
-    setStyle(rMsg->getStyle());
-}
-
 
 void RSVPResvMsg::print()
 {
@@ -168,17 +78,6 @@ void RSVPPathTear::setHop(RsvpHopObj_t * h)
 {
     rsvp_hop.Logical_Interface_Handle = h->Logical_Interface_Handle;
     rsvp_hop.Next_Hop_Address = h->Next_Hop_Address;
-
-}
-
-void RSVPPathTear::setContent(RSVPPathTear * pMsg)
-{
-    setSession(pMsg->getSession());
-    setHop(pMsg->getHop());
-    setSenderTemplate(pMsg->getSenderTemplate());
-
-
-
 
 }
 
@@ -224,13 +123,6 @@ void RSVPResvTear::setHop(RsvpHopObj_t * h)
 
 }
 
-void RSVPResvTear::setContent(RSVPResvTear * rMsg)
-{
-    setSession(rMsg->getSession());
-    setHop(rMsg->getHop());
-    setFlowDescriptor(rMsg->getFlowDescriptor());
-}
-
 void RSVPResvTear::print()
 {
     int sIP = 0;
@@ -257,16 +149,6 @@ void RSVPResvTear::print()
 RSVPPathError::RSVPPathError():RSVPPacket()
 {
     setKind(PERROR_MESSAGE);
-
-}
-
-void RSVPPathError::setContent(RSVPPathError * pMsg)
-{
-    setSession(pMsg->getSession());
-    setErrorCode(pMsg->getErrorCode());
-    setErrorNode(pMsg->getErrorNode());
-    setSenderTspec(pMsg->getSenderTspec());
-    setSenderTemplate(pMsg->getSenderTemplate());
 
 }
 
@@ -319,11 +201,4 @@ void RSVPResvError::setHop(RsvpHopObj_t * h)
 
 }
 
-void RSVPResvError::setContent(RSVPResvError * rMsg)
-{
-    setSession(rMsg->getSession());
-    setHop(rMsg->getHop());
-    setErrorCode(rMsg->getErrorCode());
-    setErrorNode(rMsg->getErrorNode());
 
-}
