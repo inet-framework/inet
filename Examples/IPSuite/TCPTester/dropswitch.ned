@@ -25,7 +25,7 @@ simple DropSwitch
         pk_delay,
         delete_probability, // in percent !!!
         syn_client_del,
-        syn_server_del,      
+        syn_server_del,
         ack_client_del,
         ack_server_del,
         tcp_server_del,
