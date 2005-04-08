@@ -742,6 +742,10 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddres
             state->snd_wl2 = tcpseg->ackNo();
         }
 
+        // this also seems to be a good time to learn our local IP address
+        // (was probably unspecified at connection open)
+        tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+
         //"
         //   If SND.UNA > ISS (our SYN has been ACKed), change the connection
         //   state to ESTABLISHED, form an ACK segment
