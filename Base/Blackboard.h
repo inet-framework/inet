@@ -1,3 +1,4 @@
+// -*- mode:c++ -*-
 //
 // Copyright (C) 2004 Andras Varga
 //
@@ -37,9 +38,14 @@ class BlackboardAccess;
  *
  * Blackboard makes it possible for several modules (representing e.g. protocol
  * layers) to share information, in a publish-subscribe fashion.
+ * Participating modules or classes have to implement the BlackboardAccess
+ * interface (=have this abstract class as base class).
  *
- * Anyone can publish data items on the blackboard. Every item is published with
- * a unique string label. The Blackboard makes no assumption about the format
+ * Anyone can publish data items on the blackboard. In order to allow for some
+ * type safety via dynamic_cast, items have to be subclassed from cPolymorphic.
+ *
+ * Every item is published with a unique string label.
+ * The Blackboard makes no assumption about the format
  * of the label, but it's generally a good idea to make it structured,
  * e.g. with a dotted format ("nic1.linkstatus"). The label can be used by
  * subscribers to identify an item ("I want to subscribe to nic1.linkstatus").
@@ -53,13 +59,10 @@ class BlackboardAccess;
  * to blackboard items; think of file handles (fd's) or FILE* variables in Unix
  * and C programming, or window handles (HWND) in the Windows API.)
  * BBItemRefs allow very efficient (constant-time) access to Blackboard items.
- *
- * Blackboard items have to be subclassed from cPolymorphic, in order to
- * allow for some type safety via dynamic_cast.
- *
- * Clients may browse blackboard contents and subscribe to items. After
- * subscription, clients will receive notifications whenever the subscribed
- * item changes. Clients may also subscribe to get notified whenever
+
+ * Clients may browse blackboard contents and subscribe to items. After subscription,
+ * clients will receive notifications via BlackboardAccess callbacks whenever
+ * the subscribed item changes. Clients may also subscribe to get notified whenever
  * items are published to or withdrawn from the blackboard.
  *
  * Notifications are done with callback-like mechanism. Participating modules
@@ -82,9 +85,21 @@ class BlackboardAccess;
  *     ...
  * };
  *
- * void Foo::initialize()
+ * void Foo::initialize(int stage)
  * {
- *     ref = blackboard()->subscribe(this,"routingTable");
+ *     // to avoid a subscribe-BEFORE-publish a two stage
+ *     // initialization should be used and all publish calls should
+ *     // go into the first stage (stage 0) whereas you should subscribe
+ *     // in the second stage (stage 1)
+ *     if(stage==0)
+ *     {
+ *         ...
+ *     }
+ *     else if(stage==1)
+ *     {
+ *         ref = blackboard()->subscribe(this,"routingTable");
+ *         ...
+ *     }
  * }
  *
  * void Foo::blackboardItemChanged(BBItemRef item)
@@ -103,11 +118,14 @@ class BlackboardAccess;
  *    ...
  * };
  *
- * void Bar::initialize()
+ * void Bar::initialize(int stage)
  * {
- *     blackboard()->registerClient(this);
- *     // make sure we get what's already on the blackboard
- *     blackboard()->invokePublishedForAllBBItems(this);
+ *     if(stage==0)
+ *     {
+ *         blackboard()->registerClient(this);
+ *         // make sure we get what's already on the blackboard
+ *         blackboard()->getBlackboardContent(this);
+ *     }
  * }
  *
  * void Bar::blackboardItemPublished(BBItemRef item)
@@ -140,6 +158,7 @@ class BlackboardAccess;
  * </pre>
  *
  * @author Andras Varga
+ * @ingroup blackboard
  */
 class Blackboard : public cSimpleModule
 {
@@ -147,7 +166,7 @@ class Blackboard : public cSimpleModule
     typedef std::vector<BlackboardAccess *> SubscriberVector;
 
     /**
-     * Represents a blackboard items.
+     * Represents a blackboard item.
      */
     class BBItem
     {
@@ -157,11 +176,18 @@ class Blackboard : public cSimpleModule
         std::string _label;
         SubscriberVector subscribers;
       public:
+        /** Return the label of this data item*/
         const char *label()  {return _label.c_str();}
+        /** Return the data item*/
         cPolymorphic *data()  {return _item;}
+        /** Return the data item*/
+        const cPolymorphic *data() const  {return _item;}
     };
 
   protected:
+    /** @brief Set debugging for the basic module*/
+    bool coreDebug;
+
     class Iterator;
     friend class Iterator;
 
@@ -170,7 +196,7 @@ class Blackboard : public cSimpleModule
     ContentsMap contents;
 
     // those who have subscribed to publish()/withdraw() requests
-    SubscriberVector addRemoveSubscribers;
+    SubscriberVector registeredClients;
 
   public:
     /**
@@ -234,6 +260,7 @@ class Blackboard : public cSimpleModule
     //@}
 
     /** @name Methods for subscribers */
+    //@{
     /**
      * Subscribe to a BB item identified by a label
      */
@@ -255,15 +282,15 @@ class Blackboard : public cSimpleModule
     void unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
 
     /**
-     * Start to receive notifications about items being published
+     * Generally subscribe to notifications about items being published
      * to/withdrawn from BB.
      */
     void registerClient(BlackboardAccess *bbClient);
 
     /**
-     * The pair of registerClient().
+     * Cancel subscription initiated by registerClient().
      */
-    void deregisterClient(BlackboardAccess *bbClient);
+    void removeClient(BlackboardAccess *bbClient);
 
     /**
      * Utility function: the client gets immediate notification with
@@ -271,7 +298,7 @@ class Blackboard : public cSimpleModule
      * This may simplify initialization code in a subscribe-when-published
      * style client.
      */
-    void invokePublishedForAllBBItems(BlackboardAccess *bbClient);
+    void getBlackboardContent(BlackboardAccess *bbClient);
 
     /**
      * As with standard C++ classes.
@@ -289,25 +316,33 @@ typedef Blackboard::BBItemRef BBItemRef;
 
 
 /**
- * Gives subscribe access to the blackboard.
+ * Gives subscribe access to the Blackboard.
+ *
+ * @author Andras Varga
+ * @ingroup blackboard
  */
 class BlackboardAccess
 {
-  private:
-    Blackboard *bb;
-  public:
-    BlackboardAccess() {bb=NULL;}
-    Blackboard *blackboard();
+protected:
+  Blackboard *bb;
+public:
+  BlackboardAccess() {bb=NULL;}
+  /** Returns a pointer to the Blackboard*/
+  Blackboard *blackboard();
 
-    /** @name Callbacks invoked by the blackboard */
-    //@{
-    virtual void blackboardItemChanged(BBItemRef item) = 0;
-    virtual void blackboardItemPublished(BBItemRef item) = 0;
-    virtual void blackboardItemWithdrawn(BBItemRef item) = 0;
-    //@}
+  /** @name Callbacks invoked by the blackboard */
+  //@{
+  /** Called whenever an already published item changes*/
+  virtual bool blackboardItemChanged(BBItemRef item) = 0;
+  /** Called whenever a new item is published on the Blackboard*/
+  virtual bool blackboardItemPublished(BBItemRef item) = 0;
+  /** Called whenever an item is removed from the Blackboard*/
+  virtual bool blackboardItemWithdrawn(BBItemRef item) = 0;
+  //@}
 };
 
 #endif
+
 
 
 

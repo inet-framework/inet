@@ -18,10 +18,20 @@
 
 
 #include "Blackboard.h"
+#include "stlwatch.h"
 #include <algorithm>
 
 Define_Module(Blackboard);
 
+
+#define coreEV (ev.disabled()||!coreDebug) ? std::cout : ev <<parentModule()->name()<<"["<<parentModule()->index()<<"]::Blackboard: "
+
+
+std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)
+{
+    os << bbi.data()->info();
+    return os;
+}
 
 Blackboard::~Blackboard()
 {
@@ -35,6 +45,11 @@ Blackboard::~Blackboard()
 
 void Blackboard::initialize()
 {
+  if(hasPar("coreDebug"))
+    coreDebug = par("coreDebug").boolValue();
+  else
+    coreDebug = false;
+    WATCH_PTRMAP(contents);
 }
 
 void Blackboard::handleMessage(cMessage *msg)
@@ -57,10 +72,13 @@ BBItemRef Blackboard::publish(const char *label, cPolymorphic *item)
     bbitem->_label = label;
     contents[bbitem->_label] = bbitem;
 
+    coreEV <<"publish "<<label<<" on bb\n";
+    coreEV <<"bbItem->label: "<<bbitem->label()<<endl;
     // notify
-    SubscriberVector& vec = addRemoveSubscribers;
-    for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i)
+    SubscriberVector& vec = registeredClients;
+    for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i){
         (*i)->blackboardItemPublished(bbitem);
+    }
     return bbitem;
 }
 
@@ -71,10 +89,10 @@ void Blackboard::withdraw(BBItemRef bbItem)
     // find on BB
     ContentsMap::iterator k = contents.find(bbItem->_label);
     if (k==contents.end())
-        error("withdraw(): item labelled `%s' is not on clipboard (BBItemRef stale?)", bbItem->_label.c_str());
+      error("withdraw(): item labelled `%s' is not on clipboard (BBItemRef stale?)", bbItem->_label.c_str());
 
-    // notify
-    SubscriberVector& vec = addRemoveSubscribers;
+    // notify subscribers
+    SubscriberVector& vec = bbItem->subscribers;
     for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i)
         (*i)->blackboardItemWithdrawn(bbItem);
 
@@ -86,16 +104,18 @@ void Blackboard::withdraw(BBItemRef bbItem)
 
 void Blackboard::changed(BBItemRef bbItem, cPolymorphic *item)
 {
-    Enter_Method("changed(\"%s\", %s *ptr)", bbItem->label(), item->className());
+  coreEV <<"enter changed; item: "<<bbItem->label()<<" changed -> notify subscribers\n";
+
+  Enter_Method("changed(\"%s\", %s *ptr)", bbItem->label(), item->className());
 
     // update data pointer
     if (item)
         bbItem->_item = item;
-
     // notify subscribers
     SubscriberVector& vec = bbItem->subscribers;
-    for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i)
+    for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i){
         (*i)->blackboardItemChanged(bbItem);
+    }
 }
 
 BBItemRef Blackboard::subscribe(BlackboardAccess *bbClient, const char *label)
@@ -108,6 +128,7 @@ BBItemRef Blackboard::subscribe(BlackboardAccess *bbClient, const char *label)
        error("subscribe(): item labelled `%s' not on blackboard", label);
 
     // subscribe
+    coreEV <<"subscribe for "<<label<<" on bb\n";
     subscribe(bbClient, item);
     return item;
 }
@@ -129,6 +150,8 @@ BBItemRef Blackboard::subscribe(BlackboardAccess *bbClient, BBItemRef bbItem)
 
     // add subscriber
     vec.push_back(bbClient);
+
+    coreEV <<"sucessfully subscribed for item: "<<bbItem->label()<<endl;
     return bbItem;
 }
 
@@ -151,7 +174,7 @@ void Blackboard::registerClient(BlackboardAccess *bbClient)
     Enter_Method("registerClient(this)");
 
     // check if already subscribed
-    SubscriberVector& vec = addRemoveSubscribers;
+    SubscriberVector& vec = registeredClients;
     if (std::find(vec.begin(), vec.end(), bbClient)!=vec.end())
         return; // ok, already subscribed
 
@@ -159,12 +182,12 @@ void Blackboard::registerClient(BlackboardAccess *bbClient)
     vec.push_back(bbClient);
 }
 
-void Blackboard::deregisterClient(BlackboardAccess *bbClient)
+void Blackboard::removeClient(BlackboardAccess *bbClient)
 {
-    Enter_Method("deregisterClient(this)");
+    Enter_Method("removeClient(this)");
 
     // check if subscribed
-    SubscriberVector& vec = addRemoveSubscribers;
+    SubscriberVector& vec = registeredClients;
     SubscriberVector::iterator k = std::find(vec.begin(), vec.end(), bbClient);
     if (k==vec.end())
         return; // ok, not subscribed
@@ -173,9 +196,9 @@ void Blackboard::deregisterClient(BlackboardAccess *bbClient)
     vec.erase(k);
 }
 
-void Blackboard::invokePublishedForAllBBItems(BlackboardAccess *bbClient)
+void Blackboard::getBlackboardContent(BlackboardAccess *bbClient)
 {
-    Enter_Method("invokePublishedForAllBBItems(this)");
+    Enter_Method("getBlackboardContent(this)");
 
     for (ContentsMap::iterator i=contents.begin(); i!=contents.end(); ++i)
         bbClient->blackboardItemPublished((*i).second);
@@ -187,8 +210,12 @@ Blackboard *BlackboardAccess::blackboard()
 {
     if (!bb)
     {
-        // FIXME find
+      std::cout<<"do not have a valid pointer to the blackboard"<<endl;
+      // FIXME find
+      // I think it's hard to find the bb here since BBAccess is not a
+      // cModule... We take care of that within the BasicModule...
     }
     return bb;
 }
+
 
