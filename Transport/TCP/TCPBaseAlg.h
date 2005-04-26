@@ -16,60 +16,64 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPTAHOERENO_H
-#define __TCPTAHOERENO_H
+#ifndef __TCPBASEALG_H
+#define __TCPBASEALG_H
 
 #include <omnetpp.h>
 #include "TCPAlgorithm.h"
 
 
 /**
- * State variables for TCPTahoeReno.
+ * State variables for TCPBaseAlg.
  */
-class TCPTahoeRenoStateVariables : public TCPStateVariables
+class TCPBaseAlgStateVariables : public TCPStateVariables
 {
   public:
-    TCPTahoeRenoStateVariables();
+    TCPBaseAlgStateVariables();
+    virtual std::string info() const;
+    virtual std::string detailedInfo() const;
 
-    // TCP features
-    bool delayed_acks_enabled; // delayed ACKs enabled/disabled; FIXME make this a socket option
-    bool nagle_enabled;        // Nagle's algorithm (off = NODELAY socket option)
-    enum {TAHOE,RENO} tcpvariant;  // TCP algorithm
+    /// TCP features
+    //@{
+    bool delayed_acks_enabled; ///< delayed ACKs enabled/disabled; FIXME make this a socket option
+    bool nagle_enabled;        ///< Nagle's algorithm (off = NODELAY socket option)
+    //@}
 
-    // retransmit count
-    int rexmit_count;         // number of retransmissions (=1 after first rexmit)
-    simtime_t rexmit_timeout; // current retransmission timeout (aka RTO)
+    /// retransmit count
+    //@{
+    int rexmit_count;         ///< number of retransmissions (=1 after first rexmit)
+    simtime_t rexmit_timeout; ///< current retransmission timeout (aka RTO)
+    //@}
 
-    // slow start and congestion avoidance variables (RFC 2001)
-    uint snd_cwnd;            // congestion window
-    uint ssthresh;            // slow start threshold
+    /// congestion window
+    //@{
+    uint snd_cwnd;            ///< congestion window
+    //@}
 
-    // performing round-trip time measurements
-    uint32 rtseq;            // starting sequence number of timed data
-    simtime_t t_rtseq_sent;  // time when rtseq was sent (0 if RTT measurement is not running)
+    /// round-trip time measurements
+    //@{
+    uint32 rtseq;            ///< starting sequence number of timed data
+    simtime_t rtseq_sendtime;  ///< time when rtseq was sent (0 if RTT measurement is not running)
+    //@}
 
-    // round-trip time estimation (Jacobson's algorithm)
-    simtime_t srtt;          // smoothed round-trip time
-    simtime_t rttvar;        // variance of round-trip time
-
-    // last time a segment was sent
-    //double last_snd_time;
-
-    // ACK times
-    //double ack_send_time;
-    //double ack_rcv_time;
+    /// round-trip time estimation (Jacobson's algorithm)
+    //@{
+    simtime_t srtt;          ///< smoothed round-trip time
+    simtime_t rttvar;        ///< variance of round-trip time
+    //@}
 };
 
 
 /**
  * Includes basic TCP algorithms: adaptive retransmission, persist timer,
- * keep-alive, delayed acks, congestion control.
+ * keep-alive, delayed acks -- EXCLUDING congestion control. Congestion
+ * control is implemented in subclasses such as TCPTahoeAlg or TCPRenoAlg.
  *
  * Implements:
  *   - delayed acks
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
  *   - Nagle's algorithm to prevent silly window syndrome
- *   - Tahoe (Fast Rexmit) or Reno (Fast Rexmit/Fast Recovery)
+ *
  * To be done:
  *   - persist timer, keepalive timer
  *
@@ -77,16 +81,24 @@ class TCPTahoeRenoStateVariables : public TCPStateVariables
  * and NOT in Unix (200ms or 500ms) ticks. It's possible to write another
  * TCPAlgorithm which uses ticks (or rather, factor out timer handling to
  * separate methods, and redefine only those).
+ *
+ * Congestion window is set to MSS when the connection is established,
+ * and not touched after that. Subclasses may redefine any of the virtual
+ * functions here to add their congestion control code.
  */
-class TCPTahoeReno : public TCPAlgorithm
+class TCPBaseAlg : public TCPAlgorithm
 {
   protected:
+    TCPBaseAlgStateVariables *&state; // alias to TCLAlgorithm's 'state'
+
     cMessage *rexmitTimer;
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
 
-    TCPTahoeRenoStateVariables *state;
+    cOutVector *cwndVector;  // will record changes to snd_cwnd
+    cOutVector *rttVector;   // will record measured RTT
+    cOutVector *srttVector;  // will record smoothed RTT
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -121,22 +133,17 @@ class TCPTahoeReno : public TCPAlgorithm
     /**
      * Ctor.
      */
-    TCPTahoeReno();
+    TCPBaseAlg();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPTahoeReno();
+    virtual ~TCPBaseAlg();
 
     /**
      * Create timers, etc.
      */
     virtual void initialize();
-
-    /**
-     * Create and return a TCPTahoeRenoStateVariables object.
-     */
-    virtual TCPStateVariables *createStateVariables();
 
     virtual void established(bool active);
 

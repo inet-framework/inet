@@ -60,8 +60,8 @@ class TCPSegment;
  *    of send and receive queues
  *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
  *    queues with "virtual" bytes (byte counts only)
- *  - TCPAlgorithm: abstract base class for TCP algorithms
- *  - DummyTCPAlg and TCPTahoeReno, two concrete TCPAlgorithm implementations.
+ *  - TCPAlgorithm: abstract base class for TCP algorithms, and subclasses:
+ *    DumbTCP, TCPBaseAlg, TCPTahoeRenoFamily, TCPTahoe, TCPReno.
  *
  * TCPMain subclassed from cSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
@@ -91,7 +91,7 @@ class TCPSegment;
  * design of TCPConnection and makes it a lot easier to implement new TCP
  * variations such as NewReno, Vegas or LinuxTCP as TCPAlgorithm subclasses.
  *
- * Currently implemented TCPAlgorithm classes are DummyTCPAlg and TCPTahoeReno.
+ * Currently implemented TCPAlgorithm classes are DumbTCP, TCPTahoe, TCPReno, etc.
  *
  * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
@@ -152,6 +152,8 @@ class TCPMain : public cSimpleModule
   public:
     static bool testing;    // switches between tcpEV and testingEV
     static bool logverbose; // if !testing, turns on more verbose logging
+
+    bool recordStatistics;  // output vectors on/off
 
   public:
     Module_Class_Members(TCPMain, cSimpleModule, 0);

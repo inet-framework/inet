@@ -61,6 +61,8 @@ void TCPMain::initialize()
     WATCH_PTRMAP(tcpConnMap);
     WATCH_PTRMAP(tcpAppConnMap);
 
+    recordStatistics = par("recordStats");
+
     cModule *netw = simulation.systemModule();
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();

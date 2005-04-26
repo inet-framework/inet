@@ -21,8 +21,6 @@
 
 #include <omnetpp.h>
 #include "TCPConnection.h"
-#include "TCPSendQueue.h"
-#include "TCPReceiveQueue.h"
 #include "TCPSegment.h"
 
 
@@ -37,14 +35,21 @@ class TCPAlgorithm : public cPolymorphic
 {
   protected:
     TCPConnection *conn; // we belong to this connection
-    TCPSendQueue *sendQueue;
-    TCPReceiveQueue *receiveQueue;
+    TCPStateVariables *state; // our state variables
+
+    /**
+     * Create state block (TCB) used by this TCP variant. It is expected
+     * that every TCPAlgorithm subclass will have its own state block,
+     * subclassed from TCPStateVariables. This factory method should
+     * create and return a "blank" state block of the appropriate type.
+     */
+    virtual TCPStateVariables *createStateVariables() = 0;
 
   public:
     /**
      * Ctor.
      */
-    TCPAlgorithm() {conn = NULL; sendQueue = NULL; receiveQueue = NULL;}
+    TCPAlgorithm() {state = NULL; conn = NULL;}
 
     /**
      * Virtual dtor.
@@ -56,10 +61,14 @@ class TCPAlgorithm : public cPolymorphic
      * TCPConnection must be set already at this time, because we cache
      * their pointers here.
      */
-    void setConnection(TCPConnection *_conn)  {
-        conn = _conn;
-        sendQueue = conn->getSendQueue();
-        receiveQueue = conn->getReceiveQueue();
+    void setConnection(TCPConnection *_conn)  {conn = _conn;}
+
+    /**
+     * Creates and returns the TCP state variables.
+     */
+    TCPStateVariables *stateVariables() {
+        if (!state) state = createStateVariables();
+        return state;
     }
 
     /**
@@ -68,14 +77,6 @@ class TCPAlgorithm : public cPolymorphic
      * available in the constructor yet.
      */
     virtual void initialize() {}
-
-    /**
-     * Create state block (TCB) used by this TCP variant. It is expected
-     * that every TCPAlgorithm subclass will have its own state block,
-     * subclassed from TCPStateVariables. This factory method should
-     * create and return a "blank" state block of the appropriate type.
-     */
-    virtual TCPStateVariables *createStateVariables() = 0;
 
     /**
      * Called when the connection is going to ESTABLISHED from SYN_SENT or

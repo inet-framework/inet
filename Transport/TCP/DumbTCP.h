@@ -16,17 +16,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __PLAINTCP_H
-#define __PLAINTCP_H
+#ifndef __DUMBTCP_H
+#define __DUMBTCP_H
 
 #include <omnetpp.h>
 #include "TCPAlgorithm.h"
 
 
 /**
- * State variables for DummyTCPAlg.
+ * State variables for DumbTCP.
  */
-class DummyTCPStateVariables : public TCPStateVariables
+class DumbTCPStateVariables : public TCPStateVariables
 {
   public:
     //...
@@ -34,29 +34,32 @@ class DummyTCPStateVariables : public TCPStateVariables
 
 
 /**
- * A very simplistic but concrete TCPAlgorithm implementation, only for
- * demonstration. Doesn't even include retransmissions.
+ * A very-very basic TCPAlgorithm implementation, with hardcoded
+ * retransmission timeout and no other sophistication. It can be
+ * used to demonstrate what happened if there was no adaptive
+ * timeout calculation, delayed acks, silly window avoidance,
+ * congestion control, etc.
  */
-class DummyTCPAlg : public TCPAlgorithm
+class DumbTCP : public TCPAlgorithm
 {
   protected:
-    DummyTCPStateVariables *state;
+    DumbTCPStateVariables *&state; // alias to TCLAlgorithm's 'state'
+
+    cMessage *rexmitTimer;  // retransmission timer
+
+  protected:
+    /** Creates and returns a DumbTCPStateVariables object. */
+    virtual TCPStateVariables *createStateVariables() {
+        return new DumbTCPStateVariables();
+    }
 
   public:
-    /**
-     * Ctor.
-     */
-    DummyTCPAlg();
+    /** Ctor */
+    DumbTCP();
 
-    /**
-     * Virtual dtor.
-     */
-    virtual ~DummyTCPAlg();
+    virtual ~DumbTCP();
 
-    /**
-     * Creates and returns a DummyTCPStateVariables object.
-     */
-    virtual TCPStateVariables *createStateVariables();
+    virtual void initialize();
 
     virtual void established(bool active);
 

@@ -106,10 +106,11 @@ const char *TCPConnection::indicationName(int code)
 
 void TCPConnection::printConnBrief()
 {
-    tcpEV << "Connection " << this << " ";
+    tcpEV << "Connection ";
     tcpEV << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
     tcpEV << "  on app[" << appGateIndex << "],connId=" << connId;
-    tcpEV << "  in " << stateName(fsm.state()) << "\n";
+    tcpEV << "  in " << stateName(fsm.state());
+    tcpEV << "  (ptr=0x" << this << ")\n";
 }
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
@@ -146,9 +147,9 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     const char *tcpAlgorithmClass = tcpAlgorithm->className();
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
     conn->tcpAlgorithm->setConnection(conn);
-    conn->tcpAlgorithm->initialize();
 
-    conn->state = conn->tcpAlgorithm->createStateVariables();
+    conn->state = conn->tcpAlgorithm->stateVariables();
+    conn->tcpAlgorithm->initialize();
 
     // put it into LISTEN, with our localAddr/localPort
     conn->state->active = false;
@@ -162,6 +163,11 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg)
 {
+    // record seq (only if we do send data) and ackno
+    if (sndNxtVector && tcpseg->payloadLength()!=0) 
+        sndNxtVector->record(tcpseg->sequenceNo());
+    if (sndAckVector) sndAckVector->record(tcpseg->ackNo());
+    
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
@@ -251,10 +257,10 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
     tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
     tcpAlgorithm->setConnection(this);
-    tcpAlgorithm->initialize();
 
     // create state block
-    state = tcpAlgorithm->createStateVariables();
+    state = tcpAlgorithm->stateVariables();
+    tcpAlgorithm->initialize();
 }
 
 void TCPConnection::selectInitialSeqNum()
@@ -380,57 +386,76 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
+void TCPConnection::sendSegment(int bytes)
 {
-    // start sending from snd_max
+    // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
+    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
+    tcpseg->setAckNo(state->rcv_nxt);
+    tcpseg->setAckBit(true);
+    tcpseg->setWindow(state->rcv_wnd);
+    // TBD when to set PSH bit?
+    // TBD set URG bit if needed
+    ASSERT(bytes==tcpseg->payloadLength());
+
+    state->snd_nxt += bytes;
+
+    if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
+    {
+        tcpEV << "Setting FIN on segment\n";
+        tcpseg->setFinBit(true);
+        state->snd_nxt = state->snd_fin_seq+1;
+    }
+
+    sendToIP(tcpseg);
+}
+
+bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
+{
+    // we'll start sending from snd_max
     state->snd_nxt = state->snd_max;
 
-    // check how much we can sent
+    // check how many bytes we have
     ulong buffered = sendQueue->bytesAvailable(state->snd_nxt);
     if (buffered==0)
         return false;
-    ulong win = state->snd_una + state->snd_wnd - state->snd_nxt;
-    if (maxNumBytes!=-1 && (ulong)maxNumBytes<win)
-        win = maxNumBytes;
-    if (win>buffered)
-        win = buffered;
-    if (win==0)
+
+    // maxWindow is smaller of (snd_wnd, congestionWindow)
+    long maxWindow = state->snd_wnd;
+    if (congestionWindow>=0 && maxWindow > congestionWindow)
+        maxWindow = congestionWindow;
+
+    // effectiveWindow: number of bytes we're allowed to send now
+    long effectiveWin = maxWindow - (state->snd_nxt - state->snd_una);
+    if (effectiveWin <= 0)
     {
-        tcpEV << (maxNumBytes==0 ? "Cannot send, congestion window closed\n" : "Cannot send, send window closed (snd_una+snd_wnd-snd_max=0)\n");
-        return false;
-    }
-    if (fullSegments && win<state->snd_mss)
-    {
-        tcpEV << "Cannot send, don't have a full segment (snd_mss=" << state->snd_mss << ")\n";
+        tcpEV << "Effective window is zero (advertised window " << state->snd_wnd <<
+                 ", congestion window " << congestionWindow << "), cannot send.\n";
         return false;
     }
 
-    // start sending 'win' bytes
+    ulong bytesToSend = effectiveWin;
+
+    if (bytesToSend > buffered)
+        bytesToSend = buffered;
+
+    if (fullSegmentsOnly && bytesToSend < state->snd_mss)
+    {
+        tcpEV << "Cannot send, not enough data for a full segment (MSS=" << state->snd_mss
+              << ", in buffer " << buffered << ")\n";
+        return false;
+    }
+
+    // start sending 'bytesToSend' bytes
+    tcpEV << "Will send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin
+          << ", in buffer " << buffered << " bytes)\n";
+
     uint32 old_snd_nxt = state->snd_nxt;
-    ASSERT(win>0);
-    while (win>0)
+    ASSERT(bytesToSend>0);
+    while (bytesToSend>0) // FIXME should this be if(fullSegmentsOnly ? bytesToSend>=state->snd_mss : bytesToSend>0) ?
     {
-        ulong bytes = Min(win, state->snd_mss);
-        TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
-        tcpseg->setAckNo(state->rcv_nxt);
-        tcpseg->setAckBit(true);
-        tcpseg->setWindow(state->rcv_wnd);
-        // TBD when to set PSH bit?
-        // TBD set URG bit if needed
-        ASSERT(bytes==(ulong)tcpseg->payloadLength());
-
-        win -= bytes;
-        state->snd_nxt += bytes;
-        state->snd_wnd -= bytes;
-
-        if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
-        {
-            tcpEV << "Setting FIN on segment and advancing snd_nxt over FIN\n";
-            tcpseg->setFinBit(true);
-            state->snd_nxt = state->snd_fin_seq+1;
-        }
-
-        sendToIP(tcpseg);
+        ulong bytes = Min(bytesToSend, state->snd_mss);
+        sendSegment(bytes);
+        bytesToSend -= bytes;
     }
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
@@ -445,8 +470,36 @@ bool TCPConnection::sendData(bool fullSegments, int maxNumBytes)
     return true;
 }
 
+bool TCPConnection::sendProbe()
+{
+    // we'll start sending from snd_max
+    state->snd_nxt = state->snd_max;
 
-void TCPConnection::retransmitData()
+    // check we have 1 byte to send
+    if (sendQueue->bytesAvailable(state->snd_nxt)==0)
+    {
+        tcpEV << "Cannot send probe because send buffer is empty\n";
+        return false;
+    }
+
+    uint32 old_snd_nxt = state->snd_nxt;
+
+    tcpEV << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
+    sendSegment(1);
+
+    // remember highest seq sent (snd_nxt may be set back on retransmission,
+    // but we'll need snd_max to check validity of ACKs -- they must ack
+    // something we really sent)
+    state->snd_max = state->snd_nxt;
+
+    // notify
+    tcpAlgorithm->ackSent();
+    tcpAlgorithm->dataSent(old_snd_nxt);
+
+    return true;
+}
+
+void TCPConnection::retransmitOneSegment()
 {
     // retransmit one segment at snd_una, and set snd_nxt accordingly
     state->snd_nxt = state->snd_una;
@@ -454,110 +507,26 @@ void TCPConnection::retransmitData()
     ulong bytes = Min(state->snd_mss, state->snd_max - state->snd_nxt);
     ASSERT(bytes!=0);
 
-    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
-    tcpseg->setAckNo(state->rcv_nxt);
-    tcpseg->setAckBit(true);
-    tcpseg->setWindow(state->rcv_wnd);
-    // TBD when to set PSH bit?
-    // TBD set URG bit if needed
-    ASSERT(bytes==(ulong)tcpseg->payloadLength());
-
-    state->snd_nxt += bytes;
-
-    if (state->send_fin && state->snd_nxt==state->snd_fin_seq)
-    {
-        tcpEV << "Setting FIN on retransmitted segment\n";
-        tcpseg->setFinBit(true);
-        state->snd_nxt = state->snd_fin_seq+1;
-    }
-
-    sendToIP(tcpseg);
+    sendSegment(bytes);
 
     // notify
     tcpAlgorithm->ackSent();
 }
 
-
-/*
-bool TCPConnection::segAccept(TCPSegment *tcpseg)
+void TCPConnection::retransmitData()
 {
-  //first octet outside the recive window
-  unsigned long rcv_wnd_nxt = tcb_block->rcv_nxt + tcb_block->rcv_wnd;
-  //seq. number of the last octet of the incoming segment
-  unsigned long seg_end;
+    // retransmit everything from snd_una
+    state->snd_nxt = state->snd_una;
 
-  //get the received segment
-  cMessage*  seg        = tcb_block->st_event.pmsg;
-  //get header of the segment
-  TcpHeader* tcp_header = (TcpHeader*) (seg->par("tcpheader").pointerValue());
-  //set sequence number
-  tcb_block->seg_seq    = tcp_header->th_seq_no;
-  //get segment length (counting SYN, FIN)
-  tcb_block->seg_len    = seg->par("seg_len");
+    ulong bytesToSend = state->snd_max - state->snd_nxt;
+    ASSERT(bytesToSend!=0);
 
-  //if segment has bit errors it is not acceptable.
-  //TCP does this with checksum, we check the hasBitError() member
-  if (seg->hasBitError() == true)
+    while (bytesToSend>0)
     {
-      if (debug) ev << "Incoming segment has bit errors. Ignoring the segment.\n";
-      return 0;
+        ulong bytes = Min(bytesToSend, state->snd_mss);
+        sendSegment(bytes);
+        bytesToSend -= bytes;
     }
-
-  //if SEG.SEQ inside receive window ==> seg. acceptable
-  if (seqLE(tcb_block->rcv_nxt, tcb_block->seg_seq) && seqLess(tcb_block->seg_seq, rcv_wnd_nxt))
-    {
-      if (debug) ev << "Incoming segment acceptable.\n";
-      return 1;
-    }
-  //if segment length equals 0
-  if (tcb_block->seg_len == 0)
-    {
-      //if RCV.WND = 0: seg. acceptable <=> SEG.SEQ = RCV.NXT
-      if (tcb_block->rcv_wnd == 0 && tcb_block->seg_seq == tcb_block->rcv_nxt)
-        {
-          if (debug) ev << "Incoming segment acceptable.\n";
-          return 1;
-        }
-    }
-  //if segment length not equal to 0
-  else
-    {
-      seg_end = tcb_block->seg_seq + tcb_block->seg_len - 1;
-      if (seqLE(tcb_block->rcv_nxt, seg_end) && seqLess(seg_end, rcv_wnd_nxt))
-        {
-          if (debug) ev << "Incoming segment acceptable.\n";
-          return 1;
-        }
-      //if only 1 octet in segment
-      if (tcb_block->seg_len == 1 && tcb_block->rcv_nxt == tcb_block->seg_seq)
-        {
-          if (debug) ev << "Incoming segment acceptable.\n";
-          return 1;
-        }
-    }
-
-  //if segment is not acceptable, send an ACK in reply (unless RST is set),
-  //drop the segment
-  if (debug) ev << "Incoming segment not acceptable.\n";
-  if (debug) ev << "The receive window is " << tcb_block->rcv_nxt << " to " << rcv_wnd_nxt << endl;
-  if (debug) ev << "and the sequence number is " << tcb_block->seg_seq << endl;
-  ackSchedule(tcb_block, true);
-
-  if (tcb_block->rcv_wnd == 0 && tcb_block->seg_seq == tcb_block->rcv_nxt)
-    {
-      if (debug) ev << "The receive window is zero.\n";
-      if (debug) ev << "Processing control information (RST, SYN, ACK) nevertheless.\n";
-      if (checkRst(tcb_block))
-        {
-          if (checkSyn(tcb_block))
-            {
-              checkAck(tcb_block);
-            }
-        }
-    }
-
-  return 0;
 }
-*/
 
 

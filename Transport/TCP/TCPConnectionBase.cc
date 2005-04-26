@@ -128,6 +128,22 @@ TCPConnection::TCPConnection(TCPMain *_mod, int _appGateIndex, int _connId)
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
+
+    // statistics
+    sndWndVector = NULL;
+    sndNxtVector = NULL;
+    sndAckVector = NULL;
+    rcvSeqVector = NULL;
+    rcvAckVector = NULL;
+
+    if (getTcpMain()->recordStatistics)
+    {
+        sndWndVector = new cOutVector("advertised window");
+        sndNxtVector = new cOutVector("send seq");
+        sndAckVector = new cOutVector("sent ack");
+        rcvSeqVector = new cOutVector("rcvd seq");
+        rcvAckVector = new cOutVector("rcvd ack");
+    }
 }
 
 TCPConnection::~TCPConnection()
@@ -141,6 +157,13 @@ TCPConnection::~TCPConnection()
     if (connEstabTimer) delete cancelEvent(connEstabTimer);
     if (finWait2Timer)  delete cancelEvent(finWait2Timer);
     if (synRexmitTimer) delete cancelEvent(synRexmitTimer);
+
+    // statistics
+    delete sndWndVector;
+    delete sndNxtVector;
+    delete sndAckVector;
+    delete rcvSeqVector;
+    delete rcvAckVector;
 }
 
 bool TCPConnection::processTimer(cMessage *msg)

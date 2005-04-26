@@ -284,6 +284,13 @@ class TCPConnection
     cMessage *finWait2Timer;
     cMessage *synRexmitTimer;  // for retransmitting SYN and SYN+ACK
 
+    // statistics
+    cOutVector *sndWndVector;
+    cOutVector *sndNxtVector;
+    cOutVector *sndAckVector;
+    cOutVector *rcvSeqVector;
+    cOutVector *rcvAckVector;
+
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
@@ -354,13 +361,19 @@ class TCPConnection
     void sendAck();
 
     /**
-     * Utility: Send data from sendQueue, at most maxNumBytes (-1 means no limit).
-     * If fullSegments is set, don't send segments smaller than MSS (needed for Nagle).
+     * Utility: Send data from sendQueue, at most congestionWindow (-1 means no limit).  FIXME adjust comment!!!
+     * If fullSegmentsOnly is set, don't send segments smaller than MSS (needed for Nagle).
      * Returns true if some data was actually sent.
      */
-    bool sendData(bool fullSegments, int maxNumBytes=-1);
+    bool sendData(bool fullSegmentsOnly, int congestionWindow=-1);
+
+    /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
+    bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
+    void retransmitOneSegment();
+
+    /** Utility: retransmit all from snd_una to snd_max */
     void retransmitData();
 
     /** Utility: sends RST */
@@ -372,6 +385,12 @@ class TCPConnection
 
     /** Utility: sends FIN */
     void sendFin();
+
+    /**
+     * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
+     * sendData(), sendProbe() and retransmitData() internally all rely on this one.
+     */
+    void sendSegment(int bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
     void sendToIP(TCPSegment *tcpseg);

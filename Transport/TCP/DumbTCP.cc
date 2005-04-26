@@ -16,30 +16,37 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "DummyTCPAlg.h"
+#include "DumbTCP.h"
 #include "TCPMain.h"
 
-Register_Class(DummyTCPAlg);
+Register_Class(DumbTCP);
 
 
-DummyTCPAlg::DummyTCPAlg() : TCPAlgorithm()
+// just a dummy value
+#define REXMIT_TIMEOUT 2
+
+
+DumbTCP::DumbTCP() : TCPAlgorithm(),
+  state((DumbTCPStateVariables *&)TCPAlgorithm::state)
 {
-    state = NULL;
+    rexmitTimer = NULL;
 }
 
-DummyTCPAlg::~DummyTCPAlg()
+DumbTCP::~DumbTCP()
 {
-    // Note: don't delete "state" here, it'll be deleted from TCPConnection
+    // cancel and delete timers
+    if (rexmitTimer)
+        delete conn->getTcpMain()->cancelEvent(rexmitTimer);
 }
 
-TCPStateVariables *DummyTCPAlg::createStateVariables()
+void DumbTCP::initialize()
 {
-    ASSERT(state==NULL);
-    state = new DummyTCPStateVariables();
-    return state;
+    TCPAlgorithm::initialize();
+
+    rexmitTimer = new cMessage("REXMIT");
 }
 
-void DummyTCPAlg::established(bool active)
+void DumbTCP::established(bool active)
 {
     if (active)
     {
@@ -50,28 +57,33 @@ void DummyTCPAlg::established(bool active)
     }
 }
 
-void DummyTCPAlg::connectionClosed()
+void DumbTCP::connectionClosed()
 {
+    conn->getTcpMain()->cancelEvent(rexmitTimer);
 }
 
-void DummyTCPAlg::processTimer(cMessage *timer, TCPEventCode& event)
+void DumbTCP::processTimer(cMessage *timer, TCPEventCode& event)
 {
-    // no extra timers in this TCP variant
+    if (timer!=rexmitTimer)
+        throw new cException(timer, "unrecognized timer");
+
+    conn->retransmitData();
+    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
 
-void DummyTCPAlg::sendCommandInvoked()
+void DumbTCP::sendCommandInvoked()
 {
     // start sending
     conn->sendData(false);
 }
 
-void DummyTCPAlg::receivedOutOfOrderSegment()
+void DumbTCP::receivedOutOfOrderSegment()
 {
     tcpEV << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
 }
 
-void DummyTCPAlg::receiveSeqChanged()
+void DumbTCP::receiveSeqChanged()
 {
     // new data received, ACK immediately (more sophisticated algs should
     // wait a little to see if piggybacking is possible)
@@ -79,30 +91,33 @@ void DummyTCPAlg::receiveSeqChanged()
     conn->sendAck();
 }
 
-void DummyTCPAlg::receivedDataAck(uint32)
+void DumbTCP::receivedDataAck(uint32)
 {
     // ack may have freed up some room in the window, try sending.
     // small segments also OK (Nagle off)
     conn->sendData(false);
 }
 
-void DummyTCPAlg::receivedDuplicateAck()
+void DumbTCP::receivedDuplicateAck()
 {
     tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
-void DummyTCPAlg::receivedAckForDataNotYetSent(uint32 seq)
+void DumbTCP::receivedAckForDataNotYetSent(uint32 seq)
 {
     tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
 }
 
-void DummyTCPAlg::ackSent()
+void DumbTCP::ackSent()
 {
 }
 
-void DummyTCPAlg::dataSent(uint32)
+void DumbTCP::dataSent(uint32)
 {
+    if (rexmitTimer->isScheduled())
+        conn->getTcpMain()->cancelEvent(rexmitTimer);
+    conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
 
 

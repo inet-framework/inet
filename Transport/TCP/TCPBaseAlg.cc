@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "TCPTahoeReno.h"
+#include "TCPBaseAlg.h"
 #include "TCPMain.h"
 
 
@@ -35,23 +35,20 @@
 //#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
 #define MAX_REXMIT_TIMEOUT    240   // 2*MSL (RFC1122)
 
-Register_Class(TCPTahoeReno);
 
 
-TCPTahoeRenoStateVariables::TCPTahoeRenoStateVariables()
+TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
 {
     delayed_acks_enabled = true;
     nagle_enabled = true;
-    tcpvariant = TAHOE;
 
     rexmit_count = 0;
     rexmit_timeout = 3.0;
 
     snd_cwnd = 0; // will be set to MSS when connection is established
-    ssthresh = 65535;
 
     rtseq = 0;
-    t_rtseq_sent = 0;
+    rtseq_sendtime = 0;
 
     // Jacobson's alg: srtt must be initialized to 0, rttvar to a value which
     // will yield rto = 3s initially.
@@ -59,14 +56,33 @@ TCPTahoeRenoStateVariables::TCPTahoeRenoStateVariables()
     rttvar = 3.0/4.0;
 }
 
-
-TCPTahoeReno::TCPTahoeReno() : TCPAlgorithm()
+std::string TCPBaseAlgStateVariables::info() const
 {
-    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
-    state = NULL;
+    std::stringstream out;
+    out << TCPStateVariables::info();
+    out << " snd_cwnd=" << snd_cwnd;
+    out << " rto=" << rexmit_timeout;
+    return out.str();
 }
 
-TCPTahoeReno::~TCPTahoeReno()
+std::string TCPBaseAlgStateVariables::detailedInfo() const
+{
+    std::stringstream out;
+    out << TCPStateVariables::detailedInfo();
+    out << "snd_cwnd = " << snd_cwnd << "\n";
+    out << "rto = " << rexmit_timeout << "\n";
+    // TBD add others too
+    return out.str();
+}
+
+TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
+  state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
+{
+    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
+    cwndVector = rttVector = srttVector = NULL;
+}
+
+TCPBaseAlg::~TCPBaseAlg()
 {
     // Note: don't delete "state" here, it'll be deleted from TCPConnection
 
@@ -75,9 +91,14 @@ TCPTahoeReno::~TCPTahoeReno()
     if (persistTimer)    delete cancelEvent(persistTimer);
     if (delayedAckTimer) delete cancelEvent(delayedAckTimer);
     if (keepAliveTimer)  delete cancelEvent(keepAliveTimer);
+
+    // delete statistics objects
+    delete cwndVector;
+    delete rttVector;
+    delete srttVector;
 }
 
-void TCPTahoeReno::initialize()
+void TCPBaseAlg::initialize()
 {
     TCPAlgorithm::initialize();
 
@@ -90,20 +111,21 @@ void TCPTahoeReno::initialize()
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
+
+    if (conn->getTcpMain()->recordStatistics)
+    {
+        cwndVector = new cOutVector("congestion window");
+        rttVector = new cOutVector("measured RTT");
+        srttVector = new cOutVector("smoothed RTT");
+    }
 }
 
-TCPStateVariables *TCPTahoeReno::createStateVariables()
-{
-    ASSERT(state==NULL);
-    state = new TCPTahoeRenoStateVariables();
-    return state;
-}
-
-void TCPTahoeReno::established(bool active)
+void TCPBaseAlg::established(bool active)
 {
     // initialize cwnd (we may learn MSS during connection setup --
     // this (MSS TCP option) is not implemented yet though)
     state->snd_cwnd = state->snd_mss;
+    if (cwndVector) cwndVector->record(state->snd_cwnd);
 
     if (active)
     {
@@ -114,7 +136,7 @@ void TCPTahoeReno::established(bool active)
     }
 }
 
-void TCPTahoeReno::connectionClosed()
+void TCPBaseAlg::connectionClosed()
 {
     cancelEvent(rexmitTimer);
     cancelEvent(persistTimer);
@@ -122,7 +144,7 @@ void TCPTahoeReno::connectionClosed()
     cancelEvent(keepAliveTimer);
 }
 
-void TCPTahoeReno::processTimer(cMessage *timer, TCPEventCode& event)
+void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
 {
     if (timer==rexmitTimer)
         processRexmitTimer(event);
@@ -136,7 +158,7 @@ void TCPTahoeReno::processTimer(cMessage *timer, TCPEventCode& event)
         throw new cException(timer, "unrecognized timer");
 }
 
-void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
+void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
 {
     //"
     // For any state if the retransmission timeout expires on a segment in
@@ -144,8 +166,10 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
     // retransmission queue again, reinitialize the retransmission timer,
     // and return.
     //"
+    // Also: abort connection after max 12 retries.
     //
-    // Also, abort connection after max 12 retries
+    // However, retransmission is actually more complicated than that
+    // in RFC 793 above, we'll leave it to subclasses (e.g. TCPTahoe, TCPReno).
     //
     if (++state->rexmit_count > MAX_REXMIT_COUNT)
     {
@@ -155,7 +179,8 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
         return;
     }
 
-    tcpEV << "Performing retransmission #" << state->rexmit_count << "\n";
+    tcpEV << "Performing retransmission #" << state->rexmit_count
+          << " (increasing RTO from " << state->rexmit_timeout << "s to ";
 
     //
     // Karn's algorithm is implemented below:
@@ -169,36 +194,37 @@ void TCPTahoeReno::processRexmitTimer(TCPEventCode& event)
         state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 
+    tcpEV << " to " << state->rexmit_timeout << "s, and cancelling RTT measurement\n";
+
     // cancel round-trip time measurement
-    state->t_rtseq_sent = 0;
+    state->rtseq_sendtime = 0;
 
     //
-    // Slow Start, Congestion Control (RFC2001)
+    // Leave congestion window management and actual retransmission to
+    // subclasses (e.g. TCPTahoe, TCPReno).
     //
-    uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
-    state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
-    state->snd_cwnd = state->snd_mss;
-
-    // retransmit
-    conn->retransmitData();
+    // That is, subclasses will redefine this method, call us, then perform
+    // window adjustments and do the retransmission as they like.
+    //
 }
 
-void TCPTahoeReno::processPersistTimer(TCPEventCode& event)
+void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
 {
-    // FIXME TBD
+    // FIXME TBD finish (currently Persist Timer never gets scheduled)
+    conn->sendProbe();
 }
 
-void TCPTahoeReno::processDelayedAckTimer(TCPEventCode& event)
+void TCPBaseAlg::processDelayedAckTimer(TCPEventCode& event)
 {
     conn->sendAck();
 }
 
-void TCPTahoeReno::processKeepAliveTimer(TCPEventCode& event)
+void TCPBaseAlg::processKeepAliveTimer(TCPEventCode& event)
 {
     // FIXME TBD
 }
 
-void TCPTahoeReno::startRexmitTimer()
+void TCPBaseAlg::startRexmitTimer()
 {
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
@@ -208,7 +234,7 @@ void TCPTahoeReno::startRexmitTimer()
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 }
 
-void TCPTahoeReno::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
+void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
 {
     //
     // Jacobson's algorithm for estimating RTT and adaptively setting RTO.
@@ -218,16 +244,21 @@ void TCPTahoeReno::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     //
 
     // update smoothed RTT estimate (srtt) and variance (rttvar)
-    const double g = 0.125;   // 1/8; (1-alpha) if alpha = 7/8;
+    const double g = 0.125;   // 1/8; (1-alpha) where alpha=7/8;
     double newRTT = tAcked-tSent;
 
     double& srtt = state->srtt;
     double& rttvar = state->rttvar;
 
-    double err = srtt - newRTT;
+    double err = newRTT - srtt;
 
     srtt += g*err;
     rttvar += g*(fabs(err) - rttvar);
+
+    // record statistics
+    tcpEV << "Measured RTT=" << (newRTT*1000) << "ms, updated SRTT=" << (srtt*1000) << "ms\n";
+    if (rttVector) rttVector->record(newRTT);
+    if (srttVector) srttVector->record(srtt);
 
     // assign RTO (here: rexmit_timeout) a new value
     double rto = srtt + 4*rttvar;
@@ -240,7 +271,7 @@ void TCPTahoeReno::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     state->rexmit_timeout = rto;
 }
 
-bool TCPTahoeReno::sendData()
+bool TCPBaseAlg::sendData()
 {
     //
     // Nagle's algorithm: when a TCP connection has outstanding data that has not
@@ -254,16 +285,16 @@ bool TCPTahoeReno::sendData()
 
     bool fullSegmentsOnly = state->nagle_enabled && state->snd_una!=state->snd_max;
     if (fullSegmentsOnly)
-        tcpEV << "Nagle is enabled and there's unack'ed data: only full segments will be sent\n";
+        tcpEV << "Nagle is enabled and there's unacked data: only full segments will be sent\n";
 
     //
-    // Slow start, congestion control etc.: send window is effectively the
-    // minimum of the congestion window (cwnd) and the advertised window (snd_wnd).
+    // Send window is effectively the minimum of the congestion window (cwnd)
+    // and the advertised window (snd_wnd).
     //
     return conn->sendData(fullSegmentsOnly, state->snd_cwnd);
 }
 
-void TCPTahoeReno::sendCommandInvoked()
+void TCPBaseAlg::sendCommandInvoked()
 {
     // FIXME there's a problem with this: it interferes with slow start.
     // Every time we get a SEND command we send up to cwnd bytes, whether
@@ -273,13 +304,13 @@ void TCPTahoeReno::sendCommandInvoked()
     sendData();
 }
 
-void TCPTahoeReno::receivedOutOfOrderSegment()
+void TCPBaseAlg::receivedOutOfOrderSegment()
 {
     tcpEV << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
 }
 
-void TCPTahoeReno::receiveSeqChanged()
+void TCPBaseAlg::receiveSeqChanged()
 {
     if (!state->delayed_acks_enabled)
     {
@@ -296,136 +327,78 @@ void TCPTahoeReno::receiveSeqChanged()
     }
 }
 
-void TCPTahoeReno::receivedDataAck(uint32 firstSeqAcked)
+void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 {
     // first cancel retransmission timer
     cancelEvent(rexmitTimer);
 
     // if round-trip time measurement is running, check if rtseq has been acked
-    if (state->t_rtseq_sent!=0 && seqLess(state->rtseq, state->snd_una))
+    if (state->rtseq_sendtime!=0 && seqLess(state->rtseq, state->snd_una))
     {
         // print value
         tcpEV << "Round-trip time measured on rtseq=" << state->rtseq << ": "
-              << int((conn->getTcpMain()->simTime() - state->t_rtseq_sent)*1000+0.5) << "ms\n";
+              << int((conn->getTcpMain()->simTime() - state->rtseq_sendtime)*1000+0.5) << "ms\n";
 
         // update RTT variables with new value
-        rttMeasurementComplete(state->t_rtseq_sent, conn->getTcpMain()->simTime());
+        rttMeasurementComplete(state->rtseq_sendtime, conn->getTcpMain()->simTime());
 
         // measurement finished
-        state->t_rtseq_sent = 0;
+        state->rtseq_sendtime = 0;
     }
 
-    // handling of retransmission timer: (as in SSFNet):
-    // "if the ACK is for the last segment sent (no data in flight), cancel
-    // the timer, else restart the timer with the current RTO value."
+    //
+    // handling of retransmission timer: if the ACK is for the last segment sent
+    // (no data in flight), cancel the timer, otherwise restart the timer
+    // with the current RTO value.
+    //
     if (state->snd_una==state->snd_max)
     {
         tcpEV << "ACK acks all outstanding segments\n";
     }
     else
     {
-        tcpEV << "ACK acks some but not all outstanding segments, restarting REXMIT timer\n";
+        tcpEV << "ACK acks some but not all outstanding segments ("
+              << (state->snd_max - state->snd_una)
+              << " bytes outstanding), restarting REXMIT timer\n";
         startRexmitTimer();
     }
 
-    if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO && state->dupacks>=3)
-    {
-        //
-        // Reno: if we're just after a Fast Retransmission, perform Fast Recovery:
-        // set cwnd to ssthresh (deflating the window).
-        //
-        state->snd_cwnd = state->ssthresh;
-    }
-    else
-    {
-        //
-        // Perform slow start and congestion avoidance. RFC2001: "Slow start has
-        // cwnd begin at one segment, and be incremented by one segment every time
-        // an ACK is received."  NOTE: "every time" means "for every segment
-        // acknowledged!"
-        //
-        int bytesAcked = state->snd_una - firstSeqAcked;
-        int segmentsAcked = Max(1,bytesAcked/state->snd_mss); // probably shouldn't be zero. FIXME is this right?
-
-        if (state->snd_cwnd <= state->ssthresh)
-        {
-            // perform Slow Start
-            state->snd_cwnd += segmentsAcked * state->snd_mss;
-        }
-        else
-        {
-            // perform Congestion Avoidance
-            for (int i=0; i<segmentsAcked; i++)
-                state->snd_cwnd += state->snd_mss * state->snd_mss / state->snd_cwnd;
-        }
-    }
-
-    // ack may have freed up some room in the window, try sending
-    sendData();
+    //
+    // Leave congestion window management and possible sending data to
+    // subclasses (e.g. TCPTahoe, TCPReno).
+    //
+    // That is, subclasses will redefine this method, call us, then perform
+    // window adjustments and send data (if there's room in the window).
+    //
 }
 
-void TCPTahoeReno::receivedDuplicateAck()
+void TCPBaseAlg::receivedDuplicateAck()
 {
     tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
 
-    if (state->dupacks==3)
-    {
-        //
-        // perform Fast Retransmission (Tahoe) or Fast Retransmission/Recovery (Reno)
-        //
-
-        // Reset ssthresh and cwnd. Note: code is similar to that in processRexmitTimer()
-        uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
-        state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
-        if (state->tcpvariant==TCPTahoeRenoStateVariables::TAHOE)
-            state->snd_cwnd = state->snd_mss;
-        else if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO)
-            state->snd_cwnd = 3*state->snd_mss;
-        else
-            ASSERT(0);
-
-        tcpEV << "Performing Fast Retransmit, new cwnd=" << state->snd_cwnd << "\n";
-
-        // cancel round-trip time measurement
-        state->t_rtseq_sent = 0;
-
-        // restart retransmission timer (with rexmit_count=0). RTO is unchanged.
-        cancelEvent(rexmitTimer);
-        startRexmitTimer();
-
-        // retransmit missing segment
-        conn->retransmitData();
-    }
-    else if (state->dupacks > 3)
-    {
-        //
-        // Reno: For each additional duplicate ACK received, increment cwnd by MSS.
-        // This artificially inflates the congestion window in order to reflect the
-        // additional segment that has left the network
-        //
-        if (state->tcpvariant==TCPTahoeRenoStateVariables::RENO)
-        {
-            state->snd_cwnd += state->snd_mss;
-            tcpEV << "Reno: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
-        }
-        // FIXME shouldn't we try to transmit, retransmit or something like that here?
-    }
+    //
+    // Leave to subclasses (e.g. TCPTahoe, TCPReno) whatever they want to do
+    // on duplicate Acks.
+    //
+    // That is, subclasses will redefine this method, call us, then perform
+    // whatever action they want to do on dupAcks (e.g. retransmitting one segment).
+    //
 }
 
-void TCPTahoeReno::receivedAckForDataNotYetSent(uint32 seq)
+void TCPBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
 {
     tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
 }
 
-void TCPTahoeReno::ackSent()
+void TCPBaseAlg::ackSent()
 {
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
         cancelEvent(delayedAckTimer);
 }
 
-void TCPTahoeReno::dataSent(uint32 fromseq)
+void TCPBaseAlg::dataSent(uint32 fromseq)
 {
     // if retransmission timer not running, schedule it
     if (!rexmitTimer->isScheduled())
@@ -435,13 +408,13 @@ void TCPTahoeReno::dataSent(uint32 fromseq)
     }
 
     // start round-trip time measurement (if not already running)
-    if (state->t_rtseq_sent==0)
+    if (state->rtseq_sendtime==0)
     {
         // remember this sequence number and when it was sent
         state->rtseq = fromseq;
-        state->t_rtseq_sent = conn->getTcpMain()->simTime();
+        state->rtseq_sendtime = conn->getTcpMain()->simTime();
+        tcpEV << "Starting rtt measurement on seq=" << state->rtseq << "\n";
     }
-
 }
 
 
