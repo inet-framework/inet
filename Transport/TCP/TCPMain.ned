@@ -186,7 +186,8 @@ simple TCPMain
     parameters:
       sendQueueClass: string,
       receiveQueueClass: string,
-      tcpAlgorithmClass: string;
+      tcpAlgorithmClass: string,
+      recordStats: bool;
     gates:
       in: from_appl[], from_ip;
       out: to_appl[], to_ip;
