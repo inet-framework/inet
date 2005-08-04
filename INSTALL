@@ -18,16 +18,13 @@ LINUX (UNIX)
    to make sure it contains the right settings. You'll probably
    need to adjust ROOT.
 
-3. Re-generate the omnetppconfig file to get the local OMNeT++ configuration
-   by typing "opp_makemake -f --genconfig omnetppconfig"
+3. Type "./makemake" to create the makefiles and the omnetppconfig file.
 
-4. Type "./makemake" to create the makefiles.
+4. Type "make" to build everything.
 
-5. Type "make" to build everything.
+5. Add INET/bin directory to the LD_LIBRARY_PATH.
 
-6. Add INET/bin directory to the LD_LIBRARY_PATH.
-
-7. If you modify INET and add/remove/rename directories, you'll need to modify
+6. If you modify INET and add/remove/rename directories, you'll need to modify
    "makemakefiles", and go to step 4.
 
 That should be it.

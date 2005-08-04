@@ -347,7 +347,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
 
     /**
      * Returns true if the given address is one of the addresses assigned,
-     * whether tentative or not.
+     * regardless whether it is tentative or not.
      */
     bool hasAddress(const IPv6Address& addr) const;
 

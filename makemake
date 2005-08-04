@@ -1,3 +1,4 @@
+opp_makemake -f --genconfig omnetppconfig
 make ROOT=`pwd` MAKEMAKE=opp_makemake EXT= -f makemakefiles
 
 echo

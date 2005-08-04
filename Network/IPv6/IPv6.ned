@@ -42,11 +42,10 @@
 // The recommended setting is:
 // - \TCP (6) : 0
 // - \UDP (17) : 1
-// - \ICMP (1) : 2
-// - \IGMP (2) : 3
-// - \RSVP (46) : 4
+// - \RSVP (46) : 2
+// - \ICMPv6 (89) : 3
 //
-// That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
+// That is, <tt>protocolMapping="6:0,17:1,46:2,89:3"</tt>
 //
 // <b>Routing and interfacing with lower layers</b>
 //
