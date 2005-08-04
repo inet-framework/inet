@@ -1,80 +1,10 @@
-#!/bin/sh
-root=`pwd`
-MAKEMAKE=opp_makemake
-OPTS="-f -N -b $root -c $root/inetconfig"
+make ROOT=`pwd` MAKEMAKE=opp_makemake EXT= -f makemakefiles
 
-ALL_INET_INCLUDES="-I$root/Network/IPv4 -I$root/Network/IPv4d -I$root/Network/AutoRouting -I$root/Transport/TCP -I$root/Transport/UDP -I$root/NetworkInterfaces -I$root/NetworkInterfaces/_802 -I$root/NetworkInterfaces/ARP -I$root/NetworkInterfaces/Ethernet -I$root/NetworkInterfaces/PPP -I$root/Applications/Generic -I$root/Applications/Ethernet -I$root/Applications/TCPApp -I$root/Applications/UDPApp -I$root/Applications/PingApp -I$root/Base -I$root/Util -I$root/Nodes/INET"
-ALL_MPLS_INET_INCLUDES="$ALL_INET_INCLUDES -I$root/Network/MPLS -I$root/Network/LDP -I$root/Network/RSVP_TE -I$root/Network/Scenario -I$root/Nodes/MPLS"
-
-# ALL_MODEL_OPTS="$OPTS -w $ALL_MPLS_INET_INCLUDES"
-ALL_MODEL_OPTS="$OPTS -n"
-
-: #--------------------------------------
-
-$MAKEMAKE $OPTS -n -r
-
-(cd Applications && $MAKEMAKE $OPTS -n -r)
-(cd Examples && $MAKEMAKE $OPTS -n -r)
-(cd Tests && $MAKEMAKE $OPTS -n -r)
-(cd Network && $MAKEMAKE $OPTS -n -r)
-(cd NetworkInterfaces && $MAKEMAKE $OPTS -n -r)
-(cd Nodes && $MAKEMAKE $OPTS -n -r)
-(cd PHY && $MAKEMAKE $OPTS -n -r)
-(cd Transport && $MAKEMAKE $OPTS -n -r)
-(cd Base && $MAKEMAKE $OPTS -n -r)
-(cd Util && $MAKEMAKE $OPTS -n -r)
-
-(cd Applications/Generic && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Base -I../../Util)
-(cd Applications/Ethernet && $MAKEMAKE $OPTS -n -r -I../../NetworkInterfaces/Ethernet -I../../NetworkInterfaces/_802 -I../../Base -I../../Util)
-(cd Applications/PingApp && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Base -I../../Util)
-(cd Applications/TCPApp && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Transport/TCP -I../../Base -I../../Util)
-(cd Applications/UDPApp && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Transport/UDP -I../../Base -I../../Util)
-
-(cd Network/IPv4 && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util)
-(cd Network/IPv4d && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../../Base -I../../Util)
-(cd Network/AutoRouting && $MAKEMAKE $OPTS -n -r -I../IPv4  -I../../Base -I../../Util)
-(cd Network/MPLS && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Base -I../../Util)
-(cd Network/LDP && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../../Transport/UDP -I../../Transport/TCP -I../MPLS -I../../Base -I../../Util)
-(cd Network/RSVP_TE && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../MPLS -I../../Base -I../../Util)
-(cd Network/Scenario && $MAKEMAKE $OPTS -n -r -I../IPv4 -I../IPv4d -I../MPLS -I../RSVP_TE -I../../Base -I../../Util)
-
-(cd NetworkInterfaces/PPP && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util -I../../Network/IPv4)
-(cd NetworkInterfaces/_802 && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util -I../../Network/IPv4)
-(cd NetworkInterfaces/Ethernet && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util -I../_802 -I../../Network/IPv4)
-(cd NetworkInterfaces/ARP && $MAKEMAKE $OPTS -n -r -I../../Base -I../../Util -I../../Network/IPv4 -I../_802 -I../Ethernet)
-
-(cd Nodes/INET && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Network/IPv4d -I../../Network/IPv4/QoS -I../../Transport/UDP -I../../NetworkInterfaces/PPP -I../../NetworkInterfaces  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/UDPApp -I../../Applications/PingApp -I../../Base -I../../Util)
-(cd Nodes/MPLS && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Network/IPv4d -I../../Network/IPv4/QoS -I../../Network/MPLS -I../../Network/LDP -I../../Network/RSVP_TE -I../../Transport/UDP -I../../NetworkInterfaces/PPP -I../../NetworkInterfaces  -I../../Applications/Generic -I../../Applications/TCPApp -I../../Applications/PingApp -I../INET -I../../Base -I../../Util)
-
-(cd Transport/UDP && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Base -I../../Util)
-(cd Transport/RTP && $MAKEMAKE $OPTS -n -r -I../../Network/IPv4 -I../../Base -I../../Util)
-(cd Transport/TCP && $MAKEMAKE $OPTS -n -I../../Network/IPv4 -I../../Base -I../../Util)
-
-(cd Examples/bin && $MAKEMAKE $OPTS -w -o INET $ALL_MPLS_INET_INCLUDES)
-
-(cd Examples/Ethernet && $MAKEMAKE $OPTS -n -r)
-(cd Examples/INET && $MAKEMAKE $OPTS -n -r)
-(cd Examples/MPLS && $MAKEMAKE $OPTS -n -r)
-
-(cd Examples/Ethernet/ARPTest && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/Ethernet/LANs && $MAKEMAKE $ALL_MODEL_OPTS)
-
-(cd Examples/INET/NClients && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/INET/FlatNet && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/INET/KIDSNw1 && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/INET/Multicast && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/INET/RouterPerf && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/INET/BulkTransfer && $MAKEMAKE $ALL_MODEL_OPTS)
-
-(cd Examples/MPLS/ldp-mpls1 && $MAKEMAKE $ALL_MODEL_OPTS)
-(cd Examples/MPLS/TestTE1 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-(cd Examples/MPLS/TestTE2 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-(cd Examples/MPLS/TestTE3 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-(cd Examples/MPLS/TestTE4 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-(cd Examples/MPLS/TestTE5 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-(cd Examples/MPLS/TestTE6 && $MAKEMAKE $ALL_MODEL_OPTS -I../Tester)
-
-(cd Tests/MPLS && $MAKEMAKE $OPTS -n -r)
-(cd Tests/MPLS/LDP1 && $MAKEMAKE $OPTS -w $ALL_MPLS_INET_INCLUDES)
-(cd Tests/NewTCP && $MAKEMAKE $OPTS -w $ALL_MPLS_INET_INCLUDES)
+echo
+echo 'Regenerating nedfiles.lst...'
+find . -name \*.ned > nedfiles.lst
+perl -i.bak -pe "s|^(./)?Examples/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Unsupported/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Tests/.*||" nedfiles.lst
+echo 'Done'
 

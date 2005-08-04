@@ -7,14 +7,14 @@
 
 ifconfig:
 
-# ethernet card (modelled by point-to-point link) 0 to host 5
-name: ppp0  inet_addr: 172.0.2.3    MTU: 1500   Metric: 1  BROADCAST MULTICAST
+# interface 0 to host 5
+name: ppp0  inet_addr: 172.0.2.3    MTU: 1500
 
-# ethernet card (modelled by point-to-point link) 1 to host 6
-name: ppp1  inet_addr: 172.0.2.4    MTU: 1500   Metric: 1  BROADCAST MULTICAST
+# interface 1 to host 6
+name: ppp1  inet_addr: 172.0.2.4    MTU: 1500
 
-# PPP link to router 2
-name: ppp2  inet_addr: 172.1.0.5    MTU: 512000     Metric: 1
+# PPP link to router 2  (with deliberately a small MTU, so that we can observe fragmentation)
+name: ppp2  inet_addr: 172.1.0.5    MTU: 800
 
 ifconfigend.
 

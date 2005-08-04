@@ -67,7 +67,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     if (origDatagram->transportProtocol() == IP_PROT_ICMP)
     {
         ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->encapsulatedMsg());
-        if (recICMPMsg->getIsError())
+        if (recICMPMsg->getType()<128)
         {
             ev << "ICMP error received -- do not reply to it" << endl;
             delete origDatagram;
@@ -75,10 +75,9 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
         }
     }
 
-    ICMPMessage *errorMessage = new ICMPMessage("icmp error");
+    ICMPMessage *errorMessage = new ICMPMessage("icmp error"); // TBD use names like "timeExceeded"
     errorMessage->setType(type);
     errorMessage->setCode(code);
-    errorMessage->setIsError(true);
     errorMessage->encapsulate(origDatagram);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
@@ -86,11 +85,11 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    if (origDatagram->srcAddress().isNull())
+    if (origDatagram->srcAddress().isUnspecified())
     {
         // pretend it came from the IP layer
         IPControlInfo *controlInfo = new IPControlInfo();
-        controlInfo->setSrcAddr(IPAddress("127.0.0.1")); // FIXME maybe use configured loopback address
+        controlInfo->setSrcAddr(IPAddress::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
         controlInfo->setProtocol(IP_PROT_ICMP);
         errorMessage->setControlInfo(controlInfo);
 
@@ -108,24 +107,13 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
 
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
 {
-    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(icmpmsg->removeControlInfo());
-    // use source of ICMP message as destination for reply
-    IPAddress src = controlInfo->srcAddr();
-    delete controlInfo;
-
     switch (icmpmsg->getType())
     {
-        case ICMP_ECHO_REPLY:
-            recEchoReply(icmpmsg);
-            break;
         case ICMP_DESTINATION_UNREACHABLE:
             errorOut(icmpmsg);
             break;
         case ICMP_REDIRECT:
             errorOut(icmpmsg);
-            break;
-        case ICMP_ECHO_REQUEST:
-            recEchoRequest(icmpmsg, src);
             break;
         case ICMP_TIME_EXCEEDED:
             errorOut(icmpmsg);
@@ -133,11 +121,17 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
         case ICMP_PARAMETER_PROBLEM:
             errorOut(icmpmsg);
             break;
+        case ICMP_ECHO_REQUEST:
+            processEchoRequest(icmpmsg);
+            break;
+        case ICMP_ECHO_REPLY:
+            processEchoReply(icmpmsg);
+            break;
         case ICMP_TIMESTAMP_REQUEST:
-            recEchoRequest(icmpmsg, src);
+            processEchoRequest(icmpmsg);
             break;
         case ICMP_TIMESTAMP_REPLY:
-            recEchoReply(icmpmsg);
+            processEchoReply(icmpmsg);
             break;
         default:
             opp_error("Unknown ICMP type %d", icmpmsg->getType());
@@ -149,53 +143,42 @@ void ICMP::errorOut(ICMPMessage *icmpmsg)
     send(icmpmsg, "errorOut");
 }
 
-void ICMP::recEchoRequest(ICMPMessage *request, const IPAddress& dest)
+void ICMP::processEchoRequest(ICMPMessage *request)
 {
-    ICMPMessage *reply = new ICMPMessage(*request);
-    bool timestampValid = request->getQuery().getIsTimestampValid();
+    // turn request into a reply
+    ICMPMessage *reply = request;
+    reply->setName((std::string(request->name())+"-reply").c_str());
+    reply->setType(ICMP_ECHO_REPLY);
 
-    reply->setType(timestampValid ? ICMP_TIMESTAMP_REPLY : ICMP_ECHO_REPLY);
-    reply->setCode(0);
-    // FIXME query must be copied too. Was: reply->setQuery( new ICMPQuery(*(request->query)) );
-    reply->setLength(8*20);
+    // swap src and dest
+    // TBD check what to do if dest was multicast etc?
+    IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(reply->controlInfo());
+    IPAddress src = ctrl->srcAddr();
+    IPAddress dest = ctrl->destAddr();
+    ctrl->setSrcAddr(dest);
+    ctrl->setDestAddr(src);
 
-    delete request;
-
-    if (timestampValid)
-    {
-        reply->getQuery().setReceiveTimestamp(simTime());
-        reply->getQuery().setTransmitTimestamp(simTime());
-    }
-
-    sendToIP(reply, dest);
+    sendToIP(reply);
 }
 
-void ICMP::recEchoReply (ICMPMessage *reply)
+void ICMP::processEchoReply(ICMPMessage *reply)
 {
-    cMessage *msg = new cMessage;
-    ICMPQuery *echoInfo = new ICMPQuery(reply->getQuery());
-
+    IPControlInfo *ctrl = check_and_cast<IPControlInfo*>(reply->removeControlInfo());
+    cMessage *payload = reply->decapsulate();
+    payload->setControlInfo(ctrl);
     delete reply;
-
-    //FIXME add back next line ASAP
-    //msg->parList().add( echoInfo );
-    send(msg, "pingOut");
+    send(payload, "pingOut");
 }
 
 void ICMP::sendEchoRequest(cMessage *msg)
 {
-    ICMPMessage *icmpmsg = new ICMPMessage();
-    ICMPQuery *echoInfo = (ICMPQuery *)msg->parList().get("echoInfo");  // FIXME cPar!!!
-
-    icmpmsg->setType(echoInfo->getIsTimestampValid() ? ICMP_TIMESTAMP_REQUEST : ICMP_ECHO_REQUEST);
-    icmpmsg->setCode(0);
-    // FIXME query must be copied too. Was: icmpmsg->query = new ICMPQuery(*echoInfo);
-    icmpmsg->setLength(8*20);
-
-    IPAddress dest = msg->par("destination_address").stringValue();
-    delete msg;
-
-    sendToIP(icmpmsg, dest);
+    IPControlInfo *ctrl = check_and_cast<IPControlInfo*>(msg->removeControlInfo());
+    ctrl->setProtocol(IP_PROT_ICMP);
+    ICMPMessage *request = new ICMPMessage(msg->name());
+    request->setType(ICMP_ECHO_REQUEST);
+    request->encapsulate(msg);
+    request->setControlInfo(ctrl);
+    sendToIP(request);
 }
 
 void ICMP::sendToIP(ICMPMessage *msg, const IPAddress& dest)
@@ -208,4 +191,9 @@ void ICMP::sendToIP(ICMPMessage *msg, const IPAddress& dest)
     send(msg, "sendOut");
 }
 
+void ICMP::sendToIP(ICMPMessage *msg)
+{
+    // assumes IPControlInfo is already attached
+    send(msg, "sendOut");
+}
 

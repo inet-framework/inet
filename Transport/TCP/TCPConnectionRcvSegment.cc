@@ -18,11 +18,10 @@
 
 
 #include <string.h>
-#include "TCPMain.h"
+#include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo_m.h"
 #include "TCPSendQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
@@ -34,7 +33,7 @@ bool TCPConnection::tryFastRoute(TCPSegment *tcpseg)
 }
 
 
-void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
+void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
 {
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
@@ -77,7 +76,7 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPAddress srcA
     }
 }
 
-TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPAddress src, IPAddress dest)
+TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
 {
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
@@ -286,25 +285,27 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             return TCP_E_IGNORE;  // if acks something not yet sent, drop it
     }
 
-    if ((fsm.state()==TCP_S_FIN_WAIT_1 && state->fin_ack_rcvd) || fsm.state()==TCP_S_FIN_WAIT_2)
+    if ((fsm.state()==TCP_S_FIN_WAIT_1 && state->fin_ack_rcvd))
     {
         //"
         // FIN-WAIT-1 STATE
         //   In addition to the processing for the ESTABLISHED state, if
         //   our FIN is now acknowledged then enter FIN-WAIT-2 and continue
         //   processing in that state.
-        //
+        //"
+        event = TCP_E_RCV_ACK;  // will trigger transition to FIN-WAIT-2
+    }
+
+    if (fsm.state()==TCP_S_FIN_WAIT_2)
+    {
+        //"
         // FIN-WAIT-2 STATE
         //  In addition to the processing for the ESTABLISHED state, if
         //  the retransmission queue is empty, the user's CLOSE can be
         //  acknowledged ("ok") but do not delete the TCB.
         //"
-        //
-        // Note: we won't acknowledge the the user's close (i.e. send TCP_I_CLOSED)
-        // until we really reach the CLOSED state.
-        //
-        if (fsm.state()==TCP_S_FIN_WAIT_1)
-            event = TCP_E_RCV_ACK;  // will trigger transition to FIN-WAIT-2
+        // nothing to do here (in our model, used commands don't need to be
+        // acknowledged)
     }
 
     if (fsm.state()==TCP_S_CLOSING)
@@ -319,6 +320,10 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             tcpEV << "Our FIN acked -- can go to TIME_WAIT now\n";
             event = TCP_E_RCV_ACK;  // will trigger transition to TIME-WAIT
             scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);  // start timer
+
+            // we're entering TIME_WAIT, so we can signal CLOSED the user
+            // (the only thing left to do is wait until the 2MSL timer expires)
+            sendIndicationToApp(TCP_I_CLOSED);
         }
     }
 
@@ -344,6 +349,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // retransmission of the remote FIN.  Acknowledge it, and restart
         // the 2 MSL timeout.
         //"
+        // And we are staying in the TIME_WAIT state.
+        //
         sendAck();
         cancelEvent(the2MSLTimer);
         scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
@@ -494,15 +501,23 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 if (state->fin_ack_rcvd)
                 {
                     event = TCP_E_RCV_FIN_ACK;
-                    // start the time-wait timer, turn off the other timers;
-                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                    // start the time-wait timer, turn off the other timers
                     cancelEvent(finWait2Timer);
+                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                    // we're entering TIME_WAIT, so we can signal CLOSED the user
+                    // (the only thing left to do is wait until the 2MSL timer expires)
+                    sendIndicationToApp(TCP_I_CLOSED);
                 }
                 break;
             case TCP_S_FIN_WAIT_2:
                 // Start the time-wait timer, turn off the other timers.
-                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
                 cancelEvent(finWait2Timer);
+                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+
+                // we're entering TIME_WAIT, so we can signal CLOSED the user
+                // (the only thing left to do is wait until the 2MSL timer expires)
+                sendIndicationToApp(TCP_I_CLOSED);
                 break;
             case TCP_S_TIME_WAIT:
                 // Restart the 2 MSL time-wait timeout.
@@ -538,7 +553,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
 //----
 
-TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
+TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
 {
     tcpEV2 << "Processing segment in LISTEN\n";
 
@@ -657,7 +672,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPAddress
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPAddress srcAddr, IPAddress destAddr)
+TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
 {
     tcpEV2 << "Processing segment in SYN_SENT\n";
 
@@ -1000,8 +1015,9 @@ void TCPConnection::process_TIMEOUT_2MSL()
     {
         case TCP_S_TIME_WAIT:
             // Nothing to do here. The TIMEOUT_2MSL event will automatically take
-            // the connection to CLOSED.
-            sendIndicationToApp(TCP_I_CLOSED);
+            // the connection to CLOSED. We already notified the user
+            // (TCP_I_CLOSED) when we entered the TIME_WAIT state from CLOSING,
+            // FIN_WAIT_1 or FIN_WAIT_2.
             break;
         default:
             // We should not receive this timeout in this state.
@@ -1065,7 +1081,7 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
 
 
 //
-//FIXME TBD:
+//TBD:
 //"
 // USER TIMEOUT
 //

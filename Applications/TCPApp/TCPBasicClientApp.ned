@@ -20,9 +20,10 @@
 //
 // Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
+// Compatible with both IPv4 and IPv6.
 //
 // The model communicates with the server in sessions. During a session,
-// the client opens a single TCP connection to the server, sends several
+// the client opens a single \TCP connection to the server, sends several
 // requests (always waiting for the complete reply to arrive before
 // sending a new request), and closes the connection.
 //
@@ -38,7 +39,7 @@
 //    replyLength = exponential(1000000)
 // </pre>
 //
-// Note that this module doesn't open separate TCP connections for commands
+// Note that this module doesn't open separate \TCP connections for commands
 // and data transfer as the FTP protocol.
 //
 // HTTP:

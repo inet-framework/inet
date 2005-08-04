@@ -20,12 +20,14 @@
 #include <vector>
 #include <omnetpp.h>
 #include "MPLSPacket.h"
-#include "IPDatagram.h"
 #include "LIBTableAccess.h"
-#include "RoutingTableAccess.h"
-#include "RoutingTable.h"
 #include "ConstType.h"
+#include "IPAddress.h"
 
+
+class InterfaceTable;
+class RoutingTable;
+class IPDatagram;
 
 #define DEST_CLASSIFIER         1
 #define SRC_AND_DEST_CLASSIFIER 2
@@ -41,7 +43,7 @@
 /**
  * Implements MPLS.
  */
-class MPLSModule : public cSimpleModule
+class INET_API MPLSModule : public cSimpleModule
 {
    public:
      /**
@@ -59,7 +61,8 @@ class MPLSModule : public cSimpleModule
      };
 
    private:
-      RoutingTableAccess routingTableAccess;
+      InterfaceTable *ift;
+      RoutingTable *rt;
       LIBTableAccess libTableAccess;
 
       bool isIR;

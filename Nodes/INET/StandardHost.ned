@@ -19,10 +19,12 @@
 
 
 import
-    "Blackboard",
+    "NotificationBoard",
+    "InterfaceTable",
+    "RoutingTable",
     "TCPApp.ned",
-    "TCPMain.ned",
-    "UDPProcessing",
+    "TCP.ned",
+    "UDP",
     "UDPApp",
     "NetworkLayer",
     "PingApp",
@@ -48,35 +50,37 @@ module StandardHost
         in: ethIn[];
         out: ethOut[];
     submodules:
-        blackboard: Blackboard;
-            display: "p=60,75;i=block/blackboard";
+        notificationBoard: NotificationBoard;
+            display: "p=60,70;i=block/control";
+        interfaceTable: InterfaceTable;
+            display: "p=60,150;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=60,150;i=block/table";
+            display: "p=60,230;i=block/table";
         tcpApp: tcpAppType[numTcpApps] like TCPApp;
             display: "p=163,67;i=block/app";
-        tcp: TCPMain;
+        tcp: TCP;
             display: "p=163,154;i=block/wheelbarrow";
         udpApp: udpAppType[numUdpApps] like UDPApp;
             display: "i=block/app;p=272,67";
-        udp: UDPProcessing;
+        udp: UDP;
             display: "p=272,154;i=block/transport";
         pingApp: PingApp;
             display: "i=block/app;p=343,200";
         networkLayer: NetworkLayer;
+            parameters:
+                proxyARP = false;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
             display: "p=248,247;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=205,350,row,90;q=queue;i=block/ifcard";
+            display: "p=205,350,row,90;q=txQueue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
-            parameters:
-                proxyARP = false;
-            display: "p=240,350,row,90;q=queue;i=block/ifcard";
+            display: "p=240,350,row,90;q=txQueue;i=block/ifcard";
     connections nocheck:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
@@ -87,15 +91,15 @@ module StandardHost
         tcp.from_ip <-- networkLayer.TCPOut;
 
         for i=0..numUdpApps-1 do
-            udpApp[i].to_udp --> udp.from_application++;
-            udpApp[i].from_udp <-- udp.to_application++;
+            udpApp[i].to_udp --> udp.from_app++;
+            udpApp[i].from_udp <-- udp.to_app++;
         endfor;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;
 
-        networkLayer.pingOut --> pingApp.in;
-        networkLayer.pingIn <-- pingApp.out;
+        networkLayer.pingOut --> pingApp.pingIn;
+        networkLayer.pingIn <-- pingApp.pingOut;
 
         // connections to network outside
         for i=0..sizeof(out)-1 do

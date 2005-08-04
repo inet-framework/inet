@@ -46,7 +46,7 @@ typedef std::vector<simple_link_t> simple_link_tVector;
 /**
  * Implements the constrained shortest path algorithm
  */
-class OspfTe : public cSimpleModule
+class INET_API OspfTe : public cSimpleModule
 {
 private:
 

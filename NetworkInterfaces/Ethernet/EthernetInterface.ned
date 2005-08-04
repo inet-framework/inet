@@ -18,39 +18,30 @@
 
 
 import
-    "ARP",
     "EtherMAC",
-    "EtherLLC";
+    "EtherEncap";
 
 //
 // Ethernet network interface. Corresponds to the prototype NetworkInterface.
 //
 module EthernetInterface
-    parameters:
-        proxyARP: bool;  // sets proxy ARP mode
     gates:
         in: physIn, netwIn;
         out: physOut, netwOut;
     submodules:
-        arp: ARP;
-            parameters:
-                proxyARP = proxyARP;
-            display: "p=100,80;i=block/layer;q=pendingQueue";
-        encap: EtherEncap;
-            gatesizes:
-                upperLayerIn[1],
-                upperLayerOut[1];
-            display: "i=block/fork;p=100,160";
         mac: EtherMAC;
-            display: "i=block/queue;p=100,240;q=queue";
+            parameters: 
+                queueModule = "",
+                txQueueLimit = 1000; // may be increased if necessary
+            display: "i=block/rxtx;p=100,160;q=txQueue";
+        encap: EtherEncap;
+            display: "i=block/square;p=100,80";
     connections:
-        netwOut <-- arp.hlOut;
-        netwIn --> arp.hlIn;
-        arp.hwOut --> encap.upperLayerIn;
-        arp.hwIn <-- encap.upperLayerOut;
+        netwIn --> encap.upperLayerIn;
+        netwOut <-- encap.upperLayerOut;
         encap.lowerLayerOut --> mac.upperLayerIn;
         encap.lowerLayerIn <-- mac.upperLayerOut;
-        mac.physicalIn <-- physIn;
-        mac.physicalOut --> physOut;
+        mac.physIn <-- physIn;
+        mac.physOut --> physOut;
 endmodule
 

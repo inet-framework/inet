@@ -24,6 +24,8 @@
 #include "EnqueueHook.h"
 
 
+// TBD this whole thing should probably be removed, together with IPv4d
+
 /**
  * Queue with constant processing time, with integrated QoS behaviour.
  * Processing time is taken from the "procDelay" module parameter,
@@ -31,7 +33,7 @@
  *
  * Leaves the endService(cMessage *msg) method of AbstractQueue undefined.
  */
-class QueueWithQoS : public AbstractQueue
+class INET_API QueueWithQoS : public AbstractQueue
 {
   protected:
     simtime_t delay;

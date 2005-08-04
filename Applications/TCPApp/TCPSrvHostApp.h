@@ -27,7 +27,7 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class TCPSrvHostApp : public cSimpleModule
+class INET_API TCPSrvHostApp : public cSimpleModule
 {
   protected:
     TCPSocket serverSocket;
@@ -50,7 +50,7 @@ class TCPSrvHostApp : public cSimpleModule
  *
  * @see TCPSrvHostApp
  */
-class TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInterface
+class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::CallbackInterface
 {
   private:
     TCPSrvHostApp *hostmod;

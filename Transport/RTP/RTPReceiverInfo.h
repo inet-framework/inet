@@ -34,7 +34,7 @@ about other rtp endsystems.
 This class processes rtp packets, rtcp sender reports and rtcp sdes chunks
 originating from this endsystem.
 */
-class RTPReceiverInfo : public RTPParticipantInfo {
+class INET_API RTPReceiverInfo : public RTPParticipantInfo {
 
     public:
 
@@ -206,3 +206,4 @@ class RTPReceiverInfo : public RTPParticipantInfo {
 };
 
 #endif
+

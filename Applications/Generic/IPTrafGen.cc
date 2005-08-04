@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004-2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,7 +21,7 @@
 #include <omnetpp.h>
 #include "IPTrafGen.h"
 #include "IPControlInfo_m.h"
-#include "StringTokenizer.h"
+#include "IPv6ControlInfo_m.h"
 #include "IPAddressResolver.h"
 
 
@@ -48,15 +49,27 @@ void IPTrafSink::handleMessage(cMessage *msg)
 
 void IPTrafSink::printPacket(cMessage *msg)
 {
-    IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
-
-    IPAddress src = controlInfo->srcAddr();
-    IPAddress dest = controlInfo->destAddr();
-    int protocol = controlInfo->protocol();
+    IPvXAddress src, dest;
+    int protocol = -1;
+    if (dynamic_cast<IPControlInfo *>(msg->controlInfo())!=NULL)
+    {
+        IPControlInfo *ctrl = (IPControlInfo *)msg->controlInfo();
+        src = ctrl->srcAddr();
+        dest = ctrl->destAddr();
+        protocol = ctrl->protocol();
+    }
+    else if (dynamic_cast<IPv6ControlInfo *>(msg->controlInfo())!=NULL)
+    {
+        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->controlInfo();
+        src = ctrl->srcAddr();
+        dest = ctrl->destAddr();
+        protocol = ctrl->protocol();
+    }
 
     ev  << msg << endl;
     ev  << "Payload length: " << (msg->length()/8) << " bytes" << endl;
-    ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+    if (protocol!=-1)
+        ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
 void IPTrafSink::processPacket(cMessage *msg)
@@ -92,7 +105,7 @@ void IPTrafGen::initialize(int stage)
     simtime_t startTime = par("startTime");
 
     const char *destAddrs = par("destAddresses");
-    StringTokenizer tokenizer(destAddrs);
+    cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
         destAddresses.push_back(IPAddressResolver().resolve(token));
@@ -109,7 +122,7 @@ void IPTrafGen::initialize(int stage)
     scheduleAt(startTime, timer);
 }
 
-IPAddress IPTrafGen::chooseDestAddr()
+IPvXAddress IPTrafGen::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     return destAddresses[k];
@@ -123,16 +136,33 @@ void IPTrafGen::sendPacket()
     cMessage *payload = new cMessage(msgName);
     payload->setLength(msgLength);
 
-    IPControlInfo *controlInfo = new IPControlInfo();
-    IPAddress destAddr = chooseDestAddr();
-    controlInfo->setDestAddr(destAddr);
-    controlInfo->setProtocol(protocol);
-    payload->setControlInfo(controlInfo);
+    IPvXAddress destAddr = chooseDestAddr();
+    if (!destAddr.isIPv6())
+    {
+        // send to IPv4
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setDestAddr(destAddr.get4());
+        controlInfo->setProtocol(protocol);
+        payload->setControlInfo(controlInfo);
 
-    ev << "Sending packet: ";
-    printPacket(payload);
+        ev << "Sending packet: ";
+        printPacket(payload);
 
-    send(payload, "to_ip");
+        send(payload, "to_ip");
+    }
+    else
+    {
+        // send to IPv6
+        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+        controlInfo->setDestAddr(destAddr.get6());
+        controlInfo->setProtocol(protocol);
+        payload->setControlInfo(controlInfo);
+
+        ev << "Sending packet: ";
+        printPacket(payload);
+
+        send(payload, "to_ipv6");
+    }
     numSent++;
 }
 

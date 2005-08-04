@@ -40,7 +40,7 @@ void RTPPayloadSender::initialize() {
     _clockRate = 0;
     _timeStampBase = intrand(65535);
     _timeStamp = _timeStampBase;
-    _sequenceNumberBase = intrand();
+    _sequenceNumberBase = intrand(0x7fffffff);
     _sequenceNumber = _sequenceNumberBase;
 };
 

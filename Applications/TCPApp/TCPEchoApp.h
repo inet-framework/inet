@@ -15,6 +15,7 @@
 #define __TCPECHOAPP_H_
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 
@@ -22,7 +23,7 @@
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class TCPEchoApp : public cSimpleModule
+class INET_API TCPEchoApp : public cSimpleModule
 {
   protected:
     double delay;

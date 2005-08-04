@@ -18,11 +18,12 @@
 
 
 #include <string.h>
-#include "TCPMain.h"
+#include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 #include "IPControlInfo_m.h"
+#include "IPv6ControlInfo_m.h"
 #include "TCPSendQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
@@ -164,40 +165,72 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 void TCPConnection::sendToIP(TCPSegment *tcpseg)
 {
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && tcpseg->payloadLength()!=0) 
+    if (sndNxtVector && tcpseg->payloadLength()!=0)
         sndNxtVector->record(tcpseg->sequenceNo());
     if (sndAckVector) sndAckVector->record(tcpseg->ackNo());
-    
+
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
     tcpseg->setLength(8*(TCP_HEADER_OCTETS+tcpseg->payloadLength()));
     // TBD account for Options (once they get implemented)
 
-    IPControlInfo *controlInfo = new IPControlInfo();
-    controlInfo->setProtocol(IP_PROT_TCP);
-    controlInfo->setSrcAddr(localAddr);
-    controlInfo->setDestAddr(remoteAddr);
-    tcpseg->setControlInfo(controlInfo);
-
-    tcpEV << "Send: ";
+    tcpEV << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    tcpMain->send(tcpseg,"to_ip");
+    // TBD reuse next function for sending
+
+    if (!remoteAddr.isIPv6())
+    {
+        // send over IPv4
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setProtocol(IP_PROT_TCP);
+        controlInfo->setSrcAddr(localAddr.get4());
+        controlInfo->setDestAddr(remoteAddr.get4());
+        tcpseg->setControlInfo(controlInfo);
+
+        tcpMain->send(tcpseg,"to_ip");
+    }
+    else
+    {
+        // send over IPv6
+        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+        controlInfo->setProtocol(IP_PROT_TCP);
+        controlInfo->setSrcAddr(localAddr.get6());
+        controlInfo->setDestAddr(remoteAddr.get6());
+        tcpseg->setControlInfo(controlInfo);
+
+        tcpMain->send(tcpseg,"to_ipv6");
+    }
 }
 
-void TCPConnection::sendToIP(TCPSegment *tcpseg, IPAddress src, IPAddress dest)
+void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
 {
-    IPControlInfo *controlInfo = new IPControlInfo();
-    controlInfo->setProtocol(IP_PROT_TCP);
-    controlInfo->setSrcAddr(src);
-    controlInfo->setDestAddr(dest);
-    tcpseg->setControlInfo(controlInfo);
-
-    tcpEV << "Send: ";
+    tcpEV << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    check_and_cast<TCPMain *>(simulation.contextModule())->send(tcpseg,"to_ip");
+    if (!dest.isIPv6())
+    {
+        // send over IPv4
+        IPControlInfo *controlInfo = new IPControlInfo();
+        controlInfo->setProtocol(IP_PROT_TCP);
+        controlInfo->setSrcAddr(src.get4());
+        controlInfo->setDestAddr(dest.get4());
+        tcpseg->setControlInfo(controlInfo);
+
+        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"to_ip");
+    }
+    else
+    {
+        // send over IPv6
+        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+        controlInfo->setProtocol(IP_PROT_TCP);
+        controlInfo->setSrcAddr(src.get6());
+        controlInfo->setDestAddr(dest.get6());
+        tcpseg->setControlInfo(controlInfo);
+
+        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"to_ipv6");
+    }
 }
 
 void TCPConnection::signalConnectionTimeout()
@@ -283,7 +316,7 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 
 void TCPConnection::sendSyn()
 {
-    if (remoteAddr.isNull() || remotePort==-1)
+    if (remoteAddr.isUnspecified() || remotePort==-1)
         opp_error("Error processing command OPEN_ACTIVE: foreign socket unspecified");
     if (localPort==-1)
         opp_error("Error processing command OPEN_ACTIVE: local port unspecified");
@@ -321,7 +354,7 @@ void TCPConnection::sendRst(uint32 seqNo)
     sendRst(seqNo, localAddr, remoteAddr, localPort, remotePort);
 }
 
-void TCPConnection::sendRst(uint32 seq, IPAddress src, IPAddress dest, int srcPort, int destPort)
+void TCPConnection::sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort)
 {
     TCPSegment *tcpseg = new TCPSegment("RST");
 
@@ -335,7 +368,7 @@ void TCPConnection::sendRst(uint32 seq, IPAddress src, IPAddress dest, int srcPo
     sendToIP(tcpseg, src, dest);
 }
 
-void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPAddress src, IPAddress dest, int srcPort, int destPort)
+void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort)
 {
     TCPSegment *tcpseg = new TCPSegment("RST+ACK");
 
@@ -451,12 +484,34 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
 
     uint32 old_snd_nxt = state->snd_nxt;
     ASSERT(bytesToSend>0);
-    while (bytesToSend>0) // FIXME should this be if(fullSegmentsOnly ? bytesToSend>=state->snd_mss : bytesToSend>0) ?
+
+#ifdef TCP_SENDFRAGMENTS  /* normally undefined */
+    // make agressive use of the window until the last byte
+    while (bytesToSend>0)
     {
         ulong bytes = Min(bytesToSend, state->snd_mss);
         sendSegment(bytes);
         bytesToSend -= bytes;
     }
+#else
+    // send <MSS segments only if it's the only segment we can send now
+    // FIXME this should probably obey Nagle's alg -- to be checked
+    if (bytesToSend <= state->snd_mss)
+    {
+        sendSegment(bytesToSend);
+    }
+    else
+    {
+        // send whole segments only
+        while (bytesToSend>=state->snd_mss)
+        {
+            sendSegment(state->snd_mss);
+            bytesToSend -= state->snd_mss;
+        }
+        if (bytesToSend>0)
+           tcpEV << bytesToSend << " bytes of space left in effectiveWindow\n";
+    }
+#endif
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack

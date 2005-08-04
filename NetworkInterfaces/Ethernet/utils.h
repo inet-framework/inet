@@ -38,7 +38,7 @@ class MessageId;
 /**
  * Experimental class to help tracing messages.
  */
-class MessageTracer
+class INET_API MessageTracer
 {
   protected:
     static MessageTracer trc;
@@ -59,7 +59,7 @@ class MessageTracer
 /**
  * Experimental class to help tracing messages.
  */
-class MessageId
+class INET_API MessageId
 {
   public:
     static unsigned int nextId;

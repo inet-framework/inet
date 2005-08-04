@@ -30,7 +30,7 @@
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
  */
-class EtherHub : public cSimpleModule
+class INET_API EtherHub : public cSimpleModule
 {
     Module_Class_Members(EtherHub,cSimpleModule,0);
 

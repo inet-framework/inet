@@ -14,9 +14,11 @@
 *********************************************************************/
 
 #include "TED.h"
-#include "StringTokenizer.h"
 #include "IPAddressResolver.h"
 #include "stlwatch.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
+#include "RoutingTableAccess.h"
 
 
 Define_Module(TED);
@@ -92,7 +94,7 @@ void TED::buildDatabase()
 
     cTopology topo;
     const char *moduleTypes = par("moduleTypes").stringValue();
-    std::vector<std::string> types = StringTokenizer(moduleTypes, " ").asVector();
+    std::vector<std::string> types = cStringTokenizer(moduleTypes, " ").asVector();
     topo.extractByModuleType(types);
     ev << "Total number of RSVP LSR nodes = " << topo.nodes() << "\n";
 
@@ -101,19 +103,21 @@ void TED::buildDatabase()
         sTopoNode *node = topo.node(i);
         cModule *module = node->module();
 
+        InterfaceTable *myIFT = IPAddressResolver().interfaceTableOf(module);
         RoutingTable *myRT = IPAddressResolver().routingTableOf(module);
         IPAddress modAddr = myRT->getRouterId();
-        if (modAddr.isNull())
-            modAddr = IPAddressResolver().getAddressFrom(myRT);
+        if (modAddr.isUnspecified())
+            modAddr = IPAddressResolver().getAddressFrom(myIFT).get4();
 
         for (int j = 0; j < node->outLinks(); j++)
         {
             cModule *neighbour = node->out(j)->remoteNode()->module();
 
+            InterfaceTable *neighbourIFT = IPAddressResolver().interfaceTableOf(neighbour);
             RoutingTable *neighbourRT = IPAddressResolver().routingTableOf(neighbour);
             IPAddress neighbourAddr = neighbourRT->getRouterId();
-            if (neighbourAddr.isNull())
-                neighbourAddr = IPAddressResolver().getAddressFrom(neighbourRT);
+            if (neighbourAddr.isUnspecified())
+                neighbourAddr = IPAddressResolver().getAddressFrom(neighbourIFT).get4();
 
             // For each link
             // Get linkId
@@ -126,9 +130,9 @@ void TED::buildDatabase()
             int remote_gateIndex = node->out(j)->remoteGate()->index();
 
             // Get local address
-            entry.local = myRT->interfaceByPortNo(local_gateIndex)->inetAddr;
+            entry.local = myIFT->interfaceByPortNo(local_gateIndex)->ipv4()->inetAddress();
             // Get remote address
-            entry.remote = neighbourRT->interfaceByPortNo(remote_gateIndex)->inetAddr;
+            entry.remote = neighbourIFT->interfaceByPortNo(remote_gateIndex)->ipv4()->inetAddress();
 
             double BW = node->out(j)->localGate()->datarate()->doubleValue();
             double delay = node->out(j)->localGate()->delay()->doubleValue();

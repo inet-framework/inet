@@ -17,7 +17,7 @@
 
 /*! \file reports.cc
 This file contains the implementations of member functions of the
-class SenderReport and ReceptionReport.
+class INET_API SenderReport and ReceptionReport.
 */
 
 #include <omnetpp.h>
@@ -33,7 +33,7 @@ class SenderReport and ReceptionReport.
 Register_Class(SenderReport);
 
 
-SenderReport::SenderReport(const char *name = NULL) : cObject(name) {
+SenderReport::SenderReport(const char *name) : cObject(name) {
     _ntpTimeStamp = 0;
     _rtpTimeStamp = 0;
     _packetCount = 0;
@@ -71,14 +71,14 @@ const char *SenderReport::className() const {
 };
 
 
-std::string SenderReport::info() const {
+std::string SenderReport::info() {
     std::stringstream out;
     out << "SenderReport.timeStamp=" << _rtpTimeStamp;
     return out.str();
 };
 
 
-void SenderReport::writeContents(ostream& os) const {
+void SenderReport::writeContents(std::ostream& os) const {
     os << "SenderReport:" << endl;
     os << "  ntpTimeStamp = " << _ntpTimeStamp << endl;
     os << "  rtpTimeStamp = " << _rtpTimeStamp << endl;
@@ -133,7 +133,7 @@ void SenderReport::setByteCount(u_int32 byteCount) {
 Register_Class(ReceptionReport);
 
 
-ReceptionReport::ReceptionReport(const char *name = NULL) : cObject(name) {
+ReceptionReport::ReceptionReport(const char *name) : cObject(name) {
     _ssrc = 0;
     _fractionLost = 0;
     _packetsLostCumulative = 0;
@@ -177,14 +177,14 @@ const char *ReceptionReport::className() const {
 };
 
 
-std::string ReceptionReport::info() const {
+std::string ReceptionReport::info() {
     std::stringstream out;
     out << "ReceptionReport.ssrc=" << _ssrc;
     return out.str();
 };
 
 
-void ReceptionReport::writeContents(ostream& os) const {
+void ReceptionReport::writeContents(std::ostream& os) const {
     os << "ReceptionReport:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     os << "  fractionLost = " << (int)_fractionLost << endl;

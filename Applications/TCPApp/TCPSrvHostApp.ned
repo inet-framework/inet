@@ -37,6 +37,8 @@
 // client from TCPGenericCliAppBase then; check TelnetApp and TCPBasicClientApp
 // for examples.
 //
+// Compatible with both IPv4 and IPv6.
+//
 simple TCPSrvHostApp
     parameters:
         address: string, // may be left empty ("")

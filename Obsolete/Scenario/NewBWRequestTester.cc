@@ -19,7 +19,7 @@
 
 
 
-class NewBWRequestTester : public cSimpleModule
+class INET_API NewBWRequestTester : public cSimpleModule
 {
   private:
     simtime_t startTime;

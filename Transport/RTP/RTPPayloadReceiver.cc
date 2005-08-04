@@ -20,7 +20,7 @@
 This file contains method implementations for RTPPayloadReceiver.
 */
 
-#include <fstream.h>
+#include <fstream>
 #include "RTPPayloadReceiver.h"
 #include "RTPPacket.h"
 #include "RTPInnerPacket.h"

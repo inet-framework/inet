@@ -29,7 +29,7 @@
 /**
  * Gives access to ICMP.
  */
-class ICMPAccess : public ModuleAccess<ICMP>
+class INET_API ICMPAccess : public ModuleAccess<ICMP>
 {
     public:
         ICMPAccess() : ModuleAccess<ICMP>("icmp") {}

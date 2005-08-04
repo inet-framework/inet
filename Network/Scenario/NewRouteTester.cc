@@ -20,7 +20,7 @@
 
 
 
-class NewRouteTester : public cSimpleModule
+class INET_API NewRouteTester : public cSimpleModule
 {
 private:
    simtime_t startTime;

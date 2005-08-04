@@ -37,7 +37,7 @@ void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
-    tcpdump.dump(lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
+    tcpdump.dump(fromA, lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
 }
 
 void TCPTesterBase::finish()

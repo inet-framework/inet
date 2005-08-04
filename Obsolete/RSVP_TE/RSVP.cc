@@ -12,11 +12,15 @@
 *
 *
 *********************************************************************/
+
 #include "RSVP.h"
 #include "IPAddress.h"
 #include "MPLSModule.h"
 #include "IPAddressResolver.h"
 #include "IPControlInfo_m.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
+#include "RoutingTableAccess.h"
 
 Define_Module(RSVP);
 
@@ -109,7 +113,8 @@ void RSVP::initialize(int stage)
     if (stage!=4)
         return;
 
-    RoutingTable *rt = routingTableAccess.get();
+    ift = InterfaceTableAccess().get();
+    rt = RoutingTableAccess().get();
 
     // get routerId
     routerId = rt->getRouterId().getInt();
@@ -119,7 +124,7 @@ void RSVP::initialize(int stage)
     IsER = par("isER").boolValue();
 
     // initialize interface address list
-    NoOfLinks = rt->numInterfaces();
+    NoOfLinks = ift->numInterfaces();
 
     // fill in LocalAddress[] array, using TED (in stage>=4!)
     updateTED();
@@ -492,7 +497,6 @@ void RSVP::processResvMsg(RSVPResvMsg * rmsg)
        }
      */
 
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
     ResvStateBlock_t *activeRSB;
@@ -589,7 +593,7 @@ void RSVP::processResvMsg(RSVPResvMsg * rmsg)
        a RERR message specifying "Conflicting Style", drop the
        RESV message, and return.
      */
-    // for(int m=0;m< RSBList.size();m++)
+    // for(unsigned int m=0;m< RSBList.size();m++)
     // {
     //     if (rmsg->isInSession(&(RSBList[m].Session_Object)))
     //         if(ResvStyle != r_iter.style)
@@ -914,21 +918,19 @@ void RSVP::processResvMsg(RSVPResvMsg * rmsg)
                         {
 
                             int outInf = rmsg->getLIH();
-                            int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                            int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort(); // FIXME ->outputPort(): is this OK? --AV
                             int inInf = 0;
                             getIncInet(Refresh_PHOP_list[i], &inInf);
 
-                            int inInfIndex = rt->interfaceByAddress(IPAddress(inInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
+                            int inInfIndex = rt->interfaceByAddress(IPAddress(inInf))->outputPort(); // FIXME ->outputPort(): is this OK? --AV
                             int label = (*fdlist).label;
 
                             if (label != -1)
                             {
                                 int lsp_id = (*fdlist).Filter_Spec_Object.Lsp_Id;
 
-                                const char *outInfName =
-                                    (rt->interfaceByPortNo(outInfIndex))->name.c_str();
-                                const char *inInfName =
-                                    (rt->interfaceByPortNo(inInfIndex))->name.c_str();
+                                const char *outInfName = ift->interfaceByPortNo(outInfIndex)->name();
+                                const char *inInfName = ift->interfaceByPortNo(inInfIndex)->name();
 
                                 int inLabel = -2;
 
@@ -1909,7 +1911,7 @@ int RSVP::TC_ModFlowspec(int tunnelId, int OI, FlowSpecObj_t fs, SenderTspecObj_
         addFs->req_bandwidth = fs.req_bandwidth;
     addFs->link_delay = fs.link_delay;
 
-    for (int i = 0; i < FlowTable.size(); i++)
+    for (unsigned int i = 0; i < FlowTable.size(); i++)
     {
         if (FlowTable[i].handle == tunnelId)
         {
@@ -1961,7 +1963,7 @@ bool RSVP::allocateResource(int tunnelId, int holdingPri, int setupPri, int oi, 
     double total_releasedBW = 0;
     double releasedBW = 0;
 
-    for (int i = 0; i < ted.size(); i++)
+    for (unsigned int i = 0; i < ted.size(); i++)
     {
         if (ted[i].local.getInt() == oi && ted[i].advrouter.getInt() == routerId)
         {
@@ -1996,7 +1998,7 @@ bool RSVP::allocateResource(int tunnelId, int holdingPri, int setupPri, int oi, 
                     // findTunnel = false;
                     // Select which tunnel to preempt
 
-                    for (int j = 0; j < FlowTable.size(); j++)
+                    for (unsigned int j = 0; j < FlowTable.size(); j++)
                     {
                         // Ignore myself
                         if (FlowTable[i].handle == tunnelId)
@@ -2041,7 +2043,7 @@ bool RSVP::allocateResource(int tunnelId, int holdingPri, int setupPri, int oi, 
                 for (lowest_pri_to_preempt = 7; lowest_pri_to_preempt >= setupPri;
                      lowest_pri_to_preempt--)
                 {
-                    for (int j = 0; j < FlowTable.size(); j++)
+                    for (unsigned int j = 0; j < FlowTable.size(); j++)
                     {
                         // Ignore myself
                         if (FlowTable[i].handle == tunnelId)
@@ -2106,8 +2108,6 @@ int RSVP::GetFwdFS(int oi, FlowSpecObj_t * fwdFS)
 
 void RSVP::Mcast_Route_Query(IPADDR srcAddr, int iad, IPADDR destAddr, int *outl)        // FIXME change to int& outl
 {
-    RoutingTable *rt = routingTableAccess.get();
-
     if (destAddr == routerId)
     {
         (*outl) = -1;
@@ -2118,7 +2118,7 @@ void RSVP::Mcast_Route_Query(IPADDR srcAddr, int iad, IPADDR destAddr, int *outl
     // int j=0;
 
     foundIndex = rt->outputPortNo(IPAddress(destAddr));
-    (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return???
+    (*outl) = ift->interfaceByPortNo(foundIndex)->ipv4()->inetAddress().getInt();   // FIXME why not return???
 
     return;
 }
@@ -2384,7 +2384,7 @@ bool RSVP::doCACCheck(RSVPPathMsg * pmsg, int OI)
 
     updateTED();
 
-    for (int k = 0; k < ted.size(); k++)
+    for (unsigned int k = 0; k < ted.size(); k++)
     {
 
         if (ted[k].local.getInt() == OI && ted[k].advrouter.getInt() == routerId)
@@ -2440,7 +2440,7 @@ void RSVP::preemptTunnel(int tunnelId)
 
     if (!PSBList.empty())
     {
-        for (int m = 0; m < PSBList.size(); m++)
+        for (unsigned int m = 0; m < PSBList.size(); m++)
         {
             if (PSBList[m].Session_Object.Tunnel_Id == tunnelId)
             {
@@ -2472,11 +2472,11 @@ void RSVP::preemptTunnel(int tunnelId)
     // RESV TEAR
     if (!RSBList.empty())
     {
-        for (int m = 0; m < PSBList.size(); m++)
+        for (unsigned int m = 0; m < PSBList.size(); m++)
         {
             if (PSBList[m].Session_Object.Tunnel_Id == tunnelId)
             {
-                for (int i = 0; i < locList.size(); i++)
+                for (unsigned int i = 0; i < locList.size(); i++)
                     RTearFwd(&r_iter, locList[i]);
 
                 // RSBList.erase(r_iterI);  // FIXME This line is very unsafe !!!!

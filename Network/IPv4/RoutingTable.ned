@@ -18,11 +18,10 @@
 
 
 //
-// Keeps the table of all routing and interface information.
+// Stores the routing table. (Per-interface configuration is stored in 
+// InterfaceTable.)
 //
-// Interfaces are dynamically registered by the corresponding L2 modules, e.g.
-// PPPInterface. In addition to registered interfaces, a loopback interface
-// will also be created. For hosts, the routerId parameter should be empty (""),
+// For hosts, the routerId module parameter should be empty (""),
 // in which case the loopback IP address will be set to 127.0.0.1/8.
 // For routers which have a routerId set, the loopback address will be set to
 // routerId. (See also RFC 2072 "\Router Renumbering Guide".)
@@ -42,6 +41,7 @@
 // functions of the C++ module class. For detailed info, please see the C++
 // documentation of the class (Doxygen).
 //
+// @see InterfaceTable
 // @author: Jochen Reber, Andras Varga
 //
 simple RoutingTable

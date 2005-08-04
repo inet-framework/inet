@@ -24,7 +24,7 @@ This file declares the class RTPPayloadReceiver.
 #define __RTPPAYLOADRECEIVER_H__
 
 
-#include <fstream.h>
+#include <fstream>
 #include <omnetpp.h>
 #include "RTPPacket.h"
 
@@ -33,7 +33,7 @@ This file declares the class RTPPayloadReceiver.
 The class RTPPayloadReceiver acts as a base class for modules
 processing incoming rtp data packets.
 */
-class RTPPayloadReceiver : public cSimpleModule {
+class INET_API RTPPayloadReceiver : public cSimpleModule {
 
     Module_Class_Members(RTPPayloadReceiver, cSimpleModule, 0);
 
@@ -61,7 +61,7 @@ class RTPPayloadReceiver : public cSimpleModule {
         /*!
         The output file stream.
         */
-        ofstream _outputFileStream;
+        std::ofstream _outputFileStream;
 
         /*!
         The payload type this RTPPayloadReceiver module processes.
@@ -94,3 +94,4 @@ class RTPPayloadReceiver : public cSimpleModule {
 };
 
 #endif
+

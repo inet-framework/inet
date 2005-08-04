@@ -18,7 +18,6 @@
 
 
 #include "TCPDump.h"
-#include "IPControlInfo_m.h"
 
 
 TCPDumper::TCPDumper(std::ostream& out)
@@ -26,13 +25,30 @@ TCPDumper::TCPDumper(std::ostream& out)
     outp = &out;
 }
 
-void TCPDumper::dump(const char *label, IPDatagram *dgram, const char *comment)
+void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)
 {
-    TCPSegment *tcpseg = check_and_cast<TCPSegment *>(dgram->encapsulatedMsg());
-    dump(label, tcpseg, dgram->srcAddress().str(), dgram->destAddress().str(), comment);
+    cMessage *encapmsg = dgram->encapsulatedMsg();
+    if (dynamic_cast<TCPSegment *>(encapmsg))
+    {
+        // if TCP, dump as TCP
+        dump(l2r, label, (TCPSegment *)encapmsg, dgram->srcAddress().str(), dgram->destAddress().str(), comment);
+    }
+    else
+    {
+        // some other packet, dump what we can
+        std::ostream& out = *outp;
+
+        // seq and time (not part of the tcpdump format)
+        char buf[30];
+        sprintf(buf,"[%.3f%s] ", simulation.simTime(), label);
+        out << buf;
+
+        // packet class and name
+        out << "? " << encapmsg->className() << " \"" << encapmsg->name() << "\"\n";
+    }
 }
 
-void TCPDumper::dump(const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
+void TCPDumper::dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     std::ostream& out = *outp;
 
@@ -42,8 +58,16 @@ void TCPDumper::dump(const char *label, TCPSegment *tcpseg, const std::string& s
     out << buf;
 
     // src/dest
-    out << srcAddr << "." << tcpseg->srcPort() << " > ";
-    out << destAddr << "." << tcpseg->destPort() << ": ";
+    if (l2r)
+    {
+        out << srcAddr << "." << tcpseg->srcPort() << " > ";
+        out << destAddr << "." << tcpseg->destPort() << ": ";
+    }
+    else
+    {
+        out << destAddr << "." << tcpseg->destPort() << " < ";
+        out << srcAddr << "." << tcpseg->srcPort() << ": ";
+    }
 
     // flags
     bool flags = false;
@@ -107,14 +131,20 @@ void TCPDump::handleMessage(cMessage *msg)
     // dump
     if (!ev.disabled())
     {
-        if (dynamic_cast<IPDatagram *>(msg))
+        bool l2r = msg->arrivedOn("in1");
+        if (dynamic_cast<TCPSegment *>(msg))
         {
-            tcpdump.dump("", (IPDatagram *)msg);
+            tcpdump.dump(l2r, "", (TCPSegment *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
         }
-        else if (dynamic_cast<TCPSegment *>(msg))
+        else
         {
-            bool dir = msg->arrivedOn("in1");
-            tcpdump.dump("", (TCPSegment *)msg, std::string(dir?"A":"B"),std::string(dir?"B":"A"));
+            // search for encapsulated IPDatagram in it
+            cMessage *encapmsg = msg;
+            while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL)
+                encapmsg = encapmsg->encapsulatedMsg();
+            if (!encapmsg)
+                error("packet %s doesn't contain an IPDatagram", msg->name());
+            tcpdump.dump(l2r, "", (IPDatagram *)encapmsg);
         }
     }
 

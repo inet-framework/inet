@@ -2,6 +2,10 @@
 #include <string.h>
 #include "MPLSModule.h"
 #include "stlwatch.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
+#include "RoutingTableAccess.h"
+#include "IPDatagram.h"
 
 
 using namespace std;
@@ -17,6 +21,9 @@ std::ostream& operator<<(std::ostream& os, const MPLSModule::FECElem& fec)
 
 void MPLSModule::initialize()
 {
+    ift = InterfaceTableAccess().get();
+    rt = RoutingTableAccess().get();
+
     ipdataQueue.setName("ipdataQueue");
     ldpQueue.setName("ldpQueue");
     maxFecId = 0;
@@ -146,7 +153,6 @@ void MPLSModule::processPacketFromSignalling(cMessage * msg)
 
 void MPLSModule::trySendBufferedPackets(int returnedFecId)
 {
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
     for (int i = 0; i < ipdataQueue.items(); i++)
@@ -168,8 +174,8 @@ void MPLSModule::trySendBufferedPackets(int returnedFecId)
 
         // Incoming interface
         int gateIndex = datagram->par("gateIndex");
-        InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-        string senderInterface = ientry->name;
+        InterfaceEntry *ientry = ift->interfaceByPortNo(gateIndex);
+        string senderInterface = ientry->name();
 
         // Construct a new MPLS packet
         MPLSPacket *newPacket = new MPLSPacket(datagram->name());
@@ -187,7 +193,7 @@ void MPLSModule::trySendBufferedPackets(int returnedFecId)
         ev << "Encapsulating buffered packet " << datagram << " into MPLS with label=" <<
               label << ", sending to " << outgoingInterface << "\n";
 
-        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
+        int outgoingPort = ift->interfaceByName(outgoingInterface.c_str())->outputPort();
         send(newPacket, "toL2", outgoingPort);
     }
 }
@@ -234,14 +240,13 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
 
 void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
     int gateIndex = mplsPacket->arrivalGate()->index();
 
     // Here we process MPLS packets
-    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-    string senderInterface = ientry->name;
+    InterfaceEntry *ie = ift->interfaceByPortNo(gateIndex);
+    string senderInterface = ie->name();
     int oldLabel = mplsPacket->topLabel();
 
     ev << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inIntf=" << senderInterface;
@@ -289,14 +294,14 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
         ev << ", outgoing interface: " << outgoingInterface << "\n";
 
-        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
+        int outgoingPort = ift->interfaceByName(outgoingInterface.c_str())->outputPort();
         send(mplsPacket, "toL2", outgoingPort);
 
     }
     // FIXME (!found) case not handled...
     else if (newLabel==-1 && isER)  // ER router and the new label must be native IP
     {
-        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
+        int outgoingPort = ift->interfaceByName(outgoingInterface.c_str())->outputPort();
 
         mplsPacket->popLabel();
 
@@ -327,14 +332,13 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
 void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 {
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
     int gateIndex = ipdatagram->arrivalGate()->index();
 
     // Incoming interface
-    InterfaceEntry *ientry = rt->interfaceByPortNo(gateIndex);
-    string senderInterface = ientry->name;
+    InterfaceEntry *ie = ift->interfaceByPortNo(gateIndex);
+    string senderInterface = ie->name();
     ev << "Message from outside to Ingress node\n";
 
     bool makeRequest = false;
@@ -369,7 +373,7 @@ void MPLSModule::processIPDatagramFromL2(IPDatagram *ipdatagram)
 
         newPacket->pushLabel(label);
 
-        int outgoingPort = rt->interfaceByName(outgoingInterface.c_str())->outputPort;
+        int outgoingPort = ift->interfaceByName(outgoingInterface.c_str())->outputPort();
         send(newPacket, "toL2", outgoingPort);
     }
     else  // Need to make ldp query

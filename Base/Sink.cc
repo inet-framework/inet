@@ -18,8 +18,12 @@
 
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
-class Sink : public cSimpleModule
+/**
+ * A module that just deletes every message it receives.
+ */
+class INET_API Sink : public cSimpleModule
 {
   protected:
     int count;

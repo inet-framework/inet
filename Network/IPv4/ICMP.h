@@ -31,17 +31,18 @@
 /**
  * ICMP module.
  */
-class ICMP : public cSimpleModule
+class INET_API ICMP : public cSimpleModule
 {
   protected:
     RoutingTableAccess routingTableAccess;
 
-    void processICMPMessage(ICMPMessage *);
-    void errorOut(ICMPMessage *);
-    void recEchoRequest (ICMPMessage *, const IPAddress& dest);
-    void recEchoReply (ICMPMessage *);
-    void sendEchoRequest(cMessage *);
-    void sendToIP(ICMPMessage *, const IPAddress& dest);
+    virtual void processICMPMessage(ICMPMessage *);
+    virtual void errorOut(ICMPMessage *);
+    virtual void processEchoRequest (ICMPMessage *);
+    virtual void processEchoReply (ICMPMessage *);
+    virtual void sendEchoRequest(cMessage *);
+    virtual void sendToIP(ICMPMessage *, const IPAddress& dest);
+    virtual void sendToIP(ICMPMessage *msg);
 
   public:
     Module_Class_Members(ICMP, cSimpleModule, 0);

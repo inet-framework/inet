@@ -20,7 +20,7 @@
 #define __TCPDUMP_H
 
 #include <omnetpp.h>
-#include "IPAddress.h"
+#include "IPvXAddress.h"
 #include "IPDatagram_m.h"
 #include "TCPSegment.h"
 
@@ -28,15 +28,15 @@
 /**
  * Dumps TCP packets in tcpdump format.
  */
-class TCPDumper
+class INET_API TCPDumper
 {
   protected:
     int seq;
     std::ostream *outp;
   public:
     TCPDumper(std::ostream& o);
-    void dump(const char *label, IPDatagram *dgram, const char *comment=NULL);
-    void dump(const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
+    void dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
+    void dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
     // dumps arbitary text
     void dump(const char *label, const char *msg);
 };
@@ -45,7 +45,7 @@ class TCPDumper
 /**
  * Dumps every packet using the TCPDumper class
  */
-class TCPDump : public cSimpleModule
+class INET_API TCPDump : public cSimpleModule
 {
   protected:
     TCPDumper tcpdump;

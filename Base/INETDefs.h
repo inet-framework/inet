@@ -26,10 +26,17 @@
 
 #include <omnetpp.h>
 
+#ifdef BUILDING_INET
+#  define INET_API  OPP_DLLEXPORT
+#else
+#  define INET_API  OPP_DLLIMPORT
+#endif
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 typedef unsigned int uint32;
+
 
 //FIXME Check below doesn't work:
 // MSVC6.0 gives C1017: invalid integer constant expression

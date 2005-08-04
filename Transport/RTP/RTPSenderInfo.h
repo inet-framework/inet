@@ -34,7 +34,7 @@ This file declares the class RTPSenderInfo.
 The class RTPSenderInfo is used by an rtp end system for storing information
 about itself. With the stored information it can create a SenderReport.
 */
-class RTPSenderInfo : public RTPParticipantInfo {
+class INET_API RTPSenderInfo : public RTPParticipantInfo {
 
     public:
 
@@ -147,3 +147,4 @@ class RTPSenderInfo : public RTPParticipantInfo {
 };
 
 #endif
+

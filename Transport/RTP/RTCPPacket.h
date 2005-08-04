@@ -32,8 +32,7 @@ over the network.
 #ifndef __RTCPPACKET_H__
 #define __RTCPPACKET_H__
 
-#include <iostream.h>
-
+#include <iostream>
 #include <omnetpp.h>
 
 #include "types.h"
@@ -44,7 +43,7 @@ over the network.
 This is a base class for all types (except RTCPCompoundPacket) of rtcp
 packets. It isn't intended to be used directly.
 */
-class RTCPPacket : public cPacket {
+class INET_API RTCPPacket : public cPacket {
 
     public:
 
@@ -93,12 +92,12 @@ class RTCPPacket : public cPacket {
         /*!
         Writes a short info about this RTCPPacket into the given buffer.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a detailed report about this RTCPPacket into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns the rtp version of the rtcp packet. It's always 2.
@@ -165,7 +164,7 @@ This class represents rtcp receiver report packets. It can hold 0 to 31
 ReceptionReports. Also the header field ssrc is included.
 \sa ReceptionReport
 */
-class RTCPReceiverReportPacket : public RTCPPacket {
+class INET_API RTCPReceiverReportPacket : public RTCPPacket {
 
     public:
 
@@ -202,12 +201,12 @@ class RTCPReceiverReportPacket : public RTCPPacket {
         /*!
         Reports a one line info about the RTCPReceiverReportPacket.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a report about the RTCPReceiverReportPacket into the stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns the ssrc indentifier of the source which has sent this
@@ -254,7 +253,7 @@ of RTPReceiverReportPacket.
 \sa SenderReport
 \sa ReceptionReport
 */
-class RTCPSenderReportPacket : public RTCPReceiverReportPacket {
+class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket {
 
     public:
 
@@ -291,12 +290,12 @@ class RTCPSenderReportPacket : public RTCPReceiverReportPacket {
         /*!
         Writes a one line info about this RTCPSenderReportPacket into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this RTCPSenderReportPacket into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns a copy of the  sender report stored in this RTCPSenderReportPacket.
@@ -325,7 +324,7 @@ An object of this class holds 0 to 31 source description chunks for
 participants of the rtp session.
 \sa SDESChunk
 */
-class RTCPSDESPacket : public RTCPPacket {
+class INET_API RTCPSDESPacket : public RTCPPacket {
 
     public:
         /*!
@@ -361,12 +360,12 @@ class RTCPSDESPacket : public RTCPPacket {
         /*!
         Writes a short info about this RTCPSDESPacket into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer report about this RTCPSDESPacket into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns a copy of the cArray where the sdes chunks are stored.
@@ -395,7 +394,7 @@ This implementation offers less functionality than described
 in the rfc: Only one ssrc identifier can be stored in it and
 the reason for leaving isn't transmitted.
 */
-class RTCPByePacket : public RTCPPacket {
+class INET_API RTCPByePacket : public RTCPPacket {
 
     public:
         /*!
@@ -453,7 +452,7 @@ must consist at least one RTCPSenderReportPacketof RTCPReceiverReportPacket and
 one RTCPSDESPacket. This class doesn't check if these requirements are
 met.
 */
-class RTCPCompoundPacket : public cPacket {
+class INET_API RTCPCompoundPacket : public cPacket {
 
     public:
         /*!
@@ -489,12 +488,12 @@ class RTCPCompoundPacket : public cPacket {
         /*!
         Writes a short info about this RTCPCompoundPacket into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this RTCPCompoundPacket into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Adds an RTCPPacket to this RTCPCompoundPacket.
@@ -516,3 +515,5 @@ class RTCPCompoundPacket : public cPacket {
 
 };
 #endif
+
+

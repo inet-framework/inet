@@ -34,7 +34,7 @@
 // RAW mode (only used by the IPX protocol) is not supported.
 //
 // Expected environment:
-// - physicalIn and physicalOut should be connected to the "network"
+// - physIn and physOut should be connected to the "network"
 // - upperLayerIn and upperLayerOut are usually connected to EtherLLC (in hosts)
 //   or MACRelayUnitPP (in a switch)
 //
@@ -86,6 +86,20 @@
 // it receives. It is currently not supported to dynamically connect/disconnect
 // an EtherMAC.
 //
+//
+// <b>Queueing</b>
+//
+// In routers, EtherMAC relies on an external queue module (see OutputQueue)
+// to model finite buffer, implement QoS and/or RED, and requests packets
+// from this external queue one-by-one.
+//
+// In hosts, no such queue is used, so EtherMAC contains an internal
+// queue named txQueue to queue up packets waiting for transmission.
+// Conceptually, txQueue is of infinite size, but for better diagnostics
+// one can specify a hard limit in the txQueueLimit parameter -- if this is
+// exceeded, the simulation stops with an error.
+//
+//
 // <b>Physical layer messaging</b>
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
@@ -99,7 +113,7 @@
 // - bytesReceivedOK: total bytes received, including Ethernet frame fields
 //   (but excluding preamble and SFD), including discarded frames (see also
 //   framesPassedToHL)
-// - droppedQueueFull: number of frames from higher layer dropped
+// - droppedIfaceDown: number of frames from higher layer dropped
 // - droppedBitError: number of frames dropped because of bit errors
 // - droppedNotForUs: number of frames dropped because destination address didn't match
 // - framesPassedToHL: number of frames actually passed up to higher layer
@@ -110,6 +124,9 @@
 //
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
+//
+// @see EthernetInterface, EthernetRouterInterface, OutputQueue, EtherEncap, EtherLLC
+// @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
 simple EtherMAC
     parameters:
@@ -125,12 +142,13 @@ simple EtherMAC
                                 // MAC will actually use duplex mode depends on the result
                                 // of the auto-configuration process (duplex is only
                                 // possible with DTE-to-DTE connection).
-        maxQueueSize : numeric, // maximum number of frames queued up for transmission;
-                                // additional frames are dropped
+        txQueueLimit : numeric, // maximum number of frames queued up for transmission;
+                                // additional frames are dropped. Only used if queueModule==""
+        queueModule: string,    // name of external queue module
         writeScalars: bool;     // enable/disable recording statistics in omnetpp.sca
     gates:
-        in: physicalIn;      // to physical layer or the network
-        out: physicalOut;    // to physical layer or the network
+        in: physIn;      // to physical layer or the network
+        out: physOut;    // to physical layer or the network
         in: upperLayerIn;    // to EtherLLC or MACRelayUnitPP
         out: upperLayerOut;  // to EtherLLC or MACRelayUnitPP
 endsimple

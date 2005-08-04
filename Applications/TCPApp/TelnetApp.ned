@@ -19,8 +19,8 @@
 
 //
 // Models Telnet sessions with a specific user behaviour.
-//
 // The server app should be TCPGenericSrvApp.
+// Compatible with both IPv4 and IPv6.
 //
 // NOTE: This module emulates a very specific user behaviour, and as such,
 // it should be viewed as an example rather than a generic Telnet model.
@@ -38,7 +38,7 @@ simple TelnetApp
         numCommands: numeric, // user types this many commands in a session
         commandLength: numeric, // commands are this many characters (plus Enter)
         keyPressDelay: numeric, // delay between keypresses
-        commandOutputLength: numeric, // commands produces this much output (bytes)
+        commandOutputLength: numeric, // commands produce this much output (bytes)
         thinkTime: numeric, // user waits this much before starting to type new command
         idleInterval: numeric, // time gap between sessions
         reconnectInterval;  // if connection breaks, user waits this much before trying to reconnect

@@ -20,8 +20,9 @@
 #pragma warning(disable:4786)
 #endif
 
-#include <omnetpp.h>
 #include <vector>
+#include <omnetpp.h>
+#include "INETDefs.h"
 #include "EtherFrame_m.h"  // for EtherAutoconfig only
 #include "utils.h"
 
@@ -42,7 +43,7 @@ struct BusTap
 /**
  * Implements the bus which connects hosts, switches and other LAN entities on an Ethernet LAN.
  */
-class EtherBus : public cSimpleModule
+class INET_API EtherBus : public cSimpleModule
 {
     Module_Class_Members(EtherBus,cSimpleModule,0);
 
@@ -217,7 +218,7 @@ void EtherBus::tokenize(const char *str, std::vector<double>& array)
 {
     char *str2 = opp_strdup(str);
     if (!str2) return;
-	char *s = strtok(str2, " ");
+        char *s = strtok(str2, " ");
     while (s)
     {
         array.push_back(atof(s));

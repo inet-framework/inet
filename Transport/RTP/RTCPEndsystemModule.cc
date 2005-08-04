@@ -22,10 +22,11 @@ RTCPEndsystemModule.
 
 #include <omnetpp.h>
 
-#include "SocketInterfacePacket.h"
-#include "sockets.h"
+//XXX #include "SocketInterfacePacket.h"
+//XXX #include "sockets.h"
+#include "tmp/defs.h"
 
-#include "ip_address.h"
+#include "IPAddress.h"
 
 #include "types.h"
 #include "RTCPEndsystemModule.h"
@@ -201,7 +202,7 @@ void RTCPEndsystemModule::socketRet(SocketInterfacePacket *sifpIn) {
             sifpOut1->bind(_socketFdIn, IN_Addr(_destinationAddress), IN_Port(_port));
         }
         else {
-            sifpOut1->bind(_socketFdIn, IN_Addr(IN_Addr::ADDR_UNDEF), IN_Port(_port));
+            sifpOut1->bind(_socketFdIn, IPADDRESS_UNDEF, IN_Port(_port));
         }
         send(sifpOut1, "toSocketLayer");
 
@@ -245,13 +246,13 @@ void RTCPEndsystemModule::readRet(SocketInterfacePacket *sifpIn) {
 
 void RTCPEndsystemModule::createServerSocket() {
     SocketInterfacePacket *sifp = new SocketInterfacePacket("socket()");
-    sifp->socket(Socket::AF_INET, Socket::SOCK_DGRAM, Socket::UDP);
+    sifp->socket(Socket::IPSuite_AF_INET, Socket::IPSuite_SOCK_DGRAM, Socket::UDP);
     send(sifp, "toSocketLayer");
 };
 
 void RTCPEndsystemModule::createClientSocket() {
     SocketInterfacePacket *sifp = new SocketInterfacePacket("socket()");
-    sifp->socket(Socket::AF_INET, Socket::SOCK_DGRAM, Socket::UDP);
+    sifp->socket(Socket::IPSuite_AF_INET, Socket::IPSuite_SOCK_DGRAM, Socket::UDP);
     send(sifp, "toSocketLayer");
 };
 
@@ -284,7 +285,7 @@ void RTCPEndsystemModule::chooseSSRC() {
     u_int32 ssrc = 0;
     bool ssrcConflict = false;
     do {
-        ssrc = intrand();
+        ssrc = intrand(0x7fffffff);
         ssrcConflict = findParticipantInfo(ssrc) != NULL;
     } while (ssrcConflict);
     _senderInfo->setSSRC(ssrc);
@@ -390,7 +391,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr ad
         if (participantInfo->address() != address) {
             // we have an address conflict
         }
-        if (participantInfo->rtpPort() == IN_Port(IN_Port::PORT_UNDEF)) {
+        if (participantInfo->rtpPort() == IPSuite_PORT_UNDEF) {
             participantInfo->setRTPPort(port);
         }
         else if (participantInfo->rtpPort() != port) {
@@ -429,7 +430,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 }
                 else {
                     if (participantInfo->address() == address) {
-                        if (participantInfo->rtcpPort() == IN_Port(IN_Port::PORT_UNDEF)) {
+                        if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {
@@ -471,7 +472,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 }
                 else {
                     if (participantInfo->address() == address) {
-                        if (participantInfo->rtcpPort() == IN_Port(IN_Port::PORT_UNDEF)) {
+                        if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {

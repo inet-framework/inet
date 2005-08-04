@@ -8,13 +8,13 @@
 ifconfig:
 
 # PPP link 0 to router 1
-name: ppp0  inet_addr: 172.1.0.1    MTU: 512000     Metric: 1
+name: ppp0  inet_addr: 172.1.0.1    MTU: 512000
 
 # PPP link 1 to router 3
-name: ppp1  inet_addr: 172.1.0.2    MTU: 512000     Metric: 1
+name: ppp1  inet_addr: 172.1.0.2    MTU: 512000
 
-# PPP link 2 to router 4
-name: ppp2  inet_addr: 172.1.0.4    MTU: 512000     Metric: 1
+# PPP link 2 to router 4 (with deliberately a small MTU, so that we can observe fragmentation)
+name: ppp2  inet_addr: 172.1.0.4    MTU: 800
 
 ifconfigend.
 

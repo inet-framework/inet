@@ -9,8 +9,6 @@ unnecessary data packets.
 The hosts run a simple application which sends UDP packets to randomly
 chosen hosts or multicast groups.
 
-Connections between router and hosts are configured as 10Mb ethernet,
-connections between the router are fast fibre optic cables. Host 2 is
-connected to host 3 with a serial modem connection which is used only
-for direct communication between them both - all other packets are
-directly forwarded to router 1.
+The connection between router2 and router4 deliberately has a small MTU, 
+so that we can observe fragmentation.
+

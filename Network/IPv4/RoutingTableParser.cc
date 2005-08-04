@@ -26,7 +26,13 @@
 #include <ctype.h>
 
 #include "RoutingTableParser.h"
+#include "IPv4InterfaceData.h"
 
+//
+// Constants
+//
+const int MAX_FILESIZE = 10000; // TBD lift hardcoded limit
+const int MAX_ENTRY_STRING_SIZE = 500;
 
 //
 // Tokens that mark the route file.
@@ -36,8 +42,9 @@ const char  *IFCONFIG_START_TOKEN = "ifconfig:",
             *ROUTE_START_TOKEN = "route:",
             *ROUTE_END_TOKEN = "routeend.";
 
-RoutingTableParser::RoutingTableParser(RoutingTable *r)
+RoutingTableParser::RoutingTableParser(InterfaceTable *i, RoutingTable *r)
 {
+    ift = i;
     rt = r;
 }
 
@@ -158,8 +165,9 @@ char *RoutingTableParser::createFilteredFile (char *file,
 
 void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
+    char buf[MAX_ENTRY_STRING_SIZE];
     int charpointer = 0;
-    InterfaceEntry *e;
+    InterfaceEntry *ie;
 
     // parsing of entries in interface definition
     while(ifconfigFile[charpointer] != '\0')
@@ -167,82 +175,68 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         // name entry
         if (streq(ifconfigFile + charpointer, "name:")) {
             // find existing interface with this name
-            char *name = parseInterfaceEntry(ifconfigFile, "name:", charpointer,
-                                             new char[MAX_ENTRY_STRING_SIZE]);
-            e = rt->interfaceByName(name);
-            if (!e)
+            char *name = parseEntry(ifconfigFile, "name:", charpointer,buf);
+            ie = ift->interfaceByName(name);
+            if (!ie)
                 opp_error("Error in routing file: interface name `%s' not registered by any L2 module", name);
-            delete [] name;
             continue;
         }
 
         // encap entry
         if (streq(ifconfigFile + charpointer, "encap:")) {
             // ignore encap
-            parseInterfaceEntry(ifconfigFile, "encap:", charpointer,
-                                new char[MAX_ENTRY_STRING_SIZE]);
+            parseEntry(ifconfigFile, "encap:", charpointer, buf);
             continue;
         }
 
         // HWaddr entry
         if (streq(ifconfigFile + charpointer, "HWaddr:")) {
             // ignore hwAddr
-            parseInterfaceEntry(ifconfigFile, "HWaddr:", charpointer,
-                                new char[MAX_ENTRY_STRING_SIZE]);
+            parseEntry(ifconfigFile, "HWaddr:", charpointer, buf);
             continue;
         }
 
         // inet_addr entry
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
-            e->inetAddr = IPAddress(parseInterfaceEntry(ifconfigFile, "inet_addr:", charpointer,
-                                    new char[MAX_ENTRY_STRING_SIZE]));  // FIXME mem leak
+            ie->ipv4()->setInetAddress(IPAddress(parseEntry(ifconfigFile, "inet_addr:", charpointer,buf)));
             continue;
         }
 
         // Broadcast address entry
         if (streq(ifconfigFile + charpointer, "Bcast:")) {
             // ignore Bcast
-            parseInterfaceEntry(ifconfigFile, "Bcast:", charpointer,
-                                new char[MAX_ENTRY_STRING_SIZE]);  // FIXME mem leak
+            parseEntry(ifconfigFile, "Bcast:", charpointer, buf);
             continue;
         }
 
         // Mask entry
         if (streq(ifconfigFile + charpointer, "Mask:")) {
-            e->mask = IPAddress(parseInterfaceEntry(ifconfigFile, "Mask:", charpointer,
-                                new char[MAX_ENTRY_STRING_SIZE]));  // FIXME mem leak
+            ie->ipv4()->setNetmask(IPAddress(parseEntry(ifconfigFile, "Mask:", charpointer,buf)));
             continue;
         }
 
         // Multicast groups entry
         if (streq(ifconfigFile + charpointer, "Groups:")) {
-            char *grStr = parseInterfaceEntry(ifconfigFile, "Groups:",
-                                              charpointer,
-                                              new char[MAX_GROUP_STRING_SIZE]);
-            //PRINTF("\nMulticast gr str: %s\n", grStr);
-            parseMulticastGroups(grStr, e);
+            char *grStr = parseEntry(ifconfigFile, "Groups:", charpointer, buf);
+            parseMulticastGroups(grStr, ie);
             continue;
         }
 
         // MTU entry
         if (streq(ifconfigFile + charpointer, "MTU:")) {
-            e->mtu = atoi(
-                parseInterfaceEntry(ifconfigFile, "MTU:", charpointer,
-                                    new char[MAX_ENTRY_STRING_SIZE])); // FIXME mem leak
+            ie->setMtu(atoi(parseEntry(ifconfigFile, "MTU:", charpointer,buf)));
             continue;
         }
 
         // Metric entry
         if (streq(ifconfigFile + charpointer, "Metric:")) {
-            e->metric = atoi(
-                parseInterfaceEntry(ifconfigFile, "Metric:", charpointer,
-                                    new char[MAX_ENTRY_STRING_SIZE]));
+            ie->ipv4()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer,buf)));
             continue;
         }
 
         // BROADCAST Flag
         if (streq(ifconfigFile + charpointer, "BROADCAST")) {
-            e->broadcast = true;
+            ie->setBroadcast(true);
             charpointer += strlen("BROADCAST");
             skipBlanks(ifconfigFile, charpointer);
             continue;
@@ -250,7 +244,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // MULTICAST Flag
         if (streq(ifconfigFile + charpointer, "MULTICAST")) {
-            e->multicast = true;
+            ie->setMulticast(true);
             charpointer += strlen("MULTICAST");
             skipBlanks(ifconfigFile, charpointer);
             continue;
@@ -258,7 +252,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // POINTTOPOINT Flag
         if (streq(ifconfigFile + charpointer, "POINTTOPOINT")) {
-            e->pointToPoint= true;
+            ie->setPointToPoint(true);
             charpointer += strlen("POINTTOPOINT");
             skipBlanks(ifconfigFile, charpointer);
             continue;
@@ -270,7 +264,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 }
 
 
-char *RoutingTableParser::parseInterfaceEntry (char *ifconfigFile,
+char *RoutingTableParser::parseEntry (char *ifconfigFile,
                                                const char *tokenStr,
                                                int &charpointer,
                                                char* destStr)
@@ -291,51 +285,22 @@ char *RoutingTableParser::parseInterfaceEntry (char *ifconfigFile,
 void RoutingTableParser::parseMulticastGroups (char *groupStr,
                                               InterfaceEntry *itf)
 {
-    int i, j, groupNo;
+    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4()->multicastGroups();
 
-    itf->multicastGroupCtr = 1;
-
-    // add "224.0.0.1" automatically,
-    // use ":"-separator only if string not empty
-    if (!strcmp(groupStr, "")) {
-        strcat(groupStr, "224.0.0.1");
-    } else { // string not empty, use seperator
-        strcat(groupStr, ":224.0.0.1");
-    }
+    // add "224.0.0.1" automatically
+    mcg.push_back(IPAddress::ALL_HOSTS_MCAST);
 
     // add 224.0.0.2" only if Router (IP forwarding enabled)
-    if (rt->ipForward()) {
-        strcat(groupStr, ":224.0.0.2");
-    }
+    if (rt->ipForward())
+        mcg.push_back(IPAddress::ALL_ROUTERS_MCAST);
 
-    // count number of group entries
-    for (i = 0; groupStr[i] != '\0'; i++) {
-        if (groupStr[i] == ':')
-            itf->multicastGroupCtr++;
-    }
+    // Parse string (IP addresses separated by colons)
+    cStringTokenizer tokenizer(groupStr,":");
+    const char *token;
+    while ((token = tokenizer.nextToken())!=NULL)
+        mcg.push_back(IPAddress(token));
 
-    char *str = new char[ADDRESS_STRING_SIZE];
-    itf->multicastGroup = new IPAddress[itf->multicastGroupCtr];
-
-    // Create the different IPAddress
-    for (i = 0, j = 0, groupNo = 0; groupStr[i] != '\0'; i++, j++) {
-        // Skip to next multicast group, if separator found
-        // it's a bit a ugly...
-        if (groupStr[i] == ':') {
-            str[j] = '\0';
-            itf->multicastGroup[groupNo] = IPAddress(str);
-            j = -1;
-            groupNo++;
-            continue;
-        }
-        if (groupStr[i + 1] == '\0') {
-            str[j] = groupStr[i];
-            str[j + 1] = '\0';
-            itf->multicastGroup[groupNo] = IPAddress(str);
-            break;
-        }
-        str[j] = groupStr[i];
-    }
+    itf->ipv4()->setMulticastGroups(mcg);
 }
 
 void RoutingTableParser::parseRouting(char *routeFile)
@@ -363,7 +328,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         skipBlanks(routeFile, pos);
         if (!strcmp(str, "*") || !strcmp(str, "0.0.0.0"))
         {
-            e->gateway = IPAddress("0.0.0.0");
+            e->gateway = IPAddress::UNSPECIFIED_ADDRESS;
         }
         else
         {
@@ -405,7 +370,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         e->interfaceName.reserve(MAX_ENTRY_STRING_SIZE);
         pos += strcpyword(e->interfaceName.buffer(), routeFile + pos);
         skipBlanks(routeFile, pos);
-        e->interfacePtr = rt->interfaceByName(e->interfaceName.c_str());
+        e->interfacePtr = ift->interfaceByName(e->interfaceName.c_str());
         if (e->interfacePtr==NULL)
             opp_error("Syntax error in routing file: 6th column should be an existing "
                       "interface name not `%s'", e->interfaceName.c_str());

@@ -52,7 +52,7 @@ module RTPHost
         udpModule: UDPModule;
             parameters:
                 debug = false;
-            display: "b=32,30;p=87,166;i=block/transport";
+            display: "p=87,166;i=block/transport";
         networkLayer: NetworkLayer;
             parameters:
                 IPForward = false,
@@ -60,7 +60,7 @@ module RTPHost
             gatesizes:
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
-            display: "b=32,30;p=87,242;i=block/fork";
+            display: "p=87,242;i=block/fork";
         ppp : PPPInterface[sizeof(out)];
             display: "p=80,300,row;q=queue;i=block/ifcard";
     connections nocheck:

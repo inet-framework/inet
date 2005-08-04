@@ -18,7 +18,26 @@
 
 
 //
-// @page irt.html, The routing files
+// @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
+//
+// In INET, TCP, UDP and all application layer modules work with
+// both IPv4 and IPv6. Internally they use the IPvXAddress C++ class, which
+// can represent both IPv4 and IPv6 addresses.
+//
+// Most modules use the IPAddressResolver C++ class to resolve addresses
+// specified in module parameters in omnetpp.ini.
+// IPAddressResolver accepts the following syntax:
+//
+//    - literal IPv4 address: "186.54.66.2"
+//    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
+//    - module name: "server", "subnet.server[3]"
+//    - interface of a host or router: "server/eth0", "subnet.server[3]/eth0"
+//    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
+//      "subnet.server[3](ipv6)"
+//    - IPv4 or IPv6 address of an interface of a host or router:
+//      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
+//
+// @page irt.html, The IP routing files
 //
 // Routing files are files with <tt>.irt</tt> or <tt>.mrt</tt> extension,
 // and their names are passed in the routingFileName parameter
@@ -30,7 +49,7 @@
 // configure existing interfaces; static routes are added to the route table.
 //
 // Interfaces themselves are represented in the simulation by modules
-// (such as PPPModule). Modules automatically register themselves
+// (such as the PPP module). Modules automatically register themselves
 // with appropriate defaults in the RoutingTable, and entries in the
 // routing file refine (overwrite) these settings.
 // Interfaces are identified by names (e.g. ppp0, ppp1, eth0) which

@@ -59,8 +59,8 @@ void TCPBasicClientApp::handleTimer(cMessage *msg)
         case MSGKIND_SEND:
            sendRequest();
            numRequestsToSend--;
-           // no scheduleAt(): next request will be send when reply to this one
-           // has arrived (see socketDataArrived())
+           // no scheduleAt(): next request will be sent when reply to this one
+           // arrives (see socketDataArrived())
            break;
     }
 }

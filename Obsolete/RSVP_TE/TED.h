@@ -50,7 +50,7 @@ struct simple_link_t
 /**
  * Traffic Engineering Database.
  */
-class TED : public cSimpleModule
+class INET_API TED : public cSimpleModule
 {
 private:
     static int tedModuleId;

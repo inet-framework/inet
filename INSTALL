@@ -1,70 +1,73 @@
 INSTALLATION INSTRUCTIONS
 =========================
 
-The INET framework can be compiled on any platform supported by OMNeT++.
+The INET Framework can be compiled on any platform supported by OMNeT++.
 
 PREREQUISITES
 
-You should have a working OMNeT++ installation, version 3.0 or later.
-It must be compiled with dynamic NED loading enabled (WITH_NETBUILDER=yes 
+You should have a working OMNeT++ installation, version 3.1 or later.
+It must be compiled with dynamic NED loading enabled (WITH_NETBUILDER=yes
 setting).
 
 LINUX (UNIX)
 
 1. Make sure you OMNeT++ installation works OK (e.g. try running the samples)
-   and it is in the path (try "which nedtool").
+   and it is in the path (to test, try the command "which nedtool").
 
-2. Change to the INET framework directory and edit the inetconfig file
+2. Change to the INET directory and edit the inetconfig file
    to make sure it contains the right settings. You'll probably
    need to adjust ROOT.
 
 3. Re-generate the omnetppconfig file to get the local OMNeT++ configuration
    by typing "opp_makemake -f --genconfig omnetppconfig"
 
-4. Type "make" to build everything. That should be it.
+4. Type "./makemake" to create the makefiles.
 
-5. If there's a Makefile-related error, or if you change add/remove files,
-   try recreating the makefiles by typing "./makemake".
-   If you add/remove/rename directories, you'll need to modify "makemake".
+5. Type "make" to build everything.
+
+6. Add INET/bin directory to the LD_LIBRARY_PATH.
+
+7. If you modify INET and add/remove/rename directories, you'll need to modify
+   "makemakefiles", and go to step 4.
+
+That should be it.
 
 Finally, try running the demo simulations. Change into Examples/ and type
 "./rundemo".
 
-The INET framework is still work in progress, and thus, not everything will work.
-Notably, MPLS is being revised, and RTP hasn't been integrated yet.
+Note:
+-----
+If you add/remove files later, recreate the makefiles with "./makemake".
+If you add/remove/rename directories, you'll need to modify "makemakefiles".
 
 
 
 WINDOWS
 
-If you're using Cygwin or MinGW, see instructions for Unix.
+If you're using Cygwin or MinGW, see instructions for Unix. The instructions
+below are for Visual C++ 7.1.
 
-If you're using Microsoft Visual C++ (6.0 or .NET):
+IMPORTANT: YOU NEED VC 7.1 .NET! INET won't compile with VC 6.0.
 
-1. You need a working OMNeT++ installation. Note that 3.0 alpha versions
-   are only distributed in source code form, so you'll have to compile
-   it yourself. Make sure the sample simulations work OK. Also, OMNeT++
-   and MSVC should be in the PATH (you can verify this by typing "nedtool"
-   and "nmake" at the cmd prompt.)
+1. You need a working OMNeT++ installation. Make sure the sample simulations
+   work OK. Also, OMNeT++ and MSVC should be in the PATH (you can verify this
+   by typing "nedtool" and "nmake" at the cmd prompt.)
 
 2. Change to the INET framework directory. Edit the inetconfig.vc file and
    adjust the OMNETPP_ROOT setting to suit your installation.
 
-3. Type "nmake -f Makefile.vc" to build everything.
+3. Run "makemake.cmd" to create the makefiles.
+
+4. Run "nmake -f makefile.vc depend" to add dependencies to makefiles. You need 
+   to do this every time you re-generate the makefies with "makemakefiles".
+
+5. Type "nmake -f Makefile.vc" to build everything.
       HINT: Create an "m.bat" file with the content "nmake -f Makefile.vc %*".
       It will save you a lot of typing!
 
-4. If there's a Makefile-related error, or if you change add/remove files,
-   try recreating the makefiles by typing "makemake", then
-   "nmake -f makefile.vc depend".
-   If you add/remove/rename directories, you'll need to modify "makemake.cmd".
+6. If you modify INET and add/remove/rename directories, you'll need to modify
+   "makemakefiles", and go to step 3.
 
 Finally, try running the demo simulations. Change to Examples/ and type
 "rundemo.bat".
-
-The INET framework is still work in progress, and thus, not everything will work.
-Notably, MPLS is being revised, and RTP hasn't been integrated yet.
-
-Have fun.
-Andras
 

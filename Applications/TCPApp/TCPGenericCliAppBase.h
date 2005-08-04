@@ -26,7 +26,7 @@
  *
  * Generally used together with GenericAppMsg and TCPGenericSrvApp.
  */
-class TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSocket socket;

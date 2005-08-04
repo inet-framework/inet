@@ -16,18 +16,20 @@
 #ifndef _STLWATCH_H__
 #define _STLWATCH_H__
 
-#include <omnetpp.h>
 #include <vector>
+#include <list>
 #include <map>
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <omnetpp.h>
+#include "INETDefs.h"
 
 
 //
 // Internal class
 //
-class cVectorWatcherBase : public cObject
+class INET_API cVectorWatcherBase : public cObject
 {
   public:
     cVectorWatcherBase(const char *name) : cObject(name) {}
@@ -46,7 +48,7 @@ class cVectorWatcherBase : public cObject
 // Internal class
 //
 template<class T>
-class cVectorWatcher : public cVectorWatcherBase
+class INET_API cVectorWatcher : public cVectorWatcherBase
 {
   protected:
     std::vector<T>& v;
@@ -72,7 +74,7 @@ void createVectorWatcher(const char *varname, std::vector<T>& v)
 // Internal class
 //
 template<class T>
-class cPointerVectorWatcher : public cVectorWatcher<T>
+class INET_API cPointerVectorWatcher : public cVectorWatcher<T>
 {
   public:
     cPointerVectorWatcher(const char *name, std::vector<T>& var) : cVectorWatcher<T>(name, var) {}
@@ -88,8 +90,80 @@ void createPointerVectorWatcher(const char *varname, std::vector<T>& v)
 //
 // Internal class
 //
+template<class T>
+class INET_API cListWatcher : public cVectorWatcherBase
+{
+  protected:
+    std::list<T>& v;
+    std::string classname;
+    mutable typename std::list<T>::iterator it;
+    mutable int itPos;
+  public:
+    cListWatcher(const char *name, std::list<T>& var) : cVectorWatcherBase(name), v(var) {
+        itPos=-1;
+        classname = std::string("std::list<")+opp_typename(typeid(T))+">";
+    }
+    const char *className() const {return classname.c_str();}
+    virtual const char *elemTypeName() const {return opp_typename(typeid(T));}
+    virtual int size() const {return v.size();}
+    virtual std::string at(int i) const {
+        // std::list doesn't support random access iterator and iteration is slow,
+        // so we have to use a trick, knowing that Tkenv will call this function with
+        // i=0, i=1, etc...
+        if (i==0) {
+            it=v.begin(); itPos=0;
+        } else if (i==itPos+1 && it!=v.end()) {
+            ++it; ++itPos;
+        } else {
+            it=v.begin();
+            for (int k=0; k<i && it!=v.end(); k++) ++it;
+            itPos=i;
+        }
+        if (it==v.end()) {
+            return std::string("out of bounds");
+        }
+        return atIt();
+    }
+    virtual std::string atIt() const {
+        std::stringstream out;
+        out << (*it);
+        return out.str();
+    }
+};
+
+template <class T>
+void createListWatcher(const char *varname, std::list<T>& v)
+{
+    new cListWatcher<T>(varname, v);
+}
+
+
+//
+// Internal class
+//
+template<class T>
+class INET_API cPointerListWatcher : public cListWatcher<T>
+{
+  public:
+    cPointerListWatcher(const char *name, std::list<T>& var) : cListWatcher<T>(name, var) {}
+    virtual std::string atIt() const {
+        std::stringstream out;
+        out << (**this->it);
+        return out.str();
+    }
+};
+
+template <class T>
+void createPointerListWatcher(const char *varname, std::list<T>& v)
+{
+    new cPointerListWatcher<T>(varname, v);
+}
+
+//
+// Internal class
+//
 template<class KeyT, class ValueT, class CmpT>
-class cMapWatcher : public cVectorWatcherBase
+class INET_API cMapWatcher : public cVectorWatcherBase
 {
   protected:
     std::map<KeyT,ValueT,CmpT>& m;
@@ -124,7 +198,7 @@ class cMapWatcher : public cVectorWatcherBase
     }
     virtual std::string atIt() const {
         std::stringstream out;
-        out << "{" << it->first << "}  ==>  {" << it->second << "}";
+        out << it->first << " ==> " << it->second;
         return out.str();
     }
 };
@@ -140,13 +214,13 @@ void createMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
 // Internal class
 //
 template<class KeyT, class ValueT, class CmpT>
-class cPointerMapWatcher : public cMapWatcher<KeyT,ValueT,CmpT>
+class INET_API cPointerMapWatcher : public cMapWatcher<KeyT,ValueT,CmpT>
 {
   public:
     cPointerMapWatcher(const char *name, std::map<KeyT,ValueT,CmpT>& var) : cMapWatcher<KeyT,ValueT,CmpT>(name, var) {}
     virtual std::string atIt() const {
         std::stringstream out;
-        out << "{" << this->it->first << "}  ==>  {" << *(this->it->second) << "}";
+        out << this->it->first << "  ==>  " << *(this->it->second);
         return out.str();
     }
 };
@@ -160,6 +234,10 @@ void createPointerMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
 #define WATCH_VECTOR(v)      createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
+
+#define WATCH_LIST(v)        createListWatcher(#v,(v))
+
+#define WATCH_PTRLIST(v)     createPointerListWatcher(#v,(v))
 
 #define WATCH_MAP(m)         createMapWatcher(#m,(m))
 

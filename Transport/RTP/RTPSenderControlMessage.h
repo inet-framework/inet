@@ -44,7 +44,7 @@ go to temporal position within the file (not allowed while playing)
 SEEK_BYTE
 go to data byte (not allowed while playing)
 */
-class RTPSenderControlMessage : public cMessage  {
+class INET_API RTPSenderControlMessage : public cMessage  {
 
 public:
 
@@ -106,3 +106,4 @@ private:
 };
 
 #endif
+

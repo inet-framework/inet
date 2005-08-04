@@ -1,6 +1,6 @@
 ;NSIS Modern User Interface version 1.70
 ;INET Demo install script
-;Andras Varga
+;Author: Andras Varga
 
 ;--------------------------------
 ;Include Modern UI

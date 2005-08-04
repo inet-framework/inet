@@ -24,7 +24,7 @@
 /**
  * Gives access to the MPLS module.
  */
-class MPLSAccess : public ModuleAccess<MPLSModule>
+class INET_API MPLSAccess : public ModuleAccess<MPLSModule>
 {
     public:
         MPLSAccess() : ModuleAccess<MPLSModule>("mplsModule") {}

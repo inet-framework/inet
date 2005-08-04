@@ -20,12 +20,13 @@
 #define __MODULEACCESS_H__
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 /**
  * Find a module with given name and type "closest" to module "from".
  *
- * Operation: gradually raises in the module hierarchy, and searches
+ * Operation: gradually rises in the module hierarchy, and searches
  * recursively among all submodules at every level.
  */
 cModule *findModuleWherever(const char *name, const char *classname, cModule *from);
@@ -35,7 +36,7 @@ cModule *findModuleWherever(const char *name, const char *classname, cModule *fr
  * Uses findModuleWherever(). See usage e.g. at RoutingTableAccess.
  */
 template<typename T>
-class ModuleAccess
+class INET_API ModuleAccess
 {
      // Note: MSVC 6.0 doesn't like const char *N as template parameter,
      // so we have to pass it via the ctor...

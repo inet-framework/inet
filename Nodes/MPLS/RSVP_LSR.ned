@@ -12,12 +12,15 @@
 
 
 import
-    "Blackboard",
+    "NotificationBoard",
     "NetworkLayer",
+    "RoutingTable",
+    "InterfaceTable",
     "MPLSModule",
     "LIBTable",
     "RSVP",
     "OspfTe",
+    "PPPInterface",
     "RSVPAppl";
 
 
@@ -41,21 +44,23 @@ module RSVP_LSR
         in: in[];
         out: out[];
     submodules:
-        blackboard: Blackboard;
-            display: "p=70,60;i=block/blackboard";
+        notificationBoard: NotificationBoard;
+            display: "p=70,60;i=block/control";
+        interfaceTable: InterfaceTable;
+            display: "p=70,150;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=70,142;i=block/table";
+            display: "p=70,240;i=block/table";
         ospf_te: OspfTe;
-            display: "i=block/cogwheel;p=308,207;o=#008040";
+            display: "i=block/cogwheel;p=300,240;o=#008040";
         signal_module: RSVPAppl;
             parameters:
                 isIR = isIR,
                 isER = isER;
-            display: "i=block/control;o=#8080ff;p=295,60";
+            display: "i=block/control;o=#8080ff;p=300,60";
         rsvp: RSVP;
             parameters:
                 isIR = isIR,
@@ -82,7 +87,7 @@ module RSVP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "i=block/table2;p=70,224";
+            display: "i=block/table2;p=300,145";
     connections nocheck:
         signal_module.to_rsvp --> rsvp.from_rsvp_app;
         signal_module.from_rsvp <-- rsvp.to_rsvp_app;

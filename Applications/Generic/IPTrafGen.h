@@ -18,19 +18,19 @@
 //
 
 
-#ifndef __CBRAPP_H__
-#define __CBRAPP_H__
+#ifndef __IPTRAFGEN_H__
+#define __IPTRAFGEN_H__
 
 #include <vector>
 #include <omnetpp.h>
 
-#include "IPControlInfo_m.h"
+#include "IPvXAddress.h"
 
 
 /**
- * Consumes and prints packets received from the UDP module. See NED for more info.
+ * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class IPTrafSink : public cSimpleModule
+class INET_API IPTrafSink : public cSimpleModule
 {
   protected:
     int numReceived;
@@ -46,23 +46,23 @@ class IPTrafSink : public cSimpleModule
 
 
 /**
- * UDP application. See NED for more info.
+ * IP traffic generator application. See NED for more info.
  */
-class IPTrafGen : public IPTrafSink
+class INET_API IPTrafGen : public IPTrafSink
 {
   protected:
     std::string nodeName;
     int protocol;
     int msgLength;
     int numPackets;
-    std::vector<IPAddress> destAddresses;
+    std::vector<IPvXAddress> destAddresses;
 
     static int counter; // counter for generating a global number for each packet
 
     int numSent;
 
     // chooses random destination address
-    virtual IPAddress chooseDestAddr();
+    virtual IPvXAddress chooseDestAddr();
     virtual void sendPacket();
 
   public:

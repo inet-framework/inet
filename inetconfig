@@ -10,6 +10,8 @@
 ROOT=$(HOME)/INET
 include $(ROOT)/omnetppconfig
 
+CFLAGS+= -DWITH_IPv6
+
 #INCLUDE_PATH+= ...additional include directories...
 #LIBS+= ...additional libs and lib directories...
 

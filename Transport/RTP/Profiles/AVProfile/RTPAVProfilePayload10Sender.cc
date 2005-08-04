@@ -2,8 +2,8 @@
                           RTPAVProfilePayload10Sender.cc  -  description
                              -------------------
     begin                : Sat Sep 7 2002
-    copyright            : (C) 2002 by 
-    email                :                                                      
+    copyright            : (C) 2002 by
+    email                :
  ***************************************************************************/
 
 /***************************************************************************
@@ -27,10 +27,10 @@
 Define_Module_Like(RTPAVProfilePayload10Sender, RTPPayloadSender);
 
 void RTPAVProfilePayload10Sender::initialize() {
-	RTPPayloadSender::initialize();
-	_payloadType = 10;
-	_clockRate = 44100;
-	_samplingRate = 44100;
-	_sampleWidth = 16;
-	_numberOfChannels = 2;
+    RTPPayloadSender::initialize();
+    _payloadType = 10;
+    _clockRate = 44100;
+    _samplingRate = 44100;
+    _sampleWidth = 16;
+    _numberOfChannels = 2;
 };

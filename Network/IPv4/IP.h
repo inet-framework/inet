@@ -20,6 +20,7 @@
 #define __IP_H__
 
 #include "QueueBase.h"
+#include "InterfaceTableAccess.h"
 #include "RoutingTableAccess.h"
 #include "RoutingTable.h"
 #include "ICMPAccess.h"
@@ -29,6 +30,8 @@
 #include "ProtocolMap.h"
 
 
+class ARPPacket;
+
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 
@@ -36,10 +39,11 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 /**
  * Implements the IP protocol.
  */
-class IP : public QueueBase
+class INET_API IP : public QueueBase
 {
   protected:
-    RoutingTableAccess routingTableAccess;
+    RoutingTable *rt;
+    InterfaceTable *ift;
     ICMPAccess icmpAccess;
 
     // config
@@ -82,6 +86,11 @@ class IP : public QueueBase
     virtual void handleMessageFromHL(cMessage *msg);
 
     /**
+     * Handle incoming ARP packets by sending them over "queueOut" to ARP.
+     */
+    virtual void handleARP(ARPPacket *msg);
+
+    /**
      * Performs routing. Based on the routing decision, it dispatches to
      * localDeliver() for local packets, to fragmentAndSend() for forwarded packets,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
@@ -92,7 +101,7 @@ class IP : public QueueBase
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void handleMulticastPacket(IPDatagram *datagram);
+    virtual void routeMulticastPacket(IPDatagram *datagram);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the

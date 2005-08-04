@@ -25,6 +25,9 @@
 #include "OspfTe.h"
 #include "LIBTableAccess.h"
 
+class InterfaceTable;
+class RoutingTable;
+
 
 #define InLIST_SIZE        5
 #define TABLE_SIZE        10
@@ -38,7 +41,7 @@ void print(RSVPResvTear *p);
 /**
  * Implementation of the RSVP module.
  */
-class RSVP :  public cSimpleModule
+class INET_API RSVP :  public cSimpleModule
 {
 private:
     struct PathStateBlock_t
@@ -159,7 +162,8 @@ private:
     };
 
 private:
-    RoutingTableAccess routingTableAccess;
+    InterfaceTable *ift;
+    RoutingTable *rt;
     LIBTableAccess libTableAccess;
 
     std::vector<PathStateBlock_t> PSBList;  //Path State Block

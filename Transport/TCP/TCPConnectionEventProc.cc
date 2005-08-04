@@ -18,11 +18,10 @@
 
 
 #include <string.h>
-#include "TCPMain.h"
+#include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo_m.h"
 #include "TCPSendQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
@@ -35,15 +34,14 @@
 void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
-    IPAddress localAddr, remoteAddr;
+    IPvXAddress localAddr, remoteAddr;
     short localPort, remotePort;
 
     switch(fsm.state())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
-            // no break: run on to TCP_S_LISTEN code
-        case TCP_S_LISTEN:
+
             // store local/remote socket
             state->active = true;
             localAddr = openCmd->localAddr();
@@ -51,7 +49,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             localPort = openCmd->localPort();
             remotePort = openCmd->remotePort();
 
-            if (remoteAddr.isNull() || remotePort==-1)
+            if (remoteAddr.isUnspecified() || remotePort==-1)
                 opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
             if (localPort==-1)
@@ -62,7 +60,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
 
             tcpEV << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
 
-            tcpMain->updateSockPair(this, localAddr, remoteAddr, localPort, remotePort);
+            tcpMain->addSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
             // send initial SYN
             selectInitialSeqNum();
@@ -82,15 +80,14 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
 void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
-    IPAddress localAddr;
+    IPvXAddress localAddr;
     short localPort;
 
     switch(fsm.state())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
-            // no break: run on to TCP_S_LISTEN code
-        case TCP_S_LISTEN:
+
             // store local/remote socket
             state->active = false;
             state->fork = openCmd->fork();
@@ -102,7 +99,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
 
             tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
-            tcpMain->updateSockPair(this, localAddr, IPAddress(), localPort, -1);
+            tcpMain->addSockPair(this, localAddr, IPvXAddress(), localPort, -1);
             break;
 
         default:

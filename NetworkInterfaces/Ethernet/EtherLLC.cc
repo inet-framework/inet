@@ -21,18 +21,18 @@
 #endif
 
 #include <stdio.h>
-#include <omnetpp.h>
 #include <map>
-
+#include <omnetpp.h>
 #include "Ethernet.h"
 #include "EtherFrame_m.h"
+#include "Ieee802Ctrl_m.h"
 #include "utils.h"
 
 
 /**
  * Implements the LLC sub-layer of the Datalink Layer in Ethernet networks
  */
-class EtherLLC : public cSimpleModule
+class INET_API EtherLLC : public cSimpleModule
 {
   protected:
     int seqNum;
@@ -82,7 +82,7 @@ void EtherLLC::handleMessage(cMessage *msg)
 {
     switch (msg->kind())
     {
-      case ETHCTRL_DATA:
+      case IEEE802CTRL_DATA:
         // data received from higher layer
         processPacketFromHigherLayer(msg);
         break;
@@ -92,17 +92,17 @@ void EtherLLC::handleMessage(cMessage *msg)
         processFrameFromMAC(check_and_cast<EtherFrameWithLLC *>(msg));
         break;
 
-      case ETHCTRL_REGISTER_DSAP:
+      case IEEE802CTRL_REGISTER_DSAP:
         // higher layer registers itself
         handleRegisterSAP(msg);
         break;
 
-      case ETHCTRL_DEREGISTER_DSAP:
+      case IEEE802CTRL_DEREGISTER_DSAP:
         // higher layer deregisters itself
         handleDeregisterSAP(msg);
         break;
 
-      case ETHCTRL_SENDPAUSE:
+      case IEEE802CTRL_SENDPAUSE:
         // higher layer want MAC to send PAUSE frame
         handleSendPause(msg);
         break;
@@ -119,10 +119,10 @@ void EtherLLC::handleMessage(cMessage *msg)
 void EtherLLC::updateDisplayString()
 {
     char buf[80];
-    sprintf(buf, "passed up: %d\nsent: %d", totalPassedUp, totalFromHigherLayer);
+    sprintf(buf, "passed up: %ld\nsent: %ld", totalPassedUp, totalFromHigherLayer);
     if (droppedUnknownDSAP>0)
     {
-        sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %d", droppedUnknownDSAP);
+        sprintf(buf+strlen(buf), "\ndropped (wrong DSAP): %ld", droppedUnknownDSAP);
     }
     displayString().setTagArg("t",0,buf);
 }
@@ -137,13 +137,13 @@ void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
 
-    // create Ethernet frame, fill it in from EtherCtrl and encapsulate msg in it
+    // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV << "Encapsulating higher layer packet `" << msg->name() <<"' for MAC\n";
     EV << "Sent from " << simulation.module(msg->senderModuleId())->fullPath() << " at " << msg->sendingTime() << " and was created " << msg->creationTime() <<  "\n";
 
-    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->name());
 
     EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->name(), ETH_FRAME);
 
@@ -178,7 +178,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
     cMessage *higherlayermsg = frame->decapsulate();
 
-    EtherCtrl *etherctrl = new EtherCtrl();
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(frame->getSsap());
     etherctrl->setDsap(frame->getDsap());
     etherctrl->setSrc(frame->getSrc());
@@ -205,9 +205,9 @@ int EtherLLC::findPortForSAP(int dsap)
 void EtherLLC::handleRegisterSAP(cMessage *msg)
 {
     int port = msg->arrivalGate()->index();
-    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->name());
     int dsap = etherctrl->getDsap();
 
     EV << "Registering higher layer with DSAP=" << dsap << " on port=" << port << "\n";
@@ -222,9 +222,9 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
 
 void EtherLLC::handleDeregisterSAP(cMessage *msg)
 {
-    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->name());
     int dsap = etherctrl->getDsap();
 
     EV << "Deregistering higher layer with DSAP=" << dsap << "\n";
@@ -238,9 +238,9 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
 
 void EtherLLC::handleSendPause(cMessage *msg)
 {
-    EtherCtrl *etherctrl = dynamic_cast<EtherCtrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without EtherCtrl", msg->name());
+        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->name());
 
     int pauseUnits = etherctrl->getPauseUnits();
     EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";

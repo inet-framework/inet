@@ -20,7 +20,7 @@
 #include "RTPSenderControlMessage.h"
 
 
-RTPSenderControlMessage::RTPSenderControlMessage(const char *name = NULL) {
+RTPSenderControlMessage::RTPSenderControlMessage(const char *name) {
     _command = "";
 };
 

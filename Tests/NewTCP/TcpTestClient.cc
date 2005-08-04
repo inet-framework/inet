@@ -13,15 +13,16 @@
 //
 
 #include <vector>
-#include <omnetpp.h>
 #include <string>
+#include <omnetpp.h>
+#include "INETDefs.h"
 #include "TCPSocket.h"
 
 
 /**
  * TCP client application for testing the TCP model.
  */
-class TcpTestClient : public cSimpleModule
+class INET_API TcpTestClient : public cSimpleModule
 {
   protected:
     struct Command
@@ -119,10 +120,10 @@ void TcpTestClient::activity()
     // open
     waitAndEnqueue(tOpen-simTime(), &queue);
 
-    socket.bind(IPAddress(address), port);
+    socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     if (active)
-        socket.connect(IPAddress(connectAddress), connectPort);
+        socket.connect(IPvXAddress(connectAddress), connectPort);
     else
         socket.listen();
 

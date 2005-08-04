@@ -20,8 +20,8 @@
 #include <string.h>
 #include <math.h>
 #include <omnetpp.h>
-
-#include "EtherCtrl_m.h"
+#include "INETDefs.h"
+#include "Ieee802Ctrl_m.h"
 #include "EtherApp_m.h"
 #include "utils.h"
 
@@ -30,7 +30,7 @@
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class EtherAppCli : public cSimpleModule
+class INET_API EtherAppCli : public cSimpleModule
 {
     // send parameters
     long seqNum;
@@ -91,7 +91,7 @@ void EtherAppCli::initialize(int stage)
     destMACAddress = resolveDestMACAddress();
 
     // if no dest address given, nothing to do
-    if (destMACAddress.isEmpty())
+    if (destMACAddress.isUnspecified())
         return;
 
     registerDSAP(localSAP);
@@ -145,9 +145,9 @@ void EtherAppCli::registerDSAP(int dsap)
 {
     EV << fullPath() << " registering DSAP " << dsap << "\n";
 
-    EtherCtrl *etherctrl = new EtherCtrl();
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", ETHCTRL_REGISTER_DSAP);
+    cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
     msg->setControlInfo(etherctrl);
 
     send(msg, "out");
@@ -161,7 +161,7 @@ void EtherAppCli::sendPacket()
     sprintf(msgname, "req-%d-%ld", id(), seqNum);
     EV << "Generating packet `" << msgname << "'\n";
 
-    EtherAppReq *datapacket = new EtherAppReq(msgname, ETHCTRL_DATA);
+    EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
 
     datapacket->setRequestId(seqNum);
 
@@ -171,7 +171,7 @@ void EtherAppCli::sendPacket()
     long respLen = respLength->longValue();
     datapacket->setResponseBytes(respLen);
 
-    EtherCtrl *etherctrl = new EtherCtrl();
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(remoteSAP);
     etherctrl->setDest(destMACAddress);

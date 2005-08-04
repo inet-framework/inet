@@ -20,7 +20,7 @@
 #include <string.h>
 #include <omnetpp.h>
 
-#include "EtherCtrl_m.h"
+#include "Ieee802Ctrl_m.h"
 #include "EtherApp_m.h"
 #include "utils.h"
 
@@ -31,7 +31,7 @@
 /**
  * Server-side process EtherAppCli.
  */
-class EtherAppSrv : public cSimpleModule
+class INET_API EtherAppSrv : public cSimpleModule
 {
   protected:
     int localSAP;
@@ -80,7 +80,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     eedStats.collect(lastEED);
 
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
-    EtherCtrl *ctrl = check_and_cast<EtherCtrl *>(req->removeControlInfo());
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
     MACAddress srcAddr = ctrl->getSrc();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
@@ -103,7 +103,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
         EV << "Generating packet `" << msgname << "'\n";
 
-        EtherAppResp *datapacket = new EtherAppResp(msgname, ETHCTRL_DATA);
+        EtherAppResp *datapacket = new EtherAppResp(msgname, IEEE802CTRL_DATA);
         datapacket->setRequestId(requestId);
         datapacket->setLength(8*l);
         sendPacket(datapacket, srcAddr);
@@ -116,7 +116,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
 void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
 {
-    EtherCtrl *etherctrl = new EtherCtrl();
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(remoteSAP);
     etherctrl->setDest(destAddr);
@@ -128,9 +128,9 @@ void EtherAppSrv::registerDSAP(int dsap)
 {
     EV << fullPath() << " registering DSAP " << dsap << "\n";
 
-    EtherCtrl *etherctrl = new EtherCtrl();
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", ETHCTRL_REGISTER_DSAP);
+    cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
     msg->setControlInfo(etherctrl);
 
     send(msg, "out");

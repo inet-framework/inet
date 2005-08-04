@@ -30,7 +30,7 @@ The class RTPApplication is just a very simple sample for an application which
 uses RTP. It acts as a sender if the omnet parameter fileName is set, and as
 a receiver if the parameter is empty.
 */
-class RTPApplication : public cSimpleModule {
+class INET_API RTPApplication : public cSimpleModule {
 
     Module_Class_Members(RTPApplication, cSimpleModule, 16384);
 
@@ -108,3 +108,5 @@ class RTPApplication : public cSimpleModule {
 };
 
 #endif
+
+

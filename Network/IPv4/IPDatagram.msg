@@ -26,10 +26,10 @@ cplusplus {{
 #include "IPProtocolId_m.h"
 
 // default IP header length: 20 bytes
-const int DEFAULT_HEADER_LENGTH = 20;
+const int IP_HEADER_BYTES = 20;
 
-// maximum IP header length: 60 = 4 * 15 bytes
-const int MAX_HEADER_LENGTH = 60;
+// maximum IP header length (base+options): 60 = 4 * 15 bytes
+const int IP_MAX_HEADER_BYTES = 60;
 
 // option entry number
 const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;
@@ -118,7 +118,7 @@ message IPDatagram
         omitGetVerb = true;
     fields:
         short version = 4;
-        short headerLength = DEFAULT_HEADER_LENGTH;
+        short headerLength = IP_HEADER_BYTES;
 
         IPAddress srcAddress;
         IPAddress destAddress;
@@ -162,7 +162,7 @@ message IPDatagram
 //
 //      // HeaderLength is set automatically to maximum with option
 //      setLength(length() - headerLength()*8);
-//      header_length = MAX_HEADER_LENGTH;
+//      header_length = IP_MAX_HEADER_BYTES;
 //      setLength(length() + headerLength()*8);
 //}
 //

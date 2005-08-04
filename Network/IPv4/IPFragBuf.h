@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include "INETDefs.h"
+#include "ReassemblyBuffer.h"
 #include "IPDatagram.h"
 
 
@@ -31,22 +32,12 @@ class ICMP;
 /**
  * Reassembly buffer for fragmented IP datagrams.
  */
-class IPFragBuf
+class INET_API IPFragBuf
 {
   protected:
-    // stores an offset range
-    struct Region
-    {
-        ushort beg;   // first offset stored
-        ushort end;   // last+1 offset stored
-        bool islast;  // if this region represents the last bytes of the datagram
-    };
-
-    typedef std::vector<Region> RegionVector;
-
-    /**
-     * Key for finding the reassembly buffer for a datagram.
-     */
+    //
+    // Key for finding the reassembly buffer for a datagram.
+    //
     struct Key
     {
         ushort id;
@@ -58,35 +49,24 @@ class IPFragBuf
         }
     };
 
-    /**
-     * Represents the buffer for assembling one IP datagram from fragments.
-     * 99% of time, fragments will arrive in order and none gets lost,
-     * so we have to handle this case very efficiently. For this purpose
-     * we'll store the offset of the first and last+1 byte we have
-     * (main.beg, main.end variables), and keep extending this range
-     * as new fragments arrive. If we receive non-connecting fragments,
-     * put them aside into buf until new fragments come and fill the gap.
-     */
-    struct ReassemblyBuffer
+    //
+    // Reassembly buffer for the datagram
+    //
+    struct DatagramBuffer
     {
-        Region main;   // offset range we already have
-        RegionVector *fragments;  // only used if we receive disjoint fragments
+        ReassemblyBuffer buf;  // reassembly buffer
         IPDatagram *datagram;  // the actual datagram
         simtime_t lastupdate;  // last time a new fragment arrived
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<Key,ReassemblyBuffer> Buffers;
+    typedef std::map<Key,DatagramBuffer> Buffers;
 
     // the reassembly buffers
     Buffers bufs;
 
     // needed for TIME_EXCEEDED errors
     ICMP *icmpModule;
-
-  protected:
-    void merge(ReassemblyBuffer& buf, ushort beg, ushort end, bool islast);
-    void mergeFragments(ReassemblyBuffer& buf);
 
   public:
     /**

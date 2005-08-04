@@ -37,7 +37,7 @@ void RTPProfile::initialize() {
 
     _profileName = "Profile";
     _rtcpPercentage = 5;
-    _preferredPort = IN_Port(IN_Port::PORT_UNDEF);
+    _preferredPort = IPSuite_PORT_UNDEF;
 
     // how many gates to payload receivers do we have
     _maxReceivers = gate("toPayloadReceiver")->size();

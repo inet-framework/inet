@@ -19,11 +19,10 @@
 
 #include <string.h>
 #include <assert.h>
-#include "TCPMain.h"
+#include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo_m.h"
 #include "TCPSendQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
@@ -44,7 +43,7 @@ TCPStateVariables::TCPStateVariables()
     snd_wl2 = 0;
     iss = 0;
     rcv_nxt = 0;
-    rcv_wnd = 16384; // FIXME make it parameter
+    rcv_wnd = 128*1024; // 128K; FIXME make it parameter
     rcv_up = 0;
     irs = 0;
 
@@ -99,7 +98,7 @@ std::string TCPStateVariables::detailedInfo() const
 // FSM framework, TCP FSM
 //
 
-TCPConnection::TCPConnection(TCPMain *_mod, int _appGateIndex, int _connId)
+TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
 {
     tcpMain = _mod;
     appGateIndex = _appGateIndex;
@@ -203,15 +202,15 @@ bool TCPConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPAddress segSrcAddr, IPAddress segDestAddr)
+bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPvXAddress segSrcAddr, IPvXAddress segDestAddr)
 {
     printConnBrief();
-    if (!localAddr.isNull())
+    if (!localAddr.isUnspecified())
     {
         ASSERT(localAddr==segDestAddr);
         ASSERT(localPort==tcpseg->destPort());
     }
-    if (!remoteAddr.isNull())
+    if (!remoteAddr.isUnspecified())
     {
         ASSERT(remoteAddr==segSrcAddr);
         ASSERT(remotePort==tcpseg->srcPort());

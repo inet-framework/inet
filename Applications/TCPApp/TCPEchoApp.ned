@@ -18,20 +18,22 @@
 
 
 //
-// Accepts any number of incoming TCP connections, and sends back the 
+// Accepts any number of incoming TCP connections, and sends back the
 // messages that arrive on them, The lengths of the messages are
-// multiplied by echoFactor before sending them back (echoFactor=1 will 
-// result in sending back the same message unmodified.) The reply can also be 
+// multiplied by echoFactor before sending them back (echoFactor=1 will
+// result in sending back the same message unmodified.) The reply can also be
 // delayed by a constant time (echoDelay parameter).
 //
-// When TCPEchoApp receives data packets from TCP (and such, when they can be 
-// echoed) depends on the sendQueue/receiveQueue setting of TCPMain. 
-// With TCPVirtualBytesSendQueue/RcvQueue, TCP passes up data to us 
-// as soon as a segment arrives, so it can be echoed immediately. 
-// With TCPMsgBasedSendQueue/RcvQueue, our local TCP reproduces the same 
-// messages that the sender app passed down to its TCP -- so if the sender 
-// app sent a single 100 MB message, it will be echoed only when all 
+// When TCPEchoApp receives data packets from TCP (and such, when they can be
+// echoed) depends on the sendQueue/receiveQueue setting of TCP.
+// With TCPVirtualBytesSendQueue/RcvQueue, TCP passes up data to us
+// as soon as a segment arrives, so it can be echoed immediately.
+// With TCPMsgBasedSendQueue/RcvQueue, our local TCP reproduces the same
+// messages that the sender app passed down to its TCP -- so if the sender
+// app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
+//
+// Compatible with both IPv4 and IPv6.
 //
 simple TCPEchoApp
     parameters:

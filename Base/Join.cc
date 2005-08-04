@@ -18,8 +18,9 @@
 
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
-class Join : public cSimpleModule
+class INET_API Join : public cSimpleModule
 {
   protected:
     cGate *outg;

@@ -24,8 +24,9 @@ This file declares the class RTPInnerPacket.
 
 #include <omnetpp.h>
 
-#include "in_addr.h"
-#include "in_port.h"
+//XXX #include "in_addr.h"
+//XXX #include "in_port.h"
+#include "tmp/defs.h"
 
 #include "types.h"
 #include "RTPPacket.h"
@@ -36,7 +37,7 @@ This file declares the class RTPInnerPacket.
 /*! \class RTPInnerPacket
 This class is used for communication between submodules of the rtp layer module.
 */
-class RTPInnerPacket : public cPacket {
+class INET_API RTPInnerPacket : public cPacket {
 
     public:
 
@@ -97,12 +98,12 @@ class RTPInnerPacket : public cPacket {
         /*!
         Writes a short info about this RTPInnerPacket into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this RTPInnerPacket into the given output stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Called by the rtp module after creating the profile module. It
@@ -303,3 +304,4 @@ class RTPInnerPacket : public cPacket {
 };
 
 #endif
+

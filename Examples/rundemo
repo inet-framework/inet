@@ -34,35 +34,41 @@ set i 0
 set first ""
 foreach line {
    {"INET Framework"}
-   {"About..."               "README.txt"      "../Documentation/index.html"}
+   {"About..."               "README"               "../Documentation/index.html"}
    {"INET"}
-   {"NClients/Telnet"        "INET/NClients"     "./NClients"              "NClients"}
-   {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini" "NClients -f basicHTTP.ini"}
+   {"NClients/Telnet"        "INET/NClients"        "./NClients"              "NClients"}
+   {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
    {"NClients/file transfer" "INET/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
-   {"FlatNet"                "INET/FlatNet"      "./FlatNet"               "FlatNet"}
-   {"KIDSNw1"                "INET/KIDSNw1"      "./KIDSNw1"               "KIDSNw1"}
-   {"Multicast"              "INET/Multicast"    "./Multicast"             "Multicast"}
-   {"RouterPerf"             "INET/RouterPerf"   "./RouterPerf"            "RouterPerf"}
-   {"BulkTransfer"           "INET/BulkTransfer" "./BulkTransfer"          "BulkTransfer"}
+   {"FlatNet"                "INET/FlatNet"         "./FlatNet"               "FlatNet"}
+   {"KIDSNw1"                "INET/KIDSNw1"         "./KIDSNw1"               "KIDSNw1"}
+   {"Multicast"              "INET/Multicast"       "./Multicast"             "Multicast"}
+   {"RouterPerf"             "INET/RouterPerf"      "./RouterPerf"            "RouterPerf"}
+   {"BulkTransfer"           "INET/BulkTransfer"    "./BulkTransfer"          "BulkTransfer"}
+
+   {"Mobile/ad-hoc"}
+   {"Mobility"               "MobileAdhoc/Mobility" "./Mobility"              "Mobility"}
+   {"802.11b ad-hoc"         "MobileAdhoc/80211"    "./80211"                 "80211"}
+
+   {"IPv6 (work in progress)"}
+   {"NClients"               "IPv6/NClients"        "./NClients"              "NClients"}
 
    {"Ethernet"}
-   {"ARP Test"               "Ethernet/ARPTest"  "./ARPTest"               "ARPTest"}
-   {"LANs: mixed Ethernet"   "Ethernet/LANs"     "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
-   {"LANs: Ethernet bus"     "Ethernet/LANs"     "./LANs -f bus.ini"       "LANs -f bus.ini"}
-   {"LANs: hub"              "Ethernet/LANs"     "./LANs -f hub.ini"       "LANs -f hub.ini"}
-   {"LANs: switch"           "Ethernet/LANs"     "./LANs -f switch.ini"    "LANs -f switch.ini"}
-   {"LANs: two hosts"        "Ethernet/LANs"     "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
-   {"LANs: very large LAN"   "Ethernet/LANs"     "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
+   {"ARP Test"               "Ethernet/ARPTest"     "./ARPTest"               "ARPTest"}
+   {"LANs: mixed Ethernet"   "Ethernet/LANs"        "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
+   {"LANs: Ethernet bus"     "Ethernet/LANs"        "./LANs -f bus.ini"       "LANs -f bus.ini"}
+   {"LANs: hub"              "Ethernet/LANs"        "./LANs -f hub.ini"       "LANs -f hub.ini"}
+   {"LANs: switch"           "Ethernet/LANs"        "./LANs -f switch.ini"    "LANs -f switch.ini"}
+   {"LANs: two hosts"        "Ethernet/LANs"        "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
+   {"LANs: very large LAN"   "Ethernet/LANs"        "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
 
    {"MPLS"}
-   {"MPLS-LDP"               "MPLS/ldp-mpls1" "./ldp-mpls1" "ldp-mpls1"}
-   {"CSPF Routing"           "MPLS/TestTE1"   "./TestTE"    "TestTE"}
-   {"Hop-by-Hop Routing"     "MPLS/TestTE2"   "./TestTE"    "TestTE"}
-   {"ER Routing"             "MPLS/TestTE3"   "./TestTE"    "TestTE"}
-   {"Traffic Reroute 1"      "MPLS/TestTE4"   "./TestTE"    "TestTE"}
-   {"Traffic Reroute 2"      "MPLS/TestTE5"   "./TestTE"    "TestTE"}
-   {"Reservation preemption" "MPLS/TestTE6"   "./TestTE"    "TestTE"}
-
+   {"MPLS-LDP"               "MPLS/ldp-mpls1"       "./ldp-mpls1"             "ldp-mpls1"}
+   {"CSPF Routing"           "MPLS/TestTE1"         "./TestTE"                "TestTE"}
+   {"Hop-by-Hop Routing"     "MPLS/TestTE2"         "./TestTE"                "TestTE"}
+   {"ER Routing"             "MPLS/TestTE3"         "./TestTE"                "TestTE"}
+   {"Traffic Reroute 1"      "MPLS/TestTE4"         "./TestTE"                "TestTE"}
+   {"Traffic Reroute 2"      "MPLS/TestTE5"         "./TestTE"                "TestTE"}
+   {"Reservation preemption" "MPLS/TestTE6"         "./TestTE"                "TestTE"}
 } {
    lappend samples $i
    if {[llength $line]==0} {

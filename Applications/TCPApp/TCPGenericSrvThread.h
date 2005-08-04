@@ -21,7 +21,7 @@
 /**
  * Example server thread, to be used with TCPSrvHostApp.
  */
-class TCPGenericSrvThread : public TCPServerThreadBase
+class INET_API TCPGenericSrvThread : public TCPServerThreadBase
 {
   public:
     TCPGenericSrvThread() {}

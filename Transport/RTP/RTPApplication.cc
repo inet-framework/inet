@@ -22,8 +22,9 @@ of RTPApplication.
 
 #include <omnetpp.h>
 
-#include "in_addr.h"
-#include "in_port.h"
+//XXX #include "in_addr.h"
+//XXX #include "in_port.h"
+#include "tmp/defs.h"
 
 #include "types.h"
 #include "RTPApplication.h"
@@ -46,7 +47,7 @@ void RTPApplication::initialize() {
     _bandwidth = par("bandwidth");
 
     // the ip address to connect to (unicast or multicast)
-    _destinationAddress = IN_Addr(par("destinationAddress"));
+    _destinationAddress = IN_Addr(par("destinationAddress").stringValue());
 
     // port number which is to be used; to ports are actually used: one
     // for rtp and one for rtcp

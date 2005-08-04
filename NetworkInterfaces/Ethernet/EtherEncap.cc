@@ -22,17 +22,19 @@
 
 #include <stdio.h>
 #include <omnetpp.h>
-
 #include "Ethernet.h"
 #include "EtherFrame_m.h"
-#include "EtherCtrl_m.h"
+#include "Ieee802Ctrl_m.h"
 #include "utils.h"
+#include "InterfaceTable.h"
+#include "InterfaceTableAccess.h"
+#include "EtherMAC.h"
 
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class EtherEncap : public cSimpleModule
+class INET_API EtherEncap : public cSimpleModule
 {
   protected:
     int seqNum;
@@ -48,6 +50,7 @@ class EtherEncap : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+    virtual void registerInterface();
 
     virtual void processPacketFromHigherLayer(cMessage *msg);
     virtual void processFrameFromMAC(EtherFrame *msg);
@@ -67,6 +70,9 @@ void EtherEncap::initialize()
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
     WATCH(totalPauseSent);
+
+    // register ourselves in InterfaceTable
+    registerInterface();
 }
 
 void EtherEncap::handleMessage(cMessage *msg)
@@ -80,12 +86,12 @@ void EtherEncap::handleMessage(cMessage *msg)
         // from higher layer
         switch(msg->kind())
         {
-            case ETHCTRL_DATA:
+            case IEEE802CTRL_DATA:
             case 0: // default message kind (0) is also accepted
               processPacketFromHigherLayer(msg);
               break;
 
-            case ETHCTRL_SENDPAUSE:
+            case IEEE802CTRL_SENDPAUSE:
               // higher layer want MAC to send PAUSE frame
               handleSendPause(msg);
               break;
@@ -102,7 +108,7 @@ void EtherEncap::handleMessage(cMessage *msg)
 void EtherEncap::updateDisplayString()
 {
     char buf[80];
-    sprintf(buf, "passed up: %d\nsent: %d", totalFromMAC, totalFromHigherLayer);
+    sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
     displayString().setTagArg("t",0,buf);
 }
 
@@ -116,10 +122,10 @@ void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
     // Creates MAC header information and encapsulates received higher layer data
     // with this information and transmits resultant frame to lower layer
 
-    // create Ethernet frame, fill it in from EtherCtrl and encapsulate msg in it
+    // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV << "Encapsulating higher layer packet `" << msg->name() <<"' for MAC\n";
 
-    EtherCtrl *etherctrl = check_and_cast<EtherCtrl*>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
     EthernetIIFrame *frame = new EthernetIIFrame(msg->name(), ETH_FRAME);
 
     frame->setSrc(etherctrl->getSrc());  // if blank, will be filled in by MAC
@@ -142,8 +148,8 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     // decapsulate and attach control info
     cMessage *higherlayermsg = frame->decapsulate();
 
-    // add EtherCtrl to packet
-    EtherCtrl *etherctrl = new EtherCtrl();
+    // add Ieee802Ctrl to packet
+    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
     higherlayermsg->setControlInfo(etherctrl);
@@ -158,7 +164,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 
 void EtherEncap::handleSendPause(cMessage *msg)
 {
-    EtherCtrl *etherctrl = check_and_cast<EtherCtrl*>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+    if (!etherctrl)
+        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->name());
     int pauseUnits = etherctrl->getPauseUnits();
     delete etherctrl;
 
@@ -188,4 +196,44 @@ void EtherEncap::finish()
         recordScalar("frames from MAC", totalFromMAC);
     }
 }
+
+void EtherEncap::registerInterface()
+{
+    InterfaceEntry *e = new InterfaceEntry();
+
+    // interface name: NetworkInterface module's name without special characters ([])
+    // --> Emin : Parent module name is used since EtherEncap belongs to EthernetInterface.
+    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *d=interfaceName;
+    for (const char *s=parentModule()->fullName(); *s; s++)
+        if (isalnum(*s))
+            *d++ = *s;
+    *d = '\0';
+
+    e->setName(interfaceName);
+    delete [] interfaceName;
+
+    MACAddress myMACAddress = ((EtherMAC *)parentModule()->submodule("mac"))->getMACAddress();
+    e->setMACAddress(myMACAddress);
+
+    // generate interface identifier for IPv6
+    e->setInterfaceToken(myMACAddress.formInterfaceIdentifier());
+
+    // port: index of gate where parent module's "netwIn" is connected (in IP)
+    int outputPort = parentModule()->gate("netwIn")->fromGate()->index();
+    e->setOutputPort(outputPort);
+
+    // MTU is 1500 on Ethernet
+    e->setMtu(1500);
+
+    // capabilities
+    e->setBroadcast(true);
+    e->setMulticast(true);
+    e->setPointToPoint(false);
+
+    // add
+    InterfaceTable *ift = InterfaceTableAccess().get();
+    ift->addInterface(e);
+}
+
 

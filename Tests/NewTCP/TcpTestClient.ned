@@ -18,7 +18,7 @@
 
 
 //
-// TCP client application for testing the TCP model.
+// \TCP client application for testing the TCP model.
 //
 simple TcpTestClient
     parameters:

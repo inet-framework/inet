@@ -36,7 +36,7 @@ RTCPByePacket and RTCPCompoundPacket are implemented.
 Register_Class(RTCPPacket);
 
 
-RTCPPacket::RTCPPacket(const char *name = NULL) : cPacket(name) {
+RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
     // initialize variables
     _version = 2;
     _padding = 0;
@@ -82,14 +82,14 @@ cObject *RTCPPacket::dup() const {
 };
 
 
-std::string RTCPPacket::info() const {
+std::string RTCPPacket::info() {
     std::stringstream out;
     out << "RTCPPacket.packetType=" << _packetType;
     return out.str();
 };
 
 
-void RTCPPacket::writeContents(ostream& os) const {
+void RTCPPacket::writeContents(std::ostream& os) const {
     os << "RTCPPacket:" << endl;
     os << "  version = " << _version << endl;
     os << "  padding = " << _padding << endl;
@@ -134,7 +134,7 @@ int RTCPPacket::rtcpLength() const {
 Register_Class(RTCPReceiverReportPacket);
 
 
-RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name = NULL) : RTCPPacket(name) {
+RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name) : RTCPPacket(name) {
     _packetType = RTCP_PT_RR;
     _ssrc = 0;
     _receptionReports = new cArray("ReceptionReports");
@@ -173,14 +173,14 @@ const char *RTCPReceiverReportPacket::className() const {
 };
 
 
-std::string RTCPReceiverReportPacket::info() const {
+std::string RTCPReceiverReportPacket::info() {
     std::stringstream out;
     out << "RTCPReceiverReportPacket #rr=" << _count;
     return out.str();
 };
 
 
-void RTCPReceiverReportPacket::writeContents(ostream& os) const {
+void RTCPReceiverReportPacket::writeContents(std::ostream& os) const {
     os << "RTCPReceiverReportPacket:" << endl;
     for (int i = 0; i < _receptionReports->items(); i++) {
         if (_receptionReports->exist(i)) {
@@ -222,7 +222,7 @@ cArray *RTCPReceiverReportPacket::receptionReports() {
 Register_Class(RTCPSenderReportPacket);
 
 
-RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name = NULL) : RTCPReceiverReportPacket(name) {
+RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name) : RTCPReceiverReportPacket(name) {
     _packetType = RTCP_PT_SR;
     _senderReport = new SenderReport("SenderReport");
     // a sender report is 20 bytes long
@@ -258,14 +258,14 @@ const char *RTCPSenderReportPacket::className() const {
 };
 
 
-std::string RTCPSenderReportPacket::info() const {
+std::string RTCPSenderReportPacket::info() {
     std::stringstream out;
     out << "RTCPSenderReportPacket.ssrc=" << _ssrc;
     return out.str();
 };
 
 
-void RTCPSenderReportPacket::writeContents(ostream& os) const {
+void RTCPSenderReportPacket::writeContents(std::ostream& os) const {
     os << "RTCPSenderReportPacket:" << endl;
     _senderReport->writeContents(os);
     for (int i = 0; i < _receptionReports->items(); i++) {
@@ -295,7 +295,7 @@ void RTCPSenderReportPacket::setSenderReport(SenderReport *report) {
 Register_Class(RTCPSDESPacket);
 
 
-RTCPSDESPacket::RTCPSDESPacket(const char *name = NULL) : RTCPPacket(name) {
+RTCPSDESPacket::RTCPSDESPacket(const char *name) : RTCPPacket(name) {
     _packetType = RTCP_PT_SDES;
     _sdesChunks = new cArray("SDESChunks");
     // no addLength() needed, sdes chunks
@@ -332,14 +332,14 @@ const char *RTCPSDESPacket::className() const {
 };
 
 
-std::string RTCPSDESPacket::info() const {
+std::string RTCPSDESPacket::info() {
     std::stringstream out;
     out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->items();
     return out.str();
 };
 
 
-void RTCPSDESPacket::writeContents(ostream& os) const {
+void RTCPSDESPacket::writeContents(std::ostream& os) const {
     os << "RTCPSDESPacket:" << endl;
     for (int i = 0; i < _sdesChunks->items(); i++) {
         if (_sdesChunks->exist(i))
@@ -369,7 +369,7 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk) {
 
 Register_Class(RTCPByePacket);
 
-RTCPByePacket::RTCPByePacket(const char *name = NULL) : RTCPPacket(name) {
+RTCPByePacket::RTCPByePacket(const char *name) : RTCPPacket(name) {
     _packetType = RTCP_PT_BYE;
     _count = 1;
     _ssrc = 0;
@@ -423,7 +423,7 @@ void RTCPByePacket::setSSRC(u_int32 ssrc) {
 Register_Class(RTCPCompoundPacket);
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(const char *name = NULL) : cPacket(name) {
+RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cPacket(name) {
     _rtcpPackets = new cArray("RTCPPackets");
     // an empty rtcp compound packet has length 0 bytes
     setLength(0);
@@ -459,14 +459,14 @@ const char *RTCPCompoundPacket::className() const {
 };
 
 
-std::string RTCPCompoundPacket::info() const {
+std::string RTCPCompoundPacket::info() {
     std::stringstream out;
     out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->items();
     return out.str();
 };
 
 
-void RTCPCompoundPacket::writeContents(ostream& os) const {
+void RTCPCompoundPacket::writeContents(std::ostream& os) const {
     os << "RTCPCompoundPacket:" << endl;
     for (int i = 0; i < _rtcpPackets->items(); i++) {
         if (_rtcpPackets->exist(i)) {

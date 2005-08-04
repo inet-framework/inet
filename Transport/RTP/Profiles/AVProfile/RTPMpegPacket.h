@@ -37,100 +37,100 @@ reading the gdf file.
 \sa RTPAVProfilePayload32Receiver
 */
 
-class RTPMpegPacket : public cPacket  {
+class INET_API RTPMpegPacket : public cPacket  {
 
-	public:
-		/*!
-		Default constructor.
-		*/
-		RTPMpegPacket(const char *name = NULL);
+    public:
+        /*!
+        Default constructor.
+        */
+        RTPMpegPacket(const char *name = NULL);
 
-		/*!
-		Copy constructor.
-		*/
-		RTPMpegPacket(const RTPMpegPacket& packet);
+        /*!
+        Copy constructor.
+        */
+        RTPMpegPacket(const RTPMpegPacket& packet);
 
-		/*!
-		Destructor.
-		*/
-		virtual ~RTPMpegPacket();
+        /*!
+        Destructor.
+        */
+        virtual ~RTPMpegPacket();
 
-		/*!
-		Assignment operator.
-		*/
-		RTPMpegPacket& operator=(const RTPMpegPacket& packet);
+        /*!
+        Assignment operator.
+        */
+        RTPMpegPacket& operator=(const RTPMpegPacket& packet);
 
-		/*!
-		Duplicates the RTPMpegPacket by calling the copy constructor.
-		*/
-		virtual cObject *dup() const;
+        /*!
+        Duplicates the RTPMpegPacket by calling the copy constructor.
+        */
+        virtual cObject *dup() const;
 
-		/*!
-		Returns the class name "RTPMpegPacket".
-		*/
-		virtual const char *className() const;
+        /*!
+        Returns the class name "RTPMpegPacket".
+        */
+        virtual const char *className() const;
 
-		/*!
-		Returns the constant header length (4 bytes).
-		*/
-		static int headerLength();
+        /*!
+        Returns the constant header length (4 bytes).
+        */
+        static int headerLength();
 
-		/*!
-		Returns the size of mpeg data.
-		*/
-		virtual int payloadLength();
+        /*!
+        Returns the size of mpeg data.
+        */
+        virtual int payloadLength();
 
-		/*!
-		Returns the picture type of the frame the data in this
-		packet belongs to.
-		*/
-		virtual int pictureType();
+        /*!
+        Returns the picture type of the frame the data in this
+        packet belongs to.
+        */
+        virtual int pictureType();
 
-		/*!
-		Sets the picture type.
-		*/
-		virtual void setPictureType(int pictureType);
+        /*!
+        Sets the picture type.
+        */
+        virtual void setPictureType(int pictureType);
 
-	private:
+    private:
 
-		//! Not used.
-		int _mzb;
+        //! Not used.
+        int _mzb;
 
-		//! Not used.
-		int _two;
+        //! Not used.
+        int _two;
 
-		//! Not used.
-		int _temporalReference;
+        //! Not used.
+        int _temporalReference;
 
-		//! Not used.
-		int _activeN;
+        //! Not used.
+        int _activeN;
 
-		//! Not used.
-		int _newPictureHeader;
+        //! Not used.
+        int _newPictureHeader;
 
-		//! Not used.
-		int _sequenceHeaderPresent;
+        //! Not used.
+        int _sequenceHeaderPresent;
 
-		//! Not used.
-		int _beginningOfSlice;
+        //! Not used.
+        int _beginningOfSlice;
 
-		//! Not used.
-		int _endOfSlice;
+        //! Not used.
+        int _endOfSlice;
 
-		//! The picture type of the frame this packet belongs to.
-		int _pictureType;
+        //! The picture type of the frame this packet belongs to.
+        int _pictureType;
 
-		//! Not used.
-		int _fbv;
+        //! Not used.
+        int _fbv;
 
-		//! Not used.
-		int _bfc;
+        //! Not used.
+        int _bfc;
 
-		//! Not used.
-		int _ffv;
+        //! Not used.
+        int _ffv;
 
-		//! Not used.
-		int _ffc;
+        //! Not used.
+        int _ffc;
 
 };
 

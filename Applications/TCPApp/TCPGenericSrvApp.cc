@@ -35,8 +35,8 @@ void TCPGenericSrvApp::initialize()
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
-    socket.bind(address[0] ? IPAddress(address) : IPAddress(), port);
-    socket.listen(true);
+    socket.bind(address[0] ? IPvXAddress(address) : IPvXAddress(), port);
+    socket.listen();
 }
 
 void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)

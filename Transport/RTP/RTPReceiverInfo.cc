@@ -28,7 +28,7 @@ This file contains the implementation of member functions of the class RTPReceiv
 
 Register_Class(RTPReceiverInfo);
 
-RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc = 0) : RTPParticipantInfo(ssrc)  {
+RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc)  {
 
     _sequenceNumberBase = 0;
     _highestSequenceNumber = 0;

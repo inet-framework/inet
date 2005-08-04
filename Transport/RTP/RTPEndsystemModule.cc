@@ -21,10 +21,11 @@ This file contains the implementation of member functions of the class RTPEndsys
 
 #include <omnetpp.h>
 
-#include "SocketInterfacePacket.h"
-#include "in_port.h"
+//XXX #include "SocketInterfacePacket.h"
+//XXX #include "in_port.h"
+#include "tmp/defs.h"
 
-#include "ip_address.h"
+#include "IPAddress.h"
 
 #include "RTPEndsystemModule.h"
 #include "RTPInterfacePacket.h"
@@ -219,7 +220,7 @@ void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp) {
 
 void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp) {
     _rtcpPercentage = rinp->rtcpPercentage();
-    if (_port == IN_Port(IN_Port::PORT_UNDEF)) {
+    if (_port == IPSuite_PORT_UNDEF) {
         _port = rinp->port();
         if (_port % 2 != 0) {
             _port = _port - 1;
@@ -313,7 +314,7 @@ void RTPEndsystemModule::socketRet(SocketInterfacePacket *sifp) {
             sifpOut->bind(_socketFdIn, IN_Addr(_destinationAddress), IN_Port(_port));
         }
         else {
-            sifpOut->bind(_socketFdIn, IN_Addr(IN_Addr::ADDR_UNDEF), IN_Port(_port));
+            sifpOut->bind(_socketFdIn, IPADDRESS_UNDEF, IN_Port(_port));
         }
         send(sifpOut, "toSocketLayer");
 
@@ -392,14 +393,14 @@ void RTPEndsystemModule::createProfile() {
 
 void RTPEndsystemModule::createServerSocket() {
     SocketInterfacePacket *sifp = new SocketInterfacePacket("socket()");
-    sifp->socket(Socket::AF_INET, Socket::SOCK_DGRAM, Socket::UDP);
+    sifp->socket(Socket::IPSuite_AF_INET, Socket::IPSuite_SOCK_DGRAM, Socket::UDP);
     send(sifp, "toSocketLayer");
 };
 
 
 void RTPEndsystemModule::createClientSocket() {
     SocketInterfacePacket *sifp = new SocketInterfacePacket("socket()");
-    sifp->socket(Socket::AF_INET, Socket::SOCK_DGRAM, Socket::UDP);
+    sifp->socket(Socket::IPSuite_AF_INET, Socket::IPSuite_SOCK_DGRAM, Socket::UDP);
     send(sifp, "toSocketLayer");
 };
 

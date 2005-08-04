@@ -34,11 +34,11 @@
 /*! \class RTPAVProfilePayload10Sender
 */
 
-class RTPAVProfilePayload10Sender : public RTPAVProfileSampleBasedAudioSender {
+class INET_API RTPAVProfilePayload10Sender : public RTPAVProfileSampleBasedAudioSender {
 
-	Module_Class_Members(RTPAVProfilePayload10Sender, RTPAVProfileSampleBasedAudioSender, 16384);
+    Module_Class_Members(RTPAVProfilePayload10Sender, RTPAVProfileSampleBasedAudioSender, 16384);
 
-	virtual void initialize();
+    virtual void initialize();
 };
 
 

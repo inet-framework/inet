@@ -22,7 +22,7 @@
 /**
  * Single-connection TCP application.
  */
-class TCPSessionApp : public cSimpleModule
+class INET_API TCPSessionApp : public cSimpleModule
 {
   protected:
     struct Command

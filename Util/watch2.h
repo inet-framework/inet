@@ -19,10 +19,11 @@
 #include <iostream>
 #include <sstream>
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 template<class T>
-class cWatch2 : public cObject
+class INET_API cWatch2 : public cObject
 {
   private:
     const T& r;
@@ -34,7 +35,7 @@ class cWatch2 : public cObject
     {
         return opp_typename(typeid(T));
     }
-    virtual std::string info() const
+    virtual std::string info()
     {
         std::stringstream out;
         out << className() << " " << name() << " = " << r;
@@ -43,7 +44,7 @@ class cWatch2 : public cObject
     //virtual cStructDescriptor *createDescriptor();
 };
 
-class cWatch2_stdstring : public cObject
+class INET_API cWatch2_stdstring : public cObject
 {
   private:
     const std::string& r;
@@ -55,7 +56,7 @@ class cWatch2_stdstring : public cObject
     {
         return "std::string";
     }
-    virtual std::string info() const
+    virtual std::string info()
     {
         std::stringstream out;
         out << className() << " " << name() << " = \"" << r << "\"";

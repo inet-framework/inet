@@ -19,7 +19,7 @@
 
 //
 // In addition to providing tcpdump-like functionality, it can delete,
-// delay or duplicate TCP segments, and inject new segments. Such segment
+// delay or duplicate \TCP segments, and inject new segments. Such segment
 // manipulation can be controlled via a script.
 //
 // Script format:

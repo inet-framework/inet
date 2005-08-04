@@ -25,9 +25,10 @@
 #pragma warning(disable : 4786)
 #endif
 
-#include <omnetpp.h>
 #include <map>
 #include <vector>
+#include <omnetpp.h>
+#include "INETDefs.h"
 
 
 class BlackboardAccess;
@@ -35,6 +36,9 @@ class BlackboardAccess;
 
 /**
  * The Blackboard works as entity to enable inter-layer/inter-process communication.
+ *
+ * NOTE: BLACKBOARD IS NO LONGER USED BY THE INET FRAMEWORK -- SUCCESSOR IS
+ * NotificationBoard.
  *
  * Blackboard makes it possible for several modules (representing e.g. protocol
  * layers) to share information, in a publish-subscribe fashion.
@@ -160,7 +164,7 @@ class BlackboardAccess;
  * @author Andras Varga
  * @ingroup blackboard
  */
-class Blackboard : public cSimpleModule
+class INET_API Blackboard : public cSimpleModule
 {
   public:
     typedef std::vector<BlackboardAccess *> SubscriberVector;
@@ -321,12 +325,14 @@ typedef Blackboard::BBItemRef BBItemRef;
  * @author Andras Varga
  * @ingroup blackboard
  */
-class BlackboardAccess
+class INET_API BlackboardAccess
 {
 protected:
   Blackboard *bb;
 public:
   BlackboardAccess() {bb=NULL;}
+  virtual ~BlackboardAccess() {}
+
   /** Returns a pointer to the Blackboard*/
   Blackboard *blackboard();
 

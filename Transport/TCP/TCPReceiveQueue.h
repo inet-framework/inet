@@ -44,7 +44,7 @@ class TCPCommand;
  *
  * @see TCPSendQueue
  */
-class TCPReceiveQueue : public cPolymorphic
+class INET_API TCPReceiveQueue : public cPolymorphic
 {
   protected:
     TCPConnection *conn; // TCP connection object

@@ -16,24 +16,26 @@
 #define __CONSTANT____H
 
 
-enum messageKind{
+#include "INETDefs.h"
 
+enum messageKind
+{
     MPLS_KIND,
     LDP_KIND,
     SIGNAL_KIND
 };
 
 
-namespace ConstType// : cSimpleModule
+namespace ConstType
 {
 
 const  char libDataMarker[]="In-lbl       In-intf     Out-lbl       Out-intf";
 const  char prtDataMarker[]="Prefix            Pointer";
 
-const char  UnknownData[]="UNDEFINED";
-const char  NoLabel[] = "Nolabel";
-const  char wildcast[]="*";
-const   char empty[]="";
+const char UnknownData[]="UNDEFINED";
+const char NoLabel[] = "Nolabel";
+const char wildcast[]="*";
+const char empty[]="";
 
 const int ldp_port = 646;
 

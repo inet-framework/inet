@@ -29,7 +29,7 @@ This file contains the implementation of member functions of the class RTPSSRCGa
 
 Register_Class(RTPSSRCGate);
 
-RTPSSRCGate::RTPSSRCGate(u_int32 ssrc = 0) : cObject() {
+RTPSSRCGate::RTPSSRCGate(u_int32 ssrc) : cObject() {
     _ssrc = ssrc;
     setName(RTPParticipantInfo::ssrcToName(_ssrc));
 };

@@ -15,6 +15,7 @@
 #define __TCPSINKAPP_H_
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 
@@ -22,7 +23,7 @@
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
  */
-class TCPSinkApp : public cSimpleModule
+class INET_API TCPSinkApp : public cSimpleModule
 {
   protected:
     long bytesRcvd;

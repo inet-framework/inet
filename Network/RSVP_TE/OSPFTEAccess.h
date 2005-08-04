@@ -24,7 +24,7 @@
 /**
  * Gives access to the OSPF/TE module.
  */
-class OSPFTEAccess : public ModuleAccess<OspfTe>
+class INET_API OSPFTEAccess : public ModuleAccess<OspfTe>
 {
     public:
         OSPFTEAccess() : ModuleAccess<OspfTe>("ospf_te") {}

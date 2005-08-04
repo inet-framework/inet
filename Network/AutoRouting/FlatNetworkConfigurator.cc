@@ -22,9 +22,10 @@
 
 #include <algorithm>
 #include "RoutingTable.h"
-#include "StringTokenizer.h"
+#include "InterfaceTable.h"
 #include "IPAddressResolver.h"
 #include "FlatNetworkConfigurator.h"
+#include "IPv4InterfaceData.h"
 
 
 Define_Module(FlatNetworkConfigurator);
@@ -36,13 +37,16 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     cTopology topo("topo");
 
-    std::vector<std::string> types = StringTokenizer(par("moduleTypes"), " ").asVector();
+    StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
+    StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
+    int i;
+    for (i=0; i<nonIPTypes.size(); i++)
+        types.push_back(nonIPTypes[i]);
+
+    // extract topology
     topo.extractByModuleType(types);
     ev << "cTopology found " << topo.nodes() << " nodes\n";
 
-    // Although bus types are not auto-configured, FNC must still know them
-    // since topology may depend on them.
-    std::vector<std::string> nonIPTypes = StringTokenizer(par("nonIPModuleTypes"), " ").asVector();
 
     // assign IP addresses
     uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
@@ -55,12 +59,11 @@ void FlatNetworkConfigurator::initialize(int stage)
     std::vector<uint32> nodeAddresses;
     nodeAddresses.resize(topo.nodes());
 
-    int i;
     int numIPNodes = 0;
     for (i=0; i<topo.nodes(); i++)
     {
         // skip bus types
-        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(i)->module()->className())!=nonIPTypes.end())
+        if (isNonIPType(topo.node(i), nonIPTypes))
             continue;
 
         uint32 addr = networkAddress | uint32(++numIPNodes);
@@ -68,15 +71,15 @@ void FlatNetworkConfigurator::initialize(int stage)
 
         // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.node(i)->module();
-        RoutingTable *rt = IPAddressResolver().routingTableOf(mod);
+        InterfaceTable *ift = IPAddressResolver().interfaceTableOf(mod);
 
-        for (int k=0; k<rt->numInterfaces(); k++)
+        for (int k=0; k<ift->numInterfaces(); k++)
         {
-            InterfaceEntry *e = rt->interfaceById(k);
-            if (!e->loopback)
+            InterfaceEntry *ie = ift->interfaceAt(k);
+            if (!ie->isLoopback())
             {
-                e->inetAddr = IPAddress(addr);
-                e->mask = IPAddress("255.255.255.255"); // full address must match for local delivery
+                ie->ipv4()->setInetAddress(IPAddress(addr));
+                ie->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }
@@ -89,17 +92,18 @@ void FlatNetworkConfigurator::initialize(int stage)
         cTopology::Node *node = topo.node(i);
 
         // skip bus types
-        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(i)->module()->className())!=nonIPTypes.end())
+        if (isNonIPType(topo.node(i), nonIPTypes))
             continue;
 
+        InterfaceTable *ift = IPAddressResolver().interfaceTableOf(node->module());
         RoutingTable *rt = IPAddressResolver().routingTableOf(node->module());
 
         // count non-loopback interfaces
         int numIntf = 0;
-        InterfaceEntry *interf = NULL;
-        for (int k=0; k<rt->numInterfaces(); k++)
-            if (!rt->interfaceById(k)->loopback)
-                {interf = rt->interfaceById(k); numIntf++;}
+        InterfaceEntry *ie = NULL;
+        for (int k=0; k<ift->numInterfaces(); k++)
+            if (!ift->interfaceAt(k)->isLoopback())
+                {ie = ift->interfaceAt(k); numIntf++;}
 
         usesDefaultRoute[i] = (numIntf==1);
         if (numIntf!=1)
@@ -112,11 +116,11 @@ void FlatNetworkConfigurator::initialize(int stage)
         RoutingEntry *e = new RoutingEntry();
         e->host = IPAddress();
         e->netmask = IPAddress();
-        e->interfaceName = interf->name.c_str();
-        e->interfacePtr = interf;
+        e->interfaceName = ie->name();
+        e->interfacePtr = ie;
         e->type = RoutingEntry::REMOTE;
         e->source = RoutingEntry::MANUAL;
-        //e->metric = 1;
+        //e->metric() = 1;
         rt->addRoutingEntry(e);
     }
 
@@ -126,7 +130,7 @@ void FlatNetworkConfigurator::initialize(int stage)
         cTopology::Node *destNode = topo.node(i);
 
         // skip bus types
-        if (std::find(nonIPTypes.begin(), nonIPTypes.end(), destNode->module()->className())!=nonIPTypes.end())
+        if (isNonIPType(destNode, nonIPTypes))
             continue;
 
         uint32 destAddr = nodeAddresses[i];
@@ -140,7 +144,7 @@ void FlatNetworkConfigurator::initialize(int stage)
         for (int j=0; j<topo.nodes(); j++)
         {
             if (i==j) continue;
-            if (std::find(nonIPTypes.begin(), nonIPTypes.end(), topo.node(j)->module()->className())!=nonIPTypes.end())
+            if (isNonIPType(topo.node(j), nonIPTypes))
                 continue;
 
             cTopology::Node *atNode = topo.node(j);
@@ -156,26 +160,26 @@ void FlatNetworkConfigurator::initialize(int stage)
             ev << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
 
             // add route
+            InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());
             RoutingTable *rt = IPAddressResolver().routingTableOf(atNode->module());
-            InterfaceEntry *interf = rt->interfaceByPortNo(outputPort);
+            InterfaceEntry *ie = ift->interfaceByPortNo(outputPort);
+            if (!ie)
+                error("%s has no entry for interface %d", ift->fullPath().c_str(), outputPort);
 
             RoutingEntry *e = new RoutingEntry();
             e->host = IPAddress(destAddr);
             e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = interf->name.c_str();
-            e->interfacePtr = interf;
+            e->interfaceName = ie->name();
+            e->interfacePtr = ie;
             e->type = RoutingEntry::DIRECT;
             e->source = RoutingEntry::MANUAL;
-            //e->metric = 1;
+            //e->metric() = 1;
             rt->addRoutingEntry(e);
         }
     }
 
     // update display string
-    char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.nodes()-numIPNodes);
-    displayString().setTagArg("t",0,buf);
-
+    setDisplayString(numIPNodes, topo.nodes()-numIPNodes);
 }
 
 void FlatNetworkConfigurator::handleMessage(cMessage *msg)
@@ -183,4 +187,16 @@ void FlatNetworkConfigurator::handleMessage(cMessage *msg)
     error("this module doesn't handle messages, it runs only in initialize()");
 }
 
+void FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
+{
+    // update display string
+    char buf[80];
+    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
+    displayString().setTagArg("t",0,buf);
+}
+
+bool FlatNetworkConfigurator::isNonIPType(cTopology::Node *node, StringVector& nonIPTypes)
+{
+    return std::find(nonIPTypes.begin(), nonIPTypes.end(), node->module()->className())!=nonIPTypes.end();
+}
 

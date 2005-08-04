@@ -36,7 +36,7 @@ module to store the association between an ssrc identifier and the gate
 which leads to the RTPPayloadReceiver module.
 */
 
-class RTPSSRCGate : public cObject {
+class INET_API RTPSSRCGate : public cObject {
 
     public:
 
@@ -88,3 +88,4 @@ class RTPSSRCGate : public cObject {
 };
 
 #endif
+

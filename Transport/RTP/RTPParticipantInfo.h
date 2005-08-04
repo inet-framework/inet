@@ -24,8 +24,9 @@ TThis file declares the class RTPParticipantInfo.
 
 #include <omnetpp.h>
 
-#include "in_addr.h"
-#include "in_port.h"
+//XXX #include "in_addr.h"
+//XXX #include "in_port.h"
+#include "tmp/defs.h"
 
 #include "types.h"
 #include "RTPPacket.h"
@@ -43,7 +44,7 @@ about itself.
 \sa RTPReceiverInformation
 \sa RTPSenderInformation
 */
-class RTPParticipantInfo : public cObject {
+class INET_API RTPParticipantInfo : public cObject {
 
     public:
 
@@ -249,3 +250,4 @@ class RTPParticipantInfo : public cObject {
 };
 
 #endif
+

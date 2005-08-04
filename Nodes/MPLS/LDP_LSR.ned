@@ -12,11 +12,13 @@
 
 
 import
-    "Blackboard",
+    "NotificationBoard",
+    "RoutingTable",
+    "InterfaceTable",
     "NetworkLayer",
     "NewLDP",
-    "TCPMain",
-    "UDPProcessing",
+    "TCP",
+    "UDP",
     "MPLSModule",
     "PPPInterface",
     "LIBTable";
@@ -44,14 +46,16 @@ module LDP_LSR
         out: out[];
 
     submodules:
-        blackboard: Blackboard;
-            display: "p=70,60;i=block/blackboard";
+        notificationBoard: NotificationBoard;
+            display: "p=70,60;i=block/control";
+        interfaceTable: InterfaceTable;
+            display: "p=70,150;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=70,142;i=block/table";
+            display: "p=70,240;i=block/table";
         signal_module: NewLDP;
             parameters:
                 routerId = routerId,
@@ -59,9 +63,9 @@ module LDP_LSR
                 isER = isER,
                 isIR = isIR;
             display: "p=222,67;i=block/control";
-        tcp: TCPMain;
+        tcp: TCP;
             display: "p=177,145;i=block/wheelbarrow";
-        udp: UDPProcessing;
+        udp: UDP;
             display: "p=267,145;i=block/transport";
         networkLayer: NetworkLayer;
             gatesizes:
@@ -84,13 +88,13 @@ module LDP_LSR
             parameters:
                 LibTableFileName = LibTableFileName,
                 PrtTableFileName = PrtTableFileName;
-            display: "p=70,224;i=block/table2";
+            display: "p=340,281;i=block/table2";
     connections nocheck:
         signal_module.from_tcp_interface <-- tcp.to_appl++;
         signal_module.to_tcp_interface --> tcp.from_appl++;
 
-        signal_module.to_udp_interface --> udp.from_application++;
-        signal_module.from_udp_interface <-- udp.to_application++;
+        signal_module.to_udp_interface --> udp.from_app++;
+        signal_module.from_udp_interface <-- udp.to_app++;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

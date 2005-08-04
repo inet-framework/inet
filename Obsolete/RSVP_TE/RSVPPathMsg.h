@@ -25,7 +25,7 @@
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPPathMsg : public RSVPPathMsg_Base
+class INET_API RSVPPathMsg : public RSVPPathMsg_Base
 {
   public:
     RSVPPathMsg(const char *name=NULL, int kind=PATH_MESSAGE) : RSVPPathMsg_Base(name,kind) {}
@@ -56,7 +56,7 @@ class RSVPPathMsg : public RSVPPathMsg_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPPathTear : public RSVPPathTear_Base
+class INET_API RSVPPathTear : public RSVPPathTear_Base
 {
   public:
     RSVPPathTear(const char *name=NULL, int kind=PTEAR_MESSAGE) : RSVPPathTear_Base(name,kind) {}
@@ -77,7 +77,7 @@ class RSVPPathTear : public RSVPPathTear_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPPathError : public RSVPPathError_Base
+class INET_API RSVPPathError : public RSVPPathError_Base
 {
   public:
     RSVPPathError(const char *name=NULL, int kind=PERROR_MESSAGE) : RSVPPathError_Base(name,kind) {}

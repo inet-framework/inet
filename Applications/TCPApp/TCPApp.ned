@@ -18,8 +18,10 @@
 
 
 //
-// Not an actual module type. It only shows which gates a TCP app should have
-// to be able to be used in StandardHost etc.
+// Template for TCP applications.
+//
+// This is not an actual module type. It only shows which gates an TCP app 
+// needs, to be able to be used in StandardHost etc.
 //
 simple TCPApp
     gates:

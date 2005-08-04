@@ -32,7 +32,7 @@ in RTCPSenderReportPacket and RTCPReceiverReportPacket.
 The class SenderReport represents an rtp sender report as contained
 in an RTCPSenderReportPacket.
 */
-class SenderReport : public cObject {
+class INET_API SenderReport : public cObject {
 
     public:
 
@@ -69,12 +69,12 @@ class SenderReport : public cObject {
         /*!
         Writes a short info about this SenderReport into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this SenderReport into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns the contained ntp time stamp.
@@ -144,7 +144,7 @@ class SenderReport : public cObject {
 The class ReceptionReport represents an rtp receiver report stored
 in an RTPSenderReportPacket or RTPReceiverReport.
 */
-class ReceptionReport : public cObject {
+class INET_API ReceptionReport : public cObject {
 
     public:
         /*!
@@ -180,12 +180,12 @@ class ReceptionReport : public cObject {
         /*!
         Writes a short info about this ReceptionReport into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this ReceptionReport into the given stream.
         */
-        virtual void writeContents(ostream& os) const;
+        virtual void writeContents(std::ostream& os) const;
 
         /*!
         Returns the ssrc identifier for which sender this ReceptionReport is.
@@ -300,3 +300,4 @@ class ReceptionReport : public cObject {
 };
 
 #endif
+

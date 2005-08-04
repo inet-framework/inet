@@ -17,9 +17,10 @@
 //
 
 
+#include <algorithm>
 #include "Blackboard.h"
 #include "stlwatch.h"
-#include <algorithm>
+#include "ModuleAccess.h"
 
 Define_Module(Blackboard);
 
@@ -210,10 +211,7 @@ Blackboard *BlackboardAccess::blackboard()
 {
     if (!bb)
     {
-      std::cout<<"do not have a valid pointer to the blackboard"<<endl;
-      // FIXME find
-      // I think it's hard to find the bb here since BBAccess is not a
-      // cModule... We take care of that within the BasicModule...
+        bb = ModuleAccess<Blackboard>("blackboard").get();
     }
     return bb;
 }

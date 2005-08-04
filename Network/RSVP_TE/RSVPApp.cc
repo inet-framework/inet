@@ -19,7 +19,9 @@
 #include "RSVPTesterCommands.h"
 #include "MPLSModule.h"
 #include "IPAddressResolver.h"
-#include "StringTokenizer.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
+#include "RoutingTableAccess.h"
 
 Define_Module(RSVPAppl);
 
@@ -32,7 +34,10 @@ void RSVPAppl::initialize(int stage)
         return;
 
     // Get router IP Address
-    routerId = RoutingTableAccess().get()->getRouterId().getInt();
+    ift = InterfaceTableAccess().get();
+    rt = RoutingTableAccess().get();
+
+    routerId = rt->getRouterId().getInt();
     ASSERT(routerId!=0);
 
     isIR = par("isIR").boolValue();
@@ -117,7 +122,6 @@ void RSVPAppl::processRSVP_RTEAR(RSVPResvTear *msg)
 
 void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
 {
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
 
     IPADDR receiverIP = pMessage->getDestAddress();
@@ -134,8 +138,8 @@ void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
     if (!outInfP) error("no interface with outInf address %s",IPAddress(outInf).str().c_str());
     if (!inInfP) error("no interface with inInf address %s",IPAddress(inInf).str().c_str());
 
-    const char *outInfName = outInfP->name.c_str();
-    const char *inInfName = inInfP->name.c_str();
+    const char *outInfName = outInfP->name();
+    const char *inInfName = inInfP->name();
 
     if (isER)
     {
@@ -156,7 +160,6 @@ void RSVPAppl::processRSVP_PATH(RSVPPathMsg *pMessage)
 
 void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
 {
-    RoutingTable *rt = routingTableAccess.get();
     LIBTable *lt = libTableAccess.get();
     MPLSModule *mplsMod = mplsAccess.get();
 
@@ -241,9 +244,9 @@ void RSVPAppl::processRSVP_RESV(RSVPResvMsg *rMessage)
                     // signalMPLS->addPar("dest") = aTunnel.Session.DestAddress;
                     // Install new label
                     int outInf = rMessage->getLIH();
-                    int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort; // FIXME ->outputPort: is this OK? --AV
-                    const char *outInfName = (rt->interfaceByPortNo(outInfIndex))->name.c_str();
-                    const char *inInfName = (rt->interfaceByPortNo(aTunnel.inInfIndex))->name.c_str();
+                    int outInfIndex = rt->interfaceByAddress(IPAddress(outInf))->outputPort(); // FIXME ->outputPort(): is this OK? --AV
+                    const char *outInfName = (ift->interfaceByPortNo(outInfIndex))->name();
+                    const char *inInfName = (ift->interfaceByPortNo(aTunnel.inInfIndex))->name();
 
                     ev << "INSTALL new label \n";
                     ev << "src=" << IPAddress(aTunnel.Sender_Template.
@@ -715,7 +718,7 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 
                 // copy returned path into ERO structure
                 int hopCount = 0;
-                for (int n = 0; n < ero.size(); n++)
+                for (unsigned int n = 0; n < ero.size(); n++)
                 {
                     ev << IPAddress(ero[n]) << "\n";
                     ERO[hopCount].node = ero[n];
@@ -796,11 +799,10 @@ void RSVPAppl::sendPathMessage(SessionObj_t * s, traffic_request_t * t, int lspI
 
 void RSVPAppl::Unicast_Route_Query(IPADDR da, int *outl)
 {
-    RoutingTable *rt = routingTableAccess.get();
     int foundIndex;
     // int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
+    (*outl) = ift->interfaceByPortNo(foundIndex)->ipv4()->inetAddress().getInt();   // FIXME why not return outl???
 
     return;
 
@@ -808,12 +810,10 @@ void RSVPAppl::Unicast_Route_Query(IPADDR da, int *outl)
 
 void RSVPAppl::Mcast_Route_Query(IPADDR sa, int iad, IPADDR da, int *outl)
 {
-    RoutingTable *rt = routingTableAccess.get();
-
     int foundIndex;
     // int j=0;
     foundIndex = rt->outputPortNo(IPAddress(da));
-    (*outl) = rt->interfaceByPortNo(foundIndex)->inetAddr.getInt();   // FIXME why not return outl???
+    (*outl) = ift->interfaceByPortNo(foundIndex)->ipv4()->inetAddress().getInt();   // FIXME why not return outl???
 
     return;
 }
@@ -960,7 +960,7 @@ RSVPAppl::traffic_request_t RSVPAppl::parseTrafficRequest(const cXMLElement *con
         else if (!strcmp(child->getTagName(),"route"))
         {
             const char *line = child->getNodeValue();
-            StringTokenizer tokenizer(line, ",");
+            cStringTokenizer tokenizer(line, ",");
             const char *aField;
             while ((aField = tokenizer.nextToken()) != NULL)
             {

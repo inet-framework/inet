@@ -1,17 +1,16 @@
-/*******************************************************************
-*
-*    This library is free software, you can redistribute it
-*    and/or modify
-*    it under  the terms of the GNU Lesser General Public License
-*    as published by the Free Software Foundation;
-*    either version 2 of the License, or any later version.
-*    The library is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*    See the GNU Lesser General Public License for more details.
-*
-*
-*********************************************************************/
+//
+// (C) 2004 Andras Varga
+//
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
+// either version 2 of the License, or any later version.
+// The library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
 
 #ifndef __NEWLDP_H__
 #define __NEWLDP_H__
@@ -21,17 +20,20 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <vector>
+#include "INETDefs.h"
 #include "LDPPacket_m.h"
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
-#include "RoutingTableAccess.h"
 #include "TCPSocketMap.h"
 
+
+class InterfaceTable;
+class RoutingTable;
 
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 {
   public:
     struct fec_src_bind
@@ -71,7 +73,8 @@ class NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     //
     // other variables:
     //
-    RoutingTableAccess routingTableAccess;
+    InterfaceTable *ift;
+    RoutingTable *rt;
     LIBTableAccess libTableAccess;
     MPLSAccess mplsAccess;
 

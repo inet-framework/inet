@@ -29,7 +29,7 @@
 /**
  * Base class for TCP testing modules.
  */
-class TCPTesterBase : public cSimpleModule
+class INET_API TCPTesterBase : public cSimpleModule
 {
   protected:
     int fromASeq;
@@ -53,7 +53,7 @@ class TCPTesterBase : public cSimpleModule
  *
  * Script format: see NED documentation.
  */
-class TCPScriptableTester : public TCPTesterBase
+class INET_API TCPScriptableTester : public TCPTesterBase
 {
   protected:
     enum {CMD_DELETE,CMD_COPY}; // "delay" is same as "copy"
@@ -83,7 +83,7 @@ class TCPScriptableTester : public TCPTesterBase
 /**
  * Randomly delete, delay etc packets.
  */
-class TCPRandomTester : public TCPTesterBase
+class INET_API TCPRandomTester : public TCPTesterBase
 {
   protected:
     double pdelete;

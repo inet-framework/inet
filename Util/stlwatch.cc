@@ -21,7 +21,7 @@
 //
 // Internal
 //
-class cVectorWatchDescriptor : public cStructDescriptor
+class INET_API cVectorWatchDescriptor : public cStructDescriptor
 {
   public:
     cVectorWatchDescriptor();

@@ -19,7 +19,7 @@
 
 
 //
-// Represents an UDP packet.
+// Represents an \UDP packet, to be used with the UDP module.
 //
 message UDPPacket
 {
@@ -28,6 +28,5 @@ message UDPPacket
     fields:
         int sourcePort = -1;
         int destinationPort = -1;
-        bool checksumValid = true;
 };
 

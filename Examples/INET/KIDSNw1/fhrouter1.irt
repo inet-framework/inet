@@ -7,11 +7,11 @@
 
 ifconfig:
 
-# ethernet card (modelled by point-to-point link) 0 to host 1
-name: ppp0  inet_addr: 172.0.0.3    MTU: 1500   Metric: 1  BROADCAST MULTICAST
+# interface 0 to host 1
+name: ppp0  inet_addr: 172.0.0.3    MTU: 1500   Metric: 1
 
-# ethernet card (modelled by point-to-point link) 1 to host 2
-name: ppp1  inet_addr: 172.0.0.4    MTU: 1500   Metric: 1  BROADCAST MULTICAST
+# interface 1 to host 2
+name: ppp1  inet_addr: 172.0.0.4    MTU: 1500   Metric: 1
 
 # router connection 0 to interior router 2
 name: ppp2  inet_addr: 172.0.1.0    MTU: 1200   Metric: 1

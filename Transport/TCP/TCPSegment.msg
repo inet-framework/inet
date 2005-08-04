@@ -18,7 +18,14 @@
 
 
 cplusplus {{
+#include <iostream>
+
 typedef cMessage *cMessagePtr;
+
+inline std::ostream& operator<<(std::ostream& os, cMessagePtr msg) {
+    return os << "(" << msg->className() << ") " << msg->name() << ": " << msg->info();
+}
+
 }};
 
 struct cMessagePtr;
@@ -31,9 +38,9 @@ struct TCPPayloadMessage
 };
 
 //
-// Represents a TCP segment.
+// Represents a \TCP segment, to be used with the TCP module.
 //
-// TCP header fields not explicitly modelled:
+// \TCP header fields not explicitly modelled:
 // - Data Offset (number of 32 bit words in the header): represented
 //   by cMessage::length().
 // - Reserved (reserved for future use)
@@ -86,7 +93,7 @@ message TCPSegment extends cMessage
         // the URG control bit set.
         unsigned long urgentPointer;
 
-        // Payload length in octets (not an actual TCP header field).
+        // Payload length in octets (not an actual \TCP header field).
         // This may not always be the same as encapsulatedPacket()->length()*8;
         // e.g. when simulating a virtual data stream there's no encapsulated
         // packet at all.

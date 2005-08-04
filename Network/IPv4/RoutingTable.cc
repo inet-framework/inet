@@ -24,72 +24,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include <algorithm>
 #include <sstream>
 
 #include "stlwatch.h"
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
+#include "IPv4InterfaceData.h"
+#include "InterfaceTable.h"
+#include "InterfaceTableAccess.h"
+#include "NotifierConsts.h"
 
-
-
-InterfaceEntry::InterfaceEntry()
-{
-    id = -1;
-    outputPort = -1;
-
-    static const IPAddress allOnes("255.255.255.255");
-    mask = allOnes;
-
-    mtu = 0;
-    metric = 0;
-
-    broadcast = false;
-    multicast = false;
-    pointToPoint= false;
-    loopback = false;
-
-    // add default mouticast groups!
-    multicastGroupCtr = 0;
-    multicastGroup = NULL;
-}
-
-std::string InterfaceEntry::info() const
-{
-    std::stringstream out;
-    out << (!name.empty() ? name.c_str() : "*");
-    out << "  outputPort:" << outputPort;
-    out << "  addr:" << inetAddr << "  mask:" << mask;
-    out << "  MTU:" << mtu << "  Metric:" << metric;
-    return out.str();
-}
-
-std::string InterfaceEntry::detailedInfo() const
-{
-    std::stringstream out;
-    out << "name:" << (!name.empty() ? name.c_str() : "*")
-        << "\toutputPort:" << outputPort << "\n";
-    out << "inet addr:" << inetAddr << "\tMask: " << mask << "\n";
-
-    out << "MTU: " << mtu << " \tMetric: " << metric << "\n";
-
-    out << "Groups:";
-    for (int j=0; j<multicastGroupCtr; j++)
-        if (!multicastGroup[j].isNull())
-            out << "  " << multicastGroup[j];
-    out << "\n";
-
-    if (broadcast) out << "BROADCAST ";
-    if (multicast) out << "MULTICAST ";
-    if (pointToPoint) out << "POINTTOPOINT ";
-    if (loopback) out << "LOOPBACK ";
-    out << "\n";
-
-    return out.str();
-}
-
-//================================================================
 
 RoutingEntry::RoutingEntry()
 {
@@ -98,18 +43,25 @@ RoutingEntry::RoutingEntry()
     metric = 0;
     type = DIRECT;
     source = MANUAL;
-
-    age = -1;
 }
 
 std::string RoutingEntry::info() const
 {
     std::stringstream out;
-    out << "dest:"; if (host.isNull()) out << "*  "; else out << host << "  ";
-    out << "gw:"; if (gateway.isNull()) out << "*  "; else out << gateway << "  ";
-    out << "mask:"; if (netmask.isNull()) out << "*  "; else out << netmask << "  ";
+    out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
+    out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
+    out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "if:"; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
+    switch (source)
+    {
+        case MANUAL:       out << " MANUAL"; break;
+        case IFACENETMASK: out << " IFACENETMASK"; break;
+        case RIP:          out << " RIP"; break;
+        case OSPF:         out << " OSPF"; break;
+        case BGP:          out << " BGP"; break;
+        default:           out << " ???"; break;
+    }
     return out.str();
 }
 
@@ -131,63 +83,74 @@ std::ostream& operator<<(std::ostream& os, const RoutingEntry& e)
     return os;
 };
 
-std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
-{
-    os << e.info();
-    return os;
-};
-
 void RoutingTable::initialize(int stage)
 {
-    // L2 modules register themselves in stage 0, so we can only configure
-    // the interfaces in stage 1. So we'll just do the whole initialize()
-    // stuff in stage 1.
-    if (stage!=1)
-        return;
-
-    IPForward = par("IPForward").boolValue();
-    const char *filename = par("routingFile");
-
-    // At this point, all L2 modules have registered themselves (added their
-    // interface entries). Add one extra interface, the loopback here.
-    InterfaceEntry *lo0 = addLocalLoopback();
-
-    // read routing table file (and interface configuration)
-    RoutingTableParser parser(this);
-    if (*filename && parser.readRoutingTableFromFile(filename)==-1)
-        error("Error reading routing table file %s", filename);
-
-    const char *routerIdStr = par("routerId").stringValue();
-    if (!strcmp(routerIdStr, ""))
+    if (stage==0)
     {
-        routerId = IPAddress();
+        // get a pointer to the NotificationBoard module and InterfaceTable
+        nb = NotificationBoardAccess().get();
+        ift = InterfaceTableAccess().get();
+
+        IPForward = par("IPForward").boolValue();
+
+        WATCH_PTRVECTOR(routes);
+        WATCH_PTRVECTOR(multicastRoutes);
+        WATCH(IPForward);
+        //WATCH(routerId);
     }
-    else if (!strcmp(routerIdStr, "auto"))
+    else if (stage==1)
     {
-        // choose highest interface address as routerId
-        routerId = IPAddress();
-        for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-            if (!(*i)->loopback && (*i)->inetAddr.getInt() > routerId.getInt())
-                routerId = (*i)->inetAddr;
+        // L2 modules register themselves in stage 0, so we can only configure
+        // the interfaces in stage 1.
+        const char *filename = par("routingFile");
+
+        // At this point, all L2 modules have registered themselves (added their
+        // interface entries). Create the per-interface IPv4 data structures.
+        InterfaceTable *interfaceTable = InterfaceTableAccess().get();
+        for (int i=0; i<interfaceTable->numInterfaces(); ++i)
+            configureInterfaceForIPv4(interfaceTable->interfaceAt(i));
+        configureLoopbackForIPv4();
+
+        // read routing table file (and interface configuration)
+        RoutingTableParser parser(ift, this);
+        if (*filename && parser.readRoutingTableFromFile(filename)==-1)
+            error("Error reading routing table file %s", filename);
+
+        const char *routerIdStr = par("routerId").stringValue();
+        if (!strcmp(routerIdStr, ""))
+        {
+            routerId = IPAddress();
+        }
+        else if (!strcmp(routerIdStr, "auto"))
+        {
+            // choose highest interface address as routerId
+            routerId = IPAddress();
+            for (int i=0; i<ift->numInterfaces(); ++i)
+            {
+                InterfaceEntry *ie = ift->interfaceAt(i);
+                if (!ie->isLoopback() && ie->ipv4()->inetAddress().getInt() > routerId.getInt())
+                    routerId = ie->ipv4()->inetAddress();
+            }
+        }
+        else
+        {
+            // use routerId both as routerId and loopback address
+            routerId = IPAddress(routerIdStr);
+
+            InterfaceEntry *lo0 = ift->firstLoopbackInterface();
+            lo0->ipv4()->setInetAddress(routerId);
+            lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
+        }
     }
-    else
+    else if (stage==3)
     {
-        // use routerId both as routerId and loopback address
-        routerId = IPAddress(routerIdStr);
+        // we don't use notifications during initialize(), so we do it manually.
+        // Should be in stage=3 because autoconfigurator runs in stage=2.
+        updateNetmaskRoutes();
 
-        lo0->inetAddr = routerId;
-        lo0->mask = IPAddress("255.255.255.255");
+        //printIfconfig();
+        //printRoutingTable();
     }
-
-    WATCH_PTRVECTOR(interfaces);
-    WATCH_PTRVECTOR(routes);
-    WATCH_PTRVECTOR(multicastRoutes);
-    //WATCH(routerId);
-
-    //printIfconfig();
-    //printRoutingTable();
-
-    updateDisplayString();
 }
 
 void RoutingTable::updateDisplayString()
@@ -196,7 +159,7 @@ void RoutingTable::updateDisplayString()
         return;
 
     char buf[80];
-    if (routerId.isNull())
+    if (routerId.isUnspecified())
         sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
     else
         sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
@@ -208,12 +171,14 @@ void RoutingTable::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void RoutingTable::printIfconfig()
+void RoutingTable::receiveChangeNotification(int category, cPolymorphic *)
 {
-    ev << "---- IF config ----\n";
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        ev << (*i)->detailedInfo() << "\n";
-    ev << "\n";
+    if (category==NF_IPv4_INTERFACECONFIG_CHANGED)
+    {
+        // if anything IPv4-related changes in the interfaces, interface netmask
+        // based routes have to be re-built.
+        updateNetmaskRoutes();
+    }
 }
 
 void RoutingTable::printRoutingTable()
@@ -231,106 +196,48 @@ std::vector<IPAddress> RoutingTable::gatherAddresses()
 {
     std::vector<IPAddress> addressvector;
 
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        addressvector.push_back((*i)->inetAddr);
+    for (int i=0; i<ift->numInterfaces(); ++i)
+        addressvector.push_back(ift->interfaceAt(i)->ipv4()->inetAddress());
     return addressvector;
 }
 
 //---
 
-InterfaceEntry *RoutingTable::interfaceById(int id)
+void RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
 {
-    if (id<0 || id>=(int)interfaces.size())
-        opp_error("interfaceById(): nonexistent interface %d", id);
-    return interfaces[id];
-}
+    IPv4InterfaceData *d = new IPv4InterfaceData();
+    ie->setIPv4Data(d);
 
-void RoutingTable::addInterface(InterfaceEntry *entry)
-{
-    // check name and outputPort are unique
-    if (interfaceByName(entry->name.c_str())!=NULL)
-        opp_error("addInterface(): interface '%s' already registered", entry->name.c_str());
-    if (entry->outputPort!=-1 && interfaceByPortNo(entry->outputPort)!=NULL)
-        opp_error("addInterface(): interface with output=%d already registered", entry->outputPort);
-
-    // insert
-    entry->id = interfaces.size();
-    interfaces.push_back(entry);
-}
-
-void RoutingTable::deleteInterface(InterfaceEntry *entry)
-{
-    // check if any route table entries refer to this interface
-    for (int k=0; k<numRoutingEntries(); k++)
-        if (routingEntry(k)->interfacePtr==entry)
-            opp_error("deleteInterface(): interface '%s' is still referenced by routes", entry->name.c_str());
-
-    InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
-    if (i==interfaces.end())
-        opp_error("deleteInterface(): interface '%s' not found in interface table", entry->name.c_str());
-
-    interfaces.erase(i);
-    delete entry;
-
-    // renumber other interfaces
-    for (i=interfaces.begin(); i!=interfaces.end(); ++i)
-        (*i)->id = i-interfaces.begin();
-}
-
-InterfaceEntry *RoutingTable::interfaceByPortNo(int portNo)
-{
-    // linear search is OK because normally we have don't have many interfaces (1..4, rarely more)
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->outputPort==portNo)
-            return *i;
-    return NULL;
-}
-
-InterfaceEntry *RoutingTable::interfaceByName(const char *name)
-{
-    Enter_Method("interfaceByName(%s)=?", name);
-    if (!name)
-        return NULL;
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (!strcmp(name, (*i)->name.c_str()))
-            return *i;
-    return NULL;
+    // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+    d->setMetric((int)ceil(2e9/ie->datarate())); // use OSPF cost as default
 }
 
 InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
 {
-    // This used to check the network part of the interface IP address.
-    // No clue what it was good for, but screwed up routing for me. --Andras
     Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
-    if (addr.isNull())
+    if (addr.isUnspecified())
         return NULL;
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->inetAddr==addr)
-            return *i;
+    for (int i=0; i<ift->numInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        if (ie->ipv4()->inetAddress()==addr)
+            return ie;
+    }
     return NULL;
 }
 
-InterfaceEntry *RoutingTable::addLocalLoopback()
+
+void RoutingTable::configureLoopbackForIPv4()
 {
-    InterfaceEntry *loopbackInterface = new InterfaceEntry();
+    InterfaceEntry *ie = ift->firstLoopbackInterface();
 
-    loopbackInterface->name = "lo0";
-
-    // 127.0.0.1/8 by default -- we may reconfigure later it to be the routerId
-    loopbackInterface->inetAddr = IPAddress("127.0.0.1");
-    loopbackInterface->mask = IPAddress("255.0.0.0");
-
-    loopbackInterface->mtu = 3924;
-    loopbackInterface->metric = 1;
-    loopbackInterface->loopback = true;
-
-    loopbackInterface->multicastGroupCtr = 0;
-    loopbackInterface->multicastGroup = NULL;
-
-    // add interface to table
-    addInterface(loopbackInterface);
-
-    return loopbackInterface;
+    // add IPv4 info. Set 127.0.0.1/8 as address by default --
+    // we may reconfigure later it to be the routerId
+    IPv4InterfaceData *d = new IPv4InterfaceData();
+    d->setInetAddress(IPAddress::LOOPBACK_ADDRESS);
+    d->setNetmask(IPAddress::LOOPBACK_NETMASK);
+    d->setMetric(1);
+    ie->setIPv4Data(d);
 }
 
 //---
@@ -339,10 +246,13 @@ bool RoutingTable::localDeliver(const IPAddress& dest)
 {
     Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
 
-    // check if we have an interface with this address, obeying interface's netmask
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (IPAddress::maskedAddrAreEqual(dest, (*i)->inetAddr, (*i)->mask))
+    // check if we have an interface with this address
+    for (int i=0; i<ift->numInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        if (dest==ie->ipv4()->inetAddress())
             return true;
+    }
     return false;
 }
 
@@ -350,10 +260,13 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 {
     Enter_Method("multicastLocalDeliver(%s) y/n", dest.str().c_str());
 
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        for (int j=0; j < (*i)->multicastGroupCtr; j++)
-            if (dest.equals((*i)->multicastGroup[j]))
+    for (int i=0; i<ift->numInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        for (unsigned int j=0; j < ie->ipv4()->multicastGroups().size(); j++)
+            if (dest.equals(ie->ipv4()->multicastGroups()[j]))
                 return true;
+    }
     return false;
 }
 
@@ -383,7 +296,7 @@ int RoutingTable::outputPortNo(const IPAddress& dest)
 
     RoutingEntry *e = selectBestMatchingRoute(dest);
     if (!e) return -1;
-    return e->interfacePtr->outputPort;
+    return e->interfacePtr->outputPort();
 }
 
 IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
@@ -408,7 +321,7 @@ MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
         if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
         {
             MulticastRoute r;
-            r.interf = interfaceByName(e->interfaceName.c_str()); // Ughhhh
+            r.interf = ift->interfaceByName(e->interfaceName.c_str()); // Ughhhh
             r.gateway = e->gateway;
             res.push_back(r);
         }
@@ -451,12 +364,12 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
     Enter_Method("addRoutingEntry(...)");
 
     // check for null address and default route
-    if ((entry->host.isNull() || entry->netmask.isNull()) &&
-        (!entry->host.isNull() || !entry->netmask.isNull()))
+    if ((entry->host.isUnspecified() || entry->netmask.isUnspecified()) &&
+        (!entry->host.isUnspecified() || !entry->netmask.isUnspecified()))
         error("addRoutingEntry(): to add a default route, set both host and netmask to zero");
 
     // fill in interface ptr from interface name
-    entry->interfacePtr = interfaceByName(entry->interfaceName.c_str());
+    entry->interfacePtr = ift->interfaceByName(entry->interfaceName.c_str());
     if (!entry->interfacePtr)
         error("addRoutingEntry(): interface `%s' doesn't exist", entry->interfaceName.c_str());
 
@@ -505,11 +418,11 @@ bool RoutingTable::routingEntryMatches(RoutingEntry *entry,
                                 int metric,
                                 const char *dev)
 {
-    if (!target.isNull() && !target.equals(entry->host))
+    if (!target.isUnspecified() && !target.equals(entry->host))
         return false;
-    if (!nmask.isNull() && !nmask.equals(entry->netmask))
+    if (!nmask.isUnspecified() && !nmask.equals(entry->netmask))
         return false;
-    if (!gw.isNull() && !gw.equals(entry->gateway))
+    if (!gw.isUnspecified() && !gw.equals(entry->gateway))
         return false;
     if (metric && metric!=entry->metric)
         return false;
@@ -519,3 +432,31 @@ bool RoutingTable::routingEntryMatches(RoutingEntry *entry,
     return true;
 }
 
+void RoutingTable::updateNetmaskRoutes()
+{
+    // first, delete all routes with src=IFACENETMASK
+    for (unsigned int k=0; k<routes.size(); k++)
+        if (routes[k]->source==RoutingEntry::IFACENETMASK)
+            routes.erase(routes.begin()+(k--));  // '--' is necessary because indices shift down
+
+    // then re-add them, according to actual interface configuration
+    for (int i=0; i<ift->numInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        if (ie->ipv4()->netmask()!=IPAddress::ALLONES_ADDRESS)
+        {
+            RoutingEntry *route = new RoutingEntry();
+            route->type = RoutingEntry::DIRECT;
+            route->source = RoutingEntry::IFACENETMASK;
+            route->host = ie->ipv4()->inetAddress();
+            route->netmask = ie->ipv4()->netmask();
+            route->gateway = IPAddress();
+            route->metric = ie->ipv4()->metric();
+            route->interfaceName = ie->name();
+            route->interfacePtr = ie;
+            routes.push_back(route);
+        }
+    }
+
+    updateDisplayString();
+}

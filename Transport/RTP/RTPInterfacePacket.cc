@@ -24,13 +24,13 @@
 Register_Class(RTPInterfacePacket);
 
 
-RTPInterfacePacket::RTPInterfacePacket(const char *name = NULL) : cPacket(name) {
+RTPInterfacePacket::RTPInterfacePacket(const char *name) : cPacket(name) {
     _type = RTP_IFP_UNDEF;
     _commonName = NULL;
     _profileName = NULL;
     _bandwidth = 0;
-    _destinationAddress = IN_Addr(IN_Addr::ADDR_UNDEF);
-    _port = IN_Port(IN_Port::PORT_UNDEF);
+    _destinationAddress = IPADDRESS_UNDEF;
+    _port = IPSuite_PORT_UNDEF;
     _ssrc = 0;
     _payloadType = 0;
     _fileName = NULL;
@@ -78,14 +78,14 @@ const char *RTPInterfacePacket::className() const {
 };
 
 
-std::string RTPInterfacePacket::info() const {
+std::string RTPInterfacePacket::info() {
     std::stringstream out;
     out << "RTPInterfacePacket: type=" << _type;
     return out.str();
 };
 
 
-void RTPInterfacePacket::writeContents(ostream& os) {
+void RTPInterfacePacket::writeContents(std::ostream& os) {
     os << "RTPInterfacePacket:" << endl;
     os << "  type = " << _type << endl;
     os << "  commonName = " << _commonName << endl;

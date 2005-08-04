@@ -20,11 +20,13 @@
 #define __FIFOBASE_H
 
 #include <omnetpp.h>
+#include "INETDefs.h"
+
 
 /**
  * Abstract base class for single-server queues.
  */
-class AbstractQueue : public cSimpleModule
+class INET_API AbstractQueue : public cSimpleModule
 {
   public:
     Module_Class_Members(AbstractQueue,cSimpleModule,0);

@@ -28,7 +28,7 @@
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
  */
-class TCPSegment : public TCPSegment_Base
+class INET_API TCPSegment : public TCPSegment_Base
 {
   protected:
     std::list<TCPPayloadMessage> payloadList;

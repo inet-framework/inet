@@ -24,7 +24,8 @@ This file declares the class RTCPEndsystemModule.
 
 #include <omnetpp.h>
 
-#include "sockets.h"
+//XXX #include "sockets.h"
+#include "tmp/defs.h"
 
 #include "types.h"
 #include "RTPInnerPacket.h"
@@ -37,7 +38,7 @@ The class RTCPEndsystemModule is responsible for creating, receiving and
 processing of rtcp packets. It also keeps track of this and other
 rtp end systems.
 */
-class RTCPEndsystemModule : public cSimpleModule {
+class INET_API RTCPEndsystemModule : public cSimpleModule {
 
     Module_Class_Members(RTCPEndsystemModule, cSimpleModule, 0);
 
@@ -244,3 +245,5 @@ class RTCPEndsystemModule : public cSimpleModule {
 };
 
 #endif
+
+

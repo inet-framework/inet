@@ -39,8 +39,8 @@
 //
 // If you can't wait to see the model, start here:
 //  - the MixedLAN model contains hosts, switch, hub and bus;
-//  - the <a href="largenet.html">\LargeNet model</a> contains hundreds of 
-//    computers, switches and hubs (numbers depend on model configuration in 
+//  - the <a href="largenet.html">\LargeNet model</a> contains hundreds of
+//    computers, switches and hubs (numbers depend on model configuration in
 //    largenet.ini), and mixes all kinds of Ethernet technologies;
 //  - EtherHost is a sample node with an Ethernet NIC;
 //  - EtherSwitch, EtherBus, EtherHub model switching hub, repeating hub and
@@ -138,27 +138,27 @@
 //
 // When a higher layer wants to send a packet via Ethernet, it just
 // passes the data packet (a cMessage or any subclass) to EtherLLC.
-// The message kind has to be set to ETHCTRL_DATA.
+// The message kind has to be set to IEEE802CTRL_DATA.
 //
 // In general, if EtherLLC receives a packet from the higher layers,
 // it interprets the message kind as a command. The commands include
-// ETHCTRL_DATA (send a frame), ETHCTRL_REGISTER_DSAP (register highher layer)
-// ETHCTRL_DEREGISTER_DSAP (deregister higher layer) and ETHCTRL_SENDPAUSE
+// IEEE802CTRL_DATA (send a frame), IEEE802CTRL_REGISTER_DSAP (register highher layer)
+// IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and IEEE802CTRL_SENDPAUSE
 // (send PAUSE frame) -- see EtherLLC for a more complete list.
 //
 // The arguments to the command are NOT inside the data packet but
-// in a "control info" data structure of class EtherCtrl, attached to
+// in a "control info" data structure of class Ieee802Ctrl, attached to
 // the packet. See controlInfo() method of cMessage (OMNeT++ 3.0).
 //
 // For example, to send a packet to a given MAC address and protocol
 // identifier, the application sets the data packet's message kind
 // to ETH_DATA ("please send this data packet" command),
-// fills in the EtherCtrl structure with the destination MAC address and
+// fills in the Ieee802Ctrl structure with the destination MAC address and
 // the protocol identifier, adds the control info to the message, then sends
 // the packet to EtherLLC.
 //
 // When the command doesn't involve a data packet (e.g.
-// ETHCTRL_(DE)REGISTER_DSAP, ETHCTRL_SENDPAUSE), a dummy packet
+// IEEE802CTRL_(DE)REGISTER_DSAP, IEEE802CTRL_SENDPAUSE), a dummy packet
 // (empty cMessage) is used.
 //
 // <h3>Rationale</h3>
@@ -189,13 +189,13 @@
 // So that data arriving from the network can be dispatched to the
 // correct applications (higher layer protocols), applications
 // have to register themselves in EtherLLC. The registration
-// is done with the ETHCTRL_REGISTER_DSAP command
+// is done with the IEEE802CTRL_REGISTER_DSAP command
 // (see <a href="llc-app.html">communication between LLC and higher layers</a>)
 // which associates a SAP with the LLC port. Different applications
 // have to connect to different ports of EtherLLC.
 //
-// The ETHERCTRL_REGISTER_DSAP/ETHCTRL_DEREGISTER_DSAP commands use only the
-// dsap field in the EtherCtrl structure.
+// The ETHERCTRL_REGISTER_DSAP/IEEE802CTRL_DEREGISTER_DSAP commands use only the
+// dsap field in the Ieee802Ctrl structure.
 //
 //
 // @page physical.html, Ethernet: Messaging on the Physical Layer

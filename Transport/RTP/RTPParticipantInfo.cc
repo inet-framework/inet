@@ -30,7 +30,7 @@ This file contains the implementation of member functions of the class RTPPartic
 Register_Class(RTPParticipantInfo);
 
 
-RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc = 0) : cObject() {
+RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc) : cObject() {
     setName(ssrcToName(ssrc));
     _sdesChunk = new SDESChunk("SDESChunk", ssrc);
     // because there haven't been sent any rtp packets
@@ -39,9 +39,9 @@ RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc = 0) : cObject() {
     // it but not to regard this endsystem as a sender
     // it is set to 3; see isSender() for details
     _silentIntervals = 3;
-    _address = IN_Addr(IN_Addr::ADDR_UNDEF);
-    _rtpPort = IN_Port(IN_Port::PORT_UNDEF);
-    _rtcpPort = IN_Port(IN_Port::PORT_UNDEF);
+    _address = IPADDRESS_UNDEF;
+    _rtpPort = IPSuite_PORT_UNDEF;
+    _rtcpPort = IPSuite_PORT_UNDEF;
 };
 
 

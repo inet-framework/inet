@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2004-2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -24,7 +25,7 @@
 //
 simple IPTrafficGenerator
     gates:
-        in: from_ip;
-        out: to_ip;
+        in: from_ip, from_ipv6;
+        out: to_ip, to_ipv6;
 endsimple
 

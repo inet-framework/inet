@@ -24,7 +24,7 @@
 /**
  * Gives access to the LIBTable.
  */
-class LIBTableAccess : public ModuleAccess<LIBTable>
+class INET_API LIBTableAccess : public ModuleAccess<LIBTable>
 {
     public:
         LIBTableAccess() : ModuleAccess<LIBTable>("libTable") {}

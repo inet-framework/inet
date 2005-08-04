@@ -49,7 +49,7 @@
 // MPLS module is required to interact with L2 (Link Layer) and L3 (Network
 // Layer) in the OSI model. In addition, it needs to obtain label information
 // from the LIB component and label query result from the LDP module. Messages
-// the model communicates with L2 and Network Layers are L2 packets (PPP,
+// the model communicates with L2 and Network Layers are L2 packets (\PPP,
 // Frame Relay, ATM, Ethernet, etc.), and \IP native packets. Specifically,
 // MPLS module encapsulates \IP packet and is encapsulated in L2 packet.
 // Different L2 protocols may require different methods of encapsulation to

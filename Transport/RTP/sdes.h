@@ -30,7 +30,7 @@ This file declares the source description classes SDESItem and SDESChunk.
 The class SDESItem is used for storing a source description item
 (type of description, description string) for an rtp end system.
 */
-class SDESItem : public cObject {
+class INET_API SDESItem : public cObject {
 
     public:
         /*!
@@ -88,12 +88,12 @@ class SDESItem : public cObject {
         /*!
         Writes a short info about this SDESItem into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes an info about this SDESItem into the give output stream.
         */
-        virtual void writeContents(ostream& os);
+        virtual void writeContents(std::ostream& os);
 
         /*!
         Returns the type of this sdes item.
@@ -134,7 +134,7 @@ class SDESItem : public cObject {
 The class SDESChunk is used for storing SDESItem objects
 for one rtp end system.
 */
-class SDESChunk : public cArray {
+class INET_API SDESChunk : public cArray {
 
     public:
         /*!
@@ -170,12 +170,12 @@ class SDESChunk : public cArray {
         /*!
         Writes a short info about this SDESChunk into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer info about this SDESChunk into the given stream.
         */
-        virtual void writeContents(ostream& os);
+        virtual void writeContents(std::ostream& os);
 
         /*!
         Adds an SDESItem to this SDESChunk. If there is already an SDESItem
@@ -212,3 +212,4 @@ class SDESChunk : public cArray {
 };
 
 #endif
+

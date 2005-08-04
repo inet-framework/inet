@@ -26,7 +26,7 @@ void OspfTe::initialize(int stage)
     if (stage==1)
     {
         routerId = RoutingTableAccess().get()->getRouterId().getInt();
-        ASSERT(!routerId.isNull());
+        ASSERT(!routerId.isUnspecified());
 
         // to invoke handleMessage() when we start  FIXME what?????? Andras
         scheduleAt(simTime(), new cMessage());

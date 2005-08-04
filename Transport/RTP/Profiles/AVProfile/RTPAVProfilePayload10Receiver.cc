@@ -28,21 +28,21 @@
 
 
 
-Define_Module_Like(RTPAVProfilePayload10Receiver, RTPPayloadReceiver);    
+Define_Module_Like(RTPAVProfilePayload10Receiver, RTPPayloadReceiver);
 
 void RTPAVProfilePayload10Receiver::initialize() {
-	_sampleWidth = 16;
-	_samplingRate = 44100;
-	_numberOfChannels = 2;
-	RTPAVProfileSampleBasedAudioReceiver::initialize();
+    _sampleWidth = 16;
+    _samplingRate = 44100;
+    _numberOfChannels = 2;
+    RTPAVProfileSampleBasedAudioReceiver::initialize();
 };
 
 
 void RTPAVProfilePayload10Receiver::insertSilence(simtime_t duration) {
-	// one sample is 32 bit (2 channels, both 16 bit)
-	u_int32 *data;
-	int numberOfSamples = (int)(duration / ((float)_samplingRate));
-	data = new u_int32[numberOfSamples];
-	bzero(data, numberOfSamples * 4);
-	afWriteFrames(_audioFile, AF_DEFAULT_TRACK, data, numberOfSamples);
+    // one sample is 32 bit (2 channels, both 16 bit)
+    u_int32 *data;
+    int numberOfSamples = (int)(duration / ((float)_samplingRate));
+    data = new u_int32[numberOfSamples];
+    bzero(data, numberOfSamples * 4);
+    afWriteFrames(_audioFile, AF_DEFAULT_TRACK, data, numberOfSamples);
 };

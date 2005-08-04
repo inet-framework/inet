@@ -15,8 +15,7 @@ import
     "Router",
     "StandardHost",
     "EtherBus",
-    "FlatNetworkConfigurator",
-    "RTEntryEraser";
+    "FlatNetworkConfigurator";
 
 
 module ARPTest

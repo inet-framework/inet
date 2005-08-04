@@ -33,51 +33,10 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
+#include "InterfaceTable.h"
+#include "NotificationBoard.h"
 
 class RoutingTableParser;
-
-
-/*
- * Constants
- */
-const int MAX_FILESIZE = 5000;
-const int MAX_ENTRY_STRING_SIZE = 20;
-const int MAX_GROUP_STRING_SIZE = 160;
-
-/**
- * Interface entry for the interface table in RoutingTable.
- *
- * @see RoutingTable
- */
-class InterfaceEntry : public cPolymorphic
-{
-  public:
-    int id;             //< identifies the interface (not the same as outputPort!)
-    std::string name;   //< interface name (must be unique)
-    IPAddress inetAddr; //< IP address of interface
-    IPAddress mask;     //< netmask
-    int outputPort;     //< output gate index (-1 if unused, e.g. loopback interface)
-    int mtu;            //< Maximum Transmission Unit (e.g. 1500 on Ethernet)
-    int metric;         //< link "cost"; see e.g. MS KB article Q299540
-    bool broadcast;     //< interface supports broadcast
-    bool multicast;     //< interface supports multicast
-    bool pointToPoint;  //< interface is point-to-point link
-    bool loopback;      //< interface is loopback interface
-
-    int multicastGroupCtr; //< table size
-    IPAddress *multicastGroup;  //< dynamically allocated IPAddress table
-
-  private:
-    // copying not supported: following are private and also left undefined
-    InterfaceEntry(const InterfaceEntry& obj);
-    InterfaceEntry& operator=(const InterfaceEntry& obj);
-
-  public:
-    InterfaceEntry();
-    virtual ~InterfaceEntry() {}
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
-};
 
 
 /**
@@ -85,27 +44,26 @@ class InterfaceEntry : public cPolymorphic
  *
  * @see RoutingTable
  */
-class RoutingEntry : public cPolymorphic
+//TODO: make it consistent with IPv6 RoutingTable; wrap public members into
+//methods; add notification mechanism
+class INET_API RoutingEntry : public cPolymorphic
 {
   public:
-    /**
-     * Route type
-     */
+    /** Route type */
     enum RouteType
     {
-        DIRECT,  // Directly attached to the router
-        REMOTE   // Reached through another router
+        DIRECT,  ///< Directly attached to the router
+        REMOTE   ///< Reached through another router
     };
 
-    /**
-     * How the route was discovered
-     */
+    /** Specifies where the route comes from */
     enum RouteSource
     {
-        MANUAL,
-        RIP,
-        OSPF,
-        BGP
+        MANUAL,       ///< manually added static route
+        IFACENETMASK, ///< comes from an interface's netmask
+        RIP,          ///< managed by the given routing protocol
+        OSPF,         ///< managed by the given routing protocol
+        BGP           ///< managed by the given routing protocol
     };
 
     /// Destination
@@ -130,10 +88,6 @@ class RoutingEntry : public cPolymorphic
 
     /// Metric ("cost" to reach the destination)
     int metric;
-
-    /// Route age (in seconds, since the route was last updated)
-    //TBD not implemented yet
-    int age;
 
   private:
     // copying not supported: following are private and also left undefined
@@ -160,7 +114,7 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
 /**
  * Represents the routing table. This object has one instance per host
  * or router. It has methods to manage the route table and the interface table,
- * so one can active functionality similar to the "route" and "ifconfig" commands.
+ * so one can achieve functionality similar to the "route" and "ifconfig" commands.
  *
  * See the NED documentation for general overview.
  *
@@ -177,26 +131,21 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  * be read and modified during simulation, typically by routing protocol
  * implementations (e.g. OSPF).
  *
- * Interfaces are represented by InterfaceEntry objects, and entries in the
- * route table by RoutingEntry objects. Both can be polymorphic: if an
- * interface or a routing protocol needs to store additional data, it can
- * simply subclass from InterfaceEntry or RoutingEntry, and add the derived
- * object to the table.
+ * Entries in the route table are represented by RoutingEntry objects.
+ * RoutingEntry objects can be polymorphic: if a routing protocol needs
+ * to store additional data, it can simply subclass from RoutingEntry,
+ * and add the derived object to the table.
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
  *
  *
- * @see InterfaceEntry, RoutingEntry
+ * @see InterfaceEntry, IPv4InterfaceData, RoutingEntry
  */
-class RoutingTable: public cSimpleModule
+class INET_API RoutingTable: public cSimpleModule, public INotifiable
 {
   private:
-
-    //
-    // Interfaces:
-    //
-    typedef std::vector<InterfaceEntry *> InterfaceVector;
-    InterfaceVector interfaces;
+    InterfaceTable *ift; // cached pointer
+    NotificationBoard *nb; // cached pointer
 
     IPAddress routerId;
     bool IPForward;
@@ -209,8 +158,8 @@ class RoutingTable: public cSimpleModule
     RouteVector multicastRoutes; // Multicast route array
 
   protected:
-    // Add the entry of the local loopback interface
-    InterfaceEntry *addLocalLoopback();
+    // set IP address etc on local loopback
+    void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
     bool routingEntryMatches(RoutingEntry *entry,
@@ -223,19 +172,28 @@ class RoutingTable: public cSimpleModule
     // the routing function
     RoutingEntry *selectBestMatchingRoute(const IPAddress& dest);
 
+    // adjust routes with src=IFACENETMASK to actual interface netmasks
+    void updateNetmaskRoutes();
+
     // displays summary above the icon
     void updateDisplayString();
 
   public:
     Module_Class_Members(RoutingTable, cSimpleModule, 0);
 
-    int numInitStages() const  {return 2;}
+    int numInitStages() const  {return 4;}
     void initialize(int stage);
 
     /**
      * Raises an error.
      */
     void handleMessage(cMessage *);
+
+    /**
+     * Called by the NotificationBoard whenever a change of a category
+     * occurs to which this client has subscribed.
+     */
+    virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
     /** @name Debug/utility */
     //@{
@@ -245,39 +203,7 @@ class RoutingTable: public cSimpleModule
 
     /** @name Interfaces */
     //@{
-    /**
-     * Returns the number of interfaces. Interface ids are in range
-     * 0..numInterfaces()-1.
-     */
-    int numInterfaces()  {return interfaces.size();}
-
-    /**
-     * Returns the InterfaceEntry specified by its id (0..numInterfaces-1).
-     */
-    InterfaceEntry *interfaceById(int id);
-
-    /**
-     * Add an interface.
-     */
-    void addInterface(InterfaceEntry *entry);
-
-    /**
-     * Delete an interface. Throws an error if the interface is not in the
-     * interface table. Indices of interfaces above this one will change!
-     */
-    void deleteInterface(InterfaceEntry *entry);
-
-    /**
-     * Returns an interface given by its port number (gate index).
-     * Returns NULL if not found (e.g. the loopback interface has no
-     * port number).
-     */
-    InterfaceEntry *interfaceByPortNo(int portNo);
-
-    /**
-     * Returns an interface given by its name. Returns NULL if not found.
-     */
-    InterfaceEntry *interfaceByName(const char *name);
+    void configureInterfaceForIPv4(InterfaceEntry *ie);
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.

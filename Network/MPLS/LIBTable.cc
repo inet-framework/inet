@@ -12,9 +12,10 @@
 *
 *
 *********************************************************************/
+
 #include <iostream>
 #include "LIBtable.h"
-#include "StringTokenizer.h"
+#include "RoutingTableAccess.h"
 #include "stlwatch.h"
 
 using namespace std;
@@ -93,7 +94,7 @@ int LIBTable::readLibTableFromFile(const char *filename)
         if (!line[0])
             break;
 
-        StringTokenizer tokenizer(line, ", ");
+        cStringTokenizer tokenizer(line, ", ");
         const char *aField;
 
         // Get the first field - Incoming Label
@@ -161,7 +162,7 @@ int LIBTable::readPrtTableFromFile(const char *filename)
         if (!line[0])
             break;  // Reach the end of table
 
-        StringTokenizer tokenizer(line, ", ");
+        cStringTokenizer tokenizer(line, ", ");
         const char *aField;
         if ((aField = tokenizer.nextToken()) != NULL)
             record.fec = IPAddress(aField).getInt(); // FIXME probably whole PRT table is broken (Andras)

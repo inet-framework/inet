@@ -27,32 +27,31 @@
 #include "RTPPayloadReceiver.h"
 
 
-/*! \class RTPAVProfileSampleBasedAudioReceiver
+/**
+ *
+ */
+class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver {
 
-*/
+    Module_Class_Members(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver, 0)
 
-class RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver {
+    virtual ~RTPAVProfileSampleBasedAudioReceiver();
 
-	Module_Class_Members(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver, 0)
+    protected:
+        AFfilehandle _audioFile;
+        AFfilesetup _fileSetup;
+        int _samplingRate, _sampleWidth, _numberOfChannels;
 
-	virtual ~RTPAVProfileSampleBasedAudioReceiver();
+        virtual void processPacket(RTPPacket *packet);
 
-	protected:
-		AFfilehandle _audioFile;
-		AFfilesetup _fileSetup;
-		int _samplingRate, _sampleWidth, _numberOfChannels;
+        virtual void openOutputFile(const char *fileName);
+        virtual void closeOutputFile();
 
-		virtual void processPacket(RTPPacket *packet);
-
-		virtual void openOutputFile(const char *fileName);
-		virtual void closeOutputFile();
-
-		/*!
-		When packets arrival late or have been lost, this method can be called to
-		insert a silence period. It must be overwritten because in different audio
-		formats different values for silence exist.
-		*/
-		virtual void insertSilence(simtime_t duration);
+        /*!
+        When packets arrival late or have been lost, this method can be called to
+        insert a silence period. It must be overwritten because in different audio
+        formats different values for silence exist.
+        */
+        virtual void insertSilence(simtime_t duration);
 
 };
 

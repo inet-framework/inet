@@ -27,7 +27,7 @@
  * Queue with constant processing time.
  * Leaves the endService(cMessage *msg) method of AbstractQueue undefined.
  */
-class QueueBase : public AbstractQueue
+class INET_API QueueBase : public AbstractQueue
 {
   private:
     simtime_t delay;

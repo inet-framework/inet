@@ -25,7 +25,7 @@
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPResvMsg : public RSVPResvMsg_Base
+class INET_API RSVPResvMsg : public RSVPResvMsg_Base
 {
   public:
     RSVPResvMsg(const char *name=NULL, int kind=RESV_MESSAGE) : RSVPResvMsg_Base(name,kind) {}
@@ -46,7 +46,7 @@ class RSVPResvMsg : public RSVPResvMsg_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPResvTear : public RSVPResvTear_Base
+class INET_API RSVPResvTear : public RSVPResvTear_Base
 {
   public:
     RSVPResvTear(const char *name=NULL, int kind=RTEAR_MESSAGE) : RSVPResvTear_Base(name,kind) {}
@@ -68,7 +68,7 @@ class RSVPResvTear : public RSVPResvTear_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPResvError : public RSVPResvError_Base
+class INET_API RSVPResvError : public RSVPResvError_Base
 {
   public:
     RSVPResvError(const char *name=NULL, int kind=RERROR_MESSAGE) : RSVPResvError_Base(name,kind) {}

@@ -23,7 +23,7 @@ This file declares the class RTPPayloadSender.
 #ifndef __RTPPAYLOADSENDER_H__
 #define __RTPPAYLOADSENDER_H__
 
-#include <fstream.h>
+#include <fstream>
 #include <omnetpp.h>
 #include "types.h"
 #include "RTPInnerPacket.h"
@@ -35,7 +35,7 @@ rtp data packets. It provides functionality needed by every rtp data
 packet sender like opening and closing the data file and choosing sequence
 number and time stamp start values.
 */
-class RTPPayloadSender : public cSimpleModule {
+class INET_API RTPPayloadSender : public cSimpleModule {
 
     Module_Class_Members(RTPPayloadSender, cSimpleModule, 8192);
 
@@ -67,7 +67,7 @@ class RTPPayloadSender : public cSimpleModule {
         /*!
         The input file stream for the data file.
         */
-        ifstream  _inputFileStream;
+        std::ifstream  _inputFileStream;
 
         /*!
         The maximum size of an RTPPacket.
@@ -211,3 +211,4 @@ class RTPPayloadSender : public cSimpleModule {
 };
 
 #endif
+

@@ -37,16 +37,17 @@
 /**
  * Parses a routing table file into a routing table.
  */
-class RoutingTableParser
+class INET_API RoutingTableParser
 {
   private:
+    InterfaceTable *ift;
     RoutingTable *rt;
 
   public:
     /**
      * Constructor
      */
-    RoutingTableParser(RoutingTable *rt);
+    RoutingTableParser(InterfaceTable *ift, RoutingTable *rt);
 
     /**
      * Read Routing Table file; return 0 on success, -1 on error
@@ -72,10 +73,10 @@ class RoutingTableParser
     // write them into the routing table.
     void parseRouting(char *routeFile);
 
-    char *parseInterfaceEntry (char *ifconfigFile,
-                               const char *tokenStr,
-                               int &charpointer,
-                               char* destStr);
+    char *parseEntry (char *ifconfigFile,
+                      const char *tokenStr,
+                      int &charpointer,
+                      char* destStr);
 
     // Convert string separated by ':' into dynamic string array.
     void parseMulticastGroups (char *groupStr, InterfaceEntry*);

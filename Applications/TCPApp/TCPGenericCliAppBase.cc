@@ -31,10 +31,7 @@ void TCPGenericCliAppBase::initialize()
     // parameters
     const char *address = par("address");
     int port = par("port");
-    if (!address[0])
-        socket.bind(port);
-    else
-        socket.bind(IPAddress(address), port);
+    socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     socket.setCallbackObject(this);
     socket.setOutputGate(gate("tcpOut"));
@@ -52,6 +49,10 @@ void TCPGenericCliAppBase::handleMessage(cMessage *msg)
 
 void TCPGenericCliAppBase::connect()
 {
+    // we need a new connId if this is not the first connection
+    socket.renewSocket();
+
+    // connect
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
 

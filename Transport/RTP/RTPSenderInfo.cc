@@ -28,7 +28,7 @@ This file contains the implementation of member functions of the class RTPSender
 
 Register_Class(RTPSenderInfo);
 
-RTPSenderInfo::RTPSenderInfo(u_int32 ssrc = 0) : RTPParticipantInfo(ssrc) {
+RTPSenderInfo::RTPSenderInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc) {
     _startTime = 0.0;
     _clockRate = 0;
     _timeStampBase = 0;

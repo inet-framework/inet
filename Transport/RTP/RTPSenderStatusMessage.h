@@ -29,7 +29,7 @@ string is defined in which the information is stored. This can be "PLAYING",
 If a message must provide more information than just a string, a new class
 defining this parameter can derived.
 */
-class RTPSenderStatusMessage : public cMessage  {
+class INET_API RTPSenderStatusMessage : public cMessage  {
 public:
 
     /*!
@@ -88,3 +88,4 @@ private:
 };
 
 #endif
+

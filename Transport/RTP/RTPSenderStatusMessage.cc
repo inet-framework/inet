@@ -18,7 +18,7 @@
 #include "RTPSenderStatusMessage.h"
 #include "types.h"
 
-RTPSenderStatusMessage::RTPSenderStatusMessage(const char *name = NULL) {
+RTPSenderStatusMessage::RTPSenderStatusMessage(const char *name) {
     _status = "";
 };
 
@@ -36,6 +36,7 @@ RTPSenderStatusMessage::~RTPSenderStatusMessage(){
 RTPSenderStatusMessage& RTPSenderStatusMessage::operator=(const RTPSenderStatusMessage& message) {
     cMessage::operator=(message);
     _status = message.status();
+    return *this;
 };
 
 

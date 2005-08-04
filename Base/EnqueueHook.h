@@ -21,11 +21,12 @@
 #define __ENQUEUEHOOK_H__
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 /**
  * Abstract base class for enqueue hooks.
  */
-class EnqueueHook : public cPolymorphic
+class INET_API EnqueueHook : public cPolymorphic
 {
   public:
     /**
@@ -37,16 +38,16 @@ class EnqueueHook : public cPolymorphic
     virtual void setModule(cSimpleModule *) {}
 
     /**
-     * Called when a packet arrives and the queue is not empty. 
-     * Implementation of this function should enqueue the packet -- 
+     * Called when a packet arrives and the queue is not empty.
+     * Implementation of this function should enqueue the packet --
      * or just discard it. It can also do priority queueing or
      * discard other packets already in the queue -- anything.
      */
     virtual void enqueue(cMessage *msg, cQueue& queue) = 0;
 
     /**
-     * Called when a packet arrives and the queue is empty. 
-     * Implementation of this function should either return the same 
+     * Called when a packet arrives and the queue is empty.
+     * Implementation of this function should either return the same
      * pointer, or drop the packet and return NULL.
      */
     virtual cMessage *dropIfNotNeeded(cMessage *msg) = 0;

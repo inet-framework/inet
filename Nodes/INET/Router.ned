@@ -18,7 +18,11 @@
 
 
 import
-    "Blackboard",
+    "NotificationBoard",
+    "InterfaceTable",
+    "RoutingTable",
+    "PPPRouterInterface",
+    "EthernetRouterInterface",
     "NetworkLayer";
 
 
@@ -34,23 +38,25 @@ module Router
         in: ethIn[];
         out: ethOut[];
     submodules:
-        blackboard: Blackboard;
-            display: "p=62,60;i=block/blackboard";
+        notificationBoard: NotificationBoard;
+            display: "p=60,60;i=block/control";
+        interfaceTable: InterfaceTable;
+            display: "p=150,60;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
-            display: "p=62,140;i=block/table";
+            display: "p=240,60;i=block/table";
         networkLayer: NetworkLayer;
             gatesizes:
                 physIn[sizeof(out)+sizeof(ethOut)],
                 physOut[sizeof(out)+sizeof(ethOut)];
-            display: "p=200,124;i=block/fork;q=queue";
-        ppp: PPPInterface[sizeof(out)];
-            display: "p=90,240,row,110;q=queue;i=block/ifcard";
-        eth: EthernetInterface[sizeof(ethOut)];
-            display: "p=145,240,row,110;q=queue;i=block/ifcard";
+            display: "p=200,141;i=block/fork;q=queue";
+        ppp: PPPRouterInterface[sizeof(out)];
+            display: "p=90,257,row,110;q=queue;i=block/ifcard";
+        eth: EthernetRouterInterface[sizeof(ethOut)];
+            display: "p=145,257,row,110;q=queue;i=block/ifcard";
     connections nocheck:
         // connections to network outside
         for i=0..sizeof(out)-1 do

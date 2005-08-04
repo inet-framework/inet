@@ -14,14 +14,13 @@
 #ifndef __TELNETAPP_H_
 #define __TELNETAPP_H_
 
-#include <omnetpp.h>
 #include "TCPGenericCliAppBase.h"
 
 
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
-class TelnetApp : public TCPGenericCliAppBase
+class INET_API TelnetApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;

@@ -32,13 +32,13 @@ its initialize() method.
 For for information about the rtp audio/video profile consult
 rfc 1890.
 */
-class RTPAVProfile : public RTPProfile {
-	
-	Module_Class_Members(RTPAVProfile, RTPProfile, 0);
-	
-	/*!
-	This initialisation method sets following values:
-	name, rtcpPercentage and preferredPort.
-	*/
-	virtual void initialize();
+class INET_API RTPAVProfile : public RTPProfile {
+
+    Module_Class_Members(RTPAVProfile, RTPProfile, 0);
+
+    /*!
+    This initialisation method sets following values:
+    name, rtcpPercentage and preferredPort.
+    */
+    virtual void initialize();
 };

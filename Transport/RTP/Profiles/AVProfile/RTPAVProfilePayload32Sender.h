@@ -31,47 +31,47 @@ file created by Mpeg_Stat and sends rtp data packets which contain
 an RTPMpegPacket.
 The corresponding receiver module RTPAVProfilePayload32Receiver.
 */
-class RTPAVProfilePayload32Sender : public RTPPayloadSender {
-	
-	Module_Class_Members(RTPAVProfilePayload32Sender, RTPPayloadSender, 16384);
-	
-	/*!
-	Initializes the module. It sets the values for clock rate and payload type.
-	*/
-	virtual void initialize();
-	
-	/*!
-	The main method.
-	*/
-	//virtual void activity();
-	
-	protected:
-	
-		/*!
-		This method reads the gdf file header.
-		*/
-		virtual void initializeSenderModule(RTPInnerPacket *rinpIn);
-		
-		/*!
-		This method sends one mpeg frame. It sends one or more
-		rtp data packet. Returns false if there were no more frames.
-		*/
-		virtual bool sendPacket();
-		
-		/*!
-		The initial delay of the mpeg video.
-		*/
-		double _initialDelay;
-		
-		/*!
-		The number of frames per second of the mpeg video.
-		*/
-		double _framesPerSecond;
-		
-		/*!
-		The number of the current mpeg frame. Needed for calculating
-		the rtp time stamp in the rtp data packets.
-		*/
-		double _frameNumber;
-		
+class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender {
+
+    Module_Class_Members(RTPAVProfilePayload32Sender, RTPPayloadSender, 16384);
+
+    /*!
+    Initializes the module. It sets the values for clock rate and payload type.
+    */
+    virtual void initialize();
+
+    /*!
+    The main method.
+    */
+    //virtual void activity();
+
+    protected:
+
+        /*!
+        This method reads the gdf file header.
+        */
+        virtual void initializeSenderModule(RTPInnerPacket *rinpIn);
+
+        /*!
+        This method sends one mpeg frame. It sends one or more
+        rtp data packet. Returns false if there were no more frames.
+        */
+        virtual bool sendPacket();
+
+        /*!
+        The initial delay of the mpeg video.
+        */
+        double _initialDelay;
+
+        /*!
+        The number of frames per second of the mpeg video.
+        */
+        double _framesPerSecond;
+
+        /*!
+        The number of the current mpeg frame. Needed for calculating
+        the rtp time stamp in the rtp data packets.
+        */
+        double _frameNumber;
+
 };

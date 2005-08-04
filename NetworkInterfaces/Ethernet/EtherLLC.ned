@@ -31,15 +31,15 @@
 // Processes commands received from upper layers, as described in
 // <a href="llc-app.html">Communication between LLC and higher layers</a>.
 // The following commands are supported:
-// - ETHCTRL_DATA: send a frame.
+// - IEEE802CTRL_DATA: send a frame.
 //   Encapsulates packet into EtherFrameWithLLC. This includes assigning
-//   dest address, ssap and dsap from the EtherCtrl structure acompanying
+//   dest address, ssap and dsap from the Ieee802Ctrl structure acompanying
 //   the message. Src address will be filled in by EtherMAC.
-// - ETHCTRL_REGISTER_DSAP: register application in LLC, as described in
+// - IEEE802CTRL_REGISTER_DSAP: register application in LLC, as described in
 //   <a href="appreg.html">Application registration</a>.
-// - ETHCTRL_DEREGISTER_DSAP: deregister application, as described in
+// - IEEE802CTRL_DEREGISTER_DSAP: deregister application, as described in
 //   <a href="appreg.html">Application registration</a>.
-// - ETHCTRL_SENDPAUSE: send PAUSE frame, as described in
+// - IEEE802CTRL_SENDPAUSE: send PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
 //
 // Processing of packets received from the lower layers:

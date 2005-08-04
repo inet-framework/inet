@@ -20,8 +20,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include "RoutingTableAccess.h"
 #include "ConstType.h"
+#include "INETDefs.h"
 
 
 
@@ -52,7 +52,7 @@
  *   135.6.1.0     F2
  * </pre>
  */
-class LIBTable: public cSimpleModule
+class INET_API LIBTable: public cSimpleModule
 {
 public:
     // PRT (Prefix Table) entry. The PRT table maps one or more FECs

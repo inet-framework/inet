@@ -20,6 +20,7 @@
 #define __FLATNETWORKCONFIGURATOR_H__
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 /**
@@ -29,8 +30,9 @@
  *
  * For more info please see the NED file.
  */
-class FlatNetworkConfigurator : public cSimpleModule
+class INET_API FlatNetworkConfigurator : public cSimpleModule
 {
+    typedef std::vector<std::string> StringVector;
   public:
     Module_Class_Members(FlatNetworkConfigurator, cSimpleModule, 0);
 
@@ -38,6 +40,10 @@ class FlatNetworkConfigurator : public cSimpleModule
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+
+    void setDisplayString(int numIPNodes, int numNonIPNodes);
+    bool isNonIPType(cTopology::Node *node, StringVector& nonIPTypes);
+    //int determineGateIndex(cGate *nodeGate);
 };
 
 #endif

@@ -24,7 +24,8 @@ This file declares the class RTPProfile.
 
 #include <omnetpp.h>
 
-#include "in_port.h"
+//XXX #include "in_port.h"
+#include "tmp/defs.h"
 
 #include "RTPInnerPacket.h"
 #include "RTPSSRCGate.h"
@@ -41,7 +42,7 @@ have have following class names:
 RTP<profileName>Payload<payloadType>Sender
 RTP<profileName>Payload<payloadType>Receiver
 */
-class RTPProfile : public cSimpleModule {
+class INET_API RTPProfile : public cSimpleModule {
 
     Module_Class_Members(RTPProfile, cSimpleModule, 0);
 
@@ -198,3 +199,4 @@ class RTPProfile : public cSimpleModule {
 };
 
 #endif
+

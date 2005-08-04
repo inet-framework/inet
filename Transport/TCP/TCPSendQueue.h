@@ -76,7 +76,7 @@
  *
  * @see TCPReceiveQueue
  */
-class TCPSendQueue : public cPolymorphic
+class INET_API TCPSendQueue : public cPolymorphic
 {
   public:
     /**

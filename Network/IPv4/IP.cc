@@ -25,6 +25,8 @@
 #include "IPDatagram.h"
 #include "IPControlInfo_m.h"
 #include "ICMPMessage_m.h"
+#include "IPv4InterfaceData.h"
+#include "ARPPacket_m.h"
 
 Define_Module(IP);
 
@@ -32,6 +34,9 @@ Define_Module(IP);
 void IP::initialize()
 {
     QueueBase::initialize();
+
+    ift = InterfaceTableAccess().get();
+    rt = RoutingTableAccess().get();
 
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
@@ -68,6 +73,11 @@ void IP::endService(cMessage *msg)
     {
         handleMessageFromHL(msg);
     }
+    else if (dynamic_cast<ARPPacket *>(msg))
+    {
+        // dispatch ARP packets to ARP
+        handleARP((ARPPacket *)msg);
+    }
     else
     {
         IPDatagram *dgram = check_and_cast<IPDatagram *>(msg);
@@ -98,42 +108,66 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
         }
     }
 
-    // hop counter decrement
-    datagram->setTimeToLive (datagram->timeToLive()-1);
+    // remove control info
+    delete datagram->removeControlInfo();
 
-    // routepacket
-    routePacket(datagram);
+    // hop counter decrement; FIXME but not if it will be locally delivered
+    datagram->setTimeToLive(datagram->timeToLive()-1);
+
+    // route packet
+    if (!datagram->destAddress().isMulticast())
+        routePacket(datagram);
+    else
+        routeMulticastPacket(datagram);
+}
+
+void IP::handleARP(ARPPacket *msg)
+{
+    // FIXME hasBitError() check  missing!
+
+    // dispatch ARP packets to ARP and let it know the gate index it arrived on
+    int inputPort = msg->arrivalGate()->index();
+
+    IPRoutingDecision *routingDecision = new IPRoutingDecision();
+    routingDecision->setInputPort(inputPort);
+    delete msg->removeControlInfo();
+    msg->setControlInfo(routingDecision);
+
+    send(msg, "queueOut");
 }
 
 void IP::handleMessageFromHL(cMessage *msg)
 {
+    // if no interface exists, do not send datagram
+    if (ift->numInterfaces() == 0)
+    {
+        ev << "No interfaces exist, dropping packet\n";
+        delete msg;
+        return;
+    }
+
+    // encapsulate and send
     IPDatagram *datagram = encapsulate(msg);
-    routePacket(datagram);
+
+    // route packet
+    if (!datagram->destAddress().isMulticast())
+        routePacket(datagram);
+    else
+        routeMulticastPacket(datagram);
 }
 
 void IP::routePacket(IPDatagram *datagram)
 {
     // TBD add option handling code here
 
-    IPAddress destAddress = datagram->destAddress();
+    IPAddress destAddr = datagram->destAddress();
 
-    ev << "Packet destination address is: " << destAddress << ", ";
-
-    // multicast check
-    RoutingTable *rt = routingTableAccess.get();
-    if (destAddress.isMulticast())
-    {
-        ev << "sending to multicast\n";
-        numMulticast++;
-        handleMulticastPacket(datagram);
-        return;
-    }
+    ev << "Routing datagram `" << datagram->name() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
-    // FIXME I don't think that local loopback (127.0.0.1) works correctly... (Andras)
-    if (rt->localDeliver(destAddress))
+    if (rt->localDeliver(destAddr))
     {
-        ev << "sending to localDeliver\n";
+        ev << "local delivery\n";
         numLocalDeliver++;
         localDeliver(datagram);
         return;
@@ -151,7 +185,7 @@ void IP::routePacket(IPDatagram *datagram)
 
     // error handling: destination address does not exist in routing table:
     // notify ICMP, throw packet away and continue
-    int outputPort = rt->outputPortNo(destAddress);
+    int outputPort = rt->outputPortNo(destAddr);
     if (outputPort==-1)
     {
         ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
@@ -161,14 +195,14 @@ void IP::routePacket(IPDatagram *datagram)
     }
 
     // get next-hop address (TBD: merge with outputPortNo())
-    IPAddress nextHopAddr = rt->nextGatewayAddress(destAddress);
+    IPAddress nextHopAddr = rt->nextGatewayAddress(destAddr);
 
     // set datagram source address if not yet set
-    if (datagram->srcAddress().isNull())
-        datagram->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
+    if (datagram->srcAddress().isUnspecified())
+        datagram->setSrcAddress(ift->interfaceByPortNo(outputPort)->ipv4()->inetAddress());
 
     // default: send datagram to fragmentation
-    ev << "output port is " << outputPort << ", next-hop address: " << nextHopAddr << "\n";
+    ev << "output interface is " << outputPort << ", next-hop address: " << nextHopAddr << "\n";
     numForwarded++;
 
     //
@@ -177,10 +211,12 @@ void IP::routePacket(IPDatagram *datagram)
     fragmentAndSend(datagram, outputPort, nextHopAddr);
 }
 
-void IP::handleMulticastPacket(IPDatagram *datagram)
+void IP::routeMulticastPacket(IPDatagram *datagram)
 {
-    // FIXME multicast-->tunneling link (present in original IPSuite) missing from here
-    RoutingTable *rt = routingTableAccess.get();
+    IPAddress destAddr = datagram->destAddress();
+    ev << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
+
+    numMulticast++;
 
     // DVMRP: process datagram only if sent locally or arrived on the shortest
     // route (provided routing table already contains srcAddr); otherwise
@@ -195,26 +231,38 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
         return;
     }
 
-    // check for local delivery
-    IPAddress destAddress = datagram->destAddress();
-    if (rt->multicastLocalDeliver(destAddress))
+    // if received from the network...
+    if (inputPort!=-1)
     {
-        IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
+        // check for local delivery
+        if (rt->multicastLocalDeliver(destAddr))
+        {
+            IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
-        // FIXME code from the MPLS model: set packet dest address to routerId (???)
-        datagramCopy->setDestAddress(rt->getRouterId());
+            // FIXME code from the MPLS model: set packet dest address to routerId (???)
+            datagramCopy->setDestAddress(rt->getRouterId());
 
-        localDeliver(datagramCopy);
+            localDeliver(datagramCopy);
+        }
+
+        // don't forward if IP forwarding is off
+        if (!rt->ipForward())
+        {
+            delete datagram;
+            return;
+        }
+
+        // don't forward if dest address is link-scope
+        if (destAddr.isLinkLocalMulticast())
+        {
+            delete datagram;
+            return;
+        }
+
     }
 
-    // forward datagram only if IP forward is enabled, or sent locally
-    if (inputPort!=-1 && !rt->ipForward())
-    {
-        delete datagram;
-        return;
-    }
-
-    MulticastRoutes routes = rt->multicastRoutesFor(destAddress);
+    // now: routing
+    MulticastRoutes routes = rt->multicastRoutesFor(destAddr);
     if (routes.size()==0)
     {
         // no destination: delete datagram
@@ -225,7 +273,7 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
         // copy original datagram for multiple destinations
         for (unsigned int i=0; i<routes.size(); i++)
         {
-            int outputPort = routes[i].interf->outputPort;
+            int outputPort = routes[i].interf->outputPort();
 
             // don't forward to input port
             if (outputPort>=0 && outputPort!=inputPort)
@@ -233,8 +281,8 @@ void IP::handleMulticastPacket(IPDatagram *datagram)
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
                 // set datagram source address if not yet set
-                if (datagramCopy->srcAddress().isNull())
-                    datagramCopy->setSrcAddress(rt->interfaceByPortNo(outputPort)->inetAddr);
+                if (datagramCopy->srcAddress().isUnspecified())
+                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputPort)->ipv4()->inetAddress());
 
                 // send
                 IPAddress nextHopAddr = routes[i].gateway;
@@ -307,8 +355,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
 
 void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr)
 {
-    RoutingTable *rt = routingTableAccess.get();
-    int mtu = rt->interfaceByPortNo(outputPort)->mtu;
+    int mtu = ift->interfaceByPortNo(outputPort)->mtu();
 
     // check if datagram does not require fragmentation
     if (datagram->length()/8 <= mtu)
@@ -335,12 +382,16 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
 
     // create and send fragments
     ev << "Breaking datagram into " << noOfFragments << " fragments\n";
+    std::string fragMsgName = datagram->name();
+    fragMsgName += "-frag";
+
     // FIXME revise this!
     for (int i=0; i<noOfFragments; i++)
     {
         // FIXME is it ok that full encapsulated packet travels in every datagram fragment?
         // should better travel in the last fragment only. Cf. with reassembly code!
         IPDatagram *fragment = (IPDatagram *) datagram->dup();
+        fragment->setName(fragMsgName.c_str());
 
         // total_length equal to mtu, except for last fragment;
         // "more fragments" bit is unchanged in the last fragment, otherwise true
@@ -366,18 +417,10 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
 
 IPDatagram *IP::encapsulate(cMessage *transportPacket)
 {
-    // if no interface exists, do not send datagram
-    RoutingTable *rt = routingTableAccess.get();
-    if (rt->numInterfaces() == 0)
-    {
-        ev << "No interfaces exist, dropping packet\n";
-        delete transportPacket;
-        return NULL;
-    }
-
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
     IPDatagram *datagram = new IPDatagram(transportPacket->name());
+    datagram->setLength(8*IP_HEADER_BYTES);
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
@@ -388,7 +431,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
-    if (!src.isNull())
+    if (!src.isUnspecified())
     {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->interfaceByAddress(src)==NULL)
@@ -430,20 +473,13 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress ne
         return;
     }
 
-    // check port
-    int numOfPorts = gate("queueOut")->size();
-    if (outputPort >= numOfPorts)
-        error("Illegal output port %d", outputPort);
+    // send out datagram to ARP, with control info attached
+    IPRoutingDecision *routingDecision = new IPRoutingDecision();
+    routingDecision->setOutputPort(outputPort);
+    routingDecision->setNextHopAddr(nextHopAddr);
+    datagram->setControlInfo(routingDecision);
 
-    // attach next hop address if needed
-    if (!nextHopAddr.isNull())
-    {
-        IPRoutingDecision *routingDecision = new IPRoutingDecision();
-        routingDecision->setNextHopAddr(nextHopAddr);
-        datagram->setControlInfo(routingDecision);
-    }
-
-    send(datagram, "queueOut", outputPort);
+    send(datagram, "queueOut");
 }
 
 

@@ -21,7 +21,7 @@
 /**
  * An example request-reply based client application.
  */
-class TCPBasicClientApp : public TCPGenericCliAppBase
+class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;

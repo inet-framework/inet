@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2001, 2003, 2004 Johnny Lai, Monash University, Melbourne, Australia
+// Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,25 +17,55 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-#ifndef __PINGAPP_H__
-#define __PINGAPP_H__
-
-#include <string>
 #include <omnetpp.h>
-#include "IPControlInfo_m.h"
+#include "IPvXAddress.h"
+
+class PingPayload;
 
 
 /**
- * Ping application.
+ * Generates ping requests and calculates the packet loss and round trip
+ * parameters of the replies.
+ *
+ * See NED file for detailed description of operation.
  */
-class PingApp: public cSimpleModule
+class INET_API PingApp : public cSimpleModule
 {
   public:
     Module_Class_Members(PingApp, cSimpleModule, 0);
-
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+
+  protected:
+    virtual void sendPing();
+    virtual void scheduleNextPing(cMessage *timer);
+    virtual void sendToICMP(cMessage *payload, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit);
+    virtual void processPingResponse(PingPayload *msg);
+    virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
+
+  protected:
+    // configuration
+    IPvXAddress destAddr;
+    IPvXAddress srcAddr;
+    int packetSize;
+    cPar *intervalp;
+    int hopLimit;
+    int count;
+    simtime_t startTime;
+    simtime_t stopTime;
+    bool printPing;
+
+    // state
+    long sendSeqNo;
+    long expectedReplySeqNo;
+
+    // statistics
+    cStdDev delayStat;
+    cOutVector delayVector;
+    cOutVector dropVector;
+    long dropCount;
+    long outOfOrderArrivalCount;
 };
 
-#endif
+

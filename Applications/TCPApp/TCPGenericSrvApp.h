@@ -15,6 +15,7 @@
 #define __TCPGENERICSRVAPP_H_
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
 
 
@@ -24,7 +25,7 @@
  *
  * @see GenericAppMsg, TCPGenericCliAppBase
  */
-class TCPGenericSrvApp : public cSimpleModule
+class INET_API TCPGenericSrvApp : public cSimpleModule
 {
   protected:
     simtime_t delay;

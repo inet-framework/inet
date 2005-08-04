@@ -33,7 +33,7 @@ adding length.
 Following rtp header fields exist but aren't used: padding, extension,
 csrcCount. The csrcList can't be used because csrcCount is always 0.
 */
-class RTPPacket : public cPacket {
+class INET_API RTPPacket : public cPacket {
 
     public:
         /*!
@@ -69,12 +69,12 @@ class RTPPacket : public cPacket {
         /*!
         Writes a one line info about this RTPPacket into the given string.
         */
-        virtual std::string info() const;
+        virtual std::string info();
 
         /*!
         Writes a longer description about this RTPPacket into the given stream.
         */
-        virtual void writeContents(ostream& os);
+        virtual void writeContents(std::ostream& os);
 
         /*!
         Returns the value of the marker bit in this RTPPacket.
@@ -207,3 +207,4 @@ class RTPPacket : public cPacket {
 };
 
 #endif
+

@@ -19,6 +19,7 @@
 #ifndef _ETHERNETDEFS_H
 #define _ETHERNETDEFS_H
 
+#include "INETDefs.h"
 
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST          13

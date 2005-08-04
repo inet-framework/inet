@@ -2,8 +2,8 @@
                           RTPAVProfileSampleBasedAudioSender.h  -  description
                              -------------------
     begin                : Sat Sep 21 2002
-    copyright            : (C) 2002 by 
-    email                : 
+    copyright            : (C) 2002 by
+    email                :
  ***************************************************************************/
 
 /***************************************************************************
@@ -35,53 +35,53 @@ Subclasses must provide a method initialize() to set parameters like
 sampling rate, sample width and number of channels.
 */
 
-class RTPAVProfileSampleBasedAudioSender : public RTPPayloadSender {
+class INET_API RTPAVProfileSampleBasedAudioSender : public RTPPayloadSender {
 
-	Module_Class_Members(RTPAVProfileSampleBasedAudioSender, RTPPayloadSender, 8192);
+    Module_Class_Members(RTPAVProfileSampleBasedAudioSender, RTPPayloadSender, 8192);
 
-	protected:
+    protected:
 
-		/*!
-		File handle for the audio file.
-		*/
-		AFfilehandle _audioFile;
+        /*!
+        File handle for the audio file.
+        */
+        AFfilehandle _audioFile;
 
-		/*!
-		The time this sender module got initialized. Used to calculate time stamps.
-		*/
-		simtime_t _startTime;
+        /*!
+        The time this sender module got initialized. Used to calculate time stamps.
+        */
+        simtime_t _startTime;
 
-		/*!
-		The sampling rate of the audio. Must be set by subclasses in initialize().
-		*/
-		int _samplingRate;
+        /*!
+        The sampling rate of the audio. Must be set by subclasses in initialize().
+        */
+        int _samplingRate;
 
-		/*!
-		The width of a sample of one channel in bits. Possibly values are 8, 16 and 24.
-		Must be set by subclasses in initialize().
-		*/
-		int _sampleWidth;
+        /*!
+        The width of a sample of one channel in bits. Possibly values are 8, 16 and 24.
+        Must be set by subclasses in initialize().
+        */
+        int _sampleWidth;
 
-		/*!
-		The number of different audio channels. Must be set by subclasses in initialize().
-		*/
-		int _numberOfChannels;
+        /*!
+        The number of different audio channels. Must be set by subclasses in initialize().
+        */
+        int _numberOfChannels;
 
 
-		/*!
-		Called when this sender module receives a message initializeSenderModule.
-		*/
-		virtual void initializeSenderModule(RTPInnerPacket *);
+        /*!
+        Called when this sender module receives a message initializeSenderModule.
+        */
+        virtual void initializeSenderModule(RTPInnerPacket *);
 
-		virtual void openSourceFile(const char *fileName);
-		virtual void closeSourceFile();
+        virtual void openSourceFile(const char *fileName);
+        virtual void closeSourceFile();
 
-		virtual void play();
-		virtual void stop();
-		virtual void seekTime(simtime_t moment);
-		virtual void seekByte(int position);
+        virtual void play();
+        virtual void stop();
+        virtual void seekTime(simtime_t moment);
+        virtual void seekByte(int position);
 
-		virtual bool sendPacket();
+        virtual bool sendPacket();
 
 };
 

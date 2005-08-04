@@ -31,7 +31,7 @@
 /**
  * Gives access to the RoutingTable.
  */
-class RoutingTableAccess : public ModuleAccess<RoutingTable>
+class INET_API RoutingTableAccess : public ModuleAccess<RoutingTable>
 {
     public:
         RoutingTableAccess() : ModuleAccess<RoutingTable>("routingTable") {}

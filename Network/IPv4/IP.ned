@@ -18,9 +18,8 @@
 
 
 //
-// Implements the \IP protocol. This is the all-in-one version of IPProcessing.
-//
-// The \IP protocol header is represented by the IPDatagram message class.
+// Implements the \IP protocol. The protocol header is represented
+// by the IPDatagram message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
@@ -41,8 +40,8 @@
 // </pre>
 //
 // The recommended setting is:
-// - TCP (6) : 0
-// - UDP (17) : 1
+// - \TCP (6) : 0
+// - \UDP (17) : 1
 // - \ICMP (1) : 2
 // - \IGMP (2) : 3
 // - \RSVP (46) : 4
@@ -57,10 +56,10 @@
 // calling C++ methods (such as outputPortNo(destAddress)) of RoutingTable.
 // No message exchange with RoutingTable takes place.
 //
-// A routed datagram will be sent to the given interface, either without
-// control info or with an IPRoutingDecision attached; if the route entry
-// contained a next hop address, it will be passed to the interface
-// in the attached IPRoutingDecision.
+// A routed datagram will be sent to the queueOut gate, with an
+// IPRoutingDecision control info object attached which contains
+// next hop address and interface number. queueOut is expected to be
+// connected to ARP.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling RoutingTable's methods in C++.
@@ -69,19 +68,15 @@
 //
 // In the current form, IP contains a FIFO which queues up \IP datagrams;
 // datagrams are processed in order. The processing time is determined by the
-// procDelay module parameter. 
+// procDelay module parameter.
 //
 // The current performance model comes from the QueueBase C++ base class.
-// If you need a more sophisticated performance model, you may change the 
-// module implementation (the IP class), and: (1) override the startService() 
+// If you need a more sophisticated performance model, you may change the
+// module implementation (the IP class), and: (1) override the startService()
 // method which determines processing time for a packet, or (2) use a
-// different base class. Or, if you want to implement QoS, you may try the
-// QueueWithQoS base class, which allows you to extract forwarding behaviour
-// in a separate "qosBehaviorClass", subclassed from the EnqueueHook class.
-// QueueWithQoS allows you to switch between different EnqueueHook classes
-// from omnetpp.ini.
+// different base class.
 //
-// @see RoutingTable, IPProcessing, IPControlInfo, IPRoutingDecision
+// @see RoutingTable, IPControlInfo, IPRoutingDecision, ARP
 //
 // @author Andras Varga
 //
@@ -96,6 +91,6 @@ simple IP
         in: transportIn[];
         out: transportOut[];
         in: queueIn[];
-        out: queueOut[];
+        out: queueOut;
 endsimple
 

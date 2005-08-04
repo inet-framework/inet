@@ -42,10 +42,13 @@
 #define DEFAULT_RECV_DELAY    1
 
 
+class InterfaceTable;
+class RoutingTable;
+
 /**
  * Implementation of the RSVPAppl module.
  */
-class RSVPAppl: public cSimpleModule
+class INET_API RSVPAppl: public cSimpleModule
 {
 private:
     struct traffic_request_t
@@ -74,7 +77,8 @@ private:
         IPADDR route[MAX_ROUTE];
     };
 
-    RoutingTableAccess routingTableAccess;
+    InterfaceTable *ift;
+    RoutingTable *rt;
     LIBTableAccess libTableAccess;
     OSPFTEAccess ospfteAccess;
     MPLSAccess mplsAccess;

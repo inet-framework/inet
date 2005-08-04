@@ -17,23 +17,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 import
     "IP",
-    "IPProcessing",
+    "ARP",
     "ICMP",
     "IGMP",
-    "RoutingTable",
-    "NetworkInterface";
-
-
+    "ErrorHandling";
 
 //
-// Network layers of an \IP node.
+// Network layer of an \IP node.
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
-//# FIXME add ICMP errors
 //
 module NetworkLayer
+    parameters:
+        proxyARP: bool;
     gates:
         in: physIn[]; // FIXME to be renamed
         in: TCPIn;
@@ -49,7 +48,6 @@ module NetworkLayer
         out: pingOut;
 
     submodules:
-        //ip: IPProcessing;
         ip: IP;
             parameters:
                 timeToLive = 32,
@@ -59,15 +57,20 @@ module NetworkLayer
             gatesizes:
                 transportIn[6],
                 transportOut[6],
-                queueIn[sizeof(physIn)],
-                queueOut[sizeof(physOut)];
+                queueIn[sizeof(physIn)];
             display: "p=85,95;i=block/routing;q=queue";
+        arp: ARP;
+            parameters:
+                proxyARP = proxyARP;
+            gatesizes:
+                nicOut[sizeof(physOut)];
+            display: "p=163,206;i=block/layer;q=pendingQueue";
         icmp: ICMP;
             display: "p=160,63;i=block/control_s";
         igmp: IGMP;
             display: "p=160,122;i=block/cogwheel_s";
         errorHandling: ErrorHandling;
-            display: "p=133,174;i=block/process_s";
+            display: "p=239,63;i=block/process_s";
     connections nocheck:
         // transport Layer
         ip.transportOut[0] --> TCPOut;
@@ -88,10 +91,17 @@ module NetworkLayer
         ip.transportOut[5] --> OSPFOut;
         ip.transportIn[5] <-- OSPFIn;
 
-        // L2 interfaces to IP
+        icmp.pingOut --> pingOut;
+        icmp.pingIn <-- pingIn;
+
+        icmp.errorOut --> errorHandling.in;
+
+        ip.queueOut --> arp.ipIn;
+
+        // L2 interfaces to IP and from ARP
         for i=0..sizeof(physOut)-1 do
             physIn[i] --> ip.queueIn[i] display "m=s";
-            physOut[i] <-- ip.queueOut[i] display "m=s";
+            physOut[i] <-- arp.nicOut[i] display "m=s";
         endfor;
 endmodule
 

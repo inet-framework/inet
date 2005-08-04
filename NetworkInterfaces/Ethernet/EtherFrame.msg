@@ -21,13 +21,16 @@ cplusplus {{
 #include "utils.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
-#include "EtherCtrl_m.h" // for enums
+#include "Ieee802Ctrl_m.h" // for enums
+
+#define JAM_SIGNAL 2000   // jam signal on shared medium
+#define ETH_FRAME  2001   // Ethernet frame
+#define ETH_PAUSE  2002   // Ethernet PAUSE frame
 }};
 
 class noncobject MACAddress;
 class noncobject MessageId;
 
-enum EtherMessageKind;
 enum EtherType;
 enum SAPCode;
 

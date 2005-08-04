@@ -7,11 +7,11 @@
 
 ifconfig:
 
-# ethernet card (modelled by point-to-point link) 0 to host 4
-name: ppp0  inet_addr: 172.0.1.2    MTU: 1500       Metric: 1  BROADCAST MULTICAST
+# interface 0 to host 4
+name: ppp0  inet_addr: 172.0.1.2    MTU: 1500
 
 # PPP link to router 2
-name: ppp1  inet_addr: 172.1.0.3    MTU: 512000     Metric: 1
+name: ppp1  inet_addr: 172.1.0.3    MTU: 512000
 
 ifconfigend.
 

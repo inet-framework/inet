@@ -24,6 +24,7 @@
 // (time, number of bytes) pairs. May act either as client or as server,
 // and works with TCPVirtualBytesSendQueue/RcvQueue as sendQueue/receiveQueue
 // setting for TCP.
+// Compatible with both IPv4 and IPv6.
 //
 // <b>Opening the connection</b>
 //
@@ -50,7 +51,7 @@
 //
 // <b>Closing the connection</b>
 //
-// The application will issue a TCP CLOSE at time tClose. If tClose=-1, no
+// The application will issue a \TCP CLOSE at time tClose. If tClose=-1, no
 // CLOSE will be issued.
 //
 simple TCPSessionApp
