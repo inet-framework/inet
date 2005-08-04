@@ -36,7 +36,7 @@ import
 // Models a host with one wireless (802.11b) card. This module is basically
 // a StandardHost with a Nic80211 added.
 //
-module Wirelesshost
+module WirelessHost
     parameters:
         numTcpApps: numeric const,
         numUdpApps: numeric const,

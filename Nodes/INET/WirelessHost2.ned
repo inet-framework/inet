@@ -46,7 +46,7 @@ import
 //             radioIn[2];   // two 802.11 NICs
 // </pre>
 //
-module Wirelesshost2
+module WirelessHost2
     parameters:
         numTcpApps: numeric const,
         numUdpApps: numeric const,

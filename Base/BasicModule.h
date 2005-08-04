@@ -35,12 +35,8 @@
  * @brief Base class for all simple modules of a host that want to have
  * access to the NotificationBoard module.
  *
- * The basic module additionally provides a function findHost which
- * returns a pointer to the host module and a function hostIndex to
- * return the index of the host module. The latter one correspondes to
- * the index shown in tkenv and comes in very handy for testing and
- * debugging using tkenv. It is used e.g. in all the 'print' macros
- * used for debugging.
+ * The basic module additionally provides a function findHost() which
+ * returns a pointer to the host module.
  *
  * There is no Define_Module() for this class because we use
  * BasicModule only as a base class to derive all other

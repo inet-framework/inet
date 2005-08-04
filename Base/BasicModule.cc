@@ -66,12 +66,10 @@ cModule *BasicModule::findHost(void) const
 {
     cModule *mod;
     for (mod = parentModule(); mod != 0; mod = mod->parentModule())
-    {
-        if (strstr(mod->name(), "host") != NULL || strstr(mod->name(), "Host") != NULL)
+        if (mod->submodule("notificationBoard"))
             break;
-    }
     if (!mod)
-        error("findHost: no host module found!");
+        error("findHost(): host module not found (it should have a submodule named notificationBoard)");
 
     return mod;
 }
