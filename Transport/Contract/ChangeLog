@@ -1,0 +1,15 @@
+2005-07-12  Andras Varga
+
+	* TCPSocket.h: listen(bool fork) got split to listen() [forking] and 
+	listenOnce() [non-forking] member functions
+
+	* renewSocket() now brings back the socket (almost) to its original 
+	state, so it has to be bound again if you want to listen() once more
+
+2005-07-06  Andras Varga
+
+	* TCPSocket: new connectionId must be obtained via renewSocket(), to be
+	able to re-connect with a "used" TCPSocket object. This was 
+	necessitated by the TCP fix of the same date.
+
+

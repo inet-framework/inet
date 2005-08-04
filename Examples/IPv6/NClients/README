@@ -1,0 +1,17 @@
+The same network (consisting of three routers, a server and several clients)
+can be simulated with three different kinds of traffic:
+
+ - Telnet sessions, using the TelnetApp and TCPGenericSrvApp modules;
+
+ - web users issuing HTTP requests, using the TCPBasicCliApp and
+   TCPGenericSrvApp modules;
+
+ - file transfer sessions, using the TCPBasicCliApp and TCPGenericSrvApp
+   modules with a different configuration.
+
+IP addresses and routing tables are set up automatically, by using
+the FlatNetworkConfigurator module.
+
+
+
+

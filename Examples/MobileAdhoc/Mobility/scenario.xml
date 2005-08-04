@@ -1,0 +1,10 @@
+<!-- NOT a mobility trace. This file is used by the ScenarioManager. -->
+<scenario>
+    <set-param t="10" module="host[1].mobility" par="speed" value="1"/>
+    <set-param t="20" module="host[1].mobility" par="speed" value="30"/>
+    <set-param t="30" module="host[1].mobility" par="speed" value="5"/>
+    <set-param t="40" module="host[1].mobility" par="speed" value="40"/>
+    <set-param t="50" module="host[1].mobility" par="speed" value="5"/>
+    <set-param t="60" module="host[1].mobility" par="speed" value="40"/>
+    <set-param t="70" module="host[1].mobility" par="speed" value="5"/>
+</scenario>
