@@ -1,0 +1,20 @@
+INET Framework for OMNEST/OMNeT++
+=================================
+
+The INET framework is an open-source communication networks simulation
+package, written for the OMNEST/OMNeT++ simulation system. The INET framework
+contains models for several Internet protocols: beyond TCP and IP there is UDP,
+Ethernet, PPP and MPLS with LDP and RSVP-TE signalling. See the CREDITS file
+for the names of people who have contributed to the INET Framework.
+
+Example simulations are grouped into the following subdirectories:
+
+   Ethernet/           example Ethernet networks
+   INET/               IP-based example networks
+   IPv6/               IPv6-based example networks
+   MPLS/               example networks for MPLS/LDP/RSVP-TE
+   RTP/                RTP examples (not yet integrated)
+   MobileAdhoc/        mobile and ad-hoc networks (incomplete)
+
+The package's main README file contains links to additional info to help you
+get started with the framework.

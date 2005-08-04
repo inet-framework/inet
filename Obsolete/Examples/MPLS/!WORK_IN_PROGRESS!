@@ -1,0 +1,5 @@
+The current MPLS and RSVP models are unstable and incomplete. They will be 
+replaced by a new implementation soon. Please stay tuned.
+
+The current LDP model is *very* incomplete -- we're seeking contributors 
+to improve it.

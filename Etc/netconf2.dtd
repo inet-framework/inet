@@ -1,0 +1,258 @@
+<?xml encoding="ISO-8859-1"?>
+<!--
+Copyright (C) 2001, 2004 Eric Wu and Johnny Lai
+
+This file is part of IPv6Suite
+
+IPv6Suite is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+IPv6Suite is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+-->
+
+<!ELEMENT netconf (global?, local*, misc?)>
+<!ATTLIST netconf
+          version NMTOKEN "0.0.5"
+          debugChannel NMTOKEN #IMPLIED
+          >
+
+<!ELEMENT global (WirelessEtherInfo?, ObjectMovement?)>
+<!ATTLIST global
+          gSendAdvertisements (on|off) "off"
+          gMaxRtrAdvInterval NMTOKEN #IMPLIED
+          gMinRtrAdvInterval NMTOKEN #IMPLIED
+          gAdvManagedFlag (on|off) "off"
+          gAdvOtherConfigFlag (on|off) "off"
+          gAdvLinkMTU NMTOKEN #IMPLIED
+          gAdvReachableTime NMTOKEN #IMPLIED
+          gAdvRetransTimer NMTOKEN #IMPLIED
+          gAdvCurHopLimit NMTOKEN #IMPLIED
+          gAdvDefaultLifetime NMTOKEN #IMPLIED
+          gHostLinkMTU NMTOKEN #IMPLIED
+          gHostCurHopLimit NMTOKEN #IMPLIED
+          gHostBaseReachableTime NMTOKEN #IMPLIED
+          gHostRetransTimer NMTOKEN #IMPLIED
+          gHostDupAddrDetectTransmits NMTOKEN #IMPLIED
+          >
+
+<!-- Should all these be attributes? If they can't why aren't the elements -->
+<!-- shared with the per interface ones? -->
+<!ELEMENT gSendAdvertisements (#PCDATA)>
+<!ELEMENT gMaxRtrAdvInterval (#PCDATA)>
+<!ELEMENT gMinRtrAdvInterval (#PCDATA)>
+<!ELEMENT gAdvManagedFlag (#PCDATA)>
+<!ELEMENT gAdvOtherConfigFlag (#PCDATA)>
+<!ELEMENT gAdvLinkMTU (#PCDATA)>
+<!ELEMENT gAdvReachableTime (#PCDATA)>
+<!ELEMENT gAdvRetransTimer (#PCDATA)>
+<!ELEMENT gAdvCurHopLimit (#PCDATA)>
+<!ELEMENT gAdvDefaultLifetime (#PCDATA)>
+<!ELEMENT gHostLinkMTU (#PCDATA)>
+<!ELEMENT gHostCurHopLimit (#PCDATA)>
+<!ELEMENT gHostBaseReachableTime (#PCDATA)>
+<!ELEMENT gHostRetransTimer (#PCDATA)>
+<!ELEMENT gHostDupAddrDetectTransmits (#PCDATA)>
+
+<!ELEMENT local (interface*, (route?| tunnel?| sourceRoute?|mobileConfig?)*)>
+<!ATTLIST local
+          node NMTOKEN #REQUIRED
+          routePackets (on|off) "off"
+          forwardSitePackets (on|off) "on"
+          optimisticDAD (on|off) "off"
+          mobileIPv6Support (on|off) "off"
+          mobileIPv6Role (None|HomeAgent|MobileNode) "None"
+          routeOptimisation (on|off) "on"
+          returnRoutability (on|off) "off"
+          earlyBU (on|off) "off"
+	  signalingEnhance (None|Direct|CellResidency) "None"
+          respondBindingRequest (on|off) "off"
+          eagerHandover (on|off) "off"
+          hierarchicalMIPv6Support (on|off) "off"
+          map (on|off) "off"
+          mapMode (Basic|Extended) "Basic"
+          mapMNMAYSetRoCAAsSource (on|off) "on"
+          mapMNMUSTSetRoCAAsSource (on|off) "on"
+          mapReverseTunnel (on|off) "on"
+          edgeHandoverType CDATA ""
+          ewuOutVectorHODelays (on|off) "off"
+          >
+
+<!ELEMENT route (routeEntry)+>
+<!ELEMENT routeEntry EMPTY>
+<!ATTLIST routeEntry
+          routeIface NMTOKEN #REQUIRED
+          routeDestination CDATA #REQUIRED
+          routeNextHop CDATA ""
+          isRouter (on|off) "off"
+          >
+
+<!ELEMENT sourceRoute (sourceRouteEntry)+>
+<!ELEMENT sourceRouteEntry (nextHop)+>
+<!ATTLIST sourceRouteEntry finalDestination CDATA #REQUIRED>
+<!ELEMENT nextHop EMPTY>
+<!ATTLIST nextHop address CDATA #REQUIRED>
+
+<!ELEMENT tunnel (tunnelEntry)+>
+<!ELEMENT tunnelEntry  (triggers)*>
+<!ATTLIST tunnelEntry
+          exitIface NMTOKEN #REQUIRED
+          entryPoint CDATA #REQUIRED
+          exitPoint  CDATA #REQUIRED
+          >
+<!ELEMENT triggers EMPTY>
+<!ATTLIST triggers destination CDATA #REQUIRED>
+
+<!ELEMENT mobileConfig (homeAgent|mobileNode)>
+<!ELEMENT homeAgent EMPTY>
+<!ELEMENT mobileNode (staticConfig?)>
+
+<!-- Used when mobile node is away from home during node startup -->
+<!-- homeAgentAddr is the home agent's globally routable address with prefix specified. The home address is formed from this prefix on homeAddrIface. This can simply be the home prefix if the bits after prefix are 0 for testing of DHAAD -->
+<!-- homeAddrIface references one of the interface elements of this local node by its name on this interface that has a route path to the home agent and will be where the home address is actually bound to -->
+
+<!ELEMENT staticConfig EMPTY>
+<!ATTLIST staticConfig
+          homeAddrIface NMTOKEN #REQUIRED
+          homeAgentAddr CDATA #REQUIRED
+          >
+
+<!ELEMENT interface (inetAddr*, AdvPrefixList?, AdvMAPList?, WirelessEtherInfo?)>
+
+<!-- Require non ID type for name attribute as that requires each "interface
+name" to be unique across whole xml document not just inside interface
+element. -->
+<!-- Use of MIPv6MaxRtrAdvInterval and MIPv6MinRtrAdvInterval when mobileIPv6Support is on -->
+<!-- minRtrSolInterval is the relaxed Neighbour Discovery rtr solicitation interval-->
+<!-- maxInterval is the maximum interval at which no further rtr sol attempts are made -->
+<!ATTLIST interface
+          name NMTOKEN #IMPLIED
+          SendAdvertisements (on|off) "off"
+          AdvHomeAgent (on|off) "off"
+          MaxRtrAdvInterval NMTOKEN "600"
+          MinRtrAdvInterval NMTOKEN "198"
+          MIPv6MaxRtrAdvInterval NMTOKEN "1.5"
+          MIPv6MinRtrAdvInterval NMTOKEN "1"
+          MIPv6MinRtrSolInterval NMTOKEN "1"
+          MIPv6MaxInterval NMTOKEN "8"
+          MaxFastRAS       NMTOKEN "10"
+          MaxConsecMissRtrAdv NMTOKEN "1"
+          >
+
+<!-- Suggested additions to phase out elements (non conformant default values)
+UNPARSED -->
+<!-- Do not use hexadecimal values as XML parsing does not cater for this
+AdvDefaultLifetime NMTOKEN "0xFFFFFF"
+-->
+ <!ATTLIST interface
+          AdvManagedFlag (on|off) "off"
+          AdvOtherConfigFlag (on|off) "off"
+          AdvLinkMTU NMTOKEN "16000"
+          AdvReachableTime NMTOKEN "2"
+          AdvRetransTimer NMTOKEN "6"
+          AdvCurHopLimit NMTOKEN "32"
+          AdvDefaultLifetime NMTOKEN "1800"
+          HostLinkMTU NMTOKEN "16000"
+          HostCurHopLimit NMTOKEN "32"
+          HostBaseReachableTime NMTOKEN "40"
+          HostRetransTimer NMTOKEN "120"
+          HostDupAddrDetectTransmits NMTOKEN "2"
+          HostMaxRtrSolDelay NMTOKEN "1"
+          HMIPAdvMAP (on|off) "off"
+          HMIPForwardMAPOption (on|off) "off"
+          >
+
+<!ELEMENT inetAddr (#PCDATA)>
+<!ELEMENT AdvPrefixList (AdvPrefix)+>
+<!ELEMENT AdvPrefix (#PCDATA)>
+<!ATTLIST AdvPrefix
+          AdvValidLifetime NMTOKEN "2592000"
+          AdvOnLinkFlag (on|off) "off"
+          AdvPreferredLifetime NMTOKEN "605800"
+          AdvAutonomousFlag (on|off) "on"
+          AdvRtrAddrFlag (on|off) "off"
+          >
+
+<!ELEMENT AdvMAPList (AdvMAPEntry)+>
+<!ELEMENT AdvMAPEntry (#PCDATA)>
+<!ATTLIST AdvMAPEntry
+          AdvMAPDist NMTOKEN "1"
+          AdvMAPPref NMTOKEN "1"
+          AdvMAPValidLifetime NMTOKEN "2592"
+          >
+ 
+<!-- These elements will be deprecated although there is no other alternative at this time -->
+<!ELEMENT AdvManagedFlag (#PCDATA)>
+<!ELEMENT AdvOtherConfigFlag (#PCDATA)>
+<!ELEMENT AdvLinkMTU (#PCDATA)>
+<!ELEMENT AdvReachableTime (#PCDATA)>
+<!ELEMENT AdvRetransTimer (#PCDATA)>
+<!ELEMENT AdvCurHopLimit (#PCDATA)>
+<!ELEMENT AdvDefaultLifetime (#PCDATA)>
+
+<!ELEMENT HostLinkMTU (#PCDATA)>
+<!ELEMENT HostCurHopLimit (#PCDATA)>
+<!ELEMENT HostBaseReachableTime (#PCDATA)>
+<!ELEMENT HostRetransTimer (#PCDATA)>
+<!ELEMENT HostDupAddrDetectTransmits (#PCDATA)>
+
+<!-- Misc. options. Any conditions preset for the behaviour -->
+<!-- the entire network. and they are part of IP configuration -->
+
+<!ELEMENT misc (ObjectMovement?)>
+
+<!ELEMENT ObjectMovement (MovingNode*, RandomMovement*, RandomPattern*)>
+<!ATTLIST MovingNode
+          NodeName NMTOKEN #REQUIRED
+          startTime NMTOKEN #REQUIRED
+          >
+
+<!ELEMENT MovingNode (move*)>
+<!ELEMENT move EMPTY>
+<!ATTLIST move
+          moveToX NMTOKEN #REQUIRED
+          moveToY NMTOKEN #REQUIRED
+          moveSpeed NMTOKEN #REQUIRED
+          >
+
+<!ELEMENT RandomMovement (#PCDATA)>
+<!ATTLIST RandomMovement
+          RWNodeName NMTOKEN #REQUIRED
+          RWMoveKind (toroidal|bouncing) "bouncing"
+          RWMinX NMTOKEN #REQUIRED
+          RWMaxX NMTOKEN #REQUIRED
+          RWMinY NMTOKEN #REQUIRED
+          RWMaxY NMTOKEN #REQUIRED
+          RWMoveInterval NMTOKEN #REQUIRED
+          RWMinSpeed NMTOKEN #REQUIRED
+	  RWMaxSpeed NMTOKEN #REQUIRED
+	  RWDistance NMTOKEN #REQUIRED
+	  RWPauseTime NMTOKEN #REQUIRED
+	  RWStartTime NMTOKEN "5"
+          >
+
+<!ELEMENT RandomPattern (RPNode*)>
+<!ATTLIST RandomPattern
+          RPXSize NMTOKEN #REQUIRED
+          RPYSize NMTOKEN #REQUIRED
+          RPMoveInterval NMTOKEN #REQUIRED
+          RPMinSpeed NMTOKEN #REQUIRED
+	  RPMaxSpeed NMTOKEN #REQUIRED
+	  RPDistance NMTOKEN #REQUIRED
+	  RPPauseTime NMTOKEN #REQUIRED
+          >
+
+<!ELEMENT RPNode EMPTY>
+<!ATTLIST RPNode
+          RPNodeName NMTOKEN #REQUIRED
+          RPXOffset NMTOKEN #REQUIRED
+          RPYOffset NMTOKEN #REQUIRED
+          >
