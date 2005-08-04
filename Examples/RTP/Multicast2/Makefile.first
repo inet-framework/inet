@@ -1,5 +1,0 @@
-default:
-	PATH=. creator.py
-
-clean:
-	rm -f *.mrt *.sim omnetpp.ini multicast2.ned
