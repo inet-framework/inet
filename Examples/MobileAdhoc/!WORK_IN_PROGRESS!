@@ -1,0 +1,3 @@
+The INET Framework does not yet support ad-hoc networks. The lower layers
+(mobility, physical, 802.11 MAC ad-hoc mode) are there, but there's no
+ad-hoc routing protocol yet.

@@ -1,0 +1,21 @@
+2005-07-20 Andras Varga
+
+	* some sources moved into subdirs queues/ and flavours/
+
+2005-07-14 Andras Varga
+
+	* TCPMain renamed to TCP
+
+2005-07-12  Andras Varga
+
+	* TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received 
+	several active/passive opens with same local port number. Now it raises
+	an error (~EADDRINUSE)
+
+2005-07-06  Andras Varga
+
+	* TCPConnectionRcvSegment.cc: fixed bug which caused closing of a
+	connection to be reported 2MSL (240s) later to the user. Basically,
+	the user has to be notified already when the connection enters the
+	TIME_WAIT state. (TCP stays in TIME_WAIT for 240s or longer, and 
+	nothing can happen during that time that's of interest to the user.)

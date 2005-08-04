@@ -1,0 +1,14 @@
+HEADERS=`find @IPv6Suite_SOURCE_DIR@ -name \*.h`
+#duplicates in QoSStub and QoS. Used QoS version which is updated by
+#Andras to remove crud
+NEDS=`find @IPv6Suite_SOURCE_DIR@ -path ./\*QoSStub\* -prune -o \( -name \*.ned -print \)`
+mkdir -pv include
+for h in $HEADERS;
+do
+  cp -f $h include
+done
+mkdir -pv ned
+for n in $NEDS;
+do
+  cp -f $n ned
+done

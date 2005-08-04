@@ -1,0 +1,3 @@
+RTP hasn't been integrated yet into the INET Framework. This should not be very
+difficult, but it's currently low priority. If RTP is important to you, 
+please write.

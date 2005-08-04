@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# This one originates from http://www.gentoo.org
+
+#various paths
+
+CVSDIR=@PROJECT_SOURCE_DIR@
+WORK_DIR=@GENERATED_DOCUMENTATION_DIR@
+OUTLOG=${WORK_DIR}/cl.xml
+XSLTP=`which xsltproc`
+if [ "$1" == "" ]; then
+    OUTPUT=${WORK_DIR}/CVS-ChangeLog.html
+else
+    OUTPUT=${WORK_DIR}/CVS-ChangeLog-$1.html
+fi
+
+
+#the main script
+cd $CVSDIR
+#. set_env
+#cvs login
+
+if [ "$1" != "" ]; then
+    CVSDATE=`ruby -e "require 'date'; d = Date.today(); print (d-$1).to_s"`
+fi
+
+if [ $? -gt 0 ]; then
+    exit 1
+fi
+
+today=`date -R`
+if [ "${CVSDATE}" == "" ]; then
+    CVSDATE=`ruby -e "require 'date'; d = Date.today();print Date.new(d.year, 1, 1).to_s"`
+fi
+
+cvsdate=-d\'"${CVSDATE}"\<${today}\'
+
+#echo $cvsdate && exit
+
+#generate cvs2cl.pl XML output
+cvs2cl.pl --xml --xml-encoding iso-8859-15 --noxmlns -f ${OUTLOG} -l "${cvsdate}" --lines-modified || exit 2
+ruby @SCRIPTDIR@/priorRev.rb ${OUTLOG}
+
+# convert cvs2cl.pl XML
+$XSLTP -o "$OUTPUT" @DOCUMENTATION_DIR@/cl2html-ciaglia.xsl ${OUTLOG} || exit 3
+
+rm ${OUTLOG}
+
+#cvs logout

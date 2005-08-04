@@ -1,0 +1,13 @@
+2005-07-06  Andras Varga
+
+	* IP.cc: don't forward "link-local" multicast addresses (224.0.0.x)
+
+2005-07-04  Andras Varga
+
+	* RoutingTable: localDeliver() ignores interface netmask [reported by
+	Michael Tuexen]
+	
+	* RoutingTable: interface netmask functionality is now achieved by 
+	routes of type IFACENETMASK added to the routing table. These routes
+	are re-build whenever notification is received that there was a change
+	in the interface IPv4 configurations.
