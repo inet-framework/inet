@@ -1,0 +1,4 @@
+all:
+	doxygen doxyfile
+	copy *.png ..\..\tcp-tutorial
+
