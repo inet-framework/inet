@@ -18,10 +18,6 @@
 //* description:  snr network interace card Compound Module
 //*
 //***************************************************************************
-//* changelog:   $Revision$
-//*              last modified:   $Date$
-//*              by:              $Author$
-//***************************************************************************
 
 import
     "CSMAMacLayer",

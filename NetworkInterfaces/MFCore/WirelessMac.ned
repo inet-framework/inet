@@ -21,11 +21,6 @@
 //* description: basic MAC layer class
 //*              subclass to create your own MAC layer
 //***************************************************************************
-//* changelog:   $Revision$
-//*              last modified:   $Date$
-//*              by:              $Author$
-//**************************************************************************/
-
 
 //
 // This is not an actual MAC implementation, just a prototype for wireless MAC's
