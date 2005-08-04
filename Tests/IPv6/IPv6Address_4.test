@@ -1,0 +1,32 @@
+%description:
+test IPv6Address constants
+
+%global:
+#include "IPv6Address.h"
+
+%activity:
+#define P(X)  ev << #X << "  " << X << "\n";
+
+P(IPv6Address::UNSPECIFIED_ADDRESS);
+P(IPv6Address::LOOPBACK_ADDRESS);
+P(IPv6Address::ALL_NODES_1);
+P(IPv6Address::ALL_NODES_2);
+P(IPv6Address::ALL_ROUTERS_1);
+P(IPv6Address::ALL_ROUTERS_2);
+P(IPv6Address::ALL_ROUTERS_5);
+P(IPv6Address::SOLICITED_NODE_PREFIX);
+P(IPv6Address::LINKLOCAL_PREFIX);
+ev << ".\n";
+
+%contains: stdout
+IPv6Address::UNSPECIFIED_ADDRESS  ::0
+IPv6Address::LOOPBACK_ADDRESS  ::1
+IPv6Address::ALL_NODES_1  ff01::1
+IPv6Address::ALL_NODES_2  ff02::1
+IPv6Address::ALL_ROUTERS_1  ff01::2
+IPv6Address::ALL_ROUTERS_2  ff02::2
+IPv6Address::ALL_ROUTERS_5  ff05::2
+IPv6Address::SOLICITED_NODE_PREFIX  ff02::1:0:0
+IPv6Address::LINKLOCAL_PREFIX  fe80::
+.
+

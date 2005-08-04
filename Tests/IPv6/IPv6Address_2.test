@@ -1,0 +1,54 @@
+%description:
+a misc IPv6Address test
+
+%global:
+#include "IPv6Address.h"
+
+%activity:
+IPv6Address linkLocalAddr;
+IPv6Address siteLocalAddr;
+IPv6Address multicast;
+IPv6Address unspecified;
+IPv6Address loopback;
+
+ev << "This is a link local address." << endl;
+linkLocalAddr.set("fe80:1111:2222:3300:fe44:a555:6666:7777");
+ev << linkLocalAddr.str() << endl;
+ev << linkLocalAddr.scope() << endl;
+
+ev << "This is a site local address." << endl;
+siteLocalAddr.set("fec0:1111:2222:3300:fe44:a555:6666:7777");
+ev << siteLocalAddr.str() << endl;
+ev << siteLocalAddr.scope() << endl;
+
+ev << "This is a multicast address." << endl;
+multicast.set("ff00:1111:2222:3300:fe44:a555:6666:7777");
+ev << multicast.str() << endl;
+ev << multicast.scope() << endl;
+
+ev << "This is an unspecified address." << endl;
+unspecified.set("0:0:0:0:0:0:0:0");
+ev << unspecified.str() << endl;
+ev << unspecified.scope() << endl;
+
+ev << "This is a loopback address." << endl;
+loopback.set("0:0:0:0:0:0:0:1");
+ev << loopback.str() << endl;
+ev << loopback.scope() << endl;
+
+%contains: stdout
+This is a link local address.
+fe80:1111:2222:3300:fe44:a555:6666:7777
+3
+This is a site local address.
+fec0:1111:2222:3300:fe44:a555:6666:7777
+4
+This is a multicast address.
+ff00:1111:2222:3300:fe44:a555:6666:7777
+2
+This is an unspecified address.
+::0
+0
+This is a loopback address.
+::1
+1

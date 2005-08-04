@@ -1,0 +1,53 @@
+%description:
+Test parsing IPv6 addresses 
+
+%global:
+#include "IPv6Address.h"
+
+static void parseAddr(const char *s)
+{
+    IPv6Address a(s);
+    uint32 *d = a.words();
+    ev << s << " --> " << a.str() << " (";
+    ev.printf("%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
+    ev << ")\n";
+}
+
+%activity:
+parseAddr("::");
+parseAddr("::1");
+parseAddr("::ffff");
+parseAddr("::a:b:c");
+parseAddr("::aaaa:bbbb:cccc");
+parseAddr("1::");
+parseAddr("ffff::");
+parseAddr("aaaa:bbbb:cccc::");
+parseAddr("1::2");
+parseAddr("aaaa::bbbb");
+parseAddr("aaaa:bbbb::1:ffff");
+parseAddr("12:34:56::aa:bb:cc");
+parseAddr("12:34:56::aa:bb:cc");
+parseAddr("ff80:1111:2222:3300:fe44:a555:6666:7778");
+parseAddr("::fe44:a555:6666:7778");
+parseAddr("ff80:1111:2222:3300::");
+ev << ".\n";
+
+%contains: stdout
+:: --> ::0 (0-0-0-0)
+::1 --> ::1 (0-0-0-1)
+::ffff --> ::ffff (0-0-0-ffff)
+::a:b:c --> ::a:b:c (0-0-a-b000c)
+::aaaa:bbbb:cccc --> ::aaaa:bbbb:cccc (0-0-aaaa-bbbbcccc)
+1:: --> 1:: (10000-0-0-0)
+ffff:: --> ffff:: (ffff0000-0-0-0)
+aaaa:bbbb:cccc:: --> aaaa:bbbb:cccc:: (aaaabbbb-cccc0000-0-0)
+1::2 --> 1::2 (10000-0-0-2)
+aaaa::bbbb --> aaaa::bbbb (aaaa0000-0-0-bbbb)
+aaaa:bbbb::1:ffff --> aaaa:bbbb::1:ffff (aaaabbbb-0-0-1ffff)
+12:34:56::aa:bb:cc --> 12:34:56::aa:bb:cc (120034-560000-aa-bb00cc)
+12:34:56::aa:bb:cc --> 12:34:56::aa:bb:cc (120034-560000-aa-bb00cc)
+ff80:1111:2222:3300:fe44:a555:6666:7778 --> ff80:1111:2222:3300:fe44:a555:6666:7778 (ff801111-22223300-fe44a555-66667778)
+::fe44:a555:6666:7778 --> ::fe44:a555:6666:7778 (0-0-fe44a555-66667778)
+ff80:1111:2222:3300:: --> ff80:1111:2222:3300:: (ff801111-22223300-0-0)
+.
+

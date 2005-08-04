@@ -1,0 +1,9 @@
+
+
+OMNETPP_CMD_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(CMDENV_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
+
+all: $(TARGET) cmd$(TARGET)
+
+cmd$(TARGET): $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS)  Makefile.vc
+	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_CMD_LIBS) /out:cmd$(TARGET)
+	@echo.>.tstamp

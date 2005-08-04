@@ -1,0 +1,14 @@
+LDFLAGS+= -Wl,-export-dynamic
+#USERIF_LIBS=$(CMDENV_LIBS) $(TKENV_LIBS)
+
+
+#
+# incompatible with Windows
+#
+#all: $(TARGET) INET
+#	echo>.tstamp
+#
+#INET: $(TARGET) Makefile
+#	$(CXX) -o INET $(TARGET) $(OMNETPP_LIBS)
+#
+
