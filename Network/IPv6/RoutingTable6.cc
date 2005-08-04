@@ -133,15 +133,14 @@ void RoutingTable6::handleMessage(cMessage *msg)
 
 void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
 {
-    IPv6InterfaceData *d = new IPv6InterfaceData();
-    ie->setIPv6Data(d);
+    IPv6InterfaceData *ipv6IfData = new IPv6InterfaceData();
+    ie->setIPv6Data(ipv6IfData);
 
     // for routers, turn on advertisements by default
     //FIXME: we will use this isRouter flag for now. what if future implementations
     //have 2 interfaces where one interface is configured as a router and the other
     //as a host?
-    d->setAdvSendAdvertisements(isrouter);//Added by WEI
-    //d->setSendRouterAdvertisements(isrouter);
+    ipv6IfData->setAdvSendAdvertisements(isrouter);//Added by WEI
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     //d->setMetric((int)ceil(2e9/ie->datarate())); // use OSPF cost as default

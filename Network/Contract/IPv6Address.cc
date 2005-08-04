@@ -30,8 +30,8 @@ const uint32 LINK_LOCAL_MASK = 0xFFF00000;
 const uint32 SITE_LOCAL_MASK = 0xFFF00000;
 const uint32 MULTICAST_MASK = 0xFF000000;
 
-
-// predefined addresses
+// RFC 3513: IPv6 Addressing Architecture
+// Section 2.7.1: Pre-defined Multicast Addresses
 const IPv6Address IPv6Address::UNSPECIFIED_ADDRESS("::0");
 const IPv6Address IPv6Address::LOOPBACK_ADDRESS("::1");
 const IPv6Address IPv6Address::ALL_NODES_1("FF01::1");
@@ -39,7 +39,7 @@ const IPv6Address IPv6Address::ALL_NODES_2("FF02::1");
 const IPv6Address IPv6Address::ALL_ROUTERS_1("FF01::2");
 const IPv6Address IPv6Address::ALL_ROUTERS_2("FF02::2");
 const IPv6Address IPv6Address::ALL_ROUTERS_5("FF05::2");
-const IPv6Address IPv6Address::SOLICITED_NODE_PREFIX("FF02::1:0:0");
+const IPv6Address IPv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
 const IPv6Address IPv6Address::LINKLOCAL_PREFIX("FE80::");
 
 

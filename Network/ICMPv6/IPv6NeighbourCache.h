@@ -41,7 +41,7 @@
 class INET_API IPv6NeighbourCache
 {
   public:
-    /** Used for Duplicate Address Detection */
+    /** Neighbour's reachability state */
     enum ReachabilityState {INCOMPLETE, REACHABLE, STALE, DELAY, PROBE};
 
     /**

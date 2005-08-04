@@ -90,7 +90,7 @@ message IPv6RouterAdvertisement extends IPv6NDMessage
         unsigned int curHopLimit;
         bool managedAddrConfFlag;
         bool otherStatefulConfFlag;
-        unsigned short routerLifetime;
+        unsigned short routerLifetime;  // 0 indicates router is not a default router
         unsigned int reachableTime;
         unsigned int retransTimer;
 

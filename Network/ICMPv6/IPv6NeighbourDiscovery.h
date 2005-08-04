@@ -141,6 +141,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
 
         void processIPv6Datagram(IPv6Datagram *datagram);
         IPv6NeighbourDiscovery::AdvIfEntry *fetchAdvIfEntry(InterfaceEntry *ie);
+        IPv6NeighbourDiscovery::RDEntry *fetchRDEntry(InterfaceEntry *ie);
         /************************End of Miscellaneous Stuff********************/
 
         /**
@@ -155,9 +156,25 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         const IPv6Address& determineNextHop(const IPv6Address& destAddr, int& outIfID);
         void initiateNeighbourUnreachabilityDetection(Neighbour *neighbour);
         const IPv6Address& selectDefaultRouter(int& outIfID);
-        void initiateAddressResolution(const IPv6Address& neighbourAddr, int ifID);
+        void initiateAddressResolution(const IPv6Address& dgSrcAddr,
+            const IPv6Address& neighbourAddr, int ifID);
         void sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
             const IPv6Address& srcAddr, int inputGateIndex);
+        /**
+         *  Convenience class for sending Neighbour Discovery messages that
+         *  requires some form of delay. This could potentially save the usage
+         *  of too many self messages and its associated complexity.
+         */
+        void sendDelayedPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
+            const IPv6Address& srcAddr, int inputGateIndex, simtime_t delay);
+        /**
+         *  Send off any queued packets within the Neighbour Discovery module
+         *  awaiting address resolution.
+         *  TODO: Assuming queue has packets awaiting for address resolution on
+         *  different IP addresses, shouldn't this method have a smart mechanism
+         *  to send off the correct packet?
+         */
+        void sendQueuedPacketToIPv6Module();
 
         /**
          *  Assign a tentative address to the given Interface entry. This is a
@@ -181,6 +198,15 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /************Router Solicitation Stuff*********************************/
         IPv6RouterSolicitation *createAndSendRSPacket(InterfaceEntry *ie);
         void initiateRouterDiscovery(cMessage *msg);
+        /**
+         *  Once the host sends a Router Solicitation, and receives a valid
+         *  Router Advertisement with a non-zero Router Lifetime, the host MUST
+         *  desist from sending additional solicitations on that interface,
+         *
+         *  Cancel Router Discovery on the Interface where a RA was received with
+         *  the given Interface Entry.
+         */
+        void cancelRouterDiscovery(InterfaceEntry *ie);
         void processRDTimeout(cMessage *msg);
         void processRSPacket(IPv6RouterSolicitation *rs, IPv6ControlInfo *rsCtrlInfo);
         bool validateRSPacket(IPv6RouterSolicitation *rs, IPv6ControlInfo *rsCtrlInfo);
@@ -190,6 +216,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         IPv6RouterAdvertisement *createAndSendRAPacket(const IPv6Address& destAddr,
             InterfaceEntry *ie);
         void processRAPacket(IPv6RouterAdvertisement *ra, IPv6ControlInfo *raCtrlInfo);
+        void updateRouterList(IPv6RouterAdvertisement *ra, IPv6ControlInfo *raCtrlInfo);
+        void processRAPrefixInfoForAutoConf(IPv6NDPrefixInformation& prefixInfo,
+            InterfaceEntry *ie);
         /**
          *  Create a timer for the given interface entry that sends periodic
          *  Router Advertisements
@@ -208,8 +237,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /************End of Router Advertisement Stuff*************************/
 
         /************Neighbour Solicitaton Stuff*******************************/
-        IPv6NeighbourSolicitation *createAndSendNSPacket( const IPv6Address& nsTargetAddr,
-            const IPv6Address& nsDestAddr, InterfaceEntry *ie);
+        IPv6NeighbourSolicitation *createAndSendNSPacket(
+            const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
+            const IPv6Address& dgSrcAddr, InterfaceEntry *ie);
         void processNSPacket(IPv6NeighbourSolicitation *ns, IPv6ControlInfo *naCtrlInfo);
         bool validateNSPacket(IPv6NeighbourSolicitation *ns, IPv6ControlInfo *nsCtrlInfo);
         void processNSForTentativeAddress(IPv6NeighbourSolicitation *ns,
@@ -223,6 +253,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /************Neighbour Advertisment Stuff)*****************************/
         IPv6NeighbourAdvertisement *createAndSendNAPacket(IPv6NeighbourSolicitation *ns,
             const IPv6Address& nsSrcAddr, const IPv6Address& nsDestAddr, InterfaceEntry *ie);
+        void sendSolicitedNA(IPv6NeighbourSolicitation *ns,
+            IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie);
+        void sendUnsolicitedNA(InterfaceEntry *ie);
         void processNAPacket(IPv6NeighbourAdvertisement *na, IPv6ControlInfo *naCtrlInfo);
         bool validateNAPacket(IPv6NeighbourAdvertisement *na, IPv6ControlInfo *naCtrlInfo);
         void processNAForIncompleteNeighbourEntry(IPv6NeighbourAdvertisement *na,
