@@ -17,6 +17,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
+cplusplus {{
+#include "INETDefs.h"
+}}
+
+
 //
 // Not the real ICMP codes; here it's set up so that codes above 128 are
 // informational

@@ -7,7 +7,7 @@
 #
 
 # include omnetppconfig from this directory
-ROOT=$(HOME)/INET
+ROOT=$(HOME)/INET-pcvs
 include $(ROOT)/omnetppconfig
 
 CFLAGS+= -DWITH_IPv6

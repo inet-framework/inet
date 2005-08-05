@@ -10,6 +10,7 @@
 #EXT=.vc
 
 # for compiled-in NED files, remove -N from OPTS, and switch to the longer version of ALL_MODEL_OPTS below
+# with omnetpp-3.2 or newer, if you want to build windows dlls, add this to OPTS below: -PINET_API
 OPTS=-f -N -b $(ROOT) -c $(ROOT)/inetconfig$(EXT) -I.
 
 CONTRACT_INCLUDES=-I$(ROOT)/Transport/Contract -I$(ROOT)/Network/Contract -I$(ROOT)/NetworkInterfaces/Contract -I$(ROOT)/Base -I$(ROOT)/Util

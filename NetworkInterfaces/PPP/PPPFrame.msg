@@ -24,6 +24,7 @@
 // only one Flag is required between back-to-back frames.)
 //
 cplusplus {{
+#include "INETDefs.h"
 const int PPP_OVERHEAD_BYTES = 7;
 }}
 

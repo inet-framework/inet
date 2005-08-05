@@ -19,6 +19,7 @@
 
 cplusplus {{
 #include <iostream>
+#include "INETDefs.h"
 
 typedef cMessage *cMessagePtr;
 

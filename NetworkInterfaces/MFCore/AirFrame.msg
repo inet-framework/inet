@@ -18,6 +18,7 @@
 // **************************************************************************/
 
 cplusplus {{
+#include "INETDefs.h"
 #include "SnrList.h"
 #include "Coord.h"
 }}

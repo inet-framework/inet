@@ -17,6 +17,11 @@
 //
 
 
+cplusplus {{
+#include "INETDefs.h"
+}}
+
+
 //
 // Message class for generic request-reply style applications.
 // The client sends a GenericAppMsg which contains the number of
@@ -35,7 +40,7 @@ message GenericAppMsg
     fields:
         int expectedReplyLength;  // in bytes
         double replyDelay;  // reply after this many seconds
-        bool close;  // with TCP: if true, server should close the 
+        bool close;  // with TCP: if true, server should close the
                      // connection after sending the reply
 };
 

@@ -25,6 +25,7 @@ Base/Nop.ned
 Base/NotificationBoard.ned
 Base/Sink.ned
 Mobility/ANSimMobility.ned
+Mobility/BasicMobility.ned
 Mobility/BonnMotionMobility.ned
 Mobility/CircleMobility.ned
 Mobility/ConstSpeedMobility.ned

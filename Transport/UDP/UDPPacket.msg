@@ -18,6 +18,10 @@
 //
 
 
+cplusplus {{
+#include "INETDefs.h"
+}}
+
 //
 // Represents an \UDP packet, to be used with the UDP module.
 //

@@ -18,9 +18,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 cplusplus {{
+#include "INETDefs.h"
 #define ICMPv6_HEADER_BYTES  8
 }}
+
 
 enum ICMPv6Type
 {

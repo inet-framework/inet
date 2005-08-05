@@ -17,6 +17,9 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+cplusplus {{
+#include "INETDefs.h"
+}}
 
 //
 // Timer to indicate a completely received frame
