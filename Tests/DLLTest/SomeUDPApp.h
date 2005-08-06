@@ -27,9 +27,10 @@
 
 
 /**
- * UDP application. See NED for more info.
+ * A copy of UDPBasicApp, just for testing. 
+ * NOTE that this class is NOT declared INET_API!
  */
-class INET_API SomeUDPApp : public UDPAppBase
+class SomeUDPApp : public UDPAppBase
 {
   protected:
     std::string nodeName;
