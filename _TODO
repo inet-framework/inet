@@ -1,0 +1,24 @@
+- apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
+
+- TCP tests fail now (TCPDump has changed)
+
+- if a node pings itself, that'll be "destination unreachable" -- fix it
+
+- Eth: restore original conn color when transmission ends
+
+- "headerLength" param in snrEval???
+
+- IPv4 configurator: should fill in next hop addresses too, not only interface (esp with Ethernet)
+
+- rename TCPBasicClientApp to TCPRequestReplyClientApp ?
+
+
+AFTER omnetpp-3.2 RELEASE:
+- add handleParameterChange() to apps (needed for Scenario Manager!)
+- setLength(), length() --> byteLength()
+- makemakefiles: -P option
+- use cDisplayString setTagArg(long)
+- use new opp_msgc features? (kind=..., length=...etc)
+
+
+
