@@ -22,6 +22,6 @@ AFTER omnetpp-3.2 RELEASE:
 - makemakefiles: -P option
 - use cDisplayString setTagArg(long)
 - use new opp_msgc features? (kind=..., length=...etc)
-
+- remove Util/stlwatch.h/cc, Utils/watch2.h
 
 
