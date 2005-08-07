@@ -18,7 +18,7 @@
 
 
 //
-// Scenario Manager is for setting up and controlling simulation experiments.
+// ScenarioManager is for setting up and controlling simulation experiments.
 // You can schedule certain events to take place at specified times,
 // like changing a parameter value, changing the bit error rate of
 // a connection, removing or adding connections, removing or
