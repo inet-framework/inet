@@ -42,7 +42,7 @@ void ChannelAccess::initialize(int stage)
     }
     else if (stage == 1)
     {
-        cModule *hostModule = parentModule()->parentModule();
+        cModule *hostModule = findHost();
         myHostRef = cc->lookupHost(hostModule);
         if (myHostRef==0)
             error("host not registered yet in ChannelControl (this should be done by "
