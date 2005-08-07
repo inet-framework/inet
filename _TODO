@@ -12,6 +12,9 @@
 
 - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
 
+- IPv4: make it usable with ad-hoc models
+
+- notifboard: switch to the context of the client before calling its receiveNotification()
 
 AFTER omnetpp-3.2 RELEASE:
 - add handleParameterChange() to apps (needed for Scenario Manager!)
