@@ -16,6 +16,8 @@
 
 - notifboard: switch to the context of the client before calling its receiveNotification()
 
+- doxy: turn on generation if "called/referenced from" things2
+
 AFTER omnetpp-3.2 RELEASE:
 - add handleParameterChange() to apps (needed for Scenario Manager!)
 - setLength(), length() --> byteLength()

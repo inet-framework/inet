@@ -47,7 +47,7 @@
 // Built-in commands: <set-param>, <set-channel-attr>, <at>.
 //
 // All commands have a t attribute which carries the simulation time
-// the command has to be carried out. You can group several commands
+// at which the command has to be carried out. You can group several commands
 // to be carried out at the same simulation time using <at>, and
 // then only the <at> command is needed to have a t attribute.
 //
