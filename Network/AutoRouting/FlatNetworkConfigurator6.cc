@@ -193,7 +193,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
         RoutingTable6 *destRt = IPAddressResolver().routingTable6Of(destNode->module());
         InterfaceTable *destIft = IPAddressResolver().interfaceTableOf(destNode->module());
 
-        // skip hosts
+        // don't add routes towards hosts
         if (!destRt->par("isRouter").boolValue())
             continue;
 
@@ -231,8 +231,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
             RoutingTable6 *rt = IPAddressResolver().routingTable6Of(atNode->module());
             InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());
 
-            // skip hosts
-            if (!destRt->par("isRouter").boolValue())
+            // skip hosts' routing tables
+            if (!rt->par("isRouter").boolValue())
                 continue;
 
             // determine the local interface id
