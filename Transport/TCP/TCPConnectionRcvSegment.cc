@@ -179,7 +179,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // enter the CLOSED state, delete the TCB, and return.
                 //"
                 tcpEV << "RST: closing connection\n";
-                sendIndicationToApp(TCP_I_CLOSED);
+                if (fsm.state()!=TCP_S_TIME_WAIT)
+                    sendIndicationToApp(TCP_I_CLOSED); // in TIME_WAIT, we've already sent it
                 return TCP_E_RCV_RST; // this will trigger state transition
 
             default: ASSERT(0);
