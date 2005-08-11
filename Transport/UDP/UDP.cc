@@ -72,7 +72,7 @@ void UDP::handleMessage(cMessage *msg)
 
 void UDP::bind(int gateIndex, int udpPort)
 {
-    dispatchByPort = false;
+    dispatchByPort = true;
     if (port2indexMap.find(udpPort)!=port2indexMap.end())
         error("bind(): port %d already bound, to app on gate index %d", udpPort, port2indexMap[udpPort]);
     port2indexMap[udpPort] = gateIndex;
