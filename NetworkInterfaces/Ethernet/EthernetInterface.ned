@@ -32,7 +32,7 @@ module EthernetInterface
         mac: EtherMAC;
             parameters: 
                 queueModule = "",
-                txQueueLimit = 1000; // may be increased if necessary
+                txQueueLimit = 100000; // prevents overflow in bogus simulations
             display: "i=block/rxtx;p=100,160;q=txQueue";
         encap: EtherEncap;
             display: "i=block/square;p=100,80";

@@ -33,7 +33,7 @@ module PPPInterface
         ppp: PPP;
             parameters:
                 queueModule = "",
-                txQueueLimit = 1000; // may be increased if necessary
+                txQueueLimit = 100000; // prevents overflow in bogus simulations
             display: "i=block/rxtx;p=80,80;q=txQueue";
     connections:
         netwIn --> ppp.netwIn display "m=n";
