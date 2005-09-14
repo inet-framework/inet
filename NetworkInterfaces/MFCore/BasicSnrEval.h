@@ -71,8 +71,7 @@ class INET_API BasicSnrEval : public ChannelAccess
 
  public:
   /** @brief constructor */
-  BasicSnrEval(const char* n, cModule *p, unsigned s=0) :
-    ChannelAccess(n, p, s) {};
+  Module_Class_Members(BasicSnrEval, ChannelAccess, 0);
 
   /** @brief Initialization of the module and some variables*/
   virtual void initialize(int);
