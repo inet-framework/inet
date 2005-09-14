@@ -1,3 +1,6 @@
+NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
+
+
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
 
