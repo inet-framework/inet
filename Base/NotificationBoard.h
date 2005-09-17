@@ -56,12 +56,13 @@ class INotifiable;
  */
 class INET_API NotificationBoard : public cSimpleModule
 {
-  protected:
+  public: // should be protected
     typedef std::vector<INotifiable *> NotifiableVector;
     typedef std::map<int, NotifiableVector> ClientMap;
-    ClientMap clientMap;
+    friend std::ostream& operator<<(std::ostream&, const NotifiableVector&); // doesn't work in MSVC 6.0
 
-    friend std::ostream& operator<<(std::ostream&, const NotifiableVector&);
+  protected:
+    ClientMap clientMap;
 
   public:
     Module_Class_Members(NotificationBoard, cSimpleModule, 0);
