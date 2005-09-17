@@ -75,12 +75,13 @@ std::string IPv6InterfaceData::info() const
 {
     std::ostringstream os;
     os << "IPv6:{";
-    for (int i=0; i<numAddresses(); i++)
+    int i;
+    for (i=0; i<numAddresses(); i++)
         os << (i?", ":"Addrs: ") << address(i)
            << "(" << IPv6Address::scopeName(address(i).scope())
            << (isTentativeAddress(i)?" tent":"") << ")";
 
-    for (int i=0; i<numAdvPrefixes(); i++)
+    for (i=0; i<numAdvPrefixes(); i++)
     {
         const AdvPrefix& a = advPrefix(i);
         os << (i?", ":"  AdvPrefixes: ") << a.prefix << "/" << a.prefixLength << "("
@@ -247,27 +248,27 @@ void IPv6InterfaceData::choosePreferredAddress()
 
 void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
 {
-   return rtrVars.advPrefixList.push_back(advPrefix);
+    rtrVars.advPrefixList.push_back(advPrefix);
 }
 
 const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::advPrefix(int i) const
 {
-   ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
-   return rtrVars.advPrefixList[i];
+    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    return rtrVars.advPrefixList[i];
 }
 
 void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
 {
-   ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
-   ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
-   ASSERT(rtrVars.advPrefixList[i].prefixLength == advPrefix.prefixLength);
-   rtrVars.advPrefixList[i] = advPrefix;
+    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
+    ASSERT(rtrVars.advPrefixList[i].prefixLength == advPrefix.prefixLength);
+    rtrVars.advPrefixList[i] = advPrefix;
 }
 
 void IPv6InterfaceData::removeAdvPrefix(int i)
 {
-   ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
-   rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin()+i);
+    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin()+i);
 }
 
 simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,

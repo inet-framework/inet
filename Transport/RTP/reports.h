@@ -59,7 +59,7 @@ class INET_API SenderReport : public cObject {
         /*!
         Duplicates this SenderReport by calling the copy constructor.
         */
-        virtual cObject *dup() const;
+        virtual cPolymorphic *dup() const;
 
         /*!
         Returns the class name "SenderReport".
@@ -170,7 +170,7 @@ class INET_API ReceptionReport : public cObject {
         /*!
         Duplicates this ReceptionReport by calling the copy constructor.
         */
-        virtual cObject *dup() const;
+        virtual cPolymorphic *dup() const;
 
         /*!
         Returns the class name "ReceptionReport".

@@ -37,7 +37,7 @@ class INET_API TCPSegment : public TCPSegment_Base
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.name()) {operator=(other);}
     TCPSegment& operator=(const TCPSegment& other);
-    virtual cObject *dup() const {return new TCPSegment(*this);}
+    virtual cPolymorphic *dup() const {return new TCPSegment(*this);}
 
     /** Generated but unused method, should not be called. */
     virtual void setPayloadArraySize(unsigned int size);

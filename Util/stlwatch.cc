@@ -27,7 +27,7 @@ class INET_API cVectorWatchDescriptor : public cStructDescriptor
     cVectorWatchDescriptor();
     virtual ~cVectorWatchDescriptor();
     cVectorWatchDescriptor& operator=(const cVectorWatchDescriptor& other);
-    virtual cObject *dup() const {return new cVectorWatchDescriptor(*this);}
+    virtual cPolymorphic *dup() const {return new cVectorWatchDescriptor(*this);}
 
     virtual int getFieldCount();
     virtual const char *getFieldName(int field);
