@@ -55,7 +55,7 @@ public:
     /*!
     Duplicates the object.
     */
-    cPolymorphic *dup() const;
+    cObject *dup() const;
 
     /*!
     Returns the class name "RTPSenderStatusMessage".

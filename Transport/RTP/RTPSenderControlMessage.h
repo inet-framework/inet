@@ -71,7 +71,7 @@ public:
         /*!
         Duplicates the object.
         */
-        virtual cPolymorphic *dup() const;
+        virtual cObject *dup() const;
 
         /*!
         Returns the class name "RTPSenderControlMessage".

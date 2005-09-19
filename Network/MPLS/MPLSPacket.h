@@ -42,7 +42,7 @@ class INET_API MPLSPacket: public cMessage
     /**
      * cloning function
      */
-    virtual cPolymorphic *dup() const {return new MPLSPacket(*this);}
+    virtual cObject *dup() const {return new MPLSPacket(*this);}
 
     /**
      * Swap Label operation

@@ -1,9 +1,9 @@
-LDFLAGS+= -Wl,-export-dynamic
+#LDFLAGS+= -Wl,-export-dynamic
 #USERIF_LIBS=$(CMDENV_LIBS) $(TKENV_LIBS)
 
 
 #
-# incompatible with Windows
+#The following conflicts with Windows (in makemakefiles' contents):
 #
 #all: $(TARGET) INET
 #	echo>.tstamp

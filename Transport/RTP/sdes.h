@@ -78,7 +78,7 @@ class INET_API SDESItem : public cObject {
         /*!
         Duplicates theis SDESItem by calling the copy constructor.
         */
-        virtual cPolymorphic *dup() const;
+        virtual cObject *dup() const;
 
         /*!
         Returns the class name "SDESItem".
@@ -160,7 +160,7 @@ class INET_API SDESChunk : public cArray {
         /*!
         Duplicates this SDESChunk by calling the copy constructor.
         */
-        virtual cPolymorphic *dup() const;
+        virtual cObject *dup() const;
 
         /*!
         Returns the class name "SDESChunk".

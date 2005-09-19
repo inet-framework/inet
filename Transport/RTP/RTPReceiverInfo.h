@@ -61,7 +61,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo {
         /*!
         Duplicates this RTPReceiverInfo by calling the copy constructor.
         */
-        virtual cPolymorphic *dup() const;
+        virtual cObject *dup() const;
 
         /*!
         Returns the class name "RTPReceiverInfo".

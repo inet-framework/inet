@@ -91,7 +91,7 @@ public:
   SocketInterfacePacket(const  SocketInterfacePacket& );
 
   SocketInterfacePacket& operator=(const SocketInterfacePacket& ip);
-  virtual cPolymorphic *dup() const  { return new SocketInterfacePacket(*this); }
+  virtual cObject *dup() const  { return new SocketInterfacePacket(*this); }
 
   virtual void info(char *buf);
   virtual void writeContents(std::ostream& os);

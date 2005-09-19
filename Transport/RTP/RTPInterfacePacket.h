@@ -88,7 +88,7 @@ class INET_API RTPInterfacePacket : public cPacket {
         /*!
         Duplicates the RTPInterfacePacket by calling the copy constructor.
         */
-        virtual cPolymorphic *dup() const;
+        virtual cObject *dup() const;
 
         /*!
         Returns the class name "RTPInterfacePacket".

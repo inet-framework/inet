@@ -74,8 +74,8 @@ all:
 	cd Network/ICMPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv6
 
 	cd NetworkInterfaces/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
-	cd NetworkInterfaces/PPP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
-	cd NetworkInterfaces/Ethernet && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
+	cd NetworkInterfaces/PPP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/Queue
+	cd NetworkInterfaces/Ethernet && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/Queue
 	cd NetworkInterfaces/EtherSwitch && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../Ethernet
 
 	cd Nodes/INET && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES)
