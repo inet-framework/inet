@@ -2,6 +2,25 @@ Recent changes in the INET Framework
 ====================================
 
 
+INET-20050922
+-------------
+- patched for OMNeT++ 3.2:
+  - added '=NULL' default value to all args of hand-code module constructors
+    (2 or 3 places)
+  - RSVPPacket.h: dup() return type has to be cPolymorphic with OMNeT++ 3.2;
+    fixed it using '#if OMNETPP_VERSION<0x0302...#else...#endif'
+
+  Note: THIS IS THE ONLY RELEASE WHICH IS COMPATIBLE WITH BOTH 3.1 AND 3.2 
+
+- UDP dispatchByPort bug fixed; further smaller fixes
+
+- IPv6 updated (still unfinished)
+
+- NOT YET FIXED: 
+  - TCP bug http://www.omnetpp.org/listarchive/msg05687.php
+  - incorrect handling of host queues (Michael Tuexen)
+
+
 INET-20050720
 -------------
 
