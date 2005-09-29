@@ -149,10 +149,10 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  destination address to be onlink and simply return any available
          *  interface.
          */
-        const IPv6Address& determineNextHop(const IPv6Address& destAddr, int& outIfID);
+        IPv6Address determineNextHop(const IPv6Address& destAddr, int& outIfID);
         void initiateNeighbourUnreachabilityDetection(Neighbour *neighbour);
         void processNUDTimeout(cMessage *timeoutMsg);
-        const IPv6Address& selectDefaultRouter(int& outIfID);
+        IPv6Address selectDefaultRouter(int& outIfID);
         /**
          *  RFC 2461: Section 6.3.5
          *  Whenever the invalidation timer expires for a Prefix List entry, that

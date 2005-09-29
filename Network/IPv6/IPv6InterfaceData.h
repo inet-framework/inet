@@ -528,6 +528,11 @@ class INET_API IPv6InterfaceData : public cPolymorphic
      */
     simtime_t generateReachableTime(double MIN_RANDOM_FACTOR,
         double MAX_RANDOM_FACTOR, uint baseReachableTime);
+
+    /**
+     * Arg-less version.
+     */
+    simtime_t generateReachableTime();
   };
 
 #endif

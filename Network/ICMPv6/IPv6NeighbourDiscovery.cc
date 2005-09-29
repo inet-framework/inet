@@ -194,7 +194,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         //the sender creates one, sets its state to INCOMPLETE,
         ev << "Creating an INCOMPLETE entry in the neighbour cache.\n";
         nce = neighbourCache.addNeighbour(nextHopAddr, nextHopIfID);
-        
+
         //initiates Address Resolution,
         ev << "Initiating Address Resolution for:" << nextHopAddr
            << " on Interface:" << nextHopIfID << endl;
@@ -274,7 +274,7 @@ const MACAddress& IPv6NeighbourDiscovery::resolveNeighbour(const IPv6Address& ne
 
     Neighbour *nce = neighbourCache.lookup(nextHop, interfaceId);
     InterfaceEntry *ie = ift->interfaceAt(interfaceId);
-    
+
     if (!nce || nce->reachabilityState==IPv6NeighbourCache::INCOMPLETE)
         return MACAddress::UNSPECIFIED_ADDRESS;
     else if (nce->reachabilityState==IPv6NeighbourCache::STALE)
@@ -301,9 +301,9 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     Enter_Method("reachabilityConfirmed(%s,if=%d)", neighbour.str().c_str(), interfaceId);
     //hmmm... this should only be invoked if a TCP ACK was received and NUD is
     //currently being performed on the neighbour where the TCP ACK was received from.
-    
+
     Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
-    
+
     cMessage *msg = nce->nudTimeoutEvent;
     if (msg != NULL)
     {
@@ -312,7 +312,7 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
         cancelEvent(msg);
         delete msg;
     }
-    
+
     // TODO (see header file for description)
     /*A neighbor is considered reachable if the node has recently received
     a confirmation that packets sent recently to the neighbor were
@@ -363,7 +363,7 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     reachability of the forward path is of interest.*/
 }
 
-const IPv6Address& IPv6NeighbourDiscovery::determineNextHop(
+IPv6Address IPv6NeighbourDiscovery::determineNextHop(
     const IPv6Address& destAddr, int& outIfID)
 {
     IPv6Address nextHopAddr;
@@ -375,7 +375,7 @@ const IPv6Address& IPv6NeighbourDiscovery::determineNextHop(
     //determine whether the packet's destination is on- or off-link.
     ev << "Find out if supplied dest addr is on-link or off-link.\n";
     const IPv6Route *route = rt6->doLongestPrefixMatch(destAddr);
-    
+
     if (route != NULL)
     {
         //If the destination is on-link, the next-hop address is the same as the
@@ -398,14 +398,14 @@ const IPv6Address& IPv6NeighbourDiscovery::determineNextHop(
     {
         //Otherwise, the sender selects a router from the Default Router List
         //(following the rules described in Section 6.3.6).
-        
+
         ev << "No routes were found, Dest addr is off-link.\n";
         nextHopAddr = selectDefaultRouter(outIfID);
 
         if (outIfID == -1) ev << "No Default Routers were found.";
         else ev << "Default router found.\n";
     }
-    
+
     /*the results of next-hop determination computations are saved in the Destination
     Cache (which also contains updates learned from Redirect messages).*/
     rt6->updateDestCache(destAddr, nextHopAddr, outIfID);
@@ -460,7 +460,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
         neighbourCache.remove(nceKey->address, nceKey->interfaceID);
         return;
     }
-    
+
     /*Upon entering the PROBE state, a node sends a unicast Neighbor Solicitation
     message to the neighbor using the cached link-layer address.*/
     createAndSendNSPacket(nceKey->address, nceKey->address,
@@ -473,7 +473,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     scheduleAt(simTime()+ie->ipv6()->_retransTimer(), timeoutMsg);
 }
 
-const IPv6Address& IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
+IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
 {
     ev << "Selecting default router...\n";
     //draft-ietf-ipv6-2461bis-04.txt Section 6.3.6
@@ -507,7 +507,7 @@ const IPv6Address& IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
                 routerExpired = true;
             }
         }
-        
+
         if (routerExpired == false)
         {
             if (nce.reachabilityState == IPv6NeighbourCache::REACHABLE ||
@@ -554,7 +554,7 @@ void IPv6NeighbourDiscovery::timeoutPrefixEntry(const IPv6Address& destPrefix,
     rt6->removeOnLinkPrefix(destPrefix, prefixLength);
     //hmmm... should the unicast address associated with this prefix be deleted
     //as well?-TODO: The address should be timeout/deleted as well!!
-    
+
     /*No existing Destination Cache entries need be updated, however. Should a
     reachability problem arise with an existing Neighbor Cache entry, Neighbor
     Unreachability Detection will perform any needed recovery.*/
@@ -567,7 +567,7 @@ void IPv6NeighbourDiscovery::timeoutDefaultRouter(const IPv6Address& addr,
     /*Whenever the Lifetime of an entry in the Default Router List expires,
     that entry is discarded.*/
     neighbourCache.remove(addr, interfaceID);
-    
+
     /*When removing a router from the Default Router list, the node MUST update
     the Destination Cache in such a way that all entries using the router perform
     next-hop determination again rather than continue sending traffic to the
@@ -590,7 +590,7 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
     //Neighbor Cache entry in the INCOMPLETE state(already created if not done yet)
     //WEI-If entry already exists, we still have to ensure that its state is INCOMPLETE.
     nce->reachabilityState = IPv6NeighbourCache::INCOMPLETE;
-    
+
     //and transmitting a Neighbor Solicitation message targeted at the
     //neighbor.  The solicitation is sent to the solicited-node multicast
     //address "corresponding to"(or "derived from") the target address.
@@ -616,7 +616,7 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
     createAndSendNSPacket(nsTargetAddr, nsDestAddr, nsSrcAddr, ie);
     nce->numOfARNSSent = 1;
     nce->nsSrcAddr = nsSrcAddr;
-    
+
     /*While awaiting a response, the sender SHOULD retransmit Neighbor Solicitation
     messages approximately every RetransTimer milliseconds, even in the absence
     of additional traffic to the neighbor. Retransmissions MUST be rate-limited
@@ -674,7 +674,7 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
         pendingQueue.remove(msg);
         icmpv6->sendErrorMessage(ipv6Msg, ICMPv6_DESTINATION_UNREACHABLE, ADDRESS_UNREACHABLE);
     }
-    
+
     //RFC 2461: Section 7.3.3
     /*If address resolution fails, the entry SHOULD be deleted, so that subsequent
     traffic to that neighbor invokes the next-hop determination procedure again.*/
@@ -1055,7 +1055,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         its advertising interfaces.  Outgoing Router Advertisements are filled
         with the following values consistent with the message format given in
         Section 4.2:*/
-        
+
         //- In the Router Lifetime field: the interface's configured AdvDefaultLifetime.
         ra->setRouterLifetime(ie->ipv6()->advDefaultLifetime());
 
@@ -1063,13 +1063,13 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         //AdvOtherConfigFlag, respectively.  See [ADDRCONF].
         ra->setManagedAddrConfFlag(ie->ipv6()->advManagedFlag());
         ra->setOtherStatefulConfFlag(ie->ipv6()->advOtherConfigFlag());
-        
+
         //- In the Cur Hop Limit field: the interface's configured CurHopLimit.
         ra->setCurHopLimit(ie->ipv6()->advCurHopLimit());
 
         //- In the Reachable Time field: the interface's configured AdvReachableTime.
         ra->setReachableTime(ie->ipv6()->advReachableTime());
-        
+
         //- In the Retrans Timer field: the interface's configured AdvRetransTimer.
         ra->setRetransTimer(ie->ipv6()->advRetransTimer());
 
@@ -1089,7 +1089,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
             IPv6NDPrefixInformation prefixInfo;
             prefixInfo.setPrefix(advPrefix.prefix);
             prefixInfo.setPrefixLength(advPrefix.prefixLength);
-            
+
             //- In the "on-link" flag: the entry's AdvOnLinkFlag.
             prefixInfo.setOnlinkFlag(advPrefix.advOnLinkFlag);
             //- In the Valid Lifetime field: the entry's AdvValidLifetime.
@@ -1151,13 +1151,13 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     ev << "Processing RA for Router Updates\n";
     //RFC2461: Section 6.3.4
     //Paragraphs 1 and 2 omitted.
-    
+
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
     IPv6Address raSrcAddr = raCtrlInfo->srcAddr();
     InterfaceEntry *ie = ift->interfaceByPortNo(raCtrlInfo->inputGateIndex());
     int ifID = ie->interfaceId();
-    
+
     /*- If the address is not already present in the host's Default Router List,
     and the advertisement's Router Lifetime is non-zero, create a new entry in
     the list, and initialize its invalidation timer value from the advertisement's
@@ -1197,7 +1197,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
         //If no Source Link-Layer Address is included, but a corresponding Neighbor
         //Cache entry exists, its IsRouter flag MUST be set to TRUE.
         neighbour->isRouter = true;
-        
+
         //If a cache entry already exists and is updated with a different link-
         //layer address the reachability state MUST also be set to STALE.
         if (ra->sourceLinkLayerAddress().isUnspecified() == false &&
@@ -1218,7 +1218,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
             timeoutDefaultRouter(raSrcAddr, ifID);
         }
     }
-    
+
     //Paragraph Omitted.
 
     //If the received Cur Hop Limit value is non-zero the host SHOULD set
@@ -1229,7 +1229,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
            << "received value.\n";
         ie->ipv6()->setCurHopLimit(ra->curHopLimit());
     }
-    
+
     //If the received Reachable Time value is non-zero the host SHOULD set its
     //BaseReachableTime variable to the received value.
     if (ra->reachableTime() != 0)
@@ -1246,7 +1246,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
         }
         ev << endl;
     }
-    
+
     //The RetransTimer variable SHOULD be copied from the Retrans Timer field,
     //if the received value is non-zero.
     if (ra->retransTimer() != 0)
@@ -1288,7 +1288,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
     {
         prefixInfo = ra->prefixInformation(i);
         if (!prefixInfo.onlinkFlag()) break;//skip to next prefix option
-        
+
         //with the on-link flag set, a host does the following:
         ev << "Fetching Prefix Information:" << i+1 << " of "
            << ra->prefixInformationArraySize() << endl;
@@ -1359,7 +1359,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
 
     //RFC 2461: Section 5.5.3
     //First condition tested, the autonomous flag is already set
-    
+
     //b) If the prefix is the link-local prefix, silently ignore the Prefix
     //Information option.
     if (prefixInfo.prefix().isLinkLocal() == true)
@@ -1398,7 +1398,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
         ie->ipv6()->assignAddress(newAddr, false, simTime()+validLifetime,
             simTime()+preferredLifetime);
     }
-    
+
     //TODO: this is the simplified version.
     /*e) If the advertised prefix matches the prefix of an autoconfigured
        address (i.e., one obtained via stateless or stateful address
@@ -1423,7 +1423,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
 
        3) Otherwise, reset the stored Lifetime in the corresponding
           address to two hours.*/
-    
+
 }
 
 void IPv6NeighbourDiscovery::createRATimer(InterfaceEntry *ie)
@@ -1436,7 +1436,7 @@ void IPv6NeighbourDiscovery::createRATimer(InterfaceEntry *ie)
     simtime_t interval
         = uniform(ie->ipv6()->minRtrAdvInterval(),ie->ipv6()->maxRtrAdvInterval());
     advIfEntry->raTimeoutMsg = msg;
-    
+
     simtime_t nextScheduledTime = simTime() + interval;
     advIfEntry->nextScheduledRATime = nextScheduledTime;
     advIfList.insert(advIfEntry);
@@ -1475,7 +1475,7 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     createAndSendRAPacket(destAddr, ie);
     advIfEntry->numRASent++;
     simtime_t nextScheduledTime;
-    
+
     //RFC 2461, Section 6.2.4
     /*Whenever a multicast advertisement is sent from an interface, the timer is
     reset to a uniformly-distributed random value between the interface's
@@ -1484,7 +1484,7 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     simtime_t interval
         = uniform(ie->ipv6()->minRtrAdvInterval(),ie->ipv6()->maxRtrAdvInterval());
     nextScheduledTime = simTime() + interval;
-    
+
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
     sent from an interface when it becomes an advertising interface,*/
     ev << "Num RA sent is: " << advIfEntry->numRASent << endl;
@@ -1576,7 +1576,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
         ns->setSourceLinkLayerAddress(myMacAddr);
 
     sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, inputGateIndex);
-    
+
     return ns;
 }
 
@@ -1769,7 +1769,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns,
     been received. If the solicitation's IP Destination Address is a multicast
     address, the Target Link-Layer option MUST be included in the advertisement.*/
     na->setTargetLinkLayerAddress(ie->macAddress());//here, we always include the MAC addr.
-    
+
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
     otherwise it MUST set the flag to zero.*/
     na->setRouterFlag(rt6->isRouter());
@@ -1804,7 +1804,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns,
         na->setSolicitedFlag(true);
         naDestAddr = nsCtrlInfo->srcAddr();
     }
-    
+
     /*If the Target Address is an anycast address the sender SHOULD delay sending
     a response for a random time between 0 and MAX_ANYCAST_DELAY_TIME seconds.*/
     /*TODO: More associated complexity for this one. We will have to delay
@@ -2059,7 +2059,7 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
         is the same as that in the cache, or no Target Link-layer address
         option was supplied, the received advertisement MUST update the
         Neighbor Cache entry as follows:*/
-        
+
         /*- The link-layer address in the Target Link-Layer Address option
             MUST be inserted in the cache (if one is supplied and is
             Different than the already recorded address).*/
@@ -2069,7 +2069,7 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
             ev << "Updating NCE's MAC addr with NA's.\n";
             nce->macAddress = naMacAddr;
         }
-        
+
         //- If the Solicited flag is set,
         if (naSolicitedFlag == TRUE)
         {

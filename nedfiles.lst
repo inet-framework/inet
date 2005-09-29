@@ -46,6 +46,7 @@ Network/IPv4/IGMP.ned
 Network/IPv4/IP.ned
 Network/IPv4/RoutingTable.ned
 Network/IPv6/IPv6.ned
+Network/IPv6/IPv6ErrorHandling.ned
 Network/IPv6/RoutingTable6.ned
 Network/LDP/NewLDP.ned
 Network/MPLS/LIBTable.ned
