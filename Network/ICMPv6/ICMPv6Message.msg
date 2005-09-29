@@ -55,10 +55,10 @@ enum ICMPv6Type
 enum ICMPv6DEST_UN
 {
   NO_ROUTE_TO_DEST = 0;
+  COMM_WITH_DEST_PROHIBITED = 1;
+  //2 - NOT ASSIGNED
   ADDRESS_UNREACHABLE = 3;
-  // 1 -- Communication with dest prohibited (firewall filter)
-  // 2 -- Unused
-  // 4 -- port unreachable
+  PORT_UNREACHABLE = 4;
 };
 
 

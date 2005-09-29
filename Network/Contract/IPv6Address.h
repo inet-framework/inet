@@ -221,6 +221,22 @@ class INET_API IPv6Address
         };
 
         /**
+         * RFC 3513: Section 2.6.1
+         * The Subnet-Router anycast address is predefined.  Its format is as
+         * follows:
+         * <pre>
+         * |                         n bits                 |   128-n bits   |
+         * +------------------------------------------------+----------------+
+         * |                   subnet prefix                | 00000000000000 |
+         * +------------------------------------------------+----------------+
+         * </pre>
+         */
+        // TODO revise doc, revise function! make static?  (Andras)
+        IPv6Address formSubnetRouterAnycastAddress(int prefixLength) const {
+            return IPv6Address(*this).setSuffix(UNSPECIFIED_ADDRESS, prefixLength);
+        }
+
+        /**
          * Forms a link-local address using the given interface identifier.
          */
         static IPv6Address formLinkLocalAddress(const InterfaceToken& ident);

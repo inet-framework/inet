@@ -36,12 +36,8 @@
 #include "RoutingTable6.h"
 #include "RoutingTable6Access.h"
 #include "IPv6NeighbourCache.h"
-
-/**
- * Constants
- */
-#define MAX_MULTICAST_SOLICIT//TODO: Add values
-#define MAX_RTR_SOLICITATIONS
+#include "ICMPv6.h"
+#include "ICMPv6Access.h"
 
 /**
  * Implements RFC 2461 Neighbor Discovery for IPv6.
@@ -49,6 +45,8 @@
 class INET_API IPv6NeighbourDiscovery : public cSimpleModule
 {
     public:
+        typedef std::vector<cMessage*> MsgPtrVector;
+        typedef IPv6NeighbourCache::Key Key;//for convenience
         typedef IPv6NeighbourCache::Neighbour Neighbour;  // for convenience
 
         Module_Class_Members(IPv6NeighbourDiscovery, cSimpleModule, 0);
@@ -84,14 +82,12 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         
     protected:
 
-        int NUM_OF_SOLICIT_SENT;
-        simtime_t MAX_ANYCAST_DELAY_TIME;
-
         //Packets awaiting Address Resolution or Next-Hop Determination.
         cQueue pendingQueue;
 
         InterfaceTable *ift;
         RoutingTable6 *rt6;
+        ICMPv6 *icmpv6;
         IPv6NeighbourCache neighbourCache;
         typedef std::set<cMessage*> RATimerList;
 
@@ -155,11 +151,53 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          */
         const IPv6Address& determineNextHop(const IPv6Address& destAddr, int& outIfID);
         void initiateNeighbourUnreachabilityDetection(Neighbour *neighbour);
+        void processNUDTimeout(cMessage *timeoutMsg);
         const IPv6Address& selectDefaultRouter(int& outIfID);
+        /**
+         *  RFC 2461: Section 6.3.5
+         *  Whenever the invalidation timer expires for a Prefix List entry, that
+         *  entry is discarded. No existing Destination Cache entries need be
+         *  updated, however. Should a reachability problem arise with an
+         *  existing Neighbor Cache entry, Neighbor Unreachability Detection will
+         *  perform any needed recovery.
+         */
+        void timeoutPrefixEntry(const IPv6Address& destPrefix, int prefixLength);
+        /**
+         *  RFC 2461: Section 6.3.5
+         *  Whenever the Lifetime of an entry in the Default Router List expires,
+         *  that entry is discarded. When removing a router from the Default
+         *  Router list, the node MUST update the Destination Cache in such a way
+         *  that all entries using the router perform next-hop determination
+         *  again rather than continue sending traffic to the (deleted) router.
+         */
+        void timeoutDefaultRouter(const IPv6Address& addr, int interfaceID);
+        /**
+         *  This method attempts to resolve the given neighbour's link-layer address.
+         *  The source address of the packet prompting address resolution is also
+         *  given in order to decide the source address of the NS to be sent.
+         *  nceKey stores 2 pieces of information (Neighbour address and Interface ID)
+         *  which is needed for addr resolution and access to the corresponding
+         *  nce.
+         */
         void initiateAddressResolution(const IPv6Address& dgSrcAddr,
-            const IPv6Address& neighbourAddr, int ifID);
+            Neighbour *nce);
+        /**
+         *  Resends a NS packet to the address intended for address resolution.
+         *  TODO: Not implemented yet!
+         */
+        void processARTimeout(cMessage *arTimeoutMsg);
+        /**
+         *  Drops specific queued packets for a specific NCE AR-timeout.
+         *  TODO: Not implemented yet!
+         */
+        void dropQueuedPacketsAwaitingAR(Neighbour *nce);
+        /**
+         *  Create control info and assigns it to a msg. Returns a copy of the
+         *  msg with the control info.
+         */
         void sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
             const IPv6Address& srcAddr, int inputGateIndex);
+
         /**
          *  Convenience class for sending Neighbour Discovery messages that
          *  requires some form of delay. This could potentially save the usage
@@ -167,14 +205,12 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          */
         void sendDelayedPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
             const IPv6Address& srcAddr, int inputGateIndex, simtime_t delay);
+
         /**
          *  Send off any queued packets within the Neighbour Discovery module
          *  awaiting address resolution.
-         *  TODO: Assuming queue has packets awaiting for address resolution on
-         *  different IP addresses, shouldn't this method have a smart mechanism
-         *  to send off the correct packet?
          */
-        void sendQueuedPacketToIPv6Module();
+        void sendQueuedPacketsToIPv6Module(Neighbour *nce);
 
         /**
          *  Assign a tentative address to the given Interface entry. This is a
@@ -199,6 +235,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         IPv6RouterSolicitation *createAndSendRSPacket(InterfaceEntry *ie);
         void initiateRouterDiscovery(cMessage *msg);
         /**
+         *  RFC 2461: Section 6.3.7 4th paragraph
          *  Once the host sends a Router Solicitation, and receives a valid
          *  Router Advertisement with a non-zero Router Lifetime, the host MUST
          *  desist from sending additional solicitations on that interface,
@@ -216,8 +253,16 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         IPv6RouterAdvertisement *createAndSendRAPacket(const IPv6Address& destAddr,
             InterfaceEntry *ie);
         void processRAPacket(IPv6RouterAdvertisement *ra, IPv6ControlInfo *raCtrlInfo);
-        void updateRouterList(IPv6RouterAdvertisement *ra, IPv6ControlInfo *raCtrlInfo);
-        void processRAPrefixInfoForAutoConf(IPv6NDPrefixInformation& prefixInfo,
+        void processRAForRouterUpdates(IPv6RouterAdvertisement *ra,
+            IPv6ControlInfo *raCtrlInfo);
+        //RFC 2461: Section 6.3.4
+        /*Note: Implementations can choose to process the on-link aspects of the
+        prefixes separately from the address autoconfiguration aspects of the
+        prefixes by, e.g., passing a copy of each valid Router Advertisement message
+        to both an "on-link" and an "addrconf" function. Each function can then
+        operate independently on the prefixes that have the appropriate flag set.*/
+        void processRAPrefixInfo(IPv6RouterAdvertisement *ra, InterfaceEntry *ie);
+        void processRAPrefixInfoForAddrAutoConf(IPv6NDPrefixInformation& prefixInfo,
             InterfaceEntry *ie);
         /**
          *  Create a timer for the given interface entry that sends periodic
@@ -258,10 +303,10 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         void sendUnsolicitedNA(InterfaceEntry *ie);
         void processNAPacket(IPv6NeighbourAdvertisement *na, IPv6ControlInfo *naCtrlInfo);
         bool validateNAPacket(IPv6NeighbourAdvertisement *na, IPv6ControlInfo *naCtrlInfo);
-        void processNAForIncompleteNeighbourEntry(IPv6NeighbourAdvertisement *na,
-            IPv6NeighbourCache::Neighbour *neighbourEntry);
-        void processNAForExistingNeighborEntry(IPv6NeighbourAdvertisement *na,
-            IPv6NeighbourCache::Neighbour *neighbourEntry);
+        void processNAForIncompleteNCEState(IPv6NeighbourAdvertisement *na,
+            IPv6NeighbourCache::Neighbour *nce);
+        void processNAForOtherNCEStates(IPv6NeighbourAdvertisement *na,
+            IPv6NeighbourCache::Neighbour *nce);
         /************End Of Neighbour Advertisement Stuff**********************/
 
         /************Redirect Message Stuff************************************/
@@ -272,7 +317,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /**
          *  RFC2463 Section 3.1: Destination Unreachable Message
          *  Send an unreachable message to the IPv6 module.
+         *  TODO: Relocate to ICMPv6 module
          */
-        ICMPv6DestUnreachableMsg *createUnreachableMessage(IPv6Address destAddress);
+        /*ICMPv6DestUnreachableMsg *createAndSendUnreachableMessage(
+            const IPv6Address& destAddress, InterfaceEntry *ie);*/
 };
 #endif //IPV6NEIGHBOURDISCOVERY_H

@@ -33,7 +33,7 @@ std::string IPv6Route::info() const
 {
     std::stringstream out;
     out << destPrefix() << "/" << prefixLength() << " --> ";
-    out << "if=" << interfaceID() << " " << nextHop(); // FIXME try printing interface name
+    out << "if=" << interfaceID() << " next hop:" << nextHop(); // FIXME try printing interface name
     out << " " << routeSrcName(src());
     if (expiryTime()>0)
         out << " exp:" << simtimeToStr(expiryTime());
@@ -49,10 +49,10 @@ const char *IPv6Route::routeSrcName(RouteSrc src)
 {
     switch (src)
     {
-        case ROUTERADV:       return "ROUTERADV";
-        case OWNADVPREFIX:    return "OWNADVPREFIX";
+        case FROM_RA:         return "FROM_RA";
+        case OWN_ADV_PREFIX:  return "OWN_ADV_PREFIX";
         case STATIC:          return "STATIC";
-        case ROUTINGPROTOCOL: return "ROUTINGPROTOCOL";
+        case ROUTING_PROT:    return "ROUTING_PROT";
         default:              return "???";
     }
 }
@@ -79,9 +79,6 @@ void RoutingTable6::initialize(int stage)
 
         WATCH_PTRVECTOR(routeList);
         WATCH_MAP(destCache); // FIXME commented out for now
-    //FIXME: we will use this isRouter flag for now. what if future implementations
-    //have 2 interfaces where one interface is configured as a router and the other
-    //as a host?
         isrouter = par("isRouter");
         WATCH(isrouter);
 
@@ -145,6 +142,49 @@ void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     //d->setMetric((int)ceil(2e9/ie->datarate())); // use OSPF cost as default
     //FIXME TBD fill in the rest
+
+    assignRequiredNodeAddresses(ie);
+}
+
+void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
+{
+    //RFC 3513 Section 2.8:A Node's Required Addresses
+    /*A host is required to recognize the following addresses as
+    identifying itself:*/
+
+    //o  The loopback address.
+    if (ie->isLoopback())
+    {
+        ie->ipv6()->assignAddress(IPv6Address("::1"), false, 0, 0);
+        return;
+    }
+    //o  Its required Link-Local Address for each interface.
+    //IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->interfaceToken());
+    //ie->ipv6()->assignAddress(linkLocalAddr, true, 0, 0);
+
+    /*o  Any additional Unicast and Anycast Addresses that have been configured
+    for the node's interfaces (manually or automatically).*/
+
+    // FIXME FIXME Andras: commented out the following lines, because these addresses
+    // are implicitly checked for in localDeliver()  (we don't want redundancy,
+    // and manually adding solicited-node mcast address for each and every address
+    // is very error-prone!)
+    //
+    //o  The All-Nodes Multicast Addresses defined in section 2.7.1.
+
+    /*o  The Solicited-Node Multicast Address for each of its unicast and anycast
+    addresses.*/
+
+    //o  Multicast Addresses of all other groups to which the node belongs.
+
+    /*A router is required to recognize all addresses that a host is
+    required to recognize, plus the following addresses as identifying
+    itself:*/
+    /*o  The Subnet-Router Anycast Addresses for all interfaces for
+    which it is configured to act as a router.*/
+
+    //o  All other Anycast Addresses with which the router has been configured.
+    //o  The All-Routers Multicast Addresses defined in section 2.7.1.
 }
 
 static const char *getRequiredAttr(cXMLElement *elem, const char *attrName)
@@ -287,12 +327,30 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
+    {
         if (dest.matches((*it)->destPrefix(),(*it)->prefixLength()))
-            return *it;
-
+        {
+            // FIXME proofread this code, iterator invalidation-wise, etc
+            bool entryExpired = false;
+            if (simTime() > (*it)->expiryTime() && (*it)->expiryTime() != 0)//since 0 represents infinity.
+            {
+                ev << "Expired prefix detected!!" << endl;
+                removeOnLinkPrefix((*it)->destPrefix(), (*it)->prefixLength());
+                entryExpired = true;
+            }
+            if (entryExpired == false) return *it;
+        }
+    }
     // FIXME todo: if we selected an expired route, throw it out and select again!
-
     return NULL;
+}
+
+bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix)
+{
+    for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
+        if (prefix.matches((*it)->destPrefix(),128))
+            return true;
+    return false;
 }
 
 void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId)
@@ -336,7 +394,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::ROUTERADV && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -346,7 +404,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::ROUTERADV);
+        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::FROM_RA);
         route->setInterfaceID(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -373,7 +431,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::OWNADVPREFIX && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::OWN_ADV_PREFIX && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -383,7 +441,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::OWNADVPREFIX);
+        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::OWN_ADV_PREFIX);
         route->setInterfaceID(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -406,7 +464,7 @@ void RoutingTable6::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefix
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::ROUTERADV && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
         {
             routeList.erase(it);
             return; // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
@@ -436,7 +494,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
 
 void RoutingTable6::addRoutingProtocolRoute(IPv6Route *route)
 {
-    ASSERT(route->src()==IPv6Route::ROUTINGPROTOCOL);
+    ASSERT(route->src()==IPv6Route::ROUTING_PROT);
     addRoute(route);
 }
 

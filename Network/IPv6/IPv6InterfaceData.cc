@@ -73,50 +73,56 @@ IPv6InterfaceData::IPv6InterfaceData()
 
 std::string IPv6InterfaceData::info() const
 {
+    // FIXME FIXME FIXME FIXME info() should never print a newline
     std::ostringstream os;
-    os << "IPv6:{";
-    int i;
-    for (i=0; i<numAddresses(); i++)
-        os << (i?", ":"Addrs: ") << address(i)
+    os << "IPv6:{" << endl;
+    for (int i=0; i<numAddresses(); i++)
+        os << (i?"\t            , ":"\tAddrs:") << address(i)
            << "(" << IPv6Address::scopeName(address(i).scope())
-           << (isTentativeAddress(i)?" tent":"") << ")";
+           << (isTentativeAddress(i)?" tent":"") << ") "
+           << " expiryTime: " << (addresses[i].expiryTime==0?"inf":simtimeToStr(addresses[i].expiryTime))
+           << " prefExpiryTime: " << (addresses[i].prefExpiryTime==0?"inf":simtimeToStr(addresses[i].prefExpiryTime))
+           << endl;
 
-    for (i=0; i<numAdvPrefixes(); i++)
+    for (int i=0; i<numAdvPrefixes(); i++)
     {
         const AdvPrefix& a = advPrefix(i);
-        os << (i?", ":"  AdvPrefixes: ") << a.prefix << "/" << a.prefixLength << "("
+        os << (i?", ":"\tAdvPrefixes: ") << a.prefix << "/" << a.prefixLength << "("
            << (a.advOnLinkFlag?"":"off-link ")
            << (a.advAutonomousFlag?"":"non-auto ");
-        if (a.advValidLifetime>0)
-           os  << "expires:" << a.advValidLifetime;
-        else if (a.advValidLifetime<0)
-           os  << "lifetime:+" << (-a.advValidLifetime);
+        if (a.advValidLifetime==0) 
+           os  << "lifetime:inf"; 
+        else if (a.advValidLifetime>0)
+           os  << "expires:" << simtimeToStr(a.advValidLifetime);
         else
-           os  << "lifetime:inf";
-        os << ")";
+           os  << "lifetime:+" << (-a.advValidLifetime);
+        os << ")" << endl;
     }
     os << " ";
 
     // uncomment the following as needed!
-    os << " Node:";
+    os << "\tNode:";
     os << " dupAddrDetectTrans=" << nodeVars.dupAddrDetectTransmits;
     //os << " curHopLimit=" << hostVars.curHopLimit;
     //os << " retransTimer=" << hostVars.retransTimer;
     //os << " baseReachableTime=" << hostVars.baseReachableTime;
-    os << " reachableTime=" << hostVars.reachableTime;
+    os << " reachableTime=" << hostVars.reachableTime << endl;
 
-    os << "  Router:";
-    os << " maxRtrAdvInt=" << rtrVars.maxRtrAdvInterval;
-    os << " minRtrAdvInt=" << rtrVars.minRtrAdvInterval;
-    //os << " advManagedFlag=" << rtrVars.advManagedFlag;
-    //os << " advOtherFlag=" << rtrVars.advOtherFlag;
-    //os << " advLinkMTU=" << rtrVars.advLinkMTU;
-    //os << " advReachableTime=" << rtrVars.advReachableTime;
-    //os << " advRetransTimer=" << rtrVars.advRetransTimer;
-    //os << " advCurHopLimit=" << rtrVars.advCurHopLimit;
-    //os << " advDefaultLifetime=" << rtrVars.advDefaultLifetime;
+    if (rtrVars.advSendAdvertisements)
+    {
+        os << "\tRouter:";
+        os << " maxRtrAdvInt=" << rtrVars.maxRtrAdvInterval;
+        os << " minRtrAdvInt=" << rtrVars.minRtrAdvInterval << endl;
+        //os << " advManagedFlag=" << rtrVars.advManagedFlag;
+        //os << " advOtherFlag=" << rtrVars.advOtherFlag;
+        //os << " advLinkMTU=" << rtrVars.advLinkMTU;
+        //os << " advReachableTime=" << rtrVars.advReachableTime;
+        //os << " advRetransTimer=" << rtrVars.advRetransTimer;
+        //os << " advCurHopLimit=" << rtrVars.advCurHopLimit;
+        //os << " advDefaultLifetime=" << rtrVars.advDefaultLifetime;
+    }
 
-    os << "}";
+    os << "   }" << endl;
     return os.str();
 }
 
@@ -275,6 +281,12 @@ simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
     double MAX_RANDOM_FACTOR, uint baseReachableTime)
 {
     return uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
+}
+
+//FIXME use the above one
+simtime_t IPv6InterfaceData::generateReachableTime()
+{
+    return uniform(_minRandomFactor(), _maxRandomFactor()) * baseReachableTime();
 }
 
 

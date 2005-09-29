@@ -27,7 +27,7 @@
 
 
 /**
- * Represents a route in the route table. Routes with src=ROUTERADV represent
+ * Represents a route in the route table. Routes with src=FROM_RA represent
  * on-link prefixes advertised by routers.
  */
 class INET_API IPv6Route : public cPolymorphic
@@ -36,11 +36,10 @@ class INET_API IPv6Route : public cPolymorphic
     /** Specifies where the route comes from */
     enum RouteSrc
     {
-        ROUTERADV,        ///< on-link prefix, from Router Advertisement
-        //FIXME:(Wei)on-link prefixes from RA messages? I thought routers do not process RAs? RFC2461:section 6.3.4
-        OWNADVPREFIX,     ///< on routers: on-link prefix advertised by the router itself:yes this is what we need in RAs
-        STATIC,           ///< static route
-        ROUTINGPROTOCOL,  ///< route is managed by a routing protocol (OSPF,BGP,etc)
+        FROM_RA,        ///< on-link prefix, from Router Advertisement
+        OWN_ADV_PREFIX, ///< on routers: on-link prefix that the router **itself** advertises on the link
+        STATIC,         ///< static route
+        ROUTING_PROT, ///< route is managed by a routing protocol (OSPF,BGP,etc)
     };
 
   private:
@@ -72,7 +71,7 @@ class INET_API IPv6Route : public cPolymorphic
 
     void setInterfaceID(int interfaceId)  {_interfaceID = interfaceId;}
     void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
-    void setExpiryTime(simtime_t expiryTime)  {_expiryTime = _expiryTime;}
+    void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
     void setMetric(int metric)  {_metric = _metric;}
 
     const IPv6Address& destPrefix() const {return _destPrefix;}
@@ -130,6 +129,12 @@ class INET_API RoutingTable6 : public cSimpleModule
     static bool routeLessThan(const IPv6Route *a, const IPv6Route *b);
     // internal
     void configureInterfaceForIPv6(InterfaceEntry *ie);
+    /**
+     *  RFC 3513: Section 2.8 A Node's Required Address
+     *  Assign the various addresses to the node's respective interface. This
+     *  should be done when the IPv6 Protocol stack is created.
+     */
+    void assignRequiredNodeAddresses(InterfaceEntry *ie);
     // internal
     void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
 
@@ -187,6 +192,11 @@ class INET_API RoutingTable6 : public cSimpleModule
      * the resulting route, or NULL if there was no match.
      */
     const IPv6Route *doLongestPrefixMatch(const IPv6Address& dest);
+    
+    /**
+     * Checks if the given prefix already exists in the routing table (prefix list)
+     */
+    bool isPrefixPresent(const IPv6Address& prefix);
 
     //TBD multicast delivery
     //@}
@@ -214,7 +224,7 @@ class INET_API RoutingTable6 : public cSimpleModule
     /** @name Managing prefixes and the route table */
     //@{
     /**
-     * Add on-link prefix (route of type ROUTERADV), or update existing one.
+     * Add on-link prefix (route of type FROM_RA), or update existing one.
      * To be called from code processing on-link prefixes in Router Advertisements.
      * Expiry time can be derived from the Valid Lifetime field
      * in the Router Advertisements.
@@ -236,8 +246,8 @@ class INET_API RoutingTable6 : public cSimpleModule
     void removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
 
     /**
-     * Add route of type OWNADVPREFIX.
-     * FIXME comment!
+     * Add route of type OWN_ADV_PREFIX. This is a prefix that *this* router
+     * advertises on this interface.
      */
     void addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
                                  int interfaceId, simtime_t expiryTime);
@@ -252,7 +262,7 @@ class INET_API RoutingTable6 : public cSimpleModule
 
     /**
      * Adds the given route (which can be OSPF, BGP, RIP or any other route)
-     * with src==ROUTINGPROTOCOL. To store additional information with the route,
+     * with src==ROUTING_PROT. To store additional information with the route,
      * one can subclass from IPv6Route and add more fields.
      */
     void addRoutingProtocolRoute(IPv6Route *route);

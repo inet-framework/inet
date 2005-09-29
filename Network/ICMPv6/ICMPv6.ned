@@ -31,8 +31,9 @@ simple ICMPv6
     gates:
         in: fromIPv6;
         out: toIPv6;
-        in: pingIn;
+        in: pingIn; // ping requests from app
         out: pingOut;
+	out: errorOut;  // for errors
 endsimple
 
 

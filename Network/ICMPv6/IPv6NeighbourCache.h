@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2005 Andras Varga
+ * Copyright (C) 2005 Wei Yang, Ng
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +21,7 @@
 #define NEIGHBORCACHE_H
 
 #include <map>
+#include <vector>
 #include <omnetpp.h>
 #include "IPv6Address.h"
 #include "MACAddress.h"
@@ -41,6 +43,8 @@
 class INET_API IPv6NeighbourCache
 {
   public:
+    typedef std::vector<cMessage*> MsgPtrVector;  // TODO verify this is really needed --Andras
+
     /** Neighbour's reachability state */
     enum ReachabilityState {INCOMPLETE, REACHABLE, STALE, DELAY, PROBE};
 
@@ -63,6 +67,7 @@ class INET_API IPv6NeighbourCache
     struct Neighbour
     {
         // Neighbour info
+        const Key *nceKey;//store a pointer back to the key that links to this NCE.-WEI
         MACAddress macAddress;
         bool isRouter;
         bool isDefaultRouter; // is it on the Default Router List?
@@ -71,8 +76,17 @@ class INET_API IPv6NeighbourCache
         ReachabilityState reachabilityState;
         simtime_t reachabilityExpires; // reachabilityLastConfirmed+reachableTime
         short numProbesSent;
-        cMessage *timeoutEvent; // DELAY or PROBE timer
-
+        cMessage *nudTimeoutEvent; // DELAY or PROBE timer
+        
+        //WEI-We could have a seperate AREntry in the ND module.
+        //But we should merge those information in the neighbour cache for a
+        //cleaner solution. if reachability state is INCOMPLETE, it means that
+        //addr resolution is being performed for this NCE.
+        int numOfARNSSent;
+        cMessage *arTimer;//Address Resolution self-message timer
+        MsgPtrVector pendingPackets; //ptrs to queued packets associated with this NCE
+        IPv6Address nsSrcAddr;//the src addr that was used to send the previous NS
+        
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement
         // fields (reachableTime, retransTimer, MTU) update the interface
@@ -103,6 +117,9 @@ class INET_API IPv6NeighbourCache
 
     /** Returns a neighbour entry, or NULL. */
     Neighbour *lookup(const IPv6Address& addr, int interfaceID);
+    
+    /** Experimental code. */
+    const Key *lookupKeyAddr(Key& key);
 
     /** For iteration on the internal std::map */
     iterator begin()  {return neighbourMap.begin();}
@@ -111,6 +128,7 @@ class INET_API IPv6NeighbourCache
     iterator end()  {return neighbourMap.end();}
 
     /** Creates and initializes a neighbour entry with isRouter=false, state=INCOMPLETE. */
+    //TODO merge into next one (using default arg)
     Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID);
 
     /** Creates and initializes a neighbour entry with isRouter=false, MAC address and state=STALE. */
@@ -118,6 +136,7 @@ class INET_API IPv6NeighbourCache
                             MACAddress macAddress);
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), state=INCOMPLETE. */
+    //TODO merge into next one (using default arg)
     Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
                         simtime_t expiryTime);
 

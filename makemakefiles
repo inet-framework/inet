@@ -115,6 +115,7 @@ all:
 	cd Examples/MPLS/TestTE6 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
 
 	cd Examples/IPv6/NClients && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/IPv6/DemoNetworkEth && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)

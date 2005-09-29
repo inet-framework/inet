@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2005 Andras Varga
+ * Copyright (C) 2005 Wei Yang, Ng
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,7 +33,7 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
     if (e.isRouter) os << " ROUTER";
     if (e.isDefaultRouter) os << " defaultRtr";
     os << " " << IPv6NeighbourCache::stateName(e.reachabilityState);
-    os << " exp:"  << simtimeToStr(e.reachabilityExpires);
+    os << " reachabilityExp:"  << simtimeToStr(e.reachabilityExpires);
     if (e.numProbesSent) os << " probesSent:" << e.numProbesSent;
     if (e.isRouter) os << " rtrExp:" << simtimeToStr(e.routerExpiryTime);
     return os;
@@ -50,18 +51,26 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::lookup(const IPv6Address& add
     return i==neighbourMap.end() ? NULL : &(i->second);
 }
 
+const IPv6NeighbourCache::Key *IPv6NeighbourCache::lookupKeyAddr(Key& key)
+{
+    NeighbourMap::iterator i = neighbourMap.find(key);
+    return &(i->first);
+}
+
 IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);
     ASSERT(neighbourMap.find(key)==neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
+    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
     nbor.isRouter = false;
     nbor.isDefaultRouter = false;
     nbor.reachabilityState = INCOMPLETE;
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
-    nbor.timeoutEvent = NULL;
+    nbor.nudTimeoutEvent = NULL;
+    nbor.numOfARNSSent = 0;
     nbor.routerExpiryTime = 0;
     return &nbor;
 }
@@ -72,13 +81,14 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Addres
     ASSERT(neighbourMap.find(key)==neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
+    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
     nbor.macAddress = macAddress;
     nbor.isRouter = false;
     nbor.isDefaultRouter = false;
     nbor.reachabilityState = STALE;
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
-    nbor.timeoutEvent = NULL;
+    nbor.nudTimeoutEvent = NULL;
     nbor.routerExpiryTime = 0;
     return &nbor;
 }
@@ -90,13 +100,14 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     ASSERT(neighbourMap.find(key)==neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
+    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
     nbor.isRouter = true;
-    nbor.isDefaultRouter = true;
+    nbor.isDefaultRouter = true;//FIXME: a router may advertise itself it self as a router but not as a default one.-WEI
     nbor.reachabilityState = INCOMPLETE;
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
-    nbor.timeoutEvent = NULL;
-    nbor.routerExpiryTime = 0;
+    nbor.nudTimeoutEvent = NULL;
+    nbor.routerExpiryTime = expiryTime;
     return &nbor;
 }
 
@@ -107,14 +118,16 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     ASSERT(neighbourMap.find(key)==neighbourMap.end()); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
+    nbor.nceKey = lookupKeyAddr(key);//a ptr that links to the key.-WEI for convenience.
     nbor.macAddress = macAddress;
     nbor.isRouter = true;
     nbor.isDefaultRouter = true;
     nbor.reachabilityState = STALE;
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
-    nbor.timeoutEvent = NULL;
-    nbor.routerExpiryTime = 0;
+    nbor.nudTimeoutEvent = NULL;
+    
+    nbor.routerExpiryTime = expiryTime;
     return &nbor;
 }
 
@@ -123,13 +136,13 @@ void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
     Key key(addr, interfaceID);
     NeighbourMap::iterator it = neighbourMap.find(key);
     ASSERT(it!=neighbourMap.end()); // entry must exist
-    delete it->second.timeoutEvent;
+    delete it->second.nudTimeoutEvent;
     neighbourMap.erase(it);
 }
 
 void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 {
-    delete it->second.timeoutEvent;
+    delete it->second.nudTimeoutEvent;
     neighbourMap.erase(it);
 }
 

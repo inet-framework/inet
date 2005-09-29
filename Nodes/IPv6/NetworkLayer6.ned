@@ -1,4 +1,7 @@
 //
+// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 Wei Yang, Ng
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -18,7 +21,8 @@
 import
     "IPv6",
     "ICMPv6",
-    "IPv6NeighbourDiscovery";
+    "IPv6NeighbourDiscovery",
+    "IPv6ErrorHandling";
 
 
 //
@@ -54,8 +58,10 @@ module NetworkLayer6
             display: "i=block/network2;p=84,129";
         icmpv6: ICMPv6;
             display: "i=block/control;p=208,79";
+        ipv6ErrorHandling: IPv6ErrorHandling;
+        	display: "p=280,79;i=block/process_s";
         neighbourDiscovery: IPv6NeighbourDiscovery;
-            display: "p=209,171;i=block/network";
+            display: "p=208,171;i=block/network";
     connections nocheck:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer
         ipv6.transportOut[0] --> TCPOut display "m=n";
@@ -73,6 +79,13 @@ module NetworkLayer6
         // IPv6 to ICMPv6
         ipv6.icmpOut --> icmpv6.fromIPv6;
         ipv6.icmpIn <-- icmpv6.toIPv6;
+        
+        // ICMPv6 to IPv6ErrorHandling
+        icmpv6.errorOut --> ipv6ErrorHandling.in;
+        
+        // ICMPv6 to ping I/O
+        icmpv6.pingOut --> pingOut;
+        icmpv6.pingIn <-- pingIn;
 
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.fromIPv6;

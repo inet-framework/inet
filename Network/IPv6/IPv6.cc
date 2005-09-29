@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 Wei Yang, Ng
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -71,7 +72,8 @@ void IPv6::updateDisplayString()
 void IPv6::endService(cMessage *msg)
 {
     if (msg->arrivalGate()->isName("transportIn") ||
-        (msg->arrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg)))
+       (msg->arrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg)) ||
+       (msg->arrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)))//Added this for ICMP msgs from ICMP module-WEI
     {
         // packet from upper layers or ND: encapsulate and send out
         handleMessageFromHL(msg);
@@ -178,10 +180,15 @@ void IPv6::routePacket(IPv6Datagram *datagram)
     }
 
     int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
+    ev << "Input Gate Index: " << inputGateIndex << endl;
     if (inputGateIndex!=-1)
     {
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
-        if (!rt->isRouter())
+        //yes but datagrams from the ND module is getting dropped too!-WEI
+        //so we add a 2nd condition
+        // FIXME rewrite code so that condition is cleaner --Andras
+        //if (!rt->isRouter())
+        if (!rt->isRouter() && !(datagram->arrivalGate()->isName("ndIn")))
         {
             ev << "forwarding is off, dropping packet\n";
             numDropped++;
@@ -227,8 +234,10 @@ void IPv6::routePacket(IPv6Datagram *datagram)
             }
             return;
         }
-        nextHop = route->nextHop();
         interfaceId = route->interfaceID();
+        nextHop = route->nextHop();
+        if (nextHop.isUnspecified())
+            nextHop = destAddress;  // next hop is the host itself
 
         // add result into destination cache
         rt->updateDestCache(destAddress, nextHop, interfaceId);
@@ -419,6 +428,11 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         ev << "Neigbour Discovery packet: passing it to ND module\n";
         send(packet, "ndOut");
     }
+    else if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message*>(packet))
+    {
+        ev << "ICMPv6 packet: passing it to ICMPv6 module\n";
+        send(packet, "icmpOut");
+    }//Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol==IP_PROT_IP || protocol==IP_PROT_IPv6)
     {
         ev << "Tunnelled IP datagram\n";
@@ -429,6 +443,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     {
         int gateindex = mapping.outputGateForProtocol(protocol);
         ev << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
+        //TODO: Indication of forward progress
         send(packet, "transportOut", gateindex);
     }
 }
@@ -441,6 +456,7 @@ cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
     controlInfo->setProtocol(datagram->transportProtocol());
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
+    controlInfo->setHopLimit(datagram->hopLimit());
     int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
     controlInfo->setInputGateIndex(inputGateIndex);
     packet->setControlInfo(controlInfo);

@@ -124,9 +124,16 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVecto
             IPv6InterfaceData::AdvPrefix p;
             p.prefix = prefix;
             p.prefixLength = 64;
-            p.advValidLifetime = 0;
+            // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
+            // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in 
+            // consecutive advertisements).
+            p.advValidLifetime = 2592000;
+            // Default: TRUE
             p.advOnLinkFlag = true;
-            p.advPreferredLifetime = 0;
+            // Default: 604800 seconds (7 days), fixed (i.e., stays the same in consecutive
+            // advertisements).
+            p.advPreferredLifetime = 604800;
+            // Default: TRUE
             p.advAutonomousFlag = true;
             ie->ipv6()->addAdvPrefix(p);
 
