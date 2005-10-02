@@ -53,8 +53,7 @@ void ChannelAccess::initialize(int stage)
 
 /**
  * This function has to be called whenever a packet is supposed to be
- * sent to the channel. Don't try to figure out what gates you have
- * and which ones are connected, this function does this for you!
+ * sent to the channel.
  *
  * This function really sends the message away, so if you still want
  * to work with it you should send a duplicate!
@@ -76,6 +75,8 @@ void ChannelAccess::sendToChannel(cMessage *msg, double delay)
             continue;
         int radioStart = radioGate->id();
         int radioEnd = radioStart + radioGate->size();
+        // TODO account for propagation delay, based on distance? 
+        // Over 300m, dt=1us=10 bit times @ 10Mbps
         for (int g = radioStart; g != radioEnd; ++g)
             sendDirect((cMessage *)msg->dup(), delay, mod, g);
     }

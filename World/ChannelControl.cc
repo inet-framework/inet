@@ -160,7 +160,7 @@ void ChannelControl::updateConnections(HostRef h)
             if (h->neighbors.insert(it).second == true)
             {
                 it->neighbors.insert(h);
-                h->isModuleListValid = it->isModuleListValid = false;
+                h->isModuleListValid = it->isModuleListValid = false; 
             }
         }
         else

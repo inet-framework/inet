@@ -55,6 +55,9 @@ void ScenarioManager::handleMessage(cMessage *msg)
     delete msg;
 
     processCommand(node);
+
+    numDone++;
+    updateDisplayString();
 }
 
 void ScenarioManager::processCommand(cXMLElement *node)
@@ -74,9 +77,6 @@ void ScenarioManager::processCommand(cXMLElement *node)
     //    processConnectCommand(node);
     else
         processModuleSpecificCommand(node);
-
-    numDone++;
-    updateDisplayString();
 }
 
 // helper function
