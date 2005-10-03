@@ -12,100 +12,102 @@
 
 
 import
-    "NotificationBoard",
     "NetworkLayer",
-    "RoutingTable",
-    "InterfaceTable",
     "MPLSModule",
     "LIBTable",
+    "RoutingTable",
+    "InterfaceTable",
+    "SimpleClassifier",
     "RSVP",
-    "OspfTe",
-    "PPPInterface",
-    "RSVPAppl";
-
-
+    "TED";
 
 //
 // An \RSVP-TE capable router.
 //
 // \RSVP occupies the Transport layer; however, it is not a transport protocol
-// itself. \RSVP uses transport protocols to route packets. OSPF-TE is used
+// itself. \RSVP uses transport protocols to route packets. TED is used
 // to calculate shortest paths.
 //
 module RSVP_LSR
-    parameters:
-        routerId : string,
-        isIR : bool,
-        isER : bool,
-        routingFile : string,
-        LibTableFileName : string,
-        PrtTableFileName : string;
-    gates:
-        in: in[];
-        out: out[];
-    submodules:
-        notificationBoard: NotificationBoard;
-            display: "p=70,60;i=block/control";
-        interfaceTable: InterfaceTable;
-            display: "p=70,150;i=block/table";
-        routingTable: RoutingTable;
-            parameters:
-                IPForward = true,
-                routerId = routerId,
-                routingFile = routingFile;
-            display: "p=70,240;i=block/table";
-        ospf_te: OspfTe;
-            display: "i=block/cogwheel;p=300,240;o=#008040";
-        signal_module: RSVPAppl;
-            parameters:
-                isIR = isIR,
-                isER = isER;
-            display: "i=block/control;o=#8080ff;p=300,60";
-        rsvp: RSVP;
-            parameters:
-                isIR = isIR,
-                isER = isER;
-            display: "i=block/square;o=#0080c0;p=192,60";
-        networkLayer: NetworkLayer;
-            gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
-            display: "p=192,155;i=block/fork";
-        ppp: PPPInterface[sizeof(out)];
-            display: "p=88,330,row,90;q=queue;i=block/ifcard";
+	parameters:
+		namid : numeric,
+		namlog : string,
+		namprolog : string,
+		
+		peers : string,
+		routerId : string,
+		routingFile : string;
+	gates:
+		in: in[];
+		out: out[];
+
+	submodules:
+		routingTable: RoutingTable;
+		parameters:
+			IPForward = true,
+			routerId = routerId,
+			routingFile = routingFile;
+		display: "p=60,130;i=box3";
+
+		interfaceTable: InterfaceTable;
+		parameters:
+		display: "p=60,240;i=box3";
+						
+		ted_module: TED;
+		parameters:
+			peers = peers;
+		display: "o=#0080c0;p=190,51;b=40,24,rect";
+			
+		rsvp: RSVP;
+        	parameters:
+			peers = peers;
+		display: "o=#008080;p=260,51;b=40,24,rect";
+
+		classifier: SimpleClassifier;
+		parameters:
+		display: "o=#008000;p=330,51;b=40,24,rect";
+            
+		networkLayer: NetworkLayer;
+		gatesizes:
+			physIn[sizeof(out)],
+			physOut[sizeof(out)];
+		display: "p=192,163;i=fork";
+			
+		ppp: PPPRouterInterface[sizeof(out)];
+		parameters:
+			namid = namid,
+			namlog = namlog,
+			namprolog = namprolog;
+		display: "p=88,297,row,90;q=queue;i=iface";
+			
         mplsModule: MPLSModule;
-            parameters:
-                isIR = isIR,
-                isER = isER;
-            gatesizes:
-                fromL3[sizeof(out)],
-                toL3[sizeof(out)],
-                fromL2[sizeof(out)],
-                toL2[sizeof(out)];
-            display: "i=block/switch;o=#ff8000;p=192,247";
-        libTable: LIBTable;
-            parameters:
-                LibTableFileName = LibTableFileName,
-                PrtTableFileName = PrtTableFileName;
-            display: "i=block/table2;p=300,145";
-    connections nocheck:
-        signal_module.to_rsvp --> rsvp.from_rsvp_app;
-        signal_module.from_rsvp <-- rsvp.to_rsvp_app;
+		parameters:
+			labelIf = peers;
+		gatesizes:
+			fromL3[sizeof(out)],
+			toL3[sizeof(out)],
+			fromL2[sizeof(out)],
+			toL2[sizeof(out)];
+		display: "o=#ff8000;p=192,238;b=66,14";
+			
+		libTable: LIBTable;
+		display: "i=box3;p=60,180";
 
-        rsvp.to_ip --> networkLayer.RSVPIn;
-        rsvp.from_ip <-- networkLayer.RSVPOut;
+connections nocheck:
+	ted_module.to_ip --> networkLayer.OSPFIn;
+	ted_module.from_ip <-- networkLayer.OSPFOut;
 
-        for i=0..sizeof(out)-1 do
-            in[i] --> ppp[i].physIn;
-            out[i] <-- ppp[i].physOut;
+	rsvp.to_ip --> networkLayer.RSVPIn;
+	rsvp.from_ip <-- networkLayer.RSVPOut;
 
-            ppp[i].netwOut --> mplsModule.fromL2[i];
-            ppp[i].netwIn <-- mplsModule.toL2[i];
+	for i=0..sizeof(out)-1 do
+		in[i] --> ppp[i].physIn;
+		out[i] <-- ppp[i].physOut;
 
-            mplsModule.toL3[i] --> networkLayer.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
-        endfor;
+		ppp[i].netwOut --> mplsModule.fromL2[i];
+		ppp[i].netwIn <-- mplsModule.toL2[i];
+
+		mplsModule.toL3[i] --> networkLayer.physIn[i];
+		mplsModule.fromL3[i] <-- networkLayer.physOut[i];
+	endfor;
 endmodule
-
-
-
