@@ -1,0 +1,32 @@
+//
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
+// either version 2 of the License, or any later version.
+// The library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
+
+//
+// This module implements a very minimalistic link state routing protcol.
+// Apart from the basic topology information, the current link usage
+// is distributed to all participants in the network (by means of flooding).
+//
+// Collaborations
+//
+// \TED exposes several public methods for querying the current network state
+// and allows RSVP and individual applications to calculate feasible LSPs
+// meeting the chosen bandwidth criteria.
+//
+simple TED
+	parameters:
+		peers : string;
+	gates:
+		in: from_ip;
+		out: to_ip;
+		
+		in: from_rsvp;
+endsimple
