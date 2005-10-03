@@ -19,7 +19,8 @@
 import
 	"Router6",
 	"StandardHost6",
-	"FlatNetworkConfigurator6";
+	"FlatNetworkConfigurator6",
+	"TCPDump";
 
 channel ethernetline
 	delay 0.1us;
@@ -31,8 +32,8 @@ module DemoNetworkEth
 	submodules:
 		configurator: FlatNetworkConfigurator6;
 			parameters:
-				moduleTypes = "Router6 StandardHost6",
-				nonIPModuleTypes = "EtherHub";
+				moduleTypes = "Router6 StandardHost6 TCPDump",
+				nonIPModuleTypes = "EtherHub TCPDump";
 			display: "i=block/cogwheel";
         r1: Router6;
             display: "i=abstract/router";
@@ -42,10 +43,16 @@ module DemoNetworkEth
         	display: "i=device/laptop";
         srv: StandardHost6[n];
         	display: "i=device/server_l";
+        linemonitor: TCPDump[n];
+        	display: "i=device/clock";
 	connections nocheck:
 		for i=0..n-1 do
-			cli[i].ethOut++ --> ethernetline --> r1.ethIn++;
-			cli[i].ethIn++ <-- ethernetline <-- r1.ethOut++;
+			cli[i].ethOut++ --> ethernetline --> linemonitor[i].in1;
+			linemonitor[i].out2 --> ethernetline --> r1.ethIn++;
+			linemonitor[i].in2 <-- ethernetline <-- r1.ethOut++;
+			cli[i].ethIn++ <-- ethernetline <-- linemonitor[i].out1;			
+			//cli[i].ethOut++ --> ethernetline --> r1.ethIn++;
+			//cli[i].ethIn++ <-- ethernetline <-- r1.ethOut++;
 			srv[i].ethOut++ --> ethernetline --> r2.ethIn++;
 			srv[i].ethIn++ <-- ethernetline <-- r2.ethOut++;
 		endfor
