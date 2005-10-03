@@ -28,7 +28,7 @@ ALL_MODEL_OPTS=$(OPTS) -n
 #FIXME TBD create ALL_CONTRACTS var, and use it for subdir makemakes!
 
 all:
-	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Unsupported -X Tests -X Research
+	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete
 
 	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
 
@@ -69,7 +69,6 @@ all:
 	cd Network/MPLS && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4
 	cd Network/LDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4
 	cd Network/RSVP_TE && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4
-	cd Network/Scenario && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../RSVP_TE
 	cd Network/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../ICMPv6
 	cd Network/ICMPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv6
 
@@ -107,12 +106,10 @@ all:
 	cd Examples/INET/REDTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MPLS/ldp-mpls1 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
-	cd Examples/MPLS/TestTE1 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
-	cd Examples/MPLS/TestTE2 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
-	cd Examples/MPLS/TestTE3 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
-	cd Examples/MPLS/TestTE4 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
-	cd Examples/MPLS/TestTE5 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
-	cd Examples/MPLS/TestTE6 && $(MAKEMAKE) $(ALL_MODEL_OPTS) -I../Tester
+	cd Examples/MPLS/TestTE_Failure && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MPLS/TestTE_Reroute && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MPLS/TestTE_Routing && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MPLS/TestTE_Tunnel  && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/IPv6/NClients && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/IPv6/DemoNetworkEth && $(MAKEMAKE) $(ALL_MODEL_OPTS)

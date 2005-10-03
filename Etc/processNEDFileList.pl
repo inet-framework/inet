@@ -15,7 +15,7 @@ while (<IN>)
     if (!/.ned$/ ) {next;}
     s|^\Q$rootdir\E\\*||g;
     s|\\|/|g;
-    if (/^Examples\// || /^Unsupported\// || /^Tests\//) {next;}
+    if (/^Examples\// || /^Unsupported\// || /^Obsolete\// || /^Tests\//) {next;}
     print OUT;
 }
 close(IN);
