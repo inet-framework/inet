@@ -27,6 +27,10 @@
 
 
 //
+// NOTE: THIS FILE IS ONLY NEEDED FOR OMNET++ RELEASES < 3.2.
+//
+
+//
 // Internal class
 //
 class INET_API cVectorWatcherBase : public cObject
@@ -231,6 +235,8 @@ void createPointerMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
     new cPointerMapWatcher<KeyT,ValueT,CmpT>(varname, m);
 }
 
+#ifndef WATCH_VECTOR
+
 #define WATCH_VECTOR(v)      createVectorWatcher(#v,(v))
 
 #define WATCH_PTRVECTOR(v)   createPointerVectorWatcher(#v,(v))
@@ -242,6 +248,8 @@ void createPointerMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m)
 #define WATCH_MAP(m)         createMapWatcher(#m,(m))
 
 #define WATCH_PTRMAP(m)      createPointerMapWatcher(#m,(m))
+
+#endif
 
 #endif
 
