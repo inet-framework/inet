@@ -21,26 +21,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-
-
-/**
- * Modules that need to be scriptable by ScenarioManager should "implement"
- * (subclass from) this class.
- *
- * @see ScenarioManager
- * @author Andras Varga
- */
-class INET_API IScriptable
-{
-  public:
-    virtual ~IScriptable() {}
-
-    /**
-     * Called by ScenarioManager whenever a script command needs to be
-     * carried out by the module.
-     */
-    virtual void processCommand(const char *command, const std::map<std::string,std::string>& args) = 0;
-};
+#include "IScriptable.h"
 
 
 /**

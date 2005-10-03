@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Vojtech Janota
+// Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,27 +16,34 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef FAILUREMANAGER_H
-#define FAILUREMANAGER_H
+
+#ifndef __INOTIFIABLE_H
+#define __INOTIFIABLE_H
 
 #include <omnetpp.h>
 
-#include "IScriptable.h"
 
-class INET_API FailureManager : public cSimpleModule, public IScriptable
+/**
+ * Clients can receive change notifications from the NotificationBoard via
+ * this interface. Clients must "implement" (subclass from) this class.
+ *
+ * @see NotificationBoard
+ * @author Andras Varga
+ */
+class INET_API INotifiable
 {
   public:
-    Module_Class_Members(FailureManager, cSimpleModule, 0);
-    virtual ~FailureManager() {}
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    
-    // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node);
-    
-  private:
-  	void replaceNode(const char *target, const char *newNodeType);
-  	void reconnectNode(cModule *old, cModule *n);
+    virtual ~INotifiable() {}
+
+    /**
+     * Called by the NotificationBoard whenever a change of a category
+     * occurs to which this client has subscribed.
+     */
+    virtual void receiveChangeNotification(int category, cPolymorphic *details) = 0;
 };
 
 #endif
+
+
+
+

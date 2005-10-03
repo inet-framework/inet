@@ -28,9 +28,7 @@
 #include <map>
 #include <vector>
 #include "ModuleAccess.h"
-
-
-class INotifiable;
+#include "INotifiable.h"
 
 
 /**
@@ -101,25 +99,6 @@ class INET_API NotificationBoard : public cSimpleModule
      */
     void fireChangeNotification(int category, cPolymorphic *details=NULL);
     //@}
-};
-
-/**
- * Clients can receive change notifications from the NotificationBoard via
- * this interface. Clients must "implement" (subclass from) this class.
- *
- * @see NotificationBoard
- * @author Andras Varga
- */
-class INET_API INotifiable
-{
-  public:
-    virtual ~INotifiable() {}
-
-    /**
-     * Called by the NotificationBoard whenever a change of a category
-     * occurs to which this client has subscribed.
-     */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details) = 0;
 };
 
 /**

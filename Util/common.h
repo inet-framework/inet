@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Vojtech Janota
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,27 +16,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef FAILUREMANAGER_H
-#define FAILUREMANAGER_H
+#ifndef __INETCOMMON_H
+#define __INETCOMMON_H
 
 #include <omnetpp.h>
+#include <string>
 
-#include "IScriptable.h"
+#include "IntServ.h" // IPAddressVector, EroVector
 
-class INET_API FailureManager : public cSimpleModule, public IScriptable
-{
-  public:
-    Module_Class_Members(FailureManager, cSimpleModule, 0);
-    virtual ~FailureManager() {}
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    
-    // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node);
-    
-  private:
-  	void replaceNode(const char *target, const char *newNodeType);
-  	void reconnectNode(cModule *old, cModule *n);
-};
+std::string intToString(int i);
+std::string vectorToString(IPAddressVector vec);
+std::string vectorToString(IPAddressVector vec, const char *delim);
+std::string vectorToString(EroVector vec);
+std::string vectorToString(EroVector vec, const char *delim);
+
+EroVector routeToEro(IPAddressVector rro);
 
 #endif
+
+

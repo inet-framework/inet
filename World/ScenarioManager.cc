@@ -146,7 +146,7 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
               node->getTagName(), className(), mod->className(), node->getSourceLocation());
 
     // ok, trust it to process this command
-    scriptable->processCommand(node->getTagName(), node->getAttributes());
+    scriptable->processCommand(*node);
 }
 
 void ScenarioManager::processSetParamCommand(cXMLElement *node)

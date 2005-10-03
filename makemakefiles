@@ -17,7 +17,7 @@ CONTRACT_INCLUDES=-I$(ROOT)/Transport/Contract -I$(ROOT)/Network/Contract -I$(RO
 
 ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Network/Queue -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/TCP/flavours -I$(ROOT)/Transport/TCP/queues -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/Network/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/EtherSwitch -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/Ethernet -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Nodes/INET
 # -I$(ROOT)/Applications/BRModel
-ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Network/Scenario -I$(ROOT)/Nodes/MPLS
+ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
 ALL_IPv6_INCLUDES=-I$(ROOT)/Network/IPv6 -I$(ROOT)/Network/ICMPv6 -I$(ROOT)/Nodes/IPv6
 # -I$(ROOT)/Network/MIPv6 -I$(ROOT)/Network/HMIPv6 -I$(ROOT)/World -I$(ROOT)/PHY -I$(ROOT)/Mobility -I$(ROOT)/Mobility/adHocSim -I$(ROOT)/NetworkInterfaces/Ethernet6 -I$(ROOT)/NetworkInterfaces/PPP6 -I$(ROOT)/NetworkInterfaces/Wireless -I$(ROOT)/NetworkInterfaces/DualWireless -I$(ROOT)/Util/XML
 ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/MFCore -I$(ROOT)/NetworkInterfaces/MF80211 -I$(ROOT)/NetworkInterfaces/MF80211/macLayer -I$(ROOT)/NetworkInterfaces/MF80211/mgmt -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/decider -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/snrEval
@@ -25,7 +25,6 @@ ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/M
 #ALL_MODEL_OPTS=$(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_IPv6_INCLUDES)
 ALL_MODEL_OPTS=$(OPTS) -n
 
-#FIXME TBD create ALL_CONTRACTS var, and use it for subdir makemakes!
 
 all:
 	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete
@@ -66,7 +65,7 @@ all:
 	cd Network/Queue && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4 -I../IPv6
 	cd Network/ARP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4
 	cd Network/AutoRouting && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4 -I../IPv6 -I../ICMPv6
-	cd Network/MPLS && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4
+	cd Network/MPLS && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4 -I../RSVP_TE
 	cd Network/LDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4
 	cd Network/RSVP_TE && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4
 	cd Network/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../ICMPv6
