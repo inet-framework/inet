@@ -23,11 +23,52 @@ Define_Module(NAMTraceWriter);
 
 void NAMTraceWriter::initialize()
 {
+    lastnamid = 0;
+    namfb = NULL;
+    nams = NULL;
+    const char *namlog = par("logfile");
+    if (namelog && namlog[0])
+    {
+        ev << "nam tracing enabled (file " << namlog << ")" << endl;
+        namfb = new std::filebuf();
+        namfb->open(namlog, std::ios::out | std::ios::app);
+        nams = new std::ostream(namfb);
+
+        const char *prolog = par("prolog");
+        if (strlen(prolog))
+        {
+            cStringTokenizer tokenizer(prolog, ";");
+            const char *token;
+            while((token = tokenizer.nextToken())!=NULL)
+                    *nams << token << endl;
+            *nams << std::flush;
+        }
+    }
+}
+
+std::ostream NAMTraceWriter::log()
+{
+    if (!nams)
+        error("Cannot write to (%s)%s log: log not open", className(), fullPath().c_str());
+    return *nams;
 }
 
 void NAMTraceWriter::handleMessage(cMessage *msg)
 {
     error("This module doesn't process messages");
+}
+
+int NAMTraceWriter::getNamId(cModule *node)
+{
+    int modid = node->id();
+    std::map<int,int>::iterator it = modid2namid.find(modid);
+    if (it == modid2namid.end())
+    {
+        int namid = ++lastnamid;
+        modid2namid[modid] = namid;
+        return namid;
+    }
+    return it->second;
 }
 
 

@@ -23,7 +23,8 @@
 //
 simple NAMTraceWriter
     parameters:
-        script: xml;
+        logfile : string,
+        prolog : string;
 endsimple
 
 

@@ -30,17 +30,21 @@
 class INET_API NAMTraceWriter : public cSimpleModule
 {
   private:
-    void traceInit();
-    void tracePacket(const char event, cMessage *msg);
-
     std::filebuf *namfb;
     std::ostream *nams;
+
+    int lastnamid;
+    std::map<int,int> modid2namid;
 
   public:
     Module_Class_Members(NAMTraceWriter, cSimpleModule, 0);
     virtual ~NAMTraceWriter() {}
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+
+    int getNamId(cModule *node);
+    bool enabled() {return nams!=NULL;}
+    std::ostream log();
 };
 
 #endif
