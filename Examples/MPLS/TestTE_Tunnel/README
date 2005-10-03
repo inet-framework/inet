@@ -1,0 +1,7 @@
+This is a sample to demonstrate label stacking used for creating tunnel
+hierarchy.
+
+IMPORANT: In this scenario, the Label Information Base (LIB) of all routers is
+configured explicitly (LSR*_lib.xml) when the simulation starts. To my best
+knowledge, the RSVP-TE itself does not support creation of tunnel hierarchy
+(correct me if I'm wrong: vojta at pohoda dot cz).

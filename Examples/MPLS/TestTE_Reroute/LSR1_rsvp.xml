@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>10.2.1.1</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<setup_pri>1</setup_pri>
+		<holding_pri>1</holding_pri>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>10.1.1.1</node>
+					<node>10.1.3.1</node>
+					<node>10.1.7.1</node>
+					<node>10.1.5.1</node>
+				</route>
+
+				<permanent>true</permanent>
+				<color>100</color>
+			</path>
+		</paths>
+	</session>
+	<session>
+		<endpoint>10.2.2.1</endpoint>
+		<tunnel_id>2</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>200</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>10.1.1.1</node>
+					<node>10.1.2.1</node>
+					<node>10.1.4.1</node>
+					<node>10.1.5.1</node>
+				</route>
+
+				<permanent>true</permanent>
+				<color>200</color>
+			</path>
+		</paths>
+	</session>
+</sessions>
