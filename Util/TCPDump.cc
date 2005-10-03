@@ -48,6 +48,30 @@ void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char 
     }
 }
 
+//FIXME: Temporary hack for Ipv6 support
+void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment)
+{
+    cMessage *encapmsg = dgram->encapsulatedMsg();
+    if (dynamic_cast<TCPSegment *>(encapmsg))
+    {
+        // if TCP, dump as TCP
+        dump(l2r, label, (TCPSegment *)encapmsg, dgram->srcAddress().str(), dgram->destAddress().str(), comment);
+    }
+    else
+    {
+        // some other packet, dump what we can
+        std::ostream& out = *outp;
+
+        // seq and time (not part of the tcpdump format)
+        char buf[30];
+        sprintf(buf,"[%.3f%s] ", simulation.simTime(), label);
+        out << buf;
+
+        // packet class and name
+        out << "? " << encapmsg->className() << " \"" << encapmsg->name() << "\"\n";
+    }
+}
+
 void TCPDumper::dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     std::ostream& out = *outp;
@@ -138,13 +162,25 @@ void TCPDump::handleMessage(cMessage *msg)
         }
         else
         {
-            // search for encapsulated IPDatagram in it
+            // search for encapsulated IP[v6]Datagram in it
             cMessage *encapmsg = msg;
-            while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL)
+            while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL && dynamic_cast<IPv6Datagram_Base *>(encapmsg)==NULL)
                 encapmsg = encapmsg->encapsulatedMsg();
             if (!encapmsg)
-                error("packet %s doesn't contain an IPDatagram", msg->name());
-            tcpdump.dump(l2r, "", (IPDatagram *)encapmsg);
+            {
+                //We do not want this to end in an error if EtherAutoconf messages
+                //are passed, so just print a warning. -WEI
+                ev << "CANNOT DECODE: packet " << msg->name() << " doesn't contain either IP or IPv6 Datagram\n";
+            }
+            else
+            {
+                if (dynamic_cast<IPDatagram *>(encapmsg))
+                    tcpdump.dump(l2r, "", (IPDatagram *)encapmsg);
+                else if (dynamic_cast<IPv6Datagram_Base *>(encapmsg))
+                    tcpdump.dumpIPv6(l2r, "", (IPv6Datagram_Base *)encapmsg);
+                else
+                    ASSERT(0); // cannot get here
+            }
         }
     }
 

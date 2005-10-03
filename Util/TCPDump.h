@@ -22,6 +22,7 @@
 #include <omnetpp.h>
 #include "IPvXAddress.h"
 #include "IPDatagram_m.h"
+#include "IPv6Datagram_m.h"
 #include "TCPSegment.h"
 
 
@@ -36,6 +37,7 @@ class INET_API TCPDumper
   public:
     TCPDumper(std::ostream& o);
     void dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
+    void dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment=NULL);//FIXME: Temporary hack
     void dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
     // dumps arbitary text
     void dump(const char *label, const char *msg);
