@@ -12,6 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+#if 0  //FIXME *** LDP TEMPORARILY OUT OF ORDER ***
+
 #include <omnetpp.h>
 #include <iostream>
 #include <fstream>
@@ -656,3 +658,5 @@ TCPSocket *NewLDP::peerSocket(IPAddress peerAddr)
     }
     return myPeers[i].socket;
 }
+
+#endif // #if 0
