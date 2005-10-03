@@ -22,10 +22,6 @@ import
 //
 module FAILED_LSR
     parameters:
-        namid: numeric,
-        namlog: string,
-        namprolog: string,
-
         peers: string,
         routerId: string,
         routingFile: string;
@@ -35,8 +31,6 @@ module FAILED_LSR
 
     submodules:
         dummy: Dummy;
-            parameters:
-                namid = namid;
             gatesizes:
                 in[sizeof(in)],
                 out[sizeof(out)];

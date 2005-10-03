@@ -30,10 +30,6 @@ import
 //
 module RSVP_LSR
     parameters:
-        namid: numeric,
-        namlog: string,
-        namprolog: string,
-
         peers: string,
         routerId: string,
         routingFile: string;
@@ -68,10 +64,6 @@ module RSVP_LSR
                 physOut[sizeof(out)];
             display: "p=192,163;i=block/fork";
         ppp: PPPRouterInterface[sizeof(out)];
-            parameters:
-                namid = namid,
-                namlog = namlog,
-                namprolog = namprolog;
             display: "p=88,297,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:

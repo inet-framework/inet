@@ -46,16 +46,20 @@ void NAMTraceWriter::initialize()
     }
 }
 
-std::ostream NAMTraceWriter::log()
-{
-    if (!nams)
-        error("Cannot write to (%s)%s log: log not open", className(), fullPath().c_str());
-    return *nams;
-}
-
 void NAMTraceWriter::handleMessage(cMessage *msg)
 {
     error("This module doesn't process messages");
+}
+
+void NAMTraceWriter::finish()
+{
+    if (fnamfb)
+        namfb->close();
+}
+
+int NAMTraceWriter::setNamId(cModule *node, int namid)
+{
+    modid2namid[node->id()] = namid==-1 ? ++lastnamid : namid;
 }
 
 int NAMTraceWriter::getNamId(cModule *node)
@@ -63,12 +67,13 @@ int NAMTraceWriter::getNamId(cModule *node)
     int modid = node->id();
     std::map<int,int>::iterator it = modid2namid.find(modid);
     if (it == modid2namid.end())
-    {
-        int namid = ++lastnamid;
-        modid2namid[modid] = namid;
-        return namid;
-    }
+        error("getNamId(): setNamId() on module '%s' not yet called", node->fullPath().c_str());
     return it->second;
 }
 
-
+std::ostream NAMTraceWriter::log()
+{
+    if (!nams)
+        error("Cannot write to (%s)%s log: log not open", className(), fullPath().c_str());
+    return *nams;
+}

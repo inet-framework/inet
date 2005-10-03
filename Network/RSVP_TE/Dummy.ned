@@ -16,15 +16,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
 //
 // Implementation of a failed router. Does nothing and simply discards any
 // incoming messages. 
 //
 simple Dummy
-	parameters:
-		namid : numeric;
-	gates:
-		in: in[];
-		out: out[];
+    gates:
+        in: in[];
+        out: out[];
 endsimple
 

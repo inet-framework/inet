@@ -28,54 +28,53 @@ module RSVPTE4
     submodules:
         LSR1: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1";
+                peers = "ppp0 ppp1";
             gatesizes:
                 in[5],
                 out[5];
             display: "p=160,167;i=abstract/router";
         LSR2: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1 ppp2";
+                peers = "ppp0 ppp1 ppp2";
             gatesizes:
                 in[3],
                 out[3];
             display: "p=254,255;i=abstract/router";
         LSR3: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1 ppp2";
+                peers = "ppp0 ppp1 ppp2";
             gatesizes:
                 in[3],
                 out[3];
             display: "p=253,78;i=abstract/router";
         LSR4: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1 ppp2";
+                peers = "ppp0 ppp1 ppp2";
             gatesizes:
                 in[3],
                 out[3];
             display: "p=358,167;i=abstract/router";
         LSR5: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp3 ppp4";
+                peers = "ppp0 ppp3 ppp4";
             gatesizes:
                 in[5],
                 out[5];
             display: "p=460,167;i=abstract/router";
         LSR6: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1";
+                peers = "ppp0 ppp1";
             gatesizes:
                 in[2],
                 out[2];
             display: "p=400,300;i=abstract/router";
         LSR7: RSVP_LSR;
             parameters:
-		peers = "ppp0 ppp1";
+                peers = "ppp0 ppp1";
             gatesizes:
                 in[2],
                 out[2];
             display: "p=400,50;i=abstract/router";
-
         host1: StandardHost; // client
             display: "p=71,80;i=device/pc2";
         host2: StandardHost; // client
@@ -86,13 +85,12 @@ module RSVPTE4
             display: "p=562,256;i=device/server";
         host5: StandardHost; // client
             display: "p=73,233;i=device/pc2";
-
-	scenarioManager: ScenarioManager;
-	    display: "p=150,50;i=block/control_s";
-
-	failureManager: FailureManager;
-	    display: "p=500,50;i=block/control_s";
-
+        scenarioManager: ScenarioManager;
+            display: "p=150,50;i=block/control_s";
+        failureManager: FailureManager;
+            display: "p=500,50;i=block/control_s";
+        //nam: NAMTraceWriter;
+        //    display: "p=152,280;i=old/floppy1";
     connections nocheck:
         LSR1.out[0] --> delay 15ms datarate 600000 --> LSR2.in[0];
         LSR1.in[0] <-- delay 15ms datarate 600000 <-- LSR2.out[0];
@@ -121,17 +119,17 @@ module RSVPTE4
         LSR5.out[2] --> delay 10ms datarate 600000 --> host4.in++;
         LSR5.in[2] <-- delay 10ms datarate 600000 <-- host4.out++;
 
-	LSR2.out[2] --> delay 10ms datarate 600000 --> LSR6.in[0];
-	LSR2.in[2] <-- delay 10ms datarate 600000 <-- LSR6.out[0];
+        LSR2.out[2] --> delay 10ms datarate 600000 --> LSR6.in[0];
+        LSR2.in[2] <-- delay 10ms datarate 600000 <-- LSR6.out[0];
 
-	LSR5.out[3] --> delay 10ms datarate 600000 --> LSR6.in[1];
-	LSR5.in[3] <-- delay 10ms datarate 600000 <-- LSR6.out[1];
+        LSR5.out[3] --> delay 10ms datarate 600000 --> LSR6.in[1];
+        LSR5.in[3] <-- delay 10ms datarate 600000 <-- LSR6.out[1];
 
-	LSR3.out[2] --> delay 10ms datarate 600000 --> LSR7.in[0];
-	LSR3.in[2] <-- delay 10ms datarate 600000 <-- LSR7.out[0];
+        LSR3.out[2] --> delay 10ms datarate 600000 --> LSR7.in[0];
+        LSR3.in[2] <-- delay 10ms datarate 600000 <-- LSR7.out[0];
 
-	LSR5.out[4] --> delay 10ms datarate 600000 --> LSR7.in[1];
-	LSR5.in[4] <-- delay 10ms datarate 600000 <-- LSR7.out[1];
+        LSR5.out[4] --> delay 10ms datarate 600000 --> LSR7.in[1];
+        LSR5.in[4] <-- delay 10ms datarate 600000 <-- LSR7.out[1];
 
         host5.in++ <-- delay 10ms datarate 600000 <-- LSR1.out[4];
         host5.out++ --> delay 10ms datarate 600000 --> LSR1.in[4];
