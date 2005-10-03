@@ -115,7 +115,7 @@ Transport/RTP/RTPPayloadReceiver.ned
 Transport/RTP/RTPPayloadSender.ned
 Transport/RTP/RTPProfile.ned
 Transport/TCP/TCP.ned
-Transport/TCP/TCPDump.ned
 Transport/UDP/UDP.ned
+Util/TCPDump.ned
 World/ChannelControl.ned
 World/ScenarioManager.ned

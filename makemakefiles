@@ -40,7 +40,7 @@ all:
 	cd Nodes && $(MAKEMAKE) $(OPTS) -n -r
 	cd Transport && $(MAKEMAKE) $(OPTS) -n -r -X RTP
 	cd Base && $(MAKEMAKE) $(OPTS) -n -r -I../Util
-	cd Util && $(MAKEMAKE) $(OPTS) -n -r -I../Base -X boost -X Loki -X Topology
+	cd Util && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
 
 	: # MF stuff follows
 	cd World && $(MAKEMAKE) $(OPTS) -n -r -I../Util -I../Base
@@ -84,7 +84,7 @@ all:
 	cd Transport/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Transport/UDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Transport/RTP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -X Profiles -X tmp
-	cd Transport/TCP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/IPv4
+	cd Transport/TCP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Transport/TCP/flavours && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I..
 	cd Transport/TCP/queues && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I..
 
