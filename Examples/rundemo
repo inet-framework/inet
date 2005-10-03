@@ -61,14 +61,11 @@ foreach line {
    {"LANs: two hosts"        "Ethernet/LANs"        "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
    {"LANs: very large LAN"   "Ethernet/LANs"        "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
 
-   {"MPLS"}
-   {"MPLS-LDP"               "MPLS/ldp-mpls1"       "./ldp-mpls1"             "ldp-mpls1"}
-   {"CSPF Routing"           "MPLS/TestTE1"         "./TestTE"                "TestTE"}
-   {"Hop-by-Hop Routing"     "MPLS/TestTE2"         "./TestTE"                "TestTE"}
-   {"ER Routing"             "MPLS/TestTE3"         "./TestTE"                "TestTE"}
-   {"Traffic Reroute 1"      "MPLS/TestTE4"         "./TestTE"                "TestTE"}
-   {"Traffic Reroute 2"      "MPLS/TestTE5"         "./TestTE"                "TestTE"}
-   {"Reservation preemption" "MPLS/TestTE6"         "./TestTE"                "TestTE"}
+   {"MPLS/RSVP-TE"}
+   {"TestTE/failure"         "MPLS/TestTE_Failure"  "./TestTE"                "TestTE"}
+   {"TestTE/reroute"         "MPLS/TestTE_Reroute"  "./TestTE"                "TestTE"}
+   {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
+   {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
 } {
    lappend samples $i
    if {[llength $line]==0} {

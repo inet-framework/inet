@@ -41,6 +41,7 @@ module FAILED_LSR
                 in[sizeof(in)],
                 out[sizeof(out)];
 
+            display: "p=118,88;i=block/sink";
     connections nocheck:
         for i=0..sizeof(out)-1 do
             in[i] --> dummy.in[i];

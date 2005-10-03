@@ -29,85 +29,77 @@ import
 // to calculate shortest paths.
 //
 module RSVP_LSR
-	parameters:
-		namid : numeric,
-		namlog : string,
-		namprolog : string,
-		
-		peers : string,
-		routerId : string,
-		routingFile : string;
-	gates:
-		in: in[];
-		out: out[];
+    parameters:
+        namid: numeric,
+        namlog: string,
+        namprolog: string,
 
-	submodules:
-		routingTable: RoutingTable;
-		parameters:
-			IPForward = true,
-			routerId = routerId,
-			routingFile = routingFile;
-		display: "p=60,130;i=box3";
+        peers: string,
+        routerId: string,
+        routingFile: string;
+    gates:
+        in: in[];
+        out: out[];
 
-		interfaceTable: InterfaceTable;
-		parameters:
-		display: "p=60,240;i=box3";
-						
-		ted_module: TED;
-		parameters:
-			peers = peers;
-		display: "o=#0080c0;p=190,51;b=40,24,rect";
-			
-		rsvp: RSVP;
-        	parameters:
-			peers = peers;
-		display: "o=#008080;p=260,51;b=40,24,rect";
-
-		classifier: SimpleClassifier;
-		parameters:
-		display: "o=#008000;p=330,51;b=40,24,rect";
-            
-		networkLayer: NetworkLayer;
-		gatesizes:
-			physIn[sizeof(out)],
-			physOut[sizeof(out)];
-		display: "p=192,163;i=fork";
-			
-		ppp: PPPRouterInterface[sizeof(out)];
-		parameters:
-			namid = namid,
-			namlog = namlog,
-			namprolog = namprolog;
-		display: "p=88,297,row,90;q=queue;i=iface";
-			
+    submodules:
+        routingTable: RoutingTable;
+            parameters:
+                IPForward = true,
+                routerId = routerId,
+                routingFile = routingFile;
+            display: "p=60,74;i=block/table";
+        interfaceTable: InterfaceTable;
+            parameters:
+            display: "p=60,152;i=block/table";
+        ted_module: TED;
+            parameters:
+                peers = peers;
+            display: "i=block/network2;p=158,51";
+        rsvp: RSVP;
+            parameters:
+                peers = peers;
+            display: "i=block/control;p=244,51";
+        classifier: SimpleClassifier;
+            parameters:
+            display: "i=block/classifier;p=330,51";
+        networkLayer: NetworkLayer;
+            gatesizes:
+                physIn[sizeof(out)],
+                physOut[sizeof(out)];
+            display: "p=192,163;i=block/fork";
+        ppp: PPPRouterInterface[sizeof(out)];
+            parameters:
+                namid = namid,
+                namlog = namlog,
+                namprolog = namprolog;
+            display: "p=88,297,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
-		parameters:
-			labelIf = peers;
-		gatesizes:
-			fromL3[sizeof(out)],
-			toL3[sizeof(out)],
-			fromL2[sizeof(out)],
-			toL2[sizeof(out)];
-		display: "o=#ff8000;p=192,238;b=66,14";
-			
-		libTable: LIBTable;
-		display: "i=box3;p=60,180";
+            parameters:
+                labelIf = peers;
+            gatesizes:
+                fromL3[sizeof(out)],
+                toL3[sizeof(out)],
+                fromL2[sizeof(out)],
+                toL2[sizeof(out)];
+            display: "o=#ff8000;p=192,238;b=66,14";
+        libTable: LIBTable;
+            display: "i=block/table2;p=60,228";
+    connections nocheck:
+        ted_module.to_ip --> networkLayer.OSPFIn;
+        ted_module.from_ip <-- networkLayer.OSPFOut;
 
-connections nocheck:
-	ted_module.to_ip --> networkLayer.OSPFIn;
-	ted_module.from_ip <-- networkLayer.OSPFOut;
+        rsvp.to_ip --> networkLayer.RSVPIn;
+        rsvp.from_ip <-- networkLayer.RSVPOut;
 
-	rsvp.to_ip --> networkLayer.RSVPIn;
-	rsvp.from_ip <-- networkLayer.RSVPOut;
+        for i=0..sizeof(out)-1 do
+            in[i] --> ppp[i].physIn;
+            out[i] <-- ppp[i].physOut;
 
-	for i=0..sizeof(out)-1 do
-		in[i] --> ppp[i].physIn;
-		out[i] <-- ppp[i].physOut;
+            ppp[i].netwOut --> mplsModule.fromL2[i];
+            ppp[i].netwIn <-- mplsModule.toL2[i];
 
-		ppp[i].netwOut --> mplsModule.fromL2[i];
-		ppp[i].netwIn <-- mplsModule.toL2[i];
-
-		mplsModule.toL3[i] --> networkLayer.physIn[i];
-		mplsModule.fromL3[i] <-- networkLayer.physOut[i];
-	endfor;
+            mplsModule.toL3[i] --> networkLayer.physIn[i];
+            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
+        endfor;
 endmodule
+
