@@ -56,7 +56,7 @@ IMPORTANT: YOU NEED VC 7.1 .NET! INET won't compile with VC 6.0.
 3. Run "makemake.cmd" to create the makefiles.
 
 4. Run "nmake -f makefile.vc depend" to add dependencies to makefiles. You need 
-   to do this every time you re-generate the makefies with "makemakefiles".
+   to do this every time you re-generate the makefiles with "makemake.bat".
 
 5. Type "nmake -f Makefile.vc" to build everything.
       HINT: Create an "m.bat" file with the content "nmake -f Makefile.vc %*".
