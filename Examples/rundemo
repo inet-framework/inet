@@ -19,9 +19,10 @@ exec wish "$0" "$@"
 # Configuration
 #
 set wantScrollbar 1
-set unixbrowser "netscape"
+set unixbrowser "firefox"
 #set unixbrowser "mozilla"
 #set unixbrowser "konqueror"
+#set unixbrowser "netscape"
 
 #
 # title line:   {"title"}
