@@ -1,5 +1,9 @@
 #
-# Config file for the INET framework. This is included by every makefile.
+# Config file for the INET framework on Linux and other Unix-like systems. 
+# Not used on Windows/MSVC. 
+#
+# This gets included by every makefile.
+# 
 #
 # !!! IMPORTANT !!!
 # Please re-generate omnetppconfig before trying to build INET!

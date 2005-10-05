@@ -1,5 +1,6 @@
 #
-# Config file for the INET framework. This is included by every makefile.
+# Config file for the INET framework on Windows/MSVC. (Not used on Linux.)
+# This is included by every makefile.
 #
 # BEFORE COMPILATION: copy/rename this file to inetconfig.vc, and adjust 
 # OMNETPP_ROOT in it. (inetconfig.vc was removed from the CVS, to prevent
