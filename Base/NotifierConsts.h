@@ -26,15 +26,22 @@
 /**
  * Category constants for NotificationBoard
  */
+// TODO consider: use allocated IDs, like: const int NF_FOO = registerCategory("FOO");
 enum
 {
-    // - mobility
+    // - host
     NF_HOSTPOSITION_UPDATED,
+    NF_HOST_FAILURE,
+    NF_HOST_RECOVERY,
 
     // - layer 1 (physical)
     NF_RADIOSTATE_CHANGED,
 
     // - layer 2 (data-link)
+    NF_PP_TX_BEGIN,   // point-to-point transmission begins (currently PPP)
+    NF_PP_TX_END,     // point-to-point transmission ends (currently PPP)
+    NF_PP_RX_END,     // point-to-point reception ends (currently PPP)
+    NF_L2_Q_DROP,
     NF_MAC_BECAME_IDLE,
     NF_LAYER2_HANDOVER_OCCURRED,
 

@@ -102,6 +102,7 @@ Nodes/INET/WirelessHost2.ned
 Nodes/IPv6/NetworkLayer6.ned
 Nodes/IPv6/Router6.ned
 Nodes/IPv6/StandardHost6.ned
+Nodes/MPLS/FAILED_LSR.ned
 Nodes/MPLS/LDP_LSR.ned
 Nodes/MPLS/RSVP_LSR.ned
 Transport/RTP/RTCPModule.ned
@@ -114,6 +115,8 @@ Transport/RTP/RTPPayloadSender.ned
 Transport/RTP/RTPProfile.ned
 Transport/TCP/TCP.ned
 Transport/UDP/UDP.ned
+Util/NAMTraceWriter.ned
 Util/TCPDump.ned
 World/ChannelControl.ned
+World/NAMTraceWriter.ned
 World/ScenarioManager.ned

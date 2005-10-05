@@ -27,13 +27,24 @@ const char *notificationCategoryName(int category)
     switch (category)
     {
         case NF_HOSTPOSITION_UPDATED: return "POS";
+        case NF_HOST_FAILURE: return "FAILURE";
+        case NF_HOST_RECOVERY: return "RECOVERY";
+
         case NF_RADIOSTATE_CHANGED: return "RADIO";
+        case NF_PP_TX_BEGIN: return "TX-BEG";
+        case NF_PP_TX_END: return "TX-END";
+        case NF_PP_RX_END: return "RX-END";
+        case NF_L2_Q_DROP: return "DROP";
+
         case NF_MAC_BECAME_IDLE: return "MAC-IDLE";
         case NF_LAYER2_HANDOVER_OCCURRED: return "L2-HANDOVER";
+
         case NF_INTERFACE_STATE_CHANGED: return "IFACE";
         case NF_INTERFACE_CONFIG_CHANGED: return "IFACE-CFG";
+
         case NF_IPv4_INTERFACECONFIG_CHANGED: return "IPv4-CFG";
         case NF_IPv4_ROUTINGTABLE_CHANGED: return "ROUTINGTABLE";
+
         case NF_IPv6_INTERFACECONFIG_CHANGED: return "IPv6-CFG";
         case NF_IPv6_ROUTINGTABLE_CHANGED: return "IPv6-ROUTINGTABLE";
         case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
