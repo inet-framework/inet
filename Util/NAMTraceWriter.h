@@ -27,6 +27,7 @@
 #include "INotifiable.h"
 #include "NotifierConsts.h"
 
+class NAMTrace;
 
 /**
  * Writes a "nam" trace.
@@ -35,6 +36,10 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
 {
   protected:
     int namid;
+    NAMTrace *nt;
+
+  protected:
+    void recordPacketEvent(const char event, cModule *peer, cMessage *msg);
 
   public:
     Module_Class_Members(NAMTraceWriter, cSimpleModule, 0);

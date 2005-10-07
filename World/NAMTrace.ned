@@ -18,10 +18,10 @@
 
 
 //
-// NAMTraceWriter writes a trace file to be played back with ns2's
+// NAMTrace manages a "nam" trace file which can be played back with ns2's
 // Network ANimator, nam.
 //
-simple NAMTraceWriter
+simple NAMTrace
     parameters:
         logfile : string,
         prolog : string;

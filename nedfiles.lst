@@ -118,5 +118,5 @@ Transport/UDP/UDP.ned
 Util/NAMTraceWriter.ned
 Util/TCPDump.ned
 World/ChannelControl.ned
-World/NAMTraceWriter.ned
+World/NAMTrace.ned
 World/ScenarioManager.ned

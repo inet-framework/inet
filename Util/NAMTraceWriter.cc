@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
+#include "NAMTrace.h"
 #include "NAMTraceWriter.h"
 #include "NotificationBoard.h"
 
@@ -33,15 +34,23 @@ void NAMTraceWriter::initialize(int stage)
     if (stage!=0)
         return;
 
-    namid = par("namid");
-
+    // subscribe to the interesting notifications
     NotificationBoard *nb = NotificationBoardAccess().get();
     nb->subscribe(this, NF_HOST_FAILURE);
     nb->subscribe(this, NF_HOST_RECOVERY);
     nb->subscribe(this, NF_PP_TX_BEGIN);
     nb->subscribe(this, NF_PP_TX_END);
-    nb->subscribe(this, NF_PP_RX_END);
     nb->subscribe(this, NF_L2_Q_DROP);
+
+    // get pointer to the NAMTrace module
+    nt = check_and_cast<NAMTrace*>(simulation.moduleByPath("nam"));
+
+    // register given namid, or allocate one (if -1 was configured)
+    int namid0 = par("namid");
+    cModule *node = parentModule();  // the host or router
+    namid = nt->assignNamId(node, namid0);
+    if (namid0==-1)
+        par("namid") = namid;
 }
 
 NAMTraceWriter::~NAMTraceWriter()
@@ -50,50 +59,70 @@ NAMTraceWriter::~NAMTraceWriter()
 
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
+/* FIXME where to get peernamid? from InterfaceEntry?
+    switch(category)
+    {
+        case NF_HOST_FAILURE: break;
+        case NF_HOST_RECOVERY: break;
+        case NF_PP_TX_BEGIN: recordPacketEvent('h', peer, msg); break;
+        case NF_PP_TX_END: recordPacketEvent('e', peer, msg); break;
+        case NF_L2_Q_DROP: recordPacketEvent('d', peer, msg); break;
+    }
+*/
 }
 
 #if 0
 void NAMTraceWriter::traceInit()
 {
     // node entry
+    recordNodeEvent("UP", "circle");
+
+    // link entry
+    // LINKS HAVE TO BE REGISTERED ONLY ON ONE END!!!
+    *nams << "l -t * -s " << namid << " -d " << peernamid << " -S UP -r " <<
+            (int)bandwidth << " -D " << delay << endl;
+
+    // queue entry
+    *nams << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
+}
+
+void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
+{
+    std::ostream& out = nt->log();
     *nams << "n -t ";
     if (simTime() == 0.0)
         *nams << "*";
     else
         *nams << simTime();
-    *nams << " -s " << namid << " -a " << namid << " -S UP -v circle" << endl;
-
-    // link entry
-    *nams << "l -t * -s " << namid << " -d " << peerid << " -S UP -r " <<
-            (int)bandwidth << " -D " << delay << endl;
-
-    // queue entry
-    *nams << "q -t * -s " << namid << " -d " << peerid << " -a 0 " << endl;
-    *nams << "q -t * -s " << peerid << " -d " << namid << " -a 0 " << endl;
+    *nams << " -s " << namid << " -a " << namid << " -S " << state << " -v " << shape << endl;
 }
 
-void NAMTraceWriter::tracePacket(const char event, cMessage *msg)
+void NAMTraceWriter::recordLinkEvent(InterfaceEntry *ie)
 {
-    if(!nams)
-        return;
+    std::ostream& out = nt->log();
+}
+#endif
+
+void NAMTraceWriter::recordPacketEvent(const char event, cModule *peer, cMessage *msg)
+{
+    std::ostream& out = nt->log();
+    int peernamid = nt->getNamId(peer);
 
     int size = msg->length() / 8;
 
-    *nams << event << " -t " << simTime() << " -s " << namid << " -d " <<
-            peerid << " -e " << size;
+    out << event << " -t " << simTime() << " -s " << namid << " -d " << peernamid << " -e " << size;
 
     cMessage *em = msg;
-    while(em)
+    while (em)
     {
-        if(em->hasPar("color"))
+        if (em->hasPar("color"))
         {
-            *nams << " -a " << em->par("color").longValue();
+            out << " -a " << em->par("color").longValue();
             break;
         }
         em = em->encapsulatedMsg();
     }
 
-    *nams << endl;
+    out << endl;
 }
-#endif
 

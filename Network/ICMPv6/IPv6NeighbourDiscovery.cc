@@ -2071,7 +2071,7 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
         }
 
         //- If the Solicited flag is set,
-        if (naSolicitedFlag == TRUE)
+        if (naSolicitedFlag == true)
         {
             ev << "Solicited Flag is TRUE. Set NCE state to REACHABLE.\n";
             //the state of the entry MUST be set to REACHABLE.

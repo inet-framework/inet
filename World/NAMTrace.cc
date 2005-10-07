@@ -16,18 +16,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "NAMTraceWriter.h"
+#include "NAMTrace.h"
 
-Define_Module(NAMTraceWriter);
+Define_Module(NAMTrace);
 
 
-void NAMTraceWriter::initialize()
+void NAMTrace::initialize()
 {
     lastnamid = 0;
     namfb = NULL;
     nams = NULL;
     const char *namlog = par("logfile");
-    if (namelog && namlog[0])
+    if (namlog && namlog[0])
     {
         ev << "nam tracing enabled (file " << namlog << ")" << endl;
         namfb = new std::filebuf();
@@ -46,32 +46,33 @@ void NAMTraceWriter::initialize()
     }
 }
 
-void NAMTraceWriter::handleMessage(cMessage *msg)
+void NAMTrace::handleMessage(cMessage *msg)
 {
     error("This module doesn't process messages");
 }
 
-void NAMTraceWriter::finish()
+void NAMTrace::finish()
 {
-    if (fnamfb)
+    if (namfb)
         namfb->close();
 }
 
-int NAMTraceWriter::setNamId(cModule *node, int namid)
+int NAMTrace::assignNamId(cModule *node, int namid)
 {
-    modid2namid[node->id()] = namid==-1 ? ++lastnamid : namid;
+    // FIXME make sure nobody's using that namid yet
+    return modid2namid[node->id()] = namid==-1 ? ++lastnamid : namid;
 }
 
-int NAMTraceWriter::getNamId(cModule *node)
+int NAMTrace::getNamId(cModule *node) const
 {
     int modid = node->id();
-    std::map<int,int>::iterator it = modid2namid.find(modid);
+    std::map<int,int>::const_iterator it = modid2namid.find(modid);
     if (it == modid2namid.end())
-        error("getNamId(): setNamId() on module '%s' not yet called", node->fullPath().c_str());
+        error("getNamId(): assignNamId() on module '%s' not yet called", node->fullPath().c_str());
     return it->second;
 }
 
-std::ostream NAMTraceWriter::log()
+std::ostream& NAMTrace::log()
 {
     if (!nams)
         error("Cannot write to (%s)%s log: log not open", className(), fullPath().c_str());

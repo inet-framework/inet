@@ -16,9 +16,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef NAMTRACEWRITER_H
-#define NAMTRACEWRITER_H
+#ifndef _NAMTRACE_H
+#define _NAMTRACE_H
 
+#include <fstream>
 #include <omnetpp.h>
 #include "INETDefs.h"
 
@@ -27,7 +28,7 @@
  *
  * @author Andras Varga
  */
-class INET_API NAMTraceWriter : public cSimpleModule
+class INET_API NAMTrace : public cSimpleModule
 {
   private:
     std::filebuf *namfb;
@@ -37,20 +38,20 @@ class INET_API NAMTraceWriter : public cSimpleModule
     std::map<int,int> modid2namid;
 
   public:
-    Module_Class_Members(NAMTraceWriter, cSimpleModule, 0);
-    virtual ~NAMTraceWriter() {}
+    Module_Class_Members(NAMTrace, cSimpleModule, 0);
+    virtual ~NAMTrace() {}
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
     /**
-     * Assign a nam ID to the given module (host or router). 
+     * Assign a nam ID to the given module (host or router).
      * -1 means auto-assigned ID.
      */
-    void setNamId(cModule *node, int namid=-1);
+    int assignNamId(cModule *node, int namid=-1);
 
     /**
-     * Returns the nam ID of the given module (host or router). setNamId() must
+     * Returns the nam ID of the given module (host or router). assignNamId() must
      * have been called for the given module before, at least with -1 (auto-ID).
      */
     int getNamId(cModule *node) const;
@@ -63,7 +64,7 @@ class INET_API NAMTraceWriter : public cSimpleModule
     /**
      * Returns the stream to which the trace events can be written.
      */
-    std::ostream log();
+    std::ostream& log();
 };
 
 #endif
