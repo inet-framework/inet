@@ -26,7 +26,7 @@
 //
 simple NAMTraceWriter
     parameters:
-        namid : numeric,
+        namid : numeric;
 endsimple
 
 
