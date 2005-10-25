@@ -1,8 +1,6 @@
 NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
-
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
-
 
 - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
 
@@ -24,6 +22,8 @@ NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
 - doxy: turn on generation if "called/referenced from" things2
 
+- WARN_IF_ARP_OVER_PPP
+
 AFTER omnetpp-3.2 RELEASE:
 - add handleParameterChange() to apps (needed for Scenario Manager!)
 - setLength(), length() --> byteLength()
@@ -32,4 +32,147 @@ AFTER omnetpp-3.2 RELEASE:
 - use new opp_msgc features? (kind=..., length=...etc)
 - remove Util/stlwatch.h/cc, Utils/watch2.h
 
+----------------------- 
+ 
+_WLAN_CATALA_MONZO_ANGEL! 
 
+----------------------- 
+ 
+_WLAN_MAGNUS_KARLSSON! 
+
+----------------------- 
+ 
+__CPACKETQUEUE!!!! 
+
+----------------------- 
+ 
+__HOSTS_TO_ROUTERINTERFACE 
+
+----------------------- 
+ 
+__inetconfigvc-t_kikuszobolni!!! 
+
+----------------------- 
+ 
+into the ipv6 doc:
+"
+Currently, IPv6 support consists of several modules. The IPv6 module
+implements IPv6 datagram handling (sending, forwarding etc). It relies on
+RoutingTable6 to get access to the routes. RoutingTable6 also contains the
+neighbour discovery data structures (dest cache, neighbour cache, prefix
+list -- the latter effectively merged into the route table). Interface
+configuration (address, state, timeouts etc) is held in the InterfaceTable,
+in IPv6InterfaceData objects attached to InterfaceEntry as its ipv6()
+member.
+
+The module IPv6NeighbourDiscovery implements all tasks associated with
+neighbour discovery and stateless address autoconfiguration. Its data
+structures are in RoutingTable6 (dest cache, neighbour cache, prefix list).
+Neighbour discovery packets are only sent and processed by this module --
+when IPv6 receives one, it forwards the packet to IPv6NeighbourDiscovery.
+
+The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
+the module ICMPv6, just like with IPv4. ICMP errors are sent into
+IPv6ErrorHandling, which the user can extend or replace to get errors
+handled in any way they like.
+"
+
+----------------------- 
+ 
+__NAMTRACE:
+There should be a per-node optional NAMTraceWriter, which works 
+from notifications fired by PPP whenever sth happens...
+
+NAMTraceWriter would register namId with global NAMTrace module in stage 0,
+and other NAMTraceWriter modules could obtain it from there in stage 1 or later.
+
+
+NF_PPTX_BEGIN
+NF_PPTX_END
+PPTXNotification {
+     cMessage *pk;
+     cGate *outGate;
+}
+
+----------------------- 
+ 
+__TCP_BUG 
+From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de] 
+Sent: Sunday, September 25, 2005 7:51 PM
+To: omnetpp-l@omnetpp.org
+Subject: [omnetpp] Incorrect behaviour of TCP in IPv6SuiteWithINET(2005-05-02)?
+
+Hi!
+
+I found something that seems to be a bug in TCPMain:
+
+I open a TCP-Connection with TCPSocket and send a message (let's call it "A") trough it. This happens:
+"ActiveOPEN" is sent to TCPMain, followed by message A. Message A is buffered (according to RFC 793) an the 3-way-handshake starts. The last message of the 3-way-handshake (ACK) already carries message A (piggybacking). So far so good. The receiver then changes state from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper layer. Instead the sender waits 3 seconds for timeout and resends message A, which is then successfully delivered to the receiver's application (and ACKed).
+
+IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73: "If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_ continue processing in the new state and forward the attached message A to application.
+
+Is this really a bug in TCPMain or did I miss something? If it is a bug: is it fixed in newer releases?
+
+The interesting part of my code is the following:
+> TCPSocket socket;
+> cMessage *msg;
+> [...]
+> socket.setOutputGate(gate("tcpOut"));
+> [..]
+> socket.connect(IPAddressResolver ().resolve("aaas/ppp0"),3868); 
+> socket.send(msg);
+(no "socket.close")
+
+Regards,
+Joachim
+
+
+----------------------- 
+__VOJTA 
+Here are some random thoughts I gathered during my work. Actually we 
+already discussed some of these, but I will repeat them for completness.
+
+1. Running Quagga in OMNeT++ should be possible using activity model 
+with almost no modification to the source code. Some modifications will 
+be required, namely:
+
+- to handle global variables, this is possible and can be to great 
+extent automated via #define
+- to handle "syscalls" (all kernel, some stdlib stuff etc). In the 
+source code, this can be again done using #define. Plus those syscalls 
+must be emulated of course.
+- on windows, there will be some #include magic required. Here one can 
+make use of "gcc -E"  switch. If applied to an "empty" source file 
+containing only all required includes, it generates huge "kernel.h" file 
+with all necessary data structures defined. Unfortunately it won't 
+contain any constant definitions done via #define, but this can be 
+solved again. Once it successfully compiles on windows, it should run 
+there without problems, since all syscalls are emulated
+- on unix, it should probably use the same "kernel.h" mechanism, but 
+this may require further modifications to avoid redefinitions of 
+existing structures included by gcc
+
+2. Some minor changes in INET are required
+
+* bind mechanism in both TCP/UDP should be generalized
+ -bind to address:port not just port
+ -Ripd (others may too, I didn't check) uses multicast and binds several 
+sockets to the same UDP address/port  (this is possible using 
+SO_REUSEADDR and SO_REUSEPORT)
+ -moreover, there exist multiple UDP sockets at the same time and it 
+probably makes sense to demultiplex incoming packets at the transport 
+layer, not in application (e.g. by using user supplied identifier on bind)
+ -make connect work without bind (autoassign local address based on 
+destination, currently unspecified address is sent and SYN+ACK will not 
+be sent back (at least for 127.0.0.1, I didn't check for others))
+ -UDPSocket similar to TCPSocket would be helpful
+
+* multicast routing - specify outputPort overriding routing table 
+decision for given packet (extend ControlInfo passed to networklayer)
+
+I have solved this issues in somewhat chaotic manner as they emerged, 
+but something similar to what I did will probably be needed. It is also 
+very likely that other issues will arise as more features are properly 
+implemented, but it all should be only cosmetic.
+
+ 
