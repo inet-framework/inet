@@ -51,6 +51,7 @@ std::string RoutingEntry::info() const
     out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
     out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
+    out << "metric:" << metric << " ";
     out << "if:"; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
     switch (source)

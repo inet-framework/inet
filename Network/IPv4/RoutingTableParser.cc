@@ -359,12 +359,13 @@ void RoutingTableParser::parseRouting(char *routeFile)
             }
         }
 
-        // 5th entry: references (ignored)
+        // 5th entry: metric
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
-        int ref = atoi(str);
-        if (ref==0 && str[0]!='0')
+        int metric = atoi(str);
+        if (metric==0 && str[0]!='0')
             opp_error("Syntax error in routing file: 5th column should be numeric not `%s'", str);
+        e->metric = metric;
 
         // 6th entry: interfaceName
         e->interfaceName.reserve(MAX_ENTRY_STRING_SIZE);

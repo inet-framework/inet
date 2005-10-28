@@ -118,7 +118,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     if (!datagram->destAddress().isMulticast())
         routePacket(datagram);
     else
-        routeMulticastPacket(datagram);
+        routeMulticastPacket(datagram, -1);
 }
 
 void IP::handleARP(ARPPacket *msg)
@@ -147,13 +147,14 @@ void IP::handleMessageFromHL(cMessage *msg)
     }
 
     // encapsulate and send
-    IPDatagram *datagram = encapsulate(msg);
+    int outputPort;
+    IPDatagram *datagram = encapsulate(msg, outputPort);
 
     // route packet
     if (!datagram->destAddress().isMulticast())
         routePacket(datagram);
     else
-        routeMulticastPacket(datagram);
+        routeMulticastPacket(datagram, outputPort);
 }
 
 void IP::routePacket(IPDatagram *datagram)
@@ -211,7 +212,7 @@ void IP::routePacket(IPDatagram *datagram)
     fragmentAndSend(datagram, outputPort, nextHopAddr);
 }
 
-void IP::routeMulticastPacket(IPDatagram *datagram)
+void IP::routeMulticastPacket(IPDatagram *datagram, int outputPort)
 {
     IPAddress destAddr = datagram->destAddress();
     ev << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
@@ -258,6 +259,24 @@ void IP::routeMulticastPacket(IPDatagram *datagram)
             delete datagram;
             return;
         }
+
+    }
+
+    // routed explicitly via IP_MULTICAST_IF
+    if (outputPort != -1)
+    {
+        ASSERT(datagram->destAddress().isMulticast());
+
+        ev << "multicast packet explicitly routed via outputPort=" << outputPort << endl;
+
+        // set datagram source address if not yet set
+        if (datagram->srcAddress().isUnspecified())
+            datagram->setSrcAddress(ift->interfaceByPortNo(outputPort)->ipv4()->inetAddress());
+
+        // send
+        fragmentAndSend(datagram, outputPort, datagram->destAddress());
+
+        return;
 
     }
 
@@ -415,7 +434,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
 }
 
 
-IPDatagram *IP::encapsulate(cMessage *transportPacket)
+IPDatagram *IP::encapsulate(cMessage *transportPacket, int& outputPort)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
@@ -426,6 +445,17 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket)
     // set source and destination address
     IPAddress dest = controlInfo->destAddr();
     datagram->setDestAddress(dest);
+
+    if (dest.isMulticast())
+    {
+        // user might have specified interface via IP_MULTICAST_IF
+        outputPort = controlInfo->outputPort();
+    }
+    else
+    {
+        // unicast, let routing table decide
+        outputPort = -1;
+    }
 
     IPAddress src = controlInfo->srcAddr();
 
