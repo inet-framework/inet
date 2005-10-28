@@ -15,7 +15,7 @@ OPTS=-f -N -b $(ROOT) -c $(ROOT)/inetconfig$(EXT) -I.
 
 CONTRACT_INCLUDES=-I$(ROOT)/Transport/Contract -I$(ROOT)/Network/Contract -I$(ROOT)/NetworkInterfaces/Contract -I$(ROOT)/Base -I$(ROOT)/Util
 
-ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Network/Queue -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/TCP/flavours -I$(ROOT)/Transport/TCP/queues -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/Network/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/EtherSwitch -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/Ethernet -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Nodes/INET
+ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Network/Queue-I$(ROOT)/Network/OSPFv2 -I$(ROOT)/Network/OSPFv2/Interface -I$(ROOT)/Network/OSPFv2/MessageHandler -I$(ROOT)/Network/OSPFv2/Neighbor -I$(ROOT)/Network/OSPFv2/Router -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/TCP/flavours -I$(ROOT)/Transport/TCP/queues -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/Network/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/EtherSwitch -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/Ethernet -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Nodes/INET
 # -I$(ROOT)/Applications/BRModel
 ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Nodes/MPLS
 ALL_IPv6_INCLUDES=-I$(ROOT)/Network/IPv6 -I$(ROOT)/Network/ICMPv6 -I$(ROOT)/Nodes/IPv6
@@ -70,6 +70,12 @@ all:
 	cd Network/RSVP_TE && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4
 	cd Network/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../ICMPv6
 	cd Network/ICMPv6 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv6
+
+	cd Network/OSPFv2 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I../IPv4 -IRouter -IInterface -IMessageHandler -INeighbor
+	cd Network/OSPFv2/Interface && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../Neighbor -I../Router -I../MessageHandler
+	cd Network/OSPFv2/MessageHandler && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../Interface -I../Neighbor -I../Router
+	cd Network/OSPFv2/Neighbor && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../MessageHandler -I../Interface -I../Router
+	cd Network/OSPFv2/Router && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../MessageHandler -I../Interface -I../Neighbor
 
 	cd NetworkInterfaces/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd NetworkInterfaces/PPP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/Queue

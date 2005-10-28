@@ -1,3 +1,9 @@
+- REORGANIZE INSTALL FILE!!!!!!!!!!!!!!!!
+    should plain contain this:
+        makemake
+        nmake -f Makefile.vc depend
+        nmake -f Makefile.vc 
+
 NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)

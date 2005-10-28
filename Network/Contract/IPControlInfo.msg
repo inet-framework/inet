@@ -62,6 +62,7 @@ class IPControlInfo
         IPAddress destAddr;  // destination IP address
         IPAddress srcAddr;   // source IP address
         int inputPort;       // port number of interface on which the datagram was received
+        int outputPort = -1; // port number of the interface where the datagram should be sent (for multicast)
         short protocol enum(IPProtocolId);  // encapsulated protocol
         unsigned char diffServCodePoint;  // for QoS
         short timeToLive;   // maximum hop count

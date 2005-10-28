@@ -114,7 +114,7 @@
 // The route fields are:
 //
 // <pre>
-// Destination  Gateway  Netmask  Flags  References Interface
+// Destination  Gateway  Netmask  Flags  Metric Interface
 // </pre>
 //
 // <i>Destination, Gateway</i> and <i>Netmask</i> have the usual meaning.
@@ -125,8 +125,6 @@
 // <i>Flags</i> denotes route type:
 //    - <i>H</i> "host": direct route (directly attached to the router), and
 //    - <i>G</i> "gateway": remote route (reached through another router)
-//
-// The <i>References</i> field is currently ignored.
 //
 // <i>Interface</i> is the interface name, e.g. <tt>eth0</tt>.
 //

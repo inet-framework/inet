@@ -51,6 +51,7 @@ Network/IPv6/RoutingTable6.ned
 Network/LDP/NewLDP.ned
 Network/MPLS/LIBTable.ned
 Network/MPLS/MPLSModule.ned
+Network/OSPFv2/OSPFRouting.ned
 Network/Queue/DropTailQoSQueue.ned
 Network/Queue/DropTailQueue.ned
 Network/Queue/OutputQueue.ned
@@ -95,6 +96,7 @@ NetworkInterfaces/PPP/ThruputMeter.ned
 Nodes/INET/BurstHost.ned
 Nodes/INET/MobileHost.ned
 Nodes/INET/NetworkLayer.ned
+Nodes/INET/OSPFRouter.ned
 Nodes/INET/Router.ned
 Nodes/INET/StandardHost.ned
 Nodes/INET/WirelessHost.ned
