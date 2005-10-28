@@ -43,13 +43,13 @@ module OSPFRouter
         notificationBoard: NotificationBoard;
             display: "p=60,60;i=block/control";
         interfaceTable: InterfaceTable;
-            display: "p=60,130;i=block/table";
+            display: "p=60,140;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = "auto",
                 routingFile = routingFile;
-            display: "p=60,200;i=block/table";
+            display: "p=60,220;i=block/table";
         ospf: OSPFRouting;
             parameters:
             display: "p=300,140,row;i=block/network2";

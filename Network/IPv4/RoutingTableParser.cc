@@ -144,8 +144,7 @@ char *RoutingTableParser::createFilteredFile (char *file,
 
     while(true) {
         // skip blank lines and comments
-        // FIXME TBD consider this: while ( !isalnum(file[charpointer]) && !isspace(file[charpointer]) ) {
-        while ( !isalnum(file[charpointer]) ) {
+        while ( !isalnum(file[charpointer]) && !isspace(file[charpointer]) ) {
             while (file[charpointer++] != '\n') ;
         }
 
@@ -158,6 +157,8 @@ char *RoutingTableParser::createFilteredFile (char *file,
         // copy whole line to filterFile
         while ((filterFile[i++] = file[charpointer++]) != '\n') ;
     }
+
+ev << "filterfile : [[" << filterFile << "]]\n";
 
     return filterFile;
 }
