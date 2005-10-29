@@ -20,13 +20,13 @@ void OSPF::LinkStateRequestHandler::ProcessPacket (OSPFPacket* packet, OSPF::Int
     {
         OSPFLinkStateRequestPacket* lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket*> (packet);
 
-        unsigned int          requestCount = lsRequestPacket->getRequestsArraySize ();
+        unsigned long         requestCount = lsRequestPacket->getRequestsArraySize ();
         bool                  error        = false;
         std::vector<OSPFLSA*> lsas;
 
         ev << "  Processing packet contents:\n";
 
-        for (int i = 0; i < requestCount; i++) {
+        for (unsigned long i = 0; i < requestCount; i++) {
             LSARequest&      request = lsRequestPacket->getRequests (i);
             OSPF::LSAKeyType lsaKey;
             char             addressString[16];

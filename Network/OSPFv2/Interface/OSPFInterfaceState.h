@@ -11,6 +11,8 @@ protected:
     void CalculateDesignatedRouter (Interface* intf);
 
 public:
+    virtual ~InterfaceState () {}
+
     virtual void ProcessEvent (Interface* intf, Interface::InterfaceEventType event) = 0;
     virtual Interface::InterfaceStateType GetState (void) const = 0;
 };

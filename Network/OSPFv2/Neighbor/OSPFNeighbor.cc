@@ -10,16 +10,17 @@
 unsigned long OSPF::Neighbor::ddSequenceNumberInitSeed = 0;
 
 OSPF::Neighbor::Neighbor (RouterID neighbor) :
-    requestRetransmissionTimerActive (false),
     updateRetransmissionTimerActive (false),
-    neighborID (neighbor),
+    requestRetransmissionTimerActive (false),
     firstAdjacencyInited (false),
     ddSequenceNumber (0),
+    neighborID (neighbor),
     neighborPriority (0),
     neighborIPAddress (OSPF::NullIPv4Address),
     neighborsDesignatedRouter (OSPF::NullDesignatedRouterID),
     neighborsBackupDesignatedRouter (OSPF::NullDesignatedRouterID),
     designatedRoutersSetUp (false),
+    neighborsRouterDeadInterval (40),
     lastTransmittedDDPacket (NULL)
 {
     memset (&lastReceivedDDPacket, 0, sizeof (OSPF::Neighbor::DDPacketID));

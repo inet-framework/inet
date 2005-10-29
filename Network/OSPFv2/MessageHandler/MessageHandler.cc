@@ -3,12 +3,12 @@
 
 OSPF::MessageHandler::MessageHandler (OSPF::Router* containingRouter, cSimpleModule* containingModule) :
     OSPF::IMessageHandler (containingRouter),
+    ospfModule (containingModule),
     helloHandler (containingRouter),
     ddHandler (containingRouter),
     lsRequestHandler (containingRouter),
     lsUpdateHandler (containingRouter),
-    lsAckHandler (containingRouter),
-    ospfModule (containingModule)
+    lsAckHandler (containingRouter)
 {
 }
 

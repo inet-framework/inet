@@ -36,7 +36,7 @@
 
 namespace OSPF {
 
-typedef unsigned short   Metric;
+typedef unsigned long Metric;
 
 enum AuthenticationType {
     NullType           = 0,
@@ -219,9 +219,9 @@ inline OSPF::IPv4Address IPv4AddressFromAddressString (const char* charForm)
 {
     OSPF::IPv4Address byteForm = OSPF::NullIPv4Address;
 
-    char lastDot = -1;
-    char byteCount = 0;
-    for (char i = 0; i < 16; i++) {
+    int  lastDot = -1;
+    int  byteCount = 0;
+    for (int i = 0; i < 16; i++) {
         if (charForm[i] == '\0') {
             if ((byteCount <= 3) && (i - lastDot - 1 <= 3)) {
                 switch (i - lastDot - 1) {
@@ -299,10 +299,10 @@ inline char* AddressStringFromULong (char* buffer, int bufferLength, unsigned lo
         buffer = '\0';
     }
     else {
-        sprintf (buffer, "%d.%d.%d.%d", ((longForm & 0xFF000000) >> 24),
-                                        ((longForm & 0x00FF0000) >> 16),
-                                        ((longForm & 0x0000FF00) >> 8),
-                                         (longForm & 0x000000FF));
+        sprintf (buffer, "%d.%d.%d.%d", (int)((longForm & 0xFF000000) >> 24),
+                                        (int)((longForm & 0x00FF0000) >> 16),
+                                        (int)((longForm & 0x0000FF00) >> 8),
+                                        (int)(longForm & 0x000000FF));
     }
     return buffer;
 }

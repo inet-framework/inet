@@ -244,9 +244,8 @@ bool OSPF::Router::InstallASExternalLSA (OSPFASExternalLSA* lsa)
 
     lsaIt = asExternalLSAsByID.find (lsaKey);
     if (lsaIt != asExternalLSAsByID.end ()) {
-        long areaCount = areas.size ();
-
-        for (unsigned int i = 0; i < areaCount; i++) {
+        unsigned long areaCount = areas.size ();
+        for (unsigned long i = 0; i < areaCount; i++) {
             areas[i]->RemoveFromAllRetransmissionLists (lsaKey);
         }
         return ((lsaIt->second->Update (lsa)) | ownLSAFloodedOut);
@@ -629,12 +628,12 @@ OSPF::RoutingTableEntry* OSPF::Router::Lookup (IPAddress destination, std::vecto
 {
     const std::vector<OSPF::RoutingTableEntry*>& rTable           = (table == NULL) ? routingTable : (*table);
     unsigned long                                dest             = destination.getInt ();
-    unsigned int                                 routingTableSize = rTable.size ();
+    unsigned long                                routingTableSize = rTable.size ();
     bool                                         unreachable      = false;
     std::vector<OSPF::RoutingTableEntry*>        discard;
-    unsigned int                                 i;
+    unsigned long                                i;
 
-    long areaCount = areas.size ();
+    unsigned long areaCount = areas.size ();
     for (i = 0; i < areaCount; i++) {
         unsigned int addressRangeCount = areas[i]->GetAddressRangeCount ();
         for (unsigned int j = 0; j < addressRangeCount; j++) {
@@ -712,15 +711,15 @@ OSPF::RoutingTableEntry* OSPF::Router::Lookup (IPAddress destination, std::vecto
 
 
 /**
- * Rebuilds the routing table from scratch (based on teh LSA database).
+ * Rebuilds the routing table from scratch (based on the LSA database).
  * @sa RFC2328 Section 16.
  */
 void OSPF::Router::RebuildRoutingTable (void)
 {
-    unsigned int                          areaCount       = areas.size ();
+    unsigned long                         areaCount       = areas.size ();
     bool                                  hasTransitAreas = false;
     std::vector<OSPF::RoutingTableEntry*> newTable;
-    unsigned int                          i;
+    unsigned long                         i;
 
     ev << "Rebuilding routing table:\n";
 
@@ -750,7 +749,7 @@ void OSPF::Router::RebuildRoutingTable (void)
     CalculateASExternalRoutes (newTable);
 
     // backup the routing table
-    unsigned int                          routeCount = routingTable.size ();
+    unsigned long                         routeCount = routingTable.size ();
     std::vector<OSPF::RoutingTableEntry*> oldTable;
 
     oldTable.assign (routingTable.begin (), routingTable.end ());
@@ -760,7 +759,7 @@ void OSPF::Router::RebuildRoutingTable (void)
     RoutingTableAccess         routingTableAccess;
     std::vector<RoutingEntry*> eraseEntries;
     RoutingTable*              simRoutingTable    = routingTableAccess.get ();
-    int                        routingEntryNumber = simRoutingTable->numRoutingEntries ();
+    unsigned long              routingEntryNumber = simRoutingTable->numRoutingEntries ();
     // remove entries from the IP routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
         RoutingEntry*            entry     = simRoutingTable->routingEntry (i);
@@ -799,13 +798,19 @@ void OSPF::Router::RebuildRoutingTable (void)
 }
 
 
-bool OSPF::Router::HasRouteToASBoundaryRouter (const std::vector<OSPF::RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const
+/**
+ * Returns true if there is a route to the AS Boundary Router identified by
+ * asbrRouterID in the input inRoutingTable, false otherwise.
+ * @param inRoutingTable [in] The routing table to look in.
+ * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
+ */
+bool OSPF::Router::HasRouteToASBoundaryRouter (const std::vector<OSPF::RoutingTableEntry*>& inRoutingTable, OSPF::RouterID asbrRouterID) const
 {
     long routeCount = inRoutingTable.size ();
     for (long i = 0; i < routeCount; i++) {
         OSPF::RoutingTableEntry* routingEntry = inRoutingTable[i];
         if ((routingEntry->GetDestinationType () == OSPF::RoutingTableEntry::ASBoundaryRouterDestination) &&
-            (routingEntry->GetDestinationID ().getInt () == routerID))
+            (routingEntry->GetDestinationID ().getInt () == asbrRouterID))
         {
             return true;
         }
@@ -814,7 +819,14 @@ bool OSPF::Router::HasRouteToASBoundaryRouter (const std::vector<OSPF::RoutingTa
 }
 
 
-std::vector<OSPF::RoutingTableEntry*> OSPF::Router::GetRoutesToASBoundaryRouter (const std::vector<OSPF::RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const
+/**
+ * Returns an std::vector of routes leading to the AS Boundary Router
+ * identified by asbrRouterID from the input fromRoutingTable. If there are no
+ * routes leading to the AS Boundary Router, the returned std::vector is empty.
+ * @param fromRoutingTable [in] The routing table to look in.
+ * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
+ */
+std::vector<OSPF::RoutingTableEntry*> OSPF::Router::GetRoutesToASBoundaryRouter (const std::vector<OSPF::RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID asbrRouterID) const
 {
     std::vector<OSPF::RoutingTableEntry*> results;
     long                                  routeCount = fromRoutingTable.size ();
@@ -822,7 +834,7 @@ std::vector<OSPF::RoutingTableEntry*> OSPF::Router::GetRoutesToASBoundaryRouter 
     for (long i = 0; i < routeCount; i++) {
         OSPF::RoutingTableEntry* routingEntry = fromRoutingTable[i];
         if ((routingEntry->GetDestinationType () == OSPF::RoutingTableEntry::ASBoundaryRouterDestination) &&
-            (routingEntry->GetDestinationID ().getInt () == routerID))
+            (routingEntry->GetDestinationID ().getInt () == asbrRouterID))
         {
             results.push_back (routingEntry);
         }
@@ -831,6 +843,12 @@ std::vector<OSPF::RoutingTableEntry*> OSPF::Router::GetRoutesToASBoundaryRouter 
 }
 
 
+/**
+ * Prunes the input std::vector of RoutingTableEntries according to the RFC2328
+ * Section 16.4.1.
+ * @param asbrEntries [in/out] The list of RoutingTableEntries to prune.
+ * @sa RFC2328 Section 16.4.1.
+ */
 void OSPF::Router::PruneASBoundaryRouterEntries (std::vector<OSPF::RoutingTableEntry*>& asbrEntries) const
 {
     bool hasNonBackboneIntraAreaPath = false;
@@ -859,8 +877,18 @@ void OSPF::Router::PruneASBoundaryRouterEntries (std::vector<OSPF::RoutingTableE
 }
 
 
+/**
+ * Selects the least cost RoutingTableEntry from the input std::vector of
+ * RoutingTableEntries.
+ * @param entries [in] The RoutingTableEntries to choose the least cost one from.
+ * @return The least cost entry or NULL if entries is empty.
+ */
 OSPF::RoutingTableEntry* OSPF::Router::SelectLeastCostRoutingEntry (std::vector<OSPF::RoutingTableEntry*>& entries) const
 {
+    if (entries.empty ()) {
+        return NULL;
+    }
+
     OSPF::RoutingTableEntry* leastCostEntry = entries[0];
     Metric                   leastCost      = leastCostEntry->GetCost ();
     long                     routeCount     = entries.size ();
@@ -879,6 +907,25 @@ OSPF::RoutingTableEntry* OSPF::Router::SelectLeastCostRoutingEntry (std::vector<
 }
 
 
+/**
+ * Selects the preferred routing table entry for the input LSA (which is either
+ * an ASExternalLSA or a SummaryLSA) according to the algorithm defined in
+ * RFC2328 Section 16.4. points (1) through (3). This method is used when
+ * calculating the AS external routes and also when originating an SummaryLSA
+ * for an AS Boundary Router.
+ * @param lsa                    [in] The LSA describing the destination for
+ *                                    which the preferred Routing Entry is
+ *                                    sought for.
+ * @param considerSelfOriginated [in] Whether to disregard this LSA if it was
+ *                                    self-originated.
+ * @param fromRoutingTable       [in] The Routing Table from which to select
+ *                                    the preferred RoutingTableEntry. If it is
+ *                                    NULL then the router's current
+ *                                    routing table is used instead.
+ * @return The preferred RoutingTableEntry, or NULL if no such entry exists.
+ * @sa RFC2328 Section 16.4. points (1) through (3)
+ * @sa OSPF::Area::OriginateSummaryLSA
+ */
 OSPF::RoutingTableEntry* OSPF::Router::GetPreferredEntry (const OSPFLSA& lsa, bool considerSelfOriginated, std::vector<OSPF::RoutingTableEntry*>* fromRoutingTable /*= NULL*/)
 {
     if (fromRoutingTable == NULL) {
@@ -887,7 +934,7 @@ OSPF::RoutingTableEntry* OSPF::Router::GetPreferredEntry (const OSPFLSA& lsa, bo
 
     const OSPFLSAHeader&     lsaHeader         = lsa.getHeader ();
     const OSPFASExternalLSA* asExternalLSA     = dynamic_cast<const OSPFASExternalLSA*> (&lsa);
-    unsigned short           externalCost      = (asExternalLSA != NULL) ? asExternalLSA->getContents ().getRouteCost () : 0;
+    unsigned long            externalCost      = (asExternalLSA != NULL) ? asExternalLSA->getContents ().getRouteCost () : 0;
     unsigned short           lsAge             = lsaHeader.getLsAge ();
     OSPF::RouterID           originatingRouter = lsaHeader.getAdvertisingRouter ().getInt ();
     bool                     selfOriginated    = (originatingRouter == routerID);
@@ -931,10 +978,17 @@ OSPF::RoutingTableEntry* OSPF::Router::GetPreferredEntry (const OSPFLSA& lsa, bo
 }
 
 
+/**
+ * Calculate the AS External Routes from the ASExternalLSAs in the database.
+ * @param newRoutingTable [in/out] Push the new RoutingTableEntries into this
+ *                                 routing table, and also use this for path
+ *                                 calculations.
+ * @sa RFC2328 Section 16.4.
+ */
 void OSPF::Router::CalculateASExternalRoutes (std::vector<OSPF::RoutingTableEntry*>& newRoutingTable)
 {
-    long lsaCount = asExternalLSAs.size ();
-    long i, j;
+    unsigned long lsaCount = asExternalLSAs.size ();
+    unsigned long i;
 
     for (i = 0; i < lsaCount; i++) {
         OSPF::ASExternalLSA* currentLSA        = asExternalLSAs[i];
@@ -950,7 +1004,7 @@ void OSPF::Router::CalculateASExternalRoutes (std::vector<OSPF::RoutingTableEntr
         IPAddress destination = currentHeader.getLinkStateID () & currentLSA->getContents ().getNetworkMask ().getInt ();
 
         Metric                   preferredCost    = preferredEntry->GetCost ();
-        OSPF::RoutingTableEntry* destinationEntry = Lookup (destination, &newRoutingTable);
+        OSPF::RoutingTableEntry* destinationEntry = Lookup (destination, &newRoutingTable);   // (5)
         if (destinationEntry == NULL) {
             bool                     type2ExternalMetric = currentLSA->getContents ().getE_ExternalMetricType ();
             unsigned int             nextHopCount        = preferredEntry->GetNextHopCount ();
@@ -1061,21 +1115,46 @@ void OSPF::Router::CalculateASExternalRoutes (std::vector<OSPF::RoutingTableEntr
 }
 
 
+/**
+ * Scans through the router's areas' preconfigured address ranges and returns
+ * the one containing the input addressRange.
+ * @param addressRange [in] The address range to look for.
+ * @param advertise    [out] Whether the advertise flag is set in the returned
+ *                           preconfigured address range.
+ * @return The containing preconfigured address range if found,
+ *         OSPF::NullIPv4AddressRange otherwise.
+ */
 OSPF::IPv4AddressRange OSPF::Router::GetContainingAddressRange (OSPF::IPv4AddressRange addressRange, bool* advertise /*= NULL*/) const
 {
     unsigned long areaCount = areas.size ();
     for (unsigned long i = 0; i < areaCount; i++) {
         OSPF::IPv4AddressRange containingAddressRange = areas[i]->GetContainingAddressRange (addressRange, advertise);
-        if (containingAddressRange != NullIPv4AddressRange) {
+        if (containingAddressRange != OSPF::NullIPv4AddressRange) {
             return containingAddressRange;
         }
     }
     if (advertise != NULL) {
         *advertise = false;
     }
-    return NullIPv4AddressRange;
+    return OSPF::NullIPv4AddressRange;
 }
 
+
+/**
+ * Generates a unique LinkStateID for a given destination. This may require the
+ * reorigination of an LSA already in the database (with a different
+ * LinkStateID).
+ * @param destination           [in] The destination for which a unique
+ *                                   LinkStateID is required.
+ * @param destinationCost       [in] The path cost to the destination.
+ * @param lsaToReoriginate      [out] The LSA to reoriginate (which was already
+ *                                    in the database, and had to be changed).
+ * @param externalMetricIsType2 [in] True if the destinationCost is given as a
+ *                                   Type2 external metric.
+ * @return the LinkStateID for the destination.
+ * @sa RFC2328 Appendix E.
+ * @sa OSPF::Area::GetUniqueLinkStateID
+ */
 OSPF::LinkStateID OSPF::Router::GetUniqueLinkStateID (OSPF::IPv4AddressRange destination,
                                                       OSPF::Metric destinationCost,
                                                       OSPF::ASExternalLSA*& lsaToReoriginate,
@@ -1119,6 +1198,16 @@ OSPF::LinkStateID OSPF::Router::GetUniqueLinkStateID (OSPF::IPv4AddressRange des
     }
 }
 
+
+/**
+ * After a routing table rebuild the changes in the routing table are
+ * identified and new SummaryLSAs are originated or old ones are flooded out
+ * in each area as necessary.
+ * @param oldRoutingTable [in] The previous version of the routing table (which
+ *                             is then compared with the one in routingTable).
+ * @sa RFC2328 Section 12.4. points (5) through (6).
+ */
+// TODO: review this algorithm + add virtual link changes (RFC2328 Section 16.7.).
 void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTableEntry*>& oldRoutingTable)
 {
     if (areas.size () <= 1) {
@@ -1321,19 +1410,27 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
     }
 }
 
+
+/**
+ * Stores information on an AS External Route in externalRoutes and intalls (or
+ * updates) a new ASExternalLSA into the database.
+ * @param networkAddress        [in] The external route's network address.
+ * @param externalRouteContents [in] Route configuration data for the external
+ *                                   route.
+ */
 void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents)
 {
     OSPF::ASExternalLSA* asExternalLSA = new OSPF::ASExternalLSA;
     OSPFLSAHeader&       lsaHeader     = asExternalLSA->getHeader ();
     OSPFOptions          lsaOptions;
-    OSPF::LSAKeyType     lsaKey;
+    //OSPF::LSAKeyType     lsaKey;
 
     lsaHeader.setLsAge (0);
     memset (&lsaOptions, 0, sizeof (OSPFOptions));
     lsaOptions.E_ExternalRoutingCapability = true;
     lsaHeader.setLsOptions (lsaOptions);
     lsaHeader.setLsType (ASExternalLSAType);
-    lsaHeader.setLinkStateID (ULongFromIPv4Address (networkAddress));
+    lsaHeader.setLinkStateID (ULongFromIPv4Address (networkAddress));   // TODO: get unique LinkStateID
     lsaHeader.setAdvertisingRouter (routerID);
     lsaHeader.setLsSequenceNumber (INITIAL_SEQUENCE_NUMBER);
 
@@ -1354,7 +1451,13 @@ void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const 
     }
 }
 
-void OSPF::Router::RemoveExternalRoute (OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents)
+
+/**
+ * Removes an AS External Route from the database.
+ * @param networkAddress [in] The network address of the external route which
+ *                            needs to be removed.
+ */
+void OSPF::Router::RemoveExternalRoute (OSPF::IPv4Address networkAddress)
 {
     OSPF::LSAKeyType     lsaKey;
 

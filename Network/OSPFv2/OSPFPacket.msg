@@ -133,12 +133,12 @@ struct TOSData {
 class Link
 {
     fields:
-        IPAddress       linkID;
-        unsigned long   linkData = 0;
-        unsigned char   type enum (LinkType) = PointToPointLink;
-        unsigned char   numberOfTOS = 0;
-        unsigned short  linkCost = 1;
-        TOSData         tosData[];
+        IPAddress      linkID;
+        unsigned long  linkData = 0;
+        unsigned char  type enum (LinkType) = PointToPointLink;
+        unsigned char  numberOfTOS = 0;
+        unsigned long  linkCost = 1;
+        TOSData        tosData[];
 };
 
 //
@@ -170,9 +170,9 @@ class OSPFNetworkLSA extends OSPFLSA
 class OSPFSummaryLSA extends OSPFLSA
 {
     fields:
-        IPAddress       networkMask;
-        unsigned short  routeCost = 1;
-        TOSData         tosData[];
+        IPAddress     networkMask;
+        unsigned long routeCost = 1;
+        TOSData       tosData[];
 }
 
 struct  ExternalTOSInfo {
@@ -191,7 +191,7 @@ class OSPFASExternalLSAContents
     fields:
         IPAddress       networkMask;
         bool            E_ExternalMetricType = false;
-        unsigned short  routeCost = 1;
+        unsigned long   routeCost = 1;
         IPAddress       forwardingAddress;
         long            externalRouteTag = 0;
         ExternalTOSInfo externalTOSInfo[];

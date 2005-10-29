@@ -74,7 +74,7 @@ public:
     void                 RebuildRoutingTable                  (void);
     IPv4AddressRange     GetContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
     void                 UpdateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents);
-    void                 RemoveExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents);
+    void                 RemoveExternalRoute                  (IPv4Address networkAddress);
     RoutingTableEntry*   GetPreferredEntry                    (const OSPFLSA& lsa, bool considerSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
 
 private:

@@ -10,9 +10,9 @@
 
 OSPF::Interface::Interface (OSPF::Interface::OSPFInterfaceType ifType) :
     interfaceType (ifType),
-    interfaceAddressRange (OSPF::NullIPv4AddressRange),
     ifIndex (0),
     mtu (0),
+    interfaceAddressRange (OSPF::NullIPv4AddressRange),
     areaID (OSPF::BackboneAreaID),
     helloInterval (10),
     pollInterval (120),
@@ -139,7 +139,7 @@ void OSPF::Interface::SendHelloPacket (OSPF::IPv4Address destination, short ttl)
     }
     unsigned int initedNeighborCount = neighbors.size ();
     helloPacket->setNeighborArraySize (initedNeighborCount);
-    for (int k = 0; k < initedNeighborCount; k++) {
+    for (unsigned int k = 0; k < initedNeighborCount; k++) {
         helloPacket->setNeighbor (k, ULongFromIPv4Address (neighbors[k]));
     }
 
