@@ -34,6 +34,8 @@
 // FIXME is such thing needed at all???
 class INET_API ErrorHandling: public cSimpleModule
 {
+  protected:
+    long numReceived;
   public:
     Module_Class_Members(ErrorHandling, cSimpleModule, 0);
     virtual void initialize();

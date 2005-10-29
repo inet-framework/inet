@@ -31,10 +31,14 @@ Define_Module(ErrorHandling);
 
 void ErrorHandling::initialize()
 {
+    numReceived = 0;
+    WATCH(numReceived);
 }
 
 void ErrorHandling::handleMessage(cMessage *msg)
 {
+    numReceived++;
+
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
 
@@ -48,5 +52,9 @@ void ErrorHandling::handleMessage(cMessage *msg)
        << "\n";
 
     delete icmpMsg;
+
+    char buf[80];
+    sprintf(buf, "errors: %ld", numReceived);
+    displayString().setTagArg("t",0,buf);
 }
 
