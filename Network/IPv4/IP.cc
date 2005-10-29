@@ -152,12 +152,12 @@ void IP::handleMessageFromHL(cMessage *msg)
 
     // route packet
     if (!datagram->destAddress().isMulticast())
-        routePacket(datagram);
+        routePacket(datagram, outputPort);
     else
         routeMulticastPacket(datagram, outputPort);
 }
 
-void IP::routePacket(IPDatagram *datagram)
+void IP::routePacket(IPDatagram *datagram, int outputPort)
 {
     // TBD add option handling code here
 
@@ -184,15 +184,25 @@ void IP::routePacket(IPDatagram *datagram)
         return;
     }
 
-    // error handling: destination address does not exist in routing table:
-    // notify ICMP, throw packet away and continue
-    int outputPort = rt->outputPortNo(destAddr);
-    if (outputPort==-1)
+    // if output port was explicitly requested, use that, otherwise use IP routing
+    if (outputPort!=-1)
     {
-        ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
-        numUnroutable++;
-        icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
-        return;
+        ev << "using manually specified output port " << outputPort << "\n";
+    }
+    else
+    {
+        // use IP routing (lookup in routing table)
+        outputPort = rt->outputPortNo(destAddr);
+
+        // error handling: destination address does not exist in routing table:
+        // notify ICMP, throw packet away and continue
+        if (outputPort==-1)
+        {
+            ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+            numUnroutable++;
+            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
+            return;
+        }
     }
 
     // get next-hop address (TBD: merge with outputPortNo())
@@ -277,7 +287,6 @@ void IP::routeMulticastPacket(IPDatagram *datagram, int outputPort)
         fragmentAndSend(datagram, outputPort, datagram->destAddress());
 
         return;
-
     }
 
     // now: routing

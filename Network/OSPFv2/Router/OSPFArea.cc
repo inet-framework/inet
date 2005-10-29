@@ -2281,8 +2281,8 @@ void OSPF::Area::CalculateInterAreaRoutes (std::vector<OSPF::RoutingTableEntry*>
                     /* Add the next hops of the border router advertising this destination
                      * to the equal entry.
                      */
-                    for (i = 0; i < nextHopCount; i++) {
-                        equalEntry->AddNextHop (borderRouterEntry->GetNextHop (i));
+                    for (unsigned long j = 0; j < nextHopCount; j++) {
+                        equalEntry->AddNextHop (borderRouterEntry->GetNextHop (j));
                     }
                 } else {
                     OSPF::RoutingTableEntry* newEntry = CreateRoutingTableEntryFromSummaryLSA (*currentLSA, currentCost, *borderRouterEntry);

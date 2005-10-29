@@ -596,7 +596,7 @@ bool OSPF::Router::DestinationIsUnreachable (OSPFLSA* lsa) const
 {
     IPAddress destination = lsa->getHeader ().getLinkStateID ();
 
-    OSPFNetworkLSA* networkLSA = dynamic_cast<OSPFNetworkLSA*> (lsa);
+    OSPFNetworkLSA* networkLSA       = dynamic_cast<OSPFNetworkLSA*> (lsa);
     OSPFSummaryLSA* summaryLSA       = dynamic_cast<OSPFSummaryLSA*> (lsa);
     OSPFASExternalLSA* asExternalLSA = dynamic_cast<OSPFASExternalLSA*> (lsa);
     if (networkLSA != NULL) {
@@ -791,6 +791,8 @@ void OSPF::Router::RebuildRoutingTable (void)
 
     ev << "Routing table was rebuilt.\n"
        << "Results:\n";
+
+    routeCount = routingTable.size ();
     for (i = 0; i < routeCount; i++) {
         ev << *routingTable[i]
            << "\n";
@@ -1236,6 +1238,7 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
         std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less> deletedLSAMap;
         OSPF::LSAKeyType                                        lsaKey;
 
+        routeCount = routingTable.size ();
         for (j = 0; j < routeCount; j++) {
             unsigned long                                         destination = routingTable[j]->GetDestinationID ().getInt () & routingTable[j]->GetAddressMask ().getInt ();
             std::map<unsigned long, RoutingTableEntry*>::iterator destIt      = oldTableMap.find (destination);

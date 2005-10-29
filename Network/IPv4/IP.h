@@ -96,12 +96,12 @@ class INET_API IP : public QueueBase
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPDatagram *datagram);
+    virtual void routePacket(IPDatagram *datagram, int outputPort=-1);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPDatagram *datagram, int outputPort);
+    virtual void routeMulticastPacket(IPDatagram *datagram, int outputPort=-1);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the

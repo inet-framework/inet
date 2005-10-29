@@ -141,11 +141,11 @@ inline void OSPF::RoutingTableEntry::SetType2Cost (Metric pathCost)
 inline void OSPF::RoutingTableEntry::AddNextHop (OSPF::NextHop hop)
 {
     if (nextHops.size () == 0) {
-        InterfaceEntry*    routingInterface = InterfaceTableAccess().get ()->interfaceAt (hop.ifIndex);
+        InterfaceEntry*    routingInterface = InterfaceTableAccess().get ()->interfaceByPortNo (hop.ifIndex);
 
         interfacePtr = routingInterface;
         interfaceName = routingInterface->name();
-        gateway = ULongFromIPv4Address (hop.hopAddress);
+        //gateway = ULongFromIPv4Address (hop.hopAddress); // TODO: verify this isn't necessary
     }
     nextHops.push_back (hop);
 }
