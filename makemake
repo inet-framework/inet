@@ -6,6 +6,7 @@ echo 'Regenerating nedfiles.lst...'
 find . -name \*.ned > nedfiles.lst
 perl -i.bak -pe "s|^(./)?Examples/.*||" nedfiles.lst
 perl -i.bak -pe "s|^(./)?Unsupported/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Obsolete/.*||" nedfiles.lst
 perl -i.bak -pe "s|^(./)?Tests/.*||" nedfiles.lst
 echo 'Done'
 
