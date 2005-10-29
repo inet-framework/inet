@@ -40,6 +40,7 @@ InterfaceEntry::InterfaceEntry()
     _multicast = false;
     _pointToPoint= false;
     _loopback = false;
+    _datarate = 0;
 
     _ipv4data = NULL;
     _ipv6data = NULL;
