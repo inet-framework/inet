@@ -16,6 +16,7 @@ Applications/TCPApp/TCPSrvHostApp.ned
 Applications/TCPApp/TelnetApp.ned
 Applications/UDPApp/UDPApp.ned
 Applications/UDPApp/UDPBasicApp.ned
+Applications/UDPApp/UDPEchoApp.ned
 Applications/UDPApp/UDPSink.ned
 Applications/UDPApp/UDPVideoStreamCli.ned
 Applications/UDPApp/UDPVideoStreamSvr.ned

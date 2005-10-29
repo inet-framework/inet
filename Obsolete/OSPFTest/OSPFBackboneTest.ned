@@ -70,12 +70,12 @@ module Backbone
                 in[2],
                 out[2];
             display: "p=292,384;i=switch2";
-        H1: StandardHost; //
+        H1: StandardHost;
             gatesizes:
                 ethIn[1],
                 ethOut[1];
             display: "p=372,420;i=laptop3";
-        H2: StandardHost; //
+        H2: StandardHost;
             gatesizes:
                 ethIn[1],
                 ethOut[1];

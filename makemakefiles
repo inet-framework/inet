@@ -109,6 +109,7 @@ all:
 	cd Examples/INET/RouterPerf && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/INET/BulkTransfer && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/INET/REDTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/INET/OSPFTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MPLS/ldp-mpls1 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Failure && $(MAKEMAKE) $(ALL_MODEL_OPTS)

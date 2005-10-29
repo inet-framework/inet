@@ -66,14 +66,20 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
     return destAddresses[k];
 }
 
-void UDPBasicApp::sendPacket()
+
+cMessage *UDPBasicApp::createPacket()
 {
     char msgName[32];
     sprintf(msgName,"UDPBasicAppData-%d", counter++);
 
     cMessage *payload = new cMessage(msgName);
     payload->setLength(msgLength);
+    return payload;
+}
 
+void UDPBasicApp::sendPacket()
+{
+    cMessage *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr();
     sendToUDP(payload, localPort, destAddr, destPort);
 
