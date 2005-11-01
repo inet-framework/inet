@@ -8,7 +8,10 @@
 #
 
 OMNETPP_ROOT=c:\omnet++
-#OMNETPP_ROOT=d:\home\omnetpp
+
+!if !exist($(OMNETPP_ROOT)\configuser.vc)
+!  error Please adjust OMNETPP_ROOT in inetconfig.vc to point to your OMNeT++ installation!
+!endif
 
 !include $(OMNETPP_ROOT)\configuser.vc
 
