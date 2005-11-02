@@ -1,4 +1,4 @@
-//
+
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -44,7 +44,7 @@ enum LDP_MESSAGE_TYPES
 
 enum LDP_STATUS_TYPES
 {
-	NO_ROUTE=13;
+    NO_ROUTE=13;
 };
 
 struct FEC_TLV
@@ -52,9 +52,9 @@ struct FEC_TLV
 // 
 // XXX FIXME mapping messages may contain multiple FEC elements (use std::vector)
 //
-	fields:
-		IPAddress addr;
-		int length;
+    fields:
+        IPAddress addr;
+        int length;
 };
 
 //
