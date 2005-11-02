@@ -158,8 +158,6 @@ char *RoutingTableParser::createFilteredFile (char *file,
         while ((filterFile[i++] = file[charpointer++]) != '\n') ;
     }
 
-ev << "filterfile : [[" << filterFile << "]]\n";
-
     return filterFile;
 }
 

@@ -1,5 +1,8 @@
 This is a sample to demonstrate reroute and preemption handling.
 
+Following description refers to the nam trace file genereated by the simulation
+run.
+
 Two LSPs are established on simulation startup. The green one is a higher
 priority path, the orange one has a regular priority. Later, the green path is
 rerouted to the same hop-route the orange one uses and since there is not enough

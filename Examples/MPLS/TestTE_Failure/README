@@ -1,5 +1,8 @@
 This is a sample to demonstrate LSR failure handling.
 
+Following description refers to the nam trace file genereated by the simulation
+run.
+
 Green LSP is established as a part of the initial configuration. Later, one of
 the routers lying on the green path crashes. This crash is detected by the RSVP
 HELLO mechanism by its upstream neighbour and PathErr is sent and propagates to

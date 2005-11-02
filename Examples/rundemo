@@ -67,6 +67,7 @@ foreach line {
    {"TestTE/reroute"         "MPLS/TestTE_Reroute"  "./TestTE"                "TestTE"}
    {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
    {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
+   {"LDP/test"               "MPLS/LDP"             "./TestTE"                "TestTE"}
 } {
    lappend samples $i
    if {[llength $line]==0} {

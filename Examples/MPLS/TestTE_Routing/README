@@ -1,5 +1,8 @@
 This is a sample to demonstrate various routing mechanism.
 
+Following description refers to the nam trace file genereated by the simulation
+run.
+
 Three LSPs are established on simulation startup. 
 
 The green path uses explicit routing with every hop on the path being listed
