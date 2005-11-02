@@ -22,7 +22,7 @@
 #include "IPAddress.h"
 #include "IPDatagram.h"
 #include "IScriptable.h"
-#include "RSVPClassifier.h"
+#include "IRSVPClassifier.h"
 #include "LIBtable.h"
 #include "IntServ.h"
 

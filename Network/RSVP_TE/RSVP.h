@@ -24,7 +24,7 @@
 #include "RSVPResvMsg.h"
 #include "RSVPHelloMsg.h"
 #include "SignallingMsg_m.h"
-#include "RSVPClassifier.h"
+#include "IRSVPClassifier.h"
 
 class SimpleClassifier;
 class RoutingTable;
