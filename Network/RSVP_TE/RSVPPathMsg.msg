@@ -1,4 +1,7 @@
 //
+// (C) 2005 Vojtech Janota
+// (C) 2003 Xuan Thang Nguyen
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -39,7 +42,7 @@ message RSVPPathMsg extends RSVPPacket
         SenderDescriptor_t sender_descriptor;
         EroVector ERO;
         int color;
-        
+
         int rsvpKind = PATH_MESSAGE;
 };
 
@@ -53,7 +56,7 @@ message RSVPPathTear extends RSVPPacket
     fields:
         RsvpHopObj_t hop;
         SenderTemplateObj_t senderTemplate;
-		bool force;
+        bool force;
         int rsvpKind = PTEAR_MESSAGE;
 };
 

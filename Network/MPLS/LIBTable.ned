@@ -11,6 +11,6 @@
 //
 
 simple LIBTable
-parameters:
-	conf: xml;
+    parameters:
+        conf: xml;
 endsimple

@@ -1,4 +1,6 @@
 //
+// (C) 2005 Vojtech Janota
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -27,14 +29,14 @@
 // TED, MPLSModule, and Scenario.
 //
 simple RSVP
-	parameters:
-		traffic : xml,
-		peers : string,
-		helloInterval : numeric,
-		helloTimeout : numeric;
-	gates:
-		in: from_ip;
-		out: to_ip;
-		in: from_mpls_switch;
-		in: from_app;
+    parameters:
+        traffic : xml,
+        peers : string,
+        helloInterval : numeric,
+        helloTimeout : numeric;
+    gates:
+        in: from_ip;
+        out: to_ip;
+        in: from_mpls_switch;
+        in: from_app;
 endsimple

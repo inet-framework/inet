@@ -1,4 +1,7 @@
 //
+// (C) 2005 Vojtech Janota
+// (C) 2003 Xuan Thang Nguyen
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -22,14 +25,14 @@ class RSVPMessage;
 //
 message RSVPHelloMsg extends RSVPMessage
 {
-	properties:
-		customize=true;
+    properties:
+        customize=true;
     fields:
-    	bool request;
-    	bool ack;
+        bool request;
+        bool ack;
 
-    	int srcInstance;
-    	int dstInstance;
-    	
-    	int rsvpKind = HELLO_MESSAGE;
+        int srcInstance;
+        int dstInstance;
+
+        int rsvpKind = HELLO_MESSAGE;
 };

@@ -1,25 +1,39 @@
+//
+// (C) 2005 Vojtech Janota
+// (C) 2003 Xuan Thang Nguyen
+//
+// This library is free software, you can redistribute it
+// and/or modify
+// it under  the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation;
+// either version 2 of the License, or any later version.
+// The library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
 
 cplusplus {{
 #include "IPAddress.h"
 #include "IntServ.h"
 
-#define	MSG_PSB_TIMER				1
-#define	MSG_PSB_TIMEOUT				2
+#define MSG_PSB_TIMER               1
+#define MSG_PSB_TIMEOUT             2
 
-#define	MSG_RSB_REFRESH_TIMER		3
-#define	MSG_RSB_COMMIT_TIMER		4
-#define	MSG_RSB_TIMEOUT				5
+#define MSG_RSB_REFRESH_TIMER       3
+#define MSG_RSB_COMMIT_TIMER        4
+#define MSG_RSB_TIMEOUT             5
 
-#define	MSG_HELLO_TIMER				6
-#define	MSG_HELLO_TIMEOUT			7
+#define MSG_HELLO_TIMER             6
+#define MSG_HELLO_TIMEOUT           7
 
-#define	MSG_PATH_NOTIFY				8
+#define MSG_PATH_NOTIFY             8
 
-#define	PATH_CREATED				1
-#define	PATH_UNFEASIBLE				2
-#define	PATH_FAILED					3
-#define	PATH_PREEMPTED				4
-#define	PATH_RETRY					5
+#define PATH_CREATED                1
+#define PATH_UNFEASIBLE             2
+#define PATH_FAILED                 3
+#define PATH_PREEMPTED              4
+#define PATH_RETRY                  5
 }}
 
 class noncobject IPAddress;
@@ -31,8 +45,8 @@ class noncobject SenderTemplateObj_t;
 //
 message SignallingMsg
 {
-	fields:
-		int command = 0;
+    fields:
+        int command = 0;
 };
 
 //
@@ -40,10 +54,10 @@ message SignallingMsg
 //
 message PsbTimerMsg extends SignallingMsg
 {
-	fields:
-		int id;
-	
-		int command = MSG_PSB_TIMER;
+    fields:
+        int id;
+
+        int command = MSG_PSB_TIMER;
 };
 
 //
@@ -51,10 +65,10 @@ message PsbTimerMsg extends SignallingMsg
 //
 message PsbTimeoutMsg extends SignallingMsg
 {
-	fields:
-		int id;
-	
-		int command = MSG_PSB_TIMEOUT;
+    fields:
+        int id;
+
+        int command = MSG_PSB_TIMEOUT;
 };
 
 //
@@ -62,10 +76,10 @@ message PsbTimeoutMsg extends SignallingMsg
 //
 message RsbRefreshTimerMsg extends SignallingMsg
 {
-	fields:
-		int id;
-	
-		int command = MSG_RSB_REFRESH_TIMER;
+    fields:
+        int id;
+
+        int command = MSG_RSB_REFRESH_TIMER;
 };
 
 //
@@ -73,10 +87,10 @@ message RsbRefreshTimerMsg extends SignallingMsg
 //
 message RsbCommitTimerMsg extends SignallingMsg
 {
-	fields:
-		int id;
-		
-		int command = MSG_RSB_COMMIT_TIMER;
+    fields:
+        int id;
+
+        int command = MSG_RSB_COMMIT_TIMER;
 };
 
 //
@@ -84,10 +98,10 @@ message RsbCommitTimerMsg extends SignallingMsg
 //
 message RsbTimeoutMsg extends SignallingMsg
 {
-	fields:
-		int id;
-	
-		int command = MSG_RSB_TIMEOUT;
+    fields:
+        int id;
+
+        int command = MSG_RSB_TIMEOUT;
 };
 
 //
@@ -95,10 +109,10 @@ message RsbTimeoutMsg extends SignallingMsg
 //
 message HelloTimerMsg extends SignallingMsg
 {
-	fields:
-		IPAddress peer;
-	
-		int command = MSG_HELLO_TIMER;
+    fields:
+        IPAddress peer;
+
+        int command = MSG_HELLO_TIMER;
 };
 
 //
@@ -106,10 +120,10 @@ message HelloTimerMsg extends SignallingMsg
 //
 message HelloTimeoutMsg extends SignallingMsg
 {
-	fields:
-		IPAddress peer;
-	
-		int command = MSG_HELLO_TIMEOUT;
+    fields:
+        IPAddress peer;
+
+        int command = MSG_HELLO_TIMEOUT;
 };
 
 //
@@ -117,11 +131,11 @@ message HelloTimeoutMsg extends SignallingMsg
 //
 message PathNotifyMsg extends SignallingMsg
 {
-	fields:
-		SessionObj_t session;
-		SenderTemplateObj_t sender;
-		
-		int status;
-		
-		int command = MSG_PATH_NOTIFY;
+    fields:
+        SessionObj_t session;
+        SenderTemplateObj_t sender;
+
+        int status;
+
+        int command = MSG_PATH_NOTIFY;
 };

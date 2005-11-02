@@ -45,14 +45,14 @@
 // assumes no information of QoS from the link layer.
 //
 simple MPLSModule
-	parameters:
-//		peers : string; // interfaces we should send labeled packets to (no loner used)
-		classifier : string;
-	gates:
-		in: fromL3[];
-		out: toL3[];
-		in: fromL2[];
-		out: toL2[];
-		in: fromSignalModule;
-		out: toSignalModule;
+    parameters:
+//      peers : string; // interfaces we should send labeled packets to (no loner used)
+        classifier : string;
+    gates:
+        in: fromL3[];
+        out: toL3[];
+        in: fromL2[];
+        out: toL2[];
+        in: fromSignalModule;
+        out: toSignalModule;
 endsimple

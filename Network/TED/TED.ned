@@ -1,4 +1,6 @@
 //
+// (C) 2005 Vojtech Janota
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -22,11 +24,10 @@
 // meeting the chosen bandwidth criteria.
 //
 simple TED
-	parameters:
-		peers : string;
-	gates:
-		in: from_ip;
-		out: to_ip;
-		
-		in: inotify;
+    parameters:
+        peers : string;
+    gates:
+        in: from_ip;
+        out: to_ip;
+        in: inotify;
 endsimple
