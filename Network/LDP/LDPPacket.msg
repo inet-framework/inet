@@ -24,7 +24,6 @@ cplusplus {{
 
 class noncobject IPAddress;
 
-
 //
 // LDP message types
 //
@@ -43,6 +42,20 @@ enum LDP_MESSAGE_TYPES
     UNKNOWN=20;
 };
 
+enum LDP_STATUS_TYPES
+{
+	NO_ROUTE=13;
+};
+
+struct FEC_TLV
+{
+// 
+// XXX FIXME mapping messages may contain multiple FEC elements (use std::vector)
+//
+	fields:
+		IPAddress addr;
+		int length;
+};
 
 //
 // Base class for LDP packets
@@ -64,11 +77,9 @@ message LDPPacket
 message LDPLabelMapping extends LDPPacket
 {
     fields:
-        int fecId;
-        IPAddress fec;
+    	FEC_TLV fec;
         int label;
 };
-
 
 //
 // LDP Label Request Message
@@ -76,8 +87,7 @@ message LDPLabelMapping extends LDPPacket
 message LDPLabelRequest extends LDPPacket
 {
     fields:
-        int fecId;
-        IPAddress fec;
+    	FEC_TLV fec;
 };
 
 
@@ -92,6 +102,15 @@ message LDPHello extends LDPPacket
          bool rbit;
 };
 
+//
+// LDP notification message
+//
+message LDPNotify extends LDPPacket
+{
+	fields:
+		int status;
+    	FEC_TLV fec;
+};
 
 //
 // LDP Ini Message

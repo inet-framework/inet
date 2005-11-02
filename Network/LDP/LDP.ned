@@ -41,19 +41,14 @@
 //
 // @author Andras Varga, based on original implementation LDPproc
 //
-simple NewLDP
-
+simple LDP
     parameters:
-        routerId : string,
-        helloTimeout : numeric,
-        isIR: bool,
-        isER: bool;
-
+        holdTime : numeric,
+        helloInterval : numeric,
+        routerId : string;
     gates:
-        in: from_mpls_switch;  // receives messages here by direct sending
         in: from_tcp_interface;
         in: from_udp_interface;
         out: to_tcp_interface;
         out: to_udp_interface;
-
 endsimple

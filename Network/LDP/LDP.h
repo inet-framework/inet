@@ -1,4 +1,6 @@
 //
+// (C) 2005 Vojtech Janota
+//
 // (C) 2004 Andras Varga
 //
 // This library is free software, you can redistribute it
@@ -12,8 +14,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __NEWLDP_H__
-#define __NEWLDP_H__
+#ifndef __LDP_H__
+#define __LDP_H__
 
 
 #include <string>
@@ -26,6 +28,16 @@
 #include "LIBTableAccess.h"
 #include "TCPSocketMap.h"
 
+#include "TEDAccess.h"
+
+#include <NotificationBoard.h>
+
+#define LDP_PORT  646
+
+#define	LDP_TRAFFIC 		4		// session (TCP) traffic
+#define	LDP_HELLO_TRAFFIC	5		// discovery (UDP) traffic
+#define	LDP_USER_TRAFFIC	100		// label switched user traffic
+
 
 class InterfaceTable;
 class RoutingTable;
@@ -33,15 +45,43 @@ class RoutingTable;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, public IClassifier, public INotifiable
 {
   public:
-    struct fec_src_bind
+  
+  	struct fec_t
+  	{
+  		int fecid;
+  		
+  		// FEC value
+  		IPAddress addr;
+  		int length;
+  		
+  		// FEC's next hop address
+  		IPAddress nextHop;
+  		
+  		// possibly also: (speed up)
+  		// std::string nextHopInterface
+  	};
+    typedef std::vector<fec_t> FecVector;
+    
+  
+    struct fec_bind_t
     {
-        int fecId;
-        IPAddress fec;  // actually the dest IP address
-        string fromInterface;
+    	int fecid;
+    	
+    	IPAddress peer;
+    	int label;
     };
+    typedef std::vector<fec_bind_t> FecBindVector;
+    
+    
+    struct pending_req_t
+    {
+    	int fecid;
+    	IPAddress peer;
+    };
+    typedef std::vector<pending_req_t> PendingVector;
 
     struct peer_info
     {
@@ -49,40 +89,47 @@ class INET_API NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
         bool activeRole;    // we're in active or passive role in this session
         TCPSocket *socket;  // TCP socket
         string linkInterface;
+        cMessage *timeout;
     };
+    typedef vector<peer_info> PeerVector;
 
   private:
     // configuration
-    bool isIR;
-    bool isER;
-    double helloTimeout;  // FIXME obey
+    double holdTime;
+    double helloInterval;
+    
 
-    //
-    // state variables:
-    //
-
-    // the collection of all label requests pending on the current LSR
-    // from upstream LSRs and itself.
-    typedef vector<fec_src_bind> FecSenderBindVector;
-    FecSenderBindVector fecSenderBinds;
+    // currently recognized FECs
+    FecVector fecList;
+    // bindings advertised upstream
+    FecBindVector fecUp;
+    // mappings learnt from downstream
+    FecBindVector fecDown;
+	// currently requested and yet unserviced mappings
+    PendingVector pending;
 
     // the collection of all HELLO adjacencies.
-    typedef vector<peer_info> PeerVector;
     PeerVector myPeers;
-
+    
     //
     // other variables:
     //
     InterfaceTable *ift;
     RoutingTable *rt;
+    LIBTable *lt;
+    TED *tedmod;
     LIBTableAccess libTableAccess;
     MPLSAccess mplsAccess;
+    TEDAccess tedAccess;
+    
 
     TCPSocket serverSocket;  // for listening on LDP_PORT
     TCPSocketMap socketMap;  // holds TCP connections with peers
 
     // hello timeout message
     cMessage *sendHelloMsg;
+    
+    int maxFecid;
 
   private:
     /**
@@ -106,23 +153,48 @@ class INET_API NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
 
     /** Utility: return socket for given peer. Throws error if there's no TCP connection */
     TCPSocket *peerSocket(IPAddress peerAddr);
+    /** Utility: return socket for given peer and NULL if session doesn't exist */
+	TCPSocket *peerSocketSoft(IPAddress peerAddr);
+	
+	void sendToPeer(IPAddress dest, cMessage *msg);
+	
+    
+    //bool matches(const FEC_TLV& a, const FEC_TLV& b);
+
+    FecVector::iterator findFecEntry(FecVector& fecs, IPAddress addr, int length);
+	FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, IPAddress peer);
+	
+	void sendMappingRequest(IPAddress dest, IPAddress addr, int length);
+    void sendMapping(int type, IPAddress dest, int label, IPAddress addr, int length);
+    void sendNotify(int status, IPAddress dest, IPAddress addr, int length);
+
+    void rebuildFecList();
+    void updateFecList(IPAddress nextHop);
+	void updateFecListEntry(fec_t oldItem);
+	
+	void announceLinkChange(IPAddress advrouter, IPAddress linkid);
+    
 
   public:
-    Module_Class_Members(NewLDP,cSimpleModule, 0);
+    Module_Class_Members(LDP, cSimpleModule, 0);
 
-    virtual void initialize();
+    virtual int numInitStages() const  {return 4;}
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
     void sendHelloTo(IPAddress dest);
     void openTCPConnectionToPeer(int peerIndex);
 
     void processLDPHello(LDPHello *msg);
+    void processHelloTimeout(cMessage *msg);
     void processMessageFromTCP(cMessage *msg);
-    void processRequestFromMPLSSwitch(cMessage *msg);
     void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 
     void processLABEL_MAPPING(LDPLabelMapping *packet);
     void processLABEL_REQUEST(LDPLabelRequest *packet);
+	void processLABEL_RELEASE(LDPLabelMapping *packet);
+	void processLABEL_WITHDRAW(LDPLabelMapping *packet);
+	void processNOTIFICATION(LDPNotify* packet);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
@@ -133,6 +205,12 @@ class INET_API NewLDP: public cSimpleModule, public TCPSocket::CallbackInterface
     virtual void socketFailure(int connId, void *yourPtr, int code);
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
     //@}
+    
+    // IClassifier
+	virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
+
+	// INotifiable
+	virtual void receiveChangeNotification(int category, cPolymorphic *details);
 };
 
 #endif
