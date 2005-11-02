@@ -24,7 +24,6 @@
 #include <map>
 #include <string>
 #include "MACAddress.h"
-#include "stlwatch.h"
 
 class EtherFrame;
 

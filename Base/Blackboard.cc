@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include "Blackboard.h"
-#include "stlwatch.h"
 #include "ModuleAccess.h"
 
 Define_Module(Blackboard);

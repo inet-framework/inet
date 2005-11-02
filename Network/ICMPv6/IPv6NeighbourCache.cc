@@ -19,7 +19,6 @@
 
 
 #include "IPv6NeighbourCache.h"
-#include "stlwatch.h"
 
 
 std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Key& e)
@@ -126,7 +125,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
     nbor.nudTimeoutEvent = NULL;
-    
+
     nbor.routerExpiryTime = expiryTime;
     return &nbor;
 }

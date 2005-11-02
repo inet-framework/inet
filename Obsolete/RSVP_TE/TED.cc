@@ -15,7 +15,6 @@
 
 #include "TED.h"
 #include "IPAddressResolver.h"
-#include "stlwatch.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "RoutingTableAccess.h"

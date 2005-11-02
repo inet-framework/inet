@@ -24,7 +24,6 @@
 
 #include "UDPVideoStreamSvr.h"
 #include "UDPControlInfo_m.h"
-#include "stlwatch.h"
 
 
 Define_Module(UDPVideoStreamSvr);

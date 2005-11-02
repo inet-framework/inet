@@ -18,7 +18,6 @@
 
 
 #include <algorithm>
-#include "stlwatch.h"
 #include "opp_utils.h"
 #include "RoutingTable6.h"
 #include "IPv6InterfaceData.h"

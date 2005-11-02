@@ -23,7 +23,6 @@
 #include "TCPCommand_m.h"
 #include "IPControlInfo_m.h"
 #include "IPv6ControlInfo_m.h"
-#include "stlwatch.h"
 
 Define_Module(TCP);
 

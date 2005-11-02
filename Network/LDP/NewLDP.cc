@@ -25,7 +25,6 @@
 #include "IPv4InterfaceData.h"
 #include "RoutingTableAccess.h"
 #include "UDPControlInfo_m.h"
-#include "stlwatch.h"
 
 
 #define LDP_PORT  646

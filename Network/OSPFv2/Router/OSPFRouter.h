@@ -7,7 +7,6 @@
 #include "OSPFInterface.h"
 #include "LSA.h"
 #include "OSPFRoutingTableEntry.h"
-#include "stlwatch.h"
 #include <map>
 
 /**

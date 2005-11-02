@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include "stlwatch.h"
 #include "InterfaceEntry.h"
 
 

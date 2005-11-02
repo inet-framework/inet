@@ -16,7 +16,6 @@
 
 
 #include "ChannelControl.h"
-#include "stlwatch.h"
 #include "FWMath.h"
 #include <cassert>
 

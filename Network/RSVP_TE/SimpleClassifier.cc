@@ -14,10 +14,7 @@
 *********************************************************************/
 #include <iostream>
 
-#include "stlwatch.h"
-
 #include "SimpleClassifier.h"
-
 #include "XMLUtils.h"
 #include "RoutingTableAccess.h"
 #include "LIBTableAccess.h"
@@ -29,22 +26,22 @@ Define_Module(SimpleClassifier);
 void SimpleClassifier::initialize(int stage)
 {
     if (stage!=3) // routerId must be initialized in RT
-        return; 
+        return;
 
 	maxLabel = 0;
-	
+
 	RoutingTableAccess routingTableAccess;
 	RoutingTable *rt = routingTableAccess.get();
 	routerId = rt->getRouterId();
-	
+
 	LIBTableAccess libTableAccess;
 	lt = libTableAccess.get();
-	
+
 	RSVPAccess rsvpAccess;
 	rsvp = rsvpAccess.get();
-	
+
 	readTableFromXML(par("conf").xmlValue());
-	
+
     WATCH_VECTOR(bindings);
 }
 
@@ -58,24 +55,24 @@ void SimpleClassifier::handleMessage(cMessage *)
 bool SimpleClassifier::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
 	// forwarding decision for non-labeled datagrams
-	
+
 	std::vector<FECEntry>::iterator it;
 	for(it = bindings.begin(); it != bindings.end(); it++)
 	{
 		if(!it->dest.isUnspecified() && !it->dest.equals(ipdatagram->destAddress()))
 			continue;
-			
+
 		if(!it->src.isUnspecified() && !it->src.equals(ipdatagram->srcAddress()))
 			continue;
-			
+
 		ev << "packet belongs to fecid=" << it->id << endl;
-		
+
 		if(it->inLabel < 0)
 			return false;
-			
+
 		return lt->resolveLabel("", it->inLabel, outLabel, outInterface, color);
 	}
-	
+
 	return false;
 }
 
@@ -88,10 +85,10 @@ void SimpleClassifier::bind(const SessionObj_t& session, const SenderTemplateObj
 	{
 		if(it->session != session)
 			continue;
-			
+
 		if(it->sender != sender)
 			continue;
-			
+
 		it->inLabel = inLabel;
 	}
 }
@@ -125,26 +122,26 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 {
 	ASSERT(fec);
 	ASSERT(!strcmp(fec->getTagName(), "fecentry") || !strcmp(fec->getTagName(), "bind-fec"));
-	
+
 	int fecid = getParameterIntValue(fec, "id");
-	
+
 	std::vector<FECEntry>::iterator it = findFEC(fecid);
-	
+
 	if(getUniqueChildIfExists(fec, "label"))
 	{
 		// bind-fec to label
 		checkTags(fec, "id label destination source");
-		
+
 		ev << "binding to a given label" << endl;
-		
+
 		FECEntry newFec;
-		
+
 		newFec.id = fecid;
 		newFec.dest = getParameterIPAddressValue(fec, "destination");
 		newFec.src = getParameterIPAddressValue(fec, "source", IPAddress());
 
 		newFec.inLabel = getParameterIntValue(fec, "label");
-	
+
 		if(it == bindings.end())
 		{
 			// create new binding
@@ -160,11 +157,11 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 	{
 		// bind-fec to LSP
 		checkTags(fec, "id destination source tunnel_id extended_tunnel_id endpoint lspid");
-		
+
 		ev << "binding to a given path" << endl;
-		
+
 		FECEntry newFec;
-		
+
 		newFec.id = fecid;
 		newFec.dest = getParameterIPAddressValue(fec, "destination");
 		newFec.src = getParameterIPAddressValue(fec, "source", IPAddress());
@@ -172,12 +169,12 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 		newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
 		newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();
 		newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest); // ??? always use newFec.dest ???
-		
+
 		newFec.sender.Lsp_Id = getParameterIntValue(fec, "lspid");
 		newFec.sender.SrcAddress = routerId;
-		
+
 		newFec.inLabel = rsvp->getInLabel(newFec.session, newFec.sender);
-		
+
 		if(it == bindings.end())
 		{
 			// create new binding
@@ -193,7 +190,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 	{
 		// un-bind
 		checkTags(fec, "id");
-		
+
 		if(it != bindings.end())
 		{
 			bindings.erase(it);
@@ -208,7 +205,7 @@ std::vector<SimpleClassifier::FECEntry>::iterator SimpleClassifier::findFEC(int 
 	{
 		if(it->id != fecid)
 			continue;
-			
+
 		break;
 	}
 	return it;

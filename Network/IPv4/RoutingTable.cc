@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include "stlwatch.h"
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
 #include "IPv4InterfaceData.h"

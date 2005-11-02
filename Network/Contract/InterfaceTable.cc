@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include "stlwatch.h"
 #include "InterfaceTable.h"
 #include "NotifierConsts.h"
 

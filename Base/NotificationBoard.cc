@@ -19,7 +19,6 @@
 
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
-#include "stlwatch.h"
 #include <algorithm>
 
 Define_Module(NotificationBoard);
