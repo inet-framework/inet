@@ -18,24 +18,20 @@
 #include <vector>
 #include <omnetpp.h>
 
-#include "ScenarioManager.h"
-
-#include "TEDAccess.h"
-#include "RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
-#include "LIBTableAccess.h"
-
+#include "IScriptable.h"
 #include "IntServ.h"
-
 #include "RSVPPathMsg.h"
 #include "RSVPResvMsg.h"
 #include "RSVPHelloMsg.h"
-
 #include "SignallingMsg_m.h"
-
 #include "RSVPClassifier.h"
 
 class SimpleClassifier;
+class RoutingTable;
+class InterfaceTable;
+class TED;
+class LIBTable;
+
 
 /**
  * FIXME missing documentation
@@ -173,17 +169,9 @@ private:
     double retryInterval;
 
 private:
-
-    TEDAccess tedAccess;
     TED *tedmod;
-
-    RoutingTableAccess routingTableAccess;
     RoutingTable *rt;
-
-    InterfaceTableAccess interfaceTableAccess;
     InterfaceTable *ift;
-
-    LIBTableAccess libTableAccess;
     LIBTable *lt;
 
     IRSVPClassifier *rpct;

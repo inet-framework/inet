@@ -23,13 +23,9 @@
 #include <vector>
 #include "INETDefs.h"
 #include "LDPPacket_m.h"
-#include "MPLSAccess.h"
-#include "LIBTableAccess.h"
 #include "TCPSocketMap.h"
-
-#include "TEDAccess.h"
-
-#include <NotificationBoard.h>
+#include "Classifier.h"
+#include "NotificationBoard.h"
 
 #define LDP_PORT  646
 
@@ -40,6 +36,9 @@
 
 class InterfaceTable;
 class RoutingTable;
+class LIBTable;
+class TED;
+
 
 /**
  * LDP (rfc 3036) protocol implementation.
@@ -87,10 +86,10 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
         IPAddress peerIP;   // IP address of LDP peer
         bool activeRole;    // we're in active or passive role in this session
         TCPSocket *socket;  // TCP socket
-        string linkInterface;
+        std::string linkInterface;
         cMessage *timeout;
     };
-    typedef vector<peer_info> PeerVector;
+    typedef std::vector<peer_info> PeerVector;
 
   private:
     // configuration
@@ -117,9 +116,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     RoutingTable *rt;
     LIBTable *lt;
     TED *tedmod;
-    LIBTableAccess libTableAccess;
-    MPLSAccess mplsAccess;
-    TEDAccess tedAccess;
 
 
     TCPSocket serverSocket;  // for listening on LDP_PORT
@@ -142,10 +138,10 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
      * In case no corresponding peerIP found, a peerIP (not deterministic)
      * will be returned.
      */
-    IPAddress findPeerAddrFromInterface(string interfaceName);
+    IPAddress findPeerAddrFromInterface(std::string interfaceName);
 
     //This method is the reserve of above method
-    string findInterfaceFromPeerAddr(IPAddress peerIP);
+    std::string findInterfaceFromPeerAddr(IPAddress peerIP);
 
     /** Utility: return peer's index in myPeers table, or -1 if not found */
     int findPeer(IPAddress peerAddr);
@@ -172,7 +168,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     void updateFecListEntry(fec_t oldItem);
 
     void announceLinkChange(IPAddress advrouter, IPAddress linkid);
-
 
   public:
     Module_Class_Members(LDP, cSimpleModule, 0);

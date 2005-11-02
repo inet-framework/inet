@@ -35,7 +35,6 @@ tcptut:
         cd $(DOC_DIR)\src\tcp && nmake -f Makefile.vc
 
 checkenv:
-	@echo ===== Checking environment =====
 	@if not .%OS%.==.Windows_NT. echo ERROR: This makefile can ONLY be used on NT4.0, Win2K or XP!
 	@echo  Checking if $(CXX) works...
 	@$(CXX) /? /nologo <nul > nul || echo ERROR: Could not run $(CXX). Probably PATH does not contain its BIN or DLL directory. && exit 1

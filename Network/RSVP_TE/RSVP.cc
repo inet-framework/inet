@@ -16,10 +16,12 @@
 #include "IPControlInfo_m.h"
 #include "common.h"
 #include "Utils.h"
-
 #include "XMLUtils.h"
-
 #include "IPv4InterfaceData.h"
+#include "TEDAccess.h"
+#include "RoutingTableAccess.h"
+#include "InterfaceTableAccess.h"
+#include "LIBTableAccess.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -40,11 +42,11 @@ void RSVP::initialize(int stage)
     if (stage!=3)
         return;
 
-    tedmod = tedAccess.get();
-    rt = routingTableAccess.get();
-    ift = interfaceTableAccess.get();
+    tedmod = TEDAccess().get();
+    rt = RoutingTableAccess().get();
+    ift = InterfaceTableAccess().get();
     routerId = rt->getRouterId();
-    lt = libTableAccess.get();
+    lt = LIBTableAccess().get();
 
 
     rpct = check_and_cast<IRSVPClassifier*>(parentModule()->submodule("classifier"));

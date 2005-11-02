@@ -20,14 +20,14 @@
 #include "TED_m.h"
 #include "IntServ.h"
 
-#include "RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
-
-#include "NotificationBoard.h"
-
 #define LS_INFINITY   1e16
 
 #define TED_TRAFFIC         1
+
+class RoutingTable;
+class InterfaceTable;
+class InterfaceEntry;
+class NotificationBoard;
 
 /**
  * FIXME missing documentation
@@ -69,13 +69,11 @@ class TED : public cSimpleModule
         unsigned int linkIndex(IPAddress localInf);
         unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
         IPAddressVector getLocalAddress();
-        InterfaceEntry* interfaceByAddress(IPAddress localInf);
+        InterfaceEntry *interfaceByAddress(IPAddress localInf);
 
         void rebuildRoutingTable();
 
     private:
-        RoutingTableAccess routingTableAccess;
-        InterfaceTableAccess interfaceTableAccess;
         RoutingTable *rt;
         InterfaceTable *ift;
         IPAddress routerId;

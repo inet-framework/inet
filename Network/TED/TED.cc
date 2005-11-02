@@ -17,10 +17,11 @@
 
 #include "TED.h"
 #include "IPControlInfo_m.h"
-#include "stlwatch.h"
-
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
+#include "RoutingTableAccess.h"
+#include "InterfaceTableAccess.h"
+#include "NotificationBoard.h"
 
 Define_Module(TED);
 
@@ -31,30 +32,30 @@ void TED::initialize(int stage)
     if (stage!=3)
         return;
 
-    rt = routingTableAccess.get();
-    ift = interfaceTableAccess.get();
+    rt = RoutingTableAccess().get();
+    ift = InterfaceTableAccess().get();
     routerId = rt->getRouterId();
-    nb = check_and_cast<NotificationBoard*>(parentModule()->submodule("notificationBoard"));
+    nb = NotificationBoardAccess().get();
 
     maxMessageId = 0;
 
     ASSERT(!routerId.isUnspecified());
 
-    for(int i = 0; i < ift->numInterfaces(); i++)
+    for (int i = 0; i < ift->numInterfaces(); i++)
     {
         int idx = ift->interfaceAt(i)->outputPort();
 
-        if(idx == -1)
+        if (idx == -1)
             continue;
 
-        for(int j = 0; j < rt->numRoutingEntries(); j++)
+        for (int j = 0; j < rt->numRoutingEntries(); j++)
         {
             RoutingEntry *rentry = rt->routingEntry(j);
 
             if(rentry->interfacePtr != ift->interfaceAt(i))
                 continue;
 
-            if(rentry->type != rentry->DIRECT)
+            if (rentry->type != rentry->DIRECT)
                 continue;
 
             IPAddress linkid = rt->routingEntry(j)->host;
@@ -116,23 +117,23 @@ void TED::initialize(int stage)
 
 void TED::handleMessage(cMessage * msg)
 {
-    if(msg == announceMsg)
+    if (msg == announceMsg)
     {
         delete msg;
         sendToPeers(ted, true, IPAddress());
     }
-    else if(!strcmp(msg->arrivalGate()->name(), "inotify"))
+    else if (!strcmp(msg->arrivalGate()->name(), "inotify"))
     {
         processLINK_NOTIFY(check_and_cast<LinkNotifyMsg*>(msg));
     }
-    else if(!strcmp(msg->arrivalGate()->name(), "from_ip"))
+    else if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
     {
         ev << "Processing message from IP: " << msg << endl;
         IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
         IPAddress sender = controlInfo->srcAddr();
 
         int command = check_and_cast<TEDMsg*>(msg)->getCommand();
-        switch(command)
+        switch (command)
         {
             case LINK_STATE_MESSAGE:
                 processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg*>(msg), sender);
@@ -204,7 +205,7 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
         return result;
 
     result.push_back(V[minIndex].node);
-    while(V[minIndex].parent != -1)
+    while (V[minIndex].parent != -1)
     {
         minIndex = V[minIndex].parent;
         result.insert(result.begin(), V[minIndex].node);
@@ -221,10 +222,10 @@ void TED::rebuildRoutingTable()
 
     int n = rt->numRoutingEntries();
     int j = 0;
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         RoutingEntry *entry = rt->routingEntry(j);
-        if(entry->host.isMulticast())
+        if (entry->host.isMulticast())
         {
             ++j;
         }
@@ -248,15 +249,15 @@ void TED::rebuildRoutingTable()
         if(V[i].node == routerId) // us
             continue;
 
-        if(V[i].parent == -1) // unreachable
+        if (V[i].parent == -1) // unreachable
             continue;
 
-        if(isLocalPeer(V[i].node)) // local peer
+        if (isLocalPeer(V[i].node)) // local peer
             continue;
 
         int nHop = i;
 
-        while(!isLocalPeer(V[nHop].node))
+        while (!isLocalPeer(V[nHop].node))
         {
             nHop = V[nHop].parent;
         }
@@ -266,7 +267,7 @@ void TED::rebuildRoutingTable()
         RoutingEntry *entry = new RoutingEntry;
         entry->host = V[i].node;
 
-        if(V[i].node == V[nHop].node)
+        if (V[i].node == V[nHop].node)
         {
             entry->gateway = IPAddress();
             entry->type = entry->DIRECT;

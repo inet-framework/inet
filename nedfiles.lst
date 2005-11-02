@@ -49,7 +49,7 @@ Network/IPv4/RoutingTable.ned
 Network/IPv6/IPv6.ned
 Network/IPv6/IPv6ErrorHandling.ned
 Network/IPv6/RoutingTable6.ned
-Network/LDP/NewLDP.ned
+Network/LDP/LDP.ned
 Network/MPLS/LIBTable.ned
 Network/MPLS/MPLSModule.ned
 Network/OSPFv2/OSPFRouting.ned
@@ -57,11 +57,9 @@ Network/Queue/DropTailQoSQueue.ned
 Network/Queue/DropTailQueue.ned
 Network/Queue/OutputQueue.ned
 Network/Queue/REDQueue.ned
-Network/RSVP_TE/Dummy.ned
-Network/RSVP_TE/FailureManager.ned
 Network/RSVP_TE/RSVP.ned
 Network/RSVP_TE/SimpleClassifier.ned
-Network/RSVP_TE/TED.ned
+Network/TED/TED.ned
 NetworkInterfaces/NetworkInterface.ned
 NetworkInterfaces/Ethernet/eth-index.ned
 NetworkInterfaces/Ethernet/EtherBus.ned

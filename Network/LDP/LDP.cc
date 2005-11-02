@@ -16,6 +16,7 @@
 #include <omnetpp.h>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "ConstType.h"
 #include "LDP.h"
 #include "LIBtable.h"
@@ -27,9 +28,12 @@
 #include "UDPPacket.h"
 #include "TCPSegment.h"
 
+#include "MPLSAccess.h"
+#include "LIBTableAccess.h"
+#include "TEDAccess.h"
+
 #include "NotifierConsts.h"
 
-#include <algorithm>
 
 Define_Module(LDP);
 
@@ -91,8 +95,8 @@ void LDP::initialize(int stage)
 
     ift = InterfaceTableAccess().get();
     rt = RoutingTableAccess().get();
-    lt = libTableAccess.get();
-    tedmod = tedAccess.get();
+    lt = LIBTableAccess().get();
+    tedmod = TEDAccess().get();
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecUp);
@@ -698,13 +702,13 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     if (portNo==-1)
         return IPAddress();  // no route
 
-    string iName = ift->interfaceByPortNo(portNo)->name();
+    std::string iName = ift->interfaceByPortNo(portNo)->name();
     return findPeerAddrFromInterface(iName);
 }
 
 // To allow this to work, make sure there are entries of hosts for all peers
 
-IPAddress LDP::findPeerAddrFromInterface(string interfaceName)
+IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
@@ -743,7 +747,7 @@ IPAddress LDP::findPeerAddrFromInterface(string interfaceName)
 }
 
 // Pre-condition: myPeers vector is finalized
-string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
+std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 {
 /*
     int i;

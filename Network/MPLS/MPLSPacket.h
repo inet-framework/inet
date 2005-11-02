@@ -20,15 +20,13 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
-using namespace std;
-
 /**
  * Represents a packet with MPLS headers
  */
 class INET_API MPLSPacket: public cMessage
 {
   private:
-    typedef stack<int> LabelStack;
+    typedef std::stack<int> LabelStack;
     LabelStack labels;
 
   public:
