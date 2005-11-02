@@ -11,6 +11,9 @@
 //
 
 
+//
+// FIXME missing documentation
+//
 simple SimpleClassifier
 	parameters:
 		conf: xml;

@@ -27,77 +27,80 @@
 
 #define LS_INFINITY   1e16
 
-#define	TED_TRAFFIC			1
+#define TED_TRAFFIC         1
 
+/**
+ * FIXME missing documentation
+ */
 class TED : public cSimpleModule
 {
-	public:
-		struct vertex_t
-		{
-			IPAddress node;
-			int parent;
-			double dist;
-		};
-		
-		struct edge_t
-		{
-			int src;
-			int dest;
-			double metric;
-		};
-		
-	    TELinkStateInfoVector ted;
+    public:
+        struct vertex_t
+        {
+            IPAddress node;
+            int parent;
+            double dist;
+        };
 
-	    Module_Class_Members(TED, cSimpleModule, 0);
-	    
-	    virtual void initialize(int stage);
-    	virtual int numInitStages() const  {return 4;}
-	    virtual void handleMessage(cMessage *msg);
-	    
-		IPAddressVector calculateShortestPath(IPAddressVector dest,
-			const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
-			
-		IPAddress interfaceByPeerAddress(IPAddress peerIP);
-		IPAddress peerRemoteInterface(IPAddress peerIP);
-		IPAddress peerByLocalAddress(IPAddress localInf);
-		IPAddress primaryAddress(IPAddress localInf);
-		bool isLocalPeer(IPAddress inetAddr);
-		bool isLocalAddress(IPAddress addr);
-		unsigned int linkIndex(IPAddress localInf);
-		unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
-		IPAddressVector getLocalAddress();
-		InterfaceEntry* interfaceByAddress(IPAddress localInf);
-			
-		void rebuildRoutingTable();
-		
-	private:		
-		RoutingTableAccess routingTableAccess;
-		InterfaceTableAccess interfaceTableAccess;
-		RoutingTable *rt;
-		InterfaceTable *ift;
-		IPAddress routerId;
-		NotificationBoard *nb;
+        struct edge_t
+        {
+            int src;
+            int dest;
+            double metric;
+        };
 
-		IPAddressVector LocalAddress;
-		IPAddressVector TEDPeer;
-		
-		cMessage *announceMsg;		
-		int maxMessageId;
-	
-		int assignIndex(std::vector<vertex_t>& vertices, IPAddress node);
+        TELinkStateInfoVector ted;
 
-		std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology, 
-			double req_bandwidth, int priority);
-			
-		void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exPeer);
-		void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list);
-		void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
-		
-		void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
-		void processLINK_NOTIFY(LinkNotifyMsg* msg);
+        Module_Class_Members(TED, cSimpleModule, 0);
 
-		bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo **match);
-		void updateTimestamp(TELinkStateInfo *link);
+        virtual void initialize(int stage);
+        virtual int numInitStages() const  {return 4;}
+        virtual void handleMessage(cMessage *msg);
+
+        IPAddressVector calculateShortestPath(IPAddressVector dest,
+            const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
+
+        IPAddress interfaceByPeerAddress(IPAddress peerIP);
+        IPAddress peerRemoteInterface(IPAddress peerIP);
+        IPAddress peerByLocalAddress(IPAddress localInf);
+        IPAddress primaryAddress(IPAddress localInf);
+        bool isLocalPeer(IPAddress inetAddr);
+        bool isLocalAddress(IPAddress addr);
+        unsigned int linkIndex(IPAddress localInf);
+        unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
+        IPAddressVector getLocalAddress();
+        InterfaceEntry* interfaceByAddress(IPAddress localInf);
+
+        void rebuildRoutingTable();
+
+    private:
+        RoutingTableAccess routingTableAccess;
+        InterfaceTableAccess interfaceTableAccess;
+        RoutingTable *rt;
+        InterfaceTable *ift;
+        IPAddress routerId;
+        NotificationBoard *nb;
+
+        IPAddressVector LocalAddress;
+        IPAddressVector TEDPeer;
+
+        cMessage *announceMsg;
+        int maxMessageId;
+
+        int assignIndex(std::vector<vertex_t>& vertices, IPAddress node);
+
+        std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
+            double req_bandwidth, int priority);
+
+        void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exPeer);
+        void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list);
+        void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
+
+        void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
+        void processLINK_NOTIFY(LinkNotifyMsg* msg);
+
+        bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo **match);
+        void updateTimestamp(TELinkStateInfo *link);
 };
 
 std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info);

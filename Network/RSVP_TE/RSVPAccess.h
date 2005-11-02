@@ -20,6 +20,9 @@
 #include "ModuleAccess.h"
 #include "RSVP.h"
 
+/**
+ * FIXME missing documentation
+ */
 class RSVPAccess : public ModuleAccess<RSVP>
 {
     public:

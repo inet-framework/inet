@@ -27,65 +27,65 @@
 #define SWAP_OPER              1
 #define POP_OPER               2
 
+/**
+ * FIXME missing documentation
+ */
 struct LabelOp
 {
-	int label;
-	int optcode;
+    int label;
+    int optcode;
 };
 
 typedef std::vector<LabelOp> LabelOpVector;
 
+/**
+ * FIXME missing documentation
+ */
 class INET_API LIBTable: public cSimpleModule
 {
-	public:
-	
-		struct LIBEntry
-		{
-			int inLabel;
-			std::string inInterface;
-			
-			LabelOpVector outLabel;
-			std::string outInterface;
-			
-			// FIXME colors in nam, temporary solution
-			int color;
-		};
-	
-	private:
-	
-		IPAddress routerId;
-	    int maxLabel;
-	    std::vector<LIBEntry> lib;
-	    
-	public:
+    public:
+        struct LIBEntry
+        {
+            int inLabel;
+            std::string inInterface;
 
-    	Module_Class_Members(LIBTable, cSimpleModule, 0);
-		virtual void initialize(int stage);
-		virtual int numInitStages() const  {return 5;}
-	    void handleMessage(cMessage *msg);
-	    
-	    // static configuration
-	    
-	    void readTableFromXML(const cXMLElement* libtable);
-	    
-	    // label management
-	    
-	    bool resolveLabel(std::string inInterface, int inLabel,
-	    		LabelOpVector& outLabel, std::string& outInterface, int& color);
+            LabelOpVector outLabel;
+            std::string outInterface;
 
-	    int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-				std::string outInterface, int color);
-				
-		void removeLibEntry(int inLabel);
-		
-		// utility
-		
-		static LabelOpVector pushLabel(int label);
-		static LabelOpVector swapLabel(int label);
-		static LabelOpVector popLabel();		
-		
-		
-};    
+            // FIXME colors in nam, temporary solution
+            int color;
+        };
+
+    private:
+        IPAddress routerId;
+        int maxLabel;
+        std::vector<LIBEntry> lib;
+
+    public:
+        Module_Class_Members(LIBTable, cSimpleModule, 0);
+        virtual void initialize(int stage);
+        virtual int numInitStages() const  {return 5;}
+        void handleMessage(cMessage *msg);
+
+        // static configuration
+
+        void readTableFromXML(const cXMLElement* libtable);
+
+        // label management
+
+        bool resolveLabel(std::string inInterface, int inLabel,
+                          LabelOpVector& outLabel, std::string& outInterface, int& color);
+
+        int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
+                            std::string outInterface, int color);
+
+        void removeLibEntry(int inLabel);
+
+        // utility
+        static LabelOpVector pushLabel(int label);
+        static LabelOpVector swapLabel(int label);
+        static LabelOpVector popLabel();
+};
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib);
 std::ostream & operator<<(std::ostream & os, const LabelOpVector& label);

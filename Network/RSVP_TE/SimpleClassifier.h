@@ -30,52 +30,55 @@
 
 class RSVP;
 
+/**
+ * FIXME missing documentation
+ */
 class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, public IRSVPClassifier
 {
-	public:
-	
-		struct FECEntry
-		{
-			int id;
-		
-			IPAddress src;
-			IPAddress dest;
-		
-			SessionObj_t session;
-			SenderTemplateObj_t sender;
-		
-			int inLabel;
-		};
-	
-	private:
-	
-		IPAddress routerId;
-	    int maxLabel;
+    public:
 
-		std::vector<FECEntry> bindings;
-		LIBTable *lt;
-		RSVP *rsvp;
-	    
-	public:
+        struct FECEntry
+        {
+            int id;
 
-    	Module_Class_Members(SimpleClassifier, cSimpleModule, 0);
-		virtual void initialize(int stage);
-		virtual int numInitStages() const  {return 5;}
-	    void handleMessage(cMessage *msg);
-	    
-	    // IScriptable implementation
-	    virtual void processCommand(const cXMLElement& node);
+            IPAddress src;
+            IPAddress dest;
 
-	    // IRSVPClassifier implementation
-	    virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
-	    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel);
+            SessionObj_t session;
+            SenderTemplateObj_t sender;
 
-	private:
-	
-		void readTableFromXML(const cXMLElement *fectable);
-		void readItemFromXML(const cXMLElement *fec);
-		std::vector<FECEntry>::iterator findFEC(int fecid);
-};    
+            int inLabel;
+        };
+
+    private:
+
+        IPAddress routerId;
+        int maxLabel;
+
+        std::vector<FECEntry> bindings;
+        LIBTable *lt;
+        RSVP *rsvp;
+
+    public:
+
+        Module_Class_Members(SimpleClassifier, cSimpleModule, 0);
+        virtual void initialize(int stage);
+        virtual int numInitStages() const  {return 5;}
+        void handleMessage(cMessage *msg);
+
+        // IScriptable implementation
+        virtual void processCommand(const cXMLElement& node);
+
+        // IRSVPClassifier implementation
+        virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
+        virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel);
+
+    private:
+
+        void readTableFromXML(const cXMLElement *fectable);
+        void readItemFromXML(const cXMLElement *fec);
+        std::vector<FECEntry>::iterator findFEC(int fecid);
+};
 
 #endif
 

@@ -14,59 +14,81 @@
 cplusplus {{
 #include "IPAddress.h"
 
-#define	LINK_STATE_MESSAGE		1
-#define	LINK_NOTIFY_MESSAGE		2
+#define LINK_STATE_MESSAGE      1
+#define LINK_NOTIFY_MESSAGE     2
 
 typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
 
 class noncobject IPAddress;
 
+
+//
+// FIXME missing documentation
+//
 struct TELinkStateInfo
 {
-  fields:
-    IPAddress advrouter;
-    IPAddress linkid;
-    IPAddress local;
-    IPAddress remote;
-    double metric;
-    double MaxBandwidth;
-    double UnResvBandwidth[8];
-    
-	double timestamp;
-	unsigned int sourceId;
-	unsigned int messageId;
-    bool state;
+    fields:
+        IPAddress advrouter;
+        IPAddress linkid;
+        IPAddress local;
+        IPAddress remote;
+        double metric;
+        double MaxBandwidth;
+        double UnResvBandwidth[8];
+
+        double timestamp;
+        unsigned int sourceId;
+        unsigned int messageId;
+        bool state;
 };
 
+
+//
+// FIXME missing documentation
+//
 struct TELink
 {
-  fields:
-  	IPAddress advrouter;
-	IPAddress linkid;
+    fields:
+        IPAddress advrouter;
+        IPAddress linkid;
 };
 
-message TEDMsg 
+
+//
+// FIXME missing documentation
+//
+message TEDMsg
 {
-	fields:
-		int command = 0;
+    fields:
+        int command = 0;
 };
 
+
+//
+// FIXME missing documentation
+//
 message LinkStateMsg extends TEDMsg
 {
-	fields:
-		TELinkStateInfo linkInfo[];	
-		
-		bool request = false;
-		bool ack = false;
-	
-		int command = LINK_STATE_MESSAGE;
+    fields:
+        TELinkStateInfo linkInfo[];
+
+        bool request = false;
+        bool ack = false;
+
+        int command = LINK_STATE_MESSAGE;
 };
 
+
+//
+// FIXME missing documentation
+//
 message LinkNotifyMsg extends TEDMsg
 {
-  fields:
-  	TELink link[];
-  	
-	int command = LINK_NOTIFY_MESSAGE;
+    fields:
+        TELink link[];
+
+        int command = LINK_NOTIFY_MESSAGE;
 };
+
+

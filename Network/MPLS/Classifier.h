@@ -21,6 +21,9 @@
 #include "IPDatagram.h"
 #include "LIBtable.h"
 
+/**
+ * FIXME missing documentation
+ */
 class INET_API IClassifier
 {
   public:

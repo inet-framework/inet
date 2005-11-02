@@ -23,6 +23,9 @@ class noncobject FlowDescriptorVector;
 
 class RSVPPacket;
 
+//
+// FIXME missing documentation
+//
 message RSVPResvMsg extends RSVPPacket
 {
     properties:
@@ -33,6 +36,9 @@ message RSVPResvMsg extends RSVPPacket
         int rsvpKind = RESV_MESSAGE;
 }
 
+//
+// FIXME missing documentation
+//
 message RSVPResvTear extends RSVPPacket
 {
     properties:
@@ -43,6 +49,9 @@ message RSVPResvTear extends RSVPPacket
         int rsvpKind = RTEAR_MESSAGE;
 };
 
+//
+// FIXME missing documentation
+//
 message RSVPResvError extends RSVPPacket
 {
     properties:

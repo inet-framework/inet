@@ -17,6 +17,9 @@ cplusplus {{
 
 class RSVPMessage;
 
+//
+// FIXME missing documentation
+//
 message RSVPHelloMsg extends RSVPMessage
 {
 	properties:

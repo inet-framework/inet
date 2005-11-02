@@ -26,6 +26,9 @@ class noncobject EroVector;
 
 class RSVPPacket;
 
+//
+// FIXME missing documentation
+//
 message RSVPPathMsg extends RSVPPacket
 {
     properties:
@@ -40,6 +43,9 @@ message RSVPPathMsg extends RSVPPacket
         int rsvpKind = PATH_MESSAGE;
 };
 
+//
+// FIXME missing documentation
+//
 message RSVPPathTear extends RSVPPacket
 {
     properties:
@@ -52,6 +58,9 @@ message RSVPPathTear extends RSVPPacket
 };
 
 
+//
+// FIXME missing documentation
+//
 message RSVPPathError extends RSVPPacket
 {
     properties:

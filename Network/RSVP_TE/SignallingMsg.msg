@@ -26,12 +26,18 @@ class noncobject IPAddress;
 class noncobject SessionObj_t;
 class noncobject SenderTemplateObj_t;
 
+//
+// FIXME missing documentation
+//
 message SignallingMsg
 {
 	fields:
 		int command = 0;
 };
 
+//
+// FIXME missing documentation
+//
 message PsbTimerMsg extends SignallingMsg
 {
 	fields:
@@ -40,6 +46,9 @@ message PsbTimerMsg extends SignallingMsg
 		int command = MSG_PSB_TIMER;
 };
 
+//
+// FIXME missing documentation
+//
 message PsbTimeoutMsg extends SignallingMsg
 {
 	fields:
@@ -48,6 +57,9 @@ message PsbTimeoutMsg extends SignallingMsg
 		int command = MSG_PSB_TIMEOUT;
 };
 
+//
+// FIXME missing documentation
+//
 message RsbRefreshTimerMsg extends SignallingMsg
 {
 	fields:
@@ -56,6 +68,9 @@ message RsbRefreshTimerMsg extends SignallingMsg
 		int command = MSG_RSB_REFRESH_TIMER;
 };
 
+//
+// FIXME missing documentation
+//
 message RsbCommitTimerMsg extends SignallingMsg
 {
 	fields:
@@ -64,6 +79,9 @@ message RsbCommitTimerMsg extends SignallingMsg
 		int command = MSG_RSB_COMMIT_TIMER;
 };
 
+//
+// FIXME missing documentation
+//
 message RsbTimeoutMsg extends SignallingMsg
 {
 	fields:
@@ -72,6 +90,9 @@ message RsbTimeoutMsg extends SignallingMsg
 		int command = MSG_RSB_TIMEOUT;
 };
 
+//
+// FIXME missing documentation
+//
 message HelloTimerMsg extends SignallingMsg
 {
 	fields:
@@ -80,6 +101,9 @@ message HelloTimerMsg extends SignallingMsg
 		int command = MSG_HELLO_TIMER;
 };
 
+//
+// FIXME missing documentation
+//
 message HelloTimeoutMsg extends SignallingMsg
 {
 	fields:
@@ -88,6 +112,9 @@ message HelloTimeoutMsg extends SignallingMsg
 		int command = MSG_HELLO_TIMEOUT;
 };
 
+//
+// FIXME missing documentation
+//
 message PathNotifyMsg extends SignallingMsg
 {
 	fields:

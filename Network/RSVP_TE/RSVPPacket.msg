@@ -44,6 +44,9 @@ message RSVPMessage
 		int rsvpKind;
 }
 
+//
+// FIXME missing documentation
+//
 message RSVPPacket extends RSVPMessage
 {
     properties:

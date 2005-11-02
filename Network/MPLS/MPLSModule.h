@@ -28,40 +28,38 @@
 
 #include "Classifier.h"
 
-//
-
+/**
+ * FIXME missing documentation
+ */
 class INET_API MPLSModule : public cSimpleModule
 {
-	private:
+    private:
+        simtime_t delay1;
 
-		simtime_t delay1;
-		
-		//no longer used, see comment in intialize
-		//std::vector<bool> labelIf;
-		
-		LIBTable *lt;
-		InterfaceTable *ift;
-		IClassifier *pct;
+        //no longer used, see comment in intialize
+        //std::vector<bool> labelIf;
 
-	public:
+        LIBTable *lt;
+        InterfaceTable *ift;
+        IClassifier *pct;
 
-		Module_Class_Members(MPLSModule, cSimpleModule, 0);
-      
-		virtual void initialize(int stage);
-		virtual int numInitStages() const  {return 5;}
-		virtual void handleMessage(cMessage *msg);
+    public:
+        Module_Class_Members(MPLSModule, cSimpleModule, 0);
 
-	private:
-	
-		void processPacketFromL3(cMessage *msg);
-		void processPacketFromL2(cMessage *msg);
-		void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
-		
-		bool tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram);
-		void labelAndForwardIPDatagram(IPDatagram *ipdatagram);
+        virtual void initialize(int stage);
+        virtual int numInitStages() const  {return 5;}
+        virtual void handleMessage(cMessage *msg);
 
-		void sendToL2(cMessage *msg, int gateIndex);  
-		void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
+    private:
+        void processPacketFromL3(cMessage *msg);
+        void processPacketFromL2(cMessage *msg);
+        void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
+
+        bool tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram);
+        void labelAndForwardIPDatagram(IPDatagram *ipdatagram);
+
+        void sendToL2(cMessage *msg, int gateIndex);
+        void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
 };
 
 #endif

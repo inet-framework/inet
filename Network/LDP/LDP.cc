@@ -26,7 +26,6 @@
 #include "UDPControlInfo_m.h"
 #include "UDPPacket.h"
 #include "TCPSegment.h"
-#include "stlwatch.h"
 
 #include "NotifierConsts.h"
 

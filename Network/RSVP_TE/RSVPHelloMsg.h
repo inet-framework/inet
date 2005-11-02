@@ -25,7 +25,7 @@
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
- 
+
 // XXX FIXME all RSVP message have kind=RSVP_TRAFFIC
 // to distinguish them:
 // if they are RSVPPacket: use packet->getRsvpKind()
@@ -34,7 +34,7 @@
 // thus, we need dynamic_cast to find out what it is
 // that's not good. we don't use kind, because kind
 // is used by IP QoS mechanism (use DS field for IP QoS instead???)
- 
+
 class RSVPHelloMsg : public RSVPHelloMsg_Base
 {
   public:

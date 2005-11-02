@@ -18,7 +18,7 @@
 
 #include "RSVPPacket_m.h"
 
-#define	RSVP_TRAFFIC		2
+#define RSVP_TRAFFIC        2
 
 /**
  * RSVP message common part.
