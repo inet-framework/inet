@@ -36,7 +36,8 @@ class INET_API MPLSModule : public cSimpleModule
 
 		simtime_t delay1;
 		
-		std::vector<bool> labelIf;
+		//no longer used, see comment in intialize
+		//std::vector<bool> labelIf;
 		
 		LIBTable *lt;
 		InterfaceTable *ift;

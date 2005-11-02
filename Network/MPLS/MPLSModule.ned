@@ -46,7 +46,8 @@
 //
 simple MPLSModule
 	parameters:
-		labelIf : string; // interfaces we should send labeled packets to
+//		peers : string; // interfaces we should send labeled packets to (no loner used)
+		classifier : string;
 	gates:
 		in: fromL3[];
 		out: toL3[];

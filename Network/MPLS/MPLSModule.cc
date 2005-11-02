@@ -10,6 +10,12 @@
 #include "Classifier.h"
 
 
+// temporary fix
+#include "LDP.h"
+#include "TCPSegment.h"
+#define	ICMP_TRAFFIC	6
+
+
 Define_Module(MPLSModule);
 
 void MPLSModule::initialize(int stage)
@@ -29,12 +35,14 @@ void MPLSModule::initialize(int stage)
 	
 	//
 	
-	pct = check_and_cast<IClassifier*>(parentModule()->submodule("classifier"));
+	pct = check_and_cast<IClassifier*>(parentModule()->submodule(par("classifier")));
 	
-	//
-	
+	/*
+	 * we now send plain ipdatagrams instead of packets with label=-1
+	 * and we thus do not need this extra configuration
+	 * 
 	labelIf.resize(ift->numInterfaces());
-	cStringTokenizer tokenizer(par("labelIf"));
+	cStringTokenizer tokenizer(par("peers"));
 	const char *token;
 	while ((token = tokenizer.nextToken())!=NULL)
 	{
@@ -43,6 +51,7 @@ void MPLSModule::initialize(int stage)
 		ASSERT(n >= 0 && n < labelIf.size());
     	labelIf[n] = true;
 	}
+	*/
 }
 
 void MPLSModule::handleMessage(cMessage * msg)
@@ -72,31 +81,25 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
 {
     IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(msg);
     int gateIndex = msg->arrivalGate()->index();
-
-	switch(ipdatagram->transportProtocol())
-	{
-		case IP_PROT_OSPF:
-		case IP_PROT_RSVP:
+    
+    // XXX temporary solution, until TCPSocket and IP are extended to support nam tracing
+    if (ipdatagram->transportProtocol() == IP_PROT_TCP)
+    {
+		TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->encapsulatedMsg());
+		if(seg->destPort() == LDP_PORT || seg->srcPort() == LDP_PORT)
 		{
-			if(labelIf[gateIndex])
-			{
-			    ev << "Encapsulating into MPLS with label=-1 (\"native IP\")" << endl;
-		    
-			    MPLSPacket *outPacket = new MPLSPacket(ipdatagram->name());
-			    outPacket->encapsulate(ipdatagram);
-			    outPacket->pushLabel(-1);
-				sendToL2(outPacket, gateIndex);
-			}
-			else
-			{
-				ev << "Not an LSR peer, sending plain datagram" << endl;
-				sendToL2(ipdatagram, gateIndex);
-			}
-    		break;
-		}	
-    	default: // other (regular) traffic
-			labelAndForwardIPDatagram(ipdatagram);
-	}
+	    	ASSERT(!ipdatagram->hasPar("color"));
+	    	ipdatagram->addPar("color") = LDP_TRAFFIC;
+		}
+    }
+    else if(!strcmp(ipdatagram->name(), "icmp error"))
+    {
+    	ASSERT(!ipdatagram->hasPar("color"));
+    	ipdatagram->addPar("color") = ICMP_TRAFFIC;
+    }
+    // XXX end of temporary area
+
+	labelAndForwardIPDatagram(ipdatagram);
 }
 
 bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
@@ -123,7 +126,15 @@ bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
 	mplsPacket->addPar("color") = color;	
 		
-	sendToL2(mplsPacket, outgoingPort);
+	if(!mplsPacket->hasLabel())
+	{
+		// yes, this may happen - if we'are both ingress and egress
+		ipdatagram = check_and_cast<IPDatagram*>(mplsPacket->decapsulate()); // XXX FIXME superfluous encaps/decaps
+		delete mplsPacket;
+		sendToL2(ipdatagram, outgoingPort);
+	}
+	else
+		sendToL2(mplsPacket, outgoingPort);
 	
 	return true;
 }
@@ -134,22 +145,13 @@ void MPLSModule::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
 		return;
 
 	// handling our outgoing IP traffic that didn't match any FEC/LSP		
+	// do not use labelAndForwardIPDatagram for packets arriving to ingress!
 		
 	ev << "FEC not resolved, doing regular L3 routing" << endl;
 		
 	int gateIndex = ipdatagram->arrivalGate()->index();
 		
-	if(labelIf[gateIndex])
-	{
-		MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->name());
-		mplsPacket->encapsulate(ipdatagram);
-	    mplsPacket->pushLabel(-1);
-		sendToL2(mplsPacket, gateIndex);
-	}
-	else
-	{
-		sendToL2(ipdatagram, gateIndex);
-	}
+	sendToL2(ipdatagram, gateIndex);
 }
 
 void MPLSModule::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
@@ -215,6 +217,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     int gateIndex = mplsPacket->arrivalGate()->index();
     InterfaceEntry *ientry = ift->interfaceByPortNo(gateIndex);
 	std::string senderInterface = ientry->name();
+	ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->topLabel();
     
     ev << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
@@ -263,7 +266,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 			mplsPacket->addPar("color") = color;
 		}
 		
-		ASSERT(labelIf[outgoingPort]);
+		//ASSERT(labelIf[outgoingPort]);
 
 		sendToL2(mplsPacket, outgoingPort);
 	}

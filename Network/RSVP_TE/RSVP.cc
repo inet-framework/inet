@@ -750,7 +750,7 @@ void RSVP::announceLinkChange(IPAddress advrouter, IPAddress linkid)
 	LinkNotifyMsg *msg = new LinkNotifyMsg("notify");
 	msg->setLinkArraySize(1);
 	msg->setLink(0, link);
-	sendDirect(msg, 0.0, tedmod, "from_rsvp");
+	sendDirect(msg, 0.0, tedmod, "inotify");
 }
 
 void RSVP::commitResv(ResvStateBlock_t *rsb)

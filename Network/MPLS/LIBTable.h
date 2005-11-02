@@ -78,7 +78,11 @@ class INET_API LIBTable: public cSimpleModule
 				
 		void removeLibEntry(int inLabel);
 		
+		// utility
 		
+		static LabelOpVector pushLabel(int label);
+		static LabelOpVector swapLabel(int label);
+		static LabelOpVector popLabel();		
 		
 		
 };    

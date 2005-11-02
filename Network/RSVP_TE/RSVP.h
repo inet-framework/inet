@@ -18,7 +18,7 @@
 #include <vector>
 #include <omnetpp.h>
 
-#include "IScriptable.h"
+#include "ScenarioManager.h"
 
 #include "TEDAccess.h"
 #include "RoutingTableAccess.h"

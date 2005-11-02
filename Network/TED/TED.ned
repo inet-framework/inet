@@ -28,5 +28,5 @@ simple TED
 		in: from_ip;
 		out: to_ip;
 		
-		in: from_rsvp;
+		in: inotify;
 endsimple

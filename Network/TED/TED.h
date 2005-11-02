@@ -23,6 +23,8 @@
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 
+#include "NotificationBoard.h"
+
 #define LS_INFINITY   1e16
 
 #define	TED_TRAFFIC			1
@@ -74,6 +76,7 @@ class TED : public cSimpleModule
 		RoutingTable *rt;
 		InterfaceTable *ift;
 		IPAddress routerId;
+		NotificationBoard *nb;
 
 		IPAddressVector LocalAddress;
 		IPAddressVector TEDPeer;
