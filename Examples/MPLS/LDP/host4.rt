@@ -1,0 +1,9 @@
+ifconfig:
+name: ppp0	inet_addr: 10.0.4.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.1.5.1	*		255.255.255.255	H	0	ppp0
+default:	10.1.5.1	0.0.0.0		G	0	ppp0
+routeend.
+

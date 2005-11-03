@@ -1,0 +1,32 @@
+This is a sample to demonstrate LDP label distribution protocol.
+
+Following description refers to the nam trace file genereated by the simulation
+run.
+
+LDP works in the ordered control downstream-on-demand mode. There is a router (2)
+failure @2 secs. Failed router recovers @10 secs.  The meaning of
+individual colors appearing in the animation are as follows:
+
+Black
+- regular (user data) IP datagrams routed via routing table (e.g. when no label
+  mapping exists on the LSR)
+
+Green
+- user data routed using LIB (e.g. mapping exits on the LSR)
+
+Red
+- link state routing protocol (TED) traffic
+
+Magenta
+- LDP Hello packets
+
+Brown 
+- LDP (TCP) session packets (including session establishment)
+
+Orange 
+- ICMP error packets (these occur at the very beginning, since when both hosts
+  start sending their packets, no routes to their respective destinations exist
+  (until TED populates routing tables))
+
+NOTE: The time required for failure detection is rather long and is due to the LDP
+Hello interval configuration.
