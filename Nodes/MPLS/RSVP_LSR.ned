@@ -12,6 +12,7 @@
 
 
 import
+    "NotificationBoard",
     "NetworkLayer",
     "MPLSModule",
     "LIBTable",
@@ -38,6 +39,8 @@ module RSVP_LSR
         out: out[];
 
     submodules:
+        notificationBoard: NotificationBoard;
+            display: "p=70,50;i=block/control";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
@@ -45,7 +48,6 @@ module RSVP_LSR
                 routingFile = routingFile;
             display: "p=60,74;i=block/table";
         interfaceTable: InterfaceTable;
-            parameters:
             display: "p=60,152;i=block/table";
         ted_module: TED;
             parameters:
@@ -56,7 +58,6 @@ module RSVP_LSR
                 peers = peers;
             display: "i=block/control;p=244,51";
         classifier: SimpleClassifier;
-            parameters:
             display: "i=block/classifier;p=330,51";
         networkLayer: NetworkLayer;
             gatesizes:
@@ -67,7 +68,8 @@ module RSVP_LSR
             display: "p=88,297,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
-                labelIf = peers;
+                //peers = peers;
+                classifier = "classifier";
             gatesizes:
                 fromL3[sizeof(out)],
                 toL3[sizeof(out)],

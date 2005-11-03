@@ -10,7 +10,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-import 
+import
     "Dummy";
 
 
@@ -21,32 +21,25 @@ import
 // with \FAILED_LSR.
 //
 module LDP_FAILED
-	parameters:
+    parameters:
         holdTime : numeric,
         helloInterval : numeric,
-
-		namid : numeric,
-		namlog : string,
-		namprolog : string,
-        
-		peers : string,
+        peers : string,
         routerId : string,
         routingFile : string;
-	gates:
-		in: in[];
-		out: out[];
-        
-	submodules:
-       	dummy: Dummy;
-		parameters:
-			namid = namid;
-		gatesizes:
-			in[sizeof(in)],
-			out[sizeof(out)];
-				
-connections nocheck:
-	for i=0..sizeof(out)-1 do
-		in[i] --> dummy.in[i];
-       		dummy.out[i] --> out[i];
-	endfor;
+    gates:
+        in: in[];
+        out: out[];
+
+    submodules:
+        dummy: Dummy;
+            gatesizes:
+                in[sizeof(in)],
+                out[sizeof(out)];
+
+    connections nocheck:
+        for i=0..sizeof(out)-1 do
+            in[i] --> dummy.in[i];
+            dummy.out[i] --> out[i];
+        endfor;
 endmodule

@@ -21,10 +21,8 @@
 // incoming messages. 
 //
 simple Dummy
-	parameters:
-		namid : numeric;
-	gates:
-		in: in[];
-		out: out[];
+    gates:
+        in: in[];
+        out: out[];
 endsimple
 

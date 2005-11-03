@@ -16,9 +16,10 @@ import
     "RoutingTable",
     "InterfaceTable",
     "NetworkLayer",
-    "NewLDP",
+    "LDP",
     "TCP",
     "UDP",
+    "TED",
     "MPLSModule",
     "PPPInterface",
     "LIBTable";
@@ -31,16 +32,16 @@ import
 //
 module LDP_LSR
     parameters:
+        holdTime : numeric,
+        helloInterval : numeric,
+
+        namid : numeric,
+        namlog : string,
+        namprolog : string,
+
+        peers : string,
         routerId : string,
-        ldpTimeout : numeric,
-        ldpKeepAliveTime : numeric,
-        helloTimeout : numeric,
-        peerNo : numeric,
-        isIR : bool,
-        isER : bool,
-        routingFile : string,
-        LibTableFileName : string,
-        PrtTableFileName : string;
+        routingFile : string;
     gates:
         in: in[];
         out: out[];
@@ -56,13 +57,17 @@ module LDP_LSR
                 routerId = routerId,
                 routingFile = routingFile;
             display: "p=70,240;i=block/table";
-        signal_module: NewLDP;
+        ldp: LDP;
             parameters:
-                routerId = routerId,
-                helloTimeout = helloTimeout,
-                isER = isER,
-                isIR = isIR;
+                holdTime = holdTime,
+                helloInterval = helloInterval,
+                routerId = routerId;
             display: "p=222,67;i=block/control";
+        ted_module: TED;
+            parameters:
+                peers = peers;
+            display: "p=360,140;i=block/control";
+
         tcp: TCP;
             display: "p=177,145;i=block/wheelbarrow";
         udp: UDP;
@@ -72,12 +77,12 @@ module LDP_LSR
                 physIn[sizeof(out)],
                 physOut[sizeof(out)];
             display: "p=224,223;i=block/fork";
-        ppp: PPPInterface[sizeof(out)];
+        ppp: PPPRouterInterface[sizeof(out)];
             display: "p=105,388,row,90;q=queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
-                isIR = isIR,
-                isER = isER;
+                //peers = peers,
+                classifier = "ldp";
             gatesizes:
                 fromL3[sizeof(out)],
                 toL3[sizeof(out)],
@@ -86,15 +91,16 @@ module LDP_LSR
             display: "p=224,302;i=block/switch";
         libTable: LIBTable;
             parameters:
-                LibTableFileName = LibTableFileName,
-                PrtTableFileName = PrtTableFileName;
             display: "p=340,281;i=block/table2";
     connections nocheck:
-        signal_module.from_tcp_interface <-- tcp.to_appl++;
-        signal_module.to_tcp_interface --> tcp.from_appl++;
+        ted_module.to_ip --> networkLayer.OSPFIn;
+        ted_module.from_ip <-- networkLayer.OSPFOut;
 
-        signal_module.to_udp_interface --> udp.from_app++;
-        signal_module.from_udp_interface <-- udp.to_app++;
+        ldp.from_tcp_interface <-- tcp.to_appl++;
+        ldp.to_tcp_interface --> tcp.from_appl++;
+
+        ldp.to_udp_interface --> udp.from_app++;
+        ldp.from_udp_interface <-- udp.to_app++;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

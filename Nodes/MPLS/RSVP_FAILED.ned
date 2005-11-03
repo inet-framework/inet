@@ -11,7 +11,7 @@
 //
 
 import
-	"Dummy";
+    "Dummy";
 
 //
 // Failed router. Discards all incoming traffic and generates nothing. Its
@@ -20,29 +20,23 @@ import
 // with \FAILED_LSR.
 //
 module RSVP_FAILED
-	parameters:
-		namid : numeric,
-		namlog : string,
-		namprolog : string,
-		
-		peers : string,
-		routerId : string,
-		routingFile : string;
-	gates:
-		in: in[];
-		out: out[];
-        
-	submodules:
-       	dummy: Dummy;
-		parameters:
-			namid = namid;
-		gatesizes:
-			in[sizeof(in)],
-			out[sizeof(out)];
-				
-	connections nocheck:
-	for i=0..sizeof(out)-1 do
-		in[i] --> dummy.in[i];
-       		dummy.out[i] --> out[i];
-	endfor;
+    parameters:
+        peers : string,
+        routerId : string,
+        routingFile : string;
+    gates:
+        in: in[];
+        out: out[];
+
+    submodules:
+        dummy: Dummy;
+            gatesizes:
+                in[sizeof(in)],
+                out[sizeof(out)];
+
+    connections nocheck:
+        for i=0..sizeof(out)-1 do
+            in[i] --> dummy.in[i];
+                dummy.out[i] --> out[i];
+        endfor;
 endmodule

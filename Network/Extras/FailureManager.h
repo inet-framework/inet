@@ -21,7 +21,7 @@
 
 #include <omnetpp.h>
 
-#include "ScenarioManager.h"
+#include "IScriptable.h"
 
 /**
  * FIXME missing documentation

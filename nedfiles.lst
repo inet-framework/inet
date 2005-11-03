@@ -39,6 +39,8 @@ Network/ARP/ARP.ned
 Network/AutoRouting/FlatNetworkConfigurator.ned
 Network/AutoRouting/FlatNetworkConfigurator6.ned
 Network/Contract/InterfaceTable.ned
+Network/Extras/Dummy.ned
+Network/Extras/FailureManager.ned
 Network/ICMPv6/ICMPv6.ned
 Network/ICMPv6/IPv6NeighbourDiscovery.ned
 Network/IPv4/ErrorHandling.ned
@@ -103,8 +105,9 @@ Nodes/INET/WirelessHost2.ned
 Nodes/IPv6/NetworkLayer6.ned
 Nodes/IPv6/Router6.ned
 Nodes/IPv6/StandardHost6.ned
-Nodes/MPLS/FAILED_LSR.ned
+Nodes/MPLS/LDP_FAILED.ned
 Nodes/MPLS/LDP_LSR.ned
+Nodes/MPLS/RSVP_FAILED.ned
 Nodes/MPLS/RSVP_LSR.ned
 Transport/RTP/RTCPModule.ned
 Transport/RTP/RTPApplication.ned
