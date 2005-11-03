@@ -64,6 +64,8 @@ public:
 
   /** @brief Register with ChannelControl and subscribe to hostPos*/
   virtual void initialize(int stage);
+
+  virtual int numInitStages() const {return 3;}
 };
 
 #endif

@@ -40,7 +40,7 @@ void ChannelAccess::initialize(int stage)
         // register to get a notification when position changes
         nb->subscribe(this, NF_HOSTPOSITION_UPDATED);
     }
-    else if (stage == 1)
+    else if (stage == 2)
     {
         cModule *hostModule = findHost();
         myHostRef = cc->lookupHost(hostModule);
