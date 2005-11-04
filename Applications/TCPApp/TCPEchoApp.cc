@@ -40,7 +40,7 @@ void TCPEchoApp::sendOrSchedule(cMessage *msg)
 {
     if (delay==0)
     {
-        bytesSent += msg->length()/8;
+        bytesSent += msg->byteLength();
         send(msg, "tcpOut");
     }
     else
@@ -53,7 +53,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        bytesSent += msg->length()/8;
+        bytesSent += msg->byteLength();
         send(msg, "tcpOut");
     }
     else if (msg->kind()==TCP_I_PEER_CLOSED)
@@ -64,7 +64,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     }
     else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
-        bytesRcvd += msg->length()/8;
+        bytesRcvd += msg->byteLength();
         if (echoFactor==0)
         {
             delete msg;
@@ -79,9 +79,9 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             msg->setControlInfo(cmd);
             delete ind;
 
-            long len = long(msg->length()*echoFactor) & ~7U;
-            if (len<8) len=8;
-            msg->setLength(len);
+            long byteLen = msg->byteLength()*echoFactor;
+            if (byteLen<1) byteLen=1;
+            msg->setByteLength(byteLen);
 
             sendOrSchedule(msg);
         }

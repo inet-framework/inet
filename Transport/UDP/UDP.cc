@@ -170,7 +170,7 @@ void UDP::processMsgFromApp(cMessage *appData)
     UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
 
     UDPPacket *udpPacket = new UDPPacket(appData->name());
-    udpPacket->setLength(8*UDP_HEADER_BYTES);
+    udpPacket->setByteLength(UDP_HEADER_BYTES);
     udpPacket->encapsulate(appData);
 
     // set source and destination port
@@ -184,6 +184,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->getSrcAddr().get4());
         ipControlInfo->setDestAddr(udpControlInfo->getDestAddr().get4());
+        ipControlInfo->setOutputPort(udpControlInfo->getOutputPort());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 

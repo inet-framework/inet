@@ -404,8 +404,8 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
               frame->fullName(), frame->getDest().str().c_str());
     }
 
-    if (frame->length()>8*MAX_ETHERNET_FRAME)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->length()/8, MAX_ETHERNET_FRAME);
+    if (frame->byteLength() > MAX_ETHERNET_FRAME)
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->byteLength(), MAX_ETHERNET_FRAME);
 
     // must be ETH_FRAME (or ETH_PAUSE) from upper layer
     bool isPauseFrame = (frame->kind()==ETH_PAUSE);
@@ -580,10 +580,10 @@ void EtherMAC::handleEndIFGPeriod()
     EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && frame->length() < 8*GIGABIT_MIN_FRAME_WITH_EXT)
+    if (carrierExtension && frame->byteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
     {
         EV << "Performing carrier extension of small frame\n";
-        frame->setLength(8*GIGABIT_MIN_FRAME_WITH_EXT);
+        frame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
     }
 
     // start frame burst, if enabled
@@ -605,14 +605,14 @@ void EtherMAC::startFrameTransmission()
     cMessage *frame = (cMessage *) origFrame->dup();
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    frame->setLength(frame->length()+8*PREAMBLE_BYTES+8*SFD_BYTES);
+    frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
     if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
     send(frame, "physOut");
 
     // update burst variables
     if (frameBursting)
     {
-        bytesSentInBurst = frame->length()/8;
+        bytesSentInBurst = frame->byteLength();
         framesSentInBurst++;
     }
 
@@ -664,7 +664,7 @@ void EtherMAC::handleEndTxPeriod()
     cMessage *frame = (cMessage*)txQueue.pop();
 
     numFramesSent++;
-    numBytesSent += frame->length()/8;
+    numBytesSent += frame->byteLength();
     numFramesSentVector.record(numFramesSent);
     numBytesSentVector.record(numBytesSent);
 
@@ -782,7 +782,7 @@ void EtherMAC::handleEndPausePeriod()
 void EtherMAC::sendJamSignal()
 {
     cMessage *jam = new cMessage("JAM_SIGNAL", JAM_SIGNAL);
-    jam->setLength(8*JAM_SIGNAL_BYTES);
+    jam->setByteLength(JAM_SIGNAL_BYTES);
     if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, "physOut");
 
@@ -851,11 +851,11 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     }
 
     // strip preamble and SFD
-    frame->setLength(frame->length() - 8*PREAMBLE_BYTES - 8*SFD_BYTES);
+    frame->addByteLength(-PREAMBLE_BYTES-SFD_BYTES);
 
     // statistics
     numFramesReceivedOK++;
-    numBytesReceivedOK += frame->length()/8;
+    numBytesReceivedOK += frame->byteLength();
     numFramesReceivedOKVector.record(numFramesReceivedOK);
     numBytesReceivedOKVector.record(numBytesReceivedOK);
 

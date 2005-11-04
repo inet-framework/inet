@@ -165,8 +165,8 @@ void EtherAppCli::sendPacket()
 
     datapacket->setRequestId(seqNum);
 
-    long len = 8*reqLength->longValue();
-    datapacket->setLength(len);
+    long len = reqLength->longValue();
+    datapacket->setByteLength(len);
 
     long respLen = respLength->longValue();
     datapacket->setResponseBytes(respLen);

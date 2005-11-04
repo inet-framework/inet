@@ -58,7 +58,7 @@ void UDPAppBase::printPacket(cMessage *msg)
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
 
-    ev  << msg << "  (" << (msg->length()/8) << " bytes)" << endl;
+    ev  << msg << "  (" << msg->byteLength() << " bytes)" << endl;
     ev  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;
 }
 

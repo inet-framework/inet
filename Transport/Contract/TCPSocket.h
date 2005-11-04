@@ -47,7 +47,7 @@ class TCPStatusInfo;
  *   socket.connect(IPvXAddress("10.0.0.2"), 2000);
  *
  *   msg = new cMessage("data1");
- *   msg->setLength(8*16*1024);  // 16K
+ *   msg->setByteLength(16*1024);  // 16K
  *   socket.send(msg);
  *
  *   socket.close();
@@ -85,7 +85,7 @@ class TCPStatusInfo;
  * }
  *
  * void MyModule::socketDataArrived(int, void *, cMessage *msg, bool) {
- *     ev << "Received TCP data, " << msg->length()/8 << " bytes\\n";
+ *     ev << "Received TCP data, " << msg->byteLength() << " bytes\\n";
  *     delete msg;
  * }
  *

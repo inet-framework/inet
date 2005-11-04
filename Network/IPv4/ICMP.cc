@@ -81,7 +81,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     errorMessage->encapsulate(origDatagram);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
-    errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8));
+    errorMessage->setByteLength(4 + origDatagram->headerLength() + 8);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away

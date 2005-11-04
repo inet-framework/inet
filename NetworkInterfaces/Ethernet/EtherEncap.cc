@@ -114,8 +114,8 @@ void EtherEncap::updateDisplayString()
 
 void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
 {
-    if (msg->length()>8*MAX_ETHERNET_DATA)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->length()/8, MAX_ETHERNET_DATA);
+    if (msg->byteLength() > MAX_ETHERNET_DATA)
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->byteLength(), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
 
@@ -131,12 +131,12 @@ void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
     frame->setSrc(etherctrl->getSrc());  // if blank, will be filled in by MAC
     frame->setDest(etherctrl->getDest());
     frame->setEtherType(etherctrl->getEtherType());
-    frame->setLength(8*ETHER_MAC_FRAME_BYTES);
+    frame->setByteLength(ETHER_MAC_FRAME_BYTES);
     delete etherctrl;
 
     frame->encapsulate(msg);
-    if (frame->length() < 8*MIN_ETHERNET_FRAME)
-        frame->setLength(8*MIN_ETHERNET_FRAME);  // "padding"
+    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+        frame->setByteLength(MIN_ETHERNET_FRAME);  // "padding"
 
     send(frame, "lowerLayerOut");
 }
@@ -178,9 +178,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
     frame->setPauseTime(pauseUnits);
 
-    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES));
-    if (frame->length() < 8*MIN_ETHERNET_FRAME)
-        frame->setLength(8*MIN_ETHERNET_FRAME);
+    frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
+    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+        frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");
     delete msg;

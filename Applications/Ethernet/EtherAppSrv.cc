@@ -105,7 +105,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
         EtherAppResp *datapacket = new EtherAppResp(msgname, IEEE802CTRL_DATA);
         datapacket->setRequestId(requestId);
-        datapacket->setLength(8*l);
+        datapacket->setByteLength(l);
         sendPacket(datapacket, srcAddr);
         packetsSent++;
 

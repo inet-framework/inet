@@ -62,9 +62,9 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         ICMPv6ParamProblemMsg *msg2 = (ICMPv6ParamProblemMsg *)icmpv6Msg;
         code = msg2->code();
         ev << " Code: " << code;
-    }    
-    
-    ev << " Byte length: " << d->length()/8
+    }
+
+    ev << " Byte length: " << d->byteLength()
        << " Src: " << d->srcAddress()
        << " Dest: " << d->destAddress()
        << " Time: " << simTime()

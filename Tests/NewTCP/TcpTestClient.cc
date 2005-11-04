@@ -133,7 +133,7 @@ void TcpTestClient::activity()
         waitAndEnqueue(tSend-simTime(), &queue);
 
         cMessage *msg = new cMessage(makeMsgName().c_str());
-        msg->setLength(8*sendBytes);
+        msg->setByteLength(sendBytes);
         socket.send(msg);
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
@@ -141,7 +141,7 @@ void TcpTestClient::activity()
         waitAndEnqueue(i->tSend-simTime(), &queue);
 
         cMessage *msg = new cMessage(makeMsgName().c_str());
-        msg->setLength(8*i->numBytes);
+        msg->setByteLength(i->numBytes);
         socket.send(msg);
     }
 
@@ -167,11 +167,11 @@ void TcpTestClient::finish()
     while (!queue.empty())
     {
         cMessage *msg = (cMessage *)queue.pop();
-        //ev << fullPath() << ": received " << msg->name() << ", " << msg->length()/8 << " bytes\n";
+        //ev << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
         if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
         {
             n++;
-            bytes+=msg->length()/8;
+            bytes+=msg->byteLength();
         }
         else
         {

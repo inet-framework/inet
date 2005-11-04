@@ -43,7 +43,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
     }
     else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
-        bytesRcvd += msg->length()/8;
+        bytesRcvd += msg->byteLength();
         delete msg;
 
         if (ev.isGUI())

@@ -1,9 +1,3 @@
-- REORGANIZE INSTALL FILE!!!!!!!!!!!!!!!!
-    should plain contain this:
-        makemake
-        nmake -f Makefile.vc depend
-        nmake -f Makefile.vc 
-
 NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
@@ -32,12 +26,9 @@ NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
 AFTER omnetpp-3.2 RELEASE:
 - add handleParameterChange() to apps (needed for Scenario Manager!)
-- setLength(), length() --> byteLength()
 - makemakefiles: -P option
-- use cDisplayString setTagArg(long)
 - use new opp_msgc features? (kind=..., length=...etc)
-- remove Util/stlwatch.h/cc, Utils/watch2.h
-
+- ctor/dtor stuff
 ----------------------- 
  
 _WLAN_CATALA_MONZO_ANGEL! 
@@ -50,10 +41,6 @@ __CPACKETQUEUE!!!!
 ----------------------- 
  
 __HOSTS_TO_ROUTERINTERFACE 
-
------------------------ 
- 
-__inetconfigvc-t_kikuszobolni!!! 
 
 ----------------------- 
  
@@ -132,29 +119,6 @@ Joachim
 
 ----------------------- 
 __VOJTA 
-Here are some random thoughts I gathered during my work. Actually we 
-already discussed some of these, but I will repeat them for completness.
-
-1. Running Quagga in OMNeT++ should be possible using activity model 
-with almost no modification to the source code. Some modifications will 
-be required, namely:
-
-- to handle global variables, this is possible and can be to great 
-extent automated via #define
-- to handle "syscalls" (all kernel, some stdlib stuff etc). In the 
-source code, this can be again done using #define. Plus those syscalls 
-must be emulated of course.
-- on windows, there will be some #include magic required. Here one can 
-make use of "gcc -E"  switch. If applied to an "empty" source file 
-containing only all required includes, it generates huge "kernel.h" file 
-with all necessary data structures defined. Unfortunately it won't 
-contain any constant definitions done via #define, but this can be 
-solved again. Once it successfully compiles on windows, it should run 
-there without problems, since all syscalls are emulated
-- on unix, it should probably use the same "kernel.h" mechanism, but 
-this may require further modifications to avoid redefinitions of 
-existing structures included by gcc
-
 2. Some minor changes in INET are required
 
 * bind mechanism in both TCP/UDP should be generalized
@@ -172,10 +136,5 @@ be sent back (at least for 127.0.0.1, I didn't check for others))
 
 * multicast routing - specify outputPort overriding routing table 
 decision for given packet (extend ControlInfo passed to networklayer)
-
-I have solved this issues in somewhat chaotic manner as they emerged, 
-but something similar to what I did will probably be needed. It is also 
-very likely that other issues will arise as more features are properly 
-implemented, but it all should be only cosmetic.
 
  

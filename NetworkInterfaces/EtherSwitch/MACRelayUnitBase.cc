@@ -274,9 +274,9 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
     frame->setPauseTime(pauseUnits);
 
-    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES));
-    if (frame->length() < 8*MIN_ETHERNET_FRAME)
-        frame->setLength(8*MIN_ETHERNET_FRAME);
+    frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
+    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+        frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut", portno);
 }

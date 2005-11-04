@@ -447,7 +447,7 @@ void RSVP::processHELLO_TIMER(HelloTimerMsg* msg)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    hMsg->setLength(8 * length);
+    hMsg->setByteLength(length);
 
     sendToIP(hMsg, peer);
 
@@ -574,7 +574,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     int length = 85 + (ERO.size() * 5);
 
-    pm->setLength(8 * length);
+    pm->setByteLength(length);
 
     IPAddress nextHop = tedmod->peerByLocalAddress(OI);
 
@@ -667,7 +667,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setLength(length * 8);
+    msg->setByteLength(length);
 
     sendToIP(msg, PHOP);
 }
@@ -1950,7 +1950,7 @@ void RSVP::sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, co
 
     int length = 44;
 
-    msg->setLength(length * 8);
+    msg->setByteLength(length);
 
     sendToIP(msg, peerIP);
 }
@@ -1974,7 +1974,7 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setLength(length * 8);
+    msg->setByteLength(length);
 
     sendToIP(msg, nextHop);
 }

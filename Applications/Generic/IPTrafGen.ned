@@ -47,7 +47,7 @@ simple IPTrafGen
         packetInterval : numeric, // may be a random value, e.g. exponential(1)
         numPackets: numeric const, // max number of packets to generate
         protocol: numeric const, // value for IPDatagram protocol field
-        packetLength : numeric, // (bits)
+        packetLength : numeric, // in bytes (changed 2005-11-04)
         destAddresses: string; // list of \IP addresses, separated by spaces
     gates:
         in: from_ip, from_ipv6;

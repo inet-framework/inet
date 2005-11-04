@@ -108,7 +108,7 @@ void NAMTraceWriter::recordPacketEvent(const char event, cModule *peer, cMessage
     std::ostream& out = nt->log();
     int peernamid = nt->getNamId(peer);
 
-    int size = msg->length() / 8;
+    int size = msg->byteLength();
 
     out << event << " -t " << simTime() << " -s " << namid << " -d " << peernamid << " -e " << size;
 

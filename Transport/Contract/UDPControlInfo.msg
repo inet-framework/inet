@@ -56,5 +56,7 @@ class UDPControlInfo
         int srcPort;   // \UDP source port in packet
         int destPort;  // \UDP destination port in packet
         int inputPort; // gate index of interface on which the packet was received
+        int outputPort = -1; // gate index of interface on where the packet should go 
+                             // (for multicast; currently it works for IPv4 only)
 };
 

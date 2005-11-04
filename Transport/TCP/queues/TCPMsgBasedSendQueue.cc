@@ -45,8 +45,8 @@ std::string TCPMsgBasedSendQueue::info() const
 
 void TCPMsgBasedSendQueue::enqueueAppData(cMessage *msg)
 {
-    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << (msg->length()>>3) << ")\n";
-    end += msg->length() >> 3;
+    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->byteLength() << ")\n";
+    end += msg->byteLength();
 
     Payload payload;
     payload.endSequenceNo = end;

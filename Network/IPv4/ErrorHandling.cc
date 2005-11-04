@@ -45,7 +45,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
     ev << "Error Handler: ICMP message received:\n";
     ev << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
-       << " Bytelength: " << d->length()/8
+       << " Bytelength: " << d->byteLength()
        << " Src: " << d->srcAddress()
        << " Dest: " << d->destAddress()
        << " Time: " << simTime()

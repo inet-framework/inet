@@ -288,7 +288,7 @@ void PPP::updateDisplayString()
 PPPFrame *PPP::encapsulate(cMessage *msg)
 {
     PPPFrame *pppFrame = new PPPFrame(msg->name());
-    pppFrame->setLength(8*PPP_OVERHEAD_BYTES);
+    pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
     pppFrame->encapsulate(msg);
     return pppFrame;
 }

@@ -109,13 +109,10 @@ void BasicMobility::updatePosition()
 {
     cc->updateHostPosition(myHostRef, pos);
 
-    char xStr[32], yStr[32], rStr[32];
-    sprintf(xStr, "%d", FWMath::round(pos.x));
-    sprintf(yStr, "%d", FWMath::round(pos.y));
-    sprintf(rStr, "%d", FWMath::round(cc->getCommunicationRange(myHostRef)));
-    hostPtr->displayString().setTagArg("p", 0, xStr);
-    hostPtr->displayString().setTagArg("p", 1, yStr);
-    hostPtr->displayString().setTagArg("r", 0, rStr);
+    double r = cc->getCommunicationRange(myHostRef);
+    hostPtr->displayString().setTagArg("p", 0, pos.x);
+    hostPtr->displayString().setTagArg("p", 1, pos.y);
+    hostPtr->displayString().setTagArg("r", 0, r);
 
     nb->fireChangeNotification(NF_HOSTPOSITION_UPDATED, &pos);
 }

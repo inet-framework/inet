@@ -255,7 +255,7 @@ void ARP::sendARPRequest(int outputPort, IPAddress ipAddress)
 
     // fill out everything in ARP Request packet except dest MAC address
     ARPPacket *arp = new ARPPacket("arpREQ");
-    arp->setLength(ARP_HEADER_BYTES);
+    arp->setByteLength(ARP_HEADER_BYTES);
     arp->setOpcode(ARP_REQUEST);
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);

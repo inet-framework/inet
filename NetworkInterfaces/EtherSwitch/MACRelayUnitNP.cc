@@ -109,7 +109,7 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
 {
     // If buffer not full, insert payload frame into buffer and process the frame in parallel.
 
-    long length = frame->length()/8;
+    long length = frame->byteLength();
     if (length + bufferUsed < bufferSize)
     {
         bufferUsed += length;
@@ -157,7 +157,7 @@ void MACRelayUnitNP::processFrame(cMessage *msg)
 {
     int cpu = msg->kind();
     EtherFrame *frame = (EtherFrame *) msg->decapsulate();
-    long length = frame->length()/8;
+    long length = frame->byteLength();
     int inputport = frame->arrivalGate()->index();
 
     EV << "CPU-" << cpu << " completed processing of frame " << frame << endl;

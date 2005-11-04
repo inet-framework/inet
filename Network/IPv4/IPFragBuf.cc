@@ -63,7 +63,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     }
 
     // add fragment into reassembly buffer
-    int bytes = datagram->length()/8 - datagram->headerLength();
+    int bytes = datagram->byteLength() - datagram->headerLength();
     bool isComplete = buf->buf.addFragment(datagram->fragmentOffset(),
                                            datagram->fragmentOffset() + bytes,
                                            !datagram->moreFragments());
@@ -86,7 +86,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPDatagram *ret = buf->datagram;
-        ret->setLength(8*(ret->headerLength()+buf->buf.totalLength()));
+        ret->setByteLength(ret->headerLength()+buf->buf.totalLength());
         bufs.erase(i);
         return ret;
     }

@@ -76,7 +76,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     ev << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << (serverClose ? ", and server should close afterwards\n" : "\n");
 
     GenericAppMsg *msg = new GenericAppMsg("data");
-    msg->setLength(8*numBytes);
+    msg->setByteLength(numBytes);
     msg->setExpectedReplyLength(expectedReplyBytes);
     msg->setClose(serverClose);
 
@@ -102,7 +102,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
-    bytesRcvd+=msg->length()/8;
+    bytesRcvd+=msg->byteLength();
 
     delete msg;
 }

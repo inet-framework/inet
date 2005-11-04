@@ -67,7 +67,7 @@ void IPTrafSink::printPacket(cMessage *msg)
     }
 
     ev  << msg << endl;
-    ev  << "Payload length: " << (msg->length()/8) << " bytes" << endl;
+    ev  << "Payload length: " << msg->byteLength() << " bytes" << endl;
     if (protocol!=-1)
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
@@ -100,7 +100,7 @@ void IPTrafGen::initialize(int stage)
     IPTrafSink::initialize();
 
     protocol = par("protocol");
-    msgLength = par("packetLength");
+    msgByteLength = par("packetLength");
     numPackets = par("numPackets");
     simtime_t startTime = par("startTime");
 
@@ -134,7 +134,7 @@ void IPTrafGen::sendPacket()
     sprintf(msgName,"appData-%d", counter++);
 
     cMessage *payload = new cMessage(msgName);
-    payload->setLength(msgLength);
+    payload->setByteLength(msgByteLength);
 
     IPvXAddress destAddr = chooseDestAddr();
     if (!destAddr.isIPv6())

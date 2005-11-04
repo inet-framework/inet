@@ -108,7 +108,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
 {
     // If buffer not full, insert payload frame into buffer and process the frame in parallel.
 
-    long length = frame->length()/8;
+    long length = frame->byteLength();
     if (length + bufferUsed < bufferSize)
     {
         int inputport = frame->arrivalGate()->index();
@@ -155,7 +155,7 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     // Extract frame from the appropriate buffer;
     PortBuffer *pBuff = (PortBuffer*)msg->contextPointer();
     EtherFrame *frame = (EtherFrame*)pBuff->queue.pop();
-    long length = frame->length()/8;
+    long length = frame->byteLength();
     int inputport = pBuff->port;
 
     EV << "Port CPU " << inputport << " completed processing of frame " << frame << endl;

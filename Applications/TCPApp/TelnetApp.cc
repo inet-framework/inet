@@ -88,7 +88,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
 
 void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 {
-    int len = msg->length()/8;
+    int len = msg->byteLength();
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (len==1)

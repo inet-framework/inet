@@ -129,8 +129,8 @@ void EtherLLC::updateDisplayString()
 
 void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
 {
-    if (msg->length()>8*(MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
-        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", msg->length()/8, MAX_ETHERNET_DATA);
+    if (msg->byteLength() > (MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
+        error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", msg->byteLength(), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
 
@@ -151,12 +151,12 @@ void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
     frame->setSsap(etherctrl->getSsap());
     frame->setDsap(etherctrl->getDsap());
     frame->setDest(etherctrl->getDest()); // src address is filled in by MAC
-    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_LLC_HEADER_LENGTH));
+    frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_LLC_HEADER_LENGTH);
     delete etherctrl;
 
     frame->encapsulate(msg);
-    if (frame->length() < 8*MIN_ETHERNET_FRAME)
-        frame->setLength(8*MIN_ETHERNET_FRAME);
+    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+        frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");
 }
@@ -251,9 +251,9 @@ void EtherLLC::handleSendPause(cMessage *msg)
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
     frame->setPauseTime(pauseUnits);
 
-    frame->setLength(8*(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES));
-    if (frame->length() < 8*MIN_ETHERNET_FRAME)
-        frame->setLength(8*MIN_ETHERNET_FRAME);
+    frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
+    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+        frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");
 

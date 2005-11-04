@@ -50,9 +50,9 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
     msgsSent++;
-    bytesSent += msg->length()/8;
+    bytesSent += msg->byteLength();
 
-    ev << "sending \"" << msg->name() << "\" to TCP, " << msg->length()/8 << " bytes\n";
+    ev << "sending \"" << msg->name() << "\" to TCP, " << msg->byteLength() << " bytes\n";
     send(msg, "tcpOut");
 }
 
@@ -73,7 +73,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
         msgsRcvd++;
-        bytesRcvd += msg->length()/8;
+        bytesRcvd += msg->byteLength();
 
         GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
         if (!appmsg)
@@ -105,7 +105,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
             // set length and send it back
             msg->setKind(TCP_C_SEND);
-            msg->setLength(requestedBytes*8);
+            msg->setByteLength(requestedBytes);
             sendOrSchedule(msg, delay+msgDelay);
         }
 

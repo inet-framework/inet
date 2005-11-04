@@ -133,7 +133,7 @@ cMessage *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
         return NULL;
 
     cMessage *msg = new cMessage("data");
-    msg->setLength(8*numBytes);
+    msg->setByteLength(numBytes);
     return msg;
 }
 

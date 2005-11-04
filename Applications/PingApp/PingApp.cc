@@ -102,7 +102,7 @@ void PingApp::sendPing()
     PingPayload *msg = new PingPayload(name);
     msg->setOriginatorId(id());
     msg->setSeqNo(sendSeqNo);
-    msg->setLength(8*packetSize);
+    msg->setByteLength(packetSize);
 
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
@@ -165,7 +165,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 
     if (printPing)
     {
-        cout << fullPath() << ": reply of " << std::dec << msg->length()/8
+        cout << fullPath() << ": reply of " << std::dec << msg->byteLength()
              << " bytes from " << src
              << " icmp_seq=" << msg->seqNo() << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
@@ -173,7 +173,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // update statistics
-    countPingResponse(msg->length()/8, msg->seqNo(), rtt);
+    countPingResponse(msg->byteLength(), msg->seqNo(), rtt);
     delete msg;
 }
 

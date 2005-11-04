@@ -66,7 +66,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
 
     // add fragment into reassembly buffer
     // FIXME next lines aren't correct: check 4.5 of RFC 2460 regarding Unfragmentable part, Fragmentable part, etc
-    int bytes = datagram->length()/8 - datagram->calculateHeaderByteLength();
+    int bytes = datagram->byteLength() - datagram->calculateHeaderByteLength();
     bool isComplete = buf->buf.addFragment(fh->fragmentOffset(),
                                            fh->fragmentOffset() + bytes,
                                            !fh->moreFragments());
@@ -89,7 +89,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPv6Datagram *ret = buf->datagram;
-        ret->setLength(8*(ret->calculateHeaderByteLength()+buf->buf.totalLength())); // FIXME cf with 4.5 of RFC 2460
+        ret->setByteLength(ret->calculateHeaderByteLength()+buf->buf.totalLength()); // FIXME cf with 4.5 of RFC 2460
         bufs.erase(i);
         return ret;
     }

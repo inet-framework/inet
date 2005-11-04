@@ -89,21 +89,21 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
 
     if (!validateDatagramPromptingError(origDatagram))
         return;
-    
+
     ICMPv6Message *errorMsg;
-    
+
     // TODO finish! turn it into a switch(), etc
     if (type == ICMPv6_DESTINATION_UNREACHABLE) errorMsg = createDestUnreachableMsg(code);
     else if (type == 2) {}
     else if (type == 3) {}
     else if (type == 4) {}
     else error("Unknown ICMPv6 error type\n");
-    
+
     errorMsg->encapsulate(origDatagram);
 
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
-    //errorMessage->setLength(8 * (4 + origDatagram->headerLength() + 8)); What is this for?
+    //errorMessage->setByteLength(4 + origDatagram->headerLength() + 8); What is this for?
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away

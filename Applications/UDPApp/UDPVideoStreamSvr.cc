@@ -103,7 +103,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     int pktLen = (*packetLen);
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
-    pkt->setLength(8*pktLen);
+    pkt->setByteLength(pktLen);
     sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
     d->bytesLeft -= pktLen;

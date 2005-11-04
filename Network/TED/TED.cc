@@ -445,7 +445,7 @@ void TED::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
 
     int length = msg->getLinkInfoArraySize() * 72;
 
-    msg->setLength(length * 8);
+    msg->setByteLength(length);
 
     msg->addPar("color") = TED_TRAFFIC;
 

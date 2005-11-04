@@ -172,7 +172,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
-    tcpseg->setLength(8*(TCP_HEADER_OCTETS+tcpseg->payloadLength()));
+    tcpseg->setByteLength(TCP_HEADER_OCTETS+tcpseg->payloadLength());
     // TBD account for Options (once they get implemented)
 
     tcpEV << "Sending: ";

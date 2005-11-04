@@ -98,7 +98,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 /*FIXME revise
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->headerLength() / (double)datagram->length()/8;
+        double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
@@ -470,7 +470,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket)
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->name());
-    datagram->setLength(8*datagram->calculateHeaderByteLength());
+    datagram->setByteLength(datagram->calculateHeaderByteLength());
     datagram->encapsulate(transportPacket);
 
     // set source and destination address

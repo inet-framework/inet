@@ -59,7 +59,7 @@ void TCPSessionApp::count(cMessage *msg)
     if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
     {
         packetsRcvd++;
-        bytesRcvd+=msg->length()/8;
+        bytesRcvd+=msg->byteLength();
     }
     else
     {
@@ -139,7 +139,7 @@ void TCPSessionApp::activity()
         waitUntil(tSend);
         ev << "sending " << sendBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
-        msg->setLength(8*sendBytes);
+        msg->setByteLength(sendBytes);
         socket.send(msg);
     }
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
@@ -147,7 +147,7 @@ void TCPSessionApp::activity()
         waitUntil(i->tSend);
         ev << "sending " << i->numBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
-        msg->setLength(8*i->numBytes);
+        msg->setByteLength(i->numBytes);
         socket.send(msg);
     }
 

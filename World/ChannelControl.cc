@@ -63,13 +63,10 @@ void ChannelControl::initialize()
 void ChannelControl::updateDisplayString(cModule *playgroundMod)
 {
     cDisplayString& d = playgroundMod->backgroundDisplayString();
-    char xStr[32], yStr[32];
-    sprintf(xStr, "%d", FWMath::round(playgroundSize.x));
-    sprintf(yStr, "%d", FWMath::round(playgroundSize.y));
-    d.setTagArg("p",0,"0");
-    d.setTagArg("p",1,"0");
-    d.setTagArg("b",0,xStr);
-    d.setTagArg("b",1,yStr);
+    d.setTagArg("p", 0, 0L);
+    d.setTagArg("p", 1, 0L);
+    d.setTagArg("b", 0, playgroundSize.x);
+    d.setTagArg("b", 1, playgroundSize.y);
 }
 
 /**

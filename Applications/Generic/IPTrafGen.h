@@ -53,7 +53,7 @@ class INET_API IPTrafGen : public IPTrafSink
   protected:
     std::string nodeName;
     int protocol;
-    int msgLength;
+    int msgByteLength;
     int numPackets;
     std::vector<IPvXAddress> destAddresses;
 

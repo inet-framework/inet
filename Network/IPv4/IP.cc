@@ -99,7 +99,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->headerLength() / (double)datagram->length()/8;
+        double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
@@ -386,14 +386,14 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
     int mtu = ift->interfaceByPortNo(outputPort)->mtu();
 
     // check if datagram does not require fragmentation
-    if (datagram->length()/8 <= mtu)
+    if (datagram->byteLength() <= mtu)
     {
         sendDatagramToOutput(datagram, outputPort, nextHopAddr);
         return;
     }
 
     int headerLength = datagram->headerLength();
-    int payload = datagram->length()/8 - headerLength;
+    int payload = datagram->byteLength() - headerLength;
 
     int noOfFragments =
         int(ceil((float(payload)/mtu) /
@@ -426,13 +426,13 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
         if (i != noOfFragments-1)
         {
             fragment->setMoreFragments(true);
-            fragment->setLength(8*mtu);
+            fragment->setByteLength(mtu);
         }
         else
         {
             // size of last fragment
-            int bytes = datagram->length()/8 - (noOfFragments-1) * (mtu - datagram->headerLength());
-            fragment->setLength(8*bytes);
+            int bytes = datagram->byteLength() - (noOfFragments-1) * (mtu - datagram->headerLength());
+            fragment->setByteLength(bytes);
         }
         fragment->setFragmentOffset( i*(mtu - datagram->headerLength()) );
 
@@ -448,7 +448,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, int& outputPort)
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
     IPDatagram *datagram = new IPDatagram(transportPacket->name());
-    datagram->setLength(8*IP_HEADER_BYTES);
+    datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
