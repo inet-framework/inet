@@ -192,7 +192,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
 
     // adjust upstream mappings
     FecBindVector::iterator uit;
-    for(uit = fecUp.begin(); uit != fecUp.end(); uit++)
+    for (uit = fecUp.begin(); uit != fecUp.end(); uit++)
     {
         if (uit->fecid != oldItem.fecid)
             continue;
@@ -249,7 +249,7 @@ void LDP::rebuildFecList()
     FecVector oldList = fecList;
     fecList.clear();
 
-    for(int i = 0; i < rt->numRoutingEntries(); i++)
+    for (int i = 0; i < rt->numRoutingEntries(); i++)
     {
         // every entry in the routing table
 
@@ -324,12 +324,12 @@ void LDP::rebuildFecList()
         ev << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
 
         FecVector::iterator it;
-        for(it = oldList.begin(); it != oldList.end(); it++)
+        for (it = oldList.begin(); it != oldList.end(); it++)
         {
             ev << "removing FEC= " << *it << endl;
 
             FecBindVector::iterator dit;
-            for(dit = fecDown.begin(); dit != fecDown.end(); dit++)
+            for (dit = fecDown.begin(); dit != fecDown.end(); dit++)
             {
                 if (dit->fecid != it->fecid)
                     continue;
@@ -340,7 +340,7 @@ void LDP::rebuildFecList()
             }
 
             FecBindVector::iterator uit;
-            for(uit = fecUp.begin(); uit != fecUp.end(); uit++)
+            for (uit = fecUp.begin(); uit != fecUp.end(); uit++)
             {
                 if (uit->fecid != it->fecid)
                     continue;
@@ -367,7 +367,7 @@ void LDP::rebuildFecList()
 void LDP::updateFecList(IPAddress nextHop)
 {
     FecVector::iterator it;
-    for(it = fecList.begin(); it != fecList.end(); it++)
+    for (it = fecList.begin(); it != fecList.end(); it++)
     {
         if (it->nextHop != nextHop)
             continue;
@@ -404,7 +404,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     // peer is gone
 
     unsigned int i;
-    for(i = 0; i < myPeers.size(); i++)
+    for (i = 0; i < myPeers.size(); i++)
     {
         if (myPeers[i].timeout == msg)
             break;
@@ -425,7 +425,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     ev << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
     FecBindVector::iterator dit;
-    for(dit = fecDown.begin(); dit != fecDown.end(); dit++)
+    for (dit = fecDown.begin(); dit != fecDown.end(); dit++)
     {
         if (dit->peer != peerIP)
             continue;
@@ -443,7 +443,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     ev << "removing bindings from sent to peer=" << peerIP << " from fecUp" << endl;
 
     FecBindVector::iterator uit;
-    for(uit = fecUp.begin(); uit != fecUp.end(); uit++)
+    for (uit = fecUp.begin(); uit != fecUp.end(); uit++)
     {
         if (uit->peer != peerIP)
             continue;
@@ -750,7 +750,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 {
 /*
     int i;
-    for(unsigned int i=0;i<myPeers.size();i++)
+    for (unsigned int i=0;i<myPeers.size();i++)
     {
         if (myPeers[i].peerIP == peerIP)
             return string(myPeers[i].linkInterface);
@@ -771,7 +771,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 LDP::FecBindVector::iterator LDP::findFecEntry(FecBindVector& fecs, int fecid, IPAddress peer)
 {
     FecBindVector::iterator it;
-    for(it = fecs.begin(); it != fecs.end(); it++)
+    for (it = fecs.begin(); it != fecs.end(); it++)
     {
         if (it->fecid != fecid)
             continue;
@@ -787,7 +787,7 @@ LDP::FecBindVector::iterator LDP::findFecEntry(FecBindVector& fecs, int fecid, I
 LDP::FecVector::iterator LDP::findFecEntry(FecVector& fecs, IPAddress addr, int length)
 {
     FecVector::iterator it;
-    for(it = fecs.begin(); it != fecs.end(); it++)
+    for (it = fecs.begin(); it != fecs.end(); it++)
     {
         if (it->length != length)
             continue;
@@ -1105,7 +1105,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
     // respond to pending requests
 
     PendingVector::iterator pit;
-    for(pit = pending.begin(); pit != pending.end(); pit++)
+    for (pit = pending.begin(); pit != pending.end(); pit++)
     {
         if (pit->fecid != it->fecid)
             continue;
@@ -1187,7 +1187,7 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
     // regular traffic, classify, label etc.
 
     FecVector::iterator it;
-    for(it = fecList.begin(); it != fecList.end(); it++)
+    for (it = fecList.begin(); it != fecList.end(); it++)
     {
         if (!destAddr.prefixMatches(it->addr, it->length))
             continue;
