@@ -20,7 +20,7 @@
 #include "RSVP.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class RSVPAccess : public ModuleAccess<RSVP>
 {

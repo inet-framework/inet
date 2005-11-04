@@ -30,7 +30,7 @@ class InterfaceEntry;
 class NotificationBoard;
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class TED : public cSimpleModule
 {

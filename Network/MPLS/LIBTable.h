@@ -29,7 +29,7 @@
 #define POP_OPER               2
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 struct LabelOp
 {
@@ -40,7 +40,7 @@ struct LabelOp
 typedef std::vector<LabelOp> LabelOpVector;
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API LIBTable: public cSimpleModule
 {

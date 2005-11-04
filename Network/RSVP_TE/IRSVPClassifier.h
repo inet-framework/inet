@@ -21,7 +21,7 @@
 #include "Classifier.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API IRSVPClassifier : public IClassifier
 {

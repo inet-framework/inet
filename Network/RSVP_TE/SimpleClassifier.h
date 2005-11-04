@@ -29,7 +29,7 @@
 class RSVP;
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, public IRSVPClassifier
 {

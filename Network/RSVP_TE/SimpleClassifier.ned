@@ -14,9 +14,9 @@
 
 
 //
-// FIXME missing documentation
+// TODO documentation
 //
 simple SimpleClassifier
-	parameters:
-		conf: xml;
+    parameters:
+        conf: xml;
 endsimple

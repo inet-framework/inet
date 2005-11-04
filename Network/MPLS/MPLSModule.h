@@ -29,7 +29,7 @@
 #include "Classifier.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API MPLSModule : public cSimpleModule
 {

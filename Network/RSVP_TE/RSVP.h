@@ -34,7 +34,7 @@ class LIBTable;
 
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API RSVP : public cSimpleModule, public IScriptable
 {

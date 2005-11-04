@@ -24,7 +24,7 @@
 #include "IScriptable.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API FailureManager : public cSimpleModule, public IScriptable
 {

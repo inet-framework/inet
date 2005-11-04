@@ -20,32 +20,32 @@
 #include "IntServ.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 void removeDuplicates(std::vector<int>& vec);
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 bool find(std::vector<int>& vec, int value);
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 bool find(const IPAddressVector& vec, IPAddress addr); // use TEMPLATE
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 void append(std::vector<int>& dest, const std::vector<int>& src);
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 int nodepos(const EroVector& ERO, IPAddress node);
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 cModule *payloadOwner(cMessage *msg);
 

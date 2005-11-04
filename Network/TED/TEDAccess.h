@@ -20,7 +20,7 @@
 #include "TED.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class TEDAccess : public ModuleAccess<TED>
 {

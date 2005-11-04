@@ -21,7 +21,7 @@
 #include "LIBtable.h"
 
 /**
- * FIXME missing documentation
+ * TODO documentation
  */
 class INET_API IClassifier
 {
