@@ -31,6 +31,7 @@
 InterfaceEntry::InterfaceEntry()
 {
     _outputPort = -1;
+    _peernamid = -1;
 
     _mtu = 0;
 

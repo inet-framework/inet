@@ -16,17 +16,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __PPPINTERFACE_H
-#define __PPPINTERFACE_H
+#ifndef __PPP_H
+#define __PPP_H
 
 
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "PPPFrame_m.h"
-
+#include "TxNotifDetails.h"
 
 class InterfaceEntry;
 class IPassiveQueue;
+class NotificationBoard;
 
 /**
  * PPP implementation. Derived from the p-to-p OMNeT++ sample simulation.
@@ -45,6 +46,9 @@ class INET_API PPP : public cSimpleModule
 
     InterfaceEntry *interfaceEntry;  // points into InterfaceTable
     double datarate;  // only cached for the display string
+
+    NotificationBoard *nb;
+    TxNotifDetails notifDetails;
 
     std::string oldConnColor;
 

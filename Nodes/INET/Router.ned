@@ -31,13 +31,15 @@ import
 //
 module Router
     parameters:
-        routingFile : string;
+        routingFile: string;
     gates:
         in: in[];
         out: out[];
         in: ethIn[];
         out: ethOut[];
     submodules:
+        namTrace: NAMTraceWriter;
+            display: "p=330,60;i=block/sink";
         notificationBoard: NotificationBoard;
             display: "p=60,60;i=block/control";
         interfaceTable: InterfaceTable;

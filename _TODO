@@ -42,6 +42,10 @@ __CPACKETQUEUE!!!!
  
 __HOSTS_TO_ROUTERINTERFACE 
 
+-----------------------
+
+- gateindex in InterfaceEntry: wrong, because it can be out[] and ethOut[] as well!
+
 ----------------------- 
  
 into the ipv6 doc:

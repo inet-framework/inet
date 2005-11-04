@@ -31,18 +31,19 @@ Define_Module(NAMTraceWriter);
 
 void NAMTraceWriter::initialize(int stage)
 {
-    if (stage==0)
+    if (stage==1)
     {
-        // subscribe to the interesting notifications
-        NotificationBoard *nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_NODE_FAILURE);
-        nb->subscribe(this, NF_NODE_RECOVERY);
-        nb->subscribe(this, NF_PP_TX_BEGIN);
-        nb->subscribe(this, NF_PP_TX_END);
-        nb->subscribe(this, NF_L2_Q_DROP);
-
         // get pointer to the NAMTrace module
-        nt = check_and_cast<NAMTrace*>(simulation.moduleByPath("nam"));
+        cModule *namMod = simulation.moduleByPath("nam");
+        if (!namMod)
+        {
+            nt = NULL;
+            ev << "NAMTraceWriter: nam module not found, no trace will be written\n";
+            return;
+        }
+
+        // store ptr to namtrace module
+        nt = check_and_cast<NAMTrace*>(namMod);
 
         // register given namid, or allocate one (if -1 was configured)
         int namid0 = par("namid");
@@ -50,21 +51,41 @@ void NAMTraceWriter::initialize(int stage)
         namid = nt->assignNamId(node, namid0);
         if (namid0==-1)
             par("namid") = namid;
-    }
-    else if (stage==1)
-    {
-        // fill in peerNamIds in InterfaceEntries
 
         // write "node" entry to the trace
         recordNodeEvent("UP", "circle");
 
+        // subscribe to the interesting notifications
+        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_NODE_FAILURE);
+        nb->subscribe(this, NF_NODE_RECOVERY);
+        nb->subscribe(this, NF_PP_TX_BEGIN);
+        nb->subscribe(this, NF_PP_RX_END);
+        nb->subscribe(this, NF_L2_Q_DROP);
+    }
+    else if (stage==2)
+    {
         // write "link" entries
         InterfaceTable *ift = InterfaceTableAccess().get();
+        cModule *node = parentModule();  // the host or router
         for (int i=0; i<ift->numInterfaces(); i++)
         {
+            // skip loopback interfaces
             InterfaceEntry *ie = ift->interfaceAt(i);
-            if (!ie->isLoopback())
-                recordLinkEvent(ie, "UP");
+            if (ie->isLoopback()) continue;
+            if (!ie->isPointToPoint()) continue; // consider pont-to-point links only
+
+            // fill in peerNamIds in InterfaceEntries
+            cGate *outgate = node->gate("out", ie->outputPort());
+            if (!outgate || !outgate->toGate()) continue;
+            cModule *peernode = outgate->toGate()->ownerModule();
+            cModule *peerwriter = peernode->submodule("namTrace");
+            if (!peerwriter) error("module %s doesn't have a submodule named namTrace", peernode->fullPath().c_str());
+            int peernamid = peerwriter->par("namid");
+            ie->setPeerNamId(peernamid);
+
+            // write link entry into trace
+            recordLinkEvent(ie, "UP");
         }
     }
 }
@@ -75,7 +96,8 @@ NAMTraceWriter::~NAMTraceWriter()
 
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
-    if (category==NF_PP_TX_BEGIN || category==NF_PP_TX_END || category==NF_L2_Q_DROP)
+    // process notification
+    if (category==NF_PP_TX_BEGIN || category==NF_PP_RX_END || category==NF_L2_Q_DROP)
     {
         TxNotifDetails *d = check_and_cast<TxNotifDetails *>(details);
         int peernamid = d->interfaceEntry()->peerNamId();
@@ -84,7 +106,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *detai
         switch(category)
         {
             case NF_PP_TX_BEGIN: recordPacketEvent('h', peernamid, msg); break;
-            case NF_PP_TX_END:   recordPacketEvent('e', peernamid, msg); break;
+            case NF_PP_RX_END:   recordPacketEvent('r', peernamid, msg); break;
             case NF_L2_Q_DROP:   recordPacketEvent('d', peernamid, msg); break;
         }
     }
@@ -114,7 +136,7 @@ void NAMTraceWriter::recordLinkEvent(InterfaceEntry *ie, char *state)
     std::ostream& out = nt->out();
     int peernamid = ie->peerNamId();
 
-    double delay = 1e-3; // FIXME!!!!!!
+    double delay = 3.33333E-08; // FIXME should be read from channel object!!!
 
     // link entry (to be registered ON ONE END ONLY!)
     if (namid < peernamid)
@@ -130,20 +152,17 @@ void NAMTraceWriter::recordPacketEvent(const char event, int peernamid, cMessage
     std::ostream& out = nt->out();
 
     int size = msg->byteLength();
-
-    out << event << " -t " << simTime() << " -s " << namid << " -d " << peernamid << " -e " << size;
-
-    cMessage *em = msg;
-    while (em)
-    {
+    int color = 0;
+    for (cMessage *em = msg; em; em = em->encapsulatedMsg())
         if (em->hasPar("color"))
-        {
-            out << " -a " << em->par("color").longValue();
-            break;
-        }
-        em = em->encapsulatedMsg();
-    }
+            {color = em->par("color").longValue(); break;}
 
-    out << endl;
+    out << event << " -t " << simTime();
+    if (event=='h')
+        out << " -s " << namid << " -d " << peernamid;
+    else
+        out << " -s " << peernamid << " -d " << namid;
+
+    out << " -e " << size << " -a " << color << endl;
 }
 

@@ -20,6 +20,7 @@
 
 import
     "NotificationBoard",
+    "NAMTraceWriter",
     "InterfaceTable",
     "RoutingTable",
     "TCPApp.ned",
@@ -38,18 +39,20 @@ import
 //
 module StandardHost
     parameters:
-        numTcpApps : numeric const,
-        numUdpApps : numeric const,
-        tcpAppType : string,
-        udpAppType : string,
-        IPForward : bool,
-        routingFile : string;
+        numTcpApps: numeric const,
+        numUdpApps: numeric const,
+        tcpAppType: string,
+        udpAppType: string,
+        IPForward: bool,
+        routingFile: string;
     gates:
         in: in[];
         out: out[];
         in: ethIn[];
         out: ethOut[];
     submodules:
+        namTrace: NAMTraceWriter;
+            display: "p=60,310;i=block/sink";
         notificationBoard: NotificationBoard;
             display: "p=60,70;i=block/control";
         interfaceTable: InterfaceTable;

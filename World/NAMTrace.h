@@ -24,10 +24,10 @@
 #include "INETDefs.h"
 
 /**
- * Provides a central place for storing the output stream of an ns2 nam trace. 
+ * Provides a central place for storing the output stream of an ns2 nam trace.
  *
- * Only one NAMTrace module should be in a network (or, per subnetwork), and 
- * hosts/routers should contain a NAMTraceWriter module each. 
+ * Only one NAMTrace module should be in a network (or, per subnetwork), and
+ * hosts/routers should contain a NAMTraceWriter module each.
  * Every NAMTraceWriters write to an output stream which they obtain from
  * the out() method of the shared NAMTrace module.
  *
@@ -38,8 +38,7 @@
 class INET_API NAMTrace : public cSimpleModule
 {
   private:
-    std::filebuf *namfb;
-    std::ostream *nams;
+    std::ofstream *nams;
 
     int lastnamid;
     std::map<int,int> modid2namid;

@@ -17,6 +17,7 @@
 //
 
 #include "NAMTrace.h"
+#include "platdep/misc.h"
 
 Define_Module(NAMTrace);
 
@@ -24,16 +25,21 @@ Define_Module(NAMTrace);
 void NAMTrace::initialize()
 {
     lastnamid = 0;
-    namfb = NULL;
     nams = NULL;
     const char *namlog = par("logfile");
     if (namlog && namlog[0])
     {
         ev << "nam tracing enabled (file " << namlog << ")" << endl;
-        namfb = new std::filebuf();
-        namfb->open(namlog, std::ios::out | std::ios::app);
-        nams = new std::ostream(namfb);
 
+        // open namlog for write
+        if (unlink(namlog)!=0 && errno!=ENOENT)
+            error("cannot remove old `%s' file: %s", namlog, strerror(errno));
+        nams = new std::ofstream;
+        nams->open(namlog, std::ios::out);
+        if (nams->fail())
+            error("cannot open `%s' for write", namlog);
+
+        // print prolog into the file
         const char *prolog = par("prolog");
         if (strlen(prolog))
         {
@@ -53,8 +59,8 @@ void NAMTrace::handleMessage(cMessage *msg)
 
 void NAMTrace::finish()
 {
-    if (namfb)
-        namfb->close();
+    if (nams)
+        nams->close();
 }
 
 int NAMTrace::assignNamId(cModule *node, int namid)

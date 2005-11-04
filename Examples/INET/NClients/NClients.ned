@@ -20,7 +20,8 @@
 import
     "Router",
     "StandardHost",
-    "FlatNetworkConfigurator";
+    "FlatNetworkConfigurator",
+    "NAMTrace";
 
 
 channel fiberline
@@ -43,6 +44,8 @@ module NClients
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
+            display: "i=block/cogwheel";
+        nam: NAMTrace;
             display: "i=block/cogwheel";
         r1: Router;
             display: "i=abstract/router";

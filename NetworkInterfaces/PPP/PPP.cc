@@ -23,6 +23,8 @@
 #include "InterfaceTableAccess.h"
 #include "PPP.h"
 #include "IPassiveQueue.h"
+#include "NotificationBoard.h"
+#include "NotifierConsts.h"
 
 
 
@@ -84,8 +86,12 @@ void PPP::initialize(int stage)
             error("gate physOut must be connected (directly or indirectly) to a link with data rate");
     }
 
-    // register our interface entry in RoutingTable
+    // register our interface entry in InterfaceTable
     interfaceEntry = registerInterface(datarate);
+
+    // prepare to fire notifications
+    nb = NotificationBoardAccess().get();
+    notifDetails.setInterfaceEntry(interfaceEntry);
 
     // if not connected, make it gray
     if (ev.isGUI())
@@ -125,6 +131,9 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     int outputPort = parentModule()->gate("netwIn")->fromGate()->index();
     e->setOutputPort(outputPort);
 
+    // data rate
+    e->setDatarate(datarate);
+
     // generate a link-layer address to be used as interface token for IPv6
     InterfaceToken token(0, simulation.getUniqueNumber(), 64);
     e->setInterfaceToken(token);
@@ -152,6 +161,11 @@ void PPP::startTransmitting(cMessage *msg)
     PPPFrame *pppFrame = encapsulate(msg);
     if (ev.isGUI()) displayBusy();
 
+    // fire notification
+    notifDetails.setMessage(pppFrame);
+    nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
+
+    // send
     ev << "Starting transmission of " << pppFrame << endl;
     send(pppFrame, "physOut");
 
@@ -174,6 +188,10 @@ void PPP::handleMessage(cMessage *msg)
         ev << "Transmission finished.\n";
         if (ev.isGUI()) displayIdle();
 
+        // fire notification
+        notifDetails.setMessage(NULL);
+        nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
+
         if (!txQueue.empty())
         {
             msg = (cMessage *) txQueue.getTail();
@@ -188,6 +206,10 @@ void PPP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("physIn"))
     {
+        // fire notification
+        notifDetails.setMessage(msg);
+        nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
+
         // check for bit errors
         if (msg->hasBitError())
         {
