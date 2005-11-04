@@ -19,7 +19,10 @@
 
 //
 // NAMTrace manages a "nam" trace file which can be played back with ns2's
-// Network ANimator, nam.
+// Network ANimator, nam. The trace is actually written by NAMTraceWriter
+// modules which should occur per host or router.
+//
+// @see NAMTraceWriter
 //
 simple NAMTrace
     parameters:

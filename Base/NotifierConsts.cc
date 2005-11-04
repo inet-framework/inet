@@ -27,8 +27,8 @@ const char *notificationCategoryName(int category)
     switch (category)
     {
         case NF_HOSTPOSITION_UPDATED: return "POS";
-        case NF_HOST_FAILURE: return "FAILURE";
-        case NF_HOST_RECOVERY: return "RECOVERY";
+        case NF_NODE_FAILURE: return "FAILURE";
+        case NF_NODE_RECOVERY: return "RECOVERY";
 
         case NF_RADIOSTATE_CHANGED: return "RADIO";
         case NF_PP_TX_BEGIN: return "TX-BEG";

@@ -20,9 +20,12 @@
 
 //
 // Writes a NAM trace, based on notifications it receives via
-// the NotificationBoard.
+// the NotificationBoard. Expects to find a NAMTrace module named 
+// "nam" at network level.
 //
 // Has no gates and does not process messages.
+//
+// @see NAMTrace, NotificationBoard
 //
 simple NAMTraceWriter
     parameters:

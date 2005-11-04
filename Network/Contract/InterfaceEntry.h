@@ -45,6 +45,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     int _interfaceId;      ///< identifies the interface in the InterfaceTable
     std::string _name;     ///< interface name (must be unique)
     int _outputPort;       ///< output gate index (-1 if unused, e.g. loopback interface)
+    int _peernamid;        ///< used only when writing ns2 nam traces  
     int _mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
     bool _down;            ///< current state (up or down)
     bool _broadcast;       ///< interface supports broadcast
@@ -74,6 +75,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     int interfaceId() const        {return _interfaceId;}
     const char *name() const       {return _name.c_str();}
     int outputPort() const         {return _outputPort;}
+    int peerNamId() const          {return _peernamid;}
     int mtu() const                {return _mtu;}
     bool isDown() const            {return _down;}
     bool isBroadcast() const       {return _broadcast;}
@@ -86,6 +88,7 @@ class INET_API InterfaceEntry : public cPolymorphic
 
     void setName(const char *s)  {_name = s;}
     void setOutputPort(int i)    {_outputPort = i;}
+    void setPeerNamId(int ni)    {_peernamid = ni;}
     void setMtu(int m)           {_mtu = m;}
     void setDown(bool b)         {_down = b;}
     void setBroadcast(bool b)    {_broadcast = b;}

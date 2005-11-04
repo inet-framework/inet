@@ -22,35 +22,51 @@
 #include "NAMTrace.h"
 #include "NAMTraceWriter.h"
 #include "NotificationBoard.h"
-
-
+#include "TxNotifDetails.h"
+#include "InterfaceTable.h"
+#include "InterfaceTableAccess.h"
 
 Define_Module(NAMTraceWriter);
 
 
 void NAMTraceWriter::initialize(int stage)
 {
-    // all initialization is done in the first stage
-    if (stage!=0)
-        return;
+    if (stage==0)
+    {
+        // subscribe to the interesting notifications
+        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_NODE_FAILURE);
+        nb->subscribe(this, NF_NODE_RECOVERY);
+        nb->subscribe(this, NF_PP_TX_BEGIN);
+        nb->subscribe(this, NF_PP_TX_END);
+        nb->subscribe(this, NF_L2_Q_DROP);
 
-    // subscribe to the interesting notifications
-    NotificationBoard *nb = NotificationBoardAccess().get();
-    nb->subscribe(this, NF_HOST_FAILURE);
-    nb->subscribe(this, NF_HOST_RECOVERY);
-    nb->subscribe(this, NF_PP_TX_BEGIN);
-    nb->subscribe(this, NF_PP_TX_END);
-    nb->subscribe(this, NF_L2_Q_DROP);
+        // get pointer to the NAMTrace module
+        nt = check_and_cast<NAMTrace*>(simulation.moduleByPath("nam"));
 
-    // get pointer to the NAMTrace module
-    nt = check_and_cast<NAMTrace*>(simulation.moduleByPath("nam"));
+        // register given namid, or allocate one (if -1 was configured)
+        int namid0 = par("namid");
+        cModule *node = parentModule();  // the host or router
+        namid = nt->assignNamId(node, namid0);
+        if (namid0==-1)
+            par("namid") = namid;
+    }
+    else if (stage==1)
+    {
+        // fill in peerNamIds in InterfaceEntries
 
-    // register given namid, or allocate one (if -1 was configured)
-    int namid0 = par("namid");
-    cModule *node = parentModule();  // the host or router
-    namid = nt->assignNamId(node, namid0);
-    if (namid0==-1)
-        par("namid") = namid;
+        // write "node" entry to the trace
+        recordNodeEvent("UP", "circle");
+
+        // write "link" entries
+        InterfaceTable *ift = InterfaceTableAccess().get();
+        for (int i=0; i<ift->numInterfaces(); i++)
+        {
+            InterfaceEntry *ie = ift->interfaceAt(i);
+            if (!ie->isLoopback())
+                recordLinkEvent(ie, "UP");
+        }
+    }
 }
 
 NAMTraceWriter::~NAMTraceWriter()
@@ -59,54 +75,59 @@ NAMTraceWriter::~NAMTraceWriter()
 
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
-/* FIXME where to get peernamid? from InterfaceEntry?
-    switch(category)
+    if (category==NF_PP_TX_BEGIN || category==NF_PP_TX_END || category==NF_L2_Q_DROP)
     {
-        case NF_HOST_FAILURE: break;
-        case NF_HOST_RECOVERY: break;
-        case NF_PP_TX_BEGIN: recordPacketEvent('h', peer, msg); break;
-        case NF_PP_TX_END: recordPacketEvent('e', peer, msg); break;
-        case NF_L2_Q_DROP: recordPacketEvent('d', peer, msg); break;
+        TxNotifDetails *d = check_and_cast<TxNotifDetails *>(details);
+        int peernamid = d->interfaceEntry()->peerNamId();
+        cMessage *msg = d->message();
+
+        switch(category)
+        {
+            case NF_PP_TX_BEGIN: recordPacketEvent('h', peernamid, msg); break;
+            case NF_PP_TX_END:   recordPacketEvent('e', peernamid, msg); break;
+            case NF_L2_Q_DROP:   recordPacketEvent('d', peernamid, msg); break;
+        }
     }
-*/
-}
-
-#if 0
-void NAMTraceWriter::traceInit()
-{
-    // node entry
-    recordNodeEvent("UP", "circle");
-
-    // link entry
-    // LINKS HAVE TO BE REGISTERED ONLY ON ONE END!!!
-    *nams << "l -t * -s " << namid << " -d " << peernamid << " -S UP -r " <<
-            (int)bandwidth << " -D " << delay << endl;
-
-    // queue entry
-    *nams << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
+    else
+    {
+        switch(category)
+        {
+            case NF_NODE_FAILURE: break; // TODO
+            case NF_NODE_RECOVERY: break; // TODO
+        }
+    }
 }
 
 void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
 {
-    std::ostream& out = nt->log();
-    *nams << "n -t ";
+    std::ostream& out = nt->out();
+    out << "n -t ";
     if (simTime() == 0.0)
-        *nams << "*";
+        out << "*";
     else
-        *nams << simTime();
-    *nams << " -s " << namid << " -a " << namid << " -S " << state << " -v " << shape << endl;
+        out << simTime();
+    out << " -s " << namid << " -a " << namid << " -S " << state << " -v " << shape << endl;
 }
 
-void NAMTraceWriter::recordLinkEvent(InterfaceEntry *ie)
+void NAMTraceWriter::recordLinkEvent(InterfaceEntry *ie, char *state)
 {
-    std::ostream& out = nt->log();
-}
-#endif
+    std::ostream& out = nt->out();
+    int peernamid = ie->peerNamId();
 
-void NAMTraceWriter::recordPacketEvent(const char event, cModule *peer, cMessage *msg)
+    double delay = 1e-3; // FIXME!!!!!!
+
+    // link entry (to be registered ON ONE END ONLY!)
+    if (namid < peernamid)
+        out << "l -t * -s " << namid << " -d " << peernamid
+            << " -S " << state << " -r " << (int)ie->datarate() << " -D " << delay << endl;
+
+    // queue entry
+    out << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
+}
+
+void NAMTraceWriter::recordPacketEvent(const char event, int peernamid, cMessage *msg)
 {
-    std::ostream& out = nt->log();
-    int peernamid = nt->getNamId(peer);
+    std::ostream& out = nt->out();
 
     int size = msg->byteLength();
 

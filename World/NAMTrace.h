@@ -24,7 +24,14 @@
 #include "INETDefs.h"
 
 /**
- * Writes a nam trace file. See NED file for more info.
+ * Provides a central place for storing the output stream of an ns2 nam trace. 
+ *
+ * Only one NAMTrace module should be in a network (or, per subnetwork), and 
+ * hosts/routers should contain a NAMTraceWriter module each. 
+ * Every NAMTraceWriters write to an output stream which they obtain from
+ * the out() method of the shared NAMTrace module.
+ *
+ * See NED file for more info.
  *
  * @author Andras Varga
  */
@@ -64,7 +71,7 @@ class INET_API NAMTrace : public cSimpleModule
     /**
      * Returns the stream to which the trace events can be written.
      */
-    std::ostream& log();
+    std::ostream& out();
 };
 
 #endif

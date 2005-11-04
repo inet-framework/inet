@@ -72,7 +72,7 @@ int NAMTrace::getNamId(cModule *node) const
     return it->second;
 }
 
-std::ostream& NAMTrace::log()
+std::ostream& NAMTrace::out()
 {
     if (!nams)
         error("Cannot write to (%s)%s log: log not open", className(), fullPath().c_str());

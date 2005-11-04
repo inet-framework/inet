@@ -31,8 +31,8 @@ enum
 {
     // - host
     NF_HOSTPOSITION_UPDATED,
-    NF_HOST_FAILURE,
-    NF_HOST_RECOVERY,
+    NF_NODE_FAILURE,
+    NF_NODE_RECOVERY,
 
     // - layer 1 (physical)
     NF_RADIOSTATE_CHANGED,
