@@ -1,6 +1,7 @@
 NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
+- NAM trace: delay of link is not computed (hardcoded value is written into the trace)     
 
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
