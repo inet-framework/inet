@@ -48,10 +48,6 @@ std::ostream& operator<<(std::ostream& os, const NotificationBoard::NotifiableVe
 }
 
 
-NotificationBoard::~NotificationBoard()
-{
-}
-
 void NotificationBoard::initialize()
 {
     WATCH_MAP(clientMap);

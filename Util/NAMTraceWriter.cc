@@ -90,10 +90,6 @@ void NAMTraceWriter::initialize(int stage)
     }
 }
 
-NAMTraceWriter::~NAMTraceWriter()
-{
-}
-
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
     // process notification
