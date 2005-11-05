@@ -62,9 +62,6 @@ class INET_API LIBTable: public cSimpleModule
         int maxLabel;
         std::vector<LIBEntry> lib;
 
-    public:
-        LIBTable() {} // FIXME ctor
-
     protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const  {return 5;}

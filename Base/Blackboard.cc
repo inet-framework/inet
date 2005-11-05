@@ -33,6 +33,10 @@ std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)
     return os;
 }
 
+Blackboard::Blackboard()
+{
+}
+
 Blackboard::~Blackboard()
 {
     while (!contents.empty())

@@ -43,7 +43,7 @@ class OSPFRouting :  public cSimpleModule
     bool    LoadConfigFromXML (const char * filename);
 
   public:
-    OSPFRouting() {} // FIXME ctor
+    OSPFRouting();
     virtual ~OSPFRouting (void);
 
   protected:

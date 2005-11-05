@@ -70,6 +70,16 @@ std::ostream& operator<<(std::ostream& os, const RoutingTable6::DestCacheEntry& 
     return os;
 };
 
+RoutingTable6::RoutingTable6()
+{
+}
+
+RoutingTable6::~RoutingTable6()
+{
+    for (unsigned int i=0; i<routeList.size(); i++)
+        delete routeList[i];
+}
+
 void RoutingTable6::initialize(int stage)
 {
     if (stage==1)

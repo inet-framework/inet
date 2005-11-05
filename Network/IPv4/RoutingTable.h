@@ -179,7 +179,8 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     void updateDisplayString();
 
   public:
-    RoutingTable() {} // FIXME ctor
+    RoutingTable();
+    virtual ~RoutingTable();
 
   protected:
     int numInitStages() const  {return 4;}

@@ -38,7 +38,7 @@ class LIBTable;
  */
 class INET_API RSVP : public cSimpleModule, public IScriptable
 {
-private:
+  private:
 
     struct traffic_path_t
     {
@@ -168,7 +168,7 @@ private:
     double helloTimeout;
     double retryInterval;
 
-private:
+  private:
     TED *tedmod;
     RoutingTable *rt;
     InterfaceTable *ift;
@@ -187,6 +187,7 @@ private:
     RSBVector RSBList;
     HelloVector HelloList;
 
+  protected:
     void processSignallingMessage(SignallingMsg *msg);
     void processPSB_TIMER(PsbTimerMsg *msg);
     void processPSB_TIMEOUT(PsbTimeoutMsg* msg);
@@ -267,16 +268,17 @@ private:
     void addSession(const cXMLElement& node);
     void delSession(const cXMLElement& node);
 
- private:
+  private:
 
     friend class SimpleClassifier;
 
     int getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender);
 
- public:
-    RSVP() {} // FIXME ctor
+  public:
+    RSVP();
+    virtual ~RSVP();
 
- protected:
+  protected:
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

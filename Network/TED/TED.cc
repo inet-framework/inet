@@ -25,6 +25,16 @@
 
 Define_Module(TED);
 
+TED::TED()
+{
+    announceMsg = NULL;
+}
+
+TED::~TED()
+{
+    cancelAndDelete(announceMsg);
+}
+
 void TED::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)

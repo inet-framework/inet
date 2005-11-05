@@ -35,6 +35,16 @@
 
 Define_Module(RSVP);
 
+
+RSVP::RSVP()
+{
+}
+
+RSVP::~RSVP()
+{
+    // TODO cancelAndDelete timers in all data structures
+}
+
 void RSVP::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)

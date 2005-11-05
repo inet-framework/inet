@@ -33,6 +33,11 @@
 Define_Module (OSPFRouting);
 
 
+OSPFRouting::OSPFRouting ()
+{
+    ospfRouter = NULL;
+}
+
 /**
  * Destructor.
  * Deletes the whole OSPF datastructure.

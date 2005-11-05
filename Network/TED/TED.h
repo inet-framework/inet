@@ -52,7 +52,8 @@ class TED : public cSimpleModule
     TELinkStateInfoVector ted;
 
   public:
-    TED() {} // FIXME ctor
+    TED();
+    virtual ~TED();
 
   protected:
     virtual void initialize(int stage);

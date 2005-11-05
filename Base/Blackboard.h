@@ -230,7 +230,7 @@ class INET_API Blackboard : public cSimpleModule
     };
 
   public:
-    Blackboard() {} // FIXME ctor
+    Blackboard();
     virtual ~Blackboard();
 
   protected:

@@ -143,7 +143,8 @@ class INET_API RoutingTable6 : public cSimpleModule
     void updateDisplayString();
 
   public:
-    RoutingTable6() {} // FIXME ctor
+    RoutingTable6();
+    virtual ~RoutingTable6();
 
   protected:
     int numInitStages() const  {return 5;}
