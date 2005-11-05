@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPProfile.cc
+/** \file RTPProfile.cc
 This file contains the implementaion of member functions of the class RTPProfile.
 */
 

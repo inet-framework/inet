@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPApplication.cc
+/** \file RTPApplication.cc
 This file contains the implementation for member functions
 of RTPApplication.
 */

@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPMpegPacket.h
+/** \file RTPMpegPacket.h
 This file contains the declaration of the class RTPMpegPacket.
 */
 
@@ -24,7 +24,7 @@ This file contains the declaration of the class RTPMpegPacket.
 
 #include <omnetpp.h>
 
-/*! \class RTPMpegPacket
+/** \class RTPMpegPacket
 An RTPMpegPacket is intended to be capsulated into an RTPPacket when
 transmitting mpeg data with rtp under the rtp audio/video profile.
 It stores information about the mpeg data as described in rfc 2250.
@@ -40,53 +40,53 @@ reading the gdf file.
 class INET_API RTPMpegPacket : public cPacket  {
 
     public:
-        /*!
+        /**
         Default constructor.
         */
         RTPMpegPacket(const char *name = NULL);
 
-        /*!
+        /**
         Copy constructor.
         */
         RTPMpegPacket(const RTPMpegPacket& packet);
 
-        /*!
+        /**
         Destructor.
         */
         virtual ~RTPMpegPacket();
 
-        /*!
+        /**
         Assignment operator.
         */
         RTPMpegPacket& operator=(const RTPMpegPacket& packet);
 
-        /*!
+        /**
         Duplicates the RTPMpegPacket by calling the copy constructor.
         */
         virtual cObject *dup() const;
 
-        /*!
+        /**
         Returns the class name "RTPMpegPacket".
         */
         virtual const char *className() const;
 
-        /*!
+        /**
         Returns the constant header length (4 bytes).
         */
         static int headerLength();
 
-        /*!
+        /**
         Returns the size of mpeg data.
         */
         virtual int payloadLength();
 
-        /*!
+        /**
         Returns the picture type of the frame the data in this
         packet belongs to.
         */
         virtual int pictureType();
 
-        /*!
+        /**
         Sets the picture type.
         */
         virtual void setPictureType(int pictureType);

@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPSSRCGate.h
+/** \file RTPSSRCGate.h
 This file declares the class RTPSSRGate.
 */
 
@@ -30,7 +30,7 @@ This file declares the class RTPSSRGate.
 
 
 
-/*! \class RTPSSRCGate
+/** \class RTPSSRCGate
 The class RTPSSRCGate is just a small helper class used by an RTPProfile
 module to store the association between an ssrc identifier and the gate
 which leads to the RTPPayloadReceiver module.
@@ -40,48 +40,48 @@ class INET_API RTPSSRCGate : public cObject {
 
     public:
 
-        /*!
+        /**
         Default constructor.
         */
         RTPSSRCGate(u_int ssrc = 0);
 
-        /*!
+        /**
         Copy constructor.
         */
         RTPSSRCGate(const RTPSSRCGate& rtpSSRCGate);
 
-        /*!
+        /**
         Destructor.
         */
         virtual ~RTPSSRCGate();
 
-        /*!
+        /**
         Returns the ssrc identifier.
         */
         virtual u_int32 ssrc();
 
-        /*!
+        /**
         Sets the ssrc identifier.
         */
         virtual void setSSRC(u_int32 ssrc);
 
-        /*!
+        /**
         Returns the id of the gate.
         */
         virtual int gateId();
 
-        /*!
+        /**
         Sets the id of the gate.
         */
         virtual void setGateId(int gateId);
 
     protected:
-        /*!
+        /**
         The ssrc identifier.
         */
         u_int32 _ssrc;
 
-        /*!
+        /**
         The gate id.
         */
         int _gateId;

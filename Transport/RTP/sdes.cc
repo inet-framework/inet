@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file sdes.cc
+/** \file sdes.cc
 This file contains the implementations for member functions of the
 classes SDESItem and SDESChunk.
 */

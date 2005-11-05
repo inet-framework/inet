@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPInterfacePacket.cc
+/** \file RTPInterfacePacket.cc
 
 */
 

@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfile.cc
+/** \file RTPAVProfile.cc
 This file contains the implementation of member functions of
 the class RTPAProfile.
 */

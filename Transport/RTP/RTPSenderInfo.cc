@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPSenderInfo.cc
+/** \file RTPSenderInfo.cc
 This file contains the implementation of member functions of the class RTPSenderInfo.
 */
 

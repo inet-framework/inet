@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfilePayload10Receiver.cc
+/** \file RTPAVProfilePayload10Receiver.cc
 
 */
 

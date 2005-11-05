@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPAVProfilePayload10Sender.h
+/** \file RTPAVProfilePayload10Sender.h
 
 */
 
@@ -31,13 +31,12 @@
 #include "RTPAVProfileSampleBasedAudioSender.h"
 
 
-/*! \class RTPAVProfilePayload10Sender
+/** \class RTPAVProfilePayload10Sender
 */
 
-class INET_API RTPAVProfilePayload10Sender : public RTPAVProfileSampleBasedAudioSender {
-
-    Module_Class_Members(RTPAVProfilePayload10Sender, RTPAVProfileSampleBasedAudioSender, 16384);
-
+class INET_API RTPAVProfilePayload10Sender : public RTPAVProfileSampleBasedAudioSender
+{
+  protected:
     virtual void initialize();
 };
 

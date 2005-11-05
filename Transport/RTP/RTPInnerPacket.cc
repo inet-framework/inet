@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPInnerPacket.cc
+/** \file RTPInnerPacket.cc
 This file contains the implementation of member functions
 of RTPInnerPacket.
 */

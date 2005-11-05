@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfileSampleBasedAudioSender.cc
+/** \file RTPAVProfileSampleBasedAudioSender.cc
 
 */
 

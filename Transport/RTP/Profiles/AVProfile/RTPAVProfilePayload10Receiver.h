@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfilePayload10Receiver.h"
+/** \file RTPAVProfilePayload10Receiver.h"
 
 */
 
@@ -25,17 +25,11 @@
 #include "RTPAVProfileSampleBasedAudioReceiver.h"
 
 
-/*! \class RTPAVProfilePayload10Receiver
-
+/** \class RTPAVProfilePayload10Receiver
 */
-
-class INET_API RTPAVProfilePayload10Receiver : public RTPAVProfileSampleBasedAudioReceiver {
-
-    Module_Class_Members(RTPAVProfilePayload10Receiver, RTPAVProfileSampleBasedAudioReceiver, 0);
-
+class INET_API RTPAVProfilePayload10Receiver : public RTPAVProfileSampleBasedAudioReceiver
+{
+  protected:
     virtual void initialize();
-
-    protected:
-        virtual void insertSilence(simtime_t duration);
-
+    virtual void insertSilence(simtime_t duration);
 };

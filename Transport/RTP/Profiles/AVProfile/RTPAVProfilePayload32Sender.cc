@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfilePayload32Sender.cc
+/** \file RTPAVProfilePayload32Sender.cc
 
 Parts of the code in this file (reading of the gdf data) are
 extracted from the program generator.cc of Klaus Wehrle's mpg2

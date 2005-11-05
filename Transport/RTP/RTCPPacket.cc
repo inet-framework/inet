@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTCPPacket.cc
+/** \file RTCPPacket.cc
 In this file member functions of the rtcp classes RTCPPacket,
 RTCPReceiverReportPacket, RTCPSenderReportPacket, RTCPSDESPacket,
 RTCPByePacket and RTCPCompoundPacket are implemented.

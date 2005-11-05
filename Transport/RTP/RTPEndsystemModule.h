@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPEndsystemModule.h
+/** \file RTPEndsystemModule.h
 This header file declares the class RTPEndsystemModule.
 */
 
@@ -32,54 +32,54 @@ This header file declares the class RTPEndsystemModule.
 #include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 
-/*! \class RTPEndsystemModule
+/** \class RTPEndsystemModule
 An RTPEndsystemModule is the center of the rtp layer of an endsystem.
 It creates the profile module, sends and receives rtp data packets
 and forwards messages.
 It also communicates with the application.
 */
-class INET_API RTPEndsystemModule : public cSimpleModule {
+class INET_API RTPEndsystemModule : public cSimpleModule
+{
+    protected:
 
-    Module_Class_Members(RTPEndsystemModule, cSimpleModule, 0);
+        /**
+        Initializes variables.
+        */
+        virtual void initialize();
 
-    /*!
-    Initializes variables.
-    */
-    virtual void initialize();
-
-    /*!
-    Handles incoming messages.
-    */
-    virtual void handleMessage(cMessage *msg);
+        /**
+        Handles incoming messages.
+        */
+        virtual void handleMessage(cMessage *msg);
 
     protected:
 
-        /*!
+        /**
         Handles messages received from the applicaiton.
         */
         virtual void handleMessageFromApp(cMessage *msg);
 
-        /*!
+        /**
         Handles messages received from the profile module.
         */
         virtual void handleMessageFromProfile(cMessage *msg);
 
-        /*!
+        /**
         Handles messages received from the rtcp module.
         */
         virtual void handleMessageFromRTCP(cMessage *msg);
 
-        /*!
+        /**
         Handles messages received from the socket layer.
         */
         virtual void handleMessageFromSocketLayer(cMessage *msg);
 
-        /*!
+        /**
         Creates the profile module and initializes it.
         */
         virtual void enterSession(RTPInterfacePacket *rifp);
 
-        /*!
+        /**
         Destroys the profile module and orders the rtcp module
         to send an rtcp bye packet.
         */
@@ -90,7 +90,7 @@ class INET_API RTPEndsystemModule : public cSimpleModule {
         virtual void senderModuleControl(RTPInterfacePacket *rifp);
 
 
-        /*!
+        /**
         Called when the profile module is initialized.
         */
         virtual void profileInitialized(RTPInnerPacket *rinp);
@@ -100,18 +100,18 @@ class INET_API RTPEndsystemModule : public cSimpleModule {
         virtual void senderModuleInitialized(RTPInnerPacket *rinp);
         virtual void senderModuleStatus(RTPInnerPacket *rinp);
 
-        /*!
+        /**
         Sends a rtp data packet to the socket layer and a copy
         of it to the rtcp module.
         */
         virtual void dataOut(RTPInnerPacket *rinp);
 
-        /*!
+        /**
         Informs the application that the session is entered.
         */
         virtual void rtcpInitialized(RTPInnerPacket *rinp);
 
-        /*!
+        /**
         Informs the application that this end system
         has left the rtp session.
         */
@@ -119,47 +119,47 @@ class INET_API RTPEndsystemModule : public cSimpleModule {
 
 
     private:
-        /*!
+        /**
         The CNAME of this end system.
         */
         const char *_commonName;
 
-        /*!
+        /**
         The name of the profile used in this session.
         */
         const char *_profileName;
 
-        /*!
+        /**
         The available bandwidth for this session.
         */
         int _bandwidth;
 
-        /*!
+        /**
         The destination address.
         */
         IN_Addr _destinationAddress;
 
-        /*!
+        /**
         The rtp port.
         */
         IN_Port _port;
 
-        /*!
+        /**
         The maximum size of a packet.
         */
         int _mtu;
 
-        /*!
+        /**
         The percentage of the bandwidth used for rtcp.
         */
         int _rtcpPercentage;
 
-        /*!
+        /**
         The rtp server socket file descriptor.
         */
         Socket::Filedesc _socketFdIn;
 
-        /*!
+        /**
         The rtp client socket file descriptor.
         */
         Socket::Filedesc _socketFdOut;
@@ -169,42 +169,42 @@ class INET_API RTPEndsystemModule : public cSimpleModule {
         */
         virtual void createProfile();
 
-        /*!
+        /**
         Requests a server socket from the socket layer.
         */
         virtual void createServerSocket();
 
-        /*!
+        /**
         Requests a client socket from the socket layer.
         */
         virtual void createClientSocket();
 
-        /*!
+        /**
         Called when the socket layer returns a socket.
         */
         virtual void socketRet(SocketInterfacePacket *sifp);
 
-        /*!
+        /**
         Called when the socket layer has connected a socket.
         */
         virtual void connectRet(SocketInterfacePacket *sifp);
 
-        /*!
+        /**
         Called when data from the socket layer has been received.
         */
         virtual void readRet(SocketInterfacePacket *sifp);
 
-        /*!
+        /**
         Initializes the profile module.
         */
         virtual void initializeProfile();
 
-        /*!
+        /**
         Initializes the rtcp module-.
         */
         virtual void initializeRTCP();
 
-        /*!
+        /**
         Determines the maximum transmission unit that can be uses for
         rtp. This implementation assumes that we use an ethernet with
         1500 bytes mtu. The returned value is 1500 bytes minus header

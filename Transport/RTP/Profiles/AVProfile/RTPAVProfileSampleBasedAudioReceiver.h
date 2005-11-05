@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfileSampleBasedAudioReceiver.h
+/** \file RTPAVProfileSampleBasedAudioReceiver.h
 
 */
 
@@ -46,7 +46,7 @@ class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver 
         virtual void openOutputFile(const char *fileName);
         virtual void closeOutputFile();
 
-        /*!
+        /**
         When packets arrival late or have been lost, this method can be called to
         insert a silence period. It must be overwritten because in different audio
         formats different values for silence exist.

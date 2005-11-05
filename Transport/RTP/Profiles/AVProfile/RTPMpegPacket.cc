@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPMpegPacket.cc
+/** \file RTPMpegPacket.cc
 This file contains the implementation of member functions of
 the class RTPMpegPacket.
 */

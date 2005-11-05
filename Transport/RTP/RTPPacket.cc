@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPPacket.cc
+/** \file RTPPacket.cc
 This file contains the implementaion of member functions of the class RTPPacket.
 */
 

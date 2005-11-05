@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPEndsystemModule.cc
+/** \file RTPEndsystemModule.cc
 This file contains the implementation of member functions of the class RTPEndsystemModule.
 */
 

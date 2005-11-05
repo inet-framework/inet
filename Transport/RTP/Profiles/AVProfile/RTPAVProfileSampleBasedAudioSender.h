@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-/*! \file RTPAVProfileSampleBasedAudioSender.h
+/** \file RTPAVProfileSampleBasedAudioSender.h
 This file contains the definition of the class RTPAVProfileSampleBasedAudioSender.
 */
 
@@ -27,7 +27,7 @@ This file contains the definition of the class RTPAVProfileSampleBasedAudioSende
 #include "RTPPayloadSender.h"
 
 
-/*! \class RTPAVProfileSampleBasedAudioSender
+/** \class RTPAVProfileSampleBasedAudioSender
 The class RTPAVProfileSampleBasedAudioSender is a base class for modules
 sending sample based audio as defined in the RTP audio/video profile.
 For reading audio files it used libaudiofile.
@@ -35,40 +35,38 @@ Subclasses must provide a method initialize() to set parameters like
 sampling rate, sample width and number of channels.
 */
 
-class INET_API RTPAVProfileSampleBasedAudioSender : public RTPPayloadSender {
-
-    Module_Class_Members(RTPAVProfileSampleBasedAudioSender, RTPPayloadSender, 8192);
-
+class INET_API RTPAVProfileSampleBasedAudioSender : public RTPPayloadSender
+{
     protected:
 
-        /*!
+        /**
         File handle for the audio file.
         */
         AFfilehandle _audioFile;
 
-        /*!
+        /**
         The time this sender module got initialized. Used to calculate time stamps.
         */
         simtime_t _startTime;
 
-        /*!
+        /**
         The sampling rate of the audio. Must be set by subclasses in initialize().
         */
         int _samplingRate;
 
-        /*!
+        /**
         The width of a sample of one channel in bits. Possibly values are 8, 16 and 24.
         Must be set by subclasses in initialize().
         */
         int _sampleWidth;
 
-        /*!
+        /**
         The number of different audio channels. Must be set by subclasses in initialize().
         */
         int _numberOfChannels;
 
 
-        /*!
+        /**
         Called when this sender module receives a message initializeSenderModule.
         */
         virtual void initializeSenderModule(RTPInnerPacket *);

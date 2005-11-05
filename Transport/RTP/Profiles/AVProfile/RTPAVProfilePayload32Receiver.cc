@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPAVProfilePayload32Receiver.cc
+/** \file RTPAVProfilePayload32Receiver.cc
 In this file member functions of RTPAVProfilePayload32Receiver are
 implemented.
 */

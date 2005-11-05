@@ -21,7 +21,7 @@
 #include <cmessage.h>
 #include "types.h"
 
-/*!
+/**
 Messages of type RTPSenderStatusMessage are used to send information
 from an rtp sender module to the application. Within this class a status
 string is defined in which the information is stored. This can be "PLAYING",
@@ -32,42 +32,42 @@ defining this parameter can derived.
 class INET_API RTPSenderStatusMessage : public cMessage  {
 public:
 
-    /*!
+    /**
     Default constructor.
     */
     RTPSenderStatusMessage(const char *name = NULL);
 
-    /*!
+    /**
     Copy constructor.
     */
     RTPSenderStatusMessage(const RTPSenderStatusMessage& message);
 
-    /*!
+    /**
     Destructor.
     */
     ~RTPSenderStatusMessage();
 
-    /*!
+    /**
     Assignment operator.
     */
     RTPSenderStatusMessage& operator=(const RTPSenderStatusMessage& message);
 
-    /*!
+    /**
     Duplicates the object.
     */
     cObject *dup() const;
 
-    /*!
+    /**
     Returns the class name "RTPSenderStatusMessage".
     */
     const char *className() const;
 
-    /*!
+    /**
     Returns the status string stored in this message.
     */
     virtual const char *status() const;
 
-    /*!
+    /**
     Sets the status string to be stored in this message.
     */
     virtual void setStatus(const char *status);
@@ -78,7 +78,7 @@ public:
 
 private:
 
-    /*!
+    /**
     The status string.
     */
     const char *_status;

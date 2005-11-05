@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPPayloadReceiver.cc
+/** \file RTPPayloadReceiver.cc
 This file contains method implementations for RTPPayloadReceiver.
 */
 

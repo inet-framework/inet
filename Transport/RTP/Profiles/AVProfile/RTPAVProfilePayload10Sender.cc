@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 
-/*! \file RTPAVProfilePayload10Sender.cc
+/** \file RTPAVProfilePayload10Sender.cc
 */
 
 #include <audiofile.h>
