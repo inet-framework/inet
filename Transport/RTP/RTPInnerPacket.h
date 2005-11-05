@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPInnerPacket.h
-This file declares the class RTPInnerPacket.
-*/
+ * This file declares the class RTPInnerPacket.
+ */
 
 #ifndef __RTPINNERPACKET_H__
 #define __RTPINNERPACKET_H__
@@ -34,17 +34,18 @@ This file declares the class RTPInnerPacket.
 #include "RTPSenderStatusMessage.h"
 
 
-/** \class RTPInnerPacket
-This class is used for communication between submodules of the rtp layer module.
-*/
-class INET_API RTPInnerPacket : public cPacket {
+/**
+ * This class is used for communication between submodules of the rtp layer module.
+ */
+class INET_API RTPInnerPacket : public cPacket
+{
 
     public:
 
         /**
-        This enumeration is a list of all possibly types of
-        an RTPInnerPacket.
-        */
+         * This enumeration is a list of all possibly types of
+         * an RTPInnerPacket.
+         */
         enum RTP_INP_TYPE {
             RTP_INP_UNDEF,
             RTP_INP_INITIALIZE_PROFILE,
@@ -66,70 +67,69 @@ class INET_API RTPInnerPacket : public cPacket {
         };
 
         /**
-        Default constructor
-        */
+         * Default constructor
+         */
         RTPInnerPacket(const char *name = NULL);
 
         /**
-        Copy constructor.
-        */
+         * Copy constructor.
+         */
         RTPInnerPacket(const RTPInnerPacket& rinp);
 
         /**
-        Destructor.
-        */
+         * Destructor.
+         */
         virtual ~RTPInnerPacket();
 
         /**
-        Assignment operator.
-        */
+         * Assignment operator.
+         */
         RTPInnerPacket& operator=(const RTPInnerPacket& rinp);
 
         /**
-        Duplicates the RTPInnerPacket by calling the copy constructor.
-        */
+         * Duplicates the RTPInnerPacket by calling the copy constructor.
+         */
         virtual cObject *dup() const;
 
         /**
-        Returns the class name "RTPInnerPacket".
-        */
+         * Returns the class name "RTPInnerPacket".
+         */
         virtual const char *className() const;
 
         /**
-        Writes a short info about this RTPInnerPacket into the given string.
-        */
+         * Writes a short info about this RTPInnerPacket into the given string.
+         */
         virtual std::string info();
 
         /**
-        Writes a longer info about this RTPInnerPacket into the given output stream.
-        */
+         * Writes a longer info about this RTPInnerPacket into the given output stream.
+         */
         virtual void writeContents(std::ostream& os) const;
 
         /**
-        Called by the rtp module after creating the profile module. It
-        informes the profile about the maximum size an rtp packet can have.
-        */
+         * Called by the rtp module after creating the profile module. It
+         * informes the profile about the maximum size an rtp packet can have.
+         */
         virtual void initializeProfile(int mtu);
 
         /**
-        Called by the profile module after it has received the initializeProfile()
-        message. It informs the rtp module about the percentage of the available
-        bandwidth to be used by rtcp and the preferred port for this profile.
-        */
+         * Called by the profile module after it has received the initializeProfile()
+         * message. It informs the rtp module about the percentage of the available
+         * bandwidth to be used by rtcp and the preferred port for this profile.
+         */
         virtual void profileInitialized(int rtcpPercentage, IN_Port port);
 
         /**
-        Called by the rtp module to inform the rtcp module about mandatory
-        information for starting the rtp session.
-        */
+         * Called by the rtp module to inform the rtcp module about mandatory
+         * information for starting the rtp session.
+         */
         virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IN_Addr address, IN_Port port);
 
         /**
-        Called by the rtcp module after it has waited for half an rtcp interval
-        for incoming messages from other session participants. It informs the rtp
-        module which later informs the rtp application about the ssrc identifier
-        this rtp endsystem uses.
-        */
+         * Called by the rtcp module after it has waited for half an rtcp interval
+         * for incoming messages from other session participants. It informs the rtp
+         * module which later informs the rtp application about the ssrc identifier
+         */
         virtual void rtcpInitialized(u_int32 ssrc);
 
 
@@ -146,160 +146,160 @@ class INET_API RTPInnerPacket : public cPacket {
         virtual void senderModuleStatus(u_int32 ssrc, RTPSenderStatusMessage *msg);
 
         /**
-        Called by the rtp module to inform the rtcp module that the session
-        should be left.
-        */
+         * Called by the rtp module to inform the rtcp module that the session
+         * should be left.
+         */
         virtual void leaveSession();
 
         /**
-        Called by the rtcp module when the rtcp bye packet has been sent
-        to the network.
-        */
+         * Called by the rtcp module when the rtcp bye packet has been sent
+         * to the network.
+         */
         virtual void sessionLeft();
 
         /**
-        Capsulates the outgoing RTPPacket into this RTPInnerPacket to transport
-        it within the rtp layer.
-        */
+         * Capsulates the outgoing RTPPacket into this RTPInnerPacket to transport
+         * it within the rtp layer.
+         */
         virtual void dataOut(RTPPacket *packet);
 
         /**
-        Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
-        it within the rtp layer.
-        */
+         * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
+         * it within the rtp layer.
+         */
         virtual void dataIn(RTPPacket *packet, IN_Addr address, IN_Port port);
 
         /**
-        Returns the type of this RTPInnerPacket.
-        */
+         * Returns the type of this RTPInnerPacket.
+         */
         virtual RTP_INP_TYPE type();
 
         /**
-        Returns the CNAME stored in this RTPInnerPacket.
-        */
+         * Returns the CNAME stored in this RTPInnerPacket.
+         */
         virtual const char *commonName();
 
         /**
-        Returns the maximum transmission unit stored in this RTPInnerPacket.
-        */
+         * Returns the maximum transmission unit stored in this RTPInnerPacket.
+         */
         virtual int mtu();
 
         /**
-        Returns the available bandwitdth as stored in this RTPInnerPacket.
-        */
+         * Returns the available bandwitdth as stored in this RTPInnerPacket.
+         */
         virtual int bandwidth();
 
         /**
-        Returns the percentage of bandwidth for rtcp as stored in this RTPInnerPacket.
-        */
+         * Returns the percentage of bandwidth for rtcp as stored in this RTPInnerPacket.
+         */
         virtual int rtcpPercentage();
 
         /**
-        Returns the address stored in this RTPInnerPacket.
-        */
+         * Returns the address stored in this RTPInnerPacket.
+         */
         virtual IN_Addr address();
 
         /**
-        Returns the port stored in this RTPInnerPacket.
-        */
+         * Returns the port stored in this RTPInnerPacket.
+         */
         virtual IN_Port port();
 
         /**
-        Returns the ssrc identifier stored in this RTPInnerPacket.
-        */
+         * Returns the ssrc identifier stored in this RTPInnerPacket.
+         */
         virtual u_int32 ssrc();
 
         /**
-        Returns the payload type stored in this RTPInnerPacket.
-        */
+         * Returns the payload type stored in this RTPInnerPacket.
+         */
         virtual int payloadType();
 
         /**
-        Returns the file name stored in this RTPInnerPacket.
-        */
+         * Returns the file name stored in this RTPInnerPacket.
+         */
         virtual const char *fileName();
 
         /**
-        Returns the rtp clock rate stored in this RTPInnerPacket.
-        */
+         * Returns the rtp clock rate stored in this RTPInnerPacket.
+         */
         virtual int clockRate();
 
         /**
-        Returns the rtp time stamp base stored in this RTPInnerPacket.
-        */
+         * Returns the rtp time stamp base stored in this RTPInnerPacket.
+         */
         virtual int timeStampBase();
 
         /**
-        Returns the rtp sequence number base stored in this RTPInnerPacket.
-        */
+         * Returns the rtp sequence number base stored in this RTPInnerPacket.
+         */
         virtual int sequenceNumberBase();
 
 
     private:
 
         /**
-        The type of this RTPInnerPacket.
-        */
+         * The type of this RTPInnerPacket.
+         */
         RTP_INP_TYPE _type;
 
         /**
-        The CNAME stored in this RTPInnerPacket.
-        */
+         * The CNAME stored in this RTPInnerPacket.
+         */
         const char *_commonName;
 
         /**
-        The mtu stored in this RTPInnerPacket.
-        */
+         * The mtu stored in this RTPInnerPacket.
+         */
         int _mtu;
 
         /**
-        The bandwidth stored in this RTPInnerPacket.
-        */
+         * The bandwidth stored in this RTPInnerPacket.
+         */
         int _bandwidth;
 
         /**
-        The rtcp percentage stored in this RTPInnerPacket.
-        */
+         * The rtcp percentage stored in this RTPInnerPacket.
+         */
         int _rtcpPercentage;
 
         /**
-        The address stored this RTPInnerPacket.
-        */
+         * The address stored this RTPInnerPacket.
+         */
         IN_Addr _address;
 
         /**
-        The port stored this RTPInnerPacket.
-        */
+         * The port stored this RTPInnerPacket.
+         */
         IN_Port _port;
 
         /**
-        The ssrc identifier stored in this RTPInnerPacket.
-        */
+         * The ssrc identifier stored in this RTPInnerPacket.
+         */
         u_int32 _ssrc;
 
         /**
-        The payload type stored in this RTPInnerPacket.
-        */
+         * The payload type stored in this RTPInnerPacket.
+         */
         int _payloadType;
 
         /**
-        The file name stored in this RTPInnerPacket.
-        */
+         * The file name stored in this RTPInnerPacket.
+         */
         const char *_fileName;
 
         /**
-        The clock rate stored in this RTPInnerPacket.
-        */
+         * The clock rate stored in this RTPInnerPacket.
+         */
         int _clockRate;
 
         /**
-        The rtp time stamp base stored in this RTPInnerPacket.
-        */
+         * The rtp time stamp base stored in this RTPInnerPacket.
+         */
         int _timeStampBase;
 
         /**
-        The rtp sequence number base stored in this RTPInnerPacket.
-        */
+         * The rtp sequence number base stored in this RTPInnerPacket.
+         */
         int _sequenceNumberBase;
 };
 

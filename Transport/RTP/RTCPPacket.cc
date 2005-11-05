@@ -16,10 +16,10 @@
  ***************************************************************************/
 
 /** \file RTCPPacket.cc
-In this file member functions of the rtcp classes RTCPPacket,
-RTCPReceiverReportPacket, RTCPSenderReportPacket, RTCPSDESPacket,
-RTCPByePacket and RTCPCompoundPacket are implemented.
-*/
+ * In this file member functions of the rtcp classes RTCPPacket,
+ * RTCPReceiverReportPacket, RTCPSenderReportPacket, RTCPSDESPacket,
+ * RTCPByePacket and RTCPCompoundPacket are implemented.
+ */
 
 #include <omnetpp.h>
 

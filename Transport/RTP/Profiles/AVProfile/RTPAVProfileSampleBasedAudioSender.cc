@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPAVProfileSampleBasedAudioSender.cc
-
-*/
+ *
+ */
 
 #include <audiofile.h>
 #include "RTPAVProfileSampleBasedAudioSender.h"

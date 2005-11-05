@@ -17,8 +17,8 @@
 
 
 /** \file RTPAVProfilePayload32Receiver.h
-This file declares the class RTPAVProfilePayload32Receiver.
-*/
+ * This file declares the class RTPAVProfilePayload32Receiver.
+ */
 
 #ifndef __RTPAVPROFILEPAYLOAD32RECEIVER_H__
 #define __RTPAVPROFILEPAYLOAD32RECEIVER_H__
@@ -27,48 +27,47 @@ This file declares the class RTPAVProfilePayload32Receiver.
 
 #include "RTPPayloadReceiver.h"
 
-/** \class RTPAVProfilePayload32Receiver
-This module is used to receive data (mpeg video) of payload 32 for rtp endsystems
-working under the rtp av profile.
-It expects data in the format defined in rfc 2250.
-Its corresponding sender module is RTPAVProfilePayload32Sender.
-This implementation doesn't work with real mpeg data, so it doesn't write
-an mpeg file but a sim file, which can be played with a modified
-mpeg player.
-*/
-
+/**
+ * This module is used to receive data (mpeg video) of payload 32 for rtp endsystems
+ * working under the rtp av profile.
+ * It expects data in the format defined in rfc 2250.
+ * Its corresponding sender module is RTPAVProfilePayload32Sender.
+ * This implementation doesn't work with real mpeg data, so it doesn't write
+ * an mpeg file but a sim file, which can be played with a modified
+ * mpeg player.
+ */
 class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
 {
     protected:
       /**
-      Destructor.
-      */
+       * Destructor.
+       */
       virtual ~RTPAVProfilePayload32Receiver();
 
       /**
-      Calls the method of the superclass RTPPayloadReceiver and sets the payload type to 32.
-      */
+       * Calls the method of the superclass RTPPayloadReceiver and sets the payload type to 32.
+       */
       virtual void initialize();
 
 
     protected:
 
         /**
-        A reordering queue for incoming packets.
-        */
+         * A reordering queue for incoming packets.
+         */
         cQueue *_queue;
 
         /**
-        Stores the lowest allowed time stamp of rtp data packets. The value is used
-        to throw away packets from mpeg frames already stored in the data file.
-        */
+         * Stores the lowest allowed time stamp of rtp data packets. The value is used
+         * to throw away packets from mpeg frames already stored in the data file.
+         */
         u_int32 _lowestAllowedTimeStamp;
 
         /**
-        Writes information about received frames into the output file.
-        The only error correction provided is reordering packets
-        of one frame if needed.
-        */
+         * Writes information about received frames into the output file.
+         * The only error correction provided is reordering packets
+         * of one frame if needed.
+         */
         virtual void processPacket(RTPPacket *packet);
 
 

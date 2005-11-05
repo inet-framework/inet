@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPAVProfilePayload10Receiver.h"
-
-*/
+ *
+ */
 
 #include <omnetpp.h>
 
@@ -25,8 +25,9 @@
 #include "RTPAVProfileSampleBasedAudioReceiver.h"
 
 
-/** \class RTPAVProfilePayload10Receiver
-*/
+/**
+ *
+ */
 class INET_API RTPAVProfilePayload10Receiver : public RTPAVProfileSampleBasedAudioReceiver
 {
   protected:

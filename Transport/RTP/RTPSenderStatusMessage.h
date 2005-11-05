@@ -18,58 +18,60 @@
 #ifndef RTPSenderStatusMessage_H
 #define RTPSenderStatusMessage_H
 
-#include <cmessage.h>
+#include <omnetpp.h>
+#include "INETDefs.h"
 #include "types.h"
 
 /**
-Messages of type RTPSenderStatusMessage are used to send information
-from an rtp sender module to the application. Within this class a status
-string is defined in which the information is stored. This can be "PLAYING",
-"STOPPED" or "FINISHED".
-If a message must provide more information than just a string, a new class
-defining this parameter can derived.
-*/
-class INET_API RTPSenderStatusMessage : public cMessage  {
+ * Messages of type RTPSenderStatusMessage are used to send information
+ * from an rtp sender module to the application. Within this class a status
+ * string is defined in which the information is stored. This can be "PLAYING",
+ * "STOPPED" or "FINISHED".
+ * If a message must provide more information than just a string, a new class
+ * defining this parameter can derived.
+ */
+class INET_API RTPSenderStatusMessage : public cMessage
+{
 public:
 
     /**
-    Default constructor.
-    */
+     * Default constructor.
+     */
     RTPSenderStatusMessage(const char *name = NULL);
 
     /**
-    Copy constructor.
-    */
+     * Copy constructor.
+     */
     RTPSenderStatusMessage(const RTPSenderStatusMessage& message);
 
     /**
-    Destructor.
-    */
+     * Destructor.
+     */
     ~RTPSenderStatusMessage();
 
     /**
-    Assignment operator.
-    */
+     * Assignment operator.
+     */
     RTPSenderStatusMessage& operator=(const RTPSenderStatusMessage& message);
 
     /**
-    Duplicates the object.
-    */
+     * Duplicates the object.
+     */
     cObject *dup() const;
 
     /**
-    Returns the class name "RTPSenderStatusMessage".
-    */
+     * Returns the class name "RTPSenderStatusMessage".
+     */
     const char *className() const;
 
     /**
-    Returns the status string stored in this message.
-    */
+     * Returns the status string stored in this message.
+     */
     virtual const char *status() const;
 
     /**
-    Sets the status string to be stored in this message.
-    */
+     * Sets the status string to be stored in this message.
+     */
     virtual void setStatus(const char *status);
 
     virtual void setTimeStamp(const u_int32 timestamp);
@@ -79,8 +81,8 @@ public:
 private:
 
     /**
-    The status string.
-    */
+     * The status string.
+     */
     const char *_status;
 
     u_int32 _timeStamp;

@@ -17,9 +17,9 @@
 
 
 /** \file RTPAVProfilePayload32Receiver.cc
-In this file member functions of RTPAVProfilePayload32Receiver are
-implemented.
-*/
+ *  * In this file member functions of RTPAVProfilePayload32Receiver are
+ *  * implemented.
+ *  */
 
 #include <omnetpp.h>
 

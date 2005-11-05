@@ -16,28 +16,28 @@
  ***************************************************************************/
 
 /** \file RTPAVProfile.h
-This file file declares the class RTPAVProfile, a subclass
-of RTPProfile.
-*/
+ * This file file declares the class RTPAVProfile, a subclass
+ * of RTPProfile.
+ */
 
 #include <omnetpp.h>
-
+#include "INETDefs.h"
 #include "RTPProfile.h"
 
 
-/** \class RTPAVProfile
-The class RTPAVProfile is a subclass of RTPProfile. It does not extend
-the functionality of its super class, it just sets some values in
-its initialize() method.
-For for information about the rtp audio/video profile consult
-rfc 1890.
-*/
+/**
+ * The class RTPAVProfile is a subclass of RTPProfile. It does not extend
+ * the functionality of its super class, it just sets some values in
+ * its initialize() method.
+ * For for information about the rtp audio/video profile consult
+ * rfc 1890.
+ */
 class INET_API RTPAVProfile : public RTPProfile
 {
   protected:
     /**
-    This initialisation method sets following values:
-    name, rtcpPercentage and preferredPort.
-    */
+     * This initialisation method sets following values:
+     * name, rtcpPercentage and preferredPort.
+     */
     virtual void initialize();
 };

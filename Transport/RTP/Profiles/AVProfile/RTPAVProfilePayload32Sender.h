@@ -16,62 +16,62 @@
  ***************************************************************************/
 
 /** \file RTPAVProfilePayload32Sender.h
-This file declares the class RTPAVProfilePayload32Sender.
-*/
+ * This file declares the class RTPAVProfilePayload32Sender.
+ */
 
 #include <omnetpp.h>
-
 #include "RTPPayloadSender.h"
 
-/** \class RTPAVProfilePayload32Sender
-An RTPAVProfilePayload32Sender is a module for sending data of payload
-type 32 in the rtp audio/video profile, which is mpeg video.
-This implementation doesn't send real mpeg data it just reads the gdf
-file created by Mpeg_Stat and sends rtp data packets which contain
-an RTPMpegPacket.
-The corresponding receiver module RTPAVProfilePayload32Receiver.
-*/
-class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender {
+/**
+ * An RTPAVProfilePayload32Sender is a module for sending data of payload
+ * type 32 in the rtp audio/video profile, which is mpeg video.
+ * This implementation doesn't send real mpeg data it just reads the gdf
+ * file created by Mpeg_Stat and sends rtp data packets which contain
+ * an RTPMpegPacket.
+ * The corresponding receiver module RTPAVProfilePayload32Receiver.
+ */
+class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
+{
 
   protected:
 
     /**
-    Initializes the module. It sets the values for clock rate and payload type.
-    */
+     * Initializes the module. It sets the values for clock rate and payload type.
+     */
     virtual void initialize();
 
     /**
-    The main method.
-    */
+     * The main method.
+     */
     //virtual void activity();
 
     protected:
 
         /**
-        This method reads the gdf file header.
-        */
+         * This method reads the gdf file header.
+         */
         virtual void initializeSenderModule(RTPInnerPacket *rinpIn);
 
         /**
-        This method sends one mpeg frame. It sends one or more
-        rtp data packet. Returns false if there were no more frames.
-        */
+         * This method sends one mpeg frame. It sends one or more
+         * rtp data packet. Returns false if there were no more frames.
+         */
         virtual bool sendPacket();
 
         /**
-        The initial delay of the mpeg video.
-        */
+         * The initial delay of the mpeg video.
+         */
         double _initialDelay;
 
         /**
-        The number of frames per second of the mpeg video.
-        */
+         * The number of frames per second of the mpeg video.
+         */
         double _framesPerSecond;
 
         /**
-        The number of the current mpeg frame. Needed for calculating
-        the rtp time stamp in the rtp data packets.
-        */
+         * The number of the current mpeg frame. Needed for calculating
+         * the rtp time stamp in the rtp data packets.
+         */
         double _frameNumber;
 
 };

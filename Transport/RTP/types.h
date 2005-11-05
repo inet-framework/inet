@@ -17,31 +17,31 @@
 
 
 /** \file types.h
-This file declares some integer types needed for rtp.
-*/
+ * This file declares some integer types needed for rtp.
+ */
 
 /**
-An unsigned 8 bit integer.
-*/
+ * An unsigned 8 bit integer.
+ */
 typedef unsigned char  u_int8;
 
 /**
-An unsigned 16 bit integer.
-*/
+ * An unsigned 16 bit integer.
+ */
 typedef unsigned short u_int16;
 
 /**
-A signed 32 bit integer.
-*/
+ * A signed 32 bit integer.
+ */
 typedef signed int int32;
 
 /**
-An unsigned 32 bit integer.
-*/
+ * An unsigned 32 bit integer.
+ */
 typedef unsigned int u_int32;
 
 /**
-An unsigned 64 bit integer.
-*/
+ * An unsigned 64 bit integer.
+ */
 typedef unsigned long long u_int64;
 

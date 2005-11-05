@@ -17,8 +17,8 @@
 
 
 /** \file RTPAVProfilePayload10Sender.h
-
-*/
+ *
+ */
 
 #ifndef __RTPAVPROFILEPAYLOAD10SENDER_H__
 #define __RTPAVPROFILEPAYLOAD10SENDER_H__
@@ -31,8 +31,9 @@
 #include "RTPAVProfileSampleBasedAudioSender.h"
 
 
-/** \class RTPAVProfilePayload10Sender
-*/
+/**
+ *
+ */
 
 class INET_API RTPAVProfilePayload10Sender : public RTPAVProfileSampleBasedAudioSender
 {

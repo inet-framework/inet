@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPProfile.cc
-This file contains the implementaion of member functions of the class RTPProfile.
-*/
+ * This file contains the implementaion of member functions of the class RTPProfile.
+ */
 
 #include <string.h>
 

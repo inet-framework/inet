@@ -16,9 +16,9 @@
  ***************************************************************************/
 
 /** \file RTPPayloadSender.cc
-This file contains the implementation of member functions of the class
-RTPPayloadSender.
-*/
+ * This file contains the implementation of member functions of the class
+ * RTPPayloadSender.
+ */
 
 #include <omnetpp.h>
 #include "RTPPayloadSender.h"

@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPAVProfileSampleBasedAudioReceiver.h
-
-*/
+ *
+ */
 
 #ifndef __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
 #define __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
@@ -30,7 +30,8 @@
 /**
  *
  */
-class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver {
+class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver
+{
 
     Module_Class_Members(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver, 0)
 
@@ -47,10 +48,10 @@ class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver 
         virtual void closeOutputFile();
 
         /**
-        When packets arrival late or have been lost, this method can be called to
-        insert a silence period. It must be overwritten because in different audio
-        formats different values for silence exist.
-        */
+         * When packets arrival late or have been lost, this method can be called to
+         * insert a silence period. It must be overwritten because in different audio
+         * formats different values for silence exist.
+         */
         virtual void insertSilence(simtime_t duration);
 
 };

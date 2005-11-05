@@ -16,9 +16,9 @@
  ***************************************************************************/
 
 /** \file RTPApplication.cc
-This file contains the implementation for member functions
-of RTPApplication.
-*/
+ * This file contains the implementation for member functions
+ * of RTPApplication.
+ */
 
 #include <omnetpp.h>
 

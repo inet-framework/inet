@@ -16,89 +16,90 @@
  ***************************************************************************/
 
 /** \file RTPApplication.h
-The header file RTPApplication.h declares the generic class RTPApplication
-for a very simple application which uses the realDelay transport protocol.
-*/
+ * The header file RTPApplication.h declares the generic class RTPApplication
+ * for a very simple application which uses the realDelay transport protocol.
+ */
 
 #ifndef __RTPAPPLICATION_H__
 #define __RTPAPPLICATION_H__
 
 #include <omnetpp.h>
+#include "INETDefs.h"
 
-/** \class RTPApplication
-The class RTPApplication is just a very simple sample for an application which
-uses RTP. It acts as a sender if the omnet parameter fileName is set, and as
-a receiver if the parameter is empty.
-*/
+/**
+ * The class RTPApplication is just a very simple sample for an application which
+ * uses RTP. It acts as a sender if the omnet parameter fileName is set, and as
+ * a receiver if the parameter is empty.
+ */
 class INET_API RTPApplication : public cSimpleModule
 {
     protected:
         /**
-        Reads the omnet parameters.
-        */
+         * Reads the omnet parameters.
+         */
         virtual void initialize();
 
         /**
-        RTPApplication uses activity for message handling.
-        The behaviour is controlled by omnet parameters.
-        */
+         * RTPApplication uses activity for message handling.
+         * The behaviour is controlled by omnet parameters.
+         */
         virtual void activity();
 
     private:
 
         /**
-        The CNAME of this participant.
-        */
+         * The CNAME of this participant.
+         */
         const char *_commonName;
 
         /**
-        The name of the used profile.
-        */
+         * The name of the used profile.
+         */
         const char *_profileName;
 
         /**
-        The reserved bandwidth for rtp/rtcp in bytes/second.
-        */
+         * The reserved bandwidth for rtp/rtcp in bytes/second.
+         */
         int _bandwidth;
 
         /**
-        The address of the unicast peer or of the multicast group.
-        */
+         * The address of the unicast peer or of the multicast group.
+         */
         IN_Addr _destinationAddress;
 
         /**
-        One of the udp port used.
-        */
+         * One of the udp port used.
+         */
         IN_Port _port;
 
         /**
-        The name of the file to be transmitted.
-        */
+         * The name of the file to be transmitted.
+         */
         const char *_fileName;
 
         /**
-        The payload type of the data in the file.
-        */
+         * The payload type of the data in the file.
+         */
         int _payloadType;
 
         /**
-        The delay after the application enters the session,
-        */
+         * The delay after the application enters the session,
+         */
         simtime_t _sessionEnterDelay;
 
         /**
-        The delay after the application starts the transmission.
-        */
+         * The delay after the application starts the transmission.
+         */
         simtime_t _transmissionStartDelay;
 
         /**
-        The delay after the application stops the transmission.
-        */
+         * The delay after the application stops the transmission.
+         */
         simtime_t _transmissionStopDelay;
 
         /**
-        The delay after the application leaves the session.
-        */
+         * The delay after the application leaves the session.
+         */
         simtime_t _sessionLeaveDelay;
 
 };

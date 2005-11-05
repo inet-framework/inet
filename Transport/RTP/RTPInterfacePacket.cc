@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 /** \file RTPInterfacePacket.cc
-
-*/
+ *
+ */
 
 #include "RTPInterfacePacket.h"
 

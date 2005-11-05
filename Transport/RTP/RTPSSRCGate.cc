@@ -17,8 +17,8 @@
 
 
 /** \file RTPSSRCGate.cc
-This file contains the implementation of member functions of the class RTPSSRCGate.
-*/
+ * This file contains the implementation of member functions of the class RTPSSRCGate.
+ */
 
 #include <omnetpp.h>
 
