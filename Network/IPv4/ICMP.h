@@ -45,8 +45,6 @@ class INET_API ICMP : public cSimpleModule
     virtual void sendToIP(ICMPMessage *msg);
 
   public:
-    Module_Class_Members(ICMP, cSimpleModule, 0);
-
     /**
      * This method can be called from other modules to send an ICMP error packet.
      */

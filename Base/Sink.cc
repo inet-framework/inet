@@ -27,8 +27,7 @@ class INET_API Sink : public cSimpleModule
 {
   protected:
     int count;
-  public:
-    Module_Class_Members(Sink,cSimpleModule,0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

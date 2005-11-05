@@ -179,8 +179,9 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     void updateDisplayString();
 
   public:
-    Module_Class_Members(RoutingTable, cSimpleModule, 0);
+    RoutingTable() {} // FIXME ctor
 
+  protected:
     int numInitStages() const  {return 4;}
     void initialize(int stage);
 
@@ -189,6 +190,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      */
     void handleMessage(cMessage *);
 
+  public:
     /**
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.

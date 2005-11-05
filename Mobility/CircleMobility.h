@@ -43,9 +43,7 @@ class INET_API CircleMobility : public BasicMobility
     // state
     double angle;  ///< direction from the centre of the circle
 
-  public:
-    Module_Class_Members( CircleMobility, BasicMobility, 0 );
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

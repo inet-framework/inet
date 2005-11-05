@@ -36,8 +36,6 @@ class EtherFrame;
  */
 class INET_API MACRelayUnitBase : public cSimpleModule
 {
-    Module_Class_Members(MACRelayUnitBase,cSimpleModule,0);
-
   public:
     // An entry of the Address Lookup Table
     struct AddressEntry

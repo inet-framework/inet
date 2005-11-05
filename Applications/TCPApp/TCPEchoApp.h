@@ -34,8 +34,7 @@ class INET_API TCPEchoApp : public cSimpleModule
 
     void sendOrSchedule(cMessage *msg);
 
-  public:
-    Module_Class_Members(TCPEchoApp, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

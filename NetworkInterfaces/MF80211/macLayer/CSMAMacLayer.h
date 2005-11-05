@@ -71,8 +71,10 @@
 class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
 {
   public:
-    Module_Class_Members(CSMAMacLayer, WirelessMacBase, 0);
+    CSMAMacLayer() {} // FIXME ctor
+    virtual ~CSMAMacLayer() {}
 
+  protected:
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
 

@@ -33,10 +33,10 @@ class INET_API UDPSink : public UDPAppBase
   protected:
     int numReceived;
 
+  protected:
     virtual void processPacket(cMessage *msg);
 
-  public:
-    Module_Class_Members(UDPSink, UDPAppBase, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

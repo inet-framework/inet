@@ -51,104 +51,97 @@
  */
 class INET_API BasicSnrEval : public ChannelAccess
 {
+  protected:
+    /** @brief a parameter that has to be read in from omnetpp.ini*/
+    double bitrate;
 
- protected:
+    /** brief a parameter that has to be read in from omnetpp.ini*/
+    int headerLength;
 
-  /** @brief a parameter that has to be read in from omnetpp.ini*/
-  double bitrate;
+    /** @brief power used to transmit messages */
+    double transmitterPower;
 
-  /** brief a parameter that has to be read in from omnetpp.ini*/
-  int headerLength;
+    /** @brief gate id*/
+    /*@{*/
+    int uppergateOut;
+    int uppergateIn;
+    /*@}*/
 
-  /** @brief power used to transmit messages */
-  double transmitterPower;
+  protected:
+    /** @brief Initialization of the module and some variables*/
+    virtual void initialize(int);
 
-  /** @brief gate id*/
-  /*@{*/
-  int uppergateOut;
-  int uppergateIn;
-  /*@}*/
+    /** @brief Called every time a message arrives*/
+    void handleMessage( cMessage* );
 
- public:
-  /** @brief constructor */
-  Module_Class_Members(BasicSnrEval, ChannelAccess, 0);
+  protected:
+    /**
+     * @name Handle Messages
+     * @brief Functions to redefine by the programmer
+     */
+    /*@{*/
+    /**
+     * @brief Fill the header fields, redefine for your own needs...
+     */
+    virtual void handleUpperMsg(AirFrame*);
 
-  /** @brief Initialization of the module and some variables*/
-  virtual void initialize(int);
+    /**
+     * @brief Handle self messages such as timer...
+     *
+     * Define this function if you want to process timer or other kinds
+     * of self messages
+     */
+    virtual void handleSelfMsg(cMessage *msg){delete msg;};
 
-  /** @brief Called every time a message arrives*/
-  void handleMessage( cMessage* );
+    /** @brief Calculate Snr Information before buffering.*/
+    virtual void handleLowerMsgStart(AirFrame*);
 
-protected:
-  /**
-   * @name Handle Messages
-   * @brief Functions to redefine by the programmer
-   */
-  /*@{*/
-  /**
-   * @brief Fill the header fields, redefine for your own needs...
-   */
-  virtual void handleUpperMsg(AirFrame*);
+    /**
+     * @brief Calculate SnrInfo after buffering and add the PhySnrList
+     * to the message
+     */
+    virtual void handleLowerMsgEnd(AirFrame*);
+    /*@}*/
 
-  /**
-   * @brief Handle self messages such as timer...
-   *
-   * Define this function if you want to process timer or other kinds
-   * of self messages
-   */
-  virtual void handleSelfMsg(cMessage *msg){delete msg;};
+    /**
+     * @name Convenience Functions
+     * @brief Functions for convenience - NOT to be modified
+     *
+     * These are functions taking care of message encapsulation and
+     * message sending. Normally you should not need to alter these but
+     * should use them to handle message encasulation and sending. They
+     * will wirte all necessary information into packet headers and add
+     * or strip the appropriate headers for each layer.
+     *
+     */
+    /*@{*/
 
-  /** @brief Calculate Snr Information before buffering.*/
-  virtual void handleLowerMsgStart(AirFrame*);
+    /** @brief Buffers message for 'transmission time'*/
+    void bufferMsg(AirFrame *frame);
 
-  /**
-   * @brief Calculate SnrInfo after buffering and add the PhySnrList
-   * to the message
-   */
-  virtual void handleLowerMsgEnd(AirFrame*);
+    /** @brief Unbuffers a message after 'transmission time'*/
+    AirFrame* unbufferMsg(cMessage *msg);
 
-  /*@}*/
+    /** @brief Sends a message to the upper layer*/
+    void sendUp(AirFrame*, SnrList&);
 
+    /** @brief Sends a message to the channel*/
+    void sendDown(AirFrame *msg);
 
-  /**
-   * @name Convenience Functions
-   * @brief Functions for convenience - NOT to be modified
-   *
-   * These are functions taking care of message encapsulation and
-   * message sending. Normally you should not need to alter these but
-   * should use them to handle message encasulation and sending. They
-   * will wirte all necessary information into packet headers and add
-   * or strip the appropriate headers for each layer.
-   *
-   */
-  /*@{*/
+    /** @brief Sends a message to the upper layer; waits delay seconds
+        before sending*/
+    void sendDelayedUp(AirFrame*, double, SnrList&);
 
-  /** @brief Buffers message for 'transmission time'*/
-  void bufferMsg(AirFrame *frame);
+    /** @brief Sends a message to the channel; waits delay seconds
+        before sending*/
+    void sendDelayedDown(AirFrame *msg, double);
 
-  /** @brief Unbuffers a message after 'transmission time'*/
-  AirFrame* unbufferMsg(cMessage *msg);
+    /** @brief Encapsulates a MAC frame into an Air Frame*/
+    AirFrame* encapsMsg(cMessage *msg);
+    /*@}*/
 
-  /** @brief Sends a message to the upper layer*/
-  void sendUp(AirFrame*, SnrList&);
-
-  /** @brief Sends a message to the channel*/
-  void sendDown(AirFrame *msg);
-
-  /** @brief Sends a message to the upper layer; waits delay seconds
-      before sending*/
-  void sendDelayedUp(AirFrame*, double, SnrList&);
-
-  /** @brief Sends a message to the channel; waits delay seconds
-      before sending*/
-  void sendDelayedDown(AirFrame *msg, double);
-
-  /** @brief Encapsulates a MAC frame into an Air Frame*/
-  AirFrame* encapsMsg(cMessage *msg);
-  /*@}*/
-
-  /** @brief This function calculates the duration of the AirFrame */
-  virtual double calcDuration(cMessage*);
+    /** @brief This function calculates the duration of the AirFrame */
+    virtual double calcDuration(cMessage*);
 
     /**
      * @name Abstraction layer
@@ -168,7 +161,7 @@ protected:
     virtual AirFrame* createCapsulePkt() {
         return new AirFrame();
     };
-  /*@}*/
+    /*@}*/
 
 };
 

@@ -36,8 +36,7 @@ class INET_API ErrorHandling: public cSimpleModule
 {
   protected:
     long numReceived;
-  public:
-    Module_Class_Members(ErrorHandling, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

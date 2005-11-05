@@ -38,8 +38,7 @@ class INET_API IPTrafSink : public cSimpleModule
     virtual void printPacket(cMessage *msg);
     virtual void processPacket(cMessage *msg);
 
-  public:
-    Module_Class_Members(IPTrafSink, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
@@ -65,8 +64,7 @@ class INET_API IPTrafGen : public IPTrafSink
     virtual IPvXAddress chooseDestAddr();
     virtual void sendPacket();
 
-  public:
-    Module_Class_Members(IPTrafGen, IPTrafSink, 0);
+  protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

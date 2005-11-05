@@ -43,9 +43,7 @@ class INET_API MPLSModule : public cSimpleModule
         InterfaceTable *ift;
         IClassifier *pct;
 
-    public:
-        Module_Class_Members(MPLSModule, cSimpleModule, 0);
-
+    protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const  {return 5;}
         virtual void handleMessage(cMessage *msg);

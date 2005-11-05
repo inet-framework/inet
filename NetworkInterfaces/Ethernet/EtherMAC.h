@@ -58,8 +58,10 @@ class IPassiveQueue;
  */
 class INET_API EtherMAC : public cSimpleModule
 {
-    Module_Class_Members(EtherMAC,cSimpleModule,0);
+  public:
+    EtherMAC() {} // FIXME ctor
 
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

@@ -31,7 +31,8 @@ class EtherFrame;
  */
 class INET_API MACRelayUnitPP : public MACRelayUnitBase
 {
-    Module_Class_Members(MACRelayUnitPP,MACRelayUnitBase,0)
+  public:
+    MACRelayUnitPP() {} // FIXME ctor
 
   protected:
     // Stores frame buffer, one for each port

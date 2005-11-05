@@ -1,4 +1,4 @@
-/* -*-	mode:c++ -*- *******************************************************
+/* -*-  mode:c++ -*- *******************************************************
  * file:        ErrAndCollDecider.cc
  *
  * author:      Marc Loebbers
@@ -42,8 +42,6 @@
  */
 class INET_API ErrAndCollDecider : public SnrDecider
 {
-    Module_Class_Members( ErrAndCollDecider, SnrDecider, 0 );
-
   protected:
     virtual void handleLowerMsg(AirFrame*, SnrList &);
 };

@@ -1,4 +1,4 @@
-/* -*-	mode:c++ -*- *******************************************************
+/* -*-  mode:c++ -*- *******************************************************
  * file:        SnrDecider.cc
  *
  * author:      Marc Loebbers
@@ -47,8 +47,7 @@ class INET_API SnrDecider : public BasicDecider
      */
     double snrThresholdLevel;
 
-  public:
-    Module_Class_Members( SnrDecider, BasicDecider, 0 );
+  protected:
     virtual void initialize(int);
 
   protected:

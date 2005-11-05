@@ -62,7 +62,8 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     };
 
   public:
-    Module_Class_Members(Mac80211, WirelessMacBase, 0);
+    Mac80211() {} // FIXME ctor
+  protected:
 
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const {return 2;}

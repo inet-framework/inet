@@ -1,5 +1,7 @@
 NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
 
+- NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
+
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
 - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!

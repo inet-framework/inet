@@ -21,22 +21,15 @@
 
 class Dummy : public cSimpleModule
 {
-	public:
-		Module_Class_Members(Dummy, cSimpleModule, 0);
-		
-		//virtual void initialize();
-		virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual void handleMessage(cMessage *msg);
 };
 
 Define_Module(Dummy);
 
-//void Dummy::initialize()
-//{
-//}
-
 void Dummy::handleMessage(cMessage *msg)
 {
-	delete msg;
+    delete msg;
 }
 
 

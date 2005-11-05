@@ -45,27 +45,25 @@
  */
 class INET_API ChannelAccess : public BasicModule
 {
-protected:
-  /** @brief Pointer to the ChannelControl module*/
-  ChannelControl* cc;
+  protected:
+    /** @brief Pointer to the ChannelControl module*/
+    ChannelControl* cc;
 
-  /** @brief Identifies this host in the ChannelControl module*/
-  ChannelControl::HostRef myHostRef;
+    /** @brief Identifies this host in the ChannelControl module*/
+    ChannelControl::HostRef myHostRef;
 
-protected:
-  /** @brief Sends a message to all hosts in range, after delay seconds*/
-  void sendToChannel(cMessage *msg, double delay);
+  protected:
+    /** @brief Sends a message to all hosts in range, after delay seconds*/
+    void sendToChannel(cMessage *msg, double delay);
 
-  /** @brief Returns the host's position*/
-  const Coord& myPosition() {return cc->getHostPosition(myHostRef);}
+    /** @brief Returns the host's position*/
+    const Coord& myPosition() {return cc->getHostPosition(myHostRef);}
 
-public:
-  Module_Class_Members( ChannelAccess, BasicModule, 0 );
+  protected:
+    /** @brief Register with ChannelControl and subscribe to hostPos*/
+    virtual void initialize(int stage);
 
-  /** @brief Register with ChannelControl and subscribe to hostPos*/
-  virtual void initialize(int stage);
-
-  virtual int numInitStages() const {return 3;}
+    virtual int numInitStages() const {return 3;}
 };
 
 #endif

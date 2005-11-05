@@ -49,8 +49,10 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         typedef IPv6NeighbourCache::Key Key;//for convenience
         typedef IPv6NeighbourCache::Neighbour Neighbour;  // for convenience
 
-        Module_Class_Members(IPv6NeighbourDiscovery, cSimpleModule, 0);
+    public:
+        IPv6NeighbourDiscovery() {} // FIXME ctor
 
+    public:
         /**
          * Public method, to be invoked from the IPv6 module to determine
          * link-layer address and the output interface of the next hop.
@@ -79,7 +81,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          * running.
          */
         void reachabilityConfirmed(const IPv6Address& neighbour, int interfaceId);
-        
+
     protected:
 
         //Packets awaiting Address Resolution or Next-Hop Determination.
@@ -223,7 +225,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  target address set as this node's tentative link-local address.
          */
         void initiateDAD(const IPv6Address& tentativeAddr, InterfaceEntry *ie);
-        
+
         /**
          *  Sends a scheduled DAD NS packet. If number of sends is equals or more
          *  than dupAddrDetectTransmits, then permantly assign target link local

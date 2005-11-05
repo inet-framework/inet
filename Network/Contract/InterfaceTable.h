@@ -61,8 +61,9 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     void updateDisplayString();
 
   public:
-    Module_Class_Members(InterfaceTable, cSimpleModule, 0);
+    InterfaceTable() {} // FIXME ctor
 
+  protected:
     int numInitStages() const {return 2;}
     void initialize(int stage);
 
@@ -71,6 +72,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      */
     void handleMessage(cMessage *);
 
+  public:
     /**
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.

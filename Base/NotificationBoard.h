@@ -62,10 +62,7 @@ class INET_API NotificationBoard : public cSimpleModule
   protected:
     ClientMap clientMap;
 
-  public:
-    Module_Class_Members(NotificationBoard, cSimpleModule, 0);
-    virtual ~NotificationBoard();
-
+  protected:
     /**
      * Initialize.
      */
@@ -76,6 +73,7 @@ class INET_API NotificationBoard : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
 
+  public:
     /** @name Methods for consumers of change notifications */
     //@{
     /**
@@ -106,8 +104,8 @@ class INET_API NotificationBoard : public cSimpleModule
  */
 class INET_API NotificationBoardAccess : public ModuleAccess<NotificationBoard>
 {
-    public:
-        NotificationBoardAccess() : ModuleAccess<NotificationBoard>("notificationBoard") {}
+  public:
+    NotificationBoardAccess() : ModuleAccess<NotificationBoard>("notificationBoard") {}
 };
 
 #endif

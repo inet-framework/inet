@@ -44,9 +44,7 @@ class INET_API EtherEncap : public cSimpleModule
     long totalFromMAC;          // total number of frames received from MAC
     long totalPauseSent;        // total number of PAUSE frames sent
 
-  public:
-    Module_Class_Members(EtherEncap,cSimpleModule,0);
-
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

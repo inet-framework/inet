@@ -63,8 +63,9 @@ class INET_API ScenarioManager : public cSimpleModule
     void processModuleSpecificCommand(cXMLElement *node);
 
   public:
-    Module_Class_Members(ScenarioManager, cSimpleModule, 0);
-    virtual ~ScenarioManager() {}
+    ScenarioManager() {}
+
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     void updateDisplayString();

@@ -42,9 +42,7 @@ class INET_API EtherAppSrv : public cSimpleModule
     cOutVector eedVector;
     cStdDev eedStats;
 
-  public:
-    Module_Class_Members(EtherAppSrv,cSimpleModule,0);
-
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

@@ -37,14 +37,12 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     const BonnMotionFile::Line *vecp;
     int vecpos;
 
-  public:
-    Module_Class_Members(BonnMotionMobility, LineSegmentsMobilityBase, 0);
-    ~BonnMotionMobility();
+  protected:
+    virtual ~BonnMotionMobility();
 
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 
-  protected:
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void setTargetPosition();
 

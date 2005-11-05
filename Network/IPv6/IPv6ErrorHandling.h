@@ -36,10 +36,10 @@
 // FIXME is such thing needed at all???
 class INET_API IPv6ErrorHandling: public cSimpleModule
 {
-  public:
-    Module_Class_Members(IPv6ErrorHandling, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+
   private:
     void displayType1Msg(int code);
     void displayType2Msg();

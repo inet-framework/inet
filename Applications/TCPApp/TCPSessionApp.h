@@ -45,8 +45,7 @@ class INET_API TCPSessionApp : public cSimpleModule
     void waitUntil(simtime_t t);
     void count(cMessage *msg);
 
-  public:
-    Module_Class_Members(TCPSessionApp, cSimpleModule, 16384);
+  protected:
     virtual void activity();
     virtual void finish();
 };

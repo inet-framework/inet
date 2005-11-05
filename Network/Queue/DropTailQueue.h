@@ -38,9 +38,8 @@ class INET_API DropTailQueue : public PassiveQueueBase
     // statistics
     cOutVector qlenVec;
     cOutVector dropVec;
- 
-  public:
-    Module_Class_Members(DropTailQueue, PassiveQueueBase, 0);
+
+  protected:
     virtual void initialize();
 
     /**

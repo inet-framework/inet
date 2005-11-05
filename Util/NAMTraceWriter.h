@@ -44,10 +44,7 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
     void recordLinkEvent(InterfaceEntry *ie, char *state);
     void recordPacketEvent(const char event, int peernamid, cMessage *msg);
 
-  public:
-    Module_Class_Members(NAMTraceWriter, cSimpleModule, 0);
-    virtual ~NAMTraceWriter();
-
+  protected:
     virtual int numInitStages() const {return 3;}
     virtual void initialize(int stage);
 

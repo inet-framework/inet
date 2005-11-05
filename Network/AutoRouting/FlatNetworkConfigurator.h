@@ -32,10 +32,8 @@
  */
 class INET_API FlatNetworkConfigurator : public cSimpleModule
 {
-    typedef std::vector<std::string> StringVector;
   public:
-    Module_Class_Members(FlatNetworkConfigurator, cSimpleModule, 0);
-
+    typedef std::vector<std::string> StringVector;
   protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);

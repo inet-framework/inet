@@ -48,8 +48,7 @@ class INET_API UDPBasicApp : public UDPAppBase
     virtual void sendPacket();
     virtual void processPacket(cMessage *msg);
 
-  public:
-    Module_Class_Members(UDPBasicApp, UDPAppBase, 0);
+  protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

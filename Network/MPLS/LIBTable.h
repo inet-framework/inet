@@ -63,17 +63,18 @@ class INET_API LIBTable: public cSimpleModule
         std::vector<LIBEntry> lib;
 
     public:
-        Module_Class_Members(LIBTable, cSimpleModule, 0);
+        LIBTable() {} // FIXME ctor
+
+    protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const  {return 5;}
         void handleMessage(cMessage *msg);
 
         // static configuration
-
         void readTableFromXML(const cXMLElement* libtable);
 
+    public:
         // label management
-
         bool resolveLabel(std::string inInterface, int inLabel,
                           LabelOpVector& outLabel, std::string& outInterface, int& color);
 

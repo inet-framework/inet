@@ -42,13 +42,10 @@ class INET_API RectangleMobility : public BasicMobility
     double d;  ///< distance from (x1,y1), measured clockwise on the perimeter
     double corner1, corner2, corner3, corner4;
 
-  public:
-    Module_Class_Members( RectangleMobility, BasicMobility, 0 );
-
+  protected:
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int);
 
-  protected:
     /** @brief Called upon arrival of a self messages */
     virtual void handleSelfMsg(cMessage *msg);
 

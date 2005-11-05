@@ -28,9 +28,7 @@
  */
 class INET_API FailureManager : public cSimpleModule, public IScriptable
 {
-  public:
-    Module_Class_Members(FailureManager, cSimpleModule, 0);
-    virtual ~FailureManager() {}
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 

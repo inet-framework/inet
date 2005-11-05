@@ -31,9 +31,7 @@
  */
 class INET_API Mgmt80211 : public cSimpleModule, public INotifiable
 {
-  public:
-    Module_Class_Members(Mgmt80211, cSimpleModule, 0);
-
+  protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 

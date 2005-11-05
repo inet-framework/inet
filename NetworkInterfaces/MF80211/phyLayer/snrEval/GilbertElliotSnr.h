@@ -45,42 +45,40 @@
  */
 class INET_API GilbertElliotSnr : public SnrEval
 {
-  Module_Class_Members( GilbertElliotSnr, SnrEval, 0 );
+  public:
+    GilbertElliotSnr() {} // FIXME ctor
 
- public:
-  /** @brief Initialize variables and publish the radio status*/
-  virtual void initialize(int);
+  protected:
+    /** @brief Initialize variables and publish the radio status*/
+    virtual void initialize(int);
 
- protected:
+    /** @brief Handle timers*/
+    virtual void handleSelfMsg(cMessage*);
 
-  /** @brief Handle timers*/
-  virtual void handleSelfMsg(cMessage*);
+    /** @brief Buffer the frame and update noise levels and snr information...*/
+    virtual void handleLowerMsgStart(AirFrame*);
 
-  /** @brief Buffer the frame and update noise levels and snr information...*/
-  virtual void handleLowerMsgStart(AirFrame*);
+    /** @brief Unbuffer the frame and update noise levels and snr information*/
+    virtual void handleLowerMsgEnd(AirFrame*);
 
-  /** @brief Unbuffer the frame and update noise levels and snr information*/
-  virtual void handleLowerMsgEnd(AirFrame*);
+  protected:
+    /** @brief Gilbert-Elliot state types*/
+    enum State{
+      GOOD,
+      BAD
+    };
 
- protected:
+    /** @brief System state*/
+    State state;
 
-  /** @brief Gilbert-Elliot state types*/
-  enum State{
-    GOOD,
-    BAD
-  };
+    /** @brief mean value to compute the time the xystem stays in the GOOD state*/
+    double meanGood;
 
-  /** @brief System state*/
-  State state;
+    /** @brief mean value to compute the time the xystem stays in the BAD state*/
+    double meanBad;
 
-  /** @brief mean value to compute the time the xystem stays in the GOOD state*/
-  double meanGood;
-
-  /** @brief mean value to compute the time the xystem stays in the BAD state*/
-  double meanBad;
-
-  /** @brief timer to indicate a change of state*/
-  cMessage* stateChange;
+    /** @brief timer to indicate a change of state*/
+    cMessage* stateChange;
 };
 
 #endif

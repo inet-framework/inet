@@ -58,6 +58,7 @@ class INET_API PPP : public cSimpleModule
     long numBitErr;
     long numDroppedIfaceDown;
 
+  protected:
     InterfaceEntry *registerInterface(double datarate);
     void startTransmitting(cMessage *msg);
     PPPFrame *encapsulate(cMessage *msg);
@@ -67,8 +68,10 @@ class INET_API PPP : public cSimpleModule
     void updateDisplayString();
 
   public:
-    Module_Class_Members(PPP, cSimpleModule, 0);
+    PPP();
+    virtual ~PPP();
 
+  protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

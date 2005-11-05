@@ -43,11 +43,10 @@ class OSPFRouting :  public cSimpleModule
     bool    LoadConfigFromXML (const char * filename);
 
   public:
-    Module_Class_Members(OSPFRouting, cSimpleModule, 0);
-
+    OSPFRouting() {} // FIXME ctor
     virtual ~OSPFRouting (void);
 
-    /** Returns 3 - this module needs 3 stages for complete initialization. */
+  protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

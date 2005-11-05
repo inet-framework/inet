@@ -31,8 +31,7 @@ class PingPayload;
  */
 class INET_API PingApp : public cSimpleModule
 {
-  public:
-    Module_Class_Members(PingApp, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

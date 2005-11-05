@@ -40,7 +40,7 @@ class INET_API QueueWithQoS : public AbstractQueue
     EnqueueHook *qosHook;
 
   public:
-    Module_Class_Members(QueueWithQoS, AbstractQueue, 0);
+    QueueWithQoS() {}
 
   protected:
     virtual void initialize();

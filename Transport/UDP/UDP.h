@@ -76,8 +76,7 @@ class INET_API UDP : public cSimpleModule
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);
 
-  public:
-    Module_Class_Members(UDP, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

@@ -30,7 +30,8 @@ class EtherFrame;
  */
 class INET_API MACRelayUnitNP : public MACRelayUnitBase
 {
-    Module_Class_Members(MACRelayUnitNP,MACRelayUnitBase,0);
+  public:
+    MACRelayUnitNP() {} // FIXME ctor
 
   protected:
     // the shared queue

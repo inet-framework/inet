@@ -33,7 +33,7 @@ class INET_API QueueBase : public AbstractQueue
     simtime_t delay;
 
   public:
-    Module_Class_Members(QueueBase, AbstractQueue, 0);
+    QueueBase() {}
 
   protected:
     virtual void initialize();

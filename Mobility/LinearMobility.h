@@ -39,9 +39,7 @@ class INET_API LinearMobility : public BasicMobility
     double updateInterval; ///< time interval to update the hosts position
     bool stationary;       ///< if true, the host doesn't move
 
-  public:
-    Module_Class_Members( LinearMobility, BasicMobility, 0 );
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

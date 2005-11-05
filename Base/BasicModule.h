@@ -72,9 +72,7 @@ class INET_API BasicModule: public cSimpleModule, public INotifiable
     /** @brief Function to get the logging name of id*/
     const char* getLogName(int);
 
-  public:
-    Module_Class_Members( BasicModule, cSimpleModule, 0);
-
+  protected:
     /** @brief Basic initialization for all modules */
     virtual void initialize(int);
 
@@ -87,9 +85,7 @@ class INET_API BasicModule: public cSimpleModule, public INotifiable
      * should take place earliest in the second stage (stage==1),
      * when everyone interested in them has already subscribed.
      */
-    virtual int numInitStages() const {
-      return 2;
-    }
+    virtual int numInitStages() const {return 2;}
 
     /**
      * @brief Function to get the logging name of the host

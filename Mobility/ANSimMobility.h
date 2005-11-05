@@ -39,9 +39,7 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
     // state
     cXMLElement *nextPosChange; ///< points to the next \<position_change> element
 
-  public:
-    Module_Class_Members(ANSimMobility, LineSegmentsMobilityBase, 0);
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

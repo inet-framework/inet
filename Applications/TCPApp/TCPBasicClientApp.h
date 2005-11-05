@@ -31,7 +31,8 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     void sendRequest();
 
   public:
-    Module_Class_Members(TCPBasicClientApp, TCPGenericCliAppBase, 0);
+    TCPBasicClientApp() {} // FIXME ctor
+  protected:
 
     /** Redefined to schedule a connect(). */
     virtual void initialize();

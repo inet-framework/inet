@@ -126,7 +126,7 @@ class INET_API IP : public QueueBase
     virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
 
   public:
-    Module_Class_Members(IP, QueueBase, 0);
+    IP() {}
 
   protected:
     /**

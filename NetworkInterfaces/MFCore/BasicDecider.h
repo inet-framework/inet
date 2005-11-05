@@ -56,67 +56,64 @@
  */
 class INET_API BasicDecider : public BasicModule
 {
-  Module_Class_Members(BasicDecider,BasicModule,0);
+  protected:
+    /** @brief gate id*/
+    /*@{*/
+    int uppergateOut;
+    int lowergateIn;
+    /*@}*/
 
- protected:
-  /** @brief gate id*/
-  /*@{*/
-  int uppergateOut;
-  int lowergateIn;
-  /*@}*/
+    /** @brief statistics*/
+    /*@{*/
+    unsigned long numRcvd;
+    unsigned long numSentUp;
+    /*@}*/
 
-  /** @brief statistics*/
-  /*@{*/
-  unsigned long numRcvd;
-  unsigned long numSentUp;
-  /*@}*/
+  public:
+    /** @brief Initialization of the module and some variables*/
+    virtual void initialize(int);
 
+    /** @brief Called every time a message arrives*/
+    void handleMessage( cMessage* );
 
- public:
-  /** @brief Initialization of the module and some variables*/
-  virtual void initialize(int);
+   protected:
+    /**
+     * @name Handle Messages
+     * @brief Functions to redefine by the programmer
+     */
+    /*@{*/
 
-  /** @brief Called every time a message arrives*/
-  void handleMessage( cMessage* );
+    /**
+     * @brief Handle self messages such as timer...
+     *
+     * Define this function if you want to timer or other kinds of self
+     * messages
+     */
+    virtual void handleSelfMsg(cMessage *msg){delete msg;};
 
- protected:
-  /**
-   * @name Handle Messages
-   * @brief Functions to redefine by the programmer
-   */
-  /*@{*/
+    /**
+     * @brief In this function the decision whether a frame is received
+     * correctly or not is made.
+     */
+    virtual void  handleLowerMsg(AirFrame*, SnrList&);
 
-  /**
-   * @brief Handle self messages such as timer...
-   *
-   * Define this function if you want to timer or other kinds of self
-   * messages
-   */
-  virtual void handleSelfMsg(cMessage *msg){delete msg;};
+    /*@}*/
 
-  /**
-   * @brief In this function the decision whether a frame is received
-   * correctly or not is made.
-   */
-  virtual void  handleLowerMsg(AirFrame*, SnrList&);
-
-  /*@}*/
-
-  /**
-   * @name Convenience Functions
-   * @brief Functions for convenience - NOT to be modified
-   *
-   * These are functions taking care of message encapsulation and
-   * message sending. Normally you should not need to alter these but
-   * should use them to handle message encasulation and sending. They
-   * will wirte all necessary information into packet headers and add
-   * or strip the appropriate headers for each layer.
-   *
-   */
-  /*@{*/
-  /** @brief Sends a message to the upper layer*/
-  void sendUp(AirFrame*);
-  /*@}*/
+    /**
+     * @name Convenience Functions
+     * @brief Functions for convenience - NOT to be modified
+     *
+     * These are functions taking care of message encapsulation and
+     * message sending. Normally you should not need to alter these but
+     * should use them to handle message encasulation and sending. They
+     * will wirte all necessary information into packet headers and add
+     * or strip the appropriate headers for each layer.
+     *
+     */
+    /*@{*/
+    /** @brief Sends a message to the upper layer*/
+    void sendUp(AirFrame*);
+    /*@}*/
 
 };
 #endif

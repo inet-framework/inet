@@ -30,6 +30,16 @@
 
 Define_Module(PPP);
 
+PPP::PPP()
+{
+    endTransmissionEvent = NULL;
+}
+
+PPP::~PPP()
+{
+    cancelAndDelete(endTransmissionEvent);
+}
+
 void PPP::initialize(int stage)
 {
     if (stage==3)

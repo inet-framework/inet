@@ -170,8 +170,9 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     void announceLinkChange(IPAddress advrouter, IPAddress linkid);
 
   public:
-    Module_Class_Members(LDP, cSimpleModule, 0);
+    LDP() {} // FIXME ctor
 
+  protected:
     virtual int numInitStages() const  {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

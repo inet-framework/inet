@@ -41,51 +41,42 @@
  */
 class INET_API Decider80211 : public BasicDecider
 {
-  Module_Class_Members(Decider80211, BasicDecider,0);
+  protected:
+    /** @brief Initialization of the module and some variables*/
+    virtual void initialize(int);
 
+    /**
+     * @brief In this function the decision whether a frame is received
+     * correctly or not is made.
+     */
+    virtual void  handleLowerMsg(AirFrame*, SnrList&);
 
+    /** @brief converts a dB value into a normal fraction*/
+    double dB2fraction(double);
 
- protected:
-
-
- public:
-  /** @brief Initialization of the module and some variables*/
-  virtual void initialize(int);
-
-
- protected:
-  /**
-   * @brief In this function the decision whether a frame is received
-   * correctly or not is made.
-   */
-  virtual void  handleLowerMsg(AirFrame*, SnrList&);
-
-  /** @brief converts a dB value into a normal fraction*/
-  double dB2fraction(double);
-
-  /** @brief computes if packet is ok or has errors*/
-  bool packetOk(double, int);
+    /** @brief computes if packet is ok or has errors*/
+    bool packetOk(double, int);
 
 #ifdef _WIN32
-  /**
-   * @brief Implementation of the error function
-   *
-   * Unfortunately the windows math library does not provide an
-   * implementation of the error function, so we use an own
-   * implementation (Thanks to Jirka Klaue)
-   *
-   * @author Jirka Klaue
-   */
-  double erfc(double);
+    /**
+     * @brief Implementation of the error function
+     *
+     * Unfortunately the windows math library does not provide an
+     * implementation of the error function, so we use an own
+     * implementation (Thanks to Jirka Klaue)
+     *
+     * @author Jirka Klaue
+     */
+    double erfc(double);
 #endif
 
- protected:
-  /** @brief should be set in the omnetpp.ini*/
-  double bitrate;
-  /** @brief should be set in the omnetpp.ini; everthing below this
-     threshold can't be read and is therefor considered as a
-     collision*/
-  double snirThreshold;
+  protected:
+    /** @brief should be set in the omnetpp.ini*/
+    double bitrate;
+    /** @brief should be set in the omnetpp.ini; everthing below this
+       threshold can't be read and is therefor considered as a
+       collision*/
+    double snirThreshold;
 
 };
 #endif

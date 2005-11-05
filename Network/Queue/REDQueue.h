@@ -48,8 +48,7 @@ class INET_API REDQueue : public PassiveQueueBase
     cOutVector dropVec;
     long numEarlyDrops;
 
-  public:
-    Module_Class_Members(REDQueue, PassiveQueueBase, 0);
+  protected:
     virtual void initialize();
     virtual void finish();
 

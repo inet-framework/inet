@@ -33,14 +33,14 @@ class INET_API TCPSrvHostApp : public cSimpleModule
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
 
-    void updateDisplay();
-
-  public:
-    Module_Class_Members(TCPSrvHostApp, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+    void updateDisplay();
+
+  public:
     void removeThread(TCPServerThreadBase *thread);
 };
 

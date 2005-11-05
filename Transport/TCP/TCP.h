@@ -154,12 +154,15 @@ class INET_API TCP : public cSimpleModule
     bool recordStatistics;  // output vectors on/off
 
   public:
-    Module_Class_Members(TCP, cSimpleModule, 0);
+    TCP() {} // FIXME ctor
     virtual ~TCP();
+
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+  public:
     /**
      * To be called from TCPConnection when a new connection gets created,
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.

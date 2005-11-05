@@ -45,9 +45,7 @@ class INET_API EtherLLC : public cSimpleModule
     long totalPassedUp;         // total number of packets passed up to higher layer
     long droppedUnknownDSAP;    // frames dropped because no such DSAP was registered here
 
-  public:
-    Module_Class_Members(EtherLLC,cSimpleModule,0);
-
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

@@ -27,7 +27,7 @@
 
 
 /**
- * A copy of UDPBasicApp, just for testing. 
+ * A copy of UDPBasicApp, just for testing.
  * NOTE that this class is NOT declared INET_API!
  */
 class SomeUDPApp : public UDPAppBase
@@ -48,8 +48,7 @@ class SomeUDPApp : public UDPAppBase
     virtual void sendPacket();
     virtual void processPacket(cMessage *msg);
 
-  public:
-    Module_Class_Members(SomeUDPApp, UDPAppBase, 0);
+  protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

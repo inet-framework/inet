@@ -29,7 +29,8 @@
 class INET_API AbstractQueue : public cSimpleModule
 {
   public:
-    Module_Class_Members(AbstractQueue,cSimpleModule,0);
+    AbstractQueue();
+    virtual ~AbstractQueue();
 
   private:
     cMessage *msgServiced;

@@ -39,9 +39,7 @@
  */
 class INET_API SnrEval80211 : public SnrEval
 {
-  public:
-    Module_Class_Members( SnrEval80211, SnrEval, 0 );
-
+  protected:
     /** @brief Some extra parameters have to be read in */
     virtual void initialize(int);
 

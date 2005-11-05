@@ -34,9 +34,7 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
   protected:
     bool nextMoveIsWait;
 
-  public:
-    Module_Class_Members(RandomWPMobility, LineSegmentsMobilityBase, 0);
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

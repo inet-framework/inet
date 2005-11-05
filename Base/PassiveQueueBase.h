@@ -40,8 +40,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int numReceived;
     int numDropped;
 
-  public:
-    Module_Class_Members(PassiveQueueBase, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

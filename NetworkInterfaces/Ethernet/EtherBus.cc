@@ -45,8 +45,10 @@ struct BusTap
  */
 class INET_API EtherBus : public cSimpleModule
 {
-    Module_Class_Members(EtherBus,cSimpleModule,0);
+  public:
+    EtherBus() {} // FIXME ctor
 
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
     virtual void finish();
@@ -54,7 +56,7 @@ class INET_API EtherBus : public cSimpleModule
     // tokenize string containing space-separated numbers into the array
     void tokenize(const char *str, std::vector<double>& array);
 
-private:
+  private:
     double  propagationSpeed;  // propagation speed of electrical signals through copper
 
     BusTap *tap;  // physical locations of where the hosts is connected to the bus

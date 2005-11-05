@@ -39,9 +39,7 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     int bytesSent;
     int bytesRcvd;
 
-  public:
-    Module_Class_Members(TCPGenericCliAppBase, cSimpleModule, 0);
-
+  protected:
     /**
      * Initialization. Should be redefined to perform or schedule a connect().
      */

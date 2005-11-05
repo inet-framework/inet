@@ -55,8 +55,7 @@ class INET_API ThruputMeter : public cSimpleModule
     void updateStats(simtime_t now, unsigned long bits);
     void beginNewInterval(simtime_t now);
 
-  public:
-    Module_Class_Members(ThruputMeter, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

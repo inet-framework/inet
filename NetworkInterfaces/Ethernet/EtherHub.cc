@@ -32,8 +32,7 @@
  */
 class INET_API EtherHub : public cSimpleModule
 {
-    Module_Class_Members(EtherHub,cSimpleModule,0);
-
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage*);
     virtual void finish();

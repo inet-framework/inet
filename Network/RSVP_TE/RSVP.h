@@ -274,8 +274,9 @@ private:
     int getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender);
 
  public:
-    Module_Class_Members(RSVP, cSimpleModule, 0);
+    RSVP() {} // FIXME ctor
 
+ protected:
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

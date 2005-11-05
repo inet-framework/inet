@@ -75,14 +75,16 @@ class INET_API ChannelControl : public cSimpleModule
 
   public:
     /** @brief Constructor */
-    Module_Class_Members(ChannelControl, cSimpleModule, 0);
+    ChannelControl() {} // FIXME ctor
 
     /** @brief Destructor*/
     virtual ~ChannelControl() {}
 
+  protected:
     /** @brief Reads init parameters and calculates a maximal interference distance*/
     virtual void initialize();
 
+  public:
     /** @brief Registers the given host */
     HostRef registerHost(cModule *host, const Coord& initialPos);
 

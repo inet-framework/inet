@@ -44,12 +44,15 @@ class INET_API NAMTrace : public cSimpleModule
     std::map<int,int> modid2namid;
 
   public:
-    Module_Class_Members(NAMTrace, cSimpleModule, 0);
+    NAMTrace() {} // FIXME ctor
     virtual ~NAMTrace() {}
+
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+  public:
     /**
      * Assign a nam ID to the given module (host or router).
      * -1 means auto-assigned ID.

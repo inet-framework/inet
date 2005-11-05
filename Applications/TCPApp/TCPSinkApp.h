@@ -28,8 +28,7 @@ class INET_API TCPSinkApp : public cSimpleModule
   protected:
     long bytesRcvd;
 
-  public:
-    Module_Class_Members(TCPSinkApp, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

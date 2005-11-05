@@ -43,9 +43,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     BorderPolicy borderPolicy;
     std::stack<long> loopVars; // for <repeat>
 
-  public:
-    Module_Class_Members(TurtleMobility, LineSegmentsMobilityBase, 0);
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

@@ -118,7 +118,7 @@ class INET_API IPv6 : public QueueBase
     virtual void sendDatagramToOutput(IPv6Datagram *datagram, int outputGateIndex, const MACAddress& macAddr);
 
   public:
-    Module_Class_Members(IPv6, QueueBase, 0);
+    IPv6() {}
 
   protected:
     /**

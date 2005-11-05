@@ -39,7 +39,9 @@ class INET_API DropTailQoSQueue : public PassiveQueueBase
     IQoSClassifier *classifier;
 
   public:
-    Module_Class_Members(DropTailQoSQueue, PassiveQueueBase, 0);
+    DropTailQoSQueue() {} // FIXME ctor
+
+  protected:
     virtual void initialize();
 
     /**

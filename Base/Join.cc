@@ -24,8 +24,7 @@ class INET_API Join : public cSimpleModule
 {
   protected:
     cGate *outg;
-  public:
-    Module_Class_Members(Join,cSimpleModule,0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

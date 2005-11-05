@@ -72,9 +72,7 @@ class INET_API BasicMobility : public BasicModule
     /** @brief Stores the actual position of the host*/
     Coord pos;
 
-  public:
-    Module_Class_Members( BasicMobility , BasicModule , 0 );
-
+  protected:
     /** @brief This modules should only receive self-messages*/
     void handleMessage(cMessage *msg);
 
@@ -133,7 +131,6 @@ class INET_API BasicMobility : public BasicModule
      * placeRandomlyIfOutside(), depending on the given border policy.
      */
     void handleIfOutside(BorderPolicy policy, Coord& targetPos, Coord& step, double& angle);
-
 
 };
 

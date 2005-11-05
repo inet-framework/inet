@@ -35,23 +35,21 @@
  */
 class INET_API UDPVideoStreamCli : public UDPAppBase
 {
-public:
-  Module_Class_Members(UDPVideoStreamCli, UDPAppBase, 0);
+  protected:
+    ///@name Overridden cSimpleModule functions
+    //@{
+    virtual void initialize();
+    virtual void finish();
+    virtual void handleMessage(cMessage* msg);
+    //@}
 
-  ///@name Overidden cSimpleModule functions
-  //@{
-  virtual void initialize();
-  virtual void finish();
-  virtual void handleMessage(cMessage* msg);
-  //@}
+  protected:
+    void requestStream();
+    void receiveStream(cMessage* msg);
 
-protected:
-  void requestStream();
-  void receiveStream(cMessage* msg);
-
-private:
-  // statistics
-  cOutVector eed;
+  private:
+    // statistics
+    cOutVector eed;
 };
 
 

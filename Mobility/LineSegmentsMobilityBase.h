@@ -46,8 +46,6 @@ class INET_API LineSegmentsMobilityBase : public BasicMobility
     bool stationary;    ///< if set to true, host won't move
 
   protected:
-    Module_Class_Members(LineSegmentsMobilityBase, BasicMobility, 0);
-
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 

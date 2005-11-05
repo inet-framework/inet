@@ -39,8 +39,7 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
     void sendBack(cMessage *msg);
     void sendOrSchedule(cMessage *msg, simtime_t delay);
 
-  public:
-    Module_Class_Members(TCPGenericSrvApp, cSimpleModule, 0);
+  protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();

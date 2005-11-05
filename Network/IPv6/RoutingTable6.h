@@ -143,8 +143,9 @@ class INET_API RoutingTable6 : public cSimpleModule
     void updateDisplayString();
 
   public:
-    Module_Class_Members(RoutingTable6, cSimpleModule, 0);
+    RoutingTable6() {} // FIXME ctor
 
+  protected:
     int numInitStages() const  {return 5;}
     void initialize(int stage);
 
@@ -153,6 +154,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      */
     void handleMessage(cMessage *);
 
+  public:
     /** @name Interfaces */
     //@{
     /**
@@ -192,7 +194,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      * the resulting route, or NULL if there was no match.
      */
     const IPv6Route *doLongestPrefixMatch(const IPv6Address& dest);
-    
+
     /**
      * Checks if the given prefix already exists in the routing table (prefix list)
      */

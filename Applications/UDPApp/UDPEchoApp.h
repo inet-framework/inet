@@ -33,8 +33,8 @@ class UDPEchoApp : public UDPBasicApp
   protected:
     virtual cMessage *createPacket();
     virtual void processPacket(cMessage *msg);
-  public:
-    Module_Class_Members(UDPEchoApp, UDPBasicApp, 0);
+
+  protected:
     virtual void initialize(int stage);
     virtual void finish();
 };

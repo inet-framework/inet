@@ -58,13 +58,10 @@ class INET_API ConstSpeedMobility : public BasicMobility
     int step;
     /*@}*/
 
-  public:
-    Module_Class_Members( ConstSpeedMobility, BasicMobility, 0 );
-
+  protected:
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
 
-  protected:
     /** @brief Called upon arrival of a self messages*/
     virtual void handleSelfMsg(cMessage *msg);
 

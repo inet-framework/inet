@@ -37,8 +37,7 @@ class NotificationBoard;
  */
 class INET_API WirelessMacBase : public cSimpleModule
 {
-   protected:
-
+  protected:
     /** @brief gate id*/
     //@{
     int uppergateIn;
@@ -50,9 +49,7 @@ class INET_API WirelessMacBase : public cSimpleModule
     /** @brief Cached pointer to the NotificationBoard module*/
     NotificationBoard *nb;
 
-   public:
-    Module_Class_Members(WirelessMacBase, cSimpleModule, 0);
-
+  protected:
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
 
@@ -86,3 +83,4 @@ class INET_API WirelessMacBase : public cSimpleModule
 };
 
 #endif
+

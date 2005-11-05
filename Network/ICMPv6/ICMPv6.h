@@ -34,8 +34,6 @@
 class INET_API ICMPv6 : public cSimpleModule
 {
   public:
-    Module_Class_Members(ICMPv6, cSimpleModule, 0);
-
     /**
      *  This method can be called from other modules to send an ICMPv6 error packet.
      *  RFC 2463, Section 3: ICMPv6 Error Messages
@@ -54,7 +52,7 @@ class INET_API ICMPv6 : public cSimpleModule
   protected:
     // internal helper functions
     void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
-    
+
     ICMPv6Message *createDestUnreachableMsg(int code);
     ICMPv6Message *createPacketTooBigMsg(int mtu);
     ICMPv6Message *createTimeExceededMsg(int code);
@@ -77,7 +75,7 @@ class INET_API ICMPv6 : public cSimpleModule
      * Validate the received IPv6 datagram before responding with error message.
      */
     bool validateDatagramPromptingError(IPv6Datagram *datagram);
-    
+
     virtual void errorOut(ICMPv6Message *);
 };
 

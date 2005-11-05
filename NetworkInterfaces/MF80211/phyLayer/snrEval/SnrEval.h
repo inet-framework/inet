@@ -52,9 +52,7 @@
  */
 class INET_API SnrEval : public BasicSnrEval
 {
-  public:
-    Module_Class_Members( SnrEval, BasicSnrEval, 0 );
-
+  protected:
     /** @brief Initialize variables and publish the radio status*/
     virtual void initialize(int);
 

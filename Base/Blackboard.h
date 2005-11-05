@@ -230,9 +230,10 @@ class INET_API Blackboard : public cSimpleModule
     };
 
   public:
-    Module_Class_Members(Blackboard, cSimpleModule, 0);
+    Blackboard() {} // FIXME ctor
     virtual ~Blackboard();
 
+  protected:
     /**
      * Initialize BB.
      */
@@ -243,6 +244,7 @@ class INET_API Blackboard : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
 
+  public:
     /** @name Methods for publishers */
     //@{
     /**
@@ -327,24 +329,25 @@ typedef Blackboard::BBItemRef BBItemRef;
  */
 class INET_API BlackboardAccess
 {
-protected:
-  Blackboard *bb;
-public:
-  BlackboardAccess() {bb=NULL;}
-  virtual ~BlackboardAccess() {}
+  protected:
+    Blackboard *bb;
 
-  /** Returns a pointer to the Blackboard*/
-  Blackboard *blackboard();
+  public:
+    BlackboardAccess() {bb=NULL;}
+    virtual ~BlackboardAccess() {}
 
-  /** @name Callbacks invoked by the blackboard */
-  //@{
-  /** Called whenever an already published item changes*/
-  virtual bool blackboardItemChanged(BBItemRef item) = 0;
-  /** Called whenever a new item is published on the Blackboard*/
-  virtual bool blackboardItemPublished(BBItemRef item) = 0;
-  /** Called whenever an item is removed from the Blackboard*/
-  virtual bool blackboardItemWithdrawn(BBItemRef item) = 0;
-  //@}
+    /** Returns a pointer to the Blackboard*/
+    Blackboard *blackboard();
+
+    /** @name Callbacks invoked by the blackboard */
+    //@{
+    /** Called whenever an already published item changes*/
+    virtual bool blackboardItemChanged(BBItemRef item) = 0;
+    /** Called whenever a new item is published on the Blackboard*/
+    virtual bool blackboardItemPublished(BBItemRef item) = 0;
+    /** Called whenever an item is removed from the Blackboard*/
+    virtual bool blackboardItemWithdrawn(BBItemRef item) = 0;
+    //@}
 };
 
 #endif

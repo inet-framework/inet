@@ -41,8 +41,7 @@ class INET_API TcpTestClient : public cSimpleModule
     void parseScript(const char *script);
     std::string makeMsgName();
 
-  public:
-    Module_Class_Members(TcpTestClient, cSimpleModule, 16384);
+  protected:
     virtual void activity();
     virtual void finish();
 };
