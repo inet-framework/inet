@@ -23,6 +23,16 @@
 
 Define_Module(GilbertElliotSnr);
 
+GilbertElliotSnr::GilbertElliotSnr()
+{
+    stateChange = NULL;
+}
+
+GilbertElliotSnr::~GilbertElliotSnr()
+{
+    cancelAndDelete(stateChange);
+}
+
 /**
  * All values not present in the ned file will be read from the
  * ChannelControl module or assigned default values.

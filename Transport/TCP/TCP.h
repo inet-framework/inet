@@ -154,7 +154,7 @@ class INET_API TCP : public cSimpleModule
     bool recordStatistics;  // output vectors on/off
 
   public:
-    TCP() {} // FIXME ctor
+    TCP() {}
     virtual ~TCP();
 
   protected:

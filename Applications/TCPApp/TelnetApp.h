@@ -28,7 +28,8 @@ class INET_API TelnetApp : public TCPGenericCliAppBase
     int numCharsToType; // characters the user will type for current line (command)
 
   public:
-    TelnetApp() {} // FIXME ctor
+    TelnetApp();
+    virtual ~TelnetApp();
 
   protected:
     /** Redefined to schedule a connect(). */

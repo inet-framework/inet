@@ -85,6 +85,21 @@ std::ostream& operator<<(std::ostream& os, const FEC_TLV& a)
     return os;
 }
 
+
+LDP::LDP()
+{
+    sendHelloMsg = NULL;
+}
+
+LDP::~LDP()
+{
+    for (unsigned int i=0; i<myPeers.size(); i++)
+        cancelAndDelete(myPeers[i].timeout);
+
+    cancelAndDelete(sendHelloMsg);
+    socketMap.deleteSockets();
+}
+
 void LDP::initialize(int stage)
 {
     if (stage != 3)

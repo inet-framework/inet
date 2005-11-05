@@ -83,7 +83,7 @@ class INET_API ARP : public cSimpleModule
     RoutingTable *rt;  // for Proxy ARP
 
   public:
-    ARP() {} // FIXME ctor
+    ARP() {}
     ~ARP();
 
   protected:

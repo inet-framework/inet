@@ -28,6 +28,20 @@
 Define_Module(Mac80211);
 
 
+Mac80211::Mac80211()
+{
+    timeout = nav = contention = endTransmission = endSifs = NULL;
+}
+
+Mac80211::~Mac80211()
+{
+    cancelAndDelete(timeout);
+    cancelAndDelete(nav);
+    cancelAndDelete(contention);
+    cancelAndDelete(endTransmission);
+    cancelAndDelete(endSifs);
+}
+
 void Mac80211::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);

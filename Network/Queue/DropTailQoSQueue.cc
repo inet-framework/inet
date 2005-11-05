@@ -23,6 +23,19 @@
 
 Define_Module(DropTailQoSQueue);
 
+DropTailQoSQueue::DropTailQoSQueue()
+{
+    queues = NULL;
+    numQueues = NULL;
+}
+
+DropTailQoSQueue::~DropTailQoSQueue()
+{
+    for (int i=0; i<numQueues; i++)
+        delete queues[i];
+    delete [] queues;
+}
+
 void DropTailQoSQueue::initialize()
 {
     PassiveQueueBase::initialize();

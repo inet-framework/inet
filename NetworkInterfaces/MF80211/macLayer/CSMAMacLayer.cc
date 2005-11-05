@@ -26,10 +26,17 @@
 
 Define_Module(CSMAMacLayer);
 
-/**
- * Initialize the of the omnetpp.ini variables in stage 1. In stage
- * two subscribe to the RadioState.
- */
+
+CSMAMacLayer::CSMAMacLayer()
+{
+    timer = NULL;
+}
+
+CSMAMacLayer::~CSMAMacLayer()
+{
+    cancelAndDelete(timer);
+}
+
 void CSMAMacLayer::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);
@@ -105,8 +112,6 @@ void CSMAMacLayer::registerInterface()
 
 void CSMAMacLayer::finish()
 {
-    if (!timer->isScheduled())
-        delete timer;
 }
 
 
@@ -148,10 +153,10 @@ void CSMAMacLayer::handleUpperMsg(cMessage *msg)
         }
 
         // the queue is not full yet so we can queue the message
-        if ((int) macQueue.size() < queueLength)
+        if (macQueue.length() < queueLength)
         {
             EV << "already transmitting, putting pkt into queue...\n";
-            macQueue.push_back(mac);
+            macQueue.insert(mac);
             return;
         }
         // queue is full, message has to be deleted
@@ -279,11 +284,10 @@ void CSMAMacLayer::receiveChangeNotification(int category, cPolymorphic *details
         // complete and the next one can be taken out of the queue
         if (radioState == RadioState::IDLE && !macQueue.empty() && !timer->isScheduled())
         {
-            timer->setContextPointer(macQueue.front());
+            timer->setContextPointer(macQueue.pop());
             double randomTime = intuniform(0, 10) / 100.0;
             scheduleAt(simTime() + randomTime, timer);
             EV << "taking next pkt out of queue, schedule at " << simTime() + randomTime << endl;
-            macQueue.pop_front();
         }
     }
 }

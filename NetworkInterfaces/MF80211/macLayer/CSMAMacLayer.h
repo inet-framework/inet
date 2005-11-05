@@ -71,8 +71,8 @@
 class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
 {
   public:
-    CSMAMacLayer() {} // FIXME ctor
-    virtual ~CSMAMacLayer() {}
+    CSMAMacLayer();
+    virtual ~CSMAMacLayer();
 
   protected:
     /** @brief Initialization of the module and some variables*/
@@ -108,7 +108,7 @@ class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
 
     /** @brief A queue to store packets from upper layer in case another
     packet is still waiting for transmission..*/
-    std::list<MacPkt*> macQueue;
+    cQueue macQueue;
 
     /** @brief length of the queue*/
     int queueLength;

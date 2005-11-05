@@ -36,6 +36,17 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
     return os;
 };
 
+
+InterfaceTable::InterfaceTable()
+{
+}
+
+InterfaceTable::~InterfaceTable()
+{
+    for (unsigned int i=0; i<interfaces.size(); i++)
+        delete interfaces[i];
+}
+
 void InterfaceTable::initialize(int stage)
 {
     if (stage==0)

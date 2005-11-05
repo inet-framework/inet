@@ -21,6 +21,19 @@
 
 Define_Module(NAMTrace);
 
+NAMTrace::NAMTrace()
+{
+    nams = NULL;
+}
+
+NAMTrace::~NAMTrace()
+{
+    if (nams)
+    {
+        nams->close();
+        delete nams;
+    }
+}
 
 void NAMTrace::initialize()
 {
@@ -55,12 +68,6 @@ void NAMTrace::initialize()
 void NAMTrace::handleMessage(cMessage *msg)
 {
     error("This module doesn't process messages");
-}
-
-void NAMTrace::finish()
-{
-    if (nams)
-        nams->close();
 }
 
 int NAMTrace::assignNamId(cModule *node, int namid)

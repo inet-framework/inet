@@ -73,14 +73,6 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Set up playground module's display string */
     void updateDisplayString(cModule *playgroundMod);
 
-  public:
-    /** @brief Constructor */
-    ChannelControl() {} // FIXME ctor
-
-    /** @brief Destructor*/
-    virtual ~ChannelControl() {}
-
-  protected:
     /** @brief Reads init parameters and calculates a maximal interference distance*/
     virtual void initialize();
 

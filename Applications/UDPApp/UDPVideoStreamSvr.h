@@ -73,7 +73,8 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     void sendStreamData(cMessage *timer);
 
   public:
-    UDPVideoStreamSvr() {} // FIXME ctor
+    UDPVideoStreamSvr();
+    virtual ~UDPVideoStreamSvr();
 
   protected:
     ///@name Overidden cSimpleModule functions

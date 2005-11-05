@@ -31,6 +31,22 @@
 
 Define_Module(IPv6NeighbourDiscovery);
 
+
+IPv6NeighbourDiscovery::IPv6NeighbourDiscovery()
+{
+}
+
+IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
+{
+    // FIXME delete the following data structures, cancelAndDelete timers in them etc.
+    // Deleting the data structures my become unnecessary if the lists store the
+    // structs themselves and not pointers.
+    //   RATimerList raTimerList;
+    //   DADList dadList;
+    //   RDList rdList;
+    //   AdvIfList advIfList;
+}
+
 void IPv6NeighbourDiscovery::initialize(int stage)
 {
     // We have to wait until the 3rd stage (stage 2) with scheduling messages,

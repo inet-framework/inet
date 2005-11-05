@@ -40,6 +40,19 @@ static std::ostream& operator<< (std::ostream& os, cMessage *msg)
 }
 */
 
+MACRelayUnitNP::MACRelayUnitNP()
+{
+    endProcEvents = NULL;
+    numCPUs = 0;
+}
+
+MACRelayUnitNP::~MACRelayUnitNP()
+{
+    for (int i=0; i<numCPUs; i++)
+        cancelAndDelete(endProcEvents[i]);
+    delete [] endProcEvents;
+}
+
 void MACRelayUnitNP::initialize()
 {
     MACRelayUnitBase::initialize();

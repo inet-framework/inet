@@ -59,7 +59,8 @@ class IPassiveQueue;
 class INET_API EtherMAC : public cSimpleModule
 {
   public:
-    EtherMAC() {} // FIXME ctor
+    EtherMAC();
+    virtual ~EtherMAC();
 
   protected:
     virtual void initialize();

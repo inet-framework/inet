@@ -39,6 +39,22 @@ static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
 
 Define_Module( EtherMAC );
 
+EtherMAC::EtherMAC()
+{
+    frameBeingReceived = NULL;
+    endTxMsg = endJammingMsg = endRxMsg = endIFGMsg = endBackoffMsg = endPauseMsg = NULL;
+}
+
+EtherMAC::~EtherMAC()
+{
+    delete frameBeingReceived;
+    cancelAndDelete(endTxMsg);
+    cancelAndDelete(endJammingMsg);
+    cancelAndDelete(endRxMsg);
+    cancelAndDelete(endIFGMsg);
+    cancelAndDelete(endBackoffMsg);
+    cancelAndDelete(endPauseMsg);
+}
 
 void EtherMAC::initialize()
 {

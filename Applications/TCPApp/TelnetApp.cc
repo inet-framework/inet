@@ -22,6 +22,15 @@
 
 Define_Module(TelnetApp);
 
+TelnetApp::TelnetApp()
+{
+    timeoutMsg = NULL;
+}
+
+TelnetApp::~TelnetApp()
+{
+    cancelAndDelete(timeoutMsg);
+}
 
 void TelnetApp::initialize()
 {

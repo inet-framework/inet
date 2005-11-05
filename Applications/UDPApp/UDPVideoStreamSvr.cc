@@ -34,6 +34,15 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
     return out;
 }
 
+UDPVideoStreamSvr::UDPVideoStreamSvr()
+{
+}
+
+UDPVideoStreamSvr::~UDPVideoStreamSvr()
+{
+    for (unsigned int i=0; i<streamVector.size(); i++)
+        delete streamVector[i];
+}
 
 void UDPVideoStreamSvr::initialize()
 {

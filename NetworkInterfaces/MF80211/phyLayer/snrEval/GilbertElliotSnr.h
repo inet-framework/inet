@@ -46,7 +46,8 @@
 class INET_API GilbertElliotSnr : public SnrEval
 {
   public:
-    GilbertElliotSnr() {} // FIXME ctor
+    GilbertElliotSnr();
+    virtual ~GilbertElliotSnr();
 
   protected:
     /** @brief Initialize variables and publish the radio status*/

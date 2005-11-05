@@ -61,7 +61,8 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     void updateDisplayString();
 
   public:
-    InterfaceTable() {} // FIXME ctor
+    InterfaceTable();
+    virtual ~InterfaceTable();
 
   protected:
     int numInitStages() const {return 2;}

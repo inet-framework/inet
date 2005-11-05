@@ -44,13 +44,12 @@ class INET_API NAMTrace : public cSimpleModule
     std::map<int,int> modid2namid;
 
   public:
-    NAMTrace() {} // FIXME ctor
-    virtual ~NAMTrace() {}
+    NAMTrace();
+    virtual ~NAMTrace();
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void finish();
 
   public:
     /**

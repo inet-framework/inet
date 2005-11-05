@@ -31,7 +31,8 @@ class EtherFrame;
 class INET_API MACRelayUnitNP : public MACRelayUnitBase
 {
   public:
-    MACRelayUnitNP() {} // FIXME ctor
+    MACRelayUnitNP();
+    virtual ~MACRelayUnitNP();
 
   protected:
     // the shared queue

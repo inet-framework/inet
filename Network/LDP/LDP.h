@@ -96,7 +96,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     double holdTime;
     double helloInterval;
 
-
     // currently recognized FECs
     FecVector fecList;
     // bindings advertised upstream
@@ -116,7 +115,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     RoutingTable *rt;
     LIBTable *lt;
     TED *tedmod;
-
 
     TCPSocket serverSocket;  // for listening on LDP_PORT
     TCPSocketMap socketMap;  // holds TCP connections with peers
@@ -170,7 +168,8 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     void announceLinkChange(IPAddress advrouter, IPAddress linkid);
 
   public:
-    LDP() {} // FIXME ctor
+    LDP();
+    virtual ~LDP();
 
   protected:
     virtual int numInitStages() const  {return 4;}

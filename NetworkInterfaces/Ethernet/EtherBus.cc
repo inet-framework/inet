@@ -46,7 +46,8 @@ struct BusTap
 class INET_API EtherBus : public cSimpleModule
 {
   public:
-    EtherBus() {} // FIXME ctor
+    EtherBus();
+    virtual ~EtherBus();
 
   protected:
     virtual void initialize();
@@ -71,6 +72,16 @@ static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
 {
     ev.printf("(%s)%s",msg->className(),msg->fullName());
     return ev;
+}
+
+EtherBus::EtherBus()
+{
+    tap = NULL;
+}
+
+EtherBus::~EtherBus()
+{
+    delete [] tap;
 }
 
 void EtherBus::initialize()

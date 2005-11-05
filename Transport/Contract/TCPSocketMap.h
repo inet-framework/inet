@@ -42,7 +42,7 @@ class INET_API TCPSocketMap
     TCPSocketMap() {}
 
     /**
-     * Destructor.
+     * Destructor. Does NOT delete the TCPSocket objects.
      */
     ~TCPSocketMap() {}
 
@@ -70,6 +70,11 @@ class INET_API TCPSocketMap
      * Returns the number of sockets stored.
      */
     unsigned int size() {return socketMap.size();}
+
+    /**
+     * Deletes the socket objects.
+     */
+    void deleteSockets();
 };
 
 #endif

@@ -40,6 +40,16 @@ static std::ostream& operator<< (std::ostream& os, cMessage *msg)
 }
 */
 
+MACRelayUnitPP::MACRelayUnitPP()
+{
+    buffer = NULL;
+}
+
+MACRelayUnitPP::~MACRelayUnitPP()
+{
+    delete [] buffer;
+}
+
 void MACRelayUnitPP::initialize()
 {
     MACRelayUnitBase::initialize();

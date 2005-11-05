@@ -50,7 +50,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         typedef IPv6NeighbourCache::Neighbour Neighbour;  // for convenience
 
     public:
-        IPv6NeighbourDiscovery() {} // FIXME ctor
+        IPv6NeighbourDiscovery();
+        virtual ~IPv6NeighbourDiscovery();
 
     public:
         /**
@@ -101,7 +102,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
             int numNSSent;// number of DAD solicitations sent since start of sim
             cMessage *timeoutMsg;// the message to cancel when NA is received
         };
-        typedef std::set<DADEntry*> DADList;
+        typedef std::set<DADEntry*> DADList; //FIXME why ptrs are stored?
 
         //stores information about Router Discovery for an interface
         struct RDEntry {
@@ -109,7 +110,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
             int numRSSent; //number of Router Solicitations sent since start of sim
             cMessage *timeoutMsg; //the message to cancel when RA is received
         };
-        typedef std::set<RDEntry*> RDList;
+        typedef std::set<RDEntry*> RDList; //FIXME why ptrs are stored?
 
         //An entry that stores information for an Advertising Interface
         struct AdvIfEntry {
@@ -118,7 +119,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
             simtime_t nextScheduledRATime;//stores time when next RA will be sent.
             cMessage *raTimeoutMsg;//the message to cancel when resetting RA timer
         };
-        typedef std::set<AdvIfEntry*> AdvIfList;
+        typedef std::set<AdvIfEntry*> AdvIfList; //FIXME why ptrs are stored?
 
         //List of periodic RA msgs(used only for router interfaces)
         RATimerList raTimerList;

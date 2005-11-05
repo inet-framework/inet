@@ -52,6 +52,8 @@ module StandardHost
         out: ethOut[];
     submodules:
         namTrace: NAMTraceWriter;
+            parameters:
+                namid = -1; // auto
             display: "p=60,310;i=block/sink";
         notificationBoard: NotificationBoard;
             display: "p=60,70;i=block/control";

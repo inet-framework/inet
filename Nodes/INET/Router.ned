@@ -39,6 +39,8 @@ module Router
         out: ethOut[];
     submodules:
         namTrace: NAMTraceWriter;
+            parameters:
+                namid = -1; // auto
             display: "p=330,60;i=block/sink";
         notificationBoard: NotificationBoard;
             display: "p=60,60;i=block/control";

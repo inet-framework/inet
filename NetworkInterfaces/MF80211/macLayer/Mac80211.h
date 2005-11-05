@@ -62,9 +62,10 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     };
 
   public:
-    Mac80211() {} // FIXME ctor
-  protected:
+    Mac80211();
+    virtual ~Mac80211();
 
+  protected:
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -241,6 +242,5 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     int broadcastBackoff;
 };
 
-
-
 #endif
+

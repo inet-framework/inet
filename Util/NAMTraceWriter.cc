@@ -63,7 +63,7 @@ void NAMTraceWriter::initialize(int stage)
         nb->subscribe(this, NF_PP_RX_END);
         nb->subscribe(this, NF_L2_Q_DROP);
     }
-    else if (stage==2)
+    else if (stage==2 && nt!=NULL)
     {
         // write "link" entries
         InterfaceTable *ift = InterfaceTableAccess().get();

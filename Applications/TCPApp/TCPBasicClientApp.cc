@@ -21,6 +21,15 @@
 
 Define_Module(TCPBasicClientApp);
 
+TCPBasicClientApp::TCPBasicClientApp()
+{
+    timeoutMsg = NULL;
+}
+
+TCPBasicClientApp::~TCPBasicClientApp()
+{
+    cancelAndDelete(timeoutMsg);
+}
 
 void TCPBasicClientApp::initialize()
 {
