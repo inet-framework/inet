@@ -38,6 +38,9 @@ module NClients
     parameters:
         n: numeric const;
     submodules:
+        channelInstaller : ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost",

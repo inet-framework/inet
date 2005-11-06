@@ -70,11 +70,8 @@ void ThruputMeter::beginNewInterval(simtime_t now)
     double bitpersec = intvl_numbits/duration;
     double pkpersec = intvl_numpackets/duration;
 
-//FIXME introduce recordAt() into omnetpp!!!
-#define recordAt(t,d)   record(d)
-    bitpersecVector.recordAt(intvl_starttime, bitpersec);
-    pkpersecVector.recordAt(intvl_starttime, pkpersec);
-#undef recordAt
+    bitpersecVector.recordWithTimestamp(intvl_starttime, bitpersec);
+    pkpersecVector.recordWithTimestamp(intvl_starttime, pkpersec);
 
     // restart counters
     intvl_starttime = now;  // FIXME this should be *beginning* of tx of this packet, not end!
