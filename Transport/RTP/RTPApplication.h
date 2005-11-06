@@ -35,7 +35,12 @@ class INET_API RTPApplication : public cSimpleModule
 {
     protected:
         /**
-         * Reads the omnet parameters.
+         * Constructor, with activity() stack size.
+         */
+        RTPApplication() : cSimpleModule(32768) {}
+
+        /**
+         * Reads the OMNeT++ parameters.
          */
         virtual void initialize();
 

@@ -40,12 +40,14 @@ class INET_API TCPSessionApp : public cSimpleModule
     int bytesRcvd;
     int indicationsRcvd;
 
+  public:
+    TCPSessionApp() : cSimpleModule(32768) {}
+
   protected:
     void parseScript(const char *script);
     void waitUntil(simtime_t t);
     void count(cMessage *msg);
 
-  protected:
     virtual void activity();
     virtual void finish();
 };

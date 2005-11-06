@@ -40,7 +40,9 @@ module NClients
     submodules:
         channelInstaller : ChannelInstaller;
             parameters:
-                channelClass = "ThruputMeteringChannel";
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "B (U)";
+            display: "i=block/cogwheel";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost",

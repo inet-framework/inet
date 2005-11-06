@@ -54,6 +54,15 @@ cChannel *ChannelInstaller::createReplacementChannelFor(cChannel *channel)
     newchan->setError(oldchan->error());
     newchan->setDelay(oldchan->delay());
     newchan->setDatarate(oldchan->datarate());
+
+    const char *attrs = par("channelAttrs");
+    cStringTokenizer tok(attrs,";");
+    while (tok.hasMoreTokens())
+    {
+        cPar& p = newchan->addPar("format"); // FIXME parse tkn as well
+        p = tok.nextToken();
+    }
+
     return newchan;
 }
 

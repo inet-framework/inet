@@ -23,13 +23,25 @@
 #include "INETDefs.h"
 
 /**
- * A cBasicChannel extended with throughput calculation.
+ * A cBasicChannel extended with throughput calculation. Values
+ * get displayed on the link, using the connection's "t=" display
+ * string tag.
+ *
+ * The display can be customised with the "format" attribute.
+ * In the format string, the following characters will get expanded:
+ *   - 'N': number of packets
+ *   - 'V': volume (in bytes)
+ *   - 'P': average packet/sec on [0,now)
+ *   - 'B': average bandwidth on [0,now)
+ *   - 'U': average channel utilization (%) on [0,now)
+ * Other characters are copied verbatim.
  */
 class SIM_API ThruputMeteringChannel : public cBasicChannel
 {
   protected:
     long count;
     double numBits; // double to avoid overflow
+    cPar *fmtp;
 
   public:
     /**
@@ -57,6 +69,10 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
      * See cObject for more details.
      */
     virtual cPolymorphic *dup() const  {return new ThruputMeteringChannel(*this);}
+
+    virtual cPar& addPar(const char *s);
+
+    virtual cPar& addPar(cPar *p);
 
     /**
      * Performs bit error rate, delay and transmission time modelling.

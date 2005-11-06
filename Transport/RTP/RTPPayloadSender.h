@@ -40,6 +40,12 @@ class INET_API RTPPayloadSender : public cSimpleModule
 {
     public: //FIXME
     //protected:
+
+        /**
+         * Constructor, with activity() stack size.
+         */
+        RTPPayloadSender() : cSimpleModule(32768) {}
+
         /**
          * Cleaning up. Calls closeSourceFile.
          */
@@ -57,8 +63,8 @@ class INET_API RTPPayloadSender : public cSimpleModule
          * A sender module's transmission can be in different states.
          */
         enum SenderStatus {
-            STOPPED, //!< No transmission.
-            PLAYING //!< Data is being sent.
+            STOPPED, //< No transmission.
+            PLAYING  ///< Data is being sent.
         };
 
     protected:

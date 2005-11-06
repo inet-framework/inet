@@ -22,6 +22,7 @@ Register_Class(ThruputMeteringChannel);
 
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel(name)
 {
+    fmtp = NULL;
     count = 0;
     numBits = 0;
 }
@@ -30,6 +31,8 @@ ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch)
 {
     setName(ch.name());
     operator=(ch);
+    cArray& parlist = _parList();
+    fmtp = (cPar *)parlist.get("format");
 }
 
 ThruputMeteringChannel::~ThruputMeteringChannel()
@@ -45,23 +48,75 @@ ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringC
     return *this;
 }
 
+cPar& ThruputMeteringChannel::addPar(const char *s)
+{
+    cPar *p = &cBasicChannel::addPar(s);
+    if (!opp_strcmp(s,"format"))
+        fmtp = p;
+    return *p;
+}
+
+cPar& ThruputMeteringChannel::addPar(cPar *p)
+{
+    cBasicChannel::addPar(p);
+    const char *s = p->name();
+    if (!opp_strcmp(s,"format"))
+        fmtp = p;
+    return *p;
+}
 
 bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
 {
     bool ret = cBasicChannel::deliver(msg, t);
 
+    // count packets and bits
     count++;
     numBits += msg->length();
 
+    // retrieve format string
+    const char *fmt = fmtp ? fmtp->stringValue() : "B";
+
+    // produce label, based on format string
+    char buf[200];
+    char *p = buf;
     double bps = numBits/transmissionFinishes();
-    char buf[100];
+    double bytes;
+    for (const char *fp = fmt; *fp && buf+200-p>20; fp++)
+    {
+        switch (*fp)
+        {
+            case 'N': // number of packets
+                p += sprintf(p, "%ld", count);
+                break;
+            case 'V': // volume (in bytes)
+                bytes = floor(numBits/8);
+                if (bytes<1024)
+                    p += sprintf(p, "%gB", bytes);
+                else if (bytes<1024*1024)
+                    p += sprintf(p, "%.3gKB", bytes/1024);
+                else
+                    p += sprintf(p, "%.3gMB", bytes/1024/1024);
+                break;
+            case 'P': // average packet/sec on [0,now)
+                p += sprintf(p, "%.3gpps", count/transmissionFinishes());
+                break;
+            case 'B': // average bandwidth on [0,now)
+                if (bps<1000000)
+                    p += sprintf(p, "%.3gk", bps/1000);
+                else
+                    p += sprintf(p, "%.3gM", bps/1000000);
+                break;
+            case 'U': // average channel utilization (%) on [0,now)
+                p += sprintf(p, "%.3g%%", bps/datarate()*100.0);
+                break;
+            default:
+                *p++ = *fp;
+        }
+    }
+    *p = '\0';
 
-    if (bps<1000000)
-        sprintf(buf,"%.3gk", bps/1000);
-    else
-        sprintf(buf,"%.3gM", bps/1000000);
-
-    fromGate()->displayString().setTagArg("t",0, buf);
+    // display label
+    fromGate()->displayString().setTagArg("t", 0, buf);
 
     return ret;
 }

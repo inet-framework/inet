@@ -25,7 +25,8 @@
 //
 simple ChannelInstaller
     parameters:
-        channelClass: string;
+        channelClass: string,
+        channelAttrs: string;
 endsimple
 
 
