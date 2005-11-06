@@ -23,6 +23,7 @@ Register_Class(ThruputMeteringChannel);
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel(name)
 {
     count = 0;
+    numBits = 0;
 }
 
 ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cBasicChannel()
@@ -40,6 +41,7 @@ ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringC
     if (this==&ch) return *this;
     cBasicChannel::operator=(ch);
     count = ch.count;
+    numBits = ch.numBits;
     return *this;
 }
 
@@ -49,7 +51,17 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
     bool ret = cBasicChannel::deliver(msg, t);
 
     count++;
-    fromGate()->displayString().setTagArg("t",0, count);
+    numBits += msg->length();
+
+    double bps = numBits/transmissionFinishes();
+    char buf[100];
+
+    if (bps<1000000)
+        sprintf(buf,"%.3gk", bps/1000);
+    else
+        sprintf(buf,"%.3gM", bps/1000000);
+
+    fromGate()->displayString().setTagArg("t",0, buf);
 
     return ret;
 }

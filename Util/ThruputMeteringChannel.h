@@ -29,6 +29,7 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
 {
   protected:
     long count;
+    double numBits; // double to avoid overflow
 
   public:
     /**
