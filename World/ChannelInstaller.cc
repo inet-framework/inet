@@ -48,6 +48,8 @@ cChannel *ChannelInstaller::createReplacementChannelFor(cChannel *channel)
     cBasicChannel *oldchan = dynamic_cast<cBasicChannel *>(channel);
     if (!oldchan)
         return channel;
+
+    // create new channel object of the given class, and take over the original object's attributes
     const char *channelClassName = par("channelClass");
     cBasicChannel *newchan = check_and_cast<cBasicChannel *>(createOne(channelClassName));
     newchan->setName(oldchan->name());
@@ -55,12 +57,17 @@ cChannel *ChannelInstaller::createReplacementChannelFor(cChannel *channel)
     newchan->setDelay(oldchan->delay());
     newchan->setDatarate(oldchan->datarate());
 
+    // parse the "attr=value;attr=value;.." string, and set the given attributes on the channel
     const char *attrs = par("channelAttrs");
     cStringTokenizer tok(attrs,";");
     while (tok.hasMoreTokens())
     {
-        cPar& p = newchan->addPar("format"); // FIXME parse tkn as well
-        p = tok.nextToken();
+        cStringTokenizer tok2(tok.nextToken(), "=");
+        const char *attrname = tok2.nextToken();
+        const char *value = tok2.nextToken();
+        cPar& p = newchan->addPar(attrname);
+        if (!p.setFromText(value))
+            p.setStringValue(value);
     }
 
     return newchan;

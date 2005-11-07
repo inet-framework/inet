@@ -41,7 +41,7 @@ module NClients
         channelInstaller : ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "B (U)";
+                channelAttrs = "format=B (U)";
             display: "i=block/cogwheel";
         configurator: FlatNetworkConfigurator;
             parameters:
