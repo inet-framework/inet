@@ -69,7 +69,9 @@ public:
             RouterLSA  (void) : OSPFRouterLSA (), RoutingInfo (), LSATrackingInfo () {}
             RouterLSA  (const OSPFRouterLSA& lsa) : OSPFRouterLSA (lsa), RoutingInfo (), LSATrackingInfo () {}
             RouterLSA  (const RouterLSA& lsa) : OSPFRouterLSA (lsa), RoutingInfo (lsa), LSATrackingInfo (lsa) {}
-    virtual ~RouterLSA (void) {}
+    virtual ~RouterLSA (void) {
+    ;
+    }
 
     bool    ValidateLSChecksum () const   { return true; } // not implemented
 

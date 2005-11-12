@@ -72,9 +72,9 @@ public:
     RoutingTableEntry*   Lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
     void                 RebuildRoutingTable                  (void);
     IPv4AddressRange     GetContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;
-    void                 UpdateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents);
+    void                 UpdateExternalRoute                  (IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
     void                 RemoveExternalRoute                  (IPv4Address networkAddress);
-    RoutingTableEntry*   GetPreferredEntry                    (const OSPFLSA& lsa, bool considerSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
+    RoutingTableEntry*   GetPreferredEntry                    (const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
 
 private:
     bool                 InstallASExternalLSA                 (OSPFASExternalLSA* lsa);

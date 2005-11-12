@@ -1,8 +1,5 @@
-NOTE: Network/RSVP_TE/RSVPPacket.h, line33: change cObject to cPolymorphic
-
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
-- NAM trace: delay of link is not computed (hardcoded value is written into the trace)     
-- ChannelInstaller: finish parsing of attrs string!
+- ThruputMeteringChannel could integrate PPP/ThruputMeter code, for momentary thruput measurement
 
 - nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
@@ -32,7 +29,6 @@ AFTER omnetpp-3.2 RELEASE:
 - add handleParameterChange() to apps (needed for Scenario Manager!)
 - makemakefiles: -P option
 - use new opp_msgc features? (kind=..., length=...etc)
-- ctor/dtor stuff
 ----------------------- 
  
 _WLAN_CATALA_MONZO_ANGEL! 
@@ -74,23 +70,6 @@ the module ICMPv6, just like with IPv4. ICMP errors are sent into
 IPv6ErrorHandling, which the user can extend or replace to get errors
 handled in any way they like.
 "
-
------------------------ 
- 
-__NAMTRACE:
-There should be a per-node optional NAMTraceWriter, which works 
-from notifications fired by PPP whenever sth happens...
-
-NAMTraceWriter would register namId with global NAMTrace module in stage 0,
-and other NAMTraceWriter modules could obtain it from there in stage 1 or later.
-
-
-NF_PPTX_BEGIN
-NF_PPTX_END
-PPTXNotification {
-     cMessage *pk;
-     cGate *outGate;
-}
 
 ----------------------- 
  
@@ -141,8 +120,3 @@ layer, not in application (e.g. by using user supplied identifier on bind)
 destination, currently unspecified address is sent and SYN+ACK will not 
 be sent back (at least for 127.0.0.1, I didn't check for others))
  -UDPSocket similar to TCPSocket would be helpful
-
-* multicast routing - specify outputPort overriding routing table 
-decision for given packet (extend ControlInfo passed to networklayer)
-
- 

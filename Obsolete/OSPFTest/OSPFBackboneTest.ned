@@ -5,6 +5,11 @@ import
 
 module Backbone
     submodules:
+        channelInstaller : ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=B (U)";
+            display: "i=block/cogwheel";
         R1: OSPFRouter;
             gatesizes:
                 ethIn[3],

@@ -78,14 +78,19 @@ void NAMTraceWriter::initialize(int stage)
             // fill in peerNamIds in InterfaceEntries
             cGate *outgate = node->gate("out", ie->outputPort());
             if (!outgate || !outgate->toGate()) continue;
-            cModule *peernode = outgate->toGate()->ownerModule();
+            cModule *peernode = outgate->toGate()->ownerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
             cModule *peerwriter = peernode->submodule("namTrace");
             if (!peerwriter) error("module %s doesn't have a submodule named namTrace", peernode->fullPath().c_str());
             int peernamid = peerwriter->par("namid");
             ie->setPeerNamId(peernamid);
 
+            // find delay
+            double delay = 0;
+            cSimpleChannel *chan = dynamic_cast<cSimpleChannel*>(outgate->channel());
+            if (chan) delay = chan->delay();
+
             // write link entry into trace
-            recordLinkEvent(ie, "UP");
+            recordLinkEvent(peernamid, ie->datarate(), delay, "UP");
         }
     }
 }
@@ -127,17 +132,15 @@ void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
     out << " -s " << namid << " -a " << namid << " -S " << state << " -v " << shape << endl;
 }
 
-void NAMTraceWriter::recordLinkEvent(InterfaceEntry *ie, char *state)
+void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, double delay, char *state)
 {
     std::ostream& out = nt->out();
-    int peernamid = ie->peerNamId();
 
-    double delay = 3.33333E-08; // FIXME should be read from channel object!!!
-
-    // link entry (to be registered ON ONE END ONLY!)
+    // link entry (to be registered ON ONE END ONLY! This also means that
+    // ns2 thinks that datarate and delay must be the same in both directions)
     if (namid < peernamid)
         out << "l -t * -s " << namid << " -d " << peernamid
-            << " -S " << state << " -r " << (int)ie->datarate() << " -D " << delay << endl;
+            << " -S " << state << " -r " << (int)datarate << " -D " << delay << endl;
 
     // queue entry
     out << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;

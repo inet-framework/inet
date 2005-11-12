@@ -11,18 +11,19 @@ namespace OSPF {
 class RoutingTableEntry : public RoutingEntry
 {
 public:
-    enum RoutingDestinationType {
-        NetworkDestination          = 0,
-        AreaBorderRouterDestination = 1,
-        ASBoundaryRouterDestination = 2
-    };
-
     enum RoutingPathType {
         IntraArea     = 0,
         InterArea     = 1,
         Type1External = 2,
         Type2External = 3
     };
+
+    typedef unsigned char RoutingDestinationType;
+
+    // destinationType bitfield values
+    static const unsigned char NetworkDestination = 0;
+    static const unsigned char AreaBorderRouterDestination = 1;
+    static const unsigned char ASBoundaryRouterDestination = 2;
 
 private:
     RoutingDestinationType  destinationType;
@@ -183,11 +184,18 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
         << "/"
         << entry.GetAddressMask ().str ()
         << " (";
-    switch (entry.GetDestinationType ()) {
-        case OSPF::RoutingTableEntry::NetworkDestination:            out << "Network";           break;
-        case OSPF::RoutingTableEntry::AreaBorderRouterDestination:   out << "AreaBorderRouter";  break;
-        case OSPF::RoutingTableEntry::ASBoundaryRouterDestination:   out << "ASBoundaryRouter";  break;
-        default:                            out << "Unknown";           break;
+    if (entry.GetDestinationType () == OSPF::RoutingTableEntry::NetworkDestination) {
+        out << "Network";
+    } else {
+        if ((entry.GetDestinationType () & OSPF::RoutingTableEntry::AreaBorderRouterDestination) != 0) {
+            out << "AreaBorderRouter";
+        }
+        if ((entry.GetDestinationType () & (OSPF::RoutingTableEntry::ASBoundaryRouterDestination | OSPF::RoutingTableEntry::AreaBorderRouterDestination)) != 0) {
+            out << "+";
+        }
+        if ((entry.GetDestinationType () & OSPF::RoutingTableEntry::ASBoundaryRouterDestination) != 0) {
+            out << "ASBoundaryRouter";
+        }
     }
     out << "), Area: "
         << entry.GetArea ()

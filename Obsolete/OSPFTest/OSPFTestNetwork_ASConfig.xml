@@ -99,28 +99,8 @@
 
   <Area id="0.0.0.3">
     <AddressRange>
-      <Address>192.168.9.0</Address>
-      <Mask>255.255.255.0</Mask>
-      <Status>Advertise</Status>
-    </AddressRange>
-    <AddressRange>
-      <Address>192.168.10.0</Address>
-      <Mask>255.255.255.0</Mask>
-      <Status>Advertise</Status>
-    </AddressRange>
-    <AddressRange>
-      <Address>192.168.11.0</Address>
-      <Mask>255.255.255.0</Mask>
-      <Status>Advertise</Status>
-    </AddressRange>
-    <AddressRange>
-      <Address>192.168.20.11</Address>
-      <Mask>255.255.255.255</Mask>
-      <Status>Advertise</Status>
-    </AddressRange>
-    <AddressRange>
-      <Address>192.168.20.12</Address>
-      <Mask>255.255.255.255</Mask>
+      <Address>192.168.100.0</Address>
+      <Mask>255.255.252.0</Mask>
       <Status>Advertise</Status>
     </AddressRange>
   </Area>
@@ -418,7 +398,7 @@
     </BroadcastInterface>
   </Router>
 
-  <Router id="192.168.11.2"> <!-- RT9 -->
+  <Router id="192.168.102.2"> <!-- RT9 -->
     <RFC1583Compatible />
     <BroadcastInterface ifIndex="0">
       <AreaID>0.0.0.3</AreaID>
@@ -489,7 +469,7 @@
     </VirtualLink>
   </Router>
 
-  <Router id="192.168.9.4"> <!-- RT11 -->
+  <Router id="192.168.100.4"> <!-- RT11 -->
     <RFC1583Compatible />
     <BroadcastInterface ifIndex="0">
       <AreaID>0.0.0.3</AreaID>
@@ -524,7 +504,7 @@
     </VirtualLink>
   </Router>
 
-  <Router id="192.168.20.11"> <!-- RT12 -->
+  <Router id="192.168.103.11"> <!-- RT12 -->
     <RFC1583Compatible />
     <BroadcastInterface ifIndex="0">
       <AreaID>0.0.0.3</AreaID>

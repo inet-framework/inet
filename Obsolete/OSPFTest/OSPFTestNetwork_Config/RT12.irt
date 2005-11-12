@@ -2,16 +2,16 @@ ifconfig:
 
 # ethernet card 0 of router - connected to N9
 name: eth0
-    inet_addr: 192.168.9.3
+    inet_addr: 192.168.100.3
     Mask: 255.255.255.0
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500
     Metric: 1
     BROADCAST MULTICAST
 
-# ethernet card 1 of router - connected to H21
+# ethernet card 1 of router - connected to H15
 name: eth1
-    inet_addr: 192.168.20.11
+    inet_addr: 192.168.103.11
     Mask: 255.255.255.255
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500
@@ -20,7 +20,7 @@ name: eth1
 
 # ethernet card 2 of router - connected to N10
 name: eth2
-    inet_addr: 192.168.10.1
+    inet_addr: 192.168.101.1
     Mask: 255.255.255.0
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500

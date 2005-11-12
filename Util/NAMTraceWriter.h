@@ -41,6 +41,7 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
 
   protected:
     void recordNodeEvent(char *state, char *shape);
+    void recordLinkEvent(int peernamid, double datarate, double delay, char *state);
     void recordLinkEvent(InterfaceEntry *ie, char *state);
     void recordPacketEvent(const char event, int peernamid, cMessage *msg);
 

@@ -2,7 +2,7 @@ ifconfig:
 
 # ethernet card 0 of router - connected to N11
 name: eth0
-    inet_addr: 192.168.11.2
+    inet_addr: 192.168.102.2
     Mask: 255.255.255.0
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500
@@ -11,7 +11,7 @@ name: eth0
 
 # ethernet card 1 of router - connected to N9
 name: eth1
-    inet_addr: 192.168.9.1
+    inet_addr: 192.168.100.1
     Mask: 255.255.255.0
     Groups: 224.0.0.5:224.0.0.6
     MTU: 1500

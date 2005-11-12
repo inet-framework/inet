@@ -84,7 +84,7 @@ void OSPFRouting::initialize (int stage)
  */
 void OSPFRouting::handleMessage (cMessage *msg)
 {
-//    if (simulation.eventNumber () == 181970) {
+//    if (simulation.eventNumber () == 43625) {
 //        __asm int 3;
 //    }
     ospfRouter->GetMessageHandler ()->MessageReceived (msg);
@@ -330,7 +330,7 @@ void OSPFRouting::LoadExternalRoute (const cXMLElement& externalRouteConfig)
         }
     }
     // add the external route to the OSPF datastructure
-    ospfRouter->UpdateExternalRoute (networkAddress.address, asExternalRoute);
+    ospfRouter->UpdateExternalRoute (networkAddress.address, asExternalRoute, ifIndex);
 }
 
 
