@@ -11,7 +11,7 @@
 #
 
 # include omnetppconfig from this directory
-ROOT=$(HOME)/INET
+ROOT=$(HOME)/INET-20051119-unstable
 include $(ROOT)/omnetppconfig
 
 CFLAGS+= -DWITH_IPv6
