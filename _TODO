@@ -1,7 +1,9 @@
+
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
+
 - ThruputMeteringChannel could integrate PPP/ThruputMeter code, for momentary thruput measurement
 
-- nincs IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
+- there's no IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
 - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
 
@@ -25,26 +27,21 @@
 
 - WARN_IF_ARP_OVER_PPP
 
-AFTER omnetpp-3.2 RELEASE:
-- add handleParameterChange() to apps (needed for Scenario Manager!)
-- makemakefiles: -P option
-- use new opp_msgc features? (kind=..., length=...etc)
------------------------ 
- 
-_WLAN_CATALA_MONZO_ANGEL! 
-_WLAN_MAGNUS_KARLSSON! 
+- implement a cPacketQueue
 
------------------------ 
- 
-__CPACKETQUEUE!!!! 
-
------------------------ 
- 
-__HOSTS_TO_ROUTERINTERFACE 
-
------------------------
+- hosts should use RouterInterface as well
 
 - gateindex in InterfaceEntry: wrong, because it can be out[] and ethOut[] as well!
+
+- todo for omnetpp-3.2:
+     - add handleParameterChange() to apps (needed for Scenario Manager!)
+     - makemakefiles: -P option
+     - use new opp_msgc features? (kind=..., length=...etc)
+
+----------------------- 
+Note: existing other 802.11 models:
+- from CATALA MONZO ANGEL
+- from MAGNUS KARLSSON
 
 ----------------------- 
  
@@ -72,8 +69,7 @@ handled in any way they like.
 "
 
 ----------------------- 
- 
-__TCP_BUG 
+TCP BUG:
 From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de] 
 Sent: Sunday, September 25, 2005 7:51 PM
 To: omnetpp-l@omnetpp.org
@@ -105,7 +101,7 @@ Joachim
 
 
 ----------------------- 
-__VOJTA 
+VOJTA: 
 2. Some minor changes in INET are required
 
 * bind mechanism in both TCP/UDP should be generalized
