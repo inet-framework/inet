@@ -174,17 +174,17 @@ void UDP::processMsgFromApp(cMessage *appData)
     udpPacket->encapsulate(appData);
 
     // set source and destination port
-    udpPacket->setSourcePort(udpControlInfo->getSrcPort());
-    udpPacket->setDestinationPort(udpControlInfo->getDestPort());
+    udpPacket->setSourcePort(udpControlInfo->srcPort());
+    udpPacket->setDestinationPort(udpControlInfo->destPort());
 
-    if (!udpControlInfo->getDestAddr().isIPv6())
+    if (!udpControlInfo->destAddr().isIPv6())
     {
         // send to IPv4
         IPControlInfo *ipControlInfo = new IPControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpControlInfo->getSrcAddr().get4());
-        ipControlInfo->setDestAddr(udpControlInfo->getDestAddr().get4());
-        ipControlInfo->setOutputPort(udpControlInfo->getOutputPort());
+        ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get4());
+        ipControlInfo->setDestAddr(udpControlInfo->destAddr().get4());
+        ipControlInfo->setOutputPort(udpControlInfo->outputPort());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 
@@ -195,8 +195,8 @@ void UDP::processMsgFromApp(cMessage *appData)
         // send to IPv6
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpControlInfo->getSrcAddr().get6());
-        ipControlInfo->setDestAddr(udpControlInfo->getDestAddr().get6());
+        ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get6());
+        ipControlInfo->setDestAddr(udpControlInfo->destAddr().get6());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 
@@ -211,10 +211,10 @@ void UDP::processCommandFromApp(cMessage *msg)
     switch (msg->kind())
     {
         case UDP_C_BIND:
-            bind(msg->arrivalGate()->index(), udpControlInfo->getSrcPort());
+            bind(msg->arrivalGate()->index(), udpControlInfo->srcPort());
             break;
         case UDP_C_UNBIND:
-            unbind(msg->arrivalGate()->index(), udpControlInfo->getSrcPort());
+            unbind(msg->arrivalGate()->index(), udpControlInfo->srcPort());
             break;
         default:
             error("unknown command code (message kind) %d received from app", msg->kind());

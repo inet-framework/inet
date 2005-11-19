@@ -59,10 +59,10 @@ void UDPEchoApp::processPacket(cMessage *msg)
         UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->controlInfo());
 
         // swap src and dest
-        IPvXAddress srcAddr = controlInfo->getSrcAddr();
-        int srcPort = controlInfo->getSrcPort();
-        controlInfo->setSrcAddr(controlInfo->getDestAddr());
-        controlInfo->setSrcPort(controlInfo->getDestPort());
+        IPvXAddress srcAddr = controlInfo->srcAddr();
+        int srcPort = controlInfo->srcPort();
+        controlInfo->setSrcAddr(controlInfo->destAddr());
+        controlInfo->setSrcPort(controlInfo->destPort());
         controlInfo->setDestAddr(srcAddr);
         controlInfo->setDestPort(srcPort);
 

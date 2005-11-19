@@ -32,13 +32,25 @@ class noncobject IPvXAddress;
 // the message object is discarded, and only the control info's srcPort
 // field is significant.
 //
-// @see UDPControlInfo
+// @see UDPControlInfo, UDPStatusInd, 2UDP
 //
 enum UDPCommandCode
 {
     UDP_C_DATA = 0;   // datagram to send (must carry UDPControlInfo)
-    UDP_C_BIND = 1;   // only UDPControlInfo's srcPort should be filled
-    UDP_C_UNBIND = 2; // only UDPControlInfo's srcPort should be filled
+    UDP_C_BIND = 1;   // at least UDPControlInfo's srcPort and sockId must be filled
+    UDP_C_UNBIND = 2; // UDPControlInfo's sockId must be filled
+};
+
+//
+// \UDP indications, sent by UDP to the application. UDP will set these
+// constants as message kind on messages it sends to the application.
+//
+// @see UDPControlInfo, UDPCommandCode, UDP
+//
+enum UDPStatusInd
+{
+    UDP_I_DATA = 0;        // data packet (set on data packet)
+    UDP_I_PEER_CLOSED = 1; // ICMP error received on a sent datagram
 };
 
 
@@ -50,13 +62,16 @@ enum UDPCommandCode
 //
 class UDPControlInfo
 {
+    properties:
+        omitGetVerb = true;
     fields:
-        IPvXAddress srcAddr;  // source \IP or \IPv6 address
+        int sockId = -1;   // identifies the socket within the application
+        IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND
         IPvXAddress destAddr; // destination \IP or \IPv6 address
-        int srcPort;   // \UDP source port in packet
+        int srcPort;   // \UDP source port in packet, or local port with BIND
         int destPort;  // \UDP destination port in packet
         int inputPort; // gate index of interface on which the packet was received
-        int outputPort = -1; // gate index of interface on where the packet should go 
+        int outputPort = -1; // gate index of interface on where the packet should go
                              // (for multicast; currently it works for IPv4 only)
 };
 

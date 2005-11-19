@@ -488,7 +488,7 @@ void LDP::processLDPHello(LDPHello *msg)
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
     //IPAddress peerAddr = controlInfo->getSrcAddr().get4();
     IPAddress peerAddr = msg->senderAddress();
-    int inputPort = controlInfo->getInputPort();
+    int inputPort = controlInfo->inputPort();
     delete msg;
 
     ev << "Received LDP Hello from " << peerAddr << ", ";

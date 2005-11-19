@@ -86,8 +86,8 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->controlInfo());
 
     VideoStreamData *d = new VideoStreamData;
-    d->clientAddr = ctrl->getSrcAddr();
-    d->clientPort = ctrl->getSrcPort();
+    d->clientAddr = ctrl->srcAddr();
+    d->clientPort = ctrl->srcPort();
     d->videoSize = (*videoSize);
     d->bytesLeft = d->videoSize;
     d->numPkSent = 0;
