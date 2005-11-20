@@ -30,11 +30,11 @@
 
 - notifboard: switch to the context of the client before calling its receiveNotification()
 
-- doxy: turn on generation if "called/referenced from" things2
+- doxy: turn on generation of "called/referenced from" links
 
 - WARN_IF_ARP_OVER_PPP
 
-- implement a cPacketQueue
+- implement class PacketQueue : public cQueue
 
 - hosts should use RouterInterface as well
 
@@ -86,12 +86,23 @@ Hi!
 
 I found something that seems to be a bug in TCPMain:
 
-I open a TCP-Connection with TCPSocket and send a message (let's call it "A") trough it. This happens:
-"ActiveOPEN" is sent to TCPMain, followed by message A. Message A is buffered (according to RFC 793) an the 3-way-handshake starts. The last message of the 3-way-handshake (ACK) already carries message A (piggybacking). So far so good. The receiver then changes state from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper layer. Instead the sender waits 3 seconds for timeout and resends message A, which is then successfully delivered to the receiver's application (and ACKed).
+I open a TCP-Connection with TCPSocket and send a message (let's call it "A") 
+trough it. This happens: "ActiveOPEN" is sent to TCPMain, followed by 
+message A. Message A is buffered (according to RFC 793) an the 3-way-handshake 
+starts. The last message of the 3-way-handshake (ACK) already carries 
+message A (piggybacking). So far so good. The receiver then changes state 
+from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper 
+layer. Instead the sender waits 3 seconds for timeout and resends message A, 
+which is then successfully delivered to the receiver's application (and ACKed).
 
-IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73: "If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_ continue processing in the new state and forward the attached message A to application.
+IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73: 
+"If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue 
+processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_ 
+continue processing in the new state and forward the attached message A to 
+application.
 
-Is this really a bug in TCPMain or did I miss something? If it is a bug: is it fixed in newer releases?
+Is this really a bug in TCPMain or did I miss something? If it is a bug: is 
+it fixed in newer releases?
 
 The interesting part of my code is the following:
 > TCPSocket socket;
