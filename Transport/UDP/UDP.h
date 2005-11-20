@@ -27,9 +27,11 @@
 #define __UDP_H__
 
 #include <map>
-#include "IPControlInfo_m.h"
+#include <list>
 #include "UDPControlInfo_m.h"
 
+class IPControlInfo;
+class IPv6ControlInfo;
 
 const char *ERROR_IP_ADDRESS = "10.0.0.255";
 const int UDP_HEADER_BYTES = 8;
@@ -41,24 +43,27 @@ const int UDP_HEADER_BYTES = 8;
  */
 class INET_API UDP : public cSimpleModule
 {
-  protected:
+  public:
     struct SockDesc
     {
-        int sockId;
+        int sockId; // supposed to be unique across apps
         int appGateIndex;
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
         short localPort;
         short remotePort;
-        int outputPort; // FIXME use interfaceId instead
+        int inputPort; // FIXME use interfaceId instead
     };
 
     typedef std::list<SockDesc *> SockDescList;
     typedef std::map<int,SockDesc *> SocketsByIdMap;
     typedef std::map<int,SockDescList> SocketsByPortMap;
 
+  protected:
     SocketsByIdMap socketsByIdMap;
     SocketsByPortMap socketsByPortMap;
+
+    short nextEphemeralPort;
 
     int numSent;
     int numPassedUp;
@@ -74,6 +79,14 @@ class INET_API UDP : public cSimpleModule
 
     // unbind socket
     void unbind(int sockId);
+
+    // ephemeral port
+    short getEphemeralPort();
+
+    bool matchesSocket(UDPPacket *udp, IPControlInfo *ctrl, SockDesc *sd);
+    bool matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd);
+    void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
+    void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
 
     // process packets coming from IP
     virtual void processMsgFromIP(UDPPacket *udpPacket);

@@ -260,8 +260,7 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
 short TCP::getEphemeralPort()
 {
     if (nextEphemeralPort==5000)
-        error("Ephemeral port range 1024..4999 exhausted (email TCP model "
-              "author that he should implement reuse of ephemeral ports!!!)");
+        error("Ephemeral port range 1024..4999 exhausted (port number reuse not implemented)");
     return nextEphemeralPort++;
 }
 

@@ -33,6 +33,32 @@
 
 Define_Module( UDP );
 
+static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
+{
+    os << "sockId=" << sd.sockId;
+    os << " appGateIndex=" << sd.appGateIndex;
+    os << " localPort=" << sd.localPort;
+    if (sd.remotePort!=0)
+        os << " remotePort=" << sd.remotePort;
+    if (!sd.localAddr.isUnspecified())
+        os << " localAddr=" << sd.localAddr;
+    if (!sd.remoteAddr.isUnspecified())
+        os << " remoteAddr=" << sd.remoteAddr;
+    if (sd.inputPort!=-1)
+        os << " inputPort=" << sd.inputPort;
+
+    return os;
+}
+
+static std::ostream & operator<<(std::ostream & os, const UDP::SockDescList& list)
+{
+    for (UDP::SockDescList::const_iterator i=list.begin(); i!=list.end(); ++i)
+        os << "sockId=" << (*i)->sockId << " ";
+    return os;
+}
+
+//--------
+
 UDP::~UDP()
 {
     for (SocketsByIdMap::iterator i=socketsByIdMap.begin(); i!=socketsByIdMap.end(); ++i)
@@ -43,6 +69,8 @@ void UDP::initialize()
 {
     WATCH_PTRMAP(socketsByIdMap);
     WATCH_MAP(socketsByPortMap);
+
+    nextEphemeralPort = 1024;
 
     numSent = 0;
     numPassedUp = 0;
@@ -64,7 +92,10 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     sd->remoteAddr = ctrl->destAddr();
     sd->localPort = ctrl->srcPort();
     sd->remotePort = ctrl->destPort();
-    sd->outputPort = ctrl->outputPort();
+    sd->inputPort = ctrl->outputPort();
+
+    if (sd->localPort==0)
+        sd->localPort = getEphemeralPort();
 
     // add to socketsByIdMap
     ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
@@ -91,6 +122,13 @@ void UDP::unbind(int sockId)
             {list.erase(it); break;}
 
     delete sd;
+}
+
+short UDP::getEphemeralPort()
+{
+    if (nextEphemeralPort==5000)
+        error("Ephemeral port range 1024..4999 exhausted (port number reuse not implemented)");
+    return nextEphemeralPort++;
 }
 
 void UDP::handleMessage(cMessage *msg)
@@ -124,6 +162,69 @@ void UDP::updateDisplayString()
     displayString().setTagArg("t",0,buf);
 }
 
+bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ctrl, SockDesc *sd)
+{
+    // Note: OVERLOADED FUNCTION, IPv4 version!
+    if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
+        return false;
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ctrl->destAddr())
+        return false;
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ctrl->srcAddr())
+        return false;
+    if (sd->inputPort!=-1 && sd->inputPort!=ctrl->inputPort())
+        return false;
+    return true;
+}
+
+bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd)
+{
+    // Note: OVERLOADED FUNCTION, IPv6 VERSION!
+    if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
+        return false;
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ctrl->destAddr())
+        return false;
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ctrl->srcAddr())
+        return false;
+    //if (!sd->inputPort!=-1 && sd->inputPort!=ctrl->inputPort())  FIXME IPv6 should fill in inputPort!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //    return false;
+    return true;
+}
+
+void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd)
+{
+    // Note: OVERLOADED FUNCTION, IPv4 VERSION!
+    // send payload with UDPControlInfo up to the application
+    UDPControlInfo *udpControlInfo = new UDPControlInfo();
+    udpControlInfo->setSockId(sd->sockId);
+    udpControlInfo->setSrcAddr(ctrl->srcAddr());
+    udpControlInfo->setDestAddr(ctrl->destAddr());
+    udpControlInfo->setSrcPort(udpHeader->sourcePort());
+    udpControlInfo->setDestPort(udpHeader->destinationPort());
+    udpControlInfo->setInputPort(ctrl->inputPort());
+
+    cMessage *copy = (cMessage *)payload->dup();
+    copy->setControlInfo(copy);
+    send(copy, "to_app", sd->appGateIndex);
+    numPassedUp++;
+}
+
+void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd)
+{
+    // Note: OVERLOADED FUNCTION, IPv6 VERSION!
+    UDPControlInfo *udpControlInfo = new UDPControlInfo();
+    udpControlInfo->setSockId(sd->sockId);
+    udpControlInfo->setSrcAddr(ctrl->srcAddr());
+    udpControlInfo->setDestAddr(ctrl->destAddr());
+    udpControlInfo->setSrcPort(udpHeader->sourcePort());
+    udpControlInfo->setDestPort(udpHeader->destinationPort());
+    //udpControlInfo->setInputPort(ctrl->inputPort());  FIXME add inputPort to IPv6ControlInfo!!!
+
+    cMessage *copy = (cMessage *)payload->dup();
+    copy->setControlInfo(copy);
+    send(copy, "to_app", sd->appGateIndex);
+    numPassedUp++;
+}
+
 void UDP::processMsgFromIP(UDPPacket *udpPacket)
 {
     // simulate checksum: discard packet if it has bit error
@@ -134,55 +235,64 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
         return;
     }
 
-    // look up app gate
     int destPort = udpPacket->destinationPort();
-    int appGateIndex = findAppGateForPort(destPort);
-    if (appGateIndex == -1)
+
+    SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
+    if (it==socketsByPortMap.end())
     {
         delete udpPacket;
         numDroppedWrongPort++;
+        // FIXME send back ICMP?
         return;
     }
+    SockDescList& list = it->second;
 
-    // get src/dest addresses
-    IPvXAddress srcAddr, destAddr;
-    int inputPort;
-    if (dynamic_cast<IPControlInfo *>(udpPacket->controlInfo())!=NULL)
+    cPolymorphic *ctrl = udpPacket->removeControlInfo();
+    cMessage *payload = udpPacket->decapsulate();
+    int matches = 0;
+
+    if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
-        IPControlInfo *controlInfo = (IPControlInfo *)udpPacket->removeControlInfo();
-        srcAddr = controlInfo->srcAddr();
-        destAddr = controlInfo->destAddr();
-        inputPort = controlInfo->inputPort();
-        delete controlInfo;
+        IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
+        for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+        {
+            SockDesc *sd = *it;
+            if (matchesSocket(udpPacket, ctrl4, sd))
+            {
+                sendUp(payload, udpPacket, ctrl4, sd);
+                matches++;
+            }
+        }
     }
     else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->controlInfo())!=NULL)
     {
-        IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)udpPacket->removeControlInfo();
-        srcAddr = controlInfo->srcAddr();
-        destAddr = controlInfo->destAddr();
-        inputPort = controlInfo->inputGateIndex();
-        delete controlInfo;
+        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
+        for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+        {
+            SockDesc *sd = *it;
+            if (matchesSocket(udpPacket, ctrl6, sd))
+            {
+                sendUp(payload, udpPacket, ctrl6, sd);
+                matches++;
+            }
+        }
     }
     else
     {
         error("(%s)%s arrived from lower layer without control info", udpPacket->className(), udpPacket->name());
     }
 
-    // send payload with UDPControlInfo up to the application
-    UDPControlInfo *udpControlInfo = new UDPControlInfo();
-    udpControlInfo->setSrcAddr(srcAddr);
-    udpControlInfo->setDestAddr(destAddr);
-    udpControlInfo->setSrcPort(udpPacket->sourcePort());
-    udpControlInfo->setDestPort(udpPacket->destinationPort());
-    udpControlInfo->setInputPort(inputPort);
+    if (matches==0)
+    {
+        numDroppedWrongPort++;
+        // FIXME send back ICMP?
+    }
 
-    cMessage *payload = udpPacket->decapsulate();
-    payload->setControlInfo(udpControlInfo);
+    delete payload;
     delete udpPacket;
-
-    send(payload, "to_app", appGateIndex);
-    numPassedUp++;
+    delete ctrl;
 }
+
 
 void UDP::processMsgFromApp(cMessage *appData)
 {
