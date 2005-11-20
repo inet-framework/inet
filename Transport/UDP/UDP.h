@@ -39,6 +39,10 @@ const int UDP_HEADER_BYTES = 8;
 
 /**
  * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
+ *
+ * Sends incoming packets to *all* matching sockets. No attempt is made to filter out
+ * multiple binds to the same port.
+ *
  * More info in the NED file.
  */
 class INET_API UDP : public cSimpleModule
@@ -48,6 +52,7 @@ class INET_API UDP : public cSimpleModule
     {
         int sockId; // supposed to be unique across apps
         int appGateIndex;
+        bool onlyLocalPortIsSet;
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
         short localPort;

@@ -97,6 +97,11 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     if (sd->localPort==0)
         sd->localPort = getEphemeralPort();
 
+    sd->onlyLocalPortIsSet = sd->localAddr.isUnspecified() &&
+                             sd->remoteAddr.isUnspecified() &&
+                             sd->remotePort==0 &&
+                             sd->inputPort==-1;
+
     // add to socketsByIdMap
     ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
     socketsByIdMap[sd->sockId] = sd;
@@ -257,7 +262,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
         {
             SockDesc *sd = *it;
-            if (matchesSocket(udpPacket, ctrl4, sd))
+            if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl4, sd))
             {
                 sendUp(payload, udpPacket, ctrl4, sd);
                 matches++;
@@ -270,7 +275,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
         {
             SockDesc *sd = *it;
-            if (matchesSocket(udpPacket, ctrl6, sd))
+            if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl6, sd))
             {
                 sendUp(payload, udpPacket, ctrl6, sd);
                 matches++;
