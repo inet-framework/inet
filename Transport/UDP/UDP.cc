@@ -33,12 +33,16 @@
 
 Define_Module( UDP );
 
+UDP::~UDP()
+{
+    for (SocketsByIdMap::iterator i=socketsByIdMap.begin(); i!=socketsByIdMap.end(); ++i)
+        delete i->second;
+}
+
 void UDP::initialize()
 {
-    // don't dispatch to apps (send everything to gate 0) if: only 1 app + no port bound
-    dispatchByPort = (gateSize("from_app")!=1);
-
-    WATCH_MAP(port2indexMap);
+    WATCH_PTRMAP(socketsByIdMap);
+    WATCH_MAP(socketsByPortMap);
 
     numSent = 0;
     numPassedUp = 0;
@@ -48,6 +52,45 @@ void UDP::initialize()
     WATCH(numPassedUp);
     WATCH(numDroppedWrongPort);
     WATCH(numDroppedBadChecksum);
+}
+
+void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
+{
+    // create and fill in SockDesc
+    SockDesc *sd = new SockDesc();
+    sd->sockId = ctrl->sockId();
+    sd->appGateIndex = gateIndex;
+    sd->localAddr = ctrl->srcAddr();
+    sd->remoteAddr = ctrl->destAddr();
+    sd->localPort = ctrl->srcPort();
+    sd->remotePort = ctrl->destPort();
+    sd->outputPort = ctrl->outputPort();
+
+    // add to socketsByIdMap
+    ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
+    socketsByIdMap[sd->sockId] = sd;
+
+    // add to socketsByPortMap
+    SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
+    list.push_back(sd);
+}
+
+void UDP::unbind(int sockId)
+{
+    // remove from socketsByIdMap
+    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    if (it==socketsByIdMap.end())
+        error("socket id=%d doesn't exist (already closed?)", sockId);
+    SockDesc *sd = it->second;
+    socketsByIdMap.erase(it);
+
+    // remove from socketsByPortMap
+    SockDescList& list = socketsByPortMap[sd->localPort];
+    for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+        if (*it == sd)
+            {list.erase(it); break;}
+
+    delete sd;
 }
 
 void UDP::handleMessage(cMessage *msg)
@@ -67,30 +110,6 @@ void UDP::handleMessage(cMessage *msg)
 
     if (ev.isGUI())
         updateDisplayString();
-}
-
-void UDP::bind(int gateIndex, int udpPort)
-{
-    dispatchByPort = true;
-    if (port2indexMap.find(udpPort)!=port2indexMap.end())
-        error("bind(): port %d already bound, to app on gate index %d", udpPort, port2indexMap[udpPort]);
-    port2indexMap[udpPort] = gateIndex;
-}
-
-void UDP::unbind(int gateIndex, int udpPort)
-{
-    IntMap::iterator it = port2indexMap.find(udpPort);
-    if (it!=port2indexMap.end())
-        port2indexMap.erase(it);
-}
-
-int UDP::findAppGateForPort(int destPort)
-{
-    if (!dispatchByPort)
-        return 0;
-
-    IntMap::iterator it = port2indexMap.find(destPort);
-    return it==port2indexMap.end() ? -1 : it->second;
 }
 
 void UDP::updateDisplayString()
@@ -211,10 +230,10 @@ void UDP::processCommandFromApp(cMessage *msg)
     switch (msg->kind())
     {
         case UDP_C_BIND:
-            bind(msg->arrivalGate()->index(), udpControlInfo->srcPort());
+            bind(msg->arrivalGate()->index(), udpControlInfo);
             break;
         case UDP_C_UNBIND:
-            unbind(msg->arrivalGate()->index(), udpControlInfo->srcPort());
+            unbind(udpControlInfo->sockId());
             break;
         default:
             error("unknown command code (message kind) %d received from app", msg->kind());

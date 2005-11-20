@@ -23,8 +23,8 @@
 // Rewrite: Andras Varga 2004,2005
 //
 
-#ifndef __UDPPROCESSING_H__
-#define __UDPPROCESSING_H__
+#ifndef __UDP_H__
+#define __UDP_H__
 
 #include <map>
 #include "IPControlInfo_m.h"
@@ -42,12 +42,23 @@ const int UDP_HEADER_BYTES = 8;
 class INET_API UDP : public cSimpleModule
 {
   protected:
-    // if false, all incoming packets are sent up on gate 0
-    bool dispatchByPort;
+    struct SockDesc
+    {
+        int sockId;
+        int appGateIndex;
+        IPvXAddress localAddr;
+        IPvXAddress remoteAddr;
+        short localPort;
+        short remotePort;
+        int outputPort; // FIXME use interfaceId instead
+    };
 
-    // Maps UDP ports to "from_application"/"to_application" gate indices.
-    typedef std::map<int,int> IntMap;
-    IntMap port2indexMap;
+    typedef std::list<SockDesc *> SockDescList;
+    typedef std::map<int,SockDesc *> SocketsByIdMap;
+    typedef std::map<int,SockDescList> SocketsByPortMap;
+
+    SocketsByIdMap socketsByIdMap;
+    SocketsByPortMap socketsByPortMap;
 
     int numSent;
     int numPassedUp;
@@ -58,14 +69,11 @@ class INET_API UDP : public cSimpleModule
     // utility: show current statistics above the icon
     void updateDisplayString();
 
-    // utility: look up destPort in applTable
-    int findAppGateForPort(int destPort);
+    // bind socket
+    void bind(int gateIndex, UDPControlInfo *ctrl);
 
-    // bind UDP port to gate index
-    void bind(int gateIndex, int udpPort);
-
-    // remove binding
-    void unbind(int gateIndex, int udpPort);
+    // unbind socket
+    void unbind(int sockId);
 
     // process packets coming from IP
     virtual void processMsgFromIP(UDPPacket *udpPacket);
@@ -75,6 +83,10 @@ class INET_API UDP : public cSimpleModule
 
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);
+
+  public:
+    UDP() {}
+    virtual ~UDP();
 
   protected:
     virtual void initialize();
