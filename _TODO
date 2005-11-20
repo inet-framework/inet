@@ -1,4 +1,6 @@
 
+- use interfaceId instead of outputPort/inputPort EVERYWHERE!!!!
+
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
 
 - ThruputMeteringChannel could integrate PPP/ThruputMeter code, for momentary thruput measurement
