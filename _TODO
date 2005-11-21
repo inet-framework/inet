@@ -1,5 +1,6 @@
 - rewrite UDPApps to use UDPSocket class!
 
+
 - TCP/UDP: unspec port should be 0 not -1!!!
 
 - use interfaceId instead of outputPort/inputPort EVERYWHERE!!!!
@@ -7,6 +8,8 @@
       networkLayerGateIndex
       nodeOutputGateId
       nodeInputGateId
+
+- attach IPDatagram to IPControlInfo..?
 
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
 
