@@ -47,6 +47,10 @@ void FailureManager::processCommand(const cXMLElement& node)
             replaceNode(target, "RSVP_FAILED");
         else if(!strcmp(target->moduleType()->name(), "LDP_LSR"))
             replaceNode(target, "LDP_FAILED");
+        else if(!strcmp(target->moduleType()->name(), "RipdRouter"))
+            replaceNode(target, "RipdFailed");
+        else if(!strcmp(target->moduleType()->name(), "OspfdRouter"))
+            replaceNode(target, "OspfdFailed");
         else
             ASSERT(false);
     }
@@ -56,6 +60,10 @@ void FailureManager::processCommand(const cXMLElement& node)
             replaceNode(target, "RSVP_LSR");
         else if(!strcmp(target->moduleType()->name(), "LDP_FAILED"))
             replaceNode(target, "LDP_LSR");
+        else if(!strcmp(target->moduleType()->name(), "RipdFailed"))
+            replaceNode(target, "RipdRouter");
+        else if(!strcmp(target->moduleType()->name(), "OspfdFailed"))
+            replaceNode(target, "OspfdRouter");
         else
             ASSERT(false);
     }
@@ -86,33 +94,40 @@ void FailureManager::reconnectNode(cModule *old, cModule *n)
 
     n->setDisplayString(old->displayString().getString());
 
-    unsigned int insize = old->gateSize("in");
-    unsigned int outsize = old->gateSize("out");
+    reconnect(old, n, "in", "out");
+    reconnect(old, n, "ethIn", "ethOut");
 
-    n->setGateSize("in", insize);
-    n->setGateSize("out", outsize);
+}
+
+void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const char *outs)
+{
+    unsigned int insize = old->gateSize(ins);
+    unsigned int outsize = old->gateSize(outs);
+
+    n->setGateSize(ins, insize);
+    n->setGateSize(outs, outsize);
 
     for(unsigned int i = 0; i < outsize; i++)
     {
-        cGate *out = old->gate("out", i);
+        cGate *out = old->gate(outs, i);
         if(out->isConnected())
         {
             cGate *to = out->toGate();
             cChannel *ch = check_and_cast<cChannel*>(out->channel()->dup());
             out->disconnect();
-            n->gate("out", i)->connectTo(to, ch);
+            n->gate(outs, i)->connectTo(to, ch);
         }
     }
 
     for (unsigned int i = 0; i < insize; i++)
     {
-        cGate *in = old->gate("in", i);
+        cGate *in = old->gate(ins, i);
         if (in->isConnected())
         {
             cGate *from = in->fromGate();
             cChannel *ch = check_and_cast<cChannel*>(from->channel()->dup());
             from->disconnect();
-            from->connectTo(n->gate("in", i), ch);
+            from->connectTo(n->gate(ins, i), ch);
         }
     }
 }

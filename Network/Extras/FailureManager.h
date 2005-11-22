@@ -38,6 +38,7 @@ class INET_API FailureManager : public cSimpleModule, public IScriptable
   private:
     void replaceNode(cModule *mod, const char *newNodeType);
     void reconnectNode(cModule *old, cModule *n);
+    void reconnect(cModule *old, cModule *n, const char *ins, const char *outs);
     cModule* getTargetNode(const char *target);
 };
 

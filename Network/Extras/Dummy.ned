@@ -24,5 +24,7 @@ simple Dummy
     gates:
         in: in[];
         out: out[];
+        in: ethIn[];
+        out: ethOut[];
 endsimple
 

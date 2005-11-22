@@ -55,6 +55,7 @@ Network/LDP/LDP.ned
 Network/MPLS/LIBTable.ned
 Network/MPLS/MPLSModule.ned
 Network/OSPFv2/OSPFRouting.ned
+Network/Quagga/Daemon.ned
 Network/Queue/DropTailQoSQueue.ned
 Network/Queue/DropTailQueue.ned
 Network/Queue/OutputQueue.ned
