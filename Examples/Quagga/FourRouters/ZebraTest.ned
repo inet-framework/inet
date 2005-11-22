@@ -1,0 +1,101 @@
+//
+// Copyright (C) 2005 Vojtech Janota
+//
+// Copyright (C) 2004 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+import
+    "Router",
+    "OspfdRouter",
+    "StandardHost",
+    "FailureManager",
+    "ScenarioManager";
+    
+
+channel fiberline
+    delay 1ms
+    datarate 1000000;
+endchannel
+
+channel ethernetline
+    delay 10ms;
+    datarate 100000;
+endchannel
+
+module ZebraTest
+    parameters:
+        n: numeric const;
+    submodules:
+		scenarioManager: ScenarioManager;
+		    display: "p=100,50;i=block/control_s";
+
+		failureManager: FailureManager;
+		    display: "p=200,50;i=block/control_s";
+    
+        cli: StandardHost[n];
+	    parameters:
+		namid = index;
+            display: "i=device/laptop";
+
+        srv: StandardHost;
+	    parameters:
+		namid = n;
+            display: "i=device/server_l";
+
+        r1: OspfdRouter;
+	    parameters:
+		namid = n + 1;
+            display: "i=abstract/router";
+        r2: OspfdRouter;
+	    parameters:
+		namid = n + 2;
+            display: "i=abstract/router";
+        r3: OspfdRouter;
+	    parameters:
+		namid = n + 3;
+            display: "i=abstract/router";
+	r4: OspfdRouter;
+	    parameters:
+		namid = n + 4;
+            display: "i=abstract/router";
+
+    connections nocheck:
+        for i=0..n-1 do
+            cli[i].out++ --> ethernetline --> r1.in++;
+            cli[i].in++ <-- ethernetline <-- r1.out++;
+        endfor
+
+        r1.out++ --> ethernetline --> r2.in++;
+        r1.in++ <-- ethernetline <-- r2.out++;
+
+        r2.out++ --> ethernetline --> r3.in++;
+        r2.in++ <-- ethernetline <-- r3.out++;
+
+        r3.out++ --> ethernetline --> srv.in++;
+        r3.in++ <-- ethernetline <-- srv.out++;
+
+        r1.out++ --> ethernetline --> r4.in++;
+        r1.in++ <-- ethernetline <-- r4.out++;
+
+        r3.out++ --> ethernetline --> r4.in++;
+        r3.in++ <-- ethernetline <-- r4.out++;
+endmodule
+
+network zebraTest : ZebraTest
+endnetwork
+
