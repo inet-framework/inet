@@ -1,0 +1,31 @@
+--- lib/regex.c.orig	2005-11-13 16:45:24.000000000 +0100
++++ lib/regex.c	2005-11-13 16:45:38.000000000 +0100
+@@ -164,9 +164,6 @@
+ #  define SWITCH_ENUM_CAST(x) (x)
+ # endif
+ 
+-/* How many characters in the character set.  */
+-# define CHAR_SET_SIZE 256
+-
+ # ifdef SYNTAX_TABLE
+ 
+ extern char *re_syntax_table;
+@@ -1178,6 +1175,10 @@
+ int re_max_failures = 2000;
+ # endif
+ 
++// doxygen outputs wrong line number for this variable
++// moving it here helps, don't ask me why
++static char reg_unset_dummy;
++
+ union fail_stack_elt
+ {
+   unsigned char *pointer;
+@@ -1548,7 +1549,6 @@
+   while (0)
+ 
+ /* Registers are set to a sentinel when they haven't yet matched.  */
+-static char reg_unset_dummy;
+ #define REG_UNSET_VALUE (&reg_unset_dummy)
+ #define REG_UNSET(e) ((e) == REG_UNSET_VALUE)
+ 

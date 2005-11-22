@@ -1,0 +1,14 @@
+--- lib/distribute.c.orig	2005-11-15 21:23:56.000000000 +0100
++++ lib/distribute.c	2005-11-15 21:24:53.000000000 +0100
+@@ -32,8 +32,9 @@
+ struct hash *disthash;
+ 
+ /* Hook functions. */
+-void (*distribute_add_hook) (struct distribute *);
+-void (*distribute_delete_hook) (struct distribute *);
++// prototype defined in header file
++dist_hook_func distribute_add_hook;
++dist_hook_func distribute_delete_hook;
+ 
+ struct distribute *
+ distribute_new ()

@@ -1,0 +1,11 @@
+--- ospfd/ospf_opaque.h.orig	2005-11-15 11:35:18.000000000 +0100
++++ ospfd/ospf_opaque.h	2005-11-15 11:41:20.000000000 +0100
+@@ -137,7 +137,7 @@
+ extern void ospf_opaque_lsa_dump (struct stream *s, u_int16_t length);
+ 
+ extern void ospf_opaque_lsa_originate_schedule (struct ospf_interface *oi, int *init_delay);
+-extern struct ospf_lsa *ospf_opaque_lsa_install (struct ospf_lsa *new, int rt_recalc);
++extern struct ospf_lsa *ospf_opaque_lsa_install (struct ospf_lsa *new__par, int rt_recalc);
+ extern void ospf_opaque_lsa_refresh (struct ospf_lsa *lsa);
+ 
+ extern void ospf_opaque_lsa_reoriginate_schedule (void *lsa_type_dependent, u_char lsa_type, u_char opaque_type);

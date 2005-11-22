@@ -1,0 +1,73 @@
+--- ospfd/ospf_main.c.orig	2005-11-21 14:49:02.000000000 +0100
++++ ospfd/ospf_main.c	2005-11-21 14:51:14.000000000 +0100
+@@ -60,16 +60,24 @@
+ 
+ struct zebra_privs_t ospfd_privs =
+ {
++  _caps_p,
++  NULL,
++  sizeof(_caps_p)/sizeof(_caps_p[0]),
++  0,
+ #if defined(QUAGGA_USER) && defined(QUAGGA_GROUP)
+-  .user = QUAGGA_USER,
+-  .group = QUAGGA_GROUP,
++  QUAGGA_USER,
++  QUAGGA_GROUP,
++#else
++  NULL,
++  NULL,
+ #endif
+ #if defined(VTY_GROUP)
+-  .vty_group = VTY_GROUP,
++  VTY_GROUP,
++#else
++  NULL,
+ #endif
+-  .caps_p = _caps_p,
+-  .cap_num_p = sizeof(_caps_p)/sizeof(_caps_p[0]),
+-  .cap_num_i = 0
++  NULL,
++  NULL
+ };
+ 
+ /* Configuration filename and directory. */
+@@ -158,26 +166,30 @@
+ struct quagga_signal_t ospf_signals[] =
+ {
+   {
+-    .signal = SIGHUP,
+-    .handler = &sighup,
++    SIGHUP,
++    &sighup,
++    0
+   },
+   {
+-    .signal = SIGUSR1,
+-    .handler = &sigusr1,
++    SIGUSR1,
++    &sigusr1,
++    0
+   },  
+   {
+-    .signal = SIGINT,
+-    .handler = &sigint,
++    SIGINT,
++    &sigint,
++    0
+   },
+   {
+-    .signal = SIGTERM,
+-    .handler = &sigint,
++    SIGTERM,
++    &sigint,
++    0
+   },
+ };
+ 
+ /* OSPFd main routine. */
+ int
+-main (int argc, char **argv)
++ospfd_main_entry (int argc, char **argv)
+ {
+   char *p;
+   char *vty_addr = NULL;

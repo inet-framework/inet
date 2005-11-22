@@ -1,0 +1,10 @@
+--- lib/if_rmap.h.orig	2005-11-11 18:08:55.000000000 +0100
++++ lib/if_rmap.h	2005-11-11 18:11:02.000000000 +0100
+@@ -44,4 +44,7 @@
+ struct if_rmap *if_rmap_lookup (const char *);
+ int config_write_if_rmap (struct vty *);
+ 
++// prototype for hook functions
++typedef void (*if_rmap_hook_func) (struct if_rmap *);
++
+ #endif /* _ZEBRA_IF_RMAP_H */

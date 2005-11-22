@@ -1,0 +1,18 @@
+--- ospfd/ospf_spf.h.orig	2005-11-13 12:19:22.000000000 +0100
++++ ospfd/ospf_spf.h	2005-11-13 12:19:41.000000000 +0100
+@@ -20,6 +20,9 @@
+  * 02111-1307, USA.
+  */
+ 
++#ifndef	_ZEBRA_OSPF_SPF_H
++#define	_ZEBRA_OSPF_SPF_H
++
+ /* values for vertex->type */
+ #define OSPF_VERTEX_ROUTER  1  /* for a Router-LSA */
+ #define OSPF_VERTEX_NETWORK 2  /* for a Network-LSA */
+@@ -54,3 +57,5 @@
+ void ospf_rtrs_free (struct route_table *);
+ 
+ /* void ospf_spf_calculate_timer_add (); */
++
++#endif

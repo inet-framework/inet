@@ -1,0 +1,42 @@
+--- lib/command.h.orig	2005-11-21 14:58:07.000000000 +0100
++++ lib/command.h	2005-11-21 14:59:38.000000000 +0100
+@@ -166,14 +166,33 @@
+ #ifndef VTYSH_EXTRACT_PL  
+ 
+ /* helper defines for end-user DEFUN* macros */
++
++#if OSPFD
++#define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
++	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, ospfd)
++#elif RIPD
++#define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
++	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, ripd)
++#elif ZEBRA
+ #define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
+-  struct cmd_element cmdname = \
++	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, zebra)
++#else
++#define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
++	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, lib)
++#endif
++
++#define DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, mod) \
++  struct cmd_element cmdname ## _ ## mod = \
+   { \
+-    .string = cmdstr, \
+-    .func = funcname, \
+-    .doc = helpstr, \
+-    .attr = attrs, \
+-    .daemon = dnum, \
++    cmdstr, \
++    funcname, \
++    helpstr, \
++    dnum, \
++    NULL, \
++    0, \
++    NULL, \
++    NULL, \
++    attrs \
+   };
+ 
+ #define DEFUN_CMD_FUNC_DECL(funcname) \

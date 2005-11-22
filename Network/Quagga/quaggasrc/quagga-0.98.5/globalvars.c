@@ -1,0 +1,1657 @@
+#include "globalvars.h"
+
+struct GlobalVars * GlobalVars_createActiveSet()
+{
+	struct GlobalVars * ptr = (struct GlobalVars *)malloc(sizeof(struct GlobalVars));
+	memset(ptr, 0, sizeof(struct GlobalVars));
+	return ptr;
+}
+
+int GlobalVars_errno()
+{
+	return __activeVars->errno__X;
+}
+
+extern struct cmd_element no_rip_redistribute_type_cmd_ripd;
+extern struct route_map_rule_cmd route_match_metric_cmd_ripd;
+extern struct cmd_element rip_passive_interface_cmd_ripd;
+extern struct cmd_element no_ip_rip_send_version_cmd_ripd;
+extern struct cmd_element rip_offset_list_ifname_cmd_ripd;
+extern struct cmd_element match_ip_address_cmd_ripd;
+extern struct cmd_element no_rip_redistribute_type_routemap_cmd_ripd;
+extern struct route_map_rule_cmd route_match_ip_next_hop_cmd_ripd;
+extern struct cmd_element no_rip_offset_list_ifname_cmd_ripd;
+extern struct cmd_element no_debug_rip_zebra_cmd_ripd;
+extern struct cmd_element no_rip_route_cmd_ripd;
+extern struct cmd_element no_set_metric_val_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_string_cmd_ripd;
+extern struct cmd_element no_rip_network_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_key_chain2_cmd_ripd;
+extern struct cmd_element rip_distance_source_access_list_cmd_ripd;
+extern struct cmd_element ip_rip_send_version_2_cmd_ripd;
+extern struct cmd_element ip_rip_send_version_cmd_ripd;
+extern struct cmd_element no_rip_distance_source_cmd_ripd;
+extern struct cmd_element no_router_zebra_cmd_ripd;
+extern struct cmd_element debug_rip_packet_cmd_ripd;
+extern struct cmd_element match_tag_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_mode_cmd_ripd;
+extern struct cmd_element no_match_ip_address_cmd_ripd;
+extern struct cmd_element no_rip_redistribute_type_metric_routemap_cmd_ripd;
+extern struct cmd_element no_match_ip_address_prefix_list_val_cmd_ripd;
+extern struct cmd_element no_rip_timers_val_cmd_ripd;
+extern struct cmd_element ip_rip_authentication_string_cmd_ripd;
+extern struct cmd_element set_metric_cmd_ripd;
+extern struct cmd_element rip_redistribute_type_metric_cmd_ripd;
+extern struct route_map_rule_cmd route_match_ip_address_cmd_ripd;
+extern struct cmd_element ip_rip_receive_version_2_cmd_ripd;
+extern struct cmd_element rip_redistribute_type_metric_routemap_cmd_ripd;
+extern struct route_map_rule_cmd route_set_metric_cmd_ripd;
+extern struct cmd_element no_rip_default_metric_cmd_ripd;
+extern struct route_map_rule_cmd route_match_ip_next_hop_prefix_list_cmd_ripd;
+extern struct cmd_element no_debug_rip_packet_direct_cmd_ripd;
+extern struct cmd_element set_tag_cmd_ripd;
+extern struct cmd_element no_debug_rip_packet_cmd_ripd;
+extern struct cmd_element router_zebra_cmd_ripd;
+extern struct cmd_element rip_default_information_originate_cmd_ripd;
+extern struct cmd_element no_ip_rip_send_version_num_cmd_ripd;
+extern struct cmd_element rip_default_metric_cmd_ripd;
+extern struct cmd_element ip_rip_authentication_mode_authlen_cmd_ripd;
+extern struct route_map_rule_cmd route_match_tag_cmd_ripd;
+extern struct route_map_rule_cmd route_match_interface_cmd_ripd;
+extern struct cmd_element debug_rip_events_cmd_ripd;
+extern struct cmd_element no_rip_offset_list_cmd_ripd;
+extern struct cmd_element no_rip_neighbor_cmd_ripd;
+extern struct cmd_element match_ip_next_hop_prefix_list_cmd_ripd;
+extern struct cmd_element no_set_tag_val_cmd_ripd;
+extern struct cmd_element match_ip_address_prefix_list_cmd_ripd;
+extern struct cmd_element no_match_ip_address_val_cmd_ripd;
+extern struct cmd_element no_rip_redistribute_rip_cmd_ripd;
+extern struct cmd_element no_match_metric_cmd_ripd;
+extern struct cmd_element rip_neighbor_cmd_ripd;
+extern struct cmd_element set_ip_nexthop_cmd_ripd;
+extern struct cmd_element no_rip_default_metric_val_cmd_ripd;
+extern struct cmd_element no_router_rip_cmd_ripd;
+extern struct cmd_element no_match_ip_next_hop_val_cmd_ripd;
+extern struct cmd_element ip_rip_receive_version_1_cmd_ripd;
+extern struct route_map_rule_cmd route_set_ip_nexthop_cmd_ripd;
+extern struct cmd_element no_rip_distance_cmd_ripd;
+extern struct cmd_element rip_redistribute_type_cmd_ripd;
+extern struct cmd_element no_ip_rip_split_horizon_cmd_ripd;
+extern struct cmd_element rip_redistribute_rip_cmd_ripd;
+extern struct cmd_element no_match_interface_val_cmd_ripd;
+extern struct route_map_rule_cmd route_match_ip_address_prefix_list_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_key_chain_cmd_ripd;
+extern struct cmd_element no_rip_version_val_cmd_ripd;
+extern struct cmd_element rip_network_cmd_ripd;
+extern struct cmd_element debug_rip_zebra_cmd_ripd;
+extern struct cmd_element debug_rip_packet_direct_cmd_ripd;
+extern struct cmd_element no_match_metric_val_cmd_ripd;
+extern struct cmd_element router_rip_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_string2_cmd_ripd;
+extern struct cmd_element no_rip_passive_interface_cmd_ripd;
+extern struct cmd_element no_rip_version_cmd_ripd;
+extern struct cmd_element no_set_metric_cmd_ripd;
+extern struct cmd_element no_match_interface_cmd_ripd;
+extern struct cmd_element no_debug_rip_events_cmd_ripd;
+extern struct cmd_element match_interface_cmd_ripd;
+extern struct cmd_element ip_rip_split_horizon_poisoned_reverse_cmd_ripd;
+extern struct cmd_element ip_rip_send_version_1_cmd_ripd;
+extern struct cmd_element no_match_tag_val_cmd_ripd;
+extern struct cmd_element rip_offset_list_cmd_ripd;
+extern struct cmd_element no_match_ip_next_hop_cmd_ripd;
+extern struct cmd_element no_rip_distance_source_access_list_cmd_ripd;
+extern struct cmd_element set_metric_addsub_cmd_ripd;
+extern struct route_map_rule_cmd route_set_tag_cmd_ripd;
+extern struct cmd_element no_match_ip_next_hop_prefix_list_val_cmd_ripd;
+extern struct cmd_element match_ip_next_hop_cmd_ripd;
+extern struct cmd_element no_set_tag_cmd_ripd;
+extern struct cmd_element no_match_ip_next_hop_prefix_list_cmd_ripd;
+extern struct cmd_element no_rip_default_information_originate_cmd_ripd;
+extern struct cmd_element show_ip_rip_cmd_ripd;
+extern struct cmd_element ip_rip_authentication_key_chain_cmd_ripd;
+extern struct cmd_element rip_distance_cmd_ripd;
+extern struct cmd_element no_match_ip_address_prefix_list_cmd_ripd;
+extern struct cmd_element no_set_ip_nexthop_cmd_ripd;
+extern struct cmd_element no_ip_rip_receive_version_cmd_ripd;
+extern struct cmd_element rip_distance_source_cmd_ripd;
+extern struct cmd_element ip_rip_receive_version_cmd_ripd;
+extern struct cmd_element no_match_tag_cmd_ripd;
+extern struct cmd_element rip_version_cmd_ripd;
+extern struct cmd_element no_ip_rip_split_horizon_poisoned_reverse_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_mode_type_authlen_cmd_ripd;
+extern struct cmd_element no_ip_rip_authentication_mode_type_cmd_ripd;
+extern struct cmd_element ip_rip_authentication_mode_cmd_ripd;
+extern struct cmd_element no_rip_timers_cmd_ripd;
+extern struct cmd_element rip_route_cmd_ripd;
+extern struct cmd_element show_debugging_rip_cmd_ripd;
+extern struct cmd_element match_metric_cmd_ripd;
+extern struct cmd_element rip_timers_cmd_ripd;
+extern struct cmd_element no_rip_redistribute_type_metric_cmd_ripd;
+extern struct cmd_element no_ip_rip_receive_version_num_cmd_ripd;
+extern struct cmd_element no_set_ip_nexthop_val_cmd_ripd;
+extern struct cmd_element rip_redistribute_type_routemap_cmd_ripd;
+extern struct cmd_element show_ip_rip_status_cmd_ripd;
+extern struct cmd_element ip_rip_split_horizon_cmd_ripd;
+extern struct cmd_element debug_rip_packet_detail_cmd_ripd;
+
+void GlobalVars_initializeActiveSet_ripd()
+{
+	struct cmd_node zebra_node__T = 
+{
+  ZEBRA_NODE,
+  "%s(config-router)# ",
+};
+	struct cmd_node rip_node__T = 
+{
+  RIP_NODE,
+  "%s(config-router)# ",
+  1
+};
+	struct cmd_node debug_node__T = 
+{
+  DEBUG_NODE,
+  "",				
+  1
+};
+	struct cmd_node interface_node__T = 
+{
+  INTERFACE_NODE,
+  "%s(config-if)# ",
+  1,
+};
+	memcpy(&__activeVars->no_rip_redistribute_type_cmd__X, &no_rip_redistribute_type_cmd_ripd, sizeof(no_rip_redistribute_type_cmd_ripd));
+	memcpy(&__activeVars->route_match_metric_cmd__X, &route_match_metric_cmd_ripd, sizeof(route_match_metric_cmd_ripd));
+	memcpy(&__activeVars->rip_passive_interface_cmd__X, &rip_passive_interface_cmd_ripd, sizeof(rip_passive_interface_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_send_version_cmd__X, &no_ip_rip_send_version_cmd_ripd, sizeof(no_ip_rip_send_version_cmd_ripd));
+	__activeVars->retain_mode__X =  0;
+	memcpy(&__activeVars->rip_offset_list_ifname_cmd__X, &rip_offset_list_ifname_cmd_ripd, sizeof(rip_offset_list_ifname_cmd_ripd));
+	memcpy(&__activeVars->match_ip_address_cmd__X, &match_ip_address_cmd_ripd, sizeof(match_ip_address_cmd_ripd));
+	memcpy(&__activeVars->no_rip_redistribute_type_routemap_cmd__X, &no_rip_redistribute_type_routemap_cmd_ripd, sizeof(no_rip_redistribute_type_routemap_cmd_ripd));
+	memcpy(&__activeVars->route_match_ip_next_hop_cmd__X, &route_match_ip_next_hop_cmd_ripd, sizeof(route_match_ip_next_hop_cmd_ripd));
+	__activeVars->pid_file__X =  PATH_RIPD_PID;
+	memcpy(&__activeVars->no_rip_offset_list_ifname_cmd__X, &no_rip_offset_list_ifname_cmd_ripd, sizeof(no_rip_offset_list_ifname_cmd_ripd));
+	memcpy(&__activeVars->no_debug_rip_zebra_cmd__X, &no_debug_rip_zebra_cmd_ripd, sizeof(no_debug_rip_zebra_cmd_ripd));
+	memcpy(&__activeVars->no_rip_route_cmd__X, &no_rip_route_cmd_ripd, sizeof(no_rip_route_cmd_ripd));
+	memcpy(&__activeVars->no_set_metric_val_cmd__X, &no_set_metric_val_cmd_ripd, sizeof(no_set_metric_val_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_string_cmd__X, &no_ip_rip_authentication_string_cmd_ripd, sizeof(no_ip_rip_authentication_string_cmd_ripd));
+	memcpy(&__activeVars->no_rip_network_cmd__X, &no_rip_network_cmd_ripd, sizeof(no_rip_network_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_key_chain2_cmd__X, &no_ip_rip_authentication_key_chain2_cmd_ripd, sizeof(no_ip_rip_authentication_key_chain2_cmd_ripd));
+	memcpy(&__activeVars->rip_distance_source_access_list_cmd__X, &rip_distance_source_access_list_cmd_ripd, sizeof(rip_distance_source_access_list_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_send_version_2_cmd__X, &ip_rip_send_version_2_cmd_ripd, sizeof(ip_rip_send_version_2_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_send_version_cmd__X, &ip_rip_send_version_cmd_ripd, sizeof(ip_rip_send_version_cmd_ripd));
+	memcpy(&__activeVars->no_rip_distance_source_cmd__X, &no_rip_distance_source_cmd_ripd, sizeof(no_rip_distance_source_cmd_ripd));
+	memcpy(&__activeVars->no_router_zebra_cmd__X, &no_router_zebra_cmd_ripd, sizeof(no_router_zebra_cmd_ripd));
+	memcpy(&__activeVars->debug_rip_packet_cmd__X, &debug_rip_packet_cmd_ripd, sizeof(debug_rip_packet_cmd_ripd));
+	memcpy(&__activeVars->match_tag_cmd__X, &match_tag_cmd_ripd, sizeof(match_tag_cmd_ripd));
+	__activeVars->rip_global_route_changes__X =  0;
+	__activeVars->vty_addr__X =  NULL;
+	memcpy(&__activeVars->no_ip_rip_authentication_mode_cmd__X, &no_ip_rip_authentication_mode_cmd_ripd, sizeof(no_ip_rip_authentication_mode_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_address_cmd__X, &no_match_ip_address_cmd_ripd, sizeof(no_match_ip_address_cmd_ripd));
+	memcpy(&__activeVars->no_rip_redistribute_type_metric_routemap_cmd__X, &no_rip_redistribute_type_metric_routemap_cmd_ripd, sizeof(no_rip_redistribute_type_metric_routemap_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_address_prefix_list_val_cmd__X, &no_match_ip_address_prefix_list_val_cmd_ripd, sizeof(no_match_ip_address_prefix_list_val_cmd_ripd));
+	memcpy(&__activeVars->zebra_node__X, &zebra_node__T, sizeof(zebra_node__T));
+	memcpy(&__activeVars->no_rip_timers_val_cmd__X, &no_rip_timers_val_cmd_ripd, sizeof(no_rip_timers_val_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_authentication_string_cmd__X, &ip_rip_authentication_string_cmd_ripd, sizeof(ip_rip_authentication_string_cmd_ripd));
+	memcpy(&__activeVars->set_metric_cmd__X, &set_metric_cmd_ripd, sizeof(set_metric_cmd_ripd));
+	memcpy(&__activeVars->rip_redistribute_type_metric_cmd__X, &rip_redistribute_type_metric_cmd_ripd, sizeof(rip_redistribute_type_metric_cmd_ripd));
+	memcpy(&__activeVars->route_match_ip_address_cmd__X, &route_match_ip_address_cmd_ripd, sizeof(route_match_ip_address_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_receive_version_2_cmd__X, &ip_rip_receive_version_2_cmd_ripd, sizeof(ip_rip_receive_version_2_cmd_ripd));
+	memcpy(&__activeVars->rip_redistribute_type_metric_routemap_cmd__X, &rip_redistribute_type_metric_routemap_cmd_ripd, sizeof(rip_redistribute_type_metric_routemap_cmd_ripd));
+	memcpy(&__activeVars->route_set_metric_cmd__X, &route_set_metric_cmd_ripd, sizeof(route_set_metric_cmd_ripd));
+	memcpy(&__activeVars->no_rip_default_metric_cmd__X, &no_rip_default_metric_cmd_ripd, sizeof(no_rip_default_metric_cmd_ripd));
+	memcpy(&__activeVars->route_match_ip_next_hop_prefix_list_cmd__X, &route_match_ip_next_hop_prefix_list_cmd_ripd, sizeof(route_match_ip_next_hop_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_debug_rip_packet_direct_cmd__X, &no_debug_rip_packet_direct_cmd_ripd, sizeof(no_debug_rip_packet_direct_cmd_ripd));
+	memcpy(&__activeVars->set_tag_cmd__X, &set_tag_cmd_ripd, sizeof(set_tag_cmd_ripd));
+	memcpy(&__activeVars->no_debug_rip_packet_cmd__X, &no_debug_rip_packet_cmd_ripd, sizeof(no_debug_rip_packet_cmd_ripd));
+	memcpy(&__activeVars->router_zebra_cmd__X, &router_zebra_cmd_ripd, sizeof(router_zebra_cmd_ripd));
+	memcpy(&__activeVars->rip_default_information_originate_cmd__X, &rip_default_information_originate_cmd_ripd, sizeof(rip_default_information_originate_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_send_version_num_cmd__X, &no_ip_rip_send_version_num_cmd_ripd, sizeof(no_ip_rip_send_version_num_cmd_ripd));
+	memcpy(&__activeVars->rip_default_metric_cmd__X, &rip_default_metric_cmd_ripd, sizeof(rip_default_metric_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_authentication_mode_authlen_cmd__X, &ip_rip_authentication_mode_authlen_cmd_ripd, sizeof(ip_rip_authentication_mode_authlen_cmd_ripd));
+	__activeVars->rip__X =  NULL;
+	memcpy(&__activeVars->route_match_tag_cmd__X, &route_match_tag_cmd_ripd, sizeof(route_match_tag_cmd_ripd));
+	memcpy(&__activeVars->route_match_interface_cmd__X, &route_match_interface_cmd_ripd, sizeof(route_match_interface_cmd_ripd));
+	__activeVars->rip_global_queries__X =  0;
+	memcpy(&__activeVars->debug_rip_events_cmd__X, &debug_rip_events_cmd_ripd, sizeof(debug_rip_events_cmd_ripd));
+	memcpy(&__activeVars->no_rip_offset_list_cmd__X, &no_rip_offset_list_cmd_ripd, sizeof(no_rip_offset_list_cmd_ripd));
+	memcpy(&__activeVars->no_rip_neighbor_cmd__X, &no_rip_neighbor_cmd_ripd, sizeof(no_rip_neighbor_cmd_ripd));
+	memcpy(&__activeVars->match_ip_next_hop_prefix_list_cmd__X, &match_ip_next_hop_prefix_list_cmd_ripd, sizeof(match_ip_next_hop_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_set_tag_val_cmd__X, &no_set_tag_val_cmd_ripd, sizeof(no_set_tag_val_cmd_ripd));
+	memcpy(&__activeVars->match_ip_address_prefix_list_cmd__X, &match_ip_address_prefix_list_cmd_ripd, sizeof(match_ip_address_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_address_val_cmd__X, &no_match_ip_address_val_cmd_ripd, sizeof(no_match_ip_address_val_cmd_ripd));
+	__activeVars->config_file__X =  NULL;
+	memcpy(&__activeVars->no_rip_redistribute_rip_cmd__X, &no_rip_redistribute_rip_cmd_ripd, sizeof(no_rip_redistribute_rip_cmd_ripd));
+	memcpy(&__activeVars->no_match_metric_cmd__X, &no_match_metric_cmd_ripd, sizeof(no_match_metric_cmd_ripd));
+	memcpy(&__activeVars->rip_neighbor_cmd__X, &rip_neighbor_cmd_ripd, sizeof(rip_neighbor_cmd_ripd));
+	memcpy(&__activeVars->set_ip_nexthop_cmd__X, &set_ip_nexthop_cmd_ripd, sizeof(set_ip_nexthop_cmd_ripd));
+	memcpy(&__activeVars->no_rip_default_metric_val_cmd__X, &no_rip_default_metric_val_cmd_ripd, sizeof(no_rip_default_metric_val_cmd_ripd));
+	memcpy(&__activeVars->no_router_rip_cmd__X, &no_router_rip_cmd_ripd, sizeof(no_router_rip_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_next_hop_val_cmd__X, &no_match_ip_next_hop_val_cmd_ripd, sizeof(no_match_ip_next_hop_val_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_receive_version_1_cmd__X, &ip_rip_receive_version_1_cmd_ripd, sizeof(ip_rip_receive_version_1_cmd_ripd));
+	memcpy(&__activeVars->route_set_ip_nexthop_cmd__X, &route_set_ip_nexthop_cmd_ripd, sizeof(route_set_ip_nexthop_cmd_ripd));
+	memcpy(&__activeVars->no_rip_distance_cmd__X, &no_rip_distance_cmd_ripd, sizeof(no_rip_distance_cmd_ripd));
+	__activeVars->rip_debug_packet__X =  0;
+	memcpy(&__activeVars->rip_redistribute_type_cmd__X, &rip_redistribute_type_cmd_ripd, sizeof(rip_redistribute_type_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_split_horizon_cmd__X, &no_ip_rip_split_horizon_cmd_ripd, sizeof(no_ip_rip_split_horizon_cmd_ripd));
+	memcpy(&__activeVars->rip_redistribute_rip_cmd__X, &rip_redistribute_rip_cmd_ripd, sizeof(rip_redistribute_rip_cmd_ripd));
+	memcpy(&__activeVars->no_match_interface_val_cmd__X, &no_match_interface_val_cmd_ripd, sizeof(no_match_interface_val_cmd_ripd));
+	memcpy(&__activeVars->rip_node__X, &rip_node__T, sizeof(rip_node__T));
+	memcpy(&__activeVars->route_match_ip_address_prefix_list_cmd__X, &route_match_ip_address_prefix_list_cmd_ripd, sizeof(route_match_ip_address_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_key_chain_cmd__X, &no_ip_rip_authentication_key_chain_cmd_ripd, sizeof(no_ip_rip_authentication_key_chain_cmd_ripd));
+	memcpy(&__activeVars->no_rip_version_val_cmd__X, &no_rip_version_val_cmd_ripd, sizeof(no_rip_version_val_cmd_ripd));
+	memcpy(&__activeVars->rip_network_cmd__X, &rip_network_cmd_ripd, sizeof(rip_network_cmd_ripd));
+	memcpy(&__activeVars->debug_rip_zebra_cmd__X, &debug_rip_zebra_cmd_ripd, sizeof(debug_rip_zebra_cmd_ripd));
+	memcpy(&__activeVars->debug_rip_packet_direct_cmd__X, &debug_rip_packet_direct_cmd_ripd, sizeof(debug_rip_packet_direct_cmd_ripd));
+	memcpy(&__activeVars->no_match_metric_val_cmd__X, &no_match_metric_val_cmd_ripd, sizeof(no_match_metric_val_cmd_ripd));
+	memcpy(&__activeVars->router_rip_cmd__X, &router_rip_cmd_ripd, sizeof(router_rip_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_string2_cmd__X, &no_ip_rip_authentication_string2_cmd_ripd, sizeof(no_ip_rip_authentication_string2_cmd_ripd));
+	memcpy(&__activeVars->no_rip_passive_interface_cmd__X, &no_rip_passive_interface_cmd_ripd, sizeof(no_rip_passive_interface_cmd_ripd));
+	memcpy(&__activeVars->no_rip_version_cmd__X, &no_rip_version_cmd_ripd, sizeof(no_rip_version_cmd_ripd));
+	memcpy(&__activeVars->no_set_metric_cmd__X, &no_set_metric_cmd_ripd, sizeof(no_set_metric_cmd_ripd));
+	memcpy(&__activeVars->no_match_interface_cmd__X, &no_match_interface_cmd_ripd, sizeof(no_match_interface_cmd_ripd));
+	memcpy(&__activeVars->no_debug_rip_events_cmd__X, &no_debug_rip_events_cmd_ripd, sizeof(no_debug_rip_events_cmd_ripd));
+	memcpy(&__activeVars->match_interface_cmd__X, &match_interface_cmd_ripd, sizeof(match_interface_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_split_horizon_poisoned_reverse_cmd__X, &ip_rip_split_horizon_poisoned_reverse_cmd_ripd, sizeof(ip_rip_split_horizon_poisoned_reverse_cmd_ripd));
+	__activeVars->rip_debug_zebra__X =  0;
+	__activeVars->vty_port__X =  RIP_VTY_PORT;
+	__activeVars->zclient__X =  NULL;
+	memcpy(&__activeVars->ip_rip_send_version_1_cmd__X, &ip_rip_send_version_1_cmd_ripd, sizeof(ip_rip_send_version_1_cmd_ripd));
+	memcpy(&__activeVars->debug_node__X, &debug_node__T, sizeof(debug_node__T));
+	memcpy(&__activeVars->no_match_tag_val_cmd__X, &no_match_tag_val_cmd_ripd, sizeof(no_match_tag_val_cmd_ripd));
+	memcpy(&__activeVars->rip_offset_list_cmd__X, &rip_offset_list_cmd_ripd, sizeof(rip_offset_list_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_next_hop_cmd__X, &no_match_ip_next_hop_cmd_ripd, sizeof(no_match_ip_next_hop_cmd_ripd));
+	memcpy(&__activeVars->no_rip_distance_source_access_list_cmd__X, &no_rip_distance_source_access_list_cmd_ripd, sizeof(no_rip_distance_source_access_list_cmd_ripd));
+	memcpy(&__activeVars->set_metric_addsub_cmd__X, &set_metric_addsub_cmd_ripd, sizeof(set_metric_addsub_cmd_ripd));
+	memcpy(&__activeVars->route_set_tag_cmd__X, &route_set_tag_cmd_ripd, sizeof(route_set_tag_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_next_hop_prefix_list_val_cmd__X, &no_match_ip_next_hop_prefix_list_val_cmd_ripd, sizeof(no_match_ip_next_hop_prefix_list_val_cmd_ripd));
+	memcpy(&__activeVars->match_ip_next_hop_cmd__X, &match_ip_next_hop_cmd_ripd, sizeof(match_ip_next_hop_cmd_ripd));
+	memcpy(&__activeVars->no_set_tag_cmd__X, &no_set_tag_cmd_ripd, sizeof(no_set_tag_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_next_hop_prefix_list_cmd__X, &no_match_ip_next_hop_prefix_list_cmd_ripd, sizeof(no_match_ip_next_hop_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_rip_default_information_originate_cmd__X, &no_rip_default_information_originate_cmd_ripd, sizeof(no_rip_default_information_originate_cmd_ripd));
+	memcpy(&__activeVars->show_ip_rip_cmd__X, &show_ip_rip_cmd_ripd, sizeof(show_ip_rip_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_authentication_key_chain_cmd__X, &ip_rip_authentication_key_chain_cmd_ripd, sizeof(ip_rip_authentication_key_chain_cmd_ripd));
+	memcpy(&__activeVars->rip_distance_cmd__X, &rip_distance_cmd_ripd, sizeof(rip_distance_cmd_ripd));
+	memcpy(&__activeVars->no_match_ip_address_prefix_list_cmd__X, &no_match_ip_address_prefix_list_cmd_ripd, sizeof(no_match_ip_address_prefix_list_cmd_ripd));
+	memcpy(&__activeVars->no_set_ip_nexthop_cmd__X, &no_set_ip_nexthop_cmd_ripd, sizeof(no_set_ip_nexthop_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_receive_version_cmd__X, &no_ip_rip_receive_version_cmd_ripd, sizeof(no_ip_rip_receive_version_cmd_ripd));
+	memcpy(&__activeVars->rip_distance_source_cmd__X, &rip_distance_source_cmd_ripd, sizeof(rip_distance_source_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_receive_version_cmd__X, &ip_rip_receive_version_cmd_ripd, sizeof(ip_rip_receive_version_cmd_ripd));
+	memcpy(&__activeVars->no_match_tag_cmd__X, &no_match_tag_cmd_ripd, sizeof(no_match_tag_cmd_ripd));
+	memcpy(&__activeVars->rip_version_cmd__X, &rip_version_cmd_ripd, sizeof(rip_version_cmd_ripd));
+	memcpy(&__activeVars->interface_node__X, &interface_node__T, sizeof(interface_node__T));
+	memcpy(&__activeVars->no_ip_rip_split_horizon_poisoned_reverse_cmd__X, &no_ip_rip_split_horizon_poisoned_reverse_cmd_ripd, sizeof(no_ip_rip_split_horizon_poisoned_reverse_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_mode_type_authlen_cmd__X, &no_ip_rip_authentication_mode_type_authlen_cmd_ripd, sizeof(no_ip_rip_authentication_mode_type_authlen_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_authentication_mode_type_cmd__X, &no_ip_rip_authentication_mode_type_cmd_ripd, sizeof(no_ip_rip_authentication_mode_type_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_authentication_mode_cmd__X, &ip_rip_authentication_mode_cmd_ripd, sizeof(ip_rip_authentication_mode_cmd_ripd));
+	memcpy(&__activeVars->no_rip_timers_cmd__X, &no_rip_timers_cmd_ripd, sizeof(no_rip_timers_cmd_ripd));
+	memcpy(&__activeVars->rip_route_cmd__X, &rip_route_cmd_ripd, sizeof(rip_route_cmd_ripd));
+	memcpy(&__activeVars->show_debugging_rip_cmd__X, &show_debugging_rip_cmd_ripd, sizeof(show_debugging_rip_cmd_ripd));
+	memcpy(&__activeVars->match_metric_cmd__X, &match_metric_cmd_ripd, sizeof(match_metric_cmd_ripd));
+	memcpy(&__activeVars->rip_timers_cmd__X, &rip_timers_cmd_ripd, sizeof(rip_timers_cmd_ripd));
+	memcpy(&__activeVars->no_rip_redistribute_type_metric_cmd__X, &no_rip_redistribute_type_metric_cmd_ripd, sizeof(no_rip_redistribute_type_metric_cmd_ripd));
+	memcpy(&__activeVars->no_ip_rip_receive_version_num_cmd__X, &no_ip_rip_receive_version_num_cmd_ripd, sizeof(no_ip_rip_receive_version_num_cmd_ripd));
+	memcpy(&__activeVars->no_set_ip_nexthop_val_cmd__X, &no_set_ip_nexthop_val_cmd_ripd, sizeof(no_set_ip_nexthop_val_cmd_ripd));
+	memcpy(&__activeVars->rip_redistribute_type_routemap_cmd__X, &rip_redistribute_type_routemap_cmd_ripd, sizeof(rip_redistribute_type_routemap_cmd_ripd));
+	memcpy(&__activeVars->show_ip_rip_status_cmd__X, &show_ip_rip_status_cmd_ripd, sizeof(show_ip_rip_status_cmd_ripd));
+	memcpy(&__activeVars->ip_rip_split_horizon_cmd__X, &ip_rip_split_horizon_cmd_ripd, sizeof(ip_rip_split_horizon_cmd_ripd));
+	__activeVars->rip_debug_event__X =  0;
+	memcpy(&__activeVars->debug_rip_packet_detail_cmd__X, &debug_rip_packet_detail_cmd_ripd, sizeof(debug_rip_packet_detail_cmd_ripd));
+}
+
+extern struct cmd_element show_ip_ospf_route_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_param1_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_param1_cmd_ospfd;
+extern struct cmd_element ospf_area_export_list_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_zebra_sub_cmd_ospfd;
+extern struct cmd_element ospf_area_authentication_cmd_ospfd;
+extern struct cmd_element ospf_passive_interface_addr_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_retransmit_interval_addr_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_int_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_external_inter_intra_cmd_ospfd;
+extern struct cmd_element router_ospf_id_cmd_ospfd;
+extern struct cmd_element ip_ospf_hello_interval_addr_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_param4_cmd_ospfd;
+extern struct cmd_element ospf_area_range_advertise_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_metric_type_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_type_metric_cmd_ospfd;
+extern struct cmd_element router_ospf_cmd_ospfd;
+extern struct cmd_element ospf_transmit_delay_cmd_ospfd;
+extern struct cmd_element no_ospf_area_default_cost_cmd_ospfd;
+extern struct cmd_element ospf_area_range_substitute_cmd_ospfd;
+extern struct cmd_element set_metric_type_cmd_ospfd;
+extern struct cmd_element no_match_ip_address_prefix_list_val_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_transmit_delay_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_type_cmd_ospfd;
+extern struct cmd_element ospf_authentication_key_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_intra_inter_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_packet_all_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_intra_external_cmd_ospfd;
+extern struct cmd_element set_metric_cmd_ospfd;
+extern struct cmd_element debug_ospf_nsm_sub_cmd_ospfd;
+extern struct cmd_element ip_ospf_dead_interval_addr_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_type_routemap_cmd_ospfd;
+extern struct cmd_element ip_ospf_network_cmd_ospfd;
+extern struct cmd_element ospf_area_filter_list_cmd_ospfd;
+extern struct route_map_rule_cmd route_set_metric_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_md5_cmd_ospfd;
+extern struct cmd_element ospf_area_nssa_translate_no_summary_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_priority_addr_cmd_ospfd;
+extern struct cmd_element no_ospf_network_area_cmd_ospfd;
+extern struct cmd_element ospf_default_metric_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_intra_external_inter_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_ism_cmd_ospfd;
+extern struct cmd_element no_ospf_neighbor_poll_interval_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_cmd_ospfd;
+extern struct route_map_rule_cmd route_match_interface_cmd_ospfd;
+extern struct cmd_element no_ospf_area_authentication_cmd_ospfd;
+extern struct cmd_element no_ospf_area_range_advertise_cost_cmd_ospfd;
+extern struct cmd_element no_ospf_redistribute_source_cmd_ospfd;
+extern struct cmd_element ospf_network_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_type_routemap_cmd_ospfd;
+extern struct cmd_element no_ospf_refresh_timer_val_cmd_ospfd;
+extern struct cmd_element no_match_ip_address_val_cmd_ospfd;
+extern struct cmd_element debug_ospf_zebra_cmd_ospfd;
+extern struct cmd_element no_ospf_distance_source_cmd_ospfd;
+extern struct cmd_element no_ospf_passive_interface_cmd_ospfd;
+extern struct cmd_element ospf_area_default_cost_cmd_ospfd;
+extern struct cmd_element no_ospf_distance_cmd_ospfd;
+extern struct cmd_element ip_ospf_retransmit_interval_addr_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_detail_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_message_digest_key_cmd_ospfd;
+extern struct cmd_element no_ospf_area_nssa_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_authtype_md5_cmd_ospfd;
+extern struct cmd_element no_router_ospf_cmd_ospfd;
+extern struct cmd_element ip_ospf_transmit_delay_cmd_ospfd;
+extern struct cmd_element no_ospf_cost_cmd_ospfd;
+extern struct cmd_element debug_ospf_nssa_cmd_ospfd;
+extern struct cmd_element no_match_interface_val_cmd_ospfd;
+extern struct route_map_rule_cmd route_match_ip_address_prefix_list_cmd_ospfd;
+extern struct cmd_element debug_ospf_event_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_hello_interval_addr_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_metric_type_routemap_cmd_ospfd;
+extern struct cmd_element ospf_distance_source_access_list_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_cmd_ospfd;
+extern struct cmd_element no_ospf_hello_interval_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_inter_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_metric_routemap_cmd_ospfd;
+extern struct cmd_element ospf_router_id_cmd_ospfd;
+extern struct cmd_element ospf_area_authentication_message_digest_cmd_ospfd;
+extern struct cmd_element no_set_metric_cmd_ospfd;
+extern struct cmd_element ip_ospf_cost_cmd_ospfd;
+extern struct cmd_element no_match_interface_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_packet_send_recv_detail_cmd_ospfd;
+extern struct cmd_element no_set_metric_type_val_cmd_ospfd;
+extern struct cmd_element debug_ospf_ism_sub_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_inter_external_intra_cmd_ospfd;
+extern struct cmd_element ospf_area_range_cmd_ospfd;
+extern struct cmd_element no_ospf_transmit_delay_cmd_ospfd;
+extern struct cmd_element ip_ospf_retransmit_interval_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_id_self_cmd_ospfd;
+extern struct cmd_element no_ospf_auto_cost_reference_bandwidth_cmd_ospfd;
+extern struct cmd_element ospf_area_nssa_no_summary_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_routemap_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_type_metric_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_external_cmd_ospfd;
+extern struct cmd_element no_ospf_message_digest_key_cmd_ospfd;
+extern struct cmd_element ospf_message_digest_key_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_metric_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_key_cmd_ospfd;
+extern struct cmd_element no_ospf_neighbor_priority_pollinterval_cmd_ospfd;
+extern struct route_map_rule_cmd route_set_metric_type_cmd_ospfd;
+extern struct cmd_element no_ospf_dead_interval_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_cmd_ospfd;
+extern struct cmd_element ospf_neighbor_priority_cmd_ospfd;
+extern struct cmd_element no_ospf_abr_type_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_self_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_cmd_ospfd;
+extern struct cmd_element no_match_ip_next_hop_prefix_list_val_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_args_authkey_cmd_ospfd;
+extern struct cmd_element no_ospf_default_metric_val_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_metric_type_routemap_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_routemap_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_param2_cmd_ospfd;
+extern struct cmd_element no_ospf_neighbor_priority_cmd_ospfd;
+extern struct cmd_element no_match_ip_nexthop_val_cmd_ospfd;
+extern struct cmd_element show_debugging_ospf_cmd_ospfd;
+extern struct cmd_element ospf_area_nssa_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_ism_sub_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_int_detail_cmd_ospfd;
+extern struct cmd_element debug_ospf_nsm_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_cmd_ospfd;
+extern struct cmd_element no_ospf_area_filter_list_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_id_cmd_ospfd;
+extern struct cmd_element ospf_passive_interface_cmd_ospfd;
+extern struct cmd_element ospf_neighbor_poll_interval_priority_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_external_inter_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_authtype_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_args_md5_cmd_ospfd;
+extern struct cmd_element ip_ospf_cost_addr_cmd_ospfd;
+extern struct cmd_element no_ospf_compatible_rfc1583_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_metric_type_cmd_ospfd;
+extern struct cmd_element no_ospf_area_range_cmd_ospfd;
+extern struct cmd_element no_ospf_network_cmd_ospfd;
+extern struct cmd_element ospf_cost_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_intra_cmd_ospfd;
+extern struct cmd_element no_ospf_area_stub_cmd_ospfd;
+extern struct cmd_element ospf_network_area_cmd_ospfd;
+extern struct cmd_element match_ip_address_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_metric_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_intra_inter_external_cmd_ospfd;
+extern struct cmd_element no_ospf_area_export_list_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_lsa_sub_cmd_ospfd;
+extern struct cmd_element ip_ospf_message_digest_key_cmd_ospfd;
+extern struct cmd_element ospf_area_shortcut_cmd_ospfd;
+extern struct cmd_element no_set_metric_val_cmd_ospfd;
+extern struct cmd_element ospf_area_import_list_cmd_ospfd;
+extern struct cmd_element debug_ospf_lsa_sub_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authkey_cmd_ospfd;
+extern struct cmd_element ospf_compatible_rfc1583_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_inter_intra_external_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_addr_cmd_ospfd;
+extern struct cmd_element ospf_distance_source_cmd_ospfd;
+extern struct cmd_element no_ospf_authentication_key_cmd_ospfd;
+extern struct cmd_element ospf_area_range_not_advertise_cmd_ospfd;
+extern struct cmd_element ip_ospf_hello_interval_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_metric_type_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_key_addr_cmd_ospfd;
+extern struct cmd_element ip_ospf_dead_interval_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_args_cmd_ospfd;
+extern struct cmd_element debug_ospf_ism_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_cmd_ospfd;
+extern struct cmd_element no_match_ip_address_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_priority_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_dead_interval_cmd_ospfd;
+extern struct cmd_element ospf_neighbor_priority_poll_interval_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_all_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_nssa_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_type_metric_routemap_cmd_ospfd;
+extern struct cmd_element no_ospf_distance_ospf_cmd_ospfd;
+extern struct cmd_element ospf_abr_type_cmd_ospfd;
+extern struct cmd_element ospf_neighbor_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_network_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_external_intra_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_param3_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_type_routemap_cmd_ospfd;
+extern struct route_map_rule_cmd route_match_ip_address_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_lsa_cmd_ospfd;
+extern struct cmd_element no_match_ip_nexthop_cmd_ospfd;
+extern struct cmd_element no_ospf_area_range_cost_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_metric_type_routemap_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_authkey_cmd_ospfd;
+extern struct route_map_rule_cmd route_match_ip_next_hop_prefix_list_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_nsm_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_type_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_external_intra_inter_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_dead_interval_addr_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_hello_interval_cmd_ospfd;
+extern struct cmd_element no_ospf_default_metric_cmd_ospfd;
+extern struct cmd_element no_ospf_area_nssa_no_summary_cmd_ospfd;
+extern struct cmd_element ospf_neighbor_poll_interval_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_cmd_ospfd;
+extern struct cmd_element ospf_area_range_cost_cmd_ospfd;
+extern struct cmd_element ospf_auto_cost_reference_bandwidth_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_inter_external_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_nsm_sub_cmd_ospfd;
+extern struct cmd_element no_ospf_priority_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_cmd_ospfd;
+extern struct cmd_element match_ip_next_hop_prefix_list_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_type_metric_cmd_ospfd;
+extern struct cmd_element ip_ospf_priority_addr_cmd_ospfd;
+extern struct cmd_element match_ip_address_prefix_list_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_md5_cmd_ospfd;
+extern struct cmd_element no_ospf_area_range_substitute_cmd_ospfd;
+extern struct cmd_element no_ospf_neighbor_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_zebra_cmd_ospfd;
+extern struct cmd_element ospf_distance_ospf_inter_intra_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_param2_cmd_ospfd;
+extern struct cmd_element ospf_priority_cmd_ospfd;
+extern struct cmd_element ospf_hello_interval_cmd_ospfd;
+extern struct cmd_element debug_ospf_zebra_sub_cmd_ospfd;
+extern struct cmd_element ospf_timers_spf_cmd_ospfd;
+extern struct cmd_element no_ospf_area_range_advertise_cmd_ospfd;
+extern struct cmd_element no_ospf_distribute_list_out_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_retransmit_interval_cmd_ospfd;
+extern struct cmd_element debug_ospf_packet_all_cmd_ospfd;
+extern struct cmd_element no_ospf_timers_spf_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_id_adv_router_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_authentication_key_addr_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_type_metric_routemap_cmd_ospfd;
+extern struct cmd_element match_interface_cmd_ospfd;
+extern struct cmd_element ospf_area_nssa_translate_cmd_ospfd;
+extern struct cmd_element ospf_area_stub_cmd_ospfd;
+extern struct route_map_rule_cmd route_match_ip_nexthop_cmd_ospfd;
+extern struct cmd_element ospf_dead_interval_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_authentication_cmd_ospfd;
+extern struct cmd_element ospf_area_range_advertise_cost_cmd_ospfd;
+extern struct cmd_element ospf_rfc1583_flag_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_authentication_key_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_authkey_cmd_ospfd;
+extern struct cmd_element no_ospf_rfc1583_flag_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_param3_cmd_ospfd;
+extern struct cmd_element ip_ospf_transmit_delay_addr_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_param4_cmd_ospfd;
+extern struct cmd_element ip_ospf_priority_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_type_cmd_ospfd;
+extern struct cmd_element no_ospf_retransmit_interval_cmd_ospfd;
+extern struct cmd_element debug_ospf_lsa_cmd_ospfd;
+extern struct cmd_element no_ospf_passive_interface_addr_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_packet_send_recv_cmd_ospfd;
+extern struct cmd_element no_ospf_refresh_timer_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_message_digest_key_addr_cmd_ospfd;
+extern struct cmd_element no_ospf_router_id_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_cmd_ospfd;
+extern struct cmd_element ospf_distribute_list_out_cmd_ospfd;
+extern struct cmd_element no_ospf_distance_source_access_list_cmd_ospfd;
+extern struct cmd_element ospf_refresh_timer_cmd_ospfd;
+extern struct cmd_element ospf_area_stub_no_summary_cmd_ospfd;
+extern struct cmd_element ospf_retransmit_interval_cmd_ospfd;
+extern struct cmd_element no_match_ip_next_hop_prefix_list_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_md5_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_routemap_cmd_ospfd;
+extern struct cmd_element ospf_area_vlink_authtype_args_cmd_ospfd;
+extern struct cmd_element debug_ospf_packet_send_recv_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_interface_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_cost_addr_cmd_ospfd;
+extern struct cmd_element no_match_ip_address_prefix_list_cmd_ospfd;
+extern struct cmd_element no_debug_ospf_event_cmd_ospfd;
+extern struct cmd_element ip_ospf_authentication_args_addr_cmd_ospfd;
+extern struct cmd_element ospf_redistribute_source_type_metric_routemap_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_adv_router_cmd_ospfd;
+extern struct cmd_element no_ospf_default_information_originate_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_authentication_addr_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_metric_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_metric_routemap_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_border_routers_cmd_ospfd;
+extern struct cmd_element ospf_distance_cmd_ospfd;
+extern struct cmd_element no_ospf_area_stub_no_summary_cmd_ospfd;
+extern struct cmd_element no_ospf_area_shortcut_cmd_ospfd;
+extern struct cmd_element no_ospf_area_import_list_cmd_ospfd;
+extern struct cmd_element ospf_default_information_originate_always_metric_routemap_cmd_ospfd;
+extern struct cmd_element no_set_metric_type_cmd_ospfd;
+extern struct cmd_element no_ospf_area_vlink_authtype_authkey_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_database_type_id_cmd_ospfd;
+extern struct cmd_element no_router_ospf_id_cmd_ospfd;
+extern struct cmd_element ip_ospf_message_digest_key_addr_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_cost_cmd_ospfd;
+extern struct cmd_element match_ip_nexthop_cmd_ospfd;
+extern struct cmd_element show_ip_ospf_neighbor_detail_all_cmd_ospfd;
+extern struct cmd_element debug_ospf_packet_send_recv_detail_cmd_ospfd;
+extern struct cmd_element no_ip_ospf_transmit_delay_addr_cmd_ospfd;
+
+void GlobalVars_initializeActiveSet_ospfd()
+{
+	unsigned long term_debug_ospf_packet__T[5] =  {0, 0, 0, 0, 0};
+	struct cmd_node zebra_node__T = 
+{
+  ZEBRA_NODE,
+  "%s(config-router)#",
+};
+	struct cmd_node debug_node__T = 
+{
+  DEBUG_NODE,
+  "",
+  1 
+};
+	struct cmd_node interface_node__T = 
+{
+  INTERFACE_NODE,
+  "%s(config-if)# ",
+  1
+};
+	struct cmd_node ospf_node__T = 
+{
+  OSPF_NODE,
+  "%s(config-router)# ",
+  1
+};
+	unsigned long conf_debug_ospf_packet__T[5] =  {0, 0, 0, 0, 0};
+	memcpy(&__activeVars->show_ip_ospf_route_cmd__X, &show_ip_ospf_route_cmd_ospfd, sizeof(show_ip_ospf_route_cmd_ospfd));
+	__activeVars->pid_file__X =  PATH_OSPFD_PID;
+	memcpy(&__activeVars->ospf_area_vlink_param1_cmd__X, &ospf_area_vlink_param1_cmd_ospfd, sizeof(ospf_area_vlink_param1_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_param1_cmd__X, &no_ospf_area_vlink_param1_cmd_ospfd, sizeof(no_ospf_area_vlink_param1_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_export_list_cmd__X, &ospf_area_export_list_cmd_ospfd, sizeof(ospf_area_export_list_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_zebra_sub_cmd__X, &no_debug_ospf_zebra_sub_cmd_ospfd, sizeof(no_debug_ospf_zebra_sub_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_authentication_cmd__X, &ospf_area_authentication_cmd_ospfd, sizeof(ospf_area_authentication_cmd_ospfd));
+	memcpy(&__activeVars->ospf_passive_interface_addr_cmd__X, &ospf_passive_interface_addr_cmd_ospfd, sizeof(ospf_passive_interface_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_retransmit_interval_addr_cmd__X, &no_ip_ospf_retransmit_interval_addr_cmd_ospfd, sizeof(no_ip_ospf_retransmit_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_int_cmd__X, &show_ip_ospf_neighbor_int_cmd_ospfd, sizeof(show_ip_ospf_neighbor_int_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_external_inter_intra_cmd__X, &ospf_distance_ospf_external_inter_intra_cmd_ospfd, sizeof(ospf_distance_ospf_external_inter_intra_cmd_ospfd));
+	memcpy(&__activeVars->router_ospf_id_cmd__X, &router_ospf_id_cmd_ospfd, sizeof(router_ospf_id_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_hello_interval_addr_cmd__X, &ip_ospf_hello_interval_addr_cmd_ospfd, sizeof(ip_ospf_hello_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_param4_cmd__X, &no_ospf_area_vlink_param4_cmd_ospfd, sizeof(no_ospf_area_vlink_param4_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_range_advertise_cmd__X, &ospf_area_range_advertise_cmd_ospfd, sizeof(ospf_area_range_advertise_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_metric_type_cmd__X, &ospf_default_information_originate_metric_type_cmd_ospfd, sizeof(ospf_default_information_originate_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_type_metric_cmd__X, &ospf_default_information_originate_type_metric_cmd_ospfd, sizeof(ospf_default_information_originate_type_metric_cmd_ospfd));
+	memcpy(&__activeVars->router_ospf_cmd__X, &router_ospf_cmd_ospfd, sizeof(router_ospf_cmd_ospfd));
+	memcpy(&__activeVars->ospf_transmit_delay_cmd__X, &ospf_transmit_delay_cmd_ospfd, sizeof(ospf_transmit_delay_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_default_cost_cmd__X, &no_ospf_area_default_cost_cmd_ospfd, sizeof(no_ospf_area_default_cost_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_range_substitute_cmd__X, &ospf_area_range_substitute_cmd_ospfd, sizeof(ospf_area_range_substitute_cmd_ospfd));
+	memcpy(&__activeVars->set_metric_type_cmd__X, &set_metric_type_cmd_ospfd, sizeof(set_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->term_debug_ospf_packet__X, &term_debug_ospf_packet__T, sizeof(term_debug_ospf_packet__T));
+	memcpy(&__activeVars->no_match_ip_address_prefix_list_val_cmd__X, &no_match_ip_address_prefix_list_val_cmd_ospfd, sizeof(no_match_ip_address_prefix_list_val_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_transmit_delay_cmd__X, &no_ip_ospf_transmit_delay_cmd_ospfd, sizeof(no_ip_ospf_transmit_delay_cmd_ospfd));
+	memcpy(&__activeVars->zebra_node__X, &zebra_node__T, sizeof(zebra_node__T));
+	memcpy(&__activeVars->ospf_default_information_originate_type_cmd__X, &ospf_default_information_originate_type_cmd_ospfd, sizeof(ospf_default_information_originate_type_cmd_ospfd));
+	memcpy(&__activeVars->ospf_authentication_key_cmd__X, &ospf_authentication_key_cmd_ospfd, sizeof(ospf_authentication_key_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_intra_inter_cmd__X, &ospf_distance_ospf_intra_inter_cmd_ospfd, sizeof(ospf_distance_ospf_intra_inter_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_packet_all_cmd__X, &no_debug_ospf_packet_all_cmd_ospfd, sizeof(no_debug_ospf_packet_all_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_intra_external_cmd__X, &ospf_distance_ospf_intra_external_cmd_ospfd, sizeof(ospf_distance_ospf_intra_external_cmd_ospfd));
+	memcpy(&__activeVars->set_metric_cmd__X, &set_metric_cmd_ospfd, sizeof(set_metric_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_nsm_sub_cmd__X, &debug_ospf_nsm_sub_cmd_ospfd, sizeof(debug_ospf_nsm_sub_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_dead_interval_addr_cmd__X, &ip_ospf_dead_interval_addr_cmd_ospfd, sizeof(ip_ospf_dead_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_type_routemap_cmd__X, &ospf_default_information_originate_type_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_network_cmd__X, &ip_ospf_network_cmd_ospfd, sizeof(ip_ospf_network_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_filter_list_cmd__X, &ospf_area_filter_list_cmd_ospfd, sizeof(ospf_area_filter_list_cmd_ospfd));
+	memcpy(&__activeVars->route_set_metric_cmd__X, &route_set_metric_cmd_ospfd, sizeof(route_set_metric_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_md5_cmd__X, &ospf_area_vlink_authtype_md5_cmd_ospfd, sizeof(ospf_area_vlink_authtype_md5_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_nssa_translate_no_summary_cmd__X, &ospf_area_nssa_translate_no_summary_cmd_ospfd, sizeof(ospf_area_nssa_translate_no_summary_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_priority_addr_cmd__X, &no_ip_ospf_priority_addr_cmd_ospfd, sizeof(no_ip_ospf_priority_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_network_area_cmd__X, &no_ospf_network_area_cmd_ospfd, sizeof(no_ospf_network_area_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_metric_cmd__X, &ospf_default_metric_cmd_ospfd, sizeof(ospf_default_metric_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_intra_external_inter_cmd__X, &ospf_distance_ospf_intra_external_inter_cmd_ospfd, sizeof(ospf_distance_ospf_intra_external_inter_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_ism_cmd__X, &no_debug_ospf_ism_cmd_ospfd, sizeof(no_debug_ospf_ism_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_neighbor_poll_interval_cmd__X, &no_ospf_neighbor_poll_interval_cmd_ospfd, sizeof(no_ospf_neighbor_poll_interval_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_cmd__X, &no_ospf_area_vlink_cmd_ospfd, sizeof(no_ospf_area_vlink_cmd_ospfd));
+	__activeVars->term_debug_ospf_ism__X =  0;
+	memcpy(&__activeVars->route_match_interface_cmd__X, &route_match_interface_cmd_ospfd, sizeof(route_match_interface_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_authentication_cmd__X, &no_ospf_area_authentication_cmd_ospfd, sizeof(no_ospf_area_authentication_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_range_advertise_cost_cmd__X, &no_ospf_area_range_advertise_cost_cmd_ospfd, sizeof(no_ospf_area_range_advertise_cost_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_redistribute_source_cmd__X, &no_ospf_redistribute_source_cmd_ospfd, sizeof(no_ospf_redistribute_source_cmd_ospfd));
+	memcpy(&__activeVars->ospf_network_cmd__X, &ospf_network_cmd_ospfd, sizeof(ospf_network_cmd_ospfd));
+	__activeVars->conf_debug_ospf_ism__X =  0;
+	memcpy(&__activeVars->ospf_redistribute_source_type_routemap_cmd__X, &ospf_redistribute_source_type_routemap_cmd_ospfd, sizeof(ospf_redistribute_source_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_refresh_timer_val_cmd__X, &no_ospf_refresh_timer_val_cmd_ospfd, sizeof(no_ospf_refresh_timer_val_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_address_val_cmd__X, &no_match_ip_address_val_cmd_ospfd, sizeof(no_match_ip_address_val_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_zebra_cmd__X, &debug_ospf_zebra_cmd_ospfd, sizeof(debug_ospf_zebra_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_distance_source_cmd__X, &no_ospf_distance_source_cmd_ospfd, sizeof(no_ospf_distance_source_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_passive_interface_cmd__X, &no_ospf_passive_interface_cmd_ospfd, sizeof(no_ospf_passive_interface_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_default_cost_cmd__X, &ospf_area_default_cost_cmd_ospfd, sizeof(ospf_area_default_cost_cmd_ospfd));
+	__activeVars->ospf_area_type_msg_max__X =  OSPF_AREA_TYPE_MAX;
+	memcpy(&__activeVars->no_ospf_distance_cmd__X, &no_ospf_distance_cmd_ospfd, sizeof(no_ospf_distance_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_retransmit_interval_addr_cmd__X, &ip_ospf_retransmit_interval_addr_cmd_ospfd, sizeof(ip_ospf_retransmit_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_detail_cmd__X, &show_ip_ospf_neighbor_detail_cmd_ospfd, sizeof(show_ip_ospf_neighbor_detail_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_message_digest_key_cmd__X, &no_ip_ospf_message_digest_key_cmd_ospfd, sizeof(no_ip_ospf_message_digest_key_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_nssa_cmd__X, &no_ospf_area_nssa_cmd_ospfd, sizeof(no_ospf_area_nssa_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_authtype_md5_cmd__X, &no_ospf_area_vlink_authtype_md5_cmd_ospfd, sizeof(no_ospf_area_vlink_authtype_md5_cmd_ospfd));
+	memcpy(&__activeVars->no_router_ospf_cmd__X, &no_router_ospf_cmd_ospfd, sizeof(no_router_ospf_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_transmit_delay_cmd__X, &ip_ospf_transmit_delay_cmd_ospfd, sizeof(ip_ospf_transmit_delay_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_cost_cmd__X, &no_ospf_cost_cmd_ospfd, sizeof(no_ospf_cost_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_nssa_cmd__X, &debug_ospf_nssa_cmd_ospfd, sizeof(debug_ospf_nssa_cmd_ospfd));
+	memcpy(&__activeVars->no_match_interface_val_cmd__X, &no_match_interface_val_cmd_ospfd, sizeof(no_match_interface_val_cmd_ospfd));
+	memcpy(&__activeVars->route_match_ip_address_prefix_list_cmd__X, &route_match_ip_address_prefix_list_cmd_ospfd, sizeof(route_match_ip_address_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_event_cmd__X, &debug_ospf_event_cmd_ospfd, sizeof(debug_ospf_event_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_hello_interval_addr_cmd__X, &no_ip_ospf_hello_interval_addr_cmd_ospfd, sizeof(no_ip_ospf_hello_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_metric_type_routemap_cmd__X, &ospf_default_information_originate_metric_type_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_metric_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_source_access_list_cmd__X, &ospf_distance_source_access_list_cmd_ospfd, sizeof(ospf_distance_source_access_list_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_cmd__X, &show_ip_ospf_database_cmd_ospfd, sizeof(show_ip_ospf_database_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_hello_interval_cmd__X, &no_ospf_hello_interval_cmd_ospfd, sizeof(no_ospf_hello_interval_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_inter_cmd__X, &ospf_distance_ospf_inter_cmd_ospfd, sizeof(ospf_distance_ospf_inter_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_metric_routemap_cmd__X, &ospf_redistribute_source_metric_routemap_cmd_ospfd, sizeof(ospf_redistribute_source_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ospf_router_id_cmd__X, &ospf_router_id_cmd_ospfd, sizeof(ospf_router_id_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_authentication_message_digest_cmd__X, &ospf_area_authentication_message_digest_cmd_ospfd, sizeof(ospf_area_authentication_message_digest_cmd_ospfd));
+	memcpy(&__activeVars->no_set_metric_cmd__X, &no_set_metric_cmd_ospfd, sizeof(no_set_metric_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_cost_cmd__X, &ip_ospf_cost_cmd_ospfd, sizeof(ip_ospf_cost_cmd_ospfd));
+	memcpy(&__activeVars->no_match_interface_cmd__X, &no_match_interface_cmd_ospfd, sizeof(no_match_interface_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_packet_send_recv_detail_cmd__X, &no_debug_ospf_packet_send_recv_detail_cmd_ospfd, sizeof(no_debug_ospf_packet_send_recv_detail_cmd_ospfd));
+	memcpy(&__activeVars->no_set_metric_type_val_cmd__X, &no_set_metric_type_val_cmd_ospfd, sizeof(no_set_metric_type_val_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_ism_sub_cmd__X, &debug_ospf_ism_sub_cmd_ospfd, sizeof(debug_ospf_ism_sub_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_inter_external_intra_cmd__X, &ospf_distance_ospf_inter_external_intra_cmd_ospfd, sizeof(ospf_distance_ospf_inter_external_intra_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_range_cmd__X, &ospf_area_range_cmd_ospfd, sizeof(ospf_area_range_cmd_ospfd));
+	__activeVars->zclient__X =  NULL;
+	memcpy(&__activeVars->no_ospf_transmit_delay_cmd__X, &no_ospf_transmit_delay_cmd_ospfd, sizeof(no_ospf_transmit_delay_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_retransmit_interval_cmd__X, &ip_ospf_retransmit_interval_cmd_ospfd, sizeof(ip_ospf_retransmit_interval_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_type_id_self_cmd__X, &show_ip_ospf_database_type_id_self_cmd_ospfd, sizeof(show_ip_ospf_database_type_id_self_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_auto_cost_reference_bandwidth_cmd__X, &no_ospf_auto_cost_reference_bandwidth_cmd_ospfd, sizeof(no_ospf_auto_cost_reference_bandwidth_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_nssa_no_summary_cmd__X, &ospf_area_nssa_no_summary_cmd_ospfd, sizeof(ospf_area_nssa_no_summary_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_routemap_cmd__X, &ospf_default_information_originate_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_type_metric_cmd__X, &ospf_redistribute_source_type_metric_cmd_ospfd, sizeof(ospf_redistribute_source_type_metric_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_external_cmd__X, &ospf_distance_ospf_external_cmd_ospfd, sizeof(ospf_distance_ospf_external_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_message_digest_key_cmd__X, &no_ospf_message_digest_key_cmd_ospfd, sizeof(no_ospf_message_digest_key_cmd_ospfd));
+	memcpy(&__activeVars->ospf_message_digest_key_cmd__X, &ospf_message_digest_key_cmd_ospfd, sizeof(ospf_message_digest_key_cmd_ospfd));
+	memcpy(&__activeVars->debug_node__X, &debug_node__T, sizeof(debug_node__T));
+	memcpy(&__activeVars->ospf_redistribute_source_metric_cmd__X, &ospf_redistribute_source_metric_cmd_ospfd, sizeof(ospf_redistribute_source_metric_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_key_cmd__X, &ip_ospf_authentication_key_cmd_ospfd, sizeof(ip_ospf_authentication_key_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_neighbor_priority_pollinterval_cmd__X, &no_ospf_neighbor_priority_pollinterval_cmd_ospfd, sizeof(no_ospf_neighbor_priority_pollinterval_cmd_ospfd));
+	memcpy(&__activeVars->route_set_metric_type_cmd__X, &route_set_metric_type_cmd_ospfd, sizeof(route_set_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_dead_interval_cmd__X, &no_ospf_dead_interval_cmd_ospfd, sizeof(no_ospf_dead_interval_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_cmd__X, &ip_ospf_authentication_cmd_ospfd, sizeof(ip_ospf_authentication_cmd_ospfd));
+	memcpy(&__activeVars->ospf_neighbor_priority_cmd__X, &ospf_neighbor_priority_cmd_ospfd, sizeof(ospf_neighbor_priority_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_abr_type_cmd__X, &no_ospf_abr_type_cmd_ospfd, sizeof(no_ospf_abr_type_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_type_self_cmd__X, &show_ip_ospf_database_type_self_cmd_ospfd, sizeof(show_ip_ospf_database_type_self_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_type_cmd__X, &show_ip_ospf_database_type_cmd_ospfd, sizeof(show_ip_ospf_database_type_cmd_ospfd));
+	__activeVars->vlink_count__X =  0;
+	memcpy(&__activeVars->no_match_ip_next_hop_prefix_list_val_cmd__X, &no_match_ip_next_hop_prefix_list_val_cmd_ospfd, sizeof(no_match_ip_next_hop_prefix_list_val_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_args_authkey_cmd__X, &ospf_area_vlink_authtype_args_authkey_cmd_ospfd, sizeof(ospf_area_vlink_authtype_args_authkey_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_default_metric_val_cmd__X, &no_ospf_default_metric_val_cmd_ospfd, sizeof(no_ospf_default_metric_val_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_metric_type_routemap_cmd__X, &ospf_default_information_originate_always_metric_type_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_always_metric_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_routemap_cmd__X, &ospf_default_information_originate_always_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_always_routemap_cmd_ospfd));
+	__activeVars->conf_debug_ospf_nsm__X =  0;
+	memcpy(&__activeVars->ospf_area_vlink_param2_cmd__X, &ospf_area_vlink_param2_cmd_ospfd, sizeof(ospf_area_vlink_param2_cmd_ospfd));
+	memcpy(&__activeVars->interface_node__X, &interface_node__T, sizeof(interface_node__T));
+	memcpy(&__activeVars->no_ospf_neighbor_priority_cmd__X, &no_ospf_neighbor_priority_cmd_ospfd, sizeof(no_ospf_neighbor_priority_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_nexthop_val_cmd__X, &no_match_ip_nexthop_val_cmd_ospfd, sizeof(no_match_ip_nexthop_val_cmd_ospfd));
+	memcpy(&__activeVars->show_debugging_ospf_cmd__X, &show_debugging_ospf_cmd_ospfd, sizeof(show_debugging_ospf_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_nssa_cmd__X, &ospf_area_nssa_cmd_ospfd, sizeof(ospf_area_nssa_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_ism_sub_cmd__X, &no_debug_ospf_ism_sub_cmd_ospfd, sizeof(no_debug_ospf_ism_sub_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_int_detail_cmd__X, &show_ip_ospf_neighbor_int_detail_cmd_ospfd, sizeof(show_ip_ospf_neighbor_int_detail_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_nsm_cmd__X, &debug_ospf_nsm_cmd_ospfd, sizeof(debug_ospf_nsm_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_cmd__X, &ospf_area_vlink_authtype_cmd_ospfd, sizeof(ospf_area_vlink_authtype_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_filter_list_cmd__X, &no_ospf_area_filter_list_cmd_ospfd, sizeof(no_ospf_area_filter_list_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_id_cmd__X, &show_ip_ospf_neighbor_id_cmd_ospfd, sizeof(show_ip_ospf_neighbor_id_cmd_ospfd));
+	memcpy(&__activeVars->ospf_node__X, &ospf_node__T, sizeof(ospf_node__T));
+	memcpy(&__activeVars->ospf_passive_interface_cmd__X, &ospf_passive_interface_cmd_ospfd, sizeof(ospf_passive_interface_cmd_ospfd));
+	memcpy(&__activeVars->ospf_neighbor_poll_interval_priority_cmd__X, &ospf_neighbor_poll_interval_priority_cmd_ospfd, sizeof(ospf_neighbor_poll_interval_priority_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_external_inter_cmd__X, &ospf_distance_ospf_external_inter_cmd_ospfd, sizeof(ospf_distance_ospf_external_inter_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_authtype_cmd__X, &no_ospf_area_vlink_authtype_cmd_ospfd, sizeof(no_ospf_area_vlink_authtype_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_args_md5_cmd__X, &ospf_area_vlink_authtype_args_md5_cmd_ospfd, sizeof(ospf_area_vlink_authtype_args_md5_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_cost_addr_cmd__X, &ip_ospf_cost_addr_cmd_ospfd, sizeof(ip_ospf_cost_addr_cmd_ospfd));
+	__activeVars->conf_debug_ospf_lsa__X =  0;
+	memcpy(&__activeVars->no_ospf_compatible_rfc1583_cmd__X, &no_ospf_compatible_rfc1583_cmd_ospfd, sizeof(no_ospf_compatible_rfc1583_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_metric_type_cmd__X, &ospf_default_information_originate_always_metric_type_cmd_ospfd, sizeof(ospf_default_information_originate_always_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_range_cmd__X, &no_ospf_area_range_cmd_ospfd, sizeof(no_ospf_area_range_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_network_cmd__X, &no_ospf_network_cmd_ospfd, sizeof(no_ospf_network_cmd_ospfd));
+	memcpy(&__activeVars->ospf_cost_cmd__X, &ospf_cost_cmd_ospfd, sizeof(ospf_cost_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_intra_cmd__X, &ospf_distance_ospf_intra_cmd_ospfd, sizeof(ospf_distance_ospf_intra_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_stub_cmd__X, &no_ospf_area_stub_cmd_ospfd, sizeof(no_ospf_area_stub_cmd_ospfd));
+	memcpy(&__activeVars->ospf_network_area_cmd__X, &ospf_network_area_cmd_ospfd, sizeof(ospf_network_area_cmd_ospfd));
+	memcpy(&__activeVars->match_ip_address_cmd__X, &match_ip_address_cmd_ospfd, sizeof(match_ip_address_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_metric_cmd__X, &ospf_default_information_originate_always_metric_cmd_ospfd, sizeof(ospf_default_information_originate_always_metric_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_intra_inter_external_cmd__X, &ospf_distance_ospf_intra_inter_external_cmd_ospfd, sizeof(ospf_distance_ospf_intra_inter_external_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_export_list_cmd__X, &no_ospf_area_export_list_cmd_ospfd, sizeof(no_ospf_area_export_list_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_lsa_sub_cmd__X, &no_debug_ospf_lsa_sub_cmd_ospfd, sizeof(no_debug_ospf_lsa_sub_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_message_digest_key_cmd__X, &ip_ospf_message_digest_key_cmd_ospfd, sizeof(ip_ospf_message_digest_key_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_shortcut_cmd__X, &ospf_area_shortcut_cmd_ospfd, sizeof(ospf_area_shortcut_cmd_ospfd));
+	memcpy(&__activeVars->no_set_metric_val_cmd__X, &no_set_metric_val_cmd_ospfd, sizeof(no_set_metric_val_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_import_list_cmd__X, &ospf_area_import_list_cmd_ospfd, sizeof(ospf_area_import_list_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_lsa_sub_cmd__X, &debug_ospf_lsa_sub_cmd_ospfd, sizeof(debug_ospf_lsa_sub_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authkey_cmd__X, &ospf_area_vlink_authkey_cmd_ospfd, sizeof(ospf_area_vlink_authkey_cmd_ospfd));
+	memcpy(&__activeVars->ospf_compatible_rfc1583_cmd__X, &ospf_compatible_rfc1583_cmd_ospfd, sizeof(ospf_compatible_rfc1583_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_inter_intra_external_cmd__X, &ospf_distance_ospf_inter_intra_external_cmd_ospfd, sizeof(ospf_distance_ospf_inter_intra_external_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_addr_cmd__X, &ip_ospf_authentication_addr_cmd_ospfd, sizeof(ip_ospf_authentication_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_source_cmd__X, &ospf_distance_source_cmd_ospfd, sizeof(ospf_distance_source_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_authentication_key_cmd__X, &no_ospf_authentication_key_cmd_ospfd, sizeof(no_ospf_authentication_key_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_range_not_advertise_cmd__X, &ospf_area_range_not_advertise_cmd_ospfd, sizeof(ospf_area_range_not_advertise_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_hello_interval_cmd__X, &ip_ospf_hello_interval_cmd_ospfd, sizeof(ip_ospf_hello_interval_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_metric_type_cmd__X, &ospf_redistribute_source_metric_type_cmd_ospfd, sizeof(ospf_redistribute_source_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_key_addr_cmd__X, &ip_ospf_authentication_key_addr_cmd_ospfd, sizeof(ip_ospf_authentication_key_addr_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_dead_interval_cmd__X, &ip_ospf_dead_interval_cmd_ospfd, sizeof(ip_ospf_dead_interval_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_args_cmd__X, &ip_ospf_authentication_args_cmd_ospfd, sizeof(ip_ospf_authentication_args_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_ism_cmd__X, &debug_ospf_ism_cmd_ospfd, sizeof(debug_ospf_ism_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_cmd__X, &ospf_area_vlink_cmd_ospfd, sizeof(ospf_area_vlink_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_address_cmd__X, &no_match_ip_address_cmd_ospfd, sizeof(no_match_ip_address_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_priority_cmd__X, &no_ip_ospf_priority_cmd_ospfd, sizeof(no_ip_ospf_priority_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_dead_interval_cmd__X, &no_ip_ospf_dead_interval_cmd_ospfd, sizeof(no_ip_ospf_dead_interval_cmd_ospfd));
+	memcpy(&__activeVars->ospf_neighbor_priority_poll_interval_cmd__X, &ospf_neighbor_priority_poll_interval_cmd_ospfd, sizeof(ospf_neighbor_priority_poll_interval_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_all_cmd__X, &show_ip_ospf_neighbor_all_cmd_ospfd, sizeof(show_ip_ospf_neighbor_all_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_nssa_cmd__X, &no_debug_ospf_nssa_cmd_ospfd, sizeof(no_debug_ospf_nssa_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_type_metric_routemap_cmd__X, &ospf_default_information_originate_always_type_metric_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_always_type_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_distance_ospf_cmd__X, &no_ospf_distance_ospf_cmd_ospfd, sizeof(no_ospf_distance_ospf_cmd_ospfd));
+	memcpy(&__activeVars->ospf_abr_type_cmd__X, &ospf_abr_type_cmd_ospfd, sizeof(ospf_abr_type_cmd_ospfd));
+	memcpy(&__activeVars->ospf_neighbor_cmd__X, &ospf_neighbor_cmd_ospfd, sizeof(ospf_neighbor_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_network_cmd__X, &no_ip_ospf_network_cmd_ospfd, sizeof(no_ip_ospf_network_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_external_intra_cmd__X, &ospf_distance_ospf_external_intra_cmd_ospfd, sizeof(ospf_distance_ospf_external_intra_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_param3_cmd__X, &no_ospf_area_vlink_param3_cmd_ospfd, sizeof(no_ospf_area_vlink_param3_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_type_routemap_cmd__X, &ospf_default_information_originate_always_type_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_always_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->route_match_ip_address_cmd__X, &route_match_ip_address_cmd_ospfd, sizeof(route_match_ip_address_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_lsa_cmd__X, &no_debug_ospf_lsa_cmd_ospfd, sizeof(no_debug_ospf_lsa_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_nexthop_cmd__X, &no_match_ip_nexthop_cmd_ospfd, sizeof(no_match_ip_nexthop_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_range_cost_cmd__X, &no_ospf_area_range_cost_cmd_ospfd, sizeof(no_ospf_area_range_cost_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_metric_type_routemap_cmd__X, &ospf_redistribute_source_metric_type_routemap_cmd_ospfd, sizeof(ospf_redistribute_source_metric_type_routemap_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_authkey_cmd__X, &no_ospf_area_vlink_authkey_cmd_ospfd, sizeof(no_ospf_area_vlink_authkey_cmd_ospfd));
+	__activeVars->term_debug_ospf_event__X =  0;
+	memcpy(&__activeVars->route_match_ip_next_hop_prefix_list_cmd__X, &route_match_ip_next_hop_prefix_list_cmd_ospfd, sizeof(route_match_ip_next_hop_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_nsm_cmd__X, &no_debug_ospf_nsm_cmd_ospfd, sizeof(no_debug_ospf_nsm_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_type_cmd__X, &ospf_redistribute_source_type_cmd_ospfd, sizeof(ospf_redistribute_source_type_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_external_intra_inter_cmd__X, &ospf_distance_ospf_external_intra_inter_cmd_ospfd, sizeof(ospf_distance_ospf_external_intra_inter_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_dead_interval_addr_cmd__X, &no_ip_ospf_dead_interval_addr_cmd_ospfd, sizeof(no_ip_ospf_dead_interval_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_hello_interval_cmd__X, &no_ip_ospf_hello_interval_cmd_ospfd, sizeof(no_ip_ospf_hello_interval_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_default_metric_cmd__X, &no_ospf_default_metric_cmd_ospfd, sizeof(no_ospf_default_metric_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_nssa_no_summary_cmd__X, &no_ospf_area_nssa_no_summary_cmd_ospfd, sizeof(no_ospf_area_nssa_no_summary_cmd_ospfd));
+	memcpy(&__activeVars->ospf_neighbor_poll_interval_cmd__X, &ospf_neighbor_poll_interval_cmd_ospfd, sizeof(ospf_neighbor_poll_interval_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_cmd__X, &ospf_default_information_originate_always_cmd_ospfd, sizeof(ospf_default_information_originate_always_cmd_ospfd));
+	__activeVars->conf_debug_ospf_zebra__X =  0;
+	memcpy(&__activeVars->ospf_area_range_cost_cmd__X, &ospf_area_range_cost_cmd_ospfd, sizeof(ospf_area_range_cost_cmd_ospfd));
+	memcpy(&__activeVars->ospf_auto_cost_reference_bandwidth_cmd__X, &ospf_auto_cost_reference_bandwidth_cmd_ospfd, sizeof(ospf_auto_cost_reference_bandwidth_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_inter_external_cmd__X, &ospf_distance_ospf_inter_external_cmd_ospfd, sizeof(ospf_distance_ospf_inter_external_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_nsm_sub_cmd__X, &no_debug_ospf_nsm_sub_cmd_ospfd, sizeof(no_debug_ospf_nsm_sub_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_priority_cmd__X, &no_ospf_priority_cmd_ospfd, sizeof(no_ospf_priority_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_cmd__X, &ospf_redistribute_source_cmd_ospfd, sizeof(ospf_redistribute_source_cmd_ospfd));
+	memcpy(&__activeVars->match_ip_next_hop_prefix_list_cmd__X, &match_ip_next_hop_prefix_list_cmd_ospfd, sizeof(match_ip_next_hop_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_type_metric_cmd__X, &ospf_default_information_originate_always_type_metric_cmd_ospfd, sizeof(ospf_default_information_originate_always_type_metric_cmd_ospfd));
+	__activeVars->term_debug_ospf_nssa__X =  0;
+	memcpy(&__activeVars->ip_ospf_priority_addr_cmd__X, &ip_ospf_priority_addr_cmd_ospfd, sizeof(ip_ospf_priority_addr_cmd_ospfd));
+	memcpy(&__activeVars->match_ip_address_prefix_list_cmd__X, &match_ip_address_prefix_list_cmd_ospfd, sizeof(match_ip_address_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_md5_cmd__X, &no_ospf_area_vlink_md5_cmd_ospfd, sizeof(no_ospf_area_vlink_md5_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_range_substitute_cmd__X, &no_ospf_area_range_substitute_cmd_ospfd, sizeof(no_ospf_area_range_substitute_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_neighbor_cmd__X, &no_ospf_neighbor_cmd_ospfd, sizeof(no_ospf_neighbor_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_zebra_cmd__X, &no_debug_ospf_zebra_cmd_ospfd, sizeof(no_debug_ospf_zebra_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_ospf_inter_intra_cmd__X, &ospf_distance_ospf_inter_intra_cmd_ospfd, sizeof(ospf_distance_ospf_inter_intra_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_param2_cmd__X, &no_ospf_area_vlink_param2_cmd_ospfd, sizeof(no_ospf_area_vlink_param2_cmd_ospfd));
+	memcpy(&__activeVars->ospf_priority_cmd__X, &ospf_priority_cmd_ospfd, sizeof(ospf_priority_cmd_ospfd));
+	memcpy(&__activeVars->ospf_hello_interval_cmd__X, &ospf_hello_interval_cmd_ospfd, sizeof(ospf_hello_interval_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_zebra_sub_cmd__X, &debug_ospf_zebra_sub_cmd_ospfd, sizeof(debug_ospf_zebra_sub_cmd_ospfd));
+	memcpy(&__activeVars->ospf_timers_spf_cmd__X, &ospf_timers_spf_cmd_ospfd, sizeof(ospf_timers_spf_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_range_advertise_cmd__X, &no_ospf_area_range_advertise_cmd_ospfd, sizeof(no_ospf_area_range_advertise_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_distribute_list_out_cmd__X, &no_ospf_distribute_list_out_cmd_ospfd, sizeof(no_ospf_distribute_list_out_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_retransmit_interval_cmd__X, &no_ip_ospf_retransmit_interval_cmd_ospfd, sizeof(no_ip_ospf_retransmit_interval_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_packet_all_cmd__X, &debug_ospf_packet_all_cmd_ospfd, sizeof(debug_ospf_packet_all_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_timers_spf_cmd__X, &no_ospf_timers_spf_cmd_ospfd, sizeof(no_ospf_timers_spf_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_cmd__X, &show_ip_ospf_neighbor_cmd_ospfd, sizeof(show_ip_ospf_neighbor_cmd_ospfd));
+	__activeVars->term_debug_ospf_zebra__X =  0;
+	memcpy(&__activeVars->show_ip_ospf_database_type_id_adv_router_cmd__X, &show_ip_ospf_database_type_id_adv_router_cmd_ospfd, sizeof(show_ip_ospf_database_type_id_adv_router_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_authentication_key_addr_cmd__X, &no_ip_ospf_authentication_key_addr_cmd_ospfd, sizeof(no_ip_ospf_authentication_key_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_type_metric_routemap_cmd__X, &ospf_default_information_originate_type_metric_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_type_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->match_interface_cmd__X, &match_interface_cmd_ospfd, sizeof(match_interface_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_nssa_translate_cmd__X, &ospf_area_nssa_translate_cmd_ospfd, sizeof(ospf_area_nssa_translate_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_stub_cmd__X, &ospf_area_stub_cmd_ospfd, sizeof(ospf_area_stub_cmd_ospfd));
+	memcpy(&__activeVars->route_match_ip_nexthop_cmd__X, &route_match_ip_nexthop_cmd_ospfd, sizeof(route_match_ip_nexthop_cmd_ospfd));
+	memcpy(&__activeVars->ospf_dead_interval_cmd__X, &ospf_dead_interval_cmd_ospfd, sizeof(ospf_dead_interval_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_authentication_cmd__X, &no_ip_ospf_authentication_cmd_ospfd, sizeof(no_ip_ospf_authentication_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_range_advertise_cost_cmd__X, &ospf_area_range_advertise_cost_cmd_ospfd, sizeof(ospf_area_range_advertise_cost_cmd_ospfd));
+	memcpy(&__activeVars->ospf_rfc1583_flag_cmd__X, &ospf_rfc1583_flag_cmd_ospfd, sizeof(ospf_rfc1583_flag_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_authentication_key_cmd__X, &no_ip_ospf_authentication_key_cmd_ospfd, sizeof(no_ip_ospf_authentication_key_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_authkey_cmd__X, &ospf_area_vlink_authtype_authkey_cmd_ospfd, sizeof(ospf_area_vlink_authtype_authkey_cmd_ospfd));
+	__activeVars->conf_debug_ospf_event__X =  0;
+	memcpy(&__activeVars->no_ospf_rfc1583_flag_cmd__X, &no_ospf_rfc1583_flag_cmd_ospfd, sizeof(no_ospf_rfc1583_flag_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_param3_cmd__X, &ospf_area_vlink_param3_cmd_ospfd, sizeof(ospf_area_vlink_param3_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_transmit_delay_addr_cmd__X, &ip_ospf_transmit_delay_addr_cmd_ospfd, sizeof(ip_ospf_transmit_delay_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_param4_cmd__X, &ospf_area_vlink_param4_cmd_ospfd, sizeof(ospf_area_vlink_param4_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_priority_cmd__X, &ip_ospf_priority_cmd_ospfd, sizeof(ip_ospf_priority_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_type_cmd__X, &ospf_default_information_originate_always_type_cmd_ospfd, sizeof(ospf_default_information_originate_always_type_cmd_ospfd));
+	memcpy(&__activeVars->conf_debug_ospf_packet__X, &conf_debug_ospf_packet__T, sizeof(conf_debug_ospf_packet__T));
+	memcpy(&__activeVars->no_ospf_retransmit_interval_cmd__X, &no_ospf_retransmit_interval_cmd_ospfd, sizeof(no_ospf_retransmit_interval_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_lsa_cmd__X, &debug_ospf_lsa_cmd_ospfd, sizeof(debug_ospf_lsa_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_passive_interface_addr_cmd__X, &no_ospf_passive_interface_addr_cmd_ospfd, sizeof(no_ospf_passive_interface_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_packet_send_recv_cmd__X, &no_debug_ospf_packet_send_recv_cmd_ospfd, sizeof(no_debug_ospf_packet_send_recv_cmd_ospfd));
+	__activeVars->conf_debug_ospf_nssa__X =  0;
+	memcpy(&__activeVars->no_ospf_refresh_timer_cmd__X, &no_ospf_refresh_timer_cmd_ospfd, sizeof(no_ospf_refresh_timer_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_message_digest_key_addr_cmd__X, &no_ip_ospf_message_digest_key_addr_cmd_ospfd, sizeof(no_ip_ospf_message_digest_key_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_router_id_cmd__X, &no_ospf_router_id_cmd_ospfd, sizeof(no_ospf_router_id_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_cmd__X, &ospf_default_information_originate_cmd_ospfd, sizeof(ospf_default_information_originate_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_cmd__X, &show_ip_ospf_cmd_ospfd, sizeof(show_ip_ospf_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distribute_list_out_cmd__X, &ospf_distribute_list_out_cmd_ospfd, sizeof(ospf_distribute_list_out_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_distance_source_access_list_cmd__X, &no_ospf_distance_source_access_list_cmd_ospfd, sizeof(no_ospf_distance_source_access_list_cmd_ospfd));
+	memcpy(&__activeVars->ospf_refresh_timer_cmd__X, &ospf_refresh_timer_cmd_ospfd, sizeof(ospf_refresh_timer_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_stub_no_summary_cmd__X, &ospf_area_stub_no_summary_cmd_ospfd, sizeof(ospf_area_stub_no_summary_cmd_ospfd));
+	memcpy(&__activeVars->ospf_retransmit_interval_cmd__X, &ospf_retransmit_interval_cmd_ospfd, sizeof(ospf_retransmit_interval_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_next_hop_prefix_list_cmd__X, &no_match_ip_next_hop_prefix_list_cmd_ospfd, sizeof(no_match_ip_next_hop_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_md5_cmd__X, &ospf_area_vlink_md5_cmd_ospfd, sizeof(ospf_area_vlink_md5_cmd_ospfd));
+	__activeVars->term_debug_ospf_nsm__X =  0;
+	memcpy(&__activeVars->ospf_redistribute_source_routemap_cmd__X, &ospf_redistribute_source_routemap_cmd_ospfd, sizeof(ospf_redistribute_source_routemap_cmd_ospfd));
+	memcpy(&__activeVars->ospf_area_vlink_authtype_args_cmd__X, &ospf_area_vlink_authtype_args_cmd_ospfd, sizeof(ospf_area_vlink_authtype_args_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_packet_send_recv_cmd__X, &debug_ospf_packet_send_recv_cmd_ospfd, sizeof(debug_ospf_packet_send_recv_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_interface_cmd__X, &show_ip_ospf_interface_cmd_ospfd, sizeof(show_ip_ospf_interface_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_cost_addr_cmd__X, &no_ip_ospf_cost_addr_cmd_ospfd, sizeof(no_ip_ospf_cost_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_match_ip_address_prefix_list_cmd__X, &no_match_ip_address_prefix_list_cmd_ospfd, sizeof(no_match_ip_address_prefix_list_cmd_ospfd));
+	memcpy(&__activeVars->no_debug_ospf_event_cmd__X, &no_debug_ospf_event_cmd_ospfd, sizeof(no_debug_ospf_event_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_authentication_args_addr_cmd__X, &ip_ospf_authentication_args_addr_cmd_ospfd, sizeof(ip_ospf_authentication_args_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_redistribute_source_type_metric_routemap_cmd__X, &ospf_redistribute_source_type_metric_routemap_cmd_ospfd, sizeof(ospf_redistribute_source_type_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_type_adv_router_cmd__X, &show_ip_ospf_database_type_adv_router_cmd_ospfd, sizeof(show_ip_ospf_database_type_adv_router_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_default_information_originate_cmd__X, &no_ospf_default_information_originate_cmd_ospfd, sizeof(no_ospf_default_information_originate_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_authentication_addr_cmd__X, &no_ip_ospf_authentication_addr_cmd_ospfd, sizeof(no_ip_ospf_authentication_addr_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_metric_cmd__X, &ospf_default_information_originate_metric_cmd_ospfd, sizeof(ospf_default_information_originate_metric_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_metric_routemap_cmd__X, &ospf_default_information_originate_metric_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_border_routers_cmd__X, &show_ip_ospf_border_routers_cmd_ospfd, sizeof(show_ip_ospf_border_routers_cmd_ospfd));
+	memcpy(&__activeVars->ospf_distance_cmd__X, &ospf_distance_cmd_ospfd, sizeof(ospf_distance_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_stub_no_summary_cmd__X, &no_ospf_area_stub_no_summary_cmd_ospfd, sizeof(no_ospf_area_stub_no_summary_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_shortcut_cmd__X, &no_ospf_area_shortcut_cmd_ospfd, sizeof(no_ospf_area_shortcut_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_import_list_cmd__X, &no_ospf_area_import_list_cmd_ospfd, sizeof(no_ospf_area_import_list_cmd_ospfd));
+	memcpy(&__activeVars->ospf_default_information_originate_always_metric_routemap_cmd__X, &ospf_default_information_originate_always_metric_routemap_cmd_ospfd, sizeof(ospf_default_information_originate_always_metric_routemap_cmd_ospfd));
+	memcpy(&__activeVars->no_set_metric_type_cmd__X, &no_set_metric_type_cmd_ospfd, sizeof(no_set_metric_type_cmd_ospfd));
+	memcpy(&__activeVars->no_ospf_area_vlink_authtype_authkey_cmd__X, &no_ospf_area_vlink_authtype_authkey_cmd_ospfd, sizeof(no_ospf_area_vlink_authtype_authkey_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_database_type_id_cmd__X, &show_ip_ospf_database_type_id_cmd_ospfd, sizeof(show_ip_ospf_database_type_id_cmd_ospfd));
+	memcpy(&__activeVars->no_router_ospf_id_cmd__X, &no_router_ospf_id_cmd_ospfd, sizeof(no_router_ospf_id_cmd_ospfd));
+	memcpy(&__activeVars->ip_ospf_message_digest_key_addr_cmd__X, &ip_ospf_message_digest_key_addr_cmd_ospfd, sizeof(ip_ospf_message_digest_key_addr_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_cost_cmd__X, &no_ip_ospf_cost_cmd_ospfd, sizeof(no_ip_ospf_cost_cmd_ospfd));
+	__activeVars->term_debug_ospf_lsa__X =  0;
+	memcpy(&__activeVars->match_ip_nexthop_cmd__X, &match_ip_nexthop_cmd_ospfd, sizeof(match_ip_nexthop_cmd_ospfd));
+	memcpy(&__activeVars->show_ip_ospf_neighbor_detail_all_cmd__X, &show_ip_ospf_neighbor_detail_all_cmd_ospfd, sizeof(show_ip_ospf_neighbor_detail_all_cmd_ospfd));
+	memcpy(&__activeVars->debug_ospf_packet_send_recv_detail_cmd__X, &debug_ospf_packet_send_recv_detail_cmd_ospfd, sizeof(debug_ospf_packet_send_recv_detail_cmd_ospfd));
+	memcpy(&__activeVars->no_ip_ospf_transmit_delay_addr_cmd__X, &no_ip_ospf_transmit_delay_addr_cmd_ospfd, sizeof(no_ip_ospf_transmit_delay_addr_cmd_ospfd));
+}
+
+extern struct cmd_element no_ip_route_mask_distance_cmd_zebra;
+extern struct cmd_element no_bandwidth_if_cmd_zebra;
+extern struct cmd_element router_id_cmd_zebra;
+extern struct cmd_element ip_route_flags_distance2_cmd_zebra;
+extern struct cmd_element no_ip_route_mask_flags2_cmd_zebra;
+extern struct cmd_element ip_route_mask_cmd_zebra;
+extern struct cmd_element no_debug_zebra_packet_direct_cmd_zebra;
+extern struct cmd_element ip_route_mask_flags_distance_cmd_zebra;
+extern struct cmd_element no_ip_route_mask_flags_distance2_cmd_zebra;
+extern struct cmd_element show_zebra_client_cmd_zebra;
+extern struct cmd_element show_ip_route_supernets_cmd_zebra;
+extern struct cmd_element no_multicast_cmd_zebra;
+extern struct cmd_element no_ip_forwarding_cmd_zebra;
+extern struct cmd_element no_ip_route_distance_cmd_zebra;
+extern struct cmd_element no_debug_zebra_packet_cmd_zebra;
+extern struct cmd_element bandwidth_if_cmd_zebra;
+extern struct cmd_element no_ip_route_flags_cmd_zebra;
+extern struct cmd_element ip_address_cmd_zebra;
+extern struct cmd_element show_ip_route_cmd_zebra;
+extern struct cmd_element debug_zebra_packet_detail_cmd_zebra;
+extern struct cmd_element multicast_cmd_zebra;
+extern struct cmd_element show_ip_route_prefix_cmd_zebra;
+extern struct cmd_element no_ip_address_label_cmd_zebra;
+extern struct cmd_element zebra_interface_cmd_zebra;
+extern struct cmd_element ip_forwarding_cmd_zebra;
+extern struct cmd_element ip_route_flags_distance_cmd_zebra;
+extern struct cmd_element show_ip_route_prefix_longer_cmd_zebra;
+extern struct cmd_element no_ip_route_mask_flags_cmd_zebra;
+extern struct cmd_element no_debug_zebra_kernel_cmd_zebra;
+extern struct cmd_element no_ip_route_mask_flags_distance_cmd_zebra;
+extern struct cmd_element no_ip_address_cmd_zebra;
+extern struct cmd_element no_shutdown_if_cmd_zebra;
+extern struct cmd_element debug_zebra_kernel_cmd_zebra;
+extern struct cmd_element no_ip_route_cmd_zebra;
+extern struct cmd_element show_debugging_zebra_cmd_zebra;
+extern struct cmd_element shutdown_if_cmd_zebra;
+extern struct cmd_element no_bandwidth_if_val_cmd_zebra;
+extern struct cmd_element ip_route_flags_cmd_zebra;
+extern struct cmd_element show_ip_route_summary_cmd_zebra;
+extern struct cmd_element show_table_cmd_zebra;
+extern struct cmd_element ip_route_cmd_zebra;
+extern struct cmd_element show_ip_forwarding_cmd_zebra;
+extern struct cmd_element debug_zebra_packet_direct_cmd_zebra;
+extern struct cmd_element show_ip_route_protocol_cmd_zebra;
+extern struct cmd_element config_table_cmd_zebra;
+extern struct cmd_element no_linkdetect_cmd_zebra;
+extern struct cmd_element no_ip_route_mask_cmd_zebra;
+extern struct cmd_element show_interface_cmd_zebra;
+extern struct cmd_element show_ip_route_addr_cmd_zebra;
+extern struct cmd_element no_ip_route_flags_distance_cmd_zebra;
+extern struct cmd_element no_router_id_cmd_zebra;
+extern struct cmd_element debug_zebra_events_cmd_zebra;
+extern struct cmd_element ip_route_mask_flags2_cmd_zebra;
+extern struct cmd_element no_debug_zebra_events_cmd_zebra;
+extern struct cmd_element ip_route_mask_distance_cmd_zebra;
+extern struct cmd_element ip_route_flags2_cmd_zebra;
+extern struct cmd_element ip_route_mask_flags_cmd_zebra;
+extern struct cmd_element linkdetect_cmd_zebra;
+extern struct cmd_element no_ip_route_flags2_cmd_zebra;
+extern struct cmd_element ip_route_mask_flags_distance2_cmd_zebra;
+extern struct cmd_element debug_zebra_packet_cmd_zebra;
+extern struct cmd_element ip_address_label_cmd_zebra;
+extern struct cmd_element no_ip_route_flags_distance2_cmd_zebra;
+extern struct cmd_element ip_route_distance_cmd_zebra;
+
+void GlobalVars_initializeActiveSet_zebra()
+{
+	struct cmd_node table_node__T = 
+{
+  TABLE_NODE,
+  "",				
+  1
+};
+	struct cmd_node forwarding_node__T = 
+{
+  FORWARDING_NODE,
+  "",				
+  1
+};
+	struct nlsock netlink_addr__T =  { -1, 0, {0}, "netlink-addr"};
+	struct cmd_node debug_node__T = 
+{
+  DEBUG_NODE,
+  "",				
+  1
+};
+	struct zebra_t zebrad__T = 
+{
+  NULL,
+  NULL,
+  0
+};
+	struct nlsock netlink_cmd__T =  { -1, 0, {0}, "netlink-cmd"};
+	struct cmd_node ip_node__T =  { IP_NODE,  "",  1 };
+	struct cmd_node interface_node__T = 
+{
+  INTERFACE_NODE,
+  "%s(config-if)# ",
+  1
+};
+	struct nlsock netlink__T =  { -1, 0, {0}, "n""etlink-listen"};
+	__activeVars->retain_mode__X =  0;
+	memcpy(&__activeVars->no_ip_route_mask_distance_cmd__X, &no_ip_route_mask_distance_cmd_zebra, sizeof(no_ip_route_mask_distance_cmd_zebra));
+	memcpy(&__activeVars->no_bandwidth_if_cmd__X, &no_bandwidth_if_cmd_zebra, sizeof(no_bandwidth_if_cmd_zebra));
+	memcpy(&__activeVars->router_id_cmd__X, &router_id_cmd_zebra, sizeof(router_id_cmd_zebra));
+	memcpy(&__activeVars->ip_route_flags_distance2_cmd__X, &ip_route_flags_distance2_cmd_zebra, sizeof(ip_route_flags_distance2_cmd_zebra));
+	__activeVars->pid_file__X =  PATH_ZEBRA_PID;
+	memcpy(&__activeVars->table_node__X, &table_node__T, sizeof(table_node__T));
+	memcpy(&__activeVars->no_ip_route_mask_flags2_cmd__X, &no_ip_route_mask_flags2_cmd_zebra, sizeof(no_ip_route_mask_flags2_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_cmd__X, &ip_route_mask_cmd_zebra, sizeof(ip_route_mask_cmd_zebra));
+	memcpy(&__activeVars->no_debug_zebra_packet_direct_cmd__X, &no_debug_zebra_packet_direct_cmd_zebra, sizeof(no_debug_zebra_packet_direct_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_flags_distance_cmd__X, &ip_route_mask_flags_distance_cmd_zebra, sizeof(ip_route_mask_flags_distance_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_mask_flags_distance2_cmd__X, &no_ip_route_mask_flags_distance2_cmd_zebra, sizeof(no_ip_route_mask_flags_distance2_cmd_zebra));
+	memcpy(&__activeVars->show_zebra_client_cmd__X, &show_zebra_client_cmd_zebra, sizeof(show_zebra_client_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_supernets_cmd__X, &show_ip_route_supernets_cmd_zebra, sizeof(show_ip_route_supernets_cmd_zebra));
+	memcpy(&__activeVars->no_multicast_cmd__X, &no_multicast_cmd_zebra, sizeof(no_multicast_cmd_zebra));
+	memcpy(&__activeVars->no_ip_forwarding_cmd__X, &no_ip_forwarding_cmd_zebra, sizeof(no_ip_forwarding_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_distance_cmd__X, &no_ip_route_distance_cmd_zebra, sizeof(no_ip_route_distance_cmd_zebra));
+	memcpy(&__activeVars->no_debug_zebra_packet_cmd__X, &no_debug_zebra_packet_cmd_zebra, sizeof(no_debug_zebra_packet_cmd_zebra));
+	memcpy(&__activeVars->bandwidth_if_cmd__X, &bandwidth_if_cmd_zebra, sizeof(bandwidth_if_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_flags_cmd__X, &no_ip_route_flags_cmd_zebra, sizeof(no_ip_route_flags_cmd_zebra));
+	memcpy(&__activeVars->ip_address_cmd__X, &ip_address_cmd_zebra, sizeof(ip_address_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_cmd__X, &show_ip_route_cmd_zebra, sizeof(show_ip_route_cmd_zebra));
+	memcpy(&__activeVars->debug_zebra_packet_detail_cmd__X, &debug_zebra_packet_detail_cmd_zebra, sizeof(debug_zebra_packet_detail_cmd_zebra));
+	memcpy(&__activeVars->multicast_cmd__X, &multicast_cmd_zebra, sizeof(multicast_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_prefix_cmd__X, &show_ip_route_prefix_cmd_zebra, sizeof(show_ip_route_prefix_cmd_zebra));
+	memcpy(&__activeVars->no_ip_address_label_cmd__X, &no_ip_address_label_cmd_zebra, sizeof(no_ip_address_label_cmd_zebra));
+	memcpy(&__activeVars->forwarding_node__X, &forwarding_node__T, sizeof(forwarding_node__T));
+	memcpy(&__activeVars->zebra_interface_cmd__X, &zebra_interface_cmd_zebra, sizeof(zebra_interface_cmd_zebra));
+	memcpy(&__activeVars->ip_forwarding_cmd__X, &ip_forwarding_cmd_zebra, sizeof(ip_forwarding_cmd_zebra));
+	memcpy(&__activeVars->ip_route_flags_distance_cmd__X, &ip_route_flags_distance_cmd_zebra, sizeof(ip_route_flags_distance_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_prefix_longer_cmd__X, &show_ip_route_prefix_longer_cmd_zebra, sizeof(show_ip_route_prefix_longer_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_mask_flags_cmd__X, &no_ip_route_mask_flags_cmd_zebra, sizeof(no_ip_route_mask_flags_cmd_zebra));
+	memcpy(&__activeVars->netlink_addr__X, &netlink_addr__T, sizeof(netlink_addr__T));
+	memcpy(&__activeVars->debug_node__X, &debug_node__T, sizeof(debug_node__T));
+	memcpy(&__activeVars->no_debug_zebra_kernel_cmd__X, &no_debug_zebra_kernel_cmd_zebra, sizeof(no_debug_zebra_kernel_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_mask_flags_distance_cmd__X, &no_ip_route_mask_flags_distance_cmd_zebra, sizeof(no_ip_route_mask_flags_distance_cmd_zebra));
+	memcpy(&__activeVars->no_ip_address_cmd__X, &no_ip_address_cmd_zebra, sizeof(no_ip_address_cmd_zebra));
+	memcpy(&__activeVars->no_shutdown_if_cmd__X, &no_shutdown_if_cmd_zebra, sizeof(no_shutdown_if_cmd_zebra));
+	memcpy(&__activeVars->zebrad__X, &zebrad__T, sizeof(zebrad__T));
+	memcpy(&__activeVars->debug_zebra_kernel_cmd__X, &debug_zebra_kernel_cmd_zebra, sizeof(debug_zebra_kernel_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_cmd__X, &no_ip_route_cmd_zebra, sizeof(no_ip_route_cmd_zebra));
+	memcpy(&__activeVars->netlink_cmd__X, &netlink_cmd__T, sizeof(netlink_cmd__T));
+	memcpy(&__activeVars->show_debugging_zebra_cmd__X, &show_debugging_zebra_cmd_zebra, sizeof(show_debugging_zebra_cmd_zebra));
+	memcpy(&__activeVars->shutdown_if_cmd__X, &shutdown_if_cmd_zebra, sizeof(shutdown_if_cmd_zebra));
+	memcpy(&__activeVars->no_bandwidth_if_val_cmd__X, &no_bandwidth_if_val_cmd_zebra, sizeof(no_bandwidth_if_val_cmd_zebra));
+	memcpy(&__activeVars->ip_node__X, &ip_node__T, sizeof(ip_node__T));
+	memcpy(&__activeVars->ip_route_flags_cmd__X, &ip_route_flags_cmd_zebra, sizeof(ip_route_flags_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_summary_cmd__X, &show_ip_route_summary_cmd_zebra, sizeof(show_ip_route_summary_cmd_zebra));
+	memcpy(&__activeVars->show_table_cmd__X, &show_table_cmd_zebra, sizeof(show_table_cmd_zebra));
+	memcpy(&__activeVars->ip_route_cmd__X, &ip_route_cmd_zebra, sizeof(ip_route_cmd_zebra));
+	memcpy(&__activeVars->interface_node__X, &interface_node__T, sizeof(interface_node__T));
+	memcpy(&__activeVars->show_ip_forwarding_cmd__X, &show_ip_forwarding_cmd_zebra, sizeof(show_ip_forwarding_cmd_zebra));
+	memcpy(&__activeVars->debug_zebra_packet_direct_cmd__X, &debug_zebra_packet_direct_cmd_zebra, sizeof(debug_zebra_packet_direct_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_protocol_cmd__X, &show_ip_route_protocol_cmd_zebra, sizeof(show_ip_route_protocol_cmd_zebra));
+	memcpy(&__activeVars->config_table_cmd__X, &config_table_cmd_zebra, sizeof(config_table_cmd_zebra));
+	memcpy(&__activeVars->no_linkdetect_cmd__X, &no_linkdetect_cmd_zebra, sizeof(no_linkdetect_cmd_zebra));
+	__activeVars->nl_rcvbufsize__X =  0;
+	memcpy(&__activeVars->netlink__X, &netlink__T, sizeof(netlink__T));
+	memcpy(&__activeVars->no_ip_route_mask_cmd__X, &no_ip_route_mask_cmd_zebra, sizeof(no_ip_route_mask_cmd_zebra));
+	memcpy(&__activeVars->show_interface_cmd__X, &show_interface_cmd_zebra, sizeof(show_interface_cmd_zebra));
+	memcpy(&__activeVars->show_ip_route_addr_cmd__X, &show_ip_route_addr_cmd_zebra, sizeof(show_ip_route_addr_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_flags_distance_cmd__X, &no_ip_route_flags_distance_cmd_zebra, sizeof(no_ip_route_flags_distance_cmd_zebra));
+	memcpy(&__activeVars->no_router_id_cmd__X, &no_router_id_cmd_zebra, sizeof(no_router_id_cmd_zebra));
+	memcpy(&__activeVars->debug_zebra_events_cmd__X, &debug_zebra_events_cmd_zebra, sizeof(debug_zebra_events_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_flags2_cmd__X, &ip_route_mask_flags2_cmd_zebra, sizeof(ip_route_mask_flags2_cmd_zebra));
+	memcpy(&__activeVars->no_debug_zebra_events_cmd__X, &no_debug_zebra_events_cmd_zebra, sizeof(no_debug_zebra_events_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_distance_cmd__X, &ip_route_mask_distance_cmd_zebra, sizeof(ip_route_mask_distance_cmd_zebra));
+	memcpy(&__activeVars->ip_route_flags2_cmd__X, &ip_route_flags2_cmd_zebra, sizeof(ip_route_flags2_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_flags_cmd__X, &ip_route_mask_flags_cmd_zebra, sizeof(ip_route_mask_flags_cmd_zebra));
+	memcpy(&__activeVars->linkdetect_cmd__X, &linkdetect_cmd_zebra, sizeof(linkdetect_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_flags2_cmd__X, &no_ip_route_flags2_cmd_zebra, sizeof(no_ip_route_flags2_cmd_zebra));
+	memcpy(&__activeVars->ip_route_mask_flags_distance2_cmd__X, &ip_route_mask_flags_distance2_cmd_zebra, sizeof(ip_route_mask_flags_distance2_cmd_zebra));
+	memcpy(&__activeVars->debug_zebra_packet_cmd__X, &debug_zebra_packet_cmd_zebra, sizeof(debug_zebra_packet_cmd_zebra));
+	__activeVars->keep_kernel_mode__X =  0;
+	memcpy(&__activeVars->ip_address_label_cmd__X, &ip_address_label_cmd_zebra, sizeof(ip_address_label_cmd_zebra));
+	memcpy(&__activeVars->no_ip_route_flags_distance2_cmd__X, &no_ip_route_flags_distance2_cmd_zebra, sizeof(no_ip_route_flags_distance2_cmd_zebra));
+	memcpy(&__activeVars->ip_route_distance_cmd__X, &ip_route_distance_cmd_zebra, sizeof(ip_route_distance_cmd_zebra));
+}
+
+extern struct cmd_element rmap_show_name_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_seq_le_ge_cmd_lib;
+extern struct cmd_element rmap_continue_seq_cmd_lib;
+extern struct cmd_element interface_desc_cmd_lib;
+extern struct cmd_element key_chain_cmd_lib;
+extern struct cmd_element no_rmap_onmatch_next_cmd_lib;
+extern struct cmd_element show_history_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_summary_name_cmd_lib;
+extern struct cmd_element enable_password_cmd_lib;
+extern struct cmd_element config_terminal_length_cmd_lib;
+extern struct cmd_element ip_prefix_list_ge_cmd_lib;
+extern struct cmd_element no_config_log_trap_cmd_lib;
+extern struct cmd_element ipv6_distribute_list_prefix_all_cmd_lib;
+extern struct cmd_element service_terminal_length_cmd_lib;
+extern struct cmd_element accept_lifetime_day_month_day_month_cmd_lib;
+extern struct cmd_element config_help_cmd_lib;
+extern struct cmd_element send_lifetime_day_month_day_month_cmd_lib;
+extern struct cmd_element terminal_no_monitor_cmd_lib;
+extern struct cmd_element vty_login_cmd_lib;
+extern struct cmd_element route_map_cmd_lib;
+extern struct cmd_element send_lifetime_day_month_month_day_cmd_lib;
+extern struct cmd_element no_access_list_standard_nomask_cmd_lib;
+extern struct cmd_element distribute_list_cmd_lib;
+extern struct cmd_element config_log_stdout_cmd_lib;
+extern struct cmd_element service_password_encrypt_cmd_lib;
+extern struct cmd_element clear_ip_prefix_list_cmd_lib;
+extern struct cmd_element no_access_list_extended_mask_host_cmd_lib;
+extern struct cmd_element no_if_ipv6_rmap_cmd_lib;
+extern struct cmd_element access_list_standard_host_cmd_lib;
+extern struct cmd_element no_service_password_encrypt_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_detail_cmd_lib;
+extern struct cmd_element no_service_advanced_vty_cmd_lib;
+extern struct cmd_element line_vty_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_seq_le_cmd_lib;
+extern struct cmd_element no_hostname_cmd_lib;
+extern struct cmd_element no_interface_desc_cmd_lib;
+extern struct cmd_element ip_prefix_list_seq_ge_cmd_lib;
+extern struct cmd_element no_enable_password_cmd_lib;
+extern struct cmd_element key_cmd_lib;
+extern struct cmd_element copy_runningconfig_startupconfig_cmd_lib;
+extern struct cmd_element config_write_cmd_lib;
+extern struct cmd_element show_memory_cmd_lib;
+extern struct cmd_element no_access_list_extended_any_mask_cmd_lib;
+extern struct cmd_element show_memory_ospf_cmd_lib;
+extern struct cmd_element config_end_cmd_lib;
+extern struct cmd_element no_route_map_cmd_lib;
+extern struct cmd_element rmap_onmatch_goto_cmd_lib;
+extern struct cmd_element no_access_list_extended_host_any_cmd_lib;
+extern struct cmd_element no_access_list_remark_arg_cmd_lib;
+extern struct cmd_element no_access_list_extended_cmd_lib;
+extern struct cmd_element no_config_log_record_priority_cmd_lib;
+extern struct cmd_element show_memory_lib_cmd_lib;
+extern struct cmd_element no_config_log_monitor_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_name_cmd_lib;
+extern struct cmd_element send_lifetime_month_day_day_month_cmd_lib;
+extern struct cmd_element config_log_syslog_level_cmd_lib;
+extern struct cmd_element no_banner_motd_cmd_lib;
+extern struct cmd_element send_lifetime_infinite_month_day_cmd_lib;
+extern struct cmd_element no_distribute_list_cmd_lib;
+extern struct cmd_element no_config_log_facility_cmd_lib;
+extern struct cmd_element rmap_continue_index_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_le_ge_cmd_lib;
+extern struct cmd_element show_memory_ripng_cmd_lib;
+extern struct cmd_element accept_lifetime_day_month_month_day_cmd_lib;
+extern struct cmd_element accept_lifetime_duration_day_month_cmd_lib;
+extern struct cmd_element send_lifetime_duration_day_month_cmd_lib;
+extern struct cmd_element ip_prefix_list_le_ge_cmd_lib;
+extern struct cmd_element ip_prefix_list_cmd_lib;
+extern struct cmd_element exec_timeout_min_cmd_lib;
+extern struct cmd_element no_access_list_remark_cmd_lib;
+extern struct cmd_element distribute_list_all_cmd_lib;
+extern struct cmd_element no_key_string_cmd_lib;
+extern struct cmd_element no_interface_cmd_lib;
+extern struct cmd_element no_access_list_extended_mask_any_cmd_lib;
+extern struct cmd_element ipv6_distribute_list_all_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_summary_cmd_lib;
+extern struct cmd_element ip_prefix_list_description_cmd_lib;
+extern struct cmd_element no_if_rmap_cmd_lib;
+extern struct cmd_element no_access_list_standard_host_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_prefix_first_match_cmd_lib;
+extern struct cmd_element show_ip_access_list_cmd_lib;
+extern struct cmd_element rmap_continue_cmd_lib;
+extern struct cmd_element exec_timeout_sec_cmd_lib;
+extern struct cmd_element ip_prefix_list_seq_le_cmd_lib;
+extern struct cmd_element access_list_exact_cmd_lib;
+extern struct cmd_element config_disable_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_le_cmd_lib;
+extern struct cmd_element config_log_file_level_cmd_lib;
+extern struct cmd_element vty_access_class_cmd_lib;
+extern struct cmd_element clear_ip_prefix_list_name_cmd_lib;
+extern struct cmd_element ip_prefix_list_seq_ge_le_cmd_lib;
+extern struct cmd_element send_lifetime_infinite_day_month_cmd_lib;
+extern struct cmd_element access_list_extended_host_mask_cmd_lib;
+extern struct cmd_element echo_cmd_lib;
+extern struct cmd_element accept_lifetime_infinite_day_month_cmd_lib;
+extern struct cmd_element access_list_extended_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_name_seq_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_description_arg_cmd_lib;
+extern struct cmd_element show_address_cmd_lib;
+extern struct cmd_element config_write_terminal_cmd_lib;
+extern struct cmd_element ip_prefix_list_ge_le_cmd_lib;
+extern struct cmd_element config_log_file_cmd_lib;
+extern struct cmd_element no_access_list_standard_cmd_lib;
+extern struct cmd_element no_distribute_list_all_cmd_lib;
+extern struct cmd_element password_text_cmd_lib;
+extern struct cmd_element no_key_cmd_lib;
+extern struct cmd_element no_route_map_all_cmd_lib;
+extern struct cmd_element config_who_cmd_lib;
+extern struct cmd_element send_lifetime_month_day_month_day_cmd_lib;
+extern struct cmd_element config_log_syslog_facility_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_sequence_number_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_seq_ge_cmd_lib;
+extern struct cmd_element no_access_list_extended_any_host_cmd_lib;
+extern struct cmd_element access_list_extended_host_host_cmd_lib;
+extern struct cmd_element no_rmap_continue_seq_lib;
+extern struct cmd_element config_enable_cmd_lib;
+extern struct cmd_element access_list_extended_any_any_cmd_lib;
+extern struct cmd_element access_list_extended_any_host_cmd_lib;
+extern struct cmd_element accept_lifetime_month_day_day_month_cmd_lib;
+extern struct cmd_element config_write_file_cmd_lib;
+extern struct cmd_element no_config_log_syslog_facility_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_description_cmd_lib;
+extern struct cmd_element show_thread_cpu_cmd_lib;
+extern struct cmd_element no_config_log_syslog_cmd_lib;
+extern struct cmd_element no_exec_timeout_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_ge_le_cmd_lib;
+extern struct cmd_element no_key_chain_cmd_lib;
+extern struct cmd_element show_startup_config_cmd_lib;
+extern struct cmd_element terminal_monitor_cmd_lib;
+extern struct cmd_element no_config_log_file_level_cmd_lib;
+extern struct cmd_element rmap_show_cmd_lib;
+extern struct cmd_element access_list_extended_host_any_cmd_lib;
+extern struct cmd_element clear_ip_prefix_list_name_prefix_cmd_lib;
+extern struct cmd_element config_quit_cmd_lib;
+extern struct cmd_element config_log_monitor_level_cmd_lib;
+extern struct cmd_element ip_prefix_list_le_cmd_lib;
+extern struct cmd_element accept_lifetime_infinite_month_day_cmd_lib;
+extern struct cmd_element no_ipv6_distribute_list_prefix_cmd_lib;
+extern struct cmd_element if_rmap_cmd_lib;
+extern struct cmd_element no_config_log_file_cmd_lib;
+extern struct cmd_element no_ipv6_distribute_list_prefix_all_cmd_lib;
+extern struct cmd_element show_memory_bgp_cmd_lib;
+extern struct cmd_element show_memory_isis_cmd_lib;
+extern struct cmd_element no_access_list_cmd_lib;
+extern struct cmd_element no_ipv6_distribute_list_cmd_lib;
+extern struct cmd_element no_vty_login_cmd_lib;
+extern struct cmd_element no_service_terminal_length_cmd_lib;
+extern struct cmd_element show_memory_all_cmd_lib;
+extern struct cmd_element no_access_list_standard_any_cmd_lib;
+extern struct cmd_element config_log_facility_cmd_lib;
+extern struct cmd_element service_advanced_vty_cmd_lib;
+extern struct cmd_element no_distribute_list_prefix_cmd_lib;
+extern struct cmd_element no_rmap_call_cmd_lib;
+extern struct cmd_element show_running_config_cmd_lib;
+extern struct cmd_element config_terminal_cmd_lib;
+extern struct cmd_element accept_lifetime_duration_month_day_cmd_lib;
+extern struct cmd_element banner_motd_default_cmd_lib;
+extern struct cmd_element no_vty_access_class_cmd_lib;
+extern struct cmd_element show_memory_ospf6_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_cmd_lib;
+extern struct cmd_element ip_prefix_list_sequence_number_cmd_lib;
+extern struct cmd_element no_access_list_exact_cmd_lib;
+extern struct cmd_element config_write_memory_cmd_lib;
+extern struct cmd_element config_log_record_priority_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_prefix_cmd_lib;
+extern struct cmd_element show_version_cmd_lib;
+extern struct cmd_element enable_password_text_cmd_lib;
+extern struct cmd_element config_list_cmd_lib;
+extern struct cmd_element config_exit_cmd_lib;
+extern struct cmd_element show_logging_cmd_lib;
+extern struct cmd_element key_string_cmd_lib;
+extern struct cmd_element access_list_extended_any_mask_cmd_lib;
+extern struct cmd_element interface_cmd_lib;
+extern struct cmd_element access_list_standard_cmd_lib;
+extern struct cmd_element distribute_list_prefix_all_cmd_lib;
+extern struct cmd_element access_list_extended_mask_host_cmd_lib;
+extern struct cmd_element access_list_cmd_lib;
+extern struct cmd_element config_log_stdout_level_cmd_lib;
+extern struct cmd_element show_ip_access_list_name_cmd_lib;
+extern struct cmd_element no_config_log_stdout_cmd_lib;
+extern struct cmd_element access_list_any_cmd_lib;
+extern struct cmd_element config_log_trap_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_cmd_lib;
+extern struct cmd_element no_access_list_extended_host_host_cmd_lib;
+extern struct cmd_element hostname_cmd_lib;
+extern struct cmd_element no_distribute_list_prefix_all_cmd_lib;
+extern struct cmd_element password_cmd_lib;
+extern struct cmd_element accept_lifetime_month_day_month_day_cmd_lib;
+extern struct cmd_element no_access_list_extended_any_any_cmd_lib;
+extern struct cmd_element no_access_list_all_cmd_lib;
+extern struct cmd_element no_access_list_any_cmd_lib;
+extern struct cmd_element if_ipv6_rmap_cmd_lib;
+extern struct cmd_element no_access_list_extended_host_mask_cmd_lib;
+extern struct cmd_element access_list_standard_nomask_cmd_lib;
+extern struct cmd_element ipv6_distribute_list_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_seq_ge_le_cmd_lib;
+extern struct cmd_element access_list_remark_cmd_lib;
+extern struct cmd_element config_terminal_no_length_cmd_lib;
+extern struct cmd_element ip_prefix_list_seq_le_ge_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_seq_cmd_lib;
+extern struct cmd_element rmap_onmatch_next_cmd_lib;
+extern struct cmd_element no_rmap_continue_cmd_lib;
+extern struct cmd_element ipv6_distribute_list_prefix_cmd_lib;
+extern struct cmd_element access_list_extended_mask_any_cmd_lib;
+extern struct cmd_element show_memory_rip_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_ge_cmd_lib;
+extern struct cmd_element config_logmsg_cmd_lib;
+extern struct cmd_element no_rmap_onmatch_goto_cmd_lib;
+extern struct cmd_element send_lifetime_duration_month_day_cmd_lib;
+extern struct cmd_element rmap_call_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_prefix_longer_cmd_lib;
+extern struct cmd_element access_list_standard_any_cmd_lib;
+extern struct cmd_element ip_prefix_list_seq_cmd_lib;
+extern struct cmd_element config_log_monitor_cmd_lib;
+extern struct cmd_element no_ip_prefix_list_prefix_cmd_lib;
+extern struct cmd_element show_ip_prefix_list_detail_name_cmd_lib;
+extern struct cmd_element no_ipv6_distribute_list_all_cmd_lib;
+extern struct cmd_element config_log_syslog_cmd_lib;
+extern struct cmd_element distribute_list_prefix_cmd_lib;
+
+void GlobalVars_initializeActiveSet_lib()
+{
+	struct cmd_node vty_node__T = 
+{
+  VTY_NODE,
+  "%s(config-line)# ",
+  1,
+};
+	struct cmd_node enable_node__T = 
+{
+  ENABLE_NODE,
+  "%s# ",
+};
+	struct cmd_node auth_enable_node__T = 
+{
+  AUTH_ENABLE_NODE,
+  "Password: ",
+};
+	struct cmd_node prefix_node__T = 
+{
+  PREFIX_NODE,
+  "",				
+  1
+};
+	struct cmd_node view_node__T = 
+{
+  VIEW_NODE,
+  "%s> ",
+};
+	struct cmd_node keychain_node__T = 
+{
+  KEYCHAIN_NODE,
+  "%s(config-keychain)# ",
+  1
+};
+	struct route_map_list route_map_master__T =  { NULL, NULL, NULL, NULL };
+	struct prefix_master prefix_master_ipv4__T =  
+{ 
+  {NULL, NULL},
+  {NULL, NULL},
+  1,
+  NULL,
+  NULL,
+};
+	struct cmd_node access_node__T = 
+{
+  ACCESS_NODE,
+  "",				
+  1
+};
+	struct cmd_node keychain_key_node__T = 
+{
+  KEYCHAIN_KEY_NODE,
+  "%s(config-keychain-key)# ",
+  1
+};
+	struct cmd_node rmap_node__T = 
+{
+  RMAP_NODE,
+  "%s(config-route-map)# ",
+  1
+};
+	struct prefix_master prefix_master_orf__T =  
+{ 
+  {NULL, NULL},
+  {NULL, NULL},
+  1,
+  NULL,
+  NULL,
+};
+	struct cmd_node auth_node__T = 
+{
+  AUTH_NODE,
+  "Password: ",
+};
+	struct cmd_node config_node__T = 
+{
+  CONFIG_NODE,
+  "%s(config)# ",
+  1
+};
+	struct access_master access_master_ipv4__T =  
+{ 
+  {NULL, NULL},
+  {NULL, NULL},
+  NULL,
+  NULL,
+};
+	memcpy(&__activeVars->rmap_show_name_cmd__X, &rmap_show_name_cmd_lib, sizeof(rmap_show_name_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_seq_le_ge_cmd__X, &no_ip_prefix_list_seq_le_ge_cmd_lib, sizeof(no_ip_prefix_list_seq_le_ge_cmd_lib));
+	memcpy(&__activeVars->rmap_continue_seq_cmd__X, &rmap_continue_seq_cmd_lib, sizeof(rmap_continue_seq_cmd_lib));
+	memcpy(&__activeVars->vty_node__X, &vty_node__T, sizeof(vty_node__T));
+	memcpy(&__activeVars->interface_desc_cmd__X, &interface_desc_cmd_lib, sizeof(interface_desc_cmd_lib));
+	memcpy(&__activeVars->enable_node__X, &enable_node__T, sizeof(enable_node__T));
+	__activeVars->re_max_failures__X =  20000;
+	memcpy(&__activeVars->key_chain_cmd__X, &key_chain_cmd_lib, sizeof(key_chain_cmd_lib));
+	memcpy(&__activeVars->no_rmap_onmatch_next_cmd__X, &no_rmap_onmatch_next_cmd_lib, sizeof(no_rmap_onmatch_next_cmd_lib));
+	memcpy(&__activeVars->show_history_cmd__X, &show_history_cmd_lib, sizeof(show_history_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_summary_name_cmd__X, &show_ip_prefix_list_summary_name_cmd_lib, sizeof(show_ip_prefix_list_summary_name_cmd_lib));
+	memcpy(&__activeVars->enable_password_cmd__X, &enable_password_cmd_lib, sizeof(enable_password_cmd_lib));
+	memcpy(&__activeVars->config_terminal_length_cmd__X, &config_terminal_length_cmd_lib, sizeof(config_terminal_length_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_ge_cmd__X, &ip_prefix_list_ge_cmd_lib, sizeof(ip_prefix_list_ge_cmd_lib));
+	memcpy(&__activeVars->no_config_log_trap_cmd__X, &no_config_log_trap_cmd_lib, sizeof(no_config_log_trap_cmd_lib));
+	memcpy(&__activeVars->auth_enable_node__X, &auth_enable_node__T, sizeof(auth_enable_node__T));
+	memcpy(&__activeVars->ipv6_distribute_list_prefix_all_cmd__X, &ipv6_distribute_list_prefix_all_cmd_lib, sizeof(ipv6_distribute_list_prefix_all_cmd_lib));
+	memcpy(&__activeVars->service_terminal_length_cmd__X, &service_terminal_length_cmd_lib, sizeof(service_terminal_length_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_day_month_day_month_cmd__X, &accept_lifetime_day_month_day_month_cmd_lib, sizeof(accept_lifetime_day_month_day_month_cmd_lib));
+	memcpy(&__activeVars->config_help_cmd__X, &config_help_cmd_lib, sizeof(config_help_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_day_month_day_month_cmd__X, &send_lifetime_day_month_day_month_cmd_lib, sizeof(send_lifetime_day_month_day_month_cmd_lib));
+	memcpy(&__activeVars->terminal_no_monitor_cmd__X, &terminal_no_monitor_cmd_lib, sizeof(terminal_no_monitor_cmd_lib));
+	memcpy(&__activeVars->vty_login_cmd__X, &vty_login_cmd_lib, sizeof(vty_login_cmd_lib));
+	memcpy(&__activeVars->route_map_cmd__X, &route_map_cmd_lib, sizeof(route_map_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_day_month_month_day_cmd__X, &send_lifetime_day_month_month_day_cmd_lib, sizeof(send_lifetime_day_month_month_day_cmd_lib));
+	memcpy(&__activeVars->no_access_list_standard_nomask_cmd__X, &no_access_list_standard_nomask_cmd_lib, sizeof(no_access_list_standard_nomask_cmd_lib));
+	memcpy(&__activeVars->distribute_list_cmd__X, &distribute_list_cmd_lib, sizeof(distribute_list_cmd_lib));
+	memcpy(&__activeVars->config_log_stdout_cmd__X, &config_log_stdout_cmd_lib, sizeof(config_log_stdout_cmd_lib));
+	memcpy(&__activeVars->service_password_encrypt_cmd__X, &service_password_encrypt_cmd_lib, sizeof(service_password_encrypt_cmd_lib));
+	memcpy(&__activeVars->clear_ip_prefix_list_cmd__X, &clear_ip_prefix_list_cmd_lib, sizeof(clear_ip_prefix_list_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_mask_host_cmd__X, &no_access_list_extended_mask_host_cmd_lib, sizeof(no_access_list_extended_mask_host_cmd_lib));
+	__activeVars->cpu_record__X =  NULL;
+	memcpy(&__activeVars->no_if_ipv6_rmap_cmd__X, &no_if_ipv6_rmap_cmd_lib, sizeof(no_if_ipv6_rmap_cmd_lib));
+	memcpy(&__activeVars->access_list_standard_host_cmd__X, &access_list_standard_host_cmd_lib, sizeof(access_list_standard_host_cmd_lib));
+	memcpy(&__activeVars->no_service_password_encrypt_cmd__X, &no_service_password_encrypt_cmd_lib, sizeof(no_service_password_encrypt_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_detail_cmd__X, &show_ip_prefix_list_detail_cmd_lib, sizeof(show_ip_prefix_list_detail_cmd_lib));
+	__activeVars->zlog_default__X =  NULL;
+	__activeVars->vty_accesslist_name__X =  NULL;
+	memcpy(&__activeVars->no_service_advanced_vty_cmd__X, &no_service_advanced_vty_cmd_lib, sizeof(no_service_advanced_vty_cmd_lib));
+	memcpy(&__activeVars->line_vty_cmd__X, &line_vty_cmd_lib, sizeof(line_vty_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_seq_le_cmd__X, &no_ip_prefix_list_seq_le_cmd_lib, sizeof(no_ip_prefix_list_seq_le_cmd_lib));
+	memcpy(&__activeVars->no_hostname_cmd__X, &no_hostname_cmd_lib, sizeof(no_hostname_cmd_lib));
+	memcpy(&__activeVars->no_interface_desc_cmd__X, &no_interface_desc_cmd_lib, sizeof(no_interface_desc_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_seq_ge_cmd__X, &ip_prefix_list_seq_ge_cmd_lib, sizeof(ip_prefix_list_seq_ge_cmd_lib));
+	memcpy(&__activeVars->no_enable_password_cmd__X, &no_enable_password_cmd_lib, sizeof(no_enable_password_cmd_lib));
+	memcpy(&__activeVars->prefix_node__X, &prefix_node__T, sizeof(prefix_node__T));
+	memcpy(&__activeVars->key_cmd__X, &key_cmd_lib, sizeof(key_cmd_lib));
+	memcpy(&__activeVars->copy_runningconfig_startupconfig_cmd__X, &copy_runningconfig_startupconfig_cmd_lib, sizeof(copy_runningconfig_startupconfig_cmd_lib));
+	memcpy(&__activeVars->config_write_cmd__X, &config_write_cmd_lib, sizeof(config_write_cmd_lib));
+	memcpy(&__activeVars->show_memory_cmd__X, &show_memory_cmd_lib, sizeof(show_memory_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_any_mask_cmd__X, &no_access_list_extended_any_mask_cmd_lib, sizeof(no_access_list_extended_any_mask_cmd_lib));
+	__activeVars->vty_ipv6_accesslist_name__X =  NULL;
+	memcpy(&__activeVars->show_memory_ospf_cmd__X, &show_memory_ospf_cmd_lib, sizeof(show_memory_ospf_cmd_lib));
+	memcpy(&__activeVars->view_node__X, &view_node__T, sizeof(view_node__T));
+	memcpy(&__activeVars->config_end_cmd__X, &config_end_cmd_lib, sizeof(config_end_cmd_lib));
+	memcpy(&__activeVars->no_route_map_cmd__X, &no_route_map_cmd_lib, sizeof(no_route_map_cmd_lib));
+	memcpy(&__activeVars->rmap_onmatch_goto_cmd__X, &rmap_onmatch_goto_cmd_lib, sizeof(rmap_onmatch_goto_cmd_lib));
+	memcpy(&__activeVars->keychain_node__X, &keychain_node__T, sizeof(keychain_node__T));
+	memcpy(&__activeVars->no_access_list_extended_host_any_cmd__X, &no_access_list_extended_host_any_cmd_lib, sizeof(no_access_list_extended_host_any_cmd_lib));
+	memcpy(&__activeVars->route_map_master__X, &route_map_master__T, sizeof(route_map_master__T));
+	memcpy(&__activeVars->no_access_list_remark_arg_cmd__X, &no_access_list_remark_arg_cmd_lib, sizeof(no_access_list_remark_arg_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_cmd__X, &no_access_list_extended_cmd_lib, sizeof(no_access_list_extended_cmd_lib));
+	memcpy(&__activeVars->no_config_log_record_priority_cmd__X, &no_config_log_record_priority_cmd_lib, sizeof(no_config_log_record_priority_cmd_lib));
+	__activeVars->__getopt_initialized__X =  0;
+	memcpy(&__activeVars->show_memory_lib_cmd__X, &show_memory_lib_cmd_lib, sizeof(show_memory_lib_cmd_lib));
+	memcpy(&__activeVars->no_config_log_monitor_cmd__X, &no_config_log_monitor_cmd_lib, sizeof(no_config_log_monitor_cmd_lib));
+	__activeVars->optind__X =  1;
+	memcpy(&__activeVars->show_ip_prefix_list_name_cmd__X, &show_ip_prefix_list_name_cmd_lib, sizeof(show_ip_prefix_list_name_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_month_day_day_month_cmd__X, &send_lifetime_month_day_day_month_cmd_lib, sizeof(send_lifetime_month_day_day_month_cmd_lib));
+	memcpy(&__activeVars->config_log_syslog_level_cmd__X, &config_log_syslog_level_cmd_lib, sizeof(config_log_syslog_level_cmd_lib));
+	memcpy(&__activeVars->no_banner_motd_cmd__X, &no_banner_motd_cmd_lib, sizeof(no_banner_motd_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_infinite_month_day_cmd__X, &send_lifetime_infinite_month_day_cmd_lib, sizeof(send_lifetime_infinite_month_day_cmd_lib));
+	memcpy(&__activeVars->no_distribute_list_cmd__X, &no_distribute_list_cmd_lib, sizeof(no_distribute_list_cmd_lib));
+	memcpy(&__activeVars->no_config_log_facility_cmd__X, &no_config_log_facility_cmd_lib, sizeof(no_config_log_facility_cmd_lib));
+	memcpy(&__activeVars->rmap_continue_index_cmd__X, &rmap_continue_index_cmd_lib, sizeof(rmap_continue_index_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_le_ge_cmd__X, &no_ip_prefix_list_le_ge_cmd_lib, sizeof(no_ip_prefix_list_le_ge_cmd_lib));
+	memcpy(&__activeVars->show_memory_ripng_cmd__X, &show_memory_ripng_cmd_lib, sizeof(show_memory_ripng_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_day_month_month_day_cmd__X, &accept_lifetime_day_month_month_day_cmd_lib, sizeof(accept_lifetime_day_month_month_day_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_duration_day_month_cmd__X, &accept_lifetime_duration_day_month_cmd_lib, sizeof(accept_lifetime_duration_day_month_cmd_lib));
+	memcpy(&__activeVars->prefix_master_ipv4__X, &prefix_master_ipv4__T, sizeof(prefix_master_ipv4__T));
+	memcpy(&__activeVars->send_lifetime_duration_day_month_cmd__X, &send_lifetime_duration_day_month_cmd_lib, sizeof(send_lifetime_duration_day_month_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_le_ge_cmd__X, &ip_prefix_list_le_ge_cmd_lib, sizeof(ip_prefix_list_le_ge_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_cmd__X, &ip_prefix_list_cmd_lib, sizeof(ip_prefix_list_cmd_lib));
+	memcpy(&__activeVars->exec_timeout_min_cmd__X, &exec_timeout_min_cmd_lib, sizeof(exec_timeout_min_cmd_lib));
+	memcpy(&__activeVars->no_access_list_remark_cmd__X, &no_access_list_remark_cmd_lib, sizeof(no_access_list_remark_cmd_lib));
+	memcpy(&__activeVars->distribute_list_all_cmd__X, &distribute_list_all_cmd_lib, sizeof(distribute_list_all_cmd_lib));
+	memcpy(&__activeVars->no_key_string_cmd__X, &no_key_string_cmd_lib, sizeof(no_key_string_cmd_lib));
+	memcpy(&__activeVars->no_interface_cmd__X, &no_interface_cmd_lib, sizeof(no_interface_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_mask_any_cmd__X, &no_access_list_extended_mask_any_cmd_lib, sizeof(no_access_list_extended_mask_any_cmd_lib));
+	memcpy(&__activeVars->ipv6_distribute_list_all_cmd__X, &ipv6_distribute_list_all_cmd_lib, sizeof(ipv6_distribute_list_all_cmd_lib));
+	__activeVars->opterr__X =  1;
+	memcpy(&__activeVars->show_ip_prefix_list_summary_cmd__X, &show_ip_prefix_list_summary_cmd_lib, sizeof(show_ip_prefix_list_summary_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_description_cmd__X, &ip_prefix_list_description_cmd_lib, sizeof(ip_prefix_list_description_cmd_lib));
+	memcpy(&__activeVars->no_if_rmap_cmd__X, &no_if_rmap_cmd_lib, sizeof(no_if_rmap_cmd_lib));
+	memcpy(&__activeVars->no_access_list_standard_host_cmd__X, &no_access_list_standard_host_cmd_lib, sizeof(no_access_list_standard_host_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_prefix_first_match_cmd__X, &show_ip_prefix_list_prefix_first_match_cmd_lib, sizeof(show_ip_prefix_list_prefix_first_match_cmd_lib));
+	memcpy(&__activeVars->show_ip_access_list_cmd__X, &show_ip_access_list_cmd_lib, sizeof(show_ip_access_list_cmd_lib));
+	memcpy(&__activeVars->rmap_continue_cmd__X, &rmap_continue_cmd_lib, sizeof(rmap_continue_cmd_lib));
+	__activeVars->telnet_space_char__X =  ' ';
+	memcpy(&__activeVars->exec_timeout_sec_cmd__X, &exec_timeout_sec_cmd_lib, sizeof(exec_timeout_sec_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_seq_le_cmd__X, &ip_prefix_list_seq_le_cmd_lib, sizeof(ip_prefix_list_seq_le_cmd_lib));
+	memcpy(&__activeVars->access_list_exact_cmd__X, &access_list_exact_cmd_lib, sizeof(access_list_exact_cmd_lib));
+	memcpy(&__activeVars->config_disable_cmd__X, &config_disable_cmd_lib, sizeof(config_disable_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_le_cmd__X, &no_ip_prefix_list_le_cmd_lib, sizeof(no_ip_prefix_list_le_cmd_lib));
+	memcpy(&__activeVars->config_log_file_level_cmd__X, &config_log_file_level_cmd_lib, sizeof(config_log_file_level_cmd_lib));
+	memcpy(&__activeVars->vty_access_class_cmd__X, &vty_access_class_cmd_lib, sizeof(vty_access_class_cmd_lib));
+	memcpy(&__activeVars->clear_ip_prefix_list_name_cmd__X, &clear_ip_prefix_list_name_cmd_lib, sizeof(clear_ip_prefix_list_name_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_seq_ge_le_cmd__X, &ip_prefix_list_seq_ge_le_cmd_lib, sizeof(ip_prefix_list_seq_ge_le_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_infinite_day_month_cmd__X, &send_lifetime_infinite_day_month_cmd_lib, sizeof(send_lifetime_infinite_day_month_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_host_mask_cmd__X, &access_list_extended_host_mask_cmd_lib, sizeof(access_list_extended_host_mask_cmd_lib));
+	memcpy(&__activeVars->echo_cmd__X, &echo_cmd_lib, sizeof(echo_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_infinite_day_month_cmd__X, &accept_lifetime_infinite_day_month_cmd_lib, sizeof(accept_lifetime_infinite_day_month_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_cmd__X, &access_list_extended_cmd_lib, sizeof(access_list_extended_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_name_seq_cmd__X, &show_ip_prefix_list_name_seq_cmd_lib, sizeof(show_ip_prefix_list_name_seq_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_description_arg_cmd__X, &no_ip_prefix_list_description_arg_cmd_lib, sizeof(no_ip_prefix_list_description_arg_cmd_lib));
+	memcpy(&__activeVars->show_address_cmd__X, &show_address_cmd_lib, sizeof(show_address_cmd_lib));
+	memcpy(&__activeVars->config_write_terminal_cmd__X, &config_write_terminal_cmd_lib, sizeof(config_write_terminal_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_ge_le_cmd__X, &ip_prefix_list_ge_le_cmd_lib, sizeof(ip_prefix_list_ge_le_cmd_lib));
+	memcpy(&__activeVars->config_log_file_cmd__X, &config_log_file_cmd_lib, sizeof(config_log_file_cmd_lib));
+	memcpy(&__activeVars->no_access_list_standard_cmd__X, &no_access_list_standard_cmd_lib, sizeof(no_access_list_standard_cmd_lib));
+	memcpy(&__activeVars->no_distribute_list_all_cmd__X, &no_distribute_list_all_cmd_lib, sizeof(no_distribute_list_all_cmd_lib));
+	memcpy(&__activeVars->password_text_cmd__X, &password_text_cmd_lib, sizeof(password_text_cmd_lib));
+	__activeVars->syslog_fd__X =  -1;
+	memcpy(&__activeVars->no_key_cmd__X, &no_key_cmd_lib, sizeof(no_key_cmd_lib));
+	memcpy(&__activeVars->no_route_map_all_cmd__X, &no_route_map_all_cmd_lib, sizeof(no_route_map_all_cmd_lib));
+	memcpy(&__activeVars->config_who_cmd__X, &config_who_cmd_lib, sizeof(config_who_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_month_day_month_day_cmd__X, &send_lifetime_month_day_month_day_cmd_lib, sizeof(send_lifetime_month_day_month_day_cmd_lib));
+	memcpy(&__activeVars->config_log_syslog_facility_cmd__X, &config_log_syslog_facility_cmd_lib, sizeof(config_log_syslog_facility_cmd_lib));
+	__activeVars->optopt__X =  '?';
+	memcpy(&__activeVars->no_ip_prefix_list_sequence_number_cmd__X, &no_ip_prefix_list_sequence_number_cmd_lib, sizeof(no_ip_prefix_list_sequence_number_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_seq_ge_cmd__X, &no_ip_prefix_list_seq_ge_cmd_lib, sizeof(no_ip_prefix_list_seq_ge_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_any_host_cmd__X, &no_access_list_extended_any_host_cmd_lib, sizeof(no_access_list_extended_any_host_cmd_lib));
+	memcpy(&__activeVars->access_node__X, &access_node__T, sizeof(access_node__T));
+	memcpy(&__activeVars->keychain_key_node__X, &keychain_key_node__T, sizeof(keychain_key_node__T));
+	memcpy(&__activeVars->access_list_extended_host_host_cmd__X, &access_list_extended_host_host_cmd_lib, sizeof(access_list_extended_host_host_cmd_lib));
+	memcpy(&__activeVars->no_rmap_continue_seq__X, &no_rmap_continue_seq_lib, sizeof(no_rmap_continue_seq_lib));
+	memcpy(&__activeVars->config_enable_cmd__X, &config_enable_cmd_lib, sizeof(config_enable_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_any_any_cmd__X, &access_list_extended_any_any_cmd_lib, sizeof(access_list_extended_any_any_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_any_host_cmd__X, &access_list_extended_any_host_cmd_lib, sizeof(access_list_extended_any_host_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_month_day_day_month_cmd__X, &accept_lifetime_month_day_day_month_cmd_lib, sizeof(accept_lifetime_month_day_day_month_cmd_lib));
+	memcpy(&__activeVars->config_write_file_cmd__X, &config_write_file_cmd_lib, sizeof(config_write_file_cmd_lib));
+	memcpy(&__activeVars->no_config_log_syslog_facility_cmd__X, &no_config_log_syslog_facility_cmd_lib, sizeof(no_config_log_syslog_facility_cmd_lib));
+	memcpy(&__activeVars->rmap_node__X, &rmap_node__T, sizeof(rmap_node__T));
+	__activeVars->vty_timeout_val__X =  VTY_TIMEOUT_DEFAULT;
+	memcpy(&__activeVars->no_ip_prefix_list_description_cmd__X, &no_ip_prefix_list_description_cmd_lib, sizeof(no_ip_prefix_list_description_cmd_lib));
+	memcpy(&__activeVars->show_thread_cpu_cmd__X, &show_thread_cpu_cmd_lib, sizeof(show_thread_cpu_cmd_lib));
+	memcpy(&__activeVars->no_config_log_syslog_cmd__X, &no_config_log_syslog_cmd_lib, sizeof(no_config_log_syslog_cmd_lib));
+	memcpy(&__activeVars->no_exec_timeout_cmd__X, &no_exec_timeout_cmd_lib, sizeof(no_exec_timeout_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_ge_le_cmd__X, &no_ip_prefix_list_ge_le_cmd_lib, sizeof(no_ip_prefix_list_ge_le_cmd_lib));
+	memcpy(&__activeVars->no_key_chain_cmd__X, &no_key_chain_cmd_lib, sizeof(no_key_chain_cmd_lib));
+	memcpy(&__activeVars->show_startup_config_cmd__X, &show_startup_config_cmd_lib, sizeof(show_startup_config_cmd_lib));
+	memcpy(&__activeVars->terminal_monitor_cmd__X, &terminal_monitor_cmd_lib, sizeof(terminal_monitor_cmd_lib));
+	memcpy(&__activeVars->no_config_log_file_level_cmd__X, &no_config_log_file_level_cmd_lib, sizeof(no_config_log_file_level_cmd_lib));
+	memcpy(&__activeVars->rmap_show_cmd__X, &rmap_show_cmd_lib, sizeof(rmap_show_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_host_any_cmd__X, &access_list_extended_host_any_cmd_lib, sizeof(access_list_extended_host_any_cmd_lib));
+	memcpy(&__activeVars->clear_ip_prefix_list_name_prefix_cmd__X, &clear_ip_prefix_list_name_prefix_cmd_lib, sizeof(clear_ip_prefix_list_name_prefix_cmd_lib));
+	__activeVars->optarg__X =  NULL;
+	memcpy(&__activeVars->config_quit_cmd__X, &config_quit_cmd_lib, sizeof(config_quit_cmd_lib));
+	memcpy(&__activeVars->config_log_monitor_level_cmd__X, &config_log_monitor_level_cmd_lib, sizeof(config_log_monitor_level_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_le_cmd__X, &ip_prefix_list_le_cmd_lib, sizeof(ip_prefix_list_le_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_infinite_month_day_cmd__X, &accept_lifetime_infinite_month_day_cmd_lib, sizeof(accept_lifetime_infinite_month_day_cmd_lib));
+	memcpy(&__activeVars->no_ipv6_distribute_list_prefix_cmd__X, &no_ipv6_distribute_list_prefix_cmd_lib, sizeof(no_ipv6_distribute_list_prefix_cmd_lib));
+	memcpy(&__activeVars->if_rmap_cmd__X, &if_rmap_cmd_lib, sizeof(if_rmap_cmd_lib));
+	memcpy(&__activeVars->no_config_log_file_cmd__X, &no_config_log_file_cmd_lib, sizeof(no_config_log_file_cmd_lib));
+	memcpy(&__activeVars->no_ipv6_distribute_list_prefix_all_cmd__X, &no_ipv6_distribute_list_prefix_all_cmd_lib, sizeof(no_ipv6_distribute_list_prefix_all_cmd_lib));
+	memcpy(&__activeVars->prefix_master_orf__X, &prefix_master_orf__T, sizeof(prefix_master_orf__T));
+	memcpy(&__activeVars->auth_node__X, &auth_node__T, sizeof(auth_node__T));
+	__activeVars->if_rmap_add_hook__X =  NULL;
+	memcpy(&__activeVars->show_memory_bgp_cmd__X, &show_memory_bgp_cmd_lib, sizeof(show_memory_bgp_cmd_lib));
+	memcpy(&__activeVars->show_memory_isis_cmd__X, &show_memory_isis_cmd_lib, sizeof(show_memory_isis_cmd_lib));
+	memcpy(&__activeVars->no_access_list_cmd__X, &no_access_list_cmd_lib, sizeof(no_access_list_cmd_lib));
+	memcpy(&__activeVars->no_ipv6_distribute_list_cmd__X, &no_ipv6_distribute_list_cmd_lib, sizeof(no_ipv6_distribute_list_cmd_lib));
+	memcpy(&__activeVars->no_vty_login_cmd__X, &no_vty_login_cmd_lib, sizeof(no_vty_login_cmd_lib));
+	memcpy(&__activeVars->no_service_terminal_length_cmd__X, &no_service_terminal_length_cmd_lib, sizeof(no_service_terminal_length_cmd_lib));
+	memcpy(&__activeVars->show_memory_all_cmd__X, &show_memory_all_cmd_lib, sizeof(show_memory_all_cmd_lib));
+	memcpy(&__activeVars->no_access_list_standard_any_cmd__X, &no_access_list_standard_any_cmd_lib, sizeof(no_access_list_standard_any_cmd_lib));
+	memcpy(&__activeVars->config_log_facility_cmd__X, &config_log_facility_cmd_lib, sizeof(config_log_facility_cmd_lib));
+	memcpy(&__activeVars->service_advanced_vty_cmd__X, &service_advanced_vty_cmd_lib, sizeof(service_advanced_vty_cmd_lib));
+	memcpy(&__activeVars->no_distribute_list_prefix_cmd__X, &no_distribute_list_prefix_cmd_lib, sizeof(no_distribute_list_prefix_cmd_lib));
+	__activeVars->zclient_debug__X =  0;
+	memcpy(&__activeVars->no_rmap_call_cmd__X, &no_rmap_call_cmd_lib, sizeof(no_rmap_call_cmd_lib));
+	memcpy(&__activeVars->show_running_config_cmd__X, &show_running_config_cmd_lib, sizeof(show_running_config_cmd_lib));
+	memcpy(&__activeVars->config_terminal_cmd__X, &config_terminal_cmd_lib, sizeof(config_terminal_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_duration_month_day_cmd__X, &accept_lifetime_duration_month_day_cmd_lib, sizeof(accept_lifetime_duration_month_day_cmd_lib));
+	memcpy(&__activeVars->banner_motd_default_cmd__X, &banner_motd_default_cmd_lib, sizeof(banner_motd_default_cmd_lib));
+	memcpy(&__activeVars->no_vty_access_class_cmd__X, &no_vty_access_class_cmd_lib, sizeof(no_vty_access_class_cmd_lib));
+	memcpy(&__activeVars->show_memory_ospf6_cmd__X, &show_memory_ospf6_cmd_lib, sizeof(show_memory_ospf6_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_cmd__X, &show_ip_prefix_list_cmd_lib, sizeof(show_ip_prefix_list_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_sequence_number_cmd__X, &ip_prefix_list_sequence_number_cmd_lib, sizeof(ip_prefix_list_sequence_number_cmd_lib));
+	memcpy(&__activeVars->no_access_list_exact_cmd__X, &no_access_list_exact_cmd_lib, sizeof(no_access_list_exact_cmd_lib));
+	memcpy(&__activeVars->config_write_memory_cmd__X, &config_write_memory_cmd_lib, sizeof(config_write_memory_cmd_lib));
+	memcpy(&__activeVars->config_log_record_priority_cmd__X, &config_log_record_priority_cmd_lib, sizeof(config_log_record_priority_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_prefix_cmd__X, &show_ip_prefix_list_prefix_cmd_lib, sizeof(show_ip_prefix_list_prefix_cmd_lib));
+	memcpy(&__activeVars->show_version_cmd__X, &show_version_cmd_lib, sizeof(show_version_cmd_lib));
+	memcpy(&__activeVars->enable_password_text_cmd__X, &enable_password_text_cmd_lib, sizeof(enable_password_text_cmd_lib));
+	memcpy(&__activeVars->config_list_cmd__X, &config_list_cmd_lib, sizeof(config_list_cmd_lib));
+	memcpy(&__activeVars->config_exit_cmd__X, &config_exit_cmd_lib, sizeof(config_exit_cmd_lib));
+	memcpy(&__activeVars->show_logging_cmd__X, &show_logging_cmd_lib, sizeof(show_logging_cmd_lib));
+	memcpy(&__activeVars->key_string_cmd__X, &key_string_cmd_lib, sizeof(key_string_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_any_mask_cmd__X, &access_list_extended_any_mask_cmd_lib, sizeof(access_list_extended_any_mask_cmd_lib));
+	memcpy(&__activeVars->interface_cmd__X, &interface_cmd_lib, sizeof(interface_cmd_lib));
+	memcpy(&__activeVars->access_list_standard_cmd__X, &access_list_standard_cmd_lib, sizeof(access_list_standard_cmd_lib));
+	memcpy(&__activeVars->distribute_list_prefix_all_cmd__X, &distribute_list_prefix_all_cmd_lib, sizeof(distribute_list_prefix_all_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_mask_host_cmd__X, &access_list_extended_mask_host_cmd_lib, sizeof(access_list_extended_mask_host_cmd_lib));
+	memcpy(&__activeVars->access_list_cmd__X, &access_list_cmd_lib, sizeof(access_list_cmd_lib));
+	memcpy(&__activeVars->config_log_stdout_level_cmd__X, &config_log_stdout_level_cmd_lib, sizeof(config_log_stdout_level_cmd_lib));
+	memcpy(&__activeVars->show_ip_access_list_name_cmd__X, &show_ip_access_list_name_cmd_lib, sizeof(show_ip_access_list_name_cmd_lib));
+	memcpy(&__activeVars->no_config_log_stdout_cmd__X, &no_config_log_stdout_cmd_lib, sizeof(no_config_log_stdout_cmd_lib));
+	memcpy(&__activeVars->access_list_any_cmd__X, &access_list_any_cmd_lib, sizeof(access_list_any_cmd_lib));
+	memcpy(&__activeVars->config_log_trap_cmd__X, &config_log_trap_cmd_lib, sizeof(config_log_trap_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_cmd__X, &no_ip_prefix_list_cmd_lib, sizeof(no_ip_prefix_list_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_host_host_cmd__X, &no_access_list_extended_host_host_cmd_lib, sizeof(no_access_list_extended_host_host_cmd_lib));
+	memcpy(&__activeVars->hostname_cmd__X, &hostname_cmd_lib, sizeof(hostname_cmd_lib));
+	memcpy(&__activeVars->no_distribute_list_prefix_all_cmd__X, &no_distribute_list_prefix_all_cmd_lib, sizeof(no_distribute_list_prefix_all_cmd_lib));
+	memcpy(&__activeVars->password_cmd__X, &password_cmd_lib, sizeof(password_cmd_lib));
+	memcpy(&__activeVars->accept_lifetime_month_day_month_day_cmd__X, &accept_lifetime_month_day_month_day_cmd_lib, sizeof(accept_lifetime_month_day_month_day_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_any_any_cmd__X, &no_access_list_extended_any_any_cmd_lib, sizeof(no_access_list_extended_any_any_cmd_lib));
+	memcpy(&__activeVars->no_access_list_all_cmd__X, &no_access_list_all_cmd_lib, sizeof(no_access_list_all_cmd_lib));
+	memcpy(&__activeVars->no_access_list_any_cmd__X, &no_access_list_any_cmd_lib, sizeof(no_access_list_any_cmd_lib));
+	memcpy(&__activeVars->if_ipv6_rmap_cmd__X, &if_ipv6_rmap_cmd_lib, sizeof(if_ipv6_rmap_cmd_lib));
+	memcpy(&__activeVars->no_access_list_extended_host_mask_cmd__X, &no_access_list_extended_host_mask_cmd_lib, sizeof(no_access_list_extended_host_mask_cmd_lib));
+	memcpy(&__activeVars->access_list_standard_nomask_cmd__X, &access_list_standard_nomask_cmd_lib, sizeof(access_list_standard_nomask_cmd_lib));
+	memcpy(&__activeVars->ipv6_distribute_list_cmd__X, &ipv6_distribute_list_cmd_lib, sizeof(ipv6_distribute_list_cmd_lib));
+	__activeVars->no_password_check__X =  0;
+	__activeVars->telnet_backward_char__X =  0x08;
+	memcpy(&__activeVars->no_ip_prefix_list_seq_ge_le_cmd__X, &no_ip_prefix_list_seq_ge_le_cmd_lib, sizeof(no_ip_prefix_list_seq_ge_le_cmd_lib));
+	memcpy(&__activeVars->access_list_remark_cmd__X, &access_list_remark_cmd_lib, sizeof(access_list_remark_cmd_lib));
+	memcpy(&__activeVars->config_terminal_no_length_cmd__X, &config_terminal_no_length_cmd_lib, sizeof(config_terminal_no_length_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_seq_le_ge_cmd__X, &ip_prefix_list_seq_le_ge_cmd_lib, sizeof(ip_prefix_list_seq_le_ge_cmd_lib));
+	memcpy(&__activeVars->config_node__X, &config_node__T, sizeof(config_node__T));
+	memcpy(&__activeVars->no_ip_prefix_list_seq_cmd__X, &no_ip_prefix_list_seq_cmd_lib, sizeof(no_ip_prefix_list_seq_cmd_lib));
+	memcpy(&__activeVars->rmap_onmatch_next_cmd__X, &rmap_onmatch_next_cmd_lib, sizeof(rmap_onmatch_next_cmd_lib));
+	memcpy(&__activeVars->no_rmap_continue_cmd__X, &no_rmap_continue_cmd_lib, sizeof(no_rmap_continue_cmd_lib));
+	memcpy(&__activeVars->ipv6_distribute_list_prefix_cmd__X, &ipv6_distribute_list_prefix_cmd_lib, sizeof(ipv6_distribute_list_prefix_cmd_lib));
+	memcpy(&__activeVars->access_list_extended_mask_any_cmd__X, &access_list_extended_mask_any_cmd_lib, sizeof(access_list_extended_mask_any_cmd_lib));
+	memcpy(&__activeVars->show_memory_rip_cmd__X, &show_memory_rip_cmd_lib, sizeof(show_memory_rip_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_ge_cmd__X, &no_ip_prefix_list_ge_cmd_lib, sizeof(no_ip_prefix_list_ge_cmd_lib));
+	memcpy(&__activeVars->config_logmsg_cmd__X, &config_logmsg_cmd_lib, sizeof(config_logmsg_cmd_lib));
+	__activeVars->vty_cwd__X =  NULL;
+	memcpy(&__activeVars->no_rmap_onmatch_goto_cmd__X, &no_rmap_onmatch_goto_cmd_lib, sizeof(no_rmap_onmatch_goto_cmd_lib));
+	memcpy(&__activeVars->send_lifetime_duration_month_day_cmd__X, &send_lifetime_duration_month_day_cmd_lib, sizeof(send_lifetime_duration_month_day_cmd_lib));
+	memcpy(&__activeVars->rmap_call_cmd__X, &rmap_call_cmd_lib, sizeof(rmap_call_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_prefix_longer_cmd__X, &show_ip_prefix_list_prefix_longer_cmd_lib, sizeof(show_ip_prefix_list_prefix_longer_cmd_lib));
+	memcpy(&__activeVars->access_list_standard_any_cmd__X, &access_list_standard_any_cmd_lib, sizeof(access_list_standard_any_cmd_lib));
+	memcpy(&__activeVars->ip_prefix_list_seq_cmd__X, &ip_prefix_list_seq_cmd_lib, sizeof(ip_prefix_list_seq_cmd_lib));
+	memcpy(&__activeVars->config_log_monitor_cmd__X, &config_log_monitor_cmd_lib, sizeof(config_log_monitor_cmd_lib));
+	memcpy(&__activeVars->no_ip_prefix_list_prefix_cmd__X, &no_ip_prefix_list_prefix_cmd_lib, sizeof(no_ip_prefix_list_prefix_cmd_lib));
+	memcpy(&__activeVars->show_ip_prefix_list_detail_name_cmd__X, &show_ip_prefix_list_detail_name_cmd_lib, sizeof(show_ip_prefix_list_detail_name_cmd_lib));
+	memcpy(&__activeVars->no_ipv6_distribute_list_all_cmd__X, &no_ipv6_distribute_list_all_cmd_lib, sizeof(no_ipv6_distribute_list_all_cmd_lib));
+	memcpy(&__activeVars->config_log_syslog_cmd__X, &config_log_syslog_cmd_lib, sizeof(config_log_syslog_cmd_lib));
+	memcpy(&__activeVars->access_master_ipv4__X, &access_master_ipv4__T, sizeof(access_master_ipv4__T));
+	memcpy(&__activeVars->distribute_list_prefix_cmd__X, &distribute_list_prefix_cmd_lib, sizeof(distribute_list_prefix_cmd_lib));
+	__activeVars->if_rmap_delete_hook__X =  NULL;
+}
+

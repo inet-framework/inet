@@ -1,0 +1,16 @@
+--- lib/memory.c.orig	2005-11-15 21:06:33.000000000 +0100
++++ lib/memory.c	2005-11-15 21:06:46.000000000 +0100
+@@ -207,11 +207,8 @@
+   return memory;
+ }
+ #else
+-static struct 
+-{
+-  char *name;
+-  unsigned long alloc;
+-} mstat [MTYPE_MAX];
++// struct definition moved into header file
++struct FOO1__S mstat[MTYPE_MAX];
+ #endif /* MTPYE_LOG */
+ 
+ /* Increment allocation counter. */

@@ -1,0 +1,20 @@
+--- ospfd/ospf_dump.h.orig	2005-11-13 16:40:10.000000000 +0100
++++ ospfd/ospf_dump.h	2005-11-13 16:41:04.000000000 +0100
+@@ -112,7 +112,7 @@
+ #define IF_NAME(I)      ospf_if_name_string ((I))
+ 
+ /* Extern debug flag. */
+-extern unsigned long term_debug_ospf_packet[];
++extern unsigned long term_debug_ospf_packet[5];
+ extern unsigned long term_debug_ospf_event;
+ extern unsigned long term_debug_ospf_ism;
+ extern unsigned long term_debug_ospf_nsm;
+@@ -122,7 +122,7 @@
+ 
+ /* Message Strings. */
+ extern const char *ospf_packet_type_str[];
+-extern char *ospf_lsa_type_str[];
++// ospf_lsa_type_str not defined
+ 
+ /* Prototypes. */
+ const char *ospf_area_name_string (struct ospf_area *);

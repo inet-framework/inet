@@ -1,0 +1,32 @@
+--- lib/log.c.orig	2005-11-21 15:20:34.000000000 +0100
++++ lib/log.c	2005-11-21 15:21:48.000000000 +0100
+@@ -233,13 +233,19 @@
+ static void
+ syslog_sigsafe(int priority, const char *msg, size_t msglen)
+ {
+-  char buf[sizeof("<1234567890>ripngd[1234567890]: ")+msglen+50];
++  char *buf;
++  int bufl;
+   char *s;
+ 
+   if ((syslog_fd < 0) && ((syslog_fd = syslog_connect()) < 0))
+     return;
+ 
+-#define LOC s,buf+sizeof(buf)-s
++  bufl = sizeof("<1234567890>ripngd[1234567890]: ")+msglen+50;
++  buf = (char*)malloc(bufl);
++  if(!buf)
++    return;
++
++#define LOC s,buf+bufl-s
+   s = buf;
+   s = str_append(LOC,"<");
+   s = num_append(LOC,priority);
+@@ -255,6 +261,7 @@
+   s = str_append(LOC,": ");
+   s = str_append(LOC,msg);
+   write(syslog_fd,buf,s-buf);
++  free(buf);
+ #undef LOC
+ }
+ 

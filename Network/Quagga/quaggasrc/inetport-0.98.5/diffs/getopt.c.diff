@@ -1,0 +1,11 @@
+--- lib/getopt.c.orig	2005-11-21 14:45:48.000000000 +0100
++++ lib/getopt.c	2005-11-21 14:46:31.000000000 +0100
+@@ -34,6 +34,8 @@
+ # include <config.h>
+ #endif
+ 
++#include "globalvars.h"
++
+ #if !defined __STDC__ || !__STDC__
+ /* This is a separate conditional since some stdc systems
+    reject `defined (const)'.  */

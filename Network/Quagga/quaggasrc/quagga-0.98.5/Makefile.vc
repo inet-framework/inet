@@ -1,0 +1,30 @@
+!include "../../../../inetconfig.vc"
+
+INCLUDES= -I. -I./lib -I../..
+CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
+
+all: libdir ripddir zebradir ospfdir globalvars.obj
+
+libdir:
+	cd lib &&  nmake -f Makefile.vc
+
+ripddir:
+	cd ripd && nmake -f Makefile.vc
+
+zebradir:
+	cd zebra && nmake -f Makefile.vc
+
+ospfdir:
+	cd ospfd && nmake -f Makefile.vc
+
+clean:
+	cd lib && nmake -f Makefile.vc clean
+	cd ripd && nmake -f Makefile.vc clean
+	cd zebra && nmake -f Makefile.vc clean
+	cd ospfd && nmake -f Makefile.vc clean
+	-del globalvars.obj vc70.pdb vc70.idb
+
+generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
+
+depend:	# target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
+

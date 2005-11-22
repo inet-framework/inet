@@ -1,0 +1,11 @@
+--- ospfd/ospf_packet.c.orig	2005-11-21 11:57:32.000000000 +0100
++++ ospfd/ospf_packet.c	2005-11-21 11:57:40.000000000 +0100
+@@ -2074,7 +2074,7 @@
+   
+   ip_len = iph.ip_len;
+   
+-#if !defined(GNU_LINUX) && (OpenBSD < 200311)
++#if 0 && !defined(GNU_LINUX) && (OpenBSD < 200311)
+   /*
+    * Kernel network code touches incoming IP header parameters,
+    * before protocol specific processing.

@@ -1,0 +1,20 @@
+--- lib/if.h.orig	2005-11-12 10:45:41.000000000 +0100
++++ lib/if.h	2005-11-12 10:46:55.000000000 +0100
+@@ -254,7 +254,15 @@
+ extern struct cmd_element no_interface_desc_cmd;
+ extern struct cmd_element interface_cmd;
+ extern struct cmd_element no_interface_cmd;
+-extern struct cmd_element interface_pseudo_cmd;
+-extern struct cmd_element no_interface_pseudo_cmd;
++// interface_pseudo_cmd not used
++// no_interface_pseudo_cmd not used
++
++typedef int (*if_hook_func) (struct interface *);
++
++struct if_master
++{
++  if_hook_func if_new_hook;
++  if_hook_func if_delete_hook;
++};
+ 
+ #endif /* _ZEBRA_IF_H */

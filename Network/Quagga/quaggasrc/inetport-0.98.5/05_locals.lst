@@ -1,0 +1,7 @@
+L;struct access_master \*master;master
+L;struct prefix_master \*master;master
+L;struct_zclient \*zclient;zclient
+L;pid_t pid;pid
+L;int vty_port(\s*=\s*[\w_]+)?;vty_port
+L;char \*vty_addr(\s*=\s*[\w_]+)?;vty_addr
+L;char \*config_file(\s*=\s*[\w_]+)?;config_file

@@ -1,0 +1,15 @@
+--- zebra/rt_netlink.h.orig	2005-11-11 18:18:32.000000000 +0100
++++ zebra/rt_netlink.h	2005-11-11 18:18:32.000000000 +0100
+@@ -0,0 +1,12 @@
++#ifndef RT_NETLINK_H_
++#define RT_NETLINK_H_
++
++struct nlsock
++{
++  int sock;
++  int seq;
++  struct sockaddr_nl snl;
++  const char *name;
++};
++
++#endif /*RT_NETLINK_H_*/

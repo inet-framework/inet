@@ -1,0 +1,12 @@
+--- lib/distribute.h.orig	2005-11-11 18:00:42.000000000 +0100
++++ lib/distribute.h	2005-11-11 18:03:53.000000000 +0100
+@@ -42,6 +42,9 @@
+   char *prefix[DISTRIBUTE_MAX];
+ };
+ 
++// prototype for hook functions
++typedef void (*dist_hook_func)(struct distribute *);
++
+ /* Prototypes for distribute-list. */
+ void distribute_list_init (int);
+ void distribute_list_reset (void);

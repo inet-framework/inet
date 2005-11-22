@@ -1,0 +1,14 @@
+--- lib/if_rmap.c.orig	2005-11-15 21:29:01.000000000 +0100
++++ lib/if_rmap.c	2005-11-15 21:29:17.000000000 +0100
+@@ -30,8 +30,9 @@
+ struct hash *ifrmaphash;
+ 
+ /* Hook functions. */
+-void (*if_rmap_add_hook) (struct if_rmap *) = NULL;
+-void (*if_rmap_delete_hook) (struct if_rmap *) = NULL;
++// prototype defined in header file
++if_rmap_hook_func if_rmap_add_hook = NULL;
++if_rmap_hook_func if_rmap_delete_hook = NULL;
+ 
+ struct if_rmap *
+ if_rmap_new ()

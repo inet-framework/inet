@@ -1,0 +1,2409 @@
+#ifndef	__GLOBALVARS_H__
+#define	__GLOBALVARS_H__
+
+#include "allheaders.h"
+
+#undef errno
+
+
+struct GlobalVars
+{
+	struct cmd_element rmap_show_name_cmd__X;
+	struct cmd_element rip_offset_list_ifname_cmd__X;
+	struct cmd_element no_rmap_onmatch_next_cmd__X;
+	struct cmd_element ip_route_flags_distance2_cmd__X;
+	struct cmd_element show_history_cmd__X;
+	struct cmd_element config_terminal_length_cmd__X;
+	struct cmd_element no_rip_offset_list_ifname_cmd__X;
+	struct cmd_element ospf_area_vlink_param1_cmd__X;
+	struct cmd_element no_ospf_area_vlink_param1_cmd__X;
+	struct cmd_element accept_lifetime_day_month_day_month_cmd__X;
+	struct cmd_element config_help_cmd__X;
+	struct cmd_element no_debug_ospf_zebra_sub_cmd__X;
+	struct cmd_element no_ip_rip_authentication_string_cmd__X;
+	struct cmd_element vty_login_cmd__X;
+	struct cmd_element show_zebra_client_cmd__X;
+	struct cmd_element rip_distance_source_access_list_cmd__X;
+	struct cmd_element send_lifetime_day_month_month_day_cmd__X;
+	struct cmd_element no_ip_route_distance_cmd__X;
+	struct cmd_element no_debug_zebra_packet_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_int_cmd__X;
+	vector Vvty_serv_thread__X;
+	struct cmd_element no_router_zebra_cmd__X;
+	struct route_table * rip_neighbor_table__X;
+	struct hash * cpu_record__X;
+	struct cmd_element ip_address_cmd__X;
+	char * vty_addr__X;
+	long rip_global_route_changes__X;
+	struct cmd_element show_ip_route_cmd__X;
+	struct cmd_element no_service_password_encrypt_cmd__X;
+	struct cmd_element ospf_area_range_advertise_cmd__X;
+	vector rip_enable_interface__X;
+	struct cmd_element router_ospf_cmd__X;
+	struct cmd_element ospf_transmit_delay_cmd__X;
+	struct cmd_element line_vty_cmd__X;
+	struct cmd_element no_interface_desc_cmd__X;
+	struct cmd_element ospf_area_range_substitute_cmd__X;
+	struct cmd_element set_metric_type_cmd__X;
+	struct cmd_element no_enable_password_cmd__X;
+	struct cmd_element no_ip_ospf_transmit_delay_cmd__X;
+	struct cmd_node zebra_node__X;
+	struct cmd_element ospf_default_information_originate_type_cmd__X;
+	struct cmd_element no_access_list_extended_any_mask_cmd__X;
+	struct cmd_element ospf_distance_ospf_intra_inter_cmd__X;
+	struct prefix rid_user_assigned__X;
+	struct cmd_element ospf_distance_ospf_intra_external_cmd__X;
+	struct cmd_node view_node__X;
+	struct nlsock netlink_addr__X;
+	int vty_config__X;
+	struct cmd_element ip_ospf_dead_interval_addr_cmd__X;
+	struct cmd_element rmap_onmatch_goto_cmd__X;
+	struct cmd_element ospf_default_information_originate_type_routemap_cmd__X;
+	struct cmd_element no_access_list_extended_host_any_cmd__X;
+	struct cmd_element ospf_area_filter_list_cmd__X;
+	struct route_map_rule_cmd route_set_metric_cmd__X;
+	struct cmd_element no_ip_ospf_priority_addr_cmd__X;
+	int __getopt_initialized__X;
+	struct cmd_element no_rip_default_metric_cmd__X;
+	int optind__X;
+	struct cmd_element config_log_syslog_level_cmd__X;
+	struct cmd_element no_bandwidth_if_val_cmd__X;
+	struct cmd_element no_ospf_network_area_cmd__X;
+	struct cmd_element send_lifetime_infinite_month_day_cmd__X;
+	struct cmd_element no_config_log_facility_cmd__X;
+	struct cmd_element ospf_default_metric_cmd__X;
+	struct cmd_element ospf_distance_ospf_intra_external_inter_cmd__X;
+	struct cmd_element no_debug_ospf_ism_cmd__X;
+	struct cmd_element send_lifetime_duration_day_month_cmd__X;
+	struct cmd_element no_ospf_neighbor_poll_interval_cmd__X;
+	struct cmd_element rip_default_information_originate_cmd__X;
+	unsigned long term_debug_ospf_ism__X;
+	struct cmd_element rip_default_metric_cmd__X;
+	struct cmd_element ip_rip_authentication_mode_authlen_cmd__X;
+	struct_ospf_master * om__X;
+	struct cmd_element exec_timeout_min_cmd__X;
+	struct route_map_rule_cmd route_match_tag_cmd__X;
+	struct cmd_element no_key_string_cmd__X;
+	long rip_global_queries__X;
+	struct cmd_element no_rip_offset_list_cmd__X;
+	int opterr__X;
+	struct cmd_element show_interface_cmd__X;
+	unsigned long conf_debug_ospf_ism__X;
+	struct cmd_element ospf_redistribute_source_type_routemap_cmd__X;
+	struct cmd_element no_ip_route_flags_distance_cmd__X;
+	struct cmd_element no_ospf_refresh_timer_val_cmd__X;
+	struct cmd_element ip_prefix_list_description_cmd__X;
+	struct cmd_element debug_ospf_zebra_cmd__X;
+	struct cmd_element show_ip_prefix_list_prefix_first_match_cmd__X;
+	struct cmd_element no_ospf_distance_source_cmd__X;
+	struct cmd_element rip_neighbor_cmd__X;
+	char * nextchar__X;
+	struct cmd_element no_rip_default_metric_val_cmd__X;
+	struct cmd_element ospf_area_default_cost_cmd__X;
+	struct cmd_element access_list_extended_host_mask_cmd__X;
+	struct cmd_element accept_lifetime_infinite_day_month_cmd__X;
+	struct cmd_element show_address_cmd__X;
+	struct_host host__X;
+	struct cmd_element debug_zebra_packet_cmd__X;
+	struct cmd_element ip_rip_receive_version_1_cmd__X;
+	struct cmd_element no_ip_ospf_message_digest_key_cmd__X;
+	struct cmd_element no_ospf_area_nssa_cmd__X;
+	struct route_map_rule_cmd route_set_ip_nexthop_cmd__X;
+	struct cmd_element no_rip_distance_cmd__X;
+	int syslog_fd__X;
+	struct cmd_element no_key_cmd__X;
+	struct cmd_element no_route_map_all_cmd__X;
+	struct cmd_element config_who_cmd__X;
+	struct cmd_element config_log_syslog_facility_cmd__X;
+	int optopt__X;
+	struct cmd_node rip_node__X;
+	struct cmd_element no_ip_prefix_list_sequence_number_cmd__X;
+	unsigned long zebra_debug_event__X;
+	struct cmd_node access_node__X;
+	struct cmd_element ospf_default_information_originate_metric_type_routemap_cmd__X;
+	struct cmd_element show_ip_ospf_database_cmd__X;
+	struct cmd_element no_ospf_hello_interval_cmd__X;
+	struct cmd_element debug_rip_packet_direct_cmd__X;
+	struct cmd_element ospf_redistribute_source_metric_routemap_cmd__X;
+	struct cmd_element ospf_router_id_cmd__X;
+	struct cmd_element ospf_area_authentication_message_digest_cmd__X;
+	struct cmd_element terminal_monitor_cmd__X;
+	struct cmd_element no_config_log_file_level_cmd__X;
+	struct cmd_element ip_ospf_cost_cmd__X;
+	struct cmd_element access_list_extended_host_any_cmd__X;
+	struct cmd_element no_match_interface_cmd__X;
+	struct cmd_element config_quit_cmd__X;
+	struct cmd_element bandwidth_if_cmd__X;
+	struct cmd_element no_ip_route_flags_cmd__X;
+	struct cmd_element debug_zebra_packet_detail_cmd__X;
+	struct cmd_element ospf_distance_ospf_inter_external_intra_cmd__X;
+	struct cmd_element no_ip_address_label_cmd__X;
+	struct cmd_node auth_node__X;
+	struct cmd_element no_ospf_transmit_delay_cmd__X;
+	struct cmd_element no_ospf_auto_cost_reference_bandwidth_cmd__X;
+	struct cmd_element show_memory_all_cmd__X;
+	struct thread_master * master__X;
+	struct cmd_element ospf_default_information_originate_routemap_cmd__X;
+	struct cmd_element no_distribute_list_prefix_cmd__X;
+	struct cmd_element no_ospf_message_digest_key_cmd__X;
+	struct cmd_element ospf_message_digest_key_cmd__X;
+	struct cmd_node debug_node__X;
+	struct cmd_element no_ip_route_mask_flags_distance_cmd__X;
+	struct route_map_rule_cmd route_set_metric_type_cmd__X;
+	struct cmd_element no_rip_distance_source_access_list_cmd__X;
+	struct zebra_t zebrad__X;
+	struct cmd_element ip_ospf_authentication_cmd__X;
+	struct cmd_element show_memory_ospf6_cmd__X;
+	struct cmd_element no_ospf_abr_type_cmd__X;
+	struct cmd_element set_metric_addsub_cmd__X;
+	struct cmd_element show_ip_ospf_database_type_self_cmd__X;
+	struct cmd_element show_ip_ospf_database_type_cmd__X;
+	u_int vlink_count__X;
+	struct cmd_element config_write_memory_cmd__X;
+	struct cmd_element no_set_tag_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_args_authkey_cmd__X;
+	int errno__X;
+	struct cmd_element config_list_cmd__X;
+	struct cmd_element interface_cmd__X;
+	struct cmd_element distribute_list_prefix_all_cmd__X;
+	unsigned long conf_debug_ospf_nsm__X;
+	struct cmd_element ip_route_flags_cmd__X;
+	struct cmd_element ip_rip_receive_version_cmd__X;
+	struct cmd_node interface_node__X;
+	struct cmd_element no_ospf_neighbor_priority_cmd__X;
+	struct cmd_element no_linkdetect_cmd__X;
+	struct cmd_element show_debugging_ospf_cmd__X;
+	struct cmd_element no_access_list_all_cmd__X;
+	struct cmd_element ospf_area_nssa_cmd__X;
+	struct cmd_element if_ipv6_rmap_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_int_detail_cmd__X;
+	struct cmd_element no_ospf_area_filter_list_cmd__X;
+	struct cmd_element show_debugging_rip_cmd__X;
+	struct cmd_node ospf_node__X;
+	struct cmd_element ospf_neighbor_poll_interval_priority_cmd__X;
+	struct cmd_node config_node__X;
+	struct cmd_element no_ospf_area_vlink_authtype_cmd__X;
+	struct cmd_element rmap_onmatch_next_cmd__X;
+	struct cmd_element no_ip_rip_receive_version_num_cmd__X;
+	struct cmd_element ip_ospf_cost_addr_cmd__X;
+	struct cmd_element show_memory_rip_cmd__X;
+	struct cmd_element rip_redistribute_type_routemap_cmd__X;
+	struct cmd_element ip_route_mask_flags_distance2_cmd__X;
+	struct cmd_element access_list_standard_any_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_metric_type_cmd__X;
+	struct cmd_element no_ospf_area_range_cmd__X;
+	struct cmd_element ip_prefix_list_seq_cmd__X;
+	struct cmd_element config_log_monitor_cmd__X;
+	struct cmd_element no_ospf_network_cmd__X;
+	struct cmd_element no_ip_prefix_list_prefix_cmd__X;
+	struct cmd_element no_ipv6_distribute_list_all_cmd__X;
+	struct fifo message_queue__X;
+	struct cmd_element ospf_distance_ospf_intra_cmd__X;
+	struct cmd_element no_ospf_area_stub_cmd__X;
+	unsigned long rip_debug_event__X;
+	if_rmap_hook_func if_rmap_delete_hook__X;
+	struct cmd_element no_rip_redistribute_type_cmd__X;
+	struct cmd_element ospf_network_area_cmd__X;
+	struct cmd_element rmap_continue_seq_cmd__X;
+	struct route_map_rule_cmd route_match_metric_cmd__X;
+	struct cmd_node vty_node__X;
+	struct cmd_element rip_passive_interface_cmd__X;
+	struct cmd_node enable_node__X;
+	int re_max_failures__X;
+	int retain_mode__X;
+	struct cmd_element no_ip_route_mask_distance_cmd__X;
+	struct cmd_element ospf_distance_ospf_intra_inter_external_cmd__X;
+	struct cmd_element no_ospf_area_export_list_cmd__X;
+	struct cmd_element no_debug_ospf_lsa_sub_cmd__X;
+	struct cmd_element ip_ospf_message_digest_key_cmd__X;
+	struct cmd_element ipv6_distribute_list_prefix_all_cmd__X;
+	struct route_table * rip_distance_table__X;
+	struct cmd_element ospf_area_shortcut_cmd__X;
+	struct cmd_element no_rip_route_cmd__X;
+	struct cmd_element ospf_area_import_list_cmd__X;
+	struct cmd_element no_set_metric_val_cmd__X;
+	struct cmd_element debug_ospf_lsa_sub_cmd__X;
+	struct cmd_element send_lifetime_day_month_day_month_cmd__X;
+	struct cmd_element ospf_compatible_rfc1583_cmd__X;
+	struct cmd_element ospf_area_vlink_authkey_cmd__X;
+	struct cmd_element ip_rip_send_version_2_cmd__X;
+	struct cmd_element route_map_cmd__X;
+	struct list * keychain_list__X;
+	struct cmd_element ip_ospf_hello_interval_cmd__X;
+	struct cmd_element distribute_list_cmd__X;
+	struct cmd_element clear_ip_prefix_list_cmd__X;
+	struct cmd_element ip_ospf_authentication_key_addr_cmd__X;
+	struct cmd_element match_tag_cmd__X;
+	struct cmd_element ip_ospf_dead_interval_cmd__X;
+	struct cmd_element debug_ospf_ism_cmd__X;
+	struct cmd_element no_ip_rip_authentication_mode_cmd__X;
+	struct zlog * zlog_default__X;
+	struct cmd_element ospf_area_vlink_cmd__X;
+	struct cmd_element no_match_ip_address_cmd__X;
+	struct cmd_element no_ip_ospf_dead_interval_cmd__X;
+	struct cmd_element no_rip_redistribute_type_metric_routemap_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_all_cmd__X;
+	struct cmd_element ospf_neighbor_priority_poll_interval_cmd__X;
+	struct cmd_node prefix_node__X;
+	struct cmd_element ospf_default_information_originate_always_type_metric_routemap_cmd__X;
+	struct cmd_element show_memory_cmd__X;
+	struct cmd_element no_ospf_distance_ospf_cmd__X;
+	struct cmd_element no_debug_zebra_kernel_cmd__X;
+	struct cmd_element config_end_cmd__X;
+	struct cmd_element ospf_distance_ospf_external_intra_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_type_routemap_cmd__X;
+	struct cmd_element no_debug_ospf_lsa_cmd__X;
+	struct cmd_element no_ospf_area_range_cost_cmd__X;
+	struct cmd_element no_ospf_area_vlink_authkey_cmd__X;
+	struct route_map_list route_map_master__X;
+	unsigned long term_debug_ospf_event__X;
+	struct route_map_rule_cmd route_match_ip_next_hop_prefix_list_cmd__X;
+	struct cmd_element show_ip_prefix_list_name_cmd__X;
+	struct cmd_element send_lifetime_month_day_day_month_cmd__X;
+	struct cmd_element no_banner_motd_cmd__X;
+	struct cmd_node ip_node__X;
+	struct cmd_element no_distribute_list_cmd__X;
+	struct cmd_element ospf_distance_ospf_external_intra_inter_cmd__X;
+	struct cmd_element no_ip_ospf_dead_interval_addr_cmd__X;
+	struct cmd_element no_ip_ospf_hello_interval_cmd__X;
+	struct cmd_element accept_lifetime_day_month_month_day_cmd__X;
+	struct prefix_master prefix_master_ipv4__X;
+	struct cmd_element no_ospf_area_nssa_no_summary_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_cmd__X;
+	struct cmd_element show_ip_route_summary_cmd__X;
+	unsigned long conf_debug_ospf_zebra__X;
+	struct cmd_element ospf_auto_cost_reference_bandwidth_cmd__X;
+	struct cmd_element ospf_area_range_cost_cmd__X;
+	struct cmd_element no_access_list_extended_mask_any_cmd__X;
+	struct cmd_element config_table_cmd__X;
+	struct cmd_element ipv6_distribute_list_all_cmd__X;
+	struct cmd_element no_rip_neighbor_cmd__X;
+	struct cmd_element match_ip_next_hop_prefix_list_cmd__X;
+	unsigned long term_debug_ospf_nssa__X;
+	struct cmd_element no_ospf_area_vlink_md5_cmd__X;
+	struct cmd_element match_ip_address_prefix_list_cmd__X;
+	struct cmd_element show_ip_prefix_list_summary_cmd__X;
+	struct cmd_element no_if_rmap_cmd__X;
+	struct list rid_all_sorted_list__X;
+	struct cmd_element no_ospf_area_range_substitute_cmd__X;
+	struct list * rip_offset_list_master__X;
+	struct cmd_element show_ip_access_list_cmd__X;
+	struct cmd_element debug_zebra_events_cmd__X;
+	struct cmd_element no_match_metric_cmd__X;
+	struct cmd_element ip_route_mask_distance_cmd__X;
+	struct cmd_element set_ip_nexthop_cmd__X;
+	struct cmd_element rmap_continue_cmd__X;
+	struct cmd_element no_ospf_neighbor_cmd__X;
+	struct cmd_element access_list_exact_cmd__X;
+	struct cmd_element config_log_file_level_cmd__X;
+	struct cmd_element ip_route_mask_flags_cmd__X;
+	struct cmd_element linkdetect_cmd__X;
+	struct cmd_element no_ospf_area_vlink_param2_cmd__X;
+	struct cmd_element config_write_terminal_cmd__X;
+	struct cmd_element no_match_ip_next_hop_val_cmd__X;
+	struct cmd_element password_text_cmd__X;
+	struct cmd_element debug_ospf_zebra_sub_cmd__X;
+	struct cmd_element no_bandwidth_if_cmd__X;
+	struct cmd_element send_lifetime_month_day_month_day_cmd__X;
+	int first_nonopt__X;
+	struct cmd_element no_ospf_distribute_list_out_cmd__X;
+	struct cmd_element no_ospf_area_range_advertise_cmd__X;
+	struct cmd_element no_ip_ospf_retransmit_interval_cmd__X;
+	struct cmd_element access_list_extended_host_host_cmd__X;
+	struct cmd_node table_node__X;
+	struct cmd_element access_list_extended_any_any_cmd__X;
+	struct cmd_element accept_lifetime_month_day_day_month_cmd__X;
+	struct cmd_node rmap_node__X;
+	struct cmd_element no_debug_zebra_packet_direct_cmd__X;
+	struct cmd_element debug_ospf_packet_all_cmd__X;
+	struct cmd_element no_ospf_timers_spf_cmd__X;
+	struct cmd_element show_ip_route_supernets_cmd__X;
+	unsigned long term_debug_ospf_zebra__X;
+	struct cmd_element router_rip_cmd__X;
+	struct cmd_element no_ip_rip_authentication_string2_cmd__X;
+	struct cmd_element no_ip_prefix_list_ge_le_cmd__X;
+	struct cmd_element show_startup_config_cmd__X;
+	dist_hook_func distribute_add_hook__X;
+	vector vrf_vector__X;
+	struct cmd_element no_ipv6_distribute_list_prefix_cmd__X;
+	struct cmd_element ospf_default_information_originate_type_metric_routemap_cmd__X;
+	struct cmd_element no_config_log_file_cmd__X;
+	struct cmd_element ospf_area_nssa_translate_cmd__X;
+	struct cmd_element ospf_dead_interval_cmd__X;
+	struct cmd_element ospf_area_stub_cmd__X;
+	struct route_map_rule_cmd route_match_ip_nexthop_cmd__X;
+	struct cmd_element no_ipv6_distribute_list_prefix_all_cmd__X;
+	struct cmd_element multicast_cmd__X;
+	struct cmd_element show_ip_route_prefix_cmd__X;
+	struct cmd_element ospf_area_range_advertise_cost_cmd__X;
+	if_rmap_hook_func if_rmap_add_hook__X;
+	int vty_port__X;
+	struct cmd_element no_ospf_rfc1583_flag_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_authkey_cmd__X;
+	struct cmd_element no_vty_login_cmd__X;
+	struct cmd_element no_service_terminal_length_cmd__X;
+	struct cmd_element ip_ospf_transmit_delay_addr_cmd__X;
+	struct cmd_element ospf_area_vlink_param3_cmd__X;
+	struct cmd_element config_log_facility_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_type_cmd__X;
+	struct cmd_element no_ospf_passive_interface_addr_cmd__X;
+	struct cmd_element no_match_tag_val_cmd__X;
+	struct cmd_element no_debug_ospf_packet_send_recv_cmd__X;
+	struct cmd_element show_running_config_cmd__X;
+	struct cmd_element no_match_ip_next_hop_cmd__X;
+	struct cmd_element no_ospf_refresh_timer_cmd__X;
+	struct cmd_element no_ospf_router_id_cmd__X;
+	struct cmd_element accept_lifetime_duration_month_day_cmd__X;
+	struct cmd_element banner_motd_default_cmd__X;
+	struct cmd_element ospf_default_information_originate_cmd__X;
+	struct cmd_element show_ip_prefix_list_cmd__X;
+	struct cmd_element no_access_list_exact_cmd__X;
+	struct cmd_element debug_zebra_kernel_cmd__X;
+	struct cmd_element show_ip_ospf_cmd__X;
+	struct cmd_element show_version_cmd__X;
+	struct cmd_element ospf_retransmit_interval_cmd__X;
+	struct cmd_element enable_password_text_cmd__X;
+	struct cmd_element no_match_ip_next_hop_prefix_list_cmd__X;
+	struct cmd_element no_rip_default_information_originate_cmd__X;
+	struct cmd_element ospf_area_vlink_md5_cmd__X;
+	unsigned long term_debug_ospf_nsm__X;
+	struct cmd_element access_list_extended_any_mask_cmd__X;
+	struct cmd_element ospf_redistribute_source_routemap_cmd__X;
+	struct cmd_element access_list_standard_cmd__X;
+	struct cmd_element show_ip_ospf_interface_cmd__X;
+	struct_ospf_master ospf_master__X;
+	struct cmd_element access_list_extended_mask_host_cmd__X;
+	struct cmd_element access_list_cmd__X;
+	struct cmd_element rip_distance_cmd__X;
+	struct cmd_element show_ip_access_list_name_cmd__X;
+	struct cmd_element no_ip_rip_receive_version_cmd__X;
+	struct cmd_element no_match_tag_cmd__X;
+	struct cmd_element no_ip_prefix_list_cmd__X;
+	struct cmd_element no_access_list_extended_host_host_cmd__X;
+	struct cmd_element ospf_redistribute_source_type_metric_routemap_cmd__X;
+	struct cmd_element ip_ospf_authentication_args_addr_cmd__X;
+	struct cmd_element accept_lifetime_month_day_month_day_cmd__X;
+	struct cmd_element no_ospf_default_information_originate_cmd__X;
+	struct cmd_element show_ip_ospf_border_routers_cmd__X;
+	struct cmd_element access_list_standard_nomask_cmd__X;
+	struct cmd_element no_rip_timers_cmd__X;
+	struct cmd_element ospf_distance_cmd__X;
+	struct cmd_element no_ospf_area_stub_no_summary_cmd__X;
+	struct list rid_lo_sorted_list__X;
+	struct cmd_element access_list_remark_cmd__X;
+	struct cmd_element rip_timers_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_metric_routemap_cmd__X;
+	struct cmd_element no_set_metric_type_cmd__X;
+	struct cmd_element ip_route_flags2_cmd__X;
+	struct cmd_element no_set_ip_nexthop_val_cmd__X;
+	struct cmd_element ipv6_distribute_list_prefix_cmd__X;
+	struct cmd_element config_logmsg_cmd__X;
+	struct cmd_element show_ip_ospf_database_type_id_cmd__X;
+	struct cmd_element no_ospf_area_vlink_authtype_authkey_cmd__X;
+	struct cmd_element no_rmap_onmatch_goto_cmd__X;
+	struct cmd_element send_lifetime_duration_month_day_cmd__X;
+	struct cmd_element rmap_call_cmd__X;
+	struct cmd_element show_ip_prefix_list_prefix_longer_cmd__X;
+	unsigned long zebra_debug_packet__X;
+	struct cmd_element no_router_ospf_id_cmd__X;
+	struct route_table * rip_enable_network__X;
+	struct cmd_element no_ip_ospf_cost_cmd__X;
+	struct cmd_element show_ip_prefix_list_detail_name_cmd__X;
+	struct cmd_element ip_rip_split_horizon_cmd__X;
+	struct cmd_element match_ip_nexthop_cmd__X;
+	unsigned long term_debug_ospf_lsa__X;
+	struct cmd_element config_log_syslog_cmd__X;
+	struct cmd_element debug_rip_packet_detail_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_detail_all_cmd__X;
+	struct cmd_element debug_ospf_packet_send_recv_detail_cmd__X;
+	struct cmd_element no_ip_prefix_list_seq_le_ge_cmd__X;
+	struct cmd_element no_ip_rip_send_version_cmd__X;
+	struct cmd_element show_ip_ospf_route_cmd__X;
+	struct route_map_rule_cmd route_match_ip_next_hop_cmd__X;
+	struct cmd_element show_ip_prefix_list_summary_name_cmd__X;
+	const char * pid_file__X;
+	struct cmd_element enable_password_cmd__X;
+	reg_syntax_t re_syntax_options__X;
+	struct cmd_element service_terminal_length_cmd__X;
+	struct cmd_element ospf_area_export_list_cmd__X;
+	struct cmd_element ospf_area_authentication_cmd__X;
+	struct cmd_element no_multicast_cmd__X;
+	struct cmd_element ip_rip_send_version_cmd__X;
+	struct cmd_element no_rip_distance_source_cmd__X;
+	struct cmd_element ospf_passive_interface_addr_cmd__X;
+	struct cmd_element no_ip_ospf_retransmit_interval_addr_cmd__X;
+	struct cmd_element ospf_distance_ospf_external_inter_intra_cmd__X;
+	struct cmd_element router_ospf_id_cmd__X;
+	struct cmd_element ip_ospf_hello_interval_addr_cmd__X;
+	struct cmd_element no_ospf_area_vlink_param4_cmd__X;
+	struct cmd_element ospf_default_information_originate_metric_type_cmd__X;
+	char * vty_accesslist_name__X;
+	struct cmd_element ospf_default_information_originate_type_metric_cmd__X;
+	struct cmd_element no_service_advanced_vty_cmd__X;
+	dist_hook_func distribute_delete_hook__X;
+	struct cmd_element no_ospf_area_default_cost_cmd__X;
+	unsigned long term_debug_ospf_packet__X[5];
+	struct cmd_element ip_prefix_list_seq_ge_cmd__X;
+	struct thread * t_write__X;
+	struct cmd_element no_match_ip_address_prefix_list_val_cmd__X;
+	struct cmd_element copy_runningconfig_startupconfig_cmd__X;
+	struct cmd_element key_cmd__X;
+	struct cmd_element ospf_authentication_key_cmd__X;
+	struct cmd_element show_memory_ospf_cmd__X;
+	struct cmd_element no_debug_ospf_packet_all_cmd__X;
+	struct cmd_element ip_rip_authentication_string_cmd__X;
+	struct route_table * ifaddr_ipv4_table__X;
+	struct cmd_element set_metric_cmd__X;
+	struct cmd_element no_route_map_cmd__X;
+	struct cmd_element no_ip_address_cmd__X;
+	struct cmd_element debug_ospf_nsm_sub_cmd__X;
+	struct cmd_element ip_ospf_network_cmd__X;
+	struct cmd_element rip_redistribute_type_metric_routemap_cmd__X;
+	struct cmd_element no_access_list_extended_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_md5_cmd__X;
+	struct cmd_element ospf_area_nssa_translate_no_summary_cmd__X;
+	struct cmd_element no_config_log_record_priority_cmd__X;
+	struct cmd_element show_memory_lib_cmd__X;
+	struct cmd_element show_debugging_zebra_cmd__X;
+	pid_t pid__X;
+	struct cmd_element show_memory_ripng_cmd__X;
+	struct cmd_element accept_lifetime_duration_day_month_cmd__X;
+	struct cmd_element no_ospf_area_vlink_cmd__X;
+	struct cmd_element no_ip_rip_send_version_num_cmd__X;
+	struct cmd_element distribute_list_all_cmd__X;
+	pid_t old_pid__X;
+	struct route_map_rule_cmd route_match_interface_cmd__X;
+	struct cmd_element no_ospf_area_range_advertise_cost_cmd__X;
+	struct cmd_element no_ospf_area_authentication_cmd__X;
+	struct cmd_element no_ospf_redistribute_source_cmd__X;
+	struct cmd_element ospf_network_cmd__X;
+	struct cmd_element no_router_id_cmd__X;
+	char * config_file__X;
+	struct cmd_element no_match_ip_address_val_cmd__X;
+	struct cmd_element no_rip_redistribute_rip_cmd__X;
+	struct cmd_element no_debug_zebra_events_cmd__X;
+	char telnet_space_char__X;
+	struct cmd_element no_ospf_passive_interface_cmd__X;
+	struct cmd_element ip_prefix_list_seq_le_cmd__X;
+	struct cmd_element send_lifetime_infinite_day_month_cmd__X;
+	int ospf_area_type_msg_max__X;
+	struct cmd_element echo_cmd__X;
+	struct cmd_element no_ospf_distance_cmd__X;
+	struct cmd_element access_list_extended_cmd__X;
+	struct cmd_element ip_ospf_retransmit_interval_addr_cmd__X;
+	struct cmd_element no_ip_prefix_list_description_arg_cmd__X;
+	struct cmd_element show_ip_prefix_list_name_seq_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_detail_cmd__X;
+	struct cmd_element ip_prefix_list_ge_le_cmd__X;
+	struct cmd_element no_ospf_area_vlink_authtype_md5_cmd__X;
+	struct cmd_element no_distribute_list_all_cmd__X;
+	struct cmd_element no_router_ospf_cmd__X;
+	struct cmd_element ip_ospf_transmit_delay_cmd__X;
+	struct cmd_element rip_redistribute_rip_cmd__X;
+	struct cmd_element no_ospf_cost_cmd__X;
+	struct cmd_element router_id_cmd__X;
+	struct cmd_element debug_ospf_nssa_cmd__X;
+	struct cmd_element no_match_interface_val_cmd__X;
+	struct route_map_rule_cmd route_match_ip_address_prefix_list_cmd__X;
+	struct cmd_element no_access_list_extended_any_host_cmd__X;
+	struct cmd_element no_rip_version_val_cmd__X;
+	struct cmd_element no_ip_rip_authentication_key_chain_cmd__X;
+	struct cmd_element debug_ospf_event_cmd__X;
+	struct cmd_element no_ip_ospf_hello_interval_addr_cmd__X;
+	struct cmd_element config_enable_cmd__X;
+	struct cmd_element access_list_extended_any_host_cmd__X;
+	struct FOO1__S mstat__X[MTYPE_MAX];
+	struct cmd_element ospf_distance_source_access_list_cmd__X;
+	struct cmd_element no_ip_prefix_list_description_cmd__X;
+	struct cmd_element no_config_log_syslog_cmd__X;
+	struct cmd_element ospf_distance_ospf_inter_cmd__X;
+	char * posixly_correct__X;
+	struct cmd_element no_rip_version_cmd__X;
+	struct cmd_element no_rip_passive_interface_cmd__X;
+	struct cmd_element no_key_chain_cmd__X;
+	struct cmd_element no_set_metric_cmd__X;
+	struct cmd_element rmap_show_cmd__X;
+	char * optarg__X;
+	struct cmd_element clear_ip_prefix_list_name_prefix_cmd__X;
+	struct cmd_element no_debug_rip_events_cmd__X;
+	struct cmd_element if_rmap_cmd__X;
+	struct cmd_element no_debug_ospf_packet_send_recv_detail_cmd__X;
+	struct cmd_element no_set_metric_type_val_cmd__X;
+	struct cmd_element ip_rip_split_horizon_poisoned_reverse_cmd__X;
+	unsigned long rip_debug_zebra__X;
+	struct prefix_master prefix_master_orf__X;
+	struct cmd_element debug_ospf_ism_sub_cmd__X;
+	struct cmd_element ospf_area_range_cmd__X;
+	struct cmd_node forwarding_node__X;
+	struct cmd_element show_memory_bgp_cmd__X;
+	struct_zclient * zclient__X;
+	struct cmd_element no_ipv6_distribute_list_cmd__X;
+	struct cmd_element no_access_list_cmd__X;
+	struct cmd_element ip_ospf_retransmit_interval_cmd__X;
+	vector cmdvec__X;
+	struct cmd_element show_ip_ospf_database_type_id_self_cmd__X;
+	struct cmd_element ip_forwarding_cmd__X;
+	struct cmd_element ospf_area_nssa_no_summary_cmd__X;
+	struct cmd_element ip_route_flags_distance_cmd__X;
+	struct cmd_element ospf_redistribute_source_type_metric_cmd__X;
+	struct cmd_element ospf_distance_ospf_external_cmd__X;
+	int zclient_debug__X;
+	struct cmd_element ospf_redistribute_source_metric_cmd__X;
+	struct cmd_element ip_ospf_authentication_key_cmd__X;
+	struct cmd_element no_ospf_neighbor_priority_pollinterval_cmd__X;
+	struct cmd_element rip_offset_list_cmd__X;
+	struct cmd_element no_ospf_dead_interval_cmd__X;
+	struct cmd_element ip_prefix_list_sequence_number_cmd__X;
+	struct cmd_element ospf_neighbor_priority_cmd__X;
+	struct route_map_rule_cmd route_set_tag_cmd__X;
+	struct cmd_element no_match_ip_next_hop_prefix_list_val_cmd__X;
+	struct cmd_element shutdown_if_cmd__X;
+	struct cmd_element no_ospf_default_metric_val_cmd__X;
+	struct cmd_element config_exit_cmd__X;
+	struct cmd_element show_ip_rip_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_metric_type_routemap_cmd__X;
+	struct cmd_element ip_rip_authentication_key_chain_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_routemap_cmd__X;
+	struct cmd_element config_log_stdout_level_cmd__X;
+	struct cmd_element no_set_ip_nexthop_cmd__X;
+	struct cmd_element ospf_area_vlink_param2_cmd__X;
+	struct cmd_element config_log_trap_cmd__X;
+	struct cmd_element rip_distance_source_cmd__X;
+	struct cmd_element rip_version_cmd__X;
+	struct cmd_element ip_route_cmd__X;
+	struct cmd_element hostname_cmd__X;
+	struct cmd_element no_distribute_list_prefix_all_cmd__X;
+	struct cmd_element no_match_ip_nexthop_val_cmd__X;
+	struct hash * disthash__X;
+	struct cmd_element password_cmd__X;
+	struct cmd_element no_access_list_extended_any_any_cmd__X;
+	struct cmd_element no_access_list_any_cmd__X;
+	struct cmd_element no_ip_rip_split_horizon_poisoned_reverse_cmd__X;
+	struct cmd_element no_ip_rip_authentication_mode_type_authlen_cmd__X;
+	struct cmd_element no_debug_ospf_ism_sub_cmd__X;
+	struct cmd_element ip_rip_authentication_mode_cmd__X;
+	struct cmd_element debug_ospf_nsm_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_cmd__X;
+	int no_password_check__X;
+	struct cmd_element show_ip_ospf_neighbor_id_cmd__X;
+	struct cmd_element no_ip_prefix_list_seq_ge_le_cmd__X;
+	struct cmd_element config_terminal_no_length_cmd__X;
+	struct cmd_element ospf_passive_interface_cmd__X;
+	struct cmd_element ip_prefix_list_seq_le_ge_cmd__X;
+	struct cmd_element match_metric_cmd__X;
+	struct cmd_element ospf_distance_ospf_external_inter_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_args_md5_cmd__X;
+	struct cmd_element access_list_extended_mask_any_cmd__X;
+	struct cmd_element no_ip_prefix_list_ge_cmd__X;
+	unsigned long conf_debug_ospf_lsa__X;
+	struct cmd_element no_ospf_compatible_rfc1583_cmd__X;
+	unsigned long zebra_debug_kernel__X;
+	int keep_kernel_mode__X;
+	struct cmd_element ospf_cost_cmd__X;
+	struct access_master access_master_ipv4__X;
+	struct cmd_element ip_route_distance_cmd__X;
+	vector vtyvec__X;
+	struct cmd_element interface_desc_cmd__X;
+	struct cmd_element key_chain_cmd__X;
+	struct cmd_element match_ip_address_cmd__X;
+	struct cmd_element no_rip_redistribute_type_routemap_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_metric_cmd__X;
+	struct cmd_element no_debug_rip_zebra_cmd__X;
+	struct cmd_element ip_prefix_list_ge_cmd__X;
+	struct cmd_element no_config_log_trap_cmd__X;
+	struct cmd_node auth_enable_node__X;
+	struct cmd_element no_ip_route_mask_flags2_cmd__X;
+	struct cmd_element no_rip_network_cmd__X;
+	struct cmd_element ip_route_mask_flags_distance_cmd__X;
+	struct cmd_element terminal_no_monitor_cmd__X;
+	struct cmd_element ospf_distance_ospf_inter_intra_external_cmd__X;
+	struct cmd_element ip_ospf_authentication_addr_cmd__X;
+	struct cmd_element no_ip_rip_authentication_key_chain2_cmd__X;
+	struct cmd_element no_ip_route_mask_flags_distance2_cmd__X;
+	struct cmd_element ospf_distance_source_cmd__X;
+	struct cmd_element no_ospf_authentication_key_cmd__X;
+	struct cmd_element ospf_area_range_not_advertise_cmd__X;
+	struct cmd_element no_access_list_standard_nomask_cmd__X;
+	struct cmd_element config_log_stdout_cmd__X;
+	struct cmd_element service_password_encrypt_cmd__X;
+	struct cmd_element ospf_redistribute_source_metric_type_cmd__X;
+	struct cmd_element debug_rip_packet_cmd__X;
+	struct cmd_element no_access_list_extended_mask_host_cmd__X;
+	struct cmd_element no_if_ipv6_rmap_cmd__X;
+	struct cmd_element access_list_standard_host_cmd__X;
+	struct cmd_element ip_ospf_authentication_args_cmd__X;
+	vector route_set_vec__X;
+	struct cmd_element show_ip_prefix_list_detail_cmd__X;
+	struct cmd_element no_ip_ospf_priority_cmd__X;
+	struct cmd_element zebra_interface_cmd__X;
+	struct cmd_element no_hostname_cmd__X;
+	struct cmd_element no_ip_prefix_list_seq_le_cmd__X;
+	struct_if_master if_master__X;
+	struct cmd_element no_debug_ospf_nssa_cmd__X;
+	struct cmd_element config_write_cmd__X;
+	struct cmd_element no_rip_timers_val_cmd__X;
+	char * vty_ipv6_accesslist_name__X;
+	struct cmd_element ospf_abr_type_cmd__X;
+	struct cmd_element no_ip_ospf_network_cmd__X;
+	struct cmd_element ospf_neighbor_cmd__X;
+	struct cmd_element rip_redistribute_type_metric_cmd__X;
+	struct cmd_element no_shutdown_if_cmd__X;
+	struct cmd_element no_ospf_area_vlink_param3_cmd__X;
+	struct cmd_node keychain_node__X;
+	struct route_map_rule_cmd route_match_ip_address_cmd__X;
+	struct cmd_element no_match_ip_nexthop_cmd__X;
+	struct cmd_element ip_rip_receive_version_2_cmd__X;
+	struct cmd_element ospf_redistribute_source_metric_type_routemap_cmd__X;
+	struct cmd_element no_access_list_remark_arg_cmd__X;
+	struct cmd_element no_config_log_monitor_cmd__X;
+	struct quagga_sigevent_master_t sigmaster__X;
+	struct cmd_element no_debug_ospf_nsm_cmd__X;
+	struct cmd_element ospf_redistribute_source_type_cmd__X;
+	struct cmd_element no_debug_rip_packet_direct_cmd__X;
+	struct cmd_element rmap_continue_index_cmd__X;
+	struct cmd_element set_tag_cmd__X;
+	struct cmd_element no_ip_prefix_list_le_ge_cmd__X;
+	struct cmd_element no_ospf_default_metric_cmd__X;
+	struct cmd_element no_debug_rip_packet_cmd__X;
+	struct cmd_element router_zebra_cmd__X;
+	struct cmd_element ospf_neighbor_poll_interval_cmd__X;
+	struct cmd_element ip_prefix_list_le_ge_cmd__X;
+	struct cmd_element ip_prefix_list_cmd__X;
+	int passive_default__X;
+	struct list * peer_list__X;
+	struct cmd_element debug_zebra_packet_direct_cmd__X;
+	struct cmd_element no_access_list_remark_cmd__X;
+	struct_rip * rip__X;
+	struct cmd_element no_interface_cmd__X;
+	struct cmd_element ospf_distance_ospf_inter_external_cmd__X;
+	struct cmd_element no_ospf_priority_cmd__X;
+	struct cmd_element no_debug_ospf_nsm_sub_cmd__X;
+	struct cmd_element debug_rip_events_cmd__X;
+	struct cmd_element ospf_redistribute_source_cmd__X;
+	struct cmd_element no_ip_route_mask_cmd__X;
+	int last_nonopt__X;
+	struct nlsock netlink__X;
+	u_int32_t nl_rcvbufsize__X;
+	struct cmd_element no_set_tag_val_cmd__X;
+	struct cmd_element ospf_default_information_originate_always_type_metric_cmd__X;
+	struct cmd_element ip_ospf_priority_addr_cmd__X;
+	struct cmd_element no_access_list_standard_host_cmd__X;
+	char reg_unset_dummy__X;
+	struct cmd_element no_router_rip_cmd__X;
+	struct cmd_element config_disable_cmd__X;
+	struct cmd_element exec_timeout_sec_cmd__X;
+	struct cmd_element no_ip_prefix_list_le_cmd__X;
+	char re_syntax_table__X[CHAR_SET_SIZE];
+	struct cmd_element clear_ip_prefix_list_name_cmd__X;
+	struct cmd_element vty_access_class_cmd__X;
+	struct cmd_element ip_prefix_list_seq_ge_le_cmd__X;
+	struct cmd_element no_debug_ospf_zebra_cmd__X;
+	struct cmd_element ospf_distance_ospf_inter_intra_cmd__X;
+	struct cmd_element no_ip_route_flags2_cmd__X;
+	struct in_addr router_id_zebra__X;
+	struct cmd_element ospf_priority_cmd__X;
+	struct cmd_element config_log_file_cmd__X;
+	struct cmd_element ip_address_label_cmd__X;
+	struct cmd_element ospf_hello_interval_cmd__X;
+	unsigned long rip_debug_packet__X;
+	struct cmd_element no_access_list_standard_cmd__X;
+	struct cmd_element no_ip_route_flags_distance2_cmd__X;
+	struct cmd_element rip_redistribute_type_cmd__X;
+	struct cmd_element no_ip_rip_split_horizon_cmd__X;
+	struct cmd_element ospf_timers_spf_cmd__X;
+	struct cmd_node keychain_key_node__X;
+	struct cmd_element no_ip_prefix_list_seq_ge_cmd__X;
+	struct cmd_element rip_network_cmd__X;
+	struct cmd_element no_rmap_continue_seq__X;
+	struct cmd_element no_config_log_syslog_facility_cmd__X;
+	struct cmd_element config_write_file_cmd__X;
+	unsigned long vty_timeout_val__X;
+	struct cmd_element ip_route_mask_cmd__X;
+	struct cmd_element debug_rip_zebra_cmd__X;
+	struct cmd_element show_thread_cpu_cmd__X;
+	struct cmd_element no_match_metric_val_cmd__X;
+	struct cmd_element show_ip_ospf_neighbor_cmd__X;
+	struct cmd_element no_exec_timeout_cmd__X;
+	struct cmd_element no_ip_forwarding_cmd__X;
+	struct cmd_element show_ip_ospf_database_type_id_adv_router_cmd__X;
+	struct hash * ifrmaphash__X;
+	struct cmd_element no_ip_ospf_authentication_key_addr_cmd__X;
+	struct cmd_element config_log_monitor_level_cmd__X;
+	struct cmd_element accept_lifetime_infinite_month_day_cmd__X;
+	struct cmd_element ip_prefix_list_le_cmd__X;
+	struct cmd_element match_interface_cmd__X;
+	vector Vrip_passive_nondefault__X;
+	struct cmd_element no_ip_ospf_authentication_cmd__X;
+	struct _zprivs_t zprivs_state__X;
+	struct cmd_element ospf_rfc1583_flag_cmd__X;
+	struct cmd_element no_ip_ospf_authentication_key_cmd__X;
+	struct cmd_element show_memory_isis_cmd__X;
+	struct cmd_element ip_rip_send_version_1_cmd__X;
+	unsigned long conf_debug_ospf_event__X;
+	struct cmd_element no_access_list_standard_any_cmd__X;
+	struct cmd_element ip_ospf_priority_cmd__X;
+	struct cmd_element ospf_area_vlink_param4_cmd__X;
+	struct cmd_element no_ospf_retransmit_interval_cmd__X;
+	unsigned long conf_debug_ospf_packet__X[5];
+	struct cmd_element debug_ospf_lsa_cmd__X;
+	struct cmd_element show_ip_route_prefix_longer_cmd__X;
+	struct cmd_element no_ip_route_mask_flags_cmd__X;
+	struct cmd_element service_advanced_vty_cmd__X;
+	struct cmd_element no_rmap_call_cmd__X;
+	struct cmd_element config_terminal_cmd__X;
+	unsigned long conf_debug_ospf_nssa__X;
+	struct cmd_element no_ip_ospf_message_digest_key_addr_cmd__X;
+	struct cmd_element no_vty_access_class_cmd__X;
+	struct cmd_element ospf_distribute_list_out_cmd__X;
+	struct cmd_element no_ip_route_cmd__X;
+	struct cmd_element match_ip_next_hop_cmd__X;
+	struct cmd_element no_ospf_distance_source_access_list_cmd__X;
+	struct cmd_element config_log_record_priority_cmd__X;
+	struct cmd_element ospf_refresh_timer_cmd__X;
+	struct cmd_element show_ip_prefix_list_prefix_cmd__X;
+	struct cmd_element ospf_area_stub_no_summary_cmd__X;
+	struct cmd_element show_logging_cmd__X;
+	struct nlsock netlink_cmd__X;
+	struct cmd_element key_string_cmd__X;
+	struct cmd_element ospf_area_vlink_authtype_args_cmd__X;
+	struct cmd_element debug_ospf_packet_send_recv_cmd__X;
+	struct cmd_element no_ip_ospf_cost_addr_cmd__X;
+	struct cmd_element no_config_log_stdout_cmd__X;
+	struct cmd_element access_list_any_cmd__X;
+	struct cmd_element no_match_ip_address_prefix_list_cmd__X;
+	struct cmd_element show_table_cmd__X;
+	struct cmd_element show_ip_forwarding_cmd__X;
+	struct cmd_element no_debug_ospf_event_cmd__X;
+	struct cmd_element show_ip_route_protocol_cmd__X;
+	struct cmd_element show_ip_ospf_database_type_adv_router_cmd__X;
+	struct cmd_element no_ip_rip_authentication_mode_type_cmd__X;
+	struct cmd_element ospf_default_information_originate_metric_cmd__X;
+	struct cmd_element no_ip_ospf_authentication_addr_cmd__X;
+	struct cmd_element no_access_list_extended_host_mask_cmd__X;
+	struct cmd_element ospf_default_information_originate_metric_routemap_cmd__X;
+	vector route_match_vec__X;
+	struct cmd_element show_ip_route_addr_cmd__X;
+	struct cmd_element ipv6_distribute_list_cmd__X;
+	struct cmd_element rip_route_cmd__X;
+	char telnet_backward_char__X;
+	struct cmd_element no_ospf_area_shortcut_cmd__X;
+	struct cmd_element no_ospf_area_import_list_cmd__X;
+	struct cmd_element ip_route_mask_flags2_cmd__X;
+	struct cmd_element no_ip_prefix_list_seq_cmd__X;
+	struct cmd_element no_rip_redistribute_type_metric_cmd__X;
+	struct cmd_element no_rmap_continue_cmd__X;
+	char * vty_cwd__X;
+	struct list * iflist__X;
+	struct cmd_element show_ip_rip_status_cmd__X;
+	struct cmd_element ip_ospf_message_digest_key_addr_cmd__X;
+	struct cmd_element distribute_list_prefix_cmd__X;
+	struct cmd_element no_ip_ospf_transmit_delay_addr_cmd__X;
+};
+
+extern struct GlobalVars * __activeVars;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern struct GlobalVars * GlobalVars_createActiveSet();
+
+extern int GlobalVars_errno();
+
+void GlobalVars_initializeActiveSet_ripd();
+
+void GlobalVars_initializeActiveSet_ospfd();
+
+void GlobalVars_initializeActiveSet_zebra();
+
+void GlobalVars_initializeActiveSet_lib();
+
+#ifdef __cplusplus
+};
+#endif
+
+#ifndef	__GLOBALVARS_DEFS
+#define	__GLOBALVARS_DEFS
+#define	rmap_show_name_cmd__VAR  (__activeVars->rmap_show_name_cmd__X)
+#define	rmap_show_name_cmd  rmap_show_name_cmd__VAR
+#define	rip_offset_list_ifname_cmd__VAR  (__activeVars->rip_offset_list_ifname_cmd__X)
+#define	rip_offset_list_ifname_cmd  rip_offset_list_ifname_cmd__VAR
+#define	no_rmap_onmatch_next_cmd__VAR  (__activeVars->no_rmap_onmatch_next_cmd__X)
+#define	no_rmap_onmatch_next_cmd  no_rmap_onmatch_next_cmd__VAR
+#define	ip_route_flags_distance2_cmd__VAR  (__activeVars->ip_route_flags_distance2_cmd__X)
+#define	ip_route_flags_distance2_cmd  ip_route_flags_distance2_cmd__VAR
+#define	show_history_cmd__VAR  (__activeVars->show_history_cmd__X)
+#define	show_history_cmd  show_history_cmd__VAR
+#define	config_terminal_length_cmd__VAR  (__activeVars->config_terminal_length_cmd__X)
+#define	config_terminal_length_cmd  config_terminal_length_cmd__VAR
+#define	no_rip_offset_list_ifname_cmd__VAR  (__activeVars->no_rip_offset_list_ifname_cmd__X)
+#define	no_rip_offset_list_ifname_cmd  no_rip_offset_list_ifname_cmd__VAR
+#define	ospf_area_vlink_param1_cmd__VAR  (__activeVars->ospf_area_vlink_param1_cmd__X)
+#define	ospf_area_vlink_param1_cmd  ospf_area_vlink_param1_cmd__VAR
+#define	no_ospf_area_vlink_param1_cmd__VAR  (__activeVars->no_ospf_area_vlink_param1_cmd__X)
+#define	no_ospf_area_vlink_param1_cmd  no_ospf_area_vlink_param1_cmd__VAR
+#define	accept_lifetime_day_month_day_month_cmd__VAR  (__activeVars->accept_lifetime_day_month_day_month_cmd__X)
+#define	accept_lifetime_day_month_day_month_cmd  accept_lifetime_day_month_day_month_cmd__VAR
+#define	config_help_cmd__VAR  (__activeVars->config_help_cmd__X)
+#define	config_help_cmd  config_help_cmd__VAR
+#define	no_debug_ospf_zebra_sub_cmd__VAR  (__activeVars->no_debug_ospf_zebra_sub_cmd__X)
+#define	no_debug_ospf_zebra_sub_cmd  no_debug_ospf_zebra_sub_cmd__VAR
+#define	no_ip_rip_authentication_string_cmd__VAR  (__activeVars->no_ip_rip_authentication_string_cmd__X)
+#define	no_ip_rip_authentication_string_cmd  no_ip_rip_authentication_string_cmd__VAR
+#define	vty_login_cmd__VAR  (__activeVars->vty_login_cmd__X)
+#define	vty_login_cmd  vty_login_cmd__VAR
+#define	show_zebra_client_cmd__VAR  (__activeVars->show_zebra_client_cmd__X)
+#define	show_zebra_client_cmd  show_zebra_client_cmd__VAR
+#define	rip_distance_source_access_list_cmd__VAR  (__activeVars->rip_distance_source_access_list_cmd__X)
+#define	rip_distance_source_access_list_cmd  rip_distance_source_access_list_cmd__VAR
+#define	send_lifetime_day_month_month_day_cmd__VAR  (__activeVars->send_lifetime_day_month_month_day_cmd__X)
+#define	send_lifetime_day_month_month_day_cmd  send_lifetime_day_month_month_day_cmd__VAR
+#define	no_ip_route_distance_cmd__VAR  (__activeVars->no_ip_route_distance_cmd__X)
+#define	no_ip_route_distance_cmd  no_ip_route_distance_cmd__VAR
+#define	no_debug_zebra_packet_cmd__VAR  (__activeVars->no_debug_zebra_packet_cmd__X)
+#define	no_debug_zebra_packet_cmd  no_debug_zebra_packet_cmd__VAR
+#define	show_ip_ospf_neighbor_int_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_int_cmd__X)
+#define	show_ip_ospf_neighbor_int_cmd  show_ip_ospf_neighbor_int_cmd__VAR
+#define	Vvty_serv_thread__VAR  (__activeVars->Vvty_serv_thread__X)
+#define	Vvty_serv_thread  Vvty_serv_thread__VAR
+#define	no_router_zebra_cmd__VAR  (__activeVars->no_router_zebra_cmd__X)
+#define	no_router_zebra_cmd  no_router_zebra_cmd__VAR
+#define	rip_neighbor_table__VAR  (__activeVars->rip_neighbor_table__X)
+#define	rip_neighbor_table  rip_neighbor_table__VAR
+#define	cpu_record__VAR  (__activeVars->cpu_record__X)
+#define	cpu_record  cpu_record__VAR
+#define	ip_address_cmd__VAR  (__activeVars->ip_address_cmd__X)
+#define	ip_address_cmd  ip_address_cmd__VAR
+#define	vty_addr__VAR  (__activeVars->vty_addr__X)
+#define	vty_addr  vty_addr__VAR
+#define	rip_global_route_changes__VAR  (__activeVars->rip_global_route_changes__X)
+#define	rip_global_route_changes  rip_global_route_changes__VAR
+#define	show_ip_route_cmd__VAR  (__activeVars->show_ip_route_cmd__X)
+#define	show_ip_route_cmd  show_ip_route_cmd__VAR
+#define	no_service_password_encrypt_cmd__VAR  (__activeVars->no_service_password_encrypt_cmd__X)
+#define	no_service_password_encrypt_cmd  no_service_password_encrypt_cmd__VAR
+#define	ospf_area_range_advertise_cmd__VAR  (__activeVars->ospf_area_range_advertise_cmd__X)
+#define	ospf_area_range_advertise_cmd  ospf_area_range_advertise_cmd__VAR
+#define	rip_enable_interface__VAR  (__activeVars->rip_enable_interface__X)
+#define	rip_enable_interface  rip_enable_interface__VAR
+#define	router_ospf_cmd__VAR  (__activeVars->router_ospf_cmd__X)
+#define	router_ospf_cmd  router_ospf_cmd__VAR
+#define	ospf_transmit_delay_cmd__VAR  (__activeVars->ospf_transmit_delay_cmd__X)
+#define	ospf_transmit_delay_cmd  ospf_transmit_delay_cmd__VAR
+#define	line_vty_cmd__VAR  (__activeVars->line_vty_cmd__X)
+#define	line_vty_cmd  line_vty_cmd__VAR
+#define	no_interface_desc_cmd__VAR  (__activeVars->no_interface_desc_cmd__X)
+#define	no_interface_desc_cmd  no_interface_desc_cmd__VAR
+#define	ospf_area_range_substitute_cmd__VAR  (__activeVars->ospf_area_range_substitute_cmd__X)
+#define	ospf_area_range_substitute_cmd  ospf_area_range_substitute_cmd__VAR
+#define	set_metric_type_cmd__VAR  (__activeVars->set_metric_type_cmd__X)
+#define	set_metric_type_cmd  set_metric_type_cmd__VAR
+#define	no_enable_password_cmd__VAR  (__activeVars->no_enable_password_cmd__X)
+#define	no_enable_password_cmd  no_enable_password_cmd__VAR
+#define	no_ip_ospf_transmit_delay_cmd__VAR  (__activeVars->no_ip_ospf_transmit_delay_cmd__X)
+#define	no_ip_ospf_transmit_delay_cmd  no_ip_ospf_transmit_delay_cmd__VAR
+#define	zebra_node__VAR  (__activeVars->zebra_node__X)
+#define	zebra_node  zebra_node__VAR
+#define	ospf_default_information_originate_type_cmd__VAR  (__activeVars->ospf_default_information_originate_type_cmd__X)
+#define	ospf_default_information_originate_type_cmd  ospf_default_information_originate_type_cmd__VAR
+#define	no_access_list_extended_any_mask_cmd__VAR  (__activeVars->no_access_list_extended_any_mask_cmd__X)
+#define	no_access_list_extended_any_mask_cmd  no_access_list_extended_any_mask_cmd__VAR
+#define	ospf_distance_ospf_intra_inter_cmd__VAR  (__activeVars->ospf_distance_ospf_intra_inter_cmd__X)
+#define	ospf_distance_ospf_intra_inter_cmd  ospf_distance_ospf_intra_inter_cmd__VAR
+#define	rid_user_assigned__VAR  (__activeVars->rid_user_assigned__X)
+#define	rid_user_assigned  rid_user_assigned__VAR
+#define	ospf_distance_ospf_intra_external_cmd__VAR  (__activeVars->ospf_distance_ospf_intra_external_cmd__X)
+#define	ospf_distance_ospf_intra_external_cmd  ospf_distance_ospf_intra_external_cmd__VAR
+#define	view_node__VAR  (__activeVars->view_node__X)
+#define	view_node  view_node__VAR
+#define	netlink_addr__VAR  (__activeVars->netlink_addr__X)
+#define	netlink_addr  netlink_addr__VAR
+#define	vty_config__VAR  (__activeVars->vty_config__X)
+#define	vty_config  vty_config__VAR
+#define	ip_ospf_dead_interval_addr_cmd__VAR  (__activeVars->ip_ospf_dead_interval_addr_cmd__X)
+#define	ip_ospf_dead_interval_addr_cmd  ip_ospf_dead_interval_addr_cmd__VAR
+#define	rmap_onmatch_goto_cmd__VAR  (__activeVars->rmap_onmatch_goto_cmd__X)
+#define	rmap_onmatch_goto_cmd  rmap_onmatch_goto_cmd__VAR
+#define	ospf_default_information_originate_type_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_type_routemap_cmd__X)
+#define	ospf_default_information_originate_type_routemap_cmd  ospf_default_information_originate_type_routemap_cmd__VAR
+#define	no_access_list_extended_host_any_cmd__VAR  (__activeVars->no_access_list_extended_host_any_cmd__X)
+#define	no_access_list_extended_host_any_cmd  no_access_list_extended_host_any_cmd__VAR
+#define	ospf_area_filter_list_cmd__VAR  (__activeVars->ospf_area_filter_list_cmd__X)
+#define	ospf_area_filter_list_cmd  ospf_area_filter_list_cmd__VAR
+#define	route_set_metric_cmd__VAR  (__activeVars->route_set_metric_cmd__X)
+#define	route_set_metric_cmd  route_set_metric_cmd__VAR
+#define	no_ip_ospf_priority_addr_cmd__VAR  (__activeVars->no_ip_ospf_priority_addr_cmd__X)
+#define	no_ip_ospf_priority_addr_cmd  no_ip_ospf_priority_addr_cmd__VAR
+#define	__getopt_initialized__VAR  (__activeVars->__getopt_initialized__X)
+#define	__getopt_initialized  __getopt_initialized__VAR
+#define	no_rip_default_metric_cmd__VAR  (__activeVars->no_rip_default_metric_cmd__X)
+#define	no_rip_default_metric_cmd  no_rip_default_metric_cmd__VAR
+#define	optind__VAR  (__activeVars->optind__X)
+#define	optind  optind__VAR
+#define	config_log_syslog_level_cmd__VAR  (__activeVars->config_log_syslog_level_cmd__X)
+#define	config_log_syslog_level_cmd  config_log_syslog_level_cmd__VAR
+#define	no_bandwidth_if_val_cmd__VAR  (__activeVars->no_bandwidth_if_val_cmd__X)
+#define	no_bandwidth_if_val_cmd  no_bandwidth_if_val_cmd__VAR
+#define	no_ospf_network_area_cmd__VAR  (__activeVars->no_ospf_network_area_cmd__X)
+#define	no_ospf_network_area_cmd  no_ospf_network_area_cmd__VAR
+#define	send_lifetime_infinite_month_day_cmd__VAR  (__activeVars->send_lifetime_infinite_month_day_cmd__X)
+#define	send_lifetime_infinite_month_day_cmd  send_lifetime_infinite_month_day_cmd__VAR
+#define	no_config_log_facility_cmd__VAR  (__activeVars->no_config_log_facility_cmd__X)
+#define	no_config_log_facility_cmd  no_config_log_facility_cmd__VAR
+#define	ospf_default_metric_cmd__VAR  (__activeVars->ospf_default_metric_cmd__X)
+#define	ospf_default_metric_cmd  ospf_default_metric_cmd__VAR
+#define	ospf_distance_ospf_intra_external_inter_cmd__VAR  (__activeVars->ospf_distance_ospf_intra_external_inter_cmd__X)
+#define	ospf_distance_ospf_intra_external_inter_cmd  ospf_distance_ospf_intra_external_inter_cmd__VAR
+#define	no_debug_ospf_ism_cmd__VAR  (__activeVars->no_debug_ospf_ism_cmd__X)
+#define	no_debug_ospf_ism_cmd  no_debug_ospf_ism_cmd__VAR
+#define	send_lifetime_duration_day_month_cmd__VAR  (__activeVars->send_lifetime_duration_day_month_cmd__X)
+#define	send_lifetime_duration_day_month_cmd  send_lifetime_duration_day_month_cmd__VAR
+#define	no_ospf_neighbor_poll_interval_cmd__VAR  (__activeVars->no_ospf_neighbor_poll_interval_cmd__X)
+#define	no_ospf_neighbor_poll_interval_cmd  no_ospf_neighbor_poll_interval_cmd__VAR
+#define	rip_default_information_originate_cmd__VAR  (__activeVars->rip_default_information_originate_cmd__X)
+#define	rip_default_information_originate_cmd  rip_default_information_originate_cmd__VAR
+#define	term_debug_ospf_ism__VAR  (__activeVars->term_debug_ospf_ism__X)
+#define	term_debug_ospf_ism  term_debug_ospf_ism__VAR
+#define	rip_default_metric_cmd__VAR  (__activeVars->rip_default_metric_cmd__X)
+#define	rip_default_metric_cmd  rip_default_metric_cmd__VAR
+#define	ip_rip_authentication_mode_authlen_cmd__VAR  (__activeVars->ip_rip_authentication_mode_authlen_cmd__X)
+#define	ip_rip_authentication_mode_authlen_cmd  ip_rip_authentication_mode_authlen_cmd__VAR
+#define	om__VAR  (__activeVars->om__X)
+#define	om  om__VAR
+#define	exec_timeout_min_cmd__VAR  (__activeVars->exec_timeout_min_cmd__X)
+#define	exec_timeout_min_cmd  exec_timeout_min_cmd__VAR
+#define	route_match_tag_cmd__VAR  (__activeVars->route_match_tag_cmd__X)
+#define	route_match_tag_cmd  route_match_tag_cmd__VAR
+#define	no_key_string_cmd__VAR  (__activeVars->no_key_string_cmd__X)
+#define	no_key_string_cmd  no_key_string_cmd__VAR
+#define	rip_global_queries__VAR  (__activeVars->rip_global_queries__X)
+#define	rip_global_queries  rip_global_queries__VAR
+#define	no_rip_offset_list_cmd__VAR  (__activeVars->no_rip_offset_list_cmd__X)
+#define	no_rip_offset_list_cmd  no_rip_offset_list_cmd__VAR
+#define	opterr__VAR  (__activeVars->opterr__X)
+#define	opterr  opterr__VAR
+#define	show_interface_cmd__VAR  (__activeVars->show_interface_cmd__X)
+#define	show_interface_cmd  show_interface_cmd__VAR
+#define	conf_debug_ospf_ism__VAR  (__activeVars->conf_debug_ospf_ism__X)
+#define	conf_debug_ospf_ism  conf_debug_ospf_ism__VAR
+#define	ospf_redistribute_source_type_routemap_cmd__VAR  (__activeVars->ospf_redistribute_source_type_routemap_cmd__X)
+#define	ospf_redistribute_source_type_routemap_cmd  ospf_redistribute_source_type_routemap_cmd__VAR
+#define	no_ip_route_flags_distance_cmd__VAR  (__activeVars->no_ip_route_flags_distance_cmd__X)
+#define	no_ip_route_flags_distance_cmd  no_ip_route_flags_distance_cmd__VAR
+#define	no_ospf_refresh_timer_val_cmd__VAR  (__activeVars->no_ospf_refresh_timer_val_cmd__X)
+#define	no_ospf_refresh_timer_val_cmd  no_ospf_refresh_timer_val_cmd__VAR
+#define	ip_prefix_list_description_cmd__VAR  (__activeVars->ip_prefix_list_description_cmd__X)
+#define	ip_prefix_list_description_cmd  ip_prefix_list_description_cmd__VAR
+#define	debug_ospf_zebra_cmd__VAR  (__activeVars->debug_ospf_zebra_cmd__X)
+#define	debug_ospf_zebra_cmd  debug_ospf_zebra_cmd__VAR
+#define	show_ip_prefix_list_prefix_first_match_cmd__VAR  (__activeVars->show_ip_prefix_list_prefix_first_match_cmd__X)
+#define	show_ip_prefix_list_prefix_first_match_cmd  show_ip_prefix_list_prefix_first_match_cmd__VAR
+#define	no_ospf_distance_source_cmd__VAR  (__activeVars->no_ospf_distance_source_cmd__X)
+#define	no_ospf_distance_source_cmd  no_ospf_distance_source_cmd__VAR
+#define	rip_neighbor_cmd__VAR  (__activeVars->rip_neighbor_cmd__X)
+#define	rip_neighbor_cmd  rip_neighbor_cmd__VAR
+#define	nextchar__VAR  (__activeVars->nextchar__X)
+#define	nextchar  nextchar__VAR
+#define	no_rip_default_metric_val_cmd__VAR  (__activeVars->no_rip_default_metric_val_cmd__X)
+#define	no_rip_default_metric_val_cmd  no_rip_default_metric_val_cmd__VAR
+#define	ospf_area_default_cost_cmd__VAR  (__activeVars->ospf_area_default_cost_cmd__X)
+#define	ospf_area_default_cost_cmd  ospf_area_default_cost_cmd__VAR
+#define	access_list_extended_host_mask_cmd__VAR  (__activeVars->access_list_extended_host_mask_cmd__X)
+#define	access_list_extended_host_mask_cmd  access_list_extended_host_mask_cmd__VAR
+#define	accept_lifetime_infinite_day_month_cmd__VAR  (__activeVars->accept_lifetime_infinite_day_month_cmd__X)
+#define	accept_lifetime_infinite_day_month_cmd  accept_lifetime_infinite_day_month_cmd__VAR
+#define	show_address_cmd__VAR  (__activeVars->show_address_cmd__X)
+#define	show_address_cmd  show_address_cmd__VAR
+#define	host__VAR  (__activeVars->host__X)
+#define	host  host__VAR
+#define	debug_zebra_packet_cmd__VAR  (__activeVars->debug_zebra_packet_cmd__X)
+#define	debug_zebra_packet_cmd  debug_zebra_packet_cmd__VAR
+#define	ip_rip_receive_version_1_cmd__VAR  (__activeVars->ip_rip_receive_version_1_cmd__X)
+#define	ip_rip_receive_version_1_cmd  ip_rip_receive_version_1_cmd__VAR
+#define	no_ip_ospf_message_digest_key_cmd__VAR  (__activeVars->no_ip_ospf_message_digest_key_cmd__X)
+#define	no_ip_ospf_message_digest_key_cmd  no_ip_ospf_message_digest_key_cmd__VAR
+#define	no_ospf_area_nssa_cmd__VAR  (__activeVars->no_ospf_area_nssa_cmd__X)
+#define	no_ospf_area_nssa_cmd  no_ospf_area_nssa_cmd__VAR
+#define	route_set_ip_nexthop_cmd__VAR  (__activeVars->route_set_ip_nexthop_cmd__X)
+#define	route_set_ip_nexthop_cmd  route_set_ip_nexthop_cmd__VAR
+#define	no_rip_distance_cmd__VAR  (__activeVars->no_rip_distance_cmd__X)
+#define	no_rip_distance_cmd  no_rip_distance_cmd__VAR
+#define	syslog_fd__VAR  (__activeVars->syslog_fd__X)
+#define	syslog_fd  syslog_fd__VAR
+#define	no_key_cmd__VAR  (__activeVars->no_key_cmd__X)
+#define	no_key_cmd  no_key_cmd__VAR
+#define	no_route_map_all_cmd__VAR  (__activeVars->no_route_map_all_cmd__X)
+#define	no_route_map_all_cmd  no_route_map_all_cmd__VAR
+#define	config_who_cmd__VAR  (__activeVars->config_who_cmd__X)
+#define	config_who_cmd  config_who_cmd__VAR
+#define	config_log_syslog_facility_cmd__VAR  (__activeVars->config_log_syslog_facility_cmd__X)
+#define	config_log_syslog_facility_cmd  config_log_syslog_facility_cmd__VAR
+#define	optopt__VAR  (__activeVars->optopt__X)
+#define	optopt  optopt__VAR
+#define	rip_node__VAR  (__activeVars->rip_node__X)
+#define	rip_node  rip_node__VAR
+#define	no_ip_prefix_list_sequence_number_cmd__VAR  (__activeVars->no_ip_prefix_list_sequence_number_cmd__X)
+#define	no_ip_prefix_list_sequence_number_cmd  no_ip_prefix_list_sequence_number_cmd__VAR
+#define	zebra_debug_event__VAR  (__activeVars->zebra_debug_event__X)
+#define	zebra_debug_event  zebra_debug_event__VAR
+#define	access_node__VAR  (__activeVars->access_node__X)
+#define	access_node  access_node__VAR
+#define	ospf_default_information_originate_metric_type_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_metric_type_routemap_cmd__X)
+#define	ospf_default_information_originate_metric_type_routemap_cmd  ospf_default_information_originate_metric_type_routemap_cmd__VAR
+#define	show_ip_ospf_database_cmd__VAR  (__activeVars->show_ip_ospf_database_cmd__X)
+#define	show_ip_ospf_database_cmd  show_ip_ospf_database_cmd__VAR
+#define	no_ospf_hello_interval_cmd__VAR  (__activeVars->no_ospf_hello_interval_cmd__X)
+#define	no_ospf_hello_interval_cmd  no_ospf_hello_interval_cmd__VAR
+#define	debug_rip_packet_direct_cmd__VAR  (__activeVars->debug_rip_packet_direct_cmd__X)
+#define	debug_rip_packet_direct_cmd  debug_rip_packet_direct_cmd__VAR
+#define	ospf_redistribute_source_metric_routemap_cmd__VAR  (__activeVars->ospf_redistribute_source_metric_routemap_cmd__X)
+#define	ospf_redistribute_source_metric_routemap_cmd  ospf_redistribute_source_metric_routemap_cmd__VAR
+#define	ospf_router_id_cmd__VAR  (__activeVars->ospf_router_id_cmd__X)
+#define	ospf_router_id_cmd  ospf_router_id_cmd__VAR
+#define	ospf_area_authentication_message_digest_cmd__VAR  (__activeVars->ospf_area_authentication_message_digest_cmd__X)
+#define	ospf_area_authentication_message_digest_cmd  ospf_area_authentication_message_digest_cmd__VAR
+#define	terminal_monitor_cmd__VAR  (__activeVars->terminal_monitor_cmd__X)
+#define	terminal_monitor_cmd  terminal_monitor_cmd__VAR
+#define	no_config_log_file_level_cmd__VAR  (__activeVars->no_config_log_file_level_cmd__X)
+#define	no_config_log_file_level_cmd  no_config_log_file_level_cmd__VAR
+#define	ip_ospf_cost_cmd__VAR  (__activeVars->ip_ospf_cost_cmd__X)
+#define	ip_ospf_cost_cmd  ip_ospf_cost_cmd__VAR
+#define	access_list_extended_host_any_cmd__VAR  (__activeVars->access_list_extended_host_any_cmd__X)
+#define	access_list_extended_host_any_cmd  access_list_extended_host_any_cmd__VAR
+#define	no_match_interface_cmd__VAR  (__activeVars->no_match_interface_cmd__X)
+#define	no_match_interface_cmd  no_match_interface_cmd__VAR
+#define	config_quit_cmd__VAR  (__activeVars->config_quit_cmd__X)
+#define	config_quit_cmd  config_quit_cmd__VAR
+#define	bandwidth_if_cmd__VAR  (__activeVars->bandwidth_if_cmd__X)
+#define	bandwidth_if_cmd  bandwidth_if_cmd__VAR
+#define	no_ip_route_flags_cmd__VAR  (__activeVars->no_ip_route_flags_cmd__X)
+#define	no_ip_route_flags_cmd  no_ip_route_flags_cmd__VAR
+#define	debug_zebra_packet_detail_cmd__VAR  (__activeVars->debug_zebra_packet_detail_cmd__X)
+#define	debug_zebra_packet_detail_cmd  debug_zebra_packet_detail_cmd__VAR
+#define	ospf_distance_ospf_inter_external_intra_cmd__VAR  (__activeVars->ospf_distance_ospf_inter_external_intra_cmd__X)
+#define	ospf_distance_ospf_inter_external_intra_cmd  ospf_distance_ospf_inter_external_intra_cmd__VAR
+#define	no_ip_address_label_cmd__VAR  (__activeVars->no_ip_address_label_cmd__X)
+#define	no_ip_address_label_cmd  no_ip_address_label_cmd__VAR
+#define	auth_node__VAR  (__activeVars->auth_node__X)
+#define	auth_node  auth_node__VAR
+#define	no_ospf_transmit_delay_cmd__VAR  (__activeVars->no_ospf_transmit_delay_cmd__X)
+#define	no_ospf_transmit_delay_cmd  no_ospf_transmit_delay_cmd__VAR
+#define	no_ospf_auto_cost_reference_bandwidth_cmd__VAR  (__activeVars->no_ospf_auto_cost_reference_bandwidth_cmd__X)
+#define	no_ospf_auto_cost_reference_bandwidth_cmd  no_ospf_auto_cost_reference_bandwidth_cmd__VAR
+#define	show_memory_all_cmd__VAR  (__activeVars->show_memory_all_cmd__X)
+#define	show_memory_all_cmd  show_memory_all_cmd__VAR
+#define	master__VAR  (__activeVars->master__X)
+#define	master  master__VAR
+#define	ospf_default_information_originate_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_routemap_cmd__X)
+#define	ospf_default_information_originate_routemap_cmd  ospf_default_information_originate_routemap_cmd__VAR
+#define	no_distribute_list_prefix_cmd__VAR  (__activeVars->no_distribute_list_prefix_cmd__X)
+#define	no_distribute_list_prefix_cmd  no_distribute_list_prefix_cmd__VAR
+#define	no_ospf_message_digest_key_cmd__VAR  (__activeVars->no_ospf_message_digest_key_cmd__X)
+#define	no_ospf_message_digest_key_cmd  no_ospf_message_digest_key_cmd__VAR
+#define	ospf_message_digest_key_cmd__VAR  (__activeVars->ospf_message_digest_key_cmd__X)
+#define	ospf_message_digest_key_cmd  ospf_message_digest_key_cmd__VAR
+#define	debug_node__VAR  (__activeVars->debug_node__X)
+#define	debug_node  debug_node__VAR
+#define	no_ip_route_mask_flags_distance_cmd__VAR  (__activeVars->no_ip_route_mask_flags_distance_cmd__X)
+#define	no_ip_route_mask_flags_distance_cmd  no_ip_route_mask_flags_distance_cmd__VAR
+#define	route_set_metric_type_cmd__VAR  (__activeVars->route_set_metric_type_cmd__X)
+#define	route_set_metric_type_cmd  route_set_metric_type_cmd__VAR
+#define	no_rip_distance_source_access_list_cmd__VAR  (__activeVars->no_rip_distance_source_access_list_cmd__X)
+#define	no_rip_distance_source_access_list_cmd  no_rip_distance_source_access_list_cmd__VAR
+#define	zebrad__VAR  (__activeVars->zebrad__X)
+#define	zebrad  zebrad__VAR
+#define	ip_ospf_authentication_cmd__VAR  (__activeVars->ip_ospf_authentication_cmd__X)
+#define	ip_ospf_authentication_cmd  ip_ospf_authentication_cmd__VAR
+#define	show_memory_ospf6_cmd__VAR  (__activeVars->show_memory_ospf6_cmd__X)
+#define	show_memory_ospf6_cmd  show_memory_ospf6_cmd__VAR
+#define	no_ospf_abr_type_cmd__VAR  (__activeVars->no_ospf_abr_type_cmd__X)
+#define	no_ospf_abr_type_cmd  no_ospf_abr_type_cmd__VAR
+#define	set_metric_addsub_cmd__VAR  (__activeVars->set_metric_addsub_cmd__X)
+#define	set_metric_addsub_cmd  set_metric_addsub_cmd__VAR
+#define	show_ip_ospf_database_type_self_cmd__VAR  (__activeVars->show_ip_ospf_database_type_self_cmd__X)
+#define	show_ip_ospf_database_type_self_cmd  show_ip_ospf_database_type_self_cmd__VAR
+#define	show_ip_ospf_database_type_cmd__VAR  (__activeVars->show_ip_ospf_database_type_cmd__X)
+#define	show_ip_ospf_database_type_cmd  show_ip_ospf_database_type_cmd__VAR
+#define	vlink_count__VAR  (__activeVars->vlink_count__X)
+#define	vlink_count  vlink_count__VAR
+#define	config_write_memory_cmd__VAR  (__activeVars->config_write_memory_cmd__X)
+#define	config_write_memory_cmd  config_write_memory_cmd__VAR
+#define	no_set_tag_cmd__VAR  (__activeVars->no_set_tag_cmd__X)
+#define	no_set_tag_cmd  no_set_tag_cmd__VAR
+#define	ospf_area_vlink_authtype_args_authkey_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_args_authkey_cmd__X)
+#define	ospf_area_vlink_authtype_args_authkey_cmd  ospf_area_vlink_authtype_args_authkey_cmd__VAR
+#define	errno__VAR  (__activeVars->errno__X)
+#define	errno  errno__VAR
+#define	config_list_cmd__VAR  (__activeVars->config_list_cmd__X)
+#define	config_list_cmd  config_list_cmd__VAR
+#define	interface_cmd__VAR  (__activeVars->interface_cmd__X)
+#define	interface_cmd  interface_cmd__VAR
+#define	distribute_list_prefix_all_cmd__VAR  (__activeVars->distribute_list_prefix_all_cmd__X)
+#define	distribute_list_prefix_all_cmd  distribute_list_prefix_all_cmd__VAR
+#define	conf_debug_ospf_nsm__VAR  (__activeVars->conf_debug_ospf_nsm__X)
+#define	conf_debug_ospf_nsm  conf_debug_ospf_nsm__VAR
+#define	ip_route_flags_cmd__VAR  (__activeVars->ip_route_flags_cmd__X)
+#define	ip_route_flags_cmd  ip_route_flags_cmd__VAR
+#define	ip_rip_receive_version_cmd__VAR  (__activeVars->ip_rip_receive_version_cmd__X)
+#define	ip_rip_receive_version_cmd  ip_rip_receive_version_cmd__VAR
+#define	interface_node__VAR  (__activeVars->interface_node__X)
+#define	interface_node  interface_node__VAR
+#define	no_ospf_neighbor_priority_cmd__VAR  (__activeVars->no_ospf_neighbor_priority_cmd__X)
+#define	no_ospf_neighbor_priority_cmd  no_ospf_neighbor_priority_cmd__VAR
+#define	no_linkdetect_cmd__VAR  (__activeVars->no_linkdetect_cmd__X)
+#define	no_linkdetect_cmd  no_linkdetect_cmd__VAR
+#define	show_debugging_ospf_cmd__VAR  (__activeVars->show_debugging_ospf_cmd__X)
+#define	show_debugging_ospf_cmd  show_debugging_ospf_cmd__VAR
+#define	no_access_list_all_cmd__VAR  (__activeVars->no_access_list_all_cmd__X)
+#define	no_access_list_all_cmd  no_access_list_all_cmd__VAR
+#define	ospf_area_nssa_cmd__VAR  (__activeVars->ospf_area_nssa_cmd__X)
+#define	ospf_area_nssa_cmd  ospf_area_nssa_cmd__VAR
+#define	if_ipv6_rmap_cmd__VAR  (__activeVars->if_ipv6_rmap_cmd__X)
+#define	if_ipv6_rmap_cmd  if_ipv6_rmap_cmd__VAR
+#define	show_ip_ospf_neighbor_int_detail_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_int_detail_cmd__X)
+#define	show_ip_ospf_neighbor_int_detail_cmd  show_ip_ospf_neighbor_int_detail_cmd__VAR
+#define	no_ospf_area_filter_list_cmd__VAR  (__activeVars->no_ospf_area_filter_list_cmd__X)
+#define	no_ospf_area_filter_list_cmd  no_ospf_area_filter_list_cmd__VAR
+#define	show_debugging_rip_cmd__VAR  (__activeVars->show_debugging_rip_cmd__X)
+#define	show_debugging_rip_cmd  show_debugging_rip_cmd__VAR
+#define	ospf_node__VAR  (__activeVars->ospf_node__X)
+#define	ospf_node  ospf_node__VAR
+#define	ospf_neighbor_poll_interval_priority_cmd__VAR  (__activeVars->ospf_neighbor_poll_interval_priority_cmd__X)
+#define	ospf_neighbor_poll_interval_priority_cmd  ospf_neighbor_poll_interval_priority_cmd__VAR
+#define	config_node__VAR  (__activeVars->config_node__X)
+#define	config_node  config_node__VAR
+#define	no_ospf_area_vlink_authtype_cmd__VAR  (__activeVars->no_ospf_area_vlink_authtype_cmd__X)
+#define	no_ospf_area_vlink_authtype_cmd  no_ospf_area_vlink_authtype_cmd__VAR
+#define	rmap_onmatch_next_cmd__VAR  (__activeVars->rmap_onmatch_next_cmd__X)
+#define	rmap_onmatch_next_cmd  rmap_onmatch_next_cmd__VAR
+#define	no_ip_rip_receive_version_num_cmd__VAR  (__activeVars->no_ip_rip_receive_version_num_cmd__X)
+#define	no_ip_rip_receive_version_num_cmd  no_ip_rip_receive_version_num_cmd__VAR
+#define	ip_ospf_cost_addr_cmd__VAR  (__activeVars->ip_ospf_cost_addr_cmd__X)
+#define	ip_ospf_cost_addr_cmd  ip_ospf_cost_addr_cmd__VAR
+#define	show_memory_rip_cmd__VAR  (__activeVars->show_memory_rip_cmd__X)
+#define	show_memory_rip_cmd  show_memory_rip_cmd__VAR
+#define	rip_redistribute_type_routemap_cmd__VAR  (__activeVars->rip_redistribute_type_routemap_cmd__X)
+#define	rip_redistribute_type_routemap_cmd  rip_redistribute_type_routemap_cmd__VAR
+#define	ip_route_mask_flags_distance2_cmd__VAR  (__activeVars->ip_route_mask_flags_distance2_cmd__X)
+#define	ip_route_mask_flags_distance2_cmd  ip_route_mask_flags_distance2_cmd__VAR
+#define	access_list_standard_any_cmd__VAR  (__activeVars->access_list_standard_any_cmd__X)
+#define	access_list_standard_any_cmd  access_list_standard_any_cmd__VAR
+#define	ospf_default_information_originate_always_metric_type_cmd__VAR  (__activeVars->ospf_default_information_originate_always_metric_type_cmd__X)
+#define	ospf_default_information_originate_always_metric_type_cmd  ospf_default_information_originate_always_metric_type_cmd__VAR
+#define	no_ospf_area_range_cmd__VAR  (__activeVars->no_ospf_area_range_cmd__X)
+#define	no_ospf_area_range_cmd  no_ospf_area_range_cmd__VAR
+#define	ip_prefix_list_seq_cmd__VAR  (__activeVars->ip_prefix_list_seq_cmd__X)
+#define	ip_prefix_list_seq_cmd  ip_prefix_list_seq_cmd__VAR
+#define	config_log_monitor_cmd__VAR  (__activeVars->config_log_monitor_cmd__X)
+#define	config_log_monitor_cmd  config_log_monitor_cmd__VAR
+#define	no_ospf_network_cmd__VAR  (__activeVars->no_ospf_network_cmd__X)
+#define	no_ospf_network_cmd  no_ospf_network_cmd__VAR
+#define	no_ip_prefix_list_prefix_cmd__VAR  (__activeVars->no_ip_prefix_list_prefix_cmd__X)
+#define	no_ip_prefix_list_prefix_cmd  no_ip_prefix_list_prefix_cmd__VAR
+#define	no_ipv6_distribute_list_all_cmd__VAR  (__activeVars->no_ipv6_distribute_list_all_cmd__X)
+#define	no_ipv6_distribute_list_all_cmd  no_ipv6_distribute_list_all_cmd__VAR
+#define	message_queue__VAR  (__activeVars->message_queue__X)
+#define	message_queue  message_queue__VAR
+#define	ospf_distance_ospf_intra_cmd__VAR  (__activeVars->ospf_distance_ospf_intra_cmd__X)
+#define	ospf_distance_ospf_intra_cmd  ospf_distance_ospf_intra_cmd__VAR
+#define	no_ospf_area_stub_cmd__VAR  (__activeVars->no_ospf_area_stub_cmd__X)
+#define	no_ospf_area_stub_cmd  no_ospf_area_stub_cmd__VAR
+#define	rip_debug_event__VAR  (__activeVars->rip_debug_event__X)
+#define	rip_debug_event  rip_debug_event__VAR
+#define	if_rmap_delete_hook__VAR  (__activeVars->if_rmap_delete_hook__X)
+#define	if_rmap_delete_hook  if_rmap_delete_hook__VAR
+#define	no_rip_redistribute_type_cmd__VAR  (__activeVars->no_rip_redistribute_type_cmd__X)
+#define	no_rip_redistribute_type_cmd  no_rip_redistribute_type_cmd__VAR
+#define	ospf_network_area_cmd__VAR  (__activeVars->ospf_network_area_cmd__X)
+#define	ospf_network_area_cmd  ospf_network_area_cmd__VAR
+#define	rmap_continue_seq_cmd__VAR  (__activeVars->rmap_continue_seq_cmd__X)
+#define	rmap_continue_seq_cmd  rmap_continue_seq_cmd__VAR
+#define	route_match_metric_cmd__VAR  (__activeVars->route_match_metric_cmd__X)
+#define	route_match_metric_cmd  route_match_metric_cmd__VAR
+#define	vty_node__VAR  (__activeVars->vty_node__X)
+#define	vty_node  vty_node__VAR
+#define	rip_passive_interface_cmd__VAR  (__activeVars->rip_passive_interface_cmd__X)
+#define	rip_passive_interface_cmd  rip_passive_interface_cmd__VAR
+#define	enable_node__VAR  (__activeVars->enable_node__X)
+#define	enable_node  enable_node__VAR
+#define	re_max_failures__VAR  (__activeVars->re_max_failures__X)
+#define	re_max_failures  re_max_failures__VAR
+#define	retain_mode__VAR  (__activeVars->retain_mode__X)
+#define	retain_mode  retain_mode__VAR
+#define	no_ip_route_mask_distance_cmd__VAR  (__activeVars->no_ip_route_mask_distance_cmd__X)
+#define	no_ip_route_mask_distance_cmd  no_ip_route_mask_distance_cmd__VAR
+#define	ospf_distance_ospf_intra_inter_external_cmd__VAR  (__activeVars->ospf_distance_ospf_intra_inter_external_cmd__X)
+#define	ospf_distance_ospf_intra_inter_external_cmd  ospf_distance_ospf_intra_inter_external_cmd__VAR
+#define	no_ospf_area_export_list_cmd__VAR  (__activeVars->no_ospf_area_export_list_cmd__X)
+#define	no_ospf_area_export_list_cmd  no_ospf_area_export_list_cmd__VAR
+#define	no_debug_ospf_lsa_sub_cmd__VAR  (__activeVars->no_debug_ospf_lsa_sub_cmd__X)
+#define	no_debug_ospf_lsa_sub_cmd  no_debug_ospf_lsa_sub_cmd__VAR
+#define	ip_ospf_message_digest_key_cmd__VAR  (__activeVars->ip_ospf_message_digest_key_cmd__X)
+#define	ip_ospf_message_digest_key_cmd  ip_ospf_message_digest_key_cmd__VAR
+#define	ipv6_distribute_list_prefix_all_cmd__VAR  (__activeVars->ipv6_distribute_list_prefix_all_cmd__X)
+#define	ipv6_distribute_list_prefix_all_cmd  ipv6_distribute_list_prefix_all_cmd__VAR
+#define	rip_distance_table__VAR  (__activeVars->rip_distance_table__X)
+#define	rip_distance_table  rip_distance_table__VAR
+#define	ospf_area_shortcut_cmd__VAR  (__activeVars->ospf_area_shortcut_cmd__X)
+#define	ospf_area_shortcut_cmd  ospf_area_shortcut_cmd__VAR
+#define	no_rip_route_cmd__VAR  (__activeVars->no_rip_route_cmd__X)
+#define	no_rip_route_cmd  no_rip_route_cmd__VAR
+#define	ospf_area_import_list_cmd__VAR  (__activeVars->ospf_area_import_list_cmd__X)
+#define	ospf_area_import_list_cmd  ospf_area_import_list_cmd__VAR
+#define	no_set_metric_val_cmd__VAR  (__activeVars->no_set_metric_val_cmd__X)
+#define	no_set_metric_val_cmd  no_set_metric_val_cmd__VAR
+#define	debug_ospf_lsa_sub_cmd__VAR  (__activeVars->debug_ospf_lsa_sub_cmd__X)
+#define	debug_ospf_lsa_sub_cmd  debug_ospf_lsa_sub_cmd__VAR
+#define	send_lifetime_day_month_day_month_cmd__VAR  (__activeVars->send_lifetime_day_month_day_month_cmd__X)
+#define	send_lifetime_day_month_day_month_cmd  send_lifetime_day_month_day_month_cmd__VAR
+#define	ospf_compatible_rfc1583_cmd__VAR  (__activeVars->ospf_compatible_rfc1583_cmd__X)
+#define	ospf_compatible_rfc1583_cmd  ospf_compatible_rfc1583_cmd__VAR
+#define	ospf_area_vlink_authkey_cmd__VAR  (__activeVars->ospf_area_vlink_authkey_cmd__X)
+#define	ospf_area_vlink_authkey_cmd  ospf_area_vlink_authkey_cmd__VAR
+#define	ip_rip_send_version_2_cmd__VAR  (__activeVars->ip_rip_send_version_2_cmd__X)
+#define	ip_rip_send_version_2_cmd  ip_rip_send_version_2_cmd__VAR
+#define	route_map_cmd__VAR  (__activeVars->route_map_cmd__X)
+#define	route_map_cmd  route_map_cmd__VAR
+#define	keychain_list__VAR  (__activeVars->keychain_list__X)
+#define	keychain_list  keychain_list__VAR
+#define	ip_ospf_hello_interval_cmd__VAR  (__activeVars->ip_ospf_hello_interval_cmd__X)
+#define	ip_ospf_hello_interval_cmd  ip_ospf_hello_interval_cmd__VAR
+#define	distribute_list_cmd__VAR  (__activeVars->distribute_list_cmd__X)
+#define	distribute_list_cmd  distribute_list_cmd__VAR
+#define	clear_ip_prefix_list_cmd__VAR  (__activeVars->clear_ip_prefix_list_cmd__X)
+#define	clear_ip_prefix_list_cmd  clear_ip_prefix_list_cmd__VAR
+#define	ip_ospf_authentication_key_addr_cmd__VAR  (__activeVars->ip_ospf_authentication_key_addr_cmd__X)
+#define	ip_ospf_authentication_key_addr_cmd  ip_ospf_authentication_key_addr_cmd__VAR
+#define	match_tag_cmd__VAR  (__activeVars->match_tag_cmd__X)
+#define	match_tag_cmd  match_tag_cmd__VAR
+#define	ip_ospf_dead_interval_cmd__VAR  (__activeVars->ip_ospf_dead_interval_cmd__X)
+#define	ip_ospf_dead_interval_cmd  ip_ospf_dead_interval_cmd__VAR
+#define	debug_ospf_ism_cmd__VAR  (__activeVars->debug_ospf_ism_cmd__X)
+#define	debug_ospf_ism_cmd  debug_ospf_ism_cmd__VAR
+#define	no_ip_rip_authentication_mode_cmd__VAR  (__activeVars->no_ip_rip_authentication_mode_cmd__X)
+#define	no_ip_rip_authentication_mode_cmd  no_ip_rip_authentication_mode_cmd__VAR
+#define	zlog_default__VAR  (__activeVars->zlog_default__X)
+#define	zlog_default  zlog_default__VAR
+#define	ospf_area_vlink_cmd__VAR  (__activeVars->ospf_area_vlink_cmd__X)
+#define	ospf_area_vlink_cmd  ospf_area_vlink_cmd__VAR
+#define	no_match_ip_address_cmd__VAR  (__activeVars->no_match_ip_address_cmd__X)
+#define	no_match_ip_address_cmd  no_match_ip_address_cmd__VAR
+#define	no_ip_ospf_dead_interval_cmd__VAR  (__activeVars->no_ip_ospf_dead_interval_cmd__X)
+#define	no_ip_ospf_dead_interval_cmd  no_ip_ospf_dead_interval_cmd__VAR
+#define	no_rip_redistribute_type_metric_routemap_cmd__VAR  (__activeVars->no_rip_redistribute_type_metric_routemap_cmd__X)
+#define	no_rip_redistribute_type_metric_routemap_cmd  no_rip_redistribute_type_metric_routemap_cmd__VAR
+#define	show_ip_ospf_neighbor_all_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_all_cmd__X)
+#define	show_ip_ospf_neighbor_all_cmd  show_ip_ospf_neighbor_all_cmd__VAR
+#define	ospf_neighbor_priority_poll_interval_cmd__VAR  (__activeVars->ospf_neighbor_priority_poll_interval_cmd__X)
+#define	ospf_neighbor_priority_poll_interval_cmd  ospf_neighbor_priority_poll_interval_cmd__VAR
+#define	prefix_node__VAR  (__activeVars->prefix_node__X)
+#define	prefix_node  prefix_node__VAR
+#define	ospf_default_information_originate_always_type_metric_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_always_type_metric_routemap_cmd__X)
+#define	ospf_default_information_originate_always_type_metric_routemap_cmd  ospf_default_information_originate_always_type_metric_routemap_cmd__VAR
+#define	show_memory_cmd__VAR  (__activeVars->show_memory_cmd__X)
+#define	show_memory_cmd  show_memory_cmd__VAR
+#define	no_ospf_distance_ospf_cmd__VAR  (__activeVars->no_ospf_distance_ospf_cmd__X)
+#define	no_ospf_distance_ospf_cmd  no_ospf_distance_ospf_cmd__VAR
+#define	no_debug_zebra_kernel_cmd__VAR  (__activeVars->no_debug_zebra_kernel_cmd__X)
+#define	no_debug_zebra_kernel_cmd  no_debug_zebra_kernel_cmd__VAR
+#define	config_end_cmd__VAR  (__activeVars->config_end_cmd__X)
+#define	config_end_cmd  config_end_cmd__VAR
+#define	ospf_distance_ospf_external_intra_cmd__VAR  (__activeVars->ospf_distance_ospf_external_intra_cmd__X)
+#define	ospf_distance_ospf_external_intra_cmd  ospf_distance_ospf_external_intra_cmd__VAR
+#define	ospf_default_information_originate_always_type_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_always_type_routemap_cmd__X)
+#define	ospf_default_information_originate_always_type_routemap_cmd  ospf_default_information_originate_always_type_routemap_cmd__VAR
+#define	no_debug_ospf_lsa_cmd__VAR  (__activeVars->no_debug_ospf_lsa_cmd__X)
+#define	no_debug_ospf_lsa_cmd  no_debug_ospf_lsa_cmd__VAR
+#define	no_ospf_area_range_cost_cmd__VAR  (__activeVars->no_ospf_area_range_cost_cmd__X)
+#define	no_ospf_area_range_cost_cmd  no_ospf_area_range_cost_cmd__VAR
+#define	no_ospf_area_vlink_authkey_cmd__VAR  (__activeVars->no_ospf_area_vlink_authkey_cmd__X)
+#define	no_ospf_area_vlink_authkey_cmd  no_ospf_area_vlink_authkey_cmd__VAR
+#define	route_map_master__VAR  (__activeVars->route_map_master__X)
+#define	route_map_master  route_map_master__VAR
+#define	term_debug_ospf_event__VAR  (__activeVars->term_debug_ospf_event__X)
+#define	term_debug_ospf_event  term_debug_ospf_event__VAR
+#define	route_match_ip_next_hop_prefix_list_cmd__VAR  (__activeVars->route_match_ip_next_hop_prefix_list_cmd__X)
+#define	route_match_ip_next_hop_prefix_list_cmd  route_match_ip_next_hop_prefix_list_cmd__VAR
+#define	show_ip_prefix_list_name_cmd__VAR  (__activeVars->show_ip_prefix_list_name_cmd__X)
+#define	show_ip_prefix_list_name_cmd  show_ip_prefix_list_name_cmd__VAR
+#define	send_lifetime_month_day_day_month_cmd__VAR  (__activeVars->send_lifetime_month_day_day_month_cmd__X)
+#define	send_lifetime_month_day_day_month_cmd  send_lifetime_month_day_day_month_cmd__VAR
+#define	no_banner_motd_cmd__VAR  (__activeVars->no_banner_motd_cmd__X)
+#define	no_banner_motd_cmd  no_banner_motd_cmd__VAR
+#define	ip_node__VAR  (__activeVars->ip_node__X)
+#define	ip_node  ip_node__VAR
+#define	no_distribute_list_cmd__VAR  (__activeVars->no_distribute_list_cmd__X)
+#define	no_distribute_list_cmd  no_distribute_list_cmd__VAR
+#define	ospf_distance_ospf_external_intra_inter_cmd__VAR  (__activeVars->ospf_distance_ospf_external_intra_inter_cmd__X)
+#define	ospf_distance_ospf_external_intra_inter_cmd  ospf_distance_ospf_external_intra_inter_cmd__VAR
+#define	no_ip_ospf_dead_interval_addr_cmd__VAR  (__activeVars->no_ip_ospf_dead_interval_addr_cmd__X)
+#define	no_ip_ospf_dead_interval_addr_cmd  no_ip_ospf_dead_interval_addr_cmd__VAR
+#define	no_ip_ospf_hello_interval_cmd__VAR  (__activeVars->no_ip_ospf_hello_interval_cmd__X)
+#define	no_ip_ospf_hello_interval_cmd  no_ip_ospf_hello_interval_cmd__VAR
+#define	accept_lifetime_day_month_month_day_cmd__VAR  (__activeVars->accept_lifetime_day_month_month_day_cmd__X)
+#define	accept_lifetime_day_month_month_day_cmd  accept_lifetime_day_month_month_day_cmd__VAR
+#define	prefix_master_ipv4__VAR  (__activeVars->prefix_master_ipv4__X)
+#define	prefix_master_ipv4  prefix_master_ipv4__VAR
+#define	no_ospf_area_nssa_no_summary_cmd__VAR  (__activeVars->no_ospf_area_nssa_no_summary_cmd__X)
+#define	no_ospf_area_nssa_no_summary_cmd  no_ospf_area_nssa_no_summary_cmd__VAR
+#define	ospf_default_information_originate_always_cmd__VAR  (__activeVars->ospf_default_information_originate_always_cmd__X)
+#define	ospf_default_information_originate_always_cmd  ospf_default_information_originate_always_cmd__VAR
+#define	show_ip_route_summary_cmd__VAR  (__activeVars->show_ip_route_summary_cmd__X)
+#define	show_ip_route_summary_cmd  show_ip_route_summary_cmd__VAR
+#define	conf_debug_ospf_zebra__VAR  (__activeVars->conf_debug_ospf_zebra__X)
+#define	conf_debug_ospf_zebra  conf_debug_ospf_zebra__VAR
+#define	ospf_auto_cost_reference_bandwidth_cmd__VAR  (__activeVars->ospf_auto_cost_reference_bandwidth_cmd__X)
+#define	ospf_auto_cost_reference_bandwidth_cmd  ospf_auto_cost_reference_bandwidth_cmd__VAR
+#define	ospf_area_range_cost_cmd__VAR  (__activeVars->ospf_area_range_cost_cmd__X)
+#define	ospf_area_range_cost_cmd  ospf_area_range_cost_cmd__VAR
+#define	no_access_list_extended_mask_any_cmd__VAR  (__activeVars->no_access_list_extended_mask_any_cmd__X)
+#define	no_access_list_extended_mask_any_cmd  no_access_list_extended_mask_any_cmd__VAR
+#define	config_table_cmd__VAR  (__activeVars->config_table_cmd__X)
+#define	config_table_cmd  config_table_cmd__VAR
+#define	ipv6_distribute_list_all_cmd__VAR  (__activeVars->ipv6_distribute_list_all_cmd__X)
+#define	ipv6_distribute_list_all_cmd  ipv6_distribute_list_all_cmd__VAR
+#define	no_rip_neighbor_cmd__VAR  (__activeVars->no_rip_neighbor_cmd__X)
+#define	no_rip_neighbor_cmd  no_rip_neighbor_cmd__VAR
+#define	match_ip_next_hop_prefix_list_cmd__VAR  (__activeVars->match_ip_next_hop_prefix_list_cmd__X)
+#define	match_ip_next_hop_prefix_list_cmd  match_ip_next_hop_prefix_list_cmd__VAR
+#define	term_debug_ospf_nssa__VAR  (__activeVars->term_debug_ospf_nssa__X)
+#define	term_debug_ospf_nssa  term_debug_ospf_nssa__VAR
+#define	no_ospf_area_vlink_md5_cmd__VAR  (__activeVars->no_ospf_area_vlink_md5_cmd__X)
+#define	no_ospf_area_vlink_md5_cmd  no_ospf_area_vlink_md5_cmd__VAR
+#define	match_ip_address_prefix_list_cmd__VAR  (__activeVars->match_ip_address_prefix_list_cmd__X)
+#define	match_ip_address_prefix_list_cmd  match_ip_address_prefix_list_cmd__VAR
+#define	show_ip_prefix_list_summary_cmd__VAR  (__activeVars->show_ip_prefix_list_summary_cmd__X)
+#define	show_ip_prefix_list_summary_cmd  show_ip_prefix_list_summary_cmd__VAR
+#define	no_if_rmap_cmd__VAR  (__activeVars->no_if_rmap_cmd__X)
+#define	no_if_rmap_cmd  no_if_rmap_cmd__VAR
+#define	rid_all_sorted_list__VAR  (__activeVars->rid_all_sorted_list__X)
+#define	rid_all_sorted_list  rid_all_sorted_list__VAR
+#define	no_ospf_area_range_substitute_cmd__VAR  (__activeVars->no_ospf_area_range_substitute_cmd__X)
+#define	no_ospf_area_range_substitute_cmd  no_ospf_area_range_substitute_cmd__VAR
+#define	rip_offset_list_master__VAR  (__activeVars->rip_offset_list_master__X)
+#define	rip_offset_list_master  rip_offset_list_master__VAR
+#define	show_ip_access_list_cmd__VAR  (__activeVars->show_ip_access_list_cmd__X)
+#define	show_ip_access_list_cmd  show_ip_access_list_cmd__VAR
+#define	debug_zebra_events_cmd__VAR  (__activeVars->debug_zebra_events_cmd__X)
+#define	debug_zebra_events_cmd  debug_zebra_events_cmd__VAR
+#define	no_match_metric_cmd__VAR  (__activeVars->no_match_metric_cmd__X)
+#define	no_match_metric_cmd  no_match_metric_cmd__VAR
+#define	ip_route_mask_distance_cmd__VAR  (__activeVars->ip_route_mask_distance_cmd__X)
+#define	ip_route_mask_distance_cmd  ip_route_mask_distance_cmd__VAR
+#define	set_ip_nexthop_cmd__VAR  (__activeVars->set_ip_nexthop_cmd__X)
+#define	set_ip_nexthop_cmd  set_ip_nexthop_cmd__VAR
+#define	rmap_continue_cmd__VAR  (__activeVars->rmap_continue_cmd__X)
+#define	rmap_continue_cmd  rmap_continue_cmd__VAR
+#define	no_ospf_neighbor_cmd__VAR  (__activeVars->no_ospf_neighbor_cmd__X)
+#define	no_ospf_neighbor_cmd  no_ospf_neighbor_cmd__VAR
+#define	access_list_exact_cmd__VAR  (__activeVars->access_list_exact_cmd__X)
+#define	access_list_exact_cmd  access_list_exact_cmd__VAR
+#define	config_log_file_level_cmd__VAR  (__activeVars->config_log_file_level_cmd__X)
+#define	config_log_file_level_cmd  config_log_file_level_cmd__VAR
+#define	ip_route_mask_flags_cmd__VAR  (__activeVars->ip_route_mask_flags_cmd__X)
+#define	ip_route_mask_flags_cmd  ip_route_mask_flags_cmd__VAR
+#define	linkdetect_cmd__VAR  (__activeVars->linkdetect_cmd__X)
+#define	linkdetect_cmd  linkdetect_cmd__VAR
+#define	no_ospf_area_vlink_param2_cmd__VAR  (__activeVars->no_ospf_area_vlink_param2_cmd__X)
+#define	no_ospf_area_vlink_param2_cmd  no_ospf_area_vlink_param2_cmd__VAR
+#define	config_write_terminal_cmd__VAR  (__activeVars->config_write_terminal_cmd__X)
+#define	config_write_terminal_cmd  config_write_terminal_cmd__VAR
+#define	no_match_ip_next_hop_val_cmd__VAR  (__activeVars->no_match_ip_next_hop_val_cmd__X)
+#define	no_match_ip_next_hop_val_cmd  no_match_ip_next_hop_val_cmd__VAR
+#define	password_text_cmd__VAR  (__activeVars->password_text_cmd__X)
+#define	password_text_cmd  password_text_cmd__VAR
+#define	debug_ospf_zebra_sub_cmd__VAR  (__activeVars->debug_ospf_zebra_sub_cmd__X)
+#define	debug_ospf_zebra_sub_cmd  debug_ospf_zebra_sub_cmd__VAR
+#define	no_bandwidth_if_cmd__VAR  (__activeVars->no_bandwidth_if_cmd__X)
+#define	no_bandwidth_if_cmd  no_bandwidth_if_cmd__VAR
+#define	send_lifetime_month_day_month_day_cmd__VAR  (__activeVars->send_lifetime_month_day_month_day_cmd__X)
+#define	send_lifetime_month_day_month_day_cmd  send_lifetime_month_day_month_day_cmd__VAR
+#define	first_nonopt__VAR  (__activeVars->first_nonopt__X)
+#define	first_nonopt  first_nonopt__VAR
+#define	no_ospf_distribute_list_out_cmd__VAR  (__activeVars->no_ospf_distribute_list_out_cmd__X)
+#define	no_ospf_distribute_list_out_cmd  no_ospf_distribute_list_out_cmd__VAR
+#define	no_ospf_area_range_advertise_cmd__VAR  (__activeVars->no_ospf_area_range_advertise_cmd__X)
+#define	no_ospf_area_range_advertise_cmd  no_ospf_area_range_advertise_cmd__VAR
+#define	no_ip_ospf_retransmit_interval_cmd__VAR  (__activeVars->no_ip_ospf_retransmit_interval_cmd__X)
+#define	no_ip_ospf_retransmit_interval_cmd  no_ip_ospf_retransmit_interval_cmd__VAR
+#define	access_list_extended_host_host_cmd__VAR  (__activeVars->access_list_extended_host_host_cmd__X)
+#define	access_list_extended_host_host_cmd  access_list_extended_host_host_cmd__VAR
+#define	table_node__VAR  (__activeVars->table_node__X)
+#define	table_node  table_node__VAR
+#define	access_list_extended_any_any_cmd__VAR  (__activeVars->access_list_extended_any_any_cmd__X)
+#define	access_list_extended_any_any_cmd  access_list_extended_any_any_cmd__VAR
+#define	accept_lifetime_month_day_day_month_cmd__VAR  (__activeVars->accept_lifetime_month_day_day_month_cmd__X)
+#define	accept_lifetime_month_day_day_month_cmd  accept_lifetime_month_day_day_month_cmd__VAR
+#define	rmap_node__VAR  (__activeVars->rmap_node__X)
+#define	rmap_node  rmap_node__VAR
+#define	no_debug_zebra_packet_direct_cmd__VAR  (__activeVars->no_debug_zebra_packet_direct_cmd__X)
+#define	no_debug_zebra_packet_direct_cmd  no_debug_zebra_packet_direct_cmd__VAR
+#define	debug_ospf_packet_all_cmd__VAR  (__activeVars->debug_ospf_packet_all_cmd__X)
+#define	debug_ospf_packet_all_cmd  debug_ospf_packet_all_cmd__VAR
+#define	no_ospf_timers_spf_cmd__VAR  (__activeVars->no_ospf_timers_spf_cmd__X)
+#define	no_ospf_timers_spf_cmd  no_ospf_timers_spf_cmd__VAR
+#define	show_ip_route_supernets_cmd__VAR  (__activeVars->show_ip_route_supernets_cmd__X)
+#define	show_ip_route_supernets_cmd  show_ip_route_supernets_cmd__VAR
+#define	term_debug_ospf_zebra__VAR  (__activeVars->term_debug_ospf_zebra__X)
+#define	term_debug_ospf_zebra  term_debug_ospf_zebra__VAR
+#define	router_rip_cmd__VAR  (__activeVars->router_rip_cmd__X)
+#define	router_rip_cmd  router_rip_cmd__VAR
+#define	no_ip_rip_authentication_string2_cmd__VAR  (__activeVars->no_ip_rip_authentication_string2_cmd__X)
+#define	no_ip_rip_authentication_string2_cmd  no_ip_rip_authentication_string2_cmd__VAR
+#define	no_ip_prefix_list_ge_le_cmd__VAR  (__activeVars->no_ip_prefix_list_ge_le_cmd__X)
+#define	no_ip_prefix_list_ge_le_cmd  no_ip_prefix_list_ge_le_cmd__VAR
+#define	show_startup_config_cmd__VAR  (__activeVars->show_startup_config_cmd__X)
+#define	show_startup_config_cmd  show_startup_config_cmd__VAR
+#define	distribute_add_hook__VAR  (__activeVars->distribute_add_hook__X)
+#define	distribute_add_hook  distribute_add_hook__VAR
+#define	vrf_vector__VAR  (__activeVars->vrf_vector__X)
+#define	vrf_vector  vrf_vector__VAR
+#define	no_ipv6_distribute_list_prefix_cmd__VAR  (__activeVars->no_ipv6_distribute_list_prefix_cmd__X)
+#define	no_ipv6_distribute_list_prefix_cmd  no_ipv6_distribute_list_prefix_cmd__VAR
+#define	ospf_default_information_originate_type_metric_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_type_metric_routemap_cmd__X)
+#define	ospf_default_information_originate_type_metric_routemap_cmd  ospf_default_information_originate_type_metric_routemap_cmd__VAR
+#define	no_config_log_file_cmd__VAR  (__activeVars->no_config_log_file_cmd__X)
+#define	no_config_log_file_cmd  no_config_log_file_cmd__VAR
+#define	ospf_area_nssa_translate_cmd__VAR  (__activeVars->ospf_area_nssa_translate_cmd__X)
+#define	ospf_area_nssa_translate_cmd  ospf_area_nssa_translate_cmd__VAR
+#define	ospf_dead_interval_cmd__VAR  (__activeVars->ospf_dead_interval_cmd__X)
+#define	ospf_dead_interval_cmd  ospf_dead_interval_cmd__VAR
+#define	ospf_area_stub_cmd__VAR  (__activeVars->ospf_area_stub_cmd__X)
+#define	ospf_area_stub_cmd  ospf_area_stub_cmd__VAR
+#define	route_match_ip_nexthop_cmd__VAR  (__activeVars->route_match_ip_nexthop_cmd__X)
+#define	route_match_ip_nexthop_cmd  route_match_ip_nexthop_cmd__VAR
+#define	no_ipv6_distribute_list_prefix_all_cmd__VAR  (__activeVars->no_ipv6_distribute_list_prefix_all_cmd__X)
+#define	no_ipv6_distribute_list_prefix_all_cmd  no_ipv6_distribute_list_prefix_all_cmd__VAR
+#define	multicast_cmd__VAR  (__activeVars->multicast_cmd__X)
+#define	multicast_cmd  multicast_cmd__VAR
+#define	show_ip_route_prefix_cmd__VAR  (__activeVars->show_ip_route_prefix_cmd__X)
+#define	show_ip_route_prefix_cmd  show_ip_route_prefix_cmd__VAR
+#define	ospf_area_range_advertise_cost_cmd__VAR  (__activeVars->ospf_area_range_advertise_cost_cmd__X)
+#define	ospf_area_range_advertise_cost_cmd  ospf_area_range_advertise_cost_cmd__VAR
+#define	if_rmap_add_hook__VAR  (__activeVars->if_rmap_add_hook__X)
+#define	if_rmap_add_hook  if_rmap_add_hook__VAR
+#define	vty_port__VAR  (__activeVars->vty_port__X)
+#define	vty_port  vty_port__VAR
+#define	no_ospf_rfc1583_flag_cmd__VAR  (__activeVars->no_ospf_rfc1583_flag_cmd__X)
+#define	no_ospf_rfc1583_flag_cmd  no_ospf_rfc1583_flag_cmd__VAR
+#define	ospf_area_vlink_authtype_authkey_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_authkey_cmd__X)
+#define	ospf_area_vlink_authtype_authkey_cmd  ospf_area_vlink_authtype_authkey_cmd__VAR
+#define	no_vty_login_cmd__VAR  (__activeVars->no_vty_login_cmd__X)
+#define	no_vty_login_cmd  no_vty_login_cmd__VAR
+#define	no_service_terminal_length_cmd__VAR  (__activeVars->no_service_terminal_length_cmd__X)
+#define	no_service_terminal_length_cmd  no_service_terminal_length_cmd__VAR
+#define	ip_ospf_transmit_delay_addr_cmd__VAR  (__activeVars->ip_ospf_transmit_delay_addr_cmd__X)
+#define	ip_ospf_transmit_delay_addr_cmd  ip_ospf_transmit_delay_addr_cmd__VAR
+#define	ospf_area_vlink_param3_cmd__VAR  (__activeVars->ospf_area_vlink_param3_cmd__X)
+#define	ospf_area_vlink_param3_cmd  ospf_area_vlink_param3_cmd__VAR
+#define	config_log_facility_cmd__VAR  (__activeVars->config_log_facility_cmd__X)
+#define	config_log_facility_cmd  config_log_facility_cmd__VAR
+#define	ospf_default_information_originate_always_type_cmd__VAR  (__activeVars->ospf_default_information_originate_always_type_cmd__X)
+#define	ospf_default_information_originate_always_type_cmd  ospf_default_information_originate_always_type_cmd__VAR
+#define	no_ospf_passive_interface_addr_cmd__VAR  (__activeVars->no_ospf_passive_interface_addr_cmd__X)
+#define	no_ospf_passive_interface_addr_cmd  no_ospf_passive_interface_addr_cmd__VAR
+#define	no_match_tag_val_cmd__VAR  (__activeVars->no_match_tag_val_cmd__X)
+#define	no_match_tag_val_cmd  no_match_tag_val_cmd__VAR
+#define	no_debug_ospf_packet_send_recv_cmd__VAR  (__activeVars->no_debug_ospf_packet_send_recv_cmd__X)
+#define	no_debug_ospf_packet_send_recv_cmd  no_debug_ospf_packet_send_recv_cmd__VAR
+#define	show_running_config_cmd__VAR  (__activeVars->show_running_config_cmd__X)
+#define	show_running_config_cmd  show_running_config_cmd__VAR
+#define	no_match_ip_next_hop_cmd__VAR  (__activeVars->no_match_ip_next_hop_cmd__X)
+#define	no_match_ip_next_hop_cmd  no_match_ip_next_hop_cmd__VAR
+#define	no_ospf_refresh_timer_cmd__VAR  (__activeVars->no_ospf_refresh_timer_cmd__X)
+#define	no_ospf_refresh_timer_cmd  no_ospf_refresh_timer_cmd__VAR
+#define	no_ospf_router_id_cmd__VAR  (__activeVars->no_ospf_router_id_cmd__X)
+#define	no_ospf_router_id_cmd  no_ospf_router_id_cmd__VAR
+#define	accept_lifetime_duration_month_day_cmd__VAR  (__activeVars->accept_lifetime_duration_month_day_cmd__X)
+#define	accept_lifetime_duration_month_day_cmd  accept_lifetime_duration_month_day_cmd__VAR
+#define	banner_motd_default_cmd__VAR  (__activeVars->banner_motd_default_cmd__X)
+#define	banner_motd_default_cmd  banner_motd_default_cmd__VAR
+#define	ospf_default_information_originate_cmd__VAR  (__activeVars->ospf_default_information_originate_cmd__X)
+#define	ospf_default_information_originate_cmd  ospf_default_information_originate_cmd__VAR
+#define	show_ip_prefix_list_cmd__VAR  (__activeVars->show_ip_prefix_list_cmd__X)
+#define	show_ip_prefix_list_cmd  show_ip_prefix_list_cmd__VAR
+#define	no_access_list_exact_cmd__VAR  (__activeVars->no_access_list_exact_cmd__X)
+#define	no_access_list_exact_cmd  no_access_list_exact_cmd__VAR
+#define	debug_zebra_kernel_cmd__VAR  (__activeVars->debug_zebra_kernel_cmd__X)
+#define	debug_zebra_kernel_cmd  debug_zebra_kernel_cmd__VAR
+#define	show_ip_ospf_cmd__VAR  (__activeVars->show_ip_ospf_cmd__X)
+#define	show_ip_ospf_cmd  show_ip_ospf_cmd__VAR
+#define	show_version_cmd__VAR  (__activeVars->show_version_cmd__X)
+#define	show_version_cmd  show_version_cmd__VAR
+#define	ospf_retransmit_interval_cmd__VAR  (__activeVars->ospf_retransmit_interval_cmd__X)
+#define	ospf_retransmit_interval_cmd  ospf_retransmit_interval_cmd__VAR
+#define	enable_password_text_cmd__VAR  (__activeVars->enable_password_text_cmd__X)
+#define	enable_password_text_cmd  enable_password_text_cmd__VAR
+#define	no_match_ip_next_hop_prefix_list_cmd__VAR  (__activeVars->no_match_ip_next_hop_prefix_list_cmd__X)
+#define	no_match_ip_next_hop_prefix_list_cmd  no_match_ip_next_hop_prefix_list_cmd__VAR
+#define	no_rip_default_information_originate_cmd__VAR  (__activeVars->no_rip_default_information_originate_cmd__X)
+#define	no_rip_default_information_originate_cmd  no_rip_default_information_originate_cmd__VAR
+#define	ospf_area_vlink_md5_cmd__VAR  (__activeVars->ospf_area_vlink_md5_cmd__X)
+#define	ospf_area_vlink_md5_cmd  ospf_area_vlink_md5_cmd__VAR
+#define	term_debug_ospf_nsm__VAR  (__activeVars->term_debug_ospf_nsm__X)
+#define	term_debug_ospf_nsm  term_debug_ospf_nsm__VAR
+#define	access_list_extended_any_mask_cmd__VAR  (__activeVars->access_list_extended_any_mask_cmd__X)
+#define	access_list_extended_any_mask_cmd  access_list_extended_any_mask_cmd__VAR
+#define	ospf_redistribute_source_routemap_cmd__VAR  (__activeVars->ospf_redistribute_source_routemap_cmd__X)
+#define	ospf_redistribute_source_routemap_cmd  ospf_redistribute_source_routemap_cmd__VAR
+#define	access_list_standard_cmd__VAR  (__activeVars->access_list_standard_cmd__X)
+#define	access_list_standard_cmd  access_list_standard_cmd__VAR
+#define	show_ip_ospf_interface_cmd__VAR  (__activeVars->show_ip_ospf_interface_cmd__X)
+#define	show_ip_ospf_interface_cmd  show_ip_ospf_interface_cmd__VAR
+#define	ospf_master__VAR  (__activeVars->ospf_master__X)
+#define	ospf_master  ospf_master__VAR
+#define	access_list_extended_mask_host_cmd__VAR  (__activeVars->access_list_extended_mask_host_cmd__X)
+#define	access_list_extended_mask_host_cmd  access_list_extended_mask_host_cmd__VAR
+#define	access_list_cmd__VAR  (__activeVars->access_list_cmd__X)
+#define	access_list_cmd  access_list_cmd__VAR
+#define	rip_distance_cmd__VAR  (__activeVars->rip_distance_cmd__X)
+#define	rip_distance_cmd  rip_distance_cmd__VAR
+#define	show_ip_access_list_name_cmd__VAR  (__activeVars->show_ip_access_list_name_cmd__X)
+#define	show_ip_access_list_name_cmd  show_ip_access_list_name_cmd__VAR
+#define	no_ip_rip_receive_version_cmd__VAR  (__activeVars->no_ip_rip_receive_version_cmd__X)
+#define	no_ip_rip_receive_version_cmd  no_ip_rip_receive_version_cmd__VAR
+#define	no_match_tag_cmd__VAR  (__activeVars->no_match_tag_cmd__X)
+#define	no_match_tag_cmd  no_match_tag_cmd__VAR
+#define	no_ip_prefix_list_cmd__VAR  (__activeVars->no_ip_prefix_list_cmd__X)
+#define	no_ip_prefix_list_cmd  no_ip_prefix_list_cmd__VAR
+#define	no_access_list_extended_host_host_cmd__VAR  (__activeVars->no_access_list_extended_host_host_cmd__X)
+#define	no_access_list_extended_host_host_cmd  no_access_list_extended_host_host_cmd__VAR
+#define	ospf_redistribute_source_type_metric_routemap_cmd__VAR  (__activeVars->ospf_redistribute_source_type_metric_routemap_cmd__X)
+#define	ospf_redistribute_source_type_metric_routemap_cmd  ospf_redistribute_source_type_metric_routemap_cmd__VAR
+#define	ip_ospf_authentication_args_addr_cmd__VAR  (__activeVars->ip_ospf_authentication_args_addr_cmd__X)
+#define	ip_ospf_authentication_args_addr_cmd  ip_ospf_authentication_args_addr_cmd__VAR
+#define	accept_lifetime_month_day_month_day_cmd__VAR  (__activeVars->accept_lifetime_month_day_month_day_cmd__X)
+#define	accept_lifetime_month_day_month_day_cmd  accept_lifetime_month_day_month_day_cmd__VAR
+#define	no_ospf_default_information_originate_cmd__VAR  (__activeVars->no_ospf_default_information_originate_cmd__X)
+#define	no_ospf_default_information_originate_cmd  no_ospf_default_information_originate_cmd__VAR
+#define	show_ip_ospf_border_routers_cmd__VAR  (__activeVars->show_ip_ospf_border_routers_cmd__X)
+#define	show_ip_ospf_border_routers_cmd  show_ip_ospf_border_routers_cmd__VAR
+#define	access_list_standard_nomask_cmd__VAR  (__activeVars->access_list_standard_nomask_cmd__X)
+#define	access_list_standard_nomask_cmd  access_list_standard_nomask_cmd__VAR
+#define	no_rip_timers_cmd__VAR  (__activeVars->no_rip_timers_cmd__X)
+#define	no_rip_timers_cmd  no_rip_timers_cmd__VAR
+#define	ospf_distance_cmd__VAR  (__activeVars->ospf_distance_cmd__X)
+#define	ospf_distance_cmd  ospf_distance_cmd__VAR
+#define	no_ospf_area_stub_no_summary_cmd__VAR  (__activeVars->no_ospf_area_stub_no_summary_cmd__X)
+#define	no_ospf_area_stub_no_summary_cmd  no_ospf_area_stub_no_summary_cmd__VAR
+#define	rid_lo_sorted_list__VAR  (__activeVars->rid_lo_sorted_list__X)
+#define	rid_lo_sorted_list  rid_lo_sorted_list__VAR
+#define	access_list_remark_cmd__VAR  (__activeVars->access_list_remark_cmd__X)
+#define	access_list_remark_cmd  access_list_remark_cmd__VAR
+#define	rip_timers_cmd__VAR  (__activeVars->rip_timers_cmd__X)
+#define	rip_timers_cmd  rip_timers_cmd__VAR
+#define	ospf_default_information_originate_always_metric_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_always_metric_routemap_cmd__X)
+#define	ospf_default_information_originate_always_metric_routemap_cmd  ospf_default_information_originate_always_metric_routemap_cmd__VAR
+#define	no_set_metric_type_cmd__VAR  (__activeVars->no_set_metric_type_cmd__X)
+#define	no_set_metric_type_cmd  no_set_metric_type_cmd__VAR
+#define	ip_route_flags2_cmd__VAR  (__activeVars->ip_route_flags2_cmd__X)
+#define	ip_route_flags2_cmd  ip_route_flags2_cmd__VAR
+#define	no_set_ip_nexthop_val_cmd__VAR  (__activeVars->no_set_ip_nexthop_val_cmd__X)
+#define	no_set_ip_nexthop_val_cmd  no_set_ip_nexthop_val_cmd__VAR
+#define	ipv6_distribute_list_prefix_cmd__VAR  (__activeVars->ipv6_distribute_list_prefix_cmd__X)
+#define	ipv6_distribute_list_prefix_cmd  ipv6_distribute_list_prefix_cmd__VAR
+#define	config_logmsg_cmd__VAR  (__activeVars->config_logmsg_cmd__X)
+#define	config_logmsg_cmd  config_logmsg_cmd__VAR
+#define	show_ip_ospf_database_type_id_cmd__VAR  (__activeVars->show_ip_ospf_database_type_id_cmd__X)
+#define	show_ip_ospf_database_type_id_cmd  show_ip_ospf_database_type_id_cmd__VAR
+#define	no_ospf_area_vlink_authtype_authkey_cmd__VAR  (__activeVars->no_ospf_area_vlink_authtype_authkey_cmd__X)
+#define	no_ospf_area_vlink_authtype_authkey_cmd  no_ospf_area_vlink_authtype_authkey_cmd__VAR
+#define	no_rmap_onmatch_goto_cmd__VAR  (__activeVars->no_rmap_onmatch_goto_cmd__X)
+#define	no_rmap_onmatch_goto_cmd  no_rmap_onmatch_goto_cmd__VAR
+#define	send_lifetime_duration_month_day_cmd__VAR  (__activeVars->send_lifetime_duration_month_day_cmd__X)
+#define	send_lifetime_duration_month_day_cmd  send_lifetime_duration_month_day_cmd__VAR
+#define	rmap_call_cmd__VAR  (__activeVars->rmap_call_cmd__X)
+#define	rmap_call_cmd  rmap_call_cmd__VAR
+#define	show_ip_prefix_list_prefix_longer_cmd__VAR  (__activeVars->show_ip_prefix_list_prefix_longer_cmd__X)
+#define	show_ip_prefix_list_prefix_longer_cmd  show_ip_prefix_list_prefix_longer_cmd__VAR
+#define	zebra_debug_packet__VAR  (__activeVars->zebra_debug_packet__X)
+#define	zebra_debug_packet  zebra_debug_packet__VAR
+#define	no_router_ospf_id_cmd__VAR  (__activeVars->no_router_ospf_id_cmd__X)
+#define	no_router_ospf_id_cmd  no_router_ospf_id_cmd__VAR
+#define	rip_enable_network__VAR  (__activeVars->rip_enable_network__X)
+#define	rip_enable_network  rip_enable_network__VAR
+#define	no_ip_ospf_cost_cmd__VAR  (__activeVars->no_ip_ospf_cost_cmd__X)
+#define	no_ip_ospf_cost_cmd  no_ip_ospf_cost_cmd__VAR
+#define	show_ip_prefix_list_detail_name_cmd__VAR  (__activeVars->show_ip_prefix_list_detail_name_cmd__X)
+#define	show_ip_prefix_list_detail_name_cmd  show_ip_prefix_list_detail_name_cmd__VAR
+#define	ip_rip_split_horizon_cmd__VAR  (__activeVars->ip_rip_split_horizon_cmd__X)
+#define	ip_rip_split_horizon_cmd  ip_rip_split_horizon_cmd__VAR
+#define	match_ip_nexthop_cmd__VAR  (__activeVars->match_ip_nexthop_cmd__X)
+#define	match_ip_nexthop_cmd  match_ip_nexthop_cmd__VAR
+#define	term_debug_ospf_lsa__VAR  (__activeVars->term_debug_ospf_lsa__X)
+#define	term_debug_ospf_lsa  term_debug_ospf_lsa__VAR
+#define	config_log_syslog_cmd__VAR  (__activeVars->config_log_syslog_cmd__X)
+#define	config_log_syslog_cmd  config_log_syslog_cmd__VAR
+#define	debug_rip_packet_detail_cmd__VAR  (__activeVars->debug_rip_packet_detail_cmd__X)
+#define	debug_rip_packet_detail_cmd  debug_rip_packet_detail_cmd__VAR
+#define	show_ip_ospf_neighbor_detail_all_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_detail_all_cmd__X)
+#define	show_ip_ospf_neighbor_detail_all_cmd  show_ip_ospf_neighbor_detail_all_cmd__VAR
+#define	debug_ospf_packet_send_recv_detail_cmd__VAR  (__activeVars->debug_ospf_packet_send_recv_detail_cmd__X)
+#define	debug_ospf_packet_send_recv_detail_cmd  debug_ospf_packet_send_recv_detail_cmd__VAR
+#define	no_ip_prefix_list_seq_le_ge_cmd__VAR  (__activeVars->no_ip_prefix_list_seq_le_ge_cmd__X)
+#define	no_ip_prefix_list_seq_le_ge_cmd  no_ip_prefix_list_seq_le_ge_cmd__VAR
+#define	no_ip_rip_send_version_cmd__VAR  (__activeVars->no_ip_rip_send_version_cmd__X)
+#define	no_ip_rip_send_version_cmd  no_ip_rip_send_version_cmd__VAR
+#define	show_ip_ospf_route_cmd__VAR  (__activeVars->show_ip_ospf_route_cmd__X)
+#define	show_ip_ospf_route_cmd  show_ip_ospf_route_cmd__VAR
+#define	route_match_ip_next_hop_cmd__VAR  (__activeVars->route_match_ip_next_hop_cmd__X)
+#define	route_match_ip_next_hop_cmd  route_match_ip_next_hop_cmd__VAR
+#define	show_ip_prefix_list_summary_name_cmd__VAR  (__activeVars->show_ip_prefix_list_summary_name_cmd__X)
+#define	show_ip_prefix_list_summary_name_cmd  show_ip_prefix_list_summary_name_cmd__VAR
+#define	pid_file__VAR  (__activeVars->pid_file__X)
+#define	pid_file  pid_file__VAR
+#define	enable_password_cmd__VAR  (__activeVars->enable_password_cmd__X)
+#define	enable_password_cmd  enable_password_cmd__VAR
+#define	re_syntax_options__VAR  (__activeVars->re_syntax_options__X)
+#define	re_syntax_options  re_syntax_options__VAR
+#define	service_terminal_length_cmd__VAR  (__activeVars->service_terminal_length_cmd__X)
+#define	service_terminal_length_cmd  service_terminal_length_cmd__VAR
+#define	ospf_area_export_list_cmd__VAR  (__activeVars->ospf_area_export_list_cmd__X)
+#define	ospf_area_export_list_cmd  ospf_area_export_list_cmd__VAR
+#define	ospf_area_authentication_cmd__VAR  (__activeVars->ospf_area_authentication_cmd__X)
+#define	ospf_area_authentication_cmd  ospf_area_authentication_cmd__VAR
+#define	no_multicast_cmd__VAR  (__activeVars->no_multicast_cmd__X)
+#define	no_multicast_cmd  no_multicast_cmd__VAR
+#define	ip_rip_send_version_cmd__VAR  (__activeVars->ip_rip_send_version_cmd__X)
+#define	ip_rip_send_version_cmd  ip_rip_send_version_cmd__VAR
+#define	no_rip_distance_source_cmd__VAR  (__activeVars->no_rip_distance_source_cmd__X)
+#define	no_rip_distance_source_cmd  no_rip_distance_source_cmd__VAR
+#define	ospf_passive_interface_addr_cmd__VAR  (__activeVars->ospf_passive_interface_addr_cmd__X)
+#define	ospf_passive_interface_addr_cmd  ospf_passive_interface_addr_cmd__VAR
+#define	no_ip_ospf_retransmit_interval_addr_cmd__VAR  (__activeVars->no_ip_ospf_retransmit_interval_addr_cmd__X)
+#define	no_ip_ospf_retransmit_interval_addr_cmd  no_ip_ospf_retransmit_interval_addr_cmd__VAR
+#define	ospf_distance_ospf_external_inter_intra_cmd__VAR  (__activeVars->ospf_distance_ospf_external_inter_intra_cmd__X)
+#define	ospf_distance_ospf_external_inter_intra_cmd  ospf_distance_ospf_external_inter_intra_cmd__VAR
+#define	router_ospf_id_cmd__VAR  (__activeVars->router_ospf_id_cmd__X)
+#define	router_ospf_id_cmd  router_ospf_id_cmd__VAR
+#define	ip_ospf_hello_interval_addr_cmd__VAR  (__activeVars->ip_ospf_hello_interval_addr_cmd__X)
+#define	ip_ospf_hello_interval_addr_cmd  ip_ospf_hello_interval_addr_cmd__VAR
+#define	no_ospf_area_vlink_param4_cmd__VAR  (__activeVars->no_ospf_area_vlink_param4_cmd__X)
+#define	no_ospf_area_vlink_param4_cmd  no_ospf_area_vlink_param4_cmd__VAR
+#define	ospf_default_information_originate_metric_type_cmd__VAR  (__activeVars->ospf_default_information_originate_metric_type_cmd__X)
+#define	ospf_default_information_originate_metric_type_cmd  ospf_default_information_originate_metric_type_cmd__VAR
+#define	vty_accesslist_name__VAR  (__activeVars->vty_accesslist_name__X)
+#define	vty_accesslist_name  vty_accesslist_name__VAR
+#define	ospf_default_information_originate_type_metric_cmd__VAR  (__activeVars->ospf_default_information_originate_type_metric_cmd__X)
+#define	ospf_default_information_originate_type_metric_cmd  ospf_default_information_originate_type_metric_cmd__VAR
+#define	no_service_advanced_vty_cmd__VAR  (__activeVars->no_service_advanced_vty_cmd__X)
+#define	no_service_advanced_vty_cmd  no_service_advanced_vty_cmd__VAR
+#define	distribute_delete_hook__VAR  (__activeVars->distribute_delete_hook__X)
+#define	distribute_delete_hook  distribute_delete_hook__VAR
+#define	no_ospf_area_default_cost_cmd__VAR  (__activeVars->no_ospf_area_default_cost_cmd__X)
+#define	no_ospf_area_default_cost_cmd  no_ospf_area_default_cost_cmd__VAR
+#define	term_debug_ospf_packet__VAR  (__activeVars->term_debug_ospf_packet__X)
+#define	term_debug_ospf_packet  term_debug_ospf_packet__VAR
+#define	ip_prefix_list_seq_ge_cmd__VAR  (__activeVars->ip_prefix_list_seq_ge_cmd__X)
+#define	ip_prefix_list_seq_ge_cmd  ip_prefix_list_seq_ge_cmd__VAR
+#define	t_write__VAR  (__activeVars->t_write__X)
+#define	t_write  t_write__VAR
+#define	no_match_ip_address_prefix_list_val_cmd__VAR  (__activeVars->no_match_ip_address_prefix_list_val_cmd__X)
+#define	no_match_ip_address_prefix_list_val_cmd  no_match_ip_address_prefix_list_val_cmd__VAR
+#define	copy_runningconfig_startupconfig_cmd__VAR  (__activeVars->copy_runningconfig_startupconfig_cmd__X)
+#define	copy_runningconfig_startupconfig_cmd  copy_runningconfig_startupconfig_cmd__VAR
+#define	key_cmd__VAR  (__activeVars->key_cmd__X)
+#define	key_cmd  key_cmd__VAR
+#define	ospf_authentication_key_cmd__VAR  (__activeVars->ospf_authentication_key_cmd__X)
+#define	ospf_authentication_key_cmd  ospf_authentication_key_cmd__VAR
+#define	show_memory_ospf_cmd__VAR  (__activeVars->show_memory_ospf_cmd__X)
+#define	show_memory_ospf_cmd  show_memory_ospf_cmd__VAR
+#define	no_debug_ospf_packet_all_cmd__VAR  (__activeVars->no_debug_ospf_packet_all_cmd__X)
+#define	no_debug_ospf_packet_all_cmd  no_debug_ospf_packet_all_cmd__VAR
+#define	ip_rip_authentication_string_cmd__VAR  (__activeVars->ip_rip_authentication_string_cmd__X)
+#define	ip_rip_authentication_string_cmd  ip_rip_authentication_string_cmd__VAR
+#define	ifaddr_ipv4_table__VAR  (__activeVars->ifaddr_ipv4_table__X)
+#define	ifaddr_ipv4_table  ifaddr_ipv4_table__VAR
+#define	set_metric_cmd__VAR  (__activeVars->set_metric_cmd__X)
+#define	set_metric_cmd  set_metric_cmd__VAR
+#define	no_route_map_cmd__VAR  (__activeVars->no_route_map_cmd__X)
+#define	no_route_map_cmd  no_route_map_cmd__VAR
+#define	no_ip_address_cmd__VAR  (__activeVars->no_ip_address_cmd__X)
+#define	no_ip_address_cmd  no_ip_address_cmd__VAR
+#define	debug_ospf_nsm_sub_cmd__VAR  (__activeVars->debug_ospf_nsm_sub_cmd__X)
+#define	debug_ospf_nsm_sub_cmd  debug_ospf_nsm_sub_cmd__VAR
+#define	ip_ospf_network_cmd__VAR  (__activeVars->ip_ospf_network_cmd__X)
+#define	ip_ospf_network_cmd  ip_ospf_network_cmd__VAR
+#define	rip_redistribute_type_metric_routemap_cmd__VAR  (__activeVars->rip_redistribute_type_metric_routemap_cmd__X)
+#define	rip_redistribute_type_metric_routemap_cmd  rip_redistribute_type_metric_routemap_cmd__VAR
+#define	no_access_list_extended_cmd__VAR  (__activeVars->no_access_list_extended_cmd__X)
+#define	no_access_list_extended_cmd  no_access_list_extended_cmd__VAR
+#define	ospf_area_vlink_authtype_md5_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_md5_cmd__X)
+#define	ospf_area_vlink_authtype_md5_cmd  ospf_area_vlink_authtype_md5_cmd__VAR
+#define	ospf_area_nssa_translate_no_summary_cmd__VAR  (__activeVars->ospf_area_nssa_translate_no_summary_cmd__X)
+#define	ospf_area_nssa_translate_no_summary_cmd  ospf_area_nssa_translate_no_summary_cmd__VAR
+#define	no_config_log_record_priority_cmd__VAR  (__activeVars->no_config_log_record_priority_cmd__X)
+#define	no_config_log_record_priority_cmd  no_config_log_record_priority_cmd__VAR
+#define	show_memory_lib_cmd__VAR  (__activeVars->show_memory_lib_cmd__X)
+#define	show_memory_lib_cmd  show_memory_lib_cmd__VAR
+#define	show_debugging_zebra_cmd__VAR  (__activeVars->show_debugging_zebra_cmd__X)
+#define	show_debugging_zebra_cmd  show_debugging_zebra_cmd__VAR
+#define	pid__VAR  (__activeVars->pid__X)
+#define	pid  pid__VAR
+#define	show_memory_ripng_cmd__VAR  (__activeVars->show_memory_ripng_cmd__X)
+#define	show_memory_ripng_cmd  show_memory_ripng_cmd__VAR
+#define	accept_lifetime_duration_day_month_cmd__VAR  (__activeVars->accept_lifetime_duration_day_month_cmd__X)
+#define	accept_lifetime_duration_day_month_cmd  accept_lifetime_duration_day_month_cmd__VAR
+#define	no_ospf_area_vlink_cmd__VAR  (__activeVars->no_ospf_area_vlink_cmd__X)
+#define	no_ospf_area_vlink_cmd  no_ospf_area_vlink_cmd__VAR
+#define	no_ip_rip_send_version_num_cmd__VAR  (__activeVars->no_ip_rip_send_version_num_cmd__X)
+#define	no_ip_rip_send_version_num_cmd  no_ip_rip_send_version_num_cmd__VAR
+#define	distribute_list_all_cmd__VAR  (__activeVars->distribute_list_all_cmd__X)
+#define	distribute_list_all_cmd  distribute_list_all_cmd__VAR
+#define	old_pid__VAR  (__activeVars->old_pid__X)
+#define	old_pid  old_pid__VAR
+#define	route_match_interface_cmd__VAR  (__activeVars->route_match_interface_cmd__X)
+#define	route_match_interface_cmd  route_match_interface_cmd__VAR
+#define	no_ospf_area_range_advertise_cost_cmd__VAR  (__activeVars->no_ospf_area_range_advertise_cost_cmd__X)
+#define	no_ospf_area_range_advertise_cost_cmd  no_ospf_area_range_advertise_cost_cmd__VAR
+#define	no_ospf_area_authentication_cmd__VAR  (__activeVars->no_ospf_area_authentication_cmd__X)
+#define	no_ospf_area_authentication_cmd  no_ospf_area_authentication_cmd__VAR
+#define	no_ospf_redistribute_source_cmd__VAR  (__activeVars->no_ospf_redistribute_source_cmd__X)
+#define	no_ospf_redistribute_source_cmd  no_ospf_redistribute_source_cmd__VAR
+#define	ospf_network_cmd__VAR  (__activeVars->ospf_network_cmd__X)
+#define	ospf_network_cmd  ospf_network_cmd__VAR
+#define	no_router_id_cmd__VAR  (__activeVars->no_router_id_cmd__X)
+#define	no_router_id_cmd  no_router_id_cmd__VAR
+#define	config_file__VAR  (__activeVars->config_file__X)
+#define	config_file  config_file__VAR
+#define	no_match_ip_address_val_cmd__VAR  (__activeVars->no_match_ip_address_val_cmd__X)
+#define	no_match_ip_address_val_cmd  no_match_ip_address_val_cmd__VAR
+#define	no_rip_redistribute_rip_cmd__VAR  (__activeVars->no_rip_redistribute_rip_cmd__X)
+#define	no_rip_redistribute_rip_cmd  no_rip_redistribute_rip_cmd__VAR
+#define	no_debug_zebra_events_cmd__VAR  (__activeVars->no_debug_zebra_events_cmd__X)
+#define	no_debug_zebra_events_cmd  no_debug_zebra_events_cmd__VAR
+#define	telnet_space_char__VAR  (__activeVars->telnet_space_char__X)
+#define	telnet_space_char  telnet_space_char__VAR
+#define	no_ospf_passive_interface_cmd__VAR  (__activeVars->no_ospf_passive_interface_cmd__X)
+#define	no_ospf_passive_interface_cmd  no_ospf_passive_interface_cmd__VAR
+#define	ip_prefix_list_seq_le_cmd__VAR  (__activeVars->ip_prefix_list_seq_le_cmd__X)
+#define	ip_prefix_list_seq_le_cmd  ip_prefix_list_seq_le_cmd__VAR
+#define	send_lifetime_infinite_day_month_cmd__VAR  (__activeVars->send_lifetime_infinite_day_month_cmd__X)
+#define	send_lifetime_infinite_day_month_cmd  send_lifetime_infinite_day_month_cmd__VAR
+#define	ospf_area_type_msg_max__VAR  (__activeVars->ospf_area_type_msg_max__X)
+#define	ospf_area_type_msg_max  ospf_area_type_msg_max__VAR
+#define	echo_cmd__VAR  (__activeVars->echo_cmd__X)
+#define	echo_cmd  echo_cmd__VAR
+#define	no_ospf_distance_cmd__VAR  (__activeVars->no_ospf_distance_cmd__X)
+#define	no_ospf_distance_cmd  no_ospf_distance_cmd__VAR
+#define	access_list_extended_cmd__VAR  (__activeVars->access_list_extended_cmd__X)
+#define	access_list_extended_cmd  access_list_extended_cmd__VAR
+#define	ip_ospf_retransmit_interval_addr_cmd__VAR  (__activeVars->ip_ospf_retransmit_interval_addr_cmd__X)
+#define	ip_ospf_retransmit_interval_addr_cmd  ip_ospf_retransmit_interval_addr_cmd__VAR
+#define	no_ip_prefix_list_description_arg_cmd__VAR  (__activeVars->no_ip_prefix_list_description_arg_cmd__X)
+#define	no_ip_prefix_list_description_arg_cmd  no_ip_prefix_list_description_arg_cmd__VAR
+#define	show_ip_prefix_list_name_seq_cmd__VAR  (__activeVars->show_ip_prefix_list_name_seq_cmd__X)
+#define	show_ip_prefix_list_name_seq_cmd  show_ip_prefix_list_name_seq_cmd__VAR
+#define	show_ip_ospf_neighbor_detail_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_detail_cmd__X)
+#define	show_ip_ospf_neighbor_detail_cmd  show_ip_ospf_neighbor_detail_cmd__VAR
+#define	ip_prefix_list_ge_le_cmd__VAR  (__activeVars->ip_prefix_list_ge_le_cmd__X)
+#define	ip_prefix_list_ge_le_cmd  ip_prefix_list_ge_le_cmd__VAR
+#define	no_ospf_area_vlink_authtype_md5_cmd__VAR  (__activeVars->no_ospf_area_vlink_authtype_md5_cmd__X)
+#define	no_ospf_area_vlink_authtype_md5_cmd  no_ospf_area_vlink_authtype_md5_cmd__VAR
+#define	no_distribute_list_all_cmd__VAR  (__activeVars->no_distribute_list_all_cmd__X)
+#define	no_distribute_list_all_cmd  no_distribute_list_all_cmd__VAR
+#define	no_router_ospf_cmd__VAR  (__activeVars->no_router_ospf_cmd__X)
+#define	no_router_ospf_cmd  no_router_ospf_cmd__VAR
+#define	ip_ospf_transmit_delay_cmd__VAR  (__activeVars->ip_ospf_transmit_delay_cmd__X)
+#define	ip_ospf_transmit_delay_cmd  ip_ospf_transmit_delay_cmd__VAR
+#define	rip_redistribute_rip_cmd__VAR  (__activeVars->rip_redistribute_rip_cmd__X)
+#define	rip_redistribute_rip_cmd  rip_redistribute_rip_cmd__VAR
+#define	no_ospf_cost_cmd__VAR  (__activeVars->no_ospf_cost_cmd__X)
+#define	no_ospf_cost_cmd  no_ospf_cost_cmd__VAR
+#define	router_id_cmd__VAR  (__activeVars->router_id_cmd__X)
+#define	router_id_cmd  router_id_cmd__VAR
+#define	debug_ospf_nssa_cmd__VAR  (__activeVars->debug_ospf_nssa_cmd__X)
+#define	debug_ospf_nssa_cmd  debug_ospf_nssa_cmd__VAR
+#define	no_match_interface_val_cmd__VAR  (__activeVars->no_match_interface_val_cmd__X)
+#define	no_match_interface_val_cmd  no_match_interface_val_cmd__VAR
+#define	route_match_ip_address_prefix_list_cmd__VAR  (__activeVars->route_match_ip_address_prefix_list_cmd__X)
+#define	route_match_ip_address_prefix_list_cmd  route_match_ip_address_prefix_list_cmd__VAR
+#define	no_access_list_extended_any_host_cmd__VAR  (__activeVars->no_access_list_extended_any_host_cmd__X)
+#define	no_access_list_extended_any_host_cmd  no_access_list_extended_any_host_cmd__VAR
+#define	no_rip_version_val_cmd__VAR  (__activeVars->no_rip_version_val_cmd__X)
+#define	no_rip_version_val_cmd  no_rip_version_val_cmd__VAR
+#define	no_ip_rip_authentication_key_chain_cmd__VAR  (__activeVars->no_ip_rip_authentication_key_chain_cmd__X)
+#define	no_ip_rip_authentication_key_chain_cmd  no_ip_rip_authentication_key_chain_cmd__VAR
+#define	debug_ospf_event_cmd__VAR  (__activeVars->debug_ospf_event_cmd__X)
+#define	debug_ospf_event_cmd  debug_ospf_event_cmd__VAR
+#define	no_ip_ospf_hello_interval_addr_cmd__VAR  (__activeVars->no_ip_ospf_hello_interval_addr_cmd__X)
+#define	no_ip_ospf_hello_interval_addr_cmd  no_ip_ospf_hello_interval_addr_cmd__VAR
+#define	config_enable_cmd__VAR  (__activeVars->config_enable_cmd__X)
+#define	config_enable_cmd  config_enable_cmd__VAR
+#define	access_list_extended_any_host_cmd__VAR  (__activeVars->access_list_extended_any_host_cmd__X)
+#define	access_list_extended_any_host_cmd  access_list_extended_any_host_cmd__VAR
+#define	mstat__VAR  (__activeVars->mstat__X)
+#define	mstat  mstat__VAR
+#define	ospf_distance_source_access_list_cmd__VAR  (__activeVars->ospf_distance_source_access_list_cmd__X)
+#define	ospf_distance_source_access_list_cmd  ospf_distance_source_access_list_cmd__VAR
+#define	no_ip_prefix_list_description_cmd__VAR  (__activeVars->no_ip_prefix_list_description_cmd__X)
+#define	no_ip_prefix_list_description_cmd  no_ip_prefix_list_description_cmd__VAR
+#define	no_config_log_syslog_cmd__VAR  (__activeVars->no_config_log_syslog_cmd__X)
+#define	no_config_log_syslog_cmd  no_config_log_syslog_cmd__VAR
+#define	ospf_distance_ospf_inter_cmd__VAR  (__activeVars->ospf_distance_ospf_inter_cmd__X)
+#define	ospf_distance_ospf_inter_cmd  ospf_distance_ospf_inter_cmd__VAR
+#define	posixly_correct__VAR  (__activeVars->posixly_correct__X)
+#define	posixly_correct  posixly_correct__VAR
+#define	no_rip_version_cmd__VAR  (__activeVars->no_rip_version_cmd__X)
+#define	no_rip_version_cmd  no_rip_version_cmd__VAR
+#define	no_rip_passive_interface_cmd__VAR  (__activeVars->no_rip_passive_interface_cmd__X)
+#define	no_rip_passive_interface_cmd  no_rip_passive_interface_cmd__VAR
+#define	no_key_chain_cmd__VAR  (__activeVars->no_key_chain_cmd__X)
+#define	no_key_chain_cmd  no_key_chain_cmd__VAR
+#define	no_set_metric_cmd__VAR  (__activeVars->no_set_metric_cmd__X)
+#define	no_set_metric_cmd  no_set_metric_cmd__VAR
+#define	rmap_show_cmd__VAR  (__activeVars->rmap_show_cmd__X)
+#define	rmap_show_cmd  rmap_show_cmd__VAR
+#define	optarg__VAR  (__activeVars->optarg__X)
+#define	optarg  optarg__VAR
+#define	clear_ip_prefix_list_name_prefix_cmd__VAR  (__activeVars->clear_ip_prefix_list_name_prefix_cmd__X)
+#define	clear_ip_prefix_list_name_prefix_cmd  clear_ip_prefix_list_name_prefix_cmd__VAR
+#define	no_debug_rip_events_cmd__VAR  (__activeVars->no_debug_rip_events_cmd__X)
+#define	no_debug_rip_events_cmd  no_debug_rip_events_cmd__VAR
+#define	if_rmap_cmd__VAR  (__activeVars->if_rmap_cmd__X)
+#define	if_rmap_cmd  if_rmap_cmd__VAR
+#define	no_debug_ospf_packet_send_recv_detail_cmd__VAR  (__activeVars->no_debug_ospf_packet_send_recv_detail_cmd__X)
+#define	no_debug_ospf_packet_send_recv_detail_cmd  no_debug_ospf_packet_send_recv_detail_cmd__VAR
+#define	no_set_metric_type_val_cmd__VAR  (__activeVars->no_set_metric_type_val_cmd__X)
+#define	no_set_metric_type_val_cmd  no_set_metric_type_val_cmd__VAR
+#define	ip_rip_split_horizon_poisoned_reverse_cmd__VAR  (__activeVars->ip_rip_split_horizon_poisoned_reverse_cmd__X)
+#define	ip_rip_split_horizon_poisoned_reverse_cmd  ip_rip_split_horizon_poisoned_reverse_cmd__VAR
+#define	rip_debug_zebra__VAR  (__activeVars->rip_debug_zebra__X)
+#define	rip_debug_zebra  rip_debug_zebra__VAR
+#define	prefix_master_orf__VAR  (__activeVars->prefix_master_orf__X)
+#define	prefix_master_orf  prefix_master_orf__VAR
+#define	debug_ospf_ism_sub_cmd__VAR  (__activeVars->debug_ospf_ism_sub_cmd__X)
+#define	debug_ospf_ism_sub_cmd  debug_ospf_ism_sub_cmd__VAR
+#define	ospf_area_range_cmd__VAR  (__activeVars->ospf_area_range_cmd__X)
+#define	ospf_area_range_cmd  ospf_area_range_cmd__VAR
+#define	forwarding_node__VAR  (__activeVars->forwarding_node__X)
+#define	forwarding_node  forwarding_node__VAR
+#define	show_memory_bgp_cmd__VAR  (__activeVars->show_memory_bgp_cmd__X)
+#define	show_memory_bgp_cmd  show_memory_bgp_cmd__VAR
+#define	zclient__VAR  (__activeVars->zclient__X)
+#define	zclient  zclient__VAR
+#define	no_ipv6_distribute_list_cmd__VAR  (__activeVars->no_ipv6_distribute_list_cmd__X)
+#define	no_ipv6_distribute_list_cmd  no_ipv6_distribute_list_cmd__VAR
+#define	no_access_list_cmd__VAR  (__activeVars->no_access_list_cmd__X)
+#define	no_access_list_cmd  no_access_list_cmd__VAR
+#define	ip_ospf_retransmit_interval_cmd__VAR  (__activeVars->ip_ospf_retransmit_interval_cmd__X)
+#define	ip_ospf_retransmit_interval_cmd  ip_ospf_retransmit_interval_cmd__VAR
+#define	cmdvec__VAR  (__activeVars->cmdvec__X)
+#define	cmdvec  cmdvec__VAR
+#define	show_ip_ospf_database_type_id_self_cmd__VAR  (__activeVars->show_ip_ospf_database_type_id_self_cmd__X)
+#define	show_ip_ospf_database_type_id_self_cmd  show_ip_ospf_database_type_id_self_cmd__VAR
+#define	ip_forwarding_cmd__VAR  (__activeVars->ip_forwarding_cmd__X)
+#define	ip_forwarding_cmd  ip_forwarding_cmd__VAR
+#define	ospf_area_nssa_no_summary_cmd__VAR  (__activeVars->ospf_area_nssa_no_summary_cmd__X)
+#define	ospf_area_nssa_no_summary_cmd  ospf_area_nssa_no_summary_cmd__VAR
+#define	ip_route_flags_distance_cmd__VAR  (__activeVars->ip_route_flags_distance_cmd__X)
+#define	ip_route_flags_distance_cmd  ip_route_flags_distance_cmd__VAR
+#define	ospf_redistribute_source_type_metric_cmd__VAR  (__activeVars->ospf_redistribute_source_type_metric_cmd__X)
+#define	ospf_redistribute_source_type_metric_cmd  ospf_redistribute_source_type_metric_cmd__VAR
+#define	ospf_distance_ospf_external_cmd__VAR  (__activeVars->ospf_distance_ospf_external_cmd__X)
+#define	ospf_distance_ospf_external_cmd  ospf_distance_ospf_external_cmd__VAR
+#define	zclient_debug__VAR  (__activeVars->zclient_debug__X)
+#define	zclient_debug  zclient_debug__VAR
+#define	ospf_redistribute_source_metric_cmd__VAR  (__activeVars->ospf_redistribute_source_metric_cmd__X)
+#define	ospf_redistribute_source_metric_cmd  ospf_redistribute_source_metric_cmd__VAR
+#define	ip_ospf_authentication_key_cmd__VAR  (__activeVars->ip_ospf_authentication_key_cmd__X)
+#define	ip_ospf_authentication_key_cmd  ip_ospf_authentication_key_cmd__VAR
+#define	no_ospf_neighbor_priority_pollinterval_cmd__VAR  (__activeVars->no_ospf_neighbor_priority_pollinterval_cmd__X)
+#define	no_ospf_neighbor_priority_pollinterval_cmd  no_ospf_neighbor_priority_pollinterval_cmd__VAR
+#define	rip_offset_list_cmd__VAR  (__activeVars->rip_offset_list_cmd__X)
+#define	rip_offset_list_cmd  rip_offset_list_cmd__VAR
+#define	no_ospf_dead_interval_cmd__VAR  (__activeVars->no_ospf_dead_interval_cmd__X)
+#define	no_ospf_dead_interval_cmd  no_ospf_dead_interval_cmd__VAR
+#define	ip_prefix_list_sequence_number_cmd__VAR  (__activeVars->ip_prefix_list_sequence_number_cmd__X)
+#define	ip_prefix_list_sequence_number_cmd  ip_prefix_list_sequence_number_cmd__VAR
+#define	ospf_neighbor_priority_cmd__VAR  (__activeVars->ospf_neighbor_priority_cmd__X)
+#define	ospf_neighbor_priority_cmd  ospf_neighbor_priority_cmd__VAR
+#define	route_set_tag_cmd__VAR  (__activeVars->route_set_tag_cmd__X)
+#define	route_set_tag_cmd  route_set_tag_cmd__VAR
+#define	no_match_ip_next_hop_prefix_list_val_cmd__VAR  (__activeVars->no_match_ip_next_hop_prefix_list_val_cmd__X)
+#define	no_match_ip_next_hop_prefix_list_val_cmd  no_match_ip_next_hop_prefix_list_val_cmd__VAR
+#define	shutdown_if_cmd__VAR  (__activeVars->shutdown_if_cmd__X)
+#define	shutdown_if_cmd  shutdown_if_cmd__VAR
+#define	no_ospf_default_metric_val_cmd__VAR  (__activeVars->no_ospf_default_metric_val_cmd__X)
+#define	no_ospf_default_metric_val_cmd  no_ospf_default_metric_val_cmd__VAR
+#define	config_exit_cmd__VAR  (__activeVars->config_exit_cmd__X)
+#define	config_exit_cmd  config_exit_cmd__VAR
+#define	show_ip_rip_cmd__VAR  (__activeVars->show_ip_rip_cmd__X)
+#define	show_ip_rip_cmd  show_ip_rip_cmd__VAR
+#define	ospf_default_information_originate_always_metric_type_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_always_metric_type_routemap_cmd__X)
+#define	ospf_default_information_originate_always_metric_type_routemap_cmd  ospf_default_information_originate_always_metric_type_routemap_cmd__VAR
+#define	ip_rip_authentication_key_chain_cmd__VAR  (__activeVars->ip_rip_authentication_key_chain_cmd__X)
+#define	ip_rip_authentication_key_chain_cmd  ip_rip_authentication_key_chain_cmd__VAR
+#define	ospf_default_information_originate_always_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_always_routemap_cmd__X)
+#define	ospf_default_information_originate_always_routemap_cmd  ospf_default_information_originate_always_routemap_cmd__VAR
+#define	config_log_stdout_level_cmd__VAR  (__activeVars->config_log_stdout_level_cmd__X)
+#define	config_log_stdout_level_cmd  config_log_stdout_level_cmd__VAR
+#define	no_set_ip_nexthop_cmd__VAR  (__activeVars->no_set_ip_nexthop_cmd__X)
+#define	no_set_ip_nexthop_cmd  no_set_ip_nexthop_cmd__VAR
+#define	ospf_area_vlink_param2_cmd__VAR  (__activeVars->ospf_area_vlink_param2_cmd__X)
+#define	ospf_area_vlink_param2_cmd  ospf_area_vlink_param2_cmd__VAR
+#define	config_log_trap_cmd__VAR  (__activeVars->config_log_trap_cmd__X)
+#define	config_log_trap_cmd  config_log_trap_cmd__VAR
+#define	rip_distance_source_cmd__VAR  (__activeVars->rip_distance_source_cmd__X)
+#define	rip_distance_source_cmd  rip_distance_source_cmd__VAR
+#define	rip_version_cmd__VAR  (__activeVars->rip_version_cmd__X)
+#define	rip_version_cmd  rip_version_cmd__VAR
+#define	ip_route_cmd__VAR  (__activeVars->ip_route_cmd__X)
+#define	ip_route_cmd  ip_route_cmd__VAR
+#define	hostname_cmd__VAR  (__activeVars->hostname_cmd__X)
+#define	hostname_cmd  hostname_cmd__VAR
+#define	no_distribute_list_prefix_all_cmd__VAR  (__activeVars->no_distribute_list_prefix_all_cmd__X)
+#define	no_distribute_list_prefix_all_cmd  no_distribute_list_prefix_all_cmd__VAR
+#define	no_match_ip_nexthop_val_cmd__VAR  (__activeVars->no_match_ip_nexthop_val_cmd__X)
+#define	no_match_ip_nexthop_val_cmd  no_match_ip_nexthop_val_cmd__VAR
+#define	disthash__VAR  (__activeVars->disthash__X)
+#define	disthash  disthash__VAR
+#define	password_cmd__VAR  (__activeVars->password_cmd__X)
+#define	password_cmd  password_cmd__VAR
+#define	no_access_list_extended_any_any_cmd__VAR  (__activeVars->no_access_list_extended_any_any_cmd__X)
+#define	no_access_list_extended_any_any_cmd  no_access_list_extended_any_any_cmd__VAR
+#define	no_access_list_any_cmd__VAR  (__activeVars->no_access_list_any_cmd__X)
+#define	no_access_list_any_cmd  no_access_list_any_cmd__VAR
+#define	no_ip_rip_split_horizon_poisoned_reverse_cmd__VAR  (__activeVars->no_ip_rip_split_horizon_poisoned_reverse_cmd__X)
+#define	no_ip_rip_split_horizon_poisoned_reverse_cmd  no_ip_rip_split_horizon_poisoned_reverse_cmd__VAR
+#define	no_ip_rip_authentication_mode_type_authlen_cmd__VAR  (__activeVars->no_ip_rip_authentication_mode_type_authlen_cmd__X)
+#define	no_ip_rip_authentication_mode_type_authlen_cmd  no_ip_rip_authentication_mode_type_authlen_cmd__VAR
+#define	no_debug_ospf_ism_sub_cmd__VAR  (__activeVars->no_debug_ospf_ism_sub_cmd__X)
+#define	no_debug_ospf_ism_sub_cmd  no_debug_ospf_ism_sub_cmd__VAR
+#define	ip_rip_authentication_mode_cmd__VAR  (__activeVars->ip_rip_authentication_mode_cmd__X)
+#define	ip_rip_authentication_mode_cmd  ip_rip_authentication_mode_cmd__VAR
+#define	debug_ospf_nsm_cmd__VAR  (__activeVars->debug_ospf_nsm_cmd__X)
+#define	debug_ospf_nsm_cmd  debug_ospf_nsm_cmd__VAR
+#define	ospf_area_vlink_authtype_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_cmd__X)
+#define	ospf_area_vlink_authtype_cmd  ospf_area_vlink_authtype_cmd__VAR
+#define	no_password_check__VAR  (__activeVars->no_password_check__X)
+#define	no_password_check  no_password_check__VAR
+#define	show_ip_ospf_neighbor_id_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_id_cmd__X)
+#define	show_ip_ospf_neighbor_id_cmd  show_ip_ospf_neighbor_id_cmd__VAR
+#define	no_ip_prefix_list_seq_ge_le_cmd__VAR  (__activeVars->no_ip_prefix_list_seq_ge_le_cmd__X)
+#define	no_ip_prefix_list_seq_ge_le_cmd  no_ip_prefix_list_seq_ge_le_cmd__VAR
+#define	config_terminal_no_length_cmd__VAR  (__activeVars->config_terminal_no_length_cmd__X)
+#define	config_terminal_no_length_cmd  config_terminal_no_length_cmd__VAR
+#define	ospf_passive_interface_cmd__VAR  (__activeVars->ospf_passive_interface_cmd__X)
+#define	ospf_passive_interface_cmd  ospf_passive_interface_cmd__VAR
+#define	ip_prefix_list_seq_le_ge_cmd__VAR  (__activeVars->ip_prefix_list_seq_le_ge_cmd__X)
+#define	ip_prefix_list_seq_le_ge_cmd  ip_prefix_list_seq_le_ge_cmd__VAR
+#define	match_metric_cmd__VAR  (__activeVars->match_metric_cmd__X)
+#define	match_metric_cmd  match_metric_cmd__VAR
+#define	ospf_distance_ospf_external_inter_cmd__VAR  (__activeVars->ospf_distance_ospf_external_inter_cmd__X)
+#define	ospf_distance_ospf_external_inter_cmd  ospf_distance_ospf_external_inter_cmd__VAR
+#define	ospf_area_vlink_authtype_args_md5_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_args_md5_cmd__X)
+#define	ospf_area_vlink_authtype_args_md5_cmd  ospf_area_vlink_authtype_args_md5_cmd__VAR
+#define	access_list_extended_mask_any_cmd__VAR  (__activeVars->access_list_extended_mask_any_cmd__X)
+#define	access_list_extended_mask_any_cmd  access_list_extended_mask_any_cmd__VAR
+#define	no_ip_prefix_list_ge_cmd__VAR  (__activeVars->no_ip_prefix_list_ge_cmd__X)
+#define	no_ip_prefix_list_ge_cmd  no_ip_prefix_list_ge_cmd__VAR
+#define	conf_debug_ospf_lsa__VAR  (__activeVars->conf_debug_ospf_lsa__X)
+#define	conf_debug_ospf_lsa  conf_debug_ospf_lsa__VAR
+#define	no_ospf_compatible_rfc1583_cmd__VAR  (__activeVars->no_ospf_compatible_rfc1583_cmd__X)
+#define	no_ospf_compatible_rfc1583_cmd  no_ospf_compatible_rfc1583_cmd__VAR
+#define	zebra_debug_kernel__VAR  (__activeVars->zebra_debug_kernel__X)
+#define	zebra_debug_kernel  zebra_debug_kernel__VAR
+#define	keep_kernel_mode__VAR  (__activeVars->keep_kernel_mode__X)
+#define	keep_kernel_mode  keep_kernel_mode__VAR
+#define	ospf_cost_cmd__VAR  (__activeVars->ospf_cost_cmd__X)
+#define	ospf_cost_cmd  ospf_cost_cmd__VAR
+#define	access_master_ipv4__VAR  (__activeVars->access_master_ipv4__X)
+#define	access_master_ipv4  access_master_ipv4__VAR
+#define	ip_route_distance_cmd__VAR  (__activeVars->ip_route_distance_cmd__X)
+#define	ip_route_distance_cmd  ip_route_distance_cmd__VAR
+#define	vtyvec__VAR  (__activeVars->vtyvec__X)
+#define	vtyvec  vtyvec__VAR
+#define	interface_desc_cmd__VAR  (__activeVars->interface_desc_cmd__X)
+#define	interface_desc_cmd  interface_desc_cmd__VAR
+#define	key_chain_cmd__VAR  (__activeVars->key_chain_cmd__X)
+#define	key_chain_cmd  key_chain_cmd__VAR
+#define	match_ip_address_cmd__VAR  (__activeVars->match_ip_address_cmd__X)
+#define	match_ip_address_cmd  match_ip_address_cmd__VAR
+#define	no_rip_redistribute_type_routemap_cmd__VAR  (__activeVars->no_rip_redistribute_type_routemap_cmd__X)
+#define	no_rip_redistribute_type_routemap_cmd  no_rip_redistribute_type_routemap_cmd__VAR
+#define	ospf_default_information_originate_always_metric_cmd__VAR  (__activeVars->ospf_default_information_originate_always_metric_cmd__X)
+#define	ospf_default_information_originate_always_metric_cmd  ospf_default_information_originate_always_metric_cmd__VAR
+#define	no_debug_rip_zebra_cmd__VAR  (__activeVars->no_debug_rip_zebra_cmd__X)
+#define	no_debug_rip_zebra_cmd  no_debug_rip_zebra_cmd__VAR
+#define	ip_prefix_list_ge_cmd__VAR  (__activeVars->ip_prefix_list_ge_cmd__X)
+#define	ip_prefix_list_ge_cmd  ip_prefix_list_ge_cmd__VAR
+#define	no_config_log_trap_cmd__VAR  (__activeVars->no_config_log_trap_cmd__X)
+#define	no_config_log_trap_cmd  no_config_log_trap_cmd__VAR
+#define	auth_enable_node__VAR  (__activeVars->auth_enable_node__X)
+#define	auth_enable_node  auth_enable_node__VAR
+#define	no_ip_route_mask_flags2_cmd__VAR  (__activeVars->no_ip_route_mask_flags2_cmd__X)
+#define	no_ip_route_mask_flags2_cmd  no_ip_route_mask_flags2_cmd__VAR
+#define	no_rip_network_cmd__VAR  (__activeVars->no_rip_network_cmd__X)
+#define	no_rip_network_cmd  no_rip_network_cmd__VAR
+#define	ip_route_mask_flags_distance_cmd__VAR  (__activeVars->ip_route_mask_flags_distance_cmd__X)
+#define	ip_route_mask_flags_distance_cmd  ip_route_mask_flags_distance_cmd__VAR
+#define	terminal_no_monitor_cmd__VAR  (__activeVars->terminal_no_monitor_cmd__X)
+#define	terminal_no_monitor_cmd  terminal_no_monitor_cmd__VAR
+#define	ospf_distance_ospf_inter_intra_external_cmd__VAR  (__activeVars->ospf_distance_ospf_inter_intra_external_cmd__X)
+#define	ospf_distance_ospf_inter_intra_external_cmd  ospf_distance_ospf_inter_intra_external_cmd__VAR
+#define	ip_ospf_authentication_addr_cmd__VAR  (__activeVars->ip_ospf_authentication_addr_cmd__X)
+#define	ip_ospf_authentication_addr_cmd  ip_ospf_authentication_addr_cmd__VAR
+#define	no_ip_rip_authentication_key_chain2_cmd__VAR  (__activeVars->no_ip_rip_authentication_key_chain2_cmd__X)
+#define	no_ip_rip_authentication_key_chain2_cmd  no_ip_rip_authentication_key_chain2_cmd__VAR
+#define	no_ip_route_mask_flags_distance2_cmd__VAR  (__activeVars->no_ip_route_mask_flags_distance2_cmd__X)
+#define	no_ip_route_mask_flags_distance2_cmd  no_ip_route_mask_flags_distance2_cmd__VAR
+#define	ospf_distance_source_cmd__VAR  (__activeVars->ospf_distance_source_cmd__X)
+#define	ospf_distance_source_cmd  ospf_distance_source_cmd__VAR
+#define	no_ospf_authentication_key_cmd__VAR  (__activeVars->no_ospf_authentication_key_cmd__X)
+#define	no_ospf_authentication_key_cmd  no_ospf_authentication_key_cmd__VAR
+#define	ospf_area_range_not_advertise_cmd__VAR  (__activeVars->ospf_area_range_not_advertise_cmd__X)
+#define	ospf_area_range_not_advertise_cmd  ospf_area_range_not_advertise_cmd__VAR
+#define	no_access_list_standard_nomask_cmd__VAR  (__activeVars->no_access_list_standard_nomask_cmd__X)
+#define	no_access_list_standard_nomask_cmd  no_access_list_standard_nomask_cmd__VAR
+#define	config_log_stdout_cmd__VAR  (__activeVars->config_log_stdout_cmd__X)
+#define	config_log_stdout_cmd  config_log_stdout_cmd__VAR
+#define	service_password_encrypt_cmd__VAR  (__activeVars->service_password_encrypt_cmd__X)
+#define	service_password_encrypt_cmd  service_password_encrypt_cmd__VAR
+#define	ospf_redistribute_source_metric_type_cmd__VAR  (__activeVars->ospf_redistribute_source_metric_type_cmd__X)
+#define	ospf_redistribute_source_metric_type_cmd  ospf_redistribute_source_metric_type_cmd__VAR
+#define	debug_rip_packet_cmd__VAR  (__activeVars->debug_rip_packet_cmd__X)
+#define	debug_rip_packet_cmd  debug_rip_packet_cmd__VAR
+#define	no_access_list_extended_mask_host_cmd__VAR  (__activeVars->no_access_list_extended_mask_host_cmd__X)
+#define	no_access_list_extended_mask_host_cmd  no_access_list_extended_mask_host_cmd__VAR
+#define	no_if_ipv6_rmap_cmd__VAR  (__activeVars->no_if_ipv6_rmap_cmd__X)
+#define	no_if_ipv6_rmap_cmd  no_if_ipv6_rmap_cmd__VAR
+#define	access_list_standard_host_cmd__VAR  (__activeVars->access_list_standard_host_cmd__X)
+#define	access_list_standard_host_cmd  access_list_standard_host_cmd__VAR
+#define	ip_ospf_authentication_args_cmd__VAR  (__activeVars->ip_ospf_authentication_args_cmd__X)
+#define	ip_ospf_authentication_args_cmd  ip_ospf_authentication_args_cmd__VAR
+#define	route_set_vec__VAR  (__activeVars->route_set_vec__X)
+#define	route_set_vec  route_set_vec__VAR
+#define	show_ip_prefix_list_detail_cmd__VAR  (__activeVars->show_ip_prefix_list_detail_cmd__X)
+#define	show_ip_prefix_list_detail_cmd  show_ip_prefix_list_detail_cmd__VAR
+#define	no_ip_ospf_priority_cmd__VAR  (__activeVars->no_ip_ospf_priority_cmd__X)
+#define	no_ip_ospf_priority_cmd  no_ip_ospf_priority_cmd__VAR
+#define	zebra_interface_cmd__VAR  (__activeVars->zebra_interface_cmd__X)
+#define	zebra_interface_cmd  zebra_interface_cmd__VAR
+#define	no_hostname_cmd__VAR  (__activeVars->no_hostname_cmd__X)
+#define	no_hostname_cmd  no_hostname_cmd__VAR
+#define	no_ip_prefix_list_seq_le_cmd__VAR  (__activeVars->no_ip_prefix_list_seq_le_cmd__X)
+#define	no_ip_prefix_list_seq_le_cmd  no_ip_prefix_list_seq_le_cmd__VAR
+#define	if_master__VAR  (__activeVars->if_master__X)
+#define	if_master  if_master__VAR
+#define	no_debug_ospf_nssa_cmd__VAR  (__activeVars->no_debug_ospf_nssa_cmd__X)
+#define	no_debug_ospf_nssa_cmd  no_debug_ospf_nssa_cmd__VAR
+#define	config_write_cmd__VAR  (__activeVars->config_write_cmd__X)
+#define	config_write_cmd  config_write_cmd__VAR
+#define	no_rip_timers_val_cmd__VAR  (__activeVars->no_rip_timers_val_cmd__X)
+#define	no_rip_timers_val_cmd  no_rip_timers_val_cmd__VAR
+#define	vty_ipv6_accesslist_name__VAR  (__activeVars->vty_ipv6_accesslist_name__X)
+#define	vty_ipv6_accesslist_name  vty_ipv6_accesslist_name__VAR
+#define	ospf_abr_type_cmd__VAR  (__activeVars->ospf_abr_type_cmd__X)
+#define	ospf_abr_type_cmd  ospf_abr_type_cmd__VAR
+#define	no_ip_ospf_network_cmd__VAR  (__activeVars->no_ip_ospf_network_cmd__X)
+#define	no_ip_ospf_network_cmd  no_ip_ospf_network_cmd__VAR
+#define	ospf_neighbor_cmd__VAR  (__activeVars->ospf_neighbor_cmd__X)
+#define	ospf_neighbor_cmd  ospf_neighbor_cmd__VAR
+#define	rip_redistribute_type_metric_cmd__VAR  (__activeVars->rip_redistribute_type_metric_cmd__X)
+#define	rip_redistribute_type_metric_cmd  rip_redistribute_type_metric_cmd__VAR
+#define	no_shutdown_if_cmd__VAR  (__activeVars->no_shutdown_if_cmd__X)
+#define	no_shutdown_if_cmd  no_shutdown_if_cmd__VAR
+#define	no_ospf_area_vlink_param3_cmd__VAR  (__activeVars->no_ospf_area_vlink_param3_cmd__X)
+#define	no_ospf_area_vlink_param3_cmd  no_ospf_area_vlink_param3_cmd__VAR
+#define	keychain_node__VAR  (__activeVars->keychain_node__X)
+#define	keychain_node  keychain_node__VAR
+#define	route_match_ip_address_cmd__VAR  (__activeVars->route_match_ip_address_cmd__X)
+#define	route_match_ip_address_cmd  route_match_ip_address_cmd__VAR
+#define	no_match_ip_nexthop_cmd__VAR  (__activeVars->no_match_ip_nexthop_cmd__X)
+#define	no_match_ip_nexthop_cmd  no_match_ip_nexthop_cmd__VAR
+#define	ip_rip_receive_version_2_cmd__VAR  (__activeVars->ip_rip_receive_version_2_cmd__X)
+#define	ip_rip_receive_version_2_cmd  ip_rip_receive_version_2_cmd__VAR
+#define	ospf_redistribute_source_metric_type_routemap_cmd__VAR  (__activeVars->ospf_redistribute_source_metric_type_routemap_cmd__X)
+#define	ospf_redistribute_source_metric_type_routemap_cmd  ospf_redistribute_source_metric_type_routemap_cmd__VAR
+#define	no_access_list_remark_arg_cmd__VAR  (__activeVars->no_access_list_remark_arg_cmd__X)
+#define	no_access_list_remark_arg_cmd  no_access_list_remark_arg_cmd__VAR
+#define	no_config_log_monitor_cmd__VAR  (__activeVars->no_config_log_monitor_cmd__X)
+#define	no_config_log_monitor_cmd  no_config_log_monitor_cmd__VAR
+#define	sigmaster__VAR  (__activeVars->sigmaster__X)
+#define	sigmaster  sigmaster__VAR
+#define	no_debug_ospf_nsm_cmd__VAR  (__activeVars->no_debug_ospf_nsm_cmd__X)
+#define	no_debug_ospf_nsm_cmd  no_debug_ospf_nsm_cmd__VAR
+#define	ospf_redistribute_source_type_cmd__VAR  (__activeVars->ospf_redistribute_source_type_cmd__X)
+#define	ospf_redistribute_source_type_cmd  ospf_redistribute_source_type_cmd__VAR
+#define	no_debug_rip_packet_direct_cmd__VAR  (__activeVars->no_debug_rip_packet_direct_cmd__X)
+#define	no_debug_rip_packet_direct_cmd  no_debug_rip_packet_direct_cmd__VAR
+#define	rmap_continue_index_cmd__VAR  (__activeVars->rmap_continue_index_cmd__X)
+#define	rmap_continue_index_cmd  rmap_continue_index_cmd__VAR
+#define	set_tag_cmd__VAR  (__activeVars->set_tag_cmd__X)
+#define	set_tag_cmd  set_tag_cmd__VAR
+#define	no_ip_prefix_list_le_ge_cmd__VAR  (__activeVars->no_ip_prefix_list_le_ge_cmd__X)
+#define	no_ip_prefix_list_le_ge_cmd  no_ip_prefix_list_le_ge_cmd__VAR
+#define	no_ospf_default_metric_cmd__VAR  (__activeVars->no_ospf_default_metric_cmd__X)
+#define	no_ospf_default_metric_cmd  no_ospf_default_metric_cmd__VAR
+#define	no_debug_rip_packet_cmd__VAR  (__activeVars->no_debug_rip_packet_cmd__X)
+#define	no_debug_rip_packet_cmd  no_debug_rip_packet_cmd__VAR
+#define	router_zebra_cmd__VAR  (__activeVars->router_zebra_cmd__X)
+#define	router_zebra_cmd  router_zebra_cmd__VAR
+#define	ospf_neighbor_poll_interval_cmd__VAR  (__activeVars->ospf_neighbor_poll_interval_cmd__X)
+#define	ospf_neighbor_poll_interval_cmd  ospf_neighbor_poll_interval_cmd__VAR
+#define	ip_prefix_list_le_ge_cmd__VAR  (__activeVars->ip_prefix_list_le_ge_cmd__X)
+#define	ip_prefix_list_le_ge_cmd  ip_prefix_list_le_ge_cmd__VAR
+#define	ip_prefix_list_cmd__VAR  (__activeVars->ip_prefix_list_cmd__X)
+#define	ip_prefix_list_cmd  ip_prefix_list_cmd__VAR
+#define	passive_default__VAR  (__activeVars->passive_default__X)
+#define	passive_default  passive_default__VAR
+#define	peer_list__VAR  (__activeVars->peer_list__X)
+#define	peer_list  peer_list__VAR
+#define	debug_zebra_packet_direct_cmd__VAR  (__activeVars->debug_zebra_packet_direct_cmd__X)
+#define	debug_zebra_packet_direct_cmd  debug_zebra_packet_direct_cmd__VAR
+#define	no_access_list_remark_cmd__VAR  (__activeVars->no_access_list_remark_cmd__X)
+#define	no_access_list_remark_cmd  no_access_list_remark_cmd__VAR
+#define	rip__VAR  (__activeVars->rip__X)
+#define	rip  rip__VAR
+#define	no_interface_cmd__VAR  (__activeVars->no_interface_cmd__X)
+#define	no_interface_cmd  no_interface_cmd__VAR
+#define	ospf_distance_ospf_inter_external_cmd__VAR  (__activeVars->ospf_distance_ospf_inter_external_cmd__X)
+#define	ospf_distance_ospf_inter_external_cmd  ospf_distance_ospf_inter_external_cmd__VAR
+#define	no_ospf_priority_cmd__VAR  (__activeVars->no_ospf_priority_cmd__X)
+#define	no_ospf_priority_cmd  no_ospf_priority_cmd__VAR
+#define	no_debug_ospf_nsm_sub_cmd__VAR  (__activeVars->no_debug_ospf_nsm_sub_cmd__X)
+#define	no_debug_ospf_nsm_sub_cmd  no_debug_ospf_nsm_sub_cmd__VAR
+#define	debug_rip_events_cmd__VAR  (__activeVars->debug_rip_events_cmd__X)
+#define	debug_rip_events_cmd  debug_rip_events_cmd__VAR
+#define	ospf_redistribute_source_cmd__VAR  (__activeVars->ospf_redistribute_source_cmd__X)
+#define	ospf_redistribute_source_cmd  ospf_redistribute_source_cmd__VAR
+#define	no_ip_route_mask_cmd__VAR  (__activeVars->no_ip_route_mask_cmd__X)
+#define	no_ip_route_mask_cmd  no_ip_route_mask_cmd__VAR
+#define	last_nonopt__VAR  (__activeVars->last_nonopt__X)
+#define	last_nonopt  last_nonopt__VAR
+#define	netlink__VAR  (__activeVars->netlink__X)
+#define	netlink  netlink__VAR
+#define	nl_rcvbufsize__VAR  (__activeVars->nl_rcvbufsize__X)
+#define	nl_rcvbufsize  nl_rcvbufsize__VAR
+#define	no_set_tag_val_cmd__VAR  (__activeVars->no_set_tag_val_cmd__X)
+#define	no_set_tag_val_cmd  no_set_tag_val_cmd__VAR
+#define	ospf_default_information_originate_always_type_metric_cmd__VAR  (__activeVars->ospf_default_information_originate_always_type_metric_cmd__X)
+#define	ospf_default_information_originate_always_type_metric_cmd  ospf_default_information_originate_always_type_metric_cmd__VAR
+#define	ip_ospf_priority_addr_cmd__VAR  (__activeVars->ip_ospf_priority_addr_cmd__X)
+#define	ip_ospf_priority_addr_cmd  ip_ospf_priority_addr_cmd__VAR
+#define	no_access_list_standard_host_cmd__VAR  (__activeVars->no_access_list_standard_host_cmd__X)
+#define	no_access_list_standard_host_cmd  no_access_list_standard_host_cmd__VAR
+#define	reg_unset_dummy__VAR  (__activeVars->reg_unset_dummy__X)
+#define	reg_unset_dummy  reg_unset_dummy__VAR
+#define	no_router_rip_cmd__VAR  (__activeVars->no_router_rip_cmd__X)
+#define	no_router_rip_cmd  no_router_rip_cmd__VAR
+#define	config_disable_cmd__VAR  (__activeVars->config_disable_cmd__X)
+#define	config_disable_cmd  config_disable_cmd__VAR
+#define	exec_timeout_sec_cmd__VAR  (__activeVars->exec_timeout_sec_cmd__X)
+#define	exec_timeout_sec_cmd  exec_timeout_sec_cmd__VAR
+#define	no_ip_prefix_list_le_cmd__VAR  (__activeVars->no_ip_prefix_list_le_cmd__X)
+#define	no_ip_prefix_list_le_cmd  no_ip_prefix_list_le_cmd__VAR
+#define	re_syntax_table__VAR  (__activeVars->re_syntax_table__X)
+#define	re_syntax_table  re_syntax_table__VAR
+#define	clear_ip_prefix_list_name_cmd__VAR  (__activeVars->clear_ip_prefix_list_name_cmd__X)
+#define	clear_ip_prefix_list_name_cmd  clear_ip_prefix_list_name_cmd__VAR
+#define	vty_access_class_cmd__VAR  (__activeVars->vty_access_class_cmd__X)
+#define	vty_access_class_cmd  vty_access_class_cmd__VAR
+#define	ip_prefix_list_seq_ge_le_cmd__VAR  (__activeVars->ip_prefix_list_seq_ge_le_cmd__X)
+#define	ip_prefix_list_seq_ge_le_cmd  ip_prefix_list_seq_ge_le_cmd__VAR
+#define	no_debug_ospf_zebra_cmd__VAR  (__activeVars->no_debug_ospf_zebra_cmd__X)
+#define	no_debug_ospf_zebra_cmd  no_debug_ospf_zebra_cmd__VAR
+#define	ospf_distance_ospf_inter_intra_cmd__VAR  (__activeVars->ospf_distance_ospf_inter_intra_cmd__X)
+#define	ospf_distance_ospf_inter_intra_cmd  ospf_distance_ospf_inter_intra_cmd__VAR
+#define	no_ip_route_flags2_cmd__VAR  (__activeVars->no_ip_route_flags2_cmd__X)
+#define	no_ip_route_flags2_cmd  no_ip_route_flags2_cmd__VAR
+#define	router_id_zebra__VAR  (__activeVars->router_id_zebra__X)
+#define	router_id_zebra  router_id_zebra__VAR
+#define	ospf_priority_cmd__VAR  (__activeVars->ospf_priority_cmd__X)
+#define	ospf_priority_cmd  ospf_priority_cmd__VAR
+#define	config_log_file_cmd__VAR  (__activeVars->config_log_file_cmd__X)
+#define	config_log_file_cmd  config_log_file_cmd__VAR
+#define	ip_address_label_cmd__VAR  (__activeVars->ip_address_label_cmd__X)
+#define	ip_address_label_cmd  ip_address_label_cmd__VAR
+#define	ospf_hello_interval_cmd__VAR  (__activeVars->ospf_hello_interval_cmd__X)
+#define	ospf_hello_interval_cmd  ospf_hello_interval_cmd__VAR
+#define	rip_debug_packet__VAR  (__activeVars->rip_debug_packet__X)
+#define	rip_debug_packet  rip_debug_packet__VAR
+#define	no_access_list_standard_cmd__VAR  (__activeVars->no_access_list_standard_cmd__X)
+#define	no_access_list_standard_cmd  no_access_list_standard_cmd__VAR
+#define	no_ip_route_flags_distance2_cmd__VAR  (__activeVars->no_ip_route_flags_distance2_cmd__X)
+#define	no_ip_route_flags_distance2_cmd  no_ip_route_flags_distance2_cmd__VAR
+#define	rip_redistribute_type_cmd__VAR  (__activeVars->rip_redistribute_type_cmd__X)
+#define	rip_redistribute_type_cmd  rip_redistribute_type_cmd__VAR
+#define	no_ip_rip_split_horizon_cmd__VAR  (__activeVars->no_ip_rip_split_horizon_cmd__X)
+#define	no_ip_rip_split_horizon_cmd  no_ip_rip_split_horizon_cmd__VAR
+#define	ospf_timers_spf_cmd__VAR  (__activeVars->ospf_timers_spf_cmd__X)
+#define	ospf_timers_spf_cmd  ospf_timers_spf_cmd__VAR
+#define	keychain_key_node__VAR  (__activeVars->keychain_key_node__X)
+#define	keychain_key_node  keychain_key_node__VAR
+#define	no_ip_prefix_list_seq_ge_cmd__VAR  (__activeVars->no_ip_prefix_list_seq_ge_cmd__X)
+#define	no_ip_prefix_list_seq_ge_cmd  no_ip_prefix_list_seq_ge_cmd__VAR
+#define	rip_network_cmd__VAR  (__activeVars->rip_network_cmd__X)
+#define	rip_network_cmd  rip_network_cmd__VAR
+#define	no_rmap_continue_seq__VAR  (__activeVars->no_rmap_continue_seq__X)
+#define	no_rmap_continue_seq  no_rmap_continue_seq__VAR
+#define	no_config_log_syslog_facility_cmd__VAR  (__activeVars->no_config_log_syslog_facility_cmd__X)
+#define	no_config_log_syslog_facility_cmd  no_config_log_syslog_facility_cmd__VAR
+#define	config_write_file_cmd__VAR  (__activeVars->config_write_file_cmd__X)
+#define	config_write_file_cmd  config_write_file_cmd__VAR
+#define	vty_timeout_val__VAR  (__activeVars->vty_timeout_val__X)
+#define	vty_timeout_val  vty_timeout_val__VAR
+#define	ip_route_mask_cmd__VAR  (__activeVars->ip_route_mask_cmd__X)
+#define	ip_route_mask_cmd  ip_route_mask_cmd__VAR
+#define	debug_rip_zebra_cmd__VAR  (__activeVars->debug_rip_zebra_cmd__X)
+#define	debug_rip_zebra_cmd  debug_rip_zebra_cmd__VAR
+#define	show_thread_cpu_cmd__VAR  (__activeVars->show_thread_cpu_cmd__X)
+#define	show_thread_cpu_cmd  show_thread_cpu_cmd__VAR
+#define	no_match_metric_val_cmd__VAR  (__activeVars->no_match_metric_val_cmd__X)
+#define	no_match_metric_val_cmd  no_match_metric_val_cmd__VAR
+#define	show_ip_ospf_neighbor_cmd__VAR  (__activeVars->show_ip_ospf_neighbor_cmd__X)
+#define	show_ip_ospf_neighbor_cmd  show_ip_ospf_neighbor_cmd__VAR
+#define	no_exec_timeout_cmd__VAR  (__activeVars->no_exec_timeout_cmd__X)
+#define	no_exec_timeout_cmd  no_exec_timeout_cmd__VAR
+#define	no_ip_forwarding_cmd__VAR  (__activeVars->no_ip_forwarding_cmd__X)
+#define	no_ip_forwarding_cmd  no_ip_forwarding_cmd__VAR
+#define	show_ip_ospf_database_type_id_adv_router_cmd__VAR  (__activeVars->show_ip_ospf_database_type_id_adv_router_cmd__X)
+#define	show_ip_ospf_database_type_id_adv_router_cmd  show_ip_ospf_database_type_id_adv_router_cmd__VAR
+#define	ifrmaphash__VAR  (__activeVars->ifrmaphash__X)
+#define	ifrmaphash  ifrmaphash__VAR
+#define	no_ip_ospf_authentication_key_addr_cmd__VAR  (__activeVars->no_ip_ospf_authentication_key_addr_cmd__X)
+#define	no_ip_ospf_authentication_key_addr_cmd  no_ip_ospf_authentication_key_addr_cmd__VAR
+#define	config_log_monitor_level_cmd__VAR  (__activeVars->config_log_monitor_level_cmd__X)
+#define	config_log_monitor_level_cmd  config_log_monitor_level_cmd__VAR
+#define	accept_lifetime_infinite_month_day_cmd__VAR  (__activeVars->accept_lifetime_infinite_month_day_cmd__X)
+#define	accept_lifetime_infinite_month_day_cmd  accept_lifetime_infinite_month_day_cmd__VAR
+#define	ip_prefix_list_le_cmd__VAR  (__activeVars->ip_prefix_list_le_cmd__X)
+#define	ip_prefix_list_le_cmd  ip_prefix_list_le_cmd__VAR
+#define	match_interface_cmd__VAR  (__activeVars->match_interface_cmd__X)
+#define	match_interface_cmd  match_interface_cmd__VAR
+#define	Vrip_passive_nondefault__VAR  (__activeVars->Vrip_passive_nondefault__X)
+#define	Vrip_passive_nondefault  Vrip_passive_nondefault__VAR
+#define	no_ip_ospf_authentication_cmd__VAR  (__activeVars->no_ip_ospf_authentication_cmd__X)
+#define	no_ip_ospf_authentication_cmd  no_ip_ospf_authentication_cmd__VAR
+#define	zprivs_state__VAR  (__activeVars->zprivs_state__X)
+#define	zprivs_state  zprivs_state__VAR
+#define	ospf_rfc1583_flag_cmd__VAR  (__activeVars->ospf_rfc1583_flag_cmd__X)
+#define	ospf_rfc1583_flag_cmd  ospf_rfc1583_flag_cmd__VAR
+#define	no_ip_ospf_authentication_key_cmd__VAR  (__activeVars->no_ip_ospf_authentication_key_cmd__X)
+#define	no_ip_ospf_authentication_key_cmd  no_ip_ospf_authentication_key_cmd__VAR
+#define	show_memory_isis_cmd__VAR  (__activeVars->show_memory_isis_cmd__X)
+#define	show_memory_isis_cmd  show_memory_isis_cmd__VAR
+#define	ip_rip_send_version_1_cmd__VAR  (__activeVars->ip_rip_send_version_1_cmd__X)
+#define	ip_rip_send_version_1_cmd  ip_rip_send_version_1_cmd__VAR
+#define	conf_debug_ospf_event__VAR  (__activeVars->conf_debug_ospf_event__X)
+#define	conf_debug_ospf_event  conf_debug_ospf_event__VAR
+#define	no_access_list_standard_any_cmd__VAR  (__activeVars->no_access_list_standard_any_cmd__X)
+#define	no_access_list_standard_any_cmd  no_access_list_standard_any_cmd__VAR
+#define	ip_ospf_priority_cmd__VAR  (__activeVars->ip_ospf_priority_cmd__X)
+#define	ip_ospf_priority_cmd  ip_ospf_priority_cmd__VAR
+#define	ospf_area_vlink_param4_cmd__VAR  (__activeVars->ospf_area_vlink_param4_cmd__X)
+#define	ospf_area_vlink_param4_cmd  ospf_area_vlink_param4_cmd__VAR
+#define	no_ospf_retransmit_interval_cmd__VAR  (__activeVars->no_ospf_retransmit_interval_cmd__X)
+#define	no_ospf_retransmit_interval_cmd  no_ospf_retransmit_interval_cmd__VAR
+#define	conf_debug_ospf_packet__VAR  (__activeVars->conf_debug_ospf_packet__X)
+#define	conf_debug_ospf_packet  conf_debug_ospf_packet__VAR
+#define	debug_ospf_lsa_cmd__VAR  (__activeVars->debug_ospf_lsa_cmd__X)
+#define	debug_ospf_lsa_cmd  debug_ospf_lsa_cmd__VAR
+#define	show_ip_route_prefix_longer_cmd__VAR  (__activeVars->show_ip_route_prefix_longer_cmd__X)
+#define	show_ip_route_prefix_longer_cmd  show_ip_route_prefix_longer_cmd__VAR
+#define	no_ip_route_mask_flags_cmd__VAR  (__activeVars->no_ip_route_mask_flags_cmd__X)
+#define	no_ip_route_mask_flags_cmd  no_ip_route_mask_flags_cmd__VAR
+#define	service_advanced_vty_cmd__VAR  (__activeVars->service_advanced_vty_cmd__X)
+#define	service_advanced_vty_cmd  service_advanced_vty_cmd__VAR
+#define	no_rmap_call_cmd__VAR  (__activeVars->no_rmap_call_cmd__X)
+#define	no_rmap_call_cmd  no_rmap_call_cmd__VAR
+#define	config_terminal_cmd__VAR  (__activeVars->config_terminal_cmd__X)
+#define	config_terminal_cmd  config_terminal_cmd__VAR
+#define	conf_debug_ospf_nssa__VAR  (__activeVars->conf_debug_ospf_nssa__X)
+#define	conf_debug_ospf_nssa  conf_debug_ospf_nssa__VAR
+#define	no_ip_ospf_message_digest_key_addr_cmd__VAR  (__activeVars->no_ip_ospf_message_digest_key_addr_cmd__X)
+#define	no_ip_ospf_message_digest_key_addr_cmd  no_ip_ospf_message_digest_key_addr_cmd__VAR
+#define	no_vty_access_class_cmd__VAR  (__activeVars->no_vty_access_class_cmd__X)
+#define	no_vty_access_class_cmd  no_vty_access_class_cmd__VAR
+#define	ospf_distribute_list_out_cmd__VAR  (__activeVars->ospf_distribute_list_out_cmd__X)
+#define	ospf_distribute_list_out_cmd  ospf_distribute_list_out_cmd__VAR
+#define	no_ip_route_cmd__VAR  (__activeVars->no_ip_route_cmd__X)
+#define	no_ip_route_cmd  no_ip_route_cmd__VAR
+#define	match_ip_next_hop_cmd__VAR  (__activeVars->match_ip_next_hop_cmd__X)
+#define	match_ip_next_hop_cmd  match_ip_next_hop_cmd__VAR
+#define	no_ospf_distance_source_access_list_cmd__VAR  (__activeVars->no_ospf_distance_source_access_list_cmd__X)
+#define	no_ospf_distance_source_access_list_cmd  no_ospf_distance_source_access_list_cmd__VAR
+#define	config_log_record_priority_cmd__VAR  (__activeVars->config_log_record_priority_cmd__X)
+#define	config_log_record_priority_cmd  config_log_record_priority_cmd__VAR
+#define	ospf_refresh_timer_cmd__VAR  (__activeVars->ospf_refresh_timer_cmd__X)
+#define	ospf_refresh_timer_cmd  ospf_refresh_timer_cmd__VAR
+#define	show_ip_prefix_list_prefix_cmd__VAR  (__activeVars->show_ip_prefix_list_prefix_cmd__X)
+#define	show_ip_prefix_list_prefix_cmd  show_ip_prefix_list_prefix_cmd__VAR
+#define	ospf_area_stub_no_summary_cmd__VAR  (__activeVars->ospf_area_stub_no_summary_cmd__X)
+#define	ospf_area_stub_no_summary_cmd  ospf_area_stub_no_summary_cmd__VAR
+#define	show_logging_cmd__VAR  (__activeVars->show_logging_cmd__X)
+#define	show_logging_cmd  show_logging_cmd__VAR
+#define	netlink_cmd__VAR  (__activeVars->netlink_cmd__X)
+#define	netlink_cmd  netlink_cmd__VAR
+#define	key_string_cmd__VAR  (__activeVars->key_string_cmd__X)
+#define	key_string_cmd  key_string_cmd__VAR
+#define	ospf_area_vlink_authtype_args_cmd__VAR  (__activeVars->ospf_area_vlink_authtype_args_cmd__X)
+#define	ospf_area_vlink_authtype_args_cmd  ospf_area_vlink_authtype_args_cmd__VAR
+#define	debug_ospf_packet_send_recv_cmd__VAR  (__activeVars->debug_ospf_packet_send_recv_cmd__X)
+#define	debug_ospf_packet_send_recv_cmd  debug_ospf_packet_send_recv_cmd__VAR
+#define	no_ip_ospf_cost_addr_cmd__VAR  (__activeVars->no_ip_ospf_cost_addr_cmd__X)
+#define	no_ip_ospf_cost_addr_cmd  no_ip_ospf_cost_addr_cmd__VAR
+#define	no_config_log_stdout_cmd__VAR  (__activeVars->no_config_log_stdout_cmd__X)
+#define	no_config_log_stdout_cmd  no_config_log_stdout_cmd__VAR
+#define	access_list_any_cmd__VAR  (__activeVars->access_list_any_cmd__X)
+#define	access_list_any_cmd  access_list_any_cmd__VAR
+#define	no_match_ip_address_prefix_list_cmd__VAR  (__activeVars->no_match_ip_address_prefix_list_cmd__X)
+#define	no_match_ip_address_prefix_list_cmd  no_match_ip_address_prefix_list_cmd__VAR
+#define	show_table_cmd__VAR  (__activeVars->show_table_cmd__X)
+#define	show_table_cmd  show_table_cmd__VAR
+#define	show_ip_forwarding_cmd__VAR  (__activeVars->show_ip_forwarding_cmd__X)
+#define	show_ip_forwarding_cmd  show_ip_forwarding_cmd__VAR
+#define	no_debug_ospf_event_cmd__VAR  (__activeVars->no_debug_ospf_event_cmd__X)
+#define	no_debug_ospf_event_cmd  no_debug_ospf_event_cmd__VAR
+#define	show_ip_route_protocol_cmd__VAR  (__activeVars->show_ip_route_protocol_cmd__X)
+#define	show_ip_route_protocol_cmd  show_ip_route_protocol_cmd__VAR
+#define	show_ip_ospf_database_type_adv_router_cmd__VAR  (__activeVars->show_ip_ospf_database_type_adv_router_cmd__X)
+#define	show_ip_ospf_database_type_adv_router_cmd  show_ip_ospf_database_type_adv_router_cmd__VAR
+#define	no_ip_rip_authentication_mode_type_cmd__VAR  (__activeVars->no_ip_rip_authentication_mode_type_cmd__X)
+#define	no_ip_rip_authentication_mode_type_cmd  no_ip_rip_authentication_mode_type_cmd__VAR
+#define	ospf_default_information_originate_metric_cmd__VAR  (__activeVars->ospf_default_information_originate_metric_cmd__X)
+#define	ospf_default_information_originate_metric_cmd  ospf_default_information_originate_metric_cmd__VAR
+#define	no_ip_ospf_authentication_addr_cmd__VAR  (__activeVars->no_ip_ospf_authentication_addr_cmd__X)
+#define	no_ip_ospf_authentication_addr_cmd  no_ip_ospf_authentication_addr_cmd__VAR
+#define	no_access_list_extended_host_mask_cmd__VAR  (__activeVars->no_access_list_extended_host_mask_cmd__X)
+#define	no_access_list_extended_host_mask_cmd  no_access_list_extended_host_mask_cmd__VAR
+#define	ospf_default_information_originate_metric_routemap_cmd__VAR  (__activeVars->ospf_default_information_originate_metric_routemap_cmd__X)
+#define	ospf_default_information_originate_metric_routemap_cmd  ospf_default_information_originate_metric_routemap_cmd__VAR
+#define	route_match_vec__VAR  (__activeVars->route_match_vec__X)
+#define	route_match_vec  route_match_vec__VAR
+#define	show_ip_route_addr_cmd__VAR  (__activeVars->show_ip_route_addr_cmd__X)
+#define	show_ip_route_addr_cmd  show_ip_route_addr_cmd__VAR
+#define	ipv6_distribute_list_cmd__VAR  (__activeVars->ipv6_distribute_list_cmd__X)
+#define	ipv6_distribute_list_cmd  ipv6_distribute_list_cmd__VAR
+#define	rip_route_cmd__VAR  (__activeVars->rip_route_cmd__X)
+#define	rip_route_cmd  rip_route_cmd__VAR
+#define	telnet_backward_char__VAR  (__activeVars->telnet_backward_char__X)
+#define	telnet_backward_char  telnet_backward_char__VAR
+#define	no_ospf_area_shortcut_cmd__VAR  (__activeVars->no_ospf_area_shortcut_cmd__X)
+#define	no_ospf_area_shortcut_cmd  no_ospf_area_shortcut_cmd__VAR
+#define	no_ospf_area_import_list_cmd__VAR  (__activeVars->no_ospf_area_import_list_cmd__X)
+#define	no_ospf_area_import_list_cmd  no_ospf_area_import_list_cmd__VAR
+#define	ip_route_mask_flags2_cmd__VAR  (__activeVars->ip_route_mask_flags2_cmd__X)
+#define	ip_route_mask_flags2_cmd  ip_route_mask_flags2_cmd__VAR
+#define	no_ip_prefix_list_seq_cmd__VAR  (__activeVars->no_ip_prefix_list_seq_cmd__X)
+#define	no_ip_prefix_list_seq_cmd  no_ip_prefix_list_seq_cmd__VAR
+#define	no_rip_redistribute_type_metric_cmd__VAR  (__activeVars->no_rip_redistribute_type_metric_cmd__X)
+#define	no_rip_redistribute_type_metric_cmd  no_rip_redistribute_type_metric_cmd__VAR
+#define	no_rmap_continue_cmd__VAR  (__activeVars->no_rmap_continue_cmd__X)
+#define	no_rmap_continue_cmd  no_rmap_continue_cmd__VAR
+#define	vty_cwd__VAR  (__activeVars->vty_cwd__X)
+#define	vty_cwd  vty_cwd__VAR
+#define	iflist__VAR  (__activeVars->iflist__X)
+#define	iflist  iflist__VAR
+#define	show_ip_rip_status_cmd__VAR  (__activeVars->show_ip_rip_status_cmd__X)
+#define	show_ip_rip_status_cmd  show_ip_rip_status_cmd__VAR
+#define	ip_ospf_message_digest_key_addr_cmd__VAR  (__activeVars->ip_ospf_message_digest_key_addr_cmd__X)
+#define	ip_ospf_message_digest_key_addr_cmd  ip_ospf_message_digest_key_addr_cmd__VAR
+#define	distribute_list_prefix_cmd__VAR  (__activeVars->distribute_list_prefix_cmd__X)
+#define	distribute_list_prefix_cmd  distribute_list_prefix_cmd__VAR
+#define	no_ip_ospf_transmit_delay_addr_cmd__VAR  (__activeVars->no_ip_ospf_transmit_delay_addr_cmd__X)
+#define	no_ip_ospf_transmit_delay_addr_cmd  no_ip_ospf_transmit_delay_addr_cmd__VAR
+#endif
+
+#endif

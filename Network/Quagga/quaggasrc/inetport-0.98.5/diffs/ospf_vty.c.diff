@@ -1,0 +1,12 @@
+--- ospfd/ospf_vty.c.orig	2005-11-16 17:49:13.000000000 +0100
++++ ospfd/ospf_vty.c	2005-11-16 17:52:26.000000000 +0100
+@@ -3496,7 +3496,8 @@
+ }
+ #endif /* HAVE_OPAQUE_LSA */
+ 
+-int (*show_function[])(struct vty *, struct ospf_lsa *) =
++typedef int (*show_function_func)(struct vty *, struct ospf_lsa *);
++show_function_func show_function[] =
+ {
+   NULL,
+   show_router_lsa_detail,

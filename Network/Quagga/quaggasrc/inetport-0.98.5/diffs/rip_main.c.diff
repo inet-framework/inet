@@ -1,0 +1,76 @@
+--- ripd/rip_main.c.orig	2005-11-21 14:49:10.000000000 +0100
++++ ripd/rip_main.c	2005-11-21 14:53:52.000000000 +0100
+@@ -60,18 +60,27 @@
+ 
+ struct zebra_privs_t ripd_privs =
+ {
++  _caps_p,
++  NULL,
++  2,
++  0,
+ #if defined(QUAGGA_USER)
+-  .user = QUAGGA_USER,
++  QUAGGA_USER,
++#else
++  NULL,  
+ #endif
+ #if defined QUAGGA_GROUP
+-  .group = QUAGGA_GROUP,
++  QUAGGA_GROUP,
++#else
++  NULL,
+ #endif
+ #ifdef VTY_GROUP
+-  .vty_group = VTY_GROUP,
++  VTY_GROUP,
++#else
++  NULL,  
+ #endif
+-  .caps_p = _caps_p,
+-  .cap_num_p = 2,
+-  .cap_num_i = 0
++  NULL,
++  NULL
+ };
+ 
+ /* Configuration file and directory. */
+@@ -162,26 +171,30 @@
+ struct quagga_signal_t ripd_signals[] =
+ {
+   { 
+-    .signal = SIGHUP,
+-    .handler = &sighup,
++    SIGHUP,
++    &sighup,
++    0
+   },
+   { 
+-    .signal = SIGUSR1,
+-    .handler = &sigusr1,
++    SIGUSR1,
++    &sigusr1,
++    0
+   },
+   {
+-    .signal = SIGINT,
+-    .handler = &sigint,
++    SIGINT,
++    &sigint,
++    0
+   },
+   {
+-    .signal = SIGTERM,
+-    .handler = &sigint,
++    SIGTERM,
++    &sigint,
++    0
+   },
+ };  
+ 
+ /* Main routine of ripd. */
+ int
+-main (int argc, char **argv)
++ripd_main_entry (int argc, char **argv)
+ {
+   char *p;
+   int daemon_mode = 0;

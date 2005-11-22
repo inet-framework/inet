@@ -1,0 +1,883 @@
+diff -u -N -r quagga-0.98.5/allheaders.h quagga-0.98.5-inet/allheaders.h
+--- quagga-0.98.5/allheaders.h	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/allheaders.h	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,73 @@
++#include "lib/zebra.h"
++#include "lib/buffer.h"
++#include "lib/command.h"
++#include "lib/prefix.h"
++#include "lib/if.h"
++#include "zebra/interface.h"
++#include "zebra/redistribute.h"
++#include "lib/filter.h"
++#include "lib/distribute.h"
++#include "lib/getopt.h"
++#include "lib/hash.h"
++#include "lib/if_rmap.h"
++#include "lib/jhash.h"
++#include "lib/keychain.h"
++#include "lib/linklist.h"
++#include "lib/log.h"
++#include "lib/md5-gnu.h"
++#include "lib/memory.h"
++#include "lib/network.h"
++#include "lib/plist.h"
++#include "lib/pqueue.h"
++#include "lib/privs.h"
++#include "lib/regex-gnu.h"
++#include "lib/routemap.h"
++#include "lib/sigevent.h"
++#include "lib/sockopt.h"
++#include "lib/sockunion.h"
++#include "lib/stream.h"
++#include "lib/str.h"
++#include "lib/table.h"
++#include "lib/thread.h"
++#include "lib/vector.h"
++#include "lib/version.h"
++#include "lib/vty.h"
++#include "lib/zassert.h"
++#include "lib/zclient.h"
++#include "ospfd/ospfd.h"
++#include "ospfd/ospf_abr.h"
++#include "ospfd/ospf_asbr.h"
++#include "ospfd/ospf_lsa.h"
++#include "ospfd/ospf_api.h"
++#include "ospfd/ospf_lsdb.h"
++#include "ospfd/ospf_apiserver.h"
++#include "ospfd/ospf_ase.h"
++#include "ospfd/ospf_dump.h"
++#include "ospfd/ospf_flood.h"
++#include "ospfd/ospf_ia.h"
++#include "ospfd/ospf_interface.h"
++#include "ospfd/ospf_ism.h"
++#include "ospfd/ospf_neighbor.h"
++#include "ospfd/ospf_network.h"
++#include "ospfd/ospf_nsm.h"
++#include "ospfd/ospf_opaque.h"
++#include "ospfd/ospf_packet.h"
++#include "ospfd/ospf_route.h"
++#include "ospfd/ospf_snmp.h"
++#include "ospfd/ospf_spf.h"
++#include "ospfd/ospf_te.h"
++#include "ospfd/ospf_vty.h"
++#include "ospfd/ospf_zebra.h"
++#include "ripd/rip_debug.h"
++#include "ripd/ripd.h"
++#include "zebra/connected.h"
++#include "zebra/debug.h"
++#include "zebra/ioctl.h"
++#include "zebra/ipforward.h"
++#include "zebra/irdp.h"
++#include "zebra/rib.h"
++#include "zebra/router-id.h"
++#include "zebra/rtadv.h"
++#include "zebra/rt.h"
++#include "zebra/rt_netlink.h"
++#include "zebra/zserv.h"
+diff -u -N -r quagga-0.98.5/config.h quagga-0.98.5-inet/config.h
+--- quagga-0.98.5/config.h	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/config.h	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,431 @@
++
++#define	MULTIPATH_NUM	1
++
++#define	SYSCONFDIR	"/etc/quagga/"
++
++#define DEFAULT_CONFIG_FILE "zebra.conf"
++
++#define CONFIGFILE_MASK 0600
++
++#define LOGFILE_MASK 0600
++
++#define DAEMON_VTY_DIR "/var/run/quagga/"
++
++#define ZEBRA_SERV_PATH "/var/run/quagga/zserv.api"
++
++#define ZEBRA_VTYSH_PATH "/var/run/quagga/zebra.vty"
++
++#define RIPNG_VTYSH_PATH "/var/run/quagga/ripngd.vty"
++
++#define BGP_VTYSH_PATH "/var/run/quagga/bgpd.vty"
++
++#define RIP_VTYSH_PATH "/var/run/quagga/ripd.vty"
++
++#define OSPF6_VTYSH_PATH "/var/run/quagga/ospf6d.vty"
++
++#define OSPF_VTYSH_PATH "/var/run/quagga/ospfd.vty"
++
++#define ISIS_VTYSH_PATH "/var/run/quagga/isisd.vty"
++
++//
++
++#define VERSION "0.98.5"
++
++#define PACKAGE "quagga"
++
++#define PACKAGE_BUGREPORT "http://bugzilla.quagga.net"
++
++#define PACKAGE_NAME "Quagga"
++
++#define PACKAGE_STRING "Quagga 0.98.5"
++
++#define PACKAGE_TARNAME "quagga"
++
++#define PACKAGE_VERSION "0.98.5"
++
++#define PATH_BGPD_PID "/var/run/quagga/bgpd.pid"
++
++#define PATH_ISISD_PID "/var/run/quagga/isisd.pid"
++
++#define PATH_OSPF6D_PID "/var/run/quagga/ospf6d.pid"
++
++#define PATH_OSPFD_PID "/var/run/quagga/ospfd.pid"
++
++#define PATH_RIPD_PID "/var/run/quagga/ripd.pid"
++
++#define PATH_RIPNGD_PID "/var/run/quagga/ripngd.pid"
++
++#define PATH_WATCHQUAGGA_PID "/var/run/quagga/watchquagga.pid"
++
++#define PATH_ZEBRA_PID "/var/run/quagga/zebra.pid"
++
++#define QUAGGA_GROUP "quagga"
++
++#define QUAGGA_USER "quagga"
++
++//
++
++/* #undef DISABLE_BGP_ANNOUNCE */
++
++// #define GNU_LINUX 
++
++#define HAVE_ASM_TYPES_H 1
++
++/* #undef HAVE_BROKEN_ALIASES */
++
++/* #undef HAVE_BROKEN_CMSG_FIRSTHDR */
++
++#define HAVE_DAEMON 1
++
++#define HAVE_DLFCN_H 1
++
++// #define HAVE_FCNTL 1
++
++#define HAVE_GETADDRINFO 1
++
++#define HAVE_GETIFADDRS 1
++
++/* #undef HAVE_GLIBC_BACKTRACE */
++
++// #define HAVE_GNU_REGEX 
++
++/* #undef HAVE_IFALIASREQ */
++
++/* #undef HAVE_IFRA_LIFETIME */
++
++#define HAVE_IF_INDEXTONAME 1
++
++#define HAVE_IF_NAMETOINDEX 1
++
++/* #undef HAVE_IN6_ALIASREQ */
++
++
++/* #undef HAVE_INET_ND_H */
++
++#ifndef _MSC_VER
++
++#define HAVE_INET_ATON 1
++#define HAVE_INET_NTOP 
++#define HAVE_INET_PTON 
++
++#endif
++
++#define HAVE_INPKTINFO 
++
++#define HAVE_INTTYPES_H 1
++
++/* #undef HAVE_IPV6 */
++
++/* #undef HAVE_IRDP */
++
++/* #undef HAVE_KVM_H */
++
++/* #undef HAVE_LCAPS */
++
++// #define HAVE_LIBCRYPT 1
++
++/* #undef HAVE_LIBCURSES */
++
++/* #undef HAVE_LIBKVM */
++
++// #define HAVE_LIBM 1
++
++/* #undef HAVE_LIBNCURSES */
++
++/* #undef HAVE_LIBNSL */
++
++/* #undef HAVE_LIBREADLINE */
++
++/* #undef HAVE_LIBRESOLV */
++
++/* #undef HAVE_LIBSOCKET */
++
++/* #undef HAVE_LIBTERMCAP */
++
++/* #undef HAVE_LIBTINFO */
++
++/* #undef HAVE_LIBUMEM */
++
++/* #undef HAVE_LIBUTIL_H */
++
++/* #undef HAVE_LIBXNET */
++
++#define HAVE_LIMITS_H 1
++
++// #define HAVE_LINUX_VERSION_H 1
++
++/* Define to 1 if you have the `memcpy' function. */
++#define HAVE_MEMCPY 1
++
++/* Define to 1 if you have the <memory.h> header file. */
++#define HAVE_MEMORY_H 1
++
++/* Define to 1 if you have the `memset' function. */
++#define HAVE_MEMSET 1
++
++/* Define to 1 if you have the <netdb.h> header file. */
++#define HAVE_NETDB_H 1
++
++/* Define to 1 if you have the <netinet6/in6.h> header file. */
++/* #undef HAVE_NETINET6_IN6_H */
++
++/* Define to 1 if you have the <netinet6/in6_var.h> header file. */
++/* #undef HAVE_NETINET6_IN6_VAR_H */
++
++/* Define to 1 if you have the <netinet6/nd6.h> header file. */
++/* #undef HAVE_NETINET6_ND6_H */
++
++/* Define to 1 if you have the <netinet/icmp6.h> header file. */
++/* #undef HAVE_NETINET_ICMP6_H */
++
++/* Define to 1 if you have the <netinet/in6_var.h> header file. */
++/* #undef HAVE_NETINET_IN6_VAR_H */
++
++/* Define to 1 if you have the <netinet/in.h> header file. */
++#define HAVE_NETINET_IN_H 1
++
++/* Define to 1 if you have the <netinet/in_systm.h> header file. */
++#define HAVE_NETINET_IN_SYSTM_H 1
++
++/* Define to 1 if you have the <netinet/in_var.h> header file. */
++/* #undef HAVE_NETINET_IN_VAR_H */
++
++/* netlink */
++#define HAVE_NETLINK 1
++
++/* SNMP */
++/* #undef HAVE_NETSNMP */
++
++/* Define to 1 if you have the <net/if_dl.h> header file. */
++/* #undef HAVE_NET_IF_DL_H */
++
++/* Define to 1 if you have the <net/if.h> header file. */
++#define HAVE_NET_IF_H 1
++
++/* Define to 1 if you have the <net/if_var.h> header file. */
++/* #undef HAVE_NET_IF_VAR_H */
++
++/* Define to 1 if you have the <net/netopt.h> header file. */
++/* #undef HAVE_NET_NETOPT_H */
++
++/* Define to 1 if you have the <net/route.h> header file. */
++#define HAVE_NET_ROUTE_H 1
++
++/* NET_RT_IFLIST */
++/* #undef HAVE_NET_RT_IFLIST */
++
++/* SNMP */
++/* #undef HAVE_NET_SNMP */
++
++/* OSPF Opaque LSA */
++/* #undef HAVE_OPAQUE_LSA */
++
++/* Have openpam.h */
++/* #undef HAVE_OPENPAM_H */
++
++/* OSPF TE */
++/* #undef HAVE_OSPF_TE */
++
++/* Have pam_misc.h */
++/* #undef HAVE_PAM_MISC_H */
++
++/* /proc/net/dev */
++#define HAVE_PROC_NET_DEV 
++
++/* /proc/net/if_inet6 */
++/* #undef HAVE_PROC_NET_IF_INET6 */
++
++/* prctl */
++#define HAVE_PR_SET_KEEPCAPS 
++
++/* Enable IPv6 Routing Advertisement support */
++#define HAVE_RTADV 
++
++/* rt_addrinfo */
++/* #undef HAVE_RT_ADDRINFO */
++
++/* rusage */
++/* #undef HAVE_RUSAGE */
++
++/* sa_len */
++/* #undef HAVE_SA_LEN */
++
++/* Have setproctitle */
++/* #undef HAVE_SETPROCTITLE */
++
++/* scope id */
++/* #undef HAVE_SIN6_SCOPE_ID */
++
++/* sin_len */
++/* #undef HAVE_SIN_LEN */
++
++/* SNMP */
++/* #undef HAVE_SNMP */
++
++/* Define to 1 if you have the `snprintf' function. */
++#define HAVE_SNPRINTF 1
++
++/* sockaddr_dl */
++/* #undef HAVE_SOCKADDR_DL */
++
++/* socklen_t */
++#define HAVE_SOCKLEN_T 
++
++/* Define to 1 if you have the <stdint.h> header file. */
++#define HAVE_STDINT_H 1
++
++/* Define to 1 if you have the <stdlib.h> header file. */
++#define HAVE_STDLIB_H 1
++
++/* Define to 1 if you have the `strerror' function. */
++#define HAVE_STRERROR 1
++
++/* Define to 1 if you have the <strings.h> header file. */
++// #define HAVE_STRINGS_H 1
++
++/* Define to 1 if you have the <string.h> header file. */
++#define HAVE_STRING_H 1
++
++/* Define to 1 if you have the `strlcat' function. */
++/* #undef HAVE_STRLCAT */
++
++/* Define to 1 if you have the `strlcpy' function. */
++/* #undef HAVE_STRLCPY */
++
++/* Define to 1 if you have the <stropts.h> header file. */
++#define HAVE_STROPTS_H 1
++
++/* sun_len */
++/* #undef HAVE_SUN_LEN */
++
++/* Define to 1 if you have the <sys/capability.h> header file. */
++/* #undef HAVE_SYS_CAPABILITY_H */
++
++/* Define to 1 if you have the <sys/conf.h> header file. */
++/* #undef HAVE_SYS_CONF_H */
++
++/* Define to 1 if you have the <sys/ksym.h> header file. */
++/* #undef HAVE_SYS_KSYM_H */
++
++/* Define to 1 if you have the <sys/select.h> header file. */
++#define HAVE_SYS_SELECT_H 1
++
++/* Define to 1 if you have the <sys/socket.h> header file. */
++#define HAVE_SYS_SOCKET_H 1
++
++/* Define to 1 if you have the <sys/sockio.h> header file. */
++/* #undef HAVE_SYS_SOCKIO_H */
++
++/* Define to 1 if you have the <sys/stat.h> header file. */
++#define HAVE_SYS_STAT_H 1
++
++/* Define to 1 if you have the <sys/sysctl.h> header file. */
++#define HAVE_SYS_SYSCTL_H 1
++
++/* Define to 1 if you have the <sys/times.h> header file. */
++#define HAVE_SYS_TIMES_H 1
++
++/* Define to 1 if you have the <sys/time.h> header file. */
++#define HAVE_SYS_TIME_H 1
++
++/* Define to 1 if you have the <sys/types.h> header file. */
++#define HAVE_SYS_TYPES_H 1
++
++/* Use TCP for zebra communication */
++#define HAVE_TCP_ZEBRA 
++
++/* Define to 1 if you have the <ucontext.h> header file. */
++// #define HAVE_UCONTEXT_H 1
++
++/* Define to 1 if you have the <unistd.h> header file. */
++#define HAVE_UNISTD_H 1
++
++/* Define to 1 if you have the `vsnprintf' function. */
++#define HAVE_VSNPRINTF 1
++
++/* INRIA IPv6 */
++/* #undef INRIA_IPV6 */
++
++/* IRIX 6.5 */
++/* #undef IRIX_65 */
++
++/* KAME IPv6 stack */
++/* #undef KAME */
++
++/* Linux IPv6 stack */
++/* #undef LINUX_IPV6 */
++
++/* Musica IPv6 stack */
++/* #undef MUSICA */
++
++/* NRL */
++/* #undef NRL */
++
++/* OpenBSD */
++/* #undef OPEN_BSD */
++
++/* Define as the return type of signal handlers (`int' or `void'). */
++#define RETSIGTYPE void
++
++/* Solaris IPv6 */
++/* #undef SOLARIS_IPV6 */
++
++/* Define to 1 if you have the ANSI C header files. */
++#define STDC_HEADERS 1
++
++/* SunOS 5 */
++/* #undef SUNOS_5 */
++
++/* SunOS 5.6 to 5.7 */
++/* #undef SUNOS_56 */
++
++/* SunOS 5.8 up */
++/* #undef SUNOS_59 */
++
++/* OSPFAPI */
++/* #undef SUPPORT_OSPF_API */
++
++/* SNMP */
++/* #undef UCD_COMPATIBLE */
++
++/* Use PAM for authentication */
++/* #undef USE_PAM */
++
++/* Version number of package */
++
++/* VTY shell */
++/* #undef VTYSH */
++
++/* VTY Sockets Group */
++/* #undef VTY_GROUP */
++
++/* Define to 1 if your processor stores words with the most significant byte
++   first (like Motorola and SPARC, unlike Intel and VAX). */
++/* #undef WORDS_BIGENDIAN */
++
++/* Have openpam_ttyconv */
++/* #undef PAM_CONV_FUNC */
++
++/* Define to 1 if on AIX 3.
++   System headers sometimes define this.
++   We just want to avoid a redefinition error message.  */
++#ifndef _ALL_SOURCE
++/* #undef _ALL_SOURCE */
++#endif
++
++/* Define to empty if `const' does not conform to ANSI C. */
++/* #undef const */
++
++/* Old readline */
++/* #undef rl_completion_matches */
++
++// taken from regex.c, must be defined for globalvars.h
++#define CHAR_SET_SIZE 256
++
++#include "zebra_env.h"
++
++#include "syscalls.h"
++
++#include "structs.h"
++
++#include "oppsim_kernel.h"
+diff -u -N -r quagga-0.98.5/lib/Makefile quagga-0.98.5-inet/lib/Makefile
+--- quagga-0.98.5/lib/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/lib/Makefile	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,36 @@
++SOURCES = \
++        network.c pid_output.c getopt.c getopt1.c \
++        checksum.c vector.c linklist.c vty.c command.c \
++        sockunion.c prefix.c thread.c if.c memory.c buffer.c table.c hash.c \
++        filter.c routemap.c distribute.c stream.c str.c log.c plist.c \
++        zclient.c sockopt.c smux.c md5.c if_rmap.c keychain.c privs.c \
++        sigevent.c pqueue.c jhash.c
++
++HEADERS = \
++	buffer.h command.h filter.h getopt.h hash.h if.h linklist.h log.h \
++	memory.h network.h prefix.h routemap.h distribute.h sockunion.h \
++	str.h stream.h table.h thread.h vector.h version.h vty.h zebra.h \
++	plist.h zclient.h sockopt.h smux.h md5-gnu.h if_rmap.h keychain.h \
++	privs.h sigevent.h pqueue.h jhash.h zassert.h
++
++OBJECTS = \
++        network.o pid_output.o getopt.o getopt1.o \
++        checksum.o vector.o linklist.o vty.o command.o \
++        sockunion.o prefix.o thread.o if.o memory.o buffer.o table.o hash.o \
++        filter.o routemap.o distribute.o stream.o str.o log.o plist.o \
++        zclient.o sockopt.o smux.o md5.o if_rmap.o keychain.o privs.o \
++        sigevent.o pqueue.o jhash.o
++
++INCLUDES = -I./ -I../ -I../../../
++
++DEFS = -DHAVE_CONFIG_H
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: libzebra.a
++
++libzebra.a: $(OBJECTS) $(HEADERS) $(SOURCES)
++	ar rvs libzebra.a $(OBJECTS)
++
++clean:
++	rm -f *.o *.a
+diff -u -N -r quagga-0.98.5/lib/Makefile.vc quagga-0.98.5-inet/lib/Makefile.vc
+--- quagga-0.98.5/lib/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/lib/Makefile.vc	2005-11-21 14:16:17.000000000 +0100
+@@ -0,0 +1,36 @@
++!include "../../../../../inetconfig.vc"
++
++SOURCES = \
++        network.c pid_output.c getopt.c getopt1.c \
++        checksum.c vector.c linklist.c vty.c command.c \
++        sockunion.c prefix.c thread.c if.c memory.c buffer.c table.c hash.c \
++        filter.c routemap.c distribute.c stream.c str.c log.c plist.c \
++        zclient.c sockopt.c smux.c md5.c if_rmap.c keychain.c privs.c \
++        sigevent.c pqueue.c jhash.c
++
++HEADERS = \
++	buffer.h command.h filter.h getopt.h hash.h if.h linklist.h log.h \
++	memory.h network.h prefix.h routemap.h distribute.h sockunion.h \
++	str.h stream.h table.h thread.h vector.h version.h vty.h zebra.h \
++	plist.h zclient.h sockopt.h smux.h md5-gnu.h if_rmap.h keychain.h \
++	privs.h sigevent.h pqueue.h jhash.h zassert.h
++
++OBJECTS = \
++        network.obj pid_output.obj getopt.obj getopt1.obj \
++        checksum.obj vector.obj linklist.obj vty.obj command.obj \
++        sockunion.obj prefix.obj thread.obj if.obj memory.obj buffer.obj table.obj hash.obj \
++        filter.obj routemap.obj distribute.obj stream.obj str.obj log.obj plist.obj \
++        zclient.obj sockopt.obj smux.obj md5.obj if_rmap.obj keychain.obj privs.obj \
++        sigevent.obj pqueue.obj jhash.obj
++
++INCLUDES = -I. -I../ -I../../..
++
++CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
++
++all: libzebra.lib
++
++libzebra.lib: $(OBJECTS) $(HEADERS) $(SOURCES)
++	link.exe /lib $(OBJECTS) $(LDFLAGS) /OUT:libzebra.lib
++
++clean:
++	-del *.obj libzebra.lib vc70.pdb vc70.idb
+diff -u -N -r quagga-0.98.5/Makefile quagga-0.98.5-inet/Makefile
+--- quagga-0.98.5/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/Makefile	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,28 @@
++
++INCLUDES = -I./ -I./lib -I../../
++
++DEFS = -DHAVE_CONFIG_H
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: libdir ripddir zebradir ospfdir globalvars.o
++
++libdir:
++	(cd lib; make)
++
++ripddir:
++	(cd ripd; make)
++
++zebradir:
++	(cd zebra; make)
++
++ospfdir:
++	(cd ospfd; make)
++
++clean:
++	(cd lib; make clean)
++	(cd ripd; make clean)
++	(cd zebra; make clean)
++	(cd ospfd; make clean)
++	rm globalvars.o
++
+diff -u -N -r quagga-0.98.5/Makefile.vc quagga-0.98.5-inet/Makefile.vc
+--- quagga-0.98.5/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/Makefile.vc	2005-11-21 16:01:47.000000000 +0100
+@@ -0,0 +1,30 @@
++!include "../../../../inetconfig.vc"
++
++INCLUDES= -I. -I./lib -I../..
++CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
++
++all: libdir ripddir zebradir ospfdir globalvars.obj
++
++libdir:
++	cd lib &&  nmake -f Makefile.vc
++
++ripddir:
++	cd ripd && nmake -f Makefile.vc
++
++zebradir:
++	cd zebra && nmake -f Makefile.vc
++
++ospfdir:
++	cd ospfd && nmake -f Makefile.vc
++
++clean:
++	cd lib && nmake -f Makefile.vc clean
++	cd ripd && nmake -f Makefile.vc clean
++	cd zebra && nmake -f Makefile.vc clean
++	cd ospfd && nmake -f Makefile.vc clean
++	-del globalvars.obj vc70.pdb vc70.idb
++
++generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
++
++depend:	# target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
++
+diff -u -N -r quagga-0.98.5/ospfd/Makefile quagga-0.98.5-inet/ospfd/Makefile
+--- quagga-0.98.5/ospfd/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/ospfd/Makefile	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,39 @@
++SOURCES = \
++	ospf_abr.c ospf_flood.c ospf_neighbor.c ospf_snmp.c \
++	ospf_api.c ospf_ia.c ospf_network.c ospf_spf.c \
++	ospf_apiserver.c ospf_interface.c ospf_nsm.c ospf_te.c \
++	ospf_asbr.c ospf_ism.c ospf_opaque.c ospf_vty.c \
++	ospf_ase.c ospf_lsa.c ospf_packet.c ospf_zebra.c \
++	ospfd.c ospf_lsdb.c ospf_route.c ospf_dump.c \
++	ospf_main.c ospf_routemap.c
++
++HEADERS = \
++	ospf_abr.h ospf_dump.h ospf_lsdb.h ospf_route.h \
++	ospf_api.h ospf_flood.h ospf_neighbor.h ospf_snmp.h \
++	ospf_apiserver.h ospf_ia.h ospf_network.h ospf_spf.h \
++	ospf_asbr.h ospf_interface.h ospf_nsm.h ospf_te.h \
++	ospf_ase.h ospf_ism.h ospf_opaque.h ospf_vty.h \
++	ospfd.h ospf_lsa.h ospf_packet.h ospf_zebra.h
++
++OBJECTS = \
++	ospf_abr.o ospf_flood.o ospf_neighbor.o ospf_snmp.o \
++	ospf_api.o ospf_ia.o ospf_network.o ospf_spf.o \
++	ospf_apiserver.o ospf_interface.o ospf_nsm.o ospf_te.o \
++	ospf_asbr.o ospf_ism.o ospf_opaque.o ospf_vty.o \
++	ospf_ase.o ospf_lsa.o ospf_packet.o ospf_zebra.o \
++	ospfd.o ospf_lsdb.o ospf_route.o ospf_dump.o \
++	ospf_main.o ospf_routemap.o
++
++INCLUDES = -I./ -I../ -I../lib/ -I../../../
++
++DEFS = -DHAVE_CONFIG_H -DOSPFD
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: ospfd.a
++
++ospfd.a: $(OBJECTS) $(HEADERS) $(SOURCES)
++	ar rvs ospfd.a $(OBJECTS)
++
++clean:
++	rm -f *.o ospfd.a
+diff -u -N -r quagga-0.98.5/ospfd/Makefile.vc quagga-0.98.5-inet/ospfd/Makefile.vc
+--- quagga-0.98.5/ospfd/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/ospfd/Makefile.vc	2005-11-21 15:18:09.000000000 +0100
+@@ -0,0 +1,39 @@
++!include "../../../../../inetconfig.vc"
++
++SOURCES = \
++	ospf_abr.c ospf_flood.c ospf_neighbor.c ospf_snmp.c \
++	ospf_api.c ospf_ia.c ospf_network.c ospf_spf.c \
++	ospf_apiserver.c ospf_interface.c ospf_nsm.c ospf_te.c \
++	ospf_asbr.c ospf_ism.c ospf_opaque.c ospf_vty.c \
++	ospf_ase.c ospf_lsa.c ospf_packet.c ospf_zebra.c \
++	ospfd.c ospf_lsdb.c ospf_route.c ospf_dump.c \
++	ospf_main.c ospf_routemap.c
++
++HEADERS = \
++	ospf_abr.h ospf_dump.h ospf_lsdb.h ospf_route.h \
++	ospf_api.h ospf_flood.h ospf_neighbor.h ospf_snmp.h \
++	ospf_apiserver.h ospf_ia.h ospf_network.h ospf_spf.h \
++	ospf_asbr.h ospf_interface.h ospf_nsm.h ospf_te.h \
++	ospf_ase.h ospf_ism.h ospf_opaque.h ospf_vty.h \
++	ospfd.h ospf_lsa.h ospf_packet.h ospf_zebra.h
++
++OBJECTS = \
++	ospf_abr.obj ospf_flood.obj ospf_neighbor.obj ospf_snmp.obj \
++	ospf_api.obj ospf_ia.obj ospf_network.obj ospf_spf.obj \
++	ospf_apiserver.obj ospf_interface.obj ospf_nsm.obj ospf_te.obj \
++	ospf_asbr.obj ospf_ism.obj ospf_opaque.obj ospf_vty.obj \
++	ospf_ase.obj ospf_lsa.obj ospf_packet.obj ospf_zebra.obj \
++	ospfd.obj ospf_lsdb.obj ospf_route.obj ospf_dump.obj \
++	ospf_main.obj ospf_routemap.obj
++
++INCLUDES = -I. -I.. -I../lib -I../../..
++
++CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DOSPFD -DHAVE_CONFIG_H
++
++all: ospfd.lib
++
++ospfd.lib: $(OBJECTS) $(HEADERS) $(SOURCES)
++	link.exe /lib $(LDFLAGS_DEBUG) $(OBJECTS) /OUT:ospfd.lib
++
++clean:
++	-del *.obj ospfd.lib vc70.pdb vc70.idb
+diff -u -N -r quagga-0.98.5/ripd/Makefile quagga-0.98.5-inet/ripd/Makefile
+--- quagga-0.98.5/ripd/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/ripd/Makefile	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,24 @@
++SOURCES = \
++	ripd.c rip_zebra.c rip_interface.c rip_debug.c rip_snmp.c \
++	rip_routemap.c rip_peer.c rip_offset.c rip_main.c
++
++HEADERS = \
++	ripd.h rip_debug.h
++
++OBJECTS = \
++	ripd.o rip_zebra.o rip_interface.o rip_debug.o rip_snmp.o \
++	rip_routemap.o rip_peer.o rip_offset.o rip_main.o
++
++INCLUDES = -I./ -I../ -I../lib/ -I../../../
++
++DEFS = -DHAVE_CONFIG_H -DRIPD
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: ripd.a
++
++ripd.a: $(OBJECTS) $(HEADERS) $(SOURCES)
++	ar rvs ripd.a $(OBJECTS)
++
++clean:
++	rm -f *.o ripd.a
+diff -u -N -r quagga-0.98.5/ripd/Makefile.vc quagga-0.98.5-inet/ripd/Makefile.vc
+--- quagga-0.98.5/ripd/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/ripd/Makefile.vc	2005-11-21 14:16:28.000000000 +0100
+@@ -0,0 +1,24 @@
++!include "../../../../../inetconfig.vc"
++
++SOURCES = \
++	ripd.c rip_zebra.c rip_interface.c rip_debug.c rip_snmp.c \
++	rip_routemap.c rip_peer.c rip_offset.c rip_main.c
++
++HEADERS = \
++	ripd.h rip_debug.h
++
++OBJECTS = \
++	ripd.obj rip_zebra.obj rip_interface.obj rip_debug.obj rip_snmp.obj \
++	rip_routemap.obj rip_peer.obj rip_offset.obj rip_main.obj
++
++INCLUDES = -I. -I.. -I../lib -I../../..
++
++CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DRIPD -DHAVE_CONFIG_H
++
++all: ripd.lib
++
++ripd.lib: $(OBJECTS) $(HEADERS) $(SOURCES)
++	link.exe /lib $(LDFLAGS_DEBUG) $(OBJECTS) /OUT:ripd.lib
++
++clean:
++	-del *.obj ripd.lib vc70.pdb vc70.idb
+diff -u -N -r quagga-0.98.5/zebra/Makefile quagga-0.98.5-inet/zebra/Makefile
+--- quagga-0.98.5/zebra/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/zebra/Makefile	2005-11-21 16:11:06.000000000 +0100
+@@ -0,0 +1,38 @@
++
++SOURCES = \
++	zserv.c main.c interface.c connected.c zebra_rib.c \
++	redistribute.c debug.c rtadv.c zebra_snmp.c zebra_vty.c \
++	irdp_main.c irdp_interface.c irdp_packet.c router-id.c \
++	\
++	rt_netlink.c rtread_netlink.c \
++	ipforward_proc.c \
++	if_proc.c if_netlink.c \
++	ioctl.c
++
++HEADERS = \
++	connected.h ioctl.h rib.h rt.h zserv.h redistribute.h debug.h rtadv.h \
++	interface.h ipforward.h irdp.h router-id.h
++
++OBJECTS = \
++	zserv.o main.o interface.o connected.o zebra_rib.o \
++	redistribute.o debug.o rtadv.o zebra_snmp.o zebra_vty.o \
++	irdp_main.o irdp_interface.o irdp_packet.o router-id.o \
++	\
++	rt_netlink.o rtread_netlink.o \
++	ipforward_proc.o \
++	if_proc.o if_netlink.o \
++	ioctl.o
++
++INCLUDES = -I./ -I../ -I../lib/ -I../../../
++
++DEFS = -DHAVE_CONFIG_H -DZEBRA
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: zebra.a
++
++zebra.a:  $(OBJECTS) $(HEADERS) $(SOURCES)
++	ar rvs zebra.a $(OBJECTS)
++
++clean:
++	rm -f *.o *.a
+diff -u -N -r quagga-0.98.5/zebra/Makefile.vc quagga-0.98.5-inet/zebra/Makefile.vc
+--- quagga-0.98.5/zebra/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/zebra/Makefile.vc	2005-11-21 14:38:50.000000000 +0100
+@@ -0,0 +1,37 @@
++!include "../../../../../inetconfig.vc"
++
++SOURCES = \
++	zserv.c main.c interface.c connected.c zebra_rib.c \
++	redistribute.c debug.c rtadv.c zebra_snmp.c zebra_vty.c \
++	irdp_main.c irdp_interface.c irdp_packet.c router-id.c \
++	\
++	rt_netlink.c rtread_netlink.c \
++	ipforward_proc.c \
++	if_proc.c if_netlink.c \
++	ioctl.c
++
++HEADERS = \
++	connected.h ioctl.h rib.h rt.h zserv.h redistribute.h debug.h rtadv.h \
++	interface.h ipforward.h irdp.h router-id.h
++
++OBJECTS = \
++	zserv.obj main.obj interface.obj connected.obj zebra_rib.obj \
++	redistribute.obj debug.obj rtadv.obj zebra_snmp.obj zebra_vty.obj \
++	irdp_main.obj irdp_interface.obj irdp_packet.obj router-id.obj \
++	\
++	rt_netlink.obj rtread_netlink.obj \
++	ipforward_proc.obj \
++	if_proc.obj if_netlink.obj \
++	ioctl.obj
++
++INCLUDES = -I. -I.. -I../lib -I../../..
++
++CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DZEBRA -DHAVE_CONFIG_H
++
++all: zebra.lib
++
++zebra.lib:  $(OBJECTS) $(HEADERS) $(SOURCES)
++	link.exe /lib $(OBJECTS) $(LDFLAGS) /OUT:zebra.lib
++
++clean:
++	-del *.obj zebra.lib vc70.pdb vc70.idb

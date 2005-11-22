@@ -1,0 +1,30 @@
+--- lib/filter.h.orig	2005-11-13 13:30:40.000000000 +0100
++++ lib/filter.h	2005-11-13 13:31:22.000000000 +0100
+@@ -64,4 +64,27 @@
+ struct access_list *access_list_lookup (afi_t, const char *);
+ enum filter_type access_list_apply (struct access_list *, void *);
+ 
++/* List of access_list. */
++struct access_list_list
++{
++  struct access_list *head;
++  struct access_list *tail;
++};
++
++/* Master structure of access_list. */
++struct access_master
++{
++  /* List of access_list which name is number. */
++  struct access_list_list num;
++
++  /* List of access_list which name is string. */
++  struct access_list_list str;
++
++  /* Hook function which is executed when new access_list is added. */
++  void (*add_hook) ();
++
++  /* Hook function which is executed when access_list is deleted. */
++  void (*delete_hook) ();
++};
++
+ #endif /* _ZEBRA_FILTER_H */

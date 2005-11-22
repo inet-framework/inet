@@ -1,0 +1,1 @@
+set softtabstop=2

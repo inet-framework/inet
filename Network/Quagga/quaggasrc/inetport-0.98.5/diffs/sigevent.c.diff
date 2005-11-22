@@ -1,0 +1,20 @@
+--- lib/sigevent.c.orig	2005-11-12 10:51:34.000000000 +0100
++++ lib/sigevent.c	2005-11-12 10:52:00.000000000 +0100
+@@ -35,15 +35,8 @@
+ 
+ 
+ /* master signals descriptor struct */
+-struct quagga_sigevent_master_t
+-{
+-  struct thread *t;
+-
+-  struct quagga_signal_t *signals; 
+-  int sigc;
+-  
+-  volatile sig_atomic_t caught;
+-} sigmaster;
++// struct definition moved to header
++struct quagga_sigevent_master_t sigmaster;
+ 
+ /* Generic signal handler 
+  * Schedules signal event thread
