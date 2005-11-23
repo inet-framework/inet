@@ -86,6 +86,8 @@ void UDP::initialize()
 
 void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
 {
+    // XXX checks could be added, of when the bind should be allowed to proceed
+
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc();
     sd->sockId = ctrl->sockId();
@@ -244,6 +246,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
 
     int destPort = udpPacket->destinationPort();
 
+    // send back ICMP error if no socket is bound to that port
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
     if (it==socketsByPortMap.end())
     {
@@ -258,6 +261,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
     cMessage *payload = udpPacket->decapsulate();
     int matches = 0;
 
+    // deliver a copy of the packet to each matching socket
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
@@ -289,6 +293,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
         error("(%s)%s arrived from lower layer without control info", udpPacket->className(), udpPacket->name());
     }
 
+    // send back ICMP error if there is no matching socket
     if (matches==0)
     {
         numDroppedWrongPort++;
