@@ -1,3 +1,11 @@
+- CHANGE ev<< to EV<< everywhere!!!
+
+- added userId to TCPCommand and UDPControlInfo:
+     rewrite TCPSocketMap to make use of userId 
+        - socket must be inserted into map before bind(), so that a userId can be assigned
+        - what about incoming connections? how to assign userId to them?
+           IF IT CANNOT BE DONE: remove userId from TCP!!!!
+
 - rewrite UDPApps to use UDPSocket class!
 
 
