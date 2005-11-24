@@ -60,6 +60,7 @@ std::string RoutingEntry::info() const
         case RIP:          out << " RIP"; break;
         case OSPF:         out << " OSPF"; break;
         case BGP:          out << " BGP"; break;
+        case ZEBRA:        out << " ZEBRA"; break;
         default:           out << " ???"; break;
     }
     return out.str();

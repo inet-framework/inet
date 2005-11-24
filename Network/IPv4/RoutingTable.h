@@ -63,7 +63,8 @@ class INET_API RoutingEntry : public cPolymorphic
         IFACENETMASK, ///< comes from an interface's netmask
         RIP,          ///< managed by the given routing protocol
         OSPF,         ///< managed by the given routing protocol
-        BGP           ///< managed by the given routing protocol
+        BGP,          ///< managed by the given routing protocol
+        ZEBRA,        ///< managed by the Quagga/Zebra based model
     };
 
     /// Destination

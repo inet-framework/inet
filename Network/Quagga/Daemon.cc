@@ -120,36 +120,28 @@ void Daemon::activity()
 TCPSocket* Daemon::gettcpsocket(int socket)
 {
     int idx = FD_SUB(socket);
-    ASSERT(idx >= 0);
-    ASSERT(idx < fd.size());
-    ASSERT(fd[idx].type == FD_TCP);
+    ASSERT(istcpsocket(socket));
     return fd[idx].tcp;
 }
 
 UDPSocket* Daemon::getudpsocket(int socket)
 {
     int idx = FD_SUB(socket);
-    ASSERT(idx >= 0);
-    ASSERT(idx < fd.size());
-    ASSERT(fd[idx].type == FD_UDP);
+    ASSERT(isudpsocket(socket));
     return fd[idx].udp;
 }
 
 RawSocket* Daemon::getrawsocket(int socket)
 {
     int idx = FD_SUB(socket);
-    ASSERT(idx >= 0);
-    ASSERT(idx < fd.size());
-    ASSERT(fd[idx].type == FD_RAW);
+    ASSERT(israwsocket(socket));
     return fd[idx].raw;
 }
 
 Netlink* Daemon::getnlsocket(int socket)
 {
     int idx = FD_SUB(socket);
-    ASSERT(idx >= 0);
-    ASSERT(idx < fd.size());
-    ASSERT(fd[idx].type == FD_NETLINK);
+    ASSERT(isnlsocket(socket));
     return fd[idx].netlink;
 }
 
@@ -288,7 +280,8 @@ int Daemon::createUdpSocket()
     ASSERT(FD_SUB(fdesc) < fd.size());
     ASSERT(fd[FD_SUB(fdesc)].type == FD_EMPTY);
 
-    UDPSocket *udp = new UDPSocket(fdesc);
+    UDPSocket *udp = new UDPSocket();
+    udp->setUserId(fdesc);
 
     cGate *g = gate("to_udp_interface");
     ASSERT(g);
@@ -441,6 +434,7 @@ void Daemon::closesocket(int socket)
         return;
     }
 
+    // closing tcp, raw or netlink socket doesn't occur in Zebra
     ASSERT(false);
 }
 

@@ -8,6 +8,7 @@
 #include "Daemon.h"
 
 #include "RoutingTable.h"
+#include "RoutingTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "Socket_m.h"
@@ -27,6 +28,7 @@ struct GlobalVars *__activeVars = NULL;
 
 #ifdef _MSC_VER
 
+//XXX #define snprintf _snprintf ?
 int snprintf (char *s, size_t maxlen, const char *format, ...)
 {
     va_list args;
@@ -36,11 +38,13 @@ int snprintf (char *s, size_t maxlen, const char *format, ...)
     return n;
 }
 
+//XXX #define vsnprintf _vsnprintf ?
 int vsnprintf(char *s, size_t maxlen, const char *format, va_list arg)
 {
     return _vsnprintf(s, maxlen, format, arg);
 }
 
+//XXX #define strncasecmp _strnicmp ?
 int strncasecmp(const char *s1, const char *s2, size_t n)
 {
     return _strnicmp(s1, s2, n);
@@ -201,7 +205,9 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
         if(libm->isudpsocket(socket))
         {
-            libm->getudpsocket(socket)->setOutputIf(addr); // XXX FIXME should be multicastIf
+            InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
+            ASSERT(ie);
+            libm->getudpsocket(socket)->setMulticastInterface(ie->outputPort());
 
             return 0;
         }
@@ -722,7 +728,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
         msg->setLength(length * 8);
 
         UDPSocket *udp = libm->getudpsocket(socket);
-        udp->send(msg, destAddr, port);
+        udp->sendTo(msg, destAddr, port);
 
         return length;
     }
@@ -922,7 +928,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
                     ASSERT(!strcmp(msg->name(), "data"));
 
-                    socket = udpControlInfo->sockId();
+                    socket = udpControlInfo->userId();
 
                     ASSERT(socket >= 0);
 
@@ -1056,7 +1062,7 @@ int oppsim_close(int fildes)
         if(libm->isudpsocket(fildes))
         {
             UDPSocket *udp = libm->getudpsocket(fildes);
-            udp->unbind();
+            udp->close();
             libm->closesocket(fildes);
 
             return 0;

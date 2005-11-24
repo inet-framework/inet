@@ -98,6 +98,8 @@ NetworkInterfaces/PPP/ThruputMeter.ned
 Nodes/INET/BurstHost.ned
 Nodes/INET/MobileHost.ned
 Nodes/INET/NetworkLayer.ned
+Nodes/INET/OspfdFailed.ned
+Nodes/INET/OspfdRouter.ned
 Nodes/INET/OSPFRouter.ned
 Nodes/INET/Router.ned
 Nodes/INET/StandardHost.ned

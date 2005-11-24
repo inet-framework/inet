@@ -51,6 +51,7 @@ class INET_API UDP : public cSimpleModule
     struct SockDesc
     {
         int sockId; // supposed to be unique across apps
+        int userId; // we just send it back, but don't do anything with it
         int appGateIndex;
         bool onlyLocalPortIsSet;
         IPvXAddress localAddr;
@@ -58,6 +59,7 @@ class INET_API UDP : public cSimpleModule
         short localPort;
         short remotePort;
         int inputPort; // FIXME use interfaceId instead
+                       // FIXME do real sockets allow filtering by input interface??
     };
 
     typedef std::list<SockDesc *> SockDescList;

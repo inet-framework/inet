@@ -44,6 +44,7 @@ module StandardHost
         tcpAppType: string,
         udpAppType: string,
         IPForward: bool,
+        namid: numeric const,
         routingFile: string;
     gates:
         in: in[];
@@ -53,7 +54,7 @@ module StandardHost
     submodules:
         namTrace: NAMTraceWriter;
             parameters:
-                namid = -1; // auto
+                namid = namid;
             display: "p=60,310;i=block/sink";
         notificationBoard: NotificationBoard;
             display: "p=60,70;i=block/control";

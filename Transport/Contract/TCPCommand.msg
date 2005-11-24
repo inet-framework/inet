@@ -79,6 +79,8 @@ enum TCPErrorCode
 // TCP uses the (app gate index, connId) pair to identify the socket).
 // connId is to be chosen by the application in the open command.
 //
+//# TODO explain userId
+//
 // @see TcpCommandCode, TcpStatusInd, TCPOpenCommand, TCPStatusInfo, TCP
 //
 class TCPCommand
@@ -87,6 +89,7 @@ class TCPCommand
         omitGetVerb = true;
     fields:
         int connId = -1;   // identifies the socket within the application
+        int userId = -1;   // id than can be freely used by the app
 };
 
 

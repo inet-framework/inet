@@ -26,52 +26,52 @@
 
 struct rtm_request_t
 {
-	struct nlmsghdr n;
-	struct rtmsg r;
-	char buf[1024];
+    struct nlmsghdr n;
+    struct rtmsg r;
+    char buf[1024];
 };
 
 //
 
 class NetlinkResult
 {
-	public:
-		NetlinkResult() { data = 0; }
-	
-		int copyout(struct msghdr *msg);
-		void copyin(char *ptr, int len);
-		
-	private:
-		char *data;
-		int length;
+    public:
+        NetlinkResult() { data = 0; }
+
+        int copyout(struct msghdr *msg);
+        void copyin(char *ptr, int len);
+
+    private:
+        char *data;
+        int length;
 };
 
 class Netlink
 {
-	public:
-	
-		// bind
-		struct sockaddr_nl local;
-		
-		// fcntl
-		int status;
-		
-		
-		NetlinkResult shiftResult();
-		void pushResult(const NetlinkResult& result);
-		
-		NetlinkResult listInterfaces();
-		NetlinkResult listAddresses();
-		NetlinkResult listRoutes(RoutingEntry *entry = NULL);
-		RoutingEntry* Netlink::route_command(int cmd_type, rtm_request_t* rm);
-		
-		void bind(int pid);
+    public:
 
-	private:
-		std::vector<NetlinkResult> results;
-		
-		void route_del(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);
-		RoutingEntry* route_new(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);
+        // bind
+        struct sockaddr_nl local;
+
+        // fcntl
+        int status;
+
+
+        NetlinkResult shiftResult();
+        void pushResult(const NetlinkResult& result);
+
+        NetlinkResult listInterfaces();
+        NetlinkResult listAddresses();
+        NetlinkResult listRoutes(RoutingEntry *entry = NULL);
+        RoutingEntry* route_command(int cmd_type, rtm_request_t* rm);
+
+        void bind(int pid);
+
+    private:
+        std::vector<NetlinkResult> results;
+
+        void route_del(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);
+        RoutingEntry* route_new(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);
 };
 
 #endif

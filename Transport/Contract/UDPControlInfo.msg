@@ -58,6 +58,8 @@ enum UDPStatusInd
 // Control info for sending/receiving data via UDP. Travels between
 // application and UDP.
 //
+//# TODO explain userId, sockId, etc.
+//
 // @see UDPCommandCode
 //
 class UDPControlInfo
@@ -66,6 +68,7 @@ class UDPControlInfo
         omitGetVerb = true;
     fields:
         int sockId = -1;   // identifies the socket within the application
+        int userId = -1;   // id than can be freely used by the app
         IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND
         IPvXAddress destAddr; // destination \IP or \IPv6 address
         int srcPort;   // \UDP source port in packet, or local port with BIND

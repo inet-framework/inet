@@ -205,6 +205,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, S
     // send payload with UDPControlInfo up to the application
     UDPControlInfo *udpControlInfo = new UDPControlInfo();
     udpControlInfo->setSockId(sd->sockId);
+    udpControlInfo->setUserId(sd->userId);
     udpControlInfo->setSrcAddr(ctrl->srcAddr());
     udpControlInfo->setDestAddr(ctrl->destAddr());
     udpControlInfo->setSrcPort(udpHeader->sourcePort());
@@ -222,6 +223,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl,
     // Note: OVERLOADED FUNCTION, IPv6 VERSION!
     UDPControlInfo *udpControlInfo = new UDPControlInfo();
     udpControlInfo->setSockId(sd->sockId);
+    udpControlInfo->setUserId(sd->userId);
     udpControlInfo->setSrcAddr(ctrl->srcAddr());
     udpControlInfo->setDestAddr(ctrl->destAddr());
     udpControlInfo->setSrcPort(udpHeader->sourcePort());
@@ -338,6 +340,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get6());
         ipControlInfo->setDestAddr(udpControlInfo->destAddr().get6());
+        // ipControlInfo->setOutputPort(udpControlInfo->outputPort()); FIXME extend IPv6 with this!!!
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 

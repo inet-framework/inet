@@ -7,8 +7,7 @@
 #include "IPControlInfo_m.h"
 #include "IPDatagram.h"
 
-#include "RoutingTable.h"
-#include "InterfaceTableAccess.h"
+#include "RoutingTableAccess.h"
 
 #include "glue.h"
 
@@ -147,7 +146,8 @@ void RawSocket::setMulticastTtl(bool b)
 void RawSocket::setMulticastIf(IPAddress addr)
 {
     multicastIf = addr;
-    InterfaceEntry *ie = InterfaceTableAccess().get()->interfaceByAddress(addr);
+    InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
+    ASSERT(ie);
     multicastOutputPort = ie->outputPort();
 }
 
