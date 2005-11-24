@@ -44,7 +44,8 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 #undef CMSG_DATA
 #define CMSG_DATA(cmsg)				((cmsg)->__cmsg_data)
 
-#define	IP_HDRINCL	2
+// in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
+#define	IP_HDRINCL	25
 
 #define	IP_PKTINFO	19
 

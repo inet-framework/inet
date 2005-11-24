@@ -147,6 +147,7 @@ void RawSocket::setMulticastIf(IPAddress addr)
 {
     multicastIf = addr;
     InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
+printf("setMulticastIf(%s)\n",addr.str().c_str());
     ASSERT(ie);
     multicastOutputPort = ie->outputPort();
 }
