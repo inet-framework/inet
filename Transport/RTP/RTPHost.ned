@@ -58,8 +58,8 @@ module RTPHost
                 IPForward = false,
                 routingFile = routingFile;
             gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
+                ifIn[sizeof(out)],
+                ifOut[sizeof(out)];
             display: "p=87,242;i=block/fork";
         ppp : PPPInterface[sizeof(out)];
             display: "p=80,300,row;q=queue;i=block/ifcard";
@@ -80,8 +80,8 @@ module RTPHost
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
-            ppp[i].netwOut --> networkLayer.physIn[i];
-            ppp[i].netwIn <-- networkLayer.physOut[i];
+            ppp[i].netwOut --> networkLayer.ifIn[i];
+            ppp[i].netwIn <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

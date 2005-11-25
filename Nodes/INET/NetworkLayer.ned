@@ -34,13 +34,13 @@ module NetworkLayer
     parameters:
         proxyARP: bool;
     gates:
-        in: physIn[]; // FIXME to be renamed
+        in: ifIn[];
         in: TCPIn;
         in: UDPIn;
         in: RSVPIn;
         in: OSPFIn;
         in: pingIn;
-        out: physOut[]; // FIXME to be renamed
+        out: ifOut[];
         out: TCPOut;
         out: UDPOut;
         out: RSVPOut;
@@ -57,13 +57,13 @@ module NetworkLayer
             gatesizes:
                 transportIn[6],
                 transportOut[6],
-                queueIn[sizeof(physIn)];
+                queueIn[sizeof(ifIn)];
             display: "p=85,95;i=block/routing;q=queue";
         arp: ARP;
             parameters:
                 proxyARP = proxyARP;
             gatesizes:
-                nicOut[sizeof(physOut)];
+                nicOut[sizeof(ifOut)];
             display: "p=163,206;i=block/layer;q=pendingQueue";
         icmp: ICMP;
             display: "p=160,63;i=block/control_s";
@@ -99,9 +99,9 @@ module NetworkLayer
         ip.queueOut --> arp.ipIn;
 
         // L2 interfaces to IP and from ARP
-        for i=0..sizeof(physOut)-1 do
-            physIn[i] --> ip.queueIn[i] display "m=s";
-            physOut[i] <-- arp.nicOut[i] display "m=s";
+        for i=0..sizeof(ifOut)-1 do
+            ifIn[i] --> ip.queueIn[i] display "m=s";
+            ifOut[i] <-- arp.nicOut[i] display "m=s";
         endfor;
 endmodule
 

@@ -73,8 +73,8 @@ module MobileHost
             parameters:
                 proxyARP = false;
             gatesizes:
-                physIn[1],
-                physOut[1];
+                ifIn[1],
+                ifOut[1];
             display: "p=248,247;i=block/fork;q=queue";
         wlan: Nic80211;
             display: "p=248,349;q=queue;i=block/ifcard";
@@ -102,7 +102,7 @@ module MobileHost
 
         // connections to network outside
         radioIn --> wlan.radioIn;
-        wlan.uppergateOut --> networkLayer.physIn[0];
-        wlan.uppergateIn <-- networkLayer.physOut[0];
+        wlan.uppergateOut --> networkLayer.ifIn[0];
+        wlan.uppergateIn <-- networkLayer.ifOut[0];
 endmodule
 

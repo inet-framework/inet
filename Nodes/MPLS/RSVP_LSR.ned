@@ -61,8 +61,8 @@ module RSVP_LSR
             display: "i=block/classifier;p=330,51";
         networkLayer: NetworkLayer;
             gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
+                ifIn[sizeof(out)],
+                ifOut[sizeof(out)];
             display: "p=192,163;i=block/fork";
         ppp: PPPRouterInterface[sizeof(out)];
             display: "p=88,297,row,90;q=queue;i=block/ifcard";
@@ -92,8 +92,8 @@ module RSVP_LSR
             ppp[i].netwOut --> mplsModule.fromL2[i];
             ppp[i].netwIn <-- mplsModule.toL2[i];
 
-            mplsModule.toL3[i] --> networkLayer.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
+            mplsModule.toL3[i] --> networkLayer.ifIn[i];
+            mplsModule.fromL3[i] <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

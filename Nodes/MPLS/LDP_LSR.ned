@@ -74,8 +74,8 @@ module LDP_LSR
             display: "p=267,145;i=block/transport";
         networkLayer: NetworkLayer;
             gatesizes:
-                physIn[sizeof(out)],
-                physOut[sizeof(out)];
+                ifIn[sizeof(out)],
+                ifOut[sizeof(out)];
             display: "p=224,223;i=block/fork";
         ppp: PPPRouterInterface[sizeof(out)];
             display: "p=105,388,row,90;q=queue;i=block/ifcard";
@@ -115,8 +115,8 @@ module LDP_LSR
             ppp[i].netwOut --> mplsModule.fromL2[i];
             ppp[i].netwIn <-- mplsModule.toL2[i];
 
-            mplsModule.toL3[i] --> networkLayer.physIn[i];
-            mplsModule.fromL3[i] <-- networkLayer.physOut[i];
+            mplsModule.toL3[i] --> networkLayer.ifIn[i];
+            mplsModule.fromL3[i] <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

@@ -33,8 +33,8 @@ import
 //
 module NetworkLayer6
     gates:
-        in: physIn[];
-        out: physOut[];
+        in: ifIn[];
+        out: ifOut[];
         in: TCPIn;
         out: TCPOut;
         in: UDPIn;
@@ -53,13 +53,13 @@ module NetworkLayer6
             gatesizes:
                 transportIn[4],
                 transportOut[4],
-                queueIn[sizeof(physIn)],
-                queueOut[sizeof(physIn)];
+                queueIn[sizeof(ifIn)],
+                queueOut[sizeof(ifIn)];
             display: "i=block/network2;p=84,129";
         icmpv6: ICMPv6;
             display: "i=block/control;p=208,79";
         ipv6ErrorHandling: IPv6ErrorHandling;
-        	display: "p=280,79;i=block/process_s";
+            display: "p=280,79;i=block/process_s";
         neighbourDiscovery: IPv6NeighbourDiscovery;
             display: "p=208,171;i=block/network";
     connections nocheck:  // FIXME remove 'nocheck'!
@@ -79,10 +79,10 @@ module NetworkLayer6
         // IPv6 to ICMPv6
         ipv6.icmpOut --> icmpv6.fromIPv6;
         ipv6.icmpIn <-- icmpv6.toIPv6;
-        
+
         // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;
-        
+
         // ICMPv6 to ping I/O
         icmpv6.pingOut --> pingOut;
         icmpv6.pingIn <-- pingIn;
@@ -92,9 +92,9 @@ module NetworkLayer6
         ipv6.ndIn <-- neighbourDiscovery.toIPv6;
 
         // IPv6 to L2
-        for i=0..sizeof(physOut)-1 do
-            physIn[i] --> ipv6.queueIn[i] display "m=s";
-            physOut[i] <-- ipv6.queueOut[i] display "m=s";
+        for i=0..sizeof(ifOut)-1 do
+            ifIn[i] --> ipv6.queueIn[i] display "m=s";
+            ifOut[i] <-- ipv6.queueOut[i] display "m=s";
         endfor;
 endmodule
 

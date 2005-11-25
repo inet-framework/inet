@@ -75,8 +75,8 @@ module WirelessHost
             parameters:
                 proxyARP = false;
             gatesizes:
-                physIn[sizeof(out)+sizeof(ethOut)+1],
-                physOut[sizeof(out)+sizeof(ethOut)+1];
+                ifIn[sizeof(out)+sizeof(ethOut)+1],
+                ifOut[sizeof(out)+sizeof(ethOut)+1];
             display: "p=248,247;i=block/fork;q=queue";
         ppp: PPPInterface[sizeof(out)];
             display: "p=205,350,row,90;q=txQueue;i=block/ifcard";
@@ -110,19 +110,19 @@ module WirelessHost
         for i=0..sizeof(out)-1 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
-            ppp[i].netwOut --> networkLayer.physIn[i];
-            ppp[i].netwIn <-- networkLayer.physOut[i];
+            ppp[i].netwOut --> networkLayer.ifIn[i];
+            ppp[i].netwIn <-- networkLayer.ifOut[i];
         endfor;
 
         for i=0..sizeof(ethOut)-1 do
             ethIn[i] --> eth[i].physIn;
             ethOut[i] <-- eth[i].physOut;
-            eth[i].netwOut --> networkLayer.physIn[sizeof(out)+i];
-            eth[i].netwIn <-- networkLayer.physOut[sizeof(out)+i];
+            eth[i].netwOut --> networkLayer.ifIn[sizeof(out)+i];
+            eth[i].netwIn <-- networkLayer.ifOut[sizeof(out)+i];
         endfor;
 
         radioIn --> wlan.radioIn;
-        wlan.uppergateOut --> networkLayer.physIn[sizeof(out)+sizeof(ethOut)];
-        wlan.uppergateIn <-- networkLayer.physOut[sizeof(out)+sizeof(ethOut)];
+        wlan.uppergateOut --> networkLayer.ifIn[sizeof(out)+sizeof(ethOut)];
+        wlan.uppergateIn <-- networkLayer.ifOut[sizeof(out)+sizeof(ethOut)];
 endmodule
 

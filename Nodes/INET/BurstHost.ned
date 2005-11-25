@@ -54,8 +54,8 @@ module BurstHost
             display: "i=block/app;p=198,86";
         networkLayer: NetworkLayer;
             gatesizes:
-                physIn[1],
-                physOut[1];
+                ifIn[1],
+                ifOut[1];
             display: "p=198,173;i=block/fork;q=queue";
         ppp: PPPInterface[1];
             display: "p=198,262,row,90;q=txQueue;i=block/ifcard";
@@ -68,8 +68,8 @@ module BurstHost
         for i=0..0 do
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
-            ppp[i].netwOut --> networkLayer.physIn[i];
-            ppp[i].netwIn <-- networkLayer.physOut[i];
+            ppp[i].netwOut --> networkLayer.ifIn[i];
+            ppp[i].netwIn <-- networkLayer.ifOut[i];
         endfor;
 
 endmodule
