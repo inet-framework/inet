@@ -18,6 +18,14 @@ INET-200512xx
 
 - new snapshot of the IPv6 module (by Wei Yang Ng)
 
+- added ability to write nam traces (Util/NAMTraceWriter, World/NAMTrace);
+  feature originally implemented by Vojta Janota (and refactored by Andras --
+  all bugs are very likely mine)
+
+- implemented ThruputMeteringChannel which can display #packets, pk/sec etc
+  on the links; and ChannelInstaller as a temporary solution to install
+  ThruputMeteringChannel instead of the built-in BasicChannel class.
+
 - ev replaced with EV in every module (speed increase in Express mode)
 
 - NetworkLayer(6): gates towards interfaces renamed to ifOut[]/ifIn[]

@@ -25,8 +25,8 @@
 //
 simple ChannelInstaller
     parameters:
-        channelClass: string,
-        channelAttrs: string;
+        channelClass: string, // e.g. "ThruputMeteringChannel"
+        channelAttrs: string; // params for the channel class, e.g. "format=N (U)"
 endsimple
 
 
