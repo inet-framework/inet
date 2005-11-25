@@ -94,14 +94,14 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     // check for header biterror
     if (datagram->hasBitError())
     {
-        ev << "bit error\n";return; // revise!
+        EV << "bit error\n";return; // revise!
 /*FIXME revise
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
         double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
         if (dblrand() <= relativeHeaderLength)
         {
-            ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
+            EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             icmp->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
@@ -123,7 +123,7 @@ void IPv6::handleMessageFromHL(cMessage *msg)
     // if no interface exists, do not send datagram
     if (ift->numInterfaces() == 0)
     {
-        ev << "No interfaces exist, dropping packet\n";
+        EV << "No interfaces exist, dropping packet\n";
         delete msg;
         return;
     }
@@ -147,7 +147,7 @@ FIXME implement fragmentation here.
    3. if bigger, do fragmentation
          int mtu = ift->interfaceByPortNo(outputGateIndex)->mtu();
 */
-    ev << "fragmentation not implemented yet\n";
+    EV << "fragmentation not implemented yet\n";
 
     // route packet
     if (optOutputGateIndex!=-1)
@@ -168,19 +168,19 @@ void IPv6::routePacket(IPv6Datagram *datagram)
     // TBD add option handling code here
     IPv6Address destAddress = datagram->destAddress();
 
-    ev << "Routing datagram `" << datagram->name() << "' with dest=" << destAddress << ": ";
+    EV << "Routing datagram `" << datagram->name() << "' with dest=" << destAddress << ": ";
 
     // local delivery of unicast packets
     if (rt->localDeliver(destAddress))
     {
-        ev << "local delivery\n";
+        EV << "local delivery\n";
         numLocalDeliver++;
         localDeliver(datagram);
         return;
     }
 
     int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    ev << "Input Gate Index: " << inputGateIndex << endl;
+    EV << "Input Gate Index: " << inputGateIndex << endl;
     if (inputGateIndex!=-1)
     {
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
@@ -190,7 +190,7 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         //if (!rt->isRouter())
         if (!rt->isRouter() && !(datagram->arrivalGate()->isName("ndIn")))
         {
-            ev << "forwarding is off, dropping packet\n";
+            EV << "forwarding is off, dropping packet\n";
             numDropped++;
             delete datagram;
             return;
@@ -199,7 +199,7 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         // don't forward link-local addresses or weaker
         if (destAddress.isLinkLocal() || destAddress.isLoopback())
         {
-            ev << "dest address is link-local (or weaker) scope, doesn't get forwarded\n";
+            EV << "dest address is link-local (or weaker) scope, doesn't get forwarded\n";
             delete datagram;
             return;
         }
@@ -223,13 +223,13 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         {
             if (rt->isRouter())
             {
-                ev << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
+                EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
                 icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
             }
             else // host
             {
-                ev << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+                EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
                 send(datagram, "ndOut");
             }
             return;
@@ -242,17 +242,17 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         // add result into destination cache
         rt->updateDestCache(destAddress, nextHop, interfaceId);
     }
-    ev << "next hop for " << destAddress << " is " << nextHop << ", interface " << interfaceId << "\n";
+    EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << interfaceId << "\n";
     ASSERT(!nextHop.isUnspecified() && interfaceId!=-1);
 
     MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);
     if (macAddr.isUnspecified())
     {
-        ev << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
+        EV << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
         send(datagram, "ndOut");
         return;
     }
-    ev << "link-layer address: " << macAddr << "\n";
+    EV << "link-layer address: " << macAddr << "\n";
 
     // set datagram source address if not yet set
     if (datagram->srcAddress().isUnspecified())
@@ -272,7 +272,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
 {
     const IPv6Address& destAddr = datagram->destAddress();
 
-    ev << "destination address " << destAddr << " is multicast, doing multicast routing\n";
+    EV << "destination address " << destAddr << " is multicast, doing multicast routing\n";
     numMulticast++;
 
     // if received from the network...
@@ -282,7 +282,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
         // deliver locally
         if (rt->localDeliver(destAddr))
         {
-            ev << "local delivery of multicast packet\n";
+            EV << "local delivery of multicast packet\n";
             numLocalDeliver++;
             localDeliver((IPv6Datagram *)datagram->dup());
         }
@@ -290,7 +290,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
         if (!rt->isRouter())
         {
-            ev << "forwarding is off\n";
+            EV << "forwarding is off\n";
             delete datagram;
             return;
         }
@@ -298,7 +298,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
         // make sure scope of multicast address is large enough to be forwarded to other links
         if (destAddr.multicastScope()<=2)
         {
-            ev << "multicast dest address is link-local (or smaller) scope\n";
+            EV << "multicast dest address is link-local (or smaller) scope\n";
             delete datagram;
             return;
         }
@@ -311,7 +311,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
     }
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
-    ev << "sending out datagram on every interface (except incoming one)\n";
+    EV << "sending out datagram on every interface (except incoming one)\n";
     for (int i=0; i<ift->numInterfaces(); i++)
     {
         int outputGateIndex = ift->interfaceAt(i)->outputPort();
@@ -336,7 +336,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
     if (inputGateIndex!=-1 && shortestPathInputGateIndex!=-1 && inputGateIndex!=shortestPathInputGateIndex)
     {
         // FIXME count dropped
-        ev << "Packet dropped.\n";
+        EV << "Packet dropped.\n";
         delete datagram;
         return;
     }
@@ -400,7 +400,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     // Defragmentation. skip defragmentation if datagram is not fragmented
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
-        ev << "Datagram fragment: offset=" << datagram->fragmentOffset()
+        EV << "Datagram fragment: offset=" << datagram->fragmentOffset()
            << ", MORE=" << (datagram->moreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
@@ -413,10 +413,10 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         datagram = fragbuf.addFragment(datagram, simTime());
         if (!datagram)
         {
-            ev << "No complete datagram yet.\n";
+            EV << "No complete datagram yet.\n";
             return;
         }
-        ev << "This fragment completes the datagram.\n";
+        EV << "This fragment completes the datagram.\n";
     }
 */
     // decapsulate and send on appropriate output gate
@@ -425,24 +425,24 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
     if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
     {
-        ev << "Neigbour Discovery packet: passing it to ND module\n";
+        EV << "Neigbour Discovery packet: passing it to ND module\n";
         send(packet, "ndOut");
     }
     else if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message*>(packet))
     {
-        ev << "ICMPv6 packet: passing it to ICMPv6 module\n";
+        EV << "ICMPv6 packet: passing it to ICMPv6 module\n";
         send(packet, "icmpOut");
     }//Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol==IP_PROT_IP || protocol==IP_PROT_IPv6)
     {
-        ev << "Tunnelled IP datagram\n";
+        EV << "Tunnelled IP datagram\n";
         // FIXME handle tunnelling
         error("tunnelling not yet implemented");
     }
     else
     {
         int gateindex = mapping.outputGateForProtocol(protocol);
-        ev << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
+        EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
         //TODO: Indication of forward progress
         send(packet, "transportOut", gateindex);
     }
@@ -506,7 +506,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, int outputGateIndex, con
     if (datagram->hopLimit() <= 0)
     {
         // drop datagram, destruction responsibility in ICMP
-        ev << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
+        EV << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
         icmp->sendErrorMessage(datagram, ICMPv6_TIME_EXCEEDED, 0); // FIXME check icmp 'code'
         return;
     }

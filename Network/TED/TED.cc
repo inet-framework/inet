@@ -89,7 +89,7 @@ void TED::initialize(int stage)
             // use g->delay()->doubleValue() for shortest delay calculation
             entry.metric = rentry->interfacePtr->ipv4()->metric();
 
-            ev << "metric set to=" << entry.metric << endl;
+            EV << "metric set to=" << entry.metric << endl;
 
             entry.sourceId = routerId.getInt();
             entry.messageId = ++maxMessageId;
@@ -138,7 +138,7 @@ void TED::handleMessage(cMessage * msg)
     }
     else if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
     {
-        ev << "Processing message from IP: " << msg << endl;
+        EV << "Processing message from IP: " << msg << endl;
         IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
         IPAddress sender = controlInfo->srcAddr();
 
@@ -226,7 +226,7 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
 
 void TED::rebuildRoutingTable()
 {
-    ev << "rebuilding routing table at " << routerId << endl;
+    EV << "rebuilding routing table at " << routerId << endl;
 
     std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
 
@@ -247,9 +247,9 @@ void TED::rebuildRoutingTable()
 
 //  for (unsigned int i = 0; i < V.size(); i++)
 //  {
-//      ev << "V[" << i << "].node=" << V[i].node << endl;
-//      ev << "V[" << i << "].parent=" << V[i].parent << endl;
-//      ev << "V[" << i << "].dist=" << V[i].dist << endl;
+//      EV << "V[" << i << "].node=" << V[i].node << endl;
+//      EV << "V[" << i << "].parent=" << V[i].parent << endl;
+//      EV << "V[" << i << "].dist=" << V[i].dist << endl;
 //  }
 
     // insert remote destinations
@@ -328,7 +328,7 @@ IPAddress TED::interfaceByPeerAddress(IPAddress peerIP)
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->local;
     }
-    ev << "not a local peer " << peerIP << endl;
+    EV << "not a local peer " << peerIP << endl;
     ASSERT(false);
 }
 
@@ -414,7 +414,7 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
 
 void TED::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exPeer)
 {
-    ev << "sending LINK_STATE message to peers" << endl;
+    EV << "sending LINK_STATE message to peers" << endl;
 
     for (unsigned int i = 0; i < ted.size(); i++)
     {
@@ -464,7 +464,7 @@ void TED::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
 
 void TED::processLINK_NOTIFY(LinkNotifyMsg* msg)
 {
-    ev << "received LINK_NOTIFY message" << endl;
+    EV << "received LINK_NOTIFY message" << endl;
 
     unsigned int k = msg->getLinkArraySize();
 
@@ -489,7 +489,7 @@ void TED::processLINK_NOTIFY(LinkNotifyMsg* msg)
 
 void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
 {
-    ev << "received LINK_STATE message from " << sender << endl;
+    EV << "received LINK_STATE message from " << sender << endl;
 
     TELinkStateInfoVector forward;
 
@@ -507,7 +507,7 @@ void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
         {
             ASSERT(link.sourceId == link.advrouter.getInt());
 
-            ev << "new information found" << endl;
+            EV << "new information found" << endl;
 
             if(!match)
             {
@@ -553,7 +553,7 @@ void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
 
 void TED::sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list)
 {
-    ev << "sending LINK_STATE message (ACK) to " << peer << endl;
+    EV << "sending LINK_STATE message (ACK) to " << peer << endl;
 
     LinkStateMsg *out = new LinkStateMsg("link state message");
 

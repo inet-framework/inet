@@ -24,7 +24,7 @@
 Define_Module(Blackboard);
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? std::cout : ev <<parentModule()->name()<<"["<<parentModule()->index()<<"]::Blackboard: "
+#define coreEV (ev.disabled()||!coreDebug) ? std::cout : EV <<parentModule()->name()<<"["<<parentModule()->index()<<"]::Blackboard: "
 
 
 std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)

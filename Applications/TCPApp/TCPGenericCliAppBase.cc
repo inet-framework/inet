@@ -56,7 +56,7 @@ void TCPGenericCliAppBase::connect()
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
 
-    ev << "issuing OPEN command\n";
+    EV << "issuing OPEN command\n";
     setStatusString("connecting");
 
     socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
@@ -67,13 +67,13 @@ void TCPGenericCliAppBase::connect()
 void TCPGenericCliAppBase::close()
 {
     setStatusString("closing");
-    ev << "issuing CLOSE command\n";
+    EV << "issuing CLOSE command\n";
     socket.close();
 }
 
 void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
 {
-    ev << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << (serverClose ? ", and server should close afterwards\n" : "\n");
+    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << (serverClose ? ", and server should close afterwards\n" : "\n");
 
     GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setByteLength(numBytes);
@@ -94,7 +94,7 @@ void TCPGenericCliAppBase::setStatusString(const char *s)
 void TCPGenericCliAppBase::socketEstablished(int, void *)
 {
     // *redefine* to perform or schedule first sending
-    ev << "connected\n";
+    EV << "connected\n";
     setStatusString("connected");
 }
 
@@ -112,7 +112,7 @@ void TCPGenericCliAppBase::socketPeerClosed(int, void *)
     // close the connection (if not already closed)
     if (socket.state()==TCPSocket::PEER_CLOSED)
     {
-        ev << "remote TCP closed, closing here as well\n";
+        EV << "remote TCP closed, closing here as well\n";
         close();
     }
 }
@@ -120,14 +120,14 @@ void TCPGenericCliAppBase::socketPeerClosed(int, void *)
 void TCPGenericCliAppBase::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
-    ev << "connection closed\n";
+    EV << "connection closed\n";
     setStatusString("closed");
 }
 
 void TCPGenericCliAppBase::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
-    ev << "connection broken\n";
+    EV << "connection broken\n";
     setStatusString("broken");
 
     numBroken++;
@@ -135,9 +135,9 @@ void TCPGenericCliAppBase::socketFailure(int, void *, int code)
 
 void TCPGenericCliAppBase::finish()
 {
-    ev << fullPath() << ": opened " << numSessions << " sessions\n";
-    ev << fullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    EV << fullPath() << ": opened " << numSessions << " sessions\n";
+    EV << fullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 
     recordScalar("number of sessions", numSessions);
     recordScalar("packets sent", packetsSent);

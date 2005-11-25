@@ -160,7 +160,7 @@ void OSPF::DatabaseDescriptionHandler::ProcessPacket (OSPFPacket* packet, OSPF::
 
 bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket (OSPFDatabaseDescriptionPacket* ddPacket, OSPF::Interface* intf, OSPF::Neighbor* neighbor, bool inExchangeStart)
 {
-    ev << "  Processing packet contents (ddOptions="
+    EV << "  Processing packet contents (ddOptions="
        << ((ddPacket->getDdOptions ().I_Init) ? "I " : "_ ")
        << ((ddPacket->getDdOptions ().M_More) ? "M " : "_ ")
        << ((ddPacket->getDdOptions ().MS_MasterSlave) ? "MS" : "__")
@@ -174,13 +174,13 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket (OSPFDatabaseDescriptionP
         OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders (i);
         LSAType        lsaType       = static_cast<LSAType> (currentHeader.getLsType ());
 
-        ev << "    ";
+        EV << "    ";
         PrintLSAHeader (currentHeader);
 
         if ((lsaType < RouterLSAType) || (lsaType > ASExternalLSAType) ||
             ((lsaType == ASExternalLSAType) && (!intf->GetArea ()->GetExternalRoutingCapability ())))
         {
-            ev << " Error!\n";
+            EV << " Error!\n";
             neighbor->ProcessEvent (OSPF::Neighbor::SequenceNumberMismatch);
             return false;
         } else {
@@ -193,11 +193,11 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket (OSPFDatabaseDescriptionP
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer (less means older)
             if ((lsaInDatabase == NULL) || (lsaInDatabase->getHeader () < currentHeader)) {
-                ev << " (newer)";
+                EV << " (newer)";
                 neighbor->AddToRequestList (&currentHeader);
             }
         }
-        ev << "\n";
+        EV << "\n";
     }
 
     if (neighbor->GetDatabaseExchangeRelationship () == OSPF::Neighbor::Master) {

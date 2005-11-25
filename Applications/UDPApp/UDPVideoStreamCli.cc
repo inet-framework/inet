@@ -61,7 +61,7 @@ void UDPVideoStreamCli::requestStream()
     const char *address = par("serverAddress");
     IPvXAddress svrAddr = IPAddressResolver().resolve(address);
 
-    ev << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
+    EV << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
     bindToPort(localPort);
 
@@ -71,7 +71,7 @@ void UDPVideoStreamCli::requestStream()
 
 void UDPVideoStreamCli::receiveStream(cMessage* msg)
 {
-    ev << "Video stream packet:\n";
+    EV << "Video stream packet:\n";
     printPacket(msg);
     eed.record(simTime() - msg->timestamp());
     delete msg;

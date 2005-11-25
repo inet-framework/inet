@@ -42,8 +42,8 @@ void ErrorHandling::handleMessage(cMessage *msg)
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
 
-    ev << "Error Handler: ICMP message received:\n";
-    ev << " Type: " << (int)icmpMsg->getType()
+    EV << "Error Handler: ICMP message received:\n";
+    EV << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
        << " Bytelength: " << d->byteLength()
        << " Src: " << d->srcAddress()

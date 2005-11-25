@@ -90,7 +90,7 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
 {
     if (findPSB(session, sender))
     {
-        ev << "path (PSB) already exists, doing nothing" << endl;
+        EV << "path (PSB) already exists, doing nothing" << endl;
         return;
     }
 
@@ -101,7 +101,7 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
 
     if (sit == traffic.end())
     {
-        ev << "session not found in traffic database, path won't be created" << endl;
+        EV << "session not found in traffic database, path won't be created" << endl;
         return;
     }
 
@@ -110,7 +110,7 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
 
     if (pit == sit->paths.end())
     {
-        ev << "path doesn't belong to this session according to our database, doing nothing" << endl;
+        EV << "path doesn't belong to this session according to our database, doing nothing" << endl;
         return;
     }
 
@@ -122,7 +122,7 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
     }
     else
     {
-        ev << "ingress PSB couln't be created" << endl;
+        EV << "ingress PSB couln't be created" << endl;
 
         // inform the owner of this path
         sendPathNotify(pit->owner, sit->sobj, pit->sender, PATH_UNFEASIBLE, 0.0);
@@ -130,13 +130,13 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
         // remove non-permanent path
         if (!pit->permanent)
         {
-            ev << "removing path from traffic database" << endl;
+            EV << "removing path from traffic database" << endl;
 
             sit->paths.erase(pit--);
         }
         else
         {
-            ev << "path is permanent, we will try again later" << endl;
+            EV << "path is permanent, we will try again later" << endl;
 
             sendPathNotify(id(), sit->sobj, pit->sender, PATH_RETRY, retryInterval);
         }
@@ -245,7 +245,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
             pit = findPath(&(*sit), newPath.sender);
             if (pit != sit->paths.end())
             {
-                ev << "path " << lspid << " already exists in this session, doing nothing" << endl;
+                EV << "path " << lspid << " already exists in this session, doing nothing" << endl;
                 continue;
             }
         }
@@ -254,7 +254,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
             pit = findPath(&newSession, newPath.sender);
             if (pit != newSession.paths.end())
             {
-                ev << "path " << lspid << " already exists in this session, doing nothing" << endl;
+                EV << "path " << lspid << " already exists in this session, doing nothing" << endl;
                 continue;
             }
         }
@@ -282,13 +282,13 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
         if (merge)
         {
-            ev << "adding new path into an existing session" << endl;
+            EV << "adding new path into an existing session" << endl;
 
             sit->paths.push_back(newPath);
         }
         else
         {
-            ev << "adding new path into new session" << endl;
+            EV << "adding new path into new session" << endl;
 
             newSession.paths.push_back(newPath);
         }
@@ -300,7 +300,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
     if (!merge)
     {
-        ev << "adding new session into database" << endl;
+        EV << "adding new session into database" << endl;
 
         traffic.push_back(newSession);
     }
@@ -366,7 +366,7 @@ void RSVP::setupHello()
 
 void RSVP::startHello(IPAddress peer, double delay)
 {
-    ev << "scheduling hello start in " << delay << " seconds" << endl;
+    EV << "scheduling hello start in " << delay << " seconds" << endl;
 
     HelloState_t *h = findHello(peer);
     ASSERT(h);
@@ -409,7 +409,7 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg* msg)
 {
     IPAddress peer = msg->getPeer();
 
-    ev << "hello timeout, considering " << peer << " failed" << endl;
+    EV << "hello timeout, considering " << peer << " failed" << endl;
 
     // update hello state (set to failed and turn hello off)
 
@@ -516,7 +516,7 @@ void RSVP::processRSB_COMMIT_TIMER(RsbCommitTimerMsg *msg)
 
 void RSVP::processRSB_TIMEOUT(RsbTimeoutMsg* msg)
 {
-    ev << "RSB TIMEOUT RSB " << msg->getId() << endl;
+    EV << "RSB TIMEOUT RSB " << msg->getId() << endl;
 
     ResvStateBlock_t *rsb = findRsbById(msg->getId());
 
@@ -549,7 +549,7 @@ bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec
         sharedBW = it->Flowspec_Object.req_bandwidth;
     }
 
-    ev << "CACCheck: link=" << OI <<
+    EV << "CACCheck: link=" << OI <<
         " requested=" << tspec.req_bandwidth <<
         " shared=" << sharedBW <<
         " available (immediately)=" << tedmod->ted[k].UnResvBandwidth[7] <<
@@ -560,7 +560,7 @@ bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec
 
 void RSVP::refreshPath(PathStateBlock_t *psbEle)
 {
-    ev << "refresh path (PSB " << psbEle->id << ")" << endl;
+    EV << "refresh path (PSB " << psbEle->id << ")" << endl;
 
     IPAddress& OI = psbEle->OutInterface;
     EroVector& ERO = psbEle->ERO;
@@ -595,7 +595,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
 void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
 {
-    ev << "refresh reservation (RSB " << rsbEle->id << ")" << endl;
+    EV << "refresh reservation (RSB " << rsbEle->id << ")" << endl;
 
     IPAddressVector phops;
 
@@ -623,7 +623,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
 
 void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP)
 {
-    ev << "refresh reservation (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
+    EV << "refresh reservation (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
 
     RSVPResvMsg *msg = new RSVPResvMsg("    Resv");
 
@@ -767,11 +767,11 @@ void RSVP::announceLinkChange(IPAddress advrouter, IPAddress linkid)
 
 void RSVP::commitResv(ResvStateBlock_t *rsb)
 {
-    ev << "commit reservation (RSB " << rsb->id << ")" << endl;
+    EV << "commit reservation (RSB " << rsb->id << ")" << endl;
 
     // allocate bandwidth as needed
 
-    ev << "currently allocated: " << rsb->Flowspec_Object << endl;
+    EV << "currently allocated: " << rsb->Flowspec_Object << endl;
 
     while(true)
     {
@@ -796,7 +796,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             }
         }
 
-        ev << "currently required: " << req << endl;
+        EV << "currently required: " << req << endl;
 
         double needed = req.req_bandwidth - rsb->Flowspec_Object.req_bandwidth;
 
@@ -806,7 +806,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             {
                 // allocated (deallocated) successfully
 
-                ev << "additional bandwidth of " << needed << " allocated sucessfully" << endl;
+                EV << "additional bandwidth of " << needed << " allocated sucessfully" << endl;
 
                 rsb->Flowspec_Object.req_bandwidth += needed;
             }
@@ -816,13 +816,13 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
 
                 ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
 
-                ev << "not enough bandwidth to accommodate this RSB" << endl;
+                EV << "not enough bandwidth to accommodate this RSB" << endl;
 
                 int lspid = rsb->FlowDescriptor[maxFlowIndex].Filter_Spec_Object.Lsp_Id;
                 int oldInLabel = rsb->inLabelVector[maxFlowIndex];
                 PathStateBlock_t *psb = findPSB(rsb->Session_Object, (SenderTemplateObj_t&)rsb->FlowDescriptor[maxFlowIndex].Filter_Spec_Object);
 
-                ev << "removing filter lspid=" << lspid << " (max. flow)" << endl;
+                EV << "removing filter lspid=" << lspid << " (max. flow)" << endl;
 
                 rsb->FlowDescriptor.erase(rsb->FlowDescriptor.begin() + maxFlowIndex);
                 rsb->inLabelVector.erase(rsb->inLabelVector.begin() + maxFlowIndex);
@@ -856,7 +856,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
     {
         int lspid = rsb->FlowDescriptor[i].Filter_Spec_Object.Lsp_Id;
 
-        ev << "processing lspid=" << lspid << endl;
+        EV << "processing lspid=" << lspid << endl;
 
         PathStateBlock_t *psb = findPSB(rsb->Session_Object, rsb->FlowDescriptor[i].Filter_Spec_Object);
 
@@ -907,7 +907,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             }
         }
 
-        ev << "installing label for " << lspid << " outLabel=" << outLabel <<
+        EV << "installing label for " << lspid << " outLabel=" << outLabel <<
             " outInterface=" << outInterface << endl;
 
         ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
@@ -974,7 +974,7 @@ RSVP::ResvStateBlock_t* RSVP::createRSB(RSVPResvMsg *msg)
     RSBList.push_back(rsbEle);
     ResvStateBlock_t *rsb = &(*(RSBList.end() - 1));
 
-    ev << "created new RSB " << rsb->id << endl;
+    EV << "created new RSB " << rsb->id << endl;
 
     return rsb;
 }
@@ -993,11 +993,11 @@ void RSVP::updateRSB(ResvStateBlock_t* rsb, RSVPResvMsg *msg)
             if (rsb->FlowDescriptor[m].Filter_Spec_Object == flow.Filter_Spec_Object)
             {
                 // sender found
-                ev << "sender (lspid=" << flow.Filter_Spec_Object.Lsp_Id << ") found in RSB" << endl;
+                EV << "sender (lspid=" << flow.Filter_Spec_Object.Lsp_Id << ") found in RSB" << endl;
 
                 if (rsb->FlowDescriptor[m].label != flow.label)
                 {
-                    ev << "label modified (new label="  << flow.label << ")" << endl;
+                    EV << "label modified (new label="  << flow.label << ")" << endl;
 
                     rsb->FlowDescriptor[m].label = flow.label;
 
@@ -1012,7 +1012,7 @@ void RSVP::updateRSB(ResvStateBlock_t* rsb, RSVPResvMsg *msg)
         if (m == rsb->FlowDescriptor.size())
         {
             // sender not found
-            ev << "sender (lspid=" << flow.Filter_Spec_Object.Lsp_Id << ") not found in RSB, adding..." << endl;
+            EV << "sender (lspid=" << flow.Filter_Spec_Object.Lsp_Id << ") not found in RSB, adding..." << endl;
 
             rsb->FlowDescriptor.push_back(flow);
             rsb->inLabelVector.push_back(-1);
@@ -1034,7 +1034,7 @@ void RSVP::removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index)
     int lspid = rsb->FlowDescriptor[index].Filter_Spec_Object.Lsp_Id;
     int inLabel = rsb->inLabelVector[index];
 
-    ev << "removing filter (lspid=" << lspid << ")" << endl;
+    EV << "removing filter (lspid=" << lspid << ")" << endl;
 
     if (inLabel != -1)
         lt->removeLibEntry(inLabel);
@@ -1050,7 +1050,7 @@ void RSVP::removeRSB(ResvStateBlock_t *rsb)
     ASSERT(rsb);
     ASSERT(rsb->FlowDescriptor.size() == 0);
 
-    ev << "removing empty RSB " << rsb->id << endl;
+    EV << "removing empty RSB " << rsb->id << endl;
 
     cancelEvent(rsb->refreshTimerMsg);
     cancelEvent(rsb->commitTimerMsg);
@@ -1083,7 +1083,7 @@ void RSVP::removePSB(PathStateBlock_t *psb)
 
     int lspid = psb->Sender_Template_Object.Lsp_Id;
 
-    ev << "removing PSB " << psb->id << " (lspid " << lspid << ")" << endl;
+    EV << "removing PSB " << psb->id << " (lspid " << lspid << ")" << endl;
 
     // remove reservation state if exists **************************************
 
@@ -1091,7 +1091,7 @@ void RSVP::removePSB(PathStateBlock_t *psb)
     ResvStateBlock_t *rsb = findRSB(psb->Session_Object, psb->Sender_Template_Object, filterIndex);
     if (rsb)
     {
-        ev << "reservation state present, will be removed too" << endl;
+        EV << "reservation state present, will be removed too" << endl;
 
         removeRsbFilter(rsb, filterIndex);
     }
@@ -1127,7 +1127,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 
             if (outPort < 0)
             {
-                ev << "next (loose) hop address " << ERO[0].node << " is currently unroutable" << endl;
+                EV << "next (loose) hop address " << ERO[0].node << " is currently unroutable" << endl;
                 return false;
             }
 
@@ -1156,7 +1156,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 
             if (outPort < 0)
             {
-                ev << "destination address " << destAddr << " is currently unroutable" << endl;
+                EV << "destination address " << destAddr << " is currently unroutable" << endl;
                 return false;
             }
 
@@ -1230,7 +1230,7 @@ RSVP::PathStateBlock_t* RSVP::createPSB(RSVPPathMsg *msg)
     PSBList.push_back(psbEle);
     PathStateBlock_t *cPSB = &(*(PSBList.end() - 1));
 
-    ev << "created new PSB " << cPSB->id << endl;
+    EV << "created new PSB " << cPSB->id << endl;
 
     return cPSB;
 }
@@ -1253,7 +1253,7 @@ RSVP::PathStateBlock_t* RSVP::createIngressPSB(const traffic_session_t& session,
     if (!doCACCheck(session.sobj, path.tspec, OI))
         return NULL;
 
-    ev << "CACCheck passed, creating PSB" << endl;
+    EV << "CACCheck passed, creating PSB" << endl;
 
     PathStateBlock_t psbEle;
     psbEle.id = ++maxPsbId;
@@ -1314,7 +1314,7 @@ RSVP::ResvStateBlock_t* RSVP::createEgressRSB(PathStateBlock_t *psb)
     RSBList.push_back(rsbEle);
     ResvStateBlock_t *rsb = &(*(RSBList.end() - 1));
 
-    ev << "created new (egress) RSB " << rsb->id << endl;
+    EV << "created new (egress) RSB " << rsb->id << endl;
 
     return rsb;
 }
@@ -1370,7 +1370,7 @@ void RSVP::processRSVPMessage(RSVPMessage *msg)
 
 void RSVP::processHelloMsg(RSVPHelloMsg* msg)
 {
-    ev << "Received RSVP_HELLO" << endl;
+    EV << "Received RSVP_HELLO" << endl;
     //print(msg);
 
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(msg->controlInfo());
@@ -1380,10 +1380,10 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
     bool request = msg->getRequest();
     bool ack = msg->getAck();
 
-    ev << "hello sender " << peer;
-    if (request) ev << " REQ";
-    if (ack) ev << " ACK";
-    ev << endl;
+    EV << "hello sender " << peer;
+    if (request) EV << " REQ";
+    if (ack) EV << " ACK";
+    EV << endl;
 
     int rcvSrcInstance = msg->getSrcInstance();
     int rcvDstInstance = msg->getDstInstance();
@@ -1429,7 +1429,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
     {
         h->ok = true;
 
-        ev << "local peer " << peer << " is now considered up and running" << endl;
+        EV << "local peer " << peer << " is now considered up and running" << endl;
 
         recoveryEvent(peer);
     }
@@ -1459,7 +1459,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
 
 void RSVP::processPathErrMsg(RSVPPathError* msg)
 {
-    ev << "Received PATH_ERROR" << endl;
+    EV << "Received PATH_ERROR" << endl;
     //print(msg);
 
     int lspid = msg->getLspId();
@@ -1468,21 +1468,21 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
     PathStateBlock_t *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
     if (!psb)
     {
-        ev << "matching PSB not found, ignoring error message" << endl;
+        EV << "matching PSB not found, ignoring error message" << endl;
         delete msg;
         return;
     }
 
     if (psb->Previous_Hop_Address != routerId)
     {
-        ev << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
+        EV << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
 
         msg->removeControlInfo();
         sendToIP(msg, psb->Previous_Hop_Address);
     }
     else
     {
-        ev << "error reached ingress router" << endl;
+        EV << "error reached ingress router" << endl;
 
         switch(errCode)
         {
@@ -1508,7 +1508,7 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
 
 void RSVP::processPathTearMsg(RSVPPathTear *msg)
 {
-    ev << "Received PATH_TEAR" << endl;
+    EV << "Received PATH_TEAR" << endl;
     //print(msg);
 
     int lspid = msg->getLspId();
@@ -1516,7 +1516,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
     PathStateBlock_t *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
     if (!psb)
     {
-        ev << "received PATH_TEAR for nonexisting lspid=" << lspid << endl;
+        EV << "received PATH_TEAR for nonexisting lspid=" << lspid << endl;
         delete msg;
         return;
     }
@@ -1534,12 +1534,12 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
         if (!msg->getForce())
         {
-            ev << "merging backup tunnel exists and force flag is not set, ignoring teardown" << endl;
+            EV << "merging backup tunnel exists and force flag is not set, ignoring teardown" << endl;
             delete msg;
             return;
         }
 
-        ev << "merging backup must be removed too" << endl;
+        EV << "merging backup must be removed too" << endl;
 
         removePSB(&(*it));
         --it;
@@ -1554,7 +1554,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
     if (psb->ERO.size() > 0)
     {
-        ev << "forward teardown downstream" << endl;
+        EV << "forward teardown downstream" << endl;
 
         sendPathTearMessage(psb->ERO[0].node, psb->Session_Object, psb->Sender_Template_Object,
             tedmod->interfaceByPeerAddress(psb->ERO[0].node), routerId, msg->getForce());
@@ -1569,7 +1569,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
 void RSVP::processPathMsg(RSVPPathMsg *msg)
 {
-    ev << "Received PATH_MESSAGE" << endl;
+    EV << "Received PATH_MESSAGE" << endl;
     print(msg);
 
     // process ERO *************************************************************
@@ -1634,7 +1634,7 @@ void RSVP::processPathMsg(RSVPPathMsg *msg)
 
 void RSVP::processResvMsg(RSVPResvMsg *msg)
 {
-    ev << "Received RESV_MESSAGE" << endl;
+    EV << "Received RESV_MESSAGE" << endl;
     print(msg);
 
     IPAddress OI = msg->getLIH();
@@ -1647,7 +1647,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
         PathStateBlock_t *psb = findPSB(msg->getSession(), (SenderTemplateObj_t&)msg->getFlowDescriptor()[m].Filter_Spec_Object);
         if (!psb)
         {
-            ev << "matching PSB not found for lspid=" << msg->getFlowDescriptor()[m].Filter_Spec_Object.Lsp_Id << endl;
+            EV << "matching PSB not found for lspid=" << msg->getFlowDescriptor()[m].Filter_Spec_Object.Lsp_Id << endl;
 
             // remove descriptor from message
             msg->getFlowDescriptor().erase(msg->getFlowDescriptor().begin() + m);
@@ -1657,7 +1657,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
 
     if (msg->getFlowDescriptor().size() == 0)
     {
-        ev << "no matching PSB found" << endl;
+        EV << "no matching PSB found" << endl;
         delete msg;
         return;
     }
@@ -1769,7 +1769,7 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
 
     IPAddress nextHop = tedmod->peerByLocalAddress(psb->OutInterface);
 
-    ev << "sending PathTear to " << nextHop << endl;
+    EV << "sending PathTear to " << nextHop << endl;
 
     sendPathTearMessage(nextHop, psb->Session_Object, psb->Sender_Template_Object,
                         tedmod->interfaceByPeerAddress(nextHop), routerId, true);
@@ -1786,21 +1786,21 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
 
     if (p->permanent)
     {
-        ev << "this path is permanent, we will try to re-create it later" << endl;
+        EV << "this path is permanent, we will try to re-create it later" << endl;
 
         sendPathNotify(id(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
 
     }
     else
     {
-        ev << "removing path from traffic database" << endl;
+        EV << "removing path from traffic database" << endl;
 
         sit->paths.erase(pit);
     }
 
     // remove path
 
-    ev << "removing PSB" << endl;
+    EV << "removing PSB" << endl;
 
     removePSB(psb);
 }
@@ -1824,7 +1824,7 @@ void RSVP::processPATH_NOTIFY(PathNotifyMsg* msg)
             break;
 
         case PATH_CREATED:
-            ev << "Path successfully established" << endl;
+            EV << "Path successfully established" << endl;
             break;
 
 
@@ -2025,7 +2025,7 @@ void RSVP::scheduleRefreshTimer(PathStateBlock_t *psbEle, double delay)
     if (psbEle->timerMsg->isScheduled())
         cancelEvent(psbEle->timerMsg);
 
-    ev << "scheduling PSB " << psbEle->id << " refresh " << (simTime() + delay) << endl;
+    EV << "scheduling PSB " << psbEle->id << " refresh " << (simTime() + delay) << endl;
 
     scheduleAt(simTime() + delay, psbEle->timerMsg);
 }
@@ -2196,15 +2196,15 @@ std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a)
 
 void RSVP::print(RSVPPathMsg *p)
 {
-    ev << "PATH_MESSAGE: lspid " << p->getLspId() << " ERO " << vectorToString(p->getERO()) << endl;
+    EV << "PATH_MESSAGE: lspid " << p->getLspId() << " ERO " << vectorToString(p->getERO()) << endl;
 }
 
 void RSVP::print(RSVPResvMsg *r)
 {
-    ev << "RESV_MESSAGE: " << endl;
+    EV << "RESV_MESSAGE: " << endl;
     for (unsigned int i = 0; i < r->getFlowDescriptor().size(); i++)
     {
-        ev << " lspid " << r->getFlowDescriptor()[i].Filter_Spec_Object.Lsp_Id <<
+        EV << " lspid " << r->getFlowDescriptor()[i].Filter_Spec_Object.Lsp_Id <<
             " label " << r->getFlowDescriptor()[i].label << endl;
     }
 }

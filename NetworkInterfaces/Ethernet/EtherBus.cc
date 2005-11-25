@@ -101,13 +101,13 @@ void EtherBus::initialize()
     tokenize(par("positions").stringValue(), pos);
     int numPos = pos.size();
     if (numPos>taps)
-        ev << "Note: `positions' parameter contains more values ("<< numPos << ") than "
+        EV << "Note: `positions' parameter contains more values ("<< numPos << ") than "
               "the number of taps (" << taps << "), ignoring excess values.\n";
     else if (numPos<taps && numPos>=2)
-        ev << "Note: `positions' parameter contains less values ("<< numPos << ") than "
+        EV << "Note: `positions' parameter contains less values ("<< numPos << ") than "
               "the number of taps (" << taps << "), repeating distance between last 2 positions.\n";
     else if (numPos<taps && numPos<2)
-        ev << "Note: `positions' parameter contains too few values, using 5m distances.\n";
+        EV << "Note: `positions' parameter contains too few values, using 5m distances.\n";
 
     tap = new BusTap[taps];
 

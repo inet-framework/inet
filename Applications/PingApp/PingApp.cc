@@ -76,7 +76,7 @@ void PingApp::handleMessage(cMessage *msg)
             destAddr = IPAddressResolver().resolve(par("destAddr"));
             ASSERT(!destAddr.isUnspecified());
             srcAddr = IPAddressResolver().resolve(par("srcAddr"));
-            ev << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "\n";
+            EV << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "\n";
         }
 
         // send a ping
@@ -94,7 +94,7 @@ void PingApp::handleMessage(cMessage *msg)
 
 void PingApp::sendPing()
 {
-    ev << "Sending ping #" << sendSeqNo << "\n";
+    EV << "Sending ping #" << sendSeqNo << "\n";
 
     char name[32];
     sprintf(name,"ping%ld", sendSeqNo);
@@ -179,7 +179,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 {
-    ev << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
+    EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
 
     delayStat.collect(rtt);
     delayVector.record(rtt);
@@ -191,7 +191,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     }
     else if (seqNo > expectedReplySeqNo)
     {
-        ev << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
+        EV << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
 
         // jump in the sequence: count pings in gap as lost
         long jump = seqNo - expectedReplySeqNo;
@@ -204,7 +204,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     else // seqNo < expectedReplySeqNo
     {
         // ping arrived too late: count as out of order arrival
-        ev << "Arrived out of order (too late)\n";
+        EV << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
     }
 }
@@ -213,7 +213,7 @@ void PingApp::finish()
 {
     if (sendSeqNo==0)
     {
-        ev << fullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+        EV << fullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         recordScalar("Pings sent", sendSeqNo);
         return;
     }

@@ -34,7 +34,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     // process arriving ICMP message
     if (msg->arrivalGate()->isName("fromIPv6"))
     {
-        ev << "Processing ICMPv6 message.\n";
+        EV << "Processing ICMPv6 message.\n";
         processICMPv6Message(check_and_cast<ICMPv6Message *>(msg));
         return;
     }
@@ -53,7 +53,7 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
 {
     if (dynamic_cast<ICMPv6DestUnreachableMsg *>(icmpv6msg))
     {
-        ev << "ICMPv6 Destination Unreachable Message Received." << endl;
+        EV << "ICMPv6 Destination Unreachable Message Received." << endl;
         errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6PacketTooBigMsg *>(icmpv6msg))
@@ -170,7 +170,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
     // don't send ICMP error messages for multicast messages
     if (origDatagram->destAddress().isMulticast())
     {
-        ev << "won't send ICMP error messages for multicast message " << origDatagram << endl;
+        EV << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
         return false;
     }
@@ -181,7 +181,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
         ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->encapsulatedMsg());
         if (recICMPMsg->type()<128)
         {
-            ev << "ICMP error received -- do not reply to it" << endl;
+            EV << "ICMP error received -- do not reply to it" << endl;
             delete origDatagram;
             return false;
         }

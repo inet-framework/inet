@@ -68,7 +68,7 @@ void RTPEndsystemModule::handleMessage(cMessage *msg) {
     }
 
     else {
-        ev << "RTPEndsystemModule: Message from unknown Gate !" << endl;
+        EV << "RTPEndsystemModule: Message from unknown Gate !" << endl;
     }
 };
 
@@ -95,7 +95,7 @@ void RTPEndsystemModule::handleMessageFromApp(cMessage *msg) {
         leaveSession(rifp);
     }
     else {
-        ev << "RTPEndsystemModule: unknown RTPInterfacePacket type from application !" << endl;
+        EV << "RTPEndsystemModule: unknown RTPInterfacePacket type from application !" << endl;
     }
 };
 
@@ -121,7 +121,7 @@ void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg) {
         dataOut(rinp);
     }
     else {
-        ev << "RTPEndsystemModule: Unknown RTPInnerPacket type from profile !" << endl;
+        EV << "RTPEndsystemModule: Unknown RTPInnerPacket type from profile !" << endl;
     }
 }
 
@@ -135,7 +135,7 @@ void RTPEndsystemModule::handleMessageFromRTCP(cMessage *msg) {
         sessionLeft(rinp);
     }
     else {
-        ev << "RTPEndsystemModule: Unknown RTPInnerPacket type " << rinp->type() << " from rtcp !" << endl;
+        EV << "RTPEndsystemModule: Unknown RTPInnerPacket type " << rinp->type() << " from rtcp !" << endl;
     }
 };
 
@@ -152,7 +152,7 @@ void RTPEndsystemModule::handleMessageFromSocketLayer(cMessage *msg) {
         readRet(sifpIn);
     }
     else {
-        ev << "RTPEndsystemModule: Unknown SocketInterfacePacket type " << sifpIn->action() << " !" << endl;
+        EV << "RTPEndsystemModule: Unknown SocketInterfacePacket type " << sifpIn->action() << " !" << endl;
     }
 };
 
@@ -329,7 +329,7 @@ void RTPEndsystemModule::socketRet(SocketInterfacePacket *sifp) {
 
     }
     else {
-        ev << "RTPEndsystemModule: SA_SOCKET_RET from socket layer but no socket requested !" << endl;
+        EV << "RTPEndsystemModule: SA_SOCKET_RET from socket layer but no socket requested !" << endl;
     }
 
     delete sifp;

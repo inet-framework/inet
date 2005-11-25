@@ -176,7 +176,7 @@ void PPP::startTransmitting(cMessage *msg)
     nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
 
     // send
-    ev << "Starting transmission of " << pppFrame << endl;
+    EV << "Starting transmission of " << pppFrame << endl;
     send(pppFrame, "physOut");
 
     // schedule an event for the time when last bit will leave the gate.
@@ -188,14 +188,14 @@ void PPP::handleMessage(cMessage *msg)
 {
     if (!connected)
     {
-        ev << "Interface is not connected, dropping packet " << msg << endl;
+        EV << "Interface is not connected, dropping packet " << msg << endl;
         delete msg;
         numDroppedIfaceDown++;
     }
     else if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
-        ev << "Transmission finished.\n";
+        EV << "Transmission finished.\n";
         if (ev.isGUI()) displayIdle();
 
         // fire notification
@@ -223,7 +223,7 @@ void PPP::handleMessage(cMessage *msg)
         // check for bit errors
         if (msg->hasBitError())
         {
-            ev << "Bit error in " << msg << endl;
+            EV << "Bit error in " << msg << endl;
             numBitErr++;
             delete msg;
         }
@@ -240,7 +240,7 @@ void PPP::handleMessage(cMessage *msg)
         if (endTransmissionEvent->isScheduled())
         {
             // We are currently busy, so just queue up the packet.
-            ev << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
+            EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
             if (ev.isGUI() && txQueue.length()>=3) displayString().setTagArg("i",1,"red");
 
             if (txQueueLimit && txQueue.length()>txQueueLimit)
@@ -254,7 +254,7 @@ void PPP::handleMessage(cMessage *msg)
         else
         {
             // We are idle, so we can start transmitting right away.
-            ev << "Received " << msg << " for transmission\n";
+            EV << "Received " << msg << " for transmission\n";
             startTransmitting(msg);
             numSent++;
         }

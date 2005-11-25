@@ -170,7 +170,7 @@ void TCPDump::handleMessage(cMessage *msg)
             {
                 //We do not want this to end in an error if EtherAutoconf messages
                 //are passed, so just print a warning. -WEI
-                ev << "CANNOT DECODE: packet " << msg->name() << " doesn't contain either IP or IPv6 Datagram\n";
+                EV << "CANNOT DECODE: packet " << msg->name() << " doesn't contain either IP or IPv6 Datagram\n";
             }
             else
             {

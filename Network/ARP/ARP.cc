@@ -22,19 +22,19 @@
 #include "Ieee802Ctrl_m.h"
 
 
-static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
+static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
-    ev << "(" << msg->className() << ")" << msg->fullName();
-    return ev;
+    out << "(" << msg->className() << ")" << msg->fullName();
+    return out;
 }
 
-static std::ostream& operator<< (std::ostream& ev, const ARP::ARPCacheEntry& e)
+static std::ostream& operator<< (std::ostream& out, const ARP::ARPCacheEntry& e)
 {
     if (e.pending)
-        ev << "pending (" << e.numRetries << " retries)";
+        out << "pending (" << e.numRetries << " retries)";
     else
-        ev << "MAC:" << e.macAddress << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
-    return ev;
+        out << "MAC:" << e.macAddress << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
+    return out;
 }
 
 

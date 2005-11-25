@@ -22,7 +22,7 @@
 #include <iostream>
 #include "BasicModule.h"
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : ev << loggingName << "::BasicModule: "
+#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << loggingName << "::BasicModule: "
 
 /**
  * Subscription to NotificationBoard should be in stage==0, and firing

@@ -178,5 +178,5 @@ void TcpTestClient::finish()
         }
         delete msg;
     }
-    ev << fullPath() << ": received " << bytes << " bytes in " << n << " packets\n";
+    EV << fullPath() << ": received " << bytes << " bytes in " << n << " packets\n";
 }

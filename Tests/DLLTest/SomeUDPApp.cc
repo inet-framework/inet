@@ -105,7 +105,7 @@ void SomeUDPApp::handleMessage(cMessage *msg)
 
 void SomeUDPApp::processPacket(cMessage *msg)
 {
-    ev << "Received packet: ";
+    EV << "Received packet: ";
     printPacket(msg);
     delete msg;
 

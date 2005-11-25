@@ -40,7 +40,7 @@ void ChannelInstaller::initialize()
         }
     }
 
-    ev << "ChannelInstaller replaced " << count << " channel objects.\n";
+    EV << "ChannelInstaller replaced " << count << " channel objects.\n";
 }
 
 cChannel *ChannelInstaller::createReplacementChannelFor(cChannel *channel)

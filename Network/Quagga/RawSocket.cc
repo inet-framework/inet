@@ -13,7 +13,7 @@
 
 RawSocket::RawSocket(int userId, int protocol)
 {
-    ev << "creating new RawSocket for protocol=" << protocol << ", user supplied id=" << userId << endl;
+    EV << "creating new RawSocket for protocol=" << protocol << ", user supplied id=" << userId << endl;
 
     this->userId = userId;
     this->protocol = protocol;
@@ -45,7 +45,7 @@ int RawSocket::send(const struct msghdr *message, int flags)
     IPAddress destAddr = IPAddress(ntohl(inaddr->sin_addr.s_addr));
     int port = ntohs(inaddr->sin_port);
 
-    ev << "destAddr=" << destAddr << " port=" << port << endl;
+    EV << "destAddr=" << destAddr << " port=" << port << endl;
 
     ASSERT(port == 0);
 

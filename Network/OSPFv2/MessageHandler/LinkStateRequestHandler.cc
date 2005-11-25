@@ -24,14 +24,14 @@ void OSPF::LinkStateRequestHandler::ProcessPacket (OSPFPacket* packet, OSPF::Int
         bool                  error        = false;
         std::vector<OSPFLSA*> lsas;
 
-        ev << "  Processing packet contents:\n";
+        EV << "  Processing packet contents:\n";
 
         for (unsigned long i = 0; i < requestCount; i++) {
             LSARequest&      request = lsRequestPacket->getRequests (i);
             OSPF::LSAKeyType lsaKey;
             char             addressString[16];
 
-            ev << "    LSARequest: type="
+            EV << "    LSARequest: type="
                << request.lsType
                << ", LSID="
                << AddressStringFromULong (addressString, sizeof (addressString), request.linkStateID)

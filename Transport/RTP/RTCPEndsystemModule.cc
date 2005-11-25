@@ -98,7 +98,7 @@ void RTCPEndsystemModule::handleMessageFromRTP(cMessage *msg) {
         leaveSession(rinp);
     }
     else {
-        ev << "RTCPEndsystemModule: unknown RTPInnerPacket type !" << endl;
+        EV << "RTCPEndsystemModule: unknown RTPInnerPacket type !" << endl;
     }
 };
 
@@ -120,7 +120,7 @@ void RTCPEndsystemModule::handleMessageFromSocketLayer(cMessage *msg) {
         readRet(sifpIn);
     }
     else {
-        ev << "RTCPEndsystemModule: unknown SocketInterfacePacket type !" << endl;
+        EV << "RTCPEndsystemModule: unknown SocketInterfacePacket type !" << endl;
     }
 };
 
@@ -221,7 +221,7 @@ void RTCPEndsystemModule::socketRet(SocketInterfacePacket *sifpIn) {
 
     }
     else {
-        ev << "RTCPEndsystemModule: received unrequested socket from socket layer !" << endl;
+        EV << "RTCPEndsystemModule: received unrequested socket from socket layer !" << endl;
     }
 };
 

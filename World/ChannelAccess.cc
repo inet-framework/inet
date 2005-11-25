@@ -21,7 +21,7 @@
 #include "ChannelAccess.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? std::cout : ev << logName() << "::ChannelAccess: "
+#define coreEV (ev.disabled()||!coreDebug) ? std::cout : EV << logName() << "::ChannelAccess: "
 
 /**
  * Upon initialization ChannelAccess registers the nic parent module
@@ -75,7 +75,7 @@ void ChannelAccess::sendToChannel(cMessage *msg, double delay)
             continue;
         int radioStart = radioGate->id();
         int radioEnd = radioStart + radioGate->size();
-        // TODO account for propagation delay, based on distance? 
+        // TODO account for propagation delay, based on distance?
         // Over 300m, dt=1us=10 bit times @ 10Mbps
         for (int g = radioStart; g != radioEnd; ++g)
             sendDirect((cMessage *)msg->dup(), delay, mod, g);

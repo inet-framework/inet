@@ -45,7 +45,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     // extract topology
     topo.extractByModuleType(types);
-    ev << "cTopology found " << topo.nodes() << " nodes\n";
+    EV << "cTopology found " << topo.nodes() << " nodes\n";
 
 
     // assign IP addresses
@@ -109,7 +109,7 @@ void FlatNetworkConfigurator::initialize(int stage)
         if (numIntf!=1)
             continue; // only deal with nodes with one interface plus loopback
 
-        ev << "  " << node->module()->fullName() << "=" << IPAddress(nodeAddresses[i])
+        EV << "  " << node->module()->fullName() << "=" << IPAddress(nodeAddresses[i])
            << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
@@ -156,8 +156,8 @@ void FlatNetworkConfigurator::initialize(int stage)
             uint32 atAddr = nodeAddresses[j];
 
             int outputPort = atNode->path(0)->localGate()->index();
-            ev << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
-            ev << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
+            EV << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
+            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
 
             // add route
             InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());

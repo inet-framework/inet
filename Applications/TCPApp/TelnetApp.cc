@@ -51,7 +51,7 @@ void TelnetApp::handleTimer(cMessage *msg)
     switch (msg->kind())
     {
         case MSGKIND_CONNECT:
-            ev << "user fires up telnet program\n";
+            EV << "user fires up telnet program\n";
             connect();
             break;
 
@@ -59,14 +59,14 @@ void TelnetApp::handleTimer(cMessage *msg)
            if (numCharsToType>0)
            {
                // user types a character and expects it to be echoed
-               ev << "user types one character, " << numCharsToType-1 << " more to go\n";
+               EV << "user types one character, " << numCharsToType-1 << " more to go\n";
                sendPacket(1,1);
                scheduleAt(simTime()+(simtime_t)par("keyPressDelay"), timeoutMsg);
                numCharsToType--;
            }
            else
            {
-               ev << "user hits Enter key\n";
+               EV << "user hits Enter key\n";
                // Note: reply length must be at least 2, otherwise we'll think
                // it's an echo when it comes back!
                sendPacket(1, 2+(long)par("commandOutputLength"));
@@ -78,7 +78,7 @@ void TelnetApp::handleTimer(cMessage *msg)
            break;
 
         case MSGKIND_CLOSE:
-           ev << "user exits telnet program\n";
+           EV << "user exits telnet program\n";
            close();
            break;
     }
@@ -103,12 +103,12 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
     if (len==1)
     {
         // this is an echo, ignore
-        ev << "received echo\n";
+        EV << "received echo\n";
     }
     else
     {
         // output from last typed command arrived.
-        ev << "received output of command typed\n";
+        EV << "received output of command typed\n";
 
         // If user has finished working, she closes the connection, otherwise
         // starts typing again after a delay
@@ -116,13 +116,13 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urg
 
         if (numLinesToType==0)
         {
-            ev << "user has no more commands to type\n";
+            EV << "user has no more commands to type\n";
             timeoutMsg->setKind(MSGKIND_CLOSE);
             scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
         }
         else
         {
-            ev << "user looks at output, then starts typing next command\n";
+            EV << "user looks at output, then starts typing next command\n";
             timeoutMsg->setKind(MSGKIND_SEND);
             scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
         }

@@ -73,12 +73,12 @@ void MPLSModule::handleMessage(cMessage * msg)
 {
     if (!strcmp(msg->arrivalGate()->name(), "fromL2"))
     {
-        ev << "Processing message from L2: " << msg << endl;
+        EV << "Processing message from L2: " << msg << endl;
         processPacketFromL2(msg);
     }
     else if (!strcmp(msg->arrivalGate()->name(), "fromL3"))
     {
-        ev << "Processing message from L3: " << msg << endl;
+        EV << "Processing message from L3: " << msg << endl;
         processPacketFromL3(msg);
     }
     else
@@ -125,7 +125,7 @@ bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     if (!pct->lookupLabel(ipdatagram, outLabel, outInterface, color))
     {
-        ev << "no mapping exists for this packet" << endl;
+        EV << "no mapping exists for this packet" << endl;
         return false;
     }
 
@@ -137,7 +137,7 @@ bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
     mplsPacket->encapsulate(ipdatagram);
     doStackOps(mplsPacket, outLabel);
 
-    ev << "forwarding packet to " << outInterface << endl;
+    EV << "forwarding packet to " << outInterface << endl;
 
     mplsPacket->addPar("color") = color;
 
@@ -162,7 +162,7 @@ void MPLSModule::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
     // handling our outgoing IP traffic that didn't match any FEC/LSP
     // do not use labelAndForwardIPDatagram for packets arriving to ingress!
 
-    ev << "FEC not resolved, doing regular L3 routing" << endl;
+    EV << "FEC not resolved, doing regular L3 routing" << endl;
 
     int gateIndex = ipdatagram->arrivalGate()->index();
 
@@ -173,7 +173,7 @@ void MPLSModule::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabe
 {
     unsigned int n = outLabel.size();
 
-    ev << "doStackOps: " << outLabel << endl;
+    EV << "doStackOps: " << outLabel << endl;
 
     ASSERT(n >= 0);
 
@@ -235,13 +235,13 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->topLabel();
 
-    ev << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
+    EV << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
 
     if (oldLabel==-1)
     {
         // This is a IP native packet (RSVP/TED traffic)
         // Decapsulate the message and pass up to L3
-        ev << ": decapsulating and sending up\n";
+        EV << ": decapsulating and sending up\n";
 
         IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
         delete mplsPacket;
@@ -256,7 +256,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     bool found = lt->resolveLabel(senderInterface, oldLabel, outLabel, outInterface, color);
     if (!found)
     {
-        ev << "discarding packet, incoming label not resolved" << endl;
+        EV << "discarding packet, incoming label not resolved" << endl;
 
         delete mplsPacket;
         return;
@@ -270,7 +270,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     {
         // forward labeled packet
 
-        ev << "forwarding packet to " << outInterface << endl;
+        EV << "forwarding packet to " << outInterface << endl;
 
         if (mplsPacket->hasPar("color"))
         {
@@ -289,7 +289,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     {
         // last label popped, decapsulate and send out IP datagram
 
-        ev << "decapsulating IP datagram" << endl;
+        EV << "decapsulating IP datagram" << endl;
 
         IPDatagram *nativeIP = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
         delete mplsPacket;

@@ -46,7 +46,7 @@ void TCPBasicClientApp::initialize()
 
 void TCPBasicClientApp::sendRequest()
 {
-     ev << "sending request, " << numRequestsToSend-1 << " more to go\n";
+     EV << "sending request, " << numRequestsToSend-1 << " more to go\n";
 
      long requestLength = par("requestLength");
      long replyLength = par("replyLength");
@@ -61,7 +61,7 @@ void TCPBasicClientApp::handleTimer(cMessage *msg)
     switch (msg->kind())
     {
         case MSGKIND_CONNECT:
-            ev << "starting session\n";
+            EV << "starting session\n";
             connect();
             break;
 
@@ -93,13 +93,13 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cMessage *msg, 
 
     if (numRequestsToSend>0)
     {
-        ev << "reply arrived\n";
+        EV << "reply arrived\n";
         timeoutMsg->setKind(MSGKIND_SEND);
         scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
     }
     else
     {
-        ev << "reply to last request arrived, closing session\n";
+        EV << "reply to last request arrived, closing session\n";
         close();
     }
 }

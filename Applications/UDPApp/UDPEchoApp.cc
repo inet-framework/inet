@@ -72,7 +72,7 @@ void UDPEchoApp::processPacket(cMessage *msg)
     else
     {
         simtime_t rtt = simTime() - packet->creationTime();
-        ev << "RTT: " << rtt << "\n";
+        EV << "RTT: " << rtt << "\n";
         delete msg;
     }
     numReceived++;

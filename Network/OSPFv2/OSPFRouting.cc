@@ -132,7 +132,7 @@ void OSPFRouting::LoadAreaFromXML (const cXMLElement& asConfig, const std::strin
         error ("No configuration for Area ID: %s", areaID.c_str ());
     }
     else {
-        ev << "    loading info for Area id = " << areaID << "\n";
+        EV << "    loading info for Area id = " << areaID << "\n";
     }
 
     OSPF::Area* area = new OSPF::Area (ULongFromAddressString (areaID.c_str ()));
@@ -171,7 +171,7 @@ void OSPFRouting::LoadInterfaceParameters (const cXMLElement& ifConfig)
     int              ifIndex       = atoi (ifConfig.getAttribute ("ifIndex"));
     std::string      interfaceType = ifConfig.getTagName ();
 
-    ev << "        loading " << interfaceType << " ifIndex[" << ifIndex << "]\n";
+    EV << "        loading " << interfaceType << " ifIndex[" << ifIndex << "]\n";
 
     intf->SetIfIndex (ifIndex);
     if (interfaceType == "PointToPointInterface") {
@@ -287,7 +287,7 @@ void OSPFRouting::LoadExternalRoute (const cXMLElement& externalRouteConfig)
     OSPF::RoutingTableEntry   externalRoutingEntry; // only used here to keep the path cost calculation in one place
     OSPF::IPv4AddressRange    networkAddress;
 
-    ev << "        loading ExternalInterface ifIndex[" << ifIndex << "]\n";
+    EV << "        loading ExternalInterface ifIndex[" << ifIndex << "]\n";
 
     cXMLElementList ifDetails = externalRouteConfig.getChildren ();
     for (cXMLElementList::iterator exElemIt = ifDetails.begin (); exElemIt != ifDetails.end (); exElemIt++) {
@@ -345,7 +345,7 @@ void OSPFRouting::LoadHostRoute (const cXMLElement& hostRouteConfig)
 
     hostParameters.ifIndex = atoi (hostRouteConfig.getAttribute ("ifIndex"));
 
-    ev << "        loading HostInterface ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
+    EV << "        loading HostInterface ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
     cXMLElementList ifDetails = hostRouteConfig.getChildren ();
     for (cXMLElementList::iterator hostElemIt = ifDetails.begin (); hostElemIt != ifDetails.end (); hostElemIt++) {
@@ -381,7 +381,7 @@ void OSPFRouting::LoadVirtualLink (const cXMLElement& virtualLinkConfig)
     std::string      endPoint = virtualLinkConfig.getAttribute ("endPointRouterID");
     OSPF::Neighbor*  neighbor = new OSPF::Neighbor;
 
-    ev << "        loading VirtualLink to " << endPoint << "\n";
+    EV << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->SetType (OSPF::Interface::Virtual);
     neighbor->SetNeighborID (ULongFromAddressString (endPoint.c_str ()));
@@ -466,7 +466,7 @@ bool OSPFRouting::LoadConfigFromXML (const char * filename)
         error ("No configuration for Router ID: %s", routerId.str ().c_str ());
     }
     else {
-        ev << "OSPFRouting: Loading info for Router id = " << routerId.str () << "\n";
+        EV << "OSPFRouting: Loading info for Router id = " << routerId.str () << "\n";
     }
 
     if (routerNode->getChildrenByTagName ("RFC1583Compatible").size () > 0) {

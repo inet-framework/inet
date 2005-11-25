@@ -46,8 +46,8 @@ void Daemon::activity()
     // initialize global variables
     GlobalVars_initializeActiveSet_lib();
 
-    ev << "Quagga daemon starting" << endl;
-    ev << " with variable context " << varp << endl;
+    EV << "Quagga daemon starting" << endl;
+    EV << " with variable context " << varp << endl;
 
     blocked = false;
     cwd = "/";
@@ -81,7 +81,7 @@ void Daemon::activity()
         __activeVars = varp;
         GlobalVars_initializeActiveSet_zebra();
 
-        ev << "ready for zebra_main_entry()" << endl;
+        EV << "ready for zebra_main_entry()" << endl;
 
         zebra_main_entry(1, cmdline);
     }
@@ -93,7 +93,7 @@ void Daemon::activity()
         __activeVars = varp;
         GlobalVars_initializeActiveSet_ripd();
 
-        ev << "ready for ripd_main_entry()" << endl;
+        EV << "ready for ripd_main_entry()" << endl;
 
         ripd_main_entry(1, cmdline);
     }
@@ -105,13 +105,13 @@ void Daemon::activity()
         __activeVars = varp;
         GlobalVars_initializeActiveSet_ospfd();
 
-        ev << "ready for ospfd_main_entry()" << endl;
+        EV << "ready for ospfd_main_entry()" << endl;
 
         ospfd_main_entry(1, cmdline);
     }
     else
     {
-        ev << "daemon " << server << " not recognized" << endl;
+        EV << "daemon " << server << " not recognized" << endl;
 
         ASSERT(false);
     }
@@ -245,7 +245,7 @@ int Daemon::createFile(const char *path, char *mode)
 
     ASSERT(newItem.stream);
 
-    ev << "created new file descriptor=" << fdesc << " for file=" << path << endl;
+    EV << "created new file descriptor=" << fdesc << " for file=" << path << endl;
 
     return fdesc;
 }
@@ -292,7 +292,7 @@ int Daemon::createUdpSocket()
     newItem.udp = udp;
     fd[FD_SUB(fdesc)] = newItem;
 
-    ev << "created new UDP socket=" << fdesc << endl;
+    EV << "created new UDP socket=" << fdesc << endl;
 
     return fdesc;
 }
@@ -326,7 +326,7 @@ int Daemon::createTcpSocket(cMessage *msg)
     newItem.tcp = tcp;
     fd[FD_SUB(fdesc)] = newItem;
 
-    ev << "created new TCP socket=" << fdesc << endl;
+    EV << "created new TCP socket=" << fdesc << endl;
 
     socketMap.addSocket(tcp);
 
@@ -403,7 +403,7 @@ int Daemon::createNetlinkSocket()
     newItem.netlink = nl;
     fd[FD_SUB(fdesc)] = newItem;
 
-    ev << "created new Netlink socket=" << fdesc << endl;
+    EV << "created new Netlink socket=" << fdesc << endl;
 
     return fdesc;
 }
@@ -467,7 +467,7 @@ int Daemon::incomingtcpsocket(cMessage *msg)
     TCPSocket *socket = socketMap.findSocketFor(msg);
     if(!socket)
     {
-        ev << "connection not found" << endl;
+        EV << "connection not found" << endl;
         return -1;
     }
 
@@ -527,12 +527,12 @@ void Daemon::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool ur
 {
     int socket = (long)yourPtr;
 
-    ev << "data arrived on socket=" << socket << endl;
+    EV << "data arrived on socket=" << socket << endl;
 
     enqueue(socket, msg);
 }
 
 void Daemon::socketEstablished(int connId, void *yourPtr)
 {
-    ev << "socket=" << (long)yourPtr << " established" << endl;
+    EV << "socket=" << (long)yourPtr << " established" << endl;
 }

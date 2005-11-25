@@ -343,7 +343,7 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
             bool entryExpired = false;
             if (simTime() > (*it)->expiryTime() && (*it)->expiryTime() != 0)//since 0 represents infinity.
             {
-                ev << "Expired prefix detected!!" << endl;
+                EV << "Expired prefix detected!!" << endl;
                 removeOnLinkPrefix((*it)->destPrefix(), (*it)->prefixLength());
                 entryExpired = true;
             }

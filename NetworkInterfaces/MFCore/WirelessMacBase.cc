@@ -52,13 +52,13 @@ void WirelessMacBase::handleMessage(cMessage *msg)
 
 void WirelessMacBase::sendDown(cMessage *msg)
 {
-    ev << "sending down " << msg << "\n";
+    EV << "sending down " << msg << "\n";
     send(msg, lowergateOut);
 }
 
 void WirelessMacBase::sendUp(cMessage *msg)
 {
-    ev << "sending up " << msg << "\n";
+    EV << "sending up " << msg << "\n";
     send(msg, uppergateOut);
 }
 

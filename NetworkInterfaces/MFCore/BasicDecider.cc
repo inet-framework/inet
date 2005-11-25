@@ -21,7 +21,7 @@
 #include "BasicDecider.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : ev << logName() << "::BasicDecider: "
+#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicDecider: "
 
 Define_Module(BasicDecider);
 

@@ -101,7 +101,7 @@ bool REDQueue::enqueue(cMessage *msg)
         double pa = pb / (1-count*pb);
         if (dblrand() < pa)
         {
-            ev << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
+            EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
             mark = true;
             count = 0;
             numEarlyDrops++;
@@ -109,7 +109,7 @@ bool REDQueue::enqueue(cMessage *msg)
     }
     else if (maxth <= avg)
     {
-        ev << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
+        EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
         mark = true;
         count = 0;
     }

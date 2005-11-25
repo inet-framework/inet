@@ -30,10 +30,10 @@
 
 
 
-static std::ostream& operator<< (std::ostream& ev, cMessage *msg)
+static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
-    ev << "(" << msg->className() << ")" << msg->fullName();
-    return ev;
+    out << "(" << msg->className() << ")" << msg->fullName();
+    return out;
 }
 
 

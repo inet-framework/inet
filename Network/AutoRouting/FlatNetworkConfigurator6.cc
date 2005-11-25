@@ -48,7 +48,7 @@ void FlatNetworkConfigurator6::initialize(int stage)
 
     // extract topology
     topo.extractByModuleType(types);
-    ev << "cTopology found " << topo.nodes() << " nodes\n";
+    EV << "cTopology found " << topo.nodes() << " nodes\n";
 
     if (stage==2)
     {
@@ -125,7 +125,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVecto
             p.prefix = prefix;
             p.prefixLength = 64;
             // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
-            // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in 
+            // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in
             // consecutive advertisements).
             p.advValidLifetime = 2592000;
             // Default: TRUE

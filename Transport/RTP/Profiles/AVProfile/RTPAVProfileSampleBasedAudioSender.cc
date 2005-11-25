@@ -76,7 +76,7 @@ void RTPAVProfileSampleBasedAudioSender::play() {
         sendPacket();
     }
     else if (_status == PLAYING) {
-        ev << "sender module: already playing" << endl;
+        EV << "sender module: already playing" << endl;
     }
 };
 
@@ -98,7 +98,7 @@ void RTPAVProfileSampleBasedAudioSender::seekTime(simtime_t moment) {
         send(rinp, "toProfile");
     }
     else {
-        ev << "sender module: seeking not allowed while playing" << endl;
+        EV << "sender module: seeking not allowed while playing" << endl;
     };
 };
 
@@ -114,7 +114,7 @@ void RTPAVProfileSampleBasedAudioSender::seekByte(int position) {
         send(rinp, "toProfile");
     }
     else {
-        ev << "sender module: seeking not allowed while playing" << endl;
+        EV << "sender module: seeking not allowed while playing" << endl;
     };
 };
 

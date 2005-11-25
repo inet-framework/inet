@@ -196,13 +196,13 @@ void RoutingTable::receiveChangeNotification(int category, cPolymorphic *)
 
 void RoutingTable::printRoutingTable()
 {
-    ev << "-- Routing table --\n";
+    EV << "-- Routing table --\n";
     ev.printf("%-16s %-16s %-16s %-3s %s\n",
               "Destination", "Gateway", "Netmask", "Iface");
 
     for (int i=0; i<numRoutingEntries(); i++)
-        ev << routingEntry(i)->detailedInfo() << "\n";
-    ev << "\n";
+        EV << routingEntry(i)->detailedInfo() << "\n";
+    EV << "\n";
 }
 
 std::vector<IPAddress> RoutingTable::gatherAddresses()

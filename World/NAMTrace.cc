@@ -43,7 +43,7 @@ void NAMTrace::initialize()
     const char *namlog = par("logfile");
     if (namlog && namlog[0])
     {
-        ev << "nam tracing enabled (file " << namlog << ")" << endl;
+        EV << "nam tracing enabled (file " << namlog << ")" << endl;
 
         // open namlog for write
         if (unlink(namlog)!=0 && errno!=ENOENT)

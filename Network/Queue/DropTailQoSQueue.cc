@@ -63,7 +63,7 @@ bool DropTailQoSQueue::enqueue(cMessage *msg)
 
     if (frameCapacity && queue->length() >= frameCapacity)
     {
-        ev << "Queue " << queueIndex << " full, dropping packet.\n";
+        EV << "Queue " << queueIndex << " full, dropping packet.\n";
         delete msg;
         return true;
     }

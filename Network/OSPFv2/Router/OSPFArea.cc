@@ -340,7 +340,7 @@ void OSPF::Area::AgeDatabase (void)
             lsa->getHeader ().setLsAge (lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->ValidateLSChecksum ()) {
-                    ev << "Invalid LS checksum. Memory error detected!\n";
+                    EV << "Invalid LS checksum. Memory error detected!\n";
                 }
             }
             lsa->IncrementInstallTime ();
@@ -431,7 +431,7 @@ void OSPF::Area::AgeDatabase (void)
             lsa->getHeader ().setLsAge (lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->ValidateLSChecksum ()) {
-                    ev << "Invalid LS checksum. Memory error detected!\n";
+                    EV << "Invalid LS checksum. Memory error detected!\n";
                 }
             }
             lsa->IncrementInstallTime ();
@@ -522,7 +522,7 @@ void OSPF::Area::AgeDatabase (void)
             lsa->getHeader ().setLsAge (lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->ValidateLSChecksum ()) {
-                    ev << "Invalid LS checksum. Memory error detected!\n";
+                    EV << "Invalid LS checksum. Memory error detected!\n";
                 }
             }
             lsa->IncrementInstallTime ();
@@ -1744,7 +1744,7 @@ void OSPF::Area::CalculateShortestPathTree (std::vector<OSPF::RoutingTableEntry*
                 if (distance < entryCost) {
                     //FIXME remove
                     //if (parentRouter->GetRouterID () == 0xC0A80302) {
-                    //    ev << "CHEAPER STUB LINK FOUND TO " << IPAddress (destinationID).str () << "\n";
+                    //    EV << "CHEAPER STUB LINK FOUND TO " << IPAddress (destinationID).str () << "\n";
                     //}
                     entry->SetCost (distance);
                     entry->ClearNextHops ();
@@ -1766,7 +1766,7 @@ void OSPF::Area::CalculateShortestPathTree (std::vector<OSPF::RoutingTableEntry*
             } else {
                 //FIXME remove
                 //if (parentRouter->GetRouterID () == 0xC0A80302) {
-                //    ev << "STUB LINK FOUND TO " << IPAddress (destinationID).str () << "\n";
+                //    EV << "STUB LINK FOUND TO " << IPAddress (destinationID).str () << "\n";
                 //}
                 entry = new OSPF::RoutingTableEntry;
 

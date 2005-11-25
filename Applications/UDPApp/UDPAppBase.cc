@@ -23,7 +23,7 @@
 
 void UDPAppBase::bindToPort(int port)
 {
-    ev << "Binding to UDP port " << port << endl;
+    EV << "Binding to UDP port " << port << endl;
 
     cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
     UDPControlInfo *ctrl = new UDPControlInfo();
@@ -43,7 +43,7 @@ void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAd
     ctrl->setDestPort(destPort);
     msg->setControlInfo(ctrl);
 
-    ev << "Sending packet: ";
+    EV << "Sending packet: ";
     printPacket(msg);
 
     send(msg, "to_udp");

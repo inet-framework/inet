@@ -114,7 +114,7 @@ void TCPSessionApp::activity()
 
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
-    ev << "issuing OPEN command\n";
+    EV << "issuing OPEN command\n";
     if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting":"listening");
 
     if (active)
@@ -130,14 +130,14 @@ void TCPSessionApp::activity()
             return;
     }
 
-    ev << "connection established, starting sending\n";
+    EV << "connection established, starting sending\n";
     if (ev.isGUI()) displayString().setTagArg("t",0,"connected");
 
     // send
     if (sendBytes>0)
     {
         waitUntil(tSend);
-        ev << "sending " << sendBytes << " bytes\n";
+        EV << "sending " << sendBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
         msg->setByteLength(sendBytes);
         socket.send(msg);
@@ -145,7 +145,7 @@ void TCPSessionApp::activity()
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
     {
         waitUntil(i->tSend);
-        ev << "sending " << i->numBytes << " bytes\n";
+        EV << "sending " << i->numBytes << " bytes\n";
         cMessage *msg = new cMessage("data1");
         msg->setByteLength(i->numBytes);
         socket.send(msg);
@@ -155,7 +155,7 @@ void TCPSessionApp::activity()
     if (tClose>=0)
     {
         waitUntil(tClose);
-        ev << "issuing CLOSE command\n";
+        EV << "issuing CLOSE command\n";
         if (ev.isGUI()) displayString().setTagArg("t",0,"closing");
         socket.close();
     }
@@ -171,5 +171,5 @@ void TCPSessionApp::activity()
 
 void TCPSessionApp::finish()
 {
-    ev << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }

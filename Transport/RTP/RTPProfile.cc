@@ -62,7 +62,7 @@ void RTPProfile::handleMessage(cMessage *msg) {
 
     else {
         // this shouldn't happen
-        ev << "RTPProfile: message coming from unknown gate" << endl;
+        EV << "RTPProfile: message coming from unknown gate" << endl;
     }
 
 };
@@ -96,7 +96,7 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg) {
         }
 
         else {
-            ev << "RTPProfile: RTPInnerPacket from RTPModule has wrong type !"<< endl;
+            EV << "RTPProfile: RTPInnerPacket from RTPModule has wrong type !"<< endl;
         }
 
 }
@@ -119,7 +119,7 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg) {
     }
 
     else {
-        ev << "Profile received RTPInnerPacket from sender module with wrong type!" << endl;
+        EV << "Profile received RTPInnerPacket from sender module with wrong type!" << endl;
     }
 
 }

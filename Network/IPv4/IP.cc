@@ -102,7 +102,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
         double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
         if (dblrand() <= relativeHeaderLength)
         {
-            ev << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
+            EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
@@ -141,7 +141,7 @@ void IP::handleMessageFromHL(cMessage *msg)
     // if no interface exists, do not send datagram
     if (ift->numInterfaces() == 0)
     {
-        ev << "No interfaces exist, dropping packet\n";
+        EV << "No interfaces exist, dropping packet\n";
         delete msg;
         return;
     }
@@ -163,12 +163,12 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
 
     IPAddress destAddr = datagram->destAddress();
 
-    ev << "Routing datagram `" << datagram->name() << "' with dest=" << destAddr << ": ";
+    EV << "Routing datagram `" << datagram->name() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
     if (rt->localDeliver(destAddr))
     {
-        ev << "local delivery\n";
+        EV << "local delivery\n";
         numLocalDeliver++;
         localDeliver(datagram);
         return;
@@ -178,7 +178,7 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
     int inputPort = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
     if (inputPort!=-1 && !rt->ipForward())
     {
-        ev << "forwarding off, dropping packet\n";
+        EV << "forwarding off, dropping packet\n";
         numDropped++;
         delete datagram;
         return;
@@ -187,7 +187,7 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
     // if output port was explicitly requested, use that, otherwise use IP routing
     if (outputPort!=-1)
     {
-        ev << "using manually specified output port " << outputPort << "\n";
+        EV << "using manually specified output port " << outputPort << "\n";
     }
     else
     {
@@ -198,7 +198,7 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
         // notify ICMP, throw packet away and continue
         if (outputPort==-1)
         {
-            ev << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+            EV << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
             numUnroutable++;
             icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
             return;
@@ -213,7 +213,7 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
         datagram->setSrcAddress(ift->interfaceByPortNo(outputPort)->ipv4()->inetAddress());
 
     // default: send datagram to fragmentation
-    ev << "output interface is " << outputPort << ", next-hop address: " << nextHopAddr << "\n";
+    EV << "output interface is " << outputPort << ", next-hop address: " << nextHopAddr << "\n";
     numForwarded++;
 
     //
@@ -225,7 +225,7 @@ void IP::routePacket(IPDatagram *datagram, int outputPort)
 void IP::routeMulticastPacket(IPDatagram *datagram, int outputPort)
 {
     IPAddress destAddr = datagram->destAddress();
-    ev << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
+    EV << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
@@ -237,7 +237,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, int outputPort)
     if (inputPort!=-1 && shortestPathInputPort!=-1 && inputPort!=shortestPathInputPort)
     {
         // FIXME count dropped
-        ev << "Packet dropped.\n";
+        EV << "Packet dropped.\n";
         delete datagram;
         return;
     }
@@ -277,7 +277,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, int outputPort)
     {
         ASSERT(datagram->destAddress().isMulticast());
 
-        ev << "multicast packet explicitly routed via outputPort=" << outputPort << endl;
+        EV << "multicast packet explicitly routed via outputPort=" << outputPort << endl;
 
         // set datagram source address if not yet set
         if (datagram->srcAddress().isUnspecified())
@@ -328,7 +328,7 @@ void IP::localDeliver(IPDatagram *datagram)
     // Defragmentation. skip defragmentation if datagram is not fragmented
     if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
     {
-        ev << "Datagram fragment: offset=" << datagram->fragmentOffset()
+        EV << "Datagram fragment: offset=" << datagram->fragmentOffset()
            << ", MORE=" << (datagram->moreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
@@ -341,10 +341,10 @@ void IP::localDeliver(IPDatagram *datagram)
         datagram = fragbuf.addFragment(datagram, simTime());
         if (!datagram)
         {
-            ev << "No complete datagram yet.\n";
+            EV << "No complete datagram yet.\n";
             return;
         }
-        ev << "This fragment completes the datagram.\n";
+        EV << "This fragment completes the datagram.\n";
     }
 
     // decapsulate and send on appropriate output gate
@@ -402,14 +402,14 @@ void IP::fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHop
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->dontFragment() && noOfFragments>1)
     {
-        ev << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
+        EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
                                                      ICMP_FRAGMENTATION_ERROR_CODE);
         return;
     }
 
     // create and send fragments
-    ev << "Breaking datagram into " << noOfFragments << " fragments\n";
+    EV << "Breaking datagram into " << noOfFragments << " fragments\n";
     std::string fragMsgName = datagram->name();
     fragMsgName += "-frag";
 
@@ -507,7 +507,7 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress ne
     if (datagram->timeToLive() <= 0)
     {
         // drop datagram, destruction responsibility in ICMP
-        ev << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
+        EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
         return;
     }

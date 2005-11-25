@@ -74,7 +74,7 @@ void IPTrafSink::printPacket(cMessage *msg)
 
 void IPTrafSink::processPacket(cMessage *msg)
 {
-    ev << "Received packet: ";
+    EV << "Received packet: ";
     printPacket(msg);
     delete msg;
 
@@ -145,7 +145,7 @@ void IPTrafGen::sendPacket()
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
 
-        ev << "Sending packet: ";
+        EV << "Sending packet: ";
         printPacket(payload);
 
         send(payload, "to_ip");
@@ -158,7 +158,7 @@ void IPTrafGen::sendPacket()
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
 
-        ev << "Sending packet: ";
+        EV << "Sending packet: ";
         printPacket(payload);
 
         send(payload, "to_ipv6");

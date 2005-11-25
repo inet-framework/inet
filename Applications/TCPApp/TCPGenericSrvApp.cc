@@ -52,7 +52,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
     msgsSent++;
     bytesSent += msg->byteLength();
 
-    ev << "sending \"" << msg->name() << "\" to TCP, " << msg->byteLength() << " bytes\n";
+    EV << "sending \"" << msg->name() << "\" to TCP, " << msg->byteLength() << " bytes\n";
     send(msg, "tcpOut");
 }
 
@@ -135,8 +135,8 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
 void TCPGenericSrvApp::finish()
 {
-    ev << fullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
-    ev << fullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+    EV << fullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
+    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 
     recordScalar("packets sent", msgsSent);
     recordScalar("packets rcvd", msgsRcvd);

@@ -24,7 +24,7 @@
 #include "FWMath.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : ev << logName() << "::BasicMobility: "
+#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
 
 Define_Module(BasicMobility);
 

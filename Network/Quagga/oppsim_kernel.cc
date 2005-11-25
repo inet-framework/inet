@@ -119,7 +119,7 @@ uid_t oppsim_geteuid(void)
 {
     int euid = DAEMON->euid;
 
-    ev << "geteuid: return " << euid << endl;
+    EV << "geteuid: return " << euid << endl;
 
     return euid;
 }
@@ -170,26 +170,26 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 {
     Daemon *libm = DAEMON;
 
-    ev << "setsockopt: socket=" << socket << " level=" << level << " option_name=" << option_name <<
+    EV << "setsockopt: socket=" << socket << " level=" << level << " option_name=" << option_name <<
             " option_value=" << option_value << " option_len=" << option_len << endl;
 
     ASSERT(libm->issocket(socket));
 
     if(level == SOL_SOCKET && option_name == SO_RCVBUF)
     {
-        ev << "SO_RCVBUF option, ignore" << endl;
+        EV << "SO_RCVBUF option, ignore" << endl;
         return 0;
     }
 
     if(level == SOL_SOCKET && option_name == SO_REUSEADDR)
     {
-        ev << "SO_REUSEADDR option, ignore" << endl;
+        EV << "SO_REUSEADDR option, ignore" << endl;
         return 0;
     }
 
     if(level == SOL_SOCKET && option_name == SO_BROADCAST)
     {
-        ev << "SO_BROADCAST option, ignore" << endl;
+        EV << "SO_BROADCAST option, ignore" << endl;
         return 0;
     }
 
@@ -201,7 +201,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         const struct in_addr *iaddr  = (in_addr*)option_value;
 
         IPAddress addr = IPAddress(ntohl(iaddr->s_addr));
-        ev << "IP_MULTICAST_IF: " << addr << endl;
+        EV << "IP_MULTICAST_IF: " << addr << endl;
 
         if(libm->isudpsocket(socket))
         {
@@ -223,13 +223,13 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
     if(level == 0 && option_name == IP_ADD_MEMBERSHIP)
     {
-        ev << "IP_ADD_MEMBERSHIP option, ignore" << endl;
+        EV << "IP_ADD_MEMBERSHIP option, ignore" << endl;
         return 0;
     }
 
     if(level == IPPROTO_IP && option_name == IP_HDRINCL)
     {
-        ev << "IP_HDRINCL option" << endl;
+        EV << "IP_HDRINCL option" << endl;
 
         ASSERT(libm->israwsocket(socket));
         ASSERT(option_len == sizeof(int));
@@ -240,7 +240,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
     if(level == IPPROTO_IP && option_name == IP_PKTINFO)
     {
-        ev << "IP_PKTINFO option" << endl;
+        EV << "IP_PKTINFO option" << endl;
 
         ASSERT(libm->israwsocket(socket));
         ASSERT(option_len == sizeof(int));
@@ -251,7 +251,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
     if(level == IPPROTO_IP && option_name == IP_MULTICAST_LOOP)
     {
-        ev << "IP_MULTICAST_LOOP option" << endl;
+        EV << "IP_MULTICAST_LOOP option" << endl;
 
         ASSERT(libm->israwsocket(socket));
         ASSERT(option_len == sizeof(u_char));
@@ -262,7 +262,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
     if(level == IPPROTO_IP && option_name == IP_MULTICAST_TTL)
     {
-        ev << "IP_MULTICAST_TTL option" << endl;
+        EV << "IP_MULTICAST_TTL option" << endl;
 
         ASSERT(libm->israwsocket(socket));
         ASSERT(option_len == sizeof(u_char));
@@ -278,7 +278,7 @@ int oppsim_socket(int domain, int type, int protocol)
 {
     Daemon *libm = DAEMON;
 
-    ev << "socket: domain=" << domain << " type=" << type << " protocol=" << protocol << endl;
+    EV << "socket: domain=" << domain << " type=" << type << " protocol=" << protocol << endl;
 
     if(domain == AF_INET && type == SOCK_STREAM && protocol == 0)
     {
@@ -305,9 +305,9 @@ int oppsim_socket(int domain, int type, int protocol)
 
 void oppsim_openlog(const char *ident, int logopt, int facility)
 {
-    ev << "openlog: ident=" << ident << " logopt=" << logopt << " facility=" << facility << endl;
+    EV << "openlog: ident=" << ident << " logopt=" << logopt << " facility=" << facility << endl;
 
-    ev << "dummy, do nothing" << endl;
+    EV << "dummy, do nothing" << endl;
 }
 
 void oppsim_closelog()
@@ -324,17 +324,17 @@ int oppsim_fcntl(int fildes, int cmd, ...)
 {
     Daemon *libm = DAEMON;
 
-    ev << "fcntl: fildes=" << fildes << " cmd=" << cmd << endl;
+    EV << "fcntl: fildes=" << fildes << " cmd=" << cmd << endl;
 
     if(libm->issocket(fildes))
     {
-        ev << "socket operation, ignore" << endl;
+        EV << "socket operation, ignore" << endl;
         return 0;
     }
 
     // XXX we would have to parse cmd and fetch appropriate arguments etc
 
-    ev << "regular descriptor, ignore" << endl;
+    EV << "regular descriptor, ignore" << endl;
     return 0;
 }
 
@@ -342,7 +342,7 @@ int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_
 {
     Daemon *libm = DAEMON;
 
-    ev << "getsockname: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
+    EV << "getsockname: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
     if(libm->istcpsocket(socket))
     {
@@ -469,7 +469,7 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
         ASSERT(index >= 0);
         *(int*)CMSG_DATA(cmsg) = index + 1;
 
-        ev << "IP_PKTINTO set to " << (index + 1) << endl;
+        EV << "IP_PKTINTO set to " << (index + 1) << endl;
 
         ASSERT(message->msg_controllen >= cmsg->cmsg_len);
 
@@ -493,7 +493,7 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
 {
     Daemon *libm = DAEMON;
 
-    ev << "recvfrom: socket=" << socket << " buffer=" << buffer << " length=" << length << " flags=" <<
+    EV << "recvfrom: socket=" << socket << " buffer=" << buffer << " length=" << length << " flags=" <<
             flags << " address=" << address << " address_len=" << address_len << endl;
 
     if(libm->israwsocket(socket))
@@ -544,7 +544,7 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
 
         if(bread < datalen)
         {
-            ev << "warning: discarding " << (datalen - bread) << " bytes from this message" << endl;
+            EV << "warning: discarding " << (datalen - bread) << " bytes from this message" << endl;
         }
 
         delete msg;
@@ -561,7 +561,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
 {
     Daemon *libm = DAEMON;
 
-    ev << "netlink request, process immediately and store result" << endl;
+    EV << "netlink request, process immediately and store result" << endl;
 
     ASSERT(libm->isnlsocket(socket));
 
@@ -578,7 +578,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     ASSERT(req->nlh.nlmsg_len >= sizeof(req_t));
     ASSERT(req->nlh.nlmsg_pid == 0);
 
-    ev << "seq=" << req->nlh.nlmsg_seq << " type=" << req->nlh.nlmsg_type << " family=" <<
+    EV << "seq=" << req->nlh.nlmsg_seq << " type=" << req->nlh.nlmsg_type << " family=" <<
             (int)req->g.rtgen_family << " flags=" << req->nlh.nlmsg_flags << endl;
 
     // process request
@@ -587,7 +587,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     {
         if(req->nlh.nlmsg_flags == (NLM_F_ROOT | NLM_F_MATCH | NLM_F_REQUEST))
         {
-            ev << "RTM_GETLINK dump" << endl;
+            EV << "RTM_GETLINK dump" << endl;
 
             nl->pushResult(nl->listInterfaces());
 
@@ -599,7 +599,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     {
         if(req->nlh.nlmsg_flags == (NLM_F_ROOT | NLM_F_MATCH | NLM_F_REQUEST))
         {
-            ev << "RTM_GETADDR dump" << endl;
+            EV << "RTM_GETADDR dump" << endl;
 
             nl->pushResult(nl->listAddresses());
 
@@ -611,7 +611,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     {
         if(req->nlh.nlmsg_flags == (NLM_F_ROOT | NLM_F_MATCH | NLM_F_REQUEST))
         {
-            ev << "RTM_GETROUTE dump" << endl;
+            EV << "RTM_GETROUTE dump" << endl;
 
             nl->pushResult(nl->listRoutes());
 
@@ -623,7 +623,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     {
         if(req->nlh.nlmsg_flags == (NLM_F_CREATE | NLM_F_REQUEST | NLM_F_ACK))
         {
-            ev << "RTM_DELROUTE create request" << endl;
+            EV << "RTM_DELROUTE create request" << endl;
 
             RoutingEntry* re = nl->route_command(req->nlh.nlmsg_type, (rtm_request_t*)message);
 
@@ -638,7 +638,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
     {
         if(req->nlh.nlmsg_flags == (NLM_F_CREATE | NLM_F_REQUEST | NLM_F_ACK))
         {
-            ev << "RTM_NEWROUTE create request" << endl;
+            EV << "RTM_NEWROUTE create request" << endl;
 
             RoutingEntry* re = nl->route_command(req->nlh.nlmsg_type, (rtm_request_t*)message);
 
@@ -655,14 +655,14 @@ ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 {
     Daemon *d = DAEMON;
 
-    ev << "sendmsg: socket=" << socket << " msghdr=" << message << " flags=" << flags << endl;
+    EV << "sendmsg: socket=" << socket << " msghdr=" << message << " flags=" << flags << endl;
 
     if(d->isnlsocket(socket))
     {
         ASSERT(message->msg_iovlen == 1);
         ASSERT(flags == 0);
 
-        ev << "message->msg_flags=" << message->msg_flags << endl;
+        EV << "message->msg_flags=" << message->msg_flags << endl;
 
         return nl_request(socket, message->msg_iov[0].iov_base, message->msg_iov[0].iov_len, message->msg_flags);
     }
@@ -678,7 +678,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 {
     Daemon *libm = DAEMON;
 
-    ev << "sendto: socket=" << socket << " message=" << message << " length=" << length << " flags=" << flags <<
+    EV << "sendto: socket=" << socket << " message=" << message << " length=" << length << " flags=" << flags <<
             " dest_addr=" << dest_addr << " dest_len=" << dest_len << endl;
 
     if(libm->isnlsocket(socket))
@@ -704,7 +704,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 
     if(libm->isudpsocket(socket))
     {
-        ev << "udp socket" << endl;
+        EV << "udp socket" << endl;
 
         ASSERT(dest_addr);
         ASSERT(dest_addr->sa_family == AF_INET);
@@ -715,7 +715,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
         IPAddress destAddr = IPAddress(ntohl(inaddr->sin_addr.s_addr));
         int port = ntohs(inaddr->sin_port);
 
-        ev << "destAddr=" << destAddr << " port=" << port << endl;
+        EV << "destAddr=" << destAddr << " port=" << port << endl;
 
         SocketMsg *msg = new SocketMsg("data");
 
@@ -740,11 +740,11 @@ ssize_t oppsim_recvmsg(int socket, struct msghdr *message, int flags)
 {
     Daemon *libm = DAEMON;
 
-    ev << "recvmsg: socket=" << socket << " message=" << message << " flags=" << flags << endl;
+    EV << "recvmsg: socket=" << socket << " message=" << message << " flags=" << flags << endl;
 
     if(libm->isnlsocket(socket))
     {
-        ev << "reading netlink result" << endl;
+        EV << "reading netlink result" << endl;
 
         ASSERT(message);
 
@@ -752,7 +752,7 @@ ssize_t oppsim_recvmsg(int socket, struct msghdr *message, int flags)
     }
     else if(libm->israwsocket(socket))
     {
-        ev << "reading from raw socket" << endl;
+        EV << "reading from raw socket" << endl;
 
         return receive_raw(socket, message, flags);
     }
@@ -770,20 +770,20 @@ FILE* oppsim_fopen(const char * filename, const char * mode)
 {
     Daemon *libm = DAEMON;
 
-    ev << "fopen: filename=" << filename << " mode=" << mode << endl;
+    EV << "fopen: filename=" << filename << " mode=" << mode << endl;
 
     ASSERT(*filename == '/');
 
     std::string rpath = (libm->getrootprefix() + filename);
 
-    ev << "real filename=" << rpath << endl;
+    EV << "real filename=" << rpath << endl;
 
     return fopen(rpath.c_str(), mode);
 }
 
 int oppsim_getpagesize()
 {
-    ev << "getpagesize: we use 8192" << endl;
+    EV << "getpagesize: we use 8192" << endl;
     return 8192;
 }
 
@@ -791,13 +791,13 @@ int oppsim_open(const char *path, int oflag, ...)
 {
     Daemon *libm = DAEMON;
 
-    ev << "open: path=" << path << " oflag=" << oflag << endl;
+    EV << "open: path=" << path << " oflag=" << oflag << endl;
 
     ASSERT(*path == '/');
 
     std::string rpath = (libm->getrootprefix() + path);
 
-    ev << "real path=" << rpath << endl;
+    EV << "real path=" << rpath << endl;
 
     if(oflag == (O_RDWR | O_CREAT))
     {
@@ -806,7 +806,7 @@ int oppsim_open(const char *path, int oflag, ...)
         mode_t mode = va_arg(ap, mode_t);
         va_end(ap);
 
-        ev << "mode=" << mode << endl;
+        EV << "mode=" << mode << endl;
 
         //ASSERT(mode == LOGFILE_MASK);
         return libm->createFile(rpath.c_str(), "r+");
@@ -820,7 +820,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 {
     Daemon *libm = DAEMON;
 
-    ev << "select: nfds=" << nfds << " readfds=" << readfds << " writefds=" << writefds << " errorfds=" <<
+    EV << "select: nfds=" << nfds << " readfds=" << readfds << " writefds=" << writefds << " errorfds=" <<
             errorfds << " timeout=" << timeout << endl;
 
     // make sure we wait on our pseudo-sockets only
@@ -839,29 +839,29 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
     {
         if(FD_ISSET(i, readfds))
         {
-            ev << "read " << i << endl;
+            EV << "read " << i << endl;
 
             if(libm->getqueuetail(i))
             {
-                ev << "this socket is ready" << endl;
+                EV << "this socket is ready" << endl;
                 ++success;
             }
         }
 
         if(FD_ISSET(i, writefds))
         {
-            ev << "write " << i << endl;
+            EV << "write " << i << endl;
 
             if(true)
             {
-                ev << "write socket is always ready" << endl;
+                EV << "write socket is always ready" << endl;
                 ++success;
             }
         }
 
         if(FD_ISSET(i, errorfds))
         {
-            ev << "error " << i << endl;
+            EV << "error " << i << endl;
 
             // exceptions not supported at the moment
         }
@@ -883,18 +883,18 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         {
             libm->setblocked(true);
 
-            ev << "we have to block ";
+            EV << "we have to block ";
 
             if(timeout)
             {
                 ASSERT(limit != simulation.simTime());
 
-                ev << "with timeout " << (limit - simulation.simTime()) << " secs" << endl;
+                EV << "with timeout " << (limit - simulation.simTime()) << " secs" << endl;
                 msg = libm->receive(limit - simulation.simTime());
             }
             else
             {
-                ev << "with no timeout" << endl;
+                EV << "with no timeout" << endl;
                 msg = libm->receive();
                 ASSERT(msg);
             }
@@ -908,13 +908,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
             {
                 ASSERT(timeout);
 
-                ev << "timeout expired" << endl;
+                EV << "timeout expired" << endl;
 
                 return 0;
             }
             else
             {
-                ev << "received message=" << msg->name() << " while blocked in select" << endl;
+                EV << "received message=" << msg->name() << " while blocked in select" << endl;
 
                 int socket;
 
@@ -980,7 +980,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
                     if(socket < 0)
                     {
-                        ev << "no recipient (socket) for this message, discarding" << endl;
+                        EV << "no recipient (socket) for this message, discarding" << endl;
                         delete msg;
                         continue;
                     }
@@ -996,13 +996,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
                 if(FD_ISSET(socket, readfds))
                 {
-                    ev << "event on watched socket=" << socket << endl;
+                    EV << "event on watched socket=" << socket << endl;
                     ++success;
                     break;
                 }
                 else
                 {
-                    ev << "socket=" << socket << " not watched, ignore" << endl;
+                    EV << "socket=" << socket << " not watched, ignore" << endl;
                     continue;
                 }
 
@@ -1014,7 +1014,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
     ASSERT(success);
 
-    ev << "there are " << success << " sockets ready" << endl;
+    EV << "there are " << success << " sockets ready" << endl;
 
     for(int i = FD_MIN; i < nfds; i++)
     {
@@ -1053,11 +1053,11 @@ int oppsim_close(int fildes)
 {
     Daemon *libm = DAEMON;
 
-    ev << "close: fildes=" << fildes << endl;
+    EV << "close: fildes=" << fildes << endl;
 
     if(libm->issocket(fildes))
     {
-        ev << "closing pseudo socket" << endl;
+        EV << "closing pseudo socket" << endl;
 
         if(libm->isudpsocket(fildes))
         {
@@ -1074,7 +1074,7 @@ int oppsim_close(int fildes)
 
     if(libm->isfile(fildes))
     {
-        ev << "closing file descriptor" << endl;
+        EV << "closing file descriptor" << endl;
 
         libm->closefile(fildes);
 
@@ -1088,14 +1088,14 @@ int oppsim_close(int fildes)
 
 void oppsim_perror(const char *s)
 {
-    ev << "perror: " << s << ": " << strerror(GlobalVars_errno()) << endl;
+    EV << "perror: " << s << ": " << strerror(GlobalVars_errno()) << endl;
 
     ASSERT(false);
 }
 
 ssize_t oppsim_writev(int fildes, const struct iovec *iov, int iovcnt)
 {
-    ev << "writev: fildes=" << fildes << " iov=" << iov << " iovcnt=" << iovcnt << endl;
+    EV << "writev: fildes=" << fildes << " iov=" << iov << " iovcnt=" << iovcnt << endl;
 
     Daemon *libm = DAEMON;
 
@@ -1118,13 +1118,13 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
 {
     Daemon *libm = DAEMON;
 
-    ev << "write: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
+    EV << "write: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
     if(libm->issocket(fildes))
     {
         if(libm->istcpsocket(fildes))
         {
-            ev << "write into tcp socket" << endl;
+            EV << "write into tcp socket" << endl;
 
             SocketMsg *msg = new SocketMsg("data");
 
@@ -1146,7 +1146,7 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
 
     if(libm->isfile(fildes))
     {
-        ev << "regular file descriptor, use fwrite" << endl;
+        EV << "regular file descriptor, use fwrite" << endl;
 
         return fwrite(buf, 1, nbyte, libm->getstream(fildes));
     }
@@ -1159,7 +1159,7 @@ int oppsim_listen(int socket, int backlog)
 {
     Daemon *libm = DAEMON;
 
-    ev << "listen: socket=" << socket << " backlog=" << backlog << endl;
+    EV << "listen: socket=" << socket << " backlog=" << backlog << endl;
 
     libm->gettcpsocket(socket)->listen();
 
@@ -1171,7 +1171,7 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
 {
     Daemon *libm = DAEMON;
 
-    ev << "bind: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
+    EV << "bind: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
     ASSERT(address);
 
@@ -1182,7 +1182,7 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
         int port = ntohs(inaddr->sin_port);
         int addr = ntohl(inaddr->sin_addr.s_addr);
 
-        ev << "binding to address=" << IPAddress(addr) << " port=" << port << endl;
+        EV << "binding to address=" << IPAddress(addr) << " port=" << port << endl;
 
         if(libm->istcpsocket(socket))
         {
@@ -1210,12 +1210,12 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
         if(pid == 0)
         {
             pid = oppsim_getpid();
-            ev << "autogenerating nl_pid" << endl;
+            EV << "autogenerating nl_pid" << endl;
         }
 
         libm->getnlsocket(socket)->bind(pid);
 
-        ev << "binding to nl_pid=" << pid << endl;
+        EV << "binding to nl_pid=" << pid << endl;
 
         return 0;
     }
@@ -1227,7 +1227,7 @@ int oppsim_accept(int socket, struct sockaddr *address, socklen_t *address_len)
 {
     Daemon *libm = DAEMON;
 
-    ev << "accept: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
+    EV << "accept: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
     int csocket = libm->getaccepthead(socket, true);
     ASSERT(csocket != -1);
@@ -1263,13 +1263,13 @@ ssize_t oppsim_read(int fildes, void *buf, size_t nbyte)
 {
     Daemon *libm = DAEMON;
 
-    ev << "read: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
+    EV << "read: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
     if(libm->issocket(fildes))
     {
         if(libm->istcpsocket(fildes))
         {
-            ev << "reading from TCP socket" << endl;
+            EV << "reading from TCP socket" << endl;
 
             int bread = 0;
 
@@ -1368,7 +1368,7 @@ char *oppsim_getcwd(char *buf, size_t size)
 {
     Daemon *libm = DAEMON;
 
-    ev << "getcwd: buf=" << (void*)buf << " size=" << size << endl;
+    EV << "getcwd: buf=" << (void*)buf << " size=" << size << endl;
 
     std::string cwd = libm->getcwd();
 
@@ -1378,7 +1378,7 @@ char *oppsim_getcwd(char *buf, size_t size)
 
     strncpy(buf, cwdstr, size);
 
-    ev << "cwd=" << buf << endl;
+    EV << "cwd=" << buf << endl;
 
     return buf;
 }
@@ -1393,7 +1393,7 @@ struct passwd *oppsim_getpwnam(const char *name)
 {
     Daemon *libm = DAEMON;
 
-    ev << "getpwnam: name=" << name << endl;
+    EV << "getpwnam: name=" << name << endl;
 
     return &libm->pwd_entry;
 }
@@ -1402,7 +1402,7 @@ struct group *oppsim_getgrnam(const char *name)
 {
     Daemon *libm = DAEMON;
 
-    ev << "getgrnam: name=" << name << endl;
+    EV << "getgrnam: name=" << name << endl;
 
     return &libm->grp_entry;
 }
@@ -1417,13 +1417,13 @@ int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address
 {
     Daemon *libm = DAEMON;
 
-    ev << "connect: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
+    EV << "connect: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
     struct sockaddr_in *inaddr = (sockaddr_in*)address;
     ASSERT(address_len == sizeof(*inaddr));
     IPAddress destAddr = IPAddress(ntohl(inaddr->sin_addr.s_addr));
 
-    ev << "destAddress=" << destAddr << endl;
+    EV << "destAddress=" << destAddr << endl;
 
     TCPSocket *tcp = libm->gettcpsocket(socket);
 
@@ -1446,14 +1446,14 @@ int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address
             localAddr = ift->interfaceByPortNo(outp)->ipv4()->inetAddress();
         }
 
-        ev << "autoassigning local address=" << localAddr << endl;
+        EV << "autoassigning local address=" << localAddr << endl;
 
         tcp->bind(localAddr, -1);
     }
 
     tcp->connect(destAddr, ntohs(inaddr->sin_port));
 
-    ev << "connect to destAddr=" << destAddr << " port=" << ntohs(inaddr->sin_port) << endl;
+    EV << "connect to destAddr=" << destAddr << " port=" << ntohs(inaddr->sin_port) << endl;
 
     // XXX FIXME block until connection is established ???
     // INET seems to queue request arriving prematurely
@@ -1487,7 +1487,7 @@ int oppsim_sigaction(int sig, const struct sigaction *act, struct sigaction *oac
 {
     Daemon *libm = DAEMON;
 
-    ev << "sigaction: sig=" << sig << " act=" << act << " oact=" << oact << endl;
+    EV << "sigaction: sig=" << sig << " act=" << act << " oact=" << oact << endl;
 
     struct sigaction *sptr = libm->sigactionimpl(sig);
 

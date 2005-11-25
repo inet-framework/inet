@@ -50,7 +50,7 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg) {
         delete rinp;
     }
     else {
-        ev << "receiver module: RTPInnerPacket of wrong type received" << endl;
+        EV << "receiver module: RTPInnerPacket of wrong type received" << endl;
         delete rinp;
     }
 };

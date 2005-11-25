@@ -15,16 +15,16 @@ void OSPF::LinkStateAcknowledgementHandler::ProcessPacket (OSPFPacket* packet, O
 
         int  lsaCount = lsAckPacket->getLsaHeadersArraySize ();
 
-        ev << "  Processing packet contents:\n";
+        EV << "  Processing packet contents:\n";
 
         for (int i  = 0; i < lsaCount; i++) {
             OSPFLSAHeader&   lsaHeader = lsAckPacket->getLsaHeaders (i);
             OSPFLSA*         lsaOnRetransmissionList;
             OSPF::LSAKeyType lsaKey;
 
-            ev << "    ";
+            EV << "    ";
             PrintLSAHeader (lsaHeader);
-            ev << "\n";
+            EV << "\n";
 
             lsaKey.linkStateID = lsaHeader.getLinkStateID ();
             lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter ().getInt ();
@@ -33,7 +33,7 @@ void OSPF::LinkStateAcknowledgementHandler::ProcessPacket (OSPFPacket* packet, O
                 if (operator== (lsaHeader, lsaOnRetransmissionList->getHeader ())) {
                     neighbor->RemoveFromRetransmissionList (lsaKey);
                 } else {
-                    ev << "Got an Acknowledgement packet for an unsent Update packet.\n";
+                    EV << "Got an Acknowledgement packet for an unsent Update packet.\n";
                 }
             }
         }

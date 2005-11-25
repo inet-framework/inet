@@ -188,7 +188,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
             continue;
         IPv6Address ifAddr = ie->ipv6()->preferredAddress();
         if (addr.isGlobal() && ifAddr.isGlobal() && addr!=ifAddr)
-            ev << ift->fullPath() << " has at least two globally routable addresses on different interfaces\n";
+            EV << ift->fullPath() << " has at least two globally routable addresses on different interfaces\n";
         if (ifAddr.isGlobal())
             addr = ifAddr;
     }

@@ -63,7 +63,7 @@ void ScenarioManager::handleMessage(cMessage *msg)
 void ScenarioManager::processCommand(cXMLElement *node)
 {
     const char *tag = node->getTagName();
-    ev << "processing <" << tag << "> command...\n";
+    EV << "processing <" << tag << "> command...\n";
 
     if (!strcmp(tag,"at"))
         processAtCommand(node);
@@ -156,7 +156,7 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
     const char *parAttr = getRequiredAttribute(node, "par");
     const char *valueAttr = getRequiredAttribute(node, "value");
 
-    ev << "Setting " << mod->fullPath() << "." << parAttr << " = " << valueAttr << "\n";
+    EV << "Setting " << mod->fullPath() << "." << parAttr << " = " << valueAttr << "\n";
     bubble((std::string("setting: ")+mod->fullPath()+"."+parAttr+" = "+valueAttr).c_str());
 
     // set the parameter to the given value
@@ -171,7 +171,7 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
     const char *attrAttr = getRequiredAttribute(node, "attr");
     const char *valueAttr = getRequiredAttribute(node, "value");
 
-    ev << "Setting channel attribute: " << attrAttr << " = " << valueAttr
+    EV << "Setting channel attribute: " << attrAttr << " = " << valueAttr
        << " of gate " << g->fullPath() << "\n";
     bubble((std::string("setting channel attr: ")+attrAttr+" = "+valueAttr).c_str());
 

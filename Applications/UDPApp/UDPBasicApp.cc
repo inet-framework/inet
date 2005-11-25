@@ -111,7 +111,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
 
 void UDPBasicApp::processPacket(cMessage *msg)
 {
-    ev << "Received packet: ";
+    EV << "Received packet: ";
     printPacket(msg);
     delete msg;
 

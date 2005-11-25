@@ -100,7 +100,7 @@ void RTPAVProfilePayload32Sender::activity() {
                     stop();
                 }
                 else {
-                    ev << "payload sender: unknown sender control message, ignored" << endl;
+                    EV << "payload sender: unknown sender control message, ignored" << endl;
                 }
                 //delete rscm;
             }
