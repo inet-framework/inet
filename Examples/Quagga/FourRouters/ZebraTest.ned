@@ -47,6 +47,11 @@ module ZebraTest
             display: "p=152,50;i=block/control_s";
         nam: NAMTrace;
             display: "p=219,50;i=block/cogwheel_s";
+        channelInstaller: ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=N (U)";
+            display: "p=284,50;i=block/cogwheel_s";
         cli: StandardHost[n];
             parameters:
                 namid = index;
