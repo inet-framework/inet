@@ -127,7 +127,7 @@ void Mac80211::registerInterface()
 
     // add
     InterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e);
+    ift->addInterface(e, this);
 }
 
 

@@ -30,7 +30,10 @@
 
 InterfaceEntry::InterfaceEntry()
 {
-    _outputPort = -1;
+    _nwLayerGateIndex = -1;
+    _nodeOutputGateId = -1;
+    _nodeInputGateId = -1;
+    _outputPort = -1; // FIXME eliminate
     _peernamid = -1;
 
     _mtu = 0;
@@ -52,7 +55,10 @@ std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (!_name.empty() ? name() : "*");
-    out << "  gateIndex:" << outputPort();
+    if (networkLayerGateIndex()==-1)
+        out << "  on:-";
+    else
+        out << "  on:nwLayer.ifOut[" << networkLayerGateIndex() << "]";
     out << "  MTU:" << mtu();
     if (isDown()) out << " DOWN";
     if (isBroadcast()) out << " BROADCAST";

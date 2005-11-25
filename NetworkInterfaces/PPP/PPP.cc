@@ -158,7 +158,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // add
     InterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e);
+    ift->addInterface(e, this);
 
     return e;
 }
