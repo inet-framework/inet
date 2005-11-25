@@ -1,6 +1,27 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-200512xx
+-------------
+
+- MPLS, RSVP-TE, LDP models rewritten by Vojta Janota
+
+- new model: Network/Quagga. This is port of the Quagga routing daemon to the
+  INET Framework. Currently provides RIP and OSPFv2 routing. Quagga itself is 
+  a fork of Zebra. (Ported to INET by Vojta Janota)
+
+- new model: Network/OSPFv2. This is a new OSPF implementation. 
+  (author: Andras Babos)
+
+- UDP rewritten, UDPSocket class added (thanks to Michael Tuexen and Vojta 
+  Janota for feedback)
+
+- new snapshot of the IPv6 module (by Wei Yang Ng)
+
+- ev replaced with EV in every module (speed increase in Express mode)
+
+- NetworkLayer(6): gates towards interfaces renamed to ifOut[]/ifIn[]
+
 
 INET-20050922
 -------------
