@@ -25,10 +25,10 @@ import
     "StandardHost",
     "FailureManager",
     "ScenarioManager";
-    
+
 
 channel fiberline
-    delay 1ms
+    delay 1ms;
     datarate 1000000;
 endchannel
 
@@ -41,44 +41,41 @@ module ZebraTest
     parameters:
         n: numeric const;
     submodules:
-		scenarioManager: ScenarioManager;
-		    display: "p=100,50;i=block/control_s";
-
-		failureManager: FailureManager;
-		    display: "p=200,50;i=block/control_s";
-    
+        scenarioManager: ScenarioManager;
+            display: "p=68,50;i=block/control_s";
+        failureManager: FailureManager;
+            display: "p=152,50;i=block/control_s";
+        nam: NAMTrace;
+            display: "p=219,50;i=block/cogwheel_s";
         cli: StandardHost[n];
-	    parameters:
-		namid = index;
-            display: "i=device/laptop";
-
+            parameters:
+                namid = index;
+            display: "p=62,146,c;i=device/laptop";
         srv: StandardHost;
-	    parameters:
-		namid = n;
-            display: "i=device/server_l";
-
+            parameters:
+                namid = n;
+            display: "p=512,242;i=device/server_l";
         r1: OspfdRouter;
-	    parameters:
-		namid = n + 1;
-            display: "i=abstract/router";
+            parameters:
+                namid = n + 1;
+            display: "p=173,250;i=abstract/router";
         r2: OspfdRouter;
-	    parameters:
-		namid = n + 2;
-            display: "i=abstract/router";
+            parameters:
+                namid = n + 2;
+            display: "p=284,130;i=abstract/router";
         r3: OspfdRouter;
-	    parameters:
-		namid = n + 3;
-            display: "i=abstract/router";
-	r4: OspfdRouter;
-	    parameters:
-		namid = n + 4;
-            display: "i=abstract/router";
-
+            parameters:
+                namid = n + 3;
+            display: "p=405,242;i=abstract/router";
+        r4: OspfdRouter;
+            parameters:
+                namid = n + 4;
+            display: "p=294,370;i=abstract/router";
     connections nocheck:
         for i=0..n-1 do
             cli[i].out++ --> ethernetline --> r1.in++;
             cli[i].in++ <-- ethernetline <-- r1.out++;
-        endfor
+        endfor;
 
         r1.out++ --> ethernetline --> r2.in++;
         r1.in++ <-- ethernetline <-- r2.out++;
