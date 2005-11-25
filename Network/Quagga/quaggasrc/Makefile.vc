@@ -3,6 +3,9 @@
 all:
 	cd $(QUAGGA_VERSION) && nmake /nologo /f Makefile.vc
 
+clean:
+	cd $(QUAGGA_VERSION) && nmake /nologo /f Makefile.vc clean
+
 generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
 
 depend:	# target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
