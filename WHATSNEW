@@ -26,6 +26,10 @@ INET-200512xx
   on the links; and ChannelInstaller as a temporary solution to install
   ThruputMeteringChannel instead of the built-in BasicChannel class.
 
+- updated module class ctors/dtors for OMNeT++ 3.2; changed msg->length()/8 to
+  msg->byteLength() and msg->setLength(8*bytes) to msg->setByteLength(bytes),
+  etc.
+
 - ev replaced with EV in every module (speed increase in Express mode)
 
 - NetworkLayer(6): gates towards interfaces renamed to ifOut[]/ifIn[]
