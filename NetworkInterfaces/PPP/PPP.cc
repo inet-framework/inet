@@ -137,10 +137,6 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setName(interfaceName);
     delete [] interfaceName;
 
-    // port: index of gate where our "netwIn" is connected (in IP)
-    int outputPort = parentModule()->gate("netwIn")->fromGate()->index();
-    e->setOutputPort(outputPort);
-
     // data rate
     e->setDatarate(datarate);
 

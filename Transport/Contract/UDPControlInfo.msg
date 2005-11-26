@@ -73,8 +73,6 @@ class UDPControlInfo
         IPvXAddress destAddr; // destination \IP or \IPv6 address
         int srcPort;   // \UDP source port in packet, or local port with BIND
         int destPort;  // \UDP destination port in packet
-        int inputPort; // gate index of interface on which the packet was received
-        int outputPort = -1; // gate index of interface on where the packet should go
-                             // (for multicast; currently it works for IPv4 only)
+        int interfaceId = -1; // interface on which pk was received/should be sent (see InterfaceTable)
 };
 

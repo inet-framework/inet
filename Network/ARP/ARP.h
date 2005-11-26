@@ -50,10 +50,10 @@ class INET_API ARP : public cSimpleModule
     typedef std::vector<cMessage*> MsgPtrVector;
 
     // IPAddress -> MACAddress table
-    // TBD should we key it on (IPAddress, outputPort)?
+    // TBD should we key it on (IPAddress, InterfaceEntry*)?
     struct ARPCacheEntry
     {
-        int outputPort; // NIC to send the packet to
+        InterfaceEntry *ie; // NIC to send the packet to
         bool pending; // true if resolution is pending
         MACAddress macAddress;  // MAC address
         simtime_t lastUpdate;  // entries should time out after cacheTimeout
@@ -92,12 +92,12 @@ class INET_API ARP : public cSimpleModule
     virtual void finish();
 
     void processOutboundPacket(cMessage *msg);
-    void sendPacketToNIC(cMessage *msg, int outputPort, const MACAddress& macAddress);
+    void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
 
     void initiateARPResolution(ARPCacheEntry *entry);
-    void sendARPRequest(int outputPort, IPAddress ipAddress);
+    void sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress);
     void requestTimedOut(cMessage *selfmsg);
-    bool addressRecognized(IPAddress destAddr, int outputPort);
+    bool addressRecognized(IPAddress destAddr, InterfaceEntry *ie);
     void processARPPacket(ARPPacket *arp);
     void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 

@@ -207,7 +207,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         {
             InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
             ASSERT(ie);
-            libm->getudpsocket(socket)->setMulticastInterface(ie->outputPort());
+            libm->getudpsocket(socket)->setMulticastInterface(ie->interfaceId());
 
             return 0;
         }
@@ -465,11 +465,11 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
         cmsg->cmsg_type = IP_PKTINFO;
         cmsg->cmsg_len = sizeof(int) + sizeof(struct cmsghdr);
 
-        int index = ipControlInfo->inputPort();
-        ASSERT(index >= 0);
-        *(int*)CMSG_DATA(cmsg) = index + 1;
+        int interfaceId = ipControlInfo->interfaceId();
+        ASSERT(interfaceId >= 0);
+        *(int*)CMSG_DATA(cmsg) = interfaceId + 1;
 
-        EV << "IP_PKTINTO set to " << (index + 1) << endl;
+        EV << "IP_PKTINFO set to " << (interfaceId + 1) << endl;
 
         ASSERT(message->msg_controllen >= cmsg->cmsg_len);
 
@@ -1440,10 +1440,9 @@ int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address
         }
         else
         {
-            int outp = rt->outputPortNo(destAddr);
-            ASSERT(outp >= 0);
-            InterfaceTable *ift = check_and_cast<InterfaceTable*>(libm->parentModule()->submodule("interfaceTable"));
-            localAddr = ift->interfaceByPortNo(outp)->ipv4()->inetAddress();
+            InterfaceEntry *ie = rt->interfaceForDestAddr(destAddr);
+            ASSERT(ie!=NULL);
+            localAddr = ie->ipv4()->inetAddress();
         }
 
         EV << "autoassigning local address=" << localAddr << endl;

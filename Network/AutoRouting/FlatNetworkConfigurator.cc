@@ -155,17 +155,18 @@ void FlatNetworkConfigurator::initialize(int stage)
 
             uint32 atAddr = nodeAddresses[j];
 
-            int outputPort = atNode->path(0)->localGate()->index();
+            InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());
+
+            int outputGateId = atNode->path(0)->localGate()->id();
+            InterfaceEntry *ie = ift->interfaceByNodeOutputGateId(outputGateId);
+            if (!ie)
+                error("%s has no interface for output gate id %d", ift->fullPath().c_str(), outputGateId);
+
             EV << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
-            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " outputPort=" << outputPort << endl;
+            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->name() << endl;
 
             // add route
-            InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());
             RoutingTable *rt = IPAddressResolver().routingTableOf(atNode->module());
-            InterfaceEntry *ie = ift->interfaceByPortNo(outputPort);
-            if (!ie)
-                error("%s has no entry for interface %d", ift->fullPath().c_str(), outputPort);
-
             RoutingEntry *e = new RoutingEntry();
             e->host = IPAddress(destAddr);
             e->netmask = IPAddress(255,255,255,255); // full match needed

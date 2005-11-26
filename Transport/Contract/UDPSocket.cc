@@ -140,7 +140,7 @@ void UDPSocket::sendTo(cMessage *msg, IPvXAddress remoteAddr, int remotePort)
     ctrl->setSrcPort(localPrt);
     ctrl->setDestAddr(remoteAddr);
     ctrl->setDestPort(remotePort);
-    ctrl->setOutputPort(mcastIfaceId);
+    ctrl->setInterfaceId(mcastIfaceId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }

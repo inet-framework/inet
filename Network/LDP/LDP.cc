@@ -314,7 +314,7 @@ void LDP::rebuildFecList()
     for (int i = 0; i< ift->numInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (ie->outputPort() < 0)
+        if (ie->networkLayerGateIndex() < 0)
             continue;
 
         FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->inetAddress(), 32);
@@ -488,7 +488,7 @@ void LDP::processLDPHello(LDPHello *msg)
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
     //IPAddress peerAddr = controlInfo->getSrcAddr().get4();
     IPAddress peerAddr = msg->senderAddress();
-    int inputPort = controlInfo->inputPort();
+    int interfaceId = controlInfo->interfaceId();
     delete msg;
 
     EV << "Received LDP Hello from " << peerAddr << ", ";
@@ -523,7 +523,7 @@ void LDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = ift->interfaceByPortNo(inputPort)->name();
+    info.linkInterface = ift->interfaceAt(interfaceId)->name();
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");
@@ -712,11 +712,11 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     //if (i == rt->numRoutingEntries())
     //    return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
     //
-    int portNo = rt->outputPortNo(dest);
-    if (portNo==-1)
+    InterfaceEntry *ie = rt->interfaceForDestAddr(dest);
+    if (!ie)
         return IPAddress();  // no route
 
-    std::string iName = ift->interfaceByPortNo(portNo)->name();
+    std::string iName = ie->name(); // FIXME why use name for lookup?
     return findPeerAddrFromInterface(iName);
 }
 
@@ -773,8 +773,8 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
     return string("X");
 */
 //    Rely on port index to find the interface name
-    int portNo = rt->outputPortNo(peerIP);
-    return ift->interfaceByPortNo(portNo)->name();
+    InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
+    return ie->name();
 
 }
 

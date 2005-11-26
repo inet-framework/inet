@@ -217,10 +217,6 @@ void EtherEncap::registerInterface()
     // generate interface identifier for IPv6
     e->setInterfaceToken(myMACAddress.formInterfaceIdentifier());
 
-    // port: index of gate where parent module's "netwIn" is connected (in IP)
-    int outputPort = parentModule()->gate("netwIn")->fromGate()->index();
-    e->setOutputPort(outputPort);
-
     // MTU is 1500 on Ethernet
     e->setMtu(1500);
 

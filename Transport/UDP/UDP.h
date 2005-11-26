@@ -58,8 +58,7 @@ class INET_API UDP : public cSimpleModule
         IPvXAddress remoteAddr;
         short localPort;
         short remotePort;
-        int inputPort; // FIXME use interfaceId instead
-                       // FIXME do real sockets allow filtering by input interface??
+        int interfaceId; // FIXME do real sockets allow filtering by input interface??
     };
 
     typedef std::list<SockDesc *> SockDescList;

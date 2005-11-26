@@ -57,7 +57,6 @@ void InterfaceTable::initialize(int stage)
         // register a loopback interface
         InterfaceEntry *ie = new InterfaceEntry();
         ie->setName("lo0");
-        ie->setOutputPort(-1);
         ie->setMtu(3924);
         ie->setLoopback(true);
         addInterface(ie, NULL);
@@ -100,11 +99,9 @@ InterfaceEntry *InterfaceTable::interfaceAt(int pos)
 
 void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 {
-    // check name and outputPort are unique
+    // check name is unique
     if (interfaceByName(entry->name())!=NULL)
         opp_error("addInterface(): interface '%s' already registered", entry->name());
-    if (entry->outputPort()!=-1 && interfaceByPortNo(entry->outputPort())!=NULL)
-        opp_error("addInterface(): interface with outputPort=%d already registered", entry->outputPort());
 
     // insert
     entry->_interfaceId = interfaces.size();
@@ -164,23 +161,32 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 }
 */
 
-int InterfaceTable::numInterfaceGates()
+InterfaceEntry *InterfaceTable::interfaceByNodeOutputGateId(int id)
 {
-    // linear search is OK because normally we have don't have many interfaces (1..4, rarely more)
-    int max = -1;
+    // linear search is OK because normally we have don't have many interfaces and this func is rarely called
+    Enter_Method_Silent();
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->outputPort()>max)
-            max = (*i)->outputPort();
-    return max+1;
+        if ((*i)->nodeOutputGateId()==id)
+            return *i;
+    return NULL;
 }
 
-InterfaceEntry *InterfaceTable::interfaceByPortNo(int portNo)
+InterfaceEntry *InterfaceTable::interfaceByNodeInputGateId(int id)
 {
+    // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-
-    // linear search is OK because normally we have don't have many interfaces (1..4, rarely more)
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->outputPort()==portNo)
+        if ((*i)->nodeInputGateId()==id)
+            return *i;
+    return NULL;
+}
+
+InterfaceEntry *InterfaceTable::interfaceByNetworkLayerGateIndex(int index)
+{
+    // linear search is OK because normally we have don't have many interfaces and this func is rarely called
+    Enter_Method_Silent();
+    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
+        if ((*i)->networkLayerGateIndex()==index)
             return *i;
     return NULL;
 }

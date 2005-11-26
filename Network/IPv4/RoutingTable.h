@@ -170,9 +170,6 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                              int metric,
                              const char *dev);
 
-    // the routing function
-    RoutingEntry *selectBestMatchingRoute(const IPAddress& dest);
-
     // adjust routes with src=IFACENETMASK to actual interface netmasks
     void updateNetmaskRoutes();
 
@@ -233,18 +230,26 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     bool localDeliver(const IPAddress& dest);
 
     /**
-     * Returns the port number to send the packets with dest as
-     * destination address, or -1 if destination is not in routing table.
+     * The routing function.
      */
-    int outputPortNo(const IPAddress& dest);
+    RoutingEntry *findBestMatchingRoute(const IPAddress& dest);
 
     /**
-     * Returns the gateway to send the destination,
-     * address if the destination is not in routing table or there is
+     * Convenience function based on findBestMatchingRoute().
+     *
+     * Returns the interface Id to send the packets with dest as
+     * destination address, or -1 if destination is not in routing table.
+     */
+    InterfaceEntry *interfaceForDestAddr(const IPAddress& dest);
+
+    /**
+     * Convenience function based on findBestMatchingRoute().
+     *
+     * Returns the gateway to send the destination. Returns null address
+     * if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    // TBD maybe join with outputPortNo()
-    IPAddress nextGatewayAddress(const IPAddress& dest);
+    IPAddress gatewayForDestAddr(const IPAddress& dest);
     //@}
 
     /** @name Multicast routing functions */

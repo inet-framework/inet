@@ -563,8 +563,8 @@ RoutingEntry* Netlink::route_new(IPAddress destAddr, IPAddress netmaskAddr, IPAd
     if(index < 0)
     {
         ASSERT(!re->gateway.isUnspecified());
-        ASSERT(rt->outputPortNo(re->gateway) >= 0);
-        re->interfacePtr = ift->interfaceByPortNo(rt->outputPortNo(re->gateway));
+        ASSERT(rt->interfaceForDestAddr(re->gateway)!=NULL);
+        re->interfacePtr = rt->interfaceForDestAddr(re->gateway);
     }
     else
         re->interfacePtr = ift->interfaceAt(index);

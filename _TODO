@@ -1,3 +1,8 @@
+- OSPF: ifIndex-et olvas az XML-bol!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- OSPF: szar! setOutputPort van benne!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+- IPv6RoutingTable: change _interfaceId to _ie!!!
+
 - interfaceAt -> interfaceById!!!
 
 - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId 
@@ -7,14 +12,7 @@
 
 - rewrite UDPApps to use UDPSocket class!
 
-
 - TCP/UDP: unspec port should be 0 not -1!!!
-
-- use interfaceId instead of outputPort/inputPort EVERYWHERE!!!!
-   * and InterfaceEntry should contain:
-      networkLayerGateIndex
-      nodeOutputGateId
-      nodeInputGateId
 
 - attach IPDatagram to IPControlInfo..?
 

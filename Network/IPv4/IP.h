@@ -65,13 +65,16 @@ class INET_API IP : public QueueBase
     int numForwarded;
 
   protected:
+    // utility: look up interface from arrivalGate()
+    InterfaceEntry *sourceInterfaceFrom(cMessage *msg);
+
     // utility: show current statistics above the icon
     void updateDisplayString();
 
     /**
      * Encapsulate packet coming from higher layers into IPDatagram
      */
-    IPDatagram *encapsulate(cMessage *transportPacket, int& outputPort);
+    IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&ie);
 
     /**
      * Handle IPDatagram messages arriving from lower layer.
@@ -96,12 +99,12 @@ class INET_API IP : public QueueBase
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPDatagram *datagram, int outputPort=-1);
+    virtual void routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPDatagram *datagram, int outputPort=-1);
+    virtual void routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *srcIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -118,12 +121,12 @@ class INET_API IP : public QueueBase
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
+    virtual void fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr);
 
     /**
      * Last TTL check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPDatagram *datagram, int outputPort, IPAddress nextHopAddr);
+    virtual void sendDatagramToOutput(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr);
 
   public:
     IP() {}

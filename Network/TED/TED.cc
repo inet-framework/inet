@@ -53,9 +53,9 @@ void TED::initialize(int stage)
 
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
-        int idx = ift->interfaceAt(i)->outputPort();
+        InterfaceEntry *ie = ift->interfaceAt(i);
 
-        if (idx == -1)
+        if (ie->nodeOutputGateId() == -1)
             continue;
 
         for (int j = 0; j < rt->numRoutingEntries(); j++)
@@ -73,12 +73,12 @@ void TED::initialize(int stage)
 
             ASSERT(!remote.isUnspecified());
 
-            cGate *g = parentModule()->gate("out", idx);
+            cGate *g = parentModule()->gate(ie->nodeOutputGateId());
             ASSERT(g);
 
             TELinkStateInfo entry;
             entry.advrouter = routerId;
-            entry.local = ift->interfaceByPortNo(idx)->ipv4()->inetAddress();
+            entry.local = ie->ipv4()->inetAddress();
             entry.linkid = linkid;
             entry.remote = remote;
             entry.MaxBandwidth = g->datarate()->doubleValue();
@@ -287,7 +287,7 @@ void TED::rebuildRoutingTable()
             entry->gateway = V[nHop].node;
             entry->type = entry->REMOTE;
         }
-        entry->interfacePtr = interfaceByAddress(interfaceByPeerAddress(V[nHop].node));
+        entry->interfacePtr = rt->interfaceByAddress(interfaceAddrByPeerAddress(V[nHop].node));
         entry->interfaceName = opp_string(entry->interfacePtr->name());
         entry->source = RoutingEntry::OSPF;
 
@@ -306,7 +306,7 @@ void TED::rebuildRoutingTable()
         entry->host = peerByLocalAddress(LocalAddress[i]);
         entry->gateway = IPAddress();
         entry->type = entry->DIRECT;
-        entry->interfacePtr = interfaceByAddress(LocalAddress[i]);
+        entry->interfacePtr = rt->interfaceByAddress(LocalAddress[i]);
         entry->interfaceName = opp_string(entry->interfacePtr->name());
         entry->source = RoutingEntry::OSPF;
 
@@ -320,7 +320,7 @@ void TED::rebuildRoutingTable()
 
 }
 
-IPAddress TED::interfaceByPeerAddress(IPAddress peerIP)
+IPAddress TED::interfaceAddrByPeerAddress(IPAddress peerIP)
 {
     std::vector<TELinkStateInfo>::iterator it;
     for (it = ted.begin(); it != ted.end(); it++)
@@ -677,22 +677,5 @@ IPAddress TED::peerByLocalAddress(IPAddress localInf)
     return ted[index].linkid;
 }
 
-InterfaceEntry* TED::interfaceByAddress(IPAddress localInf)
-{
-    ASSERT(!localInf.isUnspecified());
-    for (int i = 0; i < ift->numInterfaces(); i++)
-    {
-        InterfaceEntry *ie = ift->interfaceAt(i);
-
-        // ignore loopback
-        if(ie->outputPort() == -1)
-            continue;
-
-        if (ie->ipv4()->inetAddress()==localInf)
-            return ie;
-    }
-
-    ASSERT(false);
-}
 
 

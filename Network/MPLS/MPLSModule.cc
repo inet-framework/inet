@@ -38,17 +38,8 @@ void MPLSModule::initialize(int stage)
     if (stage!=3) // interfaceTable must be initialized
         return;
 
-    //
-
-    LIBTableAccess libTableAccess;
-    lt = libTableAccess.get();
-
-    //
-
-    InterfaceTableAccess interfaceTableAccess;
-    ift = interfaceTableAccess.get();
-
-    //
+    lt = LIBTableAccess().get();
+    ift = InterfaceTableAccess().get();
 
     pct = check_and_cast<IClassifier*>(parentModule()->submodule(par("classifier")));
 
@@ -131,7 +122,7 @@ bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     ASSERT(outLabel.size() > 0);
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->outputPort();
+    int outgoingPort = ift->interfaceByName(outInterface.c_str())->networkLayerGateIndex();
 
     MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->name());
     mplsPacket->encapsulate(ipdatagram);
@@ -262,7 +253,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->outputPort();
+    int outgoingPort = ift->interfaceByName(outInterface.c_str())->networkLayerGateIndex();
 
     doStackOps(mplsPacket, outLabel);
 

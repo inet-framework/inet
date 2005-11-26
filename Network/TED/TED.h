@@ -64,7 +64,7 @@ class TED : public cSimpleModule
         const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
 
   public:
-    IPAddress interfaceByPeerAddress(IPAddress peerIP);
+    IPAddress interfaceAddrByPeerAddress(IPAddress peerIP);
     IPAddress peerRemoteInterface(IPAddress peerIP);
     IPAddress peerByLocalAddress(IPAddress localInf);
     IPAddress primaryAddress(IPAddress localInf);
@@ -73,7 +73,6 @@ class TED : public cSimpleModule
     unsigned int linkIndex(IPAddress localInf);
     unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
     IPAddressVector getLocalAddress();
-    InterfaceEntry *interfaceByAddress(IPAddress localInf);
 
     void rebuildRoutingTable();
 

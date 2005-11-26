@@ -53,7 +53,8 @@ class IPv6ControlInfo
         IPv6Address destAddr; // destination IPv6 address
         IPv6Address srcAddr;  // source IPv6 address
         short hopLimit;       // hop limit
-        int inputGateIndex = -1; // interface on which the datagram was received
+        int interfaceId = -1; // interface on which dgram was received/should 
+                              // be sent (see InterfaceTable)
 };
 
 

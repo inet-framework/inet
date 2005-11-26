@@ -47,7 +47,6 @@ class INET_API InterfaceEntry : public cPolymorphic
     int _nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int _nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int _nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int _outputPort;       // FIXME REMOVE!!!!! output gate index (-1 if unused, e.g. loopback interface)
     int _peernamid;        ///< used only when writing ns2 nam traces
     int _mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
     bool _down;            ///< current state (up or down)
@@ -80,7 +79,6 @@ class INET_API InterfaceEntry : public cPolymorphic
     int networkLayerGateIndex() const {return _nwLayerGateIndex;}
     int nodeOutputGateId() const   {return _nodeOutputGateId;}
     int nodeInputGateId() const    {return _nodeInputGateId;}
-    int outputPort() const         {return _outputPort;} // FIXME eliminate
     int peerNamId() const          {return _peernamid;}
     int mtu() const                {return _mtu;}
     bool isDown() const            {return _down;}
@@ -96,7 +94,6 @@ class INET_API InterfaceEntry : public cPolymorphic
     void setNetworkLayerGateIndex(int i) {_nwLayerGateIndex = i;}
     void setNodeOutputGateId(int i) {_nodeOutputGateId = i;}
     void setNodeInputGateId(int i)  {_nodeInputGateId = i;}
-    void setOutputPort(int i)    {_outputPort = i;}  // FIXME eliminate
     void setPeerNamId(int ni)    {_peernamid = ni;}
     void setMtu(int m)           {_mtu = m;}
     void setDown(bool b)         {_down = b;}

@@ -82,13 +82,6 @@ bool FlatNetworkConfigurator6::isNonIPType(cTopology::Node *node, StringVector& 
     return std::find(nonIPTypes.begin(), nonIPTypes.end(), node->module()->className())!=nonIPTypes.end();
 }
 
-int FlatNetworkConfigurator6::determineGateIndex(cGate *nodeGate)
-{
-    // given a gate of host/router, determine "gateIndex", e.g. the gate index of IP
-    //FIXME TBD doesn't work if PPP and Ethernet are mixed -- then both out[0] and ethOut[0] will return 0!
-    return nodeGate->index();
-}
-
 #ifdef WITH_IPv6
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVector& nonIPTypes)
 {
@@ -118,7 +111,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVecto
                 continue;  // already has one
 
             // add a prefix
-            IPv6Address prefix(0xaaaa0000+ift->id(), ie->outputPort()<<16, 0, 0);
+            IPv6Address prefix(0xaaaa0000+ift->id(), ie->networkLayerGateIndex()<<16, 0, 0);
             ASSERT(prefix.isGlobal());
 
             IPv6InterfaceData::AdvPrefix p;
@@ -244,14 +237,13 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
 
             // determine the local interface id
             cGate *localGate = atNode->path(0)->localGate();
-            int localGateIdx = determineGateIndex(localGate);
-            int localInterfaceId = ift->interfaceByPortNo(localGateIdx)->interfaceId();
+            InterfaceEntry *localIf = ift->interfaceByNodeOutputGateId(localGate->id());
 
             // determine next hop link address. That's a bit tricky because
             // the directly adjacent cTopo node might be a non-IP node (ethernet switch etc)
             // so we have to "seek through" them.
             cTopology::Node *prevNode = atNode;
-            // if we there's no ethernet switch between atNode and it's next hop
+            // if there's no ethernet switch between atNode and it's next hop
             // neighbour, we don't go into the following while() loop
             while (isNonIPType(prevNode->path(0)->remoteNode(), nonIPTypes))
                 prevNode = prevNode->path(0)->remoteNode();
@@ -260,7 +252,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
             cGate *remoteGate = prevNode->path(0)->remoteGate();
             cModule *nextHop = remoteGate->ownerModule();
             InterfaceTable *nextHopIft = IPAddressResolver().interfaceTableOf(nextHop);
-            InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByPortNo(determineGateIndex(remoteGate));
+            InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByNodeInputGateId(remoteGate->id());
 
             // find link-local address for next hop
             IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6()->linkLocalAddress();
@@ -270,7 +262,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
             for (unsigned int k = 0; k < destPrefixes.size(); k++)
             {
                 rt->addStaticRoute(destPrefixes[k]->prefix, destPrefixes[k]->prefixLength,
-                                   localInterfaceId, nextHopLinkLocalAddr);
+                                   localIf->interfaceId(), nextHopLinkLocalAddr);
             }
         }
     }

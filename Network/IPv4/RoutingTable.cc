@@ -284,7 +284,7 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 }
 
 
-RoutingEntry *RoutingTable::selectBestMatchingRoute(const IPAddress& dest)
+RoutingEntry *RoutingTable::findBestMatchingRoute(const IPAddress& dest)
 {
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
@@ -303,20 +303,20 @@ RoutingEntry *RoutingTable::selectBestMatchingRoute(const IPAddress& dest)
     return bestRoute;
 }
 
-int RoutingTable::outputPortNo(const IPAddress& dest)
+InterfaceEntry *RoutingTable::interfaceForDestAddr(const IPAddress& dest)
 {
-    Enter_Method("outputPortNo(%s)=?", dest.str().c_str());
+    Enter_Method("interfaceForDestAddr(%s)=?", dest.str().c_str());
 
-    RoutingEntry *e = selectBestMatchingRoute(dest);
-    if (!e) return -1;
-    return e->interfacePtr->outputPort();
+    RoutingEntry *e = findBestMatchingRoute(dest);
+    if (!e) return NULL;
+    return e->interfacePtr;
 }
 
-IPAddress RoutingTable::nextGatewayAddress(const IPAddress& dest)
+IPAddress RoutingTable::gatewayForDestAddr(const IPAddress& dest)
 {
-    Enter_Method("nextGatewayAddress(%s)=?", dest.str().c_str());
+    Enter_Method("gatewayForDestAddr(%s)=?", dest.str().c_str());
 
-    RoutingEntry *e = selectBestMatchingRoute(dest);
+    RoutingEntry *e = findBestMatchingRoute(dest);
     if (!e) return IPAddress();
     return e->gateway;
 }

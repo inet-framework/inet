@@ -76,7 +76,7 @@ void NAMTraceWriter::initialize(int stage)
             if (!ie->isPointToPoint()) continue; // consider pont-to-point links only
 
             // fill in peerNamIds in InterfaceEntries
-            cGate *outgate = node->gate("out", ie->outputPort());
+            cGate *outgate = node->gate(ie->nodeOutputGateId());
             if (!outgate || !outgate->toGate()) continue;
             cModule *peernode = outgate->toGate()->ownerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
             cModule *peerwriter = peernode->submodule("namTrace");

@@ -245,14 +245,12 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     else if (nce->reachabilityState == IPv6NeighbourCache::REACHABLE)
     {
         EV << "Next hop is REACHABLE, sending packet to next-hop address.";
-        InterfaceEntry *ie = ift->interfaceAt(nextHopIfID);
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->srcAddress(), ie->outputPort());
+        sendPacketToIPv6Module(msg, nextHopAddr, msg->srcAddress(), nextHopIfID);
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::DELAY)//TODO: What if NCE is in PROBE state?
     {
         EV << "Next hop is in DELAY state, sending packet to next-hop address.";
-        InterfaceEntry *ie = ift->interfaceAt(nextHopIfID);
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->srcAddress(), ie->outputPort());
+        sendPacketToIPv6Module(msg, nextHopAddr, msg->srcAddress(), nextHopIfID);
     }
     else
         error("Unknown Neighbour cache entry state.");
@@ -699,34 +697,20 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
 }
 
 void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
-    const IPv6Address& srcAddr, int inputGateIndex)
+    const IPv6Address& srcAddr, int interfaceId)
 {
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     controlInfo->setDestAddr(destAddr);
     controlInfo->setSrcAddr(srcAddr);
     controlInfo->setHopLimit(255);
-    controlInfo->setInputGateIndex(inputGateIndex);
+    controlInfo->setInterfaceId(interfaceId);
     msg->setControlInfo(controlInfo);
 
     send(msg,"toIPv6");
 }
 
-/**Not used yet-unsure if we really need it*/
-void IPv6NeighbourDiscovery::sendDelayedPacketToIPv6Module(cMessage *msg,
-    const IPv6Address& destAddr, const IPv6Address& srcAddr, int inputGateIndex,
-    simtime_t delay)
-{
-    IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IPv6_ICMP);
-    controlInfo->setDestAddr(destAddr);
-    controlInfo->setSrcAddr(srcAddr);
-    controlInfo->setHopLimit(255);
-    controlInfo->setInputGateIndex(inputGateIndex);
-    msg->setControlInfo(controlInfo);
-
-    sendDelayed(msg, delay, "toIPv6");
-}
+/**Not used yet-unsure if we really need it. --DELETED, Andras*/
 
 void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
 {
@@ -858,7 +842,7 @@ IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceE
         rs->setSourceLinkLayerAddress(ie->macAddress());
 
     //Construct a Router Solicitation message
-    sendPacketToIPv6Module(rs, destAddr, myIPv6Address, ie->outputPort());
+    sendPacketToIPv6Module(rs, destAddr, myIPv6Address, ie->interfaceId());
     return rs;
 }
 
@@ -1058,7 +1042,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
     EV << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
     IPv6Address sourceAddr = ie->ipv6()->linkLocalAddress();
-    int inputGateIndex = ie->outputPort();
+    int interfaceId = ie->interfaceId();
     //This operation includes all options, regardless whether it is solicited or unsolicited.
     if (ie->ipv6()->advSendAdvertisements())//if this is an advertising interface
     {
@@ -1118,7 +1102,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
             //Now we pop the prefix info into the RA.
             ra->setPrefixInformation(i, prefixInfo);
         }
-        sendPacketToIPv6Module(ra, destAddr, sourceAddr, inputGateIndex);
+        sendPacketToIPv6Module(ra, destAddr, sourceAddr, interfaceId);
         return ra;
     }
 }
@@ -1126,8 +1110,8 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
     IPv6ControlInfo *raCtrlInfo)
 {
-    int inputGateIndex = raCtrlInfo->inputGateIndex();
-    InterfaceEntry *ie = ift->interfaceByPortNo(inputGateIndex);
+    int interfaceId = raCtrlInfo->interfaceId();
+    InterfaceEntry *ie = ift->interfaceAt(interfaceId);
 
     if (ie->ipv6()->advSendAdvertisements())
     {
@@ -1171,7 +1155,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
     IPv6Address raSrcAddr = raCtrlInfo->srcAddr();
-    InterfaceEntry *ie = ift->interfaceByPortNo(raCtrlInfo->inputGateIndex());
+    InterfaceEntry *ie = ift->interfaceAt(raCtrlInfo->interfaceId());
     int ifID = ie->interfaceId();
 
     /*- If the address is not already present in the host's Default Router List,
@@ -1575,7 +1559,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
     const IPv6Address& dgSrcAddr, InterfaceEntry *ie)
 {
     MACAddress myMacAddr = ie->macAddress();
-    int inputGateIndex = ie->outputPort();
+    int interfaceId = ie->interfaceId();
 
     //Construct a Neighbour Solicitation message
     IPv6NeighbourSolicitation *ns = new IPv6NeighbourSolicitation("NSpacket");
@@ -1591,7 +1575,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
         dgSrcAddr.isUnspecified() == false)
         ns->setSourceLinkLayerAddress(myMacAddr);
 
-    sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, inputGateIndex);
+    sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, interfaceId);
 
     return ns;
 }
@@ -1600,10 +1584,10 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
     IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
-    int nsInputGate = nsCtrlInfo->inputGateIndex();
+    int interfaceId = nsCtrlInfo->interfaceId();
+    InterfaceEntry *ie = ift->interfaceByPortNo(interfaceId);
 
     IPv6Address nsTargetAddr = ns->targetAddress();
-    InterfaceEntry *ie = ift->interfaceByPortNo(nsInputGate);
 
     //RFC 2461:Section 7.2.3
     //If target address is not a valid "unicast" or anycast address assigned to the
@@ -1841,7 +1825,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns,
     //done we should check the destinations of the list of queued packets and send
     //off the respective ones.
     IPv6Address myIPv6Addr = ie->ipv6()->preferredAddress();
-    sendPacketToIPv6Module(na, naDestAddr, myIPv6Addr, ie->outputPort());
+    sendPacketToIPv6Module(na, naDestAddr, myIPv6Addr, ie->interfaceId());
 }
 
 void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)

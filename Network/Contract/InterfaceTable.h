@@ -103,16 +103,22 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     InterfaceEntry *interfaceAt(int pos);
 
     /**
-     * Returns the maximum gate index plus one.
-     */
-    int numInterfaceGates();
-
-    /**
-     * Returns an interface given by its port number (gate index,
-     * 0..numInterfaceGates()-1).
+     * Returns an interface given by its nodeOutputGateId().
      * Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByPortNo(int portNo);
+    InterfaceEntry *interfaceByNodeOutputGateId(int id);
+
+    /**
+     * Returns an interface given by its nodeInputGateId().
+     * Returns NULL if not found.
+     */
+    InterfaceEntry *interfaceByNodeInputGateId(int id);
+
+    /**
+     * Returns an interface given by its networkLayerGateIndex().
+     * Returns NULL if not found.
+     */
+    InterfaceEntry *interfaceByNetworkLayerGateIndex(int index);
 
     /**
      * Returns an interface given by its name. Returns NULL if not found.

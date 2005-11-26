@@ -46,8 +46,8 @@ static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
         os << " localAddr=" << sd.localAddr;
     if (!sd.remoteAddr.isUnspecified())
         os << " remoteAddr=" << sd.remoteAddr;
-    if (sd.inputPort!=-1)
-        os << " inputPort=" << sd.inputPort;
+    if (sd.interfaceId!=-1)
+        os << " interfaceId=" << sd.interfaceId;
 
     return os;
 }
@@ -96,7 +96,7 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     sd->remoteAddr = ctrl->destAddr();
     sd->localPort = ctrl->srcPort();
     sd->remotePort = ctrl->destPort();
-    sd->inputPort = ctrl->outputPort();
+    sd->interfaceId = ctrl->interfaceId();
 
     if (sd->localPort==0)
         sd->localPort = getEphemeralPort();
@@ -104,7 +104,7 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     sd->onlyLocalPortIsSet = sd->localAddr.isUnspecified() &&
                              sd->remoteAddr.isUnspecified() &&
                              sd->remotePort==0 &&
-                             sd->inputPort==-1;
+                             sd->interfaceId==-1;
 
     // add to socketsByIdMap
     ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
@@ -180,7 +180,7 @@ bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ctrl, SockDesc *sd)
         return false;
     if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ctrl->srcAddr())
         return false;
-    if (sd->inputPort!=-1 && sd->inputPort!=ctrl->inputPort())
+    if (sd->interfaceId!=-1 && sd->interfaceId!=ctrl->interfaceId())
         return false;
     return true;
 }
@@ -194,7 +194,7 @@ bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd)
         return false;
     if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ctrl->srcAddr())
         return false;
-    //if (!sd->inputPort!=-1 && sd->inputPort!=ctrl->inputPort())  FIXME IPv6 should fill in inputPort!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //if (sd->interfaceId!=-1 && sd->interfaceId!=ctrl->interfaceId()) FIXME IPv6 should fill in interfaceId!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //    return false;
     return true;
 }
@@ -210,7 +210,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, S
     udpControlInfo->setDestAddr(ctrl->destAddr());
     udpControlInfo->setSrcPort(udpHeader->sourcePort());
     udpControlInfo->setDestPort(udpHeader->destinationPort());
-    udpControlInfo->setInputPort(ctrl->inputPort());
+    udpControlInfo->setInterfaceId(ctrl->interfaceId());
 
     cMessage *copy = (cMessage *)payload->dup();
     copy->setControlInfo(copy);
@@ -228,7 +228,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl,
     udpControlInfo->setDestAddr(ctrl->destAddr());
     udpControlInfo->setSrcPort(udpHeader->sourcePort());
     udpControlInfo->setDestPort(udpHeader->destinationPort());
-    //udpControlInfo->setInputPort(ctrl->inputPort());  FIXME add inputPort to IPv6ControlInfo!!!
+    //udpControlInfo->setInterfaceId(ctrl->interfaceId());  FIXME add interfaceId to IPv6ControlInfo!!!
 
     cMessage *copy = (cMessage *)payload->dup();
     copy->setControlInfo(copy);
@@ -327,7 +327,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get4());
         ipControlInfo->setDestAddr(udpControlInfo->destAddr().get4());
-        ipControlInfo->setOutputPort(udpControlInfo->outputPort());
+        ipControlInfo->setInterfaceId(udpControlInfo->interfaceId());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 
@@ -340,7 +340,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get6());
         ipControlInfo->setDestAddr(udpControlInfo->destAddr().get6());
-        // ipControlInfo->setOutputPort(udpControlInfo->outputPort()); FIXME extend IPv6 with this!!!
+        // ipControlInfo->setInterfaceId(udpControlInfo->InterfaceId()); FIXME extend IPv6 with this!!!
         udpPacket->setControlInfo(ipControlInfo);
         delete udpControlInfo;
 

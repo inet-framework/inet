@@ -53,7 +53,7 @@
 // The routing table is stored in the module RoutingTable. When a datagram
 // needs to be routed, IP queries RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as outputPortNo(destAddress)) of RoutingTable.
+// calling C++ methods (such as findBestMatchingRoute(destAddress)) of RoutingTable.
 // No message exchange with RoutingTable takes place.
 //
 // A routed datagram will be sent to the queueOut gate, with an

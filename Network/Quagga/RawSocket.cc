@@ -87,7 +87,7 @@ int RawSocket::send(const struct msghdr *message, int flags)
 
     if(destAddr.isMulticast())
     {
-        ipControlInfo->setOutputPort(multicastOutputPort);
+        ipControlInfo->setInterfaceId(multicastOutputInterfaceId);
     }
     else
     {
@@ -147,9 +147,8 @@ void RawSocket::setMulticastIf(IPAddress addr)
 {
     multicastIf = addr;
     InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
-printf("setMulticastIf(%s)\n",addr.str().c_str());
     ASSERT(ie);
-    multicastOutputPort = ie->outputPort();
+    multicastOutputInterfaceId = ie->interfaceId();
 }
 
 IPAddress RawSocket::getMulticastIf()

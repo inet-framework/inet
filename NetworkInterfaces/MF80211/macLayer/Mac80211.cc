@@ -113,10 +113,6 @@ void Mac80211::registerInterface()
     // generate interface identifier for IPv6
     e->setInterfaceToken(myMacAddr.formInterfaceIdentifier());
 
-    // port: index of gate where parent module's "uppergateIn" is connected (in IP)
-    int outputPort = parentModule()->gate("uppergateIn")->fromGate()->index();
-    e->setOutputPort(outputPort);
-
     // MTU on 802.11 = ?
     e->setMtu(1500);            // FIXME
 

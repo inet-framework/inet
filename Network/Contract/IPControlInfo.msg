@@ -47,9 +47,6 @@ cplusplus {{
 // - timeToLive: default defined as module parameter
 // - dontFragment: default: false
 //
-// interfaceId is set by the \IP module when passing up data packets;
-// it does not affect on which port the \IP packet is transmitted.
-//
 // Not supported:
 // - options: \IP Options currently not used
 // - Identifier is currently always chosen by the \IP layer
@@ -61,8 +58,8 @@ class IPControlInfo
     fields:
         IPAddress destAddr;  // destination IP address
         IPAddress srcAddr;   // source IP address
-        int inputPort;       // port number of interface on which the datagram was received
-        int outputPort = -1; // port number of the interface where the datagram should be sent (for multicast)
+        int interfaceId = -1; // interface on which dgram was received/should
+                              // be sent (see InterfaceTable)
         short protocol enum(IPProtocolId);  // encapsulated protocol
         unsigned char diffServCodePoint;  // for QoS
         short timeToLive;   // maximum hop count
@@ -82,8 +79,7 @@ class IPRoutingDecision
     properties:
         omitGetVerb = true;
     fields:
-        int inputPort = -1;
-        int outputPort = -1;
+        int interfaceId = -1; // interface on which dgram should be sent (see InterfaceTable)
         IPAddress nextHopAddr;
 };
 

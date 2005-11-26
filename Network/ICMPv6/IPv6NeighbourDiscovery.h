@@ -199,15 +199,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  msg with the control info.
          */
         void sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
-            const IPv6Address& srcAddr, int inputGateIndex);
-
-        /**
-         *  Convenience class for sending Neighbour Discovery messages that
-         *  requires some form of delay. This could potentially save the usage
-         *  of too many self messages and its associated complexity.
-         */
-        void sendDelayedPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
-            const IPv6Address& srcAddr, int inputGateIndex, simtime_t delay);
+            const IPv6Address& srcAddr, int inputInterfaceId);
 
         /**
          *  Send off any queued packets within the Neighbour Discovery module

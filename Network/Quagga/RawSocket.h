@@ -40,7 +40,7 @@ class RawSocket
         bool multicastLoop;
         bool multicastTtl;
         IPAddress multicastIf;
-        int multicastOutputPort; // determined from multicastIf address
+        int multicastOutputInterfaceId; // determined from multicastIf address
 
         cGate *gateToIP;
 

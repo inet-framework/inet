@@ -47,7 +47,6 @@ class INET_API FlatNetworkConfigurator6 : public cSimpleModule
 
     void setDisplayString(int numIPNodes, int numNonIPNodes);
     bool isNonIPType(cTopology::Node *node, StringVector& nonIPTypes);
-    int determineGateIndex(cGate *nodeGate);
 };
 
 #endif

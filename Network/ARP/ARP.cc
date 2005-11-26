@@ -115,15 +115,14 @@ void ARP::processOutboundPacket(cMessage *msg)
     // get next hop address from control info in packet
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(msg->removeControlInfo());
     IPAddress nextHopAddr = controlInfo->nextHopAddr();
-    int outputPort = controlInfo->outputPort();
+    InterfaceEntry *ie = ift->interfaceAt(controlInfo->interfaceId());
     delete controlInfo;
 
     // if output interface is not broadcast, don't bother with ARP
-    InterfaceEntry *ie = ift->interfaceByPortNo(outputPort);
     if (!ie->isBroadcast())
     {
         EV << "output interface " << ie->name() << " is not broadcast, skipping ARP\n";
-        send(msg, "nicOut", outputPort);
+        send(msg, "nicOut", ie->networkLayerGateIndex());
         return;
     }
 
@@ -154,7 +153,7 @@ void ARP::processOutboundPacket(cMessage *msg)
         // FIXME: we do a simpler solution right now: send to the Broadcast MAC address
         EV << "destination address is multicast, sending packet to broadcast MAC address\n";
         static MACAddress broadcastAddr("FF:FF:FF:FF:FF:FF");
-        sendPacketToNIC(msg, outputPort, broadcastAddr);
+        sendPacketToNIC(msg, ie, broadcastAddr);
         return;
 #if 0
         // experimental RFC 1112 code
@@ -168,21 +167,21 @@ void ARP::processOutboundPacket(cMessage *msg)
         macBytes[5] = nextHopAddr.getDByte(3);
         MACAddress multicastMacAddr;
         multicastMacAddr.setAddressBytes(bytes);
-        sendPacketToNIC(msg, outputPort, multicastMacAddr);
+        sendPacketToNIC(msg, ie, multicastMacAddr);
         return;
 #endif
     }
 
     // try look up
     ARPCache::iterator it = arpCache.find(nextHopAddr);
-    //ASSERT(it==arpCache.end() || outputPort==(*it).second->outputPort); // verify: if arpCache gets keyed on outputPort too, this becomes unnecessary
+    //ASSERT(it==arpCache.end() || ie==(*it).second->ie); // verify: if arpCache gets keyed on InterfaceEntry* too, this becomes unnecessary
     if (it==arpCache.end())
     {
         // no cache entry: launch ARP request
         ARPCacheEntry *entry = new ARPCacheEntry();
         ARPCache::iterator where = arpCache.insert(arpCache.begin(), std::make_pair(nextHopAddr,entry));
         entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
-        entry->outputPort = outputPort;
+        entry->ie = ie;
 
         EV << "Starting ARP resolution for " << nextHopAddr << "\n";
         initiateARPResolution(entry);
@@ -204,7 +203,7 @@ void ARP::processOutboundPacket(cMessage *msg)
 
         // cache entry stale, send new ARP request
         ARPCacheEntry *entry = (*it).second;
-        entry->outputPort = outputPort; // routing table may have changed
+        entry->ie = ie; // routing table may have changed
         initiateARPResolution(entry);
 
         // and queue up packet
@@ -215,7 +214,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     {
         // valid ARP cache entry found, flag msg with MAC address and send it out
         EV << "ARP cache hit, MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
-        sendPacketToNIC(msg, outputPort, (*it).second->macAddress);
+        sendPacketToNIC(msg, ie, (*it).second->macAddress);
     }
 }
 
@@ -225,7 +224,7 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     entry->pending = true;
     entry->numRetries = 0;
     entry->lastUpdate = 0;
-    sendARPRequest(entry->outputPort, nextHopAddr);
+    sendARPRequest(entry->ie, nextHopAddr);
 
     // start timer
     cMessage *msg = entry->timer = new cMessage("ARP timeout");
@@ -235,7 +234,7 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     numResolutions++;
 }
 
-void ARP::sendPacketToNIC(cMessage *msg, int outputPort, const MACAddress& macAddress)
+void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress)
 {
     // add control info with MAC address
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
@@ -243,13 +242,12 @@ void ARP::sendPacketToNIC(cMessage *msg, int outputPort, const MACAddress& macAd
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, "nicOut", outputPort);
+    send(msg, "nicOut", ie->networkLayerGateIndex());
 }
 
-void ARP::sendARPRequest(int outputPort, IPAddress ipAddress)
+void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
 {
     // find our own IP address and MAC address on the given interface
-    InterfaceEntry *ie = ift->interfaceByPortNo(outputPort);
     MACAddress myMACAddress = ie->macAddress();
     IPAddress myIPAddress = ie->ipv4()->inetAddress();
 
@@ -262,7 +260,7 @@ void ARP::sendARPRequest(int outputPort, IPAddress ipAddress)
     arp->setDestIPAddress(ipAddress);
 
     static MACAddress broadcastAddress("ff:ff:ff:ff:ff:ff");
-    sendPacketToNIC(arp, outputPort, broadcastAddress);
+    sendPacketToNIC(arp, ie, broadcastAddress);
     numRequestsSent++;
 }
 
@@ -275,7 +273,7 @@ void ARP::requestTimedOut(cMessage *selfmsg)
         // retry
         IPAddress nextHopAddr = entry->myIter->first;
         EV << "ARP request for " << nextHopAddr << " timed out, resending\n";
-        sendARPRequest(entry->outputPort, nextHopAddr);
+        sendARPRequest(entry->ie, nextHopAddr);
         scheduleAt(simTime()+retryTimeout, selfmsg);
         return;
     }
@@ -301,7 +299,7 @@ void ARP::requestTimedOut(cMessage *selfmsg)
 }
 
 
-bool ARP::addressRecognized(IPAddress destAddr, int outputPort)
+bool ARP::addressRecognized(IPAddress destAddr, InterfaceEntry *ie)
 {
     if (rt->localDeliver(destAddr))
         return true;
@@ -310,8 +308,8 @@ bool ARP::addressRecognized(IPAddress destAddr, int outputPort)
     // output port is different from this one), say yes
     if (!doProxyARP)
         return false;
-    int rteOutputPort = rt->outputPortNo(destAddr);
-    return outputPort!=-1 && rteOutputPort!=outputPort;
+    InterfaceEntry *rtie = rt->interfaceForDestAddr(destAddr);
+    return rtie!=NULL && rtie!=ie;
 }
 
 void ARP::dumpARPPacket(ARPPacket *arp)
@@ -329,7 +327,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
     // extract input port
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(arp->removeControlInfo());
-    int inputPort = controlInfo->inputPort();
+    InterfaceEntry *ie = ift->interfaceAt(controlInfo->interfaceId());
     delete controlInfo;
 
     //
@@ -376,7 +374,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
     // "?Am I the target protocol address?"
     // if Proxy ARP is enabled, we also have to reply if we're a router to the dest IP address
-    if (addressRecognized(arp->getDestIPAddress(), inputPort))
+    if (addressRecognized(arp->getDestIPAddress(), ie))
     {
         // "If Merge_flag is false, add the triplet protocol type, sender
         // protocol address, sender hardware address to the translation table"
@@ -392,7 +390,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 entry = new ARPCacheEntry();
                 ARPCache::iterator where = arpCache.insert(arpCache.begin(), std::make_pair(srcIPAddress,entry));
                 entry->myIter = where;
-                entry->outputPort = inputPort;
+                entry->ie = ie;
 
                 entry->pending = false;
                 entry->timer = NULL;
@@ -409,7 +407,6 @@ void ARP::processARPPacket(ARPPacket *arp)
                 EV << "Packet was ARP REQUEST, sending REPLY\n";
 
                 // find our own IP address and MAC address on the given interface
-                InterfaceEntry *ie = ift->interfaceByPortNo(inputPort);
                 MACAddress myMACAddress = ie->macAddress();
                 IPAddress myIPAddress = ie->ipv4()->inetAddress();
 
@@ -422,7 +419,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 arp->setSrcMACAddress(myMACAddress);
                 arp->setOpcode(ARP_REPLY);
                 delete arp->removeControlInfo();
-                sendPacketToNIC(arp, inputPort, srcMACAddress);
+                sendPacketToNIC(arp, ie, srcMACAddress);
                 numRepliesSent++;
                 break;
             }
@@ -469,7 +466,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
         EV << "Sending out queued packet " << msg << "\n";
-        sendPacketToNIC(msg, entry->outputPort, macAddress);
+        sendPacketToNIC(msg, entry->ie, macAddress);
     }
 }
 
