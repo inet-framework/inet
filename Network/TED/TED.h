@@ -56,7 +56,7 @@ class TED : public cSimpleModule
     };
 
     /**     
-     * TODO *** This stores what? ***
+     * The link state database, with TODO *** This stores what? ***
      * (defined in TED.msg)
      */
     TELinkStateInfoVector ted;
@@ -74,6 +74,8 @@ class TED : public cSimpleModule
         const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
 
   public:
+    /** @name Public interface to the Traffic Engineering Database */
+    //@{
     IPAddress interfaceAddrByPeerAddress(IPAddress peerIP);
     IPAddress peerRemoteInterface(IPAddress peerIP);
     IPAddress peerByLocalAddress(IPAddress localInf);
@@ -85,6 +87,7 @@ class TED : public cSimpleModule
     IPAddressVector getLocalAddress();
 
     void rebuildRoutingTable();
+    //@}
 
   private:
     RoutingTable *rt;

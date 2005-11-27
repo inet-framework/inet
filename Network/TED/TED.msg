@@ -31,18 +31,18 @@ class noncobject IPAddress;
 struct TELinkStateInfo
 {
     fields:
-        IPAddress advrouter;
-        IPAddress linkid;
-        IPAddress local;
-        IPAddress remote;
-        double metric;
-        double MaxBandwidth;
-        double UnResvBandwidth[8];
+        IPAddress advrouter; // routerId of originator of this link state entry
+        IPAddress linkid;    // FIXME what's this?
+        IPAddress local;     // address of local interface of this link
+        IPAddress remote;    // address of remote interface of this link
+        double metric;       // link metric
+        double MaxBandwidth; // maximum bandwidth (bps)
+        double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
 
-        double timestamp;
-        unsigned int sourceId;
-        unsigned int messageId;
-        bool state;
+        double timestamp;    // time of originating this entry
+        unsigned int sourceId;  // FIXME what's this?
+        unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
+        bool state;          // FIXME values?
 };
 
 
