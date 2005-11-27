@@ -20,7 +20,8 @@ import
     "EtherBus",
     "EtherHub",
     "EtherHost",
-    "EtherSwitch";
+    "EtherSwitch",
+    "ChannelInstaller";
 
 
 //
@@ -28,10 +29,15 @@ import
 //
 module MixedLAN
     submodules:
+        channelInstaller: ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=P";
+            display: "p=75,52;i=block/cogwheel_s";
         bus: EtherBus;
             parameters:
                 positions = "10 20 24 35 40 48",
-                propagationSpeed = 200000000;  // 1us = 200m
+                propagationSpeed = 200000000; // 1us = 200m
             gatesizes:
                 in[6],
                 out[6];

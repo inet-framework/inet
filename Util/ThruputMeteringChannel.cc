@@ -79,7 +79,9 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
     // produce label, based on format string
     char buf[200];
     char *p = buf;
-    double bps = numBits/transmissionFinishes();
+    simtime_t tt = transmissionFinishes();
+    if (tt==0) tt = simulation.simTime();
+    double bps = (tt==0) ? 0 : numBits/tt;
     double bytes;
     for (const char *fp = fmt; *fp && buf+200-p>20; fp++)
     {
@@ -98,7 +100,7 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
                     p += sprintf(p, "%.3gMB", bytes/1024/1024);
                 break;
             case 'P': // average packet/sec on [0,now)
-                p += sprintf(p, "%.3gpps", count/transmissionFinishes());
+                p += sprintf(p, "%.3gpps", tt==0 ? 0 : count/tt);
                 break;
             case 'B': // average bandwidth on [0,now)
                 if (bps<1000000)
@@ -107,7 +109,10 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
                     p += sprintf(p, "%.3gM", bps/1000000);
                 break;
             case 'U': // average channel utilization (%) on [0,now)
-                p += sprintf(p, "%.3g%%", bps/datarate()*100.0);
+                if (datarate()==0)
+                    p += sprintf(p, "n/a");
+                else
+                    p += sprintf(p, "%.3g%%", bps/datarate()*100.0);
                 break;
             default:
                 *p++ = *fp;

@@ -20,7 +20,8 @@ import
     "EtherBus",
     "EtherHub",
     "EtherHost",
-    "EtherSwitch";
+    "EtherSwitch",
+    "ChannelInstaller";
 
 channel cable
     delay 0.1us

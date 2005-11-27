@@ -35,6 +35,9 @@
  *   - 'B': average bandwidth on [0,now)
  *   - 'U': average channel utilization (%) on [0,now)
  * Other characters are copied verbatim.
+ *
+ * PROBLEM: display only gets updated if there's traffic! (For example, a 
+ * high pk/sec value might stay displayed even when the link becomes idle!)
  */
 class SIM_API ThruputMeteringChannel : public cBasicChannel
 {
