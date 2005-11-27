@@ -1,4 +1,4 @@
-
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -49,7 +49,7 @@ enum LDP_STATUS_TYPES
 
 struct FEC_TLV
 {
-// 
+//
 // XXX FIXME mapping messages may contain multiple FEC elements (use std::vector)
 //
     fields:
@@ -77,7 +77,7 @@ message LDPPacket
 message LDPLabelMapping extends LDPPacket
 {
     fields:
-    	FEC_TLV fec;
+        FEC_TLV fec;
         int label;
 };
 
@@ -87,7 +87,7 @@ message LDPLabelMapping extends LDPPacket
 message LDPLabelRequest extends LDPPacket
 {
     fields:
-    	FEC_TLV fec;
+        FEC_TLV fec;
 };
 
 
@@ -107,9 +107,9 @@ message LDPHello extends LDPPacket
 //
 message LDPNotify extends LDPPacket
 {
-	fields:
-		int status;
-    	FEC_TLV fec;
+    fields:
+        int status;
+        FEC_TLV fec;
 };
 
 //

@@ -1,3 +1,7 @@
+- MPLS/LDP/RSVP: document! ScenarioManager commands, XML file formats, unimplemented features
+
+- TCP, UDP, LDP, RSVP, TED: rename gates...
+
 - rename TED to ... ? LinkStateRouting?
 
 - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
@@ -23,8 +27,6 @@
         - socket must be inserted into map before bind(), so that a userId can be assigned
         - what about incoming connections? how to assign userId to them?
            IF IT CANNOT BE DONE: remove userId from TCP!!!!
-
-- rewrite UDPApps to use UDPSocket class!
 
 - TCP/UDP: unspec port should be 0 not -1!!!
 

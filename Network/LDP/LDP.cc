@@ -24,15 +24,12 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "RoutingTableAccess.h"
-#include "UDPControlInfo_m.h"
-#include "UDPPacket.h"
-#include "TCPSegment.h"
-
 #include "MPLSAccess.h"
 #include "LIBTableAccess.h"
 #include "TEDAccess.h"
-
 #include "NotifierConsts.h"
+#include "UDPPacket.h"
+#include "TCPSegment.h"
 
 
 Define_Module(LDP);
@@ -125,7 +122,11 @@ void LDP::initialize(int stage)
     sendHelloMsg = new cMessage("LDPSendHello");
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
-    // start listening for incoming conns
+    // bind UDP socket
+    udpSocket.setOutputGate(gate("to_udp_interface"));
+    udpSocket.bind(LDP_PORT);
+
+    // start listening for incoming TCP conns
     EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
     serverSocket.setOutputGate(gate("to_tcp_interface"));
     serverSocket.bind(LDP_PORT);
@@ -401,17 +402,9 @@ void LDP::sendHelloTo(IPAddress dest)
     hello->setHoldTime(holdTime);
     //hello->setRbit(...);
     //hello->setTbit(...);
-
-    UDPControlInfo *controlInfo = new UDPControlInfo();
-    //controlInfo->setSrcAddr(rt->getRouterId());
-    controlInfo->setDestAddr(dest);
-    controlInfo->setSrcPort(LDP_PORT);
-    controlInfo->setDestPort(LDP_PORT);
-    hello->setControlInfo(controlInfo);
-
     hello->addPar("color") = LDP_HELLO_TRAFFIC;
 
-    send(hello, "to_udp_interface");
+    udpSocket.sendTo(hello, dest, LDP_PORT);
 }
 
 void LDP::processHelloTimeout(cMessage *msg)

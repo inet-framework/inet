@@ -23,7 +23,7 @@ UDPSocket::UDPSocket()
 {
     // don't allow user-specified sockIds because they may conflict with
     // automatically assigned ones.
-    sockId = ev.getUniqueNumber();
+    sockId = generateSocketId();
     usrId = -1;
     sockstate = NOT_BOUND;
 
@@ -46,6 +46,11 @@ const char *UDPSocket::stateName(int state)
     }
     return s;
 #undef CASE
+}
+
+int UDPSocket::generateSocketId()
+{
+    return ev.getUniqueNumber();
 }
 
 void UDPSocket::sendToUDP(cMessage *msg)

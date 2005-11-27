@@ -55,8 +55,13 @@ enum UDPStatusInd
 
 
 //
-// Control info for sending/receiving data via UDP. Travels between
-// application and UDP.
+// Control info for sending/receiving data via \UDP. Travels between
+// application and the UDP module.
+//
+// The most convenient way to handle UDP is the UDPSocket class, which hides
+// UDPControlInfo completely from you. But even if you manage talking
+// to UDP yourself without help from UDPSocket, sockId must be obtained 
+// from UDPSocket::generateSocketId().
 //
 //# TODO explain userId, sockId, etc.
 //
@@ -67,7 +72,7 @@ class UDPControlInfo
     properties:
         omitGetVerb = true;
     fields:
-        int sockId = -1;   // identifies the socket within the application
+        int sockId = -1;   // uniquely identifies the \UDP socket
         int userId = -1;   // id than can be freely used by the app
         IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND
         IPvXAddress destAddr; // destination \IP or \IPv6 address

@@ -1,4 +1,5 @@
 //
+// (C) 2005 Vojta Janota
 // (C) 2004 Andras Varga
 //
 // This library is free software, you can redistribute it
@@ -24,22 +25,12 @@
 // Operations
 //
 // All LDP message types are subclassed from LDPPacket, and include
-// LDPHello, LDPLabelMapping, LDPLabelRequest, LDPIni and LDPAddress.
+// LDPHello, LDPNotify, LDPLabelRequest, LDPIni and LDPAddress.
 //
-// Message processing in NewLDP module is explained in
+// Message processing in the LDP module is explained in
 // <a href="ldp-processing.html">LDP Message Processing</a>
 //
-// Collaborations
-//
-// NewLDP is implemented as a simple module. It has buffers to store Label
-// Request messages when finding the paths for FEC in these messages. NewLDP
-// can communicate directly with MPLSModule. The following messages are
-// exchanged between these two modules:
-//
-// - label requests for unknown FECs from MPLSModule to NewLDP
-// - label replies for particular FECs from NewLDP module to MPLSModule
-//
-// @author Andras Varga, based on original implementation LDPproc
+// @author Andras Varga, Vojta Janota
 //
 simple LDP
     parameters:

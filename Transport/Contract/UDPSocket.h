@@ -174,6 +174,11 @@ class INET_API UDPSocket
      */
     static const char *stateName(int state);
 
+    /**
+     * Generates a new socket id.
+     */
+    static int generateSocketId();
+
     /** @name Getter functions */
     //@{
     IPvXAddress localAddress() {return localAddr;}

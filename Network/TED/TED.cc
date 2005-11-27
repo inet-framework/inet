@@ -120,7 +120,6 @@ void TED::initialize(int stage)
     rebuildRoutingTable();
 
     announceMsg = new cMessage("announce");
-
     scheduleAt(simTime() + exponential(0.01), announceMsg);
 
     WATCH_VECTOR(ted);
@@ -130,7 +129,8 @@ void TED::handleMessage(cMessage * msg)
 {
     if (msg == announceMsg)
     {
-        delete msg;
+        delete announceMsg;
+        announceMsg = NULL;
         sendToPeers(ted, true, IPAddress());
     }
     else if (!strcmp(msg->arrivalGate()->name(), "inotify"))
@@ -431,7 +431,7 @@ void TED::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddr
         if(find(TEDPeer.begin(), TEDPeer.end(), ted[i].local) == TEDPeer.end())
             continue;
 
-        LinkStateMsg *out = new LinkStateMsg("link state message");
+        LinkStateMsg *out = new LinkStateMsg("link state");
         out->setLinkInfoArraySize(list.size());
 
         for (unsigned int j = 0; j < list.size(); j++)
@@ -556,7 +556,7 @@ void TED::sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list)
 {
     EV << "sending LINK_STATE message (ACK) to " << peer << endl;
 
-    LinkStateMsg *out = new LinkStateMsg("link state message");
+    LinkStateMsg *out = new LinkStateMsg("link state");
 
     out->setLinkInfoArraySize(list.size());
     for (unsigned int j = 0; j < list.size(); j++)

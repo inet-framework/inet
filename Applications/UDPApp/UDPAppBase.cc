@@ -19,15 +19,19 @@
 
 #include <omnetpp.h>
 #include "UDPAppBase.h"
+#include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
 
 void UDPAppBase::bindToPort(int port)
 {
     EV << "Binding to UDP port " << port << endl;
 
+    // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
+    // we just manage the UDP socket by hand...
     cMessage *msg = new cMessage("UDP_C_BIND", UDP_C_BIND);
     UDPControlInfo *ctrl = new UDPControlInfo();
     ctrl->setSrcPort(port);
+    ctrl->setSockId(UDPSocket::generateSocketId());
     msg->setControlInfo(ctrl);
     send(msg, "to_udp");
 }

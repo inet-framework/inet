@@ -23,6 +23,8 @@
 #include <vector>
 #include "INETDefs.h"
 #include "LDPPacket_m.h"
+#include "UDPSocket.h"
+#include "TCPSocket.h"
 #include "TCPSocketMap.h"
 #include "Classifier.h"
 #include "NotificationBoard.h"
@@ -116,6 +118,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     LIBTable *lt;
     TED *tedmod;
 
+    UDPSocket udpSocket;     // for sending/receiving Hello
     TCPSocket serverSocket;  // for listening on LDP_PORT
     TCPSocketMap socketMap;  // holds TCP connections with peers
 
