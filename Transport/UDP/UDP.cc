@@ -98,6 +98,8 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     sd->remotePort = ctrl->destPort();
     sd->interfaceId = ctrl->interfaceId();
 
+    if (sd->sockId==-1)
+        error("sockId in BIND message not filled in");
     if (sd->localPort==0)
         sd->localPort = getEphemeralPort();
 

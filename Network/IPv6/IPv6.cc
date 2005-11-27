@@ -91,7 +91,8 @@ void IPv6::endService(cMessage *msg)
 
 InterfaceEntry *IPv6::sourceInterfaceFrom(cMessage *msg)
 {
-    return ift->interfaceByNetworkLayerGateIndex(msg->arrivalGate()->index());
+    cGate *g = msg->arrivalGate();
+    return g ? ift->interfaceByNetworkLayerGateIndex(g->index()) : NULL;
 }
 
 void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
@@ -454,7 +455,7 @@ cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setHopLimit(datagram->hopLimit());
-    controlInfo->setInterfaceId(fromIE->interfaceId());
+    controlInfo->setInterfaceId(fromIE ? fromIE->interfaceId() : -1);
     packet->setControlInfo(controlInfo);
     delete datagram;
 

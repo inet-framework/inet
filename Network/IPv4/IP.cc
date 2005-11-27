@@ -90,7 +90,8 @@ void IP::endService(cMessage *msg)
 
 InterfaceEntry *IP::sourceInterfaceFrom(cMessage *msg)
 {
-    return ift->interfaceByNetworkLayerGateIndex(msg->arrivalGate()->index());
+    cGate *g = msg->arrivalGate();
+    return g ? ift->interfaceByNetworkLayerGateIndex(g->index()) : NULL;
 }
 
 void IP::handlePacketFromNetwork(IPDatagram *datagram)
@@ -383,7 +384,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
-    controlInfo->setInterfaceId(fromIE->interfaceId());
+    controlInfo->setInterfaceId(fromIE ? fromIE->interfaceId() : -1);
     packet->setControlInfo(controlInfo);
     delete datagram;
 

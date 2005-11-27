@@ -92,6 +92,8 @@ void InterfaceTable::receiveChangeNotification(int, cPolymorphic *)
 
 InterfaceEntry *InterfaceTable::interfaceAt(int pos)
 {
+    if (pos==-1) // -1 is commonly used as "none"
+        return NULL;
     if (pos<0 || pos>=(int)interfaces.size())
         opp_error("interfaceAt(): nonexistent interface %d", pos);
     return interfaces[pos];
