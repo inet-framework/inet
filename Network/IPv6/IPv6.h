@@ -54,13 +54,16 @@ class INET_API IPv6 : public QueueBase
     int numForwarded;
 
   protected:
+    // utility: look up interface from arrivalGate()
+    InterfaceEntry *sourceInterfaceFrom(cMessage *msg);
+
     // utility: show current statistics above the icon
     void updateDisplayString();
 
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
-    IPv6Datagram *encapsulate(cMessage *transportPacket);
+    IPv6Datagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 
     /**
      * Handle IPv6Datagram messages arriving from lower layer.
@@ -80,13 +83,7 @@ class INET_API IPv6 : public QueueBase
      * the datagram to be sent out on a specific interface, bypassing
      * the routing table.
      */
-    virtual void fragmentAndRoute(IPv6Datagram *datagram, int optOutputGateIndex=-1);
-
-    /**
-     * Used if higher layer protocol explicitly requests the datagram to be
-     * sent out on a specific interface, bypassing the routing table.
-     */
-    virtual void sendToGateIndex(IPv6Datagram *datagram, int outputGateIndex);
+    virtual void fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE=NULL);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
@@ -94,12 +91,12 @@ class INET_API IPv6 : public QueueBase
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPv6Datagram *datagram);
+    virtual void routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPv6Datagram *datagram);
+    virtual void routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -115,7 +112,7 @@ class INET_API IPv6 : public QueueBase
     /**
      * Last hoplimit check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPv6Datagram *datagram, int outputGateIndex, const MACAddress& macAddr);
+    virtual void sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr);
 
   public:
     IPv6() {}

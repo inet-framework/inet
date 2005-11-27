@@ -134,11 +134,11 @@ void IP::handleARP(ARPPacket *msg)
     delete msg->removeControlInfo();
 
     // dispatch ARP packets to ARP and let it know the gate index it arrived on
-    InterfaceEntry *srcIE = sourceInterfaceFrom(msg);
-    ASSERT(srcIE);
+    InterfaceEntry *fromIE = sourceInterfaceFrom(msg);
+    ASSERT(fromIE);
 
     IPRoutingDecision *routingDecision = new IPRoutingDecision();
-    routingDecision->setInterfaceId(srcIE->interfaceId());
+    routingDecision->setInterfaceId(fromIE->interfaceId());
     msg->setControlInfo(routingDecision);
 
     send(msg, "queueOut");
@@ -155,7 +155,7 @@ void IP::handleMessageFromHL(cMessage *msg)
     }
 
     // encapsulate and send
-    InterfaceEntry *destIE;
+    InterfaceEntry *destIE; // will be filled in by encapsulate()
     IPDatagram *datagram = encapsulate(msg, destIE);
 
     // route packet
@@ -233,7 +233,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     fragmentAndSend(datagram, destIE, nextHopAddr);
 }
 
-void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *srcIE)
+void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {
     IPAddress destAddr = datagram->destAddress();
     EV << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
@@ -244,7 +244,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     // route (provided routing table already contains srcAddr); otherwise
     // discard and continue.
     InterfaceEntry *shortestPathIE = rt->interfaceForDestAddr(datagram->srcAddress());
-    if (srcIE!=NULL && shortestPathIE!=NULL && srcIE!=shortestPathIE)
+    if (fromIE!=NULL && shortestPathIE!=NULL && fromIE!=shortestPathIE)
     {
         // FIXME count dropped
         EV << "Packet dropped.\n";
@@ -253,7 +253,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     }
 
     // if received from the network...
-    if (srcIE!=NULL)
+    if (fromIE!=NULL)
     {
         // check for local delivery
         if (rt->multicastLocalDeliver(destAddr))
@@ -314,7 +314,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
             InterfaceEntry *destIE = routes[i].interf;
 
             // don't forward to input port
-            if (destIE && destIE!=srcIE)
+            if (destIE && destIE!=fromIE)
             {
                 IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
@@ -375,7 +375,7 @@ void IP::localDeliver(IPDatagram *datagram)
 
 cMessage *IP::decapsulateIP(IPDatagram *datagram)
 {
-    InterfaceEntry *srcIE = sourceInterfaceFrom(datagram);
+    InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
     IPControlInfo *controlInfo = new IPControlInfo();
@@ -383,7 +383,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
-    controlInfo->setInterfaceId(srcIE->interfaceId());
+    controlInfo->setInterfaceId(fromIE->interfaceId());
     packet->setControlInfo(controlInfo);
     delete datagram;
 
@@ -453,7 +453,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
 }
 
 
-IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&ie)
+IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
@@ -465,12 +465,8 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&ie)
     IPAddress dest = controlInfo->destAddr();
     datagram->setDestAddress(dest);
 
-    ie = NULL;
-    if (dest.isMulticast() && controlInfo->interfaceId()!=-1)
-    {
-        // IP_MULTICAST_IF option
-        ie = ift->interfaceAt(controlInfo->interfaceId());
-    }
+    // IP_MULTICAST_IF option, but allow interface selection for unicast packets as well
+    destIE = ift->interfaceAt(controlInfo->interfaceId());
 
     IPAddress src = controlInfo->srcAddr();
 

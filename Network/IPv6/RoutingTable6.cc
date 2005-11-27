@@ -251,7 +251,7 @@ static bool toBool(const char *s, bool defaultValue=false)
 
 void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
 {
-    /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific 
+    /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific
     node's interface. We can set advertising prefixes and other variables to be used
     in RAs. The IPv6 interface data gets overwritten if lines 249 to 262 is uncommented.
     The fix is to create an XML file with all the default values. Customised XML files
@@ -261,7 +261,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
     //TODO: leave this off first!! They overwrite stuff!
-//* TODO: Wei commented out the stuff below. To be checked why (Andras).
+/* TODO: Wei commented out the stuff below. To be checked why (Andras).
     d->setMaxRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
     d->setMinRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
     d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));

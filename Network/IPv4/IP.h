@@ -74,7 +74,7 @@ class INET_API IP : public QueueBase
     /**
      * Encapsulate packet coming from higher layers into IPDatagram
      */
-    IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&ie);
+    IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 
     /**
      * Handle IPDatagram messages arriving from lower layer.
@@ -104,7 +104,7 @@ class INET_API IP : public QueueBase
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *srcIE);
+    virtual void routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the

@@ -89,6 +89,11 @@ void IPv6::endService(cMessage *msg)
         updateDisplayString();
 }
 
+InterfaceEntry *IPv6::sourceInterfaceFrom(cMessage *msg)
+{
+    return ift->interfaceByNetworkLayerGateIndex(msg->arrivalGate()->index());
+}
+
 void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 {
     // check for header biterror
@@ -113,9 +118,9 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 
     // routepacket
     if (!datagram->destAddress().isMulticast())
-        routePacket(datagram);
+        routePacket(datagram, NULL, false);
     else
-        routeMulticastPacket(datagram);
+        routeMulticastPacket(datagram, NULL, sourceInterfaceFrom(datagram));
 }
 
 void IPv6::handleMessageFromHL(cMessage *msg)
@@ -128,17 +133,15 @@ void IPv6::handleMessageFromHL(cMessage *msg)
         return;
     }
 
-    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(msg->controlInfo());
-    int optOutputGateIndex = controlInfo->inputGateIndex(); // FIXME looks a bit silly
-
     // encapsulate upper-layer packet into IPv6Datagram
-    IPv6Datagram *datagram = encapsulate(msg);
+    InterfaceEntry *destIE; // to be filled in by encapsulate()
+    IPv6Datagram *datagram = encapsulate(msg, destIE);
 
     // possibly fragment (in IPv6, only the source node does that), then route it
-    fragmentAndRoute(datagram, optOutputGateIndex);
+    fragmentAndRoute(datagram, destIE);
 }
 
-void IPv6::fragmentAndRoute(IPv6Datagram *datagram, int optOutputGateIndex)
+void IPv6::fragmentAndRoute(IPv6Datagram *datagram, InterfaceEntry *destIE)
 {
 /*
 FIXME implement fragmentation here.
@@ -150,20 +153,15 @@ FIXME implement fragmentation here.
     EV << "fragmentation not implemented yet\n";
 
     // route packet
-    if (optOutputGateIndex!=-1)
-        sendToGateIndex(datagram, optOutputGateIndex);
+    if (destIE!=NULL)
+        sendDatagramToOutput(datagram, destIE, MACAddress::BROADCAST_ADDRESS); // FIXME what MAC address to use?
     else if (!datagram->destAddress().isMulticast())
-        routePacket(datagram);
+        routePacket(datagram, destIE, true);
     else
-        routeMulticastPacket(datagram);
+        routeMulticastPacket(datagram, destIE, NULL);
 }
 
-void IPv6::sendToGateIndex(IPv6Datagram *datagram, int outputGateIndex)
-{
-    sendDatagramToOutput(datagram, outputGateIndex, MACAddress::BROADCAST_ADDRESS); // FIXME what MAC address to use?
-}
-
-void IPv6::routePacket(IPv6Datagram *datagram)
+void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
 {
     // TBD add option handling code here
     IPv6Address destAddress = datagram->destAddress();
@@ -179,9 +177,7 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         return;
     }
 
-    int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    EV << "Input Gate Index: " << inputGateIndex << endl;
-    if (inputGateIndex!=-1)
+    if (!fromHL)
     {
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
         //yes but datagrams from the ND module is getting dropped too!-WEI
@@ -242,8 +238,10 @@ void IPv6::routePacket(IPv6Datagram *datagram)
         // add result into destination cache
         rt->updateDestCache(destAddress, nextHop, interfaceId);
     }
-    EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << interfaceId << "\n";
-    ASSERT(!nextHop.isUnspecified() && interfaceId!=-1);
+
+    InterfaceEntry *ie = ift->interfaceAt(interfaceId);
+    EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->name() << "\n";
+    ASSERT(!nextHop.isUnspecified() && ie!=NULL);
 
     MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);
     if (macAddr.isUnspecified())
@@ -257,18 +255,17 @@ void IPv6::routePacket(IPv6Datagram *datagram)
     // set datagram source address if not yet set
     if (datagram->srcAddress().isUnspecified())
     {
-        const IPv6Address& srcAddr = ift->interfaceAt(interfaceId)->ipv6()->preferredAddress();
+        const IPv6Address& srcAddr = ie->ipv6()->preferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
         datagram->setSrcAddress(srcAddr);
     }
 
     // send out datagram
     numForwarded++;
-    int outputGateIndex = ift->interfaceAt(interfaceId)->outputPort();
-    sendDatagramToOutput(datagram, outputGateIndex, macAddr);
+    sendDatagramToOutput(datagram, ie, macAddr);
 }
 
-void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
+void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {
     const IPv6Address& destAddr = datagram->destAddress();
 
@@ -276,8 +273,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
     numMulticast++;
 
     // if received from the network...
-    int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    if (inputGateIndex!=-1)
+    if (fromIE!=NULL)
     {
         // deliver locally
         if (rt->localDeliver(destAddr))
@@ -314,9 +310,9 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram)
     EV << "sending out datagram on every interface (except incoming one)\n";
     for (int i=0; i<ift->numInterfaces(); i++)
     {
-        int outputGateIndex = ift->interfaceAt(i)->outputPort();
-        if (inputGateIndex!=outputGateIndex)
-            sendDatagramToOutput((IPv6Datagram *)datagram->dup(), outputGateIndex, MACAddress::BROADCAST_ADDRESS);
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        if (fromIE!=ie)
+            sendDatagramToOutput((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS);
     }
     delete datagram;
 
@@ -450,6 +446,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
 cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 {
+    InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -457,21 +454,23 @@ cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setHopLimit(datagram->hopLimit());
-    int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
-    controlInfo->setInputGateIndex(inputGateIndex);
+    controlInfo->setInterfaceId(fromIE->interfaceId());
     packet->setControlInfo(controlInfo);
     delete datagram;
 
     return packet;
 }
 
-IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket)
+IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 {
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->name());
     datagram->setByteLength(datagram->calculateHeaderByteLength());
     datagram->encapsulate(transportPacket);
+
+    // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
+    destIE = ift->interfaceAt(controlInfo->interfaceId());
 
     // set source and destination address
     IPv6Address dest = controlInfo->destAddr();
@@ -500,7 +499,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket)
     return datagram;
 }
 
-void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, int outputGateIndex, const MACAddress& macAddr)
+void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)
 {
     // hop counter check
     if (datagram->hopLimit() <= 0)
@@ -520,7 +519,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, int outputGateIndex, con
     }
 
     // send datagram to link layer
-    send(datagram, "queueOut", outputGateIndex);
+    send(datagram, "queueOut", ie->networkLayerGateIndex());
 }
 
 

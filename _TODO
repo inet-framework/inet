@@ -1,3 +1,7 @@
+- implement tunnelling
+
+- mpls models use interface NAME - why?
+
 - revise fragmentation in IP
 
 - OSPF: ifIndex-et olvas az XML-bol!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

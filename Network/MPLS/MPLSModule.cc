@@ -221,8 +221,8 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
 void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
     int gateIndex = mplsPacket->arrivalGate()->index();
-    InterfaceEntry *ientry = ift->interfaceByPortNo(gateIndex);
-    std::string senderInterface = ientry->name();
+    InterfaceEntry *ie = ift->interfaceByNetworkLayerGateIndex(gateIndex);
+    std::string senderInterface = ie->name();
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->topLabel();
 
