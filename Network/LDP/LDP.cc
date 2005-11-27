@@ -142,6 +142,7 @@ void LDP::initialize(int stage)
 
 void LDP::handleMessage(cMessage *msg)
 {
+    EV << "Received: (" << msg->className() << ")" << msg->name() << "\n";
     if (msg==sendHelloMsg)
     {
         // every LDP capable router periodically sends HELLO messages to the
@@ -154,6 +155,7 @@ void LDP::handleMessage(cMessage *msg)
     }
     else if (msg->isSelfMessage())
     {
+        EV << "Timer " << msg->name() << " expired\n";
         if (!strcmp(msg->name(), "HelloTimeout"))
         {
             processHelloTimeout(msg);
@@ -767,8 +769,9 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 */
 //    Rely on port index to find the interface name
     InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
+    if (!ie)
+        error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->name();
-
 }
 
 //bool LDP::matches(const FEC_TLV& a, const FEC_TLV& b)

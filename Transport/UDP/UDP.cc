@@ -177,67 +177,68 @@ void UDP::updateDisplayString()
     displayString().setTagArg("t",0,buf);
 }
 
-bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ctrl, SockDesc *sd)
+bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ipCtrl, SockDesc *sd)
 {
-    // Note: OVERLOADED FUNCTION, IPv4 version!
+    // IPv4 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ctrl->destAddr())
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ipCtrl->destAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ctrl->srcAddr())
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ipCtrl->srcAddr())
         return false;
-    if (sd->interfaceId!=-1 && sd->interfaceId!=ctrl->interfaceId())
+    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->interfaceId())
         return false;
     return true;
 }
 
-bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd)
+bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 {
-    // Note: OVERLOADED FUNCTION, IPv6 VERSION!
+    // IPv6 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ctrl->destAddr())
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ipCtrl->destAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ctrl->srcAddr())
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ipCtrl->srcAddr())
         return false;
-    //if (sd->interfaceId!=-1 && sd->interfaceId!=ctrl->interfaceId()) FIXME IPv6 should fill in interfaceId!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //    return false;
+    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->interfaceId())
+        return false;
     return true;
 }
 
-void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd)
+void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
 {
-    // Note: OVERLOADED FUNCTION, IPv4 VERSION!
-    // send payload with UDPControlInfo up to the application
-    UDPControlInfo *udpControlInfo = new UDPControlInfo();
-    udpControlInfo->setSockId(sd->sockId);
-    udpControlInfo->setUserId(sd->userId);
-    udpControlInfo->setSrcAddr(ctrl->srcAddr());
-    udpControlInfo->setDestAddr(ctrl->destAddr());
-    udpControlInfo->setSrcPort(udpHeader->sourcePort());
-    udpControlInfo->setDestPort(udpHeader->destinationPort());
-    udpControlInfo->setInterfaceId(ctrl->interfaceId());
-
+    // send payload with UDPControlInfo up to the application -- IPv4 version
     cMessage *copy = (cMessage *)payload->dup();
-    copy->setControlInfo(copy);
+
+    UDPControlInfo *udpCtrl = new UDPControlInfo();
+    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setUserId(sd->userId);
+    udpCtrl->setSrcAddr(ipCtrl->srcAddr());
+    udpCtrl->setDestAddr(ipCtrl->destAddr());
+    udpCtrl->setSrcPort(udpHeader->sourcePort());
+    udpCtrl->setDestPort(udpHeader->destinationPort());
+    udpCtrl->setInterfaceId(ipCtrl->interfaceId());
+    copy->setControlInfo(udpCtrl);
+
     send(copy, "to_app", sd->appGateIndex);
     numPassedUp++;
 }
 
-void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd)
+void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 {
-    // Note: OVERLOADED FUNCTION, IPv6 VERSION!
-    UDPControlInfo *udpControlInfo = new UDPControlInfo();
-    udpControlInfo->setSockId(sd->sockId);
-    udpControlInfo->setUserId(sd->userId);
-    udpControlInfo->setSrcAddr(ctrl->srcAddr());
-    udpControlInfo->setDestAddr(ctrl->destAddr());
-    udpControlInfo->setSrcPort(udpHeader->sourcePort());
-    udpControlInfo->setDestPort(udpHeader->destinationPort());
-    //udpControlInfo->setInterfaceId(ctrl->interfaceId());  FIXME add interfaceId to IPv6ControlInfo!!!
-
+    // send payload with UDPControlInfo up to the application -- IPv6 version
     cMessage *copy = (cMessage *)payload->dup();
-    copy->setControlInfo(copy);
+
+    UDPControlInfo *udpCtrl = new UDPControlInfo();
+    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setUserId(sd->userId);
+    udpCtrl->setSrcAddr(ipCtrl->srcAddr());
+    udpCtrl->setDestAddr(ipCtrl->destAddr());
+    udpCtrl->setSrcPort(udpHeader->sourcePort());
+    udpCtrl->setDestPort(udpHeader->destinationPort());
+    udpCtrl->setInterfaceId(ipCtrl->interfaceId());
+    copy->setControlInfo(udpCtrl);
+
     send(copy, "to_app", sd->appGateIndex);
     numPassedUp++;
 }
@@ -322,27 +323,27 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
 
 void UDP::processMsgFromApp(cMessage *appData)
 {
-    UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
+    UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
 
     UDPPacket *udpPacket = new UDPPacket(appData->name());
     udpPacket->setByteLength(UDP_HEADER_BYTES);
     udpPacket->encapsulate(appData);
 
     // set source and destination port
-    udpPacket->setSourcePort(udpControlInfo->srcPort());
-    udpPacket->setDestinationPort(udpControlInfo->destPort());
+    udpPacket->setSourcePort(udpCtrl->srcPort());
+    udpPacket->setDestinationPort(udpCtrl->destPort());
 
-    if (!udpControlInfo->destAddr().isIPv6())
+    if (!udpCtrl->destAddr().isIPv6())
     {
         // send to IPv4
         EV << "Sending app packet " << appData->name() << " over IPv4.\n";
         IPControlInfo *ipControlInfo = new IPControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get4());
-        ipControlInfo->setDestAddr(udpControlInfo->destAddr().get4());
-        ipControlInfo->setInterfaceId(udpControlInfo->interfaceId());
+        ipControlInfo->setSrcAddr(udpCtrl->srcAddr().get4());
+        ipControlInfo->setDestAddr(udpCtrl->destAddr().get4());
+        ipControlInfo->setInterfaceId(udpCtrl->interfaceId());
         udpPacket->setControlInfo(ipControlInfo);
-        delete udpControlInfo;
+        delete udpCtrl;
 
         send(udpPacket,"to_ip");
     }
@@ -352,11 +353,11 @@ void UDP::processMsgFromApp(cMessage *appData)
         EV << "Sending app packet " << appData->name() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get6());
-        ipControlInfo->setDestAddr(udpControlInfo->destAddr().get6());
-        // ipControlInfo->setInterfaceId(udpControlInfo->InterfaceId()); FIXME extend IPv6 with this!!!
+        ipControlInfo->setSrcAddr(udpCtrl->srcAddr().get6());
+        ipControlInfo->setDestAddr(udpCtrl->destAddr().get6());
+        // ipControlInfo->setInterfaceId(udpCtrl->InterfaceId()); FIXME extend IPv6 with this!!!
         udpPacket->setControlInfo(ipControlInfo);
-        delete udpControlInfo;
+        delete udpCtrl;
 
         send(udpPacket,"to_ipv6");
     }
@@ -365,20 +366,20 @@ void UDP::processMsgFromApp(cMessage *appData)
 
 void UDP::processCommandFromApp(cMessage *msg)
 {
-    UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
+    UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
     switch (msg->kind())
     {
         case UDP_C_BIND:
-            bind(msg->arrivalGate()->index(), udpControlInfo);
+            bind(msg->arrivalGate()->index(), udpCtrl);
             break;
         case UDP_C_UNBIND:
-            unbind(udpControlInfo->sockId());
+            unbind(udpCtrl->sockId());
             break;
         default:
             error("unknown command code (message kind) %d received from app", msg->kind());
     }
 
-    delete udpControlInfo;
+    delete udpCtrl;
     delete msg;
 }
 
