@@ -35,20 +35,29 @@ class NotificationBoard;
 class TED : public cSimpleModule
 {
   public:
+    /**
+     * Node in the network. FIXME Used what for???
+     */
     struct vertex_t
     {
-        IPAddress node;
-        int parent;
+        IPAddress node; // is this routerID or what? is it routable or not?
+        int parent;     // FIXME points into what vector????
         double dist;
     };
 
+    /**
+     * Edge in the graph. FIXME Used what for?
+     */
     struct edge_t
     {
-        int src;
-        int dest;
+        int src;   // FIXME what is this integer?? points into what vector??
+        int dest;  // FIXME what is this other integer?? points into what vector??
         double metric;
     };
 
+    /**
+     * TODO this is..........  (defined in TED.msg)
+     */
     TELinkStateInfoVector ted;
 
   public:
@@ -82,8 +91,8 @@ class TED : public cSimpleModule
     IPAddress routerId;
     NotificationBoard *nb;
 
-    IPAddressVector LocalAddress;
-    IPAddressVector TEDPeer;
+    IPAddressVector LocalAddress; // FIXME indexed by what???????????
+    IPAddressVector TEDPeer; // FIXME indexed by what???????????
 
     cMessage *announceMsg;
     int maxMessageId;

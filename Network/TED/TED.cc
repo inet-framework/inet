@@ -55,7 +55,7 @@ void TED::initialize(int stage)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
 
-        if (ie->nodeOutputGateId() == -1)
+        if (ie->nodeOutputGateId() == -1)  //FIXME is this what was meant?
             continue;
 
         for (int j = 0; j < rt->numRoutingEntries(); j++)
@@ -101,9 +101,12 @@ void TED::initialize(int stage)
         }
     }
 
-    // FIXME this looks suspicious. why store it? (Andras)
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
+        //Used to be this:
+        //  cGate *g = parentModule()->gate("out", i);
+        //  if(g) LocalAddress.push_back(ift->interfaceByPortNo(g->index())->ipv4()->inetAddress());
+        //FIXME I have no idea whether the thing below would do (Andras)
         InterfaceEntry *ie = ift->interfaceAt(i);
         LocalAddress.push_back(ie->ipv4()->inetAddress());
     }
@@ -325,12 +328,10 @@ IPAddress TED::interfaceAddrByPeerAddress(IPAddress peerIP)
 {
     std::vector<TELinkStateInfo>::iterator it;
     for (it = ted.begin(); it != ted.end(); it++)
-    {
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->local;
-    }
-    EV << "not a local peer " << peerIP << endl;
-    ASSERT(false);
+    error("not a local peer: %s", peerIP.str().c_str());
+    return IPAddress(); // prevent warning
 }
 
 IPAddress TED::peerRemoteInterface(IPAddress peerIP)
@@ -338,22 +339,19 @@ IPAddress TED::peerRemoteInterface(IPAddress peerIP)
     ASSERT(isLocalPeer(peerIP));
     std::vector<TELinkStateInfo>::iterator it;
     for (it = ted.begin(); it != ted.end(); it++)
-    {
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->remote;
-    }
-    ASSERT(false);
+    error("not a local peer: %s", peerIP.str().c_str());
+    return IPAddress(); // prevent warning
 }
 
 bool TED::isLocalPeer(IPAddress inetAddr)
 {
     std::vector<TELinkStateInfo>::iterator it;
     for (it = ted.begin(); it != ted.end(); it++)
-    {
         if (it->linkid == inetAddr && it->advrouter == routerId)
             break;
-    }
-    return (it != ted.end());
+    return it != ted.end();
 }
 
 std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVector& topology,

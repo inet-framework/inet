@@ -1243,7 +1243,7 @@ void LDP::announceLinkChange(IPAddress advrouter, IPAddress linkid)
     LinkNotifyMsg *msg = new LinkNotifyMsg("notify");
     msg->setLinkArraySize(1);
     msg->setLink(0, link);
-    sendDirect(msg, 0.0, tedmod, "inotify");
+    sendDirect(msg, 0.0, tedmod, "inotify"); //FIXME use notificationboard for this!
 }
 
 
