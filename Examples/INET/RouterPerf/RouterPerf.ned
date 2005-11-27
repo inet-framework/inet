@@ -22,26 +22,32 @@
 import
     "Router",
     "BurstHost",
-    "FlatNetworkConfigurator";
+    "FlatNetworkConfigurator",
+    "ChannelInstaller";
 
 
 module RouterPerfNetwork
     parameters:
-        nodeNo : numeric const;
+        nodeNo: numeric const;
     submodules:
+        channelInstaller: ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=U";
+            display: "p=59,211;i=block/cogwheel_s";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router BurstHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "p=60,160;i=block/cogwheel";
+            display: "p=61,163;i=block/cogwheel_s";
         sender: BurstHost[nodeNo];
-            display: "p=100,317,row;i=device/pc3,yellow,10";
+            display: "p=100,300,row,100;i=device/pc3,yellow,10";
         recip: BurstHost[nodeNo];
-            display: "p=100,68,row;i=device/pc3";
+            display: "p=100,80,row,100;i=device/pc3";
         router: Router;
-            display: "p=172,182;i=abstract/router";
+            display: "p=210,190;i=abstract/router";
     connections nocheck:
         for i=0..nodeNo-1 do
             sender[i].out++ --> datarate 1000000 --> router.in++;

@@ -23,17 +23,23 @@ import
     "ThruputMeter",
     "TCPDump",
     "FlatNetworkConfigurator",
-    "ScenarioManager";
+    "ScenarioManager",
+    "ChannelInstaller";
 
 module REDTestDebug
     submodules:
+        channelInstaller : ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=B (U)";
+            display: "i=block/cogwheel_vs";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost ThruputMeter TCPDump",
                 nonIPModuleTypes = "ThruputMeter TCPDump",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "p=283,259;i=block/cogwheel";
+            display: "p=283,259;i=block/cogwheel_vs";
         scenarioManager: ScenarioManager;
             display: "p=150,50;i=block/control_s";
         r1: Router;

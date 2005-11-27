@@ -21,7 +21,8 @@ import
     "Router",
     "StandardHost",
     "FlatNetworkConfigurator",
-    "NAMTrace";
+    "NAMTrace",
+    "ChannelInstaller";
 
 
 channel fiberline

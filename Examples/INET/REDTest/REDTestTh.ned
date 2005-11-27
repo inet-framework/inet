@@ -22,10 +22,16 @@ import
     "StandardHost",
     "ThruputMeter",
     "FlatNetworkConfigurator",
-    "ScenarioManager";
+    "ScenarioManager",
+    "ChannelInstaller";
 
 module REDTestTh
     submodules:
+        channelInstaller : ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=B (U)";
+            display: "i=block/cogwheel_vs";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost ThruputMeter",
