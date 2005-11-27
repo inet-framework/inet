@@ -1,4 +1,8 @@
-- implement tunnelling
+- create model with both Ethernet and PPP
+
+- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
+
+- IP/IPv6: implement tunnelling
 
 - mpls models use interface NAME - why?
 

@@ -101,10 +101,11 @@ void TED::initialize(int stage)
         }
     }
 
+    // FIXME this looks suspicious. why store it? (Andras)
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
-        cGate *g = parentModule()->gate("out", i);
-        if(g) LocalAddress.push_back(ift->interfaceByPortNo(g->index())->ipv4()->inetAddress());
+        InterfaceEntry *ie = ift->interfaceAt(i);
+        LocalAddress.push_back(ie->ipv4()->inetAddress());
     }
 
 
