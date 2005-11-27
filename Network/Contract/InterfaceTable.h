@@ -60,6 +60,9 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     // displays summary above the icon
     void updateDisplayString();
 
+    // discover and store which nwlayer/host gates connect to this interface
+    void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
+
   public:
     InterfaceTable();
     virtual ~InterfaceTable();

@@ -71,10 +71,10 @@ module RSVP_LSR
                 //peers = peers;
                 classifier = "classifier";
             gatesizes:
-                fromL3[sizeof(out)],
-                toL3[sizeof(out)],
-                fromL2[sizeof(out)],
-                toL2[sizeof(out)];
+                netwIn[sizeof(out)],
+                netwOut[sizeof(out)],
+                ifIn[sizeof(out)],
+                ifOut[sizeof(out)];
             display: "o=#ff8000;p=192,238;b=66,14";
         libTable: LIBTable;
             display: "i=block/table2;p=60,228";
@@ -89,11 +89,11 @@ module RSVP_LSR
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
 
-            ppp[i].netwOut --> mplsModule.fromL2[i];
-            ppp[i].netwIn <-- mplsModule.toL2[i];
+            ppp[i].netwOut --> mplsModule.ifIn[i];
+            ppp[i].netwIn <-- mplsModule.ifOut[i];
 
-            mplsModule.toL3[i] --> networkLayer.ifIn[i];
-            mplsModule.fromL3[i] <-- networkLayer.ifOut[i];
+            mplsModule.netwOut[i] --> networkLayer.ifIn[i];
+            mplsModule.netwIn[i] <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

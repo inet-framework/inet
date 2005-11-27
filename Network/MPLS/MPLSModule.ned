@@ -49,10 +49,8 @@ simple MPLSModule
 //      peers : string; // interfaces we should send labeled packets to (no loner used)
         classifier : string;
     gates:
-        in: fromL3[];
-        out: toL3[];
-        in: fromL2[];
-        out: toL2[];
-        in: fromSignalModule;
-        out: toSignalModule;
+        in: netwIn[];
+        out: netwOut[];
+        in: ifIn[];
+        out: ifOut[];
 endsimple

@@ -109,10 +109,13 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
     entry->_interfaceId = interfaces.size();
     interfaces.push_back(entry);
 
-    // fill in gates
-    if (!ifmod)
-        return; // logical interface
+    // fill in networkLayerGateIndex, nodeOutputGateId, nodeInputGateId
+    if (ifmod)
+        discoverConnectingGates(entry, ifmod);
+}
 
+void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod)
+{
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
     cModule *host = parentModule();
     while (ifmod && ifmod->parentModule()!=host)
@@ -120,31 +123,30 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
     if (!ifmod)
         opp_error("addInterface(): specified module is not in this host/router");
 
-    // find networkLayer as well
-    cModule *nwlayer = host->submodule("networkLayer");
-    if (!nwlayer) nwlayer = host->submodule("networkLayer6");
-    if (!nwlayer)
-        opp_error("addInterface(): cannot find network layer as 'networkLayer' or 'networkLayer6' submodule of %s", host->fullPath().c_str());
-
     // find gates connected to host / network layer
     cGate *nwlayerInGate=NULL, *nwlayerOutGate=NULL;
     for (int i=0; i<ifmod->gates(); i++)
     {
         cGate *g = ifmod->gate(i);
         if (!g) continue;
+
+        // find the host/router's gates that internally connect to this interface
         if (g->type()=='O' && g->toGate() && g->toGate()->ownerModule()==host)
             entry->setNodeOutputGateId(g->toGate()->id());
         if (g->type()=='I' && g->fromGate() && g->fromGate()->ownerModule()==host)
             entry->setNodeInputGateId(g->fromGate()->id());
-        if (g->type()=='O' && g->toGate() && g->toGate()->ownerModule()==nwlayer)
+
+        // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
+        if (g->type()=='O' && g->toGate() && g->toGate()->isName("ifIn"))
             nwlayerInGate = g->toGate();
-        if (g->type()=='I' && g->fromGate() && g->fromGate()->ownerModule()==nwlayer)
+        if (g->type()=='I' && g->fromGate() && g->fromGate()->isName("ifOut"))
             nwlayerOutGate = g->fromGate();
     }
+
     // consistency checks
-    if (!nwlayerInGate || !nwlayerOutGate ||
-        !nwlayerInGate->isName("ifIn") || !nwlayerOutGate->isName("ifOut") ||
-        nwlayerInGate->index()!=nwlayerOutGate->index())
+    // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
+    // are not connected to the host
+    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->index()!=nwlayerOutGate->index())
         opp_error("addInterface(): interface must be connected to network layer's ifIn[]/ifOut[] gates of the same index");
     entry->setNetworkLayerGateIndex(nwlayerInGate->index());
 }

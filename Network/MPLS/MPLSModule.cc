@@ -62,12 +62,12 @@ void MPLSModule::initialize(int stage)
 
 void MPLSModule::handleMessage(cMessage * msg)
 {
-    if (!strcmp(msg->arrivalGate()->name(), "fromL2"))
+    if (!strcmp(msg->arrivalGate()->name(), "ifIn"))
     {
         EV << "Processing message from L2: " << msg << endl;
         processPacketFromL2(msg);
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "fromL3"))
+    else if (!strcmp(msg->arrivalGate()->name(), "netwIn"))
     {
         EV << "Processing message from L3: " << msg << endl;
         processPacketFromL3(msg);
@@ -80,7 +80,7 @@ void MPLSModule::handleMessage(cMessage * msg)
 
 void MPLSModule::sendToL2(cMessage *msg, int gateIndex)
 {
-    send(msg, "toL2", gateIndex);
+    send(msg, "ifOut", gateIndex);
 }
 
 void MPLSModule::processPacketFromL3(cMessage * msg)
@@ -209,7 +209,7 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
         if (!tryLabelAndForwardIPDatagram(ipdatagram))
         {
             int gateIndex = ipdatagram->arrivalGate()->index();
-            send(ipdatagram, "toL3", gateIndex);
+            send(ipdatagram, "netwOut", gateIndex);
         }
     }
     else
@@ -236,7 +236,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(mplsPacket->decapsulate());
         delete mplsPacket;
-        send(ipdatagram, "toL3", gateIndex);
+        send(ipdatagram, "netwOut", gateIndex);
         return;
     }
 
@@ -291,7 +291,7 @@ void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
         else
         {
-            send(nativeIP, "toL3", gateIndex);
+            send(nativeIP, "netwOut", gateIndex);
         }
     }
 }
