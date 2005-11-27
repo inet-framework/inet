@@ -51,6 +51,9 @@ void TED::initialize(int stage)
 
     ASSERT(!routerId.isUnspecified());
 
+    //
+    // FIXME description: what does the following do.
+    //
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
@@ -101,6 +104,9 @@ void TED::initialize(int stage)
         }
     }
 
+    //
+    // FIXME comment: what does this do? cannot be merged into previous for() loop to ensure consistency of indices?
+    //
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         //Used to be this:
@@ -170,8 +176,8 @@ std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info)
     os << "  state:" << info.state;
     os << "  metric:" << info.metric;
     os << "  maxBW:" << info.MaxBandwidth;
-    os << "  unResvBW[7]:" << info.UnResvBandwidth[7];
-    os << "  unResvBW[4]:" << info.UnResvBandwidth[4];
+    os << "  unResvBW[7]:" << info.UnResvBandwidth[7];  // FIXME comment: what is 7 ? 
+    os << "  unResvBW[4]:" << info.UnResvBandwidth[4];  // FIXME comment: what is 4 ? 
 
     return os;
 }
@@ -196,11 +202,13 @@ int TED::assignIndex(std::vector<vertex_t>& vertices, IPAddress node)
 IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
             const TELinkStateInfoVector& topology, double req_bandwidth, int priority)
 {
+    // FIXME comment: what do we do here?
     std::vector<vertex_t> V = calculateShortestPaths(topology, req_bandwidth, priority);
 
     double minDist = LS_INFINITY;
     int minIndex = -1;
 
+    // FIXME comment: what do we do in this block?
     for (unsigned int i = 0; i < V.size(); i++)
     {
         if(V[i].dist >= minDist)
@@ -234,6 +242,7 @@ void TED::rebuildRoutingTable()
 
     std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
 
+    // remove all routing entries, except multicast ones (we don't care about them)
     int n = rt->numRoutingEntries();
     int j = 0;
     for (int i = 0; i < n; i++)
@@ -360,6 +369,8 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     std::vector<vertex_t> vertices;
     std::vector<edge_t> edges;
 
+    // select edges that have enough bandwidth left, and store them into edges[].
+    // meanwhile, collect vertices in vectices[].
     for (unsigned int i = 0; i < topology.size(); i++)
     {
         if(!topology[i].state)
@@ -380,6 +391,7 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     int srcIndex = assignIndex(vertices, srcAddr);
     vertices[srcIndex].dist = 0.0;
 
+    // FIXME comment: Dijkstra? just guessing...
     for (unsigned int i = 1; i < vertices.size(); i++)
     {
         bool mod = false;
@@ -496,12 +508,14 @@ void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
 
     bool change = false; // in topology
 
+    // loop through every link in the message
     for (unsigned int i = 0; i < n; i++)
     {
         const TELinkStateInfo& link = msg->getLinkInfo(i);
 
         TELinkStateInfo *match;
 
+        // process link if we haven't seen this already and timestamp is newer
         if(checkLinkValidity(link, &match))
         {
             ASSERT(link.sourceId == link.advrouter.getInt());
@@ -510,12 +524,13 @@ void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
 
             if(!match)
             {
-                // and we have no info on this link so far
+                // and we have no info on this link so far, store it as it is
                 ted.push_back(link);
                 change = true;
             }
             else
             {
+                // copy over the information from it
                 if(match->state != link.state)
                 {
                     match->state = link.state;

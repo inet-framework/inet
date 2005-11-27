@@ -36,27 +36,28 @@ class TED : public cSimpleModule
 {
   public:
     /**
-     * Node in the network. FIXME Used what for???
+     * Node in the network. FIXME *** Used what for? There is no class member with this type ***
      */
     struct vertex_t
     {
-        IPAddress node; // is this routerID or what? is it routable or not?
-        int parent;     // FIXME points into what vector????
+        IPAddress node; // FIXME *** is this routerID or what? is it routable or not? ***
+        int parent;     // FIXME *** points into what vector? ***
         double dist;
     };
 
     /**
-     * Edge in the graph. FIXME Used what for?
+     * Edge in the graph. FIXME *** Used what for?  There is no class member with this type ***
      */
     struct edge_t
     {
-        int src;   // FIXME what is this integer?? points into what vector??
-        int dest;  // FIXME what is this other integer?? points into what vector??
+        int src;   // FIXME *** what is this integer?? points into what vector? ***
+        int dest;  // FIXME *** what is this other integer?? points into what vector? ***
         double metric;
     };
 
-    /**
-     * TODO this is..........  (defined in TED.msg)
+    /**     
+     * TODO *** This stores what? ***
+     * (defined in TED.msg)
      */
     TELinkStateInfoVector ted;
 
@@ -91,8 +92,8 @@ class TED : public cSimpleModule
     IPAddress routerId;
     NotificationBoard *nb;
 
-    IPAddressVector LocalAddress; // FIXME indexed by what???????????
-    IPAddressVector TEDPeer; // FIXME indexed by what???????????
+    IPAddressVector LocalAddress; // FIXME *** indexed by what? ted link index? how to keep consistent? ***
+    IPAddressVector TEDPeer;      // FIXME *** indexed by what? ted link index? how to keep consistent? ***
 
     cMessage *announceMsg;
     int maxMessageId;
