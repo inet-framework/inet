@@ -127,7 +127,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
         opp_error("addInterface(): cannot find network layer as 'networkLayer' or 'networkLayer6' submodule of %s", host->fullPath().c_str());
 
     // find gates connected to host / network layer
-    cGate *nwlayerInGate, *nwlayerOutGate;
+    cGate *nwlayerInGate=NULL, *nwlayerOutGate=NULL;
     for (int i=0; i<ifmod->gates(); i++)
     {
         cGate *g = ifmod->gate(i);

@@ -1,3 +1,5 @@
+- rename TED to ... ? LinkStateRouting?
+
 - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
 - create example network with both Ethernet and PPP
