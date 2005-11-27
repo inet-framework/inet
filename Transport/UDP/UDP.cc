@@ -108,6 +108,8 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
                              sd->remotePort==0 &&
                              sd->interfaceId==-1;
 
+    EV << "Binding socket: " << *sd << "\n";
+
     // add to socketsByIdMap
     ASSERT(socketsByIdMap.find(sd->sockId)==socketsByIdMap.end());
     socketsByIdMap[sd->sockId] = sd;
@@ -125,6 +127,8 @@ void UDP::unbind(int sockId)
         error("socket id=%d doesn't exist (already closed?)", sockId);
     SockDesc *sd = it->second;
     socketsByIdMap.erase(it);
+
+    EV << "Unbinding socket: " << *sd << "\n";
 
     // remove from socketsByPortMap
     SockDescList& list = socketsByPortMap[sd->localPort];
@@ -241,8 +245,10 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl,
 void UDP::processMsgFromIP(UDPPacket *udpPacket)
 {
     // simulate checksum: discard packet if it has bit error
+    EV << "Packet " << udpPacket->name() << " received from network, dest port " << udpPacket->destinationPort() << "\n";
     if (udpPacket->hasBitError())
     {
+        EV << "Packet has bit error, discarding\n";
         delete udpPacket;
         numDroppedBadChecksum++;
         return;
@@ -254,6 +260,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
     if (it==socketsByPortMap.end())
     {
+        EV << "No socket registered on port " << destPort << ", discarding packet\n";
         delete udpPacket;
         numDroppedWrongPort++;
         // FIXME send back ICMP?
@@ -274,6 +281,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
             SockDesc *sd = *it;
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl4, sd))
             {
+                EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
                 sendUp(payload, udpPacket, ctrl4, sd);
                 matches++;
             }
@@ -287,6 +295,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
             SockDesc *sd = *it;
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl6, sd))
             {
+                EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
                 sendUp(payload, udpPacket, ctrl6, sd);
                 matches++;
             }
@@ -300,6 +309,7 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
     // send back ICMP error if there is no matching socket
     if (matches==0)
     {
+        EV << "None of the sockets on port " << destPort << " matches the packet, discarding.\n";
         numDroppedWrongPort++;
         // FIXME send back ICMP?
     }
@@ -325,6 +335,7 @@ void UDP::processMsgFromApp(cMessage *appData)
     if (!udpControlInfo->destAddr().isIPv6())
     {
         // send to IPv4
+        EV << "Sending app packet " << appData->name() << " over IPv4.\n";
         IPControlInfo *ipControlInfo = new IPControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get4());
@@ -338,6 +349,7 @@ void UDP::processMsgFromApp(cMessage *appData)
     else
     {
         // send to IPv6
+        EV << "Sending app packet " << appData->name() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSrcAddr(udpControlInfo->srcAddr().get6());
