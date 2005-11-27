@@ -52,6 +52,7 @@ class INET_API ICMPv6 : public cSimpleModule
   protected:
     // internal helper functions
     void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
+    void sendToIP(ICMPv6Message *msg); // FIXME check if really needed
 
     ICMPv6Message *createDestUnreachableMsg(int code);
     ICMPv6Message *createPacketTooBigMsg(int mtu);
@@ -70,6 +71,22 @@ class INET_API ICMPv6 : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
     virtual void processICMPv6Message(ICMPv6Message *);
+
+    /**
+     *  Respond to the machine that tried to ping us.
+     */
+    virtual void processEchoRequest(ICMPv6EchoRequestMsg *);
+
+    /**
+     *  Forward the ping reply to the "pingOut" of this module.
+     */
+    virtual void processEchoReply(ICMPv6EchoReplyMsg *);
+
+    /**
+     *  Ping a machine. The information needed to do this is in the cMessage
+     *  parameter.  TODO where in cMessage? document!!!
+     */
+    virtual void sendEchoRequest(cMessage *);
 
     /**
      * Validate the received IPv6 datagram before responding with error message.

@@ -283,7 +283,6 @@ simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
     return uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
 
-//FIXME use the above one
 simtime_t IPv6InterfaceData::generateReachableTime()
 {
     return uniform(_minRandomFactor(), _maxRandomFactor()) * baseReachableTime();

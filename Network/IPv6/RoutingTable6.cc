@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 Wei Yang, Ng
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -98,27 +99,64 @@ void RoutingTable6::initialize(int stage)
             configureInterfaceForIPv6(ie);
         }
 
-        // configure interfaces from XML config file
-        cXMLElement *config = par("routingTableFile");
-        for (cXMLElement *child=config->getFirstChild(); child; child = child->getNextSibling())
-        {
-            if (opp_strcmp(child->getTagName(),"interface")!=0)
-                continue;
-            const char *ifname = child->getAttribute("name");
-            if (!ifname)
-                error("<interface> without name attribute at %s", child->getSourceLocation());
-            InterfaceEntry *ie = ift->interfaceByName(ifname);
-            if (!ie)
-                error("no interface named %s was registered, %s", ifname, child->getSourceLocation());
-            configureInterfaceFromXML(ie, child);
-        }
+        parseXMLConfigFile();
 
-        // FIXME todo: read routing table as well
+        // skip hosts
+        if (isrouter)
+        {
+            // add globally routable prefixes to routing table
+            for (int x = 0; x < ift->numInterfaces(); x++)
+            {
+                InterfaceEntry *ie = ift->interfaceAt(x);
+
+                if (ie->isLoopback())
+                    continue;
+
+                for (int y = 0; y < ie->ipv6()->numAdvPrefixes(); y++)
+                    if (ie->ipv6()->advPrefix(y).prefix.isGlobal())
+                        addOrUpdateOwnAdvPrefix(ie->ipv6()->advPrefix(y).prefix,
+                                                ie->ipv6()->advPrefix(y).prefixLength,
+                                                x, 0);
+            }
+        }
     }
     else if (stage==4)
     {
         // configurator adds routes only in stage==3
         updateDisplayString();
+    }
+}
+
+void RoutingTable6::parseXMLConfigFile()
+{
+    // TODO to be revised by Andras
+    // configure interfaces from XML config file
+    cXMLElement *config = par("routingTableFile");
+    for (cXMLElement *child=config->getFirstChild(); child; child = child->getNextSibling())
+    {
+        //std::cout << "configuring interfaces from XML file." << endl;
+        //std::cout << "selected element is: " << child->getTagName() << endl;
+        // we ensure that the selected element is local.
+        if (opp_strcmp(child->getTagName(),"local")!=0) continue;
+        //ensure that this is the right parent module we are configuring.
+        if (opp_strcmp(child->getAttribute("node"),parentModule()->fullName())!=0)
+            continue;
+        //Go one level deeper.
+        //child = child->getFirstChild();
+        for (cXMLElement *ifTag=child->getFirstChild(); ifTag; ifTag = ifTag->getNextSibling())
+        {
+            //The next tag should be "interface".
+            if (opp_strcmp(ifTag->getTagName(),"interface")!=0)
+                continue;
+            //std::cout << "Getting attribute: name" << endl;
+            const char *ifname = ifTag->getAttribute("name");
+            if (!ifname)
+                error("<interface> without name attribute at %s", child->getSourceLocation());
+            InterfaceEntry *ie = ift->interfaceByName(ifname);
+            if (!ie)
+                error("no interface named %s was registered, %s", ifname, child->getSourceLocation());
+            configureInterfaceFromXML(ie, ifTag);
+        }
     }
 }
 
@@ -213,10 +251,17 @@ static bool toBool(const char *s, bool defaultValue=false)
 
 void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
 {
+    /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific 
+    node's interface. We can set advertising prefixes and other variables to be used
+    in RAs. The IPv6 interface data gets overwritten if lines 249 to 262 is uncommented.
+    The fix is to create an XML file with all the default values. Customised XML files
+    can be used for future protocols that requires different values. (MIPv6)*/
     IPv6InterfaceData *d = ie->ipv6();
 
     // parse basic config (attributes)
-    d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "SendAdvertisements")));//Modified by WEI
+    d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
+    //TODO: leave this off first!! They overwrite stuff!
+//* TODO: Wei commented out the stuff below. To be checked why (Andras).
     d->setMaxRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
     d->setMinRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
     d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
@@ -231,6 +276,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     d->setBaseReachableTime(OPP_Global::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
     d->setRetransTimer(OPP_Global::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
     d->setDupAddrDetectTransmits(OPP_Global::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
+*/
 
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
     // element, but we don't check that)
@@ -252,7 +298,6 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
         prefix.advOnLinkFlag = toBool(getRequiredAttr(node, "AdvOnLinkFlag"));
         prefix.advPreferredLifetime = OPP_Global::atoul(getRequiredAttr(node, "AdvPreferredLifetime"));
         prefix.advAutonomousFlag = toBool(getRequiredAttr(node, "AdvAutonomousFlag"));
-
         d->addAdvPrefix(prefix);
     }
 
@@ -262,7 +307,8 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     {
         cXMLElement *node = addrList[k];
         IPv6Address address(node->getNodeValue());
-        d->assignAddress(address, true, 0, 0);  // set up as tentative, with infinite lifetimes
+        //We can now decide if the address is tentative or not.
+        d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), 0, 0);  // set up with infinite lifetimes
     }
 }
 
@@ -496,6 +542,19 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
         metric = 10; // TBD should be filled from interface metric
     }
     route->setMetric(metric);
+
+    // then add it
+    addRoute(route);
+}
+
+void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,
+    simtime_t routerLifetime)
+{
+    // create route object
+    IPv6Route *route = new IPv6Route(IPv6Address(), 0, IPv6Route::FROM_RA);
+    route->setInterfaceID(ifID);
+    route->setNextHop(nextHop);
+    route->setMetric(10);//FIXME:should be filled from interface metric
 
     // then add it
     addRoute(route);

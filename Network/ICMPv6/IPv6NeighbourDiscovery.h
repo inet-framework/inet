@@ -199,19 +199,13 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  msg with the control info.
          */
         void sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
-            const IPv6Address& srcAddr, int inputInterfaceId);
+            const IPv6Address& srcAddr, int interfaceId);
 
         /**
          *  Send off any queued packets within the Neighbour Discovery module
          *  awaiting address resolution.
          */
         void sendQueuedPacketsToIPv6Module(Neighbour *nce);
-
-        /**
-         *  Assign a tentative address to the given Interface entry. This is a
-         *  pre-requisite step for performing Duplicate Address Detection.
-         */
-        void resolveTentativeAddress(cMessage *timerMsg);
 
         /**
          *  Initiating DAD means to send off a Neighbour Solicitation with its
@@ -225,6 +219,25 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  address as permanent address for given interface entry.
          */
         void processDADTimeout(cMessage *msg);
+
+        /************Address Autoconfiguration Stuff***************************/
+        /**
+         *  as it is not possbile to explicitly define RFC 2462. ND is the next
+         *  best place to do this.
+         *
+         *  RFC 2462-IPv6 Stateless Address Autoconfiguration: Section 1
+         *  The autoconfiguration process specified in this document applies only
+         *  to hosts and not routers. Since host autoconfiguration uses
+         *  information advertised by routers, routers will need to be configured
+         *  by some other means. However, it is expected that routers will
+         *  generate link-local addresses using the mechanism described in this
+         *  document. In addition, routers are expected to successfully pass the
+         *  Duplicate Address Detection procedure described in this document on
+         *  all addresses prior to assigning them to an interface.
+         */
+        void assignLinkLocalAddress(cMessage *timerMsg);
+
+        /************End Of Address Autoconfiguration Stuff********************/
 
         /************Router Solicitation Stuff*********************************/
         IPv6RouterSolicitation *createAndSendRSPacket(InterfaceEntry *ie);

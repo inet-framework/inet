@@ -26,8 +26,9 @@ const uint32 LINK_LOCAL_PREFIX = 0xFE800000;
 const uint32 SITE_LOCAL_PREFIX = 0xFEC00000;
 const uint32 MULTICAST_PREFIX = 0xFF000000;
 
-const uint32 LINK_LOCAL_MASK = 0xFFF00000;
-const uint32 SITE_LOCAL_MASK = 0xFFF00000;
+//Link and Site local masks should only preserve 10 bits as prefix length is 10.
+const uint32 LINK_LOCAL_MASK = 0xFFC00000;
+const uint32 SITE_LOCAL_MASK = 0xFFC00000;
 const uint32 MULTICAST_MASK = 0xFF000000;
 
 // RFC 3513: IPv6 Addressing Architecture
@@ -56,7 +57,8 @@ static int parseOctals(const char *&s, int *octals)
             if (k!=0) s--;  // "unskip" preceding ':'
             return k;
         }
-        if (octals[k]<0 || octals[k]>0xffff) // if negative or too big, return (s will point to beginning of large number)
+        // if negative or too big, return (s will point to beginning of large number)
+        if (octals[k]<0 || octals[k]>0xffff)
             return k;
         k++;  // octals[k] successfully stored
         s = e;  // skip converted hex number
@@ -362,7 +364,7 @@ bool IPv6Address::matches(const IPv6Address& prefix, int prefixLength) const
     uint32 mask[4];
     constructMask(prefixLength, mask);
 
-    // xor the bits of the 2 addresses, and the result should be zero whereever
+    // xor the bits of the 2 addresses, and the result should be zero wherever
     // the mask has 1 bits
     return (((d[0]^prefix.d[0])&mask[0]) | ((d[1]^prefix.d[1])&mask[1]) |
             ((d[2]^prefix.d[2])&mask[2]) | ((d[3]^prefix.d[3])&mask[3]))==0;

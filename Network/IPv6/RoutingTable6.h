@@ -149,6 +149,7 @@ class INET_API RoutingTable6 : public cSimpleModule
   protected:
     int numInitStages() const  {return 5;}
     void initialize(int stage);
+    void parseXMLConfigFile();
 
     /**
      * Raises an error.
@@ -262,6 +263,13 @@ class INET_API RoutingTable6 : public cSimpleModule
     void addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
                         unsigned int interfaceId, const IPv6Address& nextHop,
                         int metric=0);
+
+    /**
+     *  Adds a default route for a host. This method requires the RA's source
+     *  address and the router expiry time plus the simTime().
+     */
+    void addDefaultRoute(const IPv6Address& raSrcAddr, unsigned int ifID,
+        simtime_t routerLifetime);
 
     /**
      * Adds the given route (which can be OSPF, BGP, RIP or any other route)

@@ -194,7 +194,6 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     IPAddress nextHopAddr;
 
     // if output port was explicitly requested, use that, otherwise use IP routing
-    // FIXME needed? or it's only an option for multicast packets?
     if (destIE)
     {
         EV << "using manually specified output interface " << destIE->name() << "\n";

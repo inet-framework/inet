@@ -135,12 +135,11 @@ message ICMPv6ParamProblemMsg extends ICMPv6Message
         omitGetVerb = true;
     fields:
         int code enum(ICMPv6_PARAMETER_PROB);
-        //TODO: what is this pointer thingy?
 }
 
 //
-// Notes:
-//    1. As defined in RFC2463: Section 4
+// ICMPv6 Echo Request packet (RFC2463: Section 4).
+// Data is attached through encapsulation (see ICMPv6.cc)
 //
 message ICMPv6EchoRequestMsg extends ICMPv6Message
 {
@@ -150,9 +149,12 @@ message ICMPv6EchoRequestMsg extends ICMPv6Message
         int code; //set to 0.
         int identifier; // identifier to aid in matching Echo replies. May be Zero
         int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
-        //TODO: what kind of data?
+        //Data is attached through encapsulation. See ICMPv6.cc
 }
 
+//
+// ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ICMPv6.cc)
+//
 message ICMPv6EchoReplyMsg extends ICMPv6Message
 {
     properties:
@@ -161,5 +163,4 @@ message ICMPv6EchoReplyMsg extends ICMPv6Message
         int code; //set to 0.
         int identifier; // identifier to aid in matching Echo replies. May be Zero
         int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
-        //TODO: what kind of data?
 }

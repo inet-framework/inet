@@ -39,18 +39,17 @@ void ICMPv6::handleMessage(cMessage *msg)
         return;
     }
 
-    //TODO: need to refer to INET implementations and see how this works out.
     // request from application
     if (msg->arrivalGate()->isName("pingIn"))
     {
-        //TODO: to be implemented
-        //sendEchoRequest(msg);
+        sendEchoRequest(msg);
         return;
     }
 }
 
 void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
 {
+    ASSERT(dynamic_cast<ICMPv6Message *>(icmpv6msg));
     if (dynamic_cast<ICMPv6DestUnreachableMsg *>(icmpv6msg))
     {
         EV << "ICMPv6 Destination Unreachable Message Received." << endl;
@@ -58,26 +57,74 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
     }
     else if (dynamic_cast<ICMPv6PacketTooBigMsg *>(icmpv6msg))
     {
-        //TODO: To be implemented
+        EV << "ICMPv6 Packet Too Big Message Received." << endl;
+        errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6TimeExceededMsg *>(icmpv6msg))
     {
-        //TODO: To be implemented
+        EV << "ICMPv6 Time Exceeded Message Received." << endl;
+        errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6ParamProblemMsg *>(icmpv6msg))
     {
-        //TODO: To be implemented
+        EV << "ICMPv6 Parameter Problem Message Received." << endl;
+        errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6EchoRequestMsg *>(icmpv6msg))
     {
-        //TODO: To be implemented
+        EV << "ICMPv6 Echo Request Message Received." << endl;
+        processEchoRequest((ICMPv6EchoRequestMsg *)icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6EchoReplyMsg *>(icmpv6msg))
     {
-        //TODO: To be implemented
+        EV << "ICMPv6 Echo Reply Message Received." << endl;
+        processEchoReply((ICMPv6EchoReplyMsg *)icmpv6msg);
     }
     else
         error("Unknown message type received.\n");
+}
+
+void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
+{
+    //Create an ICMPv6 Reply Message
+    ICMPv6EchoReplyMsg *reply = new ICMPv6EchoReplyMsg("Echo Reply");
+    reply->setName((std::string(request->name())+"-reply").c_str());
+    reply->setType(ICMPv6_ECHO_REPLY);
+    reply->encapsulate(request->decapsulate());
+    
+    // TBD check what to do if dest was multicast etc?
+    IPv6ControlInfo *ctrl
+        = check_and_cast<IPv6ControlInfo *>(request->controlInfo());
+    IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
+    replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
+    //set Msg's source addr as the dest addr of request msg.
+    replyCtrl->setSrcAddr(ctrl->destAddr());
+    //set Msg's dest addr as the source addr of request msg.
+    replyCtrl->setDestAddr(ctrl->srcAddr());
+    reply->setControlInfo(replyCtrl);
+
+    delete request;
+    sendToIP(reply);
+}
+
+void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
+{
+    IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo*>(reply->removeControlInfo());
+    cMessage *payload = reply->decapsulate();
+    payload->setControlInfo(ctrl);
+    delete reply;
+    send(payload, "pingOut");
+}
+
+void ICMPv6::sendEchoRequest(cMessage *msg)
+{
+    IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo*>(msg->removeControlInfo());
+    ctrl->setProtocol(IP_PROT_IPv6_ICMP);
+    ICMPv6EchoRequestMsg *request = new ICMPv6EchoRequestMsg(msg->name());
+    request->setType(ICMPv6_ECHO_REQUEST);
+    request->encapsulate(msg);
+    request->setControlInfo(ctrl);
+    sendToIP(request);
 }
 
 void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int code)
@@ -92,11 +139,11 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
 
     ICMPv6Message *errorMsg;
 
-    // TODO finish! turn it into a switch(), etc
     if (type == ICMPv6_DESTINATION_UNREACHABLE) errorMsg = createDestUnreachableMsg(code);
-    else if (type == 2) {}
-    else if (type == 3) {}
-    else if (type == 4) {}
+    //TODO: implement MTU support.
+    else if (type == ICMPv6_PACKET_TOO_BIG) errorMsg = createPacketTooBigMsg(0);
+    else if (type == ICMPv6_TIME_EXCEEDED) errorMsg = createTimeExceededMsg(code);
+    else if (type == ICMPv6_PARAMETER_PROBLEM) {}//errorMsg = createParamProblemMsg(code);
     else error("Unknown ICMPv6 error type\n");
 
     errorMsg->encapsulate(origDatagram);
@@ -124,7 +171,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     }
 
     // debugging information
-    //ev << "sending ICMP error: " << errorMsg->type() << " / " << errorMsg->code() << endl;
+    //EV << "sending ICMP error: " << errorMsg->type() << " / " << errorMsg->code() << endl;
 }
 
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
@@ -135,6 +182,12 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
     ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
 
+    send(msg,"toIPv6");
+}
+
+void ICMPv6::sendToIP(ICMPv6Message *msg)
+{
+    // assumes IPControlInfo is already attached
     send(msg,"toIPv6");
 }
 
@@ -149,20 +202,31 @@ ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
 
 ICMPv6Message *ICMPv6::createPacketTooBigMsg(int mtu)
 {
-    //TODO: Not implemented yet
-    return &ICMPv6Message();
+    ICMPv6PacketTooBigMsg *errorMsg
+        = new ICMPv6PacketTooBigMsg("Packet Too Big");
+    errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
+    errorMsg->setCode(0);//Set to 0 by sender and ignored by receiver.
+    errorMsg->setMTU(mtu);
+    return errorMsg;
 }
 
 ICMPv6Message *ICMPv6::createTimeExceededMsg(int code)
 {
-    //TODO: Not implemented yet
-    return &ICMPv6Message();
+    ICMPv6TimeExceededMsg *errorMsg
+            = new ICMPv6TimeExceededMsg("Time Exceeded");
+    errorMsg->setType(ICMPv6_TIME_EXCEEDED);
+    errorMsg->setCode(code);
+    return errorMsg;
 }
 
 ICMPv6Message *createParamProblemMsg(int code)
 {
-    //TODO: Not implemented yet
-    return &ICMPv6Message();
+    ICMPv6ParamProblemMsg *errorMsg
+            = new ICMPv6ParamProblemMsg("Parameter Problem");
+    errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
+    errorMsg->setCode(code);
+    //TODO: What Pointer? section 3.4
+    return errorMsg;
 }
 
 bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)

@@ -20,7 +20,7 @@
 #include "IPv6NeighbourDiscovery.h"
 
 
-#define MK_RESOLVE_TENTATIVE_ADDRESS 0
+#define MK_ASSIGN_LINKLOCAL_ADDRESS 0
 #define MK_SEND_PERIODIC_RTRADV 1
 #define MK_SEND_SOL_RTRADV 2
 #define MK_INITIATE_RTRDIS 3
@@ -67,13 +67,15 @@ void IPv6NeighbourDiscovery::initialize(int stage)
             {
                 createRATimer(ie);
             }
-            if (!(ie->isLoopback()))
-            {
-                cMessage *msg = new cMessage("resolveTentativeAddr", MK_RESOLVE_TENTATIVE_ADDRESS);
-                msg->setContextPointer(ie);
-                scheduleAt(uniform(0,1), msg);//Random node bootup time
-            }
         }
+        //This simulates random node bootup time. Link local address assignment
+        //takes place during this time.
+        cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
+        //We want routers to boot up faster!
+        if (rt6->isRouter())
+            scheduleAt(uniform(0,0.3), msg);//Random Router bootup time
+        else
+            scheduleAt(uniform(0.4,1), msg);//Random Host bootup time
     }
 }
 
@@ -92,10 +94,10 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
             EV << "Sending solicited RA\n";
             sendSolicitedRA(msg);
         }
-        else if (msg->kind()==MK_RESOLVE_TENTATIVE_ADDRESS)
+        else if (msg->kind()==MK_ASSIGN_LINKLOCAL_ADDRESS)
         {
-            EV << "Resolving Tentative Address\n";
-            resolveTentativeAddress(msg);
+            EV << "Assigning Link Local Address\n";
+            assignLinkLocalAddress(msg);
         }
         else if (msg->kind()==MK_DAD_TIMEOUT)
         {
@@ -726,24 +728,27 @@ void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
     }
 }
 
-void IPv6NeighbourDiscovery::resolveTentativeAddress(cMessage *timerMsg)
+void IPv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 {
-    InterfaceEntry *ie = (InterfaceEntry *)timerMsg->contextPointer();
-    IPv6Address linkLocalAddr = ie->ipv6()->linkLocalAddress();
+    //Node has booted up. Start assigning a link-local address for each
+    //interface in this node.
+    for (int i=0; i < ift->numInterfaces(); i++)
+{
+        InterfaceEntry *ie = ift->interfaceAt(i);
 
+        //Skip the loopback interface.
+        if (ie->isLoopback()) continue;
+
+    IPv6Address linkLocalAddr = ie->ipv6()->linkLocalAddress();
     if (linkLocalAddr.isUnspecified())
     {
         //if no link local address exists for this interface, we assign one to it.
-        bubble("No link local address exists. Forming one");
+            EV << "No link local address exists. Forming one" << endl;
         linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->interfaceToken());
         ie->ipv6()->assignAddress(linkLocalAddr, true, 0, 0);
     }
 
-    if (ie->ipv6()->isTentativeAddress(linkLocalAddr))
-    {
-        //if the link local address for this interface is tentative, we initiate
-        //DAD.
-        bubble("Link Local Address is tentative. Initiate DAD");
+        //Before we can use this address, we MUST initiate DAD first.
         initiateDAD(linkLocalAddr, ie);
     }
     delete timerMsg;
@@ -767,7 +772,8 @@ void IPv6NeighbourDiscovery::initiateDAD(const IPv6Address& tentativeAddr,
     target address.*/
     IPv6Address destAddr = tentativeAddr.formSolicitedNodeMulticastAddress();
     //Send a NS
-    createAndSendNSPacket(tentativeAddr, destAddr, IPv6Address::UNSPECIFIED_ADDRESS, ie);
+    createAndSendNSPacket(tentativeAddr, destAddr,
+        IPv6Address::UNSPECIFIED_ADDRESS, ie);
     dadEntry->numNSSent++;
 
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
@@ -866,7 +872,7 @@ void IPv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
 
     //Create and schedule a message for retransmission to this module
     cMessage *rdTimeoutMsg = new cMessage("processRDTimeout", MK_RD_TIMEOUT);
-    rdTimeoutMsg->setContextPointer(ie); //Andras
+    rdTimeoutMsg->setContextPointer(ie);
     rdEntry->timeoutMsg = rdTimeoutMsg;
     rdList.insert(rdEntry);
     /*Before a host sends an initial solicitation, it SHOULD delay the
@@ -932,7 +938,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
 {
     if (validateRSPacket(rs, rsCtrlInfo) == false) return;
     //Find out which interface the RS message arrived on.
-    InterfaceEntry *ie = ift->interfaceByPortNo(rsCtrlInfo->inputGateIndex());
+    InterfaceEntry *ie = ift->interfaceAt(rsCtrlInfo->interfaceId());
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);//fetch advertising interface entry.
 
     //RFC 2461: Section 6.2.6
@@ -1042,9 +1048,9 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
     EV << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
     IPv6Address sourceAddr = ie->ipv6()->linkLocalAddress();
-    int interfaceId = ie->interfaceId();
+
     //This operation includes all options, regardless whether it is solicited or unsolicited.
-    if (ie->ipv6()->advSendAdvertisements())//if this is an advertising interface
+    if (ie->ipv6()->advSendAdvertisements()) //if this is an advertising interface
     {
         //Construct a Router Advertisment message
         IPv6RouterAdvertisement *ra = new IPv6RouterAdvertisement("RApacket");
@@ -1102,7 +1108,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
             //Now we pop the prefix info into the RA.
             ra->setPrefixInformation(i, prefixInfo);
         }
-        sendPacketToIPv6Module(ra, destAddr, sourceAddr, interfaceId);
+        sendPacketToIPv6Module(ra, destAddr, sourceAddr, ie->interfaceId());
         return ra;
     }
 }
@@ -1110,8 +1116,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
     IPv6ControlInfo *raCtrlInfo)
 {
-    int interfaceId = raCtrlInfo->interfaceId();
-    InterfaceEntry *ie = ift->interfaceAt(interfaceId);
+    InterfaceEntry *ie = ift->interfaceAt(raCtrlInfo->interfaceId());
 
     if (ie->ipv6()->advSendAdvertisements())
     {
@@ -1173,12 +1178,18 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             if (ra->sourceLinkLayerAddress().isUnspecified())
+            {
                 neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
                     simTime()+ra->routerLifetime());
                 //Note:invalidation timers are not explicitly defined.
+            }
             else
+            {
                 neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
                     ra->sourceLinkLayerAddress(), simTime()+ra->routerLifetime());
+                //According to Greg, we should add a default route for hosts as well!
+                rt6->addDefaultRoute(raSrcAddr, ifID, simTime()+ra->routerLifetime());
+            }
         }
         else
         {
@@ -1559,7 +1570,6 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
     const IPv6Address& dgSrcAddr, InterfaceEntry *ie)
 {
     MACAddress myMacAddr = ie->macAddress();
-    int interfaceId = ie->interfaceId();
 
     //Construct a Neighbour Solicitation message
     IPv6NeighbourSolicitation *ns = new IPv6NeighbourSolicitation("NSpacket");
@@ -1571,11 +1581,11 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(
     /*If the solicitation is being sent to a solicited-node multicast
     address, the sender MUST include its link-layer address (if it has
     one) as a Source Link-Layer Address option.*/
-    if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"),104) &&
-        dgSrcAddr.isUnspecified() == false)
+    if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"),104) && // FIXME what's this? make constant...
+        !dgSrcAddr.isUnspecified())
         ns->setSourceLinkLayerAddress(myMacAddr);
 
-    sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, interfaceId);
+    sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, ie->interfaceId());
 
     return ns;
 }
@@ -1584,8 +1594,7 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
     IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
-    int interfaceId = nsCtrlInfo->interfaceId();
-    InterfaceEntry *ie = ift->interfaceByPortNo(interfaceId);
+    InterfaceEntry *ie = ift->interfaceAt(nsCtrlInfo->interfaceId());
 
     IPv6Address nsTargetAddr = ns->targetAddress();
 
@@ -1667,7 +1676,6 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
     //Control Information
     IPv6Address nsSrcAddr = nsCtrlInfo->srcAddr();
     IPv6Address nsDestAddr = nsCtrlInfo->destAddr();
-    int inputGateIndex = nsCtrlInfo->inputGateIndex();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
     //solicitation is processed as described in RFC2462:section 5.4.3
@@ -1892,15 +1900,12 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
         return;
     }
 
-    //Control Information
-    int inputGateIndex = naCtrlInfo->inputGateIndex();
-
     //Neighbour Advertisement Information
     IPv6Address naTargetAddr = na->targetAddress();
 
     //First, we check if the target address in NA is found in the interface it
     //was received on is tentative.
-    InterfaceEntry *ie = ift->interfaceByPortNo(inputGateIndex);
+    InterfaceEntry *ie = ift->interfaceAt(naCtrlInfo->interfaceId());
     if (ie->ipv6()->isTentativeAddress(naTargetAddr))
     {
         error("Duplicate Address Detected! Manual attention needed!");
