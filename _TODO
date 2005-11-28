@@ -1,3 +1,7 @@
+- OSPFv2 TODO: should use the proper IPAddress class, not its own one...
+
+- BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
+
 - MPLS/LDP/RSVP: document! ScenarioManager commands, XML file formats, unimplemented features
 
 - TCP, UDP, LDP, RSVP, TED: rename gates...
@@ -63,8 +67,6 @@
 - implement class PacketQueue : public cQueue
 
 - hosts should use RouterInterface as well
-
-- gateindex in InterfaceEntry: wrong, because it can be out[] and ethOut[] as well!
 
 - add more notifications (NotificationBoard): interface up/down, routing table change, etc
 - todo for omnetpp-3.2:
