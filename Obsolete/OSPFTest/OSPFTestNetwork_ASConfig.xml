@@ -108,7 +108,7 @@
   <!-- Routers -->
   <Router id="192.168.3.2"> <!-- RT1 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -119,7 +119,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -134,7 +134,7 @@
 
   <Router id="192.168.3.3"> <!-- RT2 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -145,7 +145,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -160,7 +160,7 @@
 
   <Router id="192.168.20.1"> <!-- RT3 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -171,7 +171,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -182,7 +182,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <PointToPointInterface ifIndex="2">
+    <PointToPointInterface ifName="eth2">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>8</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -196,7 +196,7 @@
 
   <Router id="192.168.20.2"> <!-- RT4 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -207,7 +207,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>8</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -221,7 +221,7 @@
 
   <Router id="192.168.20.5"> <!-- RT5 -->
     <RFC1583Compatible />
-    <ExternalInterface ifIndex="0">
+    <ExternalInterface ifName="eth0">
       <AdvertisedExternalNetwork>
         <Address>192.168.13.0</Address>
         <Mask>255.255.255.0</Mask>
@@ -233,7 +233,7 @@
       <ForwardingAddress>0.0.0.0</ForwardingAddress>
       <ExternalRouteTag>0x00</ExternalRouteTag>
     </ExternalInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>8</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -243,7 +243,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="2">
+    <PointToPointInterface ifName="eth2">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>7</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -253,7 +253,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="3">
+    <PointToPointInterface ifName="eth3">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>6</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -263,7 +263,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <ExternalInterface ifIndex="4">
+    <ExternalInterface ifName="eth4">
       <AdvertisedExternalNetwork>
         <Address>192.168.12.0</Address>
         <Mask>255.255.255.0</Mask>
@@ -275,7 +275,7 @@
       <ForwardingAddress>0.0.0.0</ForwardingAddress>
       <ExternalRouteTag>0x00</ExternalRouteTag>
     </ExternalInterface>
-    <ExternalInterface ifIndex="5">
+    <ExternalInterface ifName="eth5">
       <AdvertisedExternalNetwork>
         <Address>192.168.14.0</Address>
         <Mask>255.255.255.0</Mask>
@@ -291,7 +291,7 @@
 
   <Router id="192.168.20.8"> <!-- RT6 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>6</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -301,7 +301,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>7</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -311,7 +311,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="2">
+    <PointToPointInterface ifName="eth2">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>6</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -325,7 +325,7 @@
 
   <Router id="192.168.20.9"> <!-- RT7 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>6</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -335,7 +335,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -346,7 +346,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <ExternalInterface ifIndex="2">
+    <ExternalInterface ifName="eth2">
       <AdvertisedExternalNetwork>
         <Address>192.168.15.0</Address>
         <Mask>255.255.255.0</Mask>
@@ -358,7 +358,7 @@
       <ForwardingAddress>0.0.0.0</ForwardingAddress>
       <ExternalRouteTag>0x00</ExternalRouteTag>
     </ExternalInterface>
-    <ExternalInterface ifIndex="3">
+    <ExternalInterface ifName="eth3">
       <AdvertisedExternalNetwork>
         <Address>192.168.12.0</Address>
         <Mask>255.255.255.0</Mask>
@@ -374,7 +374,7 @@
 
   <Router id="192.168.7.1"> <!-- RT8 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -385,7 +385,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>4</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -400,7 +400,7 @@
 
   <Router id="192.168.102.2"> <!-- RT9 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.3</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -411,7 +411,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.3</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -426,7 +426,7 @@
 
   <Router id="192.168.20.10"> <!-- RT10 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>5</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -436,7 +436,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -447,7 +447,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="2">
+    <BroadcastInterface ifName="eth2">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -471,7 +471,7 @@
 
   <Router id="192.168.100.4"> <!-- RT11 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.3</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -482,7 +482,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <BroadcastInterface ifIndex="1">
+    <BroadcastInterface ifName="eth1">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -506,7 +506,7 @@
 
   <Router id="192.168.103.11"> <!-- RT12 -->
     <RFC1583Compatible />
-    <BroadcastInterface ifIndex="0">
+    <BroadcastInterface ifName="eth0">
       <AreaID>0.0.0.3</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -517,12 +517,12 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </BroadcastInterface>
-    <HostInterface ifIndex="1">
+    <HostInterface ifName="eth1">
       <AreaID>0.0.0.3</AreaID>
       <AttachedHost>192.168.20.12</AttachedHost>
       <LinkCost>10</LinkCost>
     </HostInterface>
-    <BroadcastInterface ifIndex="2">
+    <BroadcastInterface ifName="eth2">
       <AreaID>0.0.0.3</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>

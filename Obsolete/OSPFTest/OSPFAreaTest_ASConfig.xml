@@ -80,7 +80,7 @@
   <!-- Routers -->
   <Router id="192.168.11.2"> <!-- R1 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -90,7 +90,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -100,7 +100,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <BroadcastInterface ifIndex="2">
+    <BroadcastInterface ifName="eth2">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>1</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -115,7 +115,7 @@
 
   <Router id="192.168.12.2"> <!-- R2 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -125,7 +125,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -135,7 +135,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <BroadcastInterface ifIndex="2">
+    <BroadcastInterface ifName="eth2">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>2</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -150,7 +150,7 @@
 
   <Router id="192.168.13.3"> <!-- R3 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -160,7 +160,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -170,7 +170,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="2">
+    <PointToPointInterface ifName="eth2">
       <AreaID>0.0.0.1</AreaID>
       <InterfaceOutputCost>3</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -184,7 +184,7 @@
 
   <Router id="192.168.14.2"> <!-- R4 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>4</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -194,7 +194,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.0</AreaID>
       <InterfaceOutputCost>4</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -208,7 +208,7 @@
 
   <Router id="192.168.15.2"> <!-- R5 -->
     <RFC1583Compatible />
-    <PointToPointInterface ifIndex="0">
+    <PointToPointInterface ifName="eth0">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>5</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
@@ -218,7 +218,7 @@
       <AuthenticationType>NullType</AuthenticationType>
       <AuthenticationKey>0x00</AuthenticationKey>
     </PointToPointInterface>
-    <PointToPointInterface ifIndex="1">
+    <PointToPointInterface ifName="eth1">
       <AreaID>0.0.0.2</AreaID>
       <InterfaceOutputCost>5</InterfaceOutputCost>
       <RetransmissionInterval>5</RetransmissionInterval>
