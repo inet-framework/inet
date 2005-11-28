@@ -24,6 +24,8 @@
 #include "OSPFArea.h"
 #include "OSPFInterface.h"
 #include "MessageHandler.h"
+#include "RoutingTableAccess.h"
+#include "InterfaceTableAccess.h"
 #include <string>
 #include <map>
 #include <stdlib.h>
@@ -63,7 +65,8 @@ void OSPFRouting::initialize (int stage)
         return;
     }
 
-    RoutingTable *rt = routingTableAccess.get ();
+    rt = RoutingTableAccess ().get ();
+    ift = InterfaceTableAccess ().get ();
 
     // Get routerId
     ospfRouter = new OSPF::Router (rt->getRouterId ().getInt (), this);
@@ -90,6 +93,16 @@ void OSPFRouting::handleMessage (cMessage *msg)
     ospfRouter->GetMessageHandler ()->MessageReceived (msg);
 }
 
+/**
+ * Looks up the interface name in InterfaceTable, and returns interfaceId a.k.a ifIndex.
+ */
+int OSPFRouting::ResolveInterfaceName (const std::string& name) const
+{
+    InterfaceEntry* ie = ift->interfaceByName (name.c_str());
+    if (!ie)
+        opp_error ("error reading XML config: InterfaceTable contains no interface named '%s'", name.c_str());
+    return ie->interfaceId ();
+}
 
 /**
  * Loads a list of OSPF Areas connected to this router from the config XML.
@@ -168,10 +181,11 @@ void OSPFRouting::LoadAreaFromXML (const cXMLElement& asConfig, const std::strin
 void OSPFRouting::LoadInterfaceParameters (const cXMLElement& ifConfig)
 {
     OSPF::Interface* intf          = new OSPF::Interface;
-    int              ifIndex       = atoi (ifConfig.getAttribute ("ifIndex"));
+    std::string      ifName        = ifConfig.getAttribute ("ifName");
+    int              ifIndex       = ResolveInterfaceName (ifName);
     std::string      interfaceType = ifConfig.getTagName ();
 
-    EV << "        loading " << interfaceType << " ifIndex[" << ifIndex << "]\n";
+    EV << "        loading " << interfaceType << " " << ifName << " ifIndex[" << ifIndex << "]\n";
 
     intf->SetIfIndex (ifIndex);
     if (interfaceType == "PointToPointInterface") {
@@ -282,12 +296,13 @@ void OSPFRouting::LoadInterfaceParameters (const cXMLElement& ifConfig)
  */
 void OSPFRouting::LoadExternalRoute (const cXMLElement& externalRouteConfig)
 {
-    int                       ifIndex              = atoi (externalRouteConfig.getAttribute ("ifIndex"));
+    std::string               ifName  = externalRouteConfig.getAttribute ("ifName");
+    int                       ifIndex = ResolveInterfaceName (ifName);
     OSPFASExternalLSAContents asExternalRoute;
     OSPF::RoutingTableEntry   externalRoutingEntry; // only used here to keep the path cost calculation in one place
     OSPF::IPv4AddressRange    networkAddress;
 
-    EV << "        loading ExternalInterface ifIndex[" << ifIndex << "]\n";
+    EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
     cXMLElementList ifDetails = externalRouteConfig.getChildren ();
     for (cXMLElementList::iterator exElemIt = ifDetails.begin (); exElemIt != ifDetails.end (); exElemIt++) {
@@ -343,9 +358,10 @@ void OSPFRouting::LoadHostRoute (const cXMLElement& hostRouteConfig)
     OSPF::HostRouteParameters hostParameters;
     OSPF::AreaID              hostArea;
 
-    hostParameters.ifIndex = atoi (hostRouteConfig.getAttribute ("ifIndex"));
+    std::string ifName = hostRouteConfig.getAttribute ("ifName");
+    hostParameters.ifIndex = ResolveInterfaceName (ifName);
 
-    EV << "        loading HostInterface ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
+    EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
     cXMLElementList ifDetails = hostRouteConfig.getChildren ();
     for (cXMLElementList::iterator hostElemIt = ifDetails.begin (); hostElemIt != ifDetails.end (); hostElemIt++) {

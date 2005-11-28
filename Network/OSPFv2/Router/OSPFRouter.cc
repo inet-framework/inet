@@ -1492,7 +1492,7 @@ void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const 
         RoutingEntry* entry = new RoutingEntry;
         entry->host = ULongFromIPv4Address (networkAddress);
         entry->netmask = externalRouteContents.getNetworkMask ();
-        entry->interfacePtr = InterfaceTableAccess ().get ()->interfaceByPortNo (ifIndex);
+        entry->interfacePtr = InterfaceTableAccess ().get ()->interfaceAt (ifIndex);
         entry->interfaceName = entry->interfacePtr->name ();
         entry->type = RoutingEntry::REMOTE;
         entry->source = RoutingEntry::MANUAL;

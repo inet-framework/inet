@@ -18,11 +18,11 @@ void OSPF::MessageHandler::MessageReceived (cMessage* message)
         HandleTimer (check_and_cast<OSPFTimer*> (message));
     } else {
         OSPFPacket* packet = check_and_cast<OSPFPacket*> (message);
+        EV << "Received packet: (" << packet->className () << ")" << packet->name() << "\n";
         if (packet->getRouterID () == router->GetRouterID ()) {
-            EV << "Discarding self-message.\n";
+            EV << "This packet is from ourselves, discarding.\n";
             delete message;
         } else {
-            EV << "Received packet: (" << packet->className () << ")" << packet->name() << "\n";
             ProcessPacket (packet);
         }
     }
@@ -150,13 +150,13 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
     // packet version must be OSPF version 2
     if (packet->getVersion () == 2) {
         IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->controlInfo ());
-        int             inputPort   = controlInfo->inputPort ();
+        int             interfaceId = controlInfo->interfaceId ();
         OSPF::AreaID    areaID      = packet->getAreaID ().getInt ();
         OSPF::Area*     area        = router->GetArea (areaID);
 
         if (area != NULL) {
             // packet Area ID must either match the Area ID of the receiving interface or...
-            OSPF::Interface* intf = area->GetInterface (inputPort);
+            OSPF::Interface* intf = area->GetInterface (interfaceId);
 
             if (intf == NULL) {
                 // it must be the backbone area and...
@@ -170,7 +170,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
 
                             if (virtualLinkTransitArea != NULL) {
                                 // the receiving interface must attach to the virtual link's configured transit area
-                                OSPF::Interface* virtualLinkInterface = virtualLinkTransitArea->GetInterface (inputPort);
+                                OSPF::Interface* virtualLinkInterface = virtualLinkTransitArea->GetInterface (interfaceId);
 
                                 if (virtualLinkInterface == NULL) {
                                     intf = NULL;
@@ -258,7 +258,7 @@ void OSPF::MessageHandler::SendPacket (OSPFPacket* packet, IPv4Address destinati
     ipControlInfo->setProtocol (IP_PROT_OSPF);
     ipControlInfo->setDestAddr (ULongFromIPv4Address (destination));
     ipControlInfo->setTimeToLive (ttl);
-    ipControlInfo->setOutputPort (outputIfIndex);
+    ipControlInfo->setInterfaceId (outputIfIndex);
 
     packet->setControlInfo (ipControlInfo);
     switch (packet->getType ()) {

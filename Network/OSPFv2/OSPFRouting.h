@@ -19,7 +19,7 @@
 #include <vector>
 #include <omnetpp.h>
 #include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+#include "InterfaceTable.h"
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
 
@@ -30,9 +30,11 @@
 class OSPFRouting :  public cSimpleModule
 {
   private:
-    RoutingTableAccess  routingTableAccess; ///< Provides access to the IP routing table.
-    OSPF::Router*       ospfRouter;         ///< Root object of the OSPF datastructure.
+    InterfaceTable*     ift;        ///< Provides access to the interface table.
+    RoutingTable*       rt;         ///< Provides access to the IP routing table.
+    OSPF::Router*       ospfRouter; ///< Root object of the OSPF datastructure.
 
+    int     ResolveInterfaceName (const std::string& name) const;
     void    GetAreaListFromXML (const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
     void    LoadAreaFromXML (const cXMLElement& asConfig, const std::string& areaID);
     void    LoadInterfaceParameters (const cXMLElement& ifConfig);
