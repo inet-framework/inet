@@ -11,11 +11,7 @@
 --------
 - "make dist"?
 
-- MPLS/LDP/RSVP: document! ScenarioManager commands, XML file formats, unimplemented features
-
 - TCP, UDP, LDP, RSVP, TED: rename gates...
-
-- rename TED to ... ? LinkStateRouting?
 
 - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
@@ -25,7 +21,6 @@
 
 - IP/IPv6: implement tunnelling
 
-- mpls models use interface NAME - why?
 
 - revise fragmentation in IP
 
@@ -78,6 +73,12 @@
 Note: existing other 802.11 models:
 - from CATALA MONZO ANGEL
 - from MAGNUS KARLSSON
+-----------------------
+- MPLS/LDP/RSVP: 
+    - document! ScenarioManager commands, XML file formats, unimplemented features
+    - split TED to TED+LinkStateRouting !
+    - Quagga ospfd: could it serve as OSPF_TE??
+- mpls models use interface NAME - why?
 
 -----------------------
 - OSPFv2 TODO: 
