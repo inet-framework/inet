@@ -1,12 +1,15 @@
 - hosts should use RouterInterface as well
 
-- attach IPDatagram to IPControlInfo..?
+- attach IPDatagram to IPControlInfo..? and fix UDP.
 
 - TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we 
   transition to this FIN_WAIT_1. I should in theory be deferred until we 
   actually send the FIN segment, but does no harm to do it that way.
 
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
+
+--------
+- "make dist"?
 
 - MPLS/LDP/RSVP: document! ScenarioManager commands, XML file formats, unimplemented features
 
