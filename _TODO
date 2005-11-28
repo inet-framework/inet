@@ -1,9 +1,10 @@
-- OSPFv2 TODO: 
-     - should use the proper IPAddress class, not its own one...
-     - OSPFTimer class only contains a timerKind() -- is this class necessary at all...?
-     - rename ifIndex (SetIfIndex, GetIfIndex, etc) to interfaceId AND change default value to -1!
-     - OSPFRouting::LoadInterfaceParameters: interfaceType is contained in InterfaceEntry, it's redundant to read it from XML!
-     - try to reduce size of configuration. If Zebra can do it...
+- hosts should use RouterInterface as well
+
+- attach IPDatagram to IPControlInfo..?
+
+- TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we 
+  transition to this FIN_WAIT_1. I should in theory be deferred until we 
+  actually send the FIN segment, but does no harm to do it that way.
 
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 
@@ -25,9 +26,6 @@
 
 - revise fragmentation in IP
 
-- OSPF: ifIndex-et olvas az XML-bol!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-- OSPF: szar! setOutputPort van benne!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 - IPv6RoutingTable: change _interfaceId to _ie!!!
 
 - interfaceAt -> interfaceById!!!
@@ -38,8 +36,6 @@
            IF IT CANNOT BE DONE: remove userId from TCP!!!!
 
 - TCP/UDP: unspec port should be 0 not -1!!!
-
-- attach IPDatagram to IPControlInfo..?
 
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
 
@@ -67,11 +63,7 @@
 
 - doxy: turn on generation of "called/referenced from" links
 
-- WARN_IF_ARP_OVER_PPP
-
 - implement class PacketQueue : public cQueue
-
-- hosts should use RouterInterface as well
 
 - add more notifications (NotificationBoard): interface up/down, routing table change, etc
 - todo for omnetpp-3.2:
@@ -84,8 +76,14 @@ Note: existing other 802.11 models:
 - from CATALA MONZO ANGEL
 - from MAGNUS KARLSSON
 
+-----------------------
+- OSPFv2 TODO: 
+     - should use the proper IPAddress class, not its own one...
+     - OSPFTimer class only contains a timerKind() -- is this class necessary at all...?
+     - rename ifIndex (SetIfIndex, GetIfIndex, etc) to interfaceId AND change default value to -1!
+     - OSPFRouting::LoadInterfaceParameters: interfaceType is contained in InterfaceEntry, it's redundant to read it from XML!
+     - try to reduce size of configuration. If Zebra can do it...
 ----------------------- 
- 
 into the ipv6 doc:
 "
 Currently, IPv6 support consists of several modules. The IPv6 module
