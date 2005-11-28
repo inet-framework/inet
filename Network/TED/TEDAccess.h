@@ -20,7 +20,7 @@
 #include "TED.h"
 
 /**
- * TODO documentation
+ * Provides access to the TED module.
  */
 class TEDAccess : public ModuleAccess<TED>
 {

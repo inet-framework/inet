@@ -26,7 +26,7 @@ class noncobject IPAddress;
 
 
 //
-// FIXME missing documentation
+// Represents a link in a LinkStateMsg packet.
 //
 struct TELinkStateInfo
 {
@@ -58,7 +58,8 @@ struct TELink
 
 
 //
-// FIXME missing documentation
+// Base class for protocol messages of a minimalistic link state routing
+// protocol implemented as part of the TED module.
 //
 message TEDMsg
 {

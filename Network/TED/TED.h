@@ -29,35 +29,42 @@ class InterfaceTable;
 class InterfaceEntry;
 class NotificationBoard;
 
+
 /**
- * TODO documentation
+ * Contains the Traffic Engineering Database and provides public methods
+ * to access it from MPLS signalling protocols (LDP, RSVP-TE).
+ *
+ * Also contains implementation of a minimalistic link state routing protocol.
+ *
+ * See NED file for more info.
  */
 class TED : public cSimpleModule
 {
   public:
     /**
-     * Node in the network. FIXME *** Used what for? There is no class member with this type ***
+     * Only used internally, during shortest path calculation:
+     * vertex in the graph we build from links in TELinkStateInfoVector.
      */
     struct vertex_t
     {
-        IPAddress node; // FIXME *** is this routerID or what? is it routable or not? ***
-        int parent;     // FIXME *** points into what vector? ***
-        double dist;
+        IPAddress node; // FIXME *** is this the routerID? ***
+        int parent;     // index into the same vertex_t vector
+        double dist;    // distance to root (???)
     };
 
     /**
-     * Edge in the graph. FIXME *** Used what for?  There is no class member with this type ***
+     * Only used internally, during shortest path calculation:
+     * edge in the graph we build from links in TELinkStateInfoVector.
      */
     struct edge_t
     {
-        int src;   // FIXME *** what is this integer?? points into what vector? ***
-        int dest;  // FIXME *** what is this other integer?? points into what vector? ***
-        double metric;
+        int src;       // index into the vertex_t[] vector
+        int dest;      // index into the vertex_t[] vector
+        double metric; // link cost
     };
 
-    /**     
-     * The link state database, with TODO *** This stores what? ***
-     * (defined in TED.msg)
+    /**
+     * The link state database. (TELinkStateInfoVector is defined in TED.msg)
      */
     TELinkStateInfoVector ted;
 
