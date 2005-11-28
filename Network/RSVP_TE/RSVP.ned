@@ -26,7 +26,7 @@
 // Collaborations
 //
 // \RSVP-TE communicates with the following components in the system:
-// TED, MPLSModule, and Scenario.
+// TED, MPLSModule, and may receive commands from ScenarioManager.
 //
 simple RSVP
     parameters:
