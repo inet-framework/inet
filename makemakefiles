@@ -99,7 +99,8 @@ all:
 
 	cd Examples/Ethernet && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/INET && $(MAKEMAKE) $(OPTS) -n -r
-	cd Examples/Routing && $(MAKEMAKE) $(OPTS) -n -r
+	cd Examples/OSPFv2 && $(MAKEMAKE) $(OPTS) -n -r
+	cd Examples/Quagga && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/MPLS && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/IPv6 && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/RTP && $(MAKEMAKE) $(OPTS) -n -r -X Data -X Multicast1 -X Multicast2 -X Unicast
@@ -116,8 +117,13 @@ all:
 	cd Examples/INET/BulkTransfer && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/INET/REDTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
-	cd Examples/Routing/Quagga && $(MAKEMAKE) $(ALL_MODEL_OPTS)
-	cd Examples/Routing/OSPFTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/OSPFv2/Areas && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/OSPFv2/Backbone && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/OSPFv2/FullTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/OSPFv2/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+
+	cd Examples/Quagga/RIP && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Quagga/OSPF && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MPLS/LDP && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Failure && $(MAKEMAKE) $(ALL_MODEL_OPTS)

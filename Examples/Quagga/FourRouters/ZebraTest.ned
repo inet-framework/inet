@@ -21,7 +21,7 @@
 
 import
     "Router",
-    "OspfdRouter",
+    "QuaggaRouter",
     "StandardHost",
     "FailureManager",
     "ScenarioManager";
@@ -60,19 +60,19 @@ module ZebraTest
             parameters:
                 namid = n;
             display: "p=512,242;i=device/server_l";
-        r1: OspfdRouter;
+        r1: QuaggaRouter;
             parameters:
                 namid = n + 1;
             display: "p=173,250;i=abstract/router";
-        r2: OspfdRouter;
+        r2: QuaggaRouter;
             parameters:
                 namid = n + 2;
             display: "p=284,130;i=abstract/router";
-        r3: OspfdRouter;
+        r3: QuaggaRouter;
             parameters:
                 namid = n + 3;
             display: "p=405,242;i=abstract/router";
-        r4: OspfdRouter;
+        r4: QuaggaRouter;
             parameters:
                 namid = n + 4;
             display: "p=294,370;i=abstract/router";

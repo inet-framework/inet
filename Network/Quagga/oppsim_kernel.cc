@@ -206,7 +206,8 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         if(libm->isudpsocket(socket))
         {
             InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
-            ASSERT(ie);
+            if (!ie)
+                opp_error("there is no interface with address %s", addr.str().c_str());
             libm->getudpsocket(socket)->setMulticastInterface(ie->interfaceId());
 
             return 0;
@@ -774,7 +775,13 @@ FILE* oppsim_fopen(const char * filename, const char * mode)
 
     ASSERT(*filename == '/');
 
-    std::string rpath = (libm->getrootprefix() + filename);
+    // translate "/etc/quagga/ripd.conf" to "_etc_quagga_ripd.conf"
+    char *filename2 = strdup(filename);
+    for (char *s = filename2; *s; s++)
+        if (*s == '/')
+            *s = '_';
+    std::string rpath = (libm->getrootprefix() + "/" + filename2);
+    free(filename2);
 
     EV << "real filename=" << rpath << endl;
 

@@ -23,6 +23,7 @@ import
 
 //
 // \IP router.
+//# FIXME what to do with this? cf FailureManager...
 //
 module OspfdFailed
     parameters:

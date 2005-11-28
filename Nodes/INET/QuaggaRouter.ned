@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2005 Vojta Janota
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,12 +29,13 @@ import
 
 
 //
-// \IP router.
+// Quagga-based \IP router.
 //
-module OspfdRouter
+module QuaggaRouter
     parameters:
         namid: numeric,
-        routingFile: string;
+        routingFile: string,
+        routingDaemon: string; // "ripd", "ospfd", etc.
     gates:
         in: in[];
         out: out[];
@@ -74,7 +75,7 @@ module OspfdRouter
             display: "p=150, 150;i=block/cogwheel";
         ospfd: Daemon;
             parameters:
-                server = "ospfd";
+                server = routingDaemon;
             display: "p=250, 150;i=block/cogwheel";
     connections nocheck:
         // connections to network outside
