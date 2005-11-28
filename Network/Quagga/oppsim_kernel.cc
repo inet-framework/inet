@@ -467,9 +467,9 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
 
         int interfaceId = ipControlInfo->interfaceId();
         ASSERT(interfaceId >= 0);
-        *(int*)CMSG_DATA(cmsg) = interfaceId + 1;
+        *(int*)CMSG_DATA(cmsg) = interfaceId;
 
-        EV << "IP_PKTINFO set to " << (interfaceId + 1) << endl;
+        EV << "IP_PKTINFO set to " << interfaceId << endl;
 
         ASSERT(message->msg_controllen >= cmsg->cmsg_len);
 
