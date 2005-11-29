@@ -19,8 +19,8 @@ INET-200512xx
 - new snapshot of the IPv6 module (by Wei Yang Ng)
 
 - added ability to write nam traces (Util/NAMTraceWriter, World/NAMTrace);
-  feature originally implemented by Vojta Janota (and refactored by Andras --
-  all bugs are very likely mine)
+  feature originally implemented by Vojta Janota (and refactored by Andras, 
+  so bugs are very likely mine)
 
 - implemented ThruputMeteringChannel which can display #packets, pk/sec etc
   on the links; and ChannelInstaller as a temporary solution to install
@@ -29,6 +29,10 @@ INET-200512xx
 - updated module class ctors/dtors for OMNeT++ 3.2; changed msg->length()/8 to
   msg->byteLength() and msg->setLength(8*bytes) to msg->setByteLength(bytes),
   etc.
+
+- TCP Reno bugs fixed (reported by Pascal Rousseau)
+
+- hosts have now the same queues as routers (reported by Michael Tuexen)
 
 - ev replaced with EV in every module (speed increase in Express mode)
 

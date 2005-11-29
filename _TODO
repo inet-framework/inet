@@ -1,5 +1,3 @@
-- hosts should use RouterInterface as well
-
 - attach IPDatagram to IPControlInfo..? and fix UDP.
 
 - TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we 
@@ -17,16 +15,10 @@
 
 - create example network with both Ethernet and PPP
 
-- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
 
 - IP/IPv6: implement tunnelling
 
-
 - revise fragmentation in IP
-
-- IPv6RoutingTable: change _interfaceId to _ie!!!
-
-- interfaceAt -> interfaceById!!!
 
 - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId 
         - socket must be inserted into map before bind(), so that a userId can be assigned
@@ -73,6 +65,17 @@
 Note: existing other 802.11 models:
 - from CATALA MONZO ANGEL
 - from MAGNUS KARLSSON
+-----------------------
+Interfaces:
+- IPv6RoutingTable: change _interfaceId to _ie!!!
+
+- interfaceAt -> interfaceById!!!
+
+- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable! 
+  - this makes it possible to implement interface deletion as well, with preserving ids;
+  - or just use a vector like for gates and modules? (apps must check for holes then!)
+- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
+
 -----------------------
 - MPLS/LDP/RSVP: 
     - document! ScenarioManager commands, XML file formats, unimplemented features
