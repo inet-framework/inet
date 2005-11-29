@@ -49,8 +49,8 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
-    // retransmit one segment at the front of the queue
-    conn->retransmitOneSegment();  // 20051129 (3)
+    // Reno retransmits all data (unlike Tahoe which transmits only the segment)
+    conn->retransmitData();
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)

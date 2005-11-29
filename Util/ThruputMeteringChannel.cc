@@ -23,8 +23,14 @@ Register_Class(ThruputMeteringChannel);
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel(name)
 {
     fmtp = NULL;
-    count = 0;
+    batchSize = 10;    // packets
+    maxInterval = 0.1; // seconds
+
+    numPackets = 0;
     numBits = 0;
+
+    intvlStartTime = intvlLastPkTime = 0;
+    intvlNumPackets = intvlNumBits = 0;
 }
 
 ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cBasicChannel()
@@ -43,7 +49,7 @@ ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringC
 {
     if (this==&ch) return *this;
     cBasicChannel::operator=(ch);
-    count = ch.count;
+    numPackets = ch.numPackets;
     numBits = ch.numBits;
     return *this;
 }
@@ -70,9 +76,38 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
     bool ret = cBasicChannel::deliver(msg, t);
 
     // count packets and bits
-    count++;
+    numPackets++;
     numBits += msg->length();
 
+    // packet should be counted to new interval
+    if (intvlNumPackets >= batchSize || t-intvlStartTime >= maxInterval)
+        beginNewInterval(t);
+
+    intvlNumPackets++;
+    intvlNumBits += msg->length();
+    intvlLastPkTime = t;
+
+    // update display string
+    updateDisplay();
+
+    return ret;
+}
+
+void ThruputMeteringChannel::beginNewInterval(simtime_t now)
+{
+    simtime_t duration = now - intvlStartTime;
+
+    // record measurements
+    currentBitPerSec = intvlNumBits/duration;
+    currentPkPerSec = intvlNumPackets/duration;
+
+    // restart counters
+    intvlStartTime = now;
+    intvlNumPackets = intvlNumBits = 0;
+}
+
+void ThruputMeteringChannel::updateDisplay()
+{
     // retrieve format string
     const char *fmt = fmtp ? fmtp->stringValue() : "B";
 
@@ -88,7 +123,7 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
         switch (*fp)
         {
             case 'N': // number of packets
-                p += sprintf(p, "%ld", count);
+                p += sprintf(p, "%ld", numPackets);
                 break;
             case 'V': // volume (in bytes)
                 bytes = floor(numBits/8);
@@ -99,8 +134,25 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
                 else
                     p += sprintf(p, "%.3gMB", bytes/1024/1024);
                 break;
+
+            case 'p': // current packet/sec
+                p += sprintf(p, "%.3gpps", currentPkPerSec);
+                break;
+            case 'b': // current bandwidth
+                if (currentBitPerSec<1000000)
+                    p += sprintf(p, "%.3gk", currentBitPerSec/1000);
+                else
+                    p += sprintf(p, "%.3gM", currentBitPerSec/1000000);
+                break;
+            case 'u': // current channel utilization (%)
+                if (datarate()==0)
+                    p += sprintf(p, "n/a");
+                else
+                    p += sprintf(p, "%.3g%%", currentBitPerSec/datarate()*100.0);
+                break;
+
             case 'P': // average packet/sec on [0,now)
-                p += sprintf(p, "%.3gpps", tt==0 ? 0 : count/tt);
+                p += sprintf(p, "%.3gpps", tt==0 ? 0 : numPackets/tt);
                 break;
             case 'B': // average bandwidth on [0,now)
                 if (bps<1000000)
@@ -122,7 +174,5 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
 
     // display label
     fromGate()->displayString().setTagArg("t", 0, buf);
-
-    return ret;
 }
 

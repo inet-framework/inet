@@ -31,20 +31,47 @@
  * In the format string, the following characters will get expanded:
  *   - 'N': number of packets
  *   - 'V': volume (in bytes)
+ *   - 'p': current packet/sec
+ *   - 'b': current bandwidth
+ *   - 'u': current channel utilization (%)
  *   - 'P': average packet/sec on [0,now)
  *   - 'B': average bandwidth on [0,now)
  *   - 'U': average channel utilization (%) on [0,now)
  * Other characters are copied verbatim.
  *
- * PROBLEM: display only gets updated if there's traffic! (For example, a 
+ * "Current" actually means the last measurement interval, which is
+ * 10 packets or 0.1s, whichever comes first.
+ *
+ * PROBLEM: display only gets updated if there's traffic! (For example, a
  * high pk/sec value might stay displayed even when the link becomes idle!)
  */
 class SIM_API ThruputMeteringChannel : public cBasicChannel
 {
   protected:
-    long count;
+    // configuration
+    cPar *fmtp;      // display format
+    int batchSize;   // number of packets in a batch
+    int maxInterval; // max length of measurement interval (measurement ends
+                     // if either batchSize or maxInterval is reached, whichever
+                     // is reached first)
+
+    // global statistics
+    long numPackets;
     double numBits; // double to avoid overflow
-    cPar *fmtp;
+
+    // current measurement interval
+    simtime_t intvlStartTime;
+    simtime_t intvlLastPkTime;
+    unsigned long intvlNumPackets;
+    unsigned long intvlNumBits;
+
+    // reading from last interval
+    double currentBitPerSec;
+    double currentPkPerSec;
+
+  protected:
+    void beginNewInterval(simtime_t now);
+    void updateDisplay();
 
   public:
     /**
@@ -73,8 +100,14 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
      */
     virtual cPolymorphic *dup() const  {return new ThruputMeteringChannel(*this);}
 
+    /**
+     * Redefined to add an extra attribute
+     */
     virtual cPar& addPar(const char *s);
 
+    /**
+     * Redefined to add an extra attribute
+     */
     virtual cPar& addPar(cPar *p);
 
     /**

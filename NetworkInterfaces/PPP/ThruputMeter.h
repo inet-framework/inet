@@ -27,25 +27,27 @@
 /**
  * Measures and records network thruput
  */
+// FIXME problem: if traffic suddenly stops, it'll show the last reading forever;
+// (output vector will be correct though); would need a timer to handle this situation
 class INET_API ThruputMeter : public cSimpleModule
 {
   private:
     // config
-    simtime_t starttime; // start time
-    int batchsize;   // number of packets in a batch
-    int maxinterval; // max length of measurement interval (measurement ends
-                     // if either batchsize or maxinterval is reached, whichever
+    simtime_t startTime; // start time
+    int batchSize;   // number of packets in a batch
+    int maxInterval; // max length of measurement interval (measurement ends
+                     // if either batchSize or maxInterval is reached, whichever
                      // is reached first)
 
     // global statistics
-    unsigned long numpackets;
-    unsigned long numbits;
+    unsigned long numPackets;
+    unsigned long numBits;
 
     // current measurement interval
-    simtime_t intvl_starttime;
-    simtime_t intvl_lastpktime;
-    unsigned long intvl_numpackets;
-    unsigned long intvl_numbits;
+    simtime_t intvlStartTime;
+    simtime_t intvlLastPkTime;
+    unsigned long intvlNumPackets;
+    unsigned long intvlNumBits;
 
     // statistics
     cOutVector bitpersecVector;

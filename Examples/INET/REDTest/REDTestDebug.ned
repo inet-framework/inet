@@ -31,7 +31,7 @@ module REDTestDebug
         channelInstaller : ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=B (U)";
+                channelAttrs = "format=b (u)";
             display: "i=block/cogwheel_vs";
         configurator: FlatNetworkConfigurator;
             parameters:

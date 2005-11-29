@@ -24,19 +24,19 @@ Define_Module(ThruputMeter);
 
 void ThruputMeter::initialize()
 {
-    starttime = par("startTime");
-    batchsize = par("batchSize");
-    maxinterval = par("maxInterval");
+    startTime = par("startTime");
+    batchSize = par("batchSize");
+    maxInterval = par("maxInterval");
 
-    numpackets = numbits = 0;
-    intvl_starttime = intvl_lastpktime = 0;
-    intvl_numpackets = intvl_numbits = 0;
+    numPackets = numBits = 0;
+    intvlStartTime = intvlLastPkTime = 0;
+    intvlNumPackets = intvlNumBits = 0;
 
-    WATCH(numpackets);
-    WATCH(numbits);
-    WATCH(intvl_starttime);
-    WATCH(intvl_numpackets);
-    WATCH(intvl_numbits);
+    WATCH(numPackets);
+    WATCH(numBits);
+    WATCH(intvlStartTime);
+    WATCH(intvlNumPackets);
+    WATCH(intvlNumBits);
 
     bitpersecVector.setName("thruput (bit/sec)");
     pkpersecVector.setName("packet/sec");
@@ -50,44 +50,44 @@ void ThruputMeter::handleMessage(cMessage *msg)
 
 void ThruputMeter::updateStats(simtime_t now, unsigned long bits)
 {
-    numpackets++;
-    numbits += bits;
+    numPackets++;
+    numBits += bits;
 
     // packet should be counted to new interval
-    if (intvl_numpackets >= batchsize || now-intvl_starttime >= maxinterval)
+    if (intvlNumPackets >= batchSize || now-intvlStartTime >= maxInterval)
         beginNewInterval(now);
 
-    intvl_numpackets++;
-    intvl_numbits += bits;
-    intvl_lastpktime = now;
+    intvlNumPackets++;
+    intvlNumBits += bits;
+    intvlLastPkTime = now;
 }
 
 void ThruputMeter::beginNewInterval(simtime_t now)
 {
-    simtime_t duration = now - intvl_starttime;
+    simtime_t duration = now - intvlStartTime;
 
     // record measurements
-    double bitpersec = intvl_numbits/duration;
-    double pkpersec = intvl_numpackets/duration;
+    double bitpersec = intvlNumBits/duration;
+    double pkpersec = intvlNumPackets/duration;
 
-    bitpersecVector.recordWithTimestamp(intvl_starttime, bitpersec);
-    pkpersecVector.recordWithTimestamp(intvl_starttime, pkpersec);
+    bitpersecVector.recordWithTimestamp(intvlStartTime, bitpersec);
+    pkpersecVector.recordWithTimestamp(intvlStartTime, pkpersec);
 
     // restart counters
-    intvl_starttime = now;  // FIXME this should be *beginning* of tx of this packet, not end!
-    intvl_numpackets = intvl_numbits = 0;
+    intvlStartTime = now;  // FIXME this should be *beginning* of tx of this packet, not end!
+    intvlNumPackets = intvlNumBits = 0;
 }
 
 void ThruputMeter::finish()
 {
-    simtime_t duration = simTime() - starttime;
+    simtime_t duration = simTime() - startTime;
 
     recordScalar("duration", duration);
-    recordScalar("total packets", numpackets);
-    recordScalar("total bits", numbits);
+    recordScalar("total packets", numPackets);
+    recordScalar("total bits", numBits);
 
-    recordScalar("avg throughput (bit/s)", numbits/duration);
-    recordScalar("avg packets/s", numpackets/duration);
+    recordScalar("avg throughput (bit/s)", numBits/duration);
+    recordScalar("avg packets/s", numPackets/duration);
 }
 
 
