@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2005 Vojta Janota
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,10 +22,9 @@ import
 
 
 //
-// \IP router.
-//# FIXME what to do with this? cf FailureManager...
+// A failed \IP router. Simply discards all packets it receives, and that's all.
 //
-module OspfdFailed
+module FailedRouter
     parameters:
         namid: numeric,
         routingFile: string;
@@ -43,7 +42,6 @@ module OspfdFailed
                 out[sizeof(out)],
                 ethIn[sizeof(ethIn)],
                 ethOut[sizeof(ethOut)];
-
     connections nocheck:
         for i=0..sizeof(out)-1 do
             in[i] --> dummy.in[i];

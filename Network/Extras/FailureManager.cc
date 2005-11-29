@@ -30,7 +30,7 @@ void FailureManager::handleMessage(cMessage *msg)
     ASSERT(false);
 }
 
-cModule* FailureManager::getTargetNode(const char *target)
+cModule *FailureManager::getTargetNode(const char *target)
 {
     cModule *mod = simulation.moduleByPath(target);
     ASSERT(mod);
@@ -47,10 +47,8 @@ void FailureManager::processCommand(const cXMLElement& node)
             replaceNode(target, "RSVP_FAILED");
         else if(!strcmp(target->moduleType()->name(), "LDP_LSR"))
             replaceNode(target, "LDP_FAILED");
-        else if(!strcmp(target->moduleType()->name(), "RipdRouter"))
-            replaceNode(target, "RipdFailed");
-        else if(!strcmp(target->moduleType()->name(), "OspfdRouter"))
-            replaceNode(target, "OspfdFailed");
+        else if(!strcmp(target->moduleType()->name(), "QuaggaRouter"))
+            replaceNode(target, "FailedRouter");
         else
             ASSERT(false);
     }
@@ -60,10 +58,8 @@ void FailureManager::processCommand(const cXMLElement& node)
             replaceNode(target, "RSVP_LSR");
         else if(!strcmp(target->moduleType()->name(), "LDP_FAILED"))
             replaceNode(target, "LDP_LSR");
-        else if(!strcmp(target->moduleType()->name(), "RipdFailed"))
-            replaceNode(target, "RipdRouter");
-        else if(!strcmp(target->moduleType()->name(), "OspfdFailed"))
-            replaceNode(target, "OspfdRouter");
+        else if(!strcmp(target->moduleType()->name(), "FailedRouter"))
+            replaceNode(target, "QuaggaRouter");
         else
             ASSERT(false);
     }

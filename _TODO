@@ -7,6 +7,8 @@
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 
 --------
+- put NAMTraceWriter into all routers
+
 - "make dist"?
 
 - TCP, UDP, LDP, RSVP, TED: rename gates...
