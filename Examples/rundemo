@@ -74,10 +74,10 @@ foreach line {
    {"Network1"               "Quagga/Network1"      "./ZebraTest"             "ZebraTest"}
 
    {"OSPFv2"}
+   {"SimpleTest"             "OSPFv2/SimpleTest"    "./OSPF"                  "OSPF"}
    {"Areas"                  "OSPFv2/Areas"         "./OSPF"                  "OSPF"}
    {"Backbone"               "OSPFv2/Backbone"      "./OSPF"                  "OSPF"}
    {"FullTest"               "OSPFv2/FullTest"      "./OSPF"                  "OSPF"}
-   {"SimpleTest"             "OSPFv2/SimpleTest"    "./OSPF"                  "OSPF"}
 } {
    lappend samples $i
    if {[llength $line]==0} {

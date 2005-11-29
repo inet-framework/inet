@@ -32,7 +32,7 @@ module MixedLAN
         channelInstaller: ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=P";
+                channelAttrs = "format=#N";
             display: "p=75,52;i=block/cogwheel_s";
         bus: EtherBus;
             parameters:

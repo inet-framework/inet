@@ -8,7 +8,7 @@ module Backbone
         channelInstaller : ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=B (U)";
+                channelAttrs = "format=#N";
             display: "i=block/cogwheel";
         R1: OSPFRouter;
             gatesizes:

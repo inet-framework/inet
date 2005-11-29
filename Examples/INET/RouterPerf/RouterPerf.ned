@@ -33,7 +33,7 @@ module RouterPerfNetwork
         channelInstaller: ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=U";
+                channelAttrs = "format=u";
             display: "p=59,211;i=block/cogwheel_s";
         configurator: FlatNetworkConfigurator;
             parameters:

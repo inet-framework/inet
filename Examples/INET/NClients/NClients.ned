@@ -39,35 +39,35 @@ module NClients
     parameters:
         n: numeric const;
     submodules:
-        channelInstaller : ChannelInstaller;
+        channelInstaller: ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=B (U)";
-            display: "i=block/cogwheel";
+                channelAttrs = "format=u";
+            display: "p=98,50;i=block/cogwheel_s";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "i=block/cogwheel";
+            display: "p=185,50;i=block/cogwheel_s";
         nam: NAMTrace;
-            display: "i=block/cogwheel";
+            display: "p=260,50;i=block/cogwheel_s";
         r1: Router;
-            display: "i=abstract/router";
+            display: "p=186,250;i=abstract/router";
         r2: Router;
-            display: "i=abstract/router";
+            display: "p=304,220;i=abstract/router";
         r3: Router;
-            display: "i=abstract/router";
+            display: "p=433,250;i=abstract/router";
         cli: StandardHost[n];
             display: "i=device/laptop";
         srv: StandardHost;
-            display: "i=device/server_l";
+            display: "p=544,194;i=device/server_l";
     connections nocheck:
         for i=0..n-1 do
             cli[i].out++ --> ethernetline --> r1.in++;
             cli[i].in++ <-- ethernetline <-- r1.out++;
-        endfor
+        endfor;
 
         r1.out++ --> ethernetline --> r2.in++;
         r1.in++ <-- ethernetline <-- r2.out++;

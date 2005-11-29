@@ -50,7 +50,7 @@ module ZebraTest
         channelInstaller: ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
-                channelAttrs = "format=N (U)";
+                channelAttrs = "format=u #N";
             display: "p=284,50;i=block/cogwheel_s";
         cli: StandardHost[n];
             parameters:
