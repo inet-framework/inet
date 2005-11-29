@@ -96,9 +96,9 @@ NetworkInterfaces/PPP/PPPInterface.ned
 NetworkInterfaces/PPP/PPPInterfaceNoQueue.ned
 NetworkInterfaces/PPP/ThruputMeter.ned
 Nodes/INET/BurstHost.ned
+Nodes/INET/FailedRouter.ned
 Nodes/INET/MobileHost.ned
 Nodes/INET/NetworkLayer.ned
-Nodes/INET/OspfdFailed.ned
 Nodes/INET/OSPFRouter.ned
 Nodes/INET/QuaggaRouter.ned
 Nodes/INET/Router.ned
