@@ -36,6 +36,7 @@ set first ""
 foreach line {
    {"INET Framework"}
    {"About..."               "README"               "../Documentation/index.html"}
+
    {"INET"}
    {"NClients/Telnet"        "INET/NClients"        "./NClients"              "NClients"}
    {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
@@ -68,6 +69,15 @@ foreach line {
    {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
    {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
    {"LDP/test"               "MPLS/LDP"             "./TestTE"                "TestTE"}
+
+   {"Quagga Routing"}
+   {"Network1"               "Quagga/Network1"      "./ZebraTest"             "ZebraTest"}
+
+   {"OSPFv2"}
+   {"Areas"                  "OSPFv2/Areas"         "./OSPF"                  "OSPF"}
+   {"Backbone"               "OSPFv2/Backbone"      "./OSPF"                  "OSPF"}
+   {"FullTest"               "OSPFv2/FullTest"      "./OSPF"                  "OSPF"}
+   {"SimpleTest"             "OSPFv2/SimpleTest"    "./OSPF"                  "OSPF"}
 } {
    lappend samples $i
    if {[llength $line]==0} {
