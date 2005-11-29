@@ -19,26 +19,38 @@
 
 import
     "EtherMAC",
-    "EtherEncap";
+    "EtherEncap",
+    "OutputQueue";
 
 //
 // Ethernet network interface. Corresponds to the prototype NetworkInterface.
+// Complements EtherMAC and EtherEncap with an output queue for QoS and 
+// RED support.
+//
+// @see EthernetInterfaceNoQueue
 //
 module EthernetInterface
+    parameters:
+        queueType: string;
     gates:
-        in: physIn, netwIn;
-        out: physOut, netwOut;
+        in: physIn;
+        in: netwIn;
+        out: physOut;
+        out: netwOut;
     submodules:
+        queue: queueType like OutputQueue;
+            display: "i=block/queue;p=92,71;q=l2queue";
         mac: EtherMAC;
-            parameters: 
-                queueModule = "",
-                txQueueLimit = 100000; // prevents overflow in bogus simulations
-            display: "i=block/rxtx;p=100,160;q=txQueue";
+            parameters:
+                queueModule = "queue",
+                txQueueLimit = 1; // queue sends one packet at a time
+            display: "i=block/rxtx;p=116,231";
         encap: EtherEncap;
-            display: "i=block/square;p=100,80";
+            display: "i=block/square;p=116,151";
     connections:
-        netwIn --> encap.upperLayerIn;
-        netwOut <-- encap.upperLayerOut;
+        netwIn --> queue.in;
+        queue.out --> encap.upperLayerIn;
+        netwOut <-- encap.upperLayerOut display "m=n";
         encap.lowerLayerOut --> mac.upperLayerIn;
         encap.lowerLayerIn <-- mac.upperLayerOut;
         mac.physIn <-- physIn;

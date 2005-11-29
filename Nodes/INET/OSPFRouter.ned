@@ -21,8 +21,8 @@ import
     "NotificationBoard",
     "InterfaceTable",
     "RoutingTable",
-    "PPPRouterInterface",
-    "EthernetRouterInterface",
+    "PPPInterface",
+    "EthernetInterface",
     "NetworkLayer",
     "OSPFRouting";
 
@@ -58,10 +58,10 @@ module OSPFRouter
                 ifIn[sizeof(out)+sizeof(ethOut)],
                 ifOut[sizeof(out)+sizeof(ethOut)];
             display: "p=200,140;i=block/fork;q=queue";
-        ppp: PPPRouterInterface[sizeof(out)];
-            display: "p=90,257,row,110;q=queue;i=block/ifcard";
-        eth: EthernetRouterInterface[sizeof(ethOut)];
-            display: "p=145,257,row,110;q=queue;i=block/ifcard";
+        ppp: PPPInterface[sizeof(out)];
+            display: "p=90,257,row,110;q=l2queue;i=block/ifcard";
+        eth: EthernetInterface[sizeof(ethOut)];
+            display: "p=145,257,row,110;q=l2queue;i=block/ifcard";
     connections nocheck:
         ospf.to_ip --> networkLayer.OSPFIn;
         ospf.from_ip <-- networkLayer.OSPFOut;

@@ -40,7 +40,7 @@
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see PPPInterface, PPPRouterInterface, OutputQueue, PPPFrame
+// @see PPPInterface, OutputQueue, PPPFrame
 //
 simple PPP
     parameters:

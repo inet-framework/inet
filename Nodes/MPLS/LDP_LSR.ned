@@ -77,8 +77,8 @@ module LDP_LSR
                 ifIn[sizeof(out)],
                 ifOut[sizeof(out)];
             display: "p=224,223;i=block/fork";
-        ppp: PPPRouterInterface[sizeof(out)];
-            display: "p=105,388,row,90;q=queue;i=block/ifcard";
+        ppp: PPPInterface[sizeof(out)];
+            display: "p=105,388,row,90;q=l2queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 //peers = peers,

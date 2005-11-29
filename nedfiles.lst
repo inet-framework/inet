@@ -71,7 +71,7 @@ NetworkInterfaces/Ethernet/EtherHub.ned
 NetworkInterfaces/Ethernet/EtherLLC.ned
 NetworkInterfaces/Ethernet/EtherMAC.ned
 NetworkInterfaces/Ethernet/EthernetInterface.ned
-NetworkInterfaces/Ethernet/EthernetRouterInterface.ned
+NetworkInterfaces/Ethernet/EthernetInterfaceNoQueue.ned
 NetworkInterfaces/EtherSwitch/EtherSwitch.ned
 NetworkInterfaces/EtherSwitch/MACRelayUnit.ned
 NetworkInterfaces/EtherSwitch/MACRelayUnitNP.ned
@@ -93,7 +93,7 @@ NetworkInterfaces/MFCore/BasicSnrEval.ned
 NetworkInterfaces/MFCore/WirelessMac.ned
 NetworkInterfaces/PPP/PPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
-NetworkInterfaces/PPP/PPPRouterInterface.ned
+NetworkInterfaces/PPP/PPPInterfaceNoQueue.ned
 NetworkInterfaces/PPP/ThruputMeter.ned
 Nodes/INET/BurstHost.ned
 Nodes/INET/MobileHost.ned

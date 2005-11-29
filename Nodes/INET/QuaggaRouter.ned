@@ -21,8 +21,8 @@ import
     "NotificationBoard",
     "InterfaceTable",
     "RoutingTable",
-    "PPPRouterInterface",
-    "EthernetRouterInterface",
+    "PPPInterface",
+    "EthernetInterface",
     "NetworkLayer",
     "UDP",
     "Daemon";
@@ -61,10 +61,10 @@ module QuaggaRouter
                 ifIn[sizeof(out)+sizeof(ethOut)],
                 ifOut[sizeof(out)+sizeof(ethOut)];
             display: "p=200,341;i=block/fork;q=queue";
-        ppp: PPPRouterInterface[sizeof(out)];
-            display: "p=90,457,row,110;q=queue;i=block/ifcard";
-        eth: EthernetRouterInterface[sizeof(ethOut)];
-            display: "p=145,457,row,110;q=queue;i=block/ifcard";
+        ppp: PPPInterface[sizeof(out)];
+            display: "p=90,457,row,110;q=l2queue;i=block/ifcard";
+        eth: EthernetInterface[sizeof(ethOut)];
+            display: "p=145,457,row,110;q=l2queue;i=block/ifcard";
         tcp: TCP;
             display: "p=200,250;i=block/wheelbarrow";
         udp: UDP;

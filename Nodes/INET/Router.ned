@@ -21,8 +21,8 @@ import
     "NotificationBoard",
     "InterfaceTable",
     "RoutingTable",
-    "PPPRouterInterface",
-    "EthernetRouterInterface",
+    "PPPInterface",
+    "EthernetInterface",
     "NetworkLayer";
 
 
@@ -57,10 +57,10 @@ module Router
                 ifIn[sizeof(out)+sizeof(ethOut)],
                 ifOut[sizeof(out)+sizeof(ethOut)];
             display: "p=200,141;i=block/fork;q=queue";
-        ppp: PPPRouterInterface[sizeof(out)];
-            display: "p=90,257,row,110;q=queue;i=block/ifcard";
-        eth: EthernetRouterInterface[sizeof(ethOut)];
-            display: "p=145,257,row,110;q=queue;i=block/ifcard";
+        ppp: PPPInterface[sizeof(out)];
+            display: "p=90,257,row,110;q=l2queue;i=block/ifcard";
+        eth: EthernetInterface[sizeof(ethOut)];
+            display: "p=145,257,row,110;q=l2queue;i=block/ifcard";
     connections nocheck:
         // connections to network outside
         for i=0..sizeof(out)-1 do

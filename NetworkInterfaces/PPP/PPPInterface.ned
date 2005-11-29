@@ -19,24 +19,30 @@
 
 
 //
-// \PPP interface.
+// \PPP interface. Complements the PPP module with an output queue
+// for QoS and RED support.
 //
-// @see PPPRouterInterface
+// @see PPPInterfaceNoQueue
 //
 module PPPInterface
+    parameters:
+        queueType: string;
     gates:
         in: physIn;
         out: physOut;
         in: netwIn;
         out: netwOut;
     submodules:
+        queue: queueType like OutputQueue;
+            display: "i=block/queue;p=60,85;q=l2queue";
         ppp: PPP;
             parameters:
-                queueModule = "",
-                txQueueLimit = 100000; // prevents overflow in bogus simulations
-            display: "i=block/rxtx;p=80,80;q=txQueue";
+                queueModule = "queue",
+                txQueueLimit = 1; // queue sends one packet at a time
+            display: "i=block/rxtx;p=88,165";
     connections:
-        netwIn --> ppp.netwIn display "m=n";
+        netwIn --> queue.in display "m=n";
+        queue.out --> ppp.netwIn;
         netwOut <-- ppp.netwOut display "m=n";
         physIn --> ppp.physIn display "m=s";
         physOut <-- ppp.physOut display "m=s";

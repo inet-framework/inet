@@ -53,8 +53,7 @@
 //    ARPTest, MixedLAN, etc.
 //  - hosts, routers, switches: StandardHost, Router, EtherSwitch, EtherHub,
 //    etc.
-//  - network interfaces: EthernetInterface, EthernetRouterInterface,
-//    PPPInterface, PPPRouterInterface, Nic80211
+//  - network interfaces: EthernetInterface, PPPInterface, Nic80211
 //  - higher layer protocols: IP, IPv6, ARP, TCP, UDP
 //  - RoutingTable, InterfaceTable and NotificationBoard are there in every
 //    host and router model

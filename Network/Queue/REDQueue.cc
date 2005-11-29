@@ -26,7 +26,7 @@ Define_Module(REDQueue);
 void REDQueue::initialize()
 {
     PassiveQueueBase::initialize();
-    queue.setName("queue");
+    queue.setName("l2queue");
 
     avgQlenVec.setName("avg queue length");
     qlenVec.setName("queue length");

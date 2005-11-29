@@ -125,7 +125,7 @@
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EthernetInterface, EthernetRouterInterface, OutputQueue, EtherEncap, EtherLLC
+// @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
 simple EtherMAC

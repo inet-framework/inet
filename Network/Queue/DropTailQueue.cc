@@ -26,7 +26,7 @@ Define_Module(DropTailQueue);
 void DropTailQueue::initialize()
 {
     PassiveQueueBase::initialize();
-    queue.setName("queue");
+    queue.setName("l2queue");
 
     qlenVec.setName("queue length");
     dropVec.setName("drops");
