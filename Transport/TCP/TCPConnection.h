@@ -345,6 +345,9 @@ class INET_API TCPConnection
     /** Utility: creates send/receive queues and tcpAlgorithm */
     void initConnection(TCPOpenCommand *openCmd);
 
+    /** Utility: set snd_mss and rcv_wnd in newly created state variables block */
+    void configureStateVariables();
+
     /** Utility: generates ISS and initializes corresponding state variables */
     void selectInitialSeqNum();
 

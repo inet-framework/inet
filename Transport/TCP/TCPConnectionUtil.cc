@@ -150,6 +150,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     conn->tcpAlgorithm->setConnection(conn);
 
     conn->state = conn->tcpAlgorithm->stateVariables();
+    configureStateVariables();
     conn->tcpAlgorithm->initialize();
 
     // put it into LISTEN, with our localAddr/localPort
@@ -293,7 +294,14 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 
     // create state block
     state = tcpAlgorithm->stateVariables();
+    configureStateVariables();
     tcpAlgorithm->initialize();
+}
+
+void TCPConnection::configureStateVariables()
+{
+    state->snd_mss = tcpMain->par("mss").longValue(); // TODO: mss=-1 should mean autodetect
+    state->rcv_wnd = tcpMain->par("advertisedWindow").longValue();
 }
 
 void TCPConnection::selectInitialSeqNum()

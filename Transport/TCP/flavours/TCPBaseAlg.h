@@ -99,6 +99,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     cOutVector *cwndVector;  // will record changes to snd_cwnd
     cOutVector *rttVector;   // will record measured RTT
     cOutVector *srttVector;  // will record smoothed RTT
+    cOutVector *rttvarVector;// will record RTT variance (rttvar)
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */

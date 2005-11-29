@@ -91,7 +91,7 @@ TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
   state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
-    cwndVector = rttVector = srttVector = NULL;
+    cwndVector = rttVector = srttVector = rttvarVector = NULL;
 }
 
 TCPBaseAlg::~TCPBaseAlg()
@@ -108,6 +108,7 @@ TCPBaseAlg::~TCPBaseAlg()
     delete cwndVector;
     delete rttVector;
     delete srttVector;
+    delete rttvarVector;
 }
 
 void TCPBaseAlg::initialize()
@@ -129,6 +130,7 @@ void TCPBaseAlg::initialize()
         cwndVector = new cOutVector("congestion window");
         rttVector = new cOutVector("measured RTT");
         srttVector = new cOutVector("smoothed RTT");
+        rttvarVector = new cOutVector("RTTVAR");
     }
 }
 
@@ -192,7 +194,7 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
     }
 
     tcpEV << "Performing retransmission #" << state->rexmit_count
-          << " (increasing RTO from " << state->rexmit_timeout << "s to ";
+          << "; increasing RTO from " << state->rexmit_timeout << "s ";
 
     //
     // Karn's algorithm is implemented below:
@@ -271,6 +273,7 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     tcpEV << "Measured RTT=" << (newRTT*1000) << "ms, updated SRTT=" << (srtt*1000) << "ms\n";
     if (rttVector) rttVector->record(newRTT);
     if (srttVector) srttVector->record(srtt);
+    if (rttvarVector) rttvarVector->record(rttvar);
 
     // assign RTO (here: rexmit_timeout) a new value
     double rto = srtt + 4*rttvar;

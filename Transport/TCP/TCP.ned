@@ -144,7 +144,7 @@
 //    between TCP and the app.
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
-//    without actually sending the buffered data. This may not be what you'd 
+//    without actually sending the buffered data. This may not be what you'd
 //    expect.
 //  - if you close while there are still data in the send buffer, the
 //    connection will spend the remainder of the data transfer in FIN_WAIT_1.
@@ -153,8 +153,6 @@
 //  - no \TCP header options (e.g. MSS is currently hardcoded, no SACK)
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
-//  - some parameters (like MSS) are presently constants which should better
-//    be configurable via NED or TCPCommand parameters
 //  - the 3rd message of the connection setup, ACK will be piggybacked on data
 //    if possible.
 //  - all timeouts are precisely calculated, so "granularity" introduced by
@@ -180,6 +178,8 @@
 //
 simple TCP
     parameters:
+      mss: numeric const, // maximum segment size
+      advertisedWindow: numeric const, // in bytes (Note: normally, NIC queues should be at least this size)
       tcpAlgorithmClass: string, // TCPTahoe/TCPReno/TCPNoCongestionControl/DumbTCP
       sendQueueClass: string,    // TCPVirtualDataSendQueue/TCPMsgBasedSendQueue
       receiveQueueClass: string, // TCPVirtualDataRcvQueue/TCPMsgBasedRcvQueue

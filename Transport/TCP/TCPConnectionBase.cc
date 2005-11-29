@@ -33,7 +33,7 @@ TCPStateVariables::TCPStateVariables()
     // set everything to 0 -- real init values will be set manually
     active = false;
     fork = false;
-    snd_mss = 1024;  // FIXME make it parameter
+    snd_mss = -1; // will be set from configureStateVariables()
     snd_una = 0;
     snd_nxt = 0;
     snd_max = 0;
@@ -43,7 +43,7 @@ TCPStateVariables::TCPStateVariables()
     snd_wl2 = 0;
     iss = 0;
     rcv_nxt = 0;
-    rcv_wnd = 128*1024; // 128K; FIXME make it parameter
+    rcv_wnd = -1; // will be set from configureStateVariables()
     rcv_up = 0;
     irs = 0;
 
