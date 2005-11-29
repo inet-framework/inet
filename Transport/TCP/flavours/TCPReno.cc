@@ -49,8 +49,8 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
-    // Reno retransmits all data (unlike Tahoe which transmits only the segment)
-    conn->retransmitData();
+    // retransmit one segment at the front of the queue
+    conn->retransmitOneSegment();  // 20051129 (3)
 }
 
 void TCPReno::receivedDataAck(uint32 firstSeqAcked)
@@ -132,8 +132,9 @@ void TCPReno::receivedDuplicateAck()
         conn->retransmitOneSegment();
 
         // enter slow start
+        // "set cwnd to ssthresh plus 3 times the segment size." (rfc 2001)
         recalculateSlowStartThreshold();
-        state->snd_cwnd = 3*state->snd_mss;  // note: in Tahoe we used one MSS not 3 (=dupacks)
+        state->snd_cwnd = state->ssthresh + 3*state->snd_mss;  // 20051129 (1)
         if (cwndVector) cwndVector->record(state->snd_cwnd);
 
         tcpEV << "set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
@@ -155,6 +156,9 @@ void TCPReno::receivedDuplicateAck()
         state->snd_cwnd += state->snd_mss;
         tcpEV << "Reno on dupAck>3: Fast Recovery: inflating cwnd by MSS, new cwnd=" << state->snd_cwnd << "\n";
         if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+        // cwnd increased, try sending
+        sendData();  // 20051129 (2)
     }
 }
 
