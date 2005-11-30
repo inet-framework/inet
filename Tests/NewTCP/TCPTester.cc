@@ -20,8 +20,7 @@
 #include "TCPTester.h"
 #include "IPControlInfo_m.h"
 
-TCPTesterBase::TCPTesterBase(const char *name, cModule *parent) :
-  cSimpleModule(name, parent, 0), tcpdump(ev)
+TCPTesterBase::TCPTesterBase() : cSimpleModule(), tcpdump(ev)
 {
 }
 
@@ -52,11 +51,6 @@ void TCPTesterBase::finish()
 //---
 
 Define_Module(TCPScriptableTester);
-
-TCPScriptableTester::TCPScriptableTester(const char *name, cModule *parent) :
-  TCPTesterBase(name, parent)
-{
-}
 
 void TCPScriptableTester::initialize()
 {
@@ -208,11 +202,6 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
 //------
 
 Define_Module(TCPRandomTester);
-
-TCPRandomTester::TCPRandomTester(const char *name, cModule *parent) :
-  TCPTesterBase(name, parent)
-{
-}
 
 void TCPRandomTester::initialize()
 {

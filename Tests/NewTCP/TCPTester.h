@@ -41,7 +41,7 @@ class INET_API TCPTesterBase : public cSimpleModule
     void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
 
   public:
-    TCPTesterBase(const char *name, cModule *parent);
+    TCPTesterBase();
     virtual void initialize();
     virtual void finish();
 };
@@ -74,7 +74,7 @@ class INET_API TCPScriptableTester : public TCPTesterBase
     void processIncomingSegment(TCPSegment *seg, bool fromA);
 
   public:
-    TCPScriptableTester(const char *name, cModule *parent);
+    TCPScriptableTester() {}
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
@@ -97,7 +97,7 @@ class INET_API TCPRandomTester : public TCPTesterBase
     void processIncomingSegment(TCPSegment *seg, bool fromA);
 
   public:
-    TCPRandomTester(const char *name, cModule *parent);
+    TCPRandomTester() {}
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };

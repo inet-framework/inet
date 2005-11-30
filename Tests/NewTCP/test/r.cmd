@@ -1,3 +1,3 @@
 call ..\..\..\..\tools\setenv.cmd
-call ..\..\..\..\omnetpp\vcvars32.bat
+call ..\..\..\..\omnetpp\setenv-vc71.bat
 runtest %*
