@@ -91,7 +91,7 @@ TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
   state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
-    cwndVector = rttVector = srttVector = rttvarVector = NULL;
+    cwndVector = rttVector = srttVector = rttvarVector = rtoVector = NULL;
 }
 
 TCPBaseAlg::~TCPBaseAlg()
@@ -109,6 +109,7 @@ TCPBaseAlg::~TCPBaseAlg()
     delete rttVector;
     delete srttVector;
     delete rttvarVector;
+    delete rtoVector;
 }
 
 void TCPBaseAlg::initialize()
@@ -131,6 +132,7 @@ void TCPBaseAlg::initialize()
         rttVector = new cOutVector("measured RTT");
         srttVector = new cOutVector("smoothed RTT");
         rttvarVector = new cOutVector("RTTVAR");
+        rtoVector = new cOutVector("RTO");
     }
 }
 
@@ -269,12 +271,6 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     srtt += g*err;
     rttvar += g*(fabs(err) - rttvar);
 
-    // record statistics
-    tcpEV << "Measured RTT=" << (newRTT*1000) << "ms, updated SRTT=" << (srtt*1000) << "ms\n";
-    if (rttVector) rttVector->record(newRTT);
-    if (srttVector) srttVector->record(srtt);
-    if (rttvarVector) rttvarVector->record(rttvar);
-
     // assign RTO (here: rexmit_timeout) a new value
     double rto = srtt + 4*rttvar;
     if (rto>MAX_REXMIT_TIMEOUT)
@@ -282,8 +278,15 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     else if (rto<MIN_REXMIT_TIMEOUT)
         rto = MIN_REXMIT_TIMEOUT;
 
-    ASSERT(!rexmitTimer->isScheduled());  // RTT measurement is only successful if there's no retransmission
     state->rexmit_timeout = rto;
+
+    // record statistics
+    tcpEV << "Measured RTT=" << (newRTT*1000) << "ms, updated SRTT=" << (srtt*1000)
+          << "ms, new RTO=" << (rto*1000) << "ms\n";
+    if (rttVector) rttVector->record(newRTT);
+    if (srttVector) srttVector->record(srtt);
+    if (rttvarVector) rttvarVector->record(rttvar);
+    if (rtoVector) rtoVector->record(rto);
 }
 
 bool TCPBaseAlg::sendData()
@@ -340,9 +343,6 @@ void TCPBaseAlg::receiveSeqChanged()
 
 void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 {
-    // first cancel retransmission timer
-    cancelEvent(rexmitTimer);
-
     // if round-trip time measurement is running, check if rtseq has been acked
     if (state->rtseq_sendtime!=0 && seqLess(state->rtseq, state->snd_una))
     {
@@ -359,20 +359,29 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 
     //
     // handling of retransmission timer: if the ACK is for the last segment sent
-    // (no data in flight), cancel the timer, otherwise restart the timer
-    // with the current RTO value.
+    // (no data in flight), cancel the timer.
     //
     if (state->snd_una==state->snd_max)
     {
-        tcpEV << "ACK acks all outstanding segments\n";
+        if (rexmitTimer->isScheduled())
+        {
+            tcpEV << "ACK acks all outstanding segments, cancel REXMIT timer\n";
+            cancelEvent(rexmitTimer);
+        }
+        else
+        {
+            tcpEV << "There were no outstanding segments, nothing new in this ACK.\n";
+        }
     }
     else
     {
         tcpEV << "ACK acks some but not all outstanding segments ("
-              << (state->snd_max - state->snd_una)
-              << " bytes outstanding), restarting REXMIT timer\n";
+              << (state->snd_max - state->snd_una) << " bytes outstanding), "
+              << "restarting REXMIT timer\n";
+        cancelEvent(rexmitTimer);
         startRexmitTimer();
     }
+
 
     //
     // Leave congestion window management and possible sending data to

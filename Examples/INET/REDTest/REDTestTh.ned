@@ -27,20 +27,20 @@ import
 
 module REDTestTh
     submodules:
-        channelInstaller : ChannelInstaller;
+        channelInstaller: ChannelInstaller;
             parameters:
                 channelClass = "ThruputMeteringChannel",
                 channelAttrs = "format=b (u)";
-            display: "i=block/cogwheel_vs";
+            display: "p=327,40;i=block/cogwheel_s";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost ThruputMeter",
                 nonIPModuleTypes = "ThruputMeter",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
-            display: "p=283,259;i=block/cogwheel";
+            display: "p=149,40;i=block/cogwheel_s";
         scenarioManager: ScenarioManager;
-            display: "p=150,50;i=block/control_s";
+            display: "p=236,40;i=block/control_s";
         r1: Router;
             display: "p=147,143;i=abstract/router";
         r2: Router;
