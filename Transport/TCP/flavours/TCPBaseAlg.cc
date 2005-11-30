@@ -359,7 +359,8 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 
     //
     // handling of retransmission timer: if the ACK is for the last segment sent
-    // (no data in flight), cancel the timer.
+    // (no data in flight), cancel the timer, otherwise restart the timer
+    // with the current RTO value.
     //
     if (state->snd_una==state->snd_max)
     {
@@ -381,7 +382,6 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
         cancelEvent(rexmitTimer);
         startRexmitTimer();
     }
-
 
     //
     // Leave congestion window management and possible sending data to
