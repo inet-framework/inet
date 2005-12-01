@@ -59,7 +59,7 @@
 //    host and router model
 //  - queues in router network interfaces: DropTailQueue, REDQueue,
 //    DropTailQoSQueue.
-//  - FlatNetworkConfigurator to automatically assing \IP addresses and
+//  - FlatNetworkConfigurator to automatically assign \IP addresses and
 //    set up static routes;
 //  - ScenarioManager lets you change things in the model in the middle
 //    of the simulation, and study the transient
