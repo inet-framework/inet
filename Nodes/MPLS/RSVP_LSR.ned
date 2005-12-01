@@ -40,7 +40,7 @@ module RSVP_LSR
 
     submodules:
         notificationBoard: NotificationBoard;
-            display: "p=70,50;i=block/control";
+            display: "p=330,145;i=block/control";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
@@ -58,7 +58,7 @@ module RSVP_LSR
                 peers = peers;
             display: "i=block/control;p=244,51";
         classifier: SimpleClassifier;
-            display: "i=block/classifier;p=330,51";
+            display: "i=block/classifier;p=330,59";
         networkLayer: NetworkLayer;
             gatesizes:
                 ifIn[sizeof(out)],
