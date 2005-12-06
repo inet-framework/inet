@@ -91,7 +91,7 @@ TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
   state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
-    cwndVector = rttVector = srttVector = rttvarVector = rtoVector = NULL;
+    cwndVector = ssthreshVector = rttVector = srttVector = rttvarVector = rtoVector = NULL;
 }
 
 TCPBaseAlg::~TCPBaseAlg()
@@ -106,6 +106,7 @@ TCPBaseAlg::~TCPBaseAlg()
 
     // delete statistics objects
     delete cwndVector;
+    delete ssthreshVector;
     delete rttVector;
     delete srttVector;
     delete rttvarVector;
@@ -128,7 +129,8 @@ void TCPBaseAlg::initialize()
 
     if (conn->getTcpMain()->recordStatistics)
     {
-        cwndVector = new cOutVector("congestion window");
+        cwndVector = new cOutVector("cwnd");
+        ssthreshVector = new cOutVector("ssthresh");
         rttVector = new cOutVector("measured RTT");
         srttVector = new cOutVector("smoothed RTT");
         rttvarVector = new cOutVector("RTTVAR");

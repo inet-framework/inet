@@ -34,6 +34,7 @@ void TCPTahoe::recalculateSlowStartThreshold()
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
     uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
     state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
+    if (ssthreshVector) ssthreshVector->record(state->ssthresh);
 }
 
 void TCPTahoe::processRexmitTimer(TCPEventCode& event)

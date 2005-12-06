@@ -97,6 +97,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     cMessage *keepAliveTimer;
 
     cOutVector *cwndVector;  // will record changes to snd_cwnd
+    cOutVector *ssthreshVector; // will record changes to ssthresh
     cOutVector *rttVector;   // will record measured RTT
     cOutVector *srttVector;  // will record smoothed RTT
     cOutVector *rttvarVector;// will record RTT variance (rttvar)
