@@ -134,14 +134,16 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     sndAckVector = NULL;
     rcvSeqVector = NULL;
     rcvAckVector = NULL;
+    unackedVector = NULL;
 
     if (getTcpMain()->recordStatistics)
     {
-        sndWndVector = new cOutVector("advertised window");
+        sndWndVector = new cOutVector("send window");
         sndNxtVector = new cOutVector("send seq");
         sndAckVector = new cOutVector("sent ack");
         rcvSeqVector = new cOutVector("rcvd seq");
         rcvAckVector = new cOutVector("rcvd ack");
+        unackedVector = new cOutVector("unacked bytes");
     }
 }
 
@@ -163,6 +165,7 @@ TCPConnection::~TCPConnection()
     delete sndAckVector;
     delete rcvSeqVector;
     delete rcvAckVector;
+    delete unackedVector;
 }
 
 bool TCPConnection::processTimer(cMessage *msg)

@@ -525,6 +525,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
     state->snd_max = state->snd_nxt;
+    if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
     // notify (once is enough)
     tcpAlgorithm->ackSent();
@@ -554,6 +555,7 @@ bool TCPConnection::sendProbe()
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
     state->snd_max = state->snd_nxt;
+    if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
     // notify
     tcpAlgorithm->ackSent();
