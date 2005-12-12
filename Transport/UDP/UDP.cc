@@ -39,6 +39,7 @@ static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {
     os << "sockId=" << sd.sockId;
     os << " appGateIndex=" << sd.appGateIndex;
+    os << " userId=" << sd.userId;
     os << " localPort=" << sd.localPort;
     if (sd.remotePort!=0)
         os << " remotePort=" << sd.remotePort;
@@ -91,6 +92,7 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc();
     sd->sockId = ctrl->sockId();
+    sd->userId = ctrl->userId();
     sd->appGateIndex = gateIndex;
     sd->localAddr = ctrl->srcAddr();
     sd->remoteAddr = ctrl->destAddr();
