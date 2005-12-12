@@ -83,6 +83,9 @@ class INET_API UDP : public cSimpleModule
     // bind socket
     void bind(int gateIndex, UDPControlInfo *ctrl);
 
+    // connect socket
+    void connect(int sockId, IPvXAddress addr, int port);
+
     // unbind socket
     void unbind(int sockId);
 

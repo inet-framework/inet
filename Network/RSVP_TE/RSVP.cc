@@ -13,7 +13,7 @@
 //
 
 #include "RSVP.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "common.h"
 #include "Utils.h"
 #include "XMLUtils.h"

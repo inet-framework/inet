@@ -18,7 +18,7 @@
 
 #include "IPv4InterfaceData.h"
 
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 
 #define QUAGGA_UID  100
 #define QUAGGA_GID  100

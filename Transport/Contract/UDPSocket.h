@@ -124,6 +124,8 @@ class INET_API UDPSocket
 
     IPvXAddress localAddr; // needed for sendTo() as local address
     int localPrt;
+    IPvXAddress remoteAddr; // needed to enable send(msg) call
+    int remotePrt; // needed to enable send(msg) call
     int mcastIfaceId;
 
     CallbackInterface *cb;
@@ -206,9 +208,11 @@ class INET_API UDPSocket
     void bind(IPvXAddress localAddr, int localPort);
 
     /**
-     * FIXME
+     * Connects to a remote UDP socket. This has two effects:
+     * (1) this socket will only receive packets from specified address/port,
+     * and (2) you can use send() (as opposed to sendTo()) to send packets.
      */
-    void bindAndConnect(IPvXAddress localAddr, int localPort, IPvXAddress remoteAddr, int remotePort);
+    void connect(IPvXAddress remoteAddr, int remotePort);
 
     /**
      * Set the output interface for sending multicast packets (like the Unix
@@ -223,9 +227,15 @@ class INET_API UDPSocket
     int multicastInterface() const {return mcastIfaceId;}
 
     /**
-     * Sends data packet.
+     * Sends a data packet to the given address and port.
      */
-    void sendTo(cMessage *msg, IPvXAddress remoteAddr, int remotePort);
+    void sendTo(cMessage *msg, IPvXAddress destAddr, int destPort);
+
+    /**
+     * Sends a data packet to the address and port specified previously
+     * in a connect() call.
+     */
+    void send(cMessage *msg);
 
     /**
      * Unbinds the socket. There is no need for renewSocket() as with TCPSocket.

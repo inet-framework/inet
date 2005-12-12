@@ -25,7 +25,7 @@
 #include "RoutingTable6Access.h"
 #include "IPv6Datagram.h"
 #include "ICMPv6Message_m.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPv6ControlInfo.h"
 
 
 /**

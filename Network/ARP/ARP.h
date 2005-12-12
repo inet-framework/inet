@@ -30,7 +30,7 @@
 #include <omnetpp.h>
 #include "IPAddress.h"
 #include "ARPPacket_m.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "IPDatagram.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"

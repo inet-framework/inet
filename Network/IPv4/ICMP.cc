@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 #include <string.h>
 
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "ICMP.h"
 
 Define_Module(ICMP);

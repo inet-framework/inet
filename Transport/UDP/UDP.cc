@@ -27,8 +27,8 @@
 #include <string.h>
 #include "UDPPacket.h"
 #include "UDP.h"
-#include "IPControlInfo_m.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPControlInfo.h"
+#include "IPv6ControlInfo.h"
 //#include "ICMPAccess.h"
 //#include "ICMPv6Access.h"
 
@@ -119,6 +119,25 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
     // add to socketsByPortMap
     SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
     list.push_back(sd);
+}
+
+void UDP::connect(int sockId, IPvXAddress addr, int port)
+{
+    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    if (it==socketsByIdMap.end())
+        error("socket id=%d doesn't exist (already closed?)", sockId);
+    if (addr.isUnspecified())
+        opp_error("connect: unspecified remote address");
+    if (port<=0 || port>65535)
+        opp_error("connect: invalid remote port number %d", port);
+
+    SockDesc *sd = it->second;
+    sd->remoteAddr = addr;
+    sd->remotePort = port;
+
+    sd->onlyLocalPortIsSet = false;
+
+    EV << "Connecting socket: " << *sd << "\n";
 }
 
 void UDP::unbind(int sockId)
@@ -373,6 +392,9 @@ void UDP::processCommandFromApp(cMessage *msg)
     {
         case UDP_C_BIND:
             bind(msg->arrivalGate()->index(), udpCtrl);
+            break;
+        case UDP_C_CONNECT:
+            connect(udpCtrl->sockId(), udpCtrl->destAddr(), udpCtrl->destPort());
             break;
         case UDP_C_UNBIND:
             unbind(udpCtrl->sockId());

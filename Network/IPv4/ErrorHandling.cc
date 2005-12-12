@@ -22,7 +22,7 @@
 
 #include <omnetpp.h>
 #include "ErrorHandling.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "IPDatagram.h"
 #include "ICMPMessage.h"
 

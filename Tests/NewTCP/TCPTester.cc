@@ -18,7 +18,7 @@
 
 
 #include "TCPTester.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 
 TCPTesterBase::TCPTesterBase() : cSimpleModule(), tcpdump(ev)
 {

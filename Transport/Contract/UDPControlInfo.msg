@@ -27,18 +27,15 @@ class noncobject IPvXAddress;
 //
 // \UDP command codes, sent by the application to UDP. These constants
 // should be set as message kind on a message sent to the UDP entity.
-// UDP_C_BIND (UDP_C_UNBIND) tells UDP that the app is interested
-// (no longer interested) in receiving \UDP packets on the given port;
-// the message object is discarded, and only the control info's srcPort
-// field is significant.
 //
-// @see UDPControlInfo, UDPStatusInd, 2UDP
+// @see UDPControlInfo, UDPStatusInd, UDP
 //
 enum UDPCommandCode
 {
-    UDP_C_DATA = 0;   // datagram to send (must carry UDPControlInfo)
-    UDP_C_BIND = 1;   // at least UDPControlInfo's srcPort and sockId must be filled
-    UDP_C_UNBIND = 2; // UDPControlInfo's sockId must be filled
+    UDP_C_DATA = 0;    // datagram to send (must carry UDPControlInfo)
+    UDP_C_BIND = 1;    // fill srcPort and srcAddr in UDPControlInfo
+    UDP_C_CONNECT = 2; // fill destAddr and destPort in UDPControlInfo
+    UDP_C_UNBIND = 3;  // fill sockId in UDPControlInfo
 };
 
 //

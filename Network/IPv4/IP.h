@@ -24,7 +24,7 @@
 #include "RoutingTableAccess.h"
 #include "RoutingTable.h"
 #include "ICMPAccess.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "IPDatagram.h"
 #include "IPFragBuf.h"
 #include "ProtocolMap.h"

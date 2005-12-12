@@ -8,7 +8,7 @@
 #include "LinkStateUpdateHandler.h"
 #include "LinkStateAcknowledgementHandler.h"
 #include "OSPFTimer_m.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "OSPFInterface.h"
 //#include "OSPFNeighbor.h"
 

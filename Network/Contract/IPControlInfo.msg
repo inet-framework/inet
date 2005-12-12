@@ -20,10 +20,13 @@
 
 enum IPProtocolId;
 class noncobject IPAddress;
+class noncobject IPDatagramPtr;
 
 cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
+class IPDatagram;
+typedef IPDatagram *IPDatagramPtr;
 }}
 
 
@@ -55,15 +58,17 @@ class IPControlInfo
 {
     properties:
         omitGetVerb = true;
+        customize = true;
     fields:
-        IPAddress destAddr;  // destination IP address
-        IPAddress srcAddr;   // source IP address
+        IPAddress destAddr;   // destination IP address
+        IPAddress srcAddr;    // source IP address
         int interfaceId = -1; // interface on which dgram was received/should
                               // be sent (see InterfaceTable)
         short protocol enum(IPProtocolId);  // encapsulated protocol
         unsigned char diffServCodePoint;  // for QoS
-        short timeToLive;   // maximum hop count
-        bool dontFragment;  // "don't fragment" bit
+        short timeToLive;     // maximum hop count
+        bool dontFragment;    // "don't fragment" bit
+        IPDatagramPtr dgram = 0; // when sending up: the original datagram
 };
 
 

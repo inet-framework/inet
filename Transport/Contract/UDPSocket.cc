@@ -27,7 +27,7 @@ UDPSocket::UDPSocket()
     usrId = -1;
     sockstate = NOT_BOUND;
 
-    localPrt = -1;
+    localPrt = remotePrt = 0;
     mcastIfaceId = -1;
     cb = NULL;
     yourPtr = NULL;
@@ -72,7 +72,7 @@ void UDPSocket::bind(int lPort)
 {
     if (sockstate!=NOT_BOUND)
         opp_error("UDPSocket::bind(): socket already bound");
-    if (lPort<0 || lPort>65535)
+    if (lPort<=0 || lPort>65535)
         opp_error("UDPSocket::bind(): invalid port number %d", lPort);
 
     localPrt = lPort;
@@ -92,7 +92,7 @@ void UDPSocket::bind(IPvXAddress lAddr, int lPort)
 {
     if (sockstate!=NOT_BOUND)
         opp_error("UDPSocket::bind(): socket already bound");
-    if (lPort<0 || lPort>65535)
+    if (lPort<=0 || lPort>65535)
         opp_error("UDPSocket::bind(): invalid port number %d", lPort);
 
     localAddr = lAddr;
@@ -110,50 +110,52 @@ void UDPSocket::bind(IPvXAddress lAddr, int lPort)
     sockstate = BOUND;
 }
 
-void UDPSocket::bindAndConnect(IPvXAddress lAddr, int lPort, IPvXAddress remoteAddr, int remotePort)
+void UDPSocket::connect(IPvXAddress addr, int port)
 {
-    if (sockstate!=NOT_BOUND && sockstate!=BOUND)
-        opp_error( "UDPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
-    if (lPort<0 || lPort>65535)
-        opp_error("UDPSocket::bind(): invalid port number %d", lPort);
-    if (remotePort<0 || remotePort>65535)
-        opp_error("UDPSocket::connect(): invalid remote port number %d", remotePort);
+    if (sockstate!=BOUND)
+        opp_error( "UDPSocket::connect(): socket must be bound before connect() can be called");
+    if (addr.isUnspecified())
+        opp_error("UDPSocket::connect(): unspecified remote address");
+    if (port<=0 || port>65535)
+        opp_error("UDPSocket::connect(): invalid remote port number %d", port);
 
-    localAddr = lAddr;
-    localPrt = lPort;
+    remoteAddr = addr;
+    remotePrt = port;
 
     UDPControlInfo *ctrl = new UDPControlInfo();
     ctrl->setSockId(sockId);
-    ctrl->setUserId(usrId);
-    ctrl->setSrcAddr(localAddr);
-    ctrl->setSrcPort(localPrt);
     ctrl->setDestAddr(remoteAddr);
-    ctrl->setDestPort(remotePort);
-    cMessage *msg = new cMessage("BIND+CONNECT", UDP_C_BIND);
+    ctrl->setDestPort(remotePrt);
+    cMessage *msg = new cMessage("CONNECT", UDP_C_CONNECT);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
-
-    sockstate = BOUND;
 }
 
-void UDPSocket::sendTo(cMessage *msg, IPvXAddress remoteAddr, int remotePort)
+void UDPSocket::sendTo(cMessage *msg, IPvXAddress destAddr, int destPort)
 {
     msg->setKind(UDP_C_DATA);
     UDPControlInfo *ctrl = new UDPControlInfo();
     ctrl->setSockId(sockId);
     ctrl->setSrcAddr(localAddr);
     ctrl->setSrcPort(localPrt);
-    ctrl->setDestAddr(remoteAddr);
-    ctrl->setDestPort(remotePort);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setDestPort(destPort);
     ctrl->setInterfaceId(mcastIfaceId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
 
+void UDPSocket::send(cMessage *msg)
+{
+    if (remoteAddr.isUnspecified() || remotePrt==0)
+        opp_error("UDPSocket::send(): must call connect() before using send()");
+    sendTo(msg, remoteAddr, remotePrt);
+}
+
 void UDPSocket::close()
 {
     if (sockstate!=BOUND)
-        opp_error("UDPSocket::close(): socket not bound or close() already called");
+        return;
 
     cMessage *msg = new cMessage("UNBIND", UDP_C_UNBIND);
     UDPControlInfo *ctrl = new UDPControlInfo();
@@ -202,7 +204,7 @@ void UDPSocket::processMessage(cMessage *msg)
                  cb->socketPeerClosed(sockId, yourPtr);
              break;
         default:
-             opp_error("UDPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->kind());
+             opp_error("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->kind());
     }
 }
 

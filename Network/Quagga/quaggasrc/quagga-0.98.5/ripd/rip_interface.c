@@ -148,10 +148,13 @@ rip_interface_multicast_set (int sock, struct connected *connected)
   
   assert (connected != NULL);
   
-  if (if_is_pointopoint(connected->ifp) && CONNECTED_DEST_HOST(connected))
+/*
+if (if_is_pointopoint(connected->ifp) && CONNECTED_DEST_HOST(connected))
     p = (struct prefix_ipv4 *) connected->destination;
   else
     p = (struct prefix_ipv4 *) connected->address;
+*/
+  p = (struct prefix_ipv4 *) connected->address;
   
   addr = p->prefix;
 

@@ -19,10 +19,13 @@
 
 enum IPProtocolId;
 class noncobject IPv6Address;
+class noncobject IPv6DatagramPtr;
 
 cplusplus {{
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
+class IPv6Datagram;
+typedef IPv6Datagram *IPv6DatagramPtr;
 }}
 
 
@@ -48,6 +51,7 @@ class IPv6ControlInfo
 {
     properties:
         omitGetVerb=true;
+        customize = true;
     fields:
         int protocol enum(IPProtocolId);  // transport layer protocol
         IPv6Address destAddr; // destination IPv6 address
@@ -55,6 +59,7 @@ class IPv6ControlInfo
         short hopLimit;       // hop limit
         int interfaceId = -1; // interface on which dgram was received/should 
                               // be sent (see InterfaceTable)
+        IPv6DatagramPtr dgram = 0; // when sending up: the original datagram
 };
 
 

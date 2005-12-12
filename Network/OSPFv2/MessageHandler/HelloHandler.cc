@@ -1,5 +1,5 @@
 #include "HelloHandler.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "OSPFRouter.h"
 #include "OSPFArea.h"
 #include "OSPFInterface.h"

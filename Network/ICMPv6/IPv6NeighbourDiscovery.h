@@ -28,7 +28,7 @@
 #include "IPv6Address.h"
 #include "IPv6Datagram.h"
 #include "IPv6NDMessage_m.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPv6ControlInfo.h"
 #include "IPv6InterfaceData.h"
 #include "InterfaceEntry.h"
 #include "InterfaceTable.h"

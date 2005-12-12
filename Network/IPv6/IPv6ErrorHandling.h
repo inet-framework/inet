@@ -27,7 +27,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPv6ControlInfo.h"
 #include "ICMPv6Message_m.h"
 
 /**

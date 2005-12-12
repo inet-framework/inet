@@ -25,7 +25,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 
 
 /**

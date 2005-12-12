@@ -24,7 +24,7 @@
 
 #include <omnetpp.h>
 #include "IPv6ErrorHandling.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 
 Define_Module(IPv6ErrorHandling);

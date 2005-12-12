@@ -23,7 +23,7 @@
 
 #include "IP.h"
 #include "IPDatagram.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "ICMPMessage_m.h"
 #include "IPv4InterfaceData.h"
 #include "ARPPacket_m.h"

@@ -15,7 +15,7 @@
 
 #include "UDPControlInfo_m.h"
 #include "TCPCommand_m.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 
 // ***************
 

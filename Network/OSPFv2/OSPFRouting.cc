@@ -21,7 +21,7 @@
 #include "OSPFRouting.h"
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "OSPFcommon.h"
 #include "OSPFArea.h"
 #include "OSPFInterface.h"

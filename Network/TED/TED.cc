@@ -16,7 +16,7 @@
 #include <algorithm>
 
 #include "TED.h"
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
 #include "RoutingTableAccess.h"
@@ -176,8 +176,8 @@ std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info)
     os << "  state:" << info.state;
     os << "  metric:" << info.metric;
     os << "  maxBW:" << info.MaxBandwidth;
-    os << "  unResvBW[7]:" << info.UnResvBandwidth[7];  // FIXME comment: what is 7 ? 
-    os << "  unResvBW[4]:" << info.UnResvBandwidth[4];  // FIXME comment: what is 4 ? 
+    os << "  unResvBW[7]:" << info.UnResvBandwidth[7];  // FIXME comment: what is 7 ?
+    os << "  unResvBW[4]:" << info.UnResvBandwidth[4];  // FIXME comment: what is 4 ?
 
     return os;
 }

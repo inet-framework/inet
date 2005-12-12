@@ -20,8 +20,8 @@
 
 #include <omnetpp.h>
 #include "IPTrafGen.h"
-#include "IPControlInfo_m.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPControlInfo.h"
+#include "IPv6ControlInfo.h"
 #include "IPAddressResolver.h"
 
 

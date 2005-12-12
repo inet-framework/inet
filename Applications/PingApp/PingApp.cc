@@ -24,8 +24,8 @@
 #include "IPAddressResolver.h"
 #include "PingApp.h"
 #include "PingPayload_m.h"
-#include "IPControlInfo_m.h"
-#include "IPv6ControlInfo_m.h"
+#include "IPControlInfo.h"
+#include "IPv6ControlInfo.h"
 
 using std::cout;
 

@@ -4,7 +4,7 @@
 #include "RawSocket.h"
 #include "Socket_m.h"
 
-#include "IPControlInfo_m.h"
+#include "IPControlInfo.h"
 #include "IPDatagram.h"
 
 #include "RoutingTableAccess.h"
