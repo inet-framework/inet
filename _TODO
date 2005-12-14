@@ -31,8 +31,6 @@
 
 - NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
 
-- ThruputMeteringChannel could integrate PPP/ThruputMeter code, for momentary thruput measurement
-
 - there's no IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
 
 - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
@@ -116,7 +114,18 @@ IPv6ErrorHandling, which the user can extend or replace to get errors
 handled in any way they like.
 "
 
------------------------ 
+-----------------------
+TCP: 
+Slow Start should be applied every time TCP starts to send "after a 
+sufficiently long idle period".
+
+"Idle" could be interpreted as when the send queue is empty (there's nothing 
+to send), and there's no unacknowledged data (i.e. previously sent segments 
+have all been acknowledged). But what is "sufficiently long"? I guess that 
+should be measured in RTT rather than absolute time (secs). So maybe we 
+should say 5*RTT is "sufficiently long"?
+
+-----------------------
 TCP BUG:
 From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de] 
 Sent: Sunday, September 25, 2005 7:51 PM
