@@ -22,6 +22,7 @@
 #include <omnetpp.h>
 #include <string.h>
 
+#include "IPDatagram.h"
 #include "IPControlInfo.h"
 #include "ICMP.h"
 
@@ -103,6 +104,15 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
 
     // debugging information
     EV << "sending ICMP error: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
+}
+
+void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
+{
+    Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
+
+    IPDatagram *datagram = ctrl->dgram();
+    datagram->encapsulate(transportPacket);
+    sendErrorMessage(datagram, type, code);
 }
 
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)

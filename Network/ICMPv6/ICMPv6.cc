@@ -91,7 +91,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->setName((std::string(request->name())+"-reply").c_str());
     reply->setType(ICMPv6_ECHO_REPLY);
     reply->encapsulate(request->decapsulate());
-    
+
     // TBD check what to do if dest was multicast etc?
     IPv6ControlInfo *ctrl
         = check_and_cast<IPv6ControlInfo *>(request->controlInfo());
@@ -150,7 +150,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
 
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
-    //errorMessage->setByteLength(4 + origDatagram->headerLength() + 8); What is this for?
+    //errorMessage->setByteLength(4 + origDatagram->headerLength() + 8); FIXME What is this for?
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
@@ -172,6 +172,15 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
 
     // debugging information
     //EV << "sending ICMP error: " << errorMsg->type() << " / " << errorMsg->code() << endl;
+}
+
+void ICMPv6::sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
+{
+    Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
+
+    IPv6Datagram *datagram = ctrl->dgram();
+    datagram->encapsulate(transportPacket);
+    sendErrorMessage(datagram, type, code);
 }
 
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)

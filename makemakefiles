@@ -91,7 +91,7 @@ all:
 	cd Nodes/MPLS && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES)
 
 	cd Transport/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
-	cd Transport/UDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
+	cd Transport/UDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/IPv4 -I../../Network/ICMPv6 -I../../Network/IPv6
 	cd Transport/RTP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -X Profiles -X tmp
 	cd Transport/TCP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Transport/TCP/flavours && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I..

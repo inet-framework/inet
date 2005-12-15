@@ -23,6 +23,10 @@ cplusplus {{
 #define ICMPv6_HEADER_BYTES  8
 }}
 
+//
+//# TODO consolidate this file's contents with ICMPMessage.msg
+//
+
 enum ICMPv6Type
 {
     ICMPv6_UNSPECIFIED = 0;

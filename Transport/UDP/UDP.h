@@ -32,6 +32,8 @@
 
 class IPControlInfo;
 class IPv6ControlInfo;
+class ICMP;
+class ICMPv6;
 
 const char *ERROR_IP_ADDRESS = "10.0.0.255";
 const int UDP_HEADER_BYTES = 8;
@@ -66,11 +68,16 @@ class INET_API UDP : public cSimpleModule
     typedef std::map<int,SockDescList> SocketsByPortMap;
 
   protected:
+    // sockets
     SocketsByIdMap socketsByIdMap;
     SocketsByPortMap socketsByPortMap;
 
+    // other state vars
     short nextEphemeralPort;
+    ICMP *icmp;
+    ICMPv6 *icmpv6;
 
+    // statistics
     int numSent;
     int numPassedUp;
     int numDroppedWrongPort;
@@ -96,6 +103,7 @@ class INET_API UDP : public cSimpleModule
     bool matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd);
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
+    void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
 
     // process packets coming from IP
     virtual void processMsgFromIP(UDPPacket *udpPacket);

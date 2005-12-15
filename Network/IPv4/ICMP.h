@@ -25,7 +25,9 @@
 
 #include "RoutingTableAccess.h"
 #include "ICMPMessage.h"
-#include "IPDatagram.h"
+
+class IPDatagram;
+class IPControlInfo;
 
 
 /**
@@ -46,9 +48,19 @@ class INET_API ICMP : public cSimpleModule
 
   public:
     /**
-     * This method can be called from other modules to send an ICMP error packet.
+     * This method can be called from other modules to send an ICMP error packet
+     * in response to a received bogus packet.
      */
     void sendErrorMessage(IPDatagram *datagram, ICMPType type, ICMPCode code);
+
+    /**
+     * This method can be called from other modules to send an ICMP error packet
+     * in response to a received bogus packet from the transport layer (like UDP).
+     * The ICMP error packet needs to include (part of) the original IP datagram,
+     * so this function will wrap back the transport packet into the IP datagram
+     * based on its IPControlInfo.
+     */
+    void sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
 
   protected:
     virtual void handleMessage(cMessage *msg);

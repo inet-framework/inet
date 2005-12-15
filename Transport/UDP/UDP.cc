@@ -29,8 +29,8 @@
 #include "UDP.h"
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
-//#include "ICMPAccess.h"
-//#include "ICMPv6Access.h"
+#include "ICMPAccess.h"
+#include "ICMPv6Access.h"
 
 
 Define_Module( UDP );
@@ -74,6 +74,8 @@ void UDP::initialize()
     WATCH_MAP(socketsByPortMap);
 
     nextEphemeralPort = 1024;
+    icmp = NULL;
+    icmpv6 = NULL;
 
     numSent = 0;
     numPassedUp = 0;
@@ -229,8 +231,6 @@ bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
 {
     // send payload with UDPControlInfo up to the application -- IPv4 version
-    cMessage *copy = (cMessage *)payload->dup();
-
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
@@ -239,17 +239,15 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl,
     udpCtrl->setSrcPort(udpHeader->sourcePort());
     udpCtrl->setDestPort(udpHeader->destinationPort());
     udpCtrl->setInterfaceId(ipCtrl->interfaceId());
-    copy->setControlInfo(udpCtrl);
+    payload->setControlInfo(udpCtrl);
 
-    send(copy, "to_app", sd->appGateIndex);
+    send(payload, "to_app", sd->appGateIndex);
     numPassedUp++;
 }
 
 void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 {
     // send payload with UDPControlInfo up to the application -- IPv6 version
-    cMessage *copy = (cMessage *)payload->dup();
-
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
@@ -258,10 +256,35 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtr
     udpCtrl->setSrcPort(udpHeader->sourcePort());
     udpCtrl->setDestPort(udpHeader->destinationPort());
     udpCtrl->setInterfaceId(ipCtrl->interfaceId());
-    copy->setControlInfo(udpCtrl);
+    payload->setControlInfo(udpCtrl);
 
-    send(copy, "to_app", sd->appGateIndex);
+    send(payload, "to_app", sd->appGateIndex);
     numPassedUp++;
+}
+
+void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
+{
+    numDroppedWrongPort++;
+
+    // send back ICMP PORT_UNREACHABLE
+    if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
+    {
+        if (!icmp)
+            icmp = ICMPAccess().get();
+        IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
+        icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+    }
+    else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->controlInfo())!=NULL)
+    {
+        if (!icmpv6)
+            icmpv6 = ICMPv6Access().get();
+        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
+        icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+    }
+    else
+    {
+        error("(%s)%s arrived from lower layer without control info", udpPacket->className(), udpPacket->name());
+    }
 }
 
 void UDP::processMsgFromIP(UDPPacket *udpPacket)
@@ -277,21 +300,18 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
     }
 
     int destPort = udpPacket->destinationPort();
+    cPolymorphic *ctrl = udpPacket->removeControlInfo();
 
     // send back ICMP error if no socket is bound to that port
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
     if (it==socketsByPortMap.end())
     {
         EV << "No socket registered on port " << destPort << ", discarding packet\n";
-        delete udpPacket;
-        numDroppedWrongPort++;
-        // FIXME send back ICMP?
+        processUndeliverablePacket(udpPacket, ctrl);
         return;
     }
     SockDescList& list = it->second;
 
-    cPolymorphic *ctrl = udpPacket->removeControlInfo();
-    cMessage *payload = udpPacket->decapsulate();
     int matches = 0;
 
     // deliver a copy of the packet to each matching socket
@@ -304,7 +324,8 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl4, sd))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                sendUp(payload, udpPacket, ctrl4, sd);
+                cMessage *payload = udpPacket->decapsulate();
+                sendUp((cMessage*)payload->dup(), udpPacket, ctrl4, sd);
                 matches++;
             }
         }
@@ -318,7 +339,8 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl6, sd))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                sendUp(payload, udpPacket, ctrl6, sd);
+                cMessage *payload = udpPacket->decapsulate();
+                sendUp((cMessage*)payload->dup(), udpPacket, ctrl6, sd);
                 matches++;
             }
         }
@@ -332,11 +354,10 @@ void UDP::processMsgFromIP(UDPPacket *udpPacket)
     if (matches==0)
     {
         EV << "None of the sockets on port " << destPort << " matches the packet, discarding.\n";
-        numDroppedWrongPort++;
-        // FIXME send back ICMP?
+        processUndeliverablePacket(udpPacket, ctrl);
+        return;
     }
 
-    delete payload;
     delete udpPacket;
     delete ctrl;
 }

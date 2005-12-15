@@ -61,6 +61,8 @@
      - makemakefiles: -P option
      - use new opp_msgc features? (kind=..., length=...etc)
 
+- ICMP: shouldn't we unify ICMP and ICMPv6? at least types and codes?
+
 ----------------------- 
 Note: existing other 802.11 models:
 - from CATALA MONZO ANGEL

@@ -49,6 +49,15 @@ class INET_API ICMPv6 : public cSimpleModule
      */
     void sendErrorMessage(IPv6Datagram *datagram, ICMPv6Type type, int code);
 
+    /**
+     * This method can be called from other modules to send an ICMP error packet
+     * in response to a received bogus packet from the transport layer (like UDP).
+     * The ICMP error packet needs to include (part of) the original IP datagram,
+     * so this function will wrap back the transport packet into the IP datagram
+     * based on its IPControlInfo.
+     */
+    void sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+
   protected:
     // internal helper functions
     void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
