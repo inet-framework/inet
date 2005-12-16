@@ -105,8 +105,8 @@ class INET_API UDP : public cSimpleModule
     // process an ICMP error packet
     virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage
 
-    // process packets coming from IP
-    virtual void processMsgFromIP(UDPPacket *udpPacket);
+    // process UDP packets coming from IP
+    virtual void processUDPPacket(UDPPacket *udpPacket);
 
     // process packets from application
     virtual void processMsgFromApp(cMessage *appData);

@@ -192,7 +192,10 @@ void UDP::handleMessage(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("from_ip") || msg->arrivedOn("from_ipv6"))
     {
-        processMsgFromIP(check_and_cast<UDPPacket *>(msg));
+        if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
+            processICMPError(msg);
+        else
+            processUDPPacket(check_and_cast<UDPPacket *>(msg));
     }
     else // received from application layer
     {
@@ -305,13 +308,20 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
     }
 }
 
-void UDP::processICMPError(cMessage *icmpErrorMsg)
+void UDP::processICMPError(cMessage *msg)
 {
-    // ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(icmpErrorMsg);
-    // IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
+/*
+    if (dynamic_cast<ICMPMessage *>(msg))
+    {
+        ICMPMessage *icmpMsg = (ICMPMessage *)msg;
+        cMessage *datagram = icmpMsg->decapsulate();
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
+
+    }
+*/
 }
 
-void UDP::processMsgFromIP(UDPPacket *udpPacket)
+void UDP::processUDPPacket(UDPPacket *udpPacket)
 {
     // simulate checksum: discard packet if it has bit error
     EV << "Packet " << udpPacket->name() << " received from network, dest port " << udpPacket->destinationPort() << "\n";
