@@ -7,6 +7,9 @@
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 
 --------
+- implement TCP and UDP port reuse. bitmap or free list?
+
+--------
 - put NAMTraceWriter into all routers
 
 - "make dist"?
