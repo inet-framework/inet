@@ -24,8 +24,6 @@ class noncobject IPv6DatagramPtr;
 cplusplus {{
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
-class IPv6Datagram;
-typedef IPv6Datagram *IPv6DatagramPtr;
 }}
 
 
@@ -57,9 +55,8 @@ class IPv6ControlInfo
         IPv6Address destAddr; // destination IPv6 address
         IPv6Address srcAddr;  // source IPv6 address
         short hopLimit;       // hop limit
-        int interfaceId = -1; // interface on which dgram was received/should 
+        int interfaceId = -1; // interface on which dgram was received/should
                               // be sent (see InterfaceTable)
-        IPv6DatagramPtr dgram = 0; // when sending up: the original datagram
 };
 
 

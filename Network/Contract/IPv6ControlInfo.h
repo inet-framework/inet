@@ -21,13 +21,20 @@
 
 #include "IPv6ControlInfo_m.h"
 
+class IPv6Datagram;
+
 class IPv6ControlInfo : public IPv6ControlInfo_Base
 {
+  protected:
+    IPv6Datagram *dgram;
   public:
-    IPv6ControlInfo() : IPv6ControlInfo_Base() {}
-    ~IPv6ControlInfo() {delete dgram();}
-    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {operator=(other);}
+    IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram=NULL;}
+    ~IPv6ControlInfo() {delete dgram;}
+    IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram=NULL; operator=(other);}
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
+
+    virtual void attachOrigDatagram(IPv6Datagram *d);
+    virtual IPv6Datagram *removeOrigDatagram();
 };
 
 #endif

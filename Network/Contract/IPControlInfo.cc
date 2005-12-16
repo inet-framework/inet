@@ -16,27 +16,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPCONTROLINFO_H
-#define __IPCONTROLINFO_H
+#include "IPControlInfo.h"
 
-#include "IPControlInfo_m.h"
-
-class IPDatagram;
-
-class IPControlInfo : public IPControlInfo_Base
+void IPControlInfo::attachOrigDatagram(IPDatagram *d)
 {
-  protected:
-    IPDatagram *dgram;
-  public:
-    IPControlInfo() : IPControlInfo_Base() {dgram=NULL;}
-    ~IPControlInfo() {delete dgram;}
-    IPControlInfo(const IPControlInfo& other) : IPControlInfo_Base() {dgram=NULL; operator=(other);}
-    IPControlInfo& operator=(const IPControlInfo& other) {IPControlInfo_Base::operator=(other); return *this;}
+    if (dgram)
+        opp_error("IPControlInfo::attachOrigDatagram(): a datagram is already attached");
+    dgram = d;
+}
 
-    virtual void attachOrigDatagram(IPDatagram *d);
-    virtual IPDatagram *removeOrigDatagram();
-};
-
-#endif
+IPDatagram *IPControlInfo::removeOrigDatagram()
+{
+    if (!dgram)
+        opp_error("IPControlInfo::removeOrigDatagram(): no datagram attached "
+                  "(already removed, or maybe this IPControlInfo does not come "
+                  "from the IP module?)");
+    IPDatagram *ret = dgram;
+    dgram = NULL;
+    return ret;
+}
 
 

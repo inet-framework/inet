@@ -26,7 +26,6 @@ cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
 class IPDatagram;
-typedef IPDatagram *IPDatagramPtr;
 }}
 
 
@@ -68,7 +67,6 @@ class IPControlInfo
         unsigned char diffServCodePoint;  // for QoS
         short timeToLive;     // maximum hop count
         bool dontFragment;    // "don't fragment" bit
-        IPDatagramPtr dgram = 0; // when sending up: the original datagram
 };
 
 

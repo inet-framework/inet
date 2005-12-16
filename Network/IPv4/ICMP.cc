@@ -110,7 +110,7 @@ void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMP
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
-    IPDatagram *datagram = ctrl->dgram();
+    IPDatagram *datagram = ctrl->removeOrigDatagram();
     datagram->encapsulate(transportPacket);
     sendErrorMessage(datagram, type, code);
 }
