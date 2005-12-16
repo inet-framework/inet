@@ -310,7 +310,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
 
 void UDP::processICMPError(cMessage *msg)
 {
-/*
+/* FIXME TODO to be completed !!! (plus, add similar code to TCP)
     if (dynamic_cast<ICMPMessage *>(msg))
     {
         ICMPMessage *icmpMsg = (ICMPMessage *)msg;
