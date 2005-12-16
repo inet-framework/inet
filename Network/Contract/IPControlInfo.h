@@ -33,7 +33,7 @@ class IPControlInfo : public IPControlInfo_Base
     IPControlInfo(const IPControlInfo& other) : IPControlInfo_Base() {dgram=NULL; operator=(other);}
     IPControlInfo& operator=(const IPControlInfo& other) {IPControlInfo_Base::operator=(other); return *this;}
 
-    virtual void attachOrigDatagram(IPDatagram *d);
+    virtual void setOrigDatagram(IPDatagram *d);
     virtual IPDatagram *removeOrigDatagram();
 };
 

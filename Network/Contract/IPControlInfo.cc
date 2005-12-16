@@ -18,10 +18,10 @@
 
 #include "IPControlInfo.h"
 
-void IPControlInfo::attachOrigDatagram(IPDatagram *d)
+void IPControlInfo::setOrigDatagram(IPDatagram *d)
 {
     if (dgram)
-        opp_error("IPControlInfo::attachOrigDatagram(): a datagram is already attached");
+        opp_error("IPControlInfo::setOrigDatagram(): a datagram is already attached");
     dgram = d;
 }
 

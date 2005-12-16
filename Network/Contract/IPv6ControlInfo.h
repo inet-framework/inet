@@ -33,7 +33,7 @@ class IPv6ControlInfo : public IPv6ControlInfo_Base
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram=NULL; operator=(other);}
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
 
-    virtual void attachOrigDatagram(IPv6Datagram *d);
+    virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *removeOrigDatagram();
 };
 

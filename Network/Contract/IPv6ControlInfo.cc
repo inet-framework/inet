@@ -18,10 +18,10 @@
 
 #include "IPv6ControlInfo.h"
 
-void IPv6ControlInfo::attachOrigDatagram(IPv6Datagram *d)
+void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
 {
     if (dgram)
-        opp_error("IPv6ControlInfo::attachOrigDatagram(): a datagram is already attached");
+        opp_error("IPv6ControlInfo::setOrigDatagram(): a datagram is already attached");
     dgram = d;
 }
 

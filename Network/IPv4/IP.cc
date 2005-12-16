@@ -376,17 +376,23 @@ void IP::localDeliver(IPDatagram *datagram)
 
 cMessage *IP::decapsulateIP(IPDatagram *datagram)
 {
+    // decapsulate transport packet
     InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
+    // create and fill in control info
     IPControlInfo *controlInfo = new IPControlInfo();
     controlInfo->setProtocol(datagram->transportProtocol());
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setDiffServCodePoint(datagram->diffServCodePoint());
     controlInfo->setInterfaceId(fromIE ? fromIE->interfaceId() : -1);
+
+    // original IP datagram might be needed in upper layers to send back ICMP error message
+    controlInfo->setOrigDatagram(datagram);
+
+    // attach control info
     packet->setControlInfo(controlInfo);
-    delete datagram;
 
     return packet;
 }

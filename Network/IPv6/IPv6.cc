@@ -447,17 +447,23 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
 cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 {
+    // decapsulate transport packet
     InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
+    // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setProtocol(datagram->transportProtocol());
     controlInfo->setSrcAddr(datagram->srcAddress());
     controlInfo->setDestAddr(datagram->destAddress());
     controlInfo->setHopLimit(datagram->hopLimit());
     controlInfo->setInterfaceId(fromIE ? fromIE->interfaceId() : -1);
+
+    // original IP datagram might be needed in upper layers to send back ICMP error message
+    controlInfo->setOrigDatagram(datagram);
+
+    // attach control info
     packet->setControlInfo(controlInfo);
-    delete datagram;
 
     return packet;
 }
