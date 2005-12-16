@@ -73,7 +73,7 @@ class INET_API UDP : public cSimpleModule
     SocketsByPortMap socketsByPortMap;
 
     // other state vars
-    short nextEphemeralPort;
+    short lastEphemeralPort;
     ICMP *icmp;
     ICMPv6 *icmpv6;
 

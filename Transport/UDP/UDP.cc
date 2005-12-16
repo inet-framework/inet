@@ -32,8 +32,12 @@
 #include "ICMPAccess.h"
 #include "ICMPv6Access.h"
 
+#define EPHEMERAL_PORTRANGE_START 1024
+#define EPHEMERAL_PORTRANGE_END   5000
+
 
 Define_Module( UDP );
+
 
 static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {
@@ -73,7 +77,7 @@ void UDP::initialize()
     WATCH_PTRMAP(socketsByIdMap);
     WATCH_MAP(socketsByPortMap);
 
-    nextEphemeralPort = 1024;
+    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     icmp = NULL;
     icmpv6 = NULL;
 
@@ -158,15 +162,29 @@ void UDP::unbind(int sockId)
     for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
         if (*it == sd)
             {list.erase(it); break;}
-
+    if (list.empty())
+        socketsByPortMap.erase(sd->localPort);
     delete sd;
 }
 
 short UDP::getEphemeralPort()
 {
-    if (nextEphemeralPort==5000)
-        error("Ephemeral port range 1024..4999 exhausted (port number reuse not implemented)");
-    return nextEphemeralPort++;
+    // start at the last allocated port number + 1, and search for an unused one
+    short searchUntil = lastEphemeralPort++;
+    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+
+    while (socketsByPortMap.find(lastEphemeralPort)!=socketsByPortMap.end())
+    {
+        if (lastEphemeralPort == searchUntil) // got back to starting point?
+            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+        lastEphemeralPort++;
+        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    }
+
+    // found a free one, return it
+    return lastEphemeralPort;
 }
 
 void UDP::handleMessage(cMessage *msg)

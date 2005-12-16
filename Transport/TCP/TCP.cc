@@ -30,6 +30,8 @@ Define_Module(TCP);
 bool TCP::testing;
 bool TCP::logverbose;
 
+#define EPHEMERAL_PORTRANGE_START 1024
+#define EPHEMERAL_PORTRANGE_END   5000
 
 static std::ostream & operator<<(std::ostream & os, const TCP::SockPair& sp)
 {
@@ -54,7 +56,8 @@ static std::ostream & operator<<(std::ostream & os, const TCPConnection& conn)
 
 void TCP::initialize()
 {
-    nextEphemeralPort = 1024;
+    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    WATCH(lastEphemeralPort);
 
     WATCH_PTRMAP(tcpConnMap);
     WATCH_PTRMAP(tcpAppConnMap);
@@ -259,9 +262,22 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
 
 short TCP::getEphemeralPort()
 {
-    if (nextEphemeralPort==5000)
-        error("Ephemeral port range 1024..4999 exhausted (port number reuse not implemented)");
-    return nextEphemeralPort++;
+    // start at the last allocated port number + 1, and search for an unused one
+    short searchUntil = lastEphemeralPort++;
+    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+
+    while (usedEphemeralPorts.find(lastEphemeralPort)!=usedEphemeralPorts.end())
+    {
+        if (lastEphemeralPort == searchUntil) // got back to starting point?
+            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+        lastEphemeralPort++;
+        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    }
+
+    // found a free one, return it
+    return lastEphemeralPort;
 }
 
 void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
@@ -288,6 +304,10 @@ void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress re
 
     // then insert it into tcpConnMap
     tcpConnMap[key] = conn;
+
+    // mark port as used
+    if (localPort>=EPHEMERAL_PORTRANGE_START && localPort<EPHEMERAL_PORTRANGE_END)
+        usedEphemeralPorts.insert(localPort);
 }
 
 void TCP::updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
@@ -307,9 +327,11 @@ void TCP::updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress
     // then update addresses/ports, and re-insert it with new key into tcpConnMap
     key.localAddr = conn->localAddr = localAddr;
     key.remoteAddr = conn->remoteAddr = remoteAddr;
-    key.localPort = conn->localPort = localPort;
+    ASSERT(conn->localPort == localPort);
     key.remotePort = conn->remotePort = remotePort;
     tcpConnMap[key] = conn;
+
+    // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
 }
 
 void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
@@ -347,6 +369,12 @@ void TCP::removeConnection(TCPConnection *conn)
     key2.localPort = conn->localPort;
     key2.remotePort = conn->remotePort;
     tcpConnMap.erase(key2);
+
+    // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
+    // deletes ALL occurrences of the port from the multiset.
+    std::multiset<short>::iterator it = usedEphemeralPorts.find(conn->localPort);
+    if (it!=usedEphemeralPorts.end())
+        usedEphemeralPorts.erase(it);
 
     delete conn;
 }

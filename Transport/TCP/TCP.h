@@ -24,6 +24,7 @@
 #endif
 
 #include <map>
+#include <set>
 #include <omnetpp.h>
 #include "IPvXAddress.h"
 
@@ -140,7 +141,8 @@ class INET_API TCP : public cSimpleModule
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
-    short nextEphemeralPort;
+    short lastEphemeralPort;
+    std::multiset<short> usedEphemeralPorts;
 
     TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr);
     TCPConnection *findConnForApp(int appGateIndex, int connId);

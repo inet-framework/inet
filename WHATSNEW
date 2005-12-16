@@ -30,7 +30,8 @@ INET-200512xx
   msg->byteLength() and msg->setLength(8*bytes) to msg->setByteLength(bytes),
   etc.
 
-- TCP Reno bugs fixed (reported by Pascal Rousseau)
+- TCP: Reno bugs fixed (reported by Pascal Rousseau); implemented reuse of 
+  ephemeral ports
 
 - hosts have now the same queues as routers (reported by Michael Tuexen)
 
