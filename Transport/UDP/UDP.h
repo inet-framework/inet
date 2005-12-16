@@ -42,9 +42,6 @@ const int UDP_HEADER_BYTES = 8;
 /**
  * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
  *
- * Sends incoming packets to *all* matching sockets. No attempt is made to filter out
- * multiple binds to the same port.
- *
  * More info in the NED file.
  */
 class INET_API UDP : public cSimpleModule
@@ -104,6 +101,9 @@ class INET_API UDP : public cSimpleModule
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
     void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
+
+    // process an ICMP error packet
+    virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage
 
     // process packets coming from IP
     virtual void processMsgFromIP(UDPPacket *udpPacket);

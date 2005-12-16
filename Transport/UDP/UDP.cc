@@ -305,6 +305,12 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
     }
 }
 
+void UDP::processICMPError(cMessage *icmpErrorMsg)
+{
+    // ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(icmpErrorMsg);
+    // IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
+}
+
 void UDP::processMsgFromIP(UDPPacket *udpPacket)
 {
     // simulate checksum: discard packet if it has bit error
