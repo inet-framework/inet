@@ -604,30 +604,70 @@ bool OSPF::Router::DestinationIsUnreachable (OSPFLSA* lsa) const
     if (routerLSA != NULL) {
         OSPF::RoutingInfo* routingInfo = check_and_cast<OSPF::RoutingInfo*> (routerLSA);
         if (routerLSA->getHeader ().getLinkStateID () == routerID) { // this is spfTreeRoot
-            return true;
+            return false;
         }
 
+        // get the interface address pointing backwards on the shortest path tree
         unsigned int     linkCount   = routerLSA->getLinksArraySize ();
         OSPF::RouterLSA* toRouterLSA = dynamic_cast<OSPF::RouterLSA*> (routingInfo->GetParent ());
         if (toRouterLSA != NULL) {
-            bool destinationFound = false;
+            bool      destinationFound           = false;
+            bool      unnumberedPointToPointLink = false;
+            IPAddress firstNumberedIfAddress;
+
             for (unsigned int i = 0; i < linkCount; i++) {
                 Link& link = routerLSA->getLinks (i);
 
-                if ((link.getType () == PointToPointLink) &&
-                    (link.getLinkID () == toRouterLSA->getHeader ().getLinkStateID ()))
-                {
-                    destination = link.getLinkData ();
-                    destinationFound = true;
-                    break;
+                if (link.getType () == PointToPointLink) {
+                    if (link.getLinkID () == toRouterLSA->getHeader ().getLinkStateID ()) {
+                        if ((link.getLinkData () & 0xFF000000) == 0) {
+                            unnumberedPointToPointLink = true;
+                            if (!firstNumberedIfAddress.isUnspecified ()) {
+                                break;
+                            }
+                        } else {
+                            destination = link.getLinkData ();
+                            destinationFound = true;
+                            break;
+                        }
+                    } else {
+                        if (((link.getLinkData () & 0xFF000000) != 0) &&
+                             firstNumberedIfAddress.isUnspecified ())
+                        {
+                            firstNumberedIfAddress = link.getLinkData ();
+                        }
+                    }
+                } else if (link.getType () == TransitLink) {
+                    if (firstNumberedIfAddress.isUnspecified ()) {
+                        firstNumberedIfAddress = link.getLinkData ();
+                    }
+                } else if (link.getType () == VirtualLink) {
+                    if (link.getLinkID () == toRouterLSA->getHeader ().getLinkStateID ()) {
+                        destination = link.getLinkData ();
+                        destinationFound = true;
+                        break;
+                    } else {
+                        if (firstNumberedIfAddress.isUnspecified ()) {
+                            firstNumberedIfAddress = link.getLinkData ();
+                        }
+                    }
+                }
+                // There's no way to get an interface address for the router from a StubLink
+            }
+            if (unnumberedPointToPointLink) {
+                if (!firstNumberedIfAddress.isUnspecified ()) {
+                    destination = firstNumberedIfAddress;
+                } else {
+                    return true;
                 }
             }
             if (!destinationFound) {
-                return false;
+                return true;
             }
         } else {
             OSPF::NetworkLSA* toNetworkLSA = dynamic_cast<OSPF::NetworkLSA*> (routingInfo->GetParent ());
             if (toNetworkLSA != NULL) {
+                // get the interface address pointing backwards on the shortest path tree
                 bool destinationFound = false;
                 for (unsigned int i = 0; i < linkCount; i++) {
                     Link& link = routerLSA->getLinks (i);
@@ -641,10 +681,10 @@ bool OSPF::Router::DestinationIsUnreachable (OSPFLSA* lsa) const
                     }
                 }
                 if (!destinationFound) {
-                    return false;
+                    return true;
                 }
             } else {
-                return false;
+                return true;
             }
         }
     }
