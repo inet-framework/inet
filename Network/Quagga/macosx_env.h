@@ -39,6 +39,10 @@ typedef uint64_t u64;
 
 #define IP_PKTINFO      19
 
+
+#undef SO_REUSEPORT
+
+
 // netlink & messages
 
 struct sockaddr_nl
