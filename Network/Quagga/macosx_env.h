@@ -43,6 +43,7 @@ typedef uint64_t u64;
 
 struct sockaddr_nl
 {
+        __uint8_t sa_len; /* unlike on Linux, sockaddr begins on OS/X with sa_len! */
         sa_family_t nl_family;
         unsigned short nl_pad;
         u32 nl_pid;
