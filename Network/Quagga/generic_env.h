@@ -616,6 +616,8 @@ enum
 
 // netlink & messages
 
+// FIXME (WinXP): if we map cmsghdr and msghdr as well, something gets messed up and we get ___cmsg_nxthdr as undefined symbol
+
 //#define cmsghdr  oppsimt_cmsghdr
 //struct oppsimt_cmsghdr
 struct cmsghdr
