@@ -518,6 +518,7 @@ typedef struct siginfo
 
 } siginfo_t;
 
+// FIXME add this to globalwhitelist.lst as well (must replace "struct sigaction" --> "struct_sigaction" in Quagga src)
 #define struct_sigaction  struct oppsimt_sigaction
 struct oppsimt_sigaction
 {
