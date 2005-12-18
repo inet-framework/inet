@@ -13,6 +13,11 @@
 #include <fcntl.h>
 #include <errno.h>
 
+/*
+ * For portability reasons, we want to be independent of the underlying OS.
+ * So we undefine everything that might get into our way, then define it 
+ * in the way we like.
+ */
 #undef __inline__
 #undef CMSG_FIRSTHDR
 #undef CMSG_NXTHDR
