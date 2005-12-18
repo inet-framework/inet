@@ -6,7 +6,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stddef.h>
 #include <sys/malloc.h>
+#include <sys/un.h>
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -15,6 +17,7 @@
 #include <grp.h>
 #include <net/if_arp.h>
 #include <net/if.h>
+#include <net/if_dl.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <fcntl.h>
@@ -23,6 +26,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#undef sigfillset
 
 typedef int8_t    s8;
 typedef uint8_t   u8;
