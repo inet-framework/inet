@@ -187,6 +187,12 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         return 0;
     }
 
+    if(level == SOL_SOCKET && option_name == SO_REUSEPORT)
+    {
+        EV << "SO_REUSEPORT option, ignore" << endl;
+        return 0;
+    }
+
     if(level == SOL_SOCKET && option_name == SO_BROADCAST)
     {
         EV << "SO_BROADCAST option, ignore" << endl;
