@@ -10,7 +10,6 @@
 #include <limits.h>
 #include <stddef.h>
 #include <sys/stat.h>
-#include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -57,6 +56,9 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 
 #define MAXPATHLEN  4096
 
+#undef EWOULDBLOCK
+#undef EAFNOSUPPORT
+#undef EINPROGRESS
 #define EWOULDBLOCK     EAGAIN
 #define EAFNOSUPPORT    97
 #define EINPROGRESS     115
@@ -158,6 +160,7 @@ struct oppsimt_sockaddr_in
 
 
 #define SOCKET  u_int64_t
+#undef FD_SETSIZE
 #define FD_SETSIZE      64
 
 #define fd_set struct oppsimt_fd_set
@@ -447,21 +450,40 @@ struct oppsimt_iovec
 
 #define sig_atomic_t        int
 
+#undef SA_SIGINFO
+
 typedef void (*sighandler_t) (int);
 
-typedef struct
+#define sigset_t  struct oppsimt_sigset 
+struct oppsimt_sigset
 {
     unsigned long int __val[(1024 / (8 * sizeof (unsigned long int)))];
-} sigset_t;
+};
 
 
-typedef union sigval
+#define sigval_t  union oppsimt_sigval  
+union oppsimt_sigval
 {
     int sival_int;
     void *sival_ptr;
-} sigval_t;
+};
 
-typedef struct siginfo
+#define siginfo_t  struct oppsimt_siginfo 
+struct oppsimt_siginfo {
+        int     si_signo;
+        int     si_errno;
+        int     si_code;
+        pid_t   si_pid;
+        uid_t   si_uid;
+        int     si_status;
+        void    *si_addr;
+        union sigval si_value;
+        long    si_band;
+        unsigned long   pad[7];
+}; 
+
+/*
+struct oppsimt_siginfo
 {
     int si_signo;
     int si_errno;
@@ -513,7 +535,12 @@ typedef struct siginfo
 
     } _sifields;
 
-} siginfo_t;
+};
+*/
+
+
+#undef sa_handler  // OS/X
+#undef sa_sigaction  // OS/X
 
 // FIXME add this to globalwhitelist.lst as well (must replace "struct sigaction" --> "struct_sigaction" in Quagga src)
 #define struct_sigaction  struct oppsimt_sigaction
@@ -1060,11 +1087,26 @@ struct oppsimt_in_pktinfo
 
 // asm/fcntl.h
 
+#undef O_NONBLOCK
+
 #define F_GETFL     3
 #define F_SETFL     4
 #define O_NONBLOCK  04000
 
 // asm/signal.h
+
+#undef SIGHUP
+#undef SIGINT
+#undef SIGQUIT
+#undef SIGILL
+#undef SIGBUS
+#undef SIGFPE
+#undef SIGUSR1
+#undef SIGSEGV
+#undef SIGUSR2
+#undef SIGPIPE
+#undef SIGALRM
+#undef SIGTERM
 
 #define SIGHUP          1
 #define SIGINT          2
@@ -1114,5 +1156,12 @@ struct oppsimt_in_pktinfo
 #define _IOT_ifreq     _IOT(_IOTS(char),IFNAMSIZ,_IOTS(char),16,0,0)
 #define _IOT_ifreq_short _IOT(_IOTS(char),IFNAMSIZ,_IOTS(short),1,0,0)
 #define _IOT_ifreq_int _IOT(_IOTS(char),IFNAMSIZ,_IOTS(int),1,0,0)
+
+// 
+
+#undef ntohl
+#undef ntohs
+#undef htonl
+#undef htons
 
 #endif
