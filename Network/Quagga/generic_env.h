@@ -121,8 +121,8 @@ typedef char *caddr_t;
 
 // in_addr (from winsock.h)
 
-#define in_addr  in_addr__X
-struct in_addr__X
+#define in_addr  oppsimt_in_addr
+struct oppsimt_in_addr
 {
         union {
                 struct { u_char s_b1,s_b2,s_b3,s_b4; } S_un_b;
@@ -137,15 +137,15 @@ struct in_addr__X
 #define s_lh    S_un.S_un_b.s_b3
 };
 
-#define sockaddr  sockaddr__X
-struct sockaddr__X
+#define sockaddr  oppsimt_sockaddr
+struct oppsimt_sockaddr
 {
         u_short sa_family;              /* address family */
         char    sa_data[14];            /* up to 14 bytes of direct address */
 };
 
-#define sockaddr_in  sockaddr_in__X
-struct sockaddr_in__X
+#define sockaddr_in  oppsimt_sockaddr_in
+struct oppsimt_sockaddr_in
 {
         short   sin_family;
         u_short sin_port;
@@ -157,8 +157,8 @@ struct sockaddr_in__X
 #define SOCKET  u_int64_t
 #define FD_SETSIZE      64
 
-#define fd_set struct fd_set__X
-struct fd_set__X
+#define fd_set struct oppsimt_fd_set
+struct oppsimt_fd_set
 {
         u_int   fd_count;
         SOCKET  fd_array[FD_SETSIZE];
@@ -361,15 +361,15 @@ static int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
 /*
  * Argument structure for IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP.
  */
-#define ip_mreq  ip_mreq__X
-struct ip_mreq__X
+#define ip_mreq  oppsimt_ip_mreq
+struct oppsimt_ip_mreq
 {
         struct in_addr  imr_multiaddr;  /* IP multicast address of group */
         struct in_addr  imr_interface;  /* local IP address of interface */
 };
 
-#define servent  servent__X
-struct servent__X
+#define servent  oppsimt_servent
+struct oppsimt_servent
 {
         char  * s_name;           /* official service name */
         char ** s_aliases;      /* alias list */
@@ -400,15 +400,15 @@ static u_short oppsim_ntohs(u_short netshort) {return 0;}
 
 // time
 
-#define timeval  timeval__X
-struct timeval__X
+#define timeval  oppsimt_timeval
+struct oppsimt_timeval
 {
         long    tv_sec;
         long    tv_usec;
 };
 
-#define timespec  timespec__X
-struct timespec__X
+#define timespec  oppsimt_timespec
+struct oppsimt_timespec
 {
     time_t tv_sec;
     long int tv_nsec;
@@ -416,8 +416,8 @@ struct timespec__X
 
 // passwd
 
-#define group  group__X
-struct group__X
+#define group  oppsimt_group
+struct oppsimt_group
 {
     char *gr_name;
     char *gr_passwd;
@@ -425,8 +425,8 @@ struct group__X
     char **gr_mem;
 };
 
-#define passwd  passwd__X
-struct passwd__X
+#define passwd  oppsimt_passwd
+struct oppsimt_passwd
 {
     char *pw_name;
     char *pw_passwd;
@@ -439,8 +439,8 @@ struct passwd__X
 
 // writev etc
 
-#define iovec  iovec__X
-struct iovec__X
+#define iovec  oppsimt_iovec
+struct oppsimt_iovec
 {
     void *iov_base;
     size_t iov_len;
@@ -518,8 +518,8 @@ typedef struct siginfo
 
 } siginfo_t;
 
-#define struct_sigaction  struct sigaction__X
-struct sigaction__X
+#define struct_sigaction  struct oppsimt_sigaction
+struct oppsimt_sigaction
 {
     sighandler_t sa_handler;
 
@@ -532,8 +532,8 @@ struct sigaction__X
 
 // uname
 
-#define utsname  utsname__X
-struct utsname__X
+#define utsname  oppsimt_utsname
+struct oppsimt_utsname
 {
     char sysname[65];
     char nodename[65];
@@ -549,8 +549,8 @@ struct utsname__X
 
 #define sa_family_t     unsigned short int
 
-#define sockaddr_nl  sockaddr_nl__X
-struct sockaddr_nl__X
+#define sockaddr_nl  oppsimt_sockaddr_nl
+struct oppsimt_sockaddr_nl
 {
         sa_family_t nl_family;
         unsigned short nl_pad;
@@ -558,8 +558,8 @@ struct sockaddr_nl__X
         u32 nl_groups;
 };
 
-#define ip  ip__X
-struct ip__X
+#define ip  oppsimt_ip
+struct oppsimt_ip
 {
     unsigned int ip_hl:4;
     unsigned int ip_v:4;
@@ -575,8 +575,8 @@ struct ip__X
     struct in_addr ip_src, ip_dst;
 };
 
-#define sockaddr_un  sockaddr_un__X
-struct sockaddr_un__X
+#define sockaddr_un  oppsimt_sockaddr_un
+struct oppsimt_sockaddr_un
 {
     sa_family_t sun_family;
     char sun_path[108];
@@ -584,8 +584,8 @@ struct sockaddr_un__X
 
 #define in_port_t       uint16_t
 
-#define in6_addr  in6_addr__X
-struct in6_addr__X
+#define in6_addr  oppsimt_in6_addr
+struct oppsimt_in6_addr
 {
     union
     {
@@ -616,8 +616,8 @@ enum
 
 // netlink & messages
 
-//#define cmsghdr  cmsghdr__X
-//struct cmsghdr__X
+//#define cmsghdr  oppsimt_cmsghdr
+//struct oppsimt_cmsghdr
 struct cmsghdr
 {
     size_t cmsg_len;
@@ -628,8 +628,8 @@ struct cmsghdr
     unsigned char __cmsg_data [];
 };
 
-//#define msghdr  msghdr__X
-//struct msghdr__X
+//#define msghdr  oppsimt_msghdr
+//struct oppsimt_msghdr
 struct msghdr
 {
     void *msg_name;
@@ -670,8 +670,8 @@ enum rtattr_type_t
         RTA_SESSION,
 };
 
-#define nlmsghdr  nlmsghdr__X
-struct nlmsghdr__X
+#define nlmsghdr  oppsimt_nlmsghdr
+struct oppsimt_nlmsghdr
 {
         u32 nlmsg_len;
         u16 nlmsg_type;
@@ -680,14 +680,14 @@ struct nlmsghdr__X
         u32 nlmsg_pid;
 };
 
-#define rtgenmsg  rtgenmsg__X
-struct rtgenmsg__X
+#define rtgenmsg  oppsimt_rtgenmsg
+struct oppsimt_rtgenmsg
 {
     unsigned char rtgen_family;
 };
 
-#define ifinfomsg  ifinfomsg__X
-struct ifinfomsg__X
+#define ifinfomsg  oppsimt_ifinfomsg
+struct oppsimt_ifinfomsg
 {
     unsigned char ifi_family;
     unsigned char __ifi_pad;
@@ -697,22 +697,22 @@ struct ifinfomsg__X
     unsigned ifi_change;
 };
 
-#define nlmsgerr  nlmsgerr__X
-struct nlmsgerr__X
+#define nlmsgerr  oppsimt_nlmsgerr
+struct oppsimt_nlmsgerr
 {
     int error;
     struct nlmsghdr msg;
 };
 
-#define rtattr  rtattr__X
-struct rtattr__X
+#define rtattr  oppsimt_rtattr
+struct oppsimt_rtattr
 {
     unsigned short rta_len;
     unsigned short rta_type;
 };
 
-#define rtmsg  rtmsg__X
-struct rtmsg__X
+#define rtmsg  oppsimt_rtmsg
+struct oppsimt_rtmsg
 {
     unsigned char rtm_family;
     unsigned char rtm_dst_len;
@@ -755,8 +755,8 @@ enum
         IFA_CACHEINFO
 };
 
-#define ifaddrmsg  ifaddrmsg__X
-struct ifaddrmsg__X
+#define ifaddrmsg  oppsimt_ifaddrmsg
+struct oppsimt_ifaddrmsg
 {
     unsigned char ifa_family;
     unsigned char ifa_prefixlen;
@@ -790,8 +790,8 @@ enum rt_scope_t
     RT_SCOPE_NOWHERE=255
 };
 
-#define rtnexthop  rtnexthop__X
-struct rtnexthop__X
+#define rtnexthop  oppsimt_rtnexthop
+struct oppsimt_rtnexthop
 {
     unsigned short rtnh_len;
     unsigned char rtnh_flags;
@@ -799,8 +799,8 @@ struct rtnexthop__X
     int rtnh_ifindex;
 };
 
-#define ifmap  ifmap__X
-struct ifmap__X
+#define ifmap  oppsimt_ifmap
+struct oppsimt_ifmap
 {
     unsigned long int mem_start;
     unsigned long int mem_end;
@@ -810,8 +810,8 @@ struct ifmap__X
     unsigned char port;
 };
 
-#define ifreq  ifreq__X
-struct ifreq__X
+#define ifreq  oppsimt_ifreq
+struct oppsimt_ifreq
 {
     union
     {
@@ -837,8 +837,8 @@ struct ifreq__X
 
 typedef int (*compar_fn_t) (const void *, const void *);
 
-#define in_pktinfo  in_pktinfo__X
-struct in_pktinfo__X
+#define in_pktinfo  oppsimt_in_pktinfo
+struct oppsimt_in_pktinfo
 {
   int ipi_ifindex;
   struct in_addr ipi_spec_dst;
