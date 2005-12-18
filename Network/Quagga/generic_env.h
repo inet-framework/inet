@@ -13,6 +13,396 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#undef __inline__
+#undef CMSG_FIRSTHDR
+#undef CMSG_NXTHDR
+#undef CMSG_ALIGN
+#undef CMSG_DATA
+#undef IP_HDRINCL
+#undef IP_PKTINFO
+#undef IN_CLASSD
+#undef IN_MULTICAST
+#undef MSG_TRUNC
+#undef MAXPATHLEN
+#undef EWOULDBLOCK
+#undef EAFNOSUPPORT
+#undef EINPROGRESS
+#undef IPVERSION
+#undef mode_t
+#undef uid_t
+#undef gid_t
+#undef pid_t
+#undef time_t
+#undef socklen_t
+#undef ssize_t
+#undef u_char
+#undef u_short
+#undef u_int
+#undef u_long
+#undef useconds_t
+#undef suseconds_t
+#undef ino64_t
+#undef nlink_t
+#undef off_t
+#undef off64_t
+#undef blksize_t
+#undef blkcnt_t
+#undef blkcnt64_t
+#undef clock_t
+#undef fd_mask
+#undef uint8_t
+#undef uint16_t
+#undef uint32_t
+#undef s8
+#undef u8
+#undef s16
+#undef u16
+#undef s32
+#undef u32
+#undef s64
+#undef u64
+#undef in_addr
+#undef s_addr
+#undef s_host
+#undef s_net
+#undef s_imp
+#undef s_impno
+#undef s_lh
+#undef sockaddr
+#undef sockaddr_in
+#undef SOCKET
+#undef FD_SETSIZE
+#undef fd_set
+#undef FD_CLR
+#undef FD_SET
+#undef FD_ZERO
+#undef FD_ISSET
+#undef TCP_NODELAY
+#undef TCP_BSDURGENT
+#undef AF_UNSPEC
+#undef AF_UNIX
+#undef AF_INET
+#undef AF_INET6
+#undef IPPROTO_IP
+#undef IPPROTO_ICMP
+#undef IPPROTO_IGMP
+#undef IPPROTO_GGP
+#undef IPPROTO_TCP
+#undef IPPROTO_PUP
+#undef IPPROTO_UDP
+#undef IPPROTO_IDP
+#undef IPPROTO_ND
+#undef IPPROTO_RAW
+#undef IPPROTO_MAX
+#undef SOCK_STREAM
+#undef SOCK_DGRAM
+#undef SOCK_RAW
+#undef SOCK_RDM
+#undef SOCK_SEQPACKET
+#undef INADDR_ANY
+#undef INADDR_LOOPBACK
+#undef INADDR_BROADCAST
+#undef INADDR_NONE
+#undef IN_CLASSA
+#undef IN_CLASSA_NET
+#undef IN_CLASSA_NSHIFT
+#undef IN_CLASSA_HOST
+#undef IN_CLASSA_MAX
+#undef IN_CLASSB
+#undef IN_CLASSB_NET
+#undef IN_CLASSB_NSHIFT
+#undef IN_CLASSB_HOST
+#undef IN_CLASSB_MAX
+#undef IN_CLASSC
+#undef IN_CLASSC_NET
+#undef IN_CLASSC_NSHIFT
+#undef IN_CLASSC_HOST
+#undef SOL_SOCKET
+#undef SO_DEBUG
+#undef SO_ACCEPTCONN
+#undef SO_REUSEADDR
+#undef SO_KEEPALIVE
+#undef SO_DONTROUTE
+#undef SO_BROADCAST
+#undef SO_USELOOPBACK
+#undef SO_LINGER
+#undef SO_OOBINLINE
+#undef SO_DONTLINGER
+#undef SO_SNDBUF
+#undef SO_RCVBUF
+#undef SO_SNDLOWAT
+#undef SO_RCVLOWAT
+#undef SO_SNDTIMEO
+#undef SO_RCVTIMEO
+#undef SO_ERROR
+#undef SO_TYPE
+#undef SO_CONNDATA
+#undef SO_CONNOPT
+#undef SO_DISCDATA
+#undef SO_DISCOPT
+#undef SO_CONNDATALEN
+#undef SO_CONNOPTLEN
+#undef SO_DISCDATALEN
+#undef SO_DISCOPTLEN
+#undef SO_OPENTYPE
+#undef SO_SYNCHRONOUS_ALERT
+#undef SO_SYNCHRONOUS_NONALERT
+#undef SO_MAXDG
+#undef SO_MAXPATHDG
+#undef SO_UPDATE_ACCEPT_CONTEXT
+#undef SO_CONNECT_TIME
+#undef IP_OPTIONS
+#undef IP_MULTICAST_IF
+#undef IP_MULTICAST_TTL
+#undef IP_MULTICAST_LOOP
+#undef IP_ADD_MEMBERSHIP
+#undef IP_DROP_MEMBERSHIP
+#undef IP_TTL
+#undef IP_TOS
+#undef IP_DONTFRAGMENT
+#undef IP_DEFAULT_MULTICAST_TTL
+#undef IP_DEFAULT_MULTICAST_LOOP
+#undef IP_MAX_MEMBERSHIPS
+#undef ip_mreq
+#undef servent
+#undef MSG_OOB
+#undef MSG_PEEK
+#undef MSG_DONTROUTE
+#undef MSG_MAXIOVLEN
+#undef MSG_PARTIAL
+#undef timeval
+#undef timespec
+#undef group
+#undef passwd
+#undef iovec
+#undef sig_atomic_t
+#undef sigset_t
+#undef sigval_t
+#undef siginfo_t
+#undef struct_sigaction
+#undef utsname
+#undef in_addr_t
+#undef sa_family_t
+#undef sockaddr_nl
+#undef ip
+#undef sockaddr_un
+#undef in_port_t
+#undef in6_addr
+#undef nlmsghdr
+#undef rtgenmsg
+#undef ifinfomsg
+#undef nlmsgerr
+#undef rtattr
+#undef rtmsg
+#undef ifaddrmsg
+#undef rtnexthop
+#undef ifmap
+#undef ifreq
+#undef in_pktinfo
+#undef RT_TABLE_MAX
+#undef RTM_BASE
+#undef RTM_NEWLINK
+#undef RTM_DELLINK
+#undef RTM_GETLINK
+#undef RTM_SETLINK
+#undef RTM_NEWADDR
+#undef RTM_DELADDR
+#undef RTM_GETADDR
+#undef RTM_NEWROUTE
+#undef RTM_DELROUTE
+#undef RTM_GETROUTE
+#undef RTM_NEWNEIGH
+#undef RTM_DELNEIGH
+#undef RTM_GETNEIGH
+#undef RTM_NEWRULE
+#undef RTM_DELRULE
+#undef RTM_GETRULE
+#undef RTM_NEWQDISC
+#undef RTM_DELQDISC
+#undef RTM_GETQDISC
+#undef RTM_NEWTCLASS
+#undef RTM_DELTCLASS
+#undef RTM_GETTCLASS
+#undef RTM_NEWTFILTER
+#undef RTM_DELTFILTER
+#undef RTM_GETTFILTER
+#undef RTM_MAX
+#undef RTA_MAX
+#undef RTN_MAX
+#undef IFLA_COST
+#undef IFLA_PRIORITY
+#undef IFLA_MASTER
+#undef IFLA_WIRELESS
+#undef IFLA_PROTINFO
+#undef IFLA_MAX
+#undef IFA_MAX
+#undef IFA_F_SECONDARY
+#undef IFA_F_TEMPORARY
+#undef IFA_F_DEPRECATED
+#undef IFA_F_TENTATIVE
+#undef IFA_F_PERMANENT
+#undef RTM_F_NOTIFY
+#undef RTM_F_CLONED
+#undef RTM_F_EQUALIZE
+#undef RTM_F_PREFIX
+#undef RTPROT_UNSPEC
+#undef RTPROT_REDIRECT
+#undef RTPROT_KERNEL
+#undef RTPROT_BOOT
+#undef RTPROT_STATIC
+#undef RTPROT_GATED
+#undef RTPROT_RA
+#undef RTPROT_MRT
+#undef RTPROT_ZEBRA
+#undef RTPROT_BIRD
+#undef RTPROT_DNROUTED
+#undef RTMGRP_LINK
+#undef RTMGRP_NOTIFY
+#undef RTMGRP_NEIGH
+#undef RTMGRP_TC
+#undef RTMGRP_IPV4_IFADDR
+#undef RTMGRP_IPV4_MROUTE
+#undef RTMGRP_IPV4_ROUTE
+#undef RTMGRP_IPV6_IFADDR
+#undef RTMGRP_IPV6_MROUTE
+#undef RTMGRP_IPV6_ROUTE
+#undef RTMGRP_DECnet_IFADDR
+#undef RTMGRP_DECnet_ROUTE
+#undef RTA_ALIGNTO
+#undef RTA_ALIGN
+#undef RTA_OK
+#undef RTA_NEXT
+#undef RTA_LENGTH
+#undef RTA_SPACE
+#undef RTA_DATA
+#undef RTA_PAYLOAD
+#undef IFLA_RTA
+#undef IFLA_PAYLOAD
+#undef IFA_RTA
+#undef IFA_PAYLOAD
+#undef RTM_RTA
+#undef RTM_PAYLOAD
+#undef RTNH_ALIGNTO
+#undef RTNH_ALIGN
+#undef RTNH_NEXT
+#undef NETLINK_ROUTE
+#undef NLM_F_REQUEST
+#undef NLM_F_MULTI
+#undef NLM_F_ROOT
+#undef NLM_F_MATCH
+#undef NLM_F_ACK
+#undef NLM_F_ECHO
+#undef NLM_F_REPLACE
+#undef NLM_F_EXCL
+#undef NLM_F_CREATE
+#undef NLM_F_APPEND
+#undef NLMSG_ALIGNTO
+#undef NLMSG_ALIGN
+#undef NLMSG_LENGTH
+#undef NLMSG_SPACE
+#undef NLMSG_DATA
+#undef NLMSG_NEXT
+#undef NLMSG_OK
+#undef NLMSG_PAYLOAD
+#undef NLMSG_NOOP
+#undef NLMSG_ERROR
+#undef NLMSG_DONE
+#undef NLMSG_OVERRUN
+#undef ARPHRD_ETHER
+#undef ARPHRD_PPP
+#undef ARPHRD_LOOPBACK
+#undef AF_NETLINK
+#undef AF_PACKET
+#undef PF_NETLINK
+#undef PF_PACKET
+#undef IAC
+#undef DONT
+#undef DO
+#undef WILL
+#undef SB
+#undef SE
+#undef TELOPT_ECHO
+#undef TELOPT_SGA
+#undef TELOPT_NAWS
+#undef TELOPT_LINEMODE
+#undef LOG_EMERG
+#undef LOG_ALERT
+#undef LOG_CRIT
+#undef LOG_ERR
+#undef LOG_WARNING
+#undef LOG_NOTICE
+#undef LOG_INFO
+#undef LOG_DEBUG
+#undef LOG_KERN
+#undef LOG_USER
+#undef LOG_MAIL
+#undef LOG_DAEMON
+#undef LOG_AUTH
+#undef LOG_SYSLOG
+#undef LOG_LPR
+#undef LOG_NEWS
+#undef LOG_UUCP
+#undef LOG_CRON
+#undef LOG_AUTHPRIV
+#undef LOG_FTP
+#undef LOG_LOCAL0
+#undef LOG_LOCAL1
+#undef LOG_LOCAL2
+#undef LOG_LOCAL3
+#undef LOG_LOCAL4
+#undef LOG_LOCAL5
+#undef LOG_LOCAL6
+#undef LOG_LOCAL7
+#undef LOG_PID
+#undef LOG_CONS
+#undef LOG_ODELAY
+#undef LOG_NDELAY
+#undef LOG_NOWAIT
+#undef LOG_PERROR
+#undef F_GETFL
+#undef F_SETFL
+#undef O_NONBLOCK
+#undef SIGHUP
+#undef SIGINT
+#undef SIGQUIT
+#undef SIGILL
+#undef SIGBUS
+#undef SIGFPE
+#undef SIGUSR1
+#undef SIGSEGV
+#undef SIGUSR2
+#undef SIGPIPE
+#undef SIGALRM
+#undef SIGTERM
+#undef SIOCADDRT
+#undef SIOCDELRT
+#undef SIOCRTMSG
+#undef SIOCGIFFLAGS
+#undef SIOCSIFFLAGS
+#undef IF_NAMESIZE
+#undef IFHWADDRLEN
+#undef IFNAMSIZ
+#undef ifr_name
+#undef ifr_hwaddr
+#undef ifr_addr
+#undef ifr_dstaddr
+#undef ifr_broadaddr
+#undef ifr_netmask
+#undef ifr_flags
+#undef ifr_metric
+#undef ifr_mtu
+#undef ifr_map
+#undef ifr_slave
+#undef ifr_data
+#undef ifr_ifindex
+#undef ifr_bandwidth
+#undef ifr_qlen
+#undef ifr_newname
+#undef _IOT_ifreq
+#undef _IOT_ifreq_short
+#undef _IOT_ifreq_int
+
+
 
 #define __inline__  __inline
 
@@ -40,7 +430,6 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 #define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) \
                                  & (size_t) ~(sizeof (size_t) - 1))
 
-#undef CMSG_DATA
 #define CMSG_DATA(cmsg)             ((cmsg)->__cmsg_data)
 
 // in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
@@ -56,9 +445,6 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 
 #define MAXPATHLEN  4096
 
-#undef EWOULDBLOCK
-#undef EAFNOSUPPORT
-#undef EINPROGRESS
 #define EWOULDBLOCK     EAGAIN
 #define EAFNOSUPPORT    97
 #define EINPROGRESS     115
@@ -160,7 +546,6 @@ struct oppsimt_sockaddr_in
 
 
 #define SOCKET  u_int64_t
-#undef FD_SETSIZE
 #define FD_SETSIZE      64
 
 #define fd_set struct oppsimt_fd_set
@@ -170,10 +555,6 @@ struct oppsimt_fd_set
         SOCKET  fd_array[FD_SETSIZE];
 };
 
-#undef FD_CLR
-#undef FD_ZERO
-#undef FD_SET
-#undef FD_ISSET
 
 #define FD_CLR(fd, set) do { \
     u_int __i; \
@@ -217,32 +598,9 @@ static int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
 /*
  * Address families.
  */
-#define AF_UNSPEC       0               /* unspecified */
-#define AF_UNIX         1               /* local to host (pipes, portals) */
-#define AF_INET         2               /* internetwork: UDP, TCP, etc. */
-#define AF_IMPLINK      3               /* arpanet imp addresses */
-#define AF_PUP          4               /* pup protocols: e.g. BSP */
-#define AF_CHAOS        5               /* mit CHAOS protocols */
-#define AF_IPX          6               /* IPX and SPX */
-#define AF_NS           6               /* XEROX NS protocols */
-#define AF_ISO          7               /* ISO protocols */
-#define AF_OSI          AF_ISO          /* OSI is ISO */
-#define AF_ECMA         8               /* european computer manufacturers */
-#define AF_DATAKIT      9               /* datakit protocols */
-#define AF_CCITT        10              /* CCITT protocols, X.25 etc */
-#define AF_SNA          11              /* IBM SNA */
-#define AF_DECnet       12              /* DECnet */
-#define AF_DLI          13              /* Direct data link interface */
-#define AF_LAT          14              /* LAT */
-#define AF_HYLINK       15              /* NSC Hyperchannel */
-#define AF_APPLETALK    16              /* AppleTalk */
-#define AF_NETBIOS      17              /* NetBios-style addresses */
-#define AF_VOICEVIEW    18              /* VoiceView */
-#define AF_FIREFOX      19              /* FireFox */
-#define AF_UNKNOWN1     20              /* Somebody is using this! */
-#define AF_BAN          21              /* Banyan */
-
-#define AF_MAX          22
+#define AF_UNSPEC       0
+#define AF_UNIX         1
+#define AF_INET         2
 
 /*
  * Protocols
@@ -450,25 +808,24 @@ struct oppsimt_iovec
 
 #define sig_atomic_t        int
 
-#undef SA_SIGINFO
 
 typedef void (*sighandler_t) (int);
 
-#define sigset_t  struct oppsimt_sigset 
+#define sigset_t  struct oppsimt_sigset
 struct oppsimt_sigset
 {
     unsigned long int __val[(1024 / (8 * sizeof (unsigned long int)))];
 };
 
 
-#define sigval_t  union oppsimt_sigval  
+#define sigval_t  union oppsimt_sigval
 union oppsimt_sigval
 {
     int sival_int;
     void *sival_ptr;
 };
 
-#define siginfo_t  struct oppsimt_siginfo 
+#define siginfo_t  struct oppsimt_siginfo
 struct oppsimt_siginfo {
         int     si_signo;
         int     si_errno;
@@ -477,72 +834,13 @@ struct oppsimt_siginfo {
         uid_t   si_uid;
         int     si_status;
         void    *si_addr;
-        union sigval si_value;
+        sigval_t si_value;
         long    si_band;
         unsigned long   pad[7];
-}; 
-
-/*
-struct oppsimt_siginfo
-{
-    int si_signo;
-    int si_errno;
-    int si_code;
-
-    union
-    {
-        int _pad[((128 / sizeof (int)) - 4)];
-
-        struct
-        {
-            pid_t si_pid;
-            uid_t si_uid;
-        } _kill;
-
-        struct
-        {
-            int si_tid;
-            int si_overrun;
-            sigval_t si_sigval;
-        } _timer;
-
-        struct
-        {
-            pid_t si_pid;
-            uid_t si_uid;
-            sigval_t si_sigval;
-        } _rt;
-
-        struct
-        {
-            pid_t si_pid;
-            uid_t si_uid;
-            int si_status;
-            clock_t si_utime;
-            clock_t si_stime;
-        } _sigchld;
-
-        struct
-        {
-            void *si_addr;
-        } _sigfault;
-
-        struct
-        {
-            long int si_band;
-            int si_fd;
-        } _sigpoll;
-
-    } _sifields;
-
 };
-*/
 
 
-#undef sa_handler  // OS/X
-#undef sa_sigaction  // OS/X
-
-// FIXME add this to globalwhitelist.lst as well (must replace "struct sigaction" --> "struct_sigaction" in Quagga src)
+// FIXME add this to globalwhitelist.lst as well?
 #define struct_sigaction  struct oppsimt_sigaction
 struct oppsimt_sigaction
 {
@@ -1087,26 +1385,12 @@ struct oppsimt_in_pktinfo
 
 // asm/fcntl.h
 
-#undef O_NONBLOCK
 
 #define F_GETFL     3
 #define F_SETFL     4
 #define O_NONBLOCK  04000
 
 // asm/signal.h
-
-#undef SIGHUP
-#undef SIGINT
-#undef SIGQUIT
-#undef SIGILL
-#undef SIGBUS
-#undef SIGFPE
-#undef SIGUSR1
-#undef SIGSEGV
-#undef SIGUSR2
-#undef SIGPIPE
-#undef SIGALRM
-#undef SIGTERM
 
 #define SIGHUP          1
 #define SIGINT          2
@@ -1120,6 +1404,11 @@ struct oppsimt_in_pktinfo
 #define SIGPIPE         13
 #define SIGALRM         14
 #define SIGTERM         15
+
+#define SIG_DFL   (sighandler_t)0
+#define SIG_IGN   (sighandler_t)1
+#define SIG_SGE   (sighandler_t)3
+#define SIG_ACK   (sighandler_t)4
 
 // bits/ioctls.h
 
@@ -1156,12 +1445,5 @@ struct oppsimt_in_pktinfo
 #define _IOT_ifreq     _IOT(_IOTS(char),IFNAMSIZ,_IOTS(char),16,0,0)
 #define _IOT_ifreq_short _IOT(_IOTS(char),IFNAMSIZ,_IOTS(short),1,0,0)
 #define _IOT_ifreq_int _IOT(_IOTS(char),IFNAMSIZ,_IOTS(int),1,0,0)
-
-// 
-
-#undef ntohl
-#undef ntohs
-#undef htonl
-#undef htons
 
 #endif
