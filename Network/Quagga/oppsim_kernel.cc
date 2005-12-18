@@ -50,6 +50,8 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
     return _strnicmp(s1, s2, n);
 }
 
+#endif
+
 struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
 {
     if ((size_t) __cmsg->cmsg_len < sizeof (struct cmsghdr))
@@ -62,7 +64,6 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
         return __cmsg;
 }
 
-#endif
 
 struct servent *oppsim_getservbyname(const char *name, const char *proto)
 {
