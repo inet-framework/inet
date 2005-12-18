@@ -9,6 +9,7 @@
 #define	ERANGE	34
 #endif 
 
+/*
 #if defined(_MSC_VER)
 #include "msvc_env.h"
 #elif defined(__APPLE__)
@@ -16,7 +17,8 @@
 #else
 #include "native_env.h"
 #endif
+*/
 
-//#include "generic_env.h"
+#include "generic_env.h"
 
 #endif

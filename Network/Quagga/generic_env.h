@@ -18,10 +18,10 @@
 #undef CMSG_NXTHDR
 #undef CMSG_ALIGN
 #undef CMSG_DATA
-#undef _CMSG_DATA_ALIGN(n)
-#undef _CMSG_HDR_ALIGN(n)
-#undef CMSG_SPACE(l)
-#undef CMSG_LEN(l)
+#undef _CMSG_DATA_ALIGN
+#undef _CMSG_HDR_ALIGN
+#undef CMSG_SPACE
+#undef CMSG_LEN
 #undef IP_HDRINCL
 #undef IP_PKTINFO
 #undef IN_CLASSD
