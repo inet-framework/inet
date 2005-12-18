@@ -374,6 +374,10 @@
 #undef SIGPIPE
 #undef SIGALRM
 #undef SIGTERM
+#undef SIG_DFL
+#undef SIG_IGN
+#undef SIG_SGE
+#undef SIG_ACK
 #undef SIOCADDRT
 #undef SIOCDELRT
 #undef SIOCRTMSG
