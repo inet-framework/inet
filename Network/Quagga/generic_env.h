@@ -427,23 +427,9 @@ int snprintf (char *s, size_t maxlen, const char *format, ...);
 int vsnprintf(char *s, size_t maxlen, const char *format, va_list arg);
 int strncasecmp(const char *s1, const char *s2, size_t n);
 
-struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
-
 #ifdef __cplusplus
 };
 #endif
-
-
-#define CMSG_FIRSTHDR(mhdr) \
-    ((size_t) (mhdr)->msg_controllen >= sizeof (struct cmsghdr) \
-     ? (struct cmsghdr *) (mhdr)->msg_control : (struct cmsghdr *) NULL)
-
-#define CMSG_NXTHDR(mhdr, cmsg) __cmsg_nxthdr (mhdr, cmsg)
-
-#define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) \
-                                 & (size_t) ~(sizeof (size_t) - 1))
-
-#define CMSG_DATA(cmsg)             ((cmsg)->__cmsg_data)
 
 // in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
 #define IP_HDRINCL  25
@@ -981,6 +967,29 @@ struct msghdr
 
     int msg_flags;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
+
+#ifdef __cplusplus
+};
+#endif
+
+
+#define CMSG_FIRSTHDR(mhdr) \
+    ((size_t) (mhdr)->msg_controllen >= sizeof (struct cmsghdr) \
+     ? (struct cmsghdr *) (mhdr)->msg_control : (struct cmsghdr *) NULL)
+
+#define CMSG_NXTHDR(mhdr, cmsg) __cmsg_nxthdr (mhdr, cmsg)
+
+#define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) \
+                                 & (size_t) ~(sizeof (size_t) - 1))
+
+#define CMSG_DATA(cmsg)             ((cmsg)->__cmsg_data)
+
 
 enum rt_class_t
 {
