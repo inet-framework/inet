@@ -29,7 +29,7 @@ class IPControlInfo : public IPControlInfo_Base
     IPDatagram *dgram;
   public:
     IPControlInfo() : IPControlInfo_Base() {dgram=NULL;}
-    ~IPControlInfo() {delete dgram;}
+    ~IPControlInfo();
     IPControlInfo(const IPControlInfo& other) : IPControlInfo_Base() {dgram=NULL; operator=(other);}
     IPControlInfo& operator=(const IPControlInfo& other) {IPControlInfo_Base::operator=(other); return *this;}
 

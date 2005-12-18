@@ -17,6 +17,12 @@
 //
 
 #include "IPControlInfo.h"
+#include "IPDatagram.h"
+
+IPControlInfo::~IPControlInfo()
+{
+    delete dgram;
+}
 
 void IPControlInfo::setOrigDatagram(IPDatagram *d)
 {
