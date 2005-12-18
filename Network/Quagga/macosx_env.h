@@ -44,6 +44,8 @@ typedef uint64_t u64;
 
 #define struct_sigaction  struct sigaction
 
+#define CMSG_ALIGN ALIGN
+
 // netlink & messages
 
 struct sockaddr_nl
