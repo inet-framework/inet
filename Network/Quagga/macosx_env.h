@@ -42,6 +42,7 @@ typedef uint64_t u64;
 
 #undef SO_REUSEPORT
 
+#define struct_sigaction  struct sigaction
 
 // netlink & messages
 

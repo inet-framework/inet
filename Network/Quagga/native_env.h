@@ -19,5 +19,7 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
+#define struct_sigaction  struct sigaction
+
 #endif
 

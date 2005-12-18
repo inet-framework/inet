@@ -219,6 +219,7 @@ typedef struct siginfo
 	
 } siginfo_t;
 
+#define struct_sigaction  struct sigaction
 struct sigaction
 {
 	sighandler_t sa_handler;

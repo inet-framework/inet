@@ -14,7 +14,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-//#include <Winsock.h>
 
 #define __inline__  __inline
 
@@ -168,6 +167,11 @@ struct oppsimt_fd_set
         SOCKET  fd_array[FD_SETSIZE];
 };
 
+#undef FD_CLR
+#undef FD_ZERO
+#undef FD_SET
+#undef FD_ISSET
+
 #define FD_CLR(fd, set) do { \
     u_int __i; \
     for (__i = 0; __i < ((fd_set *)(set))->fd_count ; __i++) { \
@@ -195,7 +199,7 @@ struct oppsimt_fd_set
 static int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
 {
     u_int i;
-    for (i = 0; i < set->fd_count; i++) 
+    for (i = 0; i < set->fd_count; i++)
         if (set->fd_array[i] == fd)
             return 1;
     return 0;
@@ -378,7 +382,7 @@ struct oppsimt_ip_mreq
 struct oppsimt_servent
 {
         char  * s_name;           /* official service name */
-        char ** s_aliases;      /* alias list */
+        char ** s_aliases;        /* alias list */
         short   s_port;           /* port # */
         char  * s_proto;          /* protocol to use */
 };
@@ -390,19 +394,6 @@ struct oppsimt_servent
 #define MSG_MAXIOVLEN   16
 
 #define MSG_PARTIAL     0x8000          /* partial send or recv for message xport */
-
-// FIXME to be emulated:
-#define htonl      oppsim_htonl
-#define htons      oppsim_htons
-#define inet_ntoa  oppsim_inet_ntoa
-#define ntohl      oppsim_ntohl
-#define ntohs      oppsim_ntohs
-
-static u_long oppsim_htonl(u_long hostlong) {return hostlong;}
-static u_short oppsim_htons(u_short hostshort) {return hostshort;}
-static char *oppsim_inet_ntoa(struct in_addr in) {return "fixme";}
-static u_long oppsim_ntohl(u_long netlong) {return netlong;}
-static u_short oppsim_ntohs(u_short netshort) {return netshort;}
 
 // time
 

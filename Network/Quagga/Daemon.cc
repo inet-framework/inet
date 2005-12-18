@@ -59,7 +59,7 @@ void Daemon::activity()
 
     for(int i = 0; i < 32; i++)
     {
-        struct sigaction sa;
+        struct_sigaction sa;
         sa.sa_handler = SIG_DFL;
         //sigemptyset(&sa.sa_mask); XXX FIXME memset to zero?
         sa.sa_flags = 0;
@@ -179,7 +179,7 @@ std::string Daemon::getrootprefix()
     return rootprefix;
 }
 
-struct sigaction * Daemon::sigactionimpl(int signo)
+struct_sigaction * Daemon::sigactionimpl(int signo)
 {
     ASSERT(signo >= 0);
     ASSERT(signo < sig.size());

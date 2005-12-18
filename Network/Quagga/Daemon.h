@@ -79,7 +79,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         virtual void socketFailure(int connId, void *yourPtr, int code) { ASSERT(false); }
 
 
-        struct sigaction* sigactionimpl(int signo);
+        struct_sigaction* sigactionimpl(int signo);
         std::string getcwd();
         std::string getrootprefix();
         cMessage* getqueuetail(int socket, bool remove=false);
@@ -115,7 +115,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 
         std::vector<lib_descriptor_t> fd;
 
-        std::vector<struct sigaction> sig;
+        std::vector<struct_sigaction> sig;
 
         std::string cwd;
         std::string rootprefix;

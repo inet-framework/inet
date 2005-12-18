@@ -60,3 +60,11 @@
 #undef zmalloc
 #undef zcalloc
 #undef zrealloc
+#undef getservbyname
+#undef htonl
+#undef htons
+#undef inet_ntoa
+#undef ntohl
+#undef ntohs
+#undef inet_addr
+

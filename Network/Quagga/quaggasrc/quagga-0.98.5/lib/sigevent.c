@@ -133,8 +133,8 @@ static int
 signal_set (int signo)
 {
   int ret;
-  struct sigaction sig;
-  struct sigaction osig;
+  struct_sigaction sig;
+  struct_sigaction osig;
 
   sig.sa_handler = &quagga_signal_handler;
   sigfillset (&sig.sa_mask);
@@ -269,11 +269,11 @@ trap_default_signals(void)
 
       for (j = 0; j < sigmap[i].nsigs; j++)
         {
-	  struct sigaction oact;
+	  struct_sigaction oact;
 	  if ((sigaction(sigmap[i].sigs[j],NULL,&oact) == 0) &&
 	      (oact.sa_handler == SIG_DFL))
 	    {
-	      struct sigaction act;
+	      struct_sigaction act;
 	      sigfillset (&act.sa_mask);
 	      if (sigmap[i].handler == NULL)
 	        {

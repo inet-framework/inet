@@ -66,8 +66,45 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
 
 struct servent *oppsim_getservbyname(const char *name, const char *proto)
 {
-    // XXX FIXME implement custom (fixed) mapping
-    return getservbyname(name, proto);
+    // Quagga doesn't mind if getservbyname() returns NULL, so that's the perfect solution
+    return NULL;
+
+#if 0
+    // and this code is in fact not necessary (== overkill)
+    static struct servent smux_tcp;
+    static struct servent ospfapi_tcp;
+    static struct servent router_udp;
+    static bool initialized = 0;
+
+    if (!initialized)
+    {
+        initialized = true;
+
+        smux_tcp.s_name = "smux";
+        smux_tcp.s_aliases = NULL;
+        smux_tcp.s_port = 199;  // SMUX_PORT_DEFAULT
+        smux_tcp.s_proto = "tcp";
+
+        ospfapi_tcp.s_name = "ospfapi";
+        ospfapi_tcp.s_aliases = NULL;
+        ospfapi_tcp.s_port = 2607;  // OSPF_API_SYNC_PORT
+        ospfapi_tcp.s_proto = "tcp";
+
+        router_udp.s_name = "router";
+        router_udp.s_aliases = NULL;
+        router_udp.s_port = 520;  // RIP_PORT_DEFAULT
+        router_udp.s_proto = "udp";
+    }
+
+    if (!strcmp(name,"smux") && !strcmp(proto,"tcp"))
+        return &smux_tcp;
+    else if (!strcmp(name,"ospfapi") && !strcmp(proto,"tcp"))
+        return &ospfapi_tcp;
+    else if (!strcmp(name,"router") && !strcmp(proto,"udp"))
+        return &router_udp;
+    else
+        opp_error("oppsim_getservbyname(): called with unexpected args");
+#endif
 }
 
 
@@ -184,12 +221,6 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
     if(level == SOL_SOCKET && option_name == SO_REUSEADDR)
     {
         EV << "SO_REUSEADDR option, ignore" << endl;
-        return 0;
-    }
-
-    if(level == SOL_SOCKET && option_name == SO_REUSEPORT)
-    {
-        EV << "SO_REUSEPORT option, ignore" << endl;
         return 0;
     }
 
@@ -1495,13 +1526,13 @@ void oppsim__exit(int status)
     ASSERT(false);
 }
 
-int oppsim_sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
+int oppsim_sigaction(int sig, const struct_sigaction *act, struct_sigaction *oact)
 {
     Daemon *libm = DAEMON;
 
     EV << "sigaction: sig=" << sig << " act=" << act << " oact=" << oact << endl;
 
-    struct sigaction *sptr = libm->sigactionimpl(sig);
+    struct_sigaction *sptr = libm->sigactionimpl(sig);
 
     if(oact)
         memcpy(oact, sptr, sizeof(*oact));
@@ -1516,3 +1547,55 @@ char *oppsim_getenv(const char *name)
 {
     return getenv(name);
 }
+
+inline bool bigendian()
+{
+    static int a = 255;
+    return *(char *)(&a) == 0;
+}
+
+u_long oppsim_htonl(u_long hostlong)
+{
+    if (bigendian())
+        return hostlong;
+    else
+        return ((hostlong & 0xff)<<24) | ((hostlong & 0xff00)<<8) | ((hostlong & 0xff0000)>>8) | ((hostlong & 0xff000000)>>24);
+}
+
+u_short oppsim_htons(u_short hostshort)
+{
+    if (bigendian())
+        return hostshort;
+    else
+        return ((hostshort & 0xff)<<8) | ((hostshort & 0xff00)>>8);
+}
+
+char *oppsim_inet_ntoa(struct in_addr in)
+{
+    static char buf[32];
+    sprintf(buf,"%d.%d.%d.%d", in.S_un.S_un_b.s_b1, in.S_un.S_un_b.s_b2,
+                               in.S_un.S_un_b.s_b3, in.S_un.S_un_b.s_b4);
+    return buf;
+}
+
+u_long oppsim_ntohl(u_long netlong)
+{
+    if (bigendian())
+        return netlong;
+    else
+        return ((netlong & 0xff)<<24) | ((netlong & 0xff00)<<8) | ((netlong & 0xff0000)>>8) | ((netlong & 0xff000000)>>24);
+}
+
+u_short oppsim_ntohs(u_short netshort)
+{
+    if (bigendian())
+        return netshort;
+    else
+        return ((netshort & 0xff)<<8) | ((netshort & 0xff00)>>8);
+}
+
+unsigned long oppsim_inet_addr(const char *str)
+{
+    return IPAddress(str).getInt();
+}
+
