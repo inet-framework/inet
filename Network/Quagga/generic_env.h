@@ -180,7 +180,7 @@
 #undef sigval_t
 #undef siginfo_t
 #undef struct_sigaction
-#undef SA_SIGACTION
+#undef SA_SIGINFO
 #undef sa_sigaction
 #undef sa_handler
 #undef sa_mask
@@ -411,7 +411,10 @@
 #undef _IOT_ifreq
 #undef _IOT_ifreq_short
 #undef _IOT_ifreq_int
-
+#undef htonl
+#undef htons
+#undef ntohl
+#undef ntohs
 
 
 #define __inline__  __inline
