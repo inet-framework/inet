@@ -18,6 +18,10 @@
 #undef CMSG_NXTHDR
 #undef CMSG_ALIGN
 #undef CMSG_DATA
+#undef _CMSG_DATA_ALIGN(n)
+#undef _CMSG_HDR_ALIGN(n)
+#undef CMSG_SPACE(l)
+#undef CMSG_LEN(l)
 #undef IP_HDRINCL
 #undef IP_PKTINFO
 #undef IN_CLASSD
@@ -989,6 +993,15 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
                                  & (size_t) ~(sizeof (size_t) - 1))
 
 #define CMSG_DATA(cmsg)             ((cmsg)->__cmsg_data)
+
+#define _CMSG_DATA_ALIGN(n)           (((n) + 3) & ~3)
+
+#define _CMSG_HDR_ALIGN(n)            (((n) + 3) & ~3)
+
+#define CMSG_SPACE(l)       (_CMSG_DATA_ALIGN(sizeof(struct cmsghdr)) + \
+                              _CMSG_HDR_ALIGN(l))
+
+#define CMSG_LEN(l)         (_CMSG_DATA_ALIGN(sizeof(struct cmsghdr)) + (l))
 
 
 enum rt_class_t
