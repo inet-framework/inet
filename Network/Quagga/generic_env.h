@@ -180,6 +180,12 @@
 #undef sigval_t
 #undef siginfo_t
 #undef struct_sigaction
+#undef SA_SIGACTION
+#undef sa_sigaction
+#undef sa_handler
+#undef sa_mask
+#undef sa_flags
+#undef sa_restorer
 #undef utsname
 #undef in_addr_t
 #undef sa_family_t
