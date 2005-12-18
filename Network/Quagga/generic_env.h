@@ -104,14 +104,18 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 
 typedef char *caddr_t;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #  define u_int8_t    unsigned __int8
 #  define u_int16_t   unsigned __int16
 #  define u_int32_t   unsigned __int32
 #  define u_int64_t   unsigned __int64
 #  define int32_t     __int32
+#elif defined(__GNUC__)
+#  define u_int8_t    uint8_t
+#  define u_int16_t   uint16_t
+#  define u_int32_t   uint32_t
+#  define u_int64_t   uint64_t
 #else
-// FIXME what are the gnu-ish equivalents?
 #  define u_int8_t    unsigned char
 #  define u_int16_t   unsigned short
 #  define u_int32_t   unsigned int
@@ -119,7 +123,7 @@ typedef char *caddr_t;
 #  define int32_t     int
 #endif
 
-// in_addr (from winsock.h)
+// in_addr
 
 #define in_addr  oppsimt_in_addr
 struct oppsimt_in_addr
@@ -140,8 +144,8 @@ struct oppsimt_in_addr
 #define sockaddr  oppsimt_sockaddr
 struct oppsimt_sockaddr
 {
-        u_short sa_family;              /* address family */
-        char    sa_data[14];            /* up to 14 bytes of direct address */
+        u_short sa_family;
+        char    sa_data[14];
 };
 
 #define sockaddr_in  oppsimt_sockaddr_in
@@ -190,8 +194,10 @@ struct oppsimt_fd_set
 
 static int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
 {
-    //FIXME to be implemented
-    ASSERT(0);
+    u_int i;
+    for (i = 0; i < set->fd_count; i++) 
+        if (set->fd_array[i] == fd)
+            return 1;
     return 0;
 }
 
@@ -392,11 +398,11 @@ struct oppsimt_servent
 #define ntohl      oppsim_ntohl
 #define ntohs      oppsim_ntohs
 
-static u_long oppsim_htonl(u_long hostlong) {return 0;}
-static u_short oppsim_htons(u_short hostshort) {return 0;}
+static u_long oppsim_htonl(u_long hostlong) {return hostlong;}
+static u_short oppsim_htons(u_short hostshort) {return hostshort;}
 static char *oppsim_inet_ntoa(struct in_addr in) {return "fixme";}
-static u_long oppsim_ntohl(u_long netlong) {return 0;}
-static u_short oppsim_ntohs(u_short netshort) {return 0;}
+static u_long oppsim_ntohl(u_long netlong) {return netlong;}
+static u_short oppsim_ntohs(u_short netshort) {return netshort;}
 
 // time
 
