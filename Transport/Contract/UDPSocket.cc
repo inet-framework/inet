@@ -197,7 +197,7 @@ void UDPSocket::processMessage(cMessage *msg)
                  delete ctrl;
              }
              break;
-        case UDP_I_PEER_CLOSED:
+        case UDP_I_ERROR:
              sockstate = NOT_BOUND;
              delete msg;
              if (cb)

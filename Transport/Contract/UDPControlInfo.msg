@@ -47,7 +47,7 @@ enum UDPCommandCode
 enum UDPStatusInd
 {
     UDP_I_DATA = 0;        // data packet (set on data packet)
-    UDP_I_PEER_CLOSED = 1; // ICMP error received on a sent datagram
+    UDP_I_ERROR = 1; // ICMP error received on a sent datagram
 };
 
 
@@ -57,7 +57,7 @@ enum UDPStatusInd
 //
 // The most convenient way to handle UDP is the UDPSocket class, which hides
 // UDPControlInfo completely from you. But even if you manage talking
-// to UDP yourself without help from UDPSocket, sockId must be obtained 
+// to UDP yourself without help from UDPSocket, sockId must be obtained
 // from UDPSocket::generateSocketId().
 //
 //# TODO explain userId, sockId, etc.

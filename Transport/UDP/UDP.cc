@@ -307,14 +307,16 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
         if (!icmp)
             icmp = ICMPAccess().get();
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
-        icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+        if (!ctrl4->destAddr().isMulticast())
+            icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
     }
     else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->controlInfo())!=NULL)
     {
         if (!icmpv6)
             icmpv6 = ICMPv6Access().get();
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+        if (!ctrl6->destAddr().isMulticast())
+            icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
     }
     else
     {
@@ -386,9 +388,9 @@ void UDP::processICMPError(cMessage *msg)
         return;
     }
 
-    // send UDP_I_PEER_CLOSED to socket
+    // send UDP_I_ERROR to socket
     EV << "Source socket is sockId=" << srcSocket->sockId << ", notifying.\n";
-    sendUpErrorNotification(srcSocket, UDP_I_PEER_CLOSED, localAddr, remoteAddr, remotePort);
+    sendUpErrorNotification(srcSocket, UDP_I_ERROR, localAddr, remoteAddr, remotePort);
 }
 
 void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort)

@@ -62,11 +62,19 @@
      - makemakefiles: -P option
      - use new opp_msgc features? (kind=..., length=...etc)
 
+----------------------
 - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes? 
+  ICMPv6 uses different type&code numeric values but this is only of interest
+  if we want to do emulation
 
-- also: how to deliver ICMP errors to UDP and TCP? maybe icmpErrorType and 
-  icmpErrorCode in IPControlInfo, plus a message kind IP_I_ICMP_ERROR?
-  plus: remove IP/ICMP dependencies from TCP and UDP in makemakefiles!!!!
+- instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and 
+  IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
+  (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
+
+- ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
+  ICMP module itself as well?
+
+- TCP: how to handle ICMP error reports?
 
 ----------------------- 
 Note: existing other 802.11 models:
