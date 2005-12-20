@@ -66,6 +66,7 @@
 
 - also: how to deliver ICMP errors to UDP and TCP? maybe icmpErrorType and 
   icmpErrorCode in IPControlInfo, plus a message kind IP_I_ICMP_ERROR?
+  plus: remove IP/ICMP dependencies from TCP and UDP in makemakefiles!!!!
 
 ----------------------- 
 Note: existing other 802.11 models:
