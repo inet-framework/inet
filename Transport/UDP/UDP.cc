@@ -368,7 +368,7 @@ void UDP::processICMPError(cMessage *msg)
     for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
     {
         SockDesc *sd = *it;
-/*
+/*FIXME finish!!!
         if (sd->onlyLocalPortIsSet && sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
         return false;
     if (!sd->localAddr.isUnspecified() && sd->localAddr==localAddr)
