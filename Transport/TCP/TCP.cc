@@ -23,6 +23,8 @@
 #include "TCPCommand_m.h"
 #include "IPControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "ICMPMessage_m.h"
+#include "ICMPv6Message_m.h"
 
 Define_Module(TCP);
 
@@ -91,41 +93,49 @@ void TCP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("from_ip") || msg->arrivedOn("from_ipv6"))
     {
-        // must be a TCPSegment
-        TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
-
-        // get src/dest addresses
-        IPvXAddress srcAddr, destAddr;
-        if (dynamic_cast<IPControlInfo *>(tcpseg->controlInfo())!=NULL)
+        if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
         {
-            IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
-            srcAddr = controlInfo->srcAddr();
-            destAddr = controlInfo->destAddr();
-            delete controlInfo;
-        }
-        else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->controlInfo())!=NULL)
-        {
-            IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
-            srcAddr = controlInfo->srcAddr();
-            destAddr = controlInfo->destAddr();
-            delete controlInfo;
+            tcpEV << "ICMP error received -- discarding\n"; // TODO implement processsing ICMP errors
+            delete msg;
         }
         else
         {
-            error("(%s)%s arrived without control info", tcpseg->className(), tcpseg->name());
-        }
+            // must be a TCPSegment
+            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
 
-        // process segment
-        TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
-        if (!conn)
-        {
-            TCPConnection::segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
-            delete tcpseg;
-            return;
+            // get src/dest addresses
+            IPvXAddress srcAddr, destAddr;
+            if (dynamic_cast<IPControlInfo *>(tcpseg->controlInfo())!=NULL)
+            {
+                IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
+                srcAddr = controlInfo->srcAddr();
+                destAddr = controlInfo->destAddr();
+                delete controlInfo;
+            }
+            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->controlInfo())!=NULL)
+            {
+                IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
+                srcAddr = controlInfo->srcAddr();
+                destAddr = controlInfo->destAddr();
+                delete controlInfo;
+            }
+            else
+            {
+                error("(%s)%s arrived without control info", tcpseg->className(), tcpseg->name());
+            }
+
+            // process segment
+            TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
+            if (!conn)
+            {
+                TCPConnection::segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+                delete tcpseg;
+                return;
+            }
+            bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
+            if (!ret)
+                removeConnection(conn);
         }
-        bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
-        if (!ret)
-            removeConnection(conn);
     }
     else // must be from app
     {

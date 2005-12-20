@@ -32,6 +32,13 @@
 #include "ICMPAccess.h"
 #include "ICMPv6Access.h"
 
+// the following is only for ICMP error processing
+#include "ICMPMessage_m.h"
+#include "ICMPv6Message_m.h"
+#include "IPDatagram_m.h"
+#include "IPv6Datagram_m.h"
+
+
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
 
@@ -310,15 +317,90 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
 
 void UDP::processICMPError(cMessage *msg)
 {
-/* FIXME TODO to be completed !!! (plus, add similar code to TCP)
+    // extract details from the error message, then try to notify socket that sent bogus packet
+    int type, code;
+    IPvXAddress localAddr, remoteAddr;
+    int localPort, remotePort;
+
     if (dynamic_cast<ICMPMessage *>(msg))
     {
         ICMPMessage *icmpMsg = (ICMPMessage *)msg;
-        cMessage *datagram = icmpMsg->decapsulate();
+        type = icmpMsg->getType();
+        code = icmpMsg->getCode();
+        IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->decapsulate());
+        localAddr = datagram->srcAddress();
+        remoteAddr = datagram->destAddress();
         UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
-
+        localPort = packet->sourcePort();
+        remotePort = packet->destinationPort();
+        delete icmpMsg;
+        delete datagram;
+        delete packet;
     }
+    else if (dynamic_cast<ICMPv6Message *>(msg))
+    {
+        ICMPv6Message *icmpMsg = (ICMPv6Message *)msg;
+        type = icmpMsg->type();
+        code = -1; // FIXME this is dependent on type()...
+        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->decapsulate());
+        localAddr = datagram->srcAddress();
+        remoteAddr = datagram->destAddress();
+        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
+        localPort = packet->sourcePort();
+        remotePort = packet->destinationPort();
+        delete icmpMsg;
+        delete datagram;
+        delete packet;
+    }
+    EV << "ICMP error received: type=" << type << " code=" << code
+       << " about packet " << localAddr << ":" << localPort << " > "
+       << remoteAddr << ":" << remotePort << "\n";
+
+    // identify socket and report error to it
+    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    if (it==socketsByPortMap.end())
+    {
+        EV << "No socket on that local port, ignoring ICMP error\n";
+        return;
+    }
+    SockDescList& list = it->second;
+    SockDesc *srcSocket = NULL;
+    for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
+    {
+        SockDesc *sd = *it;
+/*
+        if (sd->onlyLocalPortIsSet && sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
+        return false;
+    if (!sd->localAddr.isUnspecified() && sd->localAddr==localAddr)
+        return false;
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr==remoteAddr)
+        return false;
+    // sd->interfaceId: not known any more
 */
+
+        {
+            srcSocket = sd;
+        }
+    }
+    if (!srcSocket)
+    {
+        EV << "No matching socket, ignoring ICMP error\n";
+        return;
+    }
+
+    // send UDP_I_PEER_CLOSED to socket
+    EV << "Source socket is sockId=" << srcSocket->sockId << ", notifying.\n";
+    cMessage *notifyMsg = new cMessage("PEER_CLOSED", UDP_I_PEER_CLOSED);
+    UDPControlInfo *udpCtrl = new UDPControlInfo();
+    udpCtrl->setSockId(srcSocket->sockId);
+    udpCtrl->setUserId(srcSocket->userId);
+    udpCtrl->setSrcAddr(localAddr);
+    udpCtrl->setDestAddr(remoteAddr);
+    udpCtrl->setSrcPort(localPort);
+    udpCtrl->setDestPort(remotePort);
+    notifyMsg->setControlInfo(udpCtrl);
+
+    send(notifyMsg, "to_app", srcSocket->appGateIndex);
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -340,7 +422,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);
     if (it==socketsByPortMap.end())
     {
-        EV << "No socket registered on port " << destPort << ", discarding packet\n";
+        EV << "No socket registered on port " << destPort << "\n";
         processUndeliverablePacket(udpPacket, ctrl);
         return;
     }
@@ -349,6 +431,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int matches = 0;
 
     // deliver a copy of the packet to each matching socket
+    cMessage *payload = udpPacket->encapsulatedMsg();
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
@@ -358,7 +441,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl4, sd))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                cMessage *payload = udpPacket->decapsulate();
                 sendUp((cMessage*)payload->dup(), udpPacket, ctrl4, sd);
                 matches++;
             }
@@ -373,7 +455,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl6, sd))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                cMessage *payload = udpPacket->decapsulate();
                 sendUp((cMessage*)payload->dup(), udpPacket, ctrl6, sd);
                 matches++;
             }
@@ -387,7 +468,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     // send back ICMP error if there is no matching socket
     if (matches==0)
     {
-        EV << "None of the sockets on port " << destPort << " matches the packet, discarding.\n";
+        EV << "None of the sockets on port " << destPort << " matches the packet\n";
         processUndeliverablePacket(udpPacket, ctrl);
         return;
     }

@@ -27,6 +27,7 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl_m.h"
+#include "ICMPv6Message_m.h"
 
 
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
@@ -444,6 +445,34 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         send(packet, "transportOut", gateindex);
     }
 }
+
+void IPv6::handleReceivedICMP(ICMPv6Message *msg)
+{
+    switch (msg->type())
+    {
+        case ICMPv6_REDIRECT:  // TODO implement redirect handling
+        case ICMPv6_DESTINATION_UNREACHABLE:
+        case ICMPv6_PACKET_TOO_BIG:
+        case ICMPv6_TIME_EXCEEDED:
+        case ICMPv6_PARAMETER_PROBLEM: {
+            // ICMP errors are delivered to the appropriate higher layer protocols
+            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->encapsulatedMsg());
+            int protocol = bogusPacket->transportProtocol();
+            int gateindex = mapping.outputGateForProtocol(protocol);
+            send(msg, "transportOut", gateindex);
+            break;
+        }
+        default: {
+            // all others are delivered to ICMP:
+            // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
+            // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
+            // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
+            int gateindex = mapping.outputGateForProtocol(IP_PROT_ICMP);
+            send(msg, "transportOut", gateindex);
+        }
+     }
+}
+
 
 cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 {

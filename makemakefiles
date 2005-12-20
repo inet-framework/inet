@@ -93,7 +93,7 @@ all:
 	cd Transport/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Transport/UDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/IPv4 -I../../Network/ICMPv6 -I../../Network/IPv6
 	cd Transport/RTP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -X Profiles -X tmp
-	cd Transport/TCP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
+	cd Transport/TCP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Network/IPv4 -I../../Network/ICMPv6 -I../../Network/IPv6
 	cd Transport/TCP/flavours && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I..
 	cd Transport/TCP/queues && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I..
 

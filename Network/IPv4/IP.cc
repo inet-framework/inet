@@ -145,6 +145,30 @@ void IP::handleARP(ARPPacket *msg)
     send(msg, "queueOut");
 }
 
+void IP::handleReceivedICMP(ICMPMessage *msg)
+{
+    switch (msg->getType())
+    {
+        case ICMP_REDIRECT: // TODO implement redirect handling
+        case ICMP_DESTINATION_UNREACHABLE:
+        case ICMP_TIME_EXCEEDED:
+        case ICMP_PARAMETER_PROBLEM: {
+            // ICMP errors are delivered to the appropriate higher layer protocol
+            IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->encapsulatedMsg());
+            int protocol = bogusPacket->transportProtocol();
+            int gateindex = mapping.outputGateForProtocol(protocol);
+            send(msg, "transportOut", gateindex);
+            break;
+        }
+        default: {
+            // all others are delivered to ICMP: ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY,
+            // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
+            int gateindex = mapping.outputGateForProtocol(IP_PROT_ICMP);
+            send(msg, "transportOut", gateindex);
+        }
+    }
+}
+
 void IP::handleMessageFromHL(cMessage *msg)
 {
     // if no interface exists, do not send datagram
@@ -362,7 +386,12 @@ void IP::localDeliver(IPDatagram *datagram)
     int protocol = datagram->transportProtocol();
     cMessage *packet = decapsulateIP(datagram);
 
-    if (protocol==IP_PROT_IP)
+    if (protocol==IP_PROT_ICMP)
+    {
+        // incoming ICMP packets are handled specially
+        handleReceivedICMP(check_and_cast<ICMPMessage *>(packet));
+    }
+    else if (protocol==IP_PROT_IP)
     {
         // tunnelled IP packets are handled separately
         send(packet, "preRoutingOut");

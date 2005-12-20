@@ -29,6 +29,8 @@
 #include "IPv6FragBuf.h"
 #include "ProtocolMap.h"
 
+class ICMPv6Message;
+
 /**
  * IPv6 implementation.
  */
@@ -76,6 +78,11 @@ class INET_API IPv6 : public QueueBase
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cMessage *msg);
+
+    /**
+     * Handle incoming ICMP messages.
+     */
+    virtual void handleReceivedICMP(ICMPv6Message *msg);
 
     /**
      * Fragment packet if needed, then send it. The optional output gate

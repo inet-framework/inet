@@ -31,6 +31,7 @@
 
 
 class ARPPacket;
+class ICMPMessage;
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
@@ -92,6 +93,11 @@ class INET_API IP : public QueueBase
      * Handle incoming ARP packets by sending them over "queueOut" to ARP.
      */
     virtual void handleARP(ARPPacket *msg);
+
+    /**
+     * Handle incoming ICMP messages.
+     */
+    virtual void handleReceivedICMP(ICMPMessage *msg);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to

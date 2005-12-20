@@ -103,7 +103,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
 
     // debugging information
-    EV << "sending ICMP error: " << errorMessage->getType() << " / " << errorMessage->getCode() << endl;
+    EV << "sending ICMP error type=" << errorMessage->getType() << " code=" << errorMessage->getCode() << endl;
 }
 
 void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
@@ -111,6 +111,8 @@ void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMP
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
     IPDatagram *datagram = ctrl->removeOrigDatagram();
+    take(transportPacket);
+    take(datagram);
     datagram->encapsulate(transportPacket);
     sendErrorMessage(datagram, type, code);
 }
