@@ -228,7 +228,7 @@ void UDP::updateDisplayString()
     displayString().setTagArg("t",0,buf);
 }
 
-bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ipCtrl, SockDesc *sd)
+bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
 {
     // IPv4 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
@@ -242,7 +242,7 @@ bool UDP::matchesSocket(UDPPacket *udp, IPControlInfo *ipCtrl, SockDesc *sd)
     return true;
 }
 
-bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ipCtrl, SockDesc *sd)
+bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
 {
     // IPv6 version
     if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
@@ -254,6 +254,13 @@ bool UDP::matchesSocket(UDPPacket *udp, IPv6ControlInfo *ipCtrl, SockDesc *sd)
     if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->interfaceId())
         return false;
     return true;
+}
+
+bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort)
+{
+    return (sd->remotePort==0 || sd->remotePort!=remotePort) &&
+           (sd->localAddr.isUnspecified() || sd->localAddr==localAddr) &&
+           (sd->remoteAddr.isUnspecified() || sd->remoteAddr==remoteAddr);
 }
 
 void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
@@ -368,18 +375,9 @@ void UDP::processICMPError(cMessage *msg)
     for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
     {
         SockDesc *sd = *it;
-/*FIXME finish!!!
-        if (sd->onlyLocalPortIsSet && sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
-        return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr==localAddr)
-        return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr==remoteAddr)
-        return false;
-    // sd->interfaceId: not known any more
-*/
-
+        if (sd->onlyLocalPortIsSet || matchesSocket(sd, localAddr, remoteAddr, remotePort))
         {
-            srcSocket = sd;
+            srcSocket = sd; // FIXME what to do if there's more than one matching socket ???
         }
     }
     if (!srcSocket)
@@ -390,17 +388,22 @@ void UDP::processICMPError(cMessage *msg)
 
     // send UDP_I_PEER_CLOSED to socket
     EV << "Source socket is sockId=" << srcSocket->sockId << ", notifying.\n";
-    cMessage *notifyMsg = new cMessage("PEER_CLOSED", UDP_I_PEER_CLOSED);
+    sendUpErrorNotification(srcSocket, UDP_I_PEER_CLOSED, localAddr, remoteAddr, remotePort);
+}
+
+void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort)
+{
+    cMessage *notifyMsg = new cMessage("ERROR", msgkind);
     UDPControlInfo *udpCtrl = new UDPControlInfo();
-    udpCtrl->setSockId(srcSocket->sockId);
-    udpCtrl->setUserId(srcSocket->userId);
+    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setUserId(sd->userId);
     udpCtrl->setSrcAddr(localAddr);
     udpCtrl->setDestAddr(remoteAddr);
-    udpCtrl->setSrcPort(localPort);
+    udpCtrl->setSrcPort(sd->localPort);
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
 
-    send(notifyMsg, "to_app", srcSocket->appGateIndex);
+    send(notifyMsg, "to_app", sd->appGateIndex);
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -438,7 +441,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
         {
             SockDesc *sd = *it;
-            if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl4, sd))
+            if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl4))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
                 sendUp((cMessage*)payload->dup(), udpPacket, ctrl4, sd);
@@ -452,7 +455,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         for (SockDescList::iterator it=list.begin(); it!=list.end(); ++it)
         {
             SockDesc *sd = *it;
-            if (sd->onlyLocalPortIsSet || matchesSocket(udpPacket, ctrl6, sd))
+            if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl6))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
                 sendUp((cMessage*)payload->dup(), udpPacket, ctrl6, sd);

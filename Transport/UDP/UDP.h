@@ -96,11 +96,13 @@ class INET_API UDP : public cSimpleModule
     // ephemeral port
     short getEphemeralPort();
 
-    bool matchesSocket(UDPPacket *udp, IPControlInfo *ctrl, SockDesc *sd);
-    bool matchesSocket(UDPPacket *udp, IPv6ControlInfo *ctrl, SockDesc *sd);
+    bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
+    bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
+    bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
     void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
     void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
+    void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage
