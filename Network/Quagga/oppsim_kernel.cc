@@ -1597,6 +1597,25 @@ u_short oppsim_ntohs(u_short netshort)
 
 unsigned long oppsim_inet_addr(const char *str)
 {
-    return IPAddress(str).getInt();
+    return oppsim_htonl(IPAddress(str).getInt());
+}
+
+int oppsim_inet_aton(const char *cp, struct in_addr *addr)
+{
+    addr->s_addr = oppsim_inet_addr(cp); 
+    return 1;
+}
+
+char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
+{
+    if (af==AF_INET) {
+        ASSERT(size>=16);
+        struct in_addr& in = *(in_addr *)src;
+        sprintf(dst,"%d.%d.%d.%d", in.S_un.S_un_b.s_b1, in.S_un.S_un_b.s_b2,
+                                   in.S_un.S_un_b.s_b3, in.S_un.S_un_b.s_b4);
+        return dst;
+    } else {
+        opp_error("oppsim_inet_ntop: address family not supported");
+    }
 }
 

@@ -67,4 +67,6 @@
 #undef ntohl
 #undef ntohs
 #undef inet_addr
+#undef inet_aton
+#undef inet_ntop
 

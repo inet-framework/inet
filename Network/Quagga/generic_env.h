@@ -447,6 +447,8 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #define ntohl  oppsim_ntohl
 #define ntohs  oppsim_ntohs
 #define inet_addr  oppsim_inet_addr
+#define inet_aton  oppsim_inet_aton
+#define inet_ntop  oppsim_inet_ntop
 
 
 // in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
