@@ -10,6 +10,7 @@
 #include "RoutingTableAccess.h"
 
 #include "glue.h"
+#include "oppsim_kernel.h"  // oppsim_htons() etc
 
 RawSocket::RawSocket(int userId, int protocol)
 {

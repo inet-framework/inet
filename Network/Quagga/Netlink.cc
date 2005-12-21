@@ -5,6 +5,7 @@
 #include "RoutingTable.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
+#include "oppsim_kernel.h"  // oppsim_htons() etc
 
 extern "C" {
 

@@ -15,7 +15,7 @@
 
 /*
  * For portability reasons, we want to be independent of the underlying OS.
- * So we undefine everything that might get into our way, then define it 
+ * So we undefine everything that might get into our way, then define it
  * in the way we like.
  */
 #undef __inline__
@@ -37,6 +37,7 @@
 #undef EAFNOSUPPORT
 #undef EINPROGRESS
 #undef IPVERSION
+#undef caddr_t
 #undef mode_t
 #undef uid_t
 #undef gid_t
@@ -59,9 +60,6 @@
 #undef blkcnt64_t
 #undef clock_t
 #undef fd_mask
-#undef uint8_t
-#undef uint16_t
-#undef uint32_t
 #undef s8
 #undef u8
 #undef s16
@@ -440,6 +438,17 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 };
 #endif
 
+/*
+ * htonl() etc maybe used Netlink.cc, RawSocket.cc, etc as well, so we have to define them here
+ */
+#define htonl  oppsim_htonl
+#define htons  oppsim_htons
+#define inet_ntoa  oppsim_inet_ntoa
+#define ntohl  oppsim_ntohl
+#define ntohs  oppsim_ntohs
+#define inet_addr  oppsim_inet_addr
+
+
 // in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
 #define IP_HDRINCL  25
 
@@ -484,39 +493,49 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #define clock_t     long int
 #define fd_mask     long int
 
-#define uint8_t     unsigned char
-#define uint16_t    unsigned short int
-#define uint32_t    unsigned int
-
-#define s8          signed char
-#define u8          unsigned char
-#define s16         signed short
-#define u16         unsigned short
-#define s32         signed int
-#define u32         unsigned int
-#define s64         signed long long
-#define u64         unsigned long long
-
-typedef char *caddr_t;
-
 #if defined(_MSC_VER)
+#  define int8_t      __int8
+#  define int16_t     __int16
+#  define int32_t     __int32
+#  define int64_t     __int64
+#  define uint8_t     unsigned __int8
+#  define uint16_t    unsigned __int16
+#  define uint32_t    unsigned __int32
+#  define uint64_t    unsigned __int64
 #  define u_int8_t    unsigned __int8
 #  define u_int16_t   unsigned __int16
 #  define u_int32_t   unsigned __int32
 #  define u_int64_t   unsigned __int64
-#  define int32_t     __int32
-#elif defined(__GNUC__)
-#  define u_int8_t    uint8_t
-#  define u_int16_t   uint16_t
-#  define u_int32_t   uint32_t
-#  define u_int64_t   uint64_t
-#else
+#elif defined(int8_t)
+  /* 
+   * assume u_int8_t, int8_t etc are all defined
+   */
+#else /* a guess known to work on almost all (or all?) platforms */
+#  define int8_t      signed char
+#  define int16_t     short
+#  define int32_t     int
+#  define int64_t     long long
+#  define uint8_t     unsigned char
+#  define uint16_t    unsigned short
+#  define uint32_t    unsigned int
+#  define uint64_t    unsigned long long
 #  define u_int8_t    unsigned char
 #  define u_int16_t   unsigned short
 #  define u_int32_t   unsigned int
 #  define u_int64_t   unsigned long long
-#  define int32_t     int
 #endif
+
+#define s8          int8_t
+#define u8          uint8_t
+#define s16         int16_t
+#define u16         uint16_t
+#define s32         int32_t
+#define u32         uint32_t
+#define s64         int32_t
+#define u64         uint32_t
+
+#define caddr_t  oppsimt_caddr_t
+typedef char *oppsimt_caddr_t;
 
 // in_addr
 
