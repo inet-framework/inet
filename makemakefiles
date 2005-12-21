@@ -123,6 +123,7 @@ all:
 	cd Examples/OSPFv2/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/Quagga/Network1 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Quagga/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MPLS/LDP && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Failure && $(MAKEMAKE) $(ALL_MODEL_OPTS)
