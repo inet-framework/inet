@@ -1606,6 +1606,17 @@ int oppsim_inet_aton(const char *cp, struct in_addr *addr)
     return 1;
 }
 
+int oppsim_inet_pton(int af, const char *strptr, void *addrptr)
+{
+    if (af==AF_INET) {
+        struct in_addr& in = *(in_addr *)addrptr;
+        in.s_addr = oppsim_inet_addr(strptr); 
+        return 1;
+    } else {
+        opp_error("oppsim_inet_pton: address family not supported");
+    }
+}
+
 char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
     if (af==AF_INET) {

@@ -336,6 +336,7 @@ void UDP::processICMPError(cMessage *msg)
         ICMPMessage *icmpMsg = (ICMPMessage *)msg;
         type = icmpMsg->getType();
         code = icmpMsg->getCode();
+        icmpMsg->setLength(icmpMsg->encapsulatedMsg()->length()); // trick because payload in ICMP is conceptually truncated
         IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->decapsulate());
         localAddr = datagram->srcAddress();
         remoteAddr = datagram->destAddress();

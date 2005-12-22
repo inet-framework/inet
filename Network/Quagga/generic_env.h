@@ -448,6 +448,7 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #define ntohs  oppsim_ntohs
 #define inet_addr  oppsim_inet_addr
 #define inet_aton  oppsim_inet_aton
+#define inet_pton  oppsim_inet_pton
 #define inet_ntop  oppsim_inet_ntop
 
 

@@ -102,13 +102,13 @@
 
 /* #undef HAVE_INET_ND_H */
 
-#ifndef _MSC_VER
+/* #ifndef _MSC_VER */
 
 #define HAVE_INET_ATON 1
 #define HAVE_INET_NTOP 
 #define HAVE_INET_PTON 
 
-#endif
+/* #endif */
 
 #define HAVE_INPKTINFO 
 
