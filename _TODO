@@ -139,6 +139,12 @@ to send), and there's no unacknowledged data (i.e. previously sent segments
 have all been acknowledged). But what is "sufficiently long"? I guess that 
 should be measured in RTT rather than absolute time (secs). So maybe we 
 should say 5*RTT is "sufficiently long"?
+-----------------------
+802.11 bugs: see mailing list...
+-----------------------
+MPLS part: why is LinkNotifyMsg sent/processed by RSVP_TE and LDP? isn't this
+supposed to be part of the link state routing protocol? Hello also seems to
+be sent by RSVP...
 
 -----------------------
 TCP BUG:
