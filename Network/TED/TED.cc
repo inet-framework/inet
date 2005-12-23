@@ -52,72 +52,78 @@ void TED::initialize(int stage)
     ASSERT(!routerId.isUnspecified());
 
     //
-    // FIXME description: what does the following do.
+    // Extract initial TED contents from the routing table.
+    //
+    // We need to create one TED entry (TELinkStateInfo) for each link,
+    // i.e. for each physical interface.
     //
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
 
-        if (ie->nodeOutputGateId() == -1)  //FIXME is this what was meant?
+        if (ie->nodeOutputGateId() == -1)  // ignore if it's not a physical interface
             continue;
 
+        //
+        // We'll need to fill in "linkid" and "remote" (ie. peer addr).
+        //
+        // Real link state protocols find the peer address by exchanging HELLO messages;
+        // in this model we haven't implemented HELLO but provide peer addresses via
+        // preconfigured static host routes in routing table.
+        //
+        RoutingEntry *rentry = NULL;
         for (int j = 0; j < rt->numRoutingEntries(); j++)
         {
-            RoutingEntry *rentry = rt->routingEntry(j);
-
-            if(rentry->interfacePtr != ift->interfaceAt(i))
-                continue;
-
-            if (rentry->type != rentry->DIRECT)
-                continue;
-
-            IPAddress linkid = rt->routingEntry(j)->host;
-            IPAddress remote = rt->routingEntry(j)->gateway;
-
-            ASSERT(!remote.isUnspecified());
-
-            cGate *g = parentModule()->gate(ie->nodeOutputGateId());
-            ASSERT(g);
-
-            TELinkStateInfo entry;
-            entry.advrouter = routerId;
-            entry.local = ie->ipv4()->inetAddress();
-            entry.linkid = linkid;
-            entry.remote = remote;
-            entry.MaxBandwidth = g->datarate()->doubleValue();
-            for(int j = 0; j < 8; j++)
-                entry.UnResvBandwidth[j] = entry.MaxBandwidth;
-            entry.state = true;
-
-            // use g->delay()->doubleValue() for shortest delay calculation
-            entry.metric = rentry->interfacePtr->ipv4()->metric();
-
-            EV << "metric set to=" << entry.metric << endl;
-
-            entry.sourceId = routerId.getInt();
-            entry.messageId = ++maxMessageId;
-            entry.timestamp = simTime();
-
-            ted.push_back(entry);
-
-            break;
+            rentry = rt->routingEntry(j);
+            if (rentry->interfacePtr == ie && rentry->type == RoutingEntry::DIRECT)
+                break;
         }
+        ASSERT(rentry);
+        IPAddress linkid = rentry->host;
+        IPAddress remote = rentry->gateway;
+        ASSERT(!remote.isUnspecified());
+
+        // find bandwidth of the link
+        cGate *g = parentModule()->gate(ie->nodeOutputGateId());
+        ASSERT(g);
+        double linkBandwidth = g->datarate()->doubleValue();
+
+        //
+        // fill in and insert TED entry
+        //
+        TELinkStateInfo entry;
+        entry.advrouter = routerId;
+        entry.local = ie->ipv4()->inetAddress();
+        entry.linkid = linkid;
+        entry.remote = remote;
+        entry.MaxBandwidth = linkBandwidth;
+        for(int j = 0; j < 8; j++)
+            entry.UnResvBandwidth[j] = entry.MaxBandwidth;
+        entry.state = true;
+
+        // use g->delay()->doubleValue() for shortest delay calculation
+        entry.metric = rentry->interfacePtr->ipv4()->metric();
+
+        EV << "metric set to=" << entry.metric << endl;
+
+        entry.sourceId = routerId.getInt();
+        entry.messageId = ++maxMessageId;
+        entry.timestamp = simTime();
+
+        ted.push_back(entry);
     }
 
-    //
-    // FIXME comment: what does this do? cannot be merged into previous for() loop to ensure consistency of indices?
-    //
+    // extract list of local interface addresses into LocalAddress[]
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
-        //Used to be this:
-        //  cGate *g = parentModule()->gate("out", i);
-        //  if(g) LocalAddress.push_back(ift->interfaceByPortNo(g->index())->ipv4()->inetAddress());
-        //FIXME I have no idea whether the thing below would do (Andras)
         InterfaceEntry *ie = ift->interfaceAt(i);
-        LocalAddress.push_back(ie->ipv4()->inetAddress());
+        if (!ie->isLoopback())
+            LocalAddress.push_back(ie->ipv4()->inetAddress());
     }
 
 
+    // peers are given as interface names in the "peers" module parameter;
+    // store corresponding interface addresses in TEDPeer[]
     cStringTokenizer tokenizer(par("peers"));
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
