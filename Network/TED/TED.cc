@@ -117,8 +117,9 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (rt->interfaceByAddress(ie->ipv4()->inetAddress()) == ie)
-            error("Address of interface %s (%s) is not unique within this host/router",
+        if (rt->interfaceByAddress(ie->ipv4()->inetAddress()) != ie)
+            error("MPLS models assume interfaces to have unique addresses, "
+                  "but address of '%s' (%s) is not unique",
                   ie->name(), ie->ipv4()->inetAddress().str().c_str());
         if (!ie->isLoopback())
             LocalAddress.push_back(ie->ipv4()->inetAddress());

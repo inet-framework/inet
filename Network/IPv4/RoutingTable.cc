@@ -147,12 +147,16 @@ void RoutingTable::initialize(int stage)
         }
         else
         {
-            // use routerId both as routerId and loopback address
             routerId = IPAddress(routerIdStr);
 
-            InterfaceEntry *lo0 = ift->firstLoopbackInterface();
-            lo0->ipv4()->setInetAddress(routerId);
-            lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
+            // if there is no interface with routerId yet, assign it to the loopback address;
+            // TODO find out if this is a good practice, in which situations it is useful etc.
+            if (interfaceByAddress(routerId)==NULL)
+            {
+                InterfaceEntry *lo0 = ift->firstLoopbackInterface();
+                lo0->ipv4()->setInetAddress(routerId);
+                lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
+            }
         }
     }
     else if (stage==3)
