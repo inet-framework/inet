@@ -147,6 +147,11 @@ supposed to be part of the link state routing protocol? Hello also seems to
 be sent by RSVP...
 
 -----------------------
+FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
+This is not the usual way things are done on the internet. But if we assign 
+different addresses, which addr to use in the routing tables etc?
+
+-----------------------
 TCP BUG:
 From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de] 
 Sent: Sunday, September 25, 2005 7:51 PM
