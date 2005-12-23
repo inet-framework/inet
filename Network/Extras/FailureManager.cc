@@ -43,6 +43,7 @@ void FailureManager::processCommand(const cXMLElement& node)
 
     if (!strcmp(node.getTagName(), "shutdown"))
     {
+        target->displayString().setTagArg("i2",0,"status/cross");
         if(!strcmp(target->moduleType()->name(), "RSVP_LSR"))
             replaceNode(target, "RSVP_FAILED");
         else if(!strcmp(target->moduleType()->name(), "LDP_LSR"))
@@ -54,6 +55,7 @@ void FailureManager::processCommand(const cXMLElement& node)
     }
     else if(!strcmp(node.getTagName(), "startup"))
     {
+        target->displayString().removeTag("i2");
         if(!strcmp(target->moduleType()->name(), "RSVP_FAILED"))
             replaceNode(target, "RSVP_LSR");
         else if(!strcmp(target->moduleType()->name(), "LDP_FAILED"))
@@ -90,7 +92,7 @@ void FailureManager::reconnectNode(cModule *old, cModule *n)
 
     n->setDisplayString(old->displayString().getString());
 
-    // FIXME should examine which gates the "old" module has, and reconnect all of them 
+    // FIXME should examine which gates the "old" module has, and reconnect all of them
     // automatically (ie eliminate hardcoded gate names from here)
     reconnect(old, n, "in", "out");
     //reconnect(old, n, "ethIn", "ethOut");

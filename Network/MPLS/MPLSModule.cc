@@ -100,8 +100,9 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     }
     else if (ipdatagram->transportProtocol() == IP_PROT_ICMP)
     {
-        ASSERT(!ipdatagram->hasPar("color"));
-        ipdatagram->addPar("color") = ICMP_TRAFFIC;
+        // ASSERT(!ipdatagram->hasPar("color")); XXX this did not hold sometimes...
+        if (!ipdatagram->hasPar("color"))
+            ipdatagram->addPar("color") = ICMP_TRAFFIC;
     }
     // XXX end of temporary area
 

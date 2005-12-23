@@ -79,7 +79,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // assemble a message name
     char msgname[32];
     static long ctr;
-    sprintf(msgname, "icmp-error-%ld-t%d-c%d", ++ctr, type, code);
+    sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
 
     // create and send ICMP packet
     ICMPMessage *errorMessage = new ICMPMessage(msgname);
