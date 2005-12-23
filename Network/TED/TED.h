@@ -108,7 +108,7 @@ class TED : public cSimpleModule
     cMessage *announceMsg;
     int maxMessageId;
 
-    int assignIndex(std::vector<vertex_t>& vertices, IPAddress node);
+    int assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr);
 
     std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
         double req_bandwidth, int priority);

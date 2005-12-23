@@ -117,6 +117,9 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
+        if (rt->interfaceByAddress(ie->ipv4()->inetAddress()) == ie)
+            error("Address of interface %s (%s) is not unique within this host/router",
+                  ie->name(), ie->ipv4()->inetAddress().str().c_str());
         if (!ie->isLoopback())
             LocalAddress.push_back(ie->ipv4()->inetAddress());
     }
@@ -188,16 +191,17 @@ std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info)
     return os;
 }
 
-int TED::assignIndex(std::vector<vertex_t>& vertices, IPAddress node)
+// FIXME should this be called findOrCreateVertex() or something like that?
+int TED::assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr)
 {
+    // find node in vertices[] whose IP address is nodeAddr
     for (unsigned int i = 0 ; i < vertices.size(); i++)
-    {
-        if(vertices[i].node == node)
+        if(vertices[i].node == nodeAddr)
             return i;
-    }
 
+    // if not found, create
     vertex_t newVertex;
-    newVertex.node = node;
+    newVertex.node = nodeAddr;
     newVertex.dist = LS_INFINITY;
     newVertex.parent = -1;
 
@@ -313,6 +317,8 @@ void TED::rebuildRoutingTable()
         entry->netmask = 0xffffffff;
         entry->metric = 0; // routing table routing entry? what's that?
 
+        EV << "  inserting route: host=" << entry->host << " interface=" << entry->interfaceName << " nexthop=" << entry->gateway << "\n";
+
         rt->addRoutingEntry(entry);
     }
 
@@ -331,6 +337,8 @@ void TED::rebuildRoutingTable()
 
         entry->netmask = 0xffffffff;
         entry->metric = 0; // XXX FIXME what's that?
+
+        EV << "  inserting route: local=" << LocalAddress[i] << " peer=" << entry->host << " interface=" << entry->interfaceName << "\n";
 
         rt->addRoutingEntry(entry);
     }
