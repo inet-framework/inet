@@ -90,8 +90,10 @@ void FailureManager::reconnectNode(cModule *old, cModule *n)
 
     n->setDisplayString(old->displayString().getString());
 
+    // FIXME should examine which gates the "old" module has, and reconnect all of them 
+    // automatically (ie eliminate hardcoded gate names from here)
     reconnect(old, n, "in", "out");
-    reconnect(old, n, "ethIn", "ethOut");
+    //reconnect(old, n, "ethIn", "ethOut");
 
 }
 

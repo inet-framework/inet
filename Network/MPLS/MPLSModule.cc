@@ -98,7 +98,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
             ipdatagram->addPar("color") = LDP_TRAFFIC;
         }
     }
-    else if (!strcmp(ipdatagram->name(), "icmp error"))
+    else if (ipdatagram->transportProtocol() == IP_PROT_ICMP)
     {
         ASSERT(!ipdatagram->hasPar("color"));
         ipdatagram->addPar("color") = ICMP_TRAFFIC;

@@ -76,7 +76,13 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
         }
     }
 
-    ICMPMessage *errorMessage = new ICMPMessage("icmp error"); // TBD use names like "timeExceeded"
+    // assemble a message name
+    char msgname[32];
+    static long ctr;
+    sprintf(msgname, "icmp-error-%ld-t%d-c%d", ++ctr, type, code);
+
+    // create and send ICMP packet
+    ICMPMessage *errorMessage = new ICMPMessage(msgname);
     errorMessage->setType(type);
     errorMessage->setCode(code);
     errorMessage->encapsulate(origDatagram);
