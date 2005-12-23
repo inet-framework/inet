@@ -1,3 +1,6 @@
+- MPLS examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
+
+--------
 - TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we 
   transition to this FIN_WAIT_1. It should in theory be deferred until we 
   actually send the FIN segment, but does no harm to do it that way.
