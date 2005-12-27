@@ -687,6 +687,12 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
         }
     }
 
+    if(req->nlh.nlmsg_type == RTM_NEWADDR && req->g.rtgen_family == AF_INET)
+    {
+        opp_error("FIXME implement RTM_NEWADDR");
+        return 0;
+    }
+
     ASSERT(false);
 }
 
@@ -1602,7 +1608,7 @@ unsigned long oppsim_inet_addr(const char *str)
 
 int oppsim_inet_aton(const char *cp, struct in_addr *addr)
 {
-    addr->s_addr = oppsim_inet_addr(cp); 
+    addr->s_addr = oppsim_inet_addr(cp);
     return 1;
 }
 
@@ -1610,7 +1616,7 @@ int oppsim_inet_pton(int af, const char *strptr, void *addrptr)
 {
     if (af==AF_INET) {
         struct in_addr& in = *(in_addr *)addrptr;
-        in.s_addr = oppsim_inet_addr(strptr); 
+        in.s_addr = oppsim_inet_addr(strptr);
         return 1;
     } else {
         opp_error("oppsim_inet_pton: address family not supported");

@@ -22,6 +22,7 @@
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "LIBTableAccess.h"
+#include "NotifierConsts.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -57,7 +58,7 @@ void RSVP::initialize(int stage)
     ift = InterfaceTableAccess().get();
     routerId = rt->getRouterId();
     lt = LIBTableAccess().get();
-
+    nb = NotificationBoardAccess().get();
 
     rpct = check_and_cast<IRSVPClassifier*>(parentModule()->submodule("classifier"));
 
@@ -423,7 +424,7 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg* msg)
 
     unsigned int index = tedmod->linkIndex(routerId, peer);
     tedmod->ted[index].state = false;
-    announceLinkChange(routerId, peer);
+    announceLinkChange(index);
     tedmod->rebuildRoutingTable();
 
     // send PATH_ERROR for existing paths
@@ -748,21 +749,17 @@ bool RSVP::allocateResource(IPAddress OI, const SessionObj_t& session, double ba
 
     // announce changes
 
-    announceLinkChange(tedmod->ted[index].advrouter, tedmod->ted[index].linkid);
+    announceLinkChange(index);
 
     return true;
 }
 
-void RSVP::announceLinkChange(IPAddress advrouter, IPAddress linkid)
+void RSVP::announceLinkChange(int tedlinkindex)
 {
-    TELink link;
-    link.advrouter = advrouter;
-    link.linkid = linkid;
-
-    LinkNotifyMsg *msg = new LinkNotifyMsg("notify");
-    msg->setLinkArraySize(1);
-    msg->setLink(0, link);
-    sendDirect(msg, 0.0, tedmod, "inotify");
+    TEDChangeInfo d;
+    d.setTedLinkIndicesArraySize(1);
+    d.setTedLinkIndices(0, tedlinkindex);
+    nb->fireChangeNotification(NF_TED_CHANGED, &d);
 }
 
 void RSVP::commitResv(ResvStateBlock_t *rsb)
@@ -1702,7 +1699,7 @@ void RSVP::recoveryEvent(IPAddress peer)
     unsigned int index = tedmod->linkIndex(routerId, peer);
     bool rtmodified = !tedmod->ted[index].state;
     tedmod->ted[index].state = true;
-    announceLinkChange(routerId, peer);
+    announceLinkChange(index);
 
     // rebuild routing table if link state changed
     if (rtmodified)

@@ -109,6 +109,7 @@ void LDP::initialize(int stage)
     rt = RoutingTableAccess().get();
     lt = LIBTableAccess().get();
     tedmod = TEDAccess().get();
+    nb = NotificationBoardAccess().get();
 
     WATCH_VECTOR(myPeers);
     WATCH_VECTOR(fecUp);
@@ -136,7 +137,6 @@ void LDP::initialize(int stage)
     rebuildFecList();
 
     // listen for routing table modifications
-    NotificationBoard *nb = check_and_cast<NotificationBoard*>(parentModule()->submodule("notificationBoard"));
     nb->subscribe(this, NF_IPv4_ROUTINGTABLE_CHANGED);
 }
 
@@ -474,7 +474,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
     tedmod->ted[index].state = false;
-    announceLinkChange(rt->getRouterId(), peerIP);
+    announceLinkChange(index);
     tedmod->rebuildRoutingTable();
 }
 
@@ -501,7 +501,7 @@ void LDP::processLDPHello(LDPHello *msg)
     {
         tedmod->ted[index].state = true;
         tedmod->rebuildRoutingTable();
-        announceLinkChange(rt->getRouterId(), peerAddr);
+        announceLinkChange(index);
     }
 
     // peer already in table?
@@ -1234,16 +1234,12 @@ void LDP::receiveChangeNotification(int category, cPolymorphic *details)
     rebuildFecList();
 }
 
-void LDP::announceLinkChange(IPAddress advrouter, IPAddress linkid)
+void LDP::announceLinkChange(int tedlinkindex)
 {
-    TELink link;
-    link.advrouter = advrouter;
-    link.linkid = linkid;
-
-    LinkNotifyMsg *msg = new LinkNotifyMsg("notify");
-    msg->setLinkArraySize(1);
-    msg->setLink(0, link);
-    sendDirect(msg, 0.0, tedmod, "inotify"); //FIXME use notificationboard for this!
+    TEDChangeInfo d;
+    d.setTedLinkIndicesArraySize(1);
+    d.setTedLinkIndices(0, tedlinkindex);
+    nb->fireChangeNotification(NF_TED_CHANGED, &d);
 }
 
 

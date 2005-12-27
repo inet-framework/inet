@@ -25,6 +25,7 @@
 #include "RSVPHelloMsg.h"
 #include "SignallingMsg_m.h"
 #include "IRSVPClassifier.h"
+#include "NotificationBoard.h"
 
 class SimpleClassifier;
 class RoutingTable;
@@ -173,6 +174,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     RoutingTable *rt;
     InterfaceTable *ift;
     LIBTable *lt;
+    NotificationBoard *nb;
 
     IRSVPClassifier *rpct;
 
@@ -237,7 +239,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     bool allocateResource(IPAddress OI, const SessionObj_t& session, double bandwidth);
     void preempt(IPAddress OI, int priority, double bandwidth);
     bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPAddress OI);
-    void announceLinkChange(IPAddress advrouter, IPAddress linkid);
+    void announceLinkChange(int tedlinkindex);
 
     void sendToIP(cMessage *msg, IPAddress destAddr);
 

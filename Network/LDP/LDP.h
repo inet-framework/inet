@@ -117,6 +117,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     RoutingTable *rt;
     LIBTable *lt;
     TED *tedmod;
+    NotificationBoard *nb;
 
     UDPSocket udpSocket;     // for sending/receiving Hello
     TCPSocket serverSocket;  // for listening on LDP_PORT
@@ -168,7 +169,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     void updateFecList(IPAddress nextHop);
     void updateFecListEntry(fec_t oldItem);
 
-    void announceLinkChange(IPAddress advrouter, IPAddress linkid);
+    void announceLinkChange(int tedlinkindex);
 
   public:
     LDP();
