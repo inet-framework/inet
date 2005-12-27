@@ -48,6 +48,7 @@ enum
     // - layer 3 (network)
     NF_INTERFACE_STATE_CHANGED,
     NF_INTERFACE_CONFIG_CHANGED,
+    NF_TED_CHANGED,
 
     // layer 3 - IPv4
     NF_IPv4_INTERFACECONFIG_CHANGED,

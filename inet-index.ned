@@ -75,7 +75,7 @@
 //    BonnMotionMobility, ANSimMobility, RandomWPMobility, MassMobility
 //
 // Starting points for the MPLS models:
-//  - the core modules: MPLSModule, LIBTable, NewLDP, RSVP, TED, OspfTe
+//  - the core modules: MPLSModule, LIBTable, LDP, RSVP, TED
 //  - MPLS-enabled routers: LDP_LSR, RSVP_LSR
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>

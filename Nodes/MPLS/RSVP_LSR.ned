@@ -20,6 +20,7 @@ import
     "InterfaceTable",
     "SimpleClassifier",
     "RSVP",
+    "LinkStateRouting",
     "TED";
 
 //
@@ -40,32 +41,34 @@ module RSVP_LSR
 
     submodules:
         notificationBoard: NotificationBoard;
-            display: "p=330,145;i=block/control";
+            display: "p=74,57;i=block/control";
         routingTable: RoutingTable;
             parameters:
                 IPForward = true,
                 routerId = routerId,
                 routingFile = routingFile;
-            display: "p=60,74;i=block/table";
+            display: "p=68,138;i=block/table";
         interfaceTable: InterfaceTable;
-            display: "p=60,152;i=block/table";
+            display: "p=68,208;i=block/table";
         ted_module: TED;
             parameters:
                 peers = peers;
-            display: "i=block/network2;p=158,51";
+            display: "i=block/table;p=312,203";
+        linkStateRouting: LinkStateRouting;
+            display: "i=block/network2;p=254,115";
         rsvp: RSVP;
             parameters:
                 peers = peers;
-            display: "i=block/control;p=244,51";
+            display: "i=block/control;p=156,67";
         classifier: SimpleClassifier;
-            display: "i=block/classifier;p=330,59";
+            display: "i=block/classifier;p=330,67";
         networkLayer: NetworkLayer;
             gatesizes:
                 ifIn[sizeof(out)],
                 ifOut[sizeof(out)];
-            display: "p=192,163;i=block/fork";
+            display: "p=192,195;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
-            display: "p=88,297,row,90;q=l2queue;i=block/ifcard";
+            display: "p=88,329,row,90;q=l2queue;i=block/ifcard";
         mplsModule: MPLSModule;
             parameters:
                 //peers = peers;
@@ -75,12 +78,12 @@ module RSVP_LSR
                 netwOut[sizeof(out)],
                 ifIn[sizeof(out)],
                 ifOut[sizeof(out)];
-            display: "o=#ff8000;p=192,238;b=66,14";
+            display: "o=#ff8000;p=192,270;b=66,14";
         libTable: LIBTable;
-            display: "i=block/table2;p=60,228";
+            display: "i=block/table2;p=312,268";
     connections nocheck:
-        ted_module.to_ip --> networkLayer.OSPFIn;
-        ted_module.from_ip <-- networkLayer.OSPFOut;
+        linkStateRouting.to_ip --> networkLayer.OSPFIn;
+        linkStateRouting.from_ip <-- networkLayer.OSPFOut;
 
         rsvp.to_ip --> networkLayer.RSVPIn;
         rsvp.from_ip <-- networkLayer.RSVPOut;

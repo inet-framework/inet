@@ -1,3 +1,11 @@
+- Wrap RoutingEntry members into getter/setter methods!!!!
+
+--------
+- "ack" in LinkStateMsg redundant? (never read)
+Q: what is the TELinkInfo.state flag?
+Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
+
+--------
 - MPLS examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
 
 --------

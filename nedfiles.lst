@@ -62,6 +62,7 @@ Network/Queue/OutputQueue.ned
 Network/Queue/REDQueue.ned
 Network/RSVP_TE/RSVP.ned
 Network/RSVP_TE/SimpleClassifier.ned
+Network/TED/LinkStateRouting.ned
 Network/TED/TED.ned
 NetworkInterfaces/NetworkInterface.ned
 NetworkInterfaces/Ethernet/eth-index.ned

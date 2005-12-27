@@ -19,6 +19,7 @@ import
     "LDP",
     "TCP",
     "UDP",
+    "LinkStateRouting",
     "TED",
     "MPLSModule",
     "PPPInterface",
@@ -32,16 +33,16 @@ import
 //
 module LDP_LSR
     parameters:
-        holdTime : numeric,
-        helloInterval : numeric,
+        holdTime: numeric,
+        helloInterval: numeric,
 
-        namid : numeric,
-        namlog : string,
-        namprolog : string,
+        namid: numeric,
+        namlog: string,
+        namprolog: string,
 
-        peers : string,
-        routerId : string,
-        routingFile : string;
+        peers: string,
+        routerId: string,
+        routingFile: string;
     gates:
         in: in[];
         out: out[];
@@ -66,8 +67,9 @@ module LDP_LSR
         ted_module: TED;
             parameters:
                 peers = peers;
-            display: "p=360,140;i=block/control";
-
+            display: "p=340,244;i=block/table";
+        linkStateRouting: LinkStateRouting;
+            display: "p=360,150;i=block/network2";
         tcp: TCP;
             display: "p=177,145;i=block/wheelbarrow";
         udp: UDP;
@@ -91,10 +93,10 @@ module LDP_LSR
             display: "p=224,302;i=block/switch";
         libTable: LIBTable;
             parameters:
-            display: "p=340,281;i=block/table2";
+            display: "p=340,305;i=block/table2";
     connections nocheck:
-        ted_module.to_ip --> networkLayer.OSPFIn;
-        ted_module.from_ip <-- networkLayer.OSPFOut;
+        linkStateRouting.to_ip --> networkLayer.OSPFIn;
+        linkStateRouting.from_ip <-- networkLayer.OSPFOut;
 
         ldp.from_tcp_interface <-- tcp.to_appl++;
         ldp.to_tcp_interface --> tcp.from_appl++;
