@@ -13,17 +13,16 @@
 //
 
 //
-// Traffic Engineering Database. Stores network topology with detailed
-// link information, including total and reserved bandwidths.
+// This module implements a very minimalistic link state routing protcol.
+// Apart from the basic topology information, the current link usage
+// is distributed to all participants in the network (by means of flooding).
 //
-// TED is filled in and kept up-to-date via link state routing protocols,
-// like LinkStateRouting or (in the future) OSPF-TE.
+// Collaborations
 //
-// \TED exposes several public methods for querying the current network state
-// and allows RSVP and individual applications to calculate feasible LSPs
-// meeting the chosen bandwidth criteria.
+// The link state database is kept in the TED module.
 //
-simple TED
-    parameters:
-        peers : string;
+simple LinkStateRouting
+    gates:
+        in: from_ip;
+        out: to_ip;
 endsimple

@@ -23,16 +23,16 @@
 #include "InterfaceTableAccess.h"
 #include "NotificationBoard.h"
 
+#define LS_INFINITY   1e16
+
 Define_Module(TED);
 
 TED::TED()
 {
-    announceMsg = NULL;
 }
 
 TED::~TED()
 {
-    cancelAndDelete(announceMsg);
 }
 
 void TED::initialize(int stage)
@@ -138,43 +138,12 @@ void TED::initialize(int stage)
 
     rebuildRoutingTable();
 
-    announceMsg = new cMessage("announce");
-    scheduleAt(simTime() + exponential(0.01), announceMsg);
-
     WATCH_VECTOR(ted);
 }
 
 void TED::handleMessage(cMessage * msg)
 {
-    if (msg == announceMsg)
-    {
-        delete announceMsg;
-        announceMsg = NULL;
-        sendToPeers(ted, true, IPAddress());
-    }
-    else if (!strcmp(msg->arrivalGate()->name(), "inotify"))
-    {
-        processLINK_NOTIFY(check_and_cast<LinkNotifyMsg*>(msg));
-    }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
-    {
-        EV << "Processing message from IP: " << msg << endl;
-        IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
-        IPAddress sender = controlInfo->srcAddr();
-
-        int command = check_and_cast<TEDMsg*>(msg)->getCommand();
-        switch (command)
-        {
-            case LINK_STATE_MESSAGE:
-                processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg*>(msg), sender);
-                break;
-
-            default:
-                ASSERT(false);
-        }
-    }
-    else
-        ASSERT(false);
+    ASSERT(false);
 }
 
 std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info)
@@ -438,169 +407,11 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     return vertices;
 }
 
-void TED::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exPeer)
-{
-    EV << "sending LINK_STATE message to peers" << endl;
-
-    for (unsigned int i = 0; i < ted.size(); i++)
-    {
-        if(ted[i].advrouter != routerId)
-            continue;
-
-        if(ted[i].linkid == exPeer)
-            continue;
-
-        if(!ted[i].state)
-            continue;
-
-        if(find(TEDPeer.begin(), TEDPeer.end(), ted[i].local) == TEDPeer.end())
-            continue;
-
-        LinkStateMsg *out = new LinkStateMsg("link state");
-        out->setLinkInfoArraySize(list.size());
-
-        for (unsigned int j = 0; j < list.size(); j++)
-            out->setLinkInfo(j, list[j]);
-
-        out->setRequest(req);
-        out->setAck(false);
-
-        sendToIP(out, ted[i].linkid);
-    }
-}
-
-void TED::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
-{
-    // attach control info to packet
-    IPControlInfo *controlInfo = new IPControlInfo();
-    controlInfo->setDestAddr(destAddr);
-    controlInfo->setSrcAddr(routerId);
-    controlInfo->setProtocol(IP_PROT_OSPF);
-    msg->setControlInfo(controlInfo);
-    msg->setKind(TED_TRAFFIC);
-
-    int length = msg->getLinkInfoArraySize() * 72;
-
-    msg->setByteLength(length);
-
-    msg->addPar("color") = TED_TRAFFIC;
-
-    send(msg, "to_ip");
-}
-
-void TED::processLINK_NOTIFY(LinkNotifyMsg* msg)
-{
-    EV << "received LINK_NOTIFY message" << endl;
-
-    unsigned int k = msg->getLinkArraySize();
-
-    ASSERT(k > 0);
-
-    // build linkinfo list
-    std::vector<TELinkStateInfo> links;
-    for (unsigned int i = 0; i < k; i++)
-    {
-        TELink link = msg->getLink(i);
-
-        unsigned int index = linkIndex(link.advrouter, link.linkid);
-
-        updateTimestamp(&ted[index]);
-        links.push_back(ted[index]);
-    }
-
-    sendToPeers(links, false, IPAddress());
-
-    delete msg;
-}
-
-void TED::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender)
-{
-    EV << "received LINK_STATE message from " << sender << endl;
-
-    TELinkStateInfoVector forward;
-
-    unsigned int n = msg->getLinkInfoArraySize();
-
-    bool change = false; // in topology
-
-    // loop through every link in the message
-    for (unsigned int i = 0; i < n; i++)
-    {
-        const TELinkStateInfo& link = msg->getLinkInfo(i);
-
-        TELinkStateInfo *match;
-
-        // process link if we haven't seen this already and timestamp is newer
-        if(checkLinkValidity(link, &match))
-        {
-            ASSERT(link.sourceId == link.advrouter.getInt());
-
-            EV << "new information found" << endl;
-
-            if(!match)
-            {
-                // and we have no info on this link so far, store it as it is
-                ted.push_back(link);
-                change = true;
-            }
-            else
-            {
-                // copy over the information from it
-                if(match->state != link.state)
-                {
-                    match->state = link.state;
-                    change = true;
-                }
-                match->messageId = link.messageId;
-                match->sourceId = link.sourceId;
-                match->timestamp = link.timestamp;
-                for(int i = 0; i < 8; i++)
-                    match->UnResvBandwidth[i] = link.UnResvBandwidth[i];
-                match->MaxBandwidth = link.MaxBandwidth;
-                match->metric = link.metric;
-            }
-
-            forward.push_back(link);
-        }
-    }
-
-    if(change)
-        rebuildRoutingTable();
-
-    if(msg->getRequest())
-    {
-        sendToPeer(sender, ted);
-    }
-
-    if(forward.size() > 0)
-    {
-        sendToPeers(forward, false, sender);
-    }
-
-    delete msg;
-}
-
-void TED::sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list)
-{
-    EV << "sending LINK_STATE message (ACK) to " << peer << endl;
-
-    LinkStateMsg *out = new LinkStateMsg("link state");
-
-    out->setLinkInfoArraySize(list.size());
-    for (unsigned int j = 0; j < list.size(); j++)
-        out->setLinkInfo(j, list[j]);
-
-    out->setRequest(false);
-    out->setAck(true);
-
-    sendToIP(out, peer);
-}
-
-bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo **match)
+bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match)
 {
     std::vector<TELinkStateInfo>::iterator it;
 
-    *match = NULL;
+    match = NULL;
 
     for(it = ted.begin(); it != ted.end(); it++)
     {
@@ -617,7 +428,7 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo **match)
             if(it->timestamp < link.timestamp || (it->timestamp == link.timestamp && it->messageId < link.messageId))
             {
                 // but it's older, use this new
-                *match = &(*it);
+                match = &(*it);
                 break;
             }
             else

@@ -17,7 +17,6 @@ cplusplus {{
 #include "IPAddress.h"
 
 #define LINK_STATE_MESSAGE      1
-#define LINK_NOTIFY_MESSAGE     2
 
 typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
@@ -26,7 +25,7 @@ class noncobject IPAddress;
 
 
 //
-// Represents a link in a LinkStateMsg packet.
+// Represents a link in the TED and in LinkStateMsg packets.
 //
 struct TELinkStateInfo
 {
@@ -47,51 +46,30 @@ struct TELinkStateInfo
 
 
 //
-// FIXME missing documentation
+// Packet for disseminating link state information (TELinkStateInfo[]) by the 
+// LinkStateRouting module.
 //
-struct TELink
-{
-    fields:
-        IPAddress advrouter;
-        IPAddress linkid;
-};
-
-
-//
-// Base class for protocol messages of a minimalistic link state routing
-// protocol implemented as part of the TED module.
-//
-message TEDMsg
-{
-    fields:
-        int command = 0;
-};
-
-
-//
-// FIXME missing documentation
-//
-message LinkStateMsg extends TEDMsg
+message LinkStateMsg
 {
     fields:
         TELinkStateInfo linkInfo[];
 
-        bool request = false;
-        bool ack = false;
+        bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
+        // bool ack = false; -- apparently unused, removed -- TODO check with Vojta
 
         int command = LINK_STATE_MESSAGE;
 };
 
 
 //
-// FIXME missing documentation
+// Data structure supplied with NF_TED_CHANGE NotificationBoard notifications.
+// This triggers the link state protocol to send out up-to-date link state info
+// about the given links.
 //
-message LinkNotifyMsg extends TEDMsg
+class TEDChangeInfo
 {
     fields:
-        TELink link[];
-
-        int command = LINK_NOTIFY_MESSAGE;
+        int tedLinkIndices[];
 };
 
 

@@ -16,13 +16,8 @@
 #define __TED_H__
 
 #include <omnetpp.h>
-
 #include "TED_m.h"
 #include "IntServ.h"
-
-#define LS_INFINITY   1e16
-
-#define TED_TRAFFIC         1
 
 class RoutingTable;
 class InterfaceTable;
@@ -33,8 +28,6 @@ class NotificationBoard;
 /**
  * Contains the Traffic Engineering Database and provides public methods
  * to access it from MPLS signalling protocols (LDP, RSVP-TE).
- *
- * Also contains implementation of a minimalistic link state routing protocol.
  *
  * See NED file for more info.
  */
@@ -102,10 +95,11 @@ class TED : public cSimpleModule
     IPAddress routerId;
     NotificationBoard *nb;
 
+  public:
     IPAddressVector LocalAddress; // FIXME *** indexed by what? ted link index? how to keep consistent? ***
     IPAddressVector TEDPeer;      // FIXME *** indexed by what? ted link index? how to keep consistent? ***
 
-    cMessage *announceMsg;
+  private:
     int maxMessageId;
 
     int assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr);
@@ -113,14 +107,8 @@ class TED : public cSimpleModule
     std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
         double req_bandwidth, int priority);
 
-    void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exPeer);
-    void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list);
-    void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
-
-    void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
-    void processLINK_NOTIFY(LinkNotifyMsg* msg);
-
-    bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo **match);
+  public: //FIXME
+    bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match);
     void updateTimestamp(TELinkStateInfo *link);
 };
 
