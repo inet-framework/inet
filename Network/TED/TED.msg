@@ -31,7 +31,7 @@ struct TELinkStateInfo
 {
     fields:
         IPAddress advrouter; // routerId of originator of this link state entry
-        IPAddress linkid;    // FIXME what's this?
+        IPAddress linkid;    // identifies link within advrouter; set to interface address
         IPAddress local;     // address of local interface of this link
         IPAddress remote;    // address of remote interface of this link
         double metric;       // link metric
@@ -41,13 +41,14 @@ struct TELinkStateInfo
         double timestamp;    // time of originating this entry
         unsigned int sourceId;  // FIXME what's this?
         unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
-        bool state;          // FIXME values?
+        bool state;          // false = down, true = up
 };
 
 
 //
 // Packet for disseminating link state information (TELinkStateInfo[]) by the 
-// LinkStateRouting module.
+// LinkStateRouting module which implements a minimalistic link state routing
+// protocol.
 //
 message LinkStateMsg
 {
@@ -57,7 +58,7 @@ message LinkStateMsg
         bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
         // bool ack = false; -- apparently unused, removed -- TODO check with Vojta
 
-        int command = LINK_STATE_MESSAGE;
+        int command = LINK_STATE_MESSAGE; // FIXME maybe do without this...
 };
 
 

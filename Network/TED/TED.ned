@@ -24,6 +24,4 @@
 // meeting the chosen bandwidth criteria.
 //
 simple TED
-    parameters:
-        peers : string;
 endsimple

@@ -274,7 +274,7 @@ void TED::rebuildRoutingTable()
         entry->source = RoutingEntry::OSPF;
 
         entry->netmask = 0xffffffff;
-        entry->metric = 0; // routing table routing entry? what's that?
+        entry->metric = 0;
 
         EV << "  inserting route: host=" << entry->host << " interface=" << entry->interfaceName << " nexthop=" << entry->gateway << "\n";
 

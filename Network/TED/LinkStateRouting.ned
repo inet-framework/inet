@@ -1,5 +1,5 @@
 //
-// (C) 2005 Vojtech Janota
+// (C) 2005 Vojtech Janota, Andras Varga
 //
 // This library is free software, you can redistribute it
 // and/or modify
@@ -22,6 +22,8 @@
 // The link state database is kept in the TED module.
 //
 simple LinkStateRouting
+    parameters:
+        peers : string;
     gates:
         in: from_ip;
         out: to_ip;
