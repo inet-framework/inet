@@ -113,7 +113,7 @@ void TED::initialize(int stage)
         ted.push_back(entry);
     }
 
-    // extract list of local interface addresses into LocalAddress[]
+    // extract list of local interface addresses into interfaceAddrs[]
     for (int i = 0; i < ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
@@ -122,7 +122,7 @@ void TED::initialize(int stage)
                   "but address of '%s' (%s) is not unique",
                   ie->name(), ie->ipv4()->inetAddress().str().c_str());
         if (!ie->isLoopback())
-            LocalAddress.push_back(ie->ipv4()->inetAddress());
+            interfaceAddrs.push_back(ie->ipv4()->inetAddress());
     }
 
     rebuildRoutingTable();
@@ -283,21 +283,21 @@ void TED::rebuildRoutingTable()
 
     // insert local peers
 
-    for (unsigned int i = 0; i < LocalAddress.size(); i++)
+    for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
     {
         RoutingEntry *entry = new RoutingEntry;
 
-        entry->host = peerByLocalAddress(LocalAddress[i]);
+        entry->host = peerByLocalAddress(interfaceAddrs[i]);
         entry->gateway = IPAddress();
         entry->type = entry->DIRECT;
-        entry->interfacePtr = rt->interfaceByAddress(LocalAddress[i]);
+        entry->interfacePtr = rt->interfaceByAddress(interfaceAddrs[i]);
         entry->interfaceName = opp_string(entry->interfacePtr->name());
         entry->source = RoutingEntry::OSPF;
 
         entry->netmask = 0xffffffff;
         entry->metric = 0; // XXX FIXME what's that?
 
-        EV << "  inserting route: local=" << LocalAddress[i] << " peer=" << entry->host << " interface=" << entry->interfaceName << "\n";
+        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->host << " interface=" << entry->interfaceName << "\n";
 
         rt->addRoutingEntry(entry);
     }
@@ -435,42 +435,24 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match)
 unsigned int TED::linkIndex(IPAddress localInf)
 {
     for (unsigned int i = 0; i < ted.size(); i++)
-    {
-        if(ted[i].advrouter != routerId)
-            continue;
-
-        if(ted[i].local != localInf)
-            continue;
-
-        return i;
-    }
+        if (ted[i].advrouter == routerId && ted[i].local == localInf)
+            return i;
     ASSERT(false);
 }
 
 unsigned int TED::linkIndex(IPAddress advrouter, IPAddress linkid)
 {
     for (unsigned int i = 0; i < ted.size(); i++)
-    {
-        if(ted[i].advrouter != advrouter)
-            continue;
-
-        if(ted[i].linkid != linkid)
-            continue;
-
-        return i;
-    }
+        if(ted[i].advrouter == advrouter && ted[i].linkid == linkid)
+            return i;
     ASSERT(false);
 }
 
 bool TED::isLocalAddress(IPAddress addr)
 {
-    for (unsigned int i = 0; i < LocalAddress.size(); i++)
-    {
-        if(LocalAddress[i] != addr)
-            continue;
-
-        return true;
-    }
+    for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
+        if(interfaceAddrs[i] == addr)
+            return true;
     return false;
 }
 
@@ -484,7 +466,7 @@ void TED::updateTimestamp(TELinkStateInfo *link)
 
 IPAddressVector TED::getLocalAddress()
 {
-    return LocalAddress;
+    return interfaceAddrs;
 }
 
 IPAddress TED::primaryAddress(IPAddress localInf)

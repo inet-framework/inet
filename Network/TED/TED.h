@@ -95,8 +95,7 @@ class TED : public cSimpleModule
     IPAddress routerId;
     NotificationBoard *nb;
 
-  public:
-    IPAddressVector LocalAddress; // FIXME *** indexed by what? ted link index? how to keep consistent? ***
+    IPAddressVector interfaceAddrs; // list of local interface addresses
 
   private:
     int maxMessageId;
