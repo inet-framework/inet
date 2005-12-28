@@ -60,6 +60,8 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
     cMessage *announceMsg;
     IPAddress routerId;
 
+    IPAddressVector peerIfAddrs; // addresses of interfaces towards neighbouring routers
+
   public:
     LinkStateRouting();
     virtual ~LinkStateRouting();
@@ -69,14 +71,15 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
     virtual int numInitStages() const  {return 4;}
     virtual void handleMessage(cMessage *msg);
 
-    void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer);
-    void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req);
-    void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
-
     void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
 
     // INotifiable method
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
+
+    void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer);
+    void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req);
+    void sendToIP(LinkStateMsg *msg, IPAddress destAddr);
+
 };
 
 #endif

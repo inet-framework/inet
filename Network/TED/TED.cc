@@ -125,17 +125,6 @@ void TED::initialize(int stage)
             LocalAddress.push_back(ie->ipv4()->inetAddress());
     }
 
-
-    // peers are given as interface names in the "peers" module parameter;
-    // store corresponding interface addresses in TEDPeer[]
-    cStringTokenizer tokenizer(par("peers"));
-    const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
-    {
-        ASSERT(ift->interfaceByName(token));
-        TEDPeer.push_back(ift->interfaceByName(token)->ipv4()->inetAddress());
-    }
-
     rebuildRoutingTable();
 
     WATCH_VECTOR(ted);

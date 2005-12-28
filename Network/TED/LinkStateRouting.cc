@@ -1,5 +1,5 @@
 //
-// (C) 2005 Vojtech Janota
+// (C) 2005 Vojtech Janota, Andras Varga
 //
 // This library is free software, you can redistribute it
 // and/or modify
@@ -50,6 +50,18 @@ void LinkStateRouting::initialize(int stage)
         NotificationBoard *nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_TED_CHANGED);
 
+        // peers are given as interface names in the "peers" module parameter;
+        // store corresponding interface addresses in peerIfAddrs[]
+        cStringTokenizer tokenizer(par("peers"));
+        InterfaceTable *ift = InterfaceTableAccess().get();
+        const char *token;
+        while ((token = tokenizer.nextToken())!=NULL)
+        {
+            ASSERT(ift->interfaceByName(token));
+            peerIfAddrs.push_back(ift->interfaceByName(token)->ipv4()->inetAddress());
+        }
+
+        // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
     }
@@ -72,49 +84,6 @@ void LinkStateRouting::handleMessage(cMessage * msg)
     }
     else
         ASSERT(false);
-}
-
-void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer)
-{
-    EV << "sending LINK_STATE message to peers" << endl;
-
-    // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
-    for (unsigned int i = 0; i < tedmod->ted.size(); i++)
-    {
-        if(tedmod->ted[i].advrouter != routerId)
-            continue;
-
-        if(tedmod->ted[i].linkid == exceptPeer)
-            continue;
-
-        if(!tedmod->ted[i].state)
-            continue;
-
-        if(find(tedmod->TEDPeer.begin(), tedmod->TEDPeer.end(), tedmod->ted[i].local) == tedmod->TEDPeer.end())
-            continue;
-
-        // send a copy
-        sendToPeer(tedmod->ted[i].linkid, list, req);
-    }
-}
-
-void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
-{
-    // attach control info to packet
-    IPControlInfo *controlInfo = new IPControlInfo();
-    controlInfo->setDestAddr(destAddr);
-    controlInfo->setSrcAddr(routerId);
-    controlInfo->setProtocol(IP_PROT_OSPF);
-    msg->setControlInfo(controlInfo);
-    msg->setKind(TED_TRAFFIC);
-
-    int length = msg->getLinkInfoArraySize() * 72;
-
-    msg->setByteLength(length);
-
-    msg->addPar("color") = TED_TRAFFIC;
-
-    send(msg, "to_ip");
 }
 
 void LinkStateRouting::receiveChangeNotification(int category, cPolymorphic *details)
@@ -211,6 +180,30 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress se
     delete msg;
 }
 
+void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer)
+{
+    EV << "sending LINK_STATE message to peers" << endl;
+
+    // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
+    for (unsigned int i = 0; i < tedmod->ted.size(); i++)
+    {
+        if(tedmod->ted[i].advrouter != routerId)
+            continue;
+
+        if(tedmod->ted[i].linkid == exceptPeer)
+            continue;
+
+        if(!tedmod->ted[i].state)
+            continue;
+
+        if(find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
+            continue;
+
+        // send a copy
+        sendToPeer(tedmod->ted[i].linkid, list, req);
+    }
+}
+
 void LinkStateRouting::sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req)
 {
     EV << "sending LINK_STATE message to " << peer << endl;
@@ -226,4 +219,21 @@ void LinkStateRouting::sendToPeer(IPAddress peer, const std::vector<TELinkStateI
     sendToIP(out, peer);
 }
 
+void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
+{
+    // attach control info to packet
+    IPControlInfo *controlInfo = new IPControlInfo();
+    controlInfo->setDestAddr(destAddr);
+    controlInfo->setSrcAddr(routerId);
+    controlInfo->setProtocol(IP_PROT_OSPF);
+    msg->setControlInfo(controlInfo);
+
+    int length = msg->getLinkInfoArraySize() * 72;
+
+    msg->setByteLength(length);
+
+    msg->addPar("color") = TED_TRAFFIC;
+
+    send(msg, "to_ip");
+}
 

@@ -97,7 +97,6 @@ class TED : public cSimpleModule
 
   public:
     IPAddressVector LocalAddress; // FIXME *** indexed by what? ted link index? how to keep consistent? ***
-    IPAddressVector TEDPeer;      // FIXME *** indexed by what? ted link index? how to keep consistent? ***
 
   private:
     int maxMessageId;

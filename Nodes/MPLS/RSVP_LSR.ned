@@ -51,10 +51,10 @@ module RSVP_LSR
         interfaceTable: InterfaceTable;
             display: "p=68,208;i=block/table";
         ted_module: TED;
-            parameters:
-                peers = peers;
             display: "i=block/table;p=312,203";
         linkStateRouting: LinkStateRouting;
+            parameters:
+                peers = peers;
             display: "i=block/network2;p=254,115";
         rsvp: RSVP;
             parameters:

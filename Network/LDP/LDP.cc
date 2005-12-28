@@ -495,7 +495,7 @@ void LDP::processLDPHello(LDPHello *msg)
         return;
     }
 
-    // mark link as working if was failed and rebuild table
+    // mark link as working if it was failed, and rebuild table
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
     if (!tedmod->ted[index].state)
     {
@@ -715,7 +715,7 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     return findPeerAddrFromInterface(iName);
 }
 
-// To allow this to work, make sure there are entries of hosts for all peers
+// FIXME To allow this to work, make sure there are entries of hosts for all peers
 
 IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
 {

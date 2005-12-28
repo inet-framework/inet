@@ -65,10 +65,10 @@ module LDP_LSR
                 routerId = routerId;
             display: "p=222,67;i=block/control";
         ted_module: TED;
-            parameters:
-                peers = peers;
             display: "p=340,244;i=block/table";
         linkStateRouting: LinkStateRouting;
+            parameters:
+                peers = peers;
             display: "p=360,150;i=block/network2";
         tcp: TCP;
             display: "p=177,145;i=block/wheelbarrow";
