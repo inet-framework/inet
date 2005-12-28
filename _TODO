@@ -221,3 +221,28 @@ layer, not in application (e.g. by using user supplied identifier on bind)
 destination, currently unspecified address is sent and SYN+ACK will not 
 be sent back (at least for 127.0.0.1, I didn't check for others))
  -UDPSocket similar to TCPSocket would be helpful
+-----------------------
+from http://www.freesoft.org/CIE/Course/Section3/10.htm:
+
+# Per-interface assignment. IP addresses are assigned on a per-interface basis,
+so a host might possess several IP addresses if it has several interfaces.
+For example, a host with both Ethernet and serial interfaces would have an
+IP address for each. This is an important consequence of prefix-based 
+addressing. An IP address doesn't really refer to a host, it refers to an 
+interface.
+
+If a host is known by multiple addresses, then every service on this host 
+can be referred to by multiple names! Addressing this host requires picking 
+one of these. Since the packet is addressed to the interface and not the host,
+path information is introduced into the address. The exact ramifications of 
+this effect depend heavily on the network design. In particular, careless 
+design can result in a host becoming reachable by one address but not by 
+another. The simplest solution to this problem is to select the host's most 
+reliable interface and advertise its IP address as the host's primary IP 
+address.
+
+==> current FlatNetworkConfigurator is shit? how to do address assignment?
+
+see also: 
+ "The Network Administrators' Guide" http://www.tldp.org/LDP/nag/node1.html
+ "IP 101: All About IP Addresses" http://www.networkcomputing.com/netdesign/ip101c.html
