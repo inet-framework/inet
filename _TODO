@@ -257,3 +257,6 @@ Every interface of a router or host connected on the network must have an IP
 address and a subnet mask defined (many pieces of equipment will assign a 
 default subnet mask if none is applied). From this IP address and subnet mask, 
 the network number is derived by the IP stack and tracked in the routing table.
+
+Q: if routing tables contain network numbers, are IP addresses of router 
+interfaces also addressable?
