@@ -246,3 +246,14 @@ address.
 see also: 
  "The Network Administrators' Guide" http://www.tldp.org/LDP/nag/node1.html
  "IP 101: All About IP Addresses" http://www.networkcomputing.com/netdesign/ip101c.html
+  - according to this: network numbers and interface addresses don't necessarily
+    have to do anything with each other! may look COMPLETELY different
+
+from http://www.networkcomputing.com/netdesign/ip101.html:
+
+The important thing to realize is that while a routing table keeps track of 
+network numbers, no one assigns a network number to any piece of equipment. 
+Every interface of a router or host connected on the network must have an IP 
+address and a subnet mask defined (many pieces of equipment will assign a 
+default subnet mask if none is applied). From this IP address and subnet mask, 
+the network number is derived by the IP stack and tracked in the routing table.
