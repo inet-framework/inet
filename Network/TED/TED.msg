@@ -31,22 +31,22 @@ struct TELinkStateInfo
 {
     fields:
         IPAddress advrouter; // routerId of originator of this link state entry
-        IPAddress linkid;    // identifies link within advrouter; set to interface address
+        IPAddress linkid;    // identifies link within advrouter; set to peer's address
         IPAddress local;     // address of local interface of this link
-        IPAddress remote;    // address of remote interface of this link
+        IPAddress remote;    // address of "gateway" to peer
         double metric;       // link metric
         double MaxBandwidth; // maximum bandwidth (bps)
         double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
 
         double timestamp;    // time of originating this entry
-        unsigned int sourceId;  // FIXME what's this?
+        unsigned int sourceId;  // FIXME looks like this is the same as advrouter -- really needed?
         unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
         bool state;          // false = down, true = up
 };
 
 
 //
-// Packet for disseminating link state information (TELinkStateInfo[]) by the 
+// Packet for disseminating link state information (TELinkStateInfo[]) by the
 // LinkStateRouting module which implements a minimalistic link state routing
 // protocol.
 //

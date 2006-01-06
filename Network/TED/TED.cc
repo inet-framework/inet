@@ -469,7 +469,7 @@ IPAddressVector TED::getLocalAddress()
     return interfaceAddrs;
 }
 
-IPAddress TED::primaryAddress(IPAddress localInf)
+IPAddress TED::primaryAddress(IPAddress localInf) // only used in RSVP::processHelloMsg
 {
     for (unsigned int i = 0; i < ted.size(); i++)
     {
