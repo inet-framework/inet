@@ -1,7 +1,7 @@
 ifconfig:
 
-# ethernet card 0 of router - connected to R1
-name: eth0
+# ppp card 0 of router - connected to R1
+name: ppp0
   inet_addr: 192.168.60.62
   Mask: 255.255.255.255
   Groups: 224.0.0.5
@@ -10,7 +10,7 @@ name: eth0
   POINTTOPOINT MULTICAST
 
 # ethernet card 1 of router - connected to N2
-name: eth1
+name: eth0
   inet_addr: 192.168.2.1
   Mask: 255.255.255.0
   Groups: 224.0.0.5
@@ -21,11 +21,5 @@ name: eth1
 ifconfigend.
 
 route:
-# TODO are the next 2 lines (which explicitly configure routes to neighbours) needed?
-192.168.60.1 * 255.255.255.255 H 1 eth0
-192.168.2.1  * 255.255.255.255 H 1 eth1
-
-224.0.0.0 * 240.0.0.0   H 0 eth0
-224.0.0.0 * 240.0.0.0   H 0 eth1
-
+192.168.60.61 * 255.255.255.255 H 1 ppp0
 routeend.

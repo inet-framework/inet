@@ -1,5 +1,5 @@
 ifconfig:
-name: ppp0	inet_addr: 10.1.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp0	inet_addr: 10.1.4.1	MULTICAST	MTU: 1500	Metric: 1
 ifconfigend.
 
 route:

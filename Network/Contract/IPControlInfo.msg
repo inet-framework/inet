@@ -20,12 +20,10 @@
 
 enum IPProtocolId;
 class noncobject IPAddress;
-class noncobject IPDatagramPtr;
 
 cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
-class IPDatagram;
 }}
 
 

@@ -19,7 +19,6 @@
 
 enum IPProtocolId;
 class noncobject IPv6Address;
-class noncobject IPv6DatagramPtr;
 
 cplusplus {{
 #include "IPv6Address.h"
