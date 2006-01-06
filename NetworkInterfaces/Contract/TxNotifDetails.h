@@ -44,3 +44,4 @@ class TxNotifDetails : public cPolymorphic
 };
 
 #endif
+

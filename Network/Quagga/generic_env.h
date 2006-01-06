@@ -452,6 +452,12 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #define inet_ntop  oppsim_inet_ntop
 
 
+// disable VC8.0 warnings on strdup() etc usage
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
+
+
 // in WS2tcpip.h, IP_HDRINCL==2 while in Winsock.h that's IP_MULTICAST_IF -- define as 25 to avoid confusion
 #define IP_HDRINCL  25
 
