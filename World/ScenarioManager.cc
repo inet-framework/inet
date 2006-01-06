@@ -82,7 +82,7 @@ void ScenarioManager::processCommand(cXMLElement *node)
 // helper function
 static bool parseIndexedName(const char *s, std::string& name, int& index)
 {
-    char *b;
+    const char *b;
     if ((b=strchr(s,'['))==NULL || s[strlen(s)-1]!=']')
     {
         name = s;

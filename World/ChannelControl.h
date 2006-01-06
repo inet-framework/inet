@@ -38,7 +38,7 @@ class INET_API ChannelControl : public cSimpleModule
     typedef std::list<HostEntry> HostList;
 
   public:
-    typedef HostList::iterator HostRef;
+    typedef HostEntry *HostRef; // handle for ChannelControl's clients
     typedef std::vector<cModule*> ModuleList;
 
   protected:
@@ -52,7 +52,6 @@ class INET_API ChannelControl : public cSimpleModule
     };
     HostList hosts;
 
-    friend bool operator<(HostRef a, HostRef b) {return a->host < b->host;}
     friend std::ostream& operator<<(std::ostream&, const HostEntry&);
 
     /** @brief Set debugging for the basic module*/

@@ -114,14 +114,14 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord
     he.pos = initialPos;
     he.isModuleListValid = false;
     hosts.push_back(he);
-    return --(hosts.end()); // last element
+    return &hosts.back(); // last element
 }
 
 ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 {
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
         if (it->host == host)
-            return it;
+            return &(*it);
     return 0;
 }
 
@@ -143,29 +143,30 @@ void ChannelControl::updateConnections(HostRef h)
     double maxDistSquared = maxInterferenceDistance * maxInterferenceDistance;
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); ++it)
     {
-        if (it == h)
+        HostEntry *hi = &(*it);
+        if (hi == h)
             continue;
 
         // get the distance between the two hosts.
         // (omitting the square root (calling sqrdist() instead of distance()) saves about 5% CPU)
-        bool inRange = hpos.sqrdist(it->pos) < maxDistSquared;
+        bool inRange = hpos.sqrdist(hi->pos) < maxDistSquared;
 
         if (inRange)
         {
             // nodes within communication range: connect
-            if (h->neighbors.insert(it).second == true)
+            if (h->neighbors.insert(hi).second == true)
             {
-                it->neighbors.insert(h);
-                h->isModuleListValid = it->isModuleListValid = false;
+                hi->neighbors.insert(h);
+                h->isModuleListValid = hi->isModuleListValid = false;
             }
         }
         else
         {
             // out of range: disconnect
-            if (h->neighbors.erase(it))
+            if (h->neighbors.erase(hi))
             {
-                it->neighbors.erase(h);
-                h->isModuleListValid = it->isModuleListValid = false;
+                hi->neighbors.erase(h);
+                h->isModuleListValid = hi->isModuleListValid = false;
             }
         }
     }
