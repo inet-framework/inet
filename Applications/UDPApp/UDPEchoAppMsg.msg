@@ -18,7 +18,7 @@
 
 
 //
-// Message cass used by UDPEchoApp.
+// Message class used by UDPEchoApp.
 //
 message UDPEchoAppMsg
 {

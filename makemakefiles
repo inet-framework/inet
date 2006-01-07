@@ -27,7 +27,7 @@ ALL_MODEL_OPTS=$(OPTS) -n
 
 
 all:
-	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete
+	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete -X tmp
 
 	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
 

@@ -20,35 +20,54 @@
 
 #include "zebra_env.h"
 
+#include "InterfaceTable.h"
 #include "RoutingTable.h"
 
-// structure used by RTM_NEWROUTE and RTM_DELROUTE
+// netlink attribute manipulation ********************************************
 
-struct rtm_request_t
+struct ret_t
 {
-    struct nlmsghdr n;
-    struct rtmsg r;
-    char buf[1024];
+	struct nlmsghdr nlh;
+	union
+	{
+		struct ifaddrmsg ifa;
+		struct ifinfomsg ifi;
+		struct rtmsg rtm;
+	};
+	char buf[4096];
 };
 
-//
+extern "C" {
+
+	// borrowed from quaggasrc
+	void netlink_parse_rtattr (struct rtattr **tb, int max, struct rtattr *rta, int len);
+
+};
+
+// NetlinkResult class *******************************************************
+
 
 class NetlinkResult
 {
     public:
         NetlinkResult() { data = 0; }
+        NetlinkResult(void *ptr, int len) { data = 0; copyin(ptr, len); }
 
         int copyout(struct msghdr *msg);
-        void copyin(char *ptr, int len);
+        void copyin(void *ptr, int len);
 
     private:
         char *data;
         int length;
 };
 
+// Netlink class *************************************************************
+
 class Netlink
 {
     public:
+    
+    	Netlink();
 
         // bind
         struct sockaddr_nl local;
@@ -57,18 +76,21 @@ class Netlink
         int status;
 
 
-        NetlinkResult shiftResult();
-        void pushResult(const NetlinkResult& result);
+        NetlinkResult getNextResult();
+        void appendResult(const NetlinkResult& result);
 
         NetlinkResult listInterfaces();
         NetlinkResult listAddresses();
         NetlinkResult listRoutes(RoutingEntry *entry = NULL);
-        RoutingEntry* route_command(int cmd_type, rtm_request_t* rm);
+        RoutingEntry* route_command(int cmd_type, ret_t* rm);
 
         void bind(int pid);
 
     private:
-        std::vector<NetlinkResult> results;
+        std::list<NetlinkResult> results;
+
+        InterfaceTable *ift;
+        RoutingTable *rt;
 
         void route_del(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);
         RoutingEntry* route_new(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric);

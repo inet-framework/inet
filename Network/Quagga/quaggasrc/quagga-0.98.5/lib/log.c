@@ -86,7 +86,8 @@ time_print (FILE *fp)
 
   ret = strftime (buf, TIME_BUF, "%Y/%m/%d %H:%M:%S", tm);
   if (ret == 0) {
-    zlog_warn ("strftime error");
+    //A zlog_warn ("strftime error");
+    strcpy(buf,"strftime error");
   }
 
   fprintf (fp, "%s ", buf);

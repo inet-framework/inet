@@ -26,6 +26,8 @@
 
 #include "zebra_env.h"
 
+#define	FD_EXIST(a)		(a >= 0 && a < fd.size() && a < FD_SETSIZE)
+
 class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 {
     public:
@@ -40,35 +42,37 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         struct GlobalVars *varp;
 
     public:
+    
+		TCPSocket* getIfTcpSocket(int socket);
+		TCPSocket* getTcpSocket(int socket);
+		UDPSocket* getIfUdpSocket(int socket);
+		UDPSocket* getUdpSocket(int socket);
+		RawSocket* getIfRawSocket(int socket);
+		RawSocket* getRawSocket(int socket);
+		Netlink* getIfNetlinkSocket(int socket);
+		Netlink* getNetlinkSocket(int socket);
+		FILE* getIfStream(int fildes);
+		FILE* getStream(int fildes);
 
-        bool isfile(int fildes);
-        bool issocket(int fildes);
-
-        bool istcpsocket(int socket);
-        bool isudpsocket(int socket);
-        bool israwsocket(int socket);
-        bool isnlsocket(int socket);
-
-        int findemptydesc();
-
-        TCPSocket* gettcpsocket(int socket);
-        UDPSocket* getudpsocket(int socket);
-        RawSocket* getrawsocket(int socket);
-        Netlink* getnlsocket(int socket);
-        FILE* getstream(int fildes);
-
-
+		int getEmptySlot();
+    
         int createTcpSocket(cMessage *msg = NULL);
-        int createRawSocket(int protocol);
         int createUdpSocket();
+        int createRawSocket(int protocol);
         int createNetlinkSocket();
-        int createFile(const char *path, char *mode);
+        int createStream(const char *path, char *mode);
+        
+        int acceptTcpSocket(int socket, bool remove=false);
+        void enqueueConnection(int socket, int csocket);
+        cMessage* getSocketMessage(int socket, bool remove=false);
+        void enqueueSocketMessage(int socket, cMessage *msg);
+        
+        void closeSocket(int socket);
+        void closeStream(int fildes);
 
-        void closesocket(int socket);
-        void closefile(int fildes);
-
-        int incomingtcpsocket(cMessage *msg);
-        int incomingrawsocket(cMessage *msg);
+        int findTcpSocket(cMessage *msg);
+        int findRawSocket(int protocol);
+		int findServerSocket(TCPConnectInfo *info);
 
         void setblocked(bool b);
 
@@ -82,12 +86,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         struct_sigaction* sigactionimpl(int signo);
         std::string getcwd();
         std::string getrootprefix();
-        cMessage* getqueuetail(int socket, bool remove=false);
-        int getaccepthead(int socket, bool remove=false);
-        void enqueue(int socket, cMessage *msg);
-        void enqueuConn(int socket, int csocket);
 
-        int findparentsocket(int socket);
 
     private:
 
@@ -110,7 +109,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
             Netlink *netlink;
             FILE *stream;
             cQueue queue; // arrived messages
-            std::list<int> serv; // queued conns
+            std::list<int> incomingQueue; // queued conns
         };
 
         std::vector<lib_descriptor_t> fd;
@@ -132,11 +131,6 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 extern Daemon *current_module;
 
 #define DAEMON          (check_and_cast<Daemon*>(simulation.runningModule()))
-
-// socket=16 is stored as fd[0], socket=17 as fd[1], etc.
-#define FD_MIN          16
-#define FD_SUB(a)       (a - FD_MIN)    // socket to fd-index
-#define FD_ADD(a)       (a + FD_MIN)    // fd-index to socket
 
 #ifdef __cplusplus
 extern "C" {

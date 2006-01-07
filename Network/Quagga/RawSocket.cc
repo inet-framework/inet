@@ -2,15 +2,16 @@
 #include <omnetpp.h>
 
 #include "RawSocket.h"
-#include "Socket_m.h"
+
+#include "SocketMsg.h"
 
 #include "IPControlInfo.h"
 #include "IPDatagram.h"
+#include "oppsim_kernel.h"
 
 #include "RoutingTableAccess.h"
 
 #include "glue.h"
-#include "oppsim_kernel.h"  // oppsim_htons() etc
 
 RawSocket::RawSocket(int userId, int protocol)
 {
@@ -18,11 +19,6 @@ RawSocket::RawSocket(int userId, int protocol)
 
     this->userId = userId;
     this->protocol = protocol;
-}
-
-int RawSocket::getProtocol()
-{
-    return protocol;
 }
 
 int RawSocket::send(const struct msghdr *message, int flags)
@@ -58,10 +54,8 @@ int RawSocket::send(const struct msghdr *message, int flags)
 
     SocketMsg *msg = new SocketMsg("data");
 
-    msg->setDataArraySize(length);
-    for(int i = 0; i < length; i++)
-        msg->setData(i, ((char*)message->msg_iov[1].iov_base)[i]);
-    msg->setLength(length * 8);
+	msg->setDataFromBuffer(message->msg_iov[1].iov_base, length);
+    msg->setByteLength(length);
 
     // create controlInfo
 
@@ -103,56 +97,10 @@ int RawSocket::send(const struct msghdr *message, int flags)
 
 }
 
-void RawSocket::setOutputGate(cGate *toIP)
-{
-    gateToIP = toIP;
-}
-
-
 void RawSocket::sendToIP(cMessage *msg)
 {
     if (!gateToIP)
         opp_error("RawSocket: setOutputGate() must be invoked before socket can be used");
 
     check_and_cast<cSimpleModule *>(gateToIP->ownerModule())->send(msg, gateToIP);
-}
-
-
-
-void RawSocket::setHdrincl(bool b)
-{
-    hdrincl = b;
-}
-
-bool RawSocket::getHdrincl()
-{
-    return hdrincl;
-}
-
-void RawSocket::setPktinfo(bool b)
-{
-    pktinfo = b;
-}
-
-void RawSocket::setMulticastLoop(bool b)
-{
-    multicastLoop = b;
-}
-
-void RawSocket::setMulticastTtl(bool b)
-{
-    multicastTtl = b;
-}
-
-void RawSocket::setMulticastIf(IPAddress addr)
-{
-    multicastIf = addr;
-    InterfaceEntry *ie = RoutingTableAccess().get()->interfaceByAddress(addr);
-    ASSERT(ie);
-    multicastOutputInterfaceId = ie->interfaceId();
-}
-
-IPAddress RawSocket::getMulticastIf()
-{
-    return multicastIf;
 }

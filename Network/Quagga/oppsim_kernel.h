@@ -21,6 +21,9 @@ extern int GlobalVars_errno();
 
 //
 
+#define	HASFLAG(a, b)	((a & b) == b)
+
+
 struct timezone;
 
 long int oppsim_random(void);

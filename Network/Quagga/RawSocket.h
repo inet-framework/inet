@@ -11,22 +11,20 @@ class RawSocket
     public:
         RawSocket(int userId, int protocol);
 
-        void setOutputGate(cGate *toIP);
+        void setOutputGate(cGate *toIP) { gateToIP = toIP; }
 
         // pure unix interface
         int send(const struct msghdr *message, int flags);
 
-        int getProtocol();
+        int getProtocol() { return protocol; }
 
-        void setHdrincl(bool b);
-        bool getHdrincl();
+        void setHdrincl(bool b) { hdrincl = b; }
+        bool getHdrincl() { return hdrincl; }
 
-        void setPktinfo(bool b);
-        void setMulticastLoop(bool b);
-        void setMulticastTtl(bool b);
-
-        void setMulticastIf(IPAddress addr);
-        IPAddress getMulticastIf();
+        void setPktinfo(bool b) { pktinfo = b; }
+        void setMulticastLoop(bool b) { multicastLoop = b; }
+        void setMulticastTtl(bool b) { multicastTtl = b; }
+        void setMulticastInterface(int n) { multicastOutputInterfaceId = n; }
 
     private:
 
@@ -39,11 +37,9 @@ class RawSocket
         bool pktinfo;
         bool multicastLoop;
         bool multicastTtl;
-        IPAddress multicastIf;
-        int multicastOutputInterfaceId; // determined from multicastIf address
+        int multicastOutputInterfaceId;
 
         cGate *gateToIP;
-
 };
 
 #endif
