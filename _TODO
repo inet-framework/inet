@@ -21,6 +21,10 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 --------
 - put NAMTraceWriter into all routers
 
+- dynamic registration of notification categories:
+    x.h:  extern const int NF_TED_CHANGED;
+    x.cc: const int NF_TED_CHANGED = NotificationBoard::registerCategory("NF_TED_CHANGED");
+
 - "make dist"?
 
 - TCP, UDP, LDP, RSVP, TED: rename gates...
