@@ -49,10 +49,10 @@ void FlatNetworkConfigurator::initialize(int stage)
 
         // add default routes to hosts (nodes with a single attachment)
         std::vector<bool> usesDefaultRoute;  // to be filled in; indexed by topo nodes
-        addDefaultRoutes(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
+        addDefaultRoutes(usesDefaultRoute, topo, nodeAddresses, nonIPTypes);
 
         // calculate shortest paths, and add corresponding static routes
-        fillRoutingTables(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
+        fillRoutingTables(usesDefaultRoute, topo, nodeAddresses, nonIPTypes);
 
         // update display string
         setDisplayString(topo, nonIPTypes);
@@ -103,7 +103,7 @@ void FlatNetworkConfigurator::assignAddresses(std::vector<uint32>& nodeAddresses
     }
 }
 
-void FlatNetworkConfigurator::addDefaultRoutes(std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
+void FlatNetworkConfigurator::addDefaultRoutes(std::vector<bool>& usesDefaultRoute, cTopology& topo, const std::vector<uint32>& nodeAddresses, const StringVector& nonIPTypes)
 {
     // add default route to nodes with exactly one (non-loopback) interface
     usesDefaultRoute.resize(topo.nodes());
@@ -145,7 +145,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(std::vector<bool>& usesDefaultRou
     }
 }
 
-void FlatNetworkConfigurator::fillRoutingTables(const std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
+void FlatNetworkConfigurator::fillRoutingTables(const std::vector<bool>& usesDefaultRoute, cTopology& topo, const std::vector<uint32>& nodeAddresses, const StringVector& nonIPTypes)
 {
     // fill in routing tables with static routes
     for (int i=0; i<topo.nodes(); i++)
@@ -210,7 +210,7 @@ void FlatNetworkConfigurator::handleMessage(cMessage *msg)
 
 void FlatNetworkConfigurator::setDisplayString(cTopology& topo, const StringVector& nonIPTypes)
 {
-    int numIPNodes;
+    int numIPNodes = 0;
     for (int i=0; i<topo.nodes(); i++)
         if (!isNonIPType(topo.node(i), nonIPTypes))
             numIPNodes++;
