@@ -17,11 +17,11 @@ int NetlinkResult::copyout(struct msghdr *message)
 
     ASSERT(message->msg_iovlen > 0);
     ASSERT(message->msg_iov[0].iov_len >= length);
-    
+
     // copy stored result into output buffer
-    
+
     memcpy(message->msg_iov[0].iov_base, data, length);
-    
+
     // set source address, flags etc.
 
     struct sockaddr_nl *nl = (sockaddr_nl*)message->msg_name;
@@ -30,7 +30,7 @@ int NetlinkResult::copyout(struct msghdr *message)
     message->msg_namelen = sizeof(struct sockaddr_nl);
     message->msg_flags = 0;
 
-	// free stored result
+    // free stored result
 
     free(data);
     data = 0;
@@ -52,27 +52,27 @@ void NetlinkResult::copyin(void *ptr, int len)
 
 static void rta_add_param(rtattr** rta, unsigned short type, unsigned short len, const void *ptr, ret_t* ret)
 {
-	(*rta)->rta_type = type;
-	(*rta)->rta_len = RTA_LENGTH(len);
-	memcpy(RTA_DATA(*rta), ptr, len);
-	ret->nlh.nlmsg_len += RTA_ALIGN((*rta)->rta_len);
-	*rta = (rtattr*)(((char*)*rta) + RTA_ALIGN((*rta)->rta_len));
-} 
+    (*rta)->rta_type = type;
+    (*rta)->rta_len = RTA_LENGTH(len);
+    memcpy(RTA_DATA(*rta), ptr, len);
+    ret->nlh.nlmsg_len += RTA_ALIGN((*rta)->rta_len);
+    *rta = (rtattr*)(((char*)*rta) + RTA_ALIGN((*rta)->rta_len));
+}
 
 static void rta_end_param(ret_t **ret)
 {
-	*ret = (ret_t*)(((char*)*ret) + (*ret)->nlh.nlmsg_len);
+    *ret = (ret_t*)(((char*)*ret) + (*ret)->nlh.nlmsg_len);
 }
 
 // ***************************************************************************
 
 Netlink::Netlink()
 {
-	RoutingTableAccess rtAccess;
-	rt = rtAccess.get();
-	
-	InterfaceTableAccess iftAccess;
-	ift = iftAccess.get();
+    RoutingTableAccess rtAccess;
+    rt = rtAccess.get();
+
+    InterfaceTableAccess iftAccess;
+    ift = iftAccess.get();
 }
 
 void Netlink::bind(int pid)
@@ -154,7 +154,7 @@ NetlinkResult Netlink::listInterfaces()
     ret->nlh.nlmsg_len = NLMSG_LENGTH(0);
     ret->nlh.nlmsg_type = NLMSG_DONE;
     ret->nlh.nlmsg_flags = 0;
-    
+
     rta_end_param(&ret);
 
     // calculate length
@@ -162,13 +162,13 @@ NetlinkResult Netlink::listInterfaces()
     int length = ((char*)ret) - (char*)&retvar;
 
     EV << "total message length=" << length << endl;
-    
+
     ASSERT(length < sizeof(retvar));
 
     // store result
 
     NetlinkResult ifs(&retvar, length);
-    
+
     return ifs;
 }
 
@@ -176,39 +176,39 @@ NetlinkResult Netlink::listInterfaces()
 
 static IPAddress findPeerInRoutingTable(InterfaceEntry *localInf, RoutingTable *rt)
 {
-	ASSERT(localInf);
-	ASSERT(localInf->isPointToPoint());
-	ASSERT(rt);
-	
-	for(int k = 0; k < rt->numRoutingEntries(); k++)
-	{
-		RoutingEntry *re = rt->routingEntry(k);
+    ASSERT(localInf);
+    ASSERT(localInf->isPointToPoint());
+    ASSERT(rt);
 
-		if(re->interfacePtr != localInf)
-			continue;
+    for(int k = 0; k < rt->numRoutingEntries(); k++)
+    {
+        RoutingEntry *re = rt->routingEntry(k);
 
-		//if(!re->gateway.isUnspecified())
+        if(re->interfacePtr != localInf)
+            continue;
+
+        //if(!re->gateway.isUnspecified())
         //  continue;
 
-		if(re->netmask.netmaskLength() != 32)
-			continue;
+        if(re->netmask.netmaskLength() != 32)
+            continue;
 
-		if(re->type != RoutingEntry::DIRECT)
+        if(re->type != RoutingEntry::DIRECT)
             continue;
 
         EV << "peer address=" << re->host << endl;
-        
-		return re->host;
+
+        return re->host;
     }
-	
-	return IPAddress();
+
+    return IPAddress();
 }
 
 // ******************
 
 NetlinkResult Netlink::listAddresses()
 {
-	struct ret_t retvar;
+    struct ret_t retvar;
     struct ret_t *ret =  &retvar;
 
     for(int i = 0; i < ift->numInterfaces(); i++)
@@ -235,15 +235,15 @@ NetlinkResult Netlink::listAddresses()
 
         if(ie->isPointToPoint())
         {
-			// XXX this is temporary solution, until proper PPP layer support is added
-			// you have to add point-to-point links into routing table manually 
+            // XXX this is temporary solution, until proper PPP layer support is added
+            // you have to add point-to-point links into routing table manually
             IPAddress peerIP = findPeerInRoutingTable(ie, rt);
             ASSERT(!peerIP.isUnspecified());
 
             if(!peerIP.isUnspecified())
             {
-            	uint32 addr = htonl(peerIP.getInt());
-            	rta_add_param(&rta, IFA_ADDRESS, sizeof(addr), &addr, ret);
+                uint32 addr = htonl(peerIP.getInt());
+                rta_add_param(&rta, IFA_ADDRESS, sizeof(addr), &addr, ret);
             }
         }
 
@@ -253,13 +253,13 @@ NetlinkResult Netlink::listAddresses()
             uint32 mask_addr = ie->ipv4()->netmask().getInt();
             uint32 bcast_addr = inet_addr | (mask_addr ^ 0xffff);
 
-        	inet_addr = htonl(inet_addr);
-        	bcast_addr = htonl(bcast_addr);
-            
+            inet_addr = htonl(inet_addr);
+            bcast_addr = htonl(bcast_addr);
+
             rta_add_param(&rta, IFA_ADDRESS, sizeof(inet_addr), &inet_addr, ret);
             rta_add_param(&rta, IFA_BROADCAST, sizeof(bcast_addr), &bcast_addr, ret);
         }
-        
+
         rta_end_param(&ret);
     }
 
@@ -268,7 +268,7 @@ NetlinkResult Netlink::listAddresses()
     ret->nlh.nlmsg_len = NLMSG_LENGTH(0);
     ret->nlh.nlmsg_type = NLMSG_DONE;
     ret->nlh.nlmsg_flags = 0;
-    
+
     rta_end_param(&ret);
 
     // calculate length
@@ -276,19 +276,19 @@ NetlinkResult Netlink::listAddresses()
     int length = ((char*)ret) - (char*)&retvar;
 
     EV << "total message length=" << length << endl;
-    
+
     ASSERT(length < sizeof(retvar));
 
     // store result
 
     NetlinkResult ifs(&retvar, length);
-    
+
     return ifs;
 }
 
 NetlinkResult Netlink::listRoutes(RoutingEntry *entry)
 {
-	struct ret_t retvar;
+    struct ret_t retvar;
     struct ret_t *ret = &retvar;
 
     for(int i = 0; i < rt->numRoutingEntries(); i++)
@@ -333,13 +333,13 @@ NetlinkResult Netlink::listRoutes(RoutingEntry *entry)
         int interfaceId = re->interfacePtr->interfaceId();
         int metric = re->metric;
         const char *dststr = re->host.str().data();
-        
+
         struct rtattr *rta = RTM_RTA(NLMSG_DATA(ret));
-        
+
         rta_add_param(&rta, RTA_OIF, sizeof(interfaceId), &interfaceId, ret);
         rta_add_param(&rta, RTA_DST, strlen(dststr) + 1, dststr, ret);
         rta_add_param(&rta, RTA_PRIORITY, sizeof(metric), &metric, ret);
-        
+
         rta_end_param(&ret);
     }
 
@@ -348,7 +348,7 @@ NetlinkResult Netlink::listRoutes(RoutingEntry *entry)
     ret->nlh.nlmsg_len = NLMSG_LENGTH(0);
     ret->nlh.nlmsg_type = NLMSG_DONE;
     ret->nlh.nlmsg_flags = 0;
-    
+
     rta_end_param(&ret);
 
     // calculate length
@@ -356,13 +356,13 @@ NetlinkResult Netlink::listRoutes(RoutingEntry *entry)
     int length = ((char*)ret) - (char*)&retvar;
 
     EV << "total message length=" << length << endl;
-    
+
     ASSERT(length < sizeof(retvar));
 
     // store result
 
     NetlinkResult ifs(&retvar, length);
-    
+
     return ifs;
 }
 

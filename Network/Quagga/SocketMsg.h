@@ -24,9 +24,9 @@ class SocketMsg : public SocketMsg_Base
     SocketMsg(const SocketMsg& other) : SocketMsg_Base(other.name()) {operator=(other);}
     SocketMsg& operator=(const SocketMsg& other) {SocketMsg_Base::operator=(other); return *this;}
     virtual cPolymorphic *dup() const {return new SocketMsg(*this);}
-    
+
     void setDataFromBuffer(const void *ptr, int length);
-	void copyDataToBuffer(void *ptr, int length);
+    void copyDataToBuffer(void *ptr, int length);
     void removePrefix(int length);
 };
 

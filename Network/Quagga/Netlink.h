@@ -27,20 +27,20 @@
 
 struct ret_t
 {
-	struct nlmsghdr nlh;
-	union
-	{
-		struct ifaddrmsg ifa;
-		struct ifinfomsg ifi;
-		struct rtmsg rtm;
-	};
-	char buf[4096];
+    struct nlmsghdr nlh;
+    union
+    {
+        struct ifaddrmsg ifa;
+        struct ifinfomsg ifi;
+        struct rtmsg rtm;
+    };
+    char buf[4096];
 };
 
 extern "C" {
 
-	// borrowed from quaggasrc
-	void netlink_parse_rtattr (struct rtattr **tb, int max, struct rtattr *rta, int len);
+    // borrowed from quaggasrc
+    void netlink_parse_rtattr (struct rtattr **tb, int max, struct rtattr *rta, int len);
 
 };
 
@@ -66,8 +66,8 @@ class NetlinkResult
 class Netlink
 {
     public:
-    
-    	Netlink();
+
+        Netlink();
 
         // bind
         struct sockaddr_nl local;

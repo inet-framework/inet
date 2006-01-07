@@ -70,30 +70,30 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
 
 static struct servent services[] =
 {
-	{"zebrasrv", NULL, 2600, "tcp"},
-	{"zebra", NULL, 2601, "tcp"},
-	{"ripd", NULL, 2602, "tcp"},
-	{"ospfd", NULL, 2604, "tcp"},
-	{"router", NULL, 520, "udp"},
-	{0, 0, 0}
+    {"zebrasrv", NULL, 2600, "tcp"},
+    {"zebra", NULL, 2601, "tcp"},
+    {"ripd", NULL, 2602, "tcp"},
+    {"ospfd", NULL, 2604, "tcp"},
+    {"router", NULL, 520, "udp"},
+    {0, 0, 0}
 };
 
 struct servent *oppsim_getservbyname(const char *name, const char *proto)
 {
-	for(int i = 0; services[i].s_name; i++)
-	{
-		if(strcmp(name, services[i].s_name))
-			continue;
-			
-		if(strcmp(proto, services[i].s_proto))
-			continue;
-			
-		return &services[i];
-	}
+    for(int i = 0; services[i].s_name; i++)
+    {
+        if(strcmp(name, services[i].s_name))
+            continue;
 
-	ASSERT(false);			
-	
-	return NULL;
+        if(strcmp(proto, services[i].s_proto))
+            continue;
+
+        return &services[i];
+    }
+
+    ASSERT(false);
+
+    return NULL;
 }
 
 
@@ -114,7 +114,7 @@ time_t oppsim_time(time_t *tloc)
 
 char *oppsim_crypt(const char *key, const char *salt)
 {
-	// XXX FIXME crypt usage should be avoided by means of quagga configuration
+    // XXX FIXME crypt usage should be avoided by means of quagga configuration
     ASSERT(false);
     return NULL;
 }
@@ -197,7 +197,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
     EV << "setsockopt: socket=" << socket << " level=" << level << " option_name=" << option_name <<
             " option_value=" << option_value << " option_len=" << option_len << endl;
-            
+
     // XXX FIXME IGNORE(OPTION) MACRO
 
     if(level == SOL_SOCKET && option_name == SO_RCVBUF)
@@ -227,45 +227,45 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
         IPAddress addr = IPAddress(ntohl(iaddr->s_addr));
         EV << "IP_MULTICAST_IF: " << addr << endl;
-        
-       	RoutingTable *rt = RoutingTableAccess().get();
-        	
+
+        RoutingTable *rt = RoutingTableAccess().get();
+
         InterfaceEntry *ie = rt->interfaceByAddress(addr);
-		if (!ie)
-		{
-			// don't panic, for point-to-point links destination address is used
-            	
-			for(int i = 0; i < rt->numRoutingEntries(); i++)
-			{
-				RoutingEntry *re = rt->routingEntry(i);
-            		
-				if(!re->host.equals(addr))
-					continue;
-            			
-				if(!re->interfacePtr->isPointToPoint())
-					continue;
-            		
-				// interface found
-            			
-				ie = re->interfacePtr;
-				break;
-			}
-		}
-		if (!ie)
-		{
-			// now it's offical, interface not found
-            	
-			opp_error("there is no interface with address %s", addr.str().c_str());
-		}
-		
-		UDPSocket *udp = dm->getIfUdpSocket(socket);
-		if(udp)
+        if (!ie)
+        {
+            // don't panic, for point-to-point links destination address is used
+
+            for(int i = 0; i < rt->numRoutingEntries(); i++)
+            {
+                RoutingEntry *re = rt->routingEntry(i);
+
+                if(!re->host.equals(addr))
+                    continue;
+
+                if(!re->interfacePtr->isPointToPoint())
+                    continue;
+
+                // interface found
+
+                ie = re->interfacePtr;
+                break;
+            }
+        }
+        if (!ie)
+        {
+            // now it's offical, interface not found
+
+            opp_error("there is no interface with address %s", addr.str().c_str());
+        }
+
+        UDPSocket *udp = dm->getIfUdpSocket(socket);
+        if(udp)
         {
             udp->setMulticastInterface(ie->interfaceId());
 
             return 0;
         }
-        
+
         RawSocket *raw = dm->getIfRawSocket(socket);
         if(raw)
         {
@@ -280,68 +280,68 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
     if(level == 0 && option_name == IP_ADD_MEMBERSHIP)
     {
         EV << "IP_ADD_MEMBERSHIP option" << endl;
-        
-    	ASSERT(option_len == sizeof(struct ip_mreq));
-    	
-    	struct ip_mreq *mreq = (struct ip_mreq*)option_value;
-    	
-    	IPAddress mcast_addr = IPAddress(ntohl(mreq->imr_multiaddr.s_addr));
-    	IPAddress mcast_if = IPAddress(ntohl(mreq->imr_interface.s_addr));
-    	
-    	EV << "interface=" << mcast_if << " multicast address=" << mcast_addr << endl;
-    	
-    	RoutingTable *rt = RoutingTableAccess().get();
-    	
-    	InterfaceEntry *ie = rt->interfaceByAddress(mcast_if);
-    	
-    	ASSERT(ie);
-    	
-    	if(!ie->isMulticast())
-    	{
-    		EV << "allowing multicast on " << ie->name() << endl;
-	    	ie->setMulticast(true);
-    	}
-    	
-    	std::vector<IPAddress> mcast_grps = ie->ipv4()->multicastGroups();
-    	
-    	if(find(mcast_grps.begin(), mcast_grps.end(), mcast_addr) == mcast_grps.end())
-    	{
-    		EV << "adding multicast membership for group " << mcast_addr << " on " << ie->name() << endl;
-    		mcast_grps.push_back(mcast_addr);
-    		ie->ipv4()->setMulticastGroups(mcast_grps);
-    	}
-    	
-    	bool found = false;
-    	
-    	for(int i = 0; i < rt->numRoutingEntries(); i++)
-    	{
-    		RoutingEntry *re = rt->routingEntry(i);
-    		
-    		if(!re->host.equals(mcast_addr))
-    			continue;
-    			
-    		if(re->interfacePtr != ie)
-    			continue;
-    			
-    		found = true;
-    	}
-    	
-    	if(!found)
-    	{
-    		EV << "adding multicast route for group " << mcast_addr << " on " << ie->name() << endl;
-    		
-    		RoutingEntry *re = new RoutingEntry();
-    		re->host = mcast_addr;
-    		re->gateway = IPAddress::UNSPECIFIED_ADDRESS;
-    		re->netmask = IPAddress::ALLONES_ADDRESS;
-    		re->type = RoutingEntry::DIRECT;
-    		re->metric = 1;
-    		re->interfacePtr = ie;
-    		re->interfaceName = ie->name();
-    		re->source = RoutingEntry::IFACENETMASK; // ???
-    		rt->addRoutingEntry(re);
-    	}
-    	
+
+        ASSERT(option_len == sizeof(struct ip_mreq));
+
+        struct ip_mreq *mreq = (struct ip_mreq*)option_value;
+
+        IPAddress mcast_addr = IPAddress(ntohl(mreq->imr_multiaddr.s_addr));
+        IPAddress mcast_if = IPAddress(ntohl(mreq->imr_interface.s_addr));
+
+        EV << "interface=" << mcast_if << " multicast address=" << mcast_addr << endl;
+
+        RoutingTable *rt = RoutingTableAccess().get();
+
+        InterfaceEntry *ie = rt->interfaceByAddress(mcast_if);
+
+        ASSERT(ie);
+
+        if(!ie->isMulticast())
+        {
+            EV << "allowing multicast on " << ie->name() << endl;
+            ie->setMulticast(true);
+        }
+
+        std::vector<IPAddress> mcast_grps = ie->ipv4()->multicastGroups();
+
+        if(find(mcast_grps.begin(), mcast_grps.end(), mcast_addr) == mcast_grps.end())
+        {
+            EV << "adding multicast membership for group " << mcast_addr << " on " << ie->name() << endl;
+            mcast_grps.push_back(mcast_addr);
+            ie->ipv4()->setMulticastGroups(mcast_grps);
+        }
+
+        bool found = false;
+
+        for(int i = 0; i < rt->numRoutingEntries(); i++)
+        {
+            RoutingEntry *re = rt->routingEntry(i);
+
+            if(!re->host.equals(mcast_addr))
+                continue;
+
+            if(re->interfacePtr != ie)
+                continue;
+
+            found = true;
+        }
+
+        if(!found)
+        {
+            EV << "adding multicast route for group " << mcast_addr << " on " << ie->name() << endl;
+
+            RoutingEntry *re = new RoutingEntry();
+            re->host = mcast_addr;
+            re->gateway = IPAddress::UNSPECIFIED_ADDRESS;
+            re->netmask = IPAddress::ALLONES_ADDRESS;
+            re->type = RoutingEntry::DIRECT;
+            re->metric = 1;
+            re->interfacePtr = ie;
+            re->interfaceName = ie->name();
+            re->source = RoutingEntry::IFACENETMASK; // ???
+            rt->addRoutingEntry(re);
+        }
+
         return 0;
     }
 
@@ -390,28 +390,28 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
 int oppsim_socket(int domain, int type, int protocol)
 {
-	Daemon *dm = DAEMON;
+    Daemon *dm = DAEMON;
 
     EV << "socket: domain=" << domain << " type=" << type << " protocol=" << protocol << endl;
 
     if(domain == AF_INET && type == SOCK_STREAM && protocol == 0)
     {
-		return dm->createTcpSocket();
+        return dm->createTcpSocket();
     }
 
     if(domain == AF_NETLINK && type == SOCK_RAW && protocol == NETLINK_ROUTE)
     {
-		return dm->createNetlinkSocket();
+        return dm->createNetlinkSocket();
     }
 
     if(domain == AF_INET && type == SOCK_DGRAM && protocol == 0)
     {
-		return dm->createUdpSocket();
+        return dm->createUdpSocket();
     }
 
     if(domain == AF_INET && type == SOCK_RAW && protocol == IPPROTO_OSPFIGP)
     {
-		return dm->createRawSocket(protocol);
+        return dm->createRawSocket(protocol);
     }
 
     ASSERT(false);
@@ -437,10 +437,10 @@ void oppsim_vsyslog(int priority, const char *format, va_list ap)
 int oppsim_fcntl(int fildes, int cmd, ...)
 {
     EV << "fcntl: fildes=" << fildes << " cmd=" << cmd << endl;
-    
+
     EV << "fcntl does currently nothing" << endl;
 
-	return 0;
+    return 0;
 }
 
 int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_len)
@@ -449,8 +449,8 @@ int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_
 
     EV << "getsockname: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
-	Netlink *nl = dm->getIfNetlinkSocket(socket);
-	if(nl)
+    Netlink *nl = dm->getIfNetlinkSocket(socket);
+    if(nl)
     {
         ASSERT(*address_len == sizeof(sockaddr_nl));
 
@@ -469,78 +469,78 @@ int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_
 
 int getIpHeader(SocketMsg *srcMsg, IPControlInfo *srcInfo, void* &dstPtr, int &dstLen)
 {
-	int header_length = sizeof(struct ip);
-	
-	ASSERT(dstLen >= header_length);
+    int header_length = sizeof(struct ip);
 
-	struct ip * iph = (struct ip *)dstPtr;
+    ASSERT(dstLen >= header_length);
 
-	iph->ip_v = 4;
-	iph->ip_hl = header_length / sizeof(u_int32_t);
-	iph->ip_tos = srcInfo->diffServCodePoint();
-	iph->ip_len = htons(srcMsg->byteLength() + header_length);
-	iph->ip_ttl = srcInfo->timeToLive();
-	iph->ip_p = srcInfo->protocol();
-	iph->ip_src.s_addr = htonl(srcInfo->srcAddr().getInt());
-	iph->ip_dst.s_addr = htonl(srcInfo->destAddr().getInt());
+    struct ip * iph = (struct ip *)dstPtr;
 
-	iph->ip_id = 0; // ???
-	iph->ip_off = 0; // ???
-	iph->ip_sum = 0; // ???
-	
-	dstPtr = (char*)dstPtr + header_length;
-	dstLen -= header_length;
+    iph->ip_v = 4;
+    iph->ip_hl = header_length / sizeof(u_int32_t);
+    iph->ip_tos = srcInfo->diffServCodePoint();
+    iph->ip_len = htons(srcMsg->byteLength() + header_length);
+    iph->ip_ttl = srcInfo->timeToLive();
+    iph->ip_p = srcInfo->protocol();
+    iph->ip_src.s_addr = htonl(srcInfo->srcAddr().getInt());
+    iph->ip_dst.s_addr = htonl(srcInfo->destAddr().getInt());
 
-	return header_length;
+    iph->ip_id = 0; // ???
+    iph->ip_off = 0; // ???
+    iph->ip_sum = 0; // ???
+
+    dstPtr = (char*)dstPtr + header_length;
+    dstLen -= header_length;
+
+    return header_length;
 }
 
 ssize_t receive_stream(int socket, void *buf, size_t nbyte)
 {
     Daemon *dm = DAEMON;
-    
-	int bread = 0;
 
-	while(nbyte > 0)
-	{
-		cMessage *m = dm->getSocketMessage(socket, false);
-		if(!m)
-			break;
+    int bread = 0;
 
-		SocketMsg *msg = check_and_cast<SocketMsg*>(m);
-                
-		int datalen = msg->getDataArraySize();
-		bool empty = false;
-                
-		if(datalen > nbyte)
-		{
-			// not enough space in buffer
-			datalen = nbyte;
-		}
-		else
-		{
-			// no more data in this message
-			empty = true;
-		}
-                
-		msg->copyDataToBuffer(buf, datalen);
-                
-		buf = (char*)buf + datalen;
-		nbyte -= datalen;
-		bread += datalen;
-                
-		if(empty)
-		{
-			delete dm->getSocketMessage(socket, true);
-		}
-		else
-		{
-			msg->removePrefix(datalen);
-		}
-	}
+    while(nbyte > 0)
+    {
+        cMessage *m = dm->getSocketMessage(socket, false);
+        if(!m)
+            break;
 
-	ASSERT(bread > 0);
+        SocketMsg *msg = check_and_cast<SocketMsg*>(m);
 
-	return bread;
+        int datalen = msg->getDataArraySize();
+        bool empty = false;
+
+        if(datalen > nbyte)
+        {
+            // not enough space in buffer
+            datalen = nbyte;
+        }
+        else
+        {
+            // no more data in this message
+            empty = true;
+        }
+
+        msg->copyDataToBuffer(buf, datalen);
+
+        buf = (char*)buf + datalen;
+        nbyte -= datalen;
+        bread += datalen;
+
+        if(empty)
+        {
+            delete dm->getSocketMessage(socket, true);
+        }
+        else
+        {
+            msg->removePrefix(datalen);
+        }
+    }
+
+    ASSERT(bread > 0);
+
+    return bread;
 }
 
 ssize_t receive_raw(int socket, struct msghdr *message, int flags)
@@ -549,7 +549,7 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
 
     ASSERT(message->msg_iovlen == 1);
 
-	bool peek = HASFLAG(flags, MSG_PEEK);
+    bool peek = HASFLAG(flags, MSG_PEEK);
 
     ASSERT(!flags || flags == MSG_PEEK);
 
@@ -566,28 +566,28 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
     }
 
     message->msg_flags = 0;
-    
+
     int length = message->msg_iov[0].iov_len;
     void *buffer = message->msg_iov[0].iov_base;
     int bread = 0;
 
     if(dm->getRawSocket(socket)->getHdrincl())
     {
-    	bread += getIpHeader(msg, ipControlInfo, buffer, length);
+        bread += getIpHeader(msg, ipControlInfo, buffer, length);
     }
-    
+
     unsigned int datalen = msg->getDataArraySize();
 
     if(datalen > length)
     {
         // available data won't fit into the buffer
-    	datalen = length;
+        datalen = length;
         message->msg_flags |= MSG_TRUNC;
     }
 
-	msg->copyDataToBuffer(buffer, datalen);
-	bread += datalen;
-    
+    msg->copyDataToBuffer(buffer, datalen);
+    bread += datalen;
+
     // return control data
 
     if(message->msg_control)
@@ -624,8 +624,8 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
     EV << "recvfrom: socket=" << socket << " buffer=" << buffer << " length=" << length << " flags=" <<
             flags << " address=" << address << " address_len=" << address_len << endl;
 
-	RawSocket *raw = dm->getIfRawSocket(socket);
-	if(raw)
+    RawSocket *raw = dm->getIfRawSocket(socket);
+    if(raw)
     {
         struct msghdr msg;
         struct iovec iov;
@@ -648,7 +648,7 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
         return ret;
     }
 
-	UDPSocket *udp = dm->getIfUdpSocket(socket);
+    UDPSocket *udp = dm->getIfUdpSocket(socket);
     if(udp)
     {
         ASSERT(!flags);
@@ -664,16 +664,16 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
         inaddr->sin_addr.s_addr = htonl(udpControlInfo->srcAddr().get4().getInt());
 
         unsigned int datalen = msg->getDataArraySize();
-        
+
         if(length < datalen)
         {
-        	EV << "warning: discarding " << (datalen - length) << " bytes from this message" << endl;
+            EV << "warning: discarding " << (datalen - length) << " bytes from this message" << endl;
 
-        	datalen = length;
+            datalen = length;
         }
-        
+
         msg->copyDataToBuffer(buffer, datalen);
-        
+
         delete msg;
 
         ASSERT(datalen > 0);
@@ -791,7 +791,7 @@ ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 
         return nl_request(socket, message->msg_iov[0].iov_base, message->msg_iov[0].iov_len, message->msg_flags);
     }
-    
+
     RawSocket *raw = dm->getIfRawSocket(socket);
     if(raw)
     {
@@ -828,7 +828,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 
         return nl_request(socket, message, length, flags);
     }
-    
+
     UDPSocket *udp = dm->getIfUdpSocket(socket);
     if(udp)
     {
@@ -849,7 +849,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 
         ASSERT(length > 0);
 
-		msg->setDataFromBuffer(message, length);
+        msg->setDataFromBuffer(message, length);
 
         msg->setByteLength(length);
 
@@ -867,8 +867,8 @@ ssize_t oppsim_recvmsg(int socket, struct msghdr *message, int flags)
 
     EV << "recvmsg: socket=" << socket << " message=" << message << " flags=" << flags << endl;
 
-	Netlink* nl = dm->getIfNetlinkSocket(socket);
-	if(nl)
+    Netlink* nl = dm->getIfNetlinkSocket(socket);
+    if(nl)
     {
         EV << "reading netlink result" << endl;
 
@@ -876,7 +876,7 @@ ssize_t oppsim_recvmsg(int socket, struct msghdr *message, int flags)
 
         return nl->getNextResult().copyout(message);
     }
-    
+
     if(dm->getIfRawSocket(socket))
     {
         EV << "reading from raw socket" << endl;
@@ -1064,21 +1064,21 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                     // TCP packet
 
                     socket = dm->findTcpSocket(msg);
-                    
+
                     if(socket < 0)
                     {
                         // unknown socket, connection establishment
                         ASSERT(!strcmp(msg->name(), "ESTABLISHED"));
-                        
-						// find parent socket
-						socket = dm->findServerSocket(check_and_cast<TCPConnectInfo*>(tcpCommand));
 
-						// create new socket
-						int csocket = dm->createTcpSocket(msg);
-                            
-						// put in the list for accept
-						dm->enqueueConnection(socket, csocket);
-					}
+                        // find parent socket
+                        socket = dm->findServerSocket(check_and_cast<TCPConnectInfo*>(tcpCommand));
+
+                        // create new socket
+                        int csocket = dm->createTcpSocket(msg);
+
+                        // put in the list for accept
+                        dm->enqueueConnection(socket, csocket);
+                    }
                     else
                     {
                         // known socket, incomming data
@@ -1096,7 +1096,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                     if(socket < 0)
                     {
                         EV << "no recipient (socket) for this message, discarding" << endl;
-                        
+
                         delete msg;
                         continue;
                     }
@@ -1139,25 +1139,25 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         if(FD_ISSET(i, readfds))
         {
             //ev << " watched ";
-            
+
             bool active = false;
-            
+
             if(dm->getSocketMessage(i))
             {
-            	ev << " active (data ready)" << endl;
-            	active = true;
+                ev << " active (data ready)" << endl;
+                active = true;
             }
-            
+
             if(dm->getIfTcpSocket(i) && dm->acceptTcpSocket(i) != -1)
             {
-            	ev << " active (incomming connection)" << endl;
-            	active = true;
+                ev << " active (incomming connection)" << endl;
+                active = true;
             }
-            
+
             if(!active)
             {
                 //ev << " clear" << endl;
-                
+
                 FD_CLR(i, readfds);
             }
         }
@@ -1181,7 +1181,7 @@ int oppsim_close(int fildes)
     Daemon *dm = DAEMON;
 
     EV << "close: fildes=" << fildes << endl;
-    
+
     FILE *stream = dm->getIfStream(fildes);
     if(stream)
     {
@@ -1191,19 +1191,19 @@ int oppsim_close(int fildes)
 
         return 0;
     }
-    
+
     UDPSocket *udp = dm->getIfUdpSocket(fildes);
     if(udp)
     {
         EV << "closing UDP socket" << endl;
 
         dm->closeSocket(fildes);
-        
-		return 0;
-	}
 
-	// closing TCP/RAW/NETLINK not implemented
-	ASSERT(false);
+        return 0;
+    }
+
+    // closing TCP/RAW/NETLINK not implemented
+    ASSERT(false);
 }
 
 void oppsim_perror(const char *s)
@@ -1237,23 +1237,23 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
     Daemon *dm = DAEMON;
 
     EV << "write: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
-    
+
     TCPSocket *tcp = dm->getIfTcpSocket(fildes);
     if(tcp)
     {
-		EV << "write into tcp socket" << endl;
+        EV << "write into tcp socket" << endl;
 
-		SocketMsg *msg = new SocketMsg("data");
-            
-		msg->setDataFromBuffer(buf, nbyte);
-		msg->setByteLength(nbyte);
+        SocketMsg *msg = new SocketMsg("data");
 
-		tcp->send(msg);
+        msg->setDataFromBuffer(buf, nbyte);
+        msg->setByteLength(nbyte);
 
-		return nbyte;
+        tcp->send(msg);
+
+        return nbyte;
     }
 
-	FILE *stream = dm->getIfStream(fildes);
+    FILE *stream = dm->getIfStream(fildes);
     if(stream)
     {
         EV << "regular file descriptor, use fwrite" << endl;
@@ -1261,8 +1261,8 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
         return fwrite(buf, 1, nbyte, stream);
     }
 
-	// write to RAW/NETLINK/UDP shouldn't be used
-	ASSERT(false);
+    // write to RAW/NETLINK/UDP shouldn't be used
+    ASSERT(false);
 }
 
 int oppsim_listen(int socket, int backlog)
@@ -1293,7 +1293,7 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
         int addr = ntohl(inaddr->sin_addr.s_addr);
 
         EV << "binding to address=" << IPAddress(addr) << " port=" << port << endl;
-        
+
         TCPSocket *tcp = dm->getIfTcpSocket(socket);
         if(tcp)
         {
@@ -1302,11 +1302,11 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
             return 0;
         }
 
-		UDPSocket *udp = dm->getIfUdpSocket(socket);
+        UDPSocket *udp = dm->getIfUdpSocket(socket);
         if(udp)
         {
-        	udp->setUserId(socket);
-        	udp->bind(IPAddress(addr), port);
+            udp->setUserId(socket);
+            udp->bind(IPAddress(addr), port);
 
             return 0;
         }
@@ -1380,12 +1380,12 @@ ssize_t oppsim_read(int fildes, void *buf, size_t nbyte)
 
     if(dm->getIfTcpSocket(fildes))
     {
-		EV << "reading from TCP socket" << endl;
-            
-		return receive_stream(fildes, buf, nbyte);
-	}
+        EV << "reading from TCP socket" << endl;
 
-	// read from STEAM/RAW/NETLINK/UDP shouldn't be used
+        return receive_stream(fildes, buf, nbyte);
+    }
+
+    // read from STEAM/RAW/NETLINK/UDP shouldn't be used
     ASSERT(false);
 }
 

@@ -56,7 +56,7 @@ void Daemon::activity()
     cwd = "/";
     rootprefix = par("rootfs").stringValue();
     euid = 0; // daemon starts as root
-    
+
     // stdin, stdout, stderr
     lib_descriptor_t fd_std;
     fd_std.type = FD_FILE;
@@ -88,20 +88,20 @@ void Daemon::activity()
 
     if(!strcmp(server, "zebra"))
     {
-    	
+
         // FIXME debug only
         //++zebra_num;
         //if(zebra_num > 2)
-        //	wait(uniform(0, 0.001) + 10);
+        //  wait(uniform(0, 0.001) + 10);
         //else
-        
+
 
         // randomize start
         wait(uniform(0, 0.001));
         current_module = this;
         __activeVars = varp;
         GlobalVars_initializeActiveSet_zebra();
-        
+
         EV << "ready for zebra_main_entry()" << endl;
 
         zebra_main_entry(1, cmdline);
@@ -120,14 +120,14 @@ void Daemon::activity()
     }
     else if(!strcmp(server, "ospfd"))
     {
-    	
+
         // FIXME debug only
         //++ospf_num;
         //if(ospf_num > 2)
-        //	wait(uniform(0, 0.001) + 10);
+        //  wait(uniform(0, 0.001) + 10);
         //else
-        
-        
+
+
         // randomize start
         wait(uniform(0.002, 0.003));
         current_module = this;
@@ -148,67 +148,67 @@ void Daemon::activity()
 
 TCPSocket* Daemon::getIfTcpSocket(int socket)
 {
-	ASSERT(FD_EXIST(socket));
-	return (fd[socket].type == FD_TCP)? fd[socket].tcp: NULL;
+    ASSERT(FD_EXIST(socket));
+    return (fd[socket].type == FD_TCP)? fd[socket].tcp: NULL;
 }
 
 TCPSocket* Daemon::getTcpSocket(int socket)
 {
-	TCPSocket *tcp = getIfTcpSocket(socket);
-	ASSERT(tcp);
-	return tcp;
+    TCPSocket *tcp = getIfTcpSocket(socket);
+    ASSERT(tcp);
+    return tcp;
 }
 
 UDPSocket* Daemon::getIfUdpSocket(int socket)
 {
-	ASSERT(FD_EXIST(socket));
-	return (fd[socket].type == FD_UDP)? fd[socket].udp: NULL;
+    ASSERT(FD_EXIST(socket));
+    return (fd[socket].type == FD_UDP)? fd[socket].udp: NULL;
 }
 
 UDPSocket* Daemon::getUdpSocket(int socket)
 {
-	UDPSocket *udp = getIfUdpSocket(socket);
-	ASSERT(udp);
-	return udp;
+    UDPSocket *udp = getIfUdpSocket(socket);
+    ASSERT(udp);
+    return udp;
 }
 
 RawSocket* Daemon::getIfRawSocket(int socket)
 {
-	ASSERT(FD_EXIST(socket));
-	return (fd[socket].type == FD_RAW)? fd[socket].raw: NULL;
+    ASSERT(FD_EXIST(socket));
+    return (fd[socket].type == FD_RAW)? fd[socket].raw: NULL;
 }
 
 RawSocket* Daemon::getRawSocket(int socket)
 {
-	RawSocket *raw = getIfRawSocket(socket);
-	ASSERT(raw);
-	return raw;
+    RawSocket *raw = getIfRawSocket(socket);
+    ASSERT(raw);
+    return raw;
 }
 
 Netlink* Daemon::getIfNetlinkSocket(int socket)
 {
-	ASSERT(FD_EXIST(socket));
-	return (fd[socket].type == FD_NETLINK)? fd[socket].netlink: NULL;
+    ASSERT(FD_EXIST(socket));
+    return (fd[socket].type == FD_NETLINK)? fd[socket].netlink: NULL;
 }
 
 Netlink* Daemon::getNetlinkSocket(int socket)
 {
-	Netlink *nl = getIfNetlinkSocket(socket);
-	ASSERT(nl);
-	return nl;
+    Netlink *nl = getIfNetlinkSocket(socket);
+    ASSERT(nl);
+    return nl;
 }
 
 FILE* Daemon::getIfStream(int fildes)
 {
-	ASSERT(FD_EXIST(fildes));
-	return (fd[fildes].type == FD_FILE)? fd[fildes].stream: NULL;
+    ASSERT(FD_EXIST(fildes));
+    return (fd[fildes].type == FD_FILE)? fd[fildes].stream: NULL;
 }
 
 FILE* Daemon::getStream(int fildes)
 {
-	FILE *stream = getIfStream(fildes);
-	ASSERT(stream);
-	return stream;
+    FILE *stream = getIfStream(fildes);
+    ASSERT(stream);
+    return stream;
 }
 
 int Daemon::getEmptySlot()
@@ -217,14 +217,14 @@ int Daemon::getEmptySlot()
     for(unsigned int i = 0; i < fd.size(); i++)
     {
         if(fd[i].type != FD_EMPTY)
-        	continue;
-        	
+            continue;
+
         return i;
     }
 
-    // make sure there is enough room 
+    // make sure there is enough room
     ASSERT(fd.size() < FD_SETSIZE);
-    
+
     // create new slot
     lib_descriptor_t newItem;
     newItem.type = FD_EMPTY;
@@ -327,7 +327,7 @@ int Daemon::createStream(const char *path, char *mode)
 
     ASSERT(FD_EXIST(fdesc));
     ASSERT(fd[fdesc].type == FD_EMPTY);
-    
+
     lib_descriptor_t newItem;
     newItem.type = FD_FILE;
     newItem.stream = fopen(path, mode);
@@ -342,53 +342,53 @@ int Daemon::createStream(const char *path, char *mode)
 
 int Daemon::acceptTcpSocket(int socket, bool remove)
 {
-	ASSERT(FD_EXIST(socket));
-	ASSERT(fd[socket].type == FD_TCP);
-	
+    ASSERT(FD_EXIST(socket));
+    ASSERT(fd[socket].type == FD_TCP);
+
     if(fd[socket].incomingQueue.empty())
-    	return -1;
-    
-	int ret = fd[socket].incomingQueue.front();
+        return -1;
 
-	if(remove)
-		fd[socket].incomingQueue.pop_front();
+    int ret = fd[socket].incomingQueue.front();
 
-	return ret;
+    if(remove)
+        fd[socket].incomingQueue.pop_front();
+
+    return ret;
 }
 
 void Daemon::enqueueConnection(int socket, int csocket)
 {
-	ASSERT(getIfTcpSocket(socket));
-	ASSERT(getIfTcpSocket(csocket));
+    ASSERT(getIfTcpSocket(socket));
+    ASSERT(getIfTcpSocket(csocket));
     ASSERT(socket < csocket);
     fd[socket].incomingQueue.push_back(csocket);
 }
 
 cMessage* Daemon::getSocketMessage(int socket, bool remove)
 {
-	ASSERT(FD_EXIST(socket));
-	
-	if(fd[socket].queue.empty())
-		return NULL;
-		
-	cMessage *msg = (cMessage*)fd[socket].queue.tail();
-	
-	if(remove)
-		fd[socket].queue.remove(msg);
-	
-	return msg;
+    ASSERT(FD_EXIST(socket));
+
+    if(fd[socket].queue.empty())
+        return NULL;
+
+    cMessage *msg = (cMessage*)fd[socket].queue.tail();
+
+    if(remove)
+        fd[socket].queue.remove(msg);
+
+    return msg;
 }
 
 void Daemon::enqueueSocketMessage(int socket, cMessage *msg)
 {
-	ASSERT(FD_EXIST(socket));
-	
+    ASSERT(FD_EXIST(socket));
+
     fd[socket].queue.insert(msg);
 }
 
 void Daemon::closeSocket(int socket)
 {
-	ASSERT(FD_EXIST(socket));
+    ASSERT(FD_EXIST(socket));
 
     if(fd[socket].type == FD_UDP)
     {
@@ -406,10 +406,10 @@ void Daemon::closeSocket(int socket)
 
 void Daemon::closeStream(int fildes)
 {
-	ASSERT(FD_EXIST(fildes));
-	ASSERT(fd[fildes].type == FD_FILE);
+    ASSERT(FD_EXIST(fildes));
+    ASSERT(fd[fildes].type == FD_FILE);
     ASSERT(fd[fildes].stream);
-    
+
     fclose(fd[fildes].stream);
     fd[fildes].stream = NULL;
     fd[fildes].type = FD_EMPTY;
@@ -460,9 +460,9 @@ int Daemon::findRawSocket(int protocol)
 
 int Daemon::findServerSocket(TCPConnectInfo *info)
 {
-	// XXX FIXME this may not work in many cases
-	// some support from underlying tcp layer needed
-	
+    // XXX FIXME this may not work in many cases
+    // some support from underlying tcp layer needed
+
     int port = info->localPort();
     IPAddress addr = info->localAddr().get4();
 
