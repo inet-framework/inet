@@ -33,21 +33,39 @@ Define_Module(FlatNetworkConfigurator);
 
 void FlatNetworkConfigurator::initialize(int stage)
 {
-    if (stage!=2) return;
+    if (stage==2)
+    {
+        StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
+        StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
+        for (int i=0; i<nonIPTypes.size(); i++)
+            types.push_back(nonIPTypes[i]);
 
-    cTopology topo("topo");
+        cTopology topo("topo");
+        extractTopology(topo, types);
 
-    StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
-    StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
-    int i;
-    for (i=0; i<nonIPTypes.size(); i++)
-        types.push_back(nonIPTypes[i]);
+        // we'll store node addresses here
+        std::vector<uint32> nodeAddresses;
+        assignAddresses(nodeAddresses, topo, nonIPTypes);
 
+        std::vector<bool> usesDefaultRoute;
+        addDefaultRoutes(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
+
+        fillRoutingTables(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
+
+        // update display string
+        setDisplayString(topo, nonIPTypes);
+    }
+}
+
+void FlatNetworkConfigurator::extractTopology(cTopology& topo, const StringVector& types)
+{
     // extract topology
     topo.extractByModuleType(types);
     EV << "cTopology found " << topo.nodes() << " nodes\n";
+}
 
-
+void FlatNetworkConfigurator::assignAddresses(std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
+{
     // assign IP addresses
     uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
     uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
@@ -55,12 +73,10 @@ void FlatNetworkConfigurator::initialize(int stage)
     if (topo.nodes()>maxNodes)
         error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
 
-    // we'll store node addresses here
-    std::vector<uint32> nodeAddresses;
     nodeAddresses.resize(topo.nodes());
 
     int numIPNodes = 0;
-    for (i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.nodes(); i++)
     {
         // skip bus types
         if (isNonIPType(topo.node(i), nonIPTypes))
@@ -83,11 +99,13 @@ void FlatNetworkConfigurator::initialize(int stage)
             }
         }
     }
+}
 
+void FlatNetworkConfigurator::addDefaultRoutes(std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
+{
     // add default route to nodes with exactly one (non-loopback) interface
-    std::vector<bool> usesDefaultRoute;
     usesDefaultRoute.resize(topo.nodes());
-    for (i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *node = topo.node(i);
 
@@ -123,9 +141,12 @@ void FlatNetworkConfigurator::initialize(int stage)
         //e->metric() = 1;
         rt->addRoutingEntry(e);
     }
+}
 
+void FlatNetworkConfigurator::fillRoutingTables(const std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
+{
     // fill in routing tables
-    for (i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *destNode = topo.node(i);
 
@@ -178,9 +199,6 @@ void FlatNetworkConfigurator::initialize(int stage)
             rt->addRoutingEntry(e);
         }
     }
-
-    // update display string
-    setDisplayString(numIPNodes, topo.nodes()-numIPNodes);
 }
 
 void FlatNetworkConfigurator::handleMessage(cMessage *msg)
@@ -188,15 +206,20 @@ void FlatNetworkConfigurator::handleMessage(cMessage *msg)
     error("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
+void FlatNetworkConfigurator::setDisplayString(cTopology& topo, const StringVector& nonIPTypes)
 {
+    int numIPNodes;
+    for (int i=0; i<topo.nodes(); i++)
+        if (!isNonIPType(topo.node(i), nonIPTypes))
+            numIPNodes++;
+
     // update display string
     char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
+    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.nodes()-numIPNodes);
     displayString().setTagArg("t",0,buf);
 }
 
-bool FlatNetworkConfigurator::isNonIPType(cTopology::Node *node, StringVector& nonIPTypes)
+bool FlatNetworkConfigurator::isNonIPType(cTopology::Node *node, const StringVector& nonIPTypes)
 {
     return std::find(nonIPTypes.begin(), nonIPTypes.end(), node->module()->className())!=nonIPTypes.end();
 }

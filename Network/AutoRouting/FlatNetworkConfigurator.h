@@ -39,9 +39,13 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void setDisplayString(int numIPNodes, int numNonIPNodes);
-    bool isNonIPType(cTopology::Node *node, StringVector& nonIPTypes);
-    //int determineGateIndex(cGate *nodeGate);
+    void extractTopology(cTopology& topo, const StringVector& types);
+    void assignAddresses(std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes);
+    void addDefaultRoutes(std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes);
+    void fillRoutingTables(const std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes);
+
+    void setDisplayString(cTopology& topo, const StringVector& nonIPTypes);
+    bool isNonIPType(cTopology::Node *node, const StringVector& nonIPTypes);
 };
 
 #endif
