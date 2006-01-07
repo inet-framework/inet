@@ -43,13 +43,15 @@ void FlatNetworkConfigurator::initialize(int stage)
         cTopology topo("topo");
         extractTopology(topo, types);
 
-        // we'll store node addresses here
-        std::vector<uint32> nodeAddresses;
+        // assign addresses to IP nodes
+        std::vector<uint32> nodeAddresses;  // to be filled in; indexed by topo nodes
         assignAddresses(nodeAddresses, topo, nonIPTypes);
 
-        std::vector<bool> usesDefaultRoute;
+        // add default routes to hosts (nodes with a single attachment)
+        std::vector<bool> usesDefaultRoute;  // to be filled in; indexed by topo nodes
         addDefaultRoutes(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
 
+        // calculate shortest paths, and add corresponding static routes
         fillRoutingTables(usesDefaultRoute, nodeAddresses, topo, nonIPTypes);
 
         // update display string
@@ -145,7 +147,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(std::vector<bool>& usesDefaultRou
 
 void FlatNetworkConfigurator::fillRoutingTables(const std::vector<bool>& usesDefaultRoute, const std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes)
 {
-    // fill in routing tables
+    // fill in routing tables with static routes
     for (int i=0; i<topo.nodes(); i++)
     {
         cTopology::Node *destNode = topo.node(i);
