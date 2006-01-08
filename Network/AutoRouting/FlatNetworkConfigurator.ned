@@ -53,7 +53,7 @@
 // should be missing or empty.
 //
 // All the above takes place in initialization stage 2. (In stage 0,
-// interfaces register themselves in the RoutingTable modules, and
+// interfaces register themselves in the InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
 simple FlatNetworkConfigurator
