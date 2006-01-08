@@ -43,6 +43,10 @@ INET-200512xx
 
 - added another network configurator, NetworkConfigurator
 
+- RoutingTable: routerId selection moved from stage 1 to stage 3 (you may
+  need to revise your code if it depends on routerId)
+
+
 INET-20050922
 -------------
 - patched for OMNeT++ 3.2:

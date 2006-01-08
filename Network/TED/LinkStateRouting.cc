@@ -39,7 +39,8 @@ LinkStateRouting::~LinkStateRouting()
 
 void LinkStateRouting::initialize(int stage)
 {
-    if (stage==3)
+    // we have to wait until routerId gets assigned in stage 3
+    if (stage==4)
     {
         tedmod = TEDAccess().get();
 

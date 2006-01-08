@@ -38,8 +38,9 @@ TED::~TED()
 void TED::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and get their auto-assigned IP addresses (stage 2)
-    if (stage!=3)
+    // and get their auto-assigned IP addresses (stage 2); routerId gets
+    // assigned in stage 3
+    if (stage!=4)
         return;
 
     rt = RoutingTableAccess().get();

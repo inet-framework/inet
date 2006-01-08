@@ -67,7 +67,7 @@ class TED : public cSimpleModule
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const  {return 4;}
+    virtual int numInitStages() const  {return 5;}
     virtual void handleMessage(cMessage *msg);
 
     IPAddressVector calculateShortestPath(IPAddressVector dest,

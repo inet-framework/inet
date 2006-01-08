@@ -25,18 +25,19 @@ void LIBTable::initialize(int stage)
     if (stage==0)
         maxLabel = 0;
 
-    if (stage!=3) // routerId must be initialized in RT
-        return;
+    // we have to wait until routerId gets assigned in stage 3
+    if (stage==4)
+    {
+        RoutingTableAccess routingTableAccess;
+        RoutingTable *rt = routingTableAccess.get();
+        routerId = rt->getRouterId();
 
-    RoutingTableAccess routingTableAccess;
-    RoutingTable *rt = routingTableAccess.get();
-    routerId = rt->getRouterId();
+        // read configuration
 
-    // read configuration
+        readTableFromXML(par("conf").xmlValue());
 
-    readTableFromXML(par("conf").xmlValue());
-
-    WATCH_VECTOR(lib);
+        WATCH_VECTOR(lib);
+    }
 }
 
 void LIBTable::handleMessage(cMessage *)

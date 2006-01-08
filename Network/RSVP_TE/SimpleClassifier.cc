@@ -24,7 +24,8 @@ Define_Module(SimpleClassifier);
 
 void SimpleClassifier::initialize(int stage)
 {
-    if (stage!=3) // routerId must be initialized in RT
+    // we have to wait until routerId gets assigned in stage 3
+    if (stage!=4)
         return;
 
     maxLabel = 0;

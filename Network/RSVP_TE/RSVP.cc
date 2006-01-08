@@ -49,32 +49,31 @@ RSVP::~RSVP()
 void RSVP::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and get their auto-assigned IP addresses (stage 2)
-    if (stage!=3)
-        return;
+    // and get their auto-assigned IP addresses (stage 2); routerId gets
+    // assigned in state 3
+    if (stage!=4)
+    {
+        tedmod = TEDAccess().get();
+        rt = RoutingTableAccess().get();
+        ift = InterfaceTableAccess().get();
+        routerId = rt->getRouterId();
+        lt = LIBTableAccess().get();
+        nb = NotificationBoardAccess().get();
 
-    tedmod = TEDAccess().get();
-    rt = RoutingTableAccess().get();
-    ift = InterfaceTableAccess().get();
-    routerId = rt->getRouterId();
-    lt = LIBTableAccess().get();
-    nb = NotificationBoardAccess().get();
+        rpct = check_and_cast<IRSVPClassifier*>(parentModule()->submodule("classifier"));
 
-    rpct = check_and_cast<IRSVPClassifier*>(parentModule()->submodule("classifier"));
+        maxPsbId = 0;
+        maxRsbId = 0;
+        maxSrcInstance = 0;
 
-    maxPsbId = 0;
-    maxRsbId = 0;
-    maxSrcInstance = 0;
+        retryInterval = 1.0;
 
-    retryInterval = 1.0;
+        // setup hello
+        setupHello();
 
-    // setup hello
-
-    setupHello();
-
-    // process traffic configuration
-
-    readTrafficFromXML(par("traffic").xmlValue());
+        // process traffic configuration
+        readTrafficFromXML(par("traffic").xmlValue());
+    }
 }
 
 int RSVP::getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender)

@@ -68,7 +68,7 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const  {return 4;}
+    virtual int numInitStages() const  {return 5;}
     virtual void handleMessage(cMessage *msg);
 
     void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);

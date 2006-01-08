@@ -62,24 +62,22 @@ OSPFRouting::~OSPFRouting (void)
 void OSPFRouting::initialize (int stage)
 {
     // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and the routing table is initialized (stage 1)
-    if (stage != 2) {
-        return;
+    // and routerId gets assigned (stage 3)
+    if (stage == 4)
+    {
+        rt = RoutingTableAccess ().get ();
+        ift = InterfaceTableAccess ().get ();
+
+        // Get routerId
+        ospfRouter = new OSPF::Router (rt->getRouterId ().getInt (), this);
+
+        // read the OSPF AS configuration
+        const char *fileName = par ("ospfConfigFile");
+        if (fileName == NULL || (!strcmp(fileName, "")) || !LoadConfigFromXML (fileName))
+            error ("Error reading AS configuration from file %s", fileName);
+
+        ospfRouter->AddWatches ();
     }
-
-    rt = RoutingTableAccess ().get ();
-    ift = InterfaceTableAccess ().get ();
-
-    // Get routerId
-    ospfRouter = new OSPF::Router (rt->getRouterId ().getInt (), this);
-
-    // read the OSPF AS configuration
-    const char *fileName = par ("ospfConfigFile");
-    if (fileName == NULL || (!strcmp(fileName, "")) || !LoadConfigFromXML (fileName)) {
-        error ("Error reading AS configuration from file %s", fileName);
-    }
-
-    ospfRouter->AddWatches ();
 }
 
 
