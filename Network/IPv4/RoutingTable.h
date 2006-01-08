@@ -170,6 +170,9 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                              int metric,
                              const char *dev);
 
+    // set router Id
+    void initializeRouterId();
+
     // adjust routes with src=IFACENETMASK to actual interface netmasks
     void updateNetmaskRoutes();
 

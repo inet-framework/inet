@@ -128,45 +128,52 @@ void RoutingTable::initialize(int stage)
         RoutingTableParser parser(ift, this);
         if (*filename && parser.readRoutingTableFromFile(filename)==-1)
             error("Error reading routing table file %s", filename);
-
-        const char *routerIdStr = par("routerId").stringValue();
-        if (!strcmp(routerIdStr, ""))
-        {
-            routerId = IPAddress();
-        }
-        else if (!strcmp(routerIdStr, "auto"))
-        {
-            // choose highest interface address as routerId
-            routerId = IPAddress();
-            for (int i=0; i<ift->numInterfaces(); ++i)
-            {
-                InterfaceEntry *ie = ift->interfaceAt(i);
-                if (!ie->isLoopback() && ie->ipv4()->inetAddress().getInt() > routerId.getInt())
-                    routerId = ie->ipv4()->inetAddress();
-            }
-        }
-        else
-        {
-            routerId = IPAddress(routerIdStr);
-
-            // if there is no interface with routerId yet, assign it to the loopback address;
-            // TODO find out if this is a good practice, in which situations it is useful etc.
-            if (interfaceByAddress(routerId)==NULL)
-            {
-                InterfaceEntry *lo0 = ift->firstLoopbackInterface();
-                lo0->ipv4()->setInetAddress(routerId);
-                lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
-            }
-        }
     }
     else if (stage==3)
     {
+        // routerID selection must be after stage==2 when network autoconfiguration
+        // assigns interface addresses
+        initializeRouterId();
+
         // we don't use notifications during initialize(), so we do it manually.
         // Should be in stage=3 because autoconfigurator runs in stage=2.
         updateNetmaskRoutes();
 
         //printIfconfig();
         //printRoutingTable();
+    }
+}
+
+void RoutingTable::initializeRouterId()
+{
+    const char *routerIdStr = par("routerId").stringValue();
+    if (!strcmp(routerIdStr, ""))
+    {
+        routerId = IPAddress();
+    }
+    else if (!strcmp(routerIdStr, "auto"))
+    {
+        // choose highest interface address as routerId
+        routerId = IPAddress();
+        for (int i=0; i<ift->numInterfaces(); ++i)
+        {
+            InterfaceEntry *ie = ift->interfaceAt(i);
+            if (!ie->isLoopback() && ie->ipv4()->inetAddress().getInt() > routerId.getInt())
+                routerId = ie->ipv4()->inetAddress();
+        }
+    }
+    else
+    {
+        routerId = IPAddress(routerIdStr);
+
+        // if there is no interface with routerId yet, assign it to the loopback address;
+        // TODO find out if this is a good practice, in which situations it is useful etc.
+        if (interfaceByAddress(routerId)==NULL)
+        {
+            InterfaceEntry *lo0 = ift->firstLoopbackInterface();
+            lo0->ipv4()->setInetAddress(routerId);
+            lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
+        }
     }
 }
 

@@ -2109,6 +2109,7 @@ RSVP::PathStateBlock_t* RSVP::findPsbById(int id)
         return &PSBList[i];
     }
     ASSERT(false);
+    return NULL; // prevent warning
 }
 
 
@@ -2122,6 +2123,7 @@ RSVP::ResvStateBlock_t* RSVP::findRsbById(int id)
         return &RSBList[i];
     }
     ASSERT(false);
+    return NULL; // prevent warning
 }
 
 RSVP::HelloState_t* RSVP::findHello(IPAddress peer)

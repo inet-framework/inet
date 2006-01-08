@@ -93,8 +93,8 @@ int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
             lib[i].color = color;
             return inLabel;
         }
-
         ASSERT(false);
+        return 0; // prevent warning
     }
 }
 
