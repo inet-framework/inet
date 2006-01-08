@@ -21,6 +21,10 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
+#include "IPAddress.h"
+
+class InterfaceTable;
+class RoutingTable;
 
 
 /**
@@ -32,20 +36,29 @@
  */
 class INET_API FlatNetworkConfigurator : public cSimpleModule
 {
-  public:
+  protected:
+    struct NodeInfo {
+        NodeInfo() {isIPNode=false;ift=NULL;rt=NULL;usesDefaultRoute=false;}
+        bool isIPNode;
+        InterfaceTable *ift;
+        RoutingTable *rt;
+        IPAddress address;
+        bool usesDefaultRoute;
+    };
+    typedef std::vector<NodeInfo> NodeInfoVector;
     typedef std::vector<std::string> StringVector;
+
   protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void extractTopology(cTopology& topo, const StringVector& types);
-    void assignAddresses(std::vector<uint32>& nodeAddresses, cTopology& topo, const StringVector& nonIPTypes);
-    void addDefaultRoutes(std::vector<bool>& usesDefaultRoute, cTopology& topo, const std::vector<uint32>& nodeAddresses, const StringVector& nonIPTypes);
-    void fillRoutingTables(const std::vector<bool>& usesDefaultRoute, cTopology& topo, const std::vector<uint32>& nodeAddresses, const StringVector& nonIPTypes);
+    void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
+    void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
+    void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
+    void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 
-    void setDisplayString(cTopology& topo, const StringVector& nonIPTypes);
-    bool isNonIPType(cTopology::Node *node, const StringVector& nonIPTypes);
+    void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
 
 #endif

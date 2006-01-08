@@ -39,6 +39,8 @@ INET-200512xx
 
 - NetworkLayer(6): gates towards interfaces renamed to ifOut[]/ifIn[]
 
+- FlatNetworkConfigurator internals refactored
+
 
 INET-20050922
 -------------
