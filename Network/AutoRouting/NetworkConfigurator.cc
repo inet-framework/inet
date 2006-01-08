@@ -147,7 +147,8 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 
             // add route
             RoutingEntry *e = new RoutingEntry();
-            e->host = neighborAddr;
+            e->host = ie->ipv4()->inetAddress(); // FIXME this is brain-dead, but looks like real-life routing tables are set up like this!!!!
+            e->gateway = neighborAddr;
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->name();
             e->interfacePtr = ie;
@@ -247,10 +248,11 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             RoutingTable *rt = nodeInfo[j].rt;
             RoutingEntry *e = new RoutingEntry();
             e->host = destAddr;
+            e->gateway = ???
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->name();
             e->interfacePtr = ie;
-            e->type = RoutingEntry::DIRECT;
+            e->type = RoutingEntry::REMOTE;
             e->source = RoutingEntry::MANUAL;
             //e->metric() = 1;
             rt->addRoutingEntry(e);
