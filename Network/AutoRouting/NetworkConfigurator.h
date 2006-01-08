@@ -51,6 +51,7 @@ class INET_API NetworkConfigurator : public cSimpleModule
 
     void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
     void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
+    void addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
     void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
     void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 

@@ -45,6 +45,9 @@ void NetworkConfigurator::initialize(int stage)
         // assign addresses to IP nodes, and also store result in nodeInfo[].address
         assignAddresses(topo, nodeInfo);
 
+        // add routes for point-to-point peers
+        addPointToPointPeerRoutes(topo, nodeInfo);
+
         // add default routes to hosts (nodes with a single attachment);
         // also remember result in nodeInfo[].usesDefaultRoute
         addDefaultRoutes(topo, nodeInfo);
@@ -103,18 +106,69 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
     }
 }
 
-void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-/* FIXME TBD
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i=0; i<topo.nodes(); i++)
     {
-        cTopology::Node *node = topo.node(i);
-
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
+        cTopology::Node *node = topo.node(i);
+        InterfaceTable *ift = nodeInfo[i].ift;
+        RoutingTable *rt = nodeInfo[i].rt;
+
+        // loop through neighbors
+        for (int j=0; j<node->outLinks(); j++)
+        {
+            cTopology::Node *neighbor = node->out(j)->remoteNode();
+
+            // find neighbour's index in cTopology ==> k
+            for (int k=0; k<topo.nodes(); k++)
+                if (topo.node(k)==neighbor)
+                    break;
+            ASSERT(k<=topo.nodes());
+
+            // if it's not an IP node (e.g. an Ethernet switch), then we're not interested
+            if (!nodeInfo[k].isIPNode)
+                continue;
+
+            // find out neighbor's IP address
+            int neighborGateId = node->out(j)->remoteGate()->id();
+            InterfaceEntry *neighborIe = nodeInfo[k].ift->interfaceByNodeInputGateId(neighborGateId);
+            ASSERT(neighborIe);
+            IPAddress neighborAddr = neighborIe->ipv4()->inetAddress();
+
+            // find our own interface towards neighbor
+            int gateId = node->out(j)->localGate()->id();
+            InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
+            ASSERT(ie);
+
+            // add route
+            RoutingEntry *e = new RoutingEntry();
+            e->host = neighborAddr;
+            e->netmask = IPAddress(255,255,255,255); // full match needed
+            e->interfaceName = ie->name();
+            e->interfacePtr = ie;
+            e->type = RoutingEntry::DIRECT;
+            e->source = RoutingEntry::MANUAL;
+            //e->metric() = 1;
+            rt->addRoutingEntry(e);
+        }
+    }
+}
+
+void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+{
+    // add default route to nodes with exactly one (non-loopback) interface
+    for (int i=0; i<topo.nodes(); i++)
+    {
+        // skip bus types
+        if (!nodeInfo[i].isIPNode)
+            continue;
+
+        cTopology::Node *node = topo.node(i);
         InterfaceTable *ift = nodeInfo[i].ift;
         RoutingTable *rt = nodeInfo[i].rt;
 
@@ -129,8 +183,8 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         if (numIntf!=1)
             continue; // only deal with nodes with one interface plus loopback
 
-        EV << "  " << node->module()->fullName() << "=" << nodeInfo[i].address
-           << " has only one (non-loopback) interface, adding default route\n";
+        EV << "  " << node->module()->fullName() << " has only one (non-loopback) "
+           "interface, adding default route\n";
 
         // add route
         RoutingEntry *e = new RoutingEntry();
@@ -143,7 +197,6 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         //e->metric() = 1;
         rt->addRoutingEntry(e);
     }
-*/
 }
 
 void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
