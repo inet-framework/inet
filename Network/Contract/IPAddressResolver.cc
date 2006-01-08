@@ -214,11 +214,8 @@ InterfaceTable *IPAddressResolver::interfaceTableOf(cModule *host)
     // find InterfaceTable
     cModule *mod = host->submodule("interfaceTable");
     if (!mod)
-        mod = host->moduleByRelativePath("networkLayer.interfaceTable");
-    if (!mod)
-        opp_error("IPAddressResolver: InterfaceTable not found as `interfaceTable' or "
-                  "`networkLayer.interfaceTable' within host/router module `%s'",
-                  host->fullPath().c_str());
+        opp_error("IPAddressResolver: InterfaceTable not found as submodule "
+                  " `interfaceTable' in host/router `%s'", host->fullPath().c_str());
     return check_and_cast<InterfaceTable *>(mod);
 }
 
@@ -227,11 +224,8 @@ RoutingTable *IPAddressResolver::routingTableOf(cModule *host)
     // find RoutingTable
     cModule *mod = host->submodule("routingTable");
     if (!mod)
-        mod = host->moduleByRelativePath("networkLayer.routingTable");
-    if (!mod)
-        opp_error("IPAddressResolver: RoutingTable not found as `routingTable' or "
-                  "`networkLayer.routingTable' within host/router module `%s'",
-                  host->fullPath().c_str());
+        opp_error("IPAddressResolver: RoutingTable not found as submodule "
+                  " `routingTable' in host/router `%s'", host->fullPath().c_str());
     return check_and_cast<RoutingTable *>(mod);
 }
 
@@ -241,24 +235,48 @@ RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
     // find RoutingTable
     cModule *mod = host->submodule("routingTable6");
     if (!mod)
-        mod = host->moduleByRelativePath("networkLayer.routingTable6");
-    if (!mod)
-        opp_error("IPAddressResolver: RoutingTable6 not found as `routingTable6' or "
-                  "`networkLayer.routingTable6' within host/router module `%s'",
-                  host->fullPath().c_str());
+        opp_error("IPAddressResolver: RoutingTable6 not found as submodule "
+                  " `routingTable6' in host/router `%s'", host->fullPath().c_str());
     return check_and_cast<RoutingTable6 *>(mod);
 }
+#endif
 
 NotificationBoard *IPAddressResolver::notificationBoardOf(cModule *host)
 {
     // find NotificationBoard
     cModule *mod = host->submodule("notificationBoard");
     if (!mod)
-        opp_error("IPAddressResolver: NotificationBoard not found as 'notificationBoard' "
-                  "within host/router module `%s'", host->fullPath().c_str());
+        opp_error("IPAddressResolver: NotificationBoard not found as submodule "
+                  " notificationBoard' in host/router `%s'", host->fullPath().c_str());
     return check_and_cast<NotificationBoard *>(mod);
 }
 
+InterfaceTable *IPAddressResolver::findInterfaceTableOf(cModule *host)
+{
+    cModule *mod = host->submodule("interfaceTable");
+    return dynamic_cast<InterfaceTable *>(mod);
+}
+
+RoutingTable *IPAddressResolver::findRoutingTableOf(cModule *host)
+{
+    cModule *mod = host->submodule("routingTable");
+    return dynamic_cast<RoutingTable *>(mod);
+}
+
+#ifdef WITH_IPv6
+RoutingTable6 *IPAddressResolver::findRoutingTable6Of(cModule *host)
+{
+    cModule *mod = host->submodule("routingTable6");
+    return dynamic_cast<RoutingTable6 *>(mod);
+}
 #endif
+
+NotificationBoard *IPAddressResolver::findNotificationBoardOf(cModule *host)
+{
+    cModule *mod = host->submodule("notificationBoard");
+    return dynamic_cast<NotificationBoard *>(mod);
+}
+
+
 
 

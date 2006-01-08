@@ -47,7 +47,8 @@
 simple RoutingTable
     parameters:
         routerId: string, // for routers, the router id using IP address dotted
-                          // notation; should be left empty ("") for hosts
+                          // notation; specify "auto" to select the smallest 
+                          // interface address; should be left empty ("") for hosts
         IPForward: bool,  // turns IP forwarding on/off
         routingFile: string;  // routing table file name
 endsimple

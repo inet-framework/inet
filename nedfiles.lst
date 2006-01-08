@@ -38,6 +38,7 @@ Mobility/TurtleMobility.ned
 Network/ARP/ARP.ned
 Network/AutoRouting/FlatNetworkConfigurator.ned
 Network/AutoRouting/FlatNetworkConfigurator6.ned
+Network/AutoRouting/NetworkConfigurator.ned
 Network/Contract/InterfaceTable.ned
 Network/Extras/Dummy.ned
 Network/Extras/FailureManager.ned

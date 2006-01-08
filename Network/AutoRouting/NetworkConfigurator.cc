@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -24,14 +24,14 @@
 #include "RoutingTable.h"
 #include "InterfaceTable.h"
 #include "IPAddressResolver.h"
-#include "FlatNetworkConfigurator.h"
+#include "NetworkConfigurator.h"
 #include "IPv4InterfaceData.h"
 
 
-Define_Module(FlatNetworkConfigurator);
+Define_Module(NetworkConfigurator);
 
 
-void FlatNetworkConfigurator::initialize(int stage)
+void NetworkConfigurator::initialize(int stage)
 {
     if (stage==2)
     {
@@ -57,13 +57,9 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 }
 
-void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    // FIXME eliminate nonIPModuleTypes, like in NetworkConfigurator
     StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
-    StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
-    for (int i=0; i<nonIPTypes.size(); i++)
-        types.push_back(nonIPTypes[i]);
 
     // extract topology
     topo.extractByModuleType(types);
@@ -74,50 +70,42 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     for (int i=0; i<topo.nodes(); i++)
     {
         cModule *mod = topo.node(i)->module();
-        nodeInfo[i].isIPNode = std::find(nonIPTypes.begin(),nonIPTypes.end(), mod->className())==nonIPTypes.end();
-        if (nodeInfo[i].isIPNode)
-        {
-            nodeInfo[i].ift = IPAddressResolver().interfaceTableOf(mod);
-            nodeInfo[i].rt = IPAddressResolver().routingTableOf(mod);
-        }
+        nodeInfo[i].ift = IPAddressResolver().findInterfaceTableOf(mod);
+        nodeInfo[i].rt = IPAddressResolver().findRoutingTableOf(mod);
+        nodeInfo[i].isIPNode = nodeInfo[i].rt!=NULL;
     }
 }
 
-void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    // assign IP addresses
-    uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
-    int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
-    if (topo.nodes()>maxNodes)
-        error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
+    uint32 base = 10 << 24;  // 10.x.x.x addresses
+    int nodeCtr = 1;         // middle 16 bits
 
-    int numIPNodes = 0;
     for (int i=0; i<topo.nodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        uint32 addr = networkAddress | uint32(++numIPNodes);
-        nodeInfo[i].address.set(addr);
+        uint32 addr = base + (nodeCtr++ << 8);   // --> 10.nn.nn.0
 
-        // find interface table and assign address to all (non-loopback) interfaces
+        // assign address to all (non-loopback) interfaces
         InterfaceTable *ift = nodeInfo[i].ift;
         for (int k=0; k<ift->numInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->interfaceAt(k);
             if (!ie->isLoopback())
             {
-                ie->ipv4()->setInetAddress(IPAddress(addr));
+                ie->ipv4()->setInetAddress(IPAddress(addr | (uint32)k));
                 ie->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }
 }
 
-void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
+/* FIXME TBD
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i=0; i<topo.nodes(); i++)
     {
@@ -155,10 +143,12 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         //e->metric() = 1;
         rt->addRoutingEntry(e);
     }
+*/
 }
 
-void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
+/* FIXME TBD
     // fill in routing tables with static routes
     for (int i=0; i<topo.nodes(); i++)
     {
@@ -213,14 +203,15 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             rt->addRoutingEntry(e);
         }
     }
+*/
 }
 
-void FlatNetworkConfigurator::handleMessage(cMessage *msg)
+void NetworkConfigurator::handleMessage(cMessage *msg)
 {
     error("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
     for (int i=0; i<topo.nodes(); i++)

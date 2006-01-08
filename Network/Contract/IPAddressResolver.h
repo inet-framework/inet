@@ -145,6 +145,28 @@ class INET_API IPAddressResolver
      * if not found.
      */
     NotificationBoard *notificationBoardOf(cModule *host);
+
+    /**
+     * Like interfaceTableOf(), but doesn't throw error if not found.
+     */
+    InterfaceTable *findInterfaceTableOf(cModule *host);
+
+    /**
+     * Like routingTableOf(), but doesn't throw error if not found.
+     */
+    RoutingTable *findRoutingTableOf(cModule *host);
+
+#ifdef WITH_IPv6
+    /**
+     * Like interfaceTableOf(), but doesn't throw error if not found.
+     */
+    RoutingTable6 *findRoutingTable6Of(cModule *host);
+#endif
+
+    /**
+     * Like notificationBoardOf(), but doesn't throw error if not found.
+     */
+    NotificationBoard *findNotificationBoardOf(cModule *host);
     //@}
 };
 

@@ -41,6 +41,7 @@ INET-200512xx
 
 - FlatNetworkConfigurator internals refactored
 
+- added another network configurator, NetworkConfigurator
 
 INET-20050922
 -------------

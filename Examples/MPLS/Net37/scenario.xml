@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<scenario>
+	<at t="2">
+		<shutdown module="failureManager" target="LSR4"/>
+	</at>
+	<at t="4">
+		<startup module="failureManager" target="LSR4"/>
+	</at>
+</scenario>
