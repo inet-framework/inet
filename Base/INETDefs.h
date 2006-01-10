@@ -26,6 +26,10 @@
 
 #include <omnetpp.h>
 
+#if OMNETPP_VERSION < 0x0302
+#  error At least OMNeT++/OMNEST version 3.2 required
+#endif
+
 #ifdef BUILDING_INET
 #  define INET_API  OPP_DLLEXPORT
 #else
