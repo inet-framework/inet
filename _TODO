@@ -1,5 +1,8 @@
-- Wrap RoutingEntry members into getter/setter methods!!!!
+- rename MPLSModule to MPLS;
+- LIBtable.cc/h to capital "T"!
+- IPvXAddress: change get4()/get6() to v4()/v6()
 
+- Wrap RoutingEntry members into getter/setter methods!!!!
 --------
 - "ack" in LinkStateMsg redundant? (never read)
 Q: what is the TELinkInfo.state flag?
@@ -77,6 +80,8 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
      - makemakefiles: -P option
      - use new opp_msgc features? (kind=..., length=...etc)
 
+----------------------
+- MPLS models: "gateway" field of routing entries gets lost after TED::rebuildRoutingTable
 ----------------------
 - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes? 
   ICMPv6 uses different type&code numeric values but this is only of interest
@@ -156,11 +161,6 @@ should be measured in RTT rather than absolute time (secs). So maybe we
 should say 5*RTT is "sufficiently long"?
 -----------------------
 802.11 bugs: see mailing list...
------------------------
-MPLS part: why is LinkNotifyMsg sent/processed by RSVP_TE and LDP? isn't this
-supposed to be part of the link state routing protocol? Hello also seems to
-be sent by RSVP...
-
 -----------------------
 FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
 This is not the usual way things are done on the internet. But if we assign 

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004-2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -148,7 +148,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     InterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
-    IPAddress routerId;
+    IPAddress _routerId;
     bool IPForward;
 
     //
@@ -171,7 +171,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                              const char *dev);
 
     // set router Id
-    void initializeRouterId();
+    void autoconfigRouterId();
 
     // adjust routes with src=IFACENETMASK to actual interface netmasks
     void updateNetmaskRoutes();
@@ -223,7 +223,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Returns routerId.
      */
-    IPAddress getRouterId()  {return routerId;}
+    IPAddress routerId()  {return _routerId;}
+
+    /**
+     * Sets routerId.
+     */
+    void setRouterId(IPAddress a)  {_routerId = a;}
 
     /** @name Routing functions (query the route table) */
     //@{

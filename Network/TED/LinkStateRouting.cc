@@ -45,7 +45,7 @@ void LinkStateRouting::initialize(int stage)
         tedmod = TEDAccess().get();
 
         RoutingTable *rt = RoutingTableAccess().get();
-        routerId = rt->getRouterId();
+        routerId = rt->routerId();
 
         // listen for TED modifications
         NotificationBoard *nb = NotificationBoardAccess().get();

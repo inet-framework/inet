@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004-2006 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
 // This program is free software; you can redistribute it and/or
@@ -109,7 +109,7 @@ void RoutingTable::initialize(int stage)
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
         WATCH(IPForward);
-        WATCH(routerId);
+        WATCH(_routerId);
     }
     else if (stage==1)
     {
@@ -128,12 +128,18 @@ void RoutingTable::initialize(int stage)
         RoutingTableParser parser(ift, this);
         if (*filename && parser.readRoutingTableFromFile(filename)==-1)
             error("Error reading routing table file %s", filename);
+
+        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
+        // do it later in stage 3, after network configurators configured the interfaces)
+        const char *routerIdStr = par("routerId").stringValue();
+        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
+            _routerId = IPAddress(routerIdStr);
     }
     else if (stage==3)
     {
         // routerID selection must be after stage==2 when network autoconfiguration
         // assigns interface addresses
-        initializeRouterId();
+        autoconfigRouterId();
 
         // we don't use notifications during initialize(), so we do it manually.
         // Should be in stage=3 because autoconfigurator runs in stage=2.
@@ -144,34 +150,30 @@ void RoutingTable::initialize(int stage)
     }
 }
 
-void RoutingTable::initializeRouterId()
+void RoutingTable::autoconfigRouterId()
 {
-    const char *routerIdStr = par("routerId").stringValue();
-    if (!strcmp(routerIdStr, ""))
+    if (_routerId.isUnspecified())  // not yet configured
     {
-        routerId = IPAddress();
-    }
-    else if (!strcmp(routerIdStr, "auto"))
-    {
-        // choose highest interface address as routerId
-        routerId = IPAddress();
-        for (int i=0; i<ift->numInterfaces(); ++i)
+        const char *routerIdStr = par("routerId").stringValue();
+        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in stage 1
         {
-            InterfaceEntry *ie = ift->interfaceAt(i);
-            if (!ie->isLoopback() && ie->ipv4()->inetAddress().getInt() > routerId.getInt())
-                routerId = ie->ipv4()->inetAddress();
+            // choose highest interface address as routerId
+            for (int i=0; i<ift->numInterfaces(); ++i)
+            {
+                InterfaceEntry *ie = ift->interfaceAt(i);
+                if (!ie->isLoopback() && ie->ipv4()->inetAddress().getInt() > _routerId.getInt())
+                    _routerId = ie->ipv4()->inetAddress();
+            }
         }
     }
-    else
+    else // already configured
     {
-        routerId = IPAddress(routerIdStr);
-
         // if there is no interface with routerId yet, assign it to the loopback address;
         // TODO find out if this is a good practice, in which situations it is useful etc.
-        if (interfaceByAddress(routerId)==NULL)
+        if (interfaceByAddress(_routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->firstLoopbackInterface();
-            lo0->ipv4()->setInetAddress(routerId);
+            lo0->ipv4()->setInetAddress(_routerId);
             lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
         }
     }
@@ -183,10 +185,10 @@ void RoutingTable::updateDisplayString()
         return;
 
     char buf[80];
-    if (routerId.isUnspecified())
+    if (_routerId.isUnspecified())
         sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
     else
-        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
+        sprintf(buf, "routerId: %s\n%d+%d routes", _routerId.str().c_str(), routes.size(), multicastRoutes.size());
     displayString().setTagArg("t",0,buf);
 }
 

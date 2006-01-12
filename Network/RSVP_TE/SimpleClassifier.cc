@@ -32,7 +32,7 @@ void SimpleClassifier::initialize(int stage)
 
     RoutingTableAccess routingTableAccess;
     RoutingTable *rt = routingTableAccess.get();
-    routerId = rt->getRouterId();
+    routerId = rt->routerId();
 
     LIBTableAccess libTableAccess;
     lt = libTableAccess.get();

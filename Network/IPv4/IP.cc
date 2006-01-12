@@ -286,7 +286,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
             IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
             // FIXME code from the MPLS model: set packet dest address to routerId (???)
-            datagramCopy->setDestAddress(rt->getRouterId());
+            datagramCopy->setDestAddress(rt->routerId());
 
             localDeliver(datagramCopy);
         }

@@ -346,7 +346,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
         IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
 
         // FIXME code from the MPLS model: set packet dest address to routerId (???)
-        datagramCopy->setDestAddress(rt->getRouterId());
+        datagramCopy->setDestAddress(rt->routerId());
 
         localDeliver(datagramCopy);
     }

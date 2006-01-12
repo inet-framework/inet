@@ -10,10 +10,9 @@
 
 				<bandwidth>100000</bandwidth>
 				<route>
-					<node>10.1.1.1</node>
-					<node>10.1.2.1</node>
-					<node>10.1.4.1</node>
-					<node>10.1.5.1</node>
+					<node>LSR35</node>
+					<node>LSR33</node>
+					<node>LSR23</node>
 				</route>
 
 				<permanent>true</permanent>

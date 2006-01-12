@@ -193,7 +193,7 @@ void LDP::sendMappingRequest(IPAddress dest, IPAddress addr, int length)
     requestMsg->setFec(fec);
 
     requestMsg->setReceiverAddress(dest);
-    requestMsg->setSenderAddress(rt->getRouterId());
+    requestMsg->setSenderAddress(rt->routerId());
 
     sendToPeer(dest, requestMsg);
 }
@@ -399,7 +399,7 @@ void LDP::sendHelloTo(IPAddress dest)
     LDPHello *hello = new LDPHello("LDP-Hello");
     hello->setByteLength(LDP_HEADER_BYTES);
     hello->setType(HELLO);
-    hello->setSenderAddress(rt->getRouterId());
+    hello->setSenderAddress(rt->routerId());
     //hello->setReceiverAddress(...);
     hello->setHoldTime(holdTime);
     //hello->setRbit(...);
@@ -472,7 +472,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
     // update TED and routing table
 
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
+    unsigned int index = tedmod->linkIndex(rt->routerId(), peerIP);
     tedmod->ted[index].state = false;
     announceLinkChange(index);
     tedmod->rebuildRoutingTable();
@@ -488,7 +488,7 @@ void LDP::processLDPHello(LDPHello *msg)
 
     EV << "Received LDP Hello from " << peerAddr << ", ";
 
-    if (peerAddr.isUnspecified() || peerAddr==rt->getRouterId())
+    if (peerAddr.isUnspecified() || peerAddr==rt->routerId())
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
         EV << "that's myself, ignore\n";
@@ -496,7 +496,7 @@ void LDP::processLDPHello(LDPHello *msg)
     }
 
     // mark link as working if it was failed, and rebuild table
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
+    unsigned int index = tedmod->linkIndex(rt->routerId(), peerAddr);
     if (!tedmod->ted[index].state)
     {
         tedmod->ted[index].state = true;
@@ -519,7 +519,7 @@ void LDP::processLDPHello(LDPHello *msg)
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = ift->interfaceAt(interfaceId)->name();
-    info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
+    info.activeRole = peerAddr.getInt() > rt->routerId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");
     scheduleAt(simTime() + holdTime, info.timeout);
@@ -543,7 +543,7 @@ void LDP::openTCPConnectionToPeer(int peerIndex)
     TCPSocket *socket = new TCPSocket();
     socket->setOutputGate(gate("to_tcp_interface"));
     socket->setCallbackObject(this, (void*)peerIndex);
-    socket->bind(rt->getRouterId(), 0);
+    socket->bind(rt->routerId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
 
@@ -819,7 +819,7 @@ void LDP::sendNotify(int status, IPAddress dest, IPAddress addr, int length)
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
     lnMessage->setReceiverAddress(dest);
-    lnMessage->setSenderAddress(rt->getRouterId());
+    lnMessage->setSenderAddress(rt->routerId());
 
     FEC_TLV fec;
     fec.addr = addr;
@@ -837,7 +837,7 @@ void LDP::sendMapping(int type, IPAddress dest, int label, IPAddress addr, int l
     lmMessage->setByteLength(LDP_HEADER_BYTES); // FIXME find out actual length
     lmMessage->setType(type);
     lmMessage->setReceiverAddress(dest);
-    lmMessage->setSenderAddress(rt->getRouterId());
+    lmMessage->setSenderAddress(rt->routerId());
     lmMessage->setLabel(label);
 
     FEC_TLV fec;

@@ -103,11 +103,20 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
                 ie->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
+
+        // set routerId as well (if not yet configured)
+        RoutingTable *rt = nodeInfo[i].rt;
+        if (rt->routerId().isUnspecified())
+        {
+            rt->setRouterId(IPAddress(addr | 1U)); // 10.nn.nn.1
+        }
     }
 }
 
 void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
+    bool useRouterIdForRoutes = true; // TODO make it parameter
+
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i=0; i<topo.nodes(); i++)
     {
@@ -134,7 +143,10 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             if (!nodeInfo[k].isIPNode)
                 continue;
 
-            // find out neighbor's IP address
+            // find out neighbor's routerId
+            IPAddress neighborRouterId = nodeInfo[k].rt->routerId();
+
+            // find out neighbor's interface IP address
             int neighborGateId = node->out(j)->remoteGate()->id();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->interfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
@@ -147,8 +159,15 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 
             // add route
             RoutingEntry *e = new RoutingEntry();
-            e->host = ie->ipv4()->inetAddress(); // FIXME this is brain-dead, but looks like real-life routing tables are set up like this!!!!
-            e->gateway = neighborAddr;
+            if (useRouterIdForRoutes)
+            {
+                e->host = neighborRouterId;
+                e->gateway = neighborAddr;
+            }
+            else
+            {
+                e->host = neighborAddr; // and no gateway
+            }
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->name();
             e->interfacePtr = ie;

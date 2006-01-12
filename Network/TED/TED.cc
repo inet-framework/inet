@@ -45,7 +45,7 @@ void TED::initialize(int stage)
 
     rt = RoutingTableAccess().get();
     ift = InterfaceTableAccess().get();
-    routerId = rt->getRouterId();
+    routerId = rt->routerId();
     nb = NotificationBoardAccess().get();
 
     maxMessageId = 0;
