@@ -134,7 +134,8 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             cTopology::Node *neighbor = node->out(j)->remoteNode();
 
             // find neighbour's index in cTopology ==> k
-            for (int k=0; k<topo.nodes(); k++)
+            int k;
+            for (k=0; k<topo.nodes(); k++)
                 if (topo.node(k)==neighbor)
                     break;
             ASSERT(k<=topo.nodes());
