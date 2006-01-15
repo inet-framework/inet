@@ -1,0 +1,9 @@
+#lib table for MPLS network simulation test
+#lib4.table for LSR4
+
+LIB TABLE:
+
+In-lbl       In-intf 	Out-lbl   	Out-intf
+
+
+
