@@ -50,7 +50,7 @@ module RSVP_LSR
             display: "p=68,138;i=block/table";
         interfaceTable: InterfaceTable;
             display: "p=68,208;i=block/table";
-        ted_module: TED;
+        ted: TED;
             display: "i=block/table;p=312,203";
         linkStateRouting: LinkStateRouting;
             parameters:

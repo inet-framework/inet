@@ -63,7 +63,7 @@ module LDP_LSR
                 holdTime = holdTime,
                 helloInterval = helloInterval;
             display: "p=222,67;i=block/control";
-        ted_module: TED;
+        ted: TED;
             display: "p=340,244;i=block/table";
         linkStateRouting: LinkStateRouting;
             parameters:

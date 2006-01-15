@@ -25,7 +25,7 @@
 class TEDAccess : public ModuleAccess<TED>
 {
     public:
-        TEDAccess() : ModuleAccess<TED>("ted_module") {}
+        TEDAccess() : ModuleAccess<TED>("ted") {}
 };
 
 #endif
