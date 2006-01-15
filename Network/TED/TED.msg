@@ -46,23 +46,6 @@ struct TELinkStateInfo
 
 
 //
-// Packet for disseminating link state information (TELinkStateInfo[]) by the
-// LinkStateRouting module which implements a minimalistic link state routing
-// protocol.
-//
-message LinkStateMsg
-{
-    fields:
-        TELinkStateInfo linkInfo[];
-
-        bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
-        // bool ack = false; -- apparently unused, removed -- TODO check with Vojta
-
-        int command = LINK_STATE_MESSAGE; // FIXME maybe do without this...
-};
-
-
-//
 // Data structure supplied with NF_TED_CHANGE NotificationBoard notifications.
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.

@@ -17,13 +17,13 @@
 
 #include <omnetpp.h>
 #include "NotificationBoard.h"
-#include "TED.h"
-#include "TED_m.h"
+#include "LinkStatePacket_m.h"
 #include "IntServ.h"
 
 
 #define TED_TRAFFIC         1
 
+class TED;
 class RoutingTable;
 class InterfaceTable;
 class InterfaceEntry;
