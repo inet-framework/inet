@@ -40,7 +40,6 @@ class INET_API NetworkConfigurator : public cSimpleModule
         InterfaceTable *ift;
         RoutingTable *rt;
         bool usesDefaultRoute;
-        bool isRSVPRouter;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
     typedef std::vector<std::string> StringVector;
@@ -54,7 +53,7 @@ class INET_API NetworkConfigurator : public cSimpleModule
     void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
     void addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
     void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    void setRSVPPeers(cTopology& topo, NodeInfoVector& nodeInfo);
+    void setPeersParameter(const char *submodName, cTopology& topo, NodeInfoVector& nodeInfo);
     void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 
     void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);

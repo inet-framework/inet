@@ -52,8 +52,9 @@ void NetworkConfigurator::initialize(int stage)
         // also remember result in nodeInfo[].usesDefaultRoute
         addDefaultRoutes(topo, nodeInfo);
 
-        // help configure RSVP modules by setting their "peers" parameters
-        setRSVPPeers(topo, nodeInfo);
+        // help configure RSVP and LinkStateRouting modules by setting their "peers" parameters
+        setPeersParameter("rsvp", topo, nodeInfo);
+        setPeersParameter("linkStateRouting", topo, nodeInfo);
 
         // calculate shortest paths, and add corresponding static routes
         fillRoutingTables(topo, nodeInfo);
@@ -223,37 +224,28 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
     }
 }
 
-void NetworkConfigurator::setRSVPPeers(cTopology& topo, NodeInfoVector& nodeInfo)
+void NetworkConfigurator::setPeersParameter(const char *submodName, cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // the RSVP module expects a "peers" module parameter to contain the interfaces
     // towards directly connected other RSVP routers. Since it's cumbersome to configure
-    // manually in a large network, do it here.
+    // manually in a large network, do it here (submodName = "rsvp").
+    // The LinkStateRouting module is similar, so this function is also called with submodName = "LinkStateRouting".
 
-    // step 1: determine which nodes are RSVP routers
-    for (int i=0; i<topo.nodes(); i++)
-        nodeInfo[i].isRSVPRouter = nodeInfo[i].isIPNode && topo.node(i)->module()->submodule("rsvp")!=NULL;
-
-    // step 2: for each RSVP router, collect neighbors which are also RSVP routers
+    // for each RSVP router, collect neighbors which are also RSVP routers
     for (int i=0; i<topo.nodes(); i++)
     {
-        if (!nodeInfo[i].isRSVPRouter)
+        // if it doesn't have an RSVP submodule, we're not interested
+        cModule *submod = topo.node(i)->module()->submodule(submodName);
+        if (submod==NULL)
             continue;
 
         std::string peers;
         cTopology::Node *node = topo.node(i);
         for (int j=0; j<node->outLinks(); j++)
         {
-            cTopology::Node *neighbor = node->out(j)->remoteNode();
-
-            // find neighbour's index in cTopology ==> k
-            int k;
-            for (k=0; k<topo.nodes(); k++)
-                if (topo.node(k)==neighbor)
-                    break;
-            ASSERT(k<=topo.nodes());
-
-            // if it's not an RSVP router, then we're not interested
-            if (!nodeInfo[k].isRSVPRouter)
+            // if neighbor is not an RSVP router, then we're not interested
+            cModule *neighborSubmod = node->out(j)->remoteNode()->module()->submodule(submodName);
+            if (neighborSubmod==NULL)
                 continue;
 
             // find our own interface towards neighbor
@@ -265,8 +257,8 @@ void NetworkConfigurator::setRSVPPeers(cTopology& topo, NodeInfoVector& nodeInfo
             peers += std::string(" ") + ie->name();
         }
 
-        cModule *rsvp = topo.node(i)->module()->submodule("rsvp");
-        rsvp->par("peers") = peers.c_str();
+        // set "peers" parameter
+        submod->par("peers") = peers.c_str();
     }
 }
 
