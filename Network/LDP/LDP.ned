@@ -35,8 +35,7 @@
 simple LDP
     parameters:
         holdTime : numeric,
-        helloInterval : numeric,
-        routerId : string;
+        helloInterval : numeric;
     gates:
         in: from_tcp_interface;
         in: from_udp_interface;

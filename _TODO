@@ -35,7 +35,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 
 - create example network with both Ethernet and PPP
 
-
 - IP/IPv6: implement tunnelling
 
 - revise fragmentation in IP
@@ -113,7 +112,6 @@ Interfaces:
 -----------------------
 - MPLS/LDP/RSVP: 
     - document! ScenarioManager commands, XML file formats, unimplemented features
-    - split TED to TED+LinkStateRouting !
     - Quagga ospfd: could it serve as OSPF_TE??
 - mpls models use interface NAME - why?
 

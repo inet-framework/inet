@@ -560,7 +560,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
 
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses
-        // the routing is based on?
+        // the routing is based on? --Andras
         IPAddress peerAddr = socket->remoteAddress().get4();
 
         int i = findPeer(peerAddr);
@@ -853,7 +853,7 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
     int status = packet->getStatus();
 
     // XXX FIXME NO_ROUTE processing should probably be split into two functions,
-    // this is not the cleanest thing I ever wrote :)
+    // this is not the cleanest thing I ever wrote :)   --Vojta
 
     if (packet->isSelfMessage())
     {
