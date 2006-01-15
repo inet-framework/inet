@@ -16,7 +16,7 @@
 #include <omnetpp.h>
 #include <string.h>
 
-#include "MPLSModule.h"
+#include "MPLS.h"
 #include "Utils.h"
 
 #include "InterfaceTableAccess.h"
@@ -31,9 +31,9 @@
 #define ICMP_TRAFFIC    6
 
 
-Define_Module(MPLSModule);
+Define_Module(MPLS);
 
-void MPLSModule::initialize(int stage)
+void MPLS::initialize(int stage)
 {
     if (stage!=3) // interfaceTable must be initialized
         return;
@@ -60,7 +60,7 @@ void MPLSModule::initialize(int stage)
     */
 }
 
-void MPLSModule::handleMessage(cMessage * msg)
+void MPLS::handleMessage(cMessage * msg)
 {
     if (!strcmp(msg->arrivalGate()->name(), "ifIn"))
     {
@@ -78,12 +78,12 @@ void MPLSModule::handleMessage(cMessage * msg)
     }
 }
 
-void MPLSModule::sendToL2(cMessage *msg, int gateIndex)
+void MPLS::sendToL2(cMessage *msg, int gateIndex)
 {
     send(msg, "ifOut", gateIndex);
 }
 
-void MPLSModule::processPacketFromL3(cMessage * msg)
+void MPLS::processPacketFromL3(cMessage * msg)
 {
     IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(msg);
     int gateIndex = msg->arrivalGate()->index();
@@ -109,7 +109,7 @@ void MPLSModule::processPacketFromL3(cMessage * msg)
     labelAndForwardIPDatagram(ipdatagram);
 }
 
-bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
+bool MPLS::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 {
     LabelOpVector outLabel;
     std::string outInterface;
@@ -146,7 +146,7 @@ bool MPLSModule::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
     return true;
 }
 
-void MPLSModule::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
+void MPLS::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
 {
     if (tryLabelAndForwardIPDatagram(ipdatagram))
         return;
@@ -161,7 +161,7 @@ void MPLSModule::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
     sendToL2(ipdatagram, gateIndex);
 }
 
-void MPLSModule::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
+void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
 {
     unsigned int n = outLabel.size();
 
@@ -193,7 +193,7 @@ void MPLSModule::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabe
     }
 }
 
-void MPLSModule::processPacketFromL2(cMessage *msg)
+void MPLS::processPacketFromL2(cMessage *msg)
 {
     IPDatagram *ipdatagram = dynamic_cast<IPDatagram *>(msg);
     MPLSPacket *mplsPacket = dynamic_cast<MPLSPacket *>(msg);
@@ -219,7 +219,7 @@ void MPLSModule::processPacketFromL2(cMessage *msg)
     }
 }
 
-void MPLSModule::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
+void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
     int gateIndex = mplsPacket->arrivalGate()->index();
     InterfaceEntry *ie = ift->interfaceByNetworkLayerGateIndex(gateIndex);

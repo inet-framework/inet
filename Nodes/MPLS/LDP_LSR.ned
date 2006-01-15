@@ -21,7 +21,7 @@ import
     "UDP",
     "LinkStateRouting",
     "TED",
-    "MPLSModule",
+    "MPLS",
     "PPPInterface",
     "LIBTable";
 
@@ -81,7 +81,7 @@ module LDP_LSR
             display: "p=224,223;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
             display: "p=105,388,row,90;q=l2queue;i=block/ifcard";
-        mplsModule: MPLSModule;
+        mpls: MPLS;
             parameters:
                 //peers = peers,
                 classifier = "ldp";
@@ -114,11 +114,11 @@ module LDP_LSR
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
 
-            ppp[i].netwOut --> mplsModule.ifIn[i];
-            ppp[i].netwIn <-- mplsModule.ifOut[i];
+            ppp[i].netwOut --> mpls.ifIn[i];
+            ppp[i].netwIn <-- mpls.ifOut[i];
 
-            mplsModule.netwOut[i] --> networkLayer.ifIn[i];
-            mplsModule.netwIn[i] <-- networkLayer.ifOut[i];
+            mpls.netwOut[i] --> networkLayer.ifIn[i];
+            mpls.netwIn[i] <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

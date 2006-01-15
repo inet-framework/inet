@@ -1,5 +1,4 @@
 - rename MPLSModule to MPLS;
-- LIBtable.cc/h to capital "T"!
 - IPvXAddress: change get4()/get6() to v4()/v6()
 
 - Wrap RoutingEntry members into getter/setter methods!!!!

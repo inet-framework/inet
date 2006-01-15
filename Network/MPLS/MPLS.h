@@ -31,7 +31,7 @@
 /**
  * TODO documentation
  */
-class INET_API MPLSModule : public cSimpleModule
+class INET_API MPLS : public cSimpleModule
 {
     private:
         simtime_t delay1;

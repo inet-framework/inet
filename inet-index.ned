@@ -74,9 +74,9 @@
 //  - mobility: MobileHost; mobility models such as TurtleMobility,
 //    BonnMotionMobility, ANSimMobility, RandomWPMobility, MassMobility
 //
-// Starting points for the MPLS models:
-//  - the core modules: MPLSModule, LIBTable, LDP, RSVP, TED
-//  - MPLS-enabled routers: LDP_LSR, RSVP_LSR
+// Starting points for the \MPLS models:
+//  - the core modules: MPLS, LIBTable, LDP, RSVP, TED
+//  - \MPLS-enabled routers: LDP_LSR, RSVP_LSR
 //  - MPLSNet network model
 //  - <a href="standards.html">list of implemented standards</a>
 //
@@ -110,6 +110,6 @@
 // See <a href="http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/" target="_top">project page</a>
 // (no longer updated).
 //
-// The MPLS models are now also maintained by Andras Varga, as part of the
+// The \MPLS models are now also maintained by Andras Varga, as part of the
 // INET framework.
 //

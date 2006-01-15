@@ -50,7 +50,7 @@ void SimpleClassifier::handleMessage(cMessage *)
     ASSERT(false);
 }
 
-// IClassifier implementation (method invoked by MPLSModule)
+// IClassifier implementation (method invoked by MPLS)
 
 bool SimpleClassifier::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {

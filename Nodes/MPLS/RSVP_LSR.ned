@@ -14,7 +14,7 @@
 import
     "NotificationBoard",
     "NetworkLayer",
-    "MPLSModule",
+    "MPLS",
     "LIBTable",
     "RoutingTable",
     "InterfaceTable",
@@ -69,7 +69,7 @@ module RSVP_LSR
             display: "p=192,195;i=block/fork";
         ppp: PPPInterface[sizeof(out)];
             display: "p=88,329,row,90;q=l2queue;i=block/ifcard";
-        mplsModule: MPLSModule;
+        mpls: MPLS;
             parameters:
                 //peers = peers;
                 classifier = "classifier";
@@ -92,11 +92,11 @@ module RSVP_LSR
             in[i] --> ppp[i].physIn;
             out[i] <-- ppp[i].physOut;
 
-            ppp[i].netwOut --> mplsModule.ifIn[i];
-            ppp[i].netwIn <-- mplsModule.ifOut[i];
+            ppp[i].netwOut --> mpls.ifIn[i];
+            ppp[i].netwIn <-- mpls.ifOut[i];
 
-            mplsModule.netwOut[i] --> networkLayer.ifIn[i];
-            mplsModule.netwIn[i] <-- networkLayer.ifOut[i];
+            mpls.netwOut[i] --> networkLayer.ifIn[i];
+            mpls.netwIn[i] <-- networkLayer.ifOut[i];
         endfor;
 endmodule
 

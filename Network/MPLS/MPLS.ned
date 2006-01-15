@@ -44,7 +44,7 @@
 // inherit the L2's QoS. This implementation follows a generic approach; it
 // assumes no information of QoS from the link layer.
 //
-simple MPLSModule
+simple MPLS
     parameters:
 //      peers : string; // interfaces we should send labeled packets to (no loner used)
         classifier : string;

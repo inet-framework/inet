@@ -54,7 +54,7 @@ Network/IPv6/IPv6ErrorHandling.ned
 Network/IPv6/RoutingTable6.ned
 Network/LDP/LDP.ned
 Network/MPLS/LIBTable.ned
-Network/MPLS/MPLSModule.ned
+Network/MPLS/MPLS.ned
 Network/OSPFv2/OSPFRouting.ned
 Network/Quagga/Daemon.ned
 Network/Queue/DropTailQoSQueue.ned
