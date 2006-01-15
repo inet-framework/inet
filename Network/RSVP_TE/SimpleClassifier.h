@@ -23,7 +23,7 @@
 #include "IPDatagram.h"
 #include "IScriptable.h"
 #include "IRSVPClassifier.h"
-#include "LIBtable.h"
+#include "LIBTable.h"
 #include "IntServ.h"
 
 class RSVP;

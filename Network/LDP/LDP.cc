@@ -19,7 +19,7 @@
 #include <algorithm>
 #include "ConstType.h"
 #include "LDP.h"
-#include "LIBtable.h"
+#include "LIBTable.h"
 #include "MPLSModule.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"

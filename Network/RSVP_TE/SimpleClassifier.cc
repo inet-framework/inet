@@ -18,7 +18,7 @@
 #include "RoutingTableAccess.h"
 #include "LIBTableAccess.h"
 #include "RSVPAccess.h"
-#include "LIBtable.h"
+#include "LIBTable.h"
 
 Define_Module(SimpleClassifier);
 

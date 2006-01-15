@@ -18,7 +18,7 @@
 #include <omnetpp.h>
 
 #include "IPDatagram.h"
-#include "LIBtable.h"
+#include "LIBTable.h"
 
 /**
  * TODO documentation

@@ -23,7 +23,7 @@
 #include "IPDatagram.h"
 #include "ConstType.h"
 
-#include "LIBtable.h"
+#include "LIBTable.h"
 #include "InterfaceTable.h"
 
 #include "Classifier.h"

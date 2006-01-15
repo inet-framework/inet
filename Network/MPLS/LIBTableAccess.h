@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"
-#include "LIBtable.h"
+#include "LIBTable.h"
 
 
 /**

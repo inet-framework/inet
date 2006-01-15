@@ -14,7 +14,7 @@
 //
 
 #include <iostream>
-#include "LIBtable.h"
+#include "LIBTable.h"
 #include "XMLUtils.h"
 #include "RoutingTableAccess.h"
 
