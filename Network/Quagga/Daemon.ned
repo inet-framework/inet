@@ -11,14 +11,14 @@
 //
 
 simple Daemon
-	parameters:
-		rootfs : string,
-		server : string;
-	gates:
-		in: from_tcp_interface;
-		out: to_tcp_interface;
-		in: from_udp_interface;
-		out: to_udp_interface;
-		in: from_ip_interface;
-		out: to_ip_interface;
+    parameters:
+        rootfs : string,
+        server : string;
+    gates:
+        in: tcpIn;
+        out: tcpOut;
+        in: udpIn;
+        out: udpOut;
+        in: ipIn;
+        out: ipOut;
 endsimple

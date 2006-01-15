@@ -97,11 +97,11 @@ module LDP_LSR
         linkStateRouting.to_ip --> networkLayer.OSPFIn;
         linkStateRouting.from_ip <-- networkLayer.OSPFOut;
 
-        ldp.from_tcp_interface <-- tcp.to_appl++;
-        ldp.to_tcp_interface --> tcp.from_appl++;
+        ldp.tcpIn <-- tcp.to_appl++;
+        ldp.tcpOut --> tcp.from_appl++;
 
-        ldp.to_udp_interface --> udp.from_app++;
-        ldp.from_udp_interface <-- udp.to_app++;
+        ldp.udpOut --> udp.from_app++;
+        ldp.udpIn <-- udp.to_app++;
 
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;

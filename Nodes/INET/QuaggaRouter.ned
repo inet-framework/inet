@@ -92,17 +92,17 @@ module QuaggaRouter
         udp.to_ip --> networkLayer.UDPIn;
         udp.from_ip <-- networkLayer.UDPOut;
 
-        zebra.from_tcp_interface <-- tcp.to_appl++;
-        zebra.to_tcp_interface --> tcp.from_appl++;
+        zebra.tcpIn <-- tcp.to_appl++;
+        zebra.tcpOut --> tcp.from_appl++;
 
-        ospfd.from_tcp_interface <-- tcp.to_appl++;
-        ospfd.to_tcp_interface --> tcp.from_appl++;
+        ospfd.tcpIn <-- tcp.to_appl++;
+        ospfd.tcpOut --> tcp.from_appl++;
 
-        ospfd.from_udp_interface <-- udp.to_app++;
-        ospfd.to_udp_interface --> udp.from_app++;
+        ospfd.udpIn <-- udp.to_app++;
+        ospfd.udpOut --> udp.from_app++;
 
-        ospfd.to_ip_interface --> networkLayer.OSPFIn;
-        ospfd.from_ip_interface <-- networkLayer.OSPFOut;
+        ospfd.ipOut --> networkLayer.OSPFIn;
+        ospfd.ipIn <-- networkLayer.OSPFOut;
 
         for i=0..sizeof(ethOut)-1 do
             ethIn[i] --> eth[i].physIn;

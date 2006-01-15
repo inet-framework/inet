@@ -240,7 +240,7 @@ int Daemon::createTcpSocket(cMessage *msg)
     ASSERT(fd[socket].type == FD_EMPTY);
 
     TCPSocket *tcp = msg? new TCPSocket(msg): new TCPSocket();
-    cGate *g = gate("to_tcp_interface");
+    cGate *g = gate("tcpOut");
     ASSERT(g);
     tcp->setOutputGate(g);
     tcp->setCallbackObject(this, (void*)socket);
@@ -265,7 +265,7 @@ int Daemon::createUdpSocket()
     ASSERT(fd[socket].type == FD_EMPTY);
 
     UDPSocket *udp = new UDPSocket();
-    cGate *g = gate("to_udp_interface");
+    cGate *g = gate("udpOut");
     ASSERT(g);
     udp->setOutputGate(g);
     udp->setUserId(socket);
@@ -288,7 +288,7 @@ int Daemon::createRawSocket(int protocol)
     ASSERT(fd[socket].type == FD_EMPTY);
 
     RawSocket *raw = new RawSocket(socket, protocol);
-    cGate *g = gate("to_ip_interface");
+    cGate *g = gate("ipOut");
     ASSERT(g);
     raw->setOutputGate(g);
 

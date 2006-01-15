@@ -37,8 +37,8 @@ simple LDP
         holdTime : numeric,
         helloInterval : numeric;
     gates:
-        in: from_tcp_interface;
-        in: from_udp_interface;
-        out: to_tcp_interface;
-        out: to_udp_interface;
+        in: tcpIn;
+        in: udpIn;
+        out: tcpOut;
+        out: udpOut;
 endsimple

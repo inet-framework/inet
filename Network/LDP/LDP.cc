@@ -122,12 +122,12 @@ void LDP::initialize(int stage)
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
     // bind UDP socket
-    udpSocket.setOutputGate(gate("to_udp_interface"));
+    udpSocket.setOutputGate(gate("udpOut"));
     udpSocket.bind(LDP_PORT);
 
     // start listening for incoming TCP conns
     EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-    serverSocket.setOutputGate(gate("to_tcp_interface"));
+    serverSocket.setOutputGate(gate("tcpOut"));
     serverSocket.bind(LDP_PORT);
     serverSocket.listen();
 
@@ -163,12 +163,12 @@ void LDP::handleMessage(cMessage *msg)
             processNOTIFICATION(check_and_cast<LDPNotify*>(msg));
         }
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_udp_interface"))
+    else if (!strcmp(msg->arrivalGate()->name(), "udpIn"))
     {
         // we can only receive LDP Hello from UDP (everything else goes over TCP)
         processLDPHello(check_and_cast<LDPHello *>(msg));
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_tcp_interface"))
+    else if (!strcmp(msg->arrivalGate()->name(), "tcpIn"))
     {
         processMessageFromTCP(msg);
     }
@@ -539,7 +539,7 @@ void LDP::processLDPHello(LDPHello *msg)
 void LDP::openTCPConnectionToPeer(int peerIndex)
 {
     TCPSocket *socket = new TCPSocket();
-    socket->setOutputGate(gate("to_tcp_interface"));
+    socket->setOutputGate(gate("tcpOut"));
     socket->setCallbackObject(this, (void*)peerIndex);
     socket->bind(rt->routerId(), 0);
     socketMap.addSocket(socket);
@@ -556,7 +556,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
         // not yet in socketMap, must be new incoming connection.
         // find which peer it is and register connection
         socket = new TCPSocket(msg);
-        socket->setOutputGate(gate("to_tcp_interface"));
+        socket->setOutputGate(gate("tcpOut"));
 
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses
