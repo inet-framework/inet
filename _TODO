@@ -1,8 +1,8 @@
-- rename MPLSModule to MPLS;
 - IPvXAddress: change get4()/get6() to v4()/v6()
-
 - Wrap RoutingEntry members into getter/setter methods!!!!
+
 --------
+
 - "ack" in LinkStateMsg redundant? (never read)
 Q: what is the TELinkInfo.state flag?
 Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
