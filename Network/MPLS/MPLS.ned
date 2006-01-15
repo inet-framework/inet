@@ -49,7 +49,7 @@
 //
 simple MPLS
     parameters:
-        classifier : string;
+        classifier : string; // a module which implements the IClassifier C++ interface
     gates:
         in: netwIn[];
         out: netwOut[];

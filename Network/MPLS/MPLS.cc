@@ -22,7 +22,7 @@
 #include "InterfaceTableAccess.h"
 #include "RoutingTableAccess.h"
 #include "LIBTableAccess.h"
-#include "Classifier.h"
+#include "IClassifier.h"
 
 
 // FIXME temporary fix

@@ -26,7 +26,7 @@
 #include "UDPSocket.h"
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-#include "Classifier.h"
+#include "IClassifier.h"
 #include "NotificationBoard.h"
 
 #define LDP_PORT  646

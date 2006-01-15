@@ -26,10 +26,11 @@
 #include "LIBTable.h"
 #include "InterfaceTable.h"
 
-#include "Classifier.h"
+#include "IClassifier.h"
+
 
 /**
- * TODO documentation
+ * Implements the MPLS protocol; see the NED file for more info.
  */
 class INET_API MPLS : public cSimpleModule
 {

@@ -18,17 +18,17 @@
 #include <omnetpp.h>
 
 #include "IntServ.h"
-#include "Classifier.h"
+#include "IClassifier.h"
 
 /**
- * TODO documentation
+ * TODO
  */
 class INET_API IRSVPClassifier : public IClassifier
 {
   public:
     virtual ~IRSVPClassifier() {}
 
-    virtual void bind(const SessionObj_t&session, const SenderTemplateObj_t& sender, int inLabel) = 0;
+    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) = 0;
 };
 
 #endif
