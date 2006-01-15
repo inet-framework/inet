@@ -138,7 +138,5 @@ all:
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
-	cd Tests/MPLS && $(MAKEMAKE) $(OPTS) -n -r
-	cd Tests/MPLS/LDP1 && $(MAKEMAKE) $(OPTS) -w $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES)
 	cd Tests/NewTCP && $(MAKEMAKE) $(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 

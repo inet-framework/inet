@@ -44,7 +44,7 @@ void MPLS::initialize(int stage)
     pct = check_and_cast<IClassifier*>(parentModule()->submodule(par("classifier")));
 
     /*
-     * we now send plain ipdatagrams instead of packets with label=-1
+     * we now send plain IPDatagrams instead of packets with label=-1
      * and we thus do not need this extra configuration
      *
     labelIf.resize(ift->numInterfaces());

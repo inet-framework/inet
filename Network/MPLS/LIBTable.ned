@@ -1,4 +1,7 @@
 //
+// (C) 2005 Vojtech Janota
+// (C) 2003 Xuan Thang Nguyen
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -10,7 +13,12 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+
+//
+// Stores the LIB (Label Information Base), accessed by MPLS and its 
+// associated control protocols (RSVP, LDP) via direct C++ method calls.
+//
 simple LIBTable
     parameters:
-        conf: xml;
+        conf: xml; // table contents to be loaded on startup
 endsimple

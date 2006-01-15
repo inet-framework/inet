@@ -1,4 +1,7 @@
 //
+// (C) 2005 Vojtech Janota
+// (C) 2003 Xuan Thang Nguyen
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -12,7 +15,7 @@
 
 
 //
-// Implements the MPLS protocol.
+// Implements the \MPLS protocol.
 //
 // MPLS module is added between layer 2 and 3 in the OSI model for fast packet
 // switching. MPLS should be transparent to signalling protocols. Signalling
@@ -46,7 +49,6 @@
 //
 simple MPLS
     parameters:
-//      peers : string; // interfaces we should send labeled packets to (no loner used)
         classifier : string;
     gates:
         in: netwIn[];
