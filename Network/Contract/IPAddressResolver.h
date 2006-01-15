@@ -1,7 +1,4 @@
 //
-// Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
-// Institute of Telematics, University of Karlsruhe, Germany.
-// University Comillas, Madrid, Spain.
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -45,6 +42,7 @@ class NotificationBoard;
  *      "subnet.server[3](ipv6)"
  *    - IPv4 or IPv6 address of an interface of a host or router:
  *      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
+ *    - routerId: "router1/routerId", "R1/routerId"
  */
 class INET_API IPAddressResolver
 {
@@ -90,9 +88,7 @@ class INET_API IPAddressResolver
     /** @name Utility functions supporting resolve() */
     //@{
     /**
-     * Returns IP or IPv6 address of the given host or router. If different interfaces
-     * of the host/router have different IP addresses, the function throws
-     * an error.
+     * Returns IPv4 or IPv6 address of the given host or router.
      *
      * This function uses routingTableOf() to find the RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
@@ -105,14 +101,19 @@ class INET_API IPAddressResolver
     IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6);
 
     /**
-     * Returns the IP or IPv6 address of the given host or router, given its InterfaceTable
-     * module. If different interfaces have different IP addresses, the function
-     * throws an error.
+     * Returns the router Id of the given router. Router Id is obtained from
+     * the routerId() method of the RoutingTable submodule.
+     */
+    IPAddress routerIdOf(cModule *host);
+
+    /**
+     * Returns the IPv4 or IPv6 address of the given host or router, given its InterfaceTable
+     * module. For IPv4, the first usable interface address is chosen.
      */
     IPvXAddress getAddressFrom(InterfaceTable *ift, int addrType=ADDR_PREFER_IPv6);
 
     /**
-     * Returns the IP or IPv6 address of the given interface (of a host or router).
+     * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
      */
     IPvXAddress getAddressFrom(InterfaceEntry *ie, int addrType=ADDR_PREFER_IPv6);
 

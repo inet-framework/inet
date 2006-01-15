@@ -1134,8 +1134,10 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
             OI = tedmod->interfaceAddrByPeerAddress(ERO[0].node);
         }
 
-        HelloState_t *h = findHello(tedmod->peerByLocalAddress(OI));
-        ASSERT(h);
+        IPAddress peer = tedmod->peerByLocalAddress(OI);
+        HelloState_t *h = findHello(peer);
+        if (!h)
+            error("Peer %s on interface %s is not an RSVP peer", peer.str().c_str(), OI.str().c_str());
 
         // ok, only if next hop is up and running
 

@@ -82,9 +82,17 @@ bool IPAddressResolver::tryResolve(const char *s, IPvXAddress& result, int addrT
     // get address from the given module/interface
     if (ifname.empty())
         result = addressOf(mod, addrType);
+    else if (ifname == "routerId")
+        result = IPvXAddress(routerIdOf(mod)); // addrType is meaningless here, routerId is protocol independent
     else
         result = addressOf(mod, ifname.c_str(), addrType);
     return !result.isUnspecified();
+}
+
+IPAddress IPAddressResolver::routerIdOf(cModule *host)
+{
+    RoutingTable *rt = routingTableOf(host);
+    return rt->routerId();
 }
 
 IPvXAddress IPAddressResolver::addressOf(cModule *host, int addrType)
@@ -150,23 +158,19 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
 
 IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
 {
-    // browse interfaces: for the purposes of this function, all of them should
-    // share the same IP address
     IPAddress addr;
     if (ift->numInterfaces()==0)
         opp_error("IPAddressResolver: interface table `%s' has no interface registered "
                   "(yet? try in a later init stage!)", ift->fullPath().c_str());
 
+    // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
     for (int i=0; i<ift->numInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
         if (ie->ipv4() && !ie->ipv4()->inetAddress().isUnspecified() && !ie->isLoopback())
         {
-            if (!addr.isUnspecified() && ie->ipv4()->inetAddress()!=addr)
-                opp_error("IPAddressResolver: IP address is ambiguous: different "
-                          "interfaces in `%s' have different IP addresses",
-                          ift->fullPath().c_str());
             addr = ie->ipv4()->inetAddress();
+            break;
         }
     }
     return addr;

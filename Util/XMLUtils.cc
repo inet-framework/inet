@@ -1,5 +1,6 @@
 
 #include "XMLUtils.h"
+#include "IPAddressResolver.h"
 
 #ifdef _MSC_VER
 #define strcasecmp  stricmp
@@ -128,7 +129,7 @@ IPAddress getParameterIPAddressValue(const cXMLElement *ptr, const char *name, I
 IPAddress getParameterIPAddressValue(const cXMLElement *ptr, const char *name)
 {
 	const cXMLElement *xvalue = getUniqueChild(ptr, name);
-	return IPAddress(xvalue->getNodeValue());
+	return IPAddressResolver().resolve(xvalue->getNodeValue()).get4();
 }
 
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double def)
