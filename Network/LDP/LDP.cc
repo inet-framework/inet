@@ -846,6 +846,7 @@ void LDP::sendMapping(int type, IPAddress dest, int label, IPAddress addr, int l
 
     sendToPeer(dest, lmMessage);
 }
+
 void LDP::processNOTIFICATION(LDPNotify *packet)
 {
     FEC_TLV fec = packet->getFec();

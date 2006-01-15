@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <sessions>
 	<session>
-		<endpoint>1.1.1.1 <!--FIXME replace with correct IP address--> </endpoint>
+		<endpoint>1.1.1.1<!--FIXME replace with correct IP address--></endpoint>
 		<tunnel_id>1</tunnel_id>
 
 		<paths>

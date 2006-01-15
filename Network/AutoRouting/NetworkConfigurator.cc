@@ -52,6 +52,9 @@ void NetworkConfigurator::initialize(int stage)
         // also remember result in nodeInfo[].usesDefaultRoute
         addDefaultRoutes(topo, nodeInfo);
 
+        // help configure RSVP modules by setting their "peers" parameters
+        setRSVPPeers(topo, nodeInfo);
+
         // calculate shortest paths, and add corresponding static routes
         fillRoutingTables(topo, nodeInfo);
 
@@ -217,6 +220,53 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         e->source = RoutingEntry::MANUAL;
         //e->metric() = 1;
         rt->addRoutingEntry(e);
+    }
+}
+
+void NetworkConfigurator::setRSVPPeers(cTopology& topo, NodeInfoVector& nodeInfo)
+{
+    // the RSVP module expects a "peers" module parameter to contain the interfaces
+    // towards directly connected other RSVP routers. Since it's cumbersome to configure
+    // manually in a large network, do it here.
+
+    // step 1: determine which nodes are RSVP routers
+    for (int i=0; i<topo.nodes(); i++)
+        nodeInfo[i].isRSVPRouter = nodeInfo[i].isIPNode && topo.node(i)->module()->submodule("rsvp")!=NULL;
+
+    // step 2: for each RSVP router, collect neighbors which are also RSVP routers
+    for (int i=0; i<topo.nodes(); i++)
+    {
+        if (!nodeInfo[i].isRSVPRouter)
+            continue;
+
+        std::string peers;
+        cTopology::Node *node = topo.node(i);
+        for (int j=0; j<node->outLinks(); j++)
+        {
+            cTopology::Node *neighbor = node->out(j)->remoteNode();
+
+            // find neighbour's index in cTopology ==> k
+            int k;
+            for (k=0; k<topo.nodes(); k++)
+                if (topo.node(k)==neighbor)
+                    break;
+            ASSERT(k<=topo.nodes());
+
+            // if it's not an RSVP router, then we're not interested
+            if (!nodeInfo[k].isRSVPRouter)
+                continue;
+
+            // find our own interface towards neighbor
+            int gateId = node->out(j)->localGate()->id();
+            InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
+            ASSERT(ie);
+
+            // interface name to peers list
+            peers += std::string(" ") + ie->name();
+        }
+
+        cModule *rsvp = topo.node(i)->module()->submodule("rsvp");
+        rsvp->par("peers") = peers.c_str();
     }
 }
 
