@@ -127,7 +127,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
         bufferUsed += length;
 
         // send PAUSE if above watermark
-        if (pauseUnits>0 && highWatermark>0 && bufferUsed>=highWatermark && pauseLastSent-simTime()>pauseInterval)
+        if (pauseUnits>0 && highWatermark>0 && bufferUsed>=highWatermark && simTime()-pauseLastSent>pauseInterval)
         {
             // send PAUSE on all ports
             for (int i=0; i<numPorts; i++)
