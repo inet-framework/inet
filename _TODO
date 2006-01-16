@@ -29,7 +29,7 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 
 - "make dist"?
 
-- TCP, UDP, LDP, RSVP, TED: rename gates...
+- TCP, UDP: rename gates...
 
 - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
