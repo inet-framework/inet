@@ -4,49 +4,49 @@ channel net37ch
     datarate 60000;
 endchannel
 
-module R37
+module R37orig
     submodules:
         configurator: NetworkConfigurator;
             parameters:
                 moduleTypes = "RSVP_LSR";
-            display: "p=100,100;i=block/cogwheel_s";
-        LSR0 : RSVP_LSR;  display: "p=391,225;i=abstract/router_s";
-        LSR1 : RSVP_LSR;  display: "p=799,589;i=abstract/router_s";
-        LSR2 : RSVP_LSR;  display: "p=289,472;i=abstract/router_s";
-        LSR3 : RSVP_LSR;  display: "p=712,418;i=abstract/router_s";
-        LSR4 : RSVP_LSR;  display: "p=541,228;i=abstract/router_s";
-        LSR5 : RSVP_LSR;  display: "p=288,169;i=abstract/router_s";
-        LSR6 : RSVP_LSR;  display: "p=256,394;i=abstract/router_s";
-        LSR7 : RSVP_LSR;  display: "p=380,263;i=abstract/router_s";
-        LSR8 : RSVP_LSR;  display: "p=682,348;i=abstract/router_s";
-        LSR9 : RSVP_LSR;  display: "p=536,142;i=abstract/router_s";
-        LSR10 : RSVP_LSR;  display: "p=177,170;i=abstract/router_s";
-        LSR11 : RSVP_LSR;  display: "p=424,262;i=abstract/router_s";
-        LSR12 : RSVP_LSR;  display: "p=470,279;i=abstract/router_s";
-        LSR13 : RSVP_LSR;  display: "p=278,91;i=abstract/router_s";
-        LSR14 : RSVP_LSR;  display: "p=467,214;i=abstract/router_s";
-        LSR15 : RSVP_LSR;  display: "p=724,19;i=abstract/router_s";
-        LSR16 : RSVP_LSR;  display: "p=685,287;i=abstract/router_s";
-        LSR17 : RSVP_LSR;  display: "p=20,519;i=abstract/router_s";
-        LSR18 : RSVP_LSR;  display: "p=298,236;i=abstract/router_s";
-        LSR19 : RSVP_LSR;  display: "p=390,390;i=abstract/router_s";
-        LSR20 : RSVP_LSR;  display: "p=148,502;i=abstract/router_s";
-        LSR21 : RSVP_LSR;  display: "p=362,448;i=abstract/router_s";
-        LSR22 : RSVP_LSR;  display: "p=476,397;i=abstract/router_s";
-        LSR23 : RSVP_LSR;  display: "p=517,325;i=abstract/router_s";
-        LSR24 : RSVP_LSR;  display: "p=514,34;i=abstract/router_s";
-        LSR25 : RSVP_LSR;  display: "p=548,599;i=abstract/router_s";
-        LSR26 : RSVP_LSR;  display: "p=330,301;i=abstract/router_s";
-        LSR27 : RSVP_LSR;  display: "p=612,310;i=abstract/router_s";
-        LSR28 : RSVP_LSR;  display: "p=556,502;i=abstract/router_s";
-        LSR29 : RSVP_LSR;  display: "p=83,570;i=abstract/router_s";
-        LSR30 : RSVP_LSR;  display: "p=796,466;i=abstract/router_s";
-        LSR31 : RSVP_LSR;  display: "p=610,65;i=abstract/router_s";
-        LSR32 : RSVP_LSR;  display: "p=435,321;i=abstract/router_s";
-        LSR33 : RSVP_LSR;  display: "p=605,337;i=abstract/router_s";
-        LSR34 : RSVP_LSR;  display: "p=707,227;i=abstract/router_s";
-        LSR35 : RSVP_LSR;  display: "p=613,405;i=abstract/router_s";
-        LSR36 : RSVP_LSR;  display: "p=435,361;i=abstract/router_s";
+            display: "i=block/cogwheel";
+        LSR0 : RSVP_LSR;  display: "p=489,376;i=abstract/router_s";
+        LSR1 : RSVP_LSR;  display: "p=999,983;i=abstract/router_s";
+        LSR2 : RSVP_LSR;  display: "p=362,787;i=abstract/router_s";
+        LSR3 : RSVP_LSR;  display: "p=890,698;i=abstract/router_s";
+        LSR4 : RSVP_LSR;  display: "p=677,381;i=abstract/router_s";
+        LSR5 : RSVP_LSR;  display: "p=360,282;i=abstract/router_s";
+        LSR6 : RSVP_LSR;  display: "p=320,657;i=abstract/router_s";
+        LSR7 : RSVP_LSR;  display: "p=476,439;i=abstract/router_s";
+        LSR8 : RSVP_LSR;  display: "p=853,581;i=abstract/router_s";
+        LSR9 : RSVP_LSR;  display: "p=670,237;i=abstract/router_s";
+        LSR10 : RSVP_LSR;  display: "p=222,284;i=abstract/router_s";
+        LSR11 : RSVP_LSR;  display: "p=531,437;i=abstract/router_s";
+        LSR12 : RSVP_LSR;  display: "p=588,466;i=abstract/router_s";
+        LSR13 : RSVP_LSR;  display: "p=348,152;i=abstract/router_s";
+        LSR14 : RSVP_LSR;  display: "p=584,357;i=abstract/router_s";
+        LSR15 : RSVP_LSR;  display: "p=905,32;i=abstract/router_s";
+        LSR16 : RSVP_LSR;  display: "p=857,479;i=abstract/router_s";
+        LSR17 : RSVP_LSR;  display: "p=25,866;i=abstract/router_s";
+        LSR18 : RSVP_LSR;  display: "p=373,394;i=abstract/router_s";
+        LSR19 : RSVP_LSR;  display: "p=488,651;i=abstract/router_s";
+        LSR20 : RSVP_LSR;  display: "p=185,838;i=abstract/router_s";
+        LSR21 : RSVP_LSR;  display: "p=453,748;i=abstract/router_s";
+        LSR22 : RSVP_LSR;  display: "p=595,662;i=abstract/router_s";
+        LSR23 : RSVP_LSR;  display: "p=647,542;i=abstract/router_s";
+        LSR24 : RSVP_LSR;  display: "p=643,58;i=abstract/router_s";
+        LSR25 : RSVP_LSR;  display: "p=686,999;i=abstract/router_s";
+        LSR26 : RSVP_LSR;  display: "p=413,502;i=abstract/router_s";
+        LSR27 : RSVP_LSR;  display: "p=766,518;i=abstract/router_s";
+        LSR28 : RSVP_LSR;  display: "p=696,837;i=abstract/router_s";
+        LSR29 : RSVP_LSR;  display: "p=104,950;i=abstract/router_s";
+        LSR30 : RSVP_LSR;  display: "p=995,778;i=abstract/router_s";
+        LSR31 : RSVP_LSR;  display: "p=763,109;i=abstract/router_s";
+        LSR32 : RSVP_LSR;  display: "p=544,535;i=abstract/router_s";
+        LSR33 : RSVP_LSR;  display: "p=757,563;i=abstract/router_s";
+        LSR34 : RSVP_LSR;  display: "p=884,379;i=abstract/router_s";
+        LSR35 : RSVP_LSR;  display: "p=767,675;i=abstract/router_s";
+        LSR36 : RSVP_LSR;  display: "p=544,603;i=abstract/router_s";
 
     connections:
         LSR7.out++ --> net37ch --> LSR0.in++;  LSR7.in++ <-- net37ch <-- LSR0.out++; // cost 259
@@ -108,6 +108,6 @@ module R37
         LSR36.out++ --> net37ch --> LSR32.in++;  LSR36.in++ <-- net37ch <-- LSR32.out++; // cost 218
 endmodule
 
-network r37 : R37
+network r37orig : R37orig
 endnetwork
 
