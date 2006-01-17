@@ -8,8 +8,10 @@ module R37
     submodules:
         configurator: NetworkConfigurator;
             parameters:
-                moduleTypes = "RSVP_LSR";
+                moduleTypes = "RSVP_LSR StandardHost";
             display: "p=100,100;i=block/cogwheel_s";
+        host1 : StandardHost;  display: "p=299,522;i=device/laptop_s";
+        host2 : StandardHost;  display: "p=757,227;i=device/laptop_s";
         LSR0 : RSVP_LSR;  display: "p=391,225;i=abstract/router_s";
         LSR1 : RSVP_LSR;  display: "p=799,589;i=abstract/router_s";
         LSR2 : RSVP_LSR;  display: "p=289,472;i=abstract/router_s";
@@ -106,6 +108,10 @@ module R37
         LSR36.out++ --> net37ch --> LSR19.in++;  LSR36.in++ <-- net37ch <-- LSR19.out++; // cost 507
         LSR36.out++ --> net37ch --> LSR22.in++;  LSR36.in++ <-- net37ch <-- LSR22.out++; // cost 327
         LSR36.out++ --> net37ch --> LSR32.in++;  LSR36.in++ <-- net37ch <-- LSR32.out++; // cost 218
+
+        host1.out++ --> net37ch --> LSR2.in++; host1.in++ <-- net37ch <-- LSR2.out++;
+        host2.out++ --> net37ch --> LSR34.in++; host2.in++ <-- net37ch <-- LSR34.out++;
+
 endmodule
 
 network r37 : R37

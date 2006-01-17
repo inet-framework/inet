@@ -80,7 +80,7 @@ int RoutingTableParser::readRoutingTableFromFile (const char *filename)
 
     fp = fopen(filename, "r");
     if (fp == NULL)
-        opp_error("Error on opening routing table file.");
+        opp_error("Error opening routing table file `%s'", filename);
 
     // read the whole into the file[] char-array
     for (charpointer = 0;
