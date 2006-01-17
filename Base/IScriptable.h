@@ -43,14 +43,14 @@ class INET_API IScriptable
      * The command name can be obtained as:
      *
      * <pre>
-     * node->getTagName()
+     * const char *command = node->getTagName()
      * </pre>
      *
-     * And parameter are XML attributes, e.g. a "neighbour" parameter can be
+     * Parameters are XML attributes, e.g. a "neighbour" parameter can be
      * retrieved as:
      *
      * <pre>
-     * node->getAttribute("neighbour")
+     * const char *attr = node->getAttribute("neighbour")
      * </pre>
      *
      * More complex input can be passed in child elements. 
