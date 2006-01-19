@@ -159,7 +159,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
         bool request;
         bool ack;
 
-        // currrent status of this peer
+        // up/down status of this peer (true if we're getting regular hellos)
         bool ok;
     };
 

@@ -1,7 +1,7 @@
 
 channel net37ch
     delay 15ms;
-    datarate 60000;
+    datarate 128000;
 endchannel
 
 module R37
@@ -10,8 +10,11 @@ module R37
             parameters:
                 moduleTypes = "RSVP_LSR StandardHost";
             display: "p=100,100;i=block/cogwheel_s";
-        host1 : StandardHost;  display: "p=299,522;i=device/laptop_s";
-        host2 : StandardHost;  display: "p=757,227;i=device/laptop_s";
+        channelInstaller: ChannelInstaller;
+            parameters:
+                channelClass = "ThruputMeteringChannel",
+                channelAttrs = "format=u";
+            display: "p=100,160;i=block/cogwheel_s";
         LSR0 : RSVP_LSR;  display: "p=391,225;i=abstract/router_s";
         LSR1 : RSVP_LSR;  display: "p=799,589;i=abstract/router_s";
         LSR2 : RSVP_LSR;  display: "p=289,472;i=abstract/router_s";
@@ -49,6 +52,9 @@ module R37
         LSR34 : RSVP_LSR;  display: "p=707,227;i=abstract/router_s";
         LSR35 : RSVP_LSR;  display: "p=613,405;i=abstract/router_s";
         LSR36 : RSVP_LSR;  display: "p=435,361;i=abstract/router_s";
+
+        host1 : StandardHost;  display: "p=299,522;i=device/laptop_s";
+        host2 : StandardHost;  display: "p=757,227;i=device/laptop_s";
 
     connections:
         LSR7.out++ --> net37ch --> LSR0.in++;  LSR7.in++ <-- net37ch <-- LSR0.out++; // cost 259

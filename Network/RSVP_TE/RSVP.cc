@@ -1429,6 +1429,10 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
         EV << "local peer " << peer << " is now considered up and running" << endl;
 
         recoveryEvent(peer);
+
+        // if it was considered down, we have stopped sending hellos: resume now
+        if (!h->timer->isScheduled())
+            scheduleAt(simTime(), h->timer);
     }
 
     if (request)

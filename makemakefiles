@@ -124,6 +124,7 @@ all:
 
 	cd Examples/Quagga/Network1 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Quagga/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Quagga/OSPFBackbone && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MPLS/LDP && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/Net37 && $(MAKEMAKE) $(ALL_MODEL_OPTS)

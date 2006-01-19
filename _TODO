@@ -1,3 +1,12 @@
+--------
+- problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
+  LSR, configured IP addresses and host routes to PPP peers get lost. 
+  Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
+--------
+
+- quagga: rename "rootfs" param to "fsroot"!
+- check in Quagga documentation!!!
+
 - IPvXAddress: change get4()/get6() to v4()/v6()
 - Wrap RoutingEntry members into getter/setter methods!!!!
 
