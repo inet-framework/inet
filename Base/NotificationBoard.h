@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __NOTIFIER_H
-#define __NOTIFIER_H
+#ifndef __NOTIFICATIONBOARD_H
+#define __NOTIFICATIONBOARD_H
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)
@@ -36,16 +36,51 @@
  * modules which are interested in learning about those changes;
  * "Notification Broker".
  *
- * Modules that wish to receive notifications should implement the
- * INotifiable interface.
+ * Notification events are grouped into "categories." Examples of categories
+ * are: NF_HOSTPOSITION_UPDATED, NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN,
+ * NF_PP_TX_END, NF_LAYER2_HANDOVER_OCCURRED, NF_IPv4_ROUTINGTABLE_CHANGED,
+ * NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is identified by
+ * an integer (right now it's assigned in the source code via an enum,
+ * in the future we'll convert to dynamic category registration).
  *
- * Notification categories should be layed out like this:
- *    - layer 1 (physical): 1000-1999
- *    - layer 2 (data-link): 2000-2999
- *    - layer 3 (network): 3000-3999
- *    - layer 4 (transport): 4000-4999
- *    - layer 7 (application): 7000-7999
- *    - mobility: 8000-8999
+ * To trigger a notification, the client must obtain a pointer to the
+ * NotificationBoard of the given host or router (explained later), and
+ * call its fireChangeNotification() method. The notification will be
+ * delivered to all subscribed clients immediately, inside the
+ * fireChangeNotification() call.
+ *
+ * Clients that wish to receive notifications should implement (subclass from)
+ * the INotifiable interface, obtain a pointer to the NotificationBoard,
+ * and subscribe to the categories they are interested in by calling the
+ * subscribe() method of the NotificationBoard. Notifications will be
+ * delivered to the receiveChangeNotification() method of the client
+ * (redefined from INotifiable).
+ *
+ * In cases when the category itself (an int) does not carry enough information
+ * about the notification event, one can pass additional information
+ * in a data class. There is no restriction on what the data class may contain,
+ * except that it has to be subclassed from cPolymorphic, and of course
+ * producers and consumers of notifications should agree on its contents.
+ * If no extra info is needed, one can pass a NULL pointer in the
+ * fireChangeNotification() method.
+ *
+ * A module which implements INotifiable looks like this:
+ *
+ * <pre>
+ * class Foo : public cSimpleModule, public INotifiable {
+ *     ...
+ *     virtual void receiveChangeNotification(int category, cPolymorphic *details) {..}
+ *     ...
+ * };
+ * </pre>
+ *
+ * Obtaining a pointer to the NotificationBoard module of that host/router:
+ *
+ * <pre>
+ * NotificationBoard *nb; // this is best made a module class member
+ * nb = NotificationBoardAccess().get();  // best done in initialize()
+ * </pre>
+ *
  *
  * See NED file for additional info.
  *
