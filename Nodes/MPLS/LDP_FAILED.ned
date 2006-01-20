@@ -22,11 +22,14 @@ import
 //
 module LDP_FAILED
     parameters:
-        holdTime : numeric,
-        helloInterval : numeric,
-        peers : string,
-        routerId : string,
-        routingFile : string;
+        holdTime: numeric,
+        helloInterval: numeric,
+
+        namid: numeric,
+
+        peers: string,
+        routerId: string,
+        routingFile: string;
     gates:
         in: in[];
         out: out[];

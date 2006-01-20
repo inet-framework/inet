@@ -21,6 +21,8 @@ import
 //
 module RSVP_FAILED
     parameters:
+        namid : numeric,
+    
         peers : string,
         routerId : string,
         routingFile : string;

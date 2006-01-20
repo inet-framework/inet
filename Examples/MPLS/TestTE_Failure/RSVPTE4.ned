@@ -15,7 +15,8 @@ import
     "StandardHost",
     "RSVP_LSR",
     "FailureManager",
-    "ScenarioManager";
+    "ScenarioManager",
+    "NAMTrace";
 
 //
 // Example network to demonstrate CSPF algorithm used in \RSVP-TE.
@@ -26,6 +27,9 @@ import
 //
 module RSVPTE4
     submodules:
+        nam: NAMTrace;
+            display: "p=152,280;i=old/floppy1";
+
         LSR1: RSVP_LSR;
             parameters:
                 peers = "ppp0 ppp1";
@@ -89,8 +93,6 @@ module RSVPTE4
             display: "p=150,50;i=block/control_s";
         failureManager: FailureManager;
             display: "p=500,50;i=block/control_s";
-        //nam: NAMTraceWriter;
-        //    display: "p=152,280;i=old/floppy1";
     connections nocheck:
         LSR1.out[0] --> delay 15ms datarate 600000 --> LSR2.in[0];
         LSR1.in[0] <-- delay 15ms datarate 600000 <-- LSR2.out[0];

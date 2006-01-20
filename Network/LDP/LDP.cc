@@ -92,7 +92,8 @@ LDP::~LDP()
         cancelAndDelete(myPeers[i].timeout);
 
     cancelAndDelete(sendHelloMsg);
-    socketMap.deleteSockets();
+    //this causes segfault at the end of simulation       -- Vojta
+    //socketMap.deleteSockets();
 }
 
 void LDP::initialize(int stage)
@@ -278,6 +279,8 @@ void LDP::rebuildFecList()
         // find out current next hop according to routing table
         IPAddress nextHop = (re->type == RoutingEntry::DIRECT)? re->host: re->gateway;
         ASSERT(!nextHop.isUnspecified());
+
+        EV << "nextHop <-- " << nextHop << endl;
 
         FecVector::iterator it = findFecEntry(oldList, re->host, re->netmask.netmaskLength());
 
@@ -766,6 +769,11 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
     return string("X");
 */
 //    Rely on port index to find the interface name
+
+    // this function is a misnomer, we must recognize our own address too
+    if (rt->localDeliver(peerIP))
+        return "lo0";
+    
     InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
     if (!ie)
         error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());

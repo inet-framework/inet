@@ -23,7 +23,8 @@ import
     "TED",
     "MPLS",
     "PPPInterface",
-    "LIBTable";
+    "LIBTable",
+    "NAMTraceWriter";
 
 
 //
@@ -37,8 +38,6 @@ module LDP_LSR
         helloInterval: numeric,
 
         namid: numeric,
-        namlog: string,
-        namprolog: string,
 
         peers: string,
         routerId: string,
@@ -93,6 +92,11 @@ module LDP_LSR
         libTable: LIBTable;
             parameters:
             display: "p=340,305;i=block/table2";
+
+        namTrace: NAMTraceWriter;
+            parameters:
+                namid = namid;
+
     connections nocheck:
         linkStateRouting.to_ip --> networkLayer.OSPFIn;
         linkStateRouting.from_ip <-- networkLayer.OSPFOut;

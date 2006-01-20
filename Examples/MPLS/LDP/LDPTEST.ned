@@ -15,10 +15,14 @@ import
     "StandardHost",
     "LDP_LSR",
     "FailureManager",
-    "ScenarioManager";
+    "ScenarioManager",
+    "NAMTrace";
 
 module LDPTEST
     submodules:
+        nam: NAMTrace;
+            display: "p=152,280;i=old/floppy1";
+
         LSR1: LDP_LSR;
             parameters:
 		peers = "ppp0 ppp1 ppp2";

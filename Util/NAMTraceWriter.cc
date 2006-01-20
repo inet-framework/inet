@@ -95,6 +95,12 @@ void NAMTraceWriter::initialize(int stage)
     }
 }
 
+void NAMTraceWriter::finish()
+{
+    recordNodeEvent("DOWN", "circle");
+}
+
+
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
     // process notification

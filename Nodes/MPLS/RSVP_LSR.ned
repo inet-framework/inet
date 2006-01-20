@@ -21,7 +21,8 @@ import
     "SimpleClassifier",
     "RSVP",
     "LinkStateRouting",
-    "TED";
+    "TED",
+    "NAMTraceWriter";
 
 //
 // An \RSVP-TE capable router.
@@ -32,6 +33,9 @@ import
 //
 module RSVP_LSR
     parameters:
+    
+        namid : numeric,
+    
         peers: string,
         routerId: string,
         routingFile: string;
@@ -81,6 +85,11 @@ module RSVP_LSR
             display: "o=#ff8000;p=192,270;b=66,14";
         libTable: LIBTable;
             display: "i=block/table2;p=312,268";
+
+        namTrace: NAMTraceWriter;
+            parameters:
+                 namid = namid;
+
     connections nocheck:
         linkStateRouting.to_ip --> networkLayer.OSPFIn;
         linkStateRouting.from_ip <-- networkLayer.OSPFOut;
