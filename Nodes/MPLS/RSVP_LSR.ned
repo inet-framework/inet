@@ -85,10 +85,10 @@ module RSVP_LSR
             display: "o=#ff8000;p=192,270;b=66,14";
         libTable: LIBTable;
             display: "i=block/table2;p=312,268";
-
         namTrace: NAMTraceWriter;
             parameters:
                  namid = namid;
+            display: "p=70,270;i=old/floppy1";
 
     connections nocheck:
         linkStateRouting.to_ip --> networkLayer.OSPFIn;

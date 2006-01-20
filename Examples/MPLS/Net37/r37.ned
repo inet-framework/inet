@@ -15,6 +15,8 @@ module R37
                 channelClass = "ThruputMeteringChannel",
                 channelAttrs = "format=u";
             display: "p=100,160;i=block/cogwheel_s";
+        nam: NAMTrace;
+            display: "p=100,220;i=old/floppy1";
         LSR0 : RSVP_LSR;  display: "p=391,225;i=abstract/router_s";
         LSR1 : RSVP_LSR;  display: "p=799,589;i=abstract/router_s";
         LSR2 : RSVP_LSR;  display: "p=289,472;i=abstract/router_s";

@@ -72,7 +72,7 @@ class INET_API NAMTrace : public cSimpleModule
     /**
      * Returns the stream to which the trace events can be written.
      */
-    std::ostream& out();
+    std::ostream& out() {ASSERT(nams!=NULL); return *nams;}
 };
 
 #endif

@@ -92,10 +92,10 @@ module LDP_LSR
         libTable: LIBTable;
             parameters:
             display: "p=340,305;i=block/table2";
-
         namTrace: NAMTraceWriter;
             parameters:
                 namid = namid;
+            display: "p=70,310;i=old/floppy1";
 
     connections nocheck:
         linkStateRouting.to_ip --> networkLayer.OSPFIn;

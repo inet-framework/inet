@@ -31,7 +31,7 @@ Define_Module(NAMTraceWriter);
 
 void NAMTraceWriter::initialize(int stage)
 {
-    if (stage==1)
+    if (stage==1)  // let NAMTrace module initialize in stage 0
     {
         // get pointer to the NAMTrace module
         cModule *namMod = simulation.moduleByPath("nam");
@@ -45,15 +45,16 @@ void NAMTraceWriter::initialize(int stage)
         // store ptr to namtrace module
         nt = check_and_cast<NAMTrace*>(namMod);
 
-        // register given namid, or allocate one (if -1 was configured)
+        // register given namid; -1 means autoconfigure
         int namid0 = par("namid");
         cModule *node = parentModule();  // the host or router
         namid = nt->assignNamId(node, namid0);
         if (namid0==-1)
-            par("namid") = namid;
+            par("namid") = namid;  // let parameter reflect autoconfigured namid
 
         // write "node" entry to the trace
-        recordNodeEvent("UP", "circle");
+        if (nt->enabled())
+            recordNodeEvent("UP", "circle");
 
         // subscribe to the interesting notifications
         NotificationBoard *nb = NotificationBoardAccess().get();
@@ -63,7 +64,7 @@ void NAMTraceWriter::initialize(int stage)
         nb->subscribe(this, NF_PP_RX_END);
         nb->subscribe(this, NF_L2_Q_DROP);
     }
-    else if (stage==2 && nt!=NULL)
+    else if (stage==2 && nt!=NULL && nt->enabled())
     {
         // write "link" entries
         InterfaceTable *ift = InterfaceTableAccess().get();
@@ -97,12 +98,19 @@ void NAMTraceWriter::initialize(int stage)
 
 void NAMTraceWriter::finish()
 {
-    recordNodeEvent("DOWN", "circle");
+    if (nt && nt->enabled())
+    {
+        recordNodeEvent("DOWN", "circle");
+    }
 }
 
 
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
+    // don't do anything if global NAMTrace module doesn't exist or does not have a file open
+    if (!nt || !nt->enabled())
+        return;
+
     // process notification
     if (category==NF_PP_TX_BEGIN || category==NF_PP_RX_END || category==NF_L2_Q_DROP)
     {
@@ -129,6 +137,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *detai
 
 void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
 {
+    ASSERT(nt && nt->enabled());
     std::ostream& out = nt->out();
     out << "n -t ";
     if (simTime() == 0.0)
@@ -140,6 +149,7 @@ void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
 
 void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, double delay, char *state)
 {
+    ASSERT(nt && nt->enabled());
     std::ostream& out = nt->out();
 
     // link entry (to be registered ON ONE END ONLY! This also means that
@@ -154,6 +164,7 @@ void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, double dela
 
 void NAMTraceWriter::recordPacketEvent(const char event, int peernamid, cMessage *msg)
 {
+    ASSERT(nt && nt->enabled());
     std::ostream& out = nt->out();
 
     int size = msg->byteLength();

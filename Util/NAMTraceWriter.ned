@@ -19,11 +19,11 @@
 
 
 //
-// Writes a NAM trace, based on notifications it receives via
-// the NotificationBoard. Expects to find a NAMTrace module named 
-// "nam" at network level.
+// When placed inside a host or router, it writes a NAM trace, based on 
+// notifications it receives via the NotificationBoard. Expects to find 
+// a NAMTrace module named "nam" at network level.
 //
-// Has no gates and does not process messages.
+// This module has no gates and does not process messages.
 //
 // @see NAMTrace, NotificationBoard
 //
