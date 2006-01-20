@@ -230,7 +230,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
     msg->setControlInfo(controlInfo);
 
     int length = msg->getLinkInfoArraySize() * 72;
-
     msg->setByteLength(length);
 
     msg->addPar("color") = TED_TRAFFIC;

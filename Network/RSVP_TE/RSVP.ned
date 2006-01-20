@@ -18,20 +18,84 @@
 // processes \RSVP-TE messages, installs labels and does the reservation
 // along LSP paths.
 //
-// Operations
+// Paths can be specified statically in an XML config file ("traffic"
+// parameter), or can be set up and torn down dynamically with ScenarioManager
+// commands.
 //
-// All RSVP messages are subclassed from RSVPMessage, and include
-// RSVPPathMsg, RSVPPathTear, RSVPPathError, RSVPResvMsg, RSVPHelloMsg.
+// An example traffic.xml file:
 //
-// Collaborations
+//# FIXME verify against the code, and document formally (DTD)!
+//# <setup_pri>, <holding_pri>, <sender>, <owner>, <max_delay> elements
+//# are implemented but missing from this doc!
+//
+// <pre>
+// <?xml version="1.0"?>
+// <sessions>
+//     <session>
+//         <endpoint>host3</endpoint>
+//         <tunnel_id>1</tunnel_id>
+//         <paths>
+//             <path>
+//                 <lspid>100</lspid>
+//                 <bandwidth>100000</bandwidth>
+//                 <route>
+//                     <node>10.1.1.1</node>
+//                     <node>10.1.2.1</node>
+//                     <node>10.1.4.1</node>
+//                     <node>10.1.5.1</node>
+//                 </route>
+//                 <permanent>true</permanent>
+//                 <color>100</color>
+//             </path>
+//         </paths>
+//     </session>
+// </sessions>
+// </pre>
+//
+// RSVP understands the "add-session" and "del-session" ScenarioManager
+// commands. The contents of the <add-session> element can be the same
+// as the <session> element for the traffic.xml above.
+// The <del-command> element syntax is also similar, but only
+// <endpoint>, <tunnel_id> and <lspid> needs to be specified.
+//
+// The following is an example scenario.xml file:
+//
+// <pre>
+// <?xml version="1.0"?>
+// <scenario>
+//     <at t="2">
+//         <add-session module="LSR1.rsvp">
+//             <endpoint>10.2.1.1</endpoint>
+//             <tunnel_id>1</tunnel_id>
+//             <paths>
+//                 ...
+//             </paths>
+//         </add-session>
+//     </at>
+//     <at t="2.4">
+//         <del-session module="LSR1.rsvp">
+//             <endpoint>10.2.1.1</endpoint>
+//             <tunnel_id>1</tunnel_id>
+//             <paths>
+//                 <path>
+//                     <lspid>100</lspid>
+//                 </path>
+//             </paths>
+//         </del-session>
+//     </at>
+// </scenario>
+// </pre>
+//
+// \RSVP messages are subclassed from RSVPMessage, and include RSVPPathMsg,
+// RSVPPathTear, RSVPPathError, RSVPResvMsg and RSVPHelloMsg.
 //
 // \RSVP-TE communicates with the following components in the system:
 // TED, MPLS, and may receive commands from ScenarioManager.
 //
 simple RSVP
     parameters:
-        traffic : xml,
-        peers : string,
+        traffic : xml, // specifies paths to set up
+        peers : string, // names of the interfaces towards RSVP peers
         helloInterval : numeric,
         helloTimeout : numeric;
     gates:
@@ -40,3 +104,4 @@ simple RSVP
         in: from_mpls_switch;
         in: from_app;
 endsimple
+
