@@ -40,7 +40,7 @@
 //                 <bandwidth>100000</bandwidth>
 //                 <route>
 //                     <node>10.1.1.1</node>
-//                     <node>10.1.2.1</node>
+//                     <lnode>10.1.2.1</lnode>
 //                     <node>10.1.4.1</node>
 //                     <node>10.1.5.1</node>
 //                 </route>
@@ -51,6 +51,8 @@
 //     </session>
 // </sessions>
 // </pre>
+//
+// In the route, <node> stands for strict hop, and <lnode> for loose hop.
 //
 // RSVP understands the "add-session" and "del-session" ScenarioManager
 // commands. The contents of the <add-session> element can be the same
