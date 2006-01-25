@@ -42,14 +42,6 @@ typedef unsigned long ulong;
 typedef unsigned int uint32;
 
 
-//FIXME Check below doesn't work:
-// MSVC6.0 gives C1017: invalid integer constant expression
-// GCC: some other weird error
-//# if (sizeof(int)!=4)
-//#  error unsigned int is not 32 bits -- modify uint32's typedef in this file!
-//# endif
-
-
 //
 // Macro to prevent executing ev<< statements in Express mode.
 // Compare ev/sec values with code compiled with #define EV ev.

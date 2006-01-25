@@ -1,6 +1,6 @@
 --------
 - problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
-  LSR, configured IP addresses and host routes to PPP peers get lost. 
+  LSR, configured IP addresses and host routes to PPP peers get lost.
   Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
 --------
 
@@ -20,12 +20,22 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 - MPLS examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
 
 --------
-- TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we 
-  transition to this FIN_WAIT_1. It should in theory be deferred until we 
+- TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we
+  transition to this FIN_WAIT_1. It should in theory be deferred until we
   actually send the FIN segment, but does no harm to do it that way.
 
 - TCP: sending spoofed packet to TCP may trigger the following assert from TCPMsgBasedSendQueue.cc (line 65):
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end))
+  stack trace:
+	opp_error(const char * msgformat=0x007b8330, ...)  Line 390 + 0x35
+	TCPMsgBasedSendQueue::createSegmentWithBytes(unsigned int fromSeq=25000127, unsigned long numBytes=1)  Line 65 + 0x59
+	TCPConnection::sendSegment(int bytes=1)  Line 425 + 0x21 
+	TCPConnection::retransmitData()  Line 583
+	TCPReno::processRexmitTimer(TCPEventCode &event=TCP_E_IGNORE)  Line 54
+	TCPBaseAlg::processTimer(cMessage * timer=0x01201c58, TCPEventCode & event=TCP_E_IGNORE)  Line 162 + 0x11
+	TCPConnection::processTimer(cMessage * msg=0x01201c58) Line 198 + 0x1b
+	TCP::handleMessage(cMessage * msg=0x01201c58)  Line 86 + 0xc
+	cSimulation::doOneEvent(cSimpleModule * mod=0x011ba830) Line 582 + 0x14
 
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 
@@ -51,7 +61,7 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 
 - revise fragmentation in IP
 
-- added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId 
+- added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
         - socket must be inserted into map before bind(), so that a userId can be assigned
         - what about incoming connections? how to assign userId to them?
            IF IT CANNOT BE DONE: remove userId from TCP!!!!
@@ -91,13 +101,26 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
      - use new opp_msgc features? (kind=..., length=...etc)
 
 ----------------------
+ - ExtInterface performance optimization: I am not sure how long the pointer from
+   pcap_next() is valid [until the next such call perhaps?], but it might be possible
+   to spare the allocation of the ExtFrame and the cost of copying the bytes into it
+   inside cSocketRTScheduler::receiveWithTimeout(). I mean, the notification message
+   could just directly contain the ptr from pcap_next(), plus caplen; so the ExtInterface
+   module could directly deserialize from the pcap buffer (and also spare copying the
+   bytes out of ExtFrame). There is no concurrency problem, because events are processed
+   in strict timestamp order, the notification message has the same timestamp as the
+   external event, and receiveWithTimeout() is only invoked again when time has passed
+   that timestamp (``if (timeval_greater(targetTime, curTime))'' line in getNextEvent()).
+   This could improve the packet rate the simulation can handle in real time.
+
+----------------------
 - MPLS models: "gateway" field of routing entries gets lost after TED::rebuildRoutingTable
 ----------------------
-- ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes? 
+- ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
   ICMPv6 uses different type&code numeric values but this is only of interest
   if we want to do emulation
 
-- instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and 
+- instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
   IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
   (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
 
@@ -106,7 +129,7 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 
 - TCP: how to handle ICMP error reports?
 
------------------------ 
+-----------------------
 Note: existing other 802.11 models:
 - from CATALA MONZO ANGEL
 - from MAGNUS KARLSSON
@@ -116,25 +139,25 @@ Interfaces:
 
 - interfaceAt -> interfaceById!!!
 
-- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable! 
+- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable!
   - this makes it possible to implement interface deletion as well, with preserving ids;
   - or just use a vector like for gates and modules? (apps must check for holes then!)
 - notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
 
 -----------------------
-- MPLS/LDP/RSVP: 
+- MPLS/LDP/RSVP:
     - document! ScenarioManager commands, XML file formats, unimplemented features
     - Quagga ospfd: could it serve as OSPF_TE??
 - mpls models use interface NAME - why?
 
 -----------------------
-- OSPFv2 TODO: 
+- OSPFv2 TODO:
      - should use the proper IPAddress class, not its own one...
      - OSPFTimer class only contains a timerKind() -- is this class necessary at all...?
      - rename ifIndex (SetIfIndex, GetIfIndex, etc) to interfaceId AND change default value to -1!
      - OSPFRouting::LoadInterfaceParameters: interfaceType is contained in InterfaceEntry, it's redundant to read it from XML!
      - try to reduce size of configuration. If Zebra can do it...
------------------------ 
+-----------------------
 into the ipv6 doc:
 "
 Currently, IPv6 support consists of several modules. The IPv6 module
@@ -159,25 +182,25 @@ handled in any way they like.
 "
 
 -----------------------
-TCP: 
-Slow Start should be applied every time TCP starts to send "after a 
+TCP:
+Slow Start should be applied every time TCP starts to send "after a
 sufficiently long idle period".
 
-"Idle" could be interpreted as when the send queue is empty (there's nothing 
-to send), and there's no unacknowledged data (i.e. previously sent segments 
-have all been acknowledged). But what is "sufficiently long"? I guess that 
-should be measured in RTT rather than absolute time (secs). So maybe we 
+"Idle" could be interpreted as when the send queue is empty (there's nothing
+to send), and there's no unacknowledged data (i.e. previously sent segments
+have all been acknowledged). But what is "sufficiently long"? I guess that
+should be measured in RTT rather than absolute time (secs). So maybe we
 should say 5*RTT is "sufficiently long"?
 -----------------------
 802.11 bugs: see mailing list...
 -----------------------
 FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
-This is not the usual way things are done on the internet. But if we assign 
+This is not the usual way things are done on the internet. But if we assign
 different addresses, which addr to use in the routing tables etc?
 x
 -----------------------
 TCP BUG:
-From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de] 
+From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de]
 Sent: Sunday, September 25, 2005 7:51 PM
 To: omnetpp-l@omnetpp.org
 Subject: [omnetpp] Incorrect behaviour of TCP in IPv6SuiteWithINET(2005-05-02)?
@@ -186,22 +209,22 @@ Hi!
 
 I found something that seems to be a bug in TCPMain:
 
-I open a TCP-Connection with TCPSocket and send a message (let's call it "A") 
-trough it. This happens: "ActiveOPEN" is sent to TCPMain, followed by 
-message A. Message A is buffered (according to RFC 793) an the 3-way-handshake 
-starts. The last message of the 3-way-handshake (ACK) already carries 
-message A (piggybacking). So far so good. The receiver then changes state 
-from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper 
-layer. Instead the sender waits 3 seconds for timeout and resends message A, 
+I open a TCP-Connection with TCPSocket and send a message (let's call it "A")
+trough it. This happens: "ActiveOPEN" is sent to TCPMain, followed by
+message A. Message A is buffered (according to RFC 793) an the 3-way-handshake
+starts. The last message of the 3-way-handshake (ACK) already carries
+message A (piggybacking). So far so good. The receiver then changes state
+from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper
+layer. Instead the sender waits 3 seconds for timeout and resends message A,
 which is then successfully delivered to the receiver's application (and ACKed).
 
-IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73: 
-"If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue 
-processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_ 
-continue processing in the new state and forward the attached message A to 
+IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73:
+"If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue
+processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_
+continue processing in the new state and forward the attached message A to
 application.
 
-Is this really a bug in TCPMain or did I miss something? If it is a bug: is 
+Is this really a bug in TCPMain or did I miss something? If it is a bug: is
 it fixed in newer releases?
 
 The interesting part of my code is the following:
@@ -210,7 +233,7 @@ The interesting part of my code is the following:
 > [...]
 > socket.setOutputGate(gate("tcpOut"));
 > [..]
-> socket.connect(IPAddressResolver ().resolve("aaas/ppp0"),3868); 
+> socket.connect(IPAddressResolver ().resolve("aaas/ppp0"),3868);
 > socket.send(msg);
 (no "socket.close")
 
@@ -218,20 +241,20 @@ Regards,
 Joachim
 
 
------------------------ 
-VOJTA: 
+-----------------------
+VOJTA:
 2. Some minor changes in INET are required
 
 * bind mechanism in both TCP/UDP should be generalized
  -bind to address:port not just port
- -Ripd (others may too, I didn't check) uses multicast and binds several 
-sockets to the same UDP address/port  (this is possible using 
+ -Ripd (others may too, I didn't check) uses multicast and binds several
+sockets to the same UDP address/port  (this is possible using
 SO_REUSEADDR and SO_REUSEPORT)
- -moreover, there exist multiple UDP sockets at the same time and it 
-probably makes sense to demultiplex incoming packets at the transport 
+ -moreover, there exist multiple UDP sockets at the same time and it
+probably makes sense to demultiplex incoming packets at the transport
 layer, not in application (e.g. by using user supplied identifier on bind)
- -make connect work without bind (autoassign local address based on 
-destination, currently unspecified address is sent and SYN+ACK will not 
+ -make connect work without bind (autoassign local address based on
+destination, currently unspecified address is sent and SYN+ACK will not
 be sent back (at least for 127.0.0.1, I didn't check for others))
  -UDPSocket similar to TCPSocket would be helpful
 -----------------------
@@ -240,23 +263,23 @@ from http://www.freesoft.org/CIE/Course/Section3/10.htm:
 # Per-interface assignment. IP addresses are assigned on a per-interface basis,
 so a host might possess several IP addresses if it has several interfaces.
 For example, a host with both Ethernet and serial interfaces would have an
-IP address for each. This is an important consequence of prefix-based 
-addressing. An IP address doesn't really refer to a host, it refers to an 
+IP address for each. This is an important consequence of prefix-based
+addressing. An IP address doesn't really refer to a host, it refers to an
 interface.
 
-If a host is known by multiple addresses, then every service on this host 
-can be referred to by multiple names! Addressing this host requires picking 
+If a host is known by multiple addresses, then every service on this host
+can be referred to by multiple names! Addressing this host requires picking
 one of these. Since the packet is addressed to the interface and not the host,
-path information is introduced into the address. The exact ramifications of 
-this effect depend heavily on the network design. In particular, careless 
-design can result in a host becoming reachable by one address but not by 
-another. The simplest solution to this problem is to select the host's most 
-reliable interface and advertise its IP address as the host's primary IP 
+path information is introduced into the address. The exact ramifications of
+this effect depend heavily on the network design. In particular, careless
+design can result in a host becoming reachable by one address but not by
+another. The simplest solution to this problem is to select the host's most
+reliable interface and advertise its IP address as the host's primary IP
 address.
 
 ==> current FlatNetworkConfigurator is shit? how to do address assignment?
 
-see also: 
+see also:
  "The Network Administrators' Guide" http://www.tldp.org/LDP/nag/node1.html
  "IP 101: All About IP Addresses" http://www.networkcomputing.com/netdesign/ip101c.html
   - according to this: network numbers and interface addresses don't necessarily
@@ -264,12 +287,12 @@ see also:
 
 from http://www.networkcomputing.com/netdesign/ip101.html:
 
-The important thing to realize is that while a routing table keeps track of 
-network numbers, no one assigns a network number to any piece of equipment. 
-Every interface of a router or host connected on the network must have an IP 
-address and a subnet mask defined (many pieces of equipment will assign a 
-default subnet mask if none is applied). From this IP address and subnet mask, 
+The important thing to realize is that while a routing table keeps track of
+network numbers, no one assigns a network number to any piece of equipment.
+Every interface of a router or host connected on the network must have an IP
+address and a subnet mask defined (many pieces of equipment will assign a
+default subnet mask if none is applied). From this IP address and subnet mask,
 the network number is derived by the IP stack and tracked in the routing table.
 
-Q: if routing tables contain network numbers, are IP addresses of router 
+Q: if routing tables contain network numbers, are IP addresses of router
 interfaces also addressable?
