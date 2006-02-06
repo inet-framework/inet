@@ -271,6 +271,7 @@ inline void PrintLSAHeader (const OSPFLSAHeader& lsaHeader, std::ostream* output
             << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getAdvertisingRouter ().getInt ())
             << ", seqNumber="
             << lsaHeader.getLsSequenceNumber ();
+    *output << endl;
 }
 
 inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
