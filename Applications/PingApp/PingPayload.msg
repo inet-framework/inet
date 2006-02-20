@@ -32,5 +32,6 @@ message PingPayload
     fields:
         long originatorId; // sender module id()
         long seqNo; // sequence number
+        unsigned char data[];
 };
 
