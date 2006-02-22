@@ -203,7 +203,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     {
         EV << "local delivery\n";
         if (datagram->srcAddress().isUnspecified())
-            datagram->setSrcAddress(destAddr);
+            datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
         numLocalDeliver++;
         localDeliver(datagram);
         return;

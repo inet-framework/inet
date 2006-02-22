@@ -174,6 +174,8 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     if (rt->localDeliver(destAddress))
     {
         EV << "local delivery\n";
+        if (datagram->srcAddress().isUnspecified())
+            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
         numLocalDeliver++;
         localDeliver(datagram);
         return;
