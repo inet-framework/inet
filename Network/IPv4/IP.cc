@@ -202,6 +202,8 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     if (rt->localDeliver(destAddr))
     {
         EV << "local delivery\n";
+        if (datagram->srcAddress().isUnspecified())
+            datagram->setSrcAddress(destAddr);
         numLocalDeliver++;
         localDeliver(datagram);
         return;

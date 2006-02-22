@@ -29,7 +29,7 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
   stack trace:
 	opp_error(const char * msgformat=0x007b8330, ...)  Line 390 + 0x35
 	TCPMsgBasedSendQueue::createSegmentWithBytes(unsigned int fromSeq=25000127, unsigned long numBytes=1)  Line 65 + 0x59
-	TCPConnection::sendSegment(int bytes=1)  Line 425 + 0x21 
+	TCPConnection::sendSegment(int bytes=1)  Line 425 + 0x21
 	TCPConnection::retransmitData()  Line 583
 	TCPReno::processRexmitTimer(TCPEventCode &event=TCP_E_IGNORE)  Line 54
 	TCPBaseAlg::processTimer(cMessage * timer=0x01201c58, TCPEventCode & event=TCP_E_IGNORE)  Line 162 + 0x11
@@ -200,6 +200,12 @@ different addresses, which addr to use in the routing tables etc?
 x
 -----------------------
 TCP BUG:
+solution part 1: TCPConnectionRcvSegment.cc#383, add "fsm.state()==TCP_S_SYN_RCVD ||"
+to "if" condition of "process segment text" processing. problem: data will be
+fwded to app BEFORE estab indication! move sendEstabIndicationToApp() out of
+stateEntered() [TCPConnectionBase.cc#459] to everywhere ESTAB get actually entered???
+
+Bug desc:
 From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de]
 Sent: Sunday, September 25, 2005 7:51 PM
 To: omnetpp-l@omnetpp.org
