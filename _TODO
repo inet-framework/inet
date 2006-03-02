@@ -1,4 +1,7 @@
 --------
+- implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
+- ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
+--------
 - problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
   LSR, configured IP addresses and host routes to PPP peers get lost.
   Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
