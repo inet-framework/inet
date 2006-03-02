@@ -1,0 +1,12 @@
+This is a sample to demonstrate LSR failure handling.
+
+Following description refers to the nam trace file genereated by the simulation
+run.
+
+Green LSP is established as a part of the initial configuration. Later, one of
+the routers lying on the green path crashes. This crash is detected by the RSVP
+HELLO mechanism by its upstream neighbour and PathErr is sent and propagates to
+the LSP ingress node. The ingress router tears down the now non-working path.
+Later when LSR4 becomes operational again, the path is re-created by the
+signalling module (since it is marked as permanent in the traffic database).
+
