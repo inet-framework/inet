@@ -223,7 +223,7 @@ std::vector<SimpleClassifier::FECEntry>::iterator SimpleClassifier::findFEC(int 
     return it;
 }
 
-std::ostream & operator<<(std::ostream & os, const SimpleClassifier::FECEntry & fec)
+std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FECEntry& fec)
 {
     os << "id:" << fec.id;
     os << "    dest:" << fec.dest;
