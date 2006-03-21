@@ -200,72 +200,11 @@ should say 5*RTT is "sufficiently long"?
 FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
 This is not the usual way things are done on the internet. But if we assign
 different addresses, which addr to use in the routing tables etc?
-x
------------------------
-TCP BUG:
-solution part 1: TCPConnectionRcvSegment.cc#383, add "fsm.state()==TCP_S_SYN_RCVD ||"
-to "if" condition of "process segment text" processing. problem: data will be
-fwded to app BEFORE estab indication! move sendEstabIndicationToApp() out of
-stateEntered() [TCPConnectionBase.cc#459] to everywhere ESTAB get actually entered???
-
-Bug desc:
-From: Joachim Meichle [mailto:joachim.meichle@stud.uni-karlsruhe.de]
-Sent: Sunday, September 25, 2005 7:51 PM
-To: omnetpp-l@omnetpp.org
-Subject: [omnetpp] Incorrect behaviour of TCP in IPv6SuiteWithINET(2005-05-02)?
-
-Hi!
-
-I found something that seems to be a bug in TCPMain:
-
-I open a TCP-Connection with TCPSocket and send a message (let's call it "A")
-trough it. This happens: "ActiveOPEN" is sent to TCPMain, followed by
-message A. Message A is buffered (according to RFC 793) an the 3-way-handshake
-starts. The last message of the 3-way-handshake (ACK) already carries
-message A (piggybacking). So far so good. The receiver then changes state
-from SYN-RECEIVED to ESTABLISHED but doesn't' forward message A to the upper
-layer. Instead the sender waits 3 seconds for timeout and resends message A,
-which is then successfully delivered to the receiver's application (and ACKed).
-
-IMO the receiver behaves wrong. In accordance to RFC 793 (Page 73:
-"If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state and continue
-processing"), it should change state from SYN-RECEIVED to ESTABLISHED _and_
-continue processing in the new state and forward the attached message A to
-application.
-
-Is this really a bug in TCPMain or did I miss something? If it is a bug: is
-it fixed in newer releases?
-
-The interesting part of my code is the following:
-> TCPSocket socket;
-> cMessage *msg;
-> [...]
-> socket.setOutputGate(gate("tcpOut"));
-> [..]
-> socket.connect(IPAddressResolver ().resolve("aaas/ppp0"),3868);
-> socket.send(msg);
-(no "socket.close")
-
-Regards,
-Joachim
-
-
 -----------------------
 VOJTA:
-2. Some minor changes in INET are required
-
-* bind mechanism in both TCP/UDP should be generalized
- -bind to address:port not just port
- -Ripd (others may too, I didn't check) uses multicast and binds several
-sockets to the same UDP address/port  (this is possible using
-SO_REUSEADDR and SO_REUSEPORT)
- -moreover, there exist multiple UDP sockets at the same time and it
-probably makes sense to demultiplex incoming packets at the transport
-layer, not in application (e.g. by using user supplied identifier on bind)
  -make connect work without bind (autoassign local address based on
 destination, currently unspecified address is sent and SYN+ACK will not
 be sent back (at least for 127.0.0.1, I didn't check for others))
- -UDPSocket similar to TCPSocket would be helpful
 -----------------------
 from http://www.freesoft.org/CIE/Course/Section3/10.htm:
 
