@@ -131,6 +131,7 @@ all:
 	cd Examples/MPLS/LDP && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/Net37 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Failure && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MPLS/TestTE_Failure2 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Reroute && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Routing && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MPLS/TestTE_Tunnel  && $(MAKEMAKE) $(ALL_MODEL_OPTS)

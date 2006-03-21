@@ -4,7 +4,8 @@ Recent changes in the INET Framework
 INET-200512xx
 -------------
 
-- MPLS, RSVP-TE, LDP models rewritten by Vojta Janota
+- checked in the new MPLS, RSVP-TE and LDP models, written/rewritten by 
+  Vojta Janota
 
 - new model: Network/Quagga. This is port of the Quagga routing daemon to the
   INET Framework. Currently provides RIP and OSPFv2 routing. Quagga itself is 
@@ -30,8 +31,8 @@ INET-200512xx
   msg->byteLength() and msg->setLength(8*bytes) to msg->setByteLength(bytes),
   etc.
 
-- TCP: Reno bugs fixed (reported by Pascal Rousseau); implemented reuse of 
-  ephemeral ports
+- TCP: Reno bugs fixed (reported by Pascal Rousseau); TCPMessageBasedSendQueue
+  seqNo bug fixed (Adam Hudson); implemented reuse of ephemeral ports
 
 - hosts have now the same queues as routers (reported by Michael Tuexen)
 
