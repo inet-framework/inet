@@ -1,7 +1,7 @@
 2006-03-21 Andras Varga
 
 	* TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
-	carries data
+	carries data [reported by Joachim Meichle]
 
 2005-07-20 Andras Varga
 
