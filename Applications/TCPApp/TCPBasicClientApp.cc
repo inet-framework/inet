@@ -38,7 +38,9 @@ void TCPBasicClientApp::initialize()
     timeoutMsg = new cMessage("timer");
 
     numRequestsToSend = 0;
+    earlySend = false;  // TBD make it parameter
     WATCH(numRequestsToSend);
+    WATCH(earlySend);
 
     timeoutMsg->setKind(MSGKIND_CONNECT);
     scheduleAt((simtime_t)par("startTime"), timeoutMsg);
@@ -62,7 +64,13 @@ void TCPBasicClientApp::handleTimer(cMessage *msg)
     {
         case MSGKIND_CONNECT:
             EV << "starting session\n";
-            connect();
+            connect(); // active OPEN
+
+            // significance of earlySend: if true, data will be sent already
+            // in the ACK of SYN, otherwise only in a separate packet (but still
+            // immediately)
+            if (earlySend)
+                sendRequest();
             break;
 
         case MSGKIND_SEND:
@@ -82,8 +90,9 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     numRequestsToSend = (long) par("numRequestsPerSession");
     if (numRequestsToSend<1) numRequestsToSend=1;
 
-    // perform first request (next one will be sent when reply arrives)
-    sendRequest();
+    // perform first request if not already done (next one will be sent when reply arrives)
+    if (!earlySend)
+        sendRequest();
     numRequestsToSend--;
 }
 

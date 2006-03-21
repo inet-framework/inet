@@ -25,6 +25,7 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
 {
   protected:
     cMessage *timeoutMsg;
+    bool earlySend;  // if true, don't wait with sendRequest() until established()
     int numRequestsToSend; // requests to send in this session
 
     /** Utility: sends a request to the server */
