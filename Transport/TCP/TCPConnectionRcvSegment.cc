@@ -244,8 +244,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             return TCP_E_IGNORE;
         }
 
-        // notify
+        // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
+        sendEstabIndicationToApp();
 
         // This will trigger transition to ESTABLISHED. Timers and notifying
         // app will be taken care of in stateEntered().
@@ -379,7 +380,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     // RFC 793: seventh, process the segment text,
     //
     uint32 old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
-    if (fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2)
+    if (fsm.state()==TCP_S_SYN_RCVD || fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2)
     {
         //"
         // Once in the ESTABLISHED state, it is possible to deliver segment
@@ -432,7 +433,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 //
                 // FIXME we should implement socket READ command, and pass up only
                 // as many bytes as requested. rcv_wnd should be decreased
-                // accordingly! (right now we *always* advertise win=16386,
+                // accordingly! (right now we *always* advertise win=16384,
                 // that is, there's practically no receiver-imposed flow control!)
                 //
                 cMessage *msg;
@@ -795,8 +796,9 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
             if (tcpseg->urgBit() || tcpseg->pshBit())
                 tcpEV << "Ignoring URG and PSH bits in SYN+ACK\n"; // TBD
 
-            // notify tcpAlgorithm (it has to send ACK of SYN)
+            // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             tcpAlgorithm->established(true);
+            sendEstabIndicationToApp();
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().

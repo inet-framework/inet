@@ -1,3 +1,8 @@
+2006-03-21 Andras Varga
+
+	* TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN
+	carries data
+
 2005-07-20 Andras Varga
 
 	* some sources moved into subdirs queues/ and flavours/
@@ -10,7 +15,7 @@
 
 	* TCPMain.cc, TCPConnectionBase.cc: TCP got confused when it received 
 	several active/passive opens with same local port number. Now it raises
-	an error (~EADDRINUSE)
+	an error (this is like EADDRINUSE on *nix)
 
 2005-07-06  Andras Varga
 

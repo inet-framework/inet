@@ -455,8 +455,7 @@ void TCPConnection::stateEntered(int state)
             delete cancelEvent(connEstabTimer);
             delete cancelEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = NULL;
-            // notify
-            sendEstabIndicationToApp();
+            // TCP_I_ESTAB notification moved inside event processing
             break;
         case TCP_S_CLOSE_WAIT:
         case TCP_S_LAST_ACK:
