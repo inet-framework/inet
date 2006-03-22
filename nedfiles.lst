@@ -12,6 +12,7 @@ Applications/TCPApp/TCPEchoApp.ned
 Applications/TCPApp/TCPGenericSrvApp.ned
 Applications/TCPApp/TCPSessionApp.ned
 Applications/TCPApp/TCPSinkApp.ned
+Applications/TCPApp/TCPSpoof.ned
 Applications/TCPApp/TCPSrvHostApp.ned
 Applications/TCPApp/TelnetApp.ned
 Applications/UDPApp/UDPApp.ned

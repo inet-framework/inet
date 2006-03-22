@@ -32,7 +32,12 @@ INET-200512xx
   etc.
 
 - TCP: Reno bugs fixed (reported by Pascal Rousseau); TCPMessageBasedSendQueue
-  seqNo bug fixed (Adam Hudson); implemented reuse of ephemeral ports
+  seqNo bug fixed (Adam Hudson); implemented reuse of ephemeral ports;
+  fixed incorrect behaviour when ACK of SYN carries data (reported by Joachim 
+  Meichle); fixed minor issue that when the user issued CLOSE, transition to 
+  FIN_WAIT_1 was done immediately and not deferred until all data are sent.
+
+- added Applications/TCPApp/TCPSpoof 
 
 - hosts have now the same queues as routers (reported by Michael Tuexen)
 

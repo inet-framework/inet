@@ -108,9 +108,6 @@ enum TCPEventCode
 };
 
 
-#define TCP_HEADER_OCTETS  20    // without options
-
-
 /** @name Timeout values */
 //@{
 #define TCP_TIMEOUT_CONN_ESTAB    75    // 75 seconds

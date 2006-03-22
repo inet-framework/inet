@@ -57,7 +57,7 @@ all:
 	cd Applications/Generic && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Applications/Ethernet && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../NetworkInterfaces/Ethernet
 	cd Applications/PingApp && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
-	cd Applications/TCPApp && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
+	cd Applications/TCPApp && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../Transport/TCP
 	cd Applications/UDPApp && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 
 	cd Network/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4 -I../IPv6 -I../ICMPv6

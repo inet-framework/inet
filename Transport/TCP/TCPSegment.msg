@@ -21,6 +21,8 @@ cplusplus {{
 #include <iostream>
 #include "INETDefs.h"
 
+#define TCP_HEADER_OCTETS  20    // without options
+
 typedef cMessage *cMessagePtr;
 
 inline std::ostream& operator<<(std::ostream& os, cMessagePtr msg) {
