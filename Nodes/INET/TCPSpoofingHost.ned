@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -55,27 +54,19 @@ module TCPSpoofingHost
         namTrace: NAMTraceWriter;
             parameters:
                 namid = namid;
-            display: "p=60,310;i=block/sink";
+            display: "p=71,294;i=block/sink";
         notificationBoard: NotificationBoard;
-            display: "p=60,70;i=block/control";
+            display: "p=71,54;i=block/control";
         interfaceTable: InterfaceTable;
-            display: "p=60,150;i=block/table";
+            display: "p=71,134;i=block/table";
         routingTable: RoutingTable;
             parameters:
                 IPForward = IPForward,
                 routerId = "",
                 routingFile = routingFile;
-            display: "p=60,230;i=block/table";
-        tcpApp: tcpAppType[numTcpApps] like TCPApp;
-            display: "p=163,67;i=block/app";
-        tcp: TCP;
-            display: "p=163,154;i=block/wheelbarrow";
-        udpApp: udpAppType[numUdpApps] like UDPApp;
-            display: "i=block/app;p=272,67";
-        udp: UDP;
-            display: "p=272,154;i=block/transport";
-        pingApp: PingApp;
-            display: "i=block/app;p=343,200";
+            display: "p=71,214;i=block/table";
+        tcpSpoof: TCPSpoof;
+            display: "p=168,122;i=block/square";
         networkLayer: NetworkLayer;
             parameters:
                 proxyARP = false;
@@ -88,24 +79,7 @@ module TCPSpoofingHost
         eth: EthernetInterface[sizeof(ethOut)];
             display: "p=240,350,row,90;q=txQueue;i=block/ifcard";
     connections nocheck:
-        for i=0..numTcpApps-1 do
-            tcpApp[i].tcpOut --> tcp.from_appl++;
-            tcpApp[i].tcpIn <-- tcp.to_appl++;
-        endfor;
-
-        tcp.to_ip --> networkLayer.TCPIn;
-        tcp.from_ip <-- networkLayer.TCPOut;
-
-        for i=0..numUdpApps-1 do
-            udpApp[i].to_udp --> udp.from_app++;
-            udpApp[i].from_udp <-- udp.to_app++;
-        endfor;
-
-        udp.to_ip --> networkLayer.UDPIn;
-        udp.from_ip <-- networkLayer.UDPOut;
-
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
+        tcpSpoof.ipv4Out --> networkLayer.TCPIn;
 
         // connections to network outside
         for i=0..sizeof(out)-1 do
