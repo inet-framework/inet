@@ -43,18 +43,19 @@ void TCPSpoof::sendSpoofPacket()
     int srcPort = par("srcPort");
     int destPort = par("destPort");
 
+    // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
-    //tcpseg->setByteLength(xxx);
+    tcpseg->setByteLength(TCP_HEADER_OCTETS);
 
-    // create segment
-//    TCPSegment *tcpseg = new TCPSegment("SYN");
-//    tcpseg->setSequenceNo(xxx);
-//    tcpseg->setSynBit(true);
-//    tcpseg->setWindow(xxx);
+    //unsigned long seq = initialSeqNum();
+    unsigned long seq = 123456;
+    tcpseg->setSequenceNo(seq);
+
+    tcpseg->setSynBit(true);
+    tcpseg->setWindow(16384);
 
     sendToIP(tcpseg, srcAddr, destAddr);
-
 }
 
 void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
