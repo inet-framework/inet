@@ -539,6 +539,17 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         tcpAlgorithm->receiveSeqChanged();
     }
 
+    if ((fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_SYN_RCVD) &&
+        state->send_fin && state->snd_nxt==state->snd_fin_seq+1)
+    {
+        // if the user issued the CLOSE command a long time ago and we've just
+        // managed to send off FIN, we simulate a CLOSE command now (we had to
+        // defer it at that time because we still had data in the send queue.)
+        // This CLOSE will take us into the FIN_WAIT_1 state.
+        tcpEV << "Now we can do the CLOSE which was deferred a while ago\n";
+        event = TCP_E_CLOSE;
+    }
+
     if (fsm.state()==TCP_S_CLOSE_WAIT && state->send_fin &&
         state->snd_nxt==state->snd_fin_seq+1 && old_snd_nxt!=state->snd_nxt)
     {

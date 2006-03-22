@@ -144,13 +144,9 @@
 //    between TCP and the app.
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
-//    without actually sending the buffered data. This may not be what you'd
-//    expect.
-//  - if you close while there are still data in the send buffer, the
-//    connection will spend the remainder of the data transfer in FIN_WAIT_1.
-//    This does not cause any incorrect \TCP behaviour, but will be fixed
-//    nevertheless.
-//  - no \TCP header options (e.g. MSS is currently hardcoded, no SACK)
+//    without actually sending the buffered data. This is consistent with 
+//    rfc 763 but may not be what you'd expect.
+//  - no \TCP header options (e.g. MSS is currently module parameter; no SACK)
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //  - the 3rd message of the connection setup, ACK will be piggybacked on data
@@ -160,7 +156,7 @@
 //    implementations is not currently simulated
 //  - RTT measurement is not done when there's a retransmission (using \TCP
 //    timestamp header extension for more frequent RTT measurements, as
-//    suggested in rfc 2988 section 3 is not done)
+//    suggested in rfc 2988 section 3, is not done)
 //
 // TCPTahoe/TCPReno issues and missing features:
 //  - PERSIST timer not implemented (currently no problem, because receiver

@@ -1,3 +1,10 @@
+2006-03-22 Andras Varga
+
+	* TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user
+	issues CLOSE, defer transition to FIN_WAIT_1 until all data are sent.
+	(Before this fix the transiton was made immediately, but that was 
+	harmless, i.e. it didn't affect TCP's external behaviour.)
+
 2006-03-21 Andras Varga
 
 	* TCPConnectionRcvSegment.cc: fixed incorrect behaviour when ACK of SYN

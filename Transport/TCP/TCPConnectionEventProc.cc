@@ -201,6 +201,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             {
                 tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_max) <<
                       " bytes pending, deferring sending of FIN\n";
+                event = TCP_E_IGNORE;
             }
             state->send_fin = true;
             state->snd_fin_seq = sendQueue->bufferEndSeq();

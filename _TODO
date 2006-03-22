@@ -23,10 +23,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 - MPLS examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
 
 --------
-- TCP: TCPConnectionEventProc.cc 204: when the user issues CLOSE, we
-  transition to this FIN_WAIT_1. It should in theory be deferred until we
-  actually send the FIN segment, but does no harm to do it that way.
-
 - TCP: sending spoofed packet to TCP may trigger the following assert from TCPMsgBasedSendQueue.cc (line 65):
     ASSERT(seqLE(begin,fromSeq) && seqLE(fromSeq+numBytes,end))
   stack trace:
