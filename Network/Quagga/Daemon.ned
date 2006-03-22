@@ -12,7 +12,7 @@
 
 simple Daemon
     parameters:
-        rootfs : string,
+        fsroot : string,
         server : string;
     gates:
         in: tcpIn;

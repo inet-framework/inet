@@ -54,7 +54,7 @@ void Daemon::activity()
 
     blocked = false;
     cwd = "/";
-    rootprefix = par("rootfs").stringValue();
+    rootprefix = par("fsroot").stringValue();
     euid = 0; // daemon starts as root
 
     // stdin, stdout, stderr
