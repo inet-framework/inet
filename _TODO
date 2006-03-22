@@ -43,8 +43,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 --------
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 --------
-- implement TCP and UDP port reuse. bitmap or free list?
---------
 - put NAMTraceWriter into all routers
 
 - dynamic registration of notification categories:
@@ -91,8 +89,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 - IPv4: make it usable with ad-hoc models
 
 - notifboard: switch to the context of the client before calling its receiveNotification()
-
-- doxy: turn on generation of "called/referenced from" links
 
 - implement class PacketQueue : public cQueue
 
