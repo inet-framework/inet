@@ -35,12 +35,19 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 	TCPConnection::processTimer(cMessage * msg=0x01201c58) Line 198 + 0x1b
 	TCP::handleMessage(cMessage * msg=0x01201c58)  Line 86 + 0xc
 	cSimulation::doOneEvent(cSimpleModule * mod=0x011ba830) Line 582 + 0x14
-
+   spoofing ackNo of incoming segments does not trigger the assert, ie adding the 
+   following lines at top of TCPConnection::processSegment1stThru8th() doesn't produce
+   the bug:
+    if(simulation.eventNumber()>1000 && tcpseg->payloadLength()==0) {
+       //tcpseg->setAckNo(state->snd_max);  //FIXME debug!!
+       tcpseg->setAckNo(intrand(0x7fffffff)+intrand(0x7fffffff));
+       ev << "SPOOFED ACKNO TO: " << tcpseg->ackNo() << "\n";
+    }
+   email sent to Ulanov 22.03.2006 for more info
+--------
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
-
 --------
 - implement TCP and UDP port reuse. bitmap or free list?
-
 --------
 - put NAMTraceWriter into all routers
 
