@@ -30,6 +30,8 @@ simple TCPSpoof
         destAddress: string, // destination address
         srcPort: numeric const, // local port number
         destPort: numeric const, // destination port number
+        seqNo: numeric const, // sequence number (-1 for TCP ISS)
+        isSYN: bool, // whether to set SYN bit on packet
         t: numeric const; // simulation time to send at
     gates:
         out: ipv4Out;

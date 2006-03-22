@@ -42,17 +42,16 @@ void TCPSpoof::sendSpoofPacket()
     IPvXAddress destAddr = IPAddressResolver().resolve(par("destAddress"));
     int srcPort = par("srcPort");
     int destPort = par("destPort");
+    bool isSYN = par("isSYN");
+    unsigned long seq = par("seqNo").longValue()==-1 ? initialSeqNum() : par("seqNo").longValue();
 
     // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
     tcpseg->setByteLength(TCP_HEADER_OCTETS);
-
-    //unsigned long seq = initialSeqNum();
-    unsigned long seq = 123456;
     tcpseg->setSequenceNo(seq);
-
-    tcpseg->setSynBit(true);
+    //tcpseg->setAckNo(...);
+    tcpseg->setSynBit(isSYN);
     tcpseg->setWindow(16384);
 
     sendToIP(tcpseg, srcAddr, destAddr);
