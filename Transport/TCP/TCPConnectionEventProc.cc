@@ -201,17 +201,6 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             {
                 tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_max) <<
                       " bytes pending, deferring sending of FIN\n";
-
-                // Although the RFC says above that ESTABLISHED->FIN_WAIT_1 should
-                // be deferred until FIN gets sent, we rather do the transition
-                // right away. (The CLOSE event will do it for us.) This apparently
-                // does no harm. Same for the SYN_RCVD->FIN_WAIT_1 transition.
-                //
-                // BUT: we *do* defer the CLOSE_WAIT->LAST_ACK transition to the time
-                // when the FIN actually gets sent.
-                //
-                if (fsm.state()==TCP_S_CLOSE_WAIT)
-                    event = TCP_E_IGNORE;    // pretend we didn't get a CLOSE this time
             }
             state->send_fin = true;
             state->snd_fin_seq = sendQueue->bufferEndSeq();
