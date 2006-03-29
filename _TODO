@@ -7,7 +7,8 @@
   Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
 --------
 - check in Quagga documentation!!!
-
+- rename Daemon to QuaggaDaemon
+--------
 - IPvXAddress: change get4()/get6() to v4()/v6()
 - Wrap RoutingEntry members into getter/setter methods!!!!
 --------

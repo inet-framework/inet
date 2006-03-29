@@ -172,6 +172,8 @@ connection data in a more structured form.
 There isn't such data structure in INET's TCP as "socket" -- the TCPSocket
 class just stores the connId and offers a few convenience functions to connect,
 send, close, etc.
+
+@ref part2
 */
 
 /**

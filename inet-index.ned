@@ -23,19 +23,26 @@
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
-// <center>release 2005-07-20</center>
+// <center>release 2006-03-30</center>
 //
-// <nohtml>INET Framework contains IPv4, TCP, UDP protocol implementations,
+// <nohtml>INET Framework contains IPv4, IPv6, TCP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
-// with \RSVP-TE and LDP signalling. RSVP-TE uses the CSPF, the routing
-// algorithm in OSPF-TE, with bandwidth as the major resource constraint.
-// Link-layer models are PPP and Ethernet.</nohtml>
+// with \RSVP-TE and LDP signalling. Link-layer models are PPP and Ethernet.
+// Static routing can be set up using network autoconfigurators.
+// </nohtml>
 //
-// Recent addition is mobility and wireless support (currently 802.11b
-// ad-hoc mode), using the lower layers of the
-// <a href="http://mobility-fw.sourceforge.net/" target="_top">Mobility Framework</a>
+// Mobility and wireless support (currently 802.11b ad-hoc mode) is provided
+// by a modified version of the lower layers of the
+// <a href="http://mobility-fw.sourceforge.net/" target="_top">Mobility Framework</a>.
 // Also, several mobility models have been added (TurtleMobility,
 // BonnMotionMobility, RandomWPMobility, etc).
+//
+// New to this release is revised and mostly rewritten \MPLS, \RSVP-TE and \LDP
+// models (Vojta Janota), dynamic routing provided by the Quagga Linux/*nix
+// routing daemon ported into the INET Framework (currently ospfd and ripd
+// has been ported, by Vojta Janota) and a cleanroom \OSPFv2 model (Andras Babos).
+// There are several other bugfixes and improvements as well; see the
+// <tt>WHATSNEW</tt> file in the distribution.
 //
 // <a href="history.html">History and contributors</a>.
 //
@@ -54,15 +61,18 @@
 //  - hosts, routers, switches: StandardHost, Router, EtherSwitch, EtherHub,
 //    etc.
 //  - network interfaces: EthernetInterface, PPPInterface, Nic80211
-//  - higher layer protocols: IP, IPv6, ARP, TCP, UDP
-//  - RoutingTable, InterfaceTable and NotificationBoard are there in every
+//  - \IP, ARP and ICMP; RoutingTable
+//  - \IPv6 support: IPv6, IPv6NeighbourDiscovery, ICMPv6, RoutingTable6;
+//    see <a href="ipv6overview.html">overview</a>
+//  - transport layer: TCP, UDP
+//  - InterfaceTable and NotificationBoard are there in every
 //    host and router model
 //  - queues in router network interfaces: DropTailQueue, REDQueue,
 //    DropTailQoSQueue.
-//  - FlatNetworkConfigurator to automatically assign \IP addresses and
-//    set up static routes;
+//  - FlatNetworkConfigurator automatically assigns \IP addresses and
+//    sets up static routes;
 //  - ScenarioManager lets you change things in the model in the middle
-//    of the simulation, and study the transient
+//    of the simulation to study transient behaviour
 //  - message classes: IPDatagram, TCPSegment, UDPPacket, EthernetIIFrame,
 //    ARPPacket, PPPFrame, GenericAppMsg, EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
@@ -73,13 +83,15 @@
 //  - wireless support: ChannelControl, Nic80211
 //  - mobility: MobileHost; mobility models such as TurtleMobility,
 //    BonnMotionMobility, ANSimMobility, RandomWPMobility, MassMobility
-//
-// Starting points for the \MPLS models:
-//  - the core modules: MPLS, LIBTable, LDP, RSVP, TED
-//  - \MPLS-enabled routers: LDP_LSR, RSVP_LSR
-//  - MPLSNet network model
-//  - <a href="standards.html">list of implemented standards</a>
-//
+//  - \MPLS models: the core modules are MPLS, LIBTable, LDP, RSVP, TED,
+//    LinkStateRouting; \MPLS-enabled routers are LDP_LSR, RSVP_LSR;
+//    see also the list of <a href="standards.html">implemented standards</a>
+//  - dynamic routing is provided by the Daemon module (the Quagga routing
+//    daemon ported into the INET Framework) used inside QuaggaRouter;
+//    alternatively one can run OSPFRouter which relies on the OSPFRouting
+//    module;
+//  - support for recording <i>nam</i> traces is provided by NAMTrace and
+//    NAMTraceWriter
 //
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>
