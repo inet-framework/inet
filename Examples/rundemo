@@ -71,7 +71,9 @@ foreach line {
    {"LDP/test"               "MPLS/LDP"             "./TestTE"                "TestTE"}
 
    {"Quagga Routing"}
-   {"Network1"               "Quagga/Network1"      "./ZebraTest"             "ZebraTest"}
+   {"Two OSPF Routers"       "Quagga/SimpleTest"    "./OSPF"                  "OSPF"}
+   {"4 Routers, RIP or OSPF" "Quagga/FourRouters"   "./FourRouters"           "FourRouters"}
+   {"OSPF Backbone"          "Quagga/OSPFBackbone"  "./OSPF"                  "OSPF"}
 
    {"OSPFv2"}
    {"SimpleTest"             "OSPFv2/SimpleTest"    "./OSPF"                  "OSPF"}
