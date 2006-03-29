@@ -19,6 +19,9 @@
 //
 // Implements the \IPv6 protocol.
 //
+// An overview of the \IPv6 implementation in the INET Framework is
+// provided <a href="ipv6overview.html">here</a>.
+//
 // The \IPv6 protocol header is represented by the IPv6Datagram message class.
 //
 // <b>Interfacing with higher layer protocols</b>
@@ -66,7 +69,7 @@
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
-// @see RoutingTable6, IPv6ControlInfo
+// @see RoutingTable6, IPv6ControlInfo, IPv6NeighbourDiscovery, ICMPv6
 //
 // @author Andras Varga
 //
