@@ -1,0 +1,3 @@
+This example network demonstrates work in progress aimed at reducing the need 
+for writing routing table files (.rt/.irt) for each router in RSVP-TE 
+simulations, by using the NetworkConfigurator module.
