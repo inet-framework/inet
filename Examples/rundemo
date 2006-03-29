@@ -53,6 +53,7 @@ foreach line {
 
    {"IPv6 (work in progress)"}
    {"NClients"               "IPv6/NClients"        "./NClients"              "NClients"}
+   {"DemoNetworkEth"         "IPv6/DemoNetworkEth"  "./DemoNetworkEth"        "DemoNetworkEth"}
 
    {"Ethernet"}
    {"ARP Test"               "Ethernet/ARPTest"     "./ARPTest"               "ARPTest"}
@@ -69,6 +70,7 @@ foreach line {
    {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
    {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
    {"LDP/test"               "MPLS/LDP"             "./TestTE"                "TestTE"}
+   {"Net37"                  "MPLS/Net37"           "./Net37"                 "Net37"}
 
    {"Quagga Routing"}
    {"Two OSPF Routers"       "Quagga/SimpleTest"    "./OSPF"                  "OSPF"}
