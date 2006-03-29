@@ -121,7 +121,8 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 {
     bool useRouterIdForRoutes = true; // TODO make it parameter
 
-    // add default route to nodes with exactly one (non-loopback) interface
+    // add routes towards point-to-point routers (in real life these routes are
+    // created automatically after PPP handshake when neighbour's address is learned)
     for (int i=0; i<topo.nodes(); i++)
     {
         // skip bus types
