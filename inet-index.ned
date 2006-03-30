@@ -45,9 +45,6 @@
 //
 // <a href="history.html">History and contributors</a>.
 //
-// For up-to-date info, visit the current
-// <a href="http://ctieware.eng.monash.edu.au/twiki/bin/view/Simulation/INETFramework" target="_top">INET Framework home page</a>.
-//
 // Introductory material:
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //  - <a href="../tcp-tutorial/index.html" target="_top">Getting started with TCP</a>
