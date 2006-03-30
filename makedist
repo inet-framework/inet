@@ -2,6 +2,9 @@
 make docs
 rm -f `find . -name Makefile`
 cvs up #restore checked-in makefiles
+echo Press enter to clean up non-release files
+read
+
 rm -rf `find . -type d -name CVS`
 rm -f \!PLEASE_DONT_COMMIT_HERE\! _TODO
 rm $0
