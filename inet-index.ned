@@ -19,7 +19,6 @@
 
 
 //
-//# @page inet-index.html, About the INET Framework
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
@@ -61,9 +60,9 @@
 //  - hosts, routers, switches: StandardHost, Router, EtherSwitch, EtherHub,
 //    etc.
 //  - network interfaces: EthernetInterface, PPPInterface, Nic80211
-//  - \IP, ARP and ICMP; RoutingTable
+//  - \IP layer: IP, ARP and ICMP; RoutingTable
 //  - \IPv6 support: IPv6, IPv6NeighbourDiscovery, ICMPv6, RoutingTable6;
-//    see <a href="ipv6overview.html">overview</a>
+//    see <a href="ipv6overview.html">\IPv6 model overview</a>
 //  - transport layer: TCP, UDP
 //  - InterfaceTable and NotificationBoard are there in every
 //    host and router model

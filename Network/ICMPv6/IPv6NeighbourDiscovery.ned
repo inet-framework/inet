@@ -18,7 +18,12 @@
 
 
 //
-// Implements IPv6 Neighbour Discovery.
+// Implements \IPv6 Neighbour Discovery.
+//
+// An overview of the \IPv6 implementation in the INET Framework is
+// provided <a href="ipv6overview.html">here</a>.
+//
+// @see IPv6, RoutingTable6, ICMPv6
 //
 simple IPv6NeighbourDiscovery
     gates:

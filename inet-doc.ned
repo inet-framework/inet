@@ -130,25 +130,26 @@
 //
 //
 //
-// @page ipv6overview.html, \IPv6 model overview
+// @page ipv6overview.html, IPv6 model overview
 //
-// Currently, \IPv6 support consists of several modules. The IPv6 module
+// \IPv6 support is implemented by several cooperating modules. The IPv6 module
 // implements \IPv6 datagram handling (sending, forwarding etc). It relies on
 // RoutingTable6 to get access to the routes. RoutingTable6 also contains the
-// neighbour discovery data structures (dest cache, neighbour cache, prefix
-// list -- the latter effectively merged into the route table). Interface
+// neighbour discovery data structures (destination cache, neighbour cache,
+// prefix list -- the latter effectively merged into the route table). Interface
 // configuration (address, state, timeouts etc) is held in the InterfaceTable,
-// in IPv6InterfaceData objects attached to InterfaceEntry as its ipv6()
-// member.
+// in <tt>IPv6InterfaceData</tt> objects attached to <tt>InterfaceEntry</tt>
+// as its <tt>ipv6()</tt> member.
 //
 // The module IPv6NeighbourDiscovery implements all tasks associated with
-// neighbour discovery and stateless address autoconfiguration. Its data
-// structures are in RoutingTable6 (dest cache, neighbour cache, prefix list).
+// neighbour discovery and stateless address autoconfiguration. The data
+// structures themselves (destination cache, neighbour cache, prefix list)
+// are kept in RoutingTable6, and are accessed via public C++ methods.
 // Neighbour discovery packets are only sent and processed by this module --
 // when IPv6 receives one, it forwards the packet to IPv6NeighbourDiscovery.
 //
-// The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-// the module ICMPv6, just like with IPv4. ICMP errors are sent into
+// The rest of \ICMPv6 (\ICMP errors, echo request/reply etc) is implemented in
+// the module ICMPv6, just like with \IPv4. \ICMP errors are sent into
 // IPv6ErrorHandling, which the user can extend or replace to get errors
 // handled in any way they like.
 //
