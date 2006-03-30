@@ -69,7 +69,7 @@ foreach line {
    {"TestTE/reroute"         "MPLS/TestTE_Reroute"  "./TestTE"                "TestTE"}
    {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
    {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
-   {"LDP/test"               "MPLS/LDP"             "./TestTE"                "TestTE"}
+   {"LDP/test"               "MPLS/LDP"             "./TestLDP"               "TestLDP"}
    {"Net37"                  "MPLS/Net37"           "./Net37"                 "Net37"}
 
    {"Quagga Routing"}
