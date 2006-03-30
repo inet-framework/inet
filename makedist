@@ -1,0 +1,6 @@
+./makemake
+make docs
+rm `find . -name Makefile`
+rm `find . -name CVS`
+rm \!PLEASE_DONT_COMMIT_HERE\! _TODO
+rm $0
