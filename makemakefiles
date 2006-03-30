@@ -124,7 +124,7 @@ all:
 	cd Examples/OSPFv2/FullTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/OSPFv2/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
-	cd Examples/Quagga/Network1 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Quagga/FourRouters && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Quagga/SimpleTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Quagga/OSPFBackbone && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 

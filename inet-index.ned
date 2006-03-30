@@ -36,10 +36,10 @@
 // Also, several mobility models have been added (TurtleMobility,
 // BonnMotionMobility, RandomWPMobility, etc).
 //
-// New to this release is revised and mostly rewritten \MPLS, \RSVP-TE and \LDP
-// models (Vojta Janota), dynamic routing provided by the Quagga Linux/*nix
-// routing daemon ported into the INET Framework (currently ospfd and ripd
-// has been ported, by Vojta Janota) and a cleanroom \OSPFv2 model (Andras Babos).
+// New to this release are the revised and mostly rewritten \MPLS, \RSVP-TE and \LDP
+// models (Vojta Janota); dynamic routing (OSPFv2 and RIP) provided by the 
+// Quagga Linux/*nix routing daemon (ported into the INET Framework by Vojta Janota); 
+// and a cleanroom \OSPFv2 model (by Andras Babos).
 // There are several other bugfixes and improvements as well; see the
 // <tt>WHATSNEW</tt> file in the distribution.
 //
