@@ -97,7 +97,7 @@
 //
 // @page history.html, History
 //
-// The predecessor of the INET framework was written by written by Klaus
+// The predecessor of the INET framework was written by Klaus
 // Wehrle, Jochen Reber, Dirk Holzhausen, Volker Boehm, Verena Kahmann,
 // Ulrich Kaage and others at the University of Karlsruhe during 2000-2001,
 // under the name IPSuite.
@@ -150,5 +150,9 @@
 // who was visiting Monash between February and June 2005. This \IPv6 model
 // got first included in the July 2005 INET snapshot, and gradually refined
 // afterwards.
+//
+// Several other people have contributed to the INET Framework by providing
+// feedback, reporting bugs, suggesting features and contributing patches; 
+// I'd like to acknowledge their help here as well.
 //
 
