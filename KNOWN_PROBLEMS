@@ -1,0 +1,5 @@
+Examples/Quagga/FourRouters: stops with runtime error if ripd is chosen
+Examples/Quagga/OSPFBackbone: stops with a check_and_cast error in UDPApp
+Examples/OSPFv2/Areas: segfaults
+Examples/OSPFv2/Backbone: stops with a check_and_cast error in OSPFRouting
+
