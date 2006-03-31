@@ -1,10 +1,12 @@
+QUAGGA_DIR=quagga-0.98.5
+
 include ../../../inetconfig
 
 all:
-	cd $(QUAGGA_VERSION) && make
+	cd $(QUAGGA_DIR) && make
 
 clean:
-	cd $(QUAGGA_VERSION) && make clean
+	cd $(QUAGGA_DIR) && make clean
 
 generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
 
