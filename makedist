@@ -6,7 +6,8 @@ fi
 
 
 # generate docs
-opp_makemake -f -N
+opp_makemake -f -N -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete -X tmp
+
 make docs
 rm Makefile
 
