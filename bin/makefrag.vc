@@ -1,5 +1,6 @@
+QUAGGA_DIR=quagga-0.98.5
 
-EXTRA_OBJS= $(EXTRA_OBJS) ../Network/Quagga/quaggasrc/$(QUAGGA_VERSION)/ospfd/ospfd.lib ../Network/Quagga/quaggasrc/$(QUAGGA_VERSION)/ripd/ripd.lib ../Network/Quagga/quaggasrc/$(QUAGGA_VERSION)/zebra/zebra.lib ../Network/Quagga/quaggasrc/$(QUAGGA_VERSION)/lib/libzebra.lib ../Network/Quagga/quaggasrc/$(QUAGGA_VERSION)/globalvars.obj
+EXTRA_OBJS= $(EXTRA_OBJS) ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/ospfd/ospfd.lib ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/ripd/ripd.lib ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/zebra/zebra.lib ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/lib/libzebra.lib ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/globalvars.obj
 
 OMNETPP_CMD_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(CMDENV_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
