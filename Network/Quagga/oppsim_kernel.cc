@@ -1607,21 +1607,27 @@ u_short oppsim_ntohs(u_short netshort)
 
 unsigned long oppsim_inet_addr(const char *str)
 {
+    // should return -1 on error
+    if (!IPAddress::isWellFormed(str))
+        return -1;
     return oppsim_htonl(IPAddress(str).getInt());
 }
 
-int oppsim_inet_aton(const char *cp, struct in_addr *addr)
+int oppsim_inet_aton(const char *str, struct in_addr *addr)
 {
-    addr->s_addr = oppsim_inet_addr(cp);
+    // should return 1 on success, 0 on error
+    if (!IPAddress::isWellFormed(str))
+        return 0;
+    addr->s_addr = oppsim_htonl(IPAddress(str).getInt());
     return 1;
 }
 
 int oppsim_inet_pton(int af, const char *strptr, void *addrptr)
 {
+    // should return 1 on success, 0 if not parsable, -1 otherwise
     if (af==AF_INET) {
-        struct in_addr& in = *(in_addr *)addrptr;
-        in.s_addr = oppsim_inet_addr(strptr);
-        return 1;
+        struct in_addr *inaddr = (in_addr *)addrptr;
+        return oppsim_inet_aton(strptr, inaddr);
     } else {
         opp_error("oppsim_inet_pton: address family not supported");
     }
