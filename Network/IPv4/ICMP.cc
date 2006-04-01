@@ -81,6 +81,9 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     static long ctr;
     sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
 
+    // debugging information
+    EV << "sending ICMP error " << msgname << endl;
+
     // create and send ICMP packet
     ICMPMessage *errorMessage = new ICMPMessage(msgname);
     errorMessage->setType(type);
@@ -107,9 +110,6 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     {
         sendToIP(errorMessage, origDatagram->srcAddress());
     }
-
-    // debugging information
-    EV << "sending ICMP error type=" << errorMessage->getType() << " code=" << errorMessage->getCode() << endl;
 }
 
 void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
