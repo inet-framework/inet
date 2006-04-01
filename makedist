@@ -1,7 +1,16 @@
-./makemake
+# check
+if [ -f Transport/Makefile ]; then
+    echo "ERROR: This is not a clean checkout!"
+    exit 1
+fi
+
+
+# generate docs
+opp_makemake -f -N
 make docs
-rm -f `find . -name Makefile`
-cvs up #restore checked-in makefiles
+rm Makefile
+
+# remove unwanted files
 echo Press enter to clean up non-release files
 read
 
