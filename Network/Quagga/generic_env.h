@@ -422,7 +422,12 @@
 #undef htons
 #undef ntohl
 #undef ntohs
-
+#undef si_pid
+#undef si_uid
+#undef si_status
+#undef si_value
+#undef si_band
+#undef si_addr
 
 #define __inline__  __inline
 

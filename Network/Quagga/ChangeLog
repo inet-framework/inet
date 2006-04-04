@@ -1,0 +1,10 @@
+2006-04-04  Andras Varga
+
+	* added #undef si_pid, si_uid, si_status, si_value, si_band, and 
+	si_addr into generic_env.h, for Solaris x86 compatibility (these
+	struct siginfo field names are macros there that to refer to other 
+	struct fields) [patch from Devendra Jaisinghani]
+
+2006-03-30  Andras Varga
+
+	* ChangeLog starts with INET-20060330
