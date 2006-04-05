@@ -36,7 +36,12 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
+// This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
+#undef s_addr
+
+
 using namespace INETFw;
+
 
 
 int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int bufsize)
