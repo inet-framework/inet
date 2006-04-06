@@ -8,21 +8,21 @@ CC = gcc
 all: libdir ripddir zebradir ospfdir globalvars.o
 
 libdir:
-	(cd lib; make)
+	cd lib && $(MAKE)
 
 ripddir:
-	(cd ripd; make)
+	cd ripd && $(MAKE)
 
 zebradir:
-	(cd zebra; make)
+	cd zebra && $(MAKE)
 
 ospfdir:
-	(cd ospfd; make)
+	cd ospfd && $(MAKE)
 
 clean:
-	(cd lib; make clean)
-	(cd ripd; make clean)
-	(cd zebra; make clean)
-	(cd ospfd; make clean)
+	cd lib && $(MAKE) clean
+	cd ripd && $(MAKE) clean
+	cd zebra && $(MAKE) clean
+	cd ospfd && $(MAKE) clean
 	rm globalvars.o
 
