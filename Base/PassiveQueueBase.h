@@ -26,7 +26,7 @@
 
 /**
  * Abstract base class for passive queues. Implements IPassiveQueue.
- * Enqueue/dequeue has to be implemented in virtual functions in
+ * Enqueue/dequeue have to be implemented in virtual functions in
  * subclasses; the actual queue or piority queue data structure
  * also goes into subclasses.
  */

@@ -67,21 +67,21 @@ class TCPStatusInfo;
  * <pre>
  * class MyModule : public cSimpleModule, public TCPSocket::CallbackInterface
  * {
- *    TCPSocket socket;
- *    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
- *    virtual void socketFailure(int connId, void *yourPtr, int code);
- *    ...
+ *     TCPSocket socket;
+ *     virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+ *     virtual void socketFailure(int connId, void *yourPtr, int code);
+ *     ...
  * };
  *
  * void MyModule::initialize() {
- *    socket.setCallbackObject(this,NULL);
+ *     socket.setCallbackObject(this,NULL);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
- *    if (socket.belongsToSocket(msg))
- *       socket.processMessage(msg);
- *    else
- *       ...
+ *     if (socket.belongsToSocket(msg))
+ *         socket.processMessage(msg); // dispatch to socketXXXX() methods
+ *     else
+ *         ...
  * }
  *
  * void MyModule::socketDataArrived(int, void *, cMessage *msg, bool) {
@@ -101,7 +101,23 @@ class TCPStatusInfo;
  *
  * If you need to manage a large number of sockets (e.g. in a server
  * application which handles multiple incoming connections), the TCPSocketMap
- * class may be useful.
+ * class may be useful. The following code fragment to handle incoming
+ * connections is from the LDP module:
+ *
+ * <pre>
+ * TCPSocket *socket = socketMap.findSocketFor(msg);
+ * if (!socket)
+ * {
+ *     // not yet in socketMap, must be new incoming connection: add to socketMap
+ *     socket = new TCPSocket(msg);
+ *     socket->setOutputGate(gate("tcpOut"));
+ *     socket->setCallbackObject(this, NULL);
+ *     socketMap.addSocket(socket);
+ * }
+ * // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
+ * // or socketFailure()
+ * socket->processMessage(msg);
+ * </pre>
  *
  * @see TCPSocketMap
  */
@@ -225,7 +241,7 @@ class INET_API TCPSocket
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
-     * on the port you bound the socket to. Every an incoming connection will
+     * on the port you bound the socket to. Every incoming connection will
      * get a new connId (and thus, must be handled with a new TCPSocket object),
      * while the original connection (original connId) will keep listening on
      * the port. The new TCPSocket object must be created with the

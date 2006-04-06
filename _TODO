@@ -1,3 +1,4 @@
+- quagga/socketmsg: use base/bytearraymessage instead
 --------
 - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
 - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)

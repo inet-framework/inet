@@ -252,6 +252,11 @@ void TCPSocket::processMessage(cMessage *msg)
                  delete msg;
              break;
         case TCP_I_ESTABLISHED:
+             // Note: this code is only for sockets doing active open, and nonforking
+             // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
+             // carries a new connId which won't match the connId of this TCPSocket,
+             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
+             // want to create a new TCPSocket object via new TCPSocket(msg).
              sockstate = CONNECTED;
              connectInfo = dynamic_cast<TCPConnectInfo *>(msg->controlInfo());
              localAddr = connectInfo->localAddr();

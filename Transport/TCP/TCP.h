@@ -100,7 +100,7 @@ class TCPSegment;
 class INET_API TCP : public cSimpleModule
 {
   public:
-    struct AppConnKey
+    struct AppConnKey  // XXX this class is redundant since connId is already globally unique
     {
         int appGateIndex;
         int connId;

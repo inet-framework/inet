@@ -35,20 +35,20 @@ bool TCP::logverbose;
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
 
-static std::ostream & operator<<(std::ostream & os, const TCP::SockPair& sp)
+static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {
     os << "loc=" << IPvXAddress(sp.localAddr) << ":" << sp.localPort << " "
        << "rem=" << IPvXAddress(sp.remoteAddr) << ":" << sp.remotePort;
     return os;
 }
 
-static std::ostream & operator<<(std::ostream & os, const TCP::AppConnKey& app)
+static std::ostream& operator<<(std::ostream& os, const TCP::AppConnKey& app)
 {
     os << "connId=" << app.connId << " appGateIndex=" << app.appGateIndex;
     return os;
 }
 
-static std::ostream & operator<<(std::ostream & os, const TCPConnection& conn)
+static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 {
     os << "connId=" << conn.connId << " " << TCPConnection::stateName(conn.getFsmState())
        << " state={" << const_cast<TCPConnection&>(conn).getState()->info() << "}";
@@ -95,7 +95,7 @@ void TCP::handleMessage(cMessage *msg)
     {
         if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
         {
-            tcpEV << "ICMP error received -- discarding\n"; // TODO implement processsing ICMP errors
+            tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msg;
         }
         else
