@@ -60,6 +60,9 @@ typedef unsigned long long  uint64_t;
 # define BYTE_ORDER    __BYTE_ORDER
 #elif defined(__APPLE__)
 #include <machine/endian.h>
+#elif defined(__BSD__)  /* FIXME what is the right #define ??? */
+#define __BSD_VISIBLE
+#include <machine/endian.h>
 #endif
 
 #if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER!=LITTLE_ENDIAN && BYTE_ORDER!=BIG_ENDIAN)
