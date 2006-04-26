@@ -1,5 +1,4 @@
 @echo off
-call ..\..\..\tools\setenv.cmd
 call ..\..\..\omnetpp\setenv-vc71.bat
 
 set root=..\..
