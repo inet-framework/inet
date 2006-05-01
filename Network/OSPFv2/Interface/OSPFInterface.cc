@@ -14,6 +14,7 @@ OSPF::Interface::Interface (OSPF::Interface::OSPFInterfaceType ifType) :
     mtu (0),
     interfaceAddressRange (OSPF::NullIPv4AddressRange),
     areaID (OSPF::BackboneAreaID),
+    transitAreaID (OSPF::BackboneAreaID),
     helloInterval (10),
     pollInterval (120),
     routerDeadInterval (40),

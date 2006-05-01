@@ -178,7 +178,7 @@ bool OSPF::Area::HasVirtualLink (OSPF::AreaID withTransitArea) const
     int interfaceNum = associatedInterfaces.size ();
     for (int i = 0; i < interfaceNum; i++) {
         if ((associatedInterfaces[i]->GetType () == OSPF::Interface::Virtual) &&
-            (associatedInterfaces[i]->GetAreaID () == withTransitArea))
+            (associatedInterfaces[i]->GetTransitAreaID () == withTransitArea))
         {
             return true;
         }
@@ -1597,12 +1597,13 @@ void OSPF::Area::CalculateShortestPathTree (std::vector<OSPF::RoutingTableEntry*
                     }
                     if (backbone != NULL) {
                         OSPF::Interface* virtualIntf = backbone->FindVirtualLink (destinationID);
-                        if ((virtualIntf != NULL) && (virtualIntf->GetAreaID () == areaID)) {
+                        if ((virtualIntf != NULL) && (virtualIntf->GetTransitAreaID () == areaID)) {
                             OSPF::IPv4AddressRange range;
                             range.address = GetInterface (routerLSA->GetNextHop (0).ifIndex)->GetAddressRange ().address;
                             range.mask    = IPv4AddressFromULong (0xFFFFFFFF);
                             virtualIntf->SetAddressRange (range);
                             virtualIntf->SetIfIndex (routerLSA->GetNextHop (0).ifIndex);
+                            virtualIntf->SetOutputCost (routerLSA->GetDistance ());
                             OSPF::Neighbor* virtualNeighbor = virtualIntf->GetNeighbor (0);
                             if (virtualNeighbor != NULL) {
                                 unsigned int     linkCount   = routerLSA->getLinksArraySize ();
@@ -1612,7 +1613,8 @@ void OSPF::Area::CalculateShortestPathTree (std::vector<OSPF::RoutingTableEntry*
                                         Link& link = routerLSA->getLinks (i);
 
                                         if ((link.getType () == PointToPointLink) &&
-                                            (link.getLinkID () == toRouterLSA->getHeader ().getLinkStateID ()))
+                                            (link.getLinkID () == toRouterLSA->getHeader ().getLinkStateID ()) &&
+                                            (virtualIntf->GetState () < OSPF::Interface::WaitingState))
                                         {
                                             virtualNeighbor->SetAddress (IPv4AddressFromULong (link.getLinkData ()));
                                             virtualIntf->ProcessEvent (OSPF::Interface::InterfaceUp);
@@ -1626,7 +1628,8 @@ void OSPF::Area::CalculateShortestPathTree (std::vector<OSPF::RoutingTableEntry*
                                             Link& link = routerLSA->getLinks (i);
 
                                             if ((link.getType () == TransitLink) &&
-                                                (link.getLinkID () == toNetworkLSA->getHeader ().getLinkStateID ()))
+                                                (link.getLinkID () == toNetworkLSA->getHeader ().getLinkStateID ()) &&
+                                                (virtualIntf->GetState () < OSPF::Interface::WaitingState))
                                             {
                                                 virtualNeighbor->SetAddress (IPv4AddressFromULong (link.getLinkData ()));
                                                 virtualIntf->ProcessEvent (OSPF::Interface::InterfaceUp);
@@ -1810,7 +1813,10 @@ std::vector<OSPF::NextHop>* OSPF::Area::CalculateNextHops (OSPFLSA* destination,
                 unsigned long interfaceNum   = associatedInterfaces.size ();
                 for (i = 0; i < interfaceNum; i++) {
                     OSPF::Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->GetType ();
-                    if (intfType == OSPF::Interface::PointToPoint) {
+                    if ((intfType == OSPF::Interface::PointToPoint) ||
+                        ((intfType == OSPF::Interface::Virtual) &&
+                         (associatedInterfaces[i]->GetState () > OSPF::Interface::LoopbackState)))
+                    {
                         OSPF::Neighbor* ptpNeighbor = associatedInterfaces[i]->GetNeighbor (0);
                         if (ptpNeighbor != NULL) {
                             if (ptpNeighbor->GetNeighborID () == destinationRouterLSA->getHeader ().getLinkStateID ()) {
@@ -1933,7 +1939,10 @@ std::vector<OSPF::NextHop>* OSPF::Area::CalculateNextHops (Link& destination, OS
         for (i = 0; i < interfaceNum; i++) {
             OSPF::Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->GetType ();
 
-            if (intfType == OSPF::Interface::PointToPoint) {
+            if ((intfType == OSPF::Interface::PointToPoint) ||
+                ((intfType == OSPF::Interface::Virtual) &&
+                 (associatedInterfaces[i]->GetState () > OSPF::Interface::LoopbackState)))
+            {
                 OSPF::Neighbor* neighbor = (associatedInterfaces[i]->GetNeighborCount () > 0) ? associatedInterfaces[i]->GetNeighbor (0) : NULL;
                 if (neighbor != NULL) {
                     OSPF::IPv4Address neighborAddress = neighbor->GetAddress ();
@@ -2365,6 +2374,7 @@ void OSPF::Area::ReCheckSummaryLSAs (std::vector<OSPF::RoutingTableEntry*>& newR
                     break;
                 } else {
                     destinationEntry = routingEntry;
+                    break;
                 }
             }
         }

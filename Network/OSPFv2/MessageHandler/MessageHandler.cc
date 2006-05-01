@@ -166,7 +166,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
                         intf = area->FindVirtualLink (packet->getRouterID ().getInt ());
 
                         if (intf != NULL) {
-                            OSPF::Area* virtualLinkTransitArea = router->GetArea (intf->GetAreaID ());
+                            OSPF::Area* virtualLinkTransitArea = router->GetArea (intf->GetTransitAreaID ());
 
                             if (virtualLinkTransitArea != NULL) {
                                 // the receiving interface must attach to the virtual link's configured transit area

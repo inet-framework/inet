@@ -1337,7 +1337,8 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
                 if (newLSA != NULL) {
                     if (lsaToReoriginate != NULL) {
                         areas[i]->InstallSummaryLSA (lsaToReoriginate);
-                        FloodLSA (lsaToReoriginate, OSPF::BackboneAreaID);
+//                        FloodLSA (lsaToReoriginate, OSPF::BackboneAreaID);
+                        FloodLSA (lsaToReoriginate, areas[i]->GetAreaID ());
 
                         lsaKey.linkStateID       = lsaToReoriginate->getHeader ().getLinkStateID ();
                         lsaKey.advertisingRouter = routerID;
@@ -1347,7 +1348,8 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
                     }
 
                     areas[i]->InstallSummaryLSA (newLSA);
-                    FloodLSA (newLSA, OSPF::BackboneAreaID);
+//                    FloodLSA (newLSA, OSPF::BackboneAreaID);
+                    FloodLSA (newLSA, areas[i]->GetAreaID ());
 
                     lsaKey.linkStateID       = newLSA->getHeader ().getLinkStateID ();
                     lsaKey.advertisingRouter = routerID;
@@ -1363,7 +1365,8 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
                     if (newLSA != NULL) {
                         if (lsaToReoriginate != NULL) {
                             areas[i]->InstallSummaryLSA (lsaToReoriginate);
-                            FloodLSA (lsaToReoriginate, OSPF::BackboneAreaID);
+//                            FloodLSA (lsaToReoriginate, OSPF::BackboneAreaID);
+                            FloodLSA (lsaToReoriginate, areas[i]->GetAreaID ());
 
                             lsaKey.linkStateID       = lsaToReoriginate->getHeader ().getLinkStateID ();
                             lsaKey.advertisingRouter = routerID;
@@ -1373,7 +1376,8 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
                         }
 
                         areas[i]->InstallSummaryLSA (newLSA);
-                        FloodLSA (newLSA, OSPF::BackboneAreaID);
+//                        FloodLSA (newLSA, OSPF::BackboneAreaID);
+                        FloodLSA (newLSA, areas[i]->GetAreaID ());
 
                         lsaKey.linkStateID       = newLSA->getHeader ().getLinkStateID ();
                         lsaKey.advertisingRouter = routerID;
@@ -1420,14 +1424,16 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
                             if (summaryLSA != NULL) {
                                 if (oneLessCost != 0) { // there's an other entry in this range
                                     summaryLSA->setRouteCost (oneLessCost);
-                                    FloodLSA (summaryLSA, OSPF::BackboneAreaID);
+//                                    FloodLSA (summaryLSA, OSPF::BackboneAreaID);
+                                    FloodLSA (summaryLSA, areas[i]->GetAreaID ());
 
                                     originatedLSAMap[lsaKey] = true;
                                 } else {    // no more entries in this range -> delete it
                                     std::map<OSPF::LSAKeyType, bool, OSPF::LSAKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find (lsaKey);
                                     if (deletedIt == deletedLSAMap.end ()) {
                                         summaryLSA->getHeader ().setLsAge (MAX_AGE);
-                                        FloodLSA (summaryLSA, OSPF::BackboneAreaID);
+//                                        FloodLSA (summaryLSA, OSPF::BackboneAreaID);
+                                        FloodLSA (summaryLSA, areas[i]->GetAreaID ());
 
                                         deletedLSAMap[lsaKey]    = true;
                                     }

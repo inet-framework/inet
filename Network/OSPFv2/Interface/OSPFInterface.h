@@ -54,6 +54,7 @@ private:
     unsigned short                                                      mtu;
     IPv4AddressRange                                                    interfaceAddressRange;
     AreaID                                                              areaID;
+    AreaID                                                              transitAreaID;
     short                                                               helloInterval;
     short                                                               pollInterval;
     short                                                               routerDeadInterval;
@@ -110,6 +111,8 @@ public:
     unsigned short          GetMTU                          (void) const                { return mtu; }
     void                    SetAreaID                       (AreaID areaId)             { areaID = areaId; }
     AreaID                  GetAreaID                       (void) const                { return areaID; }
+    void                    SetTransitAreaID                (AreaID areaId)             { transitAreaID = areaId; }
+    AreaID                  GetTransitAreaID                (void) const                { return transitAreaID; }
     void                    SetOutputCost                   (Metric cost)               { interfaceOutputCost = cost; }
     Metric                  GetOutputCost                   (void) const                { return interfaceOutputCost; }
     void                    SetRetransmissionInterval       (short interval)            { retransmissionInterval = interval; }

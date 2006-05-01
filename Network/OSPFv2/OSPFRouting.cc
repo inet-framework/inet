@@ -87,7 +87,7 @@ void OSPFRouting::initialize (int stage)
  */
 void OSPFRouting::handleMessage (cMessage *msg)
 {
-//    if (simulation.eventNumber () == 43625) {
+//    if (simulation.eventNumber () == 90591) {
 //        __asm int 3;
 //    }
     ospfRouter->GetMessageHandler ()->MessageReceived (msg);
@@ -407,7 +407,7 @@ void OSPFRouting::LoadVirtualLink (const cXMLElement& virtualLinkConfig)
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin (); ifElemIt != ifDetails.end (); ifElemIt++) {
         std::string nodeName = (*ifElemIt)->getTagName ();
         if (nodeName == "TransitAreaID") {
-            intf->SetAreaID (ULongFromAddressString ((*ifElemIt)->getNodeValue ()));
+            intf->SetTransitAreaID (ULongFromAddressString ((*ifElemIt)->getNodeValue ()));
         }
         if (nodeName == "RetransmissionInterval") {
             intf->SetRetransmissionInterval (atoi ((*ifElemIt)->getNodeValue ()));
