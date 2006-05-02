@@ -84,7 +84,7 @@
 //
 // <b>Autoconfiguration</b>
 //
-// EtherDuplexMAC does NOT include autoconfiguration. Link speed is taken from
+// EtherDuplexMAC does NOT include autoconfiguration. \Link speed is taken from
 // the <tt>datarate</tt> attribute of the connection instead of module parameters
 // or autoconfiguration.
 //
@@ -92,7 +92,7 @@
 //
 // <b>Disabling and disconnecting</b>
 //
-// If the MAC is not connected to the network ("cable unplugged"), it will
+// If the MAC is not connected to the network ("\cable unplugged"), it will
 // start up in "disabled" mode. A disabled MAC simply discards any messages
 // it receives. It is currently not supported to dynamically connect/disconnect
 // a MAC.

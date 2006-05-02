@@ -26,7 +26,7 @@
 //# Varga at CTIE, Monash University, Melbourne, Australia.
 //
 // The Ethernet model contains a MAC model (EtherMAC), LLC model (EtherLLC) as well
-// as a bus (EtherBus, for modelling coaxial cable) and a hub (EtherHub) model.
+// as a bus (EtherBus, for modelling coaxial \cable) and a hub (EtherHub) model.
 // A switch model (EtherSwitch) is also provided.
 //
 // A few useful topics:
@@ -44,7 +44,7 @@
 //    largenet.ini), and mixes all kinds of Ethernet technologies;
 //  - EtherHost is a sample node with an Ethernet NIC;
 //  - EtherSwitch, EtherBus, EtherHub model switching hub, repeating hub and
-//    the old coxial cable;
+//    the old coxial \cable;
 //  - basic compnents of the model: EtherMAC, EtherLLC/EtherEncap module types,
 //    MACRelayUnit (MACRelayUnitNP and MACRelayUnitPP), EtherFrame message type,
 //    MACAddress class

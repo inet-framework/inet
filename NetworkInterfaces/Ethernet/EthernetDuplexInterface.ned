@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,18 +18,19 @@
 
 
 import
-    "EtherMAC",
+    "EtherDuplexMAC",
     "EtherEncap",
     "OutputQueue";
 
 //
-// Ethernet network interface. Corresponds to the prototype NetworkInterface.
-// Complements EtherMAC and EtherEncap with an output queue for QoS and
+// Ethernet network interface, which supports full-duplex operation only.
+// Corresponds to the prototype NetworkInterface.
+// Complements EtherDuplexMAC and EtherEncap with an output queue for QoS and
 // RED support.
 //
-// @see EthernetDuplexInterface, EthernetInterfaceNoQueue
+// @see EthernetInterface, EthernetInterfaceNoQueue
 //
-module EthernetInterface
+module EthernetDuplexInterface
     parameters:
         queueType: string;
     gates:
@@ -40,7 +41,7 @@ module EthernetInterface
     submodules:
         queue: queueType like OutputQueue;
             display: "i=block/queue;p=92,71;q=l2queue";
-        mac: EtherMAC;
+        mac: EtherDuplexMAC;
             parameters:
                 queueModule = "queue",
                 txQueueLimit = 1; // queue sends one packet at a time
