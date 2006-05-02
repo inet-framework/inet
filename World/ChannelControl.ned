@@ -44,6 +44,7 @@ simple ChannelControl
         pMax: numeric const, // maximum sending power used for this network (in mW)
         sat: numeric const, // signal attenuation threshold (in dBm)
         alpha: numeric const, // path loss coefficient
-        carrierFrequency: numeric const; // carrier frequency of the channel (in Hz)
+        carrierFrequency: numeric const, // carrier frequency of the channel (in Hz)
+        numberOfChannels: numeric const;
 endsimple
 

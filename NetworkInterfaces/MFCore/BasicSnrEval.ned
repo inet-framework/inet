@@ -41,10 +41,11 @@
 //
 simple BasicSnrEval
     parameters:
-    coreDebug : numeric const, // debug switch for the core framework
-        transmitterPower : numeric, // power used for transmission of messages (in mW)
-    bitrate: numeric, // bitrate (in bits/sec)
-    headerLength: numeric const; // header length of the AirFrame (in bits)
+        channelNumber: numeric, // channel identifier
+        coreDebug: numeric const, // debug switch for the core framework
+        transmitterPower: numeric, // power used for transmission of messages (in mW)
+        bitrate: numeric, // bitrate (in bits/sec)
+        headerLength: numeric const; // header length of the AirFrame (in bits)
     gates:
         in: uppergateIn; // from the MAC layer
         out: uppergateOut; // to the decider sub-module

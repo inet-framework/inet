@@ -171,6 +171,12 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     /** @brief Produce a readable name of the given state */
     const char *stateName(State state);
 
+    /** @brief Produce a readable name of the given timer type */
+    const char *timerTypeName(int type);
+
+    /** @brief Produce a readable name of the given packet type */
+    const char *pktTypeName(int type);
+
     /** @brief Sets the state, and produces a log message in between */
     void setState(State state);
 

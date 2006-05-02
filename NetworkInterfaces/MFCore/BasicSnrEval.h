@@ -55,7 +55,7 @@ class INET_API BasicSnrEval : public ChannelAccess
     /** @brief a parameter that has to be read in from omnetpp.ini*/
     double bitrate;
 
-    /** brief a parameter that has to be read in from omnetpp.ini*/
+    /** @brief a parameter that has to be read in from omnetpp.ini*/
     int headerLength;
 
     /** @brief power used to transmit messages */
@@ -66,6 +66,9 @@ class INET_API BasicSnrEval : public ChannelAccess
     int uppergateOut;
     int uppergateIn;
     /*@}*/
+
+    /** @brief identifies the channel */
+    int channel;
 
   protected:
     /** @brief Initialization of the module and some variables*/
@@ -127,14 +130,6 @@ class INET_API BasicSnrEval : public ChannelAccess
 
     /** @brief Sends a message to the channel*/
     void sendDown(AirFrame *msg);
-
-    /** @brief Sends a message to the upper layer; waits delay seconds
-        before sending*/
-    void sendDelayedUp(AirFrame*, double, SnrList&);
-
-    /** @brief Sends a message to the channel; waits delay seconds
-        before sending*/
-    void sendDelayedDown(AirFrame *msg, double);
 
     /** @brief Encapsulates a MAC frame into an Air Frame*/
     AirFrame* encapsMsg(cMessage *msg);

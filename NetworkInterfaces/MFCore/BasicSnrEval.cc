@@ -56,6 +56,8 @@ void BasicSnrEval::initialize(int stage)
         // transmitter power CANNOT be greater than in ChannelControl
         if (transmitterPower > (double) (cc->par("pMax")))
             error("tranmitterPower cannot be bigger than pMax in ChannelControl!");
+
+        channel = par("channelNumber");
     }
 }
 
@@ -95,9 +97,13 @@ void BasicSnrEval::handleMessage(cMessage *msg)
         else
             handleSelfMsg(msg);
     }
+    else if (((AirFrame*)msg)->getChannelNumber() != channel)  //  FIXME use check_and_cast
+    {
+        EV << "listening to different channel when receiving message -- dropping it\n";
+    }
     else
     {
-        // msg must come from channel
+        // msg must come from our own channel
         AirFrame *frame = (AirFrame *) msg;
         handleLowerMsgStart(frame);
         bufferMsg(frame);
@@ -110,12 +116,15 @@ void BasicSnrEval::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void BasicSnrEval::bufferMsg(AirFrame * frame)
+void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     TransmComplete *timer = new TransmComplete(NULL);
     timer->setContextPointer(frame);
-    scheduleAt(simTime() + (frame->getDuration()), timer);
+    // NOTE: use arrivalTime instead of simTime, because the message arrival time
+    // might be in the past when processing ongoing transmissions during a channel
+    // change
+    scheduleAt(frame->arrivalTime() + frame->getDuration(), timer);
 }
 
 /**
@@ -130,7 +139,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
     frame->setName(msg->name());
     frame->setPSend(transmitterPower);
     frame->setLength(headerLength);
-    //FIXME frame->setChannelId(((MacPkt*)msg)->getChannelId()); --MF generally lacks support for channels, that will have to be rectified
+    frame->setChannelNumber(channel);
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
     frame->setSenderPos(myPosition());
@@ -153,48 +162,15 @@ double BasicSnrEval::calcDuration(cMessage *af)
 }
 
 /**
- * Convenience function which calls sendDelayedUp with delay set to
- * 0.0.
- *
- * @sa sendDelayedUp
- */
-void BasicSnrEval::sendUp(AirFrame *msg, SnrList& list)
-{
-    sendDelayedUp(msg, 0.0, list);
-}
-
-/**
- * Convenience function which calls sendToChannel with delay set
- * to 0.0.
- *
- * @sa sendToChannel
- */
-void BasicSnrEval::sendDown(AirFrame *msg)
-{
-    sendToChannel((cMessage *) msg, 0.0);
-}
-
-/**
- * Just calls sentToChannel from ChannelAccess.
- *
- * @sa sendToChannel
- */
-void BasicSnrEval::sendDelayedDown(AirFrame *msg, double delay)
-{
-    sendToChannel((cMessage *) msg, delay);
-}
-
-/**
  * Attach control info to the message and send message to the upper
- * layer. Wait delay seconds before sending.
+ * layer.
  *
  * @param msg AirFrame to pass to the decider
  * @param list Snr list to attach as control info
- * @param delay Delay the message should be sent with in seconds
  *
  * to be called within @ref handleLowerMsgEnd.
  */
-void BasicSnrEval::sendDelayedUp(AirFrame *msg, double delay, SnrList& list)
+void BasicSnrEval::sendUp(AirFrame *msg, SnrList& list)
 {
     // create ControlInfo
     SnrControlInfo *cInfo = new SnrControlInfo;
@@ -203,7 +179,17 @@ void BasicSnrEval::sendDelayedUp(AirFrame *msg, double delay, SnrList& list)
     // attach the cInfo to the AirFrame
     msg->setControlInfo(cInfo);
 
-    sendDelayed((cMessage *) msg, delay, uppergateOut);
+    send(msg, uppergateOut);
+}
+
+/**
+ * @brief Sends a message to the channel
+ *
+ * @sa sendToChannel
+ */
+void BasicSnrEval::sendDown(AirFrame *msg)
+{
+    sendToChannel(msg);
 }
 
 /**

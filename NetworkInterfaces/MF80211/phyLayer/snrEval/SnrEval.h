@@ -20,8 +20,7 @@
 #ifndef SNR_EVAL_H
 #define SNR_EVAL_H
 
-#include <BasicSnrEval.h>
-
+#include "BasicSnrEval.h"
 #include "RadioState.h"
 
 /**
@@ -52,6 +51,17 @@
  */
 class INET_API SnrEval : public BasicSnrEval
 {
+  public:
+    /** @brief change transmitter and receiver to a new channel.
+      * This method throws an error if the radio state is transmit.
+      * Messages that are already sent to the new channel and would
+      * reach us in the future - thus they are on the air - will be
+      * received correctly.
+      */
+    void changeChannel(const int channel);
+
+    const int getChannel() {return channel;}
+
   protected:
     /** @brief Initialize variables and publish the radio status*/
     virtual void initialize(int);

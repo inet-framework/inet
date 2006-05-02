@@ -23,6 +23,8 @@
 
 #include <list>
 #include <omnetpp.h>
+// FIXME: revise directory structure
+#include "../NetworkInterfaces/MFCore/AirFrame_m.h"
 #include "BasicModule.h"
 #include "ChannelControl.h"
 
@@ -53,8 +55,8 @@ class INET_API ChannelAccess : public BasicModule
     ChannelControl::HostRef myHostRef;
 
   protected:
-    /** @brief Sends a message to all hosts in range, after delay seconds*/
-    void sendToChannel(cMessage *msg, double delay);
+    /** @brief Sends a message to all hosts in range*/
+    virtual void sendToChannel(AirFrame *msg);
 
     /** @brief Returns the host's position*/
     const Coord& myPosition() {return cc->getHostPosition(myHostRef);}

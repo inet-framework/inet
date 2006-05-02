@@ -67,7 +67,8 @@ void Mac80211::initialize(int stage)
         broadcastBackoff = par("broadcastBackoff");
         rtsCts = par("rtsCts");
         bitrate = par("bitrate");
-        delta = 1E-9;
+        // TODO: WTF delta?
+        delta = 1E-9; // FIXME rename to epsilon
 
         radioState = RadioState::IDLE; // until 1st receiveChangeNotification()
 
@@ -76,6 +77,9 @@ void Mac80211::initialize(int stage)
 
         // get registered in InterfaceTable
         registerInterface();
+
+        WATCH(state);
+        WATCH(radioState);
     }
 }
 
@@ -202,7 +206,7 @@ void Mac80211::handleLowerMsg(cMessage *msg)
     Mac80211Pkt *af = check_and_cast<Mac80211Pkt *>(msg);
 
     // end of the reception
-    EV << "frame " << af << " received\n";
+    EV << "frame " << af << " received, kind = " << pktTypeName(af->kind()) << "\n";
 
     switch (af->kind())
     {
@@ -233,6 +237,8 @@ void Mac80211::handleLowerMsg(cMessage *msg)
  */
 void Mac80211::handleSelfMsg(cMessage * msg)
 {
+    EV << "processing self message with type = " << timerTypeName(msg->kind()) << endl;
+
     switch (msg->kind())
     {
     case END_SIFS:
@@ -340,7 +346,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
  */
 void Mac80211::handleMsgForMe(Mac80211Pkt *af)
 {
-    EV << "handle msg for me\n";
+    EV << "handle msg for me in state = " << stateName(state) << " with type = " << pktTypeName(af->kind()) << "\n";
 
     switch (state)
     {
@@ -353,6 +359,7 @@ void Mac80211::handleMsgForMe(Mac80211Pkt *af)
         else if (af->kind() == DATA)
             handleDATAframe(af);
         else
+            // TODO: what if a late ACK has arrived?
             EV << "in handleMsgForMe() IDLE/CONTEND, strange message, darf das?\n";
         break;
 
@@ -437,10 +444,12 @@ void Mac80211::handleDATAframe(Mac80211Pkt * af)
  */
 void Mac80211::handleACKframe(Mac80211Pkt * af)
 {
+    EV << "handling Ack frame\n";
+
     // cancel time-out event
     cancelEvent(timeout);
 
-    // the the transmission is acknowledged : initialize long_retry_counter
+    // the transmission is acknowledged : initialize long_retry_counter
     retryCounter = 1;
 
     // removes the acknowledged packet from the queue
@@ -492,6 +501,8 @@ void Mac80211::handleBroadcastMsg(Mac80211Pkt *af)
  */
 void Mac80211::handleEndContentionTimer()
 {
+    EV << "end contention period\n";
+
     if (state != CONTEND)
         error("logic error: expiration of the contention timer outside of CONTEND state, should not happen");
 
@@ -603,6 +614,8 @@ void Mac80211::handleEndTransmissionTimer()
  */
 void Mac80211::sendDATAframe()
 {
+    EV << "sending data frame\n";
+
     // schedule time out
     scheduleAt(simTime() + timeOut(DATA, 0), timeout);
 
@@ -625,6 +638,7 @@ void Mac80211::sendACKframe(Mac80211Pkt * af)
 {
     // the MAC must wait the end of the transmission before beginning an
     // other contention period
+    // TODO: WTF delta?
     scheduleAt(simTime() + packetDuration(LENGTH_ACK) + delta, endTransmission);
 
     // send ACK frame
@@ -781,6 +795,8 @@ Mac80211Pkt *Mac80211::buildBROADCASTframe()
  */
 void Mac80211::beginNewCycle()
 {
+    EV << "beginning new contention cycle\n";
+
     // before trying to send one more time a packet, test if the
     // maximum retry limit is reached. If it is the case, then
     // delete the packet and send the next packet.
@@ -851,8 +867,7 @@ int Mac80211::contentionWindow()
     // the next packet is an unicast packet
     if (!nextIsBroadcast)
     {
-        int cw;
-        cw = (CW_MIN + 1) * (unsigned int) pow(2.0, (int) retryCounter - 1) - 1;
+        int cw = (CW_MIN + 1) * (1 << (retryCounter - 1)) - 1;
         // return the calculated value or CWmax if the maximal value is reached
         if (cw <= CW_MAX)
             return cw;
@@ -953,15 +968,20 @@ double Mac80211::timeOut(_802_11frameType type, double last_frame_duration)
     switch (type)
     {
     case RTS:
+        // TODO: WTF delta?
         time_out = SIFS + packetDuration(LENGTH_RTS) + packetDuration(LENGTH_CTS) + delta;
         break;
     case CTS:
+        // TODO: WTF delta?
         time_out = last_frame_duration - packetDuration(LENGTH_ACK) - 2 * SIFS + delta;
         break;
     case DATA:
+        // TODO: WTF delta?
         time_out =
             SIFS + packetDuration(fromUpperLayer.front()->length()) + packetDuration(LENGTH_ACK) +
-            delta;
+            delta + 0.1;
+        // FIXME: I have added some time here, because propagation delay of AirFrames caused problems
+        // the timeout periods should be carefully revised with special care for the deltas?!
         break;
     default:
         EV << "Unused frame type was given when calling timeOut(), this should not happen!\n";
@@ -992,6 +1012,43 @@ const char *Mac80211::stateName(State state)
         CASE(WFCTS);
         CASE(WFACK);
         CASE(BUSY);
+    }
+    return s;
+#undef CASE
+}
+
+const char *Mac80211::timerTypeName(int type)
+{
+#define CASE(x) case x: s=#x; break
+    const char *s = "???";
+    switch (type)
+    {
+        CASE(TIMEOUT);
+        CASE(NAV);
+        CASE(CONTENTION);
+        CASE(END_TRANSMISSION);
+        CASE(END_SIFS);
+    }
+    return s;
+#undef CASE
+}
+
+const char *Mac80211::pktTypeName(int type)
+{
+#define CASE(x) case x: s=#x; break
+    const char *s = "???";
+    switch (type)
+    {
+        CASE(TIMEOUT);
+        CASE(DATA);
+        CASE(BROADCAST);
+        CASE(RTS);
+        CASE(CTS);
+        CASE(ACK);
+        CASE(ACKRTS);
+        CASE(BEGIN_RECEPTION);
+        CASE(BITERROR);
+        CASE(COLLISION);
     }
     return s;
 #undef CASE

@@ -58,10 +58,12 @@ void ChannelAccess::initialize(int stage)
  * This function really sends the message away, so if you still want
  * to work with it you should send a duplicate!
  */
-void ChannelAccess::sendToChannel(cMessage *msg, double delay)
+void ChannelAccess::sendToChannel(AirFrame *msg)
 {
     const ChannelControl::ModuleList& neighbors = cc->getNeighbors(myHostRef);
     coreEV << "sendToChannel: sending to gates\n";
+
+    cc->addOngoingTransmission(myHostRef, msg);
 
     // loop through all hosts in range
     ChannelControl::ModuleList::const_iterator it;
@@ -71,16 +73,23 @@ void ChannelAccess::sendToChannel(cMessage *msg, double delay)
 
         // we need to send to each radioIn[] gate
         cGate *radioGate = mod->gate("radioIn");
-        if (!radioGate)
-            continue;
-        int radioStart = radioGate->id();
-        int radioEnd = radioStart + radioGate->size();
-        // TODO account for propagation delay, based on distance?
-        // Over 300m, dt=1us=10 bit times @ 10Mbps
-        for (int g = radioStart; g != radioEnd; ++g)
-            sendDirect((cMessage *)msg->dup(), delay, mod, g);
+        for (int i = 0; i < radioGate->size(); i++)
+        {
+            ChannelControl::HostRef h = cc->lookupHost(mod);
+
+            if (h == NULL)
+                error("cannot find module in channel control");
+
+            if (h->channel == msg->getChannelNumber())
+            {
+                coreEV << "sending message to host listening on the same channel\n";
+                // account for propagation delay, based on distance in meters
+                // Over 300m, dt=1us=10 bit times @ 10Mbps
+                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, mod, radioGate->id() + i);
+            }
+            else
+                coreEV << "skipping host listening on a different channel\n";
+        }
     }
     delete msg;
 }
-
-

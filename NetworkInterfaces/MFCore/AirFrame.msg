@@ -48,7 +48,7 @@ message AirFrame
 {
     fields:
         double pSend; // Power with which this packet is transmitted
-        int channelId=1; // Channel on which the packet is sent
+        int channelNumber; // Channel on which the packet is sent
         double duration; // Time it takes to transmit the packet, in seconds!
         Coord senderPos;
 };

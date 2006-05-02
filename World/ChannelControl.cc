@@ -32,6 +32,12 @@ std::ostream& operator<<(std::ostream& os, const ChannelControl::HostEntry& h)
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const ChannelControl::TransmissionList& tl)
+{
+    for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+        os << endl << *it;
+    return os;
+}
 
 /**
  * Sets up the playgroundSize and calculates the
@@ -48,10 +54,16 @@ void ChannelControl::initialize()
     playgroundSize.x = par("playgroundSizeX");
     playgroundSize.y = par("playgroundSizeY");
 
+    numberOfChannels = par("numberOfChannels");
+    transmissions.resize(numberOfChannels);
+
+    lastOngoingTransmissionsUpdate = 0;
+
     maxInterferenceDistance = calcInterfDist();
 
     WATCH(maxInterferenceDistance);
     WATCH_LIST(hosts);
+    WATCH_VECTOR(transmissions);
 
     updateDisplayString(parentModule());
 }
@@ -105,6 +117,7 @@ double ChannelControl::calcInterfDist()
 
 ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord& initialPos)
 {
+    Enter_Method("registerHost()");
     if (lookupHost(host) != NULL)
         error("ChannelControl::registerHost(): host (%s)%s already registered",
               host->className(), host->fullPath().c_str());
@@ -113,12 +126,15 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord
     he.host = host;
     he.pos = initialPos;
     he.isModuleListValid = false;
+    // TODO: get it from caller
+    he.channel = 0;
     hosts.push_back(he);
     return &hosts.back(); // last element
 }
 
 ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 {
+    Enter_Method("lookupHost()");
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
         if (it->host == host)
             return &(*it);
@@ -127,6 +143,7 @@ ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 
 const ChannelControl::ModuleList& ChannelControl::getNeighbors(HostRef h)
 {
+    Enter_Method("getNeighbors()");
     if (!h->isModuleListValid)
     {
         h->neighborModules.clear();
@@ -167,6 +184,76 @@ void ChannelControl::updateConnections(HostRef h)
             {
                 hi->neighbors.erase(h);
                 h->isModuleListValid = hi->isModuleListValid = false;
+            }
+        }
+    }
+}
+
+void ChannelControl::checkChannel(const int channel)
+{
+    if (channel >= numberOfChannels || channel < 0)
+        error("Invalid channel, must be between 0 and %d", numberOfChannels);
+}
+
+void ChannelControl::updateHostPosition(HostRef h, const Coord& pos)
+{
+    Enter_Method("updateHostPosition()");
+    h->pos = pos;
+    updateConnections(h);
+}
+
+void ChannelControl::updateHostChannel(HostRef h, const int channel)
+{
+    Enter_Method("getOngoingTransmissions()");
+    checkChannel(channel);
+
+    h->channel = channel;
+}
+
+const ChannelControl::TransmissionList& ChannelControl::getOngoingTransmissions(const int channel)
+{
+    Enter_Method("getOngoingTransmissions()");
+
+    checkChannel(channel);
+    purgeOngoingTransmissions();
+    return transmissions[channel];
+}
+
+void ChannelControl::addOngoingTransmission(HostRef h, AirFrame *frame)
+{
+    Enter_Method("addOngoingTransmission()");
+
+    // we only keep track of ongoing transmissions so that we can support
+    // NICs switching channels -- so there's no point doing it if there's only
+    // one channel
+    if (numberOfChannels==1)
+        return;
+
+    // purge old transmissions from time to time
+    if (simTime() - lastOngoingTransmissionsUpdate > TRANSMISSION_PURGE_INTERVAL)
+    {
+        purgeOngoingTransmissions();
+        lastOngoingTransmissionsUpdate = simTime();
+    }
+
+    // register ongoing transmission
+    transmissions[frame->getChannelNumber()].push_back((AirFrame*)frame->dup());
+}
+
+void ChannelControl::purgeOngoingTransmissions()
+{
+    for (int i = 0; i < numberOfChannels; i++)
+    {
+        for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end();)
+        {
+            TransmissionList::iterator curr = it;
+            AirFrame *frame = *it;
+            it++;
+
+            if (frame->timestamp() + frame->getDuration() + TRANSMISSION_PURGE_INTERVAL < simTime())
+            {
+                delete frame;
+                transmissions[i].erase(curr);
             }
         }
     }

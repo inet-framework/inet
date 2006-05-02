@@ -20,6 +20,7 @@
 
 simple SnrEval80211
     parameters:
+        channelNumber: numeric, // channel identifier
     debug: bool, // debug switch
         transmitterPower : numeric,
     bitrate: numeric,

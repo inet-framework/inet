@@ -22,6 +22,12 @@
 #include "FWMath.h"
 
 
+std::ostream& operator<<(std::ostream& os, const RadioState& rs)
+{
+    os << "state=" << rs.getState();
+    return os;
+}
+
 Define_Module(SnrEval);
 
 /**
@@ -74,6 +80,10 @@ void SnrEval::initialize(int stage)
         rs.setState(RadioState::IDLE);
         if (noiseLevel >= sensitivity)
             rs.setState(RadioState::RECV);
+
+        WATCH(noiseLevel);
+        WATCH(rs);
+        WATCH(channel);
     }
     else if (stage == 1)
     {
@@ -204,8 +214,11 @@ void SnrEval::handleLowerMsgStart(AirFrame * frame)
     recvBuff[frame] = rcvdPower;
 
     // if receive power is bigger than sensitivity and if not sending
-    // and currently not receiving another message
-    if (rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    // and currently not receiving another message and the message has
+    // arrived in time
+    // NOTE: a message may have arrival time in the past here when we are
+    // processing ongoing transmissions during a channel change
+    if (frame->arrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
         EV << "receiving frame " << frame->name() << endl;
 
@@ -226,10 +239,10 @@ void SnrEval::handleLowerMsgStart(AirFrame * frame)
             nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
         }
     }
-    // receive power is to low or another message is being send or received
+    // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << frame->name() << "is just noise\n";
+        EV << "frame " << frame->name() << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -346,4 +359,62 @@ double SnrEval::calcRcvdPower(double pSend, double distance)
     double speedOfLight = 300000000.0;
     double waveLength = speedOfLight / carrierFrequency;
     return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
+}
+
+void SnrEval::changeChannel(const int channel)
+{
+    if (channel == this->channel)
+        return;
+    else if (rs.getState() == RadioState::TRANSMIT)
+        // TODO: is there a reasonable solution for this?
+        error("changing channel while transmitting is not allowed");
+    else if (rs.getState() == RadioState::RECV)
+        // TODO: what should we do with the message being received?
+        error("changing channel while receiving is not _yet_ allowed");
+    else
+    {
+        EV << "changing channel to " << channel << " during radio idle\n";
+
+        this->channel = channel;
+        cc->updateHostChannel(myHostRef, channel);
+        ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
+
+        // clear snr info
+        snrInfo.ptr = NULL;
+        snrInfo.sList.clear();
+
+        for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+        {
+            AirFrame *frame = *it;
+            // time for the message to reach us
+            double distance = myHostRef->pos.distance(frame->getSenderPos());
+
+            EV << "processing ongoing transmission for channel change\n";
+
+            // if this transmission is on our new channel and it would reach us in the future, then schedule it
+            if (channel == frame->getChannelNumber())
+            {
+                // if there is a message on the air which will reach us in the future
+                if (frame->timestamp() + distance / LIGHT_SPEED >= simTime())
+                {
+                    EV << "scheduling ongoing transmission to be processed in the future\n";
+
+                    // we need to send to each radioIn[] gate
+                    cGate *radioGate = gate("radioIn");
+                    for (int i = 0; i < radioGate->size(); i++)
+                        sendDirect((cMessage*)frame->dup(), frame->timestamp() + distance / LIGHT_SPEED - simTime(), this, radioGate->id() + i);
+                }
+                // if we hear some part of the message
+                else if (frame->timestamp() + frame->getDuration() + distance / LIGHT_SPEED > simTime())
+                {
+                    EV << "processing ongoing transmission as noise\n";
+
+                    AirFrame *frameDup = (AirFrame*)frame->dup();
+                    frameDup->setArrivalTime(frame->timestamp() + distance / LIGHT_SPEED);
+                    handleLowerMsgStart(frameDup);
+                    bufferMsg(frameDup);
+                }
+            }
+        }
+    }
 }
