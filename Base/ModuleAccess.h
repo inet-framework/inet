@@ -55,6 +55,16 @@ class INET_API ModuleAccess
         }
         return p;
     }
+
+    T *getIfExists()
+    {
+        if (!p)
+        {
+            cModule *m = findModuleWherever(name, opp_typename(typeid(T)), simulation.contextModule());
+            p = dynamic_cast<T*>(m);
+        }
+        return p;
+    }
 };
 
 #endif

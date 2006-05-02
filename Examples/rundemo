@@ -61,6 +61,7 @@ foreach line {
    {"LANs: Ethernet bus"     "Ethernet/LANs"        "./LANs -f bus.ini"       "LANs -f bus.ini"}
    {"LANs: hub"              "Ethernet/LANs"        "./LANs -f hub.ini"       "LANs -f hub.ini"}
    {"LANs: switch"           "Ethernet/LANs"        "./LANs -f switch.ini"    "LANs -f switch.ini"}
+   {"LANs: duplexswitch"     "Ethernet/LANs"        "./LANs -f duplexswitch.ini" "LANs -f duplexswitch.ini"}
    {"LANs: two hosts"        "Ethernet/LANs"        "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
    {"LANs: very large LAN"   "Ethernet/LANs"        "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
 
