@@ -20,7 +20,9 @@ import
     "EtherBus",
     "EtherHub",
     "EtherHost",
+    "EtherDuplexHost",
     "EtherSwitch",
+    "EtherDuplexSwitch",
     "ChannelInstaller";
 
 
@@ -219,6 +221,37 @@ module BusLAN
         bus.out[3] --> hostD.in;
 endmodule
 
+channel ethernetline
+    delay 0.1us;
+    datarate 10*1000000;
+endchannel
+
+module SwitchedDuplexLAN
+    submodules:
+        hostA: EtherDuplexHost;
+            display: "p=161,55;i=device/server";
+        hostB: EtherDuplexHost;
+            display: "p=253,125;i=device/pc2";
+        hostC: EtherDuplexHost;
+            display: "p=158,199;i=device/pc2";
+        hostD: EtherDuplexHost;
+            display: "p=59,127;i=device/pc2";
+        switch: EtherDuplexSwitch;
+            gatesizes:
+                in[4],
+                out[4];
+            display: "p=162,124;i=switch2";
+    connections:
+        switch.out[0] --> ethernetline --> hostA.in;
+        switch.in[0] <-- ethernetline <-- hostA.out;
+        switch.out[1] --> ethernetline --> hostB.in;
+        switch.in[1] <-- ethernetline <-- hostB.out;
+        switch.out[2] --> ethernetline --> hostC.in;
+        switch.in[2] <-- ethernetline <-- hostC.out;
+        switch.out[3] --> ethernetline --> hostD.in;
+        switch.in[3] <-- ethernetline <-- hostD.out;
+endmodule
+
 network mixedLAN : MixedLAN
 endnetwork
 
@@ -226,6 +259,9 @@ network twoHosts : TwoHosts
 endnetwork
 
 network switchedLAN : SwitchedLAN
+endnetwork
+
+network switchedDuplexLAN : SwitchedDuplexLAN
 endnetwork
 
 network hubLAN : HubLAN

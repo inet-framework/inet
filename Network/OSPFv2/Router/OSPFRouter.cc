@@ -262,7 +262,7 @@ bool OSPF::Router::InstallASExternalLSA (OSPFASExternalLSA* lsa)
  * Find the LSA identified by the input lsaKey in the database.
  * @param lsaType [in] Look for an LSA of this type.
  * @param lsaKey  [in] Look for the LSA which is identified by this key.
- * @param areID   [in] In case of Router, Network and Summary LSAs, look in the Area's database
+ * @param areaID  [in] In case of Router, Network and Summary LSAs, look in the Area's database
  *                     identified by this parameter.
  * @return The pointer to the LSA if it was found, NULL otherwise.
  */
@@ -1512,8 +1512,8 @@ void OSPF::Router::NotifyAboutRoutingTableChanges (std::vector<OSPF::RoutingTabl
  * Stores information on an AS External Route in externalRoutes and intalls (or
  * updates) a new ASExternalLSA into the database.
  * @param networkAddress        [in] The external route's network address.
- * @param externalRouteContents [in] Route configuration data for the external
- *                                   route.
+ * @param externalRouteContents [in] Route configuration data for the external route.
+ * @param ifIndex               [in] 
  */
 void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex)
 {

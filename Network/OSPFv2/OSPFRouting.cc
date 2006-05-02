@@ -389,7 +389,7 @@ void OSPFRouting::LoadHostRoute (const cXMLElement& hostRouteConfig)
 
 /**
  * Loads the configuration of an OSPf virtual link (virtual connection between two backbone routers).
- * @param hostRouteConfig [in] XML node describing the parameters of a virtual link.
+ * @param virtualLinkConfig [in] XML node describing the parameters of a virtual link.
  */
 void OSPFRouting::LoadVirtualLink (const cXMLElement& virtualLinkConfig)
 {
