@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2003 CTIE, Monash University
+// Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,14 +18,28 @@
 
 
 //
-// Ethernet MAC layer. MAC performs transmission and reception of frames.
-// Doesn't do encapsulation/decapsulation; see EtherLLC and EtherEncap for
-// that.
+// Ethernet MAC which supports full duplex operation ONLY.
+//
+// Most of today's Ethernet networks are switched, and operate
+// in full duplex mode. Full-duplex transmission can be used for
+// point-to-point connections only. Since full-duplex connections
+// cannot be shared, collisions are eliminated. This setup eliminates
+// most of the need for the CSMA/CD access control mechanism because
+// there is no need to determine whether the connection is already
+// being used. This allows for a much simpler simulation model
+// for MAC. (In "traditional" Ethernet simulations, most of the code
+// deals with the shared medium and the CSMA/CD mechanism.)
+// EtherDuplexMAC implements Ethernet without shared medium and CSMA/CD.
+// (If you need half-duplex operation, see EtherMAC which is for a full-blown
+// and therefore more complicated Ethernet MAC model.)
+//
+// EtherDuplexMAC performs transmission and reception of frames.
+// It does not do encapsulation/decapsulation; see EtherLLC and EtherEncap
+// for that.
 //
 // Supported variations:
-// - 10Mb Ethernet bus or twisted pair
-// - 100Mb Ethernet duplex or half-duplex
-// - 1Gb Ethernet
+// - 100Mb Ethernet (full duplex mode)
+// - 1Gb Ethernet (full duplex mode)
 //
 // Supports all three Ethernet frame types. (It handles EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
@@ -70,10 +84,9 @@
 //
 // <b>Autoconfiguration</b>
 //
-// A very short period at the beginning of the simulation is spent on
-// all EtherMAC's exchanging autoconfiguration messages, during which
-// the selection of transmission rate and full duplex/half duplex mode
-// takes place.
+// EtherDuplexMAC does NOT include autoconfiguration. Link speed is taken from
+// the <tt>datarate</tt> attribute of the connection instead of module parameters
+// or autoconfiguration.
 //
 // For more info see <a href="ether-overview.html">Ethernet Model Overview</a>.
 //
@@ -126,20 +139,13 @@
 // @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
-simple EtherMAC
+simple EtherDuplexMAC
     parameters:
         promiscuous : bool,     // if true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
         address : string,       // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        txrate : numeric,       // maximum data rate supported by this station (bit/s);
-                                // actually chosen speed may be lower due to auto-
-                                // configuration. 0 means fully auto-configured.
-        duplexEnabled : bool,   // whether duplex mode can be enabled or not; whether
-                                // MAC will actually use duplex mode depends on the result
-                                // of the auto-configuration process (duplex is only
-                                // possible with DTE-to-DTE connection).
         txQueueLimit : numeric, // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         queueModule: string,    // name of external queue module
