@@ -48,6 +48,9 @@ void EtherDuplexMAC::initializeTxrate()
 
     if (connected)
     {
+        // obtain txrate from channel. As a side effect, this also asserts
+        // that the other end is an EtherDuplexMAC, since normal EtherMAC
+        // insists that the connection has *no* datarate set.
         while (g)
         {
             // does this gate have data rate?
@@ -90,7 +93,7 @@ void EtherDuplexMAC::handleMessage(cMessage *msg)
             processMsgFromNetwork(check_and_cast<EtherFrame *>(msg));
         else
             error("Message received from unknown gate!");
-    } 
+    }
 
     if (ev.isGUI())  updateDisplayString();
 }
@@ -144,18 +147,18 @@ void EtherDuplexMAC::processMsgFromNetwork(cMessage *msg)
 void EtherDuplexMAC::handleEndIFGPeriod()
 {
     EtherMACBase::handleEndIFGPeriod();
-    
+
     startFrameTransmission();
 }
 
 void EtherDuplexMAC::handleEndTxPeriod()
 {
     fireChangeNotification(NF_PP_TX_END, (cMessage *)txQueue.tail());
-    
+
     if (checkAndScheduleEndPausePeriod())
         return;
 
     EtherMACBase::handleEndTxPeriod();
-    
+
     beginSendFrames();
 }
