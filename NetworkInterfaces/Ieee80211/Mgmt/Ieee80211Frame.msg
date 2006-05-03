@@ -93,7 +93,7 @@ struct W80211SequenceControl
 //
 // Format of smallest 802.11 frame (ACK and CTS)
 //
-message W80211Frame
+message W80211BasicFrame
 {
     fields:
         W80211FrameControl frameControl;
@@ -104,7 +104,7 @@ message W80211Frame
 //
 // Format of the 802.11 RTS frame
 //
-message W80211RTSFrame extends W80211Frame
+message W80211RTSFrame extends W80211BasicFrame
 {
     fields:
         MACAddress address2;
@@ -113,6 +113,7 @@ message W80211RTSFrame extends W80211Frame
 //
 // Format of the 802.11 management frame
 //
+//# FIXME derive specific mgmt frame types from this, with "frame bodies" added as data member?
 message W80211ManagementFrame extends W80211RTSFrame
 {
     fields:

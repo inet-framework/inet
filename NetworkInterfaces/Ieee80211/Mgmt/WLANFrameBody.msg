@@ -162,7 +162,7 @@ message W80211ReassociationRequestFrameBody extends W80211AssociationRequestFram
 message W80211AssociationResponseFrameBody extends W80211FrameBody
 {
     fields:
-        unsigned short sequenceNumber;
+        //XXX ???? unsigned short sequenceNumber;
         int statusCode enum(W80211StatusCode);
         W80211CapabilityInformation capabilityInformation;
         W80211SupportedRatesElement supportedRates[];
@@ -171,7 +171,7 @@ message W80211AssociationResponseFrameBody extends W80211FrameBody
 //
 // Re-association response frame body format
 //
-message W80211RessociationResponseFrameBody extends W80211AssociationResponseFrameBody
+message W80211ReassociationResponseFrameBody extends W80211AssociationResponseFrameBody
 {
     fields:
 };
