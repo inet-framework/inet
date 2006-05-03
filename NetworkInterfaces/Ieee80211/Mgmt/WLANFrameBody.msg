@@ -171,7 +171,7 @@ message W80211AssociationResponseFrameBody extends W80211FrameBody
 //
 // Re-association response frame body format
 //
-message W80211RessociationResponseFrameBody extends AssociationResponseFrameBody
+message W80211RessociationResponseFrameBody extends W80211AssociationResponseFrameBody
 {
     fields:
 };
@@ -194,7 +194,7 @@ message W80211BeaconFrameBody extends W80211FrameBody
 //
 // Probe response frame body format (same as Beacon)
 //
-message W80211ProbeResponseFrameBody extends BeaconFrameBody
+message W80211ProbeResponseFrameBody extends W80211BeaconFrameBody
 {
     fields:
 };

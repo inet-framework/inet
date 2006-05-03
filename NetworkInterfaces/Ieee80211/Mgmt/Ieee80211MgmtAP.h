@@ -20,6 +20,7 @@
 #define MGMT80211AP_H
 
 #include <omnetpp.h>
+#include "MACAddress.h"
 #include "NotificationBoard.h"
 
 
@@ -32,6 +33,7 @@
 class INET_API Mgmt80211AP : public cSimpleModule, public INotifiable
 {
   protected:
+    enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
     struct STAInfo {
         MACAddress address;
         State state;

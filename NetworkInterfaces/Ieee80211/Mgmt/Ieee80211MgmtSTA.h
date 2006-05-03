@@ -20,6 +20,7 @@
 #define MGMT80211STA_H
 
 #include <omnetpp.h>
+#include "MACAddress.h"
 #include "NotificationBoard.h"
 
 

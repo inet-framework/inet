@@ -60,13 +60,13 @@ enum W80211SubType
 struct W80211FrameControl
 {
     fields:
-        unsigned short protocolVer;  //2 bits
-        int type enum(FrameType);    //2 bits
-        unsigned short subtype;      //4 bits
-        bool toDS;                   //1 bit
-        bool fromDS;                 //1 bit
+        unsigned short protocolVer;     // 2 bits
+        int type enum(W80211FrameType); // 2 bits
+        unsigned short subtype;         // 4 bits
+        bool toDS;                      // 1 bit
+        bool fromDS;                    // 1 bit
         //bool moreFrag;
-        bool retry;                  //1 bit
+        bool retry;                     // 1 bit
 };
 
 //
@@ -91,18 +91,18 @@ struct W80211SequenceControl
 };
 
 //
-// Format of smallest Wireless Ethernet frame (ACK and CTS)
+// Format of smallest 802.11 frame (ACK and CTS)
 //
 message W80211BasicFrame
 {
     fields:
-        FrameControl frameControl;
-        DurationID durationID;
+        W80211FrameControl frameControl;
+        W80211DurationID durationID;
         MACAddress address1;
 };
 
 //
-// Format of Wireless Ethernet RTS frame
+// Format of the 802.11 RTS frame
 //
 message W80211RTSFrame extends W80211BasicFrame
 {
@@ -111,17 +111,17 @@ message W80211RTSFrame extends W80211BasicFrame
 };
 
 //
-// Format of Wireless Ethernet management frame
+// Format of the 802.11 management frame
 //
 message W80211ManagementFrame extends W80211RTSFrame
 {
     fields:
         MACAddress address3;
-        SequenceControl sequenceControl;
+        W80211SequenceControl sequenceControl;
 };
 
 //
-// Format of Wireless Ethernet data frame
+// Format of the 802.11 data frame
 //
 message W80211DataFrame extends W80211ManagementFrame
 {
