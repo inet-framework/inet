@@ -32,6 +32,16 @@
 class INET_API Mgmt80211AP : public cSimpleModule, public INotifiable
 {
   protected:
+    struct STAInfo {
+        MACAddress address;
+        State state;
+        //int consecFailedTrans;  //XXX ???
+        //double expiry;          //XXX ???
+        //ReasonCode reasonCode;  //XXX ???
+        //StatusCode statusCode;  //XXX ???
+    };
+
+  protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
