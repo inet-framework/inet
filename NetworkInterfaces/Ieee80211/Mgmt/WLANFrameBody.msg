@@ -53,30 +53,30 @@ struct W80211HandoverParameters
 
 enum W80211ReasonCode
 {
-  RC_UNSPECIFIED = 1;
-  RC_PREV_AUTH_EXPIRED = 2;
-  RC_DEAUTH_MS_LEAVING = 3;
-  RC_DISASS_INACTIVITY = 4;
-  RC_DISASS_TOO_MANY_MS = 5;
-  RC_NONAUTH_CLASS2 = 6;
-  RC_NONASS_CLASS3 = 7;
-  RC_DIASS_MS_LEAVING = 8;
-  RC_NONAUTH_ASS_REQUEST = 9;
+    RC_UNSPECIFIED = 1;
+    RC_PREV_AUTH_EXPIRED = 2;
+    RC_DEAUTH_MS_LEAVING = 3;
+    RC_DISASS_INACTIVITY = 4;
+    RC_DISASS_TOO_MANY_MS = 5;
+    RC_NONAUTH_CLASS2 = 6;
+    RC_NONASS_CLASS3 = 7;
+    RC_DIASS_MS_LEAVING = 8;
+    RC_NONAUTH_ASS_REQUEST = 9;
 };
 
 enum W80211StatusCode
 {
-  SC_SUCCESSFUL = 0;
-  SC_UNSPECIFIED = 1;
-  SC_UNSUP_CAP = 2;
-  SC_RESASS_DENIED = 3;
-  SC_ASS_DENIED_UNKNOWN = 4;
-  SC_AUTH_ALG0_UNSUP = 5;
-  SC_AUTH_OUT_OF_SEQ = 6;
-  SC_CHALLANGE_FAILURE = 7;
-  SC_AUTH_TIMEOUT = 8;
-  SC_ASS_TOO_MANY_MS = 9;
-  SC_DATARATE_SUP = 10;
+    SC_SUCCESSFUL = 0;
+    SC_UNSPECIFIED = 1;
+    SC_UNSUP_CAP = 2;
+    SC_RESASS_DENIED = 3;
+    SC_ASS_DENIED_UNKNOWN = 4;
+    SC_AUTH_ALG0_UNSUP = 5;
+    SC_AUTH_OUT_OF_SEQ = 6;
+    SC_CHALLANGE_FAILURE = 7;
+    SC_AUTH_TIMEOUT = 8;
+    SC_ASS_TOO_MANY_MS = 9;
+    SC_DATARATE_SUP = 10;
 };
 
 //
@@ -85,8 +85,8 @@ enum W80211StatusCode
 struct W80211SupportedRatesElement
 {
     fields:
-        bool supported; //true=supported, false=unsupported
-        double rate;     //in Mbit/sec
+        bool supported; // true=supported, false=unsupported
+        double rate;    // in Mbit/sec
 };
 
 //

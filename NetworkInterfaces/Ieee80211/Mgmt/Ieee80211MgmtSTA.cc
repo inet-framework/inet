@@ -37,3 +37,50 @@ void Mgmt80211STA::receiveChangeNotification(int category, cPolymorphic *details
 {
 }
 
+/*
+void Mgmt80211STA::processFrame(W80211BasicFrame *frame)
+{
+    const FrameControl& frameControl = frame->getFrameControl();
+
+    switch(frameControl.subtype)
+    {
+      case ST_BEACON:
+        handleBeacon(check_and_cast<W80211ManagementFrame *>(frame));
+        break;
+      case ST_PROBEREQUEST:
+        handleProbeRequest(static_cast<WirelessAccessPoint*>(mod), signal);
+        break;
+      case ST_PROBERESPONSE:
+        handleProbeResponse(mod, signal);
+        break;
+      case ST_ASSOCIATIONREQUEST:
+        handleAssociationRequest(static_cast<WirelessAccessPoint*>(mod), signal);
+        break;
+      case ST_ASSOCIATIONRESPONSE:
+        handleAssociationResponse(mod, signal);
+        break;
+      case ST_REASSOCIATIONREQUEST:
+        handleReAssociationRequest(static_cast<WirelessAccessPoint*>(mod), signal);
+        break;
+      case ST_REASSOCIATIONRESPONSE:
+        handleReAssociationResponse(mod, signal);
+        break;
+      case ST_DISASSOCIATION:
+        handleDisAssociation(mod, signal);
+        break;
+      case ST_DATA:
+        handleData(mod, signal);
+        break;
+      case ST_ACK:
+        handleAck(mod, signal);
+        break;
+      case ST_AUTHENTICATION:
+        handleAuthentication(mod, signal);
+        break;
+      case ST_DEAUTHENTICATION:
+        handleDeAuthentication(mod, signal);
+        break;
+    }
+}
+*/
+

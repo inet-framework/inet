@@ -93,7 +93,7 @@ struct W80211SequenceControl
 //
 // Format of smallest 802.11 frame (ACK and CTS)
 //
-message W80211BasicFrame
+message W80211Frame
 {
     fields:
         W80211FrameControl frameControl;
@@ -104,7 +104,7 @@ message W80211BasicFrame
 //
 // Format of the 802.11 RTS frame
 //
-message W80211RTSFrame extends W80211BasicFrame
+message W80211RTSFrame extends W80211Frame
 {
     fields:
         MACAddress address2;

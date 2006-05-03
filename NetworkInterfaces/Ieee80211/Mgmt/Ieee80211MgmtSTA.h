@@ -39,6 +39,8 @@ class INET_API Mgmt80211STA : public cSimpleModule, public INotifiable
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
+
+
 };
 
 
