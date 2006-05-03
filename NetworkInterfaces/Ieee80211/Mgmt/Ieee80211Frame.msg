@@ -1,6 +1,6 @@
 //
-// Eric Wu and Steve Woon
-// Copyright (C) 2001 Monash University, Melbourne, Australia
+// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2001 Eric Wu and Steve Woon, Monash University, Melbourne, Australia
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -30,28 +30,28 @@ class noncobject MACAddress;
 //
 enum W80211FrameType
 {
-  FT_MANAGEMENT = 0;
-  FT_CONTROL = 1;
-  FT_DATA = 2;
-  FT_RESERVED = 3;
+      FT_MANAGEMENT = 0;
+      FT_CONTROL = 1;
+      FT_DATA = 2;
+      FT_RESERVED = 3;
 };
 
 enum W80211SubType
 {
-  ST_ASSOCIATIONREQUEST = 4;
-  ST_ASSOCIATIONRESPONSE = 5;
-  ST_REASSOCIATIONREQUEST = 6;
-  ST_REASSOCIATIONRESPONSE = 7;
-  ST_PROBEREQUEST = 8;
-  ST_PROBERESPONSE = 9;
-  ST_BEACON = 10;
-  ST_DISASSOCIATION = 11;
-  ST_AUTHENTICATION = 12;
-  ST_DEAUTHENTICATION = 13;
-  ST_DATA = 14;
-  ST_RTS = 15;
-  ST_CTS = 16;
-  ST_ACK = 17;
+      ST_ASSOCIATIONREQUEST = 4;
+      ST_ASSOCIATIONRESPONSE = 5;
+      ST_REASSOCIATIONREQUEST = 6;
+      ST_REASSOCIATIONRESPONSE = 7;
+      ST_PROBEREQUEST = 8;
+      ST_PROBERESPONSE = 9;
+      ST_BEACON = 10;
+      ST_DISASSOCIATION = 11;
+      ST_AUTHENTICATION = 12;
+      ST_DEAUTHENTICATION = 13;
+      ST_DATA = 14;
+      ST_RTS = 15;
+      ST_CTS = 16;
+      ST_ACK = 17;
 };
 
 //
@@ -99,10 +99,6 @@ message W80211BasicFrame
         FrameControl frameControl;
         DurationID durationID;
         MACAddress address1;
-    // SWOON HACK: To find achievable throughput
-    int appType;
-    double probTxInSlot;
-    int avgFrameSize;
 };
 
 //
