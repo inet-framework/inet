@@ -55,23 +55,23 @@ enum W80211SubType
 };
 
 //
-// Frame control format
+// Frame control format. Fields not supported by this model are omitted:
+// ProtocolVersion, MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
 struct W80211FrameControl
 {
     fields:
-        unsigned short protocolVer;     // 2 bits
-        int type enum(W80211FrameType); // 2 bits
-        unsigned short subtype;         // 4 bits
-        bool toDS;                      // 1 bit
-        bool fromDS;                    // 1 bit
-        //bool moreFrag;
-        bool retry;                     // 1 bit
+        short type enum(W80211FrameType); // 2 bits
+        short subtype;                    // 4 bits
+        bool toDS;                        // 1 bit
+        bool fromDS;                      // 1 bit
+        bool retry;                       // 1 bit
 };
 
 //
 // Duration/ID format
 //
+//# FIXME merge this into the frame as "short duration" + "short id"
 struct W80211DurationID
 {
     fields:
