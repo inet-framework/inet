@@ -1,0 +1,23 @@
+digraph g {
+   IDLE         [shape=box,width=10];
+   DEFER        [shape=box,width=10];
+   WAITDIFS     [shape=box,width=5];
+   BACKOFF      [shape=box,width=2];
+   TRANSMITTING [shape=box,width=2];
+   WAITSIFS     [shape=box,width=5];
+
+   IDLE -> DEFER           [label="upperMsg\nbackoff=false,retryCounter=1"];
+   IDLE -> DEFER           [label="-\n[!txQueue.empty()]\nbackoff=false,retryCounter=1"];
+   IDLE -> WAITSIFS        [label="lowerMsg\nsendUp()"];
+   DEFER -> WAITDIFS       [label="radioStateChange\n[radioState==IDLE]\nendDIFS.schedule()"];
+   DEFER -> WAITDIFS       [label="-\n[radioState==IDLE||!backoff]\nendDIFS.schedule()"];
+   WAITDIFS -> DEFER       [label="radioStateChange\n[radioState!=IDLE]\nbackoff=true,endDIFS.cancel()"]
+   WAITDIFS -> DEFER       [label="-\n[radioState!=IDLE]\nbackoff=true,endDIFS.cancel()"]
+   WAITDIFS -> BACKOFF     [label="endDIFS\nendBackoff.schedule()"]
+   BACKOFF -> DEFER        [label="radioStateChange\n[radioState!=IDLE]\nbackoff=true,endBackoff.cancel()"]
+   BACKOFF -> TRANSMITTING [label="endBackoff\nsendData(),endTimeout.schedule()"]
+   TRANSMITTING -> IDLE    [label="lowerMsg\n[msgKind==ACK]\nendTimeout.cancel(),txQueue.pop()"]
+   TRANSMITTING -> IDLE    [label="endTimeout\n[retryCounter>RETRY_LIMIT]\ntxQueue.pop()"]
+   TRANSMITTING -> DEFER   [label="endTimeout\n[retryCounter<=RETRY_LIMIT]\nbackoff=true,retryCounter++"]
+   WAITSIFS -> IDLE        [label="endSIFS\nsendACK()"]
+}

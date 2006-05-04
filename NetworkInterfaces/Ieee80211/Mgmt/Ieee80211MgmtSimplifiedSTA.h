@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef MGMT80211AP_H
-#define MGMT80211AP_H
+#ifndef MGMT80211SIMPLIFIEDSTA_H
+#define MGMT80211SIMPLIFIEDSTA_H
 
 #include <omnetpp.h>
 #include "Mgmt80211Base.h"
@@ -26,22 +26,22 @@
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
- * an access point (AP).
+ * a station (STA). See corresponding NED file for a detailed description.
+ * This implementation ignores many details.
  *
  * @author Andras Varga
  */
-class INET_API Mgmt80211AP : public Mgmt80211Base
+class INET_API Mgmt80211SimplifiedSTA : public Mgmt80211Base
 {
   protected:
-    enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
-    struct STAInfo {
+    // Associate Access Point
+    struct AssociateAP
+    {
         MACAddress address;
-        State state;
-        //int consecFailedTrans;  //XXX ???
-        //double expiry;          //XXX ???
-        //ReasonCode reasonCode;  //XXX ???
-        //StatusCode statusCode;  //XXX ???
+        int channel;
+        int receiveSequence;
     };
+    AssociateAP associateAP;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -68,6 +68,6 @@ class INET_API Mgmt80211AP : public Mgmt80211Base
     //@}
 };
 
-
-
 #endif
+
+

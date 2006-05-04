@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef MGMT80211AP_H
-#define MGMT80211AP_H
+#ifndef MGMT80211SIMPLIFIEDAP_H
+#define MGMT80211SIMPLIFIEDAP_H
 
 #include <omnetpp.h>
 #include "Mgmt80211Base.h"
@@ -26,11 +26,12 @@
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
- * an access point (AP).
+ * an access point (AP). See corresponding NED file for a detailed description.
+ * This implementation ignores many details.
  *
  * @author Andras Varga
  */
-class INET_API Mgmt80211AP : public Mgmt80211Base
+class INET_API Mgmt80211SimplifiedAP : public Mgmt80211Base
 {
   protected:
     enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};

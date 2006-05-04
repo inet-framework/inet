@@ -34,11 +34,11 @@
 class INET_API Mgmt80211Base : public cSimpleModule, public INotifiable
 {
   protected:
-    enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
-
-  protected:
+    /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(W80211BasicFrame *frame);
 
+    /** @name Processing of different frame types */
+    //@{
     virtual void handleDataFrame(W80211DataFrame *frame) = 0;
     virtual void handleAuthenticationFrame(W80211AuthenticationFrame *frame) = 0;
     virtual void handleDeauthenticationFrame(W80211DeauthenticationFrame *frame) = 0;
@@ -50,6 +50,7 @@ class INET_API Mgmt80211Base : public cSimpleModule, public INotifiable
     virtual void handleBeaconFrame(W80211BeaconFrame *frame) = 0;
     virtual void handleProbeRequestFrame(W80211ProbeRequestFrame *frame) = 0;
     virtual void handleProbeResponseFrame(W80211ProbeResponseFrame *frame) = 0;
+    //@}
 };
 
 

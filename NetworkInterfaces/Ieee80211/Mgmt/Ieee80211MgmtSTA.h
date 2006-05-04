@@ -31,7 +31,30 @@
  */
 class INET_API Mgmt80211STA : public Mgmt80211Base
 {
-    State state;
+  protected:
+    //
+    enum AssocState {SCANNING, NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
+    AssocState state;
+
+    // Describes an AP during scanning
+    struct APInfo
+    {
+        MACAddress address;
+        int channel;
+        double rxpower;  // received power from AP
+    };
+
+    typedef std::list<APInfo> AccessPointList;
+    AccessPointList accessPointList;
+
+    // Associated Access Point
+    struct AssociateAP
+    {
+        MACAddress address;
+        int channel;
+        int receiveSequence;
+    };
+    AssociateAP associateAP;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -42,6 +65,8 @@ class INET_API Mgmt80211STA : public Mgmt80211Base
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
+    /** @name Processing of different frame types */
+    //@{
     virtual void handleDataFrame(W80211DataFrame *frame);
     virtual void handleAuthenticationFrame(W80211AuthenticationFrame *frame);
     virtual void handleDeauthenticationFrame(W80211DeauthenticationFrame *frame);
@@ -53,6 +78,7 @@ class INET_API Mgmt80211STA : public Mgmt80211Base
     virtual void handleBeaconFrame(W80211BeaconFrame *frame);
     virtual void handleProbeRequestFrame(W80211ProbeRequestFrame *frame);
     virtual void handleProbeResponseFrame(W80211ProbeResponseFrame *frame);
+    //@}
 };
 
 

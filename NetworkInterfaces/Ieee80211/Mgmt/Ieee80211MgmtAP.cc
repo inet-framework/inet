@@ -26,7 +26,7 @@ Define_Module(Mgmt80211AP);
 
 void Mgmt80211AP::initialize(int)
 {
-    //...
+    //TBD
 }
 
 void Mgmt80211AP::handleMessage(cMessage *msg)
@@ -47,22 +47,27 @@ void Mgmt80211AP::handleMessage(cMessage *msg)
 void Mgmt80211AP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    //TBD
 }
 
 void Mgmt80211AP::handleDataFrame(W80211DataFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleAuthenticationFrame(W80211AuthenticationFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleDeauthenticationFrame(W80211DeauthenticationFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleAssociationRequestFrame(W80211AssociationRequestFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleAssociationResponseFrame(W80211AssociationResponseFrame *frame)
@@ -72,6 +77,7 @@ void Mgmt80211AP::handleAssociationResponseFrame(W80211AssociationResponseFrame 
 
 void Mgmt80211AP::handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame)
@@ -81,6 +87,7 @@ void Mgmt80211AP::handleReassociationResponseFrame(W80211ReassociationResponseFr
 
 void Mgmt80211AP::handleDisassociationFrame(W80211DisassociationFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleBeaconFrame(W80211BeaconFrame *frame)
@@ -90,6 +97,7 @@ void Mgmt80211AP::handleBeaconFrame(W80211BeaconFrame *frame)
 
 void Mgmt80211AP::handleProbeRequestFrame(W80211ProbeRequestFrame *frame)
 {
+    //TBD
 }
 
 void Mgmt80211AP::handleProbeResponseFrame(W80211ProbeResponseFrame *frame)
