@@ -86,8 +86,12 @@ NetworkInterfaces/MF80211/Nic80211.ned
 NetworkInterfaces/MF80211/NicCsma.ned
 NetworkInterfaces/MF80211/SnrNic.ned
 NetworkInterfaces/MF80211/macLayer/CSMAMacLayer.ned
+NetworkInterfaces/MF80211/macLayer/IEEE80211MAC.ned
 NetworkInterfaces/MF80211/macLayer/Mac80211.ned
-NetworkInterfaces/MF80211/mgmt/Mgmt80211.ned
+NetworkInterfaces/MF80211/mgmt/Mgmt80211AP.ned
+NetworkInterfaces/MF80211/mgmt/Mgmt80211SimplifiedAP.ned
+NetworkInterfaces/MF80211/mgmt/Mgmt80211SimplifiedSTA.ned
+NetworkInterfaces/MF80211/mgmt/Mgmt80211STA.ned
 NetworkInterfaces/MF80211/phyLayer/decider/Decider80211.ned
 NetworkInterfaces/MF80211/phyLayer/decider/ErrAndCollDecider.ned
 NetworkInterfaces/MF80211/phyLayer/decider/SnrDecider.ned

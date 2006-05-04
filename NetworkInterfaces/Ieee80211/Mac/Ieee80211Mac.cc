@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mészáros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -70,7 +70,7 @@ void IEEE80211MAC::initialize(int stage)
         }
         else
             address.setAddress(addressString);
-     
+
         // subscribe for the information of the carrier sense
         nb->subscribe(this, NF_RADIOSTATE_CHANGED);
 

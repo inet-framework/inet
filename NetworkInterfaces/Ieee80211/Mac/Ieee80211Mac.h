@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mészáros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -225,7 +225,7 @@ class INET_API IEEE80211MAC : public WirelessMacBase, public INotifiable
      * @name Utility functions
      */
     //@{
-    /** @brief Change the current MAC operation mode. */ 
+    /** @brief Change the current MAC operation mode. */
     void setMode(Mode mode);
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */

@@ -118,11 +118,22 @@ void SnrEval::handleUpperMsg(AirFrame * frame)
         error("Trying to send a message although already sending -- MAC should "
               "take care this does not happen");
 
-    // if a packet was being received, it is corrupted now (treated as
-    // noise). print a warning
+    // if a packet was being received, it is corrupted now as should be treated as noise
     if (snrInfo.ptr != NULL)
-        error("Trying to send a message although already receiving -- this would "
-              "corrupt received frame, and MAC should take care this does not happen");
+    {
+        EV << "Sending a message while receiving another. The received one is now corrupted.\n";
+
+        // remove the snr information stored for the message currently being
+        // received. This message is treated as noise now and the
+        // receive power has to be added to the noiseLevel
+
+        // delete the pointer to indicate that no message is being received
+        snrInfo.ptr = NULL;
+        // clear the snr list
+        snrInfo.sList.clear();
+        // add the receive power to the noise level
+        noiseLevel += snrInfo.rcvdPower;
+    }
 
     // now we are done with all the exception handling and can take care
     // about the "real" stuff
