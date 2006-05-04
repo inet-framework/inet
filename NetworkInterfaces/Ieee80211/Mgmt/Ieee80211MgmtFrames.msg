@@ -22,8 +22,10 @@
 cplusplus
 {{
 #include "MACAddress.h"
+#include "WLANFrame_m.h"
 }};
 class noncobject MACAddress;
+message W80211ManagementFrame;
 
 //
 // Capability Information field format
@@ -92,16 +94,16 @@ struct W80211SupportedRatesElement
 //
 // Frame body base class used to hide various frame body types
 //
-message W80211FrameBody
+class W80211FrameBody
 {
     fields:
-        unsigned short length;
+        unsigned short length; //XXX what's this?
 };
 
 //
 // Authentication frame body format
 //
-message W80211AuthenticationFrameBody extends W80211FrameBody
+class W80211AuthenticationFrameBody extends W80211FrameBody
 {
     fields:
         unsigned short sequenceNumber;
@@ -111,7 +113,7 @@ message W80211AuthenticationFrameBody extends W80211FrameBody
 //
 // De-authentication frame body format
 //
-message W80211DeauthenticationFrameBody extends W80211FrameBody
+class W80211DeauthenticationFrameBody extends W80211FrameBody
 {
     fields:
         int reasonCode enum(W80211ReasonCode);
@@ -120,7 +122,7 @@ message W80211DeauthenticationFrameBody extends W80211FrameBody
 //
 // Dis-association frame body format (same as De-authentication)
 //
-message W80211DisassociationFrameBody extends W80211FrameBody
+class W80211DisassociationFrameBody extends W80211FrameBody
 {
     fields:
         int reasonCode enum(W80211ReasonCode);
@@ -129,7 +131,7 @@ message W80211DisassociationFrameBody extends W80211FrameBody
 //
 // Probe request frame body format
 //
-message W80211ProbeRequestFrameBody extends W80211FrameBody
+class W80211ProbeRequestFrameBody extends W80211FrameBody
 {
     fields:
         string SSID;
@@ -139,7 +141,7 @@ message W80211ProbeRequestFrameBody extends W80211FrameBody
 //
 // Association request frame body format
 //
-message W80211AssociationRequestFrameBody extends W80211FrameBody
+class W80211AssociationRequestFrameBody extends W80211FrameBody
 {
     fields:
         string SSID;
@@ -150,7 +152,7 @@ message W80211AssociationRequestFrameBody extends W80211FrameBody
 //
 // Re-association request frame body format (same as association)
 //
-message W80211ReassociationRequestFrameBody extends W80211AssociationRequestFrameBody
+class W80211ReassociationRequestFrameBody extends W80211AssociationRequestFrameBody
 {
     fields:
         MACAddress currentAP;
@@ -159,7 +161,7 @@ message W80211ReassociationRequestFrameBody extends W80211AssociationRequestFram
 //
 // Association response frame body format
 //
-message W80211AssociationResponseFrameBody extends W80211FrameBody
+class W80211AssociationResponseFrameBody extends W80211FrameBody
 {
     fields:
         //XXX ???? unsigned short sequenceNumber;
@@ -171,7 +173,7 @@ message W80211AssociationResponseFrameBody extends W80211FrameBody
 //
 // Re-association response frame body format
 //
-message W80211ReassociationResponseFrameBody extends W80211AssociationResponseFrameBody
+class W80211ReassociationResponseFrameBody extends W80211AssociationResponseFrameBody
 {
     fields:
 };
@@ -179,7 +181,7 @@ message W80211ReassociationResponseFrameBody extends W80211AssociationResponseFr
 //
 // Beacon frame body format
 //
-message W80211BeaconFrameBody extends W80211FrameBody
+class W80211BeaconFrameBody extends W80211FrameBody
 {
     fields:
         string SSID;
@@ -194,7 +196,101 @@ message W80211BeaconFrameBody extends W80211FrameBody
 //
 // Probe response frame body format (same as Beacon)
 //
-message W80211ProbeResponseFrameBody extends W80211BeaconFrameBody
+class W80211ProbeResponseFrameBody extends W80211BeaconFrameBody
 {
     fields:
+};
+
+
+//--------------------------------------------------------------
+
+
+//
+// Authentication frame format (management frame + body)
+//
+message W80211AuthenticationFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211AuthenticationFrameBody body;
+};
+
+//
+// De-authentication frame format (management frame + body)
+//
+message W80211DeauthenticationFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211DeauthenticationFrameBody body;
+};
+
+//
+// Dis-association frame format (management frame + body) (same as De-authentication)
+//
+message W80211DisassociationFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211DisassociationFrameBody body;
+};
+
+//
+// Probe request frame format (management frame + body)
+//
+message W80211ProbeRequestFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211ProbeRequestFrameBody body;
+};
+
+//
+// Association request frame format (management frame + body)
+//
+message W80211AssociationRequestFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211AssociationRequestFrameBody body;
+};
+
+//
+// Re-association request frame format (management frame + body) (same as association)
+//
+message W80211ReassociationRequestFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211ReassociationRequestFrameBody body;
+};
+
+//
+// Association response frame format (management frame + body)
+//
+message W80211AssociationResponseFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211AssociationResponseFrameBody body;
+};
+
+//
+// Re-association response frame format (management frame + body)
+//
+message W80211ReassociationResponseFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211ReassociationResponseFrameBody body;
+};
+
+//
+// Beacon frame format (management frame + body)
+//
+message W80211BeaconFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211BeaconFrameBody body;
+};
+
+//
+// Probe response frame format (management frame + body); same as Beacon
+//
+message W80211ProbeResponseFrame extends W80211ManagementFrame
+{
+    fields:
+        W80211ProbeResponseFrameBody body;
 };
