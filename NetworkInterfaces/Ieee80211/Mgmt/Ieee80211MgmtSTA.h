@@ -20,7 +20,7 @@
 #define MGMT80211STA_H
 
 #include <omnetpp.h>
-#include "MACAddress.h"
+#include "Mgmt80211Base.h"
 #include "NotificationBoard.h"
 
 
@@ -29,8 +29,10 @@
  *
  * @author Andras Varga
  */
-class INET_API Mgmt80211STA : public cSimpleModule, public INotifiable
+class INET_API Mgmt80211STA : public Mgmt80211Base
 {
+    State state;
+
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -40,7 +42,17 @@ class INET_API Mgmt80211STA : public cSimpleModule, public INotifiable
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
-
+    virtual void handleDataFrame(W80211DataFrame *frame);
+    virtual void handleAuthenticationFrame(W80211AuthenticationFrame *frame);
+    virtual void handleDeauthenticationFrame(W80211DeauthenticationFrame *frame);
+    virtual void handleAssociationRequestFrame(W80211AssociationRequestFrame *frame);
+    virtual void handleAssociationResponseFrame(W80211AssociationResponseFrame *frame);
+    virtual void handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame);
+    virtual void handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame);
+    virtual void handleDisassociationFrame(W80211DisassociationFrame *frame);
+    virtual void handleBeaconFrame(W80211BeaconFrame *frame);
+    virtual void handleProbeRequestFrame(W80211ProbeRequestFrame *frame);
+    virtual void handleProbeResponseFrame(W80211ProbeResponseFrame *frame);
 };
 
 

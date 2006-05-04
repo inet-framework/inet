@@ -29,11 +29,72 @@ void Mgmt80211AP::initialize(int)
     //...
 }
 
-void Mgmt80211AP::handleMessage(cMessage *)
+void Mgmt80211AP::handleMessage(cMessage *msg)
 {
+    if (msg->isSelfMessage())
+    {
+        // TBD process timers
+    }
+    else
+    {
+        // process incoming frame
+        W80211BasicFrame *frame = check_and_cast<W80211BasicFrame *>(msg);
+        processFrame(frame);
+        delete frame;
+    }
 }
 
 void Mgmt80211AP::receiveChangeNotification(int category, cPolymorphic *details)
 {
+    Enter_Method_Silent();
 }
+
+void Mgmt80211AP::handleDataFrame(W80211DataFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleAuthenticationFrame(W80211AuthenticationFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleDeauthenticationFrame(W80211DeauthenticationFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleAssociationRequestFrame(W80211AssociationRequestFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleAssociationResponseFrame(W80211AssociationResponseFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
+void Mgmt80211AP::handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
+void Mgmt80211AP::handleDisassociationFrame(W80211DisassociationFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleBeaconFrame(W80211BeaconFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
+void Mgmt80211AP::handleProbeRequestFrame(W80211ProbeRequestFrame *frame)
+{
+}
+
+void Mgmt80211AP::handleProbeResponseFrame(W80211ProbeResponseFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
 

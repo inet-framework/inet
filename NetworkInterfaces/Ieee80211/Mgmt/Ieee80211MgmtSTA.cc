@@ -31,56 +31,68 @@ void Mgmt80211STA::initialize(int)
 
 void Mgmt80211STA::handleMessage(cMessage *msg)
 {
+    if (msg->isSelfMessage())
+    {
+        // TBD process timers
+    }
+    else
+    {
+        // process incoming frame
+        W80211BasicFrame *frame = check_and_cast<W80211BasicFrame *>(msg);
+        processFrame(frame);
+        delete frame;
+    }
 }
 
 void Mgmt80211STA::receiveChangeNotification(int category, cPolymorphic *details)
 {
 }
 
-/*
-void Mgmt80211STA::processFrame(W80211BasicFrame *frame)
+void Mgmt80211STA::handleDataFrame(W80211DataFrame *frame)
 {
-    const FrameControl& frameControl = frame->getFrameControl();
-
-    switch(frameControl.subtype)
-    {
-      case ST_BEACON:
-        handleBeacon(check_and_cast<W80211ManagementFrame *>(frame));
-        break;
-      case ST_PROBEREQUEST:
-        handleProbeRequest(static_cast<WirelessAccessPoint*>(mod), signal);
-        break;
-      case ST_PROBERESPONSE:
-        handleProbeResponse(mod, signal);
-        break;
-      case ST_ASSOCIATIONREQUEST:
-        handleAssociationRequest(static_cast<WirelessAccessPoint*>(mod), signal);
-        break;
-      case ST_ASSOCIATIONRESPONSE:
-        handleAssociationResponse(mod, signal);
-        break;
-      case ST_REASSOCIATIONREQUEST:
-        handleReAssociationRequest(static_cast<WirelessAccessPoint*>(mod), signal);
-        break;
-      case ST_REASSOCIATIONRESPONSE:
-        handleReAssociationResponse(mod, signal);
-        break;
-      case ST_DISASSOCIATION:
-        handleDisAssociation(mod, signal);
-        break;
-      case ST_DATA:
-        handleData(mod, signal);
-        break;
-      case ST_ACK:
-        handleAck(mod, signal);
-        break;
-      case ST_AUTHENTICATION:
-        handleAuthentication(mod, signal);
-        break;
-      case ST_DEAUTHENTICATION:
-        handleDeAuthentication(mod, signal);
-        break;
-    }
 }
-*/
+
+void Mgmt80211STA::handleAuthenticationFrame(W80211AuthenticationFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleDeauthenticationFrame(W80211DeauthenticationFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleAssociationRequestFrame(W80211AssociationRequestFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
+void Mgmt80211STA::handleAssociationResponseFrame(W80211AssociationResponseFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
+void Mgmt80211STA::handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleDisassociationFrame(W80211DisassociationFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleBeaconFrame(W80211BeaconFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleProbeRequestFrame(W80211ProbeRequestFrame *frame)
+{
+}
+
+void Mgmt80211STA::handleProbeResponseFrame(W80211ProbeResponseFrame *frame)
+{
+    EV << "ignoring frame " << frame << "\n";
+}
+
 
