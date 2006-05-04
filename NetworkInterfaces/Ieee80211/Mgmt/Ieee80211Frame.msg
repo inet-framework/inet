@@ -37,7 +37,10 @@ enum W80211FrameType
 };
 
 //
-// 802.11 frame subtype constants, for the "subtype" field of W80211FrameControl
+// 802.11 frame subtype constants, for the "subtype" field of W80211FrameControl.
+// (Numeric values do not correspond to the standard, where actual frame type is
+// determined by the type AND subtype fields together; here we chose unique
+// values for convenience.)
 //
 enum W80211SubType
 {
