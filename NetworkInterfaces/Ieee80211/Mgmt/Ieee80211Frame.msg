@@ -26,7 +26,7 @@ cplusplus
 class noncobject MACAddress;
 
 //
-// Enumerations of different frame types
+// 802.11 frame type constants, for the "type" field of W80211FrameControl
 //
 enum W80211FrameType
 {
@@ -36,6 +36,9 @@ enum W80211FrameType
       FT_RESERVED = 3;
 };
 
+//
+// 802.11 frame subtype constants, for the "subtype" field of W80211FrameControl
+//
 enum W80211SubType
 {
       ST_ASSOCIATIONREQUEST = 4;
@@ -69,35 +72,16 @@ struct W80211FrameControl
 };
 
 //
-// Duration/ID format
-//
-//# FIXME merge this into the frame as "short duration" + "short id"
-struct W80211DurationID
-{
-    fields:
-        bool bit15;
-        bool bit14;
-        unsigned short bit14to0;
-};
-
-//
-// Sequence control format
-//
-struct W80211SequenceControl
-{
-    fields:
-        unsigned short fragmentNumber;
-        unsigned short sequenceNumber;
-};
-
-//
-// Format of smallest 802.11 frame (ACK and CTS)
+// Format of smallest 802.11 frame (ACK and CTS). 4-byte FCS is not
+// explicitly modeled.
 //
 message W80211BasicFrame
 {
     fields:
+        byteLength = 14;
         W80211FrameControl frameControl;
-        W80211DurationID durationID;
+        short duration = -1; // "duration" in the Duration/ID field (-1=no duration)
+        short AID = -1;      // "id" (Association ID) in the Duration/ID field (-1=no ID)
         MACAddress address1;
 };
 
@@ -107,18 +91,20 @@ message W80211BasicFrame
 message W80211RTSFrame extends W80211BasicFrame
 {
     fields:
+        byteLength = 20;
         MACAddress address2;
 };
 
 //
 // Format of the 802.11 management frame
 //
-//# FIXME derive specific mgmt frame types from this, with "frame bodies" added as data member?
 message W80211ManagementFrame extends W80211RTSFrame
 {
     fields:
+        byteLength = 28;
         MACAddress address3;
-        W80211SequenceControl sequenceControl;
+        short fragmentNumber;
+        short sequenceNumber;
 };
 
 //
@@ -127,5 +113,8 @@ message W80211ManagementFrame extends W80211RTSFrame
 message W80211DataFrame extends W80211ManagementFrame
 {
     fields:
+        byteLength = 34;
         MACAddress address4;
 };
+
+
