@@ -50,6 +50,16 @@ void WirelessMacBase::handleMessage(cMessage *msg)
         handleLowerMsg(msg);
 }
 
+bool WirelessMacBase::isUpperMsg(cMessage *msg)
+{
+    return msg->arrivalGateId()==uppergateIn;
+}
+
+bool WirelessMacBase::isLowerMsg(cMessage *msg)
+{
+    return msg->arrivalGateId()==lowergateIn;
+}
+
 void WirelessMacBase::sendDown(cMessage *msg)
 {
     EV << "sending down " << msg << "\n";

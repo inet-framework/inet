@@ -66,10 +66,13 @@ class INET_API WirelessMacBase : public cSimpleModule
     virtual void handleSelfMsg(cMessage *msg) = 0;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage* msg) = 0;
+    virtual void handleUpperMsg(cMessage *msg) = 0;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage* msg) = 0;
+    virtual void handleLowerMsg(cMessage *msg) = 0;
+
+    bool isUpperMsg(cMessage *msg);
+    bool isLowerMsg(cMessage *msg);
     //@}
 
     /** @name Convenience Functions*/

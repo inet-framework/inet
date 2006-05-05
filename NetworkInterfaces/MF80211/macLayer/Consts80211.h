@@ -35,10 +35,10 @@ const double DIFS = 2*ST + SIFS;
 
 const int RETRY_LIMIT = 7;
 
-/**Minimum size (initial size) of contension window*/
+/**Minimum size (initial size) of contention window*/
 const int CW_MIN = 7;
 
-/** Maximum size of contension window*/
+/** Maximum size of contention window*/
 const int CW_MAX = 255;
 
 const int PHY_HEADER_LENGTH=192;
@@ -48,4 +48,7 @@ const double BANDWIDTH=2E+6;
 
 
 const int MAC_GENERATOR = 5;
+
+const double PROCESSING_TIMEOUT = 0.001;
+
 #endif
