@@ -204,6 +204,7 @@ class INET_API IEEE80211MAC : public WirelessMacBase, public INotifiable
     void sendRTSFrame(Mac80211Pkt *frameToSend);
     void sendCTSFrame(Mac80211Pkt *rtsFrame);
     void sendDataFrame(Mac80211Pkt *frameToSend);
+    void sendBroadcastFrame(Mac80211Pkt *frameToSend);
     //@}
 
   protected:

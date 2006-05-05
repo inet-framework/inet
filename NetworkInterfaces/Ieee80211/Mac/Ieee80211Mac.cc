@@ -293,6 +293,12 @@ void IEEE80211MAC::handleWithFSM(cMessage *msg)
                 cancelEvent(endBackoff);
                 backoffPeriod -= simTime() - endBackoff->sendingTime();
             );
+            FSMA_Event_Transition(Tx-Broadcast,
+                                  mode == DCF && msg == endBackoff && isBroadcast(transmissionQueue.front()),
+                                  TRANSMITTING,
+                sendBroadcastFrame(transmissionQueue.front());
+                scheduleTimeoutPeriod(transmissionQueue.front());
+            );
             FSMA_Event_Transition(Tx-Data,
                                   mode == DCF && msg == endBackoff,
                                   TRANSMITTING,
@@ -313,6 +319,8 @@ void IEEE80211MAC::handleWithFSM(cMessage *msg)
                 scheduleRTSTimeoutPeriod();
             );
         }
+        // TODO: Broadcasts are not acknowledged, so they have to go to IDLE (but when?)
+        // TODO: Data transmission in MACA mode will not go to IDLE, (do we need the extra states for that?)
         FSMA_State(TRANSMITTING)
         {
             FSMA_Event_Transition(Rx-ACK,
@@ -320,9 +328,9 @@ void IEEE80211MAC::handleWithFSM(cMessage *msg)
                                   IDLE,
                 cancelEvent(endTimeout);
                 popTransmissionQueue();
-                resetStateVariables();
                 if (retryCounter == 1) numSentWithoutRetry++;
                 numSent++;
+                resetStateVariables();
             );
             FSMA_Event_Transition(Rx-CTS,
                                   mode == MACA && isLowerMsg(msg) && msg->kind() == CTS,
@@ -361,13 +369,13 @@ void IEEE80211MAC::handleWithFSM(cMessage *msg)
                                   mode == DCF && msg == endSIFS,
                                   IDLE,
                 sendACKFrame((Mac80211Pkt*)endSIFS->contextPointer());
-                delete endSIFS->contextPointer();
+                delete (Mac80211Pkt*)endSIFS->contextPointer();
             );
             FSMA_Event_Transition(Tx-CTS,
                                   mode == MACA && msg == endSIFS,
                                   IDLE,
                 sendCTSFrame((Mac80211Pkt*)endSIFS->contextPointer());
-                delete endSIFS->contextPointer();
+                delete (Mac80211Pkt*)endSIFS->contextPointer();
             );
         }
         FSMA_State(RESERVE)
@@ -451,6 +459,12 @@ void IEEE80211MAC::sendDataFrame(Mac80211Pkt *frameToSend)
 {
     EV << "sending Data frame\n";
     sendDown(buildDataFrame(frameToSend));
+}
+
+void IEEE80211MAC::sendBroadcastFrame(Mac80211Pkt *frameToSend)
+{
+    EV << "sending Broadcast frame\n";
+    sendDown(buildBroadcastFrame(frameToSend));
 }
 
 void IEEE80211MAC::sendRTSFrame(Mac80211Pkt *frameToSend)
