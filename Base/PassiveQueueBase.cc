@@ -39,7 +39,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     if (packetRequested>0)
     {
         packetRequested--;
-        send(msg, "out");
+        sendOut(msg);
     }
     else
     {
@@ -67,7 +67,7 @@ void PassiveQueueBase::requestPacket()
     }
     else
     {
-        send(msg, "out");
+        sendOut(msg);
     }
 }
 

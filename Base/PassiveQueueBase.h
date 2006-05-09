@@ -57,6 +57,12 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     virtual cMessage *dequeue() = 0;
 
     /**
+     * Should be redefined to send out the packet; e.g. <tt>send(msg,"out")</tt>.
+     */
+    virtual void sendOut(cMessage *msg) = 0;
+
+   public:
+    /**
      * The queue should send a packet whenever this method is invoked.
      * If the queue is currently empty, it should send a packet when
      * when one becomes available.

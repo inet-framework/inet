@@ -61,6 +61,12 @@ class INET_API REDQueue : public PassiveQueueBase
      * Redefined from PassiveQueueBase.
      */
     virtual cMessage *dequeue();
+
+    /**
+     * Redefined from PassiveQueueBase.
+     */
+    virtual void sendOut(cMessage *msg);
+
 };
 
 #endif

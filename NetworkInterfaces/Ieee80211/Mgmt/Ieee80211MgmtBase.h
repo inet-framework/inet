@@ -21,19 +21,55 @@
 
 #include <omnetpp.h>
 #include "MACAddress.h"
+#include "PassiveQueueBase.h"
 #include "NotificationBoard.h"
 #include "Ieee80211Frame_m.h"
 #include "Ieee80211MgmtFrames_m.h"
 
 
 /**
- * Base class for 802.11 infrastructure mode management component.
+ * Base class for 802.11 infrastructure mode management components.
+ * Performs encapsulation, decapsulation, and queueing.
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtBase : public cSimpleModule, public INotifiable
+class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
 {
   protected:
+    // configuration
+    int frameCapacity;
+
+    // state
+    cQueue queue;
+
+    // statistics
+    cOutVector qlenVec;
+    cOutVector dropVec;
+
+  protected:
+    virtual void initialize();
+
+    /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
+    void handleMessage(cMessage *msg);
+
+    /** Should be redefined to deal with self-messages */
+    virtual void handleTimer(cMessage *frame) = 0;
+
+    /** Should be redefined to encapsulate and enqueue msgs from higher layers */
+    virtual void handleUpperMessage(cMessage *msg) = 0;
+
+    /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
+    void sendOrEnqueue(cMessage *frame);
+
+    /** Redefined from PassiveQueueBase. */
+    virtual bool enqueue(cMessage *msg);
+
+    /** Redefined from PassiveQueueBase. */
+    virtual cMessage *dequeue();
+
+    /** Redefined from PassiveQueueBase: send message to MAC */
+    void sendOut(cMessage *msg);
+
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Ieee80211BasicFrame *frame);
 

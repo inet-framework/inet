@@ -29,19 +29,14 @@ void Ieee80211MgmtSimplifiedSTA::initialize(int)
     //...
 }
 
-void Ieee80211MgmtSimplifiedSTA::handleMessage(cMessage *msg)
+void Ieee80211MgmtSimplifiedSTA::handleTimer(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
-        // TBD process timers
-    }
-    else
-    {
-        // process incoming frame
-        Ieee80211BasicFrame *frame = check_and_cast<Ieee80211BasicFrame *>(msg);
-        processFrame(frame);
-        delete frame;
-    }
+    //TBD
+}
+
+void Ieee80211MgmtSimplifiedSTA::handleUpperMessage(cMessage *msg)
+{
+    //TBD
 }
 
 void Ieee80211MgmtSimplifiedSTA::receiveChangeNotification(int category, cPolymorphic *details)

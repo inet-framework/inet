@@ -152,6 +152,11 @@ cMessage *REDQueue::dequeue()
     return pk;
 }
 
+void REDQueue::sendOut(cMessage *msg)
+{
+    send(msg, "out");
+}
+
 void REDQueue::finish()
 {
     PassiveQueueBase::finish();

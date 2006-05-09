@@ -54,6 +54,12 @@ class INET_API DropTailQoSQueue : public PassiveQueueBase
      * Redefined from PassiveQueueBase.
      */
     virtual cMessage *dequeue();
+
+    /**
+     * Redefined from PassiveQueueBase.
+     */
+    virtual void sendOut(cMessage *msg);
+
 };
 
 #endif

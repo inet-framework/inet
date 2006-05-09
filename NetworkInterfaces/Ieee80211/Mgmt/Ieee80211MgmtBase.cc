@@ -21,6 +21,79 @@
 #include "Ieee802Ctrl_m.h"
 
 
+void Ieee80211MgmtBase::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+    {
+        // process timers
+        handleTimer(msg);
+    }
+    else if (msg->arrivedOn("macIn"))
+    {
+        // process incoming frame
+        Ieee80211BasicFrame *frame = check_and_cast<Ieee80211BasicFrame *>(msg);
+        processFrame(frame);
+        delete frame;
+    }
+    else
+    {
+        // packet from upper layers, to be sent out
+        handleUpperMessage(msg);
+    }
+}
+
+void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
+{
+    PassiveQueueBase::handleMessage(frame);
+}
+
+void Ieee80211MgmtBase::initialize()
+{
+    PassiveQueueBase::initialize();
+    queue.setName("80211MACQueue");
+
+    qlenVec.setName("queue length");
+    dropVec.setName("drops");
+
+    // configuration
+    frameCapacity = par("frameCapacity");
+}
+
+bool Ieee80211MgmtBase::enqueue(cMessage *msg)
+{
+    if (frameCapacity && queue.length() >= frameCapacity)
+    {
+        EV << "Queue full, dropping packet.\n";
+        delete msg;
+        dropVec.record(1);
+        return true;
+    }
+    else
+    {
+        queue.insert(msg);
+        qlenVec.record(queue.length());
+        return false;
+    }
+}
+
+cMessage *Ieee80211MgmtBase::dequeue()
+{
+    if (queue.empty())
+        return NULL;
+
+   cMessage *pk = (cMessage *)queue.pop();
+
+    // statistics
+    qlenVec.record(queue.length());
+
+    return pk;
+}
+
+void Ieee80211MgmtBase::sendOut(cMessage *msg)
+{
+    send(msg, "toMac");
+}
+
 void Ieee80211MgmtBase::processFrame(Ieee80211BasicFrame *frame)
 {
     const Ieee80211FrameControl& frameControl = frame->getFrameControl();

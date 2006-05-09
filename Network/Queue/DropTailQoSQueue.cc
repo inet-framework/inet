@@ -83,5 +83,9 @@ cMessage *DropTailQoSQueue::dequeue()
     return NULL;
 }
 
+void DropTailQoSQueue::sendOut(cMessage *msg)
+{
+    send(msg, "out");
+}
 
 

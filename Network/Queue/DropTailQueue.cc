@@ -65,4 +65,9 @@ cMessage *DropTailQueue::dequeue()
     return pk;
 }
 
+void DropTailQueue::sendOut(cMessage *msg)
+{
+    send(msg, "out");
+}
+
 
