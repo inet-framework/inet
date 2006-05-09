@@ -197,7 +197,7 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
     handleWithFSM(msg);
-    delete msg;
+    //XXX delete msg; -- this won't work anymore since we send up data frames without decapsulation
 }
 
 void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details)
