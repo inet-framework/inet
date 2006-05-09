@@ -21,6 +21,23 @@
 #include "Ieee802Ctrl_m.h"
 
 
+void Ieee80211MgmtBase::initialize(int stage)
+{
+    if (stage==0)
+    {
+        PassiveQueueBase::initialize();
+
+        queue.setName("80211MacQueue");
+
+        qlenVec.setName("queue length");
+        dropVec.setName("drops");
+
+        // configuration
+        frameCapacity = par("frameCapacity");
+    }
+}
+
+
 void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
@@ -45,18 +62,6 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
 {
     PassiveQueueBase::handleMessage(frame);
-}
-
-void Ieee80211MgmtBase::initialize()
-{
-    PassiveQueueBase::initialize();
-    queue.setName("80211MacQueue");
-
-    qlenVec.setName("queue length");
-    dropVec.setName("drops");
-
-    // configuration
-    frameCapacity = par("frameCapacity");
 }
 
 bool Ieee80211MgmtBase::enqueue(cMessage *msg)

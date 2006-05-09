@@ -37,6 +37,8 @@ module Ieee80211Nic
         mgmt: mgmtType like Ieee80211MgmtInterface;
             display: "p=96,69;i=block/cogwheel";
         mac: Ieee80211Mac;
+            parameters:
+                queueModule = "mgmt";
             display: "p=96,155;i=block/layer";
         decider: Decider80211;
             display: "p=106,225;i=block/process_s";

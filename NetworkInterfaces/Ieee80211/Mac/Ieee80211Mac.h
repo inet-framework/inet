@@ -24,6 +24,7 @@
 
 #include <list>
 #include "WirelessMacBase.h"
+#include "IPassiveQueue.h"
 #include "Mac80211PktXXX_m.h"
 #include "Ieee80211Consts.h"
 #include "NotificationBoard.h"

@@ -25,6 +25,8 @@
 // @author Andras Varga
 //
 simple Ieee80211MgmtSTA
+    parameters:
+        frameCapacity: numeric;
     gates:
         in: uppergateIn;
         out: uppergateOut;

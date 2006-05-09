@@ -27,7 +27,8 @@
 //
 simple Ieee80211MgmtAP
     parameters:
-        beaconInterval: numeric const;
+        beaconInterval: numeric const,
+        frameCapacity: numeric;
     gates:
         in: uppergateIn;
         out: uppergateOut;

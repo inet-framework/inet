@@ -25,6 +25,7 @@ void PassiveQueueBase::initialize()
 {
     // state
     packetRequested = 0;
+    WATCH(packetRequested);
 
     // statistics
     numReceived = 0;

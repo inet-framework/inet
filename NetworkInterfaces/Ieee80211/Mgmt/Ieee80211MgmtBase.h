@@ -47,7 +47,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     cOutVector dropVec;
 
   protected:
-    virtual void initialize();
+    virtual int numInitStages() const {return 2;}
+    virtual void initialize(int);
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
     void handleMessage(cMessage *msg);

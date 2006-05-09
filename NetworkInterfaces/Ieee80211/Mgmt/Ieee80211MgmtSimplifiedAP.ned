@@ -29,6 +29,8 @@
 // @author Andras Varga
 //
 simple Ieee80211MgmtSimplifiedAP
+    parameters:
+        frameCapacity: numeric;
     gates:
         in: uppergateIn;
         out: uppergateOut;

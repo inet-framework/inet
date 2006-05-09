@@ -28,6 +28,8 @@
 // @author Andras Varga
 //
 simple Ieee80211MgmtAdhoc
+    parameters:
+        frameCapacity: numeric;
     gates:
         in: uppergateIn;
         out: uppergateOut;
