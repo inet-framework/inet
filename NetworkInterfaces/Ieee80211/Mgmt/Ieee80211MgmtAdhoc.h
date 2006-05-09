@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE80211_MGMT_STA_H
-#define IEEE80211_MGMT_STA_H
+#ifndef IEEE80211_MGMT_ADHOC_H
+#define IEEE80211_MGMT_ADHOC_H
 
 #include <omnetpp.h>
 #include "Ieee80211MgmtBase.h"
@@ -25,37 +25,13 @@
 
 
 /**
- * Used in 802.11 infrastructure mode: handles management frames for a station (STA).
+ * Used in 802.11 ad-hoc mode. See corresponding NED file for a detailed description.
+ * This implementation ignores many details.
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
 {
-  protected:
-    //
-    enum AssocState {SCANNING, NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
-    AssocState state;
-
-    // Describes an AP during scanning
-    struct APInfo
-    {
-        MACAddress address;
-        int channel;
-        double rxpower;  // received power from AP
-    };
-
-    typedef std::list<APInfo> AccessPointList;
-    AccessPointList accessPointList;
-
-    // Associated Access Point
-    struct AssociateAP
-    {
-        MACAddress address;
-        int channel;
-        int receiveSequence;
-    };
-    AssociateAP associateAP;
-
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -84,3 +60,5 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 };
 
 #endif
+
+

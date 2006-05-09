@@ -70,6 +70,12 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Redefined from PassiveQueueBase: send message to MAC */
     void sendOut(cMessage *msg);
 
+    /** Utility method to encapsulate a packet into a 802.11 data frame */
+    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
+
+    /** Utility method to decapsulate a data frame */
+    virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
+
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Ieee80211BasicFrame *frame);
 
@@ -89,6 +95,6 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     //@}
 };
 
-
-
 #endif
+
+

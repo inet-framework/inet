@@ -93,6 +93,16 @@ void Ieee80211MgmtBase::sendOut(cMessage *msg)
     send(msg, "toMac");
 }
 
+Ieee80211DataFrame *Ieee80211MgmtBase::encapsulate(cMessage *msg)
+{
+    return (Ieee80211DataFrame *)msg; //XXX TBD!!!!
+}
+
+cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
+{
+    return frame; //XXX TBD!!!!
+}
+
 void Ieee80211MgmtBase::processFrame(Ieee80211BasicFrame *frame)
 {
     const Ieee80211FrameControl& frameControl = frame->getFrameControl();
