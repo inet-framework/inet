@@ -131,8 +131,9 @@
     if (!___is_event)                                                                   \
     {                                                                                   \
         if (___condition_seen)                                                          \
-            error("FSMA_Enter must be defined before all FSMA_*_Transitions");          \
+            error("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code");   \
         action;                                                                         \
     }
 
 #endif
+
