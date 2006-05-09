@@ -52,7 +52,7 @@ all:
 	cd NetworkInterfaces/MF80211/phyLayer/snrEval && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../../MFCore -I../../macLayer -I../../../../World
 	cd NetworkInterfaces/Ieee80211 && $(MAKEMAKE) $(OPTS) -n -r
 	cd NetworkInterfaces/Ieee80211/Mac && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore -I../../MF80211/phyLayer/snrEval
-	cd NetworkInterfaces/Ieee80211/Mgmt && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore
+	cd NetworkInterfaces/Ieee80211/Mgmt && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../Mac
 
 	cd Nodes/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 
