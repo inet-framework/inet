@@ -34,19 +34,25 @@ module Ieee80211Nic
         out: uppergateOut; // from upper layers
         in: radioIn; // to receive AirFrames
     submodules:
+        mgmt: mgmtType like Ieee80211Mgmt;
+            display: "p=96,69;i=block/cogwheel";
         mac: Ieee80211MAC;
-            display: "p=96,87;i=block/layer";
+            display: "p=96,155;i=block/layer";
         decider: Decider80211;
-            display: "p=106,157;i=block/process_s";
+            display: "p=106,225;i=block/process_s";
         snrEval: SnrEval80211;
-            display: "p=96,236;i=block/wrxtx";
+            display: "p=96,304;i=block/wrxtx";
     connections:
         radioIn --> snrEval.radioIn;
         decider.uppergateOut --> mac.lowergateIn display "m=m,50,50,75,0";
         snrEval.uppergateIn <-- mac.lowergateOut display "m=m,25,0,25,0";
         snrEval.uppergateOut --> decider.lowergateIn display "m=m,73,0,50,50";
 
-        mac.uppergateOut --> uppergateOut;
-        mac.uppergateIn <-- uppergateIn;
+        mac.uppergateOut --> mgmt.macIn;
+        mac.uppergateIn <-- mgmt.macOut;
+
+        mgmt.uppergateOut --> uppergateOut;
+        mgmt.uppergateIn <-- uppergateIn;
+
 endmodule
 
