@@ -16,16 +16,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE_80211_MAC_H
-#define IEEE_80211_MAC_H
+#ifndef MAC_80211_V2_H
+#define MAC_80211_V2_H
 
 // uncomment this if you do not want to log state machine transitions
 #define FSM_DEBUG
 
 #include <list>
 #include "WirelessMacBase.h"
-#include "Mac80211PktXXX_m.h"
-#include "Ieee80211Consts.h"
+#include "Mac80211Pkt_m.h"
+#include "Consts80211.h"
 #include "NotificationBoard.h"
 #include "RadioState.h"
 #include "FSMA.h"
@@ -37,9 +37,9 @@
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
+class INET_API Mac80211v2 : public WirelessMacBase, public INotifiable
 {
-  typedef std::list<Mac80211PktXXX*> MacPktList;
+  typedef std::list<Mac80211Pkt*> MacPktList;
 
   protected:
     /**
@@ -59,7 +59,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
   protected:
     /**
-     * @name Ieee80211Mac state variables
+     * @name Mac80211v2 state variables
      * @brief Various state information checked and modified according to the state machine.
      */
     //@{
@@ -144,8 +144,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Construction functions
      */
     //@{
-    Ieee80211Mac();
-    virtual ~Ieee80211Mac();
+    Mac80211v2();
+    virtual ~Mac80211v2();
     //@}
 
   protected:
@@ -186,12 +186,12 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Timer functions
      */
     //@{
-    void scheduleSIFSPeriod(Mac80211PktXXX *frame);
+    void scheduleSIFSPeriod(Mac80211Pkt *frame);
     void scheduleDIFSPeriod();
     void scheduleBackoffPeriod();
-    void scheduleTimeoutPeriod(Mac80211PktXXX *frame);
+    void scheduleTimeoutPeriod(Mac80211Pkt *frame);
     void scheduleRTSTimeoutPeriod();
-    void scheduleReservePeriod(Mac80211PktXXX *frame);
+    void scheduleReservePeriod(Mac80211Pkt *frame);
     //@}
 
 
@@ -200,11 +200,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame transmission functions
      */
     //@{
-    void sendACKFrame(Mac80211PktXXX *frame);
-    void sendRTSFrame(Mac80211PktXXX *frameToSend);
-    void sendCTSFrame(Mac80211PktXXX *rtsFrame);
-    void sendDataFrame(Mac80211PktXXX *frameToSend);
-    void sendBroadcastFrame(Mac80211PktXXX *frameToSend);
+    void sendACKFrame(Mac80211Pkt *frame);
+    void sendRTSFrame(Mac80211Pkt *frameToSend);
+    void sendCTSFrame(Mac80211Pkt *rtsFrame);
+    void sendDataFrame(Mac80211Pkt *frameToSend);
+    void sendBroadcastFrame(Mac80211Pkt *frameToSend);
     //@}
 
   protected:
@@ -212,13 +212,13 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame builder functions
      */
     //@{
-    Mac80211PktXXX *encapsulate(cMessage *frame);
-    cMessage *decapsulate(Mac80211PktXXX *frame);
-    Mac80211PktXXX *buildDataFrame(Mac80211PktXXX *frameToSend);
-    Mac80211PktXXX *buildACKFrame(Mac80211PktXXX *frameToACK);
-    Mac80211PktXXX *buildRTSFrame(Mac80211PktXXX *frameToSend);
-    Mac80211PktXXX *buildCTSFrame(Mac80211PktXXX *rtsFrame);
-    Mac80211PktXXX* buildBroadcastFrame(Mac80211PktXXX *frameToSend);
+    Mac80211Pkt *encapsulate(cMessage *frame);
+    cMessage *decapsulate(Mac80211Pkt *frame);
+    Mac80211Pkt *buildDataFrame(Mac80211Pkt *frameToSend);
+    Mac80211Pkt *buildACKFrame(Mac80211Pkt *frameToACK);
+    Mac80211Pkt *buildRTSFrame(Mac80211Pkt *frameToSend);
+    Mac80211Pkt *buildCTSFrame(Mac80211Pkt *rtsFrame);
+    Mac80211Pkt* buildBroadcastFrame(Mac80211Pkt *frameToSend);
     //@}
 
   protected:

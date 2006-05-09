@@ -19,6 +19,7 @@
 
 import
     "Mac80211",
+    "Mac80211v2",
     "Decider80211",
     "SnrEval80211";
 
@@ -35,7 +36,7 @@ module Nic80211
         in: radioIn; // to receive AirFrames
     submodules:
         //mac: Mac80211;
-        mac: IEEE80211MAC;
+        mac: Mac80211v2;
             display: "p=96,87;i=block/layer";
         decider: Decider80211;
             display: "p=106,157;i=block/process_s";
