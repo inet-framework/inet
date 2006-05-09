@@ -17,7 +17,7 @@
 //
 
 
-#include "Mgmt80211SimplifiedAP.h"
+#include "Ieee80211MgmtSimplifiedAP.h"
 #include "Ieee802Ctrl_m.h"
 
 

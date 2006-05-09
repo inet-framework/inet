@@ -22,7 +22,7 @@
 cplusplus
 {{
 #include "MACAddress.h"
-#include "WLANFrame_m.h"
+#include "Ieee80211Frame_m.h"
 }};
 class noncobject MACAddress;
 message W80211ManagementFrame;

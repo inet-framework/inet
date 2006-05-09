@@ -17,7 +17,7 @@
 //
 
 
-#include "Mgmt80211SimplifiedSTA.h"
+#include "Ieee80211MgmtSimplifiedSTA.h"
 #include "Ieee802Ctrl_m.h"
 
 

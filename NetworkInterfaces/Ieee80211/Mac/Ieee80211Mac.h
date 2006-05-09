@@ -25,7 +25,7 @@
 #include <list>
 #include "WirelessMacBase.h"
 #include "Mac80211Pkt_m.h"
-#include "Consts80211.h"
+#include "Ieee80211Consts.h"
 #include "NotificationBoard.h"
 #include "RadioState.h"
 #include "FSMA.h"

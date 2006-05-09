@@ -22,8 +22,8 @@
 #include <omnetpp.h>
 #include "MACAddress.h"
 #include "NotificationBoard.h"
-#include "WLANFrame_m.h"
-#include "WLANMgmtFrames_m.h"
+#include "Ieee80211Frame_m.h"
+#include "Ieee80211MgmtFrames_m.h"
 
 
 /**

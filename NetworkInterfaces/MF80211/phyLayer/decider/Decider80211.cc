@@ -18,7 +18,6 @@
  ***************************************************************************/
 
 
-#include "Mac80211Pkt_m.h"
 #include "Decider80211.h"
 #include "Consts80211.h"
 
@@ -67,8 +66,8 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
         if (iter->snr < snirMin)
             snirMin = iter->snr;
     }
-    EV << "packet from: " << ((Mac80211Pkt *) (af->encapsulatedMsg()))->
-        getSrcAddr() << " snrMin: " << snirMin << endl;
+    cMessage *fr = af->encapsulatedMsg();
+    EV << "packet (" << fr->className() << ")" << fr->name() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
 
     //if snir is big enough so that packet can be recognized at all
     if (snirMin > snirThreshold)

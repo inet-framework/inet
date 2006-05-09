@@ -20,7 +20,7 @@
 #define MGMT80211AP_H
 
 #include <omnetpp.h>
-#include "Mgmt80211Base.h"
+#include "Ieee80211MgmtBase.h"
 #include "NotificationBoard.h"
 
 

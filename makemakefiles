@@ -20,7 +20,7 @@ ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/
 ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Network/TED -I$(ROOT)/Network/Extras -I$(ROOT)/Nodes/MPLS
 ALL_IPv6_INCLUDES=-I$(ROOT)/Network/IPv6 -I$(ROOT)/Network/ICMPv6 -I$(ROOT)/Nodes/IPv6
 # -I$(ROOT)/Network/MIPv6 -I$(ROOT)/Network/HMIPv6 -I$(ROOT)/World -I$(ROOT)/PHY -I$(ROOT)/Mobility -I$(ROOT)/Mobility/adHocSim -I$(ROOT)/NetworkInterfaces/Ethernet6 -I$(ROOT)/NetworkInterfaces/PPP6 -I$(ROOT)/NetworkInterfaces/Wireless -I$(ROOT)/NetworkInterfaces/DualWireless -I$(ROOT)/Util/XML
-ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/MFCore -I$(ROOT)/NetworkInterfaces/MF80211 -I$(ROOT)/NetworkInterfaces/MF80211/macLayer -I$(ROOT)/NetworkInterfaces/MF80211/mgmt -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/decider -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/snrEval
+ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/MFCore -I$(ROOT)/NetworkInterfaces/MF80211 -I$(ROOT)/NetworkInterfaces/MF80211/macLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/decider -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/snrEval -I$(ROOT)/NetworkInterfaces/Ieee80211 -I$(ROOT)/NetworkInterfaces/Ieee80211/Mac -I$(ROOT)/NetworkInterfaces/Ieee80211/Mgmt
 
 #ALL_MODEL_OPTS=$(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_IPv6_INCLUDES)
 ALL_MODEL_OPTS=$(OPTS) -n
@@ -47,10 +47,12 @@ all:
 	cd NetworkInterfaces/MFCore && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../../World
 	cd NetworkInterfaces/MF80211 && $(MAKEMAKE) $(OPTS) -n -r
 	cd NetworkInterfaces/MF80211/macLayer && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore -I../phyLayer/snrEval
-	cd NetworkInterfaces/MF80211/mgmt && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore -I../macLayer
 	cd NetworkInterfaces/MF80211/phyLayer && $(MAKEMAKE) $(OPTS) -n -r
 	cd NetworkInterfaces/MF80211/phyLayer/decider && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../../MFCore -I../../macLayer
 	cd NetworkInterfaces/MF80211/phyLayer/snrEval && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../../MFCore -I../../macLayer -I../../../../World
+	cd NetworkInterfaces/Ieee80211 && $(MAKEMAKE) $(OPTS) -n -r
+	cd NetworkInterfaces/Ieee80211/Mac && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore -I../../MF80211/phyLayer/snrEval
+	cd NetworkInterfaces/Ieee80211/Mgmt && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore
 
 	cd Nodes/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 
