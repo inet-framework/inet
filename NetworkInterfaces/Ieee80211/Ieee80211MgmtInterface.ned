@@ -18,20 +18,13 @@
 
 
 //
-// Implementation of the 802.11b MAC protocol. This module is intended
-// to be used in combination with the SnrEval80211 and Decider80211
-// modules as physical layer.
+// Specifies what gates a 802.11 management module should have, 
+// in order be usable in Ieee80211Nic.
 //
-simple Ieee80211Mac
-    parameters:
-        address : string,       // MAC address as hex string (12 hex digits), or
-                                // "auto". "auto" values will be replaced by
-                                // a generated MAC address in init stage 0.
-        maxQueueSize: numeric const,
-        bitrate: numeric const;
+module Ieee80211MgmtInterface
     gates:
         in: uppergateIn;
         out: uppergateOut;
-        in: lowergateIn;
-        out: lowergateOut;
-endsimple
+        in: macIn;
+        out: macOut;
+endmodule
