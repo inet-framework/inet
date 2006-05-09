@@ -85,6 +85,9 @@ void Ieee80211Mac::initialize(int stage)
         // interface
         registerInterface();
 
+        // obtain pointer to external queue
+        initializeQueueModule();
+
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
@@ -156,6 +159,7 @@ void Ieee80211Mac::initializeQueueModule()
     {
         cModule *module = parentModule()->submodule(par("queueModule").stringValue());
         queueModule = check_and_cast<IPassiveQueue *>(module);
+
         EV << "Requesting first frame from queue module\n";
         queueModule->requestPacket();
     }

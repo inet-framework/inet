@@ -104,7 +104,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
 
 void Ieee80211MgmtBase::sendOut(cMessage *msg)
 {
-    send(msg, "toMac");
+    send(msg, "macOut");
 }
 
 Ieee80211DataFrame *Ieee80211MgmtBase::encapsulate(cMessage *msg)
