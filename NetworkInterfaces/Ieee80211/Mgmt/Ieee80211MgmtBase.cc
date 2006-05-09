@@ -21,42 +21,42 @@
 #include "Ieee802Ctrl_m.h"
 
 
-void Mgmt80211Base::processFrame(W80211BasicFrame *frame)
+void Ieee80211MgmtBase::processFrame(Ieee80211BasicFrame *frame)
 {
-    const W80211FrameControl& frameControl = frame->getFrameControl();
+    const Ieee80211FrameControl& frameControl = frame->getFrameControl();
     switch(frameControl.subtype)
     {
       case ST_DATA:
-        handleDataFrame(check_and_cast<W80211DataFrame *>(frame));
+        handleDataFrame(check_and_cast<Ieee80211DataFrame *>(frame));
         break;
       case ST_AUTHENTICATION:
-        handleAuthenticationFrame(check_and_cast<W80211AuthenticationFrame *>(frame));
+        handleAuthenticationFrame(check_and_cast<Ieee80211AuthenticationFrame *>(frame));
         break;
       case ST_DEAUTHENTICATION:
-        handleDeauthenticationFrame(check_and_cast<W80211DeauthenticationFrame *>(frame));
+        handleDeauthenticationFrame(check_and_cast<Ieee80211DeauthenticationFrame *>(frame));
         break;
       case ST_ASSOCIATIONREQUEST:
-        handleAssociationRequestFrame(check_and_cast<W80211AssociationRequestFrame *>(frame));
+        handleAssociationRequestFrame(check_and_cast<Ieee80211AssociationRequestFrame *>(frame));
         break;
       case ST_ASSOCIATIONRESPONSE:
-        handleAssociationResponseFrame(check_and_cast<W80211AssociationResponseFrame *>(frame));
+        handleAssociationResponseFrame(check_and_cast<Ieee80211AssociationResponseFrame *>(frame));
         break;
       case ST_REASSOCIATIONREQUEST:
-        handleReassociationRequestFrame(check_and_cast<W80211ReassociationRequestFrame *>(frame));
+        handleReassociationRequestFrame(check_and_cast<Ieee80211ReassociationRequestFrame *>(frame));
         break;
       case ST_REASSOCIATIONRESPONSE:
-        handleReassociationResponseFrame(check_and_cast<W80211ReassociationResponseFrame *>(frame)); break;
+        handleReassociationResponseFrame(check_and_cast<Ieee80211ReassociationResponseFrame *>(frame)); break;
       case ST_DISASSOCIATION:
-        handleDisassociationFrame(check_and_cast<W80211DisassociationFrame *>(frame));
+        handleDisassociationFrame(check_and_cast<Ieee80211DisassociationFrame *>(frame));
         break;
       case ST_BEACON:
-        handleBeaconFrame(check_and_cast<W80211BeaconFrame *>(frame));
+        handleBeaconFrame(check_and_cast<Ieee80211BeaconFrame *>(frame));
         break;
       case ST_PROBEREQUEST:
-        handleProbeRequestFrame(check_and_cast<W80211ProbeRequestFrame *>(frame));
+        handleProbeRequestFrame(check_and_cast<Ieee80211ProbeRequestFrame *>(frame));
         break;
       case ST_PROBERESPONSE:
-        handleProbeResponseFrame(check_and_cast<W80211ProbeResponseFrame *>(frame));
+        handleProbeResponseFrame(check_and_cast<Ieee80211ProbeResponseFrame *>(frame));
         break;
       default:
         error("unexpected frame type (%s)%s", frame->className(), frame->name());

@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef MGMT80211SIMPLIFIEDAP_H
-#define MGMT80211SIMPLIFIEDAP_H
+#ifndef IEEE80211_MGMT_SIMPLIFIEDAP_H
+#define IEEE80211_MGMT_SIMPLIFIEDAP_H
 
 #include <omnetpp.h>
 #include "Ieee80211MgmtBase.h"
@@ -31,7 +31,7 @@
  *
  * @author Andras Varga
  */
-class INET_API Mgmt80211SimplifiedAP : public Mgmt80211Base
+class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
 {
   protected:
     enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
@@ -55,17 +55,17 @@ class INET_API Mgmt80211SimplifiedAP : public Mgmt80211Base
 
     /** @name Processing of different frame types */
     //@{
-    virtual void handleDataFrame(W80211DataFrame *frame);
-    virtual void handleAuthenticationFrame(W80211AuthenticationFrame *frame);
-    virtual void handleDeauthenticationFrame(W80211DeauthenticationFrame *frame);
-    virtual void handleAssociationRequestFrame(W80211AssociationRequestFrame *frame);
-    virtual void handleAssociationResponseFrame(W80211AssociationResponseFrame *frame);
-    virtual void handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame);
-    virtual void handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame);
-    virtual void handleDisassociationFrame(W80211DisassociationFrame *frame);
-    virtual void handleBeaconFrame(W80211BeaconFrame *frame);
-    virtual void handleProbeRequestFrame(W80211ProbeRequestFrame *frame);
-    virtual void handleProbeResponseFrame(W80211ProbeResponseFrame *frame);
+    virtual void handleDataFrame(Ieee80211DataFrame *frame);
+    virtual void handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame);
+    virtual void handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame);
+    virtual void handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame);
+    virtual void handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame);
+    virtual void handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame);
+    virtual void handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame);
+    virtual void handleDisassociationFrame(Ieee80211DisassociationFrame *frame);
+    virtual void handleBeaconFrame(Ieee80211BeaconFrame *frame);
+    virtual void handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame);
+    virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
     //@}
 };
 

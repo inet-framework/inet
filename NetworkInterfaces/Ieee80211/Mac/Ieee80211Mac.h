@@ -37,7 +37,7 @@
  *
  * @ingroup macLayer
  */
-class INET_API IEEE80211MAC : public WirelessMacBase, public INotifiable
+class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 {
   typedef std::list<Mac80211Pkt*> MacPktList;
 
@@ -59,7 +59,7 @@ class INET_API IEEE80211MAC : public WirelessMacBase, public INotifiable
 
   protected:
     /**
-     * @name IEEE80211MAC state variables
+     * @name Ieee80211Mac state variables
      * @brief Various state information checked and modified according to the state machine.
      */
     //@{
@@ -144,8 +144,8 @@ class INET_API IEEE80211MAC : public WirelessMacBase, public INotifiable
      * @name Construction functions
      */
     //@{
-    IEEE80211MAC();
-    virtual ~IEEE80211MAC();
+    Ieee80211Mac();
+    virtual ~Ieee80211Mac();
     //@}
 
   protected:

@@ -26,9 +26,9 @@ cplusplus
 class noncobject MACAddress;
 
 //
-// 802.11 frame type constants, for the "type" field of W80211FrameControl
+// 802.11 frame type constants, for the "type" field of Ieee80211FrameControl
 //
-enum W80211FrameType
+enum Ieee80211FrameType
 {
       FT_MANAGEMENT = 0;
       FT_CONTROL = 1;
@@ -37,12 +37,12 @@ enum W80211FrameType
 };
 
 //
-// 802.11 frame subtype constants, for the "subtype" field of W80211FrameControl.
+// 802.11 frame subtype constants, for the "subtype" field of Ieee80211FrameControl.
 // (Numeric values do not correspond to the standard, where actual frame type is
 // determined by the type AND subtype fields together; here we chose unique
 // values for convenience.)
 //
-enum W80211SubType
+enum Ieee80211SubType
 {
       ST_ASSOCIATIONREQUEST = 4;
       ST_ASSOCIATIONRESPONSE = 5;
@@ -64,10 +64,10 @@ enum W80211SubType
 // Frame control format. Fields not supported by this model are omitted:
 // ProtocolVersion, MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
-struct W80211FrameControl
+struct Ieee80211FrameControl
 {
     fields:
-        short type enum(W80211FrameType); // 2 bits
+        short type enum(Ieee80211FrameType); // 2 bits
         short subtype;                    // 4 bits
         bool toDS;                        // 1 bit
         bool fromDS;                      // 1 bit
@@ -78,11 +78,11 @@ struct W80211FrameControl
 // Format of smallest 802.11 frame (ACK and CTS). 4-byte FCS is not
 // explicitly modeled.
 //
-message W80211BasicFrame
+message Ieee80211BasicFrame
 {
     fields:
         byteLength = 14;
-        W80211FrameControl frameControl;
+        Ieee80211FrameControl frameControl;
         short duration = -1; // "duration" in the Duration/ID field (-1=no duration)
         short AID = -1;      // "id" (Association ID) in the Duration/ID field (-1=no ID)
         MACAddress address1;
@@ -91,7 +91,7 @@ message W80211BasicFrame
 //
 // Format of the 802.11 RTS frame
 //
-message W80211RTSFrame extends W80211BasicFrame
+message Ieee80211RTSFrame extends Ieee80211BasicFrame
 {
     fields:
         byteLength = 20;
@@ -101,7 +101,7 @@ message W80211RTSFrame extends W80211BasicFrame
 //
 // Format of the 802.11 management frame
 //
-message W80211ManagementFrame extends W80211RTSFrame
+message Ieee80211ManagementFrame extends Ieee80211RTSFrame
 {
     fields:
         byteLength = 28;
@@ -113,7 +113,7 @@ message W80211ManagementFrame extends W80211RTSFrame
 //
 // Format of the 802.11 data frame
 //
-message W80211DataFrame extends W80211ManagementFrame
+message Ieee80211DataFrame extends Ieee80211ManagementFrame
 {
     fields:
         byteLength = 34;

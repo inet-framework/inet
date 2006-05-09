@@ -21,15 +21,15 @@
 #include "Ieee802Ctrl_m.h"
 
 
-Define_Module(Mgmt80211AP);
+Define_Module(Ieee80211MgmtAP);
 
 
-void Mgmt80211AP::initialize(int)
+void Ieee80211MgmtAP::initialize(int)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleMessage(cMessage *msg)
+void Ieee80211MgmtAP::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -38,69 +38,69 @@ void Mgmt80211AP::handleMessage(cMessage *msg)
     else
     {
         // process incoming frame
-        W80211BasicFrame *frame = check_and_cast<W80211BasicFrame *>(msg);
+        Ieee80211BasicFrame *frame = check_and_cast<Ieee80211BasicFrame *>(msg);
         processFrame(frame);
         delete frame;
     }
 }
 
-void Mgmt80211AP::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
     //TBD
 }
 
-void Mgmt80211AP::handleDataFrame(W80211DataFrame *frame)
+void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleAuthenticationFrame(W80211AuthenticationFrame *frame)
+void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleDeauthenticationFrame(W80211DeauthenticationFrame *frame)
+void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleAssociationRequestFrame(W80211AssociationRequestFrame *frame)
+void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleAssociationResponseFrame(W80211AssociationResponseFrame *frame)
+void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
     EV << "ignoring frame " << frame << "\n";
 }
 
-void Mgmt80211AP::handleReassociationRequestFrame(W80211ReassociationRequestFrame *frame)
+void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleReassociationResponseFrame(W80211ReassociationResponseFrame *frame)
+void Ieee80211MgmtAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
     EV << "ignoring frame " << frame << "\n";
 }
 
-void Mgmt80211AP::handleDisassociationFrame(W80211DisassociationFrame *frame)
+void Ieee80211MgmtAP::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleBeaconFrame(W80211BeaconFrame *frame)
+void Ieee80211MgmtAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
     EV << "ignoring frame " << frame << "\n";
 }
 
-void Mgmt80211AP::handleProbeRequestFrame(W80211ProbeRequestFrame *frame)
+void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
     //TBD
 }
 
-void Mgmt80211AP::handleProbeResponseFrame(W80211ProbeResponseFrame *frame)
+void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
     EV << "ignoring frame " << frame << "\n";
 }

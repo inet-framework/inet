@@ -16,18 +16,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "IEEE80211MAC.h"
+#include "Ieee80211Mac.h"
 #include "Ieee802Ctrl_m.h"
 #include "RadioState.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
-Define_Module(IEEE80211MAC);
+Define_Module(Ieee80211Mac);
 
 /****************************************************************
  * Construction functions.
  */
-IEEE80211MAC::IEEE80211MAC()
+Ieee80211Mac::Ieee80211Mac()
 {
     endSIFS = NULL;
     endDIFS = NULL;
@@ -37,7 +37,7 @@ IEEE80211MAC::IEEE80211MAC()
     radioStateChange = NULL;
 }
 
-IEEE80211MAC::~IEEE80211MAC()
+Ieee80211Mac::~Ieee80211Mac()
 {
     cancelAndDelete(endSIFS);
     cancelAndDelete(endDIFS);
@@ -50,7 +50,7 @@ IEEE80211MAC::~IEEE80211MAC()
 /****************************************************************
  * Initialization functions.
  */
-void IEEE80211MAC::initialize(int stage)
+void Ieee80211Mac::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);
 
@@ -86,7 +86,7 @@ void IEEE80211MAC::initialize(int stage)
         registerInterface();
 
         // state variables
-        fsm.setName("IEEE80211MAC State Machine");
+        fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
         radioState = RadioState::IDLE;
         retryCounter = 1;
@@ -117,7 +117,7 @@ void IEEE80211MAC::initialize(int stage)
     }
 }
 
-void IEEE80211MAC::registerInterface()
+void Ieee80211Mac::registerInterface()
 {
     InterfaceEntry *e = new InterfaceEntry();
 
@@ -152,13 +152,13 @@ void IEEE80211MAC::registerInterface()
 /****************************************************************
  * Message handling functions.
  */
-void IEEE80211MAC::handleSelfMsg(cMessage *msg)
+void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
     handleWithFSM(msg);
 }
 
-void IEEE80211MAC::handleUpperMsg(cMessage *msg)
+void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 {
     if (msg->byteLength() > 2312)
         error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
@@ -177,14 +177,14 @@ void IEEE80211MAC::handleUpperMsg(cMessage *msg)
     handleWithFSM(msg);
 }
 
-void IEEE80211MAC::handleLowerMsg(cMessage *msg)
+void Ieee80211Mac::handleLowerMsg(cMessage *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
     handleWithFSM(msg);
     delete msg;
 }
 
-void IEEE80211MAC::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
 
@@ -199,7 +199,7 @@ void IEEE80211MAC::receiveChangeNotification(int category, cPolymorphic *details
 /**
  * Msg can be upper, lower, self or NULL (when radio state changes)
  */
-void IEEE80211MAC::handleWithFSM(cMessage *msg)
+void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (isUpperMsg(msg) && fsm.state() != IDLE) {
@@ -399,26 +399,26 @@ void IEEE80211MAC::handleWithFSM(cMessage *msg)
 /****************************************************************
  * Timer functions.
  */
-void IEEE80211MAC::scheduleSIFSPeriod(Mac80211Pkt *frame)
+void Ieee80211Mac::scheduleSIFSPeriod(Mac80211Pkt *frame)
 {
     EV << "scheduling SIFS period\n";
     endSIFS->setContextPointer(frame->dup());
     scheduleAt(simTime() + SIFS, endSIFS);
 }
 
-void IEEE80211MAC::scheduleDIFSPeriod()
+void Ieee80211Mac::scheduleDIFSPeriod()
 {
     EV << "scheduling DIFS period\n";
     scheduleAt(simTime() + DIFS, endDIFS);
 }
 
-void IEEE80211MAC::scheduleBackoffPeriod()
+void Ieee80211Mac::scheduleBackoffPeriod()
 {
     EV << "scheduling backoff period\n";
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
-void IEEE80211MAC::scheduleTimeoutPeriod(Mac80211Pkt *frameToSend)
+void Ieee80211Mac::scheduleTimeoutPeriod(Mac80211Pkt *frameToSend)
 {
     EV << "scheduling timeout period\n";
     if (isBroadcast(frameToSend))
@@ -427,12 +427,12 @@ void IEEE80211MAC::scheduleTimeoutPeriod(Mac80211Pkt *frameToSend)
         scheduleAt(simTime() + frameDuration(frameToSend->length()) + frameDuration(LENGTH_ACK) + PROCESSING_TIMEOUT, endTimeout);
 }
 
-void IEEE80211MAC::scheduleRTSTimeoutPeriod()
+void Ieee80211Mac::scheduleRTSTimeoutPeriod()
 {
     scheduleAt(simTime() + frameDuration(LENGTH_RTS) + frameDuration(LENGTH_CTS) + PROCESSING_TIMEOUT, endTimeout);
 }
 
-void IEEE80211MAC::scheduleReservePeriod(Mac80211Pkt *frame)
+void Ieee80211Mac::scheduleReservePeriod(Mac80211Pkt *frame)
 {
     EV << "scheduling reserve period\n";
 
@@ -449,31 +449,31 @@ void IEEE80211MAC::scheduleReservePeriod(Mac80211Pkt *frame)
 /****************************************************************
  * Frame sender functions.
  */
-void IEEE80211MAC::sendACKFrame(Mac80211Pkt *frameToAck)
+void Ieee80211Mac::sendACKFrame(Mac80211Pkt *frameToAck)
 {
     EV << "sending ACK frame\n";
     sendDown(buildACKFrame(frameToAck));
 }
 
-void IEEE80211MAC::sendDataFrame(Mac80211Pkt *frameToSend)
+void Ieee80211Mac::sendDataFrame(Mac80211Pkt *frameToSend)
 {
     EV << "sending Data frame\n";
     sendDown(buildDataFrame(frameToSend));
 }
 
-void IEEE80211MAC::sendBroadcastFrame(Mac80211Pkt *frameToSend)
+void Ieee80211Mac::sendBroadcastFrame(Mac80211Pkt *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     sendDown(buildBroadcastFrame(frameToSend));
 }
 
-void IEEE80211MAC::sendRTSFrame(Mac80211Pkt *frameToSend)
+void Ieee80211Mac::sendRTSFrame(Mac80211Pkt *frameToSend)
 {
     EV << "sending RTS frame\n";
     sendDown(buildRTSFrame(frameToSend));
 }
 
-void IEEE80211MAC::sendCTSFrame(Mac80211Pkt *rtsFrame)
+void Ieee80211Mac::sendCTSFrame(Mac80211Pkt *rtsFrame)
 {
     EV << "sending CTS frame\n";
     sendDown(buildCTSFrame(rtsFrame));
@@ -483,7 +483,7 @@ void IEEE80211MAC::sendCTSFrame(Mac80211Pkt *rtsFrame)
 /****************************************************************
  * Frame builder functions.
  */
-Mac80211Pkt* IEEE80211MAC::encapsulate(cMessage *msg)
+Mac80211Pkt* Ieee80211Mac::encapsulate(cMessage *msg)
 {
     Mac80211Pkt *frame = new Mac80211Pkt(msg->name());
     // headerLength, including final CRC-field
@@ -501,12 +501,12 @@ Mac80211Pkt* IEEE80211MAC::encapsulate(cMessage *msg)
     return frame;
 }
 
-cMessage* IEEE80211MAC::decapsulate(Mac80211Pkt *frame)
+cMessage* Ieee80211Mac::decapsulate(Mac80211Pkt *frame)
 {
     return frame->decapsulate();
 }
 
-Mac80211Pkt *IEEE80211MAC::buildDataFrame(Mac80211Pkt *frameToSend)
+Mac80211Pkt *Ieee80211Mac::buildDataFrame(Mac80211Pkt *frameToSend)
 {
     Mac80211Pkt *frame = (Mac80211Pkt *)frameToSend->dup();
     frame->setKind(DATA);
@@ -522,7 +522,7 @@ Mac80211Pkt *IEEE80211MAC::buildDataFrame(Mac80211Pkt *frameToSend)
     return frame;
 }
 
-Mac80211Pkt *IEEE80211MAC::buildACKFrame(Mac80211Pkt *frameToACK)
+Mac80211Pkt *Ieee80211Mac::buildACKFrame(Mac80211Pkt *frameToACK)
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-ack");
     frame->setKind(ACK);
@@ -538,7 +538,7 @@ Mac80211Pkt *IEEE80211MAC::buildACKFrame(Mac80211Pkt *frameToACK)
     return frame;
 }
 
-Mac80211Pkt *IEEE80211MAC::buildRTSFrame(Mac80211Pkt *frameToSend)
+Mac80211Pkt *Ieee80211Mac::buildRTSFrame(Mac80211Pkt *frameToSend)
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-rts");
     frame->setKind(RTS);
@@ -553,7 +553,7 @@ Mac80211Pkt *IEEE80211MAC::buildRTSFrame(Mac80211Pkt *frameToSend)
     return frame;
 }
 
-Mac80211Pkt *IEEE80211MAC::buildCTSFrame(Mac80211Pkt *rtsFrame)
+Mac80211Pkt *Ieee80211Mac::buildCTSFrame(Mac80211Pkt *rtsFrame)
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-cts");
     frame->setKind(CTS);
@@ -566,7 +566,7 @@ Mac80211Pkt *IEEE80211MAC::buildCTSFrame(Mac80211Pkt *rtsFrame)
     return frame;
 }
 
-Mac80211Pkt *IEEE80211MAC::buildBroadcastFrame(Mac80211Pkt *frameToSend)
+Mac80211Pkt *Ieee80211Mac::buildBroadcastFrame(Mac80211Pkt *frameToSend)
 {
     Mac80211Pkt *frame = (Mac80211Pkt *)frameToSend->dup();
     frame->setKind(BROADCAST);
@@ -576,7 +576,7 @@ Mac80211Pkt *IEEE80211MAC::buildBroadcastFrame(Mac80211Pkt *frameToSend)
 /****************************************************************
  * Helper functions.
  */
-void IEEE80211MAC::setMode(Mode mode)
+void Ieee80211Mac::setMode(Mode mode)
 {
     if (mode == PCF)
         error("PCF mode not yet supported");
@@ -584,20 +584,20 @@ void IEEE80211MAC::setMode(Mode mode)
     this->mode = mode;
 }
 
-void IEEE80211MAC::resetStateVariables()
+void Ieee80211Mac::resetStateVariables()
 {
     backoff = false;
     backoffPeriod = 0;
     retryCounter = 1;
 }
 
-void IEEE80211MAC::generateBackoffPeriod()
+void Ieee80211Mac::generateBackoffPeriod()
 {
     backoffPeriod = ((double) intrand(contentionWindow() + 1)) * ST;
     EV << "backoff period set to " << backoffPeriod << endl;
 }
 
-int IEEE80211MAC::contentionWindow()
+int Ieee80211Mac::contentionWindow()
 {
     // if the next packet is broadcast then the contention window must be maximal
     if (isBroadcast(transmissionQueue.front()))
@@ -613,22 +613,22 @@ int IEEE80211MAC::contentionWindow()
     }
 }
 
-bool IEEE80211MAC::isRadioStateChange(cMessage *msg)
+bool Ieee80211Mac::isRadioStateChange(cMessage *msg)
 {
     return msg == radioStateChange;
 }
 
-bool IEEE80211MAC::isBroadcast(cMessage *msg)
+bool Ieee80211Mac::isBroadcast(cMessage *msg)
 {
     return ((Mac80211Pkt *)msg)->getDestAddr().isBroadcast();
 }
 
-bool IEEE80211MAC::isForUs(cMessage *msg)
+bool Ieee80211Mac::isForUs(cMessage *msg)
 {
     return ((Mac80211Pkt *)msg)->getDestAddr() == address;
 }
 
-void IEEE80211MAC::popTransmissionQueue()
+void Ieee80211Mac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
     Mac80211Pkt *temp = transmissionQueue.front();
@@ -636,19 +636,19 @@ void IEEE80211MAC::popTransmissionQueue()
     delete temp;
 }
 
-double IEEE80211MAC::frameDuration(int bits)
+double Ieee80211Mac::frameDuration(int bits)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }
 
-void IEEE80211MAC::logState()
+void Ieee80211Mac::logState()
 {
     EV  << "state information: mode = " << modeName(mode) << ", state = " << fsm.stateName()
         << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod
         << ", retryCounter = " << retryCounter << ", radioState = " << radioState << endl;
 }
 
-const char *IEEE80211MAC::frameTypeName(int type)
+const char *Ieee80211Mac::frameTypeName(int type)
 {
 #define CASE(x) case x: s=#x; break
     const char *s = "???";
@@ -668,7 +668,7 @@ const char *IEEE80211MAC::frameTypeName(int type)
 #undef CASE
 }
 
-const char *IEEE80211MAC::modeName(int mode)
+const char *Ieee80211Mac::modeName(int mode)
 {
 #define CASE(x) case x: s=#x; break
     const char *s = "???";

@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_802_11
-#define CONSTANTS_802_11
+#ifndef IEEE80211_CONSTS_H
+#define IEEE80211_CONSTS_H
 
 //frame kinds
 enum _802_11frameType {

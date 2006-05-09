@@ -25,12 +25,12 @@ cplusplus
 #include "Ieee80211Frame_m.h"
 }};
 class noncobject MACAddress;
-message W80211ManagementFrame;
+message Ieee80211ManagementFrame;
 
 //
 // Capability Information field format
 //
-struct W80211CapabilityInformation
+struct Ieee80211CapabilityInformation
 {
     fields:
         bool ESS;
@@ -44,7 +44,7 @@ struct W80211CapabilityInformation
 // Additional parameters for handover decisions
 // (Not part of standard, for experimental purposes)
 //
-struct W80211HandoverParameters
+struct Ieee80211HandoverParameters
 {
     fields:
         double avgBackoffTime;
@@ -53,7 +53,7 @@ struct W80211HandoverParameters
         double estAvailBW;
 };
 
-enum W80211ReasonCode
+enum Ieee80211ReasonCode
 {
     RC_UNSPECIFIED = 1;
     RC_PREV_AUTH_EXPIRED = 2;
@@ -66,7 +66,7 @@ enum W80211ReasonCode
     RC_NONAUTH_ASS_REQUEST = 9;
 };
 
-enum W80211StatusCode
+enum Ieee80211StatusCode
 {
     SC_SUCCESSFUL = 0;
     SC_UNSPECIFIED = 1;
@@ -84,7 +84,7 @@ enum W80211StatusCode
 //
 // Structure to store a single supported rate information
 //
-struct W80211SupportedRatesElement
+struct Ieee80211SupportedRatesElement
 {
     fields:
         bool supported; // true=supported, false=unsupported
@@ -94,7 +94,7 @@ struct W80211SupportedRatesElement
 //
 // Frame body base class used to hide various frame body types
 //
-class W80211FrameBody
+class Ieee80211FrameBody
 {
     fields:
         unsigned short length; //XXX what's this?
@@ -103,56 +103,56 @@ class W80211FrameBody
 //
 // Authentication frame body format
 //
-class W80211AuthenticationFrameBody extends W80211FrameBody
+class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 {
     fields:
         unsigned short sequenceNumber;
-        int statusCode enum(W80211StatusCode);
+        int statusCode enum(Ieee80211StatusCode);
 };
 
 //
 // De-authentication frame body format
 //
-class W80211DeauthenticationFrameBody extends W80211FrameBody
+class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 {
     fields:
-        int reasonCode enum(W80211ReasonCode);
+        int reasonCode enum(Ieee80211ReasonCode);
 };
 
 //
 // Dis-association frame body format (same as De-authentication)
 //
-class W80211DisassociationFrameBody extends W80211FrameBody
+class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 {
     fields:
-        int reasonCode enum(W80211ReasonCode);
+        int reasonCode enum(Ieee80211ReasonCode);
 };
 
 //
 // Probe request frame body format
 //
-class W80211ProbeRequestFrameBody extends W80211FrameBody
+class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
 {
     fields:
         string SSID;
-        W80211SupportedRatesElement supportedRates[];
+        Ieee80211SupportedRatesElement supportedRates[];
 };
 
 //
 // Association request frame body format
 //
-class W80211AssociationRequestFrameBody extends W80211FrameBody
+class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
 {
     fields:
         string SSID;
-        W80211SupportedRatesElement supportedRates[];
-        W80211CapabilityInformation capabilityInformation;
+        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211CapabilityInformation capabilityInformation;
 };
 
 //
 // Re-association request frame body format (same as association)
 //
-class W80211ReassociationRequestFrameBody extends W80211AssociationRequestFrameBody
+class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequestFrameBody
 {
     fields:
         MACAddress currentAP;
@@ -161,19 +161,19 @@ class W80211ReassociationRequestFrameBody extends W80211AssociationRequestFrameB
 //
 // Association response frame body format
 //
-class W80211AssociationResponseFrameBody extends W80211FrameBody
+class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
 {
     fields:
         //XXX ???? unsigned short sequenceNumber;
-        int statusCode enum(W80211StatusCode);
-        W80211CapabilityInformation capabilityInformation;
-        W80211SupportedRatesElement supportedRates[];
+        int statusCode enum(Ieee80211StatusCode);
+        Ieee80211CapabilityInformation capabilityInformation;
+        Ieee80211SupportedRatesElement supportedRates[];
 };
 
 //
 // Re-association response frame body format
 //
-class W80211ReassociationResponseFrameBody extends W80211AssociationResponseFrameBody
+class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationResponseFrameBody
 {
     fields:
 };
@@ -181,22 +181,22 @@ class W80211ReassociationResponseFrameBody extends W80211AssociationResponseFram
 //
 // Beacon frame body format
 //
-class W80211BeaconFrameBody extends W80211FrameBody
+class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
 {
     fields:
         string SSID;
-        W80211SupportedRatesElement supportedRates[];
-        W80211CapabilityInformation capabilityInformation;
+        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211CapabilityInformation capabilityInformation;
         double timestamp;
         unsigned short beaconInterval;
         unsigned short DSChannel;
-        W80211HandoverParameters handoverParameters;
+        Ieee80211HandoverParameters handoverParameters;
 };
 
 //
 // Probe response frame body format (same as Beacon)
 //
-class W80211ProbeResponseFrameBody extends W80211BeaconFrameBody
+class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
 {
     fields:
 };
@@ -208,89 +208,89 @@ class W80211ProbeResponseFrameBody extends W80211BeaconFrameBody
 //
 // Authentication frame format (management frame + body)
 //
-message W80211AuthenticationFrame extends W80211ManagementFrame
+message Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211AuthenticationFrameBody body;
+        Ieee80211AuthenticationFrameBody body;
 };
 
 //
 // De-authentication frame format (management frame + body)
 //
-message W80211DeauthenticationFrame extends W80211ManagementFrame
+message Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211DeauthenticationFrameBody body;
+        Ieee80211DeauthenticationFrameBody body;
 };
 
 //
 // Dis-association frame format (management frame + body) (same as De-authentication)
 //
-message W80211DisassociationFrame extends W80211ManagementFrame
+message Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211DisassociationFrameBody body;
+        Ieee80211DisassociationFrameBody body;
 };
 
 //
 // Probe request frame format (management frame + body)
 //
-message W80211ProbeRequestFrame extends W80211ManagementFrame
+message Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211ProbeRequestFrameBody body;
+        Ieee80211ProbeRequestFrameBody body;
 };
 
 //
 // Association request frame format (management frame + body)
 //
-message W80211AssociationRequestFrame extends W80211ManagementFrame
+message Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211AssociationRequestFrameBody body;
+        Ieee80211AssociationRequestFrameBody body;
 };
 
 //
 // Re-association request frame format (management frame + body) (same as association)
 //
-message W80211ReassociationRequestFrame extends W80211ManagementFrame
+message Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211ReassociationRequestFrameBody body;
+        Ieee80211ReassociationRequestFrameBody body;
 };
 
 //
 // Association response frame format (management frame + body)
 //
-message W80211AssociationResponseFrame extends W80211ManagementFrame
+message Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211AssociationResponseFrameBody body;
+        Ieee80211AssociationResponseFrameBody body;
 };
 
 //
 // Re-association response frame format (management frame + body)
 //
-message W80211ReassociationResponseFrame extends W80211ManagementFrame
+message Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211ReassociationResponseFrameBody body;
+        Ieee80211ReassociationResponseFrameBody body;
 };
 
 //
 // Beacon frame format (management frame + body)
 //
-message W80211BeaconFrame extends W80211ManagementFrame
+message Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211BeaconFrameBody body;
+        Ieee80211BeaconFrameBody body;
 };
 
 //
 // Probe response frame format (management frame + body); same as Beacon
 //
-message W80211ProbeResponseFrame extends W80211ManagementFrame
+message Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
-        W80211ProbeResponseFrameBody body;
+        Ieee80211ProbeResponseFrameBody body;
 };
