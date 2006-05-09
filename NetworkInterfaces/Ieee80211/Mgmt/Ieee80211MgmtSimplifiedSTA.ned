@@ -19,18 +19,21 @@
 
 //
 // Used in 802.11 infrastructure mode: handles management frames for a station (STA).
-// Relies on the MAC layer (Mac80211) for reception and transmission of frames.
+// Relies on the MAC layer (Ieee80211Mac) for reception and transmission of frames.
 //
 // This variant is a very simplistic: the AP address and channel is preconfigured,
 // there is no scanning, authentication or association. Only data frames are
-// understood and sent at any time.
+// understood or sent at any time.
 //
 // @author Andras Varga
 //
-simple Mgmt80211SimplifiedSTA
+simple Ieee80211MgmtSimplifiedSTA
     parameters:
-        //...
+        accessPointAddr: string, // MAC address of associate AP
+        accessPointChannel: numeric; // channel number of associate AP
     gates:
-        in: fromMAC;
-        out: toMAC;
+        in: uppergateIn;
+        out: uppergateOut;
+        in: macIn;
+        out: macOut;
 endsimple

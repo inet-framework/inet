@@ -21,15 +21,16 @@
 // Used in 802.11 infrastructure mode: handles management frames for
 // an access point (AP).
 //
-// Relies on the MAC layer (Mac80211) for reception and transmission of frames.
+// Relies on the MAC layer (Ieee80211Mac) for reception and transmission of frames.
 //
 // @author Andras Varga
 //
-simple Mgmt80211APAP
+simple Ieee80211MgmtAP
     parameters:
         beaconInterval: numeric const;
-        //...
     gates:
-        in: fromMAC;
-        out: toMAC;
+        in: uppergateIn;
+        out: uppergateOut;
+        in: macIn;
+        out: macOut;
 endsimple
