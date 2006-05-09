@@ -149,6 +149,18 @@ void Ieee80211Mac::registerInterface()
     ift->addInterface(e, this);
 }
 
+void Ieee80211Mac::initializeQueueModule()
+{
+    // use of external queue module is optional -- find it if there's one specified
+    if (par("queueModule").stringValue()[0])
+    {
+        cModule *module = parentModule()->submodule(par("queueModule").stringValue());
+        queueModule = check_and_cast<IPassiveQueue *>(module);
+        EV << "Requesting first frame from queue module\n";
+        queueModule->requestPacket();
+    }
+}
+
 /****************************************************************
  * Message handling functions.
  */
@@ -634,6 +646,13 @@ void Ieee80211Mac::popTransmissionQueue()
     Mac80211PktXXX *temp = transmissionQueue.front();
     transmissionQueue.pop_front();
     delete temp;
+
+    if (queueModule)
+    {
+        // tell queue module that we've become idle
+        EV << "requesting another frame from queue module\n";
+        queueModule->requestPacket();
+    }
 }
 
 double Ieee80211Mac::frameDuration(int bits)

@@ -99,6 +99,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Messages received from upper layer and to be transmitted later */
     MacPktList transmissionQueue;
+
+    /** @brief Passive queue module to request messages from */
+    IPassiveQueue *queueModule;
     //@}
 
   protected:
@@ -153,10 +156,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Initialization functions
      */
     //@{
-    /** @brief Initialization of the module and ite variables */
+    /** @brief Initialization of the module and its variables */
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
     virtual void registerInterface();
+    virtual void initializeQueueModule();
     //@}
 
   protected:

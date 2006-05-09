@@ -50,7 +50,7 @@ void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
 void Ieee80211MgmtBase::initialize()
 {
     PassiveQueueBase::initialize();
-    queue.setName("80211MACQueue");
+    queue.setName("80211MacQueue");
 
     qlenVec.setName("queue length");
     dropVec.setName("drops");
@@ -85,7 +85,6 @@ cMessage *Ieee80211MgmtBase::dequeue()
 
     // statistics
     qlenVec.record(queue.length());
-
     return pk;
 }
 
