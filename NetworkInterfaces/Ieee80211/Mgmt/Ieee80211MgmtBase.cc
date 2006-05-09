@@ -21,6 +21,12 @@
 #include "Ieee802Ctrl_m.h"
 
 
+static std::ostream& operator<< (std::ostream& out, cMessage *msg)
+{
+    out << "(" << msg->className() << ")" << msg->fullName();
+    return out;
+}
+
 void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage==0)
@@ -43,11 +49,13 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         // process timers
+        EV << "Timer expired: " << msg << "\n";
         handleTimer(msg);
     }
     else if (msg->arrivedOn("macIn"))
     {
         // process incoming frame
+        EV << "Frame arrived from MAC: " << msg << "\n";
         Ieee80211BasicFrame *frame = check_and_cast<Ieee80211BasicFrame *>(msg);
         processFrame(frame);
         delete frame;
@@ -55,6 +63,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     else
     {
         // packet from upper layers, to be sent out
+        EV << "Packet arrived from upper layers: " << msg << "\n";
         handleUpperMessage(msg);
     }
 }
