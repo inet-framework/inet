@@ -25,7 +25,7 @@
 #include <list>
 #include "WirelessMacBase.h"
 #include "IPassiveQueue.h"
-#include "Mac80211PktXXX_m.h"
+#include "Ieee80211Frame_m.h"
 #include "Ieee80211Consts.h"
 #include "NotificationBoard.h"
 #include "RadioState.h"
@@ -40,7 +40,7 @@
  */
 class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 {
-  typedef std::list<Mac80211PktXXX*> MacPktList;
+  typedef std::list<Ieee80211DataOrMgmtFrame*> MacPktList;
 
   protected:
     /**
@@ -191,12 +191,12 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Timer functions
      */
     //@{
-    void scheduleSIFSPeriod(Mac80211PktXXX *frame);
+    void scheduleSIFSPeriod(Ieee80211Frame *frame);
     void scheduleDIFSPeriod();
     void scheduleBackoffPeriod();
-    void scheduleTimeoutPeriod(Mac80211PktXXX *frame);
+    void scheduleTimeoutPeriod(Ieee80211Frame *frame);
     void scheduleRTSTimeoutPeriod();
-    void scheduleReservePeriod(Mac80211PktXXX *frame);
+    void scheduleReservePeriod(Ieee80211Frame *frame);
     //@}
 
 
@@ -205,11 +205,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame transmission functions
      */
     //@{
-    void sendACKFrame(Mac80211PktXXX *frame);
-    void sendRTSFrame(Mac80211PktXXX *frameToSend);
-    void sendCTSFrame(Mac80211PktXXX *rtsFrame);
-    void sendDataFrame(Mac80211PktXXX *frameToSend);
-    void sendBroadcastFrame(Mac80211PktXXX *frameToSend);
+    void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
+    void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
+    void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    void sendBroadcastFrame(Ieee80211Frame *frameToSend);
     //@}
 
   protected:
@@ -217,13 +217,13 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame builder functions
      */
     //@{
-    Mac80211PktXXX *encapsulate(cMessage *frame);
-    cMessage *decapsulate(Mac80211PktXXX *frame);
-    Mac80211PktXXX *buildDataFrame(Mac80211PktXXX *frameToSend);
-    Mac80211PktXXX *buildACKFrame(Mac80211PktXXX *frameToACK);
-    Mac80211PktXXX *buildRTSFrame(Mac80211PktXXX *frameToSend);
-    Mac80211PktXXX *buildCTSFrame(Mac80211PktXXX *rtsFrame);
-    Mac80211PktXXX* buildBroadcastFrame(Mac80211PktXXX *frameToSend);
+    Ieee80211DataFrame *encapsulate(cMessage *frame);
+    cMessage *decapsulate(Ieee80211DataFrame *frame);
+    Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
+    Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
+    Ieee80211Frame *buildBroadcastFrame(Ieee80211Frame *frameToSend);
     //@}
 
   protected:
@@ -247,10 +247,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     bool isRadioStateChange(cMessage *msg);
 
     /** @brief Returns true if message is a broadcast message */
-    bool isBroadcast(cMessage *msg);
+    bool isBroadcast(Ieee80211DataOrMgmtFrame *msg);
 
     /** @brief Returns true if message destination address is ours */
-    bool isForUs(cMessage *msg);
+    bool isForUs(Ieee80211Frame *msg);
 
     /** @brief Deletes frame from front of queue. */
     void popTransmissionQueue();

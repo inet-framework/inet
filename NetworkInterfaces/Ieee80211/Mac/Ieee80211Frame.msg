@@ -75,33 +75,61 @@ struct Ieee80211FrameControl
 };
 
 //
-// Format of smallest 802.11 frame (ACK and CTS). 4-byte FCS is not
-// explicitly modeled.
+// Format of smallest 802.11 frame. FCS value is not
+// explicitly modeled, but it is included in the length.
 //
-message Ieee80211BasicFrame
+message Ieee80211Frame
 {
     fields:
         byteLength = 14;
         Ieee80211FrameControl frameControl;
         short duration = -1; // "duration" in the Duration/ID field (-1=no duration)
         short AID = -1;      // "id" (Association ID) in the Duration/ID field (-1=no ID)
-        MACAddress address1;
+        MACAddress receiverAddress; // aka address1
+};
+
+//
+// Format of a 802.11 frame with address1 present, like ACK and CTS
+//
+message Ieee80211OneAddressFrame extends Ieee80211Frame
+{
+};
+
+//
+// Format of the 802.11 ACK frame
+//
+message Ieee80211ACKFrame extends Ieee80211OneAddressFrame
+{
+};
+
+//
+// Format of a 802.11 frame with address1 and address2 present
+//
+message Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
+{
+    fields:
+        byteLength = 20;
+        MACAddress transmitterAddress; // aka address2
 };
 
 //
 // Format of the 802.11 RTS frame
 //
-message Ieee80211RTSFrame extends Ieee80211BasicFrame
+message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
-    fields:
-        byteLength = 20;
-        MACAddress address2;
 };
 
 //
-// Format of the 802.11 management frame
+// Format of the 802.11 CTS frame
 //
-message Ieee80211ManagementFrame extends Ieee80211RTSFrame
+message Ieee80211CTSFrame extends Ieee80211OneAddressFrame
+{
+};
+
+//
+// Common base class for 802.11 data and management frames
+//
+message Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 {
     fields:
         byteLength = 28;
@@ -113,11 +141,17 @@ message Ieee80211ManagementFrame extends Ieee80211RTSFrame
 //
 // Format of the 802.11 data frame
 //
-message Ieee80211DataFrame extends Ieee80211ManagementFrame
+message Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 {
     fields:
         byteLength = 34;
         MACAddress address4;
 };
 
+//
+// Base class for 802.11 management frames (subclasses will add frame body contents)
+//
+message Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
+{
+};
 

@@ -56,7 +56,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     {
         // process incoming frame
         EV << "Frame arrived from MAC: " << msg << "\n";
-        Ieee80211BasicFrame *frame = check_and_cast<Ieee80211BasicFrame *>(msg);
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
         processFrame(frame);
         delete frame;
     }
@@ -117,7 +117,7 @@ cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
     return frame; //XXX TBD!!!!
 }
 
-void Ieee80211MgmtBase::processFrame(Ieee80211BasicFrame *frame)
+void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
 {
     const Ieee80211FrameControl& frameControl = frame->getFrameControl();
     switch(frameControl.subtype)

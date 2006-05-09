@@ -78,7 +78,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
 
     /** Dispatch to frame processing methods according to frame type */
-    virtual void processFrame(Ieee80211BasicFrame *frame);
+    virtual void processFrame(Ieee80211DataOrMgmtFrame *frame);
 
     /** @name Processing of different frame types */
     //@{
