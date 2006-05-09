@@ -194,7 +194,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void scheduleSIFSPeriod(Ieee80211Frame *frame);
     void scheduleDIFSPeriod();
     void scheduleBackoffPeriod();
-    void scheduleTimeoutPeriod(Ieee80211Frame *frame);
+    void scheduleTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
     void scheduleRTSTimeoutPeriod();
     void scheduleReservePeriod(Ieee80211Frame *frame);
     //@}
@@ -209,7 +209,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
     void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    void sendBroadcastFrame(Ieee80211Frame *frameToSend);
+    void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
   protected:
@@ -217,13 +217,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame builder functions
      */
     //@{
-    Ieee80211DataFrame *encapsulate(cMessage *frame);
-    cMessage *decapsulate(Ieee80211DataFrame *frame);
     Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
     Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
-    Ieee80211Frame *buildBroadcastFrame(Ieee80211Frame *frameToSend);
+    Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
   protected:

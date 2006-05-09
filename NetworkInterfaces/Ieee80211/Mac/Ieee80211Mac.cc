@@ -176,21 +176,21 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 
 void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 {
-    if (msg->byteLength() > 2312)
-        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->className(), msg->name(), msg->byteLength());
-
-    if (maxQueueSize && transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize && transmissionQueue.size() == maxQueueSize)
+    {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         delete msg;
         return;
     }
 
-    Ieee80211DataOrMgmtFrame *frame = encapsulate(msg);
-    EV << "message " << msg << " received from higher layer, receiver=" << frame->getReceiverAddress() << ", encapsulated\n";
+    Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
+    if (frame->byteLength() > 2312+34)
+        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+              msg->className(), msg->name(), msg->byteLength());
+    EV << "frame " << frame << " received from higher layer, receiver=" << frame->getReceiverAddress() << endl;
     transmissionQueue.push_back(frame);
 
-    handleWithFSM(msg);
+    handleWithFSM(frame);
 }
 
 void Ieee80211Mac::handleLowerMsg(cMessage *msg)
@@ -204,7 +204,8 @@ void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details
 {
     Enter_Method_Silent();
 
-    if (category == NF_RADIOSTATE_CHANGED) {
+    if (category == NF_RADIOSTATE_CHANGED)
+    {
         radioState = check_and_cast<RadioState *>(details)->getState();
         EV << "radio state changed " << className() << ": " << details->info() << endl;
 
@@ -218,12 +219,14 @@ void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details
 void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMsg(msg) && fsm.state() != IDLE) {
+    if (isUpperMsg(msg) && fsm.state() != IDLE)
+    {
         EV << "deferring upper message transmission in " << fsm.stateName() << " state\n";
         return;
     }
 
-    if (isRadioStateChange(msg) && fsm.state() != DEFER && fsm.state() != WAITDIFS && fsm.state() != BACKOFF) {
+    if (isRadioStateChange(msg) && fsm.state() != DEFER && fsm.state() != WAITDIFS && fsm.state() != BACKOFF)
+    {
         EV << "ignoring radio state change in " << fsm.stateName() << " state\n";
         return;
     }
@@ -238,21 +241,21 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Rx-Data,
                                   mode == DCF && isLowerMsg(msg) && msg->kind() == DATA,
                                   WAITSIFS,
-                sendUp(decapsulate(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame)));
+                sendUp(frame);
                 numReceived++;
             );
             FSMA_Event_Transition(Rx-Broadcast,
                                   mode == DCF && isLowerMsg(msg) && msg->kind() == BROADCAST,
                                   IDLE,
-                sendUp(decapsulate(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame)));
+                sendUp(frame);
                 numReceivedBroadcast++;
             );
             FSMA_Event_Transition(Rx-RTS,
-                                  mode == MACA && isForUs(msg) && isLowerMsg(msg) && msg->kind() == RTS,
+                                  mode == MACA && isForUs(frame) && isLowerMsg(msg) && msg->kind() == RTS,
                                   WAITSIFS,
             );
             FSMA_Event_Transition(Reserve,
-                                  mode == MACA && !isForUs(msg) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
+                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
                                   RESERVE,
             );
             FSMA_Event_Transition(DataReady,
@@ -408,7 +411,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   IDLE,
             );
             FSMA_Event_Transition(RReserve,
-                                  mode == MACA && !isForUs(msg) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
+                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
                                   RESERVE,
                 scheduleReservePeriod(frame);
             );
@@ -440,7 +443,7 @@ void Ieee80211Mac::scheduleBackoffPeriod()
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
-void Ieee80211Mac::scheduleTimeoutPeriod(Ieee80211Frame *frameToSend)
+void Ieee80211Mac::scheduleTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling timeout period\n";
     if (isBroadcast(frameToSend))
@@ -483,7 +486,7 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     sendDown(buildDataFrame(frameToSend));
 }
 
-void Ieee80211Mac::sendBroadcastFrame(Ieee80211Frame *frameToSend)
+void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     sendDown(buildBroadcastFrame(frameToSend));
@@ -505,29 +508,6 @@ void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 /****************************************************************
  * Frame builder functions.
  */
-Ieee80211DataFrame* Ieee80211Mac::encapsulate(cMessage *msg)
-{
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
-    // headerLength, including final CRC-field
-    //XXX frame->setLength(272);
-
-    // copy dest address from the control info
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setReceiverAddress(ctrl->getDest());
-    delete ctrl;
-
-    // set the src address to our mac address
-    frame->setTransmitterAddress(address);
-    frame->encapsulate(msg);
-
-    return frame;
-}
-
-cMessage* Ieee80211Mac::decapsulate(Ieee80211DataFrame *frame)
-{
-    ASSERT(check_and_cast<Ieee80211DataFrame *>(frame));
-    return frame->decapsulate();
-}
 
 //XXX rename to dupDataFrame()? BTW, dup() takes care of setting the fields below as well
 Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -590,9 +570,9 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
     return frame;
 }
 
-Ieee80211Frame *Ieee80211Mac::buildBroadcastFrame(Ieee80211Frame *frameToSend)
+Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
-    Ieee80211Frame *frame = (Ieee80211Frame *)frameToSend->dup();
+    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
     frame->setKind(BROADCAST);
     return frame;
 }
@@ -644,12 +624,12 @@ bool Ieee80211Mac::isRadioStateChange(cMessage *msg)
 
 bool Ieee80211Mac::isBroadcast(Ieee80211DataOrMgmtFrame *frame)
 {
-    return frame->getReceiverAddress().isBroadcast();
+    return frame && frame->getReceiverAddress().isBroadcast();
 }
 
 bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
 {
-    return frame->getReceiverAddress() == address;
+    return frame && frame->getReceiverAddress() == address;
 }
 
 void Ieee80211Mac::popTransmissionQueue()
