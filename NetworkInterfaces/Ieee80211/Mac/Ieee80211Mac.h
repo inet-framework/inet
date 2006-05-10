@@ -250,7 +250,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Returns true if message destination address is ours */
     bool isForUs(Ieee80211Frame *msg);
 
-    /** @brief Deletes frame from front of queue. */
+    /** @brief Deletes frame at the front of queue. */
     void popTransmissionQueue();
 
     /** @brief Computes the duration (in seconds) of the transmission of a frame over the physical channel.
@@ -259,9 +259,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Logs all state information */
     void logState();
-
-    /** @brief Produce a readable name of the given frame type */
-    const char *frameTypeName(int type);
 
     /** @brief Produce a readable name of the given MAC operation mode */
     const char *modeName(int mode);

@@ -659,26 +659,6 @@ void Ieee80211Mac::logState()
         << ", retryCounter = " << retryCounter << ", radioState = " << radioState << endl;
 }
 
-const char *Ieee80211Mac::frameTypeName(int type)
-{
-#define CASE(x) case x: s=#x; break
-    const char *s = "???";
-    switch (type)
-    {
-        CASE(DATA);
-        CASE(BROADCAST);
-        CASE(RTS);
-        CASE(CTS);
-        CASE(ACK);
-        CASE(ACKRTS);
-        CASE(BEGIN_RECEPTION);
-        CASE(BITERROR);
-        CASE(COLLISION);
-    }
-    return s;
-#undef CASE
-}
-
 const char *Ieee80211Mac::modeName(int mode)
 {
 #define CASE(x) case x: s=#x; break
