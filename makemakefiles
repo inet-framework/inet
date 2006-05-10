@@ -108,6 +108,7 @@ all:
 	cd Examples/MPLS && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/IPv6 && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/RTP && $(MAKEMAKE) $(OPTS) -n -r -X Data -X Multicast1 -X Multicast2 -X Unicast
+	cd Examples/Wireless && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/MobileAdhoc && $(MAKEMAKE) $(OPTS) -n -r
 
 	cd Examples/Ethernet/ARPTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
@@ -140,6 +141,8 @@ all:
 
 	cd Examples/IPv6/NClients && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/IPv6/DemoNetworkEth && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+
+	cd Examples/Wireless/80211Lan && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)

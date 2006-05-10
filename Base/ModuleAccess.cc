@@ -41,3 +41,11 @@ cModule *findModuleWherever(const char *name, const char *classname, cModule *fr
     return mod;
 }
 
+cModule *findModuleSomewhereUp(const char *name, cModule *from)
+{
+    cModule *mod = NULL;
+    for (cModule *curmod=from; !mod && curmod; curmod=curmod->parentModule())
+        mod = curmod->submodule(name);
+    return mod;
+}
+

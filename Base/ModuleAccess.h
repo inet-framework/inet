@@ -32,6 +32,14 @@
 cModule *findModuleWherever(const char *name, const char *classname, cModule *from);
 
 /**
+ * Find a module with given name, and "closest" to module "from".
+ *
+ * Operation: gradually rises in the module hierarchy, and looks for a submodule
+ * of the given name.
+ */
+cModule *findModuleSomewhereUp(const char *name, cModule *from);
+
+/**
  * Finds and returns the pointer to a module of type T and name N.
  * Uses findModuleWherever(). See usage e.g. at RoutingTableAccess.
  */
@@ -49,7 +57,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleWherever(name, opp_typename(typeid(T)), simulation.contextModule());
+            cModule *m = findModuleSomewhereUp(name, simulation.contextModule());
             if (!m) opp_error("Module (%s)%s not found",opp_typename(typeid(T)),name);
             p = check_and_cast<T*>(m);
         }
@@ -60,7 +68,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleWherever(name, opp_typename(typeid(T)), simulation.contextModule());
+            cModule *m = findModuleSomewhereUp(name, simulation.contextModule());
             p = dynamic_cast<T*>(m);
         }
         return p;
