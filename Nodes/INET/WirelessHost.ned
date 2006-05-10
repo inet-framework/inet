@@ -29,12 +29,12 @@ import
     "PingApp",
     "PPPInterface",
     "EthernetInterface",
-    "Nic80211";
+    "Ieee80211Nic";
 
 
 //
 // Models a host with one wireless (802.11b) card. This module is basically
-// a StandardHost with a Nic80211 added.
+// a StandardHost with an Ieee80211Nic added.
 //
 module WirelessHost
     parameters:
@@ -82,7 +82,9 @@ module WirelessHost
             display: "p=205,350,row,90;q=txQueue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             display: "p=240,350,row,90;q=txQueue;i=block/ifcard";
-        wlan: Nic80211;
+        wlan: Ieee80211Nic;
+            parameters:
+                mgmtType = "Ieee80211MgmtSimplifiedSTA";
             display: "p=120,350;q=queue;i=block/ifcard";
         mobility: BasicMobility;
             display: "p=149,307;i=block/cogwheel_s";
