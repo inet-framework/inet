@@ -133,6 +133,11 @@ cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
     return frame->decapsulate();
 }
 
+void Ieee80211MgmtBase::sendUp(cMessage *msg)
+{
+    send(msg, "uppergateOut");
+}
+
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
 {
     switch(frame->getType())

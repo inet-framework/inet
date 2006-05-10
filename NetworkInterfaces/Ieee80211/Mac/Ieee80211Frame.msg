@@ -25,18 +25,13 @@ cplusplus
 }};
 class noncobject MACAddress;
 
+
 //
 // 802.11 frame type constants (type+subtype), for the "type" field of
 // Ieee80211FrameControl
 //
 enum Ieee80211FrameType
 {
-      // frame type
-      FT_MANAGEMENT = 0x00;
-      FT_CONTROL    = 0x10;
-      FT_DATA       = 0x20;
-      FT_RESERVED   = 0x30;
-
       // management:
       ST_ASSOCIATIONREQUEST    = 0x00;
       ST_ASSOCIATIONRESPONSE   = 0x01;

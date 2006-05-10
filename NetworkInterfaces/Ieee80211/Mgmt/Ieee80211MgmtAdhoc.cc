@@ -48,8 +48,7 @@ void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, cPolymorphic *d
 
 void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    cMessage *msg = decapsulate(frame);
-    send(msg, "upperGateOut");
+    sendUp(decapsulate(frame));
 }
 
 void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

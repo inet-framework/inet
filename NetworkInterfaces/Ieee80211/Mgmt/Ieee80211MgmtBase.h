@@ -77,6 +77,9 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Utility method to decapsulate a data frame */
     virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
 
+    /** Utility method: sends the packet to the upper layer */
+    virtual void sendUp(cMessage *msg);
+
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Ieee80211DataOrMgmtFrame *frame);
 
