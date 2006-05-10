@@ -172,11 +172,10 @@ void EtherMACBase::initializeStatistics()
 void EtherMACBase::registerInterface(double txrate)
 {
     InterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    if (!ift)
+        return;
 
-	if (!ift)
-		return;
-
-	interfaceEntry = new InterfaceEntry();
+    interfaceEntry = new InterfaceEntry();
 
     // interface name: our module name without special characters ([])
     char *interfaceName = new char[strlen(parentModule()->fullName())+1];

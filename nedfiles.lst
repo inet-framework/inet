@@ -120,7 +120,6 @@ Nodes/INET/StandardHost.ned
 Nodes/INET/TCPSpoofingHost.ned
 Nodes/INET/WirelessAP.ned
 Nodes/INET/WirelessHost.ned
-Nodes/INET/WirelessHost2-REMOVE_THIS!.ned
 Nodes/IPv6/NetworkLayer6.ned
 Nodes/IPv6/Router6.ned
 Nodes/IPv6/StandardHost6.ned

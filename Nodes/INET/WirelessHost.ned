@@ -43,7 +43,8 @@ module WirelessHost
         tcpAppType: string,
         udpAppType: string,
         IPForward: bool,
-        routingFile: string;
+        routingFile: string,
+        mobilityType: string;
     gates:
         in: in[];
         out: out[];
@@ -86,7 +87,7 @@ module WirelessHost
             parameters:
                 mgmtType = "Ieee80211MgmtSimplifiedSTA";
             display: "p=120,350;q=queue;i=block/ifcard";
-        mobility: BasicMobility;
+        mobility: mobilityType like BasicMobility;
             display: "p=149,307;i=block/cogwheel_s";
     connections nocheck:
         for i=0..numTcpApps-1 do

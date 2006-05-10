@@ -122,6 +122,10 @@ void Ieee80211Mac::initialize(int stage)
 
 void Ieee80211Mac::registerInterface()
 {
+    InterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    if (!ift)
+        return;
+
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: NetworkInterface module's name without special characters ([])
@@ -148,7 +152,6 @@ void Ieee80211Mac::registerInterface()
     e->setPointToPoint(false);
 
     // add
-    InterfaceTable *ift = InterfaceTableAccess().get();
     ift->addInterface(e, this);
 }
 
