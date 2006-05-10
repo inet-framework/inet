@@ -245,7 +245,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     bool isRadioStateChange(cMessage *msg);
 
     /** @brief Returns true if message is a broadcast message */
-    bool isBroadcast(Ieee80211DataOrMgmtFrame *msg);
+    bool isBroadcast(Ieee80211Frame *msg);
 
     /** @brief Returns true if message destination address is ours */
     bool isForUs(Ieee80211Frame *msg);

@@ -135,8 +135,7 @@ cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    const Ieee80211FrameControl& frameControl = frame->getFrameControl();
-    switch(frameControl.subtype)
+    switch(frame->getType())
     {
       case ST_DATA:
         handleDataFrame(check_and_cast<Ieee80211DataFrame *>(frame));

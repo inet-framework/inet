@@ -196,6 +196,10 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 void Ieee80211Mac::handleLowerMsg(cMessage *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
+    if (!dynamic_cast<Ieee80211Frame *>(msg))
+        error("message from physical layer (%s)%s is not a subclass of Ieee80211Frame",
+              msg->className(), msg->name());
+
     handleWithFSM(msg);
     //XXX delete msg; -- this won't work anymore since we send up data frames without decapsulation
 }
@@ -232,6 +236,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     }
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
+    int frameType = frame ? frame->getType() : -1;
     logState();
 
     FSMA_Switch(fsm)
@@ -239,23 +244,23 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(IDLE)
         {
             FSMA_Event_Transition(Rx-Data,
-                                  mode == DCF && isLowerMsg(msg) && msg->kind() == DATA,
+                                  mode == DCF && isLowerMsg(msg) && frameType == ST_DATA,
                                   WAITSIFS,
                 sendUp(frame);
                 numReceived++;
             );
             FSMA_Event_Transition(Rx-Broadcast,
-                                  mode == DCF && isLowerMsg(msg) && msg->kind() == BROADCAST,
+                                  mode == DCF && isLowerMsg(msg) && frameType == ST_DATA && isBroadcast(frame),
                                   IDLE,
                 sendUp(frame);
                 numReceivedBroadcast++;
             );
             FSMA_Event_Transition(Rx-RTS,
-                                  mode == MACA && isForUs(frame) && isLowerMsg(msg) && msg->kind() == RTS,
+                                  mode == MACA && isForUs(frame) && isLowerMsg(msg) && frameType == ST_RTS,
                                   WAITSIFS,
             );
             FSMA_Event_Transition(Reserve,
-                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
+                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (frameType == ST_DATA || frameType == ST_RTS || frameType == ST_CTS),
                                   RESERVE,
             );
             FSMA_Event_Transition(DataReady,
@@ -343,7 +348,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(TRANSMITTING)
         {
             FSMA_Event_Transition(Rx-ACK,
-                                  mode == DCF && isLowerMsg(msg) && msg->kind() == ACK,
+                                  mode == DCF && isLowerMsg(msg) && frameType == ST_ACK,
                                   IDLE,
                 cancelEvent(endTimeout);
                 popTransmissionQueue();
@@ -352,7 +357,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 resetStateVariables();
             );
             FSMA_Event_Transition(Rx-CTS,
-                                  mode == MACA && isLowerMsg(msg) && msg->kind() == CTS,
+                                  mode == MACA && isLowerMsg(msg) && frameType == ST_CTS,
                                   TRANSMITTING,
                 cancelEvent(endTimeout);
                 sendDataFrame(transmissionQueue.front());
@@ -411,7 +416,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   IDLE,
             );
             FSMA_Event_Transition(RReserve,
-                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (msg->kind() == DATA || msg->kind() == RTS || msg->kind() == CTS),
+                                  mode == MACA && !isForUs(frame) && isLowerMsg(msg) && (frameType == ST_DATA || frameType == ST_RTS || frameType == ST_CTS),
                                   RESERVE,
                 scheduleReservePeriod(frame);
             );
@@ -513,7 +518,6 @@ void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-    frame->setKind(DATA);
     frame->setTransmitterAddress(address);
 
     if (isBroadcast(frameToSend))
@@ -529,11 +533,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
 Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("wlan-ack");
-    frame->setKind(ACK);
-    //XXX frame->setLength(LENGTH_ACK);
-
-    //XXX frame->setTransmitterAddress(address);
+    frame->setKind(2); // only for debugging: give message a different color in the animation
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
+
     //XXX if (frameToACK->getFragmentation() == 0)
         frame->setDuration(0);
     //XXX else
@@ -545,9 +547,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
 Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
-    frame->setKind(RTS);
-    //XXX frame->setLength(LENGTH_RTS);
-
+    frame->setKind(2); // only for debugging: give message a different color in the animation
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
     frame->setDuration(3 * SIFS + frameDuration(LENGTH_CTS) +
@@ -560,10 +560,7 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
 Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
-    frame->setKind(CTS);
-    //XXX frame->setLength(LENGTH_CTS);
-
-    //XXX frame->setTransmitterAddress(address);
+    frame->setKind(2); // only for debugging: give message a different color in the animation
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
     frame->setDuration(rtsFrame->getDuration() - SIFS - frameDuration(LENGTH_CTS));
 
@@ -573,7 +570,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-    frame->setKind(BROADCAST);
+    frame->setKind(1); // only for debugging: give message a different color in the animation
     return frame;
 }
 
@@ -622,7 +619,7 @@ bool Ieee80211Mac::isRadioStateChange(cMessage *msg)
     return msg == radioStateChange;
 }
 
-bool Ieee80211Mac::isBroadcast(Ieee80211DataOrMgmtFrame *frame)
+bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame)
 {
     return frame && frame->getReceiverAddress().isBroadcast();
 }
