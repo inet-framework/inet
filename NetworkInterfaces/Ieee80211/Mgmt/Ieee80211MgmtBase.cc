@@ -109,12 +109,28 @@ void Ieee80211MgmtBase::sendOut(cMessage *msg)
 
 Ieee80211DataFrame *Ieee80211MgmtBase::encapsulate(cMessage *msg)
 {
-    return (Ieee80211DataFrame *)msg; //XXX TBD!!!!
+    if (msg->byteLength() > 2312)
+        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+              msg->className(), msg->name(), msg->byteLength());
+
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
+
+    // copy dest address from the control info
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    frame->setReceiverAddress(ctrl->getDest());
+    delete ctrl;
+
+    // set the src address to our mac address -- MAC will do this
+    //frame->setTransmitterAddress(address);
+
+    frame->encapsulate(msg);
+    return frame;
 }
 
 cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 {
-    return frame; //XXX TBD!!!!
+    //XXX create control info with src address?
+    return frame->decapsulate();
 }
 
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)

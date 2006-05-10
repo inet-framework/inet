@@ -97,7 +97,7 @@ struct Ieee80211SupportedRatesElement
 class Ieee80211FrameBody
 {
     fields:
-        unsigned short length; //XXX what's this?
+        short bodyLength; // not an actual frame field
 };
 
 //
@@ -106,6 +106,7 @@ class Ieee80211FrameBody
 class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 6; // add 2+len bytes for challenge text if present
         unsigned short sequenceNumber;
         int statusCode enum(Ieee80211StatusCode);
 };
@@ -116,6 +117,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 2;
         int reasonCode enum(Ieee80211ReasonCode);
 };
 
@@ -125,6 +127,7 @@ class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 2;
         int reasonCode enum(Ieee80211ReasonCode);
 };
 
@@ -134,6 +137,7 @@ class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 12; // assuming a 8-character SSID
         string SSID;
         Ieee80211SupportedRatesElement supportedRates[];
 };
@@ -144,6 +148,7 @@ class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
 class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 16; // assuming a 8-character SSID
         string SSID;
         Ieee80211SupportedRatesElement supportedRates[];
         Ieee80211CapabilityInformation capabilityInformation;
@@ -155,6 +160,7 @@ class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
 class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequestFrameBody
 {
     fields:
+        bodyLength = 26; // assuming a 8-character SSID and 4 supported datarate
         MACAddress currentAP;
 };
 
@@ -164,18 +170,18 @@ class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequest
 class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
 {
     fields:
-        //XXX ???? unsigned short sequenceNumber;
+        bodyLength = 26; // assuming a 8-character SSID and 4 supported datarate
         int statusCode enum(Ieee80211StatusCode);
         Ieee80211CapabilityInformation capabilityInformation;
+        short aid;
         Ieee80211SupportedRatesElement supportedRates[];
 };
 
 //
-// Re-association response frame body format
+// Re-association response frame body format (same as AssociationResponse)
 //
 class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationResponseFrameBody
 {
-    fields:
 };
 
 //
@@ -184,6 +190,7 @@ class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationRespon
 class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
 {
     fields:
+        bodyLength = 50; // assuming a 8-character SSID, 4 supported datarate plus TIM
         string SSID;
         Ieee80211SupportedRatesElement supportedRates[];
         Ieee80211CapabilityInformation capabilityInformation;
@@ -198,7 +205,6 @@ class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
 {
-    fields:
 };
 
 
@@ -211,6 +217,8 @@ class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
 message Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_AUTHENTICATION;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211AuthenticationFrameBody body;
 };
 
@@ -220,6 +228,8 @@ message Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 message Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_DEAUTHENTICATION;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211DeauthenticationFrameBody body;
 };
 
@@ -229,6 +239,8 @@ message Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 message Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_DISASSOCIATION;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211DisassociationFrameBody body;
 };
 
@@ -238,6 +250,8 @@ message Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 message Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_PROBEREQUEST;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211ProbeRequestFrameBody body;
 };
 
@@ -247,6 +261,8 @@ message Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 message Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_ASSOCIATIONREQUEST;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211AssociationRequestFrameBody body;
 };
 
@@ -256,6 +272,8 @@ message Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 message Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_REASSOCIATIONREQUEST;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211ReassociationRequestFrameBody body;
 };
 
@@ -265,6 +283,8 @@ message Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 message Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_ASSOCIATIONRESPONSE;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211AssociationResponseFrameBody body;
 };
 
@@ -274,6 +294,8 @@ message Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 message Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_REASSOCIATIONRESPONSE;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211ReassociationResponseFrameBody body;
 };
 
@@ -283,6 +305,8 @@ message Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 message Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_BEACON;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211BeaconFrameBody body;
 };
 
@@ -292,5 +316,8 @@ message Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 message Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 {
     fields:
+        type = ST_PROBERESPONSE;
+        byteLength = 34+getBody().getBodyLength();
         Ieee80211ProbeResponseFrameBody body;
 };
+

@@ -26,52 +26,50 @@ cplusplus
 class noncobject MACAddress;
 
 //
-// 802.11 frame type constants, for the "type" field of Ieee80211FrameControl
+// 802.11 frame type constants (type+subtype), for the "type" field of
+// Ieee80211FrameControl
 //
 enum Ieee80211FrameType
 {
-      FT_MANAGEMENT = 0;
-      FT_CONTROL = 1;
-      FT_DATA = 2;
-      FT_RESERVED = 3;
-};
+      // frame type
+      FT_MANAGEMENT = 0x00;
+      FT_CONTROL    = 0x10;
+      FT_DATA       = 0x20;
+      FT_RESERVED   = 0x30;
 
-//
-// 802.11 frame subtype constants, for the "subtype" field of Ieee80211FrameControl.
-// (Numeric values do not correspond to the standard, where actual frame type is
-// determined by the type AND subtype fields together; here we chose unique
-// values for convenience.)
-//
-enum Ieee80211SubType
-{
-      ST_ASSOCIATIONREQUEST = 4;
-      ST_ASSOCIATIONRESPONSE = 5;
-      ST_REASSOCIATIONREQUEST = 6;
-      ST_REASSOCIATIONRESPONSE = 7;
-      ST_PROBEREQUEST = 8;
-      ST_PROBERESPONSE = 9;
-      ST_BEACON = 10;
-      ST_DISASSOCIATION = 11;
-      ST_AUTHENTICATION = 12;
-      ST_DEAUTHENTICATION = 13;
-      ST_DATA = 14;
-      ST_RTS = 15;
-      ST_CTS = 16;
-      ST_ACK = 17;
+      // management:
+      ST_ASSOCIATIONREQUEST    = 0x00;
+      ST_ASSOCIATIONRESPONSE   = 0x01;
+      ST_REASSOCIATIONREQUEST  = 0x02;
+      ST_REASSOCIATIONRESPONSE = 0x03;
+      ST_PROBEREQUEST          = 0x04;
+      ST_PROBERESPONSE         = 0x05;
+      ST_BEACON                = 0x08;
+      ST_ATIM                  = 0x09;
+      ST_DISASSOCIATION        = 0x0a;
+      ST_AUTHENTICATION        = 0x0b;
+      ST_DEAUTHENTICATION      = 0x0c;
+
+      // control (CFEND/CFEND_CFACK omitted):
+      ST_PSPOLL = 0x1a;
+      ST_RTS    = 0x1b;
+      ST_CTS    = 0x1c;
+      ST_ACK    = 0x1d;
+
+      // data (CFPOLL/CFACK subtypes omitted):
+      ST_DATA   = 0x20;
 };
 
 //
 // Frame control format. Fields not supported by this model are omitted:
-// ProtocolVersion, MoreFlag, PowerMgmt, MoreData, WEP, Order.
+// MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
-struct Ieee80211FrameControl
+struct Ieee80211FrameControlBits
 {
     fields:
-        short type enum(Ieee80211FrameType); // 2 bits
-        short subtype;                    // 4 bits
-        bool toDS;                        // 1 bit
-        bool fromDS;                      // 1 bit
-        bool retry;                       // 1 bit
+        bool toDS;
+        bool fromDS;
+        bool retry;
 };
 
 //
@@ -82,7 +80,8 @@ message Ieee80211Frame
 {
     fields:
         byteLength = 14;
-        Ieee80211FrameControl frameControl;
+        short type enum(Ieee80211FrameType); // type and subtype
+        Ieee80211FrameControlBits flags;  // flags in the Frame Control field
         short duration = -1; // "duration" in the Duration/ID field (-1=no duration)
         short AID = -1;      // "id" (Association ID) in the Duration/ID field (-1=no ID)
         MACAddress receiverAddress; // aka address1
@@ -100,6 +99,8 @@ message Ieee80211OneAddressFrame extends Ieee80211Frame
 //
 message Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 {
+    fields:
+       type = ST_ACK;
 };
 
 //
@@ -117,6 +118,8 @@ message Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 //
 message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
+    fields:
+       type = ST_RTS;
 };
 
 //
@@ -124,6 +127,8 @@ message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 //
 message Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 {
+    fields:
+       type = ST_CTS;
 };
 
 //
@@ -144,6 +149,7 @@ message Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 message Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 {
     fields:
+        type = ST_DATA;
         byteLength = 34;
         MACAddress address4;
 };
