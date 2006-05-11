@@ -34,23 +34,17 @@
 class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
 {
   protected:
-    enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
-    struct STAInfo {
-        MACAddress address;
-        State state;
-        //int consecFailedTrans;  //XXX ???
-        //double expiry;          //XXX ???
-        //ReasonCode reasonCode;  //XXX ???
-        //StatusCode statusCode;  //XXX ???
-    };
-
-  protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
+
+    /** Utility function for handleUpperMessage() */
+    virtual void distributeDataFrame(Ieee80211DataFrame *frame);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);

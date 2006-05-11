@@ -36,8 +36,9 @@ void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSimplifiedAP::handleUpperMessage(cMessage *msg)
 {
-    Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+    ASSERT(false);  //XXX for now...
+    //Ieee80211DataFrame *frame = encapsulate(msg);
+    //sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::receiveChangeNotification(int category, cPolymorphic *details)
@@ -48,57 +49,81 @@ void Ieee80211MgmtSimplifiedAP::receiveChangeNotification(int category, cPolymor
 
 void Ieee80211MgmtSimplifiedAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    sendUp(decapsulate(frame)); //XXX
+    // check toDS bit
+    if (!frame->getToDS())
+    {
+        // looks like this is not for us - discard
+        delete frame;
+        return;
+    }
+
+    // send it out to the destination STA
+    distributeDataFrame(frame);
+}
+
+void Ieee80211MgmtSimplifiedAP::distributeDataFrame(Ieee80211DataFrame *frame)
+{
+    // adjust toDS/fromDS bits, and shuffle addresses
+    frame->setToDS(false);
+    frame->setFromDS(true);
+
+    // move destination address to address1 (receiver address),
+    // and fill address3 with original source address;
+    // sender address (address2) will be filled in by MAC
+    frame->setReceiverAddress(frame->getAddress3());
+    frame->setAddress3(frame->getTransmitterAddress());
+
+    sendOut(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 

@@ -29,7 +29,7 @@
 //
 simple Ieee80211MgmtSimplifiedSTA
     parameters:
-        accessPointAddr: string, // MAC address of associate AP
+        accessPointAddress: string, // MAC address of associate AP
         accessPointChannel: numeric, // channel number of associate AP
         frameCapacity: numeric;
     gates:

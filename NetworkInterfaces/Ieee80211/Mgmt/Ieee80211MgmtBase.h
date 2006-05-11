@@ -38,11 +38,17 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
   protected:
     // configuration
     int frameCapacity;
+    MACAddress myAddress;
 
     // state
     cQueue queue;
 
     // statistics
+    long numDataFramesReceived;
+    long numMgmtFramesReceived;
+    long numMgmtFramesDropped;
+
+    // queue statistics
     cOutVector qlenVec;
     cOutVector dropVec;
 
@@ -71,10 +77,10 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Redefined from PassiveQueueBase: send message to MAC */
     void sendOut(cMessage *msg);
 
-    /** Utility method to encapsulate a packet into a 802.11 data frame */
-    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
+    /** Utility method to dispose of an unhandled frame */
+    virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);
 
-    /** Utility method to decapsulate a data frame */
+    /** Utility method to decapsulate a data frame (encapsulation depends on adhoc/STA/AP) */
     virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
 
     /** Utility method: sends the packet to the upper layer */

@@ -36,9 +36,14 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
+
+    /** Utility function for handleUpperMessage() */
+    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);

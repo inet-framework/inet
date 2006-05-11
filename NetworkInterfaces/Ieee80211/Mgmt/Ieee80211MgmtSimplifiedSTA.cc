@@ -27,6 +27,12 @@ Define_Module(Ieee80211MgmtSimplifiedSTA);
 void Ieee80211MgmtSimplifiedSTA::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+    if (stage==0)
+    {
+        accessPointAddress.setAddress(par("accessPointAddress").stringValue());
+        accessPointChannel = par("accessPointChannel");
+        receiveSequence = 0;
+    }
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleTimer(cMessage *msg)
@@ -38,6 +44,25 @@ void Ieee80211MgmtSimplifiedSTA::handleUpperMessage(cMessage *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
+}
+
+Ieee80211DataFrame *Ieee80211MgmtSimplifiedSTA::encapsulate(cMessage *msg)
+{
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
+
+    // frame goes to the AP
+    frame->setToDS(true);
+
+    // receiver is the AP
+    frame->setReceiverAddress(accessPointAddress);
+
+    // destination address is in address3
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    frame->setAddress3(ctrl->getDest());
+    delete ctrl;
+
+    frame->encapsulate(msg);
+    return frame;
 }
 
 void Ieee80211MgmtSimplifiedSTA::receiveChangeNotification(int category, cPolymorphic *details)
@@ -53,52 +78,52 @@ void Ieee80211MgmtSimplifiedSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSimplifiedSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 

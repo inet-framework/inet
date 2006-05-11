@@ -34,12 +34,28 @@ void Ieee80211MgmtBase::initialize(int stage)
         PassiveQueueBase::initialize();
 
         queue.setName("80211MacQueue");
-
         qlenVec.setName("queue length");
         dropVec.setName("drops");
 
+        numDataFramesReceived = 0;
+        numMgmtFramesReceived = 0;
+        numMgmtFramesDropped = 0;
+        WATCH(numDataFramesReceived);
+        WATCH(numMgmtFramesReceived);
+        WATCH(numMgmtFramesDropped);
+
         // configuration
         frameCapacity = par("frameCapacity");
+
+
+    }
+    else if (stage==1)
+    {
+        // obtain our address from MAC
+        cModule *mac = parentModule()->submodule("mac");
+        if (!mac)
+            error("MAC module not found; it is expected to be next to this submodule and called 'mac'");
+        myAddress.setAddress(mac->par("address").stringValue());
     }
 }
 
@@ -58,12 +74,15 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         EV << "Frame arrived from MAC: " << msg << "\n";
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
         processFrame(frame);
-        delete frame;
     }
     else
     {
         // packet from upper layers, to be sent out
         EV << "Packet arrived from upper layers: " << msg << "\n";
+        if (msg->byteLength() > 2312)
+            error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+                  msg->className(), msg->name(), msg->byteLength());
+
         handleUpperMessage(msg);
     }
 }
@@ -107,30 +126,19 @@ void Ieee80211MgmtBase::sendOut(cMessage *msg)
     send(msg, "macOut");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtBase::encapsulate(cMessage *msg)
+void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
 {
-    if (msg->byteLength() > 2312)
-        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->className(), msg->name(), msg->byteLength());
-
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
-
-    // copy dest address from the control info
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setReceiverAddress(ctrl->getDest());
-    delete ctrl;
-
-    // set the src address to our mac address -- MAC will do this
-    //frame->setTransmitterAddress(address);
-
-    frame->encapsulate(msg);
-    return frame;
+    EV << "ignoring management frame: " << (cMessage *)frame << "\n";
+    delete frame;
+    numMgmtFramesDropped++;
 }
 
 cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 {
     //XXX create control info with src address?
-    return frame->decapsulate();
+    cMessage *payload = frame->decapsulate();
+    delete frame;
+    return payload;
 }
 
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
@@ -143,35 +151,46 @@ void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
     switch(frame->getType())
     {
       case ST_DATA:
+        numDataFramesReceived++;
         handleDataFrame(check_and_cast<Ieee80211DataFrame *>(frame));
         break;
       case ST_AUTHENTICATION:
+        numMgmtFramesReceived++;
         handleAuthenticationFrame(check_and_cast<Ieee80211AuthenticationFrame *>(frame));
         break;
       case ST_DEAUTHENTICATION:
+        numMgmtFramesReceived++;
         handleDeauthenticationFrame(check_and_cast<Ieee80211DeauthenticationFrame *>(frame));
         break;
       case ST_ASSOCIATIONREQUEST:
+        numMgmtFramesReceived++;
         handleAssociationRequestFrame(check_and_cast<Ieee80211AssociationRequestFrame *>(frame));
         break;
       case ST_ASSOCIATIONRESPONSE:
+        numMgmtFramesReceived++;
         handleAssociationResponseFrame(check_and_cast<Ieee80211AssociationResponseFrame *>(frame));
         break;
       case ST_REASSOCIATIONREQUEST:
+        numMgmtFramesReceived++;
         handleReassociationRequestFrame(check_and_cast<Ieee80211ReassociationRequestFrame *>(frame));
         break;
       case ST_REASSOCIATIONRESPONSE:
+        numMgmtFramesReceived++;
         handleReassociationResponseFrame(check_and_cast<Ieee80211ReassociationResponseFrame *>(frame)); break;
       case ST_DISASSOCIATION:
+        numMgmtFramesReceived++;
         handleDisassociationFrame(check_and_cast<Ieee80211DisassociationFrame *>(frame));
         break;
       case ST_BEACON:
+        numMgmtFramesReceived++;
         handleBeaconFrame(check_and_cast<Ieee80211BeaconFrame *>(frame));
         break;
       case ST_PROBEREQUEST:
+        numMgmtFramesReceived++;
         handleProbeRequestFrame(check_and_cast<Ieee80211ProbeRequestFrame *>(frame));
         break;
       case ST_PROBERESPONSE:
+        numMgmtFramesReceived++;
         handleProbeResponseFrame(check_and_cast<Ieee80211ProbeResponseFrame *>(frame));
         break;
       default:

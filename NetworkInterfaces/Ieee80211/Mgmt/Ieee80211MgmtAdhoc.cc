@@ -40,6 +40,19 @@ void Ieee80211MgmtAdhoc::handleUpperMessage(cMessage *msg)
     sendOrEnqueue(frame);
 }
 
+Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
+{
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
+
+    // copy receiver address from the control info (sender address will be set in MAC)
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    frame->setReceiverAddress(ctrl->getDest());
+    delete ctrl;
+
+    frame->encapsulate(msg);
+    return frame;
+}
+
 void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
@@ -53,52 +66,52 @@ void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 

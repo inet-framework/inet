@@ -67,7 +67,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
 
 void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
@@ -77,7 +77,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequ
 
 void Ieee80211MgmtAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAP::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
@@ -87,7 +87,7 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Ieee80211DisassociationFrame *fr
 
 void Ieee80211MgmtAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
@@ -97,7 +97,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 
 void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    EV << "ignoring frame " << frame << "\n";
+    dropManagementFrame(frame);;
 }
 
 
