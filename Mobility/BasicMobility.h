@@ -31,10 +31,11 @@
 
 
 /**
- * @brief Basic module for all mobility modules.
+ * @brief Abstract base class for all mobility modules.
  *
- * It does not provide mobility at all, so you can use
- * it if you only want to simulate static networks.
+ * Subclasses are expected to redefine handleSelfMsg() to update the position 
+ * and schedule the time of the next position update, and initialize() to 
+ * read parameters and schedule the first position update.
  *
  * BasicMobility provides random placement of hosts and display
  * updates as well as registering with the ChannelControl module.
@@ -84,7 +85,7 @@ class INET_API BasicMobility : public BasicModule
 
   protected:
     /** @brief Called upon arrival of a self messages*/
-    virtual void handleSelfMsg(cMessage *msg){delete msg;};
+    virtual void handleSelfMsg(cMessage *msg) = 0;
 
     /** @brief Update the position information for this node*/
     void updatePosition();
