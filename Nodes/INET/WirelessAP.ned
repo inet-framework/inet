@@ -31,12 +31,14 @@ module WirelessAP
         in: radioIn;
     submodules:
         notificationBoard: NotificationBoard;
-            display: "p=60,70;i=block/control";
+            display: "p=79,74;i=block/control";
         wlan: Ieee80211Nic;
             parameters:
                 mgmtType = "Ieee80211MgmtSimplifiedAP";
-            display: "p=100,180;q=queue;i=block/ifcard";
+            display: "p=110,179;q=queue;i=block/ifcard";
+        mobility: NullMobility;
+            display: "p=144,70;i=block/cogwheel_s";
     connections nocheck:
-        radioIn --> wlan.radioIn;
+        radioIn --> wlan.radioIn display "m=s";
 endmodule
 

@@ -26,7 +26,6 @@
 
 #define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
 
-Define_Module(BasicMobility);
 
 /**
  * Assigns a pointer to ChannelControl and gets a pointer to its host.
