@@ -24,28 +24,31 @@
 Define_Module(Ieee80211MgmtSimplifiedSTA);
 
 
-void Ieee80211MgmtSimplifiedSTA::initialize(int)
+void Ieee80211MgmtSimplifiedSTA::initialize(int stage)
 {
-    //...
+    Ieee80211MgmtBase::initialize(stage);
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleTimer(cMessage *msg)
 {
-    //TBD
+    ASSERT(false);
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleUpperMessage(cMessage *msg)
 {
-    //TBD
+    Ieee80211DataFrame *frame = encapsulate(msg);
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSimplifiedSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
+    Enter_Method_Silent();
+    EV << "ignoring change notification\n";
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    //TBD handle
+    sendUp(decapsulate(frame));
 }
 
 void Ieee80211MgmtSimplifiedSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

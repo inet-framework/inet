@@ -24,28 +24,31 @@
 Define_Module(Ieee80211MgmtSimplifiedAP);
 
 
-void Ieee80211MgmtSimplifiedAP::initialize(int)
+void Ieee80211MgmtSimplifiedAP::initialize(int stage)
 {
-    //...
+    Ieee80211MgmtBase::initialize(stage);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
 {
-    //TBD
+    ASSERT(false);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleUpperMessage(cMessage *msg)
 {
-    //TBD
+    Ieee80211DataFrame *frame = encapsulate(msg);
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    EV << "ignoring change notification\n";
 }
 
 void Ieee80211MgmtSimplifiedAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
+    sendUp(decapsulate(frame)); //XXX
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
