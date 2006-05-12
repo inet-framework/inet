@@ -121,7 +121,7 @@ void Ieee80211MgmtSimplifiedAP::sendUpACopy(Ieee80211DataFrame *frame)
         ethframe->encapsulate((cMessage *)payload->dup());
 
     // and send it up
-    send(payload,"uppergateOut");
+    send(ethframe,"uppergateOut");
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

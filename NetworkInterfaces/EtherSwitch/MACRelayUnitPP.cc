@@ -102,10 +102,7 @@ void MACRelayUnitPP::handleMessage(cMessage *msg)
     if (!msg->isSelfMessage())
     {
         // Frame received from MAC unit
-        if (msg->kind()!=ETH_FRAME)
-            error("Unknown incoming frame");
-
-        handleIncomingFrame((EtherFrame *)msg);
+        handleIncomingFrame(check_and_cast<EtherFrame *>(msg));
     }
     else
     {

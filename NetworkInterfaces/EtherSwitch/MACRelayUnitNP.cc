@@ -106,14 +106,11 @@ void MACRelayUnitNP::handleMessage(cMessage *msg)
     if (!msg->isSelfMessage())
     {
         // Frame received from MAC unit
-        if (msg->kind()!=ETH_FRAME)
-            error("Unknown incoming frame");
-
-        handleIncomingFrame((EtherFrame *)msg);
+        handleIncomingFrame(check_and_cast<EtherFrame *>(msg));
     }
     else
     {
-        // Self message signal used to indicate a frame has been finished processing
+        // Self message signal used to indicate a frame has finished processing
         processFrame(msg);
     }
 }

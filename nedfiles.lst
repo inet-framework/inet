@@ -33,6 +33,7 @@ Mobility/CircleMobility.ned
 Mobility/ConstSpeedMobility.ned
 Mobility/LinearMobility.ned
 Mobility/MassMobility.ned
+Mobility/NullMobility.ned
 Mobility/RandomWPMobility.ned
 Mobility/RectangleMobility.ned
 Mobility/TurtleMobility.ned
@@ -119,6 +120,7 @@ Nodes/INET/Router.ned
 Nodes/INET/StandardHost.ned
 Nodes/INET/TCPSpoofingHost.ned
 Nodes/INET/WirelessAP.ned
+Nodes/INET/WirelessAP2.ned
 Nodes/INET/WirelessHost.ned
 Nodes/IPv6/NetworkLayer6.ned
 Nodes/IPv6/Router6.ned
