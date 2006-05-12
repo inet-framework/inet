@@ -88,7 +88,7 @@ module WirelessHost
                 mgmtType = "Ieee80211MgmtSimplifiedSTA";
             display: "p=120,350;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
-            display: "p=149,307;i=block/cogwheel_s";
+            display: "p=58,301;i=block/cogwheel_s";
     connections nocheck:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
