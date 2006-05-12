@@ -62,7 +62,7 @@ void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFram
 
 void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
@@ -72,7 +72,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
 
 void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
@@ -97,7 +97,7 @@ void Ieee80211MgmtSTA::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame
 
 void Ieee80211MgmtSTA::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 

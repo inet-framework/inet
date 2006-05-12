@@ -19,7 +19,7 @@
 
 #include "Ieee80211MgmtSimplifiedAP.h"
 #include "Ieee802Ctrl_m.h"
-
+#include "EtherFrame_m.h"
 
 Define_Module(Ieee80211MgmtSimplifiedAP);
 
@@ -27,6 +27,9 @@ Define_Module(Ieee80211MgmtSimplifiedAP);
 void Ieee80211MgmtSimplifiedAP::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+
+    hasRelayUnit = gate("uppergateOut")->destinationGate()->isConnected();
+    WATCH(hasRelayUnit);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
@@ -36,9 +39,30 @@ void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSimplifiedAP::handleUpperMessage(cMessage *msg)
 {
-    ASSERT(false);  //XXX for now...
-    //Ieee80211DataFrame *frame = encapsulate(msg);
-    //sendOrEnqueue(frame);
+    // if this is an AP with ethernet ports, we have a RelayUnit above us
+    // which deals with EtherFrames, so we have to convert.
+    if (!hasRelayUnit)
+        error("unexpected message (%s)%s", msg->className(), msg->name());
+
+    EtherFrame *ethframe = check_and_cast<EtherFrame *>(msg);
+    cMessage *payload = ethframe->decapsulate();
+    if (!payload)
+        error("received empty EtherFrame from upper layer");
+
+    // create new frame
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(ethframe->name());
+    frame->setFromDS(true);
+
+    // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
+    frame->setReceiverAddress(ethframe->getDest());
+    frame->setAddress3(ethframe->getSrc());
+    delete ethframe;
+
+    // encapsulate
+    frame->encapsulate(msg);
+
+    // send
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::receiveChangeNotification(int category, cPolymorphic *details)
@@ -56,6 +80,10 @@ void Ieee80211MgmtSimplifiedAP::handleDataFrame(Ieee80211DataFrame *frame)
         delete frame;
         return;
     }
+
+    // possibly send frame to the other (Ethernet, etc) ports of the AP as well
+    if (hasRelayUnit)
+        sendUpACopy(frame);
 
     // send it out to the destination STA
     distributeDataFrame(frame);
@@ -76,54 +104,71 @@ void Ieee80211MgmtSimplifiedAP::distributeDataFrame(Ieee80211DataFrame *frame)
     sendOut(frame);
 }
 
+void Ieee80211MgmtSimplifiedAP::sendUpACopy(Ieee80211DataFrame *frame)
+{
+    // create a matching ethernet frame
+    EtherFrame *ethframe = new EthernetIIFrame(frame->name()); // XXX how to decide between EthernetIIFrame and EtherFrameWithSNAP
+    ethframe->setDest(frame->getAddress3());
+    ethframe->setSrc(frame->getTransmitterAddress());
+    //XXX set ethertype
+
+    // encapsulate a copy of the payload in there
+    cMessage *payload = frame->encapsulatedMsg();
+    if (payload)
+        ethframe->encapsulate((cMessage *)payload->dup());
+
+    // and send it up
+    send(payload,"uppergateOut");
+}
+
 void Ieee80211MgmtSimplifiedAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 

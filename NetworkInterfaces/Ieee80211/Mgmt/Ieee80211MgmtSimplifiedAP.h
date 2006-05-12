@@ -34,6 +34,9 @@
 class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
 {
   protected:
+    bool hasRelayUnit;
+
+  protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
@@ -45,6 +48,9 @@ class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
 
     /** Utility function for handleUpperMessage() */
     virtual void distributeDataFrame(Ieee80211DataFrame *frame);
+
+    /** Utility function: converts the frame to EtherFrame, and sends it up to the higher layer (RelayUnit) */
+    virtual void sendUpACopy(Ieee80211DataFrame *frame);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);

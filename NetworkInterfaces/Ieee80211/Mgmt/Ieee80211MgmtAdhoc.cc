@@ -66,52 +66,52 @@ void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    dropManagementFrame(frame);;
+    dropManagementFrame(frame);
 }
 
 
