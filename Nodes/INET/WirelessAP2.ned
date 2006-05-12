@@ -57,8 +57,8 @@ module WirelessAP2
             display: "p=71,121;i=block/cogwheel_s";
     connections nocheck:
         radioIn --> wlan.radioIn display "m=s";
-        wlan.upperLayerIn <-- relayUnit.lowerLayerOut[0];
-        wlan.upperLayerOut --> relayUnit.lowerLayerIn[0];
+        wlan.uppergateIn <-- relayUnit.lowerLayerOut[0];
+        wlan.uppergateOut --> relayUnit.lowerLayerIn[0];
         for i=0..sizeof(ethIn)-1 do
             eth[i].upperLayerIn <-- relayUnit.lowerLayerOut[i+1];
             eth[i].upperLayerOut --> relayUnit.lowerLayerIn[i+1];

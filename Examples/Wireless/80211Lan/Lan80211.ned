@@ -30,7 +30,7 @@ module Lan80211
     submodules:
         host: WirelessHost[numHosts];
             display: "i=device/wifilaptop;r=,,#707070";
-        ap: WirelessAP;
+        ap: WirelessAP2;
             display: "p=213,174;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
