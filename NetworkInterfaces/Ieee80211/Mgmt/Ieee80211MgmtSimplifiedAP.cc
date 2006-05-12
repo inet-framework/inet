@@ -28,8 +28,11 @@ void Ieee80211MgmtSimplifiedAP::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
 
-    hasRelayUnit = gate("uppergateOut")->destinationGate()->isConnected();
-    WATCH(hasRelayUnit);
+    if (stage==0)
+    {
+        hasRelayUnit = gate("uppergateOut")->destinationGate()->isConnected();
+        WATCH(hasRelayUnit);
+    }
 }
 
 void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
