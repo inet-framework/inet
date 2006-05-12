@@ -55,7 +55,7 @@ class INET_API MACRelayUnitBase : public cSimpleModule
 
     // Parameters controlling how the switch operates
     int numPorts;               // Number of ports of the switch
-    int addressTableSize;       // Size of the Address Table
+    int addressTableSize;       // Maximum size of the Address Table
     simtime_t agingTime;        // Determines when Ethernet entries are to be removed
 
     AddressTable addresstable;  // Address Lookup Table

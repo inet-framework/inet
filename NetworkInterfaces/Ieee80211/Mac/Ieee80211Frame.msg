@@ -56,27 +56,21 @@ enum Ieee80211FrameType
 };
 
 //
-// Frame control format. Fields not supported by this model are omitted:
+// The common part of 802.11 frames. 
+//
+// NOTE:
+// FCS value is not explicitly modeled, but it is included in the length.
+// Frame control format fields not supported by this model are omitted:
 // MoreFlag, PowerMgmt, MoreData, WEP, Order.
-//
-struct Ieee80211FrameControlBits
-{
-    fields:
-        bool toDS;
-        bool fromDS;
-        bool retry;
-};
-
-//
-// Format of smallest 802.11 frame. FCS value is not
-// explicitly modeled, but it is included in the length.
 //
 message Ieee80211Frame
 {
     fields:
         byteLength = 14;
         short type enum(Ieee80211FrameType); // type and subtype
-        Ieee80211FrameControlBits flags;  // flags in the Frame Control field
+        bool toDS;
+        bool fromDS;
+        bool retry;
         short duration = -1; // "duration" in the Duration/ID field (-1=no duration)
         short AID = -1;      // "id" (Association ID) in the Duration/ID field (-1=no ID)
         MACAddress receiverAddress; // aka address1

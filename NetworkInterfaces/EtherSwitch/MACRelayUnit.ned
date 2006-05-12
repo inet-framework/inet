@@ -21,7 +21,7 @@
 //
 // Prototype for modules providing Ethernet switch functionality.
 // These modules handle the mapping between ports and MAC addresses,
-// and forward frames to appropriate ports.
+// and forward frames (EtherFrame) to appropriate ports.
 //
 // Functions:
 // - relays frames based on their dest MAC addresses (dest-->port mapping)
