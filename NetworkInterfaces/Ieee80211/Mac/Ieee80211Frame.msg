@@ -21,7 +21,7 @@
 //
 cplusplus
 {{
-//FIXME use consts for frame lengths!!! account for LLC(3)+SNAP(5) headers in data frames!!!
+//FIXME use consts for frame lengths!!! account for LLC(3)+SNAP(5) headers in data frames!!! +add SNAP orgcode, localcode into the msg?
 #include "MACAddress.h"
 }};
 class noncobject MACAddress;
