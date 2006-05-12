@@ -19,7 +19,8 @@
 
 import
     "WirelessHost",
-    "WirelessAP";
+    "WirelessAP",
+    "WirelessAP2";
 
 
 module Lan80211
@@ -30,7 +31,7 @@ module Lan80211
     submodules:
         host: WirelessHost[numHosts];
             display: "i=device/wifilaptop;r=,,#707070";
-        ap: WirelessAP2;
+        ap: WirelessAP2; // or WirelessAP
             display: "p=213,174;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
