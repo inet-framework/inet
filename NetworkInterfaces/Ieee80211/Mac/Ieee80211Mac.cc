@@ -187,7 +187,7 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
     }
 
     Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
-    if (frame->byteLength() > 2312+34)
+    if (frame->byteLength() > 2312+34) //XXX use constant
         error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               msg->className(), msg->name(), msg->byteLength());
     EV << "frame " << frame << " received from higher layer, receiver=" << frame->getReceiverAddress() << endl;
