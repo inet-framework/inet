@@ -26,13 +26,7 @@ Define_Module(Ieee80211MgmtSimplifiedAP);
 
 void Ieee80211MgmtSimplifiedAP::initialize(int stage)
 {
-    Ieee80211MgmtBase::initialize(stage);
-
-    if (stage==0)
-    {
-        hasRelayUnit = gate("uppergateOut")->destinationGate()->isConnected();
-        WATCH(hasRelayUnit);
-    }
+    Ieee80211MgmtAPBase::initialize(stage);
 }
 
 void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
@@ -42,32 +36,10 @@ void Ieee80211MgmtSimplifiedAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSimplifiedAP::handleUpperMessage(cMessage *msg)
 {
-    // if this is an AP with ethernet ports, we have a RelayUnit above us
-    // which deals with Ethernet frames -- so we have to convert EtherFrame
-    // to Ieee80211DataFrame before sending it out to the wireless LAN.
-    Ieee80211DataFrame *frame = convertTo80211(check_and_cast<EtherFrame *>(msg));
+    // convert Ethernet frames arriving from MACRelayUnit (i.e. from
+    // the AP's other Ethernet or wireless interfaces)
+    Ieee80211DataFrame *frame = convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
     sendOrEnqueue(frame);
-}
-
-Ieee80211DataFrame *Ieee80211MgmtSimplifiedAP::convertTo80211(EtherFrame *ethframe)
-{
-    // create new frame
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(ethframe->name());
-    frame->setFromDS(true);
-
-    // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
-    frame->setReceiverAddress(ethframe->getDest());
-    frame->setAddress3(ethframe->getSrc());
-
-    // encapsulate payload
-    cMessage *payload = ethframe->decapsulate();
-    if (!payload)
-        error("received empty EtherFrame from upper layer");
-    frame->encapsulate(payload);
-    delete ethframe;
-
-    // done
-    return frame;
 }
 
 void Ieee80211MgmtSimplifiedAP::receiveChangeNotification(int category, cPolymorphic *details)
@@ -92,38 +64,6 @@ void Ieee80211MgmtSimplifiedAP::handleDataFrame(Ieee80211DataFrame *frame)
 
     // send it out to the destination STA
     distributeReceivedDataFrame(frame);
-}
-
-void Ieee80211MgmtSimplifiedAP::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
-{
-    // adjust toDS/fromDS bits, and shuffle addresses
-    frame->setToDS(false);
-    frame->setFromDS(true);
-
-    // move destination address to address1 (receiver address),
-    // and fill address3 with original source address;
-    // sender address (address2) will be filled in by MAC
-    frame->setReceiverAddress(frame->getAddress3());
-    frame->setAddress3(frame->getTransmitterAddress());
-
-    sendOut(frame);
-}
-
-EtherFrame *Ieee80211MgmtSimplifiedAP::createEtherFrame(Ieee80211DataFrame *frame)
-{
-    // create a matching ethernet frame
-    EtherFrame *ethframe = new EthernetIIFrame(frame->name()); // XXX how to decide between EthernetIIFrame and EtherFrameWithSNAP
-    ethframe->setDest(frame->getAddress3());
-    ethframe->setSrc(frame->getTransmitterAddress());
-    //XXX set ethertype
-
-    // encapsulate a copy of the payload in there
-    cMessage *payload = frame->encapsulatedMsg();
-    if (payload)
-        ethframe->encapsulate((cMessage *)payload->dup());
-
-    // done
-    return ethframe;
 }
 
 void Ieee80211MgmtSimplifiedAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

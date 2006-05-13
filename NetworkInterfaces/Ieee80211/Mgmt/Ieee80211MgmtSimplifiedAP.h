@@ -20,7 +20,7 @@
 #define IEEE80211_MGMT_SIMPLIFIEDAP_H
 
 #include <omnetpp.h>
-#include "Ieee80211MgmtBase.h"
+#include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 
 class EtherFrame;
@@ -32,11 +32,8 @@ class EtherFrame;
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtAPBase
 {
-  protected:
-    bool hasRelayUnit;
-
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -46,28 +43,6 @@ class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
-
-    /**
-     * Utility function: sends back a data frame we received from a STA
-     * to the wireless LAN, after tweaking fromDS/toDS bits and shuffling
-     * addresses as needed.
-     */
-    virtual void distributeReceivedDataFrame(Ieee80211DataFrame *frame);
-
-    /**
-     * Utility function: converts EtherFrame to Ieee80211Frame. This is needed
-     * because MACRelayUnit which we use for LAN bridging functionality deals
-     * with EtherFrames.
-     */
-    virtual Ieee80211DataFrame *convertTo80211(EtherFrame *ethframe);
-
-    /**
-     * Utility function: converts the given frame to EtherFrame. The original
-     * frame is left untouched (the encapsulated payload msg gets duplicated).
-     * This function is needed because MACRelayUnit which we use for LAN bridging
-     * functionality deals with EtherFrames.
-     */
-    virtual EtherFrame *createEtherFrame(Ieee80211DataFrame *frame);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);

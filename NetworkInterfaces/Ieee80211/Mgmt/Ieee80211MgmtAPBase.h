@@ -26,9 +26,9 @@
 class EtherFrame;
 
 /**
- * Used in 802.11 infrastructure mode: handles management frames for
- * an access point (AP). See corresponding NED file for a detailed description.
- * This implementation ignores many details.
+ * Used in 802.11 infrastructure mode: abstract base class for management frame
+ * handling for an access points (APs). This class extends Ieee80211MgmtBase
+ * with utility functions that are useful for implementing AP functionality.
  *
  * @author Andras Varga
  */
