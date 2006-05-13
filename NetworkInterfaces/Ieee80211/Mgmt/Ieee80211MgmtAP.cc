@@ -69,11 +69,21 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
 {
-    // TBD check we really have a STA with the dest address
+    // must be an EtherFrame frame arriving from MACRelayUnit, that is,
+    // bridged from another interface of the AP (probably Ethernet).
+    EtherFrame *etherframe = check_and_cast<EtherFrame *>(msg);
 
-    // convert Ethernet frames arriving from MACRelayUnit (i.e. from
-    // the AP's other Ethernet or wireless interfaces)
-    Ieee80211DataFrame *frame = convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+    // check we really have a STA with that dest address
+    STAList::iterator it = staList.find(etherframe->getDest());
+    if (it==staList.end() || it->second.status!=ASSOCIATED)
+    {
+        EV << "STA with MAC address " << etherframe->getDest() << " not associated with this AP, dropping frame\n";
+        delete etherframe; // XXX count drops?
+        return;
+    }
+
+    // convert Ethernet frame
+    Ieee80211DataFrame *frame = convertFromEtherFrame(etherframe);
     sendOrEnqueue(frame);
 }
 
