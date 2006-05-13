@@ -22,13 +22,19 @@
 // to be used in combination with the SnrEval80211 and Decider80211
 // modules as physical layer.
 //
-// Encapsulation/decapsulation must be done in the upper layers. (It is 
+// Encapsulation/decapsulation must be done in the upper layers. (It is
 // typically in the 802.11 management module, see in Ieee80211Nic).
+// The base class for 802.11 frame messages is Ieee80211Frame, but this
+// module expects Ieee80211DataOrMgmtFrame (a subclass) from upper layers
+// (the management module). This module will assign the transmitter address
+// (address 2) and the frame sequence number/fragment number fields in the
+// frames; all other fields must already be filled when this module gets
+// the frame for transmission.
 //
 // The module has an internal queue, but usually it is to be used with an
 // external passive queue module (its name should be given in the queueModule
-// parameter; specifying "" causes the internal queue to be used). The passive 
-// queue module is a simple module whose C++ class implements the IPassiveQueue 
+// parameter; specifying "" causes the internal queue to be used). The passive
+// queue module is a simple module whose C++ class implements the IPassiveQueue
 // interface.
 //
 simple Ieee80211Mac

@@ -91,6 +91,7 @@ void Ieee80211Mac::initialize(int stage)
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
+        sequenceNumber = 0;
         radioState = RadioState::IDLE;
         retryCounter = 1;
         backoff = false;
@@ -186,11 +187,18 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
         return;
     }
 
+    // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
     Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
     if (frame->byteLength() > 2312+34) //XXX use constant
         error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               msg->className(), msg->name(), msg->byteLength());
     EV << "frame " << frame << " received from higher layer, receiver=" << frame->getReceiverAddress() << endl;
+
+    // fill in missing fields (receiver address, seq number), and insert into the queue
+    frame->setTransmitterAddress(address);
+    frame->setSequenceNumber(sequenceNumber);
+    sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
+
     transmissionQueue.push_back(frame);
 
     handleWithFSM(frame);
@@ -521,7 +529,6 @@ void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-    frame->setTransmitterAddress(address);
 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
