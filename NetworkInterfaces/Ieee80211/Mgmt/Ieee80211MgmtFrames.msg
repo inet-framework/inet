@@ -82,13 +82,13 @@ enum Ieee80211StatusCode
 };
 
 //
-// Structure to store a single supported rate information
+// Structure to store supported rates
 //
 struct Ieee80211SupportedRatesElement
 {
     fields:
-        bool supported; // true=supported, false=unsupported
-        double rate;    // in Mbit/sec
+        short numRates; // number of rates (max 8)
+        double rate[8]; // in Mbit/s; should be multiple of 500 kbit/s
 };
 
 //
@@ -139,7 +139,7 @@ class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
     fields:
         bodyLength = 12; // assuming a 8-character SSID
         string SSID;
-        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211SupportedRatesElement supportedRates;
 };
 
 //
@@ -150,7 +150,7 @@ class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
     fields:
         bodyLength = 16; // assuming a 8-character SSID
         string SSID;
-        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211SupportedRatesElement supportedRates;
         Ieee80211CapabilityInformation capabilityInformation;
 };
 
@@ -174,7 +174,7 @@ class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
         int statusCode enum(Ieee80211StatusCode);
         Ieee80211CapabilityInformation capabilityInformation;
         short aid;
-        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211SupportedRatesElement supportedRates;
 };
 
 //
@@ -192,7 +192,7 @@ class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
     fields:
         bodyLength = 50; // assuming a 8-character SSID, 4 supported datarate plus TIM
         string SSID;
-        Ieee80211SupportedRatesElement supportedRates[];
+        Ieee80211SupportedRatesElement supportedRates;
         Ieee80211CapabilityInformation capabilityInformation;
         double timestamp;
         unsigned short beaconInterval;

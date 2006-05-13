@@ -24,6 +24,8 @@
 Define_Module(Ieee80211MgmtSimplifiedAP);
 
 
+// FIXME add sequence number handling
+
 void Ieee80211MgmtSimplifiedAP::initialize(int stage)
 {
     Ieee80211MgmtAPBase::initialize(stage);

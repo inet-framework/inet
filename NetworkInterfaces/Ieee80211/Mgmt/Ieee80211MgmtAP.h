@@ -44,6 +44,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     struct STAInfo {
         MACAddress address;
         STAStatus status;
+        STAAuthStatus authStatus;
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX
         //ReasonCode reasonCode;  //XXX
@@ -58,10 +59,14 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
   protected:
     // configuration
     std::string ssid;
+    int channelNumber;
     simtime_t beaconInterval;
+    Ieee80211SupportedRatesElement supportedRates;
+    Ieee80211CapabilityInformation capabilityInfo;
 
     // state
     STAList staList; ///< list of STAs
+    cMessage *beaconTimer;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -81,6 +86,9 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 
     /** Utility function: set fields in the given frame and send it out to the given STA */
     void sendManagementFrame(Ieee80211ManagementFrame *frame, STAInfo *sta);
+
+    /** Utility function: creates and sends a beacon frame */
+    void sendBeacon();
 
     /** @name Processing of different frame types */
     //@{

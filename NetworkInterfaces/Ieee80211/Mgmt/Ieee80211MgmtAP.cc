@@ -36,17 +36,35 @@ void Ieee80211MgmtAP::initialize(int stage)
 
     if (stage==0)
     {
+        // read params and init vars
         ssid = par("ssid").stringValue();
+        channelNumber = par("channelNumber");
         beaconInterval = par("beaconInterval");
         WATCH(ssid);
         WATCH(beaconInterval);
+        WATCH(channelNumber);
         WATCH_MAP(staList);
+
+        //TBD fill in supportedRates and capabilityInfo
+        //TBD tune MAC to the given channel
+
+        // start beacon timer (randomize startup time)
+        beaconTimer = new cMessage("beaconTimer");
+        scheduleAt(uniform(0,beaconInterval), beaconTimer);
     }
 }
 
 void Ieee80211MgmtAP::handleTimer(cMessage *msg)
 {
-    //TBD
+    if (msg==beaconTimer)
+    {
+        sendBeacon();
+        scheduleAt(simTime()+beaconInterval, beaconTimer);
+    }
+    else
+    {
+        error("internal error: unrecognized timer '%s'", msg->name());
+    }
 }
 
 void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
@@ -62,7 +80,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
 void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    //TBD
+    // ignore notifications
 }
 
 Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFrame *frame)
@@ -75,8 +93,28 @@ void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, STAIn
 {
     frame->setFromDS(true);
     frame->setReceiverAddress(sta->address);
+    frame->setSequenceNumber(0);  //XXX
     //TBD set other fields?
     sendOrEnqueue(frame); //FIXME or do mgmt frames have priority?
+}
+
+void Ieee80211MgmtAP::sendBeacon()
+{
+    Ieee80211BeaconFrame *frame = new Ieee80211BeaconFrame("Beacon");
+    Ieee80211BeaconFrameBody& body = frame->getBody();
+    body.setSSID(ssid.c_str());
+    body.setSupportedRates(supportedRates);
+    body.setCapabilityInformation(capabilityInfo);
+    body.setTimestamp(simTime()); //XXX this is to be refined
+    body.setBeaconInterval(beaconInterval);
+    body.setDSChannel(channelNumber);
+
+    frame->setSequenceNumber(0);  //XXX
+    frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);  //XXX or what
+    frame->setFromDS(true);
+
+    sendOrEnqueue(frame); // FIXME it's not that simple! must insert at front of the queue,
+                          // plus there are special timing requirements...
 }
 
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
@@ -91,7 +129,6 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 
     // look up destination address in our STA list
     STAList::iterator it = staList.find(frame->getAddress3());
-    EV << it->first;
     if (it==staList.end())
     {
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
@@ -112,12 +149,31 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    //TBD
+    STAInfo *sta = lookupSenderSTA(frame);
+    if (!sta)
+    {
+        // create STA entry
+        MACAddress staAddress = frame->getTransmitterAddress();
+        sta = &staList[staAddress]; // this implicitly creates a new entry
+        sta->address = staAddress;
+        sta->status = NOT_AUTHENTICATED;
+        sta->authStatus = AUTH_NOTYETSTARTED;
+    }
+
+    //TBD....
 }
 
 void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
-    //TBD
+    STAInfo *sta = lookupSenderSTA(frame);
+    delete frame;
+
+    if (sta)
+    {
+        // mark as not authenticated; alternetively, it could also be removed from staList
+        sta->status = NOT_AUTHENTICATED;
+        sta->authStatus = AUTH_NOTYETSTARTED;
+    }
 }
 
 void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
@@ -132,6 +188,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
     sta->status = ASSOCIATED;
 
     Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
+    //XXX fill in resp frame
     sendManagementFrame(resp, sta);
 }
 
@@ -142,7 +199,9 @@ void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationRespons
 
 void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
-    //TBD
+    STAInfo *sta = lookupSenderSTA(frame);
+    delete frame;
+    //TBD ...
 }
 
 void Ieee80211MgmtAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
@@ -152,7 +211,13 @@ void Ieee80211MgmtAP::handleReassociationResponseFrame(Ieee80211ReassociationRes
 
 void Ieee80211MgmtAP::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
-    //TBD
+    STAInfo *sta = lookupSenderSTA(frame);
+    delete frame;
+
+    if (sta)
+    {
+        sta->status = AUTHENTICATED;
+    }
 }
 
 void Ieee80211MgmtAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
@@ -162,7 +227,31 @@ void Ieee80211MgmtAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 
 void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    //TBD
+    if (strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
+    {
+        EV << "SSID does not match, ignoring frame\n";
+        dropManagementFrame(frame);
+        return;
+    }
+
+    MACAddress staAddress = frame->getTransmitterAddress();
+    delete frame;
+
+    Ieee80211ProbeResponseFrame *resp = new Ieee80211ProbeResponseFrame("ProbeResp");
+    Ieee80211ProbeResponseFrameBody& body = resp->getBody();
+    body.setSSID(ssid.c_str());
+    body.setSupportedRates(supportedRates);
+    body.setCapabilityInformation(capabilityInfo);
+    body.setTimestamp(simTime()); //XXX this is to be refined
+    body.setBeaconInterval(beaconInterval);
+    body.setDSChannel(channelNumber);
+
+    resp->setSequenceNumber(0);  //XXX
+    resp->setReceiverAddress(staAddress);  //XXX or what
+    resp->setFromDS(true);
+
+    sendOrEnqueue(resp); // FIXME it's not that simple! must insert at front of the queue,
+                          // plus there are special timing requirements...
 }
 
 void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
