@@ -19,14 +19,15 @@
 
 #include "Ieee80211MgmtAP.h"
 #include "Ieee802Ctrl_m.h"
+#include "EtherFrame_m.h"
 
 
 Define_Module(Ieee80211MgmtAP);
 
 
-void Ieee80211MgmtAP::initialize(int)
+void Ieee80211MgmtAP::initialize(int stage)
 {
-    //TBD
+    Ieee80211MgmtAPBase::initialize(stage);
 }
 
 void Ieee80211MgmtAP::handleTimer(cMessage *msg)
@@ -36,7 +37,12 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
 {
-    //TBD
+    // TBD check we really have a STA with the dest address
+
+    // convert Ethernet frames arriving from MACRelayUnit (i.e. from
+    // the AP's other Ethernet or wireless interfaces)
+    Ieee80211DataFrame *frame = convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
@@ -47,7 +53,20 @@ void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *deta
 
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
-    //TBD
+    // check toDS bit
+    if (!frame->getToDS())
+    {
+        // looks like this is not for us - discard
+        delete frame;
+        return;
+    }
+
+    // possibly send frame to the other (Ethernet, etc) ports of the AP as well
+    if (hasRelayUnit)
+        send(createEtherFrame(frame), "uppergateOut");
+
+    // send it out to the destination STA
+    distributeReceivedDataFrame(frame);
 }
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

@@ -20,17 +20,17 @@
 #define IEEE80211_MGMT_AP_H
 
 #include <omnetpp.h>
-#include "Ieee80211MgmtBase.h"
+#include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
- * an access point (AP).
+ * an access point (AP). See corresponding NED file for a detailed description.
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtAP : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 {
   protected:
     enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
@@ -47,8 +47,10 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtBase
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg);
 
+    /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */

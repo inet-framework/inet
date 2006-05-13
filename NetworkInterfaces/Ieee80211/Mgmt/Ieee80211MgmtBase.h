@@ -28,8 +28,9 @@
 
 
 /**
- * Base class for 802.11 infrastructure mode management components.
- * Performs encapsulation, decapsulation, and queueing.
+ * Abstract base class for 802.11 infrastructure mode management components.
+ * Performs queueing for MAC, and dispatching incoming frames by frame type.
+ * Also keeps some simple statistics (frame counts).
  *
  * @author Andras Varga
  */
