@@ -19,19 +19,26 @@
 
 //
 // Used in 802.11 infrastructure mode: handles management frames for
-// an access point (AP).
+// an access point (AP). It relies on a connected Ieee80211Mac for actual
+// reception and transmission of frames.
 //
-// Relies on the MAC layer (Ieee80211Mac) for reception and transmission of frames.
+// When simulating an AP that has other (Ethernet or wireless) interfaces
+// as well, this module can be connected to a MACRelayUnit which performs
+// bridging of Ethernet frames. This module will perform conversion from/to
+// EtherFrame for MACRelayUnit.
 //
 // @author Andras Varga
 //
 simple Ieee80211MgmtAP
     parameters:
+        ssid: string,
         beaconInterval: numeric const,
         frameCapacity: numeric;
+        //dataRate: numeric; XXX TBD
     gates:
-        in: uppergateIn;
-        out: uppergateOut;
-        in: macIn;
-        out: macOut;
+        in: uppergateIn; // from MACRelayUnit; can be left unconnected
+        out: uppergateOut; // to MACRelayUnit; can be left unconnected
+        in: macIn; // from Ieee80211Mac
+        out: macOut; // to Ieee80211Mac
 endsimple
+

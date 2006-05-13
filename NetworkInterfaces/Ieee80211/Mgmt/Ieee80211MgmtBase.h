@@ -50,8 +50,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     long numMgmtFramesDropped;
 
     // queue statistics
-    cOutVector qlenVec;
-    cOutVector dropVec;
+    cOutVector queueLenVec;
+    cOutVector queueDropVec;
 
   protected:
     virtual int numInitStages() const {return 2;}

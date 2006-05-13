@@ -33,15 +33,23 @@
 class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 {
   protected:
-    enum State {NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ASSOCIATED};
+    /** State of a STA */
+    enum STAState {NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
+
+    /** Sub-states within STAState NOT_AUTHENTICATED to track progress of authentication process. XXX needed? */
+    enum STAAuthState {AUTH_NOTYETSTARTED, AUTH_CHALLENGESENT};
+
+    /** Describes a STA */
     struct STAInfo {
         MACAddress address;
-        State state;
-        //int consecFailedTrans;  //XXX ???
-        //double expiry;          //XXX ???
-        //ReasonCode reasonCode;  //XXX ???
-        //StatusCode statusCode;  //XXX ???
+        STAState state;
+        //int consecFailedTrans;  //XXX
+        //double expiry;          //XXX
+        //ReasonCode reasonCode;  //XXX
+        //StatusCode statusCode;  //XXX
     };
+    typedef std::map<MACAccess,STAInfo> STAList;
+    STAList staList; ///< list of STAs
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -73,3 +81,4 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 };
 
 #endif
+

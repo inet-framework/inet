@@ -34,8 +34,8 @@ void Ieee80211MgmtBase::initialize(int stage)
         PassiveQueueBase::initialize();
 
         queue.setName("80211MacQueue");
-        qlenVec.setName("queue length");
-        dropVec.setName("drops");
+        queueLenVec.setName("queue length");
+        queueDropVec.setName("queue drop count");
 
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
@@ -98,13 +98,13 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
-        dropVec.record(1);
+        queueDropVec.record(1);
         return true;
     }
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
+        queueLenVec.record(queue.length());
         return false;
     }
 }
@@ -117,7 +117,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
    cMessage *pk = (cMessage *)queue.pop();
 
     // statistics
-    qlenVec.record(queue.length());
+    queueLenVec.record(queue.length());
     return pk;
 }
 
