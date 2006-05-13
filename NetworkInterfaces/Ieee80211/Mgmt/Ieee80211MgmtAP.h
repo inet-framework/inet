@@ -84,8 +84,8 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
     STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);
 
-    /** Utility function: set fields in the given frame and send it out to the given STA */
-    void sendManagementFrame(Ieee80211ManagementFrame *frame, STAInfo *sta);
+    /** Utility function: set fields in the given frame and send it out to the address */
+    void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& destAddr);
 
     /** Utility function: creates and sends a beacon frame */
     void sendBeacon();

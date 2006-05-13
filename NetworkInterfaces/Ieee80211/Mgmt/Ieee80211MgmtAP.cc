@@ -89,12 +89,11 @@ Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFr
     return it==staList.end() ? NULL : &(it->second);
 }
 
-void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, STAInfo *sta)
+void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& destAddr)
 {
     frame->setFromDS(true);
-    frame->setReceiverAddress(sta->address);
-    frame->setSequenceNumber(0);  //XXX
-    //TBD set other fields?
+    frame->setReceiverAddress(destAddr);
+    frame->setAddress3(myAddress);
     sendOrEnqueue(frame); //FIXME or do mgmt frames have priority?
 }
 
@@ -109,7 +108,6 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setBeaconInterval(beaconInterval);
     body.setDSChannel(channelNumber);
 
-    frame->setSequenceNumber(0);  //XXX
     frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);  //XXX or what
     frame->setFromDS(true);
 
@@ -178,18 +176,28 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame
 
 void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
+    // "11.3.2 AP association procedures"
     STAInfo *sta = lookupSenderSTA(frame);
-    if (!sta || sta->status==NOT_AUTHENTICATED || sta->status==ASSOCIATED)
-        ;// TBD send error, drop frame and return
-    if (sta->status==ASSOCIATED)
-        ;// TBD send error, drop frame and return
+    if (!sta || sta->status==NOT_AUTHENTICATED)
+    {
+        // STA not authenticated: send error and return
+        Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
+        resp->setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        sendManagementFrame(resp, frame->getTransmitterAddress());
+        delete frame;
+        return;
+    }
 
-    // mark STA as associated, and send response
-    sta->status = ASSOCIATED;
+    // mark STA as associated
+    sta->status = ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
+    // send OK response
     Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
-    //XXX fill in resp frame
-    sendManagementFrame(resp, sta);
+    resp->setStatusCode(SC_SUCCESSFUL);
+    resp->setCapabilityInformation(capabilityInfo);
+    resp->setAid(0); //XXX
+    resp->setSupportedRates(supportedRates);
+    sendManagementFrame(resp, sta->address);
 }
 
 void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
@@ -246,12 +254,10 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     body.setBeaconInterval(beaconInterval);
     body.setDSChannel(channelNumber);
 
-    resp->setSequenceNumber(0);  //XXX
     resp->setReceiverAddress(staAddress);  //XXX or what
     resp->setFromDS(true);
 
-    sendOrEnqueue(resp); // FIXME it's not that simple! must insert at front of the queue,
-                          // plus there are special timing requirements...
+    sendManagementFrame(resp, staAddress); // FIXME it might be not that simple, cf beacon...
 }
 
 void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)

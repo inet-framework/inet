@@ -53,6 +53,9 @@ struct Ieee80211HandoverParameters
         double estAvailBW;
 };
 
+//
+// 802.11 reason code; values correspond to the standard.
+//
 enum Ieee80211ReasonCode
 {
     RC_UNSPECIFIED = 1;
@@ -66,19 +69,22 @@ enum Ieee80211ReasonCode
     RC_NONAUTH_ASS_REQUEST = 9;
 };
 
+//
+// 802.11 status code; values correspond to the standard.
+//
 enum Ieee80211StatusCode
 {
     SC_SUCCESSFUL = 0;
     SC_UNSPECIFIED = 1;
-    SC_UNSUP_CAP = 2;
-    SC_RESASS_DENIED = 3;
-    SC_ASS_DENIED_UNKNOWN = 4;
-    SC_AUTH_ALG0_UNSUP = 5;
-    SC_AUTH_OUT_OF_SEQ = 6;
-    SC_CHALLANGE_FAILURE = 7;
-    SC_AUTH_TIMEOUT = 8;
-    SC_ASS_TOO_MANY_MS = 9;
-    SC_DATARATE_SUP = 10;
+    SC_UNSUP_CAP = 10;
+    SC_REASS_DENIED = 11;
+    SC_ASS_DENIED_UNKNOWN = 12;
+    SC_AUTH_ALG0_UNSUP = 13;
+    SC_AUTH_OUT_OF_SEQ = 14;
+    SC_AUTH_CHALLENGE_FAIL = 15;
+    SC_AUTH_TIMEOUT = 16;
+    SC_ASS_TOO_MANY_MS = 17;
+    SC_DATARATE_UNSUP = 18;
 };
 
 //
