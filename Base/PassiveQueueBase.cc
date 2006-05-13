@@ -28,15 +28,15 @@ void PassiveQueueBase::initialize()
     WATCH(packetRequested);
 
     // statistics
-    numReceived = 0;
-    numDropped = 0;
-    WATCH(numReceived);
-    WATCH(numDropped);
+    numQueueReceived = 0;
+    numQueueDropped = 0;
+    WATCH(numQueueReceived);
+    WATCH(numQueueDropped);
 }
 
 void PassiveQueueBase::handleMessage(cMessage *msg)
 {
-    numReceived++;
+    numQueueReceived++;
     if (packetRequested>0)
     {
         packetRequested--;
@@ -46,13 +46,13 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     {
         bool dropped = enqueue(msg);
         if (dropped)
-            numDropped++;
+            numQueueDropped++;
     }
 
     if (ev.isGUI())
     {
         char buf[40];
-        sprintf(buf, "rcvd: %d pks\ndropped: %d pks", numReceived, numDropped);
+        sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
         displayString().setTagArg("t",0,buf);
     }
 }
@@ -74,7 +74,7 @@ void PassiveQueueBase::requestPacket()
 
 void PassiveQueueBase::finish()
 {
-    recordScalar("packets received", numReceived);
-    recordScalar("packets dropped", numDropped);
+    recordScalar("packets received by queue", numQueueReceived);
+    recordScalar("packets dropped by queue", numQueueDropped);
 }
 
