@@ -23,6 +23,7 @@
 #include "Ieee80211MgmtBase.h"
 #include "NotificationBoard.h"
 
+class EtherFrame;
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
@@ -46,11 +47,27 @@ class INET_API Ieee80211MgmtSimplifiedAP : public Ieee80211MgmtBase
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
 
-    /** Utility function for handleUpperMessage() */
-    virtual void distributeDataFrame(Ieee80211DataFrame *frame);
+    /**
+     * Utility function: sends back a data frame we received from a STA
+     * to the wireless LAN, after tweaking fromDS/toDS bits and shuffling
+     * addresses as needed.
+     */
+    virtual void distributeReceivedDataFrame(Ieee80211DataFrame *frame);
 
-    /** Utility function: converts the frame to EtherFrame, and sends it up to the higher layer (RelayUnit) */
-    virtual void sendUpACopy(Ieee80211DataFrame *frame);
+    /**
+     * Utility function: converts EtherFrame to Ieee80211Frame. This is needed
+     * because MACRelayUnit which we use for LAN bridging functionality deals
+     * with EtherFrames.
+     */
+    virtual Ieee80211DataFrame *convertTo80211(EtherFrame *ethframe);
+
+    /**
+     * Utility function: converts the given frame to EtherFrame. The original
+     * frame is left untouched (the encapsulated payload msg gets duplicated).
+     * This function is needed because MACRelayUnit which we use for LAN bridging
+     * functionality deals with EtherFrames.
+     */
+    virtual EtherFrame *createEtherFrame(Ieee80211DataFrame *frame);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
