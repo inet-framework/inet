@@ -182,7 +182,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
     {
         // STA not authenticated: send error and return
         Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
-        resp->setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
         return;
@@ -193,10 +193,11 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
 
     // send OK response
     Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
-    resp->setStatusCode(SC_SUCCESSFUL);
-    resp->setCapabilityInformation(capabilityInfo);
-    resp->setAid(0); //XXX
-    resp->setSupportedRates(supportedRates);
+    Ieee80211AssociationResponseFrameBody& body = resp->getBody();
+    body.setStatusCode(SC_SUCCESSFUL);
+    body.setCapabilityInformation(capabilityInfo);
+    body.setAid(0); //XXX
+    body.setSupportedRates(supportedRates);
     sendManagementFrame(resp, sta->address);
 }
 
@@ -207,9 +208,29 @@ void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationRespons
 
 void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
+    // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
     STAInfo *sta = lookupSenderSTA(frame);
-    delete frame;
-    //TBD ...
+    if (!sta || sta->status==NOT_AUTHENTICATED)
+    {
+        // STA not authenticated: send error and return
+        Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
+        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        sendManagementFrame(resp, frame->getTransmitterAddress());
+        delete frame;
+        return;
+    }
+
+    // mark STA as associated
+    sta->status = ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
+
+    // send OK response
+    Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp(OK)");
+    Ieee80211ReassociationResponseFrameBody& body = resp->getBody();
+    body.setStatusCode(SC_SUCCESSFUL);
+    body.setCapabilityInformation(capabilityInfo);
+    body.setAid(0); //XXX
+    body.setSupportedRates(supportedRates);
+    sendManagementFrame(resp, sta->address);
 }
 
 void Ieee80211MgmtAP::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
