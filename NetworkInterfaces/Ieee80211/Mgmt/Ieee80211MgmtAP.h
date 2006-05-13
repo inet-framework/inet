@@ -20,6 +20,7 @@
 #define IEEE80211_MGMT_AP_H
 
 #include <omnetpp.h>
+#include <map>
 #include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 
@@ -32,23 +33,34 @@
  */
 class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 {
-  protected:
+  public:
     /** State of a STA */
-    enum STAState {NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
+    enum STAStatus {NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
 
     /** Sub-states within STAState NOT_AUTHENTICATED to track progress of authentication process. XXX needed? */
-    enum STAAuthState {AUTH_NOTYETSTARTED, AUTH_CHALLENGESENT};
+    enum STAAuthStatus {AUTH_NOTYETSTARTED, AUTH_CHALLENGESENT};
 
     /** Describes a STA */
     struct STAInfo {
         MACAddress address;
-        STAState state;
+        STAStatus status;
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX
         //ReasonCode reasonCode;  //XXX
         //StatusCode statusCode;  //XXX
     };
-    typedef std::map<MACAccess,STAInfo> STAList;
+
+    struct MAC_compare {
+        bool operator()(const MACAddress& u1, const MACAddress& u2) const {return u1.compareTo(u2) < 0;}
+    };
+    typedef std::map<MACAddress,STAInfo, MAC_compare> STAList;
+
+  protected:
+    // configuration
+    std::string ssid;
+    simtime_t beaconInterval;
+
+    // state
     STAList staList; ///< list of STAs
 
   protected:
@@ -63,6 +75,12 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
+
+    /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
+    STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);
+
+    /** Utility function: set fields in the given frame and send it out to the given STA */
+    void sendManagementFrame(Ieee80211ManagementFrame *frame, STAInfo *sta);
 
     /** @name Processing of different frame types */
     //@{

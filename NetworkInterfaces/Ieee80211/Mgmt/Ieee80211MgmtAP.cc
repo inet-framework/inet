@@ -24,10 +24,24 @@
 
 Define_Module(Ieee80211MgmtAP);
 
+static std::ostream& operator<< (std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
+{
+    os << "state:" << sta.status;
+    return os;
+}
 
 void Ieee80211MgmtAP::initialize(int stage)
 {
     Ieee80211MgmtAPBase::initialize(stage);
+
+    if (stage==0)
+    {
+        ssid = par("ssid").stringValue();
+        beaconInterval = par("beaconInterval");
+        WATCH(ssid);
+        WATCH(beaconInterval);
+        WATCH_MAP(staList);
+    }
 }
 
 void Ieee80211MgmtAP::handleTimer(cMessage *msg)
@@ -51,6 +65,20 @@ void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *deta
     //TBD
 }
 
+Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFrame *frame)
+{
+    STAList::iterator it = staList.find(frame->getTransmitterAddress());
+    return it==staList.end() ? NULL : &(it->second);
+}
+
+void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, STAInfo *sta)
+{
+    frame->setFromDS(true);
+    frame->setReceiverAddress(sta->address);
+    //TBD set other fields?
+    sendOrEnqueue(frame); //FIXME or do mgmt frames have priority?
+}
+
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
     // check toDS bit
@@ -61,12 +89,25 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         return;
     }
 
-    // possibly send frame to the other (Ethernet, etc) ports of the AP as well
-    if (hasRelayUnit)
-        send(createEtherFrame(frame), "uppergateOut");
-
-    // send it out to the destination STA
-    distributeReceivedDataFrame(frame);
+    // look up destination address in our STA list
+    STAList::iterator it = staList.find(frame->getAddress3());
+    EV << it->first;
+    if (it==staList.end())
+    {
+        // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
+        if (hasRelayUnit)
+            send(createEtherFrame(frame), "uppergateOut");
+        else
+            delete frame;
+    }
+    else
+    {
+        // dest address is our STA, but is it already associated?
+        if (it->second.status == ASSOCIATED)
+            distributeReceivedDataFrame(frame); // send it out to the destination STA
+        else
+            delete frame;
+    }
 }
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
@@ -81,7 +122,17 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame
 
 void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
-    //TBD
+    STAInfo *sta = lookupSenderSTA(frame);
+    if (!sta || sta->status==NOT_AUTHENTICATED || sta->status==ASSOCIATED)
+        ;// TBD send error, drop frame and return
+    if (sta->status==ASSOCIATED)
+        ;// TBD send error, drop frame and return
+
+    // mark STA as associated, and send response
+    sta->status = ASSOCIATED;
+
+    Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
+    sendManagementFrame(resp, sta);
 }
 
 void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
