@@ -37,14 +37,11 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     /** State of a STA */
     enum STAStatus {NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
 
-    /** Sub-states within STAState NOT_AUTHENTICATED to track progress of authentication process. XXX needed? */
-    enum STAAuthStatus {AUTH_NOTYETSTARTED, AUTH_CHALLENGESENT};
-
     /** Describes a STA */
     struct STAInfo {
         MACAddress address;
         STAStatus status;
-        STAAuthStatus authStatus;
+        int authSeqExpected;  // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX
         //ReasonCode reasonCode;  //XXX
@@ -61,6 +58,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     std::string ssid;
     int channelNumber;
     simtime_t beaconInterval;
+    int numAuthSteps;
     Ieee80211SupportedRatesElement supportedRates;
     Ieee80211CapabilityInformation capabilityInfo;
 

@@ -40,9 +40,13 @@ void Ieee80211MgmtAP::initialize(int stage)
         ssid = par("ssid").stringValue();
         channelNumber = par("channelNumber");
         beaconInterval = par("beaconInterval");
+        numAuthSteps = par("numAuthSteps");
+        if (numAuthSteps!=2 && numAuthSteps!=4)
+            error("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
         WATCH(ssid);
-        WATCH(beaconInterval);
         WATCH(channelNumber);
+        WATCH(beaconInterval);
+        WATCH(numAuthSteps);
         WATCH_MAP(staList);
 
         //TBD fill in supportedRates and capabilityInfo
@@ -123,6 +127,7 @@ void Ieee80211MgmtAP::sendBeacon()
 
     sendOrEnqueue(frame); // FIXME it's not that simple! must insert at front of the queue,
                           // plus there are special timing requirements...
+                          // FIXME and MAC should synchronize to beacon timing?
 }
 
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
@@ -157,18 +162,47 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
+    // create STA entry if needed
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta)
     {
-        // create STA entry
         MACAddress staAddress = frame->getTransmitterAddress();
         sta = &staList[staAddress]; // this implicitly creates a new entry
         sta->address = staAddress;
         sta->status = NOT_AUTHENTICATED;
-        sta->authStatus = AUTH_NOTYETSTARTED;
+        sta->authSeqExpected = 1;
     }
 
-    //TBD....
+    // check authentication sequence number is OK
+    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    if (frameAuthSeq != sta->authSeqExpected)
+    {
+        // wrong sequence number: send error and return
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(ERR)");
+        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        sendManagementFrame(resp, frame->getTransmitterAddress());
+        delete frame;
+        sta->authSeqExpected = 1; // go back to start square
+        return;
+    }
+
+    // send OK response (we don't model the cryptography part, just assume
+    // successful authentication every time)
+    Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(OK)");
+    resp->getBody().setSequenceNumber(frameAuthSeq);
+    resp->getBody().setStatusCode(SC_SUCCESSFUL);
+    // XXX frame length could be increased to account for challenge text length etc.
+    sendManagementFrame(resp, frame->getTransmitterAddress());
+
+    // station is authenticated if it made it through the required number of steps
+    if (frameAuthSeq+1 == numAuthSteps)
+    {
+        sta->status = AUTHENTICATED; // XXX maybe only when ACK of this frame arrives?
+    }
+    else
+    {
+        sta->authSeqExpected += 2;
+    }
 }
 
 void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
@@ -178,9 +212,9 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame
 
     if (sta)
     {
-        // mark as not authenticated; alternetively, it could also be removed from staList
+        // mark STA as not authenticated; alternatively, it could also be removed from staList
         sta->status = NOT_AUTHENTICATED;
-        sta->authStatus = AUTH_NOTYETSTARTED;
+        sta->authSeqExpected = 1;
     }
 }
 
@@ -284,10 +318,6 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     body.setTimestamp(simTime()); //XXX this is to be refined
     body.setBeaconInterval(beaconInterval);
     body.setDSChannel(channelNumber);
-
-    resp->setReceiverAddress(staAddress);  //XXX or what
-    resp->setFromDS(true);
-
     sendManagementFrame(resp, staAddress); // FIXME it might be not that simple, cf beacon...
 }
 
