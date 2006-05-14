@@ -44,8 +44,6 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
         int authSeqExpected;  // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX
-        //ReasonCode reasonCode;  //XXX
-        //StatusCode statusCode;  //XXX
     };
 
     struct MAC_compare {
