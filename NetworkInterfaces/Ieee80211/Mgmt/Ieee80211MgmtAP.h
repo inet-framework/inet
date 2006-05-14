@@ -43,7 +43,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
         STAStatus status;
         int authSeqExpected;  // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
-        //double expiry;          //XXX
+        //double expiry;          //XXX association should expire after a while if STA is silent?
     };
 
     struct MAC_compare {

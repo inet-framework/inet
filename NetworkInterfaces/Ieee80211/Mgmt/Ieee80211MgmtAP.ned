@@ -33,7 +33,8 @@ simple Ieee80211MgmtAP
     parameters:
         ssid: string,
         beaconInterval: numeric const,
-        frameCapacity: numeric;
+        frameCapacity: numeric const, // maximum queue length
+        numAuthSteps: numeric const; // use 2 for Open System auth, 4 for WEP
         //dataRate: numeric; XXX TBD
     gates:
         in: uppergateIn; // from MACRelayUnit; can be left unconnected

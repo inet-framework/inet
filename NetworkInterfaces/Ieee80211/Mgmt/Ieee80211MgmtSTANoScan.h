@@ -30,21 +30,10 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtSTANoScan : public Ieee80211MgmtBase
 {
   protected:
     enum AssocState {SCANNING, NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
-
-    // Describes an AP during scanning
-    struct APInfo
-    {
-        MACAddress address;
-        int channel;
-        double rxpower;  // received power from AP
-    };
-
-    typedef std::list<APInfo> AccessPointList;
-    AccessPointList apList;
 
     // Associated Access Point
     struct AssociateAP

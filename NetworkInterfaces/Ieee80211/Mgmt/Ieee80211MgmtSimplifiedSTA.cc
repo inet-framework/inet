@@ -32,6 +32,7 @@ void Ieee80211MgmtSimplifiedSTA::initialize(int stage)
         accessPointAddress.setAddress(par("accessPointAddress").stringValue());
         accessPointChannel = par("accessPointChannel");
         receiveSequence = 0;
+        //XXX todo: tune MAC to the given channel
     }
 }
 

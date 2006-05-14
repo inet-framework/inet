@@ -17,14 +17,14 @@
 //
 
 
-#include "Ieee80211MgmtSTA.h"
+#include "Ieee80211MgmtSTANoScan.h"
 #include "Ieee802Ctrl_m.h"
 
 
-Define_Module(Ieee80211MgmtSTA);
+Define_Module(Ieee80211MgmtSTANoScan);
 
 
-void Ieee80211MgmtSTA::initialize(int stage)
+void Ieee80211MgmtSTANoScan::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
     if (stage==0)
@@ -33,19 +33,19 @@ void Ieee80211MgmtSTA::initialize(int stage)
     }
 }
 
-void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
+void Ieee80211MgmtSTANoScan::handleTimer(cMessage *msg)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtSTANoScan::handleUpperMessage(cMessage *msg)
 {
     // XXX revise
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
+Ieee80211DataFrame *Ieee80211MgmtSTANoScan::encapsulate(cMessage *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
 
@@ -64,63 +64,63 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     return frame;
 }
 
-void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtSTANoScan::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
+void Ieee80211MgmtSTANoScan::handleDataFrame(Ieee80211DataFrame *frame)
 {
     sendUp(decapsulate(frame));
 }
 
-void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
+void Ieee80211MgmtSTANoScan::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
+void Ieee80211MgmtSTANoScan::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
+void Ieee80211MgmtSTANoScan::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
     dropManagementFrame(frame);
 }
 
-void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
+void Ieee80211MgmtSTANoScan::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
+void Ieee80211MgmtSTANoScan::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
     dropManagementFrame(frame);
 }
 
-void Ieee80211MgmtSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
+void Ieee80211MgmtSTANoScan::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
+void Ieee80211MgmtSTANoScan::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
+void Ieee80211MgmtSTANoScan::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
+void Ieee80211MgmtSTANoScan::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
     //TBD
 }
 
-void Ieee80211MgmtSTA::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
+void Ieee80211MgmtSTANoScan::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
     dropManagementFrame(frame);
 }
