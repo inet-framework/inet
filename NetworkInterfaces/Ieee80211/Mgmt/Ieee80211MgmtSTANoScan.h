@@ -33,16 +33,22 @@
 class INET_API Ieee80211MgmtSTANoScan : public Ieee80211MgmtBase
 {
   protected:
+    // configuration:
+    simtime_t authenticationTimeout;
+    simtime_t associationTimeout;
+
+    // state:
     enum AssocState {SCANNING, NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
 
     // Associated Access Point
-    struct AssociateAP
+    struct APInfo
     {
         MACAddress address;
         int channel;
         int receiveSequence;
+        cMessage *authTimeoutMsg;
     };
-    AssociateAP associateAP;
+    APInfo associateAP;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -56,6 +62,9 @@ class INET_API Ieee80211MgmtSTANoScan : public Ieee80211MgmtBase
 
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
+
+    /** Utility function */
+    virtual void startAuthentication(APInfo *ap);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
