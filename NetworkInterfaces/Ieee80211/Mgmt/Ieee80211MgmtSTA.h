@@ -24,6 +24,8 @@
 #include "NotificationBoard.h"
 
 
+//FIXME TBD implement channel switching, bitrate switching (involves notification of MAC, SnrEval, Decider)
+
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
@@ -32,23 +34,7 @@
  */
 class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 {
-  public:
-    class AbstractBehaviour
-    {
-      public:
-        virtual void authenticationError() = 0;
-        virtual void authenticationTimedOut() = 0;
-        virtual void authenticationSuccess() = 0;
-        virtual void associationTimedOut() = 0;
-        virtual void associationSuccess() = 0;
-        virtual void scanResultsReady() = 0;
-    };
-
   protected:
-    // configuration:
-    simtime_t authenticationTimeout;
-    simtime_t associationTimeout;
-
     // state:
     enum Status {SCANNING, NOT_AUTHENTICATED, ASSOCIATED}; // authentication state is managed per-AP
     Status status;

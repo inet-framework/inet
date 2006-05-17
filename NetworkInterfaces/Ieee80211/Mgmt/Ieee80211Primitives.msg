@@ -20,25 +20,32 @@
 //
 cplusplus
 {{
-#include "MACAddress.h"
+#include "Ieee80211MgmtFrames_m.h"
 }};
 class noncobject MACAddress;
+class noncobject Ieee80211CapabilityInformation;
+class noncobject Ieee80211SupportedRatesElement;
 
+enum AuthenticationType
+{
+    AUTHTYPE_OPENSYSTEM = 1;
+    AUTHTYPE_SHAREDKEY = 2;
+};
 
 //
-// 10.3.2.1 MLME-SCAN.request
+// Losely based on MLME-SCAN.request
 //
 class Ieee80211Prim_ScanRequest
 {
     fields:
         bool BSSType;
         MACAddress BSSID;
-        String SSID;
+        string SSID;
         bool activeScan;
-        ProbeDelay,
-        ChannelList,
-        MinChannelTime,
-        MaxChannelTime
+        double probeDelay;
+        int channelList[];
+        double minChannelTime;
+        double maxChannelTime;
 };
 
 class Ieee80211Prim_BSSDescription
@@ -47,18 +54,64 @@ class Ieee80211Prim_BSSDescription
         MACAddress BSSID;
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
-        Ieee80211CapabilityInformation capabilityInformation;
+        Ieee80211CapabilityInformation capabilityInfo;
         unsigned short beaconInterval;
         unsigned short DSChannel;
 };
 
 //
-// 10.3.2.2 MLME-SCAN.confirm
+// Loosely based on MLME-SCAN.confirm
 //
 class Ieee80211Prim_ScanConfirm
 {
     fields:
         Ieee80211Prim_BSSDescription bssList[];
-        ResultCode result;
 };
+
+//
+// Losely based on MLME-AUTHENTICATE.request
+//
+class Ieee80211Prim_AuthenticateRequest
+{
+    fields:
+        MACAddress address;
+        int authType enum(AuthenticationType);
+        double timeout;
+};
+
+//
+// Losely based on MLME-AUTHENTICATE.confirm
+//
+class Ieee80211Prim_AuthenticateConfirm
+{
+    fields:
+        MACAddress address;
+        int authType enum(AuthenticationType);
+        int result; //=0 OK
+};
+
+//
+// Losely based on MLME-ASSOCIATE.request
+//
+class Ieee80211Prim_AssociateRequest
+{
+    fields:
+        MACAddress address;
+        double timeout;
+        Ieee80211CapabilityInformation capablityInfo;
+        int listenInterval; // unsupported by MAC
+};
+
+//
+// Losely based on MLME-ASSOCIATE.confirm
+//
+class Ieee80211Prim_AssociateConfirm
+{
+    fields:
+        int result; // SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
+};
+
+
+// TODO: deauthenticate, disassociate, reassociate, ...
+
 
