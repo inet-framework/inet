@@ -27,16 +27,9 @@
 simple Ieee80211MgmtSTA
     parameters:
         frameCapacity: numeric;
-        hoThresholdPower: numeric const, // dBm; handover threshold power
-        probeResponseTimeout: numeric const,
         authenticationTimeout: numeric const,
         associationTimeout: numeric const,
         retry: numeric const,
-        fastActiveScan: bool,
-        scanShortCircuit: bool,
-        channelsToScan: string,
-        activeScan: bool,
-        channelScanTime: numeric,
         dataRate: numeric;
     gates:
         in: uppergateIn;

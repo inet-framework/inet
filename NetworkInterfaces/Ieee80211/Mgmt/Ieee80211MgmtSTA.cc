@@ -23,19 +23,29 @@
 
 Define_Module(Ieee80211MgmtSTA);
 
+#define MK_AUTH_TIMEOUT 1
+
 
 void Ieee80211MgmtSTA::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
     if (stage==0)
     {
-        // XXX read params etc
+        authenticationTimeout = par("authenticationTimeout");
+        associationTimeout = par("associationTimeout");
     }
 }
 
 void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 {
-    //TBD
+    if (msg->kind()==MK_AUTH_TIMEOUT)
+    {
+        //TBD handle authentication timeout
+    }
+    else
+    {
+        error("internal error: unrecognized timer '%s'", msg->name());
+    }
 }
 
 void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
@@ -64,6 +74,20 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     return frame;
 }
 
+void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, )
+{
+    // create and send first authentication frame
+    Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
+    frame->getBody().setSequenceNumber(1);
+    // XXX frame length could be increased to account for challenge text length etc.
+    sendManagementFrame(frame, ap->address);
+
+    // schedule timeout
+    ASSERT(ap->timeoutMsg==NULL);
+    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
+    scheduleAt(simTime()+authenticationTimeout, ap->timeoutMsg);
+}
+
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
@@ -77,7 +101,13 @@ void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    //TBD
+    if (!ap->authTimeoutMsg || !ap->authTimeoutMsg->isScheduled())
+    {
+        // there is no authentication in progress -- discard frame
+        delete frame;
+        return;
+    }
+
 }
 
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
@@ -112,12 +142,18 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *f
 
 void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    //TBD
+    if (status==SCANNING)
+    {
+        // add access point to list
+    }
 }
 
 void Ieee80211MgmtSTA::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    //TBD
+    if (status==SCANNING)
+    {
+        // add access point to list
+    }
 }
 
 void Ieee80211MgmtSTA::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)

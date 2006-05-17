@@ -32,28 +32,42 @@
  */
 class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 {
-  protected:
-    enum AssocState {SCANNING, NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
+  public:
+    class AbstractBehaviour
+    {
+      public:
+        virtual void authenticationError() = 0;
+        virtual void authenticationTimedOut() = 0;
+        virtual void authenticationSuccess() = 0;
+        virtual void associationTimedOut() = 0;
+        virtual void associationSuccess() = 0;
+        virtual void scanResultsReady() = 0;
+    };
 
-    // Describes an AP during scanning
+  protected:
+    // configuration:
+    simtime_t authenticationTimeout;
+    simtime_t associationTimeout;
+
+    // state:
+    enum Status {SCANNING, NOT_AUTHENTICATED, ASSOCIATED}; // authentication state is managed per-AP
+    Status status;
+
+    // Associated Access Point
     struct APInfo
     {
         MACAddress address;
         int channel;
-        double rxpower;  // received power from AP
+        bool authenticated;
+        int receiveSequence;
+        cMessage *timeoutMsg; // authentication/association timeout
     };
+    APInfo associateAP;
 
     typedef std::list<APInfo> AccessPointList;
     AccessPointList apList;
 
-    // Associated Access Point
-    struct AssociateAP
-    {
-        MACAddress address;
-        int channel;
-        int receiveSequence;
-    };
-    AssociateAP associateAP;
+    APInfo scanningResultAPList;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -67,6 +81,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
+
+    /** Utility function */
+    virtual void startAuthentication(APInfo *ap);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
