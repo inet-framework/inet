@@ -124,7 +124,7 @@ class INET_API ChannelControl : public cSimpleModule
     const TransmissionList& getOngoingTransmissions(const int channel);
 
     /** @brief Notifies the channel control with an ongoing transmission */
-    void ChannelControl::addOngoingTransmission(HostRef h, AirFrame *frame);
+    void addOngoingTransmission(HostRef h, AirFrame *frame);
 
     /** @brief Returns the host's position */
     const Coord& getHostPosition(HostRef h)  {return h->pos;}
