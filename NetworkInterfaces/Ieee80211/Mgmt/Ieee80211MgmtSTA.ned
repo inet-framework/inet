@@ -26,7 +26,7 @@
 //
 simple Ieee80211MgmtSTA
     parameters:
-        frameCapacity: numeric;
+        frameCapacity: numeric,
         authenticationTimeout: numeric const,
         associationTimeout: numeric const,
         retry: numeric const,
