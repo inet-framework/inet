@@ -31,8 +31,8 @@ void Ieee80211MgmtSTA::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage==0)
     {
-        authenticationTimeout = par("authenticationTimeout");
-        associationTimeout = par("associationTimeout");
+//XXX        authenticationTimeout = par("authenticationTimeout");
+//XXX        associationTimeout = par("associationTimeout");
     }
 }
 
@@ -74,18 +74,18 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     return frame;
 }
 
-void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, )
+void Ieee80211MgmtSTA::startAuthentication(APInfo *ap)
 {
-    // create and send first authentication frame
-    Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
-    frame->getBody().setSequenceNumber(1);
-    // XXX frame length could be increased to account for challenge text length etc.
-    sendManagementFrame(frame, ap->address);
-
-    // schedule timeout
-    ASSERT(ap->timeoutMsg==NULL);
-    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
-    scheduleAt(simTime()+authenticationTimeout, ap->timeoutMsg);
+//    // create and send first authentication frame
+//    Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
+//    frame->getBody().setSequenceNumber(1);
+//    // XXX frame length could be increased to account for challenge text length etc.
+//    sendManagementFrame(frame, ap->address);
+//
+//    // schedule timeout
+//    ASSERT(ap->timeoutMsg==NULL);
+//    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
+//    scheduleAt(simTime()+authenticationTimeout, ap->timeoutMsg);
 }
 
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
@@ -101,12 +101,12 @@ void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    if (!ap->authTimeoutMsg || !ap->authTimeoutMsg->isScheduled())
-    {
-        // there is no authentication in progress -- discard frame
-        delete frame;
-        return;
-    }
+//    if (!ap->authTimeoutMsg || !ap->authTimeoutMsg->isScheduled())
+//    {
+//        // there is no authentication in progress -- discard frame
+//        delete frame;
+//        return;
+//    }
 
 }
 
