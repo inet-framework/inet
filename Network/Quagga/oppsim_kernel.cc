@@ -67,28 +67,48 @@ struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
         return __cmsg;
 }
 
+static std::vector<struct servent> * services = NULL;
 
-static struct servent services[] =
+static void add_service(char *name, int port, char *proto)
 {
-    {"zebrasrv", NULL, 2600, "tcp"},
-    {"zebra", NULL, 2601, "tcp"},
-    {"ripd", NULL, 2602, "tcp"},
-    {"ospfd", NULL, 2604, "tcp"},
-    {"router", NULL, 520, "udp"},
-    {0, 0, 0}
+	struct servent ser;
+	ser.s_name = name;
+	ser.s_aliases = NULL;
+	ser.s_port = htons(port);
+	ser.s_proto = proto;
+	(*services).push_back(ser);
+}
+
+static void initialize_services() 
+{
+	if(services) return;
+	
+	// FIXME load settings from /etc/services
+	// (also services must be per-daemon then)
+	
+	services = new std::vector<struct servent>;
+	
+	add_service("zebrasrv", 2600, "tcp");
+	add_service("zebra", 2601, "tcp");
+	add_service("ripd", 2602, "tcp");
+	add_service("ospfd", 2604, "tcp");
+	add_service("router", 520, "udp");	
+	add_service("ospfapi", 2607, "tcp");    
 };
 
 struct servent *oppsim_getservbyname(const char *name, const char *proto)
 {
-    for(int i = 0; services[i].s_name; i++)
+    initialize_services();
+	
+    for(int i = 0; (*services).size(); i++)
     {
-        if(strcmp(name, services[i].s_name))
+        if(strcmp(name, (*services)[i].s_name))
             continue;
 
-        if(strcmp(proto, services[i].s_proto))
+        if(strcmp(proto, (*services)[i].s_proto))
             continue;
 
-        return &services[i];
+        return &(*services)[i];
     }
 
     ASSERT(false);
@@ -193,7 +213,7 @@ void oppsim_sync(void)
 
 int oppsim_setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "setsockopt: socket=" << socket << " level=" << level << " option_name=" << option_name <<
             " option_value=" << option_value << " option_len=" << option_len << endl;
@@ -390,7 +410,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
 int oppsim_socket(int domain, int type, int protocol)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "socket: domain=" << domain << " type=" << type << " protocol=" << protocol << endl;
 
@@ -445,7 +465,7 @@ int oppsim_fcntl(int fildes, int cmd, ...)
 
 int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "getsockname: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
@@ -496,7 +516,12 @@ int getIpHeader(SocketMsg *srcMsg, IPControlInfo *srcInfo, void* &dstPtr, int &d
 
 ssize_t receive_stream(int socket, void *buf, size_t nbyte)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
+
+    while(dm->isBlocking(socket) && !dm->getSocketMessage(socket, false))
+    {
+        dm->receiveAndHandleMessage(0.0);
+    }
 
     int bread = 0;
 
@@ -545,7 +570,7 @@ ssize_t receive_stream(int socket, void *buf, size_t nbyte)
 
 ssize_t receive_raw(int socket, struct msghdr *message, int flags)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     ASSERT(message->msg_iovlen == 1);
 
@@ -619,7 +644,7 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
 
 ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, struct sockaddr *address, socklen_t *address_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "recvfrom: socket=" << socket << " buffer=" << buffer << " length=" << length << " flags=" <<
             flags << " address=" << address << " address_len=" << address_len << endl;
@@ -686,7 +711,7 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
 
 ssize_t nl_request(int socket, const void *message, size_t length, int flags)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "netlink request, process immediately and store result" << endl;
 
@@ -778,7 +803,7 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
 
 ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "sendmsg: socket=" << socket << " msghdr=" << message << " flags=" << flags << endl;
 
@@ -803,7 +828,7 @@ ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 
 ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "sendto: socket=" << socket << " message=" << message << " length=" << length << " flags=" << flags <<
             " dest_addr=" << dest_addr << " dest_len=" << dest_len << endl;
@@ -863,7 +888,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 
 ssize_t oppsim_recvmsg(int socket, struct msghdr *message, int flags)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "recvmsg: socket=" << socket << " message=" << message << " flags=" << flags << endl;
 
@@ -895,7 +920,7 @@ int oppsim_stat(const char *path, struct stat *buf)
 
 FILE* oppsim_fopen(const char * filename, const char * mode)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "fopen: filename=" << filename << " mode=" << mode << endl;
 
@@ -922,7 +947,7 @@ int oppsim_getpagesize()
 
 int oppsim_open(const char *path, int oflag, ...)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "open: path=" << path << " oflag=" << oflag << endl;
 
@@ -951,181 +976,80 @@ int oppsim_open(const char *path, int oflag, ...)
 
 int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "select: nfds=" << nfds << " readfds=" << readfds << " writefds=" << writefds << " errorfds=" <<
             errorfds << " timeout=" << timeout << endl;
 
-    // see if any socket is ready
-
     int success = 0;
-
-    for(int i = 0; i < nfds; i++)
+    
+    double limit;
+    if(timeout)
     {
-        if(FD_ISSET(i, readfds))
-        {
-            EV << "read " << i << endl;
-
-            if(dm->getSocketMessage(i))
-            {
-                EV << "this socket is ready" << endl;
-                ++success;
-            }
-        }
-
-        if(FD_ISSET(i, writefds))
-        {
-            EV << "write " << i << endl;
-
-            if(true)
-            {
-                EV << "write socket is always ready" << endl;
-                ++success;
-            }
-        }
-
-        if(FD_ISSET(i, errorfds))
-        {
-            EV << "error " << i << endl;
-
-            // exceptions not supported at the moment
-        }
+        limit = simulation.simTime() + (double)timeout->tv_sec + (double)timeout->tv_usec/1000000;
+        ASSERT(limit > simulation.simTime());
     }
 
-    if(!success)
+    while(!success)
     {
-        double limit;
-
-        if(timeout)
+        EV << "select: checking descriptors:" << endl;
+        
+        // first see if any descriptor is ready
+        for(int i = 0; i < nfds; i++)
         {
-            limit = simulation.simTime() + (double)timeout->tv_sec + (double)timeout->tv_usec/1000000;
-            ASSERT(limit > simulation.simTime());
-        }
-
-        cMessage *msg;
-
-        while(true)
-        {
-            dm->setblocked(true);
-
-            EV << "we have to block ";
-
-            if(timeout)
+            if(FD_ISSET(i, readfds))
             {
-                ASSERT(limit != simulation.simTime());
-
-                EV << "with timeout " << (limit - simulation.simTime()) << " secs" << endl;
-                msg = dm->receive(limit - simulation.simTime());
-            }
-            else
-            {
-                EV << "with no timeout" << endl;
-                msg = dm->receive();
-                ASSERT(msg);
-            }
-
-            dm->setblocked(false);
-
-            current_module = DAEMON;
-            __activeVars = current_module->varp;
-
-            if(!msg)
-            {
-                ASSERT(timeout);
-
-                EV << "timeout expired" << endl;
-
-                return 0;
-            }
-            else
-            {
-                EV << "received message=" << msg->name() << " while blocked in select" << endl;
-
-                int socket;
-
-                UDPControlInfo *udpControlInfo = dynamic_cast<UDPControlInfo*>(msg->controlInfo());
-                TCPCommand *tcpCommand = dynamic_cast<TCPCommand*>(msg->controlInfo());
-                IPControlInfo *ipControlInfo = dynamic_cast<IPControlInfo*>(msg->controlInfo());
-
-                if(udpControlInfo)
+                EV << "read " << i;
+    
+                if(dm->getSocketMessage(i))
                 {
-                    // UDP packet
-
-                    ASSERT(!strcmp(msg->name(), "data"));
-
-                    socket = udpControlInfo->userId();
-
-                    ASSERT(socket >= 0);
-
-                    dm->enqueueSocketMessage(socket, msg);
-                }
-                else if(tcpCommand)
-                {
-                    // TCP packet
-
-                    socket = dm->findTcpSocket(msg);
-
-                    if(socket < 0)
-                    {
-                        // unknown socket, connection establishment
-                        ASSERT(!strcmp(msg->name(), "ESTABLISHED"));
-
-                        // find parent socket
-                        socket = dm->findServerSocket(check_and_cast<TCPConnectInfo*>(tcpCommand));
-
-                        // create new socket
-                        int csocket = dm->createTcpSocket(msg);
-
-                        // put in the list for accept
-                        dm->enqueueConnection(socket, csocket);
-                    }
-                    else
-                    {
-                        // known socket, incomming data
-                        dm->getTcpSocket(socket)->processMessage(msg);
-                    }
-                }
-                else if(ipControlInfo)
-                {
-                    // IP Packet
-
-                    ASSERT(!strcmp(msg->name(), "data"));
-
-                    socket = dm->findRawSocket(ipControlInfo->protocol());
-
-                    if(socket < 0)
-                    {
-                        EV << "no recipient (socket) for this message, discarding" << endl;
-
-                        delete msg;
-                        continue;
-                    }
-
-                    ASSERT(socket >= 0);
-
-                    dm->enqueueSocketMessage(socket, msg);
-                }
-                else
-                {
-                    ASSERT(false);
-                }
-
-                if(FD_ISSET(socket, readfds))
-                {
-                    EV << "event on watched socket=" << socket << endl;
+                    EV << " (ready)" << endl;
                     ++success;
-                    break;
-                }
-                else
-                {
-                    EV << "socket=" << socket << " not watched, ignore" << endl;
                     continue;
                 }
-
+                else if(dm->getIfTcpSocket(i) && dm->hasQueuedConnections(i))
+                {
+                    EV << " (ready)" << endl;
+                    ++success;
+                    continue;
+                }
+                else
+                {
+                    EV << endl;
+                }
             }
-
+    
+            if(FD_ISSET(i, writefds))
+            {
+                EV << "write " << i << " (write is always ready)" << endl;
+                ++success;
+                continue;
+            }
+    
+            if(FD_ISSET(i, errorfds))
+            {
+                EV << "error " << i << endl;
+    
+                // exceptions not supported at the moment
+            }
         }
 
+        // some descriptors are ready, we're done
+        if(success) break;
+        
+        EV << "select" << endl;
+        
+        if(timeout)
+        {
+            double d = limit - simulation.simTime();
+            if(!dm->receiveAndHandleMessage(d))
+               return 0; // timeout received before any event arrived
+        }
+        else
+        {
+            // with no timeout
+            dm->receiveAndHandleMessage(0.0);
+        }
     }
 
     ASSERT(success);
@@ -1134,12 +1058,8 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
     for(int i = 0; i < nfds; i++)
     {
-        //ev << "testing " << i << endl;
-
         if(FD_ISSET(i, readfds))
         {
-            //ev << " watched ";
-
             bool active = false;
 
             if(dm->getSocketMessage(i))
@@ -1148,7 +1068,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                 active = true;
             }
 
-            if(dm->getIfTcpSocket(i) && dm->acceptTcpSocket(i) != -1)
+            if(dm->getIfTcpSocket(i) && dm->hasQueuedConnections(i))
             {
                 ev << " active (incomming connection)" << endl;
                 active = true;
@@ -1161,13 +1081,8 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                 FD_CLR(i, readfds);
             }
         }
-        else
-        {
-            //ev << " not watched" << endl;
-        }
 
-        // write is always ready
-
+        // write is always ready, don't touch writefds
     }
 
     // exceptions not supported yet
@@ -1178,7 +1093,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
 int oppsim_close(int fildes)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "close: fildes=" << fildes << endl;
 
@@ -1201,8 +1116,18 @@ int oppsim_close(int fildes)
 
         return 0;
     }
+    
+    TCPSocket *tcp = dm->getIfTcpSocket(fildes);
+    if(tcp)
+    {
+        EV << "closing TCP socket" << endl;
+        
+        dm->closeSocket(fildes);
+        
+        return 0;
+    }
 
-    // closing TCP/RAW/NETLINK not implemented
+    // closing RAW/NETLINK not implemented
     ASSERT(false);
 }
 
@@ -1217,7 +1142,7 @@ ssize_t oppsim_writev(int fildes, const struct iovec *iov, int iovcnt)
 {
     EV << "writev: fildes=" << fildes << " iov=" << iov << " iovcnt=" << iovcnt << endl;
 
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     FILE *stream = dm->getStream(fildes);
 
@@ -1234,7 +1159,7 @@ ssize_t oppsim_writev(int fildes, const struct iovec *iov, int iovcnt)
 
 ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON;
 
     EV << "write: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
@@ -1267,7 +1192,7 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
 
 int oppsim_listen(int socket, int backlog)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "listen: socket=" << socket << " backlog=" << backlog << endl;
 
@@ -1279,7 +1204,7 @@ int oppsim_listen(int socket, int backlog)
 
 int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "bind: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
@@ -1338,11 +1263,11 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
 
 int oppsim_accept(int socket, struct sockaddr *address, socklen_t *address_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "accept: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
-    int csocket = dm->acceptTcpSocket(socket, true);
+    int csocket = dm->acceptTcpSocket(socket);
     ASSERT(csocket != -1);
 
     if(address)
@@ -1374,7 +1299,7 @@ int oppsim_ioctl(int fildes, int request, ...)
 
 ssize_t oppsim_read(int fildes, void *buf, size_t nbyte)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON;
 
     EV << "read: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
@@ -1421,7 +1346,7 @@ int oppsim_link(const char *path1, const char *path2)
 
 char *oppsim_getcwd(char *buf, size_t size)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "getcwd: buf=" << (void*)buf << " size=" << size << endl;
 
@@ -1446,7 +1371,7 @@ int oppsim_chdir(const char *path)
 
 struct passwd *oppsim_getpwnam(const char *name)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "getpwnam: name=" << name << endl;
 
@@ -1455,7 +1380,7 @@ struct passwd *oppsim_getpwnam(const char *name)
 
 struct group *oppsim_getgrnam(const char *name)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "getgrnam: name=" << name << endl;
 
@@ -1470,7 +1395,7 @@ int oppsim_setgroups(size_t size, const gid_t *list)
 
 int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "connect: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
@@ -1485,6 +1410,7 @@ int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address
     if(tcp->localAddress().isUnspecified())
     {
         // XXX FIXME this should be probably fixed in TCP layer
+        // XXX FIXME this hack doesn't work if client is already bound (with 0.0.0.0:some_port)
 
         IPAddress localAddr;
 
@@ -1508,17 +1434,44 @@ int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address
     tcp->connect(destAddr, ntohs(inaddr->sin_port));
 
     EV << "connect to destAddr=" << destAddr << " port=" << ntohs(inaddr->sin_port) << endl;
-
-    // XXX FIXME block until connection is established ???
-    // INET seems to queue request arriving prematurely
+    
+    if(dm->isBlocking(socket))
+    {
+        while(true)
+        {
+            EV << "connect" << endl;
+            
+            dm->receiveAndHandleMessage(0.0);
+            
+            if(tcp->state() == tcp->CONNECTED)
+                break;
+        } 
+        
+        EV << "connection fully established" << endl;
+    }
 
     return 0;
 }
 
 int oppsim_getpeername(int socket, struct sockaddr *address, socklen_t *address_len)
 {
-    ASSERT(false);
-    return -1;
+    Daemon *d = current_module; //DAEMON
+    
+    EV << "getpeername:  socket=" << socket << endl;
+    
+    TCPSocket *tcp = d->getTcpSocket(socket);
+    
+    ASSERT(*address_len >= sizeof(struct sockaddr_in));
+    
+    struct sockaddr_in *inaddr = (struct sockaddr_in*)address;
+    
+    inaddr->sin_family = AF_INET;
+    inaddr->sin_port = htons(tcp->remotePort());
+    inaddr->sin_addr.s_addr = htonl(tcp->remoteAddress().get4().getInt());
+    
+    *address_len = sizeof(struct sockaddr_in);
+
+    return 0;
 }
 
 void oppsim_abort()
@@ -1539,7 +1492,7 @@ void oppsim__exit(int status)
 
 int oppsim_sigaction(int sig, const struct_sigaction *act, struct_sigaction *oact)
 {
-    Daemon *dm = DAEMON;
+    Daemon *dm = current_module; //DAEMON
 
     EV << "sigaction: sig=" << sig << " act=" << act << " oact=" << oact << endl;
 

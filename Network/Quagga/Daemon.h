@@ -53,6 +53,8 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 		Netlink* getNetlinkSocket(int socket);
 		FILE* getIfStream(int fildes);
 		FILE* getStream(int fildes);
+        
+        bool isBlocking(int fildes);
 
 		int getEmptySlot();
     
@@ -62,7 +64,11 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         int createNetlinkSocket();
         int createStream(const char *path, char *mode);
         
-        int acceptTcpSocket(int socket, bool remove=false);
+        void handleReceivedMessage(cMessage *msg);
+        bool receiveAndHandleMessage(double timeout);
+        
+        bool hasQueuedConnections(int socket);
+        int acceptTcpSocket(int socket);
         void enqueueConnection(int socket, int csocket);
         cMessage* getSocketMessage(int socket, bool remove=false);
         void enqueueSocketMessage(int socket, cMessage *msg);
@@ -74,7 +80,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         int findRawSocket(int protocol);
 		int findServerSocket(TCPConnectInfo *info);
 
-        void setblocked(bool b);
+        void setBlocked(bool b);
 
         virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
         virtual void socketEstablished(int connId, void *yourPtr);
@@ -88,7 +94,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         std::string getrootprefix();
 
 
-    private:
+    public:
 
         enum fdtype
         {
@@ -110,9 +116,12 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
             FILE *stream;
             cQueue queue; // arrived messages
             std::list<int> incomingQueue; // queued conns
+            bool blocking;
         };
 
         std::vector<lib_descriptor_t> fd;
+        
+    private:        
 
         std::vector<struct_sigaction> sig;
 
@@ -121,10 +130,10 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 
         TCPSocketMap socketMap;
 
-        bool blocked;
-
     public:
 
+        bool blocked;
+        
         int euid;
 };
 

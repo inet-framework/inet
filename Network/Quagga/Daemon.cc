@@ -18,7 +18,11 @@
 
 #include "IPv4InterfaceData.h"
 
-#include "IPControlInfo_m.h"
+#include "UDPControlInfo_m.h"
+#include "TCPCommand_m.h"
+#include "IPControlInfo.h"
+
+
 
 #define QUAGGA_UID  100
 #define QUAGGA_GID  100
@@ -88,14 +92,6 @@ void Daemon::activity()
 
     if(!strcmp(server, "zebra"))
     {
-
-        // FIXME debug only
-        //++zebra_num;
-        //if(zebra_num > 2)
-        //  wait(uniform(0, 0.001) + 10);
-        //else
-
-
         // randomize start
         wait(uniform(0, 0.001));
         current_module = this;
@@ -120,14 +116,6 @@ void Daemon::activity()
     }
     else if(!strcmp(server, "ospfd"))
     {
-
-        // FIXME debug only
-        //++ospf_num;
-        //if(ospf_num > 2)
-        //  wait(uniform(0, 0.001) + 10);
-        //else
-
-
         // randomize start
         wait(uniform(0.002, 0.003));
         current_module = this;
@@ -248,6 +236,7 @@ int Daemon::createTcpSocket(cMessage *msg)
     lib_descriptor_t newItem;
     newItem.type = FD_TCP;
     newItem.tcp = tcp;
+    newItem.blocking = true;
     fd[socket] = newItem;
 
     EV << "created new TCP socket=" << socket << endl;
@@ -273,6 +262,7 @@ int Daemon::createUdpSocket()
     lib_descriptor_t newItem;
     newItem.type = FD_UDP;
     newItem.udp = udp;
+    newItem.blocking = true;
     fd[socket] = newItem;
 
     EV << "created new UDP socket=" << socket << endl;
@@ -295,6 +285,7 @@ int Daemon::createRawSocket(int protocol)
     lib_descriptor_t newItem;
     newItem.type = FD_RAW;
     newItem.raw = raw;
+    newItem.blocking = true;
     fd[socket] = newItem;
 
     EV << "created new UDP socket=" << socket << endl;
@@ -314,6 +305,7 @@ int Daemon::createNetlinkSocket()
     lib_descriptor_t newItem;
     newItem.type = FD_NETLINK;
     newItem.netlink = nl;
+    newItem.blocking = true;
     fd[socket] = newItem;
 
     EV << "created new Netlink socket=" << socket << endl;
@@ -331,6 +323,7 @@ int Daemon::createStream(const char *path, char *mode)
     lib_descriptor_t newItem;
     newItem.type = FD_FILE;
     newItem.stream = fopen(path, mode);
+    newItem.blocking = true;
     fd[fdesc] = newItem;
 
     ASSERT(newItem.stream);
@@ -340,20 +333,159 @@ int Daemon::createStream(const char *path, char *mode)
     return fdesc;
 }
 
-int Daemon::acceptTcpSocket(int socket, bool remove)
+bool Daemon::receiveAndHandleMessage(double timeout)
+{
+    setBlocked(true);
+    
+    cMessage *msg;
+    
+    if(timeout == 0.0)
+    {
+        msg = receive();
+    }
+    else
+    {
+        msg = receive(timeout);
+    }
+    
+    setBlocked(false);
+    
+    current_module = DAEMON;
+    __activeVars = current_module->varp;
+    
+    if(msg)
+    {
+        handleReceivedMessage(msg);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Daemon::hasQueuedConnections(int socket)
+{
+   ASSERT(FD_EXIST(socket));
+   ASSERT(fd[socket].type == FD_TCP);
+
+   return !fd[socket].incomingQueue.empty();
+}
+    
+
+int Daemon::acceptTcpSocket(int socket)
 {
     ASSERT(FD_EXIST(socket));
     ASSERT(fd[socket].type == FD_TCP);
-
+    
+    while(fd[socket].blocking && fd[socket].incomingQueue.empty())
+    {
+        EV << "accept" << endl;
+        receiveAndHandleMessage(0.0);
+    }
+    
     if(fd[socket].incomingQueue.empty())
+    {
         return -1;
+    }
+            
+    EV << "ready to accept connection" << endl;            
 
     int ret = fd[socket].incomingQueue.front();
 
-    if(remove)
-        fd[socket].incomingQueue.pop_front();
+    fd[socket].incomingQueue.pop_front();
 
     return ret;
+}
+
+bool Daemon::isBlocking(int fildes)
+{
+    ASSERT(fildes >= 0 && fildes < fd.size());
+    
+    return fd[fildes].blocking;
+}
+
+void Daemon::handleReceivedMessage(cMessage *msg)
+{
+    UDPControlInfo *udpControlInfo = dynamic_cast<UDPControlInfo*>(msg->controlInfo());
+    TCPCommand *tcpCommand = dynamic_cast<TCPCommand*>(msg->controlInfo());
+    IPControlInfo *ipControlInfo = dynamic_cast<IPControlInfo*>(msg->controlInfo());
+    
+    int socket;
+
+    if(udpControlInfo)
+    {
+        // UDP packet
+        
+        if(!strcmp(msg->name(), "ERROR")) {
+        	// ICMP errors in INET generate UDP ERROR packets
+        	EV << "Ignoring ERROR UDP packet" << endl;
+        	delete msg;
+        	return;
+        }
+
+        ASSERT(!strcmp(msg->name(), "data"));
+
+        socket = udpControlInfo->userId();
+
+        ASSERT(socket >= 0);
+
+        enqueueSocketMessage(socket, msg);
+    }
+    else if(tcpCommand)
+    {
+        // TCP packet
+
+        socket = findTcpSocket(msg);
+        
+        if(socket < 0)
+        {
+            // unknown socket, connection establishment
+            ASSERT(!strcmp(msg->name(), "ESTABLISHED"));
+            
+            TCPConnectInfo *info = check_and_cast<TCPConnectInfo*>(tcpCommand);
+            
+            // find parent socket
+            socket = findServerSocket(info);
+            
+            ASSERT(socket >= 0);
+
+            // create new socket
+            int csocket = createTcpSocket(msg);
+            
+            EV << "parent socket: " << socket << endl;
+
+            // put in the list for accept
+            enqueueConnection(socket, csocket);
+        }
+        else
+        {
+            // known socket, incomming data
+            getTcpSocket(socket)->processMessage(msg);
+        }
+    }
+    else if(ipControlInfo)
+    {
+        // IP Packet
+
+        ASSERT(!strcmp(msg->name(), "data"));
+
+        socket = findRawSocket(ipControlInfo->protocol());
+
+        if(socket < 0)
+        {
+            EV << "no recipient (socket) for this message, discarding" << endl;
+
+            delete msg;
+            return;
+        }
+
+        enqueueSocketMessage(socket, msg);
+    }
+    else
+    {
+        ASSERT(false);
+    }
 }
 
 void Daemon::enqueueConnection(int socket, int csocket)
@@ -389,19 +521,29 @@ void Daemon::enqueueSocketMessage(int socket, cMessage *msg)
 void Daemon::closeSocket(int socket)
 {
     ASSERT(FD_EXIST(socket));
-
-    if(fd[socket].type == FD_UDP)
+    
+    switch(fd[socket].type)
     {
-        ASSERT(fd[socket].udp);
-        fd[socket].udp->close();
-        delete fd[socket].udp;
-        fd[socket].udp = NULL;
-        fd[socket].type = FD_EMPTY;
-        return;
+        case FD_UDP:
+            ASSERT(fd[socket].udp);
+            fd[socket].udp->close();
+            delete fd[socket].udp;
+            fd[socket].udp = NULL;
+            break;
+            
+        case FD_TCP:
+            ASSERT(fd[socket].tcp);
+            fd[socket].tcp->close();
+            delete fd[socket].tcp;
+            fd[socket].tcp = NULL;
+            break;
+            
+        default:
+            // closing raw or netlink socket currently not implemented/used
+            ASSERT(false);
     }
-
-    // closing tcp, raw or netlink socket currently not implemented/used
-    ASSERT(false);
+            
+    fd[socket].type = FD_EMPTY;
 }
 
 void Daemon::closeStream(int fildes)
@@ -465,6 +607,8 @@ int Daemon::findServerSocket(TCPConnectInfo *info)
 
     int port = info->localPort();
     IPAddress addr = info->localAddr().get4();
+    
+    EV << "find parent (server) socket for " << addr << ":" << port << endl;
 
     for(unsigned int i = 0; i < fd.size(); i++)
     {
@@ -474,13 +618,14 @@ int Daemon::findServerSocket(TCPConnectInfo *info)
         if(fd[i].tcp->localPort() != port)
             continue;
 
-        if(!fd[i].tcp->localAddress().equals(addr))
+        // XXX FIXME
+        if(!fd[i].tcp->localAddress().equals(addr) && !fd[i].tcp->localAddress().isUnspecified())
             continue;
 
         return i;
     }
 
-    ASSERT(false);
+    return -1;
 }
 
 std::string Daemon::getcwd()
@@ -500,9 +645,13 @@ struct_sigaction * Daemon::sigactionimpl(int signo)
     return &sig[signo];
 }
 
-void Daemon::setblocked(bool b)
+void Daemon::setBlocked(bool b)
 {
     ASSERT(blocked != b);
+    
+    if(b) EV << "blocking" << endl;
+    else EV << "unblocking" << endl;
+
     blocked = b;
 }
 
@@ -517,5 +666,9 @@ void Daemon::socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool ur
 
 void Daemon::socketEstablished(int connId, void *yourPtr)
 {
-    EV << "socket=" << (long)yourPtr << " established" << endl;
+    int socket = (long)yourPtr;
+    
+    EV << "socket=" << socket << " established" << endl;
+    
+    
 }
