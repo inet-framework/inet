@@ -30,9 +30,9 @@ ALL_MODEL_OPTS=$(OPTS) -n
 # files, so they don't need Makefiles. They all invoke the bin/INET executable.
 #
 
-all: base
+all: inetbase
 
-base:
+inetbase:
 	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Examples -X Tests -X Experimental -X Obsolete -X tmp
 
 	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
@@ -107,7 +107,7 @@ base:
 
 # UNUSED TARGET. It might only be needed with fully compiled-in NED files, or when
 # an example simulation contains C++ parts too (currently none have).
-examples:
+examples-dir:
 	cd Examples && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/Ethernet && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/INET && $(MAKEMAKE) $(OPTS) -n -r
@@ -155,7 +155,7 @@ examples:
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
-tests:
+tests-dir:
 	cd Tests && $(MAKEMAKE) $(OPTS) -n -r -X IPv4 -X MPLS
 	cd Tests/NewTCP && $(MAKEMAKE) $(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 
