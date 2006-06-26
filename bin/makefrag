@@ -1,9 +1,9 @@
 #LDFLAGS+= -Wl,-export-dynamic
 #USERIF_LIBS=$(CMDENV_LIBS) $(TKENV_LIBS)
 
-QUAGGA_DIR=quagga-0.98.5
+QUAGGA=../Network/Quagga/quaggasrc/quagga
 
-LIBS += ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/ospfd/ospfd.a ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/ripd/ripd.a ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/zebra/zebra.a ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/lib/libzebra.a ../Network/Quagga/quaggasrc/$(QUAGGA_DIR)/globalvars.o
+LIBS += $(QUAGGA)/ospfd/ospfd.a $(QUAGGA)/ripd/ripd.a $(QUAGGA)/zebra/zebra.a $(QUAGGA)/lib/libzebra.a $(QUAGGA)/globalvars.o
 
 #
 #The following conflicts with Windows (in makemakefiles' contents):
