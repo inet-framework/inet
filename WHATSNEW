@@ -9,6 +9,11 @@ INET-200605xx
 - added EtherDuplexMAC, a simplified Ethernet implementation for full duplex
   point-to-point operation mode when CSMA/CD is not in use.
 
+- makefiles within Examples/ have been largely unnecessary because all 
+  simulations just invoke bin/INET. Realizing these makefiles have been 
+  confusing to many people, they got removed now. The target to generate
+  them is still present in makemakefiles in case someone needs it.
+  
 - several other fixes
 
 INET-20060330
