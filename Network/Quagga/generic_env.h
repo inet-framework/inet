@@ -14,7 +14,8 @@
 #include <errno.h>
 
 /*
- * For portability reasons, we want to be independent of the underlying OS.
+ * Instead of providing specific hacks for each OS, we choose the solution of 
+ * insulating our code completely from the underlying OS specifics. 
  * So we undefine everything that might get into our way, then define it
  * in the way we like.
  */
