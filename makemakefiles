@@ -25,15 +25,19 @@ ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/M
 #ALL_MODEL_OPTS=$(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_IPv6_INCLUDES)
 ALL_MODEL_OPTS=$(OPTS) -n
 
+#
+# Example simulations don't contain C++ code, only NED, ini and other config
+# files, so they don't need Makefiles. They all invoke the bin/INET executable.
+#
 
-all:
-	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete -X tmp
+all: base
+
+base:
+	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Examples -X Tests -X Experimental -X Obsolete -X tmp
 
 	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
 
 	cd Applications && $(MAKEMAKE) $(OPTS) -n -r
-	cd Examples && $(MAKEMAKE) $(OPTS) -n -r
-	cd Tests && $(MAKEMAKE) $(OPTS) -n -r -X IPv4 -X MPLS
 	cd Network && $(MAKEMAKE) $(OPTS) -n -r
 	cd NetworkInterfaces && $(MAKEMAKE) $(OPTS) -n -r
 	cd Nodes && $(MAKEMAKE) $(OPTS) -n -r
@@ -101,6 +105,10 @@ all:
 
 	cd Util/HeaderSerializers && $(MAKEMAKE) $(OPTS) -n $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
 
+# UNUSED TARGET. It might only be needed with fully compiled-in NED files, or when
+# an example simulation contains C++ parts too (currently none have).
+examples:
+	cd Examples && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/Ethernet && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/INET && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/OSPFv2 && $(MAKEMAKE) $(OPTS) -n -r
@@ -147,5 +155,7 @@ all:
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
+tests:
+	cd Tests && $(MAKEMAKE) $(OPTS) -n -r -X IPv4 -X MPLS
 	cd Tests/NewTCP && $(MAKEMAKE) $(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 
