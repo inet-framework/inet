@@ -51,6 +51,9 @@ foreach line {
    {"Mobility"               "MobileAdhoc/Mobility" "./Mobility"              "Mobility"}
    {"802.11b ad-hoc"         "MobileAdhoc/80211"    "./80211"                 "80211"}
 
+   {"Wireless"}
+   {"802.11b AP and hosts"   "Wireless/80211Lan"    "./80211Lan"             "80211Lan"}
+
    {"IPv6 (work in progress)"}
    {"NClients"               "IPv6/NClients"        "./NClients"              "NClients"}
    {"DemoNetworkEth"         "IPv6/DemoNetworkEth"  "./DemoNetworkEth"        "DemoNetworkEth"}
