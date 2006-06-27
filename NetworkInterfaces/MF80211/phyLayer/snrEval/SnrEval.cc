@@ -173,7 +173,7 @@ void SnrEval::handleSelfMsg(cMessage *msg)
         {
             // set the RadioState to RECV
             rs.setState(RadioState::RECV);
-            EV << "transmission over but noise level to high, switch to recv mode (state:RECV)\n";
+            EV << "transmission over but noise level too high, switch to recv mode (state:RECV)\n";
             nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
         }
 

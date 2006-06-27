@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <list>
+#include <deque>
 #include <set>
 #include <omnetpp.h>
 // FIXME: revise directory structure
@@ -108,6 +109,8 @@ class INET_API ChannelControl : public cSimpleModule
     void checkChannel(const int channel);
 
   public:
+    ~ChannelControl();
+
     /** @brief Registers the given host */
     HostRef registerHost(cModule *host, const Coord& initialPos);
 

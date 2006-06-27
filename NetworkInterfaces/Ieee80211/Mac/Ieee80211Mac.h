@@ -32,7 +32,11 @@
 #include "FSMA.h"
 
 /**
- * @brief An implementation of the 802.11b MAC.
+ * IEEE 802.11b Media Access Control Layer.
+ *
+ * Various comments in the code refer to the Wireless LAN Medium Access
+ * Control (MAC) and Physical Layer(PHY) Specifications
+ * ANSI/IEEE Std 802.11, 1999 Edition (R2003)
  *
  * For more info, see the NED file.
  *
@@ -40,7 +44,18 @@
  */
 class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 {
-  typedef std::list<Ieee80211DataOrMgmtFrame*> MacPktList;
+  typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
+
+  /**
+   * @brief This is used to populate fragments and identify duplicated messages. see spec 9.2.9 */
+  struct Ieee80211ASFTuple
+  {
+      MACAddress address;
+      int sequenceNumber;
+      int fragmentNumber;
+  };
+
+  typedef std::list<Ieee80211ASFTuple*> Ieee80211ASFTupleList;
 
   protected:
     /**
@@ -56,6 +71,14 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Maximal number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize;
+
+    /** @brief The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely large value
+        means never. see spec 9.2.6 and 361
+        TODO: this is not yet used */
+    static const int rtsThreshold = 3000;
+
+    /** @brief Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
+    static const int fragmentationThreshold = 2346;
     //@}
 
   protected:
@@ -71,10 +94,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
         WAITDIFS,
         BACKOFF,
         TRANSMITTING,
+        RECEIVING,
         WAITSIFS,
-        TRANSMITTING_RTS_CTS,
-        RECEIVING_RTS_CTS,
-        RESERVE,
     };
     cFSM fsm;
 
@@ -89,20 +110,34 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Sequence number to be assigned to the next frame */
     int sequenceNumber;
 
+    /** @brief Indicates that the last frame received had bit errors in it or there was a
+     *  collision during receiving the frame. If this flag is set, then the MAC will wait EIFS
+     *  instead of DIFS period of time in WAITDIFS state. */
+    bool lastReceiveFailed;
+
     /** @brief true if backoff is enabled */
     bool backoff;
+
+    /** @brief true during network allocation period */
+    bool nav;
 
     /** @brief Remaining backoff period in seconds */
     double backoffPeriod;
 
-    /** @brief Number of frame retransmission attempts */
+    /** @brief Number of frame retransmission attempts, this is a simpification of
+     *  SLRC and SSRC, see 9.2.4 in the spec */
     int retryCounter;
 
     /** @brief Physical radio (medium) state copied from physical layer */
     RadioState::States radioState;
 
     /** @brief Messages received from upper layer and to be transmitted later */
-    MacPktList transmissionQueue;
+    Ieee80211DataOrMgmtFrameList transmissionQueue;
+
+    /** @brief A list of last sender, sequence and fragment number tuples to identify duplicates.
+        see spec 9.2.9
+        TODO: this is not yet used */
+    Ieee80211ASFTupleList asfTuplesList;
 
     /** @brief Passive queue module to request messages from */
     IPassiveQueue *queueModule;
@@ -125,11 +160,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Timeout after the transmission of an RTS, a CTS, or a DATA frame */
     cMessage *endTimeout;
 
-    /** @brief End of medium reserve period when two other nodes were communicating on the channel */
+    /** @brief End of medium reserve period (NAV) when two other nodes were communicating on the channel */
     cMessage *endReserve;
 
     /** @brief Radio state change self message. Currently this is optimized away and sent directly */
-    cMessage *radioStateChange;
+    cMessage *mediumStateChange;
     //@}
 
   protected:
@@ -140,10 +175,13 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     long numRetry;
     long numSentWithoutRetry;
     long numGivenUp;
+    long numCollision;
     long numSent;
     long numReceived;
     long numSentBroadcast;
     long numReceivedBroadcast;
+    cOutVector stateVector;
+    cOutVector radioStateVector;
     //@}
 
   public:
@@ -191,25 +229,52 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
   protected:
     /**
+     * @name Timing functions
+     * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
+     */
+    //@{
+    simtime_t SIFSPeriod();
+    simtime_t SlotPeriod();
+    simtime_t DIFSPeriod();
+    simtime_t EIFSPeriod();
+    simtime_t PIFSPeriod();
+    simtime_t BackoffPeriod(Ieee80211Frame *msg, int r);
+    //@}
+
+  protected:
+    /**
      * @name Timer functions
+     * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
     void scheduleSIFSPeriod(Ieee80211Frame *frame);
-    void scheduleDIFSPeriod();
-    void scheduleBackoffPeriod();
-    void scheduleTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
-    void scheduleRTSTimeoutPeriod();
-    void scheduleReservePeriod(Ieee80211Frame *frame);
-    //@}
 
+    void scheduleDIFSPeriod();
+    void cancelDIFSPeriod();
+
+    void scheduleTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    void cancelTimeoutPeriod();
+
+    void scheduleRTSTimeoutPeriod();
+
+    void scheduleReservePeriod(Ieee80211Frame *frame);
+
+    /** @brief Generates a new backoff period based on the contention window. */
+    void generateBackoffPeriod();
+    void decreaseBackoffPeriod();
+    void scheduleBackoffPeriod();
+    void cancelBackoffPeriod();
+    //@}
 
   protected:
     /**
      * @name Frame transmission functions
      */
     //@{
+    void sendACKFrameOnEndSIFS();
     void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
     void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    void sendCTSFrameOnEndSIFS();
     void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
     void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
@@ -235,17 +300,18 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Change the current MAC operation mode. */
     void setMode(Mode mode);
 
+    /** @brief Returns the current frame being transmitted */
+    Ieee80211DataOrMgmtFrame *currentTransmission();
+
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     void resetStateVariables();
 
-    /** @brief Generates a new backoff period based on the contention window. */
-    void generateBackoffPeriod();
+    /** @brief Used by the state machine to identify medium state change events.
+        This message is currently optimized away and not sent through the kernel. */
+    bool isMediumStateChange(cMessage *msg);
 
-    /** @brief Compute the contention window with the binary backoff algorithm. */
-    int contentionWindow();
-
-    /** @brief Used by the state machine to identify radio state change events. This message is currently optimized away. */
-    bool isRadioStateChange(cMessage *msg);
+    /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
+    bool isMediumFree();
 
     /** @brief Returns true if message is a broadcast message */
     bool isBroadcast(Ieee80211Frame *msg);

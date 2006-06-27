@@ -37,6 +37,7 @@
 // queue module is a simple module whose C++ class implements the IPassiveQueue
 // interface.
 //
+// TODO: document not supported features (variable bitrate, fragmentation, etc.?)
 simple Ieee80211Mac
     parameters:
         address : string,       // MAC address as hex string (12 hex digits), or

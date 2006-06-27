@@ -39,6 +39,17 @@ std::ostream& operator<<(std::ostream& os, const ChannelControl::TransmissionLis
     return os;
 }
 
+ChannelControl::~ChannelControl()
+{
+    for (int i = 0; i < numberOfChannels; i++)
+    {
+        for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end(); it++)
+        {
+            delete *it;
+        }
+    }
+}
+
 /**
  * Sets up the playgroundSize and calculates the
  * maxInterferenceDistance
