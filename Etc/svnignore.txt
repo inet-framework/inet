@@ -1,0 +1,4 @@
+add to .subversion/config, or D:\Documents and Settings\andras\Application Data\Subversion\config:
+
+[miscellany]
+global-ignores = *.obj *.exe *.lib *_n.* *_m.* *.pdb *.idb *.ilk *.exp *.o *.a *.so *.lo *.la #*# .*.rej *.rej *.bak .*~ *~ .#* .DS_Store Backups .tstamp .tkenvrc
