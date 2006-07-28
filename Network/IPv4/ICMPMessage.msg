@@ -64,7 +64,7 @@ enum ICMPDestinationUnreachableCodes
     ICMP_DU_COMMUNICATION_PROHIBITED =                13,
     ICMP_DU_HOST_PRECEDENCE_VIOLATION =               14,
     ICMP_DU_PRECEDENCE_CUTOFF_IN_EFFECT =             15,
-    ICMP_AODV_QUEUE_FULL =             16
+    ICMP_AODV_QUEUE_FULL =                            16
 };
 
 }}
