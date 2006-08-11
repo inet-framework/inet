@@ -27,6 +27,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
+#include "UDPSerializer.h"
 
 #if defined(_MSC_VER)
 #undef s_addr   /* MSVC #definition interferes with us */
@@ -72,11 +73,19 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
         packetLength += ICMPSerializer().serialize(check_and_cast<ICMPMessage *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
+      case IP_PROT_UDP:
+        packetLength += UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
+                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
+        break;
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dgram->transportProtocol());
     }
 
-    ip->ip_len = htons(packetLength);
+#ifdef linux
+	ip->ip_len = htons(packetLength);
+#else
+	ip->ip_len = packetLength;
+#endif
     return packetLength;
 }
 
@@ -111,6 +120,10 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
       case IP_PROT_ICMP:
         encapPacket = new ICMPMessage("icmp-from-wire");
         ICMPSerializer().parse(buf + headerLength, min(totalLength, bufsize) - headerLength, (ICMPMessage *)encapPacket);
+        break;
+      case IP_PROT_UDP:
+        encapPacket = new UDPPacket("udp-from-wire");
+        UDPSerializer().parse(buf + headerLength, min(totalLength, bufsize) - headerLength, (UDPPacket *)encapPacket);
         break;
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dest->transportProtocol());

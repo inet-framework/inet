@@ -25,7 +25,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/ip.h"
 #include "headers/ip_icmp.h"
 };
-
+#include "IPSerializer.h"
 #include "ICMPSerializer.h"
 #include "../../Applications/PingApp/PingPayload_m.h"
 
@@ -42,6 +42,8 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
     struct icmp *icmp = (struct icmp *) (buf);
     int packetLength;
 
+    packetLength = ICMP_MINLEN;
+
     switch(pkt->getType())
     {
         case ICMP_ECHO_REQUEST:
@@ -54,7 +56,7 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             unsigned int datalen = (pp->byteLength() - 4);
             for(unsigned int i=0; i < datalen; i++)
                 icmp->icmp_data[i] = 'a';
-            packetLength = ICMP_MINLEN + datalen;
+            packetLength += datalen;
             break;
         }
         case ICMP_ECHO_REPLY:
@@ -67,7 +69,23 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             unsigned int datalen = pp->dataArraySize();
             for(unsigned int i=0; i < datalen; i++)
                 icmp->icmp_data[i] = pp->data(i);
-            packetLength = ICMP_MINLEN + datalen;
+            packetLength += datalen;
+            break;
+        }
+        case ICMP_DESTINATION_UNREACHABLE:
+        {
+            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->encapsulatedMsg());
+            icmp->icmp_type = ICMP_UNREACH;
+            icmp->icmp_code = pkt->getCode();
+            packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
+            break;
+        }
+        case ICMP_TIME_EXCEEDED:
+        {
+            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->encapsulatedMsg());
+            icmp->icmp_type = ICMP_TIMXCEED;
+            icmp->icmp_code = ICMP_TIMXCEED_INTRANS;
+            packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
             break;
         }
         default:
