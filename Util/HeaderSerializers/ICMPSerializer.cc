@@ -91,7 +91,7 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
         default:
         {
             packetLength = 0;
-            EV << "Can not serialize ICMP packet: type " << icmp->icmp_type << " not supported.";
+            EV << "Can not serialize ICMP packet: type " << pkt->getType() << " not supported.";
             break;
         }
     }
