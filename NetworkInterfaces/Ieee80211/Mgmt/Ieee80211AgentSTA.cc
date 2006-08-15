@@ -26,7 +26,7 @@ Define_Module(Ieee80211AgentSTA);
 
 void Ieee80211AgentSTA::initialize(int stage)
 {
-    //...
+    //TODO schedule scan request?...
 }
 
 void Ieee80211AgentSTA::handleMessage(cMessage *msg)
@@ -47,5 +47,32 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
 {
     //...
 }
+
+void Ieee80211AgentSTA::sendRequest(Ieee80211Prim *req)
+{
+    cMessage *msg = new cMessage(req->className());
+    msg->setControlInfo(req);
+    send(msg, "mgmtOut");
+}
+
+
+void Ieee80211AgentSTA::sendScanRequest()
+{
+    Ieee80211Prim_ScanRequest *req = new Ieee80211Prim_ScanRequest();
+
+    //TODO req params -- should come from module parameters?
+    // bool BSSType;
+    // MACAddress BSSID;
+    // string SSID;
+    // bool activeScan;
+    // double probeDelay;
+    // int channelList[];
+    // double minChannelTime;
+    // double maxChannelTime;
+
+    sendRequest(req);
+}
+
+
 
 

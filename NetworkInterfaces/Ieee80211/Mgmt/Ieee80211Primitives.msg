@@ -33,9 +33,16 @@ enum AuthenticationType
 };
 
 //
+// Base class
+//
+class Ieee80211Prim
+{
+};
+
+//
 // Losely based on MLME-SCAN.request
 //
-class Ieee80211Prim_ScanRequest
+class Ieee80211Prim_ScanRequest extends Ieee80211Prim
 {
     fields:
         bool BSSType;
@@ -62,7 +69,7 @@ class Ieee80211Prim_BSSDescription
 //
 // Loosely based on MLME-SCAN.confirm
 //
-class Ieee80211Prim_ScanConfirm
+class Ieee80211Prim_ScanConfirm extends Ieee80211Prim
 {
     fields:
         Ieee80211Prim_BSSDescription bssList[];
@@ -71,7 +78,7 @@ class Ieee80211Prim_ScanConfirm
 //
 // Losely based on MLME-AUTHENTICATE.request
 //
-class Ieee80211Prim_AuthenticateRequest
+class Ieee80211Prim_AuthenticateRequest extends Ieee80211Prim
 {
     fields:
         MACAddress address;
@@ -82,7 +89,7 @@ class Ieee80211Prim_AuthenticateRequest
 //
 // Losely based on MLME-AUTHENTICATE.confirm
 //
-class Ieee80211Prim_AuthenticateConfirm
+class Ieee80211Prim_AuthenticateConfirm extends Ieee80211Prim
 {
     fields:
         MACAddress address;
@@ -93,7 +100,7 @@ class Ieee80211Prim_AuthenticateConfirm
 //
 // Losely based on MLME-ASSOCIATE.request
 //
-class Ieee80211Prim_AssociateRequest
+class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
 {
     fields:
         MACAddress address;
@@ -105,7 +112,7 @@ class Ieee80211Prim_AssociateRequest
 //
 // Losely based on MLME-ASSOCIATE.confirm
 //
-class Ieee80211Prim_AssociateConfirm
+class Ieee80211Prim_AssociateConfirm extends Ieee80211Prim
 {
     fields:
         int result; // SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
