@@ -1,0 +1,75 @@
+//
+// Copyright (C) 2006 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+#ifndef IEEE80211_AGENT_STA_H
+#define IEEE80211_AGENT_STA_H
+
+#include <omnetpp.h>
+#include "Ieee80211MgmtBase.h"
+#include "NotificationBoard.h"
+
+
+/**
+ * Used in 802.11 infrastructure mode: in a station (STA), this module
+ * controls channel scanning, association and handovers, by sending commands
+ * (e.g. Ieee80211Prim_ScanRequest) to the management module (Ieee80211MgmtSTA).
+ *
+ * See corresponding NED file for a detailed description.
+ *
+ * @author Andras Varga
+ */
+class INET_API Ieee80211AgentSTA : public cSimpleModule
+{
+  protected:
+    // state:
+    enum Status {SCANNING, NOT_AUTHENTICATED, ASSOCIATED}; // authentication state is managed per-AP
+    Status status;
+
+    // Associated Access Point
+    struct APInfo
+    {
+        MACAddress address;
+        int channel;
+        bool authenticated;
+        int receiveSequence;
+        cMessage *timeoutMsg; // authentication/association timeout
+    };
+    APInfo associateAP;
+
+    typedef std::list<APInfo> AccessPointList;
+    AccessPointList apList;
+
+    APInfo scanningResultAPList;
+
+  protected:
+    virtual int numInitStages() const {return 2;}
+    virtual void initialize(int);
+
+    /** Overridden cSimpleModule method */
+    virtual void handleMessage(cMessage *msg);
+
+    /** Handle timers */
+    virtual void handleTimer(cMessage *msg);
+
+    /** Handle responses from mgmgt */
+    virtual void handleResponse(cMessage *msg);
+};
+
+#endif
+
+
