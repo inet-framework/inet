@@ -21,6 +21,10 @@
 #include "Ieee80211Primitives_m.h"
 
 
+#define DEFAULT_AUTH_TIMEOUT    120 /*sec*/
+#define DEFAULT_ASSOC_TIMEOUT   120 /*sec*/
+
+
 Define_Module(Ieee80211AgentSTA);
 
 
@@ -45,7 +49,20 @@ void Ieee80211AgentSTA::handleTimer(cMessage *msg)
 
 void Ieee80211AgentSTA::handleResponse(cMessage *msg)
 {
-    //...
+    cPolymorphic *ctrl = msg->removeControlInfo();
+    delete msg;
+
+    if (dynamic_cast<Ieee80211Prim_ScanConfirm *>(ctrl))
+        processScanConfirm((Ieee80211Prim_ScanConfirm *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
+        processAuthenticateConfirm((Ieee80211Prim_AuthenticateConfirm *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
+        processAssociateConfirm((Ieee80211Prim_AssociateConfirm *)ctrl);
+    else if (ctrl)
+        error("handleResponse(): unrecognized control info class `%s'", ctrl->className());
+    else
+        error("handleResponse(): control info is NULL");
+    delete ctrl;
 }
 
 void Ieee80211AgentSTA::sendRequest(Ieee80211Prim *req)
@@ -71,6 +88,54 @@ void Ieee80211AgentSTA::sendScanRequest()
     // double maxChannelTime;
 
     sendRequest(req);
+}
+
+void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address, int authType)
+{
+    Ieee80211Prim_AuthenticateRequest *req = new Ieee80211Prim_AuthenticateRequest();
+    req->setAddress(address);
+    req->setAuthType(authType);
+    req->setTimeout(DEFAULT_AUTH_TIMEOUT);
+    sendRequest(req);
+}
+
+void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
+{
+    Ieee80211Prim_AssociateRequest *req = new Ieee80211Prim_AssociateRequest();
+    req->setAddress(address);
+    req->setTimeout(DEFAULT_ASSOC_TIMEOUT);
+    //XXX    Ieee80211CapabilityInformation capabilityInfo;
+    //XXX    int listenInterval; // unsupported by MAC
+    sendRequest(req);
+}
+
+void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
+{
+    // choose best AP
+    int bssIndex = chooseBSS(resp);
+    Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
+    sendAuthenticateRequest(bssDesc.getBSSID(), AUTHTYPE_SHAREDKEY); //XXX or AUTHTYPE_OPENSYSTEM -- should be parameter?
+}
+
+int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
+{
+    // here, just choose the one with the greatest receive power
+    // TODO and which supports a good data rate we support
+    int bestIndex = 0;
+    for (int i=0; i<resp->getBssListArraySize(); i++)
+        if (resp->getBssList(i).getRxPower() > resp->getBssList(bestIndex).getRxPower())
+            bestIndex = i;
+    return bestIndex;
+}
+
+void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
+{
+    //XXX
+}
+
+void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
+{
+    //XXX
 }
 
 

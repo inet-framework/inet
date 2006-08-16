@@ -64,6 +64,9 @@ class Ieee80211Prim_BSSDescription
         Ieee80211CapabilityInformation capabilityInfo;
         unsigned short beaconInterval;
         unsigned short DSChannel;
+
+        double rxPower; // received power from AP; not part of the standard
+
 };
 
 //
@@ -105,7 +108,7 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
     fields:
         MACAddress address;
         double timeout;
-        Ieee80211CapabilityInformation capablityInfo;
+        Ieee80211CapabilityInformation capabilityInfo;
         int listenInterval; // unsupported by MAC
 };
 

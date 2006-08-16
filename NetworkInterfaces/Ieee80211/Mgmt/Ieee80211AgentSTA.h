@@ -20,7 +20,7 @@
 #define IEEE80211_AGENT_STA_H
 
 #include <omnetpp.h>
-#include "Ieee80211MgmtBase.h"
+#include "Ieee80211Primitives_m.h"
 #include "NotificationBoard.h"
 
 
@@ -53,7 +53,18 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule
 
     //@{
     void sendScanRequest();
+    void sendAuthenticateRequest(const MACAddress& address, int authType);
+    void sendAssociateRequest(const MACAddress& address);
     //@}
+
+    //@{
+    void processScanConfirm(Ieee80211Prim_ScanConfirm *resp);
+    void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp);
+    void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp);
+    //@}
+
+    virtual int chooseBSS(Ieee80211Prim_ScanConfirm *resp);
+
 };
 
 #endif
