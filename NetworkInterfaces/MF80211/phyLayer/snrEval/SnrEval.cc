@@ -442,6 +442,7 @@ void SnrEval::changeChannel(int channel)
     ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
 
     // pick up ongoing transmissions on the new channel
+    EV << "Picking up ongoing transmissions on new channel:\n";
     for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
     {
         AirFrame *frame = *it;
@@ -449,15 +450,15 @@ void SnrEval::changeChannel(int channel)
         double distance = myHostRef->pos.distance(frame->getSenderPos());
         double propagationDelay = distance / LIGHT_SPEED;
 
-        EV << "processing ongoing transmission for channel change\n";
-
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == frame->getChannelNumber())
         {
+            EV << " - (" << frame->className() << ")" << frame->name() << ": ";
+
             // if there is a message on the air which will reach us in the future
             if (frame->timestamp() + propagationDelay >= simTime())
             {
-                EV << "scheduling ongoing transmission to be processed in the future\n";
+                EV << "will arrive in the future, scheduling it\n";
 
                 // we need to send to each radioIn[] gate
                 cGate *radioGate = gate("radioIn");
@@ -467,12 +468,16 @@ void SnrEval::changeChannel(int channel)
             // if we hear some part of the message
             else if (frame->timestamp() + frame->getDuration() + propagationDelay > simTime())
             {
-                EV << "processing ongoing transmission as noise\n";
+                EV << "missed beginning of frame, processing it as noise\n";
 
                 AirFrame *frameDup = (AirFrame*)frame->dup();
                 frameDup->setArrivalTime(frame->timestamp() + propagationDelay);
                 handleLowerMsgStart(frameDup);
                 bufferMsg(frameDup);
+            }
+            else
+            {
+                EV << "in the past\n";
             }
         }
     }
