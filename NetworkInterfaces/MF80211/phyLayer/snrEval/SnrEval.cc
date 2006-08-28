@@ -80,6 +80,12 @@ void SnrEval::initialize(int stage)
         nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
         nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
     }
+    else if (stage == 2)
+    {
+        // tell initial channel number to ChannelControl; should be done in
+        // stage==2 or later, because base class initializes myHostRef in that stage
+        cc->updateHostChannel(myHostRef, rs.getChannel());
+    }
 }
 
 void SnrEval::finish()
