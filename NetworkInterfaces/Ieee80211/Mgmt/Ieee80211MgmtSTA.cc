@@ -410,6 +410,9 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     //XXX how many exchanges are needed for auth to be complete? (check seqNum)
     int statusCode = frame->getBody().getStatusCode();
 
+    if (statusCode!=SC_SUCCESSFUL)
+        EV << "Authentication failed with AP address=" << ap->address << "\n";
+
     //TBD if auth complete, set isAuthenticated=true and send back response
 /*
     if (frameAuthSeq < numAuthSteps)
@@ -434,7 +437,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     }
 */
     //XXX the following should only be done only if completed numSteps
-    ap->isAuthenticated = (statusCode==0);
+    ap->isAuthenticated = (statusCode==SC_SUCCESSFUL);
     delete cancelEvent(ap->timeoutMsg);
     ap->timeoutMsg = NULL;
     sendAuthenticationConfirm(ap, statusCode);
@@ -454,7 +457,6 @@ void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequest
 void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
     EV << "Received Association Response frame\n";
-    //XXX check if we have actually sent an AssocReq to this AP!
 
     // extract frame contents
     MACAddress address = frame->getTransmitterAddress();
@@ -467,17 +469,26 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
     // look up AP data structure
     APInfo *ap = lookupAP(address);
     if (!ap)
-        error("handleAssociationResponseFrame: AP not known: address = %s", address.str().c_str());
+        error("handleAssociationResponseFrame: AP not known: address=%s", address.str().c_str());
 
     if (isAssociated)
     {
         //XXX something to do about our existing association...?
     }
 
-    // change our state to "associated"
-    if (statusCode==0) //XXX OK
+    //XXX check if we have actually sent an AssocReq to this AP!
+    delete cancelEvent(ap->timeoutMsg);
+    ap->timeoutMsg = NULL;
+
+    if (statusCode!=SC_SUCCESSFUL)
     {
-        EV << "Association successful, AP address = " << ap->address << "\n";
+        EV << "Association failed with AP address=" << ap->address << "\n";
+    }
+    else
+    {
+        EV << "Association successful, AP address=" << ap->address << "\n";
+
+        // change our state to "associated"
         isAssociated = true;
         apAddress = address;
         receiveSequence = 1; //XXX ???

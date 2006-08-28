@@ -33,6 +33,9 @@
 // bridging of Ethernet frames. This module will perform conversion from/to
 // EtherFrame for MACRelayUnit.
 //
+// This module never switches channels, that is, it will operate on the channel
+// the physical layer is configured for (see channelNumber in SnrEval80211).
+//
 // @author Andras Varga
 //
 simple Ieee80211MgmtAPSimplified

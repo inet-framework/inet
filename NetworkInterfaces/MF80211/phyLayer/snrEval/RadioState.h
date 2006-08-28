@@ -73,13 +73,13 @@ public:
     /** @brief set the state of the radio*/
     void setState(State s) { state = s; }
 
-    /** @brief function to get the channel */
+    /** @brief function to get the channel number (frequency) */
     int getChannel() const { return channel; }
 
-    /** @brief set the radio channel */
+    /** @brief set the channel number (frequency) */
     void setChannel(int chan) { channel = chan; }
 
-    /** @brief Constructor*/
+    /** @brief Constructor */
     RadioState(int radioModuleId) : cPolymorphic() {radioId=radioModuleId; state=IDLE; channel=-1;}
 
     static const char *stateName(State state) {

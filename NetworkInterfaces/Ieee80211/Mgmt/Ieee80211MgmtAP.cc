@@ -20,6 +20,8 @@
 #include "Ieee80211MgmtAP.h"
 #include "Ieee802Ctrl_m.h"
 #include "EtherFrame_m.h"
+#include "NotifierConsts.h"
+#include "RadioState.h"
 
 
 Define_Module(Ieee80211MgmtAP);
@@ -38,11 +40,11 @@ void Ieee80211MgmtAP::initialize(int stage)
     {
         // read params and init vars
         ssid = par("ssid").stringValue();
-        channelNumber = par("channelNumber");
         beaconInterval = par("beaconInterval");
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps!=2 && numAuthSteps!=4)
             error("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
+        channelNumber = -1;  // value will arrive from physical layer in receiveChangeNotification()
         WATCH(ssid);
         WATCH(channelNumber);
         WATCH(beaconInterval);
@@ -50,7 +52,10 @@ void Ieee80211MgmtAP::initialize(int stage)
         WATCH_MAP(staList);
 
         //TBD fill in supportedRates and capabilityInfo
-        //TBD tune MAC to the given channel
+
+        // subscribe for notifications
+        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_RADIO_CHANNEL_CHANGED);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -99,7 +104,11 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cPolymorphic *ctrl)
 void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    // ignore notifications
+    if (category == NF_RADIO_CHANNEL_CHANGED)
+    {
+        channelNumber = check_and_cast<RadioState *>(details)->getChannel();
+        EV << className() << ": on channel " << channelNumber << endl;
+    }
 }
 
 Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFrame *frame)

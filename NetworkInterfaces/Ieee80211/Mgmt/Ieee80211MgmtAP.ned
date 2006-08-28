@@ -27,6 +27,9 @@
 // bridging of Ethernet frames. This module will perform conversion from/to
 // EtherFrame for MACRelayUnit.
 //
+// This module never switches channels, that is, it will operate on the channel
+// the physical layer is configured for (see channelNumber in SnrEval80211).
+//
 // @author Andras Varga
 //
 simple Ieee80211MgmtAP
@@ -34,7 +37,6 @@ simple Ieee80211MgmtAP
         ssid: string,
         beaconInterval: numeric const,
         frameCapacity: numeric const, // maximum queue length
-        channelNumber: numeric const, // channel    XXX is this the right place?
         numAuthSteps: numeric const; // use 2 for Open System auth, 4 for WEP
         //dataRate: numeric; XXX TBD
     gates:

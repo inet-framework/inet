@@ -154,9 +154,28 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
         return;
     }
 
+    dumpAPList(resp);
+
     Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
     EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
     sendAuthenticateRequest(bssDesc.getBSSID(), AUTHTYPE_SHAREDKEY); //XXX or AUTHTYPE_OPENSYSTEM -- should be parameter?
+}
+
+void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
+{
+    EV << "Received AP list:\n";
+    for (int i=0; i<resp->getBssListArraySize(); i++)
+    {
+        Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
+        EV << "    " << i << ". "
+           << " address=" << bssDesc.getBSSID()
+           << " channel=" << bssDesc.getChannel()
+           << " SSID=" << bssDesc.getSSID()
+           << " beaconIntvl=" << bssDesc.getBeaconInterval()
+           << " rxPower=" << bssDesc.getRxPower()
+           << endl;
+        // later: supportedRates, capabilityInfo
+    }
 }
 
 int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
@@ -175,24 +194,28 @@ int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
 
 void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
 {
-    if (resp->getResult()!=0)
+    if (resp->getResult()!=SC_SUCCESSFUL)
     {
+        EV << "Authentication error\n";
         //XXX handle error
     }
     else
     {
+        EV << "Authentication successful\n";
         sendAssociateRequest(resp->getAddress());
     }
 }
 
 void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
 {
-    if (resp->getResult()!=0)
+    if (resp->getResult()!=SC_SUCCESSFUL)
     {
+        EV << "Association error\n";
         //XXX handle error
     }
     else
     {
+        EV << "Association successful\n";
         //XXX OK...
     }
 }

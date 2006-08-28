@@ -25,6 +25,9 @@
 // there is no scanning, authentication or association. Only data frames are
 // understood or sent at any time.
 //
+// This module never switches channels, that is, it will operate on the channel
+// the physical layer is configured for (see channelNumber in SnrEval80211).
+//
 // @author Andras Varga
 //
 simple Ieee80211MgmtSTASimplified

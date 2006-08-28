@@ -74,7 +74,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     //@}
 
     virtual int chooseBSS(Ieee80211Prim_ScanConfirm *resp);
-
+    virtual void dumpAPList(Ieee80211Prim_ScanConfirm *resp);
 };
 
 #endif
