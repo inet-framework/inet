@@ -73,7 +73,7 @@ void UDPVideoStreamCli::receiveStream(cMessage* msg)
 {
     EV << "Video stream packet:\n";
     printPacket(msg);
-    eed.record(simTime() - msg->timestamp());
+    eed.record(simTime() - msg->creationTime());
     delete msg;
 }
 

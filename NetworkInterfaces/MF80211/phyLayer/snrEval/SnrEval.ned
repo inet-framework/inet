@@ -1,7 +1,7 @@
 //***************************************************************************
 // * file:        SnrEval.ned
 // *
-// * author:      Marc Loebbers
+// * author:      Marc Loebbers, Andras Varga, Levente Meszaros
 // *
 // * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 // *              Technische Universitaet Berlin, Germany.
@@ -18,18 +18,34 @@
 // **************************************************************************/
 
 
+//
+// Represents the radio. Frames received from higher layers (typically the
+// MAC protocol) are transmitted on the radio channel, using the global
+// ChannelControl module. Frames received on the radio channel will have
+// their signal-noise ratio evaluated and passed up to the decider.
+// (It is the decider's task to determine whether the frame was received
+// correctly, and pass it up to the MAC layer).
+//
+// The receive/transmit channel (frequency) can be changed by sending
+// SnrEval a blank cMessage with PHY_C_CHANGECHANNEL as message kind, and
+// a PhyControlInfo object attached to it as control info, to hold the
+// new channel number. If the radio is currently transmitting, the channel
+// switch will actually take place after the transmission is completed.
+//
+//# FIXME merge docu with BasicSnrEval's
 simple SnrEval
     parameters:
-    debug : bool, // debug switch
-        transmitterPower : numeric,
-    bitrate: numeric,
-    headerLength: numeric const,
-    carrierFrequency: numeric,
-    thermalNoise: numeric,
-    pathLossAlpha: numeric,
-    sensitivity: numeric;
+        channelNumber: numeric const, // channel identifier
+        debug : bool, // debug switch
+        transmitterPower : numeric const,
+        bitrate: numeric const,
+        headerLength: numeric const,
+        thermalNoise: numeric const,
+        pathLossAlpha: numeric const,
+        sensitivity: numeric const;
     gates:
-        in: uppergateIn;
-        out: uppergateOut;
-        in: radioIn; // to receive AirFrames
+        in: uppergateIn;   // from higher layer protocol (MAC)
+        out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        in: radioIn; // to receive frames (AirFrame) on the radio channel
 endsimple
+

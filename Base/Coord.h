@@ -139,5 +139,10 @@ class INET_API Coord : public cPolymorphic
 
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
+{
+    return os << "(" << coord.x << "," << coord.y << ")";
+}
+
 #endif
 

@@ -51,8 +51,8 @@
 simple MassMobility
     parameters:
         debug : bool, // debug switch
-        x: numeric const, // x starting point of the node (-1 = random)
-        y: numeric const, // y starting point of the node (-1 = random)
+        x: numeric const, // start x coordinate (-1 = display string position, or random if it's missing)
+        y: numeric const, // start y coordinate (-1 = display string position, or random if it's missing)
         changeInterval: numeric, // frequency of changing speed and angle (can be random) [s]
         changeAngleBy: numeric, // change angle by this much (can be random) [deg]
         speed: numeric, // speed (can be random, updated every changeInterval) [m/s]

@@ -77,9 +77,7 @@ module MobileHost
                 ifIn[1],
                 ifOut[1];
             display: "p=248,247;i=block/fork;q=queue";
-        wlan: Ieee80211Nic; // Nic80211 also works, it uses MF's 802.11 implementation
-            parameters:
-                mgmtType = "Ieee80211MgmtAdhoc";
+        wlan: Ieee80211NicAdhoc; // Nic80211 also works, it uses MF's 802.11 implementation
             display: "p=248,349;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
             display: "p=149,307;i=block/cogwheel";

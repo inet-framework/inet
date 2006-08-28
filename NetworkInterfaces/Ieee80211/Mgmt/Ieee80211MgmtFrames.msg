@@ -201,8 +201,8 @@ class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
         Ieee80211SupportedRatesElement supportedRates;
         Ieee80211CapabilityInformation capabilityInformation;
         double timestamp;
-        unsigned short beaconInterval;
-        unsigned short DSChannel;
+        double beaconInterval;
+        int channel;
         Ieee80211HandoverParameters handoverParameters;
 };
 

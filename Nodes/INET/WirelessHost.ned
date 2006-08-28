@@ -83,9 +83,7 @@ module WirelessHost
             display: "p=205,350,row,90;q=txQueue;i=block/ifcard";
         eth: EthernetInterface[sizeof(ethOut)];
             display: "p=240,350,row,90;q=txQueue;i=block/ifcard";
-        wlan: Ieee80211Nic;
-            parameters:
-                mgmtType = "Ieee80211MgmtSimplifiedSTA";
+        wlan: Ieee80211NicSTA;
             display: "p=120,350;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
             display: "p=58,301;i=block/cogwheel_s";

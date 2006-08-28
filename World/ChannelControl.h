@@ -70,7 +70,7 @@ class INET_API ChannelControl : public cSimpleModule
      * is empty or busy)
      */
     typedef std::vector<TransmissionList> ChannelTransmissionLists;
-    ChannelTransmissionLists transmissions;
+    ChannelTransmissionLists transmissions; // indexed by channel number (size=numChannels)
 
     /** @brief used to clear the transmission list from time to time */
     double lastOngoingTransmissionsUpdate;
@@ -88,7 +88,7 @@ class INET_API ChannelControl : public cSimpleModule
     double maxInterferenceDistance;
 
     /** @brief the number of controlled channels */
-    int numberOfChannels;
+    int numChannels;
 
   protected:
     void updateConnections(HostRef h);
@@ -109,6 +109,7 @@ class INET_API ChannelControl : public cSimpleModule
     void checkChannel(const int channel);
 
   public:
+    ChannelControl();
     ~ChannelControl();
 
     /** @brief Registers the given host */
@@ -143,7 +144,8 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Returns the playground size */
     const Coord *getPgs()  {return &playgroundSize;}
 
-    const int getNumberOfChannels() {return numberOfChannels;}
+    /** @brief Returns the number of radio channels (frequencies) simulated */
+    const int getNumChannels() {return numChannels;}
 };
 
 #endif

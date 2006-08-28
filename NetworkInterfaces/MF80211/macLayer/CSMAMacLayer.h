@@ -104,7 +104,7 @@ class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
     MACAddress myMacAddr;
 
     /** @brief Current state of the radio (kept updated by receiveChangeNotification()) */
-    RadioState::States radioState;
+    RadioState::State radioState;
 
     /** @brief A queue to store packets from upper layer in case another
     packet is still waiting for transmission..*/

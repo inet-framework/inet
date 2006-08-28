@@ -30,14 +30,15 @@ const char *notificationCategoryName(int category)
         case NF_NODE_FAILURE: return "FAILURE";
         case NF_NODE_RECOVERY: return "RECOVERY";
 
-        case NF_RADIOSTATE_CHANGED: return "RADIO";
+        case NF_RADIOSTATE_CHANGED: return "RADIO-STATE";
+        case NF_RADIO_CHANNEL_CHANGED: return "RADIO-CHANNEL";
         case NF_PP_TX_BEGIN: return "TX-BEG";
         case NF_PP_TX_END: return "TX-END";
         case NF_PP_RX_END: return "RX-END";
         case NF_L2_Q_DROP: return "DROP";
-
         case NF_MAC_BECAME_IDLE: return "MAC-IDLE";
-        case NF_LAYER2_HANDOVER_OCCURRED: return "L2-HANDOVER";
+        case NF_L2_BEACON_LOST: return "BEACON-LOST";
+        case NF_L2_ASSOCIATED: return "ASSOCIATED";
 
         case NF_INTERFACE_STATE_CHANGED: return "IFACE";
         case NF_INTERFACE_CONFIG_CHANGED: return "IFACE-CFG";

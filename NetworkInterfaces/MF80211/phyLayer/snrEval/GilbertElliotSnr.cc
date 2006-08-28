@@ -92,7 +92,7 @@ void GilbertElliotSnr::handleSelfMsg(cMessage *msg)
         if (state == GOOD)
         {
             state = BAD;
-            for (cRecvBuff::iterator it = recvBuff.begin(); it != recvBuff.end(); it++)
+            for (RecvBuff::iterator it = recvBuff.begin(); it != recvBuff.end(); it++)
                 (it->first)->setBitError(true);
             scheduleAt(simTime() + exponential(meanBad, 0), stateChange);
         }
@@ -103,7 +103,7 @@ void GilbertElliotSnr::handleSelfMsg(cMessage *msg)
         }
     }
     else
-        error("received unknown self messages!");
+        error("Internal error: unknown self-message `%s'", msg->name());
 }
 
 

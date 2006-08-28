@@ -42,6 +42,9 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleUpperMessage(cMessage *msg);
 
+    /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
+    virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
+
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 

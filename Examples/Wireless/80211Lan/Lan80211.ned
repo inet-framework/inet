@@ -29,20 +29,20 @@ module Lan80211
         playgroundSizeX: numeric const,
         playgroundSizeY: numeric const;
     submodules:
-        host: WirelessHost[numHosts];
+        host: WirelessHostSimplified[numHosts];
             display: "i=device/wifilaptop;r=,,#707070";
-        ap: WirelessAP2; // or WirelessAP
+        ap: WirelessAPSimplified;
             display: "p=213,174;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
                 playgroundSizeX = playgroundSizeX,
                 playgroundSizeY = playgroundSizeY,
-                numberOfChannels = 2;
+                numChannels = 2;
             display: "p=61,46;i=misc/sun";
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "WirelessHost",
-                nonIPModuleTypes = "WirelessAP",
+                moduleTypes = "WirelessHost WirelessHostSimplified",
+                nonIPModuleTypes = "WirelessAP WirelessAPSimplified",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
             display: "p=140,50;i=block/cogwheel_s";

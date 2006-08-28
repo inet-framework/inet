@@ -26,10 +26,17 @@ class noncobject MACAddress;
 class noncobject Ieee80211CapabilityInformation;
 class noncobject Ieee80211SupportedRatesElement;
 
-enum AuthenticationType
+enum Ieee80211AuthenticationType
 {
     AUTHTYPE_OPENSYSTEM = 1;
     AUTHTYPE_SHAREDKEY = 2;
+};
+
+enum Ieee80211BSSType
+{
+    BSSTYPE_ANY = 0;
+    BSSTYPE_INFRASTRUCTURE = 1;
+    BSSTYPE_INDEPENDENT = 2;
 };
 
 //
@@ -45,28 +52,27 @@ class Ieee80211Prim
 class Ieee80211Prim_ScanRequest extends Ieee80211Prim
 {
     fields:
-        bool BSSType;
-        MACAddress BSSID;
-        string SSID;
-        bool activeScan;
-        double probeDelay;
-        int channelList[];
-        double minChannelTime;
-        double maxChannelTime;
+        int BSSType enum(Ieee80211BSSType); // determines type of BSS's to include in the scan
+        MACAddress BSSID; // specific BSSID to scan for (default: any)
+        string SSID;      // SSID to scan for SSID (default: any)
+        bool activeScan;  // whether to perform active or passive scanning
+        double probeDelay; // delay (in ìs) to be used prior to transmitting a Probe frame during active scanning
+        int channelList[]; // list of channels to scan (default: all channels)
+        double minChannelTime; // minimum time to spend on each channel when scanning
+        double maxChannelTime; // maximum time to spend on each channel when scanning
 };
 
 class Ieee80211Prim_BSSDescription
 {
     fields:
+        int channel;
         MACAddress BSSID;
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
         Ieee80211CapabilityInformation capabilityInfo;
-        unsigned short beaconInterval;
-        unsigned short DSChannel;
+        double beaconInterval;
 
         double rxPower; // received power from AP; not part of the standard
-
 };
 
 //
@@ -85,7 +91,7 @@ class Ieee80211Prim_AuthenticateRequest extends Ieee80211Prim
 {
     fields:
         MACAddress address;
-        int authType enum(AuthenticationType);
+        int authType enum(Ieee80211AuthenticationType);
         double timeout;
 };
 
@@ -96,7 +102,7 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211Prim
 {
     fields:
         MACAddress address;
-        int authType enum(AuthenticationType);
+        int authType enum(Ieee80211AuthenticationType);
         int result; //=0 OK
 };
 

@@ -41,7 +41,7 @@ void BasicSnrEval::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    coreEV << "Initializing BasiSnrEval, stage=" << stage << endl;
+    coreEV << "Initializing BasicSnrEval, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -55,9 +55,7 @@ void BasicSnrEval::initialize(int stage)
 
         // transmitter power CANNOT be greater than in ChannelControl
         if (transmitterPower > (double) (cc->par("pMax")))
-            error("tranmitterPower cannot be bigger than pMax in ChannelControl!");
-
-        channel = par("channelNumber");
+            error("transmitterPower cannot be bigger than pMax in ChannelControl!");
     }
 }
 
@@ -97,16 +95,17 @@ void BasicSnrEval::handleMessage(cMessage *msg)
         else
             handleSelfMsg(msg);
     }
-    else if (((AirFrame*)msg)->getChannelNumber() != channel)  //  FIXME use check_and_cast
+    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == channelNumber())
     {
-        EV << "listening to different channel when receiving message -- dropping it\n";
-    }
-    else
-    {
-        // msg must come from our own channel
+        // must be an AirFrame
         AirFrame *frame = (AirFrame *) msg;
         handleLowerMsgStart(frame);
         bufferMsg(frame);
+    }
+    else
+    {
+        EV << "listening to different channel when receiving message -- dropping it\n";
+        delete msg;
     }
 }
 
@@ -119,12 +118,13 @@ void BasicSnrEval::handleMessage(cMessage *msg)
 void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
-    TransmComplete *timer = new TransmComplete(NULL);
-    timer->setContextPointer(frame);
-    // NOTE: use arrivalTime instead of simTime, because the message arrival time
-    // might be in the past when processing ongoing transmissions during a channel
-    // change
-    scheduleAt(frame->arrivalTime() + frame->getDuration(), timer);
+    TransmComplete *endRxTimer = new TransmComplete(NULL);
+    endRxTimer->setContextPointer(frame);
+    frame->setContextPointer(endRxTimer);
+    // NOTE: use arrivalTime instead of simTime, because we might be calling this
+    // function during a channel change, when we're picking up ongoing transmissions
+    // on the channel -- and then the message's arrival time is in the past!
+    scheduleAt(frame->arrivalTime() + frame->getDuration(), endRxTimer);
 }
 
 /**
@@ -139,7 +139,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
     frame->setName(msg->name());
     frame->setPSend(transmitterPower);
     frame->setLength(headerLength);
-    frame->setChannelNumber(channel);
+    frame->setChannelNumber(channelNumber());
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
     frame->setSenderPos(myPosition());

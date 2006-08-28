@@ -214,7 +214,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     State state;
 
     /** @brief Current state of the radio (kept updated by receiveChangeNotification()) */
-    RadioState::States radioState;
+    RadioState::State radioState;
 
     /** @brief Maximal number of packets in the queue; should be set in
        the omnetpp.ini*/

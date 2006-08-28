@@ -20,15 +20,15 @@
 
 simple SnrEval80211
     parameters:
-        channelNumber: numeric, // channel identifier
-    debug: bool, // debug switch
-        transmitterPower : numeric,
-    bitrate: numeric,
-    headerLength: numeric const,
-    carrierFrequency: numeric,
-    thermalNoise: numeric,
-    pathLossAlpha: numeric,
-    sensitivity: numeric;
+        channelNumber: numeric const, // channel identifier
+        debug: bool, // debug switch
+        transmitterPower : numeric const,
+        bitrate: numeric const,
+        headerLength: numeric const,
+        carrierFrequency: numeric const,
+        thermalNoise: numeric const,
+        pathLossAlpha: numeric const,
+        sensitivity: numeric const;
     gates:
         in: uppergateIn;
         out: uppergateOut;

@@ -20,7 +20,7 @@
 import
     "NotificationBoard",
     "EthernetInterface",
-    "Ieee80211Nic";
+    "Ieee80211NicAP";
 
 
 //
@@ -32,9 +32,7 @@ module WirelessAP
     submodules:
         notificationBoard: NotificationBoard;
             display: "p=79,74;i=block/control";
-        wlan: Ieee80211Nic;
-            parameters:
-                mgmtType = "Ieee80211MgmtSimplifiedAP";
+        wlan: Ieee80211NicAP; // see also Ieee80211NicAPSimplified
             display: "p=110,179;q=queue;i=block/ifcard";
         mobility: NullMobility;
             display: "p=144,70;i=block/cogwheel_s";

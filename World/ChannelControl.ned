@@ -45,6 +45,6 @@ simple ChannelControl
         sat: numeric const, // signal attenuation threshold (in dBm)
         alpha: numeric const, // path loss coefficient
         carrierFrequency: numeric const, // carrier frequency of the channel (in Hz)
-        numberOfChannels: numeric const;
+        numChannels: numeric const; // number of radio channels (frequencies)
 endsimple
 

@@ -27,6 +27,7 @@
  * Category constants for NotificationBoard
  */
 // TODO consider: use allocated IDs, like: const int NF_FOO = registerCategory("FOO");
+// TODO document associated notification detail structs
 enum
 {
     // - host
@@ -36,14 +37,19 @@ enum
 
     // - layer 1 (physical)
     NF_RADIOSTATE_CHANGED,
+    NF_RADIO_CHANNEL_CHANGED,
 
     // - layer 2 (data-link)
+    //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
+    // they generally carry TxNotifDetails as "details" to identify the interface and the frame
     NF_PP_TX_BEGIN,   // point-to-point transmission begins (currently PPP)
     NF_PP_TX_END,     // point-to-point transmission ends (currently PPP)
     NF_PP_RX_END,     // point-to-point reception ends (currently PPP)
+    NF_TX_ACKED,      // transmitted frame got acked (currently Ieee80211)
     NF_L2_Q_DROP,
     NF_MAC_BECAME_IDLE,
-    NF_LAYER2_HANDOVER_OCCURRED,
+    NF_L2_BEACON_LOST,   // missed several consecutive beacons (currently Ieee80211)
+    NF_L2_ASSOCIATED,   // successfully associated with an AP (currently Ieee80211)
 
     // - layer 3 (network)
     NF_INTERFACE_STATE_CHANGED,

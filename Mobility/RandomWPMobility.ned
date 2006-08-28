@@ -39,8 +39,8 @@
 simple RandomWPMobility
     parameters:
         debug: bool, // debug switch
-        x: numeric const, // x coordinate of the nodes' position (-1 = random)
-        y: numeric const, // y coordinate of the nodes' position (-1 = random)
+        x: numeric const, // start x coordinate (-1 = display string position, or random if it's missing)
+        y: numeric const, // start y coordinate (-1 = display string position, or random if it's missing)
         updateInterval: numeric const,
         speed: numeric, // use uniform(minSpeed, maxSpeed) or another distribution
         waitTime: numeric; // wait time between reaching a target and choosing a new one

@@ -25,6 +25,12 @@
 // @author Andras Varga
 //
 simple Ieee80211AgentSTA
+    parameters:
+        probeDelay: numeric const,
+        minChannelTime: numeric const,
+        maxChannelTime: numeric const,
+        authenticationTimeout: numeric const,
+        associationTimeout: numeric const;
     gates:
         in: mgmtIn;
         out: mgmtOut;

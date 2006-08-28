@@ -19,20 +19,63 @@
 
 #include "Ieee80211MgmtSTA.h"
 #include "Ieee802Ctrl_m.h"
+#include "NotifierConsts.h"
+#include "PhyControlInfo_m.h"
 
 
 Define_Module(Ieee80211MgmtSTA);
 
-#define MK_AUTH_TIMEOUT 1
+// message kind values for timers
+#define MK_AUTH_TIMEOUT   1
+#define MK_ASSOC_TIMEOUT  2
+#define MK_CHANNEL_CHANGE 3
+#define MK_BEACON_TIMEOUT 4
 
+#define AUTHRESULT_TIMEDOUT  1  //FIXME move it into msg file, code from spec, etc!
+#define ASSOCRESULT_TIMEDOUT 1  //FIXME move it into msg file, code from spec, etc!
+
+
+std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
+{
+    os << "AP addr=" << ap.address
+       << " chan=" << ap.channel
+       << " ssid=" << ap.ssid
+       //TBD supportedRates, capabilityInformation,...
+       << " tstamp=" << ap.timestamp
+       << " beaconIntvl=" << ap.beaconInterval
+       << " rxPower=" << ap.rxPower
+       << " authSeqExpected=" << ap.authSeqExpected
+       << " isAuthenticated=" << ap.isAuthenticated
+       << " authType=" << ap.authType
+       << " rcvSeq=" << ap.receiveSequence;
+    return os;
+}
 
 void Ieee80211MgmtSTA::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
     if (stage==0)
     {
-//XXX        authenticationTimeout = par("authenticationTimeout");
-//XXX        associationTimeout = par("associationTimeout");
+        isScanning = false;
+        isAssociated = false;
+        receiveSequence = 0;
+
+        nb = NotificationBoardAccess().get();
+
+        // determine numChannels (needed when we're told to scan "all" channels)
+        //XXX find a better way than directly accessing channelControl
+        cModule *cc = simulation.moduleByPath("channelcontrol");
+        if (cc == NULL)
+            error("cannot not find ChannelControl module");
+        numChannels = cc->par("numChannels");
+
+        WATCH(isScanning);
+        WATCH(isAssociated);
+        //TODO: watch "scanning"
+
+        WATCH(apAddress);
+        WATCH(receiveSequence);
+        WATCH_LIST(apList);
     }
 }
 
@@ -40,7 +83,33 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 {
     if (msg->kind()==MK_AUTH_TIMEOUT)
     {
-        //TBD handle authentication timeout
+        // authentication timed out
+        APInfo *ap = (APInfo *)msg->contextPointer();
+        EV << "Authentication timed out, AP address = " << ap->address << "\n";
+
+        // send back failure report to agent
+        sendAuthenticationConfirm(ap, AUTHRESULT_TIMEDOUT);
+    }
+    else if (msg->kind()==MK_ASSOC_TIMEOUT)
+    {
+        // association timed out
+        APInfo *ap = (APInfo *)msg->contextPointer();
+        EV << "Association timed out, AP address = " << ap->address << "\n";
+
+        // send back failure report to agent
+        sendAssociationConfirm(ap, ASSOCRESULT_TIMEDOUT);
+    }
+    else if (msg->kind()==MK_CHANNEL_CHANGE)
+    {
+        // go to next channel during scanning
+        bool done = scanNextChannel(msg);
+        if (done)
+            sendScanConfirm(); // send back response to agents' "scan" command
+    }
+    else if (msg->kind()==MK_BEACON_TIMEOUT)
+    {
+        // missed a few consecutive beacons
+        beaconLost();
     }
     else
     {
@@ -55,6 +124,21 @@ void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
     sendOrEnqueue(frame);
 }
 
+void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
+{
+    if (dynamic_cast<Ieee80211Prim_ScanRequest *>(ctrl))
+        processScanCommand((Ieee80211Prim_ScanRequest *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_AuthenticateRequest *>(ctrl))
+        processAuthenticateCommand((Ieee80211Prim_AuthenticateRequest *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
+        processAssociateCommand((Ieee80211Prim_AssociateRequest *)ctrl);
+    else if (ctrl)
+        error("handleCommand(): unrecognized control info class `%s'", ctrl->className());
+    else
+        error("handleCommand(): control info is NULL");
+    delete ctrl;
+}
+
 Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
@@ -63,7 +147,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     frame->setToDS(true);
 
     // receiver is the AP
-    frame->setReceiverAddress(associateAP.address);
+    frame->setReceiverAddress(apAddress);
 
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
@@ -74,24 +158,217 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     return frame;
 }
 
-void Ieee80211MgmtSTA::startAuthentication(APInfo *ap)
+Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 {
-//    // create and send first authentication frame
-//    Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
-//    frame->getBody().setSequenceNumber(1);
-//    // XXX frame length could be increased to account for challenge text length etc.
-//    sendManagementFrame(frame, ap->address);
-//
-//    // schedule timeout
-//    ASSERT(ap->timeoutMsg==NULL);
-//    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
-//    scheduleAt(simTime()+authenticationTimeout, ap->timeoutMsg);
+    for (AccessPointList::iterator it=apList.begin(); it!=apList.end(); ++it)
+        if (it->address == address)
+            return &(*it);
+    return NULL;
+}
+
+void Ieee80211MgmtSTA::clearAPList()
+{
+    for (AccessPointList::iterator it=apList.begin(); it!=apList.end(); ++it)
+        if (it->timeoutMsg)
+            delete cancelEvent(it->timeoutMsg);
+    apList.clear();
+}
+
+void Ieee80211MgmtSTA::changeChannel(int channelNum)
+{
+    EV << "Tuning to channel " << channelNum << "\n";
+
+    // sending PHY_C_CHANGECHANNEL command to MAC
+    PhyControlInfo *phyCtrl = new PhyControlInfo();
+    phyCtrl->setChannelNumber(channelNum);
+    cMessage *msg = new cMessage("changeChannel", PHY_C_CHANGECHANNEL);
+    msg->setControlInfo(phyCtrl);
+    send(msg, "macOut");
+}
+
+void Ieee80211MgmtSTA::beaconLost()
+{
+    EV << "Missed a few consecutive beacons -- AP is considered lost\n";
+    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //FIXME use InterfaceEntry as detail, etc...
+
+    //XXX break existing association with AP? send Disassociation frame?
+    //XXX delete beaconTimeout timer?
+}
+
+void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
+{
+    // frame goes to the specified AP
+    frame->setToDS(true);
+    frame->setReceiverAddress(address);
+    //XXX set sequenceNumber?
+
+    sendOrEnqueue(frame); //XXX or should mgmt frames take priority over normal frames?
+}
+
+void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, int authType, double timeout)
+{
+    changeChannel(ap->channel);
+    ap->authType = authType;
+
+    // create and send first authentication frame
+    Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
+    frame->getBody().setSequenceNumber(1);
+    //XXX frame length could be increased to account for challenge text length etc.
+    //XXX obey authType
+    sendManagementFrame(frame, ap->address);
+
+    // schedule timeout
+    ASSERT(ap->timeoutMsg==NULL);
+    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
+    ap->timeoutMsg->setContextPointer(ap);
+    scheduleAt(simTime()+timeout, ap->timeoutMsg);
+}
+
+void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
+{
+    //XXX check authentication status? or is it enough if AP does that?
+
+    // switch to that channel
+    changeChannel(ap->channel);
+
+    // create and send association request
+    Ieee80211AssociationRequestFrame *frame = new Ieee80211AssociationRequestFrame("Assoc");
+
+    //XXX set the following too?
+    // string SSID;
+    // Ieee80211SupportedRatesElement supportedRates;
+    // Ieee80211CapabilityInformation capabilityInformation;
+
+    sendManagementFrame(frame, ap->address);
+
+    // schedule timeout
+    ASSERT(ap->timeoutMsg==NULL);
+    ap->timeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
+    ap->timeoutMsg->setContextPointer(ap);
+    scheduleAt(simTime()+timeout, ap->timeoutMsg);
 }
 
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
     //TBD
+}
+
+void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
+{
+    EV << "Received Scan Request from agent, clearing AP list and starting scanning...\n";
+
+    // clear existing AP list (and cancel any pending authentications) -- we want to start with a clean page
+    clearAPList();
+
+    // fill in scanning state
+    ASSERT(ctrl->getBSSType()==BSSTYPE_INFRASTRUCTURE);
+    scanning.bssid = ctrl->getBSSID();
+    scanning.ssid = ctrl->getSSID();
+    scanning.activeScan = ctrl->getActiveScan();
+    scanning.probeDelay = ctrl->getProbeDelay();
+    scanning.channelList.clear();
+    scanning.minChannelTime = ctrl->getMinChannelTime();
+    scanning.maxChannelTime = ctrl->getMaxChannelTime();
+
+    // channel list to scan (deafult: all channels)
+    for (int i=0; i<ctrl->getChannelListArraySize(); i++)
+        scanning.channelList.push_back(ctrl->getChannelList(i));
+    if (scanning.channelList.empty())
+        for (int i=0; i<numChannels; i++)
+            scanning.channelList.push_back(i);
+
+    // start scanning
+    scanning.currentChannelIndex = -1; // so we'll start with index==0
+    cMessage *timerMsg = new cMessage("changeChannel", MK_CHANNEL_CHANGE);
+    scanNextChannel(timerMsg);
+}
+
+bool Ieee80211MgmtSTA::scanNextChannel(cMessage *reuseTimerMsg)
+{
+    // if we're already at the last channel, we're through
+    if (scanning.currentChannelIndex==scanning.channelList.size()-1)
+    {
+        EV << "Finished scanning last channel\n";
+        delete reuseTimerMsg;
+        return true; // we're done
+    }
+
+    // tune to first channel and schedule next channel switch
+    int newChannel = scanning.channelList[++scanning.currentChannelIndex];
+    changeChannel(newChannel);
+    double channelTime = (scanning.minChannelTime+scanning.maxChannelTime)/2;
+    scheduleAt(simTime()+channelTime, reuseTimerMsg);
+    //XXX schedule probe
+    return false;
+}
+
+void Ieee80211MgmtSTA::sendScanConfirm()
+{
+    EV << "Scanning complete, found " << apList.size() << " APs, sending confirmation to agent\n";
+
+    // copy apList contents into a ScanConfirm primitive and send it back
+    int n = apList.size();
+    Ieee80211Prim_ScanConfirm *confirm = new Ieee80211Prim_ScanConfirm();
+    confirm->setBssListArraySize(n);
+    AccessPointList::iterator it = apList.begin();
+    //XXX filter for req'd bssid and ssid
+    for (int i=0; i<n; i++, it++)
+    {
+        APInfo *ap = &(*it);
+        Ieee80211Prim_BSSDescription& bss = confirm->getBssList(i);
+        bss.setChannel(ap->channel);
+        bss.setBSSID(ap->address);
+        bss.setSSID(ap->ssid.c_str());
+        bss.setSupportedRates(ap->supportedRates);
+        bss.setCapabilityInfo(ap->capabilityInformation);
+        bss.setBeaconInterval(ap->beaconInterval);
+        bss.setRxPower(ap->rxPower);
+    }
+    sendConfirm(confirm);
+}
+
+void Ieee80211MgmtSTA::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequest *ctrl)
+{
+    const MACAddress& address = ctrl->getAddress();
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+        error("processAuthenticateCommand: AP not known: address = %s", address.str().c_str());
+    startAuthentication(ap, ctrl->getAuthType(), ctrl->getTimeout());
+}
+
+void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
+{
+    const MACAddress& address = ctrl->getAddress();
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+        error("processAssociateCommand: AP not known: address = %s", address.str().c_str());
+    if (!ap->isAuthenticated)
+        error("processAssociateCommand: not authenticated with AP address = %s", address.str().c_str());
+    startAssociation(ap, ctrl->getTimeout());
+}
+
+void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
+{
+    Ieee80211Prim_AuthenticateConfirm *confirm = new Ieee80211Prim_AuthenticateConfirm();
+    confirm->setAddress(ap->address);
+    confirm->setAuthType(ap->authType);
+    confirm->setResult(resultCode);
+    sendConfirm(confirm);
+}
+
+void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, int resultCode)
+{
+    Ieee80211Prim_AssociateConfirm *confirm = new Ieee80211Prim_AssociateConfirm();
+    confirm->setResult(resultCode);
+    sendConfirm(confirm);
+}
+
+void Ieee80211MgmtSTA::sendConfirm(Ieee80211Prim *req)
+{
+    cMessage *msg = new cMessage(req->className());
+    msg->setControlInfo(req);
+    send(msg, "agentOut");
 }
 
 void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
@@ -101,17 +378,71 @@ void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-//    if (!ap->authTimeoutMsg || !ap->authTimeoutMsg->isScheduled())
-//    {
-//        // there is no authentication in progress -- discard frame
-//        delete frame;
-//        return;
-//    }
+    EV << "Received Authentication frame\n";
 
+    MACAddress address = frame->getTransmitterAddress();
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+    {
+        EV << "AP not known (address=" << address.str() << "), discarding authentication frame\n";
+        delete frame;
+        return;
+    }
+
+    //XXX what if already authenticated with AP?
+    //XXX check authentication is currently in progress
+    //XXX check sequenceNumber if in sequence
+/*
+    // check authentication sequence number is OK
+    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    if (frameAuthSeq != ap->authSeqExpected)
+    {
+        // wrong sequence number: send error and return
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(ERR)");
+        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        sendManagementFrame(resp, frame->getTransmitterAddress());
+        delete frame;
+        ap->authSeqExpected = 1; // go back to start square XXX
+        //XXX send error to agent
+        return;
+    }
+*/
+    //XXX how many exchanges are needed for auth to be complete? (check seqNum)
+    int statusCode = frame->getBody().getStatusCode();
+
+    //TBD if auth complete, set isAuthenticated=true and send back response
+/*
+    if (frameAuthSeq < numAuthSteps)
+    {
+        // send OK response (we don't model the cryptography part, just assume
+        // successful authentication every time)
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(OK)");
+        resp->getBody().setSequenceNumber(frameAuthSeq);
+        resp->getBody().setStatusCode(SC_SUCCESSFUL);
+        // XXX frame length could be increased to account for challenge text length etc.
+        sendManagementFrame(resp, ap->address);
+    }
+
+    // we are authenticated with AP if we made it through the required number of steps
+    if (frameAuthSeq+1 == numAuthSteps)
+    {
+        ap->isAuthenticated = true;
+    }
+    else
+    {
+        ap->authSeqExpected += 2;
+    }
+*/
+    //XXX the following should only be done only if completed numSteps
+    ap->isAuthenticated = (statusCode==0);
+    delete cancelEvent(ap->timeoutMsg);
+    ap->timeoutMsg = NULL;
+    sendAuthenticationConfirm(ap, statusCode);
 }
 
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
+    EV << "Received Deauthentication frame\n";
     //TBD
 }
 
@@ -122,7 +453,43 @@ void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequest
 
 void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
-    //TBD
+    EV << "Received Association Response frame\n";
+    //XXX check if we have actually sent an AssocReq to this AP!
+
+    // extract frame contents
+    MACAddress address = frame->getTransmitterAddress();
+    int statusCode = frame->getBody().getStatusCode();
+    //XXX Ieee80211CapabilityInformation capabilityInformation;
+    //XXX short aid;
+    //XXX Ieee80211SupportedRatesElement supportedRates;
+    delete frame;
+
+    // look up AP data structure
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+        error("handleAssociationResponseFrame: AP not known: address = %s", address.str().c_str());
+
+    if (isAssociated)
+    {
+        //XXX something to do about our existing association...?
+    }
+
+    // change our state to "associated"
+    if (statusCode==0) //XXX OK
+    {
+        EV << "Association successful, AP address = " << ap->address << "\n";
+        isAssociated = true;
+        apAddress = address;
+        receiveSequence = 1; //XXX ???
+
+        nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
+
+        beaconTimeout = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
+        scheduleAt(simTime()+1, beaconTimeout);  //FIXME use +3.5*beaconInterval or sth like that
+    }
+
+    // report back to agent
+    sendAssociationConfirm(ap, statusCode);
 }
 
 void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
@@ -132,33 +499,70 @@ void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationReq
 
 void Ieee80211MgmtSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
+    EV << "Received Reassociation Response frame\n";
     //TBD
 }
 
 void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
+    EV << "Received Disassociation frame\n";
     //TBD
 }
 
 void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 {
-    if (status==SCANNING)
+    EV << "Received Beacon frame\n";
+    storeAPInfo(frame->getTransmitterAddress(), frame->getBody());
+
+    // if it is out associate AP, restart beacon timeout
+    if (isAssociated && frame->getTransmitterAddress()==apAddress)
     {
-        // add access point to list
+        EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
+        ASSERT(beaconTimeout!=NULL);
+        cancelEvent(beaconTimeout);
+        scheduleAt(simTime()+1, beaconTimeout); //XXX use 3.5*beaconIntvl or sth like that
+
+        //APInfo *ap = lookupAP(frame->getTransmitterAddress());
+        //ASSERT(ap!=NULL);
     }
+
+    delete frame;
 }
 
 void Ieee80211MgmtSTA::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
-    if (status==SCANNING)
-    {
-        // add access point to list
-    }
+    dropManagementFrame(frame);
 }
 
 void Ieee80211MgmtSTA::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
 {
-    dropManagementFrame(frame);
+    EV << "Received Probe Response frame\n";
+    storeAPInfo(frame->getTransmitterAddress(), frame->getBody());
+    delete frame;
 }
 
+void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body)
+{
+    APInfo *ap = lookupAP(address);
+    if (ap)
+    {
+        EV << "AP address=" << address << ", SSID=" << body.getSSID() << " already in our AP list, refreshing the info\n";
+    }
+    else
+    {
+        EV << "Inserting AP address=" << address << ", SSID=" << body.getSSID() << " into our AP list\n";
+        apList.push_back(APInfo());
+        ap = &apList.back();
+    }
+
+    ap->channel = body.getChannel();
+    ap->address = address;
+    ap->ssid = body.getSSID();
+    ap->supportedRates = body.getSupportedRates();
+    ap->capabilityInformation = body.getCapabilityInformation();
+    ap->timestamp = body.getTimestamp();
+    ap->beaconInterval = body.getBeaconInterval();
+
+    //XXX where to get this from???    ap->rxPower = ...;
+}
 

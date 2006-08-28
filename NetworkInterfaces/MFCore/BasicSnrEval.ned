@@ -41,7 +41,6 @@
 //
 simple BasicSnrEval
     parameters:
-        channelNumber: numeric, // channel identifier
         coreDebug: numeric const, // debug switch for the core framework
         transmitterPower: numeric, // power used for transmission of messages (in mW)
         bitrate: numeric, // bitrate (in bits/sec)

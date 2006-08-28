@@ -2,6 +2,7 @@
  * file:        SnrEval.cc
  *
  * author:      Marc Loebbers
+ *              Multi-channel support: Levente Meszaros, Andras Varga
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -30,40 +31,25 @@ std::ostream& operator<<(std::ostream& os, const RadioState& rs)
 
 Define_Module(SnrEval);
 
-/**
- * All values not present in the ned file will be read from the
- * ChannelControl module or assigned default values.
- */
+SnrEval::SnrEval() : rs(this->id())
+{
+}
+
 void SnrEval::initialize(int stage)
 {
     BasicSnrEval::initialize(stage);
 
     if (stage == 0)
     {
-        if (hasPar("thermalNoise"))
-            thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
-        else
-            thermalNoise = FWMath::dBm2mW(-100);
-
-        if (hasPar("carrierFrequency"))
-            carrierFrequency = par("carrierFrequency");
-        else
-            carrierFrequency = cc->par("carrierFrequency");
-
-        if (hasPar("sensitivity"))
-            sensitivity = FWMath::dBm2mW(par("sensitivity"));
-        else
-            sensitivity = FWMath::dBm2mW(-90);
-
-        if (hasPar("pathLossAlpha"))
-        {
-            pathLossAlpha = par("pathLossAlpha");
-            if (pathLossAlpha < (double) (cc->par("alpha")))
-                error("SnrEval::initialize() pathLossAlpha can't be smaller than in "
-                      "ChannelControl. Please adjust your omnetpp.ini file accordingly");
-        }
-        else
-            pathLossAlpha = cc->par("alpha");
+        // read parameters
+        rs.setChannel(par("channelNumber"));
+        thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
+        carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
+        sensitivity = FWMath::dBm2mW(par("sensitivity"));
+        pathLossAlpha = par("pathLossAlpha");
+        if (pathLossAlpha < (double) (cc->par("alpha")))
+            error("SnrEval::initialize(): pathLossAlpha can't be smaller than in "
+                  "ChannelControl. Please adjust your omnetpp.ini file accordingly");
 
         // initialize noiseLevel
         noiseLevel = thermalNoise;
@@ -75,6 +61,9 @@ void SnrEval::initialize(int stage)
         // that currently no message is received
         snrInfo.ptr = NULL;
 
+        // no channel switch pending
+        newChannel = -1;
+
         // Initialize radio state. If thermal noise is already to high, radio
         // state has to be initialized as RECV
         rs.setState(RadioState::IDLE);
@@ -83,7 +72,6 @@ void SnrEval::initialize(int stage)
 
         WATCH(noiseLevel);
         WATCH(rs);
-        WATCH(channel);
     }
     else if (stage == 1)
     {
@@ -93,29 +81,49 @@ void SnrEval::initialize(int stage)
     }
 }
 
-/**
- * delete the RadioState
- */
 void SnrEval::finish()
 {
     BasicSnrEval::finish();
 }
 
+SnrEval::~SnrEval()
+{
+    // delete messages being received
+    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
+        delete it->first;
+}
+
+void SnrEval::handleMessage(cMessage *msg)
+{
+    if (msg->arrivalGateId()==uppergateIn && msg->kind()!=0)
+    {
+        //XXX shouldn't this whole command stuff be moved into BasicSnrEval?
+        cPolymorphic *ctrl = msg->removeControlInfo();
+        if (msg->length()!=0)
+            error("Commands sent to the physical layer (nonzero msg kind) should be attached to blank messages (len=0) not data frames");
+        handleCommand(msg->kind(), ctrl);
+        delete msg;
+    }
+    else
+    {
+        BasicSnrEval::handleMessage(msg); // let base class do it
+    }
+}
+
 /**
- * If a message is already being send the newly arrived one is
- * deletetd and a warning is printed.
+ * If a message is already being transmitted, an error is raised.
  *
  * Otherwise the RadioState is set to TRANSMIT and a timer is
- * started. When this timer expires the RadioState is set back to RECV
+ * started. When this timer expires the RadioState will be set back to RECV
  * (or IDLE respectively) again.
  *
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
-*/
+ */
 void SnrEval::handleUpperMsg(AirFrame * frame)
 {
     if (rs.getState() == RadioState::TRANSMIT)
-        error("Trying to send a message although already sending -- MAC should "
+        error("Trying to send a message while already transmitting -- MAC should "
               "take care this does not happen");
 
     // if a packet was being received, it is corrupted now as should be treated as noise
@@ -138,7 +146,7 @@ void SnrEval::handleUpperMsg(AirFrame * frame)
     // now we are done with all the exception handling and can take care
     // about the "real" stuff
 
-    //change radio status
+    // change radio status
     rs.setState(RadioState::TRANSMIT);
     EV << "sending, changing RadioState to TRANSMIT\n";
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
@@ -148,6 +156,29 @@ void SnrEval::handleUpperMsg(AirFrame * frame)
     sendDown(frame);
 }
 
+void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
+{
+    if (msgkind==PHY_C_CHANGECHANNEL)
+    {
+        // extract new channel number
+        PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
+        int newChannel = phyCtrl->channelNumber();
+        delete ctrl;
+
+        EV << "Command received: Change To Channel " << newChannel << "\n";
+
+        // do it
+        if (rs.getChannel()==newChannel)
+            EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
+        else if (rs.getState()==RadioState::TRANSMIT) {
+            EV << "We're transmitting right now, remembering to change after it's completed\n";
+            this->newChannel = newChannel;
+        } else
+            changeChannel(newChannel); // change channel right now
+    }
+    else
+        error("unknown command (msgkind=%d)", msgkind);
+}
 
 /**
  * The only self message that can arrive is a timer to indicate that
@@ -161,7 +192,6 @@ void SnrEval::handleSelfMsg(cMessage *msg)
 {
     if (msg->kind() == TRANSM_OVER)
     {
-
         if (noiseLevel < sensitivity)
         {
             // set the RadioState to IDLE
@@ -179,9 +209,16 @@ void SnrEval::handleSelfMsg(cMessage *msg)
 
         // delete the timer
         delete msg;
+
+        // switch channel if it needs be
+        if (newChannel!=-1)
+        {
+            changeChannel(newChannel);
+            newChannel = -1;
+        }
     }
     else
-        error("unknown selfMsg erhalten.....");
+        error("Internal error: unknown self-message `%s'", msg->name());
 }
 
 
@@ -193,11 +230,10 @@ void SnrEval::handleSelfMsg(cMessage *msg)
  * stored in the recvBuff. Afterwards it has to be decided whether the
  * packet is just noise or a "real" packet that needs to be received.
  *
- * The message is not treated as noise if all of the follwoing
+ * The message is not treated as noise if all of the following
  * conditions apply:
  *
- * -# the power of the received signal is higher than the
- * sensitivity.
+ * -# the power of the received signal is higher than the sensitivity.
  * -# the host is currently not sending a message
  * -# no other packet is already being received
  *
@@ -346,17 +382,14 @@ void SnrEval::handleLowerMsgEnd(AirFrame * frame)
 
 
 /**
- * The Snr information of the buffered message is updated....
+ * The Snr information of the buffered message is updated.
  */
 void SnrEval::addNewSnr()
 {
-    //print("NoiseLevel: "<<noiseLevel<<" recvPower: "<<snrInfo.rcvdPower);
-
-    SnrListEntry listEntry;     //create a new entry
+    SnrListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
     listEntry.snr = snrInfo.rcvdPower / noiseLevel;
     snrInfo.sList.push_back(listEntry);
-    //print("New Snr added: "<<listEntry.snr<<" at time:"<<simTime());
 }
 
 
@@ -372,60 +405,78 @@ double SnrEval::calcRcvdPower(double pSend, double distance)
     return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
 }
 
-void SnrEval::changeChannel(const int channel)
+
+void SnrEval::changeChannel(int channel)
 {
-    if (channel == this->channel)
+    if (channel == rs.getChannel())
         return;
-    else if (rs.getState() == RadioState::TRANSMIT)
-        // TODO: is there a reasonable solution for this?
+    if (channel < 0 || channel >= cc->getNumChannels())
+        error("changeChannel(): channel number %d is out of range (hint: numChannels is a parameter of ChannelControl)", channel);
+    if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
-    else if (rs.getState() == RadioState::RECV)
-        // TODO: what should we do with the message being received?
-        error("changing channel while receiving is not _yet_ allowed");
-    else
+
+    // if we are currently receiving, must clean that up before moving to different channel
+    if (rs.getState() == RadioState::RECV)
     {
-        EV << "changing channel to " << channel << " during radio idle\n";
-
-        this->channel = channel;
-        cc->updateHostChannel(myHostRef, channel);
-        ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
-
-        // clear snr info
-        snrInfo.ptr = NULL;
-        snrInfo.sList.clear();
-
-        for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+        // delete messages being received, and cancel associated self-messages
+        for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
         {
-            AirFrame *frame = *it;
-            // time for the message to reach us
-            double distance = myHostRef->pos.distance(frame->getSenderPos());
+            AirFrame *frame = it->first;
+            cMessage *endRxTimer = (cMessage *)frame->contextPointer();
+            delete frame;
+            delete cancelEvent(endRxTimer);
+        }
+        recvBuff.clear();
+    }
 
-            EV << "processing ongoing transmission for channel change\n";
+    // clear snr info
+    snrInfo.ptr = NULL;
+    snrInfo.sList.clear();
 
-            // if this transmission is on our new channel and it would reach us in the future, then schedule it
-            if (channel == frame->getChannelNumber())
+    // do channel switch
+    EV << "Changing channel to " << channel << "\n";
+
+    rs.setChannel(channel);
+    cc->updateHostChannel(myHostRef, channel);
+    ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
+
+    // pick up ongoing transmissions on the new channel
+    for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+    {
+        AirFrame *frame = *it;
+        // time for the message to reach us
+        double distance = myHostRef->pos.distance(frame->getSenderPos());
+        double propagationDelay = distance / LIGHT_SPEED;
+
+        EV << "processing ongoing transmission for channel change\n";
+
+        // if this transmission is on our new channel and it would reach us in the future, then schedule it
+        if (channel == frame->getChannelNumber())
+        {
+            // if there is a message on the air which will reach us in the future
+            if (frame->timestamp() + propagationDelay >= simTime())
             {
-                // if there is a message on the air which will reach us in the future
-                if (frame->timestamp() + distance / LIGHT_SPEED >= simTime())
-                {
-                    EV << "scheduling ongoing transmission to be processed in the future\n";
+                EV << "scheduling ongoing transmission to be processed in the future\n";
 
-                    // we need to send to each radioIn[] gate
-                    cGate *radioGate = gate("radioIn");
-                    for (int i = 0; i < radioGate->size(); i++)
-                        sendDirect((cMessage*)frame->dup(), frame->timestamp() + distance / LIGHT_SPEED - simTime(), this, radioGate->id() + i);
-                }
-                // if we hear some part of the message
-                else if (frame->timestamp() + frame->getDuration() + distance / LIGHT_SPEED > simTime())
-                {
-                    EV << "processing ongoing transmission as noise\n";
+                // we need to send to each radioIn[] gate
+                cGate *radioGate = gate("radioIn");
+                for (int i = 0; i < radioGate->size(); i++)
+                    sendDirect((cMessage*)frame->dup(), frame->timestamp() + propagationDelay - simTime(), this, radioGate->id() + i);
+            }
+            // if we hear some part of the message
+            else if (frame->timestamp() + frame->getDuration() + propagationDelay > simTime())
+            {
+                EV << "processing ongoing transmission as noise\n";
 
-                    AirFrame *frameDup = (AirFrame*)frame->dup();
-                    frameDup->setArrivalTime(frame->timestamp() + distance / LIGHT_SPEED);
-                    handleLowerMsgStart(frameDup);
-                    bufferMsg(frameDup);
-                }
+                AirFrame *frameDup = (AirFrame*)frame->dup();
+                frameDup->setArrivalTime(frame->timestamp() + propagationDelay);
+                handleLowerMsgStart(frameDup);
+                bufferMsg(frameDup);
             }
         }
     }
+
+    // notify other modules about the channel switch
+    nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
 }
+

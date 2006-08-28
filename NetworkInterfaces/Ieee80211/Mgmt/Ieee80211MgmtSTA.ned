@@ -26,14 +26,12 @@
 //
 simple Ieee80211MgmtSTA
     parameters:
-        frameCapacity: numeric,
-        authenticationTimeout: numeric const,
-        associationTimeout: numeric const,
-        retry: numeric const,
-        dataRate: numeric;
+        frameCapacity: numeric const; // maximum queue length
     gates:
         in: uppergateIn;
         out: uppergateOut;
         in: macIn;
         out: macOut;
+        in: agentIn;
+        out: agentOut;
 endsimple

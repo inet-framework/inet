@@ -33,8 +33,15 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211AgentSTA : public cSimpleModule
+class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
 {
+  protected:
+    double probeDelay;
+    double minChannelTime;
+    double maxChannelTime;
+    double authenticationTimeout;
+    double associationTimeout;
+
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -47,6 +54,9 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule
 
     /** Handle responses from mgmgt */
     virtual void handleResponse(cMessage *msg);
+
+    /** Redefined from INotifiable; called by NotificationBoard */
+    virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     void sendRequest(Ieee80211Prim *req);

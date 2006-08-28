@@ -2,6 +2,7 @@
  * file:        SnrEval.h
  *
  * author:      Marc Loebbers
+ *              Multi-channel support: Levente Meszaros, Andras Varga
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -22,6 +23,7 @@
 
 #include "BasicSnrEval.h"
 #include "RadioState.h"
+#include "PhyControlInfo_m.h"
 
 /**
  * @brief Keeps track of the different snir levels when receiving a
@@ -34,7 +36,7 @@
  * and handed to upper layers or just treated as noise.
  *
  * After the packet is completely received the snir information is
- * attached and it is handed to the deceider module.
+ * attached and it is handed to the decider module.
  *
  * The snir information is a SnrList that lists all different snr
  * levels together with the point of time (simTime()) when they
@@ -52,15 +54,15 @@
 class INET_API SnrEval : public BasicSnrEval
 {
   public:
+    SnrEval();
+
     /** @brief change transmitter and receiver to a new channel.
       * This method throws an error if the radio state is transmit.
       * Messages that are already sent to the new channel and would
       * reach us in the future - thus they are on the air - will be
       * received correctly.
       */
-    void changeChannel(const int channel);
-
-    const int getChannel() {return channel;}
+    void changeChannel(int channel);
 
   protected:
     /** @brief Initialize variables and publish the radio status*/
@@ -68,12 +70,18 @@ class INET_API SnrEval : public BasicSnrEval
 
     virtual void finish();
 
+    virtual ~SnrEval();
+
   protected:
+    void handleMessage(cMessage *msg);
+
     virtual void handleUpperMsg(AirFrame*);
 
     virtual void handleSelfMsg(cMessage*);
 
-    /** @brief Buffer the frame and update noise levels and snr information...*/
+    virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
+
+    /** @brief Buffer the frame and update noise levels and snr information */
     virtual void handleLowerMsgStart(AirFrame*);
 
     /** @brief Unbuffer the frame and update noise levels and snr information*/
@@ -81,6 +89,9 @@ class INET_API SnrEval : public BasicSnrEval
 
     /** @brief Calculates the power with which a packet is received.*/
     double calcRcvdPower(double pSend, double distance);
+
+    /** Redefined from BasicSnrEval */
+    virtual int channelNumber() const  {return rs.getChannel();}
 
     /** @brief updates the snr information of the relevant AirFrames*/
     void addNewSnr();
@@ -94,9 +105,9 @@ class INET_API SnrEval : public BasicSnrEval
       };
 
     /**
-     * @brief Struct to store a pointer to the mesage, rcvdPower AND a
+     * @brief Struct to store a pointer to the message, rcvdPower AND a
      * SnrList, needed in SnrEval::addNewSnr
-    */
+     */
     struct SnrStruct {
       /** @brief Pointer to the message this information belongs to*/
       AirFrame* ptr;
@@ -107,8 +118,8 @@ class INET_API SnrEval : public BasicSnrEval
     };
 
     /**
-     * @brief SnrInfo stores the snrList and the the recvdPower for the
-     * message currently being received together with a pointer to the
+     * @brief State: SnrInfo stores the snrList and the the recvdPower for the
+     * message currently being received, together with a pointer to the
      * message.
      */
     SnrStruct snrInfo;
@@ -117,35 +128,36 @@ class INET_API SnrEval : public BasicSnrEval
      * @brief Typedef used to store received messages together with
      * receive power.
      */
-    typedef std::map<AirFrame*,double> cRecvBuff;
+    typedef std::map<AirFrame*,double> RecvBuff;
 
     /**
-     * @brief A buffer to store a pointer to a message and the related
+     * @brief State: A buffer to store a pointer to a message and the related
      * receive power.
      */
-    cRecvBuff recvBuff;
+    RecvBuff recvBuff;
 
-    /** @brief Actual RadioState of the nic*/
+    /** @brief State: the current RadioState of the NIC; includes channel number */
     RadioState rs;
 
-    /** @brief The noise level of the channel.*/
+    /** @brief State: if not -1, we have to switch to that channel once we finished transmitting */
+    int newChannel;
+
+    /** @brief State: the current noise level of the channel.*/
     double noiseLevel;
 
     /**
-     * @brief The carrier frequency used.Can be specified in the
-     * omnetpp.ini file. If not it is read from the ChannelControl
-     * module.
+     * @brief Configuration: The carrier frequency used. It is read from the ChannelControl module.
      */
     double carrierFrequency;
 
     /**
-     * @brief Thermal noise on the channel. Can be specified in
+     * @brief Configuration: Thermal noise on the channel. Can be specified in
      * omnetpp.ini. Default: -100 dBm
      */
     double thermalNoise;
 
     /**
-     * @brief Defines up to what Power level (in dBm) a message can be
+     * @brief Configuration: Defines up to what Power level (in dBm) a message can be
      * understood. If the level of a received packet is lower, it is
      * only treated as noise. Can be specified in omnetpp.ini. Default:
      * -85 dBm
@@ -153,10 +165,10 @@ class INET_API SnrEval : public BasicSnrEval
     double sensitivity;
 
     /**
-     * @brief Path loss coefficient. Can be specified in omnetpp.ini. If
+     * @brief Configuration: Path loss coefficient. Can be specified in omnetpp.ini. If
      * not it is read from the ChannelControl module. This value CANNOT
      * be smaller than the one specified in the ChannelControl
-     * module. The simulation will exit with an error!
+     * module, or the simulation will exit with an error!
      */
     double pathLossAlpha;
 };

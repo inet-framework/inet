@@ -28,9 +28,9 @@
  *
  * Subclass of SnrEval. Basically the same except for some extra
  * parameters of 802.11 and the duration of the packet that has to be
- * computed differently as the modualtion of header and data part of the
+ * computed differently as the modulation of header and data part of the
  * packet are different. This module forms a physical layer together with
- * the Decider80211 module. The resluting physical layer is intended to
+ * the Decider80211 module. The resulting physical layer is intended to
  * be used together with the Mac80211 module.
  *
  * @author Marc Löbbers

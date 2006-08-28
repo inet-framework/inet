@@ -24,7 +24,7 @@ import
 //
 // This NIC implements an 802.11 network interface card.
 // It can be configured via the mgmtType parameter to act
-// as an AP or a STA.
+// as an AP or a STA, or for ad-hoc mode.
 //
 module Ieee80211Nic
     parameters:

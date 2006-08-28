@@ -66,6 +66,9 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Should be redefined to encapsulate and enqueue msgs from higher layers */
     virtual void handleUpperMessage(cMessage *msg) = 0;
 
+    /** Should be redefined to handle commands from the "agent" (if present) */
+    virtual void handleCommand(int msgkind, cPolymorphic *ctrl) = 0;
+
     /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
     void sendOrEnqueue(cMessage *frame);
 

@@ -39,15 +39,15 @@ std::ostream& operator<<(std::ostream& os, const ChannelControl::TransmissionLis
     return os;
 }
 
+ChannelControl::ChannelControl()
+{
+}
+
 ChannelControl::~ChannelControl()
 {
-    for (int i = 0; i < numberOfChannels; i++)
-    {
+    for (int i = 0; i < transmissions.size(); i++)
         for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end(); it++)
-        {
             delete *it;
-        }
-    }
 }
 
 /**
@@ -65,8 +65,8 @@ void ChannelControl::initialize()
     playgroundSize.x = par("playgroundSizeX");
     playgroundSize.y = par("playgroundSizeY");
 
-    numberOfChannels = par("numberOfChannels");
-    transmissions.resize(numberOfChannels);
+    numChannels = par("numChannels");
+    transmissions.resize(numChannels);
 
     lastOngoingTransmissionsUpdate = 0;
 
@@ -202,8 +202,8 @@ void ChannelControl::updateConnections(HostRef h)
 
 void ChannelControl::checkChannel(const int channel)
 {
-    if (channel >= numberOfChannels || channel < 0)
-        error("Invalid channel, must be between 0 and %d", numberOfChannels);
+    if (channel >= numChannels || channel < 0)
+        error("Invalid channel, must be between 0 and %d", numChannels);
 }
 
 void ChannelControl::updateHostPosition(HostRef h, const Coord& pos)
@@ -237,8 +237,11 @@ void ChannelControl::addOngoingTransmission(HostRef h, AirFrame *frame)
     // we only keep track of ongoing transmissions so that we can support
     // NICs switching channels -- so there's no point doing it if there's only
     // one channel
-    if (numberOfChannels==1)
+    if (numChannels==1) 
+    {
+        delete frame;
         return;
+    }
 
     // purge old transmissions from time to time
     if (simTime() - lastOngoingTransmissionsUpdate > TRANSMISSION_PURGE_INTERVAL)
@@ -248,12 +251,14 @@ void ChannelControl::addOngoingTransmission(HostRef h, AirFrame *frame)
     }
 
     // register ongoing transmission
-    transmissions[frame->getChannelNumber()].push_back((AirFrame*)frame->dup());
+    take(frame);
+    frame->setTimestamp(); // store time of transmission start
+    transmissions[frame->getChannelNumber()].push_back(frame);
 }
 
 void ChannelControl::purgeOngoingTransmissions()
 {
-    for (int i = 0; i < numberOfChannels; i++)
+    for (int i = 0; i < numChannels; i++)
     {
         for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end();)
         {

@@ -37,8 +37,8 @@
 simple ConstSpeedMobility
     parameters:
     debug : bool, // debug switch
-        vHost : numeric const, // spped of the host (in m/s)
+        vHost : numeric const, // speed of the host (in m/s)
         updateInterval : numeric const, // time interval to update the hosts position
-        x: numeric const, // x starting point of the node (-1 = random)
-        y: numeric const; // y starting point of the node (-1 = random)
+        x: numeric const, // start x coordinate (-1 = display string position, or random if it's missing)
+        y: numeric const; // start y coordinate (-1 = display string position, or random if it's missing)
 endsimple

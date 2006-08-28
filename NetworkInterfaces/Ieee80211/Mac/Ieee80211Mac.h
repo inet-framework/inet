@@ -129,7 +129,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     int retryCounter;
 
     /** @brief Physical radio (medium) state copied from physical layer */
-    RadioState::States radioState;
+    RadioState::State radioState;
 
     /** @brief Messages received from upper layer and to be transmitted later */
     Ieee80211DataOrMgmtFrameList transmissionQueue;
@@ -335,3 +335,4 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 };
 
 #endif
+

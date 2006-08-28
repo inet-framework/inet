@@ -32,7 +32,7 @@
  *
  * The BasicSnrEval module provides functionality like en- and
  * decapsulation of messages. If you use the standard message formats
- * everythng should work fine. Before a packet is sent some
+ * everything should work fine. Before a packet is sent some
  * information, e.g. transmission power, can be written to the
  * AirFrame header. If you write your own snrEval, just subclass and
  * redefine the handleUpperMsg function (see description of the
@@ -44,6 +44,8 @@
  * call of these functions represent the following events: 1. received
  * a message (i.e. transmission startet) 2. message will be handed on
  * to the upper layer (i.e. transmission time is over)
+ *
+ * This supports a single radio channel only
  *
  * @author Marc Loebbers
  * @ingroup snrEval
@@ -66,9 +68,6 @@ class INET_API BasicSnrEval : public ChannelAccess
     int uppergateOut;
     int uppergateIn;
     /*@}*/
-
-    /** @brief identifies the channel */
-    int channel;
 
   protected:
     /** @brief Initialization of the module and some variables*/
@@ -132,11 +131,14 @@ class INET_API BasicSnrEval : public ChannelAccess
     void sendDown(AirFrame *msg);
 
     /** @brief Encapsulates a MAC frame into an Air Frame*/
-    AirFrame* encapsMsg(cMessage *msg);
+    virtual AirFrame *encapsMsg(cMessage *msg);
     /*@}*/
 
     /** @brief This function calculates the duration of the AirFrame */
     virtual double calcDuration(cMessage*);
+
+    /** @brief Returns the channel we're listening on. This version always returns 0 (single radio channel supported) */
+    virtual int channelNumber() const {return 0;}
 
     /**
      * @name Abstraction layer

@@ -20,6 +20,7 @@
 #include "RadioState.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
+#include "PhyControlInfo_m.h"
 
 Define_Module(Ieee80211Mac);
 
@@ -190,6 +191,23 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 
 void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 {
+    // check if it's a command from the mgmt layer
+    if (msg->length()==0 && msg->kind()!=0)
+    {
+        if (msg->kind()==PHY_C_CHANGECHANNEL)
+        {
+            EV << "Passing on channel change command to physical layer\n";
+            //FIXME TODO reset MAC state
+            sendDown(msg);
+        }
+        else
+        {
+            error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->className(), msg->name(), msg->kind());
+        }
+        return;
+    }
+
+    // check for queue overflow
     if (maxQueueSize && transmissionQueue.size() == maxQueueSize)
     {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
@@ -234,8 +252,8 @@ void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details
 
     if (category == NF_RADIOSTATE_CHANGED)
     {
-        RadioState::States newRadioState = check_and_cast<RadioState *>(details)->getState();
-        EV << "radio state changed " << className() << ": " << details->info() << endl;
+        RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
+        EV << className() << ": radio state changed to " << details->info() << endl;
 
         // FIXME: double recording, because there's no sample hold in the gui
         radioStateVector.record(radioState);
@@ -261,6 +279,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
     int frameType = frame ? frame->getType() : -1;
+    bool isDataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
     int msgKind = msg->kind();
     logState();
     stateVector.record(fsm.state());
@@ -418,27 +437,27 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVING)
         {
             FSMA_No_Event_Transition(Receive-Broadcast,
-                                     isLowerMsg(msg) && isBroadcast(frame) && frameType == ST_DATA,
+                                     isLowerMsg(msg) && isBroadcast(frame) && isDataOrMgmtFrame,
                                      IDLE,
                 lastReceiveFailed = false;
                 sendUp(frame);
                 numReceivedBroadcast++;
             );
             FSMA_No_Event_Transition(Receive-Data,
-                                     isLowerMsg(msg) && isForUs(frame) && frameType == ST_DATA,
+                                     isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame,
                                      WAITSIFS,
                 lastReceiveFailed = false;
                 sendUp(frame);
                 numReceived++;
             );
             FSMA_No_Event_Transition(Receive-RTS,
-                                     mode == MACA && isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS, 
+                                     mode == MACA && isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
                                      WAITSIFS,
             );
             FSMA_No_Event_Transition(Receive-Error,
                                      isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
                                      IDLE,
-                EV << "received frame contains bit errors or collision, next wait period is EIFSn"; 
+                EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                 lastReceiveFailed = true;
                 numCollision++;
             );
@@ -446,8 +465,8 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      isLowerMsg(msg) && !isForUs(frame),
                                      IDLE,
                 if (frame->getDuration() != 0)
-                {                                                                                    
-                    EV << "received frame with network allocationn";
+                {
+                    EV << "received frame with network allocation\n";
                     scheduleReservePeriod(frame);
                 }
             );
@@ -748,7 +767,7 @@ void Ieee80211Mac::resetStateVariables()
     backoff = false;
     backoffPeriod = 0;
     retryCounter = 1;
-    
+
     if (!transmissionQueue.empty())
         currentTransmission()->setRetry(false);
 }

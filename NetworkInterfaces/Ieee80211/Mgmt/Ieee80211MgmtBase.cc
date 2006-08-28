@@ -75,6 +75,16 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
         processFrame(frame);
     }
+    else if (msg->arrivedOn("agentIn"))
+    {
+        // process command from agent
+        EV << "Command arrived from agent: " << msg << "\n";
+        int msgkind = msg->kind();
+        cPolymorphic *ctrl = msg->removeControlInfo();
+        delete msg;
+
+        handleCommand(msgkind, ctrl);
+    }
     else
     {
         // packet from upper layers, to be sent out

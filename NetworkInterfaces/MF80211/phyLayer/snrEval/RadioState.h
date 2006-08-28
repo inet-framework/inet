@@ -43,9 +43,9 @@
  */
 class INET_API RadioState : public cPolymorphic
 {
- public:
+public:
     /** @brief possible states of the radio*/
-    enum States
+    enum State
     {
       IDLE,
       RECV,
@@ -54,29 +54,35 @@ class INET_API RadioState : public cPolymorphic
     };
 
 private:
-    /** @brief Variable that hold the actual state*/
-    States state;
+    /** @brief Identifies the radio */
+    int radioId;
 
-    /** @brief Identifies the radio channel */
-    int channelId;   // FIXME use channel!
+    /** @brief Variable that hold the actual state*/
+    State state;
+
+    /** @brief The radio channel */
+    int channel;
 
 public:
+    /** @brief id of the SnrEval module -- identifies the radio in case there're more than one in the host */
+    int getRadioId() const { return radioId; }
+
     /** @brief function to get the state*/
-    States getState() const { return state; }
+    State getState() const { return state; }
+
     /** @brief set the state of the radio*/
-    void setState(States s) { state = s; }
+    void setState(State s) { state = s; }
 
     /** @brief function to get the channel */
-    int getChannelId() const { return channelId; }
+    int getChannel() const { return channel; }
+
     /** @brief set the radio channel */
-    void setChannelId(int chan) { channelId = chan; }
+    void setChannel(int chan) { channel = chan; }
 
     /** @brief Constructor*/
-    RadioState(States s=IDLE) : cPolymorphic(), state(s), channelId(-1) {};
+    RadioState(int radioModuleId) : cPolymorphic() {radioId=radioModuleId; state=IDLE; channel=-1;}
 
-    /** @brief Enables inspection */
-    std::string info() const {
-        // FIXME add channel
+    static const char *stateName(State state) {
         switch(state) {
             case IDLE: return "IDLE";
             case RECV: return "RECV";
@@ -84,6 +90,13 @@ public:
             case SLEEP: return "SLEEP";
             default: return "???";
         }
+    }
+
+    /** @brief Enables inspection */
+    std::string info() const {
+        std::stringstream out;
+        out << "channel=" << channel << " " << stateName(state);
+        return out.str();
     }
 
 };

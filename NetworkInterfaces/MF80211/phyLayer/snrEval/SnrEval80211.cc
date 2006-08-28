@@ -25,7 +25,7 @@ void SnrEval80211::initialize(int stage)
     {
         EV << "initializing stage 0\n";
         if (bitrate != 1E+6 && bitrate != 2E+6 && bitrate != 5.5E+6 && bitrate != 11E+6)
-            error("Wrong bitrate!! Please chose 1E+6, 2E+6, 5.5E+6 or 11E+6 as bitrate!!");
+            error("Wrong bit rate for 802.11, valid values are 1E+6, 2E+6, 5.5E+6 or 11E+6");
         headerLength = 192;     //has to be 192; this makes sure it is!
     }
 }

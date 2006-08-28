@@ -91,6 +91,11 @@ void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
     sendOrEnqueue(frame);
 }
 
+void Ieee80211MgmtAP::handleCommand(int msgkind, cPolymorphic *ctrl)
+{
+    error("handleCommand(): no commands supported");
+}
+
 void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
@@ -113,6 +118,7 @@ void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, const
 
 void Ieee80211MgmtAP::sendBeacon()
 {
+    EV << "Sending beacon\n";
     Ieee80211BeaconFrame *frame = new Ieee80211BeaconFrame("Beacon");
     Ieee80211BeaconFrameBody& body = frame->getBody();
     body.setSSID(ssid.c_str());
@@ -120,7 +126,7 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setCapabilityInformation(capabilityInfo);
     body.setTimestamp(simTime()); //XXX this is to be refined
     body.setBeaconInterval(beaconInterval);
-    body.setDSChannel(channelNumber);
+    body.setChannel(channelNumber);
 
     frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);  //XXX or what
     frame->setFromDS(true);
@@ -162,6 +168,8 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
+    EV << "Processing Authentication frame\n";
+
     // create STA entry if needed
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta)
@@ -207,6 +215,8 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
 
 void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
+    EV << "Processing Deauthentication frame\n";
+
     STAInfo *sta = lookupSenderSTA(frame);
     delete frame;
 
@@ -220,6 +230,8 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame
 
 void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
 {
+    EV << "Processing AssociationRequest frame\n";
+
     // "11.3.2 AP association procedures"
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta || sta->status==NOT_AUTHENTICATED)
@@ -252,6 +264,8 @@ void Ieee80211MgmtAP::handleAssociationResponseFrame(Ieee80211AssociationRespons
 
 void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
 {
+    EV << "Processing ReassociationRequest frame\n";
+
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta || sta->status==NOT_AUTHENTICATED)
@@ -300,6 +314,8 @@ void Ieee80211MgmtAP::handleBeaconFrame(Ieee80211BeaconFrame *frame)
 
 void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
+    EV << "Processing ProbeRequest frame\n";
+
     if (strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
     {
         EV << "SSID does not match, ignoring frame\n";
@@ -310,6 +326,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     MACAddress staAddress = frame->getTransmitterAddress();
     delete frame;
 
+    EV << "Sending ProbeResponse frame\n";
     Ieee80211ProbeResponseFrame *resp = new Ieee80211ProbeResponseFrame("ProbeResp");
     Ieee80211ProbeResponseFrameBody& body = resp->getBody();
     body.setSSID(ssid.c_str());
@@ -317,7 +334,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     body.setCapabilityInformation(capabilityInfo);
     body.setTimestamp(simTime()); //XXX this is to be refined
     body.setBeaconInterval(beaconInterval);
-    body.setDSChannel(channelNumber);
+    body.setChannel(channelNumber);
     sendManagementFrame(resp, staAddress); // FIXME it might be not that simple, cf beacon...
 }
 

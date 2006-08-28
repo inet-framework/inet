@@ -19,7 +19,7 @@
 
 //
 // Specifies what gates a 802.11 management module should have, 
-// in order be usable in Ieee80211Nic.
+// in order to be usable in Ieee80211Nic.
 //
 module Ieee80211MgmtInterface
     gates:

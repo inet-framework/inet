@@ -63,8 +63,6 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
     const ChannelControl::ModuleList& neighbors = cc->getNeighbors(myHostRef);
     coreEV << "sendToChannel: sending to gates\n";
 
-    cc->addOngoingTransmission(myHostRef, msg);
-
     // loop through all hosts in range
     ChannelControl::ModuleList::const_iterator it;
     for (it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -91,5 +89,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
                 coreEV << "skipping host listening on a different channel\n";
         }
     }
-    delete msg;
+
+    // register transmission in ChannelControl
+    cc->addOngoingTransmission(myHostRef, msg);
 }

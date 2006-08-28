@@ -26,6 +26,15 @@
 
 #define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
 
+static int parseInt(const char *s, int defaultValue)
+{
+    if (!s || !*s)
+        return defaultValue;
+    char *endptr;
+    int value = strtol(s, &endptr, 10);
+    return *endptr=='\0' ? value : defaultValue;
+}
+
 
 /**
  * Assigns a pointer to ChannelControl and gets a pointer to its host.
@@ -41,7 +50,7 @@ void BasicMobility::initialize(int stage)
 {
     BasicModule::initialize(stage);
 
-    coreEV << "initializing BasicMobility stage " << stage << endl;
+    EV << "initializing BasicMobility stage " << stage << endl;
 
     if (stage == 0)
     {
@@ -49,7 +58,7 @@ void BasicMobility::initialize(int stage)
         if (cc == 0)
             error("Could not find channelcontrol module");
 
-        //get a pointer to the host
+        // get a pointer to the host
         hostPtr = findHost();
         myHostRef = cc->registerHost(hostPtr, Coord());
     }
@@ -59,24 +68,26 @@ void BasicMobility::initialize(int stage)
         // read the playgroundsize from ChannelControl
         Coord pgs = cc->getPgs();
 
-        // reading the out from omnetpp.ini makes predefined scenarios a lot easier
-        if (hasPar("x") && hasPar("y"))
-        {
+        // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
+        // -1 indicates start at display string position, or random position if it's not present
+        pos.x = pos.y = -1;
+        if (hasPar("x"))   // not all mobility models have an "x" parameter
             pos.x = par("x");
+        if (pos.x == -1)
+            pos.x = parseInt(hostPtr->displayString().getTagArg("p",0), -1);
+        if (pos.x == -1)
+            pos.x = genk_uniform(0, 0, pgs.x);
+
+        if (hasPar("y")) // not all mobility models have an "y" parameter
             pos.y = par("y");
-            // -1 indicates start at random position
-            if (pos.x == -1 || pos.y == -1)
-                pos = getRandomPosition();
-            //we do not have negative positions
-            //also checks whether position is within the playground
-            else if (pos.x < 0 || pos.y < 0 || pos.x > pgs.x || pos.y > pgs.y)
-                error("node position specified in omnetpp.ini exceeds playgroundsize");
-        }
-        else
-        {
-            // Start at a random position
-            pos = getRandomPosition();
-        }
+        if (pos.y == -1)
+            pos.y = parseInt(hostPtr->displayString().getTagArg("p",1), -1);
+        if (pos.y == -1)
+            pos.y = genk_uniform(0, 0, pgs.y);
+
+        // check validity of position
+        if (pos.x < 0 || pos.y < 0 || pos.x >= pgs.x || pos.y >= pgs.y)
+            error("node position (%d,%d) is outside the playground", pos.x, pos.y);
 
         // adjusting the display string is no longer needed (Andras)
 

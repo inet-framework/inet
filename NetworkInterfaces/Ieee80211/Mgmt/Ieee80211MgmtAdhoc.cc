@@ -40,6 +40,11 @@ void Ieee80211MgmtAdhoc::handleUpperMessage(cMessage *msg)
     sendOrEnqueue(frame);
 }
 
+void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cPolymorphic *ctrl)
+{
+    error("handleCommand(): no commands supported");
+}
+
 Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());

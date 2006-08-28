@@ -33,8 +33,7 @@ module Net80211
         channelcontrol: ChannelControl;
             parameters:
                 playgroundSizeX = playgroundSizeX,
-                playgroundSizeY = playgroundSizeY,
-                numberOfChannels = 2;
+                playgroundSizeY = playgroundSizeY;
             display: "p=60,50;i=misc/sun";
         configurator: FlatNetworkConfigurator;
             parameters:

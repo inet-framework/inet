@@ -28,8 +28,8 @@
 simple LinearMobility
     parameters:
         debug : bool, // debug switch
-        x: numeric const, // x starting point of the node (-1 = random)
-        y: numeric const, // y starting point of the node (-1 = random)
+        x: numeric const, // start x coordinate (-1 = display string position, or random if it's missing)
+        y: numeric const, // start y coordinate (-1 = display string position, or random if it's missing)
         speed: numeric const, // speed of the host (in m/s)
         angle: numeric const, // angle of linear motion (degreees)
         acceleration: numeric const, // acceleration of linear motion (m/s2)
