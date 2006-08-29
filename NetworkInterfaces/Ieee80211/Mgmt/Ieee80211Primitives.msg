@@ -159,6 +159,20 @@ class Ieee80211Prim_AssociateConfirm extends Ieee80211Prim
 };
 
 //
+// MLME-REASSOCIATE.request is very similar to MLME-ASSOCIATE.request
+//
+class Ieee80211Prim_ReassociateRequest extends Ieee80211Prim_AssociateRequest
+{
+};
+
+//
+// MLME-REASSOCIATE.confirm is very similar to MLME-ASSOCIATE.confirm
+//
+class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
+{
+};
+
+//
 // Losely based on MLME-DISASSOCIATE.request
 //
 class Ieee80211Prim_DisassociateRequest extends Ieee80211Prim
@@ -172,27 +186,6 @@ class Ieee80211Prim_DisassociateRequest extends Ieee80211Prim
 // Losely based on MLME-DISASSOCIATE.confirm
 //
 class Ieee80211Prim_DisassociateConfirm extends Ieee80211Prim
-{
-    fields:
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
-};
-
-//
-// Losely based on MLME-REASSOCIATE.request
-//
-class Ieee80211Prim_ReassociateRequest extends Ieee80211Prim
-{
-    fields:
-        MACAddress newAPAddress;
-        double timeout;
-        Ieee80211CapabilityInformation capabilityInfo;
-        int listenInterval; //XXX supported by MAC?
-};
-
-//
-// Losely based on MLME-REASSOCIATE.confirm
-//
-class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim
 {
     fields:
         int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED

@@ -159,6 +159,13 @@ void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
 
 void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
 {
+    EV << "Sending ReassociateRequest primitive to mgmt\n";
+    Ieee80211Prim_ReassociateRequest *req = new Ieee80211Prim_ReassociateRequest();
+    req->setAddress(address);
+    req->setTimeout(associationTimeout);
+    //XXX    Ieee80211CapabilityInformation capabilityInfo;
+    //XXX    int listenInterval; // unsupported by MAC
+    sendRequest(req);
 }
 
 void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, int reasonCode)

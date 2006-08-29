@@ -177,7 +177,10 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     //@{
     virtual void processScanCommand(Ieee80211Prim_ScanRequest *ctrl);
     virtual void processAuthenticateCommand(Ieee80211Prim_AuthenticateRequest *ctrl);
+    virtual void processDeauthenticateCommand(Ieee80211Prim_DeauthenticateRequest *ctrl);
     virtual void processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl);
+    virtual void processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl);
+    virtual void processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl);
     //@}
 };
 

@@ -126,8 +126,14 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
         processScanCommand((Ieee80211Prim_ScanRequest *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AuthenticateRequest *>(ctrl))
         processAuthenticateCommand((Ieee80211Prim_AuthenticateRequest *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_DeauthenticateRequest *>(ctrl))
+        processDeauthenticateCommand((Ieee80211Prim_DeauthenticateRequest *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
         processAssociateCommand((Ieee80211Prim_AssociateRequest *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_ReassociateRequest *>(ctrl))
+        processReassociateCommand((Ieee80211Prim_ReassociateRequest *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
+        processDisassociateCommand((Ieee80211Prim_DisassociateRequest *)ctrl);
     else if (ctrl)
         error("handleCommand(): unrecognized control info class `%s'", ctrl->className());
     else
@@ -333,6 +339,16 @@ void Ieee80211MgmtSTA::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequ
     startAuthentication(ap, ctrl->getAuthType(), ctrl->getTimeout());
 }
 
+void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_DeauthenticateRequest *ctrl)
+{
+    const MACAddress& address = ctrl->getAddress();
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+        error("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
+    //XXX send deauth...
+    //XXX send confirm...
+}
+
 void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
 {
     const MACAddress& address = ctrl->getAddress();
@@ -342,6 +358,22 @@ void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
     if (!ap->isAuthenticated)
         error("processAssociateCommand: not authenticated with AP address = %s", address.str().c_str());
     startAssociation(ap, ctrl->getTimeout());
+}
+
+void Ieee80211MgmtSTA::processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl)
+{
+    // treat the same way as association
+    processAssociateCommand(ctrl);
+}
+
+void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl)
+{
+    const MACAddress& address = ctrl->getAddress();
+    APInfo *ap = lookupAP(address);
+    if (!ap)
+        error("processDisassociateCommand: AP not known: address = %s", address.str().c_str());
+    //XXX send disass...
+    //XXX send confirm...
 }
 
 void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
