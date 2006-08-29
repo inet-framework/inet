@@ -22,6 +22,8 @@
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 
+//FIXME TBD implement bitrate switching (involves notification of MAC, SnrEval, Decider)
+
 
 Define_Module(Ieee80211MgmtSTA);
 
@@ -345,7 +347,12 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     APInfo *ap = lookupAP(address);
     if (!ap)
         error("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
-    //XXX send deauth...
+
+    // create and send deauthentication request
+    Ieee80211DeauthenticationFrame *frame = new Ieee80211DeauthenticationFrame("Deauth");
+    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    sendManagementFrame(frame, address);
+
     //XXX send confirm...
 }
 
@@ -369,10 +376,13 @@ void Ieee80211MgmtSTA::processReassociateCommand(Ieee80211Prim_ReassociateReques
 void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl)
 {
     const MACAddress& address = ctrl->getAddress();
-    APInfo *ap = lookupAP(address);
-    if (!ap)
-        error("processDisassociateCommand: AP not known: address = %s", address.str().c_str());
-    //XXX send disass...
+    //XXX check we are associated at all
+
+    // create and send disassociation request
+    Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disass");
+    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    sendManagementFrame(frame, address);
+
     //XXX send confirm...
 }
 

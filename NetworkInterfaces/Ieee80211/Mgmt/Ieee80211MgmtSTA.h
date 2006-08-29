@@ -25,8 +25,6 @@
 #include "Ieee80211Primitives_m.h"
 
 
-//FIXME TBD implement bitrate switching (involves notification of MAC, SnrEval, Decider)
-
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
