@@ -59,21 +59,26 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
-    void sendRequest(Ieee80211Prim *req);
+    virtual void sendRequest(Ieee80211Prim *req);
 
+    /** Sending of Request primitives */
     //@{
-    void sendScanRequest();
-    void sendAuthenticateRequest(const MACAddress& address, int authType);
-    void sendAssociateRequest(const MACAddress& address);
+    virtual void sendScanRequest();
+    virtual void sendAuthenticateRequest(const MACAddress& address, int authType);
+    virtual void sendAssociateRequest(const MACAddress& address);
     //@}
 
+    /** Processing Confirm primitives */
     //@{
-    void processScanConfirm(Ieee80211Prim_ScanConfirm *resp);
-    void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp);
-    void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp);
+    virtual void processScanConfirm(Ieee80211Prim_ScanConfirm *resp);
+    virtual void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp);
+    virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp);
     //@}
 
+    /** Choose one AP from the list to associate with */
     virtual int chooseBSS(Ieee80211Prim_ScanConfirm *resp);
+
+    // utility method, for debugging
     virtual void dumpAPList(Ieee80211Prim_ScanConfirm *resp);
 };
 

@@ -31,9 +31,6 @@ Define_Module(Ieee80211MgmtSTA);
 #define MK_CHANNEL_CHANGE 3
 #define MK_BEACON_TIMEOUT 4
 
-#define AUTHRESULT_TIMEDOUT  1  //FIXME move it into msg file, code from spec, etc!
-#define ASSOCRESULT_TIMEDOUT 1  //FIXME move it into msg file, code from spec, etc!
-
 
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
 {
@@ -88,7 +85,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
         EV << "Authentication timed out, AP address = " << ap->address << "\n";
 
         // send back failure report to agent
-        sendAuthenticationConfirm(ap, AUTHRESULT_TIMEDOUT);
+        sendAuthenticationConfirm(ap, PRC_TIMEOUT);
     }
     else if (msg->kind()==MK_ASSOC_TIMEOUT)
     {
@@ -97,7 +94,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
         EV << "Association timed out, AP address = " << ap->address << "\n";
 
         // send back failure report to agent
-        sendAssociationConfirm(ap, ASSOCRESULT_TIMEDOUT);
+        sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
     else if (msg->kind()==MK_CHANNEL_CHANGE)
     {
@@ -353,14 +350,14 @@ void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
     Ieee80211Prim_AuthenticateConfirm *confirm = new Ieee80211Prim_AuthenticateConfirm();
     confirm->setAddress(ap->address);
     confirm->setAuthType(ap->authType);
-    confirm->setResult(resultCode);
+    confirm->setResultCode(resultCode);
     sendConfirm(confirm);
 }
 
 void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, int resultCode)
 {
     Ieee80211Prim_AssociateConfirm *confirm = new Ieee80211Prim_AssociateConfirm();
-    confirm->setResult(resultCode);
+    confirm->setResultCode(resultCode);
     sendConfirm(confirm);
 }
 
@@ -369,6 +366,11 @@ void Ieee80211MgmtSTA::sendConfirm(Ieee80211Prim *req)
     cMessage *msg = new cMessage(req->className());
     msg->setControlInfo(req);
     send(msg, "agentOut");
+}
+
+int Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
+{
+    return statusCode==SC_SUCCESSFUL ? PRC_SUCCESS : PRC_REFUSED;
 }
 
 void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
@@ -440,7 +442,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     ap->isAuthenticated = (statusCode==SC_SUCCESSFUL);
     delete cancelEvent(ap->timeoutMsg);
     ap->timeoutMsg = NULL;
-    sendAuthenticationConfirm(ap, statusCode);
+    sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
@@ -500,7 +502,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
     }
 
     // report back to agent
-    sendAssociationConfirm(ap, statusCode);
+    sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
 void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)

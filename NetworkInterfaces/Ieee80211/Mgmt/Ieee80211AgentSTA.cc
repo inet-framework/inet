@@ -22,7 +22,6 @@
 #include "NotifierConsts.h"
 
 
-//XXX how do we learn that we lost the associate AP?
 
 Define_Module(Ieee80211AgentSTA);
 
@@ -194,29 +193,35 @@ int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
 
 void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
 {
-    if (resp->getResult()!=SC_SUCCESSFUL)
+    if (resp->getResultCode()!=PRC_SUCCESS)
     {
         EV << "Authentication error\n";
-        //XXX handle error
+
+        // try scanning again, maybe we'll have better luck next time, possibly with a different AP
+        EV << "Going back to scanning\n";
+        sendScanRequest();
     }
     else
     {
-        EV << "Authentication successful\n";
+        EV << "Authentication successful, let's try to associate\n";
         sendAssociateRequest(resp->getAddress());
     }
 }
 
 void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
 {
-    if (resp->getResult()!=SC_SUCCESSFUL)
+    if (resp->getResultCode()!=PRC_SUCCESS)
     {
         EV << "Association error\n";
-        //XXX handle error
+
+        // try scanning again, maybe we'll have better luck next time, possibly with a different AP
+        EV << "Going back to scanning\n";
+        sendScanRequest();
     }
     else
     {
         EV << "Association successful\n";
-        //XXX OK...
+        // we are happy!
     }
 }
 

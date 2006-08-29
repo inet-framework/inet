@@ -25,6 +25,7 @@ cplusplus
 class noncobject MACAddress;
 class noncobject Ieee80211CapabilityInformation;
 class noncobject Ieee80211SupportedRatesElement;
+enum Ieee80211ReasonCode;
 
 enum Ieee80211AuthenticationType
 {
@@ -32,11 +33,21 @@ enum Ieee80211AuthenticationType
     AUTHTYPE_SHAREDKEY = 2;
 };
 
+//XXX make implicit
 enum Ieee80211BSSType
 {
     BSSTYPE_ANY = 0;
     BSSTYPE_INFRASTRUCTURE = 1;
     BSSTYPE_INDEPENDENT = 2;
+};
+
+enum Ieee80211Prim_ResultCode
+{
+    PRC_SUCCESS = 0;
+    PRC_INVALID_PARAMETERS = 1;
+    PRC_TIMEOUT = 2;
+    PRC_TOO_MANY_SIMULTANEOUS_REQUESTS = 3;
+    PRC_REFUSED = 4;
 };
 
 //
@@ -82,6 +93,7 @@ class Ieee80211Prim_ScanConfirm extends Ieee80211Prim
 {
     fields:
         Ieee80211Prim_BSSDescription bssList[];
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS
 };
 
 //
@@ -103,7 +115,26 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211Prim
     fields:
         MACAddress address;
         int authType enum(Ieee80211AuthenticationType);
-        int result; //=0 OK
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, TOO_MANY_SIMULTANEOUS_REQUESTS, REFUSED
+};
+
+//
+// Losely based on MLME-DEAUTHENTICATE.request
+//
+class Ieee80211Prim_DeauthenticateRequest extends Ieee80211Prim
+{
+    fields:
+        MACAddress address;
+        int reasonCode enum(Ieee80211ReasonCode);
+};
+
+//
+// Losely based on MLME-DEAUTHENTICATE.confirm
+//
+class Ieee80211Prim_DeauthenticateConfirm extends Ieee80211Prim
+{
+    fields:
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TOO_MANY_SIMULTANEOUS_REQUESTS
 };
 
 //
@@ -115,7 +146,7 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
         MACAddress address;
         double timeout;
         Ieee80211CapabilityInformation capabilityInfo;
-        int listenInterval; // unsupported by MAC
+        int listenInterval; //XXX supported by MAC?
 };
 
 //
@@ -124,10 +155,49 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
 class Ieee80211Prim_AssociateConfirm extends Ieee80211Prim
 {
     fields:
-        int result; // SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
+};
+
+//
+// Losely based on MLME-DISASSOCIATE.request
+//
+class Ieee80211Prim_DisassociateRequest extends Ieee80211Prim
+{
+    fields:
+        MACAddress address;
+        int reasonCode enum(Ieee80211ReasonCode);
+};
+
+//
+// Losely based on MLME-DISASSOCIATE.confirm
+//
+class Ieee80211Prim_DisassociateConfirm extends Ieee80211Prim
+{
+    fields:
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
+};
+
+//
+// Losely based on MLME-REASSOCIATE.request
+//
+class Ieee80211Prim_ReassociateRequest extends Ieee80211Prim
+{
+    fields:
+        MACAddress newAPAddress;
+        double timeout;
+        Ieee80211CapabilityInformation capabilityInfo;
+        int listenInterval; //XXX supported by MAC?
+};
+
+//
+// Losely based on MLME-REASSOCIATE.confirm
+//
+class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim
+{
+    fields:
+        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
 };
 
 
-// TODO: deauthenticate, disassociate, reassociate, ...
 
 
