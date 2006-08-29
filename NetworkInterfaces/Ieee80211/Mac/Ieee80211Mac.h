@@ -40,6 +40,12 @@
  *
  * For more info, see the NED file.
  *
+ * TODO: support fragmentation
+ * TODO: PCF mode
+ * TODO: CF period
+ * TODO: pass radio power to upper layer
+ * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
+ *
  * @ingroup macLayer
  */
 class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
@@ -73,9 +79,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     int maxQueueSize;
 
     /** @brief The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely large value
-        means never. see spec 9.2.6 and 361
-        TODO: this is not yet used */
-    static const int rtsThreshold = 3000;
+        means never. see spec 9.2.6 and 361 */
+    int rtsThreshold;
 
     /** @brief Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
     static const int fragmentationThreshold = 2346;
@@ -102,7 +107,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief 80211 MAC operation modes */
     enum Mode {
         DCF,  // Distributed Coordination Function
-        MACA, // DCF with RTS/CTS (Request To Send / Clear To Send)
         PCF,  // Point Coordination Function
     };
     Mode mode;
@@ -118,7 +122,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief true if backoff is enabled */
     bool backoff;
 
-    /** @brief true during network allocation period */
+    /** @brief true during network allocation period. this flag is present to be able to watch this state. */
     bool nav;
 
     /** @brief Remaining backoff period in seconds */
@@ -141,6 +145,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Passive queue module to request messages from */
     IPassiveQueue *queueModule;
+
+    /** @brief The last change channel message received and not yet sent to the physical layer or NULL.
+        The message will be sent down when the state goes to IDLE or DEFER next time. */
+    cMessage *changeChannelMessage;
     //@}
 
   protected:
@@ -257,6 +265,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     void scheduleRTSTimeoutPeriod();
 
+    /** @brief Schedule network allocation period according to 9.2.5.4. */
     void scheduleReservePeriod(Ieee80211Frame *frame);
 
     /** @brief Generates a new backoff period based on the contention window. */
@@ -297,6 +306,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Utility functions
      */
     //@{
+    /** @brief Send down the change channel message to the physical layer if there is any. */
+    void sendDownChangeChannelMessage();
+
     /** @brief Change the current MAC operation mode. */
     void setMode(Mode mode);
 
@@ -318,6 +330,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief Returns true if message destination address is ours */
     bool isForUs(Ieee80211Frame *msg);
+
+    /** @brief Returns the frame type of the last received frame. */
+    int lastReceivedFrameType();
 
     /** @brief Deletes frame at the front of queue. */
     void popTransmissionQueue();

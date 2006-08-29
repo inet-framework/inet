@@ -147,6 +147,12 @@ cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 {
     //XXX create control info with src address?
     cMessage *payload = frame->decapsulate();
+
+    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+    ctrl->setSrc(frame->getAddress3());
+    ctrl->setDest(frame->getReceiverAddress());
+    payload->setControlInfo(ctrl);
+
     delete frame;
     return payload;
 }

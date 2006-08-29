@@ -35,6 +35,7 @@ Ieee80211Mac::Ieee80211Mac()
     endTimeout = NULL;
     endReserve = NULL;
     mediumStateChange = NULL;
+    changeChannelMessage = NULL;
 }
 
 Ieee80211Mac::~Ieee80211Mac()
@@ -61,6 +62,7 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
+        rtsThreshold = par("rtsThreshold");
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
@@ -197,8 +199,22 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
         if (msg->kind()==PHY_C_CHANGECHANNEL)
         {
             EV << "Passing on channel change command to physical layer\n";
-            //FIXME TODO reset MAC state
-            sendDown(msg);
+            if (changeChannelMessage != NULL)
+            {
+                delete changeChannelMessage;
+                changeChannelMessage = NULL;
+            }
+
+            if (fsm.state() == IDLE || fsm.state() == DEFER || fsm.state() == BACKOFF)
+            {
+                EV << "Immediately changing channel\n";
+                sendDown(msg);
+            }
+            else
+            {
+                EV << "Delaying channel change until next IDLE or DEFER state\n";
+                changeChannelMessage = msg;
+            }
         }
         else
         {
@@ -284,10 +300,16 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     logState();
     stateVector.record(fsm.state());
 
+    if (frame && isLowerMsg(frame))
+    {
+        scheduleReservePeriod(frame);
+    }
+
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
         {
+            FSMA_Enter(sendDownChangeChannelMessage());
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMsg(msg),
                                   DEFER,
@@ -307,6 +329,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(DEFER)
         {
+            FSMA_Enter(sendDownChangeChannelMessage());
             FSMA_Event_Transition(Wait-DIFS,
                                   isMediumStateChange(msg) && isMediumFree(),
                                   WAITDIFS,
@@ -324,9 +347,16 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(WAITDIFS)
         {
+            FSMA_Event_Transition(Immediate-Transmit-RTS,
+                                  mode == DCF && msg == endDIFS && !isBroadcast(currentTransmission())
+                                  && currentTransmission()->byteLength() >= rtsThreshold && !backoff,
+                                  TRANSMITTING,
+                sendRTSFrame(currentTransmission());
+                scheduleRTSTimeoutPeriod();
+            );
             FSMA_Event_Transition(Immediate-Transmit-Data,
-                                     msg == endDIFS && !backoff,
-                                     TRANSMITTING,
+                                  msg == endDIFS && !backoff,
+                                  TRANSMITTING,
                 sendDataFrame(currentTransmission());
                 scheduleTimeoutPeriod(currentTransmission());
             );
@@ -368,17 +398,18 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 sendBroadcastFrame(currentTransmission());
                 scheduleTimeoutPeriod(currentTransmission());
             );
+            FSMA_Event_Transition(Transmit-RTS,
+                                  mode == DCF && msg == endBackoff && !isBroadcast(currentTransmission())
+                                  && currentTransmission()->byteLength() >= rtsThreshold,
+                                  TRANSMITTING,
+                sendRTSFrame(currentTransmission());
+                scheduleRTSTimeoutPeriod();
+            );
             FSMA_Event_Transition(Transmit-Data,
                                   mode == DCF && msg == endBackoff,
                                   TRANSMITTING,
                 sendDataFrame(currentTransmission());
                 scheduleTimeoutPeriod(currentTransmission());
-            );
-            FSMA_Event_Transition(Transmit-RTS,
-                                  mode == MACA && msg == endBackoff,
-                                  TRANSMITTING,
-                sendRTSFrame(currentTransmission());
-                scheduleRTSTimeoutPeriod();
             );
             FSMA_Event_Transition(Receive,
                                   isLowerMsg(msg),
@@ -390,7 +421,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(TRANSMITTING)
         {
             FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMsg(msg) && frameType == ST_ACK,
+                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
                                   IDLE,
                 cancelTimeoutPeriod();
                 popTransmissionQueue();
@@ -398,13 +429,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 numSent++;
                 resetStateVariables();
             );
-//            FSMA_Event_Transition(Receive-CTS,
-//                                  mode == MACA && isLowerMsg(msg) && frameType == ST_CTS,
-//                                  TRANSMITTING,
-//                cancelTimeoutPeriod();
-//                sendDataFrame(currentTransmission());
-//                scheduleTimeoutPeriod(currentTransmission());
-//            );
+            FSMA_Event_Transition(Receive-CTS,
+                                  mode == DCF && isLowerMsg(msg) && isForUs(frame) && frameType == ST_CTS,
+                                  TRANSMITTING,
+                cancelTimeoutPeriod();
+                sendDataFrame(currentTransmission());
+                scheduleTimeoutPeriod(currentTransmission());
+            );
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endTimeout && isBroadcast(currentTransmission()),
                                   IDLE,
@@ -436,53 +467,48 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(RECEIVING)
         {
-            FSMA_No_Event_Transition(Receive-Broadcast,
+            FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMsg(msg) && isBroadcast(frame) && isDataOrMgmtFrame,
                                      IDLE,
                 lastReceiveFailed = false;
                 sendUp(frame);
                 numReceivedBroadcast++;
             );
-            FSMA_No_Event_Transition(Receive-Data,
+            FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame,
                                      WAITSIFS,
                 lastReceiveFailed = false;
                 sendUp(frame);
                 numReceived++;
             );
-            FSMA_No_Event_Transition(Receive-RTS,
-                                     mode == MACA && isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
+            FSMA_No_Event_Transition(Immediate-Receive-RTS,
+                                     mode == DCF && isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
                                      WAITSIFS,
             );
-            FSMA_No_Event_Transition(Receive-Error,
+            FSMA_No_Event_Transition(Immediate-Receive-Error,
                                      isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
                                      IDLE,
                 EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                 lastReceiveFailed = true;
                 numCollision++;
             );
-            FSMA_No_Event_Transition(Receive-Other,
+            FSMA_No_Event_Transition(Immediate-Receive-Other,
                                      isLowerMsg(msg) && !isForUs(frame),
                                      IDLE,
-                if (frame->getDuration() != 0)
-                {
-                    EV << "received frame with network allocation\n";
-                    scheduleReservePeriod(frame);
-                }
             );
         }
         FSMA_State(WAITSIFS)
         {
             FSMA_Enter(scheduleSIFSPeriod(frame));
+            FSMA_Event_Transition(Transmit-CTS,
+                                  mode == DCF && lastReceivedFrameType() == ST_RTS && msg == endSIFS,
+                                  IDLE,
+                sendCTSFrameOnEndSIFS();
+            );
             FSMA_Event_Transition(Transmit-ACK,
                                   mode == DCF && msg == endSIFS,
                                   IDLE,
                 sendACKFrameOnEndSIFS();
-            );
-            FSMA_Event_Transition(Transmit-CTS,
-                                  mode == MACA && msg == endSIFS,
-                                  IDLE,
-                sendCTSFrameOnEndSIFS();
             );
         }
     }
@@ -597,20 +623,31 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
 {
     simtime_t reserve = frame->getDuration();
 
-    if (endReserve->isScheduled()) {
-        reserve = max(reserve, endReserve->arrivalTime() - simTime());
-        cancelEvent(endReserve);
-    }
-    else if (radioState == RadioState::IDLE)
+    // see spec. 7.1.3.2
+    if (!isForUs(frame) && reserve != 0 && reserve < 32768)
     {
-        // NAV: the channel is virtually busy according to the spec
-        scheduleAt(simTime(), mediumStateChange);
+        if (endReserve->isScheduled()) {
+            simtime_t oldReserve = endReserve->arrivalTime() - simTime();
+
+            if (oldReserve > reserve)
+                return;
+
+            reserve = max(reserve, oldReserve);
+            cancelEvent(endReserve);
+        }
+        else if (radioState == RadioState::IDLE)
+        {
+            // NAV: the channel just became virtually busy according to the spec
+            scheduleAt(simTime(), mediumStateChange);
+        }
+
+        EV << "scheduling reserve period for: " << reserve << endl;
+
+        ASSERT(reserve > 0);
+
+        nav = true;
+        scheduleAt(simTime() + reserve, endReserve);
     }
-
-    EV << "scheduling reserve period for: " << reserve << endl;
-
-    nav = true;
-    scheduleAt(simTime() + reserve, endReserve);
 }
 
 void Ieee80211Mac::generateBackoffPeriod()
@@ -638,6 +675,7 @@ void Ieee80211Mac::cancelBackoffPeriod()
     EV << "cancelling Backoff period\n";
     cancelEvent(endBackoff);
 }
+
 /****************************************************************
  * Frame sender functions.
  */
@@ -697,10 +735,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
-        frame->setDuration(SIFS + frameDuration(LENGTH_ACK));
+        frame->setDuration(SIFSPeriod() + frameDuration(LENGTH_ACK));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * SIFS + 2 * frameDuration(LENGTH_ACK) + frameDuration(frameToSend->length()));
+        frame->setDuration(3 * SIFSPeriod() + 2 * frameDuration(LENGTH_ACK) + frameDuration(frameToSend->length()));
 
     return frame;
 }
@@ -713,7 +751,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - SIFS - frameDuration(LENGTH_ACK));
+        frame->setDuration(frameToACK->getDuration() - SIFSPeriod() - frameDuration(LENGTH_ACK));
 
     return frame;
 }
@@ -723,7 +761,7 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * SIFS + frameDuration(LENGTH_CTS) +
+    frame->setDuration(3 * SIFSPeriod() + frameDuration(LENGTH_CTS) +
                        frameDuration(frameToSend->length()) +
                        frameDuration(LENGTH_ACK));
 
@@ -734,7 +772,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - SIFS - frameDuration(LENGTH_CTS));
+    frame->setDuration(rtsFrame->getDuration() - SIFSPeriod() - frameDuration(LENGTH_CTS));
 
     return frame;
 }
@@ -749,6 +787,15 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtF
 /****************************************************************
  * Helper functions.
  */
+void Ieee80211Mac::sendDownChangeChannelMessage()
+{
+    if (changeChannelMessage != NULL)
+    {
+        sendDown(changeChannelMessage);
+        changeChannelMessage = NULL;
+    }
+}
+
 void Ieee80211Mac::setMode(Mode mode)
 {
     if (mode == PCF)
@@ -792,6 +839,12 @@ bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
     return frame && frame->getReceiverAddress() == address;
 }
 
+int Ieee80211Mac::lastReceivedFrameType()
+{
+    Ieee80211Frame *frame = (Ieee80211Frame *)endSIFS->contextPointer();
+    return frame ? frame->getType() : -1;
+}
+
 void Ieee80211Mac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
@@ -827,7 +880,6 @@ const char *Ieee80211Mac::modeName(int mode)
     switch (mode)
     {
         CASE(DCF);
-        CASE(MACA);
         CASE(PCF);
     }
     return s;
