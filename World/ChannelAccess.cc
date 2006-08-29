@@ -71,6 +71,10 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
 
         // we need to send to each radioIn[] gate
         cGate *radioGate = mod->gate("radioIn");
+
+        if (radioGate == NULL)
+            error("module %s must have a gate called radioIn", mod->fullPath().c_str());
+
         for (int i = 0; i < radioGate->size(); i++)
         {
             ChannelControl::HostRef h = cc->lookupHost(mod);
