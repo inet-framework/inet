@@ -70,8 +70,14 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
         processScanConfirm((Ieee80211Prim_ScanConfirm *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
         processAuthenticateConfirm((Ieee80211Prim_AuthenticateConfirm *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_DeauthenticateConfirm *>(ctrl))
+        processDeauthenticateConfirm((Ieee80211Prim_DeauthenticateConfirm *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
         processAssociateConfirm((Ieee80211Prim_AssociateConfirm *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
+        processReassociateConfirm((Ieee80211Prim_ReassociateConfirm *)ctrl);
+    else if (dynamic_cast<Ieee80211Prim_DisassociateConfirm *>(ctrl))
+        processDisassociateConfirm((Ieee80211Prim_DisassociateConfirm *)ctrl);
     else if (ctrl)
         error("handleResponse(): unrecognized control info class `%s'", ctrl->className());
     else
@@ -131,6 +137,15 @@ void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address, int a
     sendRequest(req);
 }
 
+void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, int reasonCode)
+{
+    EV << "Sending DeauthenticateRequest primitive to mgmt\n";
+    Ieee80211Prim_DeauthenticateRequest *req = new Ieee80211Prim_DeauthenticateRequest();
+    req->setAddress(address);
+    req->setReasonCode(reasonCode);
+    sendRequest(req);
+}
+
 void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
 {
     EV << "Sending AssociateRequest primitive to mgmt\n";
@@ -139,6 +154,19 @@ void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
     req->setTimeout(associationTimeout);
     //XXX    Ieee80211CapabilityInformation capabilityInfo;
     //XXX    int listenInterval; // unsupported by MAC
+    sendRequest(req);
+}
+
+void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
+{
+}
+
+void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, int reasonCode)
+{
+    EV << "Sending DisassociateRequest primitive to mgmt\n";
+    Ieee80211Prim_DisassociateRequest *req = new Ieee80211Prim_DisassociateRequest();
+    req->setAddress(address);
+    req->setReasonCode(reasonCode);
     sendRequest(req);
 }
 
@@ -208,6 +236,11 @@ void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateCon
     }
 }
 
+void Ieee80211AgentSTA::processDeauthenticateConfirm(Ieee80211Prim_DeauthenticateConfirm *resp)
+{
+    EV << "Deauthenticate " << (resp->getResultCode()==PRC_SUCCESS ? "successful" : "error") << "\n";
+}
+
 void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
 {
     if (resp->getResultCode()!=PRC_SUCCESS)
@@ -225,6 +258,24 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     }
 }
 
+void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp)
+{
+    // treat the same way as AssociateConfirm
+    if (resp->getResultCode()!=PRC_SUCCESS)
+    {
+        EV << "Reassociation error\n";
+        EV << "Going back to scanning\n";
+        sendScanRequest();
+    }
+    else
+    {
+        EV << "Reassociation successful\n";
+        // we are happy!
+    }
+}
 
-
+void Ieee80211AgentSTA::processDisassociateConfirm(Ieee80211Prim_DisassociateConfirm *resp)
+{
+    EV << "Disassociation " << (resp->getResultCode()==PRC_SUCCESS ? "successful" : "error") << "\n";
+}
 

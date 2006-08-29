@@ -45,7 +45,7 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     frame->setReceiverAddress(frame->getAddress3());
     frame->setAddress3(frame->getTransmitterAddress());
 
-    sendOut(frame);
+    sendOrEnqueue(frame);
 }
 
 EtherFrame *Ieee80211MgmtAPBase::createEtherFrame(Ieee80211DataFrame *frame)

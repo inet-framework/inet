@@ -65,14 +65,20 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     //@{
     virtual void sendScanRequest();
     virtual void sendAuthenticateRequest(const MACAddress& address, int authType);
+    virtual void sendDeauthenticateRequest(const MACAddress& address, int reasonCode);
     virtual void sendAssociateRequest(const MACAddress& address);
+    virtual void sendReassociateRequest(const MACAddress& address);
+    virtual void sendDisassociateRequest(const MACAddress& address, int reasonCode);
     //@}
 
     /** Processing Confirm primitives */
     //@{
     virtual void processScanConfirm(Ieee80211Prim_ScanConfirm *resp);
     virtual void processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp);
+    virtual void processDeauthenticateConfirm(Ieee80211Prim_DeauthenticateConfirm *resp);
     virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp);
+    virtual void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp);
+    virtual void processDisassociateConfirm(Ieee80211Prim_DisassociateConfirm *resp);
     //@}
 
     /** Choose one AP from the list to associate with */

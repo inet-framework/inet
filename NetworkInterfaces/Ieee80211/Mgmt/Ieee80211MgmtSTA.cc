@@ -116,7 +116,6 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
 {
-    // XXX revise
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
 }
