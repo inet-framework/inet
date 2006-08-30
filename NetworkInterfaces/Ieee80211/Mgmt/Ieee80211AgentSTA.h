@@ -64,7 +64,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     /** Sending of Request primitives */
     //@{
     virtual void sendScanRequest();
-    virtual void sendAuthenticateRequest(const MACAddress& address, int authType);
+    virtual void sendAuthenticateRequest(const MACAddress& address);
     virtual void sendDeauthenticateRequest(const MACAddress& address, int reasonCode);
     virtual void sendAssociateRequest(const MACAddress& address);
     virtual void sendReassociateRequest(const MACAddress& address);

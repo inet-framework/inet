@@ -193,7 +193,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     if (frameAuthSeq != sta->authSeqExpected)
     {
         // wrong sequence number: send error and return
-        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(ERR)");
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
         resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
@@ -201,18 +201,22 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
         return;
     }
 
+    // station is authenticated if it made it through the required number of steps
+    bool isLast = (frameAuthSeq+1 == numAuthSteps);
+
     // send OK response (we don't model the cryptography part, just assume
     // successful authentication every time)
-    Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(OK)");
+    Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame(isLast ? "Auth-OK" : "Auth");
     resp->getBody().setSequenceNumber(frameAuthSeq);
     resp->getBody().setStatusCode(SC_SUCCESSFUL);
+    resp->getBody().setIsLast(isLast);
     // XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame(resp, frame->getTransmitterAddress());
 
-    // station is authenticated if it made it through the required number of steps
-    if (frameAuthSeq+1 == numAuthSteps)
+    // update status
+    if (isLast)
     {
-        sta->status = AUTHENTICATED; // XXX maybe only when ACK of this frame arrives?
+        sta->status = AUTHENTICATED; // XXX only when ACK of this frame arrives
     }
     else
     {

@@ -78,13 +78,12 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
         bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
         int authSeqExpected;  // valid while authenticating; values: 1,3,5...
-        int authType;
         cMessage *timeoutMsg; // authentication/association timeout
 
         APInfo()
         {
             channel=-1; beaconInterval=rxPower=0;
-            authSeqExpected=-1; isAuthenticated=false; authType=0;
+            authSeqExpected=-1; isAuthenticated=false;
             timeoutMsg=NULL;
         }
     };
@@ -110,7 +109,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 
     /** Utility function: sends authentication request */
-    virtual void startAuthentication(APInfo *ap, int authType, double timeout);
+    virtual void startAuthentication(APInfo *ap, double timeout);
 
     /** Utility function: sends association request */
     virtual void startAssociation(APInfo *ap, double timeout);

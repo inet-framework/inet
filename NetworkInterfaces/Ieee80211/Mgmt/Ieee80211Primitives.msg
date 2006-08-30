@@ -59,12 +59,6 @@ enum Ieee80211PrimConfirmCode
     PR_DISASSOCIATE_CONFIRM = 6;
 };
 
-enum Ieee80211AuthenticationType
-{
-    AUTHTYPE_OPENSYSTEM = 1;
-    AUTHTYPE_SHAREDKEY = 2;
-};
-
 enum Ieee80211BSSType
 {
     BSSTYPE_ANY = 0;
@@ -132,7 +126,7 @@ class Ieee80211Prim_BSSDescription
 };
 
 //
-// Loosely based on MLME-SCAN.confirm
+// Losely based on MLME-SCAN.confirm
 // Possible result codes: SUCCESS, INVALID_PARAMETERS
 //
 class Ieee80211Prim_ScanConfirm extends Ieee80211PrimConfirm
@@ -142,13 +136,17 @@ class Ieee80211Prim_ScanConfirm extends Ieee80211PrimConfirm
 };
 
 //
-// Losely based on MLME-AUTHENTICATE.request
+// Losely based on MLME-AUTHENTICATE.request.
+//
+// Note: the "authType" parameter (Open System, Shared Key, etc) is omitted.
+// The authentication procedure is simulated by this model by exchanging
+// a number of "dummy" authentication frames without real contents,
+// and it is configured in the AP how many authentication steps it requires.
 //
 class Ieee80211Prim_AuthenticateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
-        int authType enum(Ieee80211AuthenticationType);
         double timeout;
 };
 
@@ -160,7 +158,6 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 {
     fields:
         MACAddress address;
-        int authType enum(Ieee80211AuthenticationType);
 };
 
 //

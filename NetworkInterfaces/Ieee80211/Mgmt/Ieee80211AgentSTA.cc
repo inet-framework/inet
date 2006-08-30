@@ -128,12 +128,11 @@ void Ieee80211AgentSTA::sendScanRequest()
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address, int authType)
+void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address)
 {
     EV << "Sending AuthenticateRequest primitive to mgmt\n";
     Ieee80211Prim_AuthenticateRequest *req = new Ieee80211Prim_AuthenticateRequest();
     req->setAddress(address);
-    req->setAuthType(authType);
     req->setTimeout(authenticationTimeout);
     sendRequest(req);
 }
@@ -189,7 +188,7 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 
     Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
     EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
-    sendAuthenticateRequest(bssDesc.getBSSID(), AUTHTYPE_SHAREDKEY); //XXX or AUTHTYPE_OPENSYSTEM -- should be parameter?
+    sendAuthenticateRequest(bssDesc.getBSSID());
 }
 
 void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)

@@ -111,7 +111,14 @@ class Ieee80211FrameBody
 };
 
 //
-// Authentication frame body format
+// Authentication frame body format.
+//
+// Note: the "isLast" field is not part of the standard.
+// The authentication procedure is simulated by this model by exchanging
+// a number of "dummy" authentication frames without real contents;
+// the "isLast" field gets set by the AP to signal the STA that
+// the authentication procedure has completed and it does not need to
+// send any more Authentication frames.
 //
 class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 {
@@ -119,6 +126,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
         bodyLength = 6; // add 2+len bytes for challenge text if present
         unsigned short sequenceNumber;
         int statusCode enum(Ieee80211StatusCode);
+        bool isLast; // not part of the standard; see above
 };
 
 //

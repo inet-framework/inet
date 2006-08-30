@@ -23,7 +23,6 @@
 #include "PhyControlInfo_m.h"
 
 //FIXME supportedRates!
-//FIXME authType vs numAuthSteps
 //FIXME use command msg kinds?
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
@@ -50,8 +49,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
        << " beaconIntvl=" << ap.beaconInterval
        << " rxPower=" << ap.rxPower
        << " authSeqExpected=" << ap.authSeqExpected
-       << " isAuthenticated=" << ap.isAuthenticated
-       << " authType=" << ap.authType;
+       << " isAuthenticated=" << ap.isAuthenticated;
     return os;
 }
 
@@ -217,17 +215,17 @@ void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, cons
     sendOrEnqueue(frame); //XXX or should mgmt frames take priority over normal frames?
 }
 
-void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, int authType, double timeout)
+void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, double timeout)
 {
     changeChannel(ap->channel);
-    ap->authType = authType;
 
     // create and send first authentication frame
     Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
     frame->getBody().setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
-    //XXX obey authType
     sendManagementFrame(frame, ap->address);
+
+    ap->authSeqExpected = 1;
 
     // schedule timeout
     ASSERT(ap->timeoutMsg==NULL);
@@ -357,7 +355,7 @@ void Ieee80211MgmtSTA::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequ
     APInfo *ap = lookupAP(address);
     if (!ap)
         error("processAuthenticateCommand: AP not known: address = %s", address.str().c_str());
-    startAuthentication(ap, ctrl->getAuthType(), ctrl->getTimeout());
+    startAuthentication(ap, ctrl->getTimeout());
 }
 
 void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_DeauthenticateRequest *ctrl)
@@ -424,7 +422,6 @@ void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
 {
     Ieee80211Prim_AuthenticateConfirm *confirm = new Ieee80211Prim_AuthenticateConfirm();
     confirm->setAddress(ap->address);
-    confirm->setAuthType(ap->authType);
     sendConfirm(confirm, resultCode);
 }
 
@@ -466,56 +463,52 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
 
     //XXX what if already authenticated with AP?
     //XXX check authentication is currently in progress
-    //XXX check sequenceNumber if in sequence
-/*
+
     // check authentication sequence number is OK
     int frameAuthSeq = frame->getBody().getSequenceNumber();
     if (frameAuthSeq != ap->authSeqExpected)
     {
         // wrong sequence number: send error and return
-        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(ERR)");
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
         resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
-        ap->authSeqExpected = 1; // go back to start square XXX
-        //XXX send error to agent
+
+        // cancel timeout, send error to agent
+        delete cancelEvent(ap->timeoutMsg);
+        ap->timeoutMsg = NULL;
+        sendAuthenticationConfirm(ap, PRC_REFUSED); //XXX or what resultCode?
         return;
     }
-*/
-    //XXX how many exchanges are needed for auth to be complete? (check seqNum)
+
+    // check if more exchanges are needed for auth to be complete
     int statusCode = frame->getBody().getStatusCode();
 
-    if (statusCode!=SC_SUCCESSFUL)
-        EV << "Authentication failed with AP address=" << ap->address << "\n";
-
-    //TBD if auth complete, set isAuthenticated=true and send back response
-/*
-    if (frameAuthSeq < numAuthSteps)
+    if (statusCode==SC_SUCCESSFUL && !frame->getBody().getIsLast())
     {
-        // send OK response (we don't model the cryptography part, just assume
-        // successful authentication every time)
-        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth(OK)");
-        resp->getBody().setSequenceNumber(frameAuthSeq);
+        EV << "More steps required, send another Authentication frame to AP address=" << ap->address << "\n";
+
+        // more steps required, send another Authentication frame
+        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth");
+        resp->getBody().setSequenceNumber(frameAuthSeq+1);
         resp->getBody().setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
-        sendManagementFrame(resp, ap->address);
-    }
-
-    // we are authenticated with AP if we made it through the required number of steps
-    if (frameAuthSeq+1 == numAuthSteps)
-    {
-        ap->isAuthenticated = true;
+        sendManagementFrame(resp, address);
+        frameAuthSeq += 2;
     }
     else
     {
-        ap->authSeqExpected += 2;
+        if (statusCode==SC_SUCCESSFUL)
+            EV << "Authentication successful with AP address=" << ap->address << "\n";
+        else
+            EV << "Authentication failed with AP address=" << ap->address << "\n";
+
+        // authentication completed
+        ap->isAuthenticated = (statusCode==SC_SUCCESSFUL);
+        delete cancelEvent(ap->timeoutMsg);
+        ap->timeoutMsg = NULL;
+        sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
-*/
-    //XXX the following should only be done only if completed numSteps
-    ap->isAuthenticated = (statusCode==SC_SUCCESSFUL);
-    delete cancelEvent(ap->timeoutMsg);
-    ap->timeoutMsg = NULL;
-    sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
