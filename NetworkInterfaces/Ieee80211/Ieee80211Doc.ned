@@ -27,13 +27,14 @@
 //    - Ieee80211Nic: a generic (configurable) NIC
 //    - Ieee80211NicAdhoc: for ad-hoc mode
 //    - Ieee80211NicAP, Ieee80211NicAPSimplified: for use in an access point
-//    - Ieee80211NicSTA, Ieee80211NicSTASimplified: for use in an infrastructure-mode station
+//    - Ieee80211NicSTA, Ieee80211NicSTASimplified: for use in an
+//      infrastructure-mode station
 //
 // (The "simplified" ones do not model the scan-authenticate-associate process,
 // so they cannot be used in experiments involving handover. For such experiments,
 // you need to use the "non-simplified" variants.)
 //
-// NICs consist of four layers, which are in top-down order:
+// NICs consist of four layers, which are the following (in top-down order):
 //
 //   -# agent
 //   -# management
@@ -82,4 +83,8 @@
 //
 // See the documentation of Ieee80211Mac for features unsupported by this
 // model.
+//
+//# further details about the implementation: what is modelled and what is
+//# not (beacons, auth, ...), communication between modules, frame formats,
+//# ...
 //
