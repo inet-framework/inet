@@ -73,8 +73,6 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         MACAddress address; // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
-        Ieee80211CapabilityInformation capabilityInformation;
-        double timestamp; //XXX not needed
         double beaconInterval;
         double rxPower;
 
@@ -85,7 +83,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
         APInfo()
         {
-            channel=-1; timestamp=beaconInterval=rxPower=0;
+            channel=-1; beaconInterval=rxPower=0;
             authSeqExpected=-1; isAuthenticated=false; authType=0;
             timeoutMsg=NULL;
         }

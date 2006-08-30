@@ -28,7 +28,11 @@ class noncobject MACAddress;
 message Ieee80211ManagementFrame;
 
 //
-// Capability Information field format
+// Capability Information field format. This field is not used
+// by the model (and is omitted from management frame formats too),
+// because its fields are related to features not supported by this model
+// (PCF, privacy, and beacons in ad-hoc mode). It is only provided here
+// for completeness.
 //
 struct Ieee80211CapabilityInformation
 {
@@ -157,7 +161,6 @@ class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
         bodyLength = 16; // assuming a 8-character SSID
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
-        Ieee80211CapabilityInformation capabilityInformation;
 };
 
 //
@@ -178,7 +181,6 @@ class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
     fields:
         bodyLength = 26; // assuming a 8-character SSID and 4 supported datarate
         int statusCode enum(Ieee80211StatusCode);
-        Ieee80211CapabilityInformation capabilityInformation;
         short aid;
         Ieee80211SupportedRatesElement supportedRates;
 };
@@ -191,7 +193,7 @@ class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationRespon
 };
 
 //
-// Beacon frame body format
+// Beacon frame body format.
 //
 class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
 {
@@ -199,8 +201,6 @@ class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
         bodyLength = 50; // assuming a 8-character SSID, 4 supported datarate plus TIM
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
-        Ieee80211CapabilityInformation capabilityInformation;
-        double timestamp;
         double beaconInterval;
         int channel;
         Ieee80211HandoverParameters handoverParameters;

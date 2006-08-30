@@ -51,7 +51,7 @@ void Ieee80211MgmtAP::initialize(int stage)
         WATCH(numAuthSteps);
         WATCH_MAP(staList);
 
-        //TBD fill in supportedRates and capabilityInfo
+        //TBD fill in supportedRates
 
         // subscribe for notifications
         NotificationBoard *nb = NotificationBoardAccess().get();
@@ -132,8 +132,6 @@ void Ieee80211MgmtAP::sendBeacon()
     Ieee80211BeaconFrameBody& body = frame->getBody();
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
-    body.setCapabilityInformation(capabilityInfo);
-    body.setTimestamp(simTime()); //XXX this is to be refined
     body.setBeaconInterval(beaconInterval);
     body.setChannel(channelNumber);
 
@@ -260,7 +258,6 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
     Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
     Ieee80211AssociationResponseFrameBody& body = resp->getBody();
     body.setStatusCode(SC_SUCCESSFUL);
-    body.setCapabilityInformation(capabilityInfo);
     body.setAid(0); //XXX
     body.setSupportedRates(supportedRates);
     sendManagementFrame(resp, sta->address);
@@ -294,7 +291,6 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequ
     Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp(OK)");
     Ieee80211ReassociationResponseFrameBody& body = resp->getBody();
     body.setStatusCode(SC_SUCCESSFUL);
-    body.setCapabilityInformation(capabilityInfo);
     body.setAid(0); //XXX
     body.setSupportedRates(supportedRates);
     sendManagementFrame(resp, sta->address);
@@ -340,8 +336,6 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     Ieee80211ProbeResponseFrameBody& body = resp->getBody();
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
-    body.setCapabilityInformation(capabilityInfo);
-    body.setTimestamp(simTime()); //XXX this is to be refined
     body.setBeaconInterval(beaconInterval);
     body.setChannel(channelNumber);
     sendManagementFrame(resp, staAddress); // FIXME it might be not that simple, cf beacon...

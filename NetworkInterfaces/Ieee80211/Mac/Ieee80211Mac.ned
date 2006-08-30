@@ -37,7 +37,20 @@
 // queue module is a simple module whose C++ class implements the IPassiveQueue
 // interface.
 //
-// TODO: document not supported features (variable bitrate, fragmentation, etc.?)
+// Features not supported:
+//    -# fragmentation
+//    -# power management
+//    -# polling (PCF)
+//
+// Also, physical layer algorithms such as frequency hopping and direct
+// sequence are not modelled directly.
+//
+// Fields related to the above unsupported features are omitted from
+// management frame formats as well (for example, FH/DS/CF parameter sets,
+// beacon/probe timestamp which is related to physical layer synchronization,
+// listen interval which is related to power management, capability information
+// which is related to PCF and other non-modelled features).
+//
 simple Ieee80211Mac
     parameters:
         address : string,       // MAC address as hex string (12 hex digits), or

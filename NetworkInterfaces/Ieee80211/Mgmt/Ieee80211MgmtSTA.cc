@@ -44,8 +44,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
     os << "AP addr=" << ap.address
        << " chan=" << ap.channel
        << " ssid=" << ap.ssid
-       //TBD supportedRates, capabilityInformation,...
-       << " tstamp=" << ap.timestamp
+       //TBD supportedRates...
        << " beaconIntvl=" << ap.beaconInterval
        << " rxPower=" << ap.rxPower
        << " authSeqExpected=" << ap.authSeqExpected
@@ -248,7 +247,6 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
     //XXX set the following too?
     // string SSID;
     // Ieee80211SupportedRatesElement supportedRates;
-    // Ieee80211CapabilityInformation capabilityInformation;
 
     sendManagementFrame(frame, ap->address);
 
@@ -345,7 +343,6 @@ void Ieee80211MgmtSTA::sendScanConfirm()
         bss.setBSSID(ap->address);
         bss.setSSID(ap->ssid.c_str());
         bss.setSupportedRates(ap->supportedRates);
-        bss.setCapabilityInfo(ap->capabilityInformation);
         bss.setBeaconInterval(ap->beaconInterval);
         bss.setRxPower(ap->rxPower);
     }
@@ -548,7 +545,6 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
     // extract frame contents
     MACAddress address = frame->getTransmitterAddress();
     int statusCode = frame->getBody().getStatusCode();
-    //XXX Ieee80211CapabilityInformation capabilityInformation;
     //XXX short aid;
     //XXX Ieee80211SupportedRatesElement supportedRates;
     delete frame;
@@ -671,8 +667,6 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
     ap->address = address;
     ap->ssid = body.getSSID();
     ap->supportedRates = body.getSupportedRates();
-    ap->capabilityInformation = body.getCapabilityInformation();
-    ap->timestamp = body.getTimestamp();
     ap->beaconInterval = body.getBeaconInterval();
 
     //XXX where to get this from???    ap->rxPower = ...;

@@ -58,7 +58,6 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     simtime_t beaconInterval;
     int numAuthSteps;
     Ieee80211SupportedRatesElement supportedRates;
-    Ieee80211CapabilityInformation capabilityInfo;
 
     // state
     STAList staList; ///< list of STAs

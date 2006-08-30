@@ -23,7 +23,6 @@ cplusplus
 #include "Ieee80211MgmtFrames_m.h"
 }};
 class noncobject MACAddress;
-class noncobject Ieee80211CapabilityInformation;
 class noncobject Ieee80211SupportedRatesElement;
 enum Ieee80211ReasonCode;
 
@@ -33,7 +32,6 @@ enum Ieee80211AuthenticationType
     AUTHTYPE_SHAREDKEY = 2;
 };
 
-//XXX make implicit
 enum Ieee80211BSSType
 {
     BSSTYPE_ANY = 0;
@@ -67,7 +65,7 @@ class Ieee80211PrimConfirm
 };
 
 //
-// Losely based on MLME-SCAN.request
+// Losely based on MLME-SCAN.request.
 //
 class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
 {
@@ -89,7 +87,6 @@ class Ieee80211Prim_BSSDescription
         MACAddress BSSID;
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
-        Ieee80211CapabilityInformation capabilityInfo;
         double beaconInterval;
 
         double rxPower; // received power from AP; not part of the standard
@@ -154,8 +151,6 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211PrimRequest
     fields:
         MACAddress address;
         double timeout;
-        Ieee80211CapabilityInformation capabilityInfo;
-        int listenInterval; //XXX supported by MAC?
 };
 
 //

@@ -153,8 +153,6 @@ void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
     Ieee80211Prim_AssociateRequest *req = new Ieee80211Prim_AssociateRequest();
     req->setAddress(address);
     req->setTimeout(associationTimeout);
-    //XXX    Ieee80211CapabilityInformation capabilityInfo;
-    //XXX    int listenInterval; // unsupported by MAC
     sendRequest(req);
 }
 
@@ -164,8 +162,6 @@ void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
     Ieee80211Prim_ReassociateRequest *req = new Ieee80211Prim_ReassociateRequest();
     req->setAddress(address);
     req->setTimeout(associationTimeout);
-    //XXX    Ieee80211CapabilityInformation capabilityInfo;
-    //XXX    int listenInterval; // unsupported by MAC
     sendRequest(req);
 }
 
@@ -209,7 +205,7 @@ void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
            << " beaconIntvl=" << bssDesc.getBeaconInterval()
            << " rxPower=" << bssDesc.getRxPower()
            << endl;
-        // later: supportedRates, capabilityInfo
+        // later: supportedRates
     }
 }
 
