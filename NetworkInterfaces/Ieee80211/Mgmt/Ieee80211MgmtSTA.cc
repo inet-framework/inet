@@ -50,8 +50,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
        << " rxPower=" << ap.rxPower
        << " authSeqExpected=" << ap.authSeqExpected
        << " isAuthenticated=" << ap.isAuthenticated
-       << " authType=" << ap.authType
-       << " rcvSeq=" << ap.receiveSequence;
+       << " authType=" << ap.authType;
     return os;
 }
 
@@ -205,9 +204,6 @@ void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
     nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //FIXME use InterfaceEntry as detail, etc...
-
-    //XXX break existing association with AP? send Disassociation frame?
-    //XXX delete beaconTimeout timer?
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -266,7 +262,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    //TBD
+    EV << fullPath() << ": ignoring change notification\n";
 }
 
 void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
@@ -526,7 +522,18 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
 {
     EV << "Received Deauthentication frame\n";
-    //TBD
+    const MACAddress& address = frame->getAddress3();  // source address
+    APInfo *ap = lookupAP(address);
+    if (!ap || !ap->isAuthenticated)
+    {
+        //XXX if we are currently authenticatING, cancel timer etc!!!
+        EV << "Unknown AP, or not authenticated with that AP -- ignoring frame\n";
+        delete frame;
+        return;
+    }
+
+    EV << "Setting isAuthenticated flag for that AP to false\n";
+    ap->isAuthenticated = false;
 }
 
 void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
@@ -553,7 +560,9 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
 
     if (isAssociated)
     {
-        //XXX something to do about our existing association...?
+        EV << "Breaking existing association with AP address=" << apAddress << "\n";
+        isAssociated = false;
+        delete cancelEvent(beaconTimeout);
     }
 
     //XXX check if we have actually sent an AssocReq to this AP!
@@ -591,13 +600,25 @@ void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationReq
 void Ieee80211MgmtSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
     EV << "Received Reassociation Response frame\n";
-    //TBD handle with the same code as Association Response????
+    //TBD handle with the same code as Association Response?
 }
 
 void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
 {
     EV << "Received Disassociation frame\n";
-    //TBD
+    const MACAddress& address = frame->getAddress3();  // source address
+    if (!isAssociated || address!=apAddress)
+    {
+        //XXX if we are currently associatING, cancel timer etc!!!
+        EV << "Not associated with that AP -- ignoring frame\n";
+        delete frame;
+        return;
+    }
+
+    EV << "Setting isAssociated flag to false\n";
+    isAssociated = false;
+    delete cancelEvent(beaconTimeout);
+    beaconTimeout = NULL;
 }
 
 void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)

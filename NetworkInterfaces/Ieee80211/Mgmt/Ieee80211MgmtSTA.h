@@ -81,14 +81,13 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         int authSeqExpected;  //1,3,5...; -1 means no authentication in progress
         bool isAuthenticated;
         int authType;
-        int receiveSequence; //XXX do we need this?
         cMessage *timeoutMsg; // authentication/association timeout
 
         APInfo()
         {
             channel=-1; timestamp=beaconInterval=rxPower=0;
             authSeqExpected=-1; isAuthenticated=false; authType=0;
-            receiveSequence=0; timeoutMsg=NULL;
+            timeoutMsg=NULL;
         }
     };
   protected:

@@ -132,6 +132,11 @@ class INET_API MACAddress
     bool operator==(const MACAddress& other) const {return (*this).equals(other);}
 
     /**
+     * Returns true if the two addresses are not equal.
+     */
+    bool operator!=(const MACAddress& other) const {return !(*this).equals(other);}
+
+    /**
      * Returns -1, 0 or 1 as result of comparison of 2 addresses.
      */
     int compareTo(const MACAddress& other) const;
