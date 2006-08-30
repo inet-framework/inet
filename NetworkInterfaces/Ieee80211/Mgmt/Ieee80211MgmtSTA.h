@@ -46,7 +46,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     // - we may also be performing scanning while STA is associated (XXX is that so?)
     //
     bool isScanning;
-    bool isAssociated;
+    bool isAssociated; //XXX -> NOT_ASSOCIATED, ASSOCIATING, ASSOCIATED
 
     struct {
         MACAddress bssid; // specific BSSID to scan for, or the broadcast address
@@ -78,8 +78,8 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         double beaconInterval;
         double rxPower;
 
-        int authSeqExpected;  //1,3,5...; -1 means no authentication in progress
-        bool isAuthenticated;
+        bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
+        int authSeqExpected;  // valid while authenticating; values: 1,3,5...
         int authType;
         cMessage *timeoutMsg; // authentication/association timeout
 

@@ -117,7 +117,7 @@ class Ieee80211Prim_AuthenticateRequest extends Ieee80211PrimRequest
 };
 
 //
-// Losely based on MLME-AUTHENTICATE.confirm
+// Losely based on MLME-AUTHENTICATE.confirm.
 // Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, TOO_MANY_SIMULTANEOUS_REQUESTS, REFUSED
 //
 class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
@@ -138,8 +138,9 @@ class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 };
 
 //
-// Losely based on MLME-DEAUTHENTICATE.confirm
+// Losely based on MLME-DEAUTHENTICATE.confirm.
 // Possible result codes: SUCCESS, INVALID_PARAMETERS, TOO_MANY_SIMULTANEOUS_REQUESTS
+// (currently only SUCCESS is sent).
 //
 class Ieee80211Prim_DeauthenticateConfirm extends Ieee80211PrimConfirm
 {
@@ -180,7 +181,7 @@ class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
 };
 
 //
-// Losely based on MLME-DISASSOCIATE.request
+// Losely based on MLME-DISASSOCIATE.request.
 //
 class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 {
@@ -192,6 +193,7 @@ class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 //
 // Losely based on MLME-DISASSOCIATE.confirm.
 // Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
+// (currently only SUCCESS is sent).
 //
 class Ieee80211Prim_DisassociateConfirm extends Ieee80211PrimConfirm
 {
