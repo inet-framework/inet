@@ -22,10 +22,12 @@
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 
+//FIXME supportedRates!
+//FIXME authType vs numAuthSteps
+//FIXME use command msg kinds?
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
 //FIXME beacons should overtake all other frames (inserted at front of queue)
-//FIXME remove variables, message fields etc that we don't support
 
 Define_Module(Ieee80211MgmtSTA);
 

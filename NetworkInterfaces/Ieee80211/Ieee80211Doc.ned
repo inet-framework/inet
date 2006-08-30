@@ -75,6 +75,9 @@
 // as an Ieee80211AgentSTA module. The managament entities in other NIC
 // variants do not have as much freedom as to need an agent to control them.
 //
+// By modifying or replacing the agent, one can alter the dynamic behaviour
+// of STAs in the network, for example implement different handover strategies.
+//
 // Features not supported
 //
 // See the documentation of Ieee80211Mac for features unsupported by this

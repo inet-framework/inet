@@ -154,7 +154,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
-    /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211Prim_ResultCode (->primitive) */
+    /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual int statusCodeToPrimResultCode(int statusCode);
 
     /** @name Processing of different frame types */

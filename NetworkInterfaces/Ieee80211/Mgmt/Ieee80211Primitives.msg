@@ -26,6 +26,39 @@ class noncobject MACAddress;
 class noncobject Ieee80211SupportedRatesElement;
 enum Ieee80211ReasonCode;
 
+//
+// IEEE 802.11 command codes, sent by the agent to the management entity.
+// These constants should be set as message kind on the messages.
+//
+// @see Ieee80211PrimConfirmCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+//
+enum Ieee80211PrimRequestCode
+{
+    PR_SCAN_REQUEST = 1;
+    PR_AUTHENTICATE_REQUEST = 2;
+    PR_DEAUTHENTICATE_REQUEST = 3;
+    PR_ASSOCIATE_REQUEST = 4;
+    PR_REASSOCIATE_REQUEST = 5;
+    PR_DISASSOCIATE_REQUEST = 6;
+};
+
+//
+// IEEE 802.11 confirm codes, sent by the management entity to the agent,
+// in response to the agents's requests.
+// These constants should be set as message kind on the messages.
+//
+// @see Ieee80211PrimRequestCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+//
+enum Ieee80211PrimConfirmCode
+{
+    PR_SCAN_CONFIRM = 1;
+    PR_AUTHENTICATE_CONFIRM = 2;
+    PR_DEAUTHENTICATE_CONFIRM = 3;
+    PR_ASSOCIATE_CONFIRM = 4;
+    PR_REASSOCIATE_CONFIRM = 5;
+    PR_DISASSOCIATE_CONFIRM = 6;
+};
+
 enum Ieee80211AuthenticationType
 {
     AUTHTYPE_OPENSYSTEM = 1;
@@ -39,7 +72,13 @@ enum Ieee80211BSSType
     BSSTYPE_INDEPENDENT = 2;
 };
 
-enum Ieee80211Prim_ResultCode
+//
+// Values for the resultCode field in confirm primitives, sent from
+// the management entity to the agent.
+//
+// @see Ieee80211PrimConfirmCode, Ieee80211MgmtSTA, Ieee80211AgentSTA
+//
+enum Ieee80211PrimResultCode
 {
     PRC_SUCCESS = 0;
     PRC_INVALID_PARAMETERS = 1;
@@ -61,7 +100,7 @@ class Ieee80211PrimRequest
 class Ieee80211PrimConfirm
 {
     fields:
-        int resultCode enum(Ieee80211Prim_ResultCode);
+        int resultCode enum(Ieee80211PrimResultCode);
 };
 
 //
