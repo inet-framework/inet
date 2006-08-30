@@ -94,6 +94,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
         //XXX should check details if it's about this NIC
         EV << className() << ": beacon lost, starting scanning again\n"; //XXX should we get disassociated or anything before that?
         parentModule()->parentModule()->bubble("Beacon lost!");
+        //XXX sendDisassociateRequest(); ??
         sendScanRequest();
     }
     else if (category == NF_L2_ASSOCIATED)
@@ -105,7 +106,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
     }
 }
 
-void Ieee80211AgentSTA::sendRequest(Ieee80211Prim *req)
+void Ieee80211AgentSTA::sendRequest(Ieee80211PrimRequest *req)
 {
     cMessage *msg = new cMessage(req->className());
     msg->setControlInfo(req);

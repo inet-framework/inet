@@ -36,6 +36,8 @@ Define_Module(Ieee80211MgmtSTA);
 #define MK_SEND_PROBE_REQ 4
 #define MK_BEACON_TIMEOUT 5
 
+#define MAX_BEACONS_MISSED 3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
+
 
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
 {
@@ -351,7 +353,7 @@ void Ieee80211MgmtSTA::sendScanConfirm()
         bss.setBeaconInterval(ap->beaconInterval);
         bss.setRxPower(ap->rxPower);
     }
-    sendConfirm(confirm);
+    sendConfirm(confirm, PRC_SUCCESS);
 }
 
 void Ieee80211MgmtSTA::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequest *ctrl)
@@ -370,12 +372,19 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     if (!ap)
         error("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
 
+    if (ap->isAuthenticated)
+    {
+        //XXX what if we are not authenticated?
+        ap->isAuthenticated = false;
+    }
+
     // create and send deauthentication request
     Ieee80211DeauthenticationFrame *frame = new Ieee80211DeauthenticationFrame("Deauth");
     frame->getBody().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
 
-    //XXX send confirm...
+    // send confirm to agent
+    sendConfirm(new Ieee80211Prim_DeauthenticateConfirm(), PRC_SUCCESS);
 }
 
 void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
@@ -398,14 +407,22 @@ void Ieee80211MgmtSTA::processReassociateCommand(Ieee80211Prim_ReassociateReques
 void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl)
 {
     const MACAddress& address = ctrl->getAddress();
-    //XXX check we are associated at all
+
+    //XXX what if we are not associated?
+    //XXX what if address is not our associated AP address??
+    if (isAssociated)
+    {
+        isAssociated = false;
+        delete cancelEvent(beaconTimeout);
+    }
 
     // create and send disassociation request
     Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disass");
     frame->getBody().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
 
-    //XXX send confirm...
+    // send confirm to agent
+    sendConfirm(new Ieee80211Prim_DisassociateConfirm(), PRC_SUCCESS);
 }
 
 void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
@@ -413,21 +430,19 @@ void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
     Ieee80211Prim_AuthenticateConfirm *confirm = new Ieee80211Prim_AuthenticateConfirm();
     confirm->setAddress(ap->address);
     confirm->setAuthType(ap->authType);
-    confirm->setResultCode(resultCode);
-    sendConfirm(confirm);
+    sendConfirm(confirm, resultCode);
 }
 
 void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, int resultCode)
 {
-    Ieee80211Prim_AssociateConfirm *confirm = new Ieee80211Prim_AssociateConfirm();
-    confirm->setResultCode(resultCode);
-    sendConfirm(confirm);
+    sendConfirm(new Ieee80211Prim_AssociateConfirm(), resultCode);
 }
 
-void Ieee80211MgmtSTA::sendConfirm(Ieee80211Prim *req)
+void Ieee80211MgmtSTA::sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode)
 {
-    cMessage *msg = new cMessage(req->className());
-    msg->setControlInfo(req);
+    confirm->setResultCode(resultCode);
+    cMessage *msg = new cMessage(confirm->className());
+    msg->setControlInfo(confirm);
     send(msg, "agentOut");
 }
 
@@ -561,7 +576,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
 
         beaconTimeout = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
-        scheduleAt(simTime()+1, beaconTimeout);  //FIXME use +3.5*beaconInterval or sth like that
+        scheduleAt(simTime()+MAX_BEACONS_MISSED*beaconInterval, beaconTimeout);
     }
 
     // report back to agent
@@ -576,7 +591,7 @@ void Ieee80211MgmtSTA::handleReassociationRequestFrame(Ieee80211ReassociationReq
 void Ieee80211MgmtSTA::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
 {
     EV << "Received Reassociation Response frame\n";
-    //TBD
+    //TBD handle with the same code as Association Response????
 }
 
 void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
@@ -596,7 +611,7 @@ void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(beaconTimeout!=NULL);
         cancelEvent(beaconTimeout);
-        scheduleAt(simTime()+1, beaconTimeout); //XXX use 3.5*beaconIntvl or sth like that
+        scheduleAt(simTime()+MAX_BEACONS_MISSED*beaconInterval, beaconTimeout);
 
         //APInfo *ap = lookupAP(frame->getTransmitterAddress());
         //ASSERT(ap!=NULL);

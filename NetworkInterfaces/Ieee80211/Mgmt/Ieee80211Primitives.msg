@@ -51,16 +51,25 @@ enum Ieee80211Prim_ResultCode
 };
 
 //
-// Base class
+// Base class for request primitives
 //
-class Ieee80211Prim
+class Ieee80211PrimRequest
 {
+};
+
+//
+// Base class for confirm primitives
+//
+class Ieee80211PrimConfirm
+{
+    fields:
+        int resultCode enum(Ieee80211Prim_ResultCode);
 };
 
 //
 // Losely based on MLME-SCAN.request
 //
-class Ieee80211Prim_ScanRequest extends Ieee80211Prim
+class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
 {
     fields:
         int BSSType enum(Ieee80211BSSType); // determines type of BSS's to include in the scan
@@ -88,18 +97,18 @@ class Ieee80211Prim_BSSDescription
 
 //
 // Loosely based on MLME-SCAN.confirm
+// Possible result codes: SUCCESS, INVALID_PARAMETERS
 //
-class Ieee80211Prim_ScanConfirm extends Ieee80211Prim
+class Ieee80211Prim_ScanConfirm extends Ieee80211PrimConfirm
 {
     fields:
         Ieee80211Prim_BSSDescription bssList[];
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS
 };
 
 //
 // Losely based on MLME-AUTHENTICATE.request
 //
-class Ieee80211Prim_AuthenticateRequest extends Ieee80211Prim
+class Ieee80211Prim_AuthenticateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
@@ -109,19 +118,19 @@ class Ieee80211Prim_AuthenticateRequest extends Ieee80211Prim
 
 //
 // Losely based on MLME-AUTHENTICATE.confirm
+// Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, TOO_MANY_SIMULTANEOUS_REQUESTS, REFUSED
 //
-class Ieee80211Prim_AuthenticateConfirm extends Ieee80211Prim
+class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 {
     fields:
         MACAddress address;
         int authType enum(Ieee80211AuthenticationType);
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, TOO_MANY_SIMULTANEOUS_REQUESTS, REFUSED
 };
 
 //
 // Losely based on MLME-DEAUTHENTICATE.request
 //
-class Ieee80211Prim_DeauthenticateRequest extends Ieee80211Prim
+class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
@@ -130,17 +139,16 @@ class Ieee80211Prim_DeauthenticateRequest extends Ieee80211Prim
 
 //
 // Losely based on MLME-DEAUTHENTICATE.confirm
+// Possible result codes: SUCCESS, INVALID_PARAMETERS, TOO_MANY_SIMULTANEOUS_REQUESTS
 //
-class Ieee80211Prim_DeauthenticateConfirm extends Ieee80211Prim
+class Ieee80211Prim_DeauthenticateConfirm extends Ieee80211PrimConfirm
 {
-    fields:
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TOO_MANY_SIMULTANEOUS_REQUESTS
 };
 
 //
 // Losely based on MLME-ASSOCIATE.request
 //
-class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
+class Ieee80211Prim_AssociateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
@@ -151,11 +159,10 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211Prim
 
 //
 // Losely based on MLME-ASSOCIATE.confirm
+// Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
 //
-class Ieee80211Prim_AssociateConfirm extends Ieee80211Prim
+class Ieee80211Prim_AssociateConfirm extends Ieee80211PrimConfirm
 {
-    fields:
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
 };
 
 //
@@ -175,7 +182,7 @@ class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
 //
 // Losely based on MLME-DISASSOCIATE.request
 //
-class Ieee80211Prim_DisassociateRequest extends Ieee80211Prim
+class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
@@ -183,12 +190,11 @@ class Ieee80211Prim_DisassociateRequest extends Ieee80211Prim
 };
 
 //
-// Losely based on MLME-DISASSOCIATE.confirm
+// Losely based on MLME-DISASSOCIATE.confirm.
+// Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
 //
-class Ieee80211Prim_DisassociateConfirm extends Ieee80211Prim
+class Ieee80211Prim_DisassociateConfirm extends Ieee80211PrimConfirm
 {
-    fields:
-        int resultCode enum(Ieee80211Prim_ResultCode); // SUCCESS==0, INVALID_PARAMETERS, TIMEOUT, REFUSED
 };
 
 

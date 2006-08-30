@@ -62,6 +62,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     // associated Access Point
     MACAddress apAddress;
     int receiveSequence;
+    double beaconInterval;
     cMessage *beaconTimeout;
 
   public:
@@ -73,7 +74,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
         Ieee80211CapabilityInformation capabilityInformation;
-        double timestamp;
+        double timestamp; //XXX not needed
         double beaconInterval;
         double rxPower;
 
@@ -148,7 +149,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     void sendAssociationConfirm(APInfo *ap, int resultCode);
 
     /** Utility function: sends a confirmation to the agent */
-    void sendConfirm(Ieee80211Prim *req);
+    void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
 
     /** Utility function: sends a management frame */
     void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
