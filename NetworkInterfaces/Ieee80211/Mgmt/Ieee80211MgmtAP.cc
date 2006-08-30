@@ -325,9 +325,9 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 {
     EV << "Processing ProbeRequest frame\n";
 
-    if (strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
+    if (strcmp(frame->getBody().getSSID(),"")!=0 && strcmp(frame->getBody().getSSID(), ssid.c_str())!=0)
     {
-        EV << "SSID does not match, ignoring frame\n";
+        EV << "SSID `" << frame->getBody().getSSID() << "' does not match, ignoring frame\n";
         dropManagementFrame(frame);
         return;
     }

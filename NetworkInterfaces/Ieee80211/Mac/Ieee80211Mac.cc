@@ -62,7 +62,7 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
-        rtsThreshold = par("rtsThreshold");
+        rtsThreshold = par("rtsThresholdBytes");
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address

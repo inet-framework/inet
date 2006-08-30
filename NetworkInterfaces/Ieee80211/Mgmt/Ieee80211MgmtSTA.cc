@@ -22,8 +22,10 @@
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 
-//FIXME TBD implement bitrate switching (involves notification of MAC, SnrEval, Decider)
-
+//FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
+//FIXME while scanning, discard all other requests
+//FIXME beacons should overtake all other frames (inserted at front of queue)
+//FIXME remove variables, message fields etc that we don't support
 
 Define_Module(Ieee80211MgmtSTA);
 
@@ -31,7 +33,8 @@ Define_Module(Ieee80211MgmtSTA);
 #define MK_AUTH_TIMEOUT   1
 #define MK_ASSOC_TIMEOUT  2
 #define MK_CHANNEL_CHANGE 3
-#define MK_BEACON_TIMEOUT 4
+#define MK_SEND_PROBE_REQ 4
+#define MK_BEACON_TIMEOUT 5
 
 
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
@@ -104,6 +107,12 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
         bool done = scanNextChannel(msg);
         if (done)
             sendScanConfirm(); // send back response to agents' "scan" command
+    }
+    else if (msg->kind()==MK_SEND_PROBE_REQ)
+    {
+        // send probe request during active scanning
+        sendProbeRequest();
+        delete msg;
     }
     else if (msg->kind()==MK_BEACON_TIMEOUT)
     {
@@ -267,13 +276,15 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // fill in scanning state
     ASSERT(ctrl->getBSSType()==BSSTYPE_INFRASTRUCTURE);
-    scanning.bssid = ctrl->getBSSID();
+    scanning.bssid = ctrl->getBSSID().isUnspecified() ? MACAddress::BROADCAST_ADDRESS : ctrl->getBSSID();
     scanning.ssid = ctrl->getSSID();
-    scanning.activeScan = ctrl->getActiveScan();
+    scanning.isActiveScan = ctrl->getActiveScan();
     scanning.probeDelay = ctrl->getProbeDelay();
     scanning.channelList.clear();
     scanning.minChannelTime = ctrl->getMinChannelTime();
     scanning.maxChannelTime = ctrl->getMaxChannelTime();
+    ASSERT(scanning.probeDelay < scanning.minChannelTime);
+    ASSERT(scanning.minChannelTime <= scanning.maxChannelTime);
 
     // channel list to scan (deafult: all channels)
     for (int i=0; i<ctrl->getChannelListArraySize(); i++)
@@ -284,7 +295,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     scanning.currentChannelIndex = -1; // so we'll start with index==0
-    cMessage *timerMsg = new cMessage("changeChannel", MK_CHANNEL_CHANGE);
+    cMessage *timerMsg = new cMessage("nextChannelChange", MK_CHANNEL_CHANGE);
     scanNextChannel(timerMsg);
 }
 
@@ -303,8 +314,19 @@ bool Ieee80211MgmtSTA::scanNextChannel(cMessage *reuseTimerMsg)
     changeChannel(newChannel);
     double channelTime = (scanning.minChannelTime+scanning.maxChannelTime)/2;
     scheduleAt(simTime()+channelTime, reuseTimerMsg);
-    //XXX schedule probe
+
+    if (scanning.isActiveScan)
+        scheduleAt(simTime()+scanning.probeDelay, new cMessage("sendProbe", MK_SEND_PROBE_REQ));
+
     return false;
+}
+
+void Ieee80211MgmtSTA::sendProbeRequest()
+{
+    EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
+    Ieee80211ProbeRequestFrame *frame = new Ieee80211ProbeRequestFrame("ProbeReq");
+    frame->getBody().setSSID(scanning.ssid.c_str());
+    sendManagementFrame(frame, scanning.bssid);
 }
 
 void Ieee80211MgmtSTA::sendScanConfirm()

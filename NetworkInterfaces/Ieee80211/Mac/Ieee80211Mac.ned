@@ -46,7 +46,7 @@ simple Ieee80211Mac
         queueModule: string,    // name of optional external queue module
         maxQueueSize: numeric const, // max queue length in frames; only used if queueModule==""
         bitrate: numeric const,
-        rtsThreshold: numeric const; // longer messages will be sent using RTS/CTS
+        rtsThresholdBytes: numeric const; // longer messages will be sent using RTS/CTS
     gates:
         in: uppergateIn;
         out: uppergateOut;

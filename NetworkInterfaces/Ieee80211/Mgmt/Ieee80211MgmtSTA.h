@@ -49,9 +49,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     bool isAssociated;
 
     struct {
-        MACAddress bssid; // specific BSSID to scan for (default=any)
-        std::string ssid; // SSID to scan for SSID (empty=any)
-        bool activeScan;  // whether to perform active or passive scanning
+        MACAddress bssid; // specific BSSID to scan for, or the broadcast address
+        std::string ssid; // SSID to scan for (empty=any)
+        bool isActiveScan;  // whether to perform active or passive scanning
         double probeDelay; // delay (in s) to be used prior to transmitting a Probe frame during active scanning
         std::vector<int> channelList; // list of channels to scan
         int currentChannelIndex; // index into channelList[]
@@ -131,6 +131,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     bool scanNextChannel(cMessage *reuseTimerMsg);
+
+    /** Broadcasts a Probe Request */
+    virtual void sendProbeRequest();
 
     /** Missed a few consecutive beacons */
     virtual void beaconLost();
