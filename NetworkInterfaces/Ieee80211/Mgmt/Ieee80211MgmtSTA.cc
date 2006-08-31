@@ -28,7 +28,6 @@
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
 //FIXME beacons should overtake all other frames (inserted at front of queue)
-//FIXME expect Deauth frame during authentication procedure!
 
 Define_Module(Ieee80211MgmtSTA);
 
