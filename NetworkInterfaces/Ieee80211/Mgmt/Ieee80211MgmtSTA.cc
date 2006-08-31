@@ -219,13 +219,15 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, double timeout)
 {
     changeChannel(ap->channel);
 
+    EV << "Sending Authentication frame with seqNum=1\n";
+
     // create and send first authentication frame
     Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
     frame->getBody().setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame(frame, ap->address);
 
-    ap->authSeqExpected = 1;
+    ap->authSeqExpected = 2;
 
     // schedule timeout
     ASSERT(ap->timeoutMsg==NULL);
@@ -450,7 +452,8 @@ void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    EV << "Received Authentication frame\n";
+    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    EV << "Received Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
     MACAddress address = frame->getTransmitterAddress();
     APInfo *ap = lookupAP(address);
@@ -465,10 +468,10 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     //XXX check authentication is currently in progress
 
     // check authentication sequence number is OK
-    int frameAuthSeq = frame->getBody().getSequenceNumber();
     if (frameAuthSeq != ap->authSeqExpected)
     {
         // wrong sequence number: send error and return
+        EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
         resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
@@ -486,7 +489,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
 
     if (statusCode==SC_SUCCESSFUL && !frame->getBody().getIsLast())
     {
-        EV << "More steps required, send another Authentication frame to AP address=" << ap->address << "\n";
+        EV << "More steps required, sending another Authentication frame to AP address=" << ap->address << "\n";
 
         // more steps required, send another Authentication frame
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth");
@@ -494,7 +497,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
         resp->getBody().setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
         sendManagementFrame(resp, address);
-        frameAuthSeq += 2;
+        ap->authSeqExpected += 2;
     }
     else
     {

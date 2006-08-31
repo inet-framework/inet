@@ -175,7 +175,8 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    EV << "Processing Authentication frame\n";
+    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
     // create STA entry if needed
     STAInfo *sta = lookupSenderSTA(frame);
@@ -189,10 +190,10 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     }
 
     // check authentication sequence number is OK
-    int frameAuthSeq = frame->getBody().getSequenceNumber();
     if (frameAuthSeq != sta->authSeqExpected)
     {
         // wrong sequence number: send error and return
+        EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
         resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
@@ -206,8 +207,9 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
 
     // send OK response (we don't model the cryptography part, just assume
     // successful authentication every time)
+    EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq+1) << "\n";
     Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame(isLast ? "Auth-OK" : "Auth");
-    resp->getBody().setSequenceNumber(frameAuthSeq);
+    resp->getBody().setSequenceNumber(frameAuthSeq+1);
     resp->getBody().setStatusCode(SC_SUCCESSFUL);
     resp->getBody().setIsLast(isLast);
     // XXX frame length could be increased to account for challenge text length etc.
@@ -217,10 +219,12 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     if (isLast)
     {
         sta->status = AUTHENTICATED; // XXX only when ACK of this frame arrives
+        EV << "STA authenticated\n";
     }
     else
     {
         sta->authSeqExpected += 2;
+        EV << "Expecting Authentication frame " << sta->authSeqExpected << "\n";
     }
 }
 
