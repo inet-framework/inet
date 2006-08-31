@@ -62,7 +62,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     // FIXME eliminate nonIPModuleTypes, like in NetworkConfigurator
     StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
     StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
-    for (int i=0; i<nonIPTypes.size(); i++)
+    for (unsigned int i=0; i<nonIPTypes.size(); i++)
         types.push_back(nonIPTypes[i]);
 
     // extract topology

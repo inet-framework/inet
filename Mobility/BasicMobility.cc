@@ -120,9 +120,9 @@ void BasicMobility::updatePosition()
     cc->updateHostPosition(myHostRef, pos);
 
     double r = cc->getCommunicationRange(myHostRef);
-    hostPtr->displayString().setTagArg("p", 0, pos.x);
-    hostPtr->displayString().setTagArg("p", 1, pos.y);
-    hostPtr->displayString().setTagArg("r", 0, r);
+    hostPtr->displayString().setTagArg("p", 0, (long) pos.x);
+    hostPtr->displayString().setTagArg("p", 1, (long) pos.y);
+    hostPtr->displayString().setTagArg("r", 0, (long) r);
 
     nb->fireChangeNotification(NF_HOSTPOSITION_UPDATED, &pos);
 }

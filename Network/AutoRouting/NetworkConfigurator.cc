@@ -130,7 +130,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             continue;
 
         cTopology::Node *node = topo.node(i);
-        InterfaceTable *ift = nodeInfo[i].ift;
+        //InterfaceTable *ift = nodeInfo[i].ift;
         RoutingTable *rt = nodeInfo[i].rt;
 
         // loop through neighbors

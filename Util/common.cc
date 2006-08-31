@@ -36,7 +36,7 @@ std::string vectorToString(IPAddressVector vec)
 std::string vectorToString(IPAddressVector vec, const char *delim)
 {
   std::ostringstream stream;
-  for(int i = 0; i < vec.size(); i++)
+  for(unsigned int i = 0; i < vec.size(); i++)
   {
 	  stream << vec[i];
 	  if(i < vec.size() - 1)
@@ -55,7 +55,7 @@ std::string vectorToString(EroVector vec)
 std::string vectorToString(EroVector vec, const char *delim)
 {
 	std::ostringstream stream;
-	for(int i = 0; i < vec.size(); i++)
+	for(unsigned int i = 0; i < vec.size(); i++)
 	{
 		stream << vec[i].node;
 		 

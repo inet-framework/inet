@@ -861,7 +861,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         std::string inInterface, outInterface;
 
         bool IR = (psb->Previous_Hop_Address == routerId);
-        bool ER = psb->OutInterface.isUnspecified();
+        //bool ER = psb->OutInterface.isUnspecified();
         if (!IR)
         {
             IPAddress localInf = tedmod->interfaceAddrByPeerAddress(psb->Previous_Hop_Address);
@@ -1463,7 +1463,7 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
     EV << "Received PATH_ERROR" << endl;
     //print(msg);
 
-    int lspid = msg->getLspId();
+    //int lspid = msg->getLspId();
     int errCode = msg->getErrorCode();
 
     PathStateBlock_t *psb = findPSB(msg->getSession(), msg->getSenderTemplate());

@@ -50,10 +50,10 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
   protected:
     // configuration
     cPar *fmtp;      // display format
-    int batchSize;   // number of packets in a batch
-    int maxInterval; // max length of measurement interval (measurement ends
-                     // if either batchSize or maxInterval is reached, whichever
-                     // is reached first)
+    unsigned int batchSize; // number of packets in a batch
+    double maxInterval; // max length of measurement interval (measurement ends
+                        // if either batchSize or maxInterval is reached, whichever
+                        // is reached first)
 
     // global statistics
     long numPackets;

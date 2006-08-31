@@ -26,14 +26,14 @@ void ByteArrayMessage::setDataFromBuffer(const void *ptr, int length)
 
 void ByteArrayMessage::copyDataToBuffer(void *ptr, int length)
 {
-    ASSERT(length <= data_arraysize);
+    ASSERT((uint)length <= data_arraysize);
 
     memcpy(ptr, data_var, length);
 }
 
 void ByteArrayMessage::removePrefix(int length)
 {
-    ASSERT(data_arraysize > length);
+    ASSERT(data_arraysize > (uint)length);
     ASSERT(length > 0);
 
     int nlength = data_arraysize - length;

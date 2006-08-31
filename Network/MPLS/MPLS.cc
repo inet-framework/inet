@@ -86,7 +86,7 @@ void MPLS::sendToL2(cMessage *msg, int gateIndex)
 void MPLS::processPacketFromL3(cMessage * msg)
 {
     IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(msg);
-    int gateIndex = msg->arrivalGate()->index();
+    //int gateIndex = msg->arrivalGate()->index();
 
     // XXX temporary solution, until TCPSocket and IP are extended to support nam tracing
     if (ipdatagram->transportProtocol() == IP_PROT_TCP)

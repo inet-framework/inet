@@ -113,7 +113,7 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             pkt->setType(ICMP_ECHO_REQUEST);
             pkt->setCode(0);
             pkt->setByteLength(4);
-            sprintf(name,"ping%ld", ntohs(icmp->icmp_seq));
+            sprintf(name,"ping%d", ntohs(icmp->icmp_seq));
             pp = new PingPayload(name);
             pp->setOriginatorId(ntohs(icmp->icmp_id));
             pp->setSeqNo(ntohs(icmp->icmp_seq));
@@ -133,7 +133,7 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             pkt->setType(ICMP_ECHO_REPLY);
             pkt->setCode(0);
             pkt->setByteLength(4);
-            sprintf(name,"ping%ld-reply", ntohs(icmp->icmp_seq));
+            sprintf(name,"ping%d-reply", ntohs(icmp->icmp_seq));
             pp = new PingPayload(name);
             pp->setOriginatorId(ntohs(icmp->icmp_id));
             pp->setSeqNo(ntohs(icmp->icmp_seq));

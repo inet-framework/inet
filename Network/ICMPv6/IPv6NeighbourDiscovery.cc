@@ -289,7 +289,7 @@ const MACAddress& IPv6NeighbourDiscovery::resolveNeighbour(const IPv6Address& ne
     Enter_Method("resolveNeighbor(%s,if=%d)", nextHop.str().c_str(), interfaceId);
 
     Neighbour *nce = neighbourCache.lookup(nextHop, interfaceId);
-    InterfaceEntry *ie = ift->interfaceAt(interfaceId);
+    //InterfaceEntry *ie = ift->interfaceAt(interfaceId);
 
     if (!nce || nce->reachabilityState==IPv6NeighbourCache::INCOMPLETE)
         return MACAddress::UNSPECIFIED_ADDRESS;

@@ -60,7 +60,7 @@ typedef unsigned long long  uint64_t;
 # define BYTE_ORDER    __BYTE_ORDER
 #elif defined(__APPLE__)
 #include <machine/endian.h>
-#else / * fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
+#else /* fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
 #define __BSD_VISIBLE
 #include <machine/endian.h>
 #endif
