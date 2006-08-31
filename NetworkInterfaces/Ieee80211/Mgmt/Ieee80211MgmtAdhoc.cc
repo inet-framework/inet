@@ -61,7 +61,7 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
 void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    EV << "ignoring change notification\n";
+    printNotificationBanner(category, details);
 }
 
 void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)

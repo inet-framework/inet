@@ -31,11 +31,16 @@ void Ieee80211AgentSTA::initialize(int stage)
     if (stage==0)
     {
         // read parameters
+        activeScan = par("activeScan");
         probeDelay = par("probeDelay");
         minChannelTime = par("minChannelTime");
         maxChannelTime = par("maxChannelTime");
         authenticationTimeout = par("authenticationTimeout");
         associationTimeout = par("associationTimeout");
+        cStringTokenizer tokenizer(par("channelsToScan"));
+        const char *token;
+        while ((token = tokenizer.nextToken())!=NULL)
+            channelsToScan.push_back(atoi(token));
 
         NotificationBoard *nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
@@ -88,11 +93,12 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
 void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    printNotificationBanner(category, details);
 
     if (category == NF_L2_BEACON_LOST)
     {
         //XXX should check details if it's about this NIC
-        EV << className() << ": beacon lost, starting scanning again\n"; //XXX should we get disassociated or anything before that?
+        EV << "beacon lost, starting scanning again\n"; //XXX should we get disassociated or anything before that?
         parentModule()->parentModule()->bubble("Beacon lost!");
         //XXX sendDisassociateRequest(); ??
         sendScanRequest();
@@ -101,7 +107,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
     {
         //XXX should check details if it's about this NIC
         // we don't really need to react on this (we get the confirm anyway)
-        EV << className() << ": associated with AP\n";
+        EV << "associated with AP\n";
         parentModule()->parentModule()->bubble("Associated with AP");
     }
 }
@@ -119,11 +125,14 @@ void Ieee80211AgentSTA::sendScanRequest()
     EV << "Sending ScanRequest primitive to mgmt\n";
     Ieee80211Prim_ScanRequest *req = new Ieee80211Prim_ScanRequest();
     req->setBSSType(BSSTYPE_INFRASTRUCTURE);
-    req->setActiveScan(true);
+    req->setActiveScan(activeScan);
     req->setProbeDelay(probeDelay);
     req->setMinChannelTime(minChannelTime);
     req->setMaxChannelTime(maxChannelTime);
-    // BSSID, SSID and channelList[] are left at default ("any")
+    req->setChannelListArraySize(channelsToScan.size());
+    for (int i=0; i<channelsToScan.size(); i++)
+        req->setChannelList(i, channelsToScan[i]);
+    //XXX BSSID, SSID are left at default ("any")
 
     sendRequest(req);
 }

@@ -19,6 +19,7 @@
 #ifndef IEEE80211_AGENT_STA_H
 #define IEEE80211_AGENT_STA_H
 
+#include <vector>
 #include <omnetpp.h>
 #include "Ieee80211Primitives_m.h"
 #include "NotificationBoard.h"
@@ -36,6 +37,8 @@
 class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
 {
   protected:
+    bool activeScan;
+    std::vector<int> channelsToScan;
     double probeDelay;
     double minChannelTime;
     double maxChannelTime;

@@ -31,7 +31,7 @@
  *
  * IDLE: channel is empty (radio is in receive mode)
  *
- * BUSY: channel is busy (radio is in receive mode)
+ * RECV: channel is busy (radio is in receive mode)
  *
  * TRANSMIT: the radio is transmitting
  *

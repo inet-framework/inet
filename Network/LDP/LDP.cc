@@ -773,7 +773,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
     // this function is a misnomer, we must recognize our own address too
     if (rt->localDeliver(peerIP))
         return "lo0";
-    
+
     InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
     if (!ie)
         error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
@@ -1233,6 +1233,7 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
 void LDP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    printNotificationBanner(category, details);
 
     ASSERT(category == NF_IPv4_ROUTINGTABLE_CHANGED);
 

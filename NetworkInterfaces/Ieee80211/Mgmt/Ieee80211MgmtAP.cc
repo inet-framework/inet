@@ -104,10 +104,12 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cPolymorphic *ctrl)
 void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    printNotificationBanner(category, details);
+
     if (category == NF_RADIO_CHANNEL_CHANGED)
     {
+        EV << "updating channel number\n";
         channelNumber = check_and_cast<RadioState *>(details)->getChannel();
-        EV << className() << ": on channel " << channelNumber << endl;
     }
 }
 

@@ -41,10 +41,11 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     {
         MACAddress bssid; // specific BSSID to scan for, or the broadcast address
         std::string ssid; // SSID to scan for (empty=any)
-        bool isActiveScan;  // whether to perform active or passive scanning
+        bool activeScan;  // whether to perform active or passive scanning
         double probeDelay; // delay (in s) to be used prior to transmitting a Probe frame during active scanning
         std::vector<int> channelList; // list of channels to scan
         int currentChannelIndex; // index into channelList[]
+        bool busyChannelDetected; // during minChannelTime, we have to listen for busy channel
         double minChannelTime; // minimum time to spend on each channel when scanning
         double maxChannelTime; // maximum time to spend on each channel when scanning
     };
@@ -141,7 +142,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     void storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
-    bool scanNextChannel(cMessage *reuseTimerMsg);
+    bool scanNextChannel();
 
     /** Broadcasts a Probe Request */
     virtual void sendProbeRequest();

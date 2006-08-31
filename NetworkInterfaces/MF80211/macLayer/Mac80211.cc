@@ -909,6 +909,7 @@ void Mac80211::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");
+    printNotificationBanner(category, details);
 
     if (category == NF_RADIOSTATE_CHANGED)
     {

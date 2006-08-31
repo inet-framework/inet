@@ -52,7 +52,7 @@ void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cPolymorphic *ctrl)
 void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    EV << "ignoring change notification\n";
+    printNotificationBanner(category, details);
 }
 
 void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)

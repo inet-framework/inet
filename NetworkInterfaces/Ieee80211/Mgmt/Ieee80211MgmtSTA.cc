@@ -21,6 +21,7 @@
 #include "Ieee802Ctrl_m.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
+#include "RadioState.h"
 
 //FIXME supportedRates!
 //FIXME use command msg kinds?
@@ -32,23 +33,28 @@
 Define_Module(Ieee80211MgmtSTA);
 
 // message kind values for timers
-#define MK_AUTH_TIMEOUT   1
-#define MK_ASSOC_TIMEOUT  2
-#define MK_CHANNEL_CHANGE 3
-#define MK_SEND_PROBE_REQ 4
-#define MK_BEACON_TIMEOUT 5
+#define MK_AUTH_TIMEOUT         1
+#define MK_ASSOC_TIMEOUT        2
+#define MK_SCAN_SENDPROBE       3
+#define MK_SCAN_MINCHANNELTIME  4
+#define MK_SCAN_MAXCHANNELTIME  5
+#define MK_BEACON_TIMEOUT       6
 
 #define MAX_BEACONS_MISSED 3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
 
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::ScanningInfo& scanning)
 {
-    os << "isActive=" << scanning.isActiveScan
+    os << "activeScan=" << scanning.activeScan
        << " probeDelay=" << scanning.probeDelay
-       //TBD channelList
        << " curChan=" << scanning.channelList[scanning.currentChannelIndex]
        << " minChanTime=" << scanning.minChannelTime
        << " maxChanTime=" << scanning.maxChannelTime;
+    os << " chanList={";
+    for (int i=0; i<scanning.channelList.size(); i++)
+        os << (i==0 ? "" : " ") << scanning.channelList[i];
+    os << "}";
+
     return os;
 }
 
@@ -122,18 +128,39 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
         // send back failure report to agent
         sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
-    else if (msg->kind()==MK_CHANNEL_CHANGE)
+    else if (msg->kind()==MK_SCAN_MAXCHANNELTIME)
     {
         // go to next channel during scanning
-        bool done = scanNextChannel(msg);
+        bool done = scanNextChannel();
         if (done)
             sendScanConfirm(); // send back response to agents' "scan" command
-    }
-    else if (msg->kind()==MK_SEND_PROBE_REQ)
-    {
-        // send probe request during active scanning
-        sendProbeRequest();
         delete msg;
+    }
+    else if (msg->kind()==MK_SCAN_SENDPROBE)
+    {
+        // Active Scan: send a probe request, then wait for minChannelTime (11.1.3.2.2)
+        delete msg;
+        sendProbeRequest();
+        cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
+        scheduleAt(simTime()+scanning.minChannelTime, timerMsg); //XXX actually, we should start waiting after ProbeReq actually got transmitted
+    }
+    else if (msg->kind()==MK_SCAN_MINCHANNELTIME)
+    {
+        // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
+        delete msg;
+        if (scanning.busyChannelDetected)
+        {
+            EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
+            cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+            scheduleAt(simTime()+scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
+        }
+        else
+        {
+            EV << "Channel was empty during minChannelTime, going to next channel\n";
+            bool done = scanNextChannel();
+            if (done)
+                sendScanConfirm(); // send back response to agents' "scan" command
+        }
     }
     else if (msg->kind()==MK_BEACON_TIMEOUT)
     {
@@ -283,7 +310,18 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    EV << fullPath() << ": ignoring change notification\n";
+    printNotificationBanner(category, details);
+
+    // Note that we are only subscribed during scanning!
+    if (category==NF_RADIOSTATE_CHANGED)
+    {
+        RadioState::State radioState = check_and_cast<RadioState *>(details)->getState();
+        if (radioState==RadioState::RECV)
+        {
+            EV << "busy radio channel detected during scanning\n";
+            scanning.busyChannelDetected = true;
+        }
+    }
 }
 
 void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
@@ -297,15 +335,14 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     ASSERT(ctrl->getBSSType()==BSSTYPE_INFRASTRUCTURE);
     scanning.bssid = ctrl->getBSSID().isUnspecified() ? MACAddress::BROADCAST_ADDRESS : ctrl->getBSSID();
     scanning.ssid = ctrl->getSSID();
-    scanning.isActiveScan = ctrl->getActiveScan();
+    scanning.activeScan = ctrl->getActiveScan();
     scanning.probeDelay = ctrl->getProbeDelay();
     scanning.channelList.clear();
     scanning.minChannelTime = ctrl->getMinChannelTime();
     scanning.maxChannelTime = ctrl->getMaxChannelTime();
-    ASSERT(scanning.probeDelay < scanning.minChannelTime);
     ASSERT(scanning.minChannelTime <= scanning.maxChannelTime);
 
-    // channel list to scan (deafult: all channels)
+    // channel list to scan (default: all channels)
     for (int i=0; i<ctrl->getChannelListArraySize(); i++)
         scanning.channelList.push_back(ctrl->getChannelList(i));
     if (scanning.channelList.empty())
@@ -313,29 +350,40 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
             scanning.channelList.push_back(i);
 
     // start scanning
+    if (scanning.activeScan)
+        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
-    cMessage *timerMsg = new cMessage("nextChannelChange", MK_CHANNEL_CHANGE);
-    scanNextChannel(timerMsg);
+    scanNextChannel();
 }
 
-bool Ieee80211MgmtSTA::scanNextChannel(cMessage *reuseTimerMsg)
+bool Ieee80211MgmtSTA::scanNextChannel()
 {
     // if we're already at the last channel, we're through
     if (scanning.currentChannelIndex==scanning.channelList.size()-1)
     {
         EV << "Finished scanning last channel\n";
-        delete reuseTimerMsg;
+        if (scanning.activeScan)
+            nb->unsubscribe(this, NF_RADIOSTATE_CHANGED);
         return true; // we're done
     }
 
-    // tune to first channel and schedule next channel switch
+    // tune to next channel
     int newChannel = scanning.channelList[++scanning.currentChannelIndex];
     changeChannel(newChannel);
-    double channelTime = (scanning.minChannelTime+scanning.maxChannelTime)/2;
-    scheduleAt(simTime()+channelTime, reuseTimerMsg);
+    scanning.busyChannelDetected = false;
 
-    if (scanning.isActiveScan)
-        scheduleAt(simTime()+scanning.probeDelay, new cMessage("sendProbe", MK_SEND_PROBE_REQ));
+    if (scanning.activeScan)
+    {
+        // Active Scan: first wait probeDelay, then send a probe. Listening
+        // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
+        scheduleAt(simTime()+scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
+    }
+    else
+    {
+        // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
+        cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+        scheduleAt(simTime()+scanning.maxChannelTime, timerMsg);
+    }
 
     return false;
 }

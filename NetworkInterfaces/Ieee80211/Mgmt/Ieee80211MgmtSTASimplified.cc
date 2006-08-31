@@ -74,7 +74,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
 void Ieee80211MgmtSTASimplified::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
-    EV << "ignoring change notification\n";
+    printNotificationBanner(category, details);
 }
 
 void Ieee80211MgmtSTASimplified::handleDataFrame(Ieee80211DataFrame *frame)

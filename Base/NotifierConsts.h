@@ -77,6 +77,11 @@ enum
  */
 const char *notificationCategoryName(int category);
 
+/**
+ * Utility function
+ */
+void printNotificationBanner(int category, cPolymorphic *details);
+
 #endif
 
 

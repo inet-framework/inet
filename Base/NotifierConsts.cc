@@ -54,7 +54,12 @@ const char *notificationCategoryName(int category)
     return s;
 }
 
-
+void printNotificationBanner(int category, cPolymorphic *details)
+{
+    EV << "** Notification at T=" << simulation.simTime() << ": " 
+       << notificationCategoryName(category) << " " 
+       << (details ? details->info() : "") << "\n";
+}
 
 
 

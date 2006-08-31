@@ -488,7 +488,8 @@ void SnrEval::changeChannel(int channel)
         }
     }
 
-    // notify other modules about the channel switch
+    // notify other modules about the channel switch; and actually, radio state has changed too
     nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }
 

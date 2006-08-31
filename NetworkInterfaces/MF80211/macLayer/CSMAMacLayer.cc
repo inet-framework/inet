@@ -262,6 +262,7 @@ void CSMAMacLayer::receiveChangeNotification(int category, cPolymorphic *details
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");
+    printNotificationBanner(category, details);
 
     if (category == NF_RADIOSTATE_CHANGED)
     {
@@ -271,9 +272,6 @@ void CSMAMacLayer::receiveChangeNotification(int category, cPolymorphic *details
         // NOTE: we may be invoked during INIT STAGE 1 too, when SnrEval notifies us
         // about the initial radio state. This function has to work correctly
         // even when called during initialization phase!
-
-        EV << "** Radio state update in " << className() << ": " << details->info()
-           << " (at T=" << simtimeToStr(simTime()) << ")\n";
 
         // if the channel is idle now, the queue is not empty and no timer
         // is scheduled, this means that sending the previous message is

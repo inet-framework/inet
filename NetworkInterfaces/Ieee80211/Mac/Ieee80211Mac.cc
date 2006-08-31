@@ -265,11 +265,11 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
 void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    printNotificationBanner(category, details);
 
     if (category == NF_RADIOSTATE_CHANGED)
     {
         RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
-        EV << className() << ": radio state changed to " << details->info() << endl;
 
         // FIXME: double recording, because there's no sample hold in the gui
         radioStateVector.record(radioState);

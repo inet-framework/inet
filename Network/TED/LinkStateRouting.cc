@@ -90,10 +90,11 @@ void LinkStateRouting::handleMessage(cMessage * msg)
 void LinkStateRouting::receiveChangeNotification(int category, cPolymorphic *details)
 {
     Enter_Method_Silent();
+    printNotificationBanner(category, details);
 
     ASSERT(category == NF_TED_CHANGED);
 
-    EV << "received NF_TED_CHANGED notification\n" << endl;
+    EV << "TED changed\n";
 
     TEDChangeInfo *d = check_and_cast<TEDChangeInfo *>(details);
 

@@ -26,11 +26,13 @@
 //
 simple Ieee80211AgentSTA
     parameters:
-        probeDelay: numeric const,
-        minChannelTime: numeric const,
-        maxChannelTime: numeric const,
-        authenticationTimeout: numeric const,
-        associationTimeout: numeric const;
+        activeScan: bool,  // selects between active and passive scanning
+        channelsToScan: string,  // list of channel numbers to scan (space delimited); empty means all channels
+        probeDelay: numeric const, // delay before sending a probe request during active scanning
+        minChannelTime: numeric const, // min interval to spend on a channel during active scanning
+        maxChannelTime: numeric const, // channel time for passive scanning, and max channel time for active scanning
+        authenticationTimeout: numeric const, // timeout for the authentication procedure
+        associationTimeout: numeric const; // timeout for the association procedure
     gates:
         in: mgmtIn;
         out: mgmtOut;

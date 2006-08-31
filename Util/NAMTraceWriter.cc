@@ -111,6 +111,8 @@ void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *detai
     if (!nt || !nt->enabled())
         return;
 
+    printNotificationBanner(category, details);
+
     // process notification
     if (category==NF_PP_TX_BEGIN || category==NF_PP_RX_END || category==NF_L2_Q_DROP)
     {

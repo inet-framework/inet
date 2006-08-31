@@ -29,7 +29,7 @@
 #include <vector>
 #include "ModuleAccess.h"
 #include "INotifiable.h"
-
+#include "NotifierConsts.h"
 
 /**
  * Acts as a intermediary between module where state changes can occur and

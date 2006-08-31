@@ -83,9 +83,11 @@ void InterfaceTable::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void InterfaceTable::receiveChangeNotification(int, cPolymorphic *)
+void InterfaceTable::receiveChangeNotification(int category, cPolymorphic *details)
 {
     // nothing needed here at the moment
+    Enter_Method_Silent();
+    printNotificationBanner(category, details);
 }
 
 //---

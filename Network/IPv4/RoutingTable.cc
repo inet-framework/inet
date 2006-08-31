@@ -197,8 +197,11 @@ void RoutingTable::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void RoutingTable::receiveChangeNotification(int category, cPolymorphic *)
+void RoutingTable::receiveChangeNotification(int category, cPolymorphic *details)
 {
+    Enter_Method_Silent();
+    printNotificationBanner(category, details);
+
     if (category==NF_IPv4_INTERFACECONFIG_CHANGED)
     {
         // if anything IPv4-related changes in the interfaces, interface netmask
