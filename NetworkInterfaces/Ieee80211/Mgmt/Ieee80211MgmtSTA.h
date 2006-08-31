@@ -33,6 +33,55 @@
  */
 class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 {
+  public:
+    //
+    // Encapsulates information about the ongoing scanning process
+    //
+    struct ScanningInfo
+    {
+        MACAddress bssid; // specific BSSID to scan for, or the broadcast address
+        std::string ssid; // SSID to scan for (empty=any)
+        bool isActiveScan;  // whether to perform active or passive scanning
+        double probeDelay; // delay (in s) to be used prior to transmitting a Probe frame during active scanning
+        std::vector<int> channelList; // list of channels to scan
+        int currentChannelIndex; // index into channelList[]
+        double minChannelTime; // minimum time to spend on each channel when scanning
+        double maxChannelTime; // maximum time to spend on each channel when scanning
+    };
+
+    //
+    // Stores AP info received during scanning
+    //
+    struct APInfo
+    {
+        int channel;
+        MACAddress address; // alias bssid
+        std::string ssid;
+        Ieee80211SupportedRatesElement supportedRates;
+        double beaconInterval;
+        double rxPower;
+
+        bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
+        int authSeqExpected;  // valid while authenticating; values: 1,3,5...
+        cMessage *timeoutMsg; // authentication/association timeout
+
+        APInfo() {
+            channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
+            isAuthenticated=false; timeoutMsg=NULL;
+        }
+    };
+
+    //
+    // Associated AP, plus data associated with the association with the associated AP
+    //
+    struct AssociatedAPInfo : public APInfo
+    {
+        int receiveSequence;
+        cMessage *beaconTimeoutMsg;
+
+        AssociatedAPInfo() : APInfo() {receiveSequence=0; beaconTimeoutMsg=NULL;}
+    };
+
   protected:
     NotificationBoard *nb;
     int numChannels;  // number of channels in ChannelControl -- used if we're told to scan "all" channels
@@ -48,49 +97,14 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     bool isScanning;
     bool isAssociated; //XXX -> NOT_ASSOCIATED, ASSOCIATING, ASSOCIATED
 
-    struct {
-        MACAddress bssid; // specific BSSID to scan for, or the broadcast address
-        std::string ssid; // SSID to scan for (empty=any)
-        bool isActiveScan;  // whether to perform active or passive scanning
-        double probeDelay; // delay (in s) to be used prior to transmitting a Probe frame during active scanning
-        std::vector<int> channelList; // list of channels to scan
-        int currentChannelIndex; // index into channelList[]
-        double minChannelTime; // minimum time to spend on each channel when scanning
-        double maxChannelTime; // maximum time to spend on each channel when scanning
-    } scanning;
+    ScanningInfo scanning;
 
-    // associated Access Point
-    MACAddress apAddress;
-    int receiveSequence;
-    double beaconInterval;
-    cMessage *beaconTimeout;
-
-  public:
-    // Access Point information for handovers
-    struct APInfo
-    {
-        int channel;
-        MACAddress address; // alias bssid
-        std::string ssid;
-        Ieee80211SupportedRatesElement supportedRates;
-        double beaconInterval;
-        double rxPower;
-
-        bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
-        int authSeqExpected;  // valid while authenticating; values: 1,3,5...
-        cMessage *timeoutMsg; // authentication/association timeout
-
-        APInfo()
-        {
-            channel=-1; beaconInterval=rxPower=0;
-            authSeqExpected=-1; isAuthenticated=false;
-            timeoutMsg=NULL;
-        }
-    };
-  protected:
     // we collect scanning results here
     typedef std::list<APInfo> AccessPointList;
     AccessPointList apList;
+
+    // associated Access Point
+    AssociatedAPInfo assocAP;
 
   protected:
     virtual int numInitStages() const {return 2;}

@@ -27,6 +27,7 @@
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
 //FIXME beacons should overtake all other frames (inserted at front of queue)
+//FIXME expect Deauth frame during authentication procedure!
 
 Define_Module(Ieee80211MgmtSTA);
 
@@ -40,16 +41,38 @@ Define_Module(Ieee80211MgmtSTA);
 #define MAX_BEACONS_MISSED 3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
 
+std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::ScanningInfo& scanning)
+{
+    os << "isActive=" << scanning.isActiveScan
+       << " probeDelay=" << scanning.probeDelay
+       //TBD channelList
+       << " curChan=" << scanning.channelList[scanning.currentChannelIndex]
+       << " minChanTime=" << scanning.minChannelTime
+       << " maxChanTime=" << scanning.maxChannelTime;
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::APInfo& ap)
 {
     os << "AP addr=" << ap.address
        << " chan=" << ap.channel
        << " ssid=" << ap.ssid
-       //TBD supportedRates...
+       //TBD supportedRates
        << " beaconIntvl=" << ap.beaconInterval
        << " rxPower=" << ap.rxPower
        << " authSeqExpected=" << ap.authSeqExpected
        << " isAuthenticated=" << ap.isAuthenticated;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::AssociatedAPInfo& assocAP)
+{
+    os << "AP addr=" << assocAP.address
+       << " chan=" << assocAP.channel
+       << " ssid=" << assocAP.ssid
+       << " beaconIntvl=" << assocAP.beaconInterval
+       << " receiveSeq="  << assocAP.receiveSequence
+       << " rxPower=" << assocAP.rxPower;
     return os;
 }
 
@@ -60,7 +83,6 @@ void Ieee80211MgmtSTA::initialize(int stage)
     {
         isScanning = false;
         isAssociated = false;
-        receiveSequence = 0;
 
         nb = NotificationBoardAccess().get();
 
@@ -73,10 +95,9 @@ void Ieee80211MgmtSTA::initialize(int stage)
 
         WATCH(isScanning);
         WATCH(isAssociated);
-        //TODO: watch "scanning"
 
-        WATCH(apAddress);
-        WATCH(receiveSequence);
+        WATCH(scanning);
+        WATCH(assocAP);
         WATCH_LIST(apList);
     }
 }
@@ -160,7 +181,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
     frame->setToDS(true);
 
     // receiver is the AP
-    frame->setReceiverAddress(apAddress);
+    frame->setReceiverAddress(assocAP.address);
 
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
@@ -408,7 +429,8 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     if (isAssociated)
     {
         isAssociated = false;
-        delete cancelEvent(beaconTimeout);
+        delete cancelEvent(assocAP.beaconTimeoutMsg);
+        assocAP = AssociatedAPInfo(); // clear it
     }
 
     // create and send disassociation request
@@ -512,6 +534,8 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
         ap->timeoutMsg = NULL;
         sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
+
+    delete frame;
 }
 
 void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
@@ -554,9 +578,10 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
 
     if (isAssociated)
     {
-        EV << "Breaking existing association with AP address=" << apAddress << "\n";
+        EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
         isAssociated = false;
-        delete cancelEvent(beaconTimeout);
+        delete cancelEvent(assocAP.beaconTimeoutMsg);
+        assocAP = AssociatedAPInfo();
     }
 
     //XXX check if we have actually sent an AssocReq to this AP!
@@ -573,14 +598,12 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
 
         // change our state to "associated"
         isAssociated = true;
-        apAddress = address;
-        receiveSequence = 1; //XXX ???
-        beaconInterval = ap->beaconInterval;
+        (APInfo&)assocAP = (*ap);
 
         nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
 
-        beaconTimeout = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
-        scheduleAt(simTime()+MAX_BEACONS_MISSED*beaconInterval, beaconTimeout);
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
+        scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
     }
 
     // report back to agent
@@ -602,7 +625,7 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *f
 {
     EV << "Received Disassociation frame\n";
     const MACAddress& address = frame->getAddress3();  // source address
-    if (!isAssociated || address!=apAddress)
+    if (!isAssociated || address!=assocAP.address)
     {
         //XXX if we are currently associatING, cancel timer etc!!!
         EV << "Not associated with that AP -- ignoring frame\n";
@@ -612,8 +635,8 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *f
 
     EV << "Setting isAssociated flag to false\n";
     isAssociated = false;
-    delete cancelEvent(beaconTimeout);
-    beaconTimeout = NULL;
+    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    assocAP.beaconTimeoutMsg = NULL;
 }
 
 void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
@@ -622,12 +645,12 @@ void Ieee80211MgmtSTA::handleBeaconFrame(Ieee80211BeaconFrame *frame)
     storeAPInfo(frame->getTransmitterAddress(), frame->getBody());
 
     // if it is out associate AP, restart beacon timeout
-    if (isAssociated && frame->getTransmitterAddress()==apAddress)
+    if (isAssociated && frame->getTransmitterAddress()==assocAP.address)
     {
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
-        ASSERT(beaconTimeout!=NULL);
-        cancelEvent(beaconTimeout);
-        scheduleAt(simTime()+MAX_BEACONS_MISSED*beaconInterval, beaconTimeout);
+        ASSERT(assocAP.beaconTimeoutMsg!=NULL);
+        cancelEvent(assocAP.beaconTimeoutMsg);
+        scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
 
         //APInfo *ap = lookupAP(frame->getTransmitterAddress());
         //ASSERT(ap!=NULL);

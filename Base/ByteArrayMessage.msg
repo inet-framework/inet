@@ -12,6 +12,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+cplusplus {{
+#include "INETDefs.h"
+}};
 
 //
 // Message that carries raw bytes. Used with emulation-related features.

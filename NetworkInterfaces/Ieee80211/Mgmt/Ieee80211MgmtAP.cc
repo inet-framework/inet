@@ -135,12 +135,10 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setBeaconInterval(beaconInterval);
     body.setChannel(channelNumber);
 
-    frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);  //XXX or what
+    frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);
     frame->setFromDS(true);
 
-    sendOrEnqueue(frame); // FIXME it's not that simple! must insert at front of the queue,
-                          // plus there are special timing requirements...
-                          // FIXME and MAC should synchronize to beacon timing?
+    sendOrEnqueue(frame); // FIXME insert at front of the queue
 }
 
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
@@ -215,6 +213,8 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     // XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame(resp, frame->getTransmitterAddress());
 
+    delete frame;
+
     // update status
     if (isLast)
     {
@@ -259,11 +259,13 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
         return;
     }
 
+    delete frame;
+
     // mark STA as associated
     sta->status = ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp(OK)");
+    Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp-OK");
     Ieee80211AssociationResponseFrameBody& body = resp->getBody();
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0); //XXX
@@ -292,11 +294,13 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequ
         return;
     }
 
+    delete frame;
+
     // mark STA as associated
     sta->status = ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp(OK)");
+    Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp-OK");
     Ieee80211ReassociationResponseFrameBody& body = resp->getBody();
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0); //XXX
@@ -346,7 +350,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
     body.setChannel(channelNumber);
-    sendManagementFrame(resp, staAddress); // FIXME it might be not that simple, cf beacon...
+    sendManagementFrame(resp, staAddress);
 }
 
 void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
