@@ -45,7 +45,7 @@ ChannelControl::ChannelControl()
 
 ChannelControl::~ChannelControl()
 {
-    for (int i = 0; i < transmissions.size(); i++)
+    for (unsigned int i = 0; i < transmissions.size(); i++)
         for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end(); it++)
             delete *it;
 }
@@ -88,8 +88,8 @@ void ChannelControl::updateDisplayString(cModule *playgroundMod)
     cDisplayString& d = playgroundMod->backgroundDisplayString();
     d.setTagArg("p", 0, 0L);
     d.setTagArg("p", 1, 0L);
-    d.setTagArg("b", 0, playgroundSize.x);
-    d.setTagArg("b", 1, playgroundSize.y);
+    d.setTagArg("b", 0, (long) playgroundSize.x);
+    d.setTagArg("b", 1, (long) playgroundSize.y);
 }
 
 /**

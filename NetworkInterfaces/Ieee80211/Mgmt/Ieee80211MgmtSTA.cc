@@ -575,6 +575,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         isAssociated = true;
         apAddress = address;
         receiveSequence = 1; //XXX ???
+        beaconInterval = ap->beaconInterval;
 
         nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
 
