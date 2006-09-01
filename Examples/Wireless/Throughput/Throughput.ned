@@ -33,13 +33,11 @@ module ThroughputClient
             display: "b=40,24;p=180,60,col";
         wlan: Ieee80211NicSTASimplified;
             display: "p=112,134;q=queue;i=block/ifcard";
-        mobility: NullMobility;
+        mobility: CircleMobility;
             display: "p=50,141;i=block/cogwheel_s";
     connections nocheck:
         wlan.radioIn <-- radioIn;
-
         cli.out --> wlan.uppergateIn;
-        cli.in <-- wlan.uppergateOut;
 endmodule
 
 module ThroughputServer
@@ -49,9 +47,7 @@ module ThroughputServer
     submodules:
         notificationBoard: NotificationBoard;
             display: "p=60,70;i=block/control";
-        srv: EtherAppSrv;
-            parameters:
-                registerSAP = false;
+        sink: Sink;
             display: "b=40,24;p=210,68,col";
         wlan: Ieee80211NicSTASimplified;
             display: "p=120,158;q=queue;i=block/ifcard";
@@ -59,27 +55,27 @@ module ThroughputServer
             display: "p=50,141;i=block/cogwheel_s";
     connections nocheck:
         wlan.radioIn <-- radioIn;
-
-        srv.out --> wlan.uppergateIn;
-        srv.in <-- wlan.uppergateOut;
+        sink.in++ <-- wlan.uppergateOut;
 endmodule
 
 module Throughput
     parameters:
+        numCli: numeric const,
+        numSrv: numeric const,
         playgroundSizeX: numeric const,
-        playgroundSizeY: numeric const;
+        playgroundSizeY: numeric const,
+        apType: string;
     submodules:
-        cliHost: ThroughputClient;
-            display: "p=73,132;i=device/wifilaptop;r=,,#707070";
-        srvHost: ThroughputServer;
-            display: "p=224,136;i=device/wifilaptop;r=,,#707070";
-        ap: WirelessAPWithSink;
-            display: "p=149,46;i=device/accesspoint;r=,,#707070";
+        cliHost: ThroughputClient[numCli];
+            display: "i=device/wifilaptop;r=,,#707070";
+        srvHost: ThroughputServer[numSrv];
+            display: "p=250,250;i=device/wifilaptop;r=,,#707070";
+        ap: apType like WirelessAP;
+            display: "p=200,200;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
                 playgroundSizeX = playgroundSizeX,
-                playgroundSizeY = playgroundSizeY,
-                numChannels = 1;
+                playgroundSizeY = playgroundSizeY;
             display: "p=61,46;i=misc/sun";
     connections nocheck:
     display: "b=297,203";
