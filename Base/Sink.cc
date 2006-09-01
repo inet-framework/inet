@@ -27,6 +27,9 @@ class INET_API Sink : public cSimpleModule
 {
   protected:
     int count;
+    long numBytes;
+    double throughput;
+    double pps;
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -37,13 +40,19 @@ Define_Module(Sink);
 void Sink::initialize()
 {
     count = 0;
+    numBytes = 0;
+
     WATCH(count);
+    WATCH(numBytes);
+    WATCH(throughput);
+    WATCH(pps);
 }
 
 void Sink::handleMessage(cMessage *msg)
 {
+    count++;
+    numBytes += msg->byteLength();
+    throughput = numBytes / simTime();
+    pps = count / simTime();
     delete msg;
 }
-
-
-
