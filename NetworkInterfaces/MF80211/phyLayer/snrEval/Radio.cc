@@ -23,6 +23,8 @@
 #include "Radio.h"
 #include "TransmComplete_m.h"
 #include "FWMath.h"
+#include "Consts80211.h"  //XXX for 802.11 only
+
 
 
 #define TRANSM_OVER 1  // timer to indicate that a message is completely sent now
@@ -91,6 +93,12 @@ void Radio::initialize(int stage)
 
         WATCH(noiseLevel);
         WATCH(rs);
+
+        //XXX for the 802.11 model only:
+        if (bitrate != 1E+6 && bitrate != 2E+6 && bitrate != 5.5E+6 && bitrate != 11E+6)
+            error("Wrong bit rate for 802.11, valid values are 1E+6, 2E+6, 5.5E+6 or 11E+6");
+        headerLength = 192;
+
     }
     else if (stage == 1)
     {
@@ -223,14 +231,22 @@ AirFrame *Radio::encapsMsg(cMessage *msg)
  * has a different modulation (and thus a different bitrate) than the
  * rest of the message.
  *
- * Just redefine this function in such a case!
+ * XXX Ieee80211:
+ * The header is sent with 1Mbit/s and the rest with the bitrate read in in initialize().
  */
 double Radio::calcDuration(cMessage *af)
 {
-    double duration;
-    duration = (double) af->length() / (double) bitrate;
-    return duration;
+    //XXX generic:
+    //double duration;
+    //duration = (double) af->length() / (double) bitrate;
+    //return duration;
+
+    //XXX Ieee80211:
+    EV << "bits without header: " << af->length() -
+        headerLength << ", bits header: " << headerLength << endl;
+    return ((af->length() - headerLength) / bitrate + headerLength / BITRATE_HEADER);
 }
+
 
 /**
  * Attach control info to the message and send message to the upper
