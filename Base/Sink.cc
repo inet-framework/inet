@@ -43,6 +43,8 @@ void Sink::initialize()
 {
     numPackets = 0;
     numBits = 0;
+    throughput = 0;
+    packetPerSec = 0;
 
     WATCH(numPackets);
     WATCH(numBits);
