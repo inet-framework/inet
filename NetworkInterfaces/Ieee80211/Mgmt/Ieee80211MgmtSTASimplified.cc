@@ -64,6 +64,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
 
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    ASSERT(!ctrl->getDest().isUnspecified());
     frame->setAddress3(ctrl->getDest());
     delete ctrl;
 

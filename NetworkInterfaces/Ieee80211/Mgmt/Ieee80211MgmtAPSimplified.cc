@@ -68,9 +68,9 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
     // possibly send frame to the other (Ethernet, etc) ports of the AP as well
     if (hasRelayUnit)
         send(createEtherFrame(frame), "uppergateOut");
-
-    // send it out to the destination STA
-    distributeReceivedDataFrame(frame);
+    else
+        // send it out to the destination STA
+        distributeReceivedDataFrame(frame);
 }
 
 void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

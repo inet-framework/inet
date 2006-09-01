@@ -42,6 +42,7 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     // move destination address to address1 (receiver address),
     // and fill address3 with original source address;
     // sender address (address2) will be filled in by MAC
+    ASSERT(!frame->getAddress3().isUnspecified());
     frame->setReceiverAddress(frame->getAddress3());
     frame->setAddress3(frame->getTransmitterAddress());
 
