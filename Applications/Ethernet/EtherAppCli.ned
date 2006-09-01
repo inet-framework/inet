@@ -17,8 +17,10 @@
 //
 
 //
-// Simple traffic generator for the Ethernet model; generates EtherAppReq
-// packets. It should be connected directly to EtherLLC.
+// Simple traffic generator for the Ethernet model and the 802.11 model;
+// generally any L2 model that accepts Ieee80211Ctrl control info
+// on the packets. It generates EtherAppReq packets. It should be connected
+// directly to EtherLLC or a Ieee802NicXXX module.
 //
 // Destination may be given with OMNeT++ path name or MAC address.
 //
