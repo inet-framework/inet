@@ -98,9 +98,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
         DEFER,
         WAITDIFS,
         BACKOFF,
-        TRANSMITTING,
-        RECEIVING,
+        WAITACK,
+        WAITBROADCAST,
+        WAITCTS,
         WAITSIFS,
+        RECEIVE,
     };
     cFSM fsm;
 
@@ -260,10 +262,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void scheduleDIFSPeriod();
     void cancelDIFSPeriod();
 
-    void scheduleTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    void scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
     void cancelTimeoutPeriod();
 
-    void scheduleRTSTimeoutPeriod();
+    void scheduleCTSTimeoutPeriod();
 
     /** @brief Schedule network allocation period according to 9.2.5.4. */
     void scheduleReservePeriod(Ieee80211Frame *frame);
@@ -285,6 +288,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     void sendCTSFrameOnEndSIFS();
     void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
+    void sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend);
     void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
@@ -306,7 +310,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Utility functions
      */
     //@{
-    /** @brief Send down the change channel message to the physical layer if there is any. */
+    void finishCurrentTransmission();
+    void giveUpCurrentTransmission();
+    void retryCurrentTransmission();
+
+   /** @brief Send down the change channel message to the physical layer if there is any. */
     void sendDownChangeChannelMessage();
 
     /** @brief Change the current MAC operation mode. */
