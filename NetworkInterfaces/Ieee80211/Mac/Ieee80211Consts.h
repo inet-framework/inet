@@ -36,12 +36,12 @@ const unsigned int LENGTH_ACK = 112;
 const simtime_t ST = 20E-6;
 const simtime_t SIFS = 10E-6;
 const simtime_t DIFS = 2*ST + SIFS;
-const simtime_t PROCESSING_DELAY = 0.001;  //XXX comment what's this
+const simtime_t PROCESSING_DELAY = 5E-6;  // 300 meters by the light of speed
 
 const int RETRY_LIMIT = 7;
 
 /** Minimum size (initial size) of contention window */
-const int CW_MIN = 7;
+const int CW_MIN = 31;
 
 /** Maximum size of contention window */
 const int CW_MAX = 255;

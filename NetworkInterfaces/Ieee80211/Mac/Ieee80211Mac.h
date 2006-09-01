@@ -44,6 +44,7 @@
  * TODO: PCF mode
  * TODO: CF period
  * TODO: pass radio power to upper layer
+ * TODO: transmission complete notification to upper layer
  * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
  *
  * @ingroup macLayer
@@ -339,8 +340,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Returns true if message destination address is ours */
     bool isForUs(Ieee80211Frame *msg);
 
-    /** @brief Returns the frame type of the last received frame. */
-    int lastReceivedFrameType();
+    /** @brief Checks if the frame is a data or management frame */
+    bool isDataOrMgmtFrame(Ieee80211Frame *frame);
+
+    /** @brief Returns the last frame received before the SIFS period. */
+    Ieee80211Frame *frameReceivedBeforeSIFS();
 
     /** @brief Deletes frame at the front of queue. */
     void popTransmissionQueue();

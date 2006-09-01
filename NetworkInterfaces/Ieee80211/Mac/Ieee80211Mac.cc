@@ -268,6 +268,9 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
 
+    Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(msg);
+    ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != address);
+
     handleWithFSM(msg);
 
     // if we are the owner then we did not send this message up
@@ -308,13 +311,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
     int frameType = frame ? frame->getType() : -1;
-    bool isDataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
     int msgKind = msg->kind();
     logState();
     stateVector.record(fsm.state());
 
     if (frame && isLowerMsg(frame))
     {
+        lastReceiveFailed =(msgKind == COLLISION || msgKind == BITERROR);
         scheduleReservePeriod(frame);
     }
 
@@ -483,18 +486,18 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleSIFSPeriod(frame));
             FSMA_Event_Transition(Transmit-CTS,
-                                  msg == endSIFS && lastReceivedFrameType() == ST_RTS,
+                                  msg == endSIFS && frameReceivedBeforeSIFS()->getType() == ST_RTS,
                                   IDLE,
                 sendCTSFrameOnEndSIFS();
                 resetStateVariables();
             );
             FSMA_Event_Transition(Transmit-DATA,
-                                  msg == endSIFS && lastReceivedFrameType() == ST_CTS,
+                                  msg == endSIFS && frameReceivedBeforeSIFS()->getType() == ST_CTS,
                                   WAITACK,
                 sendDataFrameOnEndSIFS(currentTransmission());
             );
             FSMA_Event_Transition(Transmit-ACK,
-                                  msg == endSIFS && lastReceivedFrameType() == ST_DATA,
+                                  msg == endSIFS && isDataOrMgmtFrame(frameReceivedBeforeSIFS()),
                                   IDLE,
                 sendACKFrameOnEndSIFS();
                 resetStateVariables();
@@ -503,18 +506,23 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         // this is not a real state
         FSMA_State(RECEIVE)
         {
-            FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
-                                     isLowerMsg(msg) && isBroadcast(frame) && isDataOrMgmtFrame,
+            FSMA_No_Event_Transition(Immediate-Receive-Error,
+                                     isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
                                      IDLE,
-                lastReceiveFailed = false;
+                EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
+                numCollision++;
+                resetStateVariables();
+            );
+            FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
+                                     isLowerMsg(msg) && isBroadcast(frame) && isDataOrMgmtFrame(frame),
+                                     IDLE,
                 sendUp(frame);
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
-                                     isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame,
+                                     isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
                                      WAITSIFS,
-                lastReceiveFailed = false;
                 sendUp(frame);
                 numReceived++;
             );
@@ -522,16 +530,8 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
                                      WAITSIFS,
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
-                                     IDLE,
-                EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
-                lastReceiveFailed = true;
-                numCollision++;
-                resetStateVariables();
-            );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
-                                     isLowerMsg(msg) && !isForUs(frame),
+                                     isLowerMsg(msg),
                                      IDLE,
                 resetStateVariables();
             );
@@ -590,7 +590,11 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
             cw = CW_MAX;
     }
 
-    return ((double)intrand(cw + 1)) * SlotPeriod();
+    int c = intrand(cw + 1);
+
+    EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
+
+    return ((double)c) * SlotPeriod();
 }
 
 /****************************************************************
@@ -626,7 +630,7 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend->length()) + frameDuration(LENGTH_ACK) + SIFSPeriod() + PROCESSING_DELAY, endTimeout);
+    scheduleAt(simTime() + frameDuration(frameToSend->length()) + SIFSPeriod() + frameDuration(LENGTH_ACK) + PROCESSING_DELAY, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -900,10 +904,14 @@ bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
     return frame && frame->getReceiverAddress() == address;
 }
 
-int Ieee80211Mac::lastReceivedFrameType()
+bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
 {
-    Ieee80211Frame *frame = (Ieee80211Frame *)endSIFS->contextPointer();
-    return frame ? frame->getType() : -1;
+    return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
+}
+
+Ieee80211Frame *Ieee80211Mac::frameReceivedBeforeSIFS()
+{
+    return (Ieee80211Frame *)endSIFS->contextPointer();
 }
 
 void Ieee80211Mac::popTransmissionQueue()
