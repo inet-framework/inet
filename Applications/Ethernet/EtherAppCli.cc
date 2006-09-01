@@ -92,7 +92,7 @@ void EtherAppCli::initialize(int stage)
     if (destMACAddress.isUnspecified())
         return;
 
-    registerDSAP(localSAP);
+    //registerDSAP(localSAP);
 
     cMessage *timermsg = new cMessage("generateNextPacket");
     double d = waitTime->doubleValue();

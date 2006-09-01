@@ -65,7 +65,7 @@ void EtherAppSrv::initialize()
     WATCH(packetsSent);
     WATCH(packetsReceived);
 
-    registerDSAP(localSAP);
+    //registerDSAP(localSAP);
 }
 
 void EtherAppSrv::handleMessage(cMessage *msg)
