@@ -79,7 +79,7 @@ module Throughput
             parameters:
                 playgroundSizeX = playgroundSizeX,
                 playgroundSizeY = playgroundSizeY,
-                numChannels = 2;
+                numChannels = 1;
             display: "p=61,46;i=misc/sun";
     connections nocheck:
     display: "b=297,203";
