@@ -69,7 +69,7 @@ module Throughput
             display: "p=73,132;i=device/wifilaptop;r=,,#707070";
         srvHost: ThroughputServer;
             display: "p=224,136;i=device/wifilaptop;r=,,#707070";
-        ap: WirelessAPSimplified;
+        ap: WirelessAPWithSink;
             display: "p=149,46;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
