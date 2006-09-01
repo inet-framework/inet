@@ -21,38 +21,52 @@
 #include "INETDefs.h"
 
 /**
- * A module that just deletes every message it receives.
+ * A module that just deletes every packet it receives, and collects
+ * basic statistics (packet count, bit count, packet rate, bit rate).
  */
 class INET_API Sink : public cSimpleModule
 {
   protected:
-    int count;
-    long numBytes;
-    double throughput;
-    double pps;
+    int numPackets;
+    long numBits;
+    double throughput; // bit/sec
+    double packetPerSec;
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 };
 
 Define_Module(Sink);
 
 void Sink::initialize()
 {
-    count = 0;
-    numBytes = 0;
+    numPackets = 0;
+    numBits = 0;
 
-    WATCH(count);
-    WATCH(numBytes);
+    WATCH(numPackets);
+    WATCH(numBits);
     WATCH(throughput);
-    WATCH(pps);
+    WATCH(packetPerSec);
 }
 
 void Sink::handleMessage(cMessage *msg)
 {
-    count++;
-    numBytes += msg->byteLength();
-    throughput = numBytes / simTime();
-    pps = count / simTime();
+    numPackets++;
+    numBits += msg->length();
+
+    throughput = numBits / simTime();
+    packetPerSec = numPackets / simTime();
+
     delete msg;
 }
+
+void Sink::finish()
+{
+    recordScalar("numPackets", numPackets);
+    recordScalar("numBits", numBits);
+    recordScalar("throughput", throughput);
+    recordScalar("packetPerSec", packetPerSec);
+}
+
+
