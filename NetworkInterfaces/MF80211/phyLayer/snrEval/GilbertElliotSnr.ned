@@ -25,16 +25,17 @@ simple GilbertElliotSnr
     parameters:
     debug : bool, // debug switch
         transmitterPower : numeric,
-    bitrate: numeric,
-    headerLength: numeric const,
-    carrierFrequency: numeric,
-    thermalNoise: numeric,
-    pathLossAlpha: numeric,
-    sensitivity: numeric,
-    meanGood: numeric,
-    meanBad: numeric;
+        bitrate: numeric,
+        headerLength: numeric const,
+        carrierFrequency: numeric,
+        thermalNoise: numeric,
+        pathLossAlpha: numeric,
+        sensitivity: numeric,
+        meanGood: numeric,
+        meanBad: numeric;
     gates:
         in: uppergateIn;
         out: uppergateOut;
         in: radioIn; // to receive AirFrames
 endsimple
+
