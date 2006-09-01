@@ -27,7 +27,7 @@
 //FIXME use command msg kinds?
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
-//FIXME beacons should overtake all other frames (inserted at front of queue)
+//FIXME where to put LCC header (SNAP)..?
 
 Define_Module(Ieee80211MgmtSTA);
 

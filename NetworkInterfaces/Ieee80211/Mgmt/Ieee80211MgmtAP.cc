@@ -159,7 +159,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     {
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
         if (hasRelayUnit)
-            send(createEtherFrame(frame), "uppergateOut");
+            send(convertToEtherFrame(frame), "uppergateOut");
         else
             delete frame;
     }

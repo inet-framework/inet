@@ -36,7 +36,7 @@ module Ieee80211NicSTA
         agent: Ieee80211AgentSTA;
             display: "p=202,69;i=block/control";
         mgmt: Ieee80211MgmtSTA;
-            display: "p=96,69;i=block/cogwheel";
+            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:
                 queueModule = "mgmt";

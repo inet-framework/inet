@@ -65,12 +65,19 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
         return;
     }
 
-    // possibly send frame to the other (Ethernet, etc) ports of the AP as well
     if (hasRelayUnit)
-        send(createEtherFrame(frame), "uppergateOut");
+    {
+        // LAN bridging: if we have a relayUnit, send up the frame to it.
+        // We don't need to call distributeReceivedDataFrame() here, because
+        // if the frame needs to be distributed onto the wireless LAN too,
+        // then relayUnit will send a copy back to us.
+        send(convertToEtherFrame(frame), "uppergateOut");
+    }
     else
+    {
         // send it out to the destination STA
         distributeReceivedDataFrame(frame);
+    }
 }
 
 void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)

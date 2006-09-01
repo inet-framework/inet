@@ -34,7 +34,7 @@ module Ieee80211NicSTASimplified
         in: radioIn; // to receive AirFrames
     submodules:
         mgmt: Ieee80211MgmtSTASimplified;
-            display: "p=96,69;i=block/cogwheel";
+            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:
                 queueModule = "mgmt";

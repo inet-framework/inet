@@ -35,7 +35,7 @@ module Ieee80211Nic
         in: radioIn; // to receive AirFrames
     submodules:
         mgmt: mgmtType like Ieee80211MgmtInterface;
-            display: "p=96,69;i=block/cogwheel";
+            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:
                 queueModule = "mgmt";

@@ -49,18 +49,19 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     sendOrEnqueue(frame);
 }
 
-EtherFrame *Ieee80211MgmtAPBase::createEtherFrame(Ieee80211DataFrame *frame)
+EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
 {
     // create a matching ethernet frame
-    EtherFrame *ethframe = new EthernetIIFrame(frame->name()); // XXX how to decide between EthernetIIFrame and EtherFrameWithSNAP
+    EtherFrame *ethframe = new EthernetIIFrame(frame->name()); //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
     //XXX set ethertype
 
-    // encapsulate a copy of the payload in there
-    cMessage *payload = frame->encapsulatedMsg();
-    if (payload)
-        ethframe->encapsulate((cMessage *)payload->dup());
+    // encapsulate the payload in there
+    cMessage *payload = frame->decapsulate();
+    delete frame;
+    ASSERT(payload!=NULL);
+    ethframe->encapsulate(payload);
 
     // done
     return ethframe;

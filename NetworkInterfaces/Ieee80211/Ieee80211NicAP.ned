@@ -33,7 +33,7 @@ module Ieee80211NicAP
         in: radioIn; // to receive AirFrames
     submodules:
         mgmt: Ieee80211MgmtAP;
-            display: "p=96,69;i=block/cogwheel";
+            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:
                 queueModule = "mgmt";

@@ -33,9 +33,10 @@ void Ieee80211MgmtBase::initialize(int stage)
     {
         PassiveQueueBase::initialize();
 
-        queue.setName("80211MacQueue");
-        queueLenVec.setName("queue length");
-        queueDropVec.setName("queue drop count");
+        dataQueue.setName("wlanDataQueue");
+        mgmtQueue.setName("wlanMgmtQueue");
+        dataQueueLenVec.setName("queue length");
+        dataQueueDropVec.setName("queue drop count");
 
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
@@ -104,30 +105,44 @@ void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
 
 bool Ieee80211MgmtBase::enqueue(cMessage *msg)
 {
-    if (frameCapacity && queue.length() >= frameCapacity)
+    ASSERT(dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg)!=NULL);
+    bool isDataFrame = dynamic_cast<Ieee80211DataFrame *>(msg)!=NULL;
+
+    if (!isDataFrame)
+    {
+        // management frames are inserted into mgmtQueue
+        mgmtQueue.insert(msg);
+        return false;
+    }
+    else if (frameCapacity && dataQueue.length() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
-        queueDropVec.record(1);
+        dataQueueDropVec.record(1);
         return true;
     }
     else
     {
-        queue.insert(msg);
-        queueLenVec.record(queue.length());
+        dataQueue.insert(msg);
+        dataQueueLenVec.record(dataQueue.length());
         return false;
     }
 }
 
 cMessage *Ieee80211MgmtBase::dequeue()
 {
-    if (queue.empty())
+    // management frames have priority
+    if (!mgmtQueue.empty())
+        return (cMessage *)mgmtQueue.pop();
+
+    // return a data frame if we have one
+    if (dataQueue.empty())
         return NULL;
 
-   cMessage *pk = (cMessage *)queue.pop();
+    cMessage *pk = (cMessage *)dataQueue.pop();
 
     // statistics
-    queueLenVec.record(queue.length());
+    dataQueueLenVec.record(dataQueue.length());
     return pk;
 }
 
@@ -145,7 +160,6 @@ void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
 
 cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 {
-    //XXX create control info with src address?
     cMessage *payload = frame->decapsulate();
 
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();

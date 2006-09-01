@@ -56,12 +56,11 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     virtual Ieee80211DataFrame *convertFromEtherFrame(EtherFrame *ethframe);
 
     /**
-     * Utility function: converts the given frame to EtherFrame. The original
-     * frame is left untouched (the encapsulated payload msg gets duplicated).
-     * This function is needed because MACRelayUnit which we use for LAN bridging
-     * functionality deals with EtherFrames.
+     * Utility function: converts the given frame to EtherFrame, deleting the
+     * original frame. This function is needed for LAN bridging functionality:
+     * MACRelayUnit deals with EtherFrames.
      */
-    virtual EtherFrame *createEtherFrame(Ieee80211DataFrame *frame);
+    virtual EtherFrame *convertToEtherFrame(Ieee80211DataFrame *frame);
 };
 
 #endif

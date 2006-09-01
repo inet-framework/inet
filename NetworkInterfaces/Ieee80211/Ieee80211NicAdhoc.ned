@@ -32,7 +32,7 @@ module Ieee80211NicAdhoc
         in: radioIn; // to receive AirFrames
     submodules:
         mgmt: Ieee80211MgmtAdhoc;
-            display: "p=96,69;i=block/cogwheel";
+            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:
                 queueModule = "mgmt";

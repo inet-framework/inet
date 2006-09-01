@@ -42,7 +42,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     MACAddress myAddress;
 
     // state
-    cQueue queue;
+    cQueue dataQueue; // queue for data frames
+    cQueue mgmtQueue; // queue for management frames (higher priority than data frames)
 
     // statistics
     long numDataFramesReceived;
@@ -50,8 +51,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     long numMgmtFramesDropped;
 
     // queue statistics
-    cOutVector queueLenVec;
-    cOutVector queueDropVec;
+    cOutVector dataQueueLenVec;
+    cOutVector dataQueueDropVec;
 
   protected:
     virtual int numInitStages() const {return 2;}
