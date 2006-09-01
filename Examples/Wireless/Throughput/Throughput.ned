@@ -28,6 +28,8 @@ module ThroughputClient
         notificationBoard: NotificationBoard;
             display: "p=52,70;i=block/control";
         cli: EtherAppCli;
+            parameters:
+                registerSAP = false;
             display: "b=40,24;p=180,60,col";
         wlan: Ieee80211NicSTASimplified;
             display: "p=112,134;q=queue;i=block/ifcard";
@@ -48,6 +50,8 @@ module ThroughputServer
         notificationBoard: NotificationBoard;
             display: "p=60,70;i=block/control";
         srv: EtherAppSrv;
+            parameters:
+                registerSAP = false;
             display: "b=40,24;p=210,68,col";
         wlan: Ieee80211NicSTASimplified;
             display: "p=120,158;q=queue;i=block/ifcard";

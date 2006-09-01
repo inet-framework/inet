@@ -24,7 +24,8 @@
 //
 simple EtherAppSrv
     parameters:
-        writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
+        registerSAP : bool, // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        writeScalars: bool; // enable/disable recording statistics in omnetpp.sca
     gates:
         in: in;
         out: out;

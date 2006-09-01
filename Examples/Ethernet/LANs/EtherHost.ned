@@ -31,11 +31,14 @@ module EtherHost
     gates:
         in: in;
         out: out;
-
     submodules:
         cli: EtherAppCli;
+            parameters:
+                registerSAP = true;
             display: "p=60,60,col";
         srv: EtherAppSrv;
+            parameters:
+                registerSAP = true;
             display: "p=250,60,col";
         llc: EtherLLC;
             gatesizes:

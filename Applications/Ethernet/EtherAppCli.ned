@@ -31,6 +31,7 @@ simple EtherAppCli
         waitTime: numeric,    // interarrival time between sending requests; may be random value
         reqLength: numeric,   // length of request packets (bytes); may be random value
         respLength: numeric,  // length of response packets (bytes); may be random value
+        registerSAP : bool,   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         writeScalars: bool;   // enable/disable recording statistics in omnetpp.sca
 
     gates:
