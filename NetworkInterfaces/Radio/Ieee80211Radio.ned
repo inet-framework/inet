@@ -19,20 +19,19 @@
 
 
 //
-// Represents the AbstractRadio. Frames received from higher layers (typically the
-// MAC protocol) are transmitted on the AbstractRadio channel, using the global
-// ChannelControl module. Frames received on the AbstractRadio channel will have
+// Represents the radio. Frames received from higher layers (typically the
+// MAC protocol) are transmitted on the radio channel, using the global
+// ChannelControl module. Frames received on the radio channel will have
 // their signal-noise ratio evaluated and passed up to the decider.
 // (It is the decider's task to determine whether the frame was received
 // correctly, and pass it up to the MAC layer).
 //
 // The receive/transmit channel (frequency) can be changed by sending
-// AbstractRadio a blank cMessage with PHY_C_CHANGECHANNEL as message kind, and
+// Radio a blank cMessage with PHY_C_CHANGECHANNEL as message kind, and
 // a PhyControlInfo object attached to it as control info, to hold the
-// new channel number. If the AbstractRadio is currently transmitting, the channel
+// new channel number. If the radio is currently transmitting, the channel
 // switch will actually take place after the transmission is completed.
 //
-//# FIXME merge docu with BasicAbstractRadio's
 simple Ieee80211Radio
     parameters:
         channelNumber: numeric const, // channel identifier
@@ -42,10 +41,11 @@ simple Ieee80211Radio
         headerLength: numeric const,
         thermalNoise: numeric const,
         pathLossAlpha: numeric const,
+        snirThreshold: numeric const,
         sensitivity: numeric const;
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
-        in: AbstractRadioIn; // to receive frames (AirFrame) on the AbstractRadio channel
+        in: radioIn; // to receive frames (AirFrame) on the radio channel
 endsimple
 

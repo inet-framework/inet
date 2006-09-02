@@ -96,7 +96,7 @@ class INET_API AbstractRadio : public ChannelAccess
     AirFrame* unbufferMsg(cMessage *msg);
 
     /** @brief Sends a message to the upper layer*/
-    void sendUp(AirFrame*, SnrList&);
+    void sendUp(AirFrame *);
 
     /** @brief Sends a message to the channel*/
     void sendDown(AirFrame *msg);
@@ -112,6 +112,8 @@ class INET_API AbstractRadio : public ChannelAccess
      * rest of the message.
      */
     virtual double calcDuration(AirFrame *) = 0;
+
+    virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList) = 0;
 
     /**
      * Should be defined to calculates the power with which a packet is received.

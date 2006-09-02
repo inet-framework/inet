@@ -52,6 +52,7 @@
  */
 class INET_API Ieee80211Radio : public AbstractRadio
 {
+    double snirThreshold;
   protected:
     /* Redefined from cSimpleModule */
     virtual void initialize(int stage);
@@ -61,6 +62,13 @@ class INET_API Ieee80211Radio : public AbstractRadio
 
     /** Calculates the power with which a packet is received.*/
     virtual double calcRcvdPower(double pSend, double distance);
+
+    virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList);
+
+    // utility
+    virtual bool packetOk(double snirMin, int lengthMPDU);
+    // utility
+    virtual double dB2fraction(double dB);
 };
 
 #endif

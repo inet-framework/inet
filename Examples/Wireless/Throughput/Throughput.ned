@@ -31,7 +31,7 @@ module ThroughputClient
             parameters:
                 registerSAP = false;
             display: "b=40,24;p=180,60,col";
-        wlan: Ieee80211NicSTASimplified;
+        wlan: Ieee80211NicSTASimplified_NEW;
             display: "p=112,134;q=queue;i=block/ifcard";
         mobility: CircleMobility;
             display: "p=50,141;i=block/cogwheel_s";
@@ -49,7 +49,7 @@ module ThroughputServer
             display: "p=60,70;i=block/control";
         sink: Sink;
             display: "b=40,24;p=210,68,col";
-        wlan: Ieee80211NicSTASimplified;
+        wlan: Ieee80211NicSTASimplified_NEW;
             display: "p=120,158;q=queue;i=block/ifcard";
         mobility: NullMobility;
             display: "p=50,141;i=block/cogwheel_s";

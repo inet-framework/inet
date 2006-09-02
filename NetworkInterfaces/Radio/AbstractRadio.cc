@@ -217,25 +217,12 @@ AirFrame *AbstractRadio::encapsMsg(cMessage *msg)
     return frame;
 }
 
-/**
- * Attach control info to the message and send message to the upper
- * layer.
- *
- * @param msg AirFrame to pass to the decider
- * @param list Snr list to attach as control info
- *
- * to be called within @ref handleLowerMsgEnd.
- */
-void AbstractRadio::sendUp(AirFrame *msg, SnrList& list)
+void AbstractRadio::sendUp(AirFrame *msg)
 {
-    // create ControlInfo
-    SnrControlInfo *cInfo = new SnrControlInfo;
-    // attach the list to cInfo
-    cInfo->setSnrList(list);
-    // attach the cInfo to the AirFrame
-    msg->setControlInfo(cInfo);
-
-    send(msg, uppergateOut);
+    cMessage *frame = msg->decapsulate();
+    delete msg;
+    EV << "sending up frame " << frame->name() << endl;
+    send(frame, uppergateOut);
 }
 
 /**
@@ -493,9 +480,18 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * frame)
         // delete the frame from the recvBuff
         recvBuff.erase(frame);
 
-        //Don't forget to send:
-        sendUp(frame, list);
-        EV << "packet sent to the decider\n";
+        // send up the frame:
+        //if (isReceivedCorrectly(frame, list))
+        //    sendUp(frame);
+        //else
+        //    delete frame;
+        if (!isReceivedCorrectly(frame, list))
+        {
+            frame->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            frame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
+            delete frame;
+        }
+        sendUp(frame);
     }
     // all other messages are noise
     else
