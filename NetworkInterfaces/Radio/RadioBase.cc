@@ -148,8 +148,8 @@ void RadioBase::handleMessage(cMessage *msg)
 
     if (msg->arrivalGateId() == uppergateIn)
     {
-        AirFrame *frame = encapsMsg(msg);
-        handleUpperMsg(frame);
+        AirFrame *airframe = encapsMsg(msg);
+        handleUpperMsg(airframe);
     }
     else if (msg->isSelfMessage())
     {
@@ -158,9 +158,9 @@ void RadioBase::handleMessage(cMessage *msg)
             EV << "frame is completely received now\n";
 
             // unbuffer the message
-            AirFrame *frame = unbufferMsg(msg);
+            AirFrame *airframe = unbufferMsg(msg);
 
-            handleLowerMsgEnd(frame);
+            handleLowerMsgEnd(airframe);
         }
         else
             handleSelfMsg(msg);
@@ -168,9 +168,9 @@ void RadioBase::handleMessage(cMessage *msg)
     else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == channelNumber())
     {
         // must be an AirFrame
-        AirFrame *frame = (AirFrame *) msg;
-        handleLowerMsgStart(frame);
-        bufferMsg(frame);
+        AirFrame *airframe = (AirFrame *) msg;
+        handleLowerMsgStart(airframe);
+        bufferMsg(airframe);
     }
     else
     {
@@ -185,42 +185,41 @@ void RadioBase::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void RadioBase::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
+void RadioBase::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     cMessage *endRxTimer = new cMessage("endRx", MK_RECEPTION_COMPLETE);
-    endRxTimer->setContextPointer(frame);
-    frame->setContextPointer(endRxTimer);
+    endRxTimer->setContextPointer(airframe);
+    airframe->setContextPointer(endRxTimer);
 
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
-    scheduleAt(frame->arrivalTime() + frame->getDuration(), endRxTimer);
+    scheduleAt(airframe->arrivalTime() + airframe->getDuration(), endRxTimer);
 }
 
 /**
  * This function encapsulates messages from the upper layer into an
  * AirFrame.
  */
-AirFrame *RadioBase::encapsMsg(cMessage *msg)
+AirFrame *RadioBase::encapsMsg(cMessage *frame)
 {
-    AirFrame *frame = createCapsulePkt();
-    frame->setName(msg->name());
-    frame->setPSend(transmitterPower);
-    frame->setChannelNumber(channelNumber());
-frame->setLength(192);//XXX
-    frame->encapsulate(msg);
-    frame->setBitRate(bitrate);
-    frame->setDuration(radioModel->calcDuration(frame));
-    frame->setSenderPos(myPosition());
+    AirFrame *airframe = createCapsulePkt();
+    airframe->setName(frame->name());
+    airframe->setPSend(transmitterPower);
+    airframe->setChannelNumber(channelNumber());
+    airframe->encapsulate(frame);
+    airframe->setBitRate(bitrate);
+    airframe->setDuration(radioModel->calcDuration(airframe));
+    airframe->setSenderPos(myPosition());
     // note: bit length (length()) of the AirFrame is irrelevant, duration is used instead
-    return frame;
+    return airframe;
 }
 
-void RadioBase::sendUp(AirFrame *msg)
+void RadioBase::sendUp(AirFrame *airframe)
 {
-    cMessage *frame = msg->decapsulate();
-    delete msg;
+    cMessage *frame = airframe->decapsulate();
+    delete airframe;
     EV << "sending up frame " << frame->name() << endl;
     send(frame, uppergateOut);
 }
@@ -230,9 +229,9 @@ void RadioBase::sendUp(AirFrame *msg)
  *
  * @sa sendToChannel
  */
-void RadioBase::sendDown(AirFrame *msg)
+void RadioBase::sendDown(AirFrame *airframe)
 {
-    sendToChannel(msg);
+    sendToChannel(airframe);
 }
 
 /**
@@ -241,11 +240,11 @@ void RadioBase::sendDown(AirFrame *msg)
  */
 AirFrame *RadioBase::unbufferMsg(cMessage *msg)
 {
-    AirFrame *frame = (AirFrame *) msg->contextPointer();
+    AirFrame *airframe = (AirFrame *) msg->contextPointer();
     //delete the self message
     delete msg;
 
-    return frame;
+    return airframe;
 }
 
 /**
@@ -258,7 +257,7 @@ AirFrame *RadioBase::unbufferMsg(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void RadioBase::handleUpperMsg(AirFrame * frame)
+void RadioBase::handleUpperMsg(AirFrame *airframe)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -290,8 +289,8 @@ void RadioBase::handleUpperMsg(AirFrame * frame)
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 
     cMessage *timer = new cMessage(NULL, MK_TRANSMISSION_OVER);
-    scheduleAt(simTime() + frame->getDuration(), timer);
-    sendDown(frame);
+    scheduleAt(simTime() + airframe->getDuration(), timer);
+    sendDown(airframe);
 }
 
 void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
@@ -383,33 +382,33 @@ void RadioBase::handleSelfMsg(cMessage *msg)
  * currently being received message (if any) has to be updated as
  * well as the RadioState.
  */
-void RadioBase::handleLowerMsgStart(AirFrame * frame)
+void RadioBase::handleLowerMsgStart(AirFrame * airframe)
 {
     // Calculate the receive power of the message
 
     // calculate distance
     const Coord& myPos = myPosition();
-    const Coord& framePos = frame->getSenderPos();
+    const Coord& framePos = airframe->getSenderPos();
     double distance = myPos.distance(framePos);
 
     // calculate receive power
-    double rcvdPower = receptionModel->calculateReceivedPower(frame->getPSend(), carrierFrequency, distance);
+    double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), carrierFrequency, distance);
 
     // store the receive power in the recvBuff
-    recvBuff[frame] = rcvdPower;
+    recvBuff[airframe] = rcvdPower;
 
     // if receive power is bigger than sensitivity and if not sending
     // and currently not receiving another message and the message has
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (frame->arrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (airframe->arrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << frame->name() << endl;
+        EV << "receiving frame " << airframe->name() << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;        //defined in SnrList.h!!
-        snrInfo.ptr = frame;
+        snrInfo.ptr = airframe;
         snrInfo.rcvdPower = rcvdPower;
         snrInfo.sList = snrList;
 
@@ -427,7 +426,7 @@ void RadioBase::handleLowerMsgStart(AirFrame * frame)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << frame->name() << " is just noise\n";
+        EV << "frame " << airframe->name() << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -462,10 +461,10 @@ void RadioBase::handleLowerMsgStart(AirFrame * frame)
  * If the corresponding AirFrame was not only noise the corresponding
  * SnrList and the AirFrame are sent to the decider.
  */
-void RadioBase::handleLowerMsgEnd(AirFrame * frame)
+void RadioBase::handleLowerMsgEnd(AirFrame * airframe)
 {
     // check if message has to be send to the decider
-    if (snrInfo.ptr == frame)
+    if (snrInfo.ptr == airframe)
     {
         EV << "reception of frame over, preparing to send packet to upper layer\n";
         // get Packet and list out of the receive buffer:
@@ -478,29 +477,29 @@ void RadioBase::handleLowerMsgEnd(AirFrame * frame)
         snrInfo.sList.clear();
 
         // delete the frame from the recvBuff
-        recvBuff.erase(frame);
+        recvBuff.erase(airframe);
 
         //XXX send up the frame:
-        //if (radioModel->isReceivedCorrectly(frame, list))
-        //    sendUp(frame);
+        //if (radioModel->isReceivedCorrectly(airframe, list))
+        //    sendUp(airframe);
         //else
-        //    delete frame;
-        if (!radioModel->isReceivedCorrectly(frame, list))
+        //    delete airframe;
+        if (!radioModel->isReceivedCorrectly(airframe, list))
         {
-            frame->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
-            frame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
+            airframe->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
         }
-        sendUp(frame);
+        sendUp(airframe);
     }
     // all other messages are noise
     else
     {
         EV << "reception of noise message over, removing recvdPower from noiseLevel....\n";
         // get the rcvdPower and subtract it from the noiseLevel
-        noiseLevel -= recvBuff[frame];
+        noiseLevel -= recvBuff[airframe];
 
         // delete message from the recvBuff
-        recvBuff.erase(frame);
+        recvBuff.erase(airframe);
 
         // update snr info for message currently being received if any
         if (snrInfo.ptr != NULL)
@@ -509,7 +508,7 @@ void RadioBase::handleLowerMsgEnd(AirFrame * frame)
         }
 
         // message should be deleted
-        delete frame;
+        delete airframe;
         EV << "message deleted\n";
     }
 
@@ -553,9 +552,9 @@ void RadioBase::changeChannel(int channel)
         // delete messages being received, and cancel associated self-messages
         for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
         {
-            AirFrame *frame = it->first;
-            cMessage *endRxTimer = (cMessage *)frame->contextPointer();
-            delete frame;
+            AirFrame *airframe = it->first;
+            cMessage *endRxTimer = (cMessage *)airframe->contextPointer();
+            delete airframe;
             delete cancelEvent(endRxTimer);
         }
         recvBuff.clear();
@@ -576,33 +575,33 @@ void RadioBase::changeChannel(int channel)
     EV << "Picking up ongoing transmissions on new channel:\n";
     for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
     {
-        AirFrame *frame = *it;
+        AirFrame *airframe = *it;
         // time for the message to reach us
-        double distance = myHostRef->pos.distance(frame->getSenderPos());
+        double distance = myHostRef->pos.distance(airframe->getSenderPos());
         double propagationDelay = distance / LIGHT_SPEED;
 
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
-        if (channel == frame->getChannelNumber())
+        if (channel == airframe->getChannelNumber())
         {
-            EV << " - (" << frame->className() << ")" << frame->name() << ": ";
+            EV << " - (" << airframe->className() << ")" << airframe->name() << ": ";
 
             // if there is a message on the air which will reach us in the future
-            if (frame->timestamp() + propagationDelay >= simTime())
+            if (airframe->timestamp() + propagationDelay >= simTime())
             {
                 EV << "will arrive in the future, scheduling it\n";
 
                 // we need to send to each radioIn[] gate
                 cGate *radioGate = gate("radioIn");
                 for (int i = 0; i < radioGate->size(); i++)
-                    sendDirect((cMessage*)frame->dup(), frame->timestamp() + propagationDelay - simTime(), this, radioGate->id() + i);
+                    sendDirect((cMessage*)airframe->dup(), airframe->timestamp() + propagationDelay - simTime(), this, radioGate->id() + i);
             }
             // if we hear some part of the message
-            else if (frame->timestamp() + frame->getDuration() + propagationDelay > simTime())
+            else if (airframe->timestamp() + airframe->getDuration() + propagationDelay > simTime())
             {
                 EV << "missed beginning of frame, processing it as noise\n";
 
-                AirFrame *frameDup = (AirFrame*)frame->dup();
-                frameDup->setArrivalTime(frame->timestamp() + propagationDelay);
+                AirFrame *frameDup = (AirFrame*)airframe->dup();
+                frameDup->setArrivalTime(airframe->timestamp() + propagationDelay);
                 handleLowerMsgStart(frameDup);
                 bufferMsg(frameDup);
             }

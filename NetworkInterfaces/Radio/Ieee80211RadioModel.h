@@ -33,9 +33,9 @@ class INET_API Ieee80211RadioModel : public IRadioModel
   protected:
     virtual void initializeFrom(cModule *radioModule);
 
-    virtual double calcDuration(AirFrame *);
+    virtual double calcDuration(AirFrame *airframe);
 
-    virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList);
+    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
 
     // utility
     virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate);

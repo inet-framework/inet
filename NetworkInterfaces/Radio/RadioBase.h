@@ -87,28 +87,28 @@ class INET_API RadioBase : public ChannelAccess
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
 
     /** @brief Buffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgStart(AirFrame*);
+    virtual void handleLowerMsgStart(AirFrame *airframe);
 
     /** @brief Unbuffer the frame and update noise levels and snr information*/
-    virtual void handleLowerMsgEnd(AirFrame*);
+    virtual void handleLowerMsgEnd(AirFrame *airframe);
 
     /** @brief Buffers message for 'transmission time'*/
-    void bufferMsg(AirFrame *frame);
+    void bufferMsg(AirFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time'*/
     AirFrame* unbufferMsg(cMessage *msg);
 
     /** @brief Sends a message to the upper layer*/
-    void sendUp(AirFrame *);
+    void sendUp(AirFrame *airframe);
 
     /** @brief Sends a message to the channel*/
-    void sendDown(AirFrame *msg);
+    void sendDown(AirFrame *airframe);
 
     /** @brief Encapsulates a MAC frame into an Air Frame*/  //XXX into RadioModel too!!!
     virtual AirFrame *encapsMsg(cMessage *msg);
 
     /** Redefined from BasicRadio */
-    virtual int channelNumber() const  {return rs.getChannel();}
+    virtual int channelNumber() const {return rs.getChannel();}
 
     /** @brief updates the snr information of the relevant AirFrames*/
     void addNewSnr();

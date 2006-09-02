@@ -36,21 +36,13 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 /**
  * The header is sent with 1Mbit/s and the rest with "bitrate"
  */
-double Ieee80211RadioModel::calcDuration(AirFrame *af)  //FIXME this should accept bitRate as parameter!
+double Ieee80211RadioModel::calcDuration(AirFrame *airframe)
 {
-    //XXX generic:
-    //double duration;
-    //duration = (double) af->length() / (double) af->getBitRate();
-    //return duration;
-
-    //XXX Ieee80211:
-    EV << "bits without header: " << af->length() -
-        HEADERLENGTH << ", bits header: " << HEADERLENGTH << endl;
-    return ((af->length() - HEADERLENGTH) / af->getBitRate() + HEADERLENGTH / BITRATE_HEADER);
+    return airframe->length()/airframe->getBitRate() + HEADERLENGTH/BITRATE_HEADER;
 }
 
 
-bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *af, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -58,8 +50,8 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *af, const SnrList& recei
         if (iter->snr < snirMin)
             snirMin = iter->snr;
 
-    cMessage *fr = af->encapsulatedMsg();
-    EV << "packet (" << fr->className() << ")" << fr->name() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
+    cMessage *frame = airframe->encapsulatedMsg();
+    EV << "packet (" << frame->className() << ")" << frame->name() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
 
     if (snirMin <= snirThreshold)
     {
@@ -67,7 +59,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *af, const SnrList& recei
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, af->encapsulatedMsg()->length(), af->getBitRate()))
+    else if (packetOk(snirMin, airframe->encapsulatedMsg()->length(), airframe->getBitRate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

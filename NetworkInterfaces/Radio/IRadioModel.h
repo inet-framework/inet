@@ -59,7 +59,7 @@ class INET_API IRadioModel : public cPolymorphic
      *
      * FIXME where do things like Gilbert-Elliot go??
      */
-    virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList) = 0;
+    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList) = 0;
 };
 
 #endif
