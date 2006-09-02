@@ -160,23 +160,40 @@ void SnrEval::handleUpperMsg(AirFrame * frame)
 
 void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
 {
-    if (msgkind==PHY_C_CHANGECHANNEL)
+    if (msgkind==PHY_C_CONFIGURERADIO)
     {
         // extract new channel number
         PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
         int newChannel = phyCtrl->channelNumber();
+        double newBitrate = phyCtrl->bitrate();
         delete ctrl;
 
-        EV << "Command received: Change To Channel " << newChannel << "\n";
+        if (newChannel!=-1)
+        {
+            EV << "Command received: change to channel " << newChannel << "\n";
 
-        // do it
-        if (rs.getChannel()==newChannel)
-            EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
-        else if (rs.getState()==RadioState::TRANSMIT) {
-            EV << "We're transmitting right now, remembering to change after it's completed\n";
-            this->newChannel = newChannel;
-        } else
-            changeChannel(newChannel); // change channel right now
+            // do it
+            if (rs.getChannel()==newChannel)
+                EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
+            else if (rs.getState()==RadioState::TRANSMIT) {
+                EV << "We're transmitting right now, remembering to change after it's completed\n";
+                this->newChannel = newChannel;
+            } else
+                changeChannel(newChannel); // change channel right now
+        }
+        if (newBitrate!=-1)
+        {
+            EV << "Command received: change bitrate to " << newBitrate << "\n";
+
+            // do it
+            if (rs.getBitrate()==newBitrate)
+                EV << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
+            else if (rs.getState()==RadioState::TRANSMIT) {
+                EV << "We're transmitting right now, remembering to change after it's completed\n";
+                this->newBitrate = newBitrate;
+            } else
+                setBitrate(newBitrate); // change bitrate right now
+        }
     }
     else
         error("unknown command (msgkind=%d)", msgkind);
@@ -486,5 +503,20 @@ void SnrEval::changeChannel(int channel)
     // notify other modules about the channel switch; and actually, radio state has changed too
     nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+}
+
+void SnrEval::setBitrate(double bitrate)
+{
+    if (this->bitrate == bitrate)
+        return;
+    if (bitrate < 0)
+        error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
+    if (rs.getState() == RadioState::TRANSMIT)
+        error("changing the bitrate while transmitting is not allowed");
+
+    EV << "Setting bitrate to " << bitrate << "bps\n";
+    this->bitrate = bitrate;
+
+    //XXX fire some notification?
 }
 

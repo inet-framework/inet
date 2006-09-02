@@ -30,7 +30,7 @@
 //FIXME where to put LCC header (SNAP)..?
 //FIXME control frames should be transmitted at 2Mbps! (basic data rate set: 1, 2Mbps)
 //FIXME mac: minCW is 31 for 802.11b, 7 for 2Mbps
-//FIXME mac should be able to signal if 
+//FIXME mac should be able to signal if
 
 Define_Module(Ieee80211MgmtSTA);
 
@@ -241,10 +241,10 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 {
     EV << "Tuning to channel " << channelNum << "\n";
 
-    // sending PHY_C_CHANGECHANNEL command to MAC
+    // sending PHY_C_CONFIGURERADIO command to MAC
     PhyControlInfo *phyCtrl = new PhyControlInfo();
     phyCtrl->setChannelNumber(channelNum);
-    cMessage *msg = new cMessage("changeChannel", PHY_C_CHANGECHANNEL);
+    cMessage *msg = new cMessage("changeChannel", PHY_C_CONFIGURERADIO);
     msg->setControlInfo(phyCtrl);
     send(msg, "macOut");
 }

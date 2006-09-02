@@ -151,7 +151,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief The last change channel message received and not yet sent to the physical layer or NULL.
         The message will be sent down when the state goes to IDLE or DEFER next time. */
-    cMessage *changeChannelMessage;
+    cMessage *pendingRadioConfigCommand;
     //@}
 
   protected:
@@ -224,6 +224,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     //@{
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic* details);
+
+    /** @brief Handle commands (msg kind+control info) coming from upper layers */
+    virtual void handleCommand(cMessage *msg);
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMsg(cMessage *msg);

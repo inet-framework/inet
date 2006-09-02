@@ -56,7 +56,7 @@ inetbase:
 	cd NetworkInterfaces/Ieee80211 && $(MAKEMAKE) $(OPTS) -n -r
 	cd NetworkInterfaces/Ieee80211/Mac && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../../MFCore
 	cd NetworkInterfaces/Ieee80211/Mgmt && $(MAKEMAKE) $(OPTS) -n $(CONTRACT_INCLUDES) -I../Mac -I../../Ethernet
-	cd NetworkInterfaces/Radio && $(MAKEMAKE) $(OPTS) -n -n $(CONTRACT_INCLUDES) -I../MFCore -I../MF80211/macLayer -I../../World
+	cd NetworkInterfaces/Radio && $(MAKEMAKE) $(OPTS) -n -n $(CONTRACT_INCLUDES) -I../MFCore -I../Ieee80211/Mac -I../../World
 
 	cd Nodes/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES)
 

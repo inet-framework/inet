@@ -27,7 +27,7 @@
 // correctly, and pass it up to the MAC layer).
 //
 // The receive/transmit channel (frequency) can be changed by sending
-// SnrEval a blank cMessage with PHY_C_CHANGECHANNEL as message kind, and
+// SnrEval a blank cMessage with PHY_C_CONFIGURERADIO as message kind, and
 // a PhyControlInfo object attached to it as control info, to hold the
 // new channel number. If the radio is currently transmitting, the channel
 // switch will actually take place after the transmission is completed.

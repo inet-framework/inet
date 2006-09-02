@@ -64,6 +64,11 @@ class INET_API SnrEval : public BasicSnrEval
       */
     void changeChannel(int channel);
 
+    /** @brief change the bitrate to the given value.
+      * This method throws an error if the radio state is transmit.
+      */
+    void setBitrate(double bitrate);
+
   protected:
     /** @brief Initialize variables and publish the radio status*/
     virtual void initialize(int);
@@ -141,6 +146,9 @@ class INET_API SnrEval : public BasicSnrEval
 
     /** @brief State: if not -1, we have to switch to that channel once we finished transmitting */
     int newChannel;
+
+    /** @brief State: if not -1, we have to switch to that bitrate once we finished transmitting */
+    double newBitrate;
 
     /** @brief State: the current noise level of the channel.*/
     double noiseLevel;

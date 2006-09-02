@@ -35,7 +35,7 @@ Ieee80211Mac::Ieee80211Mac()
     endTimeout = NULL;
     endReserve = NULL;
     mediumStateChange = NULL;
-    changeChannelMessage = NULL;
+    pendingRadioConfigCommand = NULL;
 }
 
 Ieee80211Mac::~Ieee80211Mac()
@@ -47,8 +47,8 @@ Ieee80211Mac::~Ieee80211Mac()
     cancelAndDelete(endReserve);
     cancelAndDelete(mediumStateChange);
 
-    if (changeChannelMessage)
-        delete changeChannelMessage;
+    if (pendingRadioConfigCommand)
+        delete pendingRadioConfigCommand;
 }
 
 /****************************************************************
@@ -201,30 +201,7 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
     // check if it's a command from the mgmt layer
     if (msg->length()==0 && msg->kind()!=0)
     {
-        if (msg->kind()==PHY_C_CHANGECHANNEL)
-        {
-            EV << "Passing on channel change command to physical layer\n";
-            if (changeChannelMessage != NULL)
-            {
-                delete changeChannelMessage;
-                changeChannelMessage = NULL;
-            }
-
-            if (fsm.state() == IDLE || fsm.state() == DEFER || fsm.state() == BACKOFF)
-            {
-                EV << "Immediately changing channel\n";
-                sendDown(msg);
-            }
-            else
-            {
-                EV << "Delaying channel change until next IDLE or DEFER state\n";
-                changeChannelMessage = msg;
-            }
-        }
-        else
-        {
-            error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->className(), msg->name(), msg->kind());
-        }
+        handleCommand(msg);
         return;
     }
 
@@ -253,6 +230,41 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
     transmissionQueue.push_back(frame);
 
     handleWithFSM(frame);
+}
+
+void Ieee80211Mac::handleCommand(cMessage *msg)
+{
+    if (msg->kind()==PHY_C_CONFIGURERADIO)
+    {
+        EV << "Passing on command " << msg->name() << " to physical layer\n";
+        if (pendingRadioConfigCommand != NULL)
+        {
+            // merge contents of the old command into the new one, then delete it
+            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigCommand->controlInfo());
+            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->controlInfo());
+            if (pNew->channelNumber()==-1 && pOld->channelNumber()!=-1)
+                pNew->setChannelNumber(pOld->channelNumber());
+            if (pNew->bitrate()==-1 && pOld->bitrate()!=-1)
+                pNew->setBitrate(pOld->bitrate());
+            delete pendingRadioConfigCommand;
+            pendingRadioConfigCommand = NULL;
+        }
+
+        if (fsm.state() == IDLE || fsm.state() == DEFER || fsm.state() == BACKOFF)
+        {
+            EV << "Sending it down immediately\n";
+            sendDown(msg);
+        }
+        else
+        {
+            EV << "Delaying " << msg->name() << " until next IDLE or DEFER state\n";
+            pendingRadioConfigCommand = msg;
+        }
+    }
+    else
+    {
+        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->className(), msg->name(), msg->kind());
+    }
 }
 
 void Ieee80211Mac::handleLowerMsg(cMessage *msg)
@@ -855,10 +867,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::currentTransmission()
 
 void Ieee80211Mac::sendDownChangeChannelMessage()
 {
-    if (changeChannelMessage != NULL)
+    if (pendingRadioConfigCommand != NULL)
     {
-        sendDown(changeChannelMessage);
-        changeChannelMessage = NULL;
+        sendDown(pendingRadioConfigCommand);
+        pendingRadioConfigCommand = NULL;
     }
 }
 

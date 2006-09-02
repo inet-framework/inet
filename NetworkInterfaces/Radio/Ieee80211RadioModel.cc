@@ -19,14 +19,11 @@
 
 
 #include "Ieee80211RadioModel.h"
+#include "Ieee80211Consts.h"
 #include "FWMath.h"
-#include "Consts80211.h"
 
 
 Register_Class(Ieee80211RadioModel);
-
-
-#define HEADERLENGTH 192
 
 
 void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
@@ -37,7 +34,7 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 double Ieee80211RadioModel::calcDuration(AirFrame *airframe)
 {
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-    return airframe->length()/airframe->getBitRate() + HEADERLENGTH/BITRATE_HEADER;
+    return airframe->length()/airframe->getBitrate() + PHY_HEADER_LENGTH/BITRATE_HEADER;
 }
 
 
@@ -58,7 +55,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, airframe->encapsulatedMsg()->length(), airframe->getBitRate()))
+    else if (packetOk(snirMin, airframe->encapsulatedMsg()->length(), airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

@@ -107,7 +107,6 @@ NetworkInterfaces/MF80211/phyLayer/decider/Decider80211.ned
 NetworkInterfaces/MF80211/phyLayer/decider/ErrAndCollDecider.ned
 NetworkInterfaces/MF80211/phyLayer/decider/SnrDecider.ned
 NetworkInterfaces/MF80211/phyLayer/snrEval/GilbertElliotSnr.ned
-NetworkInterfaces/MF80211/phyLayer/snrEval/Radio.ned
 NetworkInterfaces/MF80211/phyLayer/snrEval/SnrEval.ned
 NetworkInterfaces/MF80211/phyLayer/snrEval/SnrEval80211.ned
 NetworkInterfaces/MFCore/BasicDecider.ned

@@ -19,24 +19,24 @@
 #ifndef IEEE80211_CONSTS_H
 #define IEEE80211_CONSTS_H
 
-// TODO: these are taken over from Consts80211.h
+// XXX these are taken over from Consts80211.h
 // the phy has recognized a bit error in the packet
 #define BITERROR -1
 // packet lost due to collision
 #define COLLISION 9
 
-//frame lengths in bits
-//XXX this is duplicate, it's already in Ieee80211Frame.msg
+// frame lengths in bits
+// XXX this is duplicate, it's already in Ieee80211Frame.msg
 const unsigned int LENGTH_RTS = 160;
 const unsigned int LENGTH_CTS = 112;
 const unsigned int LENGTH_ACK = 112;
 
-//time slot ST, short interframe space SIFS, distributed interframe
-//space DIFS, and extended interframe space EIFS
+// time slot ST, short interframe space SIFS, distributed interframe
+// space DIFS, and extended interframe space EIFS
 const simtime_t ST = 20E-6;
 const simtime_t SIFS = 10E-6;
 const simtime_t DIFS = 2*ST + SIFS;
-const simtime_t PROCESSING_DELAY = 5E-6;  // 300 meters by the light of speed
+const simtime_t PROCESSING_DELAY = 5E-6;  // 300 meters at the speed of light
 
 const int RETRY_LIMIT = 7;
 
@@ -52,3 +52,4 @@ const double BITRATE_HEADER=1E+6;
 const double BANDWIDTH=2E+6;
 
 #endif
+

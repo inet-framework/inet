@@ -23,13 +23,14 @@ cplusplus {{
 
 //
 // Command codes for controlling the physical layer (the radio). These constants
-// should be set as message kind on a message sent to the TCP entity.
+// should be set as message kind on a message sent to the radio module.
 //
-// @see TCPCommand, TCPOpenCommand, TCP
+// @see PhyControlInfo
 //
 enum PhyCommandCode
 {
-    PHY_C_CHANGECHANNEL = 1; // change the channel
+    PHY_C_CONFIGURERADIO = 1; // change the channel
+    PHY_C_FRAME_BITRATE = 2; //FIXME implement: transmit this one frame at the specified bitrate
 };
 
 //
@@ -40,7 +41,8 @@ class PhyControlInfo
     properties:
         omitGetVerb=true;
     fields:
-        int channelNumber; // with PHY_C_CHANGECHANNEL: the channel to switch to
+        int channelNumber = -1; // with PHY_C_CONFIGURERADIO: the channel to switch to
+        double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
 };
 
 

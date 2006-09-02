@@ -43,7 +43,7 @@
  */
 class INET_API RadioState : public cPolymorphic
 {
-public:
+  public:
     /** @brief possible states of the radio*/
     enum State
     {
@@ -53,7 +53,7 @@ public:
       SLEEP
     };
 
-private:
+  private:
     /** @brief Identifies the radio */
     int radioId;
 
@@ -63,8 +63,11 @@ private:
     /** @brief The radio channel */
     int channel;
 
-public:
-    /** @brief id of the SnrEval module -- identifies the radio in case there're more than one in the host */
+    /** @brief The current transmit bitrate */
+    double bitrate;
+
+  public:
+    /** @brief id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
 
     /** @brief function to get the state*/
@@ -79,8 +82,14 @@ public:
     /** @brief set the channel number (frequency) */
     void setChannel(int chan) { channel = chan; }
 
+    /** @brief function to get the bitrate */
+    double getBitrate() const { return bitrate; }
+
+    /** @brief set the bitrate */
+    void setBitrate(double d) { bitrate = d; }
+
     /** @brief Constructor */
-    RadioState(int radioModuleId) : cPolymorphic() {radioId=radioModuleId; state=IDLE; channel=-1;}
+    RadioState(int radioModuleId) : cPolymorphic() {radioId=radioModuleId; state=IDLE; channel=-1; bitrate=-1;}
 
     static const char *stateName(State state) {
         switch(state) {
@@ -95,7 +104,7 @@ public:
     /** @brief Enables inspection */
     std::string info() const {
         std::stringstream out;
-        out << "channel=" << channel << " " << stateName(state);
+        out << "channel=" << channel << " " << bitrate << "bps "<< stateName(state);
         return out.str();
     }
 
