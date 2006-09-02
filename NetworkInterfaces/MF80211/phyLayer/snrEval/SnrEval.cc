@@ -23,11 +23,6 @@
 #include "FWMath.h"
 
 
-std::ostream& operator<<(std::ostream& os, const RadioState& rs)
-{
-    os << "state=" << rs.getState();
-    return os;
-}
 
 Define_Module(SnrEval);
 

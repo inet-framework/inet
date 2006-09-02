@@ -102,5 +102,9 @@ public:
 };
 
 
+inline std::ostream& operator<<(std::ostream& os, const RadioState& r)
+{
+    return os << r.info();
+}
 
 #endif

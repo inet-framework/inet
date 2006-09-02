@@ -28,6 +28,9 @@
 //FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
 //FIXME while scanning, discard all other requests
 //FIXME where to put LCC header (SNAP)..?
+//FIXME control frames should be transmitted at 2Mbps! (basic data rate set: 1, 2Mbps)
+//FIXME mac: minCW is 31 for 802.11b, 7 for 2Mbps
+//FIXME mac should be able to signal if 
 
 Define_Module(Ieee80211MgmtSTA);
 

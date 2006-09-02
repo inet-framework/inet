@@ -20,7 +20,7 @@
 
 //FIXME docu
 
-#include "Radio.h"
+#include "AbstractRadio.h"
 #include "TransmComplete_m.h"
 #include "FWMath.h"
 #include "Consts80211.h"  //XXX for 802.11 only
@@ -30,17 +30,15 @@
 #define TRANSM_OVER 1  // timer to indicate that a message is completely sent now
 
 
-Define_Module(Radio);
-
-Radio::Radio() : rs(this->id())
+AbstractRadio::AbstractRadio() : rs(this->id())
 {
 }
 
-void Radio::initialize(int stage)
+void AbstractRadio::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << "Initializing Radio, stage=" << stage << endl;
+    EV << "Initializing AbstractRadio, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -63,7 +61,7 @@ void Radio::initialize(int stage)
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
         pathLossAlpha = par("pathLossAlpha");
         if (pathLossAlpha < (double) (cc->par("alpha")))
-            error("Radio::initialize(): pathLossAlpha can't be smaller than in "
+            error("AbstractRadio::initialize(): pathLossAlpha can't be smaller than in "
                   "ChannelControl. Please adjust your omnetpp.ini file accordingly");
 
         // initialize noiseLevel
@@ -109,11 +107,11 @@ void Radio::initialize(int stage)
     }
 }
 
-void Radio::finish()
+void AbstractRadio::finish()
 {
 }
 
-Radio::~Radio()
+AbstractRadio::~AbstractRadio()
 {
     // delete messages being received
     for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
@@ -135,7 +133,7 @@ Radio::~Radio()
  * @sa handleUpperMsg, handleLowerMsgStart, handleLowerMsgEnd,
  * handleSelfMsg
  */
-void Radio::handleMessage(cMessage *msg)
+void AbstractRadio::handleMessage(cMessage *msg)
 {
     // handle commands
     if (msg->arrivalGateId()==uppergateIn && msg->kind()!=0)
@@ -188,7 +186,7 @@ void Radio::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void Radio::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
+void AbstractRadio::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     TransmComplete *endRxTimer = new TransmComplete(NULL);
@@ -206,7 +204,7 @@ void Radio::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime a
  * headerLength, sets the pSend (transmitterPower) and returns the
  * AirFrame.
  */
-AirFrame *Radio::encapsMsg(cMessage *msg)
+AirFrame *AbstractRadio::encapsMsg(cMessage *msg)
 {
     AirFrame *frame = createCapsulePkt();
     frame->setName(msg->name());
@@ -220,29 +218,6 @@ AirFrame *Radio::encapsMsg(cMessage *msg)
 }
 
 /**
- * Usually the duration is just the frame length divided by the
- * bitrate. However there may be cases (like 802.11) where the header
- * has a different modulation (and thus a different bitrate) than the
- * rest of the message.
- *
- * XXX Ieee80211:
- * The header is sent with 1Mbit/s and the rest with the bitrate read in in initialize().
- */
-double Radio::calcDuration(cMessage *af)
-{
-    //XXX generic:
-    //double duration;
-    //duration = (double) af->length() / (double) bitrate;
-    //return duration;
-
-    //XXX Ieee80211:
-    EV << "bits without header: " << af->length() -
-        headerLength << ", bits header: " << headerLength << endl;
-    return ((af->length() - headerLength) / bitrate + headerLength / BITRATE_HEADER);
-}
-
-
-/**
  * Attach control info to the message and send message to the upper
  * layer.
  *
@@ -251,7 +226,7 @@ double Radio::calcDuration(cMessage *af)
  *
  * to be called within @ref handleLowerMsgEnd.
  */
-void Radio::sendUp(AirFrame *msg, SnrList& list)
+void AbstractRadio::sendUp(AirFrame *msg, SnrList& list)
 {
     // create ControlInfo
     SnrControlInfo *cInfo = new SnrControlInfo;
@@ -268,7 +243,7 @@ void Radio::sendUp(AirFrame *msg, SnrList& list)
  *
  * @sa sendToChannel
  */
-void Radio::sendDown(AirFrame *msg)
+void AbstractRadio::sendDown(AirFrame *msg)
 {
     sendToChannel(msg);
 }
@@ -277,7 +252,7 @@ void Radio::sendDown(AirFrame *msg)
  * Get the context pointer to the now completely received AirFrame and
  * delete the self message
  */
-AirFrame *Radio::unbufferMsg(cMessage *msg)
+AirFrame *AbstractRadio::unbufferMsg(cMessage *msg)
 {
     AirFrame *frame = (AirFrame *) msg->contextPointer();
     //delete the self message
@@ -296,7 +271,7 @@ AirFrame *Radio::unbufferMsg(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void Radio::handleUpperMsg(AirFrame * frame)
+void AbstractRadio::handleUpperMsg(AirFrame * frame)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -332,7 +307,7 @@ void Radio::handleUpperMsg(AirFrame * frame)
     sendDown(frame);
 }
 
-void Radio::handleCommand(int msgkind, cPolymorphic *ctrl)
+void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
 {
     if (msgkind==PHY_C_CHANGECHANNEL)
     {
@@ -364,7 +339,7 @@ void Radio::handleCommand(int msgkind, cPolymorphic *ctrl)
  * channel. If the noise level is bigger than the sensitivity switch
  * to receive mode odtherwise to idle mode.
  */
-void Radio::handleSelfMsg(cMessage *msg)
+void AbstractRadio::handleSelfMsg(cMessage *msg)
 {
     if (msg->kind() == TRANSM_OVER)
     {
@@ -421,7 +396,7 @@ void Radio::handleSelfMsg(cMessage *msg)
  * currently being received message (if any) has to be updated as
  * well as the RadioState.
  */
-void Radio::handleLowerMsgStart(AirFrame * frame)
+void AbstractRadio::handleLowerMsgStart(AirFrame * frame)
 {
     // Calculate the receive power of the message
 
@@ -500,7 +475,7 @@ void Radio::handleLowerMsgStart(AirFrame * frame)
  * If the corresponding AirFrame was not only noise the corresponding
  * SnrList and the AirFrame are sent to the decider.
  */
-void Radio::handleLowerMsgEnd(AirFrame * frame)
+void AbstractRadio::handleLowerMsgEnd(AirFrame * frame)
 {
     // check if message has to be send to the decider
     if (snrInfo.ptr == frame)
@@ -560,7 +535,7 @@ void Radio::handleLowerMsgEnd(AirFrame * frame)
 /**
  * The Snr information of the buffered message is updated.
  */
-void Radio::addNewSnr()
+void AbstractRadio::addNewSnr()
 {
     SnrListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
@@ -568,21 +543,7 @@ void Radio::addNewSnr()
     snrInfo.sList.push_back(listEntry);
 }
 
-
-/**
- * This function simply calculates with how much power the signal
- * arrives "here". If a different way of computing the path loss is
- * required this function can be redefined.
- */
-double Radio::calcRcvdPower(double pSend, double distance)
-{
-    double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
-    return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
-}
-
-
-void Radio::changeChannel(int channel)
+void AbstractRadio::changeChannel(int channel)
 {
     if (channel == rs.getChannel())
         return;

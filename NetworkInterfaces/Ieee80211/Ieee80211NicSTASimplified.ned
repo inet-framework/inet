@@ -41,7 +41,8 @@ module Ieee80211NicSTASimplified
             display: "p=96,155;i=block/layer";
         decider: Decider80211;
             display: "p=106,225;i=block/process_s";
-        snrEval: SnrEval80211;
+        //snrEval: SnrEval80211;
+        snrEval: Radio;
             display: "p=96,304;i=block/wrxtx";
     connections:
         radioIn --> snrEval.radioIn;
