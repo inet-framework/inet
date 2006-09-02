@@ -20,25 +20,28 @@
 
 //FIXME docu
 
-#include "AbstractRadio.h"
+#include "RadioBase.h"
 #include "TransmComplete_m.h"
 #include "FWMath.h"
-#include "Consts80211.h"  //XXX for 802.11 only
+#include "PhyControlInfo_m.h"
 
+#include "Consts80211.h"  //XXX COLLISION and BITERROR are defined there!!!!
 
 
 #define TRANSM_OVER 1  // timer to indicate that a message is completely sent now
 
 
-AbstractRadio::AbstractRadio() : rs(this->id())
+RadioBase::RadioBase() : rs(this->id())
 {
+    radioModel = NULL;
+    receptionModel = NULL;
 }
 
-void AbstractRadio::initialize(int stage)
+void RadioBase::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << "Initializing AbstractRadio, stage=" << stage << endl;
+    EV << "Initializing RadioBase, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -61,7 +64,7 @@ void AbstractRadio::initialize(int stage)
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
         pathLossAlpha = par("pathLossAlpha");
         if (pathLossAlpha < (double) (cc->par("alpha")))
-            error("AbstractRadio::initialize(): pathLossAlpha can't be smaller than in "
+            error("RadioBase::initialize(): pathLossAlpha can't be smaller than in "
                   "ChannelControl. Please adjust your omnetpp.ini file accordingly");
 
         // initialize noiseLevel
@@ -107,12 +110,15 @@ void AbstractRadio::initialize(int stage)
     }
 }
 
-void AbstractRadio::finish()
+void RadioBase::finish()
 {
 }
 
-AbstractRadio::~AbstractRadio()
+RadioBase::~RadioBase()
 {
+    delete radioModel;
+    delete receptionModel;
+
     // delete messages being received
     for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
         delete it->first;
@@ -133,7 +139,7 @@ AbstractRadio::~AbstractRadio()
  * @sa handleUpperMsg, handleLowerMsgStart, handleLowerMsgEnd,
  * handleSelfMsg
  */
-void AbstractRadio::handleMessage(cMessage *msg)
+void RadioBase::handleMessage(cMessage *msg)
 {
     // handle commands
     if (msg->arrivalGateId()==uppergateIn && msg->kind()!=0)
@@ -186,7 +192,7 @@ void AbstractRadio::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void AbstractRadio::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
+void RadioBase::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     TransmComplete *endRxTimer = new TransmComplete(NULL);
@@ -204,7 +210,7 @@ void AbstractRadio::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t 
  * headerLength, sets the pSend (transmitterPower) and returns the
  * AirFrame.
  */
-AirFrame *AbstractRadio::encapsMsg(cMessage *msg)
+AirFrame *RadioBase::encapsMsg(cMessage *msg)
 {
     AirFrame *frame = createCapsulePkt();
     frame->setName(msg->name());
@@ -212,12 +218,12 @@ AirFrame *AbstractRadio::encapsMsg(cMessage *msg)
     frame->setLength(headerLength);
     frame->setChannelNumber(channelNumber());
     frame->encapsulate(msg);
-    frame->setDuration(calcDuration(frame));
+    frame->setDuration(radioModel->calcDuration(frame));
     frame->setSenderPos(myPosition());
     return frame;
 }
 
-void AbstractRadio::sendUp(AirFrame *msg)
+void RadioBase::sendUp(AirFrame *msg)
 {
     cMessage *frame = msg->decapsulate();
     delete msg;
@@ -230,7 +236,7 @@ void AbstractRadio::sendUp(AirFrame *msg)
  *
  * @sa sendToChannel
  */
-void AbstractRadio::sendDown(AirFrame *msg)
+void RadioBase::sendDown(AirFrame *msg)
 {
     sendToChannel(msg);
 }
@@ -239,7 +245,7 @@ void AbstractRadio::sendDown(AirFrame *msg)
  * Get the context pointer to the now completely received AirFrame and
  * delete the self message
  */
-AirFrame *AbstractRadio::unbufferMsg(cMessage *msg)
+AirFrame *RadioBase::unbufferMsg(cMessage *msg)
 {
     AirFrame *frame = (AirFrame *) msg->contextPointer();
     //delete the self message
@@ -258,7 +264,7 @@ AirFrame *AbstractRadio::unbufferMsg(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void AbstractRadio::handleUpperMsg(AirFrame * frame)
+void RadioBase::handleUpperMsg(AirFrame * frame)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -294,7 +300,7 @@ void AbstractRadio::handleUpperMsg(AirFrame * frame)
     sendDown(frame);
 }
 
-void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
+void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
 {
     if (msgkind==PHY_C_CHANGECHANNEL)
     {
@@ -326,7 +332,7 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
  * channel. If the noise level is bigger than the sensitivity switch
  * to receive mode odtherwise to idle mode.
  */
-void AbstractRadio::handleSelfMsg(cMessage *msg)
+void RadioBase::handleSelfMsg(cMessage *msg)
 {
     if (msg->kind() == TRANSM_OVER)
     {
@@ -383,7 +389,7 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
  * currently being received message (if any) has to be updated as
  * well as the RadioState.
  */
-void AbstractRadio::handleLowerMsgStart(AirFrame * frame)
+void RadioBase::handleLowerMsgStart(AirFrame * frame)
 {
     // Calculate the receive power of the message
 
@@ -393,7 +399,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * frame)
     double distance = myPos.distance(framePos);
 
     // calculate receive power
-    double rcvdPower = calculateReceivedPower(frame->getPSend(), distance);
+    double rcvdPower = receptionModel->calculateReceivedPower(frame->getPSend(), carrierFrequency, distance);
 
     // store the receive power in the recvBuff
     recvBuff[frame] = rcvdPower;
@@ -462,7 +468,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * frame)
  * If the corresponding AirFrame was not only noise the corresponding
  * SnrList and the AirFrame are sent to the decider.
  */
-void AbstractRadio::handleLowerMsgEnd(AirFrame * frame)
+void RadioBase::handleLowerMsgEnd(AirFrame * frame)
 {
     // check if message has to be send to the decider
     if (snrInfo.ptr == frame)
@@ -481,11 +487,11 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * frame)
         recvBuff.erase(frame);
 
         // send up the frame:
-        //if (isReceivedCorrectly(frame, list))
+        //if (radioModel->isReceivedCorrectly(frame, list))
         //    sendUp(frame);
         //else
         //    delete frame;
-        if (!isReceivedCorrectly(frame, list))
+        if (!radioModel->isReceivedCorrectly(frame, list))
         {
             frame->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
             frame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
@@ -531,7 +537,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * frame)
 /**
  * The Snr information of the buffered message is updated.
  */
-void AbstractRadio::addNewSnr()
+void RadioBase::addNewSnr()
 {
     SnrListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
@@ -539,7 +545,7 @@ void AbstractRadio::addNewSnr()
     snrInfo.sList.push_back(listEntry);
 }
 
-void AbstractRadio::changeChannel(int channel)
+void RadioBase::changeChannel(int channel)
 {
     if (channel == rs.getChannel())
         return;

@@ -61,7 +61,7 @@ class INET_API Ieee80211Radio : public AbstractRadio
     virtual double calcDuration(AirFrame *);
 
     /** Calculates the power with which a packet is received.*/
-    virtual double calcRcvdPower(double pSend, double distance);
+    virtual double calculateReceivedPower(double pSend, double distance);
 
     virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList);
 

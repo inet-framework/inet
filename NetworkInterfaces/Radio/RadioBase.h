@@ -17,13 +17,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef ABSTRACTRADIO_H
-#define ABSTRACTRADIO_H
+#ifndef RADIOBASE_H
+#define RADIOBASE_H
 
 #include "ChannelAccess.h"
 #include "RadioState.h"
 #include "AirFrame_m.h"
-#include "PhyControlInfo_m.h"
+#include "IRadioModel.h"
+#include "IReceptionModel.h"
+
 
 //FIXME docu
 
@@ -53,10 +55,10 @@
  * @author Marc Loebbers
  * @ingroup snrEval
  */
-class INET_API AbstractRadio : public ChannelAccess
+class INET_API RadioBase : public ChannelAccess
 {
   public:
-    AbstractRadio();
+    RadioBase();
 
     /** @brief change transmitter and receiver to a new channel.
       * This method throws an error if the radio state is transmit.
@@ -72,7 +74,7 @@ class INET_API AbstractRadio : public ChannelAccess
 
     virtual void finish();
 
-    virtual ~AbstractRadio();
+    virtual ~RadioBase();
 
   protected:
     void handleMessage(cMessage *msg);
@@ -101,24 +103,8 @@ class INET_API AbstractRadio : public ChannelAccess
     /** @brief Sends a message to the channel*/
     void sendDown(AirFrame *msg);
 
-    /** @brief Encapsulates a MAC frame into an Air Frame*/
+    /** @brief Encapsulates a MAC frame into an Air Frame*/  //XXX into RadioModel too!!!
     virtual AirFrame *encapsMsg(cMessage *msg);
-
-    /**
-     * Should be defined to calculate the duration of the AirFrame.
-     * Usually the duration is just the frame length divided by the
-     * bitrate. However there may be cases (like 802.11) where the header
-     * has a different modulation (and thus a different bitrate) than the
-     * rest of the message.
-     */
-    virtual double calcDuration(AirFrame *) = 0;
-
-    virtual bool isReceivedCorrectly(AirFrame *af, const SnrList& receivedList) = 0;
-
-    /**
-     * Should be defined to calculates the power with which a packet is received.
-     */
-    virtual double calculateReceivedPower(double pSend, double distance) = 0;
 
     /** Redefined from BasicRadio */
     virtual int channelNumber() const  {return rs.getChannel();}
@@ -130,6 +116,9 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual AirFrame* createCapsulePkt() {return new AirFrame();};
 
   protected:
+    IRadioModel *radioModel;
+    IReceptionModel *receptionModel;
+
     double bitrate;
     int headerLength;
 
@@ -144,7 +133,7 @@ class INET_API AbstractRadio : public ChannelAccess
 
     /**
      * @brief Struct to store a pointer to the message, rcvdPower AND a
-     * SnrList, needed in AbstractRadio::addNewSnr
+     * SnrList, needed in RadioBase::addNewSnr
      */
     struct SnrStruct {
       /** @brief Pointer to the message this information belongs to*/

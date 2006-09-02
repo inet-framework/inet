@@ -18,55 +18,34 @@
 //
 
 
-#include "Ieee80211Radio.h"
-#include "TransmComplete_m.h"
+#include "Ieee80211RadioModel.h"
 #include "FWMath.h"
-#include "Consts80211.h"  //XXX for 802.11 only
+#include "Consts80211.h"
 
+//FIXME AirFrame::bitRate must be set!!!!
 
+Register_Class(Ieee80211RadioModel);
 
-Define_Module(Ieee80211Radio);
-
-void Ieee80211Radio::initialize(int stage)
-{
-    AbstractRadio::initialize(stage);
-
-    if (stage==0)
-    {
-        snirThreshold = dB2fraction(par("snirThreshold")); //XXX use different name then...
-    }
-}
+#define HEADERLENGTH 192
 
 /**
  * The header is sent with 1Mbit/s and the rest with "bitrate"
  */
-double Ieee80211Radio::calcDuration(AirFrame *af)
+double Ieee80211RadioModel::calcDuration(AirFrame *af)  //FIXME this should accept bitRate as parameter!
 {
     //XXX generic:
     //double duration;
-    //duration = (double) af->length() / (double) bitrate;
+    //duration = (double) af->length() / (double) af->getBitRate();
     //return duration;
 
     //XXX Ieee80211:
     EV << "bits without header: " << af->length() -
-        headerLength << ", bits header: " << headerLength << endl;
-    return ((af->length() - headerLength) / bitrate + headerLength / BITRATE_HEADER);
-}
-
-/**
- * This function simply calculates with how much power the signal
- * arrives "here". If a different way of computing the path loss is
- * required this function can be redefined.
- */
-double Ieee80211Radio::calculateReceivedPower(double pSend, double distance)
-{
-    double speedOfLight = 300000000.0;
-    double waveLength = speedOfLight / carrierFrequency;
-    return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
+        HEADERLENGTH << ", bits header: " << HEADERLENGTH << endl;
+    return ((af->length() - HEADERLENGTH) / af->getBitRate() + HEADERLENGTH / BITRATE_HEADER);
 }
 
 
-bool Ieee80211Radio::isReceivedCorrectly(AirFrame *af, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *af, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -77,13 +56,14 @@ bool Ieee80211Radio::isReceivedCorrectly(AirFrame *af, const SnrList& receivedLi
     cMessage *fr = af->encapsulatedMsg();
     EV << "packet (" << fr->className() << ")" << fr->name() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
 
-    if (snirMin <= snirThreshold)
+    double snirThreshold=0; //FIXME just temporary
+    if (snirMin <= snirThreshold)  //FIXME this should go back to Radio!!!
     {
         // if snir is too low for the packet to be recognized
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, af->encapsulatedMsg()->length()))
+    else if (packetOk(snirMin, af->encapsulatedMsg()->length(), af->getBitRate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;
@@ -96,7 +76,7 @@ bool Ieee80211Radio::isReceivedCorrectly(AirFrame *af, const SnrList& receivedLi
 }
 
 
-bool Ieee80211Radio::packetOk(double snirMin, int lengthMPDU)
+bool Ieee80211RadioModel::packetOk(double snirMin, int lengthMPDU, double bitrate)
 {
     double berHeader, berMPDU;
 
@@ -133,7 +113,7 @@ bool Ieee80211Radio::packetOk(double snirMin, int lengthMPDU)
     }
 }
 
-double Ieee80211Radio::dB2fraction(double dB)
+double Ieee80211RadioModel::dB2fraction(double dB)
 {
     return pow(10.0, (dB / 10));
 }
