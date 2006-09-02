@@ -24,7 +24,6 @@
 #include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
 
 //FIXME comments...
-//FIXME command to switch the bitrate
 //FIXME controlInfo to set bitrate for one packet only
 
 #define MK_TRANSMISSION_OVER  1
@@ -48,15 +47,11 @@ void RadioBase::initialize(int stage)
         uppergateIn = findGate("uppergateIn");
         uppergateOut = findGate("uppergateOut");
 
+        // read parameters
         bitrate = par("bitrate");
-
         transmitterPower = par("transmitterPower");
-
-        // transmitter power CANNOT be greater than in ChannelControl
         if (transmitterPower > (double) (cc->par("pMax")))
             error("transmitterPower cannot be bigger than pMax in ChannelControl!");
-
-        // read parameters
         rs.setChannel(par("channelNumber"));
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
