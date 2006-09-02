@@ -57,19 +57,6 @@ class INET_API Decider80211 : public BasicDecider
     /** @brief computes if packet is ok or has errors*/
     bool packetOk(double, int);
 
-#ifdef _WIN32
-    /**
-     * @brief Implementation of the error function
-     *
-     * Unfortunately the windows math library does not provide an
-     * implementation of the error function, so we use an own
-     * implementation (Thanks to Jirka Klaue)
-     *
-     * @author Jirka Klaue
-     */
-    double erfc(double);
-#endif
-
   protected:
     /** @brief should be set in the omnetpp.ini*/
     double bitrate;
