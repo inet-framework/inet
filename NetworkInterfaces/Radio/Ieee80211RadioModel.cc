@@ -22,22 +22,21 @@
 #include "FWMath.h"
 #include "Consts80211.h"
 
-//FIXME AirFrame::bitRate must be set!!!!
 
 Register_Class(Ieee80211RadioModel);
 
+
 #define HEADERLENGTH 192
+
 
 void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 {
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
 }
 
-/**
- * The header is sent with 1Mbit/s and the rest with "bitrate"
- */
 double Ieee80211RadioModel::calcDuration(AirFrame *airframe)
 {
+    // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
     return airframe->length()/airframe->getBitRate() + HEADERLENGTH/BITRATE_HEADER;
 }
 
@@ -77,36 +76,30 @@ bool Ieee80211RadioModel::packetOk(double snirMin, int lengthMPDU, double bitrat
     double berHeader, berMPDU;
 
     berHeader = 0.5 * exp(-snirMin * BANDWIDTH / BITRATE_HEADER);
-    //if PSK modulation
+
+    // if PSK modulation
     if (bitrate == 1E+6 || bitrate == 2E+6)
         berMPDU = 0.5 * exp(-snirMin * BANDWIDTH / bitrate);
-    //if CCK modulation (modeled with 16-QAM)
+    // if CCK modulation (modeled with 16-QAM)
     else if (bitrate == 5.5E+6)
         berMPDU = 0.5 * (1 - 1 / sqrt(pow(2.0, 4))) * erfc(snirMin * BANDWIDTH / bitrate);
     else                        // CCK, modelled with 256-QAM
         berMPDU = 0.25 * (1 - 1 / sqrt(pow(2.0, 8))) * erfc(snirMin * BANDWIDTH / bitrate);
-    //probability of no bit error in the PLCP header
+
+    // probability of no bit error in the PLCP header
     double headerNoError = pow(1.0 - berHeader, HEADER_WITHOUT_PREAMBLE);
 
-    //probability of no bit error in the MPDU
+    // probability of no bit error in the MPDU
     double MpduNoError = pow(1.0 - berMPDU, lengthMPDU);
     EV << "berHeader: " << berHeader << " berMPDU: " << berMPDU << endl;
     double rand = dblrand();
 
-    //if error in header
     if (rand > headerNoError)
-        return (false);
+        return false; // error in header
+    else if (dblrand() > MpduNoError)
+        return false;  // error in MPDU
     else
-    {
-        rand = dblrand();
-
-        //if error in MPDU
-        if (rand > MpduNoError)
-            return (false);
-        //if no error
-        else
-            return (true);
-    }
+        return true; // no error
 }
 
 double Ieee80211RadioModel::dB2fraction(double dB)

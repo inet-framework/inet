@@ -30,8 +30,12 @@ void PathLossReceptionModel::initializeFrom(cModule *radioModule)
     //    error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
 }
 
+//FIXME add possibility to denote "bad channel" state
+//FIXME add possibility to add extra noise to snr (btw, use RcvdPowerList instead snrList for this?)
+
 double PathLossReceptionModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
+//FIXME pass in the node's position, plus in general the whole cc too!
     const double speedOfLight = 300000000.0;
     double waveLength = speedOfLight / carrierFrequency;
     return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));

@@ -25,6 +25,10 @@
 #include "Consts80211.h"  //XXX COLLISION and BITERROR are defined there!!!!
 
 
+//FIXME comments...
+//FIXME command to switch the bitrate
+//FIXME controlInfo to set bitrate for one packet only
+
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
 
