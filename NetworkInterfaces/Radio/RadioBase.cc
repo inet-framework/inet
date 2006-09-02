@@ -94,6 +94,8 @@ void RadioBase::initialize(int stage)
             error("Wrong bit rate for 802.11, valid values are 1E+6, 2E+6, 5.5E+6 or 11E+6");
         headerLength = 192;
 
+        receptionModel = createReceptionModel();
+        radioModel = createRadioModel();
     }
     else if (stage == 1)
     {
@@ -218,6 +220,7 @@ AirFrame *RadioBase::encapsMsg(cMessage *msg)
     frame->setLength(headerLength);
     frame->setChannelNumber(channelNumber());
     frame->encapsulate(msg);
+    frame->setBitRate(bitrate);
     frame->setDuration(radioModel->calcDuration(frame));
     frame->setSenderPos(myPosition());
     return frame;

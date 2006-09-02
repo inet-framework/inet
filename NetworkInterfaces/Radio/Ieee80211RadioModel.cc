@@ -28,6 +28,10 @@ Register_Class(Ieee80211RadioModel);
 
 #define HEADERLENGTH 192
 
+void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
+{
+}
+
 /**
  * The header is sent with 1Mbit/s and the rest with "bitrate"
  */

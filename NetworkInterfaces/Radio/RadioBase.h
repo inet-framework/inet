@@ -115,6 +115,9 @@ class INET_API RadioBase : public ChannelAccess
     /** @brief Create a new AirFrame */
     virtual AirFrame* createCapsulePkt() {return new AirFrame();};
 
+    virtual IRadioModel *createRadioModel() = 0;
+    virtual IReceptionModel *createReceptionModel() = 0;
+
   protected:
     IRadioModel *radioModel;
     IReceptionModel *receptionModel;
