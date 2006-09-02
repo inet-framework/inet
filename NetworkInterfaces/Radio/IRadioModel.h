@@ -21,6 +21,7 @@
 
 #include "INETDefs.h"
 #include "AirFrame_m.h"
+#include "SnrList.h"
 
 /**
  * Abstract class to encapsulate the calculation of received power of a

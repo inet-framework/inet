@@ -25,6 +25,7 @@
 
 #include "ChannelAccess.h"
 #include "AirFrame_m.h"
+#include "SnrControlInfo_m.h"
 
 
 /**

@@ -25,6 +25,7 @@
 
 #include "BasicModule.h"
 #include "AirFrame_m.h"
+#include "SnrControlInfo_m.h"
 
 
 /**

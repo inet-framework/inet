@@ -117,7 +117,8 @@ NetworkInterfaces/PPP/PPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
 NetworkInterfaces/PPP/PPPInterfaceNoQueue.ned
 NetworkInterfaces/PPP/ThruputMeter.ned
-NetworkInterfaces/Radio/Ieee80211Radio.ned
+NetworkInterfaces/Radio/Ieee80211Radio2.ned
+NetworkInterfaces/Radio/old/Ieee80211Radio.ned
 Nodes/INET/BurstHost.ned
 Nodes/INET/FailedRouter.ned
 Nodes/INET/MobileHost.ned

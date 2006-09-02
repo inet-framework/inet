@@ -28,6 +28,9 @@
 class INET_API Ieee80211RadioModel : public IRadioModel
 {
   protected:
+    double snirThreshold;
+
+  protected:
     virtual void initializeFrom(cModule *radioModule);
 
     virtual double calcDuration(AirFrame *);

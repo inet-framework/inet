@@ -18,17 +18,15 @@
 //
 
 
-//FIXME docu
-
 #include "RadioBase.h"
-#include "TransmComplete_m.h"
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
 
 #include "Consts80211.h"  //XXX COLLISION and BITERROR are defined there!!!!
 
 
-#define TRANSM_OVER 1  // timer to indicate that a message is completely sent now
+#define MK_TRANSMISSION_OVER  1
+#define MK_RECEPTION_COMPLETE 2
 
 
 RadioBase::RadioBase() : rs(this->id())
@@ -48,7 +46,6 @@ void RadioBase::initialize(int stage)
         uppergateIn = findGate("uppergateIn");
         uppergateOut = findGate("uppergateOut");
 
-        headerLength = par("headerLength");
         bitrate = par("bitrate");
 
         transmitterPower = par("transmitterPower");
@@ -62,10 +59,6 @@ void RadioBase::initialize(int stage)
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
-        pathLossAlpha = par("pathLossAlpha");
-        if (pathLossAlpha < (double) (cc->par("alpha")))
-            error("RadioBase::initialize(): pathLossAlpha can't be smaller than in "
-                  "ChannelControl. Please adjust your omnetpp.ini file accordingly");
 
         // initialize noiseLevel
         noiseLevel = thermalNoise;
@@ -89,13 +82,11 @@ void RadioBase::initialize(int stage)
         WATCH(noiseLevel);
         WATCH(rs);
 
-        //XXX for the 802.11 model only:
-        if (bitrate != 1E+6 && bitrate != 2E+6 && bitrate != 5.5E+6 && bitrate != 11E+6)
-            error("Wrong bit rate for 802.11, valid values are 1E+6, 2E+6, 5.5E+6 or 11E+6");
-        headerLength = 192;
-
         receptionModel = createReceptionModel();
+        receptionModel->initializeFrom(this);
+
         radioModel = createRadioModel();
+        radioModel->initializeFrom(this);
     }
     else if (stage == 1)
     {
@@ -162,7 +153,7 @@ void RadioBase::handleMessage(cMessage *msg)
     }
     else if (msg->isSelfMessage())
     {
-        if (dynamic_cast<TransmComplete *>(msg) != 0)
+        if (msg->kind()==MK_RECEPTION_COMPLETE)
         {
             EV << "frame is completely received now\n";
 
@@ -197,9 +188,10 @@ void RadioBase::handleMessage(cMessage *msg)
 void RadioBase::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
-    TransmComplete *endRxTimer = new TransmComplete(NULL);
+    cMessage *endRxTimer = new cMessage("endRx", MK_RECEPTION_COMPLETE);
     endRxTimer->setContextPointer(frame);
     frame->setContextPointer(endRxTimer);
+
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
@@ -208,8 +200,6 @@ void RadioBase::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t atTi
 
 /**
  * This function encapsulates messages from the upper layer into an
- * AirFrame, copies the type and channel fields, adds the
- * headerLength, sets the pSend (transmitterPower) and returns the
  * AirFrame.
  */
 AirFrame *RadioBase::encapsMsg(cMessage *msg)
@@ -217,12 +207,13 @@ AirFrame *RadioBase::encapsMsg(cMessage *msg)
     AirFrame *frame = createCapsulePkt();
     frame->setName(msg->name());
     frame->setPSend(transmitterPower);
-    frame->setLength(headerLength);
     frame->setChannelNumber(channelNumber());
+frame->setLength(192);//XXX
     frame->encapsulate(msg);
     frame->setBitRate(bitrate);
     frame->setDuration(radioModel->calcDuration(frame));
     frame->setSenderPos(myPosition());
+    // note: bit length (length()) of the AirFrame is irrelevant, duration is used instead
     return frame;
 }
 
@@ -298,7 +289,7 @@ void RadioBase::handleUpperMsg(AirFrame * frame)
     EV << "sending, changing RadioState to TRANSMIT\n";
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 
-    cMessage *timer = new cMessage(NULL, TRANSM_OVER);
+    cMessage *timer = new cMessage(NULL, MK_TRANSMISSION_OVER);
     scheduleAt(simTime() + frame->getDuration(), timer);
     sendDown(frame);
 }
@@ -337,7 +328,7 @@ void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
  */
 void RadioBase::handleSelfMsg(cMessage *msg)
 {
-    if (msg->kind() == TRANSM_OVER)
+    if (msg->kind() == MK_TRANSMISSION_OVER)
     {
         if (noiseLevel < sensitivity)
         {
@@ -489,7 +480,7 @@ void RadioBase::handleLowerMsgEnd(AirFrame * frame)
         // delete the frame from the recvBuff
         recvBuff.erase(frame);
 
-        // send up the frame:
+        //XXX send up the frame:
         //if (radioModel->isReceivedCorrectly(frame, list))
         //    sendUp(frame);
         //else
@@ -498,7 +489,6 @@ void RadioBase::handleLowerMsgEnd(AirFrame * frame)
         {
             frame->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
             frame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
-            delete frame;
         }
         sendUp(frame);
     }

@@ -21,16 +21,16 @@
 #define IEEE80211RADIO_H
 
 #include "RadioBase.h"
-//FIXME docu
 
 /**
- *...
+ * Radio for the IEEE 802.11 model. Uses PathLossReceptionModel and 
+ * Ieee80211RadioModel.
  */
 class INET_API Ieee80211Radio2 : public RadioBase
 {
   protected:
-    virtual IRadioModel *createRadioModel() {return (IRadioModel *)createOne("Ieee80211RadioModel");}
     virtual IReceptionModel *createReceptionModel() {return (IReceptionModel *)createOne("PathLossReceptionModel");}
+    virtual IRadioModel *createRadioModel() {return (IRadioModel *)createOne("Ieee80211RadioModel");}
 };
 
 #endif

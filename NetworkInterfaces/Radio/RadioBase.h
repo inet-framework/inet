@@ -25,6 +25,7 @@
 #include "AirFrame_m.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
+#include "SnrList.h"
 
 
 //FIXME docu
@@ -123,7 +124,6 @@ class INET_API RadioBase : public ChannelAccess
     IReceptionModel *receptionModel;
 
     double bitrate;
-    int headerLength;
 
     /** @brief power used to transmit messages */
     double transmitterPower;
@@ -193,14 +193,6 @@ class INET_API RadioBase : public ChannelAccess
      * -85 dBm
      */
     double sensitivity;
-
-    /**
-     * @brief Configuration: Path loss coefficient. Can be specified in omnetpp.ini. If
-     * not it is read from the ChannelControl module. This value CANNOT
-     * be smaller than the one specified in the ChannelControl
-     * module, or the simulation will exit with an error!
-     */
-    double pathLossAlpha;
 };
 
 #endif

@@ -30,6 +30,7 @@ Register_Class(Ieee80211RadioModel);
 
 void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 {
+    snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
 }
 
 /**
@@ -60,8 +61,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *af, const SnrList& recei
     cMessage *fr = af->encapsulatedMsg();
     EV << "packet (" << fr->className() << ")" << fr->name() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
 
-    double snirThreshold=0; //FIXME just temporary
-    if (snirMin <= snirThreshold)  //FIXME this should go back to Radio!!!
+    if (snirMin <= snirThreshold)
     {
         // if snir is too low for the packet to be recognized
         EV << "COLLISION! Packet got lost\n";

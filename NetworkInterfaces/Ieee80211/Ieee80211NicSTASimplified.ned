@@ -68,7 +68,7 @@ module Ieee80211NicSTASimplified_NEW  //XXX
             parameters:
                 queueModule = "mgmt";
             display: "p=96,155;i=block/layer";
-        snrEval: Ieee80211Radio;
+        snrEval: Ieee80211Radio2;
             display: "p=96,304;i=block/wrxtx";
     connections:
         radioIn --> snrEval.radioIn;

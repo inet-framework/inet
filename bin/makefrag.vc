@@ -4,7 +4,8 @@ EXTRA_OBJS= $(EXTRA_OBJS) $(QUAGGA)/ospfd/ospfd.lib $(QUAGGA)/ripd/ripd.lib $(QU
 
 OMNETPP_CMD_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(CMDENV_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
-all: $(TARGET) cmd$(TARGET)
+#all: $(TARGET) cmd$(TARGET)
+all: $(TARGET)
 
 cmd$(TARGET): $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS)  Makefile.vc
 	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_CMD_LIBS) /out:cmd$(TARGET)
