@@ -36,6 +36,8 @@
 // a message (i.e. transmission startet) 2. message will be handed on
 // to the upper layer (i.e. transmission time is over)
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @see SnrEval
 // @author Marc Loebbers
 //

@@ -37,6 +37,8 @@ import
 // IMPORTANT:<br> In order to work with the ChannelControl module the snrEval
 // module has to be called "snrEval" in the ned file.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @see BasicMacLayer, SnrDecider, SnrEval
 //
 // @author Daniel Willkomm

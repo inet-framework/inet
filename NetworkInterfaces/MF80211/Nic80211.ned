@@ -26,6 +26,8 @@ import
 //
 // This NIC implements an 802.11 network interface card.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @see Mac80211, Decider80211, SnrEval80211
 // @author Marc Loebbers
 //

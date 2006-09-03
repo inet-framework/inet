@@ -19,6 +19,8 @@ class MacPkt;
 //
 // Defines all fields of an 802.11 MAC frame
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 message Mac80211Pkt extends MacPkt
 {
    fields:

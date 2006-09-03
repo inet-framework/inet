@@ -21,6 +21,8 @@
 //
 // Decider module of the 802.11 modules
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple Decider80211
     parameters:
         debug : bool, // debug switch

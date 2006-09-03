@@ -96,7 +96,7 @@ class INET_API SnrEval : public BasicSnrEval
     double calcRcvdPower(double pSend, double distance);
 
     /** Redefined from BasicSnrEval */
-    virtual int channelNumber() const  {return rs.getChannel();}
+    virtual int channelNumber() const  {return rs.getChannelNumber();}
 
     /** @brief updates the snr information of the relevant AirFrames*/
     void addNewSnr();

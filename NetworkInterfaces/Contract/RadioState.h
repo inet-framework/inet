@@ -25,18 +25,13 @@
 #include "INETDefs.h"
 
 /**
- * @brief Class to hold the radio state of the host
+ * Holds the current state and other properties of the radio.
+ * Possible states are:
  *
- * Holds the actual state of the radio. Possible states
- * are : IDLE, RECV, TRANSMIT and SLEEP
- *
- * IDLE: channel is empty (radio is in receive mode)
- *
- * RECV: channel is busy (radio is in receive mode)
- *
- * TRANSMIT: the radio is transmitting
- *
- * SLEEP: the radio is sleeping
+ *  - IDLE: channel is empty (radio is in receive mode)
+ *  - RECV: channel is busy (radio is in receive mode)
+ *  - TRANSMIT: the radio is transmitting
+ *  - SLEEP: the radio is sleeping
  *
  * @ingroup utils
  * @author Andreas Köpke
@@ -62,12 +57,17 @@ class INET_API RadioState : public cPolymorphic
     State state;
 
     /** @brief The radio channel */
-    int channel;
+    int channelNumber;
 
     /** @brief The current transmit bitrate */
     double bitrate;
 
   public:
+    /** @brief Constructor */
+    RadioState(int radioModuleId) : cPolymorphic() {
+        radioId = radioModuleId; state = IDLE; channelNumber = -1; bitrate = -1;
+    }
+
     /** @brief id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
 
@@ -78,10 +78,10 @@ class INET_API RadioState : public cPolymorphic
     void setState(State s) { state = s; }
 
     /** @brief function to get the channel number (frequency) */
-    int getChannel() const { return channel; }
+    int getChannelNumber() const { return channelNumber; }
 
     /** @brief set the channel number (frequency) */
-    void setChannel(int chan) { channel = chan; }
+    void setChannelNumber(int chan) { channelNumber = chan; }
 
     /** @brief function to get the bitrate */
     double getBitrate() const { return bitrate; }
@@ -89,9 +89,7 @@ class INET_API RadioState : public cPolymorphic
     /** @brief set the bitrate */
     void setBitrate(double d) { bitrate = d; }
 
-    /** @brief Constructor */
-    RadioState(int radioModuleId) : cPolymorphic() {radioId=radioModuleId; state=IDLE; channel=-1; bitrate=-1;}
-
+    /** @brief Returns the name of the radio state in a readable form */
     static const char *stateName(State state) {
         switch(state) {
             case IDLE: return "IDLE";
@@ -105,7 +103,7 @@ class INET_API RadioState : public cPolymorphic
     /** @brief Enables inspection */
     std::string info() const {
         std::stringstream out;
-        out << stateName(state) << ", channel #" << channel << ", " << (bitrate/1e6) << "Mbps ";
+        out << stateName(state) << ", channel #" << channelNumber << ", " << (bitrate/1e6) << "Mbps ";
         return out.str();
     }
 

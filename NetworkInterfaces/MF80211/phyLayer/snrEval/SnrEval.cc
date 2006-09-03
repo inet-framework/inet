@@ -37,7 +37,7 @@ void SnrEval::initialize(int stage)
     if (stage == 0)
     {
         // read parameters
-        rs.setChannel(par("channelNumber"));
+        rs.setChannelNumber(par("channelNumber"));
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
@@ -79,7 +79,7 @@ void SnrEval::initialize(int stage)
     {
         // tell initial channel number to ChannelControl; should be done in
         // stage==2 or later, because base class initializes myHostRef in that stage
-        cc->updateHostChannel(myHostRef, rs.getChannel());
+        cc->updateHostChannel(myHostRef, rs.getChannelNumber());
     }
 }
 
@@ -176,7 +176,7 @@ void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
             EV << "Command received: change to channel " << newChannel << "\n";
 
             // do it
-            if (rs.getChannel()==newChannel)
+            if (rs.getChannelNumber()==newChannel)
                 EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
             else if (rs.getState()==RadioState::TRANSMIT) {
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
@@ -430,7 +430,7 @@ double SnrEval::calcRcvdPower(double pSend, double distance)
 
 void SnrEval::changeChannel(int channel)
 {
-    if (channel == rs.getChannel())
+    if (channel == rs.getChannelNumber())
         return;
     if (channel < 0 || channel >= cc->getNumChannels())
         error("changeChannel(): channel number %d is out of range (hint: numChannels is a parameter of ChannelControl)", channel);
@@ -458,7 +458,7 @@ void SnrEval::changeChannel(int channel)
     // do channel switch
     EV << "Changing channel to " << channel << "\n";
 
-    rs.setChannel(channel);
+    rs.setChannelNumber(channel);
     cc->updateHostChannel(myHostRef, channel);
     ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
 

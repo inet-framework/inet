@@ -40,6 +40,8 @@
 // All decider modules should assume bits as a unit for the length
 // fields.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @author Marc Löbbers, Daniel Willkomm
 //
 simple BasicDecider

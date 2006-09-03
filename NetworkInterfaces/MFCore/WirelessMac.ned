@@ -26,6 +26,8 @@
 // This is not an actual MAC implementation, just a prototype for wireless MAC's
 // that use a MF (Mobility Framework)-based physical layer.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @author Daniel Willkomm, Andras Varga
 //
 simple WirelessMac

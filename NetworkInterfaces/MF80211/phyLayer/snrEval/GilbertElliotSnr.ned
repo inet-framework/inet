@@ -21,6 +21,8 @@
 //
 // Gilbert-Elliot signal-noise evaluator
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple GilbertElliotSnr
     parameters:
     debug : bool, // debug switch

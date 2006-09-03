@@ -32,6 +32,8 @@
 // new channel number. If the radio is currently transmitting, the channel
 // switch will actually take place after the transmission is completed.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 //# FIXME merge docu with BasicSnrEval's
 simple SnrEval
     parameters:

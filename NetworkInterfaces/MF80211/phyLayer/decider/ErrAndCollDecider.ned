@@ -21,6 +21,8 @@
 //
 // Decider module to use with digital channel modules like GilbertElliotSnr
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple ErrAndCollDecider
     parameters:
         debug : bool, // debug switch

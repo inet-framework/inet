@@ -28,6 +28,8 @@ cplusplus {{
 // AirFrame is completely received. It has no parameters and was only
 // introduced to differentiate this timer from other self messages
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @author Daniel Willkomm
 //
 message TransmComplete

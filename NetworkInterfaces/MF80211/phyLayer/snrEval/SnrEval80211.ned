@@ -18,6 +18,9 @@
 // **************************************************************************/
 
 
+//
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple SnrEval80211
     parameters:
         channelNumber: numeric const, // channel identifier

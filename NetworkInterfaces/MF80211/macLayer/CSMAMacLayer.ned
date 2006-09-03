@@ -22,6 +22,8 @@
 //
 // CSMA MAC protocol
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple CSMAMacLayer
     parameters:
         debug: bool, // debug switch

@@ -38,6 +38,8 @@ class noncobject Coord;
 // your own message! Just extend (subclass) this message format (see Omnet
 // manual,chapter Messages - Inheritance among message classes).
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @todo As soon as opp_msgc also supports pointers we should replace
 // the id with a pointer to the nodes coordinates itself.
 // @author Marc Loebbers

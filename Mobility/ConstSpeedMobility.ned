@@ -31,6 +31,8 @@
 // position and updates the display. Once the target position is reached
 // ConstSpeedMobility calculates a new target position.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @see ChannelControl
 // @author Steffen Sroka, Marc Loebbers, Daniel Willkomm
 //

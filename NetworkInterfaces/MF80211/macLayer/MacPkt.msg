@@ -31,6 +31,8 @@ class noncobject MACAddress;
 // The basic MAC message only provides source and destination address
 // and and the channel it should be send on
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 // @author Daniel Willkomm
 //
 //# FIXME just temporary here

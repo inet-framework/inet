@@ -28,6 +28,8 @@
 // management frames), and does not support fragmentation, RTS threshold,
 // duplication detection and recovery.
 //
+// This component has been taken over from Mobility Framework 1.0a5.
+//
 simple Mac80211
     parameters:
         address : string,       // MAC address as hex string (12 hex digits), or
