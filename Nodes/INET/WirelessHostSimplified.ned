@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -33,9 +33,15 @@ import
 
 
 //
-// Models a host with one wireless (802.11b) card, but using a simplified NIC 
-// that does not support handovers. This module is basically a StandardHost 
-// with an Ieee80211NicSTASimplified added.
+// Models a host with one wireless (802.11b) card in infrastructure mode,
+// but using a simplified NIC that does not support handovers.
+// This module is basically a StandardHost with an Ieee80211NicSTASimplified
+// added. It should be used in conjunction with WirelessAPSimplified,
+// or any other AP model which contains Ieee80211NicAPSimplified.
+//
+// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
+// @see WirelessHost, WirelessHostSimplified
+// @see MobileHost, MFMobileHost
 //
 module WirelessHostSimplified
     parameters:

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -28,15 +28,16 @@ import
     "NetworkLayer",
     "PingApp",
     "Ieee80211Nic",
-    "Nic80211",
     "BasicMobility";
 
 
 //
-// Models a mobile host with a wireless (802.11b) card. This module is
-// a WirelessHost less the \PPP and Ethernet interfaces, plus mobility
-// support (BasicMobility). It is intended mainly for mobile ad-hoc
-// networks.
+// Models a mobile host with a wireless (802.11b) card in ad-hoc mode.
+// This model contains the new IEEE 802.11 implementation, Ieee80211Nic,
+// and IP, TCP and UDP protocols. The mobility model can be
+// dynamically specified with the mobilityType parameter.
+//
+// @see MFMobileHost, WirelessHost
 //
 module MobileHost
     parameters:
@@ -77,7 +78,7 @@ module MobileHost
                 ifIn[1],
                 ifOut[1];
             display: "p=248,247;i=block/fork;q=queue";
-        wlan: Ieee80211NicAdhoc; // Nic80211 also works, it uses MF's 802.11 implementation
+        wlan: Ieee80211Nic;
             display: "p=248,349;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
             display: "p=149,307;i=block/cogwheel";

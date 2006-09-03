@@ -27,6 +27,12 @@ import
 
 //
 // Models a 802.11 Access Point with Ethernet ports.
+// It can be used in conjunction with WirelessHost, or any other host model
+// containing WirelessNicSTA.
+//
+// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
+// @see WirelessHost, WirelessHostSimplified
+// @see MobileHost, MFMobileHost
 //
 module WirelessAPWithEth
     parameters:

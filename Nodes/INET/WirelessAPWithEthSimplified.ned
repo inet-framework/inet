@@ -26,8 +26,13 @@ import
 
 
 //
-// Models a 802.11 Access Point with Ethernet ports, but using a simplified NIC 
-// that does not support handovers.
+// Models a 802.11 Access Point with Ethernet ports, but using a simplified NIC
+// that does not support handovers. It can be used in conjunction with
+// WirelessHostSimplified, or any other host model containing WirelessNicSTASimplified.
+//
+// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
+// @see WirelessHost, WirelessHostSimplified
+// @see MobileHost, MFMobileHost
 //
 module WirelessAPWithEthSimplified
     parameters:

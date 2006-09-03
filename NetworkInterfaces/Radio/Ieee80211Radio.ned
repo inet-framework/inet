@@ -19,14 +19,14 @@
 
 
 //
-// Physical layer for the IEEE 802.11 models. Its external interface 
-// (including gates and how it communicates with other modules) 
-// is the same as the AbstractRadio module's.
+// Physical layer for the IEEE 802.11 models. Its external interface
+// (including gates and how it communicates with other modules)
+// is the same as the RadioPrototype module's.
 //
-// The implementation is largely based on the Mobility Framework's 
+// The implementation is largely based on the Mobility Framework's
 // SnrEval80211 and Decider80211 modules.
 //
-// @see AbstractRadio
+// @see RadioPrototype
 // @author Andras Varga
 //
 simple Ieee80211Radio

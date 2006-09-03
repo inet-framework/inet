@@ -34,7 +34,7 @@
 // new channel number. If the radio is currently transmitting, the channel
 // switch will actually take place after the transmission is completed.
 //
-simple AbstractRadio
+simple RadioPrototype
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)

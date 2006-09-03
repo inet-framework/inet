@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -27,22 +27,19 @@ import
     "UDPApp",
     "NetworkLayer",
     "PingApp",
-    "PPPInterface",
-    "EthernetInterface",
-    "Ieee80211Nic";
+    "Nic80211",
+    "BasicMobility";
 
 
 //
-// Models a host with one wireless (802.11b) card in infrastructure mode.
-// This module is basically a StandardHost with an Ieee80211NicSTA added.
-// It should be used in conjunction with WirelessAP, or any other AP model
-// which contains Ieee80211NicAP.
+// Models a mobile host with a wireless (802.11b) card in ad-hoc mode.
+// This model contains the Mobility Framework's 802.11 implementation, Nic80211,
+// and IP, TCP and UDP protocols. The mobility model can be dynamically
+// specified with the mobilityType parameter.
 //
-// @see WirelessAP, WirelessAPSimplified, WirelessAPWithEth, WirelessAPWithEthSimplified
-// @see WirelessHost, WirelessHostSimplified
-// @see MobileHost, MFMobileHost
+// @see MobileHost, WirelessHost
 //
-module WirelessHost
+module MFMobileHost
     parameters:
         numTcpApps: numeric const,
         numUdpApps: numeric const,
@@ -52,10 +49,6 @@ module WirelessHost
         routingFile: string,
         mobilityType: string;
     gates:
-        in: in[];
-        out: out[];
-        in: ethIn[];
-        out: ethOut[];
         in: radioIn;
     submodules:
         notificationBoard: NotificationBoard;
@@ -82,17 +75,13 @@ module WirelessHost
             parameters:
                 proxyARP = false;
             gatesizes:
-                ifIn[sizeof(out)+sizeof(ethOut)+1],
-                ifOut[sizeof(out)+sizeof(ethOut)+1];
+                ifIn[1],
+                ifOut[1];
             display: "p=248,247;i=block/fork;q=queue";
-        ppp: PPPInterface[sizeof(out)];
-            display: "p=205,350,row,90;q=txQueue;i=block/ifcard";
-        eth: EthernetInterface[sizeof(ethOut)];
-            display: "p=240,350,row,90;q=txQueue;i=block/ifcard";
-        wlan: Ieee80211NicSTA;
-            display: "p=120,350;q=queue;i=block/ifcard";
+        wlan: Nic80211;
+            display: "p=248,349;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
-            display: "p=58,301;i=block/cogwheel_s";
+            display: "p=149,307;i=block/cogwheel";
     connections nocheck:
         for i=0..numTcpApps-1 do
             tcpApp[i].tcpOut --> tcp.from_appl++;
@@ -114,22 +103,8 @@ module WirelessHost
         networkLayer.pingIn <-- pingApp.pingOut;
 
         // connections to network outside
-        for i=0..sizeof(out)-1 do
-            in[i] --> ppp[i].physIn;
-            out[i] <-- ppp[i].physOut;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
-        endfor;
-
-        for i=0..sizeof(ethOut)-1 do
-            ethIn[i] --> eth[i].physIn;
-            ethOut[i] <-- eth[i].physOut;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(out)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(out)+i];
-        endfor;
-
         radioIn --> wlan.radioIn;
-        wlan.uppergateOut --> networkLayer.ifIn[sizeof(out)+sizeof(ethOut)];
-        wlan.uppergateIn <-- networkLayer.ifOut[sizeof(out)+sizeof(ethOut)];
+        wlan.uppergateOut --> networkLayer.ifIn[0];
+        wlan.uppergateIn <-- networkLayer.ifOut[0];
 endmodule
 

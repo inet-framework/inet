@@ -22,7 +22,7 @@
 // management module types. It exists to specify what gates a management
 // module should have in order to be usable within Ieee80211Nic.
 //
-simple Ieee80211MgmtInterface
+simple Ieee80211Mgmt
     gates:
         in: uppergateIn;
         out: uppergateOut;

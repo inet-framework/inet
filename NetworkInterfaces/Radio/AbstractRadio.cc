@@ -18,7 +18,7 @@
 //
 
 
-#include "RadioBase.h"
+#include "AbstractRadio.h"
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
 #include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
@@ -31,17 +31,17 @@
 #define MK_RECEPTION_COMPLETE 2
 
 
-RadioBase::RadioBase() : rs(this->id())
+AbstractRadio::AbstractRadio() : rs(this->id())
 {
     radioModel = NULL;
     receptionModel = NULL;
 }
 
-void RadioBase::initialize(int stage)
+void AbstractRadio::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << "Initializing RadioBase, stage=" << stage << endl;
+    EV << "Initializing AbstractRadio, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -101,11 +101,11 @@ void RadioBase::initialize(int stage)
     }
 }
 
-void RadioBase::finish()
+void AbstractRadio::finish()
 {
 }
 
-RadioBase::~RadioBase()
+AbstractRadio::~AbstractRadio()
 {
     delete radioModel;
     delete receptionModel;
@@ -130,7 +130,7 @@ RadioBase::~RadioBase()
  * @sa handleUpperMsg, handleLowerMsgStart, handleLowerMsgEnd,
  * handleSelfMsg
  */
-void RadioBase::handleMessage(cMessage *msg)
+void AbstractRadio::handleMessage(cMessage *msg)
 {
     // handle commands
     if (msg->arrivalGateId()==uppergateIn && msg->length()==0)
@@ -182,7 +182,7 @@ void RadioBase::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void RadioBase::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_t atTime arg?
+void AbstractRadio::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     cMessage *endRxTimer = new cMessage("endRx", MK_RECEPTION_COMPLETE);
@@ -199,7 +199,7 @@ void RadioBase::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_t at
  * This function encapsulates messages from the upper layer into an
  * AirFrame.
  */
-AirFrame *RadioBase::encapsMsg(cMessage *frame)
+AirFrame *AbstractRadio::encapsMsg(cMessage *frame)
 {
     PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
     ASSERT(!ctrl || ctrl->channelNumber()==-1); // per-packet channel switching not supported
@@ -220,7 +220,7 @@ AirFrame *RadioBase::encapsMsg(cMessage *frame)
     return airframe;
 }
 
-void RadioBase::sendUp(AirFrame *airframe)
+void AbstractRadio::sendUp(AirFrame *airframe)
 {
     cMessage *frame = airframe->decapsulate();
     delete airframe;
@@ -233,7 +233,7 @@ void RadioBase::sendUp(AirFrame *airframe)
  *
  * @sa sendToChannel
  */
-void RadioBase::sendDown(AirFrame *airframe)
+void AbstractRadio::sendDown(AirFrame *airframe)
 {
     sendToChannel(airframe);
 }
@@ -242,7 +242,7 @@ void RadioBase::sendDown(AirFrame *airframe)
  * Get the context pointer to the now completely received AirFrame and
  * delete the self message
  */
-AirFrame *RadioBase::unbufferMsg(cMessage *msg)
+AirFrame *AbstractRadio::unbufferMsg(cMessage *msg)
 {
     AirFrame *airframe = (AirFrame *) msg->contextPointer();
     //delete the self message
@@ -261,7 +261,7 @@ AirFrame *RadioBase::unbufferMsg(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void RadioBase::handleUpperMsg(AirFrame *airframe)
+void AbstractRadio::handleUpperMsg(AirFrame *airframe)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -297,7 +297,7 @@ void RadioBase::handleUpperMsg(AirFrame *airframe)
     sendDown(airframe);
 }
 
-void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
+void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
 {
     if (msgkind==PHY_C_CONFIGURERADIO)
     {
@@ -348,7 +348,7 @@ void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
  * channel. If the noise level is bigger than the sensitivity switch
  * to receive mode odtherwise to idle mode.
  */
-void RadioBase::handleSelfMsg(cMessage *msg)
+void AbstractRadio::handleSelfMsg(cMessage *msg)
 {
     if (msg->kind() == MK_TRANSMISSION_OVER)
     {
@@ -405,7 +405,7 @@ void RadioBase::handleSelfMsg(cMessage *msg)
  * currently being received message (if any) has to be updated as
  * well as the RadioState.
  */
-void RadioBase::handleLowerMsgStart(AirFrame * airframe)
+void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
 {
     // Calculate the receive power of the message
 
@@ -484,7 +484,7 @@ void RadioBase::handleLowerMsgStart(AirFrame * airframe)
  * If the corresponding AirFrame was not only noise the corresponding
  * SnrList and the AirFrame are sent to the decider.
  */
-void RadioBase::handleLowerMsgEnd(AirFrame * airframe)
+void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
 {
     // check if message has to be send to the decider
     if (snrInfo.ptr == airframe)
@@ -552,7 +552,7 @@ void RadioBase::handleLowerMsgEnd(AirFrame * airframe)
 /**
  * The Snr information of the buffered message is updated.
  */
-void RadioBase::addNewSnr()
+void AbstractRadio::addNewSnr()
 {
     SnrListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
@@ -560,7 +560,7 @@ void RadioBase::addNewSnr()
     snrInfo.sList.push_back(listEntry);
 }
 
-void RadioBase::changeChannel(int channel)
+void AbstractRadio::changeChannel(int channel)
 {
     if (channel == rs.getChannel())
         return;
@@ -640,7 +640,7 @@ void RadioBase::changeChannel(int channel)
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }
 
-void RadioBase::setBitrate(double bitrate)
+void AbstractRadio::setBitrate(double bitrate)
 {
     if (rs.getBitrate() == bitrate)
         return;

@@ -17,7 +17,7 @@
 //
 
 import
-    "Ieee80211MgmtInterface",
+    "Ieee80211Mgmt",
     "Ieee80211Mac",
     "Ieee80211Radio";
 
@@ -34,7 +34,7 @@ module Ieee80211Nic
         out: uppergateOut; // from upper layers
         in: radioIn; // to receive AirFrames
     submodules:
-        mgmt: mgmtType like Ieee80211MgmtInterface;
+        mgmt: mgmtType like Ieee80211Mgmt;
             display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
         mac: Ieee80211Mac;
             parameters:

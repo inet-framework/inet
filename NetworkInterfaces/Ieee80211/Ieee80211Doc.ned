@@ -40,7 +40,7 @@
 //  -# physical layer (radio)
 //
 // <i>The physical layer</i> modules (Ieee80211Radio; with some limitations, 
-// Snr80211, Decider80211 can also be used) deal with modelling
+// SnrEval80211, Decider80211 can also be used) deal with modelling
 // transmission and reception of frames. They model the characteristics of
 // the radio channel, and determine if a frame was received correctly
 // (that is, it did not suffer bit errors due to low signal power or
