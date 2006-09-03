@@ -67,8 +67,7 @@ void Mac80211::initialize(int stage)
         broadcastBackoff = par("broadcastBackoff");
         rtsCts = par("rtsCts");
         bitrate = par("bitrate");
-        // TODO: WTF delta?
-        delta = 1E-9; // FIXME rename to epsilon
+        delta = 1E-9; //XXX it's rather "epsilon", but this delta business looks a bit dodgy a solution anyway
 
         radioState = RadioState::IDLE; // until 1st receiveChangeNotification()
 
@@ -638,7 +637,6 @@ void Mac80211::sendACKframe(Mac80211Pkt * af)
 {
     // the MAC must wait the end of the transmission before beginning an
     // other contention period
-    // TODO: WTF delta?
     scheduleAt(simTime() + packetDuration(LENGTH_ACK) + delta, endTransmission);
 
     // send ACK frame
@@ -969,20 +967,17 @@ double Mac80211::timeOut(_802_11frameType type, double last_frame_duration)
     switch (type)
     {
     case RTS:
-        // TODO: WTF delta?
         time_out = SIFS + packetDuration(LENGTH_RTS) + packetDuration(LENGTH_CTS) + delta;
         break;
     case CTS:
-        // TODO: WTF delta?
         time_out = last_frame_duration - packetDuration(LENGTH_ACK) - 2 * SIFS + delta;
         break;
     case DATA:
-        // TODO: WTF delta?
         time_out =
             SIFS + packetDuration(fromUpperLayer.front()->length()) + packetDuration(LENGTH_ACK) +
             delta + 0.1;
-        // FIXME: I have added some time here, because propagation delay of AirFrames caused problems
-        // the timeout periods should be carefully revised with special care for the deltas?!
+        //XXX: I have added some time here, because propagation delay of AirFrames caused problems
+        // the timeout periods should be carefully revised with special care for the deltas?! --Levy
         break;
     default:
         EV << "Unused frame type was given when calling timeOut(), this should not happen!\n";
