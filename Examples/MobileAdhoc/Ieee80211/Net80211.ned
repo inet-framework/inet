@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 
 
 import
-    "MFMobileHost",
+    "MobileHost",
     "ChannelControl";
 
 
@@ -28,7 +28,7 @@ module Net80211
         playgroundSizeX: numeric const,
         playgroundSizeY: numeric const;
     submodules:
-        host: MFMobileHost[numHosts];
+        host: MobileHost[numHosts];
             display: "i=device/pocketpc_s;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
@@ -37,7 +37,7 @@ module Net80211
             display: "p=60,50;i=misc/sun";
         configurator: FlatNetworkConfigurator;
             parameters:
-                moduleTypes = "MFMobileHost",
+                moduleTypes = "MobileHost",
                 nonIPModuleTypes = "",
                 networkAddress = "145.236.0.0",
                 netmask = "255.255.0.0";
