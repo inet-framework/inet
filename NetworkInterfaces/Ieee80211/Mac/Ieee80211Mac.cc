@@ -35,7 +35,7 @@ Ieee80211Mac::Ieee80211Mac()
     endTimeout = NULL;
     endReserve = NULL;
     mediumStateChange = NULL;
-    pendingRadioConfigCommand = NULL;
+    pendingRadioConfigMsg = NULL;
 }
 
 Ieee80211Mac::~Ieee80211Mac()
@@ -47,8 +47,8 @@ Ieee80211Mac::~Ieee80211Mac()
     cancelAndDelete(endReserve);
     cancelAndDelete(mediumStateChange);
 
-    if (pendingRadioConfigCommand)
-        delete pendingRadioConfigCommand;
+    if (pendingRadioConfigMsg)
+        delete pendingRadioConfigMsg;
 }
 
 /****************************************************************
@@ -65,6 +65,7 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
+        basicBitrate = 2e6; //FIXME make it parameter
         rtsThreshold = par("rtsThresholdBytes");
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
@@ -237,17 +238,17 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
     if (msg->kind()==PHY_C_CONFIGURERADIO)
     {
         EV << "Passing on command " << msg->name() << " to physical layer\n";
-        if (pendingRadioConfigCommand != NULL)
+        if (pendingRadioConfigMsg != NULL)
         {
             // merge contents of the old command into the new one, then delete it
-            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigCommand->controlInfo());
+            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->controlInfo());
             PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->controlInfo());
             if (pNew->channelNumber()==-1 && pOld->channelNumber()!=-1)
                 pNew->setChannelNumber(pOld->channelNumber());
             if (pNew->bitrate()==-1 && pOld->bitrate()!=-1)
                 pNew->setBitrate(pOld->bitrate());
-            delete pendingRadioConfigCommand;
-            pendingRadioConfigCommand = NULL;
+            delete pendingRadioConfigMsg;
+            pendingRadioConfigMsg = NULL;
         }
 
         if (fsm.state() == IDLE || fsm.state() == DEFER || fsm.state() == BACKOFF)
@@ -258,7 +259,7 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
         else
         {
             EV << "Delaying " << msg->name() << " until next IDLE or DEFER state\n";
-            pendingRadioConfigCommand = msg;
+            pendingRadioConfigMsg = msg;
         }
     }
     else
@@ -337,7 +338,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     {
         FSMA_State(IDLE)
         {
-            FSMA_Enter(sendDownChangeChannelMessage());
+            FSMA_Enter(sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMsg(msg),
                                   DEFER,
@@ -355,7 +356,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(DEFER)
         {
-            FSMA_Enter(sendDownChangeChannelMessage());
+            FSMA_Enter(sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Wait-DIFS,
                                   isMediumStateChange(msg) && isMediumFree(),
                                   WAITDIFS,
@@ -733,7 +734,7 @@ void Ieee80211Mac::sendACKFrameOnEndSIFS()
 void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
-    sendDown(buildACKFrame(frameToACK));
+    sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
 void Ieee80211Mac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -759,7 +760,7 @@ void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending RTS frame\n";
-    sendDown(buildRTSFrame(frameToSend));
+    sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
 }
 
 void Ieee80211Mac::sendCTSFrameOnEndSIFS()
@@ -773,7 +774,7 @@ void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV << "sending CTS frame\n";
-    sendDown(buildCTSFrame(rtsFrame));
+    sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
 }
 
 /****************************************************************
@@ -835,6 +836,15 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtF
     return frame;
 }
 
+Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
+{
+    ASSERT(frame->controlInfo()==NULL);
+    PhyControlInfo *ctrl = new PhyControlInfo();
+    ctrl->setBitrate(basicBitrate);
+    frame->setControlInfo(ctrl);
+    return frame;
+}
+
 /****************************************************************
  * Helper functions.
  */
@@ -865,12 +875,12 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::currentTransmission()
     return (Ieee80211DataOrMgmtFrame *)transmissionQueue.front();
 }
 
-void Ieee80211Mac::sendDownChangeChannelMessage()
+void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigCommand != NULL)
+    if (pendingRadioConfigMsg != NULL)
     {
-        sendDown(pendingRadioConfigCommand);
-        pendingRadioConfigCommand = NULL;
+        sendDown(pendingRadioConfigMsg);
+        pendingRadioConfigMsg = NULL;
     }
 }
 

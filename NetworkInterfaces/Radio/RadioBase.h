@@ -28,7 +28,7 @@
 #include "SnrList.h"
 
 
-//FIXME docu
+//FIXME update docu
 
 /**
  * @brief Keeps track of the different snir levels when receiving a
@@ -109,7 +109,7 @@ class INET_API RadioBase : public ChannelAccess
     /** @brief Sends a message to the channel*/
     void sendDown(AirFrame *airframe);
 
-    /** @brief Encapsulates a MAC frame into an Air Frame*/  //XXX into RadioModel too!!!
+    /** @brief Encapsulates a MAC frame into an Air Frame*/
     virtual AirFrame *encapsMsg(cMessage *msg);
 
     /** Redefined from BasicRadio */

@@ -73,8 +73,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief MAC address */
     MACAddress address;
 
-    /** @brief The bitrate should be set in omnetpp.ini; be sure to use a valid 802.11 bitrate */
+    /** @brief The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
     double bitrate;
+
+    /** @brief The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
+    double basicBitrate;
 
     /** @brief Maximal number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize;
@@ -151,7 +154,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
     /** @brief The last change channel message received and not yet sent to the physical layer or NULL.
         The message will be sent down when the state goes to IDLE or DEFER next time. */
-    cMessage *pendingRadioConfigCommand;
+    cMessage *pendingRadioConfigMsg;
     //@}
 
   protected:
@@ -309,6 +312,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
+    // adds control info to the frame that will cause it to be sent at Basic data rate (e.g. 2Mbps not 11)
+    Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
+
   protected:
     /**
      * @name Utility functions
@@ -319,7 +325,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void retryCurrentTransmission();
 
    /** @brief Send down the change channel message to the physical layer if there is any. */
-    void sendDownChangeChannelMessage();
+    void sendDownPendingRadioConfigMsg();
 
     /** @brief Change the current MAC operation mode. */
     void setMode(Mode mode);

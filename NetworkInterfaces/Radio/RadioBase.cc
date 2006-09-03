@@ -215,7 +215,8 @@ AirFrame *RadioBase::encapsMsg(cMessage *frame)
     airframe->setSenderPos(myPosition());
     delete ctrl;
 
-    EV << "Frame will be transmitted at " << (airframe->getBitrate()/1e6) << "Mbps\n";
+    EV << "Frame (" << frame->className() << ")" << frame->name()
+       << " will be transmitted at " << (airframe->getBitrate()/1e6) << "Mbps\n";
     return airframe;
 }
 
