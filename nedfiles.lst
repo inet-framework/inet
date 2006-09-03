@@ -84,7 +84,6 @@ NetworkInterfaces/EtherSwitch/MACRelayUnit.ned
 NetworkInterfaces/EtherSwitch/MACRelayUnitNP.ned
 NetworkInterfaces/EtherSwitch/MACRelayUnitPP.ned
 NetworkInterfaces/Ieee80211/Ieee80211Doc.ned
-NetworkInterfaces/Ieee80211/Ieee80211MgmtInterface.ned
 NetworkInterfaces/Ieee80211/Ieee80211Nic.ned
 NetworkInterfaces/Ieee80211/Ieee80211NicAdhoc.ned
 NetworkInterfaces/Ieee80211/Ieee80211NicAP.ned
@@ -92,13 +91,8 @@ NetworkInterfaces/Ieee80211/Ieee80211NicAPSimplified.ned
 NetworkInterfaces/Ieee80211/Ieee80211NicSTA.ned
 NetworkInterfaces/Ieee80211/Ieee80211NicSTASimplified.ned
 NetworkInterfaces/Ieee80211/Mac/Ieee80211Mac.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211Nic.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211NicAdhoc.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211NicAP.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211NicAPSimplified.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211NicSTA.ned
-NetworkInterfaces/Ieee80211/Mac/mf-versions/Ieee80211NicSTASimplified.ned
 NetworkInterfaces/Ieee80211/Mgmt/Ieee80211AgentSTA.ned
+NetworkInterfaces/Ieee80211/Mgmt/Ieee80211Mgmt.ned
 NetworkInterfaces/Ieee80211/Mgmt/Ieee80211MgmtAdhoc.ned
 NetworkInterfaces/Ieee80211/Mgmt/Ieee80211MgmtAP.ned
 NetworkInterfaces/Ieee80211/Mgmt/Ieee80211MgmtAPSimplified.ned
@@ -122,10 +116,11 @@ NetworkInterfaces/PPP/PPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
 NetworkInterfaces/PPP/PPPInterfaceNoQueue.ned
 NetworkInterfaces/PPP/ThruputMeter.ned
-NetworkInterfaces/Radio/AbstractRadio.ned
 NetworkInterfaces/Radio/Ieee80211Radio.ned
+NetworkInterfaces/Radio/RadioPrototype.ned
 Nodes/INET/BurstHost.ned
 Nodes/INET/FailedRouter.ned
+Nodes/INET/MFMobileHost.ned
 Nodes/INET/MobileHost.ned
 Nodes/INET/NetworkLayer.ned
 Nodes/INET/OSPFRouter.ned

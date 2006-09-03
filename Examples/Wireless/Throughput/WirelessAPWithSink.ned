@@ -18,8 +18,9 @@
 
 
 import
-    "MACRelayUnit",
-    "EtherMAC",
+    "Sink",
+    "Ieee80211NicAPSimplified",
+    "NullMobility",
     "NotificationBoard";
 
 //
@@ -31,7 +32,7 @@ module WirelessAPWithSink
     submodules:
         sink: Sink;
             display: "i=block/sink;p=169,124";
-        wlan: Ieee80211NicAPSimplified_NEW;
+        wlan: Ieee80211NicAPSimplified;
             display: "p=89,225;q=queue;i=block/ifcard,#ff8000";
         notificationBoard: NotificationBoard;
             display: "p=78,60;i=block/control";

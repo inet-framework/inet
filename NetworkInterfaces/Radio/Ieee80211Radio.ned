@@ -35,7 +35,6 @@ simple Ieee80211Radio
         debug : bool, // debug switch
         transmitterPower : numeric const,
         bitrate: numeric const,
-        headerLength: numeric const,
         thermalNoise: numeric const,
         pathLossAlpha: numeric const,
         snirThreshold: numeric const,

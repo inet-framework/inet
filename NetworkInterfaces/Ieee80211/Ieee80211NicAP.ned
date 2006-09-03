@@ -37,12 +37,12 @@ module Ieee80211NicAP
             parameters:
                 queueModule = "mgmt";
             display: "p=96,155;i=block/layer";
-        snrEval: Ieee80211Radio;
+        radio: Ieee80211Radio;
             display: "p=96,240;i=block/wrxtx";
     connections:
-        radioIn --> snrEval.radioIn;
-        snrEval.uppergateIn <-- mac.lowergateOut;
-        snrEval.uppergateOut --> mac.lowergateIn;
+        radioIn --> radio.radioIn;
+        radio.uppergateIn <-- mac.lowergateOut;
+        radio.uppergateOut --> mac.lowergateIn;
 
         mac.uppergateOut --> mgmt.macIn;
         mac.uppergateIn <-- mgmt.macOut;
