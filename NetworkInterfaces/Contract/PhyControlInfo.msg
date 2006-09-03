@@ -29,8 +29,7 @@ cplusplus {{
 //
 enum PhyCommandCode
 {
-    PHY_C_CONFIGURERADIO = 1; // change the channel
-    PHY_C_FRAME_BITRATE = 2; //FIXME implement: transmit this one frame at the specified bitrate
+    PHY_C_CONFIGURERADIO = 1;
 };
 
 //

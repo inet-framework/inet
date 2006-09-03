@@ -122,11 +122,14 @@ void SnrEval::handleMessage(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void SnrEval::handleUpperMsg(AirFrame * frame)
+void SnrEval::handleUpperMsg(AirFrame *frame)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
               "take care this does not happen");
+
+    if (frame->controlInfo()!=NULL)
+        error("Setting control info (here: %s) on frames is not supported", frame->controlInfo()->className());
 
     // if a packet was being received, it is corrupted now as should be treated as noise
     if (snrInfo.ptr != NULL)
@@ -183,7 +186,7 @@ void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
         }
         if (newBitrate!=-1)
         {
-            EV << "Command received: change bitrate to " << newBitrate << "\n";
+            EV << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
 
             // do it
             if (rs.getBitrate()==newBitrate)
@@ -514,7 +517,7 @@ void SnrEval::setBitrate(double bitrate)
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing the bitrate while transmitting is not allowed");
 
-    EV << "Setting bitrate to " << bitrate << "bps\n";
+    EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
     this->bitrate = bitrate;
 
     //XXX fire some notification?

@@ -104,7 +104,7 @@ class INET_API RadioState : public cPolymorphic
     /** @brief Enables inspection */
     std::string info() const {
         std::stringstream out;
-        out << "channel=" << channel << " " << bitrate << "bps "<< stateName(state);
+        out << stateName(state) << ", channel #" << channel << ", " << (bitrate/1e6) << "Mbps ";
         return out.str();
     }
 

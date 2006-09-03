@@ -128,8 +128,6 @@ class INET_API RadioBase : public ChannelAccess
     IRadioModel *radioModel;
     IReceptionModel *receptionModel;
 
-    double bitrate;
-
     /** @brief power used to transmit messages */
     double transmitterPower;
 

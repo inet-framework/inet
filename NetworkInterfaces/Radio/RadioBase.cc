@@ -24,7 +24,8 @@
 #include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
 
 //FIXME comments...
-//FIXME controlInfo to set bitrate for one packet only
+//FIXME document bitrate switching in NED/msg files...
+//FIXME create radios with modulation="QAM"/"BPSK"/etc string parameter!
 
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
@@ -48,10 +49,10 @@ void RadioBase::initialize(int stage)
         uppergateOut = findGate("uppergateOut");
 
         // read parameters
-        bitrate = par("bitrate");
         transmitterPower = par("transmitterPower");
         if (transmitterPower > (double) (cc->par("pMax")))
             error("transmitterPower cannot be bigger than pMax in ChannelControl!");
+        rs.setBitrate(par("bitrate"));
         rs.setChannel(par("channelNumber"));
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         carrierFrequency = cc->par("carrierFrequency");  // taken from ChannelControl
@@ -132,12 +133,11 @@ RadioBase::~RadioBase()
 void RadioBase::handleMessage(cMessage *msg)
 {
     // handle commands
-    if (msg->arrivalGateId()==uppergateIn && msg->kind()!=0)
+    if (msg->arrivalGateId()==uppergateIn && msg->length()==0)
     {
-        //XXX shouldn't this whole command stuff be moved into BasicRadio?
         cPolymorphic *ctrl = msg->removeControlInfo();
-        if (msg->length()!=0)
-            error("Commands sent to the physical layer (nonzero msg kind) should be attached to blank messages (len=0) not data frames");
+        if (msg->kind()==0)
+            error("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->name());
         handleCommand(msg->kind(), ctrl);
         delete msg;
         return;
@@ -201,15 +201,21 @@ void RadioBase::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_t at
  */
 AirFrame *RadioBase::encapsMsg(cMessage *frame)
 {
+    PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
+    ASSERT(!ctrl || ctrl->channelNumber()==-1); // per-packet channel switching not supported
+
+    // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
     AirFrame *airframe = createCapsulePkt();
     airframe->setName(frame->name());
     airframe->setPSend(transmitterPower);
     airframe->setChannelNumber(channelNumber());
     airframe->encapsulate(frame);
-    airframe->setBitrate(bitrate);
+    airframe->setBitrate(ctrl ? ctrl->bitrate() : rs.getBitrate());
     airframe->setDuration(radioModel->calcDuration(airframe));
     airframe->setSenderPos(myPosition());
-    // note: bit length (length()) of the AirFrame is irrelevant, duration is used instead
+    delete ctrl;
+
+    EV << "Frame will be transmitted at " << (airframe->getBitrate()/1e6) << "Mbps\n";
     return airframe;
 }
 
@@ -302,7 +308,7 @@ void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
 
         if (newChannel!=-1)
         {
-            EV << "Command received: change to channel " << newChannel << "\n";
+            EV << "Command received: change to channel #" << newChannel << "\n";
 
             // do it
             if (rs.getChannel()==newChannel)
@@ -315,7 +321,7 @@ void RadioBase::handleCommand(int msgkind, cPolymorphic *ctrl)
         }
         if (newBitrate!=-1)
         {
-            EV << "Command received: change bitrate to " << newBitrate << "\n";
+            EV << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
 
             // do it
             if (rs.getBitrate()==newBitrate)
@@ -581,7 +587,7 @@ void RadioBase::changeChannel(int channel)
     snrInfo.sList.clear();
 
     // do channel switch
-    EV << "Changing channel to " << channel << "\n";
+    EV << "Changing to channel #" << channel << "\n";
 
     rs.setChannel(channel);
     cc->updateHostChannel(myHostRef, channel);
@@ -635,15 +641,15 @@ void RadioBase::changeChannel(int channel)
 
 void RadioBase::setBitrate(double bitrate)
 {
-    if (this->bitrate == bitrate)
+    if (rs.getBitrate() == bitrate)
         return;
     if (bitrate < 0)
         error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing the bitrate while transmitting is not allowed");
 
-    EV << "Setting bitrate to " << bitrate << "bps\n";
-    this->bitrate = bitrate;
+    EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
+    rs.setBitrate(bitrate);
 
     //XXX fire some notification?
 }

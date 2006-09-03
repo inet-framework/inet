@@ -239,7 +239,7 @@ void Ieee80211MgmtSTA::clearAPList()
 
 void Ieee80211MgmtSTA::changeChannel(int channelNum)
 {
-    EV << "Tuning to channel " << channelNum << "\n";
+    EV << "Tuning to channel #" << channelNum << "\n";
 
     // sending PHY_C_CONFIGURERADIO command to MAC
     PhyControlInfo *phyCtrl = new PhyControlInfo();
