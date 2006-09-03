@@ -46,6 +46,9 @@
  * TODO: pass radio power to upper layer
  * TODO: transmission complete notification to upper layer
  * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
+ * 
+ * Parts of the implementation have been taken over from the 
+ * Mobility Framework's Mac80211 module.
  *
  * @ingroup macLayer
  */

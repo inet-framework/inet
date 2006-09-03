@@ -39,41 +39,12 @@ module Ieee80211NicAPSimplified
             parameters:
                 queueModule = "mgmt";
             display: "p=96,155;i=block/layer";
-        decider: Decider80211;
-            display: "p=106,225;i=block/process_s";
-        snrEval: SnrEval80211;
-            display: "p=96,304;i=block/wrxtx";
+        snrEval: Ieee80211Radio;
+            display: "p=96,240;i=block/wrxtx";
     connections:
         radioIn --> snrEval.radioIn;
-        decider.uppergateOut --> mac.lowergateIn display "m=m,50,50,75,0";
-        snrEval.uppergateIn <-- mac.lowergateOut display "m=m,25,0,25,0";
-        snrEval.uppergateOut --> decider.lowergateIn display "m=m,73,0,50,50";
-
-        mac.uppergateOut --> mgmt.macIn;
-        mac.uppergateIn <-- mgmt.macOut;
-
-        mgmt.uppergateOut --> uppergateOut;
-        mgmt.uppergateIn <-- uppergateIn;
-endmodule
-
-module Ieee80211NicAPSimplified_NEW //XXX FIXME
-    gates:
-        in: uppergateIn; // to upper layers
-        out: uppergateOut; // from upper layers
-        in: radioIn; // to receive AirFrames
-    submodules:
-        mgmt: Ieee80211MgmtAPSimplified;
-            display: "p=96,69;i=block/cogwheel;q=wlanDataQueue";
-        mac: Ieee80211Mac;
-            parameters:
-                queueModule = "mgmt";
-            display: "p=96,155;i=block/layer";
-        snrEval: Ieee80211Radio2;
-            display: "p=96,304;i=block/wrxtx";
-    connections:
-        radioIn --> snrEval.radioIn;
-        snrEval.uppergateIn <-- mac.lowergateOut display "m=m,25,0,25,0";
-        snrEval.uppergateOut --> mac.lowergateIn display "m=m,73,0,50,50";
+        snrEval.uppergateIn <-- mac.lowergateOut;
+        snrEval.uppergateOut --> mac.lowergateIn;
 
         mac.uppergateOut --> mgmt.macIn;
         mac.uppergateIn <-- mgmt.macOut;

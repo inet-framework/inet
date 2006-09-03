@@ -17,7 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "Ieee80211Radio2.h"
+#include "Ieee80211Radio.h"
 
-Define_Module(Ieee80211Radio2);
+Define_Module(Ieee80211Radio);
 

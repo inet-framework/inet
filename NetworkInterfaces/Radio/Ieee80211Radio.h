@@ -23,10 +23,10 @@
 #include "RadioBase.h"
 
 /**
- * Radio for the IEEE 802.11 model. Uses PathLossReceptionModel and 
- * Ieee80211RadioModel.
+ * Radio for the IEEE 802.11 model. Just a RadioBase with PathLossReceptionModel 
+ * and Ieee80211RadioModel.
  */
-class INET_API Ieee80211Radio2 : public RadioBase
+class INET_API Ieee80211Radio : public RadioBase
 {
   protected:
     virtual IReceptionModel *createReceptionModel() {return (IReceptionModel *)createOne("PathLossReceptionModel");}

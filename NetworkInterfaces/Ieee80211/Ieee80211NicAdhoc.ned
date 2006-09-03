@@ -19,8 +19,7 @@
 import
     "Ieee80211MgmtAdhoc",
     "Ieee80211Mac",
-    "Decider80211",
-    "SnrEval80211";
+    "Ieee80211Radio";
 
 //
 // This NIC implements an 802.11 network interface card in ad-hoc mode.
@@ -37,15 +36,12 @@ module Ieee80211NicAdhoc
             parameters:
                 queueModule = "mgmt";
             display: "p=96,155;i=block/layer";
-        decider: Decider80211;
-            display: "p=106,225;i=block/process_s";
-        snrEval: SnrEval80211;
-            display: "p=96,304;i=block/wrxtx";
+        snrEval: Ieee80211Radio;
+            display: "p=96,240;i=block/wrxtx";
     connections:
         radioIn --> snrEval.radioIn;
-        decider.uppergateOut --> mac.lowergateIn display "m=m,50,50,75,0";
-        snrEval.uppergateIn <-- mac.lowergateOut display "m=m,25,0,25,0";
-        snrEval.uppergateOut --> decider.lowergateIn display "m=m,73,0,50,50";
+        snrEval.uppergateIn <-- mac.lowergateOut;
+        snrEval.uppergateOut --> mac.lowergateIn;
 
         mac.uppergateOut --> mgmt.macIn;
         mac.uppergateIn <-- mgmt.macOut;

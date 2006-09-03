@@ -28,9 +28,10 @@
 #include "SnrList.h"
 
 
-//FIXME update docu
 
 /**
+//FIXME update docu!!!!
+ *
  * @brief Keeps track of the different snir levels when receiving a
  * packet
  *
@@ -52,9 +53,18 @@
  * about whether this module is sending a packet, receiving a packet or idle.
  * This information can be accessed via the NotificationBoard by other modules,
  * e.g. a CSMAMacLayer.
+
  *
- * @author Marc Loebbers
- * @ingroup snrEval
+ * History
+ *
+ * The implementation is largely based on the Mobility Framework's 
+ * SnrEval and Decider modules. They have been merged into a single 
+ * module, multi-channel support, runtime channel and bitrate switching
+ * capability added, and all code specific to the physical channel 
+ * and radio characteristics have been factored out into the IReceptionModel 
+ * and IRadioModel classes.
+ *
+ * @author Andras Varga, Levente Meszaros
  */
 class INET_API RadioBase : public ChannelAccess
 {

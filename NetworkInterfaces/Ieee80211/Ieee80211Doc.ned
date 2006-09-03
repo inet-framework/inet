@@ -18,30 +18,29 @@
 
 
 //
+// @page ieee80211.html, IEEE 802.11 Model
+//
 // This page provides an overview of the IEEE 802.11 model for the INET Framework.
 //
-// An IEEE 802.11 interface (NIC) comes in several flavours, varying
-// in their roles (ad-hoc station, infrastructure mode station, or
-// access point) and their levels of detail:
+// An IEEE 802.11 interface (NIC) comes in several flavours, differring
+// in their role (ad-hoc station, infrastructure mode station, or
+// access point) and their level of detail:
 //
-//    - Ieee80211Nic: a generic (configurable) NIC
-//    - Ieee80211NicAdhoc: for ad-hoc mode
-//    - Ieee80211NicAP, Ieee80211NicAPSimplified: for use in an access point
-//    - Ieee80211NicSTA, Ieee80211NicSTASimplified: for use in an
-//      infrastructure-mode station
-//
-// (The "simplified" ones do not model the scan-authenticate-associate process,
-// so they cannot be used in experiments involving handover. For such experiments,
-// you need to use the "non-simplified" variants.)
+//  - Ieee80211Nic: a generic (configurable) NIC
+//  - Ieee80211NicAdhoc: for ad-hoc mode
+//  - Ieee80211NicAP, Ieee80211NicAPSimplified: for use in an access point
+//  - Ieee80211NicSTA, Ieee80211NicSTASimplified: for use in an
+//    infrastructure-mode station
 //
 // NICs consist of four layers, which are the following (in top-down order):
 //
-//   -# agent
-//   -# management
-//   -# MAC
-//   -# physical layer (radio)
+//  -# agent
+//  -# management
+//  -# MAC
+//  -# physical layer (radio)
 //
-// <i>The physical layer</i> modules (Snr80211, Decider80211) deal with modelling
+// <i>The physical layer</i> modules (Ieee80211Radio; with some limitations, 
+// Snr80211, Decider80211 can also be used) deal with modelling
 // transmission and reception of frames. They model the characteristics of
 // the radio channel, and determine if a frame was received correctly
 // (that is, it did not suffer bit errors due to low signal power or
@@ -62,10 +61,12 @@
 // switches channels, and collects information from received beacons and
 // probe responses.
 //
-// The management layer has several implementations, which differ in role
-// (STA/AP/ad-hoc) and level of detail: Ieee80211AgentSTA, Ieee80211MgmtAdhoc,
+// The management layer has several implementations which differ in their role
+// (STA/AP/ad-hoc) and level of detail: Ieee80211MgmtAdhoc,
 // Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtSTA,
-// Ieee80211MgmtSTASimplified.
+// Ieee80211MgmtSTASimplified. The ..Simplified ones differ from the others
+// in that they do not model the scan-authenticate-associate process,
+// so they cannot be used in experiments involving handover.
 //
 // <i>The agent</i> is what instructs the management layer to perform
 // scanning, authentication and association. The management layer itself
@@ -79,7 +80,7 @@
 // By modifying or replacing the agent, one can alter the dynamic behaviour
 // of STAs in the network, for example implement different handover strategies.
 //
-// Features not supported
+// <b>Limitations</b>
 //
 // See the documentation of Ieee80211Mac for features unsupported by this
 // model.

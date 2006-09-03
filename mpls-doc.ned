@@ -13,7 +13,7 @@
 
 
 //
-// @page standards.html, Implemented Standards
+// @page standards.html, MPLS/RSVP/LDP Model - Implemented Standards
 //
 // The implementation follows those RFCs below:
 // - RFC 2702: Requirements for Traffic Engineering Over MPLS

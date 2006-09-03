@@ -22,7 +22,7 @@
 // @titlepage
 //
 // <center><h1>INET Framework for OMNeT++/OMNEST</h1></center>
-// <center>release 2006-03-30</center>
+// <center>release 2006-10-05</center>
 //
 // <nohtml>INET Framework contains IPv4, IPv6, TCP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
@@ -30,18 +30,22 @@
 // Static routing can be set up using network autoconfigurators.
 // </nohtml>
 //
+// This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
+// which supports both ad-hoc and infrastructure mode.
+//
 // Mobility and wireless support (currently 802.11b ad-hoc mode) is provided
 // by a modified version of the lower layers of the
 // <a href="http://mobility-fw.sourceforge.net/" target="_top">Mobility Framework</a>.
 // Also, several mobility models have been added (TurtleMobility,
 // BonnMotionMobility, RandomWPMobility, etc).
 //
-// New to this release are the revised and mostly rewritten \MPLS, \RSVP-TE and \LDP
-// models (Vojta Janota); dynamic routing (OSPFv2 and RIP) provided by the 
-// Quagga Linux/*nix routing daemon (ported into the INET Framework by Vojta Janota); 
-// and a cleanroom \OSPFv2 model (by Andras Babos).
 // There are several other bugfixes and improvements as well; see the
 // <tt>WHATSNEW</tt> file in the distribution.
+//
+// Recent additions: \MPLS, \RSVP-TE and \LDP models revised/rewritten (Vojta Janota);
+// dynamic routing (OSPFv2 and RIP) provided by the Quagga Linux/*nix routing daemon
+// (ported into the INET Framework by Vojta Janota);
+// and a cleanroom \OSPFv2 model (by Andras Babos).
 //
 // <a href="history.html">History and contributors</a>.
 //
@@ -56,7 +60,10 @@
 //    ARPTest, MixedLAN, etc.
 //  - hosts, routers, switches: StandardHost, Router, EtherSwitch, EtherHub,
 //    etc.
-//  - network interfaces: EthernetInterface, PPPInterface, Nic80211
+//  - network interfaces: EthernetInterface, PPPInterface, Ieee80211NicAdhoc,
+//    Ieee80211NicSTA
+//  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
+//    mode are supported
 //  - \IP layer: IP, ARP and ICMP; RoutingTable
 //  - \IPv6 support: IPv6, IPv6NeighbourDiscovery, ICMPv6, RoutingTable6;
 //    see <a href="ipv6overview.html">\IPv6 model overview</a>
@@ -149,7 +156,7 @@
 // afterwards.
 //
 // Several other people have contributed to the INET Framework by providing
-// feedback, reporting bugs, suggesting features and contributing patches; 
+// feedback, reporting bugs, suggesting features and contributing patches;
 // I'd like to acknowledge their help here as well.
 //
 

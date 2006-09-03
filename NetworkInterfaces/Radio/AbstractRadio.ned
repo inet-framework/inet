@@ -19,6 +19,8 @@
 
 
 //
+// XXX this is a prototype...
+//
 // Represents the radio. Frames received from higher layers (typically the
 // MAC protocol) are transmitted on the radio channel, using the global
 // ChannelControl module. Frames received on the radio channel will have
@@ -32,17 +34,7 @@
 // new channel number. If the radio is currently transmitting, the channel
 // switch will actually take place after the transmission is completed.
 //
-simple Ieee80211Radio2
-    parameters:
-        channelNumber: numeric const, // channel identifier
-        debug : bool, // debug switch
-        transmitterPower : numeric const,
-        bitrate: numeric const,
-        headerLength: numeric const,
-        thermalNoise: numeric const,
-        pathLossAlpha: numeric const,
-        snirThreshold: numeric const,
-        sensitivity: numeric const;
+simple AbstractRadio
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)

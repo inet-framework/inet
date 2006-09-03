@@ -23,7 +23,9 @@
 #include "IRadioModel.h"
 
 /**
- * Radio model for IEEE 802.11.
+ * Radio model for IEEE 802.11. The implementation is largely based on the 
+ * Mobility Framework's SnrEval80211 and Decider80211 modules.
+ * See the NED file for more info.
  */
 class INET_API Ieee80211RadioModel : public IRadioModel
 {

@@ -19,8 +19,9 @@
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
-// to be used in combination with the SnrEval80211 and Decider80211
-// modules as physical layer.
+// to be used in combination with the Ieee80211Radio module as the physical
+// layer. (The SnrEval80211 and Decider80211 modules should also work if
+// per-packet bitrate setting gets implemented.)
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
 // typically in the 802.11 management module, see in Ieee80211Nic).
@@ -37,13 +38,11 @@
 // queue module is a simple module whose C++ class implements the IPassiveQueue
 // interface.
 //
-// Features not supported:
-//    -# fragmentation
-//    -# power management
-//    -# polling (PCF)
+// <b>Limitations</b>
 //
-// Also, physical layer algorithms such as frequency hopping and direct
-// sequence are not modelled directly.
+// The following features not supported: 1) fragmentation, 2) power management,
+// 3) polling (PCF). Physical layer algorithms such as frequency hopping and 
+// direct sequence spread spectrum are not modelled directly.
 //
 // Fields related to the above unsupported features are omitted from
 // management frame formats as well (for example, FH/DS/CF parameter sets,
@@ -59,7 +58,7 @@ simple Ieee80211Mac
         queueModule: string,    // name of optional external queue module
         maxQueueSize: numeric const, // max queue length in frames; only used if queueModule==""
         bitrate: numeric const,
-        rtsThresholdBytes: numeric const; // longer messages will be sent using RTS/CTS
+        rtsThresholdBytes: numeric const; // longer messages will be sent using RTS/CTS; use 2346 for default
     gates:
         in: uppergateIn;
         out: uppergateOut;
