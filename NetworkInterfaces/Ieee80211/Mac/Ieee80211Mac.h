@@ -46,8 +46,8 @@
  * TODO: pass radio power to upper layer
  * TODO: transmission complete notification to upper layer
  * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
- * 
- * Parts of the implementation have been taken over from the 
+ *
+ * Parts of the implementation have been taken over from the
  * Mobility Framework's Mac80211 module.
  *
  * @ingroup macLayer
@@ -57,7 +57,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
   typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
   /**
-   * @brief This is used to populate fragments and identify duplicated messages. see spec 9.2.9 */
+   * This is used to populate fragments and identify duplicated messages. See spec 9.2.9.
+   */
   struct Ieee80211ASFTuple
   {
       MACAddress address;
@@ -69,37 +70,39 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 
   protected:
     /**
-     * @name Parameters
-     * @brief These are filled in during the initialization phase and not supposed to change afterwards.
+     * @name Configuration parameters
+     * These are filled in during the initialization phase and not supposed to change afterwards.
      */
     //@{
-    /** @brief MAC address */
+    /** MAC address */
     MACAddress address;
 
-    /** @brief The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
+    /** The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
     double bitrate;
 
-    /** @brief The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
+    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
     double basicBitrate;
 
-    /** @brief Maximal number of frames in the queue; should be set in the omnetpp.ini */
+    /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize;
 
-    /** @brief The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely large value
-        means never. see spec 9.2.6 and 361 */
+    /**
+     * The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely
+     * large value means never. See spec 9.2.6 and 361.
+     */
     int rtsThreshold;
 
-    /** @brief Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
+    /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
     static const int fragmentationThreshold = 2346;
     //@}
 
   protected:
     /**
      * @name Ieee80211Mac state variables
-     * @brief Various state information checked and modified according to the state machine.
+     * Various state information checked and modified according to the state machine.
      */
     //@{
-    /** @brief the 80211 MAC state machine */
+    /** the 80211 MAC state machine */
     enum State {
         IDLE,
         DEFER,
@@ -113,81 +116,85 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     };
     cFSM fsm;
 
-    /** @brief 80211 MAC operation modes */
+    /** 80211 MAC operation modes */
     enum Mode {
-        DCF,  // Distributed Coordination Function
-        PCF,  // Point Coordination Function
+        DCF,  ///< Distributed Coordination Function
+        PCF,  ///< Point Coordination Function
     };
     Mode mode;
 
-    /** @brief Sequence number to be assigned to the next frame */
+    /** Sequence number to be assigned to the next frame */
     int sequenceNumber;
 
-    /** @brief Indicates that the last frame received had bit errors in it or there was a
-     *  collision during receiving the frame. If this flag is set, then the MAC will wait EIFS
-     *  instead of DIFS period of time in WAITDIFS state. */
+    /**
+     * Indicates that the last frame received had bit errors in it or there was a
+     * collision during receiving the frame. If this flag is set, then the MAC
+     * will wait EIFS instead of DIFS period of time in WAITDIFS state.
+     */
     bool lastReceiveFailed;
 
-    /** @brief true if backoff is enabled */
+    /** True if backoff is enabled */
     bool backoff;
 
-    /** @brief true during network allocation period. this flag is present to be able to watch this state. */
+    /** True during network allocation period. This flag is present to be able to watch this state. */
     bool nav;
 
-    /** @brief Remaining backoff period in seconds */
+    /** Remaining backoff period in seconds */
     double backoffPeriod;
 
-    /** @brief Number of frame retransmission attempts, this is a simpification of
-     *  SLRC and SSRC, see 9.2.4 in the spec */
+    /**
+     * Number of frame retransmission attempts, this is a simpification of
+     * SLRC and SSRC, see 9.2.4 in the spec
+     */
     int retryCounter;
 
-    /** @brief Physical radio (medium) state copied from physical layer */
+    /** Physical radio (medium) state copied from physical layer */
     RadioState::State radioState;
 
-    /** @brief Messages received from upper layer and to be transmitted later */
+    /** Messages received from upper layer and to be transmitted later */
     Ieee80211DataOrMgmtFrameList transmissionQueue;
 
-    /** @brief A list of last sender, sequence and fragment number tuples to identify duplicates.
-        see spec 9.2.9
-        TODO: this is not yet used */
+    /**
+     * A list of last sender, sequence and fragment number tuples to identify
+     * duplicates, see spec 9.2.9.
+     * TODO: this is not yet used
+     */
     Ieee80211ASFTupleList asfTuplesList;
 
-    /** @brief Passive queue module to request messages from */
+    /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
 
-    /** @brief The last change channel message received and not yet sent to the physical layer or NULL.
-        The message will be sent down when the state goes to IDLE or DEFER next time. */
+    /**
+     * The last change channel message received and not yet sent to the physical layer, or NULL.
+     * The message will be sent down when the state goes to IDLE or DEFER next time.
+     */
     cMessage *pendingRadioConfigMsg;
     //@}
 
   protected:
-    /**
-     * @name Timer self messages
-     */
+    /** @name Timer messages */
     //@{
-    /** @brief End of the Short Inter-Frame Time period */
+    /** End of the Short Inter-Frame Time period */
     cMessage *endSIFS;
 
-    /** @brief End of the Data Inter-Frame Time period */
+    /** End of the Data Inter-Frame Time period */
     cMessage *endDIFS;
 
-    /** @brief End of the backoff period */
+    /** End of the backoff period */
     cMessage *endBackoff;
 
-    /** @brief Timeout after the transmission of an RTS, a CTS, or a DATA frame */
+    /** Timeout after the transmission of an RTS, a CTS, or a DATA frame */
     cMessage *endTimeout;
 
-    /** @brief End of medium reserve period (NAV) when two other nodes were communicating on the channel */
+    /** End of medium reserve period (NAV) when two other nodes were communicating on the channel */
     cMessage *endReserve;
 
-    /** @brief Radio state change self message. Currently this is optimized away and sent directly */
+    /** Radio state change self message. Currently this is optimized away and sent directly */
     cMessage *mediumStateChange;
     //@}
 
   protected:
-    /**
-     * @name Statistics
-     */
+    /** @name Statistics */
     //@{
     long numRetry;
     long numSentWithoutRetry;
@@ -315,7 +322,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
-    // adds control info to the frame that will cause it to be sent at Basic data rate (e.g. 2Mbps not 11)
+    /**
+     * @brief Attaches a PhyControlInfo to the frame which will cause it to be sent at
+     * basicBitrate not bitrate (e.g. 2Mbps instead of 11Mbps). Used with ACK, CTS, RTS.
+     */
     Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
 
   protected:
@@ -361,8 +371,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Deletes frame at the front of queue. */
     void popTransmissionQueue();
 
-    /** @brief Computes the duration (in seconds) of the transmission of a frame over the physical channel.
-               'bits' should be the total length of the MAC frame in bits. */
+    /**
+     * @brief Computes the duration (in seconds) of the transmission of a frame
+     * over the physical channel. 'bits' should be the total length of the MAC frame
+     * in bits, but excluding the physical layer framing (preamble etc.)
+     */
     double frameDuration(int bits);
 
     /** @brief Logs all state information */
