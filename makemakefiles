@@ -15,7 +15,7 @@ OPTS=-f -N -b $(ROOT) -c $(ROOT)/inetconfig$(EXT) -I.
 
 CONTRACT_INCLUDES=-I$(ROOT)/Transport/Contract -I$(ROOT)/Network/Contract -I$(ROOT)/NetworkInterfaces/Contract -I$(ROOT)/Base -I$(ROOT)/Util
 
-ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Network/Queue -I$(ROOT)/Network/Quagga -I$(ROOT)/Network/OSPFv2 -I$(ROOT)/Network/OSPFv2/Interface -I$(ROOT)/Network/OSPFv2/MessageHandler -I$(ROOT)/Network/OSPFv2/Neighbor -I$(ROOT)/Network/OSPFv2/Router -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/TCP/flavours -I$(ROOT)/Transport/TCP/queues -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/Network/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/EtherSwitch -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/Ethernet -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util/HeaderSerializers -I$(ROOT)/Nodes/INET
+ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/AutoRouting -I$(ROOT)/Network/Queue -I$(ROOT)/Network/Quagga -I$(ROOT)/Network/OSPFv2 -I$(ROOT)/Network/OSPFv2/Interface -I$(ROOT)/Network/OSPFv2/MessageHandler -I$(ROOT)/Network/OSPFv2/Neighbor -I$(ROOT)/Network/OSPFv2/Router -I$(ROOT)/Transport/TCP -I$(ROOT)/Transport/TCP/flavours -I$(ROOT)/Transport/TCP/queues -I$(ROOT)/Transport/UDP -I$(ROOT)/NetworkInterfaces -I$(ROOT)/Network/ARP -I$(ROOT)/NetworkInterfaces/Ethernet -I$(ROOT)/NetworkInterfaces/EtherSwitch -I$(ROOT)/NetworkInterfaces/PPP -I$(ROOT)/Applications/Generic -I$(ROOT)/Applications/Ethernet -I$(ROOT)/Applications/TCPApp -I$(ROOT)/Applications/UDPApp -I$(ROOT)/Applications/PingApp -I$(ROOT)/Util/HeaderSerializers -I$(ROOT)/Nodes/INET -I$(ROOT)/Nodes/Wireless -I$(ROOT)/Nodes/Adhoc
 # -I$(ROOT)/Applications/BRModel
 ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Network/TED -I$(ROOT)/Network/Extras -I$(ROOT)/Nodes/MPLS
 ALL_IPv6_INCLUDES=-I$(ROOT)/Network/IPv6 -I$(ROOT)/Network/ICMPv6 -I$(ROOT)/Nodes/IPv6
@@ -94,6 +94,9 @@ inetbase:
 	cd NetworkInterfaces/EtherSwitch && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../Ethernet
 
 	cd Nodes/INET && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES)
+	cd Nodes/IPv6 && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES)
+	cd Nodes/Wireless && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES)
+	cd Nodes/Adhoc && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES)
 	cd Nodes/MPLS && $(MAKEMAKE) $(OPTS) -n -r $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES)
 
 	cd Transport/Contract && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
@@ -152,9 +155,11 @@ examples-dir:
 
 	cd Examples/Wireless/80211Lan && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Wireless/Handover && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Wireless/Throughput && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
-	cd Examples/MobileAdhoc/80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MobileAdhoc/Ieee80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/MobileAdhoc/MF80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 tests-dir:
 	cd Tests && $(MAKEMAKE) $(OPTS) -n -r -X IPv4 -X MPLS

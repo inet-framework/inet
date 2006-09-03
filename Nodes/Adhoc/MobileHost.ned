@@ -78,7 +78,7 @@ module MobileHost
                 ifIn[1],
                 ifOut[1];
             display: "p=248,247;i=block/fork;q=queue";
-        wlan: Ieee80211Nic;
+        wlan: Ieee80211NicAdhoc;
             display: "p=248,349;q=queue;i=block/ifcard";
         mobility: mobilityType like BasicMobility;
             display: "p=149,307;i=block/cogwheel";
