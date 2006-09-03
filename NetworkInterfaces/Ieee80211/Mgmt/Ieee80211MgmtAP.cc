@@ -109,7 +109,7 @@ void Ieee80211MgmtAP::receiveChangeNotification(int category, cPolymorphic *deta
     if (category == NF_RADIO_CHANNEL_CHANGED)
     {
         EV << "updating channel number\n";
-        channelNumber = check_and_cast<RadioState *>(details)->getChannel();
+        channelNumber = check_and_cast<RadioState *>(details)->getChannelNumber();
     }
 }
 
