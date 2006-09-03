@@ -120,7 +120,7 @@ examples-dir:
 	cd Examples/IPv6 && $(MAKEMAKE) $(OPTS) -n -r
 	cd Examples/RTP && $(MAKEMAKE) $(OPTS) -n -r -X Data -X Multicast1 -X Multicast2 -X Unicast
 	cd Examples/Wireless && $(MAKEMAKE) $(OPTS) -n -r
-	cd Examples/MobileAdhoc && $(MAKEMAKE) $(OPTS) -n -r
+	cd Examples/Adhoc && $(MAKEMAKE) $(OPTS) -n -r
 
 	cd Examples/Ethernet/ARPTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Ethernet/LANs && $(MAKEMAKE) $(ALL_MODEL_OPTS)
@@ -157,9 +157,9 @@ examples-dir:
 	cd Examples/Wireless/Handover && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Wireless/Throughput && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
-	cd Examples/MobileAdhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
-	cd Examples/MobileAdhoc/Ieee80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
-	cd Examples/MobileAdhoc/MF80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Adhoc/Mobility && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Adhoc/Ieee80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Adhoc/MF80211 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 tests-dir:
 	cd Tests && $(MAKEMAKE) $(OPTS) -n -r -X IPv4 -X MPLS
