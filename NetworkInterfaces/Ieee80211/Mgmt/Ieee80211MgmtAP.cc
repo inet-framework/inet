@@ -135,7 +135,7 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
-    body.setChannel(channelNumber);
+    body.setChannelNumber(channelNumber);
 
     frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);
     frame->setFromDS(true);
@@ -351,7 +351,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
-    body.setChannel(channelNumber);
+    body.setChannelNumber(channelNumber);
     sendManagementFrame(resp, staAddress);
 }
 

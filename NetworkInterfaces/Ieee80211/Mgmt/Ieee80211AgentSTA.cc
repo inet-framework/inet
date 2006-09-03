@@ -208,7 +208,7 @@ void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
         Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
         EV << "    " << i << ". "
            << " address=" << bssDesc.getBSSID()
-           << " channel=" << bssDesc.getChannel()
+           << " channel=" << bssDesc.getChannelNumber()
            << " SSID=" << bssDesc.getSSID()
            << " beaconIntvl=" << bssDesc.getBeaconInterval()
            << " rxPower=" << bssDesc.getRxPower()

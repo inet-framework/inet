@@ -210,7 +210,7 @@ class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
         double beaconInterval;
-        int channel;
+        int channelNumber;
         Ieee80211HandoverParameters handoverParameters;
 };
 

@@ -412,7 +412,7 @@ void Ieee80211MgmtSTA::sendScanConfirm()
     {
         APInfo *ap = &(*it);
         Ieee80211Prim_BSSDescription& bss = confirm->getBssList(i);
-        bss.setChannel(ap->channel);
+        bss.setChannelNumber(ap->channel);
         bss.setBSSID(ap->address);
         bss.setSSID(ap->ssid.c_str());
         bss.setSupportedRates(ap->supportedRates);
@@ -735,7 +735,7 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
         ap = &apList.back();
     }
 
-    ap->channel = body.getChannel();
+    ap->channel = body.getChannelNumber();
     ap->address = address;
     ap->ssid = body.getSSID();
     ap->supportedRates = body.getSupportedRates();

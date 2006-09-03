@@ -116,7 +116,7 @@ class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
 class Ieee80211Prim_BSSDescription
 {
     fields:
-        int channel;
+        int channelNumber;
         MACAddress BSSID;
         string SSID;
         Ieee80211SupportedRatesElement supportedRates;
