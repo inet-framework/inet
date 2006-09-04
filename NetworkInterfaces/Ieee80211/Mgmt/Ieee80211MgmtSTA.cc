@@ -91,6 +91,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
     {
         isScanning = false;
         isAssociated = false;
+        assocTimeoutMsg = NULL;
 
         nb = NotificationBoardAccess().get();
 
@@ -232,8 +233,8 @@ Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 void Ieee80211MgmtSTA::clearAPList()
 {
     for (AccessPointList::iterator it=apList.begin(); it!=apList.end(); ++it)
-        if (it->timeoutMsg)
-            delete cancelEvent(it->timeoutMsg);
+        if (it->authTimeoutMsg)
+            delete cancelEvent(it->authTimeoutMsg);
     apList.clear();
 }
 
@@ -262,14 +263,19 @@ void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, cons
     frame->setReceiverAddress(address);
     //XXX set sequenceNumber?
 
-    sendOrEnqueue(frame); //XXX or should mgmt frames take priority over normal frames?
+    sendOrEnqueue(frame);
 }
 
 void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, double timeout)
 {
+    if (ap->authTimeoutMsg)
+        error("startAuthentication: authentication currently in progress with AP address=", ap->address.str().c_str());
+    if (ap->isAuthenticated)
+        error("startAuthentication: already authenticated with AP address=", ap->address.str().c_str());
+
     changeChannel(ap->channel);
 
-    EV << "Sending Authentication frame with seqNum=1\n";
+    EV << "Sending initial Authentication frame with seqNum=1\n";
 
     // create and send first authentication frame
     Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
@@ -280,15 +286,18 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, double timeout)
     ap->authSeqExpected = 2;
 
     // schedule timeout
-    ASSERT(ap->timeoutMsg==NULL);
-    ap->timeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
-    ap->timeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime()+timeout, ap->timeoutMsg);
+    ASSERT(ap->authTimeoutMsg==NULL);
+    ap->authTimeoutMsg = new cMessage("authTimeout", MK_AUTH_TIMEOUT);
+    ap->authTimeoutMsg->setContextPointer(ap);
+    scheduleAt(simTime()+timeout, ap->authTimeoutMsg);
 }
 
 void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
 {
-    //XXX check authentication status? or is it enough if AP does that?
+    if (isAssociated || assocTimeoutMsg)
+        error("startAssociation: already associated or association currently in progress");
+    if (!ap->isAuthenticated)
+        error("startAssociation: not yet authenticated with AP address=", ap->address.str().c_str());
 
     // switch to that channel
     changeChannel(ap->channel);
@@ -303,10 +312,10 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
     sendManagementFrame(frame, ap->address);
 
     // schedule timeout
-    ASSERT(ap->timeoutMsg==NULL);
-    ap->timeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
-    ap->timeoutMsg->setContextPointer(ap);
-    scheduleAt(simTime()+timeout, ap->timeoutMsg);
+    ASSERT(assocTimeoutMsg==NULL);
+    assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
+    assocTimeoutMsg->setContextPointer(ap);
+    scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
 void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
@@ -329,6 +338,11 @@ void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *det
 void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 {
     EV << "Received Scan Request from agent, clearing AP list and starting scanning...\n";
+
+    if (isScanning)
+        error("processScanCommand: scanning already in progress");
+    if (isAssociated || assocTimeoutMsg)
+        error("processScanCommand: refusing to scan while station is associated or currently associating");
 
     // clear existing AP list (and cancel any pending authentications) -- we want to start with a clean page
     clearAPList();
@@ -355,6 +369,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     if (scanning.activeScan)
         nb->subscribe(this, NF_RADIOSTATE_CHANGED);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
+    isScanning = true;
     scanNextChannel();
 }
 
@@ -366,6 +381,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
             nb->unsubscribe(this, NF_RADIOSTATE_CHANGED);
+        isScanning = false;
         return true; // we're done
     }
 
@@ -438,10 +454,17 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     if (!ap)
         error("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
 
+    if (isAssociated && assocAP.address==address)
+        disassociate();
+
     if (ap->isAuthenticated)
-    {
-        //XXX what if we are not authenticated?
         ap->isAuthenticated = false;
+
+    // cancel possible pending authentication timer
+    if (ap->authTimeoutMsg)
+    {
+        delete cancelEvent(ap->authTimeoutMsg);
+        ap->authTimeoutMsg = NULL;
     }
 
     // create and send deauthentication request
@@ -459,14 +482,13 @@ void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
     APInfo *ap = lookupAP(address);
     if (!ap)
         error("processAssociateCommand: AP not known: address = %s", address.str().c_str());
-    if (!ap->isAuthenticated)
-        error("processAssociateCommand: not authenticated with AP address = %s", address.str().c_str());
     startAssociation(ap, ctrl->getTimeout());
 }
 
 void Ieee80211MgmtSTA::processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl)
 {
     // treat the same way as association
+    //XXX refine
     processAssociateCommand(ctrl);
 }
 
@@ -474,13 +496,15 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
 {
     const MACAddress& address = ctrl->getAddress();
 
-    //XXX what if we are not associated?
-    //XXX what if address is not our associated AP address??
-    if (isAssociated)
+    if (isAssociated && address==assocAP.address)
     {
-        isAssociated = false;
-        delete cancelEvent(assocAP.beaconTimeoutMsg);
-        assocAP = AssociatedAPInfo(); // clear it
+        disassociate();
+    }
+    else if (assocTimeoutMsg)
+    {
+        // pending association
+        delete cancelEvent(assocTimeoutMsg);
+        assocTimeoutMsg = NULL;
     }
 
     // create and send disassociation request
@@ -490,6 +514,16 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
 
     // send confirm to agent
     sendConfirm(new Ieee80211Prim_DisassociateConfirm(), PRC_SUCCESS);
+}
+
+void Ieee80211MgmtSTA::disassociate()
+{
+    EV << "Disassociating from AP address=" << assocAP.address << "\n";
+    ASSERT(isAssociated);
+    isAssociated = false;
+    delete cancelEvent(assocAP.beaconTimeoutMsg);
+    assocAP.beaconTimeoutMsg = NULL;
+    assocAP = AssociatedAPInfo(); // clear it
 }
 
 void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
@@ -524,20 +558,33 @@ void Ieee80211MgmtSTA::handleDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {
-    int frameAuthSeq = frame->getBody().getSequenceNumber();
-    EV << "Received Authentication frame, seqNum=" << frameAuthSeq << "\n";
-
     MACAddress address = frame->getTransmitterAddress();
+    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    EV << "Received Authentication frame from address=" << address << ", seqNum=" << frameAuthSeq << "\n";
+
     APInfo *ap = lookupAP(address);
     if (!ap)
     {
-        EV << "AP not known (address=" << address.str() << "), discarding authentication frame\n";
+        EV << "AP not known, discarding authentication frame\n";
         delete frame;
         return;
     }
 
-    //XXX what if already authenticated with AP?
-    //XXX check authentication is currently in progress
+    // what if already authenticated with AP
+    if (ap->isAuthenticated)
+    {
+        EV << "AP already authenticated, ignoring frame\n";
+        delete frame;
+        return;
+    }
+
+    // is authentication is in progress with this AP?
+    if (!ap->authTimeoutMsg)
+    {
+        EV << "No authentication in progress with AP, ignoring frame\n";
+        delete frame;
+        return;
+    }
 
     // check authentication sequence number is OK
     if (frameAuthSeq != ap->authSeqExpected)
@@ -550,8 +597,8 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
         delete frame;
 
         // cancel timeout, send error to agent
-        delete cancelEvent(ap->timeoutMsg);
-        ap->timeoutMsg = NULL;
+        delete cancelEvent(ap->authTimeoutMsg);
+        ap->authTimeoutMsg = NULL;
         sendAuthenticationConfirm(ap, PRC_REFUSED); //XXX or what resultCode?
         return;
     }
@@ -561,7 +608,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
 
     if (statusCode==SC_SUCCESSFUL && !frame->getBody().getIsLast())
     {
-        EV << "More steps required, sending another Authentication frame to AP address=" << ap->address << "\n";
+        EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth");
@@ -574,14 +621,14 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     else
     {
         if (statusCode==SC_SUCCESSFUL)
-            EV << "Authentication successful with AP address=" << ap->address << "\n";
+            EV << "Authentication successful\n";
         else
-            EV << "Authentication failed with AP address=" << ap->address << "\n";
+            EV << "Authentication failed\n";
 
         // authentication completed
         ap->isAuthenticated = (statusCode==SC_SUCCESSFUL);
-        delete cancelEvent(ap->timeoutMsg);
-        ap->timeoutMsg = NULL;
+        delete cancelEvent(ap->authTimeoutMsg);
+        ap->authTimeoutMsg = NULL;
         sendAuthenticationConfirm(ap, statusCodeToPrimResultCode(statusCode));
     }
 
@@ -595,8 +642,15 @@ void Ieee80211MgmtSTA::handleDeauthenticationFrame(Ieee80211DeauthenticationFram
     APInfo *ap = lookupAP(address);
     if (!ap || !ap->isAuthenticated)
     {
-        //XXX if we are currently authenticatING, cancel timer etc!!!
         EV << "Unknown AP, or not authenticated with that AP -- ignoring frame\n";
+        delete frame;
+        return;
+    }
+    if (ap->authTimeoutMsg)
+    {
+        delete cancelEvent(ap->authTimeoutMsg);
+        ap->authTimeoutMsg = NULL;
+        EV << "Cancelling pending authentication\n";
         delete frame;
         return;
     }
@@ -613,6 +667,13 @@ void Ieee80211MgmtSTA::handleAssociationRequestFrame(Ieee80211AssociationRequest
 void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
 {
     EV << "Received Association Response frame\n";
+
+    if (!assocTimeoutMsg)
+    {
+        EV << "No association in progress, ignoring frame\n";
+        delete frame;
+        return;
+    }
 
     // extract frame contents
     MACAddress address = frame->getTransmitterAddress();
@@ -631,12 +692,12 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
         isAssociated = false;
         delete cancelEvent(assocAP.beaconTimeoutMsg);
+        assocAP.beaconTimeoutMsg = NULL;
         assocAP = AssociatedAPInfo();
     }
 
-    //XXX check if we have actually sent an AssocReq to this AP!
-    delete cancelEvent(ap->timeoutMsg);
-    ap->timeoutMsg = NULL;
+    delete cancelEvent(assocTimeoutMsg);
+    assocTimeoutMsg = NULL;
 
     if (statusCode!=SC_SUCCESSFUL)
     {

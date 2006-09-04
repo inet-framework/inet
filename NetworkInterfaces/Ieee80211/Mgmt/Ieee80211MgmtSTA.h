@@ -64,11 +64,11 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
         bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
         int authSeqExpected;  // valid while authenticating; values: 1,3,5...
-        cMessage *timeoutMsg; // authentication/association timeout
+        cMessage *authTimeoutMsg; // authentication/association timeout
 
         APInfo() {
             channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
-            isAuthenticated=false; timeoutMsg=NULL;
+            isAuthenticated=false; authTimeoutMsg=NULL;
         }
     };
 
@@ -96,8 +96,6 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     // - we may also be performing scanning while STA is associated (XXX is that so?)
     //
     bool isScanning;
-    bool isAssociated; //XXX -> NOT_ASSOCIATED, ASSOCIATING, ASSOCIATED
-
     ScanningInfo scanning;
 
     // we collect scanning results here
@@ -105,6 +103,8 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     AccessPointList apList;
 
     // associated Access Point
+    bool isAssociated; //XXX -> NOT_ASSOCIATED, ASSOCIATING, ASSOCIATED
+    cMessage *assocTimeoutMsg;
     AssociatedAPInfo assocAP;
 
   protected:
@@ -158,6 +158,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
     /** Sends back result of association to the agent */
     void sendAssociationConfirm(APInfo *ap, int resultCode);
+
+    /** Utility function: Cancel the existing association */
+    void disassociate();
 
     /** Utility function: sends a confirmation to the agent */
     void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
