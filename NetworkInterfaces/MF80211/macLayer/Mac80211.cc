@@ -843,8 +843,11 @@ double Mac80211::backoff()
 {
     // the MAC has won the previous contention. We have to compute a new
     // backoff window
-    if (BW == 0)
-        BW = ((double) intrand(contentionWindow() + 1)) * ST;
+    if (BW == 0) {
+        int CW = contentionWindow();
+        EV << "generating backoff for CW: " << CW << endl;
+        BW = ((double) intrand(CW + 1)) * ST;
+    }
     // CW is the contention window (see the function). ST is the
     // slot time.  else we take the old value of BW, in order to give a
     // bigger priority to a node which has lost a previous contention

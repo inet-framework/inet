@@ -92,6 +92,15 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      */
     int rtsThreshold;
 
+    /** Maximum number of retries. */
+    int retryLimit;
+
+    /** Minimum contention window. */
+    int cwMinData;
+
+    /** Contention window size for broadcast messages. */
+    int cwMinBroadcast;
+
     /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
     static const int fragmentationThreshold = 2346;
     //@}
@@ -289,6 +298,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void scheduleReservePeriod(Ieee80211Frame *frame);
 
     /** @brief Generates a new backoff period based on the contention window. */
+    void invalidateBackoffPeriod();
+    bool isInvalidBackoffPeriod();
     void generateBackoffPeriod();
     void decreaseBackoffPeriod();
     void scheduleBackoffPeriod();

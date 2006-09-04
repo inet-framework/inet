@@ -67,6 +67,10 @@ void Ieee80211Mac::initialize(int stage)
         bitrate = par("bitrate");
         basicBitrate = 2e6; //FIXME make it parameter
         rtsThreshold = par("rtsThresholdBytes");
+        retryLimit = par("retryLimit");
+        cwMinData = par("cwMinData");
+        if (cwMinData == -1) cwMinData = CW_MIN;
+        cwMinBroadcast = par("cwMinBroadcast");
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
@@ -342,12 +346,12 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMsg(msg),
                                   DEFER,
-                generateBackoffPeriod();
+                invalidateBackoffPeriod();
             );
             FSMA_No_Event_Transition(Immediate-Data-Ready,
                                      !transmissionQueue.empty(),
                                      DEFER,
-                generateBackoffPeriod();
+                invalidateBackoffPeriod();
             );
             FSMA_Event_Transition(Receive,
                                   isLowerMsg(msg),
@@ -396,6 +400,8 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   msg == endDIFS,
                                   BACKOFF,
                 ASSERT(backoff);
+                if (isInvalidBackoffPeriod())
+                    generateBackoffPeriod();
             );
             FSMA_Event_Transition(Busy,
                                   isMediumStateChange(msg) && !isMediumFree(),
@@ -454,7 +460,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 numSent++;
             );
             FSMA_Event_Transition(Transmit-Data-Failed,
-                                  msg == endTimeout && retryCounter == RETRY_LIMIT,
+                                  msg == endTimeout && retryCounter == retryLimit,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -485,7 +491,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 cancelTimeoutPeriod();
             );
             FSMA_Event_Transition(Transmit-RTS-Failed,
-                                  msg == endTimeout && retryCounter == RETRY_LIMIT,
+                                  msg == endTimeout && retryCounter == retryLimit,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -590,16 +596,13 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 {
     int cw;
 
-    // FIXME: if the next packet is broadcast then the contention window must be maximal?
-    // FIXME: I could not verify this in the spec
-    // TODO: do we need a parameter here such as broadcastBackoffCW?
     if (isBroadcast(msg))
-        cw = CW_MAX;
+        cw = cwMinBroadcast;
     else
     {
-        ASSERT(0 <= r && r <= RETRY_LIMIT);
+        ASSERT(0 <= r && r <= retryLimit);
 
-        cw = (CW_MIN + 1) * (1 << r) - 1;
+        cw = (cwMinData + 1) * (1 << r) - 1;
 
         if (cw > CW_MAX)
             cw = CW_MAX;
@@ -611,7 +614,7 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 
     return ((double)c) * SlotPeriod();
 }
-
+    
 /****************************************************************
  * Timer functions.
  */
@@ -694,6 +697,16 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
         nav = true;
         scheduleAt(simTime() + reserve, endReserve);
     }
+}
+
+void Ieee80211Mac::invalidateBackoffPeriod()
+{
+    backoffPeriod = -1;
+}
+
+bool Ieee80211Mac::isInvalidBackoffPeriod()
+{
+    return backoffPeriod == -1;
 }
 
 void Ieee80211Mac::generateBackoffPeriod()

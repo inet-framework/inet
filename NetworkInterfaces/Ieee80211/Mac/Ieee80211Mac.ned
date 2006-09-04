@@ -58,7 +58,10 @@ simple Ieee80211Mac
         queueModule: string,    // name of optional external queue module
         maxQueueSize: numeric const, // max queue length in frames; only used if queueModule==""
         bitrate: numeric const,
-        rtsThresholdBytes: numeric const; // longer messages will be sent using RTS/CTS; use 2346 for default
+        rtsThresholdBytes: numeric const, // longer messages will be sent using RTS/CTS; use 2346 for default
+        retryLimit: numeric const, // maximum number of retries per message, -1 means default
+        cwMinData: numeric const, // contention window for normal data frames, -1 means default
+        cwMinBroadcast: numeric const; // contention window for broadcast messates
     gates:
         in: uppergateIn;
         out: uppergateOut;
