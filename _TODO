@@ -1,5 +1,6 @@
-- DECIDER BUG: it modifies the encapsulated message! does msg->encapsulatedMsg()->setKind(..)!!!
-  this may interfere with others! 1st decapsulate, then setKind()! 
+- ChannelControl: grid; instead of having pMax parameter, it should ask all
+  radios and collect pMax from them! (or, directly the range!)
+  
 --------
 - tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
 --------
