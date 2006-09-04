@@ -97,12 +97,9 @@ SnrEval::~SnrEval()
 
 void SnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->arrivalGateId()==uppergateIn && msg->kind()!=0)
+    if (msg->arrivalGateId()==uppergateIn && msg->length()==0)
     {
-        //XXX shouldn't this whole command stuff be moved into BasicSnrEval?
         cPolymorphic *ctrl = msg->removeControlInfo();
-        if (msg->length()!=0)
-            error("Commands sent to the physical layer (nonzero msg kind) should be attached to blank messages (len=0) not data frames");
         handleCommand(msg->kind(), ctrl);
         delete msg;
     }
