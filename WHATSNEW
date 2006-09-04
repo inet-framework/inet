@@ -6,14 +6,20 @@ INET-200605xx
 - improvements on the wireless infrastructure: support for multiple channels
   and channel switching by NICs; account for finite radio wave propagation speed
 
+- added new 802.11 model which also supports infrastructure mode; see
+  NetworkInterfaces/Ieee80211. Even for ad-hoc mode, Ieee80211Mac is recommended
+  over the older Mac80211 from MF.
+
+- added Ieee80211Radio which supersedes SnrEval80211 and Decider80211.
+
 - added EtherDuplexMAC, a simplified Ethernet implementation for full duplex
   point-to-point operation mode when CSMA/CD is not in use.
 
-- makefiles within Examples/ have been largely unnecessary because all 
-  simulations just invoke bin/INET. Realizing these makefiles have been 
+- makefiles within Examples/ have been largely unnecessary because all
+  simulations just invoke bin/INET. Realizing these makefiles have been
   confusing to many people, they got removed now. The target to generate
   them is still present in makemakefiles in case someone needs it.
-  
+
 - several other fixes
 
 INET-20060330
