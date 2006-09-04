@@ -99,7 +99,7 @@ void Ieee80211Mac::initialize(int stage)
         mode = DCF;
         sequenceNumber = 0;
         radioState = RadioState::IDLE;
-        retryCounter = 1;
+        retryCounter = 0;
         backoff = false;
         lastReceiveFailed = false;
         nav = false;
@@ -450,18 +450,18 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   IDLE,
                 cancelTimeoutPeriod();
                 finishCurrentTransmission();
-                if (retryCounter == 1) numSentWithoutRetry++;
+                if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
+            );
+            FSMA_Event_Transition(Transmit-Data-Failed,
+                                  msg == endTimeout && retryCounter == RETRY_LIMIT,
+                                  IDLE,
+                giveUpCurrentTransmission();
             );
             FSMA_Event_Transition(Receive-ACK-Timeout,
                                   msg == endTimeout,
                                   DEFER,
                 retryCurrentTransmission();
-            );
-            FSMA_Event_Transition(Transmit-Data-Failed,
-                                  msg == endTimeout && retryCounter > RETRY_LIMIT,
-                                  IDLE,
-                giveUpCurrentTransmission();
             );
         }
         // wait until broadcast is sent
@@ -484,15 +484,15 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   WAITSIFS,
                 cancelTimeoutPeriod();
             );
+            FSMA_Event_Transition(Transmit-RTS-Failed,
+                                  msg == endTimeout && retryCounter == RETRY_LIMIT,
+                                  IDLE,
+                giveUpCurrentTransmission();
+            );
             FSMA_Event_Transition(Receive-CTS-Timeout,
                                   msg == endTimeout,
                                   DEFER,
                 retryCurrentTransmission();
-            );
-            FSMA_Event_Transition(Transmit-RTS-Failed,
-                                  msg == endTimeout && retryCounter > RETRY_LIMIT,
-                                  IDLE,
-                giveUpCurrentTransmission();
             );
         }
         FSMA_State(WAITSIFS)
@@ -597,7 +597,9 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
         cw = CW_MAX;
     else
     {
-        cw = (CW_MIN + 1) * (1 << (r - 1)) - 1;
+        ASSERT(0 <= r && r <= RETRY_LIMIT);
+
+        cw = (CW_MIN + 1) * (1 << r) - 1;
 
         if (cw > CW_MAX)
             cw = CW_MAX;
@@ -697,6 +699,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
 void Ieee80211Mac::generateBackoffPeriod()
 {
     backoffPeriod = BackoffPeriod(currentTransmission(), retryCounter);
+    ASSERT(backoffPeriod >= 0);
     EV << "backoff period set to " << backoffPeriod << endl;
 }
 
@@ -705,6 +708,7 @@ void Ieee80211Mac::decreaseBackoffPeriod()
     // see spec 9.2.5.2
     simtime_t elapsedBackoffTime = simTime() - endBackoff->sendingTime();
     backoffPeriod -= ((int)(elapsedBackoffTime / SlotPeriod())) * SlotPeriod();
+    ASSERT(backoffPeriod >= 0);
     EV << "backoff period decreased to " << backoffPeriod << endl;
 }
 
@@ -895,7 +899,7 @@ void Ieee80211Mac::setMode(Mode mode)
 void Ieee80211Mac::resetStateVariables()
 {
     backoffPeriod = 0;
-    retryCounter = 1;
+    retryCounter = 0;
 
     if (!transmissionQueue.empty()) {
         backoff = true;
