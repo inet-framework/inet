@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) Andras Varga, Levente Meszaros
+// Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,30 +17,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef PATHLOSSRECEPTIONMODEL_H
-#define PATHLOSSRECEPTIONMODEL_H
+#ifndef IEEE80211RADIOMODEL_H
+#define IEEE80211RADIOMODEL_H
 
-#include "IReceptionModel.h"
+#include "IRadioModel.h"
 
 /**
- * Path loss model which calculates the received power using a path loss exponent
- * and the distance.
+ * Radio model for IEEE 802.11. The implementation is largely based on the 
+ * Mobility Framework's SnrEval80211 and Decider80211 modules.
+ * See the NED file for more info.
  */
-class INET_API PathLossReceptionModel : public IReceptionModel
+class INET_API Ieee80211RadioModel : public IRadioModel
 {
-  private:
-    double pathLossAlpha;
+  protected:
+    double snirThreshold;
 
-  public:
-    /**
-     * Parameters read from the radio module: pathLossAlpha.
-     */
+  protected:
     virtual void initializeFrom(cModule *radioModule);
 
-    /**
-     * Perform the calculation.
-     */
-    virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
+    virtual double calcDuration(AirFrame *airframe);
+
+    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
+
+    // utility
+    virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate);
+    // utility
+    virtual double dB2fraction(double dB);
 };
 
 #endif

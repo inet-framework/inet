@@ -1,5 +1,5 @@
 //
-// Copyright (C) Andras Varga
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -49,7 +49,7 @@ class INET_API IRadioModel : public cPolymorphic
      * has a different modulation (and thus a different bitrate) than the
      * rest of the message.
      */
-    virtual double calcDuration(AirFrame *) = 0;
+    virtual double calculateDuration(AirFrame *) = 0;
 
     /**
      * Should be defined to calculate whether the frame has been received

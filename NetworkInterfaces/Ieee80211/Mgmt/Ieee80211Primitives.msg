@@ -163,20 +163,15 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 //
 // Losely based on MLME-DEAUTHENTICATE.request
 //
+// NOTE: there is no Deauthenticate Confirm, because Deauthenticate Request 
+// takes place immediately, and nothing can go wrong (there is no reply 
+// from the AP to wait for)
+//
 class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
         int reasonCode enum(Ieee80211ReasonCode);
-};
-
-//
-// Losely based on MLME-DEAUTHENTICATE.confirm.
-// Possible result codes: SUCCESS, INVALID_PARAMETERS, TOO_MANY_SIMULTANEOUS_REQUESTS
-// (currently only SUCCESS is sent).
-//
-class Ieee80211Prim_DeauthenticateConfirm extends Ieee80211PrimConfirm
-{
 };
 
 //
@@ -214,22 +209,13 @@ class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
 //
 // Losely based on MLME-DISASSOCIATE.request.
 //
+// NOTE: there is no Disassociate Confirm, because Disassociate Request 
+// takes place immediately, and nothing can go wrong (there is no reply 
+// from the AP to wait for)
+//
 class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 {
     fields:
         MACAddress address;
         int reasonCode enum(Ieee80211ReasonCode);
 };
-
-//
-// Losely based on MLME-DISASSOCIATE.confirm.
-// Possible result codes: SUCCESS, INVALID_PARAMETERS, TIMEOUT, REFUSED
-// (currently only SUCCESS is sent).
-//
-class Ieee80211Prim_DisassociateConfirm extends Ieee80211PrimConfirm
-{
-};
-
-
-
-

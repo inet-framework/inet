@@ -1,5 +1,5 @@
 //
-// Copyright (C) Andras Varga, Levente Meszaros
+// Copyright (C) 2006 Andras Varga, Levente Meszaros
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 #include "IRadioModel.h"
 
 /**
- * Radio model for IEEE 802.11. The implementation is largely based on the 
+ * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
  * See the NED file for more info.
  */
@@ -35,7 +35,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
   protected:
     virtual void initializeFrom(cModule *radioModule);
 
-    virtual double calcDuration(AirFrame *airframe);
+    virtual double calculateDuration(AirFrame *airframe);
 
     virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
 

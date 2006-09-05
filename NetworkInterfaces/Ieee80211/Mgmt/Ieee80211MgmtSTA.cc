@@ -341,8 +341,16 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     if (isScanning)
         error("processScanCommand: scanning already in progress");
-    if (isAssociated || assocTimeoutMsg)
-        error("processScanCommand: refusing to scan while station is associated or currently associating");
+    if (isAssociated)
+    {
+        disassociate();
+    }
+    else if (assocTimeoutMsg)
+    {
+        EV << "Cancelling ongoing association process\n";
+        delete cancelEvent(assocTimeoutMsg);
+        assocTimeoutMsg = NULL;
+    }
 
     // clear existing AP list (and cancel any pending authentications) -- we want to start with a clean page
     clearAPList();
@@ -471,9 +479,6 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     Ieee80211DeauthenticationFrame *frame = new Ieee80211DeauthenticationFrame("Deauth");
     frame->getBody().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
-
-    // send confirm to agent
-    sendConfirm(new Ieee80211Prim_DeauthenticateConfirm(), PRC_SUCCESS);
 }
 
 void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
@@ -511,9 +516,6 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disass");
     frame->getBody().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
-
-    // send confirm to agent
-    sendConfirm(new Ieee80211Prim_DisassociateConfirm(), PRC_SUCCESS);
 }
 
 void Ieee80211MgmtSTA::disassociate()
@@ -736,9 +738,15 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Ieee80211DisassociationFrame *f
 {
     EV << "Received Disassociation frame\n";
     const MACAddress& address = frame->getAddress3();  // source address
+
+    if (assocTimeoutMsg)
+    {
+        // pending association
+        delete cancelEvent(assocTimeoutMsg);
+        assocTimeoutMsg = NULL;
+    }
     if (!isAssociated || address!=assocAP.address)
     {
-        //XXX if we are currently associatING, cancel timer etc!!!
         EV << "Not associated with that AP -- ignoring frame\n";
         delete frame;
         return;

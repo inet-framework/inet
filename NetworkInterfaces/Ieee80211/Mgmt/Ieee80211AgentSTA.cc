@@ -25,6 +25,7 @@
 
 Define_Module(Ieee80211AgentSTA);
 
+#define MK_STARTUP  1
 
 void Ieee80211AgentSTA::initialize(int stage)
 {
@@ -44,10 +45,9 @@ void Ieee80211AgentSTA::initialize(int stage)
 
         NotificationBoard *nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
-        nb->subscribe(this, NF_L2_ASSOCIATED);
 
-        // start up: send scan request; XXX refine! e.g. use scheduleAt
-        sendScanRequest();
+        // start up: send scan request
+        scheduleAt(simTime(), new cMessage("startUp", MK_STARTUP));
     }
 }
 
@@ -61,7 +61,16 @@ void Ieee80211AgentSTA::handleMessage(cMessage *msg)
 
 void Ieee80211AgentSTA::handleTimer(cMessage *msg)
 {
-    error("internal error: unrecognized timer '%s'", msg->name());
+    if (msg->kind()==MK_STARTUP)
+    {
+        EV << "Starting up\n";
+        sendScanRequest();
+        delete msg;
+    }
+    else
+    {
+        error("internal error: unrecognized timer '%s'", msg->name());
+    }
 }
 
 void Ieee80211AgentSTA::handleResponse(cMessage *msg)
@@ -75,14 +84,10 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
         processScanConfirm((Ieee80211Prim_ScanConfirm *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
         processAuthenticateConfirm((Ieee80211Prim_AuthenticateConfirm *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_DeauthenticateConfirm *>(ctrl))
-        processDeauthenticateConfirm((Ieee80211Prim_DeauthenticateConfirm *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
         processAssociateConfirm((Ieee80211Prim_AssociateConfirm *)ctrl);
     else if (dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
         processReassociateConfirm((Ieee80211Prim_ReassociateConfirm *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_DisassociateConfirm *>(ctrl))
-        processDisassociateConfirm((Ieee80211Prim_DisassociateConfirm *)ctrl);
     else if (ctrl)
         error("handleResponse(): unrecognized control info class `%s'", ctrl->className());
     else
@@ -98,17 +103,10 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
     if (category == NF_L2_BEACON_LOST)
     {
         //XXX should check details if it's about this NIC
-        EV << "beacon lost, starting scanning again\n"; //XXX should we get disassociated or anything before that?
+        EV << "beacon lost, starting scanning again\n";
         parentModule()->parentModule()->bubble("Beacon lost!");
-        //XXX sendDisassociateRequest(); ??
+        //sendDisassociateRequest();
         sendScanRequest();
-    }
-    else if (category == NF_L2_ASSOCIATED)
-    {
-        //XXX should check details if it's about this NIC
-        // we don't really need to react on this (we get the confirm anyway)
-        EV << "associated with AP\n";
-        parentModule()->parentModule()->bubble("Associated with AP");
     }
 }
 
@@ -248,11 +246,6 @@ void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateCon
     }
 }
 
-void Ieee80211AgentSTA::processDeauthenticateConfirm(Ieee80211Prim_DeauthenticateConfirm *resp)
-{
-    EV << "Deauthenticate " << (resp->getResultCode()==PRC_SUCCESS ? "successful" : "error") << "\n";
-}
-
 void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
 {
     if (resp->getResultCode()!=PRC_SUCCESS)
@@ -267,6 +260,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     {
         EV << "Association successful\n";
         // we are happy!
+        parentModule()->parentModule()->bubble("Associated with AP");
     }
 }
 
@@ -284,10 +278,5 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
         EV << "Reassociation successful\n";
         // we are happy!
     }
-}
-
-void Ieee80211AgentSTA::processDisassociateConfirm(Ieee80211Prim_DisassociateConfirm *resp)
-{
-    EV << "Disassociation " << (resp->getResultCode()==PRC_SUCCESS ? "successful" : "error") << "\n";
 }
 

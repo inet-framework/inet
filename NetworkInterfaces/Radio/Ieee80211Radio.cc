@@ -1,5 +1,5 @@
 //
-// Copyright (C) Andras Varga, Levente Meszaros
+// Copyright (C) 2006 Andras Varga, Levente Meszaros
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or

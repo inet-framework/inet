@@ -19,25 +19,27 @@
 
 
 //
-// XXX this is a prototype...
+// Prototype for radio modules.
 //
 // Represents the radio. Frames received from higher layers (typically the
 // MAC protocol) are transmitted on the radio channel, using the global
-// ChannelControl module. Frames received on the radio channel will have
-// their signal-noise ratio evaluated and passed up to the decider.
-// (It is the decider's task to determine whether the frame was received
-// correctly, and pass it up to the MAC layer).
+// ChannelControl module.
 //
-// The receive/transmit channel (frequency) can be changed by sending
+//# TODO describe NotificationBoard stuff, how frame get received, etc...
+//
+// The bitrate and the receive/transmit channel can be changed by sending
 // Radio a blank cMessage with PHY_C_CONFIGURERADIO as message kind, and
 // a PhyControlInfo object attached to it as control info, to hold the
-// new channel number. If the radio is currently transmitting, the channel
-// switch will actually take place after the transmission is completed.
+// new bitrate and/or channel number. If the radio is currently transmitting,
+// the change will actually take place after the transmission is completed.
+//
+// It is also possible to specify a different bitrate for individual frames;
+// to do that, attach a PhyControlInfo with birate filled in to the frame.
 //
 simple RadioPrototype
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
-        out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
+        out: uppergateOut; // to higher layer protocol (MAC)
         in: radioIn; // to receive frames (AirFrame) on the radio channel
 endsimple
 

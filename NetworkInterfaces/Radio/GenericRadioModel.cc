@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga, Levente Meszaros
+// Copyright (C) Andras Varga, Levente Meszaros
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -31,7 +31,7 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
     snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
 }
 
-double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
+double Ieee80211RadioModel::calcDuration(AirFrame *airframe)
 {
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
     return airframe->length()/airframe->getBitrate() + PHY_HEADER_LENGTH/BITRATE_HEADER;

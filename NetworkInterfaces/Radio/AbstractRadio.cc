@@ -1,5 +1,5 @@
 //
-// Copyright (C) Andras Varga, Levente Meszaros
+// Copyright (C) 2006 Andras Varga, Levente Meszaros
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -211,7 +211,7 @@ AirFrame *AbstractRadio::encapsMsg(cMessage *frame)
     airframe->setChannelNumber(channelNumber());
     airframe->encapsulate(frame);
     airframe->setBitrate(ctrl ? ctrl->bitrate() : rs.getBitrate());
-    airframe->setDuration(radioModel->calcDuration(airframe));
+    airframe->setDuration(radioModel->calculateDuration(airframe));
     airframe->setSenderPos(myPosition());
     delete ctrl;
 
