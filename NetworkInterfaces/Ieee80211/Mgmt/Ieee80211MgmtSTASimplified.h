@@ -36,7 +36,6 @@ class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
   protected:
     // associate AP information
     MACAddress accessPointAddress;
-    int accessPointChannel;
     int receiveSequence;
 
   protected:

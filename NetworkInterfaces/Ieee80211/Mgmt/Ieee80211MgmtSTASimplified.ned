@@ -26,14 +26,13 @@
 // understood or sent at any time.
 //
 // This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see channelNumber in SnrEval80211).
+// the physical layer is configured for (see channelNumber in Ieee80211Radio).
 //
 // @author Andras Varga
 //
 simple Ieee80211MgmtSTASimplified
     parameters:
         accessPointAddress: string, // MAC address of associate AP
-        accessPointChannel: numeric, // channel number of associate AP
         frameCapacity: numeric;
     gates:
         in: uppergateIn;

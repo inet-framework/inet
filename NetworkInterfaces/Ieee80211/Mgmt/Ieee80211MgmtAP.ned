@@ -28,7 +28,7 @@
 // EtherFrame for MACRelayUnit.
 //
 // This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see channelNumber in SnrEval80211).
+// the physical layer is configured for (see channelNumber in Ieee80211Radio).
 //
 // @author Andras Varga
 //

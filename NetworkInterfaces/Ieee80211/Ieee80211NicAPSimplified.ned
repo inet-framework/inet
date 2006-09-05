@@ -19,8 +19,7 @@
 import
     "Ieee80211MgmtAPSimplified",
     "Ieee80211Mac",
-    "Decider80211",
-    "SnrEval80211";
+    "Ieee80211Radio";
 
 //
 // This NIC implements an infrastructure mode 802.11 network interface card
