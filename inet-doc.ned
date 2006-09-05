@@ -46,11 +46,15 @@
 // ConstSpeedMobility), and perform housekeeping associated with radio channels
 // in wireless simulations (ChannelControl).
 //
+// Protocol headers and packet formats are described in message definition
+// files (msg files), which are translated into C++ classes by OMNeT++'s
+// <i>opp_msgc</i> tool. The generated message classes subclass from OMNeT++'s
+// <code>cMessage</code> class.
 //
 // <h3>About the documentation</h3>
 //
 // The INET Framework documentation itself is also comprised of two bodies of HTML pages:
-// <i>neddoc</i> generated from NED files using OMNeT++'s <i>opp_neddoc</i> tool,
+// <i>neddoc</i> generated from NED and MSG files using OMNeT++'s <i>opp_neddoc</i> tool,
 // and the documentation of the underlying C++ classes, generated from the source files
 // using <a href="http://www.doxygen.org" target="_top">Doxygen</a>.
 // The C++ doc is generated in a way that it contains <b>the full C++ source code</b>
@@ -106,17 +110,27 @@
 // - ChannelControl is required for wireless simulations. It keeps track of which
 //   nodes are within interference distance of other nodes.
 //
-//# TBD
-//# <h3>Module interaction patterns</h3>
-//#
-//# <b>message passing</b>
-//#
-//# <b>ControlINfo</b>
-//#
-//# <b>notificationboard</b>
-//#
-//# <b>direct method calls of "Data" simple modules</b>
-//#
+// <h3>Communication between protocol layers</h3>
+//
+// In the INET Framework, when an upper-layer protocol wants to send a data
+// packet over a lower-layer protocol, the upper-layer module just sends the
+// message object representing the packet to the lower-layer module, which
+// will in turn encapsulate it and send it. The reverse process takes place
+// when a lower layer protocol receives a packet and sends it up after
+// decapsulation.
+//
+// It is often necessary to convey extra information with the packet. For
+// example, when an application-layer module wants to send data over TCP, some
+// connection identifier needs to be specified for TCP. When TCP sends a
+// segment over IP, IP will need a destination address and possibly other
+// parameters like TTL. When IP sends a datagram to an Ethernet interface for
+// transmission, a destination MAC address must be specified. This extra
+// information is attached to the message object to as <i>control info</i>.
+//
+// Control info are small value objects, which are attached to packets
+// (message objects) with its <code>setControlInfo()</code> member function.
+// Control info only holds auxiliary information for the next protocol layer,
+// and is not supposed to be sent over the network to other hosts and routers.
 //
 // @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
 //

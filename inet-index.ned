@@ -26,8 +26,9 @@
 //
 // <nohtml>INET Framework contains IPv4, IPv6, TCP, UDP protocol implementations,
 // and several application models. The framework also includes an MPLS model
-// with \RSVP-TE and LDP signalling. Link-layer models are PPP and Ethernet.
-// Static routing can be set up using network autoconfigurators.
+// with \RSVP-TE and LDP signalling. Link-layer models are PPP, Ethernet and 802.11.
+// Static routing can be set up using network autoconfigurators, or one can use
+// routing protocol implementations.
 // </nohtml>
 //
 // This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
