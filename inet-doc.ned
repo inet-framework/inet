@@ -16,6 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
+
 // @page inet-architecture.html, Architecture of the INET Framework
 //
 // The INET Framework builds upon OMNeT++, and uses the same concept:
@@ -56,10 +58,10 @@
 // The INET Framework documentation itself is also comprised of two bodies of HTML pages:
 // <i>neddoc</i> generated from NED and MSG files using OMNeT++'s <i>opp_neddoc</i> tool,
 // and the documentation of the underlying C++ classes, generated from the source files
-// using <a href="http://www.doxygen.org" target="_top">Doxygen</a>.
+// using Doxygen.
 // The C++ doc is generated in a way that it contains <b>the full C++ source code</b>
-// as HTML pages. It is syntax highlighted and variable and class names hyperlinked
-// and cross-referenced, so it is quite convenient for understanding the code.
+// as HTML pages. It is syntax highlighted, and variable and class names are hyperlinked
+// and cross-referenced, which makes it convenient for exploring the code.
 //
 //
 // <h3>Common modules in hosts and routers</h3>

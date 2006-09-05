@@ -34,7 +34,7 @@
 // <nohtml>
 // The INET Framework supports wireless and mobile simulations as well. Support
 // for mobility and wireless communication has been derived from the
-// <a href="http://mobility-fw.sourceforge.net/" target="_top">Mobility Framework</a>.
+// <a href="http://mobility-fw.sourceforge.net">Mobility Framework</a>.
 // </nohtml>
 //
 // <b>This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
@@ -51,7 +51,7 @@
 // <a href="history.html">History and contributors</a>.
 //
 // Introductory material:
-//  - <a href="inet-architecture.html">INET Framework architecture</a> <b>NEW</b>
+//  - <a href="inet-architecture.html">INET Framework architecture</a> <b>(NEW!)</b>
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //  - <a href="../tcp-tutorial/index.html" target="_top">Getting started with TCP</a>
 //

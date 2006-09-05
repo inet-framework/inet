@@ -1,6 +1,10 @@
 - ChannelControl: grid; instead of having pMax parameter, it should ask all
   radios and collect pMax from them! (or, directly the range!)
-  
+--------
+- radio models: when calculating the probability of bit errors, snirMIN is 
+  assumed for the whole duration of the frame! This means that if snir 
+  changes along the packet duration, we overestimate the probability of 
+  bit error!
 --------
 - tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
 --------

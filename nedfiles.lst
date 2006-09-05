@@ -116,6 +116,7 @@ NetworkInterfaces/PPP/PPP.ned
 NetworkInterfaces/PPP/PPPInterface.ned
 NetworkInterfaces/PPP/PPPInterfaceNoQueue.ned
 NetworkInterfaces/PPP/ThruputMeter.ned
+NetworkInterfaces/Radio/GenericRadio.ned
 NetworkInterfaces/Radio/Ieee80211Radio.ned
 NetworkInterfaces/Radio/RadioPrototype.ned
 Nodes/Adhoc/MFMobileHost.ned
