@@ -6,14 +6,14 @@ The host and the access point transmitter powers are configured so that every ho
 
 The sheet also shows the measured throughput at the sink of the access point and 
 compares it to the theoretical maximum which is roughly 5.12 Mbps. The result is that
-the measured throughput and the theoretical maximum are very close actually the difference
+the measured throughput and the theoretical maximum are very close, the difference
 is less than 1 kbps.
 
 2. Multi host throughput
 
 In this case the average backoff interval on the channel decreases but there is a
 chance of frame collision. This makes the calculation of the theoretical maximum
-rather complicated. To simplify things the sheet does not consider collisions when
+rather complicated. To simplify things, the Excel sheet does not consider collisions when
 calculating the maximum throughput. For 3 hosts the minimum backoff period is
 (n - 1) ^ 2 / (4 * n) where n is the contention window size that is 32. This shows roughly
 7.5 average contention window and an increased total channel throughput.
