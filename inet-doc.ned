@@ -21,6 +21,8 @@
 // The INET Framework builds upon OMNeT++, and uses the same concept:
 // modules communicating by message passing.
 //
+// <h3>Modules and protocols</h3>
+//
 // Protocols are represented by simple modules. A simple module's external
 // interface (gates [connectors] and parameters) is described in a NED file,
 // and the implementation is contained in a C++ class with the same name.
@@ -45,18 +47,18 @@
 // in wireless simulations (ChannelControl).
 //
 //
-// <b>About the documentation</b>
+// <h3>About the documentation</h3>
 //
 // The INET Framework documentation itself is also comprised of two bodies of HTML pages:
 // <i>neddoc</i> generated from NED files using OMNeT++'s <i>opp_neddoc</i> tool,
-// and the documentation of the underlying C++ classes,
-// generated from the source files using <a href="http://www.doxygen.org">Doxygen</a>.
+// and the documentation of the underlying C++ classes, generated from the source files
+// using <a href="http://www.doxygen.org" target="_top">Doxygen</a>.
 // The C++ doc is generated in a way that it contains <b>the full C++ source code</b>
 // as HTML pages. It is syntax highlighted and variable and class names hyperlinked
 // and cross-referenced, so it is quite convenient for understanding the code.
 //
 //
-// <b>Common modules in hosts and routers</b>
+// <h3>Common modules in hosts and routers</h3>
 //
 // There are some common modules that appear in all (or many) host, router and device
 // models.
@@ -70,11 +72,11 @@
 //   functions). Network interfaces get dynamically registered (added to the table)
 //   by simple modules implementing the network interface, for example EtherMAC.
 //
-// - RoutingTable. This module contains the IP (v4) routing table, and heavily relies
+// - RoutingTable. This module contains the \IP (v4) routing table, and heavily relies
 //   on InterfaceTable for its operation. This module is also accessed from other
 //   modules (typically IP) by calling the public member functions of its C++ class.
 //   There are member functions for querying, adding, deleting routes, and
-//   finding the best matching route for a given destination IP address.
+//   finding the best matching route for a given destination \IP address.
 //   The routing table submodule within the host (router) must be called
 //   <code>routingTable</code> for other modules to find it.
 //
@@ -91,7 +93,7 @@
 //   <code>notificationBoard</code> for other modules to find it.
 //
 //
-// <b>Common modules at network level</b>
+// <h3>Common modules at network level</h3>
 //
 // Some modules have only one instance, at global network level:
 //
@@ -104,6 +106,17 @@
 // - ChannelControl is required for wireless simulations. It keeps track of which
 //   nodes are within interference distance of other nodes.
 //
+//# TBD
+//# <h3>Module interaction patterns</h3>
+//#
+//# <b>message passing</b>
+//#
+//# <b>ControlINfo</b>
+//#
+//# <b>notificationboard</b>
+//#
+//# <b>direct method calls of "Data" simple modules</b>
+//#
 //
 // @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
 //
