@@ -16,7 +16,94 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
+// @page inet-architecture.html, Architecture of the INET Framework
+//
+// The INET Framework builds upon OMNeT++, and uses the same concept:
+// modules communicating by message passing.
+//
+// Protocols are represented by simple modules. A simple module's external
+// interface (gates [connectors] and parameters) is described in a NED file,
+// and the implementation is contained in a C++ class with the same name.
+// Some examples: TCP, IP.
+//
+// These modules can be freely combined to form hosts and other network devices
+// with the NED language (no C++ code and no recompilation required).
+// Various pre-assembled host, router, switch, access point, etc. models can
+// be found in the <code>Nodes/</code> subdirectory (for example: StandardHost,
+// Router), but you can also create your own ones for tailored to your particular
+// simulation scenarios.
+//
+// Network interfaces (Ethernet, 802.11, etc) are usually compound modules (i.e.
+// assembled from simple modules) themselves, and are being composed of a queue,
+// a MAC, and possibly other simple modules. See EthernetInterface as an example.
+//
+// Not all modules implement protocols though. There are modules which hold
+// data (for example RoutingTable), facilitate communication of modules
+// (NotificationBoard), perform autoconfiguration of a network
+// (FlatNetworkConfigurator), move a mobile node around (for example
+// ConstSpeedMobility), and perform housekeeping associated with radio channels
+// in wireless simulations (ChannelControl).
+//
+//
+// <b>About the documentation</b>
+//
+// The INET Framework documentation itself is also comprised of two bodies of HTML pages:
+// <i>neddoc</i> generated from NED files using OMNeT++'s <i>opp_neddoc</i> tool,
+// and the documentation of the underlying C++ classes,
+// generated from the source files using <a href="http://www.doxygen.org">Doxygen</a>.
+// The C++ doc is generated in a way that it contains <b>the full C++ source code</b>
+// as HTML pages. It is syntax highlighted and variable and class names hyperlinked
+// and cross-referenced, so it is quite convenient for understanding the code.
+//
+//
+// <b>Common modules in hosts and routers</b>
+//
+// There are some common modules that appear in all (or many) host, router and device
+// models.
+//
+// - InterfaceTable. This module contains the table of network interfaces
+//   (eth0, wlan0, etc) in the host. This module does not send or receive messages:
+//   it is accessed by other modules using standard C++ member function calls.
+//   Other modules rely on the interface table submodule within the host to be called
+//   <code>interfaceTable</code> to be able to find it. (They obtain a <code>cModule *</code>
+//   pointer to it, then cast it to <code>\InterfaceTable *</code> to be able to call its
+//   functions). Network interfaces get dynamically registered (added to the table)
+//   by simple modules implementing the network interface, for example EtherMAC.
+//
+// - RoutingTable. This module contains the IP (v4) routing table, and heavily relies
+//   on InterfaceTable for its operation. This module is also accessed from other
+//   modules (typically IP) by calling the public member functions of its C++ class.
+//   There are member functions for querying, adding, deleting routes, and
+//   finding the best matching route for a given destination IP address.
+//   The routing table submodule within the host (router) must be called
+//   <code>routingTable</code> for other modules to find it.
+//
+// - RoutingTable6. This is like RoutingTable, but for IPv6.
+//
+// - NotificationBoard. This module makes it possible for several modules to
+//   communicate in a publish-subscribe manner. For example, the radio module
+//   (Ieee80211Radio) fires a <i>"radio state changed"</i> notification when
+//   the state of the radio channel changes (from TRANSMIT to IDLE, for example),
+//   and it will be delivered to other modules that have previously subscribed
+//   to that notification category. The notification mechanism also works
+//   my C++ functions calls, no message sending is involved.
+//   The notification board submodule within the host (router) must be called
+//   <code>notificationBoard</code> for other modules to find it.
+//
+//
+// <b>Common modules at network level</b>
+//
+// Some modules have only one instance, at global network level:
+//
+// - FlatNetworkConfigurator assigns IP addresses to hosts and routers,
+//   and sets up static routing.
+//
+// - ScenarioManager makes simulations scriptable. Modules can be made to support
+//   scripting by implementing the <code>IScriptable</code> C++ interface.
+//
+// - ChannelControl is required for wireless simulations. It keeps track of which
+//   nodes are within interference distance of other nodes.
+//
 //
 // @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
 //

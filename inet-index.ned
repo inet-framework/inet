@@ -50,6 +50,7 @@
 // <a href="history.html">History and contributors</a>.
 //
 // Introductory material:
+//  - <a href="inet-architecture.html">INET Framework architecture</a> <b>NEW</b>
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //  - <a href="../tcp-tutorial/index.html" target="_top">Getting started with TCP</a>
 //
