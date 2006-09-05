@@ -17,7 +17,6 @@
 //
 
 import
-    "WirelessAP",
     "WirelessAPWithSink";
 
 module ThroughputClient
@@ -33,44 +32,22 @@ module ThroughputClient
             display: "b=40,24;p=180,60,col";
         wlan: Ieee80211NicSTASimplified;
             display: "p=112,134;q=queue;i=block/ifcard";
-        mobility: CircleMobility;
+        mobility: NullMobility;
             display: "p=50,141;i=block/cogwheel_s";
     connections nocheck:
         wlan.radioIn <-- radioIn;
         cli.out --> wlan.uppergateIn;
 endmodule
 
-module ThroughputServer
-    gates:
-        in: radioIn;
-
-    submodules:
-        notificationBoard: NotificationBoard;
-            display: "p=60,70;i=block/control";
-        sink: Sink;
-            display: "b=40,24;p=210,68,col";
-        wlan: Ieee80211NicSTASimplified;
-            display: "p=120,158;q=queue;i=block/ifcard";
-        mobility: NullMobility;
-            display: "p=50,141;i=block/cogwheel_s";
-    connections nocheck:
-        wlan.radioIn <-- radioIn;
-        sink.in++ <-- wlan.uppergateOut;
-endmodule
-
 module Throughput
     parameters:
         numCli: numeric const,
-        numSrv: numeric const,
         playgroundSizeX: numeric const,
-        playgroundSizeY: numeric const,
-        apType: string;
+        playgroundSizeY: numeric const;
     submodules:
         cliHost: ThroughputClient[numCli];
             display: "i=device/wifilaptop;r=,,#707070";
-        srvHost: ThroughputServer[numSrv];
-            display: "p=250,250;i=device/wifilaptop;r=,,#707070";
-        ap: apType like WirelessAP;
+        ap: WirelessAPWithSink;
             display: "p=200,200;i=device/accesspoint;r=,,#707070";
         channelcontrol: ChannelControl;
             parameters:
@@ -83,4 +60,3 @@ endmodule
 
 network throughput : Throughput
 endnetwork
-
