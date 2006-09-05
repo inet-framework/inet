@@ -36,7 +36,7 @@ const unsigned int LENGTH_ACK = 112;
 const simtime_t ST = 20E-6;
 const simtime_t SIFS = 10E-6;
 const simtime_t DIFS = 2*ST + SIFS;
-const simtime_t PROCESSING_DELAY = 5E-6;  // 300 meters at the speed of light
+const simtime_t MAX_PROPAGATION_DELAY = 2E-6;  // 300 meters at the speed of light
 
 const int RETRY_LIMIT = 7;
 

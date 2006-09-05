@@ -589,7 +589,7 @@ simtime_t Ieee80211Mac::DIFSPeriod()
 simtime_t Ieee80211Mac::EIFSPeriod()
 {
 // FIXME:   return SIFSPeriod() + DIFSPeriod() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return SIFSPeriod() + DIFSPeriod() + (8 * LENGTH_ACK) / 1E+6;
+    return SIFSPeriod() + DIFSPeriod() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
 }
 
 simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
@@ -648,13 +648,13 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend->length()) + SIFSPeriod() + frameDuration(LENGTH_ACK) + PROCESSING_DELAY, endTimeout);
+    scheduleAt(simTime() + frameDuration(frameToSend) + SIFSPeriod() + frameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling broadcast timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend->length()), endTimeout);
+    scheduleAt(simTime() + frameDuration(frameToSend), endTimeout);
 }
 
 void Ieee80211Mac::cancelTimeoutPeriod()
@@ -665,7 +665,7 @@ void Ieee80211Mac::cancelTimeoutPeriod()
 
 void Ieee80211Mac::scheduleCTSTimeoutPeriod()
 {
-    scheduleAt(simTime() + frameDuration(LENGTH_RTS) + SIFSPeriod() + frameDuration(LENGTH_CTS) + PROCESSING_DELAY, endTimeout);
+    scheduleAt(simTime() + frameDuration(LENGTH_RTS, basicBitrate) + SIFSPeriod() + frameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
@@ -804,10 +804,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
-        frame->setDuration(SIFSPeriod() + frameDuration(LENGTH_ACK));
+        frame->setDuration(SIFSPeriod() + frameDuration(LENGTH_ACK, basicBitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * SIFSPeriod() + 2 * frameDuration(LENGTH_ACK) + frameDuration(frameToSend->length()));
+        frame->setDuration(3 * SIFSPeriod() + 2 * frameDuration(LENGTH_ACK, basicBitrate) + frameDuration(frameToSend));
 
     return frame;
 }
@@ -820,7 +820,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - SIFSPeriod() - frameDuration(LENGTH_ACK));
+        frame->setDuration(frameToACK->getDuration() - SIFSPeriod() - frameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -830,9 +830,9 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * SIFSPeriod() + frameDuration(LENGTH_CTS) +
-                       frameDuration(frameToSend->length()) +
-                       frameDuration(LENGTH_ACK));
+    frame->setDuration(3 * SIFSPeriod() + frameDuration(LENGTH_CTS, basicBitrate) +
+                       frameDuration(frameToSend) +
+                       frameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -841,7 +841,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - SIFSPeriod() - frameDuration(LENGTH_CTS));
+    frame->setDuration(rtsFrame->getDuration() - SIFSPeriod() - frameDuration(LENGTH_CTS, basicBitrate));
 
     return frame;
 }
@@ -968,7 +968,12 @@ void Ieee80211Mac::popTransmissionQueue()
     }
 }
 
-double Ieee80211Mac::frameDuration(int bits)
+double Ieee80211Mac::frameDuration(Ieee80211Frame *msg)
+{
+    return frameDuration(msg->length(), bitrate);
+}
+
+double Ieee80211Mac::frameDuration(int bits, double bitrate)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }
