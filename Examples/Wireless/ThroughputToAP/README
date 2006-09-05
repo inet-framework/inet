@@ -21,4 +21,4 @@ calculating the maximum throughput. For 3 hosts the minimum backoff period is
 The difference between the theoretical throughput maximum and the measured throughput
 is caused by collisions. Adding the number of frame collisions to the number of correctly
 received frames makes the difference less than 50 kbps. This is probably caused by waiting
-EIFS time instead of DIFS time after detecting a collision.
+EIFS instead of DIFS after detecting a collision.
