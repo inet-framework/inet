@@ -31,14 +31,14 @@
 // routing protocol implementations.
 // </nohtml>
 //
-// This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
-// which supports both ad-hoc and infrastructure mode.
-//
-// Mobility and wireless support (currently 802.11b ad-hoc mode) is provided
-// by a modified version of the lower layers of the
+// <nohtml>
+// The INET Framework supports wireless and mobile simulations as well. Support
+// for mobility and wireless communication has been derived from the
 // <a href="http://mobility-fw.sourceforge.net/" target="_top">Mobility Framework</a>.
-// Also, several mobility models have been added (TurtleMobility,
-// BonnMotionMobility, RandomWPMobility, etc).
+// </nohtml>
+//
+// <b>This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
+// which supports both ad-hoc and infrastructure mode.</b>
 //
 // There are several other bugfixes and improvements as well; see the
 // <tt>WHATSNEW</tt> file in the distribution.
