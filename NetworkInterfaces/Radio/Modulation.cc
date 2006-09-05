@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga, Levente Meszaros
+// Copyright (C) 2006 Andras Varga
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -17,34 +17,29 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE80211RADIOMODEL_H
-#define IEEE80211RADIOMODEL_H
+#include "Modulation.h"
 
-#include "IRadioModel.h"
 
-/**
- * Radio model for IEEE 802.11. The implementation is largely based on the
- * Mobility Framework's SnrEval80211 and Decider80211 modules.
- * See the NED file for more info.
- */
-class INET_API Ieee80211RadioModel : public IRadioModel
+double NoErrorsModulation::bitErrorRate(double, double, double)
 {
-  protected:
-    double snirThreshold;
+    return 0;
+}
 
-  public:
-    virtual void initializeFrom(cModule *radioModule);
+double BPSKModulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+{
+    return 0.5 * exp(-snir * bandwidth / bitrate);
+}
 
-    virtual double calculateDuration(AirFrame *airframe);
+double QAM16Modulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+{
+    return 0.5 * (1 - 1 / sqrt(pow(2.0, 4))) * erfc(snir * bandwidth / bitrate);
+}
 
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
+double QAM256Modulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+{
+    return 0.25 * (1 - 1 / sqrt(pow(2.0, 8))) * erfc(snir * bandwidth / bitrate);
+}
 
-  protected:
-    // utility
-    virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate);
-    // utility
-    virtual double dB2fraction(double dB);
-};
 
-#endif
+
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) Andras Varga, Levente Meszaros
+// Copyright (C) Andras Varga
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -19,17 +19,13 @@
 
 
 //
-// Physical layer for the IEEE 802.11 models. Its external interface
-// (including gates and how it communicates with other modules)
-// is the same as the RadioPrototype module's.
-//
-// The implementation is largely based on the Mobility Framework's
-// SnrEval80211 and Decider80211 modules.
+// Generic radio module. The implementation is largely based on the
+// Mobility Framework's SnrEval and Decider modules.
 //
 // @see RadioPrototype
 // @author Andras Varga
 //
-simple Ieee80211Radio
+simple GenericRadio
     parameters:
         channelNumber: numeric const, // channel identifier
         transmitterPower : numeric const, // power used for transmission of messages (in mW)
@@ -37,7 +33,11 @@ simple Ieee80211Radio
         thermalNoise: numeric const, // base noise level
         pathLossAlpha: numeric const, // used by the path loss calculation
         snirThreshold: numeric const, // is SNIR is below
-        sensitivity: numeric const; // received signals with power below sensitivity are ignored
+        sensitivity: numeric const, // received signals with power below sensitivity are ignored
+        headerLengthBits: numeric const, // length of physical layer framing (preamble, etc)
+        bandwidth: numeric const, // signal bandwidth, used for bit error calculation
+        modulation: string; // "BPSK", "16-QAM", "256-QAM" or "no bit errors";
+                            // selects bit error calculation method
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)

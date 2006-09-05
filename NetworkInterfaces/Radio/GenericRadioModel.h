@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga, Levente Meszaros
+// Copyright (C) 2006 Andras Varga
 // Based on the Mobility Framework's SnrEval by Marc Loebbers
 //
 // This program is free software; you can redistribute it and/or
@@ -17,22 +17,30 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE80211RADIOMODEL_H
-#define IEEE80211RADIOMODEL_H
+#ifndef GENERICRADIOMODEL_H
+#define GENERICRADIOMODEL_H
 
 #include "IRadioModel.h"
+#include "IModulation.h"
 
 /**
- * Radio model for IEEE 802.11. The implementation is largely based on the
- * Mobility Framework's SnrEval80211 and Decider80211 modules.
- * See the NED file for more info.
+ * Generic radio model. Frame duration is calculated from the bitrate
+ * and the packet length plus a physical header length. Bit error rate
+ * is calculated from the modulation scheme, signal bandwidth, bitrate
+ * and the frame length.
  */
-class INET_API Ieee80211RadioModel : public IRadioModel
+class INET_API GenericRadioModel : public IRadioModel
 {
   protected:
     double snirThreshold;
+    long headerLengthBits;
+    double bandwidth;
+    IModulation *modulation;
 
   public:
+    GenericRadioModel();
+    virtual ~GenericRadioModel();
+
     virtual void initializeFrom(cModule *radioModule);
 
     virtual double calculateDuration(AirFrame *airframe);
@@ -41,7 +49,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
 
   protected:
     // utility
-    virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate);
+    virtual bool packetOk(double snirMin, int length, double bitrate);
     // utility
     virtual double dB2fraction(double dB);
 };
