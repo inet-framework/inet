@@ -62,9 +62,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
         double beaconInterval;
         double rxPower;
 
-        bool isAuthenticated; //XXX -> NOT_AUTHENTICATED, AUTHENTICATING, AUTHENTICATED
+        bool isAuthenticated;
         int authSeqExpected;  // valid while authenticating; values: 1,3,5...
-        cMessage *authTimeoutMsg; // authentication/association timeout
+        cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
 
         APInfo() {
             channel=-1; beaconInterval=rxPower=0; authSeqExpected=-1;
@@ -85,26 +85,22 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
   protected:
     NotificationBoard *nb;
-    int numChannels;  // number of channels in ChannelControl -- used if we're told to scan "all" channels
 
-    // State bits.
-    //
-    // NOTE:
-    // - there can be several ongoing authentications simultaneously; per-AP
-    //   authentication status is stored in APInfo
-    // - we may be performing authentications while STA is associated
-    // - we may also be performing scanning while STA is associated (XXX is that so?)
-    //
+    // number of channels in ChannelControl -- used if we're told to scan "all" channels
+    int numChannels;
+
+    // scanning status
     bool isScanning;
     ScanningInfo scanning;
 
-    // we collect scanning results here
+    // APInfo list: we collect scanning results and keep track of ongoing authentications here
+    // Note: there can be several ongoing authentications simultaneously
     typedef std::list<APInfo> AccessPointList;
     AccessPointList apList;
 
     // associated Access Point
-    bool isAssociated; //XXX -> NOT_ASSOCIATED, ASSOCIATING, ASSOCIATED
-    cMessage *assocTimeoutMsg;
+    bool isAssociated;
+    cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
     AssociatedAPInfo assocAP;
 
   protected:

@@ -23,14 +23,11 @@
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
 
-//FIXME supportedRates!
-//FIXME use command msg kinds?
-//FIXME implement bitrate switching (involves notification of MAC, SnrEval, Decider)
-//FIXME while scanning, discard all other requests
-//FIXME where to put LCC header (SNAP)..?
-//FIXME control frames should be transmitted at 2Mbps! (basic data rate set: 1, 2Mbps)
-//FIXME mac: minCW is 31 for 802.11b, 7 for 2Mbps
-//FIXME mac should be able to signal if
+//TBD supportedRates!
+//TBD use command msg kinds?
+//TBD implement bitrate switching (Radio already supports it)
+//TBD where to put LCC header (SNAP)..?
+//TBD mac should be able to signal when msg got transmitted
 
 Define_Module(Ieee80211MgmtSTA);
 
@@ -253,7 +250,7 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //FIXME use InterfaceEntry as detail, etc...
+    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //XXX use InterfaceEntry as detail, etc...
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -306,7 +303,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, double timeout)
     Ieee80211AssociationRequestFrame *frame = new Ieee80211AssociationRequestFrame("Assoc");
 
     //XXX set the following too?
-    // string SSID;
+    // string SSID
     // Ieee80211SupportedRatesElement supportedRates;
 
     sendManagementFrame(frame, ap->address);
@@ -810,6 +807,7 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
     ap->supportedRates = body.getSupportedRates();
     ap->beaconInterval = body.getBeaconInterval();
 
-    //XXX where to get this from???    ap->rxPower = ...;
+    //XXX where to get this from?
+    //ap->rxPower = ...
 }
 
