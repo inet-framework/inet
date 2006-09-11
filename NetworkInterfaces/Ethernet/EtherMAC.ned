@@ -20,7 +20,9 @@
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // Doesn't do encapsulation/decapsulation; see EtherLLC and EtherEncap for
-// that.
+// that. Also does not perform interface registration in RoutingTable -- that
+// task is delegated to ARP, which makes it possible to use EtherMAC independent
+// of the \IP framework.
 //
 // Supported variations:
 // - 10Mb Ethernet bus or twisted pair
@@ -54,7 +56,7 @@
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (EtherLLC or EtherEncap).
+// this is done by higher layers (EtherLLC).
 //
 // When a frame is received from the higher layers, it must be an EtherFrame
 // with message kind set to ETH_FRAME, and with all protocol fields filled out
@@ -79,19 +81,19 @@
 //
 // <b>Disabling and disconnecting</b>
 //
-// If the MAC is not connected to the network ("cable unplugged"), it will
+// If the EtherMAC is not connected to the network ("cable unplugged"), it will
 // start up in "disabled" mode. A disabled MAC simply discards any messages
 // it receives. It is currently not supported to dynamically connect/disconnect
-// a MAC.
+// an EtherMAC.
 //
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see OutputQueue)
+// In routers, EtherMAC relies on an external queue module (see OutputQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
-// In hosts, no such queue is used, so MAC contains an internal
+// In hosts, no such queue is used, so EtherMAC contains an internal
 // queue named txQueue to queue up packets waiting for transmission.
 // Conceptually, txQueue is of infinite size, but for better diagnostics
 // one can specify a hard limit in the txQueueLimit parameter -- if this is
@@ -123,7 +125,7 @@
 // Output scalars (written in the finish() function) include the final values of
 // the above variables and throughput.
 //
-// @see EtherDuplexMAC, EthernetInterface, EthernetDuplexInterface, OutputQueue, EtherEncap, EtherLLC
+// @see EthernetInterface, EthernetInterface, OutputQueue, EtherEncap, EtherLLC
 // @see EtherFrame, EthernetIIFrame, EtherFrameWithLLC, Ieee802Ctrl
 //
 simple EtherMAC
@@ -142,7 +144,7 @@ simple EtherMAC
                                 // possible with DTE-to-DTE connection).
         txQueueLimit : numeric, // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
-        queueModule: string,    // name of optional external queue module
+        queueModule: string,    // name of external queue module
         writeScalars: bool;     // enable/disable recording statistics in omnetpp.sca
     gates:
         in: physIn;      // to physical layer or the network
