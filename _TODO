@@ -1,3 +1,4 @@
+- code consistency: use omit-get-verb everywhere, including the Ieee80211 models?
 --------
 - ChannelControl: grid; instead of having pMax parameter, it should ask all
   radios and collect pMax from them! (or, directly the range!)
@@ -5,7 +6,7 @@
 - radio models: when calculating the probability of bit errors, snirMIN is 
   assumed for the whole duration of the frame! This means that if snir 
   changes along the packet duration, we overestimate the probability of 
-  bit error!
+  bit error. (there should be proper integration there)
 --------
 - IReceptionModel: 
   - improve it to be able to accomodate antenna gain: calculation function
@@ -19,6 +20,10 @@
       PowerList ambientNoise(...)
     (maybe this should be some IDetailedReceptionModel, plugging into
     a specialized version of AbstractRadio?)
+--------
+- AbstractRadio: consider: don't sent up the packet if there're bit errors,
+  just fire some specific radio state change notification! would simplify the
+  Ieee80211Mac state machine a lot! 
 --------
 - tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
 --------
