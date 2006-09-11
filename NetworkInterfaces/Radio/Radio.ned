@@ -42,10 +42,20 @@
 // module. If it was found to have been received correctly, it gets
 // decapsulated and the frame sent to the upper layer.
 //
-// Determining whether the frame was received correctly is a complicated
-// process.
+// Note: currently the packet is also sent up if it was NOT received
+// incorrectly, with its message kind set to COLLISION or BITERROR.
+// This may change in the future, as erroneous receptions could also
+// be signalled via the NotificationBoard.
 //
-//#details!!!
+// Determining whether the frame was received correctly is a complicated
+// process. The AbstractRadio C++ class from which the Ieee80211Radio
+// and GenericRadio are derived, basically first calculates the received
+// power of the frame, taking a path loss model into account.
+// Then it calculates the signal-noise ratio, thermal noise and other
+// frames being counted as noise. It is determined from the SNR
+// whether the packet was received correctly, taking modulation
+// scheme and possible forward error correction into account.
+// For details please see the C++ code and its documentation.
 //
 //
 // <b>Monitoring the radio state</b>
@@ -59,7 +69,7 @@
 // <b>Dynamically configuring the radio</b>
 //
 // The bitrate and the receive/transmit channel can be changed by sending
-// Radio a blank cMessage with PHY_C_CONFIGURERADIO as message kind, and
+// Radio a blank cMessage with <tt>PHY_C_CONFIGURERADIO</tt> as message kind, and
 // a PhyControlInfo object attached to it as control info, to hold the
 // new bitrate and/or channel number. If the radio is currently transmitting,
 // the change will actually take place after the transmission is completed.
