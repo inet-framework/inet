@@ -85,7 +85,7 @@ void AbstractRadio::initialize(int stage)
     }
     else if (stage == 1)
     {
-        // tell initial value to MAC; must be done in stage 1, because they
+        // tell initial values to MAC; must be done in stage 1, because they
         // subscribe in stage 0
         nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
         nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
@@ -266,9 +266,8 @@ void AbstractRadio::handleUpperMsg(AirFrame *airframe)
     // about the "real" stuff
 
     // change radio status
-    rs.setState(RadioState::TRANSMIT);
     EV << "sending, changing RadioState to TRANSMIT\n";
-    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+    setRadioState(RadioState::TRANSMIT);
 
     cMessage *timer = new cMessage(NULL, MK_TRANSMISSION_OVER);
     scheduleAt(simTime() + airframe->getDuration(), timer);
@@ -338,16 +337,14 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
         if (noiseLevel < sensitivity)
         {
             // set the RadioState to IDLE
-            rs.setState(RadioState::IDLE);
             EV << "transmission over, switch to idle mode (state:IDLE)\n";
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            setRadioState(RadioState::IDLE);
         }
         else
         {
             // set the RadioState to RECV
-            rs.setState(RadioState::RECV);
             EV << "transmission over but noise level too high, switch to recv mode (state:RECV)\n";
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            setRadioState(RadioState::RECV);
         }
 
         // delete the timer
@@ -426,9 +423,8 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
         if (rs.getState() != RadioState::RECV)
         {
             // publish new RadioState
-            rs.setState(RadioState::RECV);
             EV << "publish new RadioState:RECV\n";
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            setRadioState(RadioState::RECV);
         }
     }
     // receive power is too low or another message is being sent or received
@@ -442,7 +438,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
         if (snrInfo.ptr != NULL)
         {
             // update snr info for currently being received message
-            EV << "add new snr value to snr list of message being received\n";
+            EV << "adding new snr value to snr list of message being received\n";
             addNewSnr();
         }
 
@@ -450,10 +446,8 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
         // and the radio is currently not in receive or in send mode
         if (noiseLevel >= sensitivity && rs.getState() == RadioState::IDLE)
         {
-            // publish new RadioState
-            rs.setState(RadioState::RECV);
-            EV << "publish new RadioState:RECV\n";
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            EV << "setting radio state to RECV\n";
+            setRadioState(RadioState::RECV);
         }
     }
 }
@@ -528,8 +522,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
     {
         // publish the new RadioState:
         EV << "new RadioState is IDLE\n";
-        rs.setState(RadioState::IDLE);
-        nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+        setRadioState(RadioState::IDLE);
     }
 }
 
@@ -634,5 +627,11 @@ void AbstractRadio::setBitrate(double bitrate)
     rs.setBitrate(bitrate);
 
     //XXX fire some notification?
+}
+
+void AbstractRadio::setRadioState(RadioState::State newState)
+{
+    rs.setState(newState);
+    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }
 

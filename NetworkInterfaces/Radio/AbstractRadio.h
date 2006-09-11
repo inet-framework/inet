@@ -104,6 +104,9 @@ class INET_API AbstractRadio : public ChannelAccess
     /** Encapsulates a MAC frame into an Air Frame */
     virtual AirFrame *encapsulatePacket(cMessage *msg);
 
+    /** Sets the radio state, and also fires change notification */
+    void setRadioState(RadioState::State newState);
+
     /** Returns the current channel the radio is tuned to */
     virtual int channelNumber() const {return rs.getChannelNumber();}
 
