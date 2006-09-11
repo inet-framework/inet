@@ -48,20 +48,20 @@ class INET_API RadioState : public cPolymorphic
       SLEEP
     };
 
-    /** Possible states of the radio */
-    enum Transition
-    {
-      TRANSMIT_START, ///< start of a transmission (non-TRANSMIT to TRANSMIT)
-      TRANSMIT_END,   ///< TRANSMIT to non-TRANSMIT (note: new state is in "state" field)
-      RECV_START,     ///< IDLE to RECV (note: new state is in "state" field)
-      RECV_END_OK,    ///< reception ends, frame received OK
-      RECV_END_ERROR  ///< reception ends, received frame has bit errors
-    };
+    //XXX consider adding the following:
+    //Q: how to notify a TRANSMIT->RECV transition? as TRANSMIT_END, RECV_START, both, or some 3rd one?
+    // enum Transition
+    // {
+    //   TRANSMIT_START, ///< start of a transmission (non-TRANSMIT to TRANSMIT)
+    //   TRANSMIT_END,   ///< TRANSMIT to non-TRANSMIT (note: new state is in "state" field)
+    //   RECV_START,     ///< IDLE to RECV
+    //   RECV_END_OK,    ///< reception ends, frame received OK
+    //   RECV_END_ERROR  ///< reception ends, received frame has bit errors
+    // };
 
   private:
     int radioId; // identifies the radio
     State state; // IDLE, RECV, TRANSMIT, SLEEP
-    Transition transition; // another way to look at the current state change
     int channelNumber; // the radio channel
     double bitrate; // the current transmit bitrate
 
@@ -77,14 +77,8 @@ class INET_API RadioState : public cPolymorphic
     /** Returns radio state */
     State getState() const { return state; }
 
-    /** set the state of the radio*/
+    /** Sets the radio state */
     void setState(State s) { state = s; }
-
-    /** */
-    Transition getTransition() const { return transition; }
-
-    /** set the state of the radio*/
-    void setTransition(Transition t) { transition = t; }
 
     /** function to get the channel number (frequency) */
     int getChannelNumber() const { return channelNumber; }
