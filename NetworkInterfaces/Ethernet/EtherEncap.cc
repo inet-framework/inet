@@ -48,7 +48,6 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-    virtual void registerInterface();
 
     virtual void processPacketFromHigherLayer(cMessage *msg);
     virtual void processFrameFromMAC(EtherFrame *msg);
@@ -68,9 +67,6 @@ void EtherEncap::initialize()
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);
     WATCH(totalPauseSent);
-
-    // register ourselves in InterfaceTable
-    registerInterface();
 }
 
 void EtherEncap::handleMessage(cMessage *msg)
@@ -193,41 +189,6 @@ void EtherEncap::finish()
         recordScalar("packets from higher layer", totalFromHigherLayer);
         recordScalar("frames from MAC", totalFromMAC);
     }
-}
-
-void EtherEncap::registerInterface()
-{
-    InterfaceEntry *e = new InterfaceEntry();
-
-    // interface name: NetworkInterface module's name without special characters ([])
-    // --> Emin : Parent module name is used since EtherEncap belongs to EthernetInterface.
-    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
-    char *d=interfaceName;
-    for (const char *s=parentModule()->fullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
-
-    MACAddress myMACAddress = ((EtherMAC *)parentModule()->submodule("mac"))->getMACAddress();
-    e->setMACAddress(myMACAddress);
-
-    // generate interface identifier for IPv6
-    e->setInterfaceToken(myMACAddress.formInterfaceIdentifier());
-
-    // MTU is 1500 on Ethernet
-    e->setMtu(1500);
-
-    // capabilities
-    e->setBroadcast(true);
-    e->setMulticast(true);
-    e->setPointToPoint(false);
-
-    // add
-    InterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
 }
 
 

@@ -27,7 +27,7 @@ import
 // Complements EtherMAC and EtherEncap with an output queue for QoS and
 // RED support.
 //
-// @see EthernetInterfaceNoQueue
+// @see EthernetInterface2, EthernetInterfaceNoQueue
 //
 module EthernetInterface
     parameters:

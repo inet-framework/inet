@@ -20,7 +20,7 @@ import
     "EtherBus",
     "EtherHub",
     "EtherHost",
-    "EtherDuplexHost",
+    "EtherHost2",
     "EtherSwitch",
     "EtherDuplexSwitch",
     "ChannelInstaller";
@@ -228,15 +228,15 @@ endchannel
 
 module SwitchedDuplexLAN
     submodules:
-        hostA: EtherDuplexHost;
+        hostA: EtherHost2;
             display: "p=161,55;i=device/server";
-        hostB: EtherDuplexHost;
+        hostB: EtherHost2;
             display: "p=253,125;i=device/pc2";
-        hostC: EtherDuplexHost;
+        hostC: EtherHost2;
             display: "p=158,199;i=device/pc2";
-        hostD: EtherDuplexHost;
+        hostD: EtherHost2;
             display: "p=59,127;i=device/pc2";
-        switch: EtherDuplexSwitch;
+        switch: EtherSwitch2;
             gatesizes:
                 in[4],
                 out[4];

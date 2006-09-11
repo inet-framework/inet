@@ -19,7 +19,7 @@
 import
     "EtherAppCli",
     "EtherAppSrv",
-    "EtherDuplexMAC",
+    "EtherMAC2",
     "EtherLLC";
 
 
@@ -27,7 +27,7 @@ import
 // Example host model with one Ethernet port and several traffic generators
 // to create traffic in the test network.
 //
-module EtherDuplexHost
+module EtherHost2
     gates:
         in: in;
         out: out;
@@ -46,7 +46,7 @@ module EtherDuplexHost
                 upperLayerIn[2],
                 upperLayerOut[2];
             display: "p=155,120;i=block/fork";
-        mac: EtherDuplexMAC;
+        mac: EtherMAC2;
             parameters:
                 txQueueLimit = 1000, // increase if needed
                 queueModule = "";
