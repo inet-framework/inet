@@ -34,9 +34,9 @@
 // the change will actually take place after the transmission is completed.
 //
 // It is also possible to specify a different bitrate for individual frames;
-// to do that, attach a PhyControlInfo with birate filled in to the frame.
+// to do that, attach a PhyControlInfo with bitrate filled in to the frame.
 //
-simple RadioPrototype
+simple Radio
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to higher layer protocol (MAC)

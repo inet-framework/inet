@@ -23,9 +23,9 @@
 #include "IModulation.h"
 
 /**
- * Ideal modulation which returns zero bit error rate, whatever the parameters.
+ * Ideal modulation which returns zero bit error rate, regardless of the parameters.
  */
-class INET_API NoErrorsModulation : public IModulation
+class INET_API NullModulation : public IModulation
 {
   public:
     virtual const char *name() {return "no bit errors";}

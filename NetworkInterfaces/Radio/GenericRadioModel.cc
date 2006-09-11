@@ -42,8 +42,8 @@ void GenericRadioModel::initializeFrom(cModule *radioModule)
     bandwidth = radioModule->par("bandwidth");
 
     const char *modulationName = radioModule->par("modulation");
-    if (strcmp(modulationName, "no bit errors")==0)
-        modulation = new NoErrorsModulation();
+    if (strcmp(modulationName, "null")==0)
+        modulation = new NullModulation();
     else if (strcmp(modulationName, "BPSK")==0)
         modulation = new BPSKModulation();
     else if (strcmp(modulationName, "16-QAM")==0)

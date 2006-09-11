@@ -20,7 +20,7 @@
 #include "Modulation.h"
 
 
-double NoErrorsModulation::bitErrorRate(double, double, double)
+double NullModulation::bitErrorRate(double, double, double)
 {
     return 0;
 }

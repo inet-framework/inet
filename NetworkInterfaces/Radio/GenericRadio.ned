@@ -22,7 +22,7 @@
 // Generic radio module. The implementation is largely based on the
 // Mobility Framework's SnrEval and Decider modules.
 //
-// @see RadioPrototype
+// @see Radio
 // @author Andras Varga
 //
 simple GenericRadio
@@ -36,8 +36,7 @@ simple GenericRadio
         sensitivity: numeric const, // received signals with power below sensitivity are ignored
         headerLengthBits: numeric const, // length of physical layer framing (preamble, etc)
         bandwidth: numeric const, // signal bandwidth, used for bit error calculation
-        modulation: string; // "BPSK", "16-QAM", "256-QAM" or "no bit errors";
-                            // selects bit error calculation method
+        modulation: string; // "BPSK", "16-QAM", "256-QAM" or "null"; selects bit error calculation method
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)
         out: uppergateOut; // to decider (decider connects to higher layer protocol, i.e. the MAC)
