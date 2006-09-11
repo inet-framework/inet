@@ -23,9 +23,6 @@
 #include "PhyControlInfo_m.h"
 #include "Ieee80211Consts.h"  //XXX for the COLLISION and BITERROR msg kind constants
 
-//FIXME comments...
-//FIXME document bitrate switching in NED/msg files...
-//FIXME create radios with modulation="QAM"/"BPSK"/etc string parameter!
 
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
@@ -145,22 +142,12 @@ void AbstractRadio::handleMessage(cMessage *msg)
 
     if (msg->arrivalGateId() == uppergateIn)
     {
-        AirFrame *airframe = encapsMsg(msg);
+        AirFrame *airframe = encapsulatePacket(msg);
         handleUpperMsg(airframe);
     }
     else if (msg->isSelfMessage())
     {
-        if (msg->kind()==MK_RECEPTION_COMPLETE)
-        {
-            EV << "frame is completely received now\n";
-
-            // unbuffer the message
-            AirFrame *airframe = unbufferMsg(msg);
-
-            handleLowerMsgEnd(airframe);
-        }
-        else
-            handleSelfMsg(msg);
+        handleSelfMsg(msg);
     }
     else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == channelNumber())
     {
@@ -195,17 +182,13 @@ void AbstractRadio::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_
     scheduleAt(airframe->arrivalTime() + airframe->getDuration(), endRxTimer);
 }
 
-/**
- * This function encapsulates messages from the upper layer into an
- * AirFrame.
- */
-AirFrame *AbstractRadio::encapsMsg(cMessage *frame)
+AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
 {
     PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
     ASSERT(!ctrl || ctrl->channelNumber()==-1); // per-packet channel switching not supported
 
     // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
-    AirFrame *airframe = createCapsulePkt();
+    AirFrame *airframe = createAirFrame();
     airframe->setName(frame->name());
     airframe->setPSend(transmitterPower);
     airframe->setChannelNumber(channelNumber());
@@ -228,11 +211,6 @@ void AbstractRadio::sendUp(AirFrame *airframe)
     send(frame, uppergateOut);
 }
 
-/**
- * @brief Sends a message to the channel
- *
- * @sa sendToChannel
- */
 void AbstractRadio::sendDown(AirFrame *airframe)
 {
     sendToChannel(airframe);
@@ -340,18 +318,23 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
     }
 }
 
-/**
- * The only self message that can arrive is a timer to indicate that
- * sending of a message is completed.
- *
- * The RadioState has to be changed based on the noise level on the
- * channel. If the noise level is bigger than the sensitivity switch
- * to receive mode odtherwise to idle mode.
- */
 void AbstractRadio::handleSelfMsg(cMessage *msg)
 {
-    if (msg->kind() == MK_TRANSMISSION_OVER)
+    if (msg->kind()==MK_RECEPTION_COMPLETE)
     {
+        EV << "frame is completely received now\n";
+
+        // unbuffer the message
+        AirFrame *airframe = unbufferMsg(msg);
+
+        handleLowerMsgEnd(airframe);
+    }
+    else if (msg->kind() == MK_TRANSMISSION_OVER)
+    {
+        // Transmission has completed. The RadioState has to be changed
+        // to IDLE or RECV, based on the noise level on the channel.
+        // If the noise level is bigger than the sensitivity switch to receive mode,
+        // otherwise to idle mode.
         if (noiseLevel < sensitivity)
         {
             // set the RadioState to IDLE
@@ -378,7 +361,9 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
         }
     }
     else
+    {
         error("Internal error: unknown self-message `%s'", msg->name());
+    }
 }
 
 
@@ -548,10 +533,6 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
     }
 }
 
-
-/**
- * The Snr information of the buffered message is updated.
- */
 void AbstractRadio::addNewSnr()
 {
     SnrListEntry listEntry;     // create a new entry

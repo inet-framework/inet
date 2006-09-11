@@ -53,7 +53,6 @@
  * about whether this module is sending a packet, receiving a packet or idle.
  * This information can be accessed via the NotificationBoard by other modules,
  * e.g. a CSMAMacLayer.
-
  *
  * History
  *
@@ -70,31 +69,12 @@ class INET_API AbstractRadio : public ChannelAccess
 {
   public:
     AbstractRadio();
-
-    /**
-     * @brief change transmitter and receiver to a new channel.
-     * This method throws an error if the radio state is transmit.
-     * Messages that are already sent to the new channel and would
-     * reach us in the future - thus they are on the air - will be
-     * received correctly.
-     */
-    void changeChannel(int channel);
-
-    /**
-     * @brief change the bitrate to the given value.
-     * This method throws an error if the radio state is transmit.
-     */
-    void setBitrate(double bitrate);
-
-  protected:
-    /** @brief Initialize variables and publish the radio status */
-    virtual void initialize(int);
-
-    virtual void finish();
-
     virtual ~AbstractRadio();
 
   protected:
+    virtual void initialize(int stage);
+    virtual void finish();
+
     void handleMessage(cMessage *msg);
 
     virtual void handleUpperMsg(AirFrame*);
@@ -113,28 +93,54 @@ class INET_API AbstractRadio : public ChannelAccess
     void bufferMsg(AirFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time' */
-    AirFrame* unbufferMsg(cMessage *msg);
+    AirFrame *unbufferMsg(cMessage *msg);
 
-    /** @brief Sends a message to the upper layer */
+    /** Sends a message to the upper layer */
     void sendUp(AirFrame *airframe);
 
-    /** @brief Sends a message to the channel */
+    /** Sends a message to the channel */
     void sendDown(AirFrame *airframe);
 
-    /** @brief Encapsulates a MAC frame into an Air Frame */
-    virtual AirFrame *encapsMsg(cMessage *msg);
+    /** Encapsulates a MAC frame into an Air Frame */
+    virtual AirFrame *encapsulatePacket(cMessage *msg);
 
-    /** @brief Returns the current channel the radio is tuned to */
+    /** Returns the current channel the radio is tuned to */
     virtual int channelNumber() const {return rs.getChannelNumber();}
 
-    /** @brief updates the snr information of the relevant AirFrames */
+    /** Updates the SNR information of the relevant AirFrame */
     void addNewSnr();
 
-    /** @brief Create a new AirFrame */
-    virtual AirFrame* createCapsulePkt() {return new AirFrame();}
+    /** Create a new AirFrame */
+    virtual AirFrame *createAirFrame() {return new AirFrame();}
 
-    virtual IRadioModel *createRadioModel() = 0;
+    /**
+     * Change transmitter and receiver to a new channel.
+     * This method throws an error if the radio state is transmit.
+     * Messages that are already sent to the new channel and would
+     * reach us in the future - thus they are on the air - will be
+     * received correctly.
+     */
+    void changeChannel(int channel);
+
+    /**
+     * Change the bitrate to the given value. This method throws an error
+     * if the radio state is transmit.
+     */
+    void setBitrate(double bitrate);
+
+    /**
+     * To be defined to provide a reception model. The reception model
+     * is responsible for modelling path loss, interference and antenna
+     * gain.
+     */
     virtual IReceptionModel *createReceptionModel() = 0;
+
+    /**
+     * To be defined to provide a radio model. The radio model is
+     * responsible for calculating frame duration, and modelling modulation
+     * scheme and possible forward error correction.
+     */
+    virtual IRadioModel *createRadioModel() = 0;
 
   protected:
     IRadioModel *radioModel;
@@ -155,9 +161,9 @@ class INET_API AbstractRadio : public ChannelAccess
      */
     struct SnrStruct
     {
-      AirFrame *ptr;    ///< Pointer to the message this information belongs to
-      double rcvdPower; ///< Received power of the message
-      SnrList sList;    ///< Snr list to store the SNR values
+        AirFrame *ptr;    ///< pointer to the message this information belongs to
+        double rcvdPower; ///< received power of the message
+        SnrList sList;    ///< stores SNR over time
     };
 
     /**
