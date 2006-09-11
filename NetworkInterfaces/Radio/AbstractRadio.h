@@ -30,54 +30,20 @@
 
 
 /**
- * Represents the radio.
-
- * See the Radio module's NED description for a functional description
- * of what a radio does.
-
- It receives and transmits AirFrame messages,
- * which represent the physical characteristics (e.g. transmit power)
- * of messages.
-
-
- This is an abstract class -- details of
- * radio reception (
-
-     * To be defined to provide a reception model. The reception model
-     * is responsible for modelling path loss, interference and antenna
-     * gain.
-
-     * To be defined to provide a radio model. The radio model is
-     * responsible for calculating frame duration, and modelling modulation
-     * scheme and possible forward error correction.
-
-
-
-//FIXME update docu!!!!
+ * Abstract base class for radio modules. Radio modules deal with the 
+ * transmission of frames over a wireless medium (the radio channel).
+ * See the Radio module's NED documentation for an overview of radio modules.
  *
- * @brief Keeps track of the different snir levels when receiving a
- * packet
+ * This class implements common functionality of the radio, and abstracts
+ * out specific parts into two interfaces, IReceptionModel and IRadioModel.
+ * The reception model is responsible for modelling path loss, interference
+ * and antenna gain. The radio model is responsible for calculating frame
+ * duration, and modelling modulation scheme and possible forward error
+ * correction. Subclasses have to redefine the <tt>createReceptionModel()</tt>
+ * and <tt>createRadioModel()</tt> methods to create and return appropriate
+ * reception model and radio model objects.
  *
- * This module keeps track of the noise level of the channel.
- *
- * When receiving a packet this module updates the noise level of the
- * channel. Based on the receive power of the packet it is processed
- * and handed to upper layers or just treated as noise.
- *
- * After the packet is completely received the snir information is
- * attached and it is handed to the decider module.
- *
- * The snir information is a SnrList that lists all different snr
- * levels together with the point of time (simTime()) when they
- * started.
- *
- * On top of that this module manages the RadioState, and posts notifications
- * on NotificationBoard whenever it changes. The radio state gives information
- * about whether this module is sending a packet, receiving a packet or idle.
- * This information can be accessed via the NotificationBoard by other modules,
- * e.g. a CSMAMacLayer.
- *
- * History
+ * <b>History</b>
  *
  * The implementation is largely based on the Mobility Framework's
  * SnrEval and Decider modules. They have been merged into a single

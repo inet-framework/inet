@@ -31,11 +31,9 @@
 // routing protocol implementations.
 // </nohtml>
 //
-// <nohtml>
 // The INET Framework supports wireless and mobile simulations as well. Support
 // for mobility and wireless communication has been derived from the
-// <a href="http://mobility-fw.sourceforge.net">Mobility Framework</a>.
-// </nohtml>
+// <a href="http://mobility-fw.sourceforge.net" target="_blank">Mobility Framework</a>.
 //
 // <b>This release features a new <a href="ieee80211.html">IEEE 802.11 model</a>,
 // which supports both ad-hoc and infrastructure mode.</b>
