@@ -33,14 +33,13 @@
  *  - TRANSMIT: the radio is transmitting
  *  - SLEEP: the radio is sleeping
  *
- * @ingroup utils
- * @author Andreas Köpke
- * @sa NotificationBoard
+ * @author Andreas Köpke, Andras Varga
+ * @see NotificationBoard
  */
 class INET_API RadioState : public cPolymorphic
 {
   public:
-    /** @brief possible states of the radio*/
+    /** Possible states of the radio */
     enum State
     {
       IDLE,
@@ -49,47 +48,57 @@ class INET_API RadioState : public cPolymorphic
       SLEEP
     };
 
+    /** Possible states of the radio */
+    enum Transition
+    {
+      TRANSMIT_START, ///< start of a transmission (non-TRANSMIT to TRANSMIT)
+      TRANSMIT_END,   ///< TRANSMIT to non-TRANSMIT (note: new state is in "state" field)
+      RECV_START,     ///< IDLE to RECV (note: new state is in "state" field)
+      RECV_END_OK,    ///< reception ends, frame received OK
+      RECV_END_ERROR  ///< reception ends, received frame has bit errors
+    };
+
   private:
-    /** @brief Identifies the radio */
-    int radioId;
-
-    /** @brief Variable that hold the actual state*/
-    State state;
-
-    /** @brief The radio channel */
-    int channelNumber;
-
-    /** @brief The current transmit bitrate */
-    double bitrate;
+    int radioId; // identifies the radio
+    State state; // IDLE, RECV, TRANSMIT, SLEEP
+    Transition transition; // another way to look at the current state change
+    int channelNumber; // the radio channel
+    double bitrate; // the current transmit bitrate
 
   public:
-    /** @brief Constructor */
+    /** Constructor */
     RadioState(int radioModuleId) : cPolymorphic() {
         radioId = radioModuleId; state = IDLE; channelNumber = -1; bitrate = -1;
     }
 
-    /** @brief id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
+    /** id of the radio/snrEval module -- identifies the radio in case there're more than one in the host */
     int getRadioId() const { return radioId; }
 
-    /** @brief function to get the state*/
+    /** Returns radio state */
     State getState() const { return state; }
 
-    /** @brief set the state of the radio*/
+    /** set the state of the radio*/
     void setState(State s) { state = s; }
 
-    /** @brief function to get the channel number (frequency) */
+    /** */
+    Transition getTransition() const { return transition; }
+
+    /** set the state of the radio*/
+    void setTransition(Transition t) { transition = t; }
+
+    /** function to get the channel number (frequency) */
     int getChannelNumber() const { return channelNumber; }
 
-    /** @brief set the channel number (frequency) */
+    /** set the channel number (frequency) */
     void setChannelNumber(int chan) { channelNumber = chan; }
 
-    /** @brief function to get the bitrate */
+    /** function to get the bitrate */
     double getBitrate() const { return bitrate; }
 
-    /** @brief set the bitrate */
+    /** set the bitrate */
     void setBitrate(double d) { bitrate = d; }
 
-    /** @brief Returns the name of the radio state in a readable form */
+    /** Returns the name of the radio state in a readable form */
     static const char *stateName(State state) {
         switch(state) {
             case IDLE: return "IDLE";
@@ -100,7 +109,7 @@ class INET_API RadioState : public cPolymorphic
         }
     }
 
-    /** @brief Enables inspection */
+    /** Enables inspection */
     std::string info() const {
         std::stringstream out;
         out << stateName(state) << ", channel #" << channelNumber << ", " << (bitrate/1e6) << "Mbps ";

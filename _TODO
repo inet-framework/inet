@@ -1,3 +1,4 @@
+--------
 - ChannelControl: grid; instead of having pMax parameter, it should ask all
   radios and collect pMax from them! (or, directly the range!)
 --------
@@ -5,6 +6,19 @@
   assumed for the whole duration of the frame! This means that if snir 
   changes along the packet duration, we overestimate the probability of 
   bit error!
+--------
+- IReceptionModel: 
+  - improve it to be able to accomodate antenna gain: calculation function
+    should take node positions, antenna directions (maybe this should be in
+    some IDirectionalReceptionmodel, plugging into some AbstractDirectionalRadio?)
+  - allow for implementing "good/bad channel"-type radio models (Gilbert-Elliot)
+    e.g. containsBadChannelState(starttime, endtime)
+  - allow the radio model to add extra noise over time, or modify received power
+    over time, e.g. using functions like 
+      PowerList calculateReceivedPower(...)
+      PowerList ambientNoise(...)
+    (maybe this should be some IDetailedReceptionModel, plugging into
+    a specialized version of AbstractRadio?)
 --------
 - tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
 --------

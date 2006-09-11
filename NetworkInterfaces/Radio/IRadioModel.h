@@ -56,8 +56,6 @@ class INET_API IRadioModel : public cPolymorphic
      * correctly. Input is the signal-noise ratio over the duration of the
      * frame. The calculation may take into account the modulation scheme,
      * possible error correction code, etc.
-     *
-     * FIXME where do things like Gilbert-Elliot go??
      */
     virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList) = 0;
 };

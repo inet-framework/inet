@@ -89,3 +89,10 @@
 //# not (beacons, auth, ...), communication between modules, frame formats,
 //# ...
 //
+// <b>Notes</b>
+//
+// If you are new to 802.11, reading an 
+// <a href="http://www.wi-fiplanet.com/tutorials/article.php/1216351" target="_blank">introductory material</a>
+// before the IEEE standard can help.
+//
+

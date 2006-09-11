@@ -412,7 +412,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
         EV << "receiving frame " << airframe->name() << endl;
 
         // Put frame and related SnrList in receive buffer
-        SnrList snrList;        //defined in SnrList.h!!
+        SnrList snrList;
         snrInfo.ptr = airframe;
         snrInfo.rcvdPower = rcvdPower;
         snrInfo.sList = snrList;

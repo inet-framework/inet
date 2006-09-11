@@ -19,13 +19,44 @@
 
 
 //
-// Prototype for radio modules.
+// Prototype for radio modules. Radio modules deal with the transmission
+// of frames over a wireless medium (the radio channel).
 //
-// Represents the radio. Frames received from higher layers (typically the
-// MAC protocol) are transmitted on the radio channel, using the global
-// ChannelControl module.
+// <b>Transmission</b>
 //
-//# TODO describe NotificationBoard stuff, how frame get received, etc...
+// Upper layers (wireless L2 protocols) can send frames to the radio
+// module. Frames will be encapsulated into AirFrame messages and
+// distributed to other network nodes within interference distance.
+// The AirFrame represents the signal in the radio channel, and
+// its fields hold properties of the transmission like the transmit power.
+//
+// The global ChannelControl module keeps track of node positions,
+// and knows which nodes are within interference distance of others
+// (neighbour list). When transmitting, the radio module obtains the
+// neighbour list, and sends a copy of the AirFrame to each neighbour.
+//
+//
+// <b>Reception</b>
+//
+// Received AirFrame messages get delivered to the radioIn gate of the
+// module. If it was found to have been received correctly, it gets
+// decapsulated and the frame sent to the upper layer.
+//
+// Determining whether the frame was received correctly is a complicated
+// process.
+//
+//#details!!!
+//
+//
+// <b>Monitoring the radio state</b>
+//
+// Wireless L2 protocols and other modules within the node can monitor
+// radio transmissions and receptions by subscribing to the
+// <code>NF_RADIOSTATE_CHANGED</code> category at the NotificationBoard
+// module of the node.
+//
+//
+// <b>Dynamically configuring the radio</b>
 //
 // The bitrate and the receive/transmit channel can be changed by sending
 // Radio a blank cMessage with PHY_C_CONFIGURERADIO as message kind, and

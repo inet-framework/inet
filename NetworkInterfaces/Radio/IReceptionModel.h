@@ -21,6 +21,7 @@
 
 #include "INETDefs.h"
 
+
 /**
  * Abstract class to encapsulate the calculation of received power of a
  * radio transmission. The calculation may include the effects of

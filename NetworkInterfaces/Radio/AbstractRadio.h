@@ -30,6 +30,29 @@
 
 
 /**
+ * Represents the radio.
+
+ * See the Radio module's NED description for a functional description
+ * of what a radio does.
+
+ It receives and transmits AirFrame messages,
+ * which represent the physical characteristics (e.g. transmit power)
+ * of messages.
+
+
+ This is an abstract class -- details of
+ * radio reception (
+
+     * To be defined to provide a reception model. The reception model
+     * is responsible for modelling path loss, interference and antenna
+     * gain.
+
+     * To be defined to provide a radio model. The radio model is
+     * responsible for calculating frame duration, and modelling modulation
+     * scheme and possible forward error correction.
+
+
+
 //FIXME update docu!!!!
  *
  * @brief Keeps track of the different snir levels when receiving a
