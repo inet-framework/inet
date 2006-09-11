@@ -55,8 +55,8 @@ foreach line {
    {"Wireless"}
    {"802.11 AP and hosts"   "Wireless/80211Lan"     "./80211Lan"              "80211Lan"}
    {"802.11 handover"       "Wireless/Handover"     "./Handover"              "Handover"}
-   {"802.11 thruput test"   "Wireless/ThroughputToAP"   "./Throughput"        "Throughput"}
-   {"802.11 thruput test 2" "Wireless/ThroughputOverAP" "./Throughput"        "Throughput"}
+   {"802.11 thruput test"   "Wireless/Throughput"   "./Throughput"            "Throughput"}
+   {"802.11 thruput test 2" "Wireless/HostToHost"   "./Throughput"            "Throughput"}
 
    {"IPv6 (work in progress)"}
    {"NClients"               "IPv6/NClients"        "./NClients"              "NClients"}
