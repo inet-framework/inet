@@ -34,9 +34,9 @@ simple Ieee80211Radio
         channelNumber: numeric const, // channel identifier
         transmitterPower : numeric const, // power used for transmission of messages (in mW)
         bitrate: numeric const, // (in bits/s)
-        thermalNoise: numeric const, // base noise level
+        thermalNoise: numeric const, // base noise level (dBm)
         pathLossAlpha: numeric const, // used by the path loss calculation
-        snirThreshold: numeric const, // is SNIR is below
+        snirThreshold: numeric const, // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         sensitivity: numeric const; // received signals with power below sensitivity are ignored
     gates:
         in: uppergateIn;   // from higher layer protocol (MAC)

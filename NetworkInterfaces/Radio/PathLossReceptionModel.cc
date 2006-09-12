@@ -25,17 +25,15 @@ void PathLossReceptionModel::initializeFrom(cModule *radioModule)
 {
     pathLossAlpha = radioModule->par("pathLossAlpha");
 
-    //XXX put back
-    //if (pathLossAlpha < (double) (cc->par("alpha")))
-    //    error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
+    cModule *cc = simulation.moduleByPath("channelcontrol");
+    if (!cc)
+        opp_error("PathLossReceptionModel: module (ChannelControl)channelcontrol not found");
+    if (pathLossAlpha < (double) (cc->par("alpha")))
+        opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
 }
-
-//FIXME add possibility to denote "bad channel" state
-//FIXME add possibility to add extra noise to snr (btw, use RcvdPowerList instead snrList for this?)
 
 double PathLossReceptionModel::calculateReceivedPower(double pSend, double carrierFrequency, double distance)
 {
-//FIXME pass in the node's position, plus in general the whole cc too!
     const double speedOfLight = 300000000.0;
     double waveLength = speedOfLight / carrierFrequency;
     return (pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha)));
