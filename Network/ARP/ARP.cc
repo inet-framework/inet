@@ -251,6 +251,10 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
     MACAddress myMACAddress = ie->macAddress();
     IPAddress myIPAddress = ie->ipv4()->inetAddress();
 
+    // both must be set
+    ASSERT(!myMACAddress.isUnspecified());
+    ASSERT(!myIPAddress.isUnspecified());
+
     // fill out everything in ARP Request packet except dest MAC address
     ARPPacket *arp = new ARPPacket("arpREQ");
     arp->setByteLength(ARP_HEADER_BYTES);
@@ -360,6 +364,11 @@ void ARP::processARPPacket(ARPPacket *arp)
 
     MACAddress srcMACAddress = arp->getSrcMACAddress();
     IPAddress srcIPAddress = arp->getSrcIPAddress();
+
+    if (srcMACAddress.isUnspecified())
+        error("wrong ARP packet: source MAC address is empty");
+    if (srcIPAddress.isUnspecified())
+        error("wrong ARP packet: source IP address is empty");
 
     bool mergeFlag = false;
     // "If ... sender protocol address is already in my translation table"

@@ -43,19 +43,20 @@ EtherMACBase::~EtherMACBase()
 void EtherMACBase::initialize()
 {
     initializeFlags();
-    
+
     initializeTxrate();
     WATCH(txrate);
 
-    registerInterface(txrate);
     initializeMACAddress();
     initializeQueueModule();
     initializeNotificationBoard();
     initializeStatistics();
 
+    registerInterface(txrate); // needs MAC address
+
     // initialize queue
     txQueue.setName("txQueue");
- 
+
     // initialize self messages
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
     endIFGMsg = new cMessage("EndIFG", ENDIFG);
@@ -70,7 +71,7 @@ void EtherMACBase::initialize()
     // initalize pause
     pauseUnitsRequested = 0;
     WATCH(pauseUnitsRequested);
- 
+
     // initialize queue limit
     txQueueLimit = par("txQueueLimit");
     WATCH(txQueueLimit);
@@ -141,7 +142,7 @@ void EtherMACBase::initializeStatistics()
     numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
     numFramesFromHL = numDroppedIfaceDown = 0;
     numPauseFramesRcvd = numPauseFramesSent = 0;
-    
+
     WATCH(framesSentInBurst);
     WATCH(bytesSentInBurst);
 
@@ -192,8 +193,10 @@ void EtherMACBase::registerInterface(double txrate)
     interfaceEntry->setDatarate(txrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
-    interfaceEntry->setInterfaceToken(token);
+    interfaceEntry->setMACAddress(address);
+    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
+    //InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    //interfaceEntry->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
