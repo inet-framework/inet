@@ -26,7 +26,6 @@ Define_Module(ICMPv6);
 
 void ICMPv6::initialize()
 {
-    //...
 }
 
 void ICMPv6::handleMessage(cMessage *msg)
