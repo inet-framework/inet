@@ -31,6 +31,8 @@ void ICMPv6::initialize()
 
 void ICMPv6::handleMessage(cMessage *msg)
 {
+    ASSERT(!msg->isSelfMessage()); // no timers in ICMPv6
+
     // process arriving ICMP message
     if (msg->arrivalGate()->isName("fromIPv6"))
     {
@@ -143,10 +145,14 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     //TODO: implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG) errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED) errorMsg = createTimeExceededMsg(code);
-    else if (type == ICMPv6_PARAMETER_PROBLEM) {}//errorMsg = createParamProblemMsg(code);
+    else if (type == ICMPv6_PARAMETER_PROBLEM) errorMsg = createParamProblemMsg(code);
     else error("Unknown ICMPv6 error type\n");
 
     errorMsg->encapsulate(origDatagram);
+
+    // debugging information
+    EV << "sending ICMP error: (" << errorMsg->className() << ")" << errorMsg->name()
+       << " type=" << type << " code=" << code << endl;
 
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
@@ -163,15 +169,12 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
         errorMsg->setControlInfo(ctrlInfo);
 
         // then process it locally
-        handleMessage(errorMsg);
+        processICMPv6Message(errorMsg);
     }
     else
     {
         sendToIP(errorMsg, origDatagram->srcAddress());
     }
-
-    // debugging information
-    //EV << "sending ICMP error: " << errorMsg->type() << " / " << errorMsg->code() << endl;
 }
 
 void ICMPv6::sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
@@ -202,8 +205,7 @@ void ICMPv6::sendToIP(ICMPv6Message *msg)
 
 ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
 {
-    ICMPv6DestUnreachableMsg *errorMsg
-        = new ICMPv6DestUnreachableMsg("Dest Unreachable");
+    ICMPv6DestUnreachableMsg *errorMsg = new ICMPv6DestUnreachableMsg("Dest Unreachable");
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
     errorMsg->setCode(code);
     return errorMsg;
@@ -211,8 +213,7 @@ ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
 
 ICMPv6Message *ICMPv6::createPacketTooBigMsg(int mtu)
 {
-    ICMPv6PacketTooBigMsg *errorMsg
-        = new ICMPv6PacketTooBigMsg("Packet Too Big");
+    ICMPv6PacketTooBigMsg *errorMsg = new ICMPv6PacketTooBigMsg("Packet Too Big");
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
     errorMsg->setCode(0);//Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
@@ -221,17 +222,15 @@ ICMPv6Message *ICMPv6::createPacketTooBigMsg(int mtu)
 
 ICMPv6Message *ICMPv6::createTimeExceededMsg(int code)
 {
-    ICMPv6TimeExceededMsg *errorMsg
-            = new ICMPv6TimeExceededMsg("Time Exceeded");
+    ICMPv6TimeExceededMsg *errorMsg = new ICMPv6TimeExceededMsg("Time Exceeded");
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
     errorMsg->setCode(code);
     return errorMsg;
 }
 
-ICMPv6Message *createParamProblemMsg(int code)
+ICMPv6Message *ICMPv6::createParamProblemMsg(int code)
 {
-    ICMPv6ParamProblemMsg *errorMsg
-            = new ICMPv6ParamProblemMsg("Parameter Problem");
+    ICMPv6ParamProblemMsg *errorMsg = new ICMPv6ParamProblemMsg("Parameter Problem");
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
     //TODO: What Pointer? section 3.4
