@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-200605xx
+INET-20060912
 -------------
 - improvements on the wireless infrastructure: support for multiple channels
   and channel switching by NICs; account for finite radio wave propagation speed
