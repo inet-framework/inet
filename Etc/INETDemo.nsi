@@ -10,11 +10,11 @@
 ;--------------------------------
 ;Defines
 
-  !define Version           "20041019"
+  !define Version           "20060912a"
   !define DefaultInstallDir "$PROGRAMFILES\INET Demo"
   !define StartMenuFolder   "$SMPROGRAMS\INET Framework for OMNeT++ Demo"
   !define SwRegistryKey     "SOFTWARE\INET"
-  !define SrcDir            "D:\home\INET-Demo"
+  !define SrcDir            "E:\INET Demo"
 
 ;--------------------------------
 ;General
@@ -70,7 +70,11 @@ Section ""
   WriteRegStr HKCU "${SwRegistryKey}" "" $INSTDIR
 
   ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+
+  ;Register uninstaller
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo" "DisplayName" "INET Framework Demo ${Version}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo" "UninstallString" '"$INSTDIR\uninstall.exe"'
 
 SectionEnd
 
@@ -85,5 +89,6 @@ Section "Uninstall"
   RMDir /r "${StartMenuFolder}"
 
   DeleteRegKey /ifempty HKCU "${SwRegistryKey}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo"
 
 SectionEnd
