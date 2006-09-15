@@ -10,11 +10,13 @@
 ;--------------------------------
 ;Defines
 
-  !define Version           "20060912a"
-  !define DefaultInstallDir "$PROGRAMFILES\INET Demo"
-  !define StartMenuFolder   "$SMPROGRAMS\INET Framework for OMNeT++ Demo"
-  !define SwRegistryKey     "SOFTWARE\INET"
-  !define SrcDir            "E:\INET Demo"
+  !define Product            "INET Framework Demo"
+  !define Version            "20060912a"
+  !define ProductWithVersion "${Product} ${Version}"
+  !define DefaultInstallDir  "$PROGRAMFILES\${Product}"
+  !define StartMenuFolder    "$SMPROGRAMS\INET Framework for OMNeT++ Demo"
+  !define SwRegistryKey      "SOFTWARE\${ProductWithVersion}"
+  !define SrcDir             "E:\INET Demo"
 
 ;--------------------------------
 ;General
@@ -59,11 +61,11 @@ Section ""
   File /r "${SrcDir}\*"
 
   FileOpen $0 "Version.txt" "w"
-  FileWrite $0 "INET Demo ${Version}"
+  FileWrite $0 "${ProductWithVersion}"
   FileClose $0
 
   CreateDirectory "${StartMenuFolder}"
-  CreateShortCut "${StartMenuFolder}\INET Framework Demo.lnk" "$INSTDIR\rundemo.bat" "" ""
+  CreateShortCut "${StartMenuFolder}\${Product}.lnk" "$INSTDIR\rundemo.bat" "" ""
   CreateShortCut "${StartMenuFolder}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" ""
 
   ;Store installation folder
@@ -73,8 +75,8 @@ Section ""
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   ;Register uninstaller
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo" "DisplayName" "INET Framework Demo ${Version}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${ProductWithVersion}" "DisplayName" "${ProductWithVersion}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${ProductWithVersion}" "UninstallString" '"$INSTDIR\uninstall.exe"'
 
 SectionEnd
 
@@ -89,6 +91,6 @@ Section "Uninstall"
   RMDir /r "${StartMenuFolder}"
 
   DeleteRegKey /ifempty HKCU "${SwRegistryKey}"
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\INET Framework Demo"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${ProductWithVersion}"
 
 SectionEnd
