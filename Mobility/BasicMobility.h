@@ -87,7 +87,14 @@ class INET_API BasicMobility : public BasicModule
     /** @brief Called upon arrival of a self messages*/
     virtual void handleSelfMsg(cMessage *msg) = 0;
 
-    /** @brief Update the position information for this node*/
+    /** @brief Update the position information for this node.
+     *
+     * This function tells NotificationBoard that the position has changed, and
+     * it also moves the host's icon to the new position on the screen.
+     *
+     * This function has to be called every time the position of the host
+     * changes!
+     */
     void updatePosition();
 
     /** @brief Returns the width of the playground */

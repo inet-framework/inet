@@ -36,16 +36,6 @@ static int parseInt(const char *s, int defaultValue)
 }
 
 
-/**
- * Assigns a pointer to ChannelControl and gets a pointer to its host.
- *
- * Creates a random position for a host if the position is not given
- * as a parameter in "omnetpp.ini".
- *
- * Additionally the registration with ChannelControl is done and it is
- * assured that the position display string tag (p) exists and contains
- * the exact (x) tag.
- */
 void BasicMobility::initialize(int stage)
 {
     BasicModule::initialize(stage);
@@ -96,9 +86,6 @@ void BasicMobility::initialize(int stage)
     }
 }
 
-/**
- * Dispatches self-messages to handleSelfMsg()
- */
 void BasicMobility::handleMessage(cMessage * msg)
 {
     if (!msg->isSelfMessage())
@@ -108,13 +95,6 @@ void BasicMobility::handleMessage(cMessage * msg)
 }
 
 
-/**
- * This function tells NotificationBoard that the position has changed, and
- * it also moves the host's icon to the new position on the screen.
- *
- * This function has to be called every time the position of the host
- * changes!
- */
 void BasicMobility::updatePosition()
 {
     cc->updateHostPosition(myHostRef, pos);

@@ -23,6 +23,9 @@
 // @author Andras Varga
 //
 simple NullMobility
+    parameters:
+        x: numeric const, // start x coordinate (-1 = display string position, or random if it's missing)
+        y: numeric const; // start y coordinate (-1 = display string position, or random if it's missing)
 endsimple
 
 
