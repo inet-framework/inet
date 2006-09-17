@@ -1,3 +1,6 @@
+- model link failures, via isDown() method of InterfaceEntry. L2 modules 
+  should understand isDown(), and FailureManager should be enhanced with
+  linkdown/linkup commands.
 --------
 - create NetworkInterfaces/Base subdirectory: AirFrame, WirelessMacBase,
   ChannelAccess, etc.

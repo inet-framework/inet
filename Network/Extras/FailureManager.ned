@@ -16,6 +16,39 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
+//
+// Module for managing node failure and recovery in the network. If used,
+// it should have exactly one instance in the whole network.
+//
+// FailureManager does not send or receive messages, and has no parameters
+// either. Instead, it is invoked from ScenarioManager scripts, for example:
+//
+// <pre><nohtml>
+// <scenario>
+//   <at t="2">
+//     <shutdown module="failureManager" target="LSR2"/>
+//   </at>
+//   <at t="10">
+//     <startup module="failureManager" target="LSR2"/>
+//   </at>
+// </scenario>
+// </nohtml></pre>
+//
+// It is currently only used with MPLS simulations, and supports the following
+// commands:
+//
+// - <code>shutdown</code>: replaces a router module named by the <tt>target</tt> attribute
+//   with another module that represents a failed router. It currently replaces
+//   RSVP_LSR with RSVP_FAILED, LDP_LSR with LDP_FAILED, and QuaggaRouter with
+//   FailedRouter.
+// - <code>startup</code>: the inverse of <tt>shutdown</tt>: replaces a <i>failed</i>
+//   router model named by the <tt>target</tt> attribute with an operational host/router
+//   module type.
+//
+// The operation of FailureManager is likely to get refined and generalized in next
+// versions.
+//
 simple FailureManager
 endsimple
 
