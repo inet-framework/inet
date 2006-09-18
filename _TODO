@@ -1,3 +1,5 @@
+- add IdealRadio, DistanceBasedRadio, GilbertElliotRadio
+--------
 - model link failures, via isDown() method of InterfaceEntry. L2 modules 
   should understand isDown(), and FailureManager should be enhanced with
   linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
