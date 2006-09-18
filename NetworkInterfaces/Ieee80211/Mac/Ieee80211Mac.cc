@@ -67,10 +67,19 @@ void Ieee80211Mac::initialize(int stage)
         bitrate = par("bitrate");
         basicBitrate = 2e6; //FIXME make it parameter
         rtsThreshold = par("rtsThresholdBytes");
+
         retryLimit = par("retryLimit");
+        if (retryLimit == -1) retryLimit = 7;
+        ASSERT(retryLimit >= 0);
+
         cwMinData = par("cwMinData");
         if (cwMinData == -1) cwMinData = CW_MIN;
+        ASSERT(cwMinData >= 0);
+
         cwMinBroadcast = par("cwMinBroadcast");
+        if (cwMinBroadcast == -1) cwMinBroadcast = 31;
+        ASSERT(cwMinBroadcast >= 0);
+
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
@@ -596,6 +605,8 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 {
     int cw;
 
+    EV << "generating backoff slot number for retry: " << r << endl; 
+
     if (isBroadcast(msg))
         cw = cwMinBroadcast;
     else
@@ -880,6 +891,7 @@ void Ieee80211Mac::giveUpCurrentTransmission()
 
 void Ieee80211Mac::retryCurrentTransmission()
 {
+    ASSERT(retryCounter < retryLimit);
     currentTransmission()->setRetry(true);
     retryCounter++;
     numRetry++;
