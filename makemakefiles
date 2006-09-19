@@ -123,6 +123,7 @@ examples-dir:
 	cd Examples/Adhoc && $(MAKEMAKE) $(OPTS) -n -r
 
 	cd Examples/Ethernet/ARPTest && $(MAKEMAKE) $(ALL_MODEL_OPTS)
+	cd Examples/Ethernet/ARPTest2 && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 	cd Examples/Ethernet/LANs && $(MAKEMAKE) $(ALL_MODEL_OPTS)
 
 	cd Examples/INET/NClients && $(MAKEMAKE) $(ALL_MODEL_OPTS)

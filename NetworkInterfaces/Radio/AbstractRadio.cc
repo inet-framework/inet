@@ -568,6 +568,9 @@ void AbstractRadio::changeChannel(int channel)
     cc->updateHostChannel(myHostRef, channel);
     ChannelControl::TransmissionList tl = cc->getOngoingTransmissions(channel);
 
+    cModule *myHost = findHost();
+    cGate *radioGate = myHost->gate("radioIn");
+
     // pick up ongoing transmissions on the new channel
     EV << "Picking up ongoing transmissions on new channel:\n";
     for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
@@ -585,22 +588,21 @@ void AbstractRadio::changeChannel(int channel)
             // if there is a message on the air which will reach us in the future
             if (airframe->timestamp() + propagationDelay >= simTime())
             {
-                EV << "will arrive in the future, scheduling it\n";
+                 EV << "will arrive in the future, scheduling it\n";
 
-                // we need to send to each radioIn[] gate
-                cGate *radioGate = gate("radioIn");
-                for (int i = 0; i < radioGate->size(); i++)
-                    sendDirect((cMessage*)airframe->dup(), airframe->timestamp() + propagationDelay - simTime(), this, radioGate->id() + i);
+                 // we need to send to each radioIn[] gate of this host
+                 for (int i = 0; i < radioGate->size(); i++)
+                     sendDirect((cMessage*)airframe->dup(), airframe->timestamp() + propagationDelay - simTime(), myHost, radioGate->id() + i);
             }
             // if we hear some part of the message
             else if (airframe->timestamp() + airframe->getDuration() + propagationDelay > simTime())
             {
-                EV << "missed beginning of frame, processing it as noise\n";
+                 EV << "missed beginning of frame, processing it as noise\n";
 
-                AirFrame *frameDup = (AirFrame*)airframe->dup();
-                frameDup->setArrivalTime(airframe->timestamp() + propagationDelay);
-                handleLowerMsgStart(frameDup);
-                bufferMsg(frameDup);
+                 AirFrame *frameDup = (AirFrame*)airframe->dup();
+                 frameDup->setArrivalTime(airframe->timestamp() + propagationDelay);
+                 handleLowerMsgStart(frameDup);
+                 bufferMsg(frameDup);
             }
             else
             {

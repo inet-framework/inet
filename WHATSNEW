@@ -1,8 +1,17 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-20060912
--------------
+INET-xxxxxx
+-----------
+
+- new example network: Examples/Ethernet/ARPTest2
+
+- bugfixes: AbstractRadio (Dave Symonds); Ieee80211 (also reported by Dave)
+
+
+INET-20060912a
+--------------
+
 - improvements on the wireless infrastructure: support for multiple channels
   and channel switching by NICs; account for finite radio wave propagation speed
 
@@ -21,6 +30,7 @@ INET-20060912
   them is still present in makemakefiles in case someone needs it.
 
 - several other fixes
+
 
 INET-20060330
 -------------
