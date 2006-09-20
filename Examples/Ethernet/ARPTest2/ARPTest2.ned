@@ -26,26 +26,26 @@ endchannel
 module ARPTest2
     submodules:
         client: StandardHost;
-            display: "p=72,143;i=device/laptop_l";
+            display: "p=71,64;i=device/laptop_l";
         host1: StandardHost;
-            display: "p=70,224;i=device/pc";
+            display: "p=65,131;i=device/pc";
         host2: StandardHost;
-            display: "p=72,306;i=device/pc";
+            display: "p=60,191;i=device/pc";
         switch: EtherSwitch;
-            display: "p=200,242;i=device/switch";
+            display: "p=202,156;i=device/switch";
         net: Router;
-            display: "p=392,252;i=misc/cloud_l";
+            display: "p=394,166;i=misc/cloud_l";
         router: Router;
-            display: "p=309,160;i=abstract/router";
+            display: "p=311,74;i=abstract/router";
         server: StandardHost;
-            display: "p=505,130;i=device/server_l";
+            display: "p=512,58;i=device/server_l";
         configurator: FlatNetworkConfigurator;
             parameters:
                 moduleTypes = "Router StandardHost EtherSwitch",
                 nonIPModuleTypes = "EtherSwitch",
                 networkAddress = "10.0.0.0",
                 netmask = "255.255.0.0";
-            display: "p=80,56;i=block/cogwheel_s";
+            display: "p=495,160;i=block/cogwheel_s";
     connections:
         client.ethOut++ --> switch.in++;
         switch.out++ --> client.ethIn++;
