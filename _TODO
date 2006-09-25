@@ -1,4 +1,6 @@
-- add IdealRadio, DistanceBasedRadio, GilbertElliotRadio
+- add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
+   in DistanceBasedRadio: decouple transmission range from interference range 
+   (ie use 2 different module parameters)
 --------
 - model link failures, via isDown() method of InterfaceEntry. L2 modules 
   should understand isDown(), and FailureManager should be enhanced with
