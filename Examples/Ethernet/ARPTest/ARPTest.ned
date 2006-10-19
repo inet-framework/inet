@@ -23,7 +23,7 @@ channel fiberline
 endchannel
 
 
-module ARPTest2
+module ARPTest
     submodules:
         client: StandardHost;
             display: "p=71,64;i=device/laptop_l";
@@ -66,6 +66,6 @@ module ARPTest2
         net.out++ --> fiberline --> server.in++;
 endmodule
 
-network arpTest2 : ARPTest2
+network arpTest : ARPTest
 endnetwork
 
