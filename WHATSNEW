@@ -1,10 +1,10 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-xxxxxx
------------
+INET-20061020
+-------------
 
-- new example network: Examples/Ethernet/ARPTest2
+- new example network: Examples/Ethernet/ARPTest (old ARPTest renamed)
 
 - bugfixes: AbstractRadio (Dave Symonds); Ieee80211 (also reported by Dave)
 
