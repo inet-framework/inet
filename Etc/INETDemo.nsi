@@ -11,7 +11,7 @@
 ;Defines
 
   !define Product            "INET Framework Demo"
-  !define Version            "20060912a"
+  !define Version            "20061020"
   !define ProductWithVersion "${Product} ${Version}"
   !define DefaultInstallDir  "$PROGRAMFILES\${Product}"
   !define StartMenuFolder    "$SMPROGRAMS\INET Framework for OMNeT++ Demo"

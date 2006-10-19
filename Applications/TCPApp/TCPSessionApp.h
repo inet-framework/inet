@@ -41,7 +41,7 @@ class INET_API TCPSessionApp : public cSimpleModule
     int indicationsRcvd;
 
   public:
-    TCPSessionApp() : cSimpleModule(32768) {}
+    TCPSessionApp() : cSimpleModule(65536) {}
 
   protected:
     void parseScript(const char *script);
