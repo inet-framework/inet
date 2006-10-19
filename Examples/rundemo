@@ -64,6 +64,7 @@ foreach line {
 
    {"Ethernet"}
    {"ARP Test"               "Ethernet/ARPTest"     "./ARPTest"               "ARPTest"}
+   {"ARP Test 2"             "Ethernet/ARPTest2"    "./ARPTest"               "ARPTest"}
    {"LANs: mixed Ethernet"   "Ethernet/LANs"        "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
    {"LANs: Ethernet bus"     "Ethernet/LANs"        "./LANs -f bus.ini"       "LANs -f bus.ini"}
    {"LANs: hub"              "Ethernet/LANs"        "./LANs -f hub.ini"       "LANs -f hub.ini"}
