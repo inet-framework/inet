@@ -128,7 +128,7 @@ double ChannelControl::calcInterfDist()
 
 ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord& initialPos)
 {
-    Enter_Method("registerHost()");
+    Enter_Method_Silent("registerHost()");
     if (lookupHost(host) != NULL)
         error("ChannelControl::registerHost(): host (%s)%s already registered",
               host->className(), host->fullPath().c_str());
@@ -145,7 +145,7 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord
 
 ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 {
-    Enter_Method("lookupHost()");
+    Enter_Method_Silent("lookupHost()");
     for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++)
         if (it->host == host)
             return &(*it);
@@ -154,7 +154,7 @@ ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 
 const ChannelControl::ModuleList& ChannelControl::getNeighbors(HostRef h)
 {
-    Enter_Method("getNeighbors()");
+    Enter_Method_Silent("getNeighbors()");
     if (!h->isModuleListValid)
     {
         h->neighborModules.clear();
@@ -208,14 +208,14 @@ void ChannelControl::checkChannel(const int channel)
 
 void ChannelControl::updateHostPosition(HostRef h, const Coord& pos)
 {
-    Enter_Method("updateHostPosition()");
+    Enter_Method_Silent("updateHostPosition()");
     h->pos = pos;
     updateConnections(h);
 }
 
 void ChannelControl::updateHostChannel(HostRef h, const int channel)
 {
-    Enter_Method("getOngoingTransmissions()");
+    Enter_Method_Silent("getOngoingTransmissions()");
     checkChannel(channel);
 
     h->channel = channel;
@@ -223,7 +223,7 @@ void ChannelControl::updateHostChannel(HostRef h, const int channel)
 
 const ChannelControl::TransmissionList& ChannelControl::getOngoingTransmissions(const int channel)
 {
-    Enter_Method("getOngoingTransmissions()");
+    Enter_Method_Silent("getOngoingTransmissions()");
 
     checkChannel(channel);
     purgeOngoingTransmissions();
@@ -232,12 +232,12 @@ const ChannelControl::TransmissionList& ChannelControl::getOngoingTransmissions(
 
 void ChannelControl::addOngoingTransmission(HostRef h, AirFrame *frame)
 {
-    Enter_Method("addOngoingTransmission()");
+    Enter_Method_Silent("addOngoingTransmission()");
 
     // we only keep track of ongoing transmissions so that we can support
     // NICs switching channels -- so there's no point doing it if there's only
     // one channel
-    if (numChannels==1) 
+    if (numChannels==1)
     {
         delete frame;
         return;
