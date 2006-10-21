@@ -106,7 +106,7 @@ static struct option longopts[] =
 struct thread_master *master_ospfd;
 
 /* Process ID saved for use by init system */
-const char *pid_file_ospfd = PATH_OSPFD_PID;
+const char *pid_file_ospfd ;
 
 #ifdef SUPPORT_OSPF_API
 extern int ospf_apiserver_enable;

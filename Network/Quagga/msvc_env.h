@@ -25,6 +25,7 @@ extern "C" {
 int snprintf (char *s, size_t maxlen, const char *format, ...);
 int vsnprintf(char *s, size_t maxlen, const char *format, va_list arg);
 int strncasecmp(const char *s1, const char *s2, size_t n);
+int strcasecmp(const char *s1, const char *s2);
 
 struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg);
 

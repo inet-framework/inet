@@ -809,7 +809,7 @@ ospf_vl_data_free (struct ospf_vl_data *vl_data)
   XFREE (MTYPE_OSPF_VL_DATA, vl_data);
 }
 
-u_int vlink_count_ospfd = 0;
+u_int vlink_count_ospfd ;
 
 struct ospf_interface * 
 ospf_vl_new (struct ospf *ospf, struct ospf_vl_data *vl_data)

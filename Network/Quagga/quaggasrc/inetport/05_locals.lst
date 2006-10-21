@@ -5,3 +5,5 @@ L;pid_t pid;pid
 L;int vty_port(\s*=\s*[\w_]+)?;vty_port
 L;char \*vty_addr(\s*=\s*[\w_]+)?;vty_addr
 L;char \*config_file(\s*=\s*[\w_]+)?;config_file
+L;struct_bgp_master \*bm;bm
+L;struct_zclient \*zlookup;zlookup

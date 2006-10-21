@@ -53,6 +53,12 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
     return _strnicmp(s1, s2, n);
 }
 
+//XXX #define strcasecmp _stricmp ?
+int strcasecmp(const char *s1, const char *s2)
+{
+    return _stricmp(s1, s2);
+}
+
 #endif
 
 struct cmsghdr * __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg)
@@ -457,10 +463,29 @@ void oppsim_vsyslog(int priority, const char *format, va_list ap)
 int oppsim_fcntl(int fildes, int cmd, ...)
 {
     EV << "fcntl: fildes=" << fildes << " cmd=" << cmd << endl;
+    
+    long arg;
+	va_list ap;
 
-    EV << "fcntl does currently nothing" << endl;
-
-    return 0;
+    switch(cmd) 
+	{
+		case F_GETFL:
+			EV << "WARNING: F_GETFL currently only recognizes O_NONBLOCK " << endl;
+	   		if(!current_module->isBlocking(fildes)) return O_NONBLOCK;
+	   		else return 0;
+	   			
+		case F_SETFL:
+		    EV << "WARNING: F_SETFL currently only recognizes O_NONBLOCK" << endl;
+        	va_start(ap, cmd);
+        	arg = va_arg(ap, long);
+        	va_end(ap);
+        	if(current_module->isBlocking(fildes) == (arg && O_NONBLOCK)) current_module->setBlocking(fildes, !(arg && O_NONBLOCK));
+        	return 0;
+        		
+		default:        		
+		   	EV << "WARNING: only F_SETFL/F_GETFL is recognized, ignoring " << cmd << endl;
+		   	return 0;
+	}
 }
 
 int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_len)
@@ -514,36 +539,48 @@ int getIpHeader(SocketMsg *srcMsg, IPControlInfo *srcInfo, void* &dstPtr, int &d
     return header_length;
 }
 
-ssize_t receive_stream(int socket, void *buf, size_t nbyte)
+ssize_t receive(int socket, void *buf, size_t nbyte, bool dgram, struct sockaddr *addr, socklen_t *len)
 {
-    Daemon *dm = current_module; //DAEMON
-
-    while(dm->isBlocking(socket) && !dm->getSocketMessage(socket, false))
+    while(current_module->isBlocking(socket) && !current_module->getSocketMessage(socket, false))
     {
-        dm->receiveAndHandleMessage(0.0);
+        current_module->receiveAndHandleMessage(0.0, "read");
     }
 
     int bread = 0;
 
     while(nbyte > 0)
     {
-        cMessage *m = dm->getSocketMessage(socket, false);
+        cMessage *m = current_module->getSocketMessage(socket, false);
         if(!m)
             break;
 
         SocketMsg *msg = check_and_cast<SocketMsg*>(m);
+        
+        if(dgram && addr)
+        {
+        	// copy src address 
+        	
+        	ASSERT(*len >= sizeof(struct sockaddr_in));
+        	
+        	UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo*>(msg->controlInfo());
+        	((sockaddr_in*)addr)->sin_family = AF_INET;
+        	((sockaddr_in*)addr)->sin_port = htons(udpControlInfo->srcPort());
+        	((sockaddr_in*)addr)->sin_addr.s_addr = htonl(udpControlInfo->srcAddr().get4().getInt());
+        	*len = sizeof(struct sockaddr_in);
+        }
 
         int datalen = msg->getDataArraySize();
         bool empty = false;
 
         if(datalen > nbyte)
         {
-            // not enough space in buffer
+            if(dgram) EV << "warning: discarding " << (datalen - nbyte) << " bytes from this message" << endl;            	
+            
             datalen = nbyte;
         }
         else
         {
-            // no more data in this message
+            // whole message consumed
             empty = true;
         }
 
@@ -553,17 +590,24 @@ ssize_t receive_stream(int socket, void *buf, size_t nbyte)
         nbyte -= datalen;
         bread += datalen;
 
-        if(empty)
+        if(empty || dgram)
         {
-            delete dm->getSocketMessage(socket, true);
+            delete current_module->getSocketMessage(socket, true);
         }
         else
         {
             msg->removePrefix(datalen);
         }
+        
+        if(dgram)
+        	break;
     }
 
-    ASSERT(bread > 0);
+	if(bread == 0)
+	{
+		errno = EAGAIN;
+		return -1;
+	}
 
     return bread;
 }
@@ -677,33 +721,8 @@ ssize_t oppsim_recvfrom(int socket, void *buffer, size_t length, int flags, stru
     if(udp)
     {
         ASSERT(!flags);
-        ASSERT(*address_len == sizeof(sockaddr_in));
-
-        SocketMsg *msg = check_and_cast<SocketMsg*>(dm->getSocketMessage(socket, true));
-
-        UDPControlInfo *udpControlInfo = check_and_cast<UDPControlInfo*>(msg->controlInfo());
-
-        struct sockaddr_in *inaddr = (sockaddr_in*)address;
-        inaddr->sin_family = AF_INET;
-        inaddr->sin_port = htons(udpControlInfo->srcPort());
-        inaddr->sin_addr.s_addr = htonl(udpControlInfo->srcAddr().get4().getInt());
-
-        unsigned int datalen = msg->getDataArraySize();
-
-        if(length < datalen)
-        {
-            EV << "warning: discarding " << (datalen - length) << " bytes from this message" << endl;
-
-            datalen = length;
-        }
-
-        msg->copyDataToBuffer(buffer, datalen);
-
-        delete msg;
-
-        ASSERT(datalen > 0);
-
-        return datalen;
+        
+        return receive(socket, buffer, length, true, address, address_len);
     }
 
     ASSERT(false);
@@ -828,12 +847,10 @@ ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 
 ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len)
 {
-    Daemon *dm = current_module; //DAEMON
-
     EV << "sendto: socket=" << socket << " message=" << message << " length=" << length << " flags=" << flags <<
             " dest_addr=" << dest_addr << " dest_len=" << dest_len << endl;
 
-    if(dm->getIfNetlinkSocket(socket))
+    if(current_module->getIfNetlinkSocket(socket))
     {
         // make sure it is for us (kernel)
         ASSERT(dest_len == sizeof(struct sockaddr_nl));
@@ -854,11 +871,9 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
         return nl_request(socket, message, length, flags);
     }
 
-    UDPSocket *udp = dm->getIfUdpSocket(socket);
+    UDPSocket *udp = current_module->getIfUdpSocket(socket);
     if(udp)
     {
-        EV << "udp socket" << endl;
-
         ASSERT(dest_addr);
         ASSERT(dest_addr->sa_family == AF_INET);
         ASSERT(dest_len == sizeof(sockaddr_in));
@@ -877,7 +892,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
         msg->setDataFromBuffer(message, length);
 
         msg->setByteLength(length);
-
+        
         udp->sendTo(msg, destAddr, port);
 
         return length;
@@ -977,6 +992,7 @@ int oppsim_open(const char *path, int oflag, ...)
 int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout)
 {
     Daemon *dm = current_module; //DAEMON
+    TCPSocket *tcp;
 
     EV << "select: nfds=" << nfds << " readfds=" << readfds << " writefds=" << writefds << " errorfds=" <<
             errorfds << " timeout=" << timeout << endl;
@@ -997,7 +1013,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         // first see if any descriptor is ready
         for(int i = 0; i < nfds; i++)
         {
-            if(FD_ISSET(i, readfds))
+            if(readfds && FD_ISSET(i, readfds))
             {
                 EV << "read " << i;
     
@@ -1019,14 +1035,31 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                 }
             }
     
-            if(FD_ISSET(i, writefds))
+            if(writefds && FD_ISSET(i, writefds))
             {
-                EV << "write " << i << " (write is always ready)" << endl;
-                ++success;
+            	if((tcp = current_module->getIfTcpSocket(i)) != NULL) 
+            	{
+            		if(tcp->state() == TCPSocket::CONNECTED)
+            		{
+            			EV << "write " << i << "(TCP socket connected)" << endl;
+            			++success;
+            		}
+            	}
+            	else if(current_module->getIfUdpSocket(i))
+            	{
+            		EV << "write " << i << "(UDP socket)" << endl;
+            		++success;
+            	}
+            	else
+            	{
+            		// XXX FIXME:
+	                EV << "write " << i << " (always ready)" << endl;
+    	            ++success;
+            	}
                 continue;
             }
     
-            if(FD_ISSET(i, errorfds))
+            if(errorfds && FD_ISSET(i, errorfds))
             {
                 EV << "error " << i << endl;
     
@@ -1042,13 +1075,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         if(timeout)
         {
             double d = limit - simulation.simTime();
-            if(!dm->receiveAndHandleMessage(d))
+            if(!dm->receiveAndHandleMessage(d, "select"))
                return 0; // timeout received before any event arrived
         }
         else
         {
             // with no timeout
-            dm->receiveAndHandleMessage(0.0);
+            dm->receiveAndHandleMessage(0.0, "select");
         }
     }
 
@@ -1058,7 +1091,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 
     for(int i = 0; i < nfds; i++)
     {
-        if(FD_ISSET(i, readfds))
+        if(readfds && FD_ISSET(i, readfds))
         {
             bool active = false;
 
@@ -1081,12 +1114,40 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                 FD_CLR(i, readfds);
             }
         }
-
-        // write is always ready, don't touch writefds
+        
+        if(writefds && FD_ISSET(i, writefds))
+        {
+        	bool active = false;
+            
+            if((tcp = current_module->getIfTcpSocket(i)) != NULL)
+            {
+            	if(tcp->state() == TCPSocket::CONNECTED)
+            	{
+            		EV << " active (connected TCP socket)" << endl;
+            		active = true;
+            	}
+            }
+            else if(current_module->getIfUdpSocket(i))
+            {
+            	EV << " active (UDP socket)" << endl;
+            	active = true;
+            }
+            else
+            {
+            	EV << " active (always ready)" << endl;
+            	active = true;
+            }
+            
+            if(!active)
+            {
+            	FD_CLR(i, writefds);
+            }
+        }
     }
 
     // exceptions not supported yet
-    FD_ZERO(errorfds);
+    if(errorfds)
+    	FD_ZERO(errorfds);
 
     return success;
 }
@@ -1263,20 +1324,17 @@ int oppsim_bind(int socket, const struct sockaddr *address, socklen_t address_le
 
 int oppsim_accept(int socket, struct sockaddr *address, socklen_t *address_len)
 {
-    Daemon *dm = current_module; //DAEMON
-
     EV << "accept: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
-    int csocket = dm->acceptTcpSocket(socket);
-    ASSERT(csocket != -1);
+    int csocket = current_module->acceptTcpSocket(socket);
 
-    if(address)
+    if(csocket != -1 && address)
     {
         ASSERT(address_len);
         ASSERT(*address_len == sizeof(sockaddr_in));
         struct sockaddr_in *inaddr = (sockaddr_in*)address;
 
-        TCPSocket *tcp = dm->getTcpSocket(csocket);
+        TCPSocket *tcp = current_module->getTcpSocket(csocket);
         inaddr->sin_family = AF_INET;
         inaddr->sin_port = htons(tcp->remotePort());
         inaddr->sin_addr.s_addr = htonl(tcp->remoteAddress().get4().getInt());
@@ -1287,6 +1345,14 @@ int oppsim_accept(int socket, struct sockaddr *address, socklen_t *address_len)
 
 int oppsim_getsockopt(int socket, int level, int option_name, void *option_value, socklen_t *option_len)
 {
+	if(level == SOL_SOCKET && option_name == SO_ERROR)
+	{
+		ASSERT(*option_len >= sizeof(int));
+		*(int*)option_value = current_module->getSocketError(socket, true);
+		return 0;
+	}
+						
+	// unsupported	
     ASSERT(false);
     return -1;
 }
@@ -1299,18 +1365,16 @@ int oppsim_ioctl(int fildes, int request, ...)
 
 ssize_t oppsim_read(int fildes, void *buf, size_t nbyte)
 {
-    Daemon *dm = current_module; //DAEMON;
-
     EV << "read: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
-    if(dm->getIfTcpSocket(fildes))
+    if(current_module->getIfTcpSocket(fildes))
     {
         EV << "reading from TCP socket" << endl;
 
-        return receive_stream(fildes, buf, nbyte);
+        return receive(fildes, buf, nbyte, false, NULL, NULL);
     }
 
-    // read from STEAM/RAW/NETLINK/UDP shouldn't be used
+    // read from STREAM/RAW/NETLINK/UDP shouldn't be used
     ASSERT(false);
 }
 
@@ -1395,62 +1459,16 @@ int oppsim_setgroups(size_t size, const gid_t *list)
 
 int oppsim_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 {
-    Daemon *dm = current_module; //DAEMON
-
     EV << "connect: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
     struct sockaddr_in *inaddr = (sockaddr_in*)address;
-    ASSERT(address_len == sizeof(*inaddr));
-    IPAddress destAddr = IPAddress(ntohl(inaddr->sin_addr.s_addr));
-
-    EV << "destAddress=" << destAddr << endl;
-
-    TCPSocket *tcp = dm->getIfTcpSocket(socket);
-
-    if(tcp->localAddress().isUnspecified())
-    {
-        // XXX FIXME this should be probably fixed in TCP layer
-        // XXX FIXME this hack doesn't work if client is already bound (with 0.0.0.0:some_port)
-
-        IPAddress localAddr;
-
-        RoutingTable *rt = check_and_cast<RoutingTable*>(dm->parentModule()->submodule("routingTable"));
-        if(rt->localDeliver(destAddr))
-        {
-            localAddr = destAddr;
-        }
-        else
-        {
-            InterfaceEntry *ie = rt->interfaceForDestAddr(destAddr);
-            ASSERT(ie!=NULL);
-            localAddr = ie->ipv4()->inetAddress();
-        }
-
-        EV << "autoassigning local address=" << localAddr << endl;
-
-        tcp->bind(localAddr, -1);
-    }
-
-    tcp->connect(destAddr, ntohs(inaddr->sin_port));
-
-    EV << "connect to destAddr=" << destAddr << " port=" << ntohs(inaddr->sin_port) << endl;
     
-    if(dm->isBlocking(socket))
-    {
-        while(true)
-        {
-            EV << "connect" << endl;
-            
-            dm->receiveAndHandleMessage(0.0);
-            
-            if(tcp->state() == tcp->CONNECTED)
-                break;
-        } 
-        
-        EV << "connection fully established" << endl;
-    }
+    ASSERT(address_len == sizeof(*inaddr));
+    
+    IPAddress destAddr = IPAddress(ntohl(inaddr->sin_addr.s_addr));
+    int destPort = ntohs(inaddr->sin_port);
 
-    return 0;
+    return current_module->connectTcpSocket(socket, destAddr, destPort);
 }
 
 int oppsim_getpeername(int socket, struct sockaddr *address, socklen_t *address_len)
@@ -1472,6 +1490,15 @@ int oppsim_getpeername(int socket, struct sockaddr *address, socklen_t *address_
     *address_len = sizeof(struct sockaddr_in);
 
     return 0;
+}
+
+unsigned int oppsim_sleep(unsigned int seconds)
+{
+	EV << "sleep: seconds=" << seconds << endl;
+	
+	current_module->sleep((double)seconds);
+	
+	return 0;
 }
 
 void oppsim_abort()
@@ -1586,7 +1613,7 @@ int oppsim_inet_pton(int af, const char *strptr, void *addrptr)
     }
 }
 
-char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
+const char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
 {
     if (af==AF_INET) {
         ASSERT(size>=16);

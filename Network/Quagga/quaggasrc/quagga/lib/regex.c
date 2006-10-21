@@ -27,6 +27,8 @@
 #undef	_GNU_SOURCE
 #define _GNU_SOURCE
 
+#include "globalvars.h"
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -188,7 +190,7 @@ extern char *re_syntax_table;
 
 # else /* not SYNTAX_TABLE */
 
-static char re_syntax_table_lib[CHAR_SET_SIZE];
+static char re_syntax_table[CHAR_SET_SIZE];
 
 static void
 init_syntax_once ()
@@ -1035,7 +1037,6 @@ weak_alias (__re_set_syntax, re_set_syntax)
    but why not be nice?  */
 
 static const char re_error_msgid[] =
-  {
 #define REG_NOERROR_IDX	0
     gettext_noop ("Success")	/* REG_NOERROR */
     "\0"
@@ -1046,7 +1047,7 @@ static const char re_error_msgid[] =
     gettext_noop ("Invalid regular expression") /* REG_BADPAT */
     "\0"
 #define REG_ECOLLATE_IDX (REG_BADPAT_IDX + sizeof "Invalid regular expression")
-    gettext_noop ("Invalid collation character"), /* REG_ECOLLATE */
+    gettext_noop ("Invalid collation character") /* REG_ECOLLATE */
     "\0"
 #define REG_ECTYPE_IDX	(REG_ECOLLATE_IDX + sizeof "Invalid collation character")
     gettext_noop ("Invalid character class name") /* REG_ECTYPE */
@@ -1085,8 +1086,7 @@ static const char re_error_msgid[] =
     gettext_noop ("Regular expression too big") /* REG_ESIZE */
     "\0"
 #define REG_ERPAREN_IDX	(REG_ESIZE_IDX + sizeof "Regular expression too big")
-    gettext_noop ("Unmatched ) or \\)"), /* REG_ERPAREN */
-  };
+    gettext_noop ("Unmatched ) or \\)"); /* REG_ERPAREN */
 
 static const size_t re_error_msgid_idx[] =
   {
@@ -1194,7 +1194,7 @@ typedef struct
 # if defined MATCH_MAY_ALLOCATE
 /* 4400 was enough to cause a crash on Alpha OSF/1,
    whose default stack limit is 2mb.  */
-int re_max_failures_lib = 20000;
+int re_max_failures_lib ;
 # else
 int re_max_failures = 2000;
 # endif

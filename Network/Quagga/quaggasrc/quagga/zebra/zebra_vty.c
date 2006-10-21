@@ -1997,7 +1997,7 @@ zebra_ip_config (struct vty *vty)
 }
 
 /* IP node for static routes. */
-struct cmd_node ip_node_zebra = { IP_NODE,  "",  1 };
+struct cmd_node ip_node_zebra ;
 
 /* Route VTY.  */
 void

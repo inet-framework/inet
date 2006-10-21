@@ -38,7 +38,7 @@ static vector route_set_vec_lib;
 // struct definitions moved to header
 
 /* Master list of route map. */
-static struct route_map_list route_map_master_lib = { NULL, NULL, NULL, NULL };
+static struct route_map_list route_map_master_lib ;
 
 static void
 route_map_rule_delete (struct route_map_rule_list *,

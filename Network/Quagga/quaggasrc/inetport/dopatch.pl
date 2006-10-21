@@ -375,25 +375,37 @@ while(my $line = <STDIN>)
 	  # we believe this statement defines local variable, so we...
 	  ++$m;
 
-	  # ...remove macro definiton
-	  $lines[$i] = "#undef\t$v\n".$lines[$i];
+          # starting from here...
+          my $oldi = $i;
 
 	  # ...until closing bracket
 	  my $b = 1;
 	  do
 	  {
-	    $i < @lines or die "unable to find closing bracket";
-
 	    ++$i;
+
+	    ($i < @lines) or last;
 
 	    $b += ($lines[$i] =~ s/{/{/g);
 	    $b -= ($lines[$i] =~ s/}/}/g);
 
 	  } while($b > 0);
-	  $b == 0 or die "too many closing brackets found";
 
-          # turn global variable back on
-	  $lines[$i] .= "\n#define\t$v\t${v}__VAR";
+          if($b < 0) {
+            die "too many closing brackets found";
+	  } elsif($b > 0) {
+            if($b == 1) {
+              # global variable definition (probably)
+            } else {
+              die "not enough closing brackets found";
+            }
+          } else {
+	    # ...remove macro definiton
+	    $lines[$oldi] = "#undef\t$v\n".$lines[$oldi];
+
+            # turn global variable back on
+            $lines[$i] .= "\n#define\t$v\t${v}__VAR";
+          }
 	}
       }
       if($m)
@@ -511,9 +523,14 @@ while(my $line = <STDIN>)
     # read file into memory
     readfile($fn);
 
-    # rename variable on given position
+    # commenting the variable out is more difficult -> only rename it, that is easier
+    # we also need to preserve its initializer if it is subject to memcpy later
     my @lines = split(/\n/, $files{$fn});
     ($lines[$fl-1] =~ s/\b$v\b/${v}_$dir/g) == 1 or die "patching failed: file=$fn var=$v line=".$lines[$fl-1];
+    if($vars_init{$dir}{$v} ne "memcpy" && $vars_init{$dir}{$v} !~ /^{/) {
+      $lines[$fl-1] =~ s/=\s*$init;/;/;
+    }
+     
     $files{$fn} = join("\n", @lines)."\n";
     $modified{$fn} = 1;
   }

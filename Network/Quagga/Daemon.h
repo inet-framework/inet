@@ -28,18 +28,19 @@
 
 #define	FD_EXIST(a)		(a >= 0 && a < fd.size() && a < FD_SETSIZE)
 
-class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
+class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface, public UDPSocket::CallbackInterface
 {
     public:
         Module_Class_Members(Daemon, cSimpleModule, 32768);
-        virtual void activity();
-
 
     public:
         struct passwd pwd_entry;
         struct group grp_entry;
 
         struct GlobalVars *varp;
+        
+	protected:
+		void init(bool vars);        
 
     public:
     
@@ -55,6 +56,9 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 		FILE* getStream(int fildes);
         
         bool isBlocking(int fildes);
+        void setBlocking(int fildes, bool block);
+        
+        int getSocketError(int fildes, bool clear);
 
 		int getEmptySlot();
     
@@ -65,10 +69,12 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         int createStream(const char *path, char *mode);
         
         void handleReceivedMessage(cMessage *msg);
-        bool receiveAndHandleMessage(double timeout);
+        bool receiveAndHandleMessage(double timeout, const char *cmd);
+        void sleep(double interval);
         
         bool hasQueuedConnections(int socket);
         int acceptTcpSocket(int socket);
+		int connectTcpSocket(int socket, IPAddress destAddr, int destPort);        
         void enqueueConnection(int socket, int csocket);
         cMessage* getSocketMessage(int socket, bool remove=false);
         void enqueueSocketMessage(int socket, cMessage *msg);
@@ -84,9 +90,10 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
 
         virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
         virtual void socketEstablished(int connId, void *yourPtr);
-        virtual void socketPeerClosed(int connId, void *yourPtr) { ASSERT(false); }
         virtual void socketClosed(int connId, void *yourPtr) { ASSERT(false); }
-        virtual void socketFailure(int connId, void *yourPtr, int code) { ASSERT(false); }
+        virtual void socketPeerClosed(int connId, void *yourPtr);
+        virtual void socketFailure(int connId, void *yourPtr, int code);
+        virtual void socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDPControlInfo *ctrl);
 
 
         struct_sigaction* sigactionimpl(int signo);
@@ -117,6 +124,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
             cQueue queue; // arrived messages
             std::list<int> incomingQueue; // queued conns
             bool blocking;
+            int error; // pending error
         };
 
         std::vector<lib_descriptor_t> fd;
@@ -129,6 +137,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface
         std::string rootprefix;
 
         TCPSocketMap socketMap;
+        cQueue eventQueue;
 
     public:
 

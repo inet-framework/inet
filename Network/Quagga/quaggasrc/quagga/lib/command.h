@@ -176,6 +176,9 @@ struct desc
 #elif ZEBRA
 #define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
 	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, zebra)
+#elif BGPD
+#define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
+	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, bgpd)
 #else
 #define DEFUN_CMD_ELEMENT(funcname, cmdname, cmdstr, helpstr, attrs, dnum) \
 	DEFUN_CMD_ELEMENT_LONG(funcname, cmdname, cmdstr, helpstr, attrs, dnum, lib)

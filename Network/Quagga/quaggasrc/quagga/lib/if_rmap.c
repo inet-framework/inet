@@ -31,8 +31,8 @@ struct hash *ifrmaphash_lib;
 
 /* Hook functions. */
 // prototype defined in header file
-if_rmap_hook_func if_rmap_add_hook_lib = NULL;
-if_rmap_hook_func if_rmap_delete_hook_lib = NULL;
+if_rmap_hook_func if_rmap_add_hook_lib ;
+if_rmap_hook_func if_rmap_delete_hook_lib ;
 
 struct if_rmap *
 if_rmap_new ()

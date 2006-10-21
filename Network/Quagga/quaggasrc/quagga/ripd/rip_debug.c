@@ -24,9 +24,9 @@
 #include "ripd/rip_debug.h"
 
 /* For debug statement. */
-unsigned long rip_debug_event_ripd = 0;
-unsigned long rip_debug_packet_ripd = 0;
-unsigned long rip_debug_zebra_ripd = 0;
+unsigned long rip_debug_event_ripd ;
+unsigned long rip_debug_packet_ripd ;
+unsigned long rip_debug_zebra_ripd ;
 
 #undef	show_debugging_rip_cmd
 DEFUN (show_debugging_rip,

@@ -30,7 +30,7 @@
 #include "command.h"
 #include "sigevent.h"
 
-static struct hash *cpu_record_lib = NULL;
+static struct hash *cpu_record_lib ;
 
 /* Struct timeval's tv_usec one second value.  */
 #define TIMER_SECOND_MICRO 1000000L

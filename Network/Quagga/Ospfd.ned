@@ -1,3 +1,5 @@
+// XXX FIXME: file shouldn't be needed according to manual 
+//
 //
 // This library is free software, you can redistribute it
 // and/or modify
@@ -10,10 +12,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-simple Daemon
+simple Ospfd
     parameters:
-        fsroot : string,
-        server : string;
+        fsroot : string;
     gates:
         in: tcpIn;
         out: tcpOut;

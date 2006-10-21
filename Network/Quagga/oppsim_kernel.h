@@ -15,6 +15,7 @@ extern void GlobalVars_initializeActiveSet_ripd();
 extern void GlobalVars_initializeActiveSet_ospfd();
 extern void GlobalVars_initializeActiveSet_zebra();
 extern void GlobalVars_initializeActiveSet_lib();
+extern void GlobalVars_initializeActiveSet_bgpd();
 
 extern struct GlobalVars * GlobalVars_createActiveSet();
 extern int GlobalVars_errno();
@@ -105,7 +106,9 @@ u_short oppsim_ntohs(u_short netshort);
 unsigned long oppsim_inet_addr(const char *str);
 int oppsim_inet_aton(const char *cp, struct in_addr *addr);
 int oppsim_inet_pton (int af, const char *strptr, void *addrptr);
-char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size);
+const char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size);
+
+unsigned int oppsim_sleep(unsigned int seconds);
 
 extern time_t zero_time;
 

@@ -62,25 +62,25 @@ extern struct_host host_lib;
 static vector vtyvec_lib;
 
 /* Vty timeout value. */
-static unsigned long vty_timeout_val_lib = VTY_TIMEOUT_DEFAULT;
+static unsigned long vty_timeout_val_lib ;
 
 /* Vty access-class command */
-static char *vty_accesslist_name_lib = NULL;
+static char *vty_accesslist_name_lib ;
 
 /* Vty access-calss for IPv6. */
-static char *vty_ipv6_accesslist_name_lib = NULL;
+static char *vty_ipv6_accesslist_name_lib ;
 
 /* VTY server thread. */
 vector Vvty_serv_thread_lib;
 
 /* Current directory. */
-char *vty_cwd_lib = NULL;
+char *vty_cwd_lib ;
 
 /* Configure lock. */
 static int vty_config_lib;
 
 /* Login password check. */
-static int no_password_check_lib = 0;
+static int no_password_check_lib ;
 
 /* Integrated configuration file path */
 char integrate_default[] = SYSCONFDIR INTEGRATE_DEFAULT_CONFIG;
@@ -385,8 +385,8 @@ vty_command (struct vty *vty, char *buf)
   return ret;
 }
 
-char telnet_backward_char_lib = 0x08;
-char telnet_space_char_lib = ' ';
+char telnet_backward_char_lib ;
+char telnet_space_char_lib ;
 
 /* Basic function to write buffer to vty. */
 static void

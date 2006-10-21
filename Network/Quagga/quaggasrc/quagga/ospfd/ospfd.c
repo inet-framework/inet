@@ -924,7 +924,7 @@ struct message ospf_area_type_msg[] =
   { OSPF_AREA_STUB,     "Stub" },
   { OSPF_AREA_NSSA,     "NSSA" },
 };
-int ospf_area_type_msg_max_ospfd = OSPF_AREA_TYPE_MAX;
+int ospf_area_type_msg_max_ospfd ;
 
 void
 ospf_area_type_set (struct ospf_area *area, int type)

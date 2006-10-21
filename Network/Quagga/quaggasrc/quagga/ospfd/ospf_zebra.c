@@ -50,7 +50,7 @@
 #endif /* HAVE_SNMP */
 
 /* Zebra structure to hold current status. */
-struct_zclient *zclient_ospfd = NULL;
+struct_zclient *zclient_ospfd ;
 
 /* For registering threads. */
 extern struct thread_master *master_ospfd;

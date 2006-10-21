@@ -6,7 +6,7 @@ SOURCES = \
         sockunion.c prefix.c thread.c if.c memory.c buffer.c table.c hash.c \
         filter.c routemap.c distribute.c stream.c str.c log.c plist.c \
         zclient.c sockopt.c smux.c md5.c if_rmap.c keychain.c privs.c \
-        sigevent.c pqueue.c jhash.c
+        sigevent.c pqueue.c jhash.c regex.c
 
 HEADERS = \
 	buffer.h command.h filter.h getopt.h hash.h if.h linklist.h log.h \
@@ -21,11 +21,11 @@ OBJECTS = \
         sockunion.obj prefix.obj thread.obj if.obj memory.obj buffer.obj table.obj hash.obj \
         filter.obj routemap.obj distribute.obj stream.obj str.obj log.obj plist.obj \
         zclient.obj sockopt.obj smux.obj md5.obj if_rmap.obj keychain.obj privs.obj \
-        sigevent.obj pqueue.obj jhash.obj
+        sigevent.obj pqueue.obj jhash.obj regex.obj
 
 INCLUDES = -I. -I../ -I../../..
 
-CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
+CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H -DREGEX_MALLOC
 
 all: libzebra.lib
 

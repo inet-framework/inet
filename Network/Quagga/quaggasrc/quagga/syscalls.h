@@ -60,7 +60,7 @@
 #define zmalloc  oppsim_zmalloc
 #define zcalloc  oppsim_zcalloc
 #define zrealloc  oppsim_zrealloc
-#define getservbyname oppsim_getservbyname
+#define getservbyname  oppsim_getservbyname
 #define htonl  oppsim_htonl
 #define htons  oppsim_htons
 #define inet_ntoa  oppsim_inet_ntoa
@@ -70,4 +70,3 @@
 #define inet_aton  oppsim_inet_aton
 #define inet_pton  oppsim_inet_pton
 #define inet_ntop  oppsim_inet_ntop
-

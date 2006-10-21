@@ -1,7 +1,7 @@
 diff -u -N -r quagga-0.98.5/allheaders.h quagga-0.98.5-inet/allheaders.h
 --- quagga-0.98.5/allheaders.h	1970-01-01 01:00:00.000000000 +0100
 +++ quagga-0.98.5-inet/allheaders.h	2005-11-21 16:11:06.000000000 +0100
-@@ -0,0 +1,73 @@
+@@ -0,0 +1,96 @@
 +#include "lib/zebra.h"
 +#include "lib/buffer.h"
 +#include "lib/command.h"
@@ -75,6 +75,29 @@ diff -u -N -r quagga-0.98.5/allheaders.h quagga-0.98.5-inet/allheaders.h
 +#include "zebra/rt.h"
 +#include "zebra/rt_netlink.h"
 +#include "zebra/zserv.h"
++#include "bgpd/bgpd.h"
++#include "bgpd/bgp_aspath.h"
++#include "bgpd/bgp_attr.h"
++#include "bgpd/bgp_community.h"
++#include "bgpd/bgp_debug.h"
++#include "bgpd/bgp_fsm.h"
++#include "bgpd/bgp_network.h"
++#include "bgpd/bgp_open.h"
++#include "bgpd/bgp_packet.h"
++#include "bgpd/bgp_regex.h"
++#include "bgpd/bgp_route.h"
++#include "bgpd/bgp_filter.h"
++#include "bgpd/bgp_clist.h"
++#include "bgpd/bgp_dump.h"
++#include "bgpd/bgp_zebra.h"
++#include "bgpd/bgp_ecommunity.h"
++#include "bgpd/bgp_mplsvpn.h"
++#include "bgpd/bgp_nexthop.h"
++#include "bgpd/bgp_damp.h"
++#include "bgpd/bgp_table.h"
++#include "bgpd/bgp_advertise.h"
++#include "bgpd/bgp_snmp.h"
++#include "bgpd/bgp_vty.h"
 diff -u -N -r quagga-0.98.5/config.h quagga-0.98.5-inet/config.h
 --- quagga-0.98.5/config.h	1970-01-01 01:00:00.000000000 +0100
 +++ quagga-0.98.5-inet/config.h	2005-11-21 16:11:06.000000000 +0100
@@ -183,13 +206,13 @@ diff -u -N -r quagga-0.98.5/config.h quagga-0.98.5-inet/config.h
 +
 +/* #undef HAVE_INET_ND_H */
 +
-+#ifndef _MSC_VER
++
 +
 +#define HAVE_INET_ATON 1
-+#define HAVE_INET_NTOP 
-+#define HAVE_INET_PTON 
++#define HAVE_INET_NTOP 1
++#define HAVE_INET_PTON 1
 +
-+#endif
++
 +
 +#define HAVE_INPKTINFO 
 +
@@ -562,7 +585,7 @@ diff -u -N -r quagga-0.98.5/lib/Makefile.vc quagga-0.98.5-inet/lib/Makefile.vc
 +        sockunion.c prefix.c thread.c if.c memory.c buffer.c table.c hash.c \
 +        filter.c routemap.c distribute.c stream.c str.c log.c plist.c \
 +        zclient.c sockopt.c smux.c md5.c if_rmap.c keychain.c privs.c \
-+        sigevent.c pqueue.c jhash.c
++        sigevent.c pqueue.c jhash.c regex.c
 +
 +HEADERS = \
 +	buffer.h command.h filter.h getopt.h hash.h if.h linklist.h log.h \
@@ -577,11 +600,11 @@ diff -u -N -r quagga-0.98.5/lib/Makefile.vc quagga-0.98.5-inet/lib/Makefile.vc
 +        sockunion.obj prefix.obj thread.obj if.obj memory.obj buffer.obj table.obj hash.obj \
 +        filter.obj routemap.obj distribute.obj stream.obj str.obj log.obj plist.obj \
 +        zclient.obj sockopt.obj smux.obj md5.obj if_rmap.obj keychain.obj privs.obj \
-+        sigevent.obj pqueue.obj jhash.obj
++        sigevent.obj pqueue.obj jhash.obj regex.obj
 +
 +INCLUDES = -I. -I../ -I../../..
 +
-+CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
++CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H -DREGEX_MALLOC
 +
 +all: libzebra.lib
 +
@@ -593,7 +616,7 @@ diff -u -N -r quagga-0.98.5/lib/Makefile.vc quagga-0.98.5-inet/lib/Makefile.vc
 diff -u -N -r quagga-0.98.5/Makefile quagga-0.98.5-inet/Makefile
 --- quagga-0.98.5/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ quagga-0.98.5-inet/Makefile	2005-11-21 16:11:06.000000000 +0100
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,32 @@
 +
 +INCLUDES = -I./ -I./lib -I../../
 +
@@ -601,7 +624,7 @@ diff -u -N -r quagga-0.98.5/Makefile quagga-0.98.5-inet/Makefile
 +CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
 +CC = gcc
 +
-+all: libdir ripddir zebradir ospfdir globalvars.o
++all: libdir ripddir zebradir ospfdir bgpddir globalvars.o
 +
 +libdir:
 +	(cd lib; make)
@@ -615,23 +638,27 @@ diff -u -N -r quagga-0.98.5/Makefile quagga-0.98.5-inet/Makefile
 +ospfdir:
 +	(cd ospfd; make)
 +
++bgpddir:
++	(cd bgpd; make)
++
 +clean:
 +	(cd lib; make clean)
 +	(cd ripd; make clean)
 +	(cd zebra; make clean)
 +	(cd ospfd; make clean)
++	(cd bgpd; make clean)
 +	rm globalvars.o
 +
 diff -u -N -r quagga-0.98.5/Makefile.vc quagga-0.98.5-inet/Makefile.vc
 --- quagga-0.98.5/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
 +++ quagga-0.98.5-inet/Makefile.vc	2005-11-21 16:01:47.000000000 +0100
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,34 @@
 +!include "../../../../inetconfig.vc"
 +
 +INCLUDES= -I. -I./lib -I../..
 +CFLAGS= /nologo $(INCLUDES) $(CFLAGS) -DHAVE_CONFIG_H
 +
-+all: libdir ripddir zebradir ospfdir globalvars.obj
++all: libdir ripddir zebradir ospfdir bgpddir globalvars.obj
 +
 +libdir:
 +	cd lib &&  nmake -f Makefile.vc
@@ -645,11 +672,15 @@ diff -u -N -r quagga-0.98.5/Makefile.vc quagga-0.98.5-inet/Makefile.vc
 +ospfdir:
 +	cd ospfd && nmake -f Makefile.vc
 +
++bgpddir:
++	cd bgpd && nmake -f Makefile.vc
++
 +clean:
 +	cd lib && nmake -f Makefile.vc clean
 +	cd ripd && nmake -f Makefile.vc clean
 +	cd zebra && nmake -f Makefile.vc clean
 +	cd ospfd && nmake -f Makefile.vc clean
++	cd bgpd && nmake -f Makefile.vc clean
 +	-del globalvars.obj vc70.pdb vc70.idb
 +
 +generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
@@ -881,3 +912,79 @@ diff -u -N -r quagga-0.98.5/zebra/Makefile.vc quagga-0.98.5-inet/zebra/Makefile.
 +
 +clean:
 +	-del *.obj zebra.lib vc70.pdb vc70.idb
+diff -u -N -r quagga-0.98.5/bgpd/Makefile quagga-0.98.5-inet/bgpd/Makefile
+--- quagga-0.98.5/bgpd/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/bgpd/Makefile	2005-11-21 14:38:50.000000000 +0100
+@@ -0,0 +1,34 @@
++SOURCES = \
++	bgpd.c bgp_fsm.c bgp_aspath.c bgp_community.c bgp_attr.c \
++	bgp_debug.c bgp_route.c bgp_zebra.c bgp_open.c bgp_routemap.c \
++	bgp_packet.c bgp_network.c bgp_filter.c bgp_regex.c bgp_clist.c \
++	bgp_dump.c bgp_snmp.c bgp_ecommunity.c bgp_mplsvpn.c bgp_nexthop.c \
++	bgp_damp.c bgp_table.c bgp_advertise.c bgp_vty.c bgp_main.c
++
++HEADERS = \
++	bgp_aspath.h bgp_attr.h bgp_community.h bgp_debug.h bgp_fsm.h \
++	bgp_network.h bgp_open.h bgp_packet.h bgp_regex.h bgp_route.h \
++	bgpd.h bgp_filter.h bgp_clist.h bgp_dump.h bgp_zebra.h \
++	bgp_ecommunity.h bgp_mplsvpn.h bgp_nexthop.h bgp_damp.h bgp_table.h \
++	bgp_advertise.h bgp_snmp.h bgp_vty.h
++
++OBJECTS = \
++	bgpd.o bgp_fsm.o bgp_aspath.o bgp_community.o bgp_attr.o \
++	bgp_debug.o bgp_route.o bgp_zebra.o bgp_open.o bgp_routemap.o \
++	bgp_packet.o bgp_network.o bgp_filter.o bgp_regex.o bgp_clist.o \
++	bgp_dump.o bgp_snmp.o bgp_ecommunity.o bgp_mplsvpn.o bgp_nexthop.o \
++	bgp_damp.o bgp_table.o bgp_advertise.o bgp_vty.o bgp_main.o
++
++INCLUDES = -I./ -I../ -I../lib/ -I../../../
++
++DEFS = -DHAVE_CONFIG_H -DBGPD
++CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
++CC = gcc
++
++all: bgpd.a
++
++bgpd.a: $(OBJECTS) $(HEADERS) $(SOURCES)
++	ar rvs bgpd.a $(OBJECTS)
++
++clean:
++	rm -f *.o bgpd.a
+diff -u -N -r quagga-0.98.5/bgpd/Makefile.vc quagga-0.98.5-inet/bgpd/Makefile.vc
+--- quagga-0.98.5/bgpd/Makefile.vc	1970-01-01 01:00:00.000000000 +0100
++++ quagga-0.98.5-inet/bgpd/Makefile.vc	2005-11-21 14:38:50.000000000 +0100
+@@ -0,0 +1,34 @@
++!include "../../../../../inetconfig.vc"
++
++SOURCES = \
++	bgpd.c bgp_fsm.c bgp_aspath.c bgp_community.c bgp_attr.c \
++	bgp_debug.c bgp_route.c bgp_zebra.c bgp_open.c bgp_routemap.c \
++	bgp_packet.c bgp_network.c bgp_filter.c bgp_regex.c bgp_clist.c \
++	bgp_dump.c bgp_snmp.c bgp_ecommunity.c bgp_mplsvpn.c bgp_nexthop.c \
++	bgp_damp.c bgp_table.c bgp_advertise.c bgp_vty.c bgp_main.c
++
++HEADERS = \
++	bgp_aspath.h bgp_attr.h bgp_community.h bgp_debug.h bgp_fsm.h \
++	bgp_network.h bgp_open.h bgp_packet.h bgp_regex.h bgp_route.h \
++	bgpd.h bgp_filter.h bgp_clist.h bgp_dump.h bgp_zebra.h \
++	bgp_ecommunity.h bgp_mplsvpn.h bgp_nexthop.h bgp_damp.h bgp_table.h \
++	bgp_advertise.h bgp_snmp.h bgp_vty.h
++
++OBJECTS = \
++	bgpd.obj bgp_fsm.obj bgp_aspath.obj bgp_community.obj bgp_attr.obj \
++	bgp_debug.obj bgp_route.obj bgp_zebra.obj bgp_open.obj bgp_routemap.obj \
++	bgp_packet.obj bgp_network.obj bgp_filter.obj bgp_regex.obj bgp_clist.obj \
++	bgp_dump.obj bgp_snmp.obj bgp_ecommunity.obj bgp_mplsvpn.obj bgp_nexthop.obj \
++	bgp_damp.obj bgp_table.obj bgp_advertise.obj bgp_vty.obj bgp_main.obj
++
++INCLUDES = -I. -I.. -I../lib -I../../..
++
++CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DBGPD -DHAVE_CONFIG_H
++
++all: bgpd.lib
++
++bgpd.lib: $(OBJECTS) $(HEADERS) $(SOURCES)
++	link.exe /lib $(LDFLAGS_DEBUG) $(OBJECTS) /OUT:bgpd.lib
++
++clean:
++	-del *.obj bgpd.lib vc70.pdb vc70.idb

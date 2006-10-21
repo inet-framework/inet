@@ -31,7 +31,7 @@
 #include "ripd/rip_debug.h"
 
 /* All information about zebra. */
-struct_zclient *zclient_ripd = NULL;
+struct_zclient *zclient_ripd ;
 
 /* Callback prototypes for zebra client service. */
 int rip_interface_add (int, struct_zclient *, zebra_size_t);

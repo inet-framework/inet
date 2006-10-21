@@ -54,14 +54,14 @@ pid_t pid_zebra;
 struct thread_master *master_zebra;
 
 /* Route retain mode flag. */
-int retain_mode_zebra = 0;
+int retain_mode_zebra ;
 
 /* Don't delete kernel route. */
-int keep_kernel_mode_zebra = 0;
+int keep_kernel_mode_zebra ;
 
 #ifdef HAVE_NETLINK
 /* Receive buffer size for netlink socket */
-u_int32_t nl_rcvbufsize_zebra = 0;
+u_int32_t nl_rcvbufsize_zebra ;
 #endif /* HAVE_NETLINK */
 
 /* Command line options. */
@@ -120,7 +120,7 @@ struct zebra_privs_t zserv_privs =
 static char config_default[] = SYSCONFDIR DEFAULT_CONFIG_FILE;
 
 /* Process ID saved for use by init system */
-const char *pid_file_zebra = PATH_ZEBRA_PID;
+const char *pid_file_zebra ;
 
 /* Help information display. */
 static void

@@ -130,22 +130,22 @@ struct message ospf_network_type_msg[] =
 int ospf_network_type_msg_max = OSPF_IFTYPE_MAX;
 
 /* Configuration debug option variables. */
-unsigned long conf_debug_ospf_packet_ospfd[5] = {0, 0, 0, 0, 0};
-unsigned long conf_debug_ospf_event_ospfd = 0;
-unsigned long conf_debug_ospf_ism_ospfd = 0;
-unsigned long conf_debug_ospf_nsm_ospfd = 0;
-unsigned long conf_debug_ospf_lsa_ospfd = 0;
-unsigned long conf_debug_ospf_zebra_ospfd = 0;
-unsigned long conf_debug_ospf_nssa_ospfd = 0;
+unsigned long conf_debug_ospf_packet_ospfd[5] ;
+unsigned long conf_debug_ospf_event_ospfd ;
+unsigned long conf_debug_ospf_ism_ospfd ;
+unsigned long conf_debug_ospf_nsm_ospfd ;
+unsigned long conf_debug_ospf_lsa_ospfd ;
+unsigned long conf_debug_ospf_zebra_ospfd ;
+unsigned long conf_debug_ospf_nssa_ospfd ;
 
 /* Enable debug option variables -- valid only session. */
-unsigned long term_debug_ospf_packet_ospfd[5] = {0, 0, 0, 0, 0};
-unsigned long term_debug_ospf_event_ospfd = 0;
-unsigned long term_debug_ospf_ism_ospfd = 0;
-unsigned long term_debug_ospf_nsm_ospfd = 0;
-unsigned long term_debug_ospf_lsa_ospfd = 0;
-unsigned long term_debug_ospf_zebra_ospfd = 0;
-unsigned long term_debug_ospf_nssa_ospfd = 0;
+unsigned long term_debug_ospf_packet_ospfd[5] ;
+unsigned long term_debug_ospf_event_ospfd ;
+unsigned long term_debug_ospf_ism_ospfd ;
+unsigned long term_debug_ospf_nsm_ospfd ;
+unsigned long term_debug_ospf_lsa_ospfd ;
+unsigned long term_debug_ospf_zebra_ospfd ;
+unsigned long term_debug_ospf_nssa_ospfd ;
 
 
 #define OSPF_AREA_STRING_MAXLEN  16

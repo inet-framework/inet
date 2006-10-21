@@ -50,16 +50,16 @@
 extern struct zebra_privs_t ripd_privs;
 
 /* RIP Structure. */
-struct_rip *rip_ripd = NULL;
+struct_rip *rip_ripd ;
 
 /* RIP neighbor address table. */
 struct route_table *rip_neighbor_table_ripd;
 
 /* RIP route changes. */
-long rip_global_route_changes_ripd = 0;
+long rip_global_route_changes_ripd ;
 
 /* RIP queries. */
-long rip_global_queries_ripd = 0;
+long rip_global_queries_ripd ;
 
 /* Prototypes. */
 void rip_event (enum rip_event, int);

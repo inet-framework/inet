@@ -1,6 +1,7 @@
 aclocal.m4
 AUTHORS
-bgpd
+bgpd/Makefile.am
+bgpd/Makefile.in
 ChangeLog
 config.guess
 config.h.in

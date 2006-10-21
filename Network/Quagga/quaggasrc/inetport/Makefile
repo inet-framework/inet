@@ -1,7 +1,4 @@
-VERSION = 0.98.5
-QUAGGA_VERSION = quagga-$(VERSION)
-INETPORT_VERSION = inetport-$(VERSION)
-
+QUAGGA_VERSION = `cat QUAGGA_VERSION`
 
 all: extract prepatch1 prepatch2 doxy makepatch patch
 
@@ -9,24 +6,24 @@ extract:
 	tar xvzf ../$(QUAGGA_VERSION).tar.gz -C ..
 	( \
 		cd ../$(QUAGGA_VERSION); \
-		cat ../$(INETPORT_VERSION)/remove.lst | xargs rm -R; \
-		cat ../$(INETPORT_VERSION)/staticmake.diff | patch -p1; \
+		cat ../inetport/remove.lst | xargs rm -R; \
+		cat ../inetport/staticmake.diff | patch -p1; \
 	)
 	
 prepatch1:
 	( \
 		cd ../$(QUAGGA_VERSION); \
-		for i in ../$(INETPORT_VERSION)/diffs/*.diff ; do 	patch -p0 < $$i ; done ; \
+		for i in ../inetport/diffs/*.diff ; do 	patch -p0 < $$i ; done ; \
 	)
 
 prepatch2:
 	( \
 		cd ../$(QUAGGA_VERSION); \
-		../$(INETPORT_VERSION)/dopatch.pl . -predoxy ; \
+		../inetport/dopatch.pl . -predoxy ; \
 	)
 
 doxy:
-	( cd ../$(QUAGGA_VERSION); doxygen ../$(INETPORT_VERSION)/Doxyfile )
+	( cd ../$(QUAGGA_VERSION); doxygen ../inetport/Doxyfile )
 
 makepatch:
 	xsltproc compact.xsl xml/index.xml
@@ -39,18 +36,20 @@ makepatch:
 patch:
 	( \
 		cd ../$(QUAGGA_VERSION); \
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/00_syscalls.lst ; \
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/02_struct.patch ;\
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/03_globals.patch ; \
+		../inetport/dopatch.pl . < ../inetport/00_syscalls.lst ; \
+		../inetport/dopatch.pl . < ../inetport/02_struct.patch ; \
+		../inetport/dopatch.pl . < ../inetport/02_struct-sigaction.lst  ; \
+		../inetport/dopatch.pl . < ../inetport/03_globals.patch ; \
 		mv globalvars.h.tmp globalvars.h ; \
 		mv globalvars.c.tmp globalvars.c ; \
 		mv globalvars_on.h.tmp globalvars_on.h ; \
 		mv globalvars_off.h.tmp globalvars_off.h ; \
-		cat ../$(INETPORT_VERSION)/02_struct.patch | grep -E "^S;" | ../$(INETPORT_VERSION)/dopatch.pl globalvars.h > /dev/null ; \
-		cat ../$(INETPORT_VERSION)/02_struct.patch | grep -E "^S;" | ../$(INETPORT_VERSION)/dopatch.pl globalvars.c > /dev/null ; \
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/04_params.patch ; \
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/05_locals.lst ; \
-		../$(INETPORT_VERSION)/dopatch.pl . < ../$(INETPORT_VERSION)/06_incl.patch ; \
+		cat ../inetport/02_struct.patch | grep -E "^S;" | ../inetport/dopatch.pl globalvars.h > /dev/null ; \
+		cat ../inetport/02_struct.patch | grep -E "^S;" | ../inetport/dopatch.pl globalvars.c > /dev/null ; \
+		../inetport/dopatch.pl . < ../inetport/04_params.patch ; \
+		../inetport/dopatch.pl . < ../inetport/05_locals.lst ; \
+		../inetport/dopatch.pl . < ../inetport/06_incl.patch ; \
+		cp ../inetport/QUAGGA_VERSION . \
 	)
 
 clean:

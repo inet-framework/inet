@@ -41,7 +41,7 @@ enum event {ZCLIENT_SCHEDULE, ZCLIENT_READ, ZCLIENT_CONNECT};
 static void zclient_event (enum event whatever, struct_zclient *justadoxybugworkaround);
 
 /* This file local debug flag. */
-int zclient_debug_lib = 0;
+int zclient_debug_lib ;
 
 /* Allocate zclient structure. */
 struct_zclient *

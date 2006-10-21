@@ -439,6 +439,7 @@ extern "C" {
 int snprintf (char *s, size_t maxlen, const char *format, ...);
 int vsnprintf(char *s, size_t maxlen, const char *format, va_list arg);
 int strncasecmp(const char *s1, const char *s2, size_t n);
+int strcasecmp(const char *s1, const char *s2);
 
 #ifdef __cplusplus
 };

@@ -40,12 +40,12 @@
 extern struct zebra_t zebrad_zebra;
 
 /* Each route type's string and default distance value. */
-struct FOO6 
+struct FOO7 
 {  
   int key;
   int distance;
 };
-static struct FOO6  route_info[] =
+static struct FOO7  route_info[] =
 {
   {ZEBRA_ROUTE_SYSTEM,    0},
   {ZEBRA_ROUTE_KERNEL,    0},

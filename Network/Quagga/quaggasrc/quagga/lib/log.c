@@ -37,7 +37,7 @@
 #endif
 #endif
 
-struct zlog *zlog_default_lib = NULL;
+struct zlog *zlog_default_lib ;
 
 const char *zlog_proto_names[] = 
 {
@@ -86,8 +86,7 @@ time_print (FILE *fp)
 
   ret = strftime (buf, TIME_BUF, "%Y/%m/%d %H:%M:%S", tm);
   if (ret == 0) {
-    //A zlog_warn ("strftime error");
-    strcpy(buf,"strftime error");
+    zlog_warn ("strftime error");
   }
 
   fprintf (fp, "%s ", buf);
@@ -204,7 +203,7 @@ hex_append(char *s, int len, u_long x)
 }
 #endif
 
-static int syslog_fd_lib = -1;
+static int syslog_fd_lib ;
 
 /* Needs to be enhanced to support Solaris. */
 static int
