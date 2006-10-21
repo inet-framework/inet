@@ -3,7 +3,7 @@
 
 QUAGGA=../Network/Quagga/quaggasrc/quagga
 
-LIBS += $(QUAGGA)/ospfd/ospfd.a $(QUAGGA)/ripd/ripd.a $(QUAGGA)/zebra/zebra.a $(QUAGGA)/lib/libzebra.a $(QUAGGA)/globalvars.o
+LIBS += $(QUAGGA)/ospfd/ospfd.a $(QUAGGA)/ripd/ripd.a $(QUAGGA)/zebra/zebra.a $(QUAGGA)/lib/libzebra.a $(QUAGGA)/globalvars.o $(QUAGGA)/bgpd/bgpd.a
 
 #
 #The following conflicts with Windows (in makemakefiles' contents):
