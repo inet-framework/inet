@@ -99,14 +99,16 @@ static void initialize_services()
 	add_service("ripd", 2602, "tcp");
 	add_service("ospfd", 2604, "tcp");
 	add_service("router", 520, "udp");	
-	add_service("ospfapi", 2607, "tcp");    
+	add_service("ospfapi", 2607, "tcp");
+	add_service("bgp", 179, "udp");
+	add_service("bgp", 179, "tcp");    
 };
 
 struct servent *oppsim_getservbyname(const char *name, const char *proto)
 {
     initialize_services();
 	
-    for(int i = 0; (*services).size(); i++)
+    for(int i = 0; i < (*services).size(); i++)
     {
         if(strcmp(name, (*services)[i].s_name))
             continue;
@@ -116,8 +118,6 @@ struct servent *oppsim_getservbyname(const char *name, const char *proto)
 
         return &(*services)[i];
     }
-
-    ASSERT(false);
 
     return NULL;
 }
