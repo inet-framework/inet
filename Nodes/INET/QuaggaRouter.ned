@@ -25,7 +25,7 @@ import
     "EthernetInterface",
     "NetworkLayer",
     "UDP",
-    "Daemon";
+    "Zebra";
 
 
 //
@@ -35,7 +35,7 @@ module QuaggaRouter
     parameters:
         namid: numeric,
         routingFile: string,
-        routingDaemon: string; // "ripd", "ospfd", etc.
+        routingDaemon: string; // "Ripd", "Ospfd", etc.
     gates:
         in: in[];
         out: out[];
@@ -69,13 +69,11 @@ module QuaggaRouter
             display: "p=200,250;i=block/wheelbarrow";
         udp: UDP;
             display: "p=300,250;i=block/wheelbarrow";
-        zebra: Daemon;
+        zebra: Zebra;
             parameters:
-                server = "zebra";
             display: "p=150, 150;i=block/cogwheel";
-        ospfd: Daemon;
+        router: routingDaemon like Zebra;
             parameters:
-                server = routingDaemon;
             display: "p=250, 150;i=block/cogwheel";
     connections nocheck:
         // connections to network outside
@@ -95,14 +93,14 @@ module QuaggaRouter
         zebra.tcpIn <-- tcp.to_appl++;
         zebra.tcpOut --> tcp.from_appl++;
 
-        ospfd.tcpIn <-- tcp.to_appl++;
-        ospfd.tcpOut --> tcp.from_appl++;
+        router.tcpIn <-- tcp.to_appl++;
+        router.tcpOut --> tcp.from_appl++;
 
-        ospfd.udpIn <-- udp.to_app++;
-        ospfd.udpOut --> udp.from_app++;
+        router.udpIn <-- udp.to_app++;
+        router.udpOut --> udp.from_app++;
 
-        ospfd.ipOut --> networkLayer.OSPFIn;
-        ospfd.ipIn <-- networkLayer.OSPFOut;
+        router.ipOut --> networkLayer.OSPFIn;
+        router.ipIn <-- networkLayer.OSPFOut;
 
         for i=0..sizeof(ethOut)-1 do
             ethIn[i] --> eth[i].physIn;
