@@ -40,7 +40,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface, public
         struct GlobalVars *varp;
         
 	protected:
-		void init(bool vars);        
+		void init();        
 
     public:
     

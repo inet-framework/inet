@@ -27,7 +27,7 @@
 
 #include "oppsim_kernel.h"
 
-void Daemon::init(bool vars)
+void Daemon::init()
 {
     EV << "Quagga daemon starting" << endl;
 
@@ -61,16 +61,13 @@ void Daemon::init(bool vars)
 	// cached pointer used by DAEMON macro
 	current_module = this;
 	
-    if(vars)
-    {
-	    // global variable structure pointer
-	    varp = GlobalVars_createActiveSet();
-	    ASSERT(varp);
-	    __activeVars = varp;
+    // global variable structure pointer
+    varp = GlobalVars_createActiveSet();
+    ASSERT(varp);
+    __activeVars = varp;
 
-    	// initialize global variables
-    	GlobalVars_initializeActiveSet_lib();
-    }
+   	// initialize global variables
+   	GlobalVars_initializeActiveSet_lib();
 }
 
 TCPSocket* Daemon::getIfTcpSocket(int socket)
@@ -366,7 +363,7 @@ int Daemon::connectTcpSocket(int socket, IPAddress destAddr, int destPort)
     {
     	EV << "connection in progress" << endl;
     	
-    	errno = EINPROGRESS;
+    	*GlobalVars_errno() = EINPROGRESS;
 	    return -1;
     }
 }    
@@ -383,7 +380,7 @@ int Daemon::acceptTcpSocket(int socket)
     
     if(fd[socket].incomingQueue.empty())
     {
-    	errno = EAGAIN;
+    	*GlobalVars_errno() = EAGAIN;
         return -1;
     }
             
@@ -463,7 +460,10 @@ void Daemon::handleReceivedMessage(cMessage *msg)
             enqueueConnection(socket, csocket);
         }
         else
-        	ASSERT(false);
+        {
+        	EV << "throwing message away (socket doesn't exist)" << endl; 
+        	delete msg;
+        }
     }
     else if(ipControlInfo)
     {
@@ -535,6 +535,7 @@ void Daemon::closeSocket(int socket)
         case FD_TCP:
             ASSERT(fd[socket].tcp);
             fd[socket].tcp->close();
+            socketMap.removeSocket(fd[socket].tcp);
             delete fd[socket].tcp;
             fd[socket].tcp = NULL;
             break;
@@ -696,8 +697,11 @@ void Daemon::socketPeerClosed(int sockId, void *yourPtr)
 {
 	int socket = (long)yourPtr;	
 	
-	ASSERT(FD_EXIST(socket) && fd[socket].type == FD_UDP);
+	ASSERT(FD_EXIST(socket));
 	
-	fd[socket].error = -1; // XXX FIXME
+	fd[socket].error = -1; // XXX FIXME (???)
 	
+	if(fd[socket].type == FD_TCP) {
+		socketMap.removeSocket(fd[socket].tcp);
+	}
 }

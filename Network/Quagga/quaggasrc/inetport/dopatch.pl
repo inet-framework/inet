@@ -596,8 +596,8 @@ sub flushvars()
   do_output("\treturn ptr;\n", $outs{'G_c'});
   do_output("}\n\n", $outs{'G_c'});
 
-  do_output("int ${glob_struct_name}_errno()\n{\n", $outs{'G_c'});
-  do_output("\treturn $glob_variable_name->errno__X;\n", $outs{'G_c'});
+  do_output("int* ${glob_struct_name}_errno()\n{\n", $outs{'G_c'});
+  do_output("\treturn &$glob_variable_name->errno__X;\n", $outs{'G_c'});
   do_output("}\n\n", $outs{'G_c'});
 
   foreach my $dir (keys %vars_init)
@@ -685,7 +685,7 @@ sub flushvars()
   do_output("#endif\n\n", $outs{'G_h'});
 
   do_output("extern struct $glob_struct_name * ${glob_struct_name}_createActiveSet();\n\n", $outs{'G_h'});
-  do_output("extern int ${glob_struct_name}_errno();\n\n", $outs{'G_h'});
+  do_output("extern int* ${glob_struct_name}_errno();\n\n", $outs{'G_h'});
 
   foreach my $dir (keys %vars_init)
   {

@@ -7,9 +7,9 @@ struct GlobalVars * GlobalVars_createActiveSet()
 	return ptr;
 }
 
-int GlobalVars_errno()
+int* GlobalVars_errno()
 {
-	return __activeVars->errno__X;
+	return &__activeVars->errno__X;
 }
 
 extern struct cmd_element no_rip_redistribute_type_cmd_ripd;

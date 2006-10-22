@@ -12,7 +12,7 @@ Define_Module(Ripd);
 
 void Ripd::activity()
 {
-	Daemon::init(true);
+	Daemon::init();
 	
 	// randomize start
     wait(uniform(0.001, 0.002));

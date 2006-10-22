@@ -5,7 +5,7 @@
 
 void UnitTest::activity()
 {
-	Daemon::init(false);
+	Daemon::init();
 	config = par("config").xmlValue();
 	outp = par("output").xmlValue();
 	execute();

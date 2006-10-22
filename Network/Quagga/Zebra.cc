@@ -12,7 +12,7 @@ Define_Module(Zebra);
 
 void Zebra::activity()
 {
-	Daemon::init(true);
+	Daemon::init();
 	
 	// randomize start
     wait(uniform(0, 0.001));

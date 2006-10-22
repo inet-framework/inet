@@ -12,7 +12,7 @@ Define_Module(Bgpd);
 
 void Bgpd::activity()
 {
-	Daemon::init(true);
+	Daemon::init();
 	
 	// randomize start
     wait(uniform(0.001, 0.002));

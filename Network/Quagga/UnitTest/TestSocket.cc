@@ -35,7 +35,7 @@ int doConnect(int socket, const sockaddr *addr, int len, bool blocking)
 {
 	int ret = oppsim_connect(socket, addr, len);
 	
-	if(ret < 0 && !blocking && errno == EINPROGRESS) 
+	if(ret < 0 && !blocking && *GlobalVars_errno() == EINPROGRESS) 
 	{
 		ret = waitForEvent(socket, write_event);
 		if(ret < 0) return ret;
@@ -51,7 +51,7 @@ int doAccept(int socket, sockaddr *addr, socklen_t *len, bool blocking)
 	while(true)
 	{
 		int ret = oppsim_accept(socket, addr, len);
-		if(ret < 0 && !blocking && (errno == EAGAIN || errno == EWOULDBLOCK))
+		if(ret < 0 && !blocking && (*GlobalVars_errno() == EAGAIN || *GlobalVars_errno() == EWOULDBLOCK))
 		{
 			if(waitForEvent(socket, read_event) < 0 || checkSocket(socket)) return -1;
 		}
@@ -100,7 +100,7 @@ ssize_t doRead(int socket, void *buf, size_t nbyte, bool blocking, read_kind met
 		}
 		
 		
-		if(ret < 0 && !blocking && (errno == EAGAIN || errno == EWOULDBLOCK))
+		if(ret < 0 && !blocking && (*GlobalVars_errno() == EAGAIN || *GlobalVars_errno() == EWOULDBLOCK))
 		{
 			if(waitForEvent(socket, read_event) < 0 || checkSocket(socket)) return -1;
 		}

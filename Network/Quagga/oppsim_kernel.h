@@ -18,7 +18,7 @@ extern void GlobalVars_initializeActiveSet_lib();
 extern void GlobalVars_initializeActiveSet_bgpd();
 
 extern struct GlobalVars * GlobalVars_createActiveSet();
-extern int GlobalVars_errno();
+extern int* GlobalVars_errno();
 
 //
 

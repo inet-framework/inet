@@ -12,7 +12,7 @@ Define_Module(Ospfd);
 
 void Ospfd::activity()
 {
-	Daemon::init(true);
+	Daemon::init();
 
     // randomize start
     wait(uniform(0.002, 0.003));

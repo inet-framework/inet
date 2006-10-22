@@ -490,11 +490,9 @@ int oppsim_fcntl(int fildes, int cmd, ...)
 
 int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_len)
 {
-    Daemon *dm = current_module; //DAEMON
-
     EV << "getsockname: socket=" << socket << " address=" << address << " address_len=" << address_len << endl;
 
-    Netlink *nl = dm->getIfNetlinkSocket(socket);
+    Netlink *nl = current_module->getIfNetlinkSocket(socket);
     if(nl)
     {
         ASSERT(*address_len == sizeof(sockaddr_nl));
@@ -507,6 +505,20 @@ int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_
         nladdr->nl_groups = nl->local.nl_groups;
 
         return 0;
+    }
+    
+    TCPSocket *tcp = current_module->getIfTcpSocket(socket);
+    if(tcp)
+    {
+    	ASSERT(address && address_len);
+    	ASSERT(*address_len >= sizeof(sockaddr_in));
+    	
+        ((sockaddr_in*)address)->sin_family = AF_INET;
+        ((sockaddr_in*)address)->sin_port = htons(tcp->localPort());
+        ((sockaddr_in*)address)->sin_addr.s_addr = htonl(tcp->localAddress().get4().getInt());
+        *address_len = sizeof(struct sockaddr_in);
+        
+        return 0;    	
     }
 
     ASSERT(false);
@@ -605,7 +617,7 @@ ssize_t receive(int socket, void *buf, size_t nbyte, bool dgram, struct sockaddr
 
 	if(bread == 0)
 	{
-		errno = EAGAIN;
+		*GlobalVars_errno() = EAGAIN;
 		return -1;
 	}
 
@@ -1194,7 +1206,7 @@ int oppsim_close(int fildes)
 
 void oppsim_perror(const char *s)
 {
-    EV << "perror: " << s << ": " << strerror(GlobalVars_errno()) << endl;
+    EV << "perror: " << s << ": " << strerror(*GlobalVars_errno()) << endl;
 
     ASSERT(false);
 }
@@ -1625,4 +1637,3 @@ const char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
         opp_error("oppsim_inet_ntop: address family not supported");
     }
 }
-
