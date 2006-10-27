@@ -61,7 +61,7 @@ typedef unsigned long long  uint64_t;
 #elif defined(__APPLE__)
 #include <machine/endian.h>
 #else /* fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
-#define __BSD_VISIBLE
+//XXX this causes problems in FreeBSD, and probably not needed anyway: #define __BSD_VISIBLE
 #include <machine/endian.h>
 #endif
 
