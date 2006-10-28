@@ -96,7 +96,7 @@ void NAMTraceWriter::initialize(int stage)
     }
 }
 
-void NAMTraceWriter::finish()
+NAMTraceWriter::~NAMTraceWriter()
 {
     if (nt && nt->enabled())
     {

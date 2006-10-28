@@ -48,7 +48,7 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
   protected:
     virtual int numInitStages() const {return 3;}
     virtual void initialize(int stage);
-    virtual void finish();
+    virtual ~NAMTraceWriter();
 
     /**
      * Redefined INotifiable method. Called by NotificationBoard on changes.
