@@ -1,3 +1,5 @@
+include ../../../../../inetconfig
+
 SOURCES = \
 	ripd.c rip_zebra.c rip_interface.c rip_debug.c rip_snmp.c \
 	rip_routemap.c rip_peer.c rip_offset.c rip_main.c
@@ -12,8 +14,7 @@ OBJECTS = \
 INCLUDES = -I./ -I../ -I../lib/ -I../../../
 
 DEFS = -DHAVE_CONFIG_H -DRIPD
-CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
-CC = gcc
+CFLAGS += $(INCLUDES) $(DEFS) -fPIC -Wimplicit -fexceptions
 
 all: ripd.a
 

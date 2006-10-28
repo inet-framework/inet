@@ -1,3 +1,5 @@
+include ../../../../../inetconfig
+
 SOURCES = \
 	bgpd.c bgp_fsm.c bgp_aspath.c bgp_community.c bgp_attr.c \
 	bgp_debug.c bgp_route.c bgp_zebra.c bgp_open.c bgp_routemap.c \
@@ -22,8 +24,7 @@ OBJECTS = \
 INCLUDES = -I./ -I../ -I../lib/ -I../../../
 
 DEFS = -DHAVE_CONFIG_H -DBGPD
-CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
-CC = gcc
+CFLAGS += $(INCLUDES) $(DEFS) -fPIC -Wimplicit -fexceptions
 
 all: bgpd.a
 

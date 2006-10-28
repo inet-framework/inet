@@ -1,3 +1,4 @@
+include ../../../../../inetconfig
 
 SOURCES = \
 	zserv.c main.c interface.c connected.c zebra_rib.c \
@@ -26,8 +27,7 @@ OBJECTS = \
 INCLUDES = -I./ -I../ -I../lib/ -I../../../
 
 DEFS = -DHAVE_CONFIG_H -DZEBRA
-CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
-CC = gcc
+CFLAGS += $(INCLUDES) $(DEFS) -fPIC -Wimplicit -fexceptions
 
 all: zebra.a
 

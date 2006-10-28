@@ -1,3 +1,5 @@
+include ../../../../../inetconfig
+
 SOURCES = \
         network.c pid_output.c getopt.c getopt1.c \
         checksum.c vector.c linklist.c vty.c command.c \
@@ -24,8 +26,7 @@ OBJECTS = \
 INCLUDES = -I./ -I../ -I../../../
 
 DEFS = -DHAVE_CONFIG_H
-CFLAGS = $(INCLUDES) $(DEFS) -fPIC -ggdb -Wimplicit -fexceptions
-CC = gcc
+CFLAGS += $(INCLUDES) $(DEFS) -fPIC -Wimplicit -fexceptions
 
 all: libzebra.a
 
