@@ -74,12 +74,12 @@ void TCPScriptableTester::parseScript(const char *script)
         else if (*s=='b' || *s=='B')
             cmd.fromA = false;
         else
-            throw new cException("syntax error in script: wrong segment spec");
+            throw new cRuntimeError("syntax error in script: wrong segment spec");
         s++;
 
         // seg number
         if (!isdigit(*s))
-            throw new cException("syntax error in script: wrong segment spec");
+            throw new cRuntimeError("syntax error in script: wrong segment spec");
         cmd.segno = atoi(s);
         while (isdigit(*s)) s++;
 
@@ -92,7 +92,7 @@ void TCPScriptableTester::parseScript(const char *script)
         } else if (!strncmp(s,"copy",4)) {
             cmd.command = CMD_COPY; s+=4;
         } else
-            throw new cException("syntax error in script: wrong command");
+            throw new cRuntimeError("syntax error in script: wrong command");
 
         // args
         if (cmd.command==CMD_COPY)
@@ -106,7 +106,7 @@ void TCPScriptableTester::parseScript(const char *script)
                 while (isspace(*s)) s++;
                 if (!*s || *s==';') break;
                 if (*s!=',')
-                    throw new cException("syntax error in script: error in arg list");
+                    throw new cRuntimeError("syntax error in script: error in arg list");
                 s++;
             }
         }
@@ -118,7 +118,7 @@ void TCPScriptableTester::parseScript(const char *script)
         while (isspace(*s)) s++;
         if (!*s) break;
         if (*s!=';')
-            throw new cException("syntax error in script: command separator ';' missing");
+            throw new cRuntimeError("syntax error in script: command separator ';' missing");
         s++;
         while (isspace(*s)) s++;
     }
@@ -195,7 +195,7 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
     }
     else
     {
-        throw new cException("wrong command code");
+        throw new cRuntimeError("wrong command code");
     }
 }
 

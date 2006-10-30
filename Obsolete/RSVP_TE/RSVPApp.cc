@@ -896,9 +896,9 @@ void RSVPAppl::updateTED()
 bool RSVPAppl::initFromFile(const cXMLElement *root)
 {
     if (!root)
-        throw new cException("No traffic configuration");
+        throw new cRuntimeError("No traffic configuration");
     if (strcmp(root->getTagName(),"traffic"))
-        throw new cException("Traffic configuration: wrong document type, root node is not <traffic>");
+        throw new cRuntimeError("Traffic configuration: wrong document type, root node is not <traffic>");
 
     cXMLElementList list = root->getChildrenByTagName("conn");
     for (cXMLElementList::iterator i=list.begin(); i!=list.end(); i++)

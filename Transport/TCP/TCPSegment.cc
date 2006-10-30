@@ -34,7 +34,7 @@ TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 
 void TCPSegment::setPayloadArraySize(unsigned int size)
 {
-    throw new cException(this, "setPayloadArraySize() not supported, use addPayloadMessage()");
+    throw new cRuntimeError(this, "setPayloadArraySize() not supported, use addPayloadMessage()");
 }
 
 unsigned int TCPSegment::payloadArraySize() const
@@ -52,7 +52,7 @@ TCPPayloadMessage& TCPSegment::payload(unsigned int k)
 
 void TCPSegment::setPayload(unsigned int k, const TCPPayloadMessage& payload_var)
 {
-    throw new cException(this, "setPayload() not supported, use addPayloadMessage()");
+    throw new cRuntimeError(this, "setPayload() not supported, use addPayloadMessage()");
 }
 
 void TCPSegment::addPayloadMessage(cMessage *msg, uint32 endSequenceNo)

@@ -173,7 +173,7 @@ void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
     else if (timer==keepAliveTimer)
         processKeepAliveTimer(event);
     else
-        throw new cException(timer, "unrecognized timer");
+        throw new cRuntimeError(timer, "unrecognized timer");
 }
 
 void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)

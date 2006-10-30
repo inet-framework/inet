@@ -65,7 +65,7 @@ void DumbTCP::connectionClosed()
 void DumbTCP::processTimer(cMessage *timer, TCPEventCode& event)
 {
     if (timer!=rexmitTimer)
-        throw new cException(timer, "unrecognized timer");
+        throw new cRuntimeError(timer, "unrecognized timer");
 
     conn->retransmitData();
     conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);

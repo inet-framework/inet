@@ -30,16 +30,16 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
         Entry entry;
 
         if (!isdigit(*s))
-            throw new cException("syntax error: protocol number expected");
+            throw new cRuntimeError("syntax error: protocol number expected");
         entry.protocolNumber = atoi(s);
         while (isdigit(*s)) s++;
 
         if (*s++!=':')
-            throw new cException("syntax error: colon expected");
+            throw new cRuntimeError("syntax error: colon expected");
 
         while (isspace(*s)) s++;
         if (!isdigit(*s))
-            throw new cException("syntax error in script: output gate index expected");
+            throw new cRuntimeError("syntax error in script: output gate index expected");
         entry.outGateIndex = atoi(s);
         while (isdigit(*s)) s++;
 
@@ -50,7 +50,7 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
         while (isspace(*s)) s++;
         if (!*s) break;
         if (*s++!=',')
-            throw new cException("syntax error: comma expected");
+            throw new cRuntimeError("syntax error: comma expected");
         while (isspace(*s)) s++;
     }
 

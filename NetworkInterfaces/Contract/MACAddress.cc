@@ -89,22 +89,22 @@ unsigned int MACAddress::getAddressArraySize() const
 
 unsigned char MACAddress::getAddress(unsigned int k) const
 {
-    if (k>=6) throw new cException("Array of size 6 indexed with %d", k);
+    if (k>=6) throw new cRuntimeError("Array of size 6 indexed with %d", k);
     return address[k];
 }
 
 void MACAddress::setAddress(unsigned int k, unsigned char addrbyte)
 {
-    if (k>=6) throw new cException("Array of size 6 indexed with %d", k);
+    if (k>=6) throw new cRuntimeError("Array of size 6 indexed with %d", k);
     address[k] = addrbyte;
 }
 
 void MACAddress::setAddress(const char *hexstr)
 {
     if (!hexstr)
-        throw new cException("MACAddress::setAddress(const char *): got null pointer");
+        throw new cRuntimeError("MACAddress::setAddress(const char *): got null pointer");
     if (hextobin(hexstr, address, MAC_ADDRESS_BYTES)!=MAC_ADDRESS_BYTES)
-        throw new cException("MACAddress::setAddress(const char *): hex string \"%s\" too short, should be 12 hex digits", hexstr);
+        throw new cRuntimeError("MACAddress::setAddress(const char *): hex string \"%s\" too short, should be 12 hex digits", hexstr);
 }
 
 void MACAddress::setAddressBytes(unsigned char *addrbytes)
