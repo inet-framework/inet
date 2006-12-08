@@ -46,8 +46,12 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::ScanningInfo&
 {
     os << "activeScan=" << scanning.activeScan
        << " probeDelay=" << scanning.probeDelay
-       << " curChan=" << scanning.channelList[scanning.currentChannelIndex]
-       << " minChanTime=" << scanning.minChannelTime
+       << " curChan=";
+    if (scanning.channelList.empty())
+        os << "<none>";
+    else
+        os << scanning.channelList[scanning.currentChannelIndex];
+    os << " minChanTime=" << scanning.minChannelTime
        << " maxChanTime=" << scanning.maxChannelTime;
     os << " chanList={";
     for (int i=0; i<scanning.channelList.size(); i++)

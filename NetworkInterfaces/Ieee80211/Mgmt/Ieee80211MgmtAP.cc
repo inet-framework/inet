@@ -149,7 +149,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     if (!frame->getToDS())
     {
         // looks like this is not for us - discard
-        ev << "Frame is not for us (toDS=false) -- discarding\n";
+        EV << "Frame is not for us (toDS=false) -- discarding\n";
         delete frame;
         return;
     }
@@ -157,9 +157,9 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     // handle broadcast frames
     if (frame->getAddress3().isBroadcast())
     {
-        ev << "Handling broadcast frame\n";
+        EV << "Handling broadcast frame\n";
         if (hasRelayUnit)
-            send(convertToEtherFrame(frame->dup()), "uppergateOut");
+            send(convertToEtherFrame((Ieee80211DataFrame *)frame->dup()), "uppergateOut");
         distributeReceivedDataFrame(frame);
         return;
     }
@@ -172,7 +172,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         if (hasRelayUnit)
             send(convertToEtherFrame(frame), "uppergateOut");
         else {
-            ev << "Frame's destination address is not in our STA list -- dropping frame\n";
+            EV << "Frame's destination address is not in our STA list -- dropping frame\n";
             delete frame;
         }
     }
@@ -182,7 +182,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         if (it->second.status == ASSOCIATED)
             distributeReceivedDataFrame(frame); // send it out to the destination STA
         else {
-            ev << "Frame's destination STA is not in associated state -- dropping frame\n";
+            EV << "Frame's destination STA is not in associated state -- dropping frame\n";
             delete frame;
         }
     }

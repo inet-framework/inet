@@ -60,6 +60,11 @@ void UDPVideoStreamCli::requestStream()
     int localPort = par("localPort");
     const char *address = par("serverAddress");
     IPvXAddress svrAddr = IPAddressResolver().resolve(address);
+    if (svrAddr.isUnspecified())
+    {
+        EV << "Server address is unspecified, skip sending video stream request\n";
+        return;
+    }
 
     EV << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
