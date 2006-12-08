@@ -149,7 +149,18 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     if (!frame->getToDS())
     {
         // looks like this is not for us - discard
+        ev << "Frame is not for us (toDS=false) -- discarding\n";
         delete frame;
+        return;
+    }
+
+    // handle broadcast frames
+    if (frame->getAddress3().isBroadcast())
+    {
+        ev << "Handling broadcast frame\n";
+        if (hasRelayUnit)
+            send(convertToEtherFrame(frame), "uppergateOut");
+        distributeReceivedDataFrame(frame);
         return;
     }
 
@@ -160,16 +171,20 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
         if (hasRelayUnit)
             send(convertToEtherFrame(frame), "uppergateOut");
-        else
+        else {
+            ev << "Frame's destination address is not in our STA list -- dropping frame\n";
             delete frame;
+        }
     }
     else
     {
         // dest address is our STA, but is it already associated?
         if (it->second.status == ASSOCIATED)
             distributeReceivedDataFrame(frame); // send it out to the destination STA
-        else
+        else {
+            ev << "Frame's destination STA is not in associated state -- dropping frame\n";
             delete frame;
+        }
     }
 }
 
