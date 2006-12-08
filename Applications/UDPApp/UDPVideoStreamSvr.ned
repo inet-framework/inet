@@ -36,7 +36,7 @@
 simple UDPVideoStreamSvr
     parameters:
         serverPort: numeric const, // port to listen on
-        waitInterval: numeric,     // can be random, to accomodate jitter
+        waitInterval: numeric,     // interval between sending viedo stream packets
         packetLen: numeric,        // bytes; can be random
         videoSize: numeric;        // bytes; can be random
     gates:
