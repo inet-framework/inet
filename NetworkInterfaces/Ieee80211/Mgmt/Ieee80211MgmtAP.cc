@@ -159,7 +159,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     {
         ev << "Handling broadcast frame\n";
         if (hasRelayUnit)
-            send(convertToEtherFrame(frame), "uppergateOut");
+            send(convertToEtherFrame(frame->dup()), "uppergateOut");
         distributeReceivedDataFrame(frame);
         return;
     }
