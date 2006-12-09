@@ -173,7 +173,7 @@ void IPTrafGen::handleMessage(cMessage *msg)
         // send, then reschedule next sending
         sendPacket();
 
-        if (numSent<numPackets)
+        if (!numPackets || numSent<numPackets)
             scheduleAt(simTime()+(double)par("packetInterval"), msg);
     }
     else
