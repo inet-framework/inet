@@ -98,10 +98,12 @@ void NAMTraceWriter::initialize(int stage)
 
 NAMTraceWriter::~NAMTraceWriter()
 {
+/*FIXME this will crash if the "nt" module gets cleaned up sooner than this one
     if (nt && nt->enabled())
     {
         recordNodeEvent("DOWN", "circle");
     }
+*/
 }
 
 
