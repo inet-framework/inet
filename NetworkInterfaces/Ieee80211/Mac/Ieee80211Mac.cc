@@ -113,6 +113,7 @@ void Ieee80211Mac::initialize(int stage)
         sequenceNumber = 0;
         radioState = RadioState::IDLE;
         retryCounter = 0;
+        backoffPeriod = -1;
         backoff = false;
         lastReceiveFailed = false;
         nav = false;
@@ -347,6 +348,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         scheduleReservePeriod(frame);
     }
 
+    // TODO: fix bug according to the message: [omnetpp] A possible bug in the Ieee80211's FSM.
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -355,6 +357,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMsg(msg),
                                   DEFER,
+                ASSERT(isInvalidBackoffPeriod() || backoffPeriod == 0);
                 invalidateBackoffPeriod();
             );
             FSMA_No_Event_Transition(Immediate-Data-Ready,
