@@ -463,10 +463,10 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Receive-ACK,
                                   isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
                                   IDLE,
-                cancelTimeoutPeriod();
-                finishCurrentTransmission();
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
+                cancelTimeoutPeriod();
+                finishCurrentTransmission();
             );
             FSMA_Event_Transition(Transmit-Data-Failed,
                                   msg == endTimeout && retryCounter == retryLimit,
