@@ -1,0 +1,3 @@
+2007-01-12  Andras Varga
+	* Ieee80211MgmtFrames.msg: fix: frame size is 28+body not 34+body 
+	[reported by Francesco Sgolacchia]
