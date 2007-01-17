@@ -44,7 +44,7 @@ const int RETRY_LIMIT = 7;
 const int CW_MIN = 31;
 
 /** Maximum size of contention window */
-const int CW_MAX = 255;
+const int CW_MAX = 1023;
 
 const int PHY_HEADER_LENGTH=192;
 const int HEADER_WITHOUT_PREAMBLE=48;

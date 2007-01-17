@@ -1,0 +1,3 @@
+2007-01-17  Levente Meszaros
+	* Ieee80211Consts.h: fix CW_MAX and set it to 1023 according to the standard 
+	[reported by Wang Wei]
