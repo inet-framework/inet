@@ -68,9 +68,11 @@ void Ieee80211Mac::initialize(int stage)
         basicBitrate = 2e6; //FIXME make it parameter
         rtsThreshold = par("rtsThresholdBytes");
 
-        retryLimit = par("retryLimit");
-        if (retryLimit == -1) retryLimit = 7;
-        ASSERT(retryLimit >= 0);
+        // the variable is renamed due to a confusion in the standard
+        // the name retry limit would be misleading, see the header file comment
+        transmissionLimit = par("retryLimit");
+        if (transmissionLimit == -1) transmissionLimit = 7;
+        ASSERT(transmissionLimit > 0);
 
         cwMinData = par("cwMinData");
         if (cwMinData == -1) cwMinData = CW_MIN;
@@ -472,7 +474,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 finishCurrentTransmission();
             );
             FSMA_Event_Transition(Transmit-Data-Failed,
-                                  msg == endTimeout && retryCounter == retryLimit,
+                                  msg == endTimeout && retryCounter == transmissionLimit - 1,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -503,7 +505,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 cancelTimeoutPeriod();
             );
             FSMA_Event_Transition(Transmit-RTS-Failed,
-                                  msg == endTimeout && retryCounter == retryLimit,
+                                  msg == endTimeout && retryCounter == transmissionLimit - 1,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -614,7 +616,7 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
         cw = cwMinBroadcast;
     else
     {
-        ASSERT(0 <= r && r <= retryLimit);
+        ASSERT(0 <= r && r < transmissionLimit);
 
         cw = (cwMinData + 1) * (1 << r) - 1;
 
@@ -894,7 +896,7 @@ void Ieee80211Mac::giveUpCurrentTransmission()
 
 void Ieee80211Mac::retryCurrentTransmission()
 {
-    ASSERT(retryCounter < retryLimit);
+    ASSERT(retryCounter < transmissionLimit - 1);
     currentTransmission()->setRetry(true);
     retryCounter++;
     numRetry++;
