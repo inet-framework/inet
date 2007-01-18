@@ -1,6 +1,6 @@
 2007-01-18  Levente Meszaros
 	* Ieee80211Mac.cc Ieee80211Mac.h: rename retryLimit to transmissionLimit and update uses
-          see header file comment
+          The number of total transmissions of a message is now at most equal to transmissionLimit.
 	[reported by Wang Wei] 
 
 2007-01-17  Levente Meszaros
