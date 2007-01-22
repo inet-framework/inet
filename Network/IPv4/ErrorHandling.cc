@@ -53,8 +53,11 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     delete icmpMsg;
 
-    char buf[80];
-    sprintf(buf, "errors: %ld", numReceived);
-    displayString().setTagArg("t",0,buf);
+    if (ev.isGUI())
+    {
+        char buf[80];
+        sprintf(buf, "errors: %ld", numReceived);
+        displayString().setTagArg("t",0,buf);
+    }
 }
 
