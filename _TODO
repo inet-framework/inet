@@ -1,3 +1,11 @@
+- in Ieee80211Mac: if there's a broadcast at t=0, raise error! higher layers must 
+  introduce a random jitter for the first sending, otherwise transmissions
+  will collide (and broadcast has no ACK). There is NO random backoff
+  unless we're immediately after the end of someone else's or or our own transmission
+  (see p.70 in the standard, "For a STA to transmit, it shall sense the medium to 
+  determine if another STA is transmitting. If the medium is not determined to be 
+  busy (see 9.2.1), the transmission may proceed.").
+--------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
    in DistanceBasedRadio: decouple transmission range from interference range 
    (ie use 2 different module parameters)
