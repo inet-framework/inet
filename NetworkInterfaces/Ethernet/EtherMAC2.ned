@@ -38,6 +38,7 @@
 // for that.
 //
 // Supported variations:
+// - 10Mb Ethernet (full duplex mode)
 // - 100Mb Ethernet (full duplex mode)
 // - 1Gb Ethernet (full duplex mode)
 //
