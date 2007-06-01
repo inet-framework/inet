@@ -36,8 +36,7 @@ all: inetbase
 inetbase:
 	$(MAKEMAKE) $(OPTS) -n -r -X Documentation -X Etc -X Examples -X Tests -X Experimental -X Obsolete -X tmp
 
-	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES)
-	: # $(QUAGGA_INCLUDES)
+	cd bin && $(MAKEMAKE) $(OPTS) -w -o INET $(ALL_INET_INCLUDES) $(ALL_IPv6_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_MF_INCLUDES) $(QUAGGA_INCLUDES)
 
 	cd Applications && $(MAKEMAKE) $(OPTS) -n -r
 	cd Network && $(MAKEMAKE) $(OPTS) -n -r
@@ -84,7 +83,7 @@ inetbase:
 	cd Network/TED && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4 -I../RSVP_TE
 	cd Network/Extras && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
 	cd Network/Quagga && $(MAKEMAKE) $(OPTS) -n -r $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES) $(ALL_MF_INCLUDES)
-	cd Network/Quagga/UnitTest && $(MAKEMAKE) $(OPTS) -n -r $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES) $(ALL_MF_INCLUDES)
+	cd Network/Quagga/UnitTest && $(MAKEMAKE) $(OPTS) -n -r $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES) $(ALL_MF_INCLUDES) $(QUAGGA_INCLUDES)
 
 	cd Network/OSPFv2 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I../IPv4 -IRouter -IInterface -IMessageHandler -INeighbor
 	cd Network/OSPFv2/Interface && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../Neighbor -I../Router -I../MessageHandler
