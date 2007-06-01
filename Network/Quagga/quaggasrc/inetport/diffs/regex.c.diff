@@ -1,5 +1,5 @@
---- lib/regex.c.orig	2004-11-24 17:14:49.000000000 +0000
-+++ lib/regex.c	2006-10-21 13:51:44.000000000 +0000
+--- lib/regex.c.orig	2007-06-01 19:39:14.000000000 +0200
++++ lib/regex.c	2007-06-01 19:39:05.000000000 +0200
 @@ -27,6 +27,8 @@
  #undef	_GNU_SOURCE
  #define _GNU_SOURCE
@@ -65,3 +65,16 @@
  #define REG_UNSET_VALUE (&reg_unset_dummy)
  #define REG_UNSET(e) ((e) == REG_UNSET_VALUE)
  
+@@ -5818,11 +5818,7 @@
+    from either regcomp or regexec.   We don't use PREG here.  */
+ 
+ size_t
+-regerror (errcode, preg, errbuf, errbuf_size)
+-    int errcode;
+-    const regex_t *preg;
+-    char *errbuf;
+-    size_t errbuf_size;
++regerror (int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+ {
+   const char *msg;
+   size_t msg_size;
