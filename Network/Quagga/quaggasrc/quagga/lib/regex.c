@@ -27,7 +27,7 @@
 #undef	_GNU_SOURCE
 #define _GNU_SOURCE
 
-#include "globalvars.h"
+#include "globalvars_lib.h"
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -44,10 +44,10 @@
 #if defined STDC_HEADERS && !defined emacs
 #ifdef NATIVE_KERNEL
 #include "usyscalls.h"
-#include "globalvars_off.h"
+#include "globalvars_lib_off.h"
 # include <stddef.h>
 #include "syscalls.h"
-#include "globalvars_on.h"
+#include "globalvars_lib_on.h"
 #endif
 #else
 /* We need this for `regex.h', and perhaps for the Emacs include files.  */
@@ -120,10 +120,10 @@
 # if defined STDC_HEADERS || defined _LIBC
 #ifdef NATIVE_KERNEL
 #include "usyscalls.h"
-#include "globalvars_off.h"
+#include "globalvars_lib_off.h"
 #  include <stdlib.h>
 #include "syscalls.h"
-#include "globalvars_on.h"
+#include "globalvars_lib_on.h"
 #endif
 # else
 char *malloc ();
@@ -147,10 +147,10 @@ char *realloc ();
 #  if defined HAVE_STRING_H || defined STDC_HEADERS || defined _LIBC
 #ifdef NATIVE_KERNEL
 #include "usyscalls.h"
-#include "globalvars_off.h"
+#include "globalvars_lib_off.h"
 #   include <string.h>
 #include "syscalls.h"
-#include "globalvars_on.h"
+#include "globalvars_lib_on.h"
 #endif
 #   ifndef bzero
 #    ifndef _LIBC
@@ -229,10 +229,10 @@ init_syntax_once ()
 /* isalpha etc. are used for the character classes.  */
 #ifdef NATIVE_KERNEL
 #include "usyscalls.h"
-#include "globalvars_off.h"
+#include "globalvars_lib_off.h"
 #include <ctype.h>
 #include "syscalls.h"
-#include "globalvars_on.h"
+#include "globalvars_lib_on.h"
 #endif
 
 /* Jim Meyering writes:

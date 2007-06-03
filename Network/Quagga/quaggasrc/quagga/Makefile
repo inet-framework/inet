@@ -5,7 +5,7 @@ INCLUDES = -I./ -I./lib -I../../
 DEFS = -DHAVE_CONFIG_H
 CFLAGS += $(INCLUDES) $(DEFS) -fPIC -Wimplicit -fexceptions
 
-all: libdir ripddir zebradir ospfdir bgpddir globalvars.o
+all: libdir ripddir zebradir ospfdir bgpddir 
 
 libdir:
 	(cd lib; make)
@@ -28,5 +28,4 @@ clean:
 	(cd zebra; make clean)
 	(cd ospfd; make clean)
 	(cd bgpd; make clean)
-	rm globalvars.o
 

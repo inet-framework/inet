@@ -8,11 +8,11 @@ SOURCES = \
 	rt_netlink.c rtread_netlink.c \
 	ipforward_proc.c \
 	if_proc.c if_netlink.c \
-	ioctl.c
+	ioctl.c globalvars_zebra.c
 
 HEADERS = \
 	connected.h ioctl.h rib.h rt.h zserv.h redistribute.h debug.h rtadv.h \
-	interface.h ipforward.h irdp.h router-id.h
+	interface.h ipforward.h irdp.h router-id.h globalvars_zebra.h
 
 OBJECTS = \
 	zserv.o main.o interface.o connected.o zebra_rib.o \
@@ -22,7 +22,7 @@ OBJECTS = \
 	rt_netlink.o rtread_netlink.o \
 	ipforward_proc.o \
 	if_proc.o if_netlink.o \
-	ioctl.o
+	ioctl.o globalvars_zebra.o
 
 INCLUDES = -I./ -I../ -I../lib/ -I../../../
 

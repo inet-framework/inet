@@ -190,4 +190,51 @@ struct te_link_subtlv_rsc_clsclr
 extern int ospf_mpls_te_init (void);
 extern void ospf_mpls_te_term (void);
 
+/* Following structure are internal use only. */
+struct ospf_mpls_te
+{
+  enum { disabled, enabled } status;
+
+  /* List elements are zebra-interfaces (ifp), not ospf-interfaces (oi). */
+  struct list *iflist__item;
+
+  /* Store Router-TLV in network byte order. */
+  struct te_tlv_router_addr router_addr;
+};
+
+struct mpls_te_link
+{
+  /*
+   * According to MPLS-TE (draft) specification, 24-bit Opaque-ID field
+   * is subdivided into 8-bit "unused" field and 16-bit "instance" field.
+   * In this implementation, each Link-TLV has its own instance.
+   */
+  u_int32_t instance;
+
+  /* Reference pointer to a Zebra-interface. */
+  struct interface_FOO *ifp;
+
+  /* Area info in which this MPLS-TE link belongs to. */
+  struct ospf_area *area;
+
+  /* Flags to manage this link parameters. */
+  u_int32_t flags;
+#define LPFLG_LOOKUP_DONE		0x1
+#define LPFLG_LSA_ENGAGED		0x2
+#define LPFLG_LSA_FORCED_REFRESH	0x4
+
+  /* Store Link-TLV in network byte order. */
+  struct te_tlv_link link_header;
+  struct te_link_subtlv_link_type link_type;
+  struct te_link_subtlv_link_id link_id;
+  struct te_link_subtlv_lclif_ipaddr *lclif_ipaddr;
+  struct te_link_subtlv_rmtif_ipaddr *rmtif_ipaddr;
+  struct te_link_subtlv_te_metric te_metric;
+  struct te_link_subtlv_max_bw max_bw;
+  struct te_link_subtlv_max_rsv_bw max_rsv_bw;
+  struct te_link_subtlv_unrsv_bw unrsv_bw;
+  struct te_link_subtlv_rsc_clsclr rsc_clsclr;
+};
+
+
 #endif /* _ZEBRA_OSPF_MPLS_TE_H */

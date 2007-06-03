@@ -208,7 +208,13 @@ if_get_hwaddr (struct interface_FOO *ifp)
 #endif /* SIOCGIFHWADDR */
 
 #ifdef HAVE_GETIFADDRS
+#ifdef NATIVE_KERNEL
+#include "usyscalls.h"
+#include "globalvars_off.h"
 #include <ifaddrs.h>
+#include "syscalls.h"
+#include "globalvars_on.h"
+#endif
 
 int
 if_getaddrs ()

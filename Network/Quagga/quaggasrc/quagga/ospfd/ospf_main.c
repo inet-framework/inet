@@ -109,7 +109,7 @@ struct thread_master *master_ospfd;
 const char *pid_file_ospfd ;
 
 #ifdef SUPPORT_OSPF_API
-extern int ospf_apiserver_enable;
+extern int ospf_apiserver_enable_ospfd;
 #endif /* SUPPORT_OSPF_API */
 
 /* Help information display. */

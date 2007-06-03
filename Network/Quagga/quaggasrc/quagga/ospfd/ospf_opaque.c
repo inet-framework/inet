@@ -70,7 +70,7 @@
 int ospf_apiserver_init (void);
 void ospf_apiserver_term (void); 
 /* Init apiserver? It's disabled by default. */
-int ospf_apiserver_enable;
+int ospf_apiserver_enable_ospfd;
 #endif /* SUPPORT_OSPF_API */
 
 static void ospf_opaque_register_vty (void);
@@ -257,10 +257,10 @@ struct ospf_opaque_functab
 };
 
 /* Handle LSA-9/10/11 altogether. */
-static struct list *ospf_opaque_wildcard_funclist;
-static struct list *ospf_opaque_type9_funclist;
-static struct list *ospf_opaque_type10_funclist;
-static struct list *ospf_opaque_type11_funclist;
+static struct list *ospf_opaque_wildcard_funclist_ospfd;
+static struct list *ospf_opaque_type9_funclist_ospfd;
+static struct list *ospf_opaque_type10_funclist_ospfd;
+static struct list *ospf_opaque_type11_funclist_ospfd;
 
 static void
 ospf_opaque_del_functab (void *val)
@@ -756,6 +756,7 @@ out:
  * Followings are (vty) configuration functions for Opaque-LSAs handling.
  *------------------------------------------------------------------------*/
 
+#undef	capability_opaque_cmd
 DEFUN (capability_opaque,
        capability_opaque_cmd,
        "capability opaque",
@@ -775,13 +776,17 @@ DEFUN (capability_opaque,
     }
   return CMD_SUCCESS;
 }
+#define	capability_opaque_cmd	capability_opaque_cmd__VAR
 
+#undef	ospf_opaque_capable_cmd
 ALIAS (capability_opaque,
        ospf_opaque_capable_cmd,
        "ospf opaque-lsa",
        "OSPF specific commands\n"
        "Enable the Opaque-LSA capability (rfc2370)\n");
+#define	ospf_opaque_capable_cmd	ospf_opaque_capable_cmd__VAR
 
+#undef	no_capability_opaque_cmd
 DEFUN (no_capability_opaque,
        no_capability_opaque_cmd,
        "no capability opaque",
@@ -802,13 +807,16 @@ DEFUN (no_capability_opaque,
     }
   return CMD_SUCCESS;
 }
+#define	no_capability_opaque_cmd	no_capability_opaque_cmd__VAR
 
+#undef	no_ospf_opaque_capable_cmd
 ALIAS (no_capability_opaque,
        no_ospf_opaque_capable_cmd,
        "no ospf opaque-lsa",
        NO_STR
        "OSPF specific commands\n"
        "Disable the Opaque-LSA capability (rfc2370)\n");
+#define	no_ospf_opaque_capable_cmd	no_ospf_opaque_capable_cmd__VAR
 
 static void
 ospf_opaque_register_vty (void)

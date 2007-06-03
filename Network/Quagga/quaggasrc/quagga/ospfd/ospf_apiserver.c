@@ -41,7 +41,13 @@
 #include "sockunion.h"		/* for inet_aton() */
 #include "buffer.h"
 
+#ifdef NATIVE_KERNEL
+#include "usyscalls.h"
+#include "globalvars_off.h"
 #include <sys/types.h>
+#include "syscalls.h"
+#include "globalvars_on.h"
+#endif
 
 #include "ospfd/ospfd.h"        /* for "struct thread_master" */
 #include "ospfd/ospf_interface.h"
@@ -73,7 +79,7 @@
  * daemon supports multiple applications concurrently.  */
 
 /* List of all active connections. */
-struct list *apiserver_list;
+struct list *apiserver_list_ospfd;
 
 /* -----------------------------------------------------------
  * Functions to lookup interfaces

@@ -21,17 +21,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #ifndef _ZEBRA_H
 #define _ZEBRA_H
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#ifdef SUNOS_5
-#define _XPG4_2
-#define __EXTENSIONS__
-typedef unsigned int    u_int32_t;
-typedef unsigned short  u_int16_t;
-typedef unsigned char   u_int8_t;
-#endif /* SUNOS_5 */
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -39,218 +29,53 @@ typedef int socklen_t;
 
 #ifdef NATIVE_KERNEL
 #include "usyscalls.h"
-#include "globalvars_off.h"
+#include "globalvars_lib_off.h"
+
 #include <unistd.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <stdio.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <stdlib.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <ctype.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <errno.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <fcntl.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <signal.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <string.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <pwd.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <grp.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef HAVE_STROPTS_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <stropts.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_STROPTS_H */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/fcntl.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/select.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_SYS_SELECT_H */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/stat.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/time.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/types.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/param.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef HAVE_SYS_SYSCTL_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/sysctl.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_SYS_SYSCTL_H */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/ioctl.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef HAVE_SYS_CONF_H
-#include <sys/conf.h>
-#endif /* HAVE_SYS_CONF_H */
-#ifdef HAVE_SYS_KSYM_H
-#include <sys/ksym.h>
-#endif /* HAVE_SYS_KSYM_H */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <syslog.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <time.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/uio.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <sys/utsname.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef HAVE_RUSAGE
-#include <sys/resource.h>
-#endif /* HAVE_RUSAGE */
-#ifdef HAVE_LIMITS_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <limits.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_LIMITS_H */
-
-/* machine dependent includes */
-#ifdef SUNOS_5
-#include <strings.h>
-#endif /* SUNOS_5 */
-
-/* machine dependent includes */
-#ifdef HAVE_LINUX_VERSION_H
-#include <linux/version.h>
-#endif /* HAVE_LINUX_VERSION_H */
-
-#ifdef HAVE_ASM_TYPES_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <asm/types.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_ASM_TYPES_H */
-
-/* misc include group */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
 #include <stdarg.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <net/if.h>
+#include <net/route.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <arpa/telnet.h>
+
+#include "globalvars_lib_on.h"
 #include "syscalls.h"
-#include "globalvars_on.h"
 #endif
+
+// XXX FIXME: check if this can/should be removed
+
 #if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 /* Not C99; do we need to define va_copy? */
 #ifndef va_copy
@@ -268,190 +93,10 @@ typedef int socklen_t;
 #endif /* !va_copy */
 #endif /* !C99 */
 
-
-#ifdef HAVE_LCAPS
-#include <sys/capability.h>
-#include <sys/prctl.h>
-#endif /* HAVE_LCAPS */
-
-/* network include group */
-
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <sys/socket.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-
-#ifdef HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif /* HAVE_SYS_SOCKIO_H */
-
-#ifdef HAVE_NETINET_IN_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <netinet/in.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_NETINET_IN_H */
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <netinet/in_systm.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <netinet/ip.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <netinet/tcp.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-
-#ifdef HAVE_NET_NETOPT_H
-#include <net/netopt.h>
-#endif /* HAVE_NET_NETOPT_H */
-
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <net/if.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-
-#ifdef HAVE_NET_IF_DL_H
-#include <net/if_dl.h>
-#endif /* HAVE_NET_IF_DL_H */
-
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif /* HAVE_NET_IF_VAR_H */
-
-#ifdef HAVE_NET_ROUTE_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <net/route.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_NET_ROUTE_H */
-
-#ifdef HAVE_NETLINK
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <linux/netlink.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <linux/rtnetlink.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#else
-#define RT_TABLE_MAIN		0
-#endif /* HAVE_NETLINK */
-
-#ifdef HAVE_NETDB_H
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <netdb.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#endif /* HAVE_NETDB_H */
-
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <arpa/inet.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-#ifdef NATIVE_KERNEL
-#include "usyscalls.h"
-#include "globalvars_off.h"
-#include <arpa/telnet.h>
-#include "syscalls.h"
-#include "globalvars_on.h"
-#endif
-
-#ifdef HAVE_INET_ND_H
-#include <inet/nd.h>
-#endif /* HAVE_INET_ND_H */
-
-#ifdef HAVE_NETINET_IN_VAR_H
-#include <netinet/in_var.h>
-#endif /* HAVE_NETINET_IN_VAR_H */
-
-#ifdef HAVE_NETINET6_IN6_VAR_H
-#include <netinet6/in6_var.h>
-#endif /* HAVE_NETINET6_IN6_VAR_H */
-
-#ifdef HAVE_NETINET_IN6_VAR_H
-#include <netinet/in6_var.h>
-#endif /* HAVE_NETINET_IN6_VAR_H */
-
-#ifdef HAVE_NETINET6_IN_H
-#include <netinet6/in.h>
-#endif /* HAVE_NETINET6_IN_H */
-
-
-#ifdef HAVE_NETINET6_IP6_H
-#include <netinet6/ip6.h>
-#endif /* HAVE_NETINET6_IP6_H */
-
-#ifdef HAVE_NETINET_ICMP6_H
-#include <netinet/icmp6.h>
-#endif /* HAVE_NETINET_ICMP6_H */
-
-#ifdef HAVE_NETINET6_ND6_H
-#include <netinet6/nd6.h>
-#endif /* HAVE_NETINET6_ND6_H */
-
 /* Some systems do not define UINT32_MAX */
 #ifndef UINT32_MAX
 #define UINT32_MAX 0xFFFFFFFFU
 #endif /* UINT32_MAX */
-
-#ifdef HAVE_LIBUTIL_H
-#include <libutil.h>
-#endif /* HAVE_LIBUTIL_H */
-
-#ifdef HAVE_GLIBC_BACKTRACE
-#include <execinfo.h>
-#endif /* HAVE_GLIBC_BACKTRACE */
-
-#ifdef BSDI_NRL
-
-#ifdef HAVE_NETINET6_IN6_H
-#include <netinet6/in6.h>
-#endif /* HAVE_NETINET6_IN6_H */
-
-#ifdef NRL
-#include <netinet6/in6.h>
-#endif /* NRL */
-
-#define IN6_ARE_ADDR_EQUAL IN6_IS_ADDR_EQUAL
-
-#endif /* BSDI_NRL */
 
 /* Local includes: */
 #if !(defined(__GNUC__) || defined(VTYSH_EXTRACT_PL)) 
@@ -460,30 +105,12 @@ typedef int socklen_t;
 
 #include "zassert.h"
 
-
-#ifdef HAVE_BROKEN_CMSG_FIRSTHDR
-/* This bug is present in Solaris 8 and pre-patch Solaris 9 <sys/socket.h>;
-   please refer to http://bugzilla.quagga.net/show_bug.cgi?id=142 */
-
-/* Check that msg_controllen is large enough. */
-#define ZCMSG_FIRSTHDR(mhdr) \
-  (((size_t)((mhdr)->msg_controllen) >= sizeof(struct cmsghdr)) ? \
-   CMSG_FIRSTHDR(mhdr) : (struct cmsghdr *)NULL)
-
-#ifndef _MSC_VER
-#warning "CMSG_FIRSTHDR is broken on this platform, using a workaround"
-#endif
-
-#else /* HAVE_BROKEN_CMSG_FIRSTHDR */
-#define ZCMSG_FIRSTHDR(M) CMSG_FIRSTHDR(M)
-#endif /* HAVE_BROKEN_CMSG_FIRSTHDR */
-
-
-
 /* 
  * RFC 3542 defines several macros for using struct cmsghdr.
  * Here, we define those that are not present
  */
+ 
+#define ZCMSG_FIRSTHDR(M) CMSG_FIRSTHDR(M) 
 
 /*
  * Internal defines, for use only in this file.
@@ -517,17 +144,7 @@ typedef int socklen_t;
 #endif
 #endif /* CMSG_LEN */
 
-
-/*  The definition of struct in_pktinfo is missing in old version of
-    GLIBC 2.1 (Redhat 6.1).  */
-#if defined (GNU_LINUX) && ! defined (HAVE_INPKTINFO)
-struct in_pktinfo
-{
-  int ipi_ifindex;
-  struct in_addr ipi_spec_dst;
-  struct in_addr ipi_addr;
-};
-#endif
+// XXX FIXME: check if this can be removed
 
 /* 
  * OSPF Fragmentation / fragmented writes
@@ -547,21 +164,6 @@ struct in_pktinfo
  */
 #ifdef GNU_LINUX
 #define WANT_OSPF_WRITE_FRAGMENT
-#endif
-
-/* 
- * IP_HDRINCL / struct ip byte order
- *
- * Linux: network byte order
- * *BSD: network, except for length and offset. (cf Stevens)
- * SunOS: nominally as per BSD. but bug: network order on LE.
- * OpenBSD: network byte order, apart from older versions which are as per 
- *          *BSD
- */
-#if defined(__NetBSD__) || defined(__FreeBSD__) \
-   || (defined(__OpenBSD__) && (OpenBSD < 200311)) \
-   || (defined(SUNOS_5) && defined(WORDS_BIGENDIAN))
-#define HAVE_IP_HDRINCL_BSD_ORDER
 #endif
 
 /* MAX / MIN are not commonly defined, but useful */
@@ -734,8 +336,31 @@ struct fifo
   (FIFO_EMPTY(F) ? NULL : ((struct fifo *)(F))->next)
 
 #include "allheaders.h"
-#include "globalvars.h"
+#include "oppsim_kernel.h"
 
-extern int errno_lib; // handle as a regular global variable
+#include "globalvars_lib.h"
+#include "globalvars_lib_on.h"
+
+#ifdef RIPD
+#include "globalvars_ripd.h"
+#include "globalvars_ripd_on.h"
+#endif
+
+#ifdef ZEBRA
+#include "globalvars_zebra.h"
+#include "globalvars_zebra_on.h"
+#endif
+
+#ifdef BGPD
+#include "globalvars_bgpd.h"
+#include "globalvars_bgpd_on.h"
+#endif
+
+#ifdef OSPFD
+#include "globalvars_ospfd.h"
+#include "globalvars_ospfd_on.h"
+#endif
+
+extern int errno_lib; // handle errno as a regular global variable
 
 #endif /* _ZEBRA_H */

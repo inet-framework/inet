@@ -70,3 +70,5 @@
 #define inet_aton  oppsim_inet_aton
 #define inet_pton  oppsim_inet_pton
 #define inet_ntop  oppsim_inet_ntop
+#define getopt  oppsim_getopt
+#define getopt_long  oppsim_getopt_long

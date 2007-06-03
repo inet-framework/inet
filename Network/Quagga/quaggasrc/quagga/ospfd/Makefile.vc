@@ -7,7 +7,7 @@ SOURCES = \
 	ospf_asbr.c ospf_ism.c ospf_opaque.c ospf_vty.c \
 	ospf_ase.c ospf_lsa.c ospf_packet.c ospf_zebra.c \
 	ospfd.c ospf_lsdb.c ospf_route.c ospf_dump.c \
-	ospf_main.c ospf_routemap.c
+	ospf_main.c ospf_routemap.c globalvars_ospfd.c
 
 HEADERS = \
 	ospf_abr.h ospf_dump.h ospf_lsdb.h ospf_route.h \
@@ -15,7 +15,8 @@ HEADERS = \
 	ospf_apiserver.h ospf_ia.h ospf_network.h ospf_spf.h \
 	ospf_asbr.h ospf_interface.h ospf_nsm.h ospf_te.h \
 	ospf_ase.h ospf_ism.h ospf_opaque.h ospf_vty.h \
-	ospfd.h ospf_lsa.h ospf_packet.h ospf_zebra.h
+	ospfd.h ospf_lsa.h ospf_packet.h ospf_zebra.h \
+  globalvars_ospfd.h
 
 OBJECTS = \
 	ospf_abr.obj ospf_flood.obj ospf_neighbor.obj ospf_snmp.obj \
@@ -24,7 +25,7 @@ OBJECTS = \
 	ospf_asbr.obj ospf_ism.obj ospf_opaque.obj ospf_vty.obj \
 	ospf_ase.obj ospf_lsa.obj ospf_packet.obj ospf_zebra.obj \
 	ospfd.obj ospf_lsdb.obj ospf_route.obj ospf_dump.obj \
-	ospf_main.obj ospf_routemap.obj
+	ospf_main.obj ospf_routemap.obj globalvars_ospfd.obj
 
 INCLUDES = -I. -I.. -I../lib -I../../..
 

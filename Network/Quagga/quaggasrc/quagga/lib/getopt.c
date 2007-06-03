@@ -34,7 +34,8 @@
 # include <config.h>
 #endif
 
-#include "globalvars.h"
+#include "globalvars_lib.h"
+#include "globalvars_lib_on.h"
 
 #if !defined __STDC__ || !__STDC__
 /* This is a separate conditional since some stdc systems
@@ -68,7 +69,7 @@
 # endif
 #endif
 
-#ifndef ELIDE_CODE
+#ifndef ELIDE_CODE_xxx
 
 
 /* This needs to come after some library #include
@@ -76,8 +77,8 @@
 #ifdef	__GNU_LIBRARY__
 /* Don't include stdlib.h for non-GNU C libraries because some of them
    contain conflicting prototypes for getopt.  */
-# include <stdlib.h>
-# include <unistd.h>
+//# include <stdlib.h>
+//# include <unistd.h>
 #endif	/* GNU C library.  */
 
 #ifdef VMS

@@ -58,13 +58,13 @@
 #endif
 #endif
 
-#ifndef ELIDE_CODE
+#ifndef ELIDE_CODE_xxx
 
 
 /* This needs to come after some library #include
    to get __GNU_LIBRARY__ defined.  */
 #ifdef __GNU_LIBRARY__
-#include <stdlib.h>
+//#include <stdlib.h>
 #endif
 
 #ifndef	NULL

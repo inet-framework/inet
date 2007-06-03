@@ -61,57 +61,11 @@
 #include "ospfd/ospf_zebra.h"
 #include "ospfd/ospf_te.h"
 
-/* Following structure are internal use only. */
-struct ospf_mpls_te
-{
-  enum { disabled, enabled } status;
-
-  /* List elements are zebra-interfaces (ifp), not ospf-interfaces (oi). */
-  struct list *iflist;
-
-  /* Store Router-TLV in network byte order. */
-  struct te_tlv_router_addr router_addr;
-};
-
-struct mpls_te_link
-{
-  /*
-   * According to MPLS-TE (draft) specification, 24-bit Opaque-ID field
-   * is subdivided into 8-bit "unused" field and 16-bit "instance" field.
-   * In this implementation, each Link-TLV has its own instance.
-   */
-  u_int32_t instance;
-
-  /* Reference pointer to a Zebra-interface. */
-  struct interface_FOO *ifp;
-
-  /* Area info in which this MPLS-TE link belongs to. */
-  struct ospf_area *area;
-
-  /* Flags to manage this link parameters. */
-  u_int32_t flags;
-#define LPFLG_LOOKUP_DONE		0x1
-#define LPFLG_LSA_ENGAGED		0x2
-#define LPFLG_LSA_FORCED_REFRESH	0x4
-
-  /* Store Link-TLV in network byte order. */
-  struct te_tlv_link link_header;
-  struct te_link_subtlv_link_type link_type;
-  struct te_link_subtlv_link_id link_id;
-  struct te_link_subtlv_lclif_ipaddr *lclif_ipaddr;
-  struct te_link_subtlv_rmtif_ipaddr *rmtif_ipaddr;
-  struct te_link_subtlv_te_metric te_metric;
-  struct te_link_subtlv_max_bw max_bw;
-  struct te_link_subtlv_max_rsv_bw max_rsv_bw;
-  struct te_link_subtlv_unrsv_bw unrsv_bw;
-  struct te_link_subtlv_rsc_clsclr rsc_clsclr;
-};
-
 /*
  * Global variable to manage Opaque-LSA/MPLS-TE on this node.
  * Note that all parameter values are stored in network byte order.
  */
-static struct ospf_mpls_te OspfMplsTE;
+static struct ospf_mpls_te OspfMplsTE_ospfd;
 
 enum oifstate {
   OI_ANY, OI_DOWN, OI_UP
@@ -592,6 +546,7 @@ ospf_mpls_te_del_if (struct interface_FOO *ifp)
 
   if ((lp = lookup_linkparams_by_ifp (ifp)) != NULL)
     {
+#undef	iflist
       struct list *iflist = OspfMplsTE.iflist__item;
 
       /* Dequeue listnode entry from the list. */
@@ -603,6 +558,7 @@ ospf_mpls_te_del_if (struct interface_FOO *ifp)
 
       XFREE (MTYPE_OSPF_MPLS_TE_LINKPARAMS, lp);
     }
+#define	iflist	iflist__VAR
 
   /* Schedule Opaque-LSA refresh. *//* XXX */
 
@@ -681,7 +637,7 @@ out:
 static void
 ospf_mpls_te_nsm_change (struct ospf_neighbor *nbr, int old_state)
 {
-  /* So far, nothing to do here. */
+  ospf_mpls_te_ism_change(nbr->oi, nbr->oi->state); // working around: link.id == link.adv all the time
   return;
 }
 
@@ -1465,6 +1421,7 @@ ospf_mpls_te_config_write_if (struct vty *vty, struct interface_FOO *ifp)
  * Followings are vty command functions.
  *------------------------------------------------------------------------*/
 
+#undef	mpls_te_cmd
 DEFUN (mpls_te,
        mpls_te_cmd,
        "mpls-te",
@@ -1496,13 +1453,17 @@ DEFUN (mpls_te,
 
   return CMD_SUCCESS;
 }
+#define	mpls_te_cmd	mpls_te_cmd__VAR
 
+#undef	mpls_te_on_cmd
 ALIAS (mpls_te,
        mpls_te_on_cmd,
        "mpls-te on",
        "Configure MPLS-TE parameters\n"
        "Enable the MPLS-TE functionality\n");
+#define	mpls_te_on_cmd	mpls_te_on_cmd__VAR
 
+#undef	no_mpls_te_cmd
 DEFUN (no_mpls_te,
        no_mpls_te_cmd,
        "no mpls-te",
@@ -1529,7 +1490,9 @@ DEFUN (no_mpls_te,
 
   return CMD_SUCCESS;
 }
+#define	no_mpls_te_cmd	no_mpls_te_cmd__VAR
 
+#undef	mpls_te_router_addr_cmd
 DEFUN (mpls_te_router_addr,
        mpls_te_router_addr_cmd,
        "mpls-te router-address A.B.C.D",
@@ -1588,7 +1551,9 @@ DEFUN (mpls_te_router_addr,
 out:
   return CMD_SUCCESS;
 }
+#define	mpls_te_router_addr_cmd	mpls_te_router_addr_cmd__VAR
 
+#undef	mpls_te_link_metric_cmd
 DEFUN (mpls_te_link_metric,
        mpls_te_link_metric_cmd,
        "mpls-te link metric <0-4294967295>",
@@ -1625,7 +1590,9 @@ DEFUN (mpls_te_link_metric,
     }
   return CMD_SUCCESS;
 }
+#define	mpls_te_link_metric_cmd	mpls_te_link_metric_cmd__VAR
 
+#undef	mpls_te_link_maxbw_cmd
 DEFUN (mpls_te_link_maxbw,
        mpls_te_link_maxbw_cmd,
        "mpls-te link max-bw BANDWIDTH",
@@ -1667,7 +1634,9 @@ DEFUN (mpls_te_link_maxbw,
     }
   return CMD_SUCCESS;
 }
+#define	mpls_te_link_maxbw_cmd	mpls_te_link_maxbw_cmd__VAR
 
+#undef	mpls_te_link_max_rsv_bw_cmd
 DEFUN (mpls_te_link_max_rsv_bw,
        mpls_te_link_max_rsv_bw_cmd,
        "mpls-te link max-rsv-bw BANDWIDTH",
@@ -1709,7 +1678,9 @@ DEFUN (mpls_te_link_max_rsv_bw,
     }
   return CMD_SUCCESS;
 }
+#define	mpls_te_link_max_rsv_bw_cmd	mpls_te_link_max_rsv_bw_cmd__VAR
 
+#undef	mpls_te_link_unrsv_bw_cmd
 DEFUN (mpls_te_link_unrsv_bw,
        mpls_te_link_unrsv_bw_cmd,
        "mpls-te link unrsv-bw <0-7> BANDWIDTH",
@@ -1760,7 +1731,9 @@ DEFUN (mpls_te_link_unrsv_bw,
     }
   return CMD_SUCCESS;
 }
+#define	mpls_te_link_unrsv_bw_cmd	mpls_te_link_unrsv_bw_cmd__VAR
 
+#undef	mpls_te_link_rsc_clsclr_cmd
 DEFUN (mpls_te_link_rsc_clsclr,
        mpls_te_link_rsc_clsclr_cmd,
        "mpls-te link rsc-clsclr BITPATTERN",
@@ -1801,7 +1774,9 @@ DEFUN (mpls_te_link_rsc_clsclr,
     }
   return CMD_SUCCESS;
 }
+#define	mpls_te_link_rsc_clsclr_cmd	mpls_te_link_rsc_clsclr_cmd__VAR
 
+#undef	show_mpls_te_router_cmd
 DEFUN (show_mpls_te_router,
        show_mpls_te_router_cmd,
        "show mpls-te router",
@@ -1821,6 +1796,7 @@ DEFUN (show_mpls_te_router,
     }
   return CMD_SUCCESS;
 }
+#define	show_mpls_te_router_cmd	show_mpls_te_router_cmd__VAR
 
 static void
 show_mpls_te_link_sub (struct vty *vty, struct interface_FOO *ifp)
@@ -1859,6 +1835,7 @@ show_mpls_te_link_sub (struct vty *vty, struct interface_FOO *ifp)
   return;
 }
 
+#undef	show_mpls_te_link_cmd
 DEFUN (show_mpls_te_link,
        show_mpls_te_link_cmd,
        "show mpls-te interface [INTERFACE]",
@@ -1887,6 +1864,7 @@ DEFUN (show_mpls_te_link,
 
   return CMD_SUCCESS;
 }
+#define	show_mpls_te_link_cmd	show_mpls_te_link_cmd__VAR
 
 static void
 ospf_mpls_te_register_vty (void)

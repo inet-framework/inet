@@ -218,13 +218,13 @@
 /* #undef HAVE_NET_SNMP */
 
 /* OSPF Opaque LSA */
-/* #undef HAVE_OPAQUE_LSA */
+#define HAVE_OPAQUE_LSA
 
 /* Have openpam.h */
 /* #undef HAVE_OPENPAM_H */
 
 /* OSPF TE */
-/* #undef HAVE_OSPF_TE */
+#define HAVE_OSPF_TE
 
 /* Have pam_misc.h */
 /* #undef HAVE_PAM_MISC_H */
@@ -383,8 +383,8 @@
 /* #undef SUNOS_59 */
 
 /* OSPFAPI */
-/* #undef SUPPORT_OSPF_API */
-
+#define SUPPORT_OSPF_API
+#define USE_ASYNC_READ
 /* SNMP */
 /* #undef UCD_COMPATIBLE */
 
@@ -428,4 +428,3 @@
 
 #include "structs.h"
 
-#include "oppsim_kernel.h"

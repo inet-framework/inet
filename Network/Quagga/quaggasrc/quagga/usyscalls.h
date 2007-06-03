@@ -70,3 +70,5 @@
 #undef inet_aton
 #undef inet_pton
 #undef inet_ntop
+#undef getopt
+#undef getopt_long
