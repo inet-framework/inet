@@ -1,0 +1,957 @@
+#ifndef __GLOBALVARS_BGPD_H__
+#define __GLOBALVARS_BGPD_H__
+
+#include "allheaders.h"
+
+extern struct GlobalVars_bgpd * __activeVars_bgpd;
+
+#ifdef __cplusplus
+extern "C" {
+#endif    
+
+struct GlobalVars_bgpd * GlobalVars_createActiveSet_bgpd();
+void GlobalVars_initializeActiveSet_bgpd();
+    
+#ifdef __cplusplus
+};
+#endif    
+
+struct GlobalVars_bgpd 
+{
+    struct bgp_dump bgp_dump_all__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_soft_in_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_soft_cmd__X;
+    struct cmd_element no_bgp_graceful_restart_cmd__X;
+    struct cmd_element no_router_bgp_cmd__X;
+    struct cmd_element clear_bgp_all_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_summary_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_summary_cmd__X;
+    struct bgp_table * cache2_table__X[AFI_MAX];
+    int bgp_notify_cease_msg_max__X;
+    unsigned long term_bgp_debug_fsm__X;
+    struct cmd_element clear_bgp_ipv6_peer_soft_in_cmd__X;
+    struct cmd_element show_ip_bgp_summary_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_in_cmd__X;
+    struct cmd_element show_ip_bgp_instance_ipv4_rsclient_summary_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_soft_in_cmd__X;
+    struct cmd_element show_ip_bgp_view_prefix_cmd__X;
+    struct cmd_element bgp_deterministic_med_cmd__X;
+    struct cmd_element clear_bgp_peer_group_out_cmd__X;
+    struct cmd_element clear_ip_bgp_all_vpnv4_soft_out_cmd__X;
+    struct cmd_element bgp_damp_set3_cmd__X;
+    struct thread * t_bgp_dump_routes__X;
+    struct cmd_element show_bgp_neighbors_peer_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_neighbors_cmd__X;
+    struct cmd_element dump_bgp_updates_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_in_prefix_filter_cmd__X;
+    struct cmd_element show_ip_bgp_community_list_exact_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_soft_out_cmd__X;
+    struct cmd_element no_bgp_bestpath_med2_cmd__X;
+    struct cmd_element no_bgp_multiple_instance_cmd__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_soft_cmd__X;
+    struct cmd_element bgp_distance_source_access_list_cmd__X;
+    struct cmd_element show_ip_bgp_community3_cmd__X;
+    struct cmd_element clear_bgp_peer_group_cmd__X;
+    struct cmd_element show_ip_bgp_rsclient_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbor_received_prefix_filter_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_ipv4_soft_in_cmd__X;
+    struct cmd_element router_bgp_view_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community_all_cmd__X;
+    struct cmd_element clear_bgp_as_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_out_cmd__X;
+    struct cmd_element no_bgp_distance_source_access_list_cmd__X;
+    unsigned long conf_bgp_debug_keepalive__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_all_vpnv4_soft_cmd__X;
+    struct cmd_element no_neighbor_ebgp_multihop_ttl_cmd__X;
+    struct cmd_element show_ip_bgp_flap_cidr_only_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_summary_cmd__X;
+    struct cmd_element clear_bgp_external_soft_cmd__X;
+    unsigned long term_bgp_debug_keepalive__X;
+    struct cmd_element clear_bgp_ipv6_all_out_cmd__X;
+    struct cmd_element bgp_config_type_cmd__X;
+    struct cmd_element no_bgp_network_backdoor_cmd__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_in_cmd__X;
+    struct cmd_element show_ip_bgp_community_all_cmd__X;
+    struct bgp_table * bgp_nexthop_cache_table__X[AFI_MAX];
+    struct_bgp_master bgp_master__X;
+    struct cmd_element clear_ip_bgp_all_vpnv4_soft_in_cmd__X;
+    unsigned long bgp_debug_option__X;
+    struct cmd_element clear_ip_bgp_external_soft_out_cmd__X;
+    struct bgp_table * bgp_connected_table__X[AFI_MAX];
+    struct bgp_table * cache1_table__X[AFI_MAX];
+    struct cmd_element clear_bgp_all_out_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_route_cmd__X;
+    struct cmd_element clear_bgp_instance_all_soft_in_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_soft_in_cmd__X;
+    struct cmd_element no_bgp_client_to_client_reflection_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_out_cmd__X;
+    unsigned long conf_bgp_debug_filter__X;
+    struct thread * bgp_scan_thread__X;
+    struct cmd_element show_ip_bgp_attr_info_cmd__X;
+    struct cmd_element show_ip_bgp_prefix_cmd__X;
+    struct cmd_element clear_ip_bgp_dampening_prefix_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_cmd__X;
+    struct cmd_element show_ip_bgp_prefix_list_cmd__X;
+    struct cmd_element debug_bgp_fsm_cmd__X;
+    struct cmd_element show_bgp_instance_neighbors_cmd__X;
+    struct community_list_handler * bgp_clist__X;
+    struct cmd_element no_bgp_scan_time_cmd__X;
+    struct cmd_element undebug_bgp_normal_cmd__X;
+    struct cmd_element clear_bgp_external_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_flap_route_map_cmd__X;
+    struct cmd_element clear_bgp_peer_in_cmd__X;
+    struct cmd_element clear_ip_bgp_all_in_cmd__X;
+    struct cmd_element show_ip_bgp_prefix_longer_cmd__X;
+    struct cmd_element bgp_bestpath_med3_cmd__X;
+    struct cmd_element clear_ip_bgp_dampening_address_mask_cmd__X;
+    struct cmd_element dump_bgp_updates_interval_cmd__X;
+    struct cmd_element no_bgp_redistribute_ipv4_rmap_metric_cmd__X;
+    struct bgp_damp_config bgp_damp_cfg__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_neighbor_advertised_routes_cmd__X;
+    struct cmd_element no_bgp_default_local_preference_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_tags_cmd__X;
+    struct cmd_element show_bgp_neighbors_cmd__X;
+    struct cmd_element no_bgp_network_mask_natural_backdoor_cmd__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_soft_out_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_in_prefix_filter_cmd__X;
+    struct cmd_element no_bgp_network_mask_backdoor_cmd__X;
+    struct cmd_element no_bgp_bestpath_aspath_ignore_cmd__X;
+    struct cmd_element undebug_bgp_update_cmd__X;
+    struct cmd_element no_bgp_redistribute_ipv4_rmap_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_in_prefix_filter_cmd__X;
+    struct cmd_element undebug_bgp_filter_cmd__X;
+    struct cmd_element no_dump_bgp_all_cmd__X;
+    struct cmd_element clear_ip_bgp_all_in_prefix_filter_cmd__X;
+    struct cmd_element no_bgp_default_ipv4_unicast_cmd__X;
+    struct cmd_element bgp_log_neighbor_changes_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_in_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_vpnv4_out_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_soft_out_cmd__X;
+    struct cmd_element no_bgp_redistribute_ipv4_cmd__X;
+    struct cmd_element bgp_network_mask_cmd__X;
+    struct cmd_element bgp_network_backdoor_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_cmd__X;
+    struct cmd_element show_ip_bgp_flap_prefix_longer_cmd__X;
+    struct cmd_element bgp_damp_set2_cmd__X;
+    struct cmd_element show_ip_bgp_flap_statistics_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_vpnv4_soft_cmd__X;
+    unsigned long term_bgp_debug_update__X;
+    struct cmd_element clear_ip_bgp_peer_out_cmd__X;
+    struct cmd_element debug_bgp_update_cmd__X;
+    struct cmd_element clear_bgp_peer_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_soft_out_cmd__X;
+    struct cmd_element clear_bgp_peer_group_soft_cmd__X;
+    struct cmd_element bgp_timers_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_in_cmd__X;
+    struct cmd_element show_ip_bgp_regexp_cmd__X;
+    struct cmd_element bgp_redistribute_ipv4_rmap_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_in_cmd__X;
+    struct cmd_element dump_bgp_routes_interval_cmd__X;
+    struct cmd_element show_ip_bgp_dampened_paths_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_in_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_out_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_tags_cmd__X;
+    struct cmd_element no_debug_bgp_fsm_cmd__X;
+    struct cmd_element show_ip_bgp_flap_prefix_cmd__X;
+    struct bgp_table * bgp_distance_table__X;
+    struct cmd_element clear_bgp_as_in_cmd__X;
+    struct cmd_element show_ip_bgp_view_route_cmd__X;
+    struct cmd_element show_ip_bgp_neighbors_cmd__X;
+    struct cmd_element bgp_network_mask_natural_cmd__X;
+    struct cmd_element debug_bgp_events_cmd__X;
+    struct cmd_element clear_bgp_all_soft_in_cmd__X;
+    struct cmd_element show_ip_bgp_paths_cmd__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_in_cmd__X;
+    struct cmd_element no_bgp_scan_time_val_cmd__X;
+    struct cmd_element no_debug_bgp_all_cmd__X;
+    struct cmd_element show_ip_bgp_flap_address_cmd__X;
+    struct cmd_element no_bgp_cluster_id_arg_cmd__X;
+    struct_bgp_master * bm__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbors_peer_cmd__X;
+    int bgp_notify_head_msg_max__X;
+    struct cmd_element router_bgp_cmd__X;
+    struct cmd_element clear_ip_bgp_as_out_cmd__X;
+    struct cmd_element no_bgp_network_mask_natural_cmd__X;
+    struct cmd_element clear_bgp_external_in_prefix_filter_cmd__X;
+    struct cmd_element undebug_bgp_events_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element clear_bgp_external_in_cmd__X;
+    struct cmd_element clear_bgp_external_out_cmd__X;
+    struct cmd_element show_ip_bgp_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_neighbor_routes_cmd__X;
+    struct cmd_element bgp_router_id_cmd__X;
+    struct cmd_element show_ip_bgp_community_list_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_rsclient_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_soft_cmd__X;
+    struct cmd_element undebug_bgp_all_cmd__X;
+    unsigned long conf_bgp_debug_fsm__X;
+    struct cmd_element clear_ip_bgp_instance_all_ipv4_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_as_vpnv4_soft_cmd__X;
+    struct cmd_element bgp_bestpath_compare_router_id_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_in_cmd__X;
+    struct cmd_element clear_bgp_all_in_prefix_filter_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_soft_in_cmd__X;
+    struct cmd_element bgp_network_mask_backdoor_cmd__X;
+    struct cmd_element no_bgp_bestpath_med3_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_out_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_route_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community_list_cmd__X;
+    unsigned long conf_bgp_debug_events__X;
+    struct cmd_element clear_ip_bgp_as_soft_in_cmd__X;
+    struct cmd_element bgp_bestpath_med2_cmd__X;
+    unsigned long term_bgp_debug_events__X;
+    struct cmd_element no_bgp_enforce_first_as_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_in_prefix_filter_cmd__X;
+    struct cmd_element show_bgp_ipv6_neighbors_peer_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_soft_cmd__X;
+    struct cmd_element clear_bgp_peer_soft_cmd__X;
+    struct cmd_element no_debug_bgp_filter_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_neighbor_routes_cmd__X;
+    struct cmd_element show_ip_bgp_community_info_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_instance_neighbors_peer_cmd__X;
+    struct cmd_element no_bgp_always_compare_med_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_external_in_prefix_filter_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_vpnv4_soft_in_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_soft_in_cmd__X;
+    struct cmd_node bgp_ipv4_unicast_node__X;
+    struct cmd_element show_ip_bgp_cidr_only_cmd__X;
+    struct cmd_element show_ip_bgp_route_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_neighbor_advertised_routes_cmd__X;
+    int bgp_import_interval__X;
+    struct cmd_element no_bgp_network_mask_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_soft_out_cmd__X;
+    struct cmd_element bgp_network_mask_route_map_cmd__X;
+    struct cmd_node bgp_ipv6_unicast_node__X;
+    struct cmd_element no_bgp_default_local_preference_val_cmd__X;
+    struct cmd_element clear_ip_bgp_all_vpnv4_in_cmd__X;
+    struct cmd_element bgp_network_import_check_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_soft_out_cmd__X;
+    struct cmd_element bgp_always_compare_med_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_rsclient_summary_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community3_cmd__X;
+    struct cmd_element clear_bgp_all_soft_cmd__X;
+    struct cmd_element show_ip_bgp_community4_exact_cmd__X;
+    struct cmd_element clear_bgp_all_soft_out_cmd__X;
+    struct cmd_element clear_bgp_peer_soft_in_cmd__X;
+    struct cmd_element bgp_damp_unset2_cmd__X;
+    struct cmd_element clear_ip_bgp_as_vpnv4_soft_in_cmd__X;
+    struct cmd_element show_ip_bgp_view_rsclient_prefix_cmd__X;
+    struct cmd_element bgp_network_route_map_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_damp_cmd__X;
+    struct cmd_element bgp_network_cmd__X;
+    struct cmd_element show_ip_bgp_scan_cmd__X;
+    struct cmd_element clear_bgp_peer_in_prefix_filter_cmd__X;
+    struct cmd_element bgp_default_local_preference_cmd__X;
+    struct cmd_element bgp_network_mask_natural_backdoor_cmd__X;
+    struct cmd_element undebug_bgp_fsm_cmd__X;
+    struct cmd_element dump_bgp_all_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_received_routes_cmd__X;
+    struct cmd_element no_bgp_network_route_map_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbor_received_routes_cmd__X;
+    struct cmd_element clear_bgp_peer_soft_out_cmd__X;
+    struct bgp_dump bgp_dump_updates__X;
+    struct cmd_element show_debugging_bgp_cmd__X;
+    struct cmd_element clear_ip_bgp_as_in_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_out_cmd__X;
+    unsigned long conf_bgp_debug_packet__X;
+    struct cmd_element clear_ip_bgp_peer_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_in_cmd__X;
+    struct cmd_element neighbor_ebgp_multihop_ttl_cmd__X;
+    struct cmd_element no_debug_bgp_keepalive_cmd__X;
+    struct cmd_element show_ip_bgp_filter_list_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_route_cmd__X;
+    struct cmd_element undebug_bgp_keepalive_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_soft_in_cmd__X;
+    struct cmd_node bgp_node__X;
+    struct cmd_element bgp_confederation_identifier_cmd__X;
+    struct cmd_element debug_bgp_update_direct_cmd__X;
+    struct cmd_element show_ip_bgp_flap_filter_list_cmd__X;
+    struct cmd_element bgp_network_mask_natural_route_map_cmd__X;
+    unsigned long conf_bgp_debug_update__X;
+    struct cmd_element clear_ip_bgp_as_vpnv4_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_rsclient_summary_cmd__X;
+    struct cmd_element clear_ip_bgp_all_soft_cmd__X;
+    struct cmd_element no_bgp_config_type_cmd__X;
+    struct cmd_element no_debug_bgp_events_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_cmd__X;
+    struct cmd_element show_ip_bgp_community3_exact_cmd__X;
+    struct cmd_element clear_bgp_as_cmd__X;
+    struct cmd_element show_ip_bgp_community_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_in_prefix_filter_cmd__X;
+    struct cmd_element no_bgp_confederation_identifier_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbors_cmd__X;
+    struct cmd_element clear_ip_bgp_all_out_cmd__X;
+    int bgp_notify_capability_msg_max__X;
+    struct cmd_element bgp_redistribute_ipv4_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element clear_bgp_external_cmd__X;
+    struct cmd_element no_bgp_router_id_cmd__X;
+    struct cmd_element clear_ip_bgp_external_soft_in_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_cmd__X;
+    struct cmd_element clear_bgp_peer_group_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_neighbors_peer_cmd__X;
+    struct cmd_element no_neighbor_ebgp_multihop_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_ipv4_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_as_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_external_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_as_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_view_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_neighbors_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_routes_cmd__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community4_exact_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_prefix_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_prefix_list_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community2_exact_cmd__X;
+    struct cmd_element bgp_fast_external_failover_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_out_cmd__X;
+    struct cmd_element clear_bgp_peer_out_cmd__X;
+    struct cmd_element no_bgp_network_mask_route_map_cmd__X;
+    struct cmd_element show_bgp_ipv6_route_map_cmd__X;
+    struct cmd_element no_bgp_fast_external_failover_cmd__X;
+    struct stream * bgp_dump_obuf__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_soft_in_cmd__X;
+    unsigned long term_bgp_debug_filter__X;
+    struct cmd_element show_bgp_instance_ipv6_neighbors_peer_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_advertised_route_cmd__X;
+    struct cmd_element clear_bgp_as_in_prefix_filter_cmd__X;
+    struct cmd_element show_bgp_ipv6_neighbors_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_rsclient_cmd__X;
+    struct cmd_element show_ip_bgp_instance_ipv4_summary_cmd__X;
+    struct cmd_element no_bgp_network_mask_natural_route_map_cmd__X;
+    struct cmd_element no_bgp_redistribute_ipv4_metric_cmd__X;
+    struct bgp_damp_config * damp__X;
+    struct cmd_element show_ip_bgp_community2_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_cmd__X;
+    struct cmd_element show_ip_bgp_community_exact_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_soft_cmd__X;
+    struct cmd_element show_bgp_instance_neighbors_peer_cmd__X;
+    struct cmd_element clear_ip_bgp_all_soft_out_cmd__X;
+    struct cmd_element no_bgp_network_cmd__X;
+    struct cmd_element bgp_multiple_instance_cmd__X;
+    struct cmd_element clear_ip_bgp_external_out_cmd__X;
+    struct cmd_element no_bgp_log_neighbor_changes_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_cmd__X;
+    struct cmd_element clear_bgp_instance_all_soft_out_cmd__X;
+    struct cmd_element bgp_client_to_client_reflection_cmd__X;
+    int bgp_notify_open_msg_max__X;
+    struct cmd_element no_bgp_distance_cmd__X;
+    struct cmd_element no_bgp_bestpath_compare_router_id_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_prefix_cmd__X;
+    struct cmd_element show_ip_bgp_rsclient_prefix_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_cmd__X;
+    struct cmd_element no_bgp_distance2_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_all_in_prefix_filter_cmd__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_soft_cmd__X;
+    struct cmd_element no_router_bgp_view_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_soft_in_cmd__X;
+    struct cmd_element bgp_default_ipv4_unicast_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_rd_prefix_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_vpnv4_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_external_in_cmd__X;
+    struct cmd_element clear_ip_bgp_instance_peer_rsclient_cmd__X;
+    struct cmd_element no_dump_bgp_updates_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbor_advertised_route_cmd__X;
+    struct cmd_element show_ip_bgp_view_rsclient_cmd__X;
+    struct cmd_element dump_bgp_all_interval_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_soft_cmd__X;
+    struct cmd_element clear_bgp_peer_group_in_cmd__X;
+    struct cmd_element bgp_enforce_first_as_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_route_map_cmd__X;
+    struct cmd_element no_bgp_timers_arg_cmd__X;
+    struct cmd_element no_bgp_network_import_check_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_soft_in_cmd__X;
+    struct cmd_element show_ip_bgp_community4_cmd__X;
+    struct cmd_element clear_ip_bgp_all_rsclient_cmd__X;
+    struct cmd_element no_bgp_bestpath_med_cmd__X;
+    struct cmd_element debug_bgp_normal_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_in_prefix_filter_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_out_cmd__X;
+    struct cmd_element no_bgp_distance_source_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_paths_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_out_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_regexp_cmd__X;
+    struct thread * bgp_import_thread__X;
+    struct cmd_element show_ip_bgp_instance_summary_cmd__X;
+    struct cmd_element clear_bgp_as_soft_out_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_flap_cmd__X;
+    struct cmd_element clear_bgp_as_out_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_in_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_neighbor_routes_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_cmd__X;
+    struct cmd_element clear_ip_bgp_as_vpnv4_out_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_in_prefix_filter_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_soft_cmd__X;
+    struct cmd_element no_debug_bgp_update_cmd__X;
+    struct cmd_element no_bgp_confederation_identifier_arg_cmd__X;
+    struct cmd_element clear_ip_bgp_as_cmd__X;
+    struct cmd_element clear_ip_bgp_as_in_prefix_filter_cmd__X;
+    unsigned long term_bgp_debug_normal__X;
+    struct cmd_element show_ip_bgp_ipv4_filter_list_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_soft_in_cmd__X;
+    int bgp_notify_msg_max__X;
+    struct cmd_element clear_ip_bgp_peer_group_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_soft_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_ipv4_soft_cmd__X;
+    struct cmd_element clear_bgp_ipv6_external_cmd__X;
+    unsigned long conf_bgp_debug_normal__X;
+    struct cmd_element bgp_confederation_peers_cmd__X;
+    struct cmd_element show_ip_bgp_neighbors_peer_cmd__X;
+    struct cmd_element bgp_distance_cmd__X;
+    struct cmd_element no_debug_bgp_normal_cmd__X;
+    struct cmd_element debug_bgp_filter_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community_exact_cmd__X;
+    struct cmd_element no_bgp_router_id_val_cmd__X;
+    struct cmd_element show_ip_bgp_flap_prefix_list_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_soft_in_cmd__X;
+    struct cmd_element clear_ip_bgp_dampening_address_cmd__X;
+    struct cmd_element clear_bgp_ipv6_as_soft_cmd__X;
+    struct cmd_element show_ip_bgp_rsclient_route_cmd__X;
+    struct cmd_element clear_ip_bgp_external_cmd__X;
+    struct cmd_element show_ip_bgp_route_map_cmd__X;
+    struct cmd_element clear_ip_bgp_dampening_cmd__X;
+    struct cmd_element clear_bgp_external_soft_in_cmd__X;
+    struct cmd_element debug_bgp_keepalive_cmd__X;
+    struct cmd_element dump_bgp_routes_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_soft_in_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_group_cmd__X;
+    struct cmd_element clear_bgp_instance_all_soft_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_cidr_only_cmd__X;
+    struct cmd_element bgp_bestpath_med_cmd__X;
+    unsigned long term_bgp_debug_packet__X;
+    struct cmd_node bgp_vpnv4_node__X;
+    struct cmd_element clear_ip_bgp_as_vpnv4_in_cmd__X;
+    int bgp_scan_interval__X;
+    struct cmd_element bgp_bestpath_aspath_ignore_cmd__X;
+    struct cmd_element show_ip_bgp_vpnv4_all_neighbors_peer_cmd__X;
+    int bgp_status_msg_max__X;
+    struct cmd_element clear_ip_bgp_all_vpnv4_out_cmd__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_out_cmd__X;
+    struct cmd_element show_ip_bgp_view_rsclient_route_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community_cmd__X;
+    struct cmd_element show_ip_bgp_community2_exact_cmd__X;
+    struct cmd_element show_ip_bgp_flap_regexp_cmd__X;
+    struct cmd_element bgp_redistribute_ipv4_rmap_metric_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_out_cmd__X;
+    struct cmd_element clear_ip_bgp_all_cmd__X;
+    struct cmd_element clear_ip_bgp_external_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element bgp_damp_unset_cmd__X;
+    struct cmd_element show_ip_bgp_neighbor_received_prefix_filter_cmd__X;
+    struct cmd_element clear_bgp_ipv6_peer_group_in_cmd__X;
+    struct cmd_node bgp_dump_node__X;
+    struct cmd_element clear_bgp_all_in_cmd__X;
+    struct cmd_element bgp_damp_set_cmd__X;
+    struct cmd_element no_dump_bgp_routes_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community4_cmd__X;
+    struct cmd_element no_bgp_confederation_peers_cmd__X;
+    struct cmd_element bgp_graceful_restart_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community_list_exact_cmd__X;
+    struct cmd_element bgp_scan_time_cmd__X;
+    struct bgp_dump bgp_dump_routes__X;
+    struct cmd_element show_ip_bgp_ipv4_community3_exact_cmd__X;
+    struct cmd_element clear_ip_bgp_peer_vpnv4_in_cmd__X;
+    int bgp_notify_update_msg_max__X;
+    struct cmd_element clear_bgp_ipv6_external_soft_out_cmd__X;
+    struct cmd_element clear_ip_bgp_as_ipv4_in_prefix_filter_cmd__X;
+    struct cmd_element show_bgp_instance_ipv6_neighbors_cmd__X;
+    struct cmd_element show_ip_bgp_instance_neighbors_cmd__X;
+    struct cmd_element bgp_cluster_id_cmd__X;
+    struct cmd_element clear_ip_bgp_all_ipv4_soft_out_cmd__X;
+    struct cmd_element bgp_redistribute_ipv4_metric_cmd__X;
+    struct cmd_element clear_bgp_instance_all_cmd__X;
+    struct cmd_element clear_bgp_as_soft_in_cmd__X;
+    struct cmd_element bgp_cluster_id32_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_prefix_longer_cmd__X;
+    struct cmd_element no_bgp_deterministic_med_cmd__X;
+    struct cmd_element show_ip_bgp_ipv4_community2_cmd__X;
+    struct cmd_element no_bgp_redistribute_ipv4_metric_rmap_cmd__X;
+    struct cmd_element no_bgp_cluster_id_cmd__X;
+    struct cmd_node bgp_ipv4_multicast_node__X;
+    struct cmd_element clear_bgp_peer_group_soft_in_cmd__X;
+    struct cmd_element neighbor_ebgp_multihop_cmd__X;
+    struct cmd_element clear_ip_bgp_all_soft_in_cmd__X;
+    struct cmd_element clear_bgp_ipv6_all_in_cmd__X;
+    struct cmd_element show_ip_bgp_instance_rsclient_summary_cmd__X;
+    struct cmd_element clear_bgp_peer_group_in_prefix_filter_cmd__X;
+    struct cmd_element bgp_distance_source_cmd__X;
+    struct cmd_element no_bgp_timers_cmd__X;
+    struct cmd_element bgp_redistribute_ipv4_metric_rmap_cmd__X;
+    struct cmd_element show_bgp_route_map_cmd__X;
+};
+
+#define bm__VAR  (__activeVars_bgpd->bm__X)
+#define cache1_table__VAR  (__activeVars_bgpd->cache1_table__X)
+#define cache2_table__VAR  (__activeVars_bgpd->cache2_table__X)
+#define damp__VAR  (__activeVars_bgpd->damp__X)
+
+#define bgp_dump_all__VAR  (__activeVars_bgpd->bgp_dump_all__X)
+#define clear_ip_bgp_all_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_soft_in_cmd__X)
+#define clear_ip_bgp_instance_all_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_soft_cmd__X)
+#define no_bgp_graceful_restart_cmd__VAR  (__activeVars_bgpd->no_bgp_graceful_restart_cmd__X)
+#define no_router_bgp_cmd__VAR  (__activeVars_bgpd->no_router_bgp_cmd__X)
+#define clear_bgp_all_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_cmd__X)
+#define show_ip_bgp_ipv4_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_summary_cmd__X)
+#define show_ip_bgp_vpnv4_rd_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_summary_cmd__X)
+#define bgp_notify_cease_msg_max__VAR  (__activeVars_bgpd->bgp_notify_cease_msg_max__X)
+#define term_bgp_debug_fsm__VAR  (__activeVars_bgpd->term_bgp_debug_fsm__X)
+#define clear_bgp_ipv6_peer_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_soft_in_cmd__X)
+#define show_ip_bgp_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_summary_cmd__X)
+#define clear_bgp_ipv6_peer_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_in_cmd__X)
+#define show_ip_bgp_instance_ipv4_rsclient_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_ipv4_rsclient_summary_cmd__X)
+#define clear_bgp_ipv6_peer_group_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_soft_in_cmd__X)
+#define show_ip_bgp_view_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_prefix_cmd__X)
+#define bgp_deterministic_med_cmd__VAR  (__activeVars_bgpd->bgp_deterministic_med_cmd__X)
+#define clear_bgp_peer_group_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_out_cmd__X)
+#define clear_ip_bgp_all_vpnv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_vpnv4_soft_out_cmd__X)
+#define bgp_damp_set3_cmd__VAR  (__activeVars_bgpd->bgp_damp_set3_cmd__X)
+#define t_bgp_dump_routes__VAR  (__activeVars_bgpd->t_bgp_dump_routes__X)
+#define show_bgp_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_bgp_neighbors_peer_cmd__X)
+#define show_ip_bgp_vpnv4_all_neighbors_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_neighbors_cmd__X)
+#define dump_bgp_updates_cmd__VAR  (__activeVars_bgpd->dump_bgp_updates_cmd__X)
+#define clear_ip_bgp_peer_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_in_prefix_filter_cmd__X)
+#define show_ip_bgp_community_list_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_list_exact_cmd__X)
+#define clear_bgp_ipv6_all_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_soft_out_cmd__X)
+#define no_bgp_bestpath_med2_cmd__VAR  (__activeVars_bgpd->no_bgp_bestpath_med2_cmd__X)
+#define no_bgp_multiple_instance_cmd__VAR  (__activeVars_bgpd->no_bgp_multiple_instance_cmd__X)
+#define clear_ip_bgp_as_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_soft_cmd__X)
+#define bgp_distance_source_access_list_cmd__VAR  (__activeVars_bgpd->bgp_distance_source_access_list_cmd__X)
+#define show_ip_bgp_community3_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community3_cmd__X)
+#define clear_bgp_peer_group_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_cmd__X)
+#define show_ip_bgp_rsclient_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_rsclient_cmd__X)
+#define show_ip_bgp_ipv4_neighbor_received_prefix_filter_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbor_received_prefix_filter_cmd__X)
+#define clear_ip_bgp_instance_all_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_ipv4_soft_in_cmd__X)
+#define router_bgp_view_cmd__VAR  (__activeVars_bgpd->router_bgp_view_cmd__X)
+#define show_ip_bgp_ipv4_community_all_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community_all_cmd__X)
+#define clear_bgp_as_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_soft_cmd__X)
+#define clear_ip_bgp_all_ipv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_out_cmd__X)
+#define no_bgp_distance_source_access_list_cmd__VAR  (__activeVars_bgpd->no_bgp_distance_source_access_list_cmd__X)
+#define conf_bgp_debug_keepalive__VAR  (__activeVars_bgpd->conf_bgp_debug_keepalive__X)
+#define clear_ip_bgp_peer_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_soft_out_cmd__X)
+#define clear_ip_bgp_all_vpnv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_vpnv4_soft_cmd__X)
+#define no_neighbor_ebgp_multihop_ttl_cmd__VAR  (__activeVars_bgpd->no_neighbor_ebgp_multihop_ttl_cmd__X)
+#define show_ip_bgp_flap_cidr_only_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_cidr_only_cmd__X)
+#define show_ip_bgp_vpnv4_all_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_summary_cmd__X)
+#define clear_bgp_external_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_soft_cmd__X)
+#define term_bgp_debug_keepalive__VAR  (__activeVars_bgpd->term_bgp_debug_keepalive__X)
+#define clear_bgp_ipv6_all_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_out_cmd__X)
+#define bgp_config_type_cmd__VAR  (__activeVars_bgpd->bgp_config_type_cmd__X)
+#define no_bgp_network_backdoor_cmd__VAR  (__activeVars_bgpd->no_bgp_network_backdoor_cmd__X)
+#define clear_ip_bgp_as_ipv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_in_cmd__X)
+#define show_ip_bgp_community_all_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_all_cmd__X)
+#define bgp_nexthop_cache_table__VAR  (__activeVars_bgpd->bgp_nexthop_cache_table__X)
+#define bgp_master__VAR  (__activeVars_bgpd->bgp_master__X)
+#define clear_ip_bgp_all_vpnv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_vpnv4_soft_in_cmd__X)
+#define bgp_debug_option__VAR  (__activeVars_bgpd->bgp_debug_option__X)
+#define clear_ip_bgp_external_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_soft_out_cmd__X)
+#define bgp_connected_table__VAR  (__activeVars_bgpd->bgp_connected_table__X)
+#define clear_bgp_all_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_out_cmd__X)
+#define show_ip_bgp_vpnv4_all_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_route_cmd__X)
+#define clear_bgp_instance_all_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_instance_all_soft_in_cmd__X)
+#define clear_ip_bgp_external_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_soft_in_cmd__X)
+#define no_bgp_client_to_client_reflection_cmd__VAR  (__activeVars_bgpd->no_bgp_client_to_client_reflection_cmd__X)
+#define clear_ip_bgp_peer_group_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_out_cmd__X)
+#define conf_bgp_debug_filter__VAR  (__activeVars_bgpd->conf_bgp_debug_filter__X)
+#define bgp_scan_thread__VAR  (__activeVars_bgpd->bgp_scan_thread__X)
+#define show_ip_bgp_attr_info_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_attr_info_cmd__X)
+#define show_ip_bgp_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_prefix_cmd__X)
+#define clear_ip_bgp_dampening_prefix_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_dampening_prefix_cmd__X)
+#define show_ip_bgp_ipv4_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_cmd__X)
+#define show_ip_bgp_prefix_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_prefix_list_cmd__X)
+#define debug_bgp_fsm_cmd__VAR  (__activeVars_bgpd->debug_bgp_fsm_cmd__X)
+#define show_bgp_instance_neighbors_cmd__VAR  (__activeVars_bgpd->show_bgp_instance_neighbors_cmd__X)
+#define bgp_clist__VAR  (__activeVars_bgpd->bgp_clist__X)
+#define no_bgp_scan_time_cmd__VAR  (__activeVars_bgpd->no_bgp_scan_time_cmd__X)
+#define undebug_bgp_normal_cmd__VAR  (__activeVars_bgpd->undebug_bgp_normal_cmd__X)
+#define clear_bgp_external_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_soft_out_cmd__X)
+#define show_ip_bgp_flap_route_map_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_route_map_cmd__X)
+#define clear_bgp_peer_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_in_cmd__X)
+#define clear_ip_bgp_all_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_in_cmd__X)
+#define show_ip_bgp_prefix_longer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_prefix_longer_cmd__X)
+#define bgp_bestpath_med3_cmd__VAR  (__activeVars_bgpd->bgp_bestpath_med3_cmd__X)
+#define clear_ip_bgp_dampening_address_mask_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_dampening_address_mask_cmd__X)
+#define dump_bgp_updates_interval_cmd__VAR  (__activeVars_bgpd->dump_bgp_updates_interval_cmd__X)
+#define no_bgp_redistribute_ipv4_rmap_metric_cmd__VAR  (__activeVars_bgpd->no_bgp_redistribute_ipv4_rmap_metric_cmd__X)
+#define bgp_damp_cfg__VAR  (__activeVars_bgpd->bgp_damp_cfg__X)
+#define show_ip_bgp_vpnv4_all_neighbor_advertised_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_neighbor_advertised_routes_cmd__X)
+#define no_bgp_default_local_preference_cmd__VAR  (__activeVars_bgpd->no_bgp_default_local_preference_cmd__X)
+#define show_ip_bgp_vpnv4_rd_tags_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_tags_cmd__X)
+#define show_bgp_neighbors_cmd__VAR  (__activeVars_bgpd->show_bgp_neighbors_cmd__X)
+#define no_bgp_network_mask_natural_backdoor_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_natural_backdoor_cmd__X)
+#define clear_ip_bgp_as_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_soft_out_cmd__X)
+#define clear_bgp_ipv6_peer_group_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_in_prefix_filter_cmd__X)
+#define no_bgp_network_mask_backdoor_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_backdoor_cmd__X)
+#define no_bgp_bestpath_aspath_ignore_cmd__VAR  (__activeVars_bgpd->no_bgp_bestpath_aspath_ignore_cmd__X)
+#define undebug_bgp_update_cmd__VAR  (__activeVars_bgpd->undebug_bgp_update_cmd__X)
+#define no_bgp_redistribute_ipv4_rmap_cmd__VAR  (__activeVars_bgpd->no_bgp_redistribute_ipv4_rmap_cmd__X)
+#define clear_bgp_ipv6_external_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_in_prefix_filter_cmd__X)
+#define undebug_bgp_filter_cmd__VAR  (__activeVars_bgpd->undebug_bgp_filter_cmd__X)
+#define no_dump_bgp_all_cmd__VAR  (__activeVars_bgpd->no_dump_bgp_all_cmd__X)
+#define clear_ip_bgp_all_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_in_prefix_filter_cmd__X)
+#define no_bgp_default_ipv4_unicast_cmd__VAR  (__activeVars_bgpd->no_bgp_default_ipv4_unicast_cmd__X)
+#define bgp_log_neighbor_changes_cmd__VAR  (__activeVars_bgpd->bgp_log_neighbor_changes_cmd__X)
+#define clear_bgp_ipv6_as_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_in_cmd__X)
+#define clear_ip_bgp_peer_vpnv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_vpnv4_out_cmd__X)
+#define clear_bgp_ipv6_peer_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_soft_out_cmd__X)
+#define no_bgp_redistribute_ipv4_cmd__VAR  (__activeVars_bgpd->no_bgp_redistribute_ipv4_cmd__X)
+#define bgp_network_mask_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_cmd__X)
+#define bgp_network_backdoor_cmd__VAR  (__activeVars_bgpd->bgp_network_backdoor_cmd__X)
+#define clear_ip_bgp_instance_all_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_cmd__X)
+#define show_ip_bgp_flap_prefix_longer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_prefix_longer_cmd__X)
+#define bgp_damp_set2_cmd__VAR  (__activeVars_bgpd->bgp_damp_set2_cmd__X)
+#define show_ip_bgp_flap_statistics_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_statistics_cmd__X)
+#define clear_ip_bgp_peer_vpnv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_vpnv4_soft_cmd__X)
+#define term_bgp_debug_update__VAR  (__activeVars_bgpd->term_bgp_debug_update__X)
+#define clear_ip_bgp_peer_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_out_cmd__X)
+#define debug_bgp_update_cmd__VAR  (__activeVars_bgpd->debug_bgp_update_cmd__X)
+#define clear_bgp_peer_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_cmd__X)
+#define clear_ip_bgp_peer_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_soft_out_cmd__X)
+#define clear_bgp_peer_group_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_soft_cmd__X)
+#define bgp_timers_cmd__VAR  (__activeVars_bgpd->bgp_timers_cmd__X)
+#define clear_ip_bgp_external_ipv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_in_cmd__X)
+#define show_ip_bgp_regexp_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_regexp_cmd__X)
+#define bgp_redistribute_ipv4_rmap_cmd__VAR  (__activeVars_bgpd->bgp_redistribute_ipv4_rmap_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_in_cmd__X)
+#define dump_bgp_routes_interval_cmd__VAR  (__activeVars_bgpd->dump_bgp_routes_interval_cmd__X)
+#define show_ip_bgp_dampened_paths_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_dampened_paths_cmd__X)
+#define clear_ip_bgp_peer_group_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_in_cmd__X)
+#define clear_bgp_ipv6_peer_group_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_out_cmd__X)
+#define show_ip_bgp_vpnv4_all_tags_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_tags_cmd__X)
+#define no_debug_bgp_fsm_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_fsm_cmd__X)
+#define show_ip_bgp_flap_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_prefix_cmd__X)
+#define bgp_distance_table__VAR  (__activeVars_bgpd->bgp_distance_table__X)
+#define clear_bgp_as_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_in_cmd__X)
+#define show_ip_bgp_view_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_route_cmd__X)
+#define show_ip_bgp_neighbors_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbors_cmd__X)
+#define bgp_network_mask_natural_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_natural_cmd__X)
+#define debug_bgp_events_cmd__VAR  (__activeVars_bgpd->debug_bgp_events_cmd__X)
+#define clear_bgp_all_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_soft_in_cmd__X)
+#define show_ip_bgp_paths_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_paths_cmd__X)
+#define clear_ip_bgp_all_ipv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_in_cmd__X)
+#define no_bgp_scan_time_val_cmd__VAR  (__activeVars_bgpd->no_bgp_scan_time_val_cmd__X)
+#define no_debug_bgp_all_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_all_cmd__X)
+#define show_ip_bgp_flap_address_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_address_cmd__X)
+#define no_bgp_cluster_id_arg_cmd__VAR  (__activeVars_bgpd->no_bgp_cluster_id_arg_cmd__X)
+#define show_ip_bgp_ipv4_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbors_peer_cmd__X)
+#define bgp_notify_head_msg_max__VAR  (__activeVars_bgpd->bgp_notify_head_msg_max__X)
+#define router_bgp_cmd__VAR  (__activeVars_bgpd->router_bgp_cmd__X)
+#define clear_ip_bgp_as_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_out_cmd__X)
+#define no_bgp_network_mask_natural_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_natural_cmd__X)
+#define clear_bgp_external_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_in_prefix_filter_cmd__X)
+#define undebug_bgp_events_cmd__VAR  (__activeVars_bgpd->undebug_bgp_events_cmd__X)
+#define clear_ip_bgp_instance_all_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_ipv4_in_prefix_filter_cmd__X)
+#define clear_bgp_external_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_in_cmd__X)
+#define clear_bgp_external_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_out_cmd__X)
+#define show_ip_bgp_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_cmd__X)
+#define show_ip_bgp_vpnv4_rd_neighbor_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_neighbor_routes_cmd__X)
+#define bgp_router_id_cmd__VAR  (__activeVars_bgpd->bgp_router_id_cmd__X)
+#define show_ip_bgp_community_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_list_cmd__X)
+#define clear_ip_bgp_peer_rsclient_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_rsclient_cmd__X)
+#define clear_bgp_ipv6_all_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_soft_cmd__X)
+#define undebug_bgp_all_cmd__VAR  (__activeVars_bgpd->undebug_bgp_all_cmd__X)
+#define conf_bgp_debug_fsm__VAR  (__activeVars_bgpd->conf_bgp_debug_fsm__X)
+#define clear_ip_bgp_instance_all_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_ipv4_soft_cmd__X)
+#define clear_ip_bgp_as_vpnv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_vpnv4_soft_cmd__X)
+#define bgp_bestpath_compare_router_id_cmd__VAR  (__activeVars_bgpd->bgp_bestpath_compare_router_id_cmd__X)
+#define clear_ip_bgp_peer_ipv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_in_cmd__X)
+#define clear_bgp_all_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_in_prefix_filter_cmd__X)
+#define clear_ip_bgp_instance_all_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_soft_in_cmd__X)
+#define bgp_network_mask_backdoor_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_backdoor_cmd__X)
+#define no_bgp_bestpath_med3_cmd__VAR  (__activeVars_bgpd->no_bgp_bestpath_med3_cmd__X)
+#define clear_bgp_ipv6_as_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_out_cmd__X)
+#define show_ip_bgp_ipv4_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_route_cmd__X)
+#define show_ip_bgp_ipv4_community_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community_list_cmd__X)
+#define conf_bgp_debug_events__VAR  (__activeVars_bgpd->conf_bgp_debug_events__X)
+#define clear_ip_bgp_as_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_soft_in_cmd__X)
+#define bgp_bestpath_med2_cmd__VAR  (__activeVars_bgpd->bgp_bestpath_med2_cmd__X)
+#define term_bgp_debug_events__VAR  (__activeVars_bgpd->term_bgp_debug_events__X)
+#define no_bgp_enforce_first_as_cmd__VAR  (__activeVars_bgpd->no_bgp_enforce_first_as_cmd__X)
+#define clear_ip_bgp_peer_group_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_in_prefix_filter_cmd__X)
+#define show_bgp_ipv6_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_bgp_ipv6_neighbors_peer_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_soft_cmd__X)
+#define clear_bgp_peer_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_soft_cmd__X)
+#define no_debug_bgp_filter_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_filter_cmd__X)
+#define show_ip_bgp_vpnv4_all_neighbor_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_neighbor_routes_cmd__X)
+#define show_ip_bgp_community_info_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_info_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_soft_out_cmd__X)
+#define show_ip_bgp_instance_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_neighbors_peer_cmd__X)
+#define no_bgp_always_compare_med_cmd__VAR  (__activeVars_bgpd->no_bgp_always_compare_med_cmd__X)
+#define clear_bgp_ipv6_as_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_soft_out_cmd__X)
+#define clear_ip_bgp_external_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_in_prefix_filter_cmd__X)
+#define clear_ip_bgp_peer_vpnv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_vpnv4_soft_in_cmd__X)
+#define clear_bgp_ipv6_all_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_soft_in_cmd__X)
+#define bgp_ipv4_unicast_node__VAR  (__activeVars_bgpd->bgp_ipv4_unicast_node__X)
+#define show_ip_bgp_cidr_only_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_cidr_only_cmd__X)
+#define show_ip_bgp_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_route_cmd__X)
+#define show_ip_bgp_vpnv4_rd_neighbor_advertised_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_neighbor_advertised_routes_cmd__X)
+#define bgp_import_interval__VAR  (__activeVars_bgpd->bgp_import_interval__X)
+#define no_bgp_network_mask_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_cmd__X)
+#define clear_ip_bgp_external_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_soft_cmd__X)
+#define clear_ip_bgp_instance_all_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_soft_out_cmd__X)
+#define bgp_network_mask_route_map_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_route_map_cmd__X)
+#define bgp_ipv6_unicast_node__VAR  (__activeVars_bgpd->bgp_ipv6_unicast_node__X)
+#define no_bgp_default_local_preference_val_cmd__VAR  (__activeVars_bgpd->no_bgp_default_local_preference_val_cmd__X)
+#define clear_ip_bgp_all_vpnv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_vpnv4_in_cmd__X)
+#define bgp_network_import_check_cmd__VAR  (__activeVars_bgpd->bgp_network_import_check_cmd__X)
+#define clear_bgp_ipv6_peer_group_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_soft_out_cmd__X)
+#define bgp_always_compare_med_cmd__VAR  (__activeVars_bgpd->bgp_always_compare_med_cmd__X)
+#define show_ip_bgp_ipv4_rsclient_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_rsclient_summary_cmd__X)
+#define show_ip_bgp_ipv4_community3_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community3_cmd__X)
+#define clear_bgp_all_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_soft_cmd__X)
+#define show_ip_bgp_community4_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community4_exact_cmd__X)
+#define clear_bgp_all_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_soft_out_cmd__X)
+#define clear_bgp_peer_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_soft_in_cmd__X)
+#define bgp_damp_unset2_cmd__VAR  (__activeVars_bgpd->bgp_damp_unset2_cmd__X)
+#define clear_ip_bgp_as_vpnv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_vpnv4_soft_in_cmd__X)
+#define show_ip_bgp_view_rsclient_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_rsclient_prefix_cmd__X)
+#define bgp_network_route_map_cmd__VAR  (__activeVars_bgpd->bgp_network_route_map_cmd__X)
+#define show_ip_bgp_neighbor_damp_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_damp_cmd__X)
+#define bgp_network_cmd__VAR  (__activeVars_bgpd->bgp_network_cmd__X)
+#define show_ip_bgp_scan_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_scan_cmd__X)
+#define clear_bgp_peer_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_in_prefix_filter_cmd__X)
+#define bgp_default_local_preference_cmd__VAR  (__activeVars_bgpd->bgp_default_local_preference_cmd__X)
+#define bgp_network_mask_natural_backdoor_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_natural_backdoor_cmd__X)
+#define undebug_bgp_fsm_cmd__VAR  (__activeVars_bgpd->undebug_bgp_fsm_cmd__X)
+#define dump_bgp_all_cmd__VAR  (__activeVars_bgpd->dump_bgp_all_cmd__X)
+#define show_ip_bgp_neighbor_received_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_received_routes_cmd__X)
+#define no_bgp_network_route_map_cmd__VAR  (__activeVars_bgpd->no_bgp_network_route_map_cmd__X)
+#define show_ip_bgp_ipv4_neighbor_received_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbor_received_routes_cmd__X)
+#define clear_bgp_peer_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_soft_out_cmd__X)
+#define bgp_dump_updates__VAR  (__activeVars_bgpd->bgp_dump_updates__X)
+#define show_debugging_bgp_cmd__VAR  (__activeVars_bgpd->show_debugging_bgp_cmd__X)
+#define clear_ip_bgp_as_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_in_cmd__X)
+#define clear_ip_bgp_external_ipv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_out_cmd__X)
+#define conf_bgp_debug_packet__VAR  (__activeVars_bgpd->conf_bgp_debug_packet__X)
+#define clear_ip_bgp_peer_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_soft_cmd__X)
+#define clear_ip_bgp_peer_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_in_cmd__X)
+#define neighbor_ebgp_multihop_ttl_cmd__VAR  (__activeVars_bgpd->neighbor_ebgp_multihop_ttl_cmd__X)
+#define no_debug_bgp_keepalive_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_keepalive_cmd__X)
+#define show_ip_bgp_filter_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_filter_list_cmd__X)
+#define show_ip_bgp_vpnv4_rd_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_route_cmd__X)
+#define undebug_bgp_keepalive_cmd__VAR  (__activeVars_bgpd->undebug_bgp_keepalive_cmd__X)
+#define clear_ip_bgp_peer_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_soft_in_cmd__X)
+#define bgp_node__VAR  (__activeVars_bgpd->bgp_node__X)
+#define bgp_confederation_identifier_cmd__VAR  (__activeVars_bgpd->bgp_confederation_identifier_cmd__X)
+#define debug_bgp_update_direct_cmd__VAR  (__activeVars_bgpd->debug_bgp_update_direct_cmd__X)
+#define show_ip_bgp_flap_filter_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_filter_list_cmd__X)
+#define bgp_network_mask_natural_route_map_cmd__VAR  (__activeVars_bgpd->bgp_network_mask_natural_route_map_cmd__X)
+#define conf_bgp_debug_update__VAR  (__activeVars_bgpd->conf_bgp_debug_update__X)
+#define clear_ip_bgp_as_vpnv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_vpnv4_soft_out_cmd__X)
+#define show_ip_bgp_rsclient_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_rsclient_summary_cmd__X)
+#define clear_ip_bgp_all_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_soft_cmd__X)
+#define no_bgp_config_type_cmd__VAR  (__activeVars_bgpd->no_bgp_config_type_cmd__X)
+#define no_debug_bgp_events_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_events_cmd__X)
+#define clear_bgp_ipv6_peer_group_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_cmd__X)
+#define show_ip_bgp_community3_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community3_exact_cmd__X)
+#define clear_bgp_as_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_cmd__X)
+#define show_ip_bgp_community_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_cmd__X)
+#define clear_bgp_ipv6_all_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_cmd__X)
+#define clear_bgp_ipv6_peer_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_in_prefix_filter_cmd__X)
+#define no_bgp_confederation_identifier_cmd__VAR  (__activeVars_bgpd->no_bgp_confederation_identifier_cmd__X)
+#define show_ip_bgp_ipv4_neighbors_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbors_cmd__X)
+#define clear_ip_bgp_all_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_out_cmd__X)
+#define bgp_notify_capability_msg_max__VAR  (__activeVars_bgpd->bgp_notify_capability_msg_max__X)
+#define bgp_redistribute_ipv4_cmd__VAR  (__activeVars_bgpd->bgp_redistribute_ipv4_cmd__X)
+#define clear_ip_bgp_peer_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_in_prefix_filter_cmd__X)
+#define clear_bgp_external_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_cmd__X)
+#define no_bgp_router_id_cmd__VAR  (__activeVars_bgpd->no_bgp_router_id_cmd__X)
+#define clear_ip_bgp_external_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_soft_in_cmd__X)
+#define clear_bgp_ipv6_as_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_cmd__X)
+#define clear_bgp_peer_group_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_soft_out_cmd__X)
+#define show_ip_bgp_vpnv4_rd_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_neighbors_peer_cmd__X)
+#define no_neighbor_ebgp_multihop_cmd__VAR  (__activeVars_bgpd->no_neighbor_ebgp_multihop_cmd__X)
+#define clear_ip_bgp_instance_all_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_ipv4_soft_out_cmd__X)
+#define clear_ip_bgp_as_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_soft_cmd__X)
+#define clear_ip_bgp_external_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_soft_cmd__X)
+#define clear_ip_bgp_as_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_soft_out_cmd__X)
+#define show_ip_bgp_view_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_cmd__X)
+#define show_ip_bgp_vpnv4_rd_neighbors_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_neighbors_cmd__X)
+#define show_ip_bgp_neighbor_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_routes_cmd__X)
+#define clear_ip_bgp_all_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_in_prefix_filter_cmd__X)
+#define show_ip_bgp_ipv4_community4_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community4_exact_cmd__X)
+#define show_ip_bgp_ipv4_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_prefix_cmd__X)
+#define show_ip_bgp_ipv4_prefix_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_prefix_list_cmd__X)
+#define show_ip_bgp_ipv4_community2_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community2_exact_cmd__X)
+#define bgp_fast_external_failover_cmd__VAR  (__activeVars_bgpd->bgp_fast_external_failover_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_out_cmd__X)
+#define clear_bgp_peer_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_out_cmd__X)
+#define no_bgp_network_mask_route_map_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_route_map_cmd__X)
+#define show_bgp_ipv6_route_map_cmd__VAR  (__activeVars_bgpd->show_bgp_ipv6_route_map_cmd__X)
+#define no_bgp_fast_external_failover_cmd__VAR  (__activeVars_bgpd->no_bgp_fast_external_failover_cmd__X)
+#define bgp_dump_obuf__VAR  (__activeVars_bgpd->bgp_dump_obuf__X)
+#define clear_ip_bgp_as_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_soft_in_cmd__X)
+#define term_bgp_debug_filter__VAR  (__activeVars_bgpd->term_bgp_debug_filter__X)
+#define show_bgp_instance_ipv6_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_bgp_instance_ipv6_neighbors_peer_cmd__X)
+#define show_ip_bgp_neighbor_advertised_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_advertised_route_cmd__X)
+#define clear_bgp_as_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_in_prefix_filter_cmd__X)
+#define show_bgp_ipv6_neighbors_cmd__VAR  (__activeVars_bgpd->show_bgp_ipv6_neighbors_cmd__X)
+#define clear_ip_bgp_instance_all_rsclient_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_rsclient_cmd__X)
+#define show_ip_bgp_instance_ipv4_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_ipv4_summary_cmd__X)
+#define no_bgp_network_mask_natural_route_map_cmd__VAR  (__activeVars_bgpd->no_bgp_network_mask_natural_route_map_cmd__X)
+#define no_bgp_redistribute_ipv4_metric_cmd__VAR  (__activeVars_bgpd->no_bgp_redistribute_ipv4_metric_cmd__X)
+#define show_ip_bgp_community2_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community2_cmd__X)
+#define show_ip_bgp_vpnv4_rd_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_cmd__X)
+#define show_ip_bgp_community_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community_exact_cmd__X)
+#define clear_bgp_ipv6_peer_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_soft_cmd__X)
+#define show_bgp_instance_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_bgp_instance_neighbors_peer_cmd__X)
+#define clear_ip_bgp_all_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_soft_out_cmd__X)
+#define no_bgp_network_cmd__VAR  (__activeVars_bgpd->no_bgp_network_cmd__X)
+#define bgp_multiple_instance_cmd__VAR  (__activeVars_bgpd->bgp_multiple_instance_cmd__X)
+#define clear_ip_bgp_external_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_out_cmd__X)
+#define no_bgp_log_neighbor_changes_cmd__VAR  (__activeVars_bgpd->no_bgp_log_neighbor_changes_cmd__X)
+#define show_ip_bgp_vpnv4_all_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_cmd__X)
+#define clear_bgp_instance_all_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_instance_all_soft_out_cmd__X)
+#define bgp_client_to_client_reflection_cmd__VAR  (__activeVars_bgpd->bgp_client_to_client_reflection_cmd__X)
+#define bgp_notify_open_msg_max__VAR  (__activeVars_bgpd->bgp_notify_open_msg_max__X)
+#define no_bgp_distance_cmd__VAR  (__activeVars_bgpd->no_bgp_distance_cmd__X)
+#define no_bgp_bestpath_compare_router_id_cmd__VAR  (__activeVars_bgpd->no_bgp_bestpath_compare_router_id_cmd__X)
+#define show_ip_bgp_vpnv4_all_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_prefix_cmd__X)
+#define show_ip_bgp_rsclient_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_rsclient_prefix_cmd__X)
+#define clear_ip_bgp_peer_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_cmd__X)
+#define no_bgp_distance2_cmd__VAR  (__activeVars_bgpd->no_bgp_distance2_cmd__X)
+#define clear_ip_bgp_instance_all_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_all_in_prefix_filter_cmd__X)
+#define clear_ip_bgp_all_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_soft_cmd__X)
+#define no_router_bgp_view_cmd__VAR  (__activeVars_bgpd->no_router_bgp_view_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_soft_in_cmd__X)
+#define bgp_default_ipv4_unicast_cmd__VAR  (__activeVars_bgpd->bgp_default_ipv4_unicast_cmd__X)
+#define show_ip_bgp_vpnv4_rd_prefix_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_rd_prefix_cmd__X)
+#define clear_ip_bgp_peer_vpnv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_vpnv4_soft_out_cmd__X)
+#define clear_ip_bgp_external_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_in_cmd__X)
+#define clear_ip_bgp_instance_peer_rsclient_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_instance_peer_rsclient_cmd__X)
+#define no_dump_bgp_updates_cmd__VAR  (__activeVars_bgpd->no_dump_bgp_updates_cmd__X)
+#define show_ip_bgp_ipv4_neighbor_advertised_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbor_advertised_route_cmd__X)
+#define show_ip_bgp_view_rsclient_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_rsclient_cmd__X)
+#define dump_bgp_all_interval_cmd__VAR  (__activeVars_bgpd->dump_bgp_all_interval_cmd__X)
+#define clear_bgp_ipv6_peer_group_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_soft_cmd__X)
+#define clear_bgp_peer_group_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_in_cmd__X)
+#define bgp_enforce_first_as_cmd__VAR  (__activeVars_bgpd->bgp_enforce_first_as_cmd__X)
+#define clear_ip_bgp_peer_group_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_ipv4_in_prefix_filter_cmd__X)
+#define show_ip_bgp_ipv4_route_map_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_route_map_cmd__X)
+#define no_bgp_timers_arg_cmd__VAR  (__activeVars_bgpd->no_bgp_timers_arg_cmd__X)
+#define no_bgp_network_import_check_cmd__VAR  (__activeVars_bgpd->no_bgp_network_import_check_cmd__X)
+#define clear_bgp_ipv6_as_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_soft_in_cmd__X)
+#define show_ip_bgp_community4_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community4_cmd__X)
+#define clear_ip_bgp_all_rsclient_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_rsclient_cmd__X)
+#define no_bgp_bestpath_med_cmd__VAR  (__activeVars_bgpd->no_bgp_bestpath_med_cmd__X)
+#define debug_bgp_normal_cmd__VAR  (__activeVars_bgpd->debug_bgp_normal_cmd__X)
+#define clear_bgp_ipv6_all_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_in_prefix_filter_cmd__X)
+#define clear_bgp_ipv6_external_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_out_cmd__X)
+#define no_bgp_distance_source_cmd__VAR  (__activeVars_bgpd->no_bgp_distance_source_cmd__X)
+#define show_ip_bgp_ipv4_paths_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_paths_cmd__X)
+#define clear_ip_bgp_peer_ipv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_out_cmd__X)
+#define show_ip_bgp_ipv4_regexp_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_regexp_cmd__X)
+#define bgp_import_thread__VAR  (__activeVars_bgpd->bgp_import_thread__X)
+#define show_ip_bgp_instance_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_summary_cmd__X)
+#define clear_bgp_as_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_soft_out_cmd__X)
+#define show_ip_bgp_neighbor_flap_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_flap_cmd__X)
+#define clear_bgp_as_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_out_cmd__X)
+#define clear_bgp_ipv6_external_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_in_cmd__X)
+#define show_ip_bgp_ipv4_neighbor_routes_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_neighbor_routes_cmd__X)
+#define clear_bgp_ipv6_peer_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_cmd__X)
+#define clear_ip_bgp_as_vpnv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_vpnv4_out_cmd__X)
+#define clear_bgp_ipv6_as_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_in_prefix_filter_cmd__X)
+#define clear_bgp_ipv6_external_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_soft_cmd__X)
+#define no_debug_bgp_update_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_update_cmd__X)
+#define no_bgp_confederation_identifier_arg_cmd__VAR  (__activeVars_bgpd->no_bgp_confederation_identifier_arg_cmd__X)
+#define clear_ip_bgp_as_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_cmd__X)
+#define clear_ip_bgp_as_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_in_prefix_filter_cmd__X)
+#define term_bgp_debug_normal__VAR  (__activeVars_bgpd->term_bgp_debug_normal__X)
+#define show_ip_bgp_ipv4_filter_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_filter_list_cmd__X)
+#define clear_bgp_ipv6_external_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_soft_in_cmd__X)
+#define bgp_notify_msg_max__VAR  (__activeVars_bgpd->bgp_notify_msg_max__X)
+#define clear_ip_bgp_peer_group_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_soft_out_cmd__X)
+#define clear_ip_bgp_external_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_soft_out_cmd__X)
+#define clear_ip_bgp_peer_group_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_soft_cmd__X)
+#define clear_ip_bgp_peer_ipv4_soft_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_ipv4_soft_cmd__X)
+#define clear_bgp_ipv6_external_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_cmd__X)
+#define conf_bgp_debug_normal__VAR  (__activeVars_bgpd->conf_bgp_debug_normal__X)
+#define bgp_confederation_peers_cmd__VAR  (__activeVars_bgpd->bgp_confederation_peers_cmd__X)
+#define show_ip_bgp_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbors_peer_cmd__X)
+#define bgp_distance_cmd__VAR  (__activeVars_bgpd->bgp_distance_cmd__X)
+#define no_debug_bgp_normal_cmd__VAR  (__activeVars_bgpd->no_debug_bgp_normal_cmd__X)
+#define debug_bgp_filter_cmd__VAR  (__activeVars_bgpd->debug_bgp_filter_cmd__X)
+#define show_ip_bgp_ipv4_community_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community_exact_cmd__X)
+#define no_bgp_router_id_val_cmd__VAR  (__activeVars_bgpd->no_bgp_router_id_val_cmd__X)
+#define show_ip_bgp_flap_prefix_list_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_prefix_list_cmd__X)
+#define clear_ip_bgp_peer_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_soft_in_cmd__X)
+#define clear_ip_bgp_dampening_address_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_dampening_address_cmd__X)
+#define clear_bgp_ipv6_as_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_as_soft_cmd__X)
+#define show_ip_bgp_rsclient_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_rsclient_route_cmd__X)
+#define clear_ip_bgp_external_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_cmd__X)
+#define show_ip_bgp_route_map_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_route_map_cmd__X)
+#define clear_ip_bgp_dampening_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_dampening_cmd__X)
+#define clear_bgp_external_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_external_soft_in_cmd__X)
+#define debug_bgp_keepalive_cmd__VAR  (__activeVars_bgpd->debug_bgp_keepalive_cmd__X)
+#define dump_bgp_routes_cmd__VAR  (__activeVars_bgpd->dump_bgp_routes_cmd__X)
+#define clear_ip_bgp_peer_group_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_soft_in_cmd__X)
+#define clear_ip_bgp_peer_group_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_group_cmd__X)
+#define clear_bgp_instance_all_soft_cmd__VAR  (__activeVars_bgpd->clear_bgp_instance_all_soft_cmd__X)
+#define show_ip_bgp_ipv4_cidr_only_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_cidr_only_cmd__X)
+#define bgp_bestpath_med_cmd__VAR  (__activeVars_bgpd->bgp_bestpath_med_cmd__X)
+#define term_bgp_debug_packet__VAR  (__activeVars_bgpd->term_bgp_debug_packet__X)
+#define bgp_vpnv4_node__VAR  (__activeVars_bgpd->bgp_vpnv4_node__X)
+#define clear_ip_bgp_as_vpnv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_vpnv4_in_cmd__X)
+#define bgp_scan_interval__VAR  (__activeVars_bgpd->bgp_scan_interval__X)
+#define bgp_bestpath_aspath_ignore_cmd__VAR  (__activeVars_bgpd->bgp_bestpath_aspath_ignore_cmd__X)
+#define show_ip_bgp_vpnv4_all_neighbors_peer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_vpnv4_all_neighbors_peer_cmd__X)
+#define bgp_status_msg_max__VAR  (__activeVars_bgpd->bgp_status_msg_max__X)
+#define clear_ip_bgp_all_vpnv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_vpnv4_out_cmd__X)
+#define clear_ip_bgp_as_ipv4_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_out_cmd__X)
+#define show_ip_bgp_view_rsclient_route_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_view_rsclient_route_cmd__X)
+#define show_ip_bgp_ipv4_community_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community_cmd__X)
+#define show_ip_bgp_community2_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_community2_exact_cmd__X)
+#define show_ip_bgp_flap_regexp_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_flap_regexp_cmd__X)
+#define bgp_redistribute_ipv4_rmap_metric_cmd__VAR  (__activeVars_bgpd->bgp_redistribute_ipv4_rmap_metric_cmd__X)
+#define clear_bgp_ipv6_peer_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_out_cmd__X)
+#define clear_ip_bgp_all_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_cmd__X)
+#define clear_ip_bgp_external_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_external_ipv4_in_prefix_filter_cmd__X)
+#define bgp_damp_unset_cmd__VAR  (__activeVars_bgpd->bgp_damp_unset_cmd__X)
+#define show_ip_bgp_neighbor_received_prefix_filter_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_neighbor_received_prefix_filter_cmd__X)
+#define clear_bgp_ipv6_peer_group_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_peer_group_in_cmd__X)
+#define bgp_dump_node__VAR  (__activeVars_bgpd->bgp_dump_node__X)
+#define clear_bgp_all_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_all_in_cmd__X)
+#define bgp_damp_set_cmd__VAR  (__activeVars_bgpd->bgp_damp_set_cmd__X)
+#define no_dump_bgp_routes_cmd__VAR  (__activeVars_bgpd->no_dump_bgp_routes_cmd__X)
+#define show_ip_bgp_ipv4_community4_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community4_cmd__X)
+#define no_bgp_confederation_peers_cmd__VAR  (__activeVars_bgpd->no_bgp_confederation_peers_cmd__X)
+#define bgp_graceful_restart_cmd__VAR  (__activeVars_bgpd->bgp_graceful_restart_cmd__X)
+#define show_ip_bgp_ipv4_community_list_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community_list_exact_cmd__X)
+#define bgp_scan_time_cmd__VAR  (__activeVars_bgpd->bgp_scan_time_cmd__X)
+#define bgp_dump_routes__VAR  (__activeVars_bgpd->bgp_dump_routes__X)
+#define show_ip_bgp_ipv4_community3_exact_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community3_exact_cmd__X)
+#define clear_ip_bgp_peer_vpnv4_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_peer_vpnv4_in_cmd__X)
+#define bgp_notify_update_msg_max__VAR  (__activeVars_bgpd->bgp_notify_update_msg_max__X)
+#define clear_bgp_ipv6_external_soft_out_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_external_soft_out_cmd__X)
+#define clear_ip_bgp_as_ipv4_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_as_ipv4_in_prefix_filter_cmd__X)
+#define show_bgp_instance_ipv6_neighbors_cmd__VAR  (__activeVars_bgpd->show_bgp_instance_ipv6_neighbors_cmd__X)
+#define show_ip_bgp_instance_neighbors_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_neighbors_cmd__X)
+#define bgp_cluster_id_cmd__VAR  (__activeVars_bgpd->bgp_cluster_id_cmd__X)
+#define clear_ip_bgp_all_ipv4_soft_out_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_ipv4_soft_out_cmd__X)
+#define bgp_redistribute_ipv4_metric_cmd__VAR  (__activeVars_bgpd->bgp_redistribute_ipv4_metric_cmd__X)
+#define clear_bgp_instance_all_cmd__VAR  (__activeVars_bgpd->clear_bgp_instance_all_cmd__X)
+#define clear_bgp_as_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_as_soft_in_cmd__X)
+#define bgp_cluster_id32_cmd__VAR  (__activeVars_bgpd->bgp_cluster_id32_cmd__X)
+#define show_ip_bgp_ipv4_prefix_longer_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_prefix_longer_cmd__X)
+#define no_bgp_deterministic_med_cmd__VAR  (__activeVars_bgpd->no_bgp_deterministic_med_cmd__X)
+#define show_ip_bgp_ipv4_community2_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_ipv4_community2_cmd__X)
+#define no_bgp_redistribute_ipv4_metric_rmap_cmd__VAR  (__activeVars_bgpd->no_bgp_redistribute_ipv4_metric_rmap_cmd__X)
+#define no_bgp_cluster_id_cmd__VAR  (__activeVars_bgpd->no_bgp_cluster_id_cmd__X)
+#define bgp_ipv4_multicast_node__VAR  (__activeVars_bgpd->bgp_ipv4_multicast_node__X)
+#define clear_bgp_peer_group_soft_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_soft_in_cmd__X)
+#define neighbor_ebgp_multihop_cmd__VAR  (__activeVars_bgpd->neighbor_ebgp_multihop_cmd__X)
+#define clear_ip_bgp_all_soft_in_cmd__VAR  (__activeVars_bgpd->clear_ip_bgp_all_soft_in_cmd__X)
+#define clear_bgp_ipv6_all_in_cmd__VAR  (__activeVars_bgpd->clear_bgp_ipv6_all_in_cmd__X)
+#define show_ip_bgp_instance_rsclient_summary_cmd__VAR  (__activeVars_bgpd->show_ip_bgp_instance_rsclient_summary_cmd__X)
+#define clear_bgp_peer_group_in_prefix_filter_cmd__VAR  (__activeVars_bgpd->clear_bgp_peer_group_in_prefix_filter_cmd__X)
+#define bgp_distance_source_cmd__VAR  (__activeVars_bgpd->bgp_distance_source_cmd__X)
+#define no_bgp_timers_cmd__VAR  (__activeVars_bgpd->no_bgp_timers_cmd__X)
+#define bgp_redistribute_ipv4_metric_rmap_cmd__VAR  (__activeVars_bgpd->bgp_redistribute_ipv4_metric_rmap_cmd__X)
+#define show_bgp_route_map_cmd__VAR  (__activeVars_bgpd->show_bgp_route_map_cmd__X)
+
+#endif

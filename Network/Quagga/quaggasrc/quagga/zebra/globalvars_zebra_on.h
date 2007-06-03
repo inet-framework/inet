@@ -1,0 +1,16 @@
+#define debug_zebra_packet_cmd  debug_zebra_packet_cmd__VAR
+#define zebra_debug_event  zebra_debug_event__VAR
+#define zebrad  zebrad__VAR
+#define debug_zebra_kernel_cmd  debug_zebra_kernel_cmd__VAR
+#define no_debug_zebra_events_cmd  no_debug_zebra_events_cmd__VAR
+#define debug_zebra_packet_direct_cmd  debug_zebra_packet_direct_cmd__VAR
+#define show_zebra_client_cmd  show_zebra_client_cmd__VAR
+#define no_debug_zebra_packet_cmd  no_debug_zebra_packet_cmd__VAR
+#define debug_zebra_packet_detail_cmd  debug_zebra_packet_detail_cmd__VAR
+#define no_debug_zebra_kernel_cmd  no_debug_zebra_kernel_cmd__VAR
+#define debug_zebra_events_cmd  debug_zebra_events_cmd__VAR
+#define no_debug_zebra_packet_direct_cmd  no_debug_zebra_packet_direct_cmd__VAR
+#define zebra_debug_packet  zebra_debug_packet__VAR
+#define show_debugging_zebra_cmd  show_debugging_zebra_cmd__VAR
+#define zebra_debug_kernel  zebra_debug_kernel__VAR
+#define zebra_interface_cmd  zebra_interface_cmd__VAR
