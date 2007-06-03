@@ -21,7 +21,7 @@ ALL_INET_INCLUDES=$(CONTRACT_INCLUDES) -I$(ROOT)/Network/IPv4 -I$(ROOT)/Network/
 ALL_MPLS_INCLUDES=-I$(ROOT)/Network/MPLS -I$(ROOT)/Network/LDP -I$(ROOT)/Network/RSVP_TE -I$(ROOT)/Network/TED -I$(ROOT)/Network/Extras -I$(ROOT)/Nodes/MPLS
 ALL_IPv6_INCLUDES=-I$(ROOT)/Network/IPv6 -I$(ROOT)/Network/ICMPv6 -I$(ROOT)/Nodes/IPv6
 ALL_MF_INCLUDES=-I$(ROOT)/World -I$(ROOT)/Mobility -I$(ROOT)/NetworkInterfaces/MFCore -I$(ROOT)/NetworkInterfaces/MF80211 -I$(ROOT)/NetworkInterfaces/MF80211/macLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/decider -I$(ROOT)/NetworkInterfaces/MF80211/phyLayer/snrEval -I$(ROOT)/NetworkInterfaces/Ieee80211 -I$(ROOT)/NetworkInterfaces/Ieee80211/Mac -I$(ROOT)/NetworkInterfaces/Ieee80211/Mgmt -I$(ROOT)/NetworkInterfaces/Radio
-QUAGGA_INCLUDES=-I$(ROOT)/Network/Quagga -I$(ROOT)/Network/Quagga/UnitTest
+QUAGGA_INCLUDES=-I$(ROOT)/Network/Quagga
 
 #ALL_MODEL_OPTS=$(OPTS) -w $(ALL_INET_INCLUDES) $(ALL_MPLS_INCLUDES) $(ALL_IPv6_INCLUDES)
 ALL_MODEL_OPTS=$(OPTS) -n
@@ -81,9 +81,8 @@ inetbase:
 	cd Network/LDP && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4 -I../TED -I../RSVP_TE -I../../Transport/UDP -I../../Transport/TCP
 	cd Network/RSVP_TE && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4 -I../TED
 	cd Network/TED && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../MPLS -I../IPv4 -I../RSVP_TE
-	cd Network/Extras && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES)
+	cd Network/Extras && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I../IPv4
 	cd Network/Quagga && $(MAKEMAKE) $(OPTS) -n -r $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES) $(ALL_MF_INCLUDES)
-	cd Network/Quagga/UnitTest && $(MAKEMAKE) $(OPTS) -n -r $(ALL_MPLS_INCLUDES) $(ALL_INET_INCLUDES) $(ALL_MF_INCLUDES) $(QUAGGA_INCLUDES)
 
 	cd Network/OSPFv2 && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I../IPv4 -IRouter -IInterface -IMessageHandler -INeighbor
 	cd Network/OSPFv2/Interface && $(MAKEMAKE) $(OPTS) -n -r $(CONTRACT_INCLUDES) -I. -I.. -I../../IPv4 -I../Neighbor -I../Router -I../MessageHandler
