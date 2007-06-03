@@ -7,23 +7,7 @@ extern "C" {
 
 #include "zebra_env.h"
 
-// pieces from quaggasrc needed in Daemon
-
-extern struct GlobalVars * __activeVars;
-
-extern void GlobalVars_initializeActiveSet_ripd();
-extern void GlobalVars_initializeActiveSet_ospfd();
-extern void GlobalVars_initializeActiveSet_zebra();
-extern void GlobalVars_initializeActiveSet_lib();
-extern void GlobalVars_initializeActiveSet_bgpd();
-
-extern struct GlobalVars * GlobalVars_createActiveSet();
-extern int* GlobalVars_errno();
-
-//
-
 #define	HASFLAG(a, b)	((a & b) == b)
-
 
 struct timezone;
 
@@ -107,10 +91,13 @@ unsigned long oppsim_inet_addr(const char *str);
 int oppsim_inet_aton(const char *cp, struct in_addr *addr);
 int oppsim_inet_pton (int af, const char *strptr, void *addrptr);
 const char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size);
+int oppsim_getopt_long (int argc, char *const *argv, const char *shortopts, const struct option *longopts, int *longind);
 
 unsigned int oppsim_sleep(unsigned int seconds);
 
 extern time_t zero_time;
+
+int oppsim_FD_IS_SET(SOCKET fd, fd_set *set);
 
 #ifdef __cplusplus
 };

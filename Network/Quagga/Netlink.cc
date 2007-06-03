@@ -453,7 +453,7 @@ RoutingEntry* Netlink::route_command(int cmd_type, ret_t* rm)
 
 void Netlink::route_del(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric)
 {
-    Daemon *libm = DAEMON;
+    Daemon *libm = current_module;
 
     RoutingEntry *re = rt->findRoutingEntry(destAddr, netmaskAddr, gwAddr, metric);
     ASSERT(re);
@@ -467,7 +467,7 @@ void Netlink::route_del(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwA
 
 RoutingEntry* Netlink::route_new(IPAddress destAddr, IPAddress netmaskAddr, IPAddress gwAddr, int index, int metric)
 {
-    Daemon *libm = DAEMON;
+    Daemon *libm = current_module;
 
     RoutingEntry *re = new RoutingEntry();
     re->host = destAddr;

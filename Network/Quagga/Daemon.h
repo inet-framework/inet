@@ -26,6 +26,18 @@
 
 #include "zebra_env.h"
 
+extern "C" {
+
+extern struct GlobalVars_lib * __activeVars_lib;
+extern void GlobalVars_initializeActiveSet_lib();
+extern struct GlobalVars_lib * GlobalVars_createActiveSet_lib();
+
+extern int* GlobalVars_errno();
+extern int* GlobalVars_optind();
+extern char** GlobalVars_optarg();
+
+}
+
 #define	FD_EXIST(a)		(a >= 0 && a < fd.size() && a < FD_SETSIZE)
 
 class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface, public UDPSocket::CallbackInterface
@@ -37,10 +49,11 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface, public
         struct passwd pwd_entry;
         struct group grp_entry;
 
-        struct GlobalVars *varp;
+        struct GlobalVars_lib *varp_lib;
         
 	protected:
-		void init();        
+		void init(); 
+        virtual void activate();       
 
     public:
     
@@ -148,7 +161,7 @@ class Daemon : public cSimpleModule, public TCPSocket::CallbackInterface, public
 
 extern Daemon *current_module;
 
-#define DAEMON          (check_and_cast<Daemon*>(simulation.runningModule()))
+//#define DAEMON          (check_and_cast<Daemon*>(simulation.runningModule()))
 
 #ifdef __cplusplus
 extern "C" {

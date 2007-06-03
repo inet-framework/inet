@@ -1,3 +1,9 @@
+2007-06-03  Vojtech Janota
+
+	* global variables per-daemon to workaround structure size limitations
+	encountered in MSVC71
+	* removed UnitTest (better replacement soon to come)
+
 2006-10-22  Vojtech Janota
 
 	* several fixes in oppsim_kernel

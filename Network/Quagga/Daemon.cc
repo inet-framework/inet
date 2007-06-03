@@ -14,7 +14,7 @@
 *********************************************************************/
 #include "Daemon.h"
 
-#include "SocketMsg.h"
+#include "ByteArrayMessage.h"
 
 #include "IPv4InterfaceData.h"
 
@@ -26,6 +26,8 @@
 #define QUAGGA_GID  100
 
 #include "oppsim_kernel.h"
+
+struct GlobalVars_lib *__activeVars_lib = NULL;
 
 void Daemon::init()
 {
@@ -62,9 +64,8 @@ void Daemon::init()
 	current_module = this;
 	
     // global variable structure pointer
-    varp = GlobalVars_createActiveSet();
-    ASSERT(varp);
-    __activeVars = varp;
+    varp_lib = GlobalVars_createActiveSet_lib();
+    __activeVars_lib = varp_lib;
 
    	// initialize global variables
    	GlobalVars_initializeActiveSet_lib();
@@ -288,8 +289,13 @@ void Daemon::sleep(simtime_t interval)
 	
 	setBlocked(false);
 	
-	current_module = DAEMON;
-    __activeVars = current_module->varp;
+    activate();
+}
+
+void Daemon::activate()
+{
+    current_module = this;
+    __activeVars_lib = varp_lib;
 }
 
 bool Daemon::receiveAndHandleMessage(double timeout, const char *cmd)
@@ -306,9 +312,8 @@ bool Daemon::receiveAndHandleMessage(double timeout, const char *cmd)
     	else msg = receive(timeout);
     
     	setBlocked(false);
-    
-    	current_module = DAEMON;
-    	__activeVars = current_module->varp;
+        
+        activate();
 	}
 	else
 	{

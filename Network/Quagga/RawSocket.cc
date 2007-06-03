@@ -3,7 +3,7 @@
 
 #include "RawSocket.h"
 
-#include "SocketMsg.h"
+#include "ByteArrayMessage.h"
 
 #include "IPControlInfo.h"
 #include "IPDatagram.h"
@@ -52,7 +52,7 @@ int RawSocket::send(const struct msghdr *message, int flags)
 
     // create payload
 
-    SocketMsg *msg = new SocketMsg("data");
+    ByteArrayMessage *msg = new ByteArrayMessage("data");
 
     msg->setDataFromBuffer(message->msg_iov[1].iov_base, length);
     msg->setByteLength(length);

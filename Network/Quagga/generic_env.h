@@ -623,14 +623,16 @@ struct oppsimt_fd_set
 
 #define FD_ISSET(fd, set) oppsim_FD_IS_SET((SOCKET)(fd), (fd_set *)(set))
 
-static int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
-{
-    u_int i;
-    for (i = 0; i < set->fd_count; i++)
-        if (set->fd_array[i] == fd)
-            return 1;
-    return 0;
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// XXX FIXME: why not macro like others?
+extern int oppsim_FD_IS_SET(SOCKET fd, fd_set *set);
+
+#ifdef __cplusplus
+};
+#endif
 
 /*
  * TCP options.

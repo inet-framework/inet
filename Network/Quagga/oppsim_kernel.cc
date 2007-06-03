@@ -9,10 +9,11 @@
 
 #include "RoutingTable.h"
 #include "RoutingTableAccess.h"
+#include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
 
-#include "SocketMsg.h"
+#include "ByteArrayMessage.h"
 
 #include "UDPControlInfo_m.h"
 #include "TCPCommand_m.h"
@@ -25,7 +26,6 @@
 time_t zero_time = 0; // start of simulation run or whatever
 
 Daemon *current_module = NULL;
-struct GlobalVars *__activeVars = NULL;
 
 // ****************
 
@@ -168,7 +168,7 @@ uid_t oppsim_getuid(void)
 
 uid_t oppsim_geteuid(void)
 {
-    int euid = DAEMON->euid;
+    int euid = current_module->euid;
 
     EV << "geteuid: return " << euid << endl;
 
@@ -188,7 +188,7 @@ void oppsim_exit(int status)
 
 pid_t oppsim_getpid(void)
 {
-    return DAEMON->id();
+    return current_module->id();
 }
 
 int oppsim_daemon (int nochdir, int noclose)
@@ -255,7 +255,7 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         EV << "IP_MULTICAST_IF: " << addr << endl;
 
         RoutingTable *rt = RoutingTableAccess().get();
-
+        
         InterfaceEntry *ie = rt->interfaceByAddress(addr);
         if (!ie)
         {
@@ -283,12 +283,11 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
 
             opp_error("there is no interface with address %s", addr.str().c_str());
         }
-
+        
         UDPSocket *udp = dm->getIfUdpSocket(socket);
         if(udp)
         {
             udp->setMulticastInterface(ie->interfaceId());
-
             return 0;
         }
 
@@ -296,7 +295,6 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         if(raw)
         {
             raw->setMulticastInterface(ie->interfaceId());
-
             return 0;
         }
 
@@ -524,7 +522,7 @@ int oppsim_getsockname(int socket, struct sockaddr *address, socklen_t *address_
     ASSERT(false);
 }
 
-int getIpHeader(SocketMsg *srcMsg, IPControlInfo *srcInfo, void* &dstPtr, int &dstLen)
+int getIpHeader(ByteArrayMessage *srcMsg, IPControlInfo *srcInfo, void* &dstPtr, int &dstLen)
 {
     int header_length = sizeof(struct ip);
 
@@ -566,7 +564,7 @@ ssize_t receive(int socket, void *buf, size_t nbyte, bool dgram, struct sockaddr
         if(!m)
             break;
 
-        SocketMsg *msg = check_and_cast<SocketMsg*>(m);
+        ByteArrayMessage *msg = check_and_cast<ByteArrayMessage*>(m);
         
         if(dgram && addr)
         {
@@ -634,7 +632,7 @@ ssize_t receive_raw(int socket, struct msghdr *message, int flags)
 
     ASSERT(!flags || flags == MSG_PEEK);
 
-    SocketMsg *msg = check_and_cast<SocketMsg*>(dm->getSocketMessage(socket, !peek));
+    ByteArrayMessage *msg = check_and_cast<ByteArrayMessage*>(dm->getSocketMessage(socket, !peek));
     IPControlInfo *ipControlInfo = check_and_cast<IPControlInfo*>(msg->controlInfo());
 
     if(message->msg_name)
@@ -834,23 +832,22 @@ ssize_t nl_request(int socket, const void *message, size_t length, int flags)
 
 ssize_t oppsim_sendmsg(int socket, const struct msghdr *message, int flags)
 {
-    Daemon *dm = current_module; //DAEMON
-
     EV << "sendmsg: socket=" << socket << " msghdr=" << message << " flags=" << flags << endl;
 
-    if(dm->getIfNetlinkSocket(socket))
+    if(current_module->getIfNetlinkSocket(socket))
     {
         ASSERT(message->msg_iovlen == 1);
         ASSERT(flags == 0);
 
-        EV << "message->msg_flags=" << message->msg_flags << endl;
+        EV << "(Netlink) message->msg_flags=" << message->msg_flags << endl;
 
         return nl_request(socket, message->msg_iov[0].iov_base, message->msg_iov[0].iov_len, message->msg_flags);
     }
 
-    RawSocket *raw = dm->getIfRawSocket(socket);
+    RawSocket *raw = current_module->getIfRawSocket(socket);
     if(raw)
     {
+        EV << "(Raw)" << endl;
         return raw->send(message, flags);
     }
 
@@ -897,7 +894,7 @@ ssize_t oppsim_sendto(int socket, const void *message, size_t length, int flags,
 
         EV << "destAddr=" << destAddr << " port=" << port << endl;
 
-        SocketMsg *msg = new SocketMsg("data");
+        ByteArrayMessage *msg = new ByteArrayMessage("data");
 
         ASSERT(length > 0);
 
@@ -1003,7 +1000,6 @@ int oppsim_open(const char *path, int oflag, ...)
 
 int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout)
 {
-    Daemon *dm = current_module; //DAEMON
     TCPSocket *tcp;
 
     EV << "select: nfds=" << nfds << " readfds=" << readfds << " writefds=" << writefds << " errorfds=" <<
@@ -1029,13 +1025,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
             {
                 EV << "read " << i;
     
-                if(dm->getSocketMessage(i))
+                if(current_module->getSocketMessage(i))
                 {
                     EV << " (ready)" << endl;
                     ++success;
                     continue;
                 }
-                else if(dm->getIfTcpSocket(i) && dm->hasQueuedConnections(i))
+                else if(current_module->getIfTcpSocket(i) && current_module->hasQueuedConnections(i))
                 {
                     EV << " (ready)" << endl;
                     ++success;
@@ -1087,13 +1083,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         if(timeout)
         {
             double d = limit - simulation.simTime();
-            if(!dm->receiveAndHandleMessage(d, "select"))
+            if(!current_module->receiveAndHandleMessage(d, "select"))
                return 0; // timeout received before any event arrived
         }
         else
         {
             // with no timeout
-            dm->receiveAndHandleMessage(0.0, "select");
+            current_module->receiveAndHandleMessage(0.0, "select");
         }
     }
 
@@ -1107,13 +1103,13 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
         {
             bool active = false;
 
-            if(dm->getSocketMessage(i))
+            if(current_module->getSocketMessage(i))
             {
                 ev << " active (data ready)" << endl;
                 active = true;
             }
 
-            if(dm->getIfTcpSocket(i) && dm->hasQueuedConnections(i))
+            if(current_module->getIfTcpSocket(i) && current_module->hasQueuedConnections(i))
             {
                 ev << " active (incomming connection)" << endl;
                 active = true;
@@ -1232,16 +1228,14 @@ ssize_t oppsim_writev(int fildes, const struct iovec *iov, int iovcnt)
 
 ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
 {
-    Daemon *dm = current_module; //DAEMON;
-
     EV << "write: fildes=" << fildes << " buf=" << buf << " nbyte=" << nbyte << endl;
 
-    TCPSocket *tcp = dm->getIfTcpSocket(fildes);
+    TCPSocket *tcp = current_module->getIfTcpSocket(fildes);
     if(tcp)
     {
         EV << "write into tcp socket" << endl;
 
-        SocketMsg *msg = new SocketMsg("data");
+        ByteArrayMessage *msg = new ByteArrayMessage("data");
 
         msg->setDataFromBuffer(buf, nbyte);
         msg->setByteLength(nbyte);
@@ -1251,7 +1245,7 @@ ssize_t oppsim_write(int fildes, const void *buf, size_t nbyte)
         return nbyte;
     }
 
-    FILE *stream = dm->getIfStream(fildes);
+    FILE *stream = current_module->getIfStream(fildes);
     if(stream)
     {
         EV << "regular file descriptor, use fwrite" << endl;
@@ -1637,3 +1631,15 @@ const char *oppsim_inet_ntop(int af, const void *src, char *dst, size_t size)
         opp_error("oppsim_inet_ntop: address family not supported");
     }
 }
+
+// XXX FIXME: why not defined as macro in generic_env.h as FD_SET et friends?
+int oppsim_FD_IS_SET(SOCKET fd, fd_set *set)
+{
+    u_int i;
+    for (i = 0; i < set->fd_count; i++)
+        if (set->fd_array[i] == fd)
+            return 1;
+    return 0;
+}
+
+
