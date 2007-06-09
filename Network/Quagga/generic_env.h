@@ -43,7 +43,6 @@
 #undef uid_t
 #undef gid_t
 #undef pid_t
-#undef time_t
 #undef socklen_t
 #undef ssize_t
 #undef u_char
@@ -490,7 +489,6 @@ int strcasecmp(const char *s1, const char *s2);
 #define uid_t       unsigned int
 #define gid_t       unsigned int
 #define pid_t       int
-#define time_t      long int
 #define socklen_t   unsigned int
 #define ssize_t     long int
 #define u_char      unsigned char
