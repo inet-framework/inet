@@ -1,0 +1,6 @@
+ifconfig:
+name: eth0 inet_addr: 195.1.95.138 Mask: 255.255.255.252 MTU: 1500 Metric: 1
+name: eth1 inet_addr: 195.1.95.142 Mask: 255.255.255.252 MTU: 1500 Metric: 1
+name: eth2 inet_addr: 195.1.95.177 Mask: 255.255.255.252 MTU: 1500 Metric: 1
+name: eth3 inet_addr: 195.1.95.181 Mask: 255.255.255.252 MTU: 1500 Metric: 1
+ifconfigend.

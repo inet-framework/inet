@@ -1,0 +1,6 @@
+ifconfig:
+name: eth0 inet_addr: 195.1.95.66 Mask: 255.255.255.192 MTU: 1500 Metric: 1
+ifconfigend.
+route:
+default:	195.1.95.65	0.0.0.0	G	0	eth0
+routeend.
