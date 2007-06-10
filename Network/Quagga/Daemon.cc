@@ -700,11 +700,11 @@ void Daemon::socketDatagramArrived(int sockId, void *yourPtr, cMessage *msg, UDP
 
 void Daemon::socketPeerClosed(int sockId, void *yourPtr)
 {
-	int socket = (long)yourPtr;	
+	int socket = (long)yourPtr;
+    
+    EV << "peer closed socket=" << socket << endl;	
 	
 	ASSERT(FD_EXIST(socket));
-	
-	fd[socket].error = -1; // XXX FIXME (???)
 	
 	if(fd[socket].type == FD_TCP) {
 		socketMap.removeSocket(fd[socket].tcp);

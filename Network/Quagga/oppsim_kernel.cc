@@ -409,6 +409,18 @@ int oppsim_setsockopt(int socket, int level, int option_name, const void *option
         return 0;
     }
 
+    if(level == IPPROTO_IP && option_name == IP_TTL)
+    {
+        EV << "IP_TTL option" << endl;
+
+        ASSERT(option_len == sizeof(int));
+
+        // TCPSocket currently does not support setting time-to-live        
+        EV << "TTL not supported, option will be ignored" << endl;
+        
+        return 0;
+    }
+
     ASSERT(false);
 }
 
@@ -551,6 +563,13 @@ int getIpHeader(ByteArrayMessage *srcMsg, IPControlInfo *srcInfo, void* &dstPtr,
 
 ssize_t receive(int socket, void *buf, size_t nbyte, bool dgram, struct sockaddr *addr, socklen_t *len)
 {
+    TCPSocket *tcp =  current_module->getIfTcpSocket(socket);
+    if(tcp && tcp->state() == TCPSocket::PEER_CLOSED)
+    {
+        // no more data available on closed socket
+        return 0;
+    }
+     
     while(current_module->isBlocking(socket) && !current_module->getSocketMessage(socket, false))
     {
         current_module->receiveAndHandleMessage(0.0, "read");
@@ -1031,7 +1050,7 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
                     ++success;
                     continue;
                 }
-                else if(current_module->getIfTcpSocket(i) && current_module->hasQueuedConnections(i))
+                else if(current_module->getIfTcpSocket(i) && (current_module->hasQueuedConnections(i) || current_module->getTcpSocket(i)->state() == TCPSocket::PEER_CLOSED))
                 {
                     EV << " (ready)" << endl;
                     ++success;
@@ -1112,6 +1131,12 @@ int oppsim_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds,
             if(current_module->getIfTcpSocket(i) && current_module->hasQueuedConnections(i))
             {
                 ev << " active (incomming connection)" << endl;
+                active = true;
+            }
+            
+            if(current_module->getIfTcpSocket(i) && current_module->getTcpSocket(i)->state() == TCPSocket::PEER_CLOSED)
+            {
+                ev << " active (peer closed connection)" << endl;
                 active = true;
             }
 
