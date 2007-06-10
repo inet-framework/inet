@@ -434,7 +434,8 @@ RoutingEntry* Netlink::route_command(int cmd_type, ret_t* rm)
         index = *(int *) RTA_DATA (tb[RTA_OIF]);
     }
 
-    netmaskAddr = IPAddress(IPAddress("255.255.255.255").getInt() ^ ((1 << (32 - rm->rtm.rtm_dst_len)) - 1));
+    if(rm->rtm.rtm_dst_len == 0) netmaskAddr = IPAddress();
+    else netmaskAddr = IPAddress(IPAddress("255.255.255.255").getInt() ^ ((1 << (32 - rm->rtm.rtm_dst_len)) - 1));
 
     // execute command
 
