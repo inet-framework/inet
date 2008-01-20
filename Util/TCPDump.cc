@@ -18,7 +18,12 @@
 
 
 #include "TCPDump.h"
+#include "../../Util/HeaderSerializers/IPSerializer.h"
+#ifndef _MSC_VER
+#include <netinet/in.h>  // htonl, ntohl, ...
+#endif
 
+#define BUFFERSIZE (1<<16)
 
 TCPDumper::TCPDumper(std::ostream& out)
 {
@@ -150,12 +155,56 @@ TCPDump::TCPDump(const char *name, cModule *parent) :
 {
 }
 
+void TCPDump::initialize()
+{
+    struct pcap_hdr fh;
+    const char* file = this->par("dumpFile");
+
+    tcpdump.dumpfile = NULL;
+    tcpdump.buffer = NULL;
+    
+    if (strcmp(file, "") != 0)
+    {
+        tcpdump.buffer = (unsigned char *)malloc(BUFFERSIZE);
+        if (tcpdump.buffer)
+        {
+            tcpdump.dumpfile = fopen(file, "w");
+            if (tcpdump.dumpfile) 
+            {
+                fh.magic = PCAP_MAGIC;
+                fh.version_major = 2;
+                fh.version_minor = 4;
+                fh.thiszone = 0;
+                fh.sigfigs = 0;
+                fh.snaplen = 65535;
+                fh.network = 1;
+                fwrite(&fh, sizeof(struct pcap_hdr), 1, tcpdump.dumpfile);
+            }
+            else
+            {
+                free(tcpdump.buffer);
+                tcpdump.buffer = NULL;
+                EV << "Can not open dumpfile\n";
+            }
+        }
+        else
+        {
+            EV << "Can not allocate dumpbuffer\n";
+        }
+    }
+}
+
 void TCPDump::handleMessage(cMessage *msg)
 {
+    int index, outGate;
+    bool l2r;
+
+    l2r = msg->arrivalGate()->isName("ifIn");
+    index = msg->arrivalGate()->index();
+
     // dump
     if (!ev.disabled())
     {
-        bool l2r = msg->arrivedOn("in1");
         if (dynamic_cast<TCPSegment *>(msg))
         {
             tcpdump.dump(l2r, "", (TCPSegment *)msg, std::string(l2r?"A":"B"),std::string(l2r?"B":"A"));
@@ -184,12 +233,44 @@ void TCPDump::handleMessage(cMessage *msg)
         }
     }
 
+    if (tcpdump.dumpfile)
+    {
+        if (check_and_cast<IPDatagram *>(msg))
+        {
+            simtime_t stime = simulation.simTime();
+            struct pcaprec_hdr ph;
+
+            ph.ts_sec = (uint32_t)stime;
+            ph.ts_usec = (uint32_t)((stime - ph.ts_sec) * 1000000);
+            dummy_ethernet_hdr.l3pid = htons(0x800);
+            IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
+            int length = IPSerializer().serialize(ipPacket, tcpdump.buffer, BUFFERSIZE);
+            ph.incl_len = length + sizeof(struct eth_hdr);
+            ph.orig_len = ph.incl_len;
+            fwrite(&ph, sizeof(struct pcaprec_hdr), 1, tcpdump.dumpfile);
+            fwrite(&dummy_ethernet_hdr, sizeof(struct eth_hdr), 1, tcpdump.dumpfile);
+            fwrite(tcpdump.buffer, length, 1, tcpdump.dumpfile);
+        }
+    }
+
     // forward
-    send(msg, msg->arrivedOn("in1") ? "out2" : "out1");
+    if (l2r)
+        outGate = findGate("nwOut",index);
+    else
+        outGate = findGate("ifOut",index);
+    send(msg, outGate);
 }
 
 void TCPDump::finish()
 {
     tcpdump.dump("", "tcpdump finished");
+    if (tcpdump.dumpfile)
+    {
+        fclose(tcpdump.dumpfile);
+    }
+    if (tcpdump.buffer)
+    {
+        free(tcpdump.buffer);
+    }
 }
 

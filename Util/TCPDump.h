@@ -24,7 +24,41 @@
 #include "IPDatagram_m.h"
 #include "IPv6Datagram_m.h"
 #include "TCPSegment.h"
+#include <HeaderSerializers/headers/defs.h>
 
+#define PCAP_MAGIC 0xa1b2c3d4
+
+#pragma pack (1)
+/* "libpcap" file header (minus magic number). */
+struct pcap_hdr {
+    uint32_t magic;         /* magic */
+    uint16_t version_major; /* major version number */
+    uint16_t version_minor; /* minor version number */
+    uint32_t thiszone;      /* GMT to local correction */
+    uint32_t sigfigs;       /* accuracy of timestamps */
+    uint32_t snaplen;       /* max length of captured packets, in octets */
+    uint32_t network;       /* data link type */
+};
+
+/* "libpcap" record header. */
+struct pcaprec_hdr {
+    uint32_t ts_sec;   /* timestamp seconds */
+    uint32_t ts_usec;  /* timestamp microseconds */
+    uint32_t incl_len; /* number of octets of packet saved in file */
+    uint32_t orig_len; /* actual length of packet */
+};
+
+struct eth_hdr{
+    uint8_t dest_addr[6];
+    uint8_t src_addr[6];
+    uint16_t l3pid;
+};
+
+static struct eth_hdr dummy_ethernet_hdr = {
+    {0x02, 0x02, 0x02, 0x02, 0x02, 0x02},
+    {0x01, 0x01, 0x01, 0x01, 0x01, 0x01},
+    0};
+#pragma pack ()
 
 /**
  * Dumps TCP packets in tcpdump format.
@@ -41,6 +75,8 @@ class INET_API TCPDumper
     void dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
     // dumps arbitary text
     void dump(const char *label, const char *msg);
+    FILE *dumpfile;
+    unsigned char *buffer;
 };
 
 
@@ -54,6 +90,7 @@ class INET_API TCPDump : public cSimpleModule
   public:
     TCPDump(const char *name=NULL, cModule *parent=NULL); // TODO remove args for later omnetpp versions
     virtual void handleMessage(cMessage *msg);
+    virtual void initialize();
     virtual void finish();
 };
 

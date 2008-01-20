@@ -21,7 +21,9 @@
 // Provides tcpdump-like functionality
 //
 simple TCPDump
+    parameters:
+      dumpFile: string;
     gates:
-      in: in1, in2;
-      out: out1, out2;
+      in: ifIn[], nwIn[];
+      out: ifOut[], nwOut[];
 endsimple
