@@ -1,0 +1,4 @@
+move Nodes/QuaggaRouter into Quagga project
+remove obsolete makefiles/fragments/bindir/etc...
+copy TODO files from old branch's and old trunk's working copy
+merge ond trunk changes
