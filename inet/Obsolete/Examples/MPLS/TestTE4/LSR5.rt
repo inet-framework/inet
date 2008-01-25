@@ -1,0 +1,24 @@
+# Routing table for MPLS test network - LSR5.rt
+
+ifconfig:
+
+# link 0,  to LSR4
+name: ppp0    inet_addr: 1.0.1.5    MTU: 1500   Groups: 224.0.0.0   Metric: 1
+
+# link 1,  to host3
+name: ppp1    inet_addr: 1.0.2.5    MTU: 1500   Metric: 1
+
+# link 2,  to host4
+name: ppp2    inet_addr: 1.0.3.5    MTU: 1500   Metric: 1
+
+ifconfigend.
+
+route:
+
+10.0.1.2    *   255.255.255.255     H   0   ppp1
+11.0.1.2    *   255.255.255.255     H   0   ppp2
+
+default:    1.0.0.4     0.0.0.0     G   0   ppp0
+
+routeend.
+

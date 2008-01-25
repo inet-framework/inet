@@ -1,0 +1,84 @@
+--- zebra/main.c.orig	2005-11-21 14:49:18.000000000 +0100
++++ zebra/main.c	2005-11-21 14:55:48.000000000 +0100
+@@ -41,7 +41,9 @@
+ /* Zebra instance */
+ struct zebra_t zebrad =
+ {
+-  .rtm_table_default = 0,
++  NULL,
++  NULL,
++  0
+ };
+ 
+ /* process id. */
+@@ -94,16 +96,24 @@
+ /* zebra privileges to run with */
+ struct zebra_privs_t zserv_privs =
+ {
++  _caps_p,
++  NULL,
++  sizeof(_caps_p)/sizeof(_caps_p[0]),
++  0,
+ #if defined(QUAGGA_USER) && defined(QUAGGA_GROUP)
+-  .user = QUAGGA_USER,
+-  .group = QUAGGA_GROUP,
++  QUAGGA_USER,
++  QUAGGA_GROUP,
++#else
++  NULL,
++  NULL,
+ #endif
+ #ifdef VTY_GROUP
+-  .vty_group = VTY_GROUP,
++  VTY_GROUP,
++#else
++  NULL,
+ #endif
+-  .caps_p = _caps_p,
+-  .cap_num_p = sizeof(_caps_p)/sizeof(_caps_p[0]),
+-  .cap_num_i = 0
++  NULL,
++  NULL
+ };
+ 
+ /* Default configuration file path. */
+@@ -186,26 +196,30 @@
+ struct quagga_signal_t zebra_signals[] =
+ {
+   { 
+-    .signal = SIGHUP, 
+-    .handler = &sighup,
++    SIGHUP, 
++    &sighup,
++    0
+   },
+   {
+-    .signal = SIGUSR1,
+-    .handler = &sigusr1,
++    SIGUSR1,
++    &sigusr1,
++    0
+   },
+   {
+-    .signal = SIGINT,
+-    .handler = &sigint,
++    SIGINT,
++    &sigint,
++    0
+   },
+   {
+-    .signal = SIGTERM,
+-    .handler = &sigint,
++    SIGTERM,
++    &sigint,
++    0
+   },
+ };
+ 
+ /* Main startup routine. */
+ int
+-main (int argc, char **argv)
++zebra_main_entry (int argc, char **argv)
+ {
+   char *p;
+   char *vty_addr = NULL;

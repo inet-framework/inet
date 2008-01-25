@@ -1,0 +1,17 @@
+#LDFLAGS+= -Wl,-export-dynamic
+#USERIF_LIBS=$(CMDENV_LIBS) $(TKENV_LIBS)
+
+QUAGGA=../Network/Quagga/quaggasrc/quagga
+
+LIBS += $(QUAGGA)/ospfd/ospfd.a $(QUAGGA)/ripd/ripd.a $(QUAGGA)/zebra/zebra.a $(QUAGGA)/lib/libzebra.a $(QUAGGA)/globalvars.o $(QUAGGA)/bgpd/bgpd.a
+
+#
+#The following conflicts with Windows (in makemakefiles' contents):
+#
+#all: $(TARGET) INET
+#	echo>.tstamp
+#
+#INET: $(TARGET) Makefile
+#	$(CXX) -o INET $(TARGET) $(OMNETPP_LIBS)
+#
+

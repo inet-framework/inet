@@ -1,0 +1,20 @@
+# check
+if [ -f Transport/Makefile ]; then
+    echo "ERROR: This is not a clean checkout!"
+    exit 1
+fi
+
+
+# generate docs
+opp_makemake -f -N -n -r -X Documentation -X Etc -X Tests -X Research -X Unsupported -X Obsolete -X tmp
+
+make docs
+rm Makefile
+
+# remove unwanted files
+echo Press enter to clean up non-release files
+read
+
+rm -rf `find . -type d -name .svn`
+rm -f \!PLEASE_DONT_COMMIT_HERE\! _TODO
+rm $0

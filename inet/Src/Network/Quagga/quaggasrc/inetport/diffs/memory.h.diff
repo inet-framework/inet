@@ -1,0 +1,16 @@
+--- lib/memory.h.orig	2005-11-11 15:37:52.000000000 +0100
++++ lib/memory.h	2005-11-11 15:40:11.000000000 +0100
+@@ -21,6 +21,13 @@
+ #ifndef _ZEBRA_MEMORY_H
+ #define _ZEBRA_MEMORY_H
+ 
++// struct definition from memory.c
++struct FOO1__S
++{
++  char *name;
++  unsigned long alloc;
++};
++
+ /* #define MEMORY_LOG */
+ 
+ /* For tagging memory, below is the type of the memory. */

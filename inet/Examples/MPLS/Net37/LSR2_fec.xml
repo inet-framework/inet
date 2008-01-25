@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<fectable>
+    <fecentry>
+        <id>1</id>
+
+        <destination>host2</destination>
+
+        <tunnel_id>1</tunnel_id>
+        <lspid>100</lspid>
+    </fecentry>
+</fectable>

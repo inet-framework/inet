@@ -1,0 +1,7 @@
+Matthias Oppitz <matthias.oppitz@gmx.de>:
+original author
+
+Arndt Buschmann <a.buschmann@gmx.de>:
+changes in RTPSenderStatusMessage.h/.cc and RTPPayloadSender.cc
+(some messages contain an rtp timestamp now)
+

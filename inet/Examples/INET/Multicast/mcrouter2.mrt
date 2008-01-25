@@ -1,0 +1,44 @@
+
+# filename: mcrouter2.mrt
+# routing table for router 2 of multicast network 2
+# connected to routers 1, 3 and 4
+# author: Jochen Reber
+
+
+ifconfig:
+
+# PPP link 0 to router 1
+name: ppp0  inet_addr: 172.1.0.1    MTU: 512000
+
+# PPP link 1 to router 3
+name: ppp1  inet_addr: 172.1.0.2    MTU: 512000
+
+# PPP link 2 to router 4 (with deliberately a small MTU, so that we can observe fragmentation)
+name: ppp2  inet_addr: 172.1.0.4    MTU: 800
+
+ifconfigend.
+
+route:
+172.0.0.0       172.1.0.0       255.255.255.0   G   0   ppp0
+172.0.1.0       172.1.0.3       255.255.255.0   G   0   ppp1
+172.0.2.0       172.1.0.3       255.255.255.0   G   0   ppp2
+
+#multicast
+
+225.0.0.1       172.1.0.0       255.255.255.255 G   0   ppp0
+225.0.0.2       172.1.0.3       255.255.255.255 G   0   ppp1
+225.0.0.3       172.1.0.5       255.255.255.255 G   0   ppp2
+
+225.0.1.1       172.1.0.0       255.255.255.255 G   0   ppp0
+225.0.1.1       172.1.0.5       255.255.255.255 G   0   ppp2
+
+225.0.1.2       172.1.0.0       255.255.255.255 G   0   ppp0
+225.0.1.2       172.1.0.3       255.255.255.255 G   0   ppp1
+225.0.1.2       172.1.0.5       255.255.255.255 G   0   ppp2
+
+225.0.2.1       172.1.0.0       255.255.255.255 G   0   ppp0
+225.0.2.1       172.1.0.3       255.255.255.255 G   0   ppp1
+225.0.2.1       172.1.0.5       255.255.255.255 G   0   ppp2
+
+routeend.
+

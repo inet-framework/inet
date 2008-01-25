@@ -1,0 +1,19 @@
+/* 
+ * Diagram is in Graphviz dot format.
+ *
+ * To produce GIF image, try: dot -Tgif < NUD.dot >NUD.gif
+ */
+
+digraph NeighbourDiscoveryTables {
+        node [fontsize=10, fontname="Courier", shape=record];
+        edge [fontsize=10, fontname="Courier"];
+
+	DestCache [label="{DestinationCache|destAddr -\> nextHopAddr,iface}"];
+	/* RouterList [label="RouterList"]; */
+	NeighborCache [label="{NeighborCache|neighborAddr -\> iface,macAddr,isRouter (+reachabilityState,etc)}"];
+	ForwardingTable [label="{ForwardingTable|prefix -\> iface,nextHop (+lifetime,src=adv/static/ospf,etc)}"];
+
+	ForwardingTable -> NeighborCache;
+	DestCache -> NeighborCache;
+	/* RouterList -> NeighborCache; */
+};

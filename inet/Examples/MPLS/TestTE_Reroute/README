@@ -1,0 +1,38 @@
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+from scratch by Vojta Janota since the INET-20050922 release. This network
+already features the new simulation models.
+
+This is a sample to demonstrate reroute and preemption handling.
+
+Following description refers to the nam trace file genereated by the simulation
+run.
+
+Two LSPs are established on simulation startup. The green one is a higher
+priority path, the orange one has a regular priority. Later, the green path is
+rerouted to the same hop-route the orange one uses and since there is not enough
+bandwidth to serve both, the lower priority orange path is preempted.
+
+Remarks: 
+
+Rerouting in RSVP-TE works in 3 steps:
+
+   1. New LSP (A) is created in the same session as the path being rerouted (B).
+
+   2. After (A) is successfully built, the ingress starts forwarding the traffic
+      via this new path.
+
+   3. Old LSP (B) is torn down (usually after some short period).
+
+In this simulation, this process is controlled by the ScenarioManager. The
+small delay between the preemption and the actual act of rerouting the traffic
+onto new path is caused by the static timing of the process in the
+scenario.xml, i.e. traffic is not rerouted as soon as the (A) is ready, but
+after a fixed period after (A) starts to be built.
+
+After the orange path is preempted, there is no LSP for the traffic coming from
+host2 and this traffic is thus handled as a regular best-effort IP traffic.
+Particularly this means:
+
+   1. its color changes to black (black is used for L3-routed IP datagrams)
+
+   2. it's routed via the routing table

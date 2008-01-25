@@ -1,0 +1,31 @@
+%description:
+Test using a long transmission and lossy channel (TCPRandomTester).
+Here: packet loss (5% of packets), and packet delays (20% of packets, by 
+mean=1s)
+
+%inifile: {}.ini
+[General]
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+network=tcpTestNet2
+
+[Cmdenv]
+express-mode=true
+#event-banners=false
+#module-messages=false
+
+[Parameters]
+*.testing=true
+
+*.cli.tSend=1
+*.cli.sendBytes=655360  # 640K
+
+*.tcptester.pdelete=0.05
+*.tcptester.pdelay=0.2
+*.tcptester.delayValue=exponential(1)
+
+include ../../defaults.ini
+
+%contains: stdout
+tcpTestNet2.cli: received 0 bytes in 0 packets
+tcpTestNet2.srv: received 655360 bytes in 156 packets
+[98.570] tcpdump finished, A:714 B:588 segments

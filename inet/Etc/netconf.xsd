@@ -1,0 +1,719 @@
+<?xml version="1.0"?>
+<!--!DOCTYPE xs:schema SYSTEM "XMLSchema/XMLSchema.dtd"-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<!--
+Copyright (C) 2002, 2004 Johnny Lai
+
+This file is part of IPv6Suite
+
+ATTENTION -- THIS FILE IS PROBABLY SERIOUSLY OUT OF DATE, DON'T USE
+
+IPv6Suite is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+IPv6Suite is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+This file was created originally from netconf2.dtd using dtd2xs from
+www.lumrix.com.  Had to run the java app on the command line rather than as an
+applet in a web page which didn't seem to work.  After that manual changes 
+were made to make it more normative.  This was followed by running it through 
+IBM DeveloperWorks Schema Quality Checker (SQC) to ensure my changes were 
+conformant with XML Schema from W3C.  The included shell script didn't work 
+but running it directly like so does:
+
+CP=.:xmlParserAPIs.jar:xercesImpl.jar:xschemaREC.jar:xml4j.jar:mofrt.jar:regex4j.jar:mail.jar; java -classpath $CP com.ibm.sketch.util.SchemaQualityChecker netconf.xsd
+
+A good book on learning XML schemas is XML Schema Essentials.  Although rather
+dry and boring in the first 2 chapters eventually you realise its actually
+coming together by chapter 4 or 5 and the advantages of Schema over DTDs.
+
+-->
+
+<!--
+  Group common elements or attributes together if used collectively or if it makes sense to group them together.  
+  
+  Define global attibutes and elements if they are reused.  
+
+  Uncoment the !DOCTYPE line in emacs to use the shift-mouse-3 menu for inserting
+  tags. Howerver will need to comment it out again for validation by xerces4j
+-->
+  <xs:annotation>
+    <xs:documentation xml:lang="en"> IPv6Suite XML configuration 
+      </xs:documentation>
+  </xs:annotation>
+  <xs:annotation>
+    <xs:documentation xml:lang="en">
+      <p>This schema defines the XML configuration file for the IPv6 Model 
+        Suite.</p>
+      <p>If you are a first-time user (and you are viewing the HTML 
+        documentation generated from the schema), the best starting point is 
+        the <a href="usage-diagram.html">Usage diagram</a> or the 
+        <tt>netconf</tt> element.</p>
+      <p>This schema was initially converted from a DTD, using Lumrix's dtd2xsd 
+        java utility. The comment flag is just plain wrong or I don't know how 
+        to drive it.</p>
+      <pre> java -cp . dtd2xsd -entity -comment 1000 en "element attribute" 2 1 
+        netconf2-merge.dtd </pre>
+      <p> Further refinements were made to gather the same anonymous datatypes 
+        into global named types e.g. BooleanType, IPv6AddressType and 
+        IPv6PrefixType. </p>
+      <p>If you want to validate this schema, you can do it using the Schema 
+        Quality Checker (SQC2) from IBM DeveloperWorks:</p>
+      <pre> cd &lt;path to SQC2&gt; export 
+        CP=.:xmlParserAPIs.jar:xercesImpl.jar:xschemaREC.jar:xml4j.jar:mofrt.jar:regex4j.jar:mail.jar 
+        java -classpath $CP com.ibm.sketch.util.SchemaQualityChecker &lt;path 
+        to netconf.xsd&gt; </pre>
+      <p> See <a 
+        href="../../Etc/HMIPv6Network-schema.xml">HMIPv6Network-schema.xml</a> 
+        in the same source directory for a sample document using this schema. 
+        To validate documents against this XML Schema you will need something 
+        like the Xerces Java XML parser that handles W3C Schemas. </p>
+      <pre> cd &lt;path to xerces 2.x&gt; export 
+        CP=".:xml-apis.jar:resolver.jar:xercesImpl.jar:xercesSamples.jar" java 
+        -cp $CP dom.Counter -v -s -f &lt;path to xml document&gt; </pre>
+    </xs:documentation>
+  </xs:annotation>
+  <xs:element name="netconf">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> This is the root element of the 
+        configuration XML. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="global" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="local" />
+        <xs:element minOccurs="0" ref="misc" />
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:NMTOKEN" default="0.0.5" />
+      <xs:attribute name="debugChannel" type="xs:NMTOKEN" />
+      <xs:attribute name="topologyFile" type="xs:NMTOKEN">
+        <xs:annotation>
+          <xs:documentation xml:lang="en"> Name of file that contains a 
+            graphviz dot syntax topology file. Refer to graphviz for syntax 
+            details. Simulation uses BGL to parse topology file into BGL graph 
+            and iterate through all nodes to create routers. Iterate through 
+            edges and connect modules accordingly. </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name = "MIPv6MaxRtrAdvIntervalType">
+    <xs:restriction base="xs:decimal">
+      <xs:maxInclusive value="1.5"/>
+      <xs:minInclusive value="0.07"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name = "MIPv6MinRtrAdvIntervalType">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.03"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:attributeGroup name="interfaceAttr">
+    <xs:attribute name="AdvSendAdvertisements" type ="BooleanType" 
+      default="off" />
+    <xs:attribute name="AdvHomeAgent" type ="BooleanType" default="off" />
+    <xs:attribute name="MaxRtrAdvInterval" type="xs:NMTOKEN" default="600" />
+    <xs:attribute name="MinRtrAdvInterval" type="xs:NMTOKEN" default="198" />
+    <xs:attribute name="MIPv6MaxRtrAdvInterval" 
+      type="MIPv6MaxRtrAdvIntervalType" default="1.5"/>
+    <xs:attribute name="MIPv6MinRtrAdvInterval" 
+      type="MIPv6MinRtrAdvIntervalType" default="0.05" />
+    <xs:attribute name="MIPv6MinRtrSolInterval" type="xs:NMTOKEN" default="1" />
+    <xs:attribute name="MIPv6MaxInterval" type="xs:NMTOKEN" default="8" />
+    <xs:attribute name="MaxFastRAS" type="xs:NMTOKEN" default="0"/>
+    <xs:attribute name="MaxConsecMissRtrAdv" type="xs:nonNegativeInteger" default="1">
+      <xs:annotation>
+	<xs:documentation xml:lang="en">Maximum number of expected consecutive router
+	advertisements missed before handover to new
+	router. Thus a value of 0 means not to allow any missed RAs whilst one
+	will require two consective missed RAs to initiate handover.  </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="AdvManagedFlag" type ="BooleanType" default="off" />
+    <xs:attribute name="AdvOtherConfigFlag" type ="BooleanType" default="off" />
+    <xs:attribute name="AdvLinkMTU" type="xs:NMTOKEN" default="16000" />
+    <xs:attribute name="AdvReachableTime" type="xs:NMTOKEN" default="2" />
+    <xs:attribute name="AdvRetransTimer" type="xs:NMTOKEN" default="6" />
+    <xs:attribute name="AdvCurHopLimit" type="xs:NMTOKEN" default="32" />
+    <xs:attribute name="AdvDefaultLifetime" type="xs:NMTOKEN" 
+      default="1800" />
+    <xs:attribute name="HostLinkMTU" type="xs:NMTOKEN" default="16000" />
+    <xs:attribute name="HostCurHopLimit" type="xs:NMTOKEN" default="32" />
+    <xs:attribute name="HostBaseReachableTime" type="xs:NMTOKEN" default="40" />
+    <xs:attribute name="HostRetransTimer" type="xs:NMTOKEN" default="120" />
+    <xs:attribute name="HostDupAddrDetectTransmits" type="xs:NMTOKEN" 
+      default="2" />
+    <xs:attribute name="HMIPAdvMAP" type ="BooleanType" default="off" />
+    <xs:attribute name="HMIPForwardMAPOption" type ="BooleanType" default="off" 
+      />
+  </xs:attributeGroup>
+  <xs:element name="global">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> This element is obsolete and will be 
+        removed. It was originally meant to provide default values for all 
+        nodes in the network, but this is better done with default values for 
+        XML attributes. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attributeGroup ref="interfaceAttr"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="mipv6NodeAttr">
+    <xs:attribute name="mobileIPv6Role" default="None">
+      <xs:annotation>
+        <xs:documentation xml:lang="en"> <tt>HomeAgent</tt> for router to 
+          server as HA. <tt>MobileNode</tt> for hosts to serve as MN. Default 
+          is <tt>None</tt> so it behaves like a CN. </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="None" />
+          <xs:enumeration value="HomeAgent" />
+          <xs:enumeration value="MobileNode" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="routeOptimisation" type="BooleanType" default="on"/>
+    <xs:attribute name="returnRoutability" type="BooleanType" default="off">
+      <xs:annotation>
+	<xs:documentation xml:lang="en">Turn on return routability as required
+	by MIPv6 RFC? Has an effect only if routeOptimisation is on
+	</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="earlyBU" type="BooleanType" default="off">
+      <xs:annotation>
+	<xs:documentation xml:lang="en">TODO</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="directSignaling" type="BooleanType" default="off">
+      <xs:annotation>
+	<xs:documentation xml:lang="en">TODO</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="respondBindingRequest" type ="BooleanType" 
+      default="off"/>
+    <xs:attribute name="eagerHandover" type="BooleanType" default="off">
+      <xs:annotation>
+	<xs:documentation xml:lang="en">Causes MN to handover as
+	soon as a Router Advertisement from a new Router is detected</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="hmipv6NodeAttr">
+    <xs:attribute name="map" type ="BooleanType" default="off">
+      <xs:annotation>
+        <xs:documentation xml:lang="en"> For router will enable serving as a 
+          MAP. It should advertise itself by specifying its global address in 
+          ./interface/<a href="AdvMAPList.html">AdvMAPList</a> 
+          element for the interfaces that it should serve as MAP on. 
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    <xs:attribute name="mapMode" default="Basic">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Basic" />
+          <xs:enumeration value="Extended" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="mapMNMAYSetRoCAAsSource" type ="BooleanType" 
+      default="on" />
+    <xs:attribute name="mapMNMUSTSetRoCAAsSource" type ="BooleanType" 
+      default="on" />
+    <xs:attribute name="mapReverseTunnel" type ="BooleanType" default="on" />
+    <xs:attribute name="edgeHandoverType" type="xs:string" default=" ">
+      <xs:annotation>
+        <xs:documentation xml:lang="en"> String for type of edge handover
+        algorithm. Idea is to instantiate the correct subclass of Edgehandover
+        based on value here. Empty value default means not to use any edge
+        handover algorithm.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="local">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Contains node-specific configuration. 
+        Nodes (hosts, routers, etc) are identified by the <tt>name</tt> 
+        attribute, which should correspond to the name of the node in the NED 
+        file. This element is ignored if this requirement is not met. Currently 
+        all nodes should be top-level nodes, i.e. subnetworks are not 
+        supported. Was known as <tt>local</tt> element in DTD. If we rename 
+        this to node as it was before we get errors from xsddoc. It looks like 
+        node is a keyword in dot format.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="interface" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="route" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="tunnel" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="sourceRoute" />
+<!--
+        <xs:element minOccurs="0" maxOccurs="1" ref="mobileConfig" />
+-->
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:NMTOKEN">
+        <xs:annotation>
+          <xs:documentation xml:lang="en"> Was previously known as 
+            <tt>node</tt> attribute in DTD.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="routePackets" type ="BooleanType" default="off" />
+      <xs:attribute name="forwardSitePackets" type ="BooleanType" default="on" 
+        />
+      <xs:attribute name="optimisticDAD" type="BooleanType" default="off">
+        <xs:annotation>        
+          <xs:documentation xml:lang="en"> When enabled node will resort to behaviour
+	    defined in Optimistic DAD Internet draft.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>		
+      <xs:attribute name="mobileIPv6Support" type ="BooleanType" default="off">
+        <xs:annotation>
+          <xs:documentation> For routers set to on in order to use the reduced 
+            unsolicited RA intervals and the addition of the router advertising 
+            interval option as de- fined in the MIPv6 draft. For hosts this 
+            enables CN support for route optimi- sation. </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attributeGroup ref="mipv6NodeAttr"/>
+      <xs:attribute name="hierarchicalMIPv6Support" type ="BooleanType" 
+        default="off" >
+        <xs:annotation>
+          <xs:documentation xml:lang="en"> Turns on MN 
+            support to register with a MAP. For routers this attribute does not 
+            have an effect unless the map attribute is also on. By default all 
+            routers will forward MAP options when simulation is built with 
+            BUILD_HMIP.
+          </xs:documentation>
+        </xs:annotation>
+        </xs:attribute>
+      <xs:attributeGroup ref="hmipv6NodeAttr"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="route">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines static routing table for the 
+        node. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="routeEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="routeEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines a static routing table entry. 
+        </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="routeIface" type="IfaceType" use="required" />
+      <!--
+choice for this (better yet split them into separate routing types to make it more explicit)
+-->
+      <xs:attribute name="routeDestination" type="IPv6AddressType" 
+        use="required" />
+      <xs:attribute name="routeNextHop" type="IPv6AddressStrictType"/>
+      <xs:attribute name="isRouter" type ="BooleanType" default="off" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sourceRoute">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines routing table for source 
+        routing. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="sourceRouteEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sourceRouteEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines a route to the given 
+        destination. Embedded <tt>nextHop</tt> elements contain the hops of the 
+        actual route. The IPv6 models will always use source routing if the 
+        destination is in the source routing tables. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="nextHop" />
+      </xs:sequence>
+      <xs:attribute name="finalDestination" type="IPv6AddressStrictType" 
+        use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="nextHop">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines one hop in source route. 
+        </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="address" type="IPv6AddressType" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="tunnel">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines tunnelling information for the 
+        node. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="tunnelEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="tunnelEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Defines one virtual tunnel between two 
+        endpoints entryPoint and exitPoint. The packet will leave this node via 
+        the physical interface exitIface.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="triggers" />
+      </xs:sequence>
+      <xs:attribute name="exitIface" type="IfaceType" use="required" />
+      <xs:attribute name="entryPoint" type="IPv6AddressStrictType" 
+        use="required" />
+      <xs:attribute name="exitPoint" type="IPv6AddressStrictType" 
+        use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="triggers">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> A packet with this destination address 
+        will be forwarded to this virtual tunnel. The destination may also be a 
+        subnet prefix. </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="destination" type="IPv6AddressType" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <!--
+  <xs:element name="mobileConfig">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="homeAgent" />
+        <xs:element ref="mobileNode" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="homeAgent">
+    <xs:complexType />
+  </xs:element>
+  <xs:element name="mobileNode">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="staticConfig" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="staticConfig">
+    <xs:complexType>
+      <xs:attribute name="homeAddrIface" type="IfaceType" use="required" />
+      <xs:attribute name="homeAgentAddr" type="IPv6AddressType" use="required" 
+        />
+    </xs:complexType>
+  </xs:element>
+  -->
+  <xs:element name="interface">
+    <xs:annotation>
+      <xs:documentation xml:lang="en"> Configures one interface of a node. 
+        </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="inetAddr" />
+        <xs:element minOccurs="0" ref="AdvPrefixList" />
+        <xs:element minOccurs="0" ref="AdvMAPList" />
+        <xs:element minOccurs="0" ref="WirelessEtherInfo"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="IfaceType" >
+        <xs:annotation>
+          <xs:documentation xml:lang="en"> name is not a real requirement as 
+            we parse by order of encountered interface not by the interface <tt>name</tt>. But 
+            forgot how to specify optional attribute. </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attributeGroup ref="interfaceAttr"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="inetAddr" type="IPv6AddressType" />
+  <xs:element name="AdvPrefixList">
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="AdvPrefix" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AdvPrefix">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="IPv6PrefixType">
+          <xs:attribute name="AdvValidLifetime" type="xs:NMTOKEN" 
+            default="2592000" />
+          <xs:attribute name="AdvOnLinkFlag" type ="BooleanType" default="off" 
+            />
+          <xs:attribute name="AdvPreferredLifetime" type="xs:NMTOKEN" 
+            default="605800" />
+          <xs:attribute name="AdvAutonomousFlag" type ="BooleanType" 
+            default="on" />
+          <xs:attribute name="AdvRtrAddrFlag" type ="BooleanType" default="off" 
+            />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AdvMAPList">
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="AdvMAPEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AdvMAPEntry">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="IPv6AddressStrictType">
+          <xs:attribute name="AdvMAPDist" type="xs:NMTOKEN" default="1" />
+          <xs:attribute name="AdvMAPPref" type="xs:NMTOKEN" default="1" />
+          <xs:attribute name="AdvMAPValidLifetime" type="xs:NMTOKEN" 
+            default="2592" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WirelessEtherInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="WEInfo"/>
+        <xs:element minOccurs="0" ref="WESupportedRates"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WEInfo">
+    <xs:complexType>
+      <xs:sequence>
+      </xs:sequence>
+          <xs:attribute name="WEssid" type="xs:NMTOKEN" default="default"/>
+          <xs:attribute name="WETxPower" type="xs:NMTOKEN" default="0.1"/>
+          <xs:attribute name="WEThresholdPower" type="xs:NMTOKEN" 
+            default="0.0000073"/>
+          <xs:attribute name="WEHOThresholdPower" type="xs:NMTOKEN" 
+            default="0.00001"/>
+          <xs:attribute name="WEProbeEnergyTimeout" type="xs:NMTOKEN" 
+            default="0.01"/>
+          <xs:attribute name="WEProbeResponseTimeout" type="xs:NMTOKEN" 
+            default="0.035"/>
+          <xs:attribute name="WEAuthenticationTimeout" type="xs:NMTOKEN" 
+            default="2"/>
+          <xs:attribute name="WEAssociationTimeout" type="xs:NMTOKEN" 
+            default="2"/>
+          <xs:attribute name="WERetry" type="xs:NMTOKEN" default="7"/>
+          <xs:attribute name="WEFastActiveScan" type="BooleanType" 
+            default="off"/>
+          <xs:attribute name="WEScanShortCircuit" type="BooleanType" 
+            default="off"/>
+          <xs:attribute name="WECrossTalk" type="BooleanType" default="on"/>
+          <xs:attribute name="WEShadowing" type="BooleanType" default="off"/>
+          <xs:attribute name="WESignalStrengthMaxSample" type="xs:NMTOKEN"
+	    default= "1"/>
+          <xs:attribute name="WEChannelsNotToScan" type="xs:NMTOKEN" 
+            default="0"/>
+	  <xs:attribute name="WEAddress" type="xs:NMTOKEN" default="0">
+	    <xs:annotation>
+	      <xs:documentation xml:lang="en">
+Determines the MAC address of this WLAN NIC. The default value of 0 will
+autoconfigure(this was previous behaviour). Required for Dual WLAN NIC to share
+same MAC address.
+	      </xs:documentation>
+	    </xs:annotation>    
+	  </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WESupportedRates">
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element ref="WERate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WERate" type="xs:string"/>
+  <xs:element name="misc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="ObjectMovement" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ObjectMovement">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="MovingNode" />
+	<xs:element minOccurs="0" maxOccurs="unbounded" ref="RandomMovement" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MovingNode">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="move" />
+      </xs:sequence>
+      <xs:attribute name="NodeName" type="xs:NMTOKEN" use="required" />
+      <xs:attribute name="startTime" type="xs:NMTOKEN" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="move">
+    <xs:complexType>
+      <xs:attribute name="moveToX" type="xs:NMTOKEN" use="required" />
+      <xs:attribute name="moveToY" type="xs:NMTOKEN" use="required" />
+      <xs:attribute name="moveSpeed" type="xs:NMTOKEN" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RandomMovement">
+    <xs:annotation>
+      <xs:documentation>Movement information for random way point mobility model</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="RWNodeName" type="xs:NMTOKEN"/>
+      <xs:attribute name="RWMoveKind" default="bouncing" >
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+	<xs:simpleType>
+	  <xs:restriction base="xs:string">
+	    <xs:enumeration value="toroidal"/>
+	    <xs:enumeration value="bouncing"/>
+	  </xs:restriction>
+	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="RWMinX" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="RWMaxX" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWMinY" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWMaxY" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWMoveInterval" type="nonNegativeDecimal">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWMinSpeed" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWMaxSpeed" type="xs:positiveInteger">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>         
+      <xs:attribute name="RWDistance" type="nonNegativeDecimal">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="RWPauseTime" type="nonNegativeDecimal">
+	<xs:annotation>
+	  <xs:documentation xml:lang="en">TODO</xs:documentation>
+	</xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="IPv6AddressType">
+    <xs:annotation>
+      <xs:documentation>All IPv6 addresses have to conform to this format in 
+        order for simulation to parse addresses correctly. This is the address 
+        type that is suitable for both with/out prefix length. If prefix length 
+        exists it will be preserved in IPv6Address. In future we may add 
+        support for the :: notational shorthand as additional 
+        &lt;xs:pattern&gt;.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern 
+        value="([A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}(/[0-9]{1,3}){0,1}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="IPv6AddressStrictType">
+    <xs:annotation>
+      <xs:documentation>Same as IPv6AddressType except without prefix length 
+        and so will be mapped to ipv6_addr. </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="IPv6PrefixType">
+    <xs:annotation>
+      <xs:documentation>Same as IPv6AddressType except the trailing prefix 
+        length is mandatory. ( /[0-9]{3} )</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}/[0-9]{1,3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="IfaceType">
+    <xs:annotation>
+      <xs:documentation>Interface Type defines the usual network device naming 
+        convention as used on POSIX machines i.e. eth0, ppp0, etc. 
+        </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z]{3,4}[0-9]{1,2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BooleanType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="on" />
+      <xs:enumeration value="off" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="nonNegativeDecimal">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Use for real physical quantities</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0">
+      </xs:minInclusive>
+    </xs:restriction>
+  </xs:simpleType>
+
+<xs:simpleType name= "timestampType">
+  <xs:annotation>
+      <xs:documentation xml:lang="en">Time stamp in yyyyMMddHH mm:SS.ffffff</xs:documentation>
+	</xs:annotation>
+  <xs:restriction base = "xs:string">
+   <xs:pattern value='[1-9][0-9][0-9][0-9](([0][1|3|5|7|8])([0][1-9]|[1-2][0-9]|[3][0-1])|([0][4|6|9]) ([0][1-9]|[1-2][0-9]|[3][0])|([0][2])([0][1-9]|[1-2][0-9])|([1][0|2])([0][1-9]|[1-2][0-9]|[3][0-1])|([1][1])([0][1-9]|[1-2][0-9]|[3][0]))([ ]([2][1-4]|[0][0-9]|[1][0-9])[:]([0-5][0-9]|[6][0])[:]([0-5][0-9]|[6][0])[.][0-9]{6})*'/>
+  </xs:restriction>
+</xs:simpleType>
+
+</xs:schema>
+
+

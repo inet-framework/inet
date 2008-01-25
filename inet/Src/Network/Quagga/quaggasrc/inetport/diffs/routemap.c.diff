@@ -1,0 +1,37 @@
+--- lib/routemap.c.orig	2005-11-15 21:21:31.000000000 +0100
++++ lib/routemap.c	2005-11-15 21:22:12.000000000 +0100
+@@ -35,33 +35,7 @@
+ /* Vector for route set rules. */
+ static vector route_set_vec;
+ 
+-/* Route map rule. This rule has both `match' rule and `set' rule. */
+-struct route_map_rule
+-{
+-  /* Rule type. */
+-  struct route_map_rule_cmd *cmd;
+-
+-  /* For pretty printing. */
+-  char *rule_str;
+-
+-  /* Pre-compiled match rule. */
+-  void *value;
+-
+-  /* Linked list. */
+-  struct route_map_rule *next;
+-  struct route_map_rule *prev;
+-};
+-
+-/* Making route map list. */
+-struct route_map_list
+-{
+-  struct route_map *head;
+-  struct route_map *tail;
+-
+-  void (*add_hook) (const char *);
+-  void (*delete_hook) (const char *);
+-  void (*event_hook) (route_map_event_t, const char *); 
+-};
++// struct definitions moved to header
+ 
+ /* Master list of route map. */
+ static struct route_map_list route_map_master = { NULL, NULL, NULL, NULL };

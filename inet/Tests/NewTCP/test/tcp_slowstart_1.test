@@ -1,0 +1,46 @@
+%description:
+Test slow-start algorithm: every acked segment increases window by 1 segment,
+that is, cwnd=1,2,4,8,...
+
+%inifile: {}.ini
+[General]
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+
+[Cmdenv]
+event-banners=false
+
+[Parameters]
+*.testing=true
+
+*.cli.tSend=1
+*.cli.sendBytes=16384 # sixteen 1024-byte segments
+
+include ../../defaults.ini
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: . 1:1025(1024) ack 501 win 16384
+[1.203 B002] B.2000 > A.1000: . ack 1025 win 16384
+[1.205 A004] A.1000 > B.2000: . 1025:2049(1024) ack 501 win 16384
+[1.205 A005] A.1000 > B.2000: . 2049:3073(1024) ack 501 win 16384
+[1.407 B003] B.2000 > A.1000: . ack 3073 win 16384
+[1.409 A006] A.1000 > B.2000: . 3073:4097(1024) ack 501 win 16384
+[1.409 A007] A.1000 > B.2000: . 4097:5121(1024) ack 501 win 16384
+[1.409 A008] A.1000 > B.2000: . 5121:6145(1024) ack 501 win 16384
+[1.409 A009] A.1000 > B.2000: . 6145:7169(1024) ack 501 win 16384
+[1.611 B004] B.2000 > A.1000: . ack 7169 win 16384
+[1.613 A010] A.1000 > B.2000: . 7169:8193(1024) ack 501 win 16384
+[1.613 A011] A.1000 > B.2000: . 8193:9217(1024) ack 501 win 16384
+[1.613 A012] A.1000 > B.2000: . 9217:10241(1024) ack 501 win 16384
+[1.613 A013] A.1000 > B.2000: . 10241:11265(1024) ack 501 win 16384
+[1.613 A014] A.1000 > B.2000: . 11265:12289(1024) ack 501 win 16384
+[1.613 A015] A.1000 > B.2000: . 12289:13313(1024) ack 501 win 16384
+[1.613 A016] A.1000 > B.2000: . 13313:14337(1024) ack 501 win 16384
+[1.613 A017] A.1000 > B.2000: . 14337:15361(1024) ack 501 win 16384
+[1.815 B005] B.2000 > A.1000: . ack 15361 win 16384
+[1.817 A018] A.1000 > B.2000: . 15361:16385(1024) ack 501 win 16384
+[2.019 B006] B.2000 > A.1000: . ack 16385 win 16384
+
+%contains: stdout
+tcpTestNet1.cli: received 0 bytes in 0 packets
+tcpTestNet1.srv: received 16384 bytes in 16 packets
+[2.020] tcpdump finished, A:18 B:6 segments

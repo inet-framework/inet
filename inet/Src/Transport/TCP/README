@@ -1,0 +1,12 @@
+TCP
+===
+
+This folder contains the "base part" of TCP, basically the operation
+described in RFC793. This base algorithm can be extended and customized via
+"flavour" and "queue" classes that implement the TCPAlgorith, TCPSendQueue
+and TCPReceiveQueue classes, and are selected via TCP's NED parameters.
+
+The main class is TCP, which manages a set of TCPConnections. A TCP segment
+is instance of the TCPSegment class.
+
+

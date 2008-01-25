@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+   <title>OMNEST/OMNeT++ INET Framework - A Walkthrough</title>
+   <meta name="Author" content="Andras Varga">
+   <link href="opp.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+<center style="background-color:#005e77; color:#ffffff; border:1px solid">
+<h1><font size="+2">INET Framework for OMNEST/OMNeT++</font></h1>
+<p><font size="+2"><i>How to Build Networks</i></font></p>
+</center>
+
+<h3>Introduction</h3>
+
+<p>
+The purpose of this tutorial is to show you how to build network models
+from existing components with the INET framework, a simulation model
+suite for TCP/IP and Internet-related protocols,
+written for the OMNeT++/OMNEST simulation environment.
+</p>
+
+<p>
+To follow the tutorial, you need a binary (executable) version of the
+INET framework. The easiest is to download and install the Windows demo
+for INET. Alternatively (or if your platform is Linux or some other OS),
+you may download and compile the OMNeT++ and INET source packages.
+</p>
+
+<h3>The OMNeT++ approach</h3>
+
+<p>
+The OMNeT++ (OMNEST) simulation framework follows a layered approach.
+Model components which implement protocols, application behaviour,
+shared media and suchlike are programmed in C++. These components
+are then combined into larger components (models of routers, hosts)
+using the NED language. Networks, subnetworks are assembled from hosts
+and routers exactly the same ways as hosts and routers from protocols,
+using the NED language.
+</p>
+
+<p>
+Components programmed in C++ are termed <i>simple modules</i>, and
+larger components assembled from them are <i>compound modules</i>.
+Network models to be simulated are just instances of a compound module
+representing the network.
+</p>
+
+<p>
+The <tt>INET.exe</tt> program (part of the demo, or a product of the build
+process) contains all C++ components of the INET framework as well as
+the simulation kernel and the graphical user interface. NED files are
+loaded dynamically by <tt>INET.exe</tt> when it starts -- which means
+you can add you own NED files, that is, you can create your own
+networks to be simulated. You'll only need a text editor for that
+(Notepad will suffice, but you're better off with a programmer's editor
+like UltraEdit or MED).
+</p>
+
+<p>
+Models defined via NED file usually contain a large number of unbound
+parameters. These parameters will be assigned from the config file
+<tt>omnetpp.ini</tt>; this file can be kept short by using wildcards
+(<tt>*</tt>, <tt>**</tt>) to assign several parameters at once.
+</p>
+
+<p>
+So far the theory, let's see the practice!
+</p>
+
+<h3>First steps</h3>
+
+<p>
+To jump-start, we'll start by copying and modifying an existing simulation.
+This way we'll have something working right from the beginning. Let's
+start with the NClients demo simulation in the INET folder.
+</p>
+
+<p>
+The <tt>INET/NClients</tt> directory contains the following files:
+</p>
+
+<pre>
+README
+NClients.bat
+NClients.ned
+omnetpp.ini
+basicHTTP.ini
+filetransfer.ini
+</pre>
+
+<p>
+Create a working directory somewhere on your hard disk (e.g. <tt>C:\work\TryINET</tt>)
+and copy there all the above files. Then let's see what we have.
+</p>
+
+<p>
+<tt>README</tt> contains a short description of the NClients model -- you can
+read it once, but we won't need it any further.
+</p>
+
+<h3>NClients.bat</h3>
+
+<p>
+<tt>NClients.bat</tt> is a batch file to start the simulation.
+Its contents reads like this:
+</p>
+
+<pre class="src">
+..\..\bin\INET.cmd %*
+</pre>
+
+<p>
+... which instantly makes you open it in your text editor (or as the last resort,
+Notepad), and adjust the path to the directory where you actually have
+INET installed. For example:
+</p>
+
+<pre class="src">
+C:\INET-Demo\bin\INET.cmd %*
+</pre>
+
+<p>
+The batch file calls <tt>INET.cmd</tt> (and not directly <tt>INET.exe</tt>) because
+the executable needs a few environment variables (<tt>PATH</tt>,
+<tt>OMNETPP_BITMAP_PATH</tt>, <tt>TCL_LIBRARY</tt>) which are set by <tt>INET.cmd</tt>
+before launching <tt>INET.exe</tt>. <tt>%*</tt> just passes on any command-line
+arguments you might have given <tt>NClients.bat</tt>.
+</p>
+
+<p>
+In case you don't have <tt>INET.cmd</tt> somehow (e.g. because you compiled
+INET yourself), here's what it contains:
+</p>
+
+<pre class="src">
+@echo off
+set PATH=%PATH%;%~dp0\..\RESOURCES\bin
+set OMNETPP_BITMAP_PATH=%~dp0\..\RESOURCES\bitmaps
+set TCL_LIBRARY=%~dp0\..\RESOURCES\lib\tcl8.4
+%~dp0\INET.exe %*
+</pre>
+
+<p>
+The <tt>%~dp0</tt> magic stands for <i>drive+path of <tt>%0</tt></i>, where
+<tt>%0</tt> is the full path of the cmd file itself. Thus, <tt>%~dp0\INET.exe</tt>
+for example simply means "the <tt>INET.exe</tt> in the same directory as the cmd file."
+The cmd file extends the path to include the location of the necessary DLLs,
+sets <tt>OMNETPP_BITMAP_PATH</tt> to point to the location of the model icons,
+and sets <tt>TCL_LIBRARY</tt> to point to the directory which contains <tt>init.tcl</tt>,
+then launches the executable. If the locations are OK, you don't
+need to modify the cmd file.
+</p>
+
+<h3>NClients.ned</h3>
+
+<p>
+<tt>NClients.ned</tt> contains the simulation model.
+</p>
+
+<h3>Conclusion</h3>
+
+<p>
+I hope you've found this tutorial useful. If you have questions, comments
+or suggestions to improve it, please write to <u>andras at omnetpp org</u>.
+</p>
+
+<br><br>
+
+</body>
+</html>
+
+

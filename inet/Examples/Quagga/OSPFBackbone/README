@@ -1,0 +1,64 @@
+Quagga for OMNeT++
+
+Quagga (formerly Zebra) is an open-source routing daemon package for 
+Linux and other *nix systems. Quagga supports RIP, OSPF, ISIS, BGP4 and 
+OSPFv6. There is currently an ongoing effort to bring dynamic routing 
+facility into INET simulations by using modified version of Quagga, and
+placing a syscall emulation layer between Quagga and INET Framework
+components. The project is being done by Vojta Janota.
+
+This simulation example features a 7-router OSPF backbone.
+
+Configuration:
+
+Router Ids:
+  R1: 192.168.3.1
+  R2: 192.168.4.3
+  R3: 192.168.5.2
+  R4: 192.168.6.2
+  R5: 192.168.5.3
+  R6: 192.168.6.3
+  R7: 192.168.6.1
+
+Backbone area (0.0.0.0) address ranges:
+  192.168.1.0/24
+  192.168.2.0/24
+  192.168.3.0/24
+  192.168.4.0/24
+  192.168.5.0/24
+  192.168.6.0/24
+
+Router interface OSPF settings:
+  R1:
+    "eth0"  InterfaceOutputCost: 1 RouterPriority: 1
+    "eth1"  InterfaceOutputCost: 1 RouterPriority: 1
+    "eth2"  InterfaceOutputCost: 1 RouterPriority: 1
+  R2:
+    "eth0"  InterfaceOutputCost: 2 RouterPriority: 2
+    "eth1"  InterfaceOutputCost: 2 RouterPriority: 2
+  R3:
+    "eth0"  InterfaceOutputCost: 3 RouterPriority: 3
+    "eth1"  InterfaceOutputCost: 3 RouterPriority: 3
+  R4:
+    "eth0"  InterfaceOutputCost: 4 RouterPriority: 4
+    "eth1"  InterfaceOutputCost: 4 RouterPriority: 4
+  R5:
+    "eth0"  InterfaceOutputCost: 5 RouterPriority: 5
+    "eth1"  InterfaceOutputCost: 5 RouterPriority: 5
+  R6:
+    "eth0"  InterfaceOutputCost: 6 RouterPriority: 6
+    "eth1"  InterfaceOutputCost: 6 RouterPriority: 6
+  R7:
+    "eth0"  InterfaceOutputCost: 7 RouterPriority: 7
+    "eth1"  InterfaceOutputCost: 7 RouterPriority: 7
+
+Global parameters:
+  RFC1583 Compatible:           yes
+  Retransmission Interval:      5s
+  Interface Transmission Delay: 1s
+  Hello Interval:               10s
+  Router Dead Interval:         40s
+  Authentication:               none
+
+
+

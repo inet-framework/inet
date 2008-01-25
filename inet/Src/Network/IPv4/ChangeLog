@@ -1,0 +1,21 @@
+2005-10-28  Andras Varga
+
+	* IP.cc: obey new "outputPort" field of IPControlInfo when sending
+	multicast datagram
+
+	* RoutingTableParser.cc: 5th field of a route in routing files is
+	the metric (so far it was "preferences" but in fact unused)
+
+2005-07-06  Andras Varga
+
+	* IP.cc: don't forward "link-local" multicast addresses (224.0.0.x)
+
+2005-07-04  Andras Varga
+
+	* RoutingTable: localDeliver() ignores interface netmask [reported by
+	Michael Tuexen]
+	
+	* RoutingTable: interface netmask functionality is now achieved by 
+	routes of type IFACENETMASK added to the routing table. These routes
+	are re-build whenever notification is received that there was a change
+	in the interface IPv4 configurations.

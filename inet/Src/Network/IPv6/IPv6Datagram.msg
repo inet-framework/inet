@@ -1,0 +1,71 @@
+//
+// Copyright (C) 2005 Wei Yang, Ng
+// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2001-2004 CTIE, Monash University
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+cplusplus {{
+#include <iostream>
+#include "IPv6Address.h"
+#include "IPProtocolId_m.h"
+class IPv6ExtensionHeader;
+typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
+std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
+}}
+
+enum IPProtocolId;
+class noncobject IPv6Address;
+class noncobject IPv6ExtensionHeaderPtr;
+
+
+//
+// IPv6 datagram. RFC 2460 Section 3.
+//
+// Header fields not explicitly modelled:
+//    - version (=6): represented by the class name itself
+//    - payload length: will be calculated from encapsulated message length
+//      and extension headers' length
+//
+message IPv6Datagram
+{
+    properties:
+        customize=true;
+        omitGetVerb = true;
+
+    fields:
+        IPv6Address srcAddress;
+        IPv6Address destAddress;
+        unsigned int trafficClass;
+        unsigned int flowLabel;
+        short hopLimit = 0;
+        int transportProtocol enum (IPProtocolId);
+
+        IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
+};
+
+
+//
+// This serves as the base class for all the other extension headers.
+//
+class IPv6ExtensionHeader
+{
+    properties:
+        omitGetVerb = true;
+        customize = true;
+    fields:
+};
+

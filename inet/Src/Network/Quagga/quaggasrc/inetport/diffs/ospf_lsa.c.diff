@@ -1,0 +1,19 @@
+--- ospfd/ospf_lsa.c.orig	2005-11-21 17:19:44.000000000 +0100
++++ ospfd/ospf_lsa.c	2005-11-21 17:34:14.000000000 +0100
+@@ -1849,12 +1849,10 @@
+     {
+       /* find the translated Type-5 for this Type-7 */
+       struct as_external_lsa *ext = (struct as_external_lsa *)(type7->data);
+-      struct prefix_ipv4 p = 
+-        { 
+-          .prefix = type7->data->id,
+-          .prefixlen = ip_masklen (ext->mask),
+-          .family = AF_INET,
+-        };
++      struct prefix_ipv4 p;
++      p.family = AF_INET;
++      p.prefixlen = ip_masklen (ext->mask);
++      p.prefix = type7->data->id;
+ 
+       type5 = ospf_external_info_find_lsa (ospf, &p);
+     }

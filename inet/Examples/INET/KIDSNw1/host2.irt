@@ -1,0 +1,19 @@
+
+# filename: host2.irt
+# routing table for host 2 of KIDS Network 1
+# author: Jochen Reber
+
+
+ifconfig:
+
+# interface 0 to router
+name: ppp0  inet_addr: 172.0.0.2    MTU: 1500   Metric: 1
+
+ifconfigend.
+
+route:
+
+default:        172.0.0.4       0.0.0.0         G   0   ppp0
+
+routeend.
+

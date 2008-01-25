@@ -1,0 +1,11 @@
+An example of bi-directional LSP setup using LDP protocol.
+An MPLS cloud with 5 LSRs where data from two TCP clients must transit to get two
+their destination address.
+
+The LDP is hop-by-hop and operates in downstream-on-demand mode.
+
+The first TCP client(host1) sends its data to host4. The data is queued at LSR1
+till the LDP daemon successfully setups a path asscociated the FEC of the packets'
+destination (destination FEC.)
+
+

@@ -1,0 +1,59 @@
+/***************************************************************************
+                          RTPAVProfileSampleBasedAudioReceiver.h  -  description
+                             -------------------
+    begin                : Fri Sep 13 2002
+    copyright            : (C) 2002 by Matthias Oppitz
+    email                : matthias.oppitz@gmx.de
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+/** \file RTPAVProfileSampleBasedAudioReceiver.h
+ *
+ */
+
+#ifndef __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
+#define __RTPAVPROFILESAMPLEBASEDAUDIORECEIVER_H__
+
+#include <audiofile.h>
+#include <omnetpp.h>
+#include "RTPPayloadReceiver.h"
+
+
+/**
+ *
+ */
+class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver
+{
+
+    Module_Class_Members(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver, 0)
+
+    virtual ~RTPAVProfileSampleBasedAudioReceiver();
+
+    protected:
+        AFfilehandle _audioFile;
+        AFfilesetup _fileSetup;
+        int _samplingRate, _sampleWidth, _numberOfChannels;
+
+        virtual void processPacket(RTPPacket *packet);
+
+        virtual void openOutputFile(const char *fileName);
+        virtual void closeOutputFile();
+
+        /**
+         * When packets arrival late or have been lost, this method can be called to
+         * insert a silence period. It must be overwritten because in different audio
+         * formats different values for silence exist.
+         */
+        virtual void insertSilence(simtime_t duration);
+
+};
+
+#endif

@@ -1,0 +1,27 @@
+#
+# Config file for the INET framework on Windows/MSVC. (Not used on Linux.)
+# This is included by every makefile.
+#
+# BEFORE COMPILATION: copy/rename this file to inetconfig.vc, and adjust 
+# OMNETPP_ROOT in it. (inetconfig.vc was removed from the CVS, to prevent
+# overwriting each other's settings in it with each cvs update.)
+#
+
+OMNETPP_ROOT=c:\omnet++
+
+!if !exist($(OMNETPP_ROOT)\configuser.vc)
+!  error Please adjust OMNETPP_ROOT in inetconfig.vc to point to your OMNeT++ installation!
+!endif
+
+!include $(OMNETPP_ROOT)\configuser.vc
+
+CFLAGS=$(CFLAGS) /DBUILDING_INET /DWITH_IPv6
+
+#INCLUDE_PATH=$(INCLUDE_PATH) ...additional include directories...
+#LIBS=$(LIBS) ...additional libs and lib directories...
+
+
+
+
+
+

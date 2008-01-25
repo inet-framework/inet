@@ -1,0 +1,27 @@
+
+# filename: fhrouter1.irt
+# routing table for First Hop Router, No 1 of KIDS Network 1
+# connected to host 1,2 and Interior Router 2
+# author: Jochen Reber
+
+
+ifconfig:
+
+# interface 0 to host 1
+name: ppp0  inet_addr: 172.0.0.3    MTU: 1500   Metric: 1
+
+# interface 1 to host 2
+name: ppp1  inet_addr: 172.0.0.4    MTU: 1500   Metric: 1
+
+# router connection 0 to interior router 2
+name: ppp2  inet_addr: 172.0.1.0    MTU: 1200   Metric: 1
+
+ifconfigend.
+
+route:
+172.0.0.1       *               255.255.255.255 H   0   ppp0
+172.0.0.2       *               255.255.255.255 H   0   ppp1
+default:        172.0.1.1       0.0.0.0         G   0   ppp2
+
+routeend.
+

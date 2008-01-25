@@ -1,0 +1,44 @@
+//
+// Copyright (C) 2006 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+package org.omnetpp.inet.Applications.TCPApp;
+
+//
+// Sends fabricated TCP packets. This is a base implementation,
+// you'll probably have to customize it in C++ according to
+// what you want to send and when you want to send it.
+//
+// Compatible with both IPv4 and IPv6.
+//
+simple TCPSpoof
+{
+    parameters:
+        string srcAddress = default("");  // local address; may be left empty ("")
+        string destAddress = default(""); // destination address
+        int srcPort; // local port number
+        int destPort; // destination port number
+        int seqNo; // sequence number (-1 for TCP ISS)
+        bool isSYN = default(true); // whether to set SYN bit on packet
+        double t @unit("s"); // simulation time to send at
+        @display("i=block/square");
+    gates:
+        output ipv4Out;
+        output ipv6Out;
+}
+

@@ -1,0 +1,12 @@
+--- lib/zebra.h.orig	2005-11-15 13:07:37.000000000 +0100
++++ lib/zebra.h	2005-11-15 13:08:59.000000000 +0100
+@@ -497,4 +497,9 @@
+ #define FIFO_TOP(F)                                   \
+   (FIFO_EMPTY(F) ? NULL : ((struct fifo *)(F))->next)
+ 
++#include "allheaders.h"
++#include "globalvars.h"
++
++extern int errno; // handle as a regular global variable
++
+ #endif /* _ZEBRA_H */

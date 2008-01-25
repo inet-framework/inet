@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>10.2.1.1</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+
+				<bandwidth>100000</bandwidth>
+				<route>
+					<node>10.1.1.1</node>
+					<node>10.1.2.1</node>
+					<node>10.1.4.1</node>
+					<node>10.1.5.1</node>
+				</route>
+
+				<permanent>true</permanent>
+				<color>100</color>
+			</path>
+		</paths>
+	</session>
+</sessions>

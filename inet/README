@@ -1,0 +1,120 @@
+INET Framework for OMNEST/OMNeT++
+=================================
+
+The INET framework is an open-source communication networks simulation
+package, written for the OMNEST/OMNeT++ simulation system. The INET framework
+contains models for several Internet protocols: beyond TCP and IP there is UDP,
+Ethernet, PPP and MPLS with LDP and RSVP-TE signalling. See the CREDITS file
+for the names of people who have contributed to the INET Framework.
+
+IMPORTANT: The INET Framework is continuously being improved: new parts
+are added, bugs are corrected, and so on. We cannot assert that any protocol
+implemented here will work fully according to the specifications. YOU ARE
+RESPONSIBLE YOURSELF TO MAKE SURE THAT THE MODELS YOU USE IN YOUR SIMULATIONS
+WORK CORRECTLY, AND YOU'RE GETTING VALID RESULTS.
+
+Contributions are highly welcome. You can make a difference!
+
+See the WHATSNEW file for recent changes.
+
+
+GETTING STARTED
+---------------
+You may start by downloading and installing the INET demo on Windows.
+
+Then you can gather initial experience by following the INET tutorial. After
+that, you can learn the NED language from the OMNeT++ manual & sample
+simulations.
+
+After that, you may write your own topologies using the NED language. You may
+assign some of the submodule parameters in NED files. You may leave some of
+them unassigned.
+
+Then, you may assign unassigned module parameters in omnetpp.ini of your
+simulation. (You can refer to sample simulations & manual for the content of
+omnetpp.ini)
+
+Finally, you will be ready to run your simulation. As you see, you may use
+the INET framework without writing any C++ code, as long as you use the
+available modules.
+
+Finally, to implement new protocols or modify existing ones, you'll need to
+download the INET source, compile it yourself, then start adding/modifying
+source files yourself.
+
+It is a workable approach to compile your C++ code as shared library (.so on
+Linux/Unix), and get the INET executable load it dynamically. See the
+following URL for hints:
+
+http://www.omnetpp.org/article.php?story=20050603034256799
+
+
+Directory structure
+-------------------
+Directories of INET framework source are arranged roughly along the OSI layers.
+
+Bottom-up:
+
+ NetworkInterfaces/    L2 (data link layer) protocols
+   Contract/           API to common L2 functionality
+   Ethernet/           Ethernet model (MAC, LLC, Encap)
+   EtherSwitch/        Ethernet switch (relay unit) model
+   PPP/                basic PPP model (framing only)
+   MFCore/             Core modules from the Mobility Framework (modified)
+   MF80211/            MF's 802.11b ad-hoc mode model (modified)
+
+ Network/              L3 (network layer) protocols
+   Contract/           API to common L3 functionality
+   AutoRouting/        autoconfiguration of static routes
+   ARP/                ARP protocol
+   Queue/              router queues (QoS, RED, etc)
+   IPv4/               IPv4 and associated protocols
+   IPv6/               IPv6 implementation (currently in work)
+   ICMPv6/             ICMPv6 implementation (currently in work)
+   MPLS/               MPLS implementation (will be replaced soon)
+   LDP/                LDP signalling protocol for MPLS
+   RSVP_TE/            RSVP-TE signalling protocol for MPLS (will be replaced soon)
+   Scenario/           specific for RSVP-TE (will be replaced soon)
+
+ Transport/            transport layer protocols
+   Contract/           API to transport layer functionality
+   TCP/                TCP protocol
+   UDP/                UDP protocol
+   RTP/                Realtime Transport Protocol (not yet integrated)
+
+ Applications/         application layer
+   TCPApp/             TCP application models
+   UDPApp/             UDP application models (VideoStream, etc.)
+   Generic/            traffic generators (directly for IP)
+   Ethernet/           traffic generators (directly for Ethernet)
+   PingApp/            ping application
+
+Further directories are:
+
+ World/                scenario manager, MF channel manager
+
+ Nodes/                protocol stacks, host and router models
+   INET/               IP-based components
+   IPv6/               IPv6-based components
+   MPLS/               router models with MPLS/LDP/RSVP-TE
+
+ Examples/             example networks
+   Ethernet/           example Ethernet networks
+   INET/               IP-based example networks
+   IPv6/               IPv6-based example networks
+   MPLS/               example networks for MPLS/LDP/RSVP-TE
+   RTP/                RTP examples (not yet integrated)
+   MobileAdhoc/        mobile and ad-hoc networks (incomplete)
+
+ Base/                 common header files, base classes
+ Util/                 utility classes
+
+ Documentation/        documentation
+
+ Tests/                test suite
+   IPv4/               for IPv4 components
+   IPv6/               for IPv6 components
+   MPLS/               for the MPLS models
+   NewTCP/             for the TCP model
+
+

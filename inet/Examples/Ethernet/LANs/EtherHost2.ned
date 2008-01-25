@@ -1,0 +1,76 @@
+//
+// Copyright (C) 2003 CTIE, Monash University
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+
+package org.omnetpp.inet.examples.Ethernet.LANs;
+
+import org.omnetpp.inet.Applications.Ethernet.EtherAppCli;
+import org.omnetpp.inet.Applications.Ethernet.EtherAppSrv;
+import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherLLC;
+import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherMAC2;
+
+
+//
+// Example host model with one Ethernet port and several traffic generators
+// to create traffic in the test network.
+//
+module EtherHost2
+{
+    parameters:
+        @display("b=271,262i=device/pc2");
+    gates:
+        inout ethg;
+
+    submodules:
+        cli: EtherAppCli {
+            parameters:
+                registerSAP = true;
+                @display("p=60,60,col");
+        }
+        srv: EtherAppSrv {
+            parameters:
+                registerSAP = true;
+                @display("p=250,60,col");
+        }
+        llc: EtherLLC {
+            parameters:
+                @display("p=155,120");
+            gates:
+                upperLayerIn[2];
+                upperLayerOut[2];
+        }
+        mac: EtherMAC2 {
+            parameters:
+                txQueueLimit = 1000; // increase if needed
+                queueModule = "";
+                @display("p=155,200;q=queue");
+        }
+    connections:
+        llc.lowerLayerIn <-- mac.upperLayerOut;
+        llc.lowerLayerOut --> mac.upperLayerIn;
+
+        mac.phys <--> ethg;
+
+        cli.out --> llc.upperLayerIn[0];
+        cli.in <-- llc.upperLayerOut[0];
+
+        srv.out --> llc.upperLayerIn[1];
+        srv.in <-- llc.upperLayerOut[1];
+}
+

@@ -1,0 +1,107 @@
+//
+// Copyright (C) 2006 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+
+
+
+
+package org.omnetpp.inet.Nodes.INET;
+
+import org.omnetpp.inet.Applications.TCPApp.TCPSpoof;
+import org.omnetpp.inet.Base.NotificationBoard;
+import org.omnetpp.inet.Network.Contract.InterfaceTable;
+import org.omnetpp.inet.Network.IPv4.RoutingTable;
+import org.omnetpp.inet.NetworkInterfaces.Ethernet.EthernetInterface;
+import org.omnetpp.inet.NetworkInterfaces.PPP.PPPInterface;
+import org.omnetpp.inet.Util.NAMTraceWriter;
+
+
+//
+// \IP host with TCPSpoof in the application layer.
+//
+module TCPSpoofingHost
+{
+    parameters:
+        int numTcpApps = default(0);
+        int numUdpApps = default(0);
+        string tcpAppType = default("");
+        string udpAppType = default("");
+        bool IPForward = default(false);
+        int namid;
+        string routingFile = default("");
+    gates:
+        inout pppg[];
+        inout ethg[];
+    submodules:
+        namTrace: NAMTraceWriter {
+            parameters:
+                namid = namid;
+                @display("p=71,294");
+        }
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=71,54");
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=71,134");
+        }
+        routingTable: RoutingTable {
+            parameters:
+                IPForward = IPForward;
+                routerId = "";
+                routingFile = routingFile;
+                @display("p=71,214");
+        }
+        tcpSpoof: TCPSpoof {
+            parameters:
+                @display("p=168,122");
+        }
+        networkLayer: NetworkLayer {
+            parameters:
+                proxyARP = false;
+                @display("p=248,247;q=queue");
+            gates:
+                ifIn[sizeof(pppg)+sizeof(ethg)];
+                ifOut[sizeof(pppg)+sizeof(ethg)];
+        }
+        ppp[sizeof(pppg)]: PPPInterface {
+            parameters:
+                @display("p=205,350,row,90;q=txQueue");
+        }
+        eth[sizeof(ethg)]: EthernetInterface {
+            parameters:
+                @display("p=240,350,row,90;q=txQueue");
+        }
+    connections allowunconnected:
+        tcpSpoof.ipv4Out --> networkLayer.TCPIn;
+
+        // connections to network outside
+        for i=0..sizeof(pppg)-1 {
+            pppg[i] <--> ppp[i].phys;
+            ppp[i].netwOut --> networkLayer.ifIn[i];
+            ppp[i].netwIn <-- networkLayer.ifOut[i];
+        }
+
+        for i=0..sizeof(ethg)-1 {
+            ethg[i] <--> eth[i].phys;
+            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
+            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+        }
+}
+

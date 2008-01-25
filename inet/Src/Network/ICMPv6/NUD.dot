@@ -1,0 +1,22 @@
+/* 
+ * State-transition diagram in Graphviz dot format.
+ *
+ * To produce GIF image, try: dot -Tgif < NUD.dot >NUD.gif
+ */
+
+digraph NeighbourUnreachabilityDetection {
+        node [fontsize=10,fontname="Courier"];
+        edge [fontsize=10,fontname="Courier"];
+
+	START -> INCOMPLETE  [label = "sending dgram\n/queue dgram, send NS"];
+	INCOMPLETE -> REACHABLE  [label = "NA recvd\n/send queued dgrams"];
+	REACHABLE -> DELAY  [label = "dgram sent\n[reachableTime exceeded]"];
+	REACHABLE -> STALE  [label = "MAC addr changed"];
+	STALE -> REACHABLE  [label = "reachability\nconfirmed"];
+	STALE -> DELAY  [label = "dgram sent\n/start delay timer"];
+	DELAY -> REACHABLE  [label = "reachability\nconfirmed\n/cancel delay timer"];
+	DELAY -> PROBE  [label = "probe timer expired\n/send probe, start timer"];
+	PROBE -> PROBE  [label = "probe timer expired\n[count<MAX_UNICAST_SOLICIT]\n/send probe, start timer"];
+	PROBE -> END  [label = "probe timer expired\n[count==MAX_UNICAST_SOLICIT]\n/discard entry"];
+	PROBE -> REACHABLE  [label = "reachability\nconfirmed\n/cancel timer"];
+};

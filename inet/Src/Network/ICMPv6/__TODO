@@ -1,0 +1,11 @@
+- in the class: int NUM_OF_SOLICIT_SENT, simtime_t MAX_ANYCAST_DELAY_TIME: 
+  turn them into #define or const double
+
+- initiateDAD(): get rid of chaining of contextPointers, and dup'ing of NS packet.
+
+- also: createAndSend...Packet() methods should return void NOT the packet! 
+  (it's not safe to keep the pointer after sending out the packet). 
+
+- assignTentativeAddress(cMessage *timerMsg): remove message as argument (why 
+  is it passed in the 1st place? the function doesn't need it)
+

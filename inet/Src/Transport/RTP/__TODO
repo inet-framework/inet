@@ -1,0 +1,6 @@
+This is the original todo list:
+- rtp intermediate systems
+- more profiles
+- more data formats
+- integration with RTSP model from Arndt Buschmann <a.buschmann@gmx.de>
+  (new cvs module or both in one)

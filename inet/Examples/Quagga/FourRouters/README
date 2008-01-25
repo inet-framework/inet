@@ -1,0 +1,12 @@
+Quagga for OMNeT++
+
+Quagga (formerly Zebra) is an open-source routing daemon package for 
+Linux and other *nix systems. Quagga supports RIP, OSPF, ISIS, BGP4 and 
+OSPFv6. There is currently an ongoing effort to bring dynamic routing 
+facility into INET simulations by using modified version of Quagga, and
+placing a syscall emulation layer between Quagga and INET Framework
+components. The project is being done by Vojta Janota.
+
+This simulation example features a four-router network with selectable
+RIP or OSPF routing.
+

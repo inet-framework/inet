@@ -1,0 +1,3 @@
+This directory contains a modularized form of the IP module 
+(Network/IPv4/IP.ned,.h,.cc). It also uses various classes from
+that directory: IPDatagram, IPControlInfo, IPFragBuf, etc.

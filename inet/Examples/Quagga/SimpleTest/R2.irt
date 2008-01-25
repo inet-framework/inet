@@ -1,0 +1,25 @@
+ifconfig:
+
+# ppp card 0 of router - connected to R1
+name: ppp0
+  inet_addr: 192.168.60.62
+  Mask: 255.255.255.255
+  Groups: 224.0.0.5
+  MTU: 1500
+  Metric: 2
+  POINTTOPOINT MULTICAST
+
+# ethernet card 1 of router - connected to N2
+name: eth0
+  inet_addr: 192.168.2.1
+  Mask: 255.255.255.0
+  Groups: 224.0.0.5
+  MTU: 1500
+  Metric: 1
+  BROADCAST MULTICAST
+
+ifconfigend.
+
+route:
+192.168.60.61 * 255.255.255.255 H 1 ppp0
+routeend.

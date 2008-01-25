@@ -1,0 +1,17 @@
+--- lib/sigevent.h.orig	2005-11-12 10:51:37.000000000 +0100
++++ lib/sigevent.h	2005-11-12 10:52:50.000000000 +0100
+@@ -50,4 +50,14 @@
+ /* check whether there are signals to handle, process any found */
+ int quagga_sigevent_process (void);
+ 
++struct quagga_sigevent_master_t
++{
++  struct thread *t;
++
++  struct quagga_signal_t *signals; 
++  int sigc;
++  
++  volatile sig_atomic_t caught;
++};
++
+ #endif /* _QUAGGA_SIGNAL_H */

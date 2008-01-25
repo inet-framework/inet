@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<scenario>
+	<at t="200000">
+		<shutdown module="failureManager" target="r2"/>
+	</at>
+	<at t="4000000">
+		<startup module="failureManager" target="r2"/>
+	</at>
+	<at t="5000000">
+		<shutdown module="failureManager" target="r4"/>
+	</at>
+</scenario>

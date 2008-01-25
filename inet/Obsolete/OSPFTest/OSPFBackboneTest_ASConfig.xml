@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange>
+      <Address>192.168.1.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+    <AddressRange>
+      <Address>192.168.2.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+    <AddressRange>
+      <Address>192.168.3.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+    <AddressRange>
+      <Address>192.168.4.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+    <AddressRange>
+      <Address>192.168.5.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+    <AddressRange>
+      <Address>192.168.6.0</Address>
+      <Mask>255.255.255.0</Mask>
+      <Status>Advertise</Status>
+    </AddressRange>
+  </Area>
+
+  <!-- Routers -->
+  <Router id="192.168.3.1"> <!-- R1 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>1</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>1</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>1</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>1</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth2">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>1</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>1</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.4.3"> <!-- R2 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>2</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>2</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>2</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>2</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.5.2"> <!-- R3 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>3</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>3</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>3</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>3</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.6.2"> <!-- R4 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>4</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>4</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>4</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>4</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.5.3"> <!-- R5 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>5</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>5</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>5</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>5</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.6.3"> <!-- R6 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>6</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>6</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>6</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>6</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+  <Router id="192.168.6.1"> <!-- R7 -->
+    <RFC1583Compatible />
+    <BroadcastInterface ifName="eth0">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>7</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>7</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+    <BroadcastInterface ifName="eth1">
+      <AreaID>0.0.0.0</AreaID>
+      <InterfaceOutputCost>7</InterfaceOutputCost>
+      <RetransmissionInterval>5</RetransmissionInterval>
+      <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+      <RouterPriority>7</RouterPriority>
+      <HelloInterval>10</HelloInterval>
+      <RouterDeadInterval>40</RouterDeadInterval>
+      <AuthenticationType>NullType</AuthenticationType>
+      <AuthenticationKey>0x00</AuthenticationKey>
+    </BroadcastInterface>
+  </Router>
+
+</OSPFASConfig>

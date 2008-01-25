@@ -1,0 +1,29 @@
+An example of Explicit Routing in RSVP-TE.
+
+The network consists of 5 LSRs and 2 hosts. Host2 establishes its path 
+based on the input of ROUTE specified by the administrator from an 
+input file called traffic.xml.
+
+The format of input ROUTE is:
+<route>firstAddress, LBit, secondAddress, LBit, ...</route>
+
+LBit is 1 if the nexthop is loose hop and 0 if strict.
+
+
+<traffic>
+
+<conn>
+  <src>11.0.0.1</src>
+  <dest>11.0.1.2</dest>
+  <setupPri>7</setupPri>
+  <holdingPri>7</holdingPri>
+  <bandwidth>0</bandwidth>
+  <delay>0</delay>
+  <ER>true</ER>
+  <route>1.0.0.1,0, 1.0.0.3,0, 1.0.0.4,0, 1.0.0.5,0, 10.0.1.2,0</route>
+</conn>
+
+</traffic>
+
+
+

@@ -1,0 +1,16 @@
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+from scratch by Vojta Janota since the INET-20050922 release. This network
+already features the new simulation models.
+
+This is a sample to demonstrate label stacking used for creating tunnel
+hierarchy.
+
+Following description refers to the nam trace file genereated by the simulation
+run.
+
+Both green and brown LSPs are tunneled through the orange tunnel.
+
+IMPORTANT: In this scenario, the Label Information Base (LIB) of all routers is
+configured explicitly (LSR*_lib.xml) when the simulation starts. To my best
+knowledge, the RSVP-TE itself does not support creation of tunnel hierarchy
+(correct me if I'm wrong: vojta at pohoda dot cz).

@@ -1,0 +1,38 @@
+--- lib/plist.c.orig	2005-11-15 21:27:21.000000000 +0100
++++ lib/plist.c	2005-11-15 21:27:36.000000000 +0100
+@@ -49,34 +49,7 @@
+   struct prefix_list_entry *prev;
+ };
+ 
+-/* List of struct prefix_list. */
+-struct prefix_list_list
+-{
+-  struct prefix_list *head;
+-  struct prefix_list *tail;
+-};
+-
+-/* Master structure of prefix_list. */
+-struct prefix_master
+-{
+-  /* List of prefix_list which name is number. */
+-  struct prefix_list_list num;
+-
+-  /* List of prefix_list which name is string. */
+-  struct prefix_list_list str;
+-
+-  /* Whether sequential number is used. */
+-  int seqnum;
+-
+-  /* The latest update. */
+-  struct prefix_list *recent;
+-
+-  /* Hook function which is executed when new prefix_list is added. */
+-  void (*add_hook) ();
+-
+-  /* Hook function which is executed when prefix_list is deleted. */
+-  void (*delete_hook) ();
+-};
++// struct definitions moved to header
+ 
+ /* Static structure of IPv4 prefix_list's master. */
+ static struct prefix_master prefix_master_ipv4 = 

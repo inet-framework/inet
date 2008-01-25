@@ -1,0 +1,24 @@
+!include "../../../../../inetconfig.vc"
+
+SOURCES = \
+	ripd.c rip_zebra.c rip_interface.c rip_debug.c rip_snmp.c \
+	rip_routemap.c rip_peer.c rip_offset.c rip_main.c
+
+HEADERS = \
+	ripd.h rip_debug.h
+
+OBJECTS = \
+	ripd.obj rip_zebra.obj rip_interface.obj rip_debug.obj rip_snmp.obj \
+	rip_routemap.obj rip_peer.obj rip_offset.obj rip_main.obj
+
+INCLUDES = -I. -I.. -I../lib -I../../..
+
+CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DRIPD -DHAVE_CONFIG_H
+
+all: ripd.lib
+
+ripd.lib: $(OBJECTS) $(HEADERS) $(SOURCES)
+	link.exe /lib $(LDFLAGS_DEBUG) $(OBJECTS) /OUT:ripd.lib
+
+clean:
+	-del *.obj ripd.lib vc70.pdb vc70.idb

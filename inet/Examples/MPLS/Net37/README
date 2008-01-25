@@ -1,0 +1,10 @@
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+from scratch by Vojta Janota since the INET-20050922 release. This network
+already features the new simulation models.
+
+This example network demonstrates work in progress aimed (by Andras Varga)
+at reducing the need for writing routing table files (.rt/.irt) for each 
+router in RSVP-TE simulations, by using the NetworkConfigurator module.
+An alternative of this (for large network models) is to generate the routing
+table files e.g. by a Perl script.
+

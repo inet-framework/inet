@@ -1,0 +1,23 @@
+
+# filename: bgrouter3.irt
+# routing table for Border Gateway Router, No 3 of KIDS Network 1
+# connected to Interior Router 2, Border Gateway Router 4
+# author: Jochen Reber
+
+
+ifconfig:
+
+# router connection 0 to Interior Router 2
+name: ppp0  inet_addr: 172.0.2.1    MTU: 1200   Metric: 1
+
+# router connection 1 to Border Gateway Router 4
+name: ppp1  inet_addr: 172.1.0.0    MTU: 1200   Metric: 1
+
+ifconfigend.
+
+route:
+172.0.0.0       172.0.2.0       255.255.0.0     G   0   ppp0
+default:        172.1.0.1       0.0.0.0         G   0   ppp1
+
+routeend.
+

@@ -1,0 +1,70 @@
+INSTALLATION INSTRUCTIONS
+=========================
+
+The INET Framework can be compiled on any platform supported by OMNeT++.
+
+PREREQUISITES
+
+You should have a working OMNeT++ installation, version 3.1 or later.
+It must be compiled with dynamic NED loading enabled (WITH_NETBUILDER=yes
+setting).
+
+LINUX (UNIX)
+
+1. Make sure you OMNeT++ installation works OK (e.g. try running the samples)
+   and it is in the path (to test, try the command "which nedtool").
+
+2. Change to the INET directory and edit the inetconfig file
+   to make sure it contains the right settings. You'll probably
+   need to adjust ROOT.
+
+3. Type "./makemake" to create the makefiles and the omnetppconfig file.
+
+4. Type "make" to build everything.
+
+5. Add INET/bin directory to the LD_LIBRARY_PATH.
+
+6. If you modify INET and add/remove/rename directories, you'll need to modify
+   "makemakefiles", and go to step 4.
+
+That should be it.
+
+Finally, try running the demo simulations. Change into Examples/ and type
+"./rundemo".
+
+Note:
+-----
+If you add/remove files later, recreate the makefiles with "./makemake".
+If you add/remove/rename directories, you'll need to modify "makemakefiles".
+
+
+
+WINDOWS
+
+If you're using Cygwin or MinGW, see instructions for Unix. The instructions
+below are for Visual C++ 7.1.
+
+IMPORTANT: YOU NEED VC 7.1 .NET! INET won't compile with VC 6.0.
+
+1. You need a working OMNeT++ installation. Make sure the sample simulations
+   work OK. Also, OMNeT++ and MSVC should be in the PATH (you can verify this
+   by typing "nedtool" and "nmake" at the cmd prompt.)
+
+2. Change to the INET framework directory. Edit the inetconfig.vc file and
+   adjust the OMNETPP_ROOT setting to suit your installation.
+
+3. Run "makemake.cmd" to create the makefiles.
+
+4. Run "nmake -f makefile.vc depend" to add dependencies to makefiles. You need 
+   to do this every time you re-generate the makefiles with "makemake.bat".
+
+5. Type "nmake -f Makefile.vc" to build everything.
+      HINT: Create an "m.bat" file with the content "nmake -f Makefile.vc %*".
+      It will save you a lot of typing!
+
+6. If you modify INET and add/remove/rename directories, you'll need to modify
+   "makemakefiles", and go to step 3.
+
+Finally, try running the demo simulations. Change to Examples/ and type
+"rundemo.bat".
+

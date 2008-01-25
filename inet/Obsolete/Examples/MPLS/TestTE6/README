@@ -1,0 +1,32 @@
+
+LSP preemption example.
+
+The network consists of 5 LSRs and 4 hosts. The LSP between host1
+and host3 is established before host2 starts sending packets.
+As host2 starts sending packets, new LSP setup competes on resources with
+the old LSP (host1-host3). Since the new LSP's setup priority is higher 
+than the old LSP's holding priority, the old LSP is preempted by the new one.
+
+Traffic file:
+
+<traffic>
+
+<conn>
+  <src>10.0.0.1</src>
+  <dest>10.0.1.2</dest>
+  <setupPri>7</setupPri>
+  <holdingPri>7</holdingPri>
+  <bandwidth>100</bandwidth>
+  <delay>0.005</delay>
+</conn>
+
+<conn>
+  <src>11.0.0.1</src>
+  <dest>11.0.1.2</dest>
+  <setupPri>5</setupPri>
+  <holdingPri>5</holdingPri>
+  <bandwidth>130</bandwidth>
+  <delay>0.005</delay>
+</conn>
+
+</traffic>

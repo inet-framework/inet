@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<!-- Example of traffic control file -->
+
+<traffic>
+
+<conn>
+    <src>10.0.0.1</src>
+    <dest>10.0.1.2</dest>
+    <setupPri>7</setupPri>
+    <holdingPri>7</holdingPri>
+    <bandwidth>0</bandwidth>
+    <delay>0</delay>
+    <ER>false</ER>
+</conn>
+
+</traffic>
+
+

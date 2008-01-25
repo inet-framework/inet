@@ -1,0 +1,22 @@
+--- lib/privs.h.orig	2005-11-11 18:26:06.000000000 +0100
++++ lib/privs.h	2005-11-11 18:26:56.000000000 +0100
+@@ -88,4 +88,19 @@
+   /* query for runtime uid's and gid's, eg vty needs this */
+ void zprivs_get_ids(struct zprivs_ids_t *);
+ 
++struct _zprivs_t
++{
++#ifdef HAVE_LCAPS
++  cap_t caps;                 /* caps storage             */
++  cap_value_t *syscaps_p;     /* system permitted caps    */
++  cap_value_t *syscaps_i;     /* system inheritable caps  */
++  int sys_num_p;              /* number of syscaps_p      */
++  int sys_num_i;              /* number of syscaps_i      */
++#endif /* HAVE_LCAPS */
++  uid_t zuid,                 /* uid to run as            */
++        zsuid;                /* saved uid                */
++  gid_t zgid;                 /* gid to run as            */
++  gid_t vtygrp;               /* gid for vty sockets      */
++};
++
+ #endif /* _ZEBRA_PRIVS_H */

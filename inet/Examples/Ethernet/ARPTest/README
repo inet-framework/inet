@@ -1,0 +1,9 @@
+Demonstrates how Ethernet works with IP. Ethernet interfaces of hosts and 
+routers (eth[0], eth[1] etc.) consist of EtherMAC, EtherEncap and ARP. 
+Note that as the client host opens a TCP connection to the server, a Proxy ARP
+request is made to find the router.
+
+ARP operation can be followed by peeking into ARP packets, and examining
+the log from ARP either in the main window, or better, by opening text 
+output windows for individual ARP modules (right-click the ARP module, then
+select Module Output... from the context menu).

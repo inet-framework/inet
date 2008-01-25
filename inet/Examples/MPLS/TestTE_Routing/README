@@ -1,0 +1,18 @@
+The MPLS/RSVP-TE/LDP protocol models have been revised and mostly rebuilt 
+from scratch by Vojta Janota since the INET-20050922 release. This network
+already features the new simulation models.
+
+This is a sample to demonstrate various routing mechanism.
+
+Following description refers to the nam trace file genereated by the simulation
+run.
+
+Three LSPs are established on simulation startup. 
+
+The green path uses explicit routing with every hop on the path being listed
+explicitly.
+
+The orange one uses explicit routing but only some of the hops are specified
+(1-6-5 in this case).
+
+The brown path uses hop-by-hop routing.

@@ -1,0 +1,9 @@
+2005-10-28  Andras Varga
+
+	* IPControlInfo.msg: added outputPort field
+
+2005-07-12  Andras Varga
+
+	* IPAddress, IPv6Address, IPvXAddress: renamed isNull() to 
+	isUnspecified()
+

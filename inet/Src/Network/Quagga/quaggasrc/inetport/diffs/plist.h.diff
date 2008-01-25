@@ -1,0 +1,47 @@
+--- lib/plist.h.orig	2005-11-13 13:26:37.000000000 +0100
++++ lib/plist.h	2005-11-13 13:27:55.000000000 +0100
+@@ -20,6 +20,9 @@
+  * Boston, MA 02111-1307, USA.
+  */
+ 
++#ifndef __PLIST_H__
++#define __PLIST_H__
++
+ #define AFI_ORF_PREFIX 65535
+ 
+ enum prefix_list_type 
+@@ -76,3 +79,34 @@
+ int prefix_bgp_orf_set (char *, afi_t, struct orf_prefix *, int, int);
+ void prefix_bgp_orf_remove_all (char *);
+ int prefix_bgp_show_prefix_list (struct vty *, afi_t, char *);
++
++/* List of struct prefix_list. */
++struct prefix_list_list
++{
++  struct prefix_list *head;
++  struct prefix_list *tail;
++};
++
++/* Master structure of prefix_list. */
++struct prefix_master
++{
++  /* List of prefix_list which name is number. */
++  struct prefix_list_list num;
++
++  /* List of prefix_list which name is string. */
++  struct prefix_list_list str;
++
++  /* Whether sequential number is used. */
++  int seqnum;
++
++  /* The latest update. */
++  struct prefix_list *recent;
++
++  /* Hook function which is executed when new prefix_list is added. */
++  void (*add_hook) ();
++
++  /* Hook function which is executed when prefix_list is deleted. */
++  void (*delete_hook) ();
++};
++
++#endif

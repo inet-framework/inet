@@ -1,0 +1,25 @@
+--- lib/if.c.orig	2005-11-21 14:46:07.000000000 +0100
++++ lib/if.c	2005-11-21 14:47:53.000000000 +0100
+@@ -40,11 +40,8 @@
+ struct list *iflist;
+ 
+ /* One for each program.  This structure is needed to store hooks. */
+-struct if_master
+-{
+-  int (*if_new_hook) (struct interface *);
+-  int (*if_delete_hook) (struct interface *);
+-} if_master;
++// struct definition moved to header
++struct if_master if_master;
+ 
+ /* Compare interface names, returning an integer greater than, equal to, or
+  * less than 0, (following the strcmp convention), according to the
+@@ -496,7 +493,7 @@
+ 
+ 
+ /* See also wrapper function zebra_interface() in zebra/interface.c */
+-DEFUN (interface,
++DEFUN (interface_FOO,
+        interface_cmd,
+        "interface IFNAME",
+        "Select an interface to configure\n"

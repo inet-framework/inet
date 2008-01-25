@@ -1,0 +1,316 @@
+Recent changes in the INET Framework
+====================================
+
+INET-20061020
+-------------
+
+- new example network: Examples/Ethernet/ARPTest (old ARPTest renamed)
+
+- bugfixes: AbstractRadio (Dave Symonds); Ieee80211 (also reported by Dave)
+
+
+INET-20060912a
+--------------
+
+- improvements on the wireless infrastructure: support for multiple channels
+  and channel switching by NICs; account for finite radio wave propagation speed
+
+- added new 802.11 model which also supports infrastructure mode; see
+  NetworkInterfaces/Ieee80211. Even for ad-hoc mode, Ieee80211Mac is recommended
+  over the older Mac80211 from MF.
+
+- added Ieee80211Radio which supersedes SnrEval80211 and Decider80211.
+
+- added EtherDuplexMAC, a simplified Ethernet implementation for full duplex
+  point-to-point operation mode when CSMA/CD is not in use.
+
+- makefiles within Examples/ have been largely unnecessary because all
+  simulations just invoke bin/INET. Realizing these makefiles have been
+  confusing to many people, they got removed now. The target to generate
+  them is still present in makemakefiles in case someone needs it.
+
+- several other fixes
+
+
+INET-20060330
+-------------
+
+- checked in the new MPLS, RSVP-TE and LDP models, written/rewritten by
+  Vojta Janota
+
+- new model: Network/Quagga. This is port of the Quagga routing daemon to the
+  INET Framework. Currently provides RIP and OSPFv2 routing. Quagga itself is
+  a fork of Zebra. (Ported to INET by Vojta Janota)
+
+- new model: Network/OSPFv2. This is a new OSPF implementation.
+  (author: Andras Babos)
+
+- UDP rewritten: similarly to TCP, dispatching is now done inside UDP, and
+  apps now identify sockets with a sockId; implemented ephemeral port reuse
+
+- UDPSocket class added to facilitate talking to the UDP model from apps;
+  analogous to TCPSocket (thanks to Michael Tuexen and Vojta Janota for
+  feedback)
+
+- new snapshot of the IPv6 module (by Wei Yang Ng)
+
+- added ability to write nam traces (Util/NAMTraceWriter, World/NAMTrace);
+  feature originally implemented by Vojta Janota (and refactored by Andras,
+  so bugs are very likely mine)
+
+- implemented ThruputMeteringChannel which can display #packets, pk/sec etc
+  on the links; and ChannelInstaller as a temporary solution to install
+  ThruputMeteringChannel instead of the built-in BasicChannel class.
+
+- updated module class ctors/dtors for OMNeT++ 3.2; changed msg->length()/8 to
+  msg->byteLength() and msg->setLength(8*bytes) to msg->setByteLength(bytes),
+  etc.
+
+- TCP: Reno bugs fixed (reported by Pascal Rousseau); TCPMessageBasedSendQueue
+  seqNo bug fixed (Adam Hudson); implemented reuse of ephemeral ports;
+  fixed incorrect behaviour when ACK of SYN carries data (reported by Joachim
+  Meichle); fixed minor issue that when the user issued CLOSE, transition to
+  FIN_WAIT_1 was done immediately and not deferred until all data are sent.
+
+- added Applications/TCPApp/TCPSpoof
+
+- hosts have now the same queues as routers (reported by Michael Tuexen)
+
+- ev replaced with EV in every module (speed increase in Express mode)
+
+- NetworkLayer(6): gates towards interfaces renamed to ifOut[]/ifIn[]
+
+- FlatNetworkConfigurator internals refactored
+
+- added another network configurator, NetworkConfigurator
+
+- RoutingTable: routerId selection moved from stage 1 to stage 3 (you may
+  need to revise your code if it depends on routerId)
+
+
+INET-20050922
+-------------
+- patched for OMNeT++ 3.2:
+  - added '=NULL' default value to all args of hand-code module constructors
+    (2 or 3 places)
+  - RSVPPacket.h: dup() return type has to be cPolymorphic with OMNeT++ 3.2;
+    fixed it using '#if OMNETPP_VERSION<0x0302...#else...#endif'
+
+  Note: THIS IS THE ONLY RELEASE WHICH IS COMPATIBLE WITH BOTH 3.1 AND 3.2
+
+- UDP dispatchByPort bug fixed; further smaller fixes
+
+- IPv6 updated (still unfinished)
+
+- NOT YET FIXED:
+  - TCP bug http://www.omnetpp.org/listarchive/msg05687.php
+  - incorrect handling of host queues (Michael Tuexen)
+
+
+INET-20050720
+-------------
+
+- module types renamed for consistency: PPPModule -> PPP, TCPMain -> TCP,
+  UDPProcessing -> UDP
+
+- C++ methods renamed: isNull() -> isUnspecified() in IPAddress, IPv6Addres,
+  IPvXAddress
+
+- created two subdirs under Transport/TCP: flavours and queues, and moved
+  the appropriate cc/h files there. The structure of the TCP model should
+  now be much more obvious to readers. Also added READMEs explaining things.
+
+- TCP fixes: raise an error (~EADDRINUSE) on attempt to create more than one
+  connections to listen on the same port
+
+- implemented REDQueue
+
+- beginnings of a "Getting started with TCP" doc
+
+
+INET-20050705
+-------------
+- TCP improvements: separate congestion control behaviour classes
+  TCPTahoe, TCPReno and TCPNoCongestionControl provided, for teaching
+  purposes (their code is very short, to the point, and extensively
+  commented).
+
+- TCP: fixed bogus RTT calculation and other other bugs; also, sequence
+  numbers are now recorded into omnetpp.vec, so with Plove one can create
+  sequence number plots like Sally Floyd's [thanks to Ahmet Sekercioglu
+  for help!]
+
+- still TCP: fixed the bug which caused closing of a connection to be reported
+  2MSL (240s) later to the user.
+
+- Added support for drop-tail router queues, and queues with QoS support
+  based on DS Code Point; RED in preparation (see Network/Queue)
+
+- Added wireless and mobility support (based on Mobility Framework code),
+  including 802.11b ad-hoc mode MAC, and several new mobility models
+  (also new to MF). Supports mobility traces from BonnMotion and ANSim.
+
+- Contract directories introduced: Transport/Contract, Network/Contract
+  and NetworkInterfaces/Contract. These directories contain a minimal set
+  of classes necessary for using one layer's functionality from higher layers.
+
+- Added notification mechanism: modules can now notify each other about
+  "events" such as routing table changes, interface status changes (up/down),
+  interface configuration changes, wireless handovers, changes in the state
+  of the wireless channel, mobile node position changes, etc. Notification
+  works via the NotificationBoard which replaces the Blackboard.
+
+- InterfaceTable introduced: it stores all interface configuration that was
+  previously stored in RoutingTable. Per-interface data structure was also
+  split into protocol independent (InterfaceEntry) and protocol dependent
+  (IPv4InterfaceData, IPv6InterfaceData) parts.
+
+- ScenarioManager introduced (experimental, in World/ subdirectory):
+  it addresses the need for simulating scenarios like "what if this cable
+  breaks at t=20s", or "what if traffic intensity grows at t=100s".
+  Scenario is described in an XML file.
+
+- Ping and VideoStream applications added (from IPv6SuiteWithINET)
+
+- ARP got moved up from L2 to L3; this is to prepare for IPv6 support (IPv6
+  doesn't need ARP, so we can no longer have it as part of the network
+  interfaces)
+
+- prepared for IPv6: application layer, transport layer and IPv6 contract
+  taken over from IPv6SuiteWithINET-20050502
+
+- work in progress: from-scratch IPv6 implementation by Wei Yang Ng (Monash
+  University) and Andras Varga
+
+- added INET_API definitions to classes, so that one can build a DLL that can
+  be loaded dynamically into INET.exe (hint: compile DLL code *without*
+  /DBUILDING_INET, and link them with INET.lib! then add [General]/load-libs=
+  to omnetpp.ini.)
+
+- Network/IPv4d subdirectory finally thrown out. It was a bad idea to
+  implement IP with a dozen small modules in the first place.
+
+- added files called !WORK_IN_PROGRESS! with some explanations to
+  directories which contain unfinished simulation models.
+
+
+INET-20050404 released
+----------------------
+- Updated to omnetpp-3.1.
+- patches from Michael Tuexen
+
+
+INET-20050102
+-------------
+- updated to omnetpp-3.0
+
+
+INET-20041007
+-------------
+- package renamed to INET Framework
+
+
+IPSuite-20041007
+----------------
+- practically a complete rewrite of IPSuite took place 03/2004 through
+  10/2004. See change log at http://ctieware.eng.monash.edu.au/twiki/
+  bin/view/Simulation/IPSuiteLogOfChanges
+
+
+Preparations for rewriting IPSuite, 09/2003-03/2004
+---------------------------------------------------
+2004-02-04  Andras Varga
+
+        * got it compiled with omnetpp-3.0pre1. changes:
+        - added #include <iostream>, using std::ostream at a couple of places
+        - deprecated receiveOn(), receiveNewOn() no longer exists, replaced by:
+                msg = receive();
+                ASSERT(dfmsg->arrivedOn("fromEnqHook"));  // FIXME revise this
+        * removed ProcessorManager altogether
+
+2003-09-19  Andras Varga
+
+        * added the MPLS/LDP/RSVP-TE models created by Xuan Thang Nguyen
+        (Xuan.T.Nguyen@uts.edu.au) at UTS (University of Technology, Sydney).
+        See http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/
+
+        * did IPsuite modifications necessary fo MPLS. Modularity is preserved:
+        it is still possible to build IPSuite without the MPLS models.
+
+2003-09-18  Andras Varga
+
+        * merged patches for compiling with MSVC.
+
+        * module descriptions (comments) added to/rearranged in all NED files
+        for documentation generation with new opp_neddoc.
+
+        * DIRECTORY STRUCTURE WAS REARRANGED along the lines of the OSI layers,
+        and also to make it consistent with the IPv6Suite. Hopefully every file
+        is now where one would expect to find it.
+
+        * added makemake.cmd for generating Makefile.vc's (using opp_nmakemake)
+        for building with MSVC, and makemake for generating Unix makefiles
+
+        * lots of minor fixes to make the code compile with MSVC.
+        Note: for compatibility with MSVC6.0,
+          1. return type of dup() should ALWAYS be cObject* (and cannot be the
+             actual class name)
+          2. class variables cannot be initialized (even const or
+             static const ones) within the class declaration.
+
+        * updated for recent OMNeT++ versions: added ",row" to vector module
+        display strings; removed className() methods, etc.
+
+        * FIXME: KIDSRouter was missing from the original IPSuite! KIDSNw1
+        didn't compile. I temporarily substituted a copy of NextHopRouter.
+
+2003-09-17  Andras Varga
+
+        * taken ipsuite-20021124-src.tgz and started improving it.
+
+
+IPSuite's change log, 2000-2001
+-------------------------------
+Before Andras Varga took over the development in 2003, IPSuite was
+created and developed at University of Karlsruhe, Germany.
+
+2001-12-10  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+        * Global changes for OMNeT++ 2.2 conformance:
+        copy constructor -> const argument
+        virtual long length(const ) -> virtual long length(const) const
+        virtual int numInitStages() -> virtual int numInitStages () const
+        virtual char *className() -> virtual const char* className() const
+        virtual cObject *dup() -> virtual cObject *dup() const
+        cObject& operator=(cObject& o) -> cObject& operator=(const cObject& o)
+
+2001-08-31  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+        * CVS-Tag da-kussaether: Work on TCP by Rolf Kussaether;
+        implementation of TCP flavours Reno (fast recovery) and New Reno.
+
+2001-03-19 Verena Kahmann <kahmann@telematik.informatik.uni-karlsruhe.de>
+        * deleted all queues and behaviors except FIFO* and the basic behaviors.
+        Maybe we have to apply some extra cleaning still.
+2000-12-19  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+        * recent (standalone) TCP model is merged into the ip-suite. The
+        simple test network is now located in ./Networks/TCPTester
+
+2000-12-13  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+        * makeipsuite: replaced by top level Makefile
+
+        * rundemo: front end for launching all available simulations
+
+        * Makefile: Top level makefile to create Makefiles from Makefile.in
+        in all subdirectories
+
+        * removed mmake in subdirectories and replaced them by Makefile.in
+
+2000-11-22  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+        * CREDITS: Put your name here if you have contributed to the
+        OMNeT++ Internet Protocol Suite
+
+

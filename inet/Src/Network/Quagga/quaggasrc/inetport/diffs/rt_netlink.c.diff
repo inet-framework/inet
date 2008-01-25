@@ -1,0 +1,39 @@
+--- zebra/rt_netlink.c.orig	2005-11-12 18:36:56.000000000 +0100
++++ zebra/rt_netlink.c	2005-11-12 18:39:19.000000000 +0100
+@@ -36,21 +36,18 @@
+ #include "thread.h"
+ #include "privs.h"
+ 
++#include "rt_netlink.h"
++
+ #include "zebra/zserv.h"
+ #include "zebra/redistribute.h"
+ #include "zebra/interface.h"
+ #include "zebra/debug.h"
+ 
+ /* Socket interface to kernel */
+-struct nlsock
+-{
+-  int sock;
+-  int seq;
+-  struct sockaddr_nl snl;
+-  const char *name;
+-} netlink      = { -1, 0, {0}, "netlink-listen"},     /* kernel messages */
+-  netlink_cmd  = { -1, 0, {0}, "netlink-cmd"},        /* command channel */
+-  netlink_addr = { -1, 0, {0}, "netlink-addr"};       /* address channel */
++// struct definition moved to header
++struct nlsock netlink = { -1, 0, {0}, "n""etlink-listen"}; /* kernel messages, circumvent substitution of the 2nd n-e-t-l-i-n-k string */
++struct nlsock netlink_cmd = { -1, 0, {0}, "netlink-cmd"}; /* command channel */
++struct nlsock netlink_addr = { -1, 0, {0}, "netlink-addr"}; /* address channel */
+ 
+ struct message nlmsg_str[] = {
+   {RTM_NEWROUTE, "RTM_NEWROUTE"},
+@@ -451,7 +448,7 @@
+ }
+ 
+ /* Utility function for parse rtattr. */
+-static void
++void
+ netlink_parse_rtattr (struct rtattr **tb, int max, struct rtattr *rta,
+                       int len)
+ {

@@ -1,0 +1,17 @@
+ifconfig:
+
+# ethernet card 0 of host - connected to N10
+name: eth0
+	inet_addr: 192.168.101.3
+	Mask: 255.255.255.0
+	MTU: 1500
+	Metric: 1
+	BROADCAST MULTICAST
+
+ifconfigend.
+
+route:
+
+default:		*	0.0.0.0		H	0	eth0
+
+routeend.

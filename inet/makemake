@@ -1,0 +1,22 @@
+opp_makemake -f --genconfig omnetppconfig
+make ROOT=`pwd` MAKEMAKE=opp_makemake EXT= -f makemakefiles
+
+echo
+echo 'Regenerating nedfiles.lst...'
+find . -name \*.ned > nedfiles.lst
+perl -i.bak -pe "s|^(./)?Examples/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Unsupported/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Obsolete/.*||" nedfiles.lst
+perl -i.bak -pe "s|^(./)?Tests/.*||" nedfiles.lst
+echo 'Done'
+
+if [ "$LANG" != "" -o "$LANGUAGE" != "" ]; then
+    echo
+    echo '==============================================================================='
+    echo 'NOTE: if you experience linker errors associated with IPv6ExtensionHeader, try the following commands:'
+    echo '  unset LANG; unset LANGUAGE'
+    echo 'See http://www.omnetpp.org/pmwiki/index.php?n=Main.INETLinkerErrorIPv6ExtensionHeader for more info.'
+    echo '==============================================================================='
+    echo
+fi
+

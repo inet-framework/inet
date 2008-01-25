@@ -1,0 +1,13 @@
+QUAGGA=../Network/Quagga/quaggasrc/quagga
+
+#FIXME re-enable quagga
+#EXTRA_OBJS= $(EXTRA_OBJS) $(QUAGGA)/ospfd/ospfd.lib $(QUAGGA)/ripd/ripd.lib $(QUAGGA)/zebra/zebra.lib $(QUAGGA)/lib/libzebra.lib $(QUAGGA)/globalvars.obj $(QUAGGA)/bgpd/bgpd.lib
+
+OMNETPP_CMD_LIBS=/libpath:$(OMNETPP_LIB_DIR) $(CMDENV_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
+
+#all: $(TARGET) cmd$(TARGET)
+all: $(TARGET)
+
+cmd$(TARGET): $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_TSTAMPS)  Makefile.vc
+	$(LINK) $(LDFLAGS) $(OBJS) $(EXTRA_OBJS) $(EXT_DIR_OBJS) $(LIBS) $(OMNETPP_CMD_LIBS) /out:cmd$(TARGET)
+	@echo.>.tstamp

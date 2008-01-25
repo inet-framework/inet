@@ -1,0 +1,32 @@
+--- lib/filter.c.orig	2005-11-16 00:10:35.000000000 +0100
++++ lib/filter.c	2005-11-16 00:10:59.000000000 +0100
+@@ -67,28 +67,7 @@
+     } u;
+ };
+ 
+-/* List of access_list. */
+-struct access_list_list
+-{
+-  struct access_list *head;
+-  struct access_list *tail;
+-};
+-
+-/* Master structure of access_list. */
+-struct access_master
+-{
+-  /* List of access_list which name is number. */
+-  struct access_list_list num;
+-
+-  /* List of access_list which name is string. */
+-  struct access_list_list str;
+-
+-  /* Hook function which is executed when new access_list is added. */
+-  void (*add_hook) ();
+-
+-  /* Hook function which is executed when access_list is deleted. */
+-  void (*delete_hook) ();
+-};
++// struct definitions moved to header
+ 
+ /* Static structure for IPv4 access_list's master. */
+ static struct access_master access_master_ipv4 = 

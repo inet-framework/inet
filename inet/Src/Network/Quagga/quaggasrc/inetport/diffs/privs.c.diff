@@ -1,0 +1,25 @@
+--- lib/privs.c.orig	2005-11-11 18:26:02.000000000 +0100
++++ lib/privs.c	2005-11-11 18:27:20.000000000 +0100
+@@ -27,20 +27,8 @@
+ #include "memory.h"
+ 
+ /* internal privileges state */
+-static struct _zprivs_t
+-{
+-#ifdef HAVE_LCAPS
+-  cap_t caps;                 /* caps storage             */
+-  cap_value_t *syscaps_p;     /* system permitted caps    */
+-  cap_value_t *syscaps_i;     /* system inheritable caps  */
+-  int sys_num_p;              /* number of syscaps_p      */
+-  int sys_num_i;              /* number of syscaps_i      */
+-#endif /* HAVE_LCAPS */
+-  uid_t zuid,                 /* uid to run as            */
+-        zsuid;                /* saved uid                */
+-  gid_t zgid;                 /* gid to run as            */
+-  gid_t vtygrp;               /* gid for vty sockets      */
+-} zprivs_state;
++// struct definition moved to header file
++struct _zprivs_t zprivs_state;
+ 
+ /* externally exported but not directly accessed functions */
+ #ifdef HAVE_LCAPS

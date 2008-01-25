@@ -1,0 +1,12 @@
+!include "../../../inetconfig.vc"
+
+all:
+	cd quagga && nmake /nologo /f Makefile.vc
+
+clean:
+	cd quagga && nmake /nologo /f Makefile.vc clean
+
+generateheaders: # target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
+
+depend:	# target invoked by OMNeT++-generated uplevel Makefile.vc; does nothing for now
+

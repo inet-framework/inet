@@ -1,0 +1,37 @@
+!include "../../../../../inetconfig.vc"
+
+SOURCES = \
+	zserv.c main.c interface.c connected.c zebra_rib.c \
+	redistribute.c debug.c rtadv.c zebra_snmp.c zebra_vty.c \
+	irdp_main.c irdp_interface.c irdp_packet.c router-id.c \
+	\
+	rt_netlink.c rtread_netlink.c \
+	ipforward_proc.c \
+	if_proc.c if_netlink.c \
+	ioctl.c
+
+HEADERS = \
+	connected.h ioctl.h rib.h rt.h zserv.h redistribute.h debug.h rtadv.h \
+	interface.h ipforward.h irdp.h router-id.h
+
+OBJECTS = \
+	zserv.obj main.obj interface.obj connected.obj zebra_rib.obj \
+	redistribute.obj debug.obj rtadv.obj zebra_snmp.obj zebra_vty.obj \
+	irdp_main.obj irdp_interface.obj irdp_packet.obj router-id.obj \
+	\
+	rt_netlink.obj rtread_netlink.obj \
+	ipforward_proc.obj \
+	if_proc.obj if_netlink.obj \
+	ioctl.obj
+
+INCLUDES = -I. -I.. -I../lib -I../../..
+
+CFLAGS = /nologo $(INCLUDES) $(CFLAGS) -DZEBRA -DHAVE_CONFIG_H
+
+all: zebra.lib
+
+zebra.lib:  $(OBJECTS) $(HEADERS) $(SOURCES)
+	link.exe /lib $(OBJECTS) $(LDFLAGS) /OUT:zebra.lib
+
+clean:
+	-del *.obj zebra.lib vc70.pdb vc70.idb

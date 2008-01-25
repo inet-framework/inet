@@ -1,0 +1,32 @@
+This is a sample to demonstrate CSPF algorithm used in RSVP-TE.
+The network consists of 5 LSR and 4 hosts. Host 1 and 2 have different requests
+of bandwidth level.
+
+Depending on the availability of the network topology, the CSPF will find a route
+appropriate for each of the requests. The criteria is first based on Bandwidth
+available and secondly the delay.
+
+
+Traffic file:
+
+<traffic>
+
+<conn>
+  <src>10.0.0.1</src>
+  <dest>10.0.1.2</dest>
+  <setupPri>7</setupPri>
+  <holdingPri>7</holdingPri>
+  <bandwidth>400</bandwidth>
+  <delay>0.005</delay>
+</conn>
+
+<conn>
+  <src>11.0.0.1</src>
+  <dest>11.0.1.2</dest>
+  <setupPri>7</setupPri>
+  <holdingPri>7</holdingPri>
+  <bandwidth>100</bandwidth>
+  <delay>0.005</delay>
+</conn>
+
+</traffic>

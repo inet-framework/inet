@@ -1,0 +1,38 @@
+%description:
+What if the SEND command is issued during connection setup.
+
+%inifile: {}.ini
+[General]
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+
+[Cmdenv]
+event-banners=false
+
+[Parameters]
+*.testing=true
+
+*.cli.tOpen=0
+*.srv.tOpen=0
+
+*.cli.tSend=0
+*.cli.sendBytes=100
+
+include ../../defaults.ini
+
+%contains: stdout
+tcpcli: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+tcpsrv: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+tcpsrv: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] B.2000 > A.1000: S 500:500(0) ack 1 win 16384
+tcpcli: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: . 1:101(100) ack 501 win 16384
+tcpsrv: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[3.005 A003] A.1000 > B.2000: . 1:101(100) ack 501 win 16384
+[3.207 B002] B.2000 > A.1000: . ack 101 win 16384
+
+%contains: stdout
+tcpTestNet1.cli: received 0 bytes in 0 packets
+tcpTestNet1.srv: received 100 bytes in 1 packets
+[3.208] tcpdump finished, A:3 B:2 segments
+

@@ -1,0 +1,1 @@
+call opp_nmakemake -f -N -s -t ../../bin/INET.lib -I../../Base -I../../Applications/UDPApp -I../../Transport/Contract -I../../Network/Contract  -I../../NetworkInterfaces/Contract

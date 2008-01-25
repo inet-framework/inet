@@ -1,0 +1,42 @@
+2004-05-10  Andras Varga
+
+	* EtherMAC: auto MAC address assignment
+
+	* EtherMAC: auto-configuration of transmission rate and duplex/half duplex i
+	  mode.
+
+	* it's no longer an error if EtherMAC is not connected to the network 
+	  ("unplugged cable")
+
+	* elaboration of Ethernet frame types: Ethernet II, 802.3 with LLC,
+	  802.3 with LLC and SNAP.
+
+	* added EtherEncap, which does encapsulation/decapsulation with
+	  Ethernet II frames.
+
+	* communication between LLC and higher layers changed: now it uses
+	  controlInfo() as introduced in OMNeT++ 3.0
+
+	* PAUSE handling fixed: PAUSE frames to be sent have now priority
+	  in the MAC (they overtake normal frames in the queue).
+	  MACRelayUnits: minimal time interval introduced that must elapse
+	  before sending another PAUSE frame.
+
+	* new example network: models a very large Ethernet LAN. Ini files
+	  for old example networks available in test/ subdir.
+
+	* sample application changed to EtherAppCli+EtherAppSrv. EtherAppCli
+	  sends requests of at configurable intervals to EtherAppSrv.
+	  Each request contains how many bytes EtherAppSrv should send back
+	  in response. If this number is 0, no frames are sent; if it is
+	  larger than ~1500, several frames are sent back.
+
+2004-01-20  Andras Varga
+
+	* Various fixes on the switch model:
+	- address table reading was broken
+	- fixed bug in MACRelayUnitNP and PP (referencing a deleted message)
+	- fixed crash at removing aged entries from table
+	- zero addressTableSize to mean unlimited table
+	- table management: if table full, throw out oldest entry
+

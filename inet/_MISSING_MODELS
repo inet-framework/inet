@@ -1,0 +1,19 @@
+Qeueing (we have: FIFO, RED):
+  CBQ
+  WFQ 
+  RIO
+  Round Robin
+  Fair queueing Round Robin
+
+TCP:
+  SACK
+  New Reno
+  Vegas
+
+Revive RTP/RTCP
+
+WiMAX
+
+MIPv6
+
+

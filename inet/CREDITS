@@ -1,0 +1,61 @@
+The INET Framework is developed by Andras Varga.
+
+List of contributors:
+
+----- INET Framework contributors -----
+
+Patch for getting Ethernet and ARP working with IP; ARPTest example, 2004:
+* Emin Ilker Cetinbas   <niw3@yahoo.com>
+
+
+----- INET Framework -----
+
+INET Framework maintainer:
+* Andras Varga          <andras@omnetpp.org>
+
+The INET Framework is loosely based on the IPSuite from University of 
+Karlsruhe. After by extensive restructuring and rewrite, very little 
+of the original code could be kept -- most if it has been completely 
+rewritten in 2003-2004 by Andras Varga.
+
+Changes include: UDP, IP, PPP, TCP reimplemented; TCPSocket added; 
+Ethernet and MPLS models integrated; extensive refactoring on MPLS
+and RSVP; LDP reimplemented; added ARP; added app models for TCP and 
+Ethernet; added network configurators; added neddoc documentation.
+
+
+----- Ethernet model -----
+
+Ethernet model (2003):
+* David Wu              <davidwu@eng.monash.edu.au>
+* Andras Varga          <andras@whale.hit.bme.hu>
+
+
+----- Original MPLS code -----
+
+MPLS, LDP, RSVP-TE models, 2003:
+* Xuan Thang Nguyen     <Xuan.T.Nguyen@uts.edu.au>
+
+
+----- Old IPSuite -----
+
+Design and coding of original IPSuite (UDP, IP, PPP), 2000:
+* Klaus Wehrle          <wehrle@telematik.informatik.uni-karlsruhe.de>
+* Jochen Reber          <un6b@rz.uni-karlsruhe.de>
+* Dirk Holzhausen       <dholzh@gmx.de>
+
+Old TCP (tcpmodule.cc, obsoleted by new TCP) design and initial coding, 2000:
+* Volker Boehm          <Volker.Boehm@nortelnetworks.com>
+* Verena Kahmann        <kahmann@telematik.informatik.uni-karlsruhe.de>
+* Uli Kaage             <kaage@int.uni-karlsruhe.de>
+
+Bugfixes to old TCP (tcpmodule.cc, obsoleted by new TCP), 2003, 2004:
+* Donald Liang (LYBD), Virginia Tech
+* Jeroen Idserda, University of Twente
+* Joung Woong Lee (zipizigi), University of Tsukuba
+
+RTP models (not yet integrated as of April 2004):
+* Matthias Oppitz       <matthias.oppitz@gmx.de>
+* Arndt Buschmann       <a.buschmann@gmx.de>
+
+If you think your name is missing, please write to andras@omnetpp.org.

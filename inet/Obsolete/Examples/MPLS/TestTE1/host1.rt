@@ -1,0 +1,18 @@
+
+# Routing table for MPLS test network - host1.rt
+ifconfig:
+
+# PPP link 0    to      LSR1
+name: ppp0  inet_addr: 10.0.0.1    MTU: 1500   Metric: 1
+
+ifconfigend.
+
+
+route:
+10.0.1.2    *       255.255.255.255     H   0   ppp0
+11.0.1.2    *       255.255.255.255     H   0   ppp0
+
+default:    1.0.0.1     0.0.0.0         G   0   ppp0
+
+routeend.
+

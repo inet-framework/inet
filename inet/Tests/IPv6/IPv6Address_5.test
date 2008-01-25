@@ -1,0 +1,36 @@
+%description:
+test IPv6Address scope and multicast scope
+
+%global:
+#include "IPv6Address.h"
+
+%activity:
+#define P(X)  ev << #X << "  " << IPv6Address::scopeName(X.scope()) << " " << \
+                    (X.isMulticast() ? X.multicastScope() : -1) << "\n";
+
+P(IPv6Address::UNSPECIFIED_ADDRESS);
+P(IPv6Address::LOOPBACK_ADDRESS);
+P(IPv6Address("ff03::1"));
+P(IPv6Address("ffff::1"));
+P(IPv6Address::ALL_NODES_1);
+P(IPv6Address::ALL_NODES_2);
+P(IPv6Address::ALL_ROUTERS_1);
+P(IPv6Address::ALL_ROUTERS_2);
+P(IPv6Address::ALL_ROUTERS_5);
+P(IPv6Address::SOLICITED_NODE_PREFIX);
+P(IPv6Address::LINKLOCAL_PREFIX);
+ev << ".\n";
+
+%contains: stdout
+IPv6Address::UNSPECIFIED_ADDRESS  unspec -1
+IPv6Address::LOOPBACK_ADDRESS  loopback -1
+IPv6Address("ff03::1")  mcast 3
+IPv6Address("ffff::1")  mcast 15
+IPv6Address::ALL_NODES_1  mcast 1
+IPv6Address::ALL_NODES_2  mcast 2
+IPv6Address::ALL_ROUTERS_1  mcast 1
+IPv6Address::ALL_ROUTERS_2  mcast 2
+IPv6Address::ALL_ROUTERS_5  mcast 5
+IPv6Address::SOLICITED_NODE_PREFIX  mcast 2
+IPv6Address::LINKLOCAL_PREFIX  link -1
+.

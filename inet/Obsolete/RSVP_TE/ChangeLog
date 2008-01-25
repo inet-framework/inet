@@ -1,0 +1,8 @@
+2003-10-03  Andras Varga
+	
+	* fixed a lot of "unused variable" warnings
+	* made it compile with MSVC 6.0
+
+2003-09-19  Andras Varga
+
+	* original version  from Xuan Thang Nguyen, UTS

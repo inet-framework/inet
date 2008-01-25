@@ -1,0 +1,65 @@
+ifconfig:
+
+# ethernet card 0 of router - connected to N13
+name: eth0
+    inet_addr: 192.168.13.2
+    Mask: 255.255.255.0
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 8
+    BROADCAST MULTICAST
+
+# ethernet card 1 of router - connected to RT4
+name: eth1
+    inet_addr: 192.168.20.3
+    Mask: 255.255.255.255
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 8
+    POINTTOPOINT MULTICAST
+
+# ethernet card 2 of router - connected to RT6
+name: eth2
+    inet_addr: 192.168.20.4
+    Mask: 255.255.255.255
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 7
+    POINTTOPOINT MULTICAST
+
+# ethernet card 3 of router - connected to RT7
+name: eth3
+    inet_addr: 192.168.20.5
+    Mask: 255.255.255.255
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 6
+    POINTTOPOINT MULTICAST
+
+# ethernet card 4 of router - connected to N12
+name: eth4
+    inet_addr: 192.168.12.1
+    Mask: 255.255.255.0
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 8
+    BROADCAST MULTICAST
+
+# ethernet card 5 of router - connected to N14
+name: eth5
+    inet_addr: 192.168.14.2
+    Mask: 255.255.255.0
+    Groups: 224.0.0.5:224.0.0.6
+    MTU: 1500
+    Metric: 8
+    BROADCAST MULTICAST
+
+ifconfigend.
+
+route:
+
+224.0.0.0 * 240.0.0.0   H 0 eth1
+224.0.0.0 * 240.0.0.0   H 0 eth2
+224.0.0.0 * 240.0.0.0   H 0 eth3
+
+routeend.

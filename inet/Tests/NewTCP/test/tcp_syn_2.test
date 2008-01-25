@@ -1,0 +1,48 @@
+%description:
+Test connection setup: simultaneous active open by A and B
+  A,B: INIT --> SYN_SENT --> SYN_RCVD --> ESTABLISHED
+Have them send 100-100 bytes to check seq numbers are correct.
+
+
+%inifile: {}.ini
+[General]
+preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+
+[Cmdenv]
+event-banners=false
+
+[Parameters]
+*.testing=true
+
+*.cli.active=1
+*.srv.active=1
+
+*.cli.tOpen=0
+*.srv.tOpen=0
+
+*.cli.tSend=1
+*.cli.sendBytes=100
+*.srv.tSend=1
+*.srv.sendBytes=100
+
+include ../../defaults.ini
+
+%contains: stdout
+tcpcli: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+tcpsrv: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+[0.001 B001] B.2000 > A.1000: S 0:0(0) win 16384
+tcpsrv: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
+tcpcli: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
+[0.003 B002] B.2000 > A.1000: S 0:0(0) ack 1 win 16384
+[0.003 A002] A.1000 > B.2000: S 0:0(0) ack 1 win 16384
+[0.005 A003] A.1000 > B.2000: . ack 1 win 16384
+[0.005 B003] B.2000 > A.1000: . ack 1 win 16384
+tcpsrv: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+tcpcli: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A004] A.1000 > B.2000: . 1:101(100) ack 1 win 16384
+[1.001 B004] B.2000 > A.1000: . 1:101(100) ack 1 win 16384
+
+%contains: stdout
+[1.204] tcpdump finished, A:5 B:5 segments
+

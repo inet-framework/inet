@@ -1,0 +1,6 @@
+This example shows the use of TCP client/server models. IP addresses and
+routing tables are set up automatically, using FlatNetworkConfigurator. 
+
+The network consists of four hosts and one router. One of the clients has
+a direct connection to the server; others connect via the router.
+The application models bulk file transfer.

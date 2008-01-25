@@ -1,0 +1,21 @@
+
+# filename: mchost5.mrt
+# routing table for host 5 of multicast network 2
+# author: Jochen Reber
+
+
+ifconfig:
+
+# interface 0 to router
+name: ppp0  inet_addr: 172.0.2.1  MTU: 1500
+Groups: 225.0.0.3:225.0.1.1:225.0.2.1
+
+ifconfigend.
+
+route:
+
+default:        172.0.2.3       0.0.0.0         G   0   ppp0
+225.0.0.0       172.0.2.3       255.0.0.0       G   0   ppp0
+
+routeend.
+
