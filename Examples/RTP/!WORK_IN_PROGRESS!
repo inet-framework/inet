@@ -1,3 +1,0 @@
-The RTP protocol implementation (see Transport/RTP) hasn't been integrated yet,
-so examples in this subdirectory are not yet functional.
-

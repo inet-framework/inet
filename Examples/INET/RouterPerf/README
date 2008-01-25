@@ -1,5 +1,0 @@
-N transmitting nodes are each sending a burst of k packets over
-UPD. For every transmitting node there is a receiving node that
-doesn't send packets itself. All nodes are connected to a single
-router. IP addresses and routing tables are configured automatically
-using FlatNetworkConfigurator.

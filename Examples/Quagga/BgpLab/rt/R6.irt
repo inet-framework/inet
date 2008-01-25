@@ -1,3 +1,0 @@
-ifconfig:
-name: eth0 inet_addr: 163.0.0.02 Mask: 255.255.255.252 MTU: 1500 Metric: 1
-ifconfigend.

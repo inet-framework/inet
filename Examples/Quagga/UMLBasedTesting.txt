@@ -1,8 +1,0 @@
-Several examples in this directory are supplied with results obtained from
-simulation run performed with Quagga running in User Mode Linux (UML).
-
-WARNING: Depending on the routing algorithm/configuration, multiple outcomes
-might be possible for given topology. In such case only one of the possible
-results is presented.
-
-Feel free to send questions and comments to vojta.janota@gmail.com

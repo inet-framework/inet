@@ -1,4 +1,0 @@
-ifconfig:
-name: eth0 inet_addr: 10.7.0.2 Mask: 255.255.255.252 MTU: 1500 Metric: 1
-name: eth1 inet_addr: 10.9.0.1 Mask: 255.255.0.0 MTU: 1500 Metric: 1
-ifconfigend.
