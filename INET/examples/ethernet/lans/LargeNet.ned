@@ -17,12 +17,12 @@
 //
 
 
-package org.omnetpp.inet.examples.Ethernet.LANs;
+package org.omnetpp.inet.examples.ethernet.lans;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.NetworkInterfaces.EtherSwitch.EtherSwitch;
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherBus;
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherHub;
+import org.omnetpp.inet.networkinterfaces.ethernet.EtherBus;
+import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
+import org.omnetpp.inet.networkinterfaces.etherswitch.EtherSwitch;
 
 
 channel cable extends cBasicChannel

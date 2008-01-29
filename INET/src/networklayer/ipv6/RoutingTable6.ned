@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Network.IPv6;
+package org.omnetpp.inet.networklayer.ipv6;
 
 //
 // \IPv6 Routing Table and Neighbour Discovery data structures.

@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.NetworkInterfaces.Radio;
+package org.omnetpp.inet.networkinterfaces.radio;
 
 //
 // Generic radio module. The implementation is largely based on the

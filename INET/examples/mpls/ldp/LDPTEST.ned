@@ -12,14 +12,14 @@
 
 
 
-package org.omnetpp.inet.examples.MPLS.LDP;
+package org.omnetpp.inet.examples.mpls.ldp;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.Network.Extras.FailureManager;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
-import org.omnetpp.inet.Nodes.MPLS.LDP_LSR;
-import org.omnetpp.inet.World.NAMTrace;
-import org.omnetpp.inet.World.ScenarioManager;
+import org.omnetpp.inet.networklayer.extras.FailureManager;
+import org.omnetpp.inet.nodes.inet.StandardHost;
+import org.omnetpp.inet.nodes.mpls.LDP_LSR;
+import org.omnetpp.inet.world.NAMTrace;
+import org.omnetpp.inet.world.ScenarioManager;
 
 
 network LDPTEST

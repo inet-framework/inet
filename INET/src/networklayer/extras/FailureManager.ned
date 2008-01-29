@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Network.Extras;
+package org.omnetpp.inet.networklayer.extras;
 
 //
 // Module for managing node failure and recovery in the network. If used,

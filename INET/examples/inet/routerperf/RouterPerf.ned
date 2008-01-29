@@ -21,12 +21,12 @@
 
 
 
-package org.omnetpp.inet.examples.INET.RouterPerf;
+package org.omnetpp.inet.examples.inet.routerperf;
 
-import org.omnetpp.inet.Network.AutoRouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.Nodes.INET.BurstHost;
-import org.omnetpp.inet.Nodes.INET.Router;
-import org.omnetpp.inet.World.ChannelInstaller;
+import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
+import org.omnetpp.inet.nodes.inet.BurstHost;
+import org.omnetpp.inet.nodes.inet.Router;
+import org.omnetpp.inet.world.ChannelInstaller;
 
 
 network RouterPerfNetwork

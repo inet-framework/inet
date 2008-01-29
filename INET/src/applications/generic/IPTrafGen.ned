@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.Generic;
+package org.omnetpp.inet.applications.generic;
 
 //
 // Consumes and prints packets received from the IP module.

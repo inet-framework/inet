@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.NetworkInterfaces;
+package org.omnetpp.inet.networkinterfaces;
 
 //
 // Prototype module for link layer protocols.

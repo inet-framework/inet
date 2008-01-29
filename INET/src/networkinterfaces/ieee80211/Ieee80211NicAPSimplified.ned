@@ -17,11 +17,11 @@
 //
 
 
-package org.omnetpp.inet.NetworkInterfaces.Ieee80211;
+package org.omnetpp.inet.networkinterfaces.ieee80211;
 
-import org.omnetpp.inet.NetworkInterfaces.Ieee80211.Mac.Ieee80211Mac;
-import org.omnetpp.inet.NetworkInterfaces.Ieee80211.Mgmt.Ieee80211MgmtAPSimplified;
-import org.omnetpp.inet.NetworkInterfaces.Radio.Ieee80211Radio;
+import org.omnetpp.inet.networkinterfaces.ieee80211.mac.Ieee80211Mac;
+import org.omnetpp.inet.networkinterfaces.ieee80211.mgmt.Ieee80211MgmtAPSimplified;
+import org.omnetpp.inet.networkinterfaces.radio.Ieee80211Radio;
 
 
 //

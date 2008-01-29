@@ -17,16 +17,16 @@
 //
 
 
-package org.omnetpp.inet.examples.Wireless.HostToHost;
+package org.omnetpp.inet.examples.wireless.hosttohost;
 
-import org.omnetpp.inet.Applications.Ethernet.EtherAppCli;
-import org.omnetpp.inet.Base.NotificationBoard;
-import org.omnetpp.inet.Base.Sink;
-import org.omnetpp.inet.Mobility.CircleMobility;
-import org.omnetpp.inet.Mobility.NullMobility;
-import org.omnetpp.inet.NetworkInterfaces.Ieee80211.Ieee80211NicSTASimplified;
-import org.omnetpp.inet.Nodes.Wireless.WirelessAPSimplified;
-import org.omnetpp.inet.World.ChannelControl;
+import org.omnetpp.inet.applications.ethernet.EtherAppCli;
+import org.omnetpp.inet.base.NotificationBoard;
+import org.omnetpp.inet.base.Sink;
+import org.omnetpp.inet.mobility.CircleMobility;
+import org.omnetpp.inet.mobility.NullMobility;
+import org.omnetpp.inet.networkinterfaces.ieee80211.Ieee80211NicSTASimplified;
+import org.omnetpp.inet.nodes.wireless.WirelessAPSimplified;
+import org.omnetpp.inet.world.ChannelControl;
 
 
 module ThroughputClient

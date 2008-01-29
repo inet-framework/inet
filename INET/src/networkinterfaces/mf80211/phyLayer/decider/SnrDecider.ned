@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.NetworkInterfaces.MF80211.phyLayer.decider;
+package org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.decider;
 
 //
 // Decider module to be used with SnrEval

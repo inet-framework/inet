@@ -11,7 +11,7 @@
 //
 
 
-package org.omnetpp.inet.Network.OSPFv2;
+package org.omnetpp.inet.networklayer.ospfv2;
 
 //
 // Implements \OSPFRouting.

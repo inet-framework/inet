@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.TCPApp;
+package org.omnetpp.inet.applications.tcpapp;
 
 //
 // Single-connection TCP application: it opens a connection, sends

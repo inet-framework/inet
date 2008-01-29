@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.Base;
+package org.omnetpp.inet.base;
 
 //
 // Using NotificationBoard, modules can now notify each other about

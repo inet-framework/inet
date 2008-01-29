@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.TCPApp;
+package org.omnetpp.inet.applications.tcpapp;
 
 //
 // This module hosts TCP-based server applications. It dynamically creates

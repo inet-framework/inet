@@ -10,14 +10,14 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package org.omnetpp.inet.examples.MPLS.Net37;
+package org.omnetpp.inet.examples.mpls.net37;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.Network.AutoRouting.NetworkConfigurator;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
-import org.omnetpp.inet.Nodes.MPLS.RSVP_LSR;
-import org.omnetpp.inet.World.ChannelInstaller;
-import org.omnetpp.inet.World.NAMTrace;
+import org.omnetpp.inet.networklayer.autorouting.NetworkConfigurator;
+import org.omnetpp.inet.nodes.inet.StandardHost;
+import org.omnetpp.inet.nodes.mpls.RSVP_LSR;
+import org.omnetpp.inet.world.ChannelInstaller;
+import org.omnetpp.inet.world.NAMTrace;
 
 
 network R37

@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.World;
+package org.omnetpp.inet.world;
 
 //
 // ChannelControl has exactly one instance in every network model that 

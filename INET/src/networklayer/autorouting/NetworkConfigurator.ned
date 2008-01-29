@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Network.AutoRouting;
+package org.omnetpp.inet.networklayer.autorouting;
 
 //
 // Configures \IP addresses and routing tables for a network.

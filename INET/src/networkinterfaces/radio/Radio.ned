@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.NetworkInterfaces.Radio;
+package org.omnetpp.inet.networkinterfaces.radio;
 
 //
 // Prototype for radio modules. Radio modules deal with the transmission

@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.TCPApp;
+package org.omnetpp.inet.applications.tcpapp;
 
 //
 // Template for TCP applications. It shows what gates a TCP app 

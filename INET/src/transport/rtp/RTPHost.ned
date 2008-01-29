@@ -2,10 +2,10 @@
 
 
 
-package org.omnetpp.inet.Transport.RTP;
+package org.omnetpp.inet.transport.rtp;
 
-import org.omnetpp.inet.NetworkInterfaces.PPP.PPPInterface;
-import org.omnetpp.inet.Nodes.INET.NetworkLayer;
+import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
+import org.omnetpp.inet.nodes.inet.NetworkLayer;
 
 
 module RTPHost

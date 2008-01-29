@@ -19,13 +19,13 @@
 
 
 
-package org.omnetpp.inet.Nodes.INET;
+package org.omnetpp.inet.nodes.inet;
 
-import org.omnetpp.inet.Network.ARP.ARP;
-import org.omnetpp.inet.Network.IPv4.ErrorHandling;
-import org.omnetpp.inet.Network.IPv4.ICMP;
-import org.omnetpp.inet.Network.IPv4.IGMP;
-import org.omnetpp.inet.Network.IPv4.IP;
+import org.omnetpp.inet.networklayer.arp.ARP;
+import org.omnetpp.inet.networklayer.ipv4.ErrorHandling;
+import org.omnetpp.inet.networklayer.ipv4.ICMP;
+import org.omnetpp.inet.networklayer.ipv4.IGMP;
+import org.omnetpp.inet.networklayer.ipv4.IP;
 
 
 //

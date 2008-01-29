@@ -11,9 +11,9 @@
 //
 
 
-package org.omnetpp.inet.Nodes.MPLS;
+package org.omnetpp.inet.nodes.mpls;
 
-import org.omnetpp.inet.Network.Extras.Dummy;
+import org.omnetpp.inet.networklayer.extras.Dummy;
 
 
 //

@@ -20,15 +20,15 @@
 
 
 
-package org.omnetpp.inet.Nodes.INET;
+package org.omnetpp.inet.nodes.inet;
 
-import org.omnetpp.inet.Applications.TCPApp.TCPSpoof;
-import org.omnetpp.inet.Base.NotificationBoard;
-import org.omnetpp.inet.Network.Contract.InterfaceTable;
-import org.omnetpp.inet.Network.IPv4.RoutingTable;
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EthernetInterface;
-import org.omnetpp.inet.NetworkInterfaces.PPP.PPPInterface;
-import org.omnetpp.inet.Util.NAMTraceWriter;
+import org.omnetpp.inet.applications.tcpapp.TCPSpoof;
+import org.omnetpp.inet.base.NotificationBoard;
+import org.omnetpp.inet.networkinterfaces.ethernet.EthernetInterface;
+import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
+import org.omnetpp.inet.networklayer.contract.InterfaceTable;
+import org.omnetpp.inet.networklayer.ipv4.RoutingTable;
+import org.omnetpp.inet.util.NAMTraceWriter;
 
 
 //

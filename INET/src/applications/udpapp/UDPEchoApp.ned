@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.UDPApp;
+package org.omnetpp.inet.applications.udpapp;
 
 //
 // Similar to UDPBasicApp, but it sends back the packet after reception.

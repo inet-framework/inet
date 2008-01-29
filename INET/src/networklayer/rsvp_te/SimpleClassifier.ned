@@ -13,7 +13,7 @@
 //
 
 
-package org.omnetpp.inet.Network.RSVP_TE;
+package org.omnetpp.inet.networklayer.rsvp_te;
 
 //
 // TODO documentation

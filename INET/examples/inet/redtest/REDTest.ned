@@ -18,13 +18,13 @@
 
 
 
-package org.omnetpp.inet.examples.INET.REDTest;
+package org.omnetpp.inet.examples.inet.redtest;
 
-import org.omnetpp.inet.Network.AutoRouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.Nodes.INET.Router;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
-import org.omnetpp.inet.World.ChannelInstaller;
-import org.omnetpp.inet.World.ScenarioManager;
+import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
+import org.omnetpp.inet.nodes.inet.Router;
+import org.omnetpp.inet.nodes.inet.StandardHost;
+import org.omnetpp.inet.world.ChannelInstaller;
+import org.omnetpp.inet.world.ScenarioManager;
 
 
 network REDTest

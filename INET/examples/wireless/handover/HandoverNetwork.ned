@@ -19,12 +19,12 @@
 
 
 
-package org.omnetpp.inet.examples.Wireless.Handover;
+package org.omnetpp.inet.examples.wireless.handover;
 
-import org.omnetpp.inet.Network.AutoRouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.Nodes.Wireless.WirelessAP;
-import org.omnetpp.inet.Nodes.Wireless.WirelessHost;
-import org.omnetpp.inet.World.ChannelControl;
+import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
+import org.omnetpp.inet.nodes.wireless.WirelessAP;
+import org.omnetpp.inet.nodes.wireless.WirelessHost;
+import org.omnetpp.inet.world.ChannelControl;
 
 
 network HandoverNetwork

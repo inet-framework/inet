@@ -19,10 +19,10 @@
 
 
 
-package org.omnetpp.inet.examples.Adhoc.Mobility;
+package org.omnetpp.inet.examples.adhoc.mobility;
 
-import org.omnetpp.inet.Base.NotificationBoard;
-import org.omnetpp.inet.Mobility.BasicMobility;
+import org.omnetpp.inet.base.NotificationBoard;
+import org.omnetpp.inet.mobility.BasicMobility;
 
 
 //

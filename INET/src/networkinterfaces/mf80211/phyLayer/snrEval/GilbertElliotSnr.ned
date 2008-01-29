@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.NetworkInterfaces.MF80211.phyLayer.snrEval;
+package org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.snrEval;
 
 //
 // Gilbert-Elliot signal-noise evaluator

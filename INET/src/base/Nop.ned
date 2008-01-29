@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.Base;
+package org.omnetpp.inet.base;
 
 //
 // Just lets messages through without any change or delay.

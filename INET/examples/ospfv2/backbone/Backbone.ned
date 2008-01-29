@@ -1,11 +1,11 @@
 
-package org.omnetpp.inet.examples.OSPFv2.Backbone;
+package org.omnetpp.inet.examples.ospfv2.backbone;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherHub;
-import org.omnetpp.inet.Nodes.INET.OSPFRouter;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
-import org.omnetpp.inet.World.ChannelInstaller;
+import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
+import org.omnetpp.inet.nodes.inet.OSPFRouter;
+import org.omnetpp.inet.nodes.inet.StandardHost;
+import org.omnetpp.inet.world.ChannelInstaller;
 
 
 network Backbone

@@ -19,9 +19,9 @@
 
 
 
-package org.omnetpp.inet.NetworkInterfaces.EtherSwitch;
+package org.omnetpp.inet.networkinterfaces.etherswitch;
 
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherMAC2;
+import org.omnetpp.inet.networkinterfaces.ethernet.EtherMAC2;
 
 
 //

@@ -1,9 +1,9 @@
 
 
-package org.omnetpp.inet.examples.RTP.Unicast;
+package org.omnetpp.inet.examples.rtp.unicast;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.Transport.RTP.RTPHost;
+import org.omnetpp.inet.transport.rtp.RTPHost;
 
 
 network RTPNetwork

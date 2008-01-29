@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.UDPApp;
+package org.omnetpp.inet.applications.udpapp;
 
 //
 // Video stream server. To be used with UDPVideoStreamCli.

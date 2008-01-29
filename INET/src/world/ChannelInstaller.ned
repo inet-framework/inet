@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.World;
+package org.omnetpp.inet.world;
 
 //
 // Replaces channel objects in the network.

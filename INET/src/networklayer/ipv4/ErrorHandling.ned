@@ -17,7 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-package org.omnetpp.inet.Network.IPv4;
+package org.omnetpp.inet.networklayer.ipv4;
 
 //
 // Handles error notifications that arrive from other protocol modules.

@@ -18,11 +18,11 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.NetworkInterfaces.MF80211;
+package org.omnetpp.inet.networkinterfaces.mf80211;
 
-import org.omnetpp.inet.NetworkInterfaces.MF80211.macLayer.CSMAMacLayer;
-import org.omnetpp.inet.NetworkInterfaces.MF80211.phyLayer.snrEval.SnrEval;
-import org.omnetpp.inet.NetworkInterfaces.MFCore.BasicDecider;
+import org.omnetpp.inet.networkinterfaces.mf80211.macLayer.CSMAMacLayer;
+import org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.snrEval.SnrEval;
+import org.omnetpp.inet.networkinterfaces.mfcore.BasicDecider;
 
 
 //

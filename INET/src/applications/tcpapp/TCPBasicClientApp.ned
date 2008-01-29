@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.TCPApp;
+package org.omnetpp.inet.applications.tcpapp;
 
 //
 // Client for a generic request-response style protocol over TCP.

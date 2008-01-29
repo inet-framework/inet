@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-package org.omnetpp.inet.Network.Contract;
+package org.omnetpp.inet.networklayer.contract;
 
 //
 // Keeps the table of network interfaces.

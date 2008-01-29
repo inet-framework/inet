@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.UDPApp;
+package org.omnetpp.inet.applications.udpapp;
 
 //
 // Template for UDP applications. It shows what gates a UDP app 

@@ -18,12 +18,12 @@
 
 
 
-package org.omnetpp.inet.examples.Wireless.Throughput;
+package org.omnetpp.inet.examples.wireless.throughput;
 
-import org.omnetpp.inet.Base.NotificationBoard;
-import org.omnetpp.inet.Base.Sink;
-import org.omnetpp.inet.Mobility.NullMobility;
-import org.omnetpp.inet.NetworkInterfaces.Ieee80211.Ieee80211NicAPSimplified;
+import org.omnetpp.inet.base.NotificationBoard;
+import org.omnetpp.inet.base.Sink;
+import org.omnetpp.inet.mobility.NullMobility;
+import org.omnetpp.inet.networkinterfaces.ieee80211.Ieee80211NicAPSimplified;
 
 
 //

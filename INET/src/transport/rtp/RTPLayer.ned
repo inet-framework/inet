@@ -1,5 +1,5 @@
 
-package org.omnetpp.inet.Transport.RTP;
+package org.omnetpp.inet.transport.rtp;
 
 module RTPLayer
 

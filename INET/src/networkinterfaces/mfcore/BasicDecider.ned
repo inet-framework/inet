@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.NetworkInterfaces.MFCore;
+package org.omnetpp.inet.networkinterfaces.mfcore;
 
 //
 // Module to decide whether a frame is received correctly or is
@@ -44,7 +44,7 @@ package org.omnetpp.inet.NetworkInterfaces.MFCore;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @author Marc Löbbers, Daniel Willkomm
+// @author Marc LÃ¶bbers, Daniel Willkomm
 //
 simple BasicDecider
 {

@@ -1,8 +1,8 @@
 
 
-package org.omnetpp.inet.examples.OSPFv2.Areas;
+package org.omnetpp.inet.examples.ospfv2.areas;
 
-import org.omnetpp.inet.World.ChannelInstaller;
+import org.omnetpp.inet.world.ChannelInstaller;
 
 
 network OSPF_AreaTest

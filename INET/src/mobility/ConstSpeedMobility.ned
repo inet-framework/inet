@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.Mobility;
+package org.omnetpp.inet.mobility;
 
 //
 // Controls all movement related things of a host

@@ -17,13 +17,13 @@
 //
 
 
-package org.omnetpp.inet.examples.Wireless.Throughput;
+package org.omnetpp.inet.examples.wireless.throughput;
 
-import org.omnetpp.inet.Applications.Ethernet.EtherAppCli;
-import org.omnetpp.inet.Base.NotificationBoard;
-import org.omnetpp.inet.Mobility.NullMobility;
-import org.omnetpp.inet.NetworkInterfaces.Ieee80211.Ieee80211NicSTASimplified;
-import org.omnetpp.inet.World.ChannelControl;
+import org.omnetpp.inet.applications.ethernet.EtherAppCli;
+import org.omnetpp.inet.base.NotificationBoard;
+import org.omnetpp.inet.mobility.NullMobility;
+import org.omnetpp.inet.networkinterfaces.ieee80211.Ieee80211NicSTASimplified;
+import org.omnetpp.inet.world.ChannelControl;
 
 
 module ThroughputClient

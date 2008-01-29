@@ -13,12 +13,12 @@
 
 
 
-package org.omnetpp.inet.examples.Ethernet.ARPTest2;
+package org.omnetpp.inet.examples.ethernet.arptest2;
 
-import org.omnetpp.inet.Network.AutoRouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherBus;
-import org.omnetpp.inet.Nodes.INET.Router;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
+import org.omnetpp.inet.networkinterfaces.ethernet.EtherBus;
+import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
+import org.omnetpp.inet.nodes.inet.Router;
+import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network ARPTest

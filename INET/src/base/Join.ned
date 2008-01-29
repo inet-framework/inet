@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.Base;
+package org.omnetpp.inet.base;
 
 //
 // Joins multiple input streams into a single output stream.

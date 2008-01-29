@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.Network.ICMPv6;
+package org.omnetpp.inet.networklayer.icmpv6;
 
 //
 // ICMPv6 implementation.

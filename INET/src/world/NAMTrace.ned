@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.World;
+package org.omnetpp.inet.world;
 
 //
 // NAMTrace manages a "nam" trace file which can be played back with ns2's

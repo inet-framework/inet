@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.UDPApp;
+package org.omnetpp.inet.applications.udpapp;
 
 //
 // Consumes and prints packets received from the UDP module.

@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.Network.Queue;
+package org.omnetpp.inet.networklayer.queue;
 
 //
 // Drop-tail queue, to be used in network interfaces.

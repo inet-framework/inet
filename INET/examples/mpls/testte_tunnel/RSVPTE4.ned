@@ -12,13 +12,13 @@
 
 
 
-package org.omnetpp.inet.examples.MPLS.TestTE_Tunnel;
+package org.omnetpp.inet.examples.mpls.testte_tunnel;
 
-import org.omnetpp.inet.Network.Extras.FailureManager;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
-import org.omnetpp.inet.Nodes.MPLS.RSVP_LSR;
-import org.omnetpp.inet.World.NAMTrace;
-import org.omnetpp.inet.World.ScenarioManager;
+import org.omnetpp.inet.networklayer.extras.FailureManager;
+import org.omnetpp.inet.nodes.inet.StandardHost;
+import org.omnetpp.inet.nodes.mpls.RSVP_LSR;
+import org.omnetpp.inet.world.NAMTrace;
+import org.omnetpp.inet.world.ScenarioManager;
 
 
 //

@@ -19,10 +19,10 @@
 
 
 
-package org.omnetpp.inet.examples.Adhoc.Mobility;
+package org.omnetpp.inet.examples.adhoc.mobility;
 
-import org.omnetpp.inet.World.ChannelControl;
-import org.omnetpp.inet.World.ScenarioManager;
+import org.omnetpp.inet.world.ChannelControl;
+import org.omnetpp.inet.world.ScenarioManager;
 
 
 network MobileNet

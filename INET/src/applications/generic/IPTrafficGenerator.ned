@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.Applications.Generic;
+package org.omnetpp.inet.applications.generic;
 
 //
 // Prototype for modules that generate traffic directly over IP.

@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.NetworkInterfaces.Ethernet;
+package org.omnetpp.inet.networkinterfaces.ethernet;
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.

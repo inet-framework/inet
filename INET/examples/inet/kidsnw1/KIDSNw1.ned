@@ -19,11 +19,11 @@
 
 
 
-package org.omnetpp.inet.examples.INET.KIDSNw1;
+package org.omnetpp.inet.examples.inet.kidsnw1;
 
 import ned.cBasicChannel;
-import org.omnetpp.inet.Nodes.INET.Router;
-import org.omnetpp.inet.Nodes.INET.StandardHost;
+import org.omnetpp.inet.nodes.inet.Router;
+import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network KIDSNw1
