@@ -23,8 +23,7 @@
 
 #include <list>
 #include <omnetpp.h>
-// FIXME: revise directory structure
-#include "../NetworkInterfaces/MFCore/AirFrame_m.h"
+#include "AirFrame_m.h"
 #include "BasicModule.h"
 #include "ChannelControl.h"
 
@@ -41,7 +40,7 @@
  *
  * Please don't touch this class.
  *
- * @author Marc Löbbers
+ * @author Marc Lï¿½bbers
  * @ingroup channelControl
  * @ingroup phyLayer
  */

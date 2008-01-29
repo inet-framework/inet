@@ -27,7 +27,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 };
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
-#include "../../Applications/PingApp/PingPayload_m.h"
+#include "PingPayload_m.h"
 
 #ifndef _MSC_VER
 #include <netinet/in.h>  // htonl, ntohl, ...

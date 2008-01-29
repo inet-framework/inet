@@ -22,8 +22,7 @@
 #include <deque>
 #include <set>
 #include <omnetpp.h>
-// FIXME: revise directory structure
-#include "../NetworkInterfaces/MFCore/AirFrame_m.h"
+#include "AirFrame_m.h"
 #include "Coord.h"
 
 #define LIGHT_SPEED 3.0E+8
