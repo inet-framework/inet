@@ -1,4 +1,4 @@
-package org.omnetpp.inet.transport.rtp;
+package inet.transport.rtp;
 
 simple RTPModule
 

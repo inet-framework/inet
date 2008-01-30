@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.decider;
+package inet.networkinterfaces.mf80211.phyLayer.decider;
 
 //
 // Decider module to use with digital channel modules like GilbertElliotSnr

@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.ipv4;
+package inet.networklayer.ipv4;
 
 //
 // ICMP implementation

@@ -14,7 +14,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.ldp;
+package inet.networklayer.ldp;
 
 //
 // Handles and processes LDP messages.

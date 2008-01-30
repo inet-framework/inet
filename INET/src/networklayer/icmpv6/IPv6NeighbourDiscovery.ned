@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.icmpv6;
+package inet.networklayer.icmpv6;
 
 //
 // Implements \IPv6 Neighbour Discovery.

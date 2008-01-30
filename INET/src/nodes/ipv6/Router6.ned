@@ -19,13 +19,13 @@
 
 
 
-package org.omnetpp.inet.nodes.ipv6;
+package inet.nodes.ipv6;
 
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.networkinterfaces.ethernet.EthernetInterface;
-import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
-import org.omnetpp.inet.networklayer.contract.InterfaceTable;
-import org.omnetpp.inet.networklayer.ipv6.RoutingTable6;
+import inet.base.NotificationBoard;
+import inet.networkinterfaces.ethernet.EthernetInterface;
+import inet.networkinterfaces.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv6.RoutingTable6;
 
 
 //

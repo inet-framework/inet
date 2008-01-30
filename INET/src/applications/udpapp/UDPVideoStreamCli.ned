@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.applications.udpapp;
+package inet.applications.udpapp;
 
 //
 // Video streaming client.

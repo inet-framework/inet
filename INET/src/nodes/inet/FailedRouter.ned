@@ -19,9 +19,9 @@
 
 
 
-package org.omnetpp.inet.nodes.inet;
+package inet.nodes.inet;
 
-import org.omnetpp.inet.networklayer.extras.Dummy;
+import inet.networklayer.extras.Dummy;
 
 
 //

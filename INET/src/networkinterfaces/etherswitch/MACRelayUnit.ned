@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.etherswitch;
+package inet.networkinterfaces.etherswitch;
 
 //
 // Prototype for modules providing Ethernet switch functionality.

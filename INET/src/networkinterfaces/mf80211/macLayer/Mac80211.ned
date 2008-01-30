@@ -19,7 +19,7 @@
 //**************************************************************************/
 
 
-package org.omnetpp.inet.networkinterfaces.mf80211.macLayer;
+package inet.networkinterfaces.mf80211.macLayer;
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended

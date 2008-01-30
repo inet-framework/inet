@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networkinterfaces.ieee80211.mac;
+package inet.networkinterfaces.ieee80211.mac;
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended

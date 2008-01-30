@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package org.omnetpp.inet.networklayer.arp;
+package inet.networklayer.arp;
 
 //
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte

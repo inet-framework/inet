@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.mobility;
+package inet.mobility;
 
 //
 // Uses the <position_change> elements of the ANSim tool's

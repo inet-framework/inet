@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.autorouting;
+package inet.networklayer.autorouting;
 
 //
 // Configures \IPv6 addresses and routing tables for a "flat" network,

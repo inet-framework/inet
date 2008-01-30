@@ -18,9 +18,9 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.ppp;
+package inet.networkinterfaces.ppp;
 
-import org.omnetpp.inet.networklayer.queue.OutputQueue;
+import inet.networklayer.queue.OutputQueue;
 
 
 //

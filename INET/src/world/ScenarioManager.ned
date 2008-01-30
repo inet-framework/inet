@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.world;
+package inet.world;
 
 //
 // ScenarioManager is for setting up and controlling simulation experiments.

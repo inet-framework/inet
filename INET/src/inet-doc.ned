@@ -268,4 +268,4 @@
 // handled in any way they like.
 //
 
-package org.omnetpp.inet;
+package inet;

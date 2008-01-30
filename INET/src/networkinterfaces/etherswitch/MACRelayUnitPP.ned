@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.etherswitch;
+package inet.networkinterfaces.etherswitch;
 
 //
 // A MACRelayUnit implementation which models one CPU assigned to each

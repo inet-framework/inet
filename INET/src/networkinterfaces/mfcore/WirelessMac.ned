@@ -22,7 +22,7 @@
 //*              subclass to create your own MAC layer
 //***************************************************************************
 
-package org.omnetpp.inet.networkinterfaces.mfcore;
+package inet.networkinterfaces.mfcore;
 
 //
 // This is not an actual MAC implementation, just a prototype for wireless MAC's

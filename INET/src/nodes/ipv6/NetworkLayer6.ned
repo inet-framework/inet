@@ -22,12 +22,12 @@
 
 
 
-package org.omnetpp.inet.nodes.ipv6;
+package inet.nodes.ipv6;
 
-import org.omnetpp.inet.networklayer.icmpv6.ICMPv6;
-import org.omnetpp.inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
-import org.omnetpp.inet.networklayer.ipv6.IPv6;
-import org.omnetpp.inet.networklayer.ipv6.IPv6ErrorHandling;
+import inet.networklayer.icmpv6.ICMPv6;
+import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
+import inet.networklayer.ipv6.IPv6;
+import inet.networklayer.ipv6.IPv6ErrorHandling;
 
 
 //

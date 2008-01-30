@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networkinterfaces.ethernet;
+package inet.networkinterfaces.ethernet;
 
 //
 // A generic bus model.

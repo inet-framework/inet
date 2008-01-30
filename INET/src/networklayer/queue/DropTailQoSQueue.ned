@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.queue;
+package inet.networklayer.queue;
 
 //
 // Drop-tail queue with QoS support, to be used in network interfaces.

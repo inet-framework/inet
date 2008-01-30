@@ -17,7 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-package org.omnetpp.inet.networklayer.ipv4;
+package inet.networklayer.ipv4;
 
 //
 // Stores the routing table. (Per-interface configuration is stored in 

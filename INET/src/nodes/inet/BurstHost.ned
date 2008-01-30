@@ -20,13 +20,13 @@
 
 
 
-package org.omnetpp.inet.nodes.inet;
+package inet.nodes.inet;
 
-import org.omnetpp.inet.applications.generic.IPTrafficGenerator;
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
-import org.omnetpp.inet.networklayer.contract.InterfaceTable;
-import org.omnetpp.inet.networklayer.ipv4.RoutingTable;
+import inet.applications.generic.IPTrafficGenerator;
+import inet.base.NotificationBoard;
+import inet.networkinterfaces.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
 
 
 //

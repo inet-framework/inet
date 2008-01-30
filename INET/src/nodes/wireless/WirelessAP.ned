@@ -19,11 +19,11 @@
 
 
 
-package org.omnetpp.inet.nodes.wireless;
+package inet.nodes.wireless;
 
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.mobility.NullMobility;
-import org.omnetpp.inet.networkinterfaces.ieee80211.Ieee80211NicAP;
+import inet.base.NotificationBoard;
+import inet.mobility.NullMobility;
+import inet.networkinterfaces.ieee80211.Ieee80211NicAP;
 
 
 //

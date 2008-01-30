@@ -321,4 +321,4 @@
 // </pre>
 //
 
-package org.omnetpp.inet;
+package inet;

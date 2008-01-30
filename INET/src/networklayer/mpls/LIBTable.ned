@@ -14,7 +14,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.mpls;
+package inet.networklayer.mpls;
 
 //
 // Stores the LIB (Label Information Base), accessed by MPLS and its 

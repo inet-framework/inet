@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-package org.omnetpp.inet.networklayer.ipv6;
+package inet.networklayer.ipv6;
 
 //
 // Implements the \IPv6 protocol.

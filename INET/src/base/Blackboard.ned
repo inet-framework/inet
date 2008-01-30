@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.base;
+package inet.base;
 
 //
 // Blackboard for sharing information among modules in a host or router.

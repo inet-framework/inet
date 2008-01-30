@@ -18,7 +18,7 @@
 //
 
 
-package org.omnetpp.inet.applications.udpapp;
+package inet.applications.udpapp;
 
 //
 // Sends \UDP packets to the given \IP address at the given interval.

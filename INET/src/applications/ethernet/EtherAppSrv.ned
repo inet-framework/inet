@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.applications.ethernet;
+package inet.applications.ethernet;
 
 //
 // Server side of the EtherCli model -- generates EtherAppResp packets

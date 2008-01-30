@@ -19,21 +19,21 @@
 
 
 
-package org.omnetpp.inet.nodes.wireless;
+package inet.nodes.wireless;
 
-import org.omnetpp.inet.applications.pingapp.PingApp;
-import org.omnetpp.inet.applications.tcpapp.TCPApp;
-import org.omnetpp.inet.applications.udpapp.UDPApp;
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.mobility.BasicMobility;
-import org.omnetpp.inet.networkinterfaces.ethernet.EthernetInterface;
-import org.omnetpp.inet.networkinterfaces.ieee80211.Ieee80211NicSTA;
-import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
-import org.omnetpp.inet.networklayer.contract.InterfaceTable;
-import org.omnetpp.inet.networklayer.ipv4.RoutingTable;
-import org.omnetpp.inet.nodes.inet.NetworkLayer;
-import org.omnetpp.inet.transport.tcp.TCP;
-import org.omnetpp.inet.transport.udp.UDP;
+import inet.applications.pingapp.PingApp;
+import inet.applications.tcpapp.TCPApp;
+import inet.applications.udpapp.UDPApp;
+import inet.base.NotificationBoard;
+import inet.mobility.BasicMobility;
+import inet.networkinterfaces.ethernet.EthernetInterface;
+import inet.networkinterfaces.ieee80211.Ieee80211NicSTA;
+import inet.networkinterfaces.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.nodes.inet.NetworkLayer;
+import inet.transport.tcp.TCP;
+import inet.transport.udp.UDP;
 
 
 //

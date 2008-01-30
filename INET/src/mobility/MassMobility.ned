@@ -19,7 +19,7 @@
 //
 
 
-package org.omnetpp.inet.mobility;
+package inet.mobility;
 
 //
 // This is a random mobility model for a mobile host with a mass. It is the

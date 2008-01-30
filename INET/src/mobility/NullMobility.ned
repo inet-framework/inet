@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.mobility;
+package inet.mobility;
 
 //
 // This mobility module does nothing; it can be used for stationary nodes.

@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.mobility;
+package inet.mobility;
 
 //
 // A LOGO-style movement model, with the script coming from XML. It can be

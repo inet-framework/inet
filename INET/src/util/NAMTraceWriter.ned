@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.util;
+package inet.util;
 
 //
 // When placed inside a host or router, it writes a NAM trace, based on

@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.ppp;
+package inet.networkinterfaces.ppp;
 
 //
 // Thruput measurement utility module.

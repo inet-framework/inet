@@ -159,4 +159,4 @@
 // I'd like to acknowledge their help here as well.
 //
 
-package org.omnetpp.inet;
+package inet;

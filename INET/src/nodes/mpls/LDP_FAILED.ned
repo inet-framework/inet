@@ -12,9 +12,9 @@
 
 
 
-package org.omnetpp.inet.nodes.mpls;
+package inet.nodes.mpls;
 
-import org.omnetpp.inet.networklayer.extras.Dummy;
+import inet.networklayer.extras.Dummy;
 
 
 //

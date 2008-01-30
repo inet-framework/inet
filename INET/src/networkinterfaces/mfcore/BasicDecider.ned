@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package org.omnetpp.inet.networkinterfaces.mfcore;
+package inet.networkinterfaces.mfcore;
 
 //
 // Module to decide whether a frame is received correctly or is

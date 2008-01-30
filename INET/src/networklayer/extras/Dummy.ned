@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package org.omnetpp.inet.networklayer.extras;
+package inet.networklayer.extras;
 
 //
 // Implementation of a failed router. Does nothing and simply discards any

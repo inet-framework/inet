@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.ipv4;
+package inet.networklayer.ipv4;
 
 //
 // Implements the \IP protocol. The protocol header is represented

@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.ethernet;
+package inet.networkinterfaces.ethernet;
 
 //
 // Ethernet network interface. Assumes inifinite queue.

@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.queue;
+package inet.networklayer.queue;
 
 //
 // Prototype for per-NIC output queues. Concrete queues can implement

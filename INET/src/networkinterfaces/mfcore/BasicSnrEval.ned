@@ -18,7 +18,7 @@
 // ***************************************************************************/
 
 
-package org.omnetpp.inet.networkinterfaces.mfcore;
+package inet.networkinterfaces.mfcore;
 
 //
 // The basic class for all snrEval modules

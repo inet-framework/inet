@@ -13,21 +13,21 @@
 
 
 
-package org.omnetpp.inet.nodes.mpls;
+package inet.nodes.mpls;
 
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
-import org.omnetpp.inet.networklayer.contract.InterfaceTable;
-import org.omnetpp.inet.networklayer.ipv4.RoutingTable;
-import org.omnetpp.inet.networklayer.ldp.LDP;
-import org.omnetpp.inet.networklayer.mpls.LIBTable;
-import org.omnetpp.inet.networklayer.mpls.MPLS;
-import org.omnetpp.inet.networklayer.ted.LinkStateRouting;
-import org.omnetpp.inet.networklayer.ted.TED;
-import org.omnetpp.inet.nodes.inet.NetworkLayer;
-import org.omnetpp.inet.transport.tcp.TCP;
-import org.omnetpp.inet.transport.udp.UDP;
-import org.omnetpp.inet.util.NAMTraceWriter;
+import inet.base.NotificationBoard;
+import inet.networkinterfaces.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ldp.LDP;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.ted.TED;
+import inet.nodes.inet.NetworkLayer;
+import inet.transport.tcp.TCP;
+import inet.transport.udp.UDP;
+import inet.util.NAMTraceWriter;
 
 
 //

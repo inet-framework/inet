@@ -19,16 +19,16 @@
 
 
 
-package org.omnetpp.inet.nodes.inet;
+package inet.nodes.inet;
 
-import org.omnetpp.inet.base.NotificationBoard;
-import org.omnetpp.inet.networkinterfaces.ethernet.EthernetInterface;
-import org.omnetpp.inet.networkinterfaces.ppp.PPPInterface;
-import org.omnetpp.inet.networklayer.contract.InterfaceTable;
-import org.omnetpp.inet.networklayer.ipv4.RoutingTable;
-import org.omnetpp.inet.transport.tcp.TCP;
-import org.omnetpp.inet.transport.udp.UDP;
-import org.omnetpp.inet.util.NAMTraceWriter;
+import inet.base.NotificationBoard;
+import inet.networkinterfaces.ethernet.EthernetInterface;
+import inet.networkinterfaces.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.transport.tcp.TCP;
+import inet.transport.udp.UDP;
+import inet.util.NAMTraceWriter;
 
 
 //

@@ -19,7 +19,7 @@
 
 
 
-package org.omnetpp.inet.transport.udp;
+package inet.transport.udp;
 
 //
 // UDP protocol implementation, for IPv4 and IPv6.

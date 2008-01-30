@@ -17,7 +17,7 @@
 //
 
 
-package org.omnetpp.inet.networklayer.queue;
+package inet.networklayer.queue;
 
 //
 // RED (Random Early Detection) queue, to be used in routers' network

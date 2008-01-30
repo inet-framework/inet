@@ -21,11 +21,11 @@
 
 
 
-package org.omnetpp.inet.networkinterfaces.mf80211;
+package inet.networkinterfaces.mf80211;
 
-import org.omnetpp.inet.networkinterfaces.mf80211.macLayer.CSMAMacLayer;
-import org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.decider.SnrDecider;
-import org.omnetpp.inet.networkinterfaces.mf80211.phyLayer.snrEval.SnrEval;
+import inet.networkinterfaces.mf80211.macLayer.CSMAMacLayer;
+import inet.networkinterfaces.mf80211.phyLayer.decider.SnrDecider;
+import inet.networkinterfaces.mf80211.phyLayer.snrEval.SnrEval;
 
 
 // This is the easiest nic to implement "real" network behaviour. It uses

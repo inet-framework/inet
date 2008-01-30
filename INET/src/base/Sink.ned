@@ -18,7 +18,7 @@
 
 
 
-package org.omnetpp.inet.base;
+package inet.base;
 
 //
 // Silently discards all input messages.
