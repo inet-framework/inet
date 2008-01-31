@@ -11,11 +11,11 @@
 //
 
 
-package org.omnetpp.inet.examples.mpls.net37;
+package inet.examples.mpls.net37;
 
+import inet.networklayer.autorouting.NetworkConfigurator;
+import inet.nodes.mpls.RSVP_LSR;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networklayer.autorouting.NetworkConfigurator;
-import org.omnetpp.inet.nodes.mpls.RSVP_LSR;
 
 
 network R37orig

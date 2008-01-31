@@ -21,11 +21,11 @@
 
 
 
-package org.omnetpp.inet.examples.inet.multicast;
+package inet.examples.inet.multicast;
 
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.nodes.inet.Router;
-import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network MulticastNetwork

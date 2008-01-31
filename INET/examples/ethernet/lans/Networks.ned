@@ -18,14 +18,14 @@
 
 
 
-package org.omnetpp.inet.examples.ethernet.lans;
+package inet.examples.ethernet.lans;
 
+import inet.networkinterfaces.ethernet.EtherBus;
+import inet.networkinterfaces.ethernet.EtherHub;
+import inet.networkinterfaces.etherswitch.EtherSwitch;
+import inet.networkinterfaces.etherswitch.EtherSwitch2;
+import inet.world.ChannelInstaller;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherBus;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
-import org.omnetpp.inet.networkinterfaces.etherswitch.EtherSwitch;
-import org.omnetpp.inet.networkinterfaces.etherswitch.EtherSwitch2;
-import org.omnetpp.inet.world.ChannelInstaller;
 
 
 //

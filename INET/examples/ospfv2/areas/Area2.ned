@@ -1,10 +1,10 @@
 
-package org.omnetpp.inet.examples.ospfv2.areas;
+package inet.examples.ospfv2.areas;
 
+import inet.networkinterfaces.ethernet.EtherHub;
+import inet.nodes.inet.OSPFRouter;
+import inet.nodes.inet.StandardHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
-import org.omnetpp.inet.nodes.inet.OSPFRouter;
-import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 module OneNetArea

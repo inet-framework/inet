@@ -1,13 +1,13 @@
 
 
 
-package org.omnetpp.inet.examples.ospfv2.fulltest;
+package inet.examples.ospfv2.fulltest;
 
+import inet.networkinterfaces.ethernet.EtherHub;
+import inet.nodes.inet.OSPFRouter;
+import inet.nodes.inet.StandardHost;
+import inet.world.ChannelInstaller;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
-import org.omnetpp.inet.nodes.inet.OSPFRouter;
-import org.omnetpp.inet.nodes.inet.StandardHost;
-import org.omnetpp.inet.world.ChannelInstaller;
 
 
 network OSPF_TestNetwork

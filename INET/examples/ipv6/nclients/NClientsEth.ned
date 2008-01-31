@@ -19,14 +19,14 @@
 
 
 
-package org.omnetpp.inet.examples.ipv6.nclients;
+package inet.examples.ipv6.nclients;
 
+import inet.examples.ethernet.lans.ethernetline;
+import inet.networkinterfaces.ethernet.EtherHub;
+import inet.networklayer.autorouting.FlatNetworkConfigurator6;
+import inet.nodes.ipv6.Router6;
+import inet.nodes.ipv6.StandardHost6;
 import ned.cBasicChannel;
-import org.omnetpp.inet.examples.ethernet.lans.ethernetline;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherHub;
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import org.omnetpp.inet.nodes.ipv6.Router6;
-import org.omnetpp.inet.nodes.ipv6.StandardHost6;
 
 
 network NClientsEth

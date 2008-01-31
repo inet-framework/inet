@@ -12,13 +12,13 @@
 
 
 
-package org.omnetpp.inet.examples.mpls.testte_reroute;
+package inet.examples.mpls.testte_reroute;
 
-import org.omnetpp.inet.networklayer.extras.FailureManager;
-import org.omnetpp.inet.nodes.inet.StandardHost;
-import org.omnetpp.inet.nodes.mpls.RSVP_LSR;
-import org.omnetpp.inet.world.NAMTrace;
-import org.omnetpp.inet.world.ScenarioManager;
+import inet.networklayer.extras.FailureManager;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.world.NAMTrace;
+import inet.world.ScenarioManager;
 
 
 //

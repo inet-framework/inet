@@ -16,11 +16,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package org.omnetpp.inet.examples.adhoc.ieee80211;
+package inet.examples.adhoc.ieee80211;
 
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.nodes.adhoc.MobileHost;
-import org.omnetpp.inet.world.ChannelControl;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.adhoc.MobileHost;
+import inet.world.ChannelControl;
 
 
 network Net80211

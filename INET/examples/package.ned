@@ -1,1 +1,1 @@
-package org.omnetpp.inet.examples;
+package inet.examples;

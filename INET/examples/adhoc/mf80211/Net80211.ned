@@ -19,11 +19,11 @@
 
 
 
-package org.omnetpp.inet.examples.adhoc.mf80211;
+package inet.examples.adhoc.mf80211;
 
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.nodes.adhoc.MFMobileHost;
-import org.omnetpp.inet.world.ChannelControl;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.adhoc.MFMobileHost;
+import inet.world.ChannelControl;
 
 
 network Net80211

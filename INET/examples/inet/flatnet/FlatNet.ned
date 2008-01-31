@@ -20,13 +20,13 @@
 
 
 
-package org.omnetpp.inet.examples.inet.flatnet;
+package inet.examples.inet.flatnet;
 
+import inet.examples.ethernet.lans.ethernetline;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.examples.ethernet.lans.ethernetline;
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.nodes.inet.Router;
-import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network FlatNet

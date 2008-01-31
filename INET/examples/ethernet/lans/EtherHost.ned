@@ -18,12 +18,12 @@
 
 
 
-package org.omnetpp.inet.examples.ethernet.lans;
+package inet.examples.ethernet.lans;
 
-import org.omnetpp.inet.applications.ethernet.EtherAppCli;
-import org.omnetpp.inet.applications.ethernet.EtherAppSrv;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherLLC;
-import org.omnetpp.inet.networkinterfaces.ethernet.EtherMAC;
+import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppSrv;
+import inet.networkinterfaces.ethernet.EtherLLC;
+import inet.networkinterfaces.ethernet.EtherMAC;
 
 
 //

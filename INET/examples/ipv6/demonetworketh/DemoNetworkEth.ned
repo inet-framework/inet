@@ -17,11 +17,11 @@
 //
 
 
-package org.omnetpp.inet.examples.ipv6.demonetworketh;
+package inet.examples.ipv6.demonetworketh;
 
+import inet.networklayer.autorouting.FlatNetworkConfigurator6;
+import inet.nodes.ipv6.Router6;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator6;
-import org.omnetpp.inet.nodes.ipv6.Router6;
 
 
 network DemoNetworkEth

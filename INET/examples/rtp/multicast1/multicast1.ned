@@ -1,10 +1,10 @@
 
 
-package org.omnetpp.inet.examples.rtp.multicast1;
+package inet.examples.rtp.multicast1;
 
+import inet.nodes.inet.Router;
+import inet.transport.rtp.RTPHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.nodes.inet.Router;
-import org.omnetpp.inet.transport.rtp.RTPHost;
 
 
 network RTPMulticast1

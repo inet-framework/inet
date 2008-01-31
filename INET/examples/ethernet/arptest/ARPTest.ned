@@ -12,13 +12,13 @@
 //
 
 
-package org.omnetpp.inet.examples.ethernet.arptest;
+package inet.examples.ethernet.arptest;
 
+import inet.networkinterfaces.etherswitch.EtherSwitch;
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networkinterfaces.etherswitch.EtherSwitch;
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.nodes.inet.Router;
-import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network ARPTest

@@ -19,12 +19,12 @@
 
 
 
-package org.omnetpp.inet.examples.inet.bulktransfer;
+package inet.examples.inet.bulktransfer;
 
+import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 import ned.cBasicChannel;
-import org.omnetpp.inet.networklayer.autorouting.FlatNetworkConfigurator;
-import org.omnetpp.inet.nodes.inet.Router;
-import org.omnetpp.inet.nodes.inet.StandardHost;
 
 
 network BulkTransfer

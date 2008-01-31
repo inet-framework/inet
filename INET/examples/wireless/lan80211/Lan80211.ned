@@ -19,5 +19,5 @@
 //# FIXME what happened to this file??
 
 
-package org.omnetpp.inet.examples.wireless.lan80211;
+package inet.examples.wireless.lan80211;
 
