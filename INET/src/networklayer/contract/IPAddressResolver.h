@@ -131,7 +131,7 @@ class INET_API IPAddressResolver
      */
     RoutingTable *routingTableOf(cModule *host);
 
-#ifdef WITH_IPv6
+#ifndef NO_IPv6
     /**
      * The function tries to look up the RoutingTable6 module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
@@ -157,7 +157,7 @@ class INET_API IPAddressResolver
      */
     RoutingTable *findRoutingTableOf(cModule *host);
 
-#ifdef WITH_IPv6
+#ifndef NO_IPv6
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */

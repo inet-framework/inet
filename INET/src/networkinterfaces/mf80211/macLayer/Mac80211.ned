@@ -1,7 +1,7 @@
 //***************************************************************************
 //* file:        Mac80211.ned
 //*
-//* author:      Marc LÃ¶bbers
+//* author:      Marc Löbbers
 //*
 //* copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 //*              Technische Universitaet Berlin, Germany.
