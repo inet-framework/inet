@@ -21,3 +21,6 @@
 
 package inet.examples.wireless.lan80211;
 
+network Lan80211 
+{
+}
