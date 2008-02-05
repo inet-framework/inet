@@ -1,0 +1,79 @@
+#!/bin/sh
+INETROOT=`pwd`
+echo "[General]
+cpu-time-limit = 3" >tmp.ini
+
+run() {
+  cd $INETROOT/`dirname $1`
+  echo "Running: $1 $2"
+  $INETROOT/src/inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
+}
+
+run examples/ospfv2/areas/omnetpp.ini  AreaTest1
+run examples/ospfv2/backbone/omnetpp.ini  Backbone1
+run examples/ospfv2/fulltest/omnetpp.ini  OSPF1
+run examples/ospfv2/simpletest/omnetpp.ini  OSPF1
+run examples/wireless/handover/omnetpp.ini General
+run examples/wireless/throughput/omnetpp.ini  Throughput1
+run examples/wireless/throughput/omnetpp.ini  Throughput2
+run examples/wireless/hosttohost/omnetpp.ini  Throughput1
+run examples/wireless/lan80211/omnetpp-ftp.ini  TwoHosts
+run examples/wireless/lan80211/omnetpp-ftp.ini  NHosts
+run examples/wireless/lan80211/omnetpp.ini  Ping1
+run examples/wireless/lan80211/omnetpp.ini  Ping2
+run examples/wireless/lan80211/omnetpp-streaming.ini  Streaming1
+run examples/wireless/lan80211/omnetpp-streaming.ini  Streaming2
+run examples/inet/flatnet/omnetpp.ini General
+run examples/inet/multicast/omnetpp.ini General
+run examples/inet/kidsnw1/omnetpp.ini General
+run examples/inet/bulktransfer/omnetpp.ini General
+run examples/inet/routerperf/omnetpp.ini General
+run examples/inet/nclients/omnetpp.ini General
+run examples/inet/nclients/basicHTTP.ini General
+run examples/inet/nclients/nclients2.ini General
+run examples/inet/nclients/omnetpp-ping.ini General
+run examples/inet/nclients/video.ini General
+run examples/inet/nclients/filetransfer.ini General
+run examples/inet/redtest/omnetpp.ini  DropTailQueue
+run examples/inet/redtest/omnetpp.ini  REDQueue1
+run examples/inet/redtest/omnetpp.ini  REDQueue2
+run examples/ethernet/arptest2/omnetpp.ini  ARPTest
+run examples/ethernet/lans/omnetpp.ini  MixedLAN1
+run examples/ethernet/lans/bus.ini  BusLAN
+run examples/ethernet/lans/switch.ini  SwitchedLAN1
+run examples/ethernet/lans/hub.ini  Hub1
+run examples/ethernet/lans/hub.ini  Hub2
+run examples/ethernet/lans/hub.ini  Hub3
+run examples/ethernet/lans/hub.ini  Hub4
+run examples/ethernet/lans/duplexswitch.ini  SwitchedDuplexLAN
+run examples/ethernet/lans/mixed.ini  MixedLAN
+run examples/ethernet/lans/largeNet.ini  LargeNet
+run examples/ethernet/lans/twoHosts.ini  TwoHosts1
+run examples/ethernet/arptest/omnetpp.ini  ARPTest
+run examples/adhoc/mf80211/omnetpp.ini  Ping1
+run examples/adhoc/mf80211/omnetpp.ini  Ping2
+run examples/adhoc/mobility/omnetpp.ini  LinearMobility
+run examples/adhoc/mobility/omnetpp.ini  MassMobility
+run examples/adhoc/mobility/omnetpp.ini  RandomWPMobility
+run examples/adhoc/mobility/omnetpp.ini  CircleMobility
+run examples/adhoc/mobility/omnetpp.ini  RectangleMobility
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility1
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility2
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility3
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility4
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility5
+run examples/adhoc/mobility/omnetpp.ini  TurtleMobility6
+run examples/adhoc/mobility/omnetpp.ini  ANSimMobility
+run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility1
+run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility2
+run examples/adhoc/ieee80211/omnetpp.ini  Ping1
+run examples/adhoc/ieee80211/omnetpp.ini  Ping2
+run examples/mpls/testte_tunnel/omnetpp.ini General
+run examples/mpls/net37/omnetpp.ini General
+run examples/mpls/testte_routing/omnetpp.ini General
+run examples/mpls/testte_failure/omnetpp.ini General
+run examples/mpls/ldp/omnetpp.ini General
+run examples/mpls/testte_failure2/omnetpp.ini General
+run examples/mpls/testte_reroute/omnetpp.ini General
+run examples/ipv6/nclients/omnetpp.ini General
+run examples/ipv6/demonetworketh/omnetpp.ini General
