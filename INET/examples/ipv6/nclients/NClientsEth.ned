@@ -26,7 +26,7 @@ import inet.networkinterfaces.ethernet.EtherHub;
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network NClientsEth
@@ -34,12 +34,12 @@ network NClientsEth
     parameters:
         int n;
     types:
-        channel fiberline extends cBasicChannel
+        channel fiberline extends BasicChannel
         {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends cBasicChannel
+        channel ethernetline extends BasicChannel
         {
             delay = 0.1us;
         }

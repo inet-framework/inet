@@ -27,7 +27,7 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
 import inet.world.NAMTrace;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network NClients
@@ -35,12 +35,12 @@ network NClients
     parameters:
         int n;
     types:
-        channel fiberline extends cBasicChannel
+        channel fiberline extends BasicChannel
         {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends cBasicChannel
+        channel ethernetline extends BasicChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;

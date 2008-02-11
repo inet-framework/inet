@@ -4,7 +4,7 @@ package inet.examples.rtp.multicast1;
 
 import inet.nodes.inet.Router;
 import inet.transport.rtp.RTPHost;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network RTPMulticast1
@@ -12,7 +12,7 @@ network RTPMulticast1
     parameters:
         bool debug = default(false);
     types:
-        channel ethernet extends cBasicChannel
+        channel ethernet extends BasicChannel
         {
             delay = normal(0.00015,0.00005);
             datarate = 10Mbps;

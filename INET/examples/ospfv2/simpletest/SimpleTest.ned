@@ -5,7 +5,7 @@ import inet.networkinterfaces.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network SimpleTest
@@ -13,7 +13,7 @@ network SimpleTest
     parameters:
         @display("p=10,10;b=712,152");
     types:
-        channel C extends cBasicChannel
+        channel C extends BasicChannel
         {
             delay = 0.1us;
         }

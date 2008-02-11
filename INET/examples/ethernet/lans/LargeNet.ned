@@ -22,10 +22,10 @@ package inet.examples.ethernet.lans;
 import inet.networkinterfaces.ethernet.EtherBus;
 import inet.networkinterfaces.ethernet.EtherHub;
 import inet.networkinterfaces.etherswitch.EtherSwitch;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
-channel cable extends cBasicChannel
+channel cable extends BasicChannel
 {
     parameters:
         delay = 0.1us;

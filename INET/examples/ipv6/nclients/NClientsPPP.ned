@@ -24,7 +24,7 @@ package inet.examples.ipv6.nclients;
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network NClientsPPP
@@ -32,7 +32,7 @@ network NClientsPPP
     parameters:
         int n;
     types:
-        channel fiberline extends cBasicChannel
+        channel fiberline extends BasicChannel
         {
             delay = 1us;
             datarate = 512Mbps;

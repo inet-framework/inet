@@ -3,7 +3,7 @@
 package inet.examples.rtp.unicast;
 
 import inet.transport.rtp.RTPHost;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network RTPNetwork
@@ -11,7 +11,7 @@ network RTPNetwork
     parameters:
         bool debug = default(false);
     types:
-        channel ErrorChannel extends cBasicChannel
+        channel ErrorChannel extends BasicChannel
         {
             //delay normal (0.004, 0.0041)
             error = 0.0;

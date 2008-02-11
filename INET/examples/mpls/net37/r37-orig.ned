@@ -15,13 +15,13 @@ package inet.examples.mpls.net37;
 
 import inet.networklayer.autorouting.NetworkConfigurator;
 import inet.nodes.mpls.RSVP_LSR;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network R37orig
 {
     types:
-        channel line extends cBasicChannel
+        channel line extends BasicChannel
         {
             delay = 15ms;
             datarate = 60Kbps;

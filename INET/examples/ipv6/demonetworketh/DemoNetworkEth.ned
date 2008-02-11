@@ -21,7 +21,7 @@ package inet.examples.ipv6.demonetworketh;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network DemoNetworkEth
@@ -29,7 +29,7 @@ network DemoNetworkEth
     parameters:
         int n;
     types:
-        channel ethernetline extends cBasicChannel
+        channel ethernetline extends BasicChannel
         {
             delay = 0.1us;
         }

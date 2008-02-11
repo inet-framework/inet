@@ -23,18 +23,18 @@ package inet.examples.inet.kidsnw1;
 
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network KIDSNw1
 {
     types:
-        channel ethernet extends cBasicChannel
+        channel ethernet extends BasicChannel
         {
             delay = normal(0.00015,0.00005);
             datarate = 10Mbps;
         }
-        channel fiberrouterline extends cBasicChannel
+        channel fiberrouterline extends BasicChannel
         {
             delay = normal(0.000001,0.0000001);
             datarate = 512Mbps;

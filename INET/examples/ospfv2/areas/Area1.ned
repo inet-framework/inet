@@ -4,7 +4,7 @@ package inet.examples.ospfv2.areas;
 import inet.networkinterfaces.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 module TwoNetsArea
@@ -14,7 +14,7 @@ module TwoNetsArea
     gates:
         inout ethg[];
     types:
-        channel C extends cBasicChannel
+        channel C extends BasicChannel
         {
             delay = 0.1us;
         }

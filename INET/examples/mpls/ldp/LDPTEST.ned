@@ -19,23 +19,23 @@ import inet.nodes.inet.StandardHost;
 import inet.nodes.mpls.LDP_LSR;
 import inet.world.NAMTrace;
 import inet.world.ScenarioManager;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 network LDPTEST
 {
     types:
-        channel C5 extends cBasicChannel
+        channel C5 extends BasicChannel
         {
             datarate = 600Kbps;
             delay = 5us;
         }
-        channel C10 extends cBasicChannel
+        channel C10 extends BasicChannel
         {
             datarate = 600Kbps;
             delay = 10us;
         }
-        channel C15 extends cBasicChannel
+        channel C15 extends BasicChannel
         {
             datarate = 600Kbps;
             delay = 15us;

@@ -25,7 +25,7 @@ import inet.networkinterfaces.ethernet.EtherHub;
 import inet.networkinterfaces.etherswitch.EtherSwitch;
 import inet.networkinterfaces.etherswitch.EtherSwitch2;
 import inet.world.ChannelInstaller;
-import ned.cBasicChannel;
+import ned.BasicChannel;
 
 
 //
@@ -149,7 +149,7 @@ network TwoHosts
 network SwitchedLAN
 {
     types:
-        channel C extends cBasicChannel
+        channel C extends BasicChannel
         {
             delay = 0.1us;
         }
@@ -257,7 +257,7 @@ network BusLAN
         bus.ethg[3] <--> hostD.ethg;
 }
 
-channel ethernetline extends cBasicChannel
+channel ethernetline extends BasicChannel
 {
     parameters:
         delay = 0.1us;
