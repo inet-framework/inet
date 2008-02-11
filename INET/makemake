@@ -1,14 +1,4 @@
-opp_makemake -f --genconfig omnetppconfig
-make ROOT=`pwd` MAKEMAKE=opp_makemake EXT= -f makemakefiles
-
-echo
-echo 'Regenerating nedfiles.lst...'
-find . -name \*.ned > nedfiles.lst
-perl -i.bak -pe "s|^(./)?Examples/.*||" nedfiles.lst
-perl -i.bak -pe "s|^(./)?Unsupported/.*||" nedfiles.lst
-perl -i.bak -pe "s|^(./)?Obsolete/.*||" nedfiles.lst
-perl -i.bak -pe "s|^(./)?Tests/.*||" nedfiles.lst
-echo 'Done'
+cd src && opp_makemake -f --deep
 
 if [ "$LANG" != "" -o "$LANGUAGE" != "" ]; then
     echo
