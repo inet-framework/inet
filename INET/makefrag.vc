@@ -1,6 +1,0 @@
-# documentation targets
-doxy:
-	doxygen doxy.cfg
-
-tcptut:
-        cd doc\src\tcp && nmake -f Makefile.vc

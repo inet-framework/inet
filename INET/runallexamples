@@ -5,7 +5,11 @@ cpu-time-limit = 3" >tmp.ini
 
 run() {
   cd $INETROOT/`dirname $1`
-  echo "Running: $1 $2"
+  echo "
+========================================================
+Running: $1 $2
+
+"
   $INETROOT/src/inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
 }
 
