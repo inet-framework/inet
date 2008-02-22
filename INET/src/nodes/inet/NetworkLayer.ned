@@ -57,7 +57,7 @@ module NetworkLayer
             parameters:
                 timeToLive = 32;
                 multicastTimeToLive = 32;
-                fragmentTimeout = 60;
+                fragmentTimeout = 60s;
                 protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5";
                 @display("p=85,95;q=queue");
             gates:

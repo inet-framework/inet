@@ -42,7 +42,7 @@ simple MACRelayUnitPP like MACRelayUnit
         double agingTime = default(120s) @unit("s"); // see MACRelayUnit
         double processingTime = default(0s) @unit("s");   // processing time of one frame
         int bufferSize = default(1MB) @unit("B");   // memory (bytes)
-        int highWatermark = default(512kB) @unit("B"); // buffer usage threshold to send PAUSE frame (bytes)
+        int highWatermark = default(512KB) @unit("B"); // buffer usage threshold to send PAUSE frame (bytes)
         int pauseUnits = default(300);       // time to put in PAUSE frames (in units of 512 bit times)
         bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
 
