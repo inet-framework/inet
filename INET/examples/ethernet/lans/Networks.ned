@@ -43,7 +43,7 @@ network MixedLAN
         bus: EtherBus {
             parameters:
                 positions = "10 20 24 35 40 48";
-                propagationSpeed = 200000000; // 1us = 200m
+                propagationSpeed = 2e8mps; // 1us = 200m
                 @display("p=277,182;b=424,6;o=#408060");
             gates:
                 ethg[6];
