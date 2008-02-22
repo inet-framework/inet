@@ -26,9 +26,9 @@ package inet.networkinterfaces.ppp;
 simple ThruputMeter
 {
     parameters:
-        double startTime = default(0) @unit("s");
+        double startTime = default(0s) @unit("s");
         int batchSize = default(50);
-        double maxInterval = default(1) @unit("s");
+        double maxInterval = default(1s) @unit("s");
         @display("i=block/timer_vs");
     gates:
         input in;

@@ -34,8 +34,8 @@ simple Ieee80211AgentSTA
         double probeDelay @unit("s"); // delay before sending a probe request during active scanning
         double minChannelTime @unit("s"); // min interval to spend on a channel during active scanning
         double maxChannelTime @unit("s"); // channel time for passive scanning, and max channel time for active scanning
-        double authenticationTimeout = default(5) @unit("s"); // timeout for the authentication procedure
-        double associationTimeout = default(5) @unit("s"); // timeout for the association procedure
+        double authenticationTimeout = default(5s) @unit("s"); // timeout for the authentication procedure
+        double associationTimeout = default(5s) @unit("s"); // timeout for the association procedure
         @display("i=block/control");
     gates:
         input mgmtIn;

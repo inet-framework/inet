@@ -66,14 +66,14 @@ void BasicMobility::initialize(int stage)
         if (pos.x == -1)
             pos.x = parseInt(hostPtr->displayString().getTagArg("p",0), -1);
         if (pos.x == -1)
-            pos.x = genk_uniform(0, 0, pgs.x);
+            pos.x = uniform(0, pgs.x);
 
         if (hasPar("y")) // not all mobility models have an "y" parameter
             pos.y = par("y");
         if (pos.y == -1)
             pos.y = parseInt(hostPtr->displayString().getTagArg("p",1), -1);
         if (pos.y == -1)
-            pos.y = genk_uniform(0, 0, pgs.y);
+            pos.y = uniform(0, pgs.y);
 
         // check validity of position
         if (pos.x < 0 || pos.y < 0 || pos.x >= pgs.x || pos.y >= pgs.y)
@@ -115,8 +115,8 @@ void BasicMobility::updatePosition()
 Coord BasicMobility::getRandomPosition()
 {
     Coord p;
-    p.x = genk_uniform(0, 0, cc->getPgs()->x);
-    p.y = genk_uniform(0, 0, cc->getPgs()->y);
+    p.x = uniform(0, cc->getPgs()->x);
+    p.y = uniform(0, cc->getPgs()->y);
     return p;
 }
 

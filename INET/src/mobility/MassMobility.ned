@@ -58,8 +58,8 @@ simple MassMobility like BasicMobility
         double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
         volatile double changeInterval @unit("s"); // frequency of changing speed and angle (can be random) [s]
         volatile double changeAngleBy @unit("s"); // change angle by this much (can be random) [deg]
-        volatile double speed = default(2) @unit("mps"); // speed (can be random, updated every changeInterval) [m/s]
-        double updateInterval = default(0.1) @unit("s"); // time interval to update the hosts position
+        volatile double speed = default(2mps) @unit("mps"); // speed (can be random, updated every changeInterval) [m/s]
+        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 

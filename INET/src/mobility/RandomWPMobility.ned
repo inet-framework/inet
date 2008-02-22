@@ -44,8 +44,8 @@ simple RandomWPMobility like BasicMobility
         bool debug = default(false); // debug switch
         double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
         double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
-        double updateInterval = default(0.1) @unit("s");
-        volatile double speed = default(2) @unit("mps"); // use uniform(minSpeed, maxSpeed) or another distribution
+        double updateInterval = default(0.1s) @unit("s");
+        volatile double speed = default(2mps) @unit("mps"); // use uniform(minSpeed, maxSpeed) or another distribution
         volatile double waitTime @unit("s"); // wait time between reaching a target and choosing a new one
         @display("i=block/cogwheel_s");
 }

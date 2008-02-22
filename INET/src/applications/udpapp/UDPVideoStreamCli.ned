@@ -30,7 +30,7 @@ simple UDPVideoStreamCli like UDPApp
         int localPort;
         string serverAddress;
         int serverPort;
-        double startTime = default(1) @unit("s");
+        double startTime = default(1s) @unit("s");
     gates:
         input from_udp;
         output to_udp;

@@ -33,10 +33,10 @@ simple LinearMobility like BasicMobility
         bool debug = default(false); // debug switch
         double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
         double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
-        double speed = default(2) @unit("mps"); // speed of the host (in m/s)
+        double speed = default(2mps) @unit("mps"); // speed of the host (in m/s)
         double angle = default(0); // angle of linear motion (degreees)
         double acceleration = default(0); // acceleration of linear motion (m/s2)
-        double updateInterval = default(0.1) @unit("s"); // time interval to update the hosts position
+        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 

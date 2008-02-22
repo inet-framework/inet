@@ -29,7 +29,7 @@ simple Decider80211
 {
     parameters:
         bool debug = default(false); // debug switch
-        double snirThreshold = default(4) @unit("dB");
+        double snirThreshold = default(4dB) @unit("dB");
         double bitrate @unit("bps");
         @display("i=block/process_s");
     gates:

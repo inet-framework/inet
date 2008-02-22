@@ -33,8 +33,8 @@ simple RectangleMobility like BasicMobility
         double x2;
         double y2;
         double startPos; // in range [0.0,4.0): topleft=0, topright=1, bottomright=2, bottomleft=3
-        double speed = default(2) @unit("mps"); // speed of the host (in m/s)
-        double updateInterval = default(0.1) @unit("s"); // time interval to update the hosts position
+        double speed = default(2mps) @unit("mps"); // speed of the host (in m/s)
+        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 

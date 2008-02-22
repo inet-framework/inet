@@ -37,8 +37,8 @@ package inet.networklayer.ldp;
 simple LDP
 {
     parameters:
-        double holdTime = default(15) @unit("s");
-        double helloInterval = default(5) @unit("s");
+        double holdTime = default(15s) @unit("s");
+        double helloInterval = default(5s) @unit("s");
         @display("i=block/control");
     gates:
         input tcpIn;

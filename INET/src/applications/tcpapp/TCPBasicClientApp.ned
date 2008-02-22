@@ -69,13 +69,13 @@ simple TCPBasicClientApp like TCPApp
         int port = default(1000); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
-        double startTime = default(1) @unit("s"); // time first session begins
+        double startTime = default(1s) @unit("s"); // time first session begins
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength = default(200); // length of a request (bytes)
         volatile int replyLength = default(1MB) @unit("B"); // length of a reply (bytes)
         volatile double thinkTime @unit("s"); // time gap between requests
         volatile double idleInterval; // time gap between sessions
-        volatile double reconnectInterval = default(30) @unit("s");  // if connection breaks, waits this much before trying to reconnect
+        volatile double reconnectInterval = default(30s) @unit("s");  // if connection breaks, waits this much before trying to reconnect
     gates:
         input tcpIn;
         output tcpOut;

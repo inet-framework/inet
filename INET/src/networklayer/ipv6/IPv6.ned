@@ -78,7 +78,7 @@ package inet.networklayer.ipv6;
 simple IPv6
 {
     parameters:
-        double procDelay = default(0) @unit("s");
+        double procDelay = default(0s) @unit("s");
         string protocolMapping;
         @display("i=block/network2");
     gates:

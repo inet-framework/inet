@@ -85,11 +85,11 @@ package inet.networklayer.ipv4;
 simple IP
 {
     parameters:
-        double procDelay = default(0) @unit("s");
+        double procDelay = default(0s) @unit("s");
         int timeToLive = default(32);
         int multicastTimeToLive;
         string protocolMapping;
-        double fragmentTimeout = default(60) @unit("s");
+        double fragmentTimeout = default(60s) @unit("s");
         @display("i=block/routing");
     gates:
         input transportIn[];
