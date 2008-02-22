@@ -42,10 +42,10 @@ simple SnrEval
     parameters:
         double channelNumber = default(0); // channel identifier
         bool debug = default(false); // debug switch
-        double transmitterPower;
+        double transmitterPower @unit("mW");
         double bitrate @unit("bps");
         int headerLength;
-        double thermalNoise;
+        double thermalNoise @unit("dBm");
         double pathLossAlpha;
         double sensitivity;
         @display("i=block/wrxtx");

@@ -29,7 +29,7 @@ simple SnrDecider
 {
     parameters:
         bool debug = default(false); // debug switch
-        double snrThresholdLevel;
+        double snrThresholdLevel @unit("dB");
         @display("i=box2_s");
     gates:
         output uppergateOut;

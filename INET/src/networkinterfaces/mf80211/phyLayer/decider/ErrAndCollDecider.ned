@@ -29,7 +29,7 @@ simple ErrAndCollDecider
 {
     parameters:
         bool debug = default(false); // debug switch
-        double snrThresholdLevel;
+        double snrThresholdLevel @unit("dB");
     gates:
         output uppergateOut;
         input lowergateIn;

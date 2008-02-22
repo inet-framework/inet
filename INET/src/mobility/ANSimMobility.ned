@@ -32,7 +32,7 @@ simple ANSimMobility like BasicMobility
         xml ansimTrace; // the ANSim trace file in XML
         int nodeId; // <position_change> elements to match;
                                // -1 gets substituted to parent module's index
-        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
+        double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 
