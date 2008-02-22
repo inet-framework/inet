@@ -103,8 +103,8 @@ module WirelessHostSimplified
                 proxyARP = false;
                 @display("p=248,247;q=queue");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)+1];
-                ifOut[sizeof(pppg)+sizeof(ethg)+1];
+                ifIn[(sizeof(pppg)+sizeof(ethg))+1];
+                ifOut[(sizeof(pppg)+sizeof(ethg))+1];
         }
         ppp[sizeof(pppg)]: PPPInterface {
             parameters:

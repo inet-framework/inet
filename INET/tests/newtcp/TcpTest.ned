@@ -9,23 +9,23 @@ network TcpTestNet1
         cli: TcpTestClient {
             parameters:
                 @display("p=95,95");
-        };
+        }
         tcpcli: TCP {
             parameters:
                 @display("p=95,178");
-        };
+        }
         tcpsrv: TCP {
             parameters:
                 @display("p=302,178");
-        };
+        }
         srv: TcpTestClient {
             parameters:
                 @display("p=303,96");
-        };
+        }
         tcptester: TCPScriptableTester {
             parameters:
                 @display("p=198,178");
-        };
+        }
     connections:
         cli.tcpOut --> tcpcli.from_appl++;
         cli.tcpIn <-- tcpcli.to_appl++;
@@ -47,23 +47,23 @@ network TcpTestNet2
         cli: TcpTestClient {
             parameters:
                 @display("p=95,95");
-        };
+        }
         tcpcli: TCP {
             parameters:
                 @display("p=95,178");
-        };
+        }
         tcpsrv: TCP {
             parameters:
                 @display("p=302,178");
-        };
+        }
         srv: TcpTestClient {
             parameters:
                 @display("p=303,96");
-        };
+        }
         tcptester: TCPRandomTester {
             parameters:
                 @display("p=198,178");
-        };
+        }
     connections:
         cli.tcpOut --> tcpcli.from_appl++;
         cli.tcpIn <-- tcpcli.to_appl++;

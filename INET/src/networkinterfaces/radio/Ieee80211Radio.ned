@@ -35,11 +35,11 @@ simple Ieee80211Radio
 {
     parameters:
         int channelNumber = default(0); // channel identifier
-        double transmitterPower = default(20mW) @unit("mW"); // power used for transmission of messages (in mW)
+        double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)
         double bitrate @unit("bps"); // (in bits/s)
-        double thermalNoise = default(-110) @unit("dBm"); // base noise level (dBm)
+        double thermalNoise @unit("dBm") = default(-110); // base noise level (dBm)
         double pathLossAlpha = default(2); // used by the path loss calculation
-        double snirThreshold = default(4dB) @unit("dB"); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
+        double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         double sensitivity @unit("mW"); // received signals with power below sensitivity are ignored
         @display("i=block/wrxtx");
     gates:

@@ -42,8 +42,8 @@ simple ConstSpeedMobility like BasicMobility
 {
     parameters:
         bool debug = default(false); // debug switch
-        double vHost = default(2mps) @unit("mps"); // speed of the host (in m/s)
-        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
+        double vHost @unit("mps") = default(2mps); // speed of the host (in m/s)
+        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
         double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
         double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
         @display("i=block/cogwheel_s");

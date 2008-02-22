@@ -49,8 +49,8 @@ simple IPTrafSink like IPTrafficGenerator
 simple IPTrafGen like IPTrafficGenerator
 {
     parameters:
-        double startTime = default(1s) @unit("s"); // the time application generates first packet
-        volatile double packetInterval = default(10ms) @unit("s"); // may be a random value, e.g. exponential(1)
+        double startTime @unit("s") = default(1s); // the time application generates first packet
+        volatile double packetInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
         int numPackets = default(0); // max number of packets to generate
         int protocol; // value for IPDatagram protocol field
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)

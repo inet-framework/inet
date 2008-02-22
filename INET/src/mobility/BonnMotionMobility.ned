@@ -39,7 +39,7 @@ simple BonnMotionMobility like BasicMobility
         bool debug = default(false); // debug switch
         string traceFile; // the BonnMotion trace file
         int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
-        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
+        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 

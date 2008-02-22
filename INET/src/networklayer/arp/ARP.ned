@@ -38,9 +38,9 @@ package inet.networklayer.arp;
 simple ARP
 {
     parameters:
-        double retryTimeout = default(1s) @unit("s"); // number seconds ARP waits between retries to resolve an \IP address
+        double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an \IP address
         int retryCount = default(3);   // number of times ARP will attempt to resolve an \IP address
-        double cacheTimeout = default(120s) @unit("s"); // number seconds unused entries in the cache will time out
+        double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool proxyARP = default(true);        // sets proxy \ARP mode (replying to \ARP requests for the addresses for which a routing table entry exists)
         @display("i=block/layer");
     gates:

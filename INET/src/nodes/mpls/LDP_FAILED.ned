@@ -26,8 +26,8 @@ import inet.networklayer.extras.Dummy;
 module LDP_FAILED
 {
     parameters:
-        double holdTime = default(15s) @unit("s");
-        double helloInterval = default(5s) @unit("s");
+        double holdTime @unit("s") = default(15s);
+        double helloInterval @unit("s") = default(5s);
         int namid;
         string peers;
         string routerId = default("auto");

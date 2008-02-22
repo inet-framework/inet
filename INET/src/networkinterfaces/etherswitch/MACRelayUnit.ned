@@ -50,7 +50,7 @@ moduleinterface MACRelayUnit
     parameters:
         string addressTableFile = default("");  // set to empty string if not used
         int addressTableSize = default(100); // max size of address table
-        double agingTime = default(120s) @unit("s"); // max idle time for address table entries
+        double agingTime @unit("s") = default(120s); // max idle time for address table entries
                                     // (if expires, entry is removed from the table)
 
     gates:

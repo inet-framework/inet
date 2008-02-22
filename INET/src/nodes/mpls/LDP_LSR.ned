@@ -38,8 +38,8 @@ import inet.util.NAMTraceWriter;
 module LDP_LSR
 {
     parameters:
-        double holdTime = default(15s) @unit("s");
-        double helloInterval = default(5s) @unit("s");
+        double holdTime @unit("s") = default(15s);
+        double helloInterval @unit("s") = default(5s);
         int namid;
         string peers;
         string routerId = default("auto");

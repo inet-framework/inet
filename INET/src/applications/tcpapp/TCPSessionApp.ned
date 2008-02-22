@@ -64,11 +64,11 @@ simple TCPSessionApp like TCPApp
         bool active = default(true);
         string connectAddress;
         int connectPort;
-        double tOpen = default(1s) @unit("s");
-        double tSend = default(1s) @unit("s");
-        int sendBytes = default(1MB) @unit("B");
+        double tOpen @unit("s") = default(1s);
+        double tSend @unit("s") = default(1s);
+        int sendBytes @unit("B") = default(1MB);
         string sendScript = default("");
-        double tClose = default(2s) @unit("s");
+        double tClose @unit("s") = default(2s);
     gates:
         input tcpIn;
         output tcpOut;

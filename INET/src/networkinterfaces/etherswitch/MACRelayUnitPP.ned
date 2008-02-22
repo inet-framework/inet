@@ -39,10 +39,10 @@ simple MACRelayUnitPP like MACRelayUnit
     parameters:
         string addressTableFile = default("");  // see MACRelayUnit
         int addressTableSize = default(100); // see MACRelayUnit
-        double agingTime = default(120s) @unit("s"); // see MACRelayUnit
-        double processingTime = default(0s) @unit("s");   // processing time of one frame
-        int bufferSize = default(1MB) @unit("B");   // memory (bytes)
-        int highWatermark = default(512KB) @unit("B"); // buffer usage threshold to send PAUSE frame (bytes)
+        double agingTime @unit("s") = default(120s); // see MACRelayUnit
+        double processingTime @unit("s") = default(0s);   // processing time of one frame
+        int bufferSize @unit("B") = default(1MB);   // memory (bytes)
+        int highWatermark @unit("B") = default(512KB); // buffer usage threshold to send PAUSE frame (bytes)
         int pauseUnits = default(300);       // time to put in PAUSE frames (in units of 512 bit times)
         bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
 

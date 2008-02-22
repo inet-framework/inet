@@ -44,26 +44,23 @@ network DLLTest
                 nonIPModuleTypes = "";
                 networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";
-        };
-        r1: Router {
-        };
-        r2: Router {
-        };
-        r3: Router {
-        };
+        }
+        r1: Router;
+        r2: Router;
+        r3: Router;
         cli[n]: StandardHost {
             parameters:
                 @display("i=device/laptop");
-        };
+        }
         srv: StandardHost {
             parameters:
                 @display("i=device/server_l");
-        };
+        }
     connections allowunconnected:
         for i=0..n-1 {
             cli[i].out++ --> ethernetline --> r1.in++;
             cli[i].in++ <-- ethernetline <-- r1.out++;
-        };
+        }
 
         r1.out++ --> ethernetline --> r2.in++;
         r1.in++ <-- ethernetline <-- r2.out++;

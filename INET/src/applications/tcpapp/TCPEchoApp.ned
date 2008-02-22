@@ -43,7 +43,7 @@ simple TCPEchoApp like TCPApp
         string address = default(""); // local address; may be left empty ("")
         int port; // port number to listen on
         double echoFactor = default(1);
-        double echoDelay = default(0s) @unit("s");
+        double echoDelay @unit("s") = default(0s);
     gates:
         input tcpIn;
         output tcpOut;

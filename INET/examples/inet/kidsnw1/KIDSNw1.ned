@@ -31,21 +31,19 @@ network KIDSNw1
     types:
         channel ethernet extends BasicChannel
         {
-            delay = normal(0.00015,0.00005);
+            delay = normal(0.00015, 0.00005);
             datarate = 10Mbps;
         }
         channel fiberrouterline extends BasicChannel
         {
-            delay = normal(0.000001,0.0000001);
+            delay = normal(0.000001, 0.0000001);
             datarate = 512Mbps;
         }
     submodules:
         host[3]: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = index==0 ? "host1.irt" :
-                  index==1 ? "host2.irt" :
-                  index==2 ? "host3.irt" : "PROBLEM";
+                routingFile = (index==0 ? "host1.irt" : (index==1 ? "host2.irt" : (index==2 ? "host3.irt" : "PROBLEM")));
                 @display("p=101,307,row;i=device/pc2");
 
             gates:
@@ -54,12 +52,11 @@ network KIDSNw1
         // First Hop Router
         fhrouter[2]: Router {
             parameters:
-                routingFile = index==0 ? "fhrouter1.irt" :
-                  index==1 ? "fhrouter5.irt" : "PROBLEM";
+                routingFile = (index==0 ? "fhrouter1.irt" : (index==1 ? "fhrouter5.irt" : "PROBLEM"));
                 @display("p=119,222,row,130");
 
             gates:
-                pppg[index==0 ? 3 : 2];
+                pppg[(index==0 ? 3 : 2)];
         }
         // InteriorRouter
         irouter: Router {
@@ -73,8 +70,7 @@ network KIDSNw1
         bgrouter[2]: Router {
             parameters:
 
-                routingFile = index==0 ? "bgrouter3.irt" :
-                  index==1 ? "bgrouter4.irt" : "PROBLEM";
+                routingFile = (index==0 ? "bgrouter3.irt" : (index==1 ? "bgrouter4.irt" : "PROBLEM"));
                 @display("p=135,64,row");
             gates:
                 pppg[2];

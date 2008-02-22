@@ -31,9 +31,9 @@ simple CircleMobility like BasicMobility
         double cx = default(100); // x coord of the center of the circle
         double cy = default(100); // y coord of the center of the circle
         double r = default(100); // radius of the circle
-        double speed = default(2mps) @unit("mps"); // speed of the host (in m/s)
+        double speed @unit("mps") = default(2mps); // speed of the host (in m/s)
         double startAngle = default(0); // starting angle (degreees)
-        double updateInterval = default(0.1s) @unit("s"); // time interval to update the hosts position
+        double updateInterval @unit("s") = default(0.1s); // time interval to update the hosts position
         @display("i=block/cogwheel_s");
 }
 
