@@ -35,10 +35,10 @@ set i 0
 set first ""
 foreach line {
    {"INET Framework"}
-   {"About..."               "README"               "../Documentation/index.html"}
+   {"About..."               "README"               "../doc/index.html"}
 
    {"INET"}
-   {"NClients/Telnet"        "INET/NClients"        "./NClients"              "NClients"}
+   {"NClients/Telnet"        "inet/nclients"        "../inet"              "NClients"}
    {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
    {"NClients/file transfer" "INET/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
    {"FlatNet"                "INET/FlatNet"         "./FlatNet"               "FlatNet"}
@@ -63,7 +63,7 @@ foreach line {
    {"DemoNetworkEth"         "IPv6/DemoNetworkEth"  "./DemoNetworkEth"        "DemoNetworkEth"}
 
    {"Ethernet"}
-   {"ARP Test"               "Ethernet/ARPTest"     "./ARPTest"               "ARPTest"}
+   {"ARP Test"               "ethernet/arptest"     "./run"               "arptest"}
    {"ARP Test 2"             "Ethernet/ARPTest2"    "./ARPTest"               "ARPTest"}
    {"LANs: mixed Ethernet"   "Ethernet/LANs"        "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
    {"LANs: Ethernet bus"     "Ethernet/LANs"        "./LANs -f bus.ini"       "LANs -f bus.ini"}

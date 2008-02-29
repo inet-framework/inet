@@ -1,0 +1,44 @@
+EXAMPLES=`dirname $0`/../examples
+DIRS="$EXAMPLES/ospfv2/areas
+$EXAMPLES/ospfv2/backbone
+$EXAMPLES/ospfv2/fulltest
+$EXAMPLES/ospfv2/simpletest
+$EXAMPLES/wireless/handover
+$EXAMPLES/wireless/throughput
+$EXAMPLES/wireless/hosttohost
+$EXAMPLES/wireless/lan80211
+$EXAMPLES/rtp/data
+$EXAMPLES/rtp/multicast2
+$EXAMPLES/rtp/multicast1
+$EXAMPLES/rtp/unicast
+$EXAMPLES/inet/flatnet
+$EXAMPLES/inet/multicast
+$EXAMPLES/inet/kidsnw1
+$EXAMPLES/inet/bulktransfer
+$EXAMPLES/inet/routerperf
+$EXAMPLES/inet/nclients
+$EXAMPLES/inet/redtest
+$EXAMPLES/ethernet/arptest2
+$EXAMPLES/ethernet/lans
+$EXAMPLES/ethernet/arptest
+$EXAMPLES/adhoc/mf80211
+$EXAMPLES/adhoc/mobility
+$EXAMPLES/adhoc/ieee80211
+$EXAMPLES/mpls/testte_tunnel
+$EXAMPLES/mpls/ldp
+$EXAMPLES/mpls/net37
+$EXAMPLES/mpls/testte_routing
+$EXAMPLES/mpls/testte_failure
+$EXAMPLES/mpls/testte_failure2
+$EXAMPLES/mpls/testte_reroute
+$EXAMPLES/ipv6/nclients
+$EXAMPLES/ipv6/demonetworketh"
+
+for i in $DIRS; do
+  echo $i
+  echo '../../../src/inet -n ../..:../../../src $*' >$i/run
+  chmod +x $i/run
+  svn add $i/run
+  echo '..\..\..\src\inet -n ../..:../../../src %*' >$i/run.cmd
+  svn add $i/run.cmd
+done  
