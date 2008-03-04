@@ -29,16 +29,13 @@ package inet.applications.ethernet;
 simple EtherAppCli
 {
     parameters:
-        string destStation;  // module path name of destination station
-                              // (must be blank if destAddress is given)
-        string destAddress = default("");  // destination MAC address
-                              // (must be blank if destStation is given)
-        volatile double waitTime @unit("s");    // interarrival time between sending requests; may be random value
-        volatile int reqLength;   // length of request packets (bytes); may be random value
-        volatile int respLength;  // length of response packets (bytes); may be random value
+        string destStation;  // module path name of destination station (must be blank if destAddress is given)
+        string destAddress = default("");  // destination MAC address (must be blank if destStation is given)
+        volatile double waitTime @unit("s");  // interval between sending requests
+        volatile int reqLength @unit(B);  // length of request packets
+        volatile int respLength @unit(B);  // length of response packets
         bool registerSAP;   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
-
     gates:
         input in;
         output out;

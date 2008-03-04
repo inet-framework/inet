@@ -85,9 +85,9 @@ package inet.networklayer.queue;
 simple REDQueue like OutputQueue
 {
     parameters:
-        double wq = default(0.002);    // queue weight
-        double minth = default(5); // minimum threshold for avg queue length
-        double maxth = default(50); // maximum threshold for avg queue length (=buffer capacity)
+        double wq = default(0.002);  // queue weight
+        double minth = default(5);  // minimum threshold for avg queue length
+        double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
     gates:
