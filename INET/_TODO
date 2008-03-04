@@ -6,7 +6,8 @@ CONVERSION TO OMNET++40:
 - add gate @labels
 - gross renaming of gates and parameters, to make them more consistent
 
-
+--------
+- ONLY WORKS WITH STATICALLY BUILT OMNETPP!!!
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
    in DistanceBasedRadio: decouple transmission range from interference range 

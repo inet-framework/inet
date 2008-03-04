@@ -27,13 +27,15 @@
 #include <omnetpp.h>
 
 #if OMNETPP_VERSION < 0x0302
-#  error At least OMNeT++/OMNEST version 3.2 required
+#  error At least OMNeT++/OMNEST version 4.0 required
 #endif
 
-#ifdef BUILDING_INET
-#  define INET_API  OPP_DLLEXPORT
+#if defined(INET_EXPORT)
+#  define INET_API OPP_DLLEXPORT
+#elif defined(INET_IMPORT)
+#  define INET_API OPP_DLLIMPORT
 #else
-#  define INET_API  OPP_DLLIMPORT
+#  define INET_API
 #endif
 
 typedef unsigned short ushort;

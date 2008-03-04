@@ -1,0 +1,18 @@
+all: makefiles
+	cd src && $(MAKE)
+
+clean:
+	cd src && $(MAKE) -f Makefile.vc clean
+
+cleanall:
+	cd src && $(MAKE) -f Makefile.vc MODE=release clean
+	cd src && $(MAKE) -f Makefile.vc MODE=debug clean
+
+makefiles:
+	cd src && call opp_nmakemake -f --deep -X transport/rtp -o inet
+
+doxy:
+	doxygen doxy.cfg
+
+tcptut:
+	cd doc\src\tcp && $(MAKE) -f Makefile.vc
