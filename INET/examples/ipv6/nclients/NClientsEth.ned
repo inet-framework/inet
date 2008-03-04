@@ -17,8 +17,6 @@
 //
 
 
-
-
 package inet.examples.ipv6.nclients;
 
 import inet.examples.ethernet.lans.ethernetline;
@@ -34,13 +32,11 @@ network NClientsEth
     parameters:
         int n;
     types:
-        channel fiberline extends BasicChannel
-        {
+        channel fiberline extends BasicChannel {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends BasicChannel
-        {
+        channel ethernetline extends BasicChannel {
             delay = 0.1us;
         }
     submodules:
@@ -56,7 +52,7 @@ network NClientsEth
         srv: StandardHost6;
         hub: EtherHub;
     connections allowunconnected:
-        for i=0..n-1 do {
+        for i=0..n-1 {
             cli[i].ethg++ <--> ethernetline <--> hub.ethg++;
         }
         hub.ethg++ <--> ethernetline <--> r1.ethg++;

@@ -43,7 +43,7 @@ network ARPTest
         bus2: EtherBus {
             parameters:
                 positions = "";
-                propagationSpeed = 2e8mps;
+                propagationSpeed = 2e8 mps;
                 writeScalars = false;
                 @display("p=260,40;b=260,10");
         }
@@ -54,7 +54,7 @@ network ARPTest
         bus1: EtherBus {
             parameters:
                 positions = "";
-                propagationSpeed = 2e8mps;
+                propagationSpeed = 2e8 mps;
                 writeScalars = false;
                 @display("p=280,170;b=260,10");
         }

@@ -14,7 +14,7 @@ network RTPMulticast1
     types:
         channel ethernet extends BasicChannel
         {
-            delay = normal(0.00015, 0.00005);
+            delay = normal(0.00015s, 0.00005s);
             datarate = 10Mbps;
         }
     submodules:

@@ -126,7 +126,7 @@ module LargeLAN
         bus: EtherBus {
             parameters:
                 positions = "5 10 15"; // every 5 meters
-                propagationSpeed = 200000000;  // 1us = 200m
+                propagationSpeed = 2e8 mps;  // 1us = 200m
                 @display("b=424,6;o=#408060");
         }
         bhost[b]: EtherHost {

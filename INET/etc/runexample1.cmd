@@ -4,8 +4,8 @@ rem
 rem Args: <examplepath> <inifile> <configname>
 rem
 
-echo [General] >tmp.ini
-echo cpu-time-limit = 3s >>tmp.ini
+echo [General] >%~dp0\tmp.ini
+echo cpu-time-limit = 3s >>%~dp0\tmp.ini
 
 set INETROOT=%~dp0\..
 cd %INETROOT%\%1

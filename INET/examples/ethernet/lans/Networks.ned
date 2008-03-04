@@ -43,7 +43,7 @@ network MixedLAN
         bus: EtherBus {
             parameters:
                 positions = "10 20 24 35 40 48";
-                propagationSpeed = 2e8mps; // 1us = 200m
+                propagationSpeed = 2e8 mps; // 1us = 200m
                 @display("p=277,182;b=424,6;o=#408060");
             gates:
                 ethg[6];
@@ -245,7 +245,7 @@ network BusLAN
         bus: EtherBus {
             parameters:
                 positions = "0 10 20 30";
-                propagationSpeed = 200000000;
+                propagationSpeed = 2e8 mps;
                 @display("p=250,100;b=400,6;o=#408060");
             gates:
                 ethg[4];
@@ -261,7 +261,7 @@ channel ethernetline extends BasicChannel
 {
     parameters:
         delay = 0.1us;
-        datarate = 10*1000000;
+        datarate = 10Mbps;
 }
 
 network SwitchedDuplexLAN

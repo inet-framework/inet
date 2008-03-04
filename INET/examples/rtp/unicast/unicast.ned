@@ -13,7 +13,7 @@ network RTPNetwork
     types:
         channel ErrorChannel extends BasicChannel
         {
-            //delay normal (0.004, 0.0041)
+            //delay = normal(0.004s, 0.0041s);
             error = 0.0;
         }
     submodules:
