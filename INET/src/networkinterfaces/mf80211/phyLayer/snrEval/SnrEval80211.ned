@@ -30,11 +30,11 @@ simple SnrEval80211
         bool debug = default(false); // debug switch
         double transmitterPower @unit("mW");
         double bitrate @unit("bps");
-        int headerLength;
+        int headerLength @unit(b);
         double carrierFrequency @unit("Hz");
         double thermalNoise @unit("dBm");
         double pathLossAlpha;
-        double sensitivity;
+        double sensitivity @unit(mW);
         @display("i=block/wrxtx");
     gates:
         input uppergateIn;

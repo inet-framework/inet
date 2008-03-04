@@ -47,9 +47,9 @@ simple BasicSnrEval
 {
     parameters:
         bool coreDebug = default(false); // debug switch for the core framework
-        double transmitterPower @unit("mW"); // power used for transmission of messages (in mW)
-        double bitrate @unit("bps"); // bitrate (in bits/sec)
-        int headerLength; // header length of the AirFrame (in bits)
+        double transmitterPower @unit("mW"); // power used for transmission of messages
+        double bitrate @unit("bps"); // bitrate
+        int headerLength @unit(b);  // header length of the AirFrame
     gates:
         input uppergateIn; // from the MAC layer
         output uppergateOut; // to the decider sub-module

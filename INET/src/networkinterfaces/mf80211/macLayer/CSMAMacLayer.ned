@@ -30,7 +30,7 @@ simple CSMAMacLayer
 {
     parameters:
         bool debug = default(false); // debug switch
-        int headerLength;
+        int headerLength @unit(b);
         int queueLength;
         @display("i=prot2");
     gates:

@@ -44,10 +44,10 @@ simple SnrEval
         bool debug = default(false); // debug switch
         double transmitterPower @unit("mW");
         double bitrate @unit("bps");
-        int headerLength;
+        int headerLength @unit(b);
         double thermalNoise @unit("dBm");
         double pathLossAlpha;
-        double sensitivity;
+        double sensitivity @unit(mW);
         @display("i=block/wrxtx");
     gates:
         input uppergateIn;   // from higher layer protocol (MAC)
