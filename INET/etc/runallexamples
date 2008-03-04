@@ -24,7 +24,7 @@ run examples/wireless/hosttohost/omnetpp.ini  Throughput1
 run examples/wireless/lan80211/omnetpp-ftp.ini  TwoHosts
 run examples/wireless/lan80211/omnetpp-ftp.ini  NHosts
 run examples/wireless/lan80211/omnetpp.ini  Ping1
-run examples/wireless/lan80211/omnetpp.ini  Ping2
+# skipping interactive config: run examples/wireless/lan80211/omnetpp.ini  Ping2
 run examples/wireless/lan80211/omnetpp-streaming.ini  Streaming1
 run examples/wireless/lan80211/omnetpp-streaming.ini  Streaming2
 run examples/inet/flatnet/omnetpp.ini General
@@ -55,7 +55,7 @@ run examples/ethernet/lans/largeNet.ini  LargeNet
 run examples/ethernet/lans/twoHosts.ini  TwoHosts1
 run examples/ethernet/arptest/omnetpp.ini  ARPTest
 run examples/adhoc/mf80211/omnetpp.ini  Ping1
-run examples/adhoc/mf80211/omnetpp.ini  Ping2
+# skipping interactive config: run examples/adhoc/mf80211/omnetpp.ini  Ping2
 run examples/adhoc/mobility/omnetpp.ini  LinearMobility
 run examples/adhoc/mobility/omnetpp.ini  MassMobility
 run examples/adhoc/mobility/omnetpp.ini  RandomWPMobility
@@ -71,7 +71,7 @@ run examples/adhoc/mobility/omnetpp.ini  ANSimMobility
 run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility1
 run examples/adhoc/mobility/omnetpp.ini  BonnMotionMobility2
 run examples/adhoc/ieee80211/omnetpp.ini  Ping1
-run examples/adhoc/ieee80211/omnetpp.ini  Ping2
+# skipping interactive config: run examples/adhoc/ieee80211/omnetpp.ini  Ping2
 run examples/mpls/testte_tunnel/omnetpp.ini General
 run examples/mpls/net37/omnetpp.ini General
 run examples/mpls/testte_routing/omnetpp.ini General

@@ -243,11 +243,15 @@ double TurtleMobility::getValue(const char *s)
         s = str.c_str();
     }
 
-    // then use cMsgPar to evaluate the string
-    cMsgPar tmp;
-    if (!tmp.parse(s))
-        error("wrong value '%s' around %s", s, nextStatement->getSourceLocation());
-    return tmp.doubleValue();
+    // then use cDynamicExpression to evaluate the string
+    try {
+        cDynamicExpression expr;
+        expr.parse(s);
+        return expr.doubleValue(this);
+    }
+    catch (std::exception& e) {
+        throw cRuntimeError(this, "wrong value '%s' around %s: %s", s, nextStatement->getSourceLocation(), e.what());
+    }
 }
 
 void TurtleMobility::gotoNextStatement()

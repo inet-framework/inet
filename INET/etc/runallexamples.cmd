@@ -9,7 +9,7 @@ call %~dp0\runexample1 examples\wireless\hosttohost  omnetpp.ini  Throughput1
 call %~dp0\runexample1 examples\wireless\lan80211  omnetpp-ftp.ini  TwoHosts
 call %~dp0\runexample1 examples\wireless\lan80211  omnetpp-ftp.ini  NHosts
 call %~dp0\runexample1 examples\wireless\lan80211  omnetpp.ini  Ping1
-call %~dp0\runexample1 examples\wireless\lan80211  omnetpp.ini  Ping2
+:: skipping interactive config: call %~dp0\runexample1 examples\wireless\lan80211  omnetpp.ini  Ping2
 call %~dp0\runexample1 examples\wireless\lan80211  omnetpp-streaming.ini  Streaming1
 call %~dp0\runexample1 examples\wireless\lan80211  omnetpp-streaming.ini  Streaming2
 call %~dp0\runexample1 examples\inet\flatnet  omnetpp.ini General
@@ -40,7 +40,7 @@ call %~dp0\runexample1 examples\ethernet\lans  largeNet.ini  LargeNet
 call %~dp0\runexample1 examples\ethernet\lans  twoHosts.ini  TwoHosts1
 call %~dp0\runexample1 examples\ethernet\arptest  omnetpp.ini  ARPTest
 call %~dp0\runexample1 examples\adhoc\mf80211  omnetpp.ini  Ping1
-call %~dp0\runexample1 examples\adhoc\mf80211  omnetpp.ini  Ping2
+:: skipping interactive config: call %~dp0\runexample1 examples\adhoc\mf80211  omnetpp.ini  Ping2
 call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  LinearMobility
 call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  MassMobility
 call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  RandomWPMobility
@@ -56,7 +56,7 @@ call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  ANSimMobility
 call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  BonnMotionMobility1
 call %~dp0\runexample1 examples\adhoc\mobility  omnetpp.ini  BonnMotionMobility2
 call %~dp0\runexample1 examples\adhoc\ieee80211  omnetpp.ini  Ping1
-call %~dp0\runexample1 examples\adhoc\ieee80211  omnetpp.ini  Ping2
+:: skipping interactive config: call %~dp0\runexample1 examples\adhoc\ieee80211  omnetpp.ini  Ping2
 call %~dp0\runexample1 examples\mpls\testte_tunnel  omnetpp.ini General
 call %~dp0\runexample1 examples\mpls\net37  omnetpp.ini General
 call %~dp0\runexample1 examples\mpls\testte_routing  omnetpp.ini General

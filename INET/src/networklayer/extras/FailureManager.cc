@@ -72,8 +72,12 @@ void FailureManager::processCommand(const cXMLElement& node)
 
 void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 {
+    ASSERT(mod);
+
     cModuleType *nodeType = findModuleType(newNodeType);
-    ASSERT(nodeType);
+    if (!nodeType)
+        error("Cannot replace module `%s' with a module of type `%s': No such module type", mod->fullPath().c_str(), newNodeType);
+
     cModule *nodeMod = nodeType->create(mod->name(), simulation.systemModule());
     ASSERT(nodeMod);
 
