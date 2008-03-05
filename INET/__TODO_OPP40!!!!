@@ -5,4 +5,3 @@ put all c++ code into "inet" namespace
 replace underscore with camelCase in parameter names! ("message_length" etc)
 UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
 networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
-ethernet switch examples (2 of them) don't work
