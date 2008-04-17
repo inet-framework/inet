@@ -23,7 +23,7 @@ void OSPF::LinkStateAcknowledgementHandler::ProcessPacket (OSPFPacket* packet, O
             OSPF::LSAKeyType lsaKey;
 
             EV << "    ";
-            PrintLSAHeader (lsaHeader);
+            PrintLSAHeader (lsaHeader, ev.ostream());
             EV << "\n";
 
             lsaKey.linkStateID = lsaHeader.getLinkStateID ();

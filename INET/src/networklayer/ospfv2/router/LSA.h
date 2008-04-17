@@ -252,31 +252,31 @@ inline unsigned int CalculateLSASize (const OSPFASExternalLSA* asExternalLSA)
             (asExternalLSA->getContents ().getExternalTOSInfoArraySize () * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
 }
 
-inline void PrintLSAHeader (const OSPFLSAHeader& lsaHeader, std::ostream* output = &ev) {
+inline void PrintLSAHeader (const OSPFLSAHeader& lsaHeader, std::ostream& output) {
     char addressString[16];
-    *output << "LSAHeader: age="
-            << lsaHeader.getLsAge ()
-            << ", type=";
+    output << "LSAHeader: age="
+           << lsaHeader.getLsAge ()
+           << ", type=";
     switch (lsaHeader.getLsType ()) {
-        case RouterLSAType:                     *output << "RouterLSA";                     break;
-        case NetworkLSAType:                    *output << "NetworkLSA";                    break;
-        case SummaryLSA_NetworksType:           *output << "SummaryLSA_Networks";           break;
-        case SummaryLSA_ASBoundaryRoutersType:  *output << "SummaryLSA_ASBoundaryRouters";  break;
-        case ASExternalLSAType:                 *output << "ASExternalLSA";                 break;
-        default:                                *output << "Unknown";                       break;
+        case RouterLSAType:                     output << "RouterLSA";                     break;
+        case NetworkLSAType:                    output << "NetworkLSA";                    break;
+        case SummaryLSA_NetworksType:           output << "SummaryLSA_Networks";           break;
+        case SummaryLSA_ASBoundaryRoutersType:  output << "SummaryLSA_ASBoundaryRouters";  break;
+        case ASExternalLSAType:                 output << "ASExternalLSA";                 break;
+        default:                                output << "Unknown";                       break;
     }
-    *output << ", LSID="
-            << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getLinkStateID ());
-    *output << ", advertisingRouter="
-            << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getAdvertisingRouter ().getInt ())
-            << ", seqNumber="
-            << lsaHeader.getLsSequenceNumber ();
-    *output << endl;
+    output << ", LSID="
+           << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getLinkStateID ());
+    output << ", advertisingRouter="
+           << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getAdvertisingRouter ().getInt ())
+           << ", seqNumber="
+           << lsaHeader.getLsSequenceNumber ();
+    output << endl;
 }
 
 inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
 {
-    PrintLSAHeader (lsa.getHeader (), &ostr);
+    PrintLSAHeader (lsa.getHeader (), ostr);
     return ostr;
 }
 

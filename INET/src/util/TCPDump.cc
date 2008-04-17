@@ -145,8 +145,8 @@ void TCPDumper::dump(const char *label, const char *msg)
 
 Define_Module(TCPDump);
 
-TCPDump::TCPDump(const char *name, cModule *parent) :
-  cSimpleModule(name, parent, 0), tcpdump(ev)
+TCPDump::TCPDump() :
+  tcpdump(ev.ostream())
 {
 }
 

@@ -68,10 +68,10 @@ class INET_API EtherBus : public cSimpleModule
 
 Define_Module(EtherBus);
 
-static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
+static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    ev.printf("(%s)%s",msg->className(),msg->fullName());
-    return ev;
+    out.printf("(%s)%s",msg->className(),msg->fullName());
+    return out;
 }
 
 EtherBus::EtherBus()

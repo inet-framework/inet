@@ -20,7 +20,7 @@
 #include <cassert>
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? std::cout : EV << "ChannelControl: "
+#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << "ChannelControl: "
 
 Define_Module(ChannelControl);
 

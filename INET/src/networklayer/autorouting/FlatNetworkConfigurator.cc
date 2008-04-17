@@ -66,7 +66,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
         types.push_back(nonIPTypes[i]);
 
     // extract topology
-    topo.extractByModuleType(types);
+    topo.extractByNedTypeName(types);
     EV << "cTopology found " << topo.nodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]

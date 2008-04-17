@@ -23,7 +23,7 @@
 #include "TransmComplete_m.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicSnrEval: "
+#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << logName() << "::BasicSnrEval: "
 
 Define_Module(BasicSnrEval);
 

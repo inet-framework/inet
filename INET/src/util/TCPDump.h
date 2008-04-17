@@ -52,7 +52,7 @@ class INET_API TCPDump : public cSimpleModule
   protected:
     TCPDumper tcpdump;
   public:
-    TCPDump(const char *name=NULL, cModule *parent=NULL); // TODO remove args for later omnetpp versions
+    TCPDump();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };

@@ -45,10 +45,10 @@ class INET_API EtherHub : public cSimpleModule
 
 Define_Module(EtherHub);
 
-static cEnvir& operator<< (cEnvir& ev, cMessage *msg)
+static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    ev.printf("(%s)%s",msg->className(),msg->fullName());
-    return ev;
+    out.printf("(%s)%s",msg->className(),msg->fullName());
+    return out;
 }
 
 void EtherHub::initialize()

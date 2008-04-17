@@ -175,7 +175,7 @@ bool OSPF::DatabaseDescriptionHandler::ProcessDDPacket (OSPFDatabaseDescriptionP
         LSAType        lsaType       = static_cast<LSAType> (currentHeader.getLsType ());
 
         EV << "    ";
-        PrintLSAHeader (currentHeader);
+        PrintLSAHeader (currentHeader, ev.ostream());
 
         if ((lsaType < RouterLSAType) || (lsaType > ASExternalLSAType) ||
             ((lsaType == ASExternalLSAType) && (!intf->GetArea ()->GetExternalRoutingCapability ())))

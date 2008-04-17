@@ -21,7 +21,7 @@
 #include "ChannelAccess.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? std::cout : EV << logName() << "::ChannelAccess: "
+#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
 
 /**
  * Upon initialization ChannelAccess registers the nic parent module

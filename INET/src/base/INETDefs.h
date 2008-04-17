@@ -48,7 +48,7 @@ typedef unsigned int uint32;
 // Macro to prevent executing ev<< statements in Express mode.
 // Compare ev/sec values with code compiled with #define EV ev.
 //
-#define EV ev.disabled()?std::cout:ev
+#define EV ev.disabled()?ev:ev
 
 
 //
