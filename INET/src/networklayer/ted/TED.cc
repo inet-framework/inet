@@ -102,7 +102,7 @@ void TED::initialize(int stage)
             entry.UnResvBandwidth[j] = entry.MaxBandwidth;
         entry.state = true;
 
-        // use g->delay()->doubleValue() for shortest delay calculation
+        // use g->channel()->par("delay").doubleValue() for shortest delay calculation
         entry.metric = rentry->interfacePtr->ipv4()->metric();
 
         EV << "metric set to=" << entry.metric << endl;

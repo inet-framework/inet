@@ -163,9 +163,9 @@ void SocketLayer::initialize()
   _from_udp       = gate("from_udp")->id();
   _to_udp         = gate("to_udp")->id();
   _from_appl      = gate("from_appl")->id();
-  _from_appl_size = gate(_from_appl)->size();
+  _from_appl_size = gateSize(_from_appl);
   _to_appl        = gate("to_appl")->id();
-  _to_appl_size   = gate(_to_appl)->size();
+  _to_appl_size   = gateSize(_to_appl);
 
   // find the routing table module
   _findRoutingTable();

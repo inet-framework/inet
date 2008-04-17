@@ -32,11 +32,13 @@ network NClientsEth
     parameters:
         int n;
     types:
-        channel fiberline extends BasicChannel {
+        channel fiberline extends BasicChannel
+        {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends BasicChannel {
+        channel ethernetline extends BasicChannel
+        {
             delay = 0.1us;
         }
     submodules:
