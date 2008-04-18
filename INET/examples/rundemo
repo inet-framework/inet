@@ -38,59 +38,54 @@ foreach line {
    {"About..."               "README"               "../doc/index.html"}
 
    {"INET"}
-   {"NClients/Telnet"        "inet/nclients"        "../inet"              "NClients"}
-   {"NClients/HTTP"          "INET/NClients" "./NClients -f basicHTTP.ini"    "NClients -f basicHTTP.ini"}
-   {"NClients/file transfer" "INET/NClients" "./NClients -f filetransfer.ini" "NClients -f filetransfer.ini"}
-   {"FlatNet"                "INET/FlatNet"         "./FlatNet"               "FlatNet"}
-   {"KIDSNw1"                "INET/KIDSNw1"         "./KIDSNw1"               "KIDSNw1"}
-   {"Multicast"              "INET/Multicast"       "./Multicast"             "Multicast"}
-   {"RouterPerf"             "INET/RouterPerf"      "./RouterPerf"            "RouterPerf"}
-   {"BulkTransfer"           "INET/BulkTransfer"    "./BulkTransfer"          "BulkTransfer"}
+   {"NClients/Telnet"        "inet/nclients"        "./run"               "run"}
+   {"NClients/HTTP"          "inet/nclients" "./run basicHTTP.ini"        "run basicHTTP.ini"}
+   {"NClients/file transfer" "inet/nclients" "./run filetransfer.ini"     "run filetransfer.ini"}
+   {"FlatNet"                "inet/flatnet"         "./run"               "run"}
+   {"KIDSNw1"                "inet/kidsnw1"         "./run"               "run"}
+   {"Multicast"              "inet/multicast"       "./run"               "run"}
+   {"RouterPerf"             "inet/routerperf"      "./run"               "run"}
+   {"BulkTransfer"           "inet/bulktransfer"    "./run"               "run"}
 
    {"Ad-hoc"}
-   {"Mobility models"        "Adhoc/Mobility"       "./Mobility"              "Mobility"}
-   {"802.11b ad-hoc"         "Adhoc/Ieee80211"      "./Ieee80211"             "Ieee80211"}
-   {"802.11b ad-hoc (MF impl.)" "Adhoc/MF80211"     "./MF80211"               "MF80211"}
+   {"Mobility models"        "adhoc/mobility"       "./run"               "run"}
+   {"802.11b ad-hoc"         "adhoc/ieee80211"      "./run"               "run"}
+   {"802.11b ad-hoc (MF impl.)" "adhoc/mf80211"     "./run"               "run"}
 
    {"Wireless"}
-   {"802.11 AP and hosts"   "Wireless/80211Lan"     "./80211Lan"              "80211Lan"}
-   {"802.11 handover"       "Wireless/Handover"     "./Handover"              "Handover"}
-   {"802.11 thruput test"   "Wireless/Throughput"   "./Throughput"            "Throughput"}
-   {"802.11 thruput test 2" "Wireless/HostToHost"   "./Throughput"            "Throughput"}
+   {"802.11 AP and hosts"   "wireless/80211lan"     "./run"               "run"}
+   {"802.11 handover"       "wireless/handover"     "./run"               "run"}
+   {"802.11 thruput test"   "wireless/throughput"   "./run"               "run"}
+   {"802.11 thruput test 2" "wireless/hosttohost"   "./run"               "run"}
 
    {"IPv6 (work in progress)"}
-   {"NClients"               "IPv6/NClients"        "./NClients"              "NClients"}
-   {"DemoNetworkEth"         "IPv6/DemoNetworkEth"  "./DemoNetworkEth"        "DemoNetworkEth"}
+   {"NClients"               "ipv6/nclients"        "./run"               "run"}
+   {"DemoNetworkEth"         "ipv6/demonetworketh"  "./run"               "run"}
 
    {"Ethernet"}
-   {"ARP Test"               "ethernet/arptest"     "./run"               "arptest"}
-   {"ARP Test 2"             "Ethernet/ARPTest2"    "./ARPTest"               "ARPTest"}
-   {"LANs: mixed Ethernet"   "Ethernet/LANs"        "./LANs -f mixed.ini"     "LANs -f mixed.ini"}
-   {"LANs: Ethernet bus"     "Ethernet/LANs"        "./LANs -f bus.ini"       "LANs -f bus.ini"}
-   {"LANs: hub"              "Ethernet/LANs"        "./LANs -f hub.ini"       "LANs -f hub.ini"}
-   {"LANs: switch"           "Ethernet/LANs"        "./LANs -f switch.ini"    "LANs -f switch.ini"}
-   {"LANs: duplexswitch"     "Ethernet/LANs"        "./LANs -f duplexswitch.ini" "LANs -f duplexswitch.ini"}
-   {"LANs: two hosts"        "Ethernet/LANs"        "./LANs -f twoHosts.ini"  "LANs -f twoHosts.ini"}
-   {"LANs: very large LAN"   "Ethernet/LANs"        "./LANs -f largeNet.ini"  "LANs -f largeNet.ini"}
+   {"ARP Test"               "ethernet/arptest"     "./run"               "run"}
+   {"ARP Test 2"             "ethernet/arptest2"    "./run"               "run"}
+   {"LANs: mixed Ethernet"   "ethernet/lans"        "./run mixed.ini"     "run mixed.ini"}
+   {"LANs: Ethernet bus"     "ethernet/lans"        "./run bus.ini"       "run bus.ini"}
+   {"LANs: hub"              "ethernet/lans"        "./run hub.ini"       "run hub.ini"}
+   {"LANs: switch"           "ethernet/lans"        "./run switch.ini"    "run switch.ini"}
+   {"LANs: duplexswitch"     "ethernet/lans"        "./run duplexswitch.ini" "run duplexswitch.ini"}
+   {"LANs: two hosts"        "ethernet/lans"        "./run twoHosts.ini"  "run twoHosts.ini"}
+   {"LANs: very large LAN"   "ethernet/lans"        "./run largeNet.ini"  "run largeNet.ini"}
 
    {"MPLS/RSVP-TE"}
-   {"TestTE/failure"         "MPLS/TestTE_Failure"  "./TestTE"                "TestTE"}
-   {"TestTE/reroute"         "MPLS/TestTE_Reroute"  "./TestTE"                "TestTE"}
-   {"TestTE/routing"         "MPLS/TestTE_Routing"  "./TestTE"                "TestTE"}
-   {"TestTE/tunnel "         "MPLS/TestTE_Tunnel"   "./TestTE"                "TestTE"}
-   {"LDP/test"               "MPLS/LDP"             "./TestLDP"               "TestLDP"}
-   {"Net37"                  "MPLS/Net37"           "./Net37"                 "Net37"}
-
-   {"Quagga Routing"}
-   {"Two OSPF Routers"       "Quagga/SimpleTest"    "./OSPF"                  "OSPF"}
-   {"4 Routers, RIP or OSPF" "Quagga/FourRouters"   "./FourRouters"           "FourRouters"}
-   {"OSPF Backbone"          "Quagga/OSPFBackbone"  "./OSPF"                  "OSPF"}
+   {"TestTE/failure"         "mpls/testte_failure"  "./run"                "run"}
+   {"TestTE/reroute"         "mpls/testte_reroute"  "./run"                "run"}
+   {"TestTE/routing"         "mpls/testte_routing"  "./run"                "run"}
+   {"TestTE/tunnel "         "mpls/testte_tunnel"   "./run"                "run"}
+   {"LDP/test"               "mpls/ldp"             "./run"                "run"}
+   {"Net37"                  "mpls/net37"           "./run"                "run"}
 
    {"OSPFv2"}
-   {"SimpleTest"             "OSPFv2/SimpleTest"    "./OSPF"                  "OSPF"}
-   {"Areas"                  "OSPFv2/Areas"         "./OSPF"                  "OSPF"}
-   {"Backbone"               "OSPFv2/Backbone"      "./OSPF"                  "OSPF"}
-   {"FullTest"               "OSPFv2/FullTest"      "./OSPF"                  "OSPF"}
+   {"SimpleTest"             "ospfv2/simpletest"    "./run"                "run"}
+   {"Areas"                  "ospfv2/areas"         "./run"                "run"}
+   {"Backbone"               "ospfv2/backbone"      "./run"                "run"}
+   {"FullTest"               "ospfv2/fulltest"      "./run"                "run"}
 } {
    lappend samples $i
    if {[llength $line]==0} {
