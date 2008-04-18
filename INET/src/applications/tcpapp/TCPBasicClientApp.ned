@@ -66,7 +66,7 @@ simple TCPBasicClientApp like TCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")
-        int port = default(1000); // port number to listen on
+        int port = default(-1); // port number to listen on
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         double startTime @unit("s") = default(1s); // time first session begins

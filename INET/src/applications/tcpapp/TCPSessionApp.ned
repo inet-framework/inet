@@ -60,10 +60,10 @@ simple TCPSessionApp like TCPApp
 {
     parameters:
         string address = default("");
-        int port;
+        int port;   // FIXME change to listenPort = default(1000)
         bool active = default(true);
         string connectAddress;
-        int connectPort;
+        int connectPort = default(1000);
         double tOpen @unit("s") = default(1s);
         double tSend @unit("s") = default(1s);
         int sendBytes @unit("B") = default(1MB);

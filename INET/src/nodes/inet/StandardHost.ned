@@ -47,8 +47,8 @@ module StandardHost
         string tcpAppType;
         string udpAppType;
         bool IPForward;
-        int namid;
-        string routingFile;
+        int namid = default(0);
+        string routingFile = default("");
         @display("i=device/pc2");
     gates:
         inout pppg[];

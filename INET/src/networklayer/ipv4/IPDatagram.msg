@@ -19,7 +19,9 @@
 
 
 class noncobject IPAddress;
+
 enum IPProtocolId;
+
 
 cplusplus {{
 #include "IPAddress.h"
@@ -35,7 +37,8 @@ const int IP_MAX_HEADER_BYTES = 60;
 const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;
 const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
-}};
+}}
+
 
 
 //
@@ -43,22 +46,24 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 //
 enum IPOption
 {
+
     IPOPTION_NO_OPTION = 0;
     IPOPTION_RECORD_ROUTE = 1;
     IPOPTION_TIMESTAMP = 2;
     IPOPTION_LOOSE_SOURCE_ROUTING = 3;
     IPOPTION_STRICT_SOURCE_ROUTING = 4;
-};
+}
 
 //
 // The timestamp flag uses the same numeric values as the IP Protocol
 //
 enum TimestampFlag
 {
+
     IP_TIMESTAMP_TIMESTAMP_ONLY = 0;
     IP_TIMESTAMP_WITH_ADDRESS = 1;
     IP_TIMESTAMP_SENDER_INIT_ADDRESS = 3;
-};
+}
 
 
 //
@@ -66,37 +71,34 @@ enum TimestampFlag
 //
 class IPRecordRouteOption
 {
-    fields:
-        IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
-        short nextAddressPtr;
-};
+    IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
+    short nextAddressPtr;
+}
 
 //
 // Option structure: Timestamp
 //
 class IPTimestampOption
 {
-    fields:
-        int flag enum(TimestampFlag);
-        short overflow;
-        short nextAddressPtr;
+    int flag enum(TimestampFlag);
+    short overflow;
+    short nextAddressPtr;
 
-        // use either up to 4 addresses with timestamps or
-        // only up to 9 timestamps, according to the flag
-        IPAddress recordAddress[MAX_TIMESTAMP_OPTION_ENTRIES];
-        simtime_t recordTimestamp[MAX_IPADDR_OPTION_ENTRIES];
-};
+    // use either up to 4 addresses with timestamps or
+    // only up to 9 timestamps, according to the flag
+    IPAddress recordAddress[MAX_TIMESTAMP_OPTION_ENTRIES];
+    simtime_t recordTimestamp[MAX_IPADDR_OPTION_ENTRIES];
+}
 
 //
 // Option Structure: Source Routing
 //
 class IPSourceRoutingOption
 {
-    fields:
-        IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
-        short nextAddressPtr;
-        short lastAddressPtr;
-};
+    IPAddress recordAddress[MAX_IPADDR_OPTION_ENTRIES];
+    short nextAddressPtr;
+    short lastAddressPtr;
+}
 
 
 //
@@ -114,28 +116,26 @@ class IPSourceRoutingOption
 //
 message IPDatagram
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        short version = 4;
-        short headerLength = IP_HEADER_BYTES;
+    @omitGetVerb(true);
+    short version = 4;
+    short headerLength = IP_HEADER_BYTES;
 
-        IPAddress srcAddress;
-        IPAddress destAddress;
+    IPAddress srcAddress;
+    IPAddress destAddress;
 
-        int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
-        short timeToLive;
-        int identification;
-        bool moreFragments;
-        bool dontFragment;
-        int fragmentOffset;
-        unsigned char diffServCodePoint;
+    int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
+    short timeToLive;
+    int identification;
+    bool moreFragments;
+    bool dontFragment;
+    int fragmentOffset;
+    unsigned char diffServCodePoint;
 
-        int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
-        IPRecordRouteOption recordRoute;
-        IPTimestampOption timestampOption;
-        IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
-};
+    int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
+    IPRecordRouteOption recordRoute;
+    IPTimestampOption timestampOption;
+    IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
+}
 
 //
 // Some old code regarding options and header length
@@ -151,18 +151,3 @@ message IPDatagram
 //    conversion needs to be done by calling function */
 //void *optionField();
 
-// existing option is overwritten when setXXXOption is called
-//void setRecordRoute (const RecordRouteOptionField&);
-//void setTimestampOption (const TimestampOptionField&);
-//void setSourceRoutingOption(bool looseSourceRouting, const SourceRoutingOptionField&);
-//
-// private function
-//void IPDatagram::setOptionHeaderLength()
-//{
-//
-//      // HeaderLength is set automatically to maximum with option
-//      setLength(length() - headerLength()*8);
-//      header_length = IP_MAX_HEADER_BYTES;
-//      setLength(length() + headerLength()*8);
-//}
-//

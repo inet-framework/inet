@@ -28,7 +28,7 @@ simple TCPSinkApp like TCPApp
 {
     parameters:
         string address = default(""); // may be left empty ("")
-        int port; // port number to listen on
+        int port = default(1000); // port number to listen on
     gates:
         input tcpIn;
         output tcpOut;

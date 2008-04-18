@@ -18,26 +18,25 @@
 
 class noncobject IPAddress;
 
-
 cplusplus {{
 #include "IPAddress.h"
 }}
 
+
 enum ManetControlType
 {
+
     MANET_ROUTE_NO_OPTION = 0;
     MANET_ROUTE_UPDATE = 1;
     MANET_ROUTE_NOROUTE = 2;
-};
+}
 
 //
 // ICMP message class
 //
 message ControlManetRouting
 {
-
-    fields:
-        IPAddress srcAddress;
-        IPAddress destAddress;
-        int optionCode enum(ManetControlType) = MANET_ROUTE_NO_OPTION;  
-};
+    IPAddress srcAddress;
+    IPAddress destAddress;
+    int optionCode enum(ManetControlType) = MANET_ROUTE_NO_OPTION;
+}

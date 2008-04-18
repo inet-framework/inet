@@ -23,12 +23,14 @@ cplusplus {{
 }}
 
 
+
 //
 // Not the real ICMP codes; here it's set up so that codes above 128 are
 // informational
 //
 enum ICMPType
 {
+
     ICMP_DESTINATION_UNREACHABLE = 13;
     ICMP_REDIRECT = 5;
     ICMP_TIME_EXCEEDED = 11;
@@ -38,7 +40,7 @@ enum ICMPType
     ICMP_ECHO_REPLY = 129;
     ICMP_TIMESTAMP_REQUEST = 130;
     ICMP_TIMESTAMP_REPLY = 131;
-};
+}
 
 cplusplus {{
 typedef int ICMPCode;
@@ -70,13 +72,13 @@ enum ICMPDestinationUnreachableCodes
 }}
 
 
+
 //
 // ICMP message class
 //
 message ICMPMessage
 {
-  fields:
     int type enum(ICMPType);
     int code;
-};
+}
 
