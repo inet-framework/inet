@@ -18,6 +18,7 @@
 
 
 class noncobject IPAddress;
+
 class noncobject MACAddress;
 
 cplusplus {{
@@ -26,7 +27,8 @@ cplusplus {{
 
 // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
 #define ARP_HEADER_BYTES   28
-}};
+}}
+
 
 
 //
@@ -34,11 +36,12 @@ cplusplus {{
 //
 enum ARPOpcode
 {
+
     ARP_REQUEST = 1;      // Request. RFC 826
     ARP_REPLY = 2;        // Reply. RFC 826, RFC 1868
     ARP_RARP_REQUEST = 3; // Request Reverse. RFC 903
     ARP_RARP_REPLY = 4;   // Reply Reverse. RFC 903
-};
+}
 
 
 //
@@ -53,12 +56,11 @@ enum ARPOpcode
 //
 message ARPPacket
 {
-    fields:
-        int opcode enum(ARPOpcode);
-        MACAddress srcMACAddress;
-        MACAddress destMACAddress;
-        IPAddress srcIPAddress;
-        IPAddress destIPAddress;
-};
+    int opcode enum(ARPOpcode);
+    MACAddress srcMACAddress;
+    MACAddress destMACAddress;
+    IPAddress srcIPAddress;
+    IPAddress destIPAddress;
+}
 
 

@@ -17,77 +17,80 @@
 
 cplusplus {{
 #include "IPAddress.h"
-}};
+}}
+
 
 class noncobject IPAddress;
 
-enum OSPFPacketType {
-    HelloPacket                    = 1;
-    DatabaseDescriptionPacket      = 2;
-    LinkStateRequestPacket         = 3;
-    LinkStateUpdatePacket          = 4;
+enum OSPFPacketType
+{
+
+    HelloPacket = 1;
+    DatabaseDescriptionPacket = 2;
+    LinkStateRequestPacket = 3;
+    LinkStateUpdatePacket = 4;
     LinkStateAcknowledgementPacket = 5;
-};
+}
 
 // should be a byte long bitfield
-struct OSPFOptions {
-    fields:
-        bool unused_1;
-        bool E_ExternalRoutingCapability;
-        bool MC_MulticastForwarding;
-        bool NP_Type7LSA;
-        bool EA_ForwardExternalLSAs;
-        bool DC_DemandCircuits;
-        bool unused_2;
-        bool unused_3;
-};
+struct OSPFOptions
+{
+    bool unused_1;
+    bool E_ExternalRoutingCapability;
+    bool MC_MulticastForwarding;
+    bool NP_Type7LSA;
+    bool EA_ForwardExternalLSAs;
+    bool DC_DemandCircuits;
+    bool unused_2;
+    bool unused_3;
+}
 
 //
 // Represents an OSPF packet header
 //
 message OSPFPacket
 {
-    fields:
-        char   version = 2;
-        char   type enum(OSPFPacketType) = HelloPacket;
-        short  packetLength = 0; 
+    char version = 2;
+    char type enum(OSPFPacketType) = HelloPacket;
+    short packetLength = 0;
 
-        IPAddress routerID;
-        IPAddress areaID;
+    IPAddress routerID;
+    IPAddress areaID;
 
-        short  checksum = 0;
-        short  authenticationType = 0;
-        char   authentication[8];
-};
+    short checksum = 0;
+    short authenticationType = 0;
+    char authentication[8];
+}
 
 //
 // Represents an OSPF Hello packet
 //
 message OSPFHelloPacket extends OSPFPacket
 {
-    fields:
-        IPAddress networkMask;
+    IPAddress networkMask;
 
-        short  helloInterval = 5;
+    short helloInterval = 5;
 
-        OSPFOptions options;
+    OSPFOptions options;
 
-        char   routerPriority = 0;
-        long   routerDeadInterval = 0;
+    char routerPriority = 0;
+    long routerDeadInterval = 0;
 
-        IPAddress designatedRouter;
-        IPAddress backupDesignatedRouter;
-        IPAddress neighbor[];
-};
+    IPAddress designatedRouter;
+    IPAddress backupDesignatedRouter;
+    IPAddress neighbor[];
+}
 
 
-enum LSAType {
-    RouterLSAType                    = 1;
-    NetworkLSAType                   = 2;
-    SummaryLSA_NetworksType          = 3;
+enum LSAType
+{
+
+    RouterLSAType = 1;
+    NetworkLSAType = 2;
+    SummaryLSA_NetworksType = 3;
     SummaryLSA_ASBoundaryRoutersType = 4;
-    ASExternalLSAType                = 5;
-};
+    ASExternalLSAType = 5;
+}
 
 //
 // Represents an OSPF LSA header
@@ -95,15 +98,14 @@ enum LSAType {
 //class OSPFLSAHeader extends cObject
 class OSPFLSAHeader
 {
-    fields:
-        unsigned short  lsAge = 0;
-        OSPFOptions     lsOptions;
-        char            lsType enum (LSAType) = RouterLSAType;
-        unsigned long   linkStateID;
-        IPAddress       advertisingRouter;
-        long            lsSequenceNumber = 0;
-        short           lsChecksum = 0;
-        unsigned short  length = 0;
+    unsigned short lsAge = 0;
+    OSPFOptions lsOptions;
+    char lsType enum(LSAType) = RouterLSAType;
+    unsigned long linkStateID;
+    IPAddress advertisingRouter;
+    long lsSequenceNumber = 0;
+    short lsChecksum = 0;
+    unsigned short length = 0;
 }
 
 //
@@ -112,46 +114,45 @@ class OSPFLSAHeader
 //class OSPFLSA extends cObject
 class OSPFLSA
 {
-    fields:
-        OSPFLSAHeader   header;
+    OSPFLSAHeader header;
 }
 
-enum LinkType {
-    PointToPointLink = 1;
-    TransitLink      = 2;
-    StubLink         = 3;
-    VirtualLink      = 4;
-};
+enum LinkType
+{
 
-struct TOSData {
-    fields:
-        unsigned char   tos;
-        unsigned char   tosMetric[3];
-};
+    PointToPointLink = 1;
+    TransitLink = 2;
+    StubLink = 3;
+    VirtualLink = 4;
+}
+
+struct TOSData
+{
+    unsigned char tos;
+    unsigned char tosMetric[3];
+}
 
 //class Link extends cObject
 class Link
 {
-    fields:
-        IPAddress      linkID;
-        unsigned long  linkData = 0;
-        unsigned char  type enum (LinkType) = PointToPointLink;
-        unsigned char  numberOfTOS = 0;
-        unsigned long  linkCost = 1;
-        TOSData        tosData[];
-};
+    IPAddress linkID;
+    unsigned long linkData = 0;
+    unsigned char type enum(LinkType) = PointToPointLink;
+    unsigned char numberOfTOS = 0;
+    unsigned long linkCost = 1;
+    TOSData tosData[];
+}
 
 //
 // Represents an OSPF Router LSA
 //
 class OSPFRouterLSA extends OSPFLSA
 {
-    fields:
-        bool            V_VirtualLinkEndpoint = false;
-        bool            E_ASBoundaryRouter = false;
-        bool            B_AreaBorderRouter = false;
-        unsigned short  numberOfLinks = 0;
-        Link            links[];
+    bool V_VirtualLinkEndpoint = false;
+    bool E_ASBoundaryRouter = false;
+    bool B_AreaBorderRouter = false;
+    unsigned short numberOfLinks = 0;
+    Link links[];
 }
 
 //
@@ -159,9 +160,8 @@ class OSPFRouterLSA extends OSPFLSA
 //
 class OSPFNetworkLSA extends OSPFLSA
 {
-    fields:
-        IPAddress       networkMask;
-        IPAddress       attachedRouters[];
+    IPAddress networkMask;
+    IPAddress attachedRouters[];
 }
 
 //
@@ -169,32 +169,30 @@ class OSPFNetworkLSA extends OSPFLSA
 //
 class OSPFSummaryLSA extends OSPFLSA
 {
-    fields:
-        IPAddress     networkMask;
-        unsigned long routeCost = 1;
-        TOSData       tosData[];
+    IPAddress networkMask;
+    unsigned long routeCost = 1;
+    TOSData tosData[];
 }
 
-struct  ExternalTOSInfo {
-    fields:
-        TOSData   tosData;
-        bool      E_ExternalMetricType;
-        IPAddress forwardingAddress;
-        long      externalRouteTag;
-};
+struct ExternalTOSInfo
+{
+    TOSData tosData;
+    bool E_ExternalMetricType;
+    IPAddress forwardingAddress;
+    long externalRouteTag;
+}
 
 //
 // Represents the contents of an OSPF AS External LSA
 //
 class OSPFASExternalLSAContents
 {
-    fields:
-        IPAddress       networkMask;
-        bool            E_ExternalMetricType = false;
-        unsigned long   routeCost = 1;
-        IPAddress       forwardingAddress;
-        long            externalRouteTag = 0;
-        ExternalTOSInfo externalTOSInfo[];
+    IPAddress networkMask;
+    bool E_ExternalMetricType = false;
+    unsigned long routeCost = 1;
+    IPAddress forwardingAddress;
+    long externalRouteTag = 0;
+    ExternalTOSInfo externalTOSInfo[];
 }
 
 //
@@ -202,43 +200,40 @@ class OSPFASExternalLSAContents
 //
 class OSPFASExternalLSA extends OSPFLSA
 {
-    fields:
-        OSPFASExternalLSAContents contents;
+    OSPFASExternalLSAContents contents;
 }
 
 
 // should be a byte long bitfield
-struct OSPFDDOptions {
-    fields:
-        bool unused_1;
-        bool unused_2;
-        bool unused_3;
-        bool unused_4;
-        bool unused_5;
-        bool I_Init;
-        bool M_More;
-        bool MS_MasterSlave;
-};
+struct OSPFDDOptions
+{
+    bool unused_1;
+    bool unused_2;
+    bool unused_3;
+    bool unused_4;
+    bool unused_5;
+    bool I_Init;
+    bool M_More;
+    bool MS_MasterSlave;
+}
 
 //
 // Represents an OSPF Database Description packet
 //
 message OSPFDatabaseDescriptionPacket extends OSPFPacket
 {
-    fields:
-        unsigned short  interfaceMTU;
-        OSPFOptions     options;
-        OSPFDDOptions   ddOptions;
-        unsigned long   ddSequenceNumber;
-        OSPFLSAHeader   lsaHeaders[];
+    unsigned short interfaceMTU;
+    OSPFOptions options;
+    OSPFDDOptions ddOptions;
+    unsigned long ddSequenceNumber;
+    OSPFLSAHeader lsaHeaders[];
 }
 
 struct LSARequest
 {
-    fields:
-        unsigned long   lsType;
-        unsigned long   linkStateID;
-        IPAddress       advertisingRouter;
+    unsigned long lsType;
+    unsigned long linkStateID;
+    IPAddress advertisingRouter;
 }
 
 //
@@ -246,8 +241,7 @@ struct LSARequest
 //
 message OSPFLinkStateRequestPacket extends OSPFPacket
 {
-    fields:
-        LSARequest    requests[];
+    LSARequest requests[];
 }
 
 //
@@ -255,12 +249,11 @@ message OSPFLinkStateRequestPacket extends OSPFPacket
 //
 message OSPFLinkStateUpdatePacket extends OSPFPacket
 {
-    fields:
-        unsigned long     numberOfLSAs;
-        OSPFRouterLSA     routerLSAs[];
-        OSPFNetworkLSA    networkLSAs[];
-        OSPFSummaryLSA    summaryLSAs[];
-        OSPFASExternalLSA asExternalLSAs[];
+    unsigned long numberOfLSAs;
+    OSPFRouterLSA routerLSAs[];
+    OSPFNetworkLSA networkLSAs[];
+    OSPFSummaryLSA summaryLSAs[];
+    OSPFASExternalLSA asExternalLSAs[];
 }
 
 //
@@ -268,6 +261,5 @@ message OSPFLinkStateUpdatePacket extends OSPFPacket
 //
 message OSPFLinkStateAcknowledgementPacket extends OSPFPacket
 {
-    fields:
-        OSPFLSAHeader   lsaHeaders[];
+    OSPFLSAHeader lsaHeaders[];
 }

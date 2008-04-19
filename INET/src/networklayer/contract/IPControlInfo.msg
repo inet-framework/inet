@@ -19,12 +19,14 @@
 
 
 enum IPProtocolId;
+
 class noncobject IPAddress;
 
 cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
 }}
+
 
 
 //
@@ -53,19 +55,17 @@ cplusplus {{
 //
 class IPControlInfo
 {
-    properties:
-        omitGetVerb = true;
-        customize = true;
-    fields:
-        IPAddress destAddr;   // destination IP address
-        IPAddress srcAddr;    // source IP address
-        int interfaceId = -1; // interface on which dgram was received/should
+    @omitGetVerb(true);
+    @customize(true);
+    IPAddress destAddr;   // destination IP address
+    IPAddress srcAddr;    // source IP address
+    int interfaceId = -1; // interface on which dgram was received/should
                               // be sent (see InterfaceTable)
-        short protocol enum(IPProtocolId);  // encapsulated protocol
-        unsigned char diffServCodePoint;  // for QoS
-        short timeToLive;     // maximum hop count
-        bool dontFragment;    // "don't fragment" bit
-};
+    short protocol enum(IPProtocolId);  // encapsulated protocol
+    unsigned char diffServCodePoint;  // for QoS
+    short timeToLive;     // maximum hop count
+    bool dontFragment;    // "don't fragment" bit
+}
 
 
 //
@@ -77,11 +77,9 @@ class IPControlInfo
 //
 class IPRoutingDecision
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int interfaceId = -1; // interface on which dgram should be sent (see InterfaceTable)
-        IPAddress nextHopAddr;
-};
+    @omitGetVerb(true);
+    int interfaceId = -1; // interface on which dgram should be sent (see InterfaceTable)
+    IPAddress nextHopAddr;
+}
 
 

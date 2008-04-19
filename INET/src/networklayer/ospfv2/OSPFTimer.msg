@@ -15,24 +15,25 @@
 //
 
 
-enum OSPFTimerType {
-    InterfaceHelloTimer                = 0;
-    InterfaceWaitTimer                 = 1;
-    InterfaceAcknowledgementTimer      = 3;
-    NeighborInactivityTimer            = 4;
-    NeighborPollTimer                  = 5;
-    NeighborDDRetransmissionTimer      = 6;
-    NeighborUpdateRetransmissionTimer  = 7;
+enum OSPFTimerType
+{
+
+    InterfaceHelloTimer = 0;
+    InterfaceWaitTimer = 1;
+    InterfaceAcknowledgementTimer = 3;
+    NeighborInactivityTimer = 4;
+    NeighborPollTimer = 5;
+    NeighborDDRetransmissionTimer = 6;
+    NeighborUpdateRetransmissionTimer = 7;
     NeighborRequestRetransmissionTimer = 8;
-    DatabaseAgeTimer                   = 9;
-};
+    DatabaseAgeTimer = 9;
+}
 
 //
 // Represents an OSPF Timer
 //
 message OSPFTimer extends cMessage
 {
-    fields:
-        char   timerKind enum(OSPFTimerType) = InterfaceHelloTimer;
-};
+    char timerKind enum(OSPFTimerType) = InterfaceHelloTimer;
+}
 

@@ -17,8 +17,10 @@ cplusplus {{
 #include "TED_m.h"
 }}
 
+
 // Represents a link in the TED and in LinkStateMsg packets; from TED.msg.
 struct TELinkStateInfo;
+
 
 
 //
@@ -28,11 +30,10 @@ struct TELinkStateInfo;
 //
 message LinkStateMsg
 {
-    fields:
-        TELinkStateInfo linkInfo[];
+    TELinkStateInfo linkInfo[];
 
-        bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
+    bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
         // bool ack = false; -- apparently unused, removed -- TODO check with Vojta
 
-        int command = LINK_STATE_MESSAGE; // FIXME maybe do without this...
-};
+    int command = LINK_STATE_MESSAGE; // FIXME maybe do without this...
+}

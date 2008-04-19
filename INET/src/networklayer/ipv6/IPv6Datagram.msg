@@ -27,10 +27,12 @@ typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 }}
 
-enum IPProtocolId;
-class noncobject IPv6Address;
-class noncobject IPv6ExtensionHeaderPtr;
 
+enum IPProtocolId;
+
+class noncobject IPv6Address;
+
+class noncobject IPv6ExtensionHeaderPtr;
 
 //
 // IPv6 datagram. RFC 2460 Section 3.
@@ -42,20 +44,18 @@ class noncobject IPv6ExtensionHeaderPtr;
 //
 message IPv6Datagram
 {
-    properties:
-        customize=true;
-        omitGetVerb = true;
+    @customize(true);
+    @omitGetVerb(true);
 
-    fields:
-        IPv6Address srcAddress;
-        IPv6Address destAddress;
-        unsigned int trafficClass;
-        unsigned int flowLabel;
-        short hopLimit = 0;
-        int transportProtocol enum (IPProtocolId);
+    IPv6Address srcAddress;
+    IPv6Address destAddress;
+    unsigned int trafficClass;
+    unsigned int flowLabel;
+    short hopLimit = 0;
+    int transportProtocol enum(IPProtocolId);
 
-        IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
-};
+    IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from IPv6ExtensionHeader
+}
 
 
 //
@@ -63,9 +63,7 @@ message IPv6Datagram
 //
 class IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-        customize = true;
-    fields:
-};
+    @omitGetVerb(true);
+    @customize(true);
+}
 

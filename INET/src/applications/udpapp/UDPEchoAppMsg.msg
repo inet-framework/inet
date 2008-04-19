@@ -22,9 +22,7 @@
 //
 message UDPEchoAppMsg
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        bool isRequest = true;
-};
+    @omitGetVerb(true);
+    bool isRequest = true;
+}
 

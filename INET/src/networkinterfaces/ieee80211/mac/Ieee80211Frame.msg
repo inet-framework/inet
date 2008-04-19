@@ -19,13 +19,12 @@
 //
 // Required for MACAddress declarations
 //
-cplusplus
-{{
+cplusplus {{
 //FIXME use consts for frame lengths!!! account for LLC(3)+SNAP(5) headers in data frames!!! +add SNAP orgcode, localcode into the msg?
 #include "MACAddress.h"
-}};
-class noncobject MACAddress;
+}}
 
+class noncobject MACAddress;
 
 //
 // 802.11 frame type constants (type+subtype), for the "type" field of
@@ -33,28 +32,29 @@ class noncobject MACAddress;
 //
 enum Ieee80211FrameType
 {
-      // management:
-      ST_ASSOCIATIONREQUEST    = 0x00;
-      ST_ASSOCIATIONRESPONSE   = 0x01;
-      ST_REASSOCIATIONREQUEST  = 0x02;
-      ST_REASSOCIATIONRESPONSE = 0x03;
-      ST_PROBEREQUEST          = 0x04;
-      ST_PROBERESPONSE         = 0x05;
-      ST_BEACON                = 0x08;
-      ST_ATIM                  = 0x09;
-      ST_DISASSOCIATION        = 0x0a;
-      ST_AUTHENTICATION        = 0x0b;
-      ST_DEAUTHENTICATION      = 0x0c;
 
-      // control (CFEND/CFEND_CFACK omitted):
-      ST_PSPOLL = 0x1a;
-      ST_RTS    = 0x1b;
-      ST_CTS    = 0x1c;
-      ST_ACK    = 0x1d;
+    // management:
+    ST_ASSOCIATIONREQUEST = 0x00;
+    ST_ASSOCIATIONRESPONSE = 0x01;
+    ST_REASSOCIATIONREQUEST = 0x02;
+    ST_REASSOCIATIONRESPONSE = 0x03;
+    ST_PROBEREQUEST = 0x04;
+    ST_PROBERESPONSE = 0x05;
+    ST_BEACON = 0x08;
+    ST_ATIM = 0x09;
+    ST_DISASSOCIATION = 0x0a;
+    ST_AUTHENTICATION = 0x0b;
+    ST_DEAUTHENTICATION = 0x0c;
 
-      // data (CFPOLL/CFACK subtypes omitted):
-      ST_DATA   = 0x20;
-};
+    // control (CFEND/CFEND_CFACK omitted):
+    ST_PSPOLL = 0x1a;
+    ST_RTS = 0x1b;
+    ST_CTS = 0x1c;
+    ST_ACK = 0x1d;
+
+    // data (CFPOLL/CFACK subtypes omitted):
+    ST_DATA = 0x20;
+}
 
 //
 // The common part of 802.11 frames. 
@@ -66,89 +66,82 @@ enum Ieee80211FrameType
 //
 message Ieee80211Frame
 {
-    fields:
-        byteLength = 14;
-        short type enum(Ieee80211FrameType); // type and subtype
-        bool toDS;
-        bool fromDS;
-        bool retry;
-        bool moreFragments;
-        simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
-        short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
-        MACAddress receiverAddress; // aka address1
-};
+    byteLength = 14;
+    short type enum(Ieee80211FrameType); // type and subtype
+    bool toDS;
+    bool fromDS;
+    bool retry;
+    bool moreFragments;
+    simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
+    short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
+    MACAddress receiverAddress; // aka address1
+}
 
 //
 // Format of a 802.11 frame with address1 present, like ACK and CTS
 //
 message Ieee80211OneAddressFrame extends Ieee80211Frame
 {
-};
+}
 
 //
 // Format of the 802.11 ACK frame
 //
 message Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 {
-    fields:
-       type = ST_ACK;
-};
+    type = ST_ACK;
+}
 
 //
 // Format of a 802.11 frame with address1 and address2 present
 //
 message Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 {
-    fields:
-        byteLength = 20;
-        MACAddress transmitterAddress; // aka address2
-};
+    byteLength = 20;
+    MACAddress transmitterAddress; // aka address2
+}
 
 //
 // Format of the 802.11 RTS frame
 //
 message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
-    fields:
-       type = ST_RTS;
-};
+    type = ST_RTS;
+}
 
 //
 // Format of the 802.11 CTS frame
 //
 message Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 {
-    fields:
-       type = ST_CTS;
-};
+    type = ST_CTS;
+}
 
 //
 // Common base class for 802.11 data and management frames
 //
 message Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 {
-    fields:
-        byteLength = 28;
-        MACAddress address3;
-        short fragmentNumber;
-        short sequenceNumber;
-};
+    byteLength = 28;
+    MACAddress address3;
+    short fragmentNumber;
+    short sequenceNumber;
+}
 
 //
 // Format of the 802.11 data frame
 //
 message Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 {
-    fields:
-        type = ST_DATA;
-        byteLength = 34;
-        MACAddress address4;
-};
+    type = ST_DATA;
+    byteLength = 34;
+    MACAddress address4;
+}
 
 //
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
 message Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
 {
-};
+}
 

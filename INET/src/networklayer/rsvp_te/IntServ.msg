@@ -25,8 +25,11 @@ typedef std::vector<struct EroObj_t> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
+
 class noncobject IPAddress;
+
 class noncobject IPAddressVector;
+
 class noncobject EroVector;
 
 //
@@ -34,33 +37,30 @@ class noncobject EroVector;
 //
 struct SessionObj_t
 {
-  fields:
     int Tunnel_Id;
     int Extended_Tunnel_Id;
     IPAddress DestAddress;
     int setupPri;
     int holdingPri;
-};
+}
 
 //
 // Intserv/RSVP: RSVP HOP Structure
 //
 struct RsvpHopObj_t
 {
-  fields:
     IPAddress Next_Hop_Address;
     IPAddress Logical_Interface_Handle;
-};
+}
 
 //
 // Intserv/RSVP: Sender Template Structure
 //
 struct SenderTemplateObj_t
 {
-  fields:
     IPAddress SrcAddress;
     int Lsp_Id = -1;
-};
+}
 
 
 //
@@ -68,58 +68,57 @@ struct SenderTemplateObj_t
 //
 struct SenderTspecObj_t
 {
-  fields:
     double req_bandwidth = 0;
-};
+}
 
 //
 // Intserv/RSVP: Sender Tspec Structure
 //
-struct FlowSpecObj_t extends SenderTspecObj_t  {fields:}
+struct FlowSpecObj_t extends SenderTspecObj_t
+{
+}
 
 //
 // Intserv/RSVP: Sender Template Structure
 //
-struct FilterSpecObj_t extends SenderTemplateObj_t {fields:}
+struct FilterSpecObj_t extends SenderTemplateObj_t
+{
+}
 
 //
 // Intserv/RSVP: Label Request Object Structure
 //
 struct LabelRequestObj_t
 {
-  fields:
     // request;
     int prot;
-};
+}
 
 //
 // Intserv/RSVP: Sender Descriptor Structure
 //
 struct SenderDescriptor_t
 {
-  fields:
     SenderTemplateObj_t Sender_Template_Object;
     SenderTspecObj_t Sender_Tspec_Object;
-};
+}
 
 //
 // Intserv/RSVP: Explicit Routing Object Structure
 //
 struct EroObj_t
 {
-  fields:
     bool L = false;
     IPAddress node;
-};
+}
 
 //
 // Intserv/RSVP: Flow Descriptor Structure
 //
 struct FlowDescriptor_t
 {
-  fields:
     FlowSpecObj_t Flowspec_Object;
     FilterSpecObj_t Filter_Spec_Object;
     IPAddressVector RRO;
     int label;
-};
+}

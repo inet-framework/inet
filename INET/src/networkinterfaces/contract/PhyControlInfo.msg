@@ -21,6 +21,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+
 //
 // Command codes for controlling the physical layer (the radio). These constants
 // should be set as message kind on a message sent to the radio module.
@@ -29,19 +30,18 @@ cplusplus {{
 //
 enum PhyCommandCode
 {
+
     PHY_C_CONFIGURERADIO = 1;
-};
+}
 
 //
 // Control info for controlling the physical layer (the radio).
 //
 class PhyControlInfo
 {
-    properties:
-        omitGetVerb=true;
-    fields:
-        int channelNumber = -1; // with PHY_C_CONFIGURERADIO: the channel to switch to
-        double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
-};
+    @omitGetVerb(true);
+    int channelNumber = -1; // with PHY_C_CONFIGURERADIO: the channel to switch to
+    double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
+}
 
 

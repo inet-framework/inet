@@ -22,6 +22,7 @@ cplusplus {{
 #include "SnrList.h"
 }}
 
+
 class noncobject SnrList;
 
 //
@@ -75,6 +76,5 @@ class noncobject SnrList;
 //
 class SnrControlInfo
 {
-    fields:
-        SnrList snrList;
-};
+    SnrList snrList;
+}

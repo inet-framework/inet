@@ -14,15 +14,14 @@
 
 cplusplus {{
 #include "INETDefs.h"
-}};
+}}
+
 
 //
 // Message that carries raw bytes. Used with emulation-related features.
 //
 message ByteArrayMessage
 {
-    properties:
-        customize = true;
-    fields:
-        char data[];
-};
+    @customize(true);
+    char data[];
+}

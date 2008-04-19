@@ -19,7 +19,8 @@
 
 cplusplus {{
 #include "MACAddress.h"
-}};
+}}
+
 
 class noncobject MACAddress;
 
@@ -39,8 +40,7 @@ class noncobject MACAddress;
 //
 message MacPkt
 {
-    fields:
-        MACAddress destAddr; // destination mac address
-        MACAddress srcAddr; // source mac address
-        int channelId=1; // channel to send / receive on
+    MACAddress destAddr; // destination mac address
+    MACAddress srcAddr; // source mac address
+    int channelId = 1; // channel to send / receive on
 }

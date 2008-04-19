@@ -26,13 +26,17 @@ cplusplus {{
 #define JAM_SIGNAL 2000   // jam signal on shared medium
 #define ETH_FRAME  2001   // Ethernet frame
 #define ETH_PAUSE  2002   // Ethernet PAUSE frame
-}};
+}}
+
 
 class noncobject MACAddress;
+
 class noncobject MessageId;
 
 enum EtherType;
+
 enum SAPCode;
+
 
 
 //
@@ -51,11 +55,10 @@ enum SAPCode;
 //
 message EtherFrame
 {
-    fields:
-        MACAddress dest;
-        MACAddress src;
+    MACAddress dest;
+    MACAddress src;
         //MessageId id; -- uncomment for tracing frames
-};
+}
 
 
 //
@@ -66,9 +69,8 @@ message EtherFrame
 //
 message EthernetIIFrame extends EtherFrame
 {
-    fields:
-        int etherType;
-};
+    int etherType;
+}
 
 
 //
@@ -78,11 +80,10 @@ message EthernetIIFrame extends EtherFrame
 //
 message EtherFrameWithLLC extends EtherFrame
 {
-    fields:
-        int ssap;
-        int dsap;
-        int control;
-};
+    int ssap;
+    int dsap;
+    int control;
+}
 
 
 //
@@ -96,10 +97,9 @@ message EtherFrameWithLLC extends EtherFrame
 //
 message EtherFrameWithSNAP extends EtherFrame
 {
-    fields:
-        long orgCode;  // SNAP organization code, 0 for IP and ARP
-        int localcode; // SNAP local code (stores EtherType for IP and ARP)
-};
+    long orgCode;  // SNAP organization code, 0 for IP and ARP
+    int localcode; // SNAP local code (stores EtherType for IP and ARP)
+}
 
 
 //
@@ -107,8 +107,7 @@ message EtherFrameWithSNAP extends EtherFrame
 //
 message EtherPauseFrame extends EtherFrame
 {
-    fields:
-        int pauseTime; // in 512 bit-time units
+    int pauseTime; // in 512 bit-time units
 }
 
 
@@ -130,9 +129,8 @@ message EtherPauseFrame extends EtherFrame
 //
 message EtherAutoconfig
 {
-    fields:
-        double txrate = 0;
-        bool halfDuplex = false;
-};
+    double txrate = 0;
+    bool halfDuplex = false;
+}
 
 

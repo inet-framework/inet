@@ -18,21 +18,21 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
+
 class RSVPMessage;
+
 
 //
 // FIXME missing documentation
 //
 message RSVPHelloMsg extends RSVPMessage
 {
-    properties:
-        customize=true;
-    fields:
-        bool request;
-        bool ack;
+    @customize(true);
+    bool request;
+    bool ack;
 
-        int srcInstance;
-        int dstInstance;
+    int srcInstance;
+    int dstInstance;
 
-        int rsvpKind = HELLO_MESSAGE;
-};
+    int rsvpKind = HELLO_MESSAGE;
+}

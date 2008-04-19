@@ -23,6 +23,7 @@ class noncobject IPAddress;
 enum IPProtocolId;
 
 
+
 cplusplus {{
 #include "IPAddress.h"
 #include "IPProtocolId_m.h"
@@ -38,6 +39,7 @@ const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;
 const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 }}
+
 
 
 

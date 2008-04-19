@@ -22,16 +22,15 @@ cplusplus {{
 }}
 
 
+
 //
 // Represents payload in an ICMP/ICMPv6 Echo Request/Reply.
 //
 message PingPayload
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        long originatorId; // sender module id()
-        long seqNo; // sequence number
-        unsigned char data[];
-};
+    @omitGetVerb(true);
+    long originatorId; // sender module id()
+    long seqNo; // sequence number
+    unsigned char data[];
+}
 

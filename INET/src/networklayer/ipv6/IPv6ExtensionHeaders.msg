@@ -23,7 +23,9 @@ cplusplus {{
 #include "IPv6Datagram.h"
 }}
 
+
 class noncobject IPv6Address;
+
 class noncobject IPv6ExtensionHeader;
 
 //
@@ -33,10 +35,8 @@ class noncobject IPv6ExtensionHeader;
 //
 class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-};
+    @omitGetVerb(true);
+}
 
 //
 // Routing Header
@@ -45,13 +45,11 @@ class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 //
 class IPv6RoutingHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        unsigned char routingType;
-        unsigned char segmentsLeft;
-        IPv6Address address[];
-};
+    @omitGetVerb(true);
+    unsigned char routingType;
+    unsigned char segmentsLeft;
+    IPv6Address address[];
+}
 
 //
 // Fragment Header
@@ -60,13 +58,11 @@ class IPv6RoutingHeader extends IPv6ExtensionHeader
 //
 class IPv6FragmentHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        unsigned short fragmentOffset;
-        unsigned int identification;  // datagram ID: identifies which datagram this fragment belongs to.
-        bool moreFragments; //Is this the last fragment?
-};
+    @omitGetVerb(true);
+    unsigned short fragmentOffset;
+    unsigned int identification;  // datagram ID: identifies which datagram this fragment belongs to.
+    bool moreFragments; //Is this the last fragment?
+}
 
 //
 // Destination Options Header
@@ -75,10 +71,8 @@ class IPv6FragmentHeader extends IPv6ExtensionHeader
 //
 class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-};
+    @omitGetVerb(true);
+}
 
 //
 // Authentication Header
@@ -87,10 +81,8 @@ class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 //
 class IPv6AuthenticationHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-};
+    @omitGetVerb(true);
+}
 
 //
 // Encapsulating Security Payload Header
@@ -99,7 +91,5 @@ class IPv6AuthenticationHeader extends IPv6ExtensionHeader
 //
 class IPv6EncapsulatingSecurityPayloadHeader extends IPv6ExtensionHeader
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-};
+    @omitGetVerb(true);
+}

@@ -21,28 +21,27 @@ cplusplus {{
 typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
 
-class noncobject IPAddress;
 
+class noncobject IPAddress;
 
 //
 // Represents a link in the TED and in LinkStateMsg packets.
 //
 struct TELinkStateInfo
 {
-    fields:
-        IPAddress advrouter; // routerId of originator of this link state entry
-        IPAddress linkid;    // identifies link within advrouter; set to peer's address
-        IPAddress local;     // address of local interface of this link
-        IPAddress remote;    // address of "gateway" to peer
-        double metric;       // link metric
-        double MaxBandwidth; // maximum bandwidth (bps)
-        double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
+    IPAddress advrouter; // routerId of originator of this link state entry
+    IPAddress linkid;    // identifies link within advrouter; set to peer's address
+    IPAddress local;     // address of local interface of this link
+    IPAddress remote;    // address of "gateway" to peer
+    double metric;       // link metric
+    double MaxBandwidth; // maximum bandwidth (bps)
+    double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
 
-        simtime_t timestamp;    // time of originating this entry
-        unsigned int sourceId;  // FIXME looks like this is the same as advrouter -- really needed?
-        unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
-        bool state;             // false = down, true = up
-};
+    simtime_t timestamp;    // time of originating this entry
+    unsigned int sourceId;  // FIXME looks like this is the same as advrouter -- really needed?
+    unsigned int messageId; // id assigned to originating LinkStateMsg (FIXME or?)
+    bool state;             // false = down, true = up
+}
 
 
 //
@@ -52,8 +51,7 @@ struct TELinkStateInfo
 //
 class TEDChangeInfo
 {
-    fields:
-        int tedLinkIndices[];
-};
+    int tedLinkIndices[];
+}
 
 

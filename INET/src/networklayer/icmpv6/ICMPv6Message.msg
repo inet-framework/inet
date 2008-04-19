@@ -27,8 +27,10 @@ cplusplus {{
 //# TODO consolidate this file's contents with ICMPMessage.msg
 //
 
+
 enum ICMPv6Type
 {
+
     ICMPv6_UNSPECIFIED = 0;
     ICMPv6_DESTINATION_UNREACHABLE = 1;
     ICMPv6_PACKET_TOO_BIG = 2;
@@ -45,7 +47,7 @@ enum ICMPv6Type
     ICMPv6_NEIGHBOUR_AD = 136;
     ICMPv6_REDIRECT = 137;
     ICMPv6_MLDv2_REPORT = 143;
-};
+}
 
 
 //cplusplus {{
@@ -58,12 +60,13 @@ enum ICMPv6Type
 //
 enum ICMPv6DEST_UN
 {
-  NO_ROUTE_TO_DEST = 0;
-  COMM_WITH_DEST_PROHIBITED = 1;
-  //2 - NOT ASSIGNED
-  ADDRESS_UNREACHABLE = 3;
-  PORT_UNREACHABLE = 4;
-};
+
+    NO_ROUTE_TO_DEST = 0;
+    COMM_WITH_DEST_PROHIBITED = 1;
+    //2 - NOT ASSIGNED
+    ADDRESS_UNREACHABLE = 3;
+    PORT_UNREACHABLE = 4;
+}
 
 
 //
@@ -71,15 +74,17 @@ enum ICMPv6DEST_UN
 //
 enum ICMPv6_TIME_EX
 {
+
     ND_HOP_LIMIT_EXCEEDED = 0;
     ND_FRAGMENT_REASSEMBLY_TIME = 1;
-};
+}
 
 //
 // ICMPv6 "codes" for type ICMPv6_PARAMETER_PROBLEM
 //
 enum ICMPv6_PARAMETER_PROB
 {
+
     ERROREOUS_HDR_FIELD = 0;
     UNRECOGNIZED_NEXT_HDR_TYPE = 1;
     UNRECOGNIZED_IPV6_OPTION = 2;
@@ -97,12 +102,10 @@ enum ICMPv6_PARAMETER_PROB
 //
 message ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int type enum(ICMPv6Type);
+    @omitGetVerb(true);
+    int type enum(ICMPv6Type);
         //int code; //TODO: this should be specific to different ICMP types.
-};
+}
 
 //
 // Notes:
@@ -110,35 +113,27 @@ message ICMPv6Message
 //
 message ICMPv6DestUnreachableMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code enum(ICMPv6DEST_UN);
+    @omitGetVerb(true);
+    int code enum(ICMPv6DEST_UN);
 }
 
 message ICMPv6PacketTooBigMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code; //Set to 0 by sender and ignored by receiver.
-        int MTU; //MTU of next-hop link
+    @omitGetVerb(true);
+    int code; //Set to 0 by sender and ignored by receiver.
+    int MTU; //MTU of next-hop link
 }
 
 message ICMPv6TimeExceededMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code enum(ICMPv6_TIME_EX);
+    @omitGetVerb(true);
+    int code enum(ICMPv6_TIME_EX);
 }
 
 message ICMPv6ParamProblemMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code enum(ICMPv6_PARAMETER_PROB);
+    @omitGetVerb(true);
+    int code enum(ICMPv6_PARAMETER_PROB);
 }
 
 //
@@ -147,12 +142,10 @@ message ICMPv6ParamProblemMsg extends ICMPv6Message
 //
 message ICMPv6EchoRequestMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code; //set to 0.
-        int identifier; // identifier to aid in matching Echo replies. May be Zero
-        int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
+    @omitGetVerb(true);
+    int code; //set to 0.
+    int identifier; // identifier to aid in matching Echo replies. May be Zero
+    int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
         //Data is attached through encapsulation. See ICMPv6.cc
 }
 
@@ -161,10 +154,8 @@ message ICMPv6EchoRequestMsg extends ICMPv6Message
 //
 message ICMPv6EchoReplyMsg extends ICMPv6Message
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int code; //set to 0.
-        int identifier; // identifier to aid in matching Echo replies. May be Zero
-        int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
+    @omitGetVerb(true);
+    int code; //set to 0.
+    int identifier; // identifier to aid in matching Echo replies. May be Zero
+    int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
 }

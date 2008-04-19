@@ -22,6 +22,7 @@ cplusplus {{
 #include "IPvXAddress.h"
 }}
 
+
 class noncobject IPvXAddress;
 
 //
@@ -32,11 +33,12 @@ class noncobject IPvXAddress;
 //
 enum UDPCommandCode
 {
+
     UDP_C_DATA = 0;    // datagram to send (must carry UDPControlInfo)
     UDP_C_BIND = 1;    // fill srcPort and srcAddr in UDPControlInfo
     UDP_C_CONNECT = 2; // fill destAddr and destPort in UDPControlInfo
     UDP_C_UNBIND = 3;  // fill sockId in UDPControlInfo
-};
+}
 
 //
 // \UDP indications, sent by UDP to the application. UDP will set these
@@ -46,9 +48,10 @@ enum UDPCommandCode
 //
 enum UDPStatusInd
 {
+
     UDP_I_DATA = 0;        // data packet (set on data packet)
     UDP_I_ERROR = 1; // ICMP error received on a sent datagram
-};
+}
 
 
 //
@@ -66,15 +69,13 @@ enum UDPStatusInd
 //
 class UDPControlInfo
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int sockId = -1;   // uniquely identifies the \UDP socket
-        int userId = -1;   // id than can be freely used by the app
-        IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND
-        IPvXAddress destAddr; // destination \IP or \IPv6 address
-        int srcPort;   // \UDP source port in packet, or local port with BIND
-        int destPort;  // \UDP destination port in packet
-        int interfaceId = -1; // interface on which pk was received/should be sent (see InterfaceTable)
-};
+    @omitGetVerb(true);
+    int sockId = -1;   // uniquely identifies the \UDP socket
+    int userId = -1;   // id than can be freely used by the app
+    IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND
+    IPvXAddress destAddr; // destination \IP or \IPv6 address
+    int srcPort;   // \UDP source port in packet, or local port with BIND
+    int destPort;  // \UDP destination port in packet
+    int interfaceId = -1; // interface on which pk was received/should be sent (see InterfaceTable)
+}
 

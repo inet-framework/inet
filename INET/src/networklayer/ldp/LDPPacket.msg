@@ -22,6 +22,7 @@ cplusplus {{
 #define LDP_HEADER_BYTES  (LDP_BASEHEADER_BYTES+20)
 }}
 
+
 class noncobject IPAddress;
 
 //
@@ -29,46 +30,42 @@ class noncobject IPAddress;
 //
 enum LDP_MESSAGE_TYPES
 {
-    NOTIFICATION=10;
-    HELLO=11;
-    INITIALIZATION=12;
-    KEEP_ALIVE=13;
-    ADDRESS=14;
-    ADDRESS_WITHDRAW=15;
-    LABEL_MAPPING=16;
-    LABEL_REQUEST=17;
-    LABEL_WITHDRAW=18;
-    LABEL_RELEASE=19;
-    UNKNOWN=20;
-};
+
+    NOTIFICATION = 10;
+    HELLO = 11;
+    INITIALIZATION = 12;
+    KEEP_ALIVE = 13;
+    ADDRESS = 14;
+    ADDRESS_WITHDRAW = 15;
+    LABEL_MAPPING = 16;
+    LABEL_REQUEST = 17;
+    LABEL_WITHDRAW = 18;
+    LABEL_RELEASE = 19;
+    UNKNOWN = 20;
+}
 
 enum LDP_STATUS_TYPES
 {
-    NO_ROUTE=13;
-};
+
+    NO_ROUTE = 13;
+}
 
 struct FEC_TLV
 {
-//
-// XXX FIXME mapping messages may contain multiple FEC elements (use std::vector)
-//
-    fields:
-        IPAddress addr;
-        int length;
-};
+    IPAddress addr;
+    int length;
+}
 
 //
 // Base class for LDP packets
 //
 message LDPPacket
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int type;
-        IPAddress senderAddress;
-        IPAddress receiverAddress;
-};
+    @omitGetVerb(true);
+    int type;
+    IPAddress senderAddress;
+    IPAddress receiverAddress;
+}
 
 
 //
@@ -76,19 +73,17 @@ message LDPPacket
 //
 message LDPLabelMapping extends LDPPacket
 {
-    fields:
-        FEC_TLV fec;
-        int label;
-};
+    FEC_TLV fec;
+    int label;
+}
 
 //
 // LDP Label Request Message
 //
 message LDPLabelRequest extends LDPPacket
 {
-    fields:
-        FEC_TLV fec;
-};
+    FEC_TLV fec;
+}
 
 
 //
@@ -96,21 +91,19 @@ message LDPLabelRequest extends LDPPacket
 //
 message LDPHello extends LDPPacket
 {
-     fields:
-         double holdTime;
-         bool tbit;
-         bool rbit;
-};
+    double holdTime;
+    bool tbit;
+    bool rbit;
+}
 
 //
 // LDP notification message
 //
 message LDPNotify extends LDPPacket
 {
-    fields:
-        int status;
-        FEC_TLV fec;
-};
+    int status;
+    FEC_TLV fec;
+}
 
 //
 // LDP Ini Message
@@ -118,13 +111,12 @@ message LDPNotify extends LDPPacket
 //# FIXME currently unused
 message LDPIni extends LDPPacket
 {
-     fields:
-         double keepAliveTime;
-         bool abit;
-         bool dbit;
-         int pvLim;
-         string receiverLDPIdentifier;
-};
+    double keepAliveTime;
+    bool abit;
+    bool dbit;
+    int pvLim;
+    string receiverLDPIdentifier;
+}
 
 //
 // LDP Address Message
@@ -132,11 +124,10 @@ message LDPIni extends LDPPacket
 //# FIXME currently unused
 message LDPAddress extends LDPPacket
 {
-     fields:
-         bool isWithdraw;
-         string family;
-         string addresses[];
-};
+    bool isWithdraw;
+    string family;
+    string addresses[];
+}
 
 
 

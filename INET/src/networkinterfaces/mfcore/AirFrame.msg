@@ -22,6 +22,7 @@ cplusplus {{
 #include "Coord.h"
 }}
 
+
 class noncobject Coord;
 
 //
@@ -46,10 +47,9 @@ class noncobject Coord;
 //
 message AirFrame
 {
-    fields:
-        double pSend; // Power with which this packet is transmitted
-        int channelNumber; // Channel on which the packet is sent
-        simtime_t duration; // Time it takes to transmit the packet, in seconds
-        double bitrate;
-        Coord senderPos;
-};
+    double pSend; // Power with which this packet is transmitted
+    int channelNumber; // Channel on which the packet is sent
+    simtime_t duration; // Time it takes to transmit the packet, in seconds
+    double bitrate;
+    Coord senderPos;
+}

@@ -19,21 +19,22 @@
 
 cplusplus {{
 #include "MACAddress.h"
-}};
+}}
+
 
 class noncobject MACAddress;
-
 
 //
 // Message kind values used with in communication between L3 and IEEE 802 L2
 //
 enum Ieee802MessageKind
 {
-    IEEE802CTRL_DATA =            2003;  // data to/from higher layer
-    IEEE802CTRL_REGISTER_DSAP =   2004;  // higher layer registers itself in LLC
+
+    IEEE802CTRL_DATA = 2003;  // data to/from higher layer
+    IEEE802CTRL_REGISTER_DSAP = 2004;  // higher layer registers itself in LLC
     IEEE802CTRL_DEREGISTER_DSAP = 2005;  // higher layer deregisters itself in LLC
-    IEEE802CTRL_SENDPAUSE =       2006;  // higher layer wants MAC to send PAUSE frame
-};
+    IEEE802CTRL_SENDPAUSE = 2006;  // higher layer wants MAC to send PAUSE frame
+}
 
 
 //
@@ -41,15 +42,16 @@ enum Ieee802MessageKind
 //
 enum SAPCode
 {
-    SAP_IBM_SNA     = 0x04;
-    SAP_IP          = 0x06;
-    SAP_3COM        = 0x80;
-    SAP_SNAP        = 0xAA;
-    SAP_BANYAN      = 0xBC;
-    SAP_NOVELL_IPX  = 0xE0;
+
+    SAP_IBM_SNA = 0x04;
+    SAP_IP = 0x06;
+    SAP_3COM = 0x80;
+    SAP_SNAP = 0xAA;
+    SAP_BANYAN = 0xBC;
+    SAP_NOVELL_IPX = 0xE0;
     SAP_LAN_MANAGER = 0xF4;
-    SAP_CLNS        = 0xFE;
-};
+    SAP_CLNS = 0xFE;
+}
 
 
 //
@@ -57,10 +59,11 @@ enum SAPCode
 //
 enum EtherType
 {
-    ETHERTYPE_IP    = 0x0800;
-    ETHERTYPE_ARP   = 0x0806;
-    ETHERTYPE_RARP  = 0x8035;
-};
+
+    ETHERTYPE_IP = 0x0800;
+    ETHERTYPE_ARP = 0x0806;
+    ETHERTYPE_RARP = 0x8035;
+}
 
 
 //
@@ -68,12 +71,11 @@ enum EtherType
 //
 class Ieee802Ctrl
 {
-    fields:
-        MACAddress src;  // src MAC address (can be left empty when sending)
-        MACAddress dest; // dest MAC address
-        int etherType;   // used with EthernetIIFrame
-        int ssap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
-        int dsap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
-        int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
-        int inputPort;   // convenience field, used between IPv6 and IPv6ND
-};
+    MACAddress src;  // src MAC address (can be left empty when sending)
+    MACAddress dest; // dest MAC address
+    int etherType;   // used with EthernetIIFrame
+    int ssap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
+    int dsap;        // used with IEEE 802 LLC (see EtherFrameWithLLC)
+    int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
+    int inputPort;   // convenience field, used between IPv6 and IPv6ND
+}

@@ -19,24 +19,26 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
+
 struct RsvpHopObj_t;
 
+
 class noncobject IPAddress;
+
 class noncobject FlowDescriptorVector;
 
 class RSVPPacket;
+
 
 //
 // FIXME missing documentation
 //
 message RSVPResvMsg extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        RsvpHopObj_t hop;
-        FlowDescriptorVector flowDescriptor;
-        int rsvpKind = RESV_MESSAGE;
+    @customize(true);
+    RsvpHopObj_t hop;
+    FlowDescriptorVector flowDescriptor;
+    int rsvpKind = RESV_MESSAGE;
 }
 
 //
@@ -44,26 +46,22 @@ message RSVPResvMsg extends RSVPPacket
 //
 message RSVPResvTear extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        RsvpHopObj_t hop;
-        FlowDescriptorVector flowDescriptor;
-        int rsvpKind = RTEAR_MESSAGE;
-};
+    @customize(true);
+    RsvpHopObj_t hop;
+    FlowDescriptorVector flowDescriptor;
+    int rsvpKind = RTEAR_MESSAGE;
+}
 
 //
 // FIXME missing documentation
 //
 message RSVPResvError extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        RsvpHopObj_t hop;
-        IPAddress errorNode;
-        int errorCode;
-        int rsvpKind = RERROR_MESSAGE;
-};
+    @customize(true);
+    RsvpHopObj_t hop;
+    IPAddress errorNode;
+    int errorCode;
+    int rsvpKind = RERROR_MESSAGE;
+}
 
 

@@ -18,12 +18,14 @@
 
 
 enum IPProtocolId;
+
 class noncobject IPv6Address;
 
 cplusplus {{
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
 }}
+
 
 
 //
@@ -46,16 +48,14 @@ cplusplus {{
 //
 class IPv6ControlInfo
 {
-    properties:
-        omitGetVerb=true;
-        customize = true;
-    fields:
-        int protocol enum(IPProtocolId);  // transport layer protocol
-        IPv6Address destAddr; // destination IPv6 address
-        IPv6Address srcAddr;  // source IPv6 address
-        short hopLimit;       // hop limit
-        int interfaceId = -1; // interface on which dgram was received/should
+    @omitGetVerb(true);
+    @customize(true);
+    int protocol enum(IPProtocolId);  // transport layer protocol
+    IPv6Address destAddr; // destination IPv6 address
+    IPv6Address srcAddr;  // source IPv6 address
+    short hopLimit;       // hop limit
+    int interfaceId = -1; // interface on which dgram was received/should
                               // be sent (see InterfaceTable)
-};
+}
 
 

@@ -29,6 +29,7 @@ const int PPP_OVERHEAD_BYTES = 7;
 }}
 
 
+
 //
 // PPP frame.
 //
@@ -42,7 +43,6 @@ const int PPP_OVERHEAD_BYTES = 7;
 //
 message PPPFrame
 {
-    fields:
-};
+}
 
 

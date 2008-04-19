@@ -23,8 +23,11 @@ cplusplus {{
 #include "MACAddress.h"
 }}
 
+
 message ICMPv6Message;
+
 class noncobject IPv6Address;
+
 class noncobject MACAddress;
 
 //
@@ -33,15 +36,13 @@ class noncobject MACAddress;
 //
 class IPv6NDPrefixInformation
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        unsigned int prefixLength;
-        bool onlinkFlag;
-        bool autoAddressConfFlag;
-        unsigned int validLifetime;
-        unsigned int preferredLifetime;
-        IPv6Address prefix;
+    @omitGetVerb(true);
+    unsigned int prefixLength;
+    bool onlinkFlag;
+    bool autoAddressConfFlag;
+    unsigned int validLifetime;
+    unsigned int preferredLifetime;
+    IPv6Address prefix;
 }
 
 //
@@ -57,12 +58,10 @@ class IPv6NDPrefixInformation
 //
 message IPv6NDMessage extends ICMPv6Message
 {
-    properties:
-        //customize=true;
-        omitGetVerb = true;
-    fields:
-        int code = 0;
-};
+    //customize=true;
+    @omitGetVerb(true);
+    int code = 0;
+}
 
 //
 // Router Solicitation Message Format
@@ -70,12 +69,10 @@ message IPv6NDMessage extends ICMPv6Message
 //
 message IPv6RouterSolicitation extends IPv6NDMessage
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        //Possible Options
-        MACAddress sourceLinkLayerAddress;
-};
+    @omitGetVerb(true);
+    //Possible Options
+    MACAddress sourceLinkLayerAddress;
+}
 
 //
 // Router Advertisement Message Format
@@ -83,22 +80,20 @@ message IPv6RouterSolicitation extends IPv6NDMessage
 //
 message IPv6RouterAdvertisement extends IPv6NDMessage
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        //Additional ICMP fields
-        unsigned int curHopLimit;
-        bool managedAddrConfFlag;
-        bool otherStatefulConfFlag;
-        unsigned short routerLifetime;  // 0 indicates router is not a default router
-        unsigned int reachableTime;
-        unsigned int retransTimer;
+    @omitGetVerb(true);
+    //Additional ICMP fields
+    unsigned int curHopLimit;
+    bool managedAddrConfFlag;
+    bool otherStatefulConfFlag;
+    unsigned short routerLifetime;  // 0 indicates router is not a default router
+    unsigned int reachableTime;
+    unsigned int retransTimer;
 
-        //Possible Options
-        MACAddress sourceLinkLayerAddress;
-        unsigned int MTU;
-        IPv6NDPrefixInformation prefixInformation[];
-};
+    //Possible Options
+    MACAddress sourceLinkLayerAddress;
+    unsigned int MTU;
+    IPv6NDPrefixInformation prefixInformation[];
+}
 
 //
 // Neighbour Solicitation Message Format
@@ -106,15 +101,13 @@ message IPv6RouterAdvertisement extends IPv6NDMessage
 //
 message IPv6NeighbourSolicitation extends IPv6NDMessage
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        //Additional ICMP fields
-        IPv6Address targetAddress;// MUST NOT be a multicast address.
+    @omitGetVerb(true);
+    //Additional ICMP fields
+    IPv6Address targetAddress;// MUST NOT be a multicast address.
 
-        //Possible Options
-        MACAddress sourceLinkLayerAddress;
-};
+    //Possible Options
+    MACAddress sourceLinkLayerAddress;
+}
 
 //
 // Neighbour Advertisement Message Format
@@ -122,18 +115,16 @@ message IPv6NeighbourSolicitation extends IPv6NDMessage
 //
 message IPv6NeighbourAdvertisement extends IPv6NDMessage
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        //Additional ICMP fields
-        bool routerFlag;
-        bool solicitedFlag;
-        bool overrideFlag;
-        IPv6Address targetAddress;// MUST NOT be a multicast address.
+    @omitGetVerb(true);
+    //Additional ICMP fields
+    bool routerFlag;
+    bool solicitedFlag;
+    bool overrideFlag;
+    IPv6Address targetAddress;// MUST NOT be a multicast address.
 
-        //Possible Options
-        MACAddress targetLinkLayerAddress;
-};
+    //Possible Options
+    MACAddress targetLinkLayerAddress;
+}
 
 //
 // Redirect Message Format
@@ -141,14 +132,12 @@ message IPv6NeighbourAdvertisement extends IPv6NDMessage
 //
 message IPv6Redirect extends IPv6NDMessage
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        //Additional ICMP fields
-        IPv6Address targetAddress;
-        IPv6Address destinationAddress;
+    @omitGetVerb(true);
+    //Additional ICMP fields
+    IPv6Address targetAddress;
+    IPv6Address destinationAddress;
 
-        //Possible Options
-        MACAddress targetLinkLayerAddress;
+    //Possible Options
+    MACAddress targetLinkLayerAddress;
         //Redirected Header Encapsulated Msg
-};
+}

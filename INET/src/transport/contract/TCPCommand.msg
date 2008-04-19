@@ -21,8 +21,8 @@ cplusplus {{
 #include "IPvXAddress.h"
 }}
 
-class noncobject IPvXAddress;
 
+class noncobject IPvXAddress;
 
 //
 // \TCP command codes, sent by the application to TCP. These constants
@@ -32,13 +32,14 @@ class noncobject IPvXAddress;
 //
 enum TcpCommandCode
 {
+
     TCP_C_OPEN_ACTIVE = 1;   // active open (must carry TCPOpenCommand)
     TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry TCPOpenCommand)
     TCP_C_SEND = 3;          // send data (set on data packet)
     TCP_C_CLOSE = 5;         // "I have no more data to send"
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
-};
+}
 
 
 //
@@ -49,6 +50,7 @@ enum TcpCommandCode
 //
 enum TcpStatusInd
 {
+
     TCP_I_DATA = 1;              // data packet (set on data packet)
     TCP_I_URGENT_DATA = 2;       // urgent data (set on data packet)
     TCP_I_ESTABLISHED = 3;       // connection established
@@ -58,7 +60,7 @@ enum TcpStatusInd
     TCP_I_CONNECTION_RESET = 7;  // connection reset
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry TCPStatusInfo)
-};
+}
 
 
 //
@@ -66,7 +68,8 @@ enum TcpStatusInd
 //
 enum TCPErrorCode
 {
-};
+
+}
 
 
 //
@@ -85,12 +88,10 @@ enum TCPErrorCode
 //
 class TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int connId = -1;   // identifies the socket within the application
-        int userId = -1;   // id than can be freely used by the app
-};
+    @omitGetVerb(true);
+    int connId = -1;   // identifies the socket within the application
+    int userId = -1;   // id than can be freely used by the app
+}
 
 
 //
@@ -98,12 +99,10 @@ class TCPCommand
 //
 class TCPErrorInfo extends TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int errorCode enum(TCPErrorCode);
-        string messageText;
-};
+    @omitGetVerb(true);
+    int errorCode enum(TCPErrorCode);
+    string messageText;
+}
 
 
 //
@@ -133,18 +132,16 @@ class TCPErrorInfo extends TCPCommand
 //
 class TCPOpenCommand extends TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        IPvXAddress localAddr; // may be left empty
-        IPvXAddress remoteAddr;// required for active open
-        int localPort = -1;       // required for passive open
-        int remotePort = -1;      // required for active open
-        bool fork = false;        // used only for passive open
-        string sendQueueClass;    // may be left empty
-        string receiveQueueClass; // may be left empty
-        string tcpAlgorithmClass; // may be left empty
-};
+    @omitGetVerb(true);
+    IPvXAddress localAddr; // may be left empty
+    IPvXAddress remoteAddr;// required for active open
+    int localPort = -1;       // required for passive open
+    int remotePort = -1;      // required for active open
+    bool fork = false;        // used only for passive open
+    string sendQueueClass;    // may be left empty
+    string receiveQueueClass; // may be left empty
+    string tcpAlgorithmClass; // may be left empty
+}
 
 
 //
@@ -154,10 +151,8 @@ class TCPOpenCommand extends TCPCommand
 //
 class TCPSendCommand extends TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-};
+    @omitGetVerb(true);
+}
 
 
 //
@@ -168,14 +163,12 @@ class TCPSendCommand extends TCPCommand
 //
 class TCPConnectInfo extends TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        IPvXAddress localAddr;
-        IPvXAddress remoteAddr;
-        int localPort;
-        int remotePort;
-};
+    @omitGetVerb(true);
+    IPvXAddress localAddr;
+    IPvXAddress remoteAddr;
+    int localPort;
+    int remotePort;
+}
 
 
 //
@@ -187,33 +180,31 @@ class TCPConnectInfo extends TCPCommand
 //
 class TCPStatusInfo extends TCPCommand
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int state;
-        string stateName;
+    @omitGetVerb(true);
+    int state;
+    string stateName;
 
-        IPvXAddress localAddr;
-        IPvXAddress remoteAddr;
-        int localPort;
-        int remotePort;
+    IPvXAddress localAddr;
+    IPvXAddress remoteAddr;
+    int localPort;
+    int remotePort;
 
-        int snd_mss;
+    int snd_mss;
 
-        unsigned int snd_una;
-        unsigned int snd_nxt;
-        unsigned int snd_max;
-        unsigned int snd_wnd;
-        unsigned int snd_up;
-        unsigned int snd_wl1;
-        unsigned int snd_wl2;
-        unsigned int iss;
+    unsigned int snd_una;
+    unsigned int snd_nxt;
+    unsigned int snd_max;
+    unsigned int snd_wnd;
+    unsigned int snd_up;
+    unsigned int snd_wl1;
+    unsigned int snd_wl2;
+    unsigned int iss;
 
-        unsigned int rcv_nxt;
-        unsigned int rcv_wnd;
-        unsigned int rcv_up;
-        unsigned int irs;
+    unsigned int rcv_nxt;
+    unsigned int rcv_wnd;
+    unsigned int rcv_up;
+    unsigned int irs;
 
-        bool fin_ack_rcvd;
-};
+    bool fin_ack_rcvd;
+}
 

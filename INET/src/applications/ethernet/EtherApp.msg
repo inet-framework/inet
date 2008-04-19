@@ -20,7 +20,8 @@ cplusplus {{
 #include "INETDefs.h"
 #define ETHERAPP_CLI_SAP  0xf0
 #define ETHERAPP_SRV_SAP  0xf1
-}};
+}}
+
 
 
 //
@@ -30,19 +31,17 @@ cplusplus {{
 //
 message EtherAppReq
 {
-    fields:
-        long requestId;
-        long responseBytes;
-};
+    long requestId;
+    long responseBytes;
+}
 
 //
 // Packet sent back by EtherAppSrv in response to an EtherAppReq.
 //
 message EtherAppResp
 {
-    fields:
-        int requestId;
-        int numFrames;
-};
+    int requestId;
+    int numFrames;
+}
 
 

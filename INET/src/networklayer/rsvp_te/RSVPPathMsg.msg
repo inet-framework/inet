@@ -19,46 +19,49 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
+
 struct RsvpHopObj_t;
+
 struct SenderTemplateObj_t;
+
 struct LabelRequestObj_t;
+
 struct SenderDescriptor_t;
 
+
 class noncobject IPAddress;
+
 class noncobject EroVector;
 
 class RSVPPacket;
+
 
 //
 // FIXME missing documentation
 //
 message RSVPPathMsg extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        RsvpHopObj_t hop;
-        LabelRequestObj_t label_request;
-        SenderDescriptor_t sender_descriptor;
-        EroVector ERO;
-        int color;
+    @customize(true);
+    RsvpHopObj_t hop;
+    LabelRequestObj_t label_request;
+    SenderDescriptor_t sender_descriptor;
+    EroVector ERO;
+    int color;
 
-        int rsvpKind = PATH_MESSAGE;
-};
+    int rsvpKind = PATH_MESSAGE;
+}
 
 //
 // FIXME missing documentation
 //
 message RSVPPathTear extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        RsvpHopObj_t hop;
-        SenderTemplateObj_t senderTemplate;
-        bool force;
-        int rsvpKind = PTEAR_MESSAGE;
-};
+    @customize(true);
+    RsvpHopObj_t hop;
+    SenderTemplateObj_t senderTemplate;
+    bool force;
+    int rsvpKind = PTEAR_MESSAGE;
+}
 
 
 //
@@ -66,13 +69,11 @@ message RSVPPathTear extends RSVPPacket
 //
 message RSVPPathError extends RSVPPacket
 {
-    properties:
-        customize=true;
-    fields:
-        IPAddress errorNode;
-        int errorCode;
-        SenderDescriptor_t sender_descriptor;
+    @customize(true);
+    IPAddress errorNode;
+    int errorCode;
+    SenderDescriptor_t sender_descriptor;
 
-        int rsvpKind = PERROR_MESSAGE;
-};
+    int rsvpKind = PERROR_MESSAGE;
+}
 

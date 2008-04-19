@@ -22,15 +22,14 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+
 //
 // Represents an \UDP packet, to be used with the UDP module.
 //
 message UDPPacket
 {
-    properties:
-        omitGetVerb = true;
-    fields:
-        int sourcePort = -1;
-        int destinationPort = -1;
-};
+    @omitGetVerb(true);
+    int sourcePort = -1;
+    int destinationPort = -1;
+}
 
