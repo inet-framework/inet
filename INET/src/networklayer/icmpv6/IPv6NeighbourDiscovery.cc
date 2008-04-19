@@ -820,7 +820,7 @@ void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
             EV << "creating router discovery message timer\n";
             cMessage *rtrDisMsg = new cMessage("initiateRTRDIS",MK_INITIATE_RTRDIS);
             rtrDisMsg->setContextPointer(ie);
-            simtime_t interval = uniform(0, SIMTIME_DBL(ie->ipv6()->_maxRtrSolicitationDelay())); // random delay
+            simtime_t interval = uniform(0, ie->ipv6()->_maxRtrSolicitationDelay()); // random delay
             scheduleAt(simTime()+interval, rtrDisMsg);
         }
     }
@@ -978,7 +978,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
         delay and send the advertisement at the already-scheduled time.*/
         cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
         msg->setContextPointer(ie);
-        simtime_t interval = uniform(0, SIMTIME_DBL(ie->ipv6()->_maxRADelayTime()));
+        simtime_t interval = uniform(0, ie->ipv6()->_maxRADelayTime());
 
         if (interval < advIfEntry->nextScheduledRATime)
         {
@@ -1444,8 +1444,7 @@ void IPv6NeighbourDiscovery::createRATimer(InterfaceEntry *ie)
     AdvIfEntry *advIfEntry = new AdvIfEntry();
     advIfEntry->interfaceId = ie->interfaceId();
     advIfEntry->numRASent = 0;
-    simtime_t interval
-        = uniform(SIMTIME_DBL(ie->ipv6()->minRtrAdvInterval()), SIMTIME_DBL(ie->ipv6()->maxRtrAdvInterval()));
+    simtime_t interval = uniform(ie->ipv6()->minRtrAdvInterval(), ie->ipv6()->maxRtrAdvInterval());
     advIfEntry->raTimeoutMsg = msg;
 
     simtime_t nextScheduledTime = simTime() + interval;
@@ -1492,8 +1491,7 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     reset to a uniformly-distributed random value between the interface's
     configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
     causes the next advertisement to be sent and a new random value to be chosen.*/
-    simtime_t interval
-        = uniform(SIMTIME_DBL(ie->ipv6()->minRtrAdvInterval()), SIMTIME_DBL(ie->ipv6()->maxRtrAdvInterval()));
+    simtime_t interval = uniform(ie->ipv6()->minRtrAdvInterval(), ie->ipv6()->maxRtrAdvInterval());
     nextScheduledTime = simTime() + interval;
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)

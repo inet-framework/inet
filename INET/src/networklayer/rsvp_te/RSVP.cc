@@ -360,7 +360,7 @@ void RSVP::setupHello()
 
         if (helloInterval > 0.0)
         {
-            startHello(peer, exponential(SIMTIME_DBL(helloInterval)));
+            startHello(peer, exponential(helloInterval));
         }
     }
 }

@@ -59,7 +59,7 @@ void Ieee80211MgmtAP::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
-        scheduleAt(uniform(0,SIMTIME_DBL(beaconInterval)), beaconTimer);
+        scheduleAt(uniform(0,beaconInterval), beaconTimer);
     }
 }
 
