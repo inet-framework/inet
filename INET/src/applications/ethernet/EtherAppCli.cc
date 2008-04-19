@@ -97,7 +97,7 @@ void EtherAppCli::initialize(int stage)
         registerDSAP(localSAP);
 
     cMessage *timermsg = new cMessage("generateNextPacket");
-    double d = waitTime->doubleValue();
+    simtime_t d = waitTime->doubleValue();
     scheduleAt(simTime()+d, timermsg);
 
 }
@@ -132,7 +132,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         sendPacket();
-        double d = waitTime->doubleValue();
+        simtime_t d = waitTime->doubleValue();
         scheduleAt(simTime()+d, msg);
     }
     else

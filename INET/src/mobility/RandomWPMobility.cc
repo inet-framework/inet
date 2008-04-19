@@ -38,7 +38,7 @@ void RandomWPMobility::setTargetPosition()
 {
     if (nextMoveIsWait)
     {
-        double waitTime = par("waitTime");
+        simtime_t waitTime = par("waitTime");
         targetTime += waitTime;
     }
     else
@@ -46,7 +46,7 @@ void RandomWPMobility::setTargetPosition()
         targetPos = getRandomPosition();
         double speed = par("speed");
         double distance = pos.distance(targetPos);
-        double travelTime = distance / speed;
+        simtime_t travelTime = distance / speed;
         targetTime += travelTime;
     }
 

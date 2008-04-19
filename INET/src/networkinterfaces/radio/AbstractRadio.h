@@ -30,7 +30,7 @@
 
 
 /**
- * Abstract base class for radio modules. Radio modules deal with the 
+ * Abstract base class for radio modules. Radio modules deal with the
  * transmission of frames over a wireless medium (the radio channel).
  * See the Radio module's NED documentation for an overview of radio modules.
  *

@@ -629,7 +629,7 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 {
     int cw;
 
-    EV << "generating backoff slot number for retry: " << r << endl; 
+    EV << "generating backoff slot number for retry: " << r << endl;
 
     if (isBroadcast(msg))
         cw = cwMinBroadcast;
@@ -649,7 +649,7 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 
     return ((double)c) * SlotPeriod();
 }
-    
+
 /****************************************************************
  * Timer functions.
  */

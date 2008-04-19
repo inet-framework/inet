@@ -32,7 +32,7 @@ void LineSegmentsMobilityBase::initialize(int stage)
         targetTime = simTime();
 
         // host moves the first time after some random delay to avoid synchronized movements
-        scheduleAt(simTime() + uniform(0, SIMTIME_DBL(updateInterval)), new cMessage("move"));
+        scheduleAt(simTime() + uniform(0, updateInterval), new cMessage("move"));
     }
 }
 
@@ -63,7 +63,7 @@ void LineSegmentsMobilityBase::beginNextMove(cMessage *msg)
     else
     {
         // keep moving
-        double numIntervals = (targetTime-now) / updateInterval;
+        double numIntervals = SIMTIME_DBL(targetTime-now) / updateInterval;
         // int numSteps = floor(numIntervals); -- currently unused,
         // although we could use step counting instead of comparing
         // simTime() to targetTime each step.

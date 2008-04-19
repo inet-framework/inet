@@ -144,7 +144,7 @@ bool IPv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
 void IPv6Address::set(const char *addr)
 {
     if (!tryParse(addr))
-        throw new cRuntimeError("IPv6Address: cannot interpret address string `%s'", addr);
+        throw cRuntimeError("IPv6Address: cannot interpret address string `%s'", addr);
 }
 
 // find longest sequence of zeros in address (at least with len=2)

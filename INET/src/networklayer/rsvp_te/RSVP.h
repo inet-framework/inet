@@ -47,7 +47,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
         SenderTspecObj_t tspec;
 
         EroVector ERO;
-        double max_delay;
+        simtime_t max_delay;
 
         int owner;
         bool permanent;
@@ -165,9 +165,9 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
 
     typedef std::vector<HelloState_t> HelloVector;
 
-    double helloInterval;
-    double helloTimeout;
-    double retryInterval;
+    simtime_t helloInterval;
+    simtime_t helloTimeout;
+    simtime_t retryInterval;
 
   private:
     TED *tedmod;
@@ -220,19 +220,19 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     void refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP);
     void commitResv(ResvStateBlock_t *rsb);
 
-    void scheduleRefreshTimer(PathStateBlock_t *psbEle, double delay);
+    void scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay);
     void scheduleTimeout(PathStateBlock_t *psbEle);
-    void scheduleRefreshTimer(ResvStateBlock_t *rsbEle, double delay);
+    void scheduleRefreshTimer(ResvStateBlock_t *rsbEle, simtime_t delay);
     void scheduleCommitTimer(ResvStateBlock_t *rsbEle);
     void scheduleTimeout(ResvStateBlock_t *rsbEle);
 
     void sendPathErrorMessage(PathStateBlock_t *psb, int errCode);
     void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPAddress nextHop, int errCode);
     void sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPAddress LIH, IPAddress NHOP, bool force);
-    void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, double delay);
+    void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay);
 
     void setupHello();
-    void startHello(IPAddress peer, double delay);
+    void startHello(IPAddress peer, simtime_t delay);
 
     void recoveryEvent(IPAddress peer);
 

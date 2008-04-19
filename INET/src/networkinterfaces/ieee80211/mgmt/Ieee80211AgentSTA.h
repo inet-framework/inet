@@ -39,11 +39,11 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
   protected:
     bool activeScan;
     std::vector<int> channelsToScan;
-    double probeDelay;
-    double minChannelTime;
-    double maxChannelTime;
-    double authenticationTimeout;
-    double associationTimeout;
+    simtime_t probeDelay;
+    simtime_t minChannelTime;
+    simtime_t maxChannelTime;
+    simtime_t authenticationTimeout;
+    simtime_t associationTimeout;
 
   protected:
     virtual int numInitStages() const {return 2;}

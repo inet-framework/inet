@@ -95,8 +95,8 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
 
   private:
     // configuration
-    double holdTime;
-    double helloInterval;
+    simtime_t holdTime;
+    simtime_t helloInterval;
 
     // currently recognized FECs
     FecVector fecList;

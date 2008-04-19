@@ -10,7 +10,7 @@ const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
     if(!child)
-        throw new cRuntimeError("xml error: exactly one %s element expected", name);
+        throw cRuntimeError("xml error: exactly one %s element expected", name);
 
     return child;
 }
@@ -19,7 +19,7 @@ const cXMLElement* getUniqueChildIfExists(const cXMLElement *node, const char *n
 {
     cXMLElementList list = node->getChildrenByTagName(name);
     if(list.size() > 1)
-        throw new cRuntimeError("xml error: at most one %s element expected", name);
+        throw cRuntimeError("xml error: at most one %s element expected", name);
     else if(list.size() == 1)
         return (*list.begin());
     else
@@ -49,7 +49,7 @@ bool parseBool(const char *text)
     else if(!strcasecmp(text, "1"))
         return true;
     else
-        throw new cRuntimeError("unknown bool constant: %s", text);
+        throw cRuntimeError("unknown bool constant: %s", text);
 }
 
 void checkTags(const cXMLElement *node, const char *allowed)

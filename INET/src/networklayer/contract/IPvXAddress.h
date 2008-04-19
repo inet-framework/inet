@@ -87,7 +87,7 @@ class INET_API IPvXAddress
      */
     IPAddress get4() const {
         if (isv6)
-            throw new cRuntimeError("IPvXAddress: cannot return IPv6 address %s as IPv4", str().c_str());
+            throw cRuntimeError("IPvXAddress: cannot return IPv6 address %s as IPv4", str().c_str());
         return IPAddress(d[0]);
     }
 
@@ -98,7 +98,7 @@ class INET_API IPvXAddress
         if (!isv6)  {
             if (d[0]==0) // allow null address to be returned as IPv6
                 return IPv6Address();
-            throw new cRuntimeError("IPvXAddress: cannot return IPv4 address %s as IPv6", str().c_str());
+            throw cRuntimeError("IPvXAddress: cannot return IPv4 address %s as IPv6", str().c_str());
         }
         return IPv6Address(d[0], d[1], d[2], d[3]);
     }
@@ -143,7 +143,7 @@ class INET_API IPvXAddress
      */
     void set(const char *addr) {
         if (!tryParse(addr))
-            throw new cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
+            throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
     }
 
     /**

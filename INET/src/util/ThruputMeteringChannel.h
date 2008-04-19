@@ -54,7 +54,7 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
     // configuration
     cPar *fmtp;      // display format
     unsigned int batchSize; // number of packets in a batch
-    double maxInterval; // max length of measurement interval (measurement ends
+    simtime_t maxInterval; // max length of measurement interval (measurement ends
                         // if either batchSize or maxInterval is reached, whichever
                         // is reached first)
 
@@ -99,7 +99,7 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
 
     /**
      * Creates and returns an exact copy of this object.
-     * See cObject for more details.
+     * See cPolymorphic for more details.
      */
     virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
 

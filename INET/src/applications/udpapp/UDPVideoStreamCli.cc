@@ -31,7 +31,7 @@ Define_Module(UDPVideoStreamCli);
 void UDPVideoStreamCli::initialize()
 {
     eed.setName("video stream eed");
-    double startTime = par("startTime");
+    simtime_t startTime = par("startTime");
 
     if (startTime>=0)
         scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));

@@ -578,7 +578,7 @@ void AbstractRadio::changeChannel(int channel)
         AirFrame *airframe = *it;
         // time for the message to reach us
         double distance = myHostRef->pos.distance(airframe->getSenderPos());
-        double propagationDelay = distance / LIGHT_SPEED;
+        simtime_t propagationDelay = distance / LIGHT_SPEED;
 
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == airframe->getChannelNumber())

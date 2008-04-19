@@ -513,7 +513,7 @@ void EtherMACBase::scheduleEndTxPeriod(cMessage *frame)
 void EtherMACBase::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    double pausePeriod = pauseUnits*PAUSE_BITTIME*bitTime;
+    simtime_t pausePeriod = pauseUnits*PAUSE_BITTIME*bitTime;
     scheduleAt(simTime()+pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }

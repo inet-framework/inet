@@ -37,7 +37,7 @@ class INET_API LineSegmentsMobilityBase : public BasicMobility
 {
   protected:
     // config
-    simtime_t updateInterval; ///< time interval to update the host's position
+    double updateInterval; ///< time interval to update the host's position
 
     // state
     simtime_t targetTime;  ///< end time of current linear movement

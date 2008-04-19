@@ -402,7 +402,7 @@ void LDP::sendHelloTo(IPAddress dest)
     hello->setType(HELLO);
     hello->setSenderAddress(rt->routerId());
     //hello->setReceiverAddress(...);
-    hello->setHoldTime(holdTime);
+    hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
     //hello->setTbit(...);
     hello->addPar("color") = LDP_HELLO_TRAFFIC;
@@ -416,10 +416,8 @@ void LDP::processHelloTimeout(cMessage *msg)
 
     unsigned int i;
     for (i = 0; i < myPeers.size(); i++)
-    {
         if (myPeers[i].timeout == msg)
             break;
-    }
     ASSERT(i < myPeers.size());
 
     IPAddress peerIP = myPeers[i].peerIP;

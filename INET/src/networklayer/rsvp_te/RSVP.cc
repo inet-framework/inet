@@ -360,12 +360,12 @@ void RSVP::setupHello()
 
         if (helloInterval > 0.0)
         {
-            startHello(peer, exponential(helloInterval));
+            startHello(peer, exponential(SIMTIME_DBL(helloInterval)));
         }
     }
 }
 
-void RSVP::startHello(IPAddress peer, double delay)
+void RSVP::startHello(IPAddress peer, simtime_t delay)
 {
     EV << "scheduling hello start in " << delay << " seconds" << endl;
 
@@ -384,7 +384,7 @@ void RSVP::startHello(IPAddress peer, double delay)
     scheduleAt(simTime() + delay, h->timer);
 }
 
-void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, double delay)
+void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay)
 {
     if (handler < 0)
         return; // handler not specified
@@ -2013,7 +2013,7 @@ void RSVP::scheduleTimeout(PathStateBlock_t *psbEle)
     scheduleAt(simTime() + PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
 }
 
-void RSVP::scheduleRefreshTimer(PathStateBlock_t *psbEle, double delay)
+void RSVP::scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay)
 {
     ASSERT(psbEle);
 
@@ -2041,7 +2041,7 @@ void RSVP::scheduleTimeout(ResvStateBlock_t *rsbEle)
     scheduleAt(simTime() + RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
 }
 
-void RSVP::scheduleRefreshTimer(ResvStateBlock_t *rsbEle, double delay)
+void RSVP::scheduleRefreshTimer(ResvStateBlock_t *rsbEle, simtime_t delay)
 {
     ASSERT(rsbEle);
 

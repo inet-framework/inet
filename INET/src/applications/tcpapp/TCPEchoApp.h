@@ -26,7 +26,7 @@
 class INET_API TCPEchoApp : public cSimpleModule
 {
   protected:
-    double delay;
+    simtime_t delay;
     double echoFactor;
 
     long bytesRcvd;

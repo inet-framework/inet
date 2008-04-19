@@ -122,7 +122,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     // reschedule timer if there's bytes left to send
     if (d->bytesLeft!=0)
     {
-        double interval = (*waitInterval);
+        simtime_t interval = (*waitInterval);
         scheduleAt(simTime()+interval, timer);
     }
     else

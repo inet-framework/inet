@@ -179,7 +179,7 @@ void CSMAMacLayer::handleUpperMsg(cMessage *msg)
     else
     {
         timer->setContextPointer(mac);
-        double randomTime = intuniform(0, 10) / 100.0;
+        simtime_t randomTime = intuniform(0, 10) / 100.0;
         scheduleAt(simTime() + randomTime, timer);
         EV << "CHANNEL BUSY, I will try to retransmit at " << simTime() + randomTime << ".\n";
     }
@@ -279,7 +279,7 @@ void CSMAMacLayer::receiveChangeNotification(int category, cPolymorphic *details
         if (radioState == RadioState::IDLE && !macQueue.empty() && !timer->isScheduled())
         {
             timer->setContextPointer(macQueue.pop());
-            double randomTime = intuniform(0, 10) / 100.0;
+            simtime_t randomTime = intuniform(0, 10) / 100.0;
             scheduleAt(simTime() + randomTime, timer);
             EV << "taking next pkt out of queue, schedule at " << simTime() + randomTime << endl;
         }

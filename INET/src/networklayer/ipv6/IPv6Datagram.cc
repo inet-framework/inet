@@ -58,7 +58,7 @@ IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
             dupEh = new IPv6EncapsulatingSecurityPayloadHeader();
             *dupEh = *(IPv6EncapsulatingSecurityPayloadHeader *)eh;
         } else {
-            throw new cRuntimeError(this, "unrecognised HeaderExtension subclass %s in IPv6Datagram::operator=()", eh->className());
+            throw cRuntimeError(this, "unrecognised HeaderExtension subclass %s in IPv6Datagram::operator=()", eh->className());
         }
         addExtensionHeader(dupEh);
     }
@@ -68,7 +68,7 @@ IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
 
 void IPv6Datagram::setExtensionHeaderArraySize(unsigned int size)
 {
-    throw new cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
+    throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
 unsigned int IPv6Datagram::extensionHeaderArraySize() const
@@ -86,7 +86,7 @@ IPv6ExtensionHeaderPtr& IPv6Datagram::extensionHeader(unsigned int k)
 
 void IPv6Datagram::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
 {
-    throw new cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
+    throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
 void IPv6Datagram::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
@@ -132,7 +132,7 @@ IPProtocolId IPv6ExtensionHeader::extensionType() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return IP_PROT_IPv6EXT_ESP;
     } else {
-        throw new cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
     }
 }
 
@@ -154,7 +154,7 @@ int IPv6ExtensionHeader::byteLength() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return 8; // FIXME verify
     } else {
-        throw new cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
     }
 }
 

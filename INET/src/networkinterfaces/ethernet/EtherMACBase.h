@@ -71,16 +71,16 @@ class INET_API EtherMACBase : public cSimpleModule
 
     // MAC transmission characteristics
     double txrate;                  // transmission rate of MAC, bit/s
-    double bitTime;                 // precalculated as 1/txrate
-    double slotTime;                // slot time
-    double interFrameGap;           // IFG
-    double jamDuration;             // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
-    double shortestFrameDuration;   // precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
+    simtime_t bitTime;              // precalculated as 1/txrate
+    simtime_t slotTime;             // slot time
+    simtime_t interFrameGap;        // IFG
+    simtime_t jamDuration;          // precalculated as 8*JAM_SIGNAL_BYTES*bitTime
+    simtime_t shortestFrameDuration;// precalculated from MIN_ETHERNET_FRAME or GIGABIT_MIN_FRAME_WITH_EXT
 
     // states
-    int  transmitState;             // State of the MAC unit transmitting
-    int  receiveState;              // State of the MAC unit receiving
-    int  pauseUnitsRequested;       // requested pause duration, or zero -- examined at endTx
+    int transmitState;              // State of the MAC unit transmitting
+    int receiveState;               // State of the MAC unit receiving
+    int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
 
     cQueue txQueue;                 // output queue
     IPassiveQueue *queueModule;     // optional module to receive messages from
