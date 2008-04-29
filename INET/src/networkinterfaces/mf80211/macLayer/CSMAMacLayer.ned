@@ -1,7 +1,7 @@
 //***************************************************************************
 //* file:        CSMAMacLayer.ned
 //*
-//* author:      Marc Löbbers
+//* author:      Marc LÃ¶bbers
 //*
 //* copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 //*              Technische Universitaet Berlin, Germany.
