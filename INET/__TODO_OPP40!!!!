@@ -1,7 +1,8 @@
 move Nodes/QuaggaRouter into Quagga project
 copy TODO files from old branch's and old trunk's working copy
-merge ond trunk changes
+merge old trunk changes
 put all c++ code into "inet" namespace
 replace underscore with camelCase in parameter names! ("message_length" etc)
 UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
 networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
+FlatNetworkConfigurator to extract network by properties (@host(true) or something)
