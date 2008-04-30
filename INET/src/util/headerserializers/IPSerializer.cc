@@ -16,7 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm> // std::min
 #include "headers/defs.h"
+
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
@@ -82,9 +84,9 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
     }
 
 #ifdef linux
-	ip->ip_len = htons(packetLength);
+    ip->ip_len = htons(packetLength);
 #else
-	ip->ip_len = packetLength;
+    ip->ip_len = packetLength;
 #endif
     return packetLength;
 }
@@ -119,11 +121,11 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
     {
       case IP_PROT_ICMP:
         encapPacket = new ICMPMessage("icmp-from-wire");
-        ICMPSerializer().parse(buf + headerLength, min(totalLength, bufsize) - headerLength, (ICMPMessage *)encapPacket);
+        ICMPSerializer().parse(buf + headerLength, std::min(totalLength, bufsize) - headerLength, (ICMPMessage *)encapPacket);
         break;
       case IP_PROT_UDP:
         encapPacket = new UDPPacket("udp-from-wire");
-        UDPSerializer().parse(buf + headerLength, min(totalLength, bufsize) - headerLength, (UDPPacket *)encapPacket);
+        UDPSerializer().parse(buf + headerLength, std::min(totalLength, bufsize) - headerLength, (UDPPacket *)encapPacket);
         break;
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dest->transportProtocol());
