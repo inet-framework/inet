@@ -45,7 +45,7 @@ network FlatNet
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
-                moduleTypes = "Router StandardHost";
+                moduleTypes = "inet.nodes.inet.Router inet.nodes.inet.StandardHost";
                 nonIPModuleTypes = "";
                 networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";

@@ -62,12 +62,12 @@ void TcpTestClient::parseScript(const char *script)
         const char *s0 = s;
         cmd.tSend = strtod(s,&const_cast<char *&>(s));
         if (s==s0)
-            throw new cRuntimeError("syntax error in script: simulation time expected");
+            throw cRuntimeError("syntax error in script: simulation time expected");
 
         // parse number of bytes
         while (isspace(*s)) s++;
         if (!isdigit(*s))
-            throw new cRuntimeError("syntax error in script: number of bytes expected");
+            throw cRuntimeError("syntax error in script: number of bytes expected");
         cmd.numBytes = atoi(s);
         while (isdigit(*s)) s++;
 
@@ -78,7 +78,7 @@ void TcpTestClient::parseScript(const char *script)
         while (isspace(*s)) s++;
         if (!*s) break;
         if (*s!=';')
-            throw new cRuntimeError("syntax error in script: separator ';' missing");
+            throw cRuntimeError("syntax error in script: separator ';' missing");
         s++;
         while (isspace(*s)) s++;
     }
@@ -108,7 +108,7 @@ void TcpTestClient::activity()
     const char *script = par("sendScript");
     parseScript(script);
     if (sendBytes>0 && commands.size()>0)
-        throw new cRuntimeError("cannot use both sendScript and tSend+sendBytes");
+        throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
     TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
