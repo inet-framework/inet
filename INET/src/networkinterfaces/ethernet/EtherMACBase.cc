@@ -661,8 +661,8 @@ void EtherMACBase::updateConnectionColor(int txState)
     cGate *g = gate("phys$o");
     while (g && g->type()=='O')
     {
-        g->channel()->displayString().setTagArg("o",0,color);
-        g->channel()->displayString().setTagArg("o",1, color[0] ? "3" : "1");
+        g->displayString().setTagArg("o",0,color);
+        g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
         g = g->toGate();
     }
 }

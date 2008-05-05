@@ -111,7 +111,7 @@ void PPP::initialize(int stage)
             displayString().setTagArg("i",1,"#707070");
             displayString().setTagArg("i",2,"100");
         }
-        oldConnColor = gateToWatch->channel()->displayString().getTagArg("o",0);
+        oldConnColor = gateToWatch->displayString().getTagArg("o",0);
     }
 
     // request first frame to send
@@ -264,19 +264,19 @@ void PPP::handleMessage(cMessage *msg)
 void PPP::displayBusy()
 {
     displayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    gateToWatch->channel()->displayString().setTagArg("o",0,"yellow");
-    gateToWatch->channel()->displayString().setTagArg("o",1,"3");
-    gate("phys$o")->channel()->displayString().setTagArg("o",0,"yellow");
-    gate("phys$o")->channel()->displayString().setTagArg("o",1,"3");
+    gateToWatch->displayString().setTagArg("o",0,"yellow");
+    gateToWatch->displayString().setTagArg("o",1,"3");
+    gate("phys$o")->displayString().setTagArg("o",0,"yellow");
+    gate("phys$o")->displayString().setTagArg("o",1,"3");
 }
 
 void PPP::displayIdle()
 {
     displayString().setTagArg("i",1,"");
-    gateToWatch->channel()->displayString().setTagArg("o",0,oldConnColor.c_str());
-    gateToWatch->channel()->displayString().setTagArg("o",1,"1");
-    gate("phys$o")->channel()->displayString().setTagArg("o",0,"black");
-    gate("phys$o")->channel()->displayString().setTagArg("o",1,"1");
+    gateToWatch->displayString().setTagArg("o",0,oldConnColor.c_str());
+    gateToWatch->displayString().setTagArg("o",1,"1");
+    gate("phys$o")->displayString().setTagArg("o",0,"black");
+    gate("phys$o")->displayString().setTagArg("o",1,"1");
 }
 
 void PPP::updateDisplayString()
