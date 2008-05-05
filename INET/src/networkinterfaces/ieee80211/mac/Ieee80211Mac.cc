@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>
 #include "Ieee80211Mac.h"
 #include "RadioState.h"
 #include "InterfaceTable.h"
@@ -716,7 +717,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
             if (oldReserve > reserve)
                 return;
 
-            reserve = max(reserve, oldReserve);
+            reserve = std::max(reserve, oldReserve);
             cancelEvent(endReserve);
         }
         else if (radioState == RadioState::IDLE)
