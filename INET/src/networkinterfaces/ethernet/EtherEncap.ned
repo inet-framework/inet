@@ -40,7 +40,6 @@ package inet.networkinterfaces.ethernet;
 simple EtherEncap
 {
     parameters:
-        bool writeScalars = default(true); // enable/disable recording statistics in omnetpp.sca
         @display("i=block/square");
     gates:
         input upperLayerIn;   // higher layer

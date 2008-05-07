@@ -35,7 +35,6 @@ simple EtherAppCli
         volatile int reqLength @unit(B);  // length of request packets
         volatile int respLength @unit(B);  // length of response packets
         bool registerSAP;   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
-        bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
     gates:
         input in;
         output out;

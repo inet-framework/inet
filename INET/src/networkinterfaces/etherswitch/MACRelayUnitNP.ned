@@ -45,7 +45,6 @@ simple MACRelayUnitNP like MACRelayUnit
         int bufferSize @unit("B") = default(1MB);  // memory
         int highWatermark @unit("B") = default(512KB);  // buffer usage threshold to send PAUSE frame
         int pauseUnits = default(300);  // time to put in PAUSE frames (in units of 512 bit times)
-        bool writeScalars = default(true);  // enable/disable recording statistics in omnetpp.sca
     gates:
         input lowerLayerIn[];    // see MACRelayUnit
         output lowerLayerOut[];  // see MACRelayUnit

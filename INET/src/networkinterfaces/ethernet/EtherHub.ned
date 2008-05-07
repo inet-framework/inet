@@ -37,7 +37,6 @@ simple EtherHub
 {
     parameters:
         @node();
-        bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
         @display("i=device/hub");
     gates:
         inout ethg[];  // to stations; each one represents a port

@@ -308,14 +308,13 @@
 // modules too) write statistics into omnetpp.sca at the end
 // of the simulation: number of frames sent, received, dropped, etc.
 // These are only basic statistics, however it still makes the
-// omnetpp.sca file to be about 28 Meg in size. You can use the Scalars
-// program introduced in OMNeT++ 3.0a4 to analyse this file.
-// (If the file size is too big, writing statistics can be disabled
-// per module, with the "writeScalars" bool parameter. The model
-// can also record output vectors (omnetpp.sca), but this is
-// currently disabled in omnetpp.ini because the generated file
-// can easily reach gigabyte sizes.
-//
+// scalar file to be several ten megabytes in size. You can use
+// the analysis tools provided with OMNeT++ to visualized the data
+// in this file. (If the file size is too big, writing statistics
+// can be disabled, by putting **.record-scalar=false in the ini file.)
+// The model can also record output vectors, but this is currently
+// disabled in omnetpp.ini because the generated file can easily reach
+// gigabyte sizes.
 //
 
 package inet.networkinterfaces.ethernet;

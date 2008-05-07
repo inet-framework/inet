@@ -39,7 +39,6 @@ network ARPTest
         bus2: EtherBus {
             positions = "";
             propagationSpeed = 2e8 mps;
-            writeScalars = false;
             @display("p=260,40;b=260,10");
         }
         router5: Router {
@@ -48,7 +47,6 @@ network ARPTest
         bus1: EtherBus {
             positions = "";
             propagationSpeed = 2e8 mps;
-            writeScalars = false;
             @display("p=280,170;b=260,10");
         }
         router4: Router {

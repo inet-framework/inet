@@ -25,3 +25,8 @@ current errors: (may 7, 2008)
 <!> Error in module (ScenarioManager) LDPTEST.scenarioManager (id=12): User error: Cannot replace module `LDPTEST.LSR2' with a module of type `LDP_FAILED': No such module type.
 
 <!> Error in module (RSVP) RSVPTE4.LSR1.rsvp (id=22): User error: not a local peer: 10.1.1.1.
+
+<!> Error during startup/shutdown: (cMessageHeap)scheduled-events: dropAndDelete(): not owner of object (cObject). Aborting.
+
+<!> Error in module (EtherMAC) NClientsEth.r1.eth[0].mac (id=20): Cannot convert 1.93811e+007 to simtime_t: out of range (-9223372.036854775807,9223372.036854775807), allowed by scale exponent -12.
+

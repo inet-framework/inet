@@ -54,8 +54,6 @@ package inet.networkinterfaces.ethernet;
 simple EtherLLC
 {
     parameters:
-        bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
-
         @display("i=block/fork");
     gates:
         input upperLayerIn[];   // higher layer protocols or applications

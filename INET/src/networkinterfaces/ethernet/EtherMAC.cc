@@ -631,14 +631,11 @@ void EtherMAC::finish()
 {
     EtherMACBase::finish();
 
-    if (!disabled && par("writeScalars").boolValue())
-    {
-        simtime_t t = simTime();
-        simtime_t totalChannelIdleTime = t - totalSuccessfulRxTxTime - totalCollisionTime;
-        recordScalar("rx channel idle (%)", 100*totalChannelIdleTime/t);
-        recordScalar("rx channel utilization (%)", 100*totalSuccessfulRxTxTime/t);
-        recordScalar("rx channel collision (%)", 100*totalCollisionTime);
-        recordScalar("collisions",     numCollisions);
-        recordScalar("backoffs",       numBackoffs);
-    }
+    simtime_t t = simTime();
+    simtime_t totalChannelIdleTime = t - totalSuccessfulRxTxTime - totalCollisionTime;
+    recordScalar("rx channel idle (%)", 100*totalChannelIdleTime/t);
+    recordScalar("rx channel utilization (%)", 100*totalSuccessfulRxTxTime/t);
+    recordScalar("rx channel collision (%)", 100*totalCollisionTime);
+    recordScalar("collisions",     numCollisions);
+    recordScalar("backoffs",       numBackoffs);
 }

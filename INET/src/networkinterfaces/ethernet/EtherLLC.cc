@@ -260,13 +260,10 @@ void EtherLLC::handleSendPause(cMessage *msg)
 
 void EtherLLC::finish()
 {
-    if (par("writeScalars").boolValue())
-    {
-        recordScalar("dsaps registered", dsapsRegistered);
-        recordScalar("packets from higher layer", totalFromHigherLayer);
-        recordScalar("frames from MAC", totalFromMAC);
-        recordScalar("packets passed up", totalPassedUp);
-        recordScalar("packets dropped - unknown DSAP", droppedUnknownDSAP);
-    }
+    recordScalar("dsaps registered", dsapsRegistered);
+    recordScalar("packets from higher layer", totalFromHigherLayer);
+    recordScalar("frames from MAC", totalFromMAC);
+    recordScalar("packets passed up", totalPassedUp);
+    recordScalar("packets dropped - unknown DSAP", droppedUnknownDSAP);
 }
 

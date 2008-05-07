@@ -184,11 +184,8 @@ void EtherEncap::handleSendPause(cMessage *msg)
 
 void EtherEncap::finish()
 {
-    if (par("writeScalars").boolValue())
-    {
-        recordScalar("packets from higher layer", totalFromHigherLayer);
-        recordScalar("frames from MAC", totalFromMAC);
-    }
+    recordScalar("packets from higher layer", totalFromHigherLayer);
+    recordScalar("frames from MAC", totalFromMAC);
 }
 
 

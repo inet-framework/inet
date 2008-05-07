@@ -191,10 +191,7 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
 
 void MACRelayUnitPP::finish()
 {
-    if (par("writeScalars").boolValue())
-    {
-        recordScalar("processed frames", numProcessedFrames);
-        recordScalar("dropped frames", numDroppedFrames);
-    }
+    recordScalar("processed frames", numProcessedFrames);
+    recordScalar("dropped frames", numDroppedFrames);
 }
 

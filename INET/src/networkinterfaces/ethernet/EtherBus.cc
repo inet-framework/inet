@@ -241,12 +241,9 @@ void EtherBus::tokenize(const char *str, std::vector<double>& array)
 
 void EtherBus::finish ()
 {
-    if (par("writeScalars").boolValue())
-    {
-        simtime_t t = simTime();
-        recordScalar("simulated time", t);
-        recordScalar("messages handled", numMessages);
-        if (t>0)
-            recordScalar("messages/sec", numMessages/t);
-    }
+    simtime_t t = simTime();
+    recordScalar("simulated time", t);
+    recordScalar("messages handled", numMessages);
+    if (t>0)
+        recordScalar("messages/sec", numMessages/t);
 }

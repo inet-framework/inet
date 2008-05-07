@@ -568,7 +568,7 @@ void EtherMACBase::fireChangeNotification(int type, cMessage *msg)
 
 void EtherMACBase::finish()
 {
-    if (!disabled && par("writeScalars").boolValue())
+    if (!disabled)
     {
         simtime_t t = simTime();
         recordScalar("simulated time", t);

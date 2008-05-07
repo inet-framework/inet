@@ -195,14 +195,11 @@ void EtherAppCli::receivePacket(cMessage *msg)
 
 void EtherAppCli::finish()
 {
-    if (par("writeScalars").boolValue())
-    {
-        recordScalar("packets sent", packetsSent);
-        recordScalar("packets rcvd", packetsReceived);
-        recordScalar("end-to-end delay mean", eedStats.mean());
-        recordScalar("end-to-end delay stddev", eedStats.stddev());
-        recordScalar("end-to-end delay min", eedStats.min());
-        recordScalar("end-to-end delay max", eedStats.max());
-    }
+    recordScalar("packets sent", packetsSent);
+    recordScalar("packets rcvd", packetsReceived);
+    recordScalar("end-to-end delay mean", eedStats.mean());
+    recordScalar("end-to-end delay stddev", eedStats.stddev());
+    recordScalar("end-to-end delay min", eedStats.min());
+    recordScalar("end-to-end delay max", eedStats.max());
 }
 

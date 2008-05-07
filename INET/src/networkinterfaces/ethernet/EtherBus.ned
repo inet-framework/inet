@@ -42,7 +42,6 @@ simple EtherBus
                            // few values, the distance between the last two positions
                            // is repeated, or 5 meters is used.
         double propagationSpeed @unit("mps") = default(200mps); // signal propagation speed on the bus
-        bool writeScalars = default(true);  // enable/disable recording statistics in omnetpp.sca
     gates:
         inout ethg[];    // to stations; each one represents a tap
 }
