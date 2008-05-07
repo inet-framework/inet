@@ -47,14 +47,12 @@ while (<INFILE>) {
 #    "toSocketLayerRTP" =>   "socketLayerRTPOut",
 #    "toSocketLayerRTCP" =>  "socketLayerRTCPOut",
 
-
     # parameters
     "local_port" => "localPort",
     "dest_port" => "destPort",
     "message_length" => "messageLength",
     "message_freq" => "messageFreq",
     "dest_addresses" => "destAddresses",
-
 );
 
 foreach $fname (@fnames)
