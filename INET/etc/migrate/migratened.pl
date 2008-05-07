@@ -31,6 +31,17 @@ while (<INFILE>) {
     "to_app"    => "appOut",
     "to_appl"   => "appOut",
 
+    "TCPIn"     => "tcpIn",
+    "UDPIn"     => "udpIn",
+    "RSVPIn"    => "rsvpIn",
+    "OSPFIn"    => "ospfIn",
+    "UDPOut"    => "udpOut",
+    "RSVPOut"   => "rsvpOut",
+    "OSPFOut"   => "ospfOut",
+
+    "fromIPv6"  => "ipv6In",
+    "toIPv6"    => "ipv6Out",
+
     # from RTP -- TBD only when RTP code has been patched!
 #    "fromApp" =>            "appIn",
 #    "fromProfile" =>        "profileIn",
