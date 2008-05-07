@@ -18,15 +18,55 @@ while (<INFILE>) {
 }
 #print join(' ', @fnames);
 
+%replacements = (
+    # gates
+    "from_ip"   => "ipIn",
+    "from_ipv6" => "ipv6In",
+    "from_udp"  => "udpIn",
+    "from_app"  => "appIn",
+    "from_mpls_switch" => "mplsSwitchIn",
+    "to_ip"     => "ipOut",
+    "to_ipv6"   => "ipv6Out",
+    "to_udp"    => "udpOut",
+    "to_app"    => "appOut",
+    "to_appl"   => "appOut",
+
+    # from RTP -- TBD only when RTP code has been patched!
+#    "fromApp" =>            "appIn",
+#    "fromProfile" =>        "profileIn",
+#    "fromRTP" =>            "rtpIn",
+#    "fromRTCP" =>           "rtcpIn",
+#    "fromSocketLayer" =>    "socketLayerIn",
+#    "fromSocketLayerRTP" => "socketLayerRTPIn",
+#    "fromSocketLayerRTCP" =>"socketLayerRTCPIn",
+#    "toApp" =>              "appOut",
+#    "toProfile" =>          "profileOut",
+#    "toRTCP" =>             "rtcpOut",
+#    "toRTP" =>              "rtpOut",
+#    "toSocketLayer" =>      "socketLayerOut",
+#    "toSocketLayerRTP" =>   "socketLayerRTPOut",
+#    "toSocketLayerRTCP" =>  "socketLayerRTCPOut",
+
+
+    # parameters
+    "local_port" => "localPort",
+    "dest_port" => "destPort",
+    "message_length" => "messageLength",
+    "message_freq" => "messageFreq",
+    "dest_addresses" => "destAddresses",
+
+);
+
 foreach $fname (@fnames)
 {
     print "reading $fname...\n" if ($verbose);
     $txt = readfile($fname);
 
     # process $txt:
-    .......
-    .......
-    .......
+    foreach my $from (keys(%replacements)) {
+        my $to = $replacements{$from};
+        $txt =~ s/\b$from\b/$to/sg;
+    }
 
     writefile($fname, $txt);
     #writefile("$fname.new", $txt);
