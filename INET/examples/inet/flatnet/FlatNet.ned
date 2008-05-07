@@ -43,13 +43,7 @@ network FlatNet
             datarate = 10Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator {
-            parameters:
-                moduleTypes = "inet.nodes.inet.Router inet.nodes.inet.StandardHost";
-                nonIPModuleTypes = "";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
-        }
+        configurator: FlatNetworkConfigurator;
         rte[57]: Router {
             parameters:
                 @display("is=vs");

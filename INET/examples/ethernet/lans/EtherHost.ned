@@ -33,6 +33,7 @@ import inet.networkinterfaces.ethernet.EtherMAC;
 module EtherHost
 {
     parameters:
+        @node();
         @display("i=device/pc2");
     gates:
         inout ethg;

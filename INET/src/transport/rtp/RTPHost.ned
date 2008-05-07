@@ -11,6 +11,7 @@ import inet.nodes.inet.NetworkLayer;
 module RTPHost
 {
     parameters:
+        @node();
         bool debug = default(false);
         string profileName;
         string destinationAddress = default("");

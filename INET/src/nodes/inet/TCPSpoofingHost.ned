@@ -17,9 +17,6 @@
 //
 
 
-
-
-
 package inet.nodes.inet;
 
 import inet.applications.tcpapp.TCPSpoof;
@@ -37,6 +34,7 @@ import inet.util.NAMTraceWriter;
 module TCPSpoofingHost
 {
     parameters:
+        @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");

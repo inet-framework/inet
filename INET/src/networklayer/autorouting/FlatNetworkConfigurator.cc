@@ -59,14 +59,8 @@ void FlatNetworkConfigurator::initialize(int stage)
 
 void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    // FIXME eliminate nonIPModuleTypes, like in NetworkConfigurator
-    StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
-    StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
-    for (unsigned int i=0; i<nonIPTypes.size(); i++)
-        types.push_back(nonIPTypes[i]);
-
     // extract topology
-    topo.extractByNedTypeName(types);
+    topo.extractByProperty("node");
     EV << "cTopology found " << topo.nodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
@@ -74,7 +68,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     for (int i=0; i<topo.nodes(); i++)
     {
         cModule *mod = topo.node(i)->module();
-        nodeInfo[i].isIPNode = std::find(nonIPTypes.begin(),nonIPTypes.end(), mod->className())==nonIPTypes.end();
+        nodeInfo[i].isIPNode = IPAddressResolver().findInterfaceTableOf(mod)!=NULL;
         if (nodeInfo[i].isIPNode)
         {
             nodeInfo[i].ift = IPAddressResolver().interfaceTableOf(mod);

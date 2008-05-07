@@ -38,11 +38,7 @@ network NClientsPPP
             datarate = 512Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6 {
-            parameters:
-                moduleTypes = "Router6 StandardHost6";
-                nonIPModuleTypes = "";
-        }
+        configurator: FlatNetworkConfigurator6;
         r1: Router6;
         r2: Router6;
         r3: Router6;

@@ -32,6 +32,7 @@ import inet.mobility.BasicMobility;
 module PlainMobilityHost
 {
     parameters:
+        @node();
         string mobilityType;
         @display("i=device/pocketpc_s");
     submodules:

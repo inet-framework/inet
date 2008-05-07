@@ -16,9 +16,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
 package inet.examples.wireless.handover;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
@@ -34,30 +31,21 @@ network HandoverNetwork
         double playgroundSizeY;
     submodules:
         host: WirelessHost {
-            parameters:
-                @display("p=50,130;r=,,#707070");
+            @display("p=50,130;r=,,#707070");
         }
         ap1: WirelessAP {
-            parameters:
-                @display("p=100,200;r=,,#707070");
+            @display("p=100,200;r=,,#707070");
         }
         ap2: WirelessAP {
-            parameters:
-                @display("p=500,200;r=,,#707070");
+            @display("p=500,200;r=,,#707070");
         }
         channelcontrol: ChannelControl {
-            parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
-                @display("p=60,50");
+            playgroundSizeX = playgroundSizeX;
+            playgroundSizeY = playgroundSizeY;
+            @display("p=60,50");
         }
         configurator: FlatNetworkConfigurator {
-            parameters:
-                moduleTypes = "WirelessHost WirelessHostSimplified";
-                nonIPModuleTypes = "WirelessAP WirelessAPSimplified";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
-                @display("p=140,50");
+            @display("p=140,50");
         }
     connections allowunconnected:
 }

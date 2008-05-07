@@ -38,6 +38,7 @@ import inet.networkinterfaces.ieee80211.Ieee80211NicAPSimplified;
 module WirelessAPSimplified
 {
     parameters:
+        @node();
         @display("i=device/accesspoint");
     gates:
         input radioIn;

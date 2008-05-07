@@ -27,10 +27,7 @@ network R37orig
             datarate = 60Kbps;
         }
     submodules:
-        configurator: NetworkConfigurator {
-            parameters:
-                moduleTypes = "RSVP_LSR";
-        }
+        configurator: NetworkConfigurator;
         LSR0: RSVP_LSR {
             parameters:
                 @display("p=489,376");

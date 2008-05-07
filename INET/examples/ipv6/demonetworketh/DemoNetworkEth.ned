@@ -21,6 +21,8 @@ package inet.examples.ipv6.demonetworketh;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
+import inet.nodes.ipv6.StandardHost6;
+import inet.util.TCPDump;
 import ned.BasicChannel;
 
 
@@ -34,11 +36,18 @@ network DemoNetworkEth
             delay = 0.1us;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6 {
-            parameters:
-                moduleTypes = "Router6 StandardHost6 TCPDump";
-                nonIPModuleTypes = "EtherHub TCPDump";
-        }
+        configurator: FlatNetworkConfigurator6;
         r1: Router6;
         r2: Router6;
+        cli[n]: StandardHost6;
+        srv[n]: StandardHost6;
+        linemonitor[n]: TCPDump;
+    connections allowunconnected:
+        for i=0..n-1 {
+            cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
+            linemonitor[i].b <--> ethernetline <--> r1.ethg++;
+            //cli[i].ethg++ <--> ethernetline <--> r1.ethg++;
+            srv[i].ethg++ <--> ethernetline <--> r2.ethg++;
+        }
+        r1.ethg++ <--> ethernetline <--> r2.ethg++;
 }

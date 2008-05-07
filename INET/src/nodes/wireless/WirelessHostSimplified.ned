@@ -16,9 +16,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
 package inet.nodes.wireless;
 
 import inet.applications.pingapp.PingApp;
@@ -50,6 +47,7 @@ import inet.transport.udp.UDP;
 module WirelessHostSimplified
 {
     parameters:
+        @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");

@@ -31,7 +31,6 @@ network R37
     submodules:
         configurator: NetworkConfigurator {
             parameters:
-                moduleTypes = "RSVP_LSR StandardHost";
                 @display("p=100,100");
         }
         channelInstaller: ChannelInstaller {

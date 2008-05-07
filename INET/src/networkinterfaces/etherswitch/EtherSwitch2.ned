@@ -34,9 +34,10 @@ import inet.networkinterfaces.ethernet.EtherMAC2;
 module EtherSwitch2
 {
     parameters:
-        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
-                               // values are MACRelayUnitNP and MACRelayUnitPP
+        @node();
         @display("i=device/switch");
+        string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit; currently possible
+                                                          // values are MACRelayUnitNP and MACRelayUnitPP
     gates:
         inout ethg[];
 

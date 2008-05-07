@@ -22,7 +22,7 @@ package inet.networkinterfaces.ethernet;
 //
 // A generic wiring hub model.
 //
-// ethg[i] gates represent ports. Messages arriving on a port are broadcast 
+// ethg[i] gates represent ports. Messages arriving on a port are broadcast
 // to every other port.
 //
 // The connections should have data rate set to zero. Cable lengths
@@ -36,6 +36,7 @@ package inet.networkinterfaces.ethernet;
 simple EtherHub
 {
     parameters:
+        @node();
         bool writeScalars = default(true);   // enable/disable recording statistics in omnetpp.sca
         @display("i=device/hub");
     gates:

@@ -40,10 +40,10 @@ package inet.networklayer.autorouting;
 //
 // How does it know which modules are routers, hosts, et.c that need to
 // be configured, and what is the network topology? The configurator
-// picks all modules of types listed in the moduleTypes parameter and
-// their connections, and builds a graph from it. Then it runs Dijstra's
+// picks all modules which have a @node property and their connections,
+// and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
-// \IP nodes, that is, not listed in the nonIPModuleTypes parameter.
+// IP nodes.
 //
 // It is assumed that the routing table (RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts
@@ -52,7 +52,7 @@ package inet.networklayer.autorouting;
 // To avoid interference with the above algorithm, it's recommended that
 // no host or router should have its address set explicitly, and
 // no routes are set up manually. Practically, routing files (.irt, .mrt)
-// should be missing or empty.
+// should be absent or empty.
 //
 // All the above takes place in initialization stage 2. (In stage 0,
 // interfaces register themselves in the InterfaceTable modules, and
@@ -61,9 +61,6 @@ package inet.networklayer.autorouting;
 simple FlatNetworkConfigurator
 {
     parameters:
-        string moduleTypes; // all module types to be considered part of the topology
-        string nonIPModuleTypes; // module types which don't need \IP configuration
-                                  // (e.g. Ethernet hub, switch or bus)
         string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)
         string netmask = default("255.255.0.0"); // host part of addresses are autoconfigured
         @display("i=block/cogwheel_s");

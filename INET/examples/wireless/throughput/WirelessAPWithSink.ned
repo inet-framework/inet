@@ -32,6 +32,7 @@ import inet.networkinterfaces.ieee80211.Ieee80211NicAPSimplified;
 module WirelessAPWithSink
 {
     parameters:
+        @node();
         @display("i=device/accesspoint");
     gates:
         input radioIn;

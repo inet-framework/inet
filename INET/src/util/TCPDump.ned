@@ -25,6 +25,7 @@ package inet.util;
 simple TCPDump
 {
     parameters:
+        @node();
         @display("i=device/clock");
     gates:
         inout a;

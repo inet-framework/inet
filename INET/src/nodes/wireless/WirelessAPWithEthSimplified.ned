@@ -40,6 +40,7 @@ import inet.networkinterfaces.ieee80211.Ieee80211NicAPSimplified;
 module WirelessAPWithEthSimplified
 {
     parameters:
+        @node();
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
     gates:
         inout ethg[];

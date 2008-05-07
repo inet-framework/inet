@@ -33,20 +33,17 @@
  */
 class INET_API FlatNetworkConfigurator6 : public cSimpleModule
 {
-  public:
-    typedef std::vector<std::string> StringVector;
-
   protected:
     virtual int numInitStages() const  {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void configureAdvPrefixes(cTopology& topo, StringVector& nonIPTypes);
-    void addOwnAdvPrefixRoutes(cTopology& topo, StringVector& nonIPTypes);
-    void addStaticRoutes(cTopology& topo, StringVector& nonIPTypes);
+    void configureAdvPrefixes(cTopology& topo);
+    void addOwnAdvPrefixRoutes(cTopology& topo);
+    void addStaticRoutes(cTopology& topo);
 
     void setDisplayString(int numIPNodes, int numNonIPNodes);
-    bool isNonIPType(cTopology::Node *node, StringVector& nonIPTypes);
+    bool isIPNode(cTopology::Node *node);
 };
 
 #endif

@@ -16,9 +16,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
-
 package inet.examples.inet.nclients;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
@@ -30,8 +27,8 @@ import ned.BasicChannel;
 network NClients2
 {
     parameters:
-        int numrouters;
-        double hostsperrouter;
+        int numRouters;
+        int hostsPerRouter;
     types:
         channel ethernetline2 extends BasicChannel
         {
@@ -44,13 +41,9 @@ network NClients2
             datarate = 1Gbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator {
-            parameters:
-                moduleTypes = "Router StandardHost";
-                nonIPModuleTypes = "";
-        }
-        r[numrouters]: Router;
-        cli[numrouters*hostsperrouter]: StandardHost {
+        configurator: FlatNetworkConfigurator;
+        r[numRouters]: Router;
+        cli[numRouters*hostsPerRouter]: StandardHost {
             parameters:
                 @display("i=device/laptop_vs");
         }
@@ -59,12 +52,12 @@ network NClients2
                 @display("i=device/server_l");
         }
     connections allowunconnected:
-        for i=0..numrouters-1, for j=0..hostsperrouter-1 {
-            cli[i*hostsperrouter+j].pppg++ <--> ethernetline2 <--> r[i].pppg++;
+        for i=0..numRouters-1, for j=0..hostsPerRouter-1 {
+            cli[i*hostsPerRouter+j].pppg++ <--> ethernetline2 <--> r[i].pppg++;
         }
-        for i=0..numrouters-2 {
+        for i=0..numRouters-2 {
             r[i].pppg++ <--> gigabitline2 <--> r[i+1].pppg++;
         }
-        r[numrouters-1].pppg++ <--> ethernetline2 <--> srv.pppg++;
+        r[numRouters-1].pppg++ <--> ethernetline2 <--> srv.pppg++;
 }
 

@@ -17,9 +17,6 @@
 //
 
 
-
-
-
 package inet.nodes.inet;
 
 import inet.applications.generic.IPTrafficGenerator;
@@ -36,6 +33,7 @@ import inet.networklayer.ipv4.RoutingTable;
 module BurstHost
 {
     parameters:
+        @node();
         string trafGenType;
         bool IPForward = default(false);
         string routingFile = default("");

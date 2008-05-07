@@ -46,7 +46,6 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
         bool usesDefaultRoute;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
-    typedef std::vector<std::string> StringVector;
 
   protected:
     virtual int numInitStages() const  {return 3;}

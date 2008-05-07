@@ -45,10 +45,6 @@ network Net80211
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                moduleTypes = "MFMobileHost";
-                nonIPModuleTypes = "";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
                 @display("p=140,50");
         }
     connections allowunconnected:

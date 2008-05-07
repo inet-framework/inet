@@ -42,11 +42,7 @@ network NClientsEth
             delay = 0.1us;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6 {
-            parameters:
-                moduleTypes = "Router6 StandardHost6 EtherHub";
-                nonIPModuleTypes = "EtherHub";
-        }
+        configurator: FlatNetworkConfigurator6;
         r1: Router6;
         r2: Router6;
         r3: Router6;

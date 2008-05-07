@@ -31,40 +31,28 @@ network ARPTest
         }
     submodules:
         client: StandardHost {
-            parameters:
-                @display("p=71,64;i=device/laptop_l");
+            @display("p=71,64;i=device/laptop_l");
         }
         host1: StandardHost {
-            parameters:
-                @display("p=65,131;i=device/pc");
+            @display("p=65,131;i=device/pc");
         }
         host2: StandardHost {
-            parameters:
-                @display("p=60,191;i=device/pc");
+            @display("p=60,191;i=device/pc");
         }
         switch: EtherSwitch {
-            parameters:
-                @display("p=202,156");
+            @display("p=202,156");
         }
         net: Router {
-            parameters:
-                @display("p=394,166");
+            @display("p=394,166");
         }
         router: Router {
-            parameters:
-                @display("p=311,74");
+            @display("p=311,74");
         }
         server: StandardHost {
-            parameters:
-                @display("p=512,58;i=device/server_l");
+            @display("p=512,58;i=device/server_l");
         }
         configurator: FlatNetworkConfigurator {
-            parameters:
-                moduleTypes = "Router StandardHost EtherSwitch";
-                nonIPModuleTypes = "EtherSwitch";
-                networkAddress = "10.0.0.0";
-                netmask = "255.255.0.0";
-                @display("p=495,160");
+            @display("p=495,160");
         }
     connections:
         client.ethg++ <--> switch.ethg++;

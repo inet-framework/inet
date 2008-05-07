@@ -17,9 +17,6 @@
 //
 
 
-
-
-
 package inet.nodes.inet;
 
 import inet.base.NotificationBoard;
@@ -36,6 +33,7 @@ import inet.networklayer.ospfv2.OSPFRouting;
 module OSPFRouter
 {
     parameters:
+        @node();
         string routingFile = default("");
         @display("i=srouter");
     gates:

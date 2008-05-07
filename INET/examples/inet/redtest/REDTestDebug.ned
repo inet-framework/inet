@@ -40,10 +40,6 @@ network REDTestDebug
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                moduleTypes = "Router StandardHost ThruputMeter TCPDump";
-                nonIPModuleTypes = "ThruputMeter TCPDump";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
                 @display("p=147,40");
         }
         scenarioManager: ScenarioManager {

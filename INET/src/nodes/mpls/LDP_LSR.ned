@@ -38,6 +38,7 @@ import inet.util.NAMTraceWriter;
 module LDP_LSR
 {
     parameters:
+        @node();
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
         int namid;

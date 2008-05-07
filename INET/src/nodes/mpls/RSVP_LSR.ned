@@ -38,6 +38,7 @@ import inet.util.NAMTraceWriter;
 module RSVP_LSR
 {
     parameters:
+        @node();
         int namid;
         string peers;
         string routerId = default("auto");
@@ -92,9 +93,8 @@ module RSVP_LSR
         }
         mpls: MPLS {
             parameters:
-                //peers = peers;
                 classifier = "classifier";
-                @display("o=#ff8000;p=192,270;b=66,14");
+                @display("p=192,270");
             gates:
                 netwIn[sizeof(pppg)];
                 netwOut[sizeof(pppg)];

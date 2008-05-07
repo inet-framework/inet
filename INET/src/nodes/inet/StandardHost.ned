@@ -18,9 +18,6 @@
 //
 
 
-
-
-
 package inet.nodes.inet;
 
 import inet.applications.pingapp.PingApp;
@@ -42,6 +39,7 @@ import inet.util.NAMTraceWriter;
 module StandardHost
 {
     parameters:
+        @node();
         int numTcpApps;
         int numUdpApps;
         string tcpAppType;

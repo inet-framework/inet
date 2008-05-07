@@ -32,9 +32,6 @@ package inet.networklayer.autorouting;
 simple FlatNetworkConfigurator6
 {
     parameters:
-        string moduleTypes; // all module types to be considered part of the topology
-        string nonIPModuleTypes; // module types which don't need \IP configuration
-                                  // (e.g. Ethernet hub, switch or bus)
         @display("i=block/cogwheel");
 }
 

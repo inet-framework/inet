@@ -17,8 +17,6 @@
 //
 
 
-
-
 package inet.nodes.ipv6;
 
 import inet.base.NotificationBoard;
@@ -34,6 +32,7 @@ import inet.networklayer.ipv6.RoutingTable6;
 module Router6
 {
     parameters:
+        @node();
         @display("i=abstract/router");
     gates:
         inout pppg[];

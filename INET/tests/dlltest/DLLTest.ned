@@ -38,23 +38,15 @@ network DLLTest
     parameters:
         int n;
     submodules:
-        configurator: FlatNetworkConfigurator {
-            parameters:
-                moduleTypes = "Router StandardHost";
-                nonIPModuleTypes = "";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
-        }
+        configurator: FlatNetworkConfigurator;
         r1: Router;
         r2: Router;
         r3: Router;
         cli[n]: StandardHost {
-            parameters:
-                @display("i=device/laptop");
+            @display("i=device/laptop");
         }
         srv: StandardHost {
-            parameters:
-                @display("i=device/server_l");
+            @display("i=device/server_l");
         }
     connections allowunconnected:
         for i=0..n-1 {
@@ -70,6 +62,5 @@ network DLLTest
 
         r3.out++ --> ethernetline --> srv.in++;
         r3.in++ <-- ethernetline <-- srv.out++;
-
 }
 

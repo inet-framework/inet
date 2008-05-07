@@ -42,10 +42,6 @@ network RouterPerfNetwork
         }
         configurator: FlatNetworkConfigurator {
             parameters:
-                moduleTypes = "Router BurstHost";
-                nonIPModuleTypes = "";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
                 @display("p=61,163");
         }
         sender[nodeNo]: BurstHost {

@@ -41,30 +41,26 @@ void FlatNetworkConfigurator6::initialize(int stage)
     // FIXME: spare common beginning for all stages?
 
     cTopology topo("topo");
-    StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
-    StringVector nonIPTypes = cStringTokenizer(par("nonIPModuleTypes"), " ").asVector();
-    for (unsigned int i=0; i<nonIPTypes.size(); i++)
-        types.push_back(nonIPTypes[i]);
 
     // extract topology
-    topo.extractByNedTypeName(types);
+    topo.extractByProperty("node");
     EV << "cTopology found " << topo.nodes() << " nodes\n";
 
     if (stage==2)
     {
-        configureAdvPrefixes(topo, nonIPTypes);
+        configureAdvPrefixes(topo);
     }
     else if (stage==3)
     {
-        addOwnAdvPrefixRoutes(topo, nonIPTypes);
-        addStaticRoutes(topo, nonIPTypes);
+        addOwnAdvPrefixRoutes(topo);
+        addStaticRoutes(topo);
     }
 #else
     error("FlatNetworkConfigurator6 not supported: NO_IPv6 option was defined during compilation");
 #endif
 }
 
-void FlatNetworkConfigurator6::handleMessage(cMessage * msg)
+void FlatNetworkConfigurator6::handleMessage(cMessage *)
 {
     error("this module doesn't handle messages, it runs only in initialize()");
 }
@@ -77,19 +73,19 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
     displayString().setTagArg("t", 0, buf);
 }
 
-bool FlatNetworkConfigurator6::isNonIPType(cTopology::Node *node, StringVector& nonIPTypes)
+bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return std::find(nonIPTypes.begin(), nonIPTypes.end(), node->module()->className())!=nonIPTypes.end();
+    return IPAddressResolver().findInterfaceTableOf(node->module()) != NULL;
 }
 
 #ifndef NO_IPv6
-void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVector& nonIPTypes)
+void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 {
     // assign advertised prefixes to all router interfaces
     for (int i = 0; i < topo.nodes(); i++)
     {
         // skip bus types
-        if (isNonIPType(topo.node(i), nonIPTypes))
+        if (!isIPNode(topo.node(i)))
             continue;
 
         // find interface table and assign address to all (non-loopback) interfaces
@@ -137,7 +133,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo, StringVecto
     }
 }
 
-void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo, StringVector& nonIPTypes)
+void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
 {
     // add globally routable prefixes to routing table
     for (int i = 0; i < topo.nodes(); i++)
@@ -145,7 +141,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo, StringVect
         cTopology::Node *node = topo.node(i);
 
         // skip bus types
-        if (isNonIPType(node, nonIPTypes))
+        if (!isIPNode(node))
             continue;
 
         RoutingTable6 *rt = IPAddressResolver().routingTable6Of(node->module());
@@ -172,7 +168,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo, StringVect
     }
 }
 
-void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& nonIPTypes)
+void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 {
     int numIPNodes = 0;
 
@@ -182,7 +178,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
         cTopology::Node *destNode = topo.node(i);
 
         // skip bus types
-        if (isNonIPType(destNode, nonIPTypes))
+        if (!isIPNode(destNode))
             continue;
 /*
     void addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
@@ -221,7 +217,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
         {
             if (i == j)
                 continue;
-            if (isNonIPType(topo.node(j), nonIPTypes))
+            if (!isIPNode(topo.node(j)))
                 continue;
 
             cTopology::Node *atNode = topo.node(j);
@@ -245,7 +241,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo, StringVector& no
             cTopology::Node *prevNode = atNode;
             // if there's no ethernet switch between atNode and it's next hop
             // neighbour, we don't go into the following while() loop
-            while (isNonIPType(prevNode->path(0)->remoteNode(), nonIPTypes))
+            while (!isIPNode(prevNode->path(0)->remoteNode()))
                 prevNode = prevNode->path(0)->remoteNode();
 
             // ok, the next hop is now just one step away from prevNode

@@ -31,7 +31,6 @@ network RSVPTE4
     submodules:
         configurator: NetworkConfigurator {
             parameters:
-                moduleTypes = "RSVP_LSR StandardHost";
                 @display("p=115,50");
         }
         LSR1: RSVP_LSR {

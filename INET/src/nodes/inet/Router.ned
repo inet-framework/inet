@@ -17,8 +17,6 @@
 //
 
 
-
-
 package inet.nodes.inet;
 
 import inet.base.NotificationBoard;
@@ -35,6 +33,7 @@ import inet.util.NAMTraceWriter;
 module Router
 {
     parameters:
+        @node();
         string routingFile = default("");
         @display("i=abstract/router");
     gates:

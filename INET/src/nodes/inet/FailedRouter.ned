@@ -17,8 +17,6 @@
 //
 
 
-
-
 package inet.nodes.inet;
 
 import inet.networklayer.extras.Dummy;
@@ -30,6 +28,7 @@ import inet.networklayer.extras.Dummy;
 module FailedRouter
 {
     parameters:
+        @node();
         int namid;
         string routingFile = default("");
     gates:

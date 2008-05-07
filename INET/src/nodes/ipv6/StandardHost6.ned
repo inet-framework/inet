@@ -18,9 +18,6 @@
 //
 
 
-
-
-
 package inet.nodes.ipv6;
 
 import inet.applications.pingapp.PingApp;
@@ -41,6 +38,7 @@ import inet.transport.udp.UDP;
 module StandardHost6
 {
     parameters:
+        @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         string tcpAppType = default("");

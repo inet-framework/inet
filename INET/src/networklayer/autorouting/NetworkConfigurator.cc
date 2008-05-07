@@ -66,10 +66,8 @@ void NetworkConfigurator::initialize(int stage)
 
 void NetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    StringVector types = cStringTokenizer(par("moduleTypes"), " ").asVector();
-
     // extract topology
-    topo.extractByNedTypeName(types);
+    topo.extractByProperty("node");
     EV << "cTopology found " << topo.nodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
