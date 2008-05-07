@@ -49,8 +49,8 @@ module RTPHost
                 debug = false;
                 @display("p=180,164;b=40,24");
             gates:
-                from_appl[2];
-                to_appl[2];
+                appIn[2];
+                appOut[2];
         }
         udpModule: UDPModule {
             parameters:
@@ -74,14 +74,14 @@ module RTPHost
         // transport connections
         application.toRTP --> rtpLayer.fromApp;
         application.fromRTP <-- rtpLayer.toApp;
-        rtpLayer.toSocketLayerRTP --> socketLayer.from_appl[0];
-        rtpLayer.fromSocketLayerRTP <-- socketLayer.to_appl[0];
-        rtpLayer.toSocketLayerRTCP --> socketLayer.from_appl[1];
-        rtpLayer.fromSocketLayerRTCP <-- socketLayer.to_appl[1];
-        socketLayer.to_udp --> udpModule.from_socket;
-        socketLayer.from_udp <-- udpModule.to_socket;
-        networkLayer.UDPOut --> udpModule.from_ip;
-        networkLayer.UDPIn <-- udpModule.to_ip;
+        rtpLayer.toSocketLayerRTP --> socketLayer.appIn[0];
+        rtpLayer.fromSocketLayerRTP <-- socketLayer.appOut[0];
+        rtpLayer.toSocketLayerRTCP --> socketLayer.appIn[1];
+        rtpLayer.fromSocketLayerRTCP <-- socketLayer.appOut[1];
+        socketLayer.udpOut --> udpModule.from_socket;
+        socketLayer.udpIn <-- udpModule.to_socket;
+        networkLayer.udpOut --> udpModule.ipIn;
+        networkLayer.udpIn <-- udpModule.ipOut;
 
         // connections to network outside
         for i=0..sizeof(out)-1 {

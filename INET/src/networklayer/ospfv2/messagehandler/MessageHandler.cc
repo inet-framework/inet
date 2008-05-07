@@ -310,7 +310,7 @@ void OSPF::MessageHandler::SendPacket (OSPFPacket* packet, IPv4Address destinati
         default: break;
     }
 
-    ospfModule->send (packet,"to_ip");
+    ospfModule->send (packet,"ipOut");
 }
 
 void OSPF::MessageHandler::ClearTimer (OSPFTimer* timer)

@@ -26,9 +26,9 @@ package inet.applications.udpapp;
 simple UDPSink like UDPApp
 {
     parameters:
-        int local_port; // if -1, app doesn't bind in UDP
+        int localPort; // if -1, app doesn't bind in UDP
     gates:
-        input from_udp;
-        output to_udp;
+        input udpIn;
+        output udpOut;
 }
 

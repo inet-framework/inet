@@ -33,7 +33,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     ASSERT(!msg->isSelfMessage()); // no timers in ICMPv6
 
     // process arriving ICMP message
-    if (msg->arrivalGate()->isName("fromIPv6"))
+    if (msg->arrivalGate()->isName("ipv6In"))
     {
         EV << "Processing ICMPv6 message.\n";
         processICMPv6Message(check_and_cast<ICMPv6Message *>(msg));
@@ -193,13 +193,13 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
     ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
 
-    send(msg,"toIPv6");
+    send(msg,"ipv6Out");
 }
 
 void ICMPv6::sendToIP(ICMPv6Message *msg)
 {
     // assumes IPControlInfo is already attached
-    send(msg,"toIPv6");
+    send(msg,"ipv6Out");
 }
 
 ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)

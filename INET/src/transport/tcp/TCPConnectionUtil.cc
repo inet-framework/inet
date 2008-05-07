@@ -190,7 +190,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg,"to_ip");
+        tcpMain->send(tcpseg,"ipOut");
     }
     else
     {
@@ -201,7 +201,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg,"to_ipv6");
+        tcpMain->send(tcpseg,"ipv6Out");
     }
 }
 
@@ -219,7 +219,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"to_ip");
+        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"ipOut");
     }
     else
     {
@@ -230,7 +230,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"to_ipv6");
+        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"ipv6Out");
     }
 }
 
@@ -247,7 +247,7 @@ void TCPConnection::sendIndicationToApp(int code)
     TCPCommand *ind = new TCPCommand();
     ind->setConnId(connId);
     msg->setControlInfo(ind);
-    tcpMain->send(msg, "to_appl", appGateIndex);
+    tcpMain->send(msg, "appOut", appGateIndex);
 }
 
 void TCPConnection::sendEstabIndicationToApp()
@@ -264,12 +264,12 @@ void TCPConnection::sendEstabIndicationToApp()
     ind->setRemotePort(remotePort);
 
     msg->setControlInfo(ind);
-    tcpMain->send(msg, "to_appl", appGateIndex);
+    tcpMain->send(msg, "appOut", appGateIndex);
 }
 
 void TCPConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->send(msg, "to_appl", appGateIndex);
+    tcpMain->send(msg, "appOut", appGateIndex);
 }
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)

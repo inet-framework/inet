@@ -25,14 +25,14 @@ package inet.applications.udpapp;
 simple UDPEchoApp like UDPApp
 {
     parameters:
-        int local_port;
-        int dest_port;
-        int message_length @unit("b"); // (bits)
-        volatile double message_freq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string dest_addresses = default(""); // list of \IP addresses, separated by spaces
+        int localPort;
+        int destPort;
+        int messageLength @unit("b"); // (bits)
+        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
+        string destAddresses = default(""); // list of \IP addresses, separated by spaces
     gates:
-        input from_udp;
-        output to_udp;
+        input udpIn;
+        output udpOut;
 }
 
 

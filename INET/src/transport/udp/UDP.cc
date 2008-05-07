@@ -197,7 +197,7 @@ short UDP::getEphemeralPort()
 void UDP::handleMessage(cMessage *msg)
 {
     // received from IP layer
-    if (msg->arrivedOn("from_ip") || msg->arrivedOn("from_ipv6"))
+    if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
         if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
             processICMPError(msg);
@@ -276,7 +276,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl,
     udpCtrl->setInterfaceId(ipCtrl->interfaceId());
     payload->setControlInfo(udpCtrl);
 
-    send(payload, "to_app", sd->appGateIndex);
+    send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
 
@@ -293,7 +293,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtr
     udpCtrl->setInterfaceId(ipCtrl->interfaceId());
     payload->setControlInfo(udpCtrl);
 
-    send(payload, "to_app", sd->appGateIndex);
+    send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
 
@@ -406,7 +406,7 @@ void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& 
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
 
-    send(notifyMsg, "to_app", sd->appGateIndex);
+    send(notifyMsg, "appOut", sd->appGateIndex);
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -508,7 +508,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
-        send(udpPacket,"to_ip");
+        send(udpPacket,"ipOut");
     }
     else
     {
@@ -522,7 +522,7 @@ void UDP::processMsgFromApp(cMessage *appData)
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
-        send(udpPacket,"to_ipv6");
+        send(udpPacket,"ipv6Out");
     }
     numSent++;
 }

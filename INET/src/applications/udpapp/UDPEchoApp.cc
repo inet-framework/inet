@@ -67,7 +67,7 @@ void UDPEchoApp::processPacket(cMessage *msg)
         controlInfo->setDestPort(srcPort);
 
         packet->setIsRequest(false);
-        send(packet, "to_udp");
+        send(packet, "udpOut");
     }
     else
     {

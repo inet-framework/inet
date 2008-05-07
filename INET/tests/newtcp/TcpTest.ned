@@ -28,14 +28,14 @@ network TcpTestNet1
         }
     connections:
         cli.tcpOut --> tcpcli.from_appl++;
-        cli.tcpIn <-- tcpcli.to_appl++;
+        cli.tcpIn <-- tcpcli.appOut++;
         srv.tcpOut --> tcpsrv.from_appl++;
-        srv.tcpIn <-- tcpsrv.to_appl++;
+        srv.tcpIn <-- tcpsrv.appOut++;
 
-        tcpcli.to_ip --> {  delay = 1ms; } --> tcptester.in1;
-        tcpcli.from_ip <-- {  delay = 1ms; } <-- tcptester.out1;
-        tcptester.out2 --> {  delay = 1ms; } --> tcpsrv.from_ip;
-        tcptester.in2 <-- {  delay = 1ms; } <-- tcpsrv.to_ip;
+        tcpcli.ipOut --> {  delay = 1ms; } --> tcptester.in1;
+        tcpcli.ipIn <-- {  delay = 1ms; } <-- tcptester.out1;
+        tcptester.out2 --> {  delay = 1ms; } --> tcpsrv.ipIn;
+        tcptester.in2 <-- {  delay = 1ms; } <-- tcpsrv.ipOut;
 }
 
 
@@ -66,13 +66,13 @@ network TcpTestNet2
         }
     connections:
         cli.tcpOut --> tcpcli.from_appl++;
-        cli.tcpIn <-- tcpcli.to_appl++;
+        cli.tcpIn <-- tcpcli.appOut++;
         srv.tcpOut --> tcpsrv.from_appl++;
-        srv.tcpIn <-- tcpsrv.to_appl++;
+        srv.tcpIn <-- tcpsrv.appOut++;
 
-        tcpcli.to_ip --> tcptester.in1;
-        tcpcli.from_ip <-- tcptester.out1;
-        tcptester.out2 --> {  delay = 1ms; datarate = 1000000; } --> tcpsrv.from_ip;
-        tcptester.in2 <-- {  delay = 1ms; datarate = 1000000; } <-- tcpsrv.to_ip;
+        tcpcli.ipOut --> tcptester.in1;
+        tcpcli.ipIn <-- tcptester.out1;
+        tcptester.out2 --> {  delay = 1ms; datarate = 1000000; } --> tcpsrv.ipIn;
+        tcptester.in2 <-- {  delay = 1ms; datarate = 1000000; } <-- tcpsrv.ipOut;
 }
 

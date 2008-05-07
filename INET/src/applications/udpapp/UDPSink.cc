@@ -31,7 +31,7 @@ void UDPSink::initialize()
     numReceived = 0;
     WATCH(numReceived);
 
-    int port = par("local_port");
+    int port = par("localPort");
     if (port!=-1)
         bindToPort(port);
 }

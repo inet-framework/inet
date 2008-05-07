@@ -76,7 +76,7 @@ void LinkStateRouting::handleMessage(cMessage * msg)
         announceMsg = NULL;
         sendToPeers(tedmod->ted, true, IPAddress());
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "from_ip"))
+    else if (!strcmp(msg->arrivalGate()->name(), "ipIn"))
     {
         EV << "Processing message from IP: " << msg << endl;
         IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
@@ -235,6 +235,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPAddress destAddr)
 
     msg->addPar("color") = TED_TRAFFIC;
 
-    send(msg, "to_ip");
+    send(msg, "ipOut");
 }
 

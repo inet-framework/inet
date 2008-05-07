@@ -33,7 +33,7 @@ void UDPAppBase::bindToPort(int port)
     ctrl->setSrcPort(port);
     ctrl->setSockId(UDPSocket::generateSocketId());
     msg->setControlInfo(ctrl);
-    send(msg, "to_udp");
+    send(msg, "udpOut");
 }
 
 void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
@@ -50,7 +50,7 @@ void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAd
     EV << "Sending packet: ";
     printPacket(msg);
 
-    send(msg, "to_udp");
+    send(msg, "udpOut");
 }
 
 void UDPAppBase::printPacket(cMessage *msg)

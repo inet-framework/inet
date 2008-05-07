@@ -25,11 +25,11 @@ package inet.applications.udpapp;
 // Compatible with both IPv4 and IPv6.
 //
 // The interval can be a constant or a random value (e.g. exponential(1)).
-// If the dest_addresses parameter contains more than one address, one
+// If the destAddresses parameter contains more than one address, one
 // of them is randomly chosen for each packet. An address may be given in the
 // dotted decimal notation, or with the module name. (The IPAddressResolver
 // class is used to resolve the address.) To disable the model, set
-// dest_addresses to "".
+// destAddresses to "".
 //
 // The peer can be UDPSink or another UDPBasicApp (it handles received packets
 // exactly like UDPSink).
@@ -39,14 +39,14 @@ package inet.applications.udpapp;
 simple UDPBasicApp like UDPApp
 {
     parameters:
-        int local_port; // if -1, app doesn't bind in UDP
-        int dest_port;
-        int message_length @unit("b"); // (bits)
-        volatile double message_freq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string dest_addresses = default(""); // list of \IP addresses, separated by spaces
+        int localPort; // if -1, app doesn't bind in UDP
+        int destPort;
+        int messageLength @unit("b"); // (bits)
+        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
+        string destAddresses = default(""); // list of \IP addresses, separated by spaces
     gates:
-        input from_udp;
-        output to_udp;
+        input udpIn;
+        output udpOut;
 }
 
 

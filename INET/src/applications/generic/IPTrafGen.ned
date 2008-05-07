@@ -27,10 +27,10 @@ package inet.applications.generic;
 simple IPTrafSink like IPTrafficGenerator
 {
     gates:
-        input from_ip;
-        input from_ipv6;
-        output to_ip;
-        output to_ipv6;
+        input ipIn;
+        input ipv6In;
+        output ipOut;
+        output ipv6Out;
 }
 
 
@@ -56,10 +56,10 @@ simple IPTrafGen like IPTrafficGenerator
         volatile int packetLength @unit("B"); // in bytes (changed 2005-11-04)
         string destAddresses = default(""); // list of \IP addresses, separated by spaces
     gates:
-        input from_ip;
-        input from_ipv6;
-        output to_ip;
-        output to_ipv6;
+        input ipIn;
+        input ipv6In;
+        output ipOut;
+        output ipv6Out;
 }
 
 

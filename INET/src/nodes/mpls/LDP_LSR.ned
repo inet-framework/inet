@@ -120,20 +120,20 @@ module LDP_LSR
 
         }
     connections allowunconnected:
-        linkStateRouting.to_ip --> networkLayer.OSPFIn;
-        linkStateRouting.from_ip <-- networkLayer.OSPFOut;
+        linkStateRouting.ipOut --> networkLayer.ospfIn;
+        linkStateRouting.ipIn <-- networkLayer.ospfOut;
 
-        ldp.tcpIn <-- tcp.to_appl++;
-        ldp.tcpOut --> tcp.from_appl++;
+        ldp.tcpIn <-- tcp.appOut++;
+        ldp.tcpOut --> tcp.appIn++;
 
-        ldp.udpOut --> udp.from_app++;
-        ldp.udpIn <-- udp.to_app++;
+        ldp.udpOut --> udp.appIn++;
+        ldp.udpIn <-- udp.appOut++;
 
-        udp.to_ip --> networkLayer.UDPIn;
-        udp.from_ip <-- networkLayer.UDPOut;
+        udp.ipOut --> networkLayer.udpIn;
+        udp.ipIn <-- networkLayer.udpOut;
 
-        tcp.to_ip --> networkLayer.TCPIn;
-        tcp.from_ip <-- networkLayer.TCPOut;
+        tcp.ipOut --> networkLayer.tcpIn;
+        tcp.ipIn <-- networkLayer.TCPOut;
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;

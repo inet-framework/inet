@@ -43,14 +43,14 @@ module NetworkLayer6
     gates:
         input ifIn[];
         output ifOut[];
-        input TCPIn;
+        input tcpIn;
         output TCPOut;
-        input UDPIn;
-        output UDPOut;
-        input RSVPIn;
-        output RSVPOut;
-        input OSPFIn;
-        output OSPFOut;
+        input udpIn;
+        output udpOut;
+        input rsvpIn;
+        output rsvpOut;
+        input ospfIn;
+        output ospfOut;
         input pingIn;
         output pingOut;
         output errorOut;
@@ -80,20 +80,20 @@ module NetworkLayer6
     connections allowunconnected:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer
         ipv6.transportOut[0] --> { @display("m=n"); } --> TCPOut;
-        ipv6.transportIn[0] <-- { @display("m=n"); } <-- TCPIn;
+        ipv6.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
 
-        ipv6.transportOut[1] --> { @display("m=n"); } --> UDPOut;
-        ipv6.transportIn[1] <-- { @display("m=n"); } <-- UDPIn;
+        ipv6.transportOut[1] --> { @display("m=n"); } --> udpOut;
+        ipv6.transportIn[1] <-- { @display("m=n"); } <-- udpIn;
 
-        ipv6.transportOut[2] --> { @display("m=n"); } --> RSVPOut;
-        ipv6.transportIn[2] <-- { @display("m=n"); } <-- RSVPIn;
+        ipv6.transportOut[2] --> { @display("m=n"); } --> rsvpOut;
+        ipv6.transportIn[2] <-- { @display("m=n"); } <-- rsvpIn;
 
-        ipv6.transportOut[3] --> { @display("m=n"); } --> OSPFOut;
-        ipv6.transportIn[3] <-- { @display("m=n"); } <-- OSPFIn;
+        ipv6.transportOut[3] --> { @display("m=n"); } --> ospfOut;
+        ipv6.transportIn[3] <-- { @display("m=n"); } <-- ospfIn;
 
         // IPv6 to ICMPv6
-        ipv6.icmpOut --> icmpv6.fromIPv6;
-        ipv6.icmpIn <-- icmpv6.toIPv6;
+        ipv6.icmpOut --> icmpv6.ipv6In;
+        ipv6.icmpIn <-- icmpv6.ipv6Out;
 
         // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;
@@ -103,8 +103,8 @@ module NetworkLayer6
         icmpv6.pingIn <-- pingIn;
 
         // IPv6 to Neighbour Discovery
-        ipv6.ndOut --> neighbourDiscovery.fromIPv6;
-        ipv6.ndIn <-- neighbourDiscovery.toIPv6;
+        ipv6.ndOut --> neighbourDiscovery.ipv6In;
+        ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
 
         // IPv6 to L2
         for i=0..sizeof(ifOut)-1 {

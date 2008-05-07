@@ -75,8 +75,8 @@ module OSPFRouter
                 @display("p=145,257,row,110;q=l2queue");
         }
     connections allowunconnected:
-        ospf.to_ip --> networkLayer.OSPFIn;
-        ospf.from_ip <-- networkLayer.OSPFOut;
+        ospf.ipOut --> networkLayer.ospfIn;
+        ospf.ipIn <-- networkLayer.ospfOut;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {

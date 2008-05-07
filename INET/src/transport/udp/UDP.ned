@@ -55,12 +55,12 @@ simple UDP
     parameters:
         @display("i=block/transport");
     gates:
-        input from_app[];
-        input from_ip;
-        input from_ipv6;
-        output to_app[];
-        output to_ip;
-        output to_ipv6;
+        input appIn[];
+        input ipIn;
+        input ipv6In;
+        output appOut[];
+        output ipOut;
+        output ipv6Out;
 }
 
 

@@ -41,11 +41,11 @@ void SomeUDPApp::initialize(int stage)
     WATCH(numSent);
     WATCH(numReceived);
 
-    localPort = par("local_port");
-    destPort = par("dest_port");
-    msgLength = par("message_length");
+    localPort = par("localPort");
+    destPort = par("destPort");
+    msgLength = par("messageLength");
 
-    const char *destAddrs = par("dest_addresses");
+    const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
@@ -57,7 +57,7 @@ void SomeUDPApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("message_freq"), timer);
+    scheduleAt((double)par("messageFreq"), timer);
 }
 
 IPvXAddress SomeUDPApp::chooseDestAddr()
@@ -86,7 +86,7 @@ void SomeUDPApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("message_freq"), msg);
+        scheduleAt(simTime()+(double)par("messageFreq"), msg);
     }
     else
     {

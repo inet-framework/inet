@@ -24,14 +24,14 @@
 simple SomeUDPApp like UDPApp
 {
     parameters:
-        int local_port; // if -1, app doesn't bind in UDP
-        int dest_port;
-        int message_length; // (bits)
-        volatile double message_freq; // should usually be a random value, e.g. exponential(1)
-        string dest_addresses; // list of \IP addresses, separated by spaces
+        int localPort; // if -1, app doesn't bind in UDP
+        int destPort;
+        int messageLength; // (bits)
+        volatile double messageFreq; // should usually be a random value, e.g. exponential(1)
+        string destAddresses; // list of \IP addresses, separated by spaces
     gates:
-        input from_udp;
-        output to_udp;
+        input udpIn;
+        output udpOut;
 }
 
 

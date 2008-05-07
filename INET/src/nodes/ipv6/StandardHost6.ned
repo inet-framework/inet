@@ -98,20 +98,20 @@ module StandardHost6
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {
-            tcpApp[i].tcpOut --> tcp.from_appl++;
-            tcpApp[i].tcpIn <-- tcp.to_appl++;
+            tcpApp[i].tcpOut --> tcp.appIn++;
+            tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        tcp.to_ipv6 --> networkLayer.TCPIn;
-        tcp.from_ipv6 <-- networkLayer.TCPOut;
+        tcp.ipv6Out --> networkLayer.tcpIn;
+        tcp.ipv6In <-- networkLayer.TCPOut;
 
         for i=0..numUdpApps-1 {
-            udpApp[i].to_udp --> udp.from_app++;
-            udpApp[i].from_udp <-- udp.to_app++;
+            udpApp[i].udpOut --> udp.appIn++;
+            udpApp[i].udpIn <-- udp.appOut++;
         }
 
-        udp.to_ipv6 --> networkLayer.UDPIn;
-        udp.from_ipv6 <-- networkLayer.UDPOut;
+        udp.ipv6Out --> networkLayer.udpIn;
+        udp.ipv6In <-- networkLayer.udpOut;
 
         networkLayer.pingOut --> pingApp.pingIn;
         networkLayer.pingIn <-- pingApp.pingOut;

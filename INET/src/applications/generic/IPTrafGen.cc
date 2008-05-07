@@ -148,7 +148,7 @@ void IPTrafGen::sendPacket()
         EV << "Sending packet: ";
         printPacket(payload);
 
-        send(payload, "to_ip");
+        send(payload, "ipOut");
     }
     else
     {
@@ -161,7 +161,7 @@ void IPTrafGen::sendPacket()
         EV << "Sending packet: ";
         printPacket(payload);
 
-        send(payload, "to_ipv6");
+        send(payload, "ipv6Out");
     }
     numSent++;
 }

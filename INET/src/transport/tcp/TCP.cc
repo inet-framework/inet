@@ -91,7 +91,7 @@ void TCP::handleMessage(cMessage *msg)
         if (!ret)
             removeConnection(conn);
     }
-    else if (msg->arrivedOn("from_ip") || msg->arrivedOn("from_ipv6"))
+    else if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
         if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
         {

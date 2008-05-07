@@ -41,11 +41,11 @@ void UDPBasicApp::initialize(int stage)
     WATCH(numSent);
     WATCH(numReceived);
 
-    localPort = par("local_port");
-    destPort = par("dest_port");
-    msgByteLength = par("message_length").longValue() / 8;  // FIXME param should be in bytes instead
+    localPort = par("localPort");
+    destPort = par("destPort");
+    msgByteLength = par("messageLength").longValue() / 8;  // FIXME param should be in bytes instead
 
-    const char *destAddrs = par("dest_addresses");
+    const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
@@ -57,7 +57,7 @@ void UDPBasicApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("message_freq"), timer);
+    scheduleAt((double)par("messageFreq"), timer);
 }
 
 IPvXAddress UDPBasicApp::chooseDestAddr()
@@ -92,7 +92,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         // send, then reschedule next sending
         sendPacket();
-        scheduleAt(simTime()+(double)par("message_freq"), msg);
+        scheduleAt(simTime()+(double)par("messageFreq"), msg);
     }
     else
     {

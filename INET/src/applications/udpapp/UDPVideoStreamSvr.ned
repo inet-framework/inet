@@ -43,7 +43,7 @@ simple UDPVideoStreamSvr like UDPApp
         volatile int packetLen @unit("B");
         volatile int videoSize @unit("B");
     gates:
-        input from_udp;
-        output to_udp;
+        input udpIn;
+        output udpOut;
 }
 

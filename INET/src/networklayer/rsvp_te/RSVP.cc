@@ -2000,7 +2000,7 @@ void RSVP::sendToIP(cMessage *msg, IPAddress destAddr)
 
     msg->addPar("color") = RSVP_TRAFFIC;
 
-    send(msg, "to_ip");
+    send(msg, "ipOut");
 }
 
 void RSVP::scheduleTimeout(PathStateBlock_t *psbEle)

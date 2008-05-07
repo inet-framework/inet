@@ -40,16 +40,16 @@ module NetworkLayer
         @display("i=block/fork");
     gates:
         input ifIn[];
-        input TCPIn;
-        input UDPIn;
-        input RSVPIn;
-        input OSPFIn;
+        input tcpIn;
+        input udpIn;
+        input rsvpIn;
+        input ospfIn;
         input pingIn;
         output ifOut[];
         output TCPOut;
-        output UDPOut;
-        output RSVPOut;
-        output OSPFOut;
+        output udpOut;
+        output rsvpOut;
+        output ospfOut;
         output pingOut;
 
     submodules:
@@ -87,10 +87,10 @@ module NetworkLayer
     connections allowunconnected:
         // transport Layer
         ip.transportOut[0] --> TCPOut;
-        ip.transportIn[0] <-- TCPIn;
+        ip.transportIn[0] <-- tcpIn;
 
-        ip.transportOut[1] --> UDPOut;
-        ip.transportIn[1] <-- UDPIn;
+        ip.transportOut[1] --> udpOut;
+        ip.transportIn[1] <-- udpIn;
 
         ip.transportOut[2] --> icmp.localIn;
         ip.transportIn[2] <-- icmp.sendOut;
@@ -98,11 +98,11 @@ module NetworkLayer
         ip.transportOut[3] --> igmp.localIn;
         ip.transportIn[3] <-- igmp.sendOut;
 
-        ip.transportOut[4] --> RSVPOut;
-        ip.transportIn[4] <-- RSVPIn;
+        ip.transportOut[4] --> rsvpOut;
+        ip.transportIn[4] <-- rsvpIn;
 
-        ip.transportOut[5] --> OSPFOut;
-        ip.transportIn[5] <-- OSPFIn;
+        ip.transportOut[5] --> ospfOut;
+        ip.transportIn[5] <-- ospfIn;
 
         icmp.pingOut --> pingOut;
         icmp.pingIn <-- pingIn;

@@ -87,7 +87,7 @@ module TCPSpoofingHost
                 @display("p=240,350,row,90;q=txQueue");
         }
     connections allowunconnected:
-        tcpSpoof.ipv4Out --> networkLayer.TCPIn;
+        tcpSpoof.ipv4Out --> networkLayer.tcpIn;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {

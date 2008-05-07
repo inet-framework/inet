@@ -35,8 +35,8 @@ simple ICMPv6
     parameters:
         @display("i=block/control");
     gates:
-        input fromIPv6;
-        output toIPv6;
+        input ipv6In;
+        output ipv6Out;
         input pingIn; // ping requests from app
         output pingOut;
         output errorOut;  // for errors

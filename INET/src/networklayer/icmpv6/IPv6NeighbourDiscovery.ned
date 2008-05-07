@@ -32,6 +32,6 @@ simple IPv6NeighbourDiscovery
     parameters:
         @display("i=block/network");
     gates:
-        input fromIPv6;
-        output toIPv6;
+        input ipv6In;
+        output ipv6Out;
 }

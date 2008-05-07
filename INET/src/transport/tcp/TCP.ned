@@ -60,7 +60,7 @@ package inet.transport.tcp;
 //
 // One TCP module can serve several application modules, and several
 // connections per application. The <i>k</i>th application connects to TCP's
-// from_appl[k] and to_appl[k] ports. When talking to applications, a
+// appIn[k] and appOut[k] ports. When talking to applications, a
 // connection is identified by the (application port index, connId) pair,
 // where connId is assigned by the application in the OPEN call.
 //
@@ -120,7 +120,7 @@ package inet.transport.tcp;
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
-//    without actually sending the buffered data. This is consistent with 
+//    without actually sending the buffered data. This is consistent with
 //    rfc 763 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
@@ -153,9 +153,9 @@ package inet.transport.tcp;
 //    at the beginning. This means there's currently no flow control
 //    between TCP and the app.
 //  - no \TCP header options (e.g. MSS is currently module parameter; no SACK;
-//    no timestamp option for more frequent round-trip time measurement per 
+//    no timestamp option for more frequent round-trip time measurement per
 //    rfc 2988 section 3
-//  - all timeouts are precisely calculated: timer granularity (which is caused 
+//  - all timeouts are precisely calculated: timer granularity (which is caused
 //    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix \TCP
 //    implementations) is not simulated
 //
@@ -184,11 +184,11 @@ simple TCP
         bool recordStats = default(true); // recording seqNum etc. into output vectors on/off
         @display("i=block/wheelbarrow");
     gates:
-        input from_appl[];
-        input from_ip;
-        input from_ipv6;
-        output to_appl[];
-        output to_ip;
-        output to_ipv6;
+        input appIn[];
+        input ipIn;
+        input ipv6In;
+        output appOut[];
+        output ipOut;
+        output ipv6Out;
 }
 

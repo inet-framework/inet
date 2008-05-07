@@ -108,20 +108,20 @@ module MobileHost
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {
-            tcpApp[i].tcpOut --> tcp.from_appl++;
-            tcpApp[i].tcpIn <-- tcp.to_appl++;
+            tcpApp[i].tcpOut --> tcp.appIn++;
+            tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        tcp.to_ip --> networkLayer.TCPIn;
-        tcp.from_ip <-- networkLayer.TCPOut;
+        tcp.ipOut --> networkLayer.tcpIn;
+        tcp.ipIn <-- networkLayer.TCPOut;
 
         for i=0..numUdpApps-1 {
-            udpApp[i].to_udp --> udp.from_app++;
-            udpApp[i].from_udp <-- udp.to_app++;
+            udpApp[i].udpOut --> udp.appIn++;
+            udpApp[i].udpIn <-- udp.appOut++;
         }
 
-        udp.to_ip --> networkLayer.UDPIn;
-        udp.from_ip <-- networkLayer.UDPOut;
+        udp.ipOut --> networkLayer.udpIn;
+        udp.ipIn <-- networkLayer.udpOut;
 
         networkLayer.pingOut --> pingApp.pingIn;
         networkLayer.pingIn <-- pingApp.pingOut;
