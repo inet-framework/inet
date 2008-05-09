@@ -1,7 +1,7 @@
-call %~dp0\runexample1 examples\ospfv2\areas  omnetpp.ini  AreaTest1
-call %~dp0\runexample1 examples\ospfv2\backbone  omnetpp.ini  Backbone1
-call %~dp0\runexample1 examples\ospfv2\fulltest  omnetpp.ini  OSPF1
-call %~dp0\runexample1 examples\ospfv2\simpletest  omnetpp.ini  OSPF1
+call %~dp0\runexample1 examples\ospfv2\areas  omnetpp.ini General
+call %~dp0\runexample1 examples\ospfv2\backbone  omnetpp.ini General
+call %~dp0\runexample1 examples\ospfv2\fulltest  omnetpp.ini General
+call %~dp0\runexample1 examples\ospfv2\simpletest  omnetpp.ini General
 call %~dp0\runexample1 examples\wireless\handover  omnetpp.ini General
 call %~dp0\runexample1 examples\wireless\throughput  omnetpp.ini  Throughput1
 call %~dp0\runexample1 examples\wireless\throughput  omnetpp.ini  Throughput2

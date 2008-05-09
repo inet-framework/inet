@@ -13,10 +13,10 @@ Running: $1 $2
   $INETROOT/src/inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
 }
 
-run examples/ospfv2/areas/omnetpp.ini  AreaTest1
-run examples/ospfv2/backbone/omnetpp.ini  Backbone1
-run examples/ospfv2/fulltest/omnetpp.ini  OSPF1
-run examples/ospfv2/simpletest/omnetpp.ini  OSPF1
+run examples/ospfv2/areas/omnetpp.ini General
+run examples/ospfv2/backbone/omnetpp.ini General
+run examples/ospfv2/fulltest/omnetpp.ini General
+run examples/ospfv2/simpletest/omnetpp.ini General
 run examples/wireless/handover/omnetpp.ini General
 run examples/wireless/throughput/omnetpp.ini  Throughput1
 run examples/wireless/throughput/omnetpp.ini  Throughput2
