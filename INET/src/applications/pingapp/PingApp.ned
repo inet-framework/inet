@@ -31,7 +31,7 @@ package inet.applications.pingapp;
 // in the received ping responses' sequence number (e.g. 1, 2, 3, 5), then
 // the missing pings (number 4 in this example) is counted as lost.
 // Then if it still arrives later (that is, a reply with a sequence number
-// smaller than the largers one received so far) it will be counted as
+// smaller than the largest one received so far) it will be counted as
 // out-of-sequence arrival. So the number of really lost pings will be
 // "lost" minus "out-of-order" (assuming there's no duplicate or bogus reply).
 //
@@ -48,7 +48,7 @@ simple PingApp
         volatile double interval @unit("s") = default(1s); // time to wait between pings (can be random)
         double hopLimit = default(32); // TTL or hopLimit for IP packets
         double count = default(0); // stop after count ping requests, 0 means continuously
-        double startTime @unit("s") = default(1s); // send first ping at startTime
+        double startTime @unit("s") = default(uniform(0s,this.interval)); // send first ping at startTime
         double stopTime @unit("s") = default(0s); // send no pings after stopTime, 0 means forever
         bool printPing = default(true); // dump on stdout
         @display("i=block/app");
@@ -58,3 +58,5 @@ simple PingApp
         input pingv6In;
         output pingv6Out;
 }
+
+

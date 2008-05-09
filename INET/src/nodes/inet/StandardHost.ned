@@ -40,12 +40,12 @@ module StandardHost
 {
     parameters:
         @node();
-        int numTcpApps;
-        int numUdpApps;
-        string tcpAppType;
-        string udpAppType;
-        bool IPForward;
-        int namid = default(0);
+        int numTcpApps = default(0);
+        int numUdpApps = default(0);
+        string tcpAppType = default("n/a");
+        string udpAppType = default("n/a");
+        bool IPForward = default(false);
+        int namid = default(-1);
         string routingFile = default("");
         @display("i=device/pc2");
     gates:

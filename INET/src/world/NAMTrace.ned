@@ -29,7 +29,7 @@ package inet.world;
 simple NAMTrace
 {
     parameters:
-        string logfile = default("out.nam");
+        string logfile = default("trace.nam");
         string prolog = default("");
         @display("i=old/floppy1");
 }
