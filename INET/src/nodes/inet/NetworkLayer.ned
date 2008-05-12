@@ -36,7 +36,7 @@ import inet.networklayer.ipv4.IP;
 module NetworkLayer
 {
     parameters:
-        bool proxyARP;
+        bool proxyARP = default(true);
         @display("i=block/fork");
     gates:
         input ifIn[];
