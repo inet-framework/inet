@@ -5,6 +5,13 @@ Recent changes in the INET Framework
 
 - converted to OMNeT++ 4.0
 
+- IP/IPv6: do not schedule a timer if processing time is zero (change made 
+  in base/AbstractQueue)
+
+- FlatNetworkConfigurator: use @node() property to determine which modules are 
+  network nodes (removed moduleTypes, nonIPModuleTypes parameters)
+
+
 INET-20061020
 -------------
 

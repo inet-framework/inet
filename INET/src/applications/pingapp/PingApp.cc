@@ -227,7 +227,7 @@ void PingApp::finish()
     recordScalar("Ping drop rate (%)", 100 * dropCount / (double)sendSeqNo);
     recordScalar("Ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
 
-    delayStat.recordScalar("Ping roundtrip delays");
+    delayStat.recordAs("Ping roundtrip delays");
 
     // print it to stdout as well
     cout << "--------------------------------------------------------" << endl;

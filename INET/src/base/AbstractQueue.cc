@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004, 2008 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,54 +23,58 @@
 
 AbstractQueue::AbstractQueue()
 {
-    msgServiced = endServiceMsg = NULL;
+    msgBeingServiced = endServiceTimer = NULL;
 }
 
 AbstractQueue::~AbstractQueue()
 {
-    delete msgServiced;
-    cancelAndDelete(endServiceMsg);
+    delete msgBeingServiced;
+    cancelAndDelete(endServiceTimer);
 }
 
 void AbstractQueue::initialize()
 {
-    msgServiced = NULL;
-    endServiceMsg = new cMessage("end-service");
+    msgBeingServiced = NULL;
+    endServiceTimer = new cMessage("end-service");
     queue.setName("queue");
 }
 
 void AbstractQueue::handleMessage(cMessage *msg)
 {
-    if (msg==endServiceMsg)
+    if (msg==endServiceTimer)
     {
-        endService( msgServiced );
-        if (queue.empty())
-        {
-            msgServiced = NULL;
-        }
-        else
-        {
-            msgServiced = (cMessage *) queue.pop();
-            simtime_t serviceTime = startService( msgServiced );
-            scheduleAt( simTime()+serviceTime, endServiceMsg );
-        }
+        cMessage *tmp = msgBeingServiced;
+        msgBeingServiced = NULL;
+        doEndService(tmp);
     }
-    else if (!msgServiced)
+    else if (!msgBeingServiced)
     {
-        cMessage *msg2 = arrivalWhenIdle( msg );
+        cMessage *msg2 = arrivalWhenIdle(msg);
         if (msg2)
-        {
-            msgServiced = msg2;
-            simtime_t serviceTime = startService( msgServiced );
-            scheduleAt( simTime()+serviceTime, endServiceMsg );
-        }
-
+            doStartService(msg2);
     }
     else
     {
-        arrival( msg );
+        arrival(msg);
     }
 }
 
+void AbstractQueue::doStartService(cMessage *msg)
+{
+    simtime_t serviceTime = startService(msg);
+    if (serviceTime != 0) {
+        msgBeingServiced = msg;
+        scheduleAt(simTime()+serviceTime, endServiceTimer);
+    }
+    else {
+        doEndService(msg);
+    }
+}
 
+void AbstractQueue::doEndService(cMessage *msg)
+{
+    endService(msg);
+    if (!queue.empty())
+        doStartService(queue.pop());
+}
 

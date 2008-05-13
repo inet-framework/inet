@@ -33,15 +33,18 @@ class INET_API AbstractQueue : public cSimpleModule
     virtual ~AbstractQueue();
 
   private:
-    cMessage *msgServiced;
-    cMessage *endServiceMsg;
+    cMessage *msgBeingServiced;
+    cMessage *endServiceTimer;
+
+  private:
+    void doStartService(cMessage *msg);
+    void doEndService(cMessage *msg);
 
   protected:
     /**
-     * The queue. May be configured into a priority queue in initialize()
-     * if needed.
+     * The queue.
      */
-    cQueue queue;
+    cPacketQueue queue;
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
