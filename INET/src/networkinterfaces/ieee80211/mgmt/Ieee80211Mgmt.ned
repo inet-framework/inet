@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente M√©sz√°ros
+// Copyright (C) 2006 Andras Varga and Levente MÈsz·ros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

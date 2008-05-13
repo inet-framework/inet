@@ -44,7 +44,7 @@ package inet.networkinterfaces.mfcore;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-// @author Marc LÃ¶bbers, Daniel Willkomm
+// @author Marc Löbbers, Daniel Willkomm
 //
 simple BasicDecider
 {
