@@ -74,7 +74,7 @@ void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 {
     ASSERT(mod);
 
-    cModuleType *nodeType = findModuleType(newNodeType);
+    cModuleType *nodeType = cModuleType::find(newNodeType);
     if (!nodeType)
         error("Cannot replace module `%s' with a module of type `%s': No such module type", mod->fullPath().c_str(), newNodeType);
 

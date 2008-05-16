@@ -46,9 +46,9 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
     {
         IPvXAddress clientAddr;   ///< client address
         int clientPort;           ///< client UDP port
-        unsigned long videoSize;  ///< total size of video
-        unsigned long bytesLeft;  ///< bytes left to transmit
-        unsigned long numPkSent;  ///< number of packets sent
+        long videoSize;           ///< total size of video
+        long bytesLeft;           ///< bytes left to transmit
+        long numPkSent;           ///< number of packets sent
     };
 
   protected:

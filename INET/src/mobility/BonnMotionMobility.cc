@@ -65,7 +65,7 @@ void BonnMotionMobility::setTargetPosition()
 {
     const BonnMotionFile::Line& vec = *vecp;
 
-    if (vecpos+2 >= vec.size())
+    if (vecpos+2 >= (int)vec.size())
     {
         stationary = true;
         return;

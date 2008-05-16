@@ -169,13 +169,13 @@ int IPv6InterfaceData::findAddress(const IPv6Address& addr) const
 
 const IPv6Address& IPv6InterfaceData::address(int i) const
 {
-    ASSERT(i>=0 && i<addresses.size());
+    ASSERT(i>=0 && i<(int)addresses.size());
     return addresses[i].address;
 }
 
 bool IPv6InterfaceData::isTentativeAddress(int i) const
 {
-    ASSERT(i>=0 && i<addresses.size());
+    ASSERT(i>=0 && i<(int)addresses.size());
     return addresses[i].tentative;
 }
 
@@ -261,13 +261,13 @@ void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
 
 const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::advPrefix(int i) const
 {
-    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     return rtrVars.advPrefixList[i];
 }
 
 void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
 {
-    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
     ASSERT(rtrVars.advPrefixList[i].prefixLength == advPrefix.prefixLength);
     rtrVars.advPrefixList[i] = advPrefix;
@@ -275,7 +275,7 @@ void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
 
 void IPv6InterfaceData::removeAdvPrefix(int i)
 {
-    ASSERT(i>=0 && i<rtrVars.advPrefixList.size());
+    ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin()+i);
 }
 

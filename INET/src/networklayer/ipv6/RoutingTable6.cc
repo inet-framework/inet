@@ -603,7 +603,7 @@ int RoutingTable6::numRoutes() const
 
 IPv6Route *RoutingTable6::route(int i)
 {
-    ASSERT(i>=0 && i<routeList.size());
+    ASSERT(i>=0 && i<(int)routeList.size());
     return routeList[i];
 }
 

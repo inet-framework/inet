@@ -243,7 +243,7 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
     }
 
     // check for queue overflow
-    if (maxQueueSize && transmissionQueue.size() == maxQueueSize)
+    if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize)
     {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         delete msg;

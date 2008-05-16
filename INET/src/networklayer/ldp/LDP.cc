@@ -751,7 +751,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     }
 
     // return the peer's address if found, unspecified address otherwise
-    return i==myPeers.size() ? IPAddress() : myPeers[i].peerIP;
+    return i==(int)myPeers.size() ? IPAddress() : myPeers[i].peerIP;
 }
 
 // Pre-condition: myPeers vector is finalized

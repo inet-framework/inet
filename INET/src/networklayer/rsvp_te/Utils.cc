@@ -34,30 +34,25 @@ void removeDuplicates(std::vector<int>& vec)
 int nodepos(const EroVector& ERO, IPAddress node)
 {
     for (unsigned int i = 0; i < ERO.size(); i++)
-    {
         if (ERO[i].node == node)
             return i;
-    }
     ASSERT(false);
+    return -1; // to prevent warning
 }
 
 bool find(std::vector<int>& vec, int value)
 {
     for (unsigned int i = 0; i < vec.size(); i++)
-    {
         if (vec[i] == value)
             return true;
-    }
     return false;
 }
 
 bool find(const IPAddressVector& vec, IPAddress addr)
 {
     for (unsigned int i = 0; i < vec.size(); i++)
-    {
         if (vec[i] == addr)
             return true;
-    }
     return false;
 }
 
@@ -73,13 +68,9 @@ cModule *payloadOwner(cMessage *msg)
         msg = msg->encapsulatedMsg();
 
     if (msg->hasPar("owner"))
-    {
         return simulation.module(msg->par("owner"));
-    }
     else
-    {
         return NULL;
-    }
 }
 
 /*

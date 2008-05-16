@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSTA::ScanningInfo&
     os << " minChanTime=" << scanning.minChannelTime
        << " maxChanTime=" << scanning.maxChannelTime;
     os << " chanList={";
-    for (int i=0; i<scanning.channelList.size(); i++)
+    for (int i=0; i<(int)scanning.channelList.size(); i++)
         os << (i==0 ? "" : " ") << scanning.channelList[i];
     os << "}";
 
@@ -368,7 +368,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     ASSERT(scanning.minChannelTime <= scanning.maxChannelTime);
 
     // channel list to scan (default: all channels)
-    for (int i=0; i<ctrl->getChannelListArraySize(); i++)
+    for (int i=0; i<(int)ctrl->getChannelListArraySize(); i++)
         scanning.channelList.push_back(ctrl->getChannelList(i));
     if (scanning.channelList.empty())
         for (int i=0; i<numChannels; i++)
@@ -385,7 +385,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 bool Ieee80211MgmtSTA::scanNextChannel()
 {
     // if we're already at the last channel, we're through
-    if (scanning.currentChannelIndex==scanning.channelList.size()-1)
+    if (scanning.currentChannelIndex==(int)scanning.channelList.size()-1)
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)

@@ -140,7 +140,7 @@ void Mac80211::handleUpperMsg(cMessage *msg)
         error("packet from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               msg->className(), msg->name(), msg->byteLength());
 
-    if (maxQueueSize && fromUpperLayer.size() == maxQueueSize)
+    if (maxQueueSize && (int)fromUpperLayer.size() == maxQueueSize)
     {
         EV << "packet " << msg << " received from higher layer but MAC queue is full, deleting\n";
         delete msg;

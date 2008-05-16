@@ -91,7 +91,7 @@ void IPv6Datagram::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderP
 
 void IPv6Datagram::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
 {
-    if (atPos<0 || atPos>=extensionHeaders.size())
+    if (atPos<0 || atPos>=(int)extensionHeaders.size())
     {
         extensionHeaders.push_back(eh);
         return;

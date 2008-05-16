@@ -128,7 +128,7 @@ void Ieee80211AgentSTA::sendScanRequest()
     req->setMinChannelTime(minChannelTime);
     req->setMaxChannelTime(maxChannelTime);
     req->setChannelListArraySize(channelsToScan.size());
-    for (int i=0; i<channelsToScan.size(); i++)
+    for (int i=0; i<(int)channelsToScan.size(); i++)
         req->setChannelList(i, channelsToScan[i]);
     //XXX BSSID, SSID are left at default ("any")
 
@@ -201,7 +201,7 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
 {
     EV << "Received AP list:\n";
-    for (int i=0; i<resp->getBssListArraySize(); i++)
+    for (int i=0; i<(int)resp->getBssListArraySize(); i++)
     {
         Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
         EV << "    " << i << ". "
@@ -223,7 +223,7 @@ int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
     // here, just choose the one with the greatest receive power
     // TODO and which supports a good data rate we support
     int bestIndex = 0;
-    for (int i=0; i<resp->getBssListArraySize(); i++)
+    for (int i=0; i<(int)resp->getBssListArraySize(); i++)
         if (resp->getBssList(i).getRxPower() > resp->getBssList(bestIndex).getRxPower())
             bestIndex = i;
     return bestIndex;

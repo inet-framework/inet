@@ -25,6 +25,8 @@
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
+static const double SPEED_OF_LIGHT = 200000000.0;
+
 EtherMACBase::EtherMACBase()
 {
     nb = NULL;
@@ -341,8 +343,8 @@ void EtherMACBase::processMsgFromNetwork(cMessage *frame)
     if (!duplexMode && simTime()-frame->sendingTime()>=shortestFrameDuration)
         error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
               "(%lgs corresponds to an approx. %lgm cable)",
-              simTime()-frame->sendingTime(),
-              (simTime()-frame->sendingTime())*200000000.0);
+              SIMTIME_STR(simTime() - frame->sendingTime()),
+              SIMTIME_STR((simTime() - frame->sendingTime())*SPEED_OF_LIGHT));
 }
 
 void EtherMACBase::frameReceptionComplete(EtherFrame *frame)

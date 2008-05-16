@@ -605,7 +605,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
         if (it->OutInterface != rsbEle->OI)
             continue;
 
-        for (int i = 0; i < rsbEle->FlowDescriptor.size(); i++)
+        for (int i = 0; i < (int)rsbEle->FlowDescriptor.size(); i++)
         {
             if ((FilterSpecObj_t&)it->Sender_Template_Object != rsbEle->FlowDescriptor[i].Filter_Spec_Object)
                 continue;

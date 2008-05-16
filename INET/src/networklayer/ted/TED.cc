@@ -377,11 +377,11 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
 
             ASSERT(src >= 0);
             ASSERT(dest >= 0);
-            ASSERT(src < vertices.size());
-            ASSERT(dest < vertices.size());
+            ASSERT(src < (int)vertices.size());
+            ASSERT(dest < (int)vertices.size());
             ASSERT(src != dest);
 
-            if(vertices[src].dist + edges[j].metric >= vertices[dest].dist)
+            if (vertices[src].dist + edges[j].metric >= vertices[dest].dist)
                 continue;
 
             vertices[dest].dist = vertices[src].dist + edges[j].metric;

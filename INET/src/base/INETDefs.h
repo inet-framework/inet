@@ -69,7 +69,7 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 #define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
 
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 //
 // Implementation of the error function, from the Mobility Framework
 //

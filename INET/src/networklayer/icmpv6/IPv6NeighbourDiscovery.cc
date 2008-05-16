@@ -469,7 +469,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     after sending the MAX_UNICAST_SOLICIT solicitations, retransmissions cease
     and the entry SHOULD be deleted. Subsequent traffic to that neighbor will
     recreate the entry and performs address resolution again.*/
-    if (nce->numProbesSent == ie->ipv6()->_maxUnicastSolicit())
+    if (nce->numProbesSent == (int)ie->ipv6()->_maxUnicastSolicit())
     {
         EV << "Max number of probes have been sent." << endl;
         EV << "Neighbour is Unreachable, removing NCE." << endl;
@@ -1111,6 +1111,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         sendPacketToIPv6Module(ra, destAddr, sourceAddr, ie->interfaceId());
         return ra;
     }
+    return NULL; //XXX is this OK?
 }
 
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
@@ -1139,7 +1140,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         //Possible options
         MACAddress macAddress = ra->sourceLinkLayerAddress();
         uint mtu = ra->MTU();
-        for (int i = 0; i < ra->prefixInformationArraySize(); i++)
+        for (int i = 0; i < (int)ra->prefixInformationArraySize(); i++)
         {
             IPv6NDPrefixInformation& prefixInfo = ra->prefixInformation(i);
             if (prefixInfo.autoAddressConfFlag() == true)//If auto addr conf is set
@@ -1295,7 +1296,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
     the autonomous flag set and be used by [ADDRCONF].*/
     IPv6NDPrefixInformation prefixInfo;
     //For each Prefix Information option
-    for (int i = 0; i < ra->prefixInformationArraySize(); i++)
+    for (int i = 0; i < (int)ra->prefixInformationArraySize(); i++)
     {
         prefixInfo = ra->prefixInformation(i);
         if (!prefixInfo.onlinkFlag()) break;//skip to next prefix option
