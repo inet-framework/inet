@@ -35,7 +35,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #undef s_addr   /* MSVC #definition interferes with us */
 #endif
 
-#ifndef _MSC_VER
+#ifndef _WIN32 /*not MSVC or MinGW*/
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 

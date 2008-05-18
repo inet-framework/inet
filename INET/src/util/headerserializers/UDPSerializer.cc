@@ -27,7 +27,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "UDPSerializer.h"
 
-#ifndef _MSC_VER
+#ifndef _WIN32 /*not MSVC or MinGW*/
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 

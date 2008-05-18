@@ -49,7 +49,7 @@ typedef unsigned long long  uint64_t;
 //
 // Get endianness macros defined
 //
-#if defined(_MSC_VER)
+#if defined(_WIN32)  /*MSVC and MinGW*/
 # define LITTLE_ENDIAN  1
 # define BIG_ENDIAN     2
 # define BYTE_ORDER     LITTLE_ENDIAN   /* XXX at least on x86 */
