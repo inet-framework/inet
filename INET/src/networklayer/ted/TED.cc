@@ -98,7 +98,7 @@ void TED::initialize(int stage)
         entry.linkid = linkid;
         entry.remote = remote;
         entry.MaxBandwidth = linkBandwidth;
-        for(int j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
             entry.UnResvBandwidth[j] = entry.MaxBandwidth;
         entry.state = true;
 
@@ -156,7 +156,7 @@ int TED::assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr)
 {
     // find node in vertices[] whose IP address is nodeAddr
     for (unsigned int i = 0 ; i < vertices.size(); i++)
-        if(vertices[i].node == nodeAddr)
+        if (vertices[i].node == nodeAddr)
             return i;
 
     // if not found, create
@@ -181,10 +181,10 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
     // FIXME comment: what do we do in this block?
     for (unsigned int i = 0; i < V.size(); i++)
     {
-        if(V[i].dist >= minDist)
+        if (V[i].dist >= minDist)
             continue;
 
-        if(find(dest.begin(), dest.end(), V[i].node) == dest.end())
+        if (find(dest.begin(), dest.end(), V[i].node) == dest.end())
             continue;
 
         minDist = V[i].dist;
@@ -193,7 +193,7 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
 
     IPAddressVector result;
 
-    if(minIndex < 0)
+    if (minIndex < 0)
         return result;
 
     result.push_back(V[minIndex].node);
@@ -239,7 +239,7 @@ void TED::rebuildRoutingTable()
 
     for (unsigned int i = 0; i < V.size(); i++)
     {
-        if(V[i].node == routerId) // us
+        if (V[i].node == routerId) // us
             continue;
 
         if (V[i].parent == -1) // unreachable
@@ -347,10 +347,10 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     // meanwhile, collect vertices in vectices[].
     for (unsigned int i = 0; i < topology.size(); i++)
     {
-        if(!topology[i].state)
+        if (!topology[i].state)
             continue;
 
-        if(topology[i].UnResvBandwidth[priority] < req_bandwidth)
+        if (topology[i].UnResvBandwidth[priority] < req_bandwidth)
             continue;
 
         edge_t edge;
@@ -390,7 +390,7 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
             mod = true;
         }
 
-        if(!mod)
+        if (!mod)
             break;
     }
 
@@ -403,19 +403,19 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match)
 
     match = NULL;
 
-    for(it = ted.begin(); it != ted.end(); it++)
+    for (it = ted.begin(); it != ted.end(); it++)
     {
-        if(it->sourceId == link.sourceId && it->messageId == link.messageId && it->timestamp == link.timestamp)
+        if (it->sourceId == link.sourceId && it->messageId == link.messageId && it->timestamp == link.timestamp)
         {
             // we've already seen this message, ignore it
             return false;
         }
 
-        if(it->advrouter == link.advrouter && it->linkid == link.linkid)
+        if (it->advrouter == link.advrouter && it->linkid == link.linkid)
         {
             // we've have info about this link
 
-            if(it->timestamp < link.timestamp || (it->timestamp == link.timestamp && it->messageId < link.messageId))
+            if (it->timestamp < link.timestamp || (it->timestamp == link.timestamp && it->messageId < link.messageId))
             {
                 // but it's older, use this new
                 match = &(*it);
@@ -439,20 +439,22 @@ unsigned int TED::linkIndex(IPAddress localInf)
         if (ted[i].advrouter == routerId && ted[i].local == localInf)
             return i;
     ASSERT(false);
+    return -1; // to eliminate warning
 }
 
 unsigned int TED::linkIndex(IPAddress advrouter, IPAddress linkid)
 {
     for (unsigned int i = 0; i < ted.size(); i++)
-        if(ted[i].advrouter == advrouter && ted[i].linkid == linkid)
+        if (ted[i].advrouter == advrouter && ted[i].linkid == linkid)
             return i;
     ASSERT(false);
+    return -1; // to eliminate warning
 }
 
 bool TED::isLocalAddress(IPAddress addr)
 {
     for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
-        if(interfaceAddrs[i] == addr)
+        if (interfaceAddrs[i] == addr)
             return true;
     return false;
 }
@@ -474,13 +476,14 @@ IPAddress TED::primaryAddress(IPAddress localInf) // only used in RSVP::processH
 {
     for (unsigned int i = 0; i < ted.size(); i++)
     {
-        if(ted[i].local == localInf)
+        if (ted[i].local == localInf)
             return ted[i].advrouter;
 
-        if(ted[i].remote == localInf)
+        if (ted[i].remote == localInf)
             return ted[i].linkid;
     }
     ASSERT(false);
+    return IPAddress(); // to eliminate warning
 }
 
 IPAddress TED::peerByLocalAddress(IPAddress localInf)
