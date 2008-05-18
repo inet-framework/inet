@@ -1,13 +1,19 @@
 CONVERSION TO OMNET++40:
-- "like" --> interface, "extends"
-- configurator: moduleTypes, nonIPModuleTypes: use marker properties (@device(true)?) instead
 - move "q=queue" too into the default display string
 - trim ini files 
 - add gate @labels
 - gross renaming of gates and parameters, to make them more consistent
 
---------
-- ONLY WORKS WITH STATICALLY BUILT OMNETPP!!!
+-----------------------
+Interfaces:
+- IPv6RoutingTable: change _interfaceId to _ie!!!
+
+- interfaceAt -> interfaceById!!!
+
+- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable!
+  - this makes it possible to implement interface deletion as well, with preserving ids;
+  - or just use a vector like for gates and modules? (apps must check for holes then!)
+- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
    in DistanceBasedRadio: decouple transmission range from interference range 
@@ -160,17 +166,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
   ICMP module itself as well?
 
 - TCP: how to handle ICMP error reports?
-
------------------------
-Interfaces:
-- IPv6RoutingTable: change _interfaceId to _ie!!!
-
-- interfaceAt -> interfaceById!!!
-
-- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable!
-  - this makes it possible to implement interface deletion as well, with preserving ids;
-  - or just use a vector like for gates and modules? (apps must check for holes then!)
-- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
 
 -----------------------
 - MPLS/LDP/RSVP:

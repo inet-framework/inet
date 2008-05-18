@@ -107,7 +107,7 @@ Bottom-up:
 
  doc/                    documentation
 
- tests/                  test suite
+ tests/                  some test
    ipv4/                 for IPv4 components
    ipv6/                 for IPv6 components
    mpls/                 for the MPLS models

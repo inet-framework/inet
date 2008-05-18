@@ -1,14 +1,19 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-2008????
+-------------
+
 - directory structure reorganized
 
 - converted to OMNeT++ 4.0
 
-- IP/IPv6: do not schedule a timer if processing time is zero (change made 
+- some refactoring (parameter/gate name changes, etc)
+
+- IP/IPv6: do not schedule a timer if processing time is zero (change made
   in base/AbstractQueue)
 
-- FlatNetworkConfigurator: use @node() property to determine which modules are 
+- FlatNetworkConfigurator: use @node() property to determine which modules are
   network nodes (removed moduleTypes, nonIPModuleTypes parameters)
 
 
