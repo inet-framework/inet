@@ -30,7 +30,7 @@ simple Ieee80211AgentSTA
 {
     parameters:
         bool activeScan = default(true);  // selects between active and passive scanning
-        string channelsToScan;  // list of channel numbers to scan (space delimited); empty means all channels
+        string channelsToScan = default("");  // list of channel numbers to scan (space delimited); empty means all channels
         double probeDelay @unit("s"); // delay before sending a probe request during active scanning
         double minChannelTime @unit("s"); // min interval to spend on a channel during active scanning
         double maxChannelTime @unit("s"); // channel time for passive scanning, and max channel time for active scanning

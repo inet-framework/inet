@@ -44,7 +44,7 @@ simple ChannelControl
         bool coreDebug = default(false); // debug switch for core framework
         double playgroundSizeX = default(600); // x size of the playground (in meters)
         double playgroundSizeY = default(400); // y size of the playground (in meters)
-        double pMax @unit("mW") = default(2mW); // maximum sending power used for this network (in mW)
+        double pMax @unit("mW") = default(20mW); // maximum sending power used for this network (in mW)
         double sat @unit("dBm") = default(-110dBm); // signal attenuation threshold (in dBm)
         double alpha = default(2); // path loss coefficient
         double carrierFrequency @unit("Hz") = default(2.4GHz); // carrier frequency of the channel (in Hz)

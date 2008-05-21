@@ -55,16 +55,16 @@ package inet.networkinterfaces.ieee80211.mac;
 simple Ieee80211Mac
 {
     parameters:
-        string address;       // MAC address as hex string (12 hex digits), or
-                                // "auto". "auto" values will be replaced by
-                                // a generated MAC address in init stage 0.
+        string address = default("auto"); // MAC address as hex string (12 hex digits), or
+                                          // "auto". "auto" values will be replaced by
+                                          // a generated MAC address in init stage 0.
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize; // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
-        int rtsThresholdBytes @unit("B"); // longer messages will be sent using RTS/CTS; use 2346 for default
-        int retryLimit; // maximum number of retries per message, -1 means default
-        int cwMinData; // contention window for normal data frames, -1 means default
-        int cwMinBroadcast; // contention window for broadcast messages, -1 means default
+        int rtsThresholdBytes @unit("B") = default(2346); // longer messages will be sent using RTS/CTS
+        int retryLimit = default(-1); // maximum number of retries per message, -1 means default
+        int cwMinData = default(-1); // contention window for normal data frames, -1 means default
+        int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
         @display("i=block/layer");
     gates:
         input uppergateIn;
