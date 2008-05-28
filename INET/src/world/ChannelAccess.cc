@@ -33,9 +33,7 @@ void ChannelAccess::initialize(int stage)
 
     if (stage == 0)
     {
-        cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelcontrol"));
-        if (cc == 0)
-            error("Could not find channelcontrol module");
+        cc = ChannelControl::get();
 
         // register to get a notification when position changes
         nb->subscribe(this, NF_HOSTPOSITION_UPDATED);

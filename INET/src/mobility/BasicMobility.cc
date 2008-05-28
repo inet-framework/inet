@@ -44,9 +44,7 @@ void BasicMobility::initialize(int stage)
 
     if (stage == 0)
     {
-        cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelcontrol"));
-        if (cc == 0)
-            error("Could not find channelcontrol module");
+        cc = ChannelControl::get();
 
         // get a pointer to the host
         hostPtr = findHost();

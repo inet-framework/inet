@@ -50,6 +50,16 @@ ChannelControl::~ChannelControl()
             delete *it;
 }
 
+ChannelControl *ChannelControl::get()
+{
+    ChannelControl *cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelcontrol"));
+    if (!cc)
+        cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelControl"));
+    if (!cc)
+        throw cRuntimeError("Could not find ChannelControl module");
+    return cc;
+}
+
 /**
  * Sets up the playgroundSize and calculates the
  * maxInterferenceDistance

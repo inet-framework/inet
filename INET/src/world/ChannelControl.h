@@ -111,6 +111,9 @@ class INET_API ChannelControl : public cSimpleModule
     ChannelControl();
     ~ChannelControl();
 
+    /** @brief Finds the channelControl module in the network */
+    static ChannelControl *get();
+
     /** @brief Registers the given host */
     HostRef registerHost(cModule *host, const Coord& initialPos);
 

@@ -17,6 +17,7 @@
 //
 
 #include "PathLossReceptionModel.h"
+#include "ChannelControl.h"
 #include "FWMath.h"
 
 Register_Class(PathLossReceptionModel);
@@ -25,9 +26,7 @@ void PathLossReceptionModel::initializeFrom(cModule *radioModule)
 {
     pathLossAlpha = radioModule->par("pathLossAlpha");
 
-    cModule *cc = simulation.moduleByPath("channelcontrol");
-    if (!cc)
-        opp_error("PathLossReceptionModel: module (ChannelControl)channelcontrol not found");
+    cModule *cc = ChannelControl::get();
     if (pathLossAlpha < (double) (cc->par("alpha")))
         opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
 }
