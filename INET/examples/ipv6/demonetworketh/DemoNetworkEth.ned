@@ -19,6 +19,7 @@
 
 package inet.examples.ipv6.demonetworketh;
 
+import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;

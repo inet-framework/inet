@@ -14,8 +14,8 @@
 
 package inet.examples.ethernet.arptest;
 
-import inet.networkinterfaces.etherswitch.EtherSwitch;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.BasicChannel;

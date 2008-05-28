@@ -18,7 +18,7 @@
 
 
 
-package inet.examples.ethernet.lans;
+package inet.nodes.ethernet;
 
 import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;

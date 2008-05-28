@@ -21,7 +21,8 @@ package inet.examples.ethernet.lans;
 
 import inet.networkinterfaces.ethernet.EtherBus;
 import inet.networkinterfaces.ethernet.EtherHub;
-import inet.networkinterfaces.etherswitch.EtherSwitch;
+import inet.nodes.ethernet.EtherHost;
+import inet.nodes.ethernet.EtherSwitch;
 import ned.BasicChannel;
 
 

@@ -19,9 +19,10 @@
 
 
 
-package inet.networkinterfaces.etherswitch;
+package inet.nodes.ethernet;
 
 import inet.networkinterfaces.ethernet.EtherMAC2;
+import inet.networkinterfaces.etherswitch.MACRelayUnit;
 
 
 //
