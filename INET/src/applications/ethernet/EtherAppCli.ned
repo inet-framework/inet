@@ -19,22 +19,20 @@
 package inet.applications.ethernet;
 
 //
-// Simple traffic generator for the Ethernet model and the 802.11 model;
-// generally any L2 model that accepts Ieee80211Ctrl control info
+// A simple traffic generator for the Ethernet model and the 802.11 model,
+// and generally for any L2 model that accepts Ieee80211Ctrl control info
 // on the packets. It generates EtherAppReq packets. It should be connected
 // directly to EtherLLC or a Ieee802NicXXX module.
-//
-// Destination may be given with OMNeT++ path name or MAC address.
 //
 simple EtherAppCli
 {
     parameters:
-        string destStation;  // module path name of destination station (must be blank if destAddress is given)
-        string destAddress = default("");  // destination MAC address (must be blank if destStation is given)
-        volatile double waitTime @unit("s");  // interval between sending requests
-        volatile int reqLength @unit(B);  // length of request packets
-        volatile int respLength @unit(B);  // length of response packets
-        bool registerSAP;   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
+        double startTime @unit("s") = default(this.waitTime);  // time of sending the first request
+        volatile double waitTime @unit("s") = default(uniform(0s,1s));  // interval between sending requests
+        volatile int reqLength @unit(B) = default(100B);  // length of request packets
+        volatile int respLength @unit(B) = default(1KB);  // length of response packets
+        bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
     gates:
         input in;
         output out;

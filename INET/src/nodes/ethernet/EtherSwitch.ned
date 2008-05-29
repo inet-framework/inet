@@ -54,7 +54,6 @@ module EtherSwitch
         mac[sizeof(ethg)]: EtherMAC {
             parameters:
                 promiscuous = true;
-                txQueueLimit = 1000; // increase if needed
                 queueModule = "";
                 @display("p=70,150,row;q=queue");
         }

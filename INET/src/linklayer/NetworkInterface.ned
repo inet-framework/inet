@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces;
+package inet.linklayer;
 
 //
 // Prototype module for link layer protocols.
@@ -25,9 +25,8 @@ package inet.networkinterfaces;
 moduleinterface INetworkInterface
 {
     gates:
-        input physIn;
-        output physOut;
         input netwIn;
         output netwOut;
+        inout phys;
 }
 

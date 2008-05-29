@@ -65,64 +65,60 @@ Define_Module (EtherAppCli);
 
 void EtherAppCli::initialize(int stage)
 {
-    // we can only initialize in the 2nd stage (stage 1), because
+    // we can only initialize in the 2nd stage (stage==1), because
     // assignment of "auto" MAC addresses takes place in stage 0
-    if (stage!=1) return;
+    if (stage == 1)
+    {
+        reqLength = &par("reqLength");
+        respLength = &par("respLength");
+        waitTime = &par("waitTime");
 
-    reqLength = &par("reqLength");
-    respLength = &par("respLength");
-    waitTime = &par("waitTime");
+        localSAP = ETHERAPP_CLI_SAP;
+        remoteSAP = ETHERAPP_SRV_SAP;
 
-    localSAP = ETHERAPP_CLI_SAP;
-    remoteSAP = ETHERAPP_SRV_SAP;
+        seqNum = 0;
+        WATCH(seqNum);
 
-    seqNum = 0;
-    WATCH(seqNum);
+        // statistics
+        packetsSent = packetsReceived = 0;
+        eedVector.setName("end-to-end delay");
+        eedStats.setName("end-to-end delay");
+        WATCH(packetsSent);
+        WATCH(packetsReceived);
 
-    // statistics
-    packetsSent = packetsReceived = 0;
-    eedVector.setName("end-to-end delay");
-    eedStats.setName("end-to-end delay");
-    WATCH(packetsSent);
-    WATCH(packetsReceived);
+        destMACAddress = resolveDestMACAddress();
 
-    destMACAddress = resolveDestMACAddress();
+        // if no dest address given, nothing to do
+        if (destMACAddress.isUnspecified())
+            return;
 
-    // if no dest address given, nothing to do
-    if (destMACAddress.isUnspecified())
-        return;
+        bool registerSAP = par("registerSAP");
+        if (registerSAP)
+            registerDSAP(localSAP);
 
-    bool registerSAP = par("registerSAP");
-    if (registerSAP)
-        registerDSAP(localSAP);
-
-    cMessage *timermsg = new cMessage("generateNextPacket");
-    simtime_t d = waitTime->doubleValue();
-    scheduleAt(simTime()+d, timermsg);
-
+        cMessage *timermsg = new cMessage("generateNextPacket");
+        simtime_t d = par("startTime").doubleValue();
+        scheduleAt(simTime()+d, timermsg);
+    }
 }
-
 
 MACAddress EtherAppCli::resolveDestMACAddress()
 {
     MACAddress destMACAddress;
-    const char *destAddr = par("destAddress");
-    const char *destStation = par("destStation");
-    if (strcmp(destAddr,"") && strcmp(destStation,""))
+    const char *destAddress = par("destAddress");
+    if (destAddress[0])
     {
-        error("only one of the `destAddress' and `destStation' module parameters should be filled in");
-    }
-    else if (strcmp(destAddr,""))
-    {
-        destMACAddress.setAddress(destAddr);
-    }
-    else if (strcmp(destStation,""))
-    {
-        std::string destModName = std::string(destStation) + ".mac";
-        cModule *destMod = simulation.moduleByPath(destModName.c_str());
-        if (!destMod)
-            error("module `%s' (MAC submodule of `destStation') not found", destModName.c_str());
-        destMACAddress.setAddress(destMod->par("address"));
+        // try as mac address first, then as a module
+        if (!destMACAddress.tryParse(destAddress))
+        {
+            cModule *destStation = simulation.moduleByPath(destAddress);
+            if (!destStation)
+                error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
+            cModule *destMAC = destStation->submodule("mac");
+            if (!destMAC)
+                error("module '%s' has no 'mac' submodule", destAddress);
+            destMACAddress.setAddress(destMAC->par("address"));
+        }
     }
     return destMACAddress;
 }

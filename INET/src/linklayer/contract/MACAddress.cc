@@ -82,29 +82,48 @@ MACAddress& MACAddress::operator=(const MACAddress& other)
     return *this;
 }
 
-unsigned int MACAddress::getAddressArraySize() const
+unsigned int MACAddress::getAddressSize() const
 {
     return 6;
 }
 
-unsigned char MACAddress::getAddress(unsigned int k) const
+unsigned char MACAddress::getAddressByte(unsigned int k) const
 {
     if (k>=6) throw cRuntimeError("Array of size 6 indexed with %d", k);
     return address[k];
 }
 
-void MACAddress::setAddress(unsigned int k, unsigned char addrbyte)
+void MACAddress::setAddressByte(unsigned int k, unsigned char addrbyte)
 {
     if (k>=6) throw cRuntimeError("Array of size 6 indexed with %d", k);
     address[k] = addrbyte;
 }
 
-void MACAddress::setAddress(const char *hexstr)
+bool MACAddress::tryParse(const char *hexstr)
 {
     if (!hexstr)
-        throw cRuntimeError("MACAddress::setAddress(const char *): got null pointer");
-    if (hextobin(hexstr, address, MAC_ADDRESS_BYTES)!=MAC_ADDRESS_BYTES)
-        throw cRuntimeError("MACAddress::setAddress(const char *): hex string \"%s\" too short, should be 12 hex digits", hexstr);
+        return false;
+
+    // check syntax
+    int numHexDigits = 0;
+    for (const char *s = hexstr; *s; s++) {
+        if (isxdigit(*s))
+            numHexDigits++;
+        else if (*s!=' ' && *s!=':' && *s!='-')
+            return false; // wrong syntax
+    }
+    if (numHexDigits != 2*MAC_ADDRESS_BYTES)
+        return false;
+
+    // convert
+    hextobin(hexstr, address, MAC_ADDRESS_BYTES);
+    return true;
+}
+
+void MACAddress::setAddress(const char *hexstr)
+{
+    if (!tryParse(hexstr))
+        throw cRuntimeError("MACAddress: wrong address syntax '%s': 12 hex digits expected, with optional embedded spaces, hyphens or colons", hexstr);
 }
 
 void MACAddress::setAddressBytes(unsigned char *addrbytes)

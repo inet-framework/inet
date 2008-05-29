@@ -51,7 +51,8 @@ class INET_API MACAddress
     MACAddress();
 
     /**
-     * Constructor which accepts hex string or the string "auto".
+     * Constructor which accepts a hex string (12 hex digits, may also
+     * contain spaces, hyphens and colons)
      */
     MACAddress(const char *hexstr);
 
@@ -68,26 +69,33 @@ class INET_API MACAddress
     /**
      * Returns 6.
      */
-    unsigned int getAddressArraySize() const;
+    unsigned int getAddressSize() const;
 
     /**
      * Returns the kth byte of the address.
      */
-    unsigned char getAddress(unsigned int k) const;
+    unsigned char getAddressByte(unsigned int k) const;
 
     /**
      * Sets the kth byte of the address.
      */
-    void setAddress(unsigned int k, unsigned char addrbyte);
+    void setAddressByte(unsigned int k, unsigned char addrbyte);
 
     /**
-     * Converts address value from hex string. The string "auto" is also
-     * accepted, it'll generate a unique address starting with "A0 00".
+     * Sets the address and returns true if the syntax of the string
+     * is correct. (See setAddress() for the syntax.)
+     */
+    bool tryParse(const char *hexstr);
+
+    /**
+     * Converts address value from hex string (12 hex digits, may also
+     * contain spaces, hyphens and colons)
      */
     void setAddress(const char *hexstr);
 
     /**
-     * Returns pointer to internal binary representation of address (array of 6 unsigned chars).
+     * Returns pointer to internal binary representation of address
+     * (array of 6 unsigned chars).
      */
     unsigned char *getAddressBytes() {return address;}
 

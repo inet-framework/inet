@@ -57,7 +57,6 @@ module EtherHost
         }
         mac: EtherMAC {
             parameters:
-                txQueueLimit = 1000; // increase if needed
                 queueModule = "";
                 @display("p=155,200;q=queue");
         }

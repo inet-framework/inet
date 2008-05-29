@@ -20,6 +20,7 @@
 
 package inet.linklayer.ethernet;
 
+import inet.linklayer.INetworkInterface;
 import inet.networklayer.queue.OutputQueue;
 
 
