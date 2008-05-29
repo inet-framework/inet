@@ -39,7 +39,7 @@
 //  -# MAC
 //  -# physical layer (radio)
 //
-// <i>The physical layer</i> modules (Ieee80211Radio; with some limitations, 
+// <i>The physical layer</i> modules (Ieee80211Radio; with some limitations,
 // SnrEval80211, Decider80211 can also be used) deal with modelling
 // transmission and reception of frames. They model the characteristics of
 // the radio channel, and determine if a frame was received correctly
@@ -91,10 +91,10 @@
 //
 // <b>Notes</b>
 //
-// If you are new to 802.11, reading an 
+// If you are new to 802.11, reading an
 // <a href="http://www.wi-fiplanet.com/tutorials/article.php/1216351" target="_blank">introductory material</a>
 // before the IEEE standard can help.
 //
 
-package inet.networkinterfaces.ieee80211;
+package inet.linklayer.ieee80211;
 

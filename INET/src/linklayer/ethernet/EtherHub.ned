@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;
 
 //
 // A generic wiring hub model.

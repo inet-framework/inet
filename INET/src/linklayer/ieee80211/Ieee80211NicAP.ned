@@ -17,11 +17,11 @@
 //
 
 
-package inet.networkinterfaces.ieee80211;
+package inet.linklayer.ieee80211;
 
-import inet.networkinterfaces.ieee80211.mac.Ieee80211Mac;
-import inet.networkinterfaces.ieee80211.mgmt.Ieee80211MgmtAP;
-import inet.networkinterfaces.radio.Ieee80211Radio;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAP;
+import inet.linklayer.radio.Ieee80211Radio;
 
 
 //

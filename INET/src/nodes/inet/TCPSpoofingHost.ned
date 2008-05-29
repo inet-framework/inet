@@ -21,8 +21,8 @@ package inet.nodes.inet;
 
 import inet.applications.tcpapp.TCPSpoof;
 import inet.base.NotificationBoard;
-import inet.networkinterfaces.ethernet.EthernetInterface;
-import inet.networkinterfaces.ppp.PPPInterface;
+import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.contract.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.util.NAMTraceWriter;

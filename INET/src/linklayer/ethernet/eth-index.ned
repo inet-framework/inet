@@ -317,4 +317,4 @@
 // gigabyte sizes.
 //
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;

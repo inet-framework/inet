@@ -1,7 +1,7 @@
 
 package inet.examples.ospfv2.simpletest;
 
-import inet.networkinterfaces.ethernet.EtherHub;
+import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;

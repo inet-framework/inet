@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;
 
 //
 // Ethernet MAC which supports full duplex operation ONLY.

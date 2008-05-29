@@ -18,7 +18,7 @@
 
 
 
-package inet.networkinterfaces.etherswitch;
+package inet.linklayer.etherswitch;
 
 //
 // A MACRelayUnit implementation which models one CPU assigned to each

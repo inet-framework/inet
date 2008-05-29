@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces.ieee80211.mgmt;
+package inet.linklayer.ieee80211.mgmt;
 
 //
 // Used in 802.11 infrastructure mode: handles management frames for

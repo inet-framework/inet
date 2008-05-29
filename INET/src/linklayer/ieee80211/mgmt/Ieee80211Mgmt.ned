@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces.ieee80211.mgmt;
+package inet.linklayer.ieee80211.mgmt;
 
 //
 // This is not a concrete module type, but a prototype for all IEEE 802.11

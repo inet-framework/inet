@@ -22,7 +22,7 @@ package inet.networkinterfaces;
 //
 // Prototype module for link layer protocols.
 //
-module NetworkInterface
+moduleinterface INetworkInterface
 {
     gates:
         input physIn;

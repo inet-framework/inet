@@ -19,7 +19,7 @@
 //**************************************************************************/
 
 
-package inet.networkinterfaces.mf80211.macLayer;
+package inet.linklayer.mf80211.macLayer;
 
 //
 // CSMA MAC protocol

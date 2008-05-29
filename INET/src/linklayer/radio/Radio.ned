@@ -18,7 +18,7 @@
 //
 
 
-package inet.networkinterfaces.radio;
+package inet.linklayer.radio;
 
 //
 // Prototype for radio modules. Radio modules deal with the transmission

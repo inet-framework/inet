@@ -15,7 +15,7 @@
 
 package inet.examples.ethernet.arptest2;
 
-import inet.networkinterfaces.ethernet.EtherBus;
+import inet.linklayer.ethernet.EtherBus;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;

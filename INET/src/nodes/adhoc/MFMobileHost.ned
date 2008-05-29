@@ -24,7 +24,7 @@ import inet.applications.tcpapp.TCPApp;
 import inet.applications.udpapp.UDPApp;
 import inet.base.NotificationBoard;
 import inet.mobility.BasicMobility;
-import inet.networkinterfaces.mf80211.Nic80211;
+import inet.linklayer.mf80211.Nic80211;
 import inet.networklayer.contract.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.nodes.inet.NetworkLayer;

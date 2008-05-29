@@ -3,7 +3,7 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import inet.networkinterfaces.ethernet.EtherHub;
+import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import ned.BasicChannel;

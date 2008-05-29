@@ -22,8 +22,8 @@ package inet.nodes.ethernet;
 
 import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;
-import inet.networkinterfaces.ethernet.EtherLLC;
-import inet.networkinterfaces.ethernet.EtherMAC2;
+import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherMAC2;
 
 
 //

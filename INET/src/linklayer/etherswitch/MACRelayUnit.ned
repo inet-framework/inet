@@ -18,7 +18,7 @@
 
 
 
-package inet.networkinterfaces.etherswitch;
+package inet.linklayer.etherswitch;
 
 //
 // Prototype for modules providing Ethernet switch functionality.

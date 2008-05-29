@@ -18,19 +18,18 @@
 
 
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;
 
 import inet.networklayer.queue.OutputQueue;
 
 
 //
-// Ethernet network interface. Corresponds to the prototype NetworkInterface.
-// Complements EtherMAC and EtherEncap with an output queue for QoS and
-// RED support.
+// Ethernet network interface. Complements EtherMAC and EtherEncap
+// with an output queue for QoS and RED support.
 //
 // @see EthernetInterface2, EthernetInterfaceNoQueue
 //
-module EthernetInterface
+module EthernetInterface like INetworkInterface
 {
     parameters:
         string queueType = default("DropTailQueue");

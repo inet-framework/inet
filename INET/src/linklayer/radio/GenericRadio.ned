@@ -18,7 +18,7 @@
 //
 
 
-package inet.networkinterfaces.radio;
+package inet.linklayer.radio;
 
 //
 // Generic radio module. The implementation is largely based on the

@@ -21,8 +21,8 @@
 
 package inet.nodes.ethernet;
 
-import inet.networkinterfaces.ethernet.EtherMAC;
-import inet.networkinterfaces.etherswitch.MACRelayUnit;
+import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.etherswitch.MACRelayUnit;
 
 
 //

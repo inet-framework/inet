@@ -23,7 +23,7 @@ package inet.nodes.wireless;
 
 import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
-import inet.networkinterfaces.ieee80211.Ieee80211NicAPSimplified;
+import inet.linklayer.ieee80211.Ieee80211NicAPSimplified;
 
 
 //

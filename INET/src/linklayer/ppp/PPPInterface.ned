@@ -18,7 +18,7 @@
 
 
 
-package inet.networkinterfaces.ppp;
+package inet.linklayer.ppp;
 
 import inet.networklayer.queue.OutputQueue;
 

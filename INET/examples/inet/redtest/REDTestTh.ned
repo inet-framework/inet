@@ -20,7 +20,7 @@
 
 package inet.examples.inet.redtest;
 
-import inet.networkinterfaces.ppp.ThruputMeter;
+import inet.linklayer.ppp.ThruputMeter;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;

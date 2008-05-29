@@ -23,9 +23,9 @@ package inet.nodes.wireless;
 
 import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
-import inet.networkinterfaces.ethernet.EtherMAC;
-import inet.networkinterfaces.etherswitch.MACRelayUnit;
-import inet.networkinterfaces.ieee80211.Ieee80211NicAP;
+import inet.linklayer.ethernet.EtherMAC;
+import inet.linklayer.etherswitch.MACRelayUnit;
+import inet.linklayer.ieee80211.Ieee80211NicAP;
 
 
 //

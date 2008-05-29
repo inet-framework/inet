@@ -4,7 +4,7 @@
 
 package inet.transport.rtp;
 
-import inet.networkinterfaces.ppp.PPPInterface;
+import inet.linklayer.ppp.PPPInterface;
 import inet.nodes.inet.NetworkLayer;
 
 

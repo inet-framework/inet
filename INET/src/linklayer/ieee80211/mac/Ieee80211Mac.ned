@@ -17,7 +17,7 @@
 //
 
 
-package inet.networkinterfaces.ieee80211.mac;
+package inet.linklayer.ieee80211.mac;
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
@@ -43,7 +43,7 @@ package inet.networkinterfaces.ieee80211.mac;
 // <b>Limitations</b>
 //
 // The following features not supported: 1) fragmentation, 2) power management,
-// 3) polling (PCF). Physical layer algorithms such as frequency hopping and 
+// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
 // direct sequence spread spectrum are not modelled directly.
 //
 // Fields related to the above unsupported features are omitted from

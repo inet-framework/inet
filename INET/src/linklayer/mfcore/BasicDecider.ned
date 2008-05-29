@@ -18,7 +18,7 @@
 // **************************************************************************/
 
 
-package inet.networkinterfaces.mfcore;
+package inet.linklayer.mfcore;
 
 //
 // Module to decide whether a frame is received correctly or is

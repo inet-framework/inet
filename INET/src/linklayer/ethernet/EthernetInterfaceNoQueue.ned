@@ -18,7 +18,7 @@
 
 
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;
 
 //
 // Ethernet network interface. Assumes inifinite queue.

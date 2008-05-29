@@ -24,7 +24,7 @@ import inet.base.NotificationBoard;
 import inet.base.Sink;
 import inet.mobility.CircleMobility;
 import inet.mobility.NullMobility;
-import inet.networkinterfaces.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.nodes.wireless.WirelessAPSimplified;
 import inet.world.ChannelControl;
 

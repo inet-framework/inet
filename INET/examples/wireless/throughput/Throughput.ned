@@ -22,7 +22,7 @@ package inet.examples.wireless.throughput;
 import inet.applications.ethernet.EtherAppCli;
 import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
-import inet.networkinterfaces.ieee80211.Ieee80211NicSTASimplified;
+import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.world.ChannelControl;
 
 

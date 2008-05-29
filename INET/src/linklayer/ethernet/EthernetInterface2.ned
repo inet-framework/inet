@@ -18,20 +18,19 @@
 
 
 
-package inet.networkinterfaces.ethernet;
+package inet.linklayer.ethernet;
 
 import inet.networklayer.queue.OutputQueue;
 
 
 //
-// Ethernet network interface, which supports full-duplex operation only.
-// Corresponds to the prototype NetworkInterface.
+// Ethernet network interface which supports full-duplex operation only.
 // Complements EtherMAC2 and EtherEncap with an output queue for QoS and
 // RED support.
 //
 // @see EthernetInterface, EthernetInterfaceNoQueue
 //
-module EthernetInterface2
+module EthernetInterface2 like INetworkInterface
 {
     parameters:
         string queueType = default("DropTailQueue");
