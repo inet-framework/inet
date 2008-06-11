@@ -24,7 +24,7 @@
 
 static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
-    out << "(" << msg->className() << ")" << msg->fullName();
+    out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
 }
 
@@ -105,7 +105,7 @@ void ARP::updateDisplayString()
     char buf[80];
     sprintf(buf, "%d cache entries\nsent req:%ld repl:%ld fail:%ld",
                  arpCache.size(), numRequestsSent, numRepliesSent, numFailedResolutions);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void ARP::processOutboundPacket(cMessage *msg)
@@ -121,7 +121,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     // if output interface is not broadcast, don't bother with ARP
     if (!ie->isBroadcast())
     {
-        EV << "output interface " << ie->name() << " is not broadcast, skipping ARP\n";
+        EV << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
         send(msg, "nicOut", ie->networkLayerGateIndex());
         return;
     }
@@ -270,7 +270,7 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
 
 void ARP::requestTimedOut(cMessage *selfmsg)
 {
-    ARPCacheEntry *entry = (ARPCacheEntry *)selfmsg->contextPointer();
+    ARPCacheEntry *entry = (ARPCacheEntry *)selfmsg->getContextPointer();
     entry->numRetries++;
     if (entry->numRetries < retryCount)
     {

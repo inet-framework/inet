@@ -40,12 +40,12 @@ void ErrorHandling::handleMessage(cMessage *msg)
     numReceived++;
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
-    IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->encapsulatedMsg());
+    IPDatagram *d = check_and_cast<IPDatagram *>(icmpMsg->getEncapsulatedMsg());
 
     EV << "Error Handler: ICMP message received:\n";
     EV << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
-       << " Bytelength: " << d->byteLength()
+       << " Bytelength: " << d->getByteLength()
        << " Src: " << d->srcAddress()
        << " Dest: " << d->destAddress()
        << " Time: " << simTime()
@@ -55,6 +55,6 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     char buf[80];
     sprintf(buf, "errors: %ld", numReceived);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 

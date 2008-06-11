@@ -69,7 +69,7 @@ class INET_API RTPMpegPacket : public cPacket
         /**
          * Returns the class name "RTPMpegPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Returns the constant header length (4 bytes).

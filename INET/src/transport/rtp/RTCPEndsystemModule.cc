@@ -58,10 +58,10 @@ void RTCPEndsystemModule::initialize() {
 void RTCPEndsystemModule::handleMessage(cMessage *msg) {
 
     // first distinguish incoming messages by arrival gate
-    if (msg->arrivalGateId() == findGate("fromRTP")) {
+    if (msg->getArrivalGateId() == findGate("fromRTP")) {
         handleMessageFromRTP(msg);
     }
-    else if (msg->arrivalGateId() == findGate("fromSocketLayer")) {
+    else if (msg->getArrivalGateId() == findGate("fromSocketLayer")) {
         handleMessageFromSocketLayer(msg);
     }
     else {
@@ -82,19 +82,19 @@ void RTCPEndsystemModule::handleMessageFromRTP(cMessage *msg) {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
 
     // distinguish by type
-    if (rinp->type() == RTPInnerPacket::RTP_INP_INITIALIZE_RTCP) {
+    if (rinp->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_RTCP) {
         initializeRTCP(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
         senderModuleInitialized(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_DATA_OUT) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
         dataOut(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_DATA_IN) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
         dataIn(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_LEAVE_SESSION) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_LEAVE_SESSION) {
         leaveSession(rinp);
     }
     else {
@@ -398,7 +398,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr ad
             // we have an rtp port conflict
         }
     }
-    participantInfo->processRTPPacket(packet, packet->arrivalTime());
+    participantInfo->processRTPPacket(packet, packet->getArrivalTime());
 };
 
 
@@ -408,7 +408,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
 
     cArray *rtcpPackets = packet->rtcpPackets();
 
-    simtime_t arrivalTime = packet->arrivalTime();
+    simtime_t arrivalTime = packet->getArrivalTime();
     delete packet;
 
     for (int i = 0; i < rtcpPackets->items(); i++) {

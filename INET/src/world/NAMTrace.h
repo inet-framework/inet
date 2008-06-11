@@ -53,13 +53,13 @@ class INET_API NAMTrace : public cSimpleModule
 
   public:
     /**
-     * Assign a nam ID to the given module (host or router).
+     * Assign a nam ID to the given getModule(host or router).
      * -1 means auto-assigned ID.
      */
     int assignNamId(cModule *node, int namid=-1);
 
     /**
-     * Returns the nam ID of the given module (host or router). assignNamId() must
+     * Returns the nam ID of the given getModule(host or router). assignNamId() must
      * have been called for the given module before, at least with -1 (auto-ID).
      */
     int getNamId(cModule *node) const;
@@ -67,7 +67,7 @@ class INET_API NAMTrace : public cSimpleModule
     /**
      * Returns true if nam trace recording is enabled (filename was not "").
      */
-    bool enabled() const {return nams!=NULL;}
+    bool isEnabled() const {return nams!=NULL;}
 
     /**
      * Returns the stream to which the trace events can be written.

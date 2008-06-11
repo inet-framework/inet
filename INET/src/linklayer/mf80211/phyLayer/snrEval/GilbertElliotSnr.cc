@@ -49,7 +49,7 @@ void GilbertElliotSnr::initialize(int stage)
         stateChange->setKind(38);
         state = GOOD;
         scheduleAt(simTime() + exponential(meanGood, 0), stateChange);
-        EV << "GE state will change at: " << stateChange->arrivalTime() << endl;
+        EV << "GE state will change at: " << stateChange->getArrivalTime() << endl;
     }
 }
 
@@ -65,7 +65,7 @@ void GilbertElliotSnr::initialize(int stage)
  */
 void GilbertElliotSnr::handleSelfMsg(cMessage *msg)
 {
-    if (msg->kind() == TRANSM_OVER)
+    if (msg->getKind() == TRANSM_OVER)
     {
 
         if (noiseLevel < sensitivity)
@@ -103,7 +103,7 @@ void GilbertElliotSnr::handleSelfMsg(cMessage *msg)
         }
     }
     else
-        error("Internal error: unknown self-message `%s'", msg->name());
+        error("Internal error: unknown self-message `%s'", msg->getName());
 }
 
 

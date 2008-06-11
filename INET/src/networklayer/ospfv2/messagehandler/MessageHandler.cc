@@ -18,7 +18,7 @@ void OSPF::MessageHandler::MessageReceived (cMessage* message)
         HandleTimer (check_and_cast<OSPFTimer*> (message));
     } else {
         OSPFPacket* packet = check_and_cast<OSPFPacket*> (message);
-        EV << "Received packet: (" << packet->className () << ")" << packet->name() << "\n";
+        EV << "Received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
         if (packet->getRouterID () == router->GetRouterID ()) {
             EV << "This packet is from ourselves, discarding.\n";
             delete message;
@@ -34,7 +34,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case InterfaceHelloTimer:
             {
                 OSPF::Interface* intf;
-                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->contextPointer ()))) {
+                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid InterfaceHelloTimer.\n";
                     delete timer;
@@ -47,7 +47,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case InterfaceWaitTimer:
             {
                 OSPF::Interface* intf;
-                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->contextPointer ()))) {
+                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid InterfaceWaitTimer.\n";
                     delete timer;
@@ -60,7 +60,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case InterfaceAcknowledgementTimer:
             {
                 OSPF::Interface* intf;
-                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->contextPointer ()))) {
+                if (! (intf = reinterpret_cast <OSPF::Interface*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid InterfaceAcknowledgementTimer.\n";
                     delete timer;
@@ -73,7 +73,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case NeighborInactivityTimer:
             {
                 OSPF::Neighbor* neighbor;
-                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->contextPointer ()))) {
+                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
@@ -86,7 +86,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case NeighborPollTimer:
             {
                 OSPF::Neighbor* neighbor;
-                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->contextPointer ()))) {
+                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid NeighborInactivityTimer.\n";
                     delete timer;
@@ -99,7 +99,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case NeighborDDRetransmissionTimer:
             {
                 OSPF::Neighbor* neighbor;
-                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->contextPointer ()))) {
+                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid NeighborDDRetransmissionTimer.\n";
                     delete timer;
@@ -112,7 +112,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case NeighborUpdateRetransmissionTimer:
             {
                 OSPF::Neighbor* neighbor;
-                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->contextPointer ()))) {
+                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid NeighborUpdateRetransmissionTimer.\n";
                     delete timer;
@@ -125,7 +125,7 @@ void OSPF::MessageHandler::HandleTimer (OSPFTimer* timer)
         case NeighborRequestRetransmissionTimer:
             {
                 OSPF::Neighbor* neighbor;
-                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->contextPointer ()))) {
+                if (! (neighbor = reinterpret_cast <OSPF::Neighbor*> (timer->getContextPointer()))) {
                     // should not reach this point
                     EV << "Discarding invalid NeighborRequestRetransmissionTimer.\n";
                     delete timer;
@@ -149,7 +149,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
 {
     // packet version must be OSPF version 2
     if (packet->getVersion () == 2) {
-        IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->controlInfo ());
+        IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
         int             interfaceId = controlInfo->interfaceId ();
         OSPF::AreaID    areaID      = packet->getAreaID ().getInt ();
         OSPF::Area*     area        = router->GetArea (areaID);
@@ -411,7 +411,7 @@ void OSPF::MessageHandler::PrintDatabaseDescriptionPacket (const OSPFDatabaseDes
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize ();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader (ddPacket->getLsaHeaders (i), ev.ostream());
+        PrintLSAHeader (ddPacket->getLsaHeaders (i), ev.getOStream());
         EV << "\n";
     }
 }
@@ -453,7 +453,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket (const OSPFLinkStateUpdate
     for (i = 0; i < updateCount; i++) {
         const OSPFRouterLSA& lsa = updatePacket->getRouterLSAs(i);
         EV << "  ";
-        PrintLSAHeader (lsa.getHeader (), ev.ostream());
+        PrintLSAHeader (lsa.getHeader (), ev.getOStream());
         EV << "\n";
 
         EV << "  bits="
@@ -489,7 +489,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket (const OSPFLinkStateUpdate
     for (i = 0; i < updateCount; i++) {
         const OSPFNetworkLSA& lsa = updatePacket->getNetworkLSAs(i);
         EV << "  ";
-        PrintLSAHeader (lsa.getHeader (), ev.ostream());
+        PrintLSAHeader (lsa.getHeader (), ev.getOStream());
         EV << "\n";
 
         EV << "  netMask="
@@ -509,7 +509,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket (const OSPFLinkStateUpdate
     for (i = 0; i < updateCount; i++) {
         const OSPFSummaryLSA& lsa = updatePacket->getSummaryLSAs(i);
         EV << "  ";
-        PrintLSAHeader (lsa.getHeader (), ev.ostream());
+        PrintLSAHeader (lsa.getHeader (), ev.getOStream());
         EV << "\n";
 
         EV << "  netMask="
@@ -524,7 +524,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket (const OSPFLinkStateUpdate
     for (i = 0; i < updateCount; i++) {
         const OSPFASExternalLSA& lsa = updatePacket->getAsExternalLSAs(i);
         EV << "  ";
-        PrintLSAHeader (lsa.getHeader (), ev.ostream());
+        PrintLSAHeader (lsa.getHeader (), ev.getOStream());
         EV << "\n";
 
         const OSPFASExternalLSAContents& contents = lsa.getContents ();
@@ -554,7 +554,7 @@ void OSPF::MessageHandler::PrintLinkStateAcknowledgementPacket (const OSPFLinkSt
     unsigned int lsaCount = ackPacket->getLsaHeadersArraySize ();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader (ackPacket->getLsaHeaders (i), ev.ostream());
+        PrintLSAHeader (ackPacket->getLsaHeaders (i), ev.getOStream());
         EV << "\n";
     }
 }

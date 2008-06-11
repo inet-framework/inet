@@ -51,7 +51,7 @@ void ScenarioManager::initialize()
 
 void ScenarioManager::handleMessage(cMessage *msg)
 {
-    cXMLElement *node = (cXMLElement *) msg->contextPointer();
+    cXMLElement *node = (cXMLElement *) msg->getContextPointer();
     delete msg;
 
     processCommand(node);
@@ -109,7 +109,7 @@ const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char 
 cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
 {
     const char *moduleAttr = getRequiredAttribute(node, attr);
-    cModule *mod = simulation.moduleByPath(moduleAttr);
+    cModule *mod = simulation.getModuleByPath(moduleAttr);
     if (!mod)
         error("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
     return mod;
@@ -123,7 +123,7 @@ cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, 
     int gindex;
     cGate *g = parseIndexedName(gateStr, gname, gindex) ? mod->gate(gname.c_str(), gindex) : mod->gate(gname.c_str());
     if (!g)
-        error("module '%s' has no gate '%s' at %s", mod->fullPath().c_str(), gateStr, node->getSourceLocation());
+        error("module '%s' has no gate '%s' at %s", mod->getFullPath().c_str(), gateStr, node->getSourceLocation());
     return g;
 }
 
@@ -143,7 +143,7 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
     if (!scriptable)
         error("<%s> not understood: it is not a built-in command of %s, and module class %s "
               "is not scriptable (does not subclass from IScriptable) at %s",
-              node->getTagName(), className(), mod->className(), node->getSourceLocation());
+              node->getTagName(), getClassName(), mod->getClassName(), node->getSourceLocation());
 
     // ok, trust it to process this command
     scriptable->processCommand(*node);
@@ -156,8 +156,8 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
     const char *parAttr = getRequiredAttribute(node, "par");
     const char *valueAttr = getRequiredAttribute(node, "value");
 
-    EV << "Setting " << mod->fullPath() << "." << parAttr << " = " << valueAttr << "\n";
-    bubble((std::string("setting: ")+mod->fullPath()+"."+parAttr+" = "+valueAttr).c_str());
+    EV << "Setting " << mod->getFullPath() << "." << parAttr << " = " << valueAttr << "\n";
+    bubble((std::string("setting: ")+mod->getFullPath()+"."+parAttr+" = "+valueAttr).c_str());
 
     // set the parameter to the given value
     cPar& param = mod->par(parAttr);
@@ -172,17 +172,17 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
     const char *valueAttr = getRequiredAttribute(node, "value");
 
     EV << "Setting channel attribute: " << attrAttr << " = " << valueAttr
-       << " of gate " << g->fullPath() << "\n";
+       << " of gate " << g->getFullPath() << "\n";
     bubble((std::string("setting channel attr: ")+attrAttr+" = "+valueAttr).c_str());
 
     // make sure gate is connected at all
-    if (!g->toGate())
-        error("gate '%s' is not connected at %s", g->fullPath().c_str(), node->getSourceLocation());
+    if (!g->getToGate())
+        error("gate '%s' is not connected at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // find channel (or add one?)
-    cChannel *chan = g->channel();
+    cChannel *chan = g->getChannel();
     if (!chan)
-        error("connection starting at gate '%s' has no attributes at %s", g->fullPath().c_str(), node->getSourceLocation());
+        error("connection starting at gate '%s' has no attributes at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // set the parameter to the given value
     if (!chan->hasPar(attrAttr))
@@ -210,6 +210,6 @@ void ScenarioManager::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "total %d changes, %d left", numChanges, numChanges-numDone);
-    displayString().setTagArg("t", 0, buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 

@@ -63,15 +63,15 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     }
 
     // add fragment into reassembly buffer
-    int bytes = datagram->byteLength() - datagram->headerLength();
+    int bytes = datagram->getByteLength() - datagram->headerLength();
     bool isComplete = buf->buf.addFragment(datagram->fragmentOffset(),
                                            datagram->fragmentOffset() + bytes,
                                            !datagram->moreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
-    // content (encapsulatedMsg()), other (empty) ones are only
+    // content (getEncapsulatedMsg()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->encapsulatedMsg())
+    if (datagram->getEncapsulatedMsg())
     {
         delete buf->datagram;
         buf->datagram = datagram;

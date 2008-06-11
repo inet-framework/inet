@@ -44,7 +44,7 @@ void FlatNetworkConfigurator6::initialize(int stage)
 
     // extract topology
     topo.extractByProperty("node");
-    EV << "cTopology found " << topo.nodes() << " nodes\n";
+    EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
     if (stage==2)
     {
@@ -70,26 +70,26 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
     // update display string
     char buf[80];
     sprintf(buf, "%d IPv6 nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
-    displayString().setTagArg("t", 0, buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return IPAddressResolver().findInterfaceTableOf(node->module()) != NULL;
+    return IPAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
 #ifndef NO_IPv6
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 {
     // assign advertised prefixes to all router interfaces
-    for (int i = 0; i < topo.nodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
     {
         // skip bus types
-        if (!isIPNode(topo.node(i)))
+        if (!isIPNode(topo.getNode(i)))
             continue;
 
         // find interface table and assign address to all (non-loopback) interfaces
-        cModule *mod = topo.node(i)->module();
+        cModule *mod = topo.getNode(i)->getModule();
         InterfaceTable *ift = IPAddressResolver().interfaceTableOf(mod);
         RoutingTable6 *rt = IPAddressResolver().routingTable6Of(mod);
 
@@ -107,7 +107,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
                 continue;  // already has one
 
             // add a prefix
-            IPv6Address prefix(0xaaaa0000+ift->id(), ie->networkLayerGateIndex()<<16, 0, 0);
+            IPv6Address prefix(0xaaaa0000+ift->getId(), ie->networkLayerGateIndex()<<16, 0, 0);
             ASSERT(prefix.isGlobal());
 
             IPv6InterfaceData::AdvPrefix p;
@@ -136,16 +136,16 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
 {
     // add globally routable prefixes to routing table
-    for (int i = 0; i < topo.nodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
     {
-        cTopology::Node *node = topo.node(i);
+        cTopology::Node *node = topo.getNode(i);
 
         // skip bus types
         if (!isIPNode(node))
             continue;
 
-        RoutingTable6 *rt = IPAddressResolver().routingTable6Of(node->module());
-        InterfaceTable *ift = IPAddressResolver().interfaceTableOf(node->module());
+        RoutingTable6 *rt = IPAddressResolver().routingTable6Of(node->getModule());
+        InterfaceTable *ift = IPAddressResolver().interfaceTableOf(node->getModule());
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
@@ -173,9 +173,9 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
     int numIPNodes = 0;
 
     // fill in routing tables
-    for (int i = 0; i < topo.nodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
     {
-        cTopology::Node *destNode = topo.node(i);
+        cTopology::Node *destNode = topo.getNode(i);
 
         // skip bus types
         if (!isIPNode(destNode))
@@ -186,8 +186,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 */
 
         numIPNodes++; // FIXME split into num hosts, num routers
-        RoutingTable6 *destRt = IPAddressResolver().routingTable6Of(destNode->module());
-        InterfaceTable *destIft = IPAddressResolver().interfaceTableOf(destNode->module());
+        RoutingTable6 *destRt = IPAddressResolver().routingTable6Of(destNode->getModule());
+        InterfaceTable *destIft = IPAddressResolver().interfaceTableOf(destNode->getModule());
 
         // don't add routes towards hosts
         if (!destRt->par("isRouter").boolValue())
@@ -207,48 +207,48 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
                     destPrefixes.push_back(&destIf->ipv6()->advPrefix(y));
         }
 
-        std::string destModName = destNode->module()->fullName();
+        std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
-        topo.unweightedSingleShortestPathsTo(destNode);
+        topo.calculateUnweightedSingleShortestPathsTo(destNode);
 
         // add route (with dest=destPrefixes) to every router routing table in the network
-        for (int j = 0; j < topo.nodes(); j++)
+        for (int j = 0; j < topo.getNumNodes(); j++)
         {
             if (i == j)
                 continue;
-            if (!isIPNode(topo.node(j)))
+            if (!isIPNode(topo.getNode(j)))
                 continue;
 
-            cTopology::Node *atNode = topo.node(j);
-            if (atNode->paths() == 0)
+            cTopology::Node *atNode = topo.getNode(j);
+            if (atNode->getNumPaths() == 0)
                 continue;       // not connected
 
-            RoutingTable6 *rt = IPAddressResolver().routingTable6Of(atNode->module());
-            InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->module());
+            RoutingTable6 *rt = IPAddressResolver().routingTable6Of(atNode->getModule());
+            InterfaceTable *ift = IPAddressResolver().interfaceTableOf(atNode->getModule());
 
             // skip hosts' routing tables
             if (!rt->par("isRouter").boolValue())
                 continue;
 
             // determine the local interface id
-            cGate *localGate = atNode->path(0)->localGate();
-            InterfaceEntry *localIf = ift->interfaceByNodeOutputGateId(localGate->id());
+            cGate *localGate = atNode->path(0)->getLocalGate();
+            InterfaceEntry *localIf = ift->interfaceByNodeOutputGateId(localGate->getId());
 
             // determine next hop link address. That's a bit tricky because
-            // the directly adjacent cTopo node might be a non-IP node (ethernet switch etc)
+            // the directly adjacent cTopo node might be a non-IP getNode(ethernet switch etc)
             // so we have to "seek through" them.
             cTopology::Node *prevNode = atNode;
             // if there's no ethernet switch between atNode and it's next hop
             // neighbour, we don't go into the following while() loop
-            while (!isIPNode(prevNode->path(0)->remoteNode()))
-                prevNode = prevNode->path(0)->remoteNode();
+            while (!isIPNode(prevNode->path(0)->getRemoteNode()))
+                prevNode = prevNode->path(0)->getRemoteNode();
 
             // ok, the next hop is now just one step away from prevNode
-            cGate *remoteGate = prevNode->path(0)->remoteGate();
-            cModule *nextHop = remoteGate->ownerModule();
+            cGate *remoteGate = prevNode->path(0)->getRemoteGate();
+            cModule *nextHop = remoteGate->getOwnerModule();
             InterfaceTable *nextHopIft = IPAddressResolver().interfaceTableOf(nextHop);
-            InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByNodeInputGateId(remoteGate->id());
+            InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop
             IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6()->linkLocalAddress();
@@ -264,7 +264,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
     }
 
     // update display string
-    setDisplayString(numIPNodes, topo.nodes()-numIPNodes);
+    setDisplayString(numIPNodes, topo.getNumNodes()-numIPNodes);
 }
 #endif
 

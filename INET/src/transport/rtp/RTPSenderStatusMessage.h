@@ -62,7 +62,7 @@ public:
     /**
      * Returns the class name "RTPSenderStatusMessage".
      */
-    const char *className() const;
+    const char *getClassName() const;
 
     /**
      * Returns the status string stored in this message.

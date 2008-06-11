@@ -24,7 +24,7 @@ MPLSPacket::MPLSPacket(const char *name) : cMessage(name)
 
 MPLSPacket::MPLSPacket(const MPLSPacket & p)
 {
-    setName(p.name());
+    setName(p.getName());
     operator=(p);
 }
 

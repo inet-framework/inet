@@ -42,7 +42,7 @@ void IPTrafSink::handleMessage(cMessage *msg)
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 
 }
@@ -51,23 +51,23 @@ void IPTrafSink::printPacket(cMessage *msg)
 {
     IPvXAddress src, dest;
     int protocol = -1;
-    if (dynamic_cast<IPControlInfo *>(msg->controlInfo())!=NULL)
+    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
     {
-        IPControlInfo *ctrl = (IPControlInfo *)msg->controlInfo();
+        IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
         src = ctrl->srcAddr();
         dest = ctrl->destAddr();
         protocol = ctrl->protocol();
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->controlInfo())!=NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
     {
-        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->controlInfo();
+        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
         src = ctrl->srcAddr();
         dest = ctrl->destAddr();
         protocol = ctrl->protocol();
     }
 
     ev  << msg << endl;
-    ev  << "Payload length: " << msg->byteLength() << " bytes" << endl;
+    ev  << "Payload length: " << msg->getByteLength() << " bytes" << endl;
     if (protocol!=-1)
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
@@ -186,7 +186,7 @@ void IPTrafGen::handleMessage(cMessage *msg)
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 }
 

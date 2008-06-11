@@ -82,7 +82,7 @@
  * }
  *
  * void MyModule::socketDatagramArrived(int, void *, cMessage *msg, UDPControlInfo *ctrl) {
- *     ev << "Received UDP packet, " << msg->byteLength() << " bytes\\n";
+ *     ev << "Received UDP packet, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
  *
@@ -169,10 +169,10 @@ class INET_API UDPSocket
      * Messages received from UDP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int state()   {return sockstate;}
+    int getState()   {return sockstate;}
 
     /**
-     * Returns name of socket state code returned by state().
+     * Returns name of socket state code returned by getState().
      */
     static const char *stateName(int state);
 
@@ -247,7 +247,7 @@ class INET_API UDPSocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a UDPControlInfo as controlInfo(), and the sockId in it matches
+     * has a UDPControlInfo as getControlInfo(), and the sockId in it matches
      * that of the socket.)
      */
     bool belongsToSocket(cMessage *msg);
@@ -255,7 +255,7 @@ class INET_API UDPSocket
     /**
      * Returns true if the message belongs to any UDPSocket instance.
      * (This basically checks if the message has an UDPControlInfo attached to
-     * it as controlInfo().)
+     * it as getControlInfo().)
      */
     static bool belongsToAnyUDPSocket(cMessage *msg);
 

@@ -44,7 +44,7 @@ RTPPacket::RTPPacket(const char *name) : cPacket(name) {
 
 
 RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket() {
-    setName(packet.name());
+    setName(packet.getName());
     operator=(packet);
 };
 
@@ -75,7 +75,7 @@ RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
 };
 
 
-const char *RTPPacket::className() const {
+const char *RTPPacket::getClassName() const {
     return "RTPPacket";
 };
 

@@ -110,7 +110,7 @@ void TCPConnection::printConnBrief()
     tcpEV << "Connection ";
     tcpEV << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
     tcpEV << "  on app[" << appGateIndex << "],connId=" << connId;
-    tcpEV << "  in " << stateName(fsm.state());
+    tcpEV << "  in " << stateName(fsm.getState());
     tcpEV << "  (ptr=0x" << this << ")\n";
 }
 
@@ -139,13 +139,13 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     TCPConnection *conn = new TCPConnection(tcpMain,appGateIndex,connId);
 
     // following code to be kept consistent with initConnection()
-    const char *sendQueueClass = sendQueue->className();
+    const char *sendQueueClass = sendQueue->getClassName();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
 
-    const char *receiveQueueClass = receiveQueue->className();
+    const char *receiveQueueClass = receiveQueue->getClassName();
     conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
 
-    const char *tcpAlgorithmClass = tcpAlgorithm->className();
+    const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
     conn->tcpAlgorithm->setConnection(conn);
 
@@ -219,7 +219,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get4());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"ipOut");
+        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipOut");
     }
     else
     {
@@ -230,7 +230,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
         controlInfo->setDestAddr(dest.get6());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.contextModule())->send(tcpseg,"ipv6Out");
+        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg,"ipv6Out");
     }
 }
 

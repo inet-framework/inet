@@ -66,7 +66,7 @@ void TCP::initialize()
 
     recordStatistics = par("recordStats");
 
-    cModule *netw = simulation.systemModule();
+    cModule *netw = simulation.getSystemModule();
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 }
@@ -86,7 +86,7 @@ void TCP::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        TCPConnection *conn = (TCPConnection *) msg->contextPointer();
+        TCPConnection *conn = (TCPConnection *) msg->getContextPointer();
         bool ret = conn->processTimer(msg);
         if (!ret)
             removeConnection(conn);
@@ -105,14 +105,14 @@ void TCP::handleMessage(cMessage *msg)
 
             // get src/dest addresses
             IPvXAddress srcAddr, destAddr;
-            if (dynamic_cast<IPControlInfo *>(tcpseg->controlInfo())!=NULL)
+            if (dynamic_cast<IPControlInfo *>(tcpseg->getControlInfo())!=NULL)
             {
                 IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->srcAddr();
                 destAddr = controlInfo->destAddr();
                 delete controlInfo;
             }
-            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->controlInfo())!=NULL)
+            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo())!=NULL)
             {
                 IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
                 srcAddr = controlInfo->srcAddr();
@@ -121,7 +121,7 @@ void TCP::handleMessage(cMessage *msg)
             }
             else
             {
-                error("(%s)%s arrived without control info", tcpseg->className(), tcpseg->name());
+                error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }
 
             // process segment
@@ -139,8 +139,8 @@ void TCP::handleMessage(cMessage *msg)
     }
     else // must be from app
     {
-        TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->controlInfo());
-        int appGateIndex = msg->arrivalGate()->index();
+        TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
+        int appGateIndex = msg->getArrivalGate()->getIndex();
         int connId = controlInfo->connId();
 
         TCPConnection *conn = findConnForApp(appGateIndex, connId);
@@ -169,17 +169,17 @@ void TCP::handleMessage(cMessage *msg)
 
 void TCP::updateDisplayString()
 {
-    if (ev.disabled())
+    if (ev.isDisabled())
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
-        displayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t",0,"");
         return;
     }
 
     //char buf[40];
     //sprintf(buf,"%d conns", tcpAppConnMap.size());
-    //displayString().setTagArg("t",0,buf);
+    //getDisplayString().setTagArg("t",0,buf);
 
     int numINIT=0, numCLOSED=0, numLISTEN=0, numSYN_SENT=0, numSYN_RCVD=0,
         numESTABLISHED=0, numCLOSE_WAIT=0, numLAST_ACK=0, numFIN_WAIT_1=0,
@@ -218,7 +218,7 @@ void TCP::updateDisplayString()
     if (numFIN_WAIT_2>0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
     if (numCLOSING>0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
     if (numTIME_WAIT>0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
-    displayString().setTagArg("t",0,buf2);
+    getDisplayString().setTagArg("t",0,buf2);
 }
 
 TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
@@ -391,5 +391,5 @@ void TCP::removeConnection(TCPConnection *conn)
 
 void TCP::finish()
 {
-    tcpEV << fullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+    tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }

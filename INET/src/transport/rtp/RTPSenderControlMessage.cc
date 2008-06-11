@@ -26,7 +26,7 @@ RTPSenderControlMessage::RTPSenderControlMessage(const char *name) {
 
 
 RTPSenderControlMessage::RTPSenderControlMessage(const RTPSenderControlMessage& message) {
-    setName(message.name());
+    setName(message.getName());
     operator=(message);
 };
 
@@ -47,7 +47,7 @@ cObject *RTPSenderControlMessage::dup() const {
 };
 
 
-const char *RTPSenderControlMessage::className() const {
+const char *RTPSenderControlMessage::getClassName() const {
     return "RTPSenderControlMessage";
 };
 

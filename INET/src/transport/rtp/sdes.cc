@@ -46,7 +46,7 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject() {
 
 
 SDESItem::SDESItem(const SDESItem& sdesItem) : cObject() {
-    setName(sdesItem.name());
+    setName(sdesItem.getName());
     operator=(sdesItem);
 };
 
@@ -69,7 +69,7 @@ cObject *SDESItem::dup() const {
 };
 
 
-const char *SDESItem::className() const {
+const char *SDESItem::getClassName() const {
     return "SDESItem";
 };
 
@@ -88,7 +88,7 @@ void SDESItem::writeContents(std::ostream& os) {
 };
 
 
-SDESItem::SDES_ITEM_TYPE SDESItem::type() {
+SDESItem::SDES_ITEM_TYPE SDESItem::getType() {
     return _type;
 };
 
@@ -120,7 +120,7 @@ SDESChunk::SDESChunk(const char *name, u_int32 ssrc) : cArray(name) {
 
 
 SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk) {
-    setName(sdesChunk.name());
+    setName(sdesChunk.getName());
     operator=(sdesChunk);
 };
 
@@ -142,7 +142,7 @@ cObject *SDESChunk::dup() const {
 };
 
 
-const char *SDESChunk::className() const {
+const char *SDESChunk::getClassName() const {
     return "SDESChunk";
 };
 
@@ -169,7 +169,7 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
     for (int i = 0; i < items(); i++) {
         if (exist(i)) {
             SDESItem *compareItem = (SDESItem *)(get(i));
-            if (compareItem->type() == sdesItem->type()) {
+            if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
                 _length = _length - compareItem->length();
                 delete compareItem;

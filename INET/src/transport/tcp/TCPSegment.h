@@ -35,7 +35,7 @@ class INET_API TCPSegment : public TCPSegment_Base
 
   public:
     TCPSegment(const char *name=NULL, int kind=0) : TCPSegment_Base(name,kind) {}
-    TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.name()) {operator=(other);}
+    TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const {return new TCPSegment(*this);}
 

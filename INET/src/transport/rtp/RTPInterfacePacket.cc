@@ -38,7 +38,7 @@ RTPInterfacePacket::RTPInterfacePacket(const char *name) : cPacket(name) {
 
 
 RTPInterfacePacket::RTPInterfacePacket(const RTPInterfacePacket& rifp) : cPacket() {
-    setName(rifp.name());
+    setName(rifp.getName());
     operator=(rifp);
 };
 
@@ -73,7 +73,7 @@ cObject *RTPInterfacePacket::dup() const {
 };
 
 
-const char *RTPInterfacePacket::className() const {
+const char *RTPInterfacePacket::getClassName() const {
     return "RTPInterfacePacket";
 };
 
@@ -198,7 +198,7 @@ void RTPInterfacePacket::sessionLeft() {
 };
 
 
-RTPInterfacePacket::RTP_IFP_TYPE RTPInterfacePacket::type() {
+RTPInterfacePacket::RTP_IFP_TYPE RTPInterfacePacket::getType() {
     return _type;
 };
 
@@ -223,7 +223,7 @@ int RTPInterfacePacket::payloadType() {
 };
 
 
-const char *RTPInterfacePacket::fileName() {
+const char *RTPInterfacePacket::getFileName() {
     return opp_strdup(_fileName);
 };
 

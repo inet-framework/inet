@@ -61,7 +61,7 @@ void RSVP::initialize(int stage)
         lt = LIBTableAccess().get();
         nb = NotificationBoardAccess().get();
 
-        rpct = check_and_cast<IRSVPClassifier*>(parentModule()->submodule("classifier"));
+        rpct = check_and_cast<IRSVPClassifier*>(getParentModule()->getSubmodule("classifier"));
 
         maxPsbId = 0;
         maxRsbId = 0;
@@ -139,7 +139,7 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
         {
             EV << "path is permanent, we will try again later" << endl;
 
-            sendPathNotify(id(), sit->sobj, pit->sender, PATH_RETRY, retryInterval);
+            sendPathNotify(getId(), sit->sobj, pit->sender, PATH_RETRY, retryInterval);
         }
     }
 }
@@ -263,12 +263,12 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
         const char *str = getParameterStrValue(path, "owner", "");
         if (strlen(str))
         {
-            cModule *mod = simulation.moduleByPath(str);
-            newPath.owner = mod->id();
+            cModule *mod = simulation.getModuleByPath(str);
+            newPath.owner = mod->getId();
         }
         else
         {
-            newPath.owner = id();
+            newPath.owner = getId();
         }
 
         newPath.permanent = getParameterBoolValue(path, "permanent", true);
@@ -296,7 +296,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
         // schedule path creation
 
-        sendPathNotify(id(), newSession.sobj, newPath.sender, PATH_RETRY, 0.0);
+        sendPathNotify(getId(), newSession.sobj, newPath.sender, PATH_RETRY, 0.0);
     }
 
     if (!merge)
@@ -389,7 +389,7 @@ void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const Sender
     if (handler < 0)
         return; // handler not specified
 
-    cModule *mod = simulation.module(handler);
+    cModule *mod = simulation.getModule(handler);
 
     if (!mod)
         return; // handler no longer exists
@@ -400,7 +400,7 @@ void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const Sender
     msg->setSender(sender);
     msg->setStatus(status);
 
-    if (handler == id())
+    if (handler == getId())
         scheduleAt(simTime() + delay, msg);
     else
         sendDirect(msg, delay, mod, "from_rsvp");
@@ -865,7 +865,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         if (!IR)
         {
             IPAddress localInf = tedmod->interfaceAddrByPeerAddress(psb->Previous_Hop_Address);
-            inInterface = rt->interfaceByAddress(localInf)->name();
+            inInterface = rt->interfaceByAddress(localInf)->getName();
         }
         else
             inInterface = "any";
@@ -882,7 +882,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             lop.label = rsb->FlowDescriptor[i].label;
             outLabel.push_back(lop);
 
-            outInterface = rt->interfaceByAddress(psb->OutInterface)->name();
+            outInterface = rt->interfaceByAddress(psb->OutInterface)->getName();
         }
         else
         {
@@ -898,7 +898,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             {
                 InterfaceEntry *ie = rt->interfaceForDestAddr(psb->Session_Object.DestAddress);
                 if (ie)
-                    outInterface = ie->name(); // FIXME why use name to identify an interface?
+                    outInterface = ie->getName(); // FIXME why use name to identify an interface?
             }
         }
 
@@ -1370,7 +1370,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
     EV << "Received RSVP_HELLO" << endl;
     //print(msg);
 
-    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(msg->controlInfo());
+    IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(msg->getControlInfo());
     IPAddress sender = controlInfo->srcAddr();
     IPAddress peer = tedmod->primaryAddress(sender);
 
@@ -1789,7 +1789,7 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
     {
         EV << "this path is permanent, we will try to re-create it later" << endl;
 
-        sendPathNotify(id(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
+        sendPathNotify(getId(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
 
     }
     else

@@ -73,15 +73,15 @@ void NAMTrace::handleMessage(cMessage *msg)
 int NAMTrace::assignNamId(cModule *node, int namid)
 {
     // FIXME make sure nobody's using that namid yet
-    return modid2namid[node->id()] = namid==-1 ? ++lastnamid : namid;
+    return modid2namid[node->getId()] = namid==-1 ? ++lastnamid : namid;
 }
 
 int NAMTrace::getNamId(cModule *node) const
 {
-    int modid = node->id();
+    int modid = node->getId();
     std::map<int,int>::const_iterator it = modid2namid.find(modid);
     if (it == modid2namid.end())
-        error("getNamId(): assignNamId() on module '%s' not yet called", node->fullPath().c_str());
+        error("getNamId(): assignNamId() on module '%s' not yet called", node->getFullPath().c_str());
     return it->second;
 }
 

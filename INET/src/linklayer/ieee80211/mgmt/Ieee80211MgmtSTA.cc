@@ -113,25 +113,25 @@ void Ieee80211MgmtSTA::initialize(int stage)
 
 void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
 {
-    if (msg->kind()==MK_AUTH_TIMEOUT)
+    if (msg->getKind()==MK_AUTH_TIMEOUT)
     {
         // authentication timed out
-        APInfo *ap = (APInfo *)msg->contextPointer();
+        APInfo *ap = (APInfo *)msg->getContextPointer();
         EV << "Authentication timed out, AP address = " << ap->address << "\n";
 
         // send back failure report to agent
         sendAuthenticationConfirm(ap, PRC_TIMEOUT);
     }
-    else if (msg->kind()==MK_ASSOC_TIMEOUT)
+    else if (msg->getKind()==MK_ASSOC_TIMEOUT)
     {
         // association timed out
-        APInfo *ap = (APInfo *)msg->contextPointer();
+        APInfo *ap = (APInfo *)msg->getContextPointer();
         EV << "Association timed out, AP address = " << ap->address << "\n";
 
         // send back failure report to agent
         sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
-    else if (msg->kind()==MK_SCAN_MAXCHANNELTIME)
+    else if (msg->getKind()==MK_SCAN_MAXCHANNELTIME)
     {
         // go to next channel during scanning
         bool done = scanNextChannel();
@@ -139,7 +139,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
             sendScanConfirm(); // send back response to agents' "scan" command
         delete msg;
     }
-    else if (msg->kind()==MK_SCAN_SENDPROBE)
+    else if (msg->getKind()==MK_SCAN_SENDPROBE)
     {
         // Active Scan: send a probe request, then wait for minChannelTime (11.1.3.2.2)
         delete msg;
@@ -147,7 +147,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
         cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
         scheduleAt(simTime()+scanning.minChannelTime, timerMsg); //XXX actually, we should start waiting after ProbeReq actually got transmitted
     }
-    else if (msg->kind()==MK_SCAN_MINCHANNELTIME)
+    else if (msg->getKind()==MK_SCAN_MINCHANNELTIME)
     {
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
         delete msg;
@@ -165,14 +165,14 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
                 sendScanConfirm(); // send back response to agents' "scan" command
         }
     }
-    else if (msg->kind()==MK_BEACON_TIMEOUT)
+    else if (msg->getKind()==MK_BEACON_TIMEOUT)
     {
         // missed a few consecutive beacons
         beaconLost();
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->name());
+        error("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -197,7 +197,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
     else if (dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
         processDisassociateCommand((Ieee80211Prim_DisassociateRequest *)ctrl);
     else if (ctrl)
-        error("handleCommand(): unrecognized control info class `%s'", ctrl->className());
+        error("handleCommand(): unrecognized control info class `%s'", ctrl->getClassName());
     else
         error("handleCommand(): control info is NULL");
     delete ctrl;
@@ -205,7 +205,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
 
     // frame goes to the AP
     frame->setToDS(true);
@@ -543,7 +543,7 @@ void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, int resultCode)
 void Ieee80211MgmtSTA::sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode)
 {
     confirm->setResultCode(resultCode);
-    cMessage *msg = new cMessage(confirm->className());
+    cMessage *msg = new cMessage(confirm->getClassName());
     msg->setControlInfo(confirm);
     send(msg, "agentOut");
 }

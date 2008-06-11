@@ -29,7 +29,7 @@ class INET_API IModulation
 {
   public:
     virtual ~IModulation() {}
-    virtual const char *name() = 0;
+    virtual const char *getName() = 0;
     virtual double bitErrorRate(double snir, double bandwidth, double bitrate) = 0;
 };
 

@@ -189,7 +189,7 @@ void RoutingTable::updateDisplayString()
         sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
     else
         sprintf(buf, "routerId: %s\n%d+%d routes", _routerId.str().c_str(), routes.size(), multicastRoutes.size());
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void RoutingTable::handleMessage(cMessage *msg)
@@ -238,7 +238,7 @@ void RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
     ie->setIPv4Data(d);
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    d->setMetric((int)ceil(2e9/ie->datarate())); // use OSPF cost as default
+    d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
 }
 
 InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
@@ -481,7 +481,7 @@ void RoutingTable::updateNetmaskRoutes()
             route->netmask = ie->ipv4()->netmask();
             route->gateway = IPAddress();
             route->metric = ie->ipv4()->metric();
-            route->interfaceName = ie->name();
+            route->interfaceName = ie->getName();
             route->interfacePtr = ie;
             routes.push_back(route);
         }

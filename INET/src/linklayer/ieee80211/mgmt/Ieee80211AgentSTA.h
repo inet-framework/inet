@@ -28,7 +28,7 @@
 /**
  * Used in 802.11 infrastructure mode: in a station (STA), this module
  * controls channel scanning, association and handovers, by sending commands
- * (e.g. Ieee80211Prim_ScanRequest) to the management module (Ieee80211MgmtSTA).
+ * (e.g. Ieee80211Prim_ScanRequest) to the management getModule(Ieee80211MgmtSTA).
  *
  * See corresponding NED file for a detailed description.
  *

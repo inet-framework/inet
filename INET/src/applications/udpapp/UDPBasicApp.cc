@@ -104,7 +104,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 }
 

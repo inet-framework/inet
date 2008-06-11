@@ -145,7 +145,7 @@ inline void OSPF::RoutingTableEntry::AddNextHop (OSPF::NextHop hop)
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get ()->interfaceAt (hop.ifIndex);
 
         interfacePtr = routingInterface;
-        interfaceName = routingInterface->name();
+        interfaceName = routingInterface->getName();
         //gateway = ULongFromIPv4Address (hop.hopAddress); // TODO: verify this isn't necessary
     }
     nextHops.push_back (hop);

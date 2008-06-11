@@ -67,7 +67,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * Returns the class name "RTPSenderInfo".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Stores information about this outgoing RTPPacket.

@@ -66,7 +66,7 @@ void MassMobility::initialize(int stage)
  */
 void MassMobility::handleSelfMsg(cMessage * msg)
 {
-    switch (msg->kind())
+    switch (msg->getKind())
     {
     case MK_UPDATE_POS:
         move();

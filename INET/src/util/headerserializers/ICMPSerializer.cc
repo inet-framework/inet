@@ -48,12 +48,12 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
     {
         case ICMP_ECHO_REQUEST:
         {
-            PingPayload *pp = check_and_cast<PingPayload* >(pkt->encapsulatedMsg());
+            PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_ECHO;
             icmp->icmp_code = 0;
             icmp->icmp_id   = htons(pp->originatorId());
             icmp->icmp_seq  = htons(pp->seqNo());
-            unsigned int datalen = (pp->byteLength() - 4);
+            unsigned int datalen = (pp->getByteLength() - 4);
             for(unsigned int i=0; i < datalen; i++)
                 icmp->icmp_data[i] = 'a';
             packetLength += datalen;
@@ -61,7 +61,7 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
         }
         case ICMP_ECHO_REPLY:
         {
-            PingPayload *pp = check_and_cast<PingPayload* >(pkt->encapsulatedMsg());
+            PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_ECHOREPLY;
             icmp->icmp_code = 0;
             icmp->icmp_id   = htons(pp->originatorId());
@@ -74,7 +74,7 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
         }
         case ICMP_DESTINATION_UNREACHABLE:
         {
-            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->encapsulatedMsg());
+            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_UNREACH;
             icmp->icmp_code = pkt->getCode();
             packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
@@ -82,7 +82,7 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
         }
         case ICMP_TIME_EXCEEDED:
         {
-            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->encapsulatedMsg());
+            IPDatagram *ip = check_and_cast<IPDatagram* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_TIMXCEED;
             icmp->icmp_code = ICMP_TIMXCEED_INTRANS;
             packetLength += IPSerializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
@@ -122,7 +122,7 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             for(unsigned int i=0; i<bufsize - ICMP_MINLEN; i++)
                 pp->setData(i, icmp->icmp_data[i]);
             pkt->encapsulate(pp);
-            pkt->setName(pp->name());
+            pkt->setName(pp->getName());
             break;
         }
         case ICMP_ECHOREPLY:
@@ -139,7 +139,7 @@ void ICMPSerializer::parse(unsigned char *buf, unsigned int bufsize, ICMPMessage
             pp->setSeqNo(ntohs(icmp->icmp_seq));
             pp->setByteLength(bufsize - 4);
             pkt->encapsulate(pp);
-            pkt->setName(pp->name());
+            pkt->setName(pp->getName());
             break;
         }
         default:

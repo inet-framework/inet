@@ -109,7 +109,7 @@ class IPSourceRoutingOption
 // Uses the following cMessage fields:
 //    - length () / setLength(err)  in bits
 //    - hasBitError() / setBitError()
-//    - timestamp() / setTimestamp (simtime) used in timestamp option
+//    - getTimestamp() / setTimestamp (simtime) used in timestamp option
 //
 // Additional length fields defined in this class are in bytes
 // (totalLength()=length()/8 and header_length), or 8 bytes (fragment_offset).

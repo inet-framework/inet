@@ -27,7 +27,7 @@ TCPDumper::TCPDumper(std::ostream& out)
 
 void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment)
 {
-    cMessage *encapmsg = dgram->encapsulatedMsg();
+    cMessage *encapmsg = dgram->getEncapsulatedMsg();
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
         // if TCP, dump as TCP
@@ -44,14 +44,14 @@ void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char 
         out << buf;
 
         // packet class and name
-        out << "? " << encapmsg->className() << " \"" << encapmsg->name() << "\"\n";
+        out << "? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"\n";
     }
 }
 
 //FIXME: Temporary hack for Ipv6 support
 void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment)
 {
-    cMessage *encapmsg = dgram->encapsulatedMsg();
+    cMessage *encapmsg = dgram->getEncapsulatedMsg();
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
         // if TCP, dump as TCP
@@ -68,7 +68,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, 
         out << buf;
 
         // packet class and name
-        out << "? " << encapmsg->className() << " \"" << encapmsg->name() << "\"\n";
+        out << "? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"\n";
     }
 }
 
@@ -146,14 +146,14 @@ void TCPDumper::dump(const char *label, const char *msg)
 Define_Module(TCPDump);
 
 TCPDump::TCPDump() :
-  tcpdump(ev.ostream())
+  tcpdump(ev.getOStream())
 {
 }
 
 void TCPDump::handleMessage(cMessage *msg)
 {
     // dump
-    if (!ev.disabled())
+    if (!ev.isDisabled())
     {
         bool l2r = msg->arrivedOn("a$i");
         if (dynamic_cast<TCPSegment *>(msg))
@@ -165,12 +165,12 @@ void TCPDump::handleMessage(cMessage *msg)
             // search for encapsulated IP[v6]Datagram in it
             cMessage *encapmsg = msg;
             while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL && dynamic_cast<IPv6Datagram_Base *>(encapmsg)==NULL)
-                encapmsg = encapmsg->encapsulatedMsg();
+                encapmsg = encapmsg->getEncapsulatedMsg();
             if (!encapmsg)
             {
                 //We do not want this to end in an error if EtherAutoconf messages
                 //are passed, so just print a warning. -WEI
-                EV << "CANNOT DECODE: packet " << msg->name() << " doesn't contain either IP or IPv6 Datagram\n";
+                EV << "CANNOT DECODE: packet " << msg->getName() << " doesn't contain either IP or IPv6 Datagram\n";
             }
             else
             {

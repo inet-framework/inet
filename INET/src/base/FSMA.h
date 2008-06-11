@@ -47,9 +47,9 @@
     bool ___exit = false;
     int ___c = 0;
     cFSM ___fsm = fsm;
-    while (!___exit && (___c++ < FSM_MAXT || opp_error(eINFLOOP, ___fsm->stateName()))
+    while (!___exit && (___c++ < FSM_MAXT || opp_error(eINFLOOP, ___fsm->getStateName()))
     {
-        if (condition_seen = false, ___exit = true, ___fsm->state() == X)
+        if (condition_seen = false, ___exit = true, ___fsm->getState() == X)
         {
             if (!___is_event)
             {
@@ -59,7 +59,7 @@
             }
             condition_seen = true; if (isFoo && ___is_event)
             {
-                EV << "firing " << XY << " transition for " << ___fsm->name() << endl;
+                EV << "firing " << XY << " transition for " << ___fsm->getName() << endl;
                 doFoo;
                 ___fsm->setState(Y, "Y");
                 ___is_event = false;
@@ -68,18 +68,18 @@
             }
             condition_seen = true; if (isFooBar && !___is_event)
             {
-                EV << "firing " << XZ << " transition for " << ___fsm->name() << endl;
+                EV << "firing " << XZ << " transition for " << ___fsm->getName() << endl;
                 doFooBar;
                 ___fsm->setState(Z, "Z");
                 ___exit = false;
                 continue;
             }
         }
-        if (condition_seen = false, ___exit = true, ___fsm->state() == Y)
+        if (condition_seen = false, ___exit = true, ___fsm->getState() == Y)
         {
             condition_seen = true; if (isBar && ___is_event)
             {
-                EV << "firing " << YX << " transition for " << ___fsm->name() << endl;
+                EV << "firing " << YX << " transition for " << ___fsm->getName() << endl;
                 doVar;
                 ___fsm->setState(X, "X");
                 ___is_event = false;
@@ -96,15 +96,15 @@
     bool ___condition_seen = false;                                    \
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
-    EV << "processing event in state machine " << fsm.name() << endl;  \
-    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, fsm.stateName()), 0)))
+    EV << "processing event in state machine " << fsm.getName() << endl;  \
+    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, fsm.getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
-    (ev << "FSM " << ___fsm->name()                                    \
+    (ev << "FSM " << ___fsm->getName()                                    \
         << ((exiting) ? ": leaving state  " : ": entering state ")     \
-        << ___fsm->stateName() << endl)
+        << ___fsm->getStateName() << endl)
 
-#define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->state() == s)
+#define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->getState() == s)
 
 #define FSMA_Event_Transition(transition, condition, target, action)                    \
     ___condition_seen = true; if (condition && ___is_event)                             \
@@ -119,7 +119,7 @@
 
 #define FSMA_Transition(transition, condition, target, action)                          \
         FSMA_Print(true);                                                               \
-        EV << "firing " << #transition << " transition for " << ___fsm->name() << endl; \
+        EV << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
         action;                                                                         \
         ___fsm->setState(target, #target);                                              \
         FSMA_Print(false);                                                              \

@@ -102,7 +102,7 @@ class INET_API SnrEval : public BasicSnrEval
     void addNewSnr();
 
   protected:
-    /** @brief Enum to store self message kind()s*/
+    /** @brief Enum to store self message getKind()s*/
     enum
       {
         /** @brief timer to indicate that a message is completely sent now*/

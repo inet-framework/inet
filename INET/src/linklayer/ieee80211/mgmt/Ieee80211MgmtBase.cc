@@ -23,7 +23,7 @@
 
 static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
-    out << "(" << msg->className() << ")" << msg->fullName();
+    out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
 }
 
@@ -53,7 +53,7 @@ void Ieee80211MgmtBase::initialize(int stage)
     else if (stage==1)
     {
         // obtain our address from MAC
-        cModule *mac = parentModule()->submodule("mac");
+        cModule *mac = getParentModule()->getSubmodule("mac");
         if (!mac)
             error("MAC module not found; it is expected to be next to this submodule and called 'mac'");
         myAddress.setAddress(mac->par("address").stringValue());
@@ -80,7 +80,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     {
         // process command from agent
         EV << "Command arrived from agent: " << msg << "\n";
-        int msgkind = msg->kind();
+        int msgkind = msg->getKind();
         cPolymorphic *ctrl = msg->removeControlInfo();
         delete msg;
 
@@ -90,9 +90,9 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     {
         // packet from upper layers, to be sent out
         EV << "Packet arrived from upper layers: " << msg << "\n";
-        if (msg->byteLength() > 2312)
+        if (msg->getByteLength() > 2312)
             error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                  msg->className(), msg->name(), msg->byteLength());
+                  msg->getClassName(), msg->getName(), msg->getByteLength());
 
         handleUpperMessage(msg);
     }
@@ -224,7 +224,7 @@ void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
         handleProbeResponseFrame(check_and_cast<Ieee80211ProbeResponseFrame *>(frame));
         break;
       default:
-        error("unexpected frame type (%s)%s", frame->className(), frame->name());
+        error("unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
     }
 }
 

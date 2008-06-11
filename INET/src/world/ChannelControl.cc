@@ -20,14 +20,14 @@
 #include <cassert>
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << "ChannelControl: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << "ChannelControl: "
 
 Define_Module(ChannelControl);
 
 
 std::ostream& operator<<(std::ostream& os, const ChannelControl::HostEntry& h)
 {
-    os << h.host->fullPath() << " (x=" << h.pos.x << ",y=" << h.pos.y << "), "
+    os << h.host->getFullPath() << " (x=" << h.pos.x << ",y=" << h.pos.y << "), "
        << h.neighbors.size() << " neighbor(s)";
     return os;
 }
@@ -52,9 +52,9 @@ ChannelControl::~ChannelControl()
 
 ChannelControl *ChannelControl::get()
 {
-    ChannelControl *cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelcontrol"));
+    ChannelControl *cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
     if (!cc)
-        cc = dynamic_cast<ChannelControl *>(simulation.moduleByPath("channelControl"));
+        cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelControl"));
     if (!cc)
         throw cRuntimeError("Could not find ChannelControl module");
     return cc;
@@ -86,7 +86,7 @@ void ChannelControl::initialize()
     WATCH_LIST(hosts);
     WATCH_VECTOR(transmissions);
 
-    updateDisplayString(parentModule());
+    updateDisplayString(getParentModule());
 }
 
 /**
@@ -95,7 +95,7 @@ void ChannelControl::initialize()
  */
 void ChannelControl::updateDisplayString(cModule *playgroundMod)
 {
-    cDisplayString& d = playgroundMod->displayString();
+    cDisplayString& d = playgroundMod->getDisplayString();
     d.setTagArg("bgp", 0, 0L);
     d.setTagArg("bgp", 1, 0L);
     d.setTagArg("bgb", 0, (long) playgroundSize.x);
@@ -141,7 +141,7 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord
     Enter_Method_Silent();
     if (lookupHost(host) != NULL)
         error("ChannelControl::registerHost(): host (%s)%s already registered",
-              host->className(), host->fullPath().c_str());
+              host->getClassName(), host->getFullPath().c_str());
 
     HostEntry he;
     he.host = host;
@@ -276,7 +276,7 @@ void ChannelControl::purgeOngoingTransmissions()
             AirFrame *frame = *it;
             it++;
 
-            if (frame->timestamp() + frame->getDuration() + TRANSMISSION_PURGE_INTERVAL < simTime())
+            if (frame->getTimestamp() + frame->getDuration() + TRANSMISSION_PURGE_INTERVAL < simTime())
             {
                 delete frame;
                 transmissions[i].erase(curr);

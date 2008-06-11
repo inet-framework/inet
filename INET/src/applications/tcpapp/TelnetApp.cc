@@ -48,7 +48,7 @@ void TelnetApp::initialize()
 
 void TelnetApp::handleTimer(cMessage *msg)
 {
-    switch (msg->kind())
+    switch (msg->getKind())
     {
         case MSGKIND_CONNECT:
             EV << "user fires up telnet program\n";
@@ -97,7 +97,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
 
 void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
 {
-    int len = msg->byteLength();
+    int len = msg->getByteLength();
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (len==1)

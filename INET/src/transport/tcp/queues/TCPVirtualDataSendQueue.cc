@@ -45,8 +45,8 @@ std::string TCPVirtualDataSendQueue::info() const
 
 void TCPVirtualDataSendQueue::enqueueAppData(cMessage *msg)
 {
-    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->byteLength() << ")\n";
-    end += msg->byteLength();
+    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
+    end += msg->getByteLength();
     delete msg;
 }
 

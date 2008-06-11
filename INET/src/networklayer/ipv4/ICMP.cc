@@ -31,17 +31,17 @@ Define_Module(ICMP);
 
 void ICMP::handleMessage(cMessage *msg)
 {
-    cGate *arrivalGate = msg->arrivalGate();
+    cGate *arrivalGate = msg->getArrivalGate();
 
     // process arriving ICMP message
-    if (!strcmp(arrivalGate->name(), "localIn"))
+    if (!strcmp(arrivalGate->getName(), "localIn"))
     {
         processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
     }
 
     // request from application
-    if (!strcmp(arrivalGate->name(), "pingIn"))
+    if (!strcmp(arrivalGate->getName(), "pingIn"))
     {
         sendEchoRequest(msg);
         return;
@@ -67,7 +67,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     // do not reply with error message to error message
     if (origDatagram->transportProtocol() == IP_PROT_ICMP)
     {
-        ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->encapsulatedMsg());
+        ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->getEncapsulatedMsg());
         if (recICMPMsg->getType()<128)
         {
             EV << "ICMP error received -- do not reply to it" << endl;
@@ -165,12 +165,12 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 {
     // turn request into a reply
     ICMPMessage *reply = request;
-    reply->setName((std::string(request->name())+"-reply").c_str());
+    reply->setName((std::string(request->getName())+"-reply").c_str());
     reply->setType(ICMP_ECHO_REPLY);
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(reply->controlInfo());
+    IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(reply->getControlInfo());
     IPAddress src = ctrl->srcAddr();
     IPAddress dest = ctrl->destAddr();
     ctrl->setSrcAddr(dest);
@@ -192,7 +192,7 @@ void ICMP::sendEchoRequest(cMessage *msg)
 {
     IPControlInfo *ctrl = check_and_cast<IPControlInfo*>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_ICMP);
-    ICMPMessage *request = new ICMPMessage(msg->name());
+    ICMPMessage *request = new ICMPMessage(msg->getName());
     request->setType(ICMP_ECHO_REQUEST);
     request->encapsulate(msg);
     request->setControlInfo(ctrl);

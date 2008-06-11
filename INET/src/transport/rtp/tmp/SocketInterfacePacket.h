@@ -95,7 +95,7 @@ public:
   virtual SocketInterfacePacket *dup() const
   { return new SocketInterfacePacket(*this); }
 
-  virtual const char *className() const { return "SocketInterfacePacket"; }
+  virtual const char *getClassName() const { return "SocketInterfacePacket"; }
   virtual void info(char *buf);
   virtual void writeContents(std::ostream& os);
 
@@ -172,7 +172,7 @@ public:
   const IN_Port& fPort() const {return _fport;}
 
   Socket::Domain domain() const {return _domain;}
-  Socket::Type type()   const {return _type;}
+  Socket::Type getType()   const {return _type;}
   Socket::Protocol proto()  const {return _proto;}
   Socket::Filedesc filedesc() const {return _filedesc;}
 };

@@ -24,7 +24,7 @@ RTPSenderStatusMessage::RTPSenderStatusMessage(const char *name) {
 
 
 RTPSenderStatusMessage::RTPSenderStatusMessage(const RTPSenderStatusMessage& message) {
-    setName(message.name());
+    setName(message.getName());
     operator=(message);
 };
 
@@ -45,7 +45,7 @@ cObject *RTPSenderStatusMessage::dup() const {
 };
 
 
-const char *RTPSenderStatusMessage::className() const {
+const char *RTPSenderStatusMessage::getClassName() const {
     return "RTPSenderStatusMessage";
 };
 

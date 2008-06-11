@@ -46,8 +46,8 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         if (iter->snr < snirMin)
             snirMin = iter->snr;
 
-    cMessage *frame = airframe->encapsulatedMsg();
-    EV << "packet (" << frame->className() << ")" << frame->name() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
+    cMessage *frame = airframe->getEncapsulatedMsg();
+    EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
 
     if (snirMin <= snirThreshold)
     {
@@ -55,7 +55,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, airframe->encapsulatedMsg()->length(), airframe->getBitrate()))
+    else if (packetOk(snirMin, airframe->getEncapsulatedMsg()->length(), airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

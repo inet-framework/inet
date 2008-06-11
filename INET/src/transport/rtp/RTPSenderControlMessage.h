@@ -72,7 +72,7 @@ public:
         /**
          * Returns the class name "RTPSenderControlMessage".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Returns the command string in this message.

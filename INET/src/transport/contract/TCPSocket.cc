@@ -35,7 +35,7 @@ TCPSocket::TCPSocket()
 
 TCPSocket::TCPSocket(cMessage *msg)
 {
-    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->controlInfo());
+    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
     if (!ind)
         opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
 
@@ -48,14 +48,14 @@ TCPSocket::TCPSocket(cMessage *msg)
 
     gateToTcp = NULL;
 
-    if (msg->kind()==TCP_I_ESTABLISHED)
+    if (msg->getKind()==TCP_I_ESTABLISHED)
     {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
         // However, for convenience we extract TCPConnectInfo already here, so that
         // remote address/port can be read already after the ctor call.
 
-        TCPConnectInfo *connectInfo = dynamic_cast<TCPConnectInfo *>(msg->controlInfo());
+        TCPConnectInfo *connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
         localAddr = connectInfo->localAddr();
         remoteAddr = connectInfo->remoteAddr();
         localPrt = connectInfo->localPort();
@@ -88,7 +88,7 @@ void TCPSocket::sendToTCP(cMessage *msg)
     if (!gateToTcp)
         opp_error("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<cSimpleModule *>(gateToTcp->ownerModule())->send(msg, gateToTcp);
+    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
 void TCPSocket::bind(int lPort)
@@ -216,13 +216,13 @@ void TCPSocket::renewSocket()
 
 bool TCPSocket::belongsToSocket(cMessage *msg)
 {
-    return dynamic_cast<TCPCommand *>(msg->controlInfo()) &&
-           ((TCPCommand *)(msg->controlInfo()))->connId()==connId;
+    return dynamic_cast<TCPCommand *>(msg->getControlInfo()) &&
+           ((TCPCommand *)(msg->getControlInfo()))->connId()==connId;
 }
 
 bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
 {
-    return dynamic_cast<TCPCommand *>(msg->controlInfo());
+    return dynamic_cast<TCPCommand *>(msg->getControlInfo());
 }
 
 void TCPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
@@ -237,7 +237,7 @@ void TCPSocket::processMessage(cMessage *msg)
 
     TCPStatusInfo *status;
     TCPConnectInfo *connectInfo;
-    switch (msg->kind())
+    switch (msg->getKind())
     {
         case TCP_I_DATA:
              if (cb)
@@ -258,7 +258,7 @@ void TCPSocket::processMessage(cMessage *msg)
              // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
              // want to create a new TCPSocket object via new TCPSocket(msg).
              sockstate = CONNECTED;
-             connectInfo = dynamic_cast<TCPConnectInfo *>(msg->controlInfo());
+             connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
              localAddr = connectInfo->localAddr();
              remoteAddr = connectInfo->remoteAddr();
              localPrt = connectInfo->localPort();
@@ -284,7 +284,7 @@ void TCPSocket::processMessage(cMessage *msg)
         case TCP_I_TIMED_OUT:
              sockstate = SOCKERROR;
              if (cb)
-                 cb->socketFailure(connId, yourPtr, msg->kind());
+                 cb->socketFailure(connId, yourPtr, msg->getKind());
              delete msg;
              break;
         case TCP_I_STATUS:
@@ -294,7 +294,7 @@ void TCPSocket::processMessage(cMessage *msg)
                  cb->socketStatusArrived(connId, yourPtr, status);
              break;
         default:
-             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->kind());
+             opp_error("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
     }
 }
 

@@ -78,7 +78,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     TCPSrvHostApp *hostModule() {return hostmod;}
 
     /**
-     * Schedule an event. Do not use contextPointer() of cMessage, because
+     * Schedule an event. Do not use getContextPointer() of cMessage, because
      * TCPServerThreadBase uses it for its own purposes.
      */
     void scheduleAt(simtime_t t, cMessage *msg)  {msg->setContextPointer(this); hostmod->scheduleAt(t,msg);}

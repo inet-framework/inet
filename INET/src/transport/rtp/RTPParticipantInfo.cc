@@ -46,7 +46,7 @@ RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc) : cObject() {
 
 
 RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo) : cObject() {
-    setName(participantInfo.name());
+    setName(participantInfo.getName());
     operator=(participantInfo);
 };
 
@@ -71,7 +71,7 @@ cObject *RTPParticipantInfo::dup() const {
 };
 
 
-const char *RTPParticipantInfo::className() const {
+const char *RTPParticipantInfo::getClassName() const {
     return "RTPParticipantInfo";
 };
 

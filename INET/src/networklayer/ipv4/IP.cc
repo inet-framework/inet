@@ -64,12 +64,12 @@ void IP::updateDisplayString()
     if (numMulticast>0) sprintf(buf+strlen(buf), "mcast:%d ", numMulticast);
     if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
     if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void IP::endService(cMessage *msg)
 {
-    if (msg->arrivalGate()->isName("transportIn"))
+    if (msg->getArrivalGate()->isName("transportIn"))
     {
         handleMessageFromHL(msg);
     }
@@ -90,8 +90,8 @@ void IP::endService(cMessage *msg)
 
 InterfaceEntry *IP::sourceInterfaceFrom(cMessage *msg)
 {
-    cGate *g = msg->arrivalGate();
-    return g ? ift->interfaceByNetworkLayerGateIndex(g->index()) : NULL;
+    cGate *g = msg->getArrivalGate();
+    return g ? ift->interfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
 void IP::handlePacketFromNetwork(IPDatagram *datagram)
@@ -105,7 +105,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
+        double relativeHeaderLength = datagram->headerLength() / (double)datagram->getByteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
@@ -154,7 +154,7 @@ void IP::handleReceivedICMP(ICMPMessage *msg)
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->encapsulatedMsg());
+            IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->getEncapsulatedMsg());
             int protocol = bogusPacket->transportProtocol();
             int gateindex = mapping.outputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
@@ -196,7 +196,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
 
     IPAddress destAddr = datagram->destAddress();
 
-    EV << "Routing datagram `" << datagram->name() << "' with dest=" << destAddr << ": ";
+    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
     if (rt->localDeliver(destAddr))
@@ -223,7 +223,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     // if output port was explicitly requested, use that, otherwise use IP routing
     if (destIE)
     {
-        EV << "using manually specified output interface " << destIE->name() << "\n";
+        EV << "using manually specified output interface " << destIE->getName() << "\n";
         // and nextHopAddr remains unspecified
     }
     else
@@ -251,7 +251,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
         datagram->setSrcAddress(destIE->ipv4()->inetAddress());
 
     // default: send datagram to fragmentation
-    EV << "output interface is " << destIE->name() << ", next-hop address: " << nextHopAddr << "\n";
+    EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
     numForwarded++;
 
     //
@@ -263,7 +263,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
 void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {
     IPAddress destAddr = datagram->destAddress();
-    EV << "Routing multicast datagram `" << datagram->name() << "' with dest=" << destAddr << "\n";
+    EV << "Routing multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
@@ -314,7 +314,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     {
         ASSERT(datagram->destAddress().isMulticast());
 
-        EV << "multicast packet explicitly routed via output interface " << destIE->name() << endl;
+        EV << "multicast packet explicitly routed via output interface " << destIE->getName() << endl;
 
         // set datagram source address if not yet set
         if (datagram->srcAddress().isUnspecified())
@@ -434,14 +434,14 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
     int mtu = ie->mtu();
 
     // check if datagram does not require fragmentation
-    if (datagram->byteLength() <= mtu)
+    if (datagram->getByteLength() <= mtu)
     {
         sendDatagramToOutput(datagram, ie, nextHopAddr);
         return;
     }
 
     int headerLength = datagram->headerLength();
-    int payload = datagram->byteLength() - headerLength;
+    int payload = datagram->getByteLength() - headerLength;
 
     int noOfFragments =
         int(ceil((float(payload)/mtu) /
@@ -458,7 +458,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
 
     // create and send fragments
     EV << "Breaking datagram into " << noOfFragments << " fragments\n";
-    std::string fragMsgName = datagram->name();
+    std::string fragMsgName = datagram->getName();
     fragMsgName += "-frag";
 
     // FIXME revise this!
@@ -479,7 +479,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
         else
         {
             // size of last fragment
-            int bytes = datagram->byteLength() - (noOfFragments-1) * (mtu - datagram->headerLength());
+            int bytes = datagram->getByteLength() - (noOfFragments-1) * (mtu - datagram->headerLength());
             fragment->setByteLength(bytes);
         }
         fragment->setFragmentOffset( i*(mtu - datagram->headerLength()) );
@@ -495,7 +495,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
-    IPDatagram *datagram = new IPDatagram(transportPacket->name());
+    IPDatagram *datagram = new IPDatagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(transportPacket);
 
@@ -515,7 +515,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->interfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
-                      src.str().c_str(), transportPacket->className(), transportPacket->fullName());
+                      src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSrcAddress(src);
     }
 

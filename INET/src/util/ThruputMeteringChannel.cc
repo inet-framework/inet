@@ -38,7 +38,7 @@ ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel
 
 ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cBasicChannel()
 {
-    setName(ch.name());
+    setName(ch.getName());
     operator=(ch);
     cArray& parlist = _parList();
     fmtp = (cPar *)parlist.get("format");
@@ -68,7 +68,7 @@ cPar& ThruputMeteringChannel::addPar(const char *s)
 cPar& ThruputMeteringChannel::addPar(cPar *p)
 {
     cBasicChannel::addPar(p);
-    const char *s = p->name();
+    const char *s = p->getName();
     if (!opp_strcmp(s,"format"))
         fmtp = p;
     return *p;
@@ -117,7 +117,7 @@ void ThruputMeteringChannel::updateDisplay()
     // produce label, based on format string
     char buf[200];
     char *p = buf;
-    simtime_t tt = transmissionFinishes();
+    simtime_t tt = getTransmissionFinishTime();
     if (tt==0) tt = simulation.simTime();
     double bps = (tt==0) ? 0 : numBits/tt;
     double bytes;
@@ -148,10 +148,10 @@ void ThruputMeteringChannel::updateDisplay()
                     p += sprintf(p, "%.3gM", currentBitPerSec/1000000);
                 break;
             case 'u': // current channel utilization (%)
-                if (datarate()==0)
+                if (getDatarate()==0)
                     p += sprintf(p, "n/a");
                 else
-                    p += sprintf(p, "%.3g%%", currentBitPerSec/datarate()*100.0);
+                    p += sprintf(p, "%.3g%%", currentBitPerSec/getDatarate()*100.0);
                 break;
 
             case 'P': // average packet/sec on [0,now)
@@ -164,10 +164,10 @@ void ThruputMeteringChannel::updateDisplay()
                     p += sprintf(p, "%.3gM", bps/1000000);
                 break;
             case 'U': // average channel utilization (%) on [0,now)
-                if (datarate()==0)
+                if (getDatarate()==0)
                     p += sprintf(p, "n/a");
                 else
-                    p += sprintf(p, "%.3g%%", bps/datarate()*100.0);
+                    p += sprintf(p, "%.3g%%", bps/getDatarate()*100.0);
                 break;
             default:
                 *p++ = *fp;
@@ -176,7 +176,7 @@ void ThruputMeteringChannel::updateDisplay()
     *p = '\0';
 
     // display label
-    fromGate()->displayString().setTagArg("t", 0, buf);
+    getFromGate()->getDisplayString().setTagArg("t", 0, buf);
 }
 
 #endif

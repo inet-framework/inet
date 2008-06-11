@@ -61,7 +61,7 @@ void Ieee80211AgentSTA::handleMessage(cMessage *msg)
 
 void Ieee80211AgentSTA::handleTimer(cMessage *msg)
 {
-    if (msg->kind()==MK_STARTUP)
+    if (msg->getKind()==MK_STARTUP)
     {
         EV << "Starting up\n";
         sendScanRequest();
@@ -69,7 +69,7 @@ void Ieee80211AgentSTA::handleTimer(cMessage *msg)
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->name());
+        error("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -78,7 +78,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     cPolymorphic *ctrl = msg->removeControlInfo();
     delete msg;
 
-    EV << "Processing confirmation from mgmt: " << ctrl->className() << "\n";
+    EV << "Processing confirmation from mgmt: " << ctrl->getClassName() << "\n";
 
     if (dynamic_cast<Ieee80211Prim_ScanConfirm *>(ctrl))
         processScanConfirm((Ieee80211Prim_ScanConfirm *)ctrl);
@@ -89,7 +89,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     else if (dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
         processReassociateConfirm((Ieee80211Prim_ReassociateConfirm *)ctrl);
     else if (ctrl)
-        error("handleResponse(): unrecognized control info class `%s'", ctrl->className());
+        error("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
         error("handleResponse(): control info is NULL");
     delete ctrl;
@@ -104,7 +104,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
     {
         //XXX should check details if it's about this NIC
         EV << "beacon lost, starting scanning again\n";
-        parentModule()->parentModule()->bubble("Beacon lost!");
+        getParentModule()->getParentModule()->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
     }
@@ -112,7 +112,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *de
 
 void Ieee80211AgentSTA::sendRequest(Ieee80211PrimRequest *req)
 {
-    cMessage *msg = new cMessage(req->className());
+    cMessage *msg = new cMessage(req->getClassName());
     msg->setControlInfo(req);
     send(msg, "mgmtOut");
 }
@@ -260,7 +260,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     {
         EV << "Association successful\n";
         // we are happy!
-        parentModule()->parentModule()->bubble("Associated with AP");
+        getParentModule()->getParentModule()->bubble("Associated with AP");
     }
 }
 

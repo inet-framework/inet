@@ -34,7 +34,7 @@ void NAMTraceWriter::initialize(int stage)
     if (stage==1)  // let NAMTrace module initialize in stage 0
     {
         // get pointer to the NAMTrace module
-        cModule *namMod = simulation.moduleByPath("nam");
+        cModule *namMod = simulation.getModuleByPath("nam");
         if (!namMod)
         {
             nt = NULL;
@@ -47,13 +47,13 @@ void NAMTraceWriter::initialize(int stage)
 
         // register given namid; -1 means autoconfigure
         int namid0 = par("namid");
-        cModule *node = parentModule();  // the host or router
+        cModule *node = getParentModule();  // the host or router
         namid = nt->assignNamId(node, namid0);
         if (namid0==-1)
             par("namid") = namid;  // let parameter reflect autoconfigured namid
 
         // write "node" entry to the trace
-        if (nt->enabled())
+        if (nt->isEnabled())
             recordNodeEvent("UP", "circle");
 
         // subscribe to the interesting notifications
@@ -64,11 +64,11 @@ void NAMTraceWriter::initialize(int stage)
         nb->subscribe(this, NF_PP_RX_END);
         nb->subscribe(this, NF_L2_Q_DROP);
     }
-    else if (stage==2 && nt!=NULL && nt->enabled())
+    else if (stage==2 && nt!=NULL && nt->isEnabled())
     {
         // write "link" entries
         InterfaceTable *ift = InterfaceTableAccess().get();
-        cModule *node = parentModule();  // the host or router
+        cModule *node = getParentModule();  // the host or router
         for (int i=0; i<ift->numInterfaces(); i++)
         {
             // skip loopback interfaces
@@ -78,20 +78,20 @@ void NAMTraceWriter::initialize(int stage)
 
             // fill in peerNamIds in InterfaceEntries
             cGate *outgate = node->gate(ie->nodeOutputGateId());
-            if (!outgate || !outgate->toGate()) continue;
-            cModule *peernode = outgate->toGate()->ownerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
-            cModule *peerwriter = peernode->submodule("namTrace");
-            if (!peerwriter) error("module %s doesn't have a submodule named namTrace", peernode->fullPath().c_str());
+            if (!outgate || !outgate->getToGate()) continue;
+            cModule *peernode = outgate->getToGate()->getOwnerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
+            cModule *peerwriter = peernode->getSubmodule("namTrace");
+            if (!peerwriter) error("module %s doesn't have a submodule named namTrace", peernode->getFullPath().c_str());
             int peernamid = peerwriter->par("namid");
             ie->setPeerNamId(peernamid);
 
             // find delay
             simtime_t delay = 0;
-            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(outgate->channel());
-            if (chan) delay = chan->delay();
+            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(outgate->getChannel());
+            if (chan) delay = chan->getDelay();
 
             // write link entry into trace
-            recordLinkEvent(peernamid, ie->datarate(), delay, "UP");
+            recordLinkEvent(peernamid, ie->getDatarate(), delay, "UP");
         }
     }
 }
@@ -99,7 +99,7 @@ void NAMTraceWriter::initialize(int stage)
 NAMTraceWriter::~NAMTraceWriter()
 {
 /*FIXME this will crash if the "nt" module gets cleaned up sooner than this one
-    if (nt && nt->enabled())
+    if (nt && nt->isEnabled())
     {
         recordNodeEvent("DOWN", "circle");
     }
@@ -110,7 +110,7 @@ NAMTraceWriter::~NAMTraceWriter()
 void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *details)
 {
     // don't do anything if global NAMTrace module doesn't exist or does not have a file open
-    if (!nt || !nt->enabled())
+    if (!nt || !nt->isEnabled())
         return;
 
     printNotificationBanner(category, details);
@@ -141,7 +141,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *detai
 
 void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
 {
-    ASSERT(nt && nt->enabled());
+    ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
     out << "n -t ";
     if (simTime() == 0.0)
@@ -153,7 +153,7 @@ void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
 
 void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t delay, char *state)
 {
-    ASSERT(nt && nt->enabled());
+    ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
 
     // link entry (to be registered ON ONE END ONLY! This also means that
@@ -168,12 +168,12 @@ void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t d
 
 void NAMTraceWriter::recordPacketEvent(const char event, int peernamid, cMessage *msg)
 {
-    ASSERT(nt && nt->enabled());
+    ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
 
-    int size = msg->byteLength();
+    int size = msg->getByteLength();
     int color = 0;
-    for (cMessage *em = msg; em; em = em->encapsulatedMsg())
+    for (cMessage *em = msg; em; em = em->getEncapsulatedMsg())
         if (em->hasPar("color"))
             {color = em->par("color").longValue(); break;}
 

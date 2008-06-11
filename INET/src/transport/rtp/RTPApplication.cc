@@ -85,14 +85,14 @@ void RTPApplication::activity() {
 
         cMessage *msgIn = receive();
         if (msgIn->isSelfMessage()) {
-            if (!opp_strcmp(msgIn->name(), "enterSession")) {
+            if (!opp_strcmp(msgIn->getName(), "enterSession")) {
                 // create an RTPInterfacePacket to enter the session
                 RTPInterfacePacket *rifpOut1 = new RTPInterfacePacket("enterSession()");
                 rifpOut1->enterSession(opp_strdup(_commonName), opp_strdup(_profileName), _bandwidth, _destinationAddress, _port);
                 // and send it to the rtp layer
                 send(rifpOut1, "toRTP");
             }
-            else if (!opp_strcmp(msgIn->name(), "startTransmission")) {
+            else if (!opp_strcmp(msgIn->getName(), "startTransmission")) {
                 RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
                 rscm->setCommand("PLAY");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(PLAY)");
@@ -103,25 +103,25 @@ void RTPApplication::activity() {
                 cMessage *msg4 = new cMessage("stopTransmission");
                 scheduleAt(simTime() + _transmissionStopDelay, msg4);
             }
-            else if (!opp_strcmp(msgIn->name(), "stopTransmission")) {
+            else if (!opp_strcmp(msgIn->getName(), "stopTransmission")) {
                 RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
                 rscm->setCommand("STOP");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(STOP)");
                 rifpOut->senderModuleControl(ssrc, rscm);
                 send(rifpOut, "toRTP");
             }
-            else if (!opp_strcmp(msgIn->name(), "leaveSession")) {
+            else if (!opp_strcmp(msgIn->getName(), "leaveSession")) {
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("leaveSession()");
                 rifpOut->leaveSession();
                 send(rifpOut, "toRTP");
             }
         }
         else {
-            if (opp_strcmp(msgIn->className(), "RTPInterfacePacket")) {
+            if (opp_strcmp(msgIn->getClassName(), "RTPInterfacePacket")) {
                 opp_error("RTPApplication can only receive packets of type RTPInterfacePacket !");
             }
             RTPInterfacePacket *rifpIn = (RTPInterfacePacket *)msgIn;
-            if (rifpIn->type() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED) {
+            if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED) {
                 ssrc = rifpIn->ssrc();
                 sessionEntered = true;
                 if (opp_strcmp(_fileName, "")) {
@@ -134,11 +134,11 @@ void RTPApplication::activity() {
                     scheduleAt(simTime() + _sessionLeaveDelay, msg2);
                 }
             }
-            else if (rifpIn->type() == RTPInterfacePacket::RTP_IFP_SENDER_MODULE_CREATED) {
+            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_MODULE_CREATED) {
                 cMessage *msg3 = new cMessage("startTransmission");
                 scheduleAt(simTime() + _transmissionStartDelay, msg3);
             }
-            else if (rifpIn->type() == RTPInterfacePacket::RTP_IFP_SENDER_STATUS) {
+            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_STATUS) {
                 RTPSenderStatusMessage *rsim = (RTPSenderStatusMessage *)(rifpIn->decapsulate());
                 if (!opp_strcmp(rsim->status(), "PLAYING")) {
                     //
@@ -156,7 +156,7 @@ void RTPApplication::activity() {
                 else {
                 }
             }
-            else if (rifpIn->type() == RTPInterfacePacket::RTP_IFP_SESSION_LEFT) {
+            else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_LEFT) {
                 sessionLeft = true;
             }
         }

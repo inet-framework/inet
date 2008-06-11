@@ -95,7 +95,7 @@ class INET_API RTPInterfacePacket : public cPacket
         /**
          * Returns the class name "RTPInterfacePacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a one line info about this RTPInterfacePacket into the given string.
@@ -174,7 +174,7 @@ class INET_API RTPInterfacePacket : public cPacket
         /**
          * Returns the type of this RTPInterfacePacket.
          */
-        virtual RTP_IFP_TYPE type();
+        virtual RTP_IFP_TYPE getType();
 
         /**
          * Returns the CNAME stored in this RTPInterfacePacket.
@@ -214,7 +214,7 @@ class INET_API RTPInterfacePacket : public cPacket
         /**
          * Returns the file name stored in this RTPInterfacePacket.
          */
-        virtual const char *fileName();
+        virtual const char *getFileName();
 
     private:
 

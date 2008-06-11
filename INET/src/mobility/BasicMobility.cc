@@ -24,7 +24,7 @@
 #include "FWMath.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
 
 static int parseInt(const char *s, int defaultValue)
 {
@@ -62,14 +62,14 @@ void BasicMobility::initialize(int stage)
         if (hasPar("x"))   // not all mobility models have an "x" parameter
             pos.x = par("x");
         if (pos.x == -1)
-            pos.x = parseInt(hostPtr->displayString().getTagArg("p",0), -1);
+            pos.x = parseInt(hostPtr->getDisplayString().getTagArg("p",0), -1);
         if (pos.x == -1)
             pos.x = uniform(0, pgs.x);
 
         if (hasPar("y")) // not all mobility models have an "y" parameter
             pos.y = par("y");
         if (pos.y == -1)
-            pos.y = parseInt(hostPtr->displayString().getTagArg("p",1), -1);
+            pos.y = parseInt(hostPtr->getDisplayString().getTagArg("p",1), -1);
         if (pos.y == -1)
             pos.y = uniform(0, pgs.y);
 
@@ -98,9 +98,9 @@ void BasicMobility::updatePosition()
     cc->updateHostPosition(myHostRef, pos);
 
     double r = cc->getCommunicationRange(myHostRef);
-    hostPtr->displayString().setTagArg("p", 0, (long) pos.x);
-    hostPtr->displayString().setTagArg("p", 1, (long) pos.y);
-    hostPtr->displayString().setTagArg("r", 0, (long) r);
+    hostPtr->getDisplayString().setTagArg("p", 0, (long) pos.x);
+    hostPtr->getDisplayString().setTagArg("p", 1, (long) pos.y);
+    hostPtr->getDisplayString().setTagArg("r", 0, (long) r);
 
     nb->fireChangeNotification(NF_HOSTPOSITION_UPDATED, &pos);
 }

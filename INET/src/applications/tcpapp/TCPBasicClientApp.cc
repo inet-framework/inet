@@ -60,7 +60,7 @@ void TCPBasicClientApp::sendRequest()
 
 void TCPBasicClientApp::handleTimer(cMessage *msg)
 {
-    switch (msg->kind())
+    switch (msg->getKind())
     {
         case MSGKIND_CONNECT:
             EV << "starting session\n";

@@ -41,7 +41,7 @@ void MPLS::initialize(int stage)
     lt = LIBTableAccess().get();
     ift = InterfaceTableAccess().get();
 
-    pct = check_and_cast<IClassifier*>(parentModule()->submodule(par("classifier")));
+    pct = check_and_cast<IClassifier*>(getParentModule()->getSubmodule(par("classifier")));
 
     /*
      * we now send plain IPDatagrams instead of packets with label=-1
@@ -62,19 +62,19 @@ void MPLS::initialize(int stage)
 
 void MPLS::handleMessage(cMessage * msg)
 {
-    if (!strcmp(msg->arrivalGate()->name(), "ifIn"))
+    if (!strcmp(msg->getArrivalGate()->getName(), "ifIn"))
     {
         EV << "Processing message from L2: " << msg << endl;
         processPacketFromL2(msg);
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "netwIn"))
+    else if (!strcmp(msg->getArrivalGate()->getName(), "netwIn"))
     {
         EV << "Processing message from L3: " << msg << endl;
         processPacketFromL3(msg);
     }
     else
     {
-        error("unexpected message: %s", msg->name());
+        error("unexpected message: %s", msg->getName());
     }
 }
 
@@ -86,12 +86,12 @@ void MPLS::sendToL2(cMessage *msg, int gateIndex)
 void MPLS::processPacketFromL3(cMessage * msg)
 {
     IPDatagram *ipdatagram = check_and_cast<IPDatagram *>(msg);
-    //int gateIndex = msg->arrivalGate()->index();
+    //int gateIndex = msg->getArrivalGate()->getIndex();
 
     // XXX temporary solution, until TCPSocket and IP are extended to support nam tracing
     if (ipdatagram->transportProtocol() == IP_PROT_TCP)
     {
-        TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->encapsulatedMsg());
+        TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg());
         if (seg->destPort() == LDP_PORT || seg->srcPort() == LDP_PORT)
         {
             ASSERT(!ipdatagram->hasPar("color"));
@@ -125,7 +125,7 @@ bool MPLS::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     int outgoingPort = ift->interfaceByName(outInterface.c_str())->networkLayerGateIndex();
 
-    MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->name());
+    MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->getName());
     mplsPacket->encapsulate(ipdatagram);
     doStackOps(mplsPacket, outLabel);
 
@@ -156,7 +156,7 @@ void MPLS::labelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     EV << "FEC not resolved, doing regular L3 routing" << endl;
 
-    int gateIndex = ipdatagram->arrivalGate()->index();
+    int gateIndex = ipdatagram->getArrivalGate()->getIndex();
 
     sendToL2(ipdatagram, gateIndex);
 }
@@ -209,7 +209,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
 
         if (!tryLabelAndForwardIPDatagram(ipdatagram))
         {
-            int gateIndex = ipdatagram->arrivalGate()->index();
+            int gateIndex = ipdatagram->getArrivalGate()->getIndex();
             send(ipdatagram, "netwOut", gateIndex);
         }
     }
@@ -221,9 +221,9 @@ void MPLS::processPacketFromL2(cMessage *msg)
 
 void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
-    int gateIndex = mplsPacket->arrivalGate()->index();
+    int gateIndex = mplsPacket->getArrivalGate()->getIndex();
     InterfaceEntry *ie = ift->interfaceByNetworkLayerGateIndex(gateIndex);
-    std::string senderInterface = ie->name();
+    std::string senderInterface = ie->getName();
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->topLabel();
 

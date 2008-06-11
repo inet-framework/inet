@@ -26,7 +26,7 @@ Register_Class(IPv6Datagram);
 
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
 {
-    return os << "(" << eh->className() << ") " << eh->info();
+    return os << "(" << eh->getClassName() << ") " << eh->info();
 }
 
 IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
@@ -58,7 +58,7 @@ IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
             dupEh = new IPv6EncapsulatingSecurityPayloadHeader();
             *dupEh = *(IPv6EncapsulatingSecurityPayloadHeader *)eh;
         } else {
-            throw cRuntimeError(this, "unrecognised HeaderExtension subclass %s in IPv6Datagram::operator=()", eh->className());
+            throw cRuntimeError(this, "unrecognised HeaderExtension subclass %s in IPv6Datagram::operator=()", eh->getClassName());
         }
         addExtensionHeader(dupEh);
     }
@@ -105,7 +105,7 @@ int IPv6Datagram::calculateHeaderByteLength() const
 {
     int len = 40;
     for (unsigned int i=0; i<extensionHeaders.size(); i++)
-        len += extensionHeaders[i]->byteLength();
+        len += extensionHeaders[i]->getByteLength();
     return len;
 }
 
@@ -132,11 +132,11 @@ IPProtocolId IPv6ExtensionHeader::extensionType() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return IP_PROT_IPv6EXT_ESP;
     } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", getClassName());
     }
 }
 
-int IPv6ExtensionHeader::byteLength() const
+int IPv6ExtensionHeader::getByteLength() const
 {
     // FIXME msg files don't yet support readonly attrs that can be
     // redefined in subclasses, so for now we resort to the following
@@ -154,7 +154,7 @@ int IPv6ExtensionHeader::byteLength() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return 8; // FIXME verify
     } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", className());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", getClassName());
     }
 }
 

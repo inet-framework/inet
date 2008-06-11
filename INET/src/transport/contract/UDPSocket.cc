@@ -58,7 +58,7 @@ void UDPSocket::sendToUDP(cMessage *msg)
     if (!gateToUdp)
         opp_error("UDPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<cSimpleModule *>(gateToUdp->ownerModule())->send(msg, gateToUdp);
+    check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
 void UDPSocket::setUserId(int userId)
@@ -167,13 +167,13 @@ void UDPSocket::close()
 
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {
-    return dynamic_cast<UDPControlInfo *>(msg->controlInfo()) &&
-           ((UDPControlInfo *)(msg->controlInfo()))->sockId()==sockId;
+    return dynamic_cast<UDPControlInfo *>(msg->getControlInfo()) &&
+           ((UDPControlInfo *)(msg->getControlInfo()))->sockId()==sockId;
 }
 
 bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
 {
-    return dynamic_cast<UDPControlInfo *>(msg->controlInfo());
+    return dynamic_cast<UDPControlInfo *>(msg->getControlInfo());
 }
 
 void UDPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
@@ -187,7 +187,7 @@ void UDPSocket::processMessage(cMessage *msg)
     UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
     ASSERT(ctrl->sockId()==sockId);
 
-    switch (msg->kind())
+    switch (msg->getKind())
     {
         case UDP_I_DATA:
              if (cb)
@@ -204,7 +204,7 @@ void UDPSocket::processMessage(cMessage *msg)
                  cb->socketPeerClosed(sockId, yourPtr);
              break;
         default:
-             opp_error("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->kind());
+             opp_error("UDPSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
     }
 }
 

@@ -24,7 +24,7 @@ static cModule *findSubmodRecursive(cModule *curmod, const char *name, const cha
     for (cSubModIterator i(*curmod); !i.end(); i++)
     {
         cModule *submod = i();
-        if (!strcmp(submod->fullName(), name))
+        if (!strcmp(submod->getFullName(), name))
             return submod;
         cModule *foundmod = findSubmodRecursive(submod, name, classname);
         if (foundmod)
@@ -36,7 +36,7 @@ static cModule *findSubmodRecursive(cModule *curmod, const char *name, const cha
 cModule *findModuleWherever(const char *name, const char *classname, cModule *from)
 {
     cModule *mod = NULL;
-    for (cModule *curmod=from; !mod && curmod; curmod=curmod->parentModule())
+    for (cModule *curmod=from; !mod && curmod; curmod=curmod->getParentModule())
         mod = findSubmodRecursive(curmod, name, classname);
     return mod;
 }
@@ -44,8 +44,8 @@ cModule *findModuleWherever(const char *name, const char *classname, cModule *fr
 cModule *findModuleSomewhereUp(const char *name, cModule *from)
 {
     cModule *mod = NULL;
-    for (cModule *curmod=from; !mod && curmod; curmod=curmod->parentModule())
-        mod = curmod->submodule(name);
+    for (cModule *curmod=from; !mod && curmod; curmod=curmod->getParentModule())
+        mod = curmod->getSubmodule(name);
     return mod;
 }
 

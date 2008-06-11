@@ -64,9 +64,9 @@ void CSMAMacLayer::registerInterface()
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(parentModule()->fullName()) + 1];
+    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
     char *d = interfaceName;
-    for (const char *s = parentModule()->fullName(); *s; s++)
+    for (const char *s = getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -196,7 +196,7 @@ void CSMAMacLayer::handleSelfMsg(cMessage *msg)
     EV << "timer expired, calling handleUpperMsg again.. time: " << simTime() << endl;
 
     // timer expired for a buffered frame, try to send again
-    handleUpperMsg((MacPkt *) msg->contextPointer());
+    handleUpperMsg((MacPkt *) msg->getContextPointer());
 }
 
 
@@ -228,7 +228,7 @@ void CSMAMacLayer::handleLowerMsg(cMessage *msg)
  */
 MacPkt *CSMAMacLayer::encapsMsg(cMessage *netw)
 {
-    MacPkt *pkt = new MacPkt(netw->name());
+    MacPkt *pkt = new MacPkt(netw->getName());
     pkt->setLength(272);
 
     // copy dest address from the Control Info attached to the network

@@ -64,11 +64,11 @@ void append(std::vector<int>& dest, const std::vector<int>& src)
 
 cModule *payloadOwner(cMessage *msg)
 {
-    while(msg->encapsulatedMsg())
-        msg = msg->encapsulatedMsg();
+    while(msg->getEncapsulatedMsg())
+        msg = msg->getEncapsulatedMsg();
 
     if (msg->hasPar("owner"))
-        return simulation.module(msg->par("owner"));
+        return simulation.getModule(msg->par("owner"));
     else
         return NULL;
 }

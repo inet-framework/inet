@@ -56,10 +56,10 @@ void TCPSessionApp::parseScript(const char *script)
 
 void TCPSessionApp::count(cMessage *msg)
 {
-    if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+    if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
         packetsRcvd++;
-        bytesRcvd+=msg->byteLength();
+        bytesRcvd+=msg->getByteLength();
     }
     else
     {
@@ -115,7 +115,7 @@ void TCPSessionApp::activity()
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
-    if (ev.isGUI()) displayString().setTagArg("t",0, active?"connecting":"listening");
+    if (ev.isGUI()) getDisplayString().setTagArg("t",0, active?"connecting":"listening");
 
     if (active)
         socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
@@ -123,15 +123,15 @@ void TCPSessionApp::activity()
         socket.listen();
 
     // wait until connection gets established
-    while (socket.state()!=TCPSocket::CONNECTED)
+    while (socket.getState()!=TCPSocket::CONNECTED)
     {
         socket.processMessage(receive());
-        if (socket.state()==TCPSocket::SOCKERROR)
+        if (socket.getState()==TCPSocket::SOCKERROR)
             return;
     }
 
     EV << "connection established, starting sending\n";
-    if (ev.isGUI()) displayString().setTagArg("t",0,"connected");
+    if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
 
     // send
     if (sendBytes>0)
@@ -156,7 +156,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(tClose);
         EV << "issuing CLOSE command\n";
-        if (ev.isGUI()) displayString().setTagArg("t",0,"closing");
+        if (ev.isGUI()) getDisplayString().setTagArg("t",0,"closing");
         socket.close();
     }
 
@@ -171,5 +171,5 @@ void TCPSessionApp::activity()
 
 void TCPSessionApp::finish()
 {
-    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }

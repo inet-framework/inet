@@ -94,7 +94,7 @@ class INET_API RTPInnerPacket : public cPacket
         /**
          * Returns the class name "RTPInnerPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this RTPInnerPacket into the given string.
@@ -172,7 +172,7 @@ class INET_API RTPInnerPacket : public cPacket
         /**
          * Returns the type of this RTPInnerPacket.
          */
-        virtual RTP_INP_TYPE type();
+        virtual RTP_INP_TYPE getType();
 
         /**
          * Returns the CNAME stored in this RTPInnerPacket.
@@ -217,7 +217,7 @@ class INET_API RTPInnerPacket : public cPacket
         /**
          * Returns the file name stored in this RTPInnerPacket.
          */
-        virtual const char *fileName();
+        virtual const char *getFileName();
 
         /**
          * Returns the rtp clock rate stored in this RTPInnerPacket.

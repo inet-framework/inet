@@ -53,7 +53,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     {
         char buf[40];
         sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 }
 

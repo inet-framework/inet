@@ -71,7 +71,7 @@ bool IPAddressResolver::tryResolve(const char *s, IPvXAddress& result, int addrT
         protocol.assign(leftparenp+1, rightparenp-leftparenp-1);
 
     // find module and check protocol
-    cModule *mod = simulation.moduleByPath(modname.c_str());
+    cModule *mod = simulation.getModuleByPath(modname.c_str());
     if (!mod)
         opp_error("IPAddressResolver: module `%s' not found", modname.c_str());
     if (!protocol.empty() && protocol!="ipv4" && protocol!="ipv6")
@@ -106,7 +106,7 @@ IPvXAddress IPAddressResolver::addressOf(cModule *host, const char *ifname, int 
     InterfaceTable *ift = interfaceTableOf(host);
     InterfaceEntry *ie = ift->interfaceByName(ifname);
     if (!ie)
-        opp_error("IPAddressResolver: no interface called `%s' in `%s'", ifname, ift->fullPath().c_str());
+        opp_error("IPAddressResolver: no interface called `%s' in `%s'", ifname, ift->getFullPath().c_str());
     return getAddressFrom(ie, addrType);
 }
 
@@ -161,7 +161,7 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
     IPAddress addr;
     if (ift->numInterfaces()==0)
         opp_error("IPAddressResolver: interface table `%s' has no interface registered "
-                  "(yet? try in a later init stage!)", ift->fullPath().c_str());
+                  "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
     for (int i=0; i<ift->numInterfaces(); i++)
@@ -182,7 +182,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
     // browse interfaces and pick a globally routable address
     if (ift->numInterfaces()==0)
         opp_error("IPAddressResolver: interface table `%s' has no interface registered "
-                  "(yet? try in a later init stage!)", ift->fullPath().c_str());
+                  "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     IPv6Address addr;
     for (int i=0; i<ift->numInterfaces() && addr.isUnspecified(); i++)
@@ -192,7 +192,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
             continue;
         IPv6Address ifAddr = ie->ipv6()->preferredAddress();
         if (addr.isGlobal() && ifAddr.isGlobal() && addr!=ifAddr)
-            EV << ift->fullPath() << " has at least two globally routable addresses on different interfaces\n";
+            EV << ift->getFullPath() << " has at least two globally routable addresses on different interfaces\n";
         if (ifAddr.isGlobal())
             addr = ifAddr;
     }
@@ -216,20 +216,20 @@ IPv6Address IPAddressResolver::getInterfaceIPv6Address(InterfaceEntry *ie)
 InterfaceTable *IPAddressResolver::interfaceTableOf(cModule *host)
 {
     // find InterfaceTable
-    cModule *mod = host->submodule("interfaceTable");
+    cModule *mod = host->getSubmodule("interfaceTable");
     if (!mod)
         opp_error("IPAddressResolver: InterfaceTable not found as submodule "
-                  " `interfaceTable' in host/router `%s'", host->fullPath().c_str());
+                  " `interfaceTable' in host/router `%s'", host->getFullPath().c_str());
     return check_and_cast<InterfaceTable *>(mod);
 }
 
 RoutingTable *IPAddressResolver::routingTableOf(cModule *host)
 {
     // find RoutingTable
-    cModule *mod = host->submodule("routingTable");
+    cModule *mod = host->getSubmodule("routingTable");
     if (!mod)
         opp_error("IPAddressResolver: RoutingTable not found as submodule "
-                  " `routingTable' in host/router `%s'", host->fullPath().c_str());
+                  " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return check_and_cast<RoutingTable *>(mod);
 }
 
@@ -237,10 +237,10 @@ RoutingTable *IPAddressResolver::routingTableOf(cModule *host)
 RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
 {
     // find RoutingTable
-    cModule *mod = host->submodule("routingTable6");
+    cModule *mod = host->getSubmodule("routingTable6");
     if (!mod)
         opp_error("IPAddressResolver: RoutingTable6 not found as submodule "
-                  " `routingTable6' in host/router `%s'", host->fullPath().c_str());
+                  " `routingTable6' in host/router `%s'", host->getFullPath().c_str());
     return check_and_cast<RoutingTable6 *>(mod);
 }
 #endif
@@ -248,36 +248,36 @@ RoutingTable6 *IPAddressResolver::routingTable6Of(cModule *host)
 NotificationBoard *IPAddressResolver::notificationBoardOf(cModule *host)
 {
     // find NotificationBoard
-    cModule *mod = host->submodule("notificationBoard");
+    cModule *mod = host->getSubmodule("notificationBoard");
     if (!mod)
         opp_error("IPAddressResolver: NotificationBoard not found as submodule "
-                  " notificationBoard' in host/router `%s'", host->fullPath().c_str());
+                  " notificationBoard' in host/router `%s'", host->getFullPath().c_str());
     return check_and_cast<NotificationBoard *>(mod);
 }
 
 InterfaceTable *IPAddressResolver::findInterfaceTableOf(cModule *host)
 {
-    cModule *mod = host->submodule("interfaceTable");
+    cModule *mod = host->getSubmodule("interfaceTable");
     return dynamic_cast<InterfaceTable *>(mod);
 }
 
 RoutingTable *IPAddressResolver::findRoutingTableOf(cModule *host)
 {
-    cModule *mod = host->submodule("routingTable");
+    cModule *mod = host->getSubmodule("routingTable");
     return dynamic_cast<RoutingTable *>(mod);
 }
 
 #ifndef NO_IPv6
 RoutingTable6 *IPAddressResolver::findRoutingTable6Of(cModule *host)
 {
-    cModule *mod = host->submodule("routingTable6");
+    cModule *mod = host->getSubmodule("routingTable6");
     return dynamic_cast<RoutingTable6 *>(mod);
 }
 #endif
 
 NotificationBoard *IPAddressResolver::findNotificationBoardOf(cModule *host)
 {
-    cModule *mod = host->submodule("notificationBoard");
+    cModule *mod = host->getSubmodule("notificationBoard");
     return dynamic_cast<NotificationBoard *>(mod);
 }
 

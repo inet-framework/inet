@@ -139,7 +139,7 @@ void RoutingTable6::parseXMLConfigFile()
         // we ensure that the selected element is local.
         if (opp_strcmp(child->getTagName(),"local")!=0) continue;
         //ensure that this is the right parent module we are configuring.
-        if (opp_strcmp(child->getAttribute("node"),parentModule()->fullName())!=0)
+        if (opp_strcmp(child->getAttribute("node"),getParentModule()->getFullName())!=0)
             continue;
         //Go one level deeper.
         //child = child->getFirstChild();
@@ -167,7 +167,7 @@ void RoutingTable6::updateDisplayString()
 
     char buf[80];
     sprintf(buf, "%d routes\n%d destcache entries", numRoutes(), destCache.size());
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void RoutingTable6::handleMessage(cMessage *msg)
@@ -187,7 +187,7 @@ void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
     ipv6IfData->setAdvSendAdvertisements(isrouter);//Added by WEI
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    //d->setMetric((int)ceil(2e9/ie->datarate())); // use OSPF cost as default
+    //d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
     //FIXME TBD fill in the rest
 
     assignRequiredNodeAddresses(ie);

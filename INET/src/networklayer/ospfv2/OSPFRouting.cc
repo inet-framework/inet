@@ -87,7 +87,7 @@ void OSPFRouting::initialize (int stage)
  */
 void OSPFRouting::handleMessage (cMessage *msg)
 {
-//    if (simulation.eventNumber () == 90591) {
+//    if (simulation.getEventNumber() == 90591) {
 //        __asm int 3;
 //    }
     ospfRouter->GetMessageHandler ()->MessageReceived (msg);
@@ -462,7 +462,7 @@ void OSPFRouting::LoadVirtualLink (const cXMLElement& virtualLinkConfig)
  * Loads the configuration of the OSPF datastructure from the config XML.
  * @param filename [in] The path of the XML config file.
  * @return True if the configuration was succesfully loaded.
- * @throws an error () otherwise.
+ * @throws an getError() otherwise.
  */
 bool OSPFRouting::LoadConfigFromXML (const char * filename)
 {

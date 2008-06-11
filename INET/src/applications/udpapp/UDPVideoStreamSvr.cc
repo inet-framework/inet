@@ -83,7 +83,7 @@ void UDPVideoStreamSvr::handleMessage(cMessage *msg)
 void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 {
     // register video stream...
-    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->controlInfo());
+    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
 
     VideoStreamData *d = new VideoStreamData;
     d->clientAddr = ctrl->srcAddr();
@@ -105,7 +105,7 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 
 void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 {
-    VideoStreamData *d = (VideoStreamData *) timer->contextPointer();
+    VideoStreamData *d = (VideoStreamData *) timer->getContextPointer();
 
     // generate and send a packet
     cMessage *pkt = new cMessage("VideoStrmPk");

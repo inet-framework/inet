@@ -94,7 +94,7 @@ void OSPF::LinkStateUpdateHandler::ProcessPacket (OSPFPacket* packet, OSPF::Inte
 
                 LSAProcessingMarker marker (currentLSAIndex++);
                 EV << "    ";
-                PrintLSAHeader (currentLSA->getHeader (), ev.ostream());
+                PrintLSAHeader (currentLSA->getHeader (), ev.getOStream());
                 EV << "\n";
 
                 if ((lsaType == ASExternalLSAType) && (!area->GetExternalRoutingCapability ())) {

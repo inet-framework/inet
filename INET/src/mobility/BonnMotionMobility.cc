@@ -34,10 +34,10 @@ void BonnMotionMobility::initialize(int stage)
     {
         int nodeId = par("nodeId");
         if (nodeId == -1)
-            nodeId = parentModule()->index();
+            nodeId = getParentModule()->getIndex();
 
         const char *fname = par("traceFile");
-        const BonnMotionFile *bmFile = BonnMotionFileCache::instance()->getFile(fname);
+        const BonnMotionFile *bmFile = BonnMotionFileCache::getInstance()->getFile(fname);
 
         vecp = bmFile->getLine(nodeId);
         if (!vecp)

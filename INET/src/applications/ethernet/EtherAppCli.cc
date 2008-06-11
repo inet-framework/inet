@@ -111,10 +111,10 @@ MACAddress EtherAppCli::resolveDestMACAddress()
         // try as mac address first, then as a module
         if (!destMACAddress.tryParse(destAddress))
         {
-            cModule *destStation = simulation.moduleByPath(destAddress);
+            cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
-            cModule *destMAC = destStation->submodule("mac");
+            cModule *destMAC = destStation->getSubmodule("mac");
             if (!destMAC)
                 error("module '%s' has no 'mac' submodule", destAddress);
             destMACAddress.setAddress(destMAC->par("address"));
@@ -139,7 +139,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
 
 void EtherAppCli::registerDSAP(int dsap)
 {
-    EV << fullPath() << " registering DSAP " << dsap << "\n";
+    EV << getFullPath() << " registering DSAP " << dsap << "\n";
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
@@ -154,7 +154,7 @@ void EtherAppCli::sendPacket()
     seqNum++;
 
     char msgname[30];
-    sprintf(msgname, "req-%d-%ld", id(), seqNum);
+    sprintf(msgname, "req-%d-%ld", getId(), seqNum);
     EV << "Generating packet `" << msgname << "'\n";
 
     EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
@@ -179,10 +179,10 @@ void EtherAppCli::sendPacket()
 
 void EtherAppCli::receivePacket(cMessage *msg)
 {
-    EV << "Received packet `" << msg->name() << "'\n";
+    EV << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
-    simtime_t lastEED = simTime() - msg->creationTime();
+    simtime_t lastEED = simTime() - msg->getCreationTime();
     eedVector.record(lastEED);
     eedStats.collect(lastEED);
 
@@ -193,9 +193,9 @@ void EtherAppCli::finish()
 {
     recordScalar("packets sent", packetsSent);
     recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.mean());
-    recordScalar("end-to-end delay stddev", eedStats.stddev());
-    recordScalar("end-to-end delay min", eedStats.min());
-    recordScalar("end-to-end delay max", eedStats.max());
+    recordScalar("end-to-end delay mean", eedStats.getMean());
+    recordScalar("end-to-end delay stddev", eedStats.getStddev());
+    recordScalar("end-to-end delay min", eedStats.getMin());
+    recordScalar("end-to-end delay max", eedStats.getMax());
 }
 

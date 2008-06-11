@@ -67,14 +67,14 @@ void IPv6::updateDisplayString()
     if (numMulticast>0) sprintf(buf+strlen(buf), "mcast:%d ", numMulticast);
     if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
     if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void IPv6::endService(cMessage *msg)
 {
-    if (msg->arrivalGate()->isName("transportIn") ||
-       (msg->arrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg)) ||
-       (msg->arrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)))//Added this for ICMP msgs from ICMP module-WEI
+    if (msg->getArrivalGate()->isName("transportIn") ||
+       (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg)) ||
+       (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)))//Added this for ICMP msgs from ICMP module-WEI
     {
         // packet from upper layers or ND: encapsulate and send out
         handleMessageFromHL(msg);
@@ -92,8 +92,8 @@ void IPv6::endService(cMessage *msg)
 
 InterfaceEntry *IPv6::sourceInterfaceFrom(cMessage *msg)
 {
-    cGate *g = msg->arrivalGate();
-    return g ? ift->interfaceByNetworkLayerGateIndex(g->index()) : NULL;
+    cGate *g = msg->getArrivalGate();
+    return g ? ift->interfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
 void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
@@ -105,7 +105,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 /*FIXME revise
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->headerLength() / (double)datagram->byteLength();
+        double relativeHeaderLength = datagram->headerLength() / (double)datagram->getByteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
@@ -168,7 +168,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // TBD add option handling code here
     IPv6Address destAddress = datagram->destAddress();
 
-    EV << "Routing datagram `" << datagram->name() << "' with dest=" << destAddress << ": ";
+    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
 
     // local delivery of unicast packets
     if (rt->localDeliver(destAddress))
@@ -188,7 +188,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         //so we add a 2nd condition
         // FIXME rewrite code so that condition is cleaner --Andras
         //if (!rt->isRouter())
-        if (!rt->isRouter() && !(datagram->arrivalGate()->isName("ndIn")))
+        if (!rt->isRouter() && !(datagram->getArrivalGate()->isName("ndIn")))
         {
             EV << "forwarding is off, dropping packet\n";
             numDropped++;
@@ -244,7 +244,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
 
     InterfaceEntry *ie = ift->interfaceAt(interfaceId);
-    EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->name() << "\n";
+    EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
     ASSERT(!nextHop.isUnspecified() && ie!=NULL);
 
     MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);
@@ -331,7 +331,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     // DVMRP: process datagram only if sent locally or arrived on the shortest
     // route (provided routing table already contains srcAddr); otherwise
     // discard and continue.
-    int inputGateIndex = datagram->arrivalGate() ? datagram->arrivalGate()->index() : -1;
+    int inputGateIndex = datagram->getArrivalGate() ? datagram->getArrivalGate()->getIndex() : -1;
     int shortestPathInputGateIndex = rt->outputGateIndexNo(datagram->srcAddress());
     if (inputGateIndex!=-1 && shortestPathInputGateIndex!=-1 && inputGateIndex!=shortestPathInputGateIndex)
     {
@@ -458,7 +458,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         case ICMPv6_TIME_EXCEEDED:
         case ICMPv6_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocols
-            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->encapsulatedMsg());
+            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
             int protocol = bogusPacket->transportProtocol();
             int gateindex = mapping.outputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
@@ -503,7 +503,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
 {
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 
-    IPv6Datagram *datagram = new IPv6Datagram(transportPacket->name());
+    IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
     datagram->setByteLength(datagram->calculateHeaderByteLength());
     datagram->encapsulate(transportPacket);
 
@@ -523,7 +523,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->interfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
-                      src.str().c_str(), transportPacket->className(), transportPacket->fullName());
+                      src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSrcAddress(src);
     }
 

@@ -36,7 +36,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
 
   public:
     IPv6Datagram(const char *name=NULL, int kind=0) : IPv6Datagram_Base(name,kind) {}
-    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other.name()) {operator=(other);}
+    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other.getName()) {operator=(other);}
     IPv6Datagram& operator=(const IPv6Datagram& other);
     virtual IPv6Datagram *dup() const {return new IPv6Datagram(*this);}
 
@@ -79,7 +79,7 @@ class INET_API IPv6ExtensionHeader : public IPv6ExtensionHeader_Base
     IPv6ExtensionHeader(const IPv6ExtensionHeader& other) : IPv6ExtensionHeader_Base() {operator=(other);}
     IPv6ExtensionHeader& operator=(const IPv6ExtensionHeader& other) {IPv6ExtensionHeader_Base::operator=(other); return *this;}
     virtual IPProtocolId extensionType() const;
-    virtual int byteLength() const;
+    virtual int getByteLength() const;
 };
 
 #endif

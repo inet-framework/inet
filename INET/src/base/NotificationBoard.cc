@@ -32,12 +32,12 @@ std::ostream& operator<<(std::ostream& os, const NotificationBoard::NotifiableVe
         if (dynamic_cast<cModule*>(v[i]))
         {
             cModule *mod = dynamic_cast<cModule*>(v[i]);
-            os << "mod (" << mod->className() << ")" << mod->fullName() << " id=" << mod->id();
+            os << "mod (" << mod->getClassName() << ")" << mod->getFullName() << " id=" << mod->getId();
         }
         else if (dynamic_cast<cPolymorphic*>(v[i]))
         {
             cPolymorphic *obj = dynamic_cast<cPolymorphic*>(v[i]);
-            os << "a " << obj->className();
+            os << "a " << obj->getClassName();
         }
         else
         {

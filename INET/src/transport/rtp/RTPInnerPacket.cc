@@ -47,7 +47,7 @@ RTPInnerPacket::RTPInnerPacket(const char *name) : cPacket(name) {
 
 
 RTPInnerPacket::RTPInnerPacket(const RTPInnerPacket& rinp) : cPacket() {
-    setName(rinp.name());
+    setName(rinp.getName());
     operator=(rinp);
 };
 
@@ -84,7 +84,7 @@ cObject *RTPInnerPacket::dup() const {
 };
 
 
-const char *RTPInnerPacket::className() const {
+const char *RTPInnerPacket::getClassName() const {
     return "RTPInnerPacket";
 };
 
@@ -225,7 +225,7 @@ void RTPInnerPacket::dataIn(RTPPacket *packet, IN_Addr address, IN_Port port) {
 };
 
 
-RTPInnerPacket::RTP_INP_TYPE RTPInnerPacket::type() {
+RTPInnerPacket::RTP_INP_TYPE RTPInnerPacket::getType() {
     return _type;
 };
 
@@ -265,7 +265,7 @@ u_int32 RTPInnerPacket::ssrc() {
 };
 
 
-const char *RTPInnerPacket::fileName() {
+const char *RTPInnerPacket::getFileName() {
     return opp_strdup(_fileName);
 };
 

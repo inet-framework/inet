@@ -24,7 +24,7 @@
 Define_Module(Blackboard);
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? ev : ev <<parentModule()->name()<<"["<<parentModule()->index()<<"]::Blackboard: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev <<getParentModule()->getName()<<"["<<getParentModule()->getIndex()<<"]::Blackboard: "
 
 
 std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)
@@ -63,7 +63,7 @@ void Blackboard::handleMessage(cMessage *msg)
 
 BBItemRef Blackboard::publish(const char *label, cPolymorphic *item)
 {
-    Enter_Method("publish(\"%s\", %s *ptr)", label, item->className());
+    Enter_Method("publish(\"%s\", %s *ptr)", label, item->getClassName());
 
     // check uniqueness of label
     ContentsMap::iterator k = contents.find(std::string(label));
@@ -110,7 +110,7 @@ void Blackboard::changed(BBItemRef bbItem, cPolymorphic *item)
 {
   coreEV <<"enter changed; item: "<<bbItem->label()<<" changed -> notify subscribers\n";
 
-  Enter_Method("changed(\"%s\", %s *ptr)", bbItem->label(), item->className());
+  Enter_Method("changed(\"%s\", %s *ptr)", bbItem->label(), item->getClassName());
 
     // update data pointer
     if (item)

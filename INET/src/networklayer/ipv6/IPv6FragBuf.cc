@@ -66,15 +66,15 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
 
     // add fragment into reassembly buffer
     // FIXME next lines aren't correct: check 4.5 of RFC 2460 regarding Unfragmentable part, Fragmentable part, etc
-    int bytes = datagram->byteLength() - datagram->calculateHeaderByteLength();
+    int bytes = datagram->getByteLength() - datagram->calculateHeaderByteLength();
     bool isComplete = buf->buf.addFragment(fh->fragmentOffset(),
                                            fh->fragmentOffset() + bytes,
                                            !fh->moreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
-    // content (encapsulatedMsg()), other (empty) ones are only
+    // content (getEncapsulatedMsg()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->encapsulatedMsg())
+    if (datagram->getEncapsulatedMsg())
     {
         delete buf->datagram;
         buf->datagram = datagram;

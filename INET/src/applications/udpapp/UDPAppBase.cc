@@ -55,14 +55,14 @@ void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAd
 
 void UDPAppBase::printPacket(cMessage *msg)
 {
-    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->controlInfo());
+    UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
 
     IPvXAddress srcAddr = ctrl->srcAddr();
     IPvXAddress destAddr = ctrl->destAddr();
     int srcPort = ctrl->srcPort();
     int destPort = ctrl->destPort();
 
-    ev  << msg << "  (" << msg->byteLength() << " bytes)" << endl;
+    ev  << msg << "  (" << msg->getByteLength() << " bytes)" << endl;
     ev  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;
 }
 

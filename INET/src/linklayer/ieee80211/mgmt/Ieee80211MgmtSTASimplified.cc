@@ -52,7 +52,7 @@ void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
 {
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->name());
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
 
     // frame goes to the AP
     frame->setToDS(true);

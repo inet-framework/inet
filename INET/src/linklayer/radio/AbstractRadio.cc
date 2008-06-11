@@ -28,7 +28,7 @@
 #define MK_RECEPTION_COMPLETE 2
 
 
-AbstractRadio::AbstractRadio() : rs(this->id())
+AbstractRadio::AbstractRadio() : rs(this->getId())
 {
     radioModel = NULL;
     receptionModel = NULL;
@@ -130,17 +130,17 @@ AbstractRadio::~AbstractRadio()
 void AbstractRadio::handleMessage(cMessage *msg)
 {
     // handle commands
-    if (msg->arrivalGateId()==uppergateIn && msg->length()==0)
+    if (msg->getArrivalGateId()==uppergateIn && msg->length()==0)
     {
         cPolymorphic *ctrl = msg->removeControlInfo();
-        if (msg->kind()==0)
-            error("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->name());
-        handleCommand(msg->kind(), ctrl);
+        if (msg->getKind()==0)
+            error("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->getName());
+        handleCommand(msg->getKind(), ctrl);
         delete msg;
         return;
     }
 
-    if (msg->arrivalGateId() == uppergateIn)
+    if (msg->getArrivalGateId() == uppergateIn)
     {
         AirFrame *airframe = encapsulatePacket(msg);
         handleUpperMsg(airframe);
@@ -179,7 +179,7 @@ void AbstractRadio::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
-    scheduleAt(airframe->arrivalTime() + airframe->getDuration(), endRxTimer);
+    scheduleAt(airframe->getArrivalTime() + airframe->getDuration(), endRxTimer);
 }
 
 AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
@@ -189,7 +189,7 @@ AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
 
     // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
     AirFrame *airframe = createAirFrame();
-    airframe->setName(frame->name());
+    airframe->setName(frame->getName());
     airframe->setPSend(transmitterPower);
     airframe->setChannelNumber(channelNumber());
     airframe->encapsulate(frame);
@@ -198,7 +198,7 @@ AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
     airframe->setSenderPos(myPosition());
     delete ctrl;
 
-    EV << "Frame (" << frame->className() << ")" << frame->name()
+    EV << "Frame (" << frame->getClassName() << ")" << frame->getName()
        << " will be transmitted at " << (airframe->getBitrate()/1e6) << "Mbps\n";
     return airframe;
 }
@@ -207,7 +207,7 @@ void AbstractRadio::sendUp(AirFrame *airframe)
 {
     cMessage *frame = airframe->decapsulate();
     delete airframe;
-    EV << "sending up frame " << frame->name() << endl;
+    EV << "sending up frame " << frame->getName() << endl;
     send(frame, uppergateOut);
 }
 
@@ -222,7 +222,7 @@ void AbstractRadio::sendDown(AirFrame *airframe)
  */
 AirFrame *AbstractRadio::unbufferMsg(cMessage *msg)
 {
-    AirFrame *airframe = (AirFrame *) msg->contextPointer();
+    AirFrame *airframe = (AirFrame *) msg->getContextPointer();
     //delete the self message
     delete msg;
 
@@ -319,7 +319,7 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
 
 void AbstractRadio::handleSelfMsg(cMessage *msg)
 {
-    if (msg->kind()==MK_RECEPTION_COMPLETE)
+    if (msg->getKind()==MK_RECEPTION_COMPLETE)
     {
         EV << "frame is completely received now\n";
 
@@ -328,7 +328,7 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
 
         handleLowerMsgEnd(airframe);
     }
-    else if (msg->kind() == MK_TRANSMISSION_OVER)
+    else if (msg->getKind() == MK_TRANSMISSION_OVER)
     {
         // Transmission has completed. The RadioState has to be changed
         // to IDLE or RECV, based on the noise level on the channel.
@@ -359,7 +359,7 @@ void AbstractRadio::handleSelfMsg(cMessage *msg)
     }
     else
     {
-        error("Internal error: unknown self-message `%s'", msg->name());
+        error("Internal error: unknown self-message `%s'", msg->getName());
     }
 }
 
@@ -407,9 +407,9 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (airframe->arrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (airframe->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << airframe->name() << endl;
+        EV << "receiving frame " << airframe->getName() << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;
@@ -430,7 +430,7 @@ void AbstractRadio::handleLowerMsgStart(AirFrame * airframe)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << airframe->name() << " is just noise\n";
+        EV << "frame " << airframe->getName() << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -488,7 +488,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
         //    delete airframe;
         if (!radioModel->isReceivedCorrectly(airframe, list))
         {
-            airframe->encapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            airframe->getEncapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
             airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
         }
         sendUp(airframe);
@@ -550,7 +550,7 @@ void AbstractRadio::changeChannel(int channel)
         for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
         {
             AirFrame *airframe = it->first;
-            cMessage *endRxTimer = (cMessage *)airframe->contextPointer();
+            cMessage *endRxTimer = (cMessage *)airframe->getContextPointer();
             delete airframe;
             delete cancelEvent(endRxTimer);
         }
@@ -583,24 +583,24 @@ void AbstractRadio::changeChannel(int channel)
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == airframe->getChannelNumber())
         {
-            EV << " - (" << airframe->className() << ")" << airframe->name() << ": ";
+            EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
 
             // if there is a message on the air which will reach us in the future
-            if (airframe->timestamp() + propagationDelay >= simTime())
+            if (airframe->getTimestamp() + propagationDelay >= simTime())
             {
                  EV << "will arrive in the future, scheduling it\n";
 
                  // we need to send to each radioIn[] gate of this host
                  for (int i = 0; i < radioGate->size(); i++)
-                     sendDirect((cMessage*)airframe->dup(), airframe->timestamp() + propagationDelay - simTime(), myHost, radioGate->id() + i);
+                     sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), myHost, radioGate->getId() + i);
             }
             // if we hear some part of the message
-            else if (airframe->timestamp() + airframe->getDuration() + propagationDelay > simTime())
+            else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
             {
                  EV << "missed beginning of frame, processing it as noise\n";
 
                  AirFrame *frameDup = (AirFrame*)airframe->dup();
-                 frameDup->setArrivalTime(airframe->timestamp() + propagationDelay);
+                 frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
                  handleLowerMsgStart(frameDup);
                  bufferMsg(frameDup);
             }

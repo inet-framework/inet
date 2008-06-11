@@ -48,14 +48,14 @@ typedef unsigned int uint32;
 // Macro to prevent executing ev<< statements in Express mode.
 // Compare ev/sec values with code compiled with #define EV ev.
 //
-#define EV ev.disabled()?ev:ev
+#define EV ev.isDisabled()?ev:ev
 
 
 //
-// Macro to protect expressions like gate("out")->toGate()->toGate()
+// Macro to protect expressions like gate("out")->getToGate()->getToGate()
 // from crashing if something in between returns NULL.
 // The above expression should be changed to
-//    CHK(CHK(gate("out"))->toGate())->toGate()
+//    CHK(CHK(gate("out"))->getToGate())->getToGate()
 // which is uglier but doesn't crash, just stops with a nice
 // error message if something goes wrong.
 //

@@ -85,9 +85,9 @@ void TED::initialize(int stage)
         ASSERT(!remote.isUnspecified());
 
         // find bandwidth of the link
-        cGate *g = parentModule()->gate(ie->nodeOutputGateId());
+        cGate *g = getParentModule()->gate(ie->nodeOutputGateId());
         ASSERT(g);
-        double linkBandwidth = g->channel()->par("datarate");
+        double linkBandwidth = g->getChannel()->par("datarate");
 
         //
         // fill in and insert TED entry
@@ -102,7 +102,7 @@ void TED::initialize(int stage)
             entry.UnResvBandwidth[j] = entry.MaxBandwidth;
         entry.state = true;
 
-        // use g->channel()->par("delay").doubleValue() for shortest delay calculation
+        // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
         entry.metric = rentry->interfacePtr->ipv4()->metric();
 
         EV << "metric set to=" << entry.metric << endl;
@@ -121,7 +121,7 @@ void TED::initialize(int stage)
         if (rt->interfaceByAddress(ie->ipv4()->inetAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
-                  ie->name(), ie->ipv4()->inetAddress().str().c_str());
+                  ie->getName(), ie->ipv4()->inetAddress().str().c_str());
         if (!ie->isLoopback())
             interfaceAddrs.push_back(ie->ipv4()->inetAddress());
     }
@@ -271,7 +271,7 @@ void TED::rebuildRoutingTable()
             entry->type = entry->REMOTE;
         }
         entry->interfacePtr = rt->interfaceByAddress(interfaceAddrByPeerAddress(V[nHop].node));
-        entry->interfaceName = opp_string(entry->interfacePtr->name());
+        entry->interfaceName = opp_string(entry->interfacePtr->getName());
         entry->source = RoutingEntry::OSPF;
 
         entry->netmask = 0xffffffff;
@@ -292,7 +292,7 @@ void TED::rebuildRoutingTable()
         entry->gateway = IPAddress();
         entry->type = entry->DIRECT;
         entry->interfacePtr = rt->interfaceByAddress(interfaceAddrs[i]);
-        entry->interfaceName = opp_string(entry->interfacePtr->name());
+        entry->interfaceName = opp_string(entry->interfacePtr->getName());
         entry->source = RoutingEntry::OSPF;
 
         entry->netmask = 0xffffffff;

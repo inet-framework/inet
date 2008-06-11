@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& os, const LDP::peer_info& p)
 {
     os << "peerIP=" << p.peerIP << "  interface=" << p.linkInterface <<
           "  activeRole=" << (p.activeRole ? "true" : "false") <<
-          "  socket=" << (p.socket ? TCPSocket::stateName(p.socket->state()) : "NULL");
+          "  socket=" << (p.socket ? TCPSocket::stateName(p.socket->getState()) : "NULL");
     return os;
 }
 
@@ -141,7 +141,7 @@ void LDP::initialize(int stage)
 
 void LDP::handleMessage(cMessage *msg)
 {
-    EV << "Received: (" << msg->className() << ")" << msg->name() << "\n";
+    EV << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg==sendHelloMsg)
     {
         // every LDP capable router periodically sends HELLO messages to the
@@ -154,8 +154,8 @@ void LDP::handleMessage(cMessage *msg)
     }
     else if (msg->isSelfMessage())
     {
-        EV << "Timer " << msg->name() << " expired\n";
-        if (!strcmp(msg->name(), "HelloTimeout"))
+        EV << "Timer " << msg->getName() << " expired\n";
+        if (!strcmp(msg->getName(), "HelloTimeout"))
         {
             processHelloTimeout(msg);
         }
@@ -164,12 +164,12 @@ void LDP::handleMessage(cMessage *msg)
             processNOTIFICATION(check_and_cast<LDPNotify*>(msg));
         }
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "udpIn"))
+    else if (!strcmp(msg->getArrivalGate()->getName(), "udpIn"))
     {
         // we can only receive LDP Hello from UDP (everything else goes over TCP)
         processLDPHello(check_and_cast<LDPHello *>(msg));
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "tcpIn"))
+    else if (!strcmp(msg->getArrivalGate()->getName(), "tcpIn"))
     {
         processMessageFromTCP(msg);
     }
@@ -479,7 +479,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
 void LDP::processLDPHello(LDPHello *msg)
 {
-    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->controlInfo());
+    UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
     //IPAddress peerAddr = controlInfo->getSrcAddr().get4();
     IPAddress peerAddr = msg->senderAddress();
     int interfaceId = controlInfo->interfaceId();
@@ -517,7 +517,7 @@ void LDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = ift->interfaceAt(interfaceId)->name();
+    info.linkInterface = ift->interfaceAt(interfaceId)->getName();
     info.activeRole = peerAddr.getInt() > rt->routerId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");
@@ -612,7 +612,7 @@ void LDP::socketPeerClosed(int, void *yourPtr)
 
 /*
     // close the connection (if not already closed)
-    if (socket.state()==TCPSocket::PEER_CLOSED)
+    if (socket.getState()==TCPSocket::PEER_CLOSED)
     {
         EV << "remote TCP closed, closing here as well\n";
         close();
@@ -710,7 +710,7 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     if (!ie)
         return IPAddress();  // no route
 
-    std::string iName = ie->name(); // FIXME why use name for lookup?
+    std::string iName = ie->getName(); // FIXME why use name for lookup?
     return findPeerAddrFromInterface(iName);
 }
 
@@ -775,7 +775,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
     InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
     if (!ie)
         error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
-    return ie->name();
+    return ie->getName();
 }
 
 //bool LDP::matches(const FEC_TLV& a, const FEC_TLV& b)
@@ -1162,7 +1162,7 @@ TCPSocket *LDP::peerSocketSoft(IPAddress peerAddr)
 {
     // find peer in table and return its socket
     int i = findPeer(peerAddr);
-    if (i==-1 || !(myPeers[i].socket) || myPeers[i].socket->state()!=TCPSocket::CONNECTED)
+    if (i==-1 || !(myPeers[i].socket) || myPeers[i].socket->getState()!=TCPSocket::CONNECTED)
     {
         // we don't have an LDP session to this peer
         return NULL;
@@ -1191,13 +1191,13 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
         return false;
 
     // LDP traffic (both discovery...
-    if (protocol == IP_PROT_UDP && check_and_cast<UDPPacket*>(ipdatagram->encapsulatedMsg())->destinationPort() == LDP_PORT)
+    if (protocol == IP_PROT_UDP && check_and_cast<UDPPacket*>(ipdatagram->getEncapsulatedMsg())->destinationPort() == LDP_PORT)
         return false;
 
     // ...and session)
-    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->encapsulatedMsg())->destPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->destPort() == LDP_PORT)
         return false;
-    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->encapsulatedMsg())->srcPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->srcPort() == LDP_PORT)
         return false;
 
     // regular traffic, classify, label etc.

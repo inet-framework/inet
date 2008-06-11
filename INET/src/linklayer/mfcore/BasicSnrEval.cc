@@ -23,7 +23,7 @@
 #include "TransmComplete_m.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << logName() << "::BasicSnrEval: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::BasicSnrEval: "
 
 Define_Module(BasicSnrEval);
 
@@ -76,7 +76,7 @@ void BasicSnrEval::initialize(int stage)
  */
 void BasicSnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->arrivalGateId() == uppergateIn)
+    if (msg->getArrivalGateId() == uppergateIn)
     {
         AirFrame *frame = encapsMsg(msg);
         handleUpperMsg(frame);
@@ -124,7 +124,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
-    scheduleAt(frame->arrivalTime() + frame->getDuration(), endRxTimer);
+    scheduleAt(frame->getArrivalTime() + frame->getDuration(), endRxTimer);
 }
 
 /**
@@ -136,7 +136,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
 AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
 {
     AirFrame *frame = createCapsulePkt();
-    frame->setName(msg->name());
+    frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
     frame->setLength(headerLength);
     frame->setChannelNumber(channelNumber());
@@ -198,7 +198,7 @@ void BasicSnrEval::sendDown(AirFrame *msg)
  */
 AirFrame *BasicSnrEval::unbufferMsg(cMessage *msg)
 {
-    AirFrame *frame = (AirFrame *) msg->contextPointer();
+    AirFrame *frame = (AirFrame *) msg->getContextPointer();
     //delete the self message
     delete msg;
 
@@ -291,7 +291,7 @@ void BasicSnrEval::handleLowerMsgEnd(AirFrame * frame)
  */
 void BasicSnrEval::handleLowerMsgStart(AirFrame * frame)
 {
-    coreEV << "in handleLowerMsgStart, receiving frame " << frame->name() << endl;
+    coreEV << "in handleLowerMsgStart, receiving frame " << frame->getName() << endl;
 
     //calculate the receive power
 

@@ -61,13 +61,13 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
 {
     // extract topology
     topo.extractByProperty("node");
-    EV << "cTopology found " << topo.nodes() << " nodes\n";
+    EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
-    nodeInfo.resize(topo.nodes());
-    for (int i=0; i<topo.nodes(); i++)
+    nodeInfo.resize(topo.getNumNodes());
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
-        cModule *mod = topo.node(i)->module();
+        cModule *mod = topo.getNode(i)->getModule();
         nodeInfo[i].isIPNode = IPAddressResolver().findInterfaceTableOf(mod)!=NULL;
         if (nodeInfo[i].isIPNode)
         {
@@ -83,11 +83,11 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
     uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
     uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
-    if (topo.nodes()>maxNodes)
-        error("netmask too large, not enough addresses for all %d nodes", topo.nodes());
+    if (topo.getNumNodes()>maxNodes)
+        error("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
 
     int numIPNodes = 0;
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
@@ -113,9 +113,9 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
 void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
-        cTopology::Node *node = topo.node(i);
+        cTopology::Node *node = topo.getNode(i);
 
         // skip bus types
         if (!nodeInfo[i].isIPNode)
@@ -135,14 +135,14 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         if (numIntf!=1)
             continue; // only deal with nodes with one interface plus loopback
 
-        EV << "  " << node->module()->fullName() << "=" << nodeInfo[i].address
+        EV << "  " << node->getModule()->getFullName() << "=" << nodeInfo[i].address
            << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
         RoutingEntry *e = new RoutingEntry();
         e->host = IPAddress();
         e->netmask = IPAddress();
-        e->interfaceName = ie->name();
+        e->interfaceName = ie->getName();
         e->interfacePtr = ie;
         e->type = RoutingEntry::REMOTE;
         e->source = RoutingEntry::MANUAL;
@@ -154,30 +154,30 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
 void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // fill in routing tables with static routes
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
-        cTopology::Node *destNode = topo.node(i);
+        cTopology::Node *destNode = topo.getNode(i);
 
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
         IPAddress destAddr = nodeInfo[i].address;
-        std::string destModName = destNode->module()->fullName();
+        std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
-        topo.unweightedSingleShortestPathsTo(destNode);
+        topo.calculateUnweightedSingleShortestPathsTo(destNode);
 
         // add route (with host=destNode) to every routing table in the network
         // (excepting nodes with only one interface -- there we'll set up a default route)
-        for (int j=0; j<topo.nodes(); j++)
+        for (int j=0; j<topo.getNumNodes(); j++)
         {
             if (i==j) continue;
             if (!nodeInfo[j].isIPNode)
                 continue;
 
-            cTopology::Node *atNode = topo.node(j);
-            if (atNode->paths()==0)
+            cTopology::Node *atNode = topo.getNode(j);
+            if (atNode->getNumPaths()==0)
                 continue; // not connected
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
@@ -186,20 +186,20 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
 
             InterfaceTable *ift = nodeInfo[j].ift;
 
-            int outputGateId = atNode->path(0)->localGate()->id();
+            int outputGateId = atNode->path(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->interfaceByNodeOutputGateId(outputGateId);
             if (!ie)
-                error("%s has no interface for output gate id %d", ift->fullPath().c_str(), outputGateId);
+                error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
-            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->name() << endl;
+            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPAddress(atAddr);
+            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
             RoutingEntry *e = new RoutingEntry();
             e->host = destAddr;
             e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->name();
+            e->interfaceName = ie->getName();
             e->interfacePtr = ie;
             e->type = RoutingEntry::DIRECT;
             e->source = RoutingEntry::MANUAL;
@@ -217,14 +217,14 @@ void FlatNetworkConfigurator::handleMessage(cMessage *msg)
 void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
         if (nodeInfo[i].isIPNode)
             numIPNodes++;
 
     // update display string
     char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.nodes()-numIPNodes);
-    displayString().setTagArg("t",0,buf);
+    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 

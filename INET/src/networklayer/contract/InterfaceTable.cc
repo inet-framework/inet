@@ -75,7 +75,7 @@ void InterfaceTable::updateDisplayString()
 
     char buf[80];
     sprintf(buf, "%d interfaces", interfaces.size());
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void InterfaceTable::handleMessage(cMessage *msg)
@@ -104,8 +104,8 @@ InterfaceEntry *InterfaceTable::interfaceAt(int pos)
 void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 {
     // check name is unique
-    if (interfaceByName(entry->name())!=NULL)
-        opp_error("addInterface(): interface '%s' already registered", entry->name());
+    if (interfaceByName(entry->getName())!=NULL)
+        opp_error("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
     entry->_interfaceId = interfaces.size();
@@ -119,9 +119,9 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod)
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
-    cModule *host = parentModule();
-    while (ifmod && ifmod->parentModule()!=host)
-        ifmod = ifmod->parentModule();
+    cModule *host = getParentModule();
+    while (ifmod && ifmod->getParentModule()!=host)
+        ifmod = ifmod->getParentModule();
     if (!ifmod)
         opp_error("addInterface(): specified module is not in this host/router");
 
@@ -133,24 +133,24 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
         if (!g) continue;
 
         // find the host/router's gates that internally connect to this interface
-        if (g->type()=='O' && g->toGate() && g->toGate()->ownerModule()==host)
-            entry->setNodeOutputGateId(g->toGate()->id());
-        if (g->type()=='I' && g->fromGate() && g->fromGate()->ownerModule()==host)
-            entry->setNodeInputGateId(g->fromGate()->id());
+        if (g->getType()=='O' && g->getToGate() && g->getToGate()->getOwnerModule()==host)
+            entry->setNodeOutputGateId(g->getToGate()->getId());
+        if (g->getType()=='I' && g->getFromGate() && g->getFromGate()->getOwnerModule()==host)
+            entry->setNodeInputGateId(g->getFromGate()->getId());
 
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
-        if (g->type()=='O' && g->toGate() && g->toGate()->isName("ifIn"))
-            nwlayerInGate = g->toGate();
-        if (g->type()=='I' && g->fromGate() && g->fromGate()->isName("ifOut"))
-            nwlayerOutGate = g->fromGate();
+        if (g->getType()=='O' && g->getToGate() && g->getToGate()->isName("ifIn"))
+            nwlayerInGate = g->getToGate();
+        if (g->getType()=='I' && g->getFromGate() && g->getFromGate()->isName("ifOut"))
+            nwlayerOutGate = g->getFromGate();
     }
 
     // consistency checks
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
-    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->index()!=nwlayerOutGate->index())
+    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
         opp_error("addInterface(): interface must be connected to network layer's ifIn[]/ifOut[] gates of the same index");
-    entry->setNetworkLayerGateIndex(nwlayerInGate->index());
+    entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
 }
 
 /*
@@ -204,7 +204,7 @@ InterfaceEntry *InterfaceTable::interfaceByName(const char *name)
     if (!name)
         return NULL;
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (!strcmp(name, (*i)->name()))
+        if (!strcmp(name, (*i)->getName()))
             return *i;
     return NULL;
 }

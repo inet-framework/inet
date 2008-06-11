@@ -42,7 +42,7 @@ void WirelessMacBase::initialize(int stage)
 
 void WirelessMacBase::handleMessage(cMessage *msg)
 {
-    if (msg->arrivalGateId()==uppergateIn)
+    if (msg->getArrivalGateId()==uppergateIn)
         handleUpperMsg(msg);
     else if (msg->isSelfMessage())
         handleSelfMsg(msg);
@@ -52,12 +52,12 @@ void WirelessMacBase::handleMessage(cMessage *msg)
 
 bool WirelessMacBase::isUpperMsg(cMessage *msg)
 {
-    return msg->arrivalGateId()==uppergateIn;
+    return msg->getArrivalGateId()==uppergateIn;
 }
 
 bool WirelessMacBase::isLowerMsg(cMessage *msg)
 {
-    return msg->arrivalGateId()==lowergateIn;
+    return msg->getArrivalGateId()==lowergateIn;
 }
 
 void WirelessMacBase::sendDown(cMessage *msg)

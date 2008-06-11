@@ -83,7 +83,7 @@ void EtherMACBase::initializeQueueModule()
 {
     if (par("queueModule").stringValue()[0])
     {
-        cModule *module = parentModule()->submodule(par("queueModule").stringValue());
+        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
         queueModule = check_and_cast<IPassiveQueue *>(module);
         EV << "Requesting first frame from queue module\n";
         queueModule->requestPacket();
@@ -119,7 +119,7 @@ void EtherMACBase::initializeNotificationBoard()
 void EtherMACBase::initializeFlags()
 {
     // initialize connected flag
-    connected = gate("phys$o")->destinationGate()->isConnected();
+    connected = gate("phys$o")->getDestinationGate()->isConnected();
     if (!connected) EV << "MAC not connected to a network.\n";
     WATCH(connected);
 
@@ -181,9 +181,9 @@ void EtherMACBase::registerInterface(double txrate)
     interfaceEntry = new InterfaceEntry();
 
     // interface name: our module name without special characters ([])
-    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *interfaceName = new char[strlen(getParentModule()->getFullName())+1];
     char *d=interfaceName;
-    for (const char *s=parentModule()->fullName(); *s; s++)
+    for (const char *s=getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -219,7 +219,7 @@ bool EtherMACBase::checkDestinationAddress(EtherFrame *frame)
     // matching port's MAC address, also checks if broadcast bit is set
     if (!promiscuous && !frame->getDest().isBroadcast() && !frame->getDest().equals(address))
     {
-        EV << "Frame `" << frame->name() <<"' not destined to us, discarding\n";
+        EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
         numDroppedNotForUs++;
         numDroppedNotForUsVector.record(numDroppedNotForUs);
         delete frame;
@@ -283,23 +283,23 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     EV << "Received frame from upper layer: " << frame << endl;
 
     // check message kind
-    if (frame->kind()!=ETH_FRAME && frame->kind()!=ETH_PAUSE)
-        error("message with unexpected message kind %d arrived from higher layer", frame->kind());
+    if (frame->getKind()!=ETH_FRAME && frame->getKind()!=ETH_PAUSE)
+        error("message with unexpected message kind %d arrived from higher layer", frame->getKind());
 
     // pause frames must be EtherPauseFrame AND kind==ETH_PAUSE
-    ASSERT((frame->kind()==ETH_PAUSE) == (dynamic_cast<EtherPauseFrame *>(frame)!=NULL));
+    ASSERT((frame->getKind()==ETH_PAUSE) == (dynamic_cast<EtherPauseFrame *>(frame)!=NULL));
 
     if (frame->getDest().equals(address))
     {
         error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
-              frame->fullName(), frame->getDest().str().c_str());
+              frame->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (frame->byteLength() > MAX_ETHERNET_FRAME)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->byteLength(), MAX_ETHERNET_FRAME);
+    if (frame->getByteLength() > MAX_ETHERNET_FRAME)
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->getByteLength(), MAX_ETHERNET_FRAME);
 
     // must be ETH_FRAME (or ETH_PAUSE) from upper layer
-    bool isPauseFrame = (frame->kind()==ETH_PAUSE);
+    bool isPauseFrame = (frame->getKind()==ETH_PAUSE);
     if (!isPauseFrame)
     {
         numFramesFromHL++;
@@ -336,22 +336,22 @@ void EtherMACBase::processMsgFromNetwork(cMessage *frame)
     EV << "Received frame from network: " << frame << endl;
 
     // frame must be ETH_FRAME, ETH_PAUSE or JAM_SIGNAL
-    if (frame->kind()!=ETH_FRAME && frame->kind()!=ETH_PAUSE && frame->kind()!=JAM_SIGNAL)
-        error("message with unexpected message kind %d arrived from network", frame->kind());
+    if (frame->getKind()!=ETH_FRAME && frame->getKind()!=ETH_PAUSE && frame->getKind()!=JAM_SIGNAL)
+        error("message with unexpected message kind %d arrived from network", frame->getKind());
 
     // detect cable length violation in half-duplex mode
-    if (!duplexMode && simTime()-frame->sendingTime()>=shortestFrameDuration)
+    if (!duplexMode && simTime()-frame->getSendingTime()>=shortestFrameDuration)
         error("very long frame propagation time detected, maybe cable exceeds maximum allowed length? "
               "(%lgs corresponds to an approx. %lgm cable)",
-              SIMTIME_STR(simTime() - frame->sendingTime()),
-              SIMTIME_STR((simTime() - frame->sendingTime())*SPEED_OF_LIGHT));
+              SIMTIME_STR(simTime() - frame->getSendingTime()),
+              SIMTIME_STR((simTime() - frame->getSendingTime())*SPEED_OF_LIGHT));
 }
 
 void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
 {
     int pauseUnits;
 
-    switch (frame->kind())
+    switch (frame->getKind())
     {
       case ETH_FRAME:
         processReceivedDataFrame((EtherFrame *)frame);
@@ -366,7 +366,7 @@ void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
         break;
 
       default:
-        error("Invalid message kind %d",frame->kind());
+        error("Invalid message kind %d",frame->getKind());
     }
 }
 
@@ -386,7 +386,7 @@ void EtherMACBase::processReceivedDataFrame(EtherFrame *frame)
 
     // statistics
     numFramesReceivedOK++;
-    numBytesReceivedOK += frame->byteLength();
+    numBytesReceivedOK += frame->getByteLength();
     numFramesReceivedOKVector.record(numFramesReceivedOK);
     numBytesReceivedOKVector.record(numBytesReceivedOK);
 
@@ -437,7 +437,7 @@ void EtherMACBase::handleEndIFGPeriod()
     EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && frame->byteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
+    if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
     {
         EV << "Performing carrier extension of small frame\n";
         frame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
@@ -465,11 +465,11 @@ void EtherMACBase::handleEndTxPeriod()
     cMessage *frame = (cMessage*)txQueue.pop();
 
     numFramesSent++;
-    numBytesSent += frame->byteLength();
+    numBytesSent += frame->getByteLength();
     numFramesSentVector.record(numFramesSent);
     numBytesSentVector.record(numBytesSent);
 
-    if (frame->kind()==ETH_PAUSE)
+    if (frame->getKind()==ETH_PAUSE)
     {
         numPauseFramesSent++;
         numPauseFramesSentVector.record(numPauseFramesSent);
@@ -616,9 +616,9 @@ void EtherMACBase::updateDisplayString()
         color = "gray";
     else
         color = "";
-    displayString().setTagArg("i",1,color);
-    if (!strcmp(parentModule()->className(),"EthernetInterface"))
-        parentModule()->displayString().setTagArg("i",1,color);
+    getDisplayString().setTagArg("i",1,color);
+    if (!strcmp(getParentModule()->getClassName(),"EthernetInterface"))
+        getParentModule()->getDisplayString().setTagArg("i",1,color);
 
     // connection coloring
     updateConnectionColor(transmitState);
@@ -646,7 +646,7 @@ void EtherMACBase::updateDisplayString()
     char buf[80];
     sprintf(buf, "tx:%s rx: %s\n#boff:%d #cTx:%d",
                  txStateName, rxStateName, backoffs, numConcurrentTransmissions);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 #endif
 }
 
@@ -661,10 +661,10 @@ void EtherMACBase::updateConnectionColor(int txState)
         color = "";
 
     cGate *g = gate("phys$o");
-    while (g && g->type()=='O')
+    while (g && g->getType()=='O')
     {
-        g->displayString().setTagArg("o",0,color);
-        g->displayString().setTagArg("o",1, color[0] ? "3" : "1");
-        g = g->toGate();
+        g->getDisplayString().setTagArg("o",0,color);
+        g->getDisplayString().setTagArg("o",1, color[0] ? "3" : "1");
+        g = g->getToGate();
     }
 }

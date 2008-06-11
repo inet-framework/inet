@@ -68,13 +68,13 @@ void NetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeI
 {
     // extract topology
     topo.extractByProperty("node");
-    EV << "cTopology found " << topo.nodes() << " nodes\n";
+    EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
-    nodeInfo.resize(topo.nodes());
-    for (int i=0; i<topo.nodes(); i++)
+    nodeInfo.resize(topo.getNumNodes());
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
-        cModule *mod = topo.node(i)->module();
+        cModule *mod = topo.getNode(i)->getModule();
         nodeInfo[i].ift = IPAddressResolver().findInterfaceTableOf(mod);
         nodeInfo[i].rt = IPAddressResolver().findRoutingTableOf(mod);
         nodeInfo[i].isIPNode = nodeInfo[i].rt!=NULL;
@@ -86,7 +86,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
     uint32 base = 10 << 24;  // 10.x.x.x addresses
     int nodeCtr = 1;         // middle 16 bits
 
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
@@ -121,29 +121,29 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 
     // add routes towards point-to-point routers (in real life these routes are
     // created automatically after PPP handshake when neighbour's address is learned)
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        cTopology::Node *node = topo.node(i);
+        cTopology::Node *node = topo.getNode(i);
         //InterfaceTable *ift = nodeInfo[i].ift;
         RoutingTable *rt = nodeInfo[i].rt;
 
         // loop through neighbors
-        for (int j=0; j<node->outLinks(); j++)
+        for (int j=0; j<node->getNumOutLinks(); j++)
         {
-            cTopology::Node *neighbor = node->out(j)->remoteNode();
+            cTopology::Node *neighbor = node->out(j)->getRemoteNode();
 
             // find neighbour's index in cTopology ==> k
             int k;
-            for (k=0; k<topo.nodes(); k++)
-                if (topo.node(k)==neighbor)
+            for (k=0; k<topo.getNumNodes(); k++)
+                if (topo.getNode(k)==neighbor)
                     break;
-            ASSERT(k<=topo.nodes());
+            ASSERT(k<=topo.getNumNodes());
 
-            // if it's not an IP node (e.g. an Ethernet switch), then we're not interested
+            // if it's not an IP getNode(e.g. an Ethernet switch), then we're not interested
             if (!nodeInfo[k].isIPNode)
                 continue;
 
@@ -151,13 +151,13 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             IPAddress neighborRouterId = nodeInfo[k].rt->routerId();
 
             // find out neighbor's interface IP address
-            int neighborGateId = node->out(j)->remoteGate()->id();
+            int neighborGateId = node->out(j)->getRemoteGate()->getId();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->interfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
             IPAddress neighborAddr = neighborIe->ipv4()->inetAddress();
 
             // find our own interface towards neighbor
-            int gateId = node->out(j)->localGate()->id();
+            int gateId = node->out(j)->getLocalGate()->getId();
             InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
             ASSERT(ie);
 
@@ -173,7 +173,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
                 e->host = neighborAddr; // and no gateway
             }
             e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->name();
+            e->interfaceName = ie->getName();
             e->interfacePtr = ie;
             e->type = RoutingEntry::DIRECT;
             e->source = RoutingEntry::MANUAL;
@@ -186,13 +186,13 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        cTopology::Node *node = topo.node(i);
+        cTopology::Node *node = topo.getNode(i);
         InterfaceTable *ift = nodeInfo[i].ift;
         RoutingTable *rt = nodeInfo[i].rt;
 
@@ -207,14 +207,14 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         if (numIntf!=1)
             continue; // only deal with nodes with one interface plus loopback
 
-        EV << "  " << node->module()->fullName() << " has only one (non-loopback) "
+        EV << "  " << node->getModule()->getFullName() << " has only one (non-loopback) "
            "interface, adding default route\n";
 
         // add route
         RoutingEntry *e = new RoutingEntry();
         e->host = IPAddress();
         e->netmask = IPAddress();
-        e->interfaceName = ie->name();
+        e->interfaceName = ie->getName();
         e->interfacePtr = ie;
         e->type = RoutingEntry::REMOTE;
         e->source = RoutingEntry::MANUAL;
@@ -231,29 +231,29 @@ void NetworkConfigurator::setPeersParameter(const char *submodName, cTopology& t
     // The LinkStateRouting module is similar, so this function is also called with submodName = "LinkStateRouting".
 
     // for each RSVP router, collect neighbors which are also RSVP routers
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
         // if it doesn't have an RSVP submodule, we're not interested
-        cModule *submod = topo.node(i)->module()->submodule(submodName);
+        cModule *submod = topo.getNode(i)->getModule()->getSubmodule(submodName);
         if (submod==NULL)
             continue;
 
         std::string peers;
-        cTopology::Node *node = topo.node(i);
-        for (int j=0; j<node->outLinks(); j++)
+        cTopology::Node *node = topo.getNode(i);
+        for (int j=0; j<node->getNumOutLinks(); j++)
         {
             // if neighbor is not an RSVP router, then we're not interested
-            cModule *neighborSubmod = node->out(j)->remoteNode()->module()->submodule(submodName);
+            cModule *neighborSubmod = node->out(j)->getRemoteNode()->getModule()->getSubmodule(submodName);
             if (neighborSubmod==NULL)
                 continue;
 
             // find our own interface towards neighbor
-            int gateId = node->out(j)->localGate()->id();
+            int gateId = node->out(j)->getLocalGate()->getId();
             InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
             ASSERT(ie);
 
             // interface name to peers list
-            peers += std::string(" ") + ie->name();
+            peers += std::string(" ") + ie->getName();
         }
 
         // set "peers" parameter
@@ -265,30 +265,30 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
 {
 /* FIXME TBD
     // fill in routing tables with static routes
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
     {
-        cTopology::Node *destNode = topo.node(i);
+        cTopology::Node *destNode = topo.getNode(i);
 
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
 
         IPAddress destAddr = nodeInfo[i].address;
-        std::string destModName = destNode->module()->fullName();
+        std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
-        topo.unweightedSingleShortestPathsTo(destNode);
+        topo.calculateUnweightedSingleShortestPathsTo(destNode);
 
         // add route (with host=destNode) to every routing table in the network
         // (excepting nodes with only one interface -- there we'll set up a default route)
-        for (int j=0; j<topo.nodes(); j++)
+        for (int j=0; j<topo.getNumNodes(); j++)
         {
             if (i==j) continue;
             if (!nodeInfo[j].isIPNode)
                 continue;
 
-            cTopology::Node *atNode = topo.node(j);
-            if (atNode->paths()==0)
+            cTopology::Node *atNode = topo.getNode(j);
+            if (atNode->getNumPaths()==0)
                 continue; // not connected
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
@@ -297,13 +297,13 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
 
             InterfaceTable *ift = nodeInfo[j].ift;
 
-            int outputGateId = atNode->path(0)->localGate()->id();
+            int outputGateId = atNode->path(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->interfaceByNodeOutputGateId(outputGateId);
             if (!ie)
-                error("%s has no interface for output gate id %d", ift->fullPath().c_str(), outputGateId);
+                error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV << "  from " << atNode->module()->fullName() << "=" << IPAddress(atAddr);
-            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->name() << endl;
+            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPAddress(atAddr);
+            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
@@ -311,7 +311,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             e->host = destAddr;
             e->gateway = ???
             e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->name();
+            e->interfaceName = ie->getName();
             e->interfacePtr = ie;
             e->type = RoutingEntry::REMOTE;
             e->source = RoutingEntry::MANUAL;
@@ -330,14 +330,14 @@ void NetworkConfigurator::handleMessage(cMessage *msg)
 void NetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
-    for (int i=0; i<topo.nodes(); i++)
+    for (int i=0; i<topo.getNumNodes(); i++)
         if (nodeInfo[i].isIPNode)
             numIPNodes++;
 
     // update display string
     char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.nodes()-numIPNodes);
-    displayString().setTagArg("t",0,buf);
+    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 

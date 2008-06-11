@@ -84,42 +84,42 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         EV << "Self message received!\n";
-        if (msg->kind()==MK_SEND_PERIODIC_RTRADV)
+        if (msg->getKind()==MK_SEND_PERIODIC_RTRADV)
         {
             EV << "Sending periodic RA\n";
             sendPeriodicRA(msg);
         }
-        else if (msg->kind()==MK_SEND_SOL_RTRADV)
+        else if (msg->getKind()==MK_SEND_SOL_RTRADV)
         {
             EV << "Sending solicited RA\n";
             sendSolicitedRA(msg);
         }
-        else if (msg->kind()==MK_ASSIGN_LINKLOCAL_ADDRESS)
+        else if (msg->getKind()==MK_ASSIGN_LINKLOCAL_ADDRESS)
         {
             EV << "Assigning Link Local Address\n";
             assignLinkLocalAddress(msg);
         }
-        else if (msg->kind()==MK_DAD_TIMEOUT)
+        else if (msg->getKind()==MK_DAD_TIMEOUT)
         {
             EV << "DAD Timeout message received\n";
             processDADTimeout(msg);
         }
-        else if (msg->kind()==MK_RD_TIMEOUT)
+        else if (msg->getKind()==MK_RD_TIMEOUT)
         {
             EV << "Router Discovery message received\n";
             processRDTimeout(msg);
         }
-        else if (msg->kind()==MK_INITIATE_RTRDIS)
+        else if (msg->getKind()==MK_INITIATE_RTRDIS)
         {
             EV << "initiate router discovery.\n";
             initiateRouterDiscovery(msg);
         }
-        else if (msg->kind()==MK_NUD_TIMEOUT)
+        else if (msg->getKind()==MK_NUD_TIMEOUT)
         {
             EV << "NUD Timeout message received\n";
             processNUDTimeout(msg);
         }
-        else if (msg->kind()==MK_AR_TIMEOUT)
+        else if (msg->getKind()==MK_AR_TIMEOUT)
         {
             EV << "Address Resolution Timeout message received\n";
             processARTimeout(msg);
@@ -450,7 +450,7 @@ void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(
 void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
 {
     EV << "NUD has timed out\n";
-    Neighbour *nce = (Neighbour *) timeoutMsg->contextPointer();
+    Neighbour *nce = (Neighbour *) timeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
     InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
 
@@ -647,7 +647,7 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
 void IPv6NeighbourDiscovery::processARTimeout(cMessage *arTimeoutMsg)
 {
     //AR timeouts are cancelled when a valid solicited NA is received.
-    Neighbour *nce = (Neighbour *)arTimeoutMsg->contextPointer();
+    Neighbour *nce = (Neighbour *)arTimeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
     IPv6Address nsTargetAddr = nceKey->address;
     InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
@@ -783,7 +783,7 @@ void IPv6NeighbourDiscovery::initiateDAD(const IPv6Address& tentativeAddr,
 
 void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
 {
-    DADEntry *dadEntry = (DADEntry *)msg->contextPointer();
+    DADEntry *dadEntry = (DADEntry *)msg->getContextPointer();
     InterfaceEntry *ie = (InterfaceEntry *)ift->interfaceAt(dadEntry->interfaceId);
     IPv6Address tentativeAddr = dadEntry->address;
     //Here, we need to check how many DAD messages for the interface entry were
@@ -855,7 +855,7 @@ IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceE
 void IPv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
 {
     EV << "Initiating Router Discovery" << endl;
-    InterfaceEntry *ie = (InterfaceEntry *)msg->contextPointer();
+    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     delete msg;
     //RFC2461: Section 6.3.7
     /*When an interface becomes enabled, a host may be unwilling to wait for the
@@ -904,7 +904,7 @@ void IPv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
 
 void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 {
-    InterfaceEntry *ie = (InterfaceEntry *)msg->contextPointer();
+    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     RDEntry *rdEntry = fetchRDEntry(ie);
     if (rdEntry->numRSSent < ie->ipv6()->_maxRtrSolicitations())
     {
@@ -1406,7 +1406,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
         IPv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
         //TODO: for now we leave the newly formed address as not tentative,
         //according to Greg, we have to always perform DAD for a newly formed address.
-        EV << "Assigning new address to: " << ie->name() << endl;
+        EV << "Assigning new address to: " << ie->getName() << endl;
         ie->ipv6()->assignAddress(newAddr, false, simTime()+validLifetime,
             simTime()+preferredLifetime);
     }
@@ -1464,7 +1464,7 @@ void IPv6NeighbourDiscovery::resetRATimer(InterfaceEntry *ie)
     for (RATimerList::iterator it=raTimerList.begin(); it != raTimerList.end(); it++)
     {
         cMessage *msg = (*it);
-        InterfaceEntry *msgIE = (InterfaceEntry *)msg->contextPointer();
+        InterfaceEntry *msgIE = (InterfaceEntry *)msg->getContextPointer();
         //Find the timer that matches the given Interface Entry.
         if (msgIE->outputPort() == ie->outputPort())
         {
@@ -1480,7 +1480,7 @@ void IPv6NeighbourDiscovery::resetRATimer(InterfaceEntry *ie)
 
 void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
 {
-    InterfaceEntry *ie = (InterfaceEntry *)msg->contextPointer();
+    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);
     IPv6Address destAddr = IPv6Address("FF02::1");
     createAndSendRAPacket(destAddr, ie);
@@ -1520,7 +1520,7 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
 void IPv6NeighbourDiscovery::sendSolicitedRA(cMessage *msg)
 {
     EV << "Send Solicited RA invoked!\n";
-    InterfaceEntry *ie = (InterfaceEntry *)msg->contextPointer();
+    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     IPv6Address destAddr = IPv6Address("FF02::1");
     EV << "Testing condition!\n";
     createAndSendRAPacket(destAddr, ie);

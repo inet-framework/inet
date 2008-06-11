@@ -37,7 +37,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
     IPvXAddress localAddr, remoteAddr;
     short localPort, remotePort;
 
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -83,7 +83,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     IPvXAddress localAddr;
     short localPort;
 
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_INIT:
             initConnection(openCmd);
@@ -116,7 +116,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_INIT:
             opp_error("Error processing command SEND: connection not open");
@@ -163,7 +163,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     delete tcpCommand;
     delete msg;
 
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_INIT:
             opp_error("Error processing command CLOSE: connection not open");
@@ -228,7 +228,7 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     // state, flush queues etc -- no need to do it here. Also, we don't need to
     // send notification to the user, they know what's going on.
     //
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_INIT:
             opp_error("Error processing command ABORT: connection not open");
@@ -253,13 +253,13 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
 {
     delete tcpCommand; // but reuse msg for reply
 
-    if (fsm.state()==TCP_S_INIT)
+    if (fsm.getState()==TCP_S_INIT)
         opp_error("Error processing command STATUS: connection not open");
 
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
 
-    statusInfo->setState(fsm.state());
-    statusInfo->setStateName(stateName(fsm.state()));
+    statusInfo->setState(fsm.getState());
+    statusInfo->setStateName(stateName(fsm.getState()));
 
     statusInfo->setLocalAddr(localAddr);
     statusInfo->setRemoteAddr(remoteAddr);

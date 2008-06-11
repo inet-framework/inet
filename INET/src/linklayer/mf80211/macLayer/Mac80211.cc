@@ -88,9 +88,9 @@ void Mac80211::registerInterface()
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(parentModule()->fullName()) + 1];
+    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
     char *d = interfaceName;
-    for (const char *s = parentModule()->fullName(); *s; s++)
+    for (const char *s = getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -136,9 +136,9 @@ void Mac80211::registerInterface()
  */
 void Mac80211::handleUpperMsg(cMessage *msg)
 {
-    if (msg->byteLength() > 2312)
+    if (msg->getByteLength() > 2312)
         error("packet from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->className(), msg->name(), msg->byteLength());
+              msg->getClassName(), msg->getName(), msg->getByteLength());
 
     if (maxQueueSize && (int)fromUpperLayer.size() == maxQueueSize)
     {
@@ -169,7 +169,7 @@ void Mac80211::handleUpperMsg(cMessage *msg)
  */
 Mac80211Pkt *Mac80211::encapsMsg(cMessage * netw)
 {
-    Mac80211Pkt *pkt = new Mac80211Pkt(netw->name());
+    Mac80211Pkt *pkt = new Mac80211Pkt(netw->getName());
     pkt->setLength(272);        // headerLength, including final CRC-field
 
     // copy dest address from the control info
@@ -177,7 +177,7 @@ Mac80211Pkt *Mac80211::encapsMsg(cMessage * netw)
     pkt->setDestAddr(ctrl->getDest());
     delete ctrl;
 
-    // set the src address to own mac address (nic module id())
+    // set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(myMacAddr);
 
     // encapsulate the network packet
@@ -205,9 +205,9 @@ void Mac80211::handleLowerMsg(cMessage *msg)
     Mac80211Pkt *af = check_and_cast<Mac80211Pkt *>(msg);
 
     // end of the reception
-    EV << "frame " << af << " received, kind = " << pktTypeName(af->kind()) << "\n";
+    EV << "frame " << af << " received, kind = " << pktTypeName(af->getKind()) << "\n";
 
-    switch (af->kind())
+    switch (af->getKind())
     {
     case COLLISION: // packet lost or bit error
         delete af;
@@ -236,9 +236,9 @@ void Mac80211::handleLowerMsg(cMessage *msg)
  */
 void Mac80211::handleSelfMsg(cMessage * msg)
 {
-    EV << "processing self message with type = " << timerTypeName(msg->kind()) << endl;
+    EV << "processing self message with type = " << timerTypeName(msg->getKind()) << endl;
 
-    switch (msg->kind())
+    switch (msg->getKind())
     {
     case END_SIFS:
         handleEndSifsTimer();   // noch zu betrachten
@@ -282,7 +282,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
     EV << "handle msg not for me\n";
 
     // if this packet  can not be correctly read
-    if (af->kind() == BITERROR)
+    if (af->getKind() == BITERROR)
         af->setDuration(EIFS);
 
     // if the duration of the packet is null, then do nothing (to avoid
@@ -294,7 +294,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
         if (state == QUIET)
         {
             // the current value of the NAV is not sufficient
-            if (nav->arrivalTime() < simTime() + af->getDuration())
+            if (nav->getArrivalTime() < simTime() + af->getDuration())
             {
                 cancelEvent(nav);
                 scheduleAt(simTime() + af->getDuration(), nav);
@@ -323,7 +323,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
     {                           // todo: Nachgucken: was passiert bei Error ohne rtsCts!
         if (state == CONTEND)
         {
-            if (af->kind() == BITERROR)
+            if (af->getKind() == BITERROR)
             {
                 if (contention->isScheduled())
                     cancelEvent(contention);
@@ -345,7 +345,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
  */
 void Mac80211::handleMsgForMe(Mac80211Pkt *af)
 {
-    EV << "handle msg for me in state = " << stateName(state) << " with type = " << pktTypeName(af->kind()) << "\n";
+    EV << "handle msg for me in state = " << stateName(state) << " with type = " << pktTypeName(af->getKind()) << "\n";
 
     switch (state)
     {
@@ -353,9 +353,9 @@ void Mac80211::handleMsgForMe(Mac80211Pkt *af)
     case CONTEND:  // or waiting for RTS
 
         // RTS or DATA accepted
-        if (af->kind() == RTS)
+        if (af->getKind() == RTS)
             handleRTSframe(af);
-        else if (af->kind() == DATA)
+        else if (af->getKind() == DATA)
             handleDATAframe(af);
         else
             // TODO: what if a late ACK has arrived?
@@ -364,7 +364,7 @@ void Mac80211::handleMsgForMe(Mac80211Pkt *af)
 
     case WFDATA:  // waiting for DATA
 
-        if (af->kind() == DATA)
+        if (af->getKind() == DATA)
             handleDATAframe(af);
         else
             EV << "in handleMsgForMe() WFDATA, strange message, darf das?\n";
@@ -372,7 +372,7 @@ void Mac80211::handleMsgForMe(Mac80211Pkt *af)
 
     case WFACK:  // waiting for ACK
 
-        if (af->kind() == ACK)
+        if (af->getKind() == ACK)
             handleACKframe(af);
         else
             EV << "in handleMsgForMe() WFACK, strange message, darf das?\n";
@@ -381,7 +381,7 @@ void Mac80211::handleMsgForMe(Mac80211Pkt *af)
 
     case WFCTS:  // The MAC is waiting for CTS
 
-        if (af->kind() == CTS)
+        if (af->getKind() == CTS)
             handleCTSframe(af);
         else
             EV << "in handleMsgForMe() WFCTS, strange message, darf das?\n";
@@ -570,9 +570,9 @@ void Mac80211::handleTimeoutTimer()
  */
 void Mac80211::handleEndSifsTimer()
 {
-    Mac80211Pkt *frame = (Mac80211Pkt *) endSifs->contextPointer();
+    Mac80211Pkt *frame = (Mac80211Pkt *) endSifs->getContextPointer();
 
-    switch (frame->kind())
+    switch (frame->getKind())
     {
     case RTS:
         sendCTSframe(frame);
@@ -921,7 +921,7 @@ void Mac80211::receiveChangeNotification(int category, cPolymorphic *details)
         // about the initial radio state. This function has to work correctly
         // even when called during initialization phase!
 
-        EV << "** Radio state update in " << className() << ": " << details->info()
+        EV << "** Radio state update in " << getClassName() << ": " << details->info()
            << " (at T=" << simTime() << ")\n";
 
         // beginning of a reception
@@ -932,9 +932,9 @@ void Mac80211::receiveChangeNotification(int category, cPolymorphic *details)
             {
                 // update the backoff window in order to give higher priority in
                 // the next battle
-                if (simTime() - contention->sendingTime() >= DIFS)
+                if (simTime() - contention->getSendingTime() >= DIFS)
                 {
-                    BW = contention->arrivalTime() - simTime();
+                    BW = contention->getArrivalTime() - simTime();
                     EV << "Backoff window made smaller, new BW: " << BW << endl;
                 }
                 cancelEvent(contention);
@@ -944,7 +944,7 @@ void Mac80211::receiveChangeNotification(int category, cPolymorphic *details)
             if (endSifs->isScheduled())
             {
                 // delete the previously received frame
-                delete (Mac80211Pkt *)endSifs->contextPointer();
+                delete (Mac80211Pkt *)endSifs->getContextPointer();
 
                 // cancel the next transmission
                 cancelEvent(endSifs);

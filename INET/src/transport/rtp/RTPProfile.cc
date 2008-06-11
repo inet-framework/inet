@@ -48,15 +48,15 @@ void RTPProfile::initialize() {
 
 void RTPProfile::handleMessage(cMessage *msg) {
 
-    if (msg->arrivalGateId() == findGate("fromRTP")) {
+    if (msg->getArrivalGateId() == findGate("fromRTP")) {
         handleMessageFromRTP(msg);
     }
 
-    else if (msg->arrivalGateId() == findGate("fromPayloadSender")) {
+    else if (msg->getArrivalGateId() == findGate("fromPayloadSender")) {
         handleMessageFromPayloadSender(msg);
     }
 
-    else if (msg->arrivalGateId() >= findGate("fromPayloadReceiver") && msg->arrivalGateId() < findGate("fromPayloadReceiver") + _maxReceivers) {
+    else if (msg->getArrivalGateId() >= findGate("fromPayloadReceiver") && msg->getArrivalGateId() < findGate("fromPayloadReceiver") + _maxReceivers) {
         handleMessageFromPayloadReceiver(msg);
     }
 
@@ -70,28 +70,28 @@ void RTPProfile::handleMessage(cMessage *msg) {
 
 void RTPProfile::handleMessageFromRTP(cMessage *msg) {
 
-    if (opp_strcmp(msg->className(), "RTPInnerPacket"))
+    if (opp_strcmp(msg->getClassName(), "RTPInnerPacket"))
         error("RTPProfile: message received from RTPModule is not an RTPInnerPacket !");
 
         RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
 
-        if (rinpIn->type() == RTPInnerPacket::RTP_INP_INITIALIZE_PROFILE) {
+        if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_PROFILE) {
             initializeProfile(rinpIn);
         }
 
-        else if (rinpIn->type() == RTPInnerPacket::RTP_INP_CREATE_SENDER_MODULE) {
+        else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_CREATE_SENDER_MODULE) {
             createSenderModule(rinpIn);
         }
 
-        else if (rinpIn->type() == RTPInnerPacket::RTP_INP_DELETE_SENDER_MODULE) {
+        else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_DELETE_SENDER_MODULE) {
             deleteSenderModule(rinpIn);
         }
 
-        else if (rinpIn->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
+        else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
             senderModuleControl(rinpIn);
         }
 
-        else if (rinpIn->type() == RTPInnerPacket::RTP_INP_DATA_IN) {
+        else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
             dataIn(rinpIn);
         }
 
@@ -106,15 +106,15 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg) {
 
     RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
 
-    if (rinpIn->type() == RTPInnerPacket::RTP_INP_DATA_OUT) {
+    if (rinpIn->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
         dataOut(rinpIn);
     }
 
-    else if (rinpIn->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
+    else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
         senderModuleInitialized(rinpIn);
     }
 
-    else if (rinpIn->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_STATUS) {
+    else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_STATUS) {
         senderModuleStatus(rinpIn);
     }
 
@@ -165,7 +165,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp) {
     send(rinpOut1, "toRTP");
 
     RTPInnerPacket *rinpOut2 = new RTPInnerPacket("initializeSenderModule()");
-    rinpOut2->initializeSenderModule(ssrc, rinp->fileName(), _mtu);
+    rinpOut2->initializeSenderModule(ssrc, rinp->getFileName(), _mtu);
     send(rinpOut2, "toPayloadSender");
 
     delete rinp;
@@ -173,7 +173,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp) {
 
 
 void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
-    cModule *senderModule = gate("toPayloadSender")->toGate()->ownerModule();
+    cModule *senderModule = gate("toPayloadSender")->getToGate()->getOwnerModule();
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
@@ -193,7 +193,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp) {
 
     processIncomingPacket(rinp);
 
-    RTPPacket *packet = (RTPPacket *)(rinp->encapsulatedMsg());
+    RTPPacket *packet = (RTPPacket *)(rinp->getEncapsulatedMsg());
 
     u_int32 ssrc = packet->ssrc();
 
@@ -212,7 +212,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp) {
             RTPPayloadReceiver *receiverModule = (RTPPayloadReceiver *)(moduleType->create(payloadReceiverName, this));
             if (_autoOutputFileNames) {
                 char outputFileName[100];
-                sprintf(outputFileName, "id%i.sim", receiverModule->id());
+                sprintf(outputFileName, "id%i.sim", receiverModule->getId());
                 receiverModule->par("outputFileName") = outputFileName;
             }
             connect(this, ssrcGate->gateId(), NULL, receiverModule, receiverModule->findGate("fromProfile"));

@@ -171,7 +171,7 @@ TCPConnection::~TCPConnection()
 bool TCPConnection::processTimer(cMessage *msg)
 {
     printConnBrief();
-    tcpEV << msg->name() << " timer expired\n";
+    tcpEV << msg->getName() << " timer expired\n";
 
     // first do actions
     TCPEventCode event;
@@ -235,7 +235,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
 
     // first do actions
     TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
-    TCPEventCode event = preanalyseAppCommandEvent(msg->kind());
+    TCPEventCode event = preanalyseAppCommandEvent(msg->getKind());
     tcpEV << "App command: " << eventName(event) << "\n";
     switch (event)
     {
@@ -270,19 +270,19 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
 
 bool TCPConnection::performStateTransition(const TCPEventCode& event)
 {
-    ASSERT(fsm.state()!=TCP_S_CLOSED); // closed connections should be deleted immediately
+    ASSERT(fsm.getState()!=TCP_S_CLOSED); // closed connections should be deleted immediately
 
     if (event==TCP_E_IGNORE)  // e.g. discarded segment
     {
-        tcpEV << "Staying in state: " << stateName(fsm.state()) << " (no FSM event)\n";
+        tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (no FSM event)\n";
         return true;
     }
 
     // state machine
     // TBD add handling of connection timeout event (keepalive), with transition to CLOSED
     // Note: empty "default:" lines are for gcc's benefit which would otherwise spit warnings
-    int oldState = fsm.state();
-    switch (fsm.state())
+    int oldState = fsm.getState();
+    switch (fsm.getState())
     {
         case TCP_S_INIT:
             switch (event)
@@ -417,20 +417,20 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
             break;
     }
 
-    if (oldState!=fsm.state())
+    if (oldState!=fsm.getState())
     {
-        tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (event was: " << eventName(event) << ")\n";
-        testingEV << tcpMain->name() << ": " << stateName(oldState) << " --> " << stateName(fsm.state()) << "  (on " << eventName(event) << ")\n";
+        tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (event was: " << eventName(event) << ")\n";
+        testingEV << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
 
         // cancel timers, etc.
-        stateEntered(fsm.state());
+        stateEntered(fsm.getState());
     }
     else
     {
-        tcpEV << "Staying in state: " << stateName(fsm.state()) << " (event was: " << eventName(event) << ")\n";
+        tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (event was: " << eventName(event) << ")\n";
     }
 
-    return fsm.state()!=TCP_S_CLOSED;
+    return fsm.getState()!=TCP_S_CLOSED;
 }
 
 void TCPConnection::stateEntered(int state)

@@ -179,9 +179,9 @@ void Ieee80211Mac::registerInterface()
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(parentModule()->fullName()) + 1];
+    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
     char *d = interfaceName;
-    for (const char *s = parentModule()->fullName(); *s; s++)
+    for (const char *s = getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -210,7 +210,7 @@ void Ieee80211Mac::initializeQueueModule()
     // use of external queue module is optional -- find it if there's one specified
     if (par("queueModule").stringValue()[0])
     {
-        cModule *module = parentModule()->submodule(par("queueModule").stringValue());
+        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
         queueModule = check_and_cast<IPassiveQueue *>(module);
 
         EV << "Requesting first two frames from queue module\n";
@@ -236,7 +236,7 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 {
     // check if it's a command from the mgmt layer
-    if (msg->length()==0 && msg->kind()!=0)
+    if (msg->length()==0 && msg->getKind()!=0)
     {
         handleCommand(msg);
         return;
@@ -252,9 +252,9 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 
     // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
     Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
-    if (frame->byteLength() > fragmentationThreshold)
+    if (frame->getByteLength() > fragmentationThreshold)
         error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->className(), msg->name(), msg->byteLength());
+              msg->getClassName(), msg->getName(), msg->getByteLength());
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
     ASSERT(!frame->getReceiverAddress().isUnspecified());
@@ -271,14 +271,14 @@ void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 
 void Ieee80211Mac::handleCommand(cMessage *msg)
 {
-    if (msg->kind()==PHY_C_CONFIGURERADIO)
+    if (msg->getKind()==PHY_C_CONFIGURERADIO)
     {
-        EV << "Passing on command " << msg->name() << " to physical layer\n";
+        EV << "Passing on command " << msg->getName() << " to physical layer\n";
         if (pendingRadioConfigMsg != NULL)
         {
             // merge contents of the old command into the new one, then delete it
-            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->controlInfo());
-            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->controlInfo());
+            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
+            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
             if (pNew->channelNumber()==-1 && pOld->channelNumber()!=-1)
                 pNew->setChannelNumber(pOld->channelNumber());
             if (pNew->bitrate()==-1 && pOld->bitrate()!=-1)
@@ -287,20 +287,20 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
             pendingRadioConfigMsg = NULL;
         }
 
-        if (fsm.state() == IDLE || fsm.state() == DEFER || fsm.state() == BACKOFF)
+        if (fsm.getState() == IDLE || fsm.getState() == DEFER || fsm.getState() == BACKOFF)
         {
             EV << "Sending it down immediately\n";
             sendDown(msg);
         }
         else
         {
-            EV << "Delaying " << msg->name() << " until next IDLE or DEFER state\n";
+            EV << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
             pendingRadioConfigMsg = msg;
         }
     }
     else
     {
-        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->className(), msg->name(), msg->kind());
+        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
     }
 }
 
@@ -311,7 +311,7 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame *>(msg);
     if (!frame)
         error("message from physical layer (%s)%s is not a subclass of Ieee80211Frame",
-              msg->className(), msg->name());
+              msg->getClassName(), msg->getName());
 
     EV << "Self address: " << address
        << ", receiver address: " << frame->getReceiverAddress()
@@ -323,7 +323,7 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
     handleWithFSM(msg);
 
     // if we are the owner then we did not send this message up
-    if (msg->owner() == this)
+    if (msg->getOwner() == this)
         delete msg;
 }
 
@@ -352,17 +352,17 @@ void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details
 void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMsg(msg) && fsm.state() != IDLE)
+    if (isUpperMsg(msg) && fsm.getState() != IDLE)
     {
-        EV << "deferring upper message transmission in " << fsm.stateName() << " state\n";
+        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
         return;
     }
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
     int frameType = frame ? frame->getType() : -1;
-    int msgKind = msg->kind();
+    int msgKind = msg->getKind();
     logState();
-    stateVector.record(fsm.state());
+    stateVector.record(fsm.getState());
 
     if (frame && isLowerMsg(frame))
     {
@@ -413,7 +413,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Enter(scheduleDIFSPeriod());
             FSMA_Event_Transition(Immediate-Transmit-RTS,
                                   msg == endDIFS && !isBroadcast(currentTransmission())
-                                  && currentTransmission()->byteLength() >= rtsThreshold && !backoff,
+                                  && currentTransmission()->getByteLength() >= rtsThreshold && !backoff,
                                   WAITCTS,
                 sendRTSFrame(currentTransmission());
                 cancelDIFSPeriod();
@@ -461,7 +461,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Enter(scheduleBackoffPeriod());
             FSMA_Event_Transition(Transmit-RTS,
                                   msg == endBackoff && !isBroadcast(currentTransmission())
-                                  && currentTransmission()->byteLength() >= rtsThreshold,
+                                  && currentTransmission()->getByteLength() >= rtsThreshold,
                                   WAITCTS,
                 sendRTSFrame(currentTransmission());
             );
@@ -592,7 +592,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     }
 
     logState();
-    stateVector.record(fsm.state());
+    stateVector.record(fsm.getState());
 }
 
 /****************************************************************
@@ -712,7 +712,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
     if (!isForUs(frame) && reserve != 0 && reserve < 32768)
     {
         if (endReserve->isScheduled()) {
-            simtime_t oldReserve = endReserve->arrivalTime() - simTime();
+            simtime_t oldReserve = endReserve->getArrivalTime() - simTime();
 
             if (oldReserve > reserve)
                 return;
@@ -755,7 +755,7 @@ void Ieee80211Mac::generateBackoffPeriod()
 void Ieee80211Mac::decreaseBackoffPeriod()
 {
     // see spec 9.2.5.2
-    simtime_t elapsedBackoffTime = simTime() - endBackoff->sendingTime();
+    simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
     backoffPeriod -= ((int)(elapsedBackoffTime / SlotPeriod())) * SlotPeriod();
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period decreased to " << backoffPeriod << endl;
@@ -778,7 +778,7 @@ void Ieee80211Mac::cancelBackoffPeriod()
  */
 void Ieee80211Mac::sendACKFrameOnEndSIFS()
 {
-    Ieee80211Frame *frameToACK = (Ieee80211Frame *)endSIFS->contextPointer();
+    Ieee80211Frame *frameToACK = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
     sendACKFrame(check_and_cast<Ieee80211DataOrMgmtFrame*>(frameToACK));
     delete frameToACK;
@@ -792,7 +792,7 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 
 void Ieee80211Mac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
 {
-    Ieee80211Frame *ctsFrame = (Ieee80211Frame *)endSIFS->contextPointer();
+    Ieee80211Frame *ctsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
     sendDataFrame(frameToSend);
     delete ctsFrame;
@@ -818,7 +818,7 @@ void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 
 void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 {
-    Ieee80211Frame *rtsFrame = (Ieee80211Frame *)endSIFS->contextPointer();
+    Ieee80211Frame *rtsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
     sendCTSFrame(check_and_cast<Ieee80211RTSFrame*>(rtsFrame));
     delete rtsFrame;
@@ -891,7 +891,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtF
 
 Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 {
-    ASSERT(frame->controlInfo()==NULL);
+    ASSERT(frame->getControlInfo()==NULL);
     PhyControlInfo *ctrl = new PhyControlInfo();
     ctrl->setBitrate(basicBitrate);
     frame->setControlInfo(ctrl);
@@ -987,7 +987,7 @@ bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
 
 Ieee80211Frame *Ieee80211Mac::frameReceivedBeforeSIFS()
 {
-    return (Ieee80211Frame *)endSIFS->contextPointer();
+    return (Ieee80211Frame *)endSIFS->getContextPointer();
 }
 
 void Ieee80211Mac::popTransmissionQueue()
@@ -1017,7 +1017,7 @@ double Ieee80211Mac::frameDuration(int bits, double bitrate)
 
 void Ieee80211Mac::logState()
 {
-    EV  << "state information: mode = " << modeName(mode) << ", state = " << fsm.stateName()
+    EV  << "state information: mode = " << modeName(mode) << ", state = " << fsm.getStateName()
         << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod
         << ", retryCounter = " << retryCounter << ", radioState = " << radioState
         << ", nav = " << nav << endl;

@@ -44,7 +44,7 @@ RTPMpegPacket::RTPMpegPacket(const char *name = NULL) : cPacket(name) {
 
 
 RTPMpegPacket::RTPMpegPacket(const RTPMpegPacket& packet) : cPacket(packet) {
-    setName(packet.name());
+    setName(packet.getName());
     _mzb = packet._mzb;
     _two = packet._two;
     _temporalReference = packet._temporalReference;
@@ -76,7 +76,7 @@ cObject *RTPMpegPacket::dup() const {
 };
 
 
-const char *RTPMpegPacket::className() const {
+const char *RTPMpegPacket::getClassName() const {
     return "RTPMpegPacket";
 };
 

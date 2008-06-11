@@ -454,7 +454,7 @@ class INET_API TCPConnection
 
     /* @name Various getters */
     //@{
-    int getFsmState() const {return fsm.state();}
+    int getFsmState() const {return fsm.getState();}
     TCPStateVariables *getState() {return state;}
     TCPSendQueue *getSendQueue() {return sendQueue;}
     TCPReceiveQueue *getReceiveQueue() {return receiveQueue;}

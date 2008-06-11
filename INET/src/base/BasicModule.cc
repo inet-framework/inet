@@ -22,7 +22,7 @@
 #include <iostream>
 #include "BasicModule.h"
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << loggingName << "::BasicModule: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? (std::ostream&)ev : EV << loggingName << "::BasicModule: "
 
 /**
  * Subscription to NotificationBoard should be in stage==0, and firing
@@ -53,8 +53,8 @@ void BasicModule::initialize(int stage)
         if (parent->hasPar("logName"))
             loggingName = parent->par("logName").stringValue();
         else
-            loggingName = parent->name();
-        sprintf(&tmp[0], "[%d]", parent->index());
+            loggingName = parent->getName();
+        sprintf(&tmp[0], "[%d]", parent->getIndex());
         loggingName += tmp;
 
         // get a pointer to the NotificationBoard module
@@ -65,8 +65,8 @@ void BasicModule::initialize(int stage)
 cModule *BasicModule::findHost(void) const
 {
     cModule *mod;
-    for (mod = parentModule(); mod != 0; mod = mod->parentModule())
-        if (mod->submodule("notificationBoard"))
+    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule())
+        if (mod->getSubmodule("notificationBoard"))
             break;
     if (!mod)
         error("findHost(): host module not found (it should have a submodule named notificationBoard)");
@@ -89,13 +89,13 @@ cModule *BasicModule::findHost(void) const
 const char *BasicModule::getLogName(int id)
 {
     BasicModule *mod;
-    mod = (BasicModule *) simulation.module(id);
+    mod = (BasicModule *) simulation.getModule(id);
     if (mod->isSimple())
         return mod->logName();
-    else if (mod->submodule("snrEval"))
-        return ((BasicModule *) mod->submodule("snrEval"))->logName();
-    else if (mod->submodule("phy"))
-        return ((BasicModule *) mod->submodule("phy"))->logName();
+    else if (mod->getSubmodule("snrEval"))
+        return ((BasicModule *) mod->getSubmodule("snrEval"))->logName();
+    else if (mod->getSubmodule("phy"))
+        return ((BasicModule *) mod->getSubmodule("phy"))->logName();
     else
         return NULL;
 };

@@ -72,10 +72,10 @@ void EtherAppSrv::initialize()
 
 void EtherAppSrv::handleMessage(cMessage *msg)
 {
-    EV << "Received packet `" << msg->name() << "'\n";
+    EV << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
-    simtime_t lastEED = simTime() - msg->creationTime();
+    simtime_t lastEED = simTime() - msg->getCreationTime();
     eedVector.record(lastEED);
     eedStats.collect(lastEED);
 
@@ -85,7 +85,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
     char msgname[30];
-    strcpy(msgname,msg->name());
+    strcpy(msgname,msg->getName());
 
     delete msg;
     delete ctrl;
@@ -126,7 +126,7 @@ void EtherAppSrv::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
 
 void EtherAppSrv::registerDSAP(int dsap)
 {
-    EV << fullPath() << " registering DSAP " << dsap << "\n";
+    EV << getFullPath() << " registering DSAP " << dsap << "\n";
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
@@ -140,10 +140,10 @@ void EtherAppSrv::finish()
 {
     recordScalar("packets sent", packetsSent);
     recordScalar("packets rcvd", packetsReceived);
-    recordScalar("end-to-end delay mean", eedStats.mean());
-    recordScalar("end-to-end delay stddev", eedStats.stddev());
-    recordScalar("end-to-end delay min", eedStats.min());
-    recordScalar("end-to-end delay max", eedStats.max());
+    recordScalar("end-to-end delay mean", eedStats.getMean());
+    recordScalar("end-to-end delay stddev", eedStats.getStddev());
+    recordScalar("end-to-end delay min", eedStats.getMin());
+    recordScalar("end-to-end delay max", eedStats.getMax());
 }
 
 

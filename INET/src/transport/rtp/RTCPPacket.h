@@ -83,7 +83,7 @@ class INET_API RTCPPacket : public cPacket
         /**
          * Return the class name "RTCPPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Duplicates the RTCPPacket by calling the copy constructor.
@@ -116,7 +116,7 @@ class INET_API RTCPPacket : public cPacket
          * on the type of rtcp packet it stands for number of receiver reports
          * or number of sdes chunks contained in this packet.
          */
-        virtual int count();
+        virtual int getCount();
 
         /**
          * Returns the packet type of this rtcp packet.
@@ -197,7 +197,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
         /**
          * Returns the class name "RTCPReceiverReportPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Reports a one line info about the RTCPReceiverReportPacket.
@@ -287,7 +287,7 @@ class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket
         /**
          * Return the class name "RTCPSenderReportPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a one line info about this RTCPSenderReportPacket into the given string.
@@ -358,7 +358,7 @@ class INET_API RTCPSDESPacket : public RTCPPacket
         /**
          * Return the class name "RTCPSDESPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this RTCPSDESPacket into the given string.
@@ -429,7 +429,7 @@ class INET_API RTCPByePacket : public RTCPPacket
         /**
          * Returns the class name "RTCPByePacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Returns the ssrc identifier.
@@ -488,7 +488,7 @@ class INET_API RTCPCompoundPacket : public cPacket
         /**
          * Return the class name "RTCPCompoundPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this RTCPCompoundPacket into the given string.

@@ -72,7 +72,7 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->name());
+        error("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 

@@ -33,7 +33,7 @@
 /* unused for now
 static std::ostream& operator<< (std::ostream& os, cMessage *msg)
 {
-    os << "(" << msg->className() << ")" << msg->fullName();
+    os << "(" << msg->getClassName() << ")" << msg->getFullName();
     return os;
 }
 */
@@ -87,7 +87,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     int outputport = getPortForAddress(frame->getDest());
     if (inputport==outputport)
     {
-        EV << "Output port is same as input port, " << frame->fullName() <<
+        EV << "Output port is same as input port, " << frame->getFullName() <<
               " dest " << frame->getDest() << ", discarding frame\n";
         delete frame;
         return;
@@ -270,12 +270,12 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 
     // create Ethernet frame
     char framename[40];
-    sprintf(framename, "pause-%d-%d", id(), seqNum++);
+    sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
     frame->setPauseTime(pauseUnits);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
-    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
         frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut", portno);

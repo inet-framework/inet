@@ -21,7 +21,7 @@
 #include "BasicDecider.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << logName() << "::BasicDecider: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::BasicDecider: "
 
 Define_Module(BasicDecider);
 
@@ -65,7 +65,7 @@ void BasicDecider::initialize(int stage)
  */
 void BasicDecider::handleMessage(cMessage *msg)
 {
-    if (msg->arrivalGateId() == lowergateIn)
+    if (msg->getArrivalGateId() == lowergateIn)
     {
         numRcvd++;
 
@@ -95,7 +95,7 @@ void BasicDecider::sendUp(AirFrame * frame)
     numSentUp++;
     cMessage *macMsg = frame->decapsulate();
     send(macMsg, uppergateOut);
-    coreEV << "sending up msg " << frame->name() << endl;
+    coreEV << "sending up msg " << frame->getName() << endl;
     delete frame;
 }
 
@@ -127,12 +127,12 @@ void BasicDecider::handleLowerMsg(AirFrame * frame, SnrList& snrList)
 
     if (correct)
     {
-        coreEV << "frame " << frame->name() << " correct\n";
+        coreEV << "frame " << frame->getName() << " correct\n";
         sendUp(frame);
     }
     else
     {
-        coreEV << "frame " << frame->name() << " corrupted -> delete\n";
+        coreEV << "frame " << frame->getName() << " corrupted -> delete\n";
         delete frame;
     }
 }

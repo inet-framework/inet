@@ -42,7 +42,7 @@ SenderReport::SenderReport(const char *name) : cObject(name) {
 
 
 SenderReport::SenderReport(const SenderReport& senderReport) : cObject() {
-    setName(senderReport.name());
+    setName(senderReport.getName());
     operator=(senderReport);
 };
 
@@ -66,7 +66,7 @@ cObject *SenderReport::dup() const {
 };
 
 
-const char *SenderReport::className() const {
+const char *SenderReport::getClassName() const {
     return "SenderReport";
 };
 
@@ -145,7 +145,7 @@ ReceptionReport::ReceptionReport(const char *name) : cObject(name) {
 
 
 ReceptionReport::ReceptionReport(const ReceptionReport& receptionReport) : cObject() {
-    setName(receptionReport.name());
+    setName(receptionReport.getName());
     operator=(receptionReport);
 };
 
@@ -172,7 +172,7 @@ cObject *ReceptionReport::dup() const {
 };
 
 
-const char *ReceptionReport::className() const {
+const char *ReceptionReport::getClassName() const {
     return "ReceptionReport";
 };
 

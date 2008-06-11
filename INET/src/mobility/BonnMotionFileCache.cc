@@ -31,7 +31,7 @@ const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
 
 BonnMotionFileCache *BonnMotionFileCache::inst;
 
-BonnMotionFileCache *BonnMotionFileCache::instance()
+BonnMotionFileCache *BonnMotionFileCache::getInstance()
 {
     if (!inst)
         inst = new BonnMotionFileCache;

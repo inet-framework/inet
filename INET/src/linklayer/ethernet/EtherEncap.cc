@@ -78,7 +78,7 @@ void EtherEncap::handleMessage(cMessage *msg)
     else
     {
         // from higher layer
-        switch(msg->kind())
+        switch(msg->getKind())
         {
             case IEEE802CTRL_DATA:
             case 0: // default message kind (0) is also accepted
@@ -91,7 +91,7 @@ void EtherEncap::handleMessage(cMessage *msg)
               break;
 
             default:
-              error("received message `%s' with unknown message kind %d", msg->name(), msg->kind());
+              error("received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
         }
     }
 
@@ -103,13 +103,13 @@ void EtherEncap::updateDisplayString()
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
-    displayString().setTagArg("t",0,buf);
+    getDisplayString().setTagArg("t",0,buf);
 }
 
 void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
 {
-    if (msg->byteLength() > MAX_ETHERNET_DATA)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->byteLength(), MAX_ETHERNET_DATA);
+    if (msg->getByteLength() > MAX_ETHERNET_DATA)
+        error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->getByteLength(), MAX_ETHERNET_DATA);
 
     totalFromHigherLayer++;
 
@@ -117,10 +117,10 @@ void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
     // with this information and transmits resultant frame to lower layer
 
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
-    EV << "Encapsulating higher layer packet `" << msg->name() <<"' for MAC\n";
+    EV << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
 
     Ieee802Ctrl *etherctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-    EthernetIIFrame *frame = new EthernetIIFrame(msg->name(), ETH_FRAME);
+    EthernetIIFrame *frame = new EthernetIIFrame(msg->getName(), ETH_FRAME);
 
     frame->setSrc(etherctrl->getSrc());  // if blank, will be filled in by MAC
     frame->setDest(etherctrl->getDest());
@@ -129,7 +129,7 @@ void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
     delete etherctrl;
 
     frame->encapsulate(msg);
-    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
         frame->setByteLength(MIN_ETHERNET_FRAME);  // "padding"
 
     send(frame, "lowerLayerOut");
@@ -148,8 +148,8 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     etherctrl->setDest(frame->getDest());
     higherlayermsg->setControlInfo(etherctrl);
 
-    EV << "Decapsulating frame `" << frame->name() <<"', passing up contained "
-          "packet `" << higherlayermsg->name() << "' to higher layer\n";
+    EV << "Decapsulating frame `" << frame->getName() <<"', passing up contained "
+          "packet `" << higherlayermsg->getName() << "' to higher layer\n";
 
     // pass up to higher layers.
     send(higherlayermsg, "upperLayerOut");
@@ -160,7 +160,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
 {
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(msg->removeControlInfo());
     if (!etherctrl)
-        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->name());
+        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int pauseUnits = etherctrl->getPauseUnits();
     delete etherctrl;
 
@@ -168,12 +168,12 @@ void EtherEncap::handleSendPause(cMessage *msg)
 
     // create Ethernet frame
     char framename[30];
-    sprintf(framename, "pause-%d-%d", id(), seqNum++);
+    sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
     frame->setPauseTime(pauseUnits);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
-    if (frame->byteLength() < MIN_ETHERNET_FRAME)
+    if (frame->getByteLength() < MIN_ETHERNET_FRAME)
         frame->setByteLength(MIN_ETHERNET_FRAME);
 
     send(frame, "lowerLayerOut");

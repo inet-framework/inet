@@ -35,22 +35,22 @@ void TCPSinkApp::initialize()
 
 void TCPSinkApp::handleMessage(cMessage *msg)
 {
-    if (msg->kind()==TCP_I_PEER_CLOSED)
+    if (msg->getKind()==TCP_I_PEER_CLOSED)
     {
         // we close too
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }
-    else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        bytesRcvd += msg->byteLength();
+        bytesRcvd += msg->getByteLength();
         delete msg;
 
         if (ev.isGUI())
         {
             char buf[32];
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
-            displayString().setTagArg("t",0,buf);
+            getDisplayString().setTagArg("t",0,buf);
         }
     }
     else

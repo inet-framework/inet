@@ -70,7 +70,7 @@ Define_Module(EtherBus);
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    out.printf("(%s)%s",msg->className(),msg->fullName());
+    out.printf("(%s)%s",msg->getClassName(),msg->getFullName());
     return out;
 }
 
@@ -141,7 +141,7 @@ void EtherBus::initialize()
     }
 
     // Prints out data of parameters for parameter checking...
-    EV << "Parameters of (" << className() << ") " << fullPath() << "\n";
+    EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
     EV << "propagationSpeed: " << propagationSpeed << "\n";
     for (i=0; i<taps; i++)
     {
@@ -167,7 +167,7 @@ void EtherBus::handleMessage (cMessage *msg)
     if (!msg->isSelfMessage())
     {
         // Handle frame sent down from the network entity
-        int tapPoint = msg->arrivalGate()->index();
+        int tapPoint = msg->getArrivalGate()->getIndex();
         EV << "Frame " << msg << " arrived on tap " << tapPoint << endl;
 
         // create upstream and downstream events
@@ -198,15 +198,15 @@ void EtherBus::handleMessage (cMessage *msg)
     else
     {
         // handle upstream and downstream events
-        int direction = msg->kind();
-        BusTap *thistap = (BusTap *) msg->contextPointer();
+        int direction = msg->getKind();
+        BusTap *thistap = (BusTap *) msg->getContextPointer();
         int tapPoint = thistap->id;
 
         EV << "Event " << msg << " on tap " << tapPoint << ", sending out frame\n";
 
         // send out on gate
         bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
-        cMessage *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->encapsulatedMsg()->dup();
+        cMessage *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
         send(msg2, "ethg$o", tapPoint);
 
         // if not end of the bus, schedule for next tap

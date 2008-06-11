@@ -28,7 +28,7 @@ void Ieee80211MgmtAPBase::initialize(int stage)
 
     if (stage==0)
     {
-        hasRelayUnit = gate("uppergateOut")->destinationGate()->isConnected();
+        hasRelayUnit = gate("uppergateOut")->getDestinationGate()->isConnected();
         WATCH(hasRelayUnit);
     }
 }
@@ -52,7 +52,7 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
 EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
 {
     // create a matching ethernet frame
-    EtherFrame *ethframe = new EthernetIIFrame(frame->name()); //TODO option to use EtherFrameWithSNAP instead
+    EtherFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
     //XXX set ethertype
@@ -70,7 +70,7 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
 Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethframe)
 {
     // create new frame
-    Ieee80211DataFrame *frame = new Ieee80211DataFrame(ethframe->name());
+    Ieee80211DataFrame *frame = new Ieee80211DataFrame(ethframe->getName());
     frame->setFromDS(true);
 
     // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)

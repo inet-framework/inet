@@ -100,7 +100,7 @@ void PingApp::sendPing()
     sprintf(name,"ping%ld", sendSeqNo);
 
     PingPayload *msg = new PingPayload(name);
-    msg->setOriginatorId(id());
+    msg->setOriginatorId(getId());
     msg->setSeqNo(sendSeqNo);
     msg->setByteLength(packetSize);
 
@@ -146,34 +146,34 @@ void PingApp::processPingResponse(PingPayload *msg)
     // get src, hopCount etc from packet, and print them
     IPvXAddress src, dest;
     int msgHopCount = -1;
-    if (dynamic_cast<IPControlInfo *>(msg->controlInfo())!=NULL)
+    if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
     {
-        IPControlInfo *ctrl = (IPControlInfo *)msg->controlInfo();
+        IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
         src = ctrl->srcAddr();
         dest = ctrl->destAddr();
         msgHopCount = ctrl->timeToLive();
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->controlInfo())!=NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
     {
-        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->controlInfo();
+        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
         src = ctrl->srcAddr();
         dest = ctrl->destAddr();
         msgHopCount = ctrl->hopLimit();
     }
 
-    simtime_t rtt = simTime() - msg->creationTime();
+    simtime_t rtt = simTime() - msg->getCreationTime();
 
     if (printPing)
     {
-        cout << fullPath() << ": reply of " << std::dec << msg->byteLength()
+        cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
              << " bytes from " << src
              << " icmp_seq=" << msg->seqNo() << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
-             << " (" << msg->name() << ")" << endl;
+             << " (" << msg->getName() << ")" << endl;
     }
 
     // update statistics
-    countPingResponse(msg->byteLength(), msg->seqNo(), rtt);
+    countPingResponse(msg->getByteLength(), msg->seqNo(), rtt);
     delete msg;
 }
 
@@ -213,7 +213,7 @@ void PingApp::finish()
 {
     if (sendSeqNo==0)
     {
-        EV << fullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+        EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         recordScalar("Pings sent", sendSeqNo);
         return;
     }
@@ -231,17 +231,17 @@ void PingApp::finish()
 
     // print it to stdout as well
     cout << "--------------------------------------------------------" << endl;
-    cout << "\t" << fullPath() << endl;
+    cout << "\t" << getFullPath() << endl;
     cout << "--------------------------------------------------------" << endl;
 
     cout << "sent: " << sendSeqNo
          << "   drop rate (%): " << (100 * dropCount / (double)sendSeqNo) << endl;
     cout << "round-trip min/avg/max (ms): "
-         << (delayStat.min()*1000.0) << "/"
-         << (delayStat.mean()*1000.0) << "/"
-         << (delayStat.max()*1000.0) << endl;
-    cout << "stddev (ms): "<< (delayStat.stddev()*1000.0)
-         << "   variance:" << delayStat.variance() << endl;
+         << (delayStat.getMin()*1000.0) << "/"
+         << (delayStat.getMean()*1000.0) << "/"
+         << (delayStat.getMax()*1000.0) << endl;
+    cout << "stddev (ms): "<< (delayStat.getStddev()*1000.0)
+         << "   variance:" << delayStat.getVariance() << endl;
     cout <<"--------------------------------------------------------" << endl;
 }
 

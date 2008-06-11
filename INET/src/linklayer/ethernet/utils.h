@@ -46,7 +46,7 @@ class INET_API MessageTracer
     MessageId *lastId;
     void open();
   public:
-    static inline MessageTracer *instance() {return &trc;}
+    static inline MessageTracer *getInstance() {return &trc;}
     MessageTracer();
     ~MessageTracer();
     void created(MessageId *m);
@@ -68,10 +68,10 @@ class INET_API MessageId
     unsigned int treeId;
     unsigned int parentId;
   public:
-    MessageId() {id=++nextId; treeId=++nextTreeId; parentId=0; MessageTracer::instance()->created(this);}
-    MessageId(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::instance()->cloned(this);}
-    ~MessageId() {MessageTracer::instance()->deleted(this);}
-    MessageId& operator=(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::instance()->assigned(this); return *this;}
+    MessageId() {id=++nextId; treeId=++nextTreeId; parentId=0; MessageTracer::getInstance()->created(this);}
+    MessageId(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::getInstance()->cloned(this);}
+    ~MessageId() {MessageTracer::getInstance()->deleted(this);}
+    MessageId& operator=(const MessageId& m) {id=++nextId; treeId=m.treeId; parentId=m.id; MessageTracer::getInstance()->assigned(this); return *this;}
 };
 
 inline std::ostream& operator<<(std::ostream& out, const MessageId& m)

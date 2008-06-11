@@ -75,7 +75,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     virtual std::string detailedInfo() const;
 
     int interfaceId() const        {return _interfaceId;}
-    const char *name() const       {return _name.c_str();}
+    const char *getName() const       {return _name.c_str();}
     int networkLayerGateIndex() const {return _nwLayerGateIndex;}
     int nodeOutputGateId() const   {return _nodeOutputGateId;}
     int nodeInputGateId() const    {return _nodeInputGateId;}
@@ -86,7 +86,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     bool isMulticast() const       {return _multicast;}
     bool isPointToPoint() const    {return _pointToPoint;}
     bool isLoopback() const        {return _loopback;}
-    double datarate() const        {return _datarate;}
+    double getDatarate() const        {return _datarate;}
     const MACAddress& macAddress() const  {return _macAddr;}
     const InterfaceToken& interfaceToken() const {return _token;}//FIXME: Shouldn't this be interface identifier?
 

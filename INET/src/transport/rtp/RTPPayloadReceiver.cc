@@ -44,7 +44,7 @@ void RTPPayloadReceiver::initialize() {
 
 void RTPPayloadReceiver::handleMessage(cMessage *msg) {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
-    if (rinp->type() == RTPInnerPacket::RTP_INP_DATA_IN) {
+    if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_IN) {
         RTPPacket *packet = (RTPPacket *)(rinp->decapsulate());
         processPacket(packet);
         delete rinp;

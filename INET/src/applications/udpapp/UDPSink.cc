@@ -44,7 +44,7 @@ void UDPSink::handleMessage(cMessage *msg)
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 
 }

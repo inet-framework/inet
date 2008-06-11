@@ -72,7 +72,7 @@ class INET_API IPAddressResolver
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
      * or router ("host[2]"), and empty string (""). For the latter, it returns
      * the null address. If module name is specified, the module will be
-     * looked up using <tt>simulation.moduleByPath()</tt>, and then
+     * looked up using <tt>simulation.getModuleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
     IPvXAddress resolve(const char *str, int addrType=ADDR_PREFER_IPv6);

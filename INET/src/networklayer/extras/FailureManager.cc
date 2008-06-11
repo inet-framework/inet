@@ -32,7 +32,7 @@ void FailureManager::handleMessage(cMessage *msg)
 
 cModule *FailureManager::getTargetNode(const char *target)
 {
-    cModule *mod = simulation.moduleByPath(target);
+    cModule *mod = simulation.getModuleByPath(target);
     ASSERT(mod);
     return mod;
 }
@@ -43,24 +43,24 @@ void FailureManager::processCommand(const cXMLElement& node)
 
     if (!strcmp(node.getTagName(), "shutdown"))
     {
-        target->displayString().setTagArg("i2",0,"status/cross");
-        if(!strcmp(target->moduleType()->name(), "RSVP_LSR"))
+        target->getDisplayString().setTagArg("i2",0,"status/cross");
+        if(!strcmp(target->getModuleType()->getName(), "RSVP_LSR"))
             replaceNode(target, "RSVP_FAILED");
-        else if(!strcmp(target->moduleType()->name(), "LDP_LSR"))
+        else if(!strcmp(target->getModuleType()->getName(), "LDP_LSR"))
             replaceNode(target, "LDP_FAILED");
-        else if(!strcmp(target->moduleType()->name(), "QuaggaRouter"))
+        else if(!strcmp(target->getModuleType()->getName(), "QuaggaRouter"))
             replaceNode(target, "FailedRouter");
         else
             ASSERT(false);
     }
     else if(!strcmp(node.getTagName(), "startup"))
     {
-        target->displayString().removeTag("i2");
-        if(!strcmp(target->moduleType()->name(), "RSVP_FAILED"))
+        target->getDisplayString().removeTag("i2");
+        if(!strcmp(target->getModuleType()->getName(), "RSVP_FAILED"))
             replaceNode(target, "RSVP_LSR");
-        else if(!strcmp(target->moduleType()->name(), "LDP_FAILED"))
+        else if(!strcmp(target->getModuleType()->getName(), "LDP_FAILED"))
             replaceNode(target, "LDP_LSR");
-        else if(!strcmp(target->moduleType()->name(), "FailedRouter"))
+        else if(!strcmp(target->getModuleType()->getName(), "FailedRouter"))
             replaceNode(target, "QuaggaRouter");
         else
             ASSERT(false);
@@ -76,9 +76,9 @@ void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 
     cModuleType *nodeType = cModuleType::find(newNodeType);
     if (!nodeType)
-        error("Cannot replace module `%s' with a module of type `%s': No such module type", mod->fullPath().c_str(), newNodeType);
+        error("Cannot replace module `%s' with a module of type `%s': No such module type", mod->getFullPath().c_str(), newNodeType);
 
-    cModule *nodeMod = nodeType->create(mod->name(), simulation.systemModule());
+    cModule *nodeMod = nodeType->create(mod->getName(), simulation.getSystemModule());
     ASSERT(nodeMod);
 
     reconnectNode(mod, nodeMod);
@@ -91,10 +91,10 @@ void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 
 void FailureManager::reconnectNode(cModule *old, cModule *n)
 {
-    for(int i = 0; i < old->params(); i++)
+    for(int i = 0; i < old->getNumParams(); i++)
         n->par(i) = old->par(i);
 
-    n->setDisplayString(old->displayString().str());
+    n->setDisplayString(old->getDisplayString().str());
 
     // FIXME should examine which gates the "old" module has, and reconnect all of them
     // automatically (ie eliminate hardcoded gate names from here)
@@ -116,8 +116,8 @@ void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const 
         cGate *out = old->gate(outs, i);
         if(out->isConnected())
         {
-            cGate *to = out->toGate();
-            cChannel *ch = check_and_cast<cChannel*>(out->channel()->dup());
+            cGate *to = out->getToGate();
+            cChannel *ch = check_and_cast<cChannel*>(out->getChannel()->dup());
             out->disconnect();
             n->gate(outs, i)->connectTo(to, ch);
         }
@@ -128,8 +128,8 @@ void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const 
         cGate *in = old->gate(ins, i);
         if (in->isConnected())
         {
-            cGate *from = in->fromGate();
-            cChannel *ch = check_and_cast<cChannel*>(from->channel()->dup());
+            cGate *from = in->getFromGate();
+            cChannel *ch = check_and_cast<cChannel*>(from->getChannel()->dup());
             from->disconnect();
             from->connectTo(n->gate(ins, i), ch);
         }

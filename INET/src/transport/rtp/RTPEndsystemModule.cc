@@ -51,19 +51,19 @@ void RTPEndsystemModule::initialize() {
 
 void RTPEndsystemModule::handleMessage(cMessage *msg) {
 
-    if (msg->arrivalGateId() == findGate("fromApp")) {
+    if (msg->getArrivalGateId() == findGate("fromApp")) {
         handleMessageFromApp(msg);
     }
 
-    else if (msg->arrivalGateId() == findGate("fromProfile")) {
+    else if (msg->getArrivalGateId() == findGate("fromProfile")) {
         handleMessageFromProfile(msg);
     }
 
-    else if (msg->arrivalGateId() == findGate("fromRTCP")) {
+    else if (msg->getArrivalGateId() == findGate("fromRTCP")) {
         handleMessageFromRTCP(msg);
     }
 
-    else if (msg->arrivalGateId() == findGate("fromSocketLayer")) {
+    else if (msg->getArrivalGateId() == findGate("fromSocketLayer")) {
         handleMessageFromSocketLayer(msg);
     }
 
@@ -79,19 +79,19 @@ void RTPEndsystemModule::handleMessage(cMessage *msg) {
 
 void RTPEndsystemModule::handleMessageFromApp(cMessage *msg) {
     RTPInterfacePacket *rifp = (RTPInterfacePacket *)msg;
-    if (rifp->type() == RTPInterfacePacket::RTP_IFP_ENTER_SESSION) {
+    if (rifp->getType() == RTPInterfacePacket::RTP_IFP_ENTER_SESSION) {
         enterSession(rifp);
     }
-    else if (rifp->type() == RTPInterfacePacket::RTP_IFP_CREATE_SENDER_MODULE) {
+    else if (rifp->getType() == RTPInterfacePacket::RTP_IFP_CREATE_SENDER_MODULE) {
         createSenderModule(rifp);
     }
-    else if (rifp->type() == RTPInterfacePacket::RTP_IFP_DELETE_SENDER_MODULE) {
+    else if (rifp->getType() == RTPInterfacePacket::RTP_IFP_DELETE_SENDER_MODULE) {
         deleteSenderModule(rifp);
     }
-    else if (rifp->type() == RTPInterfacePacket::RTP_IFP_SENDER_CONTROL) {
+    else if (rifp->getType() == RTPInterfacePacket::RTP_IFP_SENDER_CONTROL) {
         senderModuleControl(rifp);
     }
-    else if (rifp->type() == RTPInterfacePacket::RTP_IFP_LEAVE_SESSION) {
+    else if (rifp->getType() == RTPInterfacePacket::RTP_IFP_LEAVE_SESSION) {
         leaveSession(rifp);
     }
     else {
@@ -102,22 +102,22 @@ void RTPEndsystemModule::handleMessageFromApp(cMessage *msg) {
 
 void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg) {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
-    if (rinp->type() == RTPInnerPacket::RTP_INP_PROFILE_INITIALIZED) {
+    if (rinp->getType() == RTPInnerPacket::RTP_INP_PROFILE_INITIALIZED) {
         profileInitialized(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CREATED) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CREATED) {
         senderModuleCreated(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_DELETED) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_DELETED) {
         senderModuleDeleted(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_INITIALIZED) {
         senderModuleInitialized(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_STATUS) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_STATUS) {
         senderModuleStatus(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_DATA_OUT) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
         dataOut(rinp);
     }
     else {
@@ -128,14 +128,14 @@ void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg) {
 
 void RTPEndsystemModule::handleMessageFromRTCP(cMessage *msg) {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
-    if (rinp->type() == RTPInnerPacket::RTP_INP_RTCP_INITIALIZED) {
+    if (rinp->getType() == RTPInnerPacket::RTP_INP_RTCP_INITIALIZED) {
         rtcpInitialized(rinp);
     }
-    else if (rinp->type() == RTPInnerPacket::RTP_INP_SESSION_LEFT) {
+    else if (rinp->getType() == RTPInnerPacket::RTP_INP_SESSION_LEFT) {
         sessionLeft(rinp);
     }
     else {
-        EV << "RTPEndsystemModule: Unknown RTPInnerPacket type " << rinp->type() << " from rtcp !" << endl;
+        EV << "RTPEndsystemModule: Unknown RTPInnerPacket type " << rinp->getType() << " from rtcp !" << endl;
     }
 };
 
@@ -181,7 +181,7 @@ void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp) {
 
 
 void RTPEndsystemModule::leaveSession(RTPInterfacePacket *rifp) {
-    cModule *profileModule = gate("toProfile")->toGate()->ownerModule();
+    cModule *profileModule = gate("toProfile")->getToGate()->getOwnerModule();
     profileModule->deleteModule();
     RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
     rinp->leaveSession();
@@ -193,7 +193,7 @@ void RTPEndsystemModule::leaveSession(RTPInterfacePacket *rifp) {
 
 void RTPEndsystemModule::createSenderModule(RTPInterfacePacket *rifp) {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
-    rinp->createSenderModule(rifp->ssrc(), rifp->payloadType(), rifp->fileName());
+    rinp->createSenderModule(rifp->ssrc(), rifp->payloadType(), rifp->getFileName());
     send(rinp, "toProfile");
 
     delete rifp;

@@ -26,7 +26,7 @@ cplusplus {{
 typedef cMessage *cMessagePtr;
 
 inline std::ostream& operator<<(std::ostream& os, cMessagePtr msg) {
-    return os << "(" << msg->className() << ") " << msg->name() << ": " << msg->info();
+    return os << "(" << msg->getClassName() << ") " << msg->getName() << ": " << msg->info();
 }
 
 }}
@@ -52,7 +52,7 @@ struct TCPPayloadMessage
 // - Options: none supported currently (MSS comes from config)
 // - Padding
 //
-// cMessage::kind() may be set to an arbitrary value: TCP entities will
+// cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
 message TCPSegment extends cMessage

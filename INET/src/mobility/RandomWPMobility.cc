@@ -29,7 +29,7 @@ void RandomWPMobility::initialize(int stage)
 
     if (stage == 0)
     {
-        stationary = (par("speed").type()=='L' || par("speed").type()=='D') && (double)par("speed") == 0;
+        stationary = (par("speed").getType()=='L' || par("speed").getType()=='D') && (double)par("speed") == 0;
         nextMoveIsWait = false;
     }
 }

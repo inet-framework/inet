@@ -50,9 +50,9 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
     msgsSent++;
-    bytesSent += msg->byteLength();
+    bytesSent += msg->getByteLength();
 
-    EV << "sending \"" << msg->name() << "\" to TCP, " << msg->byteLength() << " bytes\n";
+    EV << "sending \"" << msg->getName() << "\" to TCP, " << msg->getByteLength() << " bytes\n";
     send(msg, "tcpOut");
 }
 
@@ -62,7 +62,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         sendBack(msg);
     }
-    else if (msg->kind()==TCP_I_PEER_CLOSED)
+    else if (msg->getKind()==TCP_I_PEER_CLOSED)
     {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
@@ -70,10 +70,10 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         msg->setKind(TCP_C_CLOSE);
         sendOrSchedule(msg,delay+maxMsgDelay);
     }
-    else if (msg->kind()==TCP_I_DATA || msg->kind()==TCP_I_URGENT_DATA)
+    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
         msgsRcvd++;
-        bytesRcvd += msg->byteLength();
+        bytesRcvd += msg->getByteLength();
 
         GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
         if (!appmsg)
@@ -81,7 +81,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                   "probably wrong client app, or wrong setting of TCP's "
                   "sendQueueClass/receiveQueueClass parameters "
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
-                  msg->className(), msg->name());
+                  msg->getClassName(), msg->getName());
 
         long requestedBytes = appmsg->expectedReplyLength();
 
@@ -90,7 +90,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             maxMsgDelay = msgDelay;
 
         bool doClose = appmsg->close();
-        int connId = check_and_cast<TCPCommand *>(msg->controlInfo())->connId();
+        int connId = check_and_cast<TCPCommand *>(msg->getControlInfo())->connId();
 
         if (requestedBytes==0)
         {
@@ -129,14 +129,14 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         char buf[64];
         sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 }
 
 void TCPGenericSrvApp::finish()
 {
-    EV << fullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
-    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
+    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 
     recordScalar("packets sent", msgsSent);
     recordScalar("packets rcvd", msgsRcvd);

@@ -27,7 +27,7 @@
 #include "NotifierConsts.h"
 
 #ifndef EV
-#define EV (ev.disabled()||!debug) ? (std::ostream&)ev : ev << logName() << "::" << className() << ": "
+#define EV (ev.isDisabled()||!debug) ? (std::ostream&)ev : ev << logName() << "::" << getClassName() << ": "
 #endif
 
 

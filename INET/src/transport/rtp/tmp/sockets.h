@@ -147,14 +147,14 @@ public:
   Socket(Socket::Domain domain, Socket::Type type, Socket::Protocol proto);
   //Socket(const char* name, cOjbect* ownerobj);
   virtual ~Socket();
-  virtual const char* className() const {return "Socket";}
+  virtual const char* getClassName() const {return "Socket";}
   virtual cObject* dup() const {return new Socket(*this);}
   virtual void info(char* buf);
   virtual void writeContents(std::ostream& os);
   Socket& operator=(const Socket& socket);
 
   // new member functions
-  Type type() const {return _type;}
+  Type getType() const {return _type;}
   Protocol protocol() const {return _proto;}
   PCB* pcb() const {return _pcb;}
 

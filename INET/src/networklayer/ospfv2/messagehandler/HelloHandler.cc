@@ -39,7 +39,7 @@ void OSPF::HelloHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* int
                ExternalRoutingCapability.
              */
             if (intf->GetArea ()->GetExternalRoutingCapability () == helloPacket->getOptions ().E_ExternalRoutingCapability) {
-                IPControlInfo*      controlInfo             = check_and_cast<IPControlInfo *> (helloPacket->controlInfo ());
+                IPControlInfo*      controlInfo             = check_and_cast<IPControlInfo *> (helloPacket->getControlInfo());
                 OSPF::IPv4Address   srcAddress              = IPv4AddressFromULong (controlInfo->srcAddr ().getInt ());
                 bool                neighborChanged         = false;
                 bool                neighborsDRStateChanged = false;

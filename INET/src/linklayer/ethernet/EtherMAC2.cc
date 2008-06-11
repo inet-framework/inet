@@ -54,11 +54,11 @@ void EtherMAC2::initializeTxrate()
         while (g)
         {
             // does this gate have data rate?
-            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->channel());
+            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->getChannel());
             if (chan && (txrate=chan->par("datarate").doubleValue())>0)
                 break;
             // otherwise just check next connection in path
-            g = g->toGate();
+            g = g->getToGate();
         }
 
         if (!g)
@@ -87,9 +87,9 @@ void EtherMAC2::handleMessage(cMessage *msg)
     }
     else
     {
-        if (msg->arrivalGate() == gate("upperLayerIn"))
+        if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
-        else if (msg->arrivalGate() == gate("phys$i"))
+        else if (msg->getArrivalGate() == gate("phys$i"))
             processMsgFromNetwork(check_and_cast<EtherFrame *>(msg));
         else
             error("Message received from unknown gate!");
@@ -120,7 +120,7 @@ void EtherMAC2::startFrameTransmission()
     // update burst variables
     if (frameBursting)
     {
-        bytesSentInBurst = frame->byteLength();
+        bytesSentInBurst = frame->getByteLength();
         framesSentInBurst++;
     }
 }

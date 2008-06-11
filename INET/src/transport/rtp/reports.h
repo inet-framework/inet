@@ -66,7 +66,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the class name "SenderReport".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this SenderReport into the given string.
@@ -178,7 +178,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the class name "ReceptionReport".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this ReceptionReport into the given string.

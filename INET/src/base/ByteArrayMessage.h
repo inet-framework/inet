@@ -24,7 +24,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
 {
   public:
     ByteArrayMessage(const char *name=NULL, int kind=0) : ByteArrayMessage_Base(name,kind) {}
-    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other.name()) {operator=(other);}
+    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other.getName()) {operator=(other);}
     ByteArrayMessage& operator=(const ByteArrayMessage& other) {ByteArrayMessage_Base::operator=(other); return *this;}
     virtual ByteArrayMessage *dup() const {return new ByteArrayMessage(*this);}
 

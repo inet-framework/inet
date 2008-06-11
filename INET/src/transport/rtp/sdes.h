@@ -84,7 +84,7 @@ class INET_API SDESItem : public cObject
         /**
          * Returns the class name "SDESItem".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this SDESItem into the given string.
@@ -99,7 +99,7 @@ class INET_API SDESItem : public cObject
         /**
          * Returns the type of this sdes item.
          */
-        virtual SDES_ITEM_TYPE type();
+        virtual SDES_ITEM_TYPE getType();
 
         /**
          * Returns the stored sdes string.
@@ -167,7 +167,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the class name "SDESChunk".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this SDESChunk into the given string.

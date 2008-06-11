@@ -48,12 +48,12 @@ void RTPAVProfilePayload32Sender::activity() {
 
     cMessage *msg = receive();
 
-    if (strcmp(msg->className(), "RTPInnerPacket"))
+    if (strcmp(msg->getClassName(), "RTPInnerPacket"))
         error("RTPAVProfilePayload32Sender: received message is not an RTPInnerPacket !");
 
     RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
 
-    if (rinpIn->type() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
+    if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
         initializeSenderModule(rinpIn);
     }
     else {
@@ -77,9 +77,9 @@ void RTPAVProfilePayload32Sender::activity() {
 
         }
 
-        if (msgIn->arrivalGateId() == findGate("fromProfile")) {
+        if (msgIn->getArrivalGateId() == findGate("fromProfile")) {
             RTPInnerPacket *rinp = (RTPInnerPacket *)msgIn;
-            if (rinp->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
+            if (rinp->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
 
 
                 RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinp->decapsulate());

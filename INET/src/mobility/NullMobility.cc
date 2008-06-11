@@ -20,7 +20,7 @@
 #include "NullMobility.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? (std::ostream&)ev : EV << logName() << "::BasicMobility: "
 
 Define_Module(NullMobility);
 

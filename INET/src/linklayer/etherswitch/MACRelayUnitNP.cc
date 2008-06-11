@@ -35,7 +35,7 @@ Define_Module( MACRelayUnitNP );
 /* unused for now
 static std::ostream& operator<< (std::ostream& os, cMessage *msg)
 {
-    os << "(" << msg->className() << ")" << msg->fullName();
+    os << "(" << msg->getClassName() << ")" << msg->getFullName();
     return os;
 }
 */
@@ -89,7 +89,7 @@ void MACRelayUnitNP::initialize()
         endProcEvents[i] = new cMessage(msgname,i);
     }
 
-    EV << "Parameters of (" << className() << ") " << fullPath() << "\n";
+    EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
     EV << "number of processors: " << numCPUs << "\n";
     EV << "processing time: " << processingTime << "\n";
     EV << "ports: " << numPorts << "\n";
@@ -119,7 +119,7 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
 {
     // If buffer not full, insert payload frame into buffer and process the frame in parallel.
 
-    long length = frame->byteLength();
+    long length = frame->getByteLength();
     if (length + bufferUsed < bufferSize)
     {
         bufferUsed += length;
@@ -165,10 +165,10 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
 
 void MACRelayUnitNP::processFrame(cMessage *msg)
 {
-    int cpu = msg->kind();
+    int cpu = msg->getKind();
     EtherFrame *frame = (EtherFrame *) msg->decapsulate();
-    long length = frame->byteLength();
-    int inputport = frame->arrivalGate()->index();
+    long length = frame->getByteLength();
+    int inputport = frame->getArrivalGate()->getIndex();
 
     EV << "CPU-" << cpu << " completed processing of frame " << frame << endl;
 

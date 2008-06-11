@@ -33,7 +33,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     ASSERT(!msg->isSelfMessage()); // no timers in ICMPv6
 
     // process arriving ICMP message
-    if (msg->arrivalGate()->isName("ipv6In"))
+    if (msg->getArrivalGate()->isName("ipv6In"))
     {
         EV << "Processing ICMPv6 message.\n";
         processICMPv6Message(check_and_cast<ICMPv6Message *>(msg));
@@ -41,7 +41,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     }
 
     // request from application
-    if (msg->arrivalGate()->isName("pingIn"))
+    if (msg->getArrivalGate()->isName("pingIn"))
     {
         sendEchoRequest(msg);
         return;
@@ -89,13 +89,13 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 {
     //Create an ICMPv6 Reply Message
     ICMPv6EchoReplyMsg *reply = new ICMPv6EchoReplyMsg("Echo Reply");
-    reply->setName((std::string(request->name())+"-reply").c_str());
+    reply->setName((std::string(request->getName())+"-reply").c_str());
     reply->setType(ICMPv6_ECHO_REPLY);
     reply->encapsulate(request->decapsulate());
 
     // TBD check what to do if dest was multicast etc?
     IPv6ControlInfo *ctrl
-        = check_and_cast<IPv6ControlInfo *>(request->controlInfo());
+        = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
     //set Msg's source addr as the dest addr of request msg.
@@ -121,7 +121,7 @@ void ICMPv6::sendEchoRequest(cMessage *msg)
 {
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo*>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_IPv6_ICMP);
-    ICMPv6EchoRequestMsg *request = new ICMPv6EchoRequestMsg(msg->name());
+    ICMPv6EchoRequestMsg *request = new ICMPv6EchoRequestMsg(msg->getName());
     request->setType(ICMPv6_ECHO_REQUEST);
     request->encapsulate(msg);
     request->setControlInfo(ctrl);
@@ -150,7 +150,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     errorMsg->encapsulate(origDatagram);
 
     // debugging information
-    EV << "sending ICMP error: (" << errorMsg->className() << ")" << errorMsg->name()
+    EV << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
        << " type=" << type << " code=" << code << endl;
 
     // ICMP message length: the internet header plus the first 8 bytes of
@@ -249,7 +249,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
     // do not reply with error message to error message
     if (origDatagram->transportProtocol() == IP_PROT_IPv6_ICMP)
     {
-        ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->encapsulatedMsg());
+        ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->getEncapsulatedMsg());
         if (recICMPMsg->type()<128)
         {
             EV << "ICMP error received -- do not reply to it" << endl;

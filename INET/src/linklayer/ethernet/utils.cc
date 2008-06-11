@@ -63,7 +63,7 @@ void MessageTracer::created(MessageId *m)
 {
     if (!f) open();
     if (lastId) fprintf(f,"C I:%d T:%d P:%d E:%ld %s\n", lastId->id, lastId->treeId, lastId->parentId,
-                        simulation.eventNumber(), simulation.contextModule()->fullPath().c_str());
+                        simulation.getEventNumber(), simulation.getContextModule()->getFullPath().c_str());
     lastId = m;
 }
 
@@ -71,21 +71,21 @@ void MessageTracer::cloned(MessageId *m)
 {
     if (!f) open();
     fprintf(f,"L I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
-            simulation.eventNumber(), simulation.contextModule()->fullPath().c_str());
+            simulation.getEventNumber(), simulation.getContextModule()->getFullPath().c_str());
 }
 
 void MessageTracer::assigned(MessageId *m)
 {
     if (!f) open();
     fprintf(f,"A I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
-            simulation.eventNumber(), simulation.contextModule()->fullPath().c_str());
+            simulation.getEventNumber(), simulation.getContextModule()->getFullPath().c_str());
     if (m==lastId) lastId = NULL;
 }
 
 void MessageTracer::deleted(MessageId *m)
 {
     fprintf(f,"D I:%d T:%d P:%d E:%ld %s\n", m->id, m->treeId, m->parentId,
-            simulation.eventNumber(), simulation.contextModule()->fullPath().c_str());
+            simulation.getEventNumber(), simulation.getContextModule()->getFullPath().c_str());
 }
 
 

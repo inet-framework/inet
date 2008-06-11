@@ -29,7 +29,7 @@ cplusplus {{
 message PingPayload
 {
     @omitGetVerb(true);
-    long originatorId; // sender module id()
+    long originatorId; // sender module getId()
     long seqNo; // sequence number
     unsigned char data[];
 }

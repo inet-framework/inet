@@ -34,14 +34,14 @@ void TCPSrvHostApp::updateDisplay()
 
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
-    displayString().setTagArg("t", 0, buf);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void TCPSrvHostApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        TCPServerThreadBase *thread = (TCPServerThreadBase *)msg->contextPointer();
+        TCPServerThreadBase *thread = (TCPServerThreadBase *)msg->getContextPointer();
         thread->timerExpired(msg);
     }
     else

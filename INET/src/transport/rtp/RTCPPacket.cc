@@ -52,7 +52,7 @@ RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
 
 
 RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cPacket() {
-    setName(rtcpPacket.name());
+    setName(rtcpPacket.getName());
     operator=(rtcpPacket);
 };
 
@@ -63,7 +63,7 @@ RTCPPacket::~RTCPPacket() {
 
 RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
     cPacket::operator=(rtcpPacket);
-    setName(rtcpPacket.name());
+    setName(rtcpPacket.getName());
     _version = rtcpPacket._version;
     _padding = rtcpPacket._padding;
     _count = rtcpPacket._count;
@@ -72,7 +72,7 @@ RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
 };
 
 
-const char *RTCPPacket::className() const {
+const char *RTCPPacket::getClassName() const {
     return "RTCPPacket";
 };
 
@@ -109,7 +109,7 @@ int RTCPPacket::padding() {
 };
 
 
-int RTCPPacket::count() {
+int RTCPPacket::getCount() {
     return _count;
 };
 
@@ -145,7 +145,7 @@ RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name) : RTCPPacke
 
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const RTCPReceiverReportPacket& rtcpReceiverReportPacket) : RTCPPacket() {
-    setName(rtcpReceiverReportPacket.name());
+    setName(rtcpReceiverReportPacket.getName());
     operator=(rtcpReceiverReportPacket);
 };
 
@@ -168,7 +168,7 @@ cObject *RTCPReceiverReportPacket::dup() const {
 };
 
 
-const char *RTCPReceiverReportPacket::className() const {
+const char *RTCPReceiverReportPacket::getClassName() const {
     return "RTCPReceiverReportPacket";
 };
 
@@ -231,7 +231,7 @@ RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name) : RTCPReceiverR
 
 
 RTCPSenderReportPacket::RTCPSenderReportPacket(const RTCPSenderReportPacket& rtcpSenderReportPacket) : RTCPReceiverReportPacket() {
-    setName(rtcpSenderReportPacket.name());
+    setName(rtcpSenderReportPacket.getName());
     operator=(rtcpSenderReportPacket);
 };
 
@@ -253,7 +253,7 @@ cObject *RTCPSenderReportPacket::dup() const {
 };
 
 
-const char *RTCPSenderReportPacket::className() const {
+const char *RTCPSenderReportPacket::getClassName() const {
     return "RTCPSenderReportPacket";
 };
 
@@ -305,7 +305,7 @@ RTCPSDESPacket::RTCPSDESPacket(const char *name) : RTCPPacket(name) {
 
 
 RTCPSDESPacket::RTCPSDESPacket(const RTCPSDESPacket& rtcpSDESPacket) : RTCPPacket() {
-    setName(rtcpSDESPacket.name());
+    setName(rtcpSDESPacket.getName());
     operator=(rtcpSDESPacket);
 };
 
@@ -327,7 +327,7 @@ cObject *RTCPSDESPacket::dup() const {
 };
 
 
-const char *RTCPSDESPacket::className() const {
+const char *RTCPSDESPacket::getClassName() const {
     return "RTCPSDESPacket";
 };
 
@@ -379,7 +379,7 @@ RTCPByePacket::RTCPByePacket(const char *name) : RTCPPacket(name) {
 
 
 RTCPByePacket::RTCPByePacket(const RTCPByePacket& rtcpByePacket) : RTCPPacket() {
-    setName(rtcpByePacket.name());
+    setName(rtcpByePacket.getName());
     operator=(rtcpByePacket);
 };
 
@@ -401,7 +401,7 @@ cObject *RTCPByePacket::dup() const {
 };
 
 
-const char *RTCPByePacket::className() const {
+const char *RTCPByePacket::getClassName() const {
     return "RTCPByePacket";
 };
 
@@ -431,7 +431,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cPacket(name) {
 
 
 RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cPacket() {
-    setName(rtcpCompoundPacket.name());
+    setName(rtcpCompoundPacket.getName());
     operator=(rtcpCompoundPacket);
 };
 
@@ -454,7 +454,7 @@ cObject *RTCPCompoundPacket::dup() const {
 };
 
 
-const char *RTCPCompoundPacket::className() const {
+const char *RTCPCompoundPacket::getClassName() const {
     return "RTCPCompoundPacket";
 };
 

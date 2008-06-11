@@ -47,7 +47,7 @@ Define_Module(EtherHub);
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    out.printf("(%s)%s",msg->className(),msg->fullName());
+    out.printf("(%s)%s",msg->getClassName(),msg->getFullName());
     return out;
 }
 
@@ -71,7 +71,7 @@ void EtherHub::initialize()
 void EtherHub::handleMessage(cMessage *msg)
 {
     // Handle frame sent down from the network entity: send out on every other port
-    int arrivalPort = msg->arrivalGate()->index();
+    int arrivalPort = msg->getArrivalGate()->getIndex();
     EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;

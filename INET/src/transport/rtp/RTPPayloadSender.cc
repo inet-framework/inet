@@ -49,12 +49,12 @@ void RTPPayloadSender::activity() {
     const char *command;
     while (true) {
         cMessage *msg = receive();
-        if (msg->arrivalGateId() == findGate("fromProfile")) {
+        if (msg->getArrivalGateId() == findGate("fromProfile")) {
             RTPInnerPacket *rinpIn = (RTPInnerPacket *)msg;
-            if (rinpIn->type() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
+            if (rinpIn->getType() == RTPInnerPacket::RTP_INP_INITIALIZE_SENDER_MODULE) {
                 initializeSenderModule(rinpIn);
             }
-            else if (rinpIn->type() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
+            else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
                 RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
                 delete rinpIn;
                 command = rscm->command();
@@ -98,7 +98,7 @@ void RTPPayloadSender::activity() {
 void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn) {
     _mtu = rinpIn->mtu();
     _ssrc = rinpIn->ssrc();
-    const char *fileName = rinpIn->fileName();
+    const char *fileName = rinpIn->getFileName();
     openSourceFile(fileName);
     delete rinpIn;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleInitialized()");

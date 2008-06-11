@@ -77,7 +77,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the class name "RTPParticipantInfo".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * This method should be extended by a subclass for

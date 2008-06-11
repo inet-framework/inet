@@ -33,11 +33,11 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
                   "probably wrong client app, or wrong setting of TCP's "
                   "sendQueueClass/receiveQueueClass parameters "
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
-                  msg->className(), msg->name());
+                  msg->getClassName(), msg->getName());
     if (appmsg->replyDelay()>0)
         opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"
                   " of GenericAppMsg, try to use TCPGenericSrvApp instead",
-                  msg->className(), msg->name(), className());
+                  msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close
     // connection if that was requested too

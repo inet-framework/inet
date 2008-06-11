@@ -21,7 +21,7 @@
 #include "ChannelAccess.h"
 
 
-#define coreEV (ev.disabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
 
 /**
  * Upon initialization ChannelAccess registers the nic parent module
@@ -71,7 +71,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
         cGate *radioGate = mod->gate("radioIn");
 
         if (radioGate == NULL)
-            error("module %s must have a gate called radioIn", mod->fullPath().c_str());
+            error("module %s must have a gate called radioIn", mod->getFullPath().c_str());
 
         for (int i = 0; i < radioGate->size(); i++)
         {
@@ -85,7 +85,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
                 coreEV << "sending message to host listening on the same channel\n";
                 // account for propagation delay, based on distance in meters
                 // Over 300m, dt=1us=10 bit times @ 10Mbps
-                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, mod, radioGate->id() + i);
+                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, mod, radioGate->getId() + i);
             }
             else
                 coreEV << "skipping host listening on a different channel\n";

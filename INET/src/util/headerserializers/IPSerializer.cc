@@ -68,7 +68,7 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
 
     packetLength = IP_HEADER_BYTES;
 
-    cMessage *encapPacket = dgram->encapsulatedMsg();
+    cMessage *encapPacket = dgram->getEncapsulatedMsg();
     switch (dgram->transportProtocol())
     {
       case IP_PROT_ICMP:
@@ -133,6 +133,6 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
 
     ASSERT(encapPacket);
     dest->encapsulate(encapPacket);
-    dest->setName(encapPacket->name());
+    dest->setName(encapPacket->getName());
 }
 

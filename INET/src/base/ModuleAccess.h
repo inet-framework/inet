@@ -57,7 +57,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleSomewhereUp(name, simulation.contextModule());
+            cModule *m = findModuleSomewhereUp(name, simulation.getContextModule());
             if (!m) opp_error("Module (%s)%s not found",opp_typename(typeid(T)),name);
             p = check_and_cast<T*>(m);
         }
@@ -68,7 +68,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleSomewhereUp(name, simulation.contextModule());
+            cModule *m = findModuleSomewhereUp(name, simulation.getContextModule());
             p = dynamic_cast<T*>(m);
         }
         return p;

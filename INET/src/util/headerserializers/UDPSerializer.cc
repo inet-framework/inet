@@ -40,7 +40,7 @@ int UDPSerializer::serialize(UDPPacket *pkt, unsigned char *buf, unsigned int bu
     struct udphdr *udphdr = (struct udphdr *) (buf);
     int packetLength;
 
-	packetLength = pkt->byteLength();
+	packetLength = pkt->getByteLength();
 	udphdr->uh_sport = htons(pkt->sourcePort());
 	udphdr->uh_dport = htons(pkt->destinationPort());
 	udphdr->uh_ulen  = htons(packetLength);
@@ -59,7 +59,7 @@ void UDPSerializer::parse(unsigned char *buf, unsigned int bufsize, UDPPacket *d
 	cMessage *encapPacket = new cMessage("Payload-from-wire");
 	encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
-    dest->setName(encapPacket->name());
+    dest->setName(encapPacket->getName());
 }
 
 unsigned short UDPSerializer::checksum(unsigned char *addr, unsigned int count)

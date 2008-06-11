@@ -76,10 +76,10 @@ void LinkStateRouting::handleMessage(cMessage * msg)
         announceMsg = NULL;
         sendToPeers(tedmod->ted, true, IPAddress());
     }
-    else if (!strcmp(msg->arrivalGate()->name(), "ipIn"))
+    else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn"))
     {
         EV << "Processing message from IP: " << msg << endl;
-        IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->controlInfo());
+        IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->getControlInfo());
         IPAddress sender = controlInfo->srcAddr();
         processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg*>(msg), sender);
     }

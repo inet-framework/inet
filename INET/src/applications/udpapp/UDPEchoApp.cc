@@ -56,7 +56,7 @@ void UDPEchoApp::processPacket(cMessage *msg)
 
     if (packet->isRequest())
     {
-        UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->controlInfo());
+        UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->getControlInfo());
 
         // swap src and dest
         IPvXAddress srcAddr = controlInfo->srcAddr();
@@ -71,7 +71,7 @@ void UDPEchoApp::processPacket(cMessage *msg)
     }
     else
     {
-        simtime_t rtt = simTime() - packet->creationTime();
+        simtime_t rtt = simTime() - packet->getCreationTime();
         EV << "RTT: " << rtt << "\n";
         delete msg;
     }

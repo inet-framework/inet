@@ -65,7 +65,7 @@ class INET_API RTPPacket : public cPacket
         /**
          * Returns the class name "RTPPacket".
          */
-        virtual const char *className() const;
+        virtual const char *getClassName() const;
 
         /**
          * Writes a one line info about this RTPPacket into the given string.

@@ -70,13 +70,13 @@ void PPP::initialize(int stage)
     queueModule = NULL;
     if (par("queueModule").stringValue()[0])
     {
-        cModule *mod = parentModule()->submodule(par("queueModule").stringValue());
+        cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
         queueModule = check_and_cast<IPassiveQueue *>(mod);
     }
 
     // we're connected if other end of connection path is an input gate
     cGate *physOut = gate("phys$o");
-    connected = physOut->destinationGate()->type()=='I';
+    connected = physOut->getDestinationGate()->getType()=='I';
 
     // if we're connected, get the gate with transmission rate
     gateToWatch = physOut;
@@ -86,11 +86,11 @@ void PPP::initialize(int stage)
         while (gateToWatch)
         {
             // does this gate have data rate?
-            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(gateToWatch->channel());
+            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(gateToWatch->getChannel());
             if (chan && (datarate=chan->par("datarate").doubleValue())>0)
                 break;
             // otherwise just check next connection in path
-            gateToWatch = gateToWatch->toGate();
+            gateToWatch = gateToWatch->getToGate();
         }
         if (!gateToWatch)
             error("gate phys must be connected (directly or indirectly) to a link with data rate");
@@ -108,10 +108,10 @@ void PPP::initialize(int stage)
     {
         if (!connected)
         {
-            displayString().setTagArg("i",1,"#707070");
-            displayString().setTagArg("i",2,"100");
+            getDisplayString().setTagArg("i",1,"#707070");
+            getDisplayString().setTagArg("i",2,"100");
         }
-        oldConnColor = gateToWatch->displayString().getTagArg("o",0);
+        oldConnColor = gateToWatch->getDisplayString().getTagArg("o",0);
     }
 
     // request first frame to send
@@ -127,9 +127,9 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     InterfaceEntry *e = new InterfaceEntry();
 
     // interface name: our module name without special characters ([])
-    char *interfaceName = new char[strlen(parentModule()->fullName())+1];
+    char *interfaceName = new char[strlen(getParentModule()->getFullName())+1];
     char *d=interfaceName;
-    for (const char *s=parentModule()->fullName(); *s; s++)
+    for (const char *s=getParentModule()->getFullName(); *s; s++)
         if (isalnum(*s))
             *d++ = *s;
     *d = '\0';
@@ -176,7 +176,7 @@ void PPP::startTransmitting(cMessage *msg)
     send(pppFrame, "phys$o");
 
     // schedule an event for the time when last bit will leave the gate.
-    simtime_t endTransmission = gateToWatch->transmissionFinishes();
+    simtime_t endTransmission = gateToWatch->getTransmissionFinishTime();
     scheduleAt(endTransmission, endTransmissionEvent);
 }
 
@@ -237,7 +237,7 @@ void PPP::handleMessage(cMessage *msg)
         {
             // We are currently busy, so just queue up the packet.
             EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
-            if (ev.isGUI() && txQueue.length()>=3) displayString().setTagArg("i",1,"red");
+            if (ev.isGUI() && txQueue.length()>=3) getDisplayString().setTagArg("i",1,"red");
 
             if (txQueueLimit && txQueue.length()>txQueueLimit)
                 error("txQueue length exceeds %d -- this is probably due to "
@@ -263,29 +263,29 @@ void PPP::handleMessage(cMessage *msg)
 
 void PPP::displayBusy()
 {
-    displayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    gateToWatch->displayString().setTagArg("o",0,"yellow");
-    gateToWatch->displayString().setTagArg("o",1,"3");
-    gate("phys$o")->displayString().setTagArg("o",0,"yellow");
-    gate("phys$o")->displayString().setTagArg("o",1,"3");
+    getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
+    gateToWatch->getDisplayString().setTagArg("o",0,"yellow");
+    gateToWatch->getDisplayString().setTagArg("o",1,"3");
+    gate("phys$o")->getDisplayString().setTagArg("o",0,"yellow");
+    gate("phys$o")->getDisplayString().setTagArg("o",1,"3");
 }
 
 void PPP::displayIdle()
 {
-    displayString().setTagArg("i",1,"");
-    gateToWatch->displayString().setTagArg("o",0,oldConnColor.c_str());
-    gateToWatch->displayString().setTagArg("o",1,"1");
-    gate("phys$o")->displayString().setTagArg("o",0,"black");
-    gate("phys$o")->displayString().setTagArg("o",1,"1");
+    getDisplayString().setTagArg("i",1,"");
+    gateToWatch->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
+    gateToWatch->getDisplayString().setTagArg("o",1,"1");
+    gate("phys$o")->getDisplayString().setTagArg("o",0,"black");
+    gate("phys$o")->getDisplayString().setTagArg("o",1,"1");
 }
 
 void PPP::updateDisplayString()
 {
     char buf[80];
-    if (ev.disabled())
+    if (ev.isDisabled())
     {
         // speed up things
-        displayString().setTagArg("t",0,"");
+        getDisplayString().setTagArg("t",0,"");
     }
     else if (connected)
     {
@@ -304,18 +304,18 @@ void PPP::updateDisplayString()
         if (numBitErr>0)
             sprintf(buf+strlen(buf), "\nerr:%ld", numBitErr);
 
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
     else
     {
         sprintf(buf, "not connected\ndropped:%ld", numDroppedIfaceDown);
-        displayString().setTagArg("t",0,buf);
+        getDisplayString().setTagArg("t",0,buf);
     }
 }
 
 PPPFrame *PPP::encapsulate(cMessage *msg)
 {
-    PPPFrame *pppFrame = new PPPFrame(msg->name());
+    PPPFrame *pppFrame = new PPPFrame(msg->getName());
     pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
     pppFrame->encapsulate(msg);
     return pppFrame;

@@ -26,7 +26,7 @@
 
 Define_Module(SnrEval);
 
-SnrEval::SnrEval() : rs(this->id())
+SnrEval::SnrEval() : rs(this->getId())
 {
 }
 
@@ -97,10 +97,10 @@ SnrEval::~SnrEval()
 
 void SnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->arrivalGateId()==uppergateIn && msg->length()==0)
+    if (msg->getArrivalGateId()==uppergateIn && msg->length()==0)
     {
         cPolymorphic *ctrl = msg->removeControlInfo();
-        handleCommand(msg->kind(), ctrl);
+        handleCommand(msg->getKind(), ctrl);
         delete msg;
     }
     else
@@ -125,8 +125,8 @@ void SnrEval::handleUpperMsg(AirFrame *frame)
         error("Trying to send a message while already transmitting -- MAC should "
               "take care this does not happen");
 
-    if (frame->controlInfo()!=NULL)
-        error("Setting control info (here: %s) on frames is not supported", frame->controlInfo()->className());
+    if (frame->getControlInfo()!=NULL)
+        error("Setting control info (here: %s) on frames is not supported", frame->getControlInfo()->getClassName());
 
     // if a packet was being received, it is corrupted now as should be treated as noise
     if (snrInfo.ptr != NULL)
@@ -209,7 +209,7 @@ void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
  */
 void SnrEval::handleSelfMsg(cMessage *msg)
 {
-    if (msg->kind() == TRANSM_OVER)
+    if (msg->getKind() == TRANSM_OVER)
     {
         if (noiseLevel < sensitivity)
         {
@@ -237,7 +237,7 @@ void SnrEval::handleSelfMsg(cMessage *msg)
         }
     }
     else
-        error("Internal error: unknown self-message `%s'", msg->name());
+        error("Internal error: unknown self-message `%s'", msg->getName());
 }
 
 
@@ -284,9 +284,9 @@ void SnrEval::handleLowerMsgStart(AirFrame * frame)
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (frame->arrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (frame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << frame->name() << endl;
+        EV << "receiving frame " << frame->getName() << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;        //defined in SnrList.h!!
@@ -308,7 +308,7 @@ void SnrEval::handleLowerMsgStart(AirFrame * frame)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << frame->name() << " is just noise\n";
+        EV << "frame " << frame->getName() << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -441,7 +441,7 @@ void SnrEval::changeChannel(int channel)
         for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
         {
             AirFrame *frame = it->first;
-            cMessage *endRxTimer = (cMessage *)frame->contextPointer();
+            cMessage *endRxTimer = (cMessage *)frame->getContextPointer();
             delete frame;
             delete cancelEvent(endRxTimer);
         }
@@ -471,25 +471,25 @@ void SnrEval::changeChannel(int channel)
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == frame->getChannelNumber())
         {
-            EV << " - (" << frame->className() << ")" << frame->name() << ": ";
+            EV << " - (" << frame->getClassName() << ")" << frame->getName() << ": ";
 
             // if there is a message on the air which will reach us in the future
-            if (frame->timestamp() + propagationDelay >= simTime())
+            if (frame->getTimestamp() + propagationDelay >= simTime())
             {
                 EV << "will arrive in the future, scheduling it\n";
 
                 // we need to send to each radioIn[] gate
                 cGate *radioGate = gate("radioIn");
                 for (int i = 0; i < radioGate->size(); i++)
-                    sendDirect((cMessage*)frame->dup(), frame->timestamp() + propagationDelay - simTime(), this, radioGate->id() + i);
+                    sendDirect((cMessage*)frame->dup(), frame->getTimestamp() + propagationDelay - simTime(), this, radioGate->getId() + i);
             }
             // if we hear some part of the message
-            else if (frame->timestamp() + frame->getDuration() + propagationDelay > simTime())
+            else if (frame->getTimestamp() + frame->getDuration() + propagationDelay > simTime())
             {
                 EV << "missed beginning of frame, processing it as noise\n";
 
                 AirFrame *frameDup = (AirFrame*)frame->dup();
-                frameDup->setArrivalTime(frame->timestamp() + propagationDelay);
+                frameDup->setArrivalTime(frame->getTimestamp() + propagationDelay);
                 handleLowerMsgStart(frameDup);
                 bufferMsg(frameDup);
             }

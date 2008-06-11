@@ -40,7 +40,7 @@ RTPSenderInfo::RTPSenderInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc) {
 
 
 RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo() {
-    setName(senderInfo.name());
+    setName(senderInfo.getName());
     operator=(senderInfo);
 };
 
@@ -67,7 +67,7 @@ cObject *RTPSenderInfo::dup() const {
 };
 
 
-const char *RTPSenderInfo::className() const {
+const char *RTPSenderInfo::getClassName() const {
     return "RTPSenderInfo";
 };
 

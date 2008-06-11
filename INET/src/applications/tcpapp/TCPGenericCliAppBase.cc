@@ -88,7 +88,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
 {
-    if (ev.isGUI()) displayString().setTagArg("t", 0, s);
+    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void TCPGenericCliAppBase::socketEstablished(int, void *)
@@ -102,7 +102,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
-    bytesRcvd+=msg->byteLength();
+    bytesRcvd+=msg->getByteLength();
 
     delete msg;
 }
@@ -110,7 +110,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
 void TCPGenericCliAppBase::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
-    if (socket.state()==TCPSocket::PEER_CLOSED)
+    if (socket.getState()==TCPSocket::PEER_CLOSED)
     {
         EV << "remote TCP closed, closing here as well\n";
         close();
@@ -135,9 +135,9 @@ void TCPGenericCliAppBase::socketFailure(int, void *, int code)
 
 void TCPGenericCliAppBase::finish()
 {
-    EV << fullPath() << ": opened " << numSessions << " sessions\n";
-    EV << fullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    EV << fullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 
     recordScalar("number of sessions", numSessions);
     recordScalar("packets sent", packetsSent);

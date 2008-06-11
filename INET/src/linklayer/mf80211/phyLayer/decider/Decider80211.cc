@@ -66,13 +66,13 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
         if (iter->snr < snirMin)
             snirMin = iter->snr;
     }
-    cMessage *fr = af->encapsulatedMsg();
-    EV << "packet (" << fr->className() << ")" << fr->name() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
+    cMessage *fr = af->getEncapsulatedMsg();
+    EV << "packet (" << fr->getClassName() << ")" << fr->getName() << " (" << fr->info() << ") snrMin=" << snirMin << endl;
 
     //if snir is big enough so that packet can be recognized at all
     if (snirMin > snirThreshold)
     {
-        if (packetOk(snirMin, af->encapsulatedMsg()->length()))
+        if (packetOk(snirMin, af->getEncapsulatedMsg()->length()))
         {
             EV << "packet was received correctly, it is now handed to upper layer...\n";
             sendUp(af);
@@ -81,7 +81,7 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
         {
             EV << "Packet has BIT ERRORS! It is lost!\n";
             af->setName("ERROR");
-            af->encapsulatedMsg()->setKind(BITERROR);
+            af->getEncapsulatedMsg()->setKind(BITERROR);
             sendUp(af);
         }
     }
@@ -89,7 +89,7 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
     {
         EV << "COLLISION! Packet got lost\n";
         af->setName("COLLISION");
-        af->encapsulatedMsg()->setKind(COLLISION);
+        af->getEncapsulatedMsg()->setKind(COLLISION);
         sendUp(af);
     }
 }

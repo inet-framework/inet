@@ -65,7 +65,7 @@ class INET_API BonnMotionFileCache
     /**
      * Returns the singleton instance.
      */
-    static BonnMotionFileCache *instance();
+    static BonnMotionFileCache *getInstance();
 
     /**
      * Deletes the singleton instance.

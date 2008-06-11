@@ -32,7 +32,7 @@
 
 static std::ostream& operator<< (std::ostream& out, cMessage *msg)
 {
-    out << "(" << msg->className() << ")" << msg->fullName();
+    out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
 }
 
@@ -65,12 +65,12 @@ void EtherMAC::initialize()
     cGate *g = gate("phys$o");
     while (g)
     {
-        cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->channel());
+        cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->getChannel());
         if (chan && chan->par("datarate").doubleValue()>0)
             error("connection on gate %s has data rate set: using data rate with EtherMAC "
                   "is forbidden, module's txrate parameter must be used instead",
-                  g->fullPath().c_str());
-        g = g->toGate();
+                  g->getFullPath().c_str());
+        g = g->getToGate();
     }
 
     // launch autoconfig process
@@ -140,7 +140,7 @@ void EtherMAC::handleAutoconfigMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
     {
-        if (msg->arrivalGate() == gate("upperLayerIn"))
+        if (msg->getArrivalGate() == gate("upperLayerIn"))
         {
             // from upper layer
             EV << "Received frame from upper layer during autoconfig period: " << msg << endl;
@@ -191,10 +191,10 @@ void EtherMAC::handleAutoconfigMessage(cMessage *msg)
         {
             char modestr[64];
             sprintf(modestr, "%dMb\n%s", int(txrate/1000000), (duplexMode ? "full duplex" : "half duplex"));
-            displayString().setTagArg("t",0,modestr);
-            //displayString().setTagArg("t",1,"r");
-            sprintf(modestr, "%s: %dMb %s", fullName(), int(txrate/1000000), (duplexMode ? "duplex" : "half duplex"));
-            parentModule()->bubble(modestr);
+            getDisplayString().setTagArg("t",0,modestr);
+            //getDisplayString().setTagArg("t",1,"r");
+            sprintf(modestr, "%s: %dMb %s", getFullName(), int(txrate/1000000), (duplexMode ? "duplex" : "half duplex"));
+            getParentModule()->bubble(modestr);
         }
 
         if (!txQueue.empty())
@@ -227,7 +227,7 @@ void EtherMAC::handleMessage (cMessage *msg)
     if (!msg->isSelfMessage())
     {
         // either frame from upper layer, or frame/jam signal from the network
-        if (msg->arrivalGate() == gate("upperLayerIn"))
+        if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else
             processMsgFromNetwork(msg);
@@ -236,7 +236,7 @@ void EtherMAC::handleMessage (cMessage *msg)
     {
         // Process different self-messages (timer signals)
         EV << "Self-message " << msg << " received\n";
-        switch (msg->kind())
+        switch (msg->getKind())
         {
             case ENDIFG:
                 handleEndIFGPeriod();
@@ -263,7 +263,7 @@ void EtherMAC::handleMessage (cMessage *msg)
                 break;
 
             default:
-                error("self-message with unexpected message kind %d", msg->kind());
+                error("self-message with unexpected message kind %d", msg->getKind());
         }
     }
     printState();
@@ -294,7 +294,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
     if (!duplexMode && transmitState==TRANSMITTING_STATE)
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
-        if (msg->kind()==JAM_SIGNAL)
+        if (msg->getKind()==JAM_SIGNAL)
             error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
@@ -315,7 +315,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
     }
     else if (receiveState==RX_IDLE_STATE)
     {
-        if (msg->kind()==JAM_SIGNAL)
+        if (msg->getKind()==JAM_SIGNAL)
             error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Start reception of frame\n";
@@ -326,7 +326,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
         scheduleEndRxPeriod(msg);
         channelBusySince = simTime();
     }
-    else if (receiveState==RECEIVING_STATE && msg->kind()!=JAM_SIGNAL && endRxMsg->arrivalTime()-simTime()<bitTime)
+    else if (receiveState==RECEIVING_STATE && msg->getKind()!=JAM_SIGNAL && endRxMsg->getArrivalTime()-simTime()<bitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -348,7 +348,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
     else // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
     {
         // handle overlapping receptions
-        if (msg->kind()==JAM_SIGNAL)
+        if (msg->getKind()==JAM_SIGNAL)
         {
             if (numConcurrentTransmissions<=0)
                 error("numConcurrentTransmissions=%d on jam arrival (stray jam?)",numConcurrentTransmissions);
@@ -367,7 +367,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
         else // ETH_FRAME or ETH_PAUSE
         {
             numConcurrentTransmissions++;
-            if (endRxMsg->arrivalTime() < endRxTime)
+            if (endRxMsg->getArrivalTime() < endRxTime)
             {
                 // otherwise just wait until the end of the longest transmission
                 EV << "Overlapping receptions -- setting collision state and extending collision period\n";
@@ -405,7 +405,7 @@ void EtherMAC::handleEndIFGPeriod()
     cMessage *frame = (cMessage *)txQueue.front();
 
     // Perform carrier extension if in Gigabit Ethernet
-    if (carrierExtension && frame->byteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
+    if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
     {
         EV << "Performing carrier extension of small frame\n";
         frame->setByteLength(GIGABIT_MIN_FRAME_WITH_EXT);
@@ -429,7 +429,7 @@ void EtherMAC::startFrameTransmission()
     // update burst variables
     if (frameBursting)
     {
-        bytesSentInBurst = frame->byteLength();
+        bytesSentInBurst = frame->getByteLength();
         framesSentInBurst++;
     }
 

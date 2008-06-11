@@ -90,11 +90,11 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
     // Processing", subsection "SEGMENT ARRIVES".
     //
     TCPEventCode event;
-    if (fsm.state()==TCP_S_LISTEN)
+    if (fsm.getState()==TCP_S_LISTEN)
     {
         event = processSegmentInListen(tcpseg, src, dest);
     }
-    else if (fsm.state()==TCP_S_SYN_SENT)
+    else if (fsm.getState()==TCP_S_SYN_SENT)
     {
         event = processSegmentInSynSent(tcpseg, src, dest);
     }
@@ -140,7 +140,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     if (tcpseg->rstBit())
     {
         // Note: if we come from LISTEN, processSegmentInListen() has already handled RST.
-        switch (fsm.state())
+        switch (fsm.getState())
         {
             case TCP_S_SYN_RCVD:
                 //"
@@ -179,7 +179,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // enter the CLOSED state, delete the TCB, and return.
                 //"
                 tcpEV << "RST: closing connection\n";
-                if (fsm.state()!=TCP_S_TIME_WAIT)
+                if (fsm.getState()!=TCP_S_TIME_WAIT)
                     sendIndicationToApp(TCP_I_CLOSED); // in TIME_WAIT, we've already sent it
                 return TCP_E_RCV_RST; // this will trigger state transition
 
@@ -225,7 +225,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
     TCPEventCode event = TCP_E_IGNORE;
 
-    if (fsm.state()==TCP_S_SYN_RCVD)
+    if (fsm.getState()==TCP_S_SYN_RCVD)
     {
         //"
         // If SND.UNA =< SEG.ACK =< SND.NXT then enter ESTABLISHED state
@@ -254,9 +254,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     }
 
     uint32 old_snd_nxt = state->snd_nxt; // later we'll need to see if snd_nxt changed
-    if (fsm.state()==TCP_S_SYN_RCVD || fsm.state()==TCP_S_ESTABLISHED ||
-        fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2 ||
-        fsm.state()==TCP_S_CLOSE_WAIT || fsm.state()==TCP_S_CLOSING)
+    if (fsm.getState()==TCP_S_SYN_RCVD || fsm.getState()==TCP_S_ESTABLISHED ||
+        fsm.getState()==TCP_S_FIN_WAIT_1 || fsm.getState()==TCP_S_FIN_WAIT_2 ||
+        fsm.getState()==TCP_S_CLOSE_WAIT || fsm.getState()==TCP_S_CLOSING)
     {
         //
         // ESTABLISHED processing:
@@ -287,7 +287,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
             return TCP_E_IGNORE;  // if acks something not yet sent, drop it
     }
 
-    if ((fsm.state()==TCP_S_FIN_WAIT_1 && state->fin_ack_rcvd))
+    if ((fsm.getState()==TCP_S_FIN_WAIT_1 && state->fin_ack_rcvd))
     {
         //"
         // FIN-WAIT-1 STATE
@@ -298,7 +298,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         event = TCP_E_RCV_ACK;  // will trigger transition to FIN-WAIT-2
     }
 
-    if (fsm.state()==TCP_S_FIN_WAIT_2)
+    if (fsm.getState()==TCP_S_FIN_WAIT_2)
     {
         //"
         // FIN-WAIT-2 STATE
@@ -310,7 +310,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // acknowledged)
     }
 
-    if (fsm.state()==TCP_S_CLOSING)
+    if (fsm.getState()==TCP_S_CLOSING)
     {
         //"
         // In addition to the processing for the ESTABLISHED state, if
@@ -329,7 +329,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         }
     }
 
-    if (fsm.state()==TCP_S_LAST_ACK)
+    if (fsm.getState()==TCP_S_LAST_ACK)
     {
         //"
         // The only thing that can arrive in this state is an
@@ -344,7 +344,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         }
     }
 
-    if (fsm.state()==TCP_S_TIME_WAIT)
+    if (fsm.getState()==TCP_S_TIME_WAIT)
     {
         //"
         // The only thing that can arrive in this state is a
@@ -361,8 +361,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: sixth, check the URG bit,
     //
-    if (tcpseg->urgBit() && (fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_FIN_WAIT_1 ||
-        fsm.state()==TCP_S_FIN_WAIT_2))
+    if (tcpseg->urgBit() && (fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_FIN_WAIT_1 ||
+        fsm.getState()==TCP_S_FIN_WAIT_2))
     {
         //"
         // If the URG bit is set, RCV.UP <- max(RCV.UP,SEG.UP), and signal
@@ -380,7 +380,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     // RFC 793: seventh, process the segment text,
     //
     uint32 old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
-    if (fsm.state()==TCP_S_SYN_RCVD || fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_FIN_WAIT_1 || fsm.state()==TCP_S_FIN_WAIT_2)
+    if (fsm.getState()==TCP_S_SYN_RCVD || fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_FIN_WAIT_1 || fsm.getState()==TCP_S_FIN_WAIT_2)
     {
         //"
         // Once in the ESTABLISHED state, it is possible to deliver segment
@@ -497,7 +497,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // state transitions will be done in the state machine, here we just set
         // the proper event code (TCP_E_RCV_FIN or TCP_E_RCV_FIN_ACK)
         event = TCP_E_RCV_FIN;
-        switch (fsm.state())
+        switch (fsm.getState())
         {
             case TCP_S_FIN_WAIT_1:
                 if (state->fin_ack_rcvd)
@@ -539,7 +539,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         tcpAlgorithm->receiveSeqChanged();
     }
 
-    if ((fsm.state()==TCP_S_ESTABLISHED || fsm.state()==TCP_S_SYN_RCVD) &&
+    if ((fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_SYN_RCVD) &&
         state->send_fin && state->snd_nxt==state->snd_fin_seq+1)
     {
         // if the user issued the CLOSE command a long time ago and we've just
@@ -550,7 +550,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         event = TCP_E_CLOSE;
     }
 
-    if (fsm.state()==TCP_S_CLOSE_WAIT && state->send_fin &&
+    if (fsm.getState()==TCP_S_CLOSE_WAIT && state->send_fin &&
         state->snd_nxt==state->snd_fin_seq+1 && old_snd_nxt!=state->snd_nxt)
     {
         // if we're in CLOSE_WAIT and we just got to sent our long-pending FIN,
@@ -1002,7 +1002,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
 
 void TCPConnection::process_TIMEOUT_CONN_ESTAB()
 {
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
@@ -1016,7 +1016,7 @@ void TCPConnection::process_TIMEOUT_CONN_ESTAB()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received CONN_ESTAB timeout in state %s", stateName(fsm.state()));
+            opp_error("Internal error: received CONN_ESTAB timeout in state %s", stateName(fsm.getState()));
     }
 }
 
@@ -1026,7 +1026,7 @@ void TCPConnection::process_TIMEOUT_2MSL()
     // If the time-wait timeout expires on a connection delete the TCB,
     // enter the CLOSED state and return.
     //"
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_TIME_WAIT:
             // Nothing to do here. The TIMEOUT_2MSL event will automatically take
@@ -1036,14 +1036,14 @@ void TCPConnection::process_TIMEOUT_2MSL()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received time-wait (2MSL) timeout in state %s", stateName(fsm.state()));
+            opp_error("Internal error: received time-wait (2MSL) timeout in state %s", stateName(fsm.getState()));
     }
 
 }
 
 void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
 {
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_FIN_WAIT_2:
             // Nothing to do here. The TIMEOUT_FIN_WAIT_2 event will automatically take
@@ -1052,7 +1052,7 @@ void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
             break;
         default:
             // We should not receive this timeout in this state.
-            opp_error("Internal error: received FIN_WAIT_2 timeout in state %s", stateName(fsm.state()));
+            opp_error("Internal error: received FIN_WAIT_2 timeout in state %s", stateName(fsm.getState()));
     }
 }
 
@@ -1079,11 +1079,11 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
     tcpEV << "Performing retransmission #" << state->syn_rexmit_count << "\n";
 
     // resend what's needed
-    switch(fsm.state())
+    switch(fsm.getState())
     {
         case TCP_S_SYN_SENT: sendSyn(); break;
         case TCP_S_SYN_RCVD: sendSynAck(); break;
-        default:  opp_error("Internal error: SYN-REXMIT timer expired while in state %s", stateName(fsm.state()));
+        default:  opp_error("Internal error: SYN-REXMIT timer expired while in state %s", stateName(fsm.getState()));
     }
 
     // reschedule timer
