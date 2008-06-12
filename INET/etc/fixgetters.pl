@@ -75,5 +75,7 @@ while (<LISTFILE>)
     }
 }
 
+# BEWARE OF BOGUS REPLACEMENTS INSIDE COMMENTS!!
+# getAddress(), getData(), getPayload() !!!!
 print "\nConversion done. You may safely re-run this script as many times as you want.\n";
 
