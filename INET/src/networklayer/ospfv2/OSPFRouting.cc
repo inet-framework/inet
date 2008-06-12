@@ -101,7 +101,7 @@ int OSPFRouting::ResolveInterfaceName (const std::string& name) const
     InterfaceEntry* ie = ift->interfaceByName (name.c_str());
     if (!ie)
         opp_error ("error reading XML config: InterfaceTable contains no interface named '%s'", name.c_str());
-    return ie->interfaceId ();
+    return ie->getInterfaceId();
 }
 
 /**

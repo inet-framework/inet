@@ -22,7 +22,6 @@
 //
 message UDPEchoAppMsg
 {
-    @omitGetVerb(true);
     bool isRequest = true;
 }
 

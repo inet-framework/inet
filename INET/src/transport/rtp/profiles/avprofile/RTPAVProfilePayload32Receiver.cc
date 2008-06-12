@@ -87,7 +87,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket) {
                 RTPMpegPacket *mpegPacket = (RTPMpegPacket *)(readPacket->decapsulate());
                 if (pictureType == 0)
                     pictureType = mpegPacket->pictureType();
-                frameSize = frameSize + mpegPacket->payloadLength();
+                frameSize = frameSize + mpegPacket->getPayloadLength();
 
                 delete mpegPacket;
                 delete readPacket;

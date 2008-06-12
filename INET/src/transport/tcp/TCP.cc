@@ -108,15 +108,15 @@ void TCP::handleMessage(cMessage *msg)
             if (dynamic_cast<IPControlInfo *>(tcpseg->getControlInfo())!=NULL)
             {
                 IPControlInfo *controlInfo = (IPControlInfo *)tcpseg->removeControlInfo();
-                srcAddr = controlInfo->srcAddr();
-                destAddr = controlInfo->destAddr();
+                srcAddr = controlInfo->getSrcAddr();
+                destAddr = controlInfo->getDestAddr();
                 delete controlInfo;
             }
             else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo())!=NULL)
             {
                 IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
-                srcAddr = controlInfo->srcAddr();
-                destAddr = controlInfo->destAddr();
+                srcAddr = controlInfo->getSrcAddr();
+                destAddr = controlInfo->getDestAddr();
                 delete controlInfo;
             }
             else
@@ -141,7 +141,7 @@ void TCP::handleMessage(cMessage *msg)
     {
         TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
         int appGateIndex = msg->getArrivalGate()->getIndex();
-        int connId = controlInfo->connId();
+        int connId = controlInfo->getConnId();
 
         TCPConnection *conn = findConnForApp(appGateIndex, connId);
 
@@ -226,8 +226,8 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
     SockPair key;
     key.localAddr = destAddr;
     key.remoteAddr = srcAddr;
-    key.localPort = tcpseg->destPort();
-    key.remotePort = tcpseg->srcPort();
+    key.localPort = tcpseg->getDestPort();
+    key.remotePort = tcpseg->getSrcPort();
     SockPair save = key;
 
     // try with fully qualified SockPair

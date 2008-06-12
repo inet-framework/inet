@@ -149,16 +149,16 @@ void PingApp::processPingResponse(PingPayload *msg)
     if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
-        src = ctrl->srcAddr();
-        dest = ctrl->destAddr();
-        msgHopCount = ctrl->timeToLive();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        msgHopCount = ctrl->getTimeToLive();
     }
     else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
-        src = ctrl->srcAddr();
-        dest = ctrl->destAddr();
-        msgHopCount = ctrl->hopLimit();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        msgHopCount = ctrl->getHopLimit();
     }
 
     simtime_t rtt = simTime() - msg->getCreationTime();
@@ -167,13 +167,13 @@ void PingApp::processPingResponse(PingPayload *msg)
     {
         cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
              << " bytes from " << src
-             << " icmp_seq=" << msg->seqNo() << " ttl=" << msgHopCount
+             << " icmp_seq=" << msg->getSeqNo() << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
              << " (" << msg->getName() << ")" << endl;
     }
 
     // update statistics
-    countPingResponse(msg->getByteLength(), msg->seqNo(), rtt);
+    countPingResponse(msg->getByteLength(), msg->getSeqNo(), rtt);
     delete msg;
 }
 

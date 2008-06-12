@@ -54,15 +54,15 @@ void UDPEchoApp::processPacket(cMessage *msg)
 {
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
 
-    if (packet->isRequest())
+    if (packet->getIsRequest())
     {
         UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->getControlInfo());
 
         // swap src and dest
-        IPvXAddress srcAddr = controlInfo->srcAddr();
-        int srcPort = controlInfo->srcPort();
-        controlInfo->setSrcAddr(controlInfo->destAddr());
-        controlInfo->setSrcPort(controlInfo->destPort());
+        IPvXAddress srcAddr = controlInfo->getSrcAddr();
+        int srcPort = controlInfo->getSrcPort();
+        controlInfo->setSrcAddr(controlInfo->getDestAddr());
+        controlInfo->setSrcPort(controlInfo->getDestPort());
         controlInfo->setDestAddr(srcAddr);
         controlInfo->setDestPort(srcPort);
 

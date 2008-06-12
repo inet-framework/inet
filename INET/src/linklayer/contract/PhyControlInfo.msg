@@ -39,7 +39,6 @@ enum PhyCommandCode
 //
 class PhyControlInfo
 {
-    @omitGetVerb(true);
     int channelNumber = -1; // with PHY_C_CONFIGURERADIO: the channel to switch to
     double bitrate = -1; // with PHY_C_CONFIGURERADIO: the bitrate to switch to
 }

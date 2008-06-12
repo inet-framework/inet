@@ -95,7 +95,7 @@ void BasicSnrEval::handleMessage(cMessage *msg)
         else
             handleSelfMsg(msg);
     }
-    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == channelNumber())
+    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == getChannelNumber())
     {
         // must be an AirFrame
         AirFrame *frame = (AirFrame *) msg;
@@ -139,7 +139,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
     frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
     frame->setLength(headerLength);
-    frame->setChannelNumber(channelNumber());
+    frame->setChannelNumber(getChannelNumber());
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
     frame->setSenderPos(myPosition());

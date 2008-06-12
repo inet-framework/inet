@@ -75,7 +75,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             msg->setKind(TCP_C_SEND);
             TCPCommand *ind = check_and_cast<TCPCommand *>(msg->removeControlInfo());
             TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setConnId(ind->connId());
+            cmd->setConnId(ind->getConnId());
             msg->setControlInfo(cmd);
             delete ind;
 

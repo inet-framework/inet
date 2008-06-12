@@ -28,7 +28,6 @@ cplusplus {{
 //
 message UDPPacket
 {
-    @omitGetVerb(true);
     int sourcePort = -1;
     int destinationPort = -1;
 }

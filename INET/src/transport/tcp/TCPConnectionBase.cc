@@ -211,12 +211,12 @@ bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPvXAddress segSrcAddr
     if (!localAddr.isUnspecified())
     {
         ASSERT(localAddr==segDestAddr);
-        ASSERT(localPort==tcpseg->destPort());
+        ASSERT(localPort==tcpseg->getDestPort());
     }
     if (!remoteAddr.isUnspecified())
     {
         ASSERT(remoteAddr==segSrcAddr);
-        ASSERT(remotePort==tcpseg->srcPort());
+        ASSERT(remotePort==tcpseg->getSrcPort());
     }
 
     if (tryFastRoute(tcpseg))

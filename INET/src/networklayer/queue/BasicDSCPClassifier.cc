@@ -39,7 +39,7 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
     {
         // IPv4 QoS: map DSCP to queue number
         IPDatagram *datagram = (IPDatagram *)msg;
-        int dscp = datagram->diffServCodePoint();
+        int dscp = datagram->getDiffServCodePoint();
         return classifyByDSCP(dscp);
     }
 #ifndef NO_IPv6
@@ -47,7 +47,7 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
     {
         // IPv6 QoS: map Traffic Class to queue number
         IPv6Datagram *datagram = (IPv6Datagram *)msg;
-        int dscp = datagram->trafficClass();
+        int dscp = datagram->getTrafficClass();
         return classifyByDSCP(dscp);
     }
 #endif

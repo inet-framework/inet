@@ -71,12 +71,12 @@ void IPv6Datagram::setExtensionHeaderArraySize(unsigned int size)
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-unsigned int IPv6Datagram::extensionHeaderArraySize() const
+unsigned int IPv6Datagram::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-IPv6ExtensionHeaderPtr& IPv6Datagram::extensionHeader(unsigned int k)
+IPv6ExtensionHeaderPtr& IPv6Datagram::getExtensionHeader(unsigned int k)
 {
     static IPv6ExtensionHeaderPtr null;
     if (k>=extensionHeaders.size())

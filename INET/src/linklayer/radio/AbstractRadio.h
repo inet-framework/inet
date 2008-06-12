@@ -97,7 +97,7 @@ class INET_API AbstractRadio : public ChannelAccess
     void setRadioState(RadioState::State newState);
 
     /** Returns the current channel the radio is tuned to */
-    virtual int channelNumber() const {return rs.getChannelNumber();}
+    virtual int getChannelNumber() const {return rs.getChannelNumber();}
 
     /** Updates the SNR information of the relevant AirFrame */
     void addNewSnr();

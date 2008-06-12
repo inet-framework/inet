@@ -43,9 +43,9 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
 {
     // find datagram buffer
     Key key;
-    key.id = datagram->identification();
-    key.src = datagram->srcAddress();
-    key.dest = datagram->destAddress();
+    key.id = datagram->getIdentification();
+    key.src = datagram->getSrcAddress();
+    key.dest = datagram->getDestAddress();
 
     Buffers::iterator i = bufs.find(key);
 
@@ -63,10 +63,10 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     }
 
     // add fragment into reassembly buffer
-    int bytes = datagram->getByteLength() - datagram->headerLength();
-    bool isComplete = buf->buf.addFragment(datagram->fragmentOffset(),
-                                           datagram->fragmentOffset() + bytes,
-                                           !datagram->moreFragments());
+    int bytes = datagram->getByteLength() - datagram->getHeaderLength();
+    bool isComplete = buf->buf.addFragment(datagram->getFragmentOffset(),
+                                           datagram->getFragmentOffset() + bytes,
+                                           !datagram->getMoreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
     // content (getEncapsulatedMsg()), other (empty) ones are only
@@ -86,7 +86,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPDatagram *ret = buf->datagram;
-        ret->setByteLength(ret->headerLength()+buf->buf.totalLength());
+        ret->setByteLength(ret->getHeaderLength()+buf->buf.totalLength());
         bufs.erase(i);
         return ret;
     }

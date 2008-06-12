@@ -37,13 +37,13 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     ICMPv6Message *icmpv6Msg = check_and_cast<ICMPv6Message *>(msg);
     IPv6Datagram *d = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
-    int type = (int)icmpv6Msg->type();
+    int type = (int)icmpv6Msg->getType();
     int code;
     EV << " Type: " << type;
     if (dynamic_cast<ICMPv6DestUnreachableMsg *>(icmpv6Msg))
     {
         ICMPv6DestUnreachableMsg *msg2 = (ICMPv6DestUnreachableMsg *)icmpv6Msg;
-        code = msg2->code();
+        code = msg2->getCode();
         EV << " Code: " << code;
     }
     else if (dynamic_cast<ICMPv6PacketTooBigMsg *>(icmpv6Msg))
@@ -54,19 +54,19 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
     else if (dynamic_cast<ICMPv6TimeExceededMsg *>(icmpv6Msg))
     {
         ICMPv6TimeExceededMsg *msg2 = (ICMPv6TimeExceededMsg *)icmpv6Msg;
-        code = msg2->code();
+        code = msg2->getCode();
         EV << " Code: " << code;
     }
     else if (dynamic_cast<ICMPv6ParamProblemMsg *>(icmpv6Msg))
     {
         ICMPv6ParamProblemMsg *msg2 = (ICMPv6ParamProblemMsg *)icmpv6Msg;
-        code = msg2->code();
+        code = msg2->getCode();
         EV << " Code: " << code;
     }
 
     EV << " Byte length: " << d->getByteLength()
-       << " Src: " << d->srcAddress()
-       << " Dest: " << d->destAddress()
+       << " Src: " << d->getSrcAddress()
+       << " Dest: " << d->getDestAddress()
        << " Time: " << simTime()
        << "\n";
 

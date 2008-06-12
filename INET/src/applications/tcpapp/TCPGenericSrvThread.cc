@@ -34,15 +34,15 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
                   "sendQueueClass/receiveQueueClass parameters "
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
                   msg->getClassName(), msg->getName());
-    if (appmsg->replyDelay()>0)
+    if (appmsg->getReplyDelay()>0)
         opp_error("Cannot process (%s)%s: %s class doesn't support replyDelay field"
                   " of GenericAppMsg, try to use TCPGenericSrvApp instead",
                   msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close
     // connection if that was requested too
-    long requestedBytes = appmsg->expectedReplyLength();
-    bool doClose = appmsg->serverClose();
+    long requestedBytes = appmsg->getExpectedReplyLength();
+    bool doClose = appmsg->getServerClose();
 
     if (requestedBytes==0)
     {

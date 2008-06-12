@@ -56,7 +56,7 @@ bool SimpleClassifier::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLab
 {
     // never label OSPF(TED) and RSVP traffic
 
-    switch(ipdatagram->transportProtocol())
+    switch(ipdatagram->getTransportProtocol())
     {
         case IP_PROT_OSPF:
         case IP_PROT_RSVP:
@@ -71,10 +71,10 @@ bool SimpleClassifier::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLab
     std::vector<FECEntry>::iterator it;
     for (it = bindings.begin(); it != bindings.end(); it++)
     {
-        if (!it->dest.isUnspecified() && !it->dest.equals(ipdatagram->destAddress()))
+        if (!it->dest.isUnspecified() && !it->dest.equals(ipdatagram->getDestAddress()))
             continue;
 
-        if (!it->src.isUnspecified() && !it->src.equals(ipdatagram->srcAddress()))
+        if (!it->src.isUnspecified() && !it->src.equals(ipdatagram->getSrcAddress()))
             continue;
 
         EV << "packet belongs to fecid=" << it->id << endl;

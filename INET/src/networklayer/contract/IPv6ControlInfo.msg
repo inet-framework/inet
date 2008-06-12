@@ -48,7 +48,6 @@ cplusplus {{
 //
 class IPv6ControlInfo
 {
-    @omitGetVerb(true);
     @customize(true);
     int protocol enum(IPProtocolId);  // transport layer protocol
     IPv6Address destAddr; // destination IPv6 address

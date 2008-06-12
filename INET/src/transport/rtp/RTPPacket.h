@@ -136,12 +136,12 @@ class INET_API RTPPacket : public cPacket
          * Returns the length of the header (fixed plus variable part)
          * of this RTPPacket.
          */
-        virtual int headerLength();
+        virtual int getHeaderLength();
 
         /**
          * Returns the size of the payload stored in this RTPPacket.
          */
-        virtual int payloadLength();
+        virtual int getPayloadLength();
 
         /**
          * Compares two RTPPacket objects by comparing their

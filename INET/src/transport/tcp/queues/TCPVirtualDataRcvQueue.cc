@@ -53,7 +53,7 @@ std::string TCPVirtualDataRcvQueue::info() const
 
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
-    merge(tcpseg->sequenceNo(), tcpseg->sequenceNo()+tcpseg->payloadLength());
+    merge(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
     if (seqGE(rcv_nxt, regionList.begin()->begin))
         rcv_nxt = regionList.begin()->end;
     return rcv_nxt;

@@ -168,7 +168,7 @@ void UDPSocket::close()
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<UDPControlInfo *>(msg->getControlInfo()) &&
-           ((UDPControlInfo *)(msg->getControlInfo()))->sockId()==sockId;
+           ((UDPControlInfo *)(msg->getControlInfo()))->getSockId()==sockId;
 }
 
 bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
@@ -185,7 +185,7 @@ void UDPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer
 void UDPSocket::processMessage(cMessage *msg)
 {
     UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->removeControlInfo());
-    ASSERT(ctrl->sockId()==sockId);
+    ASSERT(ctrl->getSockId()==sockId);
 
     switch (msg->getKind())
     {

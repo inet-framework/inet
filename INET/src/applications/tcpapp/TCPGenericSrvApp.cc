@@ -83,14 +83,14 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
                   msg->getClassName(), msg->getName());
 
-        long requestedBytes = appmsg->expectedReplyLength();
+        long requestedBytes = appmsg->getExpectedReplyLength();
 
-        simtime_t msgDelay = appmsg->replyDelay();
+        simtime_t msgDelay = appmsg->getReplyDelay();
         if (msgDelay>maxMsgDelay)
             maxMsgDelay = msgDelay;
 
-        bool doClose = appmsg->serverClose();
-        int connId = check_and_cast<TCPCommand *>(msg->getControlInfo())->connId();
+        bool doClose = appmsg->getServerClose();
+        int connId = check_and_cast<TCPCommand *>(msg->getControlInfo())->getConnId();
 
         if (requestedBytes==0)
         {

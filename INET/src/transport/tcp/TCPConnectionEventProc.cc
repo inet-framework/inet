@@ -44,10 +44,10 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
 
             // store local/remote socket
             state->active = true;
-            localAddr = openCmd->localAddr();
-            remoteAddr = openCmd->remoteAddr();
-            localPort = openCmd->localPort();
-            remotePort = openCmd->remotePort();
+            localAddr = openCmd->getLocalAddr();
+            remoteAddr = openCmd->getRemoteAddr();
+            localPort = openCmd->getLocalPort();
+            remotePort = openCmd->getRemotePort();
 
             if (remoteAddr.isUnspecified() || remotePort==-1)
                 opp_error("Error processing command OPEN_ACTIVE: remote address and port must be specified");
@@ -90,9 +90,9 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
 
             // store local/remote socket
             state->active = false;
-            state->fork = openCmd->fork();
-            localAddr = openCmd->localAddr();
-            localPort = openCmd->localPort();
+            state->fork = openCmd->getFork();
+            localAddr = openCmd->getLocalAddr();
+            localPort = openCmd->getLocalPort();
 
             if (localPort==-1)
                 opp_error("Error processing command OPEN_PASSIVE: local port must be specified");

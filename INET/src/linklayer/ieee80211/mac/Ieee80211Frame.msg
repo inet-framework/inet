@@ -57,7 +57,7 @@ enum Ieee80211FrameType
 }
 
 //
-// The common part of 802.11 frames. 
+// The common part of 802.11 frames.
 //
 // NOTE:
 // FCS value is not explicitly modeled, but it is included in the length.

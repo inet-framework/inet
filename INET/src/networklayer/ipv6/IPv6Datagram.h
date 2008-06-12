@@ -48,12 +48,12 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int extensionHeaderArraySize() const;
+    virtual unsigned int getExtensionHeaderArraySize() const;
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual IPv6ExtensionHeaderPtr& extensionHeader(unsigned int k);
+    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k);
 
     /**
      * Adds an extension header to the datagram, at the given position.

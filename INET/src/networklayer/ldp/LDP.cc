@@ -481,8 +481,8 @@ void LDP::processLDPHello(LDPHello *msg)
 {
     UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
     //IPAddress peerAddr = controlInfo->getSrcAddr().get4();
-    IPAddress peerAddr = msg->senderAddress();
-    int interfaceId = controlInfo->interfaceId();
+    IPAddress peerAddr = msg->getSenderAddress();
+    int interfaceId = controlInfo->getInterfaceId();
     delete msg;
 
     EV << "Received LDP Hello from " << peerAddr << ", ";
@@ -642,7 +642,7 @@ void LDP::socketFailure(int, void *yourPtr, int code)
 
 void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 {
-    switch (ldpPacket->type())
+    switch (ldpPacket->getType())
     {
     case HELLO:
         error("Received LDP HELLO over TCP (should arrive over UDP)");
@@ -678,7 +678,7 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
         break;
 
     default:
-        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->type());
+        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->getType());
     }
 }
 
@@ -856,7 +856,7 @@ void LDP::sendMapping(int type, IPAddress dest, int label, IPAddress addr, int l
 void LDP::processNOTIFICATION(LDPNotify *packet)
 {
     FEC_TLV fec = packet->getFec();
-    IPAddress srcAddr = packet->senderAddress();
+    IPAddress srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
 
     // XXX FIXME NO_ROUTE processing should probably be split into two functions,
@@ -917,7 +917,7 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
 void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 {
     FEC_TLV fec = packet->getFec();
-    IPAddress srcAddr = packet->senderAddress();
+    IPAddress srcAddr = packet->getSenderAddress();
 
     EV << "Label Request from LSR " << srcAddr << " for FEC " << fec << endl;
 
@@ -1014,7 +1014,7 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
 {
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
-    IPAddress fromIP = packet->senderAddress();
+    IPAddress fromIP = packet->getSenderAddress();
 
     EV << "Mapping release received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
@@ -1054,7 +1054,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
 {
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
-    IPAddress fromIP = packet->senderAddress();
+    IPAddress fromIP = packet->getSenderAddress();
 
     EV << "Mapping withdraw received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
@@ -1098,7 +1098,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
 {
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
-    IPAddress fromIP = packet->senderAddress();
+    IPAddress fromIP = packet->getSenderAddress();
 
     EV << "Label mapping label=" << label << " received for fec=" << fec << " from " << fromIP << endl;
 
@@ -1181,8 +1181,8 @@ TCPSocket *LDP::peerSocket(IPAddress peerAddr)
 
 bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
-    IPAddress destAddr = ipdatagram->destAddress();
-    int protocol = ipdatagram->transportProtocol();
+    IPAddress destAddr = ipdatagram->getDestAddress();
+    int protocol = ipdatagram->getTransportProtocol();
 
     // never match and always route via L3 if:
 
@@ -1191,13 +1191,13 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
         return false;
 
     // LDP traffic (both discovery...
-    if (protocol == IP_PROT_UDP && check_and_cast<UDPPacket*>(ipdatagram->getEncapsulatedMsg())->destinationPort() == LDP_PORT)
+    if (protocol == IP_PROT_UDP && check_and_cast<UDPPacket*>(ipdatagram->getEncapsulatedMsg())->getDestinationPort() == LDP_PORT)
         return false;
 
     // ...and session)
-    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->destPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->getDestPort() == LDP_PORT)
         return false;
-    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->srcPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg())->getSrcPort() == LDP_PORT)
         return false;
 
     // regular traffic, classify, label etc.

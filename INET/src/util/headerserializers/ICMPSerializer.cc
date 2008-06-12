@@ -51,8 +51,8 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_ECHO;
             icmp->icmp_code = 0;
-            icmp->icmp_id   = htons(pp->originatorId());
-            icmp->icmp_seq  = htons(pp->seqNo());
+            icmp->icmp_id   = htons(pp->getOriginatorId());
+            icmp->icmp_seq  = htons(pp->getSeqNo());
             unsigned int datalen = (pp->getByteLength() - 4);
             for(unsigned int i=0; i < datalen; i++)
                 icmp->icmp_data[i] = 'a';
@@ -64,11 +64,11 @@ int ICMPSerializer::serialize(ICMPMessage *pkt, unsigned char *buf, unsigned int
             PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedMsg());
             icmp->icmp_type = ICMP_ECHOREPLY;
             icmp->icmp_code = 0;
-            icmp->icmp_id   = htons(pp->originatorId());
-            icmp->icmp_seq  = htons(pp->seqNo());
-            unsigned int datalen = pp->dataArraySize();
+            icmp->icmp_id   = htons(pp->getOriginatorId());
+            icmp->icmp_seq  = htons(pp->getSeqNo());
+            unsigned int datalen = pp->getDataArraySize();
             for(unsigned int i=0; i < datalen; i++)
-                icmp->icmp_data[i] = pp->data(i);
+                icmp->icmp_data[i] = pp->getData(i);
             packetLength += datalen;
             break;
         }

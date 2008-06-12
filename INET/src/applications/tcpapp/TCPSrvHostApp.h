@@ -125,7 +125,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     virtual void failure(int code) {hostmod->removeThread(this);}
 
     /**
-     * Called when a status arrives in response to socket()->status().
+     * Called when a status arrives in response to socket()->getStatus().
      * By default it deletes the status object, redefine it to add code
      * to examine the status.
      */

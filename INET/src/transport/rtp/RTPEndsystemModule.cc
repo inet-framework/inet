@@ -165,7 +165,7 @@ void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp) {
     _profileName = rifp->profileName();
     _commonName = rifp->commonName();
     _bandwidth = rifp->bandwidth();
-    _destinationAddress = rifp->destinationAddress();
+    _destinationAddress = rifp->getDestinationAddress();
     _port = rifp->port();
     if (_port % 2 != 0) {
         _port = _port - 1;

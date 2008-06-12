@@ -233,7 +233,7 @@ int RTPInterfacePacket::bandwidth() {
 };
 
 
-IN_Addr RTPInterfacePacket::destinationAddress() {
+IN_Addr RTPInterfacePacket::getDestinationAddress() {
     return _destinationAddress;
 };
 

@@ -45,7 +45,6 @@ class noncobject IPv6ExtensionHeaderPtr;
 message IPv6Datagram
 {
     @customize(true);
-    @omitGetVerb(true);
 
     IPv6Address srcAddress;
     IPv6Address destAddress;
@@ -63,7 +62,6 @@ message IPv6Datagram
 //
 class IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
     @customize(true);
 }
 

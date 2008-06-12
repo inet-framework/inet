@@ -29,7 +29,7 @@ Define_Module(Blackboard);
 
 std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)
 {
-    os << bbi.data()->info();
+    os << bbi.getData()->info();
     return os;
 }
 
@@ -77,7 +77,7 @@ BBItemRef Blackboard::publish(const char *label, cPolymorphic *item)
     contents[bbitem->_label] = bbitem;
 
     coreEV <<"publish "<<label<<" on bb\n";
-    coreEV <<"bbItem->label: "<<bbitem->label()<<endl;
+    coreEV <<"bbItem->label: "<<bbitem->getLabel()<<endl;
     // notify
     SubscriberVector& vec = registeredClients;
     for (SubscriberVector::iterator i=vec.begin(); i!=vec.end(); ++i){
@@ -88,7 +88,7 @@ BBItemRef Blackboard::publish(const char *label, cPolymorphic *item)
 
 void Blackboard::withdraw(BBItemRef bbItem)
 {
-    Enter_Method("withdraw(\"%s\")", bbItem->label());
+    Enter_Method("withdraw(\"%s\")", bbItem->getLabel());
 
     // find on BB
     ContentsMap::iterator k = contents.find(bbItem->_label);
@@ -108,9 +108,9 @@ void Blackboard::withdraw(BBItemRef bbItem)
 
 void Blackboard::changed(BBItemRef bbItem, cPolymorphic *item)
 {
-  coreEV <<"enter changed; item: "<<bbItem->label()<<" changed -> notify subscribers\n";
+  coreEV <<"enter changed; item: "<<bbItem->getLabel()<<" changed -> notify subscribers\n";
 
-  Enter_Method("changed(\"%s\", %s *ptr)", bbItem->label(), item->getClassName());
+  Enter_Method("changed(\"%s\", %s *ptr)", bbItem->getLabel(), item->getClassName());
 
     // update data pointer
     if (item)
@@ -145,7 +145,7 @@ BBItemRef Blackboard::find(const char *label)
 
 BBItemRef Blackboard::subscribe(BlackboardAccess *bbClient, BBItemRef bbItem)
 {
-    Enter_Method("subscribe(this,\"%s\")", bbItem->label());
+    Enter_Method("subscribe(this,\"%s\")", bbItem->getLabel());
 
     // check if already subscribed
     SubscriberVector& vec = bbItem->subscribers;
@@ -155,13 +155,13 @@ BBItemRef Blackboard::subscribe(BlackboardAccess *bbClient, BBItemRef bbItem)
     // add subscriber
     vec.push_back(bbClient);
 
-    coreEV <<"sucessfully subscribed for item: "<<bbItem->label()<<endl;
+    coreEV <<"sucessfully subscribed for item: "<<bbItem->getLabel()<<endl;
     return bbItem;
 }
 
 void Blackboard::unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem)
 {
-    Enter_Method("unsubscribe(this,\"%s\")", bbItem->label());
+    Enter_Method("unsubscribe(this,\"%s\")", bbItem->getLabel());
 
     // check if already subscribed
     SubscriberVector& vec = bbItem->subscribers;

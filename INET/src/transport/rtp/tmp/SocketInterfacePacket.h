@@ -18,10 +18,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
-	file: SocketInterfacePacket.h
-	Purpose:
-	Usage:
-	author: Ulrich Kaage
+    file: SocketInterfacePacket.h
+    Purpose:
+    Usage:
+    author: Ulrich Kaage
 */
 
 #ifndef __SOCKETINTERFACEPACKET_H__

@@ -67,7 +67,7 @@ public:
     /**
      * Returns the status string stored in this message.
      */
-    virtual const char *status() const;
+    virtual const char *getStatus() const;
 
     /**
      * Sets the status string to be stored in this message.

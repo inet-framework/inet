@@ -336,7 +336,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Returns ith address of the interface.
      */
-    const IPv6Address& address(int i) const;
+    const IPv6Address& getAddress(int i) const;
 
     /**
      * Returns true if the ith address of the interface is tentative.
@@ -457,10 +457,10 @@ class INET_API IPv6InterfaceData : public cPolymorphic
 
     /************Getters for Host Variables************************************/
     uint linkMTU() {return hostVars.linkMTU;}
-    short curHopLimit() {return hostVars.curHopLimit;}
+    short getCurHopLimit() {return hostVars.curHopLimit;}
     uint baseReachableTime() {return hostVars.baseReachableTime;}
-    simtime_t reachableTime() {return hostVars.reachableTime;}
-    uint retransTimer() {return hostVars.retransTimer;}
+    simtime_t getReachableTime() {return hostVars.reachableTime;}
+    uint getRetransTimer() {return hostVars.retransTimer;}
     /************Setters for Host Variables************************************/
     void setLinkMTU(uint d) {hostVars.linkMTU = d;}
     void setCurHopLimit(short d) {hostVars.curHopLimit = d;}

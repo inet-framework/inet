@@ -74,12 +74,12 @@ class INET_API RTPMpegPacket : public cPacket
         /**
          * Returns the constant header length (4 bytes).
          */
-        static int headerLength();
+        static int getHeaderLength();
 
         /**
          * Returns the size of mpeg data.
          */
-        virtual int payloadLength();
+        virtual int getPayloadLength();
 
         /**
          * Returns the picture type of the frame the data in this

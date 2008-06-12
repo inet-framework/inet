@@ -110,7 +110,7 @@ class BlackboardAccess;
  * {
  *     if (item==ref)
  *     {
- *         RoutingTable *rt = check_and_cast<RoutingTable *>(ref->data());
+ *         RoutingTable *rt = check_and_cast<RoutingTable *>(ref->getData());
  *         ...
  *     }
  *     else ...
@@ -135,8 +135,8 @@ class BlackboardAccess;
  * void Bar::blackboardItemPublished(BBItemRef item)
  * {
  *     // if label begins with "nic." and it's a NetworkInterfaceData, subscribe
- *     if (!strncmp(item->label(),"nic.",4) &&
- *         dynamic_cast<NetworkInterfaceData *>(item->data()))
+ *     if (!strncmp(item->getLabel(),"nic.",4) &&
+ *         dynamic_cast<NetworkInterfaceData *>(item->getData()))
  *     {
  *         // new network interface appeared, subscribe to it and do whatever
  *         // other actions are necessary
@@ -156,7 +156,7 @@ class BlackboardAccess;
  *     // subscribe to all NetworkInterfaceData
  *     Blackboard *bb = blackboard();
  *     for (Blackboard::iterator i=bb->begin(); i!=bb->end(); ++i)
- *         if (dynamic_cast<NetworkInterfaceData *>((*i)->data()))
+ *         if (dynamic_cast<NetworkInterfaceData *>((*i)->getData()))
  *             bb->subscribe(this, *i);
  * }
  * </pre>
@@ -181,11 +181,11 @@ class INET_API Blackboard : public cSimpleModule
         SubscriberVector subscribers;
       public:
         /** Return the label of this data item*/
-        const char *label()  {return _label.c_str();}
+        const char *getLabel()  {return _label.c_str();}
         /** Return the data item*/
-        cPolymorphic *data()  {return _item;}
+        cPolymorphic *getData()  {return _item;}
         /** Return the data item*/
-        const cPolymorphic *data() const  {return _item;}
+        const cPolymorphic *getData() const  {return _item;}
     };
 
   protected:
@@ -205,7 +205,7 @@ class INET_API Blackboard : public cSimpleModule
   public:
     /**
      * "Handle" to blackboard items. To get the data or the label, write
-     * bbref->data() and bbref->label(), respectively. BBItemRefs become
+     * bbref->getData() and bbref->getLabel(), respectively. BBItemRefs become
      * stale when the item gets withdrawn (unpublished) from the blackboard.
      */
     typedef BBItem *BBItemRef;

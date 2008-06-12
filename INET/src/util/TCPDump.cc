@@ -31,7 +31,7 @@ void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char 
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
         // if TCP, dump as TCP
-        dump(l2r, label, (TCPSegment *)encapmsg, dgram->srcAddress().str(), dgram->destAddress().str(), comment);
+        dump(l2r, label, (TCPSegment *)encapmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
     }
     else
     {
@@ -55,7 +55,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, 
     if (dynamic_cast<TCPSegment *>(encapmsg))
     {
         // if TCP, dump as TCP
-        dump(l2r, label, (TCPSegment *)encapmsg, dgram->srcAddress().str(), dgram->destAddress().str(), comment);
+        dump(l2r, label, (TCPSegment *)encapmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
     }
     else
     {
@@ -84,41 +84,41 @@ void TCPDumper::dump(bool l2r, const char *label, TCPSegment *tcpseg, const std:
     // src/dest
     if (l2r)
     {
-        out << srcAddr << "." << tcpseg->srcPort() << " > ";
-        out << destAddr << "." << tcpseg->destPort() << ": ";
+        out << srcAddr << "." << tcpseg->getSrcPort() << " > ";
+        out << destAddr << "." << tcpseg->getDestPort() << ": ";
     }
     else
     {
-        out << destAddr << "." << tcpseg->destPort() << " < ";
-        out << srcAddr << "." << tcpseg->srcPort() << ": ";
+        out << destAddr << "." << tcpseg->getDestPort() << " < ";
+        out << srcAddr << "." << tcpseg->getSrcPort() << ": ";
     }
 
     // flags
     bool flags = false;
-    if (tcpseg->synBit()) {flags=true; out << "S";}
-    if (tcpseg->finBit()) {flags=true; out << "F";}
-    if (tcpseg->pshBit()) {flags=true; out << "P";}
-    if (tcpseg->rstBit()) {flags=true; out << "R";}
+    if (tcpseg->getSynBit()) {flags=true; out << "S";}
+    if (tcpseg->getFinBit()) {flags=true; out << "F";}
+    if (tcpseg->getPshBit()) {flags=true; out << "P";}
+    if (tcpseg->getRstBit()) {flags=true; out << "R";}
     if (!flags) {out << ".";}
     out << " ";
 
     // data-seqno
-    if (tcpseg->payloadLength()>0 || tcpseg->synBit())
+    if (tcpseg->getPayloadLength()>0 || tcpseg->getSynBit())
     {
-        out << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength();
-        out << "(" << tcpseg->payloadLength() << ") ";
+        out << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo()+tcpseg->getPayloadLength();
+        out << "(" << tcpseg->getPayloadLength() << ") ";
     }
 
     // ack
-    if (tcpseg->ackBit())
-        out << "ack " << tcpseg->ackNo() << " ";
+    if (tcpseg->getAckBit())
+        out << "ack " << tcpseg->getAckNo() << " ";
 
     // window
-    out << "win " << tcpseg->window() << " ";
+    out << "win " << tcpseg->getWindow() << " ";
 
     // urgent
-    if (tcpseg->urgBit())
-        out << "urg " << tcpseg->urgentPointer() << " ";
+    if (tcpseg->getUrgBit())
+        out << "urg " << tcpseg->getUrgentPointer() << " ";
 
     // options (not supported by TCPSegment yet)
 

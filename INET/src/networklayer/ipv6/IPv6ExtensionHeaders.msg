@@ -35,7 +35,6 @@ class noncobject IPv6ExtensionHeader;
 //
 class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
 }
 
 //
@@ -45,7 +44,6 @@ class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 //
 class IPv6RoutingHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
     unsigned char routingType;
     unsigned char segmentsLeft;
     IPv6Address address[];
@@ -58,7 +56,6 @@ class IPv6RoutingHeader extends IPv6ExtensionHeader
 //
 class IPv6FragmentHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
     unsigned short fragmentOffset;
     unsigned int identification;  // datagram ID: identifies which datagram this fragment belongs to.
     bool moreFragments; //Is this the last fragment?
@@ -71,7 +68,6 @@ class IPv6FragmentHeader extends IPv6ExtensionHeader
 //
 class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
 }
 
 //
@@ -81,7 +77,6 @@ class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 //
 class IPv6AuthenticationHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
 }
 
 //
@@ -91,5 +86,4 @@ class IPv6AuthenticationHeader extends IPv6ExtensionHeader
 //
 class IPv6EncapsulatingSecurityPayloadHeader extends IPv6ExtensionHeader
 {
-    @omitGetVerb(true);
 }

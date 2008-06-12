@@ -69,7 +69,6 @@ enum UDPStatusInd
 //
 class UDPControlInfo
 {
-    @omitGetVerb(true);
     int sockId = -1;   // uniquely identifies the \UDP socket
     int userId = -1;   // id than can be freely used by the app
     IPvXAddress srcAddr;  // source \IP or \IPv6 address, or local address with BIND

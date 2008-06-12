@@ -46,8 +46,8 @@ void ErrorHandling::handleMessage(cMessage *msg)
     EV << " Type: " << (int)icmpMsg->getType()
        << " Code: " << (int)icmpMsg->getCode()
        << " Bytelength: " << d->getByteLength()
-       << " Src: " << d->srcAddress()
-       << " Dest: " << d->destAddress()
+       << " Src: " << d->getSrcAddress()
+       << " Dest: " << d->getDestAddress()
        << " Time: " << simTime()
        << "\n";
 

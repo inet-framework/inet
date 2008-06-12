@@ -99,9 +99,9 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
     //set Msg's source addr as the dest addr of request msg.
-    replyCtrl->setSrcAddr(ctrl->destAddr());
+    replyCtrl->setSrcAddr(ctrl->getDestAddr());
     //set Msg's dest addr as the source addr of request msg.
-    replyCtrl->setDestAddr(ctrl->srcAddr());
+    replyCtrl->setDestAddr(ctrl->getSrcAddr());
     reply->setControlInfo(replyCtrl);
 
     delete request;
@@ -155,11 +155,11 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
 
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
-    //errorMessage->setByteLength(4 + origDatagram->headerLength() + 8); FIXME What is this for?
+    //errorMessage->setByteLength(4 + origDatagram->getHeaderLength() + 8); FIXME What is this for?
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    if (origDatagram->srcAddress().isUnspecified())
+    if (origDatagram->getSrcAddress().isUnspecified())
     {
         // pretend it came from the IP layer
         IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
@@ -172,7 +172,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     }
     else
     {
-        sendToIP(errorMsg, origDatagram->srcAddress());
+        sendToIP(errorMsg, origDatagram->getSrcAddress());
     }
 }
 
@@ -239,7 +239,7 @@ ICMPv6Message *ICMPv6::createParamProblemMsg(int code)
 bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
 {
     // don't send ICMP error messages for multicast messages
-    if (origDatagram->destAddress().isMulticast())
+    if (origDatagram->getDestAddress().isMulticast())
     {
         EV << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
@@ -247,10 +247,10 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
     }
 
     // do not reply with error message to error message
-    if (origDatagram->transportProtocol() == IP_PROT_IPv6_ICMP)
+    if (origDatagram->getTransportProtocol() == IP_PROT_IPv6_ICMP)
     {
         ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->getEncapsulatedMsg());
-        if (recICMPMsg->type()<128)
+        if (recICMPMsg->getType()<128)
         {
             EV << "ICMP error received -- do not reply to it" << endl;
             delete origDatagram;

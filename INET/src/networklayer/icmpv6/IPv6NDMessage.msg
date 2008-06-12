@@ -36,7 +36,6 @@ class noncobject MACAddress;
 //
 class IPv6NDPrefixInformation
 {
-    @omitGetVerb(true);
     unsigned int prefixLength;
     bool onlinkFlag;
     bool autoAddressConfFlag;
@@ -59,7 +58,6 @@ class IPv6NDPrefixInformation
 message IPv6NDMessage extends ICMPv6Message
 {
     //customize=true;
-    @omitGetVerb(true);
     int code = 0;
 }
 
@@ -69,7 +67,6 @@ message IPv6NDMessage extends ICMPv6Message
 //
 message IPv6RouterSolicitation extends IPv6NDMessage
 {
-    @omitGetVerb(true);
     //Possible Options
     MACAddress sourceLinkLayerAddress;
 }
@@ -80,7 +77,6 @@ message IPv6RouterSolicitation extends IPv6NDMessage
 //
 message IPv6RouterAdvertisement extends IPv6NDMessage
 {
-    @omitGetVerb(true);
     //Additional ICMP fields
     unsigned int curHopLimit;
     bool managedAddrConfFlag;
@@ -101,7 +97,6 @@ message IPv6RouterAdvertisement extends IPv6NDMessage
 //
 message IPv6NeighbourSolicitation extends IPv6NDMessage
 {
-    @omitGetVerb(true);
     //Additional ICMP fields
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
@@ -115,7 +110,6 @@ message IPv6NeighbourSolicitation extends IPv6NDMessage
 //
 message IPv6NeighbourAdvertisement extends IPv6NDMessage
 {
-    @omitGetVerb(true);
     //Additional ICMP fields
     bool routerFlag;
     bool solicitedFlag;
@@ -132,7 +126,6 @@ message IPv6NeighbourAdvertisement extends IPv6NDMessage
 //
 message IPv6Redirect extends IPv6NDMessage
 {
-    @omitGetVerb(true);
     //Additional ICMP fields
     IPv6Address targetAddress;
     IPv6Address destinationAddress;

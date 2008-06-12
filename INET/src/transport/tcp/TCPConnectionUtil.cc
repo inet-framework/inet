@@ -116,22 +116,22 @@ void TCPConnection::printConnBrief()
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
-    tcpEV << "." << tcpseg->srcPort() << " > ";
-    tcpEV << "." << tcpseg->destPort() << ": ";
+    tcpEV << "." << tcpseg->getSrcPort() << " > ";
+    tcpEV << "." << tcpseg->getDestPort() << ": ";
 
-    if (tcpseg->synBit())  tcpEV << (tcpseg->ackBit() ? "SYN+ACK " : "SYN ");
-    if (tcpseg->finBit())  tcpEV << "FIN(+ACK) ";
-    if (tcpseg->rstBit())  tcpEV << (tcpseg->ackBit() ? "RST+ACK " : "RST ");
-    if (tcpseg->pshBit())  tcpEV << "PSH ";
+    if (tcpseg->getSynBit())  tcpEV << (tcpseg->getAckBit() ? "SYN+ACK " : "SYN ");
+    if (tcpseg->getFinBit())  tcpEV << "FIN(+ACK) ";
+    if (tcpseg->getRstBit())  tcpEV << (tcpseg->getAckBit() ? "RST+ACK " : "RST ");
+    if (tcpseg->getPshBit())  tcpEV << "PSH ";
 
-    if (tcpseg->payloadLength()>0 || tcpseg->synBit())
+    if (tcpseg->getPayloadLength()>0 || tcpseg->getSynBit())
     {
-        tcpEV << tcpseg->sequenceNo() << ":" << tcpseg->sequenceNo()+tcpseg->payloadLength();
-        tcpEV << "(" << tcpseg->payloadLength() << ") ";
+        tcpEV << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo()+tcpseg->getPayloadLength();
+        tcpEV << "(" << tcpseg->getPayloadLength() << ") ";
     }
-    if (tcpseg->ackBit())  tcpEV << "ack " << tcpseg->ackNo() << " ";
-    tcpEV << "win " << tcpseg->window() << "\n";
-    if (tcpseg->urgBit())  tcpEV << "urg " << tcpseg->urgentPointer() << " ";
+    if (tcpseg->getAckBit())  tcpEV << "ack " << tcpseg->getAckNo() << " ";
+    tcpEV << "win " << tcpseg->getWindow() << "\n";
+    if (tcpseg->getUrgBit())  tcpEV << "urg " << tcpseg->getUrgentPointer() << " ";
 }
 
 TCPConnection *TCPConnection::cloneListeningConnection()
@@ -166,14 +166,14 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 void TCPConnection::sendToIP(TCPSegment *tcpseg)
 {
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && tcpseg->payloadLength()!=0)
-        sndNxtVector->record(tcpseg->sequenceNo());
-    if (sndAckVector) sndAckVector->record(tcpseg->ackNo());
+    if (sndNxtVector && tcpseg->getPayloadLength()!=0)
+        sndNxtVector->record(tcpseg->getSequenceNo());
+    if (sndAckVector) sndAckVector->record(tcpseg->getAckNo());
 
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
-    tcpseg->setByteLength(TCP_HEADER_OCTETS+tcpseg->payloadLength());
+    tcpseg->setByteLength(TCP_HEADER_OCTETS+tcpseg->getPayloadLength());
     // TBD account for Options (once they get implemented)
 
     tcpEV << "Sending: ";
@@ -275,18 +275,18 @@ void TCPConnection::sendToApp(cMessage *msg)
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
     // create send/receive queues
-    const char *sendQueueClass = openCmd->sendQueueClass();
+    const char *sendQueueClass = openCmd->getSendQueueClass();
     if (!sendQueueClass || !sendQueueClass[0])
         sendQueueClass = tcpMain->par("sendQueueClass");
     sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
 
-    const char *receiveQueueClass = openCmd->receiveQueueClass();
+    const char *receiveQueueClass = openCmd->getReceiveQueueClass();
     if (!receiveQueueClass || !receiveQueueClass[0])
         receiveQueueClass = tcpMain->par("receiveQueueClass");
     receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
 
     // create algorithm
-    const char *tcpAlgorithmClass = openCmd->tcpAlgorithmClass();
+    const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();
     if (!tcpAlgorithmClass || !tcpAlgorithmClass[0])
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
     tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
@@ -318,8 +318,8 @@ bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
     // segment entirely falls in receive window
     //FIXME probably not this simple, see old code segAccept() below...
-    return seqGE(tcpseg->sequenceNo(),state->rcv_nxt) &&
-           seqLE(tcpseg->sequenceNo()+tcpseg->payloadLength(),state->rcv_nxt+state->rcv_wnd);
+    return seqGE(tcpseg->getSequenceNo(),state->rcv_nxt) &&
+           seqLE(tcpseg->getSequenceNo()+tcpseg->getPayloadLength(),state->rcv_nxt+state->rcv_wnd);
 }
 
 void TCPConnection::sendSyn()
@@ -436,7 +436,7 @@ void TCPConnection::sendSegment(int bytes)
     tcpseg->setWindow(state->rcv_wnd);
     // TBD when to set PSH bit?
     // TBD set URG bit if needed
-    ASSERT(bytes==tcpseg->payloadLength());
+    ASSERT(bytes==tcpseg->getPayloadLength());
 
     state->snd_nxt += bytes;
 

@@ -105,7 +105,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 /*FIXME revise
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->headerLength() / (double)datagram->getByteLength();
+        double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getByteLength();
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
@@ -119,7 +119,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     delete datagram->removeControlInfo();
 
     // routepacket
-    if (!datagram->destAddress().isMulticast())
+    if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, NULL, false);
     else
         routeMulticastPacket(datagram, NULL, sourceInterfaceFrom(datagram));
@@ -157,7 +157,7 @@ FIXME implement fragmentation here.
     // route packet
     if (destIE!=NULL)
         sendDatagramToOutput(datagram, destIE, MACAddress::BROADCAST_ADDRESS); // FIXME what MAC address to use?
-    else if (!datagram->destAddress().isMulticast())
+    else if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, destIE, true);
     else
         routeMulticastPacket(datagram, destIE, NULL);
@@ -166,7 +166,7 @@ FIXME implement fragmentation here.
 void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
 {
     // TBD add option handling code here
-    IPv6Address destAddress = datagram->destAddress();
+    IPv6Address destAddress = datagram->getDestAddress();
 
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
 
@@ -174,7 +174,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     if (rt->localDeliver(destAddress))
     {
         EV << "local delivery\n";
-        if (datagram->srcAddress().isUnspecified())
+        if (datagram->getSrcAddress().isUnspecified())
             datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
         numLocalDeliver++;
         localDeliver(datagram);
@@ -208,7 +208,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
-        datagram->setHopLimit(datagram->hopLimit()-1);
+        datagram->setHopLimit(datagram->getHopLimit()-1);
     }
 
     // routing
@@ -257,7 +257,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     EV << "link-layer address: " << macAddr << "\n";
 
     // set datagram source address if not yet set
-    if (datagram->srcAddress().isUnspecified())
+    if (datagram->getSrcAddress().isUnspecified())
     {
         const IPv6Address& srcAddr = ie->ipv6()->preferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
@@ -271,7 +271,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 
 void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
 {
-    const IPv6Address& destAddr = datagram->destAddress();
+    const IPv6Address& destAddr = datagram->getDestAddress();
 
     EV << "destination address " << destAddr << " is multicast, doing multicast routing\n";
     numMulticast++;
@@ -307,7 +307,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
-        datagram->setHopLimit(datagram->hopLimit()-1);
+        datagram->setHopLimit(datagram->getHopLimit()-1);
     }
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
@@ -332,7 +332,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     // route (provided routing table already contains srcAddr); otherwise
     // discard and continue.
     int inputGateIndex = datagram->getArrivalGate() ? datagram->getArrivalGate()->getIndex() : -1;
-    int shortestPathInputGateIndex = rt->outputGateIndexNo(datagram->srcAddress());
+    int shortestPathInputGateIndex = rt->outputGateIndexNo(datagram->getSrcAddress());
     if (inputGateIndex!=-1 && shortestPathInputGateIndex!=-1 && inputGateIndex!=shortestPathInputGateIndex)
     {
         // FIXME count dropped
@@ -342,7 +342,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     }
 
     // check for local delivery
-    IPv6Address destAddress = datagram->destAddress();
+    IPv6Address destAddress = datagram->getDestAddress();
     if (rt->multicastLocalDeliver(destAddress))
     {
         IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
@@ -379,7 +379,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
                 IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
 
                 // set datagram source address if not yet set
-                if (datagramCopy->srcAddress().isUnspecified())
+                if (datagramCopy->getSrcAddress().isUnspecified())
                     datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->inetAddress());
 
                 // send
@@ -398,10 +398,10 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 {
 /* FIXME revise and complete defragmentation
     // Defragmentation. skip defragmentation if datagram is not fragmented
-    if (datagram->fragmentOffset()!=0 || datagram->moreFragments())
+    if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
     {
-        EV << "Datagram fragment: offset=" << datagram->fragmentOffset()
-           << ", MORE=" << (datagram->moreFragments() ? "true" : "false") << ".\n";
+        EV << "Datagram fragment: offset=" << datagram->getFragmentOffset()
+           << ", MORE=" << (datagram->getMoreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
         if (simTime() >= lastCheckTime + 10)
@@ -420,7 +420,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     }
 */
     // decapsulate and send on appropriate output gate
-    int protocol = datagram->transportProtocol();
+    int protocol = datagram->getTransportProtocol();
     cMessage *packet = decapsulate(datagram);
 
     if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
@@ -450,7 +450,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 {
-    switch (msg->type())
+    switch (msg->getType())
     {
         case ICMPv6_REDIRECT:  // TODO implement redirect handling
         case ICMPv6_DESTINATION_UNREACHABLE:
@@ -459,7 +459,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         case ICMPv6_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocols
             IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
-            int protocol = bogusPacket->transportProtocol();
+            int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.outputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
             break;
@@ -484,11 +484,11 @@ cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setProtocol(datagram->transportProtocol());
-    controlInfo->setSrcAddr(datagram->srcAddress());
-    controlInfo->setDestAddr(datagram->destAddress());
-    controlInfo->setHopLimit(datagram->hopLimit());
-    controlInfo->setInterfaceId(fromIE ? fromIE->interfaceId() : -1);
+    controlInfo->setProtocol(datagram->getTransportProtocol());
+    controlInfo->setSrcAddr(datagram->getSrcAddress());
+    controlInfo->setDestAddr(datagram->getDestAddress());
+    controlInfo->setHopLimit(datagram->getHopLimit());
+    controlInfo->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
 
     // original IP datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
@@ -508,13 +508,13 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
     datagram->encapsulate(transportPacket);
 
     // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->interfaceAt(controlInfo->interfaceId());
+    destIE = ift->interfaceAt(controlInfo->getInterfaceId());
 
     // set source and destination address
-    IPv6Address dest = controlInfo->destAddr();
+    IPv6Address dest = controlInfo->getDestAddr();
     datagram->setDestAddress(dest);
 
-    IPv6Address src = controlInfo->srcAddr();
+    IPv6Address src = controlInfo->getSrcAddr();
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
@@ -528,8 +528,8 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
     }
 
     // set other fields
-    datagram->setHopLimit(controlInfo->hopLimit()>0 ? controlInfo->hopLimit() : 32); //FIXME use iface hop limit instead of 32?
-    datagram->setTransportProtocol(controlInfo->protocol());
+    datagram->setHopLimit(controlInfo->getHopLimit()>0 ? controlInfo->getHopLimit() : 32); //FIXME use iface hop limit instead of 32?
+    datagram->setTransportProtocol(controlInfo->getProtocol());
     delete controlInfo;
 
     // setting IP options is currently not supported
@@ -540,7 +540,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)
 {
     // hop counter check
-    if (datagram->hopLimit() <= 0)
+    if (datagram->getHopLimit() <= 0)
     {
         // drop datagram, destruction responsibility in ICMP
         EV << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";

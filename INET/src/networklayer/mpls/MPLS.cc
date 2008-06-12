@@ -89,16 +89,16 @@ void MPLS::processPacketFromL3(cMessage * msg)
     //int gateIndex = msg->getArrivalGate()->getIndex();
 
     // XXX temporary solution, until TCPSocket and IP are extended to support nam tracing
-    if (ipdatagram->transportProtocol() == IP_PROT_TCP)
+    if (ipdatagram->getTransportProtocol() == IP_PROT_TCP)
     {
         TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg());
-        if (seg->destPort() == LDP_PORT || seg->srcPort() == LDP_PORT)
+        if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT)
         {
             ASSERT(!ipdatagram->hasPar("color"));
             ipdatagram->addPar("color") = LDP_TRAFFIC;
         }
     }
-    else if (ipdatagram->transportProtocol() == IP_PROT_ICMP)
+    else if (ipdatagram->getTransportProtocol() == IP_PROT_ICMP)
     {
         // ASSERT(!ipdatagram->hasPar("color")); XXX this did not hold sometimes...
         if (!ipdatagram->hasPar("color"))

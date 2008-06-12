@@ -197,7 +197,7 @@ class INET_API RTPInnerPacket : public cPacket
         /**
          * Returns the address stored in this RTPInnerPacket.
          */
-        virtual IN_Addr address();
+        virtual IN_Addr getAddress();
 
         /**
          * Returns the port stored in this RTPInnerPacket.

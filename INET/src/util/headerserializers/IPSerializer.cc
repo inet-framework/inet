@@ -53,23 +53,23 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
     struct ip *ip = (struct ip *) buf;
 
     ip->ip_hl         = IP_HEADER_BYTES >> 2;
-    ip->ip_v          = dgram->version();
-    ip->ip_tos        = dgram->diffServCodePoint();
-    ip->ip_id         = htons(dgram->identification());
-    ip->ip_off        = htons(dgram->fragmentOffset());
-    ip->ip_ttl        = dgram->timeToLive();
-    ip->ip_p          = dgram->transportProtocol();
-    ip->ip_src.s_addr = htonl(dgram->srcAddress().getInt());
-    ip->ip_dst.s_addr = htonl(dgram->destAddress().getInt());
+    ip->ip_v          = dgram->getVersion();
+    ip->ip_tos        = dgram->getDiffServCodePoint();
+    ip->ip_id         = htons(dgram->getIdentification());
+    ip->ip_off        = htons(dgram->getFragmentOffset());
+    ip->ip_ttl        = dgram->getTimeToLive();
+    ip->ip_p          = dgram->getTransportProtocol();
+    ip->ip_src.s_addr = htonl(dgram->getSrcAddress().getInt());
+    ip->ip_dst.s_addr = htonl(dgram->getDestAddress().getInt());
     ip->ip_sum        = 0;
 
-    if (dgram->headerLength() > IP_HEADER_BYTES)
+    if (dgram->getHeaderLength() > IP_HEADER_BYTES)
         EV << "Serializing an IP packet with options. Dropping the options.\n";
 
     packetLength = IP_HEADER_BYTES;
 
     cMessage *encapPacket = dgram->getEncapsulatedMsg();
-    switch (dgram->transportProtocol())
+    switch (dgram->getTransportProtocol())
     {
       case IP_PROT_ICMP:
         packetLength += ICMPSerializer().serialize(check_and_cast<ICMPMessage *>(encapPacket),
@@ -80,7 +80,7 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
       default:
-        opp_error("IPSerializer: cannot serialize protocol %d", dgram->transportProtocol());
+        opp_error("IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
     }
 
 #ifdef linux
@@ -117,7 +117,7 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
     dest->setByteLength(IP_HEADER_BYTES);
 
     cMessage *encapPacket = NULL;
-    switch (dest->transportProtocol())
+    switch (dest->getTransportProtocol())
     {
       case IP_PROT_ICMP:
         encapPacket = new ICMPMessage("icmp-from-wire");
@@ -128,7 +128,7 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
         UDPSerializer().parse(buf + headerLength, std::min(totalLength, bufsize) - headerLength, (UDPPacket *)encapPacket);
         break;
       default:
-        opp_error("IPSerializer: cannot serialize protocol %d", dest->transportProtocol());
+        opp_error("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());
     }
 
     ASSERT(encapPacket);

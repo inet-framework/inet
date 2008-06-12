@@ -150,7 +150,7 @@ void RTCPEndsystemModule::initializeRTCP(RTPInnerPacket *rinp) {
     _mtu = rinp->mtu();
     _bandwidth = rinp->bandwidth();
     _rtcpPercentage = rinp->rtcpPercentage();
-    _destinationAddress = rinp->address();
+    _destinationAddress = rinp->getAddress();
     _port = rinp->port();
 
     _senderInfo = new RTPSenderInfo();
@@ -180,7 +180,7 @@ void RTCPEndsystemModule::dataOut(RTPInnerPacket *packet) {
 
 void RTCPEndsystemModule::dataIn(RTPInnerPacket *rinp) {
     RTPPacket *rtpPacket = (RTPPacket *)(rinp->decapsulate());
-    processIncomingRTPPacket(rtpPacket, rinp->address(), rinp->port());
+    processIncomingRTPPacket(rtpPacket, rinp->getAddress(), rinp->port());
 };
 
 
@@ -388,7 +388,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr ad
     }
     else {
         // check for ssrc conflict
-        if (participantInfo->address() != address) {
+        if (participantInfo->getAddress() != address) {
             // we have an address conflict
         }
         if (participantInfo->rtpPort() == IPSuite_PORT_UNDEF) {
@@ -429,7 +429,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                     _participantInfos->add(participantInfo);
                 }
                 else {
-                    if (participantInfo->address() == address) {
+                    if (participantInfo->getAddress() == address) {
                         if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
@@ -471,7 +471,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                     _participantInfos->add(participantInfo);
                 }
                 else {
-                    if (participantInfo->address() == address) {
+                    if (participantInfo->getAddress() == address) {
                         if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }

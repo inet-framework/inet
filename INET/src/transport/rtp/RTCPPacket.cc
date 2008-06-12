@@ -99,7 +99,7 @@ void RTCPPacket::writeContents(std::ostream& os) const {
 };
 
 
-int RTCPPacket::version() {
+int RTCPPacket::getVersion() {
     return _version;
 };
 

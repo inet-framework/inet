@@ -39,7 +39,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     if (!ind)
         opp_error("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
 
-    connId = ind->connId();
+    connId = ind->getConnId();
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
@@ -56,10 +56,10 @@ TCPSocket::TCPSocket(cMessage *msg)
         // remote address/port can be read already after the ctor call.
 
         TCPConnectInfo *connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
-        localAddr = connectInfo->localAddr();
-        remoteAddr = connectInfo->remoteAddr();
-        localPrt = connectInfo->localPort();
-        remotePrt = connectInfo->remotePort();
+        localAddr = connectInfo->getLocalAddr();
+        remoteAddr = connectInfo->getRemoteAddr();
+        localPrt = connectInfo->getLocalPort();
+        remotePrt = connectInfo->getRemotePort();
     }
 }
 
@@ -217,7 +217,7 @@ void TCPSocket::renewSocket()
 bool TCPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<TCPCommand *>(msg->getControlInfo()) &&
-           ((TCPCommand *)(msg->getControlInfo()))->connId()==connId;
+           ((TCPCommand *)(msg->getControlInfo()))->getConnId()==connId;
 }
 
 bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
@@ -259,10 +259,10 @@ void TCPSocket::processMessage(cMessage *msg)
              // want to create a new TCPSocket object via new TCPSocket(msg).
              sockstate = CONNECTED;
              connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
-             localAddr = connectInfo->localAddr();
-             remoteAddr = connectInfo->remoteAddr();
-             localPrt = connectInfo->localPort();
-             remotePrt = connectInfo->remotePort();
+             localAddr = connectInfo->getLocalAddr();
+             remoteAddr = connectInfo->getRemoteAddr();
+             localPrt = connectInfo->getLocalPort();
+             remotePrt = connectInfo->getRemotePort();
              delete msg;
              if (cb)
                  cb->socketEstablished(connId, yourPtr);

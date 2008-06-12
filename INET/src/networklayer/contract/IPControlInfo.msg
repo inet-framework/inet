@@ -55,7 +55,6 @@ cplusplus {{
 //
 class IPControlInfo
 {
-    @omitGetVerb(true);
     @customize(true);
     IPAddress destAddr;   // destination IP address
     IPAddress srcAddr;    // source IP address
@@ -77,7 +76,6 @@ class IPControlInfo
 //
 class IPRoutingDecision
 {
-    @omitGetVerb(true);
     int interfaceId = -1; // interface on which dgram should be sent (see InterfaceTable)
     IPAddress nextHopAddr;
 }

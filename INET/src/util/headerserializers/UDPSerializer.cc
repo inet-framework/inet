@@ -40,24 +40,24 @@ int UDPSerializer::serialize(UDPPacket *pkt, unsigned char *buf, unsigned int bu
     struct udphdr *udphdr = (struct udphdr *) (buf);
     int packetLength;
 
-	packetLength = pkt->getByteLength();
-	udphdr->uh_sport = htons(pkt->sourcePort());
-	udphdr->uh_dport = htons(pkt->destinationPort());
-	udphdr->uh_ulen  = htons(packetLength);
+    packetLength = pkt->getByteLength();
+    udphdr->uh_sport = htons(pkt->getSourcePort());
+    udphdr->uh_dport = htons(pkt->getDestinationPort());
+    udphdr->uh_ulen  = htons(packetLength);
     udphdr->uh_sum   = checksum(buf, packetLength);
     return packetLength;
 }
 
 void UDPSerializer::parse(unsigned char *buf, unsigned int bufsize, UDPPacket *dest)
 {
- 
- 	struct udphdr *udphdr = (struct udphdr*) buf;
 
-	dest->setSourcePort(ntohs(udphdr->uh_sport));
-	dest->setDestinationPort(ntohs(udphdr->uh_dport));
-	dest->setByteLength(8);
-	cMessage *encapPacket = new cMessage("Payload-from-wire");
-	encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
+    struct udphdr *udphdr = (struct udphdr*) buf;
+
+    dest->setSourcePort(ntohs(udphdr->uh_sport));
+    dest->setDestinationPort(ntohs(udphdr->uh_dport));
+    dest->setByteLength(8);
+    cMessage *encapPacket = new cMessage("Payload-from-wire");
+    encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }

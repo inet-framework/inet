@@ -57,7 +57,6 @@ struct TCPPayloadMessage
 //
 message TCPSegment extends cMessage
 {
-    @omitGetVerb(true);
     @customize(true);
     // Source Port
     short srcPort;

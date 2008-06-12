@@ -155,7 +155,7 @@ public:
 
   // new member functions
   Type getType() const {return _type;}
-  Protocol protocol() const {return _proto;}
+  Protocol getProtocol() const {return _proto;}
   PCB* pcb() const {return _pcb;}
 
   // Options

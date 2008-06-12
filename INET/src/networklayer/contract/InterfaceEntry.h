@@ -74,7 +74,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    int interfaceId() const        {return _interfaceId;}
+    int getInterfaceId() const        {return _interfaceId;}
     const char *getName() const       {return _name.c_str();}
     int networkLayerGateIndex() const {return _nwLayerGateIndex;}
     int nodeOutputGateId() const   {return _nodeOutputGateId;}

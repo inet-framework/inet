@@ -279,10 +279,10 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
             // merge contents of the old command into the new one, then delete it
             PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
             PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-            if (pNew->channelNumber()==-1 && pOld->channelNumber()!=-1)
-                pNew->setChannelNumber(pOld->channelNumber());
-            if (pNew->bitrate()==-1 && pOld->bitrate()!=-1)
-                pNew->setBitrate(pOld->bitrate());
+            if (pNew->getChannelNumber()==-1 && pOld->getChannelNumber()!=-1)
+                pNew->setChannelNumber(pOld->getChannelNumber());
+            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
+                pNew->setBitrate(pOld->getBitrate());
             delete pendingRadioConfigMsg;
             pendingRadioConfigMsg = NULL;
         }

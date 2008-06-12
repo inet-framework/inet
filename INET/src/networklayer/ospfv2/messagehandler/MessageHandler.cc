@@ -150,7 +150,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
     // packet version must be OSPF version 2
     if (packet->getVersion () == 2) {
         IPControlInfo*  controlInfo = check_and_cast<IPControlInfo *> (packet->getControlInfo());
-        int             interfaceId = controlInfo->interfaceId ();
+        int             interfaceId = controlInfo->getInterfaceId();
         OSPF::AreaID    areaID      = packet->getAreaID ().getInt ();
         OSPF::Area*     area        = router->GetArea (areaID);
 
@@ -183,7 +183,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
                 }
             }
             if (intf != NULL) {
-                unsigned long                       destinationAddress = controlInfo->destAddr ().getInt ();
+                unsigned long                       destinationAddress = controlInfo->getDestAddr().getInt ();
                 unsigned long                       allDRouters        = ULongFromIPv4Address (OSPF::AllDRouters);
                 OSPF::Interface::InterfaceStateType interfaceState     = intf->GetState ();
 
@@ -209,7 +209,7 @@ void OSPF::MessageHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* u
                                 case OSPF::Interface::Broadcast:
                                 case OSPF::Interface::NBMA:
                                 case OSPF::Interface::PointToMultiPoint:
-                                    neighbor = intf->GetNeighborByAddress (IPv4AddressFromULong (controlInfo->srcAddr ().getInt ()));
+                                    neighbor = intf->GetNeighborByAddress (IPv4AddressFromULong (controlInfo->getSrcAddr().getInt ()));
                                     break;
                                 case OSPF::Interface::PointToPoint:
                                 case OSPF::Interface::Virtual:

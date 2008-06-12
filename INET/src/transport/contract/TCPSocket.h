@@ -207,9 +207,9 @@ class INET_API TCPSocket
     /** @name Getter functions */
     //@{
     IPvXAddress localAddress() {return localAddr;}
-    int localPort() {return localPrt;}
+    int getLocalPort() {return localPrt;}
     IPvXAddress remoteAddress() {return remoteAddr;}
-    int remotePort() {return remotePrt;}
+    int getRemotePort() {return remotePrt;}
     //@}
 
     /** @name Opening and closing connections, sending data */

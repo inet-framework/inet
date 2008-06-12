@@ -118,7 +118,6 @@ class IPSourceRoutingOption
 //
 message IPDatagram
 {
-    @omitGetVerb(true);
     short version = 4;
     short headerLength = IP_HEADER_BYTES;
 
@@ -143,7 +142,7 @@ message IPDatagram
 // Some old code regarding options and header length
 //
 // header length is always set automatically
-//short headerLength() { return header_length; }
+//short getHeaderLength() { return header_length; }
 //
 // fields for options
 //IPOption optionType() { return option_code; }

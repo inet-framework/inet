@@ -80,7 +80,7 @@ void LinkStateRouting::handleMessage(cMessage * msg)
     {
         EV << "Processing message from IP: " << msg << endl;
         IPControlInfo *controlInfo = check_and_cast<IPControlInfo *>(msg->getControlInfo());
-        IPAddress sender = controlInfo->srcAddr();
+        IPAddress sender = controlInfo->getSrcAddr();
         processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg*>(msg), sender);
     }
     else

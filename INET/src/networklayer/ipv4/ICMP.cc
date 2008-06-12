@@ -57,7 +57,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     take(origDatagram);
 
     // don't send ICMP error messages for multicast messages
-    if (origDatagram->destAddress().isMulticast())
+    if (origDatagram->getDestAddress().isMulticast())
     {
         EV << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
@@ -65,7 +65,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
 
     // do not reply with error message to error message
-    if (origDatagram->transportProtocol() == IP_PROT_ICMP)
+    if (origDatagram->getTransportProtocol() == IP_PROT_ICMP)
     {
         ICMPMessage *recICMPMsg = check_and_cast<ICMPMessage *>(origDatagram->getEncapsulatedMsg());
         if (recICMPMsg->getType()<128)
@@ -91,11 +91,11 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     errorMessage->encapsulate(origDatagram);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender
-    errorMessage->setByteLength(8 + origDatagram->headerLength() + 8);
+    errorMessage->setByteLength(8 + origDatagram->getHeaderLength() + 8);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    if (origDatagram->srcAddress().isUnspecified())
+    if (origDatagram->getSrcAddress().isUnspecified())
     {
         // pretend it came from the IP layer
         IPControlInfo *controlInfo = new IPControlInfo();
@@ -108,7 +108,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
     else
     {
-        sendToIP(errorMessage, origDatagram->srcAddress());
+        sendToIP(errorMessage, origDatagram->getSrcAddress());
     }
 }
 
@@ -171,8 +171,8 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
     IPControlInfo *ctrl = check_and_cast<IPControlInfo *>(reply->getControlInfo());
-    IPAddress src = ctrl->srcAddr();
-    IPAddress dest = ctrl->destAddr();
+    IPAddress src = ctrl->getSrcAddr();
+    IPAddress dest = ctrl->getDestAddr();
     ctrl->setSrcAddr(dest);
     ctrl->setDestAddr(src);
 

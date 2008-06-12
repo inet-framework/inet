@@ -104,14 +104,14 @@ void UDP::bind(int gateIndex, UDPControlInfo *ctrl)
 
     // create and fill in SockDesc
     SockDesc *sd = new SockDesc();
-    sd->sockId = ctrl->sockId();
-    sd->userId = ctrl->userId();
+    sd->sockId = ctrl->getSockId();
+    sd->userId = ctrl->getUserId();
     sd->appGateIndex = gateIndex;
-    sd->localAddr = ctrl->srcAddr();
-    sd->remoteAddr = ctrl->destAddr();
-    sd->localPort = ctrl->srcPort();
-    sd->remotePort = ctrl->destPort();
-    sd->interfaceId = ctrl->interfaceId();
+    sd->localAddr = ctrl->getSrcAddr();
+    sd->remoteAddr = ctrl->getDestAddr();
+    sd->localPort = ctrl->getSrcPort();
+    sd->remotePort = ctrl->getDestPort();
+    sd->interfaceId = ctrl->getInterfaceId();
 
     if (sd->sockId==-1)
         error("sockId in BIND message not filled in");
@@ -231,13 +231,13 @@ void UDP::updateDisplayString()
 bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
 {
     // IPv4 version
-    if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
+    if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ipCtrl->destAddr())
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get4()!=ipCtrl->getDestAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ipCtrl->srcAddr())
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get4()!=ipCtrl->getSrcAddr())
         return false;
-    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->interfaceId())
+    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
         return false;
     return true;
 }
@@ -245,13 +245,13 @@ bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ipCtrl)
 bool UDP::matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ipCtrl)
 {
     // IPv6 version
-    if (sd->remotePort!=0 && sd->remotePort!=udp->sourcePort())
+    if (sd->remotePort!=0 && sd->remotePort!=udp->getSourcePort())
         return false;
-    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ipCtrl->destAddr())
+    if (!sd->localAddr.isUnspecified() && sd->localAddr.get6()!=ipCtrl->getDestAddr())
         return false;
-    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ipCtrl->srcAddr())
+    if (!sd->remoteAddr.isUnspecified() && sd->remoteAddr.get6()!=ipCtrl->getSrcAddr())
         return false;
-    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->interfaceId())
+    if (sd->interfaceId!=-1 && sd->interfaceId!=ipCtrl->getInterfaceId())
         return false;
     return true;
 }
@@ -269,11 +269,11 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl,
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
-    udpCtrl->setSrcAddr(ipCtrl->srcAddr());
-    udpCtrl->setDestAddr(ipCtrl->destAddr());
-    udpCtrl->setSrcPort(udpHeader->sourcePort());
-    udpCtrl->setDestPort(udpHeader->destinationPort());
-    udpCtrl->setInterfaceId(ipCtrl->interfaceId());
+    udpCtrl->setSrcAddr(ipCtrl->getSrcAddr());
+    udpCtrl->setDestAddr(ipCtrl->getDestAddr());
+    udpCtrl->setSrcPort(udpHeader->getSourcePort());
+    udpCtrl->setDestPort(udpHeader->getDestinationPort());
+    udpCtrl->setInterfaceId(ipCtrl->getInterfaceId());
     payload->setControlInfo(udpCtrl);
 
     send(payload, "appOut", sd->appGateIndex);
@@ -286,11 +286,11 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtr
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
-    udpCtrl->setSrcAddr(ipCtrl->srcAddr());
-    udpCtrl->setDestAddr(ipCtrl->destAddr());
-    udpCtrl->setSrcPort(udpHeader->sourcePort());
-    udpCtrl->setDestPort(udpHeader->destinationPort());
-    udpCtrl->setInterfaceId(ipCtrl->interfaceId());
+    udpCtrl->setSrcAddr(ipCtrl->getSrcAddr());
+    udpCtrl->setDestAddr(ipCtrl->getDestAddr());
+    udpCtrl->setSrcPort(udpHeader->getSourcePort());
+    udpCtrl->setDestPort(udpHeader->getDestinationPort());
+    udpCtrl->setInterfaceId(ipCtrl->getInterfaceId());
     payload->setControlInfo(udpCtrl);
 
     send(payload, "appOut", sd->appGateIndex);
@@ -307,7 +307,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
         if (!icmp)
             icmp = ICMPAccess().get();
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
-        if (!ctrl4->destAddr().isMulticast())
+        if (!ctrl4->getDestAddr().isMulticast())
             icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
     }
     else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo())!=NULL)
@@ -315,7 +315,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
         if (!icmpv6)
             icmpv6 = ICMPv6Access().get();
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        if (!ctrl6->destAddr().isMulticast())
+        if (!ctrl6->getDestAddr().isMulticast())
             icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
     }
     else
@@ -338,11 +338,11 @@ void UDP::processICMPError(cMessage *msg)
         code = icmpMsg->getCode();
         icmpMsg->setLength(icmpMsg->getEncapsulatedMsg()->length()); // trick because payload in ICMP is conceptually truncated
         IPDatagram *datagram = check_and_cast<IPDatagram *>(icmpMsg->decapsulate());
-        localAddr = datagram->srcAddress();
-        remoteAddr = datagram->destAddress();
+        localAddr = datagram->getSrcAddress();
+        remoteAddr = datagram->getDestAddress();
         UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
-        localPort = packet->sourcePort();
-        remotePort = packet->destinationPort();
+        localPort = packet->getSourcePort();
+        remotePort = packet->getDestinationPort();
         delete icmpMsg;
         delete datagram;
         delete packet;
@@ -350,14 +350,14 @@ void UDP::processICMPError(cMessage *msg)
     else if (dynamic_cast<ICMPv6Message *>(msg))
     {
         ICMPv6Message *icmpMsg = (ICMPv6Message *)msg;
-        type = icmpMsg->type();
+        type = icmpMsg->getType();
         code = -1; // FIXME this is dependent on getType()...
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->decapsulate());
-        localAddr = datagram->srcAddress();
-        remoteAddr = datagram->destAddress();
+        localAddr = datagram->getSrcAddress();
+        remoteAddr = datagram->getDestAddress();
         UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->decapsulate());
-        localPort = packet->sourcePort();
-        remotePort = packet->destinationPort();
+        localPort = packet->getSourcePort();
+        remotePort = packet->getDestinationPort();
         delete icmpMsg;
         delete datagram;
         delete packet;
@@ -412,7 +412,7 @@ void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
 {
     // simulate checksum: discard packet if it has bit error
-    EV << "Packet " << udpPacket->getName() << " received from network, dest port " << udpPacket->destinationPort() << "\n";
+    EV << "Packet " << udpPacket->getName() << " received from network, dest port " << udpPacket->getDestinationPort() << "\n";
     if (udpPacket->hasBitError())
     {
         EV << "Packet has bit error, discarding\n";
@@ -421,7 +421,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         return;
     }
 
-    int destPort = udpPacket->destinationPort();
+    int destPort = udpPacket->getDestinationPort();
     cPolymorphic *ctrl = udpPacket->removeControlInfo();
 
     // send back ICMP error if no socket is bound to that port
@@ -493,18 +493,18 @@ void UDP::processMsgFromApp(cMessage *appData)
     udpPacket->encapsulate(appData);
 
     // set source and destination port
-    udpPacket->setSourcePort(udpCtrl->srcPort());
-    udpPacket->setDestinationPort(udpCtrl->destPort());
+    udpPacket->setSourcePort(udpCtrl->getSrcPort());
+    udpPacket->setDestinationPort(udpCtrl->getDestPort());
 
-    if (!udpCtrl->destAddr().isIPv6())
+    if (!udpCtrl->getDestAddr().isIPv6())
     {
         // send to IPv4
         EV << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPControlInfo *ipControlInfo = new IPControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpCtrl->srcAddr().get4());
-        ipControlInfo->setDestAddr(udpCtrl->destAddr().get4());
-        ipControlInfo->setInterfaceId(udpCtrl->interfaceId());
+        ipControlInfo->setSrcAddr(udpCtrl->getSrcAddr().get4());
+        ipControlInfo->setDestAddr(udpCtrl->getDestAddr().get4());
+        ipControlInfo->setInterfaceId(udpCtrl->getInterfaceId());
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
 
@@ -516,8 +516,8 @@ void UDP::processMsgFromApp(cMessage *appData)
         EV << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(udpCtrl->srcAddr().get6());
-        ipControlInfo->setDestAddr(udpCtrl->destAddr().get6());
+        ipControlInfo->setSrcAddr(udpCtrl->getSrcAddr().get6());
+        ipControlInfo->setDestAddr(udpCtrl->getDestAddr().get6());
         // ipControlInfo->setInterfaceId(udpCtrl->InterfaceId()); FIXME extend IPv6 with this!!!
         udpPacket->setControlInfo(ipControlInfo);
         delete udpCtrl;
@@ -536,10 +536,10 @@ void UDP::processCommandFromApp(cMessage *msg)
             bind(msg->getArrivalGate()->getIndex(), udpCtrl);
             break;
         case UDP_C_CONNECT:
-            connect(udpCtrl->sockId(), udpCtrl->destAddr(), udpCtrl->destPort());
+            connect(udpCtrl->getSockId(), udpCtrl->getDestAddr(), udpCtrl->getDestPort());
             break;
         case UDP_C_UNBIND:
-            unbind(udpCtrl->sockId());
+            unbind(udpCtrl->getSockId());
             break;
         default:
             error("unknown command code (message kind) %d received from app", msg->getKind());

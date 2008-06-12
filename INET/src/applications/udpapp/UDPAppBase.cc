@@ -57,10 +57,10 @@ void UDPAppBase::printPacket(cMessage *msg)
 {
     UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
 
-    IPvXAddress srcAddr = ctrl->srcAddr();
-    IPvXAddress destAddr = ctrl->destAddr();
-    int srcPort = ctrl->srcPort();
-    int destPort = ctrl->destPort();
+    IPvXAddress srcAddr = ctrl->getSrcAddr();
+    IPvXAddress destAddr = ctrl->getDestAddr();
+    int srcPort = ctrl->getSrcPort();
+    int destPort = ctrl->getDestPort();
 
     ev  << msg << "  (" << msg->getByteLength() << " bytes)" << endl;
     ev  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;

@@ -149,7 +149,7 @@ void AbstractRadio::handleMessage(cMessage *msg)
     {
         handleSelfMsg(msg);
     }
-    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == channelNumber())
+    else if (check_and_cast<AirFrame *>(msg)->getChannelNumber() == getChannelNumber())
     {
         // must be an AirFrame
         AirFrame *airframe = (AirFrame *) msg;
@@ -185,15 +185,15 @@ void AbstractRadio::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_
 AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
 {
     PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
-    ASSERT(!ctrl || ctrl->channelNumber()==-1); // per-packet channel switching not supported
+    ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
 
     // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
     AirFrame *airframe = createAirFrame();
     airframe->setName(frame->getName());
     airframe->setPSend(transmitterPower);
-    airframe->setChannelNumber(channelNumber());
+    airframe->setChannelNumber(getChannelNumber());
     airframe->encapsulate(frame);
-    airframe->setBitrate(ctrl ? ctrl->bitrate() : rs.getBitrate());
+    airframe->setBitrate(ctrl ? ctrl->getBitrate() : rs.getBitrate());
     airframe->setDuration(radioModel->calculateDuration(airframe));
     airframe->setSenderPos(myPosition());
     delete ctrl;
@@ -280,8 +280,8 @@ void AbstractRadio::handleCommand(int msgkind, cPolymorphic *ctrl)
     {
         // extract new channel number
         PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
-        int newChannel = phyCtrl->channelNumber();
-        double newBitrate = phyCtrl->bitrate();
+        int newChannel = phyCtrl->getChannelNumber();
+        double newBitrate = phyCtrl->getBitrate();
         delete ctrl;
 
         if (newChannel!=-1)

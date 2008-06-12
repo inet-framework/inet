@@ -140,15 +140,15 @@ void RTPApplication::activity() {
             }
             else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_STATUS) {
                 RTPSenderStatusMessage *rsim = (RTPSenderStatusMessage *)(rifpIn->decapsulate());
-                if (!opp_strcmp(rsim->status(), "PLAYING")) {
+                if (!opp_strcmp(rsim->getStatus(), "PLAYING")) {
                     //
                 }
-                else if (!opp_strcmp(rsim->status(), "FINISHED")) {
+                else if (!opp_strcmp(rsim->getStatus(), "FINISHED")) {
                     transmissionFinished = true;
                     cMessage *msg5 = new cMessage("leaveSession");
                     scheduleAt(simTime() + _sessionLeaveDelay, msg5);
                 }
-                else if (!opp_strcmp(rsim->status(), "STOPPED")) {
+                else if (!opp_strcmp(rsim->getStatus(), "STOPPED")) {
                     transmissionFinished = true;
                     cMessage *msg6 = new cMessage("leaveSession");
                     scheduleAt(simTime() + _sessionLeaveDelay, msg6);

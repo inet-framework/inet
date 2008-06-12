@@ -164,8 +164,8 @@ void SnrEval::handleCommand(int msgkind, cPolymorphic *ctrl)
     {
         // extract new channel number
         PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
-        int newChannel = phyCtrl->channelNumber();
-        double newBitrate = phyCtrl->bitrate();
+        int newChannel = phyCtrl->getChannelNumber();
+        double newBitrate = phyCtrl->getBitrate();
         delete ctrl;
 
         if (newChannel!=-1)

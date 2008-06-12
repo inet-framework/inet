@@ -139,7 +139,7 @@ class INET_API BasicSnrEval : public ChannelAccess
     virtual double calcDuration(cMessage*);
 
     /** @brief Returns the channel we're listening on. This version always returns 0 (single radio channel supported) */
-    virtual int channelNumber() const {return 0;}
+    virtual int getChannelNumber() const {return 0;}
 
     /**
      * @name Abstraction layer

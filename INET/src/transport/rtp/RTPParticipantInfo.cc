@@ -157,7 +157,7 @@ void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *
 };
 
 
-IN_Addr RTPParticipantInfo::address() {
+IN_Addr RTPParticipantInfo::getAddress() {
     return _address;
 };
 

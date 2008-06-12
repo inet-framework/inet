@@ -88,7 +88,6 @@ enum TCPErrorCode
 //
 class TCPCommand
 {
-    @omitGetVerb(true);
     int connId = -1;   // identifies the socket within the application
     int userId = -1;   // id than can be freely used by the app
 }
@@ -99,7 +98,6 @@ class TCPCommand
 //
 class TCPErrorInfo extends TCPCommand
 {
-    @omitGetVerb(true);
     int errorCode enum(TCPErrorCode);
     string messageText;
 }
@@ -132,7 +130,6 @@ class TCPErrorInfo extends TCPCommand
 //
 class TCPOpenCommand extends TCPCommand
 {
-    @omitGetVerb(true);
     IPvXAddress localAddr; // may be left empty
     IPvXAddress remoteAddr;// required for active open
     int localPort = -1;       // required for passive open
@@ -151,7 +148,6 @@ class TCPOpenCommand extends TCPCommand
 //
 class TCPSendCommand extends TCPCommand
 {
-    @omitGetVerb(true);
 }
 
 
@@ -163,7 +159,6 @@ class TCPSendCommand extends TCPCommand
 //
 class TCPConnectInfo extends TCPCommand
 {
-    @omitGetVerb(true);
     IPvXAddress localAddr;
     IPvXAddress remoteAddr;
     int localPort;
@@ -180,7 +175,6 @@ class TCPConnectInfo extends TCPCommand
 //
 class TCPStatusInfo extends TCPCommand
 {
-    @omitGetVerb(true);
     int state;
     string stateName;
 

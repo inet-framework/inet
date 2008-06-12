@@ -162,7 +162,7 @@ class INET_API UDPSocket
     /**
      * Returns the userId.
      */
-    int userId() const  {return usrId;}
+    int getUserId() const  {return usrId;}
 
     /**
      * Returns the socket state, one of NOT_BOUND, BOUND, etc.
@@ -184,7 +184,7 @@ class INET_API UDPSocket
     /** @name Getter functions */
     //@{
     IPvXAddress localAddress() {return localAddr;}
-    int localPort() {return localPrt;}
+    int getLocalPort() {return localPrt;}
     //@}
 
     /** @name Opening and closing connections, sending data */

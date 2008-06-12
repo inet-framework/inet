@@ -172,7 +172,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ip address of the rtp endsystem.
          */
-        virtual IN_Addr address();
+        virtual IN_Addr getAddress();
 
         /**
          * Sets the ip address of the rtp endsystem.

@@ -194,7 +194,7 @@ class INET_API RTPInterfacePacket : public cPacket
         /**
          * Returns the address stored in this RTPInterfacePacket.
          */
-        virtual IN_Addr destinationAddress();
+        virtual IN_Addr getDestinationAddress();
 
         /**
          * Returns the port stored in this RTPInterfacePacket.

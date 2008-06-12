@@ -45,9 +45,9 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
 {
     // find datagram buffer
     Key key;
-    key.id = fh->identification();
-    key.src = datagram->srcAddress();
-    key.dest = datagram->destAddress();
+    key.id = fh->getIdentification();
+    key.src = datagram->getSrcAddress();
+    key.dest = datagram->getDestAddress();
 
     Buffers::iterator i = bufs.find(key);
 
@@ -67,9 +67,9 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     // add fragment into reassembly buffer
     // FIXME next lines aren't correct: check 4.5 of RFC 2460 regarding Unfragmentable part, Fragmentable part, etc
     int bytes = datagram->getByteLength() - datagram->calculateHeaderByteLength();
-    bool isComplete = buf->buf.addFragment(fh->fragmentOffset(),
-                                           fh->fragmentOffset() + bytes,
-                                           !fh->moreFragments());
+    bool isComplete = buf->buf.addFragment(fh->getFragmentOffset(),
+                                           fh->getFragmentOffset() + bytes,
+                                           !fh->getMoreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
     // content (getEncapsulatedMsg()), other (empty) ones are only

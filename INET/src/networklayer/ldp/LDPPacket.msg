@@ -61,7 +61,6 @@ struct FEC_TLV
 //
 message LDPPacket
 {
-    @omitGetVerb(true);
     int type;
     IPAddress senderAddress;
     IPAddress receiverAddress;

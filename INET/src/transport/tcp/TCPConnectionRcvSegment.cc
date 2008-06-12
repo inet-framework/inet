@@ -57,22 +57,22 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress sr
     //
     //    <SEQ=SEG.ACK><CTL=RST>
     //"
-    if (tcpseg->rstBit())
+    if (tcpseg->getRstBit())
     {
         tcpEV << "RST bit set: dropping segment\n";
         return;
     }
 
-    if (!tcpseg->ackBit())
+    if (!tcpseg->getAckBit())
     {
         tcpEV << "ACK bit not set: sending RST+ACK\n";
-        uint32 ackNo = tcpseg->sequenceNo() + (uint32)tcpseg->payloadLength();
-        sendRstAck(0,ackNo,destAddr,srcAddr,tcpseg->destPort(),tcpseg->srcPort());
+        uint32 ackNo = tcpseg->getSequenceNo() + (uint32)tcpseg->getPayloadLength();
+        sendRstAck(0,ackNo,destAddr,srcAddr,tcpseg->getDestPort(),tcpseg->getSrcPort());
     }
     else
     {
         tcpEV << "ACK bit set: sending RST\n";
-        sendRst(tcpseg->ackNo(),destAddr,srcAddr,tcpseg->destPort(),tcpseg->srcPort());
+        sendRst(tcpseg->getAckNo(),destAddr,srcAddr,tcpseg->getDestPort(),tcpseg->getSrcPort());
     }
 }
 
@@ -82,8 +82,8 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
     printSegmentBrief(tcpseg);
     tcpEV << "TCB: " << state->info() << "\n";
 
-    if (rcvSeqVector) rcvSeqVector->record(tcpseg->sequenceNo());
-    if (rcvAckVector) rcvAckVector->record(tcpseg->ackNo());
+    if (rcvSeqVector) rcvSeqVector->record(tcpseg->getSequenceNo());
+    if (rcvAckVector) rcvAckVector->record(tcpseg->getAckNo());
 
     //
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
@@ -122,7 +122,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         //
         //  <SEQ=SND.NXT><ACK=RCV.NXT><CTL=ACK>
         //"
-        if (tcpseg->rstBit())
+        if (tcpseg->getRstBit())
         {
             tcpEV << "RST with unacceptable seqNum: dropping\n";
         }
@@ -137,7 +137,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: second check the RST bit,
     //
-    if (tcpseg->rstBit())
+    if (tcpseg->getRstBit())
     {
         // Note: if we come from LISTEN, processSegmentInListen() has already handled RST.
         switch (fsm.getState())
@@ -193,7 +193,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: fourth, check the SYN bit,
     //
-    if (tcpseg->synBit())
+    if (tcpseg->getSynBit())
     {
         //"
         // If the SYN is in the window it is an error, send a reset, any
@@ -216,7 +216,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: fifth check the ACK field,
     //
-    if (!tcpseg->ackBit())
+    if (!tcpseg->getAckBit())
     {
         // if the ACK bit is off drop the segment and return
         tcpEV << "ACK not set, dropping segment\n";
@@ -238,9 +238,9 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         //
         // and send it.
         //"
-        if (!seqLE(state->snd_una,tcpseg->ackNo()) || !seqLE(tcpseg->ackNo(),state->snd_nxt))
+        if (!seqLE(state->snd_una,tcpseg->getAckNo()) || !seqLE(tcpseg->getAckNo(),state->snd_nxt))
         {
-            sendRst(tcpseg->ackNo());
+            sendRst(tcpseg->getAckNo());
             return TCP_E_IGNORE;
         }
 
@@ -336,7 +336,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // acknowledgment of our FIN.  If our FIN is now acknowledged,
         // delete the TCB, enter the CLOSED state, and return.
         //"
-        if (state->send_fin && tcpseg->ackNo()==state->snd_fin_seq+1)
+        if (state->send_fin && tcpseg->getAckNo()==state->snd_fin_seq+1)
         {
             tcpEV << "Last ACK arrived\n";
             sendIndicationToApp(TCP_I_CLOSED);
@@ -361,7 +361,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: sixth, check the URG bit,
     //
-    if (tcpseg->urgBit() && (fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_FIN_WAIT_1 ||
+    if (tcpseg->getUrgBit() && (fsm.getState()==TCP_S_ESTABLISHED || fsm.getState()==TCP_S_FIN_WAIT_1 ||
         fsm.getState()==TCP_S_FIN_WAIT_2))
     {
         //"
@@ -407,7 +407,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // This acknowledgment should be piggybacked on a segment being
         // transmitted if possible without incurring undue delay.
         //"
-        if (tcpseg->payloadLength()>0)
+        if (tcpseg->getPayloadLength()>0)
         {
             tcpEV2 << "Processing segment text in a data transfer state\n";
 
@@ -462,7 +462,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: eighth, check the FIN bit,
     //
-    if (tcpseg->finBit())
+    if (tcpseg->getFinBit())
     {
         //"
         // If the FIN bit is set, signal the user "connection closing" and
@@ -476,7 +476,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // segment is "above sequence" (ie. RCV.NXT < SEG.SEQ), we cannot
         // advance RCV.NXT over the FIN. Instead we remember this sequence
         // number and do it later.
-        uint32 fin_seq = (uint32)tcpseg->sequenceNo() + (uint32)tcpseg->payloadLength();
+        uint32 fin_seq = (uint32)tcpseg->getSequenceNo() + (uint32)tcpseg->getPayloadLength();
         if (state->rcv_nxt==fin_seq)
         {
             // advance rcv_nxt over FIN now
@@ -574,7 +574,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
     // first check for an RST
     //   An incoming RST should be ignored.  Return.
     //"
-    if (tcpseg->rstBit())
+    if (tcpseg->getRstBit())
     {
         tcpEV << "RST bit set: dropping segment\n";
         return TCP_E_IGNORE;
@@ -591,19 +591,19 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
     //
     //    Return.
     //"
-    if (tcpseg->ackBit())
+    if (tcpseg->getAckBit())
     {
         tcpEV << "ACK bit set: dropping segment and sending RST\n";
-        sendRst(tcpseg->ackNo(),destAddr,srcAddr,tcpseg->destPort(),tcpseg->srcPort());
+        sendRst(tcpseg->getAckNo(),destAddr,srcAddr,tcpseg->getDestPort(),tcpseg->getSrcPort());
         return TCP_E_IGNORE;
     }
 
     //"
     // third check for a SYN
     //"
-    if (tcpseg->synBit())
+    if (tcpseg->getSynBit())
     {
-        if (tcpseg->finBit())
+        if (tcpseg->getFinBit())
         {
             // Looks like implementations vary on how to react to SYN+FIN.
             // Some treat it as plain SYN (and reply with SYN+ACK), some send RST+ACK.
@@ -624,13 +624,13 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         if (state->fork)
         {
             TCPConnection *conn = cloneListeningConnection(); // this will stay LISTENing
-            tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+            tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
             tcpEV << "Connection forked: this connection got new connId=" << connId << ", "
                      "spinoff keeps LISTENing with connId=" << conn->connId << "\n";
         }
         else
         {
-            tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+            tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
         }
 
         //"
@@ -643,15 +643,15 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         //  SND.NXT is set to ISS+1 and SND.UNA to ISS.  The connection
         //  state should be changed to SYN-RECEIVED.
         //"
-        state->rcv_nxt = tcpseg->sequenceNo()+1;
-        state->irs = tcpseg->sequenceNo();
+        state->rcv_nxt = tcpseg->getSequenceNo()+1;
+        state->irs = tcpseg->getSequenceNo();
         receiveQueue->init(state->rcv_nxt);   // FIXME may init twice...
         selectInitialSeqNum();
 
         // although not mentioned in RFC 793, seems like we have to pick up
         // initial snd_wnd from the segment here.
-        state->snd_wnd = tcpseg->window();
-        state->snd_wl1 = tcpseg->sequenceNo();
+        state->snd_wnd = tcpseg->getWindow();
+        state->snd_wl1 = tcpseg->getSequenceNo();
         state->snd_wl2 = state->iss;
         if (sndWndVector) sndWndVector->record(state->snd_wnd);
 
@@ -669,9 +669,9 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
         // so there's only URG and PSH left to handle.
         //
-        if (tcpseg->payloadLength()>0)
+        if (tcpseg->getPayloadLength()>0)
             receiveQueue->insertBytesFromSegment(tcpseg);
-        if (tcpseg->urgBit() || tcpseg->pshBit())
+        if (tcpseg->getUrgBit() || tcpseg->getPshBit())
             tcpEV << "Ignoring URG and PSH bits in SYN\n"; // TBD
 
         return TCP_E_RCV_SYN;  // this will take us to SYN_RCVD
@@ -703,12 +703,12 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
     //
     //     If SND.UNA =< SEG.ACK =< SND.NXT then the ACK is acceptable.
     //"
-    if (tcpseg->ackBit())
+    if (tcpseg->getAckBit())
     {
-        if (seqLE(tcpseg->ackNo(),state->iss) || seqGreater(tcpseg->ackNo(),state->snd_nxt))
+        if (seqLE(tcpseg->getAckNo(),state->iss) || seqGreater(tcpseg->getAckNo(),state->snd_nxt))
         {
             tcpEV << "ACK bit set but wrong AckNo, sending RST\n";
-            sendRst(tcpseg->ackNo(),destAddr,srcAddr,tcpseg->destPort(),tcpseg->srcPort());
+            sendRst(tcpseg->getAckNo(),destAddr,srcAddr,tcpseg->getDestPort(),tcpseg->getSrcPort());
             return TCP_E_IGNORE;
         }
         tcpEV << "ACK bit set, AckNo acceptable\n";
@@ -724,9 +724,9 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
     //     delete TCB, and return.  Otherwise (no ACK) drop the segment
     //     and return.
     //"
-    if (tcpseg->rstBit())
+    if (tcpseg->getRstBit())
     {
-        if (tcpseg->ackBit())
+        if (tcpseg->getAckBit())
         {
             tcpEV << "RST+ACK: performing connection reset\n";
             sendIndicationToApp(TCP_I_CONNECTION_RESET);
@@ -750,7 +750,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
     //   If the SYN bit is on and the security/compartment and precedence
     //   are acceptable then,
     //"
-    if (tcpseg->synBit())
+    if (tcpseg->getSynBit())
     {
         //
         //   RCV.NXT is set to SEG.SEQ+1, IRS is set to
@@ -758,26 +758,26 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
         //   is an ACK), and any segments on the retransmission queue which
         //   are thereby acknowledged should be removed.
         //
-        state->rcv_nxt = tcpseg->sequenceNo()+1;
-        state->irs = tcpseg->sequenceNo();
+        state->rcv_nxt = tcpseg->getSequenceNo()+1;
+        state->irs = tcpseg->getSequenceNo();
         receiveQueue->init(state->rcv_nxt);
 
-        if (tcpseg->ackBit())
+        if (tcpseg->getAckBit())
         {
-            state->snd_una = tcpseg->ackNo();
+            state->snd_una = tcpseg->getAckNo();
             sendQueue->discardUpTo(state->snd_una);
 
             // although not mentioned in RFC 793, seems like we have to pick up
             // initial snd_wnd from the segment here.
-            state->snd_wnd = tcpseg->window();
-            state->snd_wl1 = tcpseg->sequenceNo();
-            state->snd_wl2 = tcpseg->ackNo();
+            state->snd_wnd = tcpseg->getWindow();
+            state->snd_wl1 = tcpseg->getSequenceNo();
+            state->snd_wl2 = tcpseg->getAckNo();
             if (sndWndVector) sndWndVector->record(state->snd_wnd);
         }
 
         // this also seems to be a good time to learn our local IP address
         // (was probably unspecified at connection open)
-        tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->destPort(), tcpseg->srcPort());
+        tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
 
         //"
         //   If SND.UNA > ISS (our SYN has been ACKed), change the connection
@@ -800,11 +800,11 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
             // Now: URG and PSH we don't support yet; in SYN+FIN we ignore FIN;
             // with segment text we just take it easy and put it in the receiveQueue
             // -- we'll forward it to the user when more data arrives.
-            if (tcpseg->finBit())
+            if (tcpseg->getFinBit())
                 tcpEV << "SYN+ACK+FIN received: ignoring FIN\n";
-            if (tcpseg->payloadLength()>0)
+            if (tcpseg->getPayloadLength()>0)
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpseg); // TBD forward to app, etc.
-            if (tcpseg->urgBit() || tcpseg->pshBit())
+            if (tcpseg->getUrgBit() || tcpseg->getPshBit())
                 tcpEV << "Ignoring URG and PSH bits in SYN+ACK\n"; // TBD
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
@@ -833,15 +833,15 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
         // Note: code below is similar to processing SYN in LISTEN.
 
         // For consistency with that code, we ignore SYN+FIN here
-        if (tcpseg->finBit())
+        if (tcpseg->getFinBit())
             tcpEV << "SYN+FIN received: ignoring FIN\n";
 
         // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
         // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
         // so there's only URG and PSH left to handle.
-        if (tcpseg->payloadLength()>0)
+        if (tcpseg->getPayloadLength()>0)
             receiveQueue->insertBytesFromSegment(tcpseg);
-        if (tcpseg->urgBit() || tcpseg->pshBit())
+        if (tcpseg->getUrgBit() || tcpseg->getPshBit())
             tcpEV << "Ignoring URG and PSH bits in SYN\n"; // TBD
         return TCP_E_RCV_SYN;
     }
@@ -910,7 +910,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
     //"
     // Note: should use SND.MAX instead of SND.NXT in above checks
     //
-    if (seqGE(state->snd_una, tcpseg->ackNo()))
+    if (seqGE(state->snd_una, tcpseg->getAckNo()))
     {
         //
         // duplicate ACK? A received TCP segment is a duplicate ACK if all of
@@ -923,7 +923,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         // received (not an update)" -- we don't do that because window updates
         // are ignored anyway if neither seqNo nor ackNo has changed.
         //
-        if (state->snd_una==tcpseg->ackNo() && tcpseg->payloadLength()==0 &&
+        if (state->snd_una==tcpseg->getAckNo() && tcpseg->getPayloadLength()==0 &&
             state->snd_una!=state->snd_max)
         {
             state->dupacks++;
@@ -932,9 +932,9 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         else
         {
             // if doesn't qualify as duplicate ACK, just ignore it.
-            if (tcpseg->payloadLength()==0)
+            if (tcpseg->getPayloadLength()==0)
             {
-                if (state->snd_una!=tcpseg->ackNo())
+                if (state->snd_una!=tcpseg->getAckNo())
                     tcpEV << "Old ACK: ackNo<snd_una\n";
                 else if (state->snd_una==state->snd_max)
                     tcpEV << "ACK looks duplicate but we have currently no unacked data (snd_una==snd_max)\n";
@@ -944,11 +944,11 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
             state->dupacks = 0;
         }
     }
-    else if (seqLE(tcpseg->ackNo(), state->snd_max))
+    else if (seqLE(tcpseg->getAckNo(), state->snd_max))
     {
         // ack in window.
         uint32 old_snd_una = state->snd_una;
-        state->snd_una = tcpseg->ackNo();
+        state->snd_una = tcpseg->getAckNo();
         if (unackedVector) unackedVector->record(state->snd_max - state->snd_una);
 
         // after retransmitting a lost segment, we may get an ack well ahead of snd_nxt
@@ -958,7 +958,7 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         uint32 discardUpToSeq = state->snd_una;
 
         // our FIN acked?
-        if (state->send_fin && tcpseg->ackNo()==state->snd_fin_seq+1)
+        if (state->send_fin && tcpseg->getAckNo()==state->snd_fin_seq+1)
         {
             // set flag that our FIN has been acked
             tcpEV << "ACK acks our FIN\n";
@@ -969,14 +969,14 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
         // acked data no longer needed in send queue
         sendQueue->discardUpTo(discardUpToSeq);
 
-        if (seqLess(state->snd_wl1, tcpseg->sequenceNo()) ||
-            (state->snd_wl1==tcpseg->sequenceNo() && seqLE(state->snd_wl2, tcpseg->ackNo())))
+        if (seqLess(state->snd_wl1, tcpseg->getSequenceNo()) ||
+            (state->snd_wl1==tcpseg->getSequenceNo() && seqLE(state->snd_wl2, tcpseg->getAckNo())))
         {
             // send window should be updated
-            tcpEV << "Updating send window from segment: new wnd=" << tcpseg->window() << "\n";
-            state->snd_wnd = tcpseg->window();
-            state->snd_wl1 = tcpseg->sequenceNo();
-            state->snd_wl2 = tcpseg->ackNo();
+            tcpEV << "Updating send window from segment: new wnd=" << tcpseg->getWindow() << "\n";
+            state->snd_wnd = tcpseg->getWindow();
+            state->snd_wl1 = tcpseg->getSequenceNo();
+            state->snd_wl2 = tcpseg->getAckNo();
             if (sndWndVector) sndWndVector->record(state->snd_wnd);
         }
 
@@ -988,10 +988,10 @@ bool TCPConnection::processAckInEstabEtc(TCPSegment *tcpseg)
     }
     else
     {
-        ASSERT(seqGreater(tcpseg->ackNo(), state->snd_max)); // from if-ladder
+        ASSERT(seqGreater(tcpseg->getAckNo(), state->snd_max)); // from if-ladder
 
         // send an ACK, drop the segment, and return.
-        tcpAlgorithm->receivedAckForDataNotYetSent(tcpseg->ackNo());
+        tcpAlgorithm->receivedAckForDataNotYetSent(tcpseg->getAckNo());
         state->dupacks = 0;
         return false;  // means "drop"
     }

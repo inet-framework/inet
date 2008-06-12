@@ -250,7 +250,7 @@ int RTPInnerPacket::rtcpPercentage() {
 };
 
 
-IN_Addr RTPInnerPacket::address() {
+IN_Addr RTPInnerPacket::getAddress() {
     return _address;
 };
 

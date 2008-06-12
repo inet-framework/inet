@@ -78,8 +78,8 @@ std::string IPv6InterfaceData::info() const
     os << "IPv6:{" << endl;
     for (int i=0; i<numAddresses(); i++)
     {
-        os << (i?"\t            , ":"\tAddrs:") << address(i)
-           << "(" << IPv6Address::scopeName(address(i).scope())
+        os << (i?"\t            , ":"\tAddrs:") << getAddress(i)
+           << "(" << IPv6Address::scopeName(getAddress(i).scope())
            << (isTentativeAddress(i)?" tent":"") << ") "
            << " expiryTime: " << (addresses[i].expiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
            << " prefExpiryTime: " << (addresses[i].prefExpiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
@@ -167,7 +167,7 @@ int IPv6InterfaceData::findAddress(const IPv6Address& addr) const
     return -1;
 }
 
-const IPv6Address& IPv6InterfaceData::address(int i) const
+const IPv6Address& IPv6InterfaceData::getAddress(int i) const
 {
     ASSERT(i>=0 && i<(int)addresses.size());
     return addresses[i].address;

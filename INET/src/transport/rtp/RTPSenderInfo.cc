@@ -74,7 +74,7 @@ const char *RTPSenderInfo::getClassName() const {
 
 void RTPSenderInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime) {
     _packetsSent++;
-    _bytesSent = _bytesSent + packet->payloadLength();
+    _bytesSent = _bytesSent + packet->getPayloadLength();
 
     // call corresponding method of superclass
     // for setting _silentIntervals

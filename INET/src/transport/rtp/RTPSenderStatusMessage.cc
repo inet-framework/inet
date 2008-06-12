@@ -35,7 +35,7 @@ RTPSenderStatusMessage::~RTPSenderStatusMessage(){
 
 RTPSenderStatusMessage& RTPSenderStatusMessage::operator=(const RTPSenderStatusMessage& message) {
     cMessage::operator=(message);
-    _status = message.status();
+    _status = message.getStatus();
     return *this;
 };
 
@@ -50,7 +50,7 @@ const char *RTPSenderStatusMessage::getClassName() const {
 };
 
 
-const char *RTPSenderStatusMessage::status() const {
+const char *RTPSenderStatusMessage::getStatus() const {
     return opp_strdup(_status);
 };
 

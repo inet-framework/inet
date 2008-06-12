@@ -70,7 +70,7 @@ void RTPAVProfileSampleBasedAudioReceiver::activity() {
 void RTPAVProfileSampleBasedAudioReceiver::processPacket(RTPPacket *packet) {
     //RTPPayloadReceiver::processPacket(packet);
     void *data = packet->par("data");
-    int dataSize = packet->payloadLength();
+    int dataSize = packet->getPayloadLength();
     int numberOfFrames = dataSize  / ((_sampleWidth / 8) * _numberOfChannels);
     afWriteFrames(_audioFile, AF_DEFAULT_TRACK, data, numberOfFrames);
 };

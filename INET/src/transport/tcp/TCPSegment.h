@@ -47,12 +47,12 @@ class INET_API TCPSegment : public TCPSegment_Base
     /**
      * Returns the number of payload messages in this TCP segment
      */
-    virtual unsigned int payloadArraySize() const;
+    virtual unsigned int getPayloadArraySize() const;
 
     /**
      * Returns the kth payload message in this TCP segment
      */
-    virtual TCPPayloadMessage& payload(unsigned int k);
+    virtual TCPPayloadMessage& getPayload(unsigned int k);
 
     /**
      * Adds a message object to the TCP segment. The sequence number+1 of the

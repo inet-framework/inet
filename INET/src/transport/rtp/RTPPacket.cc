@@ -82,7 +82,7 @@ const char *RTPPacket::getClassName() const {
 
 std::string RTPPacket::info() {
     std::stringstream out;
-    out << "RTPPacket: payloadType=" << _payloadType << " payloadLength=" << payloadLength();
+    out << "RTPPacket: payloadType=" << _payloadType << " payloadLength=" << getPayloadLength();
     return out.str();
 };
 
@@ -92,7 +92,7 @@ void RTPPacket::writeContents(std::ostream& os) {
     os << "  payloadType = " << _payloadType << endl;
     os << "  sequenceNumber = " << _sequenceNumber << endl;
     os << "  timeStamp = " << _timeStamp << endl;
-    os << "  payloadLength = " << payloadLength() << endl;
+    os << "  payloadLength = " << getPayloadLength() << endl;
 };
 
 
@@ -149,15 +149,15 @@ int RTPPacket::fixedHeaderLength() {
     return 12;
 };
 
-int RTPPacket::headerLength() {
+int RTPPacket::getHeaderLength() {
     // fixed header is 12 bytes long,
     // add 4 bytes for every csrc identifier
     return(fixedHeaderLength() + 4 * _csrcCount);
 };
 
 
-int RTPPacket::payloadLength() {
-    return(length() - headerLength());
+int RTPPacket::getPayloadLength() {
+    return(length() - getHeaderLength());
 };
 
 

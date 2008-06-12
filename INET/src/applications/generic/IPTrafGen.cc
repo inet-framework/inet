@@ -54,16 +54,16 @@ void IPTrafSink::printPacket(cMessage *msg)
     if (dynamic_cast<IPControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPControlInfo *ctrl = (IPControlInfo *)msg->getControlInfo();
-        src = ctrl->srcAddr();
-        dest = ctrl->destAddr();
-        protocol = ctrl->protocol();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
     }
     else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo())!=NULL)
     {
         IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
-        src = ctrl->srcAddr();
-        dest = ctrl->destAddr();
-        protocol = ctrl->protocol();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
     }
 
     ev  << msg << endl;

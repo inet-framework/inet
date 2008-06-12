@@ -32,7 +32,7 @@ Define_Module(RoutingTable6);
 std::string IPv6Route::info() const
 {
     std::stringstream out;
-    out << destPrefix() << "/" << prefixLength() << " --> ";
+    out << destPrefix() << "/" << getPrefixLength() << " --> ";
     out << "if=" << interfaceID() << " next hop:" << nextHop(); // FIXME try printing interface name
     out << " " << routeSrcName(src());
     if (expiryTime()>0)
@@ -306,7 +306,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     for (unsigned int k=0; k<addrList.size(); k++)
     {
         cXMLElement *node = addrList[k];
-        IPv6Address address(node->getNodeValue());
+        IPv6Address address = node->getNodeValue();
         //We can now decide if the address is tentative or not.
         d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), 0, 0);  // set up with infinite lifetimes
     }
@@ -383,14 +383,14 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
     // by prefix lengths and metric (see addRoute())
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if (dest.matches((*it)->destPrefix(),(*it)->prefixLength()))
+        if (dest.matches((*it)->destPrefix(),(*it)->getPrefixLength()))
         {
             // FIXME proofread this code, iterator invalidation-wise, etc
             bool entryExpired = false;
             if (simTime() > (*it)->expiryTime() && (*it)->expiryTime() != 0)//since 0 represents infinity.
             {
                 EV << "Expired prefix detected!!" << endl;
-                removeOnLinkPrefix((*it)->destPrefix(), (*it)->prefixLength());
+                removeOnLinkPrefix((*it)->destPrefix(), (*it)->getPrefixLength());
                 entryExpired = true;
             }
             if (entryExpired == false) return *it;
@@ -449,7 +449,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -486,7 +486,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::OWN_ADV_PREFIX && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::OWN_ADV_PREFIX && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -519,7 +519,7 @@ void RoutingTable6::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefix
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->prefixLength()==prefixLength)
+        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             routeList.erase(it);
             return; // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
@@ -571,8 +571,8 @@ bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
     // helper for sort() in addRoute(). We want routes with longer
     // prefixes to be at front, so we compare them as "less".
     // For metric, a smaller value is better (we report that as "less").
-    if (a->prefixLength()!=b->prefixLength())
-        return a->prefixLength() > b->prefixLength();
+    if (a->getPrefixLength()!=b->getPrefixLength())
+        return a->getPrefixLength() > b->getPrefixLength();
     return a->metric() < b->metric();
 }
 

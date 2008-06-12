@@ -1371,7 +1371,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg* msg)
     //print(msg);
 
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(msg->getControlInfo());
-    IPAddress sender = controlInfo->srcAddr();
+    IPAddress sender = controlInfo->getSrcAddr();
     IPAddress peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();

@@ -103,7 +103,7 @@ class INET_API RTCPPacket : public cPacket
         /**
          * Returns the rtp version of the rtcp packet. It's always 2.
          */
-        virtual int version();
+        virtual int getVersion();
 
         /**
          * 1 if padding exists, 0 otherwise. In this implementation only

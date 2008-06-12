@@ -40,7 +40,7 @@ void OSPF::HelloHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* int
              */
             if (intf->GetArea ()->GetExternalRoutingCapability () == helloPacket->getOptions ().E_ExternalRoutingCapability) {
                 IPControlInfo*      controlInfo             = check_and_cast<IPControlInfo *> (helloPacket->getControlInfo());
-                OSPF::IPv4Address   srcAddress              = IPv4AddressFromULong (controlInfo->srcAddr ().getInt ());
+                OSPF::IPv4Address   srcAddress              = IPv4AddressFromULong (controlInfo->getSrcAddr().getInt ());
                 bool                neighborChanged         = false;
                 bool                neighborsDRStateChanged = false;
                 bool                drChanged               = false;
@@ -69,7 +69,7 @@ void OSPF::HelloHandler::ProcessPacket (OSPFPacket* packet, OSPF::Interface* int
                     IPv4Address                 designatedAddress   = neighbor->GetDesignatedRouter ().ipInterfaceAddress;
                     IPv4Address                 backupAddress       = neighbor->GetBackupDesignatedRouter ().ipInterfaceAddress;
                     char                        newPriority         = helloPacket->getRouterPriority ();
-                    unsigned long               source              = controlInfo->srcAddr ().getInt ();
+                    unsigned long               source              = controlInfo->getSrcAddr().getInt ();
                     unsigned long               newDesignatedRouter = helloPacket->getDesignatedRouter ().getInt ();
                     unsigned long               newBackupRouter     = helloPacket->getBackupDesignatedRouter ().getInt ();
                     OSPF::DesignatedRouterID    dRouterID;

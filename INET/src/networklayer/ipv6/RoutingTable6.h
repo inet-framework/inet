@@ -75,7 +75,7 @@ class INET_API IPv6Route : public cPolymorphic
     void setMetric(int metric)  {_metric = _metric;}
 
     const IPv6Address& destPrefix() const {return _destPrefix;}
-    int prefixLength() const  {return _length;}
+    int getPrefixLength() const  {return _length;}
     RouteSrc src() const  {return _src;}
     int interfaceID() const  {return _interfaceID;}
     const IPv6Address& nextHop() const  {return _nextHop;}

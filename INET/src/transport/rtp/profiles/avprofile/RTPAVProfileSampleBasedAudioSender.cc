@@ -122,7 +122,7 @@ void RTPAVProfileSampleBasedAudioSender::seekByte(int position) {
 bool RTPAVProfileSampleBasedAudioSender::sendPacket() {
     RTPPacket *packet = new RTPPacket();
     int bytesPerSample = (int)afGetFrameSize(_audioFile, AF_DEFAULT_TRACK, 0);
-    int maxDataSize = _mtu - packet->headerLength();
+    int maxDataSize = _mtu - packet->getHeaderLength();
     maxDataSize = maxDataSize - (maxDataSize % bytesPerSample);
 
     // AV profile: packetization interval for audio is 20 ms
@@ -153,7 +153,7 @@ bool RTPAVProfileSampleBasedAudioSender::sendPacket() {
     int samplesRead = afReadFrames(_audioFile, AF_DEFAULT_TRACK, sampleData, samplesInPacket);
     packet->addPar("data") = sampleData;
     packet->addLength(dataSize);
-    RTPInnerPacket *rinp = new RTPInnerPacket("data()");
+    RTPInnerPacket *rinp = new RTPInnerPacket("getData()");
     rinp->dataOut(packet);
     send(rinp, "toProfile");
     if (afTellFrame(_audioFile, AF_DEFAULT_TRACK) >= afGetFrameCount(_audioFile, AF_DEFAULT_TRACK)) {

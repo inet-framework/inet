@@ -37,12 +37,12 @@ void TCPSegment::setPayloadArraySize(unsigned int size)
     throw cRuntimeError(this, "setPayloadArraySize() not supported, use addPayloadMessage()");
 }
 
-unsigned int TCPSegment::payloadArraySize() const
+unsigned int TCPSegment::getPayloadArraySize() const
 {
     return payloadList.size();
 }
 
-TCPPayloadMessage& TCPSegment::payload(unsigned int k)
+TCPPayloadMessage& TCPSegment::getPayload(unsigned int k)
 {
     std::list<TCPPayloadMessage>::iterator i = payloadList.begin();
     while (k>0 && i!=payloadList.end())
