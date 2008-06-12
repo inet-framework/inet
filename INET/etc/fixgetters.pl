@@ -6,7 +6,7 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
     destinationAddress prefix srcAddr srcAddress targetAddress
     destAddr localAddr remoteAddr
     srcAddr sourceLinkLayerAddress targetLinkLayerAddress abit
-    ackBit autoAddressConfFlag close dbit dontFragment finBit
+    ackBit autoAddressConfFlag serverClose dbit dontFragment finBit
     fin_ack_rcvd fork isRequest isWithdraw managedAddrConfFlag
     moreFragments onlinkFlag otherStatefulConfFlag overrideFlag pshBit
     rbit routerFlag rstBit solicitedFlag synBit tbit urgBit msg
@@ -14,7 +14,7 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
     keepAliveTime replyDelay MTU ackNo channelNumber code connId
     curHopLimit destPort endSequenceNo errorCode expectedReplyLength flag
     flowLabel fragmentOffset identification identifier interfaceId irs
-    iss label length localPort optionCode payloadLength preferredLifetime
+    iss label lsaLength localPort optionCode payloadLength preferredLifetime
     prefixLength protocol pvLim rcv_nxt rcv_up rcv_wnd reachableTime
     remotePort retransTimer seqNumber sequenceNo snd_max snd_mss snd_nxt
     snd_una snd_up snd_wl1 snd_wl2 snd_wnd sockId srcPort state status
@@ -77,7 +77,6 @@ while (<LISTFILE>)
     $txt =~ s/\bpaths\(\)/getNumPaths()/mg;
     $txt =~ s/\bostream\(\)/getOStream()/mg;
     $txt =~ s/\binTransientState\(\)/isInTransientState()/mg;
-    # length -- leave this one alone
 
     #with arg:
     $txt =~ s/\btakeOwnership\(/setTakeOwnership(/mg;  # since getter is done already
