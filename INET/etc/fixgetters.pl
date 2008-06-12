@@ -57,39 +57,13 @@ while (<LISTFILE>)
     my $origtxt = $txt;
 
     # process $txt:
+
+    # remove omitGetVerb from .msg files
+    $txt =~ s/\n *\@omitGetVerb\(true\); *\n//gs;
+
+    # rename getters
     $txt =~ s/\b($arglessGetters) ?\( *\)/"get".ucfirst($1)."()"/mge;
     $txt =~ s/\b($gettersWithArg) ?\(/"get".ucfirst($1)."("/mge;
-
-    #without arg:
-    $txt =~ s/\bchanged\(\)/hasChanged()/mg;
-    $txt =~ s/\bdisabled\(\)/isDisabled()/mg;
-    $txt =~ s/\benabled\(\)/isEnabled()/mg;
-    $txt =~ s/\bstackOverflow\(\)/hasStackOverflow()/mg;
-    $txt =~ s/\btakeOwnership\(\)/getTakeOwnership()/mg;
-    $txt =~ s/\bexiting\(\)/isExiting()/mg;
-
-    $txt =~ s/\bparams\(\)/getNumParams()/mg;
-    $txt =~ s/\btransmissionFinishes\(\)/getTransmissionFinishTime()/mg;
-    $txt =~ s/\bcells\(\)/getNumCells()/mg;
-    $txt =~ s/\bnodes\(\)/getNumNodes()/mg;
-    $txt =~ s/\binLinks\(\)/getNumInLinks()/mg;
-    $txt =~ s/\boutLinks\(\)/getNumOutLinks()/mg;
-    $txt =~ s/\bpaths\(\)/getNumPaths()/mg;
-    $txt =~ s/\bostream\(\)/getOStream()/mg;
-    $txt =~ s/\binTransientState\(\)/isInTransientState()/mg;
-
-    #with arg:
-    $txt =~ s/\btakeOwnership\(/setTakeOwnership(/mg;  # since getter is done already
-    $txt =~ s/\bcellInfo\(/getCellInfo(/mg;
-    $txt =~ s/\bcell\(/getCellValue(/mg;
-    $txt =~ s/\brng\(/getRNG(/mg;
-    $txt =~ s/\bpdf\(/getPDF(/mg;
-    $txt =~ s/\bcdf\(/getCDF(/mg;
-
-    # other:
-    # cDisplayString:
-    $txt =~ s/\bexistsTag\(/containsTag(/mg;
-    $txt =~ s/\bunweightedSingleShortestPathsTo\(/calculateUnweightedSingleShortestPathsTo(/mg;
 
     if ($txt eq $origtxt) {
         print "unchanged\n";
