@@ -59,7 +59,7 @@ while (<LISTFILE>)
     # process $txt:
 
     # remove omitGetVerb from .msg files
-    $txt =~ s/\n *\@omitGetVerb\(true\); *\n//gs;
+    $txt =~ s/\n *\@omitGetVerb\(true\); *\n/\n/gs;
 
     # rename getters
     $txt =~ s/\b($arglessGetters) ?\( *\)/"get".ucfirst($1)."()"/mge;
