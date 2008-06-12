@@ -1,4 +1,5 @@
 
+# from msg files
 my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
     senderAddress srcAddr srcAddress recordRoute
     sourceRoutingOption timestampOption destAddr destAddress
@@ -24,8 +25,11 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
     family messageText receiveQueueClass receiverLDPIdentifier
     sendQueueClass stateName tcpAlgorithmClass";
 
+# array fields in msg files
 my $gettersWithArg = "payload recordAddress address extensionHeader
     prefixInformation recordTimestamp addresses data";
+
+foreach $i (split(/\s/, $gettersWithArg)) {$arglessGetters .= " ${i}ArraySize";}
 
 $arglessGetters =~ s/\s+/|/g;
 $gettersWithArg =~ s/\s+/|/g;
@@ -100,6 +104,3 @@ while (<LISTFILE>)
 
 print "\nConversion done. You may safely re-run this script as many times as you want.\n";
 
-print "cObject note: only change a cObject occurrence to cOwnedObject, if:\n";
-print "   (1) cObject is not already the result of a cPolymorphic->cObject conversion, and\n";
-print "   (2) you are REALLY sure you need cOwnedObject there, with its name string and other overhead.\n";
