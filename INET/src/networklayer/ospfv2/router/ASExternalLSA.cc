@@ -19,7 +19,7 @@ bool OSPF::ASExternalLSA::DiffersFrom (const OSPFASExternalLSA* asExternalLSA) c
     bool differentHeader = ((header_var.getLsOptions () != lsaHeader.getLsOptions ()) ||
                             ((header_var.getLsAge () == MAX_AGE) && (lsaHeader.getLsAge () != MAX_AGE)) ||
                             ((header_var.getLsAge () != MAX_AGE) && (lsaHeader.getLsAge () == MAX_AGE)) ||
-                            (header_var.getLength () != lsaHeader.getLength ()));
+                            (header_var.getLsaLength () != lsaHeader.getLsaLength ()));
     bool differentBody   = false;
 
     if (!differentHeader) {

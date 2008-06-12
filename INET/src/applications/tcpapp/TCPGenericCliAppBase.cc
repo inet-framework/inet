@@ -78,7 +78,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setByteLength(numBytes);
     msg->setExpectedReplyLength(expectedReplyBytes);
-    msg->setClose(serverClose);
+    msg->setServerClose(serverClose);
 
     socket.send(msg);
 

@@ -42,7 +42,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     // process message: send back requested number of bytes, then close
     // connection if that was requested too
     long requestedBytes = appmsg->expectedReplyLength();
-    bool doClose = appmsg->close();
+    bool doClose = appmsg->serverClose();
 
     if (requestedBytes==0)
     {

@@ -37,10 +37,10 @@ cplusplus {{
 message GenericAppMsg
 {
     @omitGetVerb(true);
-    int expectedReplyLength;  // in bytes
-    double replyDelay;  // reply after this many seconds
-    bool close;  // with TCP: if true, server should close the
-                     // connection after sending the reply
+    int expectedReplyLength; // in bytes
+    double replyDelay;       // reply after this many seconds
+    bool serverClose;        // with TCP: if true, server should close the
+                             // connection after sending the reply
 }
 
 

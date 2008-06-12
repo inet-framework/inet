@@ -89,7 +89,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         if (msgDelay>maxMsgDelay)
             maxMsgDelay = msgDelay;
 
-        bool doClose = appmsg->close();
+        bool doClose = appmsg->serverClose();
         int connId = check_and_cast<TCPCommand *>(msg->getControlInfo())->connId();
 
         if (requestedBytes==0)
