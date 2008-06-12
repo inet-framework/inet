@@ -105,7 +105,7 @@ class OSPFLSAHeader
     IPAddress advertisingRouter;
     long lsSequenceNumber = 0;
     short lsChecksum = 0;
-    unsigned short length = 0;
+    unsigned short lsaLength = 0;
 }
 
 //
