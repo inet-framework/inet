@@ -118,7 +118,7 @@ void ThruputMeteringChannel::updateDisplay()
     char buf[200];
     char *p = buf;
     simtime_t tt = getTransmissionFinishTime();
-    if (tt==0) tt = simulation.simTime();
+    if (tt==0) tt = simTime();
     double bps = (tt==0) ? 0 : numBits/tt;
     double bytes;
     for (const char *fp = fmt; *fp && buf+200-p>20; fp++)

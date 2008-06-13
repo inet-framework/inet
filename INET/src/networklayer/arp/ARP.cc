@@ -33,7 +33,7 @@ static std::ostream& operator<< (std::ostream& out, const ARP::ARPCacheEntry& e)
     if (e.pending)
         out << "pending (" << e.numRetries << " retries)";
     else
-        out << "MAC:" << e.macAddress << "  age:" << floor(simulation.simTime()-e.lastUpdate) << "s";
+        out << "MAC:" << e.macAddress << "  age:" << floor(simTime()-e.lastUpdate) << "s";
     return out;
 }
 

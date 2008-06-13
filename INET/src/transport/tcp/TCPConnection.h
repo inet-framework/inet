@@ -405,7 +405,7 @@ class INET_API TCPConnection
 
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, simtime_t timeout)
-        {tcpMain->scheduleAt(tcpMain->simTime()+timeout, msg);}
+        {tcpMain->scheduleAt(simTime()+timeout, msg);}
 
   protected:
     /** Utility: cancel a timer */

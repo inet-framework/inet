@@ -350,10 +350,10 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     {
         // print value
         tcpEV << "Round-trip time measured on rtseq=" << state->rtseq << ": "
-              << floor((conn->getTcpMain()->simTime() - state->rtseq_sendtime)*1000+0.5) << "ms\n";
+              << floor((simTime() - state->rtseq_sendtime)*1000+0.5) << "ms\n";
 
         // update RTT variables with new value
-        rttMeasurementComplete(state->rtseq_sendtime, conn->getTcpMain()->simTime());
+        rttMeasurementComplete(state->rtseq_sendtime, simTime());
 
         // measurement finished
         state->rtseq_sendtime = 0;
@@ -434,7 +434,7 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
     {
         // remember this sequence number and when it was sent
         state->rtseq = fromseq;
-        state->rtseq_sendtime = conn->getTcpMain()->simTime();
+        state->rtseq_sendtime = simTime();
         tcpEV << "Starting rtt measurement on seq=" << state->rtseq << "\n";
     }
 }

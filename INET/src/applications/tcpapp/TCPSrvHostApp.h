@@ -86,9 +86,6 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     /** Cancel an event */
     void cancelEvent(cMessage *msg)  {hostmod->cancelEvent(msg);}
 
-    /** Returns simulation time */
-    simtime_t simTime() {return hostmod->simTime();}
-
     /** @name Callback methods, called on different socket events. */
     //@{
     /**

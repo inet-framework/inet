@@ -320,7 +320,7 @@ void OSPF::MessageHandler::ClearTimer (OSPFTimer* timer)
 
 void OSPF::MessageHandler::StartTimer (OSPFTimer* timer, simtime_t delay)
 {
-    ospfModule->scheduleAt (ospfModule->simTime () + delay, timer);
+    ospfModule->scheduleAt (simTime () + delay, timer);
 }
 
 void OSPF::MessageHandler::PrintEvent (const char* eventString, const OSPF::Interface* onInterface, const OSPF::Neighbor* forNeighbor /*= NULL*/) const

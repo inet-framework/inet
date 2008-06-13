@@ -40,7 +40,7 @@ void TCPDumper::dump(bool l2r, const char *label, IPDatagram *dgram, const char 
 
         // seq and time (not part of the tcpdump format)
         char buf[30];
-        sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simulation.simTime()), label);
+        sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
         out << buf;
 
         // packet class and name
@@ -64,7 +64,7 @@ void TCPDumper::dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, 
 
         // seq and time (not part of the tcpdump format)
         char buf[30];
-        sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simulation.simTime()), label);
+        sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
         out << buf;
 
         // packet class and name
@@ -78,7 +78,7 @@ void TCPDumper::dump(bool l2r, const char *label, TCPSegment *tcpseg, const std:
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simulation.simTime()), label);
+    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf;
 
     // src/dest
@@ -135,7 +135,7 @@ void TCPDumper::dump(const char *label, const char *msg)
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", SIMTIME_STR(simulation.simTime()), label);
+    sprintf(buf,"[%.3f%s] ", SIMTIME_STR(simTime()), label);
     out << buf;
 
     out << msg << "\n";
