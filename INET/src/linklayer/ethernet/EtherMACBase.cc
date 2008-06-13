@@ -508,7 +508,7 @@ void EtherMACBase::scheduleEndIFGPeriod()
 
 void EtherMACBase::scheduleEndTxPeriod(cMessage *frame)
 {
-    scheduleAt(simTime()+frame->length()*bitTime, endTxMsg);
+    scheduleAt(simTime()+frame->getBitLength()*bitTime, endTxMsg);
     transmitState = TRANSMITTING_STATE;
 }
 

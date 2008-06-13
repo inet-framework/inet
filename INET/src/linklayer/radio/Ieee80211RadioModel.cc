@@ -34,7 +34,7 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
 {
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-    return airframe->length()/airframe->getBitrate() + PHY_HEADER_LENGTH/BITRATE_HEADER;
+    return airframe->getBitLength()/airframe->getBitrate() + PHY_HEADER_LENGTH/BITRATE_HEADER;
 }
 
 
@@ -55,7 +55,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, airframe->getEncapsulatedMsg()->length(), airframe->getBitrate()))
+    else if (packetOk(snirMin, airframe->getEncapsulatedMsg()->getBitLength(), airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

@@ -354,7 +354,7 @@ void RTCPEndsystemModule::createPacket() {
         compoundPacket->addRTCPPacket(byePacket);
     };
 
-    calculateAveragePacketSize(compoundPacket->length());
+    calculateAveragePacketSize(compoundPacket->getBitLength());
 
     SocketInterfacePacket *sifp = new SocketInterfacePacket("write()");
 
@@ -404,7 +404,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr ad
 
 void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IN_Addr address, IN_Port port) {
 
-    calculateAveragePacketSize(packet->length());
+    calculateAveragePacketSize(packet->getBitLength());
 
     cArray *rtcpPackets = packet->rtcpPackets();
 

@@ -170,7 +170,7 @@ void Mac80211::handleUpperMsg(cMessage *msg)
 Mac80211Pkt *Mac80211::encapsMsg(cMessage * netw)
 {
     Mac80211Pkt *pkt = new Mac80211Pkt(netw->getName());
-    pkt->setLength(272);        // headerLength, including final CRC-field
+    pkt->setBitLength(272);        // headerLength, including final CRC-field
 
     // copy dest address from the control info
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(netw->removeControlInfo());
@@ -689,7 +689,7 @@ void Mac80211::sendBROADCASTframe()
 {
     // the MAC must wait the end of the transmission before beginning any
     // other contention period
-    scheduleAt(simTime() + packetDuration(fromUpperLayer.front()->length()), endTransmission);
+    scheduleAt(simTime() + packetDuration(fromUpperLayer.front()->getBitLength()), endTransmission);
     // send ACK frame
     sendDown(buildBROADCASTframe());
 
@@ -723,7 +723,7 @@ Mac80211Pkt *Mac80211::buildACKframe(Mac80211Pkt * af)
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-ack");
     frame->setKind(ACK);
-    frame->setLength(LENGTH_ACK);
+    frame->setBitLength(LENGTH_ACK);
 
     // the dest address must be the src adress of the RTS or the DATA
     // packet received. The src adress is the adress of the node
@@ -742,13 +742,13 @@ Mac80211Pkt *Mac80211::buildRTSframe()
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-rts");
     frame->setKind(RTS);
-    frame->setLength(LENGTH_RTS);
+    frame->setBitLength(LENGTH_RTS);
 
     // the src adress and dest address are copied in the frame in the queue (frame to be sent)
     frame->setSrcAddr(((Mac80211Pkt *) fromUpperLayer.front())->getSrcAddr());
     frame->setDestAddr(((Mac80211Pkt *) fromUpperLayer.front())->getDestAddr());
     frame->setDuration(3 * SIFS + packetDuration(LENGTH_CTS) +
-                       packetDuration(fromUpperLayer.front()->length()) +
+                       packetDuration(fromUpperLayer.front()->getBitLength()) +
                        packetDuration(LENGTH_ACK));
 
     return frame;
@@ -761,7 +761,7 @@ Mac80211Pkt *Mac80211::buildCTSframe(Mac80211Pkt * af)
 {
     Mac80211Pkt *frame = new Mac80211Pkt("wlan-cts");
     frame->setKind(CTS);
-    frame->setLength(LENGTH_CTS);
+    frame->setBitLength(LENGTH_CTS);
 
     // the dest adress must be the src adress of the RTS received. The
     // src adress is the adress of the node
@@ -977,7 +977,7 @@ simtime_t Mac80211::timeOut(_802_11frameType type, simtime_t last_frame_duration
         break;
     case DATA:
         time_out =
-            SIFS + packetDuration(fromUpperLayer.front()->length()) + packetDuration(LENGTH_ACK) +
+            SIFS + packetDuration(fromUpperLayer.front()->getBitLength()) + packetDuration(LENGTH_ACK) +
             delta + 0.1;
         //XXX: I have added some time here, because propagation delay of AirFrames caused problems
         // the timeout periods should be carefully revised with special care for the deltas?! --Levy

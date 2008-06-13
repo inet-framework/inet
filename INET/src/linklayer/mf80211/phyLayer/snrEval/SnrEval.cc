@@ -97,7 +97,7 @@ SnrEval::~SnrEval()
 
 void SnrEval::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId()==uppergateIn && msg->length()==0)
+    if (msg->getArrivalGateId()==uppergateIn && msg->getBitLength()==0)
     {
         cPolymorphic *ctrl = msg->removeControlInfo();
         handleCommand(msg->getKind(), ctrl);

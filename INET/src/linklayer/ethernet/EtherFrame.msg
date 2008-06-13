@@ -49,7 +49,7 @@ enum SAPCode;
 // Source and destination MAC address are stored in data members.
 // Other fields include:
 //  - preamble: not stored (only contributes length)
-//  - length: stored in cMessage::length(), not stored explicitly
+//  - length: stored in cMessage length, not stored explicitly
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
 //  - crc: represented by cMessage::hasBitError()
 //

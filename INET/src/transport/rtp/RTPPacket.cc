@@ -39,7 +39,7 @@ RTPPacket::RTPPacket(const char *name) : cPacket(name) {
     _ssrc = 0;
 
     // a standard rtp packet without csrcs and data has a length of 12 bytes
-    setLength(fixedHeaderLength());
+    setBitLength(fixedHeaderLength());
 };
 
 

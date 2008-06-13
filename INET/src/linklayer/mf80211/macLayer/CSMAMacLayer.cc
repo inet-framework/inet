@@ -229,7 +229,7 @@ void CSMAMacLayer::handleLowerMsg(cMessage *msg)
 MacPkt *CSMAMacLayer::encapsMsg(cMessage *netw)
 {
     MacPkt *pkt = new MacPkt(netw->getName());
-    pkt->setLength(272);
+    pkt->setBitLength(272);
 
     // copy dest address from the Control Info attached to the network
     // mesage by the network layer

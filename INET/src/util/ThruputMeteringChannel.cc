@@ -80,14 +80,14 @@ bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
 
     // count packets and bits
     numPackets++;
-    numBits += msg->length();
+    numBits += msg->getBitLength();
 
     // packet should be counted to new interval
     if (intvlNumPackets >= batchSize || t-intvlStartTime >= maxInterval)
         beginNewInterval(t);
 
     intvlNumPackets++;
-    intvlNumBits += msg->length();
+    intvlNumBits += msg->getBitLength();
     intvlLastPkTime = t;
 
     // update display string

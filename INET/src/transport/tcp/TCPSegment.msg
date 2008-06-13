@@ -95,7 +95,7 @@ message TCPSegment extends cMessage
     unsigned long urgentPointer;
 
     // Payload length in octets (not an actual \TCP header field).
-    // This may not always be the same as encapsulatedPacket()->length()*8;
+    // This may not always be the same as encapsulatedPacket()->getByteLength();
     // e.g. when simulating a virtual data stream there's no encapsulated
     // packet at all.
     int payloadLength;

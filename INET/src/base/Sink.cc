@@ -55,7 +55,7 @@ void Sink::initialize()
 void Sink::handleMessage(cMessage *msg)
 {
     numPackets++;
-    numBits += msg->length();
+    numBits += msg->getBitLength();
 
     throughput = numBits / simTime();
     packetPerSec = numPackets / simTime();

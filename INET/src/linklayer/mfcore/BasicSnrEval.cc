@@ -138,7 +138,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
     AirFrame *frame = createCapsulePkt();
     frame->setName(msg->getName());
     frame->setPSend(transmitterPower);
-    frame->setLength(headerLength);
+    frame->setBitLength(headerLength);
     frame->setChannelNumber(getChannelNumber());
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
@@ -157,7 +157,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
 double BasicSnrEval::calcDuration(cMessage *af)
 {
     double duration;
-    duration = (double) af->length() / (double) bitrate;
+    duration = (double) af->getBitLength() / (double) bitrate;
     return duration;
 }
 

@@ -39,7 +39,7 @@ RTPMpegPacket::RTPMpegPacket(const char *name = NULL) : cPacket(name) {
     _ffv = 0;
     _ffc = 0;
     // the standard header is 4 bytes long
-    setLength(getHeaderLength());
+    setBitLength(getHeaderLength());
 };
 
 

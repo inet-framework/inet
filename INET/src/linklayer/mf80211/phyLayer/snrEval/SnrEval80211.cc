@@ -38,7 +38,7 @@ void SnrEval80211::initialize(int stage)
  */
 double SnrEval80211::calcDuration(cMessage * frame)
 {
-    EV << "bits without header: " << frame->length() -
+    EV << "bits without header: " << frame->getBitLength() -
         headerLength << ", bits header: " << headerLength << endl;
-    return ((frame->length() - headerLength) / bitrate + headerLength / BITRATE_HEADER);
+    return ((frame->getBitLength() - headerLength) / bitrate + headerLength / BITRATE_HEADER);
 }

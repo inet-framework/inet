@@ -107,7 +107,7 @@ class IPSourceRoutingOption
 // Represents an IP datagram.
 //
 // Uses the following cMessage fields:
-//    - length () / setLength(err)  in bits
+//    - length () / setBitLength(err)  in bits
 //    - hasBitError() / setBitError()
 //    - getTimestamp() / setTimestamp (simtime) used in timestamp option
 //

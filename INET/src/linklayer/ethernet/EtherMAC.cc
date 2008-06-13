@@ -289,7 +289,7 @@ void EtherMAC::processMsgFromNetwork(cMessage *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
 
-    simtime_t endRxTime = simTime() + msg->length()*bitTime;
+    simtime_t endRxTime = simTime() + msg->getBitLength()*bitTime;
 
     if (!duplexMode && transmitState==TRANSMITTING_STATE)
     {
@@ -574,7 +574,7 @@ void EtherMAC::sendJamSignal()
 
 void EtherMAC::scheduleEndRxPeriod(cMessage *frame)
 {
-    scheduleAt(simTime()+frame->length()*bitTime, endRxMsg);
+    scheduleAt(simTime()+frame->getBitLength()*bitTime, endRxMsg);
     receiveState = RECEIVING_STATE;
 }
 

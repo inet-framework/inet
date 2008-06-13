@@ -130,7 +130,7 @@ AbstractRadio::~AbstractRadio()
 void AbstractRadio::handleMessage(cMessage *msg)
 {
     // handle commands
-    if (msg->getArrivalGateId()==uppergateIn && msg->length()==0)
+    if (msg->getArrivalGateId()==uppergateIn && msg->getBitLength()==0)
     {
         cPolymorphic *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)

@@ -50,12 +50,12 @@ class INET_API MPLSPacket: public cMessage
     /**
      * Pushes new label on the label stack
      */
-    inline void pushLabel(int newLabel)  {labels.push(newLabel);addLength(32);}
+    inline void pushLabel(int newLabel)  {labels.push(newLabel);addBitLength(32);}
 
     /**
      * Pops the top label
      */
-    inline void popLabel()  {labels.pop();addLength(-32);}
+    inline void popLabel()  {labels.pop();addBitLength(-32);}
 
     /**
      * Returns true if the label stack is not empty

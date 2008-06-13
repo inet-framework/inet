@@ -152,7 +152,7 @@ bool RTPAVProfileSampleBasedAudioSender::sendPacket() {
     void *sampleData = malloc(dataSize);
     int samplesRead = afReadFrames(_audioFile, AF_DEFAULT_TRACK, sampleData, samplesInPacket);
     packet->addPar("data") = sampleData;
-    packet->addLength(dataSize);
+    packet->addBitLength(dataSize);
     RTPInnerPacket *rinp = new RTPInnerPacket("getData()");
     rinp->dataOut(packet);
     send(rinp, "toProfile");

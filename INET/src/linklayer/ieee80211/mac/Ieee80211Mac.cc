@@ -236,7 +236,7 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 void Ieee80211Mac::handleUpperMsg(cMessage *msg)
 {
     // check if it's a command from the mgmt layer
-    if (msg->length()==0 && msg->getKind()!=0)
+    if (msg->getBitLength()==0 && msg->getKind()!=0)
     {
         handleCommand(msg);
         return;
@@ -1007,7 +1007,7 @@ void Ieee80211Mac::popTransmissionQueue()
 
 double Ieee80211Mac::frameDuration(Ieee80211Frame *msg)
 {
-    return frameDuration(msg->length(), bitrate);
+    return frameDuration(msg->getBitLength(), bitrate);
 }
 
 double Ieee80211Mac::frameDuration(int bits, double bitrate)
