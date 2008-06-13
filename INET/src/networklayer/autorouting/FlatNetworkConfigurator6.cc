@@ -232,7 +232,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
                 continue;
 
             // determine the local interface id
-            cGate *localGate = atNode->path(0)->getLocalGate();
+            cGate *localGate = atNode->getPath(0)->getLocalGate();
             InterfaceEntry *localIf = ift->interfaceByNodeOutputGateId(localGate->getId());
 
             // determine next hop link address. That's a bit tricky because
@@ -241,11 +241,11 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             cTopology::Node *prevNode = atNode;
             // if there's no ethernet switch between atNode and it's next hop
             // neighbour, we don't go into the following while() loop
-            while (!isIPNode(prevNode->path(0)->getRemoteNode()))
-                prevNode = prevNode->path(0)->getRemoteNode();
+            while (!isIPNode(prevNode->getPath(0)->getRemoteNode()))
+                prevNode = prevNode->getPath(0)->getRemoteNode();
 
             // ok, the next hop is now just one step away from prevNode
-            cGate *remoteGate = prevNode->path(0)->getRemoteGate();
+            cGate *remoteGate = prevNode->getPath(0)->getRemoteGate();
             cModule *nextHop = remoteGate->getOwnerModule();
             InterfaceTable *nextHopIft = IPAddressResolver().interfaceTableOf(nextHop);
             InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByNodeInputGateId(remoteGate->getId());

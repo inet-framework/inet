@@ -134,7 +134,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
         // loop through neighbors
         for (int j=0; j<node->getNumOutLinks(); j++)
         {
-            cTopology::Node *neighbor = node->out(j)->getRemoteNode();
+            cTopology::Node *neighbor = node->getLinkOut(j)->getRemoteNode();
 
             // find neighbour's index in cTopology ==> k
             int k;
@@ -151,13 +151,13 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             IPAddress neighborRouterId = nodeInfo[k].rt->routerId();
 
             // find out neighbor's interface IP address
-            int neighborGateId = node->out(j)->getRemoteGate()->getId();
+            int neighborGateId = node->getLinkOut(j)->getRemoteGate()->getId();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->interfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
             IPAddress neighborAddr = neighborIe->ipv4()->inetAddress();
 
             // find our own interface towards neighbor
-            int gateId = node->out(j)->getLocalGate()->getId();
+            int gateId = node->getLinkOut(j)->getLocalGate()->getId();
             InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
             ASSERT(ie);
 
@@ -243,12 +243,12 @@ void NetworkConfigurator::setPeersParameter(const char *submodName, cTopology& t
         for (int j=0; j<node->getNumOutLinks(); j++)
         {
             // if neighbor is not an RSVP router, then we're not interested
-            cModule *neighborSubmod = node->out(j)->getRemoteNode()->getModule()->getSubmodule(submodName);
+            cModule *neighborSubmod = node->getLinkOut(j)->getRemoteNode()->getModule()->getSubmodule(submodName);
             if (neighborSubmod==NULL)
                 continue;
 
             // find our own interface towards neighbor
-            int gateId = node->out(j)->getLocalGate()->getId();
+            int gateId = node->getLinkOut(j)->getLocalGate()->getId();
             InterfaceEntry *ie = nodeInfo[i].ift->interfaceByNodeOutputGateId(gateId);
             ASSERT(ie);
 
@@ -297,7 +297,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
 
             InterfaceTable *ift = nodeInfo[j].ift;
 
-            int outputGateId = atNode->path(0)->getLocalGate()->getId();
+            int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->interfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
