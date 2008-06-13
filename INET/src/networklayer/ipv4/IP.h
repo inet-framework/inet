@@ -101,7 +101,7 @@ class INET_API IP : public QueueBase
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
-     * localDeliver() for local packets, to fragmentAndSend() for forwarded packets,
+     * reassembleAndDeliver() for local packets, to fragmentAndSend() for forwarded packets,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
@@ -116,7 +116,7 @@ class INET_API IP : public QueueBase
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void localDeliver(IPDatagram *datagram);
+    virtual void reassembleAndDeliver(IPDatagram *datagram);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPControlInfo.

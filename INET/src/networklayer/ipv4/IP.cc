@@ -205,7 +205,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
         if (datagram->getSrcAddress().isUnspecified())
             datagram->setSrcAddress(destAddr); // allows two apps on the same host to communicate
         numLocalDeliver++;
-        localDeliver(datagram);
+        reassembleAndDeliver(datagram);
         return;
     }
 
@@ -290,7 +290,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
             // FIXME code from the MPLS model: set packet dest address to routerId (???)
             datagramCopy->setDestAddress(rt->routerId());
 
-            localDeliver(datagramCopy);
+            reassembleAndDeliver(datagramCopy);
         }
 
         // don't forward if IP forwarding is off
@@ -360,9 +360,9 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     }
 }
 
-void IP::localDeliver(IPDatagram *datagram)
+void IP::reassembleAndDeliver(IPDatagram *datagram)
 {
-    // Defragmentation. skip defragmentation if datagram is not fragmented
+    // reassemble the packet (if fragmented)
     if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
     {
         EV << "Datagram fragment: offset=" << datagram->getFragmentOffset()
