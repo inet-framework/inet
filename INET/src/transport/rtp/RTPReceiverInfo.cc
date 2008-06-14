@@ -208,7 +208,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         receptionReport->setPacketsLostCumulative(packetsLost);
         receptionReport->setSequenceNumber(_sequenceNumberCycles + _highestSequenceNumber);
 
-        receptionReport->setJitter((u_int32)_jitter);
+        receptionReport->setJitter((u_int32)SIMTIME_DBL(_jitter)); //XXX ??? store it in secs? --Andras
 
         // the middle 32 bit of the ntp time stamp of the last sender report
         receptionReport->setLastSR((_lastSenderReportNTPTimeStamp >> 16) & 0xFFFFFFFF);
@@ -217,7 +217,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         // of 1 / 65536 seconds
         // 0 if no sender report has ben received
 
-        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (u_int32)((now - _lastSenderReportArrivalTime) * 65536.0));
+        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (u_int32)(SIMTIME_DBL(now - _lastSenderReportArrivalTime) * 65536.0));
 
         return receptionReport;
     }

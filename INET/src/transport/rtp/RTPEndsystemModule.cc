@@ -26,7 +26,6 @@
 #include "IPAddress.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
-#include "lbmsMessage_m.h"
 
 #include "RTPEndsystemModule.h"
 #include "RTPInterfacePacket.h"

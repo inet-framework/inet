@@ -151,7 +151,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         /**
          * The interarrival jitter. See rtp rfc for details.
          */
-        double _jitter;
+        simtime_t _jitter;
 
         /**
          * The output vector for jitter value

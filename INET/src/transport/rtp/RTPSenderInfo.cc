@@ -92,11 +92,11 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now) {
         SenderReport *senderReport = new SenderReport();
         // ntp time stamp is 64 bit integer
 
-        u_int64 ntpSeconds = (u_int64)now;
-        u_int64 ntpFraction = (u_int64)((now - (simtime_t)ntpSeconds) * 65536.0 * 65536.0);
+        u_int64 ntpSeconds = (u_int64)SIMTIME_DBL(now);
+        u_int64 ntpFraction = (u_int64)( (SIMTIME_DBL(now) - ntpSeconds*65536.0) * 65536.0);
 
         senderReport->setNTPTimeStamp((u_int64)(ntpSeconds << 32) + ntpFraction);
-        senderReport->setRTPTimeStamp((now - _startTime) * _clockRate);
+        senderReport->setRTPTimeStamp(SIMTIME_DBL(now - _startTime) * _clockRate);
         senderReport->setPacketCount(_packetsSent);
         senderReport->setByteCount(_bytesSent);
         return senderReport;
