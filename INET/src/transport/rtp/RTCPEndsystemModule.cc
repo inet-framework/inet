@@ -35,7 +35,7 @@
 #include "RTPSenderInfo.h"
 #include "RTPReceiverInfo.h"
 
-Define_Module_Like(RTCPEndsystemModule, RTCPModule);
+Define_Module(RTCPEndsystemModule);
 
 void RTCPEndsystemModule::initialize() {
 
@@ -222,7 +222,7 @@ void RTCPEndsystemModule::createSocket()
 
 void RTCPEndsystemModule::scheduleInterval() {
 
-    simtime_t intervalLength = (simtime_t)(_averagePacketSize) * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
 
     // interval length must be at least 5 seconds

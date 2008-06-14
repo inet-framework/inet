@@ -1,6 +1,9 @@
+package inet.transport.rtp;
+
 simple RTPApplication
 {
     parameters:
+        @display("i=old/app");
         string commonName;
         string profileName;
         double bandwidth;

@@ -1,16 +1,16 @@
 // the original file was included in the UDP sockets example
 
-import NotificationBoard;
-import NetworkLayer;
-import PingApp;
-import InterfaceTable;
-import RoutingTable;
-import UDP;
-import RTPLayer;
-import RTPApplication;
-import EthernetInterface;
+package inet.transport.rtp;
 
-module RTPHost
+import inet.base.NotificationBoard;
+import inet.linklayer.ppp.PPPInterface;
+import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.nodes.inet.NetworkLayer;
+import inet.transport.udp.UDP;
+
+
+module RTPMobileHost
 {
     parameters:
         bool debug;
@@ -27,8 +27,7 @@ module RTPHost
         string routingFile;
         @display("bgb=212,371");
     gates:
-        input in[];
-        output out[];
+        inout pppg[];
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -54,7 +53,7 @@ module RTPHost
                 bandwidth = bandwidth;
                 fileName = fileName;
                 payloadType = payloadType;
-                @display("b=,,,,,2;i=old/app;p=161,36");
+                @display("p=161,36");
         }
         rtpLayer: RTPLayer {
             parameters:
@@ -66,8 +65,8 @@ module RTPHost
             parameters:
                 @display("p=161,170");
             gates:
-                from_app[2];
-                to_app[2];
+                appIn[2];
+                appOut[2];
         }
         networkLayer: NetworkLayer {
             parameters:
@@ -75,10 +74,10 @@ module RTPHost
                 proxyARP = false;
                 @display("p=161,246");
             gates:
-                ifIn[sizeof(out)];
-                ifOut[sizeof(out)];
+                ifIn[sizeof(pppg)];
+                ifOut[sizeof(pppg)];
         }
-        ppp[sizeof(out)]: PPPInterface {
+        ppp[sizeof(pppg)]: PPPInterface {
             parameters:
                 @display("p=161,324,row");
         }
@@ -87,19 +86,18 @@ module RTPHost
         application.toRTP --> rtpLayer.fromApp;
         application.fromRTP <-- rtpLayer.toApp;
 
-        rtpLayer.toUDPfromRTP --> udpModule.from_app[0];
-        rtpLayer.fromUDPtoRTP <-- udpModule.to_app[0];
+        rtpLayer.toUDPfromRTP --> udpModule.appIn[0];
+        rtpLayer.fromUDPtoRTP <-- udpModule.appOut[0];
 
-        rtpLayer.toUDPfromRTCP --> udpModule.from_app[1];
-        rtpLayer.fromUDPtoRTCP <-- udpModule.to_app[1];
+        rtpLayer.toUDPfromRTCP --> udpModule.appIn[1];
+        rtpLayer.fromUDPtoRTCP <-- udpModule.appOut[1];
 
-        networkLayer.UDPOut --> udpModule.from_ip;
-        networkLayer.UDPIn <-- udpModule.to_ip;
+        networkLayer.udpOut --> udpModule.ipIn;
+        networkLayer.udpIn <-- udpModule.ipOut;
 
         // connections to network outside
-        for i=0..sizeof(out)-1 {
-            in[i] --> ppp[i].physIn;
-            out[i] <-- ppp[i].physOut;
+        for i=0..sizeof(pppg)-1 {
+            pppg[i] <--> ppp[i].phys;
             ppp[i].netwOut --> networkLayer.ifIn[i];
             ppp[i].netwIn <-- networkLayer.ifOut[i];
         }

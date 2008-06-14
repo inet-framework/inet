@@ -1,3 +1,5 @@
+package inet.transport.rtp;
+
 simple RTPPayloadSender
 {
     gates:

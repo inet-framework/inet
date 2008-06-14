@@ -1,18 +1,20 @@
-import RTPHost;
+package inet.transport.rtp.unicast;
 
-channel ethernet extends ned.BasicChannel
+import inet.transport.rtp.RTPHost;
+
+network RTPNetwork
 {
     parameters:
-        delay = normal(0.00015, 0.00005);
-        datarate = 10*10^6;
-}
-
-module RTPNetwork
-
-{
-    parameters:
-        bool debug;
-
+        bool debug = default(true);
+        
+    types:
+        channel ethernet extends ned.BasicChannel
+        {
+            parameters:
+                delay = normal(0.00015s, 0.00005s);
+                datarate = 10Mbps;
+        }
+    
     submodules:
         sender: RTPHost {
             parameters:
@@ -27,9 +29,6 @@ module RTPNetwork
                 numOfProcessors = 1;
                 routingFile = "server.irt";
                 @display("p=50,50;i=device/pc2");
-            gates:
-                in[1];
-                out[1];
         }
         receiver: RTPHost {
             parameters:
@@ -44,18 +43,7 @@ module RTPNetwork
                 numOfProcessors = 1;
                 routingFile = "client.irt";
                 @display("p=150,50;i=device/pc2");
-            gates:
-                in[1];
-                out[1];
         }
     connections:
-        sender.out[0] --> ethernet --> receiver.in[0];
-        sender.in[0] <-- ethernet <-- receiver.out[0];
-
-}
-
-network rtpNetwork extends RTPNetwork
-{
-    parameters:
-        debug = true;
+        sender.pppg++ <--> ethernet <--> receiver.pppg++;
 }

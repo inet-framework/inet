@@ -1,5 +1,4 @@
-import RTPModule;
-import RTCPModule;
+package inet.transport.rtp;
 
 module RTPLayer
 {
