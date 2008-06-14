@@ -1,2 +1,8 @@
 RTP is now integrated on INET framework
+
+Suspicios things in the code, to be checked:
+ - packet length bit/byte mismatch
+ - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
+
 If RTP is important to you, please write.
+
