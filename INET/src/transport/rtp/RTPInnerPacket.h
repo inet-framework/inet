@@ -23,8 +23,6 @@
 #define __RTPINNERPACKET_H__
 
 #include <omnetpp.h>
-
-#include "defs.h"
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
@@ -115,13 +113,13 @@ class INET_API RTPInnerPacket : public cMessage
          * message. It informs the rtp module about the percentage of the available
          * bandwidth to be used by rtcp and the preferred port for this profile.
          */
-        virtual void profileInitialized(int rtcpPercentage, IN_Port port);
+        virtual void profileInitialized(int rtcpPercentage, int port);
 
         /**
          * Called by the rtp module to inform the rtcp module about mandatory
          * information for starting the rtp session.
          */
-        virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, IN_Port port);
+        virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, int port);
 
         /**
          * Called by the rtcp module after it has waited for half an rtcp interval
@@ -164,7 +162,7 @@ class INET_API RTPInnerPacket : public cMessage
          * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
          * it within the rtp layer.
          */
-        virtual void dataIn(RTPPacket *packet, IPAddress address, IN_Port port);
+        virtual void dataIn(RTPPacket *packet, IPAddress address, int port);
 
         /**
          * Returns the type of this RTPInnerPacket.
@@ -199,7 +197,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the port stored in this RTPInnerPacket.
          */
-        virtual IN_Port port();
+        virtual int port();
 
         /**
          * Returns the ssrc identifier stored in this RTPInnerPacket.
@@ -267,7 +265,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * The port stored this RTPInnerPacket.
          */
-        IN_Port _port;
+        int _port;
 
         /**
          * The ssrc identifier stored in this RTPInnerPacket.

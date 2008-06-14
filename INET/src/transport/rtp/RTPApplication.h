@@ -74,7 +74,7 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * One of the udp port used.
          */
-        IN_Port _port;
+        int _port;
 
         /**
          * The name of the file to be transmitted.

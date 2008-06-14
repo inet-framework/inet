@@ -22,8 +22,6 @@
 
 #include <omnetpp.h>
 
-#include "defs.h"
-
 #include "IPAddress.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
@@ -194,7 +192,7 @@ void RTCPEndsystemModule::connectRet()
 void RTCPEndsystemModule::readRet(cMessage *sifpIn)
 {
     RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
-    processIncomingRTCPPacket(packet, IPAddress(_destinationAddress),IN_Port(_port));
+    processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
 };
 
 void RTCPEndsystemModule::createSocket()
@@ -208,7 +206,7 @@ void RTCPEndsystemModule::createSocket()
 
     if (ipaddr.isMulticast()) {
         ctrl->setSrcAddr(IPAddress(_destinationAddress));
-        ctrl->setSrcPort(IN_Port(_port));
+        ctrl->setSrcPort(_port);
     }
     else {
          ctrl->setSrcPort(_port);
@@ -343,7 +341,7 @@ void RTCPEndsystemModule::processOutgoingRTPPacket(RTPPacket *packet)
 };
 
 
-void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, IN_Port port) {
+void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port) {
     u_int32 ssrc = packet->ssrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == NULL) {
@@ -357,7 +355,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress 
         if (participantInfo->getAddress() != address) {
             // we have an address conflict
         }
-        if (participantInfo->rtpPort() == IPSuite_PORT_UNDEF) {
+        if (participantInfo->rtpPort() == PORT_UNDEF) {
             participantInfo->setRTPPort(port);
         }
         else if (participantInfo->rtpPort() != port) {
@@ -368,7 +366,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress 
 };
 
 
-void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, IN_Port port)
+void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port)
 {
     calculateAveragePacketSize(packet->getBitLength());
     cArray *rtcpPackets = packet->rtcpPackets();
@@ -393,7 +391,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 }
                 else {
                     if (participantInfo->getAddress() == address) {
-                        if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
+                        if (participantInfo->rtcpPort() == PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {
@@ -435,7 +433,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 }
                 else {
                     if (participantInfo->getAddress() == address) {
-                        if (participantInfo->rtcpPort() == IPSuite_PORT_UNDEF) {
+                        if (participantInfo->rtcpPort() == PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {

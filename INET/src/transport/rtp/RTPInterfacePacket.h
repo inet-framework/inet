@@ -26,7 +26,6 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "defs.h"
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPSenderControlMessage.h"
@@ -107,7 +106,7 @@ class INET_API RTPInterfacePacket : public cMessage
          * Called by the rtp application to make the rtp layer enter an
          * rtp session with the given parameters.
          */
-        virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, IN_Port port);
+        virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port);
 
         /**
          * Called by the rtp module to inform the application that the rtp session
@@ -195,7 +194,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Returns the port stored in this RTPInterfacePacket.
          */
-        virtual IN_Port port();
+        virtual int port();
 
         /**
          * Returns the ssrc identifier stored in this RTPInterfacePacket.
@@ -242,7 +241,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * The port stored in this RTPInterfacePacket.
          */
-        IN_Port _port;
+        int _port;
 
         /**
          * The ssrc identifier stored in this RTPInterfacePacket.

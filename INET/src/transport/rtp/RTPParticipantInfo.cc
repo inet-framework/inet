@@ -39,8 +39,8 @@ RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc) : cObject() {
     // it is set to 3; see isSender() for details
     _silentIntervals = 3;
     _address = IPADDRESS_UNDEF;
-    _rtpPort = IPSuite_PORT_UNDEF;
-    _rtcpPort = IPSuite_PORT_UNDEF;
+    _rtpPort = PORT_UNDEF;
+    _rtcpPort = PORT_UNDEF;
 };
 
 
@@ -164,22 +164,22 @@ void RTPParticipantInfo::setAddress(IPAddress address) {
 };
 
 
-IN_Port RTPParticipantInfo::rtpPort() {
+int RTPParticipantInfo::rtpPort() {
     return _rtpPort;
 };
 
 
-void RTPParticipantInfo::setRTPPort(IN_Port rtpPort) {
+void RTPParticipantInfo::setRTPPort(int rtpPort) {
     _rtpPort = rtpPort;
 };
 
 
-IN_Port RTPParticipantInfo::rtcpPort() {
+int RTPParticipantInfo::rtcpPort() {
     return _rtcpPort;
 };
 
 
-void RTPParticipantInfo::setRTCPPort(IN_Port rtcpPort) {
+void RTPParticipantInfo::setRTCPPort(int rtcpPort) {
     _rtcpPort = rtcpPort;
 };
 

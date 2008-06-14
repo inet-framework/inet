@@ -30,7 +30,7 @@ RTPInterfacePacket::RTPInterfacePacket(const char *name) : cMessage(name) {
     _profileName = NULL;
     _bandwidth = 0;
     _destinationAddress = IPADDRESS_UNDEF;
-    _port = IPSuite_PORT_UNDEF;
+    _port = PORT_UNDEF;
     _ssrc = 0;
     _payloadType = 0;
     _fileName = NULL;
@@ -99,7 +99,7 @@ void RTPInterfacePacket::dump(std::ostream& os) {
 };
 
 
-void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, IN_Port port) {
+void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port) {
     _type = RTP_IFP_ENTER_SESSION;
     _commonName = commonName;
     _profileName = profileName;
@@ -238,6 +238,6 @@ IPAddress RTPInterfacePacket::getDestinationAddress() {
 };
 
 
-IN_Port RTPInterfacePacket::port() {
+int RTPInterfacePacket::port() {
     return _port;
 };

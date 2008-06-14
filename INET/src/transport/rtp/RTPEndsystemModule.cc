@@ -21,8 +21,6 @@
 
 #include <omnetpp.h>
 
-#include "defs.h"
-
 #include "IPAddress.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
@@ -217,7 +215,7 @@ void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp)
 void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp)
 {
     _rtcpPercentage = rinp->rtcpPercentage();
-    if (_port == IPSuite_PORT_UNDEF) {
+    if (_port == PORT_UNDEF) {
         _port = rinp->port();
         if (_port % 2 != 0) {
             _port = _port - 1;
@@ -331,7 +329,7 @@ void RTPEndsystemModule::readRet(cMessage *sifp)
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
-         rinp1->dataIn(new RTPPacket(*msg),IPAddress(_destinationAddress),IN_Port(_port));
+         rinp1->dataIn(new RTPPacket(*msg), IPAddress(_destinationAddress), _port);
 
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
          send(rinp2, "toRTCP");
@@ -387,7 +385,7 @@ void RTPEndsystemModule::createSocket()
 
     if (ipaddr.isMulticast()) {
         ctrl->setSrcAddr(IPAddress(_destinationAddress));
-        ctrl->setSrcPort(IN_Port(_port));
+        ctrl->setSrcPort(_port);
     }
     else {
          ctrl->setSrcPort(_port);
@@ -413,7 +411,7 @@ void RTPEndsystemModule::initializeProfile()
 void RTPEndsystemModule::initializeRTCP()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
-    IN_Port rtcpPort = _port + 1;
+    int rtcpPort = _port + 1;
     rinp->initializeRTCP(opp_strdup(_commonName), _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "toRTCP");
 };

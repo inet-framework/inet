@@ -24,8 +24,6 @@
 
 #include <omnetpp.h>
 
-#include "defs.h"
-
 #include "RTPInnerPacket.h"
 #include "RTPSSRCGate.h"
 
@@ -180,7 +178,7 @@ class INET_API RTPProfile : public cSimpleModule
         /**
          * The rtp port this profile uses if no port is given.
          */
-        IN_Port _preferredPort;
+        int _preferredPort;
 
         /**
          * The maximum size an RTPPacket can have.

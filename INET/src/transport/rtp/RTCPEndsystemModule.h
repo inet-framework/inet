@@ -24,8 +24,6 @@
 
 #include <omnetpp.h>
 
-#include "defs.h"
-
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPInnerPacket.h"
@@ -134,7 +132,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * The rtcp port.
          */
-        IN_Port _port;
+        int _port;
 
         /**
          * True when this end system has chosen its ssrc identifier.
@@ -214,12 +212,12 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * Extracts information of a received RTPPacket.
          */
-        virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, IN_Port port);
+        virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port);
 
         /**
          * Extracts information of a received RTCPCompoundPacket.
          */
-        virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, IN_Port port);
+        virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port);
 
         /**
          * Returns the RTPParticipantInfo object used for storing information

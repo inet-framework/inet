@@ -26,7 +26,6 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
-#include "defs.h"
 #include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 
@@ -140,7 +139,7 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         /**
          * The rtp port.
          */
-        IN_Port _port;
+        int _port;
 
         /**
          * The maximum size of a packet.

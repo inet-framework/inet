@@ -21,7 +21,6 @@
 
 #include <omnetpp.h>
 
-#include "defs.h"
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPApplication.h"
@@ -48,7 +47,7 @@ void RTPApplication::initialize() {
 
     // port number which is to be used; to ports are actually used: one
     // for rtp and one for rtcp
-    _port = IN_Port((int)(par("portNumber").longValue()));
+    _port = (int)par("portNumber").longValue();
 
     // fileName of file to be transmitted
     // NULL or "" means this system acts only as a receiver

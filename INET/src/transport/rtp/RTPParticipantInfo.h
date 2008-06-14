@@ -24,8 +24,6 @@
 
 #include <stdio.h>
 #include <omnetpp.h>
-
-#include "defs.h"
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
@@ -182,25 +180,25 @@ class INET_API RTPParticipantInfo : public cObject
          * Returns the port used by this endsystem for
          * transmitting rtp packets.
          */
-        virtual IN_Port rtpPort();
+        virtual int rtpPort();
 
         /**
          * Sets the port used by the endsystem for
          * transmitting rtp packets.
          */
-        virtual void setRTPPort(IN_Port rtpPort);
+        virtual void setRTPPort(int rtpPort);
 
         /**
          * Returns the port used by this endsystem for
          * transmitting rtcp packets.
          */
-        virtual IN_Port rtcpPort();
+        virtual int rtcpPort();
 
         /**
          * Sets the port used by the endsystem for
          * transmitting rtcp packets.
          */
-        virtual void setRTCPPort(IN_Port rtpPort);
+        virtual void setRTCPPort(int rtpPort);
 
         /**
          * This method returns the given 32 bit ssrc identifier as
@@ -227,12 +225,12 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Used for storing the port for rtp by this endsystem.
          */
-        IN_Port _rtpPort;
+        int _rtpPort;
 
         /**
          * Used for storing the port for rtcp by this endsystem.
          */
-        IN_Port _rtcpPort;
+        int _rtcpPort;
 
         /**
          * Stores the number of rtcp intervals (including the current one)
