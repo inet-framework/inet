@@ -73,11 +73,6 @@ RTPInterfacePacket *RTPInterfacePacket::dup() const {
 };
 
 
-const char *RTPInterfacePacket::getClassName() const {
-    return "RTPInterfacePacket";
-};
-
-
 std::string RTPInterfacePacket::info() {
     std::stringstream out;
     out << "RTPInterfacePacket: type=" << _type;

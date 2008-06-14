@@ -47,11 +47,6 @@ RTPSenderControlMessage *RTPSenderControlMessage::dup() const {
 };
 
 
-const char *RTPSenderControlMessage::getClassName() const {
-    return "RTPSenderControlMessage";
-};
-
-
 const char *RTPSenderControlMessage::command() const {
     return opp_strdup(_command);
 };

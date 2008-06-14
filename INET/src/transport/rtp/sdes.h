@@ -82,11 +82,6 @@ class INET_API SDESItem : public cObject
         virtual SDESItem *dup() const;
 
         /**
-         * Returns the class name "SDESItem".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a short info about this SDESItem into the given string.
          */
         virtual std::string info();
@@ -163,11 +158,6 @@ class INET_API SDESChunk : public cArray
          * Duplicates this SDESChunk by calling the copy constructor.
          */
         virtual SDESChunk *dup() const;
-
-        /**
-         * Returns the class name "SDESChunk".
-         */
-        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this SDESChunk into the given string.

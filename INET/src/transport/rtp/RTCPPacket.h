@@ -80,11 +80,6 @@ class INET_API RTCPPacket : public cMessage
         RTCPPacket& operator=(const RTCPPacket& rtcpPacket);
 
         /**
-         * Return the class name "RTCPPacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Duplicates the RTCPPacket by calling the copy constructor.
          */
         virtual RTCPPacket *dup() const;
@@ -194,11 +189,6 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
         virtual RTCPReceiverReportPacket *dup() const;
 
         /**
-         * Returns the class name "RTCPReceiverReportPacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Reports a one line info about the RTCPReceiverReportPacket.
          */
         virtual std::string info();
@@ -284,11 +274,6 @@ class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket
         virtual RTCPSenderReportPacket *dup() const;
 
         /**
-         * Return the class name "RTCPSenderReportPacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a one line info about this RTCPSenderReportPacket into the given string.
          */
         virtual std::string info();
@@ -353,11 +338,6 @@ class INET_API RTCPSDESPacket : public RTCPPacket
          * Duplicates the RTCPSDESPacket by calling the copy constructor.
          */
         virtual RTCPSDESPacket *dup() const;
-
-        /**
-         * Return the class name "RTCPSDESPacket".
-         */
-        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this RTCPSDESPacket into the given string.
@@ -426,11 +406,6 @@ class INET_API RTCPByePacket : public RTCPPacket
         virtual RTCPByePacket *dup() const;
 
         /**
-         * Returns the class name "RTCPByePacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Returns the ssrc identifier.
          */
         virtual u_int32 ssrc();
@@ -483,11 +458,6 @@ class INET_API RTCPCompoundPacket : public cMessage
          * Duplicates the RTCPCompoundPacket by calling the copy constructor.
          */
         virtual RTCPCompoundPacket *dup() const;
-
-        /**
-         * Return the class name "RTCPCompoundPacket".
-         */
-        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this RTCPCompoundPacket into the given string.

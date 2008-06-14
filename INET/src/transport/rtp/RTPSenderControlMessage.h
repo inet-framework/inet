@@ -70,11 +70,6 @@ public:
         virtual RTPSenderControlMessage *dup() const;
 
         /**
-         * Returns the class name "RTPSenderControlMessage".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Returns the command string in this message.
          */
         virtual const char *command() const;

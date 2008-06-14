@@ -65,11 +65,6 @@ class INET_API SenderReport : public cObject
         virtual SenderReport *dup() const;
 
         /**
-         * Returns the class name "SenderReport".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a short info about this SenderReport into the given string.
          */
         virtual std::string info();
@@ -175,11 +170,6 @@ class INET_API ReceptionReport : public cObject
          * Duplicates this ReceptionReport by calling the copy constructor.
          */
         virtual ReceptionReport *dup() const;
-
-        /**
-         * Returns the class name "ReceptionReport".
-         */
-        virtual const char *getClassName() const;
 
         /**
          * Writes a short info about this ReceptionReport into the given string.

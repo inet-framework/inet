@@ -60,11 +60,6 @@ public:
     RTPSenderStatusMessage *dup() const;
 
     /**
-     * Returns the class name "RTPSenderStatusMessage".
-     */
-    const char *getClassName() const;
-
-    /**
      * Returns the status string stored in this message.
      */
     virtual const char *getStatus() const;

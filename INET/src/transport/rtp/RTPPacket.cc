@@ -75,11 +75,6 @@ RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
 };
 
 
-const char *RTPPacket::getClassName() const {
-    return "RTPPacket";
-};
-
-
 std::string RTPPacket::info() {
     std::stringstream out;
     out << "RTPPacket: payloadType=" << _payloadType << " payloadLength=" << getPayloadLength();

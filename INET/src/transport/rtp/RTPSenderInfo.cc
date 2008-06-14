@@ -66,11 +66,6 @@ RTPSenderInfo *RTPSenderInfo::dup() const {
 };
 
 
-const char *RTPSenderInfo::getClassName() const {
-    return "RTPSenderInfo";
-};
-
-
 void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id,  simtime_t arrivalTime) {
     _packetsSent++;
     _bytesSent = _bytesSent + packet->getPayloadLength();

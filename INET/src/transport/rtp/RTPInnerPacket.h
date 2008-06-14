@@ -88,11 +88,6 @@ class INET_API RTPInnerPacket : public cMessage
         virtual RTPInnerPacket *dup() const;
 
         /**
-         * Returns the class name "RTPInnerPacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a short info about this RTPInnerPacket into the given string.
          */
         virtual std::string info();

@@ -72,11 +72,6 @@ class INET_API RTPParticipantInfo : public cObject
         virtual RTPParticipantInfo *dup() const;
 
         /**
-         * Returns the class name "RTPParticipantInfo".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * This method should be extended by a subclass for
          * extracting information about the originating
          * endsystem of an rtp packet.

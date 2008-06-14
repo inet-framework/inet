@@ -45,11 +45,6 @@ RTPSenderStatusMessage *RTPSenderStatusMessage::dup() const {
 };
 
 
-const char *RTPSenderStatusMessage::getClassName() const {
-    return "RTPSenderStatusMessage";
-};
-
-
 const char *RTPSenderStatusMessage::getStatus() const {
     return opp_strdup(_status);
 };

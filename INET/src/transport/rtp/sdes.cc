@@ -68,11 +68,6 @@ SDESItem *SDESItem::dup() const {
 };
 
 
-const char *SDESItem::getClassName() const {
-    return "SDESItem";
-};
-
-
 std::string SDESItem::info() {
     std::stringstream out;
     out << "SDESItem=" << _content;
@@ -138,11 +133,6 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk) {
 
 SDESChunk *SDESChunk::dup() const {
     return new SDESChunk(*this);
-};
-
-
-const char *SDESChunk::getClassName() const {
-    return "SDESChunk";
 };
 
 

@@ -32,21 +32,18 @@
  */
 class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
 {
+    protected:
+        /**
+         * Initializes the module. It sets the values for clock rate and payload type.
+         */
+        virtual void initialize();
 
-  protected:
-
-    /**
-     * Initializes the module. It sets the values for clock rate and payload type.
-     */
-    virtual void initialize();
-
-    /**
-     * The main method.
-     */
-    //virtual void activity();
+        /**
+         * The main method.
+         */
+        //virtual void activity();
 
     protected:
-
         /**
          * This method reads the gdf file header.
          */
@@ -73,5 +70,4 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
          * the rtp time stamp in the rtp data packets.
          */
         double _frameNumber;
-
 };

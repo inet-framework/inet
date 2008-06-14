@@ -65,11 +65,6 @@ SenderReport *SenderReport::dup() const {
 };
 
 
-const char *SenderReport::getClassName() const {
-    return "SenderReport";
-};
-
-
 std::string SenderReport::info() {
     std::stringstream out;
     out << "SenderReport.timeStamp=" << _rtpTimeStamp;
@@ -167,11 +162,6 @@ ReceptionReport& ReceptionReport::operator=(const ReceptionReport& receptionRepo
 
 ReceptionReport *ReceptionReport::dup() const {
     return new ReceptionReport(*this);
-};
-
-
-const char *ReceptionReport::getClassName() const {
-    return "ReceptionReport";
 };
 
 

@@ -97,10 +97,6 @@ RTPReceiverInfo *RTPReceiverInfo::dup() const {
     return new RTPReceiverInfo(*this);
 };
 
-const char *RTPReceiverInfo::getClassName() const {
-    return "RTPReceiverInfo";
-};
-
 void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arrivalTime)
 {
     // this endsystem sends, it isn't inactive

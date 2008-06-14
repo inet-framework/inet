@@ -69,11 +69,6 @@ RTPParticipantInfo *RTPParticipantInfo::dup() const {
 };
 
 
-const char *RTPParticipantInfo::getClassName() const {
-    return "RTPParticipantInfo";
-};
-
-
 void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime) {
     _silentIntervals = 0;
     delete packet;

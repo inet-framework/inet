@@ -72,11 +72,6 @@ RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
 };
 
 
-const char *RTCPPacket::getClassName() const {
-    return "RTCPPacket";
-};
-
-
 RTCPPacket *RTCPPacket::dup() const {
     return new RTCPPacket(*this);
 };
@@ -167,11 +162,6 @@ RTCPReceiverReportPacket *RTCPReceiverReportPacket::dup() const {
 };
 
 
-const char *RTCPReceiverReportPacket::getClassName() const {
-    return "RTCPReceiverReportPacket";
-};
-
-
 std::string RTCPReceiverReportPacket::info() {
     std::stringstream out;
     out << "RTCPReceiverReportPacket #rr=" << _count;
@@ -252,11 +242,6 @@ RTCPSenderReportPacket *RTCPSenderReportPacket::dup() const {
 };
 
 
-const char *RTCPSenderReportPacket::getClassName() const {
-    return "RTCPSenderReportPacket";
-};
-
-
 std::string RTCPSenderReportPacket::info() {
     std::stringstream out;
     out << "RTCPSenderReportPacket.ssrc=" << _ssrc;
@@ -323,11 +308,6 @@ RTCPSDESPacket& RTCPSDESPacket::operator=(const RTCPSDESPacket& rtcpSDESPacket) 
 
 RTCPSDESPacket *RTCPSDESPacket::dup() const {
     return new RTCPSDESPacket(*this);
-};
-
-
-const char *RTCPSDESPacket::getClassName() const {
-    return "RTCPSDESPacket";
 };
 
 
@@ -400,11 +380,6 @@ RTCPByePacket *RTCPByePacket::dup() const {
 };
 
 
-const char *RTCPByePacket::getClassName() const {
-    return "RTCPByePacket";
-};
-
-
 u_int32 RTCPByePacket::ssrc() {
     return _ssrc;
 };
@@ -450,11 +425,6 @@ RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcp
 
 RTCPCompoundPacket *RTCPCompoundPacket::dup() const {
     return new RTCPCompoundPacket(*this);
-};
-
-
-const char *RTCPCompoundPacket::getClassName() const {
-    return "RTCPCompoundPacket";
 };
 
 

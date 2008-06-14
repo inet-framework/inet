@@ -65,11 +65,6 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         virtual RTPSenderInfo *dup() const;
 
         /**
-         * Returns the class name "RTPSenderInfo".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Stores information about this outgoing RTPPacket.
          */
         virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);

@@ -88,11 +88,6 @@ class INET_API RTPInterfacePacket : public cMessage
         virtual RTPInterfacePacket *dup() const;
 
         /**
-         * Returns the class name "RTPInterfacePacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a one line info about this RTPInterfacePacket into the given string.
          */
         virtual std::string info();

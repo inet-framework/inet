@@ -65,11 +65,6 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         virtual RTPReceiverInfo *dup() const;
 
         /**
-         * Returns the class name "RTPReceiverInfo".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Extracts information of the given RTPPacket.
          * Also sets _inactiveIntervals to 0.
          */

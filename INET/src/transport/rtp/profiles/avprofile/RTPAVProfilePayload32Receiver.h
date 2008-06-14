@@ -28,8 +28,8 @@
 #include "RTPPayloadReceiver.h"
 
 /**
- * This module is used to receive data (mpeg video) of payload 32 for rtp endsystems
- * working under the rtp av profile.
+ * This module is used to receive getData(mpeg video) of payload 32 for rtp
+ * endsystems working under the rtp av profile.
  * It expects data in the format defined in rfc 2250.
  * Its corresponding sender module is RTPAVProfilePayload32Sender.
  * This implementation doesn't work with real mpeg data, so it doesn't write
@@ -45,7 +45,8 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
       virtual ~RTPAVProfilePayload32Receiver();
 
       /**
-       * Calls the method of the superclass RTPPayloadReceiver and sets the payload type to 32.
+       * Calls the method of the superclass RTPPayloadReceiver and sets the
+       * payload type to 32.
        */
       virtual void initialize();
 
@@ -58,10 +59,12 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
         cQueue *_queue;
 
         /**
-         * Stores the lowest allowed time stamp of rtp data packets. The value is used
-         * to throw away packets from mpeg frames already stored in the data file.
+         * Stores the lowest allowed time stamp of rtp data packets. The value
+         * is used to throw away packets from mpeg frames already stored in
+         * the data file.
          */
         u_int32 _lowestAllowedTimeStamp;
+        u_int32 _highestSequenceNumber;
 
         /**
          * Writes information about received frames into the output file.

@@ -44,7 +44,7 @@ class INET_API RTPMpegPacket : public cMessage
         /**
          * Default constructor.
          */
-        RTPMpegPacket();
+        RTPMpegPacket(const char *name = NULL);
 
         /**
          * Copy constructor.
@@ -65,11 +65,6 @@ class INET_API RTPMpegPacket : public cMessage
          * Duplicates the RTPMpegPacket by calling the copy constructor.
          */
         virtual RTPMpegPacket *dup() const;
-
-        /**
-         * Returns the class name "RTPMpegPacket".
-         */
-        virtual const char *getClassName() const;
 
         /**
          * Returns the constant header length (4 bytes).

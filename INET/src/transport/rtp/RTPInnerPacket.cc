@@ -84,11 +84,6 @@ RTPInnerPacket *RTPInnerPacket::dup() const {
 };
 
 
-const char *RTPInnerPacket::getClassName() const {
-    return "RTPInnerPacket";
-};
-
-
 std::string RTPInnerPacket::info() {
     std::stringstream out;
     out << "RTPInnerPacket: type=" << _type;

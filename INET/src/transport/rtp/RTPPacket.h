@@ -63,11 +63,6 @@ class INET_API RTPPacket : public cMessage
         virtual RTPPacket *dup() const;
 
         /**
-         * Returns the class name "RTPPacket".
-         */
-        virtual const char *getClassName() const;
-
-        /**
          * Writes a one line info about this RTPPacket into the given string.
          */
         virtual std::string info();

@@ -24,7 +24,7 @@
 
 Register_Class(RTPMpegPacket);
 
-RTPMpegPacket::RTPMpegPacket() : cMessage() {
+RTPMpegPacket::RTPMpegPacket(const char *name) : cMessage(name) {
     _mzb = 0;
     _two = 0;
     _temporalReference = 0;
@@ -73,11 +73,6 @@ RTPMpegPacket& RTPMpegPacket::operator=(const RTPMpegPacket& packet) {
 
 RTPMpegPacket *RTPMpegPacket::dup() const {
     return new RTPMpegPacket(*this);
-};
-
-
-const char *RTPMpegPacket::getClassName() const {
-    return "RTPMpegPacket";
 };
 
 

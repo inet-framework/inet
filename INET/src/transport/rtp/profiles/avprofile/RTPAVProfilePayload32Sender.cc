@@ -1,9 +1,9 @@
 /***************************************************************************
-                          RTPAVProfilePayload32Sender.cpp  -  description
+                       RTPAVProfilePayload32Sender.cpp  -  description
                              -------------------
-    begin                : Wed Nov 28 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    begin            : Fri Aug 2 2007
+    copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
+    email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
  ***************************************************************************/
 
 /***************************************************************************
@@ -22,7 +22,7 @@
  * package.
  */
 
-#include <fstream.h>
+#include <fstream>
 #include <string.h>
 
 #include <omnetpp.h>
@@ -100,7 +100,7 @@ void RTPAVProfilePayload32Sender::activity() {
                     stop();
                 }
                 else {
-                    EV << "payload sender: unknown sender control message, ignored" << endl;
+                    ev << "payload sender: unknown sender control message, ignored" << endl;
                 }
                 //delete rscm;
             }
@@ -118,8 +118,9 @@ void RTPAVProfilePayload32Sender::activity() {
 };
 */
 
-void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn) {
-
+void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
+{
+    ev << "initializeSenderModule Enter"<<endl;
     char line[100];
     char unit[100];
     char description[100];
@@ -148,14 +149,15 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     _initialDelay = delay;
 
     // wait initial delay
-//    cMessage *reminderMessage = new cMessage("next frame");
-//    scheduleAt(simTime() + _initialDelay, reminderMessage);
-
+    // cMessage *reminderMessage = new cMessage("next frame");
+    // scheduleAt(simTime() + _initialDelay, reminderMessage);
+    ev << "initializeSenderModule Exit"<<endl;
 };
 
 
-bool RTPAVProfilePayload32Sender::sendPacket() {
-
+bool RTPAVProfilePayload32Sender::sendPacket()
+{
+    ev << "sendPacket() "<< endl;
     // read next frame line
     int bits;
     char unit[100];
@@ -241,6 +243,8 @@ bool RTPAVProfilePayload32Sender::sendPacket() {
         return true;
     }
     else {
+        std::cout <<"LastSequenceNumber "<< _sequenceNumber << endl;
         return false;
     }
+    ev << "sendPacket() Exit"<< endl;
 };
