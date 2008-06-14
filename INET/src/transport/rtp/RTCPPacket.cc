@@ -47,7 +47,7 @@ RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
     // RTCP header length size is 4 bytes
     // not all rtcp packets (in particular RTCPSDESPacket) have
     // the ssrc identifier stored in the header
-    setBitLength(4);
+    setByteLength(4);
 };
 
 
@@ -118,7 +118,7 @@ int RTCPPacket::rtcpLength() const {
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
-    return (int)(getBitLength() / 4) - 1;
+    return (int)(getByteLength() / 4) - 1;
 };
 
 
@@ -135,7 +135,7 @@ RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name) : RTCPPacke
     _receptionReports = new cArray("ReceptionReports");
     // an empty rtcp receiver report packet is 4 bytes
     // longer, the ssrc identifier is stored in it
-    addBitLength(4);
+    addByteLength(4);
 };
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const RTCPReceiverReportPacket& rtcpReceiverReportPacket) : RTCPPacket() {
@@ -194,7 +194,7 @@ void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report) {
     _receptionReports->add(report);
     _count++;
     // an rtcp receiver report is 24 bytes long
-    addBitLength(24);
+    addByteLength(24);
 };
 
 
@@ -215,7 +215,7 @@ RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name) : RTCPReceiverR
     _packetType = RTCP_PT_SR;
     _senderReport = new SenderReport();
     // a sender report is 20 bytes long
-    addBitLength(20);
+    addByteLength(20);
 };
 
 
@@ -282,7 +282,7 @@ Register_Class(RTCPSDESPacket);
 RTCPSDESPacket::RTCPSDESPacket(const char *name) : RTCPPacket(name) {
     _packetType = RTCP_PT_SDES;
     _sdesChunks = new cArray("SDESChunks");
-    // no addBitLength() needed, sdes chunks
+    // no addByteLength() needed, sdes chunks
     // directly follow the standard rtcp
     // header
 };
@@ -337,7 +337,7 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk) {
     _count++;
     // the size of the rtcp packet increases by the
     // size of the sdes chunk (including ssrc)
-    addBitLength(sdesChunk->length());
+    addByteLength(sdesChunk->length());
 };
 
 
@@ -353,7 +353,7 @@ RTCPByePacket::RTCPByePacket(const char *name) : RTCPPacket(name) {
     _count = 1;
     _ssrc = 0;
     // space for the ssrc identifier
-    addBitLength(4);
+    addByteLength(4);
 };
 
 
@@ -400,7 +400,7 @@ Register_Class(RTCPCompoundPacket);
 RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cMessage(name) {
     _rtcpPackets = new cArray("RTCPPackets");
     // an empty rtcp compound packet has length 0 bytes
-    setBitLength(0);
+    setByteLength(0);
 };
 
 
@@ -417,7 +417,7 @@ RTCPCompoundPacket::~RTCPCompoundPacket() {
 
 RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcpCompoundPacket) {
     cMessage::operator=(rtcpCompoundPacket);
-    setBitLength(rtcpCompoundPacket.getBitLength());
+    setByteLength(rtcpCompoundPacket.getByteLength());
     _rtcpPackets = new cArray(*(rtcpCompoundPacket._rtcpPackets));
     return *this;
 };
@@ -450,7 +450,7 @@ void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket) {
     _rtcpPackets->add(rtcpPacket);
     // the size of the rtcp compound packet increases
     // by the size of the added rtcp packet
-    addBitLength(rtcpPacket->getBitLength());
+    addByteLength(rtcpPacket->getByteLength());
 };
 
 

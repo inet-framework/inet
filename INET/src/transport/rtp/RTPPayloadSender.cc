@@ -80,7 +80,7 @@ void RTPPayloadSender::activity() {
                     seekByte(rscm->commandParameter1());
                 }
                 else {
-                    ev << " unknown sender control message" << endl;
+                    error("unknown sender control message");
                 };
                 delete rscm;
             }
@@ -139,12 +139,12 @@ void RTPPayloadSender::play() {
 
 
 void RTPPayloadSender::playUntilTime(simtime_t moment) {
-    ev << " playUntilTime() not implemented" << endl;
+    error("playUntilTime() not implemented");
 };
 
 
 void RTPPayloadSender::playUntilByte(int position) {
-    ev << " playUntilByte() not implemented" << endl;
+    error("playUntilByte() not implemented");
 };
 
 
@@ -160,12 +160,12 @@ void RTPPayloadSender::pause() {
 
 
 void RTPPayloadSender::seekTime(simtime_t moment) {
-    ev << " seekTime() not implemented" << endl;
+    error("seekTime() not implemented");
 };
 
 
 void RTPPayloadSender::seekByte(int position) {
-    ev << " seekByte() not implemented" << endl;
+    error("seekByte() not implemented");
 };
 
 
@@ -191,6 +191,6 @@ void RTPPayloadSender::endOfFile() {
 
 
 bool RTPPayloadSender::sendPacket() {
-    ev << " sendPacket() not implemented" << endl;
+    error("sendPacket() not implemented");
     return false;
 };

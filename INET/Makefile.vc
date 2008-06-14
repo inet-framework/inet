@@ -9,7 +9,7 @@ cleanall:
 	cd src && $(MAKE) -f Makefile.vc MODE=debug clean
 
 makefiles:
-	cd src && call opp_nmakemake -f --deep -X transport/rtp/profiles -o inet
+	cd src && call opp_nmakemake -f --deep -o inet
 
 doxy:
 	doxygen doxy.cfg

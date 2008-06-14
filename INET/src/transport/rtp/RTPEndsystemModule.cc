@@ -134,7 +134,7 @@ void RTPEndsystemModule::handleMessageFromRTCP(cMessage *msg)
         sessionLeft(rinp);
     }
     else {
-        ev << "Unknown RTPInnerPacket type " << rinp->getType() << " from rtcp !" << endl;
+        error("Unknown RTPInnerPacket type %d from rtcp", rinp->getType());
     }
 };
 
@@ -356,10 +356,10 @@ int RTPEndsystemModule::resolveMTU()
 void RTPEndsystemModule::createProfile()
 {
     cModuleType *moduleType = cModuleType::find(_profileName);
-    if (moduleType == NULL) {
-        error("Profile type not found !");
-    };
-    RTPProfile *profile = (RTPProfile *)(moduleType->create("Profile", this));
+    if (moduleType == NULL)
+        error("Profile type `%s' not found", _profileName);
+
+    RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
 
     profile->setGateSize("toPayloadReceiver", 30);
     profile->setGateSize("fromPayloadReceiver", 30);
@@ -367,7 +367,7 @@ void RTPEndsystemModule::createProfile()
     this->gate("toProfile")->connectTo(profile->gate("fromRTP"));
     profile->gate("toRTP")->connectTo(this->gate("fromProfile"));
 
-    profile->initialize();
+    profile->callInitialize();
     profile->scheduleStart(simTime());
 };
 

@@ -100,7 +100,7 @@ void RTCPEndsystemModule::handleMessageFromRTP(cMessage *msg) {
         leaveSession(rinp);
     }
     else {
-        ev << "unknown RTPInnerPacket type !" << endl;
+        error("unknown RTPInnerPacket type");
     }
 };
 
@@ -314,7 +314,7 @@ void RTCPEndsystemModule::createPacket()
         compoundPacket->addRTCPPacket(byePacket);
     };
 
-    calculateAveragePacketSize(compoundPacket->getBitLength());
+    calculateAveragePacketSize(compoundPacket->getByteLength());
 
     cMessage *msg = new cMessage("RTCPCompoundPacket");
     msg->encapsulate(compoundPacket);
@@ -368,7 +368,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress 
 
 void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, int port)
 {
-    calculateAveragePacketSize(packet->getBitLength());
+    calculateAveragePacketSize(packet->getByteLength());
     cArray *rtcpPackets = packet->rtcpPackets();
 
     simtime_t arrivalTime = packet->getArrivalTime();

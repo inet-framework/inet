@@ -124,10 +124,8 @@ void RTPApplication::activity() {
             }
         }
         else {
-            if (opp_strcmp(msgIn->getClassName(), "RTPInterfacePacket")) {
-                opp_error("RTPApplication can only receive packets of type RTPInterfacePacket !");
-            }
-            RTPInterfacePacket *rifpIn = (RTPInterfacePacket *)msgIn;
+            RTPInterfacePacket *rifpIn = check_and_cast<RTPInterfacePacket *>(msgIn);
+
             if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED) {
                 ev << "Session Entered"<<endl;
                 ssrc = rifpIn->ssrc();

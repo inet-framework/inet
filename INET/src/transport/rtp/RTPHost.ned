@@ -13,7 +13,6 @@ import inet.transport.udp.UDP;
 module RTPHost
 {
     parameters:
-        bool debug;
         string profileName;
         string destinationAddress;
         int portNumber;
@@ -21,11 +20,9 @@ module RTPHost
         string fileName;
         int payloadType;
         // network information
-        int numOfProcessors;
         bool IPForward;
-        int namid;
         string routingFile;
-        @display("bgb=212,371");
+        @display("i=device/pc2");
 
     gates:
         inout pppg[];
@@ -52,7 +49,7 @@ module RTPHost
                 bandwidth = bandwidth;
                 fileName = fileName;
                 payloadType = payloadType;
-                @display("b=,,,,,2;p=161,36");
+                @display("p=161,36");
         }
         rtpLayer: RTPLayer {
             parameters:
@@ -69,7 +66,6 @@ module RTPHost
         }
         networkLayer: NetworkLayer {
             parameters:
-                //debug = false,
                 proxyARP = false;
                 @display("p=161,246");
             gates:

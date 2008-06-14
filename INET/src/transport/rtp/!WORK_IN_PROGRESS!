@@ -1,8 +1,18 @@
-RTP is now integrated on INET framework
+Andras Varga, 2008 Jun:
+	Found suspicious things in the code, to be checked: 
+	 - packet length bit/byte mismatch?
+	 - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
 
-Suspicios things in the code, to be checked:
- - packet length bit/byte mismatch
- - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
+	Also: current code is a lot more complicated than it needs to be, with lots of 
+	repetition. Hints to simplify:
+	 - use msg files (a short msg file can replace tons of source code)
+	 - RTPProfile and Server/Receiver probably don't need to be modules. It's quite
+	   enough if they are just classes that implement some C++ interface
+	Patches welcome...
 
-If RTP is important to you, please write.
+	Also: move RTPHost out under nodes/?
+
+Ahmed Ayadi, 2007:
+	RTP is now integrated on INET framework 
+	If RTP is important to you, please write.
 

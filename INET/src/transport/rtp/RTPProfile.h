@@ -41,12 +41,15 @@
  */
 class INET_API RTPProfile : public cSimpleModule
 {
-    public: // FIXME
-    //protected:
+    public:
+        RTPProfile();
+        
+    protected:
         /**
          * Initializes variables. Must be overwritten by subclasses.
          */
         virtual void initialize();
+
         virtual ~RTPProfile();
 
         /**
