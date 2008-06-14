@@ -54,7 +54,7 @@ class INET_API SDESItem : public cObject
         /**
          * Default constructor.
          */
-        SDESItem(const char *name = NULL);
+        SDESItem();
 
         /**
          * Constructor which sets the entry.
@@ -94,7 +94,7 @@ class INET_API SDESItem : public cObject
         /**
          * Writes an info about this SDESItem into the give output stream.
          */
-        virtual void writeContents(std::ostream& os);
+        virtual void dump(std::ostream& os);
 
         /**
          * Returns the type of this sdes item.
@@ -177,7 +177,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Writes a longer info about this SDESChunk into the given stream.
          */
-        virtual void writeContents(std::ostream& os);
+        virtual void dump(std::ostream& os);
 
         /**
          * Adds an SDESItem to this SDESChunk. If there is already an SDESItem

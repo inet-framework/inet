@@ -58,7 +58,6 @@ RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc)
 
 RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo()
 {
-    setName(receiverInfo.getName());
     operator=(receiverInfo);
 };
 
@@ -146,7 +145,7 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
         };
         // calculate interarrival jitter
         if (_clockRate != 0) {
-            double d = (double)(packet->timeStamp() - _lastPacketRTPTimeStamp) - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
+            simtime_t d = packet->timeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;

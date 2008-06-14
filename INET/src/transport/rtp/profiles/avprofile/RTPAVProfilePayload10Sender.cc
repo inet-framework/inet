@@ -24,7 +24,7 @@
 #include "RTPSenderControlMessage.h"
 #include "RTPAVProfilePayload10Sender.h"
 
-Define_Module_Like(RTPAVProfilePayload10Sender, RTPPayloadSender);
+Define_Module(RTPAVProfilePayload10Sender);
 
 void RTPAVProfilePayload10Sender::initialize() {
     RTPPayloadSender::initialize();

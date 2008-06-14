@@ -77,7 +77,7 @@ std::string SenderReport::info() {
 };
 
 
-void SenderReport::writeContents(std::ostream& os) const {
+void SenderReport::dump(std::ostream& os) const {
     os << "SenderReport:" << endl;
     os << "  ntpTimeStamp = " << _ntpTimeStamp << endl;
     os << "  rtpTimeStamp = " << _rtpTimeStamp << endl;
@@ -182,7 +182,7 @@ std::string ReceptionReport::info() {
 };
 
 
-void ReceptionReport::writeContents(std::ostream& os) const {
+void ReceptionReport::dump(std::ostream& os) const {
     os << "ReceptionReport:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     os << "  fractionLost = " << (int)_fractionLost << endl;

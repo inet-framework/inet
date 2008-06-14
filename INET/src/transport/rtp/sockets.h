@@ -150,7 +150,7 @@ public:
   virtual const char* getClassName() const {return "Socket";}
   virtual Socket* dup() const {return new Socket(*this);}
   virtual void info(char* buf);
-  virtual void writeContents(std::ostream& os);
+  virtual void dump(std::ostream& os);
   Socket& operator=(const Socket& socket);
 
   // new member functions

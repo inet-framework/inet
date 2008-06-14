@@ -29,14 +29,14 @@
 #include "lbmsMessage_m.h"
 
 #include "RTPEndsystemModule.h"
-#include "RTPInterfacePacket.h" 
+#include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPProfile.h"
 
 #include "RTPSenderControlMessage.h"
 #include "RTPSenderStatusMessage.h"
 
-Define_Module_Like(RTPEndsystemModule, RTPModule);
+Define_Module(RTPEndsystemModule);
 
 
 //
@@ -285,7 +285,7 @@ void RTPEndsystemModule::dataOut(RTPInnerPacket *rinp)
     ctrl->setDestPort(_port);
     msg->setControlInfo(ctrl);
 
-//     ev << "Sending packet: ";msg->writeContents();
+//     ev << "Sending packet: ";msg->dump();
     send(msg, "toUDPLayer");
 
     // RTCP module must be informed about sent rtp data packet
@@ -331,11 +331,11 @@ void RTPEndsystemModule::connectRet()
 
 void RTPEndsystemModule::readRet(cMessage *sifp)
 {
-    if ( ! _leaveSession) 
+    if ( ! _leaveSession)
     {
          RTPPacket *msg = (RTPPacket *)(sifp);
 
-         msg->writeContents();
+         msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
          rinp1->dataIn(new RTPPacket(*msg),IN_Addr(_destinationAddress),IN_Port(_port));
 

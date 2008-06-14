@@ -170,9 +170,8 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     };
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
 
-    connect(this, findGate("toPayloadSender"), NULL, rtpPayloadSender, rtpPayloadSender->findGate("fromProfile"));
-
-    connect(rtpPayloadSender, rtpPayloadSender->findGate("toProfile"), NULL, this, findGate("fromPayloadSender"));
+    gate("toPayloadSender")->connectTo(rtpPayloadSender, rtpPayloadSender->gate("fromProfile"));
+    rtpPayloadSender->gate("toProfile")->connectTo(gate("fromPayloadSender"));
 
     rtpPayloadSender->initialize();
     rtpPayloadSender->scheduleStart(simTime());

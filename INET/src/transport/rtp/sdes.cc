@@ -28,7 +28,7 @@
 Register_Class(SDESItem);
 
 
-SDESItem::SDESItem(const char *name) : cObject(name) {
+SDESItem::SDESItem() : cObject() {
     _type = SDES_UNDEF;
     _length = 2;
     _content = "";
@@ -46,7 +46,6 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject() {
 
 
 SDESItem::SDESItem(const SDESItem& sdesItem) : cObject() {
-    setName(sdesItem.getName());
     operator=(sdesItem);
 };
 
@@ -81,7 +80,7 @@ std::string SDESItem::info() {
 };
 
 
-void SDESItem::writeContents(std::ostream& os) {
+void SDESItem::dump(std::ostream& os) {
     os << "SDESItem:" << endl;
     os << "  type = " << _type << endl;
     os << "  content = " << _content << endl;
@@ -154,12 +153,12 @@ std::string SDESChunk::info() {
 };
 
 
-void SDESChunk::writeContents(std::ostream& os) {
+void SDESChunk::dump(std::ostream& os) {
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {
-            get(i)->writeContents(os);
+            //FIXME get(i)->dump(os);
         };
     };
 };

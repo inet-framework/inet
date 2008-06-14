@@ -97,7 +97,7 @@ public:
 
   virtual const char *getClassName() const { return "SocketInterfacePacket"; }
   virtual void info(char *buf);
-  virtual void writeContents(std::ostream& os);
+  virtual void dump(std::ostream& os);
 
   //
   // API  Application --> SocketLayer

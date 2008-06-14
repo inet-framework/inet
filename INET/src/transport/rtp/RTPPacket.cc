@@ -87,7 +87,7 @@ std::string RTPPacket::info() {
 };
 
 
-void RTPPacket::writeContents() {
+void RTPPacket::dump() {
     ev << "RTPPacket:" << endl;
     ev << "  payloadType = " << _payloadType << endl;
     ev << "  sequenceNumber = " << _sequenceNumber << endl;
@@ -157,7 +157,7 @@ int RTPPacket::getHeaderLength() {
 
 
 int RTPPacket::getPayloadLength() {
-    return(length() - getHeaderLength());
+    return(getBitLength() - getHeaderLength());
 };
 
 

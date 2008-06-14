@@ -26,8 +26,7 @@
 #include "RTPAVProfilePayload10Receiver.h"
 
 
-
-Define_Module_Like(RTPAVProfilePayload10Receiver, RTPPayloadReceiver);
+Define_Module(RTPAVProfilePayload10Receiver);
 
 void RTPAVProfilePayload10Receiver::initialize() {
     _sampleWidth = 16;

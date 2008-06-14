@@ -76,7 +76,7 @@ class INET_API SenderReport : public cObject
         /**
          * Writes a longer info about this SenderReport into the given stream.
          */
-        virtual void writeContents(std::ostream& os) const;
+        virtual void dump(std::ostream& os) const;
 
         /**
          * Returns the contained ntp time stamp.
@@ -188,7 +188,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Writes a longer info about this ReceptionReport into the given stream.
          */
-        virtual void writeContents(std::ostream& os) const;
+        virtual void dump(std::ostream& os) const;
 
         /**
          * Returns the ssrc identifier for which sender this ReceptionReport is.

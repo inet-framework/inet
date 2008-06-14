@@ -89,7 +89,7 @@ std::string RTCPPacket::info() {
 };
 
 
-void RTCPPacket::writeContents(std::ostream& os) const {
+void RTCPPacket::dump(std::ostream& os) const {
     os << "RTCPPacket:" << endl;
     os << "  version = " << _version << endl;
     os << "  padding = " << _padding << endl;
@@ -123,7 +123,7 @@ int RTCPPacket::rtcpLength() const {
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
-    return (int)(length() / 4) - 1;
+    return (int)(getBitLength() / 4) - 1;
 };
 
 
@@ -179,12 +179,12 @@ std::string RTCPReceiverReportPacket::info() {
 };
 
 
-void RTCPReceiverReportPacket::writeContents(std::ostream& os) const {
+void RTCPReceiverReportPacket::dump(std::ostream& os) const {
     os << "RTCPReceiverReportPacket:" << endl;
     for (int i = 0; i < _receptionReports->size(); i++) {
         if (_receptionReports->exist(i)) {
             ReceptionReport *rr = (ReceptionReport *)(_receptionReports->get(i));
-            rr->writeContents(os);
+            rr->dump(os);
         };
     };
 };
@@ -264,12 +264,12 @@ std::string RTCPSenderReportPacket::info() {
 };
 
 
-void RTCPSenderReportPacket::writeContents(std::ostream& os) const {
+void RTCPSenderReportPacket::dump(std::ostream& os) const {
     os << "RTCPSenderReportPacket:" << endl;
-    _senderReport->writeContents(os);
+    _senderReport->dump(os);
     for (int i = 0; i < _receptionReports->size(); i++) {
         if (_receptionReports->exist(i)) {
-            _receptionReports->get(i)->writeContents(os);
+            //FIXME _receptionReports->get(i)->dump(os);
         };
     };
 };
@@ -338,11 +338,11 @@ std::string RTCPSDESPacket::info() {
 };
 
 
-void RTCPSDESPacket::writeContents(std::ostream& os) const {
+void RTCPSDESPacket::dump(std::ostream& os) const {
     os << "RTCPSDESPacket:" << endl;
     for (int i = 0; i < _sdesChunks->size(); i++) {
         if (_sdesChunks->exist(i))
-            (*_sdesChunks)[i]->writeContents(os);
+            ;//FIXME (*_sdesChunks)[i]->dump(os);
     }
 };
 
@@ -442,7 +442,7 @@ RTCPCompoundPacket::~RTCPCompoundPacket() {
 
 RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcpCompoundPacket) {
     cMessage::operator=(rtcpCompoundPacket);
-    setBitLength(rtcpCompoundPacket.length());
+    setBitLength(rtcpCompoundPacket.getBitLength());
     _rtcpPackets = new cArray(*(rtcpCompoundPacket._rtcpPackets));
     return *this;
 };
@@ -465,11 +465,11 @@ std::string RTCPCompoundPacket::info() {
 };
 
 
-void RTCPCompoundPacket::writeContents(std::ostream& os) const {
+void RTCPCompoundPacket::dump(std::ostream& os) const {
     os << "RTCPCompoundPacket:" << endl;
     for (int i = 0; i < _rtcpPackets->size(); i++) {
         if (_rtcpPackets->exist(i)) {
-            _rtcpPackets->get(i)->writeContents(os);
+            //FIXME _rtcpPackets->get(i)->dump(os);
         }
     }
 };

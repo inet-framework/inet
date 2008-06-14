@@ -31,7 +31,6 @@ Register_Class(RTPSSRCGate);
 
 RTPSSRCGate::RTPSSRCGate(u_int32 ssrc) : cObject() {
     _ssrc = ssrc;
-    setName(RTPParticipantInfo::ssrcToName(_ssrc));
 };
 
 

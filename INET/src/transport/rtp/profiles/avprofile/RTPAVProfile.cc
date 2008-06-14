@@ -24,7 +24,7 @@
 
 #include "RTPAVProfile.h"
 
-Define_Module_Like(RTPAVProfile, RTPProfile);
+Define_Module(RTPAVProfile);
 
 void RTPAVProfile::initialize() {
     RTPProfile::initialize();

@@ -21,7 +21,7 @@
 #include "RTPInnerPacket.h"
 
 
-Define_Module_Like(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver);
+Define_Module(RTPAVProfileSampleBasedAudioReceiver);
 
 RTPAVProfileSampleBasedAudioReceiver::~RTPAVProfileSampleBasedAudioReceiver() {
     closeOutputFile();

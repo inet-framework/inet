@@ -104,7 +104,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Writes a longer info about this RTPInnerPacket into the given output stream.
          */
-        virtual void writeContents(std::ostream& os) const;
+        virtual void dump(std::ostream& os) const;
 
         /**
          * Called by the rtp module after creating the profile module. It

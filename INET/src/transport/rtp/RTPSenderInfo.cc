@@ -40,7 +40,6 @@ RTPSenderInfo::RTPSenderInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc) {
 
 
 RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo() {
-    setName(senderInfo.getName());
     operator=(senderInfo);
 };
 

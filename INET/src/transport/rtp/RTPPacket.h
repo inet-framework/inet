@@ -75,7 +75,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Writes a longer description about this RTPPacket into the given stream.
          */
-        virtual void writeContents();
+        virtual void dump();
 
         /**
          * Returns the value of the marker bit in this RTPPacket.

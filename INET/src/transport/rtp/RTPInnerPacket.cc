@@ -96,7 +96,7 @@ std::string RTPInnerPacket::info() {
 };
 
 
-void RTPInnerPacket::writeContents(std::ostream& os) const {
+void RTPInnerPacket::dump(std::ostream& os) const {
     os << "RTPInnerPacket:" << endl;
     os << "  type = " << _type << endl;
     os << "  commonName = " << _commonName << endl;

@@ -23,7 +23,7 @@
 #include "RTPAVProfileSampleBasedAudioSender.h"
 
 
-Define_Module_Like(RTPAVProfileSampleBasedAudioSender, RTPPayloadSender);
+Define_Module(RTPAVProfileSampleBasedAudioSender);
 
 
 void RTPAVProfileSampleBasedAudioSender::initializeSenderModule(RTPInnerPacket *rinp) {

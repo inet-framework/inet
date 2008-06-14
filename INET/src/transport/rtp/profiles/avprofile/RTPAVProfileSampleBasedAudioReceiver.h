@@ -32,10 +32,9 @@
  */
 class INET_API RTPAVProfileSampleBasedAudioReceiver : public RTPPayloadReceiver
 {
-
-    Module_Class_Members(RTPAVProfileSampleBasedAudioReceiver, RTPPayloadReceiver, 0)
-
-    virtual ~RTPAVProfileSampleBasedAudioReceiver();
+	public: 
+		RTPAVProfileSampleBasedAudioReceiver() : RTPPayloadReceiver() {}
+        virtual ~RTPAVProfileSampleBasedAudioReceiver();
 
     protected:
         AFfilehandle _audioFile;

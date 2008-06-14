@@ -87,7 +87,7 @@ int RTPMpegPacket::getHeaderLength() {
 
 
 int RTPMpegPacket::getPayloadLength() {
-    return length() - getHeaderLength();
+    return getBitLength() - getHeaderLength();
 };
 
 

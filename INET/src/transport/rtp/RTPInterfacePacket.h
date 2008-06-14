@@ -103,7 +103,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Writes a longer info about this RTPInterfacePacket into the given stream.
          */
-        virtual void writeContents(std::ostream& os);
+        virtual void dump(std::ostream& os);
 
         /**
          * Called by the rtp application to make the rtp layer enter an

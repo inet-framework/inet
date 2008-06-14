@@ -64,7 +64,7 @@ class INET_API PCB : public cObject
   virtual ~PCB();
   virtual PCB* dup() const {return new PCB(*this);}
   virtual void info(char* buf);
-  virtual void writeContents(std::ostream& os);
+  virtual void dump(std::ostream& os);
   PCB& operator=(const PCB& pcb);
 
   // new member functions

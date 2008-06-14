@@ -32,7 +32,7 @@
 #include "RTPAVProfilePayload32Sender.h"
 #include "RTPMpegPacket.h"
 
-Define_Module_Like(RTPAVProfilePayload32Sender, RTPPayloadSender);
+Define_Module(RTPAVProfilePayload32Sender);
 
 void RTPAVProfilePayload32Sender::initialize() {
 

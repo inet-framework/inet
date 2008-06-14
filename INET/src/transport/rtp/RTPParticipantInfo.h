@@ -209,7 +209,7 @@ class INET_API RTPParticipantInfo : public cObject
          */
         static char *ssrcToName(u_int32 ssrc);
 
-        void writeContents() const;
+        void dump() const;
 
     protected:
 

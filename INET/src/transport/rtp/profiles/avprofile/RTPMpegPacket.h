@@ -44,7 +44,7 @@ class INET_API RTPMpegPacket : public cMessage
         /**
          * Default constructor.
          */
-        RTPMpegPacket(const char *name = NULL);
+        RTPMpegPacket();
 
         /**
          * Copy constructor.

@@ -24,7 +24,7 @@
 
 Register_Class(RTPMpegPacket);
 
-RTPMpegPacket::RTPMpegPacket(const char *name = NULL) : cMessage(name) {
+RTPMpegPacket::RTPMpegPacket() : cMessage() {
     _mzb = 0;
     _two = 0;
     _temporalReference = 0;
@@ -87,7 +87,7 @@ int RTPMpegPacket::getHeaderLength() {
 
 
 int RTPMpegPacket::getPayloadLength() {
-    return length() - getHeaderLength();
+    return getBitLength() - getHeaderLength();
 };
 
 

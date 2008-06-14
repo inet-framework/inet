@@ -167,7 +167,7 @@ void RTCPEndsystemModule::dataOut(RTPInnerPacket *packet)
 void RTCPEndsystemModule::dataIn(RTPInnerPacket *rinp)
 {
     RTPPacket *rtpPacket = (RTPPacket *)(rinp->decapsulate());
-    //rtpPacket->writeContents();
+    //rtpPacket->dump();
     processIncomingRTPPacket(rtpPacket, rinp->getAddress(), rinp->port());
 };
 

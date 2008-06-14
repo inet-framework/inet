@@ -85,7 +85,7 @@ std::string RTPInterfacePacket::info() {
 };
 
 
-void RTPInterfacePacket::writeContents(std::ostream& os) {
+void RTPInterfacePacket::dump(std::ostream& os) {
     os << "RTPInterfacePacket:" << endl;
     os << "  type = " << _type << endl;
     os << "  commonName = " << _commonName << endl;
