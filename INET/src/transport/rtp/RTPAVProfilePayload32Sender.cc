@@ -22,7 +22,7 @@
  * package.
  */
 
-#include <fstream.h>
+#include <fstream>
 #include <string.h>
 
 #include <omnetpp.h>

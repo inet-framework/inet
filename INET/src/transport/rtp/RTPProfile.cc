@@ -163,14 +163,14 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     ev<<"ProfileName"<<_profileName<<"payloadType"<<payloadType<<endl;
     sprintf(moduleName, "RTP%sPayload%iSender", _profileName, payloadType);
 
-    cModuleType *moduleType = findModuleType(moduleName);
+    cModuleType *moduleType = cModuleType::find(moduleName);
 
     if (moduleType == NULL) {
         opp_error("RTPProfile: payload sender module \"", moduleName, "\" not found !");
     };
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
 
-    gate("toPayloadSender")->connectTo(rtpPayloadSender, rtpPayloadSender->gate("fromProfile"));
+    gate("toPayloadSender")->connectTo(rtpPayloadSender->gate("fromProfile"));
     rtpPayloadSender->gate("toProfile")->connectTo(gate("fromPayloadSender"));
 
     rtpPayloadSender->initialize();
@@ -222,7 +222,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
         char payloadReceiverName[100];
         sprintf(payloadReceiverName, "RTP%sPayload%iReceiver", _profileName, packet->payloadType());
 
-        cModuleType *moduleType = findModuleType(payloadReceiverName);
+        cModuleType *moduleType = cModuleType::find(payloadReceiverName);
         if (moduleType == NULL) {
             opp_error("Receiver module %s not found !", payloadReceiverName);
         }

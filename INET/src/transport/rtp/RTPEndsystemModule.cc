@@ -122,7 +122,7 @@ void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg)
         senderModuleStatus(rinp);
     }
     else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
-	ev<<"dataOut"<<endl;
+    ev<<"dataOut"<<endl;
         dataOut(rinp);
     }
     else {
@@ -363,7 +363,7 @@ int RTPEndsystemModule::resolveMTU()
 
 void RTPEndsystemModule::createProfile()
 {
-    cModuleType *moduleType = findModuleType(_profileName);
+    cModuleType *moduleType = cModuleType::find(_profileName);
     if (moduleType == NULL) {
         error("Profile type not found !");
     };

@@ -190,7 +190,7 @@ void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTi
 ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
     if (isSender()) {
-        ReceptionReport *receptionReport = new ReceptionReport("ReceiverReport");
+        ReceptionReport *receptionReport = new ReceptionReport();
         receptionReport->setSSRC(ssrc());
 
         u_int64 packetsExpected = _sequenceNumberCycles + (u_int64)_highestSequenceNumber - (u_int64)_sequenceNumberBase + (u_int64)1;

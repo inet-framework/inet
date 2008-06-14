@@ -89,7 +89,7 @@ void RTPSenderInfo::processReceptionReport(ReceptionReport *report, simtime_t ar
 
 SenderReport *RTPSenderInfo::senderReport(simtime_t now) {
     if (isSender()) {
-        SenderReport *senderReport = new SenderReport("SenderReport");
+        SenderReport *senderReport = new SenderReport();
         // ntp time stamp is 64 bit integer
 
         u_int64 ntpSeconds = (u_int64)now;

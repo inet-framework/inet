@@ -223,7 +223,7 @@ Register_Class(RTCPSenderReportPacket);
 
 RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name) : RTCPReceiverReportPacket(name) {
     _packetType = RTCP_PT_SR;
-    _senderReport = new SenderReport("SenderReport");
+    _senderReport = new SenderReport();
     // a sender report is 20 bytes long
     addBitLength(20);
 };
