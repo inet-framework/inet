@@ -64,7 +64,7 @@ class INET_API RTPMpegPacket : public cPacket
         /**
          * Duplicates the RTPMpegPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTPMpegPacket *dup() const;
 
         /**
          * Returns the class name "RTPMpegPacket".

@@ -60,7 +60,7 @@ class INET_API RTPPacket : public cPacket
         /**
          * Duplicates the RTPPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTPPacket *dup() const;
 
         /**
          * Returns the class name "RTPPacket".

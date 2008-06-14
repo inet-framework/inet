@@ -77,7 +77,7 @@ const char *RTCPPacket::getClassName() const {
 };
 
 
-cObject *RTCPPacket::dup() const {
+RTCPPacket *RTCPPacket::dup() const {
     return new RTCPPacket(*this);
 };
 
@@ -162,7 +162,7 @@ RTCPReceiverReportPacket& RTCPReceiverReportPacket::operator=(const RTCPReceiver
 };
 
 
-cObject *RTCPReceiverReportPacket::dup() const {
+RTCPReceiverReportPacket *RTCPReceiverReportPacket::dup() const {
     return new RTCPReceiverReportPacket(*this);
 };
 
@@ -247,7 +247,7 @@ RTCPSenderReportPacket& RTCPSenderReportPacket::operator=(const RTCPSenderReport
 };
 
 
-cObject *RTCPSenderReportPacket::dup() const {
+RTCPSenderReportPacket *RTCPSenderReportPacket::dup() const {
     return new RTCPSenderReportPacket(*this);
 };
 
@@ -321,7 +321,7 @@ RTCPSDESPacket& RTCPSDESPacket::operator=(const RTCPSDESPacket& rtcpSDESPacket) 
 };
 
 
-cObject *RTCPSDESPacket::dup() const {
+RTCPSDESPacket *RTCPSDESPacket::dup() const {
     return new RTCPSDESPacket(*this);
 };
 
@@ -395,7 +395,7 @@ RTCPByePacket& RTCPByePacket::operator=(const RTCPByePacket& rtcpByePacket) {
 };
 
 
-cObject *RTCPByePacket::dup() const {
+RTCPByePacket *RTCPByePacket::dup() const {
     return new RTCPByePacket(*this);
 };
 
@@ -448,7 +448,7 @@ RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcp
 };
 
 
-cObject *RTCPCompoundPacket::dup() const {
+RTCPCompoundPacket *RTCPCompoundPacket::dup() const {
     return new RTCPCompoundPacket(*this);
 };
 

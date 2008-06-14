@@ -71,7 +71,7 @@ RTPMpegPacket& RTPMpegPacket::operator=(const RTPMpegPacket& packet) {
 };
 
 
-cObject *RTPMpegPacket::dup() const {
+RTPMpegPacket *RTPMpegPacket::dup() const {
     return new RTPMpegPacket(*this);
 };
 

@@ -40,7 +40,7 @@ RTPSenderStatusMessage& RTPSenderStatusMessage::operator=(const RTPSenderStatusM
 };
 
 
-cObject *RTPSenderStatusMessage::dup() const {
+RTPSenderStatusMessage *RTPSenderStatusMessage::dup() const {
     return new RTPSenderStatusMessage(*this);
 };
 

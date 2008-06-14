@@ -33,7 +33,7 @@
 Register_Class(SenderReport);
 
 
-SenderReport::SenderReport(const char *name) : cObject(name) {
+SenderReport::SenderReport() : cObject() {
     _ntpTimeStamp = 0;
     _rtpTimeStamp = 0;
     _packetCount = 0;
@@ -61,7 +61,7 @@ SenderReport& SenderReport::operator=(const SenderReport& senderReport) {
 };
 
 
-cObject *SenderReport::dup() const {
+SenderReport *SenderReport::dup() const {
     return new SenderReport(*this);
 };
 
@@ -133,7 +133,7 @@ void SenderReport::setByteCount(u_int32 byteCount) {
 Register_Class(ReceptionReport);
 
 
-ReceptionReport::ReceptionReport(const char *name) : cObject(name) {
+ReceptionReport::ReceptionReport() : cObject() {
     _ssrc = 0;
     _fractionLost = 0;
     _packetsLostCumulative = 0;
@@ -167,7 +167,7 @@ ReceptionReport& ReceptionReport::operator=(const ReceptionReport& receptionRepo
 };
 
 
-cObject *ReceptionReport::dup() const {
+ReceptionReport *ReceptionReport::dup() const {
     return new ReceptionReport(*this);
 };
 

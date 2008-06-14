@@ -68,7 +68,7 @@ RTPInterfacePacket& RTPInterfacePacket::operator=(const RTPInterfacePacket& rifp
 };
 
 
-cObject *RTPInterfacePacket::dup() const {
+RTPInterfacePacket *RTPInterfacePacket::dup() const {
     return new RTPInterfacePacket(*this);
 };
 

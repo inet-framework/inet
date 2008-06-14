@@ -66,7 +66,7 @@ RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& part
 };
 
 
-cObject *RTPParticipantInfo::dup() const {
+RTPParticipantInfo *RTPParticipantInfo::dup() const {
     return new RTPParticipantInfo(*this);
 };
 

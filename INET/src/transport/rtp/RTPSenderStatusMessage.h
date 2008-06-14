@@ -57,7 +57,7 @@ public:
     /**
      * Duplicates the object.
      */
-    cObject *dup() const;
+    RTPSenderStatusMessage *dup() const;
 
     /**
      * Returns the class name "RTPSenderStatusMessage".

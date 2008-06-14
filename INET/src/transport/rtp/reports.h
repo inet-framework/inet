@@ -41,7 +41,7 @@ class INET_API SenderReport : public cObject
         /**
          * Default constructor.
          */
-        SenderReport(const char *name = NULL);
+        SenderReport();
 
         /**
          * Copy constructor. Needed by omnet++.
@@ -61,7 +61,7 @@ class INET_API SenderReport : public cObject
         /**
          * Duplicates this SenderReport by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual SenderReport *dup() const;
 
         /**
          * Returns the class name "SenderReport".
@@ -153,7 +153,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Default constructor.
          */
-        ReceptionReport(const char *name = NULL);
+        ReceptionReport();
 
         /**
          * Copy constructor..
@@ -173,7 +173,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Duplicates this ReceptionReport by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual ReceptionReport *dup() const;
 
         /**
          * Returns the class name "ReceptionReport".

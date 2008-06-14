@@ -62,7 +62,7 @@ class INET_API PCB : public cObject
   explicit PCB(const char* name);
   //PCB(const char* name, cOjbect* ownerobj);
   virtual ~PCB();
-  virtual cObject* dup() const {return new PCB(*this);}
+  virtual PCB* dup() const {return new PCB(*this);}
   virtual void info(char* buf);
   virtual void writeContents(std::ostream& os);
   PCB& operator=(const PCB& pcb);

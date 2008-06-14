@@ -62,7 +62,7 @@ RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo) {
 };
 
 
-cObject *RTPSenderInfo::dup() const {
+RTPSenderInfo *RTPSenderInfo::dup() const {
     return new RTPSenderInfo(*this);
 };
 

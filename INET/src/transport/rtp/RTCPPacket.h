@@ -87,7 +87,7 @@ class INET_API RTCPPacket : public cPacket
         /**
          * Duplicates the RTCPPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPPacket *dup() const;
 
         /**
          * Writes a short info about this RTCPPacket into the given buffer.
@@ -191,7 +191,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
         /**
          * Duplicates the RTCPReceiverReportPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPReceiverReportPacket *dup() const;
 
         /**
          * Returns the class name "RTCPReceiverReportPacket".
@@ -281,7 +281,7 @@ class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket
         /**
          * Duplicates the RTCPSenderReportPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPSenderReportPacket *dup() const;
 
         /**
          * Return the class name "RTCPSenderReportPacket".
@@ -352,7 +352,7 @@ class INET_API RTCPSDESPacket : public RTCPPacket
         /**
          * Duplicates the RTCPSDESPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPSDESPacket *dup() const;
 
         /**
          * Return the class name "RTCPSDESPacket".
@@ -423,7 +423,7 @@ class INET_API RTCPByePacket : public RTCPPacket
         /**
          * Duplicates the RTCPByePacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPByePacket *dup() const;
 
         /**
          * Returns the class name "RTCPByePacket".
@@ -482,7 +482,7 @@ class INET_API RTCPCompoundPacket : public cPacket
         /**
          * Duplicates the RTCPCompoundPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTCPCompoundPacket *dup() const;
 
         /**
          * Return the class name "RTCPCompoundPacket".

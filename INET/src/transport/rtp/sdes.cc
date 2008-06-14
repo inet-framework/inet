@@ -64,7 +64,7 @@ SDESItem& SDESItem::operator=(const SDESItem& sdesItem) {
 };
 
 
-cObject *SDESItem::dup() const {
+SDESItem *SDESItem::dup() const {
     return new SDESItem(*this);
 };
 
@@ -137,7 +137,7 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk) {
 };
 
 
-cObject *SDESChunk::dup() const {
+SDESChunk *SDESChunk::dup() const {
     return new SDESChunk(*this);
 };
 

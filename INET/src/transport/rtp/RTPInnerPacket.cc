@@ -79,7 +79,7 @@ RTPInnerPacket& RTPInnerPacket::operator=(const RTPInnerPacket& rinp) {
 };
 
 
-cObject *RTPInnerPacket::dup() const {
+RTPInnerPacket *RTPInnerPacket::dup() const {
     return new RTPInnerPacket(*this);
 };
 

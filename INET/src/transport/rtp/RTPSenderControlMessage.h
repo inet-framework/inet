@@ -67,7 +67,7 @@ public:
         /**
          * Duplicates the object.
          */
-        virtual cObject *dup() const;
+        virtual RTPSenderControlMessage *dup() const;
 
         /**
          * Returns the class name "RTPSenderControlMessage".

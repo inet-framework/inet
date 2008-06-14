@@ -42,7 +42,7 @@ RTPSenderControlMessage& RTPSenderControlMessage::operator=(const RTPSenderContr
 };
 
 
-cObject *RTPSenderControlMessage::dup() const {
+RTPSenderControlMessage *RTPSenderControlMessage::dup() const {
     return new RTPSenderControlMessage(*this);
 };
 

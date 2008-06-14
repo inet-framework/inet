@@ -55,7 +55,7 @@ RTPPacket::~RTPPacket() {
 };
 
 
-cObject *RTPPacket::dup() const {
+RTPPacket *RTPPacket::dup() const {
     return new RTPPacket(*this);
 };
 

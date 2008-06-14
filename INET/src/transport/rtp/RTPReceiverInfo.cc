@@ -94,7 +94,7 @@ RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
     return *this;
 };
 
-cObject *RTPReceiverInfo::dup() const {
+RTPReceiverInfo *RTPReceiverInfo::dup() const {
     return new RTPReceiverInfo(*this);
 };
 

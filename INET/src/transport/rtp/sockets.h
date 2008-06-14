@@ -148,7 +148,7 @@ public:
   //Socket(const char* name, cOjbect* ownerobj);
   virtual ~Socket();
   virtual const char* getClassName() const {return "Socket";}
-  virtual cObject* dup() const {return new Socket(*this);}
+  virtual Socket* dup() const {return new Socket(*this);}
   virtual void info(char* buf);
   virtual void writeContents(std::ostream& os);
   Socket& operator=(const Socket& socket);

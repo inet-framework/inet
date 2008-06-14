@@ -89,7 +89,7 @@ class INET_API RTPInnerPacket : public cPacket
         /**
          * Duplicates the RTPInnerPacket by calling the copy constructor.
          */
-        virtual cObject *dup() const;
+        virtual RTPInnerPacket *dup() const;
 
         /**
          * Returns the class name "RTPInnerPacket".
