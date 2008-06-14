@@ -46,7 +46,6 @@ module RTPMobileHost
         }
         application: RTPApplication {
             parameters:
-                //#commonName = nodename,
                 profileName = profileName;
                 destinationAddress = destinationAddress;
                 portNumber = portNumber;

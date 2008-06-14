@@ -1,2 +1,3 @@
 version 4.0
 src: --deep -o inet -O out
+.: --deep -O out --meta:auto-include-path --meta:use-exported-libs

@@ -1,25 +1,26 @@
-
-
 package inet.examples.rtp.unicast;
 
 import inet.transport.rtp.RTPHost;
-import ned.BasicChannel;
-
 
 network RTPNetwork
 {
     parameters:
-        bool debug = default(false);
+        bool debug = default(true);
+        
     types:
-        channel ErrorChannel extends BasicChannel
+        channel ethernet extends ned.BasicChannel
         {
-            //delay = normal(0.004s, 0.0041s);
-            error = 0.0;
+            parameters:
+                delay = normal(0.00015s, 0.00005s);
+                datarate = 10Mbps;
+                error = 0.00001;
         }
+    
     submodules:
         sender: RTPHost {
             parameters:
                 debug = debug;
+                IPForward = false;
                 profileName = "RTPAVProfile";
                 destinationAddress = "10.0.0.2";
                 portNumber = 5004;
@@ -27,22 +28,23 @@ network RTPNetwork
                 fileName = "../Data/moving.mpg.gdf";
                 payloadType = 32;
                 numOfProcessors = 1;
-                routingFile = "server1.irt";
+                routingFile = "server.irt";
+                @display("p=50,50;i=device/pc2");
         }
         receiver: RTPHost {
             parameters:
                 debug = debug;
+                IPForward = false;
                 profileName = "RTPAVProfile";
                 destinationAddress = "10.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
                 fileName = "";
-                payloadType = 0;
+                payloadType = 32;
                 numOfProcessors = 1;
-                routingFile = "client2.irt";
-
+                routingFile = "client.irt";
+                @display("p=150,50;i=device/pc2");
         }
     connections:
-        sender.pppg[0] <--> ErrorChannel <--> receiver.pppg[0];
+        sender.pppg++ <--> ethernet <--> receiver.pppg++;
 }
-

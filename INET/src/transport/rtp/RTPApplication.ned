@@ -6,15 +6,15 @@ simple RTPApplication
         @display("i=old/app");
         string commonName;
         string profileName;
-        double bandwidth;
+        double bandwidth;  //XXX in bytes(!) per sec
         string destinationAddress;
         int portNumber;
         string fileName;
         int payloadType;
-        volatile double sessionEnterDelay;
-        volatile double transmissionStartDelay;
-        volatile double transmissionStopDelay;
-        volatile double sessionLeaveDelay;
+        double sessionEnterDelay @unit(s);
+        double transmissionStartDelay @unit(s);
+        double transmissionStopDelay @unit(s);
+        double sessionLeaveDelay @unit(s);
 
     gates:
         output toRTP;
