@@ -1,6 +1,6 @@
 package inet.transport.rtp;
 
-simple RTPPayloadReceiver
+moduleinterface IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -10,8 +10,7 @@ simple RTPPayloadReceiver
         output toProfile;
 }
 
-//NOTE: like RTPPayloadReceiver
-simple RTPAVProfilePayload10Receiver
+simple RTPPayloadReceiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -21,8 +20,7 @@ simple RTPAVProfilePayload10Receiver
         output toProfile;
 }
 
-//NOTE: like RTPPayloadReceiver
-simple RTPAVProfilePayload32Receiver
+simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -32,8 +30,17 @@ simple RTPAVProfilePayload32Receiver
         output toProfile;
 }
 
-//NOTE: like RTPPayloadReceiver
-simple RTPAVProfileSampleBasedAudioReceiver
+simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
+{
+    parameters:
+        string outputFileName;
+
+    gates:
+        input fromProfile;
+        output toProfile;
+}
+
+simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;

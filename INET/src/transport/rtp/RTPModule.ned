@@ -1,6 +1,6 @@
 package inet.transport.rtp;
 
-simple RTPModule
+moduleinterface IRTPModule
 {
     gates:
         input fromApp;
@@ -13,8 +13,20 @@ simple RTPModule
         output toUDPLayer;
 }
 
-//NOTE: like RTPModule
-simple RTPEndsystemModule
+simple RTPModule like IRTPModule
+{
+    gates:
+        input fromApp;
+        input fromProfile;
+        input fromRTCP;
+        input fromUDPLayer;
+        output toApp;
+        output toProfile;
+        output toRTCP;
+        output toUDPLayer;
+}
+
+simple RTPEndsystemModule like IRTPModule
 {
     gates:
         input fromApp;

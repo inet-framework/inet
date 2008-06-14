@@ -39,13 +39,17 @@
  */
 class INET_API RTCPEndsystemModule : public cSimpleModule
 {
-  protected:
+    public:
+        RTCPEndsystemModule();
+
+    protected:
         /**
          * Initializes variables.
          */
         virtual void initialize();
 
         virtual ~RTCPEndsystemModule();
+
         /**
          * Message handling. Dispatches messages by arrival gate.
          */

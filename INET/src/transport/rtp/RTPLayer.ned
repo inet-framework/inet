@@ -16,11 +16,11 @@ module RTPLayer
         output toUDPfromRTCP;
 
     submodules:
-        rtpModule: <rtpModuleType> like RTPModule {
+        rtpModule: <rtpModuleType> like IRTPModule {
             parameters:
                 @display("i=block/buffer;p=63,64");
         }
-        rtcpModule: <rtcpModuleType> like RTCPModule {
+        rtcpModule: <rtcpModuleType> like IRTCPModule {
 
             parameters:
                 @display("i=block/control;p=135,64");

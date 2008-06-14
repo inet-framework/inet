@@ -37,6 +37,10 @@
 
 Define_Module(RTCPEndsystemModule);
 
+RTCPEndsystemModule::RTCPEndsystemModule() {
+    _participantInfos = NULL;
+}
+
 void RTCPEndsystemModule::initialize() {
 
     // initialize variables

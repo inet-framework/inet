@@ -1,31 +1,34 @@
 package inet.transport.rtp;
 
-simple RTPPayloadSender
+moduleinterface IRTPPayloadSender
 {
     gates:
         input fromProfile;
         output toProfile;
 }
 
-//NOTE: like RTPPayloadSender
-simple RTPAVProfilePayload10Sender
+simple RTPPayloadSender like IRTPPayloadSender
 {
     gates:
         input fromProfile;
         output toProfile;
 }
 
-//NOTE: like RTPPayloadSender
-simple RTPAVProfilePayload32Sender
+simple RTPAVProfilePayload10Sender like IRTPPayloadSender
 {
     gates:
         input fromProfile;
         output toProfile;
 }
 
+simple RTPAVProfilePayload32Sender like IRTPPayloadSender
+{
+    gates:
+        input fromProfile;
+        output toProfile;
+}
 
-//NOTE: like RTPPayloadSender
-simple RTPAVProfileSampleBasedAudioSender
+simple RTPAVProfileSampleBasedAudioSender like IRTPPayloadSender
 {
     gates:
         input fromProfile;
