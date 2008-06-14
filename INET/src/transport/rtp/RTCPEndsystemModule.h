@@ -1,9 +1,8 @@
 /***************************************************************************
-                          RTCPEndsystemModule.h  -  description
+                       RTCPEndsystemModule.h  -  description
                              -------------------
-    begin                : Sun Oct 21 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
  ***************************************************************************/
 
 /***************************************************************************
@@ -14,6 +13,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+Ahmed Ayadi 
 
 /** \file RTCPEndsystemModule.h
  * This file declares the class RTCPEndsystemModule.
@@ -24,8 +24,7 @@
 
 #include <omnetpp.h>
 
-//XXX #include "sockets.h"
-#include "tmp/defs.h"
+#include "defs.h"
 
 #include "types.h"
 #include "RTPInnerPacket.h"
@@ -46,6 +45,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
          */
         virtual void initialize();
 
+        virtual ~RTCPEndsystemModule();
         /**
          * Message handling. Dispatches messages by arrival gate.
          */
@@ -59,7 +59,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * Handles messages coming from the socket layer.
          */
-        virtual void handleMessageFromSocketLayer(cMessage *msg);
+        virtual void handleMessageFromUDP(cMessage *msg);
 
         /**
          * Handles self messages.
@@ -94,20 +94,15 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         virtual void leaveSession(RTPInnerPacket *rinp);
 
         /**
-         * Called when the socket layer has returned a socket.
-         */
-        virtual void socketRet(SocketInterfacePacket *sifpIn);
-
-        /**
          * Called when the socket layer has finished a connect.
          */
-        virtual void connectRet(SocketInterfacePacket *sifpIn);
+        virtual void connectRet();
 
         /**
          * Called when this rtcp module receives data from the
          * socket layer.
          */
-        virtual void readRet(SocketInterfacePacket *sifpIn);
+        virtual void readRet(cMessage *sifpIn);
 
     private:
 
@@ -160,12 +155,12 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * The server socket for receiving rtcp packets.
          */
-        Socket::Filedesc _socketFdIn;
+        int _socketFdIn;
 
         /**
          * The client socket for sending rtcp packets.
          */
-        Socket::Filedesc _socketFdOut;
+        int _socketFdOut;
 
         /**
          * The number of packets this rtcp module has
@@ -188,12 +183,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * Request a server socket from the socket layer.
          */
-        virtual void createServerSocket();
-
-        /**
-         * Requests a client socket from the socket layer.
-         */
-        virtual void createClientSocket();
+        virtual void createSocket();
 
         /**
          * Chooses the ssrc identifier for this end system.

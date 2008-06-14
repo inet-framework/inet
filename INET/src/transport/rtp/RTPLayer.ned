@@ -1,33 +1,40 @@
-
-package inet.transport.rtp;
+import RTPModule;
+import RTCPModule;
 
 module RTPLayer
-
 {
     parameters:
         string rtpModuleType;
         string rtcpModuleType;
+        @display("i=block/layer;bgb=178,105");
 
     gates:
         input fromApp;
-        input fromSocketLayerRTP;
-        input fromSocketLayerRTCP;
+        input fromUDPtoRTP;
+        input fromUDPtoRTCP;
         output toApp;
-        output toSocketLayerRTP;
-        output toSocketLayerRTCP;
+        output toUDPfromRTP;
+        output toUDPfromRTCP;
 
     submodules:
-        rtpModule: <rtpModuleType> like RTPModule;
-        rtcpModule: <rtcpModuleType> like RTCPModule;
+        rtpModule: <rtpModuleType> like RTPModule {
+            parameters:
+                @display("i=block/buffer;p=63,64");
+        }
+        rtcpModule: <rtcpModuleType> like RTCPModule {
+
+            parameters:
+                @display("i=block/control;p=135,64");
+        }
     connections allowunconnected:
         fromApp --> rtpModule.fromApp;
         toApp <-- rtpModule.toApp;
         rtpModule.toRTCP --> rtcpModule.fromRTP;
         rtpModule.fromRTCP <-- rtcpModule.toRTP;
-        rtpModule.toSocketLayer --> toSocketLayerRTP;
-        rtpModule.fromSocketLayer <-- fromSocketLayerRTP;
-        rtcpModule.toSocketLayer --> toSocketLayerRTCP;
-        rtcpModule.fromSocketLayer <-- fromSocketLayerRTCP;
+        rtpModule.toUDPLayer --> toUDPfromRTP;
+        rtpModule.fromUDPLayer <-- fromUDPtoRTP;
+        rtcpModule.toUDP --> toUDPfromRTCP;
+        rtcpModule.fromUDP <-- fromUDPtoRTCP;
 
 }
 

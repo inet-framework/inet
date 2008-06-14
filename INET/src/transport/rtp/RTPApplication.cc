@@ -1,9 +1,8 @@
 /***************************************************************************
-                          RTPApplication.cpp  -  description
+                       RTPApplication.cpp  -  description
                              -------------------
-    begin                : Fri Oct 19 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
  ***************************************************************************/
 
 /***************************************************************************
@@ -22,8 +21,6 @@
 
 #include <omnetpp.h>
 
-//XXX #include "in_addr.h"
-//XXX #include "in_port.h"
 #include "tmp/defs.h"
 
 #include "types.h"
@@ -64,6 +61,14 @@ void RTPApplication::initialize() {
     _transmissionStartDelay = par("transmissionStartDelay");
     _transmissionStopDelay = par("transmissionStopDelay");
     _sessionLeaveDelay = par("sessionLeaveDelay");
+
+    ev<< "commonName" <<  _commonName <<endl;
+    ev<< "profileName" <<  _profileName <<endl;
+    ev<< "bandwidth" <<  _bandwidth <<endl;
+    ev<< "destinationAddress" <<  _destinationAddress <<endl;
+    ev<< "portNumber" <<  _port <<endl;
+    ev<< "fileName" <<  _fileName <<endl;
+    ev<< "payloadType" <<  _payloadType <<endl;
 }
 
 
@@ -75,7 +80,6 @@ void RTPApplication::activity() {
     bool transmissionFinished = false;
     bool sessionLeft = false;
 
-
     cMessage *msg1 = new cMessage("enterSession");
     scheduleAt(simTime() + _sessionEnterDelay, msg1);
 
@@ -86,6 +90,7 @@ void RTPApplication::activity() {
         cMessage *msgIn = receive();
         if (msgIn->isSelfMessage()) {
             if (!opp_strcmp(msgIn->getName(), "enterSession")) {
+                ev << "enterSession"<<endl;
                 // create an RTPInterfacePacket to enter the session
                 RTPInterfacePacket *rifpOut1 = new RTPInterfacePacket("enterSession()");
                 rifpOut1->enterSession(opp_strdup(_commonName), opp_strdup(_profileName), _bandwidth, _destinationAddress, _port);
@@ -93,6 +98,7 @@ void RTPApplication::activity() {
                 send(rifpOut1, "toRTP");
             }
             else if (!opp_strcmp(msgIn->getName(), "startTransmission")) {
+                ev << "startTransmission"<<endl;
                 RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
                 rscm->setCommand("PLAY");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(PLAY)");
@@ -104,6 +110,7 @@ void RTPApplication::activity() {
                 scheduleAt(simTime() + _transmissionStopDelay, msg4);
             }
             else if (!opp_strcmp(msgIn->getName(), "stopTransmission")) {
+                ev << "stopTransmission"<<endl;
                 RTPSenderControlMessage *rscm = new RTPSenderControlMessage();
                 rscm->setCommand("STOP");
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("senderModuleControl(STOP)");
@@ -111,6 +118,7 @@ void RTPApplication::activity() {
                 send(rifpOut, "toRTP");
             }
             else if (!opp_strcmp(msgIn->getName(), "leaveSession")) {
+                ev<< "leaveSession"<<endl;
                 RTPInterfacePacket *rifpOut = new RTPInterfacePacket("leaveSession()");
                 rifpOut->leaveSession();
                 send(rifpOut, "toRTP");
@@ -122,39 +130,47 @@ void RTPApplication::activity() {
             }
             RTPInterfacePacket *rifpIn = (RTPInterfacePacket *)msgIn;
             if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED) {
+                ev << "Session Entered"<<endl;
                 ssrc = rifpIn->ssrc();
                 sessionEntered = true;
                 if (opp_strcmp(_fileName, "")) {
                     RTPInterfacePacket *rifpOut = new RTPInterfacePacket("createSenderModule()");
                     rifpOut->createSenderModule(ssrc, _payloadType, opp_strdup(_fileName));
+                    ev << "CreateSenderModule"<<endl;
                     send(rifpOut, "toRTP");
                 }
                 else {
                     cMessage *msg2 = new cMessage("leaveSession");
+                    ev << "Receiver Module : leaveSession"<<endl;
                     scheduleAt(simTime() + _sessionLeaveDelay, msg2);
                 }
             }
             else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_MODULE_CREATED) {
                 cMessage *msg3 = new cMessage("startTransmission");
+                ev << "Sender Module Created"<<endl;
                 scheduleAt(simTime() + _transmissionStartDelay, msg3);
             }
             else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SENDER_STATUS) {
                 RTPSenderStatusMessage *rsim = (RTPSenderStatusMessage *)(rifpIn->decapsulate());
                 if (!opp_strcmp(rsim->getStatus(), "PLAYING")) {
-                    //
+                    ev << "PLAYING"<<endl;
                 }
                 else if (!opp_strcmp(rsim->getStatus(), "FINISHED")) {
                     transmissionFinished = true;
+                    ev << "FINISHED"<<endl;
                     cMessage *msg5 = new cMessage("leaveSession");
                     scheduleAt(simTime() + _sessionLeaveDelay, msg5);
                 }
                 else if (!opp_strcmp(rsim->getStatus(), "STOPPED")) {
                     transmissionFinished = true;
+                    ev << "FINISHED"<<endl;
                     cMessage *msg6 = new cMessage("leaveSession");
                     scheduleAt(simTime() + _sessionLeaveDelay, msg6);
                 }
                 else {
+                    delete rifpIn;
                 }
+                cancelAndDelete(rsim);
             }
             else if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_LEFT) {
                 sessionLeft = true;

@@ -1,19 +1,18 @@
-package inet.transport.rtp;
-
 simple RTPApplication
 {
     parameters:
         string commonName;
         string profileName;
-        double bandwidth @unit("bps");
-        string destinationAddress = default("");
+        double bandwidth;
+        string destinationAddress;
         int portNumber;
         string fileName;
         int payloadType;
-        volatile double sessionEnterDelay @unit("s");
-        volatile double transmissionStartDelay @unit("s");
-        volatile double transmissionStopDelay @unit("s");
-        volatile double sessionLeaveDelay @unit("s");
+        volatile double sessionEnterDelay;
+        volatile double transmissionStartDelay;
+        volatile double transmissionStopDelay;
+        volatile double sessionLeaveDelay;
+
     gates:
         output toRTP;
         input fromRTP;

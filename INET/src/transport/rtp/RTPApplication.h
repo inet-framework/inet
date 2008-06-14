@@ -1,9 +1,8 @@
 /***************************************************************************
-                          RTPApplication.h  -  description
+                       RTPApplication.h  -  description
                              -------------------
-    begin                : Fri Oct 19 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
  ***************************************************************************/
 
 /***************************************************************************
@@ -27,13 +26,13 @@
 #include "INETDefs.h"
 
 /**
- * The class RTPApplication is just a very simple sample for an application which
- * uses RTP. It acts as a sender if the omnet parameter fileName is set, and as
- * a receiver if the parameter is empty.
+ * The class RTPApplication is just a very simple sample for an application
+ * which uses RTP. It acts as a sender if the omnet parameter fileName is
+ * set, and as a receiver if the parameter is empty.
  */
 class INET_API RTPApplication : public cSimpleModule
 {
-    protected:
+    public:
         /**
          * Constructor, with activity() stack size.
          */

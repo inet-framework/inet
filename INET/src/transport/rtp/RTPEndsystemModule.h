@@ -1,9 +1,9 @@
 /***************************************************************************
-                          RTPEndsystemModule.h  -  description
+                       RTPEndsystemModule.h  -  description
                              -------------------
-    begin                : Fri Oct 19 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    begin            : Fri Aug 2 2007
+    copyright        : (C) 2007 by Matthias Oppitz,  Ahmed Ayadi
+    email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
  ***************************************************************************/
 
 /***************************************************************************
@@ -25,11 +25,8 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
-//XXX #include "sockets.h"
-//XXX #include "in_addr.h"
-//XXX #include "in_port.h"
-#include "tmp/defs.h"
-
+#include "IPvXAddress.h"
+#include "defs.h"
 #include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 
@@ -71,9 +68,9 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         virtual void handleMessageFromRTCP(cMessage *msg);
 
         /**
-         * Handles messages received from the socket layer.
+         * Handles messages received from the UDP layer.
          */
-        virtual void handleMessageFromSocketLayer(cMessage *msg);
+        virtual void handleMessagefromUDP(cMessage *msg);
 
         /**
          * Creates the profile module and initializes it.
@@ -102,7 +99,7 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         virtual void senderModuleStatus(RTPInnerPacket *rinp);
 
         /**
-         * Sends a rtp data packet to the socket layer and a copy
+         * Sends a rtp data packet to the UDP layer and a copy
          * of it to the rtcp module.
          */
         virtual void dataOut(RTPInnerPacket *rinp);
@@ -158,12 +155,17 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         /**
          * The rtp server socket file descriptor.
          */
-        Socket::Filedesc _socketFdIn;
+        int _socketFdIn;
 
         /**
          * The rtp client socket file descriptor.
          */
-        Socket::Filedesc _socketFdOut;
+        int _socketFdOut;
+
+        /**
+         * True when this end system is about to leave the session.
+         */
+        bool _leaveSession;
 
         /**
          * Creates the profile module.
@@ -171,29 +173,24 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         virtual void createProfile();
 
         /**
-         * Requests a server socket from the socket layer.
+         * Requests a server socket from the UDP layer.
          */
-        virtual void createServerSocket();
-
-        /**
-         * Requests a client socket from the socket layer.
-         */
-        virtual void createClientSocket();
+        virtual void createSocket();
 
         /**
          * Called when the socket layer returns a socket.
          */
-        virtual void socketRet(SocketInterfacePacket *sifp);
+        virtual void socketRet();
 
         /**
          * Called when the socket layer has connected a socket.
          */
-        virtual void connectRet(SocketInterfacePacket *sifp);
+        virtual void connectRet();
 
         /**
          * Called when data from the socket layer has been received.
          */
-        virtual void readRet(SocketInterfacePacket *sifp);
+        virtual void readRet(cMessage *sifp);
 
         /**
          * Initializes the profile module.

@@ -1,9 +1,8 @@
 /***************************************************************************
-                          RTCPPacket.h  -  description
+                       RTCPPacket.h  -  description
                              -------------------
-    begin                : Sun Oct 21 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
  ***************************************************************************/
 
 /***************************************************************************

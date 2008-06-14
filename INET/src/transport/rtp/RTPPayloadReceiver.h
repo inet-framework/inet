@@ -1,9 +1,9 @@
 /***************************************************************************
-                          RTPPayloadReceiver.h  -  description
+                       RTPPayloadReceiver.h  -  description
                              -------------------
-    begin                : Fri Nov 2 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    begin            : Fri Aug 2 2007
+    copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
+    email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
  ***************************************************************************/
 
 /***************************************************************************
@@ -63,6 +63,11 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
          * The output file stream.
          */
         std::ofstream _outputFileStream;
+
+        /**
+         * The output file stream.
+         */
+        std::ofstream _outputLogLoss;
 
         /**
          * The payload type this RTPPayloadReceiver module processes.

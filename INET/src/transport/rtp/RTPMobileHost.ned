@@ -23,21 +23,20 @@ module RTPHost
         // network information
         int numOfProcessors;
         bool IPForward;
-        int namid;
+        double namid;
         string routingFile;
         @display("bgb=212,371");
     gates:
         input in[];
         output out[];
-
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=60,70");
+                @display("p=60,70;i=block/control");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=60,134");
+                @display("p=60,134;i=block/table");
         }
         routingTable: RoutingTable {
             parameters:
@@ -55,7 +54,7 @@ module RTPHost
                 bandwidth = bandwidth;
                 fileName = fileName;
                 payloadType = payloadType;
-                @display("b=,,,,,2;p=161,36");
+                @display("b=,,,,,2;i=old/app;p=161,36");
         }
         rtpLayer: RTPLayer {
             parameters:

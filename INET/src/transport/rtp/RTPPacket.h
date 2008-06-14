@@ -75,7 +75,7 @@ class INET_API RTPPacket : public cPacket
         /**
          * Writes a longer description about this RTPPacket into the given stream.
          */
-        virtual void writeContents(std::ostream& os);
+        virtual void writeContents();
 
         /**
          * Returns the value of the marker bit in this RTPPacket.

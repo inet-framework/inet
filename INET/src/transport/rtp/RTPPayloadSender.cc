@@ -1,9 +1,9 @@
 /***************************************************************************
                           RTPPayloadSender.cc  -  description
                              -------------------
-    begin                : Fri Nov 2 2001
-    copyright            : (C) 2001 by Matthias Oppitz, Arndt Buschmann
-    email                : <matthias.oppitz@gmx.de> <a.buschmann@gmx.de>
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -80,7 +80,7 @@ void RTPPayloadSender::activity() {
                     seekByte(rscm->commandParameter1());
                 }
                 else {
-                    EV << "sender module: unknown sender control message" << endl;
+                    ev << " unknown sender control message" << endl;
                 };
                 delete rscm;
             }
@@ -96,6 +96,7 @@ void RTPPayloadSender::activity() {
 
 
 void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn) {
+    ev << "initializeSenderModule Enter" << endl;
     _mtu = rinpIn->mtu();
     _ssrc = rinpIn->ssrc();
     const char *fileName = rinpIn->getFileName();
@@ -105,6 +106,7 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn) {
     rinpOut->senderModuleInitialized(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
     send(rinpOut, "toProfile");
     _status = STOPPED;
+    ev << "initializeSenderModule Exit" << endl;
 };
 
 
@@ -137,12 +139,12 @@ void RTPPayloadSender::play() {
 
 
 void RTPPayloadSender::playUntilTime(simtime_t moment) {
-    EV << "sender module: playUntilTime() not implemented" << endl;
+    ev << " playUntilTime() not implemented" << endl;
 };
 
 
 void RTPPayloadSender::playUntilByte(int position) {
-    EV << "sender module: playUntilByte() not implemented" << endl;
+    ev << " playUntilByte() not implemented" << endl;
 };
 
 
@@ -158,12 +160,12 @@ void RTPPayloadSender::pause() {
 
 
 void RTPPayloadSender::seekTime(simtime_t moment) {
-    EV << "sender module: seekTime() not implemented" << endl;
+    ev << " seekTime() not implemented" << endl;
 };
 
 
 void RTPPayloadSender::seekByte(int position) {
-    EV << "sender module: seekByte() not implemented" << endl;
+    ev << " seekByte() not implemented" << endl;
 };
 
 
@@ -189,6 +191,6 @@ void RTPPayloadSender::endOfFile() {
 
 
 bool RTPPayloadSender::sendPacket() {
-    EV << "sender module: sendPacket() not implemented" << endl;
+    ev << " sendPacket() not implemented" << endl;
     return false;
 };

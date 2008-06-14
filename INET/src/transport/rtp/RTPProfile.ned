@@ -1,7 +1,4 @@
-package inet.transport.rtp;
-
 simple RTPProfile
-
 {
     parameters:
         string autoOutputFileNames;
@@ -13,5 +10,4 @@ simple RTPProfile
         output toRTP;
         output toPayloadSender;
         output toPayloadReceiver[];
-
 }

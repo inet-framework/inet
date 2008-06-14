@@ -1,0 +1,351 @@
+
+Press ENTER to convert all C++ files under the current directory:
+C:\home\INET\trunk\INET\tmp\RTP
+
+Press any key to continue . . . 
+The following files will be checked/modified:
+C:\home\INET\trunk\INET\tmp\RTP\reports.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPApplication.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfile.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Receiver.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPEndsystemModule.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadReceiver.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadSender.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPProfile.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.cc
+C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.cc
+C:\home\INET\trunk\INET\tmp\RTP\sdes.cc
+C:\home\INET\trunk\INET\tmp\RTP\defs.h
+C:\home\INET\trunk\INET\tmp\RTP\pcb.h
+C:\home\INET\trunk\INET\tmp\RTP\reports.h
+C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.h
+C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPApplication.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfile.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Receiver.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPEndsystemModule.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadReceiver.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadSender.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPProfile.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.h
+C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.h
+C:\home\INET\trunk\INET\tmp\RTP\sdes.h
+C:\home\INET\trunk\INET\tmp\RTP\SocketInterfacePacket.h
+C:\home\INET\trunk\INET\tmp\RTP\sockets.h
+C:\home\INET\trunk\INET\tmp\RTP\types.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfile.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Receiver.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Sender.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Receiver.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioReceiver.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioSender.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.cc
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfile.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Receiver.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Sender.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Receiver.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioReceiver.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioSender.h
+C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.h
+C:\home\INET\trunk\INET\tmp\RTP\tmp\defs.h
+C:\home\INET\trunk\INET\tmp\RTP\tmp\pcb.h
+C:\home\INET\trunk\INET\tmp\RTP\tmp\SocketInterfacePacket.h
+C:\home\INET\trunk\INET\tmp\RTP\tmp\sockets.h
+
+
+Press ENTER to start the conversion or CTRL-C to quit.
+Press any key to continue . . . 
+processing C:\home\INET\trunk\INET\tmp\RTP\reports.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:36: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+SenderReport::SenderReport(const char *name) : cObject(name) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:44: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+SenderReport::SenderReport(const SenderReport& senderReport) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:55: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject::operator=(senderReport);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:64: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *SenderReport::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:136: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+ReceptionReport::ReceptionReport(const char *name) : cObject(name) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:147: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+ReceptionReport::ReceptionReport(const ReceptionReport& receptionReport) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:158: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject::operator=(receptionReport);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.cc:170: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *ReceptionReport::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:184: This variable might represent simulation time -- if so, change "double" to "simtime_t".
+    double intervalLength = 2.5 * (dblrand() + 0.5);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:225: cArray::items() renamed to size().
+    simtime_t intervalLength = (simtime_t)(_averagePacketSize) * (simtime_t)(_participantInfos->items()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:278: cArray::items() renamed to size().
+    for (int i = 0; i < _participantInfos->items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:319: note: message kind and priority changed from int to short, you may want to update the code
+    msg->setKind(UDP_C_DATA);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:375: cArray::items() renamed to size().
+   for (int i = 0; i < rtcpPackets->items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:406: cArray::items() renamed to size().
+                for (int j = 0; j < receptionReports->items(); j++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:447: cArray::items() renamed to size().
+                for (int j = 0; j < receptionReports->items(); j++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.cc:468: cArray::items() renamed to size().
+                for (int j = 0; j < sdesChunks->items(); j++) {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:80: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:165: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPReceiverReportPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:184: cArray::items() renamed to size().
+    for (int i = 0; i < _receptionReports->items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:250: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPSenderReportPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:270: cArray::items() renamed to size().
+    for (int i = 0; i < _receptionReports->items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:324: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPSDESPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:336: cArray::items() renamed to size().
+    out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->items();
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:343: cArray::items() renamed to size().
+    for (int i = 0; i < _sdesChunks->items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:398: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPByePacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:451: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTCPCompoundPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:463: cArray::items() renamed to size().
+    out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->items();
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.cc:470: cArray::items() renamed to size().
+    for (int i = 0; i < _rtcpPackets->items(); i++) {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPApplication.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfile.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Receiver.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Receiver.cc:126: if 'I'/'O' refers to a gate type, change it to cGate::INPUT or cGate::OUTPUT.
+                    picture = 'I';
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.cc:172: if 'I'/'O' refers to a gate type, change it to cGate::INPUT or cGate::OUTPUT.
+    if (strchr(description, 'I')) {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPEndsystemModule.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPEndsystemModule.cc:281: note: message kind and priority changed from int to short, you may want to update the code
+    msg->setKind(UDP_C_DATA);
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.cc:82: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPInnerPacket::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.cc:71: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPInterfacePacket::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.cc:74: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPMpegPacket::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.cc:58: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPPacket::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.cc:164: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+int RTPPacket::compareFunction(cObject *packet1, cObject *packet2) {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc:33: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+RTPParticipantInfo::RTPParticipantInfo(u_int32 ssrc) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc:48: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc:60: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject::operator=(participantInfo);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc:69: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPParticipantInfo::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.cc:98: cArray::items() renamed to size().
+    for (int i = 0; i < sdesChunk->items(); i++) {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadReceiver.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadSender.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPProfile.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPProfile.cc:290: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        cObject *co = (_ssrcGates->get(objectIndex));
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.cc:97: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPReceiverInfo::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.cc:45: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPSenderControlMessage::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.cc:65: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPSenderInfo::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.cc:43: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPSenderStatusMessage::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.cc:32: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+RTPSSRCGate::RTPSSRCGate(u_int32 ssrc) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.cc:39: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject::operator=(rtpSSRCGate);
+processing C:\home\INET\trunk\INET\tmp\RTP\sdes.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:31: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+SDESItem::SDESItem(const char *name) : cObject(name) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:38: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:48: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+SDESItem::SDESItem(const SDESItem& sdesItem) : cObject() {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:59: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject::operator=(sdesItem);
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:67: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *SDESItem::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:140: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *SDESChunk::dup() const {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:152: cArray::items() renamed to size().
+    out << "SDESChunk.ssrc=" << _ssrc << " items=" << items();
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:160: cArray::items() renamed to size().
+    for (int i = 0; i < items(); i++) {
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.cc:169: cArray::items() renamed to size().
+    for (int i = 0; i < items(); i++) {
+processing C:\home\INET\trunk\INET\tmp\RTP\defs.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\defs.h:8: "ev" became a macro, so it's no longer suitable as a variable or parameter name -- please rename
+#ifndef ev
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\defs.h:9: "ev" became a macro, so it's no longer suitable as a variable or parameter name -- please rename
+#define ev EV<<getParentModule()->getFullPath()<<"."<<getClassName()<<":"
+processing C:\home\INET\trunk\INET\tmp\RTP\pcb.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\pcb.h:44: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API PCB : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\pcb.h:65: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+  virtual cObject* dup() const {return new PCB(*this);}
+processing C:\home\INET\trunk\INET\tmp\RTP\reports.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.h:36: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API SenderReport : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.h:64: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.h:149: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API ReceptionReport : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\reports.h:176: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPEndsystemModule.h:175: This variable might represent simulation time -- if so, change "double" to "simtime_t".
+        double _averagePacketSize;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:91: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:195: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:285: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:356: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:427: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTCPPacket.h:486: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPApplication.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfile.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Receiver.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPAVProfilePayload32Sender.h:64: This variable might represent simulation time -- if so, change "double" to "simtime_t".
+        double _initialDelay;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPEndsystemModule.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPInnerPacket.h:92: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPInterfacePacket.h:91: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPMpegPacket.h:67: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.h:63: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPPacket.h:150: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        static int compareFunction(cObject *packet1, cObject *packet2);
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.h:46: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API RTPParticipantInfo : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPParticipantInfo.h:74: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadReceiver.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPPayloadSender.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPProfile.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPReceiverInfo.h:65: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderControlMessage.h:70: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderInfo.h:65: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSenderStatusMessage.h:60: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+    cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\RTPSSRCGate.h:38: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API RTPSSRCGate : public cObject
+processing C:\home\INET\trunk\INET\tmp\RTP\sdes.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.h:33: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API SDESItem : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.h:82: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sdes.h:165: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\SocketInterfacePacket.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\sockets.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sockets.h:30: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API Socket : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\sockets.h:151: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+  virtual cObject* dup() const {return new Socket(*this);}
+processing C:\home\INET\trunk\INET\tmp\RTP\types.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfile.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Receiver.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Sender.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Receiver.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Receiver.cc:109: if 'I'/'O' refers to a gate type, change it to cGate::INPUT or cGate::OUTPUT.
+                    picture = 'I';
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.cc:170: if 'I'/'O' refers to a gate type, change it to cGate::INPUT or cGate::OUTPUT.
+    if (strchr(description, 'I')) {
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioReceiver.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioSender.cc...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.cc...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.cc:74: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+cObject *RTPMpegPacket::dup() const {
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfile.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Receiver.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload10Sender.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Receiver.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfilePayload32Sender.h:64: This variable might represent simulation time -- if so, change "double" to "simtime_t".
+        double _initialDelay;
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioReceiver.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPAVProfileSampleBasedAudioSender.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\profiles\AVProfile\RTPMpegPacket.h:67: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+        virtual cObject *dup() const;
+processing C:\home\INET\trunk\INET\tmp\RTP\tmp\defs.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\tmp\pcb.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\tmp\pcb.h:44: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API PCB : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\tmp\pcb.h:65: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+  virtual cObject* dup() const {return new PCB(*this);}
+processing C:\home\INET\trunk\INET\tmp\RTP\tmp\SocketInterfacePacket.h...
+processing C:\home\INET\trunk\INET\tmp\RTP\tmp\sockets.h...
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\tmp\sockets.h:30: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+class INET_API Socket : public cObject
+*** warning at C:\home\INET\trunk\INET\tmp\RTP\tmp\sockets.h:151: cObject got renamed to cOwnedObject, check note at bottom whether you need to change the code
+  virtual cObject* dup() const {return new Socket(*this);}
+
+Conversion done. You may safely re-run this script as many times as you want.
+cObject note: only change a cObject occurrence to cOwnedObject, if:
+   (1) cObject is not already the result of a cPolymorphic->cObject conversion, and
+   (2) you are REALLY sure you need cOwnedObject there, with its name string and other overhead.

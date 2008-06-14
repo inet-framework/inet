@@ -5,3 +5,5 @@ Arndt Buschmann <a.buschmann@gmx.de>:
 changes in RTPSenderStatusMessage.h/.cc and RTPPayloadSender.cc
 (some messages contain an rtp timestamp now)
 
+Ahmed Ayadi <ahmed.ayadi@sophia.inria.fr>:
+integrated into the INET Framework

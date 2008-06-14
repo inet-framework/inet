@@ -1,12 +1,8 @@
-package inet.transport.rtp;
-
 simple RTCPModule
-
 {
     gates:
         input fromRTP;
-        input fromSocketLayer;
+        input fromUDP;
         output toRTP;
-        output toSocketLayer;
-
+        output toUDP;
 }

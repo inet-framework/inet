@@ -1,7 +1,4 @@
-package inet.transport.rtp;
-
 simple RTPPayloadReceiver
-
 {
     parameters:
         string outputFileName;
@@ -9,5 +6,4 @@ simple RTPPayloadReceiver
     gates:
         input fromProfile;
         output toProfile;
-
 }

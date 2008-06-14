@@ -87,12 +87,12 @@ std::string RTPPacket::info() {
 };
 
 
-void RTPPacket::writeContents(std::ostream& os) {
-    os << "RTPPacket:" << endl;
-    os << "  payloadType = " << _payloadType << endl;
-    os << "  sequenceNumber = " << _sequenceNumber << endl;
-    os << "  timeStamp = " << _timeStamp << endl;
-    os << "  payloadLength = " << getPayloadLength() << endl;
+void RTPPacket::writeContents() {
+    ev << "RTPPacket:" << endl;
+    ev << "  payloadType = " << _payloadType << endl;
+    ev << "  sequenceNumber = " << _sequenceNumber << endl;
+    ev << "  timeStamp = " << _timeStamp << endl;
+    ev << "  payloadLength = " << getPayloadLength() << endl;
 };
 
 

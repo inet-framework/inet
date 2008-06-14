@@ -1,0 +1,6 @@
+README.Unicast
+
+This is a quite simple example for rtp unicast transmission.
+Two hosts, one sender, one receiver.
+It is used to test RTP in an unreliable environment, in this 
+case the connection has an error rate of 0.00001.

@@ -26,7 +26,7 @@
 
 //XXX #include "in_addr.h"
 //XXX #include "in_port.h"
-#include "tmp/defs.h"
+#include "defs.h"
 
 #include "types.h"
 #include "RTPPacket.h"

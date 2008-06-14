@@ -1,9 +1,9 @@
 /***************************************************************************
-                          RTPReceiverInfo.h  -  description
+                       RTPReceiverInfo.h  -  description
                              -------------------
-    begin                : Wed Dec 5 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -24,7 +24,7 @@
 #define __RTPRECEIVERINFO_H__
 
 #include <omnetpp.h>
-
+#include <cassert>
 #include "types.h"
 #include "RTPParticipantInfo.h"
 
@@ -73,7 +73,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
          * Extracts information of the given RTPPacket.
          * Also sets _inactiveIntervals to 0.
          */
-        virtual void processRTPPacket(RTPPacket *packet, simtime_t arrivalTime);
+        virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
 
         /**
          * Extracts information of the given SenderReport.
@@ -154,6 +154,14 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         double _jitter;
 
         /**
+         * The output vector for jitter value
+         */
+        cOutVector _jitterOutVector;
+        /**
+         * The output vector for packet lost
+         */
+        cOutVector _packetLostOutVector;
+        /**
          * The clock rate (in ticks per second) the sender increases the
          * rtp timestamps. It is calculated when two sender reports have
          * been received.
@@ -204,6 +212,9 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
          */
         int _itemsReceived;
 
+        int packetLoss;
+
+        FILE * packetSequenceLostLogFile ;
 };
 
 #endif

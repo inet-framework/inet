@@ -38,6 +38,9 @@ RTPPayloadReceiver::~RTPPayloadReceiver() {
 void RTPPayloadReceiver::initialize() {
     const char *fileName = par("outputFileName");
     openOutputFile(fileName);
+    char logName[100];
+    sprintf (logName, "outputLogLoss%d.log", getId());
+    _outputLogLoss.open(logName);
     _packetArrival = new cOutVector("packet arrival");
 };
 
@@ -50,7 +53,7 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg) {
         delete rinp;
     }
     else {
-        EV << "receiver module: RTPInnerPacket of wrong type received" << endl;
+        ev << "RTPInnerPacket of wrong type received" << endl;
         delete rinp;
     }
 };
@@ -68,4 +71,5 @@ void RTPPayloadReceiver::openOutputFile(const char *fileName) {
 
 void RTPPayloadReceiver::closeOutputFile() {
     _outputFileStream.close();
+    _outputLogLoss.close();
 };

@@ -1,9 +1,9 @@
 /***************************************************************************
-                          RTPProfile.h  -  description
+                       RTPProfile.h  -  description
                              -------------------
-    begin                : Fri Oct 19 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -24,8 +24,7 @@
 
 #include <omnetpp.h>
 
-//XXX #include "in_port.h"
-#include "tmp/defs.h"
+#include "defs.h"
 
 #include "RTPInnerPacket.h"
 #include "RTPSSRCGate.h"
@@ -50,6 +49,7 @@ class INET_API RTPProfile : public cSimpleModule
          * Initializes variables. Must be overwritten by subclasses.
          */
         virtual void initialize();
+        virtual ~RTPProfile();
 
         /**
          * Creates and removes payload sender and receiver modules on demand.
@@ -99,44 +99,46 @@ class INET_API RTPProfile : public cSimpleModule
         virtual void senderModuleControl(RTPInnerPacket *rinp);
 
         /**
-         * Handles incoming data packets: If there isn't a receiver module for this
-         * sender it creates one. The data packet is forwarded to the receiver module
-         * after calling processIncomingPacket.
+         * Handles incoming data packets: If there isn't a receiver module
+         * for this sender it creates one. The data packet is forwarded to
+         * the receiver module after calling processIncomingPacket.
          */
         virtual void dataIn(RTPInnerPacket *rinp);
 
         /**
          * The sender module returns a senderModuleInitialized message after
          * being initialized. The profile module forwards this message to
-         * the rtp module which delivers it to its destination, the rtcp module.
+         * the rtp module which delivers it to its destination, the rtcp
+         * module.
          */
         virtual void senderModuleInitialized(RTPInnerPacket *rinp);
 
         /**
-         * After having received a sender module control message the sender module
-         * returns a sender status message to inform the application what it's doing
-         * at the moment.
+         * After having received a sender module control message the sender
+         * module returns a sender status message to inform the application
+         * what it's doing at the moment.
          */
         virtual void senderModuleStatus(RTPInnerPacket *rinp);
 
         /**
-         * Handles outgoing data packets: Calls processOutgoingPacket and forwards
-         * the packet to the rtp module.
+         * Handles outgoing data packets: Calls processOutgoingPacket and
+         * forwards the packet to the rtp module.
          */
         virtual void dataOut(RTPInnerPacket *rinp);
 
         /**
-         * Every time a rtp packet is received it it pre-processed by this method to
-         * remove profile specific extension which are not handled by the payload
-         * receiver module. In this implementation the packet isn't changed.
-         * Important: This method works with RTPInnerPacket. So the rtp packet must
-         * be decapsulated, changed and encapsulated again.
+         * Every time a rtp packet is received it it pre-processed by this
+         * method to remove profile specific extension which are not handled
+         * by the payload receiver module. In this implementation the packet
+         * isn't changed.
+         * Important: This method works with RTPInnerPacket. So the rtp
+         * packet must be decapsulated, changed and encapsulated again.
          */
         virtual void processIncomingPacket(RTPInnerPacket *rinp);
 
         /**
-         * Simular to the procedure for incoming packets, this adds profile specific extensions
-         * to outgoing rtp packets.
+         * Simular to the procedure for incoming packets, this adds profile
+         * specific extensions to outgoing rtp packets.
          */
         virtual void processOutgoingPacket(RTPInnerPacket *rinp);
 

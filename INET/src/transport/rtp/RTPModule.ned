@@ -1,16 +1,12 @@
-package inet.transport.rtp;
-
 simple RTPModule
-
 {
     gates:
         input fromApp;
         input fromProfile;
         input fromRTCP;
-        input fromSocketLayer;
+        input fromUDPLayer;
         output toApp;
         output toProfile;
         output toRTCP;
-        output toSocketLayer;
-
+        output toUDPLayer;
 }

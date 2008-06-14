@@ -72,7 +72,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * Stores information about this outgoing RTPPacket.
          */
-        virtual void processRTPPacket(RTPPacket *packet, simtime_t arrivalTime);
+        virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
 
         /**
          * Processes an incoming ReceptionReport for this sender.

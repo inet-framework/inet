@@ -52,7 +52,7 @@ RTPParticipantInfo::RTPParticipantInfo(const RTPParticipantInfo& participantInfo
 
 
 RTPParticipantInfo::~RTPParticipantInfo() {
-    //delete _sdesChunk;
+    delete _sdesChunk;
 };
 
 
@@ -76,7 +76,7 @@ const char *RTPParticipantInfo::getClassName() const {
 };
 
 
-void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime) {
+void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime) {
     _silentIntervals = 0;
     delete packet;
 };
@@ -191,4 +191,12 @@ char *RTPParticipantInfo::ssrcToName(u_int32 ssrc) {
     char name[9];
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);
+};
+
+
+void RTPParticipantInfo::writeContents() const {
+    std::cout <<" adress= "<< _address
+              <<" rtpPort= "<< _rtpPort
+              <<" rtcpPort= "<< _rtcpPort
+              << endl;
 };

@@ -1,9 +1,9 @@
 /***************************************************************************
                           RTPReceiverInfo.cc  -  description
                              -------------------
-    begin                : Wed Dec 5 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
+    (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+    (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -28,8 +28,8 @@
 
 Register_Class(RTPReceiverInfo);
 
-RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc)  {
-
+RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc)
+{
     _sequenceNumberBase = 0;
     _highestSequenceNumber = 0;
     _highestSequenceNumberPrior = 0;
@@ -50,20 +50,24 @@ RTPReceiverInfo::RTPReceiverInfo(u_int32 ssrc) : RTPParticipantInfo(ssrc)  {
     _inactiveIntervals = 0;
     _startOfInactivity = 0.0;
     _itemsReceived = 0;
+    //_jitterOutVector.setName("Jitter");
+    //_packetLostOutVector.setName("Packet Lost");
+
+    //packetSequenceLostLogFile = NULL;
 };
 
-
-RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo() {
+RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo()
+{
     setName(receiverInfo.getName());
     operator=(receiverInfo);
 };
 
-
-RTPReceiverInfo::~RTPReceiverInfo() {
+RTPReceiverInfo::~RTPReceiverInfo()
+{
 }
 
-
-RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo) {
+RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
+{
     RTPParticipantInfo::operator=(receiverInfo);
 
     _sequenceNumberBase = receiverInfo._sequenceNumberBase;
@@ -90,19 +94,16 @@ RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
     return *this;
 };
 
-
 cObject *RTPReceiverInfo::dup() const {
     return new RTPReceiverInfo(*this);
 };
-
 
 const char *RTPReceiverInfo::getClassName() const {
     return "RTPReceiverInfo";
 };
 
-
-void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime) {
-
+void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arrivalTime)
+{
     // this endsystem sends, it isn't inactive
     _inactiveIntervals = 0;
 
@@ -113,6 +114,23 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime)
         _sequenceNumberBase = packet->sequenceNumber();
     }
     else {
+
+        /*if (packet->sequenceNumber() > _highestSequenceNumber+1)
+        {
+            _packetLostOutVector.record(packet->sequenceNumber() - _highestSequenceNumber -1);
+            for (int i = _highestSequenceNumber+1; i< packet->sequenceNumber(); i++ )
+            {
+                //std::cout << "id = "<< id <<" SequeceNumber loss = "<<i<<endl;
+                packetSequenceLostLogFile = fopen ("PacketLossLog.log","+w");
+                if (packetSequenceLostLogFile != NULL)
+                {
+                    //sprintf (line, "id = %d SequeceNumber loss = %f ", id,i);
+                    fputs (i, packetSequenceLostLogFile);
+                    fclose (packetSequenceLostLogFile);
+                }
+            }
+        }*/
+
         if (packet->sequenceNumber() > _highestSequenceNumber) {
             // it is possible that this is a late packet from the
             // previous sequence wrap
@@ -133,19 +151,18 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, simtime_t arrivalTime)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;
         };
+
         _lastPacketRTPTimeStamp = packet->timeStamp();
         _lastPacketArrivalTime = arrivalTime;
     };
 
+    //_jitterOutVector.record((u_int32)_jitter);
 
-
-    RTPParticipantInfo::processRTPPacket(packet, arrivalTime);
-
+    RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 };
 
-
-void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime) {
-
+void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
+{
     _lastSenderReportArrivalTime = arrivalTime;
     if (_lastSenderReportRTPTimeStamp == 0) {
         _lastSenderReportRTPTimeStamp = report->rtpTimeStamp();
@@ -164,16 +181,15 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
     delete report;
 };
 
-
-void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime) {
+void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
+{
     RTPParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
     _itemsReceived++;
     _inactiveIntervals = 0;
 };
 
-
-ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now) {
-
+ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
+{
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport("ReceiverReport");
         receptionReport->setSSRC(ssrc());
@@ -210,8 +226,8 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now) {
         return NULL;
 };
 
-
-void RTPReceiverInfo::nextInterval(simtime_t now) {
+void RTPReceiverInfo::nextInterval(simtime_t now)
+{
     _inactiveIntervals++;
     if (_inactiveIntervals == 5) {
         _startOfInactivity = now;
@@ -221,16 +237,15 @@ void RTPReceiverInfo::nextInterval(simtime_t now) {
     RTPParticipantInfo::nextInterval(now);
 };
 
-
-bool RTPReceiverInfo::active() {
+bool RTPReceiverInfo::active()
+{
     return (_inactiveIntervals < 5);
 };
 
-
-bool RTPReceiverInfo::valid() {
+bool RTPReceiverInfo::valid()
+{
     return (_itemsReceived >= 5);
 };
-
 
 bool RTPReceiverInfo::toBeDeleted(simtime_t now) {
     // an rtp system should be removed from the list of known systems

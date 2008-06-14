@@ -24,10 +24,9 @@
 
 #include <omnetpp.h>
 
-//XXX #include "in_addr.h"
-//XXX #include "in_port.h"
-#include "tmp/defs.h"
 
+#include "defs.h"
+#include <stdio.h>
 #include "types.h"
 #include "RTPPacket.h"
 #include "RTCPPacket.h"
@@ -87,7 +86,7 @@ class INET_API RTPParticipantInfo : public cObject
          * the sender of this rtp packet is regarded as
          * an active sender.
          */
-        virtual void processRTPPacket(RTPPacket *packet, simtime_t arrivalTime);
+        virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
 
         /**
          * This method extracts information about an rtp endsystem
@@ -210,6 +209,8 @@ class INET_API RTPParticipantInfo : public cObject
          */
         static char *ssrcToName(u_int32 ssrc);
 
+        void writeContents() const;
+
     protected:
 
         /**
@@ -245,8 +246,6 @@ class INET_API RTPParticipantInfo : public cObject
          * this RTPParticipantInfo.
          */
         virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
-
-
 };
 
 #endif
