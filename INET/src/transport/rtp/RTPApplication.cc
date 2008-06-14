@@ -21,7 +21,7 @@
 
 #include <omnetpp.h>
 
-#include "tmp/defs.h"
+#include "defs.h"
 
 #include "types.h"
 #include "RTPApplication.h"

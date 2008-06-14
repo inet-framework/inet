@@ -21,7 +21,7 @@
 
 #include <omnetpp.h>
 
-#include "tmp/defs.h"
+#include "defs.h"
 
 #include "IPAddress.h"
 #include "UDPSocket.h"
@@ -65,7 +65,7 @@ void RTPEndsystemModule::handleMessage(cMessage *msg)
         handleMessagefromUDP(msg);
     }
     else {
-        error("Message from unknown gate")
+        error("Message from unknown gate");
     }
 };
 

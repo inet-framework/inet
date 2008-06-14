@@ -7,3 +7,6 @@ changes in RTPSenderStatusMessage.h/.cc and RTPPayloadSender.cc
 
 Ahmed Ayadi <ahmed.ayadi@sophia.inria.fr>:
 integrated into the INET Framework
+
+Andras Varga
+ported to OMNeT++ 4.0
