@@ -55,21 +55,17 @@ void RTPEndsystemModule::handleMessage(cMessage *msg)
     if (msg->getArrivalGateId() == findGate("fromApp")) {
         handleMessageFromApp(msg);
     }
-
     else if (msg->getArrivalGateId() == findGate("fromProfile")) {
         handleMessageFromProfile(msg);
     }
-
     else if (msg->getArrivalGateId() == findGate("fromRTCP")) {
         handleMessageFromRTCP(msg);
     }
-
     else if (msg->getArrivalGateId() == findGate("fromUDPLayer")) {
         handleMessagefromUDP(msg);
     }
-
     else {
-        ev << " Message from unknown Gate !" << endl;
+        error("Message from unknown gate")
     }
 };
 
@@ -97,7 +93,7 @@ void RTPEndsystemModule::handleMessageFromApp(cMessage *msg)
         leaveSession(rifp);
     }
     else {
-        ev << " unknown RTPInterfacePacket type from application !" << endl;
+        error("unknown RTPInterfacePacket type from application");
     }
 };
 
@@ -121,7 +117,6 @@ void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg)
         senderModuleStatus(rinp);
     }
     else if (rinp->getType() == RTPInnerPacket::RTP_INP_DATA_OUT) {
-    ev<<"dataOut"<<endl;
         dataOut(rinp);
     }
     else {
