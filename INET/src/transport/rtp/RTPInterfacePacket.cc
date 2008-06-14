@@ -99,7 +99,7 @@ void RTPInterfacePacket::dump(std::ostream& os) {
 };
 
 
-void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IN_Addr destinationAddress, IN_Port port) {
+void RTPInterfacePacket::enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, IN_Port port) {
     _type = RTP_IFP_ENTER_SESSION;
     _commonName = commonName;
     _profileName = profileName;
@@ -233,7 +233,7 @@ int RTPInterfacePacket::bandwidth() {
 };
 
 
-IN_Addr RTPInterfacePacket::getDestinationAddress() {
+IPAddress RTPInterfacePacket::getDestinationAddress() {
     return _destinationAddress;
 };
 

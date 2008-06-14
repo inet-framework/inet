@@ -69,7 +69,7 @@ class INET_API RTPApplication : public cSimpleModule
         /**
          * The address of the unicast peer or of the multicast group.
          */
-        IN_Addr _destinationAddress;
+        IPAddress _destinationAddress;
 
         /**
          * One of the udp port used.

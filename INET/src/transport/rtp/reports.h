@@ -27,6 +27,7 @@
 
 #include "INETDefs.h"
 #include "types.h"
+#include "IPAddress.h"
 
 
 /**

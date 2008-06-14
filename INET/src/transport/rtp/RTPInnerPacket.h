@@ -24,11 +24,9 @@
 
 #include <omnetpp.h>
 
-//XXX #include "in_addr.h"
-//XXX #include "in_port.h"
 #include "defs.h"
-
 #include "types.h"
+#include "IPAddress.h"
 #include "RTPPacket.h"
 #include "RTPSenderControlMessage.h"
 #include "RTPSenderStatusMessage.h"
@@ -123,7 +121,7 @@ class INET_API RTPInnerPacket : public cMessage
          * Called by the rtp module to inform the rtcp module about mandatory
          * information for starting the rtp session.
          */
-        virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IN_Addr address, IN_Port port);
+        virtual void initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, IN_Port port);
 
         /**
          * Called by the rtcp module after it has waited for half an rtcp interval
@@ -131,7 +129,6 @@ class INET_API RTPInnerPacket : public cMessage
          * module which later informs the rtp application about the ssrc identifier
          */
         virtual void rtcpInitialized(u_int32 ssrc);
-
 
         virtual void createSenderModule(u_int32 ssrc, int payloadType, const char *fileName);
         virtual void senderModuleCreated(u_int32 ssrc);
@@ -167,7 +164,7 @@ class INET_API RTPInnerPacket : public cMessage
          * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
          * it within the rtp layer.
          */
-        virtual void dataIn(RTPPacket *packet, IN_Addr address, IN_Port port);
+        virtual void dataIn(RTPPacket *packet, IPAddress address, IN_Port port);
 
         /**
          * Returns the type of this RTPInnerPacket.
@@ -197,7 +194,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the address stored in this RTPInnerPacket.
          */
-        virtual IN_Addr getAddress();
+        virtual IPAddress getAddress();
 
         /**
          * Returns the port stored in this RTPInnerPacket.
@@ -265,7 +262,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * The address stored this RTPInnerPacket.
          */
-        IN_Addr _address;
+        IPAddress _address;
 
         /**
          * The port stored this RTPInnerPacket.

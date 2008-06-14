@@ -127,7 +127,7 @@ void RTPInnerPacket::profileInitialized(int rtcpPercentage, IN_Port port) {
 };
 
 
-void RTPInnerPacket::initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IN_Addr address, IN_Port port) {
+void RTPInnerPacket::initializeRTCP(const char *commonName, int mtu, int bandwidth, int rtcpPercentage, IPAddress address, IN_Port port) {
     _type = RTP_INP_INITIALIZE_RTCP;
     _commonName = commonName;
     _mtu = mtu;
@@ -217,7 +217,7 @@ void RTPInnerPacket::dataOut(RTPPacket *packet) {
 };
 
 
-void RTPInnerPacket::dataIn(RTPPacket *packet, IN_Addr address, IN_Port port) {
+void RTPInnerPacket::dataIn(RTPPacket *packet, IPAddress address, IN_Port port) {
     _type = RTP_INP_DATA_IN;
     _address = address;
     _port = port;
@@ -250,7 +250,7 @@ int RTPInnerPacket::rtcpPercentage() {
 };
 
 
-IN_Addr RTPInnerPacket::getAddress() {
+IPAddress RTPInnerPacket::getAddress() {
     return _address;
 };
 

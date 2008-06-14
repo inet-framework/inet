@@ -135,7 +135,7 @@ class INET_API RTPEndsystemModule : public cSimpleModule
         /**
          * The destination address.
          */
-        IN_Addr _destinationAddress;
+        IPAddress _destinationAddress;
 
         /**
          * The rtp port.

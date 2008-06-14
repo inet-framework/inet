@@ -331,7 +331,7 @@ void RTPEndsystemModule::readRet(cMessage *sifp)
 
          msg->dump();
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
-         rinp1->dataIn(new RTPPacket(*msg),IN_Addr(_destinationAddress),IN_Port(_port));
+         rinp1->dataIn(new RTPPacket(*msg),IPAddress(_destinationAddress),IN_Port(_port));
 
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
          send(rinp2, "toRTCP");
@@ -386,7 +386,7 @@ void RTPEndsystemModule::createSocket()
     IPAddress ipaddr(_destinationAddress);
 
     if (ipaddr.isMulticast()) {
-        ctrl->setSrcAddr(IN_Addr(_destinationAddress));
+        ctrl->setSrcAddr(IPAddress(_destinationAddress));
         ctrl->setSrcPort(IN_Port(_port));
     }
     else {

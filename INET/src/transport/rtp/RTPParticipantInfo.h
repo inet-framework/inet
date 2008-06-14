@@ -22,12 +22,12 @@
 #ifndef __RTPPARTICIPANTINFO_H__
 #define __RTPPARTICIPANTINFO_H__
 
+#include <stdio.h>
 #include <omnetpp.h>
 
-
 #include "defs.h"
-#include <stdio.h>
 #include "types.h"
+#include "IPAddress.h"
 #include "RTPPacket.h"
 #include "RTCPPacket.h"
 #include "reports.h"
@@ -171,12 +171,12 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ip address of the rtp endsystem.
          */
-        virtual IN_Addr getAddress();
+        virtual IPAddress getAddress();
 
         /**
          * Sets the ip address of the rtp endsystem.
          */
-        virtual void setAddress(IN_Addr address);
+        virtual void setAddress(IPAddress address);
 
         /**
          * Returns the port used by this endsystem for
@@ -222,7 +222,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Used for storing the ip address of this endsystem.
          */
-        IN_Addr _address;
+        IPAddress _address;
 
         /**
          * Used for storing the port for rtp by this endsystem.

@@ -27,6 +27,7 @@
 #include "defs.h"
 
 #include "types.h"
+#include "IPAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
 #include "RTPSenderInfo.h"
@@ -128,7 +129,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * The destination address.
          */
-        IN_Addr _destinationAddress;
+        IPAddress _destinationAddress;
 
         /**
          * The rtcp port.
@@ -213,12 +214,12 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
         /**
          * Extracts information of a received RTPPacket.
          */
-        virtual void processIncomingRTPPacket(RTPPacket *packet, IN_Addr address, IN_Port port);
+        virtual void processIncomingRTPPacket(RTPPacket *packet, IPAddress address, IN_Port port);
 
         /**
          * Extracts information of a received RTCPCompoundPacket.
          */
-        virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IN_Addr address, IN_Port port);
+        virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, IN_Port port);
 
         /**
          * Returns the RTPParticipantInfo object used for storing information

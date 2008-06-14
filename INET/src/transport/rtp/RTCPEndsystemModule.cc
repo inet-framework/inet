@@ -194,7 +194,7 @@ void RTCPEndsystemModule::connectRet()
 void RTCPEndsystemModule::readRet(cMessage *sifpIn)
 {
     RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
-    processIncomingRTCPPacket(packet, IN_Addr(_destinationAddress),IN_Port(_port));
+    processIncomingRTCPPacket(packet, IPAddress(_destinationAddress),IN_Port(_port));
 };
 
 void RTCPEndsystemModule::createSocket()
@@ -207,7 +207,7 @@ void RTCPEndsystemModule::createSocket()
     IPAddress ipaddr(_destinationAddress);
 
     if (ipaddr.isMulticast()) {
-        ctrl->setSrcAddr(IN_Addr(_destinationAddress));
+        ctrl->setSrcAddr(IPAddress(_destinationAddress));
         ctrl->setSrcPort(IN_Port(_port));
     }
     else {
@@ -343,7 +343,7 @@ void RTCPEndsystemModule::processOutgoingRTPPacket(RTPPacket *packet)
 };
 
 
-void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr address, IN_Port port) {
+void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, IN_Port port) {
     u_int32 ssrc = packet->ssrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == NULL) {
@@ -368,7 +368,7 @@ void RTCPEndsystemModule::processIncomingRTPPacket(RTPPacket *packet, IN_Addr ad
 };
 
 
-void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IN_Addr address, IN_Port port)
+void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress address, IN_Port port)
 {
     calculateAveragePacketSize(packet->getBitLength());
     cArray *rtcpPackets = packet->rtcpPackets();

@@ -154,12 +154,12 @@ void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *
 };
 
 
-IN_Addr RTPParticipantInfo::getAddress() {
+IPAddress RTPParticipantInfo::getAddress() {
     return _address;
 };
 
 
-void RTPParticipantInfo::setAddress(IN_Addr address) {
+void RTPParticipantInfo::setAddress(IPAddress address) {
     _address = address;
 };
 
