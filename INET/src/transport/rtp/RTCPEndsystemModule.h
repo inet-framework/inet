@@ -13,7 +13,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-Ahmed Ayadi 
+
 
 /** \file RTCPEndsystemModule.h
  * This file declares the class RTCPEndsystemModule.

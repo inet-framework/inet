@@ -149,7 +149,7 @@ const char *SDESChunk::getClassName() const {
 
 std::string SDESChunk::info() {
     std::stringstream out;
-    out << "SDESChunk.ssrc=" << _ssrc << " items=" << items();
+    out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();
     return out.str();
 };
 
@@ -157,7 +157,7 @@ std::string SDESChunk::info() {
 void SDESChunk::writeContents(std::ostream& os) {
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
-    for (int i = 0; i < items(); i++) {
+    for (int i = 0; i < size(); i++) {
         if (exist(i)) {
             get(i)->writeContents(os);
         };
@@ -166,7 +166,7 @@ void SDESChunk::writeContents(std::ostream& os) {
 
 
 void SDESChunk::addSDESItem(SDESItem *sdesItem) {
-    for (int i = 0; i < items(); i++) {
+    for (int i = 0; i < size(); i++) {
         if (exist(i)) {
             SDESItem *compareItem = (SDESItem *)(get(i));
             if (compareItem->getType() == sdesItem->getType()) {

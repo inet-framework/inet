@@ -33,7 +33,7 @@
  * Following rtp header fields exist but aren't used: padding, extension,
  * csrcCount. The csrcList can't be used because csrcCount is always 0.
  */
-class INET_API RTPPacket : public cPacket
+class INET_API RTPPacket : public cMessage
 {
 
     public:

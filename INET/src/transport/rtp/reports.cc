@@ -42,7 +42,6 @@ SenderReport::SenderReport() : cObject() {
 
 
 SenderReport::SenderReport(const SenderReport& senderReport) : cObject() {
-    setName(senderReport.getName());
     operator=(senderReport);
 };
 
@@ -145,7 +144,6 @@ ReceptionReport::ReceptionReport() : cObject() {
 
 
 ReceptionReport::ReceptionReport(const ReceptionReport& receptionReport) : cObject() {
-    setName(receptionReport.getName());
     operator=(receptionReport);
 };
 

@@ -29,7 +29,7 @@
 Register_Class(RTPInnerPacket);
 
 
-RTPInnerPacket::RTPInnerPacket(const char *name) : cPacket(name) {
+RTPInnerPacket::RTPInnerPacket(const char *name) : cMessage(name) {
     _type = RTP_INP_UNDEF;
     _commonName = NULL;
     _mtu = 0;
@@ -46,7 +46,7 @@ RTPInnerPacket::RTPInnerPacket(const char *name) : cPacket(name) {
 };
 
 
-RTPInnerPacket::RTPInnerPacket(const RTPInnerPacket& rinp) : cPacket() {
+RTPInnerPacket::RTPInnerPacket(const RTPInnerPacket& rinp) : cMessage() {
     setName(rinp.getName());
     operator=(rinp);
 };
@@ -61,7 +61,7 @@ RTPInnerPacket::~RTPInnerPacket() {
 
 
 RTPInnerPacket& RTPInnerPacket::operator=(const RTPInnerPacket& rinp) {
-    cPacket::operator=(rinp);
+    cMessage::operator=(rinp);
     _type = rinp._type;
     _commonName = opp_strdup(rinp._commonName);
     _mtu = rinp._mtu;

@@ -15,6 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "INETDefs.h"
 
 /** \file types.h
  * This file declares some integer types needed for rtp.
@@ -23,7 +24,7 @@
 /**
  * An unsigned 8 bit integer.
  */
-typedef unsigned char  u_int8;
+typedef unsigned char u_int8;
 
 /**
  * An unsigned 16 bit integer.

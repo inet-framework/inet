@@ -24,7 +24,7 @@
 Register_Class(RTPInterfacePacket);
 
 
-RTPInterfacePacket::RTPInterfacePacket(const char *name) : cPacket(name) {
+RTPInterfacePacket::RTPInterfacePacket(const char *name) : cMessage(name) {
     _type = RTP_IFP_UNDEF;
     _commonName = NULL;
     _profileName = NULL;
@@ -37,7 +37,7 @@ RTPInterfacePacket::RTPInterfacePacket(const char *name) : cPacket(name) {
 };
 
 
-RTPInterfacePacket::RTPInterfacePacket(const RTPInterfacePacket& rifp) : cPacket() {
+RTPInterfacePacket::RTPInterfacePacket(const RTPInterfacePacket& rifp) : cMessage() {
     setName(rifp.getName());
     operator=(rifp);
 };
@@ -54,7 +54,7 @@ RTPInterfacePacket::~RTPInterfacePacket() {
 
 
 RTPInterfacePacket& RTPInterfacePacket::operator=(const RTPInterfacePacket& rifp) {
-    cPacket::operator=(rifp);
+    cMessage::operator=(rifp);
     _type = rifp._type;
     _commonName = opp_strdup(rifp._commonName);
     _profileName = opp_strdup(rifp._profileName);

@@ -24,7 +24,7 @@
 
 Register_Class(RTPMpegPacket);
 
-RTPMpegPacket::RTPMpegPacket(const char *name) : cPacket(name) {
+RTPMpegPacket::RTPMpegPacket(const char *name) : cMessage(name) {
     _mzb = 0;
     _two = 0;
     _temporalReference = 0;
@@ -43,7 +43,7 @@ RTPMpegPacket::RTPMpegPacket(const char *name) : cPacket(name) {
 };
 
 
-RTPMpegPacket::RTPMpegPacket(const RTPMpegPacket& packet) : cPacket(packet) {
+RTPMpegPacket::RTPMpegPacket(const RTPMpegPacket& packet) : cMessage(packet) {
     setName(packet.getName());
     _mzb = packet._mzb;
     _two = packet._two;
@@ -66,7 +66,7 @@ RTPMpegPacket::~RTPMpegPacket() {
 
 
 RTPMpegPacket& RTPMpegPacket::operator=(const RTPMpegPacket& packet) {
-    cPacket::operator=(packet);
+    cMessage::operator=(packet);
     return *this;
 };
 

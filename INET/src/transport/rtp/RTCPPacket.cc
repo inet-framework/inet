@@ -36,13 +36,13 @@
 Register_Class(RTCPPacket);
 
 
-RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
+RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
     // initialize variables
     _version = 2;
     _padding = 0;
     _count = 0;
     _packetType = RTCP_PT_UNDEF;
-    // rtcpLength can be calculated with cPacket::length()
+    // rtcpLength can be calculated with cMessage::length()
 
     // RTCP header length size is 4 bytes
     // not all rtcp packets (in particular RTCPSDESPacket) have
@@ -51,7 +51,7 @@ RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
 };
 
 
-RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cPacket() {
+RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cMessage() {
     setName(rtcpPacket.getName());
     operator=(rtcpPacket);
 };
@@ -62,7 +62,7 @@ RTCPPacket::~RTCPPacket() {
 
 
 RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
-    cPacket::operator=(rtcpPacket);
+    cMessage::operator=(rtcpPacket);
     setName(rtcpPacket.getName());
     _version = rtcpPacket._version;
     _padding = rtcpPacket._padding;
@@ -181,7 +181,7 @@ std::string RTCPReceiverReportPacket::info() {
 
 void RTCPReceiverReportPacket::writeContents(std::ostream& os) const {
     os << "RTCPReceiverReportPacket:" << endl;
-    for (int i = 0; i < _receptionReports->items(); i++) {
+    for (int i = 0; i < _receptionReports->size(); i++) {
         if (_receptionReports->exist(i)) {
             ReceptionReport *rr = (ReceptionReport *)(_receptionReports->get(i));
             rr->writeContents(os);
@@ -267,7 +267,7 @@ std::string RTCPSenderReportPacket::info() {
 void RTCPSenderReportPacket::writeContents(std::ostream& os) const {
     os << "RTCPSenderReportPacket:" << endl;
     _senderReport->writeContents(os);
-    for (int i = 0; i < _receptionReports->items(); i++) {
+    for (int i = 0; i < _receptionReports->size(); i++) {
         if (_receptionReports->exist(i)) {
             _receptionReports->get(i)->writeContents(os);
         };
@@ -333,14 +333,14 @@ const char *RTCPSDESPacket::getClassName() const {
 
 std::string RTCPSDESPacket::info() {
     std::stringstream out;
-    out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->items();
+    out << "RTCPSDESPacket: number of sdes chunks=" << _sdesChunks->size();
     return out.str();
 };
 
 
 void RTCPSDESPacket::writeContents(std::ostream& os) const {
     os << "RTCPSDESPacket:" << endl;
-    for (int i = 0; i < _sdesChunks->items(); i++) {
+    for (int i = 0; i < _sdesChunks->size(); i++) {
         if (_sdesChunks->exist(i))
             (*_sdesChunks)[i]->writeContents(os);
     }
@@ -422,14 +422,14 @@ void RTCPByePacket::setSSRC(u_int32 ssrc) {
 Register_Class(RTCPCompoundPacket);
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cPacket(name) {
+RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cMessage(name) {
     _rtcpPackets = new cArray("RTCPPackets");
     // an empty rtcp compound packet has length 0 bytes
     setBitLength(0);
 };
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cPacket() {
+RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cMessage() {
     setName(rtcpCompoundPacket.getName());
     operator=(rtcpCompoundPacket);
 };
@@ -441,7 +441,7 @@ RTCPCompoundPacket::~RTCPCompoundPacket() {
 
 
 RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcpCompoundPacket) {
-    cPacket::operator=(rtcpCompoundPacket);
+    cMessage::operator=(rtcpCompoundPacket);
     setBitLength(rtcpCompoundPacket.length());
     _rtcpPackets = new cArray(*(rtcpCompoundPacket._rtcpPackets));
     return *this;
@@ -460,14 +460,14 @@ const char *RTCPCompoundPacket::getClassName() const {
 
 std::string RTCPCompoundPacket::info() {
     std::stringstream out;
-    out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->items();
+    out << "RTCPCompoundPacket: number of rtcp packets=" << _rtcpPackets->size();
     return out.str();
 };
 
 
 void RTCPCompoundPacket::writeContents(std::ostream& os) const {
     os << "RTCPCompoundPacket:" << endl;
-    for (int i = 0; i < _rtcpPackets->items(); i++) {
+    for (int i = 0; i < _rtcpPackets->size(); i++) {
         if (_rtcpPackets->exist(i)) {
             _rtcpPackets->get(i)->writeContents(os);
         }

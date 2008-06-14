@@ -38,13 +38,13 @@
 #include "reports.h"
 #include "sdes.h"
 
+
 /**
  * This is a base class for all types (except RTCPCompoundPacket) of rtcp
  * packets. It isn't intended to be used directly.
  */
-class INET_API RTCPPacket : public cPacket
+class INET_API RTCPPacket : public cMessage
 {
-
     public:
 
         /**
@@ -125,7 +125,7 @@ class INET_API RTCPPacket : public cPacket
         /**
          * Returns the value of the field length in the rtcp header.
          * The value isn't stored because it can be calculated
-         * with the length() method inherited from cPacket.
+         * with the length() method inherited from cMessage.
          */
         virtual int rtcpLength() const;
 
@@ -455,7 +455,7 @@ class INET_API RTCPByePacket : public RTCPPacket
  * one RTCPSDESPacket. This class doesn't check if these requirements are
  * met.
  */
-class INET_API RTCPCompoundPacket : public cPacket
+class INET_API RTCPCompoundPacket : public cMessage
 {
 
     public:

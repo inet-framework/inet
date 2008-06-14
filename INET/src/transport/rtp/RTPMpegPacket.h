@@ -37,7 +37,7 @@
  * \sa RTPAVProfilePayload32Sender
  * \sa RTPAVProfilePayload32Receiver
  */
-class INET_API RTPMpegPacket : public cPacket
+class INET_API RTPMpegPacket : public cMessage
 {
 
     public:

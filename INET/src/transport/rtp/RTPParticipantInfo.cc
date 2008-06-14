@@ -95,7 +95,7 @@ void RTPParticipantInfo::processReceptionReport(ReceptionReport *report, simtime
 
 
 void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime) {
-    for (int i = 0; i < sdesChunk->items(); i++) {
+    for (int i = 0; i < sdesChunk->size(); i++) {
         if (sdesChunk->exist(i)) {
             SDESItem *sdesItem = (SDESItem *)(sdesChunk->remove(i));
             addSDESItem(sdesItem);

@@ -27,7 +27,7 @@
 Register_Class(RTPPacket);
 
 
-RTPPacket::RTPPacket(const char *name) : cPacket(name) {
+RTPPacket::RTPPacket(const char *name) : cMessage(name) {
     _version = 2;
     _padding = 0;
     _extension = 0;
@@ -43,7 +43,7 @@ RTPPacket::RTPPacket(const char *name) : cPacket(name) {
 };
 
 
-RTPPacket::RTPPacket(const RTPPacket& packet) : cPacket() {
+RTPPacket::RTPPacket(const RTPPacket& packet) : cMessage() {
     setName(packet.getName());
     operator=(packet);
 };
@@ -61,7 +61,7 @@ RTPPacket *RTPPacket::dup() const {
 
 
 RTPPacket& RTPPacket::operator=(const RTPPacket& packet) {
-    cPacket::operator=(packet);
+    cMessage::operator=(packet);
     _version = packet._version;
     _padding = packet._padding;
     _extension = packet._extension;

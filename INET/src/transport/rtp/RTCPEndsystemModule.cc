@@ -222,7 +222,7 @@ void RTCPEndsystemModule::createSocket()
 
 void RTCPEndsystemModule::scheduleInterval() {
 
-    simtime_t intervalLength = (simtime_t)(_averagePacketSize) * (simtime_t)(_participantInfos->items()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+    simtime_t intervalLength = (simtime_t)(_averagePacketSize) * (simtime_t)(_participantInfos->size()) / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
 
     // interval length must be at least 5 seconds
@@ -275,7 +275,7 @@ void RTCPEndsystemModule::createPacket()
 
 
     // insert receiver reports for packets from other sources
-    for (int i = 0; i < _participantInfos->items(); i++) {
+    for (int i = 0; i < _participantInfos->size(); i++) {
 
         if (_participantInfos->exist(i)) {
             RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos->get(i));
@@ -372,7 +372,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
     simtime_t arrivalTime = packet->getArrivalTime();
     delete packet;
 
-   for (int i = 0; i < rtcpPackets->items(); i++) {
+   for (int i = 0; i < rtcpPackets->size(); i++) {
         if (rtcpPackets->exist(i)) {
             // remove the rtcp packet from the rtcp compound packet
             RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets->remove(i));
@@ -403,7 +403,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 participantInfo->processSenderReport(rtcpSenderReportPacket->senderReport(), simTime());
 
                 cArray *receptionReports = rtcpSenderReportPacket->receptionReports();
-                for (int j = 0; j < receptionReports->items(); j++) {
+                for (int j = 0; j < receptionReports->size(); j++) {
                     if (receptionReports->exist(j)) {
                         ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports->remove(j));
                         if (_senderInfo) {
@@ -444,7 +444,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 }
 
                 cArray *receptionReports = rtcpReceiverReportPacket->receptionReports();
-                for (int j = 0; j < receptionReports->items(); j++) {
+                for (int j = 0; j < receptionReports->size(); j++) {
                     if (receptionReports->exist(j)) {
                         ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports->remove(j));
                         if (_senderInfo) {
@@ -465,7 +465,7 @@ void RTCPEndsystemModule::processIncomingRTCPPacket(RTCPCompoundPacket *packet, 
                 RTCPSDESPacket *rtcpSDESPacket = (RTCPSDESPacket *)rtcpPacket;
                 cArray *sdesChunks = rtcpSDESPacket->sdesChunks();
 
-                for (int j = 0; j < sdesChunks->items(); j++) {
+                for (int j = 0; j < sdesChunks->size(); j++) {
                     if (sdesChunks->exist(j)) {
                         // remove the sdes chunk from the cArray of sdes chunks
                         SDESChunk *sdesChunk = (SDESChunk *)(sdesChunks->remove(j));
