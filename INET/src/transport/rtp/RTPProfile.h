@@ -48,12 +48,12 @@ class INET_API RTPProfile : public cSimpleModule
         class SSRCGate : public cNamedObject  //FIXME why is it a namedObject?
         {
           protected:
-            u_int32 ssrc;
+            uint32_t ssrc;
             int gateId;
           public:
-            SSRCGate(u_int32 ssrc=0) {this->ssrc = ssrc; gateId = 0;}
-            u_int32 getSSRC() {return ssrc;}
-            void setSSRC(u_int32 ssrc) {this->ssrc = ssrc;}
+            SSRCGate(uint32_t ssrc=0) {this->ssrc = ssrc; gateId = 0;}
+            uint32_t getSSRC() {return ssrc;}
+            void setSSRC(uint32_t ssrc) {this->ssrc = ssrc;}
             int getGateId() {return gateId;}
             void setGateId(int gateId) {this->gateId = gateId;}
         };
@@ -164,12 +164,12 @@ class INET_API RTPProfile : public cSimpleModule
          * Finds the gate of the receiver module for rtp data
          * packets from this ssrc.
          */
-        virtual SSRCGate *findSSRCGate(u_int32 ssrc);
+        virtual SSRCGate *findSSRCGate(uint32_t ssrc);
 
         /**
          * Creates a new association ssrc/gateId for this ssrc.
          */
-        virtual SSRCGate *newSSRCGate(u_int32 ssrc);
+        virtual SSRCGate *newSSRCGate(uint32_t ssrc);
 
         /**
          * The name of this profile. Needed for dynamic creating

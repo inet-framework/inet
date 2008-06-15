@@ -82,7 +82,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
         /**
          * The ssrc identifier of this sender module.
          */
-        u_int32 _ssrc;
+        uint32_t _ssrc;
 
         /**
          * The payload type this sender creates.
@@ -98,23 +98,23 @@ class INET_API RTPPayloadSender : public cSimpleModule
          * The first rtp time stamp used for created rtp data
          * packets. The value is chosen randomly.
          */
-        u_int32 _timeStampBase;
+        uint32_t _timeStampBase;
 
         /**
          * The current rtp time stamp.
          */
-        u_int32 _timeStamp;
+        uint32_t _timeStamp;
 
         /**
          * The first sequence number used for created rtp data
          * packets. The value is chosen randomly.
          */
-        u_int16 _sequenceNumberBase;
+        uint16_t _sequenceNumberBase;
 
         /**
          * The current sequence number.
          */
-        u_int16 _sequenceNumber;
+        uint16_t _sequenceNumber;
 
         /**
          * The current state of data transmission.

@@ -95,32 +95,32 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the sequence number of this RTPPacket.
          */
-        virtual u_int16 getSequenceNumber();
+        virtual uint16_t getSequenceNumber();
 
         /**
          * Sets the sequence number of this RTPPacket.
          */
-        virtual void setSequenceNumber(u_int16 sequenceNumber);
+        virtual void setSequenceNumber(uint16_t sequenceNumber);
 
         /**
          * Returns the rtp time stamp of this RTPPacket.
          */
-        virtual u_int32 getTimeStamp();
+        virtual uint32_t getTimeStamp();
 
         /**
          * Sets the rtp time stamp of this RTPPacket.
          */
-        virtual void setTimeStamp(u_int32 timeStamp);
+        virtual void setTimeStamp(uint32_t timeStamp);
 
         /**
          * Returns the ssrc identifier of this RTPPacket.
          */
-        virtual u_int32 getSSRC();
+        virtual uint32_t getSSRC();
 
         /**
          * Sets the ssrc identifier of this RTPPacket.
          */
-        virtual void setSSRC(u_int32 ssrc);
+        virtual void setSSRC(uint32_t ssrc);
 
         /**
          * Returns the length of the fixed header of an RTPPacket.
@@ -177,17 +177,17 @@ class INET_API RTPPacket : public cMessage
         /**
          * The sequence number of this RTPPacket.
          */
-        u_int16 _sequenceNumber;
+        uint16_t _sequenceNumber;
 
         /**
          * The rtp time stamp of this RTPPacket.
          */
-        u_int32 _timeStamp;
+        uint32_t _timeStamp;
 
         /**
          * The ssrc identifier of the creator of this RTPPacket.
          */
-        u_int32 _ssrc;
+        uint32_t _ssrc;
 
         // no mixers, no contributing sources
         //int _csrc[];

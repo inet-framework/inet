@@ -107,7 +107,7 @@ int SDESItem::getLength() {
 Register_Class(SDESChunk);
 
 
-SDESChunk::SDESChunk(const char *name, u_int32 ssrc) : cArray(name) {
+SDESChunk::SDESChunk(const char *name, uint32_t ssrc) : cArray(name) {
     _ssrc = ssrc;
     _length = 4;
 };
@@ -173,12 +173,12 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
 };
 
 
-u_int32 SDESChunk::getSSRC() {
+uint32_t SDESChunk::getSSRC() {
     return _ssrc;
 };
 
 
-void SDESChunk::setSSRC(u_int32 ssrc) {
+void SDESChunk::setSSRC(uint32_t ssrc) {
     _ssrc = ssrc;
 };
 

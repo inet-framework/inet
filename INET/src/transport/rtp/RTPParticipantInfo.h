@@ -49,7 +49,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Default constructor.
          */
-        RTPParticipantInfo(u_int32 ssrc = 0);
+        RTPParticipantInfo(uint32_t ssrc = 0);
 
         /**
          * Copy constructor.
@@ -154,12 +154,12 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ssrc identifier of the rtp endsystem.
          */
-        virtual u_int32 getSSRC();
+        virtual uint32_t getSSRC();
 
         /**
          * Sets the ssrc identifier.
          */
-        virtual void setSSRC(u_int32 ssrc);
+        virtual void setSSRC(uint32_t ssrc);
 
         /**
          * Returns the ip address of the rtp endsystem.
@@ -200,7 +200,7 @@ class INET_API RTPParticipantInfo : public cObject
          * an 8 character hexadecimal number which is used as name
          * of an RTPParticipantInfo object.
          */
-        static char *ssrcToName(u_int32 ssrc);
+        static char *ssrcToName(uint32_t ssrc);
 
         void dump() const;
 

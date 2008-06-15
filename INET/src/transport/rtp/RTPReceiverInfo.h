@@ -42,7 +42,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         /**
          * Default constructor.
          */
-        RTPReceiverInfo(u_int32 ssrc = 0);
+        RTPReceiverInfo(uint32_t ssrc = 0);
 
         /**
          * Copy constructor.
@@ -114,34 +114,34 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         /**
          * The sequence number of the first RTPPacket received.
          */
-        u_int16 _sequenceNumberBase;
+        uint16_t _sequenceNumberBase;
 
         /**
          * The highest sequence number of an RTPPacket received.
          */
-        u_int16 _highestSequenceNumber;
+        uint16_t _highestSequenceNumber;
 
         /**
          * The highest sequence number of an RTPPacket received
          * before the beginning of the current rtcp interval.
          */
-        u_int32 _highestSequenceNumberPrior;
+        uint32_t _highestSequenceNumberPrior;
 
         /**
          * The number of sequence number wrap arounds.
          */
-        u_int32 _sequenceNumberCycles;
+        uint32_t _sequenceNumberCycles;
 
         /**
          * How many rtp packets from this source have been received.
          */
-        u_int32 _packetsReceived;
+        uint32_t _packetsReceived;
 
         /**
          * How many rtp packets have been received from this source
          * before the current rtcp interval began.
          */
-        u_int32 _packetsReceivedPrior;
+        uint32_t _packetsReceivedPrior;
 
         /**
          * The interarrival jitter. See rtp rfc for details.
@@ -166,18 +166,18 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         /**
          * The rtp time stamp of the last SenderReport received from this sender.
          */
-        u_int32 _lastSenderReportRTPTimeStamp;
+        uint32_t _lastSenderReportRTPTimeStamp;
 
         /**
          * The ntp time stamp of the last SenderReport received from this sender.
          */
-        u_int64 _lastSenderReportNTPTimeStamp;
+        uint64_t _lastSenderReportNTPTimeStamp;
 
         /**
          * The rtp time stamp of the last RTPPacket received from this sender.
          * Needed for calculating the jitter.
          */
-        u_int32 _lastPacketRTPTimeStamp;
+        uint32_t _lastPacketRTPTimeStamp;
 
         /**
          * The arrival time of the last RTPPacket received from this sender.

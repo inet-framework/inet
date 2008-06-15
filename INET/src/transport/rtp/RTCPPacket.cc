@@ -181,12 +181,12 @@ void RTCPReceiverReportPacket::dump(std::ostream& os) const {
 };
 
 
-u_int32 RTCPReceiverReportPacket::getSSRC() {
+uint32_t RTCPReceiverReportPacket::getSSRC() {
     return _ssrc;
 };
 
 
-void RTCPReceiverReportPacket::setSSRC(u_int32 ssrc) {
+void RTCPReceiverReportPacket::setSSRC(uint32_t ssrc) {
     _ssrc = ssrc;
 };
 
@@ -381,12 +381,12 @@ RTCPByePacket *RTCPByePacket::dup() const {
 };
 
 
-u_int32 RTCPByePacket::getSSRC() {
+uint32_t RTCPByePacket::getSSRC() {
     return _ssrc;
 };
 
 
-void RTCPByePacket::setSSRC(u_int32 ssrc) {
+void RTCPByePacket::setSSRC(uint32_t ssrc) {
     _ssrc = ssrc;
 };
 

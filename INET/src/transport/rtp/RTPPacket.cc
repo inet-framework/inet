@@ -111,32 +111,32 @@ void RTPPacket::setPayloadType(int payloadType) {
 };
 
 
-u_int16 RTPPacket::getSequenceNumber() {
+uint16_t RTPPacket::getSequenceNumber() {
     return _sequenceNumber;
 };
 
 
-void RTPPacket::setSequenceNumber(u_int16 sequenceNumber) {
+void RTPPacket::setSequenceNumber(uint16_t sequenceNumber) {
     _sequenceNumber = sequenceNumber;
 };
 
 
-u_int32 RTPPacket::getTimeStamp() {
+uint32_t RTPPacket::getTimeStamp() {
     return _timeStamp;
 };
 
 
-void RTPPacket::setTimeStamp(u_int32 timeStamp) {
+void RTPPacket::setTimeStamp(uint32_t timeStamp) {
     _timeStamp = timeStamp;
 };
 
 
-u_int32 RTPPacket::getSSRC() {
+uint32_t RTPPacket::getSSRC() {
     return _ssrc;
 };
 
 
-void RTPPacket::setSSRC(u_int32 ssrc) {
+void RTPPacket::setSSRC(uint32_t ssrc) {
     _ssrc = ssrc;
 };
 

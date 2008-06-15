@@ -206,7 +206,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
     RTPPacket *packet = (RTPPacket *)(rinp->getEncapsulatedMsg());
 
-    u_int32 ssrc = packet->getSSRC();
+    uint32_t ssrc = packet->getSSRC();
 
     SSRCGate *ssrcGate = findSSRCGate(ssrc);
 
@@ -274,7 +274,7 @@ void RTPProfile::processOutgoingPacket(RTPInnerPacket *rinp)
 };
 
 
-RTPProfile::SSRCGate *RTPProfile::findSSRCGate(u_int32 ssrc)
+RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32_t ssrc)
 {
     const char *name = RTPParticipantInfo::ssrcToName(ssrc);
     int objectIndex = _ssrcGates->find(name);
@@ -288,7 +288,7 @@ RTPProfile::SSRCGate *RTPProfile::findSSRCGate(u_int32 ssrc)
 };
 
 
-RTPProfile::SSRCGate *RTPProfile::newSSRCGate(u_int32 ssrc) {
+RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32_t ssrc) {
     SSRCGate *ssrcGate = new SSRCGate(ssrc);
     bool assigned = false;
     int receiverGateId = findGate("toPayloadReceiver",0);

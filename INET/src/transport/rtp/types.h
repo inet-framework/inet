@@ -24,25 +24,25 @@
 /**
  * An unsigned 8 bit integer.
  */
-typedef unsigned char u_int8;
+typedef unsigned char uint8_t;
 
 /**
  * An unsigned 16 bit integer.
  */
-typedef unsigned short u_int16;
+typedef unsigned short uint16_t;
 
 /**
  * A signed 32 bit integer.
  */
-typedef signed int int32;
+typedef signed int int32_t;
 
 /**
  * An unsigned 32 bit integer.
  */
-typedef unsigned int u_int32;
+typedef unsigned int uint32_t;
 
 /**
  * An unsigned 64 bit integer.
  */
-typedef unsigned long long u_int64;
+typedef unsigned long long uint64_t;
 
