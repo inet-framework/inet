@@ -43,7 +43,9 @@ class INET_API RTPProfile : public cSimpleModule
     protected:
         // helper class to store the association between an ssrc identifier
         // and the gate which leads to the RTPPayloadReceiver module.
-        class SSRCGate : public cNamedObject  //FIXME don't make it namedObject!!
+        // Note: in the original, this used to be a hundred lines, as RTPSSRCGate.cc/h,
+        // but even this class is an overkill --Andras
+        class SSRCGate : public cNamedObject  //FIXME why is it a namedObject?
         {
           protected:
             u_int32 ssrc;
