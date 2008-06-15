@@ -27,7 +27,6 @@
 #include "RTPInnerPacket.h"
 #include "RTPPayloadSender.h"
 #include "RTPPayloadReceiver.h"
-#include "RTPSSRCGate.h"
 #include "RTPParticipantInfo.h"
 
 
@@ -153,7 +152,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     int payloadType = rinp->getPayloadType();
     char moduleName[100];
 
-    ev<<"ProfileName: " << _profileName << " payloadType: " << payloadType<<endl;
+    ev << "ProfileName: " << _profileName << " payloadType: " << payloadType<<endl;
     const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
     sprintf(moduleName, "%sRTP%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
@@ -209,7 +208,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
     u_int32 ssrc = packet->getSSRC();
 
-    RTPSSRCGate *ssrcGate = findSSRCGate(ssrc);
+    SSRCGate *ssrcGate = findSSRCGate(ssrc);
 
     if (!ssrcGate) {
         ssrcGate = newSSRCGate(ssrc);
@@ -230,15 +229,15 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
             }
             receiverModule->finalizeParameters();
 
-            this->gate(ssrcGate->gateId())->connectTo(receiverModule->gate("fromProfile"));
-            receiverModule->gate("toProfile")->connectTo(this->gate(ssrcGate->gateId() - findGate("toPayloadReceiver",0) + findGate("fromPayloadReceiver",0)));
+            this->gate(ssrcGate->getGateId())->connectTo(receiverModule->gate("fromProfile"));
+            receiverModule->gate("toProfile")->connectTo(this->gate(ssrcGate->getGateId() - findGate("toPayloadReceiver",0) + findGate("fromPayloadReceiver",0)));
 
             receiverModule->callInitialize(0);
             receiverModule->scheduleStart(simTime());
         }
     };
 
-    send(rinp, ssrcGate->gateId());
+    send(rinp, ssrcGate->getGateId());
     ev << "dataIn(RTPInnerPacket *rinp) Exit"<<endl;
 };
 
@@ -275,7 +274,7 @@ void RTPProfile::processOutgoingPacket(RTPInnerPacket *rinp)
 };
 
 
-RTPSSRCGate *RTPProfile::findSSRCGate(u_int32 ssrc)
+RTPProfile::SSRCGate *RTPProfile::findSSRCGate(u_int32 ssrc)
 {
     const char *name = RTPParticipantInfo::ssrcToName(ssrc);
     int objectIndex = _ssrcGates->find(name);
@@ -284,13 +283,13 @@ RTPSSRCGate *RTPProfile::findSSRCGate(u_int32 ssrc)
     }
     else {
         cObject *co = (_ssrcGates->get(objectIndex));
-        return (RTPSSRCGate *)co;
+        return (SSRCGate *)co;
     };
 };
 
 
-RTPSSRCGate *RTPProfile::newSSRCGate(u_int32 ssrc) {
-    RTPSSRCGate *ssrcGate = new RTPSSRCGate(ssrc);
+RTPProfile::SSRCGate *RTPProfile::newSSRCGate(u_int32 ssrc) {
+    SSRCGate *ssrcGate = new SSRCGate(ssrc);
     bool assigned = false;
     int receiverGateId = findGate("toPayloadReceiver",0);
     for (int i = receiverGateId; i < receiverGateId + _maxReceivers && !assigned; i++) {

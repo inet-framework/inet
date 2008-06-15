@@ -8,6 +8,7 @@ import inet.networklayer.contract.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.nodes.inet.NetworkLayer;
 import inet.transport.udp.UDP;
+import inet.applications.rtpapp.RTPApplication;
 
 
 module RTPHost

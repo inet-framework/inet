@@ -25,7 +25,6 @@
 #include <omnetpp.h>
 
 #include "RTPInnerPacket.h"
-#include "RTPSSRCGate.h"
 
 
 /**
@@ -41,9 +40,25 @@
  */
 class INET_API RTPProfile : public cSimpleModule
 {
+    protected:
+        // helper class to store the association between an ssrc identifier
+        // and the gate which leads to the RTPPayloadReceiver module.
+        class SSRCGate : public cNamedObject  //FIXME don't make it namedObject!!
+        {
+          protected:
+            u_int32 ssrc;
+            int gateId;
+          public:
+            SSRCGate(u_int32 ssrc=0) {this->ssrc = ssrc; gateId = 0;}
+            u_int32 getSSRC() {return ssrc;}
+            void setSSRC(u_int32 ssrc) {this->ssrc = ssrc;}
+            int getGateId() {return gateId;}
+            void setGateId(int gateId) {this->gateId = gateId;}
+        };
+
     public:
         RTPProfile();
-        
+
     protected:
         /**
          * Initializes variables. Must be overwritten by subclasses.
@@ -147,12 +162,12 @@ class INET_API RTPProfile : public cSimpleModule
          * Finds the gate of the receiver module for rtp data
          * packets from this ssrc.
          */
-        virtual RTPSSRCGate *findSSRCGate(u_int32 ssrc);
+        virtual SSRCGate *findSSRCGate(u_int32 ssrc);
 
         /**
          * Creates a new association ssrc/gateId for this ssrc.
          */
-        virtual RTPSSRCGate *newSSRCGate(u_int32 ssrc);
+        virtual SSRCGate *newSSRCGate(u_int32 ssrc);
 
         /**
          * The name of this profile. Needed for dynamic creating
