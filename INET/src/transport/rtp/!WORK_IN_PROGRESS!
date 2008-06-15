@@ -1,19 +1,22 @@
 Andras Varga, 2008 Jun:
-	Found suspicious things in the code, to be checked: 
-	 - packet length bit/byte mismatch?
-	 - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
+    State: it compiles, runs, and does *something*, but crashes frequently
 
-	Also: current code is a lot more complicated than it needs to be, with lots of 
-	repetition. Hints to simplify:
-	 - replace cArray with std::vector everywhere
-	 - use msg files (a short msg file can replace tons of source code)
-	 - RTPProfile and Server/Receiver probably don't need to be modules. It's quite
-	   enough if they are just classes that implement some C++ interface
-	Patches welcome...
+    Found suspicious things in the code, to be checked:
+     - packet length bit/byte mismatch?
+     - simtime_t plain cast to integer and assigned to packet fields (1s resolution)
 
-	Also: move RTPHost out under nodes/?
+    TODO:
+     - replace cArray with std::vector everywhere
+     - use msg files (a short msg file can replace tons of source code)
+     - RTPProfile and Server/Receiver probably don't need to be modules.
+       It's quite enough if they are plain C++ classes that implement
+       an interface, and get instantiated via cClassFactory::createOne()
+
+    Patches welcome...
+
+    Also: move RTPHost out under nodes/?
 
 Ahmed Ayadi, 2007:
-	RTP is now integrated on INET framework 
-	If RTP is important to you, please write.
+    RTP is now integrated on INET framework
+    If RTP is important to you, please write.
 
