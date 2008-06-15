@@ -60,7 +60,7 @@ message RTPInterfacePacket
     int bandwidth;
     IPAddress destinationAddress;
     int port;
-    u_int32 ssrc;
+    u_int32 SSRC;
     int payloadType;
     string fileName;
 
