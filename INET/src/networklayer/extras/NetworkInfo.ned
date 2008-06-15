@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+package inet.networklayer.extras;
 
 //
 // NetworkInfo does not send or receive messages and has no parameters

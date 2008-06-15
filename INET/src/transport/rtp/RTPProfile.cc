@@ -153,12 +153,13 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     int payloadType = rinp->payloadType();
     char moduleName[100];
 
-    ev<<"ProfileName"<<_profileName<<"payloadType"<<payloadType<<endl;
-    sprintf(moduleName, "RTP%sPayload%iSender", _profileName, payloadType);
+    ev<<"ProfileName: " << _profileName << " payloadType: " << payloadType<<endl;
+    const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
+    sprintf(moduleName, "%sRTP%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
     cModuleType *moduleType = cModuleType::find(moduleName);
     if (moduleType == NULL)
-        opp_error("RTPProfile: payload sender module \"", moduleName, "\" not found");
+        opp_error("RTPProfile: payload sender module '%s' not found", moduleName);
 
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
@@ -213,7 +214,8 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     if (!ssrcGate) {
         ssrcGate = newSSRCGate(ssrc);
         char payloadReceiverName[100];
-        sprintf(payloadReceiverName, "RTP%sPayload%iReceiver", _profileName, packet->payloadType());
+        const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
+        sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver", pkgPrefix, _profileName, packet->payloadType());
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
         if (moduleType == NULL)
@@ -226,6 +228,8 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
                 sprintf(outputFileName, "id%i.sim", receiverModule->getId());
                 receiverModule->par("outputFileName") = outputFileName;
             }
+            receiverModule->finalizeParameters();
+
             this->gate(ssrcGate->gateId())->connectTo(receiverModule->gate("fromProfile"));
             receiverModule->gate("toProfile")->connectTo(this->gate(ssrcGate->gateId() - findGate("toPayloadReceiver",0) + findGate("fromPayloadReceiver",0)));
 

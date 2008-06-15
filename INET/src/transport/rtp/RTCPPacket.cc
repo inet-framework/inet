@@ -139,6 +139,7 @@ RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name) : RTCPPacke
 };
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const RTCPReceiverReportPacket& rtcpReceiverReportPacket) : RTCPPacket() {
+    _receptionReports = NULL;
     setName(rtcpReceiverReportPacket.getName());
     operator=(rtcpReceiverReportPacket);
 };

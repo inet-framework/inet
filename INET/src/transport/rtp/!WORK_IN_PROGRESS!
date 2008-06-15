@@ -5,6 +5,7 @@ Andras Varga, 2008 Jun:
 
 	Also: current code is a lot more complicated than it needs to be, with lots of 
 	repetition. Hints to simplify:
+	 - replace cArray with std::vector everywhere
 	 - use msg files (a short msg file can replace tons of source code)
 	 - RTPProfile and Server/Receiver probably don't need to be modules. It's quite
 	   enough if they are just classes that implement some C++ interface

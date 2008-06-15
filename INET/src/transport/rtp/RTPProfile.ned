@@ -3,7 +3,7 @@ package inet.transport.rtp;
 simple RTPProfile
 {
     parameters:
-        string autoOutputFileNames;
+        bool autoOutputFileNames;
 
     gates:
         input fromRTP;
@@ -18,7 +18,7 @@ simple RTPProfile
 simple RTPAVProfile
 {
     parameters:
-        string autoOutputFileNames;
+        bool autoOutputFileNames;
 
     gates:
         input fromRTP;

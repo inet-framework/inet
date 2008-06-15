@@ -360,6 +360,7 @@ void RTPEndsystemModule::createProfile()
         error("Profile type `%s' not found", _profileName);
 
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
+    profile->finalizeParameters();
 
     profile->setGateSize("toPayloadReceiver", 30);
     profile->setGateSize("fromPayloadReceiver", 30);

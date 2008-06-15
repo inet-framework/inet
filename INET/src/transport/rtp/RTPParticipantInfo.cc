@@ -114,7 +114,6 @@ bool RTPParticipantInfo::isSender() {
 
 
 ReceptionReport *RTPParticipantInfo::receptionReport(simtime_t now) {
-    opp_error("Returning NULL pointer results in segmentation fault");
     return NULL;
 };
 
