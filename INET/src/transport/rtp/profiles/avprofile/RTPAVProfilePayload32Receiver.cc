@@ -26,7 +26,7 @@
 #include "RTPPayloadReceiver.h"
 #include "RTPAVProfilePayload32Receiver.h"
 #include "RTPPacket.h"
-#include "RTPMpegPacket.h"
+#include "RTPMpegPacket_m.h"
 
 Define_Module(RTPAVProfilePayload32Receiver);
 
@@ -102,7 +102,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                 RTPPacket *readPacket = (RTPPacket *)(_queue->pop());
                 RTPMpegPacket *mpegPacket = (RTPMpegPacket *)(readPacket->decapsulate());
                 if (pictureType == 0)
-                    pictureType = mpegPacket->pictureType();
+                    pictureType = mpegPacket->getPictureType();
                 frameSize = frameSize + mpegPacket->getPayloadLength();
 
                 delete mpegPacket;

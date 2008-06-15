@@ -30,7 +30,7 @@
 #include "RTPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPAVProfilePayload32Sender.h"
-#include "RTPMpegPacket.h"
+#include "RTPMpegPacket_m.h"
 
 Define_Module(RTPAVProfilePayload32Sender);
 
