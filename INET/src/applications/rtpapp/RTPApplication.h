@@ -14,11 +14,6 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPApplication.h
- * The header file RTPApplication.h declares the generic class RTPApplication
- * for a very simple application which uses the realDelay transport protocol.
- */
-
 #ifndef __RTPAPPLICATION_H__
 #define __RTPAPPLICATION_H__
 

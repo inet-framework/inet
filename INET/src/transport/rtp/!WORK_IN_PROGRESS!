@@ -7,7 +7,8 @@ Andras Varga, 2008 Jun:
 
     TODO:
      - replace cArray with std::vector everywhere
-     - use msg files (a short msg file can replace tons of source code)
+     - use msg files instead of lengthy manually coded classes
+     - use controlInfo instead of InterfacePacket
      - RTPProfile and Server/Receiver probably don't need to be modules.
        It's quite enough if they are plain C++ classes that implement
        an interface, and get instantiated via cClassFactory::createOne()
