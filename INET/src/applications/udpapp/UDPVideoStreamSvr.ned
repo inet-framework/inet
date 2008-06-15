@@ -39,7 +39,7 @@ simple UDPVideoStreamSvr like UDPApp
 {
     parameters:
         int serverPort; // port to listen on
-        volatile double waitInterval @unit("s"); // interval between sending viedo stream packets
+        volatile double waitInterval @unit("s"); // interval between sending video stream packets
         volatile int packetLen @unit("B");
         volatile int videoSize @unit("B");
     gates:

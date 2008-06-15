@@ -92,8 +92,18 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      */
     int rtsThreshold;
 
-    /** Maximum number of retries. */
-    int retryLimit;
+    /**
+     * Maximum number of transmissions for a message.
+     * This includes the initial transmission and all subsequent retransmissions.
+     * Thus a value 0 is invalid and a value 1 means no retransmissions.
+     * See: dot11ShortRetryLimit on page 484.
+     *   'This attribute shall indicate the maximum number of
+     *    transmission attempts of a frame, the length of which is less
+     *    than or equal to dot11RTSThreshold, that shall be made before a
+     *    failure condition is indicated. The default value of this
+     *    attribute shall be 7'
+     */
+    int transmissionLimit;
 
     /** Minimum contention window. */
     int cwMinData;
