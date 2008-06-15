@@ -54,8 +54,6 @@ module RTPHost
         }
         rtpLayer: RTPLayer {
             parameters:
-                rtpModuleType = "RTPEndsystemModule";
-                rtcpModuleType = "RTCPEndsystemModule";
                 @display("p=161,104");
         }
         udpModule: UDP {

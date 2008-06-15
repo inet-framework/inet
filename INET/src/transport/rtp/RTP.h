@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTPEndsystemModule.h  -  description
+                       RTP.h  -  description
                              -------------------
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz,  Ahmed Ayadi
@@ -15,8 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPEndsystemModule.h
- * This header file declares the class RTPEndsystemModule.
+/** \file RTP.h
+ * This header file declares the class RTP.
  */
 
 #ifndef __RTPENDSYSTEMMODULE_H__
@@ -30,12 +30,12 @@
 #include "RTPInnerPacket.h"
 
 /**
- * An RTPEndsystemModule is the center of the rtp layer of an endsystem.
+ * An RTP is the center of the rtp layer of an endsystem.
  * It creates the profile module, sends and receives rtp data packets
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API RTPEndsystemModule : public cSimpleModule
+class INET_API RTP : public cSimpleModule
 {
     protected:
 

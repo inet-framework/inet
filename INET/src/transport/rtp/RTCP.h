@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTCPEndsystemModule.h  -  description
+                       RTCP.h  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -15,8 +15,8 @@
  ***************************************************************************/
 
 
-/** \file RTCPEndsystemModule.h
- * This file declares the class RTCPEndsystemModule.
+/** \file RTCP.h
+ * This file declares the class RTCP.
  */
 
 #ifndef __RTCPENDSYSTEMMODULE_H__
@@ -32,14 +32,14 @@
 #include "RTPReceiverInfo.h"
 
 /**
- * The class RTCPEndsystemModule is responsible for creating, receiving and
+ * The class RTCP is responsible for creating, receiving and
  * processing of rtcp packets. It also keeps track of this and other
  * rtp end systems.
  */
-class INET_API RTCPEndsystemModule : public cSimpleModule
+class INET_API RTCP : public cSimpleModule
 {
     public:
-        RTCPEndsystemModule();
+        RTCP();
 
     protected:
         /**
@@ -47,7 +47,7 @@ class INET_API RTCPEndsystemModule : public cSimpleModule
          */
         virtual void initialize();
 
-        virtual ~RTCPEndsystemModule();
+        virtual ~RTCP();
 
         /**
          * Message handling. Dispatches messages by arrival gate.

@@ -3,8 +3,6 @@ package inet.transport.rtp;
 module RTPLayer
 {
     parameters:
-        string rtpModuleType;
-        string rtcpModuleType;
         @display("i=block/layer;bgb=178,105");
 
     gates:
@@ -16,24 +14,22 @@ module RTPLayer
         output toUDPfromRTCP;
 
     submodules:
-        rtpModule: <rtpModuleType> like IRTPModule {
-            parameters:
-                @display("i=block/buffer;p=63,64");
+        rtp: RTP {
+            @display("i=block/buffer;p=63,64");
         }
-        rtcpModule: <rtcpModuleType> like IRTCPModule {
+        rtcp: RTCP {
+            @display("i=block/control;p=135,64");
+        }
 
-            parameters:
-                @display("i=block/control;p=135,64");
-        }
     connections allowunconnected:
-        fromApp --> rtpModule.fromApp;
-        toApp <-- rtpModule.toApp;
-        rtpModule.toRTCP --> rtcpModule.fromRTP;
-        rtpModule.fromRTCP <-- rtcpModule.toRTP;
-        rtpModule.toUDPLayer --> toUDPfromRTP;
-        rtpModule.fromUDPLayer <-- fromUDPtoRTP;
-        rtcpModule.toUDP --> toUDPfromRTCP;
-        rtcpModule.fromUDP <-- fromUDPtoRTCP;
+        fromApp --> rtp.fromApp;
+        toApp <-- rtp.toApp;
+        rtp.toRTCP --> rtcp.fromRTP;
+        rtp.fromRTCP <-- rtcp.toRTP;
+        rtp.toUDPLayer --> toUDPfromRTP;
+        rtp.fromUDPLayer <-- fromUDPtoRTP;
+        rtcp.toUDP --> toUDPfromRTCP;
+        rtcp.fromUDP <-- fromUDPtoRTCP;
 
 }
 

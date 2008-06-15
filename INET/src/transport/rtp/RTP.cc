@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPEndsystemModule.cc  -  description
+                          RTP.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -15,8 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
-/** \file RTPEndsystemModule.cc
- * This file contains the implementation of member functions of the class RTPEndsystemModule.
+/** \file RTP.cc
+ * This file contains the implementation of member functions of the class RTP.
  */
 
 #include <omnetpp.h>
@@ -25,7 +25,7 @@
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
 
-#include "RTPEndsystemModule.h"
+#include "RTP.h"
 #include "RTPInterfacePacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPProfile.h"
@@ -33,14 +33,14 @@
 #include "RTPSenderControlMessage_m.h"
 #include "RTPSenderStatusMessage_m.h"
 
-Define_Module(RTPEndsystemModule);
+Define_Module(RTP);
 
 
 //
 // methods inherited from cSimpleModule
 //
 
-void RTPEndsystemModule::initialize()
+void RTP::initialize()
 {
     _socketFdIn = -1;//UDPSocket::generateSocketId();
     _socketFdOut = -1;
@@ -48,7 +48,7 @@ void RTPEndsystemModule::initialize()
 };
 
 
-void RTPEndsystemModule::handleMessage(cMessage *msg)
+void RTP::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGateId() == findGate("fromApp")) {
         handleMessageFromApp(msg);
@@ -72,7 +72,7 @@ void RTPEndsystemModule::handleMessage(cMessage *msg)
 // handle messages from different gates
 //
 
-void RTPEndsystemModule::handleMessageFromApp(cMessage *msg)
+void RTP::handleMessageFromApp(cMessage *msg)
 {
     RTPInterfacePacket *rifp = (RTPInterfacePacket *)msg;
     if (rifp->getType() == RTPInterfacePacket::RTP_IFP_ENTER_SESSION) {
@@ -96,7 +96,7 @@ void RTPEndsystemModule::handleMessageFromApp(cMessage *msg)
 };
 
 
-void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg)
+void RTP::handleMessageFromProfile(cMessage *msg)
 {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
     if (rinp->getType() == RTPInnerPacket::RTP_INP_PROFILE_INITIALIZED) {
@@ -124,7 +124,7 @@ void RTPEndsystemModule::handleMessageFromProfile(cMessage *msg)
 }
 
 
-void RTPEndsystemModule::handleMessageFromRTCP(cMessage *msg)
+void RTP::handleMessageFromRTCP(cMessage *msg)
 {
     RTPInnerPacket *rinp = (RTPInnerPacket *)msg;
     if (rinp->getType() == RTPInnerPacket::RTP_INP_RTCP_INITIALIZED) {
@@ -138,7 +138,7 @@ void RTPEndsystemModule::handleMessageFromRTCP(cMessage *msg)
     }
 };
 
-void RTPEndsystemModule::handleMessagefromUDP(cMessage *msg)
+void RTP::handleMessagefromUDP(cMessage *msg)
 {
     readRet(msg);
 };
@@ -148,7 +148,7 @@ void RTPEndsystemModule::handleMessagefromUDP(cMessage *msg)
 // methods for different messages
 //
 
-void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp)
+void RTP::enterSession(RTPInterfacePacket *rifp)
 {
     _profileName = rifp->getProfileName();
     _commonName = rifp->getCommonName();
@@ -168,7 +168,7 @@ void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp)
 };
 
 
-void RTPEndsystemModule::leaveSession(RTPInterfacePacket *rifp)
+void RTP::leaveSession(RTPInterfacePacket *rifp)
 {
     cModule *profileModule = gate("toProfile")->getToGate()->getOwnerModule();
     profileModule->deleteModule();
@@ -181,7 +181,7 @@ void RTPEndsystemModule::leaveSession(RTPInterfacePacket *rifp)
 };
 
 
-void RTPEndsystemModule::createSenderModule(RTPInterfacePacket *rifp)
+void RTP::createSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
     ev << rifp->getSSRC()<<endl;
@@ -192,7 +192,7 @@ void RTPEndsystemModule::createSenderModule(RTPInterfacePacket *rifp)
 };
 
 
-void RTPEndsystemModule::deleteSenderModule(RTPInterfacePacket *rifp)
+void RTP::deleteSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
     rinp->deleteSenderModule(rifp->getSSRC());
@@ -202,7 +202,7 @@ void RTPEndsystemModule::deleteSenderModule(RTPInterfacePacket *rifp)
 };
 
 
-void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp)
+void RTP::senderModuleControl(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleControl()");
     rinp->senderModuleControl(rinp->getSSRC(), (RTPSenderControlMessage *)(rifp->decapsulate()));
@@ -212,7 +212,7 @@ void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp)
 }
 
 
-void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp)
+void RTP::profileInitialized(RTPInnerPacket *rinp)
 {
     _rtcpPercentage = rinp->getRtcpPercentage();
     if (_port == PORT_UNDEF) {
@@ -228,7 +228,7 @@ void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::senderModuleCreated(RTPInnerPacket *rinp)
+void RTP::senderModuleCreated(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleCreated()");
     rifp->senderModuleCreated(rinp->getSSRC());
@@ -238,7 +238,7 @@ void RTPEndsystemModule::senderModuleCreated(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::senderModuleDeleted(RTPInnerPacket *rinp)
+void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleDeleted()");
     rifp->senderModuleDeleted(rinp->getSSRC());
@@ -249,13 +249,13 @@ void RTPEndsystemModule::senderModuleDeleted(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::senderModuleInitialized(RTPInnerPacket *rinp)
+void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 {
     send(rinp, "toRTCP");
 };
 
 
-void RTPEndsystemModule::senderModuleStatus(RTPInnerPacket *rinp)
+void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleStatus()");
     rifp->senderModuleStatus(rinp->getSSRC(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
@@ -265,7 +265,7 @@ void RTPEndsystemModule::senderModuleStatus(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::dataOut(RTPInnerPacket *rinp)
+void RTP::dataOut(RTPInnerPacket *rinp)
 {
     RTPPacket *msg = (RTPPacket *)(rinp->decapsulate());
 
@@ -290,7 +290,7 @@ void RTPEndsystemModule::dataOut(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::rtcpInitialized(RTPInnerPacket *rinp)
+void RTP::rtcpInitialized(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionEntered()");
     rifp->sessionEntered(rinp->getSSRC());
@@ -300,7 +300,7 @@ void RTPEndsystemModule::rtcpInitialized(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::sessionLeft(RTPInnerPacket *rinp)
+void RTP::sessionLeft(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionLeft()");
     rifp->sessionLeft();
@@ -310,18 +310,18 @@ void RTPEndsystemModule::sessionLeft(RTPInnerPacket *rinp)
 };
 
 
-void RTPEndsystemModule::socketRet()
+void RTP::socketRet()
 {
 };
 
 
-void RTPEndsystemModule::connectRet()
+void RTP::connectRet()
 {
     initializeRTCP();
 };
 
 
-void RTPEndsystemModule::readRet(cMessage *sifp)
+void RTP::readRet(cMessage *sifp)
 {
     if ( ! _leaveSession)
     {
@@ -342,7 +342,7 @@ void RTPEndsystemModule::readRet(cMessage *sifp)
 };
 
 
-int RTPEndsystemModule::resolveMTU()
+int RTP::resolveMTU()
 {
     // this is not what it should be
     // do something like mtu path discovery
@@ -353,7 +353,7 @@ int RTPEndsystemModule::resolveMTU()
 };
 
 
-void RTPEndsystemModule::createProfile()
+void RTP::createProfile()
 {
     cModuleType *moduleType = cModuleType::find(_profileName);
     if (moduleType == NULL)
@@ -373,7 +373,7 @@ void RTPEndsystemModule::createProfile()
 };
 
 
-void RTPEndsystemModule::createSocket()
+void RTP::createSocket()
 {
     // TODO UDPAppBase should be ported to use UDPSocket sometime, but for now
     // we just manage the UDP socket by hand...
@@ -401,7 +401,7 @@ void RTPEndsystemModule::createSocket()
     }
 };
 
-void RTPEndsystemModule::initializeProfile()
+void RTP::initializeProfile()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeProfile()");
     rinp->initializeProfile(_mtu);
@@ -409,7 +409,7 @@ void RTPEndsystemModule::initializeProfile()
 };
 
 
-void RTPEndsystemModule::initializeRTCP()
+void RTP::initializeRTCP()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
     int rtcpPort = _port + 1;
