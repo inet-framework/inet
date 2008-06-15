@@ -133,8 +133,8 @@ bool RTPParticipantInfo::toBeDeleted(simtime_t now) {
 };
 
 
-u_int32 RTPParticipantInfo::getSsrc() {
-    return _sdesChunk->getSsrc();
+u_int32 RTPParticipantInfo::getSSRC() {
+    return _sdesChunk->getSSRC();
 };
 
 

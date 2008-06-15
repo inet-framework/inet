@@ -81,7 +81,7 @@ void SenderReport::dump(std::ostream& os) const {
 };
 
 
-u_int64 SenderReport::getNtpTimeStamp() {
+u_int64 SenderReport::getNTPTimeStamp() {
     return _ntpTimeStamp;
 };
 
@@ -91,7 +91,7 @@ void SenderReport::setNTPTimeStamp(u_int64 ntpTimeStamp) {
 }
 
 
-u_int32 SenderReport::getRtpTimeStamp() {
+u_int32 SenderReport::getRTPTimeStamp() {
     return _rtpTimeStamp;
 };
 
@@ -184,7 +184,7 @@ void ReceptionReport::dump(std::ostream& os) const {
 };
 
 
-u_int32 ReceptionReport::getSsrc() {
+u_int32 ReceptionReport::getSSRC() {
     return _ssrc;
 };
 

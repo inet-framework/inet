@@ -172,7 +172,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the maximum transmission unit stored in this RTPInnerPacket.
          */
-        virtual int getMtu();
+        virtual int getMTU();
 
         /**
          * Returns the available bandwitdth as stored in this RTPInnerPacket.
@@ -197,7 +197,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the ssrc identifier stored in this RTPInnerPacket.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Returns the payload type stored in this RTPInnerPacket.

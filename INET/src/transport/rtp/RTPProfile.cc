@@ -137,7 +137,7 @@ void RTPProfile::handleMessageFromPayloadReceiver(cMessage *msg) {
 void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
 {
     ev << "initializeProfile Enter"<<endl;
-    _mtu = rinp->getMtu();
+    _mtu = rinp->getMTU();
     delete rinp;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
     rinpOut->profileInitialized(_rtcpPercentage, _preferredPort);
@@ -149,7 +149,7 @@ void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
 void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 {
     ev << "createSenderModule Enter"<<endl;
-    int ssrc = rinp->getSsrc();
+    int ssrc = rinp->getSSRC();
     int payloadType = rinp->getPayloadType();
     char moduleName[100];
 
@@ -188,7 +188,7 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
-    rinpOut->senderModuleDeleted(rinpIn->getSsrc());
+    rinpOut->senderModuleDeleted(rinpIn->getSSRC());
     delete rinpIn;
 
     send(rinpOut, "toRTP");
@@ -207,7 +207,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
     RTPPacket *packet = (RTPPacket *)(rinp->getEncapsulatedMsg());
 
-    u_int32 ssrc = packet->getSsrc();
+    u_int32 ssrc = packet->getSSRC();
 
     RTPSSRCGate *ssrcGate = findSSRCGate(ssrc);
 

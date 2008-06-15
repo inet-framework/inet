@@ -208,7 +208,7 @@ const char *RTPInterfacePacket::getProfileName() {
 };
 
 
-u_int32 RTPInterfacePacket::getSsrc() {
+u_int32 RTPInterfacePacket::getSSRC() {
     return _ssrc;
 };
 

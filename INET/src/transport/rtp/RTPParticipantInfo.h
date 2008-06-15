@@ -154,7 +154,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ssrc identifier of the rtp endsystem.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Sets the ssrc identifier.

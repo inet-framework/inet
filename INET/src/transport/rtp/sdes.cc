@@ -173,7 +173,7 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
 };
 
 
-u_int32 SDESChunk::getSsrc() {
+u_int32 SDESChunk::getSSRC() {
     return _ssrc;
 };
 

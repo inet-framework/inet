@@ -77,7 +77,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained ntp time stamp.
          */
-        virtual u_int64 getNtpTimeStamp();
+        virtual u_int64 getNTPTimeStamp();
 
         /**
          * Sets the ntp time stamp.
@@ -87,7 +87,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained rtp time stamp.
          */
-        virtual u_int32 getRtpTimeStamp();
+        virtual u_int32 getRTPTimeStamp();
 
         /**
          * Sets the rtp time stamp.
@@ -184,7 +184,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the ssrc identifier for which sender this ReceptionReport is.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Sets the ssrc identifier of the sender this ReceptionReport is for.

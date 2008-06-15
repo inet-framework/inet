@@ -160,12 +160,12 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
 {
     _lastSenderReportArrivalTime = arrivalTime;
     if (_lastSenderReportRTPTimeStamp == 0) {
-        _lastSenderReportRTPTimeStamp = report->getRtpTimeStamp();
-        _lastSenderReportNTPTimeStamp = report->getNtpTimeStamp();
+        _lastSenderReportRTPTimeStamp = report->getRTPTimeStamp();
+        _lastSenderReportNTPTimeStamp = report->getNTPTimeStamp();
     }
     else if (_clockRate == 0) {
-        u_int32 rtpTicks = report->getRtpTimeStamp() - _lastSenderReportRTPTimeStamp;
-        u_int64 ntpDifference = report->getNtpTimeStamp() - _lastSenderReportNTPTimeStamp;
+        u_int32 rtpTicks = report->getRTPTimeStamp() - _lastSenderReportRTPTimeStamp;
+        u_int64 ntpDifference = report->getNTPTimeStamp() - _lastSenderReportNTPTimeStamp;
         long double ntpSeconds = (long double)ntpDifference / (long double)(0xFFFFFFFF);
         _clockRate = (int)((long double)rtpTicks / ntpSeconds);
     }
@@ -187,7 +187,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport();
-        receptionReport->setSSRC(getSsrc());
+        receptionReport->setSSRC(getSSRC());
 
         u_int64 packetsExpected = _sequenceNumberCycles + (u_int64)_highestSequenceNumber - (u_int64)_sequenceNumberBase + (u_int64)1;
         u_int64 packetsLost = packetsExpected - _packetsReceived;

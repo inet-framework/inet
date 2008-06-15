@@ -45,7 +45,7 @@ RTPSSRCGate::~RTPSSRCGate() {
 };
 
 
-u_int32 RTPSSRCGate::getSsrc() {
+u_int32 RTPSSRCGate::getSSRC() {
     return _ssrc;
 };
 

@@ -178,7 +178,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the ssrc identifier this SDESChunk is for.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Sets the ssrc identifier this SDESChunk is for.

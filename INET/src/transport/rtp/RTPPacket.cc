@@ -131,7 +131,7 @@ void RTPPacket::setTimeStamp(u_int32 timeStamp) {
 };
 
 
-u_int32 RTPPacket::getSsrc() {
+u_int32 RTPPacket::getSSRC() {
     return _ssrc;
 };
 

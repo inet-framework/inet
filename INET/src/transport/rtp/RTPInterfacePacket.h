@@ -194,7 +194,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Returns the ssrc identifier stored in this RTPInterfacePacket.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Returns the payload type stored in this RTPInterfacePacket.

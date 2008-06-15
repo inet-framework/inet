@@ -230,7 +230,7 @@ const char *RTPInnerPacket::getCommonName() {
 };
 
 
-int RTPInnerPacket::getMtu() {
+int RTPInnerPacket::getMTU() {
     return _mtu;
 };
 
@@ -255,7 +255,7 @@ int RTPInnerPacket::getPort() {
 };
 
 
-u_int32 RTPInnerPacket::getSsrc() {
+u_int32 RTPInnerPacket::getSSRC() {
     return _ssrc;
 };
 

@@ -115,7 +115,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the ssrc identifier of this RTPPacket.
          */
-        virtual u_int32 getSsrc();
+        virtual u_int32 getSSRC();
 
         /**
          * Sets the ssrc identifier of this RTPPacket.

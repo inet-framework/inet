@@ -124,7 +124,7 @@ void RTPApplication::activity() {
 
             if (rifpIn->getType() == RTPInterfacePacket::RTP_IFP_SESSION_ENTERED) {
                 ev << "Session Entered"<<endl;
-                ssrc = rifpIn->getSsrc();
+                ssrc = rifpIn->getSSRC();
                 sessionEntered = true;
                 if (opp_strcmp(_fileName, "")) {
                     RTPInterfacePacket *rifpOut = new RTPInterfacePacket("createSenderModule()");
