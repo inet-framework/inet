@@ -26,8 +26,8 @@
 #include "types.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
-#include "RTPSenderControlMessage.h"
-#include "RTPSenderStatusMessage.h"
+#include "RTPSenderControlMessage_m.h"
+#include "RTPSenderStatusMessage_m.h"
 
 
 /**

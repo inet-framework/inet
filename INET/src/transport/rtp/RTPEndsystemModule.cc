@@ -30,8 +30,8 @@
 #include "RTPInnerPacket.h"
 #include "RTPProfile.h"
 
-#include "RTPSenderControlMessage.h"
-#include "RTPSenderStatusMessage.h"
+#include "RTPSenderControlMessage_m.h"
+#include "RTPSenderStatusMessage_m.h"
 
 Define_Module(RTPEndsystemModule);
 

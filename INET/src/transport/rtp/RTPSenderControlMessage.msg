@@ -21,6 +21,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+class noncobject float; //XXX
 
 //
 // A message of the type RTPSenderControlMessage is created by an application to control

@@ -38,6 +38,3 @@ message RTPSenderStatusMessage
     string status;
     u_int32 timeStamp;
 };
-
-#endif
-
