@@ -1,0 +1,32 @@
+2008-06-14  Andras Varga
+
+	* integrated Ahmed Ayadi's patch into the INET Fw, and ported to 
+	  OMNeT++ 4.0; some cleanup
+
+	* refactoring: 
+	  - use C99 integer types (uint8_t etc) instead of u_int8_t
+	  - converted some classes to msg files (all messages used to be
+	    hand-coded C++ classes)
+	  - renamed RTPEndsystemModule to RTP, RTCPEndsystemModule to RTCP
+
+	* more work needed, see todo files
+
+2007-08-02  Ahmed Ayadi <ahmed.ayadi@sophia.inria.fr>
+     
+	* integrated to the INET Framework (replaced SocketInterfacePacket
+	  based communication with UDPControlInfo, etc)
+
+	* result released as patch, announced on the omnetpp-l list
+
+2003-xx-xx  Andras Varga
+
+	* added to the INET Framework as nonfunctional code (excluded from build)
+
+2001-xx-xx  Arndt Buschmann <a.buschmann@gmx.de>
+
+	* changes in RTPSenderStatusMessage.h/.cc and RTPPayloadSender.cc
+	  (some messages contain an rtp timestamp now)
+
+2001-10-20  Matthias Oppitz <Matthias.Oppitz@gmx.de>
+
+	* initial revision, as part of IPSuite (Uni Karlsruhe)
