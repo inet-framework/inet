@@ -72,7 +72,7 @@ public:
         /**
          * Returns the command string in this message.
          */
-        virtual const char *command() const;
+        virtual const char *getCommand() const;
 
         /**
          * Set the command string this message transports to the sender module.
@@ -82,8 +82,8 @@ public:
         virtual void setCommand(const char *command, float commandParameter1);
         virtual void setCommand(const char *command, float commandParameter1, float commandParameter2);
 
-        virtual float commandParameter1();
-        virtual float commandParameter2();
+        virtual float getCommandParameter1();
+        virtual float getCommandParameter2();
 
 private:
 

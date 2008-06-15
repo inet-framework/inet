@@ -81,7 +81,7 @@ void RTPAVProfilePayload32Sender::activity() {
                 RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinp->decapsulate());
 
 
-                if (!opp_strcmp(rscm->command(), "PLAY")) {
+                if (!opp_strcmp(rscm->getCommand(), "PLAY")) {
 
                     play();
 
@@ -90,7 +90,7 @@ void RTPAVProfilePayload32Sender::activity() {
 
 
                 }
-                else if (!opp_strcmp(rscm->command(), "STOP")) {
+                else if (!opp_strcmp(rscm->getCommand(), "STOP")) {
 
 
                     stop();

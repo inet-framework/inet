@@ -37,7 +37,7 @@ RTPSenderControlMessage::~RTPSenderControlMessage() {
 
 RTPSenderControlMessage& RTPSenderControlMessage::operator=(const RTPSenderControlMessage& message) {
     cMessage::operator=(message);
-    _command = message.command();
+    _command = message.getCommand();
     return *this;
 };
 
@@ -47,7 +47,7 @@ RTPSenderControlMessage *RTPSenderControlMessage::dup() const {
 };
 
 
-const char *RTPSenderControlMessage::command() const {
+const char *RTPSenderControlMessage::getCommand() const {
     return opp_strdup(_command);
 };
 
@@ -73,11 +73,11 @@ void RTPSenderControlMessage::setCommand(const char *command, float commandParam
 };
 
 
-float RTPSenderControlMessage::commandParameter1() {
+float RTPSenderControlMessage::getCommandParameter1() {
     return _commandParameter1;
 };
 
 
-float RTPSenderControlMessage::commandParameter2() {
+float RTPSenderControlMessage::getCommandParameter2() {
     return _commandParameter2;
 };

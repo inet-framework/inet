@@ -57,15 +57,15 @@ void RTPPayloadSender::activity() {
             else if (rinpIn->getType() == RTPInnerPacket::RTP_INP_SENDER_MODULE_CONTROL) {
                 RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
                 delete rinpIn;
-                command = rscm->command();
+                command = rscm->getCommand();
                 if (!opp_strcmp(command, "PLAY")) {
                     play();
                 }
                 else if (!opp_strcmp(command, "PLAY_UNTIL_TIME")) {
-                    playUntilTime(rscm->commandParameter1());
+                    playUntilTime(rscm->getCommandParameter1());
                 }
                 else if (!opp_strcmp(command, "PLAY_UNTIL_BYTE")) {
-                    playUntilByte(rscm->commandParameter1());
+                    playUntilByte(rscm->getCommandParameter1());
                 }
                 else if (!opp_strcmp(command, "PAUSE")) {
                     pause();
@@ -74,10 +74,10 @@ void RTPPayloadSender::activity() {
                     stop();
                 }
                 else if (!opp_strcmp(command, "SEEK_TIME")) {
-                    seekTime(rscm->commandParameter1());
+                    seekTime(rscm->getCommandParameter1());
                 }
                 else if (!opp_strcmp(command, "SEEK_BYTE")) {
-                    seekByte(rscm->commandParameter1());
+                    seekByte(rscm->getCommandParameter1());
                 }
                 else {
                     error("unknown sender control message");
