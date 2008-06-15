@@ -137,7 +137,7 @@ void RTPProfile::handleMessageFromPayloadReceiver(cMessage *msg) {
 void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
 {
     ev << "initializeProfile Enter"<<endl;
-    _mtu = rinp->mtu();
+    _mtu = rinp->getMtu();
     delete rinp;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
     rinpOut->profileInitialized(_rtcpPercentage, _preferredPort);
@@ -149,8 +149,8 @@ void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
 void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 {
     ev << "createSenderModule Enter"<<endl;
-    int ssrc = rinp->ssrc();
-    int payloadType = rinp->payloadType();
+    int ssrc = rinp->getSsrc();
+    int payloadType = rinp->getPayloadType();
     char moduleName[100];
 
     ev<<"ProfileName: " << _profileName << " payloadType: " << payloadType<<endl;
@@ -188,7 +188,7 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
-    rinpOut->senderModuleDeleted(rinpIn->ssrc());
+    rinpOut->senderModuleDeleted(rinpIn->getSsrc());
     delete rinpIn;
 
     send(rinpOut, "toRTP");
@@ -207,7 +207,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
     RTPPacket *packet = (RTPPacket *)(rinp->getEncapsulatedMsg());
 
-    u_int32 ssrc = packet->ssrc();
+    u_int32 ssrc = packet->getSsrc();
 
     RTPSSRCGate *ssrcGate = findSSRCGate(ssrc);
 
@@ -215,7 +215,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
         ssrcGate = newSSRCGate(ssrc);
         char payloadReceiverName[100];
         const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
-        sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver", pkgPrefix, _profileName, packet->payloadType());
+        sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver", pkgPrefix, _profileName, packet->getPayloadType());
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
         if (moduleType == NULL)

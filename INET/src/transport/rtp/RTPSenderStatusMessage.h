@@ -71,7 +71,7 @@ public:
 
     virtual void setTimeStamp(const u_int32 timestamp);
 
-    virtual const u_int32 timeStamp();
+    virtual const u_int32 getTimeStamp();
 
 private:
 

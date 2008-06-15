@@ -77,7 +77,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained ntp time stamp.
          */
-        virtual u_int64 ntpTimeStamp();
+        virtual u_int64 getNtpTimeStamp();
 
         /**
          * Sets the ntp time stamp.
@@ -87,7 +87,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained rtp time stamp.
          */
-        virtual u_int32 rtpTimeStamp();
+        virtual u_int32 getRtpTimeStamp();
 
         /**
          * Sets the rtp time stamp.
@@ -97,7 +97,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the number of packets sent as stored in this SenderReport.
          */
-        virtual u_int32 packetCount();
+        virtual u_int32 getPacketCount();
 
         /**
          * Sets the number of packets sent.
@@ -107,7 +107,7 @@ class INET_API SenderReport : public cObject
         /**
          * Returns how many bytes have been sent as store in this SenderReport.
          */
-        virtual u_int32 byteCount();
+        virtual u_int32 getByteCount();
 
         /**
          * Sets the value how many bytes have been sent.
@@ -184,7 +184,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the ssrc identifier for which sender this ReceptionReport is.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier of the sender this ReceptionReport is for.
@@ -194,7 +194,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the fraction of packets lost as stored in this ReceptionReport.
          */
-        virtual u_int8 fractionLost();
+        virtual u_int8 getFractionLost();
 
         /**
          * Sets the fraction of packets lost.
@@ -204,7 +204,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the number of expected minus the number of packets received.
          */
-        virtual int packetsLostCumulative();
+        virtual int getPacketsLostCumulative();
 
         /**
          * Sets the number of expected minus the number of packets received.
@@ -214,7 +214,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the extended highest sequence number received.
          */
-        virtual u_int32 sequenceNumber();
+        virtual u_int32 getSequenceNumber();
 
         /**
          * Set the extended highest sequence number received.
@@ -224,7 +224,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the interarrival jitter.
          */
-        virtual int jitter();
+        virtual int getJitter();
 
         /**
          * Sets ths interarrival jitter.
@@ -234,7 +234,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the rtp time stamp of the last SenderReport received from this sender.
          */
-        virtual int lastSR();
+        virtual int getLastSR();
 
         /**
          * Sets the rtp time stamp of the last SenderReport received from this sender.
@@ -245,7 +245,7 @@ class INET_API ReceptionReport : public cObject
          * Returns the delay since the last SenderReport of this sender has
          * been received in units of 1/65536 seconds.
          */
-        virtual int delaySinceLastSR();
+        virtual int getDelaySinceLastSR();
 
         /**
          * Sets the delay since the last SenderReport of this sender has

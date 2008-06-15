@@ -97,8 +97,8 @@ void RTPPayloadSender::activity() {
 
 void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn) {
     ev << "initializeSenderModule Enter" << endl;
-    _mtu = rinpIn->mtu();
-    _ssrc = rinpIn->ssrc();
+    _mtu = rinpIn->getMtu();
+    _ssrc = rinpIn->getSsrc();
     const char *fileName = rinpIn->getFileName();
     openSourceFile(fileName);
     delete rinpIn;

@@ -60,7 +60,7 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg) {
 
 
 void RTPPayloadReceiver::processPacket(RTPPacket *packet) {
-    _packetArrival->record((double)(packet->timeStamp()));
+    _packetArrival->record((double)(packet->getTimeStamp()));
 };
 
 

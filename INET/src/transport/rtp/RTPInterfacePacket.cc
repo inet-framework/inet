@@ -198,22 +198,22 @@ RTPInterfacePacket::RTP_IFP_TYPE RTPInterfacePacket::getType() {
 };
 
 
-const char *RTPInterfacePacket::commonName() {
+const char *RTPInterfacePacket::getCommonName() {
     return opp_strdup(_commonName);
 };
 
 
-const char *RTPInterfacePacket::profileName() {
+const char *RTPInterfacePacket::getProfileName() {
     return opp_strdup(_profileName);
 };
 
 
-u_int32 RTPInterfacePacket::ssrc() {
+u_int32 RTPInterfacePacket::getSsrc() {
     return _ssrc;
 };
 
 
-int RTPInterfacePacket::payloadType() {
+int RTPInterfacePacket::getPayloadType() {
     return _payloadType;
 };
 
@@ -223,7 +223,7 @@ const char *RTPInterfacePacket::getFileName() {
 };
 
 
-int RTPInterfacePacket::bandwidth() {
+int RTPInterfacePacket::getBandwidth() {
     return _bandwidth;
 };
 
@@ -233,6 +233,6 @@ IPAddress RTPInterfacePacket::getDestinationAddress() {
 };
 
 
-int RTPInterfacePacket::port() {
+int RTPInterfacePacket::getPort() {
     return _port;
 };

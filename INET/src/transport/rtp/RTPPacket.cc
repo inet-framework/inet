@@ -39,7 +39,7 @@ RTPPacket::RTPPacket(const char *name) : cMessage(name) {
     _ssrc = 0;
 
     // a standard rtp packet without csrcs and data has a length of 12 bytes
-    setByteLength(fixedHeaderLength());
+    setByteLength(getFixedHeaderLength());
 };
 
 
@@ -91,7 +91,7 @@ void RTPPacket::dump() {
 };
 
 
-int RTPPacket::marker() {
+int RTPPacket::getMarker() {
     return _marker;
 };
 
@@ -101,7 +101,7 @@ void RTPPacket::setMarker(int marker) {
 };
 
 
-int RTPPacket::payloadType() {
+int RTPPacket::getPayloadType() {
     return _payloadType;
 };
 
@@ -111,7 +111,7 @@ void RTPPacket::setPayloadType(int payloadType) {
 };
 
 
-u_int16 RTPPacket::sequenceNumber() {
+u_int16 RTPPacket::getSequenceNumber() {
     return _sequenceNumber;
 };
 
@@ -121,7 +121,7 @@ void RTPPacket::setSequenceNumber(u_int16 sequenceNumber) {
 };
 
 
-u_int32 RTPPacket::timeStamp() {
+u_int32 RTPPacket::getTimeStamp() {
     return _timeStamp;
 };
 
@@ -131,7 +131,7 @@ void RTPPacket::setTimeStamp(u_int32 timeStamp) {
 };
 
 
-u_int32 RTPPacket::ssrc() {
+u_int32 RTPPacket::getSsrc() {
     return _ssrc;
 };
 
@@ -140,14 +140,14 @@ void RTPPacket::setSSRC(u_int32 ssrc) {
     _ssrc = ssrc;
 };
 
-int RTPPacket::fixedHeaderLength() {
+int RTPPacket::getFixedHeaderLength() {
     return 12;
 };
 
 int RTPPacket::getHeaderLength() {
     // fixed header is 12 bytes long,
     // add 4 bytes for every csrc identifier
-    return(fixedHeaderLength() + 4 * _csrcCount);
+    return(getFixedHeaderLength() + 4 * _csrcCount);
 };
 
 

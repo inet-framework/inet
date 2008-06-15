@@ -99,13 +99,13 @@ class INET_API SDESItem : public cObject
         /**
          * Returns the stored sdes string.
          */
-        virtual const char *content();
+        virtual const char *getContent();
 
         /**
          * This method returns the size of this SDESItem in bytes as it
          * would be in the real world.
          */
-        virtual int length();
+        virtual int getLength();
 
     protected:
 
@@ -178,7 +178,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the ssrc identifier this SDESChunk is for.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier this SDESChunk is for.
@@ -188,7 +188,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the length in bytes of this SDESChunk.
          */
-        virtual int length();
+        virtual int getLength();
 
     protected:
 

@@ -75,7 +75,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the value of the marker bit in this RTPPacket.
          */
-        virtual int marker();
+        virtual int getMarker();
 
         /**
          * Sets the value of the marker bit in this RTPPacket.
@@ -85,7 +85,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the payload type of this RTPPacket.
          */
-        virtual int payloadType();
+        virtual int getPayloadType();
 
         /**
          * Sets the payload type of this RTPPacket.
@@ -95,7 +95,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the sequence number of this RTPPacket.
          */
-        virtual u_int16 sequenceNumber();
+        virtual u_int16 getSequenceNumber();
 
         /**
          * Sets the sequence number of this RTPPacket.
@@ -105,7 +105,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the rtp time stamp of this RTPPacket.
          */
-        virtual u_int32 timeStamp();
+        virtual u_int32 getTimeStamp();
 
         /**
          * Sets the rtp time stamp of this RTPPacket.
@@ -115,7 +115,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the ssrc identifier of this RTPPacket.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier of this RTPPacket.
@@ -125,7 +125,7 @@ class INET_API RTPPacket : public cMessage
         /**
          * Returns the length of the fixed header of an RTPPacket.
          */
-        static int fixedHeaderLength();
+        static int getFixedHeaderLength();
 
         /**
          * Returns the length of the header (fixed plus variable part)

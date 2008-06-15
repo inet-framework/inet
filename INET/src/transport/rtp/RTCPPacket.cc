@@ -42,7 +42,7 @@ RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
     _padding = 0;
     _count = 0;
     _packetType = RTCP_PT_UNDEF;
-    // rtcpLength can be calculated with cMessage::length()
+    // rtcpLength can be calculated with cMessage::getLength()
 
     // RTCP header length size is 4 bytes
     // not all rtcp packets (in particular RTCPSDESPacket) have
@@ -90,7 +90,7 @@ void RTCPPacket::dump(std::ostream& os) const {
     os << "  padding = " << _padding << endl;
     os << "  count = " << _count << endl;
     os << "  packetType = " << _packetType << endl;
-    os << "  rtcpLength = " << rtcpLength() << endl;
+    os << "  rtcpLength = " << getRtcpLength() << endl;
 };
 
 
@@ -99,7 +99,7 @@ int RTCPPacket::getVersion() {
 };
 
 
-int RTCPPacket::padding() {
+int RTCPPacket::getPadding() {
     return _padding;
 };
 
@@ -114,7 +114,7 @@ RTCPPacket::RTCP_PACKET_TYPE RTCPPacket::packetType() {
 };
 
 
-int RTCPPacket::rtcpLength() const {
+int RTCPPacket::getRtcpLength() const {
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
@@ -181,7 +181,7 @@ void RTCPReceiverReportPacket::dump(std::ostream& os) const {
 };
 
 
-u_int32 RTCPReceiverReportPacket::ssrc() {
+u_int32 RTCPReceiverReportPacket::getSsrc() {
     return _ssrc;
 };
 
@@ -199,7 +199,7 @@ void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report) {
 };
 
 
-cArray *RTCPReceiverReportPacket::receptionReports() {
+cArray *RTCPReceiverReportPacket::getReceptionReports() {
     return new cArray(*_receptionReports);
 };
 
@@ -261,7 +261,7 @@ void RTCPSenderReportPacket::dump(std::ostream& os) const {
 };
 
 
-SenderReport *RTCPSenderReportPacket::senderReport() {
+SenderReport *RTCPSenderReportPacket::getSenderReport() {
     return new SenderReport(*_senderReport);
 };
 
@@ -328,7 +328,7 @@ void RTCPSDESPacket::dump(std::ostream& os) const {
 };
 
 
-cArray *RTCPSDESPacket::sdesChunks() {
+cArray *RTCPSDESPacket::getSdesChunks() {
     return new cArray(*_sdesChunks);
 };
 
@@ -338,7 +338,7 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk) {
     _count++;
     // the size of the rtcp packet increases by the
     // size of the sdes chunk (including ssrc)
-    addByteLength(sdesChunk->length());
+    addByteLength(sdesChunk->getLength());
 };
 
 
@@ -381,7 +381,7 @@ RTCPByePacket *RTCPByePacket::dup() const {
 };
 
 
-u_int32 RTCPByePacket::ssrc() {
+u_int32 RTCPByePacket::getSsrc() {
     return _ssrc;
 };
 
@@ -455,6 +455,6 @@ void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket) {
 };
 
 
-cArray *RTCPCompoundPacket::rtcpPackets() {
+cArray *RTCPCompoundPacket::getRtcpPackets() {
     return new cArray(*_rtcpPackets);
 }

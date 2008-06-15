@@ -167,22 +167,22 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the CNAME stored in this RTPInnerPacket.
          */
-        virtual const char *commonName();
+        virtual const char *getCommonName();
 
         /**
          * Returns the maximum transmission unit stored in this RTPInnerPacket.
          */
-        virtual int mtu();
+        virtual int getMtu();
 
         /**
          * Returns the available bandwitdth as stored in this RTPInnerPacket.
          */
-        virtual int bandwidth();
+        virtual int getBandwidth();
 
         /**
          * Returns the percentage of bandwidth for rtcp as stored in this RTPInnerPacket.
          */
-        virtual int rtcpPercentage();
+        virtual int getRtcpPercentage();
 
         /**
          * Returns the address stored in this RTPInnerPacket.
@@ -192,17 +192,17 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the port stored in this RTPInnerPacket.
          */
-        virtual int port();
+        virtual int getPort();
 
         /**
          * Returns the ssrc identifier stored in this RTPInnerPacket.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Returns the payload type stored in this RTPInnerPacket.
          */
-        virtual int payloadType();
+        virtual int getPayloadType();
 
         /**
          * Returns the file name stored in this RTPInnerPacket.
@@ -212,17 +212,17 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the rtp clock rate stored in this RTPInnerPacket.
          */
-        virtual int clockRate();
+        virtual int getClockRate();
 
         /**
          * Returns the rtp time stamp base stored in this RTPInnerPacket.
          */
-        virtual int timeStampBase();
+        virtual int getTimeStampBase();
 
         /**
          * Returns the rtp sequence number base stored in this RTPInnerPacket.
          */
-        virtual int sequenceNumberBase();
+        virtual int getSequenceNumberBase();
 
 
     private:

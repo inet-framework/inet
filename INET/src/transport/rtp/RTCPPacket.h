@@ -103,7 +103,7 @@ class INET_API RTCPPacket : public cMessage
          * 1 if padding exists, 0 otherwise. In this implementation only
          * 0 is used.
          */
-        virtual int padding();
+        virtual int getPadding();
 
         /**
          * Returns the value of the count field in the rtcp header. Depending
@@ -120,9 +120,9 @@ class INET_API RTCPPacket : public cMessage
         /**
          * Returns the value of the field length in the rtcp header.
          * The value isn't stored because it can be calculated
-         * with the length() method inherited from cMessage.
+         * with the getLength() method inherited from cMessage.
          */
-        virtual int rtcpLength() const;
+        virtual int getRtcpLength() const;
 
 
     protected:
@@ -202,7 +202,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
          * Returns the ssrc indentifier of the source which has sent this
          * rtcp receiver report packet.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier for the rtcp receiver report packet.
@@ -218,7 +218,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
          * Return a copy of the cArray of receiver reports stored
          * in the object.
          */
-        virtual cArray *receptionReports();
+        virtual cArray *getReceptionReports();
 
     protected:
 
@@ -287,7 +287,7 @@ class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket
         Returns a copy of the  sender report stored in this RTCPSenderReportPacket.
         \sa SenderReport
         */
-        virtual SenderReport *senderReport();
+        virtual SenderReport *getSenderReport();
 
         /**
         Sets the sender report.
@@ -352,7 +352,7 @@ class INET_API RTCPSDESPacket : public RTCPPacket
         /**
          * Returns a copy of the cArray where the sdes chunks are stored.
          */
-        virtual cArray *sdesChunks();
+        virtual cArray *getSdesChunks();
 
         /**
         Adds an sdes chunk to this rtcp sdes packet.
@@ -408,7 +408,7 @@ class INET_API RTCPByePacket : public RTCPPacket
         /**
          * Returns the ssrc identifier.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier.
@@ -478,7 +478,7 @@ class INET_API RTCPCompoundPacket : public cMessage
          * Returns a copy of the cArray in which the rtcp
          * packets are stored.
          */
-        virtual cArray *rtcpPackets();
+        virtual cArray *getRtcpPackets();
 
     private:
 

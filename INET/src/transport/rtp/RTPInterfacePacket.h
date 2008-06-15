@@ -169,17 +169,17 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Returns the CNAME stored in this RTPInterfacePacket.
          */
-        virtual const char *commonName();
+        virtual const char *getCommonName();
 
         /**
          * Returns the profile name stored in this RTPInterfacePacket.
          */
-        virtual const char *profileName();
+        virtual const char *getProfileName();
 
         /**
          * Returns the bandidth stored in this RTPInterfacePacket.
          */
-        virtual int bandwidth();
+        virtual int getBandwidth();
 
         /**
          * Returns the address stored in this RTPInterfacePacket.
@@ -189,17 +189,17 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Returns the port stored in this RTPInterfacePacket.
          */
-        virtual int port();
+        virtual int getPort();
 
         /**
          * Returns the ssrc identifier stored in this RTPInterfacePacket.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Returns the payload type stored in this RTPInterfacePacket.
          */
-        virtual int payloadType();
+        virtual int getPayloadType();
 
         /**
          * Returns the file name stored in this RTPInterfacePacket.

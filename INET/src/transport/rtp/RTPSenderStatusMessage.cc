@@ -49,7 +49,7 @@ const char *RTPSenderStatusMessage::getStatus() const {
     return opp_strdup(_status);
 };
 
-const u_int32 RTPSenderStatusMessage::timeStamp() {
+const u_int32 RTPSenderStatusMessage::getTimeStamp() {
     return _timeStamp;
 }
 

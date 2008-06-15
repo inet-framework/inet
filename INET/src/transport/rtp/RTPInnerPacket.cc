@@ -225,22 +225,22 @@ RTPInnerPacket::RTP_INP_TYPE RTPInnerPacket::getType() {
 };
 
 
-const char *RTPInnerPacket::commonName() {
+const char *RTPInnerPacket::getCommonName() {
     return opp_strdup(_commonName);
 };
 
 
-int RTPInnerPacket::mtu() {
+int RTPInnerPacket::getMtu() {
     return _mtu;
 };
 
 
-int RTPInnerPacket::bandwidth() {
+int RTPInnerPacket::getBandwidth() {
     return _bandwidth;
 };
 
 
-int RTPInnerPacket::rtcpPercentage() {
+int RTPInnerPacket::getRtcpPercentage() {
     return _rtcpPercentage;
 };
 
@@ -250,12 +250,12 @@ IPAddress RTPInnerPacket::getAddress() {
 };
 
 
-int RTPInnerPacket::port() {
+int RTPInnerPacket::getPort() {
     return _port;
 };
 
 
-u_int32 RTPInnerPacket::ssrc() {
+u_int32 RTPInnerPacket::getSsrc() {
     return _ssrc;
 };
 
@@ -265,21 +265,21 @@ const char *RTPInnerPacket::getFileName() {
 };
 
 
-int RTPInnerPacket::payloadType() {
+int RTPInnerPacket::getPayloadType() {
     return _payloadType;
 };
 
 
-int RTPInnerPacket::clockRate() {
+int RTPInnerPacket::getClockRate() {
     return _clockRate;
 };
 
 
-int RTPInnerPacket::timeStampBase() {
+int RTPInnerPacket::getTimeStampBase() {
     return _timeStampBase;
 };
 
 
-int RTPInnerPacket::sequenceNumberBase() {
+int RTPInnerPacket::getSequenceNumberBase() {
     return _sequenceNumberBase;
 };

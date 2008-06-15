@@ -150,12 +150,12 @@ void RTPEndsystemModule::handleMessagefromUDP(cMessage *msg)
 
 void RTPEndsystemModule::enterSession(RTPInterfacePacket *rifp)
 {
-    _profileName = rifp->profileName();
-    _commonName = rifp->commonName();
-    _bandwidth = rifp->bandwidth();
+    _profileName = rifp->getProfileName();
+    _commonName = rifp->getCommonName();
+    _bandwidth = rifp->getBandwidth();
     _destinationAddress = rifp->getDestinationAddress();
 
-    _port = rifp->port();
+    _port = rifp->getPort();
     if (_port % 2 != 0) {
         _port = _port - 1;
     }
@@ -184,8 +184,8 @@ void RTPEndsystemModule::leaveSession(RTPInterfacePacket *rifp)
 void RTPEndsystemModule::createSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
-    ev << rifp->ssrc()<<endl;
-    rinp->createSenderModule(rifp->ssrc(), rifp->payloadType(), rifp->getFileName());
+    ev << rifp->getSsrc()<<endl;
+    rinp->createSenderModule(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
     send(rinp, "toProfile");
 
     delete rifp;
@@ -195,7 +195,7 @@ void RTPEndsystemModule::createSenderModule(RTPInterfacePacket *rifp)
 void RTPEndsystemModule::deleteSenderModule(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
-    rinp->deleteSenderModule(rifp->ssrc());
+    rinp->deleteSenderModule(rifp->getSsrc());
     send(rinp, "toProfile");
 
     delete rifp;
@@ -205,7 +205,7 @@ void RTPEndsystemModule::deleteSenderModule(RTPInterfacePacket *rifp)
 void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleControl()");
-    rinp->senderModuleControl(rinp->ssrc(), (RTPSenderControlMessage *)(rifp->decapsulate()));
+    rinp->senderModuleControl(rinp->getSsrc(), (RTPSenderControlMessage *)(rifp->decapsulate()));
     send(rinp, "toProfile");
 
     delete rifp;
@@ -214,9 +214,9 @@ void RTPEndsystemModule::senderModuleControl(RTPInterfacePacket *rifp)
 
 void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp)
 {
-    _rtcpPercentage = rinp->rtcpPercentage();
+    _rtcpPercentage = rinp->getRtcpPercentage();
     if (_port == PORT_UNDEF) {
-        _port = rinp->port();
+        _port = rinp->getPort();
         if (_port % 2 != 0) {
             _port = _port - 1;
         }
@@ -231,7 +231,7 @@ void RTPEndsystemModule::profileInitialized(RTPInnerPacket *rinp)
 void RTPEndsystemModule::senderModuleCreated(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleCreated()");
-    rifp->senderModuleCreated(rinp->ssrc());
+    rifp->senderModuleCreated(rinp->getSsrc());
     send(rifp, "toApp");
 
     delete rinp;
@@ -241,7 +241,7 @@ void RTPEndsystemModule::senderModuleCreated(RTPInnerPacket *rinp)
 void RTPEndsystemModule::senderModuleDeleted(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleDeleted()");
-    rifp->senderModuleDeleted(rinp->ssrc());
+    rifp->senderModuleDeleted(rinp->getSsrc());
     send(rifp, "toApp");
 
     // perhaps we should send a message to rtcp module
@@ -258,7 +258,7 @@ void RTPEndsystemModule::senderModuleInitialized(RTPInnerPacket *rinp)
 void RTPEndsystemModule::senderModuleStatus(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("senderModuleStatus()");
-    rifp->senderModuleStatus(rinp->ssrc(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
+    rifp->senderModuleStatus(rinp->getSsrc(), (RTPSenderStatusMessage *)(rinp->decapsulate()));
     send(rifp, "toApp");
 
     delete rinp;
@@ -293,7 +293,7 @@ void RTPEndsystemModule::dataOut(RTPInnerPacket *rinp)
 void RTPEndsystemModule::rtcpInitialized(RTPInnerPacket *rinp)
 {
     RTPInterfacePacket *rifp = new RTPInterfacePacket("sessionEntered()");
-    rifp->sessionEntered(rinp->ssrc());
+    rifp->sessionEntered(rinp->getSsrc());
     send(rifp, "toApp");
 
     delete rinp;

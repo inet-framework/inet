@@ -81,7 +81,7 @@ void SenderReport::dump(std::ostream& os) const {
 };
 
 
-u_int64 SenderReport::ntpTimeStamp() {
+u_int64 SenderReport::getNtpTimeStamp() {
     return _ntpTimeStamp;
 };
 
@@ -91,7 +91,7 @@ void SenderReport::setNTPTimeStamp(u_int64 ntpTimeStamp) {
 }
 
 
-u_int32 SenderReport::rtpTimeStamp() {
+u_int32 SenderReport::getRtpTimeStamp() {
     return _rtpTimeStamp;
 };
 
@@ -101,7 +101,7 @@ void SenderReport::setRTPTimeStamp(u_int32 rtpTimeStamp) {
 };
 
 
-u_int32 SenderReport::packetCount() {
+u_int32 SenderReport::getPacketCount() {
     return _packetCount;
 };
 
@@ -111,7 +111,7 @@ void SenderReport::setPacketCount(u_int32 packetCount) {
 }
 
 
-u_int32 SenderReport::byteCount() {
+u_int32 SenderReport::getByteCount() {
     return _byteCount;
 };
 
@@ -184,7 +184,7 @@ void ReceptionReport::dump(std::ostream& os) const {
 };
 
 
-u_int32 ReceptionReport::ssrc() {
+u_int32 ReceptionReport::getSsrc() {
     return _ssrc;
 };
 
@@ -194,7 +194,7 @@ void ReceptionReport::setSSRC(u_int32 ssrc) {
 };
 
 
-u_int8 ReceptionReport::fractionLost() {
+u_int8 ReceptionReport::getFractionLost() {
     return _fractionLost;
 };
 
@@ -204,7 +204,7 @@ void ReceptionReport::setFractionLost(u_int8 fractionLost) {
 };
 
 
-int ReceptionReport::packetsLostCumulative() {
+int ReceptionReport::getPacketsLostCumulative() {
     return _packetsLostCumulative;
 };
 
@@ -214,7 +214,7 @@ void ReceptionReport::setPacketsLostCumulative(int packetsLostCumulative) {
 };
 
 
-u_int32 ReceptionReport::sequenceNumber() {
+u_int32 ReceptionReport::getSequenceNumber() {
     return _extendedHighestSequenceNumber;
 };
 
@@ -224,7 +224,7 @@ void ReceptionReport::setSequenceNumber(u_int32 sequenceNumber) {
 };
 
 
-int ReceptionReport::jitter() {
+int ReceptionReport::getJitter() {
     return _jitter;
 };
 
@@ -234,7 +234,7 @@ void ReceptionReport::setJitter(int jitter) {
 };
 
 
-int ReceptionReport::lastSR() {
+int ReceptionReport::getLastSR() {
     return _lastSR;
 };
 
@@ -244,7 +244,7 @@ void ReceptionReport::setLastSR(int lastSR) {
 };
 
 
-int ReceptionReport::delaySinceLastSR() {
+int ReceptionReport::getDelaySinceLastSR() {
     return _delaySinceLastSR;
 };
 

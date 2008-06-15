@@ -58,7 +58,7 @@ class INET_API RTPSSRCGate : public cObject
         /**
          * Returns the ssrc identifier.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier.

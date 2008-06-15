@@ -32,7 +32,7 @@ Define_Module(RTPAVProfilePayload32Receiver);
 
 int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
 {
-    return ((RTPPacket *)packet1)->sequenceNumber() - ((RTPPacket *)packet2)->sequenceNumber();
+    return ((RTPPacket *)packet1)->getSequenceNumber() - ((RTPPacket *)packet2)->getSequenceNumber();
 }
 
 RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver() {
@@ -53,15 +53,15 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 {
     // the first packet sets the lowest allowed time stamp
     if (_lowestAllowedTimeStamp == 0) {
-        _lowestAllowedTimeStamp = rtpPacket->timeStamp();
-        _highestSequenceNumber = rtpPacket->sequenceNumber();
-        _outputLogLoss <<"sequenceNumberBase"<< rtpPacket->sequenceNumber() << endl;
+        _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
+        _highestSequenceNumber = rtpPacket->getSequenceNumber();
+        _outputLogLoss <<"sequenceNumberBase"<< rtpPacket->getSequenceNumber() << endl;
     }
     else
     {
-        if (rtpPacket->sequenceNumber() > _highestSequenceNumber+1)
+        if (rtpPacket->getSequenceNumber() > _highestSequenceNumber+1)
         {
-            for (int i = _highestSequenceNumber+1; i< rtpPacket->sequenceNumber(); i++ )
+            for (int i = _highestSequenceNumber+1; i< rtpPacket->getSequenceNumber(); i++ )
             {
                 //char line[100];
                 //sprintf(line, "%i", i);
@@ -70,25 +70,25 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
          };
          }
 
-    if ((rtpPacket->timeStamp() < _lowestAllowedTimeStamp) || (rtpPacket->sequenceNumber()<= _highestSequenceNumber)) {
+    if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) || (rtpPacket->getSequenceNumber()<= _highestSequenceNumber)) {
         delete rtpPacket;
     }
     else {
         // is this packet from the next frame ?
         // this can happen when the marked packet has been
         // lost or arrives late
-        bool nextTimeStamp = rtpPacket->timeStamp() > _lowestAllowedTimeStamp;
+        bool nextTimeStamp = rtpPacket->getTimeStamp() > _lowestAllowedTimeStamp;
 
         // is this packet marked, which means that it's
         // the last packet of this frame
-        bool marked = rtpPacket->marker();
+        bool marked = rtpPacket->getMarker();
 
         // test if end of frame reached
 
         // check if we received the last (= marked)
         // packet of the frame or
         // we received a packet of the next frame
-        _highestSequenceNumber = rtpPacket->sequenceNumber();
+        _highestSequenceNumber = rtpPacket->getSequenceNumber();
 
         if (nextTimeStamp || marked) {
 
@@ -116,7 +116,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
             // we start the next frame
             // set the allowed time stamp
             if (nextTimeStamp) {
-                _lowestAllowedTimeStamp = rtpPacket->timeStamp();
+                _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
                 _queue->insert(rtpPacket);
             };
 

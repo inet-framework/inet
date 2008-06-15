@@ -131,8 +131,8 @@ class INET_API RTPParticipantInfo : public cObject
          * many rtcp intervals have passed, for example an rtp end system
          * is marked as inactive if there haven't been received packets from
          * it for a certain number of rtpc intervals.
-         * Call senderReport() and receptionReport() before calling this method.
-         * \sa senderReport()
+         * Call getSenderReport() and receptionReport() before calling this method.
+         * \sa getSenderReport()
          * \sa receptionReport()
          */
         virtual void nextInterval(simtime_t now);
@@ -154,7 +154,7 @@ class INET_API RTPParticipantInfo : public cObject
         /**
          * Returns the ssrc identifier of the rtp endsystem.
          */
-        virtual u_int32 ssrc();
+        virtual u_int32 getSsrc();
 
         /**
          * Sets the ssrc identifier.

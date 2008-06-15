@@ -106,14 +106,14 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
     _itemsReceived++;
 
     if (_packetsReceived == 1) {
-        _sequenceNumberBase = packet->sequenceNumber();
+        _sequenceNumberBase = packet->getSequenceNumber();
     }
     else {
 
-        /*if (packet->sequenceNumber() > _highestSequenceNumber+1)
+        /*if (packet->getSequenceNumber() > _highestSequenceNumber+1)
         {
-            _packetLostOutVector.record(packet->sequenceNumber() - _highestSequenceNumber -1);
-            for (int i = _highestSequenceNumber+1; i< packet->sequenceNumber(); i++ )
+            _packetLostOutVector.record(packet->getSequenceNumber() - _highestSequenceNumber -1);
+            for (int i = _highestSequenceNumber+1; i< packet->getSequenceNumber(); i++ )
             {
                 //std::cout << "id = "<< id <<" SequeceNumber loss = "<<i<<endl;
                 packetSequenceLostLogFile = fopen ("PacketLossLog.log","+w");
@@ -126,28 +126,28 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
             }
         }*/
 
-        if (packet->sequenceNumber() > _highestSequenceNumber) {
+        if (packet->getSequenceNumber() > _highestSequenceNumber) {
             // it is possible that this is a late packet from the
             // previous sequence wrap
-            if (!(packet->sequenceNumber() > 0xFFEF && _highestSequenceNumber < 0x10))
-                _highestSequenceNumber = packet->sequenceNumber();
+            if (!(packet->getSequenceNumber() > 0xFFEF && _highestSequenceNumber < 0x10))
+                _highestSequenceNumber = packet->getSequenceNumber();
         }
         else {
             // is it a sequence number wrap around 0xFFFF to 0x0000 ?
-            if (packet->sequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF) {
+            if (packet->getSequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF) {
                 _sequenceNumberCycles += 0x00010000;
-                _highestSequenceNumber = packet->sequenceNumber();
+                _highestSequenceNumber = packet->getSequenceNumber();
             }
         };
         // calculate interarrival jitter
         if (_clockRate != 0) {
-            simtime_t d = packet->timeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
+            simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;
         };
 
-        _lastPacketRTPTimeStamp = packet->timeStamp();
+        _lastPacketRTPTimeStamp = packet->getTimeStamp();
         _lastPacketArrivalTime = arrivalTime;
     };
 
@@ -160,12 +160,12 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
 {
     _lastSenderReportArrivalTime = arrivalTime;
     if (_lastSenderReportRTPTimeStamp == 0) {
-        _lastSenderReportRTPTimeStamp = report->rtpTimeStamp();
-        _lastSenderReportNTPTimeStamp = report->ntpTimeStamp();
+        _lastSenderReportRTPTimeStamp = report->getRtpTimeStamp();
+        _lastSenderReportNTPTimeStamp = report->getNtpTimeStamp();
     }
     else if (_clockRate == 0) {
-        u_int32 rtpTicks = report->rtpTimeStamp() - _lastSenderReportRTPTimeStamp;
-        u_int64 ntpDifference = report->ntpTimeStamp() - _lastSenderReportNTPTimeStamp;
+        u_int32 rtpTicks = report->getRtpTimeStamp() - _lastSenderReportRTPTimeStamp;
+        u_int64 ntpDifference = report->getNtpTimeStamp() - _lastSenderReportNTPTimeStamp;
         long double ntpSeconds = (long double)ntpDifference / (long double)(0xFFFFFFFF);
         _clockRate = (int)((long double)rtpTicks / ntpSeconds);
     }
@@ -187,7 +187,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
 {
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport();
-        receptionReport->setSSRC(ssrc());
+        receptionReport->setSSRC(getSsrc());
 
         u_int64 packetsExpected = _sequenceNumberCycles + (u_int64)_highestSequenceNumber - (u_int64)_sequenceNumberBase + (u_int64)1;
         u_int64 packetsLost = packetsExpected - _packetsReceived;

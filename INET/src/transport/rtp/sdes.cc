@@ -87,12 +87,12 @@ SDESItem::SDES_ITEM_TYPE SDESItem::getType() {
 };
 
 
-const char *SDESItem::content() {
+const char *SDESItem::getContent() {
     return opp_strdup(_content);
 };
 
 
-int SDESItem::length() {
+int SDESItem::getLength() {
     // bytes needed for this sdes item are
     // one byte for type, one for length
     // and the string
@@ -160,7 +160,7 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
             SDESItem *compareItem = (SDESItem *)(get(i));
             if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
-                _length = _length - compareItem->length();
+                _length = _length - compareItem->getLength();
                 delete compareItem;
             };
         }
@@ -168,12 +168,12 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem) {
 
     //sdesItem->setOwner(this);
     add(sdesItem);
-    _length = _length + (sdesItem->length());
+    _length = _length + (sdesItem->getLength());
 
 };
 
 
-u_int32 SDESChunk::ssrc() {
+u_int32 SDESChunk::getSsrc() {
     return _ssrc;
 };
 
@@ -183,6 +183,6 @@ void SDESChunk::setSSRC(u_int32 ssrc) {
 };
 
 
-int SDESChunk::length() {
+int SDESChunk::getLength() {
     return _length;
 };
