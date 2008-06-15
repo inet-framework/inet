@@ -138,12 +138,6 @@ class INET_API RTPPacket : public cMessage
          */
         virtual int getPayloadLength();
 
-        /**
-         * Compares two RTPPacket objects by comparing their
-         * sequence numbers.
-         */
-        static int compareFunction(cObject *packet1, cObject *packet2);
-
     protected:
 
         /**

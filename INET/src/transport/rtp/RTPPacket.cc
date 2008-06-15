@@ -156,6 +156,4 @@ int RTPPacket::getPayloadLength() {
 };
 
 
-int RTPPacket::compareFunction(cObject *packet1, cObject *packet2) {
-    return ((RTPPacket *)packet1)->sequenceNumber() - ((RTPPacket *)packet2)->sequenceNumber();
-};
+

@@ -30,6 +30,10 @@
 
 Define_Module(RTPAVProfilePayload32Receiver);
 
+int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
+{
+    return ((RTPPacket *)packet1)->sequenceNumber() - ((RTPPacket *)packet2)->sequenceNumber();
+}
 
 RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver() {
     delete _queue;
@@ -39,7 +43,7 @@ RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver() {
 void RTPAVProfilePayload32Receiver::initialize() {
     RTPPayloadReceiver::initialize();
     _payloadType = 32;
-    _queue = new cQueue("IncomingQueue", &(RTPPacket::compareFunction));
+    _queue = new cQueue("IncomingQueue", &compareRTPPacketsBySequenceNumber);
     _lowestAllowedTimeStamp = 0;
     _highestSequenceNumber = 0;
 };
