@@ -22,8 +22,7 @@
 #ifndef __RTPINNERPACKET_H__
 #define __RTPINNERPACKET_H__
 
-#include <omnetpp.h>
-#include "types.h"
+#include "INETDefs.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
 #include "RTPSenderControlMessage_m.h"

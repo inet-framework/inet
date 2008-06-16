@@ -20,9 +20,6 @@
  */
 
 #include <string.h>
-
-#include <omnetpp.h>
-
 #include "RTPProfile.h"
 #include "RTPInnerPacket.h"
 #include "RTPPayloadSender.h"

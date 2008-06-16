@@ -20,9 +20,6 @@
  * This file contains the implementation of member functions of the class RTPSenderInfo.
  */
 
-#include <omnetpp.h>
-
-#include "types.h"
 #include "RTPSenderInfo.h"
 
 

@@ -20,8 +20,6 @@
  * the class RTPAProfile.
  */
 
-#include <omnetpp.h>
-
 #include "RTPAVProfile.h"
 
 Define_Module(RTPAVProfile);

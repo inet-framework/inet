@@ -22,9 +22,7 @@
 #ifndef __RTPPACKET_H__
 #define __RTPPACKET_H__
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "types.h"
 
 /**
  * This class represents an rtp data packet.

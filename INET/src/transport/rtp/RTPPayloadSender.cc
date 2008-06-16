@@ -20,7 +20,6 @@
  * RTPPayloadSender.
  */
 
-#include <omnetpp.h>
 #include "RTPPayloadSender.h"
 
 

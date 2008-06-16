@@ -21,8 +21,6 @@
  */
 
 #include <string.h>
-
-#include "types.h"
 #include "sdes.h"
 
 Register_Class(SDESItem);

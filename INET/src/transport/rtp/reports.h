@@ -23,10 +23,7 @@
 #ifndef __REPORTS_H__
 #define __REPORTS_H__
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
-#include "types.h"
 #include "IPAddress.h"
 
 

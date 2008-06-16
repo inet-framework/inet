@@ -24,9 +24,6 @@
 
 #include <fstream>
 #include <string.h>
-
-#include <omnetpp.h>
-
 #include "RTPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPAVProfilePayload32Sender.h"

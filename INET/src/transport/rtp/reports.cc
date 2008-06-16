@@ -20,9 +20,6 @@
  * class INET_API SenderReport and ReceptionReport.
  */
 
-#include <omnetpp.h>
-
-#include "types.h"
 #include "reports.h"
 
 

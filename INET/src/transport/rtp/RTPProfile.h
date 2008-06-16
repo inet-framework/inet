@@ -22,8 +22,7 @@
 #ifndef __RTPPROFILE_H__
 #define __RTPPROFILE_H__
 
-#include <omnetpp.h>
-
+#include "INETDefs.h"
 #include "RTPInnerPacket.h"
 
 

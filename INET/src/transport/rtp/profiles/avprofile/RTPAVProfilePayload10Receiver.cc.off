@@ -22,7 +22,6 @@
 #include <string.h>
 
 
-#include "types.h"
 #include "RTPAVProfilePayload10Receiver.h"
 
 

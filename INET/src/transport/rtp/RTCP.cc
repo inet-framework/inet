@@ -20,13 +20,10 @@
  * RTCP.
  */
 
-#include <omnetpp.h>
-
 #include "IPAddress.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
 
-#include "types.h"
 #include "RTCP.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"

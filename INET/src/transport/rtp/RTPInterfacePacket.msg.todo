@@ -19,13 +19,10 @@
 
 cplusplus {{
 #include "INETDefs.h"
-#include "types.h"
 #include "IPAddress.h"
 #include "RTPSenderControlMessage.h"
 #include "RTPSenderStatusMessage.h"
 }}
-
-class noncobject uint32_t;
 
 //
 // An enumeration to distinguish the different functions of the
@@ -60,7 +57,7 @@ message RTPInterfacePacket
     int bandwidth;
     IPAddress destinationAddress;
     int port;
-    uint32_t SSRC;
+    uint32 SSRC;
     int payloadType;
     string fileName;
 

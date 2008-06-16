@@ -22,9 +22,7 @@
 #ifndef __RTCPENDSYSTEMMODULE_H__
 #define __RTCPENDSYSTEMMODULE_H__
 
-#include <omnetpp.h>
-
-#include "types.h"
+#include "INETDefs.h"
 #include "IPAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"

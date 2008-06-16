@@ -21,8 +21,6 @@
  *  * implemented.
  *  */
 
-#include <omnetpp.h>
-
 #include "RTPPayloadReceiver.h"
 #include "RTPAVProfilePayload32Receiver.h"
 #include "RTPPacket.h"

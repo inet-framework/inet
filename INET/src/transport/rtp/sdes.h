@@ -22,9 +22,7 @@
 #ifndef __SDES_H__
 #define __SDES_H__
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "types.h"
 
 /**
  * The class SDESItem is used for storing a source description item

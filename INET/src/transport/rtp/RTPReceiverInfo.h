@@ -23,9 +23,8 @@
 #ifndef __RTPRECEIVERINFO_H__
 #define __RTPRECEIVERINFO_H__
 
-#include <omnetpp.h>
 #include <cassert>
-#include "types.h"
+#include "INETDefs.h"
 #include "RTPParticipantInfo.h"
 
 /**

@@ -20,10 +20,7 @@
 
 cplusplus {{
 #include "INETDefs.h"
-#include "types.h"
 }}
-
-class noncobject uint32_t;
 
 //
 // Messages of type RTPSenderStatusMessage are used to send information
@@ -36,5 +33,5 @@ class noncobject uint32_t;
 message RTPSenderStatusMessage
 {
     string status;
-    uint32_t timeStamp;
+    uint32 timeStamp;
 };

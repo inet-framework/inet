@@ -25,7 +25,6 @@
 
 
 #include <fstream>
-#include <omnetpp.h>
 #include "INETDefs.h"
 #include "RTPPacket.h"
 

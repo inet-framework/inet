@@ -32,9 +32,7 @@
 #define __RTCPPACKET_H__
 
 #include <iostream>
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "types.h"
 #include "reports.h"
 #include "sdes.h"
 

@@ -21,9 +21,6 @@
  * RTCPByePacket and RTCPCompoundPacket are implemented.
  */
 
-#include <omnetpp.h>
-
-#include "types.h"
 #include "RTCPPacket.h"
 #include "reports.h"
 #include "sdes.h"

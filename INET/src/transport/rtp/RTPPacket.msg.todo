@@ -19,11 +19,7 @@
 
 cplusplus {{
 #include "INETDefs.h"
-#include "types.h"
 }}
-
-class noncobject uint16_t;
-class noncobject uint32_t;
 
 //
 // This class represents an rtp data packet. Real data can either
@@ -73,13 +69,13 @@ message RTPPacket
     int payloadType;
 
     // The sequence number of this RTPPacket.
-    uint16_t sequenceNumber;
+    uint16 sequenceNumber;
 
     // The rtp time stamp of this RTPPacket.
-    uint32_t timeStamp;
+    uint32 timeStamp;
 
     // The ssrc identifier of the creator of this RTPPacket.
-    uint32_t SSRC;
+    uint32 SSRC;
 
     // no mixers, no contributing sources
     //int CSRC[];

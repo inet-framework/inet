@@ -15,9 +15,6 @@
  ***************************************************************************/
 
 
-#include <omnetpp.h>
-
-#include "types.h"
 #include "IPAddress.h"
 #include "RTPApplication.h"
 #include "RTPInterfacePacket.h"

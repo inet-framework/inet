@@ -24,9 +24,7 @@
 #ifndef __RTPINTERFACEPACKET_H__
 #define __RTPINTERFACEPACKET_H__
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "types.h"
 #include "IPAddress.h"
 #include "RTPSenderControlMessage_m.h"
 #include "RTPSenderStatusMessage_m.h"

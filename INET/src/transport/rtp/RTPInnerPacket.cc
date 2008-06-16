@@ -21,8 +21,6 @@
  * of RTPInnerPacket.
  */
 
-#include <omnetpp.h>
-
 #include "RTPInnerPacket.h"
 #include "RTPPacket.h"
 

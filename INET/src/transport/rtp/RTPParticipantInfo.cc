@@ -20,9 +20,6 @@
  * \sa RTPParticipantInfo
  */
 
-#include <omnetpp.h>
-
-#include "types.h"
 #include "RTPParticipantInfo.h"
 #include "reports.h"
 

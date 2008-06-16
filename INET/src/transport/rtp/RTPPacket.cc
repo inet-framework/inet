@@ -19,10 +19,7 @@
  * This file contains the implementaion of member functions of the class RTPPacket.
  */
 
-#include <omnetpp.h>
-#include "types.h"
 #include "RTPPacket.h"
-
 
 Register_Class(RTPPacket);
 

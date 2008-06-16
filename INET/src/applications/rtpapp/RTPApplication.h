@@ -17,7 +17,6 @@
 #ifndef __RTPAPPLICATION_H__
 #define __RTPAPPLICATION_H__
 
-#include <omnetpp.h>
 #include "INETDefs.h"
 
 /**

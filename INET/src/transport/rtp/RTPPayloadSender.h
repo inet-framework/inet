@@ -24,9 +24,7 @@
 #define __RTPPAYLOADSENDER_H__
 
 #include <fstream>
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "types.h"
 #include "RTPInnerPacket.h"
 
 

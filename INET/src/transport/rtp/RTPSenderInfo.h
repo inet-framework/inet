@@ -23,9 +23,7 @@
 #ifndef __RTPSENDERINFO_H__
 #define __RTPSENDERINFO_H__
 
-#include <omnetpp.h>
-
-#include "types.h"
+#include "INETDefs.h"
 #include "RTPParticipantInfo.h"
 #include "reports.h"
 

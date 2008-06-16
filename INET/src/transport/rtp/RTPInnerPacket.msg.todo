@@ -19,7 +19,6 @@
 
 cplusplus {{
 #include "INETDefs.h"
-#include "types.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
 #include "RTPSenderControlMessage_m.h"

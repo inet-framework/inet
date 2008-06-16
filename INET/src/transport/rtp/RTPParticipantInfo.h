@@ -23,8 +23,7 @@
 #define __RTPPARTICIPANTINFO_H__
 
 #include <stdio.h>
-#include <omnetpp.h>
-#include "types.h"
+#include "INETDefs.h"
 #include "IPAddress.h"
 #include "RTPPacket.h"
 #include "RTCPPacket.h"
