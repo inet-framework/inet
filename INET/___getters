@@ -9,17 +9,25 @@ simtime_t backoff()
 bool active()
 bool valid()
 
-"custom"
---------
+"get", with capitalization etc (?):
+------------------------------------
 simtime_t DIFSPeriod()   ==> getDIFS()
 simtime_t EIFSPeriod()   ==> getEIFS()
 simtime_t PIFSPeriod()   ==> getPIFS()
 simtime_t SIFSPeriod()   ==> getSIFS()
 simtime_t SlotPeriod()   ==> getSlotTime()
 int mtu()                ==> getMTU()
+IN_Port rtcpPort()
+IN_Port rtpPort()
+SDESChunk *sdesChunk()
+cArray *rtcpPackets()
+cArray *sdesChunks()
+
+
 
 "get" -- to be revised!!
 ------------------------
+bool ipForward()
 double _maxRandomFactor()
 double _minRandomFactor()
 int multicastInterface()   ==> multicastInterfaceId() ??  [setter too!]
@@ -40,6 +48,10 @@ simtime_t _minDelayBetweenRAs()
 simtime_t _reachableTime()
 simtime_t _retransTimer()
 simtime_t _rtrSolicitationInterval()
+IPv4InterfaceData *ipv4()
+IPv6InterfaceData *ipv6()
+
+initialSeqNum() ==> rather chooseInitialSeqNum()?????
 
 
 
@@ -48,14 +60,10 @@ simtime_t _rtrSolicitationInterval()
 Blackboard *blackboard()
 ConnectionState connState()
 IN_Port port()
-IN_Port rtcpPort()
-IN_Port rtpPort()
 IPAddress inetAddress()
 IPAddress netmask()
 IPAddress routerId()
 IPProtocolId extensionType()
-IPv4InterfaceData *ipv4()
-IPv6InterfaceData *ipv6()
 IPvXAddress localAddress()
 IPvXAddress remoteAddress()
 Ieee80211DataOrMgmtFrame *currentTransmission()
@@ -64,7 +72,6 @@ InterfaceEntry *firstLoopbackInterface()
 InterfaceEntry *interfaceEntry()
 RTCP_PACKET_TYPE packetType()
 RouteSrc src()
-SDESChunk *sdesChunk()
 Scope scope()
 SenderReport *senderReport()
 TCPSocket *socket()
@@ -73,10 +80,7 @@ TCPStateVariables *stateVariables()
 bool advManagedFlag()
 bool advOtherConfigFlag()
 bool advSendAdvertisements()
-bool ipForward()
 cArray *receptionReports()
-cArray *rtcpPackets()
-cArray *sdesChunks()
 cMessage *message()
 cPolymorphic *protocol3()
 cPolymorphic *protocol4()

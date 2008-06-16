@@ -28,13 +28,13 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr
 $arglessGetters="";  #FIXME remove just temp!!!
 
 # from C++ files
-$arglessGetters .= "blackboard connState port rtcpPort rtpPort inetAddress
-    netmask routerId extensionType ipv4 ipv6 localAddress remoteAddress
+$arglessGetters .= "blackboard connState port inetAddress
+    netmask routerId extensionType localAddress remoteAddress
     currentTransmission frameReceivedBeforeSIFS firstLoopbackInterface
-    interfaceEntry packetType src sdesChunk scope senderReport socket
+    interfaceEntry packetType src scope senderReport socket
     hostModule stateVariables advManagedFlag advOtherConfigFlag
-    advSendAdvertisements ipForward receptionReports rtcpPackets
-    sdesChunks message protocol3 protocol4 myPosition multicastGroups
+    advSendAdvertisements receptionReports
+    message protocol3 protocol4 myPosition multicastGroups
     destPrefix linkLocalAddress nextHop preferredAddress interfaceToken
     macAddress playgroundSizeX playgroundSizeY advLinkMTU
     advReachableTime advRetransTimer connectionId contentionWindow
@@ -44,7 +44,7 @@ $arglessGetters .= "blackboard connState port rtcpPort rtpPort inetAddress
     numRoutingEntries peerNamId socketId topLabel queueLength
     advCurHopLimit advDefaultLifetime expiryTime maxRtrAdvInterval
     minRtrAdvInterval baseReachableTime linkMTU bufferEndSeq
-    initialSeqNum totalLength"
+    totalLength";
 
 # array fields in msg files
 my $gettersWithArg = "payload recordAddress address extensionHeader
