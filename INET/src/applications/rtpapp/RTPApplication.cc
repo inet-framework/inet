@@ -78,7 +78,7 @@ void RTPApplication::activity() {
     cMessage *msg1 = new cMessage("enterSession");
     scheduleAt(simTime() + _sessionEnterDelay, msg1);
 
-    u_int32 ssrc = 0;
+    uint32_t ssrc = 0;
 
     while (!sessionLeft) {
 
