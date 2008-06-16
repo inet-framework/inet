@@ -369,7 +369,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     void setMode(Mode mode);
 
     /** @brief Returns the current frame being transmitted */
-    Ieee80211DataOrMgmtFrame *currentTransmission();
+    Ieee80211DataOrMgmtFrame *getCurrentTransmission();
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     void resetStateVariables();
@@ -391,7 +391,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     bool isDataOrMgmtFrame(Ieee80211Frame *frame);
 
     /** @brief Returns the last frame received before the SIFS period. */
-    Ieee80211Frame *frameReceivedBeforeSIFS();
+    Ieee80211Frame *getFrameReceivedBeforeSIFS();
 
     /** @brief Deletes frame at the front of queue. */
     void popTransmissionQueue();

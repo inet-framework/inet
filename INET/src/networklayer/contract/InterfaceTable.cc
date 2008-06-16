@@ -172,7 +172,7 @@ InterfaceEntry *InterfaceTable::interfaceByNodeOutputGateId(int id)
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->nodeOutputGateId()==id)
+        if ((*i)->getNodeOutputGateId()==id)
             return *i;
     return NULL;
 }
@@ -182,7 +182,7 @@ InterfaceEntry *InterfaceTable::interfaceByNodeInputGateId(int id)
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->nodeInputGateId()==id)
+        if ((*i)->getNodeInputGateId()==id)
             return *i;
     return NULL;
 }
@@ -192,7 +192,7 @@ InterfaceEntry *InterfaceTable::interfaceByNetworkLayerGateIndex(int index)
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
     for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->networkLayerGateIndex()==index)
+        if ((*i)->getNetworkLayerGateIndex()==index)
             return *i;
     return NULL;
 }
@@ -209,7 +209,7 @@ InterfaceEntry *InterfaceTable::interfaceByName(const char *name)
     return NULL;
 }
 
-InterfaceEntry *InterfaceTable::firstLoopbackInterface()
+InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
 {
     Enter_Method_Silent();
 

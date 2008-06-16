@@ -65,7 +65,7 @@ class INET_API MPLSPacket: public cMessage
     /**
      * Returns the top label
      */
-    inline int topLabel()  {return labels.top();}
+    inline int getTopLabel()  {return labels.top();}
 };
 
 #endif

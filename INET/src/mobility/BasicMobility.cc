@@ -129,10 +129,10 @@ void BasicMobility::reflectIfOutside(Coord& targetPos, Coord& step, double& angl
         step.x = -step.x;
         angle = 180 - angle;
     }
-    else if (pos.x >= playgroundSizeX())
+    else if (pos.x >= getPlaygroundSizeX())
     {
-        pos.x = 2*playgroundSizeX() - pos.x;
-        targetPos.x = 2*playgroundSizeX() - targetPos.x;
+        pos.x = 2*getPlaygroundSizeX() - pos.x;
+        targetPos.x = 2*getPlaygroundSizeX() - targetPos.x;
         step.x = -step.x;
         angle = 180 - angle;
     }
@@ -143,10 +143,10 @@ void BasicMobility::reflectIfOutside(Coord& targetPos, Coord& step, double& angl
         step.y = -step.y;
         angle = -angle;
     }
-    else if (pos.y >= playgroundSizeY())
+    else if (pos.y >= getPlaygroundSizeY())
     {
-        pos.y = 2*playgroundSizeY() - pos.y;
-        targetPos.y = 2*playgroundSizeY() - targetPos.y;
+        pos.y = 2*getPlaygroundSizeY() - pos.y;
+        targetPos.y = 2*getPlaygroundSizeY() - targetPos.y;
         step.y = -step.y;
         angle = -angle;
     }
@@ -156,29 +156,29 @@ void BasicMobility::wrapIfOutside(Coord& targetPos)
 {
     if (pos.x < 0)
     {
-        pos.x += playgroundSizeX();
-        targetPos.x += playgroundSizeX();
+        pos.x += getPlaygroundSizeX();
+        targetPos.x += getPlaygroundSizeX();
     }
-    else if (pos.x >= playgroundSizeX())
+    else if (pos.x >= getPlaygroundSizeX())
     {
-        pos.x -= playgroundSizeX();
-        targetPos.x -= playgroundSizeX();
+        pos.x -= getPlaygroundSizeX();
+        targetPos.x -= getPlaygroundSizeX();
     }
     if (pos.y < 0)
     {
-        pos.y += playgroundSizeY();
-        targetPos.y += playgroundSizeY();
+        pos.y += getPlaygroundSizeY();
+        targetPos.y += getPlaygroundSizeY();
     }
-    else if (pos.y >= playgroundSizeY())
+    else if (pos.y >= getPlaygroundSizeY())
     {
-        pos.y -= playgroundSizeY();
-        targetPos.y -= playgroundSizeY();
+        pos.y -= getPlaygroundSizeY();
+        targetPos.y -= getPlaygroundSizeY();
     }
 }
 
 void BasicMobility::placeRandomlyIfOutside(Coord& targetPos)
 {
-    if (pos.x<0 || pos.x>=playgroundSizeX() || pos.y<0 || pos.y>=playgroundSizeY())
+    if (pos.x<0 || pos.x>=getPlaygroundSizeX() || pos.y<0 || pos.y>=getPlaygroundSizeY())
     {
         Coord newPos = getRandomPosition();
         targetPos += newPos - pos;
@@ -188,10 +188,10 @@ void BasicMobility::placeRandomlyIfOutside(Coord& targetPos)
 
 void BasicMobility::raiseErrorIfOutside()
 {
-    if (pos.x<0 || pos.x>=playgroundSizeX() || pos.y<0 || pos.y>=playgroundSizeY())
+    if (pos.x<0 || pos.x>=getPlaygroundSizeX() || pos.y<0 || pos.y>=getPlaygroundSizeY())
     {
         error("node moved outside the playground of size %gx%g (x=%g,y=%g)",
-              playgroundSizeX(), playgroundSizeY(), pos.x, pos.y);
+              getPlaygroundSizeX(), getPlaygroundSizeY(), pos.x, pos.y);
     }
 }
 

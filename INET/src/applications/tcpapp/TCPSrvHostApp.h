@@ -72,10 +72,10 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     virtual ~TCPServerThreadBase() {}
 
     /** Returns the socket object */
-    TCPSocket *socket() {return sock;}
+    TCPSocket *getSocket() {return sock;}
 
     /** Returns pointer to the host module */
-    TCPSrvHostApp *hostModule() {return hostmod;}
+    TCPSrvHostApp *getHostModule() {return hostmod;}
 
     /**
      * Schedule an event. Do not use getContextPointer() of cMessage, because
@@ -107,7 +107,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
      * Called when the client closes the connection. By default it closes
      * our side too, but it can be redefined to do something different.
      */
-    virtual void peerClosed() {socket()->close();}
+    virtual void peerClosed() {getSocket()->close();}
 
     /**
      * Called when the connection closes (successful TCP teardown). By default
@@ -122,7 +122,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
     virtual void failure(int code) {hostmod->removeThread(this);}
 
     /**
-     * Called when a status arrives in response to socket()->getStatus().
+     * Called when a status arrives in response to getSocket()->getStatus().
      * By default it deletes the status object, redefine it to add code
      * to examine the status.
      */

@@ -86,7 +86,7 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPDatagram *ret = buf->datagram;
-        ret->setByteLength(ret->getHeaderLength()+buf->buf.totalLength());
+        ret->setByteLength(ret->getHeaderLength()+buf->buf.getTotalLength());
         bufs.erase(i);
         return ret;
     }

@@ -112,7 +112,7 @@ class IPSourceRoutingOption
 //    - getTimestamp() / setTimestamp (simtime) used in timestamp option
 //
 // Additional length fields defined in this class are in bytes
-// (totalLength()=length()/8 and header_length), or 8 bytes (fragment_offset).
+// (getTotalLength()=length()/8 and header_length), or 8 bytes (fragment_offset).
 //
 // Only only one of the option fields can exist at a time.
 //

@@ -57,7 +57,7 @@ void RSVP::initialize(int stage)
         tedmod = TEDAccess().get();
         rt = RoutingTableAccess().get();
         ift = InterfaceTableAccess().get();
-        routerId = rt->routerId();
+        routerId = rt->getRouterId();
         lt = LIBTableAccess().get();
         nb = NotificationBoardAccess().get();
 
@@ -331,7 +331,7 @@ void RSVP::setupHello()
     {
         ASSERT(ift->interfaceByName(token));
 
-        IPAddress peer = tedmod->peerByLocalAddress(ift->interfaceByName(token)->ipv4()->inetAddress());
+        IPAddress peer = tedmod->peerByLocalAddress(ift->interfaceByName(token)->ipv4()->getInetAddress());
 
         HelloState_t h;
 
@@ -1126,7 +1126,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
                 return false;
             }
 
-            OI = ie->ipv4()->inetAddress();
+            OI = ie->ipv4()->getInetAddress();
 
         }
         else
@@ -1157,7 +1157,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
                 return false;
             }
 
-            OI = ie->ipv4()->inetAddress();
+            OI = ie->ipv4()->getInetAddress();
 
             HelloState_t *h = findHello(tedmod->peerByLocalAddress(OI));
             if (!h)

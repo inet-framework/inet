@@ -89,7 +89,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     {
         // datagram complete: deallocate buffer and return complete datagram
         IPv6Datagram *ret = buf->datagram;
-        ret->setByteLength(ret->calculateHeaderByteLength()+buf->buf.totalLength()); // FIXME cf with 4.5 of RFC 2460
+        ret->setByteLength(ret->calculateHeaderByteLength()+buf->buf.getTotalLength()); // FIXME cf with 4.5 of RFC 2460
         bufs.erase(i);
         return ret;
     }

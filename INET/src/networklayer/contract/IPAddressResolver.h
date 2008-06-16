@@ -102,7 +102,7 @@ class INET_API IPAddressResolver
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
-     * the routerId() method of the RoutingTable submodule.
+     * the getRouterId() method of the RoutingTable submodule.
      */
     IPAddress routerIdOf(cModule *host);
 

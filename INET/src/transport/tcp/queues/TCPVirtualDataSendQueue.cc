@@ -50,7 +50,7 @@ void TCPVirtualDataSendQueue::enqueueAppData(cMessage *msg)
     delete msg;
 }
 
-uint32 TCPVirtualDataSendQueue::bufferEndSeq()
+uint32 TCPVirtualDataSendQueue::getBufferEndSeq()
 {
     return end;
 }

@@ -2,12 +2,12 @@ ignore:
 -------
 PCB* pcb()
 bool pendingAccept()
-simtime_t backoff()
 
 "is":
 -----
 bool active()
 bool valid()
+
 
 "get", with capitalization etc (?):
 ------------------------------------
@@ -22,7 +22,6 @@ IN_Port rtpPort()
 SDESChunk *sdesChunk()
 cArray *rtcpPackets()
 cArray *sdesChunks()
-
 
 
 "get" -- to be revised!!
@@ -50,88 +49,21 @@ simtime_t _retransTimer()
 simtime_t _rtrSolicitationInterval()
 IPv4InterfaceData *ipv4()
 IPv6InterfaceData *ipv6()
+protocol3()
+protocol4()
 
 initialSeqNum() ==> rather chooseInitialSeqNum()?????
 
+a bit awkward: getNetmask().getNetmaskLength();
 
+getInetAddress()...   [used to be: inetAddress()]
 
-"get":
-------
-Blackboard *blackboard()
-ConnectionState connState()
-IN_Port port()
-IPAddress inetAddress()
-IPAddress netmask()
-IPAddress routerId()
-IPProtocolId extensionType()
-IPvXAddress localAddress()
-IPvXAddress remoteAddress()
-Ieee80211DataOrMgmtFrame *currentTransmission()
-Ieee80211Frame *frameReceivedBeforeSIFS()
-InterfaceEntry *firstLoopbackInterface()
-InterfaceEntry *interfaceEntry()
-RTCP_PACKET_TYPE packetType()
-RouteSrc src()
-Scope scope()
-SenderReport *senderReport()
-TCPSocket *socket()
-TCPSrvHostApp *hostModule()
-TCPStateVariables *stateVariables()
-bool advManagedFlag()
-bool advOtherConfigFlag()
-bool advSendAdvertisements()
-cArray *receptionReports()
-cMessage *message()
-cPolymorphic *protocol3()
-cPolymorphic *protocol4()
-const Coord& myPosition()
-const IPAddressVector& multicastGroups()
-const IPv6Address& destPrefix()
-const IPv6Address& linkLocalAddress()
-const IPv6Address& nextHop()
-const IPv6Address& preferredAddress()
-const InterfaceToken& interfaceToken()
-const MACAddress& macAddress()
-double playgroundSizeX()
-double playgroundSizeY()
-int advLinkMTU()
-int advReachableTime()
-int advRetransTimer()
-int connectionId()
-int contentionWindow()
-int delaySinceLastSR()
-int fixedHeaderLength()
-int interfaceID()
-int metric()
-int multicastScope()
-int netmaskLength()
-int networkLayerGateIndex()
-int nodeInputGateId()
-int nodeOutputGateId()
-int numAddresses()
-int numAdvPrefixes()
-int numInterfaces()
-int numQueues()
-int numRoutes()
-int numRoutingEntries()
-int peerNamId()
-int socketId()
-int topLabel()
-long queueLength()
-short advCurHopLimit()
-simtime_t advDefaultLifetime()
-simtime_t expiryTime()
-simtime_t maxRtrAdvInterval()
-simtime_t minRtrAdvInterval()
-uint baseReachableTime()
-uint linkMTU()
-uint32 bufferEndSeq()
-unsigned long initialSeqNum()
-ushort totalLength()
+simtime_t backoff() ==> computeBackoff()
+contentionWindow() ==> computeContentionWindow() ?? [was: contentionWindow()]
 
 
 
-
+TBD:
 ========
 
 IPAddress gatewayForDestAddr(const IPAddress& dest)

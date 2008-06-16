@@ -79,7 +79,7 @@ class INET_API ReassemblyBuffer
      * Returns the total (assembled) length of the datagram.
      * Can only be called after addFragment() returned true.
      */
-    ushort totalLength() const {return main.end;}
+    ushort getTotalLength() const {return main.end;}
 };
 
 #endif

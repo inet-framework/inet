@@ -106,7 +106,7 @@ int RTCPPacket::getCount() {
 };
 
 
-RTCPPacket::RTCP_PACKET_TYPE RTCPPacket::packetType() {
+RTCPPacket::RTCP_PACKET_TYPE RTCPPacket::getPacketType() {
     return _packetType;
 };
 

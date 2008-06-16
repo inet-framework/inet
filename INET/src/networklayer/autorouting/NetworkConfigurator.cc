@@ -96,7 +96,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
 
         // assign address to all (non-loopback) interfaces
         InterfaceTable *ift = nodeInfo[i].ift;
-        for (int k=0; k<ift->numInterfaces(); k++)
+        for (int k=0; k<ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->interfaceAt(k);
             if (!ie->isLoopback())
@@ -108,7 +108,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
 
         // set routerId as well (if not yet configured)
         RoutingTable *rt = nodeInfo[i].rt;
-        if (rt->routerId().isUnspecified())
+        if (rt->getRouterId().isUnspecified())
         {
             rt->setRouterId(IPAddress(addr | 1U)); // 10.nn.nn.1
         }
@@ -148,13 +148,13 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
                 continue;
 
             // find out neighbor's routerId
-            IPAddress neighborRouterId = nodeInfo[k].rt->routerId();
+            IPAddress neighborRouterId = nodeInfo[k].rt->getRouterId();
 
             // find out neighbor's interface IP address
             int neighborGateId = node->getLinkOut(j)->getRemoteGate()->getId();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->interfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
-            IPAddress neighborAddr = neighborIe->ipv4()->inetAddress();
+            IPAddress neighborAddr = neighborIe->ipv4()->getInetAddress();
 
             // find our own interface towards neighbor
             int gateId = node->getLinkOut(j)->getLocalGate()->getId();
@@ -177,7 +177,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             e->interfacePtr = ie;
             e->type = RoutingEntry::DIRECT;
             e->source = RoutingEntry::MANUAL;
-            //e->metric() = 1;
+            //e->getMetric() = 1;
             rt->addRoutingEntry(e);
         }
     }
@@ -199,7 +199,7 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         // count non-loopback interfaces
         int numIntf = 0;
         InterfaceEntry *ie = NULL;
-        for (int k=0; k<ift->numInterfaces(); k++)
+        for (int k=0; k<ift->getNumInterfaces(); k++)
             if (!ift->interfaceAt(k)->isLoopback())
                 {ie = ift->interfaceAt(k); numIntf++;}
 
@@ -218,7 +218,7 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         e->interfacePtr = ie;
         e->type = RoutingEntry::REMOTE;
         e->source = RoutingEntry::MANUAL;
-        //e->metric() = 1;
+        //e->getMetric() = 1;
         rt->addRoutingEntry(e);
     }
 }
@@ -315,7 +315,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             e->interfacePtr = ie;
             e->type = RoutingEntry::REMOTE;
             e->source = RoutingEntry::MANUAL;
-            //e->metric() = 1;
+            //e->getMetric() = 1;
             rt->addRoutingEntry(e);
         }
     }

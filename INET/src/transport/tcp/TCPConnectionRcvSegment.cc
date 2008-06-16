@@ -869,7 +869,7 @@ TCPEventCode TCPConnection::processRstInSynReceived(TCPSegment *tcpseg)
     // and return.
     //"
 
-    sendQueue->discardUpTo(sendQueue->bufferEndSeq()); // flush send queue
+    sendQueue->discardUpTo(sendQueue->getBufferEndSeq()); // flush send queue
 
     if (state->active)
     {

@@ -74,13 +74,13 @@ class INET_API IPv6Route : public cPolymorphic
     void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
     void setMetric(int metric)  {_metric = _metric;}
 
-    const IPv6Address& destPrefix() const {return _destPrefix;}
+    const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
-    RouteSrc src() const  {return _src;}
-    int interfaceID() const  {return _interfaceID;}
-    const IPv6Address& nextHop() const  {return _nextHop;}
-    simtime_t expiryTime() const  {return _expiryTime;}
-    int metric() const  {return _metric;}
+    RouteSrc getSrc() const  {return _src;}
+    int getInterfaceID() const  {return _interfaceID;}
+    const IPv6Address& getNextHop() const  {return _nextHop;}
+    simtime_t getExpiryTime() const  {return _expiryTime;}
+    int getMetric() const  {return _metric;}
 };
 
 
@@ -286,7 +286,7 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Return the number of routes.
      */
-    int numRoutes() const;
+    int getNumRoutes() const;
 
     /**
      * Return the ith route.

@@ -331,7 +331,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Returns the number of addresses the interface has.
      */
-    int numAddresses() const {return addresses.size();}
+    int getNumAddresses() const {return addresses.size();}
 
     /**
      * Returns ith address of the interface.
@@ -378,13 +378,13 @@ class INET_API IPv6InterfaceData : public cPolymorphic
      *
      * FIXME turn into preferredGLOBALAddress()!
      */
-    const IPv6Address& preferredAddress() const {return preferredAddr;}  // FIXME TBD check expiry time!
+    const IPv6Address& getPreferredAddress() const {return preferredAddr;}  // FIXME TBD check expiry time!
 
     /**
      * Returns the first valid link-local address of the interface,
      * or UNSPECIFIED_ADDRESS if there's none.
      */
-    const IPv6Address& linkLocalAddress() const;
+    const IPv6Address& getLinkLocalAddress() const;
 
     /**
      * Removes the address. Called when the valid lifetime expires.
@@ -456,9 +456,9 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /************End of Node Variables getters and setters*********************/
 
     /************Getters for Host Variables************************************/
-    uint linkMTU() {return hostVars.linkMTU;}
+    uint getLinkMTU() {return hostVars.linkMTU;}
     short getCurHopLimit() {return hostVars.curHopLimit;}
-    uint baseReachableTime() {return hostVars.baseReachableTime;}
+    uint getBaseReachableTime() {return hostVars.baseReachableTime;}
     simtime_t getReachableTime() {return hostVars.reachableTime;}
     uint getRetransTimer() {return hostVars.retransTimer;}
     /************Setters for Host Variables************************************/
@@ -470,16 +470,16 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /************End of Host Variables getters and setters*********************/
 
     /************Getters for Router Configuration Variables********************/
-    bool advSendAdvertisements() {return rtrVars.advSendAdvertisements;}
-    simtime_t maxRtrAdvInterval() {return rtrVars.maxRtrAdvInterval;}
-    simtime_t minRtrAdvInterval() {return rtrVars.minRtrAdvInterval;}
-    bool advManagedFlag() {return rtrVars.advManagedFlag;}
-    bool advOtherConfigFlag() {return rtrVars.advOtherConfigFlag;}
-    int advLinkMTU() {return rtrVars.advLinkMTU;}
-    int advReachableTime() {return rtrVars.advReachableTime;}
-    int advRetransTimer() {return rtrVars.advRetransTimer;}
-    short advCurHopLimit() {return rtrVars.advCurHopLimit;}
-    simtime_t advDefaultLifetime()  {return rtrVars.advDefaultLifetime;}
+    bool getAdvSendAdvertisements() {return rtrVars.advSendAdvertisements;}
+    simtime_t getMaxRtrAdvInterval() {return rtrVars.maxRtrAdvInterval;}
+    simtime_t getMinRtrAdvInterval() {return rtrVars.minRtrAdvInterval;}
+    bool getAdvManagedFlag() {return rtrVars.advManagedFlag;}
+    bool getAdvOtherConfigFlag() {return rtrVars.advOtherConfigFlag;}
+    int getAdvLinkMTU() {return rtrVars.advLinkMTU;}
+    int getAdvReachableTime() {return rtrVars.advReachableTime;}
+    int getAdvRetransTimer() {return rtrVars.advRetransTimer;}
+    short getAdvCurHopLimit() {return rtrVars.advCurHopLimit;}
+    simtime_t getAdvDefaultLifetime()  {return rtrVars.advDefaultLifetime;}
     /************Setters for Router Configuration Variables********************/
     void setAdvSendAdvertisements(bool d) {rtrVars.advSendAdvertisements = d;}
     void setMaxRtrAdvInterval(simtime_t d) {rtrVars.maxRtrAdvInterval = d;}
@@ -503,7 +503,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Returns the number of advertised prefixes on the interface.
      */
-    int numAdvPrefixes() const {return rtrVars.advPrefixList.size();}
+    int getNumAdvPrefixes() const {return rtrVars.advPrefixList.size();}
 
     /**
      * Returns the ith advertised prefix on the interface.

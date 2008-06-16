@@ -36,11 +36,11 @@ class INET_API BasicDSCPClassifier : public IQoSClassifier
     /**
      * Returns the largest value plus one classifyPacket() returns.
      */
-    virtual int numQueues();
+    virtual int getNumQueues();
 
     /**
      * The method should return the priority (the index of subqueue)
-     * for the given packet, a value between 0 and numQueues()-1
+     * for the given packet, a value between 0 and getNumQueues()-1
      * (inclusive).
      */
     virtual int classifyPacket(cMessage *msg);

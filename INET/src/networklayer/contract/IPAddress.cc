@@ -289,7 +289,7 @@ int IPAddress::numMatchingPrefixBits(const IPAddress& to_cmp) const
     return 32;
 }
 
-int IPAddress::netmaskLength() const
+int IPAddress::getNetmaskLength() const
 {
     uint32 addr = getInt();
     int i;

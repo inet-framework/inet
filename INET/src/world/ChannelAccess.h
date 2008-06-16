@@ -58,7 +58,7 @@ class INET_API ChannelAccess : public BasicModule
     virtual void sendToChannel(AirFrame *msg);
 
     /** @brief Returns the host's position*/
-    const Coord& myPosition() {return cc->getHostPosition(myHostRef);}
+    const Coord& getMyPosition() {return cc->getHostPosition(myHostRef);}
 
   protected:
     /** @brief Register with ChannelControl and subscribe to hostPos*/

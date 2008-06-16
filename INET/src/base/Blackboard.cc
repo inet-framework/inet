@@ -210,7 +210,7 @@ void Blackboard::getBlackboardContent(BlackboardAccess *bbClient)
 
 //----
 
-Blackboard *BlackboardAccess::blackboard()
+Blackboard *BlackboardAccess::getBlackboard()
 {
     if (!bb)
     {

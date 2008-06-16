@@ -192,7 +192,7 @@ void LDP::sendMappingRequest(IPAddress dest, IPAddress addr, int length)
     requestMsg->setFec(fec);
 
     requestMsg->setReceiverAddress(dest);
-    requestMsg->setSenderAddress(rt->routerId());
+    requestMsg->setSenderAddress(rt->getRouterId());
 
     sendToPeer(dest, requestMsg);
 }
@@ -266,7 +266,7 @@ void LDP::rebuildFecList()
     FecVector oldList = fecList;
     fecList.clear();
 
-    for (int i = 0; i < rt->numRoutingEntries(); i++)
+    for (int i = 0; i < rt->getNumRoutingEntries(); i++)
     {
         // every entry in the routing table
 
@@ -282,7 +282,7 @@ void LDP::rebuildFecList()
 
         EV << "nextHop <-- " << nextHop << endl;
 
-        FecVector::iterator it = findFecEntry(oldList, re->host, re->netmask.netmaskLength());
+        FecVector::iterator it = findFecEntry(oldList, re->host, re->netmask.getNetmaskLength());
 
         if (it == oldList.end())
         {
@@ -290,7 +290,7 @@ void LDP::rebuildFecList()
             fec_t newItem;
             newItem.fecid = ++maxFecid;
             newItem.addr = re->host;
-            newItem.length = re->netmask.netmaskLength();
+            newItem.length = re->netmask.getNetmaskLength();
             newItem.nextHop = nextHop;
             updateFecListEntry(newItem);
             fecList.push_back(newItem);
@@ -315,20 +315,20 @@ void LDP::rebuildFecList()
 
     // our own addresses (XXX is it needed?)
 
-    for (int i = 0; i< ift->numInterfaces(); ++i)
+    for (int i = 0; i< ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (ie->networkLayerGateIndex() < 0)
+        if (ie->getNetworkLayerGateIndex() < 0)
             continue;
 
-        FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->inetAddress(), 32);
+        FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->getInetAddress(), 32);
         if (it == oldList.end())
         {
             fec_t newItem;
             newItem.fecid = ++maxFecid;
-            newItem.addr = ie->ipv4()->inetAddress();
+            newItem.addr = ie->ipv4()->getInetAddress();
             newItem.length = 32;
-            newItem.nextHop = ie->ipv4()->inetAddress();
+            newItem.nextHop = ie->ipv4()->getInetAddress();
             fecList.push_back(newItem);
         }
         else
@@ -400,7 +400,7 @@ void LDP::sendHelloTo(IPAddress dest)
     LDPHello *hello = new LDPHello("LDP-Hello");
     hello->setByteLength(LDP_HEADER_BYTES);
     hello->setType(HELLO);
-    hello->setSenderAddress(rt->routerId());
+    hello->setSenderAddress(rt->getRouterId());
     //hello->setReceiverAddress(...);
     hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
@@ -471,7 +471,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
     // update TED and routing table
 
-    unsigned int index = tedmod->linkIndex(rt->routerId(), peerIP);
+    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
     tedmod->ted[index].state = false;
     announceLinkChange(index);
     tedmod->rebuildRoutingTable();
@@ -487,7 +487,7 @@ void LDP::processLDPHello(LDPHello *msg)
 
     EV << "Received LDP Hello from " << peerAddr << ", ";
 
-    if (peerAddr.isUnspecified() || peerAddr==rt->routerId())
+    if (peerAddr.isUnspecified() || peerAddr==rt->getRouterId())
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
         EV << "that's myself, ignore\n";
@@ -495,7 +495,7 @@ void LDP::processLDPHello(LDPHello *msg)
     }
 
     // mark link as working if it was failed, and rebuild table
-    unsigned int index = tedmod->linkIndex(rt->routerId(), peerAddr);
+    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
     if (!tedmod->ted[index].state)
     {
         tedmod->ted[index].state = true;
@@ -518,7 +518,7 @@ void LDP::processLDPHello(LDPHello *msg)
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = ift->interfaceAt(interfaceId)->getName();
-    info.activeRole = peerAddr.getInt() > rt->routerId().getInt();
+    info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");
     scheduleAt(simTime() + holdTime, info.timeout);
@@ -542,7 +542,7 @@ void LDP::openTCPConnectionToPeer(int peerIndex)
     TCPSocket *socket = new TCPSocket();
     socket->setOutputGate(gate("tcpOut"));
     socket->setCallbackObject(this, (void*)peerIndex);
-    socket->bind(rt->routerId(), 0);
+    socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
 
@@ -562,7 +562,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses
         // the routing is based on? --Andras
-        IPAddress peerAddr = socket->remoteAddress().get4();
+        IPAddress peerAddr = socket->getRemoteAddress().get4();
 
         int i = findPeer(peerAddr);
         if (i==-1 || myPeers[i].socket)
@@ -699,11 +699,11 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     //
     // Wrong code:
     //int i;
-    //for (i=0; i < rt->numRoutingEntries(); i++)
+    //for (i=0; i < rt->getNumRoutingEntries(); i++)
     //    if (rt->routingEntry(i)->host == dest)
     //        break;
     //
-    //if (i == rt->numRoutingEntries())
+    //if (i == rt->getNumRoutingEntries())
     //    return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
     //
     InterfaceEntry *ie = rt->interfaceForDestAddr(dest);
@@ -724,7 +724,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
 
     RoutingEntry *anEntry;
 
-    for (i = 0; i < rt->numRoutingEntries(); i++)
+    for (i = 0; i < rt->getNumRoutingEntries(); i++)
     {
         for (k = 0; k < (int)myPeers.size(); k++)
         {
@@ -740,13 +740,13 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     // Return any IP which has default route - not in routing table entries
     for (i = 0; i < (int)myPeers.size(); i++)
     {
-        for (k = 0; k < rt->numRoutingEntries(); k++)
+        for (k = 0; k < rt->getNumRoutingEntries(); k++)
         {
             anEntry = rt->routingEntry(i);
             if (anEntry->host == myPeers[i].peerIP)
                 break;
         }
-        if (k == rt->numRoutingEntries())
+        if (k == rt->getNumRoutingEntries())
             break;
     }
 
@@ -823,7 +823,7 @@ void LDP::sendNotify(int status, IPAddress dest, IPAddress addr, int length)
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
     lnMessage->setReceiverAddress(dest);
-    lnMessage->setSenderAddress(rt->routerId());
+    lnMessage->setSenderAddress(rt->getRouterId());
 
     FEC_TLV fec;
     fec.addr = addr;
@@ -841,7 +841,7 @@ void LDP::sendMapping(int type, IPAddress dest, int label, IPAddress addr, int l
     lmMessage->setByteLength(LDP_HEADER_BYTES); // FIXME find out actual length
     lmMessage->setType(type);
     lmMessage->setReceiverAddress(dest);
-    lmMessage->setSenderAddress(rt->routerId());
+    lmMessage->setSenderAddress(rt->getRouterId());
     lmMessage->setLabel(label);
 
     FEC_TLV fec;

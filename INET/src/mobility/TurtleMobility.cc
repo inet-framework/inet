@@ -231,8 +231,8 @@ double TurtleMobility::getValue(const char *s)
     if (strchr(s,'$'))
     {
         char strMaxX[32], strMaxY[32];
-        sprintf(strMaxX, "%g", playgroundSizeX()-1);
-        sprintf(strMaxY, "%g", playgroundSizeY()-1);
+        sprintf(strMaxX, "%g", getPlaygroundSizeX()-1);
+        sprintf(strMaxY, "%g", getPlaygroundSizeY()-1);
 
         str = s;
         std::string::size_type pos;

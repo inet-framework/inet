@@ -149,7 +149,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
     conn->tcpAlgorithm->setConnection(conn);
 
-    conn->state = conn->tcpAlgorithm->stateVariables();
+    conn->state = conn->tcpAlgorithm->getStateVariables();
     configureStateVariables();
     conn->tcpAlgorithm->initialize();
 
@@ -293,7 +293,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     tcpAlgorithm->setConnection(this);
 
     // create state block
-    state = tcpAlgorithm->stateVariables();
+    state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
 }

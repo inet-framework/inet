@@ -113,7 +113,7 @@ class INET_API RTCPPacket : public cMessage
         /**
          * Returns the packet type of this rtcp packet.
          */
-        virtual RTCP_PACKET_TYPE packetType();
+        virtual RTCP_PACKET_TYPE getPacketType();
 
         /**
          * Returns the value of the field length in the rtcp header.

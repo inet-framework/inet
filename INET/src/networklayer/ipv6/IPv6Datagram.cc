@@ -114,7 +114,7 @@ int IPv6Datagram::calculateHeaderByteLength() const
 Register_Class(IPv6ExtensionHeader);
 
 
-IPProtocolId IPv6ExtensionHeader::extensionType() const
+IPProtocolId IPv6ExtensionHeader::getExtensionType() const
 {
     // FIXME msg files don't yet support readonly attrs that can be
     // redefined in subclasses, so for now we resort to the following
@@ -132,7 +132,7 @@ IPProtocolId IPv6ExtensionHeader::extensionType() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return IP_PROT_IPv6EXT_ESP;
     } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", getClassName());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::getExtensionType()", getClassName());
     }
 }
 
@@ -154,7 +154,7 @@ int IPv6ExtensionHeader::getByteLength() const
     } else if (dynamic_cast<const IPv6EncapsulatingSecurityPayloadHeader*>(this)) {
         return 8; // FIXME verify
     } else {
-        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::extensionType()", getClassName());
+        throw cRuntimeError("unrecognised HeaderExtension subclass %s in IPv6ExtensionHeader::getExtensionType()", getClassName());
     }
 }
 

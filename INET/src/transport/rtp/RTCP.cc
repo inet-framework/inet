@@ -375,7 +375,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
         if (rtcpPackets->exist(i)) {
             // remove the rtcp packet from the rtcp compound packet
             RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets->remove(i));
-            if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_SR) {
+            if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_SR) {
                 RTCPSenderReportPacket *rtcpSenderReportPacket = (RTCPSenderReportPacket *)rtcpPacket;
                 uint32 ssrc = rtcpSenderReportPacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -418,7 +418,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 delete receptionReports;
 
             }
-            else if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_RR) {
+            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_RR) {
                 RTCPReceiverReportPacket *rtcpReceiverReportPacket = (RTCPReceiverReportPacket *)rtcpPacket;
                 uint32 ssrc = rtcpReceiverReportPacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -460,7 +460,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 };
                 delete receptionReports;
             }
-            else if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_SDES) {
+            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_SDES) {
                 RTCPSDESPacket *rtcpSDESPacket = (RTCPSDESPacket *)rtcpPacket;
                 cArray *sdesChunks = rtcpSDESPacket->getSdesChunks();
 
@@ -487,7 +487,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 delete sdesChunks;
 
             }
-            else if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_BYE) {
+            else if (rtcpPacket->getPacketType() == RTCPPacket::RTCP_PT_BYE) {
                 RTCPByePacket *rtcpByePacket = (RTCPByePacket *)rtcpPacket;
                 uint32 ssrc = rtcpByePacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);

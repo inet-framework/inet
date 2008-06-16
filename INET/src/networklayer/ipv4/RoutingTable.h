@@ -223,7 +223,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Returns routerId.
      */
-    IPAddress routerId()  {return _routerId;}
+    IPAddress getRouterId()  {return _routerId;}
 
     /**
      * Sets routerId.
@@ -281,7 +281,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Total number of routing entries (unicast, multicast entries and default route).
      */
-    int numRoutingEntries();
+    int getNumRoutingEntries();
 
     /**
      * Return kth routing entry.

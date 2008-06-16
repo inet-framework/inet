@@ -122,7 +122,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     if (!ie->isBroadcast())
     {
         EV << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
-        send(msg, "nicOut", ie->networkLayerGateIndex());
+        send(msg, "nicOut", ie->getNetworkLayerGateIndex());
         return;
     }
 
@@ -242,14 +242,14 @@ void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& m
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, "nicOut", ie->networkLayerGateIndex());
+    send(msg, "nicOut", ie->getNetworkLayerGateIndex());
 }
 
 void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
 {
     // find our own IP address and MAC address on the given interface
-    MACAddress myMACAddress = ie->macAddress();
-    IPAddress myIPAddress = ie->ipv4()->inetAddress();
+    MACAddress myMACAddress = ie->getMacAddress();
+    IPAddress myIPAddress = ie->ipv4()->getInetAddress();
 
     // both must be set
     ASSERT(!myMACAddress.isUnspecified());
@@ -416,8 +416,8 @@ void ARP::processARPPacket(ARPPacket *arp)
                 EV << "Packet was ARP REQUEST, sending REPLY\n";
 
                 // find our own IP address and MAC address on the given interface
-                MACAddress myMACAddress = ie->macAddress();
-                IPAddress myIPAddress = ie->ipv4()->inetAddress();
+                MACAddress myMACAddress = ie->getMacAddress();
+                IPAddress myIPAddress = ie->ipv4()->getInetAddress();
 
                 // "Swap hardware and protocol fields", etc.
                 arp->setName("arpREPLY");

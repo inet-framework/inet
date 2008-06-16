@@ -128,7 +128,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
 void IPv6::handleMessageFromHL(cMessage *msg)
 {
     // if no interface exists, do not send datagram
-    if (ift->numInterfaces() == 0)
+    if (ift->getNumInterfaces() == 0)
     {
         EV << "No interfaces exist, dropping packet\n";
         delete msg;
@@ -234,8 +234,8 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             }
             return;
         }
-        interfaceId = route->interfaceID();
-        nextHop = route->nextHop();
+        interfaceId = route->getInterfaceID();
+        nextHop = route->getNextHop();
         if (nextHop.isUnspecified())
             nextHop = destAddress;  // next hop is the host itself
 
@@ -259,7 +259,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // set datagram source address if not yet set
     if (datagram->getSrcAddress().isUnspecified())
     {
-        const IPv6Address& srcAddr = ie->ipv6()->preferredAddress();
+        const IPv6Address& srcAddr = ie->ipv6()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
         datagram->setSrcAddress(srcAddr);
     }
@@ -296,7 +296,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
         }
 
         // make sure scope of multicast address is large enough to be forwarded to other links
-        if (destAddr.multicastScope()<=2)
+        if (destAddr.getMulticastScope()<=2)
         {
             EV << "multicast dest address is link-local (or smaller) scope\n";
             delete datagram;
@@ -312,7 +312,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
     EV << "sending out datagram on every interface (except incoming one)\n";
-    for (int i=0; i<ift->numInterfaces(); i++)
+    for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
         if (fromIE!=ie)
@@ -348,7 +348,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
         IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
 
         // FIXME code from the MPLS model: set packet dest address to routerId (???)
-        datagramCopy->setDestAddress(rt->routerId());
+        datagramCopy->setDestAddress(rt->getRouterId());
 
         localDeliver(datagramCopy);
     }
@@ -380,7 +380,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->inetAddress());
+                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->getInetAddress());
 
                 // send
                 IPv6Address nextHopAddr = routes[i].gateway;
@@ -557,7 +557,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     }
 
     // send datagram to link layer
-    send(datagram, "queueOut", ie->networkLayerGateIndex());
+    send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
 
 

@@ -327,7 +327,7 @@ void Mac80211::handleMsgNotForMe(Mac80211Pkt *af)
             {
                 if (contention->isScheduled())
                     cancelEvent(contention);
-                scheduleAt(simTime() + backoff() + EIFS, contention);
+                scheduleAt(simTime() + computeBackoff() + EIFS, contention);
             }
             else
                 beginNewCycle();
@@ -821,7 +821,7 @@ void Mac80211::beginNewCycle()
             else
             {
                 // backoff!
-                scheduleAt(simTime() + backoff() + DIFS, contention);
+                scheduleAt(simTime() + computeBackoff() + DIFS, contention);
             }
         }
         tryWithoutBackoff = false;
@@ -839,12 +839,12 @@ void Mac80211::beginNewCycle()
 /**
  * Compute the backoff value.
  */
-simtime_t Mac80211::backoff()
+simtime_t Mac80211::computeBackoff()
 {
     // the MAC has won the previous contention. We have to compute a new
     // backoff window
     if (BW == 0) {
-        int CW = contentionWindow();
+        int CW = computeContentionWindow();
         EV << "generating backoff for CW: " << CW << endl;
         BW = intrand(CW + 1) * ST;
     }
@@ -861,9 +861,9 @@ simtime_t Mac80211::backoff()
  *  algorithm.  Use the variable counter (attempts to transmit
  *  packet), the constant values CWmax (contention window maximum)
  *  and m (parameter for the initial backoff window, usally m=7).
- *  Called by backoff()
+ *  Called by computeBackoff()
  */
-int Mac80211::contentionWindow()
+int Mac80211::computeContentionWindow()
 {
     // the next packet is an unicast packet
     if (!nextIsBroadcast)

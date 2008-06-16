@@ -73,7 +73,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         std::vector<std::string> lines;
         
         RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
-        for (int i = 0; i < rt->numRoutingEntries(); i++)
+        for (int i = 0; i < rt->getNumRoutingEntries(); i++)
         {
             IPAddress host = rt->routingEntry(i)->host;
             

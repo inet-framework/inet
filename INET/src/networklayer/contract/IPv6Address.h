@@ -173,7 +173,7 @@ class INET_API IPv6Address
         /**
          * Get the IPv6 address scope.
          */
-        Scope scope() const;
+        Scope getScope() const;
 
         /**
          * Return the string representation of the given scope.
@@ -251,28 +251,28 @@ class INET_API IPv6Address
          */
         bool isUnspecified() const  {return (d[0]|d[1]|d[2]|d[3])==0;}
 
-        /** Utility function based on scope() */
-        bool isMulticast() const {return scope()==MULTICAST;}
+        /** Utility function based on getScope() */
+        bool isMulticast() const {return getScope()==MULTICAST;}
 
-        /** Utility function based on scope() */
-        bool isUnicast() const {return scope()!=MULTICAST && scope()!=UNSPECIFIED;}
+        /** Utility function based on getScope() */
+        bool isUnicast() const {return getScope()!=MULTICAST && getScope()!=UNSPECIFIED;}
 
-        /** Utility function based on scope() */
-        bool isLoopback() const {return scope()==LOOPBACK;}
+        /** Utility function based on getScope() */
+        bool isLoopback() const {return getScope()==LOOPBACK;}
 
-        /** Utility function based on scope() */
-        bool isLinkLocal() const {return scope()==LINK;}
+        /** Utility function based on getScope() */
+        bool isLinkLocal() const {return getScope()==LINK;}
 
-        /** Utility function based on scope() */
-        bool isSiteLocal() const {return scope()==SITE;}
+        /** Utility function based on getScope() */
+        bool isSiteLocal() const {return getScope()==SITE;}
 
-        /** Utility function based on scope() */
-        bool isGlobal() const {return scope()==GLOBAL;}
+        /** Utility function based on getScope() */
+        bool isGlobal() const {return getScope()==GLOBAL;}
 
         /**
          * Get the 4-bit scope field of an IPv6 multicast address.
          */
-        int multicastScope() const;
+        int getMulticastScope() const;
 };
 
 /**

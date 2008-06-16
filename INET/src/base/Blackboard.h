@@ -101,7 +101,7 @@ class BlackboardAccess;
  *     }
  *     else if(stage==1)
  *     {
- *         ref = blackboard()->subscribe(this,"routingTable");
+ *         ref = getBlackboard()->subscribe(this,"routingTable");
  *         ...
  *     }
  * }
@@ -126,9 +126,9 @@ class BlackboardAccess;
  * {
  *     if(stage==0)
  *     {
- *         blackboard()->registerClient(this);
+ *         getBlackboard()->registerClient(this);
  *         // make sure we get what's already on the blackboard
- *         blackboard()->getBlackboardContent(this);
+ *         getBlackboard()->getBlackboardContent(this);
  *     }
  * }
  *
@@ -140,7 +140,7 @@ class BlackboardAccess;
  *     {
  *         // new network interface appeared, subscribe to it and do whatever
  *         // other actions are necessary
- *         blackboard()->subscribe(this, item);
+ *         getBlackboard()->subscribe(this, item);
  *         ...
  *     }
  * }
@@ -154,7 +154,7 @@ class BlackboardAccess;
  * void Zak::letsCheckWhatIsOnTheBlackboard()
  * {
  *     // subscribe to all NetworkInterfaceData
- *     Blackboard *bb = blackboard();
+ *     Blackboard *bb = getBlackboard();
  *     for (Blackboard::iterator i=bb->begin(); i!=bb->end(); ++i)
  *         if (dynamic_cast<NetworkInterfaceData *>((*i)->getData()))
  *             bb->subscribe(this, *i);
@@ -337,7 +337,7 @@ class INET_API BlackboardAccess
     virtual ~BlackboardAccess() {}
 
     /** Returns a pointer to the Blackboard*/
-    Blackboard *blackboard();
+    Blackboard *getBlackboard();
 
     /** @name Callbacks invoked by the blackboard */
     //@{

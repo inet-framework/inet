@@ -848,7 +848,7 @@ void OSPF::Router::RebuildRoutingTable (void)
     RoutingTableAccess         routingTableAccess;
     std::vector<RoutingEntry*> eraseEntries;
     RoutingTable*              simRoutingTable    = routingTableAccess.get ();
-    unsigned long              routingEntryNumber = simRoutingTable->numRoutingEntries ();
+    unsigned long              routingEntryNumber = simRoutingTable->getNumRoutingEntries();
     // remove entries from the IP routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
         RoutingEntry*            entry     = simRoutingTable->routingEntry (i);
@@ -1523,7 +1523,7 @@ void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const 
     //OSPF::LSAKeyType     lsaKey;
 
     RoutingTable*      simRoutingTable    = RoutingTableAccess ().get ();
-    unsigned long      routingEntryNumber = simRoutingTable->numRoutingEntries ();
+    unsigned long      routingEntryNumber = simRoutingTable->getNumRoutingEntries();
     bool               inRoutingTable     = false;
     // add the external route to the routing table if it was not added by another module
     for (unsigned long i = 0; i < routingEntryNumber; i++) {

@@ -66,7 +66,7 @@ class INET_API TCPAlgorithm : public cPolymorphic
     /**
      * Creates and returns the TCP state variables.
      */
-    TCPStateVariables *stateVariables() {
+    TCPStateVariables *getStateVariables() {
         if (!state) state = createStateVariables();
         return state;
     }

@@ -44,13 +44,13 @@ IPv4InterfaceData::IPv4InterfaceData()
 std::string IPv4InterfaceData::info() const
 {
     std::stringstream out;
-    out << "IP:{inet_addr:" << inetAddress() << "/" << netmask().netmaskLength();
-    if (!multicastGroups().empty())
+    out << "IP:{inet_addr:" << getInetAddress() << "/" << getNetmask().getNetmaskLength();
+    if (!getMulticastGroups().empty())
     {
         out << " mcastgrps:";
-        for (unsigned int j=0; j<multicastGroups().size(); j++)
-            if (!multicastGroups()[j].isUnspecified())
-                out << (j>0?",":"") << multicastGroups()[j];
+        for (unsigned int j=0; j<getMulticastGroups().size(); j++)
+            if (!getMulticastGroups()[j].isUnspecified())
+                out << (j>0?",":"") << getMulticastGroups()[j];
     }
     out << "}";
     return out.str();
@@ -59,14 +59,14 @@ std::string IPv4InterfaceData::info() const
 std::string IPv4InterfaceData::detailedInfo() const
 {
     std::stringstream out;
-    out << "inet addr:" << inetAddress() << "\tMask: " << netmask() << "\n";
+    out << "inet addr:" << getInetAddress() << "\tMask: " << getNetmask() << "\n";
 
-    out << "Metric: " << metric() << "\n";
+    out << "Metric: " << getMetric() << "\n";
 
     out << "Groups:";
-    for (unsigned int j=0; j<multicastGroups().size(); j++)
-        if (!multicastGroups()[j].isUnspecified())
-            out << "  " << multicastGroups()[j];
+    for (unsigned int j=0; j<getMulticastGroups().size(); j++)
+        if (!getMulticastGroups()[j].isUnspecified())
+            out << "  " << getMulticastGroups()[j];
     out << "\n";
     return out.str();
 }

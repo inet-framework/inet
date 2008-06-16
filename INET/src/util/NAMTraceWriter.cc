@@ -69,7 +69,7 @@ void NAMTraceWriter::initialize(int stage)
         // write "link" entries
         InterfaceTable *ift = InterfaceTableAccess().get();
         cModule *node = getParentModule();  // the host or router
-        for (int i=0; i<ift->numInterfaces(); i++)
+        for (int i=0; i<ift->getNumInterfaces(); i++)
         {
             // skip loopback interfaces
             InterfaceEntry *ie = ift->interfaceAt(i);
@@ -77,7 +77,7 @@ void NAMTraceWriter::initialize(int stage)
             if (!ie->isPointToPoint()) continue; // consider pont-to-point links only
 
             // fill in peerNamIds in InterfaceEntries
-            cGate *outgate = node->gate(ie->nodeOutputGateId());
+            cGate *outgate = node->gate(ie->getNodeOutputGateId());
             if (!outgate || !outgate->getToGate()) continue;
             cModule *peernode = outgate->getToGate()->getOwnerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
             cModule *peerwriter = peernode->getSubmodule("namTrace");
@@ -119,8 +119,8 @@ void NAMTraceWriter::receiveChangeNotification(int category, cPolymorphic *detai
     if (category==NF_PP_TX_BEGIN || category==NF_PP_RX_END || category==NF_L2_Q_DROP)
     {
         TxNotifDetails *d = check_and_cast<TxNotifDetails *>(details);
-        int peernamid = d->interfaceEntry()->peerNamId();
-        cMessage *msg = d->message();
+        int peernamid = d->getInterfaceEntry()->getPeerNamId();
+        cMessage *msg = d->getMessage();
 
         switch(category)
         {

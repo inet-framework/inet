@@ -284,7 +284,7 @@ char *RoutingTableParser::parseEntry (char *ifconfigFile,
 void RoutingTableParser::parseMulticastGroups (char *groupStr,
                                               InterfaceEntry *itf)
 {
-    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4()->multicastGroups();
+    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4()->getMulticastGroups();
 
     // add "224.0.0.1" automatically
     mcg.push_back(IPAddress::ALL_HOSTS_MCAST);

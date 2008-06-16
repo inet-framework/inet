@@ -142,7 +142,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
     frame->setChannelNumber(getChannelNumber());
     frame->encapsulate(msg);
     frame->setDuration(calcDuration(frame));
-    frame->setSenderPos(myPosition());
+    frame->setSenderPos(getMyPosition());
     return frame;
 }
 

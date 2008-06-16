@@ -38,8 +38,8 @@ class TxNotifDetails : public cPolymorphic
   public:
     TxNotifDetails() {msg=NULL; ie=NULL;}
 
-    cMessage *message() const {return msg;}
-    InterfaceEntry *interfaceEntry() const {return ie;}
+    cMessage *getMessage() const {return msg;}
+    InterfaceEntry *getInterfaceEntry() const {return ie;}
     void setMessage(cMessage *m) {msg = m;}
     void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
 };

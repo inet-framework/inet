@@ -28,7 +28,7 @@ Register_Class(BasicDSCPClassifier);
 
 #define BEST_EFFORT 1
 
-int BasicDSCPClassifier::numQueues()
+int BasicDSCPClassifier::getNumQueues()
 {
     return 2;
 }

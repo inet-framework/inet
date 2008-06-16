@@ -54,10 +54,10 @@ std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (!_name.empty() ? getName() : "*");
-    if (networkLayerGateIndex()==-1)
+    if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else
-        out << "  on:nwLayer.ifOut[" << networkLayerGateIndex() << "]";
+        out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "  MTU:" << mtu();
     if (isDown()) out << " DOWN";
     if (isBroadcast()) out << " BROADCAST";
@@ -65,10 +65,10 @@ std::string InterfaceEntry::info() const
     if (isPointToPoint()) out << " POINTTOPOINT";
     if (isLoopback()) out << " LOOPBACK";
     out << "  macAddr:";
-    if (macAddress().isUnspecified())
+    if (getMacAddress().isUnspecified())
         out << "n/a";
     else
-        out << macAddress();
+        out << getMacAddress();
 
     if (_ipv4data)
         out << " " << ((cPolymorphic*)_ipv4data)->info(); // Khmm...
@@ -85,10 +85,10 @@ std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
     out << "name:" << (!_name.empty() ? getName() : "*");
-    if (networkLayerGateIndex()==-1)
+    if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else
-        out << "  on:nwLayer.ifOut[" << networkLayerGateIndex() << "]";
+        out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "MTU: " << mtu() << " \t";
     if (isDown()) out << "DOWN ";
     if (isBroadcast()) out << "BROADCAST ";
@@ -97,10 +97,10 @@ std::string InterfaceEntry::detailedInfo() const
     if (isLoopback()) out << "LOOPBACK ";
     out << "\n";
     out << "  macAddr:";
-    if (macAddress().isUnspecified())
+    if (getMacAddress().isUnspecified())
         out << "n/a";
     else
-        out << macAddress();
+        out << getMacAddress();
     out << "\n";
     if (_ipv4data)
         out << " " << ((cPolymorphic*)_ipv4data)->info() << "\n"; // Khmm...

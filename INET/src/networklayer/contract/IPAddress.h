@@ -232,7 +232,7 @@ class INET_API IPAddress
     /**
      * Counts 1 bits in a netmask. E.g. for 255.255.254.0, it will return 23.
      */
-    int netmaskLength() const;
+    int getNetmaskLength() const;
 
     /**
      * Test if the masked addresses (ie the mask is applied to addr1 and

@@ -76,10 +76,10 @@ class INET_API InterfaceEntry : public cPolymorphic
 
     int getInterfaceId() const        {return _interfaceId;}
     const char *getName() const       {return _name.c_str();}
-    int networkLayerGateIndex() const {return _nwLayerGateIndex;}
-    int nodeOutputGateId() const   {return _nodeOutputGateId;}
-    int nodeInputGateId() const    {return _nodeInputGateId;}
-    int peerNamId() const          {return _peernamid;}
+    int getNetworkLayerGateIndex() const {return _nwLayerGateIndex;}
+    int getNodeOutputGateId() const   {return _nodeOutputGateId;}
+    int getNodeInputGateId() const    {return _nodeInputGateId;}
+    int getPeerNamId() const          {return _peernamid;}
     int mtu() const                {return _mtu;}
     bool isDown() const            {return _down;}
     bool isBroadcast() const       {return _broadcast;}
@@ -87,8 +87,8 @@ class INET_API InterfaceEntry : public cPolymorphic
     bool isPointToPoint() const    {return _pointToPoint;}
     bool isLoopback() const        {return _loopback;}
     double getDatarate() const        {return _datarate;}
-    const MACAddress& macAddress() const  {return _macAddr;}
-    const InterfaceToken& interfaceToken() const {return _token;}//FIXME: Shouldn't this be interface identifier?
+    const MACAddress& getMacAddress() const  {return _macAddr;}
+    const InterfaceToken& getInterfaceToken() const {return _token;}//FIXME: Shouldn't this be interface identifier?
 
     void setName(const char *s)  {_name = s;}
     void setNetworkLayerGateIndex(int i) {_nwLayerGateIndex = i;}

@@ -86,8 +86,8 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     /**
      * Adds an interface. The second argument should be a module which belongs
      * to the physical interface (e.g. PPP or EtherMac) -- it will be used
-     * to discover and fill in  networkLayerGateIndex(), nodeOutputGateId(),
-     * and nodeInputGateId() in InterfaceEntry. It should be NULL if this is
+     * to discover and fill in  getNetworkLayerGateIndex(), getNodeOutputGateId(),
+     * and getNodeInputGateId() in InterfaceEntry. It should be NULL if this is
      * a virtual interface (e.g. loopback).
      *
      * Note: Interface deletion is not supported, but one can mark one
@@ -98,7 +98,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     /**
      * Returns the number of interfaces.
      */
-    int numInterfaces()  {return interfaces.size();}
+    int getNumInterfaces()  {return interfaces.size();}
 
     /**
      * Returns the InterfaceEntry specified by an index 0..numInterfaces-1.
@@ -106,19 +106,19 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     InterfaceEntry *interfaceAt(int pos);
 
     /**
-     * Returns an interface given by its nodeOutputGateId().
+     * Returns an interface given by its getNodeOutputGateId().
      * Returns NULL if not found.
      */
     InterfaceEntry *interfaceByNodeOutputGateId(int id);
 
     /**
-     * Returns an interface given by its nodeInputGateId().
+     * Returns an interface given by its getNodeInputGateId().
      * Returns NULL if not found.
      */
     InterfaceEntry *interfaceByNodeInputGateId(int id);
 
     /**
-     * Returns an interface given by its networkLayerGateIndex().
+     * Returns an interface given by its getNetworkLayerGateIndex().
      * Returns NULL if not found.
      */
     InterfaceEntry *interfaceByNetworkLayerGateIndex(int index);
@@ -134,7 +134,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      * should never happen because InterfaceTable itself registers a
      * loopback interface on startup.)
      */
-    InterfaceEntry *firstLoopbackInterface();
+    InterfaceEntry *getFirstLoopbackInterface();
 };
 
 #endif

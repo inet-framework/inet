@@ -92,7 +92,7 @@ bool IPAddressResolver::tryResolve(const char *s, IPvXAddress& result, int addrT
 IPAddress IPAddressResolver::routerIdOf(cModule *host)
 {
     RoutingTable *rt = routingTableOf(host);
-    return rt->routerId();
+    return rt->getRouterId();
 }
 
 IPvXAddress IPAddressResolver::addressOf(cModule *host, int addrType)
@@ -140,12 +140,12 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
         if (ie->ipv6())
             ret = getInterfaceIPv6Address(ie);
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv6 && ie->ipv4())
-            ret = ie->ipv4()->inetAddress();
+            ret = ie->ipv4()->getInetAddress();
     }
     else if (addrType==ADDR_IPv4 || addrType==ADDR_PREFER_IPv4)
     {
         if (ie->ipv4())
-            ret = ie->ipv4()->inetAddress();
+            ret = ie->ipv4()->getInetAddress();
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv4 && ie->ipv6())
             ret = getInterfaceIPv6Address(ie);
     }
@@ -159,17 +159,17 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
 IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
 {
     IPAddress addr;
-    if (ift->numInterfaces()==0)
+    if (ift->getNumInterfaces()==0)
         opp_error("IPAddressResolver: interface table `%s' has no interface registered "
                   "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
-    for (int i=0; i<ift->numInterfaces(); i++)
+    for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (ie->ipv4() && !ie->ipv4()->inetAddress().isUnspecified() && !ie->isLoopback())
+        if (ie->ipv4() && !ie->ipv4()->getInetAddress().isUnspecified() && !ie->isLoopback())
         {
-            addr = ie->ipv4()->inetAddress();
+            addr = ie->ipv4()->getInetAddress();
             break;
         }
     }
@@ -180,17 +180,17 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
 {
 #ifndef NO_IPv6
     // browse interfaces and pick a globally routable address
-    if (ift->numInterfaces()==0)
+    if (ift->getNumInterfaces()==0)
         opp_error("IPAddressResolver: interface table `%s' has no interface registered "
                   "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     IPv6Address addr;
-    for (int i=0; i<ift->numInterfaces() && addr.isUnspecified(); i++)
+    for (int i=0; i<ift->getNumInterfaces() && addr.isUnspecified(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
         if (!ie->ipv6() || ie->isLoopback())
             continue;
-        IPv6Address ifAddr = ie->ipv6()->preferredAddress();
+        IPv6Address ifAddr = ie->ipv6()->getPreferredAddress();
         if (addr.isGlobal() && ifAddr.isGlobal() && addr!=ifAddr)
             EV << ift->getFullPath() << " has at least two globally routable addresses on different interfaces\n";
         if (ifAddr.isGlobal())
@@ -207,7 +207,7 @@ IPv6Address IPAddressResolver::getInterfaceIPv6Address(InterfaceEntry *ie)
 #ifndef NO_IPv6
     if (!ie->ipv6())
         return IPv6Address();
-    return ie->ipv6()->preferredAddress();
+    return ie->ipv6()->getPreferredAddress();
 #else
     return IPv6Address();
 #endif

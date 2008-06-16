@@ -32,11 +32,11 @@ Define_Module(RoutingTable6);
 std::string IPv6Route::info() const
 {
     std::stringstream out;
-    out << destPrefix() << "/" << getPrefixLength() << " --> ";
-    out << "if=" << interfaceID() << " next hop:" << nextHop(); // FIXME try printing interface name
-    out << " " << routeSrcName(src());
-    if (expiryTime()>0)
-        out << " exp:" << expiryTime();
+    out << getDestPrefix() << "/" << getPrefixLength() << " --> ";
+    out << "if=" << getInterfaceID() << " next hop:" << getNextHop(); // FIXME try printing interface name
+    out << " " << routeSrcName(getSrc());
+    if (getExpiryTime()>0)
+        out << " exp:" << getExpiryTime();
     return out.str();
 }
 
@@ -93,7 +93,7 @@ void RoutingTable6::initialize(int stage)
         WATCH(isrouter);
 
         // add IPv6InterfaceData to interfaces
-        for (int i=0; i<ift->numInterfaces(); i++)
+        for (int i=0; i<ift->getNumInterfaces(); i++)
         {
             InterfaceEntry *ie = ift->interfaceAt(i);
             configureInterfaceForIPv6(ie);
@@ -105,14 +105,14 @@ void RoutingTable6::initialize(int stage)
         if (isrouter)
         {
             // add globally routable prefixes to routing table
-            for (int x = 0; x < ift->numInterfaces(); x++)
+            for (int x = 0; x < ift->getNumInterfaces(); x++)
             {
                 InterfaceEntry *ie = ift->interfaceAt(x);
 
                 if (ie->isLoopback())
                     continue;
 
-                for (int y = 0; y < ie->ipv6()->numAdvPrefixes(); y++)
+                for (int y = 0; y < ie->ipv6()->getNumAdvPrefixes(); y++)
                     if (ie->ipv6()->advPrefix(y).prefix.isGlobal())
                         addOrUpdateOwnAdvPrefix(ie->ipv6()->advPrefix(y).prefix,
                                                 ie->ipv6()->advPrefix(y).prefixLength,
@@ -166,7 +166,7 @@ void RoutingTable6::updateDisplayString()
         return;
 
     char buf[80];
-    sprintf(buf, "%d routes\n%d destcache entries", numRoutes(), destCache.size());
+    sprintf(buf, "%d routes\n%d destcache entries", getNumRoutes(), destCache.size());
     getDisplayString().setTagArg("t",0,buf);
 }
 
@@ -206,7 +206,7 @@ void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
         return;
     }
     //o  Its required Link-Local Address for each interface.
-    //IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->interfaceToken());
+    //IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->getInterfaceToken());
     //ie->ipv6()->assignAddress(linkLocalAddr, true, 0, 0);
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
@@ -318,7 +318,7 @@ InterfaceEntry *RoutingTable6::interfaceByAddress(const IPv6Address& addr)
 
     if (addr.isUnspecified())
         return NULL;
-    for (int i=0; i<ift->numInterfaces(); ++i)
+    for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
         if (ie->ipv6()->hasAddress(addr))
@@ -332,7 +332,7 @@ bool RoutingTable6::localDeliver(const IPv6Address& dest)
     Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
 
     // first, check if we have an interface with this address
-    for (int i=0; i<ift->numInterfaces(); i++)
+    for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
         if (ie->ipv6()->hasAddress(dest))
@@ -351,7 +351,7 @@ bool RoutingTable6::localDeliver(const IPv6Address& dest)
     // check for solicited-node multicast address
     if (dest.matches(IPv6Address::SOLICITED_NODE_PREFIX, 104))
     {
-        for (int i=0; i<ift->numInterfaces(); i++)
+        for (int i=0; i<ift->getNumInterfaces(); i++)
         {
             InterfaceEntry *ie = ift->interfaceAt(i);
             if (ie->ipv6()->matchesSolicitedNodeMulticastAddress(dest))
@@ -383,14 +383,14 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
     // by prefix lengths and metric (see addRoute())
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if (dest.matches((*it)->destPrefix(),(*it)->getPrefixLength()))
+        if (dest.matches((*it)->getDestPrefix(),(*it)->getPrefixLength()))
         {
             // FIXME proofread this code, iterator invalidation-wise, etc
             bool entryExpired = false;
-            if (simTime() > (*it)->expiryTime() && (*it)->expiryTime() != 0)//since 0 represents infinity.
+            if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0)//since 0 represents infinity.
             {
                 EV << "Expired prefix detected!!" << endl;
-                removeOnLinkPrefix((*it)->destPrefix(), (*it)->getPrefixLength());
+                removeOnLinkPrefix((*it)->getDestPrefix(), (*it)->getPrefixLength());
                 entryExpired = true;
             }
             if (entryExpired == false) return *it;
@@ -403,7 +403,7 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
 bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix)
 {
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
-        if (prefix.matches((*it)->destPrefix(),128))
+        if (prefix.matches((*it)->getDestPrefix(),128))
             return true;
     return false;
 }
@@ -449,7 +449,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSrc()==IPv6Route::FROM_RA && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -486,7 +486,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::OWN_ADV_PREFIX && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSrc()==IPv6Route::OWN_ADV_PREFIX && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -519,7 +519,7 @@ void RoutingTable6::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefix
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->src()==IPv6Route::FROM_RA && (*it)->destPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSrc()==IPv6Route::FROM_RA && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             routeList.erase(it);
             return; // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
@@ -562,7 +562,7 @@ void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifI
 
 void RoutingTable6::addRoutingProtocolRoute(IPv6Route *route)
 {
-    ASSERT(route->src()==IPv6Route::ROUTING_PROT);
+    ASSERT(route->getSrc()==IPv6Route::ROUTING_PROT);
     addRoute(route);
 }
 
@@ -573,7 +573,7 @@ bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
     // For metric, a smaller value is better (we report that as "less").
     if (a->getPrefixLength()!=b->getPrefixLength())
         return a->getPrefixLength() > b->getPrefixLength();
-    return a->metric() < b->metric();
+    return a->getMetric() < b->getMetric();
 }
 
 void RoutingTable6::addRoute(IPv6Route *route)
@@ -596,7 +596,7 @@ void RoutingTable6::removeRoute(IPv6Route *route)
     updateDisplayString();
 }
 
-int RoutingTable6::numRoutes() const
+int RoutingTable6::getNumRoutes() const
 {
     return routeList.size();
 }

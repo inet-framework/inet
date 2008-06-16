@@ -168,7 +168,7 @@ class INET_API TCPSocket
 
   public:
     /**
-     * Constructor. The connectionId() method returns a valid Id right after
+     * Constructor. The getConnectionId() method returns a valid Id right after
      * constructor call.
      */
     TCPSocket();
@@ -190,7 +190,7 @@ class INET_API TCPSocket
      * to identify the connection when it receives a command from the application
      * (or TCPSocket).
      */
-    int connectionId() const  {return connId;}
+    int getConnectionId() const  {return connId;}
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
@@ -206,9 +206,9 @@ class INET_API TCPSocket
 
     /** @name Getter functions */
     //@{
-    IPvXAddress localAddress() {return localAddr;}
+    IPvXAddress getLocalAddress() {return localAddr;}
     int getLocalPort() {return localPrt;}
-    IPvXAddress remoteAddress() {return remoteAddr;}
+    IPvXAddress getRemoteAddress() {return remoteAddr;}
     int getRemotePort() {return remotePrt;}
     //@}
 

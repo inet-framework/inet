@@ -138,7 +138,7 @@ class INET_API UDPSocket
 
   public:
     /**
-     * Constructor. The socketId() method returns a valid Id right after
+     * Constructor. The getSocketId() method returns a valid Id right after
      * constructor call.
      */
     UDPSocket();
@@ -151,7 +151,7 @@ class INET_API UDPSocket
     /**
      * Returns the internal socket Id.
      */
-    int socketId() const  {return sockId;}
+    int getSocketId() const  {return sockId;}
 
     /**
      * Sets userId to an arbitrary value. (This value will be sent back to us
@@ -183,7 +183,7 @@ class INET_API UDPSocket
 
     /** @name Getter functions */
     //@{
-    IPvXAddress localAddress() {return localAddr;}
+    IPvXAddress getLocalAddress() {return localAddr;}
     int getLocalPort() {return localPrt;}
     //@}
 

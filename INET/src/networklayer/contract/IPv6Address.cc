@@ -204,7 +204,7 @@ std::string IPv6Address::str() const
     return os.str();
 }
 
-IPv6Address::Scope IPv6Address::scope() const
+IPv6Address::Scope IPv6Address::getScope() const
 {
     //Mask the given IPv6 address with the different mask types
     //to get only the IPv6 address scope. Compare the masked
@@ -370,10 +370,10 @@ bool IPv6Address::matches(const IPv6Address& prefix, int prefixLength) const
             ((d[2]^prefix.d[2])&mask[2]) | ((d[3]^prefix.d[3])&mask[3]))==0;
 }
 
-int IPv6Address::multicastScope() const
+int IPv6Address::getMulticastScope() const
 {
     if ((d[0] & MULTICAST_MASK)!=MULTICAST_PREFIX)
-        throw cRuntimeError("IPv6Address::multicastScope(): %s is not a multicast address", str().c_str());
+        throw cRuntimeError("IPv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());
     return (d[0] >> 16) & 0x0F;
 }
 

@@ -46,7 +46,7 @@ void DropTailQoSQueue::initialize()
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
 
-    numQueues = classifier->numQueues();
+    numQueues = classifier->getNumQueues();
     queues = new cQueue *[numQueues];
     for (int i=0; i<numQueues; i++)
     {

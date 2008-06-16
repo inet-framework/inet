@@ -63,7 +63,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual uint32 bufferEndSeq();
+    virtual uint32 getBufferEndSeq();
 
     /**
      *

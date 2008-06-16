@@ -154,10 +154,10 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     virtual void beginNewCycle();
 
     /** @brief Compute a backoff value */
-    simtime_t backoff();
+    simtime_t computeBackoff();
 
     /** @brief Compute a new contention window */
-    int contentionWindow();
+    int computeContentionWindow();
 
     /** @brief Test if maximum number of retries to transmit is exceeded */
     void testMaxAttempts();

@@ -113,7 +113,7 @@ class INET_API TCPSendQueue : public cPolymorphic
      * Returns the sequence number of the last byte stored in the buffer plus one.
      * (The first byte of the next send operation would get this sequence number.)
      */
-    virtual uint32 bufferEndSeq() = 0;
+    virtual uint32 getBufferEndSeq() = 0;
 
     /**
      * Utility function: returns how many bytes are available in the queue, from
@@ -121,7 +121,7 @@ class INET_API TCPSendQueue : public cPolymorphic
      */
     inline ulong bytesAvailable(uint32 fromSeq)
     {
-        uint32 bufEndSeq = bufferEndSeq();
+        uint32 bufEndSeq = getBufferEndSeq();
         return seqLess(fromSeq, bufEndSeq) ? bufEndSeq-fromSeq : 0;
     }
 

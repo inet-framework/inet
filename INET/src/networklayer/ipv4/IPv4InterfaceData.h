@@ -58,10 +58,10 @@ class INET_API IPv4InterfaceData : public cPolymorphic
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    IPAddress inetAddress() const  {return _inetAddr;}
-    IPAddress netmask() const      {return _netmask;}
-    int metric() const             {return _metric;}
-    const IPAddressVector& multicastGroups() const {return _multicastGroups;}
+    IPAddress getInetAddress() const  {return _inetAddr;}
+    IPAddress getNetmask() const      {return _netmask;}
+    int getMetric() const             {return _metric;}
+    const IPAddressVector& getMulticastGroups() const {return _multicastGroups;}
 
     void setInetAddress(IPAddress a) {_inetAddr = a;}
     void setNetmask(IPAddress m)     {_netmask = m;}

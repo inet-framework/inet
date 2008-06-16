@@ -172,7 +172,7 @@ void IP::handleReceivedICMP(ICMPMessage *msg)
 void IP::handleMessageFromHL(cMessage *msg)
 {
     // if no interface exists, do not send datagram
-    if (ift->numInterfaces() == 0)
+    if (ift->getNumInterfaces() == 0)
     {
         EV << "No interfaces exist, dropping packet\n";
         delete msg;
@@ -248,7 +248,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
 
     // set datagram source address if not yet set
     if (datagram->getSrcAddress().isUnspecified())
-        datagram->setSrcAddress(destIE->ipv4()->inetAddress());
+        datagram->setSrcAddress(destIE->ipv4()->getInetAddress());
 
     // default: send datagram to fragmentation
     EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
@@ -288,7 +288,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
             IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
             // FIXME code from the MPLS model: set packet dest address to routerId (???)
-            datagramCopy->setDestAddress(rt->routerId());
+            datagramCopy->setDestAddress(rt->getRouterId());
 
             reassembleAndDeliver(datagramCopy);
         }
@@ -318,7 +318,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
         // set datagram source address if not yet set
         if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destIE->ipv4()->inetAddress());
+            datagram->setSrcAddress(destIE->ipv4()->getInetAddress());
 
         // send
         fragmentAndSend(datagram, destIE, datagram->getDestAddress());
@@ -347,7 +347,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(destIE->ipv4()->inetAddress());
+                    datagramCopy->setSrcAddress(destIE->ipv4()->getInetAddress());
 
                 // send
                 IPAddress nextHopAddr = routes[i].gateway;

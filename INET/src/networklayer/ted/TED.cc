@@ -45,7 +45,7 @@ void TED::initialize(int stage)
 
     rt = RoutingTableAccess().get();
     ift = InterfaceTableAccess().get();
-    routerId = rt->routerId();
+    routerId = rt->getRouterId();
     nb = NotificationBoardAccess().get();
 
     maxMessageId = 0;
@@ -58,11 +58,11 @@ void TED::initialize(int stage)
     // We need to create one TED entry (TELinkStateInfo) for each link,
     // i.e. for each physical interface.
     //
-    for (int i = 0; i < ift->numInterfaces(); i++)
+    for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
 
-        if (ie->nodeOutputGateId() == -1)  // ignore if it's not a physical interface
+        if (ie->getNodeOutputGateId() == -1)  // ignore if it's not a physical interface
             continue;
 
         //
@@ -73,7 +73,7 @@ void TED::initialize(int stage)
         // preconfigured static host routes in routing table.
         //
         RoutingEntry *rentry = NULL;
-        for (int j = 0; j < rt->numRoutingEntries(); j++)
+        for (int j = 0; j < rt->getNumRoutingEntries(); j++)
         {
             rentry = rt->routingEntry(j);
             if (rentry->interfacePtr == ie && rentry->type == RoutingEntry::DIRECT)
@@ -85,7 +85,7 @@ void TED::initialize(int stage)
         ASSERT(!remote.isUnspecified());
 
         // find bandwidth of the link
-        cGate *g = getParentModule()->gate(ie->nodeOutputGateId());
+        cGate *g = getParentModule()->gate(ie->getNodeOutputGateId());
         ASSERT(g);
         double linkBandwidth = g->getChannel()->par("datarate");
 
@@ -94,7 +94,7 @@ void TED::initialize(int stage)
         //
         TELinkStateInfo entry;
         entry.advrouter = routerId;
-        entry.local = ie->ipv4()->inetAddress();
+        entry.local = ie->ipv4()->getInetAddress();
         entry.linkid = linkid;
         entry.remote = remote;
         entry.MaxBandwidth = linkBandwidth;
@@ -103,7 +103,7 @@ void TED::initialize(int stage)
         entry.state = true;
 
         // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
-        entry.metric = rentry->interfacePtr->ipv4()->metric();
+        entry.metric = rentry->interfacePtr->ipv4()->getMetric();
 
         EV << "metric set to=" << entry.metric << endl;
 
@@ -115,15 +115,15 @@ void TED::initialize(int stage)
     }
 
     // extract list of local interface addresses into interfaceAddrs[]
-    for (int i = 0; i < ift->numInterfaces(); i++)
+    for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (rt->interfaceByAddress(ie->ipv4()->inetAddress()) != ie)
+        if (rt->interfaceByAddress(ie->ipv4()->getInetAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
-                  ie->getName(), ie->ipv4()->inetAddress().str().c_str());
+                  ie->getName(), ie->ipv4()->getInetAddress().str().c_str());
         if (!ie->isLoopback())
-            interfaceAddrs.push_back(ie->ipv4()->inetAddress());
+            interfaceAddrs.push_back(ie->ipv4()->getInetAddress());
     }
 
     rebuildRoutingTable();
@@ -213,7 +213,7 @@ void TED::rebuildRoutingTable()
     std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
 
     // remove all routing entries, except multicast ones (we don't care about them)
-    int n = rt->numRoutingEntries();
+    int n = rt->getNumRoutingEntries();
     int j = 0;
     for (int i = 0; i < n; i++)
     {

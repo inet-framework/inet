@@ -187,7 +187,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_max==sendQueue->bufferEndSeq())
+            if (state->snd_max==sendQueue->getBufferEndSeq())
             {
                 tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
@@ -199,12 +199,12 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             }
             else
             {
-                tcpEV << "SEND of " << (sendQueue->bufferEndSeq()-state->snd_max) <<
+                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq()-state->snd_max) <<
                       " bytes pending, deferring sending of FIN\n";
                 event = TCP_E_IGNORE;
             }
             state->send_fin = true;
-            state->snd_fin_seq = sendQueue->bufferEndSeq();
+            state->snd_fin_seq = sendQueue->getBufferEndSeq();
             break;
 
         case TCP_S_FIN_WAIT_1:

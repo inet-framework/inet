@@ -47,7 +47,7 @@ void MPLS::initialize(int stage)
      * we now send plain IPDatagrams instead of packets with label=-1
      * and we thus do not need this extra configuration
      *
-    labelIf.resize(ift->numInterfaces());
+    labelIf.resize(ift->getNumInterfaces());
     cStringTokenizer tokenizer(par("peers"));
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
@@ -123,7 +123,7 @@ bool MPLS::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     ASSERT(outLabel.size() > 0);
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->networkLayerGateIndex();
+    int outgoingPort = ift->interfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
 
     MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->getName());
     mplsPacket->encapsulate(ipdatagram);
@@ -225,7 +225,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     InterfaceEntry *ie = ift->interfaceByNetworkLayerGateIndex(gateIndex);
     std::string senderInterface = ie->getName();
     ASSERT(mplsPacket->hasLabel());
-    int oldLabel = mplsPacket->topLabel();
+    int oldLabel = mplsPacket->getTopLabel();
 
     EV << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
 
@@ -254,7 +254,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->networkLayerGateIndex();
+    int outgoingPort = ift->interfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
 
     doStackOps(mplsPacket, outLabel);
 

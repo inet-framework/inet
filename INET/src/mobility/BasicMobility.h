@@ -98,10 +98,10 @@ class INET_API BasicMobility : public BasicModule
     void updatePosition();
 
     /** @brief Returns the width of the playground */
-    double playgroundSizeX() const  {return cc->getPgs()->x;}
+    double getPlaygroundSizeX() const  {return cc->getPgs()->x;}
 
     /** @brief Returns the height of the playground */
-    double playgroundSizeY() const  {return cc->getPgs()->y;}
+    double getPlaygroundSizeY() const  {return cc->getPgs()->y;}
 
     /** @brief Get a new random position for the host*/
     virtual Coord getRandomPosition();

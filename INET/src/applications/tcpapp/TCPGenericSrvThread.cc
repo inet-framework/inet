@@ -52,12 +52,12 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     {
         msg->setByteLength(requestedBytes);
         delete msg->removeControlInfo();
-        socket()->send(msg);
+        getSocket()->send(msg);
     }
 
     if (doClose)
     {
-        socket()->close();
+        getSocket()->close();
     }
 }
 

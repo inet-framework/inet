@@ -98,7 +98,7 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
 
         // find interface table and assign address to all (non-loopback) interfaces
         InterfaceTable *ift = nodeInfo[i].ift;
-        for (int k=0; k<ift->numInterfaces(); k++)
+        for (int k=0; k<ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->interfaceAt(k);
             if (!ie->isLoopback())
@@ -127,7 +127,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         // count non-loopback interfaces
         int numIntf = 0;
         InterfaceEntry *ie = NULL;
-        for (int k=0; k<ift->numInterfaces(); k++)
+        for (int k=0; k<ift->getNumInterfaces(); k++)
             if (!ift->interfaceAt(k)->isLoopback())
                 {ie = ift->interfaceAt(k); numIntf++;}
 
@@ -146,7 +146,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         e->interfacePtr = ie;
         e->type = RoutingEntry::REMOTE;
         e->source = RoutingEntry::MANUAL;
-        //e->metric() = 1;
+        //e->getMetric() = 1;
         rt->addRoutingEntry(e);
     }
 }
@@ -203,7 +203,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             e->interfacePtr = ie;
             e->type = RoutingEntry::DIRECT;
             e->source = RoutingEntry::MANUAL;
-            //e->metric() = 1;
+            //e->getMetric() = 1;
             rt->addRoutingEntry(e);
         }
     }

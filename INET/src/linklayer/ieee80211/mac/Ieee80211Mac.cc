@@ -414,22 +414,22 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleDIFSPeriod());
             FSMA_Event_Transition(Immediate-Transmit-RTS,
-                                  msg == endDIFS && !isBroadcast(currentTransmission())
-                                  && currentTransmission()->getByteLength() >= rtsThreshold && !backoff,
+                                  msg == endDIFS && !isBroadcast(getCurrentTransmission())
+                                  && getCurrentTransmission()->getByteLength() >= rtsThreshold && !backoff,
                                   WAITCTS,
-                sendRTSFrame(currentTransmission());
+                sendRTSFrame(getCurrentTransmission());
                 cancelDIFSPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
-                                  msg == endDIFS && isBroadcast(currentTransmission()) && !backoff,
+                                  msg == endDIFS && isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITBROADCAST,
-                sendBroadcastFrame(currentTransmission());
+                sendBroadcastFrame(getCurrentTransmission());
                 cancelDIFSPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Data,
-                                  msg == endDIFS && !isBroadcast(currentTransmission()) && !backoff,
+                                  msg == endDIFS && !isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITACK,
-                sendDataFrame(currentTransmission());
+                sendDataFrame(getCurrentTransmission());
                 cancelDIFSPeriod();
             );
             FSMA_Event_Transition(DIFS-Over,
@@ -462,20 +462,20 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleBackoffPeriod());
             FSMA_Event_Transition(Transmit-RTS,
-                                  msg == endBackoff && !isBroadcast(currentTransmission())
-                                  && currentTransmission()->getByteLength() >= rtsThreshold,
+                                  msg == endBackoff && !isBroadcast(getCurrentTransmission())
+                                  && getCurrentTransmission()->getByteLength() >= rtsThreshold,
                                   WAITCTS,
-                sendRTSFrame(currentTransmission());
+                sendRTSFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Transmit-Broadcast,
-                                  msg == endBackoff && isBroadcast(currentTransmission()),
+                                  msg == endBackoff && isBroadcast(getCurrentTransmission()),
                                   WAITBROADCAST,
-                sendBroadcastFrame(currentTransmission());
+                sendBroadcastFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Transmit-Data,
-                                  msg == endBackoff && !isBroadcast(currentTransmission()),
+                                  msg == endBackoff && !isBroadcast(getCurrentTransmission()),
                                   WAITACK,
-                sendDataFrame(currentTransmission());
+                sendDataFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Backoff-Busy,
                                   isMediumStateChange(msg) && !isMediumFree(),
@@ -486,7 +486,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(WAITACK)
         {
-            FSMA_Enter(scheduleDataTimeoutPeriod(currentTransmission()));
+            FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-ACK,
                                   isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
                                   IDLE,
@@ -509,7 +509,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         // wait until broadcast is sent
         FSMA_State(WAITBROADCAST)
         {
-            FSMA_Enter(scheduleBroadcastTimeoutPeriod(currentTransmission()));
+            FSMA_Enter(scheduleBroadcastTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endTimeout,
                                   IDLE,
@@ -541,18 +541,18 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleSIFSPeriod(frame));
             FSMA_Event_Transition(Transmit-CTS,
-                                  msg == endSIFS && frameReceivedBeforeSIFS()->getType() == ST_RTS,
+                                  msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_RTS,
                                   IDLE,
                 sendCTSFrameOnEndSIFS();
                 resetStateVariables();
             );
             FSMA_Event_Transition(Transmit-DATA,
-                                  msg == endSIFS && frameReceivedBeforeSIFS()->getType() == ST_CTS,
+                                  msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_CTS,
                                   WAITACK,
-                sendDataFrameOnEndSIFS(currentTransmission());
+                sendDataFrameOnEndSIFS(getCurrentTransmission());
             );
             FSMA_Event_Transition(Transmit-ACK,
-                                  msg == endSIFS && isDataOrMgmtFrame(frameReceivedBeforeSIFS()),
+                                  msg == endSIFS && isDataOrMgmtFrame(getFrameReceivedBeforeSIFS()),
                                   IDLE,
                 sendACKFrameOnEndSIFS();
                 resetStateVariables();
@@ -749,7 +749,7 @@ bool Ieee80211Mac::isInvalidBackoffPeriod()
 
 void Ieee80211Mac::generateBackoffPeriod()
 {
-    backoffPeriod = BackoffPeriod(currentTransmission(), retryCounter);
+    backoffPeriod = BackoffPeriod(getCurrentTransmission(), retryCounter);
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period set to " << backoffPeriod << endl;
 }
@@ -919,14 +919,14 @@ void Ieee80211Mac::giveUpCurrentTransmission()
 void Ieee80211Mac::retryCurrentTransmission()
 {
     ASSERT(retryCounter < transmissionLimit - 1);
-    currentTransmission()->setRetry(true);
+    getCurrentTransmission()->setRetry(true);
     retryCounter++;
     numRetry++;
     backoff = true;
     generateBackoffPeriod();
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211Mac::currentTransmission()
+Ieee80211DataOrMgmtFrame *Ieee80211Mac::getCurrentTransmission()
 {
     return (Ieee80211DataOrMgmtFrame *)transmissionQueue.front();
 }
@@ -955,7 +955,7 @@ void Ieee80211Mac::resetStateVariables()
 
     if (!transmissionQueue.empty()) {
         backoff = true;
-        currentTransmission()->setRetry(false);
+        getCurrentTransmission()->setRetry(false);
     }
     else {
         backoff = false;
@@ -987,7 +987,7 @@ bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
     return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
 }
 
-Ieee80211Frame *Ieee80211Mac::frameReceivedBeforeSIFS()
+Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()
 {
     return (Ieee80211Frame *)endSIFS->getContextPointer();
 }

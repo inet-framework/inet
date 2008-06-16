@@ -45,7 +45,7 @@ void LinkStateRouting::initialize(int stage)
         tedmod = TEDAccess().get();
 
         RoutingTable *rt = RoutingTableAccess().get();
-        routerId = rt->routerId();
+        routerId = rt->getRouterId();
 
         // listen for TED modifications
         NotificationBoard *nb = NotificationBoardAccess().get();
@@ -59,7 +59,7 @@ void LinkStateRouting::initialize(int stage)
         while ((token = tokenizer.nextToken())!=NULL)
         {
             ASSERT(ift->interfaceByName(token));
-            peerIfAddrs.push_back(ift->interfaceByName(token)->ipv4()->inetAddress());
+            peerIfAddrs.push_back(ift->interfaceByName(token)->ipv4()->getInetAddress());
         }
 
         // schedule start of flooding link state info

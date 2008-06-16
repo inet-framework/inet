@@ -52,7 +52,7 @@ IPv6InterfaceData::IPv6InterfaceData()
     hostVars.curHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;//value specified in RFC 1700-can't find it
     hostVars.baseReachableTime = IPv6_REACHABLE_TIME;
     hostVars.reachableTime = generateReachableTime(_minRandomFactor(),
-        _maxRandomFactor(), baseReachableTime());
+        _maxRandomFactor(), getBaseReachableTime());
     hostVars.retransTimer = IPv6_RETRANS_TIMER;
 
     //rtrVars.advSendAdvertisements is set in RoutingTable6.cc:line 143
@@ -76,17 +76,17 @@ std::string IPv6InterfaceData::info() const
     // FIXME FIXME FIXME FIXME info() should never print a newline
     std::ostringstream os;
     os << "IPv6:{" << endl;
-    for (int i=0; i<numAddresses(); i++)
+    for (int i=0; i<getNumAddresses(); i++)
     {
         os << (i?"\t            , ":"\tAddrs:") << getAddress(i)
-           << "(" << IPv6Address::scopeName(getAddress(i).scope())
+           << "(" << IPv6Address::scopeName(getAddress(i).getScope())
            << (isTentativeAddress(i)?" tent":"") << ") "
            << " expiryTime: " << (addresses[i].expiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
            << " prefExpiryTime: " << (addresses[i].prefExpiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
            << endl;
     }
 
-    for (int i=0; i<numAdvPrefixes(); i++)
+    for (int i=0; i<getNumAdvPrefixes(); i++)
     {
         const AdvPrefix& a = advPrefix(i);
         os << (i?", ":"\tAdvPrefixes: ") << a.prefix << "/" << a.prefixLength << "("
@@ -206,7 +206,7 @@ void IPv6InterfaceData::permanentlyAssign(const IPv6Address& addr)
     choosePreferredAddress();
 }
 
-const IPv6Address& IPv6InterfaceData::linkLocalAddress() const
+const IPv6Address& IPv6InterfaceData::getLinkLocalAddress() const
 {
     for (AddressDataVector::const_iterator it=addresses.begin(); it!=addresses.end(); it++)
         if (it->address.isLinkLocal())  // FIXME and valid
@@ -229,8 +229,8 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
     // compare as "less", to make them appear first in the array
     if (a.tentative!=b.tentative)
          return !a.tentative; // tentative=false is better
-    if (a.address.scope()!=b.address.scope())
-         return a.address.scope()>b.address.scope(); // bigger scope is better
+    if (a.address.getScope()!=b.address.getScope())
+         return a.address.getScope()>b.address.getScope(); // bigger scope is better
     return (a.expiryTime==0 && b.expiryTime!=0) || a.expiryTime>b.expiryTime;  // longer expiry time is better
 }
 
@@ -287,7 +287,7 @@ simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
 
 simtime_t IPv6InterfaceData::generateReachableTime()
 {
-    return uniform(_minRandomFactor(), _maxRandomFactor()) * baseReachableTime();
+    return uniform(_minRandomFactor(), _maxRandomFactor()) * getBaseReachableTime();
 }
 
 

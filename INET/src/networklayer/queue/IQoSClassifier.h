@@ -38,11 +38,11 @@ class INET_API IQoSClassifier : public cPolymorphic
     /**
      * Returns the largest value plus one classifyPacket() returns.
      */
-    virtual int numQueues() = 0;
+    virtual int getNumQueues() = 0;
 
     /**
      * The method should return the priority (the index of subqueue)
-     * for the given packet, a value between 0 and numQueues()-1
+     * for the given packet, a value between 0 and getNumQueues()-1
      * (inclusive), with 0 representing the highest priority.
      */
     virtual int classifyPacket(cMessage *msg) = 0;

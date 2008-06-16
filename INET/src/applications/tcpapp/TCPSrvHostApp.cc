@@ -74,7 +74,7 @@ void TCPSrvHostApp::finish()
 void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 {
     // remove socket
-    socketMap.removeSocket(thread->socket());
+    socketMap.removeSocket(thread->getSocket());
 
     // remove thread object
     delete thread;

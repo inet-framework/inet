@@ -69,7 +69,7 @@ void OSPFRouting::initialize (int stage)
         ift = InterfaceTableAccess ().get ();
 
         // Get routerId
-        ospfRouter = new OSPF::Router (rt->routerId ().getInt (), this);
+        ospfRouter = new OSPF::Router (rt->getRouterId().getInt (), this);
 
         // read the OSPF AS configuration
         const char *fileName = par ("ospfConfigFile");
