@@ -27,7 +27,7 @@
 Register_Class(RTPParticipantInfo);
 
 
-RTPParticipantInfo::RTPParticipantInfo(uint32_t ssrc) : cObject() {
+RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject() {
     _sdesChunk = new SDESChunk("SDESChunk", ssrc);
     // because there haven't been sent any rtp packets
     // by this endsystem at all, the number of silent
@@ -130,12 +130,12 @@ bool RTPParticipantInfo::toBeDeleted(simtime_t now) {
 };
 
 
-uint32_t RTPParticipantInfo::getSSRC() {
+uint32 RTPParticipantInfo::getSSRC() {
     return _sdesChunk->getSSRC();
 };
 
 
-void RTPParticipantInfo::setSSRC(uint32_t ssrc) {
+void RTPParticipantInfo::setSSRC(uint32 ssrc) {
     _sdesChunk->setSSRC(ssrc);
 };
 
@@ -175,7 +175,7 @@ void RTPParticipantInfo::setRTCPPort(int rtcpPort) {
 };
 
 
-char *RTPParticipantInfo::ssrcToName(uint32_t ssrc) {
+char *RTPParticipantInfo::ssrcToName(uint32 ssrc) {
     char name[9];
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);

@@ -105,46 +105,46 @@ class INET_API RTPInterfacePacket : public cMessage
          * Called by the rtp module to inform the application that the rtp session
          * has been entered.
          */
-        virtual void sessionEntered(uint32_t ssrc);
+        virtual void sessionEntered(uint32 ssrc);
 
 
-        virtual void createSenderModule(uint32_t ssrc, int payloadType, const char *fileName);
-        virtual void senderModuleCreated(uint32_t ssrc);
-        virtual void deleteSenderModule(uint32_t ssrc);
-        virtual void senderModuleDeleted(uint32_t ssrc);
-        virtual void senderModuleControl(uint32_t ssrc, RTPSenderControlMessage *msg);
-        virtual void senderModuleStatus(uint32_t ssrc, RTPSenderStatusMessage *msg);
+        virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
+        virtual void senderModuleCreated(uint32 ssrc);
+        virtual void deleteSenderModule(uint32 ssrc);
+        virtual void senderModuleDeleted(uint32 ssrc);
+        virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
+        virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
 
         /**
          * Called by the application to order the rtp layer to start
          * transmitting a file.
          */
-        //virtual void startTransmission(uint32_t ssrc, int payloadType, const char *fileName);
+        //virtual void startTransmission(uint32 ssrc, int payloadType, const char *fileName);
 
         /**
          * Called by the rtp module to inform the application that
          * the transmitting has begun.
          */
-        //virtual void transmissionStarted(uint32_t ssrc);
+        //virtual void transmissionStarted(uint32 ssrc);
 
         /**
          * Called by the rtp module to inform the application
          * that the transmission has been finished because the
          * end of the file has been reached.
          */
-        //virtual void transmissionFinished(uint32_t ssrc);
+        //virtual void transmissionFinished(uint32 ssrc);
 
         /**
          * Called by the application to order the rtp layer to
          * stop transmitting.
          */
-        //virtual void stopTransmission(uint32_t ssrc);
+        //virtual void stopTransmission(uint32 ssrc);
 
         /**
          * Called by the rtp module to inform the application that
          * the transmission has been stopped as ordered.
          */
-        //virtual void transmissionStopped(uint32_t ssrc);
+        //virtual void transmissionStopped(uint32 ssrc);
 
         /**
          * Called by the application to order the rtp layer to
@@ -192,7 +192,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * Returns the ssrc identifier stored in this RTPInterfacePacket.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Returns the payload type stored in this RTPInterfacePacket.
@@ -239,7 +239,7 @@ class INET_API RTPInterfacePacket : public cMessage
         /**
          * The ssrc identifier stored in this RTPInterfacePacket.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 
         /**
          * The payload type stored in this RTPInterfacePacket.

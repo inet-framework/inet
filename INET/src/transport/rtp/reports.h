@@ -74,64 +74,64 @@ class INET_API SenderReport : public cObject
         /**
          * Returns the contained ntp time stamp.
          */
-        virtual uint64_t getNTPTimeStamp();
+        virtual uint64 getNTPTimeStamp();
 
         /**
          * Sets the ntp time stamp.
          */
-        virtual void setNTPTimeStamp(uint64_t ntpTimeStamp);
+        virtual void setNTPTimeStamp(uint64 ntpTimeStamp);
 
         /**
          * Returns the contained rtp time stamp.
          */
-        virtual uint32_t getRTPTimeStamp();
+        virtual uint32 getRTPTimeStamp();
 
         /**
          * Sets the rtp time stamp.
          */
-        virtual void setRTPTimeStamp(uint32_t timeStamp);
+        virtual void setRTPTimeStamp(uint32 timeStamp);
 
         /**
          * Returns the number of packets sent as stored in this SenderReport.
          */
-        virtual uint32_t getPacketCount();
+        virtual uint32 getPacketCount();
 
         /**
          * Sets the number of packets sent.
          */
-        virtual void setPacketCount(uint32_t packetCount);
+        virtual void setPacketCount(uint32 packetCount);
 
         /**
          * Returns how many bytes have been sent as store in this SenderReport.
          */
-        virtual uint32_t getByteCount();
+        virtual uint32 getByteCount();
 
         /**
          * Sets the value how many bytes have been sent.
          */
-        virtual void setByteCount(uint32_t byteCount);
+        virtual void setByteCount(uint32 byteCount);
 
     protected:
 
         /**
          * The ntp time stamp.
          */
-        uint64_t _ntpTimeStamp;
+        uint64 _ntpTimeStamp;
 
         /**
          * The rtp time stamp.
          */
-        uint32_t _rtpTimeStamp;
+        uint32 _rtpTimeStamp;
 
         /**
          * The number of packets sent.
          */
-        uint32_t _packetCount;
+        uint32 _packetCount;
 
         /**
          * The number of (payload) bytes sent.
          */
-        uint32_t _byteCount;
+        uint32 _byteCount;
 };
 
 
@@ -181,22 +181,22 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the ssrc identifier for which sender this ReceptionReport is.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Sets the ssrc identifier of the sender this ReceptionReport is for.
          */
-        virtual void setSSRC(uint32_t ssrc);
+        virtual void setSSRC(uint32 ssrc);
 
         /**
          * Returns the fraction of packets lost as stored in this ReceptionReport.
          */
-        virtual uint8_t getFractionLost();
+        virtual uint8 getFractionLost();
 
         /**
          * Sets the fraction of packets lost.
          */
-        virtual void setFractionLost(uint8_t fractionLost);
+        virtual void setFractionLost(uint8 fractionLost);
 
         /**
          * Returns the number of expected minus the number of packets received.
@@ -211,12 +211,12 @@ class INET_API ReceptionReport : public cObject
         /**
          * Returns the extended highest sequence number received.
          */
-        virtual uint32_t getSequenceNumber();
+        virtual uint32 getSequenceNumber();
 
         /**
          * Set the extended highest sequence number received.
          */
-        virtual void setSequenceNumber(uint32_t sequenceNumber);
+        virtual void setSequenceNumber(uint32 sequenceNumber);
 
         /**
          * Returns the interarrival jitter.
@@ -255,12 +255,12 @@ class INET_API ReceptionReport : public cObject
         /**
          * The ssrc identifier of the sender this ReceptionReport is for.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 
         /**
          * The fraction lost.
          */
-        uint8_t _fractionLost;
+        uint8 _fractionLost;
 
         /**
          * The number of packets expected minus the number of packets received.
@@ -270,7 +270,7 @@ class INET_API ReceptionReport : public cObject
         /**
          * The extended highest sequence number received.
          */
-        uint32_t _extendedHighestSequenceNumber;
+        uint32 _extendedHighestSequenceNumber;
 
         /**
          * The interarrival jitter.

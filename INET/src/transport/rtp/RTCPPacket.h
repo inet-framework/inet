@@ -200,12 +200,12 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
          * Returns the ssrc indentifier of the source which has sent this
          * rtcp receiver report packet.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Sets the ssrc identifier for the rtcp receiver report packet.
          */
-        virtual void setSSRC(uint32_t ssrc);
+        virtual void setSSRC(uint32 ssrc);
 
         /**
          * Adds a receiver report to this receiver report packet.
@@ -223,7 +223,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPPacket
         /**
          * The ssrc identifier of the source of this rtcp packet.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 
         /**
          * The reception reports in this packet are stored here.
@@ -406,18 +406,18 @@ class INET_API RTCPByePacket : public RTCPPacket
         /**
          * Returns the ssrc identifier.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Sets the ssrc identifier.
          */
-        virtual void setSSRC(uint32_t ssrc);
+        virtual void setSSRC(uint32 ssrc);
 
     protected:
         /**
          * The ssrc identifier.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 };
 
 

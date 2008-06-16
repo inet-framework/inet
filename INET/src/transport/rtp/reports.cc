@@ -78,42 +78,42 @@ void SenderReport::dump(std::ostream& os) const {
 };
 
 
-uint64_t SenderReport::getNTPTimeStamp() {
+uint64 SenderReport::getNTPTimeStamp() {
     return _ntpTimeStamp;
 };
 
 
-void SenderReport::setNTPTimeStamp(uint64_t ntpTimeStamp) {
+void SenderReport::setNTPTimeStamp(uint64 ntpTimeStamp) {
     _ntpTimeStamp = ntpTimeStamp;
 }
 
 
-uint32_t SenderReport::getRTPTimeStamp() {
+uint32 SenderReport::getRTPTimeStamp() {
     return _rtpTimeStamp;
 };
 
 
-void SenderReport::setRTPTimeStamp(uint32_t rtpTimeStamp) {
+void SenderReport::setRTPTimeStamp(uint32 rtpTimeStamp) {
     _rtpTimeStamp = rtpTimeStamp;
 };
 
 
-uint32_t SenderReport::getPacketCount() {
+uint32 SenderReport::getPacketCount() {
     return _packetCount;
 };
 
 
-void SenderReport::setPacketCount(uint32_t packetCount) {
+void SenderReport::setPacketCount(uint32 packetCount) {
     _packetCount = packetCount;
 }
 
 
-uint32_t SenderReport::getByteCount() {
+uint32 SenderReport::getByteCount() {
     return _byteCount;
 };
 
 
-void SenderReport::setByteCount(uint32_t byteCount) {
+void SenderReport::setByteCount(uint32 byteCount) {
     _byteCount = byteCount;
 }
 
@@ -181,22 +181,22 @@ void ReceptionReport::dump(std::ostream& os) const {
 };
 
 
-uint32_t ReceptionReport::getSSRC() {
+uint32 ReceptionReport::getSSRC() {
     return _ssrc;
 };
 
 
-void ReceptionReport::setSSRC(uint32_t ssrc) {
+void ReceptionReport::setSSRC(uint32 ssrc) {
     _ssrc = ssrc;
 };
 
 
-uint8_t ReceptionReport::getFractionLost() {
+uint8 ReceptionReport::getFractionLost() {
     return _fractionLost;
 };
 
 
-void ReceptionReport::setFractionLost(uint8_t fractionLost) {
+void ReceptionReport::setFractionLost(uint8 fractionLost) {
     _fractionLost = fractionLost;
 };
 
@@ -211,12 +211,12 @@ void ReceptionReport::setPacketsLostCumulative(int packetsLostCumulative) {
 };
 
 
-uint32_t ReceptionReport::getSequenceNumber() {
+uint32 ReceptionReport::getSequenceNumber() {
     return _extendedHighestSequenceNumber;
 };
 
 
-void ReceptionReport::setSequenceNumber(uint32_t sequenceNumber) {
+void ReceptionReport::setSequenceNumber(uint32 sequenceNumber) {
     _extendedHighestSequenceNumber = sequenceNumber;
 };
 

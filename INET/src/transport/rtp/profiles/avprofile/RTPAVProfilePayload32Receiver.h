@@ -63,8 +63,8 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
          * is used to throw away packets from mpeg frames already stored in
          * the data file.
          */
-        uint32_t _lowestAllowedTimeStamp;
-        uint32_t _highestSequenceNumber;
+        uint32 _lowestAllowedTimeStamp;
+        uint32 _highestSequenceNumber;
 
         /**
          * Writes information about received frames into the output file.

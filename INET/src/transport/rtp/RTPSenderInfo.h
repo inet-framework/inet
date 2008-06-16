@@ -40,7 +40,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * Default constructor.
          */
-        RTPSenderInfo(uint32_t ssrc = 0);
+        RTPSenderInfo(uint32 ssrc = 0);
 
         /**
          * Copy constructor.
@@ -94,12 +94,12 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * Sets the initial rtp time stamp.
          */
-        virtual void setTimeStampBase(uint32_t timeStampBase);
+        virtual void setTimeStampBase(uint32 timeStampBase);
 
         /**
          * Sets the initial sequence number.
          */
-        virtual void setSequenceNumberBase(uint16_t sequenceNumberBase);
+        virtual void setSequenceNumberBase(uint16 sequenceNumberBase);
 
         /**
          * A sender info shall never be deleted!
@@ -121,22 +121,22 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
         /**
          * The initial rtp time stamp.
          */
-        uint32_t _timeStampBase;
+        uint32 _timeStampBase;
 
         /**
          * The initial sequence number.
          */
-        uint16_t _sequenceNumberBase;
+        uint16 _sequenceNumberBase;
 
         /**
          * The number of rtp data packets this sender has sent.
          */
-        uint32_t _packetsSent;
+        uint32 _packetsSent;
 
         /**
          * The number of data bytes this sender has sent.
          */
-        uint32_t _bytesSent;
+        uint32 _bytesSent;
 
 };
 

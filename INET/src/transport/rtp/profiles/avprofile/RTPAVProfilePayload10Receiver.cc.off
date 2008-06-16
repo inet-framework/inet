@@ -37,9 +37,9 @@ void RTPAVProfilePayload10Receiver::initialize() {
 
 void RTPAVProfilePayload10Receiver::insertSilence(simtime_t duration) {
     // one sample is 32 bit (2 channels, both 16 bit)
-    uint32_t *data;
+    uint32 *data;
     int numberOfSamples = (int)(duration / ((float)_samplingRate));
-    data = new uint32_t[numberOfSamples];
+    data = new uint32[numberOfSamples];
     bzero(data, numberOfSamples * 4);
     afWriteFrames(_audioFile, AF_DEFAULT_TRACK, data, numberOfSamples);
 };

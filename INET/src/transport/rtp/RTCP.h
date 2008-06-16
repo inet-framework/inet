@@ -222,7 +222,7 @@ class INET_API RTCP : public cSimpleModule
          * about the rtp end system with this ssrc identifier.
          * Returns NULL if this end system is unknown.
          */
-        virtual RTPParticipantInfo* findParticipantInfo(uint32_t ssrc);
+        virtual RTPParticipantInfo* findParticipantInfo(uint32 ssrc);
 
         /**
          * Recalculates the average size of an RTCPCompoundPacket when

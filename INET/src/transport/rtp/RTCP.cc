@@ -242,7 +242,7 @@ void RTCP::scheduleInterval() {
 
 void RTCP::chooseSSRC() {
 
-    uint32_t ssrc = 0;
+    uint32 ssrc = 0;
     bool ssrcConflict = false;
     do {
         ssrc = intrand(0x7fffffff);
@@ -339,7 +339,7 @@ void RTCP::processOutgoingRTPPacket(RTPPacket *packet)
 
 
 void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int port) {
-    uint32_t ssrc = packet->getSSRC();
+    uint32 ssrc = packet->getSSRC();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == NULL) {
         participantInfo = new RTPParticipantInfo(ssrc);
@@ -377,7 +377,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
             RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets->remove(i));
             if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_SR) {
                 RTCPSenderReportPacket *rtcpSenderReportPacket = (RTCPSenderReportPacket *)rtcpPacket;
-                uint32_t ssrc = rtcpSenderReportPacket->getSSRC();
+                uint32 ssrc = rtcpSenderReportPacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
                 if (participantInfo == NULL) {
@@ -420,7 +420,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
             }
             else if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_RR) {
                 RTCPReceiverReportPacket *rtcpReceiverReportPacket = (RTCPReceiverReportPacket *)rtcpPacket;
-                uint32_t ssrc = rtcpReceiverReportPacket->getSSRC();
+                uint32 ssrc = rtcpReceiverReportPacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
                 if (participantInfo == NULL) {
                     participantInfo = new RTPReceiverInfo(ssrc);
@@ -470,7 +470,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                         SDESChunk *sdesChunk = (SDESChunk *)(sdesChunks->remove(j));
                         // this is needed to avoid seg faults
                         //sdesChunk->setOwner(this);
-                        uint32_t ssrc = sdesChunk->getSSRC();
+                        uint32 ssrc = sdesChunk->getSSRC();
                         RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
                         if (participantInfo == NULL) {
                             participantInfo = new RTPReceiverInfo(ssrc);
@@ -489,7 +489,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
             }
             else if (rtcpPacket->packetType() == RTCPPacket::RTCP_PT_BYE) {
                 RTCPByePacket *rtcpByePacket = (RTCPByePacket *)rtcpPacket;
-                uint32_t ssrc = rtcpByePacket->getSSRC();
+                uint32 ssrc = rtcpByePacket->getSSRC();
                 RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
                 if (participantInfo != NULL && participantInfo != _senderInfo) {
@@ -511,7 +511,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
 };
 
 
-RTPParticipantInfo *RTCP::findParticipantInfo(uint32_t ssrc) {
+RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc) {
     char *ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
     int participantIndex = _participantInfos->find(ssrcString);
     if (participantIndex != -1) {

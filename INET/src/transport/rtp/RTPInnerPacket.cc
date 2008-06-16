@@ -131,13 +131,13 @@ void RTPInnerPacket::initializeRTCP(const char *commonName, int mtu, int bandwid
 };
 
 
-void RTPInnerPacket::rtcpInitialized(uint32_t ssrc) {
+void RTPInnerPacket::rtcpInitialized(uint32 ssrc) {
     _type = RTP_INP_RTCP_INITIALIZED;
     _ssrc = ssrc;
 };
 
 
-void RTPInnerPacket::createSenderModule(uint32_t ssrc, int payloadType, const char *fileName) {
+void RTPInnerPacket::createSenderModule(uint32 ssrc, int payloadType, const char *fileName) {
     _type = RTP_INP_CREATE_SENDER_MODULE;
     _ssrc = ssrc;
     _payloadType = payloadType;
@@ -145,25 +145,25 @@ void RTPInnerPacket::createSenderModule(uint32_t ssrc, int payloadType, const ch
 };
 
 
-void RTPInnerPacket::senderModuleCreated(uint32_t ssrc) {
+void RTPInnerPacket::senderModuleCreated(uint32 ssrc) {
     _type = RTP_INP_SENDER_MODULE_CREATED;
     _ssrc = ssrc;
 };
 
 
-void RTPInnerPacket::deleteSenderModule(uint32_t ssrc) {
+void RTPInnerPacket::deleteSenderModule(uint32 ssrc) {
     _type = RTP_INP_DELETE_SENDER_MODULE;
     _ssrc = ssrc;
 };
 
 
-void RTPInnerPacket::senderModuleDeleted(uint32_t ssrc) {
+void RTPInnerPacket::senderModuleDeleted(uint32 ssrc) {
     _type = RTP_INP_SENDER_MODULE_DELETED;
     _ssrc = ssrc;
 };
 
 
-void RTPInnerPacket::initializeSenderModule(uint32_t ssrc, const char *fileName, int mtu) {
+void RTPInnerPacket::initializeSenderModule(uint32 ssrc, const char *fileName, int mtu) {
     _type = RTP_INP_INITIALIZE_SENDER_MODULE;
     _ssrc = ssrc;
     _fileName = fileName;
@@ -171,7 +171,7 @@ void RTPInnerPacket::initializeSenderModule(uint32_t ssrc, const char *fileName,
 };
 
 
-void RTPInnerPacket::senderModuleInitialized(uint32_t ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase) {
+void RTPInnerPacket::senderModuleInitialized(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase) {
     _type = RTP_INP_SENDER_MODULE_INITIALIZED;
     _ssrc = ssrc;
     _payloadType = payloadType;
@@ -180,14 +180,14 @@ void RTPInnerPacket::senderModuleInitialized(uint32_t ssrc, int payloadType, int
     _sequenceNumberBase = sequenceNumberBase;
 };
 
-void RTPInnerPacket::senderModuleControl(uint32_t ssrc, RTPSenderControlMessage *msg) {
+void RTPInnerPacket::senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg) {
     _type = RTP_INP_SENDER_MODULE_CONTROL;
     _ssrc = ssrc;
     encapsulate(msg);
 };
 
 
-void RTPInnerPacket::senderModuleStatus(uint32_t ssrc, RTPSenderStatusMessage *msg) {
+void RTPInnerPacket::senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg) {
     _type = RTP_INP_SENDER_MODULE_STATUS;
     _ssrc = ssrc;
     encapsulate(msg);
@@ -253,7 +253,7 @@ int RTPInnerPacket::getPort() {
 };
 
 
-uint32_t RTPInnerPacket::getSSRC() {
+uint32 RTPInnerPacket::getSSRC() {
     return _ssrc;
 };
 

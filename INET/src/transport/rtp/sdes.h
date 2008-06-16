@@ -135,7 +135,7 @@ class INET_API SDESChunk : public cArray
         /**
          * Default constructor.
          */
-        SDESChunk(const char *name = NULL, uint32_t ssrc = 0);
+        SDESChunk(const char *name = NULL, uint32 ssrc = 0);
 
         /**
          * Copy constructor.
@@ -176,12 +176,12 @@ class INET_API SDESChunk : public cArray
         /**
          * Returns the ssrc identifier this SDESChunk is for.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Sets the ssrc identifier this SDESChunk is for.
          */
-        virtual void setSSRC(uint32_t ssrc);
+        virtual void setSSRC(uint32 ssrc);
 
         /**
          * Returns the length in bytes of this SDESChunk.
@@ -193,7 +193,7 @@ class INET_API SDESChunk : public cArray
         /**
          * The ssrc identifier this SDESChunk is for.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 
         /**
          * The length in bytes of this SDESChunk.

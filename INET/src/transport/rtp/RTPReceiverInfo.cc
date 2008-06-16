@@ -25,7 +25,7 @@
 
 Register_Class(RTPReceiverInfo);
 
-RTPReceiverInfo::RTPReceiverInfo(uint32_t ssrc) : RTPParticipantInfo(ssrc)
+RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
 {
     _sequenceNumberBase = 0;
     _highestSequenceNumber = 0;
@@ -148,7 +148,7 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet,int id, simtime_t arriv
         _lastPacketArrivalTime = arrivalTime;
     };
 
-    //_jitterOutVector.record((uint32_t)_jitter);
+    //_jitterOutVector.record((uint32)_jitter);
 
     RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 };
@@ -161,8 +161,8 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
         _lastSenderReportNTPTimeStamp = report->getNTPTimeStamp();
     }
     else if (_clockRate == 0) {
-        uint32_t rtpTicks = report->getRTPTimeStamp() - _lastSenderReportRTPTimeStamp;
-        uint64_t ntpDifference = report->getNTPTimeStamp() - _lastSenderReportNTPTimeStamp;
+        uint32 rtpTicks = report->getRTPTimeStamp() - _lastSenderReportRTPTimeStamp;
+        uint64 ntpDifference = report->getNTPTimeStamp() - _lastSenderReportNTPTimeStamp;
         long double ntpSeconds = (long double)ntpDifference / (long double)(0xFFFFFFFF);
         _clockRate = (int)((long double)rtpTicks / ntpSeconds);
     }
@@ -186,13 +186,13 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         ReceptionReport *receptionReport = new ReceptionReport();
         receptionReport->setSSRC(getSSRC());
 
-        uint64_t packetsExpected = _sequenceNumberCycles + (uint64_t)_highestSequenceNumber - (uint64_t)_sequenceNumberBase + (uint64_t)1;
-        uint64_t packetsLost = packetsExpected - _packetsReceived;
+        uint64 packetsExpected = _sequenceNumberCycles + (uint64)_highestSequenceNumber - (uint64)_sequenceNumberBase + (uint64)1;
+        uint64 packetsLost = packetsExpected - _packetsReceived;
 
-        int32_t packetsExpectedInInterval = _sequenceNumberCycles + _highestSequenceNumber - _highestSequenceNumberPrior;
-        int32_t packetsReceivedInInterval = _packetsReceived - _packetsReceivedPrior;
-        int32_t packetsLostInInterval = packetsExpectedInInterval - packetsReceivedInInterval;
-        uint8_t fractionLost = 0;
+        int32 packetsExpectedInInterval = _sequenceNumberCycles + _highestSequenceNumber - _highestSequenceNumberPrior;
+        int32 packetsReceivedInInterval = _packetsReceived - _packetsReceivedPrior;
+        int32 packetsLostInInterval = packetsExpectedInInterval - packetsReceivedInInterval;
+        uint8 fractionLost = 0;
         if (packetsLostInInterval > 0) {
             fractionLost = (packetsLostInInterval << 8) / packetsExpectedInInterval;
         };
@@ -201,7 +201,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         receptionReport->setPacketsLostCumulative(packetsLost);
         receptionReport->setSequenceNumber(_sequenceNumberCycles + _highestSequenceNumber);
 
-        receptionReport->setJitter((uint32_t)SIMTIME_DBL(_jitter)); //XXX ??? store it in secs? --Andras
+        receptionReport->setJitter((uint32)SIMTIME_DBL(_jitter)); //XXX ??? store it in secs? --Andras
 
         // the middle 32 bit of the ntp time stamp of the last sender report
         receptionReport->setLastSR((_lastSenderReportNTPTimeStamp >> 16) & 0xFFFFFFFF);
@@ -210,7 +210,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         // of 1 / 65536 seconds
         // 0 if no sender report has ben received
 
-        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (uint32_t)(SIMTIME_DBL(now - _lastSenderReportArrivalTime) * 65536.0));
+        receptionReport->setDelaySinceLastSR(_lastSenderReportArrivalTime == 0.0 ? 0 : (uint32)(SIMTIME_DBL(now - _lastSenderReportArrivalTime) * 65536.0));
 
         return receptionReport;
     }

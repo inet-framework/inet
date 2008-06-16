@@ -104,13 +104,13 @@ void RTPInterfacePacket::enterSession(const char *commonName, const char *profil
 };
 
 
-void RTPInterfacePacket::sessionEntered(uint32_t ssrc) {
+void RTPInterfacePacket::sessionEntered(uint32 ssrc) {
     _type = RTP_IFP_SESSION_ENTERED;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::createSenderModule(uint32_t ssrc, int payloadType, const char *fileName) {
+void RTPInterfacePacket::createSenderModule(uint32 ssrc, int payloadType, const char *fileName) {
     _type = RTP_IFP_CREATE_SENDER_MODULE;
     _ssrc = ssrc;
     _payloadType =payloadType;
@@ -118,39 +118,39 @@ void RTPInterfacePacket::createSenderModule(uint32_t ssrc, int payloadType, cons
 };
 
 
-void RTPInterfacePacket::senderModuleCreated(uint32_t ssrc) {
+void RTPInterfacePacket::senderModuleCreated(uint32 ssrc) {
     _type = RTP_IFP_SENDER_MODULE_CREATED;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::deleteSenderModule(uint32_t ssrc) {
+void RTPInterfacePacket::deleteSenderModule(uint32 ssrc) {
     _type = RTP_IFP_DELETE_SENDER_MODULE;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::senderModuleDeleted(uint32_t ssrc) {
+void RTPInterfacePacket::senderModuleDeleted(uint32 ssrc) {
     _type = RTP_IFP_SENDER_MODULE_DELETED;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::senderModuleControl(uint32_t ssrc, RTPSenderControlMessage *msg) {
+void RTPInterfacePacket::senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg) {
     _type = RTP_IFP_SENDER_CONTROL;
     _ssrc = ssrc;
     encapsulate(msg);
 };
 
 
-void RTPInterfacePacket::senderModuleStatus(uint32_t ssrc, RTPSenderStatusMessage *msg) {
+void RTPInterfacePacket::senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg) {
     _type = RTP_IFP_SENDER_STATUS;
     _ssrc = ssrc;
     encapsulate(msg);
 };
 
 /*
-void RTPInterfacePacket::startTransmission(uint32_t ssrc, int payloadType, const char *fileName) {
+void RTPInterfacePacket::startTransmission(uint32 ssrc, int payloadType, const char *fileName) {
     _type = RTP_IFP_START_TRANSMISSION;
     _ssrc = ssrc;
     _payloadType = payloadType;
@@ -158,25 +158,25 @@ void RTPInterfacePacket::startTransmission(uint32_t ssrc, int payloadType, const
 };
 
 
-void RTPInterfacePacket::transmissionStarted(uint32_t ssrc) {
+void RTPInterfacePacket::transmissionStarted(uint32 ssrc) {
     _type = RTP_IFP_TRANSMISSION_STARTED;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::transmissionFinished(uint32_t ssrc) {
+void RTPInterfacePacket::transmissionFinished(uint32 ssrc) {
     _type = RTP_IFP_TRANSMISSION_FINISHED;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::stopTransmission(uint32_t ssrc) {
+void RTPInterfacePacket::stopTransmission(uint32 ssrc) {
     _type = RTP_IFP_STOP_TRANSMISSION;
     _ssrc = ssrc;
 };
 
 
-void RTPInterfacePacket::transmissionStopped(uint32_t ssrc) {
+void RTPInterfacePacket::transmissionStopped(uint32 ssrc) {
     _type = RTP_IFP_TRANSMISSION_STOPPED;
     _ssrc = ssrc;
 };
@@ -208,7 +208,7 @@ const char *RTPInterfacePacket::getProfileName() {
 };
 
 
-uint32_t RTPInterfacePacket::getSSRC() {
+uint32 RTPInterfacePacket::getSSRC() {
     return _ssrc;
 };
 

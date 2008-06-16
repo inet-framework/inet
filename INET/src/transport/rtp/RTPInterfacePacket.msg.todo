@@ -63,13 +63,13 @@ message RTPInterfacePacket
 
 //FIXME the handcoded class had the following methods that set the type (and some other fields):
 //   virtual void enterSession(const char *commonName, const char *profileName, int bandwidth, IPAddress destinationAddress, int port);
-//   virtual void sessionEntered(uint32_t ssrc);
-//   virtual void createSenderModule(uint32_t ssrc, int payloadType, const char *fileName);
-//   virtual void senderModuleCreated(uint32_t ssrc);
-//   virtual void deleteSenderModule(uint32_t ssrc);
-//   virtual void senderModuleDeleted(uint32_t ssrc);
-//   virtual void senderModuleControl(uint32_t ssrc, RTPSenderControlMessage *msg);
-//   virtual void senderModuleStatus(uint32_t ssrc, RTPSenderStatusMessage *msg);
+//   virtual void sessionEntered(uint32 ssrc);
+//   virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
+//   virtual void senderModuleCreated(uint32 ssrc);
+//   virtual void deleteSenderModule(uint32 ssrc);
+//   virtual void senderModuleDeleted(uint32 ssrc);
+//   virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
+//   virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
 //   virtual void leaveSession();
 //   virtual void sessionLeft();
 

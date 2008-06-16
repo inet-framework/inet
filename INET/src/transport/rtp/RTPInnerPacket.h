@@ -120,19 +120,19 @@ class INET_API RTPInnerPacket : public cMessage
          * for incoming messages from other session participants. It informs the rtp
          * module which later informs the rtp application about the ssrc identifier
          */
-        virtual void rtcpInitialized(uint32_t ssrc);
+        virtual void rtcpInitialized(uint32 ssrc);
 
-        virtual void createSenderModule(uint32_t ssrc, int payloadType, const char *fileName);
-        virtual void senderModuleCreated(uint32_t ssrc);
+        virtual void createSenderModule(uint32 ssrc, int payloadType, const char *fileName);
+        virtual void senderModuleCreated(uint32 ssrc);
 
-        virtual void deleteSenderModule(uint32_t ssrc);
-        virtual void senderModuleDeleted(uint32_t ssrc);
+        virtual void deleteSenderModule(uint32 ssrc);
+        virtual void senderModuleDeleted(uint32 ssrc);
 
-        virtual void initializeSenderModule(uint32_t ssrc, const char *fileName, int mtu);
-        virtual void senderModuleInitialized(uint32_t ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase);
+        virtual void initializeSenderModule(uint32 ssrc, const char *fileName, int mtu);
+        virtual void senderModuleInitialized(uint32 ssrc, int payloadType, int clockRate, int timeStampBase, int sequenceNumberBase);
 
-        virtual void senderModuleControl(uint32_t ssrc, RTPSenderControlMessage *msg);
-        virtual void senderModuleStatus(uint32_t ssrc, RTPSenderStatusMessage *msg);
+        virtual void senderModuleControl(uint32 ssrc, RTPSenderControlMessage *msg);
+        virtual void senderModuleStatus(uint32 ssrc, RTPSenderStatusMessage *msg);
 
         /**
          * Called by the rtp module to inform the rtcp module that the session
@@ -196,7 +196,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * Returns the ssrc identifier stored in this RTPInnerPacket.
          */
-        virtual uint32_t getSSRC();
+        virtual uint32 getSSRC();
 
         /**
          * Returns the payload type stored in this RTPInnerPacket.
@@ -264,7 +264,7 @@ class INET_API RTPInnerPacket : public cMessage
         /**
          * The ssrc identifier stored in this RTPInnerPacket.
          */
-        uint32_t _ssrc;
+        uint32 _ssrc;
 
         /**
          * The payload type stored in this RTPInnerPacket.
