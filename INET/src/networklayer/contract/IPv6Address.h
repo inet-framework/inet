@@ -100,8 +100,8 @@ class INET_API IPv6Address
         }
 
         /**
-         *  Constructor
-         *  Construct an IPv6 Address based on 4 given segments.
+         *  Constructor.
+         *  Constructs an IPv6 address based from the 4 given segments.
          */
         IPv6Address(uint32 segment0, uint32 segment1, uint32 segment2, uint32 segment3)  {
             d[0] = segment0;

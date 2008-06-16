@@ -1,7 +1,7 @@
 
 # from msg files
-my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
-    senderAddress srcAddr srcAddress recordRoute
+my $arglessGetters = "fec addr destAddr destAddress nextHopAddr
+    receiverAddress senderAddress srcAddr srcAddress recordRoute
     sourceRoutingOption timestampOption destAddr destAddress
     destinationAddress prefix srcAddr srcAddress targetAddress
     destAddr localAddr remoteAddr
@@ -25,9 +25,32 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr receiverAddress
     family messageText receiveQueueClass receiverLDPIdentifier
     sendQueueClass stateName tcpAlgorithmClass";
 
+$arglessGetters="";  #FIXME remove just temp!!!
+
+# from C++ files
+$arglessGetters .= "blackboard connState port rtcpPort rtpPort inetAddress
+    netmask routerId extensionType ipv4 ipv6 localAddress remoteAddress
+    currentTransmission frameReceivedBeforeSIFS firstLoopbackInterface
+    interfaceEntry packetType src sdesChunk scope senderReport socket
+    hostModule stateVariables advManagedFlag advOtherConfigFlag
+    advSendAdvertisements ipForward receptionReports rtcpPackets
+    sdesChunks message protocol3 protocol4 myPosition multicastGroups
+    destPrefix linkLocalAddress nextHop preferredAddress interfaceToken
+    macAddress playgroundSizeX playgroundSizeY advLinkMTU
+    advReachableTime advRetransTimer connectionId contentionWindow
+    delaySinceLastSR fixedHeaderLength interfaceID metric multicastScope
+    netmaskLength networkLayerGateIndex nodeInputGateId nodeOutputGateId
+    numAddresses numAdvPrefixes numInterfaces numQueues numRoutes
+    numRoutingEntries peerNamId socketId topLabel queueLength
+    advCurHopLimit advDefaultLifetime expiryTime maxRtrAdvInterval
+    minRtrAdvInterval baseReachableTime linkMTU bufferEndSeq
+    initialSeqNum totalLength"
+
 # array fields in msg files
 my $gettersWithArg = "payload recordAddress address extensionHeader
     prefixInformation recordTimestamp addresses data";
+
+$gettersWithArg = "-=/|/=-";  #FIXME remove just temp!!!
 
 foreach $i (split(/\s/, $gettersWithArg)) {$arglessGetters .= " ${i}ArraySize";}
 
@@ -78,4 +101,5 @@ while (<LISTFILE>)
 # BEWARE OF BOGUS REPLACEMENTS INSIDE COMMENTS!!
 # getAddress(), getData(), getPayload() !!!!
 print "\nConversion done. You may safely re-run this script as many times as you want.\n";
+
 
