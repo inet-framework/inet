@@ -2,9 +2,10 @@ add "get" and "For"? (
 ======================
 TCPSocket *peerSocket(IPAddress peerAddr)  ==> findPeerSocket ??
 TCPSocket *peerSocketSoft(IPAddress peerAddr)
+
 unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)  ==> findPeerSocket ??
 unsigned int linkIndex(IPAddress localInf)
 
-IPAddress peerRemoteInterface(IPAddress peerIP)  ????
-IPAddress primaryAddress(IPAddress localInf)   ???
+IPAddress peerRemoteInterface(IPAddress peerIP)
+IPAddress primaryAddress(IPAddress localInf)
 

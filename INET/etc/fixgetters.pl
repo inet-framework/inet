@@ -70,9 +70,6 @@ $arglessGetters =~ s/\s+/|/g;
 $underscoreArglessGetters =~ s/\s+/|/g;
 $gettersWithArg =~ s/\s+/|/g;
 
-$arglessGetters="----";  #FIXME remove just temp!!!
-$gettersWithArg="----";  #FIXME remove just temp!!!
-
 
 $listfname = $ARGV[0];
 open(LISTFILE, $listfname) || die "cannot open $listfname";
