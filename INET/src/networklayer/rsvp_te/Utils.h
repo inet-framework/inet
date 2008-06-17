@@ -47,7 +47,7 @@ int nodepos(const EroVector& ERO, IPAddress node);
 /**
  * TODO documentation
  */
-cModule *payloadOwner(cMessage *msg);
+cModule *getPayloadOwner(cMessage *msg);
 
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
 

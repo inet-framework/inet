@@ -58,8 +58,8 @@ void LinkStateRouting::initialize(int stage)
         const char *token;
         while ((token = tokenizer.nextToken())!=NULL)
         {
-            ASSERT(ift->interfaceByName(token));
-            peerIfAddrs.push_back(ift->interfaceByName(token)->ipv4()->getInetAddress());
+            ASSERT(ift->getInterfaceByName(token));
+            peerIfAddrs.push_back(ift->getInterfaceByName(token)->ipv4()->getInetAddress());
         }
 
         // schedule start of flooding link state info

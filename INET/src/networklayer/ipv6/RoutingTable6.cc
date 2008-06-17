@@ -113,9 +113,9 @@ void RoutingTable6::initialize(int stage)
                     continue;
 
                 for (int y = 0; y < ie->ipv6()->getNumAdvPrefixes(); y++)
-                    if (ie->ipv6()->advPrefix(y).prefix.isGlobal())
-                        addOrUpdateOwnAdvPrefix(ie->ipv6()->advPrefix(y).prefix,
-                                                ie->ipv6()->advPrefix(y).prefixLength,
+                    if (ie->ipv6()->getAdvPrefix(y).prefix.isGlobal())
+                        addOrUpdateOwnAdvPrefix(ie->ipv6()->getAdvPrefix(y).prefix,
+                                                ie->ipv6()->getAdvPrefix(y).prefixLength,
                                                 x, 0);
             }
         }
@@ -152,7 +152,7 @@ void RoutingTable6::parseXMLConfigFile()
             const char *ifname = ifTag->getAttribute("name");
             if (!ifname)
                 error("<interface> without name attribute at %s", child->getSourceLocation());
-            InterfaceEntry *ie = ift->interfaceByName(ifname);
+            InterfaceEntry *ie = ift->getInterfaceByName(ifname);
             if (!ie)
                 error("no interface named %s was registered, %s", ifname, child->getSourceLocation());
             configureInterfaceFromXML(ie, ifTag);
@@ -312,9 +312,9 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     }
 }
 
-InterfaceEntry *RoutingTable6::interfaceByAddress(const IPv6Address& addr)
+InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
 {
-    Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
+    Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
 
     if (addr.isUnspecified())
         return NULL;
@@ -601,7 +601,7 @@ int RoutingTable6::getNumRoutes() const
     return routeList.size();
 }
 
-IPv6Route *RoutingTable6::route(int i)
+IPv6Route *RoutingTable6::getRoute(int i)
 {
     ASSERT(i>=0 && i<(int)routeList.size());
     return routeList[i];

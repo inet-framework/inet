@@ -52,8 +52,8 @@ void MPLS::initialize(int stage)
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
     {
-        ASSERT(ift->interfaceByName(token));
-        int n = ift->interfaceByName(token)->outputPort();
+        ASSERT(ift->getInterfaceByName(token));
+        int n = ift->getInterfaceByName(token)->outputPort();
         ASSERT(n >= 0 && n < labelIf.size());
         labelIf[n] = true;
     }
@@ -123,7 +123,7 @@ bool MPLS::tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram)
 
     ASSERT(outLabel.size() > 0);
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
+    int outgoingPort = ift->getInterfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
 
     MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->getName());
     mplsPacket->encapsulate(ipdatagram);
@@ -222,7 +222,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
 void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
     int gateIndex = mplsPacket->getArrivalGate()->getIndex();
-    InterfaceEntry *ie = ift->interfaceByNetworkLayerGateIndex(gateIndex);
+    InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(gateIndex);
     std::string senderInterface = ie->getName();
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->getTopLabel();
@@ -254,7 +254,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int outgoingPort = ift->interfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
+    int outgoingPort = ift->getInterfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
 
     doStackOps(mplsPacket, outLabel);
 

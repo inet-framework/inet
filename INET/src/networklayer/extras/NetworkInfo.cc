@@ -75,17 +75,17 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutingEntries(); i++)
         {
-            IPAddress host = rt->routingEntry(i)->host;
+            IPAddress host = rt->getRoutingEntry(i)->host;
             
             if(host.isMulticast())
                 continue;
                 
-            if(rt->routingEntry(i)->interfacePtr->isLoopback())
+            if(rt->getRoutingEntry(i)->interfacePtr->isLoopback())
                 continue;
                 
-            IPAddress netmask = rt->routingEntry(i)->netmask;
-            IPAddress gateway = rt->routingEntry(i)->gateway;
-            int metric = rt->routingEntry(i)->metric;
+            IPAddress netmask = rt->getRoutingEntry(i)->netmask;
+            IPAddress gateway = rt->getRoutingEntry(i)->gateway;
+            int metric = rt->getRoutingEntry(i)->metric;
                 
             std::ostringstream line; 
     
@@ -111,12 +111,12 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             }
             
             line.width(7);
-            if(compat && rt->routingEntry(i)->source == RoutingEntry::IFACENETMASK) metric = 0;
+            if(compat && rt->getRoutingEntry(i)->source == RoutingEntry::IFACENETMASK) metric = 0;
             line << metric;
     
             if(compat) line << "0        0 ";
             
-            line << rt->routingEntry(i)->interfaceName << endl;
+            line << rt->getRoutingEntry(i)->interfaceName << endl;
 
             if(compat) lines.push_back(line.str());
             else s << line.str();

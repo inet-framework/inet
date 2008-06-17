@@ -1,8 +1,3 @@
-ignore:
--------
-PCB* pcb()
-bool pendingAccept()
-
 "is":
 -----
 bool active()
@@ -72,6 +67,9 @@ NotificationBoard *notificationBoardOf(cModule *host)
 RoutingTable *routingTableOf(cModule *host)
 RoutingTable6 *routingTable6Of(cModule *host)
 
+revise getGatewayForDestAddr(const IPAddress& dest) ==> determineGatewayForDestAddr() ???
+
+
 InterfaceEntry *interfaceAt(int pos) ==> getInterface(int) ??
 
 ReceptionReport *receptionReport(simtime_t now)  ==> createReceptionReport??
@@ -122,31 +120,5 @@ unsigned int linkIndex(IPAddress localInf)
 
 IPAddress peerRemoteInterface(IPAddress peerIP)  ????
 IPAddress primaryAddress(IPAddress localInf)   ???
-
-
-
-plain "get":
-============
-
-IPAddress gatewayForDestAddr(const IPAddress& dest)
-IPAddress interfaceAddrByPeerAddress(IPAddress peerIP)
-IPAddress peerByLocalAddress(IPAddress localInf)
-IPv6Route *route(int i)
-InterfaceEntry *interfaceByAddress(const IPAddress& address)
-InterfaceEntry *interfaceByAddress(const IPv6Address& address)
-InterfaceEntry *interfaceByName(const char *name)
-InterfaceEntry *interfaceByNetworkLayerGateIndex(int index)
-InterfaceEntry *interfaceByNodeInputGateId(int id)
-InterfaceEntry *interfaceByNodeOutputGateId(int id)
-InterfaceEntry *interfaceForDestAddr(const IPAddress& dest)
-InterfaceEntry *sourceInterfaceFrom(cMessage *msg)
-MulticastRoutes multicastRoutesFor(const IPAddress& dest)
-RoutingEntry *routingEntry(int k)
-cModule *payloadOwner(cMessage *msg)
-const AdvPrefix& advPrefix(int i)
-int numMatchingPrefixBits(const IPAddress& to_cmp)
-int outputGateForProtocol(int protocol)
-ulong bytesAvailable(uint32 fromSeq)
-
 
 

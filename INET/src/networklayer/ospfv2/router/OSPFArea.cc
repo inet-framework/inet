@@ -2124,7 +2124,7 @@ bool OSPF::Area::FindSameOrWorseCostRoute (const std::vector<OSPF::RoutingTableE
         if (foundMatching) {
             destinationInRoutingTable = true;
 
-            /* If the matching entry is an IntraArea route (intra-area paths are
+            /* If the matching entry is an IntraArea getRoute(intra-area paths are
                 * always preferred to other paths of any cost), or it's a cheaper InterArea
                 * route, then skip this LSA.
                 */

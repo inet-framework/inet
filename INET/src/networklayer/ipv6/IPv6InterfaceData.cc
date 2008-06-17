@@ -88,7 +88,7 @@ std::string IPv6InterfaceData::info() const
 
     for (int i=0; i<getNumAdvPrefixes(); i++)
     {
-        const AdvPrefix& a = advPrefix(i);
+        const AdvPrefix& a = getAdvPrefix(i);
         os << (i?", ":"\tAdvPrefixes: ") << a.prefix << "/" << a.prefixLength << "("
            << (a.advOnLinkFlag?"":"off-link ")
            << (a.advAutonomousFlag?"":"non-auto ");
@@ -259,7 +259,7 @@ void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
     rtrVars.advPrefixList.push_back(advPrefix);
 }
 
-const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::advPrefix(int i) const
+const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::getAdvPrefix(int i) const
 {
     ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     return rtrVars.advPrefixList[i];

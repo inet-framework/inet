@@ -104,7 +104,7 @@ IPvXAddress IPAddressResolver::addressOf(cModule *host, int addrType)
 IPvXAddress IPAddressResolver::addressOf(cModule *host, const char *ifname, int addrType)
 {
     InterfaceTable *ift = interfaceTableOf(host);
-    InterfaceEntry *ie = ift->interfaceByName(ifname);
+    InterfaceEntry *ie = ift->getInterfaceByName(ifname);
     if (!ie)
         opp_error("IPAddressResolver: no interface called `%s' in `%s'", ifname, ift->getFullPath().c_str());
     return getAddressFrom(ie, addrType);

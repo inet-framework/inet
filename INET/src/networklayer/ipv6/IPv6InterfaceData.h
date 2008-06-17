@@ -508,7 +508,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Returns the ith advertised prefix on the interface.
      */
-    const AdvPrefix& advPrefix(int i) const;
+    const AdvPrefix& getAdvPrefix(int i) const;
 
     /**
      * Changes the configuration of the ith advertised prefix on the

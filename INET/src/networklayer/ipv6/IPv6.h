@@ -57,7 +57,7 @@ class INET_API IPv6 : public QueueBase
 
   protected:
     // utility: look up interface from getArrivalGate()
-    InterfaceEntry *sourceInterfaceFrom(cMessage *msg);
+    InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
 
     // utility: show current statistics above the icon
     void updateDisplayString();

@@ -271,7 +271,7 @@ bool IPAddress::prefixMatches(const IPAddress& to_cmp, int numbits) const
     return (addr1 & mask) == (addr2 & mask);
 }
 
-int IPAddress::numMatchingPrefixBits(const IPAddress& to_cmp) const
+int IPAddress::getNumMatchingPrefixBits(const IPAddress& to_cmp) const
 {
     uint32 addr1 = getInt();
     uint32 addr2 = to_cmp.getInt();

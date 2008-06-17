@@ -75,7 +75,7 @@ void TED::initialize(int stage)
         RoutingEntry *rentry = NULL;
         for (int j = 0; j < rt->getNumRoutingEntries(); j++)
         {
-            rentry = rt->routingEntry(j);
+            rentry = rt->getRoutingEntry(j);
             if (rentry->interfacePtr == ie && rentry->type == RoutingEntry::DIRECT)
                 break;
         }
@@ -118,7 +118,7 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->interfaceAt(i);
-        if (rt->interfaceByAddress(ie->ipv4()->getInetAddress()) != ie)
+        if (rt->getInterfaceByAddress(ie->ipv4()->getInetAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
                   ie->getName(), ie->ipv4()->getInetAddress().str().c_str());
@@ -217,7 +217,7 @@ void TED::rebuildRoutingTable()
     int j = 0;
     for (int i = 0; i < n; i++)
     {
-        RoutingEntry *entry = rt->routingEntry(j);
+        RoutingEntry *entry = rt->getRoutingEntry(j);
         if (entry->host.isMulticast())
         {
             ++j;
@@ -270,7 +270,7 @@ void TED::rebuildRoutingTable()
             entry->gateway = V[nHop].node;
             entry->type = entry->REMOTE;
         }
-        entry->interfacePtr = rt->interfaceByAddress(interfaceAddrByPeerAddress(V[nHop].node));
+        entry->interfacePtr = rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node));
         entry->interfaceName = opp_string(entry->interfacePtr->getName());
         entry->source = RoutingEntry::OSPF;
 
@@ -288,10 +288,10 @@ void TED::rebuildRoutingTable()
     {
         RoutingEntry *entry = new RoutingEntry;
 
-        entry->host = peerByLocalAddress(interfaceAddrs[i]);
+        entry->host = getPeerByLocalAddress(interfaceAddrs[i]);
         entry->gateway = IPAddress();
         entry->type = entry->DIRECT;
-        entry->interfacePtr = rt->interfaceByAddress(interfaceAddrs[i]);
+        entry->interfacePtr = rt->getInterfaceByAddress(interfaceAddrs[i]);
         entry->interfaceName = opp_string(entry->interfacePtr->getName());
         entry->source = RoutingEntry::OSPF;
 
@@ -307,7 +307,7 @@ void TED::rebuildRoutingTable()
 
 }
 
-IPAddress TED::interfaceAddrByPeerAddress(IPAddress peerIP)
+IPAddress TED::getInterfaceAddrByPeerAddress(IPAddress peerIP)
 {
     std::vector<TELinkStateInfo>::iterator it;
     for (it = ted.begin(); it != ted.end(); it++)
@@ -486,7 +486,7 @@ IPAddress TED::primaryAddress(IPAddress localInf) // only used in RSVP::processH
     return IPAddress(); // to eliminate warning
 }
 
-IPAddress TED::peerByLocalAddress(IPAddress localInf)
+IPAddress TED::getPeerByLocalAddress(IPAddress localInf)
 {
     unsigned int index = linkIndex(localInf);
     return ted[index].linkid;

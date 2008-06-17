@@ -90,10 +90,10 @@ void IPv6::endService(cMessage *msg)
         updateDisplayString();
 }
 
-InterfaceEntry *IPv6::sourceInterfaceFrom(cMessage *msg)
+InterfaceEntry *IPv6::getSourceInterfaceFrom(cMessage *msg)
 {
     cGate *g = msg->getArrivalGate();
-    return g ? ift->interfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
+    return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
 void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
@@ -122,7 +122,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
     if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, NULL, false);
     else
-        routeMulticastPacket(datagram, NULL, sourceInterfaceFrom(datagram));
+        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
 }
 
 void IPv6::handleMessageFromHL(cMessage *msg)
@@ -360,7 +360,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
         return;
     }
 
-    MulticastRoutes routes = rt->multicastRoutesFor(destAddress);
+    MulticastRoutes routes = rt->getMulticastRoutesFor(destAddress);
     if (routes.size()==0)
     {
         // no destination: delete datagram
@@ -441,7 +441,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     }
     else
     {
-        int gateindex = mapping.outputGateForProtocol(protocol);
+        int gateindex = mapping.getOutputGateForProtocol(protocol);
         EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
         //TODO: Indication of forward progress
         send(packet, "transportOut", gateindex);
@@ -460,7 +460,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
             // ICMP errors are delivered to the appropriate higher layer protocols
             IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
             int protocol = bogusPacket->getTransportProtocol();
-            int gateindex = mapping.outputGateForProtocol(protocol);
+            int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
             break;
         }
@@ -469,7 +469,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
             // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
             // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
             // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
-            int gateindex = mapping.outputGateForProtocol(IP_PROT_ICMP);
+            int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(msg, "transportOut", gateindex);
         }
      }
@@ -479,7 +479,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
 {
     // decapsulate transport packet
-    InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
+    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
     // create and fill in control info
@@ -521,7 +521,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
     if (!src.isUnspecified())
     {
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->interfaceByAddress(src)==NULL)
+        if (rt->getInterfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSrcAddress(src);

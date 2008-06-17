@@ -456,7 +456,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     state->snd_nxt = state->snd_max;
 
     // check how many bytes we have
-    ulong buffered = sendQueue->bytesAvailable(state->snd_nxt);
+    ulong buffered = sendQueue->getBytesAvailable(state->snd_nxt);
     if (buffered==0)
         return false;
 
@@ -540,7 +540,7 @@ bool TCPConnection::sendProbe()
     state->snd_nxt = state->snd_max;
 
     // check we have 1 byte to send
-    if (sendQueue->bytesAvailable(state->snd_nxt)==0)
+    if (sendQueue->getBytesAvailable(state->snd_nxt)==0)
     {
         tcpEV << "Cannot send probe because send buffer is empty\n";
         return false;

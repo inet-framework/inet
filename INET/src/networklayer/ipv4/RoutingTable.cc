@@ -170,7 +170,7 @@ void RoutingTable::autoconfigRouterId()
     {
         // if there is no interface with routerId yet, assign it to the loopback address;
         // TODO find out if this is a good practice, in which situations it is useful etc.
-        if (interfaceByAddress(_routerId)==NULL)
+        if (getInterfaceByAddress(_routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
             lo0->ipv4()->setInetAddress(_routerId);
@@ -217,7 +217,7 @@ void RoutingTable::printRoutingTable()
               "Destination", "Gateway", "Netmask", "Iface");
 
     for (int i=0; i<getNumRoutingEntries(); i++)
-        EV << routingEntry(i)->detailedInfo() << "\n";
+        EV << getRoutingEntry(i)->detailedInfo() << "\n";
     EV << "\n";
 }
 
@@ -241,9 +241,9 @@ void RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
     d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
 }
 
-InterfaceEntry *RoutingTable::interfaceByAddress(const IPAddress& addr)
+InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPAddress& addr)
 {
-    Enter_Method("interfaceByAddress(%s)=?", addr.str().c_str());
+    Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
     if (addr.isUnspecified())
         return NULL;
     for (int i=0; i<ift->getNumInterfaces(); ++i)
@@ -319,18 +319,18 @@ RoutingEntry *RoutingTable::findBestMatchingRoute(const IPAddress& dest)
     return bestRoute;
 }
 
-InterfaceEntry *RoutingTable::interfaceForDestAddr(const IPAddress& dest)
+InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest)
 {
-    Enter_Method("interfaceForDestAddr(%s)=?", dest.str().c_str());
+    Enter_Method("getInterfaceForDestAddr(%s)=?", dest.str().c_str());
 
     RoutingEntry *e = findBestMatchingRoute(dest);
     if (!e) return NULL;
     return e->interfacePtr;
 }
 
-IPAddress RoutingTable::gatewayForDestAddr(const IPAddress& dest)
+IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest)
 {
-    Enter_Method("gatewayForDestAddr(%s)=?", dest.str().c_str());
+    Enter_Method("getGatewayForDestAddr(%s)=?", dest.str().c_str());
 
     RoutingEntry *e = findBestMatchingRoute(dest);
     if (!e) return IPAddress();
@@ -338,9 +338,9 @@ IPAddress RoutingTable::gatewayForDestAddr(const IPAddress& dest)
 }
 
 
-MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
+MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest)
 {
-    Enter_Method("multicastRoutesFor(%s)=?", dest.str().c_str());
+    Enter_Method("getMulticastRoutesFor(%s)=?", dest.str().c_str());
 
     MulticastRoutes res;
     res.reserve(16);
@@ -350,7 +350,7 @@ MulticastRoutes RoutingTable::multicastRoutesFor(const IPAddress& dest)
         if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
         {
             MulticastRoute r;
-            r.interf = ift->interfaceByName(e->interfaceName.c_str()); // Ughhhh
+            r.interf = ift->getInterfaceByName(e->interfaceName.c_str()); // Ughhhh
             r.gateway = e->gateway;
             res.push_back(r);
         }
@@ -365,7 +365,7 @@ int RoutingTable::getNumRoutingEntries()
     return routes.size()+multicastRoutes.size();
 }
 
-RoutingEntry *RoutingTable::routingEntry(int k)
+RoutingEntry *RoutingTable::getRoutingEntry(int k)
 {
     if (k < (int)routes.size())
         return routes[k];
@@ -383,8 +383,8 @@ RoutingEntry *RoutingTable::findRoutingEntry(const IPAddress& target,
 {
     int n = getNumRoutingEntries();
     for (int i=0; i<n; i++)
-        if (routingEntryMatches(routingEntry(i), target, netmask, gw, metric, dev))
-            return routingEntry(i);
+        if (routingEntryMatches(getRoutingEntry(i), target, netmask, gw, metric, dev))
+            return getRoutingEntry(i);
     return NULL;
 }
 
@@ -398,7 +398,7 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
         error("addRoutingEntry(): to add a default route, set both host and netmask to zero");
 
     // fill in interface ptr from interface name
-    entry->interfacePtr = ift->interfaceByName(entry->interfaceName.c_str());
+    entry->interfacePtr = ift->getInterfaceByName(entry->interfaceName.c_str());
     if (!entry->interfacePtr)
         error("addRoutingEntry(): interface `%s' doesn't exist", entry->interfaceName.c_str());
 

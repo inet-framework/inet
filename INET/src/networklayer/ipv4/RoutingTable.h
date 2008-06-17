@@ -212,7 +212,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByAddress(const IPAddress& address);
+    InterfaceEntry *getInterfaceByAddress(const IPAddress& address);
     //@}
 
     /**
@@ -248,7 +248,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Returns the interface Id to send the packets with dest as
      * destination address, or -1 if destination is not in routing table.
      */
-    InterfaceEntry *interfaceForDestAddr(const IPAddress& dest);
+    InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -257,7 +257,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    IPAddress gatewayForDestAddr(const IPAddress& dest);
+    IPAddress getGatewayForDestAddr(const IPAddress& dest);
     //@}
 
     /** @name Multicast routing functions */
@@ -272,7 +272,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Returns routes for a multicast address.
      */
-    MulticastRoutes multicastRoutesFor(const IPAddress& dest);
+    MulticastRoutes getMulticastRoutesFor(const IPAddress& dest);
     //@}
 
     /** @name Route table manipulation */
@@ -286,7 +286,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Return kth routing entry.
      */
-    RoutingEntry *routingEntry(int k);
+    RoutingEntry *getRoutingEntry(int k);
 
     /**
      * Find first routing entry with the given parameters.

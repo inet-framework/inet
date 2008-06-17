@@ -76,9 +76,9 @@ class TED : public cSimpleModule
   public:
     /** @name Public interface to the Traffic Engineering Database */
     //@{
-    IPAddress interfaceAddrByPeerAddress(IPAddress peerIP);
+    IPAddress getInterfaceAddrByPeerAddress(IPAddress peerIP);
     IPAddress peerRemoteInterface(IPAddress peerIP);
-    IPAddress peerByLocalAddress(IPAddress localInf);
+    IPAddress getPeerByLocalAddress(IPAddress localInf);
     IPAddress primaryAddress(IPAddress localInf);
     bool isLocalPeer(IPAddress inetAddr);
     bool isLocalAddress(IPAddress addr);

@@ -98,7 +98,7 @@ void OSPFRouting::handleMessage (cMessage *msg)
  */
 int OSPFRouting::ResolveInterfaceName (const std::string& name) const
 {
-    InterfaceEntry* ie = ift->interfaceByName (name.c_str());
+    InterfaceEntry* ie = ift->getInterfaceByName(name.c_str());
     if (!ie)
         opp_error ("error reading XML config: InterfaceTable contains no interface named '%s'", name.c_str());
     return ie->getInterfaceId();
@@ -350,7 +350,7 @@ void OSPFRouting::LoadExternalRoute (const cXMLElement& externalRouteConfig)
 
 
 /**
- * Loads the configuration of a host route (a host directly connected to the router).
+ * Loads the configuration of a host getRoute(a host directly connected to the router).
  * @param hostRouteConfig [in] XML node describing the parameters of a host route.
  */
 void OSPFRouting::LoadHostRoute (const cXMLElement& hostRouteConfig)

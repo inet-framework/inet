@@ -270,7 +270,7 @@ void LDP::rebuildFecList()
     {
         // every entry in the routing table
 
-        RoutingEntry *re = rt->routingEntry(i);
+        RoutingEntry *re = rt->getRoutingEntry(i);
 
         // ignore multicast routes
         if (re->host.isMulticast())
@@ -700,13 +700,13 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     // Wrong code:
     //int i;
     //for (i=0; i < rt->getNumRoutingEntries(); i++)
-    //    if (rt->routingEntry(i)->host == dest)
+    //    if (rt->getRoutingEntry(i)->host == dest)
     //        break;
     //
     //if (i == rt->getNumRoutingEntries())
     //    return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
     //
-    InterfaceEntry *ie = rt->interfaceForDestAddr(dest);
+    InterfaceEntry *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
         return IPAddress();  // no route
 
@@ -720,7 +720,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
-    InterfaceEntry *ie = ift->interfaceByName(interfaceName.c_str());
+    InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
 
     RoutingEntry *anEntry;
 
@@ -728,7 +728,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     {
         for (k = 0; k < (int)myPeers.size(); k++)
         {
-            anEntry = rt->routingEntry(i);
+            anEntry = rt->getRoutingEntry(i);
             if (anEntry->host==myPeers[k].peerIP && anEntry->interfacePtr==ie)
             {
                 return myPeers[k].peerIP;
@@ -742,7 +742,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     {
         for (k = 0; k < rt->getNumRoutingEntries(); k++)
         {
-            anEntry = rt->routingEntry(i);
+            anEntry = rt->getRoutingEntry(i);
             if (anEntry->host == myPeers[i].peerIP)
                 break;
         }
@@ -772,7 +772,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
     if (rt->localDeliver(peerIP))
         return "lo0";
 
-    InterfaceEntry *ie = rt->interfaceForDestAddr(peerIP);
+    InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->getName();

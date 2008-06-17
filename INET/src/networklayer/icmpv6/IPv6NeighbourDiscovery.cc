@@ -1091,7 +1091,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         ra->setPrefixInformationArraySize(numAdvPrefixes);
         for (int i = 0; i < numAdvPrefixes; i++)
         {
-            IPv6InterfaceData::AdvPrefix advPrefix = ie->ipv6()->advPrefix(i);
+            IPv6InterfaceData::AdvPrefix advPrefix = ie->ipv6()->getAdvPrefix(i);
             IPv6NDPrefixInformation prefixInfo;
             prefixInfo.setPrefix(advPrefix.prefix);
             prefixInfo.setPrefixLength(advPrefix.prefixLength);

@@ -312,7 +312,7 @@ bool ARP::addressRecognized(IPAddress destAddr, InterfaceEntry *ie)
     // output port is different from this one), say yes
     if (!doProxyARP)
         return false;
-    InterfaceEntry *rtie = rt->interfaceForDestAddr(destAddr);
+    InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
     return rtie!=NULL && rtie!=ie;
 }
 

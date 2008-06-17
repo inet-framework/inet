@@ -160,9 +160,9 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
                 continue;
 
             for (int y = 0; y < ie->ipv6()->getNumAdvPrefixes(); y++)
-                if (ie->ipv6()->advPrefix(y).prefix.isGlobal())
-                    rt->addOrUpdateOwnAdvPrefix(ie->ipv6()->advPrefix(y).prefix,
-                                                ie->ipv6()->advPrefix(y).prefixLength,
+                if (ie->ipv6()->getAdvPrefix(y).prefix.isGlobal())
+                    rt->addOrUpdateOwnAdvPrefix(ie->ipv6()->getAdvPrefix(y).prefix,
+                                                ie->ipv6()->getAdvPrefix(y).prefixLength,
                                                 x, 0);
         }
     }
@@ -203,8 +203,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
                 continue;
 
             for (int y = 0; y < destIf->ipv6()->getNumAdvPrefixes(); y++)
-                if (destIf->ipv6()->advPrefix(y).prefix.isGlobal())
-                    destPrefixes.push_back(&destIf->ipv6()->advPrefix(y));
+                if (destIf->ipv6()->getAdvPrefix(y).prefix.isGlobal())
+                    destPrefixes.push_back(&destIf->ipv6()->getAdvPrefix(y));
         }
 
         std::string destModName = destNode->getModule()->getFullName();
@@ -233,7 +233,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 
             // determine the local interface id
             cGate *localGate = atNode->getPath(0)->getLocalGate();
-            InterfaceEntry *localIf = ift->interfaceByNodeOutputGateId(localGate->getId());
+            InterfaceEntry *localIf = ift->getInterfaceByNodeOutputGateId(localGate->getId());
 
             // determine next hop link address. That's a bit tricky because
             // the directly adjacent cTopo node might be a non-IP getNode(ethernet switch etc)
@@ -248,7 +248,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             cGate *remoteGate = prevNode->getPath(0)->getRemoteGate();
             cModule *nextHop = remoteGate->getOwnerModule();
             InterfaceTable *nextHopIft = IPAddressResolver().interfaceTableOf(nextHop);
-            InterfaceEntry *nextHopOnlinkIf = nextHopIft->interfaceByNodeInputGateId(remoteGate->getId());
+            InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop
             IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6()->getLinkLocalAddress();

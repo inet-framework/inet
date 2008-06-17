@@ -162,7 +162,7 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByAddress(const IPv6Address& address);
+    InterfaceEntry *getInterfaceByAddress(const IPv6Address& address);
     //@}
 
     /**
@@ -272,7 +272,7 @@ class INET_API RoutingTable6 : public cSimpleModule
         simtime_t routerLifetime);
 
     /**
-     * Adds the given route (which can be OSPF, BGP, RIP or any other route)
+     * Adds the given getRoute(which can be OSPF, BGP, RIP or any other route)
      * with src==ROUTING_PROT. To store additional information with the route,
      * one can subclass from IPv6Route and add more fields.
      */
@@ -291,7 +291,7 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Return the ith route.
      */
-    IPv6Route *route(int i);
+    IPv6Route *getRoute(int i);
     //@}
 
 };

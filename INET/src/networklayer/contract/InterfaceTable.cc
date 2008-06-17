@@ -104,7 +104,7 @@ InterfaceEntry *InterfaceTable::interfaceAt(int pos)
 void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 {
     // check name is unique
-    if (interfaceByName(entry->getName())!=NULL)
+    if (getInterfaceByName(entry->getName())!=NULL)
         opp_error("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
@@ -167,7 +167,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 }
 */
 
-InterfaceEntry *InterfaceTable::interfaceByNodeOutputGateId(int id)
+InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -177,7 +177,7 @@ InterfaceEntry *InterfaceTable::interfaceByNodeOutputGateId(int id)
     return NULL;
 }
 
-InterfaceEntry *InterfaceTable::interfaceByNodeInputGateId(int id)
+InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -187,7 +187,7 @@ InterfaceEntry *InterfaceTable::interfaceByNodeInputGateId(int id)
     return NULL;
 }
 
-InterfaceEntry *InterfaceTable::interfaceByNetworkLayerGateIndex(int index)
+InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -197,7 +197,7 @@ InterfaceEntry *InterfaceTable::interfaceByNetworkLayerGateIndex(int index)
     return NULL;
 }
 
-InterfaceEntry *InterfaceTable::interfaceByName(const char *name)
+InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
 {
     Enter_Method_Silent();
 

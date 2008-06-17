@@ -43,7 +43,7 @@ class INET_API ProtocolMapping
     ProtocolMapping() {}
     ~ProtocolMapping() {}
     void parseProtocolMapping(const char *s);
-    int outputGateForProtocol(int protocol);
+    int getOutputGateForProtocol(int protocol);
 };
 
 #endif

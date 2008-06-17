@@ -851,7 +851,7 @@ void OSPF::Router::RebuildRoutingTable (void)
     unsigned long              routingEntryNumber = simRoutingTable->getNumRoutingEntries();
     // remove entries from the IP routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
-        RoutingEntry*            entry     = simRoutingTable->routingEntry (i);
+        RoutingEntry*            entry     = simRoutingTable->getRoutingEntry(i);
         OSPF::RoutingTableEntry* ospfEntry = dynamic_cast<OSPF::RoutingTableEntry*> (entry);
         if (ospfEntry != NULL) {
             eraseEntries.push_back (entry);
@@ -1527,7 +1527,7 @@ void OSPF::Router::UpdateExternalRoute (OSPF::IPv4Address networkAddress, const 
     bool               inRoutingTable     = false;
     // add the external route to the routing table if it was not added by another module
     for (unsigned long i = 0; i < routingEntryNumber; i++) {
-        RoutingEntry* entry = simRoutingTable->routingEntry (i);
+        RoutingEntry* entry = simRoutingTable->getRoutingEntry(i);
         if ((entry->host.getInt () & entry->netmask.getInt ()) ==
             (ULongFromIPv4Address (networkAddress) & externalRouteContents.getNetworkMask ().getInt ()))
         {

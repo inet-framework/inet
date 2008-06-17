@@ -329,9 +329,9 @@ void RSVP::setupHello()
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
     {
-        ASSERT(ift->interfaceByName(token));
+        ASSERT(ift->getInterfaceByName(token));
 
-        IPAddress peer = tedmod->peerByLocalAddress(ift->interfaceByName(token)->ipv4()->getInetAddress());
+        IPAddress peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4()->getInetAddress());
 
         HelloState_t h;
 
@@ -483,7 +483,7 @@ void RSVP::processPSB_TIMEOUT(PsbTimeoutMsg* msg)
 
     if (tedmod->isLocalAddress(psb->OutInterface))
     {
-        ASSERT(psb->OutInterface == tedmod->interfaceAddrByPeerAddress(psb->ERO[0].node));
+        ASSERT(psb->OutInterface == tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node));
 
         sendPathTearMessage(psb->ERO[0].node, psb->Session_Object,
             psb->Sender_Template_Object, psb->OutInterface, routerId, false);
@@ -587,7 +587,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     pm->setByteLength(length);
 
-    IPAddress nextHop = tedmod->peerByLocalAddress(OI);
+    IPAddress nextHop = tedmod->getPeerByLocalAddress(OI);
 
     ASSERT(ERO.size() == 0 ||ERO[0].node.equals(nextHop) || ERO[0].L);
 
@@ -864,8 +864,8 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         //bool ER = psb->OutInterface.isUnspecified();
         if (!IR)
         {
-            IPAddress localInf = tedmod->interfaceAddrByPeerAddress(psb->Previous_Hop_Address);
-            inInterface = rt->interfaceByAddress(localInf)->getName();
+            IPAddress localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
+            inInterface = rt->getInterfaceByAddress(localInf)->getName();
         }
         else
             inInterface = "any";
@@ -882,7 +882,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             lop.label = rsb->FlowDescriptor[i].label;
             outLabel.push_back(lop);
 
-            outInterface = rt->interfaceByAddress(psb->OutInterface)->getName();
+            outInterface = rt->getInterfaceByAddress(psb->OutInterface)->getName();
         }
         else
         {
@@ -896,7 +896,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
 
             if (!tedmod->isLocalAddress(psb->Session_Object.DestAddress))
             {
-                InterfaceEntry *ie = rt->interfaceForDestAddr(psb->Session_Object.DestAddress);
+                InterfaceEntry *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
                 if (ie)
                     outInterface = ie->getName(); // FIXME why use name to identify an interface?
             }
@@ -1118,7 +1118,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 
         if (ERO[0].L)
         {
-            InterfaceEntry *ie = rt->interfaceForDestAddr(ERO[0].node);
+            InterfaceEntry *ie = rt->getInterfaceForDestAddr(ERO[0].node);
 
             if (!ie)
             {
@@ -1131,10 +1131,10 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
         }
         else
         {
-            OI = tedmod->interfaceAddrByPeerAddress(ERO[0].node);
+            OI = tedmod->getInterfaceAddrByPeerAddress(ERO[0].node);
         }
 
-        IPAddress peer = tedmod->peerByLocalAddress(OI);
+        IPAddress peer = tedmod->getPeerByLocalAddress(OI);
         HelloState_t *h = findHello(peer);
         if (!h)
             error("Peer %s on interface %s is not an RSVP peer", peer.str().c_str(), OI.str().c_str());
@@ -1149,7 +1149,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 
         if (!tedmod->isLocalAddress(destAddr))
         {
-            InterfaceEntry *ie = rt->interfaceForDestAddr(destAddr);
+            InterfaceEntry *ie = rt->getInterfaceForDestAddr(destAddr);
 
             if (!ie)
             {
@@ -1159,7 +1159,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
 
             OI = ie->ipv4()->getInetAddress();
 
-            HelloState_t *h = findHello(tedmod->peerByLocalAddress(OI));
+            HelloState_t *h = findHello(tedmod->getPeerByLocalAddress(OI));
             if (!h)
             {
                 // outgoing interface is not LSR, we are egress router
@@ -1172,7 +1172,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
             {
                 // outgoing interface is LSR
 
-                ASSERT(h->ok); // rt->interfaceForDestAddr() wouldn't choose this entry
+                ASSERT(h->ok); // rt->getInterfaceForDestAddr() wouldn't choose this entry
 
                 return h->ok;
             }
@@ -1558,7 +1558,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
         EV << "forward teardown downstream" << endl;
 
         sendPathTearMessage(psb->ERO[0].node, psb->Session_Object, psb->Sender_Template_Object,
-            tedmod->interfaceAddrByPeerAddress(psb->ERO[0].node), routerId, msg->getForce());
+            tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node), routerId, msg->getForce());
     }
 
     // remove path state block
@@ -1768,12 +1768,12 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
     ASSERT(psb);
     ASSERT(!psb->OutInterface.isUnspecified());
 
-    IPAddress nextHop = tedmod->peerByLocalAddress(psb->OutInterface);
+    IPAddress nextHop = tedmod->getPeerByLocalAddress(psb->OutInterface);
 
     EV << "sending PathTear to " << nextHop << endl;
 
     sendPathTearMessage(nextHop, psb->Session_Object, psb->Sender_Template_Object,
-                        tedmod->interfaceAddrByPeerAddress(nextHop), routerId, true);
+                        tedmod->getInterfaceAddrByPeerAddress(nextHop), routerId, true);
 
     // schedule re-creation if path is permanent
 
@@ -1919,7 +1919,7 @@ void RSVP::delSession(const cXMLElement& node)
                 ASSERT(psb->ERO.size() > 0);
 
                 sendPathTearMessage(psb->ERO[0].node, psb->Session_Object, psb->Sender_Template_Object,
-                        tedmod->interfaceAddrByPeerAddress(psb->ERO[0].node), routerId, true);
+                        tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node), routerId, true);
 
                 removePSB(psb);
             }

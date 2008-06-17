@@ -88,10 +88,10 @@ void IP::endService(cMessage *msg)
         updateDisplayString();
 }
 
-InterfaceEntry *IP::sourceInterfaceFrom(cMessage *msg)
+InterfaceEntry *IP::getSourceInterfaceFrom(cMessage *msg)
 {
     cGate *g = msg->getArrivalGate();
-    return g ? ift->interfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
+    return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
 void IP::handlePacketFromNetwork(IPDatagram *datagram)
@@ -124,7 +124,7 @@ void IP::handlePacketFromNetwork(IPDatagram *datagram)
     if (!datagram->getDestAddress().isMulticast())
         routePacket(datagram, NULL, false);
     else
-        routeMulticastPacket(datagram, NULL, sourceInterfaceFrom(datagram));
+        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
 }
 
 void IP::handleARP(ARPPacket *msg)
@@ -135,7 +135,7 @@ void IP::handleARP(ARPPacket *msg)
     delete msg->removeControlInfo();
 
     // dispatch ARP packets to ARP and let it know the gate index it arrived on
-    InterfaceEntry *fromIE = sourceInterfaceFrom(msg);
+    InterfaceEntry *fromIE = getSourceInterfaceFrom(msg);
     ASSERT(fromIE);
 
     IPRoutingDecision *routingDecision = new IPRoutingDecision();
@@ -156,14 +156,14 @@ void IP::handleReceivedICMP(ICMPMessage *msg)
             // ICMP errors are delivered to the appropriate higher layer protocol
             IPDatagram *bogusPacket = check_and_cast<IPDatagram *>(msg->getEncapsulatedMsg());
             int protocol = bogusPacket->getTransportProtocol();
-            int gateindex = mapping.outputGateForProtocol(protocol);
+            int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
             break;
         }
         default: {
             // all others are delivered to ICMP: ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY,
             // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
-            int gateindex = mapping.outputGateForProtocol(IP_PROT_ICMP);
+            int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(msg, "transportOut", gateindex);
         }
     }
@@ -270,7 +270,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     // DVMRP: process datagram only if sent locally or arrived on the shortest
     // route (provided routing table already contains srcAddr); otherwise
     // discard and continue.
-    InterfaceEntry *shortestPathIE = rt->interfaceForDestAddr(datagram->getSrcAddress());
+    InterfaceEntry *shortestPathIE = rt->getInterfaceForDestAddr(datagram->getSrcAddress());
     if (fromIE!=NULL && shortestPathIE!=NULL && fromIE!=shortestPathIE)
     {
         // FIXME count dropped
@@ -327,7 +327,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     }
 
     // now: routing
-    MulticastRoutes routes = rt->multicastRoutesFor(destAddr);
+    MulticastRoutes routes = rt->getMulticastRoutesFor(destAddr);
     if (routes.size()==0)
     {
         // no destination: delete datagram
@@ -400,7 +400,7 @@ void IP::reassembleAndDeliver(IPDatagram *datagram)
     }
     else
     {
-        int gateindex = mapping.outputGateForProtocol(protocol);
+        int gateindex = mapping.getOutputGateForProtocol(protocol);
         send(packet, "transportOut", gateindex);
     }
 }
@@ -408,7 +408,7 @@ void IP::reassembleAndDeliver(IPDatagram *datagram)
 cMessage *IP::decapsulateIP(IPDatagram *datagram)
 {
     // decapsulate transport packet
-    InterfaceEntry *fromIE = sourceInterfaceFrom(datagram);
+    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cMessage *packet = datagram->decapsulate();
 
     // create and fill in control info
@@ -513,7 +513,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
     if (!src.isUnspecified())
     {
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->interfaceByAddress(src)==NULL)
+        if (rt->getInterfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSrcAddress(src);

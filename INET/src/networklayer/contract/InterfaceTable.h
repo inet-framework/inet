@@ -109,24 +109,24 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      * Returns an interface given by its getNodeOutputGateId().
      * Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByNodeOutputGateId(int id);
+    InterfaceEntry *getInterfaceByNodeOutputGateId(int id);
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByNodeInputGateId(int id);
+    InterfaceEntry *getInterfaceByNodeInputGateId(int id);
 
     /**
      * Returns an interface given by its getNetworkLayerGateIndex().
      * Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByNetworkLayerGateIndex(int index);
+    InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index);
 
     /**
      * Returns an interface given by its name. Returns NULL if not found.
      */
-    InterfaceEntry *interfaceByName(const char *name);
+    InterfaceEntry *getInterfaceByName(const char *name);
 
     /**
      * Returns the first interface with the isLoopback flag set.

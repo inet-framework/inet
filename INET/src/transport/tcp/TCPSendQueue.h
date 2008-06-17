@@ -119,7 +119,7 @@ class INET_API TCPSendQueue : public cPolymorphic
      * Utility function: returns how many bytes are available in the queue, from
      * (and including) the given sequence number.
      */
-    inline ulong bytesAvailable(uint32 fromSeq)
+    inline ulong getBytesAvailable(uint32 fromSeq)
     {
         uint32 bufEndSeq = getBufferEndSeq();
         return seqLess(fromSeq, bufEndSeq) ? bufEndSeq-fromSeq : 0;

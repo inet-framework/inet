@@ -187,7 +187,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             InterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
-            InterfaceEntry *ie = ift->interfaceByNodeOutputGateId(outputGateId);
+            InterfaceEntry *ie = ift->getInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 

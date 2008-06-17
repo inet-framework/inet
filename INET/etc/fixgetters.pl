@@ -25,8 +25,6 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr
     family messageText receiveQueueClass receiverLDPIdentifier
     sendQueueClass stateName tcpAlgorithmClass";
 
-$arglessGetters="";  #FIXME remove just temp!!!
-
 # from C++ files
 $arglessGetters .= "blackboard connState port inetAddress
     netmask routerId extensionType localAddress remoteAddress
@@ -49,13 +47,23 @@ $arglessGetters .= "blackboard connState port inetAddress
 # array fields in msg files
 my $gettersWithArg = "payload recordAddress address extensionHeader
     prefixInformation recordTimestamp addresses data";
-
-$gettersWithArg = "-=/|/=-";  #FIXME remove just temp!!!
-
 foreach $i (split(/\s/, $gettersWithArg)) {$arglessGetters .= " ${i}ArraySize";}
+
+# from C++ files
+$gettersWithArg .= "gatewayForDestAddr interfaceAddrByPeerAddress
+    peerByLocalAddress route interfaceByAddress interfaceByAddress
+    interfaceByName interfaceByNetworkLayerGateIndex interfaceByNodeInputGateId
+    interfaceByNodeOutputGateId interfaceForDestAddr sourceInterfaceFrom
+    multicastRoutesFor routingEntry payloadOwner advPrefix
+    numMatchingPrefixBits outputGateForProtocol bytesAvailable";
 
 $arglessGetters =~ s/\s+/|/g;
 $gettersWithArg =~ s/\s+/|/g;
+
+
+$arglessGetters="----";  #FIXME remove just temp!!!
+$gettersWithArg="----";  #FIXME remove just temp!!!
+
 
 $listfname = $ARGV[0];
 open(LISTFILE, $listfname) || die "cannot open $listfname";
@@ -87,6 +95,8 @@ while (<LISTFILE>)
     # rename getters
     $txt =~ s/\b($arglessGetters) ?\( *\)/"get".ucfirst($1)."()"/mge;
     $txt =~ s/\b($gettersWithArg) ?\(/"get".ucfirst($1)."("/mge;
+
+    # custom renamings
 
     if ($txt eq $origtxt) {
         print "unchanged\n";

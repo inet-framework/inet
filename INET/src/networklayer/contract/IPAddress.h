@@ -227,7 +227,7 @@ class INET_API IPAddress
      *
      * Typical usage for comparing IP prefixes.
      */
-    int numMatchingPrefixBits(const IPAddress& to_cmp) const;
+    int getNumMatchingPrefixBits(const IPAddress& to_cmp) const;
 
     /**
      * Counts 1 bits in a netmask. E.g. for 255.255.254.0, it will return 23.
