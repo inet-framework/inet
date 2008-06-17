@@ -62,49 +62,44 @@ simtime_t backoff() ==> computeBackoff()
 contentionWindow() ==> computeContentionWindow() ?? [was: contentionWindow()]
 
 
-
-TBD:
-========
-
-IPAddress gatewayForDestAddr(const IPAddress& dest)
-IPAddress interfaceAddrByPeerAddress(IPAddress peerIP)
-IPAddress peerByLocalAddress(IPAddress localInf)
-IPAddress peerRemoteInterface(IPAddress peerIP)
-IPAddress primaryAddress(IPAddress localInf)
+"get with args -- to be revised
+===============================
 IPAddress routerIdOf(cModule *host)
-IPv6Route *route(int i)
 IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6)
 IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6)
-InterfaceEntry *interfaceAt(int pos)
-InterfaceEntry *interfaceByAddress(const IPAddress& address)
-InterfaceEntry *interfaceByAddress(const IPv6Address& address)
-InterfaceEntry *interfaceByName(const char *name)
-InterfaceEntry *interfaceByNetworkLayerGateIndex(int index)
-InterfaceEntry *interfaceByNodeInputGateId(int id)
-InterfaceEntry *interfaceByNodeOutputGateId(int id)
-InterfaceEntry *interfaceForDestAddr(const IPAddress& dest)
-InterfaceEntry *sourceInterfaceFrom(cMessage *msg)
 InterfaceTable *interfaceTableOf(cModule *host)
-MulticastRoutes multicastRoutesFor(const IPAddress& dest)
 NotificationBoard *notificationBoardOf(cModule *host)
-RTPSSRCGate *newSSRCGate(u_int32 ssrc)
-ReceptionReport *receptionReport(simtime_t now)
-RoutingEntry *routingEntry(int k)
 RoutingTable *routingTableOf(cModule *host)
 RoutingTable6 *routingTable6Of(cModule *host)
-SenderReport *senderReport(simtime_t now)
-TCPSocket *peerSocket(IPAddress peerAddr)
-TCPSocket *peerSocketSoft(IPAddress peerAddr)
+
+InterfaceEntry *interfaceAt(int pos) ==> getInterface(int) ??
+
+ReceptionReport *receptionReport(simtime_t now)  ==> createReceptionReport??
+SenderReport *senderReport(simtime_t now) ==> createSenderReport ??
+
 bool AnyNeighborInStates (int states)
 bool DestinationIsUnreachable (OSPFLSA* lsa)
 bool localDeliver(const IPAddress& dest)
 bool localDeliver(const IPv6Address& dest)
-bool packetOk(double snirMin, int length, double bitrate)
+
+bool packetOk(double snirMin, int length, double bitrate)   ==> isPacketOK ??
 bool packetOk(double snirMin, int lengthMPDU, double bitrate)
 bool packetOk(double, int)
-cModule *payloadOwner(cMessage *msg)
-const AdvPrefix& advPrefix(int i)
-const Key *lookupKeyAddr(Key& key)
+
+double bitErrorRate(double snir, double bandwidth, double bitrate) ==> calculateBER ???
+
+double frameDuration(Ieee80211Frame *msg)   ==> calculateFrameDuration() ??
+double frameDuration(int bits, double bitrate)
+
+int nodepos(const EroVector& ERO, IPAddress node) ==> find() ??
+
+simtime_t BackoffPeriod(Ieee80211Frame *msg, int r)  ==> calculateBackoffPeriod
+simtime_t packetDuration(int bits)  ==> calculatePacketDuration
+simtime_t timeOut(_802_11frameType type, simtime_t last_frame_duration)  ==> calculateTimeout
+
+
+skip these??
+============
 const char *eventName(int event)
 const char *indicationName(int code)
 const char *modeName(int mode)
@@ -117,20 +112,41 @@ const char *stateName(State state)
 const char *stateName(int state)
 const char *timerTypeName(int type)
 const char* logName(void)
-destinationType (OSPF::RoutingTableEntry::NetworkDestination)
-destinationType (entry.destinationType)
-double bitErrorRate(double snir, double bandwidth, double bitrate)
-double distance( const Coord a )
-double frameDuration(Ieee80211Frame *msg)
-double frameDuration(int bits, double bitrate)
-double sqrdist( const Coord a )
-int nodepos(const EroVector& ERO, IPAddress node)
-int numMatchingPrefixBits(const IPAddress& to_cmp)
-int outputGateForProtocol(int protocol)
-int sign(double i)
-simtime_t BackoffPeriod(Ieee80211Frame *msg, int r)
-simtime_t packetDuration(int bits)
-simtime_t timeOut(_802_11frameType type, simtime_t last_frame_duration)
-ulong bytesAvailable(uint32 fromSeq)
+
+add "get" and "For"? (
+======================
+TCPSocket *peerSocket(IPAddress peerAddr)
+TCPSocket *peerSocketSoft(IPAddress peerAddr)
 unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
 unsigned int linkIndex(IPAddress localInf)
+
+IPAddress peerRemoteInterface(IPAddress peerIP)  ????
+IPAddress primaryAddress(IPAddress localInf)   ???
+
+
+
+plain "get":
+============
+
+IPAddress gatewayForDestAddr(const IPAddress& dest)
+IPAddress interfaceAddrByPeerAddress(IPAddress peerIP)
+IPAddress peerByLocalAddress(IPAddress localInf)
+IPv6Route *route(int i)
+InterfaceEntry *interfaceByAddress(const IPAddress& address)
+InterfaceEntry *interfaceByAddress(const IPv6Address& address)
+InterfaceEntry *interfaceByName(const char *name)
+InterfaceEntry *interfaceByNetworkLayerGateIndex(int index)
+InterfaceEntry *interfaceByNodeInputGateId(int id)
+InterfaceEntry *interfaceByNodeOutputGateId(int id)
+InterfaceEntry *interfaceForDestAddr(const IPAddress& dest)
+InterfaceEntry *sourceInterfaceFrom(cMessage *msg)
+MulticastRoutes multicastRoutesFor(const IPAddress& dest)
+RoutingEntry *routingEntry(int k)
+cModule *payloadOwner(cMessage *msg)
+const AdvPrefix& advPrefix(int i)
+int numMatchingPrefixBits(const IPAddress& to_cmp)
+int outputGateForProtocol(int protocol)
+ulong bytesAvailable(uint32 fromSeq)
+
+
+
