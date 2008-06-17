@@ -20,22 +20,22 @@
 #include "Modulation.h"
 
 
-double NullModulation::bitErrorRate(double, double, double)
+double NullModulation::calculateBER(double, double, double)
 {
     return 0;
 }
 
-double BPSKModulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+double BPSKModulation::calculateBER(double snir, double bandwidth, double bitrate)
 {
     return 0.5 * exp(-snir * bandwidth / bitrate);
 }
 
-double QAM16Modulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+double QAM16Modulation::calculateBER(double snir, double bandwidth, double bitrate)
 {
     return 0.5 * (1 - 1 / sqrt(pow(2.0, 4))) * erfc(snir * bandwidth / bitrate);
 }
 
-double QAM256Modulation::bitErrorRate(double snir, double bandwidth, double bitrate)
+double QAM256Modulation::calculateBER(double snir, double bandwidth, double bitrate)
 {
     return 0.25 * (1 - 1 / sqrt(pow(2.0, 8))) * erfc(snir * bandwidth / bitrate);
 }

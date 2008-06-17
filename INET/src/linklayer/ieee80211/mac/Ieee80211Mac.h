@@ -288,7 +288,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     simtime_t getDIFS();
     simtime_t getEIFS();
     simtime_t getPIFS();
-    simtime_t BackoffPeriod(Ieee80211Frame *msg, int r);
+    simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 
   protected:
@@ -401,8 +401,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * over the physical channel. 'bits' should be the total length of the MAC frame
      * in bits, but excluding the physical layer framing (preamble etc.)
      */
-    double frameDuration(Ieee80211Frame *msg);
-    double frameDuration(int bits, double bitrate);
+    double computeFrameDuration(Ieee80211Frame *msg);
+    double computeFrameDuration(int bits, double bitrate);
 
     /** @brief Logs all state information */
     void logState();

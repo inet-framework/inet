@@ -31,7 +31,7 @@ void removeDuplicates(std::vector<int>& vec)
     }
 }
 
-int nodepos(const EroVector& ERO, IPAddress node)
+int find(const EroVector& ERO, IPAddress node)
 {
     for (unsigned int i = 0; i < ERO.size(); i++)
         if (ERO[i].node == node)

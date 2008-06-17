@@ -317,7 +317,7 @@ void LDP::rebuildFecList()
 
     for (int i = 0; i< ift->getNumInterfaces(); ++i)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->getNetworkLayerGateIndex() < 0)
             continue;
 
@@ -517,7 +517,7 @@ void LDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = ift->interfaceAt(interfaceId)->getName();
+    info.linkInterface = ift->getInterface(interfaceId)->getName();
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");

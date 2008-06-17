@@ -142,7 +142,7 @@ inline void OSPF::RoutingTableEntry::SetType2Cost(Metric pathCost)
 inline void OSPF::RoutingTableEntry::AddNextHop(OSPF::NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->interfaceAt(hop.ifIndex);
+        InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterface(hop.ifIndex);
 
         interfacePtr = routingInterface;
         interfaceName = routingInterface->getName();

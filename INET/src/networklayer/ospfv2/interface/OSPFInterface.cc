@@ -68,7 +68,7 @@ void OSPF::Interface::SetIfIndex(unsigned char index)
 {
     ifIndex = index;
     if (interfaceType == OSPF::Interface::UnknownType) {
-        InterfaceEntry* routingInterface = InterfaceTableAccess().get()->interfaceAt(ifIndex);
+        InterfaceEntry* routingInterface = InterfaceTableAccess().get()->getInterface(ifIndex);
         interfaceAddressRange.address = IPv4AddressFromAddressString(routingInterface->ipv4()->getInetAddress().str().c_str());
         interfaceAddressRange.mask = IPv4AddressFromAddressString(routingInterface->ipv4()->getNetmask().str().c_str());
         mtu = routingInterface->getMTU();

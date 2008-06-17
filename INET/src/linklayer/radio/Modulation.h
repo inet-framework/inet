@@ -29,7 +29,7 @@ class INET_API NullModulation : public IModulation
 {
   public:
     virtual const char *getName() {return "no bit errors";}
-    virtual double bitErrorRate(double snir, double bandwidth, double bitrate);
+    virtual double calculateBER(double snir, double bandwidth, double bitrate);
 };
 
 /**
@@ -39,7 +39,7 @@ class INET_API BPSKModulation : public IModulation
 {
   public:
     virtual const char *getName() {return "BPSK";}
-    virtual double bitErrorRate(double snir, double bandwidth, double bitrate);
+    virtual double calculateBER(double snir, double bandwidth, double bitrate);
 };
 
 /**
@@ -49,7 +49,7 @@ class INET_API QAM16Modulation : public IModulation
 {
   public:
     virtual const char *getName() {return "16-QAM";}
-    virtual double bitErrorRate(double snir, double bandwidth, double bitrate);
+    virtual double calculateBER(double snir, double bandwidth, double bitrate);
 };
 
 /**
@@ -59,7 +59,7 @@ class INET_API QAM256Modulation : public IModulation
 {
   public:
     virtual const char *getName() {return "256-QAM";}
-    virtual double bitErrorRate(double snir, double bandwidth, double bitrate);
+    virtual double calculateBER(double snir, double bandwidth, double bitrate);
 };
 
 

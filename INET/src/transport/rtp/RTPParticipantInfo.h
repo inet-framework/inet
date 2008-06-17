@@ -130,9 +130,9 @@ class INET_API RTPParticipantInfo : public cObject
          * many rtcp intervals have passed, for example an rtp end system
          * is marked as inactive if there haven't been received packets from
          * it for a certain number of rtpc intervals.
-         * Call getSenderReport() and receptionReport() before calling this method.
+         * Call getSenderReport() and createReceptionReport() before calling this method.
          * \sa getSenderReport()
-         * \sa receptionReport()
+         * \sa createReceptionReport()
          */
         virtual void nextInterval(simtime_t now);
 

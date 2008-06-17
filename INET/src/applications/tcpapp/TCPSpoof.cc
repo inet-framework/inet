@@ -43,7 +43,7 @@ void TCPSpoof::sendSpoofPacket()
     int srcPort = par("srcPort");
     int destPort = par("destPort");
     bool isSYN = par("isSYN");
-    unsigned long seq = par("seqNo").longValue()==-1 ? initialSeqNum() : par("seqNo").longValue();
+    unsigned long seq = par("seqNo").longValue()==-1 ? chooseInitialSeqNum() : par("seqNo").longValue();
 
     // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);
@@ -86,7 +86,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
     }
 }
 
-unsigned long TCPSpoof::initialSeqNum()
+unsigned long TCPSpoof::chooseInitialSeqNum()
 {
     // choose an initial send sequence number in the same way as TCP does
     return (unsigned long)SIMTIME_DBL(fmod(simTime()*250000.0, 1.0+(double)(unsigned)0xffffffffUL)) & 0xffffffffUL;

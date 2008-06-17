@@ -163,10 +163,10 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     void testMaxAttempts();
 
     /** @brief return a timeOut value for a certain type of frame*/
-    simtime_t timeOut(_802_11frameType type, simtime_t last_frame_duration);
+    simtime_t computeTimeout(_802_11frameType type, simtime_t last_frame_duration);
 
     /** @brief computes the duration of a transmission over the physical channel*/
-    simtime_t packetDuration(int bits);
+    simtime_t computePacketDuration(int bits);
 
     /** @brief Produce a readable name of the given state */
     const char *stateName(State state);

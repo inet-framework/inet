@@ -42,7 +42,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 /**
  * TODO documentation
  */
-int nodepos(const EroVector& ERO, IPAddress node);
+int find(const EroVector& ERO, IPAddress node);
 
 /**
  * TODO documentation

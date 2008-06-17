@@ -628,7 +628,7 @@ simtime_t Ieee80211Mac::getEIFS()
     return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
 }
 
-simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
+simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
 {
     int cw;
 
@@ -686,13 +686,13 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend) + getSIFS() + frameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling broadcast timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend), endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend), endTimeout);
 }
 
 void Ieee80211Mac::cancelTimeoutPeriod()
@@ -703,7 +703,7 @@ void Ieee80211Mac::cancelTimeoutPeriod()
 
 void Ieee80211Mac::scheduleCTSTimeoutPeriod()
 {
-    scheduleAt(simTime() + frameDuration(LENGTH_RTS, basicBitrate) + getSIFS() + frameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(LENGTH_RTS, basicBitrate) + getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
@@ -749,7 +749,7 @@ bool Ieee80211Mac::isInvalidBackoffPeriod()
 
 void Ieee80211Mac::generateBackoffPeriod()
 {
-    backoffPeriod = BackoffPeriod(getCurrentTransmission(), retryCounter);
+    backoffPeriod = computeBackoffPeriod(getCurrentTransmission(), retryCounter);
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period set to " << backoffPeriod << endl;
 }
@@ -842,10 +842,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
-        frame->setDuration(getSIFS() + frameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * frameDuration(LENGTH_ACK, basicBitrate) + frameDuration(frameToSend));
+        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate) + computeFrameDuration(frameToSend));
 
     return frame;
 }
@@ -858,7 +858,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - frameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -868,9 +868,9 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * getSIFS() + frameDuration(LENGTH_CTS, basicBitrate) +
-                       frameDuration(frameToSend) +
-                       frameDuration(LENGTH_ACK, basicBitrate));
+    frame->setDuration(3 * getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) +
+                       computeFrameDuration(frameToSend) +
+                       computeFrameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -879,7 +879,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS() - frameDuration(LENGTH_CTS, basicBitrate));
+    frame->setDuration(rtsFrame->getDuration() - getSIFS() - computeFrameDuration(LENGTH_CTS, basicBitrate));
 
     return frame;
 }
@@ -1007,12 +1007,12 @@ void Ieee80211Mac::popTransmissionQueue()
     }
 }
 
-double Ieee80211Mac::frameDuration(Ieee80211Frame *msg)
+double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 {
-    return frameDuration(msg->getBitLength(), bitrate);
+    return computeFrameDuration(msg->getBitLength(), bitrate);
 }
 
-double Ieee80211Mac::frameDuration(int bits, double bitrate)
+double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }

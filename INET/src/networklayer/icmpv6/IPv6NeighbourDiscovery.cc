@@ -61,7 +61,7 @@ void IPv6NeighbourDiscovery::initialize(int stage)
 
         for (int i=0; i < ift->getNumInterfaces(); i++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(i);
+            InterfaceEntry *ie = ift->getInterface(i);
 
             if (ie->ipv6()->getAdvSendAdvertisements() && !(ie->isLoopback()))
             {
@@ -289,7 +289,7 @@ const MACAddress& IPv6NeighbourDiscovery::resolveNeighbour(const IPv6Address& ne
     Enter_Method("resolveNeighbor(%s,if=%d)", nextHop.str().c_str(), interfaceId);
 
     Neighbour *nce = neighbourCache.lookup(nextHop, interfaceId);
-    //InterfaceEntry *ie = ift->interfaceAt(interfaceId);
+    //InterfaceEntry *ie = ift->getInterface(interfaceId);
 
     if (!nce || nce->reachabilityState==IPv6NeighbourCache::INCOMPLETE)
         return MACAddress::UNSPECIFIED_ADDRESS;
@@ -434,7 +434,7 @@ void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(
     ASSERT(nce->reachabilityState==IPv6NeighbourCache::STALE);
     const Key *nceKey = nce->nceKey;
     EV << "Initiating Neighbour Unreachability Detection";
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
     EV << "Setting NCE state to DELAY.\n";
     /*The first time a node sends a packet to a neighbor whose entry is
     STALE, the sender changes the state to DELAY*/
@@ -452,7 +452,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     EV << "NUD has timed out\n";
     Neighbour *nce = (Neighbour *) timeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
 
     if (nce->reachabilityState == IPv6NeighbourCache::DELAY)
     {
@@ -595,7 +595,7 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
     Neighbour *nce)
 {
     const Key *nceKey = nce->nceKey;
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
     IPv6Address neighbourAddr = nceKey->address;
     int ifID = nceKey->interfaceID;
 
@@ -650,7 +650,7 @@ void IPv6NeighbourDiscovery::processARTimeout(cMessage *arTimeoutMsg)
     Neighbour *nce = (Neighbour *)arTimeoutMsg->getContextPointer();
     const Key *nceKey = nce->nceKey;
     IPv6Address nsTargetAddr = nceKey->address;
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
     EV << "Num Of NS Sent:" << nce->numOfARNSSent << endl;
     EV << "Max Multicast Solicitation:" << ie->ipv6()->_maxMulticastSolicit() << endl;
     if (nce->numOfARNSSent < ie->ipv6()->_maxMulticastSolicit())
@@ -734,7 +734,7 @@ void IPv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
     //interface in this node.
     for (int i=0; i < ift->getNumInterfaces(); i++)
 {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
 
         //Skip the loopback interface.
         if (ie->isLoopback()) continue;
@@ -784,7 +784,7 @@ void IPv6NeighbourDiscovery::initiateDAD(const IPv6Address& tentativeAddr,
 void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
 {
     DADEntry *dadEntry = (DADEntry *)msg->getContextPointer();
-    InterfaceEntry *ie = (InterfaceEntry *)ift->interfaceAt(dadEntry->interfaceId);
+    InterfaceEntry *ie = (InterfaceEntry *)ift->getInterface(dadEntry->interfaceId);
     IPv6Address tentativeAddr = dadEntry->address;
     //Here, we need to check how many DAD messages for the interface entry were
     //sent vs. DupAddrDetectTransmits
@@ -938,7 +938,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
 {
     if (validateRSPacket(rs, rsCtrlInfo) == false) return;
     //Find out which interface the RS message arrived on.
-    InterfaceEntry *ie = ift->interfaceAt(rsCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterface(rsCtrlInfo->getInterfaceId());
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);//fetch advertising interface entry.
 
     //RFC 2461: Section 6.2.6
@@ -1117,7 +1117,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
     IPv6ControlInfo *raCtrlInfo)
 {
-    InterfaceEntry *ie = ift->interfaceAt(raCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterface(raCtrlInfo->getInterfaceId());
 
     if (ie->ipv6()->getAdvSendAdvertisements())
     {
@@ -1161,7 +1161,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
     IPv6Address raSrcAddr = raCtrlInfo->getSrcAddr();
-    InterfaceEntry *ie = ift->interfaceAt(raCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterface(raCtrlInfo->getInterfaceId());
     int ifID = ie->getInterfaceId();
 
     /*- If the address is not already present in the host's Default Router List,
@@ -1593,7 +1593,7 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
     IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
-    InterfaceEntry *ie = ift->interfaceAt(nsCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterface(nsCtrlInfo->getInterfaceId());
 
     IPv6Address nsTargetAddr = ns->getTargetAddress();
 
@@ -1904,7 +1904,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
 
     //First, we check if the target address in NA is found in the interface it
     //was received on is tentative.
-    InterfaceEntry *ie = ift->interfaceAt(naCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterface(naCtrlInfo->getInterfaceId());
     if (ie->ipv6()->isTentativeAddress(naTargetAddr))
     {
         error("Duplicate Address Detected! Manual attention needed!");
@@ -1979,7 +1979,7 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
     bool naRouterFlag = na->getRouterFlag();
     bool naSolicitedFlag = na->getSolicitedFlag();
     const Key *nceKey = nce->nceKey;
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
 
     /*If the target's neighbour Cache entry is in the INCOMPLETE state when the
     advertisement is received, one of two things happens.*/
@@ -2028,7 +2028,7 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
     bool naOverrideFlag = na->getOverrideFlag();
     MACAddress naMacAddr = na->getTargetLinkLayerAddress();
     const Key *nceKey = nce->nceKey;
-    InterfaceEntry *ie = ift->interfaceAt(nceKey->interfaceID);
+    InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
 
     /*draft-ietf-ipv6-2461bis-04
     Section 7.2.5: Receipt of Neighbour Advertisements

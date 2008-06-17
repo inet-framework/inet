@@ -71,7 +71,7 @@ void Mac80211::initialize(int stage)
 
         radioState = RadioState::IDLE; // until 1st receiveChangeNotification()
 
-        EIFS = SIFS + DIFS + packetDuration(LENGTH_ACK);
+        EIFS = SIFS + DIFS + computePacketDuration(LENGTH_ACK);
         EV << "SIFS: " << SIFS << " DIFS: " << DIFS << " EIFS: " << EIFS << endl;
 
         // get registered in InterfaceTable
@@ -616,7 +616,7 @@ void Mac80211::sendDATAframe()
     EV << "sending data frame\n";
 
     // schedule time out
-    scheduleAt(simTime() + timeOut(DATA, 0), timeout);
+    scheduleAt(simTime() + computeTimeout(DATA, 0), timeout);
 
     if (!rtsCts)
         // retryCounter incremented
@@ -637,7 +637,7 @@ void Mac80211::sendACKframe(Mac80211Pkt * af)
 {
     // the MAC must wait the end of the transmission before beginning an
     // other contention period
-    scheduleAt(simTime() + packetDuration(LENGTH_ACK) + delta, endTransmission);
+    scheduleAt(simTime() + computePacketDuration(LENGTH_ACK) + delta, endTransmission);
 
     // send ACK frame
     sendDown(buildACKframe(af));
@@ -654,7 +654,7 @@ void Mac80211::sendACKframe(Mac80211Pkt * af)
 void Mac80211::sendRTSframe()
 {
     // schedule time-out
-    scheduleAt(simTime() + timeOut(RTS, 0), timeout);
+    scheduleAt(simTime() + computeTimeout(RTS, 0), timeout);
 
     // long_retry_counter incremented
     retryCounter++;
@@ -673,7 +673,7 @@ void Mac80211::sendRTSframe()
 void Mac80211::sendCTSframe(Mac80211Pkt * af)
 {
     // schedule time-out
-    scheduleAt(simTime() + timeOut(CTS, af->getDuration()), timeout);
+    scheduleAt(simTime() + computeTimeout(CTS, af->getDuration()), timeout);
 
     // send CTS frame
     sendDown(buildCTSframe(af));
@@ -689,7 +689,7 @@ void Mac80211::sendBROADCASTframe()
 {
     // the MAC must wait the end of the transmission before beginning any
     // other contention period
-    scheduleAt(simTime() + packetDuration(fromUpperLayer.front()->getBitLength()), endTransmission);
+    scheduleAt(simTime() + computePacketDuration(fromUpperLayer.front()->getBitLength()), endTransmission);
     // send ACK frame
     sendDown(buildBROADCASTframe());
 
@@ -708,7 +708,7 @@ Mac80211Pkt *Mac80211::buildDATAframe()
     frame->setSrcAddr(myMacAddr);
     frame->setKind(DATA);
     if (rtsCts)
-        frame->setDuration(SIFS + packetDuration(LENGTH_ACK));
+        frame->setDuration(SIFS + computePacketDuration(LENGTH_ACK));
     else
         frame->setDuration(0);
 
@@ -747,9 +747,9 @@ Mac80211Pkt *Mac80211::buildRTSframe()
     // the src adress and dest address are copied in the frame in the queue (frame to be sent)
     frame->setSrcAddr(((Mac80211Pkt *) fromUpperLayer.front())->getSrcAddr());
     frame->setDestAddr(((Mac80211Pkt *) fromUpperLayer.front())->getDestAddr());
-    frame->setDuration(3 * SIFS + packetDuration(LENGTH_CTS) +
-                       packetDuration(fromUpperLayer.front()->getBitLength()) +
-                       packetDuration(LENGTH_ACK));
+    frame->setDuration(3 * SIFS + computePacketDuration(LENGTH_CTS) +
+                       computePacketDuration(fromUpperLayer.front()->getBitLength()) +
+                       computePacketDuration(LENGTH_ACK));
 
     return frame;
 }
@@ -767,7 +767,7 @@ Mac80211Pkt *Mac80211::buildCTSframe(Mac80211Pkt * af)
     // src adress is the adress of the node
     frame->setSrcAddr(myMacAddr);
     frame->setDestAddr(af->getSrcAddr());
-    frame->setDuration(af->getDuration() - SIFS - packetDuration(LENGTH_CTS));
+    frame->setDuration(af->getDuration() - SIFS - computePacketDuration(LENGTH_CTS));
 
     return frame;
 }
@@ -964,26 +964,26 @@ void Mac80211::receiveChangeNotification(int category, cPolymorphic *details)
  *  Return a time-out value for a type of frame. Called by
  *  SendRTSframe, sendCTSframe, etc.
  */
-simtime_t Mac80211::timeOut(_802_11frameType type, simtime_t last_frame_duration)
+simtime_t Mac80211::computeTimeout(_802_11frameType type, simtime_t last_frame_duration)
 {
     simtime_t time_out = 0;
     switch (type)
     {
     case RTS:
-        time_out = SIFS + packetDuration(LENGTH_RTS) + packetDuration(LENGTH_CTS) + delta;
+        time_out = SIFS + computePacketDuration(LENGTH_RTS) + computePacketDuration(LENGTH_CTS) + delta;
         break;
     case CTS:
-        time_out = last_frame_duration - packetDuration(LENGTH_ACK) - 2 * SIFS + delta;
+        time_out = last_frame_duration - computePacketDuration(LENGTH_ACK) - 2 * SIFS + delta;
         break;
     case DATA:
         time_out =
-            SIFS + packetDuration(fromUpperLayer.front()->getBitLength()) + packetDuration(LENGTH_ACK) +
+            SIFS + computePacketDuration(fromUpperLayer.front()->getBitLength()) + computePacketDuration(LENGTH_ACK) +
             delta + 0.1;
         //XXX: I have added some time here, because propagation delay of AirFrames caused problems
         // the timeout periods should be carefully revised with special care for the deltas?! --Levy
         break;
     default:
-        EV << "Unused frame type was given when calling timeOut(), this should not happen!\n";
+        EV << "Unused frame type was given when calling computeTimeout(), this should not happen!\n";
     }
     return time_out;
 }
@@ -993,7 +993,7 @@ simtime_t Mac80211::timeOut(_802_11frameType type, simtime_t last_frame_duration
  * physical channel. 'bits' should be the total length of the MAC
  * packet in bits.
  */
-simtime_t Mac80211::packetDuration(int bits)
+simtime_t Mac80211::computePacketDuration(int bits)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }

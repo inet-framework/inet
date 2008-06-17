@@ -166,7 +166,7 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
     // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv4() && !ie->ipv4()->getInetAddress().isUnspecified() && !ie->isLoopback())
         {
             addr = ie->ipv4()->getInetAddress();
@@ -187,7 +187,7 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
     IPv6Address addr;
     for (int i=0; i<ift->getNumInterfaces() && addr.isUnspecified(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (!ie->ipv6() || ie->isLoopback())
             continue;
         IPv6Address ifAddr = ie->ipv6()->getPreferredAddress();

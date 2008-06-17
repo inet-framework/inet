@@ -121,7 +121,7 @@ void RoutingTable::initialize(int stage)
         // interface entries). Create the per-interface IPv4 data structures.
         InterfaceTable *interfaceTable = InterfaceTableAccess().get();
         for (int i=0; i<interfaceTable->getNumInterfaces(); ++i)
-            configureInterfaceForIPv4(interfaceTable->interfaceAt(i));
+            configureInterfaceForIPv4(interfaceTable->getInterface(i));
         configureLoopbackForIPv4();
 
         // read routing table file (and interface configuration)
@@ -160,7 +160,7 @@ void RoutingTable::autoconfigRouterId()
             // choose highest interface address as routerId
             for (int i=0; i<ift->getNumInterfaces(); ++i)
             {
-                InterfaceEntry *ie = ift->interfaceAt(i);
+                InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback() && ie->ipv4()->getInetAddress().getInt() > _routerId.getInt())
                     _routerId = ie->ipv4()->getInetAddress();
             }
@@ -226,7 +226,7 @@ std::vector<IPAddress> RoutingTable::gatherAddresses()
     std::vector<IPAddress> addressvector;
 
     for (int i=0; i<ift->getNumInterfaces(); ++i)
-        addressvector.push_back(ift->interfaceAt(i)->ipv4()->getInetAddress());
+        addressvector.push_back(ift->getInterface(i)->ipv4()->getInetAddress());
     return addressvector;
 }
 
@@ -248,7 +248,7 @@ InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPAddress& addr)
         return NULL;
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv4()->getInetAddress()==addr)
             return ie;
     }
@@ -278,7 +278,7 @@ bool RoutingTable::localDeliver(const IPAddress& dest)
     // check if we have an interface with this address
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (dest==ie->ipv4()->getInetAddress())
             return true;
     }
@@ -291,7 +291,7 @@ bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
 
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         for (unsigned int j=0; j < ie->ipv4()->getMulticastGroups().size(); j++)
             if (dest.equals(ie->ipv4()->getMulticastGroups()[j]))
                 return true;
@@ -471,7 +471,7 @@ void RoutingTable::updateNetmaskRoutes()
     // then re-add them, according to actual interface configuration
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv4()->getNetmask()!=IPAddress::ALLONES_ADDRESS)
         {
             RoutingEntry *route = new RoutingEntry();

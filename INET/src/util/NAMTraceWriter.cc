@@ -72,7 +72,7 @@ void NAMTraceWriter::initialize(int stage)
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
             // skip loopback interfaces
-            InterfaceEntry *ie = ift->interfaceAt(i);
+            InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isLoopback()) continue;
             if (!ie->isPointToPoint()) continue; // consider pont-to-point links only
 

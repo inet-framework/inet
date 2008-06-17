@@ -95,7 +95,7 @@ void RoutingTable6::initialize(int stage)
         // add IPv6InterfaceData to interfaces
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(i);
+            InterfaceEntry *ie = ift->getInterface(i);
             configureInterfaceForIPv6(ie);
         }
 
@@ -107,7 +107,7 @@ void RoutingTable6::initialize(int stage)
             // add globally routable prefixes to routing table
             for (int x = 0; x < ift->getNumInterfaces(); x++)
             {
-                InterfaceEntry *ie = ift->interfaceAt(x);
+                InterfaceEntry *ie = ift->getInterface(x);
 
                 if (ie->isLoopback())
                     continue;
@@ -320,7 +320,7 @@ InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
         return NULL;
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv6()->hasAddress(addr))
             return ie;
     }
@@ -334,7 +334,7 @@ bool RoutingTable6::localDeliver(const IPv6Address& dest)
     // first, check if we have an interface with this address
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv6()->hasAddress(dest))
             return true;
     }
@@ -353,7 +353,7 @@ bool RoutingTable6::localDeliver(const IPv6Address& dest)
     {
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(i);
+            InterfaceEntry *ie = ift->getInterface(i);
             if (ie->ipv6()->matchesSolicitedNodeMulticastAddress(dest))
                 return true;
         }

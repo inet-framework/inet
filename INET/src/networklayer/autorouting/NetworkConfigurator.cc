@@ -98,7 +98,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
         InterfaceTable *ift = nodeInfo[i].ift;
         for (int k=0; k<ift->getNumInterfaces(); k++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(k);
+            InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
             {
                 ie->ipv4()->setInetAddress(IPAddress(addr | (uint32)k));
@@ -200,8 +200,8 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
         int numIntf = 0;
         InterfaceEntry *ie = NULL;
         for (int k=0; k<ift->getNumInterfaces(); k++)
-            if (!ift->interfaceAt(k)->isLoopback())
-                {ie = ift->interfaceAt(k); numIntf++;}
+            if (!ift->getInterface(k)->isLoopback())
+                {ie = ift->getInterface(k); numIntf++;}
 
         nodeInfo[i].usesDefaultRoute = (numIntf==1);
         if (numIntf!=1)

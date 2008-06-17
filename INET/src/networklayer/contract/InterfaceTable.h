@@ -103,7 +103,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     /**
      * Returns the InterfaceEntry specified by an index 0..numInterfaces-1.
      */
-    InterfaceEntry *interfaceAt(int pos);
+    InterfaceEntry *getInterface(int pos);
 
     /**
      * Returns an interface given by its getNodeOutputGateId().

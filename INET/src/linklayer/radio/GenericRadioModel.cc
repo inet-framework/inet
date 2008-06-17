@@ -90,7 +90,7 @@ bool GenericRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& r
 
 bool GenericRadioModel::isPacketOK(double snirMin, int length, double bitrate)
 {
-    double ber = modulation->bitErrorRate(snirMin, bandwidth, bitrate);
+    double ber = modulation->calculateBER(snirMin, bandwidth, bitrate);
 
     if (ber==0.0)
         return true;

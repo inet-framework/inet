@@ -100,7 +100,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
         // assign prefix to interfaces
         for (int k = 0; k < ift->getNumInterfaces(); k++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(k);
+            InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->ipv6() || ie->isLoopback())
                 continue;
             if (ie->ipv6()->getNumAdvPrefixes()>0)
@@ -154,7 +154,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
         // add globally routable prefixes to routing table
         for (int x = 0; x < ift->getNumInterfaces(); x++)
         {
-            InterfaceEntry *ie = ift->interfaceAt(x);
+            InterfaceEntry *ie = ift->getInterface(x);
 
             if (ie->isLoopback())
                 continue;
@@ -197,7 +197,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
         std::vector<const IPv6InterfaceData::AdvPrefix*> destPrefixes;
         for (int x = 0; x < destIft->getNumInterfaces(); x++)
         {
-            InterfaceEntry *destIf = destIft->interfaceAt(x);
+            InterfaceEntry *destIf = destIft->getInterface(x);
 
             if (destIf->isLoopback())
                 continue;

@@ -60,7 +60,7 @@ void TED::initialize(int stage)
     //
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
 
         if (ie->getNodeOutputGateId() == -1)  // ignore if it's not a physical interface
             continue;
@@ -117,7 +117,7 @@ void TED::initialize(int stage)
     // extract list of local interface addresses into interfaceAddrs[]
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
-        InterfaceEntry *ie = ift->interfaceAt(i);
+        InterfaceEntry *ie = ift->getInterface(i);
         if (rt->getInterfaceByAddress(ie->ipv4()->getInetAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
