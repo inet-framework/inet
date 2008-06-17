@@ -8,8 +8,8 @@ namespace OSPF {
 class InterfaceStatePointToPoint : public InterfaceState
 {
 public:
-    virtual void ProcessEvent (Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType GetState (void) const { return Interface::PointToPointState; }
+    virtual void ProcessEvent(Interface* intf, Interface::InterfaceEventType event);
+    virtual Interface::InterfaceStateType GetState(void) const { return Interface::PointToPointState; }
 };
 
 } // namespace OSPF

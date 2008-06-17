@@ -99,11 +99,11 @@ private:
     static unsigned long                ddSequenceNumberInitSeed;
 
 private:
-    void ChangeState (NeighborState* newState, NeighborState* currentState);
+    void ChangeState(NeighborState* newState, NeighborState* currentState);
 
 public:
-            Neighbor (RouterID neighbor = NullRouterID);
-    virtual ~Neighbor (void);
+            Neighbor(RouterID neighbor = NullRouterID);
+    virtual ~Neighbor(void);
 
     void                ProcessEvent                        (NeighborEventType event);
     void                Reset                               (void);
@@ -111,7 +111,7 @@ public:
     NeighborStateType   GetState                            (void) const;
     static const char*  GetStateString                      (NeighborStateType stateType);
     void                SendDatabaseDescriptionPacket       (bool init = false);
-    bool                RetransmitDatabaseDescriptionPacket (void);
+    bool                RetransmitDatabaseDescriptionPacket(void);
     void                CreateDatabaseSummary               (void);
     void                SendLinkStateRequestPacket          (void);
     void                RetransmitUpdatePacket              (void);
@@ -153,8 +153,8 @@ public:
     void                SetLastReceivedDDPacket     (DDPacketID packetID)           { lastReceivedDDPacket = packetID; }
     DDPacketID          GetLastReceivedDDPacket     (void) const                    { return lastReceivedDDPacket; }
 
-    void                                SetDatabaseExchangeRelationship (DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
-    DatabaseExchangeRelationshipType    GetDatabaseExchangeRelationship (void) const                                { return databaseExchangeRelationship; }
+    void                                SetDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
+    DatabaseExchangeRelationshipType    GetDatabaseExchangeRelationship(void) const                                { return databaseExchangeRelationship; }
 
     void                SetInterface                (Interface* intf)               { parentInterface = intf; }
     Interface*          GetInterface                (void)                          { return parentInterface; }
@@ -169,12 +169,12 @@ public:
     bool                IsFirstAdjacencyInited              (void) const            { return firstAdjacencyInited; }
     bool                DesignatedRoutersAreSetUp           (void) const            { return designatedRoutersSetUp; }
     void                SetUpDesignatedRouters              (bool setUp)            { designatedRoutersSetUp = setUp; }
-    unsigned long       GetDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size (); }
+    unsigned long       GetDatabaseSummaryListCount         (void) const            { return databaseSummaryList.size(); }
 
     void IncrementDDSequenceNumber          (void)       { ddSequenceNumber++; }
-    bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty (); }
-    bool IsLinkStateRetransmissionListEmpty (void) const { return linkStateRetransmissionList.empty (); }
-    void PopFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front (); }
+    bool IsLinkStateRequestListEmpty        (void) const { return linkStateRequestList.empty(); }
+    bool IsLinkStateRetransmissionListEmpty(void) const { return linkStateRetransmissionList.empty(); }
+    void PopFirstLinkStateRequest           (void)       { linkStateRequestList.pop_front(); }
 };
 
 } // namespace OSPF

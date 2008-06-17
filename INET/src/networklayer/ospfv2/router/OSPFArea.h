@@ -32,15 +32,15 @@ private:
 
     Router*                                                 parentRouter;
 public:
-            Area (AreaID id = BackboneAreaID);
-    virtual ~Area (void);
+            Area(AreaID id = BackboneAreaID);
+    virtual ~Area(void);
 
     void                SetAreaID                       (AreaID areaId)                                 { areaID = areaId; }
     AreaID              GetAreaID                       (void) const                                    { return areaID; }
-    void                AddAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back (addressRange); advertiseAddressRanges[addressRange] = advertise; }
-    unsigned int        GetAddressRangeCount            (void) const                                    { return areaAddressRanges.size (); }
+    void                AddAddressRange                 (IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
+    unsigned int        GetAddressRangeCount            (void) const                                    { return areaAddressRanges.size(); }
     IPv4AddressRange    GetAddressRange                 (unsigned int index) const                      { return areaAddressRanges[index]; }
-    void                AddHostRoute                    (HostRouteParameters& hostRouteParameters)      { hostRoutes.push_back (hostRouteParameters); }
+    void                AddHostRoute                    (HostRouteParameters& hostRouteParameters)      { hostRoutes.push_back(hostRouteParameters); }
     void                SetTransitCapability            (bool transit)                                  { transitCapability = transit; }
     bool                GetTransitCapability            (void) const                                    { return transitCapability; }
     void                SetExternalRoutingCapability    (bool flooded)                                  { externalRoutingCapability = flooded; }
@@ -55,13 +55,13 @@ public:
     Router*             GetRouter                       (void)                                          { return parentRouter; }
     const Router*       GetRouter                       (void) const                                    { return parentRouter; }
 
-    unsigned long       GetRouterLSACount               (void) const                                    { return routerLSAs.size (); }
+    unsigned long       GetRouterLSACount               (void) const                                    { return routerLSAs.size(); }
     RouterLSA*          GetRouterLSA                    (unsigned long i)                               { return routerLSAs[i]; }
     const RouterLSA*    GetRouterLSA                    (unsigned long i) const                         { return routerLSAs[i]; }
-    unsigned long       GetNetworkLSACount              (void) const                                    { return networkLSAs.size (); }
+    unsigned long       GetNetworkLSACount              (void) const                                    { return networkLSAs.size(); }
     NetworkLSA*         GetNetworkLSA                   (unsigned long i)                               { return networkLSAs[i]; }
     const NetworkLSA*   GetNetworkLSA                   (unsigned long i) const                         { return networkLSAs[i]; }
-    unsigned long       GetSummaryLSACount              (void) const                                    { return summaryLSAs.size (); }
+    unsigned long       GetSummaryLSACount              (void) const                                    { return summaryLSAs.size(); }
     SummaryLSA*         GetSummaryLSA                   (unsigned long i)                               { return summaryLSAs[i]; }
     const SummaryLSA*   GetSummaryLSA                   (unsigned long i) const                         { return summaryLSAs[i]; }
 
@@ -98,8 +98,8 @@ public:
     void                CalculateInterAreaRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
     void                ReCheckSummaryLSAs                  (std::vector<RoutingTableEntry*>& newRoutingTable);
 
-    void        info (char* buffer);
-    std::string detailedInfo (void) const;
+    void        info(char* buffer);
+    std::string detailedInfo(void) const;
 
 private:
     SummaryLSA*             OriginateSummaryLSA                     (const OSPF::SummaryLSA* summaryLSA);
@@ -126,7 +126,7 @@ private:
 
 inline std::ostream& operator<< (std::ostream& ostr, OSPF::Area& area)
 {
-    ostr << area.detailedInfo ();
+    ostr << area.detailedInfo();
     return ostr;
 }
 

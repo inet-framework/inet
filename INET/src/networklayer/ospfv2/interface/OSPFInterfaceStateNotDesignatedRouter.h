@@ -8,8 +8,8 @@ namespace OSPF {
 class InterfaceStateNotDesignatedRouter : public InterfaceState
 {
 public:
-    virtual void ProcessEvent (Interface* intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType GetState (void) const { return Interface::NotDesignatedRouterState; }
+    virtual void ProcessEvent(Interface* intf, Interface::InterfaceEventType event);
+    virtual Interface::InterfaceStateType GetState(void) const { return Interface::NotDesignatedRouterState; }
 };
 
 } // namespace OSPF

@@ -25,7 +25,7 @@
 
 /**
  * OMNeT++ module class acting as a facade for the OSPF datastructure.
- * Handles the configuration loading and forwards the OMNeT++ messages (OSPF packets).
+ * Handles the configuration loading and forwards the OMNeT++ messages(OSPF packets).
  */
 class OSPFRouting :  public cSimpleModule
 {
@@ -34,19 +34,19 @@ class OSPFRouting :  public cSimpleModule
     RoutingTable*       rt;         ///< Provides access to the IP routing table.
     OSPF::Router*       ospfRouter; ///< Root object of the OSPF datastructure.
 
-    int     ResolveInterfaceName (const std::string& name) const;
-    void    GetAreaListFromXML (const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
-    void    LoadAreaFromXML (const cXMLElement& asConfig, const std::string& areaID);
-    void    LoadInterfaceParameters (const cXMLElement& ifConfig);
-    void    LoadExternalRoute (const cXMLElement& externalRouteConfig);
-    void    LoadHostRoute (const cXMLElement& hostRouteConfig);
-    void    LoadVirtualLink (const cXMLElement& virtualLinkConfig);
+    int     ResolveInterfaceName(const std::string& name) const;
+    void    GetAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
+    void    LoadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);
+    void    LoadInterfaceParameters(const cXMLElement& ifConfig);
+    void    LoadExternalRoute(const cXMLElement& externalRouteConfig);
+    void    LoadHostRoute(const cXMLElement& hostRouteConfig);
+    void    LoadVirtualLink(const cXMLElement& virtualLinkConfig);
 
-    bool    LoadConfigFromXML (const char * filename);
+    bool    LoadConfigFromXML(const char * filename);
 
   public:
     OSPFRouting();
-    virtual ~OSPFRouting (void);
+    virtual ~OSPFRouting(void);
 
   protected:
     virtual int numInitStages() const  {return 5;}

@@ -31,26 +31,26 @@ private:
     bool                                                               rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
 
 public:
-            Router (RouterID id, cSimpleModule* containingModule);
-    virtual ~Router (void);
+            Router(RouterID id, cSimpleModule* containingModule);
+    virtual ~Router(void);
 
     void                     SetRouterID               (RouterID id)              { routerID = id; }
     RouterID                 GetRouterID               (void) const               { return routerID; }
     void                     SetRFC1583Compatibility   (bool compatibility)       { rfc1583Compatibility = compatibility; }
     bool                     GetRFC1583Compatibility   (void) const               { return rfc1583Compatibility; }
-    unsigned long            GetAreaCount              (void) const               { return areas.size (); }
+    unsigned long            GetAreaCount              (void) const               { return areas.size(); }
 
     MessageHandler*          GetMessageHandler         (void)                     { return messageHandler; }
 
-    unsigned long            GetASExternalLSACount     (void) const               { return asExternalLSAs.size (); }
+    unsigned long            GetASExternalLSACount     (void) const               { return asExternalLSAs.size(); }
     ASExternalLSA*           GetASExternalLSA          (unsigned long i)          { return asExternalLSAs[i]; }
     const ASExternalLSA*     GetASExternalLSA          (unsigned long i) const    { return asExternalLSAs[i]; }
-    bool                     GetASBoundaryRouter       (void) const               { return (externalRoutes.size () > 0); }
+    bool                     GetASBoundaryRouter       (void) const               { return (externalRoutes.size() > 0); }
 
-    unsigned long            GetRoutingTableEntryCount (void) const               { return routingTable.size (); }
+    unsigned long            GetRoutingTableEntryCount(void) const               { return routingTable.size(); }
     RoutingTableEntry*       GetRoutingTableEntry      (unsigned long i)          { return routingTable[i]; }
     const RoutingTableEntry* GetRoutingTableEntry      (unsigned long i) const    { return routingTable[i]; }
-    void                     AddRoutingTableEntry      (RoutingTableEntry* entry) { routingTable.push_back (entry); }
+    void                     AddRoutingTableEntry      (RoutingTableEntry* entry) { routingTable.push_back(entry); }
 
     void                 AddWatches                           (void);
 

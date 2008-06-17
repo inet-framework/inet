@@ -7,9 +7,9 @@ namespace OSPF {
 
 class LinkStateAcknowledgementHandler : public IMessageHandler {
 public:
-    LinkStateAcknowledgementHandler (Router* containingRouter);
+    LinkStateAcknowledgementHandler(Router* containingRouter);
 
-    void    ProcessPacket (OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void    ProcessPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
 } // namespace OSPF

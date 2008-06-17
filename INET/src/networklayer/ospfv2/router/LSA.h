@@ -22,15 +22,15 @@ private:
     OSPFLSA*              parent;
 
 public:
-            RoutingInfo  (void) : distance (0), parent (NULL) {}
+            RoutingInfo  (void) : distance(0), parent(NULL) {}
 
-            RoutingInfo  (const RoutingInfo& routingInfo) : nextHops (routingInfo.nextHops), distance (routingInfo.distance), parent (routingInfo.parent) {}
+            RoutingInfo  (const RoutingInfo& routingInfo) : nextHops(routingInfo.nextHops), distance(routingInfo.distance), parent(routingInfo.parent) {}
 
-    virtual ~RoutingInfo (void) {}
+    virtual ~RoutingInfo(void) {}
 
-    void            AddNextHop          (NextHop nextHop)           { nextHops.push_back (nextHop); }
-    void            ClearNextHops       (void)                      { nextHops.clear (); }
-    unsigned int    GetNextHopCount     (void) const                { return nextHops.size (); }
+    void            AddNextHop          (NextHop nextHop)           { nextHops.push_back(nextHop); }
+    void            ClearNextHops       (void)                      { nextHops.clear(); }
+    unsigned int    GetNextHopCount     (void) const                { return nextHops.size(); }
     NextHop         GetNextHop          (unsigned int index) const  { return nextHops[index]; }
     void            SetDistance         (unsigned long d)           { distance = d; }
     unsigned long   GetDistance         (void) const                { return distance; }
@@ -51,8 +51,8 @@ private:
     unsigned long   installTime;
 
 public:
-        LSATrackingInfo (void) : source (Flooded), installTime (0) {}
-        LSATrackingInfo (const LSATrackingInfo& info) : source (info.source), installTime (info.installTime) {}
+        LSATrackingInfo(void) : source(Flooded), installTime(0) {}
+        LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
     void            SetSource               (InstallSource installSource)   { source = installSource; }
     InstallSource   GetSource               (void) const                    { return source; }
@@ -66,15 +66,15 @@ class RouterLSA : public OSPFRouterLSA,
                   public LSATrackingInfo
 {
 public:
-            RouterLSA  (void) : OSPFRouterLSA (), RoutingInfo (), LSATrackingInfo () {}
-            RouterLSA  (const OSPFRouterLSA& lsa) : OSPFRouterLSA (lsa), RoutingInfo (), LSATrackingInfo () {}
-            RouterLSA  (const RouterLSA& lsa) : OSPFRouterLSA (lsa), RoutingInfo (lsa), LSATrackingInfo (lsa) {}
-    virtual ~RouterLSA (void) {}
+            RouterLSA  (void) : OSPFRouterLSA(), RoutingInfo(), LSATrackingInfo() {}
+            RouterLSA  (const OSPFRouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
+            RouterLSA  (const RouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
+    virtual ~RouterLSA(void) {}
 
-    bool    ValidateLSChecksum () const   { return true; } // not implemented
+    bool    ValidateLSChecksum() const   { return true; } // not implemented
 
     bool    Update      (const OSPFRouterLSA* lsa);
-    bool    DiffersFrom (const OSPFRouterLSA* routerLSA) const;
+    bool    DiffersFrom(const OSPFRouterLSA* routerLSA) const;
 };
 
 class NetworkLSA : public OSPFNetworkLSA,
@@ -82,15 +82,15 @@ class NetworkLSA : public OSPFNetworkLSA,
                    public LSATrackingInfo
 {
 public:
-            NetworkLSA  (void) : OSPFNetworkLSA (), RoutingInfo (), LSATrackingInfo () {}
-            NetworkLSA  (const OSPFNetworkLSA& lsa) : OSPFNetworkLSA (lsa), RoutingInfo (), LSATrackingInfo () {}
-            NetworkLSA  (const NetworkLSA& lsa) : OSPFNetworkLSA (lsa), RoutingInfo (lsa), LSATrackingInfo (lsa) {}
-    virtual ~NetworkLSA (void) {}
+            NetworkLSA  (void) : OSPFNetworkLSA(), RoutingInfo(), LSATrackingInfo() {}
+            NetworkLSA  (const OSPFNetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
+            NetworkLSA  (const NetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
+    virtual ~NetworkLSA(void) {}
 
-    bool    ValidateLSChecksum () const   { return true; } // not implemented
+    bool    ValidateLSChecksum() const   { return true; } // not implemented
 
     bool    Update      (const OSPFNetworkLSA* lsa);
-    bool    DiffersFrom (const OSPFNetworkLSA* networkLSA) const;
+    bool    DiffersFrom(const OSPFNetworkLSA* networkLSA) const;
 };
 
 class SummaryLSA : public OSPFSummaryLSA,
@@ -100,18 +100,18 @@ class SummaryLSA : public OSPFSummaryLSA,
 protected:
     bool    purgeable;
 public:
-            SummaryLSA  (void) : OSPFSummaryLSA (), RoutingInfo (), LSATrackingInfo (), purgeable (false) {}
-            SummaryLSA  (const OSPFSummaryLSA& lsa) : OSPFSummaryLSA (lsa), RoutingInfo (), LSATrackingInfo (), purgeable (false) {}
-            SummaryLSA  (const SummaryLSA& lsa) : OSPFSummaryLSA (lsa), RoutingInfo (lsa), LSATrackingInfo (lsa), purgeable (lsa.purgeable) {}
-    virtual ~SummaryLSA (void) {}
+            SummaryLSA  (void) : OSPFSummaryLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            SummaryLSA  (const OSPFSummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            SummaryLSA  (const SummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
+    virtual ~SummaryLSA(void) {}
 
-    bool    GetPurgeable (void) const           { return purgeable; }
-    void    SetPurgeable (bool purge = true)    { purgeable = purge; }
+    bool    GetPurgeable(void) const           { return purgeable; }
+    void    SetPurgeable(bool purge = true)    { purgeable = purge; }
 
-    bool    ValidateLSChecksum () const   { return true; } // not implemented
+    bool    ValidateLSChecksum() const   { return true; } // not implemented
 
     bool    Update      (const OSPFSummaryLSA* lsa);
-    bool    DiffersFrom (const OSPFSummaryLSA* summaryLSA) const;
+    bool    DiffersFrom(const OSPFSummaryLSA* summaryLSA) const;
 };
 
 class ASExternalLSA : public OSPFASExternalLSA,
@@ -121,18 +121,18 @@ class ASExternalLSA : public OSPFASExternalLSA,
 protected:
     bool    purgeable;
 public:
-            ASExternalLSA  (void) : OSPFASExternalLSA (), RoutingInfo (), LSATrackingInfo (), purgeable (false) {}
-            ASExternalLSA  (const OSPFASExternalLSA& lsa) : OSPFASExternalLSA (lsa), RoutingInfo (), LSATrackingInfo (), purgeable (false) {}
-            ASExternalLSA  (const ASExternalLSA& lsa) : OSPFASExternalLSA (lsa), RoutingInfo (lsa), LSATrackingInfo (lsa), purgeable (lsa.purgeable) {}
-    virtual ~ASExternalLSA (void) {}
+            ASExternalLSA  (void) : OSPFASExternalLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            ASExternalLSA  (const OSPFASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
+            ASExternalLSA  (const ASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
+    virtual ~ASExternalLSA(void) {}
 
-    bool    GetPurgeable (void) const           { return purgeable; }
-    void    SetPurgeable (bool purge = true)    { purgeable = purge; }
+    bool    GetPurgeable(void) const           { return purgeable; }
+    void    SetPurgeable(bool purge = true)    { purgeable = purge; }
 
-    bool    ValidateLSChecksum () const   { return true; } // not implemented
+    bool    ValidateLSChecksum() const   { return true; } // not implemented
 
     bool    Update      (const OSPFASExternalLSA* lsa);
-    bool    DiffersFrom (const OSPFASExternalLSA* asExternalLSA) const;
+    bool    DiffersFrom(const OSPFASExternalLSA* asExternalLSA) const;
 };
 
 } // namespace OSPF
@@ -142,27 +142,27 @@ public:
  */
 inline bool operator< (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
-    long leftSequenceNumber  = leftLSA.getLsSequenceNumber ();
-    long rightSequenceNumber = rightLSA.getLsSequenceNumber ();
+    long leftSequenceNumber  = leftLSA.getLsSequenceNumber();
+    long rightSequenceNumber = rightLSA.getLsSequenceNumber();
 
     if (leftSequenceNumber < rightSequenceNumber) {
         return true;
     }
     if (leftSequenceNumber == rightSequenceNumber) {
-        unsigned short leftChecksum  = leftLSA.getLsChecksum ();
-        unsigned short rightChecksum = rightLSA.getLsChecksum ();
+        unsigned short leftChecksum  = leftLSA.getLsChecksum();
+        unsigned short rightChecksum = rightLSA.getLsChecksum();
 
         if (leftChecksum < rightChecksum) {
             return true;
         }
         if (leftChecksum == rightChecksum) {
-            unsigned short leftAge  = leftLSA.getLsAge ();
-            unsigned short rightAge = rightLSA.getLsAge ();
+            unsigned short leftAge  = leftLSA.getLsAge();
+            unsigned short rightAge = rightLSA.getLsAge();
 
             if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
                 return true;
             }
-            if ((abs (leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
+            if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
                 return true;
             }
         }
@@ -175,18 +175,18 @@ inline bool operator< (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightL
  */
 inline bool operator== (const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
-    long           leftSequenceNumber  = leftLSA.getLsSequenceNumber ();
-    long           rightSequenceNumber = rightLSA.getLsSequenceNumber ();
-    unsigned short leftChecksum        = leftLSA.getLsChecksum ();
-    unsigned short rightChecksum       = rightLSA.getLsChecksum ();
-    unsigned short leftAge             = leftLSA.getLsAge ();
-    unsigned short rightAge            = rightLSA.getLsAge ();
+    long           leftSequenceNumber  = leftLSA.getLsSequenceNumber();
+    long           rightSequenceNumber = rightLSA.getLsSequenceNumber();
+    unsigned short leftChecksum        = leftLSA.getLsChecksum();
+    unsigned short rightChecksum       = rightLSA.getLsChecksum();
+    unsigned short leftAge             = leftLSA.getLsAge();
+    unsigned short rightAge            = rightLSA.getLsAge();
 
     if ((leftSequenceNumber == rightSequenceNumber) &&
         (leftChecksum == rightChecksum) &&
         (((leftAge == MAX_AGE) && (rightAge == MAX_AGE)) ||
          (((leftAge != MAX_AGE) && (rightAge != MAX_AGE)) &&
-          (abs (leftAge - rightAge) <= MAX_AGE_DIFF))))
+          (abs(leftAge - rightAge) <= MAX_AGE_DIFF))))
     {
         return true;
     }
@@ -221,43 +221,43 @@ inline bool operator!= (const OSPF::NextHop& leftHop, const OSPF::NextHop& right
     return (!(leftHop == rightHop));
 }
 
-inline unsigned int CalculateLSASize (const OSPFRouterLSA* routerLSA)
+inline unsigned int CalculateLSASize(const OSPFRouterLSA* routerLSA)
 {
     unsigned int   lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
-    unsigned short linkCount = routerLSA->getLinksArraySize ();
+    unsigned short linkCount = routerLSA->getLinksArraySize();
 
     for (unsigned short i = 0; i < linkCount; i++) {
-        const Link& link = routerLSA->getLinks (i);
-        lsaLength += OSPF_LINK_HEADER_LENGTH + (link.getTosDataArraySize () * OSPF_TOS_LENGTH);
+        const Link& link = routerLSA->getLinks(i);
+        lsaLength += OSPF_LINK_HEADER_LENGTH + (link.getTosDataArraySize() * OSPF_TOS_LENGTH);
     }
 
     return lsaLength;
 }
 
-inline unsigned int CalculateLSASize (const OSPFNetworkLSA* networkLSA)
+inline unsigned int CalculateLSASize(const OSPFNetworkLSA* networkLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
-            (networkLSA->getAttachedRoutersArraySize () * OSPF_NETWORKLSA_ADDRESS_LENGTH));
+            (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH));
 }
 
-inline unsigned int CalculateLSASize (const OSPFSummaryLSA* summaryLSA)
+inline unsigned int CalculateLSASize(const OSPFSummaryLSA* summaryLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH +
-            (summaryLSA->getTosDataArraySize () * OSPF_TOS_LENGTH));
+            (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH));
 }
 
-inline unsigned int CalculateLSASize (const OSPFASExternalLSA* asExternalLSA)
+inline unsigned int CalculateLSASize(const OSPFASExternalLSA* asExternalLSA)
 {
     return (OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH +
-            (asExternalLSA->getContents ().getExternalTOSInfoArraySize () * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
+            (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
 }
 
-inline void PrintLSAHeader (const OSPFLSAHeader& lsaHeader, std::ostream& output) {
+inline void PrintLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
     char addressString[16];
     output << "LSAHeader: age="
-           << lsaHeader.getLsAge ()
+           << lsaHeader.getLsAge()
            << ", type=";
-    switch (lsaHeader.getLsType ()) {
+    switch (lsaHeader.getLsType()) {
         case RouterLSAType:                     output << "RouterLSA";                     break;
         case NetworkLSAType:                    output << "NetworkLSA";                    break;
         case SummaryLSA_NetworksType:           output << "SummaryLSA_Networks";           break;
@@ -266,17 +266,17 @@ inline void PrintLSAHeader (const OSPFLSAHeader& lsaHeader, std::ostream& output
         default:                                output << "Unknown";                       break;
     }
     output << ", LSID="
-           << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getLinkStateID ());
+           << AddressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
     output << ", advertisingRouter="
-           << AddressStringFromULong (addressString, sizeof (addressString), lsaHeader.getAdvertisingRouter ().getInt ())
+           << AddressStringFromULong(addressString, sizeof(addressString), lsaHeader.getAdvertisingRouter().getInt())
            << ", seqNumber="
-           << lsaHeader.getLsSequenceNumber ();
+           << lsaHeader.getLsSequenceNumber();
     output << endl;
 }
 
 inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
 {
-    PrintLSAHeader (lsa.getHeader (), ostr);
+    PrintLSAHeader(lsa.getHeader(), ostr);
     return ostr;
 }
 

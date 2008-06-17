@@ -215,7 +215,7 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
              (leftKey.advertisingRouter < rightKey.advertisingRouter)));
 }
 
-inline OSPF::IPv4Address IPv4AddressFromAddressString (const char* charForm)
+inline OSPF::IPv4Address IPv4AddressFromAddressString(const char* charForm)
 {
     OSPF::IPv4Address byteForm = OSPF::NullIPv4Address;
 
@@ -233,7 +233,7 @@ inline OSPF::IPv4Address IPv4AddressFromAddressString (const char* charForm)
             }
             break;
         }
-        if ((!isdigit (charForm[i])) && (charForm[i] != '.')) {
+        if ((!isdigit(charForm[i])) && (charForm[i] != '.')) {
             break;
         }
         if (charForm[i] == '.') {
@@ -260,7 +260,7 @@ inline OSPF::IPv4Address IPv4AddressFromAddressString (const char* charForm)
     return byteForm;
 }
 
-inline OSPF::IPv4Address IPv4AddressFromULong (unsigned long longForm)
+inline OSPF::IPv4Address IPv4AddressFromULong(unsigned long longForm)
 {
 
     OSPF::IPv4Address byteForm;
@@ -272,34 +272,34 @@ inline OSPF::IPv4Address IPv4AddressFromULong (unsigned long longForm)
     return byteForm;
 }
 
-inline unsigned long ULongFromIPv4Address (OSPF::IPv4Address byteForm)
+inline unsigned long ULongFromIPv4Address(OSPF::IPv4Address byteForm)
 {
     return ((byteForm.bytes[0] << 24) + (byteForm.bytes[1] << 16) + (byteForm.bytes[2] << 8) + byteForm.bytes[3]);
 }
 
-inline unsigned long ULongFromAddressString (const char* charForm)
+inline unsigned long ULongFromAddressString(const char* charForm)
 {
-    return ULongFromIPv4Address (IPv4AddressFromAddressString (charForm));
+    return ULongFromIPv4Address(IPv4AddressFromAddressString(charForm));
 }
 
-inline char* AddressStringFromIPv4Address (char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
+inline char* AddressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
 {
     if (bufferLength < 16) {
         buffer = '\0';
     }
     else {
-        sprintf (buffer, "%d.%d.%d.%d", byteForm.bytes[0], byteForm.bytes[1], byteForm.bytes[2], byteForm.bytes[3]);
+        sprintf(buffer, "%d.%d.%d.%d", byteForm.bytes[0], byteForm.bytes[1], byteForm.bytes[2], byteForm.bytes[3]);
     }
     return buffer;
 }
 
-inline char* AddressStringFromULong (char* buffer, int bufferLength, unsigned long longForm)
+inline char* AddressStringFromULong(char* buffer, int bufferLength, unsigned long longForm)
 {
     if (bufferLength < 16) {
         buffer = '\0';
     }
     else {
-        sprintf (buffer, "%d.%d.%d.%d", (int)((longForm & 0xFF000000) >> 24),
+        sprintf(buffer, "%d.%d.%d.%d", (int)((longForm & 0xFF000000) >> 24),
                                         (int)((longForm & 0x00FF0000) >> 16),
                                         (int)((longForm & 0x0000FF00) >> 8),
                                         (int)(longForm & 0x000000FF));
@@ -307,7 +307,7 @@ inline char* AddressStringFromULong (char* buffer, int bufferLength, unsigned lo
     return buffer;
 }
 
-inline char HexCharToByte (char hex)
+inline char HexCharToByte(char hex)
 {
     switch (hex) {
         case '0':   return 0;
@@ -336,9 +336,9 @@ inline char HexCharToByte (char hex)
     };
 }
 
-inline char HexPairToByte (char upperHex, char lowerHex)
+inline char HexPairToByte(char upperHex, char lowerHex)
 {
-    return ((HexCharToByte (upperHex) << 4) & (HexCharToByte (lowerHex)));
+    return ((HexCharToByte(upperHex) << 4) & (HexCharToByte(lowerHex)));
 }
 
 #endif // __COMMON_HPP__

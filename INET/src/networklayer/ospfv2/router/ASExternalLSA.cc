@@ -1,42 +1,42 @@
 #include "LSA.h"
 
-bool OSPF::ASExternalLSA::Update (const OSPFASExternalLSA* lsa)
+bool OSPF::ASExternalLSA::Update(const OSPFASExternalLSA* lsa)
 {
-    bool different = DiffersFrom (lsa);
+    bool different = DiffersFrom(lsa);
     (*this) = (*lsa);
-    ResetInstallTime ();
+    ResetInstallTime();
     if (different) {
-        ClearNextHops ();
+        ClearNextHops();
         return true;
     } else {
         return false;
     }
 }
 
-bool OSPF::ASExternalLSA::DiffersFrom (const OSPFASExternalLSA* asExternalLSA) const
+bool OSPF::ASExternalLSA::DiffersFrom(const OSPFASExternalLSA* asExternalLSA) const
 {
-    const OSPFLSAHeader& lsaHeader = asExternalLSA->getHeader ();
-    bool differentHeader = ((header_var.getLsOptions () != lsaHeader.getLsOptions ()) ||
-                            ((header_var.getLsAge () == MAX_AGE) && (lsaHeader.getLsAge () != MAX_AGE)) ||
-                            ((header_var.getLsAge () != MAX_AGE) && (lsaHeader.getLsAge () == MAX_AGE)) ||
-                            (header_var.getLsaLength () != lsaHeader.getLsaLength ()));
+    const OSPFLSAHeader& lsaHeader = asExternalLSA->getHeader();
+    bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
+                            ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
+                            ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
+                            (header_var.getLsaLength() != lsaHeader.getLsaLength()));
     bool differentBody   = false;
 
     if (!differentHeader) {
-        const OSPFASExternalLSAContents& lsaContents  = asExternalLSA->getContents ();
-        unsigned int                     tosInfoCount = contents_var.getExternalTOSInfoArraySize ();
+        const OSPFASExternalLSAContents& lsaContents  = asExternalLSA->getContents();
+        unsigned int                     tosInfoCount = contents_var.getExternalTOSInfoArraySize();
 
-        differentBody = ((contents_var.getNetworkMask () != lsaContents.getNetworkMask ()) ||
-                         (contents_var.getE_ExternalMetricType () != lsaContents.getE_ExternalMetricType ()) ||
-                         (contents_var.getRouteCost () != lsaContents.getRouteCost ()) ||
-                         (contents_var.getForwardingAddress () != lsaContents.getForwardingAddress ()) ||
-                         (contents_var.getExternalRouteTag () != lsaContents.getExternalRouteTag ()) ||
-                         (tosInfoCount != lsaContents.getExternalTOSInfoArraySize ()));
+        differentBody = ((contents_var.getNetworkMask() != lsaContents.getNetworkMask()) ||
+                         (contents_var.getE_ExternalMetricType() != lsaContents.getE_ExternalMetricType()) ||
+                         (contents_var.getRouteCost() != lsaContents.getRouteCost()) ||
+                         (contents_var.getForwardingAddress() != lsaContents.getForwardingAddress()) ||
+                         (contents_var.getExternalRouteTag() != lsaContents.getExternalRouteTag()) ||
+                         (tosInfoCount != lsaContents.getExternalTOSInfoArraySize()));
 
         if (!differentBody) {
             for (unsigned int i = 0; i < tosInfoCount; i++) {
-                const ExternalTOSInfo& currentTOSInfo = contents_var.getExternalTOSInfo (i);
-                const ExternalTOSInfo& lsaTOSInfo     = lsaContents.getExternalTOSInfo (i);
+                const ExternalTOSInfo& currentTOSInfo = contents_var.getExternalTOSInfo(i);
+                const ExternalTOSInfo& lsaTOSInfo     = lsaContents.getExternalTOSInfo(i);
 
                 if ((currentTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
                     (currentTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||

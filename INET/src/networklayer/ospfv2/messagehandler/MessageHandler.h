@@ -27,7 +27,7 @@ private:
 public:
     MessageHandler  (Router* containingRouter, cSimpleModule* containingModule);
 
-    void    MessageReceived (cMessage* message);
+    void    MessageReceived(cMessage* message);
     void    HandleTimer     (OSPFTimer* timer);
 
     void    ProcessPacket   (OSPFPacket* packet, Interface* unused1 = NULL, Neighbor* unused2 = NULL);
@@ -41,7 +41,7 @@ public:
     void    PrintDatabaseDescriptionPacket      (const OSPFDatabaseDescriptionPacket* ddPacket, IPv4Address destination, int outputIfIndex) const;
     void    PrintLinkStateRequestPacket         (const OSPFLinkStateRequestPacket* requestPacket, IPv4Address destination, int outputIfIndex) const;
     void    PrintLinkStateUpdatePacket          (const OSPFLinkStateUpdatePacket* updatePacket, IPv4Address destination, int outputIfIndex) const;
-    void    PrintLinkStateAcknowledgementPacket (const OSPFLinkStateAcknowledgementPacket* ackPacket, IPv4Address destination, int outputIfIndex) const;
+    void    PrintLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket* ackPacket, IPv4Address destination, int outputIfIndex) const;
 
     // Authentication not implemented
     bool    AuthenticatePacket  (OSPFPacket* packet)    { return true; }

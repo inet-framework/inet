@@ -8,8 +8,8 @@ namespace OSPF {
 class NeighborStateDown : public NeighborState
 {
 public:
-    virtual void ProcessEvent (Neighbor* neighbor, Neighbor::NeighborEventType event);
-    virtual Neighbor::NeighborStateType GetState (void) const { return Neighbor::DownState; }
+    virtual void ProcessEvent(Neighbor* neighbor, Neighbor::NeighborEventType event);
+    virtual Neighbor::NeighborStateType GetState(void) const { return Neighbor::DownState; }
 };
 
 } // namespace OSPF

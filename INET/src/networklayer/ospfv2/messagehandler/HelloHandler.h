@@ -7,9 +7,9 @@ namespace OSPF {
 
 class HelloHandler : public IMessageHandler {
 public:
-    HelloHandler (Router* containingRouter);
+    HelloHandler(Router* containingRouter);
 
-    void    ProcessPacket (OSPFPacket* packet, Interface* intf, Neighbor* unused = NULL);
+    void    ProcessPacket(OSPFPacket* packet, Interface* intf, Neighbor* unused = NULL);
 };
 
 } // namespace OSPF

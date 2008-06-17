@@ -78,11 +78,11 @@ private:
     Area*                                                               parentArea;
 private:
     friend class InterfaceState;
-    void ChangeState (InterfaceState* newState, InterfaceState* currentState);
+    void ChangeState(InterfaceState* newState, InterfaceState* currentState);
 
 public:
-            Interface (OSPFInterfaceType ifType = UnknownType);
-    virtual ~Interface (void);
+            Interface(OSPFInterfaceType ifType = UnknownType);
+    virtual ~Interface(void);
 
     void                ProcessEvent                        (InterfaceEventType event);
     void                Reset                               (void);
@@ -141,7 +141,7 @@ public:
     OSPFTimer*              GetAcknowledgementTimer         (void)                      { return acknowledgementTimer; }
     DesignatedRouterID      GetDesignatedRouter             (void) const                { return designatedRouter; }
     DesignatedRouterID      GetBackupDesignatedRouter       (void) const                { return backupDesignatedRouter; }
-    unsigned long           GetNeighborCount                (void) const                { return neighboringRouters.size (); }
+    unsigned long           GetNeighborCount                (void) const                { return neighboringRouters.size(); }
     Neighbor*               GetNeighbor                     (unsigned long i)           { return neighboringRouters[i]; }
     const Neighbor*         GetNeighbor                     (unsigned long i) const     { return neighboringRouters[i]; }
 
