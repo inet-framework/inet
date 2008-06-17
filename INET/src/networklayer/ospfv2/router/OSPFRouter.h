@@ -62,13 +62,13 @@ public:
     bool                 InstallLSA                           (OSPFLSA* lsa, AreaID areaID = BackboneAreaID);
     OSPFLSA*             FindLSA                              (LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
     void                 AgeDatabase                          (void);
-    bool                 AnyNeighborInStates                  (int states) const;
+    bool                 HasAnyNeighborInStates               (int states) const;
     void                 RemoveFromAllRetransmissionLists     (LSAKeyType lsaKey);
     bool                 IsOnAnyRetransmissionList            (LSAKeyType lsaKey) const;
     bool                 FloodLSA                             (OSPFLSA* lsa, AreaID areaID = BackboneAreaID, Interface* intf = NULL, Neighbor* neighbor = NULL);
     bool                 IsLocalAddress                       (IPv4Address address) const;
     bool                 HasAddressRange                      (IPv4AddressRange addressRange) const;
-    bool                 DestinationIsUnreachable             (OSPFLSA* lsa) const;
+    bool                 IsDestinationUnreachable             (OSPFLSA* lsa) const;
     RoutingTableEntry*   Lookup                               (IPAddress destination, std::vector<RoutingTableEntry*>* table = NULL) const;
     void                 RebuildRoutingTable                  (void);
     IPv4AddressRange     GetContainingAddressRange            (IPv4AddressRange addressRange, bool* advertise = NULL) const;

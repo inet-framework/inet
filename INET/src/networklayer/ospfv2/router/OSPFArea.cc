@@ -333,7 +333,7 @@ void OSPF::Area::AgeDatabase(void)
     for (i = 0; i < lsaCount; i++) {
         unsigned short   lsAge          = routerLSAs[i]->getHeader().getLsAge();
         bool             selfOriginated = (routerLSAs[i]->getHeader().getAdvertisingRouter().getInt() == parentRouter->GetRouterID());
-        bool             unreachable    = parentRouter->DestinationIsUnreachable(routerLSAs[i]);
+        bool             unreachable    = parentRouter->IsDestinationUnreachable(routerLSAs[i]);
         OSPF::RouterLSA* lsa            = routerLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
@@ -380,7 +380,7 @@ void OSPF::Area::AgeDatabase(void)
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
             if (!IsOnAnyRetransmissionList(lsaKey) &&
-                !AnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
+                !HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
             {
                 if (!selfOriginated || unreachable) {
                     routerLSAsByID.erase(lsa->getHeader().getLinkStateID());
@@ -414,7 +414,7 @@ void OSPF::Area::AgeDatabase(void)
     lsaCount = networkLSAs.size();
     for (i = 0; i < lsaCount; i++) {
         unsigned short    lsAge          = networkLSAs[i]->getHeader().getLsAge();
-        bool              unreachable    = parentRouter->DestinationIsUnreachable(networkLSAs[i]);
+        bool              unreachable    = parentRouter->IsDestinationUnreachable(networkLSAs[i]);
         OSPF::NetworkLSA* lsa            = networkLSAs[i];
         OSPF::Interface*  localIntf      = GetInterface(IPv4AddressFromULong(lsa->getHeader().getLinkStateID()));
         bool              selfOriginated = false;
@@ -422,7 +422,7 @@ void OSPF::Area::AgeDatabase(void)
         if ((localIntf != NULL) &&
             (localIntf->GetState() == OSPF::Interface::DesignatedRouterState) &&
             (localIntf->GetNeighborCount() > 0) &&
-            (localIntf->AnyNeighborInStates(OSPF::Neighbor::FullState)))
+            (localIntf->HasAnyNeighborInStates(OSPF::Neighbor::FullState)))
         {
             selfOriginated = true;
         }
@@ -476,7 +476,7 @@ void OSPF::Area::AgeDatabase(void)
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
             if (!IsOnAnyRetransmissionList(lsaKey) &&
-                !AnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
+                !HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
             {
                 if (!selfOriginated || unreachable) {
                     networkLSAsByID.erase(lsa->getHeader().getLinkStateID());
@@ -515,7 +515,7 @@ void OSPF::Area::AgeDatabase(void)
     for (i = 0; i < lsaCount; i++) {
         unsigned short    lsAge          = summaryLSAs[i]->getHeader().getLsAge();
         bool              selfOriginated = (summaryLSAs[i]->getHeader().getAdvertisingRouter().getInt() == parentRouter->GetRouterID());
-        bool              unreachable    = parentRouter->DestinationIsUnreachable(summaryLSAs[i]);
+        bool              unreachable    = parentRouter->IsDestinationUnreachable(summaryLSAs[i]);
         OSPF::SummaryLSA* lsa            = summaryLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
@@ -568,7 +568,7 @@ void OSPF::Area::AgeDatabase(void)
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
             if (!IsOnAnyRetransmissionList(lsaKey) &&
-                !AnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
+                !HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
             {
                 if (!selfOriginated || unreachable) {
                     summaryLSAsByID.erase(lsaKey);
@@ -616,11 +616,11 @@ void OSPF::Area::AgeDatabase(void)
     }
 }
 
-bool OSPF::Area::AnyNeighborInStates(int states) const
+bool OSPF::Area::HasAnyNeighborInStates(int states) const
 {
     long interfaceCount = associatedInterfaces.size();
     for (long i = 0; i < interfaceCount; i++) {
-        if (associatedInterfaces[i]->AnyNeighborInStates(states)) {
+        if (associatedInterfaces[i]->HasAnyNeighborInStates(states)) {
             return true;
         }
     }
@@ -798,7 +798,7 @@ OSPF::RouterLSA* OSPF::Area::OriginateRouterLSA(void)
                             OSPF::Neighbor* dRouter = intf->GetNeighborByAddress(intf->GetDesignatedRouter().ipInterfaceAddress);
                             if (((dRouter != NULL) && (dRouter->GetState() == OSPF::Neighbor::FullState)) ||
                                 ((intf->GetDesignatedRouter().routerID == parentRouter->GetRouterID()) &&
-                                 (intf->AnyNeighborInStates(OSPF::Neighbor::FullState))))
+                                 (intf->HasAnyNeighborInStates(OSPF::Neighbor::FullState))))
                             {
                                 Link link;
                                 link.setType(TransitLink);
@@ -914,7 +914,7 @@ OSPF::RouterLSA* OSPF::Area::OriginateRouterLSA(void)
 
 OSPF::NetworkLSA* OSPF::Area::OriginateNetworkLSA(const OSPF::Interface* intf)
 {
-    if (intf->AnyNeighborInStates(OSPF::Neighbor::FullState)) {
+    if (intf->HasAnyNeighborInStates(OSPF::Neighbor::FullState)) {
         OSPF::NetworkLSA* networkLSA      = new OSPF::NetworkLSA;
         OSPFLSAHeader&   lsaHeader        = networkLSA->getHeader();
         long             neighborCount    = intf->GetNeighborCount();

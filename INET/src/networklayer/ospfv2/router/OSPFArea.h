@@ -84,7 +84,7 @@ public:
     SummaryLSA*         FindSummaryLSA                      (LSAKeyType lsaKey);
     const SummaryLSA*   FindSummaryLSA                      (LSAKeyType lsaKey) const;
     void                AgeDatabase                         (void);
-    bool                AnyNeighborInStates                 (int states) const;
+    bool                HasAnyNeighborInStates              (int states) const;
     void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
     bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
     bool                FloodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);

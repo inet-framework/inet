@@ -352,7 +352,7 @@ void OSPF::Router::AgeDatabase(void)
     for (long i = 0; i < lsaCount; i++) {
         unsigned short       lsAge          = asExternalLSAs[i]->getHeader().getLsAge();
         bool                 selfOriginated = (asExternalLSAs[i]->getHeader().getAdvertisingRouter().getInt() == routerID);
-        bool                 unreachable    = DestinationIsUnreachable(asExternalLSAs[i]);
+        bool                 unreachable    = IsDestinationUnreachable(asExternalLSAs[i]);
         OSPF::ASExternalLSA* lsa            = asExternalLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
@@ -399,7 +399,7 @@ void OSPF::Router::AgeDatabase(void)
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
 
             if (!IsOnAnyRetransmissionList(lsaKey) &&
-                !AnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
+                !HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState))
             {
                 if (!selfOriginated || unreachable) {
                     asExternalLSAsByID.erase(lsaKey);
@@ -454,11 +454,11 @@ void OSPF::Router::AgeDatabase(void)
  * in any of the input states, false otherwise.
  * @param states [in] A bitfield combination of NeighborStateType values.
  */
-bool OSPF::Router::AnyNeighborInStates(int states) const
+bool OSPF::Router::HasAnyNeighborInStates(int states) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->AnyNeighborInStates(states)) {
+        if (areas[i]->HasAnyNeighborInStates(states)) {
             return true;
         }
     }
@@ -592,7 +592,7 @@ OSPF::ASExternalLSA* OSPF::Router::OriginateASExternalLSA(OSPF::ASExternalLSA* l
  * Returns true if the destination described by the input lsa is in the routing table, false otherwise.
  * @param lsa [in] The LSA which describes the destination to look for.
  */
-bool OSPF::Router::DestinationIsUnreachable(OSPFLSA* lsa) const
+bool OSPF::Router::IsDestinationUnreachable(OSPFLSA* lsa) const
 {
     IPAddress destination = lsa->getHeader().getLinkStateID();
 

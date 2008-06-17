@@ -93,7 +93,7 @@ public:
     void                AddNeighbor                         (Neighbor* neighbor);
     InterfaceStateType  GetState                            (void) const;
     static const char*  GetStateString                      (InterfaceStateType stateType);
-    bool                AnyNeighborInStates                 (int states) const;
+    bool                HasAnyNeighborInStates              (int states) const;
     void                RemoveFromAllRetransmissionLists    (LSAKeyType lsaKey);
     bool                IsOnAnyRetransmissionList           (LSAKeyType lsaKey) const;
     bool                FloodLSA                            (OSPFLSA* lsa, Interface* intf = NULL, Neighbor* neighbor = NULL);

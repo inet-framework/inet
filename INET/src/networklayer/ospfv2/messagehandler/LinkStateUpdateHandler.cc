@@ -115,7 +115,7 @@ void OSPF::LinkStateUpdateHandler::ProcessPacket(OSPFPacket* packet, OSPF::Inter
                 ackFlags.impliedAcknowledgement = false;
                 ackFlags.lsaReachedMaxAge = (lsAge == MAX_AGE);
                 ackFlags.noLSAInstanceInDatabase = (lsaInDatabase == NULL);
-                ackFlags.anyNeighborInExchangeOrLoadingState = router->AnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState);
+                ackFlags.anyNeighborInExchangeOrLoadingState = router->HasAnyNeighborInStates(OSPF::Neighbor::ExchangeState | OSPF::Neighbor::LoadingState);
 
                 if ((ackFlags.lsaReachedMaxAge) && (ackFlags.noLSAInstanceInDatabase) && (!ackFlags.anyNeighborInExchangeOrLoadingState)) {
                     if (intf->GetType() == OSPF::Interface::Broadcast) {

@@ -224,7 +224,7 @@ const char* OSPF::Interface::GetStateString(OSPF::Interface::InterfaceStateType 
     return "";
 }
 
-bool OSPF::Interface::AnyNeighborInStates(int states) const
+bool OSPF::Interface::HasAnyNeighborInStates(int states) const
 {
     long neighborCount = neighboringRouters.size();
     for (long i = 0; i < neighborCount; i++) {
