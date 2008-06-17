@@ -1,8 +1,17 @@
+
+
 CONVERSION TO OMNET++40:
 - move "q=queue" too into the default display string
 - trim ini files 
 - add gate @labels
 - gross renaming of gates and parameters, to make them more consistent
+
+-----------------------
+TODO rename the following TED.h methods to begin with a verb:
+  unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
+  unsigned int linkIndex(IPAddress localInf)
+  IPAddress peerRemoteInterface(IPAddress peerIP)
+  IPAddress primaryAddress(IPAddress localInf)
 
 -----------------------
 Interfaces:

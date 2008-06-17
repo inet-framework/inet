@@ -177,7 +177,7 @@ void LDP::handleMessage(cMessage *msg)
 
 void LDP::sendToPeer(IPAddress dest, cMessage *msg)
 {
-    peerSocket(dest)->send(msg);
+    getPeerSocket(dest)->send(msg);
 }
 
 void LDP::sendMappingRequest(IPAddress dest, IPAddress addr, int length)
@@ -203,7 +203,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
     FecBindVector::iterator dit = findFecEntry(fecDown, oldItem.fecid, oldItem.nextHop);
 
     // is next hop our LDP peer?
-    bool ER = !peerSocketSoft(oldItem.nextHop);
+    bool ER = findPeerSocket(oldItem.nextHop)==NULL;
 
     ASSERT(!(ER && dit != fecDown.end())); // can't be egress and have mapping at the same time
 
@@ -233,18 +233,14 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
 
             EV << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                     " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
-
         }
         else
         {
             // no mapping from DS, withdraw mapping US
-
             EV << "sending withdraw message upstream" << endl;
-
             sendMapping(LABEL_WITHDRAW, uit->peer, uit->label, oldItem.addr, oldItem.length);
 
             // remove from US mappings
-
             fecUp.erase(uit--);
         }
     }
@@ -252,9 +248,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
     if (!ER && dit == fecDown.end())
     {
         // and ask DS for mapping
-
         EV << "sending request message downstream" << endl;
-
         sendMappingRequest(oldItem.nextHop, oldItem.addr, oldItem.length);
     }
 }
@@ -378,9 +372,7 @@ void LDP::rebuildFecList()
 
     // we must keep this list sorted for matching to work correctly
     // this is probably slower than it must be
-
     std::sort(fecList.begin(), fecList.end(), fecPrefixCompare);
-
 }
 
 void LDP::updateFecList(IPAddress nextHop)
@@ -948,7 +940,7 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     FecBindVector::iterator dit = findFecEntry(fecDown, it->fecid, it->nextHop);
 
     // is next hop our LDP peer?
-    bool ER = !peerSocketSoft(it->nextHop);
+    bool ER = !findPeerSocket(it->nextHop);
 
     ASSERT(!(ER && dit != fecDown.end())); // can't be egress and have mapping at the same time
 
@@ -1158,21 +1150,18 @@ int LDP::findPeer(IPAddress peerAddr)
     return -1;
 }
 
-TCPSocket *LDP::peerSocketSoft(IPAddress peerAddr)
+TCPSocket *LDP::findPeerSocket(IPAddress peerAddr)
 {
     // find peer in table and return its socket
     int i = findPeer(peerAddr);
     if (i==-1 || !(myPeers[i].socket) || myPeers[i].socket->getState()!=TCPSocket::CONNECTED)
-    {
-        // we don't have an LDP session to this peer
-        return NULL;
-    }
+        return NULL; // we don't have an LDP session to this peer
     return myPeers[i].socket;
 }
 
-TCPSocket *LDP::peerSocket(IPAddress peerAddr)
+TCPSocket *LDP::getPeerSocket(IPAddress peerAddr)
 {
-    TCPSocket *sock = peerSocketSoft(peerAddr);
+    TCPSocket *sock = findPeerSocket(peerAddr);
     ASSERT(sock);
     if (!sock)
         error("No LDP session to peer %s yet", peerAddr.str().c_str());

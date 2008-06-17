@@ -149,9 +149,10 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     int findPeer(IPAddress peerAddr);
 
     /** Utility: return socket for given peer. Throws error if there's no TCP connection */
-    TCPSocket *peerSocket(IPAddress peerAddr);
-    /** Utility: return socket for given peer and NULL if session doesn't exist */
-    TCPSocket *peerSocketSoft(IPAddress peerAddr);
+    TCPSocket *getPeerSocket(IPAddress peerAddr);
+
+    /** Utility: return socket for given peer, and NULL if session doesn't exist */
+    TCPSocket *findPeerSocket(IPAddress peerAddr);
 
     void sendToPeer(IPAddress dest, cMessage *msg);
 
