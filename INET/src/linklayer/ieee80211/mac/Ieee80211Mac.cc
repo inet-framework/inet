@@ -600,32 +600,32 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 /****************************************************************
  * Timing functions.
  */
-simtime_t Ieee80211Mac::SIFSPeriod()
+simtime_t Ieee80211Mac::getSIFS()
 {
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
     return SIFS;
 }
 
-simtime_t Ieee80211Mac::SlotPeriod()
+simtime_t Ieee80211Mac::getSlotTime()
 {
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
     return ST;
 }
 
-simtime_t Ieee80211Mac::PIFSPeriod()
+simtime_t Ieee80211Mac::getPIFS()
 {
-    return SIFSPeriod() + SlotPeriod();
+    return getSIFS() + getSlotTime();
 }
 
-simtime_t Ieee80211Mac::DIFSPeriod()
+simtime_t Ieee80211Mac::getDIFS()
 {
-    return SIFSPeriod() + 2 * SlotPeriod();
+    return getSIFS() + 2 * getSlotTime();
 }
 
-simtime_t Ieee80211Mac::EIFSPeriod()
+simtime_t Ieee80211Mac::getEIFS()
 {
-// FIXME:   return SIFSPeriod() + DIFSPeriod() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return SIFSPeriod() + DIFSPeriod() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
+// FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
+    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
 }
 
 simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
@@ -650,7 +650,7 @@ simtime_t Ieee80211Mac::BackoffPeriod(Ieee80211Frame *msg, int r)
 
     EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
 
-    return ((double)c) * SlotPeriod();
+    return ((double)c) * getSlotTime();
 }
 
 /****************************************************************
@@ -660,7 +660,7 @@ void Ieee80211Mac::scheduleSIFSPeriod(Ieee80211Frame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSIFS->setContextPointer(frame->dup());
-    scheduleAt(simTime() + SIFSPeriod(), endSIFS);
+    scheduleAt(simTime() + getSIFS(), endSIFS);
 }
 
 void Ieee80211Mac::scheduleDIFSPeriod()
@@ -668,12 +668,12 @@ void Ieee80211Mac::scheduleDIFSPeriod()
     if (lastReceiveFailed)
     {
         EV << "receiption of last frame failed, scheduling EIFS period\n";
-        scheduleAt(simTime() + EIFSPeriod(), endDIFS);
+        scheduleAt(simTime() + getEIFS(), endDIFS);
     }
     else
     {
         EV << "scheduling DIFS period\n";
-        scheduleAt(simTime() + DIFSPeriod(), endDIFS);
+        scheduleAt(simTime() + getDIFS(), endDIFS);
     }
 }
 
@@ -686,7 +686,7 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + frameDuration(frameToSend) + SIFSPeriod() + frameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + frameDuration(frameToSend) + getSIFS() + frameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -703,7 +703,7 @@ void Ieee80211Mac::cancelTimeoutPeriod()
 
 void Ieee80211Mac::scheduleCTSTimeoutPeriod()
 {
-    scheduleAt(simTime() + frameDuration(LENGTH_RTS, basicBitrate) + SIFSPeriod() + frameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + frameDuration(LENGTH_RTS, basicBitrate) + getSIFS() + frameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
@@ -758,7 +758,7 @@ void Ieee80211Mac::decreaseBackoffPeriod()
 {
     // see spec 9.2.5.2
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffPeriod -= ((int)(elapsedBackoffTime / SlotPeriod())) * SlotPeriod();
+    backoffPeriod -= ((int)(elapsedBackoffTime / getSlotTime())) * getSlotTime();
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period decreased to " << backoffPeriod << endl;
 }
@@ -842,10 +842,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
-        frame->setDuration(SIFSPeriod() + frameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(getSIFS() + frameDuration(LENGTH_ACK, basicBitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * SIFSPeriod() + 2 * frameDuration(LENGTH_ACK, basicBitrate) + frameDuration(frameToSend));
+        frame->setDuration(3 * getSIFS() + 2 * frameDuration(LENGTH_ACK, basicBitrate) + frameDuration(frameToSend));
 
     return frame;
 }
@@ -858,7 +858,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - SIFSPeriod() - frameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(frameToACK->getDuration() - getSIFS() - frameDuration(LENGTH_ACK, basicBitrate));
 
     return frame;
 }
@@ -868,7 +868,7 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * SIFSPeriod() + frameDuration(LENGTH_CTS, basicBitrate) +
+    frame->setDuration(3 * getSIFS() + frameDuration(LENGTH_CTS, basicBitrate) +
                        frameDuration(frameToSend) +
                        frameDuration(LENGTH_ACK, basicBitrate));
 
@@ -879,7 +879,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - SIFSPeriod() - frameDuration(LENGTH_CTS, basicBitrate));
+    frame->setDuration(rtsFrame->getDuration() - getSIFS() - frameDuration(LENGTH_CTS, basicBitrate));
 
     return frame;
 }

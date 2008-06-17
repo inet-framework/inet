@@ -283,11 +283,11 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
      */
     //@{
-    simtime_t SIFSPeriod();
-    simtime_t SlotPeriod();
-    simtime_t DIFSPeriod();
-    simtime_t EIFSPeriod();
-    simtime_t PIFSPeriod();
+    simtime_t getSIFS();
+    simtime_t getSlotTime();
+    simtime_t getDIFS();
+    simtime_t getEIFS();
+    simtime_t getPIFS();
     simtime_t BackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 

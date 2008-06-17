@@ -431,7 +431,7 @@ cMessage *IP::decapsulateIP(IPDatagram *datagram)
 
 void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr)
 {
-    int mtu = ie->mtu();
+    int mtu = ie->getMTU();
 
     // check if datagram does not require fragmentation
     if (datagram->getByteLength() <= mtu)

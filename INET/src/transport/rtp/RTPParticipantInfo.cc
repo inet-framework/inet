@@ -95,7 +95,7 @@ void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arriva
 };
 
 
-SDESChunk *RTPParticipantInfo::sdesChunk() {
+SDESChunk *RTPParticipantInfo::getSDESChunk() {
     return new SDESChunk(*_sdesChunk);
 };
 
@@ -155,7 +155,7 @@ void RTPParticipantInfo::setAddress(IPAddress address) {
 };
 
 
-int RTPParticipantInfo::rtpPort() {
+int RTPParticipantInfo::getRTPPort() {
     return _rtpPort;
 };
 
@@ -165,7 +165,7 @@ void RTPParticipantInfo::setRTPPort(int rtpPort) {
 };
 
 
-int RTPParticipantInfo::rtcpPort() {
+int RTPParticipantInfo::getRTCPPort() {
     return _rtcpPort;
 };
 

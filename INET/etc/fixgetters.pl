@@ -97,6 +97,26 @@ while (<LISTFILE>)
     $txt =~ s/\b($gettersWithArg) ?\(/"get".ucfirst($1)."("/mge;
 
     # custom renamings
+    $txt =~ s/\bmtu\(\)/getMTU()/mg;
+
+    # 802.11
+    $txt =~ s/\bDIFSPeriod\(\)/getDIFS()/mg;
+    $txt =~ s/\bEIFSPeriod\(\)/getEIFS()/mg;
+    $txt =~ s/\bPIFSPeriod\(\)/getPIFS()/mg;
+    $txt =~ s/\bSIFSPeriod\(\)/getSIFS()/mg;
+    $txt =~ s/\bSlotPeriod\(\)/getSlotTime()/mg;
+
+    # RTP
+    $txt =~ s/\bvalid\(\)/isValid()/mg;
+    $txt =~ s/\bactive\(\)/isActive()/mg;
+    $txt =~ s/\brtcpPort\(\)/getRTCPPort()/mg;
+    $txt =~ s/\brtpPort\(\)/getRTPPort()/mg;
+    $txt =~ s/\bsdesChunk\(\)/getSDESChunk()/mg;
+    $txt =~ s/\bsdesChunks\(\)/getSDESChunks()/mg;
+    $txt =~ s/\brtcpPackets\(\)/getRTCPPackets()/mg;
+
+    $txt =~ s/\bpacketOk\(/isPacketOK(/mg;
+
 
     if ($txt eq $origtxt) {
         print "unchanged\n";

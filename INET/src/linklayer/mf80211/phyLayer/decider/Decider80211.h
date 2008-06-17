@@ -55,7 +55,7 @@ class INET_API Decider80211 : public BasicDecider
     double dB2fraction(double);
 
     /** @brief computes if packet is ok or has errors*/
-    bool packetOk(double, int);
+    bool isPacketOK(double, int);
 
   protected:
     /** @brief should be set in the omnetpp.ini*/

@@ -150,7 +150,7 @@ FIXME implement fragmentation here.
    1. determine output interface
    2. compare packet size with interface MTU
    3. if bigger, do fragmentation
-         int mtu = ift->interfaceByPortNo(outputGateIndex)->mtu();
+         int mtu = ift->interfaceByPortNo(outputGateIndex)->getMTU();
 */
     EV << "fragmentation not implemented yet\n";
 

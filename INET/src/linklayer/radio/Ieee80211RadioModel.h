@@ -41,7 +41,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
 
   protected:
     // utility
-    virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate);
+    virtual bool isPacketOK(double snirMin, int lengthMPDU, double bitrate);
     // utility
     virtual double dB2fraction(double dB);
 };

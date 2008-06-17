@@ -93,12 +93,12 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         /**
          * Returns true if this rtp end system is regarded active.
          */
-        virtual bool active();
+        virtual bool isActive();
 
         /**
          * Returns true if this rtp end system is regarded valid.
          */
-        virtual bool valid();
+        virtual bool isValid();
 
         /**
          * Returns true if this rtp end system should be deleted from

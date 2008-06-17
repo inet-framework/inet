@@ -55,7 +55,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, airframe->getEncapsulatedMsg()->getBitLength(), airframe->getBitrate()))
+    else if (isPacketOK(snirMin, airframe->getEncapsulatedMsg()->getBitLength(), airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;
@@ -68,7 +68,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
 }
 
 
-bool Ieee80211RadioModel::packetOk(double snirMin, int lengthMPDU, double bitrate)
+bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
     double berHeader, berMPDU;
 

@@ -72,7 +72,7 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
     //if snir is big enough so that packet can be recognized at all
     if (snirMin > snirThreshold)
     {
-        if (packetOk(snirMin, af->getEncapsulatedMsg()->getBitLength()))
+        if (isPacketOK(snirMin, af->getEncapsulatedMsg()->getBitLength()))
         {
             EV << "packet was received correctly, it is now handed to upper layer...\n";
             sendUp(af);
@@ -95,7 +95,7 @@ void Decider80211::handleLowerMsg(AirFrame *af, SnrList& receivedList)
 }
 
 
-bool Decider80211::packetOk(double snirMin, int lengthMPDU)
+bool Decider80211::isPacketOK(double snirMin, int lengthMPDU)
 {
     double berHeader, berMPDU;
 

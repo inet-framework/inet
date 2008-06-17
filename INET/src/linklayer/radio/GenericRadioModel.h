@@ -49,7 +49,7 @@ class INET_API GenericRadioModel : public IRadioModel
 
   protected:
     // utility
-    virtual bool packetOk(double snirMin, int length, double bitrate);
+    virtual bool isPacketOK(double snirMin, int length, double bitrate);
     // utility
     virtual double dB2fraction(double dB);
 };

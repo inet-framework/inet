@@ -296,7 +296,7 @@ void RTCP::createPacket()
     // insert source description items (at least common name)
     RTCPSDESPacket *sdesPacket = new RTCPSDESPacket("SDESPacket");
 
-    SDESChunk *chunk = _senderInfo->sdesChunk();
+    SDESChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
 
     RTCPCompoundPacket *compoundPacket = new RTCPCompoundPacket("RTCPCompoundPacket");
@@ -352,10 +352,10 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPAddress address, int po
         if (participantInfo->getAddress() != address) {
             // we have an address conflict
         }
-        if (participantInfo->rtpPort() == PORT_UNDEF) {
+        if (participantInfo->getRTPPort() == PORT_UNDEF) {
             participantInfo->setRTPPort(port);
         }
-        else if (participantInfo->rtpPort() != port) {
+        else if (participantInfo->getRTPPort() != port) {
             // we have an rtp port conflict
         }
     }
@@ -388,7 +388,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 }
                 else {
                     if (participantInfo->getAddress() == address) {
-                        if (participantInfo->rtcpPort() == PORT_UNDEF) {
+                        if (participantInfo->getRTCPPort() == PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {
@@ -430,7 +430,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPAddress addre
                 }
                 else {
                     if (participantInfo->getAddress() == address) {
-                        if (participantInfo->rtcpPort() == PORT_UNDEF) {
+                        if (participantInfo->getRTCPPort() == PORT_UNDEF) {
                             participantInfo->setRTCPPort(port);
                         }
                         else {

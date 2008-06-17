@@ -80,7 +80,7 @@ class INET_API InterfaceEntry : public cPolymorphic
     int getNodeOutputGateId() const   {return _nodeOutputGateId;}
     int getNodeInputGateId() const    {return _nodeInputGateId;}
     int getPeerNamId() const          {return _peernamid;}
-    int mtu() const                {return _mtu;}
+    int getMTU() const                {return _mtu;}
     bool isDown() const            {return _down;}
     bool isBroadcast() const       {return _broadcast;}
     bool isMulticast() const       {return _multicast;}

@@ -75,7 +75,7 @@ bool GenericRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& r
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (packetOk(snirMin, airframe->getBitLength()+headerLengthBits, airframe->getBitrate()))
+    else if (isPacketOK(snirMin, airframe->getBitLength()+headerLengthBits, airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;
@@ -88,7 +88,7 @@ bool GenericRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& r
 }
 
 
-bool GenericRadioModel::packetOk(double snirMin, int length, double bitrate)
+bool GenericRadioModel::isPacketOK(double snirMin, int length, double bitrate)
 {
     double ber = modulation->bitErrorRate(snirMin, bandwidth, bitrate);
 

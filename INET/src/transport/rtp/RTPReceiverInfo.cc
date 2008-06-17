@@ -229,12 +229,12 @@ void RTPReceiverInfo::nextInterval(simtime_t now)
     RTPParticipantInfo::nextInterval(now);
 };
 
-bool RTPReceiverInfo::active()
+bool RTPReceiverInfo::isActive()
 {
     return (_inactiveIntervals < 5);
 };
 
-bool RTPReceiverInfo::valid()
+bool RTPReceiverInfo::isValid()
 {
     return (_itemsReceived >= 5);
 };
@@ -244,5 +244,5 @@ bool RTPReceiverInfo::toBeDeleted(simtime_t now) {
     // when it hasn't been validated and hasn't been active for
     // 5 rtcp intervals or if it has been validated and has been
     // inactive for 30 minutes
-    return (!valid() && !active()) || (valid() && !active() && (now - _startOfInactivity > 60.0 * 30.0));
+    return (!isValid() && !isActive()) || (isValid() && !isActive() && (now - _startOfInactivity > 60.0 * 30.0));
 };

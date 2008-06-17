@@ -58,7 +58,7 @@ std::string InterfaceEntry::info() const
         out << "  on:-";
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
-    out << "  MTU:" << mtu();
+    out << "  MTU:" << getMTU();
     if (isDown()) out << " DOWN";
     if (isBroadcast()) out << " BROADCAST";
     if (isMulticast()) out << " MULTICAST";
@@ -89,7 +89,7 @@ std::string InterfaceEntry::detailedInfo() const
         out << "  on:-";
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
-    out << "MTU: " << mtu() << " \t";
+    out << "MTU: " << getMTU() << " \t";
     if (isDown()) out << "DOWN ";
     if (isBroadcast()) out << "BROADCAST ";
     if (isMulticast()) out << "MULTICAST ";
