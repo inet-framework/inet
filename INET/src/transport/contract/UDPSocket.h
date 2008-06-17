@@ -219,12 +219,12 @@ class INET_API UDPSocket
      * IP_MULTICAST_IF socket option). The argument is the interface's Id
      * in InterfaceTable.
      */
-    void setMulticastInterface(int interfaceId) {mcastIfaceId = interfaceId;}
+    void setMulticastInterfaceId(int interfaceId) {mcastIfaceId = interfaceId;}
 
     /**
      * Returns the output interface for sending multicast packets.
      */
-    int multicastInterface() const {return mcastIfaceId;}
+    int getMulticastInterfaceId() const {return mcastIfaceId;}
 
     /**
      * Sends a data packet to the given address and port.

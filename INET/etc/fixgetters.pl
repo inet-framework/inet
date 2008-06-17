@@ -124,6 +124,10 @@ while (<LISTFILE>)
     $txt =~ s/\breceptionReport\(\)/createReceptionReport()/mg;
     $txt =~ s/\bsenderReport\(\)/createSender()/mg;
 
+    # UDPSocket
+    $txt =~ s/\bsetMulticastInterface\(/setMulticastInterfaceId(/mg;
+    $txt =~ s/\bmulticastInterface\(/getMulticastInterfaceId(/mg;
+
     # other
     $txt =~ s/\bpacketOk\(/isPacketOK(/mg;
     $txt =~ s/\bnodepos\(/find(/mg;

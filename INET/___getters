@@ -1,11 +1,7 @@
 "get" -- to be revised!!
 ------------------------
-bool ipForward()
 double _maxRandomFactor()
 double _minRandomFactor()
-int multicastInterface()   ==> multicastInterfaceId() ??  [setter too!]
-int packetsLostCumulative() ==> numTotalPacketsLost()?  [setter too!]
-
 uint _maxFinalRtrAdvertisements()
 uint _maxInitialRtrAdvertisements()
 uint _maxMulticastSolicit()
@@ -31,6 +27,8 @@ getInetAddress()...   [used to be: inetAddress()]
 ===============================
 
 revise getGatewayForDestAddr(const IPAddress& dest) ==> determineGatewayForDestAddr() ???
+
+bool ipForward()
 
 bool localDeliver(const IPAddress& dest)
 bool localDeliver(const IPv6Address& dest)
@@ -73,10 +71,4 @@ InterfaceTable *interfaceTableOf(cModule *host)
 NotificationBoard *notificationBoardOf(cModule *host)
 RoutingTable *routingTableOf(cModule *host)
 RoutingTable6 *routingTable6Of(cModule *host)
-
-IPv4InterfaceData *ipv4()
-IPv6InterfaceData *ipv6()
-protocol3()
-protocol4()
-
 
