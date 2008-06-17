@@ -1,4 +1,3 @@
-
 "get" -- to be revised!!
 ------------------------
 bool ipForward()
@@ -22,58 +21,38 @@ simtime_t _minDelayBetweenRAs()
 simtime_t _reachableTime()
 simtime_t _retransTimer()
 simtime_t _rtrSolicitationInterval()
-IPv4InterfaceData *ipv4()
-IPv6InterfaceData *ipv6()
-protocol3()
-protocol4()
-
-initialSeqNum() ==> rather chooseInitialSeqNum()?????
 
 a bit awkward: getNetmask().getNetmaskLength();
 
 getInetAddress()...   [used to be: inetAddress()]
 
-simtime_t backoff() ==> computeBackoff()
-contentionWindow() ==> computeContentionWindow() ?? [was: contentionWindow()]
-
 
 "get with args -- to be revised
 ===============================
-IPAddress routerIdOf(cModule *host)
-IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6)
-IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6)
-InterfaceTable *interfaceTableOf(cModule *host)
-NotificationBoard *notificationBoardOf(cModule *host)
-RoutingTable *routingTableOf(cModule *host)
-RoutingTable6 *routingTable6Of(cModule *host)
 
 revise getGatewayForDestAddr(const IPAddress& dest) ==> determineGatewayForDestAddr() ???
 
-
-InterfaceEntry *interfaceAt(int pos) ==> getInterface(int) ??
-
-ReceptionReport *receptionReport(simtime_t now)  ==> createReceptionReport??
-SenderReport *senderReport(simtime_t now) ==> createSenderReport ??
-
-bool AnyNeighborInStates (int states)
-bool DestinationIsUnreachable (OSPFLSA* lsa)
 bool localDeliver(const IPAddress& dest)
 bool localDeliver(const IPv6Address& dest)
-
-double bitErrorRate(double snir, double bandwidth, double bitrate) ==> calculateBER ???
-
-double frameDuration(Ieee80211Frame *msg)   ==> calculateFrameDuration() ??
-double frameDuration(int bits, double bitrate)
-
-int nodepos(const EroVector& ERO, IPAddress node) ==> find() ??
-
-simtime_t BackoffPeriod(Ieee80211Frame *msg, int r)  ==> calculateBackoffPeriod
-simtime_t packetDuration(int bits)  ==> calculatePacketDuration
-simtime_t timeOut(_802_11frameType type, simtime_t last_frame_duration)  ==> calculateTimeout
+multicastLocalDeliver() ???
 
 
-skip these??
-============
+add "get" and "For"? (
+======================
+TCPSocket *peerSocket(IPAddress peerAddr)  ==> findPeerSocket ??
+TCPSocket *peerSocketSoft(IPAddress peerAddr)
+unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)  ==> findPeerSocket ??
+unsigned int linkIndex(IPAddress localInf)
+
+IPAddress peerRemoteInterface(IPAddress peerIP)  ????
+IPAddress primaryAddress(IPAddress localInf)   ???
+
+
+
+
+
+skip these
+==========
 const char *eventName(int event)
 const char *indicationName(int code)
 const char *modeName(int mode)
@@ -87,14 +66,17 @@ const char *stateName(int state)
 const char *timerTypeName(int type)
 const char* logName(void)
 
-add "get" and "For"? (
-======================
-TCPSocket *peerSocket(IPAddress peerAddr)
-TCPSocket *peerSocketSoft(IPAddress peerAddr)
-unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
-unsigned int linkIndex(IPAddress localInf)
+IPAddress routerIdOf(cModule *host)
+IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6)
+IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6)
+InterfaceTable *interfaceTableOf(cModule *host)
+NotificationBoard *notificationBoardOf(cModule *host)
+RoutingTable *routingTableOf(cModule *host)
+RoutingTable6 *routingTable6Of(cModule *host)
 
-IPAddress peerRemoteInterface(IPAddress peerIP)  ????
-IPAddress primaryAddress(IPAddress localInf)   ???
+IPv4InterfaceData *ipv4()
+IPv6InterfaceData *ipv6()
+protocol3()
+protocol4()
 
 

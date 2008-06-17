@@ -93,8 +93,8 @@ while (<LISTFILE>)
     $txt =~ s/\n *\@omitGetVerb\(true\); *\n/\n/gs;
 
     # rename getters
-    $txt =~ s/\b($arglessGetters) ?\( *\)/"get".ucfirst($1)."()"/mge;
-    $txt =~ s/\b($gettersWithArg) ?\(/"get".ucfirst($1)."("/mge;
+    $txt =~ s/\b($arglessGetters)\( *\)/"get".ucfirst($1)."()"/mge;
+    $txt =~ s/\b($gettersWithArg)\(/"get".ucfirst($1)."("/mge;
 
     # custom renamings
     $txt =~ s/\bmtu\(\)/getMTU()/mg;
@@ -106,6 +106,13 @@ while (<LISTFILE>)
     $txt =~ s/\bSIFSPeriod\(\)/getSIFS()/mg;
     $txt =~ s/\bSlotPeriod\(\)/getSlotTime()/mg;
 
+    $txt =~ s/\bbackoff\(/computeBackoff(/mg;
+    $txt =~ s/\bcontentionWindow\(/computeContentionWindow(/mg;
+    $txt =~ s/\bframeDuration\(/computeFrameDuration(/mg;
+    $txt =~ s/\bpacketDuration\(/computePacketDuration(/mg;
+    $txt =~ s/\bBackoffPeriod\(/computeBackoffPeriod(/mg;
+    $txt =~ s/\btimeOut\(/computeTimeout(/mg;
+
     # RTP
     $txt =~ s/\bvalid\(\)/isValid()/mg;
     $txt =~ s/\bactive\(\)/isActive()/mg;
@@ -114,9 +121,15 @@ while (<LISTFILE>)
     $txt =~ s/\bsdesChunk\(\)/getSDESChunk()/mg;
     $txt =~ s/\bsdesChunks\(\)/getSDESChunks()/mg;
     $txt =~ s/\brtcpPackets\(\)/getRTCPPackets()/mg;
+    $txt =~ s/\breceptionReport\(\)/createReceptionReport()/mg;
+    $txt =~ s/\bsenderReport\(\)/createSender()/mg;
 
+    # other
     $txt =~ s/\bpacketOk\(/isPacketOK(/mg;
-
+    $txt =~ s/\bnodepos\(/find(/mg;
+    $txt =~ s/\binterfaceAt\(/getInterface(/mg;
+    $txt =~ s/\bbitErrorRate\(/calculateBER(/mg;
+    $txt =~ s/\binitialSeqNum\(/chooseInitialSeqNum(/mg;
 
     if ($txt eq $origtxt) {
         print "unchanged\n";
