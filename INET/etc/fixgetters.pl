@@ -44,6 +44,15 @@ $arglessGetters .= "blackboard connState port inetAddress
     minRtrAdvInterval baseReachableTime linkMTU bufferEndSeq
     totalLength";
 
+# IPv6
+my $underscoreArglessGetters =
+    "maxRandomFactor minRandomFactor maxFinalRtrAdvertisements
+    maxInitialRtrAdvertisements maxMulticastSolicit maxNeighbourAdvertisement
+    maxRtrSolicitations maxUnicastSolicit delayFirstProbeTime
+    maxAnycastDelayTime maxInitialRtrAdvertInterval maxRADelayTime
+    maxRtrSolicitationDelay minDelayBetweenRAs reachableTime retransTimer
+    rtrSolicitationInterval";
+
 # array fields in msg files
 my $gettersWithArg = "payload recordAddress address extensionHeader
     prefixInformation recordTimestamp addresses data";
@@ -58,8 +67,8 @@ $gettersWithArg .= "gatewayForDestAddr interfaceAddrByPeerAddress
     numMatchingPrefixBits outputGateForProtocol bytesAvailable";
 
 $arglessGetters =~ s/\s+/|/g;
+$underscoreArglessGetters =~ s/\s+/|/g;
 $gettersWithArg =~ s/\s+/|/g;
-
 
 $arglessGetters="----";  #FIXME remove just temp!!!
 $gettersWithArg="----";  #FIXME remove just temp!!!
@@ -94,6 +103,7 @@ while (<LISTFILE>)
 
     # rename getters
     $txt =~ s/\b($arglessGetters)\( *\)/"get".ucfirst($1)."()"/mge;
+    $txt =~ s/\b_($underscoreArglessGetters)\( *\)/"_get".ucfirst($1)."()"/mge;
     $txt =~ s/\b($gettersWithArg)\(/"get".ucfirst($1)."("/mge;
 
     # custom renamings
@@ -142,8 +152,8 @@ while (<LISTFILE>)
     $txt =~ s/\blocalDeliver\(/isLocalAddress(/mg;
     $txt =~ s/\bmulticastLocalDeliver\(/isLocalMulticastAddress(/mg;
 
-#    InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);  ==> find...
-#    IPAddress getGatewayForDestAddr(const IPAddress& dest);
+    #$txt =~ s/\bgetInterfaceForDestAddr\(/findInterfaceForDestAddr(/mg;
+    #$txt =~ s/\bgetGatewayForDestAddr\(/findGatewayForDestAddr(/mg;
 
     if ($txt eq $origtxt) {
         print "unchanged\n";

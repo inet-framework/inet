@@ -444,7 +444,7 @@ void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(
     cMessage *msg = new cMessage("NUDTimeout", MK_NUD_TIMEOUT);
     msg->setContextPointer(nce);
     nce->nudTimeoutEvent = msg;
-    scheduleAt(simTime()+ie->ipv6()->_delayFirstProbeTime(), msg);
+    scheduleAt(simTime()+ie->ipv6()->_getDelayFirstProbeTime(), msg);
 }
 
 void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
@@ -469,7 +469,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     after sending the MAX_UNICAST_SOLICIT solicitations, retransmissions cease
     and the entry SHOULD be deleted. Subsequent traffic to that neighbor will
     recreate the entry and performs address resolution again.*/
-    if (nce->numProbesSent == (int)ie->ipv6()->_maxUnicastSolicit())
+    if (nce->numProbesSent == (int)ie->ipv6()->_getMaxUnicastSolicit())
     {
         EV << "Max number of probes have been sent." << endl;
         EV << "Neighbour is Unreachable, removing NCE." << endl;
@@ -486,7 +486,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     every RetransTimer milliseconds until reachability confirmation is obtained.
     Probes are retransmitted even if no additional packets are sent to the
     neighbor.*/
-    scheduleAt(simTime()+ie->ipv6()->_retransTimer(), timeoutMsg);
+    scheduleAt(simTime()+ie->ipv6()->_getRetransTimer(), timeoutMsg);
 }
 
 IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
@@ -640,7 +640,7 @@ void IPv6NeighbourDiscovery::initiateAddressResolution(const IPv6Address& dgSrcA
     cMessage *msg = new cMessage("arTimeout", MK_AR_TIMEOUT);//AR msg timer
     nce->arTimer = msg;
     msg->setContextPointer(nce);
-    scheduleAt(simTime()+ie->ipv6()->_retransTimer(), msg);
+    scheduleAt(simTime()+ie->ipv6()->_getRetransTimer(), msg);
 }
 
 
@@ -652,14 +652,14 @@ void IPv6NeighbourDiscovery::processARTimeout(cMessage *arTimeoutMsg)
     IPv6Address nsTargetAddr = nceKey->address;
     InterfaceEntry *ie = ift->getInterface(nceKey->interfaceID);
     EV << "Num Of NS Sent:" << nce->numOfARNSSent << endl;
-    EV << "Max Multicast Solicitation:" << ie->ipv6()->_maxMulticastSolicit() << endl;
-    if (nce->numOfARNSSent < ie->ipv6()->_maxMulticastSolicit())
+    EV << "Max Multicast Solicitation:" << ie->ipv6()->_getMaxMulticastSolicit() << endl;
+    if (nce->numOfARNSSent < ie->ipv6()->_getMaxMulticastSolicit())
     {
         EV << "Sending another Address Resolution NS message" << endl;
         IPv6Address nsDestAddr = nsTargetAddr.formSolicitedNodeMulticastAddress();
         createAndSendNSPacket(nsTargetAddr, nsDestAddr, nce->nsSrcAddr, ie);
         nce->numOfARNSSent++;
-        scheduleAt(simTime()+ie->ipv6()->_retransTimer(), arTimeoutMsg);
+        scheduleAt(simTime()+ie->ipv6()->_getRetransTimer(), arTimeoutMsg);
         return;
     }
     EV << "Address Resolution has failed." << endl;
@@ -820,7 +820,7 @@ void IPv6NeighbourDiscovery::processDADTimeout(cMessage *msg)
             EV << "creating router discovery message timer\n";
             cMessage *rtrDisMsg = new cMessage("initiateRTRDIS",MK_INITIATE_RTRDIS);
             rtrDisMsg->setContextPointer(ie);
-            simtime_t interval = uniform(0, ie->ipv6()->_maxRtrSolicitationDelay()); // random delay
+            simtime_t interval = uniform(0, ie->ipv6()->_getMaxRtrSolicitationDelay()); // random delay
             scheduleAt(simTime()+interval, rtrDisMsg);
         }
     }
@@ -883,8 +883,8 @@ void IPv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
     a random delay since the interface became (re)enabled (e.g., as part
     of Duplicate Address Detection [ADDRCONF]) there is no need to delay
     again before sending the first Router Solicitation message.*/
-    //simtime_t rndInterval = uniform(0, ie->ipv6()->_maxRtrSolicitationDelay());
-    scheduleAt(simTime()+ie->ipv6()->_rtrSolicitationInterval(), rdTimeoutMsg);
+    //simtime_t rndInterval = uniform(0, ie->ipv6()->_getMaxRtrSolicitationDelay());
+    scheduleAt(simTime()+ie->ipv6()->_getRtrSolicitationInterval(), rdTimeoutMsg);
 }
 
 void IPv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
@@ -906,16 +906,16 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 {
     InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     RDEntry *rdEntry = fetchRDEntry(ie);
-    if (rdEntry->numRSSent < ie->ipv6()->_maxRtrSolicitations())
+    if (rdEntry->numRSSent < ie->ipv6()->_getMaxRtrSolicitations())
     {
         bubble("Sending another RS message.");
         createAndSendRSPacket(ie);
         rdEntry->numRSSent++;
         //Need to find out if this is the last RS we are sending out.
-        if (rdEntry->numRSSent == ie->ipv6()->_maxRtrSolicitations())
-            scheduleAt(simTime()+ie->ipv6()->_maxRtrSolicitationDelay(), msg);
+        if (rdEntry->numRSSent == ie->ipv6()->_getMaxRtrSolicitations())
+            scheduleAt(simTime()+ie->ipv6()->_getMaxRtrSolicitationDelay(), msg);
         else
-            scheduleAt(simTime()+ie->ipv6()->_rtrSolicitationInterval(), msg);
+            scheduleAt(simTime()+ie->ipv6()->_getRtrSolicitationInterval(), msg);
     }
     else
     {
@@ -978,7 +978,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
         delay and send the advertisement at the already-scheduled time.*/
         cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
         msg->setContextPointer(ie);
-        simtime_t interval = uniform(0, ie->ipv6()->_maxRADelayTime());
+        simtime_t interval = uniform(0, ie->ipv6()->_getMaxRADelayTime());
 
         if (interval < advIfEntry->nextScheduledRATime)
         {
@@ -1498,14 +1498,14 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
     sent from an interface when it becomes an advertising interface,*/
     EV << "Num RA sent is: " << advIfEntry->numRASent << endl;
-    EV << "maxInitialRtrAdvertisements is: " << ie->ipv6()->_maxInitialRtrAdvertisements() << endl;
-    if(advIfEntry->numRASent <= ie->ipv6()->_maxInitialRtrAdvertisements())
+    EV << "maxInitialRtrAdvertisements is: " << ie->ipv6()->_getMaxInitialRtrAdvertisements() << endl;
+    if(advIfEntry->numRASent <= ie->ipv6()->_getMaxInitialRtrAdvertisements())
     {
-        if (interval > ie->ipv6()->_maxInitialRtrAdvertInterval())
+        if (interval > ie->ipv6()->_getMaxInitialRtrAdvertInterval())
         {
             //if the randomly chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL,
             //the timer SHOULD be set to MAX_INITIAL_RTR_ADVERT_INTERVAL instead.
-            nextScheduledTime = simTime() + ie->ipv6()->_maxInitialRtrAdvertInterval();
+            nextScheduledTime = simTime() + ie->ipv6()->_getMaxInitialRtrAdvertInterval();
             EV << "Sending initial RA but interval is too long. Using default value." << endl;
         }
         else
@@ -2004,7 +2004,7 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(
         {
             nce->reachabilityState = IPv6NeighbourCache::REACHABLE;
             EV << "Reachability confirmed through successful Addr Resolution.\n";
-            nce->reachabilityExpires = simTime() + ie->ipv6()->_reachableTime();
+            nce->reachabilityExpires = simTime() + ie->ipv6()->_getReachableTime();
         }
         else
             nce->reachabilityState = IPv6NeighbourCache::STALE;
@@ -2086,7 +2086,7 @@ void IPv6NeighbourDiscovery:: processNAForOtherNCEStates(
             {
                 EV << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
-                nce->reachabilityExpires = simTime() + ie->ipv6()->_reachableTime();
+                nce->reachabilityExpires = simTime() + ie->ipv6()->_getReachableTime();
                 cancelEvent(msg);
                 delete msg;
             }

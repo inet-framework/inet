@@ -1,27 +1,3 @@
-"get" -- to be revised!!
-------------------------
-double _maxRandomFactor()
-double _minRandomFactor()
-uint _maxFinalRtrAdvertisements()
-uint _maxInitialRtrAdvertisements()
-uint _maxMulticastSolicit()
-uint _maxNeighbourAdvertisement()
-uint _maxRtrSolicitations()
-uint _maxUnicastSolicit()
-simtime_t _delayFirstProbeTime()
-simtime_t _maxAnycastDelayTime()
-simtime_t _maxInitialRtrAdvertInterval()
-simtime_t _maxRADelayTime()
-simtime_t _maxRtrSolicitationDelay()
-simtime_t _minDelayBetweenRAs()
-simtime_t _reachableTime()
-simtime_t _retransTimer()
-simtime_t _rtrSolicitationInterval()
-
-"get with args -- to be revised
-===============================
-revise getGatewayForDestAddr(const IPAddress& dest) ==> determineGatewayForDestAddr() ???
-
 add "get" and "For"? (
 ======================
 TCPSocket *peerSocket(IPAddress peerAddr)  ==> findPeerSocket ??

@@ -51,8 +51,8 @@ IPv6InterfaceData::IPv6InterfaceData()
     hostVars.linkMTU = IPv6_MIN_MTU;
     hostVars.curHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;//value specified in RFC 1700-can't find it
     hostVars.baseReachableTime = IPv6_REACHABLE_TIME;
-    hostVars.reachableTime = generateReachableTime(_minRandomFactor(),
-        _maxRandomFactor(), getBaseReachableTime());
+    hostVars.reachableTime = generateReachableTime(_getMinRandomFactor(),
+        _getMaxRandomFactor(), getBaseReachableTime());
     hostVars.retransTimer = IPv6_RETRANS_TIMER;
 
     //rtrVars.advSendAdvertisements is set in RoutingTable6.cc:line 143
@@ -287,7 +287,7 @@ simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
 
 simtime_t IPv6InterfaceData::generateReachableTime()
 {
-    return uniform(_minRandomFactor(), _maxRandomFactor()) * getBaseReachableTime();
+    return uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
 

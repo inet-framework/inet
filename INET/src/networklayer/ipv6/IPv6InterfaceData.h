@@ -404,11 +404,11 @@ class INET_API IPv6InterfaceData : public cPolymorphic
      *  allows both wired and wireless networks to co-exist within a simulation run.
      */
     /************Getters for Router Protocol Constants*************************/
-    simtime_t _maxInitialRtrAdvertInterval() {return routerConstants.maxInitialRtrAdvertInterval;}
-    uint _maxInitialRtrAdvertisements() {return routerConstants.maxInitialRtrAdvertisements;}
-    uint _maxFinalRtrAdvertisements() {return routerConstants.maxFinalRtrAdvertisements;}
-    simtime_t _minDelayBetweenRAs() {return routerConstants.minDelayBetweenRAs;}
-    simtime_t _maxRADelayTime() {return routerConstants.maxRADelayTime;}
+    simtime_t _getMaxInitialRtrAdvertInterval() {return routerConstants.maxInitialRtrAdvertInterval;}
+    uint _getMaxInitialRtrAdvertisements() {return routerConstants.maxInitialRtrAdvertisements;}
+    uint _getMaxFinalRtrAdvertisements() {return routerConstants.maxFinalRtrAdvertisements;}
+    simtime_t _getMinDelayBetweenRAs() {return routerConstants.minDelayBetweenRAs;}
+    simtime_t _getMaxRADelayTime() {return routerConstants.maxRADelayTime;}
     /************Setters for Router Protocol Constants*************************/
     void _setMaxInitialRtrAdvertInterval(simtime_t d) {routerConstants.maxInitialRtrAdvertInterval = d;}
     void _setMaxInitialRtrAdvertisements(uint d) {routerConstants.maxInitialRtrAdvertisements = d;}
@@ -418,9 +418,9 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /************End of Router Protocol Constant getters and setters***********/
 
     /************Getters for Host Protocol Constants***************************/
-    simtime_t _maxRtrSolicitationDelay() {return hostConstants.maxRtrSolicitationDelay;}
-    simtime_t _rtrSolicitationInterval() {return hostConstants.rtrSolicitationInterval;}
-    uint _maxRtrSolicitations() {return hostConstants.maxRtrSolicitations;}
+    simtime_t _getMaxRtrSolicitationDelay() {return hostConstants.maxRtrSolicitationDelay;}
+    simtime_t _getRtrSolicitationInterval() {return hostConstants.rtrSolicitationInterval;}
+    uint _getMaxRtrSolicitations() {return hostConstants.maxRtrSolicitations;}
     /************Setters for Host Protocol Constants***************************/
     void _setMaxRtrSolicitationDelay(simtime_t d) {hostConstants.maxRtrSolicitationDelay = d;}
     void _setRtrSolicitationInterval(simtime_t d) {hostConstants.rtrSolicitationInterval = d;}
@@ -428,15 +428,15 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /************End of Host Protocol Constant getters and setters*************/
 
     /************Getters for Node Protocol Constants***************************/
-    uint _maxMulticastSolicit() {return nodeConstants.maxMulticastSolicit;}
-    uint _maxUnicastSolicit() {return nodeConstants.maxUnicastSolicit;}
-    simtime_t _maxAnycastDelayTime() {return nodeConstants.maxAnycastDelayTime;}
-    uint _maxNeighbourAdvertisement() {return nodeConstants.maxNeighbourAdvertisement;}
-    simtime_t _reachableTime() {return nodeConstants.reachableTime;}
-    simtime_t _retransTimer() {return nodeConstants.retransTimer;}
-    simtime_t _delayFirstProbeTime() {return nodeConstants.delayFirstProbeTime;}
-    double _minRandomFactor() {return nodeConstants.minRandomFactor;}
-    double _maxRandomFactor() {return nodeConstants.maxRandomFactor;}
+    uint _getMaxMulticastSolicit() {return nodeConstants.maxMulticastSolicit;}
+    uint _getMaxUnicastSolicit() {return nodeConstants.maxUnicastSolicit;}
+    simtime_t _getMaxAnycastDelayTime() {return nodeConstants.maxAnycastDelayTime;}
+    uint _getMaxNeighbourAdvertisement() {return nodeConstants.maxNeighbourAdvertisement;}
+    simtime_t _getReachableTime() {return nodeConstants.reachableTime;}
+    simtime_t _getRetransTimer() {return nodeConstants.retransTimer;}
+    simtime_t _getDelayFirstProbeTime() {return nodeConstants.delayFirstProbeTime;}
+    double _getMinRandomFactor() {return nodeConstants.minRandomFactor;}
+    double _getMaxRandomFactor() {return nodeConstants.maxRandomFactor;}
     /************Setters for Node Protocol Constants***************************/
     void _setMaxMulticastSolicit(uint d) {nodeConstants.maxMulticastSolicit = d;}
     void _setMaxUnicastSolicit(uint d) {nodeConstants.maxUnicastSolicit = d;}
