@@ -176,7 +176,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      * Checks if the address is one of the host's addresses, i.e.
      * assigned to one of its interfaces (tentatively or not).
      */
-    bool localDeliver(const IPv6Address& dest);
+    bool isLocalAddress(const IPv6Address& dest);
 
     /**
      * Looks up the given destination address in the Destination Cache,

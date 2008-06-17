@@ -44,7 +44,7 @@ IPv4InterfaceData::IPv4InterfaceData()
 std::string IPv4InterfaceData::info() const
 {
     std::stringstream out;
-    out << "IP:{inet_addr:" << getInetAddress() << "/" << getNetmask().getNetmaskLength();
+    out << "IP:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
     if (!getMulticastGroups().empty())
     {
         out << " mcastgrps:";
@@ -59,7 +59,7 @@ std::string IPv4InterfaceData::info() const
 std::string IPv4InterfaceData::detailedInfo() const
 {
     std::stringstream out;
-    out << "inet addr:" << getInetAddress() << "\tMask: " << getNetmask() << "\n";
+    out << "inet addr:" << getIPAddress() << "\tMask: " << getNetmask() << "\n";
 
     out << "Metric: " << getMetric() << "\n";
 

@@ -213,7 +213,7 @@ void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
     for the node's interfaces (manually or automatically).*/
 
     // FIXME FIXME Andras: commented out the following lines, because these addresses
-    // are implicitly checked for in localDeliver()  (we don't want redundancy,
+    // are implicitly checked for in isLocalAddress()  (we don't want redundancy,
     // and manually adding solicited-node mcast address for each and every address
     // is very error-prone!)
     //
@@ -327,9 +327,9 @@ InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
     return NULL;
 }
 
-bool RoutingTable6::localDeliver(const IPv6Address& dest)
+bool RoutingTable6::isLocalAddress(const IPv6Address& dest)
 {
-    Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
     // first, check if we have an interface with this address
     for (int i=0; i<ift->getNumInterfaces(); i++)

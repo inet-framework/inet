@@ -161,8 +161,8 @@ void RoutingTable::autoconfigRouterId()
             for (int i=0; i<ift->getNumInterfaces(); ++i)
             {
                 InterfaceEntry *ie = ift->getInterface(i);
-                if (!ie->isLoopback() && ie->ipv4()->getInetAddress().getInt() > _routerId.getInt())
-                    _routerId = ie->ipv4()->getInetAddress();
+                if (!ie->isLoopback() && ie->ipv4()->getIPAddress().getInt() > _routerId.getInt())
+                    _routerId = ie->ipv4()->getIPAddress();
             }
         }
     }
@@ -173,7 +173,7 @@ void RoutingTable::autoconfigRouterId()
         if (getInterfaceByAddress(_routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-            lo0->ipv4()->setInetAddress(_routerId);
+            lo0->ipv4()->setIPAddress(_routerId);
             lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
         }
     }
@@ -226,7 +226,7 @@ std::vector<IPAddress> RoutingTable::gatherAddresses()
     std::vector<IPAddress> addressvector;
 
     for (int i=0; i<ift->getNumInterfaces(); ++i)
-        addressvector.push_back(ift->getInterface(i)->ipv4()->getInetAddress());
+        addressvector.push_back(ift->getInterface(i)->ipv4()->getIPAddress());
     return addressvector;
 }
 
@@ -249,7 +249,7 @@ InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPAddress& addr)
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4()->getInetAddress()==addr)
+        if (ie->ipv4()->getIPAddress()==addr)
             return ie;
     }
     return NULL;
@@ -263,7 +263,7 @@ void RoutingTable::configureLoopbackForIPv4()
     // add IPv4 info. Set 127.0.0.1/8 as address by default --
     // we may reconfigure later it to be the routerId
     IPv4InterfaceData *d = new IPv4InterfaceData();
-    d->setInetAddress(IPAddress::LOOPBACK_ADDRESS);
+    d->setIPAddress(IPAddress::LOOPBACK_ADDRESS);
     d->setNetmask(IPAddress::LOOPBACK_NETMASK);
     d->setMetric(1);
     ie->setIPv4Data(d);
@@ -271,23 +271,23 @@ void RoutingTable::configureLoopbackForIPv4()
 
 //---
 
-bool RoutingTable::localDeliver(const IPAddress& dest)
+bool RoutingTable::isLocalAddress(const IPAddress& dest)
 {
-    Enter_Method("localDeliver(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
     // check if we have an interface with this address
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (dest==ie->ipv4()->getInetAddress())
+        if (dest==ie->ipv4()->getIPAddress())
             return true;
     }
     return false;
 }
 
-bool RoutingTable::multicastLocalDeliver(const IPAddress& dest)
+bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest)
 {
-    Enter_Method("multicastLocalDeliver(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalMulticastAddress(%s) y/n", dest.str().c_str());
 
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
@@ -477,7 +477,7 @@ void RoutingTable::updateNetmaskRoutes()
             RoutingEntry *route = new RoutingEntry();
             route->type = RoutingEntry::DIRECT;
             route->source = RoutingEntry::IFACENETMASK;
-            route->host = ie->ipv4()->getInetAddress();
+            route->host = ie->ipv4()->getIPAddress();
             route->netmask = ie->ipv4()->getNetmask();
             route->gateway = IPAddress();
             route->metric = ie->ipv4()->getMetric();

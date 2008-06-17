@@ -199,7 +199,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
-    if (rt->localDeliver(destAddr))
+    if (rt->isLocalAddress(destAddr))
     {
         EV << "local delivery\n";
         if (datagram->getSrcAddress().isUnspecified())
@@ -210,7 +210,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     }
 
     // if datagram arrived from input gate and IP_FORWARD is off, delete datagram
-    if (!fromHL && !rt->ipForward())
+    if (!fromHL && !rt->isIPForwardingEnabled())
     {
         EV << "forwarding off, dropping packet\n";
         numDropped++;
@@ -248,7 +248,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
 
     // set datagram source address if not yet set
     if (datagram->getSrcAddress().isUnspecified())
-        datagram->setSrcAddress(destIE->ipv4()->getInetAddress());
+        datagram->setSrcAddress(destIE->ipv4()->getIPAddress());
 
     // default: send datagram to fragmentation
     EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
@@ -283,7 +283,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
     if (fromIE!=NULL)
     {
         // check for local delivery
-        if (rt->multicastLocalDeliver(destAddr))
+        if (rt->isLocalMulticastAddress(destAddr))
         {
             IPDatagram *datagramCopy = (IPDatagram *) datagram->dup();
 
@@ -294,7 +294,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
         }
 
         // don't forward if IP forwarding is off
-        if (!rt->ipForward())
+        if (!rt->isIPForwardingEnabled())
         {
             delete datagram;
             return;
@@ -318,7 +318,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
         // set datagram source address if not yet set
         if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destIE->ipv4()->getInetAddress());
+            datagram->setSrcAddress(destIE->ipv4()->getIPAddress());
 
         // send
         fragmentAndSend(datagram, destIE, datagram->getDestAddress());
@@ -347,7 +347,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(destIE->ipv4()->getInetAddress());
+                    datagramCopy->setSrcAddress(destIE->ipv4()->getIPAddress());
 
                 // send
                 IPAddress nextHopAddr = routes[i].gateway;

@@ -1683,7 +1683,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
     {
         EV << "Source Address is UNSPECIFIED. Sender is performing DAD\n";
         //Sender performing Duplicate Address Detection
-        if (rt6->localDeliver(nsSrcAddr))
+        if (rt6->isLocalAddress(nsSrcAddr))
             EV << "NS comes from myself. Ignoring NS\n";
         else
             EV << "NS comes from another node. Address is duplicate!\n";

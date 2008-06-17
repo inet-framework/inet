@@ -197,7 +197,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // inet_addr entry
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
-            ie->ipv4()->setInetAddress(IPAddress(parseEntry(ifconfigFile, "inet_addr:", charpointer,buf)));
+            ie->ipv4()->setIPAddress(IPAddress(parseEntry(ifconfigFile, "inet_addr:", charpointer,buf)));
             continue;
         }
 
@@ -290,7 +290,7 @@ void RoutingTableParser::parseMulticastGroups (char *groupStr,
     mcg.push_back(IPAddress::ALL_HOSTS_MCAST);
 
     // add 224.0.0.2" only if Router (IP forwarding enabled)
-    if (rt->ipForward())
+    if (rt->isIPForwardingEnabled())
         mcg.push_back(IPAddress::ALL_ROUTERS_MCAST);
 
     // Parse string (IP addresses separated by colons)

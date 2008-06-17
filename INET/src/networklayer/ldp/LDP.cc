@@ -321,14 +321,14 @@ void LDP::rebuildFecList()
         if (ie->getNetworkLayerGateIndex() < 0)
             continue;
 
-        FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->getInetAddress(), 32);
+        FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->getIPAddress(), 32);
         if (it == oldList.end())
         {
             fec_t newItem;
             newItem.fecid = ++maxFecid;
-            newItem.addr = ie->ipv4()->getInetAddress();
+            newItem.addr = ie->ipv4()->getIPAddress();
             newItem.length = 32;
-            newItem.nextHop = ie->ipv4()->getInetAddress();
+            newItem.nextHop = ie->ipv4()->getIPAddress();
             fecList.push_back(newItem);
         }
         else
@@ -769,7 +769,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPAddress peerIP)
 //    Rely on port index to find the interface name
 
     // this function is a misnomer, we must recognize our own address too
-    if (rt->localDeliver(peerIP))
+    if (rt->isLocalAddress(peerIP))
         return "lo0";
 
     InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);

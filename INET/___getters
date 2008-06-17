@@ -18,22 +18,9 @@ simtime_t _reachableTime()
 simtime_t _retransTimer()
 simtime_t _rtrSolicitationInterval()
 
-a bit awkward: getNetmask().getNetmaskLength();
-
-getInetAddress()...   [used to be: inetAddress()]
-
-
 "get with args -- to be revised
 ===============================
-
 revise getGatewayForDestAddr(const IPAddress& dest) ==> determineGatewayForDestAddr() ???
-
-bool ipForward()
-
-bool localDeliver(const IPAddress& dest)
-bool localDeliver(const IPv6Address& dest)
-multicastLocalDeliver() ???
-
 
 add "get" and "For"? (
 ======================
@@ -44,31 +31,4 @@ unsigned int linkIndex(IPAddress localInf)
 
 IPAddress peerRemoteInterface(IPAddress peerIP)  ????
 IPAddress primaryAddress(IPAddress localInf)   ???
-
-
-
-
-
-skip these
-==========
-const char *eventName(int event)
-const char *indicationName(int code)
-const char *modeName(int mode)
-const char *notificationCategoryName(int category)
-const char *pktTypeName(int type)
-const char *routeSrcName(RouteSrc src)
-const char *scopeName(Scope s)
-const char *stateName(ReachabilityState state)
-const char *stateName(State state)
-const char *stateName(int state)
-const char *timerTypeName(int type)
-const char* logName(void)
-
-IPAddress routerIdOf(cModule *host)
-IPvXAddress addressOf(cModule *host, const char *ifname, int addrType=ADDR_PREFER_IPv6)
-IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6)
-InterfaceTable *interfaceTableOf(cModule *host)
-NotificationBoard *notificationBoardOf(cModule *host)
-RoutingTable *routingTableOf(cModule *host)
-RoutingTable6 *routingTable6Of(cModule *host)
 

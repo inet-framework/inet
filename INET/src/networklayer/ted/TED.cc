@@ -94,7 +94,7 @@ void TED::initialize(int stage)
         //
         TELinkStateInfo entry;
         entry.advrouter = routerId;
-        entry.local = ie->ipv4()->getInetAddress();
+        entry.local = ie->ipv4()->getIPAddress();
         entry.linkid = linkid;
         entry.remote = remote;
         entry.MaxBandwidth = linkBandwidth;
@@ -118,12 +118,12 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (rt->getInterfaceByAddress(ie->ipv4()->getInetAddress()) != ie)
+        if (rt->getInterfaceByAddress(ie->ipv4()->getIPAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
-                  ie->getName(), ie->ipv4()->getInetAddress().str().c_str());
+                  ie->getName(), ie->ipv4()->getIPAddress().str().c_str());
         if (!ie->isLoopback())
-            interfaceAddrs.push_back(ie->ipv4()->getInetAddress());
+            interfaceAddrs.push_back(ie->ipv4()->getIPAddress());
     }
 
     rebuildRoutingTable();

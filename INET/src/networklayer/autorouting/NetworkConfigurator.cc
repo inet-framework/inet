@@ -101,7 +101,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
             {
-                ie->ipv4()->setInetAddress(IPAddress(addr | (uint32)k));
+                ie->ipv4()->setIPAddress(IPAddress(addr | (uint32)k));
                 ie->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
@@ -154,7 +154,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             int neighborGateId = node->getLinkOut(j)->getRemoteGate()->getId();
             InterfaceEntry *neighborIe = nodeInfo[k].ift->getInterfaceByNodeInputGateId(neighborGateId);
             ASSERT(neighborIe);
-            IPAddress neighborAddr = neighborIe->ipv4()->getInetAddress();
+            IPAddress neighborAddr = neighborIe->ipv4()->getIPAddress();
 
             // find our own interface towards neighbor
             int gateId = node->getLinkOut(j)->getLocalGate()->getId();

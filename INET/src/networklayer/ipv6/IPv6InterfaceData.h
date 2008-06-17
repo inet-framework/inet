@@ -133,7 +133,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
         simtime_t prefExpiryTime; // end of preferred lifetime; 0 means infinity
     };
     typedef std::vector<AddressData> AddressDataVector;
-    // TBD should be std::map, so that localDeliver() is faster?
+    // TBD should be std::map, so that isLocalAddress() is faster?
 
     AddressDataVector addresses;   // interface addresses
     IPv6Address preferredAddr; // cached result of preferred address selection

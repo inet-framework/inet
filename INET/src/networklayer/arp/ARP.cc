@@ -249,7 +249,7 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
 {
     // find our own IP address and MAC address on the given interface
     MACAddress myMACAddress = ie->getMacAddress();
-    IPAddress myIPAddress = ie->ipv4()->getInetAddress();
+    IPAddress myIPAddress = ie->ipv4()->getIPAddress();
 
     // both must be set
     ASSERT(!myMACAddress.isUnspecified());
@@ -305,7 +305,7 @@ void ARP::requestTimedOut(cMessage *selfmsg)
 
 bool ARP::addressRecognized(IPAddress destAddr, InterfaceEntry *ie)
 {
-    if (rt->localDeliver(destAddr))
+    if (rt->isLocalAddress(destAddr))
         return true;
 
     // respond to Proxy ARP request: if we can route this packet (and the
@@ -417,7 +417,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
                 // find our own IP address and MAC address on the given interface
                 MACAddress myMACAddress = ie->getMacAddress();
-                IPAddress myIPAddress = ie->ipv4()->getInetAddress();
+                IPAddress myIPAddress = ie->ipv4()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
                 arp->setName("arpREPLY");

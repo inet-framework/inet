@@ -171,13 +171,13 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
 
     // local delivery of unicast packets
-    if (rt->localDeliver(destAddress))
+    if (rt->isLocalAddress(destAddress))
     {
         EV << "local delivery\n";
         if (datagram->getSrcAddress().isUnspecified())
             datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
         numLocalDeliver++;
-        localDeliver(datagram);
+        isLocalAddress(datagram);
         return;
     }
 
@@ -280,11 +280,11 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
     if (fromIE!=NULL)
     {
         // deliver locally
-        if (rt->localDeliver(destAddr))
+        if (rt->isLocalAddress(destAddr))
         {
             EV << "local delivery of multicast packet\n";
             numLocalDeliver++;
-            localDeliver((IPv6Datagram *)datagram->dup());
+            isLocalAddress((IPv6Datagram *)datagram->dup());
         }
 
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
@@ -343,14 +343,14 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
     // check for local delivery
     IPv6Address destAddress = datagram->getDestAddress();
-    if (rt->multicastLocalDeliver(destAddress))
+    if (rt->isLocalMulticastAddress(destAddress))
     {
         IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
 
         // FIXME code from the MPLS model: set packet dest address to routerId (???)
         datagramCopy->setDestAddress(rt->getRouterId());
 
-        localDeliver(datagramCopy);
+        isLocalAddress(datagramCopy);
     }
 
     // forward datagram only if IP forward is enabled, or sent locally
@@ -380,7 +380,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->getInetAddress());
+                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->getIPAddress());
 
                 // send
                 IPv6Address nextHopAddr = routes[i].gateway;
@@ -394,7 +394,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 */
 }
 
-void IPv6::localDeliver(IPv6Datagram *datagram)
+void IPv6::isLocalAddress(IPv6Datagram *datagram)
 {
 /* FIXME revise and complete defragmentation
     // Defragmentation. skip defragmentation if datagram is not fragmented

@@ -296,7 +296,7 @@ void PPP::updateDisplayString()
         else sprintf(drate,"%gbps", datarate);
 
 /* TBD FIXME find solution for displaying IP address without dependence on IPv6 or IPv6
-        IPAddress addr = interfaceEntry->ipv4()->getInetAddress();
+        IPAddress addr = interfaceEntry->ipv4()->getIPAddress();
         sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), drate, numRcvdOK, numSent);
 */
         sprintf(buf, "%s\nrcv:%ld snt:%ld", drate, numRcvdOK, numSent);

@@ -140,12 +140,12 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
         if (ie->ipv6())
             ret = getInterfaceIPv6Address(ie);
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv6 && ie->ipv4())
-            ret = ie->ipv4()->getInetAddress();
+            ret = ie->ipv4()->getIPAddress();
     }
     else if (addrType==ADDR_IPv4 || addrType==ADDR_PREFER_IPv4)
     {
         if (ie->ipv4())
-            ret = ie->ipv4()->getInetAddress();
+            ret = ie->ipv4()->getIPAddress();
         if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv4 && ie->ipv6())
             ret = getInterfaceIPv6Address(ie);
     }
@@ -167,9 +167,9 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4() && !ie->ipv4()->getInetAddress().isUnspecified() && !ie->isLoopback())
+        if (ie->ipv4() && !ie->ipv4()->getIPAddress().isUnspecified() && !ie->isLoopback())
         {
-            addr = ie->ipv4()->getInetAddress();
+            addr = ie->ipv4()->getIPAddress();
             break;
         }
     }

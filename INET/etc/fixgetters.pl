@@ -135,6 +135,16 @@ while (<LISTFILE>)
     $txt =~ s/\bbitErrorRate\(/calculateBER(/mg;
     $txt =~ s/\binitialSeqNum\(/chooseInitialSeqNum(/mg;
 
+    $txt =~ s/\bgetInetAddress\(\)/getIPAddress()/mg;
+    $txt =~ s/\bsetInetAddress\(/setIPAddress(/mg;
+
+    $txt =~ s/\bipForward\(\)/isIPForwardingEnabled()/mg;
+    $txt =~ s/\blocalDeliver\(/isLocalAddress(/mg;
+    $txt =~ s/\bmulticastLocalDeliver\(/isLocalMulticastAddress(/mg;
+
+#    InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);  ==> find...
+#    IPAddress getGatewayForDestAddr(const IPAddress& dest);
+
     if ($txt eq $origtxt) {
         print "unchanged\n";
     } else {

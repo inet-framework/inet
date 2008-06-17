@@ -218,7 +218,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * IP forwarding on/off
      */
-    bool ipForward()  {return IPForward;}
+    bool isIPForwardingEnabled()  {return IPForward;}
 
     /**
      * Returns routerId.
@@ -235,7 +235,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    bool localDeliver(const IPAddress& dest);
+    bool isLocalAddress(const IPAddress& dest);
 
     /**
      * The routing function.
@@ -267,7 +267,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    bool multicastLocalDeliver(const IPAddress& dest);
+    bool isLocalMulticastAddress(const IPAddress& dest);
 
     /**
      * Returns routes for a multicast address.
