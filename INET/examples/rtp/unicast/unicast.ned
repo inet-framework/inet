@@ -10,7 +10,7 @@ network RTPNetwork
             parameters:
                 delay = normal(0.00015s, 0.00005s);
                 datarate = 10Mbps;
-                error = 0.00001;
+                ber = 0.00001;
         }
     
     submodules:

@@ -9,8 +9,6 @@ import ned.BasicChannel;
 
 network RTPMulticast1
 {
-    parameters:
-        bool debug = default(false);
     types:
         channel ethernet extends BasicChannel
         {
@@ -20,45 +18,37 @@ network RTPMulticast1
     submodules:
         host1: RTPHost {
             parameters:
-                debug = debug;
                 profileName = "RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                numOfProcessors = 1;
                 routingFile = "host1.mrt";
                 @display("p=150,50");
         }
         host2: RTPHost {
             parameters:
-                debug = debug;
                 profileName = "RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                numOfProcessors = 1;
                 routingFile = "host2.mrt";
                 @display("p=250,150");
         }
         host3: RTPHost {
             parameters:
-                debug = debug;
                 profileName = "RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                numOfProcessors = 1;
                 routingFile = "host3.mrt";
                 @display("p=150,250");
         }
         host4: RTPHost {
             parameters:
-                debug = debug;
                 profileName = "RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                numOfProcessors = 1;
                 routingFile = "host4.mrt";
                 @display("p=50,150");
         }
