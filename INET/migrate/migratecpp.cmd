@@ -6,7 +6,8 @@ cd
 echo.
 pause
 
-dir /s /b *.cc *.h *.cpp *.hpp >cppfiles.lst
+rem We process .msg files as well, because of potential embedded cplusplus{{..}} sections
+dir /s /b *.cc *.h *.cpp *.hpp *.msg >cppfiles.lst
 
 echo The following files will be checked/modified:
 type cppfiles.lst | more

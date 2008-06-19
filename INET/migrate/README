@@ -1,0 +1,35 @@
+
+The tools in this directory are for migrating simulation models based
+on previous INET versions, written for OMNeT++ 3.x. These tools
+should be run *after* the correspoding migration scripts in OMNeT++
+(omnetpp-4.x/migrate/*).
+
+How do the migration:
+=====================
+
+Prerequisites:
+ - Make sure you have a *backup* of the original source files you
+   want to port. Needless to say, right?
+ - Also, have a good visual diff tool at hand that can also compare
+   whole directory trees (k3diff, meld, winmerge, etc).
+
+Then:
+ 1. unpack the sources
+
+ 2. run the scripts in omnetpp-4.x/migrate
+
+ 3. run these scripts
+
+ 4. diff the results to your original sources, and review each change.
+    Migration scripts work by plain text substitution (basically global
+    find/replace), and sometimes they replace things they were not
+    supposed to.
+
+ 5. check the README and WhatsNew files for other INET changes that
+    affect your code as well
+
+ 6. try to compile and run the simulations, fixing remaining issues
+
+Let us know if there are problems: andras@omnetpp.org
+
+
