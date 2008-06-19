@@ -1,5 +1,5 @@
 all: makefiles
-	cd src && $(MAKE)
+	cd src && $(MAKE) -f Makefile.vc
 
 clean:
 	cd src && $(MAKE) -f Makefile.vc clean
