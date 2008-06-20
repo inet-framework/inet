@@ -4,7 +4,7 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr
     receiverAddress senderAddress srcAddr srcAddress recordRoute
     sourceRoutingOption timestampOption destAddr destAddress
     destinationAddress prefix srcAddr srcAddress targetAddress
-    destAddr localAddr remoteAddr
+    destAddr localAddr remoteAddr sourcePort destinationPort
     srcAddr sourceLinkLayerAddress targetLinkLayerAddress abit
     ackBit autoAddressConfFlag serverClose dbit dontFragment finBit
     fin_ack_rcvd fork isRequest isWithdraw managedAddrConfFlag
