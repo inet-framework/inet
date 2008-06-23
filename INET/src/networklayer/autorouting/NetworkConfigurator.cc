@@ -162,7 +162,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             ASSERT(ie);
 
             // add route
-            RoutingEntry *e = new RoutingEntry();
+            IPv4Route *e = new IPv4Route();
             if (useRouterIdForRoutes)
             {
                 e->host = neighborRouterId;
@@ -175,10 +175,10 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->getName();
             e->interfacePtr = ie;
-            e->type = RoutingEntry::DIRECT;
-            e->source = RoutingEntry::MANUAL;
+            e->type = IPv4Route::DIRECT;
+            e->source = IPv4Route::MANUAL;
             //e->getMetric() = 1;
-            rt->addRoutingEntry(e);
+            rt->addRoute(e);
         }
     }
 }
@@ -211,15 +211,15 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
            "interface, adding default route\n";
 
         // add route
-        RoutingEntry *e = new RoutingEntry();
+        IPv4Route *e = new IPv4Route();
         e->host = IPAddress();
         e->netmask = IPAddress();
         e->interfaceName = ie->getName();
         e->interfacePtr = ie;
-        e->type = RoutingEntry::REMOTE;
-        e->source = RoutingEntry::MANUAL;
+        e->type = IPv4Route::REMOTE;
+        e->source = IPv4Route::MANUAL;
         //e->getMetric() = 1;
-        rt->addRoutingEntry(e);
+        rt->addRoute(e);
     }
 }
 
@@ -307,16 +307,16 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
 
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
-            RoutingEntry *e = new RoutingEntry();
+            IPv4Route *e = new IPv4Route();
             e->host = destAddr;
             e->gateway = ???
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->getName();
             e->interfacePtr = ie;
-            e->type = RoutingEntry::REMOTE;
-            e->source = RoutingEntry::MANUAL;
+            e->type = IPv4Route::REMOTE;
+            e->source = IPv4Route::MANUAL;
             //e->getMetric() = 1;
-            rt->addRoutingEntry(e);
+            rt->addRoute(e);
         }
     }
 */

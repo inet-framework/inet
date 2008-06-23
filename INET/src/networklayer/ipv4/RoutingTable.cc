@@ -35,7 +35,7 @@
 #include "NotifierConsts.h"
 
 
-RoutingEntry::RoutingEntry()
+IPv4Route::IPv4Route()
 {
     interfacePtr = NULL;
 
@@ -44,7 +44,7 @@ RoutingEntry::RoutingEntry()
     source = MANUAL;
 }
 
-std::string RoutingEntry::info() const
+std::string IPv4Route::info() const
 {
     std::stringstream out;
     out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
@@ -66,7 +66,7 @@ std::string RoutingEntry::info() const
     return out.str();
 }
 
-std::string RoutingEntry::detailedInfo() const
+std::string IPv4Route::detailedInfo() const
 {
     return std::string();
 }
@@ -78,7 +78,7 @@ std::string RoutingEntry::detailedInfo() const
 Define_Module( RoutingTable );
 
 
-std::ostream& operator<<(std::ostream& os, const RoutingEntry& e)
+std::ostream& operator<<(std::ostream& os, const IPv4Route& e)
 {
     os << e.info();
     return os;
@@ -216,8 +216,8 @@ void RoutingTable::printRoutingTable()
     ev.printf("%-16s %-16s %-16s %-3s %s\n",
               "Destination", "Gateway", "Netmask", "Iface");
 
-    for (int i=0; i<getNumRoutingEntries(); i++)
-        EV << getRoutingEntry(i)->detailedInfo() << "\n";
+    for (int i=0; i<getNumRoutes(); i++)
+        EV << getRoute(i)->detailedInfo() << "\n";
     EV << "\n";
 }
 
@@ -300,15 +300,15 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest)
 }
 
 
-RoutingEntry *RoutingTable::findBestMatchingRoute(const IPAddress& dest)
+IPv4Route *RoutingTable::findBestMatchingRoute(const IPAddress& dest)
 {
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
-    RoutingEntry *bestRoute = NULL;
+    IPv4Route *bestRoute = NULL;
     uint32 longestNetmask = 0;
     for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
     {
-        RoutingEntry *e = *i;
+        IPv4Route *e = *i;
         if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask) &&  // match
             (!bestRoute || e->netmask.getInt()>longestNetmask))  // longest so far
         {
@@ -323,7 +323,7 @@ InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest)
 {
     Enter_Method("getInterfaceForDestAddr(%s)=?", dest.str().c_str());
 
-    RoutingEntry *e = findBestMatchingRoute(dest);
+    IPv4Route *e = findBestMatchingRoute(dest);
     if (!e) return NULL;
     return e->interfacePtr;
 }
@@ -332,7 +332,7 @@ IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest)
 {
     Enter_Method("getGatewayForDestAddr(%s)=?", dest.str().c_str());
 
-    RoutingEntry *e = findBestMatchingRoute(dest);
+    IPv4Route *e = findBestMatchingRoute(dest);
     if (!e) return IPAddress();
     return e->gateway;
 }
@@ -346,7 +346,7 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest)
     res.reserve(16);
     for (RouteVector::iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
     {
-        RoutingEntry *e = *i;
+        IPv4Route *e = *i;
         if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
         {
             MulticastRoute r;
@@ -360,12 +360,12 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest)
 }
 
 
-int RoutingTable::getNumRoutingEntries()
+int RoutingTable::getNumRoutes()
 {
     return routes.size()+multicastRoutes.size();
 }
 
-RoutingEntry *RoutingTable::getRoutingEntry(int k)
+IPv4Route *RoutingTable::getRoute(int k)
 {
     if (k < (int)routes.size())
         return routes[k];
@@ -375,32 +375,32 @@ RoutingEntry *RoutingTable::getRoutingEntry(int k)
     return NULL;
 }
 
-RoutingEntry *RoutingTable::findRoutingEntry(const IPAddress& target,
+IPv4Route *RoutingTable::findRoute(const IPAddress& target,
                                              const IPAddress& netmask,
                                              const IPAddress& gw,
                                              int metric,
                                              char *dev)
 {
-    int n = getNumRoutingEntries();
+    int n = getNumRoutes();
     for (int i=0; i<n; i++)
-        if (routingEntryMatches(getRoutingEntry(i), target, netmask, gw, metric, dev))
-            return getRoutingEntry(i);
+        if (routingEntryMatches(getRoute(i), target, netmask, gw, metric, dev))
+            return getRoute(i);
     return NULL;
 }
 
-void RoutingTable::addRoutingEntry(RoutingEntry *entry)
+void RoutingTable::addRoute(IPv4Route *entry)
 {
-    Enter_Method("addRoutingEntry(...)");
+    Enter_Method("addRoute(...)");
 
     // check for null address and default route
     if ((entry->host.isUnspecified() || entry->netmask.isUnspecified()) &&
         (!entry->host.isUnspecified() || !entry->netmask.isUnspecified()))
-        error("addRoutingEntry(): to add a default route, set both host and netmask to zero");
+        error("addRoute(): to add a default route, set both host and netmask to zero");
 
     // fill in interface ptr from interface name
     entry->interfacePtr = ift->getInterfaceByName(entry->interfaceName.c_str());
     if (!entry->interfacePtr)
-        error("addRoutingEntry(): interface `%s' doesn't exist", entry->interfaceName.c_str());
+        error("addRoute(): interface `%s' doesn't exist", entry->interfaceName.c_str());
 
     // add to tables
     if (!entry->host.isMulticast())
@@ -416,9 +416,9 @@ void RoutingTable::addRoutingEntry(RoutingEntry *entry)
 }
 
 
-bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
+bool RoutingTable::deleteRoute(IPv4Route *entry)
 {
-    Enter_Method("deleteRoutingEntry(...)");
+    Enter_Method("deleteRoute(...)");
 
     RouteVector::iterator i = std::find(routes.begin(), routes.end(), entry);
     if (i!=routes.end())
@@ -440,7 +440,7 @@ bool RoutingTable::deleteRoutingEntry(RoutingEntry *entry)
 }
 
 
-bool RoutingTable::routingEntryMatches(RoutingEntry *entry,
+bool RoutingTable::routingEntryMatches(IPv4Route *entry,
                                 const IPAddress& target,
                                 const IPAddress& nmask,
                                 const IPAddress& gw,
@@ -465,7 +465,7 @@ void RoutingTable::updateNetmaskRoutes()
 {
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k=0; k<routes.size(); k++)
-        if (routes[k]->source==RoutingEntry::IFACENETMASK)
+        if (routes[k]->source==IPv4Route::IFACENETMASK)
             routes.erase(routes.begin()+(k--));  // '--' is necessary because indices shift down
 
     // then re-add them, according to actual interface configuration
@@ -474,9 +474,9 @@ void RoutingTable::updateNetmaskRoutes()
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv4()->getNetmask()!=IPAddress::ALLONES_ADDRESS)
         {
-            RoutingEntry *route = new RoutingEntry();
-            route->type = RoutingEntry::DIRECT;
-            route->source = RoutingEntry::IFACENETMASK;
+            IPv4Route *route = new IPv4Route();
+            route->type = IPv4Route::DIRECT;
+            route->source = IPv4Route::IFACENETMASK;
             route->host = ie->ipv4()->getIPAddress();
             route->netmask = ie->ipv4()->getNetmask();
             route->gateway = IPAddress();

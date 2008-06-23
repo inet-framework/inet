@@ -260,18 +260,18 @@ void LDP::rebuildFecList()
     FecVector oldList = fecList;
     fecList.clear();
 
-    for (int i = 0; i < rt->getNumRoutingEntries(); i++)
+    for (int i = 0; i < rt->getNumRoutes(); i++)
     {
         // every entry in the routing table
 
-        RoutingEntry *re = rt->getRoutingEntry(i);
+        IPv4Route *re = rt->getRoute(i);
 
         // ignore multicast routes
         if (re->host.isMulticast())
             continue;
 
         // find out current next hop according to routing table
-        IPAddress nextHop = (re->type == RoutingEntry::DIRECT)? re->host: re->gateway;
+        IPAddress nextHop = (re->type == IPv4Route::DIRECT)? re->host: re->gateway;
         ASSERT(!nextHop.isUnspecified());
 
         EV << "nextHop <-- " << nextHop << endl;
@@ -691,11 +691,11 @@ IPAddress LDP::locateNextHop(IPAddress dest)
     //
     // Wrong code:
     //int i;
-    //for (i=0; i < rt->getNumRoutingEntries(); i++)
-    //    if (rt->getRoutingEntry(i)->host == dest)
+    //for (i=0; i < rt->getNumRoutes(); i++)
+    //    if (rt->getRoute(i)->host == dest)
     //        break;
     //
-    //if (i == rt->getNumRoutingEntries())
+    //if (i == rt->getNumRoutes())
     //    return IPAddress();  // Signal an NOTIFICATION of NO ROUTE
     //
     InterfaceEntry *ie = rt->getInterfaceForDestAddr(dest);
@@ -714,13 +714,13 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     int k = 0;
     InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
 
-    RoutingEntry *anEntry;
+    IPv4Route *anEntry;
 
-    for (i = 0; i < rt->getNumRoutingEntries(); i++)
+    for (i = 0; i < rt->getNumRoutes(); i++)
     {
         for (k = 0; k < (int)myPeers.size(); k++)
         {
-            anEntry = rt->getRoutingEntry(i);
+            anEntry = rt->getRoute(i);
             if (anEntry->host==myPeers[k].peerIP && anEntry->interfacePtr==ie)
             {
                 return myPeers[k].peerIP;
@@ -732,13 +732,13 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     // Return any IP which has default route - not in routing table entries
     for (i = 0; i < (int)myPeers.size(); i++)
     {
-        for (k = 0; k < rt->getNumRoutingEntries(); k++)
+        for (k = 0; k < rt->getNumRoutes(); k++)
         {
-            anEntry = rt->getRoutingEntry(i);
+            anEntry = rt->getRoute(i);
             if (anEntry->host == myPeers[i].peerIP)
                 break;
         }
-        if (k == rt->getNumRoutingEntries())
+        if (k == rt->getNumRoutes())
             break;
     }
 

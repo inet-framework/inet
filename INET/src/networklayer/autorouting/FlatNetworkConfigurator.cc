@@ -139,15 +139,15 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
            << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
-        RoutingEntry *e = new RoutingEntry();
+        IPv4Route *e = new IPv4Route();
         e->host = IPAddress();
         e->netmask = IPAddress();
         e->interfaceName = ie->getName();
         e->interfacePtr = ie;
-        e->type = RoutingEntry::REMOTE;
-        e->source = RoutingEntry::MANUAL;
+        e->type = IPv4Route::REMOTE;
+        e->source = IPv4Route::MANUAL;
         //e->getMetric() = 1;
-        rt->addRoutingEntry(e);
+        rt->addRoute(e);
     }
 }
 
@@ -196,15 +196,15 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
 
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
-            RoutingEntry *e = new RoutingEntry();
+            IPv4Route *e = new IPv4Route();
             e->host = destAddr;
             e->netmask = IPAddress(255,255,255,255); // full match needed
             e->interfaceName = ie->getName();
             e->interfacePtr = ie;
-            e->type = RoutingEntry::DIRECT;
-            e->source = RoutingEntry::MANUAL;
+            e->type = IPv4Route::DIRECT;
+            e->source = IPv4Route::MANUAL;
             //e->getMetric() = 1;
-            rt->addRoutingEntry(e);
+            rt->addRoute(e);
         }
     }
 }

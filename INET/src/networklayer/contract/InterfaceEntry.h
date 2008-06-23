@@ -107,8 +107,8 @@ class INET_API InterfaceEntry : public cPolymorphic
 
     IPv4InterfaceData *ipv4()    {return _ipv4data;}
     IPv6InterfaceData *ipv6()    {return _ipv6data;}
-    cPolymorphic *protocol3()    {return _protocol3data;}
-    cPolymorphic *protocol4()    {return _protocol4data;}
+    cPolymorphic *getProtocol3()    {return _protocol3data;}
+    cPolymorphic *getProtocol4()    {return _protocol4data;}
 
     void setIPv4Data(IPv4InterfaceData *p)  {_ipv4data = p;}
     void setIPv6Data(IPv6InterfaceData *p)  {_ipv6data = p;}

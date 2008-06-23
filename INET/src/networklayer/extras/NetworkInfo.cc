@@ -73,19 +73,19 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         std::vector<std::string> lines;
         
         RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
-        for (int i = 0; i < rt->getNumRoutingEntries(); i++)
+        for (int i = 0; i < rt->getNumRoutes(); i++)
         {
-            IPAddress host = rt->getRoutingEntry(i)->host;
+            IPAddress host = rt->getRoute(i)->host;
             
             if(host.isMulticast())
                 continue;
                 
-            if(rt->getRoutingEntry(i)->interfacePtr->isLoopback())
+            if(rt->getRoute(i)->interfacePtr->isLoopback())
                 continue;
                 
-            IPAddress netmask = rt->getRoutingEntry(i)->netmask;
-            IPAddress gateway = rt->getRoutingEntry(i)->gateway;
-            int metric = rt->getRoutingEntry(i)->metric;
+            IPAddress netmask = rt->getRoute(i)->netmask;
+            IPAddress gateway = rt->getRoute(i)->gateway;
+            int metric = rt->getRoute(i)->metric;
                 
             std::ostringstream line; 
     
@@ -111,12 +111,12 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             }
             
             line.width(7);
-            if(compat && rt->getRoutingEntry(i)->source == RoutingEntry::IFACENETMASK) metric = 0;
+            if(compat && rt->getRoute(i)->source == IPv4Route::IFACENETMASK) metric = 0;
             line << metric;
     
             if(compat) line << "0        0 ";
             
-            line << rt->getRoutingEntry(i)->interfaceName << endl;
+            line << rt->getRoute(i)->interfaceName << endl;
 
             if(compat) lines.push_back(line.str());
             else s << line.str();

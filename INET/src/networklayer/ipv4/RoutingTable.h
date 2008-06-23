@@ -46,7 +46,7 @@ class RoutingTableParser;
  */
 //TODO: make it consistent with IPv6 RoutingTable; wrap public members into
 //methods; add notification mechanism
-class INET_API RoutingEntry : public cPolymorphic
+class INET_API IPv4Route : public cPolymorphic
 {
   public:
     /** Route type */
@@ -92,12 +92,12 @@ class INET_API RoutingEntry : public cPolymorphic
 
   private:
     // copying not supported: following are private and also left undefined
-    RoutingEntry(const RoutingEntry& obj);
-    RoutingEntry& operator=(const RoutingEntry& obj);
+    IPv4Route(const IPv4Route& obj);
+    IPv4Route& operator=(const IPv4Route& obj);
 
   public:
-    RoutingEntry();
-    virtual ~RoutingEntry() {}
+    IPv4Route();
+    virtual ~IPv4Route() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 };
@@ -132,15 +132,15 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  * be read and modified during simulation, typically by routing protocol
  * implementations (e.g. OSPF).
  *
- * Entries in the route table are represented by RoutingEntry objects.
- * RoutingEntry objects can be polymorphic: if a routing protocol needs
- * to store additional data, it can simply subclass from RoutingEntry,
+ * Entries in the route table are represented by IPv4Route objects.
+ * IPv4Route objects can be polymorphic: if a routing protocol needs
+ * to store additional data, it can simply subclass from IPv4Route,
  * and add the derived object to the table.
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
  *
  *
- * @see InterfaceEntry, IPv4InterfaceData, RoutingEntry
+ * @see InterfaceEntry, IPv4InterfaceData, IPv4Route
  */
 class INET_API RoutingTable: public cSimpleModule, public INotifiable
 {
@@ -154,7 +154,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     //
     // Routes:
     //
-    typedef std::vector<RoutingEntry *> RouteVector;
+    typedef std::vector<IPv4Route *> RouteVector;
     RouteVector routes;          // Unicast route array
     RouteVector multicastRoutes; // Multicast route array
 
@@ -163,7 +163,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
-    bool routingEntryMatches(RoutingEntry *entry,
+    bool routingEntryMatches(IPv4Route *entry,
                              const IPAddress& target,
                              const IPAddress& nmask,
                              const IPAddress& gw,
@@ -240,7 +240,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * The routing function.
      */
-    RoutingEntry *findBestMatchingRoute(const IPAddress& dest);
+    IPv4Route *findBestMatchingRoute(const IPAddress& dest);
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -281,17 +281,17 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Total number of routing entries (unicast, multicast entries and default route).
      */
-    int getNumRoutingEntries();
+    int getNumRoutes();
 
     /**
      * Return kth routing entry.
      */
-    RoutingEntry *getRoutingEntry(int k);
+    IPv4Route *getRoute(int k);
 
     /**
      * Find first routing entry with the given parameters.
      */
-    RoutingEntry *findRoutingEntry(const IPAddress& target,
+    IPv4Route *findRoute(const IPAddress& target,
                                    const IPAddress& netmask,
                                    const IPAddress& gw,
                                    int metric = 0,
@@ -300,14 +300,14 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Adds a route to the routing table.
      */
-    void addRoutingEntry(RoutingEntry *entry);
+    void addRoute(IPv4Route *entry);
 
     /**
      * Deletes the given routes from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    bool deleteRoutingEntry(RoutingEntry *entry);
+    bool deleteRoute(IPv4Route *entry);
 
     /**
      * Utility function: Returns a vector of all addresses of the node.

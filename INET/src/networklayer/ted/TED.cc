@@ -72,11 +72,11 @@ void TED::initialize(int stage)
         // in this model we haven't implemented HELLO but provide peer addresses via
         // preconfigured static host routes in routing table.
         //
-        RoutingEntry *rentry = NULL;
-        for (int j = 0; j < rt->getNumRoutingEntries(); j++)
+        IPv4Route *rentry = NULL;
+        for (int j = 0; j < rt->getNumRoutes(); j++)
         {
-            rentry = rt->getRoutingEntry(j);
-            if (rentry->interfacePtr == ie && rentry->type == RoutingEntry::DIRECT)
+            rentry = rt->getRoute(j);
+            if (rentry->interfacePtr == ie && rentry->type == IPv4Route::DIRECT)
                 break;
         }
         ASSERT(rentry);
@@ -213,18 +213,18 @@ void TED::rebuildRoutingTable()
     std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
 
     // remove all routing entries, except multicast ones (we don't care about them)
-    int n = rt->getNumRoutingEntries();
+    int n = rt->getNumRoutes();
     int j = 0;
     for (int i = 0; i < n; i++)
     {
-        RoutingEntry *entry = rt->getRoutingEntry(j);
+        IPv4Route *entry = rt->getRoute(j);
         if (entry->host.isMulticast())
         {
             ++j;
         }
         else
         {
-            rt->deleteRoutingEntry(entry);
+            rt->deleteRoute(entry);
         }
     }
 
@@ -257,7 +257,7 @@ void TED::rebuildRoutingTable()
 
         ASSERT(isLocalPeer(V[nHop].node));
 
-        RoutingEntry *entry = new RoutingEntry;
+        IPv4Route *entry = new IPv4Route;
         entry->host = V[i].node;
 
         if (V[i].node == V[nHop].node)
@@ -272,35 +272,35 @@ void TED::rebuildRoutingTable()
         }
         entry->interfacePtr = rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node));
         entry->interfaceName = opp_string(entry->interfacePtr->getName());
-        entry->source = RoutingEntry::OSPF;
+        entry->source = IPv4Route::OSPF;
 
         entry->netmask = 0xffffffff;
         entry->metric = 0;
 
         EV << "  inserting route: host=" << entry->host << " interface=" << entry->interfaceName << " nexthop=" << entry->gateway << "\n";
 
-        rt->addRoutingEntry(entry);
+        rt->addRoute(entry);
     }
 
     // insert local peers
 
     for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
     {
-        RoutingEntry *entry = new RoutingEntry;
+        IPv4Route *entry = new IPv4Route;
 
         entry->host = getPeerByLocalAddress(interfaceAddrs[i]);
         entry->gateway = IPAddress();
         entry->type = entry->DIRECT;
         entry->interfacePtr = rt->getInterfaceByAddress(interfaceAddrs[i]);
         entry->interfaceName = opp_string(entry->interfacePtr->getName());
-        entry->source = RoutingEntry::OSPF;
+        entry->source = IPv4Route::OSPF;
 
         entry->netmask = 0xffffffff;
         entry->metric = 0; // XXX FIXME what's that?
 
         EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->host << " interface=" << entry->interfaceName << "\n";
 
-        rt->addRoutingEntry(entry);
+        rt->addRoute(entry);
     }
 
     nb->fireChangeNotification(NF_IPv4_ROUTINGTABLE_CHANGED);
