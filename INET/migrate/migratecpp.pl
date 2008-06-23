@@ -208,6 +208,13 @@ while (<LISTFILE>)
         $txt =~ s/\b$from\b/$to/sg;
     }
 
+    # RoutingTable methods
+    $txt =~ s/\bgetNumRoutingEntries\(\)/getNumRoutes()/mg;
+    $txt =~ s/\bgetRoutingEntry\(/getRoute(/mg;
+    $txt =~ s/\bfindRoutingEntry\(/findRoute(/mg;
+    $txt =~ s/\baddRoutingEntry\(/addRoute(/mg;
+    $txt =~ s/\bdeleteRoutingEntry\(/deleteRoute(/mg;
+
     if ($txt eq $origtxt) {
         print "unchanged\n";
     } else {
