@@ -383,7 +383,7 @@ IPv4Route *RoutingTable::findRoute(const IPAddress& target,
 {
     int n = getNumRoutes();
     for (int i=0; i<n; i++)
-        if (routingEntryMatches(getRoute(i), target, netmask, gw, metric, dev))
+        if (routeMatches(getRoute(i), target, netmask, gw, metric, dev))
             return getRoute(i);
     return NULL;
 }
@@ -440,7 +440,7 @@ bool RoutingTable::deleteRoute(IPv4Route *entry)
 }
 
 
-bool RoutingTable::routingEntryMatches(IPv4Route *entry,
+bool RoutingTable::routeMatches(IPv4Route *entry,
                                 const IPAddress& target,
                                 const IPAddress& nmask,
                                 const IPAddress& gw,

@@ -163,12 +163,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
-    bool routingEntryMatches(IPv4Route *entry,
-                             const IPAddress& target,
-                             const IPAddress& nmask,
-                             const IPAddress& gw,
-                             int metric,
-                             const char *dev);
+    bool routeMatches(IPv4Route *entry,
+                      const IPAddress& target,
+                      const IPAddress& nmask,
+                      const IPAddress& gw,
+                      int metric,
+                      const char *dev);
 
     // set router Id
     void autoconfigRouterId();
@@ -303,7 +303,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     void addRoute(IPv4Route *entry);
 
     /**
-     * Deletes the given routes from the routing table.
+     * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
