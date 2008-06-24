@@ -21,11 +21,11 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="INET" buildProperties="" description="" id="org.omnetpp.cdt.mingw.config.debug.680546068" name="mingw-debug" parent="org.omnetpp.cdt.mingw.config.debug">
+<configuration artifactExtension="exe" artifactName="INET" buildProperties="" description="" id="org.omnetpp.cdt.mingw.config.debug.680546068" name="mingw-debug" parent="org.omnetpp.cdt.mingw.config.debug">
 <folderInfo id="org.omnetpp.cdt.mingw.config.debug.680546068." name="/" resourcePath="">
 <toolChain id="org.omnetpp.cdt.mingw.toolchain.debug.1580981532" name="MinGW for OMNeT++" superClass="org.omnetpp.cdt.mingw.toolchain.debug">
 <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1180392890" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-<builder id="org.omnetpp.cdt.mingw.builder.debug.1153063058" keepEnvironmentInBuildfile="false" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.mingw.builder.debug">
+<builder autoBuildTarget="all" buildPath="${PrimarySourceDir}" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.omnetpp.cdt.mingw.builder.debug.1153063058" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="OMNeT++ Make Builder (opp_makemake)" parallelBuildOn="false" parallelizationNumber="2" superClass="org.omnetpp.cdt.mingw.builder.debug">
 <outputEntries>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 </outputEntries>
@@ -50,7 +50,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="transport/rtp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -1466,6 +1466,7 @@
 </profile>
 </scannerConfigBuildInfo>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 <cconfiguration id="org.omnetpp.cdt.mingw.config.release.676680558">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.omnetpp.cdt.mingw.config.release.676680558" moduleId="org.eclipse.cdt.core.settings" name="mingw-release">
@@ -1508,7 +1509,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="transport/rtp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -2924,6 +2925,7 @@
 </profile>
 </scannerConfigBuildInfo>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 <cconfiguration id="org.omnetpp.cdt.gnu.config.debug.1761892866">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.omnetpp.cdt.gnu.config.debug.1761892866" moduleId="org.eclipse.cdt.core.settings" name="gcc-debug">
@@ -4382,6 +4384,7 @@
 </profile>
 </scannerConfigBuildInfo>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 <cconfiguration id="org.omnetpp.cdt.gnu.config.release.258996925">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.omnetpp.cdt.gnu.config.release.258996925" moduleId="org.eclipse.cdt.core.settings" name="gcc-release">
@@ -4424,7 +4427,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="transport/rtp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -5840,6 +5843,7 @@
 </profile>
 </scannerConfigBuildInfo>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
