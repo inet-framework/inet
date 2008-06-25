@@ -1,0 +1,2 @@
+#!/bin/sh
+indent -bl -bli0 -i4 -npcs -npsl -hnl -nsob -nut -l100 %*
