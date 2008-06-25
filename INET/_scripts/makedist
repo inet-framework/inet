@@ -1,28 +1,33 @@
 #!/bin/sh
 
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+INET_ROOT=`pwd`
 
 if [ "$BUILDID" = "" ]; then
 # generate our own build identifier   
-    export BUILDID=`date +%y%m%d%H%M`
+    export BUILDID=`date +%y%m%d`
 fi
 
-FILENAME=INET-$BUILDID-opp4-src.tgz
+FILENAME=$INET_ROOT/INET-$BUILDID-opp4-src.tgz
 DIRNAME=INET-$BUILDID
 
-mkdir /tmp/$DIRNAME
+rm -rf /tmp/$DIRNAME
 
-svn export -N . /tmp/$DIRNAME || { echo --- error during SVN export ---; exit 1;}
+svn export . /tmp/$DIRNAME || { echo --- error during SVN export ---; exit 1;}
 
 # cleanup
-todofiles=`find . -name '_*'`
+cd /tmp
+todofiles=`find $DIRNAME -name '__*'`
 if [ "$todofiles" != "" ]; then
     echo "Removing underscore files: $todofiles"
-    rm $todofiles
+    rm -rf $todofiles
 fi
+rm -rf $DIRNAME/_scripts
+rm -rf $DIRNAME/obsolete
 
 # pack and create tar.gz archives 
-echo Creating $FILENAME
-tar cfz --directory /tmp $FILENAME $DIRNAME || { echo --- error creating ...src.tar.gz ---; exit 1;} 
+echo Creating $FILENAME.
+rm -f $FILENAME
+tar cfz $FILENAME $DIRNAME || { echo --- error creating INET-....tgz ---; exit 1;} 
 rm -rf /tmp/$DIRNAME
 

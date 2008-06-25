@@ -1,0 +1,1 @@
+C:\cygwin\bin\indent.exe -bl -bli0 -i4 -npcs -npsl -hnl -nsob -nut -l100 %*
