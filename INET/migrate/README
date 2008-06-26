@@ -91,8 +91,16 @@ This setup also has the advantage that when a new INET version comes out,
 you can just replace your INET dir with the new one; no manual merging
 needed.
 
+2. Switch OMNeT++ to "double" simtime
 
-2. Run migration scripts
+Add -DUSE_DOUBLE_SIMTIME to CFLAGS (CFLAGS_DEBUG and CFLAGS_RELEASE)
+in Makefile.inc or configure.user, whichever you like (in the latter case
+don't forget to re-run ./configure), or by temporarily adding
+#define USE_DOUBLE_SIMTIME to the top of include/simkerneldefs.h;
+then recompile it (make cleanall; make)
+
+
+3. Run migration scripts
 
 Much of the migration process is automated by various scripts, located under
 omnetpp-4.x/migrate and INET/migrate. They should be run on the command prompt
@@ -117,23 +125,45 @@ omnetpp-4.x/migrate and INET/migrate. They should be run on the command prompt
       not supposed to.
 
 
-3. NED files
+4. NED files
 
 
-4. C++ files
+5. C++ files
 
 
-5. ini files
+6. ini files
 
 
-6. Validate
+7. Validate
 
-7. Recompile with int64-based simtime_t
+Run your simulations and make sure they do what they are supposed to do.
+Possibly, compare output or saved log with that from the original (3.x)
+version.
 
-8. Validate
+
+8. Recompile with int64-based simtime_t
+
+Change back OMNeT++ to int64-based simtime_t (basically undo what you did
+in (2)); then recompile everything. In your project you'll encounter
+lots of "cannot convert simtime_t to double" and "no matching function for
+somethingOrOther(foo_t, bar_t, const simtime&)". The solution is usually
+one of these:
+  - change variable or function argument from "double" to "simtime_t"
+  - add an explicit cast to double (SIMTIME_DBL() macro)
+It is sometimes tricky which way to choose, but you'll get the hang of it
+after a while.
 
 
-9. Rejoice
+9. Validate
+
+Run your simulations again, and make sure they work correctly. You cannot
+expect to get the exact same output as from "double" simtime, due to increased
+precision of simtime; outputs may even diverge significantly after a while,
+as the simulation chooses a differen trajectory; but still try to make sure
+things work correctly.
+
+
+10. Rejoice
 
 Release a big sigh of relief, and go out to have a beer :)
 
