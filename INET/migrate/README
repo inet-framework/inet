@@ -14,6 +14,8 @@ What has changed in INET for OMNeT++ 4.x?
    syntax, C++ code changes due to simulation library changes (64-bit
    simtime, added "get" verbs, methods renamed, etc)
 
+ - directory structure. Now everything is under src/ and examples/.
+
  - NED:
    - several parameters and gates got renamed (as we standardized on
      camelCaseNames instead of under_score_names; also gate names are
@@ -56,23 +58,87 @@ Prerequisites:
  - have a good visual diff tool at hand that can also compare whole
    directory trees (like meld, winmerge, k3diff, etc).
 
-Then:
- 1. unpack the sources
+The migration process
+=====================
 
- 2. run the scripts in omnetpp-4.x/migrate
+A generic advice beforehand: don't try to swallow everything at once.
+Do the porting with simtime_t = double first, get everything working,
+validate if possible -- THEN switch to int64-base simtime.
 
- 3. run these scripts
+1. Project Setup.
 
- 4. diff the results to your original sources, and review each change.
-    Migration scripts work by plain text substitution (basically global
-    find/replace), and sometimes they replace things they were not
-    supposed to.
+If you extended INET, it's likely that your sources are in various
+subdirs in the INET directory tree. In OMNeT++ 4.0 it is possible to
+do it in a cleaner way, by separating the base INET and you project
+into two separate projects. It goes like this:
 
- 5. check the README and WhatsNew files for other INET changes that
-    affect your code as well
+   1. Start the IDE.
 
- 6. try to compile and run the simulations, fixing remaining issues
+   2. Import the base INET as a project (File|Import... --> General /
+      Existing projects into workspace)
 
-Let us know if there are problems: andras@omnetpp.org
+   3. Create a new OMNeT++ project, and copy your sources into it.
+      (We recommend you make a "src" and an "examples" or "simulations"
+      subdirectory.)
+
+   4. Mark you project as dependent on INET (Project Properties --> Project
+      References --> check INET).
+
+Then your project can use modules from INET, your C++ sources may include
+headers from INET etc, all automatically. No manual tweaking needed.
+
+This setup also has the advantage that when a new INET version comes out,
+you can just replace your INET dir with the new one; no manual merging
+needed.
+
+
+2. Run migration scripts
+
+Much of the migration process is automated by various scripts, located under
+omnetpp-4.x/migrate and INET/migrate. They should be run on the command prompt
+(not inside IDE).
+
+  a. make copy of the current state of your sources
+
+  b. run the scripts one by one, first the OMNeT++ ones, then the INET ones.
+     The scripts convert files in the current directory, so you need to
+     "cd" to your project's root dir, and invoke the scripts from there,
+     like:
+         $ cd ~/workspace/myproj
+         $ ~/omnetpp-4.0/migrate/migratened
+
+     With migratecpp, you also want to save the output into a text file, as
+     it prints various suggestions about the source.
+
+   c. start your visual diff tool (meld etc), and diff the project to the
+      backup you did in step (a), to review what changes the scripts did.
+      Most migration scripts work by plain text substitution (basically
+      global find/replace), and occasionally they replace things they were
+      not supposed to.
+
+
+3. NED files
+
+
+4. C++ files
+
+
+5. ini files
+
+
+6. Validate
+
+7. Recompile with int64-based simtime_t
+
+8. Validate
+
+
+9. Rejoice
+
+Release a big sigh of relief, and go out to have a beer :)
+
+
+Send questions, problems, hatemail to:
+andras@omnetpp.org
 
 
