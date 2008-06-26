@@ -214,6 +214,7 @@ while (<LISTFILE>)
     $txt =~ s/\bfindRoutingEntry\(/findRoute(/mg;
     $txt =~ s/\baddRoutingEntry\(/addRoute(/mg;
     $txt =~ s/\bdeleteRoutingEntry\(/deleteRoute(/mg;
+    $txt =~ s/\bRoutingEntry\b/IPv4Route/mg;  # the class
 
     if ($txt eq $origtxt) {
         print "unchanged\n";

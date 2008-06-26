@@ -1,17 +1,60 @@
+Migrating your INET-based models from OMNeT++ 3.x to 4.x
+========================================================
 
+Overview
+========
 The tools in this directory are for migrating simulation models based
 on previous INET versions, written for OMNeT++ 3.x. These tools
-should be run *after* the correspoding migration scripts in OMNeT++
+should be run *after* the corresponding migration scripts in OMNeT++
 (omnetpp-4.x/migrate/*).
 
-How do the migration:
-=====================
+What has changed in INET for OMNeT++ 4.x?
+
+ - most differences are due to OMNeT++ changes: different NED and ini file
+   syntax, C++ code changes due to simulation library changes (64-bit
+   simtime, added "get" verbs, methods renamed, etc)
+
+ - NED:
+   - several parameters and gates got renamed (as we standardized on
+     camelCaseNames instead of under_score_names; also gate names are
+     now xxxIn/xxxOut versus the old fromXxx/toXxx to from_xxx/to_xxx)
+
+   - default values and @units added to many parameters
+
+   - "in"+"out" gates of Router/StandardHost got merged to inout gate "pppg",
+     and corresponding pairs of unidirectional connections got merged
+     into single bidirectional ones
+
+   - likewise, "ethIn"+"ethOut" gates and connections got merged into
+     "ethg" ones
+
+   - wherever "like" occurred in NED files, a module interface got
+     extracted, and the modules implement that interface; for example,
+     all mobility models now implement "IMobility" (by convention, names
+     of module interfaces begin with "I")
+
+   - other smaller changes
+
+ - msg:
+   - removed omitGetVerb everywhere - now all getter methods begin with "get"
+
+ - C++:
+   - several methods and some classes got renamed, mostly to let getter
+     methods begin with the word "get"
 
 Prerequisites:
- - Make sure you have a *backup* of the original source files you
-   want to port. Needless to say, right?
- - Also, have a good visual diff tool at hand that can also compare
-   whole directory trees (k3diff, meld, winmerge, etc).
+==============
+
+ - read Migration.pdf from the OMNeT++ 4.0 distro. You ABSOLUTELY want
+   to do that before doing anything.
+
+ - make sure you have a *backup* of the original source files you
+   want to port. If you have your sources in a version control
+   system (like Subversion, Mercurial or Git; highly recommended!)
+   make a branch or at least a different working copy.
+
+ - have a good visual diff tool at hand that can also compare whole
+   directory trees (like meld, winmerge, k3diff, etc).
 
 Then:
  1. unpack the sources
