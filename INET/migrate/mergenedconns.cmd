@@ -15,7 +15,7 @@ echo.
 echo Press ENTER to start the conversion, or CTRL-C to quit.
 pause
 
-perl mergenedconns.pl nedfiles.lst
+perl %~dp0\mergenedconns.pl nedfiles.lst
 
 echo You may safely re-run this script any time you want.
 

@@ -33,6 +33,17 @@ foreach $fname (@fnames)
     print "reading $fname...\n" if ($verbose);
     $txt = readfile($fname);
 
+    # if this is a network (simplification: we check if file contains at least one network)
+    if ($txt =~ /^ *network\b/m)
+    {
+        # replace "in" gate with "pppg$i", "ethIn" with "ethg$i", etc
+        $txt =~ s/\.in\b/.pppg\$i/g;
+        $txt =~ s/\.out\b/.pppg\$o/g;
+        $txt =~ s/\.ethIn\b/.ethg\$i/g;
+        $txt =~ s/\.ethOut\b/.ethg\$o/g;
+    }
+
+    # Then merge $i/$o connection pairs
     $gateo = '(\w+(\[.*?\])?\.)?\w+\$o(\+\+)?(\[.*?\])?';  # 4 nested subexprs
     $gatei = '(\w+(\[.*?\])?\.)?\w+\$i(\+\+)?(\[.*?\])?';
 
@@ -51,8 +62,11 @@ foreach $fname (@fnames)
         mergeconn($leftg, $chan, $rightg);
     }
 
-    #writefile($fname, $txt);
-    writefile("$fname.new", $txt);
+    $txt =~ s/--TBD-->/-->/g;
+    $txt =~ s/<--TBD--/<--/g;
+
+    writefile($fname, $txt);
+    #writefile("$fname.new", $txt);
 }
 
 
@@ -90,8 +104,8 @@ sub mergeconn ()
     $delete2 = "$rightginv$chan$leftginv;";
 
     print " $conntext  TO:  $replacement\n";
-    print "   delete: $delete1\n";
-    print "   delete: $delete2\n";
+    #print "   delete: $delete1\n";
+    #print "   delete: $delete2\n";
 
     # if we find the opposite direction too, go ahead
     if ($txt =~ /\Q$delete1\E/ || $txt =~ /\Q$delete2\E/) {
@@ -100,7 +114,7 @@ sub mergeconn ()
         $txt =~ s/ *\Q$delete1\E *\n//gs;
         $txt =~ s/ *\Q$delete2\E *\n//gs;
     } else {
-        print "   SKIPPED (opposite direction not found)\n";
+        print "   SKIPPED (opposite direction not found, or has different channel)\n";
         $failconntext = $conntext;
         $failconntext =~ s/-->/--TBD-->/g;
         $failconntext =~ s/<--/<--TBD--/g;
