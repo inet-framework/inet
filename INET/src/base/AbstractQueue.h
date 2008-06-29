@@ -24,7 +24,9 @@
 
 
 /**
- * Abstract base class for single-server queues.
+ * Abstract base class for single-server queues. Contains special
+ * optimization for zero service time (i.e. it does not schedule the 
+ * endService timer then).
  */
 class INET_API AbstractQueue : public cSimpleModule
 {
