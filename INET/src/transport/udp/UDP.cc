@@ -488,7 +488,7 @@ void UDP::processMsgFromApp(cMessage *appData)
 {
     UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
 
-    UDPPacket *udpPacket = new UDPPacket(appData->getName());
+    UDPPacket *udpPacket = createUDPPacket(appData->getName());
     udpPacket->setByteLength(UDP_HEADER_BYTES);
     udpPacket->encapsulate(appData);
 
@@ -525,6 +525,11 @@ void UDP::processMsgFromApp(cMessage *appData)
         send(udpPacket,"ipv6Out");
     }
     numSent++;
+}
+
+UDPPacket *UDP::createUDPPacket(const char *name)
+{
+    return new UDPPacket(name);
 }
 
 void UDP::processCommandFromApp(cMessage *msg)

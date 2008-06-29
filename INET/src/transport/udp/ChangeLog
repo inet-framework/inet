@@ -1,3 +1,7 @@
-2005-07-14 Andras Varga
+2008-06-29  Andras Varga
+
+	* factored out createUDPPacket()
+
+2005-07-14  Andras Varga
 
 	* UDPModule renamed to UDP
