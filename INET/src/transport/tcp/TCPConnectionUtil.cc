@@ -286,11 +286,13 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     if (!sendQueueClass || !sendQueueClass[0])
         sendQueueClass = tcpMain->par("sendQueueClass");
     sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
+    sendQueue->setConnection(this);
 
     const char *receiveQueueClass = openCmd->getReceiveQueueClass();
     if (!receiveQueueClass || !receiveQueueClass[0])
         receiveQueueClass = tcpMain->par("receiveQueueClass");
     receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
+    receiveQueue->setConnection(this);
 
     // create algorithm
     const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();

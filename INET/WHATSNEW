@@ -10,8 +10,12 @@ Internal snapshot, for omnetpp-4.0b2.
   like IPAddress), and also, private sections in most classes were changed to 
   protected.
 
-- some refactoring on TCP: created factory methods for TCPSegment and 
-  TCPConnection, to allow for customizing them via subclassing
+- some refactoring on TCP, UDP and IP, to allow subclassing of TCP, UDP and IP
+  packets: packets are now created via factory methods that can be overridden
+  if needed
+
+- AbstractQueue (base class for IP and other modules) made more efficient: now it 
+  doesn't schedule a timer if (when) serviceTime is zero.
 
 
 INET-20080624
