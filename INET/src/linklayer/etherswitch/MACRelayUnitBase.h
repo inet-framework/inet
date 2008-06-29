@@ -66,7 +66,7 @@ class INET_API MACRelayUnitBase : public cSimpleModule
     /**
      * Read parameters parameters.
      */
-    void initialize();
+    virtual void initialize();
 
     /**
      * Updates address table with source address, determines output port
@@ -75,49 +75,49 @@ class INET_API MACRelayUnitBase : public cSimpleModule
      *
      * The message pointer should not be referenced any more after this call.
      */
-    void handleAndDispatchFrame(EtherFrame *frame, int inputport);
+    virtual void handleAndDispatchFrame(EtherFrame *frame, int inputport);
 
     /**
      * Utility function: sends the frame on all ports except inputport.
      * The message pointer should not be referenced any more after this call.
      */
-    void broadcastFrame(EtherFrame *frame, int inputport);
+    virtual void broadcastFrame(EtherFrame *frame, int inputport);
 
     /**
      * Pre-reads in entries for Address Table during initialization.
      */
-    void readAddressTable(const char* fileName);
+    virtual void readAddressTable(const char* fileName);
 
     /**
      * Enters address into table.
      */
-    void updateTableWithAddress(MACAddress& address, int portno);
+    virtual void updateTableWithAddress(MACAddress& address, int portno);
 
     /**
      * Returns output port for address, or -1 if unknown.
      */
-    int getPortForAddress(MACAddress& address);
+    virtual int getPortForAddress(MACAddress& address);
 
     /**
      * Prints contents of address table on ev.
      */
-    void printAddressTable();
+    virtual void printAddressTable();
 
     /**
      * Utility function: throws out all aged entries from table.
      */
-    void removeAgedEntriesFromTable();
+    virtual void removeAgedEntriesFromTable();
 
     /**
      * Utility function: throws out oldest (not necessarily aged) entry from table.
      */
-    void removeOldestTableEntry();
+    virtual void removeOldestTableEntry();
 
     /**
      * Utility function (for use by subclasses) to send a flow control
      * PAUSE frame on the given port.
      */
-    void sendPauseFrame(int portno, int pauseUnits);
+    virtual void sendPauseFrame(int portno, int pauseUnits);
 
 };
 

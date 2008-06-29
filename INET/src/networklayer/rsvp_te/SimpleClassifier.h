@@ -47,7 +47,7 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
         int inLabel;
     };
 
-  private:
+  protected:
     IPAddress routerId;
     int maxLabel;
 
@@ -61,7 +61,7 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
   protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const  {return 5;}
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node);
@@ -70,9 +70,9 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
     virtual bool lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
     virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel);
 
-  private:
-    void readTableFromXML(const cXMLElement *fectable);
-    void readItemFromXML(const cXMLElement *fec);
+  protected:
+    virtual void readTableFromXML(const cXMLElement *fectable);
+    virtual void readItemFromXML(const cXMLElement *fec);
     std::vector<FECEntry>::iterator findFEC(int fecid);
 };
 

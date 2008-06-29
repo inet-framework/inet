@@ -57,15 +57,15 @@ class INET_API IPv6 : public QueueBase
 
   protected:
     // utility: look up interface from getArrivalGate()
-    InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
+    virtual InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
 
     // utility: show current statistics above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
-    IPv6Datagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
+    virtual IPv6Datagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 
     /**
      * Handle IPv6Datagram messages arriving from lower layer.

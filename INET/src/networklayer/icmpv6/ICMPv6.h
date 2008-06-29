@@ -47,7 +47,7 @@ class INET_API ICMPv6 : public cSimpleModule
      *      - Parameter Problem Message       - 4
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
-    void sendErrorMessage(IPv6Datagram *datagram, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(IPv6Datagram *datagram, ICMPv6Type type, int code);
 
     /**
      * This method can be called from other modules to send an ICMP error packet
@@ -56,17 +56,17 @@ class INET_API ICMPv6 : public cSimpleModule
      * so this function will wrap back the transport packet into the IP datagram
      * based on its IPControlInfo.
      */
-    void sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
 
   protected:
     // internal helper functions
-    void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
-    void sendToIP(ICMPv6Message *msg); // FIXME check if really needed
+    virtual void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
+    virtual void sendToIP(ICMPv6Message *msg); // FIXME check if really needed
 
-    ICMPv6Message *createDestUnreachableMsg(int code);
-    ICMPv6Message *createPacketTooBigMsg(int mtu);
-    ICMPv6Message *createTimeExceededMsg(int code);
-    ICMPv6Message *createParamProblemMsg(int code);//TODO:Section 3.4 describes a pointer. What is it?
+    virtual ICMPv6Message *createDestUnreachableMsg(int code);
+    virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
+    virtual ICMPv6Message *createTimeExceededMsg(int code);
+    virtual ICMPv6Message *createParamProblemMsg(int code);//TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**
@@ -100,7 +100,7 @@ class INET_API ICMPv6 : public cSimpleModule
     /**
      * Validate the received IPv6 datagram before responding with error message.
      */
-    bool validateDatagramPromptingError(IPv6Datagram *datagram);
+    virtual bool validateDatagramPromptingError(IPv6Datagram *datagram);
 
     virtual void errorOut(ICMPv6Message *);
 };

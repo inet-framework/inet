@@ -77,13 +77,13 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
      * Handle incoming Ethernet frame: if buffer full discard it, otherwise, insert
      * it into buffer and start processing if a processor is free.
      */
-    void handleIncomingFrame(EtherFrame *msg);
+    virtual void handleIncomingFrame(EtherFrame *msg);
 
     /**
      * Triggered when a frame has completed processing, it routes the frame
      * to the appropriate port, and starts processing the next frame.
      */
-    void processFrame(cMessage *msg);
+    virtual void processFrame(cMessage *msg);
 };
 
 #endif

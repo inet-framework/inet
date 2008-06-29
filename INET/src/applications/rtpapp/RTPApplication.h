@@ -43,7 +43,7 @@ class INET_API RTPApplication : public cSimpleModule
          */
         virtual void activity();
 
-    private:
+    protected:
 
         /**
          * The CNAME of this participant.

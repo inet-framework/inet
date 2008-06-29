@@ -42,7 +42,7 @@ class INET_API IPv6Route : public cPolymorphic
         ROUTING_PROT, ///< route is managed by a routing protocol (OSPF,BGP,etc)
     };
 
-  private:
+  protected:
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
@@ -101,7 +101,7 @@ class INET_API IPv6Route : public cPolymorphic
  */
 class INET_API RoutingTable6 : public cSimpleModule
 {
-  private:
+  protected:
     InterfaceTable *ift; // cached pointer
     bool isrouter;
 
@@ -122,39 +122,39 @@ class INET_API RoutingTable6 : public cSimpleModule
     typedef std::vector<IPv6Route*> RouteList;
     RouteList routeList;
 
-  private:
+  protected:
     // internal: routes of different type can only be added via well-defined functions
-    void addRoute(IPv6Route *route);
+    virtual void addRoute(IPv6Route *route);
     // helper for addRoute()
     static bool routeLessThan(const IPv6Route *a, const IPv6Route *b);
     // internal
-    void configureInterfaceForIPv6(InterfaceEntry *ie);
+    virtual void configureInterfaceForIPv6(InterfaceEntry *ie);
     /**
      *  RFC 3513: Section 2.8 A Node's Required Address
      *  Assign the various addresses to the node's respective interface. This
      *  should be done when the IPv6 Protocol stack is created.
      */
-    void assignRequiredNodeAddresses(InterfaceEntry *ie);
+    virtual void assignRequiredNodeAddresses(InterfaceEntry *ie);
     // internal
-    void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
+    virtual void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
 
   protected:
     // displays summary above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
   public:
     RoutingTable6();
     virtual ~RoutingTable6();
 
   protected:
-    int numInitStages() const  {return 5;}
-    void initialize(int stage);
-    void parseXMLConfigFile();
+    virtual int numInitStages() const  {return 5;}
+    virtual void initialize(int stage);
+    virtual void parseXMLConfigFile();
 
     /**
      * Raises an error.
      */
-    void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *);
 
   public:
     /** @name Interfaces */
@@ -162,13 +162,13 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByAddress(const IPv6Address& address);
+    virtual InterfaceEntry *getInterfaceByAddress(const IPv6Address& address);
     //@}
 
     /**
      * IP forwarding on/off
      */
-    bool isRouter()  const {return isrouter;}
+    virtual bool isRouter()  const {return isrouter;}
 
     /** @name Routing functions */
     //@{
@@ -176,7 +176,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      * Checks if the address is one of the host's addresses, i.e.
      * assigned to one of its interfaces (tentatively or not).
      */
-    bool isLocalAddress(const IPv6Address& dest);
+    virtual bool isLocalAddress(const IPv6Address& dest);
 
     /**
      * Looks up the given destination address in the Destination Cache,
@@ -200,7 +200,7 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Checks if the given prefix already exists in the routing table (prefix list)
      */
-    bool isPrefixPresent(const IPv6Address& prefix);
+    virtual bool isPrefixPresent(const IPv6Address& prefix);
 
     //TBD multicast delivery
     //@}
@@ -209,12 +209,12 @@ class INET_API RoutingTable6 : public cSimpleModule
     /**
      * Add or update a destination cache entry.
      */
-    void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId);
+    virtual void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId);
 
     /**
      * Discard all entries in destination cache
      */
-    void purgeDestCache();
+    virtual void purgeDestCache();
 
     /**
      * Discard all entries in destination cache where next hop is the given
@@ -222,7 +222,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      * becomes unreachable, and all destinations going via that router have to
      * go though router selection again.
      */
-    void purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId);
+    virtual void purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId);
     //@}
 
     /** @name Managing prefixes and the route table */
@@ -237,7 +237,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      * in the InterfaceTable (see IPv6InterfaceData); that has to be done
      * separately.
      */
-    void addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
+    virtual void addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
                                  int interfaceId, simtime_t expiryTime);
 
     /**
@@ -247,20 +247,20 @@ class INET_API RoutingTable6 : public cSimpleModule
      * NOTE: This method does NOT remove the matching addresses from the
      * InterfaceTable (see IPv6InterfaceData); that has to be done separately.
      */
-    void removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
+    virtual void removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
 
     /**
      * Add route of type OWN_ADV_PREFIX. This is a prefix that *this* router
      * advertises on this interface.
      */
-    void addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
+    virtual void addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
                                  int interfaceId, simtime_t expiryTime);
 
     /**
      * Creates a static route. If metric is omitted, it gets initialized
      * to the interface's metric value.
      */
-    void addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
+    virtual void addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
                         unsigned int interfaceId, const IPv6Address& nextHop,
                         int metric=0);
 
@@ -268,7 +268,7 @@ class INET_API RoutingTable6 : public cSimpleModule
      *  Adds a default route for a host. This method requires the RA's source
      *  address and the router expiry time plus the simTime().
      */
-    void addDefaultRoute(const IPv6Address& raSrcAddr, unsigned int ifID,
+    virtual void addDefaultRoute(const IPv6Address& raSrcAddr, unsigned int ifID,
         simtime_t routerLifetime);
 
     /**
@@ -276,22 +276,22 @@ class INET_API RoutingTable6 : public cSimpleModule
      * with src==ROUTING_PROT. To store additional information with the route,
      * one can subclass from IPv6Route and add more fields.
      */
-    void addRoutingProtocolRoute(IPv6Route *route);
+    virtual void addRoutingProtocolRoute(IPv6Route *route);
 
     /**
      * Deletes the given route from the route table.
      */
-    void removeRoute(IPv6Route *route);
+    virtual void removeRoute(IPv6Route *route);
 
     /**
      * Return the number of routes.
      */
-    int getNumRoutes() const;
+    virtual int getNumRoutes() const;
 
     /**
      * Return the ith route.
      */
-    IPv6Route *getRoute(int i);
+    virtual IPv6Route *getRoute(int i);
     //@}
 
 };

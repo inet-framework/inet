@@ -75,7 +75,7 @@ class INET_API BasicSnrEval : public ChannelAccess
     virtual void initialize(int);
 
     /** @brief Called every time a message arrives*/
-    void handleMessage( cMessage* );
+    virtual void handleMessage( cMessage* );
 
   protected:
     /**
@@ -120,16 +120,16 @@ class INET_API BasicSnrEval : public ChannelAccess
     /*@{*/
 
     /** @brief Buffers message for 'transmission time'*/
-    void bufferMsg(AirFrame *frame);
+    virtual void bufferMsg(AirFrame *frame);
 
     /** @brief Unbuffers a message after 'transmission time'*/
-    AirFrame* unbufferMsg(cMessage *msg);
+    virtual AirFrame* unbufferMsg(cMessage *msg);
 
     /** @brief Sends a message to the upper layer*/
-    void sendUp(AirFrame*, SnrList&);
+    virtual void sendUp(AirFrame*, SnrList&);
 
     /** @brief Sends a message to the channel*/
-    void sendDown(AirFrame *msg);
+    virtual void sendDown(AirFrame *msg);
 
     /** @brief Encapsulates a MAC frame into an Air Frame*/
     virtual AirFrame *encapsMsg(cMessage *msg);

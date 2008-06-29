@@ -33,8 +33,8 @@
 /**
  * @brief Abstract base class for all mobility modules.
  *
- * Subclasses are expected to redefine handleSelfMsg() to update the position 
- * and schedule the time of the next position update, and initialize() to 
+ * Subclasses are expected to redefine handleSelfMsg() to update the position
+ * and schedule the time of the next position update, and initialize() to
  * read parameters and schedule the first position update.
  *
  * BasicMobility provides random placement of hosts and display
@@ -75,7 +75,7 @@ class INET_API BasicMobility : public BasicModule
 
   protected:
     /** @brief This modules should only receive self-messages*/
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int);
@@ -95,13 +95,13 @@ class INET_API BasicMobility : public BasicModule
      * This function has to be called every time the position of the host
      * changes!
      */
-    void updatePosition();
+    virtual void updatePosition();
 
     /** @brief Returns the width of the playground */
-    double getPlaygroundSizeX() const  {return cc->getPgs()->x;}
+    virtual double getPlaygroundSizeX() const  {return cc->getPgs()->x;}
 
     /** @brief Returns the height of the playground */
-    double getPlaygroundSizeY() const  {return cc->getPgs()->y;}
+    virtual double getPlaygroundSizeY() const  {return cc->getPgs()->y;}
 
     /** @brief Get a new random position for the host*/
     virtual Coord getRandomPosition();
@@ -112,7 +112,7 @@ class INET_API BasicMobility : public BasicModule
      * Decision is made on pos, but the variables passed as args will
      * also be updated. (Pass dummies you don't have some of them).
      */
-    void reflectIfOutside(Coord& targetPos, Coord& step, double& angle);
+    virtual void reflectIfOutside(Coord& targetPos, Coord& step, double& angle);
 
     /** @brief Utility function to wrap the node to the opposite edge
      * (torus) if it goes outside the playground.
@@ -120,7 +120,7 @@ class INET_API BasicMobility : public BasicModule
      * Decision is made on pos, but targetPos will also be updated.
      * (Pass a dummy you don't have it).
      */
-    void wrapIfOutside(Coord& targetPos);
+    virtual void wrapIfOutside(Coord& targetPos);
 
     /** @brief Utility function to place the node randomly if it goes
      * outside the playground.
@@ -128,17 +128,17 @@ class INET_API BasicMobility : public BasicModule
      * Decision is made on pos, but targetPos will also be updated.
      * (Pass a dummy you don't have it).
      */
-    void placeRandomlyIfOutside(Coord& targetPos);
+    virtual void placeRandomlyIfOutside(Coord& targetPos);
 
     /** @brief Utility function to raise an error if the node gets outside
      * the playground.
      */
-    void raiseErrorIfOutside();
+    virtual void raiseErrorIfOutside();
 
     /** @brief Invokes one of reflectIfOutside(), wrapIfOutside() and
      * placeRandomlyIfOutside(), depending on the given border policy.
      */
-    void handleIfOutside(BorderPolicy policy, Coord& targetPos, Coord& step, double& angle);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPos, Coord& step, double& angle);
 
 };
 

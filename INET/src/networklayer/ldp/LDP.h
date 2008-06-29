@@ -93,7 +93,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     };
     typedef std::vector<peer_info> PeerVector;
 
-  private:
+  protected:
     // configuration
     simtime_t holdTime;
     simtime_t helloInterval;
@@ -128,11 +128,11 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
 
     int maxFecid;
 
-  private:
+  protected:
     /**
      * This method finds next peer in upstream direction
      */
-    IPAddress locateNextHop(IPAddress dest);
+    virtual IPAddress locateNextHop(IPAddress dest);
 
     /**
      * This method maps the peerIP with the interface name in routing table.
@@ -140,21 +140,21 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
      * In case no corresponding peerIP found, a peerIP (not deterministic)
      * will be returned.
      */
-    IPAddress findPeerAddrFromInterface(std::string interfaceName);
+    virtual IPAddress findPeerAddrFromInterface(std::string interfaceName);
 
     //This method is the reserve of above method
     std::string findInterfaceFromPeerAddr(IPAddress peerIP);
 
     /** Utility: return peer's index in myPeers table, or -1 if not found */
-    int findPeer(IPAddress peerAddr);
+    virtual int findPeer(IPAddress peerAddr);
 
     /** Utility: return socket for given peer. Throws error if there's no TCP connection */
-    TCPSocket *getPeerSocket(IPAddress peerAddr);
+    virtual TCPSocket *getPeerSocket(IPAddress peerAddr);
 
     /** Utility: return socket for given peer, and NULL if session doesn't exist */
-    TCPSocket *findPeerSocket(IPAddress peerAddr);
+    virtual TCPSocket *findPeerSocket(IPAddress peerAddr);
 
-    void sendToPeer(IPAddress dest, cMessage *msg);
+    virtual void sendToPeer(IPAddress dest, cMessage *msg);
 
 
     //bool matches(const FEC_TLV& a, const FEC_TLV& b);
@@ -162,15 +162,15 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     FecVector::iterator findFecEntry(FecVector& fecs, IPAddress addr, int length);
     FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, IPAddress peer);
 
-    void sendMappingRequest(IPAddress dest, IPAddress addr, int length);
-    void sendMapping(int type, IPAddress dest, int label, IPAddress addr, int length);
-    void sendNotify(int status, IPAddress dest, IPAddress addr, int length);
+    virtual void sendMappingRequest(IPAddress dest, IPAddress addr, int length);
+    virtual void sendMapping(int type, IPAddress dest, int label, IPAddress addr, int length);
+    virtual void sendNotify(int status, IPAddress dest, IPAddress addr, int length);
 
-    void rebuildFecList();
-    void updateFecList(IPAddress nextHop);
-    void updateFecListEntry(fec_t oldItem);
+    virtual void rebuildFecList();
+    virtual void updateFecList(IPAddress nextHop);
+    virtual void updateFecListEntry(fec_t oldItem);
 
-    void announceLinkChange(int tedlinkindex);
+    virtual void announceLinkChange(int tedlinkindex);
 
   public:
     LDP();
@@ -181,19 +181,19 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void sendHelloTo(IPAddress dest);
-    void openTCPConnectionToPeer(int peerIndex);
+    virtual void sendHelloTo(IPAddress dest);
+    virtual void openTCPConnectionToPeer(int peerIndex);
 
-    void processLDPHello(LDPHello *msg);
-    void processHelloTimeout(cMessage *msg);
-    void processMessageFromTCP(cMessage *msg);
-    void processLDPPacketFromTCP(LDPPacket *ldpPacket);
+    virtual void processLDPHello(LDPHello *msg);
+    virtual void processHelloTimeout(cMessage *msg);
+    virtual void processMessageFromTCP(cMessage *msg);
+    virtual void processLDPPacketFromTCP(LDPPacket *ldpPacket);
 
-    void processLABEL_MAPPING(LDPLabelMapping *packet);
-    void processLABEL_REQUEST(LDPLabelRequest *packet);
-    void processLABEL_RELEASE(LDPLabelMapping *packet);
-    void processLABEL_WITHDRAW(LDPLabelMapping *packet);
-    void processNOTIFICATION(LDPNotify* packet);
+    virtual void processLABEL_MAPPING(LDPLabelMapping *packet);
+    virtual void processLABEL_REQUEST(LDPLabelRequest *packet);
+    virtual void processLABEL_RELEASE(LDPLabelMapping *packet);
+    virtual void processLABEL_WITHDRAW(LDPLabelMapping *packet);
+    virtual void processNOTIFICATION(LDPNotify* packet);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{

@@ -51,7 +51,7 @@ class INET_API SnrDecider : public BasicDecider
     virtual void initialize(int);
 
   protected:
-    bool snrOverThreshold(SnrList &) const;
+    virtual bool snrOverThreshold(SnrList &) const;
     virtual void handleLowerMsg(AirFrame*, SnrList &);
 };
 

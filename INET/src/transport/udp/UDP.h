@@ -82,27 +82,27 @@ class INET_API UDP : public cSimpleModule
 
   protected:
     // utility: show current statistics above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
     // bind socket
-    void bind(int gateIndex, UDPControlInfo *ctrl);
+    virtual void bind(int gateIndex, UDPControlInfo *ctrl);
 
     // connect socket
-    void connect(int sockId, IPvXAddress addr, int port);
+    virtual void connect(int sockId, IPvXAddress addr, int port);
 
     // unbind socket
-    void unbind(int sockId);
+    virtual void unbind(int sockId);
 
     // ephemeral port
-    short getEphemeralPort();
+    virtual short getEphemeralPort();
 
-    bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
-    bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
-    bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
-    void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
-    void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
-    void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
-    void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
+    virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
+    virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
+    virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
+    virtual void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
+    virtual void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
+    virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
+    virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage

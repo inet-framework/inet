@@ -114,12 +114,12 @@ class INET_API NotificationBoard : public cSimpleModule
     /**
      * Subscribe to changes of the given category
      */
-    void subscribe(INotifiable *client, int category);
+    virtual void subscribe(INotifiable *client, int category);
 
     /**
      * Unsubscribe from changes of the given category
      */
-    void unsubscribe(INotifiable *client, int category);
+    virtual void unsubscribe(INotifiable *client, int category);
     //@}
 
     /** @name Methods for producers of change notifications */
@@ -130,7 +130,7 @@ class INET_API NotificationBoard : public cSimpleModule
      * information about the change (e.g. exact location, specific attribute
      * that changed, old value, new value, etc).
      */
-    void fireChangeNotification(int category, cPolymorphic *details=NULL);
+    virtual void fireChangeNotification(int category, cPolymorphic *details=NULL);
     //@}
 };
 

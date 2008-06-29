@@ -53,7 +53,9 @@ class INET_API ModuleAccess
     T *p;
   public:
     ModuleAccess(const char *n) {name = n; p=NULL;}
-    T *get()
+    virtual ~ModuleAccess() {}
+
+    virtual T *get()
     {
         if (!p)
         {
@@ -64,7 +66,7 @@ class INET_API ModuleAccess
         return p;
     }
 
-    T *getIfExists()
+    virtual T *getIfExists()
     {
         if (!p)
         {

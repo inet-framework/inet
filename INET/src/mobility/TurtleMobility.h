@@ -55,16 +55,16 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
 
   protected:
     /** @brief Process next statements from script */
-    void resumeScript();
+    virtual void resumeScript();
 
     /** @brief Execute the given statement*/
-    void executeStatement(cXMLElement *nextStatement);
+    virtual void executeStatement(cXMLElement *nextStatement);
 
     /** @brief Parse attrs in the script -- accepts things like "uniform(10,50) as well */
-    double getValue(const char *s);
+    virtual double getValue(const char *s);
 
     /** @brief Advance nextStatement pointer */
-    void gotoNextStatement();
+    virtual void gotoNextStatement();
 };
 
 #endif

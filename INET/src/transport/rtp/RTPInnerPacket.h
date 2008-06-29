@@ -224,7 +224,7 @@ class INET_API RTPInnerPacket : public cMessage
         virtual int getSequenceNumberBase();
 
 
-    private:
+    protected:
 
         /**
          * The type of this RTPInnerPacket.

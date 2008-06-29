@@ -32,13 +32,13 @@ class INET_API AbstractQueue : public cSimpleModule
     AbstractQueue();
     virtual ~AbstractQueue();
 
-  private:
+  protected:
     cMessage *msgBeingServiced;
     cMessage *endServiceTimer;
 
-  private:
-    void doStartService(cMessage *msg);
-    void doEndService(cMessage *msg);
+  protected:
+    virtual void doStartService(cMessage *msg);
+    virtual void doEndService(cMessage *msg);
 
   protected:
     /**

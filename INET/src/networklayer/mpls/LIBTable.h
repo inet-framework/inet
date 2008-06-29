@@ -57,7 +57,7 @@ class INET_API LIBTable: public cSimpleModule
             int color;
         };
 
-    private:
+    protected:
         IPAddress routerId;
         int maxLabel;
         std::vector<LIBEntry> lib;
@@ -65,20 +65,20 @@ class INET_API LIBTable: public cSimpleModule
     protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const  {return 5;}
-        void handleMessage(cMessage *msg);
+        virtual void handleMessage(cMessage *msg);
 
         // static configuration
-        void readTableFromXML(const cXMLElement* libtable);
+        virtual void readTableFromXML(const cXMLElement* libtable);
 
     public:
         // label management
-        bool resolveLabel(std::string inInterface, int inLabel,
+        virtual bool resolveLabel(std::string inInterface, int inLabel,
                           LabelOpVector& outLabel, std::string& outInterface, int& color);
 
-        int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
+        virtual int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
                             std::string outInterface, int color);
 
-        void removeLibEntry(int inLabel);
+        virtual void removeLibEntry(int inLabel);
 
         // utility
         static LabelOpVector pushLabel(int label);

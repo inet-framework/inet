@@ -29,7 +29,7 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     int numRequestsToSend; // requests to send in this session
 
     /** Utility: sends a request to the server */
-    void sendRequest();
+    virtual void sendRequest();
 
   public:
     TCPBasicClientApp();

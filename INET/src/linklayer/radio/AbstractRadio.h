@@ -64,7 +64,7 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual void initialize(int stage);
     virtual void finish();
 
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
     virtual void handleUpperMsg(AirFrame*);
 
@@ -79,28 +79,28 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual void handleLowerMsgEnd(AirFrame *airframe);
 
     /** @brief Buffers message for 'transmission time' */
-    void bufferMsg(AirFrame *airframe);
+    virtual void bufferMsg(AirFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time' */
-    AirFrame *unbufferMsg(cMessage *msg);
+    virtual AirFrame *unbufferMsg(cMessage *msg);
 
     /** Sends a message to the upper layer */
-    void sendUp(AirFrame *airframe);
+    virtual void sendUp(AirFrame *airframe);
 
     /** Sends a message to the channel */
-    void sendDown(AirFrame *airframe);
+    virtual void sendDown(AirFrame *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
     virtual AirFrame *encapsulatePacket(cMessage *msg);
 
     /** Sets the radio state, and also fires change notification */
-    void setRadioState(RadioState::State newState);
+    virtual void setRadioState(RadioState::State newState);
 
     /** Returns the current channel the radio is tuned to */
     virtual int getChannelNumber() const {return rs.getChannelNumber();}
 
     /** Updates the SNR information of the relevant AirFrame */
-    void addNewSnr();
+    virtual void addNewSnr();
 
     /** Create a new AirFrame */
     virtual AirFrame *createAirFrame() {return new AirFrame();}
@@ -112,13 +112,13 @@ class INET_API AbstractRadio : public ChannelAccess
      * reach us in the future - thus they are on the air - will be
      * received correctly.
      */
-    void changeChannel(int channel);
+    virtual void changeChannel(int channel);
 
     /**
      * Change the bitrate to the given value. This method throws an error
      * if the radio state is transmit.
      */
-    void setBitrate(double bitrate);
+    virtual void setBitrate(double bitrate);
 
     /**
      * To be defined to provide a reception model. The reception model

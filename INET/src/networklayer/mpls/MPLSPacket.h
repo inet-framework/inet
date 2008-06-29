@@ -25,7 +25,7 @@
  */
 class INET_API MPLSPacket: public cMessage
 {
-  private:
+  protected:
     typedef std::stack<int> LabelStack;
     LabelStack labels;
 

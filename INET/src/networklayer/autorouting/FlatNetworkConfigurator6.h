@@ -38,12 +38,12 @@ class INET_API FlatNetworkConfigurator6 : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void configureAdvPrefixes(cTopology& topo);
-    void addOwnAdvPrefixRoutes(cTopology& topo);
-    void addStaticRoutes(cTopology& topo);
+    virtual void configureAdvPrefixes(cTopology& topo);
+    virtual void addOwnAdvPrefixRoutes(cTopology& topo);
+    virtual void addStaticRoutes(cTopology& topo);
 
-    void setDisplayString(int numIPNodes, int numNonIPNodes);
-    bool isIPNode(cTopology::Node *node);
+    virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
+    virtual bool isIPNode(cTopology::Node *node);
 };
 
 #endif

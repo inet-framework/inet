@@ -34,7 +34,7 @@
  */
 class INET_API MPLS : public cSimpleModule
 {
-    private:
+    protected:
         simtime_t delay1;
 
         //no longer used, see comment in intialize
@@ -49,16 +49,16 @@ class INET_API MPLS : public cSimpleModule
         virtual int numInitStages() const  {return 5;}
         virtual void handleMessage(cMessage *msg);
 
-    private:
-        void processPacketFromL3(cMessage *msg);
-        void processPacketFromL2(cMessage *msg);
-        void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
+    protected:
+        virtual void processPacketFromL3(cMessage *msg);
+        virtual void processPacketFromL2(cMessage *msg);
+        virtual void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
 
-        bool tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram);
-        void labelAndForwardIPDatagram(IPDatagram *ipdatagram);
+        virtual bool tryLabelAndForwardIPDatagram(IPDatagram *ipdatagram);
+        virtual void labelAndForwardIPDatagram(IPDatagram *ipdatagram);
 
-        void sendToL2(cMessage *msg, int gateIndex);
-        void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
+        virtual void sendToL2(cMessage *msg, int gateIndex);
+        virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
 };
 
 #endif

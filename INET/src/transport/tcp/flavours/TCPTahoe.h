@@ -44,7 +44,7 @@ class INET_API TCPTahoe : public TCPTahoeRenoFamily
     }
 
     /** Utility function to recalculate ssthresh */
-    void recalculateSlowStartThreshold();
+    virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TCPEventCode& event);

@@ -57,7 +57,7 @@ class INET_API MassMobility : public BasicMobility
     virtual void handleSelfMsg(cMessage *msg);
 
     /** @brief Move the host*/
-    void move();
+    virtual void move();
 };
 
 #endif

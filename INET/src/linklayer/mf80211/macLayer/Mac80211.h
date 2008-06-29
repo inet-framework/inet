@@ -71,7 +71,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     virtual void initialize(int);
 
     /** @brief Register the interface in InterfaceTable */
-    void registerInterface();
+    virtual void registerInterface();
 
   protected:
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
@@ -89,96 +89,96 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     /** @brief handle end of contention */
     virtual void handleEndContentionTimer();
     /** @brief handle a message that is not for me or errornous*/
-    void handleMsgNotForMe(Mac80211Pkt*);
+    virtual void handleMsgNotForMe(Mac80211Pkt*);
     /** @brief handle a message that was meant for me*/
-    void handleMsgForMe(Mac80211Pkt*);
+    virtual void handleMsgForMe(Mac80211Pkt*);
     // ** @brief handle a Broadcast message*/
-    void handleBroadcastMsg(Mac80211Pkt*);
+    virtual void handleBroadcastMsg(Mac80211Pkt*);
 
     /** @brief handle the end of a transmission...*/
-    void handleEndTransmissionTimer();
+    virtual void handleEndTransmissionTimer();
 
     /** @brief handle end of SIFS*/
-    void handleEndSifsTimer();
+    virtual void handleEndSifsTimer();
     /** @brief handle time out*/
-    void handleTimeoutTimer();
+    virtual void handleTimeoutTimer();
     /** @brief NAV timer expired, the exchange of messages of other
        stations is done*/
-    void handleNavTimer();
+    virtual void handleNavTimer();
 
-    void handleRTSframe(Mac80211Pkt*);
+    virtual void handleRTSframe(Mac80211Pkt*);
 
-    void handleDATAframe(Mac80211Pkt*);
+    virtual void handleDATAframe(Mac80211Pkt*);
 
-    void handleACKframe(Mac80211Pkt*);
+    virtual void handleACKframe(Mac80211Pkt*);
 
-    void handleCTSframe(Mac80211Pkt*);
+    virtual void handleCTSframe(Mac80211Pkt*);
 
     /** @brief send data frame */
     virtual void sendDATAframe();
 
     /** @brief send Acknoledgement */
-    void sendACKframe(Mac80211Pkt*);
+    virtual void sendACKframe(Mac80211Pkt*);
 
     /** @brief send CTS frame */
-    void sendCTSframe(Mac80211Pkt*);
+    virtual void sendCTSframe(Mac80211Pkt*);
 
     /** @brief send RTS frame */
     virtual void sendRTSframe();
 
     /** @brief send broadcast frame */
-    void sendBROADCASTframe();
+    virtual void sendBROADCASTframe();
 
     /** @brief encapsulate packet */
-    Mac80211Pkt* encapsMsg(cMessage *netw);
+    virtual Mac80211Pkt* encapsMsg(cMessage *netw);
 
     /** @brief decapsulate packet and send to higher layer */
-    void decapsulateAndSendUp(Mac80211Pkt *frame);
+    virtual void decapsulateAndSendUp(Mac80211Pkt *frame);
 
     /** @brief build a data frame */
     virtual Mac80211Pkt* buildDATAframe();
 
     /** @brief build an ACK */
-    Mac80211Pkt* buildACKframe(Mac80211Pkt*);
+    virtual Mac80211Pkt* buildACKframe(Mac80211Pkt*);
 
     /** @brief build a CTS frame*/
-    Mac80211Pkt* buildCTSframe(Mac80211Pkt*);
+    virtual Mac80211Pkt* buildCTSframe(Mac80211Pkt*);
 
     /** @brief build an RTS frame */
     virtual Mac80211Pkt* buildRTSframe();
 
     /** @brief build a broadcast frame*/
-    Mac80211Pkt* buildBROADCASTframe();
+    virtual Mac80211Pkt* buildBROADCASTframe();
 
     /** @brief start a new contention period */
     virtual void beginNewCycle();
 
     /** @brief Compute a backoff value */
-    simtime_t computeBackoff();
+    virtual simtime_t computeBackoff();
 
     /** @brief Compute a new contention window */
-    int computeContentionWindow();
+    virtual int computeContentionWindow();
 
     /** @brief Test if maximum number of retries to transmit is exceeded */
-    void testMaxAttempts();
+    virtual void testMaxAttempts();
 
     /** @brief return a timeOut value for a certain type of frame*/
-    simtime_t computeTimeout(_802_11frameType type, simtime_t last_frame_duration);
+    virtual simtime_t computeTimeout(_802_11frameType type, simtime_t last_frame_duration);
 
     /** @brief computes the duration of a transmission over the physical channel*/
-    simtime_t computePacketDuration(int bits);
+    virtual simtime_t computePacketDuration(int bits);
 
     /** @brief Produce a readable name of the given state */
-    const char *stateName(State state);
+    static const char *stateName(State state);
 
     /** @brief Produce a readable name of the given timer type */
-    const char *timerTypeName(int type);
+    static const char *timerTypeName(int type);
 
     /** @brief Produce a readable name of the given packet type */
-    const char *pktTypeName(int type);
+    static const char *pktTypeName(int type);
 
     /** @brief Sets the state, and produces a log message in between */
-    void setState(State state);
+    virtual void setState(State state);
 
   protected:
     /** @brief mac address */

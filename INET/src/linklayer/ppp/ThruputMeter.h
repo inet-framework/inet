@@ -31,7 +31,7 @@
 // (output vector will be correct though); would need a timer to handle this situation
 class INET_API ThruputMeter : public cSimpleModule
 {
-  private:
+  protected:
     // config
     simtime_t startTime; // start time
     int batchSize;   // number of packets in a batch
@@ -54,8 +54,8 @@ class INET_API ThruputMeter : public cSimpleModule
     cOutVector pkpersecVector;
 
   protected:
-    void updateStats(simtime_t now, unsigned long bits);
-    void beginNewInterval(simtime_t now);
+    virtual void updateStats(simtime_t now, unsigned long bits);
+    virtual void beginNewInterval(simtime_t now);
 
   protected:
     virtual void initialize();

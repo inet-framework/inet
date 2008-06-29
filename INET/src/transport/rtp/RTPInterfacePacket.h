@@ -204,7 +204,7 @@ class INET_API RTPInterfacePacket : public cMessage
          */
         virtual const char *getFileName();
 
-    private:
+    protected:
 
         /**
          * The type of the RTPInterfacePacket.

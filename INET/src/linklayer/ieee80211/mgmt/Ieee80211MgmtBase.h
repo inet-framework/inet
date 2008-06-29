@@ -59,7 +59,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void initialize(int);
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
     /** Should be redefined to deal with self-messages */
     virtual void handleTimer(cMessage *frame) = 0;
@@ -71,7 +71,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl) = 0;
 
     /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
-    void sendOrEnqueue(cMessage *frame);
+    virtual void sendOrEnqueue(cMessage *frame);
 
     /** Redefined from PassiveQueueBase. */
     virtual bool enqueue(cMessage *msg);
@@ -80,7 +80,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual cMessage *dequeue();
 
     /** Redefined from PassiveQueueBase: send message to MAC */
-    void sendOut(cMessage *msg);
+    virtual void sendOut(cMessage *msg);
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);

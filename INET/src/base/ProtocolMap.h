@@ -28,7 +28,7 @@
  */
 class INET_API ProtocolMapping
 {
-  private:
+  protected:
     struct Entry
     {
         int protocolNumber;

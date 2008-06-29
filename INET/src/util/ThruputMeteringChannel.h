@@ -73,8 +73,8 @@ class SIM_API ThruputMeteringChannel : public cBasicChannel
     double currentPkPerSec;
 
   protected:
-    void beginNewInterval(simtime_t now);
-    void updateDisplay();
+    virtual void beginNewInterval(simtime_t now);
+    virtual void updateDisplay();
 
   public:
     /**

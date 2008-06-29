@@ -59,13 +59,13 @@ class INET_API PPP : public cSimpleModule
     long numDroppedIfaceDown;
 
   protected:
-    InterfaceEntry *registerInterface(double datarate);
-    void startTransmitting(cMessage *msg);
-    PPPFrame *encapsulate(cMessage *msg);
-    cMessage *decapsulate(PPPFrame *pppFrame);
-    void displayBusy();
-    void displayIdle();
-    void updateDisplayString();
+    virtual InterfaceEntry *registerInterface(double datarate);
+    virtual void startTransmitting(cMessage *msg);
+    virtual PPPFrame *encapsulate(cMessage *msg);
+    virtual cMessage *decapsulate(PPPFrame *pppFrame);
+    virtual void displayBusy();
+    virtual void displayIdle();
+    virtual void updateDisplayString();
 
   public:
     PPP();

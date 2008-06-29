@@ -69,7 +69,7 @@ class INET_API ConstSpeedMobility : public BasicMobility
     virtual void setTargetPosition();
 
     /** @brief Move the host*/
-    void move();
+    virtual void move();
 };
 
 #endif

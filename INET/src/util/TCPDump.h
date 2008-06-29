@@ -36,11 +36,11 @@ class INET_API TCPDumper
     std::ostream *outp;
   public:
     TCPDumper(std::ostream& o);
-    void dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
-    void dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment=NULL);//FIXME: Temporary hack
-    void dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
+    virtual void dump(bool l2r, const char *label, IPDatagram *dgram, const char *comment=NULL);
+    virtual void dumpIPv6(bool l2r, const char *label, IPv6Datagram_Base *dgram, const char *comment=NULL);//FIXME: Temporary hack
+    virtual void dump(bool l2r, const char *label, TCPSegment *tcpseg, const std::string& srcAddr, const std::string& destAddr, const char *comment=NULL);
     // dumps arbitary text
-    void dump(const char *label, const char *msg);
+    virtual void dump(const char *label, const char *msg);
 };
 
 

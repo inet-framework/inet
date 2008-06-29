@@ -50,10 +50,10 @@ class INET_API RectangleMobility : public BasicMobility
     virtual void handleSelfMsg(cMessage *msg);
 
     /** @brief Move the host */
-    void move();
+    virtual void move();
 
     /** @brief Maps d to (x,y) coordinates */
-    void calculateXY();
+    virtual void calculateXY();
 };
 
 #endif

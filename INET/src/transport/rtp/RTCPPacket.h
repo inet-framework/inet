@@ -293,7 +293,7 @@ class INET_API RTCPSenderReportPacket : public RTCPReceiverReportPacket
         */
         virtual void setSenderReport(SenderReport *senderReport);
 
-    private:
+    protected:
 
         /**
         The sender report stored in the packet.
@@ -358,7 +358,7 @@ class INET_API RTCPSDESPacket : public RTCPPacket
         */
         virtual void addSDESChunk(SDESChunk *sdesChunk);
 
-    private:
+    protected:
 
         /**
          * In this cArray the sdes chunks are stored.
@@ -478,7 +478,7 @@ class INET_API RTCPCompoundPacket : public cMessage
          */
         virtual cArray *getRtcpPackets();
 
-    private:
+    protected:
 
         /**
          * The cArray in which the rtcp packets are stored.

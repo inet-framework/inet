@@ -70,26 +70,26 @@ class TED : public cSimpleModule
     virtual int numInitStages() const  {return 5;}
     virtual void handleMessage(cMessage *msg);
 
-    IPAddressVector calculateShortestPath(IPAddressVector dest,
+    virtual IPAddressVector calculateShortestPath(IPAddressVector dest,
         const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
 
   public:
     /** @name Public interface to the Traffic Engineering Database */
     //@{
-    IPAddress getInterfaceAddrByPeerAddress(IPAddress peerIP);
-    IPAddress peerRemoteInterface(IPAddress peerIP);
-    IPAddress getPeerByLocalAddress(IPAddress localInf);
-    IPAddress primaryAddress(IPAddress localInf);
-    bool isLocalPeer(IPAddress inetAddr);
-    bool isLocalAddress(IPAddress addr);
-    unsigned int linkIndex(IPAddress localInf);
-    unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
-    IPAddressVector getLocalAddress();
+    virtual IPAddress getInterfaceAddrByPeerAddress(IPAddress peerIP);
+    virtual IPAddress peerRemoteInterface(IPAddress peerIP);
+    virtual IPAddress getPeerByLocalAddress(IPAddress localInf);
+    virtual IPAddress primaryAddress(IPAddress localInf);
+    virtual bool isLocalPeer(IPAddress inetAddr);
+    virtual bool isLocalAddress(IPAddress addr);
+    virtual unsigned int linkIndex(IPAddress localInf);
+    virtual unsigned int linkIndex(IPAddress advrouter, IPAddress linkid);
+    virtual IPAddressVector getLocalAddress();
 
-    void rebuildRoutingTable();
+    virtual void rebuildRoutingTable();
     //@}
 
-  private:
+  protected:
     RoutingTable *rt;
     InterfaceTable *ift;
     IPAddress routerId;
@@ -97,17 +97,17 @@ class TED : public cSimpleModule
 
     IPAddressVector interfaceAddrs; // list of local interface addresses
 
-  private:
+  protected:
     int maxMessageId;
 
-    int assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr);
+    virtual int assignIndex(std::vector<vertex_t>& vertices, IPAddress nodeAddr);
 
     std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
         double req_bandwidth, int priority);
 
   public: //FIXME
-    bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match);
-    void updateTimestamp(TELinkStateInfo *link);
+    virtual bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *&match);
+    virtual void updateTimestamp(TELinkStateInfo *link);
 };
 
 std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info);

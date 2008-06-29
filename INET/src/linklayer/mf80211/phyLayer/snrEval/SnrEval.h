@@ -62,12 +62,12 @@ class INET_API SnrEval : public BasicSnrEval
       * reach us in the future - thus they are on the air - will be
       * received correctly.
       */
-    void changeChannel(int channel);
+    virtual void changeChannel(int channel);
 
     /** @brief change the bitrate to the given value.
       * This method throws an error if the radio state is transmit.
       */
-    void setBitrate(double bitrate);
+    virtual void setBitrate(double bitrate);
 
   protected:
     /** @brief Initialize variables and publish the radio status*/
@@ -78,7 +78,7 @@ class INET_API SnrEval : public BasicSnrEval
     virtual ~SnrEval();
 
   protected:
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
     virtual void handleUpperMsg(AirFrame*);
 
@@ -93,13 +93,13 @@ class INET_API SnrEval : public BasicSnrEval
     virtual void handleLowerMsgEnd(AirFrame*);
 
     /** @brief Calculates the power with which a packet is received.*/
-    double calcRcvdPower(double pSend, double distance);
+    virtual double calcRcvdPower(double pSend, double distance);
 
     /** Redefined from BasicSnrEval */
     virtual int getChannelNumber() const  {return rs.getChannelNumber();}
 
     /** @brief updates the snr information of the relevant AirFrames*/
-    void addNewSnr();
+    virtual void addNewSnr();
 
   protected:
     /** @brief Enum to store self message getKind()s*/

@@ -283,12 +283,12 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
      */
     //@{
-    simtime_t getSIFS();
-    simtime_t getSlotTime();
-    simtime_t getDIFS();
-    simtime_t getEIFS();
-    simtime_t getPIFS();
-    simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
+    virtual simtime_t getSIFS();
+    virtual simtime_t getSlotTime();
+    virtual simtime_t getDIFS();
+    virtual simtime_t getEIFS();
+    virtual simtime_t getPIFS();
+    virtual simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 
   protected:
@@ -297,27 +297,27 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    void scheduleSIFSPeriod(Ieee80211Frame *frame);
+    virtual void scheduleSIFSPeriod(Ieee80211Frame *frame);
 
-    void scheduleDIFSPeriod();
-    void cancelDIFSPeriod();
+    virtual void scheduleDIFSPeriod();
+    virtual void cancelDIFSPeriod();
 
-    void scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
-    void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
-    void cancelTimeoutPeriod();
+    virtual void scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    virtual void cancelTimeoutPeriod();
 
-    void scheduleCTSTimeoutPeriod();
+    virtual void scheduleCTSTimeoutPeriod();
 
     /** @brief Schedule network allocation period according to 9.2.5.4. */
-    void scheduleReservePeriod(Ieee80211Frame *frame);
+    virtual void scheduleReservePeriod(Ieee80211Frame *frame);
 
     /** @brief Generates a new backoff period based on the contention window. */
-    void invalidateBackoffPeriod();
-    bool isInvalidBackoffPeriod();
-    void generateBackoffPeriod();
-    void decreaseBackoffPeriod();
-    void scheduleBackoffPeriod();
-    void cancelBackoffPeriod();
+    virtual void invalidateBackoffPeriod();
+    virtual bool isInvalidBackoffPeriod();
+    virtual void generateBackoffPeriod();
+    virtual void decreaseBackoffPeriod();
+    virtual void scheduleBackoffPeriod();
+    virtual void cancelBackoffPeriod();
     //@}
 
   protected:
@@ -325,14 +325,14 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame transmission functions
      */
     //@{
-    void sendACKFrameOnEndSIFS();
-    void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
-    void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    void sendCTSFrameOnEndSIFS();
-    void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
-    void sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend);
-    void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendACKFrameOnEndSIFS();
+    virtual void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
+    virtual void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendCTSFrameOnEndSIFS();
+    virtual void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
+    virtual void sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
   protected:
@@ -340,72 +340,72 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      * @name Frame builder functions
      */
     //@{
-    Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
-    Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
-    Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
+    virtual Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
+    virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
     /**
      * @brief Attaches a PhyControlInfo to the frame which will cause it to be sent at
      * basicBitrate not bitrate (e.g. 2Mbps instead of 11Mbps). Used with ACK, CTS, RTS.
      */
-    Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
+    virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
 
   protected:
     /**
      * @name Utility functions
      */
     //@{
-    void finishCurrentTransmission();
-    void giveUpCurrentTransmission();
-    void retryCurrentTransmission();
+    virtual void finishCurrentTransmission();
+    virtual void giveUpCurrentTransmission();
+    virtual void retryCurrentTransmission();
 
    /** @brief Send down the change channel message to the physical layer if there is any. */
-    void sendDownPendingRadioConfigMsg();
+    virtual void sendDownPendingRadioConfigMsg();
 
     /** @brief Change the current MAC operation mode. */
-    void setMode(Mode mode);
+    virtual void setMode(Mode mode);
 
     /** @brief Returns the current frame being transmitted */
-    Ieee80211DataOrMgmtFrame *getCurrentTransmission();
+    virtual Ieee80211DataOrMgmtFrame *getCurrentTransmission();
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
-    void resetStateVariables();
+    virtual void resetStateVariables();
 
     /** @brief Used by the state machine to identify medium state change events.
         This message is currently optimized away and not sent through the kernel. */
-    bool isMediumStateChange(cMessage *msg);
+    virtual bool isMediumStateChange(cMessage *msg);
 
     /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
-    bool isMediumFree();
+    virtual bool isMediumFree();
 
     /** @brief Returns true if message is a broadcast message */
-    bool isBroadcast(Ieee80211Frame *msg);
+    virtual bool isBroadcast(Ieee80211Frame *msg);
 
     /** @brief Returns true if message destination address is ours */
-    bool isForUs(Ieee80211Frame *msg);
+    virtual bool isForUs(Ieee80211Frame *msg);
 
     /** @brief Checks if the frame is a data or management frame */
-    bool isDataOrMgmtFrame(Ieee80211Frame *frame);
+    virtual bool isDataOrMgmtFrame(Ieee80211Frame *frame);
 
     /** @brief Returns the last frame received before the SIFS period. */
-    Ieee80211Frame *getFrameReceivedBeforeSIFS();
+    virtual Ieee80211Frame *getFrameReceivedBeforeSIFS();
 
     /** @brief Deletes frame at the front of queue. */
-    void popTransmissionQueue();
+    virtual void popTransmissionQueue();
 
     /**
      * @brief Computes the duration (in seconds) of the transmission of a frame
      * over the physical channel. 'bits' should be the total length of the MAC frame
      * in bits, but excluding the physical layer framing (preamble etc.)
      */
-    double computeFrameDuration(Ieee80211Frame *msg);
-    double computeFrameDuration(int bits, double bitrate);
+    virtual double computeFrameDuration(Ieee80211Frame *msg);
+    virtual double computeFrameDuration(int bits, double bitrate);
 
     /** @brief Logs all state information */
-    void logState();
+    virtual void logState();
 
     /** @brief Produce a readable name of the given MAC operation mode */
     const char *modeName(int mode);

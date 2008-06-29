@@ -29,7 +29,7 @@
  */
 class INET_API QueueBase : public AbstractQueue
 {
-  private:
+  protected:
     simtime_t delay;
 
   public:

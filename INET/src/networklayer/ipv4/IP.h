@@ -67,15 +67,15 @@ class INET_API IP : public QueueBase
 
   protected:
     // utility: look up interface from getArrivalGate()
-    InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
+    virtual InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
 
     // utility: show current statistics above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
     /**
      * Encapsulate packet coming from higher layers into IPDatagram
      */
-    IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
+    virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 
     /**
      * Handle IPDatagram messages arriving from lower layer.

@@ -29,7 +29,7 @@ class IPv6ControlInfo : public IPv6ControlInfo_Base
     IPv6Datagram *dgram;
   public:
     IPv6ControlInfo() : IPv6ControlInfo_Base() {dgram=NULL;}
-    ~IPv6ControlInfo();
+    virtual ~IPv6ControlInfo();
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base() {dgram=NULL; operator=(other);}
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other) {IPv6ControlInfo_Base::operator=(other); return *this;}
 

@@ -113,7 +113,7 @@ class INET_API RTP : public cSimpleModule
         virtual void sessionLeft(RTPInnerPacket *rinp);
 
 
-    private:
+    protected:
         /**
          * The CNAME of this end system.
          */

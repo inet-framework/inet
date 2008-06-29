@@ -41,7 +41,7 @@ class INET_API InterfaceEntry : public cPolymorphic
 {
     friend class InterfaceTable; //only this guy is allowed to set _interfaceId
 
-  private:
+  protected:
     int _interfaceId;      ///< identifies the interface in the InterfaceTable
     std::string _name;     ///< interface name (must be unique)
     int _nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)

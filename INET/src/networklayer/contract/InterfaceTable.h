@@ -50,7 +50,7 @@
  */
 class INET_API InterfaceTable : public cSimpleModule, public INotifiable
 {
-  private:
+  protected:
     NotificationBoard *nb; // cached pointer
 
     typedef std::vector<InterfaceEntry *> InterfaceVector;
@@ -58,23 +58,23 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
 
   protected:
     // displays summary above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
     // discover and store which nwlayer/host gates connect to this interface
-    void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
+    virtual void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
 
   public:
     InterfaceTable();
     virtual ~InterfaceTable();
 
   protected:
-    int numInitStages() const {return 2;}
-    void initialize(int stage);
+    virtual int numInitStages() const {return 2;}
+    virtual void initialize(int stage);
 
     /**
      * Raises an error.
      */
-    void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *);
 
   public:
     /**
@@ -93,40 +93,40 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      * Note: Interface deletion is not supported, but one can mark one
      * as "down".
      */
-    void addInterface(InterfaceEntry *entry, cModule *ifmod);
+    virtual void addInterface(InterfaceEntry *entry, cModule *ifmod);
 
     /**
      * Returns the number of interfaces.
      */
-    int getNumInterfaces()  {return interfaces.size();}
+    virtual int getNumInterfaces()  {return interfaces.size();}
 
     /**
      * Returns the InterfaceEntry specified by an index 0..numInterfaces-1.
      */
-    InterfaceEntry *getInterface(int pos);
+    virtual InterfaceEntry *getInterface(int pos);
 
     /**
      * Returns an interface given by its getNodeOutputGateId().
      * Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByNodeOutputGateId(int id);
+    virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id);
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByNodeInputGateId(int id);
+    virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id);
 
     /**
      * Returns an interface given by its getNetworkLayerGateIndex().
      * Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index);
+    virtual InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index);
 
     /**
      * Returns an interface given by its name. Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByName(const char *name);
+    virtual InterfaceEntry *getInterfaceByName(const char *name);
 
     /**
      * Returns the first interface with the isLoopback flag set.
@@ -134,7 +134,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      * should never happen because InterfaceTable itself registers a
      * loopback interface on startup.)
      */
-    InterfaceEntry *getFirstLoopbackInterface();
+    virtual InterfaceEntry *getFirstLoopbackInterface();
 };
 
 #endif

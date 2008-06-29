@@ -48,7 +48,7 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
     virtual void setTargetPosition();
 
     /** @brief Utility: extract data from given \<position_update> element*/
-    void extractDataFrom(cXMLElement *node);
+    virtual void extractDataFrom(cXMLElement *node);
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void fixIfHostGetsOutside();

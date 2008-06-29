@@ -35,11 +35,11 @@ class INET_API FailureManager : public cSimpleModule, public IScriptable
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node);
 
-  private:
-    void replaceNode(cModule *mod, const char *newNodeType);
-    void reconnectNode(cModule *old, cModule *n);
-    void reconnect(cModule *old, cModule *n, const char *ins, const char *outs);
-    cModule* getTargetNode(const char *target);
+  protected:
+    virtual void replaceNode(cModule *mod, const char *newNodeType);
+    virtual void reconnectNode(cModule *old, cModule *n);
+    virtual void reconnect(cModule *old, cModule *n, const char *ins, const char *outs);
+    virtual cModule* getTargetNode(const char *target);
 };
 
 #endif

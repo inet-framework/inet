@@ -54,7 +54,7 @@ class INET_API WirelessMacBase : public cSimpleModule
     virtual void initialize(int);
 
     /** @brief Called every time a message arrives*/
-    void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
   protected:
     /**
@@ -71,17 +71,17 @@ class INET_API WirelessMacBase : public cSimpleModule
     /** @brief Handle messages from lower layer */
     virtual void handleLowerMsg(cMessage *msg) = 0;
 
-    bool isUpperMsg(cMessage *msg);
-    bool isLowerMsg(cMessage *msg);
+    virtual bool isUpperMsg(cMessage *msg);
+    virtual bool isLowerMsg(cMessage *msg);
     //@}
 
     /** @name Convenience Functions*/
     //@{
     /** @brief Sends a message to the lower layer */
-    void sendDown(cMessage *msg);
+    virtual void sendDown(cMessage *msg);
 
     /** @brief Sends a message to the upper layer */
-    void sendUp(cMessage *msg);
+    virtual void sendUp(cMessage *msg);
     //@}
 };
 

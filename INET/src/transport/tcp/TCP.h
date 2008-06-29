@@ -144,10 +144,10 @@ class INET_API TCP : public cSimpleModule
     short lastEphemeralPort;
     std::multiset<short> usedEphemeralPorts;
 
-    TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr);
-    TCPConnection *findConnForApp(int appGateIndex, int connId);
-    void removeConnection(TCPConnection *conn);
-    void updateDisplayString();
+    virtual TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr);
+    virtual TCPConnection *findConnForApp(int appGateIndex, int connId);
+    virtual void removeConnection(TCPConnection *conn);
+    virtual void updateDisplayString();
 
   public:
     static bool testing;    // switches between tcpEV and testingEV
@@ -169,24 +169,24 @@ class INET_API TCP : public cSimpleModule
      * To be called from TCPConnection when a new connection gets created,
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
-    void addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
+    virtual void addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
 
     /**
      * To be called from TCPConnection when socket pair (key for TcpConnMap) changes
      * (e.g. becomes fully qualified).
      */
-    void updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
+    virtual void updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
 
     /**
      * Update conn's socket pair, and register newConn (which'll keep LISTENing).
      * Also, conn will get a new connId (and newConn will live on with its old connId).
      */
-    void addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
+    virtual void addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort);
 
     /**
      * To be called from TCPConnection: reserves an ephemeral port for the connection.
      */
-    short getEphemeralPort();
+    virtual short getEphemeralPort();
 };
 
 #endif

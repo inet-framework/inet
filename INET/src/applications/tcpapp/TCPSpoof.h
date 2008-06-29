@@ -26,9 +26,9 @@
 class INET_API TCPSpoof : public cSimpleModule
 {
   protected:
-    void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
-    unsigned long chooseInitialSeqNum();
-    void sendSpoofPacket();
+    virtual void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+    virtual unsigned long chooseInitialSeqNum();
+    virtual void sendSpoofPacket();
 
   protected:
     virtual void initialize();

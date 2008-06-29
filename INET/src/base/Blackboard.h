@@ -250,19 +250,19 @@ class INET_API Blackboard : public cSimpleModule
     /**
      * Publish new item on the BB, with the given label.
      */
-    BBItemRef publish(const char *label, cPolymorphic *item);
+    virtual BBItemRef publish(const char *label, cPolymorphic *item);
 
     /**
      * Withdraw (unpublish) item from the BB (typically called by publisher).
      */
-    void withdraw(BBItemRef bbItem);
+    virtual void withdraw(BBItemRef bbItem);
 
     /**
      * Tell BB that an item has changed (typically called by publisher).
      * When item pointer is omitted, it is assumed that the item object
      * was updated "in place" (as opposed to being replaced by another object).
      */
-    void changed(BBItemRef bbItem, cPolymorphic *item=NULL);
+    virtual void changed(BBItemRef bbItem, cPolymorphic *item=NULL);
     //@}
 
     /** @name Methods for subscribers */
@@ -270,33 +270,33 @@ class INET_API Blackboard : public cSimpleModule
     /**
      * Subscribe to a BB item identified by a label
      */
-    BBItemRef subscribe(BlackboardAccess *bbClient, const char *label);
+    virtual BBItemRef subscribe(BlackboardAccess *bbClient, const char *label);
 
     /**
      * Find item with given label on the BB
      */
-    BBItemRef find(const char *label);
+    virtual BBItemRef find(const char *label);
 
     /**
      * Subscribe to a BB item identified by item reference
      */
-    BBItemRef subscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
+    virtual BBItemRef subscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
 
     /**
      * Unsubcribe module from change notifications
      */
-    void unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
+    virtual void unsubscribe(BlackboardAccess *bbClient, BBItemRef bbItem);
 
     /**
      * Generally subscribe to notifications about items being published
      * to/withdrawn from BB.
      */
-    void registerClient(BlackboardAccess *bbClient);
+    virtual void registerClient(BlackboardAccess *bbClient);
 
     /**
      * Cancel subscription initiated by registerClient().
      */
-    void removeClient(BlackboardAccess *bbClient);
+    virtual void removeClient(BlackboardAccess *bbClient);
 
     /**
      * Utility function: the client gets immediate notification with
@@ -304,7 +304,7 @@ class INET_API Blackboard : public cSimpleModule
      * This may simplify initialization code in a subscribe-when-published
      * style client.
      */
-    void getBlackboardContent(BlackboardAccess *bbClient);
+    virtual void getBlackboardContent(BlackboardAccess *bbClient);
 
     /**
      * As with standard C++ classes.
@@ -337,7 +337,7 @@ class INET_API BlackboardAccess
     virtual ~BlackboardAccess() {}
 
     /** Returns a pointer to the Blackboard*/
-    Blackboard *getBlackboard();
+    virtual Blackboard *getBlackboard();
 
     /** @name Callbacks invoked by the blackboard */
     //@{

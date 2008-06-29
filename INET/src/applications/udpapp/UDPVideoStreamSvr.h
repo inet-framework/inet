@@ -67,10 +67,10 @@ class INET_API UDPVideoStreamSvr : public UDPAppBase
 
   protected:
     // process stream request from client
-    void processStreamRequest(cMessage *msg);
+    virtual void processStreamRequest(cMessage *msg);
 
     // send a packet of the given video stream
-    void sendStreamData(cMessage *timer);
+    virtual void sendStreamData(cMessage *timer);
 
   public:
     UDPVideoStreamSvr();

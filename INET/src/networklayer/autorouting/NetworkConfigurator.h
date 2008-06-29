@@ -48,14 +48,14 @@ class INET_API NetworkConfigurator : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
-    void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
-    void addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    void setPeersParameter(const char *submodName, cTopology& topo, NodeInfoVector& nodeInfo);
-    void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void addPointToPointPeerRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void setPeersParameter(const char *submodName, cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 
-    void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
 
 #endif

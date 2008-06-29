@@ -67,7 +67,7 @@ class INET_API BasicModule: public cSimpleModule, public INotifiable
 
   protected:
     /** @brief Function to get a pointer to the host module*/
-    cModule *findHost(void) const;
+    virtual cModule *findHost(void) const;
 
     /** @brief Function to get the logging name of id*/
     const char* getLogName(int);

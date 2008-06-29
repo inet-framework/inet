@@ -40,11 +40,11 @@ class INET_API IPv6ErrorHandling: public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 
-  private:
-    void displayType1Msg(int code);
-    void displayType2Msg();
-    void displayType3Msg(int code);
-    void displayType4Msg(int code);
+  protected:
+    virtual void displayType1Msg(int code);
+    virtual void displayType2Msg();
+    virtual void displayType3Msg(int code);
+    virtual void displayType4Msg(int code);
 };
 
 #endif

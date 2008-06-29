@@ -36,6 +36,10 @@
 class INET_API UDPVideoStreamCli : public UDPAppBase
 {
   protected:
+    // statistics
+    cOutVector eed;
+
+  protected:
     ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize();
@@ -44,12 +48,8 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
     //@}
 
   protected:
-    void requestStream();
-    void receiveStream(cMessage* msg);
-
-  private:
-    // statistics
-    cOutVector eed;
+    virtual void requestStream();
+    virtual void receiveStream(cMessage* msg);
 };
 
 

@@ -294,21 +294,21 @@ class INET_API TCPConnection
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
     /** Maps app command codes (msg kind of app command msgs) to TCP_E_xxx event codes */
-    TCPEventCode preanalyseAppCommandEvent(int commandCode);
+    virtual TCPEventCode preanalyseAppCommandEvent(int commandCode);
     /** Implemements the pure TCP state machine */
-    bool performStateTransition(const TCPEventCode& event);
+    virtual bool performStateTransition(const TCPEventCode& event);
     /** Perform cleanup necessary when entering a new state, e.g. cancelling timers */
-    void stateEntered(int state);
+    virtual void stateEntered(int state);
     //@}
 
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
-    void process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    void process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    void process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    void process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    void process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     //@}
 
     /** @name Processing TCP segment arrivals. Invoked from processTCPSegment(). */
@@ -317,91 +317,91 @@ class INET_API TCPConnection
      * Shortcut to process most common case as fast as possible. Returns false
      * if segment requires normal (slow) route.
      */
-    bool tryFastRoute(TCPSegment *tcpseg);
+    virtual bool tryFastRoute(TCPSegment *tcpseg);
     /**
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
-    TCPEventCode processSegmentInListen(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
-    TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
-    TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
-    TCPEventCode processRstInSynReceived(TCPSegment *tcpseg);
-    bool processAckInEstabEtc(TCPSegment *tcpseg);
+    virtual TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+    virtual TCPEventCode processSegmentInListen(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+    virtual TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+    virtual TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
+    virtual TCPEventCode processRstInSynReceived(TCPSegment *tcpseg);
+    virtual bool processAckInEstabEtc(TCPSegment *tcpseg);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{
-    void process_TIMEOUT_2MSL();
-    void process_TIMEOUT_CONN_ESTAB();
-    void process_TIMEOUT_FIN_WAIT_2();
-    void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
+    virtual void process_TIMEOUT_2MSL();
+    virtual void process_TIMEOUT_CONN_ESTAB();
+    virtual void process_TIMEOUT_FIN_WAIT_2();
+    virtual void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
     //@}
 
     /** Utility: clone a listening connection. Used for forking. */
-    TCPConnection *cloneListeningConnection();
+    virtual TCPConnection *cloneListeningConnection();
 
     /** Utility: creates send/receive queues and tcpAlgorithm */
-    void initConnection(TCPOpenCommand *openCmd);
+    virtual void initConnection(TCPOpenCommand *openCmd);
 
     /** Utility: set snd_mss and rcv_wnd in newly created state variables block */
-    void configureStateVariables();
+    virtual void configureStateVariables();
 
     /** Utility: generates ISS and initializes corresponding state variables */
-    void selectInitialSeqNum();
+    virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    bool isSegmentAcceptable(TCPSegment *tcpseg);
+    virtual bool isSegmentAcceptable(TCPSegment *tcpseg);
 
     /** Utility: send SYN */
-    void sendSyn();
+    virtual void sendSyn();
     /** Utility: send SYN+ACK */
-    void sendSynAck();
+    virtual void sendSynAck();
 
   public:
     /** Utility: send ACK */
-    void sendAck();
+    virtual void sendAck();
 
     /**
      * Utility: Send data from sendQueue, at most congestionWindow (-1 means no limit).  FIXME adjust comment!!!
      * If fullSegmentsOnly is set, don't send segments smaller than MSS (needed for Nagle).
      * Returns true if some data was actually sent.
      */
-    bool sendData(bool fullSegmentsOnly, int congestionWindow=-1);
+    virtual bool sendData(bool fullSegmentsOnly, int congestionWindow=-1);
 
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
-    bool sendProbe();
+    virtual bool sendProbe();
 
     /** Utility: retransmit one segment from snd_una */
-    void retransmitOneSegment();
+    virtual void retransmitOneSegment();
 
     /** Utility: retransmit all from snd_una to snd_max */
-    void retransmitData();
+    virtual void retransmitData();
 
     /** Utility: sends RST */
-    void sendRst(uint32 seqNo);
+    virtual void sendRst(uint32 seqNo);
     /** Utility: sends RST (called from TCP) */
     static void sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
     /** Utility: sends RST+ACK (called from TCP) */
     static void sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
 
     /** Utility: sends FIN */
-    void sendFin();
+    virtual void sendFin();
 
     /**
      * Utility: sends one segment of 'bytes' bytes from snd_nxt, and advances snd_nxt.
      * sendData(), sendProbe() and retransmitData() internally all rely on this one.
      */
-    void sendSegment(int bytes);
+    virtual void sendSegment(int bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    void sendToIP(TCPSegment *tcpseg);
+    virtual void sendToIP(TCPSegment *tcpseg);
 
     /** Utility: start SYN-REXMIT timer */
-    void startSynRexmitTimer();
+    virtual void startSynRexmitTimer();
 
     /** Utility: signal to user that connection timed out */
-    void signalConnectionTimeout();
+    virtual void signalConnectionTimeout();
 
     /** Utility: start a timer */
     void scheduleTimeout(cMessage *msg, simtime_t timeout)
@@ -415,17 +415,17 @@ class INET_API TCPConnection
     static void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
 
     /** Utility: sends packet to application */
-    void sendToApp(cMessage *msg);
+    virtual void sendToApp(cMessage *msg);
 
     /** Utility: sends status indication (TCP_I_xxx) to application */
-    void sendIndicationToApp(int code);
+    virtual void sendIndicationToApp(int code);
 
     /** Utility: sends TCP_I_ESTABLISHED indication with TCPConnectInfo to application */
-    void sendEstabIndicationToApp();
+    virtual void sendEstabIndicationToApp();
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/connId */
-    void printConnBrief();
+    virtual void printConnBrief();
     /** Utility: prints important header fields */
     static void printSegmentBrief(TCPSegment *tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
@@ -450,7 +450,7 @@ class INET_API TCPConnection
     /**
      * Destructor.
      */
-    ~TCPConnection();
+    virtual ~TCPConnection();
 
     /* @name Various getters */
     //@{
@@ -467,21 +467,21 @@ class INET_API TCPConnection
      * Normally returns true. A return value of false means that the
      * connection structure must be deleted by the caller (TCP).
      */
-    bool processTimer(cMessage *msg);
+    virtual bool processTimer(cMessage *msg);
 
     /**
      * Process incoming TCP segment. Normally returns true. A return value
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    bool processTCPSegment(TCPSegment *tcpSeg, IPvXAddress srcAddr, IPvXAddress destAddr);
+    virtual bool processTCPSegment(TCPSegment *tcpSeg, IPvXAddress srcAddr, IPvXAddress destAddr);
 
     /**
      * Process commands from the application.
      * Normally returns true. A return value of false means that the
      * connection structure must be deleted by the caller (TCP).
      */
-    bool processAppCommand(cMessage *msg);
+    virtual bool processAppCommand(cMessage *msg);
 };
 
 #endif

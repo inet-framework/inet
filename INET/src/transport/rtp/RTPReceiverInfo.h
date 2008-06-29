@@ -108,7 +108,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
         virtual bool toBeDeleted(simtime_t now);
 
 
-    private:
+    protected:
 
         /**
          * The sequence number of the first RTPPacket received.

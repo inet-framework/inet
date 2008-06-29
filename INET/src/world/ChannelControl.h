@@ -90,47 +90,47 @@ class INET_API ChannelControl : public cSimpleModule
     int numChannels;
 
   protected:
-    void updateConnections(HostRef h);
+    virtual void updateConnections(HostRef h);
 
     /** @brief Calculate interference distance*/
     virtual double calcInterfDist();
 
     /** @brief Set up playground module's display string */
-    void updateDisplayString(cModule *playgroundMod);
+    virtual void updateDisplayString(cModule *playgroundMod);
 
     /** @brief Reads init parameters and calculates a maximal interference distance*/
     virtual void initialize();
 
     /** @brief Throws away expired transmissions. */
-    void purgeOngoingTransmissions();
+    virtual void purgeOngoingTransmissions();
 
     /** @brief Validate the channel identifier */
-    void checkChannel(const int channel);
+    virtual void checkChannel(const int channel);
 
   public:
     ChannelControl();
-    ~ChannelControl();
+    virtual ~ChannelControl();
 
     /** @brief Finds the channelControl module in the network */
     static ChannelControl *get();
 
     /** @brief Registers the given host */
-    HostRef registerHost(cModule *host, const Coord& initialPos);
+    virtual HostRef registerHost(cModule *host, const Coord& initialPos);
 
     /** @brief Returns the "handle" of a previously registered host */
-    HostRef lookupHost(cModule *host);
+    virtual HostRef lookupHost(cModule *host);
 
     /** @brief To be called when the host moved; updates proximity info */
-    void updateHostPosition(HostRef h, const Coord& pos);
+    virtual void updateHostPosition(HostRef h, const Coord& pos);
 
     /** @brief Called when host switches channel */
-    void updateHostChannel(HostRef h, const int channel);
+    virtual void updateHostChannel(HostRef h, const int channel);
 
     /** @brief Provides a list of transmissions currently on the air */
     const TransmissionList& getOngoingTransmissions(const int channel);
 
     /** @brief Notifies the channel control with an ongoing transmission */
-    void addOngoingTransmission(HostRef h, AirFrame *frame);
+    virtual void addOngoingTransmission(HostRef h, AirFrame *frame);
 
     /** @brief Returns the host's position */
     const Coord& getHostPosition(HostRef h)  {return h->pos;}
@@ -139,7 +139,7 @@ class INET_API ChannelControl : public cSimpleModule
     const ModuleList& getNeighbors(HostRef h);
 
     /** @brief Reads init parameters and calculates a maximal interference distance*/
-    double getCommunicationRange(HostRef h) {
+    virtual double getCommunicationRange(HostRef h) {
         return maxInterferenceDistance;
     }
 

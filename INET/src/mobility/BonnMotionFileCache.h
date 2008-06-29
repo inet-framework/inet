@@ -34,7 +34,7 @@ class INET_API BonnMotionFile
 {
   public:
     typedef std::vector<double> Line;
-  private:
+  protected:
     friend class BonnMotionFileCache;
     typedef std::list<Line> LineList;
     LineList lines;

@@ -44,15 +44,15 @@ class INET_API MessageTracer
     static MessageTracer trc;
     FILE *f;
     MessageId *lastId;
-    void open();
+    virtual void open();
   public:
     static inline MessageTracer *getInstance() {return &trc;}
     MessageTracer();
-    ~MessageTracer();
-    void created(MessageId *m);
-    void cloned(MessageId *m);
-    void assigned(MessageId *m);
-    void deleted(MessageId *m);
+    virtual ~MessageTracer();
+    virtual void created(MessageId *m);
+    virtual void cloned(MessageId *m);
+    virtual void assigned(MessageId *m);
+    virtual void deleted(MessageId *m);
 };
 
 

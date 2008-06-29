@@ -77,7 +77,7 @@ class INET_API IPv6NeighbourCache
         simtime_t reachabilityExpires; // reachabilityLastConfirmed+reachableTime
         short numProbesSent;
         cMessage *nudTimeoutEvent; // DELAY or PROBE timer
-        
+
         //WEI-We could have a seperate AREntry in the ND module.
         //But we should merge those information in the neighbour cache for a
         //cleaner solution. if reachability state is INCOMPLETE, it means that
@@ -86,7 +86,7 @@ class INET_API IPv6NeighbourCache
         cMessage *arTimer;//Address Resolution self-message timer
         MsgPtrVector pendingPackets; //ptrs to queued packets associated with this NCE
         IPv6Address nsSrcAddr;//the src addr that was used to send the previous NS
-        
+
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement
         // fields (reachableTime, retransTimer, MTU) update the interface
@@ -108,18 +108,18 @@ class INET_API IPv6NeighbourCache
     typedef std::map<Key,Neighbour> NeighbourMap;
     typedef NeighbourMap::iterator iterator;
 
-  private:
+  protected:
     NeighbourMap neighbourMap;
 
   public:
     IPv6NeighbourCache();
-    ~IPv6NeighbourCache() {}
+    virtual ~IPv6NeighbourCache() {}
 
     /** Returns a neighbour entry, or NULL. */
-    Neighbour *lookup(const IPv6Address& addr, int interfaceID);
-    
+    virtual Neighbour *lookup(const IPv6Address& addr, int interfaceID);
+
     /** Experimental code. */
-    const Key *lookupKeyAddr(Key& key);
+    virtual const Key *lookupKeyAddr(Key& key);
 
     /** For iteration on the internal std::map */
     iterator begin()  {return neighbourMap.begin();}
@@ -129,26 +129,26 @@ class INET_API IPv6NeighbourCache
 
     /** Creates and initializes a neighbour entry with isRouter=false, state=INCOMPLETE. */
     //TODO merge into next one (using default arg)
-    Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID);
+    virtual Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID);
 
     /** Creates and initializes a neighbour entry with isRouter=false, MAC address and state=STALE. */
-    Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID,
+    virtual Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID,
                             MACAddress macAddress);
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), state=INCOMPLETE. */
     //TODO merge into next one (using default arg)
-    Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
+    virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
                         simtime_t expiryTime);
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE. */
-    Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
+    virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
                          MACAddress macAddress, simtime_t expiryTime);
 
     /** Deletes the given neighbour from the cache. */
-    void remove(const IPv6Address& addr, int interfaceID);
+    virtual void remove(const IPv6Address& addr, int interfaceID);
 
     /** Deletes the given neighbour from the cache. */
-    void remove(NeighbourMap::iterator it);
+    virtual void remove(NeighbourMap::iterator it);
 
     /** Returns the name of the given state as string */
     static const char *stateName(ReachabilityState state);

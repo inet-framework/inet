@@ -144,7 +144,7 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  */
 class INET_API RoutingTable: public cSimpleModule, public INotifiable
 {
-  private:
+  protected:
     InterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
@@ -160,10 +160,10 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
 
   protected:
     // set IP address etc on local loopback
-    void configureLoopbackForIPv4();
+    virtual void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
-    bool routeMatches(IPv4Route *entry,
+    virtual bool routeMatches(IPv4Route *entry,
                       const IPAddress& target,
                       const IPAddress& nmask,
                       const IPAddress& gw,
@@ -171,26 +171,26 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                       const char *dev);
 
     // set router Id
-    void autoconfigRouterId();
+    virtual void autoconfigRouterId();
 
     // adjust routes with src=IFACENETMASK to actual interface netmasks
-    void updateNetmaskRoutes();
+    virtual void updateNetmaskRoutes();
 
     // displays summary above the icon
-    void updateDisplayString();
+    virtual void updateDisplayString();
 
   public:
     RoutingTable();
     virtual ~RoutingTable();
 
   protected:
-    int numInitStages() const  {return 4;}
-    void initialize(int stage);
+    virtual int numInitStages() const  {return 4;}
+    virtual void initialize(int stage);
 
     /**
      * Raises an error.
      */
-    void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *);
 
   public:
     /**
@@ -201,46 +201,46 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
 
     /** @name Debug/utility */
     //@{
-    void printIfconfig();
-    void printRoutingTable();
+    virtual void printIfconfig();
+    virtual void printRoutingTable();
     //@}
 
     /** @name Interfaces */
     //@{
-    void configureInterfaceForIPv4(InterfaceEntry *ie);
+    virtual void configureInterfaceForIPv4(InterfaceEntry *ie);
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    InterfaceEntry *getInterfaceByAddress(const IPAddress& address);
+    virtual InterfaceEntry *getInterfaceByAddress(const IPAddress& address);
     //@}
 
     /**
      * IP forwarding on/off
      */
-    bool isIPForwardingEnabled()  {return IPForward;}
+    virtual bool isIPForwardingEnabled()  {return IPForward;}
 
     /**
      * Returns routerId.
      */
-    IPAddress getRouterId()  {return _routerId;}
+    virtual IPAddress getRouterId()  {return _routerId;}
 
     /**
      * Sets routerId.
      */
-    void setRouterId(IPAddress a)  {_routerId = a;}
+    virtual void setRouterId(IPAddress a)  {_routerId = a;}
 
     /** @name Routing functions (query the route table) */
     //@{
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    bool isLocalAddress(const IPAddress& dest);
+    virtual bool isLocalAddress(const IPAddress& dest);
 
     /**
      * The routing function.
      */
-    IPv4Route *findBestMatchingRoute(const IPAddress& dest);
+    virtual IPv4Route *findBestMatchingRoute(const IPAddress& dest);
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -248,7 +248,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Returns the interface Id to send the packets with dest as
      * destination address, or -1 if destination is not in routing table.
      */
-    InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);
+    virtual InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -257,7 +257,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    IPAddress getGatewayForDestAddr(const IPAddress& dest);
+    virtual IPAddress getGatewayForDestAddr(const IPAddress& dest);
     //@}
 
     /** @name Multicast routing functions */
@@ -267,12 +267,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    bool isLocalMulticastAddress(const IPAddress& dest);
+    virtual bool isLocalMulticastAddress(const IPAddress& dest);
 
     /**
      * Returns routes for a multicast address.
      */
-    MulticastRoutes getMulticastRoutesFor(const IPAddress& dest);
+    virtual MulticastRoutes getMulticastRoutesFor(const IPAddress& dest);
     //@}
 
     /** @name Route table manipulation */
@@ -281,17 +281,17 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Total number of routing entries (unicast, multicast entries and default route).
      */
-    int getNumRoutes();
+    virtual int getNumRoutes();
 
     /**
      * Return kth routing entry.
      */
-    IPv4Route *getRoute(int k);
+    virtual IPv4Route *getRoute(int k);
 
     /**
      * Find first routing entry with the given parameters.
      */
-    IPv4Route *findRoute(const IPAddress& target,
+    virtual IPv4Route *findRoute(const IPAddress& target,
                                    const IPAddress& netmask,
                                    const IPAddress& gw,
                                    int metric = 0,
@@ -300,14 +300,14 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Adds a route to the routing table.
      */
-    void addRoute(IPv4Route *entry);
+    virtual void addRoute(IPv4Route *entry);
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    bool deleteRoute(IPv4Route *entry);
+    virtual bool deleteRoute(IPv4Route *entry);
 
     /**
      * Utility function: Returns a vector of all addresses of the node.

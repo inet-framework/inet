@@ -46,21 +46,21 @@ class INET_API ScenarioManager : public cSimpleModule
   protected:
     // utilities
     const char *getRequiredAttribute(cXMLElement *node, const char *attr);
-    cModule *getRequiredModule(cXMLElement *node, const char *attr);
-    cGate *getRequiredGate(cXMLElement *node, const char *modattr, const char *gateattr);
+    virtual cModule *getRequiredModule(cXMLElement *node, const char *attr);
+    virtual cGate *getRequiredGate(cXMLElement *node, const char *modattr, const char *gateattr);
 
     // dispatch to command processors
-    void processCommand(cXMLElement *node);
+    virtual void processCommand(cXMLElement *node);
 
     // command processors
-    void processAtCommand(cXMLElement *node);
-    void processSetParamCommand(cXMLElement *node);
-    void processSetChannelAttrCommand(cXMLElement *node);
-    void processCreateModuleCommand(cXMLElement *node);
-    void processDeleteModuleCommand(cXMLElement *node);
-    void processConnectCommand(cXMLElement *node);
-    void processDisconnectCommand(cXMLElement *node);
-    void processModuleSpecificCommand(cXMLElement *node);
+    virtual void processAtCommand(cXMLElement *node);
+    virtual void processSetParamCommand(cXMLElement *node);
+    virtual void processSetChannelAttrCommand(cXMLElement *node);
+    virtual void processCreateModuleCommand(cXMLElement *node);
+    virtual void processDeleteModuleCommand(cXMLElement *node);
+    virtual void processConnectCommand(cXMLElement *node);
+    virtual void processDisconnectCommand(cXMLElement *node);
+    virtual void processModuleSpecificCommand(cXMLElement *node);
 
   public:
     ScenarioManager() {}
@@ -68,7 +68,7 @@ class INET_API ScenarioManager : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    void updateDisplayString();
+    virtual void updateDisplayString();
 };
 
 #endif

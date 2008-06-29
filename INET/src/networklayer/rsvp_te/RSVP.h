@@ -39,7 +39,7 @@ class LIBTable;
  */
 class INET_API RSVP : public cSimpleModule, public IScriptable
 {
-  private:
+  protected:
 
     struct traffic_path_t
     {
@@ -169,7 +169,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     simtime_t helloTimeout;
     simtime_t retryInterval;
 
-  private:
+  protected:
     TED *tedmod;
     RoutingTable *rt;
     InterfaceTable *ift;
@@ -190,91 +190,91 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     HelloVector HelloList;
 
   protected:
-    void processSignallingMessage(SignallingMsg *msg);
-    void processPSB_TIMER(PsbTimerMsg *msg);
-    void processPSB_TIMEOUT(PsbTimeoutMsg* msg);
-    void processRSB_REFRESH_TIMER(RsbRefreshTimerMsg *msg);
-    void processRSB_COMMIT_TIMER(RsbCommitTimerMsg *msg);
-    void processRSB_TIMEOUT(RsbTimeoutMsg* msg);
-    void processHELLO_TIMER(HelloTimerMsg* msg);
-    void processHELLO_TIMEOUT(HelloTimeoutMsg* msg);
-    void processPATH_NOTIFY(PathNotifyMsg* msg);
-    void processRSVPMessage(RSVPMessage* msg);
-    void processHelloMsg(RSVPHelloMsg* msg);
-    void processPathMsg(RSVPPathMsg* msg);
-    void processResvMsg(RSVPResvMsg* msg);
-    void processPathTearMsg(RSVPPathTear* msg);
-    void processPathErrMsg(RSVPPathError* msg);
+    virtual void processSignallingMessage(SignallingMsg *msg);
+    virtual void processPSB_TIMER(PsbTimerMsg *msg);
+    virtual void processPSB_TIMEOUT(PsbTimeoutMsg* msg);
+    virtual void processRSB_REFRESH_TIMER(RsbRefreshTimerMsg *msg);
+    virtual void processRSB_COMMIT_TIMER(RsbCommitTimerMsg *msg);
+    virtual void processRSB_TIMEOUT(RsbTimeoutMsg* msg);
+    virtual void processHELLO_TIMER(HelloTimerMsg* msg);
+    virtual void processHELLO_TIMEOUT(HelloTimeoutMsg* msg);
+    virtual void processPATH_NOTIFY(PathNotifyMsg* msg);
+    virtual void processRSVPMessage(RSVPMessage* msg);
+    virtual void processHelloMsg(RSVPHelloMsg* msg);
+    virtual void processPathMsg(RSVPPathMsg* msg);
+    virtual void processResvMsg(RSVPResvMsg* msg);
+    virtual void processPathTearMsg(RSVPPathTear* msg);
+    virtual void processPathErrMsg(RSVPPathError* msg);
 
-    PathStateBlock_t* createPSB(RSVPPathMsg *msg);
-    PathStateBlock_t* createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
-    void removePSB(PathStateBlock_t *psb);
-    ResvStateBlock_t* createRSB(RSVPResvMsg *msg);
-    ResvStateBlock_t* createEgressRSB(PathStateBlock_t *psb);
-    void updateRSB(ResvStateBlock_t* rsb, RSVPResvMsg *msg);
-    void removeRSB(ResvStateBlock_t *rsb);
-    void removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index);
+    virtual PathStateBlock_t* createPSB(RSVPPathMsg *msg);
+    virtual PathStateBlock_t* createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
+    virtual void removePSB(PathStateBlock_t *psb);
+    virtual ResvStateBlock_t* createRSB(RSVPResvMsg *msg);
+    virtual ResvStateBlock_t* createEgressRSB(PathStateBlock_t *psb);
+    virtual void updateRSB(ResvStateBlock_t* rsb, RSVPResvMsg *msg);
+    virtual void removeRSB(ResvStateBlock_t *rsb);
+    virtual void removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index);
 
-    void refreshPath(PathStateBlock_t *psbEle);
-    void refreshResv(ResvStateBlock_t *rsbEle);
-    void refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP);
-    void commitResv(ResvStateBlock_t *rsb);
+    virtual void refreshPath(PathStateBlock_t *psbEle);
+    virtual void refreshResv(ResvStateBlock_t *rsbEle);
+    virtual void refreshResv(ResvStateBlock_t *rsbEle, IPAddress PHOP);
+    virtual void commitResv(ResvStateBlock_t *rsb);
 
-    void scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay);
-    void scheduleTimeout(PathStateBlock_t *psbEle);
-    void scheduleRefreshTimer(ResvStateBlock_t *rsbEle, simtime_t delay);
-    void scheduleCommitTimer(ResvStateBlock_t *rsbEle);
-    void scheduleTimeout(ResvStateBlock_t *rsbEle);
+    virtual void scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay);
+    virtual void scheduleTimeout(PathStateBlock_t *psbEle);
+    virtual void scheduleRefreshTimer(ResvStateBlock_t *rsbEle, simtime_t delay);
+    virtual void scheduleCommitTimer(ResvStateBlock_t *rsbEle);
+    virtual void scheduleTimeout(ResvStateBlock_t *rsbEle);
 
-    void sendPathErrorMessage(PathStateBlock_t *psb, int errCode);
-    void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPAddress nextHop, int errCode);
-    void sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPAddress LIH, IPAddress NHOP, bool force);
-    void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay);
+    virtual void sendPathErrorMessage(PathStateBlock_t *psb, int errCode);
+    virtual void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPAddress nextHop, int errCode);
+    virtual void sendPathTearMessage(IPAddress peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPAddress LIH, IPAddress NHOP, bool force);
+    virtual void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay);
 
-    void setupHello();
-    void startHello(IPAddress peer, simtime_t delay);
+    virtual void setupHello();
+    virtual void startHello(IPAddress peer, simtime_t delay);
 
-    void recoveryEvent(IPAddress peer);
+    virtual void recoveryEvent(IPAddress peer);
 
-    bool allocateResource(IPAddress OI, const SessionObj_t& session, double bandwidth);
-    void preempt(IPAddress OI, int priority, double bandwidth);
-    bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPAddress OI);
-    void announceLinkChange(int tedlinkindex);
+    virtual bool allocateResource(IPAddress OI, const SessionObj_t& session, double bandwidth);
+    virtual void preempt(IPAddress OI, int priority, double bandwidth);
+    virtual bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPAddress OI);
+    virtual void announceLinkChange(int tedlinkindex);
 
-    void sendToIP(cMessage *msg, IPAddress destAddr);
+    virtual void sendToIP(cMessage *msg, IPAddress destAddr);
 
-    bool evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddress& OI);
+    virtual bool evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddress& OI);
 
-    PathStateBlock_t* findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
-    ResvStateBlock_t* findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
+    virtual PathStateBlock_t* findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual ResvStateBlock_t* findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
 
-    PathStateBlock_t* findPsbById(int id);
-    ResvStateBlock_t* findRsbById(int id);
+    virtual PathStateBlock_t* findPsbById(int id);
+    virtual ResvStateBlock_t* findRsbById(int id);
 
     std::vector<traffic_session_t>::iterator findSession(const SessionObj_t& session);
     std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj_t &sender);
 
-    HelloState_t* findHello(IPAddress peer);
+    virtual HelloState_t* findHello(IPAddress peer);
 
-    void print(RSVPPathMsg *p);
-    void print(RSVPResvMsg *r);
+    virtual void print(RSVPPathMsg *p);
+    virtual void print(RSVPResvMsg *r);
 
-    void readTrafficFromXML(const cXMLElement *traffic);
-    void readTrafficSessionFromXML(const cXMLElement *session);
-    EroVector readTrafficRouteFromXML(const cXMLElement *route);
+    virtual void readTrafficFromXML(const cXMLElement *traffic);
+    virtual void readTrafficSessionFromXML(const cXMLElement *session);
+    virtual EroVector readTrafficRouteFromXML(const cXMLElement *route);
 
-    void createPath(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual void createPath(const SessionObj_t& session, const SenderTemplateObj_t& sender);
 
-    void pathProblem(PathStateBlock_t *psb);
+    virtual void pathProblem(PathStateBlock_t *psb);
 
-    void addSession(const cXMLElement& node);
-    void delSession(const cXMLElement& node);
+    virtual void addSession(const cXMLElement& node);
+    virtual void delSession(const cXMLElement& node);
 
-  private:
+  protected:
 
     friend class SimpleClassifier;
 
-    int getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual int getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender);
 
   public:
     RSVP();

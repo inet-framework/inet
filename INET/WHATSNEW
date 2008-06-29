@@ -1,8 +1,33 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2008????
+INET-2008063x?
 -------------
+Internal snapshot, for omnetpp-4.0b2.
+
+- to enable and encourage extending INET via subclassing (as opposed to 
+  patching), nearly all member functions made virtual (except in data classes 
+  like IPAddress), and also, private sections in most classes were changed to 
+  protected.
+
+
+INET-20080624
+-------------
+Internal snapshot, for omnetpp-4.0b2.
+
+- updated for OMNeT++ 4.0b2
+
+- extensive renaming: added "get" verb to getter methods in most classes;
+  also eliminated @addGetVerb(true) from message classes
+
+- revived the RTP model: starting from Ahmed Ayadi's patch, migrated the code
+  to OMNeT++ 4.0, and started some refactoring (started introducing .msg files 
+  for handcoded message classes; not yet finished)
+
+
+INET-20080606 
+-------------
+Internal snapshot, for omnetpp-4.0b1.
 
 - directory structure reorganized
 

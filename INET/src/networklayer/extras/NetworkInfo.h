@@ -35,8 +35,8 @@ class INET_API NetworkInfo : public cSimpleModule, public IScriptable
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node);
 
-  private:
-    void dumpRoutingInfo(cModule *target, const char *filename, bool append, bool compat);
+  protected:
+    virtual void dumpRoutingInfo(cModule *target, const char *filename, bool append, bool compat);
 };
 
 

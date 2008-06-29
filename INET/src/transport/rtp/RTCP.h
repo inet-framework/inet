@@ -105,7 +105,7 @@ class INET_API RTCP : public cSimpleModule
          */
         virtual void readRet(cMessage *sifpIn);
 
-    private:
+    protected:
 
         /**
          * The maximum size an RTCPCompundPacket can have.

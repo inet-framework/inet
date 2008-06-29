@@ -39,7 +39,7 @@
  */
 class INET_API RoutingTableParser
 {
-  private:
+  protected:
     InterfaceTable *ift;
     RoutingTable *rt;
 
@@ -52,34 +52,34 @@ class INET_API RoutingTableParser
     /**
      * Read Routing Table file; return 0 on success, -1 on error
      */
-    int readRoutingTableFromFile (const char *filename);
+    virtual int readRoutingTableFromFile (const char *filename);
 
-  private:
+  protected:
     // Parsing functions
 
 
     // Used to create specific "files" char arrays without comments or blanks
     // from original file.
-    char *createFilteredFile (char *file,
+    virtual char *createFilteredFile (char *file,
                               int &charpointer,
                               const char *endtoken);
 
     // Go through the ifconfigFile char array, parse all entries and
     // write them into the interface table.
     // Loopback interface is not part of the file.
-    void parseInterfaces(char *ifconfigFile);
+    virtual void parseInterfaces(char *ifconfigFile);
 
     // Go through the routeFile char array, parse all entries line by line and
     // write them into the routing table.
-    void parseRouting(char *routeFile);
+    virtual void parseRouting(char *routeFile);
 
-    char *parseEntry (char *ifconfigFile,
+    virtual char *parseEntry (char *ifconfigFile,
                       const char *tokenStr,
                       int &charpointer,
                       char* destStr);
 
     // Convert string separated by ':' into dynamic string array.
-    void parseMulticastGroups (char *groupStr, InterfaceEntry*);
+    virtual void parseMulticastGroups (char *groupStr, InterfaceEntry*);
 
     // Return 1 if beginning of str1 and str2 is equal up to str2-len,
     // otherwise 0.

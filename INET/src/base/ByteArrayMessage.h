@@ -28,9 +28,9 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     ByteArrayMessage& operator=(const ByteArrayMessage& other) {ByteArrayMessage_Base::operator=(other); return *this;}
     virtual ByteArrayMessage *dup() const {return new ByteArrayMessage(*this);}
 
-    void setDataFromBuffer(const void *ptr, int length);
-    void copyDataToBuffer(void *ptr, int length);
-    void removePrefix(int length);
+    virtual void setDataFromBuffer(const void *ptr, int length);
+    virtual void copyDataToBuffer(void *ptr, int length);
+    virtual void removePrefix(int length);
 };
 
 #endif

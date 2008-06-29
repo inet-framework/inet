@@ -44,12 +44,12 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-  private:
+  protected:
     // parameters for autoconfig
     bool autoconfigInProgress; // true if autoconfig is currently ongoing
     double lowestTxrateSuggested;
     bool duplexVetoed;
- 
+
     // states
     int  backoffs;          // Value of backoff for exponential back-off algorithm
     int  numConcurrentTransmissions; // number of colliding frames -- we must receive this many jams
@@ -72,18 +72,18 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processMsgFromNetwork(cMessage *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
-    void handleEndRxPeriod();
-    void handleEndBackoffPeriod();
-    void handleEndJammingPeriod();
+    virtual void handleEndRxPeriod();
+    virtual void handleEndBackoffPeriod();
+    virtual void handleEndJammingPeriod();
 
     // setup, autoconfig
-    void startAutoconfig();
-    void handleAutoconfigMessage(cMessage *msg);
-    void printState();
+    virtual void startAutoconfig();
+    virtual void handleAutoconfigMessage(cMessage *msg);
+    virtual void printState();
 
     // helpers
-    void scheduleEndRxPeriod(cMessage*);
-    void sendJamSignal();
-    void handleRetransmission();
-    void startFrameTransmission();
+    virtual void scheduleEndRxPeriod(cMessage*);
+    virtual void sendJamSignal();
+    virtual void handleRetransmission();
+    virtual void startFrameTransmission();
 };

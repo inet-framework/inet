@@ -52,12 +52,12 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
-    void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
-    void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
 
-    void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
 
 #endif

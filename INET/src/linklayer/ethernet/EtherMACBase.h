@@ -122,24 +122,24 @@ class INET_API EtherMACBase : public cSimpleModule
     EtherMACBase();
     virtual ~EtherMACBase();
 
-    long getQueueLength() {return txQueue.length();}
-    MACAddress getMACAddress() {return address;}
+    virtual long getQueueLength() {return txQueue.length();}
+    virtual MACAddress getMACAddress() {return address;}
 
   protected:
     //  initialization
     virtual void initialize();
     virtual void initializeTxrate() = 0;
-    void initializeFlags();
-    void initializeMACAddress();
-    void initializeQueueModule();
-    void initializeNotificationBoard();
-    void initializeStatistics();
-    void registerInterface(double txrate);
+    virtual void initializeFlags();
+    virtual void initializeMACAddress();
+    virtual void initializeQueueModule();
+    virtual void initializeNotificationBoard();
+    virtual void initializeStatistics();
+    virtual void registerInterface(double txrate);
 
     // helpers
-    bool checkDestinationAddress(EtherFrame *frame);
-    void calculateParameters();
-    void printParameters();
+    virtual bool checkDestinationAddress(EtherFrame *frame);
+    virtual void calculateParameters();
+    virtual void printParameters();
 
     // finish
     virtual void finish();
@@ -152,21 +152,21 @@ class INET_API EtherMACBase : public cSimpleModule
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndPausePeriod();
-    void scheduleEndIFGPeriod();
-    void scheduleEndTxPeriod(cMessage*);
-    void scheduleEndPausePeriod(int pauseUnits);
+    virtual void scheduleEndIFGPeriod();
+    virtual void scheduleEndTxPeriod(cMessage*);
+    virtual void scheduleEndPausePeriod(int pauseUnits);
 
     // helpers
-    bool checkAndScheduleEndPausePeriod();
-    void fireChangeNotification(int type, cMessage *msg);
-    void beginSendFrames();
-    void frameReceptionComplete(EtherFrame *frame);
-    void processReceivedDataFrame(EtherFrame *frame);
-    void processPauseCommand(int pauseUnits);
+    virtual bool checkAndScheduleEndPausePeriod();
+    virtual void fireChangeNotification(int type, cMessage *msg);
+    virtual void beginSendFrames();
+    virtual void frameReceptionComplete(EtherFrame *frame);
+    virtual void processReceivedDataFrame(EtherFrame *frame);
+    virtual void processPauseCommand(int pauseUnits);
 
     // display
-    void updateDisplayString();
-    void updateConnectionColor(int txState);
+    virtual void updateDisplayString();
+    virtual void updateConnectionColor(int txState);
 };
 
 #endif

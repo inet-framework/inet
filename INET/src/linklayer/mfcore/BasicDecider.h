@@ -75,7 +75,7 @@ class INET_API BasicDecider : public BasicModule
     virtual void initialize(int);
 
     /** @brief Called every time a message arrives*/
-    void handleMessage( cMessage* );
+    virtual void handleMessage( cMessage* );
 
    protected:
     /**
@@ -113,7 +113,7 @@ class INET_API BasicDecider : public BasicModule
      */
     /*@{*/
     /** @brief Sends a message to the upper layer*/
-    void sendUp(AirFrame*);
+    virtual void sendUp(AirFrame*);
     /*@}*/
 
 };

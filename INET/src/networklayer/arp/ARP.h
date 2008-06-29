@@ -84,25 +84,25 @@ class INET_API ARP : public cSimpleModule
 
   public:
     ARP() {}
-    ~ARP();
+    virtual ~ARP();
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    void processOutboundPacket(cMessage *msg);
-    void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
+    virtual void processOutboundPacket(cMessage *msg);
+    virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress);
 
-    void initiateARPResolution(ARPCacheEntry *entry);
-    void sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress);
-    void requestTimedOut(cMessage *selfmsg);
-    bool addressRecognized(IPAddress destAddr, InterfaceEntry *ie);
-    void processARPPacket(ARPPacket *arp);
-    void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
+    virtual void initiateARPResolution(ARPCacheEntry *entry);
+    virtual void sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress);
+    virtual void requestTimedOut(cMessage *selfmsg);
+    virtual bool addressRecognized(IPAddress destAddr, InterfaceEntry *ie);
+    virtual void processARPPacket(ARPPacket *arp);
+    virtual void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 
-    void dumpARPPacket(ARPPacket *arp);
-    void updateDisplayString();
+    virtual void dumpARPPacket(ARPPacket *arp);
+    virtual void updateDisplayString();
 
 };
 

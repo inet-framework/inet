@@ -126,19 +126,19 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void startAssociation(APInfo *ap, simtime_t timeout);
 
     /** Utility function: looks up AP in our AP list. Returns NULL if not found. */
-    APInfo *lookupAP(const MACAddress& address);
+    virtual APInfo *lookupAP(const MACAddress& address);
 
     /** Utility function: clear the AP list, and cancel any pending authentications. */
-    void clearAPList();
+    virtual void clearAPList();
 
     /** Utility function: switches to the given radio channel. */
-    void changeChannel(int channelNum);
+    virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    void storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body);
+    virtual void storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
-    bool scanNextChannel();
+    virtual bool scanNextChannel();
 
     /** Broadcasts a Probe Request */
     virtual void sendProbeRequest();
@@ -147,22 +147,22 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void beaconLost();
 
     /** Sends back result of scanning to the agent */
-    void sendScanConfirm();
+    virtual void sendScanConfirm();
 
     /** Sends back result of authentication to the agent */
-    void sendAuthenticationConfirm(APInfo *ap, int resultCode);
+    virtual void sendAuthenticationConfirm(APInfo *ap, int resultCode);
 
     /** Sends back result of association to the agent */
-    void sendAssociationConfirm(APInfo *ap, int resultCode);
+    virtual void sendAssociationConfirm(APInfo *ap, int resultCode);
 
     /** Utility function: Cancel the existing association */
-    void disassociate();
+    virtual void disassociate();
 
     /** Utility function: sends a confirmation to the agent */
-    void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
+    virtual void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
 
     /** Utility function: sends a management frame */
-    void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
+    virtual void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);

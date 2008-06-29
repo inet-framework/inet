@@ -79,7 +79,7 @@ class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
     virtual void initialize(int);
 
     /** @brief Register the interface in InterfaceTable */
-    void registerInterface();
+    virtual void registerInterface();
 
     /** @brief Delete all dynamically allocated objects of the module*/
     virtual void finish();

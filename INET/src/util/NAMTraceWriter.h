@@ -40,10 +40,10 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
     NAMTrace *nt;
 
   protected:
-    void recordNodeEvent(char *state, char *shape);
-    void recordLinkEvent(int peernamid, double datarate, simtime_t delay, char *state);
-    void recordLinkEvent(InterfaceEntry *ie, char *state);
-    void recordPacketEvent(const char event, int peernamid, cMessage *msg);
+    virtual void recordNodeEvent(char *state, char *shape);
+    virtual void recordLinkEvent(int peernamid, double datarate, simtime_t delay, char *state);
+    virtual void recordLinkEvent(InterfaceEntry *ie, char *state);
+    virtual void recordPacketEvent(const char event, int peernamid, cMessage *msg);
 
   protected:
     virtual int numInitStages() const {return 3;}

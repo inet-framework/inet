@@ -27,7 +27,7 @@
  */
 class INET_API PathLossReceptionModel : public IReceptionModel
 {
-  private:
+  protected:
     double pathLossAlpha;
 
   public:
