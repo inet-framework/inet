@@ -199,11 +199,10 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
-    /** @name Debug/utility */
-    //@{
-    virtual void printIfconfig();
+    /**
+     * For debugging
+     */
     virtual void printRoutingTable();
-    //@}
 
     /** @name Interfaces */
     //@{

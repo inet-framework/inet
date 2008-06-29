@@ -304,8 +304,6 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         /************End Of Neighbour Solicitation Stuff***********************/
 
         /************Neighbour Advertisment Stuff)*****************************/
-        virtual IPv6NeighbourAdvertisement *createAndSendNAPacket(IPv6NeighbourSolicitation *ns,
-            const IPv6Address& nsSrcAddr, const IPv6Address& nsDestAddr, InterfaceEntry *ie);
         virtual void sendSolicitedNA(IPv6NeighbourSolicitation *ns,
             IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie);
         virtual void sendUnsolicitedNA(InterfaceEntry *ie);

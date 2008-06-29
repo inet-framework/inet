@@ -191,20 +191,25 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
     param.parse(valueAttr);
 }
 
-/* FIXME finish and test them
 void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
 {
+    // FIXME finish and test
 }
+
 void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
 {
+    // FIXME finish and test
 }
+
 void ScenarioManager::processConnectCommand(cXMLElement *node)
 {
+    // FIXME finish and test
 }
+
 void ScenarioManager::processDisconnectCommand(cXMLElement *node)
 {
+    // FIXME finish and test
 }
-*/
 
 void ScenarioManager::updateDisplayString()
 {

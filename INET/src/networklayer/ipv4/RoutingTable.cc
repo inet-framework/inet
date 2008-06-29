@@ -145,7 +145,6 @@ void RoutingTable::initialize(int stage)
         // Should be in stage=3 because autoconfigurator runs in stage=2.
         updateNetmaskRoutes();
 
-        //printIfconfig();
         //printRoutingTable();
     }
 }

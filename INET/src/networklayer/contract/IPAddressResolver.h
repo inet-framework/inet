@@ -52,7 +52,7 @@ class INET_API IPAddressResolver
     // internal
     virtual IPv6Address getIPv6AddressFrom(InterfaceTable *ift);
     // internal
-    virtual IPv6Address getIPv6AddressFrom(InterfaceTable *ift, int scope);
+    //virtual IPv6Address getIPv6AddressFrom(InterfaceTable *ift, int scope);
     // internal
     virtual IPv6Address getInterfaceIPv6Address(InterfaceEntry *ie);
 

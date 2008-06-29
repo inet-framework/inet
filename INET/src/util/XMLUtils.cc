@@ -2,10 +2,6 @@
 #include "XMLUtils.h"
 #include "IPAddressResolver.h"
 
-#ifdef _MSC_VER
-#define strcasecmp  stricmp
-#endif
-
 const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
