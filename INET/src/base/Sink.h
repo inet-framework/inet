@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Levente Meszaros
+// Copyright (C) 1992-2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,36 +16,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __ETHER_DUPLEX_MAC_H
-#define __ETHER_DUPLEX_MAC_H
+#ifndef __INET_SINK_H
+#define __INET_SINK_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
-#include "EtherFrame_m.h"
-#include "EtherMACBase.h"
 
 /**
- * A simplified version of EtherMAC. Since modern Ethernets typically
- * operate over duplex links where's no contention, the original CSMA/CD
- * algorithm is no longer needed. This simplified implementation doesn't
- * contain CSMA/CD, frames are just simply queued and sent out one by one.
+ * A module that just deletes every packet it receives, and collects
+ * basic statistics (packet count, bit count, packet rate, bit rate).
  */
-class INET_API EtherMAC2 : public EtherMACBase
+class INET_API Sink : public cSimpleModule
 {
-  public:
-    EtherMAC2();
-
+  protected:
+    int numPackets;
+    long numBits;
+    double throughput; // bit/sec
+    double packetPerSec;
   protected:
     virtual void initialize();
-    virtual void initializeTxrate();
     virtual void handleMessage(cMessage *msg);
-
-    // event handlers
-    virtual void startFrameTransmission();
-    virtual void processFrameFromUpperLayer(EtherFrame *frame);
-    virtual void processMsgFromNetwork(cMessage *msg);
-    virtual void handleEndIFGPeriod();
-    virtual void handleEndTxPeriod();
+    virtual void finish();
 };
 
 #endif
+
+

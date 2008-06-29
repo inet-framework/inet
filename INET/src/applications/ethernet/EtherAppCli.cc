@@ -19,47 +19,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <omnetpp.h>
-#include "INETDefs.h"
+#include "EtherAppCli.h"
 #include "Ieee802Ctrl_m.h"
 #include "EtherApp_m.h"
 #include "utils.h"
 
-
-
-/**
- * Simple traffic generator for the Ethernet model.
- */
-class INET_API EtherAppCli : public cSimpleModule
-{
-    // send parameters
-    long seqNum;
-    cPar *reqLength;
-    cPar *respLength;
-    cPar *waitTime;
-
-    int localSAP;
-    int remoteSAP;
-    MACAddress destMACAddress;
-
-    // receive statistics
-    long packetsSent;
-    long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
-
-  protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const {return 2;}
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
-    MACAddress resolveDestMACAddress();
-
-    void sendPacket();
-    void receivePacket(cMessage *msg);
-    void registerDSAP(int dsap);
-};
 
 Define_Module (EtherAppCli);
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mészáros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,7 +19,11 @@
 #ifndef __FSMA_H
 #define __FSMA_H
 
+#include "INETDefs.h"
+
 /*
+    This is an alternative FSM implementation.
+
     Here is an example:
 
     FSMA_Switch(fsm)
@@ -42,6 +46,9 @@
                 doBaz);
         }
     }
+
+    After macro expansion, a state machine code looks like something along
+    these lines:
 
     bool ___is_event = true;
     bool ___exit = false;

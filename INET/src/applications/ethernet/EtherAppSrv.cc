@@ -18,38 +18,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <omnetpp.h>
-
+#include "EtherAppSrv.h"
 #include "Ieee802Ctrl_m.h"
 #include "EtherApp_m.h"
 #include "utils.h"
-
-
-#define MAX_REPLY_CHUNK_SIZE   1497
-
-
-/**
- * Server-side process EtherAppCli.
- */
-class INET_API EtherAppSrv : public cSimpleModule
-{
-  protected:
-    int localSAP;
-    int remoteSAP;
-
-    long packetsSent;
-    long packetsReceived;
-    cOutVector eedVector;
-    cStdDev eedStats;
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
-    void registerDSAP(int dsap);
-    void sendPacket(cMessage *datapacket, const MACAddress& destAddr);
-};
 
 Define_Module (EtherAppSrv);
 

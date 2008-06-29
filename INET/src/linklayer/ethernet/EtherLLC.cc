@@ -16,50 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
-#include <stdio.h>
-#include <map>
-#include <omnetpp.h>
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "EtherLLC.h"
 #include "Ieee802Ctrl_m.h"
 #include "utils.h"
 
-
-/**
- * Implements the LLC sub-layer of the Datalink Layer in Ethernet networks
- */
-class INET_API EtherLLC : public cSimpleModule
-{
-  protected:
-    int seqNum;
-    std::map<int,int> dsapToPort;  // DSAP registration table
-
-    // statistics
-    long dsapsRegistered;       // number DSAPs (higher layers) registered
-    long totalFromHigherLayer;  // total number of packets received from higher layer
-    long totalFromMAC;          // total number of frames received from MAC
-    long totalPassedUp;         // total number of packets passed up to higher layer
-    long droppedUnknownDSAP;    // frames dropped because no such DSAP was registered here
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
-    virtual void processPacketFromHigherLayer(cMessage *msg);
-    virtual void processFrameFromMAC(EtherFrameWithLLC *msg);
-    virtual void handleRegisterSAP(cMessage *msg);
-    virtual void handleDeregisterSAP(cMessage *msg);
-    virtual void handleSendPause(cMessage *msg);
-    virtual int findPortForSAP(int sap);
-
-    // utility function
-    void updateDisplayString();
-};
 
 Define_Module(EtherLLC);
 

@@ -16,28 +16,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "Sink.h"
 
-#include <omnetpp.h>
-#include "INETDefs.h"
-
-/**
- * A module that just deletes every packet it receives, and collects
- * basic statistics (packet count, bit count, packet rate, bit rate).
- */
-class INET_API Sink : public cSimpleModule
-{
-  protected:
-    int numPackets;
-    long numBits;
-    double throughput; // bit/sec
-    double packetPerSec;
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-};
 
 Define_Module(Sink);
+
 
 void Sink::initialize()
 {

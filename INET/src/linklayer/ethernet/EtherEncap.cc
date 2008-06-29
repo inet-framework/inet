@@ -21,8 +21,7 @@
 #endif
 
 #include <stdio.h>
-#include <omnetpp.h>
-#include "Ethernet.h"
+#include "EtherEncap.h"
 #include "EtherFrame_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "utils.h"
@@ -30,31 +29,6 @@
 #include "InterfaceTableAccess.h"
 #include "EtherMAC.h"
 
-
-/**
- * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
- */
-class INET_API EtherEncap : public cSimpleModule
-{
-  protected:
-    int seqNum;
-
-    // statistics
-    long totalFromHigherLayer;  // total number of packets received from higher layer
-    long totalFromMAC;          // total number of frames received from MAC
-    long totalPauseSent;        // total number of PAUSE frames sent
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-
-    virtual void processPacketFromHigherLayer(cMessage *msg);
-    virtual void processFrameFromMAC(EtherFrame *msg);
-    virtual void handleSendPause(cMessage *msg);
-
-    virtual void updateDisplayString();
-};
 
 Define_Module(EtherEncap);
 

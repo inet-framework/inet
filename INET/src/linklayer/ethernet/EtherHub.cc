@@ -16,34 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
-#include <omnetpp.h>
+#include "EtherHub.h"
 #include "EtherFrame_m.h"  // for EtherAutoconfig only
 #include "utils.h"
 
 
-
-/**
- * Models a wiring hub. It simply broadcasts the received message
- * on all other ports.
- */
-class INET_API EtherHub : public cSimpleModule
-{
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
-
-  private:
-    int ports;          // number of ports
-    long numMessages;   // number of messages handled
-
-};
-
 Define_Module(EtherHub);
+
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {

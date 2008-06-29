@@ -16,55 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
-#include <vector>
-#include <omnetpp.h>
-#include "INETDefs.h"
+#include "EtherBus.h"
 #include "EtherFrame_m.h"  // for EtherAutoconfig only
 #include "utils.h"
-
-// Direction of frame travel on bus; also used as selfmessage kind
-#define UPSTREAM        0
-#define DOWNSTREAM      1
-
-
-
-// Implements the physical locations on the bus where each network entity is connected to on the bus
-struct BusTap
-{
-    int id;                         // which tap is this
-    double position;                // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
-    simtime_t propagationDelay[2];  // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
-};
-
-/**
- * Implements the bus which connects hosts, switches and other LAN entities on an Ethernet LAN.
- */
-class INET_API EtherBus : public cSimpleModule
-{
-  public:
-    EtherBus();
-    virtual ~EtherBus();
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage*);
-    virtual void finish();
-
-    // tokenize string containing space-separated numbers into the array
-    void tokenize(const char *str, std::vector<double>& array);
-
-  private:
-    double  propagationSpeed;  // propagation speed of electrical signals through copper
-
-    BusTap *tap;  // physical locations of where the hosts is connected to the bus
-    int taps;     // number of tap points on the bus
-
-    long numMessages;             // number of messages handled
-};
 
 Define_Module(EtherBus);
 
@@ -247,3 +201,5 @@ void EtherBus::finish ()
     if (t>0)
         recordScalar("messages/sec", numMessages/t);
 }
+
+

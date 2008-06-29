@@ -64,13 +64,13 @@ int RoutingTableParser::strcpyword(char *dest, const char *src)
 }
 
 
-void RoutingTableParser::skipBlanks (char *str, int &charptr)
+void RoutingTableParser::skipBlanks(char *str, int &charptr)
 {
     for(;isspace(str[charptr]); charptr++) ;
 }
 
 
-int RoutingTableParser::readRoutingTableFromFile (const char *filename)
+int RoutingTableParser::readRoutingTableFromFile(const char *filename)
 {
     FILE *fp;
     int charpointer;
@@ -134,9 +134,7 @@ int RoutingTableParser::readRoutingTableFromFile (const char *filename)
 
 }
 
-char *RoutingTableParser::createFilteredFile (char *file,
-                                              int &charpointer,
-                                              const char *endtoken)
+char *RoutingTableParser::createFilteredFile(char *file, int &charpointer, const char *endtoken)
 {
     int i = 0;
     char *filterFile = new char[MAX_FILESIZE];
@@ -263,10 +261,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 }
 
 
-char *RoutingTableParser::parseEntry (char *ifconfigFile,
-                                               const char *tokenStr,
-                                               int &charpointer,
-                                               char* destStr)
+char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
+                                     int& charpointer, char *destStr)
 {
     int temp = 0;
 
@@ -281,8 +277,7 @@ char *RoutingTableParser::parseEntry (char *ifconfigFile,
 }
 
 
-void RoutingTableParser::parseMulticastGroups (char *groupStr,
-                                              InterfaceEntry *itf)
+void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *itf)
 {
     IPv4InterfaceData::IPAddressVector mcg = itf->ipv4()->getMulticastGroups();
 
