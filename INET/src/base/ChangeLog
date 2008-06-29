@@ -1,0 +1,10 @@
+2008-06-29  Andras Varga
+
+	* AbstractQueue improved so that if serviceTime is zero, it does not
+	  schedule a timer but sends out the message (i.e. invokes endService())
+	  immediately
+
+2006-05-09  Andras Varga
+
+	* added FSMA.h (written by Levente Meszaros for the IEEE802.11 model)
+
