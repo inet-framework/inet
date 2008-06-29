@@ -10,6 +10,9 @@ Internal snapshot, for omnetpp-4.0b2.
   like IPAddress), and also, private sections in most classes were changed to 
   protected.
 
+- some refactoring on TCP: created factory methods for TCPSegment and 
+  TCPConnection, to allow for customizing them via subclassing
+
 
 INET-20080624
 -------------
