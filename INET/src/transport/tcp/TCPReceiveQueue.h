@@ -47,7 +47,7 @@ class TCPCommand;
 class INET_API TCPReceiveQueue : public cPolymorphic
 {
   protected:
-    TCPConnection *conn; // TCP connection object
+    TCPConnection *conn; // the connection that owns this queue
 
   public:
     /**
@@ -59,6 +59,11 @@ class INET_API TCPReceiveQueue : public cPolymorphic
      * Virtual dtor.
      */
     virtual ~TCPReceiveQueue() {}
+
+    /**
+     * Set the connection that owns this queue.
+     */
+    virtual void setConnection(TCPConnection *_conn)  {conn = _conn;}
 
     /**
      * Set initial receive sequence number.

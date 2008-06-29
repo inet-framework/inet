@@ -93,6 +93,17 @@ std::string TCPStateVariables::detailedInfo() const
     return out.str();
 }
 
+TCPConnection::TCPConnection()
+{
+    // Note: this ctor is NOT used to create live connections, only
+    // temporary ones to invoke segmentArrivalWhileClosed() on
+    sendQueue = NULL;
+    receiveQueue = NULL;
+    tcpAlgorithm = NULL;
+    state = NULL;
+    the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = NULL;
+    sndWndVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector = NULL;
+}
 
 //
 // FSM framework, TCP FSM

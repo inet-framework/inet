@@ -57,9 +57,8 @@ class INET_API TCPAlgorithm : public cPolymorphic
     virtual ~TCPAlgorithm() {}
 
     /**
-     * Assign this object to a TCPConnection. SendQueue and receiveQueue of
-     * TCPConnection must be set already at this time, because we cache
-     * their pointers here.
+     * Assign this object to a TCPConnection. Its sendQueue and receiveQueue
+     * must be set already at this time, because we cache their pointers here.
      */
     void setConnection(TCPConnection *_conn)  {conn = _conn;}
 

@@ -38,6 +38,9 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress sr
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
 
+    // This segment doesn't belong to any connection, so this object
+    // must be a temp object created solely for the purpose of calling us
+    ASSERT(state==NULL);
     tcpEV << "Segment doesn't belong to any existing connection\n";
 
     // RFC 793:

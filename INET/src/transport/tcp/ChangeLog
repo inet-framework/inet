@@ -1,3 +1,8 @@
+2008-06-29 Andras Varga
+
+	* some refactoring: created factory methods for TCPSegment and 
+	TCPConnection, to allow customizing them via subclassing
+
 2006-03-22 Andras Varga
 
 	* TCPConnectionEventProc.cc, TCPConnectionRcvSegment.cc: when the user

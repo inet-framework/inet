@@ -141,9 +141,11 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
+    conn->sendQueue->setConnection(conn);
 
     const char *receiveQueueClass = receiveQueue->getClassName();
     conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
+    conn->receiveQueue->setConnection(conn);
 
     const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
@@ -234,6 +236,11 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress de
     }
 }
 
+TCPSegment *TCPConnection::createTCPSegment(const char *name)
+{
+    return new TCPSegment(name);
+}
+
 void TCPConnection::signalConnectionTimeout()
 {
     sendIndicationToApp(TCP_I_TIMED_OUT);
@@ -316,7 +323,7 @@ void TCPConnection::selectInitialSeqNum()
 
 bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg)
 {
-    // segment entirely falls in receive window
+    // check that segment entirely falls in receive window
     //FIXME probably not this simple, see old code segAccept() below...
     return seqGE(tcpseg->getSequenceNo(),state->rcv_nxt) &&
            seqLE(tcpseg->getSequenceNo()+tcpseg->getPayloadLength(),state->rcv_nxt+state->rcv_wnd);
@@ -330,7 +337,7 @@ void TCPConnection::sendSyn()
         opp_error("Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
-    TCPSegment *tcpseg = new TCPSegment("SYN");
+    TCPSegment *tcpseg = createTCPSegment("SYN");
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
     tcpseg->setWindow(state->rcv_wnd);
@@ -344,7 +351,7 @@ void TCPConnection::sendSyn()
 void TCPConnection::sendSynAck()
 {
     // create segment
-    TCPSegment *tcpseg = new TCPSegment("SYN+ACK");
+    TCPSegment *tcpseg = createTCPSegment("SYN+ACK");
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
@@ -364,7 +371,7 @@ void TCPConnection::sendRst(uint32 seqNo)
 
 void TCPConnection::sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort)
 {
-    TCPSegment *tcpseg = new TCPSegment("RST");
+    TCPSegment *tcpseg = createTCPSegment("RST");
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -378,7 +385,7 @@ void TCPConnection::sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int s
 
 void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort)
 {
-    TCPSegment *tcpseg = new TCPSegment("RST+ACK");
+    TCPSegment *tcpseg = createTCPSegment("RST+ACK");
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -394,7 +401,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddr
 
 void TCPConnection::sendAck()
 {
-    TCPSegment *tcpseg = new TCPSegment("ACK");
+    TCPSegment *tcpseg = createTCPSegment("ACK");
 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(state->snd_nxt);
@@ -410,7 +417,7 @@ void TCPConnection::sendAck()
 
 void TCPConnection::sendFin()
 {
-    TCPSegment *tcpseg = new TCPSegment("FIN");
+    TCPSegment *tcpseg = createTCPSegment("FIN");
 
     // Note: ACK bit *must* be set for both FIN and FIN+ACK. What makes
     // the difference for FIN+ACK is that its ackNo acks the remote TCP's FIN.

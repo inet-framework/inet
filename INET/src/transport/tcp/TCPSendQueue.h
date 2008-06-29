@@ -78,16 +78,24 @@
  */
 class INET_API TCPSendQueue : public cPolymorphic
 {
+  protected:
+    TCPConnection *conn; // the connection that owns this queue
+
   public:
     /**
      * Ctor.
      */
-    TCPSendQueue()  {}
+    TCPSendQueue()  {conn=NULL;}
 
     /**
      * Virtual dtor.
      */
     virtual ~TCPSendQueue() {}
+
+    /**
+     * Set the connection that owns this queue.
+     */
+    virtual void setConnection(TCPConnection *_conn)  {conn = _conn;}
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first

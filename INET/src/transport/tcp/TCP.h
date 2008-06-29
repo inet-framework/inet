@@ -144,8 +144,14 @@ class INET_API TCP : public cSimpleModule
     short lastEphemeralPort;
     std::multiset<short> usedEphemeralPorts;
 
+  protected:
+    /** Factory method; may be overriden for customizing TCP */
+    virtual TCPConnection *createConnection(int appGateIndex, int connId);
+
+    // utility methods
     virtual TCPConnection *findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr);
     virtual TCPConnection *findConnForApp(int appGateIndex, int connId);
+    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void updateDisplayString();
 

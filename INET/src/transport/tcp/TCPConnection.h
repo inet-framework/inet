@@ -289,7 +289,6 @@ class INET_API TCPConnection
     cOutVector *rcvAckVector;   // received ackNo (= snd_una)
     cOutVector *unackedVector;  // number of bytes unacknowledged
 
-
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
@@ -355,6 +354,7 @@ class INET_API TCPConnection
 
     /** Utility: send SYN */
     virtual void sendSyn();
+
     /** Utility: send SYN+ACK */
     virtual void sendSynAck();
 
@@ -380,10 +380,10 @@ class INET_API TCPConnection
 
     /** Utility: sends RST */
     virtual void sendRst(uint32 seqNo);
-    /** Utility: sends RST (called from TCP) */
-    static void sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
-    /** Utility: sends RST+ACK (called from TCP) */
-    static void sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
+    /** Utility: sends RST; does not use connection state */
+    virtual void sendRst(uint32 seq, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
+    /** Utility: sends RST+ACK; does not use connection state */
+    virtual void sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddress dest, int srcPort, int destPort);
 
     /** Utility: sends FIN */
     virtual void sendFin();
@@ -396,6 +396,12 @@ class INET_API TCPConnection
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(TCPSegment *tcpseg);
+
+    /**
+     * Utility: This factory method gets invoked throughout the TCP model to
+     * create a TCPSegment. Override it if you need to subclass TCPSegment.
+     */
+    virtual TCPSegment *createTCPSegment(const char *name);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -437,20 +443,28 @@ class INET_API TCPConnection
 
   public:
     /**
-     * Static function, invoked from TCP when a segment arrives which
-     * doesn't belong to an existing connection.
-     */
-    static void segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
-
-    /**
-     * Constructor.
+     * The "normal" constructor.
      */
     TCPConnection(TCP *mod, int appGateIndex, int connId);
+
+    /**
+     * Note: this default ctor is NOT used to create live connections, only
+     * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
+     */
+    TCPConnection();
 
     /**
      * Destructor.
      */
     virtual ~TCPConnection();
+
+    /**
+     * This method gets invoked from TCP when a segment arrives which
+     * doesn't belong to an existing connection. TCP creates a temporary
+     * connection object so that it can call this method, then immediately
+     * deletes it.
+     */
+    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
 
     /* @name Various getters */
     //@{

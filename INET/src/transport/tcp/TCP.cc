@@ -81,7 +81,6 @@ TCP::~TCP()
     }
 }
 
-
 void TCP::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
@@ -126,15 +125,16 @@ void TCP::handleMessage(cMessage *msg)
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
-            if (!conn)
+            if (conn)
             {
-                TCPConnection::segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
-                delete tcpseg;
-                return;
+                bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
+                if (!ret)
+                    removeConnection(conn);
             }
-            bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
-            if (!ret)
-                removeConnection(conn);
+            else
+            {
+                segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+            }
         }
     }
     else // must be from app
@@ -147,7 +147,7 @@ void TCP::handleMessage(cMessage *msg)
 
         if (!conn)
         {
-            conn = new TCPConnection(this,appGateIndex,connId);
+            conn = createConnection(appGateIndex, connId);
 
             // add into appConnMap here; it'll be added to connMap during processing
             // the OPEN command in TCPConnection's processAppCommand().
@@ -165,6 +165,19 @@ void TCP::handleMessage(cMessage *msg)
 
     if (ev.isGUI())
         updateDisplayString();
+}
+
+TCPConnection *TCP::createConnection(int appGateIndex, int connId)
+{
+    return new TCPConnection(this, appGateIndex, connId);
+}
+
+void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+{
+    TCPConnection *tmp = new TCPConnection();
+    tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+    delete tmp;
+    delete tcpseg;
 }
 
 void TCP::updateDisplayString()
