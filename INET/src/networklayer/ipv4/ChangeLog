@@ -1,10 +1,14 @@
+2008-06-29  Andras Varga
+
+	* factored out a createIPDatagram method
+
 2005-10-28  Andras Varga
 
 	* IP.cc: obey new "outputPort" field of IPControlInfo when sending
 	multicast datagram
 
 	* RoutingTableParser.cc: 5th field of a route in routing files is
-	the metric (so far it was "preferences" but in fact unused)
+	the metric (so far it was "preferences" but in fact it was unused)
 
 2005-07-06  Andras Varga
 

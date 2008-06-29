@@ -78,6 +78,11 @@ class INET_API IP : public QueueBase
     virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
 
     /**
+     * Creates a blank IP datagram. Override when subclassing IPDatagram is needed
+     */
+    virtual IPDatagram *createIPDatagram(const char *name);
+
+    /**
      * Handle IPDatagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */

@@ -495,7 +495,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
 
-    IPDatagram *datagram = new IPDatagram(transportPacket->getName());
+    IPDatagram *datagram = createIPDatagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(transportPacket);
 
@@ -539,6 +539,11 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
     // setting IP options is currently not supported
 
     return datagram;
+}
+
+IPDatagram *IP::createIPDatagram(const char *name)
+{
+    return new IPDatagram(name);
 }
 
 void IP::sendDatagramToOutput(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nextHopAddr)
