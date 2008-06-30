@@ -4,6 +4,9 @@
 	instead of unsigned char[4], for more efficient code; several methods
 	made inline [code from Ingmar Baumgart, OverSim]
 
+	* parsim: added pack/unpack functions for IPAddress, IPv6Address, 
+	IPvXAddress
+
 	* InterfaceTable: added deleteInterface()
 
 2005-10-28  Andras Varga
