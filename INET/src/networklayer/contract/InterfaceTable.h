@@ -86,14 +86,18 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     /**
      * Adds an interface. The second argument should be a module which belongs
      * to the physical interface (e.g. PPP or EtherMac) -- it will be used
-     * to discover and fill in  getNetworkLayerGateIndex(), getNodeOutputGateId(),
+     * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),
      * and getNodeInputGateId() in InterfaceEntry. It should be NULL if this is
      * a virtual interface (e.g. loopback).
-     *
-     * Note: Interface deletion is not supported, but one can mark one
-     * as "down".
      */
     virtual void addInterface(InterfaceEntry *entry, cModule *ifmod);
+
+    /**
+     * Deletes the given interface from the table. Indices of existing
+     * interfaces (see getInterface(int)) may change. It is an error if
+     * the given interface is not in the table.
+     */
+    virtual void deleteInterface(InterfaceEntry *entry);
 
     /**
      * Returns the number of interfaces.

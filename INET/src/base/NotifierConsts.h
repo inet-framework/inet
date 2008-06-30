@@ -49,7 +49,7 @@ enum
     NF_L2_Q_DROP,
     NF_MAC_BECAME_IDLE,
     NF_L2_BEACON_LOST,   // missed several consecutive beacons (currently Ieee80211)
-    NF_L2_ASSOCIATED,   // successfully associated with an AP (currently Ieee80211)
+    NF_L2_ASSOCIATED,    // successfully associated with an AP (currently Ieee80211)
 
     // - layer 3 (network)
     NF_INTERFACE_STATE_CHANGED,
@@ -67,6 +67,12 @@ enum
 
     // - layer 4 (transport)
     //...
+
+    // - layer 7 - OverSim
+    NF_OVERLAY_TRANSPORTADDRESS_CHANGED,  // OverSim
+    NF_OVERLAY_NODE_GRACEFUL_LEAVE,       // OverSim
+    NF_OVERLAY_NODE_LEAVE,                // OverSim
+
 
     // - layer 7 (application)
     //...

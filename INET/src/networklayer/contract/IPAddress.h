@@ -62,9 +62,8 @@ const short PORT_MAX = 0x7fff;
 class INET_API IPAddress
 {
   protected:
-    // Coded in the form of 4 numbers, following the format "addr[0].addr[1].addr[2].addr[3]"
-    // Example for the address 192.24.65.10: addr[0]=192, addr[1]=24 etc.
-    unsigned char addr[4];  // FIXME use a simple uint32 instead
+    // Address is encoded in a single uint32
+    uint32 addr;
 
   protected:
     // Only keeps the n first bits of the address, completing it with zeros.
@@ -74,6 +73,7 @@ class INET_API IPAddress
 
     // Parses IP address into the given bytes, and returns true if syntax was OK.
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
+
   public:
     /** @name Predefined addresses */
     //@{
@@ -95,27 +95,27 @@ class INET_API IPAddress
     /**
      * Default constructor, initializes to 0.0.0.0.
      */
-    IPAddress() {addr[0] = addr[1] = addr[2] = addr[3] = 0;}
+    IPAddress() {addr = 0;}
 
     /**
      * IP address as int
      */
-    IPAddress(uint32 i);
+    IPAddress(uint32 ip) {addr = ip;}
 
     /**
      * IP address bytes: "i0.i1.i2.i3" format
      */
-    IPAddress(int i0, int i1, int i2, int i3);
+    IPAddress(int i0, int i1, int i2, int i3) {set(i0, i1, i2, i3);}
 
     /**
      * IP address given as text: "192.66.86.1"
      */
-    IPAddress(const char *t);
+    IPAddress(const char *text) {set(text);}
 
     /**
      * Copy constructor
      */
-    IPAddress(const IPAddress& obj);
+    IPAddress(const IPAddress& obj) {operator=(obj);}
 
     ~IPAddress() {}
     //@}
@@ -125,7 +125,7 @@ class INET_API IPAddress
     /**
      * IP address as int
      */
-    void set(uint32 i);
+    void set(uint32 ip) {addr = ip;}
 
     /**
      * IP address bytes: "i0.i1.i2.i3" format
@@ -141,24 +141,24 @@ class INET_API IPAddress
     /**
      * Assignment
      */
-    IPAddress& operator=(const IPAddress& obj);
+    IPAddress& operator=(const IPAddress& obj) {addr = obj.addr; return *this;}
 
     /**
      * True if all four address bytes are zero. The null value is customarily
      * used to represent a missing, unspecified or invalid address in the
      * simulation models.
      */
-    bool isUnspecified() const {return !addr[0] && !addr[1] && !addr[2] && !addr[3];}
+    bool isUnspecified() const {return addr==0;}
 
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPAddress& toCmp) const;
+    bool equals(const IPAddress& toCmp) const {return addr == toCmp.addr;}
 
     /**
      * Returns binary AND of the two addresses
      */
-    IPAddress doAnd(const IPAddress& ip) const;
+    IPAddress doAnd(const IPAddress& ip) const {return addr & ip.addr;}
 
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
@@ -168,13 +168,13 @@ class INET_API IPAddress
     /**
      * Returns the address as an int.
      */
-    uint32 getInt() const;
+    uint32 getInt() const {return addr;}
 
     /**
      * Returns the corresponding part of the address specified by the index
      * ("[0].[1].[2].[3]")
      */
-    int getDByte(int i) const {return addr[i];}
+    int getDByte(int i) const {return (addr >> (3-i)*8) & 0xFF;}
 
     /**
      * Returns the network class of the address: char 'A', 'B', 'C', 'D', 'E',
@@ -186,7 +186,7 @@ class INET_API IPAddress
      * Returns true if this address is in the multicast address range,
      * 224.0.0.0 thru 239.255.255.255, that is, it's a class D address.
      */
-    bool isMulticast() const {return (addr[0] & 0xF0)==0xE0;}
+    bool isMulticast() const {return (addr & 0xF0000000)==0xE0000000;}
 
     /**
      * Returns true if this address is in the range 224.0.0.0 to 224.0.0.255.
@@ -194,7 +194,7 @@ class INET_API IPAddress
      * not forward these datagrams since the applications that use these addresses
      * do not need the datagrams to go further than one hop.
      */
-    bool isLinkLocalMulticast() const {return addr[0]==224 && addr[1]==0 && addr[2]==0;}
+     bool isLinkLocalMulticast() const {return addr & 0xFFFFFF00 == 0xF4000000;}
 
     /**
      * Returns an address with the network part of the address (the bits

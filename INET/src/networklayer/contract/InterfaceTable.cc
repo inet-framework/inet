@@ -153,19 +153,16 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
     entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
 }
 
-/*
 void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 {
-    // TBD ask routing tables if they refer to this interface
-
     InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
     if (i==interfaces.end())
-        opp_error("deleteInterface(): interface '%s' not found in interface table", entry->name.c_str());
+        opp_error("deleteInterface(): interface '%s' not found in interface table", entry->getName());
 
     interfaces.erase(i);
     delete entry;
 }
-*/
+
 
 InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
 {

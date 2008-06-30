@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2008063x?
+INET-20080630
 -------------
 Internal snapshot, for omnetpp-4.0b2.
 
@@ -16,6 +16,10 @@ Internal snapshot, for omnetpp-4.0b2.
 
 - AbstractQueue (base class for IP and other modules) made more efficient: now it 
   doesn't schedule a timer if (when) serviceTime is zero.
+
+- IPAddress class made more efficient [code from Ingmar Baumgart, OverSim]
+
+- InterfaceTable: added deleteInterface()
 
 
 INET-20080624

@@ -1,3 +1,7 @@
+2008-06-30  Andras Varga
+
+	* NotifierConsts: added constants for overlay networks (OverSim)
+
 2008-06-29  Andras Varga
 
 	* AbstractQueue improved so that if serviceTime is zero, it does not

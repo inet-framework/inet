@@ -42,45 +42,10 @@ const IPAddress IPAddress::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
 const IPAddress IPAddress::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
 
 
-IPAddress::IPAddress(uint32 ip)
-{
-    set(ip);
-}
-
-IPAddress::IPAddress(int i0, int i1, int i2, int i3)
-{
-    addr[0] = i0;
-    addr[1] = i1;
-    addr[2] = i2;
-    addr[3] = i3;
-}
-
-IPAddress::IPAddress(const char *text)
-{
-    set(text);
-}
-
-IPAddress::IPAddress(const IPAddress& obj)
-{
-    operator=(obj);
-}
-
-void IPAddress::set(uint32 ip)
-{
-    addr[0] = (ip >> 24) & 0xFF;
-    addr[1] = (ip >> 16) & 0xFF;
-    addr[2] = (ip >> 8) & 0xFF;
-    addr[3] = ip & 0xFF;
-}
-
 void IPAddress::set(int i0, int i1, int i2, int i3)
 {
-    addr[0] = i0;
-    addr[1] = i1;
-    addr[2] = i2;
-    addr[3] = i3;
+    addr = (i0 << 24) | (i1 << 16) | (i2 << 8) | i3;
 }
-
 
 bool IPAddress::parseIPAddress(const char *text, unsigned char tobytes[])
 {
@@ -123,28 +88,13 @@ bool IPAddress::parseIPAddress(const char *text, unsigned char tobytes[])
 
 void IPAddress::set(const char *text)
 {
+    unsigned char buf[4];
     if (!text)
         opp_error("IP address string is NULL");
-    bool ok = parseIPAddress(text, addr);
+    bool ok = parseIPAddress(text, buf);
     if (!ok)
         opp_error("Invalid IP address string `%s'", text);
-}
-
-uint32 IPAddress::getInt () const
-{
-    return (addr[0] << 24)
-        +  (addr[1] << 16)
-        +  (addr[2] << 8)
-        +  (addr[3]);
-}
-
-IPAddress& IPAddress::operator=(const IPAddress& obj)
-{
-    addr[0] = obj.addr[0];
-    addr[1] = obj.addr[1];
-    addr[2] = obj.addr[2];
-    addr[3] = obj.addr[3];
-    return *this;
+    set(buf[0], buf[1], buf[2], buf[3]);
 }
 
 std::string IPAddress::str() const
@@ -153,34 +103,22 @@ std::string IPAddress::str() const
         return std::string("<unspec>");
 
     char buf[ADDRESS_STRING_SIZE];
-    sprintf(buf, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+    sprintf(buf, "%hhu.%hhu.%hhu.%hhu", addr>>24, addr>>16, addr>>8, addr);   //XXX check this!!!
     return std::string(buf);
 }
 
-bool IPAddress::equals(const IPAddress& toCmp) const
-{
-    return (addr[0] == toCmp.addr[0]) && (addr[1] == toCmp.addr[1]) &&
-           (addr[2] == toCmp.addr[2]) && (addr[3] == toCmp.addr[3]);
-}
-
-IPAddress IPAddress::doAnd(const IPAddress& ip) const
-{
-    return IPAddress(addr[0] & ip.addr[0], addr[1] & ip.addr[1],
-                     addr[2] & ip.addr[2], addr[3] & ip.addr[3]);
-}
-
-
 char IPAddress::getIPClass() const
 {
-    if ((addr[0] & 0x80) == 0x00)       // 0xxxx
+    unsigned char buf = getDByte(0);
+    if ((buf & 0x80) == 0x00)       // 0xxxx
         return 'A';
-    else if ((addr[0] & 0xC0) == 0x80)  // 10xxx
+    else if ((buf & 0xC0) == 0x80)  // 10xxx
         return 'B';
-    else if ((addr[0] & 0xE0) == 0xC0)  // 110xx
+    else if ((buf & 0xE0) == 0xC0)  // 110xx
         return 'C';
-    else if ((addr[0] & 0xF0) == 0xE0)  // 1110x
+    else if ((buf & 0xF0) == 0xE0)  // 1110x
         return 'D';
-    else if ((addr[0] & 0xF8) == 0xF0)  // 11110
+    else if ((buf & 0xF8) == 0xF0)  // 11110
         return 'E';
     else
         return '?';
@@ -192,13 +130,13 @@ IPAddress IPAddress::getNetwork() const
     {
     case 'A':
         // Class A: network = 7 bits
-        return IPAddress(addr[0], 0, 0, 0);
+        return IPAddress(getDByte(0), 0, 0, 0);
     case 'B':
         // Class B: network = 14 bits
-        return IPAddress(addr[0], addr[1], 0, 0);
+        return IPAddress(getDByte(0), getDByte(1), 0, 0);
     case 'C':
         // Class C: network = 21 bits
-        return IPAddress(addr[0], addr[1], addr[2], 0);
+        return IPAddress(getDByte(0), getDByte(1), getDByte(2), 0);
     default:
         // Class D or E
         return IPAddress();
@@ -227,29 +165,9 @@ IPAddress IPAddress::getNetworkMask() const
 
 bool IPAddress::isNetwork(const IPAddress& toCmp) const
 {
-    switch (getIPClass())
-    {
-    case 'A':
-        if (addr[0] == toCmp.addr[0])
-            return true;
-        break;
-    case 'B':
-        if ((addr[0] == toCmp.addr[0]) &&
-            (addr[1] == toCmp.addr[1]))
-            return true;
-        break;
-    case 'C':
-        if ((addr[0] == toCmp.addr[0]) &&
-            (addr[1] == toCmp.addr[1]) &&
-            (addr[2] == toCmp.addr[2]))
-            return true;
-        break;
-    default:
-        // Class D or E
-        return false;
-    }
-    // not equal
-    return false;
+    IPAddress netmask = getNetworkMask();
+    if (netmask.isUnspecified()) return false; // Class is D or E
+    return maskedAddrAreEqual(*this, toCmp, netmask);
 }
 
 
@@ -258,29 +176,26 @@ bool IPAddress::prefixMatches(const IPAddress& to_cmp, int numbits) const
     if (numbits<1)
         return true;
 
-    uint32 addr1 = getInt();
     uint32 addr2 = to_cmp.getInt();
 
     if (numbits > 31)
-        return addr1==addr2;
+        return addr==addr2;
 
     // The right shift on an unsigned int produces 0 on the left
     uint32 mask = 0xFFFFFFFF;
     mask = ~(mask >> numbits);
 
-    return (addr1 & mask) == (addr2 & mask);
+    return (addr & mask) == (addr2 & mask);
 }
 
 int IPAddress::getNumMatchingPrefixBits(const IPAddress& to_cmp) const
 {
-    uint32 addr1 = getInt();
     uint32 addr2 = to_cmp.getInt();
 
-    uint32 res = addr1 ^ addr2;
+    uint32 res = addr ^ addr2;
     // If the bits are equal, there is a 0, so counting
     // the zeros from the left
-    int i;
-    for (i = 31; i >= 0; i--) {
+    for (int i = 31; i >= 0; i--) {
         if (res & (1 << i)) {
             // 1, means not equal, so stop
             return 31 - i;
@@ -291,7 +206,6 @@ int IPAddress::getNumMatchingPrefixBits(const IPAddress& to_cmp) const
 
 int IPAddress::getNetmaskLength() const
 {
-    uint32 addr = getInt();
     int i;
     for (i=0; i<31; i++)
         if (addr & (1 << i))
@@ -299,30 +213,18 @@ int IPAddress::getNetmaskLength() const
     return 0;
 }
 
-void IPAddress::keepFirstBits (unsigned int n)
+void IPAddress::keepFirstBits(unsigned int n)
 {
-    if (n > 31) return;
-
-    int len_bytes = n / 8;
-
-    uint32 mask = 0xFF;
-    mask = ~(mask >> ((n - (len_bytes * 8))));
-
-    addr[len_bytes] = addr[len_bytes] & mask;
-
-    for (int i = len_bytes+1; i < 4; i++)
-        addr[i] = 0;
+    addr &= 0xFFFFFFFF << n;
 }
-
 
 bool IPAddress::maskedAddrAreEqual(const IPAddress& addr1,
                                    const IPAddress& addr2,
                                    const IPAddress& netmask)
 {
-    if (addr1.doAnd(netmask).equals(addr2.doAnd(netmask)))
-        return true;
-
-    return false;
+    // return addr1.doAnd(netmask).equals(addr2.doAnd(netmask));
+    // Looks weird, but is the same and is faster
+    return !(bool)((addr1.addr ^ addr2.addr) & netmask.addr);
 }
 
 bool IPAddress::isWellFormed(const char *text)
