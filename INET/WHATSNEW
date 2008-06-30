@@ -19,6 +19,8 @@ Internal snapshot, for omnetpp-4.0b2.
 
 - IPAddress class made more efficient [code from Ingmar Baumgart, OverSim]
 
+- parsim: added pack/unpack functions for IPAddress, IPv6Address, IPvXAddress
+
 - InterfaceTable: added deleteInterface()
 
 
