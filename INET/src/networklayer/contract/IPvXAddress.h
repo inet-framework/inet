@@ -253,6 +253,28 @@ inline std::ostream& operator<<(std::ostream& os, const IPvXAddress& ip)
     return os << ip.str();
 }
 
+inline void doPacking(cCommBuffer *buf, IPvXAddress& addr)
+{
+    if (buf->packFlag(addr.isIPv6()))
+        doPacking(buf, addr.get6());
+    else
+        doPacking(buf, addr.get4());
+}
+
+inline void doUnpacking(cCommBuffer *buf, IPvXAddress& addr)
+{
+    if (buf->checkFlag()) {
+        IPv6Address tmp;
+        doUnpacking(buf, tmp);
+        addr.set(tmp);
+    }
+    else {
+        IPAddress tmp;
+        doUnpacking(buf, tmp);
+        addr.set(tmp);
+    }
+}
+
 #endif
 
 

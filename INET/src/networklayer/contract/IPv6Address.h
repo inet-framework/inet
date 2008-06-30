@@ -291,5 +291,15 @@ inline std::ostream& operator<<(std::ostream& os, const IPv6Address& ip)
     return os << ip.str();
 }
 
+inline void doPacking(cCommBuffer *buf, IPv6Address& addr)
+{
+    buf->pack(addr.words(), 4);
+}
+
+inline void doUnpacking(cCommBuffer *buf, IPv6Address& addr)
+{
+    buf->unpack(addr.words(), 4);
+}
+
 #endif
 
