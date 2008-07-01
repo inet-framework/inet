@@ -38,32 +38,33 @@ class InterfaceTable;
  * @see InterfaceTable
  */
 //FIXME remove interfaceId? pointer or name can be used instead
+//FIXME use cNamedObject as base class (instead of separate ifname?)
 class INET_API InterfaceEntry : public cObject
 {
-    friend class InterfaceTable; //only this guy is allowed to set _interfaceId and owner
+    friend class InterfaceTable; //only this guy is allowed to set interfaceId and owner
 
   protected:
     InterfaceTable *ownerp; ///< InterfaceTable that contains this interface, or NULL
-    int _interfaceId;      ///< identifies the interface in the InterfaceTable
-    std::string _name;     ///< interface name (must be unique)
-    int _nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
-    int _nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
-    int _nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int _peernamid;        ///< used only when writing ns2 nam traces
-    int _mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
-    bool _down;            ///< current state (up or down)
-    bool _broadcast;       ///< interface supports broadcast
-    bool _multicast;       ///< interface supports multicast
-    bool _pointToPoint;    ///< interface is point-to-point link
-    bool _loopback;        ///< interface is loopback interface
-    double _datarate;      ///< data rate in bit/s
-    MACAddress _macAddr;   ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
-    InterfaceToken _token; ///< for IPv6 stateless autoconfig (RFC 1971)
+    int interfaceId;      ///< identifies the interface in the InterfaceTable
+    std::string ifname;   ///< interface name (must be unique)
+    int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
+    int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
+    int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
+    int peernamid;        ///< used only when writing ns2 nam traces
+    int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
+    bool down;            ///< current state (up or down)
+    bool broadcast;       ///< interface supports broadcast
+    bool multicast;       ///< interface supports multicast
+    bool pointToPoint;    ///< interface is point-to-point link
+    bool loopback;        ///< interface is loopback interface
+    double datarate;      ///< data rate in bit/s
+    MACAddress macAddr;   ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
+    InterfaceToken token; ///< for IPv6 stateless autoconfig (RFC 1971)
 
-    IPv4InterfaceData *_ipv4data;   ///< IPv4-specific interface info (IP address, etc)
-    IPv6InterfaceData *_ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
-    cPolymorphic *_protocol3data;   ///< extension point: data for a 3rd network-layer protocol
-    cPolymorphic *_protocol4data;   ///< extension point: data for a 4th network-layer protocol
+    IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IP address, etc)
+    IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
+    cPolymorphic *protocol3data;   ///< extension point: data for a 3rd network-layer protocol
+    cPolymorphic *protocol4data;   ///< extension point: data for a 4th network-layer protocol
 
   private:
     // copying not supported: following are private and also left undefined
@@ -91,55 +92,55 @@ class INET_API InterfaceEntry : public cObject
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
-    int getInterfaceId() const        {return _interfaceId;}   //FIXME remove on the long term! (clients should use interface pointer)
-    const char *getName() const       {return _name.c_str();}
-    int getNetworkLayerGateIndex() const {return _nwLayerGateIndex;}
-    int getNodeOutputGateId() const   {return _nodeOutputGateId;}
-    int getNodeInputGateId() const    {return _nodeInputGateId;}
-    int getPeerNamId() const          {return _peernamid;}
-    int getMTU() const                {return _mtu;}
-    bool isDown() const               {return _down;}
-    bool isBroadcast() const          {return _broadcast;}
-    bool isMulticast() const          {return _multicast;}
-    bool isPointToPoint() const       {return _pointToPoint;}
-    bool isLoopback() const           {return _loopback;}
-    double getDatarate() const        {return _datarate;}
-    const MACAddress& getMacAddress() const  {return _macAddr;}
-    const InterfaceToken& getInterfaceToken() const {return _token;}
+    int getInterfaceId() const        {return interfaceId;}   //FIXME remove on the long term! (clients should use interface pointer)
+    const char *getName() const       {return ifname.c_str();}
+    int getNetworkLayerGateIndex() const {return nwLayerGateIndex;}
+    int getNodeOutputGateId() const   {return nodeOutputGateId;}
+    int getNodeInputGateId() const    {return nodeInputGateId;}
+    int getPeerNamId() const          {return peernamid;}
+    int getMTU() const                {return mtu;}
+    bool isDown() const               {return down;}
+    bool isBroadcast() const          {return broadcast;}
+    bool isMulticast() const          {return multicast;}
+    bool isPointToPoint() const       {return pointToPoint;}
+    bool isLoopback() const           {return loopback;}
+    double getDatarate() const        {return datarate;}
+    const MACAddress& getMacAddress() const  {return macAddr;}
+    const InterfaceToken& getInterfaceToken() const {return token;}
     //@}
 
     /** @name Field setters */
     //@{
-    virtual void setName(const char *s)  {_name = s; configChanged();}
-    virtual void setNetworkLayerGateIndex(int i) {_nwLayerGateIndex = i; configChanged();}
-    virtual void setNodeOutputGateId(int i) {_nodeOutputGateId = i; configChanged();}
-    virtual void setNodeInputGateId(int i)  {_nodeInputGateId = i; configChanged();}
-    virtual void setPeerNamId(int ni)    {_peernamid = ni; configChanged();}
-    virtual void setMtu(int m)           {_mtu = m; configChanged();}
-    virtual void setDown(bool b)         {_down = b; stateChanged();}
-    virtual void setBroadcast(bool b)    {_broadcast = b; configChanged();}
-    virtual void setMulticast(bool b)    {_multicast = b; configChanged();}
-    virtual void setPointToPoint(bool b) {_pointToPoint = b; configChanged();}
-    virtual void setLoopback(bool b)     {_loopback = b; configChanged();}
-    virtual void setDatarate(double d)   {_datarate = d; configChanged();}
-    virtual void setMACAddress(const MACAddress& macAddr) {_macAddr=macAddr; configChanged();}
-    virtual void setInterfaceToken(const InterfaceToken& token) {_token=token; configChanged();}
+    virtual void setName(const char *s)  {ifname = s; configChanged();}
+    virtual void setNetworkLayerGateIndex(int i) {nwLayerGateIndex = i; configChanged();}
+    virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
+    virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
+    virtual void setPeerNamId(int ni)    {peernamid = ni; configChanged();}
+    virtual void setMtu(int m)           {mtu = m; configChanged();}
+    virtual void setDown(bool b)         {down = b; stateChanged();}
+    virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}
+    virtual void setMulticast(bool b)    {multicast = b; configChanged();}
+    virtual void setPointToPoint(bool b) {pointToPoint = b; configChanged();}
+    virtual void setLoopback(bool b)     {loopback = b; configChanged();}
+    virtual void setDatarate(double d)   {datarate = d; configChanged();}
+    virtual void setMACAddress(const MACAddress& addr) {macAddr = addr; configChanged();}
+    virtual void setInterfaceToken(const InterfaceToken& t) {token = t; configChanged();}
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
-    IPv4InterfaceData *ipv4()       {return _ipv4data;}
-    IPv6InterfaceData *ipv6()       {return _ipv6data;}
-    cPolymorphic *getProtocol3()    {return _protocol3data;}
-    cPolymorphic *getProtocol4()    {return _protocol4data;}
+    IPv4InterfaceData *ipv4()       {return ipv4data;}
+    IPv6InterfaceData *ipv6()       {return ipv6data;}
+    cPolymorphic *getProtocol3()    {return protocol3data;}
+    cPolymorphic *getProtocol4()    {return protocol4data;}
     //@}
 
     /** @name Installing protocol-specific interface data */
     //@{
-    virtual void setIPv4Data(IPv4InterfaceData *p)  {_ipv4data = p; configChanged();}
-    virtual void setIPv6Data(IPv6InterfaceData *p)  {_ipv6data = p; configChanged();}
-    virtual void setProtocol3Data(cPolymorphic *p)  {_protocol3data = p; configChanged();}
-    virtual void setProtocol4Data(cPolymorphic *p)  {_protocol4data = p; configChanged();}
+    virtual void setIPv4Data(IPv4InterfaceData *p)  {ipv4data = p; configChanged();}
+    virtual void setIPv6Data(IPv6InterfaceData *p)  {ipv6data = p; configChanged();}
+    virtual void setProtocol3Data(cPolymorphic *p)  {protocol3data = p; configChanged();}
+    virtual void setProtocol4Data(cPolymorphic *p)  {protocol4data = p; configChanged();}
     //@}
 };
 

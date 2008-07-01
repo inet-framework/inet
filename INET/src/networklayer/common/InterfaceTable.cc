@@ -108,7 +108,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
         opp_error("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
-    entry->_interfaceId = interfaces.size();
+    entry->interfaceId = interfaces.size();
     entry->setInterfaceTable(this);
     interfaces.push_back(entry);
 

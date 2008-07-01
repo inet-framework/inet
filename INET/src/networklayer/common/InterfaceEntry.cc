@@ -33,30 +33,30 @@ InterfaceEntry::InterfaceEntry()
 {
     ownerp = NULL;
 
-    _nwLayerGateIndex = -1;
-    _nodeOutputGateId = -1;
-    _nodeInputGateId = -1;
-    _peernamid = -1;
+    nwLayerGateIndex = -1;
+    nodeOutputGateId = -1;
+    nodeInputGateId = -1;
+    peernamid = -1;
 
-    _mtu = 0;
+    mtu = 0;
 
-    _down = false;
-    _broadcast = false;
-    _multicast = false;
-    _pointToPoint= false;
-    _loopback = false;
-    _datarate = 0;
+    down = false;
+    broadcast = false;
+    multicast = false;
+    pointToPoint= false;
+    loopback = false;
+    datarate = 0;
 
-    _ipv4data = NULL;
-    _ipv6data = NULL;
-    _protocol3data = NULL;
-    _protocol4data = NULL;
+    ipv4data = NULL;
+    ipv6data = NULL;
+    protocol3data = NULL;
+    protocol4data = NULL;
 }
 
 std::string InterfaceEntry::info() const
 {
     std::stringstream out;
-    out << (!_name.empty() ? getName() : "*");
+    out << (!ifname.empty() ? getName() : "*");
     if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else
@@ -73,21 +73,21 @@ std::string InterfaceEntry::info() const
     else
         out << getMacAddress();
 
-    if (_ipv4data)
-        out << " " << ((cPolymorphic*)_ipv4data)->info(); // Khmm...
-    if (_ipv6data)
-        out << " " << ((cPolymorphic*)_ipv6data)->info(); // Khmm...
-    if (_protocol3data)
-        out << " " << _protocol3data->info();
-    if (_protocol4data)
-        out << " " << _protocol4data->info();
+    if (ipv4data)
+        out << " " << ((cPolymorphic*)ipv4data)->info(); // Khmm...
+    if (ipv6data)
+        out << " " << ((cPolymorphic*)ipv6data)->info(); // Khmm...
+    if (protocol3data)
+        out << " " << protocol3data->info();
+    if (protocol4data)
+        out << " " << protocol4data->info();
     return out.str();
 }
 
 std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
-    out << "name:" << (!_name.empty() ? getName() : "*");
+    out << "name:" << (!ifname.empty() ? getName() : "*");
     if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else
@@ -105,14 +105,14 @@ std::string InterfaceEntry::detailedInfo() const
     else
         out << getMacAddress();
     out << "\n";
-    if (_ipv4data)
-        out << " " << ((cPolymorphic*)_ipv4data)->info() << "\n"; // Khmm...
-    if (_ipv6data)
-        out << " " << ((cPolymorphic*)_ipv6data)->info() << "\n"; // Khmm...
-    if (_protocol3data)
-        out << " " << _protocol3data->info() << "\n";
-    if (_protocol4data)
-        out << " " << _protocol4data->info() << "\n";
+    if (ipv4data)
+        out << " " << ((cPolymorphic*)ipv4data)->info() << "\n"; // Khmm...
+    if (ipv6data)
+        out << " " << ((cPolymorphic*)ipv6data)->info() << "\n"; // Khmm...
+    if (protocol3data)
+        out << " " << protocol3data->info() << "\n";
+    if (protocol4data)
+        out << " " << protocol4data->info() << "\n";
 
     return out.str();
 }
