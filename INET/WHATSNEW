@@ -27,6 +27,11 @@ Internal snapshot, for omnetpp-4.0b2.
   enforce by returning "const" pointers that routes already added cannot be 
   changed any more (one must delete and re-add it)
 
+- InterfaceTable: created a getInterfaceById() method, NOT to be 
+  confused with getInterface(pos)! Ids are stable after deletions,
+  unlike 0..getNumInterfaces()-1 indices, and reliable/safe unlike
+  InterfaceEntry* pointers
+
 - InterfaceTable, InterfaceEntry: implemented NotificationBoard-based 
   notifications for events NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, 
   NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED. 
