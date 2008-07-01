@@ -1,3 +1,7 @@
+2008-07-01  Andras Varga
+
+	* InterfaceTable and associated files moved to new directory common/
+
 2008-06-30  Andras Varga
 
 	* IPAddress: internal representation changed to use a single int32 
