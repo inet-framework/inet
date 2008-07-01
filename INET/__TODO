@@ -1,3 +1,9 @@
+TODO: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
+      if we change it to pointer, messages that are underway in the host during a deleteInterface()
+      may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
+      leave a hole in it?
+
+
 CONVERSION TO OMNET++40:
 - move "q=queue" too into the default display string
 - add gate @labels
@@ -12,9 +18,16 @@ TODO rename the following TED.h methods to begin with a verb:
   IPAddress primaryAddress(IPAddress localInf)
 
 -----------------------
-Interfaces:
-- IPv6RoutingTable: change _interfaceId to _ie!!!
+rename IPv4/IPv6 stuff to be consistent???
+  RoutingTable vs RoutingTable6
+  IPv4Route vs IPv6Route
+  IPAddress vs IPv6Address (vs IPcXAddress)
+  get4() vs get6()
+  FlatNetworkConfigurator vs FlatNetworkConfigurator6
 
+-----------------------
+Interfaces:
+- RoutingTable: change _interfaceId to _ie!!!
 
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
