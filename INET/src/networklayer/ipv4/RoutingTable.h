@@ -44,8 +44,7 @@ class RoutingTableParser;
  *
  * @see RoutingTable
  */
-//TODO: make it consistent with IPv6 RoutingTable; wrap public members into
-//methods; add notification mechanism
+//TODO add notification mechanism
 class INET_API IPv4Route : public cPolymorphic
 {
   public:
@@ -96,28 +95,28 @@ class INET_API IPv4Route : public cPolymorphic
     void setMetric(int metric)  {this->metric = metric;}
 
     /** Destination address prefix to match */
-    IPAddress getHost() {return host;}
+    IPAddress getHost() const {return host;}
 
     /** Represents length of prefix to match */
-    IPAddress getNetmask() {return netmask;}
+    IPAddress getNetmask() const {return netmask;}
 
     /** Next hop address */
-    IPAddress getGateway() {return gateway;}
+    IPAddress getGateway() const {return gateway;}
 
     /** Next hop interface */
-    InterfaceEntry *getInterface() {return interfacePtr;}
+    InterfaceEntry *getInterface() const {return interfacePtr;}
 
     /** Convenience method */
-    const char *getInterfaceName() {return interfacePtr ? interfacePtr->getName() : "";}
+    const char *getInterfaceName() const {return interfacePtr ? interfacePtr->getName() : "";}
 
     /** Route type: Direct or Remote */
-    RouteType getType() {return type;}
+    RouteType getType() const {return type;}
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() {return source;}
+    RouteSource getSource() const {return source;}
 
     /** "Cost" to reach the destination */
-    int getMetric() {return metric;}
+    int getMetric() const {return metric;}
 };
 
 
@@ -186,7 +185,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                       const IPAddress& nmask,
                       const IPAddress& gw,
                       int metric,
-                      const char *dev);
+                      const char *dev) const;
 
     // set router Id
     virtual void autoconfigRouterId();
@@ -220,7 +219,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * For debugging
      */
-    virtual void printRoutingTable();
+    virtual void printRoutingTable() const;
 
     /** @name Interfaces */
     //@{
@@ -229,7 +228,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const IPAddress& address);
+    virtual InterfaceEntry *getInterfaceByAddress(const IPAddress& address) const;
     //@}
 
     /**
@@ -252,12 +251,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const IPAddress& dest);
+    virtual bool isLocalAddress(const IPAddress& dest) const;
 
     /**
      * The routing function.
      */
-    virtual IPv4Route *findBestMatchingRoute(const IPAddress& dest);
+    virtual IPv4Route *findBestMatchingRoute(const IPAddress& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -265,7 +264,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Returns the interface Id to send the packets with dest as
      * destination address, or -1 if destination is not in routing table.
      */
-    virtual InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest);
+    virtual InterfaceEntry *getInterfaceForDestAddr(const IPAddress& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -274,7 +273,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * if the destination is not in routing table or there is
      * no gateway (local delivery).
      */
-    virtual IPAddress getGatewayForDestAddr(const IPAddress& dest);
+    virtual IPAddress getGatewayForDestAddr(const IPAddress& dest) const;
     //@}
 
     /** @name Multicast routing functions */
@@ -284,12 +283,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    virtual bool isLocalMulticastAddress(const IPAddress& dest);
+    virtual bool isLocalMulticastAddress(const IPAddress& dest) const;
 
     /**
      * Returns routes for a multicast address.
      */
-    virtual MulticastRoutes getMulticastRoutesFor(const IPAddress& dest);
+    virtual MulticastRoutes getMulticastRoutesFor(const IPAddress& dest) const;
     //@}
 
     /** @name Route table manipulation */
@@ -298,12 +297,12 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Total number of routing entries (unicast, multicast entries and default route).
      */
-    virtual int getNumRoutes();
+    virtual int getNumRoutes() const;
 
     /**
      * Return kth routing entry.
      */
-    virtual IPv4Route *getRoute(int k);
+    virtual IPv4Route *getRoute(int k) const;
 
     /**
      * Find first routing entry with the given parameters.
@@ -312,7 +311,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
                                    const IPAddress& netmask,
                                    const IPAddress& gw,
                                    int metric = 0,
-                                   char *dev = NULL);
+                                   char *dev = NULL) const;
 
     /**
      * Adds a route to the routing table.
@@ -329,7 +328,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * Utility function: Returns a vector of all addresses of the node.
      */
-    std::vector<IPAddress> gatherAddresses();
+    virtual std::vector<IPAddress> gatherAddresses() const;
     //@}
 
 };
