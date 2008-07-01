@@ -51,7 +51,7 @@ std::string IPv4Route::info() const
     out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "metric:" << metric << " ";
-    out << "if:"; if (interfaceName.empty()) out << "*  "; else out << interfaceName.c_str() << "  ";
+    out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "  ";
     out << (type==DIRECT ? "DIRECT" : "REMOTE");
     switch (source)
     {
@@ -308,11 +308,11 @@ IPv4Route *RoutingTable::findBestMatchingRoute(const IPAddress& dest)
     for (RouteVector::iterator i=routes.begin(); i!=routes.end(); ++i)
     {
         IPv4Route *e = *i;
-        if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask) &&  // match
-            (!bestRoute || e->netmask.getInt()>longestNetmask))  // longest so far
+        if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) &&  // match
+            (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
         {
             bestRoute = e;
-            longestNetmask = e->netmask.getInt();
+            longestNetmask = e->getNetmask().getInt();
         }
     }
     return bestRoute;
@@ -323,8 +323,7 @@ InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest)
     Enter_Method("getInterfaceForDestAddr(%s)=?", dest.str().c_str());
 
     IPv4Route *e = findBestMatchingRoute(dest);
-    if (!e) return NULL;
-    return e->interfacePtr;
+    return e ? e->getInterface() : NULL;
 }
 
 IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest)
@@ -332,8 +331,7 @@ IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest)
     Enter_Method("getGatewayForDestAddr(%s)=?", dest.str().c_str());
 
     IPv4Route *e = findBestMatchingRoute(dest);
-    if (!e) return IPAddress();
-    return e->gateway;
+    return e ? e->getGateway() : IPAddress();
 }
 
 
@@ -346,11 +344,11 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest)
     for (RouteVector::iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
     {
         IPv4Route *e = *i;
-        if (IPAddress::maskedAddrAreEqual(dest, e->host, e->netmask))
+        if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()))
         {
             MulticastRoute r;
-            r.interf = ift->getInterfaceByName(e->interfaceName.c_str()); // Ughhhh
-            r.gateway = e->gateway;
+            r.interf = e->getInterface();
+            r.gateway = e->getGateway();
             res.push_back(r);
         }
     }
@@ -392,24 +390,19 @@ void RoutingTable::addRoute(IPv4Route *entry)
     Enter_Method("addRoute(...)");
 
     // check for null address and default route
-    if ((entry->host.isUnspecified() || entry->netmask.isUnspecified()) &&
-        (!entry->host.isUnspecified() || !entry->netmask.isUnspecified()))
+    if ((entry->getHost().isUnspecified() || entry->getNetmask().isUnspecified()) &&
+        (!entry->getHost().isUnspecified() || !entry->getNetmask().isUnspecified()))
         error("addRoute(): to add a default route, set both host and netmask to zero");
 
-    // fill in interface ptr from interface name
-    entry->interfacePtr = ift->getInterfaceByName(entry->interfaceName.c_str());
-    if (!entry->interfacePtr)
-        error("addRoute(): interface `%s' doesn't exist", entry->interfaceName.c_str());
+    // check that the interface exists
+    if (!entry->getInterface())
+        error("addRoute(): interface cannot be NULL");
 
     // add to tables
-    if (!entry->host.isMulticast())
-    {
+    if (!entry->getHost().isMulticast())
         routes.push_back(entry);
-    }
     else
-    {
         multicastRoutes.push_back(entry);
-    }
 
     updateDisplayString();
 }
@@ -446,15 +439,15 @@ bool RoutingTable::routeMatches(IPv4Route *entry,
                                 int metric,
                                 const char *dev)
 {
-    if (!target.isUnspecified() && !target.equals(entry->host))
+    if (!target.isUnspecified() && !target.equals(entry->getHost()))
         return false;
-    if (!nmask.isUnspecified() && !nmask.equals(entry->netmask))
+    if (!nmask.isUnspecified() && !nmask.equals(entry->getNetmask()))
         return false;
-    if (!gw.isUnspecified() && !gw.equals(entry->gateway))
+    if (!gw.isUnspecified() && !gw.equals(entry->getGateway()))
         return false;
-    if (metric && metric!=entry->metric)
+    if (metric && metric!=entry->getMetric())
         return false;
-    if (dev && strcmp(dev, entry->interfaceName.c_str()))
+    if (dev && strcmp(dev, entry->getInterfaceName()))
         return false;
 
     return true;
@@ -464,7 +457,7 @@ void RoutingTable::updateNetmaskRoutes()
 {
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k=0; k<routes.size(); k++)
-        if (routes[k]->source==IPv4Route::IFACENETMASK)
+        if (routes[k]->getSource()==IPv4Route::IFACENETMASK)
             routes.erase(routes.begin()+(k--));  // '--' is necessary because indices shift down
 
     // then re-add them, according to actual interface configuration
@@ -474,14 +467,13 @@ void RoutingTable::updateNetmaskRoutes()
         if (ie->ipv4()->getNetmask()!=IPAddress::ALLONES_ADDRESS)
         {
             IPv4Route *route = new IPv4Route();
-            route->type = IPv4Route::DIRECT;
-            route->source = IPv4Route::IFACENETMASK;
-            route->host = ie->ipv4()->getIPAddress();
-            route->netmask = ie->ipv4()->getNetmask();
-            route->gateway = IPAddress();
-            route->metric = ie->ipv4()->getMetric();
-            route->interfaceName = ie->getName();
-            route->interfacePtr = ie;
+            route->setType(IPv4Route::DIRECT);
+            route->setSource(IPv4Route::IFACENETMASK);
+            route->setHost(ie->ipv4()->getIPAddress());
+            route->setNetmask(ie->ipv4()->getNetmask());
+            route->setGateway(IPAddress());
+            route->setMetric(ie->ipv4()->getMetric());
+            route->setInterface(ie);
             routes.push_back(route);
         }
     }

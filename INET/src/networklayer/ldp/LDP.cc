@@ -267,24 +267,24 @@ void LDP::rebuildFecList()
         IPv4Route *re = rt->getRoute(i);
 
         // ignore multicast routes
-        if (re->host.isMulticast())
+        if (re->getHost().isMulticast())
             continue;
 
         // find out current next hop according to routing table
-        IPAddress nextHop = (re->type == IPv4Route::DIRECT)? re->host: re->gateway;
+        IPAddress nextHop = (re->getType() == IPv4Route::DIRECT) ? re->getHost() : re->getGateway();
         ASSERT(!nextHop.isUnspecified());
 
         EV << "nextHop <-- " << nextHop << endl;
 
-        FecVector::iterator it = findFecEntry(oldList, re->host, re->netmask.getNetmaskLength());
+        FecVector::iterator it = findFecEntry(oldList, re->getHost(), re->getNetmask().getNetmaskLength());
 
         if (it == oldList.end())
         {
             // fec didn't exist, it was just created
             fec_t newItem;
             newItem.fecid = ++maxFecid;
-            newItem.addr = re->host;
-            newItem.length = re->netmask.getNetmaskLength();
+            newItem.addr = re->getHost();
+            newItem.length = re->getNetmask().getNetmaskLength();
             newItem.nextHop = nextHop;
             updateFecListEntry(newItem);
             fecList.push_back(newItem);
@@ -721,7 +721,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
         for (k = 0; k < (int)myPeers.size(); k++)
         {
             anEntry = rt->getRoute(i);
-            if (anEntry->host==myPeers[k].peerIP && anEntry->interfacePtr==ie)
+            if (anEntry->getHost()==myPeers[k].peerIP && anEntry->getInterface()==ie)
             {
                 return myPeers[k].peerIP;
             }
@@ -735,7 +735,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
         for (k = 0; k < rt->getNumRoutes(); k++)
         {
             anEntry = rt->getRoute(i);
-            if (anEntry->host == myPeers[i].peerIP)
+            if (anEntry->getHost() == myPeers[i].peerIP)
                 break;
         }
         if (k == rt->getNumRoutes())

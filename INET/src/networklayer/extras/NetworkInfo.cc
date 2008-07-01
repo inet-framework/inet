@@ -46,7 +46,7 @@ void NetworkInfo::processCommand(const cXMLElement& node)
         ASSERT(filename);
         const char *mode = node.getAttribute("mode");
         const char *compat = node.getAttribute("compat");
-                  
+
         dumpRoutingInfo(target, filename, (mode && !strcmp(mode, "a")), (compat && !strcmp(compat, "linux")));
     }
     else
@@ -59,82 +59,83 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     s.open(filename, append?(std::ios::app):(std::ios::out));
     if (s.fail())
         error("cannot open `%s' for write", filename);
-        
+
     if (compat) s << "Kernel IP routing table" << endl;
     s << "Destination     Gateway         Genmask         ";
     if (compat) s << "Flags ";
     s << "Metric ";
     if (compat) s << "Ref    Use ";
     s << "Iface" << endl;
-    
-    cModule *rtmod = target->getSubmodule("routingTable");                                         
+
+    cModule *rtmod = target->getSubmodule("routingTable");
     if (rtmod)
     {
         std::vector<std::string> lines;
-        
+
         RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++)
         {
-            IPAddress host = rt->getRoute(i)->host;
-            
-            if(host.isMulticast())
+            IPAddress host = rt->getRoute(i)->getHost();
+
+            if (host.isMulticast())
                 continue;
-                
-            if(rt->getRoute(i)->interfacePtr->isLoopback())
+
+            if (rt->getRoute(i)->getInterface()->isLoopback())
                 continue;
-                
-            IPAddress netmask = rt->getRoute(i)->netmask;
-            IPAddress gateway = rt->getRoute(i)->gateway;
-            int metric = rt->getRoute(i)->metric;
-                
-            std::ostringstream line; 
-    
+
+            IPAddress netmask = rt->getRoute(i)->getNetmask();
+            IPAddress gateway = rt->getRoute(i)->getGateway();
+            int metric = rt->getRoute(i)->getMetric();
+
+            std::ostringstream line;
+
             line << std::left;
-            IPAddress dest = compat?host.doAnd(netmask):host;
+            IPAddress dest = compat ? host.doAnd(netmask) : host;
             line.width(16);
-            if(dest.isUnspecified()) line << "0.0.0.0"; else line << dest;
-            
+            if (dest.isUnspecified()) line << "0.0.0.0"; else line << dest;
+
             line.width(16);
-            if(gateway.isUnspecified()) line << "0.0.0.0"; else line << gateway;
-            
+            if (gateway.isUnspecified()) line << "0.0.0.0"; else line << gateway;
+
             line.width(16);
-            if(netmask.isUnspecified()) line << "0.0.0.0"; else line << netmask;
-            
-            if(compat) 
+            if (netmask.isUnspecified()) line << "0.0.0.0"; else line << netmask;
+
+            if (compat)
             {
                 int pad = 3;
                 line << "U"; // routes in INET are always up
-                if(!gateway.isUnspecified()) line << "G"; else ++pad;
-                if(netmask.equals(IPAddress::ALLONES_ADDRESS)) line << "H"; else ++pad;
+                if (!gateway.isUnspecified()) line << "G"; else ++pad;
+                if (netmask.equals(IPAddress::ALLONES_ADDRESS)) line << "H"; else ++pad;
                 line.width(pad);
                 line << " ";
             }
-            
-            line.width(7);
-            if(compat && rt->getRoute(i)->source == IPv4Route::IFACENETMASK) metric = 0;
-            line << metric;
-    
-            if(compat) line << "0        0 ";
-            
-            line << rt->getRoute(i)->interfaceName << endl;
 
-            if(compat) lines.push_back(line.str());
-            else s << line.str();
+            line.width(7);
+            if (compat && rt->getRoute(i)->getSource() == IPv4Route::IFACENETMASK)
+                metric = 0;
+            line << metric;
+
+            if (compat) line << "0        0 ";
+
+            line << rt->getRoute(i)->getInterfaceName() << endl;
+
+            if (compat)
+                lines.push_back(line.str());
+            else
+                s << line.str();
         }
-        
-        if(compat)
+
+        if (compat)
         {
-            // sort to avoid random order 
+            // sort to avoid random order
             // typically routing tables are sorted by netmask prefix length (descending)
             // sorting by reversed natural order looks weired, but allows easy comparison
             // with `route -n | sort -r` output by means of `diff` command...
             std::sort(lines.begin(), lines.end());
-            for(std::vector<std::string>::reverse_iterator it = lines.rbegin(); it != lines.rend(); it++)
-            {
+            for (std::vector<std::string>::reverse_iterator it = lines.rbegin(); it != lines.rend(); it++)
                 s << *it;
-            }
         }
     }
-    s << endl;   
+    s << endl;
     s.close();
 }

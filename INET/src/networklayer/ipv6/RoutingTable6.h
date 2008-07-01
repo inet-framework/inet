@@ -39,14 +39,14 @@ class INET_API IPv6Route : public cPolymorphic
         FROM_RA,        ///< on-link prefix, from Router Advertisement
         OWN_ADV_PREFIX, ///< on routers: on-link prefix that the router **itself** advertises on the link
         STATIC,         ///< static route
-        ROUTING_PROT, ///< route is managed by a routing protocol (OSPF,BGP,etc)
+        ROUTING_PROT,   ///< route is managed by a routing protocol (OSPF,BGP,etc)
     };
 
   protected:
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
-    int _interfaceID;
+    int _interfaceID;   ////FIXME POINTER INSTEAD!!!!
     IPv6Address _nextHop; // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;

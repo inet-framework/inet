@@ -242,8 +242,8 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
         }
 
         // extract interface and next-hop address from routing table entry
-        destIE = re->interfacePtr;
-        nextHopAddr = re->gateway;
+        destIE = re->getInterface();
+        nextHopAddr = re->getGateway();
     }
 
     // set datagram source address if not yet set

@@ -67,28 +67,14 @@ class INET_API IPv4Route : public cPolymorphic
         ZEBRA,        ///< managed by the Quagga/Zebra based model
     };
 
-    /// Destination
-    IPAddress host;
-
-    /// Route mask
-    IPAddress netmask;
-
-    /// Next hop
-    IPAddress gateway;
-
-    /// Interface name and pointer
-    opp_string interfaceName;
-    InterfaceEntry *interfacePtr;
-
-    /// Route type: Direct or Remote
-    RouteType type;
-
-    /// Source of route, MANUAL by reading a file,
-    /// routing protocol name otherwise
-    RouteSource source;
-
-    /// Metric ("cost" to reach the destination)
-    int metric;
+  protected:
+    IPAddress host;     ///< Destination
+    IPAddress netmask;  ///< Route mask
+    IPAddress gateway;  ///< Next hop
+    InterfaceEntry *interfacePtr; ///< interface
+    RouteType type;     ///< direct or remote
+    RouteSource source; ///< manual, routing prot, etc.
+    int metric;         ///< Metric ("cost" to reach the destination)
 
   private:
     // copying not supported: following are private and also left undefined
@@ -100,6 +86,38 @@ class INET_API IPv4Route : public cPolymorphic
     virtual ~IPv4Route() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
+
+    void setHost(IPAddress host)  {this->host = host;}
+    void setNetmask(IPAddress netmask)  {this->netmask = netmask;}
+    void setGateway(IPAddress gateway)  {this->gateway = gateway;}
+    void setInterface(InterfaceEntry *interfacePtr)  {this->interfacePtr = interfacePtr;}
+    void setType(RouteType type)  {this->type = type;}
+    void setSource(RouteSource source)  {this->source = source;}
+    void setMetric(int metric)  {this->metric = metric;}
+
+    /** Destination address prefix to match */
+    IPAddress getHost() {return host;}
+
+    /** Represents length of prefix to match */
+    IPAddress getNetmask() {return netmask;}
+
+    /** Next hop address */
+    IPAddress getGateway() {return gateway;}
+
+    /** Next hop interface */
+    InterfaceEntry *getInterface() {return interfacePtr;}
+
+    /** Convenience method */
+    const char *getInterfaceName() {return interfacePtr ? interfacePtr->getName() : "";}
+
+    /** Route type: Direct or Remote */
+    RouteType getType() {return type;}
+
+    /** Source of route. MANUAL (read from file), from routing protocol, etc */
+    RouteSource getSource() {return source;}
+
+    /** "Cost" to reach the destination */
+    int getMetric() {return metric;}
 };
 
 

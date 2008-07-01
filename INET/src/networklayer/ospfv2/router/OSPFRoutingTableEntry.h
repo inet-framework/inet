@@ -99,7 +99,6 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     host          = entry.host;
     netmask       = entry.netmask;
     gateway       = entry.gateway;
-    interfaceName = entry.interfaceName;
     interfacePtr  = entry.interfacePtr;
     type          = entry.type;
     source        = entry.source;
@@ -145,7 +144,6 @@ inline void OSPF::RoutingTableEntry::AddNextHop(OSPF::NextHop hop)
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterface(hop.ifIndex);
 
         interfacePtr = routingInterface;
-        interfaceName = routingInterface->getName();
         //gateway = ULongFromIPv4Address(hop.hopAddress); // TODO: verify this isn't necessary
     }
     nextHops.push_back(hop);

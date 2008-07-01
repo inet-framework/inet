@@ -76,12 +76,12 @@ void TED::initialize(int stage)
         for (int j = 0; j < rt->getNumRoutes(); j++)
         {
             rentry = rt->getRoute(j);
-            if (rentry->interfacePtr == ie && rentry->type == IPv4Route::DIRECT)
+            if (rentry->getInterface()==ie && rentry->getType()==IPv4Route::DIRECT)
                 break;
         }
         ASSERT(rentry);
-        IPAddress linkid = rentry->host;
-        IPAddress remote = rentry->gateway;
+        IPAddress linkid = rentry->getHost();
+        IPAddress remote = rentry->getGateway();
         ASSERT(!remote.isUnspecified());
 
         // find bandwidth of the link
@@ -103,7 +103,7 @@ void TED::initialize(int stage)
         entry.state = true;
 
         // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
-        entry.metric = rentry->interfacePtr->ipv4()->getMetric();
+        entry.metric = rentry->getInterface()->ipv4()->getMetric();
 
         EV << "metric set to=" << entry.metric << endl;
 
@@ -218,7 +218,7 @@ void TED::rebuildRoutingTable()
     for (int i = 0; i < n; i++)
     {
         IPv4Route *entry = rt->getRoute(j);
-        if (entry->host.isMulticast())
+        if (entry->getHost().isMulticast())
         {
             ++j;
         }
@@ -258,26 +258,25 @@ void TED::rebuildRoutingTable()
         ASSERT(isLocalPeer(V[nHop].node));
 
         IPv4Route *entry = new IPv4Route;
-        entry->host = V[i].node;
+        entry->setHost(V[i].node);
 
         if (V[i].node == V[nHop].node)
         {
-            entry->gateway = IPAddress();
-            entry->type = entry->DIRECT;
+            entry->setGateway(IPAddress());
+            entry->setType(entry->DIRECT);
         }
         else
         {
-            entry->gateway = V[nHop].node;
-            entry->type = entry->REMOTE;
+            entry->setGateway(V[nHop].node);
+            entry->setType(entry->REMOTE);
         }
-        entry->interfacePtr = rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node));
-        entry->interfaceName = opp_string(entry->interfacePtr->getName());
-        entry->source = IPv4Route::OSPF;
+        entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
+        entry->setSource(IPv4Route::OSPF);
 
-        entry->netmask = 0xffffffff;
-        entry->metric = 0;
+        entry->setNetmask(0xffffffff);
+        entry->setMetric(0);
 
-        EV << "  inserting route: host=" << entry->host << " interface=" << entry->interfaceName << " nexthop=" << entry->gateway << "\n";
+        EV << "  inserting route: host=" << entry->getHost() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
 
         rt->addRoute(entry);
     }
@@ -288,17 +287,16 @@ void TED::rebuildRoutingTable()
     {
         IPv4Route *entry = new IPv4Route;
 
-        entry->host = getPeerByLocalAddress(interfaceAddrs[i]);
-        entry->gateway = IPAddress();
-        entry->type = entry->DIRECT;
-        entry->interfacePtr = rt->getInterfaceByAddress(interfaceAddrs[i]);
-        entry->interfaceName = opp_string(entry->interfacePtr->getName());
-        entry->source = IPv4Route::OSPF;
+        entry->setHost(getPeerByLocalAddress(interfaceAddrs[i]));
+        entry->setGateway(IPAddress());
+        entry->setType(entry->DIRECT);
+        entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
+        entry->setSource(IPv4Route::OSPF);
 
-        entry->netmask = 0xffffffff;
-        entry->metric = 0; // XXX FIXME what's that?
+        entry->setNetmask(0xffffffff);
+        entry->setMetric(0); // XXX FIXME what's that?
 
-        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->host << " interface=" << entry->interfaceName << "\n";
+        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getHost() << " interface=" << entry->getInterfaceName() << "\n";
 
         rt->addRoute(entry);
     }

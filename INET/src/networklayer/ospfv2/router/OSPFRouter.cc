@@ -1528,7 +1528,7 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
     // add the external route to the routing table if it was not added by another module
     for (unsigned long i = 0; i < routingEntryNumber; i++) {
         IPv4Route* entry = simRoutingTable->getRoute(i);
-        if ((entry->host.getInt() & entry->netmask.getInt()) ==
+        if ((entry->getHost().getInt() & entry->getNetmask().getInt()) ==
             (ULongFromIPv4Address(networkAddress) & externalRouteContents.getNetworkMask().getInt()))
         {
             inRoutingTable = true;
@@ -1536,13 +1536,12 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
     }
     if (!inRoutingTable) {
         IPv4Route* entry = new IPv4Route;
-        entry->host = ULongFromIPv4Address(networkAddress);
-        entry->netmask = externalRouteContents.getNetworkMask();
-        entry->interfacePtr = InterfaceTableAccess().get()->getInterface(ifIndex);
-        entry->interfaceName = entry->interfacePtr->getName();
-        entry->type = IPv4Route::REMOTE;
-        entry->source = IPv4Route::MANUAL;
-        entry->metric = externalRouteContents.getRouteCost();
+        entry->setHost(ULongFromIPv4Address(networkAddress));
+        entry->setNetmask(externalRouteContents.getNetworkMask());
+        entry->setInterface(InterfaceTableAccess().get()->getInterface(ifIndex));
+        entry->setType(IPv4Route::REMOTE);
+        entry->setSource(IPv4Route::MANUAL);
+        entry->setMetric(externalRouteContents.getRouteCost());
         simRoutingTable->addRoute(entry);   // RoutingTable deletes entry pointer
     }
 

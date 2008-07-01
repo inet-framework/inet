@@ -140,12 +140,11 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
 
         // add route
         IPv4Route *e = new IPv4Route();
-        e->host = IPAddress();
-        e->netmask = IPAddress();
-        e->interfaceName = ie->getName();
-        e->interfacePtr = ie;
-        e->type = IPv4Route::REMOTE;
-        e->source = IPv4Route::MANUAL;
+        e->setHost(IPAddress());
+        e->setNetmask(IPAddress());
+        e->setInterface(ie);
+        e->setType(IPv4Route::REMOTE);
+        e->setSource(IPv4Route::MANUAL);
         //e->getMetric() = 1;
         rt->addRoute(e);
     }
@@ -197,12 +196,11 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
             IPv4Route *e = new IPv4Route();
-            e->host = destAddr;
-            e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->getName();
-            e->interfacePtr = ie;
-            e->type = IPv4Route::DIRECT;
-            e->source = IPv4Route::MANUAL;
+            e->setHost(destAddr);
+            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            e->setInterface(ie);
+            e->setType(IPv4Route::DIRECT);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }

@@ -165,18 +165,17 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
             IPv4Route *e = new IPv4Route();
             if (useRouterIdForRoutes)
             {
-                e->host = neighborRouterId;
-                e->gateway = neighborAddr;
+                e->setHost(neighborRouterId);
+                e->setGateway(neighborAddr);
             }
             else
             {
-                e->host = neighborAddr; // and no gateway
+                e->setHost(neighborAddr); // and no gateway
             }
-            e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->getName();
-            e->interfacePtr = ie;
-            e->type = IPv4Route::DIRECT;
-            e->source = IPv4Route::MANUAL;
+            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            e->setInterface(ie);
+            e->setType(IPv4Route::DIRECT);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }
@@ -212,13 +211,12 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
 
         // add route
         IPv4Route *e = new IPv4Route();
-        e->host = IPAddress();
-        e->netmask = IPAddress();
-        e->interfaceName = ie->getName();
-        e->interfacePtr = ie;
-        e->type = IPv4Route::REMOTE;
-        e->source = IPv4Route::MANUAL;
-        //e->getMetric() = 1;
+        e->setHost(IPAddress());
+        e->setNetmask(IPAddress());
+        e->setInterface(ie);
+        e->setType(IPv4Route::REMOTE);
+        e->setSource(IPv4Route::MANUAL);
+        //e->setMetric(1);
         rt->addRoute(e);
     }
 }
@@ -308,13 +306,12 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             // add route
             RoutingTable *rt = nodeInfo[j].rt;
             IPv4Route *e = new IPv4Route();
-            e->host = destAddr;
+            e->setHost(destAddr);
             e->gateway = ???
-            e->netmask = IPAddress(255,255,255,255); // full match needed
-            e->interfaceName = ie->getName();
-            e->interfacePtr = ie;
-            e->type = IPv4Route::REMOTE;
-            e->source = IPv4Route::MANUAL;
+            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            e->setInterface(ie);
+            e->setType(IPv4Route::REMOTE);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }
