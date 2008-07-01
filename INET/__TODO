@@ -1,9 +1,10 @@
-TODO: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
+
+TODO: change lots of getInterface() methods to getInterfaceById()!!!!!
+
+TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
       if we change it to pointer, messages that are underway in the host during a deleteInterface()
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
       leave a hole in it?
------------------------
-add a getInterfaceById method? based on an std::map<int,InterfaceEntry*> ?
 
 -----------------------
 - move "q=queue" too into the default display string
