@@ -1,11 +1,9 @@
-
-
 CONVERSION TO OMNET++40:
 - move "q=queue" too into the default display string
-- trim ini files 
 - add gate @labels
-- gross renaming of gates and parameters, to make them more consistent
-
+- rename TCPBasicClientApp to TCPRequestReplyClientApp ?
+-----------------------
+- IPvXAddress: rename get4()/get6() to v4()/v6()
 -----------------------
 TODO rename the following TED.h methods to begin with a verb:
   unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
@@ -17,12 +15,7 @@ TODO rename the following TED.h methods to begin with a verb:
 Interfaces:
 - IPv6RoutingTable: change _interfaceId to _ie!!!
 
-- interfaceAt -> interfaceById!!!
 
-- store interfaces in an std::map<int,InterfaceEntry*> inside interfaceTable!
-  - this makes it possible to implement interface deletion as well, with preserving ids;
-  - or just use a vector like for gates and modules? (apps must check for holes then!)
-- notify when an interface gets deleted -- the RoutingTable, ARP etc should remove associated entries
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
    in DistanceBasedRadio: decouple transmission range from interference range 
@@ -38,8 +31,6 @@ Interfaces:
 - Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer 
   to use this notification to learn when ProbeRequest or AssociationResponse
   has been transmitted.
---------
-- code consistency: use omit-get-verb everywhere, including the Ieee80211 models?
 --------
 - ChannelControl: grid; instead of having pMax parameter, it should ask all
   radios and collect pMax from them! (or, directly the range!)
@@ -80,9 +71,6 @@ Interfaces:
 - check in Quagga documentation
 - rename Daemon to QuaggaDaemon
 --------
-- IPvXAddress: change get4()/get6() to v4()/v6()
-- Wrap RoutingEntry members into getter/setter methods!
---------
 - "ack" in LinkStateMsg redundant? (never read)
 Q: what is the TELinkInfo.state flag?
 Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
@@ -92,16 +80,6 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 --------
 - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
 --------
-- put NAMTraceWriter into all routers
-
-- dynamic registration of notification categories:
-    x.h:  extern const int NF_TED_CHANGED;
-    x.cc: const int NF_TED_CHANGED = NotificationBoard::registerCategory("NF_TED_CHANGED");
-
-- "make dist"?
-
-- TCP, UDP: rename gates (after omnetpp-4.0!)
-
 - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
 - create example network with both Ethernet and PPP
@@ -133,18 +111,12 @@ Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printe
 
 - IPv4 configurator: should fill in next hop addresses too, not only interface (esp with Ethernet)
 
-- rename TCPBasicClientApp to TCPRequestReplyClientApp ?
-
 - IPv4: make it usable with ad-hoc models
 
 - notifboard: switch to the context of the client before calling its receiveNotification()
 
-- implement class PacketQueue : public cQueue
-
-- add more notifications (NotificationBoard): interface up/down, routing table change, etc
 - todo for omnetpp-3.2:
      - add handleParameterChange() to apps (needed for Scenario Manager!)
-     - makemakefiles: -P option
      - use new opp_msgc features? (kind=..., length=...etc)
 
 ----------------------

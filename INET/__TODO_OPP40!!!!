@@ -1,8 +1,6 @@
-move Nodes/QuaggaRouter into Quagga project
 copy TODO files from old branch's and old trunk's working copy
 merge old trunk changes
 put all c++ code into "inet" namespace
-replace underscore with camelCase in parameter/gate names! ("message_length" etc)
 UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
 networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
 factor out common part of hosts/routers etc, and use subclassing
@@ -10,6 +8,9 @@ remove channelInstaller
 add fingerprints!
 create a new executable demo for Windows
 check also _TODO!
+
+get quagga to work
+move Nodes/QuaggaRouter into Quagga project
 
 
 current errors: (may 7, 2008)
