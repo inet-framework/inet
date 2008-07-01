@@ -22,7 +22,7 @@
 
 #include <ctype.h>
 #include "MACAddress.h"
-#include "InterfaceIdentifier.h"
+#include "InterfaceToken.h"
 
 
 unsigned int MACAddress::autoAddressCtr;

@@ -20,7 +20,7 @@
 #include <iostream>
 #include <sstream>
 #include "IPv6Address.h"
-#include "InterfaceIdentifier.h"
+#include "InterfaceToken.h"
 
 const uint32 LINK_LOCAL_PREFIX = 0xFE800000;
 const uint32 SITE_LOCAL_PREFIX = 0xFEC00000;
