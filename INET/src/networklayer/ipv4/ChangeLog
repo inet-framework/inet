@@ -1,3 +1,7 @@
+2008-07-01  Andras Varga
+
+	* wrapped naked data members of IPv4Route into getters/setters
+
 2008-06-29  Andras Varga
 
 	* factored out a createIPDatagram method

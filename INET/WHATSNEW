@@ -23,6 +23,9 @@ Internal snapshot, for omnetpp-4.0b2.
 
 - InterfaceTable: added deleteInterface()
 
+- RoutingTable: wrapped naked data members of IPv4Route into getters/setters
+
+
 
 INET-20080624
 -------------
