@@ -2,9 +2,10 @@ TODO: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains 
       if we change it to pointer, messages that are underway in the host during a deleteInterface()
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
       leave a hole in it?
+-----------------------
+add a getInterfaceById method? based on an std::map<int,InterfaceEntry*> ?
 
-
-CONVERSION TO OMNET++40:
+-----------------------
 - move "q=queue" too into the default display string
 - add gate @labels
 - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
@@ -26,9 +27,16 @@ rename IPv4/IPv6 stuff to be consistent???
   FlatNetworkConfigurator vs FlatNetworkConfigurator6
 
 -----------------------
-Interfaces:
-- RoutingTable: change _interfaceId to _ie!!!
+put all c++ code into "inet" namespace
+- UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
+- networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
+- factor out common part of hosts/routers etc, and use subclassing
+- remove channelInstaller
+- examples: add fingerprints!
+- create a new executable demo for Windows
 
+--------
+- get quagga to work
 --------
 - add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
    in DistanceBasedRadio: decouple transmission range from interference range 
