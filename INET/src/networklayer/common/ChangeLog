@@ -1,3 +1,17 @@
+
 2008-07-01  Andras Varga
 
 	* created this package, by moving files from contract/
+
+	* InterfaceEntry: setter methods made virtual. This has near zero
+	performance cost (calls to setters are rare, and the class already
+	has a vptr due to cObject). Also added backpointer to containing
+	InterfaceTable.
+
+	* InterfaceTable: implemented NotificationBoard-based notifications 
+	about interface changes: NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, 
+	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED. 
+	The detail object for all four are the InterfaceEntry.
+
+	TODO: changes to protocol-specific interface data (IPv4, IPv6)
+	doesn't trigger a notification yet

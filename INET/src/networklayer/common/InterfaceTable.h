@@ -50,6 +50,8 @@
  */
 class INET_API InterfaceTable : public cSimpleModule, public INotifiable
 {
+    friend class InterfaceEntry;  // so that it can call interfaceConfigChanged()
+
   protected:
     NotificationBoard *nb; // cached pointer
 
@@ -62,6 +64,10 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
 
     // discover and store which nwlayer/host gates connect to this interface
     virtual void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
+
+    // called from InterfaceEntry
+    virtual void interfaceConfigChanged(InterfaceEntry *entry);
+    virtual void interfaceStateChanged(InterfaceEntry *entry);
 
   public:
     InterfaceTable();

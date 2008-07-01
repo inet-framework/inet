@@ -109,11 +109,14 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
 
     // insert
     entry->_interfaceId = interfaces.size();
+    entry->setInterfaceTable(this);
     interfaces.push_back(entry);
 
     // fill in networkLayerGateIndex, nodeOutputGateId, nodeInputGateId
     if (ifmod)
         discoverConnectingGates(entry, ifmod);
+
+    nb->fireChangeNotification(NF_INTERFACE_CREATED, entry);
 }
 
 void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod)
@@ -159,10 +162,21 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
     if (i==interfaces.end())
         opp_error("deleteInterface(): interface '%s' not found in interface table", entry->getName());
 
+    nb->fireChangeNotification(NF_INTERFACE_DELETED, entry);  // actually, only going to be deleted
+
     interfaces.erase(i);
     delete entry;
 }
 
+void InterfaceTable::interfaceConfigChanged(InterfaceEntry *entry)
+{
+    nb->fireChangeNotification(NF_INTERFACE_CONFIG_CHANGED, entry);
+}
+
+void InterfaceTable::interfaceStateChanged(InterfaceEntry *entry)
+{
+    nb->fireChangeNotification(NF_INTERFACE_STATE_CHANGED, entry);
+}
 
 InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
 {

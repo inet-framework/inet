@@ -27,6 +27,7 @@
  * Category constants for NotificationBoard
  */
 // TODO consider: use allocated IDs, like: const int NF_FOO = registerCategory("FOO");
+// or maybe use structs and dynamic_cast? so we can have a hierarchy of notifications
 // TODO document associated notification detail structs
 enum
 {
@@ -52,17 +53,19 @@ enum
     NF_L2_ASSOCIATED,    // successfully associated with an AP (currently Ieee80211)
 
     // - layer 3 (network)
+    NF_INTERFACE_CREATED,
+    NF_INTERFACE_DELETED,
     NF_INTERFACE_STATE_CHANGED,
     NF_INTERFACE_CONFIG_CHANGED,
     NF_TED_CHANGED,
 
     // layer 3 - IPv4
     NF_IPv4_INTERFACECONFIG_CHANGED,
-    NF_IPv4_ROUTINGTABLE_CHANGED,
+    NF_IPv4_ROUTINGTABLE_CHANGED, //TODO split to: route added, route deleted, etc
 
     // layer 3 - IPv6
     NF_IPv6_INTERFACECONFIG_CHANGED,
-    NF_IPv6_ROUTINGTABLE_CHANGED,
+    NF_IPv6_ROUTINGTABLE_CHANGED, //TODO split to: route added, route deleted, etc
     NF_IPv6_HANDOVER_OCCURRED,
 
     // - layer 4 (transport)

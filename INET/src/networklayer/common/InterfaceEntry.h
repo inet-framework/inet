@@ -37,11 +37,13 @@ class InterfaceTable;
  *
  * @see InterfaceTable
  */
-class INET_API InterfaceEntry : public cPolymorphic
+//FIXME remove interfaceId? pointer or name can be used instead
+class INET_API InterfaceEntry : public cObject
 {
-    friend class InterfaceTable; //only this guy is allowed to set _interfaceId
+    friend class InterfaceTable; //only this guy is allowed to set _interfaceId and owner
 
   protected:
+    InterfaceTable *ownerp; ///< InterfaceTable that contains this interface, or NULL
     int _interfaceId;      ///< identifies the interface in the InterfaceTable
     std::string _name;     ///< interface name (must be unique)
     int _nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
@@ -68,52 +70,77 @@ class INET_API InterfaceEntry : public cPolymorphic
     InterfaceEntry(const InterfaceEntry& obj);
     InterfaceEntry& operator=(const InterfaceEntry& obj);
 
+  protected:
+    // change notifications
+    virtual void configChanged();
+    virtual void stateChanged();
+
+    // to be invoked from InterfaceTable only
+    virtual void setInterfaceTable(InterfaceTable *t) {ownerp = t;}
+
   public:
     InterfaceEntry();
     virtual ~InterfaceEntry() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    int getInterfaceId() const        {return _interfaceId;}
+    /**
+     * Returns the InterfaceTable this interface is in, or NULL
+     */
+    InterfaceTable *getInterfaceTable() const {return ownerp;}
+
+    /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
+    //@{
+    int getInterfaceId() const        {return _interfaceId;}   //FIXME remove on the long term! (clients should use interface pointer)
     const char *getName() const       {return _name.c_str();}
     int getNetworkLayerGateIndex() const {return _nwLayerGateIndex;}
     int getNodeOutputGateId() const   {return _nodeOutputGateId;}
     int getNodeInputGateId() const    {return _nodeInputGateId;}
     int getPeerNamId() const          {return _peernamid;}
     int getMTU() const                {return _mtu;}
-    bool isDown() const            {return _down;}
-    bool isBroadcast() const       {return _broadcast;}
-    bool isMulticast() const       {return _multicast;}
-    bool isPointToPoint() const    {return _pointToPoint;}
-    bool isLoopback() const        {return _loopback;}
+    bool isDown() const               {return _down;}
+    bool isBroadcast() const          {return _broadcast;}
+    bool isMulticast() const          {return _multicast;}
+    bool isPointToPoint() const       {return _pointToPoint;}
+    bool isLoopback() const           {return _loopback;}
     double getDatarate() const        {return _datarate;}
     const MACAddress& getMacAddress() const  {return _macAddr;}
-    const InterfaceToken& getInterfaceToken() const {return _token;}//FIXME: Shouldn't this be interface identifier?
+    const InterfaceToken& getInterfaceToken() const {return _token;}
+    //@}
 
-    void setName(const char *s)  {_name = s;}
-    void setNetworkLayerGateIndex(int i) {_nwLayerGateIndex = i;}
-    void setNodeOutputGateId(int i) {_nodeOutputGateId = i;}
-    void setNodeInputGateId(int i)  {_nodeInputGateId = i;}
-    void setPeerNamId(int ni)    {_peernamid = ni;}
-    void setMtu(int m)           {_mtu = m;}
-    void setDown(bool b)         {_down = b;}
-    void setBroadcast(bool b)    {_broadcast = b;}
-    void setMulticast(bool b)    {_multicast = b;}
-    void setPointToPoint(bool b) {_pointToPoint = b;}
-    void setLoopback(bool b)     {_loopback = b;}
-    void setDatarate(double d)   {_datarate = d;}
-    void setMACAddress(const MACAddress& macAddr) {_macAddr=macAddr;}
-    void setInterfaceToken(const InterfaceToken& token) {_token=token;}
+    /** @name Field setters */
+    //@{
+    virtual void setName(const char *s)  {_name = s; configChanged();}
+    virtual void setNetworkLayerGateIndex(int i) {_nwLayerGateIndex = i; configChanged();}
+    virtual void setNodeOutputGateId(int i) {_nodeOutputGateId = i; configChanged();}
+    virtual void setNodeInputGateId(int i)  {_nodeInputGateId = i; configChanged();}
+    virtual void setPeerNamId(int ni)    {_peernamid = ni; configChanged();}
+    virtual void setMtu(int m)           {_mtu = m; configChanged();}
+    virtual void setDown(bool b)         {_down = b; stateChanged();}
+    virtual void setBroadcast(bool b)    {_broadcast = b; configChanged();}
+    virtual void setMulticast(bool b)    {_multicast = b; configChanged();}
+    virtual void setPointToPoint(bool b) {_pointToPoint = b; configChanged();}
+    virtual void setLoopback(bool b)     {_loopback = b; configChanged();}
+    virtual void setDatarate(double d)   {_datarate = d; configChanged();}
+    virtual void setMACAddress(const MACAddress& macAddr) {_macAddr=macAddr; configChanged();}
+    virtual void setInterfaceToken(const InterfaceToken& token) {_token=token; configChanged();}
+    //@}
 
-    IPv4InterfaceData *ipv4()    {return _ipv4data;}
-    IPv6InterfaceData *ipv6()    {return _ipv6data;}
+    /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
+    //@{
+    IPv4InterfaceData *ipv4()       {return _ipv4data;}
+    IPv6InterfaceData *ipv6()       {return _ipv6data;}
     cPolymorphic *getProtocol3()    {return _protocol3data;}
     cPolymorphic *getProtocol4()    {return _protocol4data;}
+    //@}
 
-    void setIPv4Data(IPv4InterfaceData *p)  {_ipv4data = p;}
-    void setIPv6Data(IPv6InterfaceData *p)  {_ipv6data = p;}
-    void setProtocol3Data(cPolymorphic *p)  {_protocol3data = p;}
-    void setProtocol4Data(cPolymorphic *p)  {_protocol4data = p;}
+    /** @name Installing protocol-specific interface data */
+    //@{
+    virtual void setIPv4Data(IPv4InterfaceData *p)  {_ipv4data = p; configChanged();}
+    virtual void setIPv6Data(IPv6InterfaceData *p)  {_ipv6data = p; configChanged();}
+    virtual void setProtocol3Data(cPolymorphic *p)  {_protocol3data = p; configChanged();}
+    virtual void setProtocol4Data(cPolymorphic *p)  {_protocol4data = p; configChanged();}
+    //@}
 };
 
 #endif

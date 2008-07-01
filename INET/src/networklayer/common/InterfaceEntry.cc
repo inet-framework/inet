@@ -26,10 +26,13 @@
 #include <sstream>
 
 #include "InterfaceEntry.h"
+#include "InterfaceTable.h"
 
 
 InterfaceEntry::InterfaceEntry()
 {
+    ownerp = NULL;
+
     _nwLayerGateIndex = -1;
     _nodeOutputGateId = -1;
     _nodeInputGateId = -1;
@@ -113,4 +116,18 @@ std::string InterfaceEntry::detailedInfo() const
 
     return out.str();
 }
+
+void InterfaceEntry::configChanged()
+{
+    if (ownerp)
+        ownerp->interfaceConfigChanged(this);
+}
+
+void InterfaceEntry::stateChanged()
+{
+    if (ownerp)
+        ownerp->interfaceStateChanged(this);
+}
+
+
 
