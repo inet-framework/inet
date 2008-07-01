@@ -46,6 +46,21 @@
  *
  * Interfaces are represented by InterfaceEntry objects.
  *
+ * When interfaces need to be reliably and efficiently identified from other
+ * modules, interfaceIds should be used. They are better suited than pointers
+ * because when an interface gets removed (see deleteInterface()), it is
+ * often impossible/impractical to invalidate all pointers to it, and also
+ * because pointers are not necessarily unique (a new InterfaceEntry may get
+ * allocated exactly at the address of a previously deleted one).
+ * Interface Ids are unique (Ids of removed interfaces are not issued again),
+ * stale Ids can be detected, and they are also invariant to insertion/deletion.
+ *
+ * Clients can get notified about interface changes by subscribing to
+ * the following notifications in NotificationBoard: NF_INTERFACE_CREATED,
+ * NF_INTERFACE_DELETED, NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
+ * State change gets fired for up/down events; all other changes fire as
+ * config change.
+ *
  * @see InterfaceEntry
  */
 class INET_API InterfaceTable : public cSimpleModule, public INotifiable
@@ -55,8 +70,14 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
   protected:
     NotificationBoard *nb; // cached pointer
 
+    // primary storage for interfaces: vector indexed by id; may contain NULLs;
+    // slots are never reused to ensure id uniqueness
     typedef std::vector<InterfaceEntry *> InterfaceVector;
-    InterfaceVector interfaces;
+    InterfaceVector idToInterface;
+
+    // fields to support getNumInterfaces() and getInterface(pos)
+    int tmpNumInterfaces; // caches number of non-NULL elements of idToInterface; -1 if invalid
+    InterfaceEntry **tmpInterfaceList; // caches non-NULL elements of idToInterface; NULL if invalid
 
   protected:
     // displays summary above the icon
@@ -68,6 +89,9 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     // called from InterfaceEntry
     virtual void interfaceConfigChanged(InterfaceEntry *entry);
     virtual void interfaceStateChanged(InterfaceEntry *entry);
+
+    // internal
+    virtual void invalidateTmpInterfaceList();
 
   public:
     InterfaceTable();
@@ -108,12 +132,25 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     /**
      * Returns the number of interfaces.
      */
-    virtual int getNumInterfaces()  {return interfaces.size();}
+    virtual int getNumInterfaces();
 
     /**
      * Returns the InterfaceEntry specified by an index 0..numInterfaces-1.
+     * Throws an error if index is out of range.
+     *
+     * Note that this index is NOT the same as interfaceId! Indices are
+     * not guaranteed to stay the same after interface addition/deletion,
+     * so cannot be used to reliably identify the interface. Use interfaceId
+     * to refer to interfaces from other modules or from messages/packets.
      */
     virtual InterfaceEntry *getInterface(int pos);
+
+    /**
+     * Returns an interface by its Id. Ids are guaranteed to be invariant
+     * to interface deletions/additions. Returns NULL if there is no such
+     * interface (This allows detecting stale IDs without raising an error.)
+     */
+    virtual InterfaceEntry *getInterfaceById(int id);
 
     /**
      * Returns an interface given by its getNodeOutputGateId().

@@ -30,6 +30,8 @@
 
 Define_Module( InterfaceTable );
 
+#define INTERFACEIDS_START  100
+
 std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 {
     os << e.info();
@@ -39,12 +41,15 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 
 InterfaceTable::InterfaceTable()
 {
+    tmpNumInterfaces = -1;
+    tmpInterfaceList = NULL;
 }
 
 InterfaceTable::~InterfaceTable()
 {
-    for (unsigned int i=0; i<interfaces.size(); i++)
-        delete interfaces[i];
+    for (int i=0; i < (int)idToInterface.size(); i++)
+        delete idToInterface[i];
+    delete [] tmpInterfaceList;
 }
 
 void InterfaceTable::initialize(int stage)
@@ -63,7 +68,7 @@ void InterfaceTable::initialize(int stage)
     }
     else if (stage==1)
     {
-        WATCH_PTRVECTOR(interfaces);
+        WATCH_PTRVECTOR(idToInterface);
         updateDisplayString();
     }
 }
@@ -74,7 +79,7 @@ void InterfaceTable::updateDisplayString()
         return;
 
     char buf[80];
-    sprintf(buf, "%d interfaces", interfaces.size());
+    sprintf(buf, "%d interfaces", getNumInterfaces());
     getDisplayString().setTagArg("t",0,buf);
 }
 
@@ -92,13 +97,46 @@ void InterfaceTable::receiveChangeNotification(int category, cPolymorphic *detai
 
 //---
 
+int InterfaceTable::getNumInterfaces()
+{
+    if (tmpNumInterfaces == -1)
+    {
+        // count non-NULL elements
+        int n = 0;
+        int maxId = idToInterface.size();
+        for (int i=0; i<maxId; i++)
+            if (idToInterface[i])
+                n++;
+        tmpNumInterfaces = n;
+    }
+
+    return tmpNumInterfaces;
+}
+
 InterfaceEntry *InterfaceTable::getInterface(int pos)
 {
-    if (pos==-1) // -1 is commonly used as "none"
-        return NULL;
-    if (pos<0 || pos>=(int)interfaces.size())
-        opp_error("getInterface(): nonexistent interface %d", pos);
-    return interfaces[pos];
+    int n = getNumInterfaces(); // also fills tmpInterfaceList
+    if (pos<0 || pos>=n)
+        opp_error("getInterface(): interface index %d out of range 0..%d", pos, n-1);
+
+    if (!tmpInterfaceList)
+    {
+        // collect non-NULL elements into tmpInterfaceList[]
+        tmpInterfaceList = new InterfaceEntry *[n];
+        int k = 0;
+        int maxId = idToInterface.size();
+        for (int i=0; i<maxId; i++)
+            if (idToInterface[i])
+                tmpInterfaceList[k++] = idToInterface[i];
+    }
+
+    return tmpInterfaceList[pos];
+}
+
+InterfaceEntry *InterfaceTable::getInterfaceById(int id)
+{
+    id -= INTERFACEIDS_START;
+    return (id<0 || id>=(int)idToInterface.size()) ? NULL : idToInterface[id];
 }
 
 void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
@@ -108,9 +146,10 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
         opp_error("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
-    entry->interfaceId = interfaces.size();
+    entry->interfaceId = INTERFACEIDS_START + idToInterface.size();
     entry->setInterfaceTable(this);
-    interfaces.push_back(entry);
+    idToInterface.push_back(entry);
+    invalidateTmpInterfaceList();
 
     // fill in networkLayerGateIndex, nodeOutputGateId, nodeInputGateId
     if (ifmod)
@@ -158,14 +197,22 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
 
 void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 {
-    InterfaceVector::iterator i = std::find(interfaces.begin(), interfaces.end(), entry);
-    if (i==interfaces.end())
+    int id = entry->getInterfaceId();
+    if (entry != getInterfaceById(id))
         opp_error("deleteInterface(): interface '%s' not found in interface table", entry->getName());
 
     nb->fireChangeNotification(NF_INTERFACE_DELETED, entry);  // actually, only going to be deleted
 
-    interfaces.erase(i);
+    idToInterface[id - INTERFACEIDS_START] = NULL;
     delete entry;
+    invalidateTmpInterfaceList();
+}
+
+void InterfaceTable::invalidateTmpInterfaceList()
+{
+    tmpNumInterfaces = -1;
+    delete[] tmpInterfaceList;
+    tmpInterfaceList = NULL;
 }
 
 void InterfaceTable::interfaceConfigChanged(InterfaceEntry *entry)
@@ -182,9 +229,10 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->getNodeOutputGateId()==id)
-            return *i;
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && idToInterface[i]->getNodeOutputGateId()==id)
+            return idToInterface[i];
     return NULL;
 }
 
@@ -192,9 +240,10 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->getNodeInputGateId()==id)
-            return *i;
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && idToInterface[i]->getNodeInputGateId()==id)
+            return idToInterface[i];
     return NULL;
 }
 
@@ -202,31 +251,32 @@ InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->getNetworkLayerGateIndex()==index)
-            return *i;
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && idToInterface[i]->getNetworkLayerGateIndex()==index)
+            return idToInterface[i];
     return NULL;
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
 {
     Enter_Method_Silent();
-
     if (!name)
         return NULL;
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if (!strcmp(name, (*i)->getName()))
-            return *i;
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && !strcmp(name, idToInterface[i]->getName()))
+            return idToInterface[i];
     return NULL;
 }
 
 InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
 {
     Enter_Method_Silent();
-
-    for (InterfaceVector::iterator i=interfaces.begin(); i!=interfaces.end(); ++i)
-        if ((*i)->isLoopback())
-            return *i;
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && idToInterface[i]->isLoopback())
+            return idToInterface[i];
     return NULL;
 }
 

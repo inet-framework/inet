@@ -13,5 +13,10 @@
 	NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED. 
 	The detail object for all four are the InterfaceEntry.
 
+	* InterfaceTable: created a getInterfaceById() method, NOT to be 
+	confused with getInterface(pos)! Ids are stable after deletions,
+	unlike 0..getNumInterfaces()-1 indices
+
+
 	TODO: changes to protocol-specific interface data (IPv4, IPv6)
-	doesn't trigger a notification yet
+	don't trigger a notification yet
