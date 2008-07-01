@@ -2,6 +2,10 @@
 
 	* wrapped naked data members of IPv4Route into getters/setters
 
+	* RoutingTable: enforce by returning "const" pointers that routes 
+	already added cannot be changed any more (one must delete and 
+	re-add it)
+
 2008-06-29  Andras Varga
 
 	* factored out a createIPDatagram method

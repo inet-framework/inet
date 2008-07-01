@@ -264,7 +264,7 @@ void LDP::rebuildFecList()
     {
         // every entry in the routing table
 
-        IPv4Route *re = rt->getRoute(i);
+        const IPv4Route *re = rt->getRoute(i);
 
         // ignore multicast routes
         if (re->getHost().isMulticast())
@@ -714,7 +714,7 @@ IPAddress LDP::findPeerAddrFromInterface(std::string interfaceName)
     int k = 0;
     InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
 
-    IPv4Route *anEntry;
+    const IPv4Route *anEntry;
 
     for (i = 0; i < rt->getNumRoutes(); i++)
     {

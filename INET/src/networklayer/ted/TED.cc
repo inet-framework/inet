@@ -72,7 +72,7 @@ void TED::initialize(int stage)
         // in this model we haven't implemented HELLO but provide peer addresses via
         // preconfigured static host routes in routing table.
         //
-        IPv4Route *rentry = NULL;
+        const IPv4Route *rentry = NULL;
         for (int j = 0; j < rt->getNumRoutes(); j++)
         {
             rentry = rt->getRoute(j);
@@ -217,7 +217,7 @@ void TED::rebuildRoutingTable()
     int j = 0;
     for (int i = 0; i < n; i++)
     {
-        IPv4Route *entry = rt->getRoute(j);
+        const IPv4Route *entry = rt->getRoute(j);
         if (entry->getHost().isMulticast())
         {
             ++j;

@@ -299,15 +299,15 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
 }
 
 
-IPv4Route *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
+const IPv4Route *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 {
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
-    IPv4Route *bestRoute = NULL;
+    const IPv4Route *bestRoute = NULL;
     uint32 longestNetmask = 0;
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
-        IPv4Route *e = *i;
+        const IPv4Route *e = *i;
         if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()) &&  // match
             (!bestRoute || e->getNetmask().getInt() > longestNetmask))  // longest so far
         {
@@ -322,7 +322,7 @@ InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest) con
 {
     Enter_Method("getInterfaceForDestAddr(%s)=?", dest.str().c_str());
 
-    IPv4Route *e = findBestMatchingRoute(dest);
+    const IPv4Route *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : NULL;
 }
 
@@ -330,7 +330,7 @@ IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest) const
 {
     Enter_Method("getGatewayForDestAddr(%s)=?", dest.str().c_str());
 
-    IPv4Route *e = findBestMatchingRoute(dest);
+    const IPv4Route *e = findBestMatchingRoute(dest);
     return e ? e->getGateway() : IPAddress();
 }
 
@@ -343,7 +343,7 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest) const
     res.reserve(16);
     for (RouteVector::const_iterator i=multicastRoutes.begin(); i!=multicastRoutes.end(); ++i)
     {
-        IPv4Route *e = *i;
+        const IPv4Route *e = *i;
         if (IPAddress::maskedAddrAreEqual(dest, e->getHost(), e->getNetmask()))
         {
             MulticastRoute r;
@@ -353,7 +353,6 @@ MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest) const
         }
     }
     return res;
-
 }
 
 
@@ -362,7 +361,7 @@ int RoutingTable::getNumRoutes() const
     return routes.size()+multicastRoutes.size();
 }
 
-IPv4Route *RoutingTable::getRoute(int k) const
+const IPv4Route *RoutingTable::getRoute(int k) const
 {
     if (k < (int)routes.size())
         return routes[k];
@@ -372,11 +371,8 @@ IPv4Route *RoutingTable::getRoute(int k) const
     return NULL;
 }
 
-IPv4Route *RoutingTable::findRoute(const IPAddress& target,
-                                             const IPAddress& netmask,
-                                             const IPAddress& gw,
-                                             int metric,
-                                             char *dev) const
+const IPv4Route *RoutingTable::findRoute(const IPAddress& target, const IPAddress& netmask,
+    const IPAddress& gw, int metric, const char *dev) const
 {
     int n = getNumRoutes();
     for (int i=0; i<n; i++)
@@ -385,7 +381,7 @@ IPv4Route *RoutingTable::findRoute(const IPAddress& target,
     return NULL;
 }
 
-void RoutingTable::addRoute(IPv4Route *entry)
+void RoutingTable::addRoute(const IPv4Route *entry)
 {
     Enter_Method("addRoute(...)");
 
@@ -400,15 +396,15 @@ void RoutingTable::addRoute(IPv4Route *entry)
 
     // add to tables
     if (!entry->getHost().isMulticast())
-        routes.push_back(entry);
+        routes.push_back(const_cast<IPv4Route*>(entry));
     else
-        multicastRoutes.push_back(entry);
+        multicastRoutes.push_back(const_cast<IPv4Route*>(entry));
 
     updateDisplayString();
 }
 
 
-bool RoutingTable::deleteRoute(IPv4Route *entry)
+bool RoutingTable::deleteRoute(const IPv4Route *entry)
 {
     Enter_Method("deleteRoute(...)");
 
@@ -432,12 +428,9 @@ bool RoutingTable::deleteRoute(IPv4Route *entry)
 }
 
 
-bool RoutingTable::routeMatches(IPv4Route *entry,
-                                const IPAddress& target,
-                                const IPAddress& nmask,
-                                const IPAddress& gw,
-                                int metric,
-                                const char *dev) const
+bool RoutingTable::routeMatches(const IPv4Route *entry,
+    const IPAddress& target, const IPAddress& nmask,
+    const IPAddress& gw, int metric, const char *dev) const
 {
     if (!target.isUnspecified() && !target.equals(entry->getHost()))
         return false;

@@ -180,12 +180,9 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     virtual void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
-    virtual bool routeMatches(IPv4Route *entry,
-                      const IPAddress& target,
-                      const IPAddress& nmask,
-                      const IPAddress& gw,
-                      int metric,
-                      const char *dev) const;
+    virtual bool routeMatches(const IPv4Route *entry,
+        const IPAddress& target, const IPAddress& nmask, const IPAddress& gw,
+        int metric, const char *dev) const;
 
     // set router Id
     virtual void autoconfigRouterId();
@@ -256,7 +253,7 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     /**
      * The routing function.
      */
-    virtual IPv4Route *findBestMatchingRoute(const IPAddress& dest) const;
+    virtual const IPv4Route *findBestMatchingRoute(const IPAddress& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -295,35 +292,36 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
     //@{
 
     /**
-     * Total number of routing entries (unicast, multicast entries and default route).
+     * Returns the total number of routes (unicast, multicast, plus the
+     * default route).
      */
     virtual int getNumRoutes() const;
 
     /**
-     * Return kth routing entry.
+     * Returns the kth route. The returned route cannot be modified;
+     * you must delete and re-add it instead. This rule is emphasized
+     * by returning a const pointer.
      */
-    virtual IPv4Route *getRoute(int k) const;
+    virtual const IPv4Route *getRoute(int k) const;
 
     /**
      * Find first routing entry with the given parameters.
      */
-    virtual IPv4Route *findRoute(const IPAddress& target,
-                                   const IPAddress& netmask,
-                                   const IPAddress& gw,
-                                   int metric = 0,
-                                   char *dev = NULL) const;
+    virtual const IPv4Route *findRoute(const IPAddress& target, const IPAddress& netmask,
+        const IPAddress& gw, int metric = 0, const char *dev = NULL) const;
 
     /**
-     * Adds a route to the routing table.
+     * Adds a route to the routing table. Note that once added, routes
+     * cannot be modified; you must delete and re-add them instead.
      */
-    virtual void addRoute(IPv4Route *entry);
+    virtual void addRoute(const IPv4Route *entry);
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(IPv4Route *entry);
+    virtual bool deleteRoute(const IPv4Route *entry);
 
     /**
      * Utility function: Returns a vector of all addresses of the node.

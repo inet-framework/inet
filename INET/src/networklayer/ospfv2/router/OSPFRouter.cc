@@ -846,13 +846,13 @@ void OSPF::Router::RebuildRoutingTable(void)
     routingTable.assign(newTable.begin(), newTable.end());
 
     RoutingTableAccess         routingTableAccess;
-    std::vector<IPv4Route*> eraseEntries;
+    std::vector<const IPv4Route*> eraseEntries;
     RoutingTable*              simRoutingTable    = routingTableAccess.get();
     unsigned long              routingEntryNumber = simRoutingTable->getNumRoutes();
     // remove entries from the IP routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
-        IPv4Route*            entry     = simRoutingTable->getRoute(i);
-        OSPF::RoutingTableEntry* ospfEntry = dynamic_cast<OSPF::RoutingTableEntry*> (entry);
+        const IPv4Route *entry = simRoutingTable->getRoute(i);
+        const OSPF::RoutingTableEntry* ospfEntry = dynamic_cast<const OSPF::RoutingTableEntry*>(entry);
         if (ospfEntry != NULL) {
             eraseEntries.push_back(entry);
         }
@@ -1527,7 +1527,7 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
     bool               inRoutingTable     = false;
     // add the external route to the routing table if it was not added by another module
     for (unsigned long i = 0; i < routingEntryNumber; i++) {
-        IPv4Route* entry = simRoutingTable->getRoute(i);
+        const IPv4Route *entry = simRoutingTable->getRoute(i);
         if ((entry->getHost().getInt() & entry->getNetmask().getInt()) ==
             (ULongFromIPv4Address(networkAddress) & externalRouteContents.getNetworkMask().getInt()))
         {
