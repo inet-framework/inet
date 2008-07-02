@@ -1,6 +1,12 @@
+2008-07-02  Andras Varga
+
+	* INotifiable: receiveChangeNotification() signature change: details
+	object pointer became "const"
+
 2008-06-30  Andras Varga
 
-	* NotifierConsts: added constants for overlay networks (OverSim)
+	* NotifierConsts: added constants for overlay networks [from Ingmar 
+	Baumgart, OverSim]
 
 2008-06-29  Andras Varga
 
