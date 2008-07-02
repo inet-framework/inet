@@ -216,6 +216,9 @@ while (<LISTFILE>)
     $txt =~ s/\bdeleteRoutingEntry\(/deleteRoute(/mg;
     $txt =~ s/\bRoutingEntry\b/IPv4Route/mg;  # the class
 
+    # NotificationBoard
+    # add "const" to 'detail' argument in receiveChangeNotification()
+    $txt =~ s/(\breceiveChangeNotification *\( *int +[a-zA-Z]+ *), *(cPolymorphic|cObject) *\*/$1, const $2 */mg;
 
     # print warnings
     $lineno = 0;
