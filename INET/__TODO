@@ -1,5 +1,4 @@
-
-TODO: change lots of getInterface() methods to getInterfaceById()!!!!!
+TODO RoutingTable[6]: if an interface gets deleted, drop all the routes that refer to it!!!
 
 TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
       if we change it to pointer, messages that are underway in the host during a deleteInterface()

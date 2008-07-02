@@ -243,7 +243,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         rt->updateDestCache(destAddress, nextHop, interfaceId);
     }
 
-    InterfaceEntry *ie = ift->getInterface(interfaceId);
+    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
     ASSERT(!nextHop.isUnspecified() && ie!=NULL);
 
@@ -508,7 +508,7 @@ IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&dest
     datagram->encapsulate(transportPacket);
 
     // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->getInterface(controlInfo->getInterfaceId());
+    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
 
     // set source and destination address
     IPv6Address dest = controlInfo->getDestAddr();

@@ -1538,7 +1538,7 @@ void OSPF::Router::UpdateExternalRoute(OSPF::IPv4Address networkAddress, const O
         IPv4Route* entry = new IPv4Route;
         entry->setHost(ULongFromIPv4Address(networkAddress));
         entry->setNetmask(externalRouteContents.getNetworkMask());
-        entry->setInterface(InterfaceTableAccess().get()->getInterface(ifIndex));
+        entry->setInterface(InterfaceTableAccess().get()->getInterfaceById(ifIndex));
         entry->setType(IPv4Route::REMOTE);
         entry->setSource(IPv4Route::MANUAL);
         entry->setMetric(externalRouteContents.getRouteCost());

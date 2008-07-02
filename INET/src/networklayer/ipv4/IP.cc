@@ -504,7 +504,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
     datagram->setDestAddress(dest);
 
     // IP_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->getInterface(controlInfo->getInterfaceId());
+    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
 
     IPAddress src = controlInfo->getSrcAddr();
 

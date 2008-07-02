@@ -216,6 +216,21 @@ while (<LISTFILE>)
     $txt =~ s/\bdeleteRoutingEntry\(/deleteRoute(/mg;
     $txt =~ s/\bRoutingEntry\b/IPv4Route/mg;  # the class
 
+
+    # print warnings
+    $lineno = 0;
+    foreach $linewithcomment (split ("\n", $txt)) {
+       $lineno++;
+       my $line = $linewithcomment;
+       $line =~ s|//.*||; # avoid warning for stuff in comments
+
+       # getInterfaceById()
+       if ($line =~ /\bgetInterface\([^)]/) {
+          print "*** warning at $fname:$lineno: maybe you need getInterfaceById(int interfaceId) here instead of getInterface(int index). As a rule of thumb, inside a 0..getNumInterfaces() 'for' loop it should be getInterface(i), all other occurrences are likely supposed to be getInterfaceById(interfaceId).\n";
+          print "$linewithcomment\n";
+       }
+    }
+
     if ($txt eq $origtxt) {
         print "unchanged\n";
     } else {

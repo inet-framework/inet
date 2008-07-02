@@ -509,7 +509,7 @@ void LDP::processLDPHello(LDPHello *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = ift->getInterface(interfaceId)->getName();
+    info.linkInterface = ift->getInterfaceById(interfaceId)->getName();
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = NULL;
     info.timeout = new cMessage("HelloTimeout");

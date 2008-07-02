@@ -115,7 +115,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     // get next hop address from control info in packet
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(msg->removeControlInfo());
     IPAddress nextHopAddr = controlInfo->getNextHopAddr();
-    InterfaceEntry *ie = ift->getInterface(controlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     delete controlInfo;
 
     // if output interface is not broadcast, don't bother with ARP
@@ -331,7 +331,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
     // extract input port
     IPRoutingDecision *controlInfo = check_and_cast<IPRoutingDecision*>(arp->removeControlInfo());
-    InterfaceEntry *ie = ift->getInterface(controlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     delete controlInfo;
 
     //
