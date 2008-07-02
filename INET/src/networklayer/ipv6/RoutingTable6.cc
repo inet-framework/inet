@@ -86,6 +86,13 @@ void RoutingTable6::initialize(int stage)
     if (stage==1)
     {
         ift = InterfaceTableAccess().get();
+        nb = NotificationBoardAccess().get();
+
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
+        nb->subscribe(this, NF_IPv6_INTERFACECONFIG_CHANGED);
 
         WATCH_PTRVECTOR(routeList);
         WATCH_MAP(destCache); // FIXME commented out for now
@@ -173,6 +180,36 @@ void RoutingTable6::updateDisplayString()
 void RoutingTable6::handleMessage(cMessage *msg)
 {
     opp_error("This module doesn't process messages");
+}
+
+void RoutingTable6::receiveChangeNotification(int category, cPolymorphic *details)
+{
+    if (simulation.getContextType()==CTX_INITIALIZE)
+        return;  // ignore notifications during initialize
+
+    Enter_Method_Silent();
+    printNotificationBanner(category, details);
+
+    if (category==NF_INTERFACE_CREATED)
+    {
+        //TODO
+    }
+    else if (category==NF_INTERFACE_DELETED)
+    {
+        //TODO remove all routes that point to that interface
+    }
+    else if (category==NF_INTERFACE_STATE_CHANGED)
+    {
+        //TODO invalidate routing cache
+    }
+    else if (category==NF_INTERFACE_CONFIG_CHANGED)
+    {
+        //TODO invalidate routing cache
+    }
+    else if (category==NF_IPv6_INTERFACECONFIG_CHANGED)
+    {
+        // TODO
+    }
 }
 
 void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)

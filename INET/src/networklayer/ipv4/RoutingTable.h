@@ -159,7 +159,7 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  *
  * @see InterfaceEntry, IPv4InterfaceData, IPv4Route
  */
-class INET_API RoutingTable: public cSimpleModule, public INotifiable
+class INET_API RoutingTable: public cSimpleModule, protected INotifiable
 {
   protected:
     InterfaceTable *ift; // cached pointer
@@ -206,13 +206,13 @@ class INET_API RoutingTable: public cSimpleModule, public INotifiable
      */
     virtual void handleMessage(cMessage *);
 
-  public:
     /**
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
     virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
+  public:
     /**
      * For debugging
      */

@@ -106,6 +106,12 @@ void RoutingTable::initialize(int stage)
 
         IPForward = par("IPForward").boolValue();
 
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
+        nb->subscribe(this, NF_IPv4_INTERFACECONFIG_CHANGED);
+
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
         WATCH(IPForward);
@@ -198,10 +204,30 @@ void RoutingTable::handleMessage(cMessage *msg)
 
 void RoutingTable::receiveChangeNotification(int category, cPolymorphic *details)
 {
+    if (simulation.getContextType()==CTX_INITIALIZE)
+        return;  // ignore notifications during initialize
+
     Enter_Method_Silent();
     printNotificationBanner(category, details);
 
-    if (category==NF_IPv4_INTERFACECONFIG_CHANGED)
+    if (category==NF_INTERFACE_CREATED)
+    {
+        // add netmask route for the new interface
+        updateNetmaskRoutes();     //FIXME only for the new one!!!
+    }
+    else if (category==NF_INTERFACE_DELETED)
+    {
+        //TODO remove all routes that point to that interface
+    }
+    else if (category==NF_INTERFACE_STATE_CHANGED)
+    {
+        //TODO invalidate routing cache
+    }
+    else if (category==NF_INTERFACE_CONFIG_CHANGED)
+    {
+        //TODO invalidate routing cache
+    }
+    else if (category==NF_IPv4_INTERFACECONFIG_CHANGED)
     {
         // if anything IPv4-related changes in the interfaces, interface netmask
         // based routes have to be re-built.

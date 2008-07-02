@@ -99,10 +99,12 @@ class INET_API IPv6Route : public cPolymorphic
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API RoutingTable6 : public cSimpleModule
+class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
 {
   protected:
     InterfaceTable *ift; // cached pointer
+    NotificationBoard *nb; // cached pointer
+
     bool isrouter;
 
     // Destination Cache maps dest address to next hop and interfaceId.
@@ -155,6 +157,12 @@ class INET_API RoutingTable6 : public cSimpleModule
      * Raises an error.
      */
     virtual void handleMessage(cMessage *);
+
+    /**
+     * Called by the NotificationBoard whenever a change of a category
+     * occurs to which this client has subscribed.
+     */
+    virtual void receiveChangeNotification(int category, cPolymorphic *details);
 
   public:
     /** @name Interfaces */
