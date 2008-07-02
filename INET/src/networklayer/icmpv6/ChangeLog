@@ -1,4 +1,5 @@
-2005-Q2/Q3  Ng Wei Yang
-	
-	* IPv6 model implemented by Ng Wei Yang at CTIE, Monash University;
-	code skeleton and some initial code implemented by Andras Varga
+2005-08-04  Andras Varga
+
+	* checked in the IPv6 model implemented by Ng Wei Yang at CTIE, 
+	Monash University; code skeleton and some initial code 
+	implemented by Andras Varga
