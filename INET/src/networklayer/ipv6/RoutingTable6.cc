@@ -508,9 +508,11 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     }
     else
     {
-        // update existing one
+        // update existing one; notification-wise, we pretend the route got removed then re-added
+        nb->fireChangeNotification(NF_IPv6_ROUTE_DELETED, route);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
+        nb->fireChangeNotification(NF_IPv6_ROUTE_ADDED, route);
     }
 
     updateDisplayString();
@@ -545,9 +547,11 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     }
     else
     {
-        // update existing one
+        // update existing one; notification-wise, we pretend the route got removed then re-added
+        nb->fireChangeNotification(NF_IPv6_ROUTE_DELETED, route);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
+        nb->fireChangeNotification(NF_IPv6_ROUTE_ADDED, route);
     }
 
     updateDisplayString();
@@ -577,9 +581,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
     route->setInterfaceId(interfaceId);
     route->setNextHop(nextHop);
     if (metric==0)
-    {
         metric = 10; // TBD should be filled from interface metric
-    }
     route->setMetric(metric);
 
     // then add it

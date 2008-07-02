@@ -1,3 +1,7 @@
+2008-07-02  Andras Varga
+
+	* RoutingTable: properly fire notifications on routing table changes
+
 2008-07-01  Andras Varga
 
 	* wrapped naked data members of IPv4Route into getters/setters
@@ -8,7 +12,7 @@
 
 2008-06-29  Andras Varga
 
-	* factored out a createIPDatagram method
+	* IP: factored out a createIPDatagram method
 
 2005-10-28  Andras Varga
 

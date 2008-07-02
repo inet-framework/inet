@@ -21,7 +21,8 @@ Internal snapshot, for omnetpp-4.0b2.
 
 - parsim: added pack/unpack functions for IPAddress, IPv6Address, IPvXAddress
 
-- InterfaceTable: added deleteInterface()
+- InterfaceTable: added deleteInterface(). This also causes RoutingTable to 
+  drop routes that correspond to the deleted interface.
 
 - RoutingTable: wrapped naked data members of IPv4Route into getters/setters;
   enforce by returning "const" pointers that routes already added cannot be 
@@ -32,9 +33,11 @@ Internal snapshot, for omnetpp-4.0b2.
   unlike 0..getNumInterfaces()-1 indices, and reliable/safe unlike
   InterfaceEntry* pointers
 
-- InterfaceTable, InterfaceEntry: implemented NotificationBoard-based 
-  notifications for events NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, 
-  NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED. 
+- InterfaceTable and RoutingTable now fire proper notifications on changes:
+  NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, NF_INTERFACE_STATE_CHANGED, 
+  NF_INTERFACE_CONFIG_CHANGED; NF_IPv4_ROUTE_ADDED, NF_IPv4_ROUTE_DELETED,
+  NF_IPv6_ROUTE_ADDED, NF_IPv6_ROUTE_DELETED, etc.
+
 
 
 INET-20080624
