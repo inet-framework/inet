@@ -192,23 +192,25 @@ void RoutingTable6::receiveChangeNotification(int category, cPolymorphic *detail
 
     if (category==NF_INTERFACE_CREATED)
     {
-        //TODO
+        //TODO something like this:
+        //InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
+        //configureInterfaceForIPv6(ie);
     }
     else if (category==NF_INTERFACE_DELETED)
     {
-        //TODO remove all routes that point to that interface
+        //TODO remove all routes that point to that interface (?)
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
-        //TODO invalidate routing cache
+        //TODO invalidate routing cache (?)
     }
     else if (category==NF_INTERFACE_CONFIG_CHANGED)
     {
-        //TODO invalidate routing cache
+        //TODO invalidate routing cache (?)
     }
     else if (category==NF_IPv6_INTERFACECONFIG_CHANGED)
     {
-        // TODO
+        //TODO
     }
 }
 
