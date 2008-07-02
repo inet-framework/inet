@@ -23,7 +23,10 @@ my $arglessGetters = "fec addr destAddr destAddress nextHopAddr
     hopLimit lastAddressPtr nextAddressPtr overflow protocol
     routerLifetime srcPort timeToLive version
     family messageText receiveQueueClass receiverLDPIdentifier
-    sendQueueClass stateName tcpAlgorithmClass";
+    sendQueueClass stateName tcpAlgorithmClass
+    controlCode controlType id ipHops dst initiator src target isRequest
+    isTopPeer last listenPort messageId msg myIP noPeers nslpId packetNumber
+    replyLength replyPerRequest sigHops timeToRespond";
 
 # from C++ files
 $arglessGetters .= "blackboard connState port inetAddress

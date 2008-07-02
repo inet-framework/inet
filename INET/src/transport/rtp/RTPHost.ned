@@ -2,13 +2,13 @@
 
 package inet.transport.rtp;
 
+import inet.applications.rtpapp.RTPApplication;
 import inet.base.NotificationBoard;
 import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.nodes.inet.NetworkLayer;
 import inet.transport.udp.UDP;
-import inet.applications.rtpapp.RTPApplication;
 
 
 module RTPHost

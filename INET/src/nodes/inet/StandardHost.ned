@@ -26,7 +26,7 @@ import inet.applications.udpapp.UDPApp;
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.transport.tcp.TCP;
 import inet.transport.udp.UDP;

@@ -30,6 +30,7 @@
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on IPv4 and IPv6 stuff!
 class InterfaceTable;
+class InterfaceEntry;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
@@ -50,6 +51,8 @@ class INET_API InterfaceProtocolData : public cPolymorphic
     virtual void changed(int category);
 
   public:
+    InterfaceProtocolData() {ownerp = NULL;}
+
     /**
      * Returns the InterfaceEntry that contains this data object, or NULL
      */

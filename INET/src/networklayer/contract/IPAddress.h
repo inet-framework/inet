@@ -194,7 +194,7 @@ class INET_API IPAddress
      * not forward these datagrams since the applications that use these addresses
      * do not need the datagrams to go further than one hop.
      */
-     bool isLinkLocalMulticast() const {return addr & 0xFFFFFF00 == 0xF4000000;}
+     bool isLinkLocalMulticast() const {return (addr & 0xFFFFFF00) == 0xF4000000;}
 
     /**
      * Returns an address with the network part of the address (the bits
@@ -273,7 +273,7 @@ inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, IPAddress& addr)
+inline void doPacking(cCommBuffer *buf, const IPAddress& addr)
 {
     buf->pack(addr.getInt());
 }

@@ -171,6 +171,12 @@ class INET_API IPv6Address
         uint32 *words() {return d;}
 
         /**
+         * Returns pointer to internal binary representation of address,
+         * four 32-bit unsigned integers.
+         */
+        const uint32 *words() const {return d;}
+
+        /**
          * Get the IPv6 address scope.
          */
         Scope getScope() const;
@@ -291,7 +297,7 @@ inline std::ostream& operator<<(std::ostream& os, const IPv6Address& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, IPv6Address& addr)
+inline void doPacking(cCommBuffer *buf, const IPv6Address& addr)
 {
     buf->pack(addr.words(), 4);
 }

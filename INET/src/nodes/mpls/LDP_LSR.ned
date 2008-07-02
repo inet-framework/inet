@@ -17,7 +17,7 @@ package inet.nodes.mpls;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.ldp.LDP;
 import inet.networklayer.mpls.LIBTable;

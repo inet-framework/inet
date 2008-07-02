@@ -22,7 +22,7 @@ package inet.nodes.ipv6;
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.RoutingTable6;
 
 

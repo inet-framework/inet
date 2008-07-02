@@ -23,7 +23,7 @@ import inet.applications.tcpapp.TCPSpoof;
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
-import inet.networklayer.contract.InterfaceTable;
+import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.util.NAMTraceWriter;
 
