@@ -70,7 +70,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
     return frame;
 }
 
-void Ieee80211MgmtSTASimplified::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtSTASimplified::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

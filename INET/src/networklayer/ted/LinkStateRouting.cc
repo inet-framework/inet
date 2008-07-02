@@ -87,7 +87,7 @@ void LinkStateRouting::handleMessage(cMessage * msg)
         ASSERT(false);
 }
 
-void LinkStateRouting::receiveChangeNotification(int category, cPolymorphic *details)
+void LinkStateRouting::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

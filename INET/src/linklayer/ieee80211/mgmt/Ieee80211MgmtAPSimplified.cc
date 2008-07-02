@@ -49,7 +49,7 @@ void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cPolymorphic *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

@@ -24,8 +24,9 @@
 
 #include <vector>
 #include <omnetpp.h>
-#include "IPv6Address.h"
 #include "INETDefs.h"
+#include "IPv6Address.h"
+#include "InterfaceEntry.h"
 
 #define IPv6_DEFAULT_DUPADDRDETECTTRANSMITS 1   // send NS once (RFC2462:Section 5.1)
 
@@ -67,7 +68,7 @@
  * section 6.2.1 of RFC 2461 (IPv6 Neighbor Discovery, Router Configuration
  * Variables).
  */
-class INET_API IPv6InterfaceData : public cPolymorphic
+class INET_API IPv6InterfaceData : public InterfaceProtocolData
 {
   public:
     /**

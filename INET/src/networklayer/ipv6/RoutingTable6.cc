@@ -33,7 +33,7 @@ std::string IPv6Route::info() const
 {
     std::stringstream out;
     out << getDestPrefix() << "/" << getPrefixLength() << " --> ";
-    out << "if=" << getInterfaceID() << " next hop:" << getNextHop(); // FIXME try printing interface name
+    out << "if=" << getInterfaceId() << " next hop:" << getNextHop(); // FIXME try printing interface name
     out << " " << routeSrcName(getSrc());
     if (getExpiryTime()>0)
         out << " exp:" << getExpiryTime();
@@ -92,7 +92,7 @@ void RoutingTable6::initialize(int stage)
         nb->subscribe(this, NF_INTERFACE_DELETED);
         nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
         nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_IPv6_INTERFACECONFIG_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_IPv6CONFIG_CHANGED);
 
         WATCH_PTRVECTOR(routeList);
         WATCH_MAP(destCache); // FIXME commented out for now
@@ -182,7 +182,7 @@ void RoutingTable6::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void RoutingTable6::receiveChangeNotification(int category, cPolymorphic *details)
+void RoutingTable6::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
@@ -208,7 +208,7 @@ void RoutingTable6::receiveChangeNotification(int category, cPolymorphic *detail
     {
         //TODO invalidate routing cache (?)
     }
-    else if (category==NF_IPv6_INTERFACECONFIG_CHANGED)
+    else if (category==NF_INTERFACE_IPv6CONFIG_CHANGED)
     {
         //TODO
     }
@@ -366,7 +366,7 @@ InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
     return NULL;
 }
 
-bool RoutingTable6::isLocalAddress(const IPv6Address& dest)
+bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
 {
     Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
@@ -400,11 +400,11 @@ bool RoutingTable6::isLocalAddress(const IPv6Address& dest)
     return false;
 }
 
-const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId)
+const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId) const
 {
     Enter_Method("lookupDestCache(%s)", dest.str().c_str());
 
-    DestCache::iterator it = destCache.find(dest);
+    DestCache::const_iterator it = destCache.find(dest);
     if (it == destCache.end())
     {
         outInterfaceId = -1;
@@ -420,7 +420,7 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
 
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
-    for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
+    for (RouteList::const_iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
         if (dest.matches((*it)->getDestPrefix(),(*it)->getPrefixLength()))
         {
@@ -439,9 +439,9 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
     return NULL;
 }
 
-bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix)
+bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix) const
 {
-    for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
+    for (RouteList::const_iterator it=routeList.begin(); it!=routeList.end(); it++)
         if (prefix.matches((*it)->getDestPrefix(),128))
             return true;
     return false;
@@ -499,7 +499,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     {
         // create new route object
         IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::FROM_RA);
-        route->setInterfaceID(interfaceId);
+        route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
 
@@ -509,7 +509,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     else
     {
         // update existing one
-        route->setInterfaceID(interfaceId);
+        route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
     }
 
@@ -536,7 +536,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     {
         // create new route object
         IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::OWN_ADV_PREFIX);
-        route->setInterfaceID(interfaceId);
+        route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
 
@@ -546,7 +546,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     else
     {
         // update existing one
-        route->setInterfaceID(interfaceId);
+        route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
     }
 
@@ -574,7 +574,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
 {
     // create route object
     IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::STATIC);
-    route->setInterfaceID(interfaceId);
+    route->setInterfaceId(interfaceId);
     route->setNextHop(nextHop);
     if (metric==0)
     {
@@ -591,7 +591,7 @@ void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifI
 {
     // create route object
     IPv6Route *route = new IPv6Route(IPv6Address(), 0, IPv6Route::FROM_RA);
-    route->setInterfaceID(ifID);
+    route->setInterfaceId(ifID);
     route->setNextHop(nextHop);
     route->setMetric(10);//FIXME:should be filled from interface metric
 
@@ -624,13 +624,19 @@ void RoutingTable6::addRoute(IPv6Route *route)
     std::sort(routeList.begin(), routeList.end(), routeLessThan);
 
     updateDisplayString();
+
+    nb->fireChangeNotification(NF_IPv6_ROUTE_ADDED, route);
 }
 
 void RoutingTable6::removeRoute(IPv6Route *route)
 {
     RouteList::iterator it = std::find(routeList.begin(), routeList.end(), route);
     ASSERT(it!=routeList.end());
+
+    nb->fireChangeNotification(NF_IPv6_ROUTE_DELETED, route); // rather: going to be deleted
+
     routeList.erase(it);
+    delete route;
 
     updateDisplayString();
 }

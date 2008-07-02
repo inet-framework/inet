@@ -77,7 +77,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
     /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
     virtual STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);

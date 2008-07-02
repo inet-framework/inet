@@ -97,7 +97,7 @@ class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
     virtual MacPkt *encapsMsg(cMessage *netw);
 
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
   protected:
     /** @brief mac address */

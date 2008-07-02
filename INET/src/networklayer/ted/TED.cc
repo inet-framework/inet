@@ -300,9 +300,6 @@ void TED::rebuildRoutingTable()
 
         rt->addRoute(entry);
     }
-
-    nb->fireChangeNotification(NF_IPv4_ROUTINGTABLE_CHANGED);
-
 }
 
 IPAddress TED::getInterfaceAddrByPeerAddress(IPAddress peerIP)

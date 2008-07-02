@@ -210,7 +210,7 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
   public:
     /**

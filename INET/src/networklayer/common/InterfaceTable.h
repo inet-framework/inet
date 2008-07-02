@@ -111,7 +111,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
     /**
      * Adds an interface. The second argument should be a module which belongs

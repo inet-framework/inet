@@ -318,7 +318,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

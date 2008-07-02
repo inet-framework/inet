@@ -329,7 +329,7 @@ void Ieee80211Mac::handleLowerMsg(cMessage *msg)
         delete msg;
 }
 
-void Ieee80211Mac::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211Mac::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

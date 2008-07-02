@@ -259,7 +259,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
      */
     //@{
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, cPolymorphic* details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic * details);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
     virtual void handleCommand(cMessage *msg);

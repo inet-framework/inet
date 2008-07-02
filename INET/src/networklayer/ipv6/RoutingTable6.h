@@ -46,8 +46,8 @@ class INET_API IPv6Route : public cPolymorphic
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
-    int _interfaceID;   ////FIXME POINTER INSTEAD!!!!
-    IPv6Address _nextHop; // unspecified means "direct"
+    int _interfaceID;      //XXX IPv4 RoutingTable uses interface pointer
+    IPv6Address _nextHop;  // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;
 
@@ -69,7 +69,7 @@ class INET_API IPv6Route : public cPolymorphic
     virtual std::string detailedInfo() const;
     static const char *routeSrcName(RouteSrc src);
 
-    void setInterfaceID(int interfaceId)  {_interfaceID = interfaceId;}
+    void setInterfaceId(int interfaceId)  {_interfaceID = interfaceId;}
     void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
     void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
     void setMetric(int metric)  {_metric = _metric;}
@@ -77,7 +77,7 @@ class INET_API IPv6Route : public cPolymorphic
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
     RouteSrc getSrc() const  {return _src;}
-    int getInterfaceID() const  {return _interfaceID;}
+    int getInterfaceId() const  {return _interfaceID;}
     const IPv6Address& getNextHop() const  {return _nextHop;}
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
@@ -162,7 +162,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
   public:
     /** @name Interfaces */
@@ -176,7 +176,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     /**
      * IP forwarding on/off
      */
-    virtual bool isRouter()  const {return isrouter;}
+    virtual bool isRouter() const {return isrouter;}
 
     /** @name Routing functions */
     //@{
@@ -184,7 +184,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * Checks if the address is one of the host's addresses, i.e.
      * assigned to one of its interfaces (tentatively or not).
      */
-    virtual bool isLocalAddress(const IPv6Address& dest);
+    virtual bool isLocalAddress(const IPv6Address& dest) const;
 
     /**
      * Looks up the given destination address in the Destination Cache,
@@ -197,7 +197,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * NOTE: outInterfaceId is an OUTPUT parameter -- its initial value is ignored,
      * and the lookupDestCache() sets it to the correct value instead.
      */
-    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId);
+    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId) const;
 
     /**
      * Performs longest prefix match in the routing table and returns
@@ -208,7 +208,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     /**
      * Checks if the given prefix already exists in the routing table (prefix list)
      */
-    virtual bool isPrefixPresent(const IPv6Address& prefix);
+    virtual bool isPrefixPresent(const IPv6Address& prefix) const;
 
     //TBD multicast delivery
     //@}

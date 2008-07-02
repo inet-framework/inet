@@ -55,7 +55,7 @@ class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
     virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
     /** @name Processing of different frame types */
     //@{

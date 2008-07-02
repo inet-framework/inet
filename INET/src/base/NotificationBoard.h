@@ -38,7 +38,7 @@
  *
  * Notification events are grouped into "categories." Examples of categories
  * are: NF_HOSTPOSITION_UPDATED, NF_RADIOSTATE_CHANGED, NF_PP_TX_BEGIN,
- * NF_PP_TX_END, NF_IPv4_ROUTINGTABLE_CHANGED, NF_BEACON_LOST
+ * NF_PP_TX_END, NF_IPv4_ROUTE_ADDED, NF_BEACON_LOST
  * NF_NODE_FAILURE, NF_NODE_RECOVERY, etc. Each category is identified by
  * an integer (right now it's assigned in the source code via an enum,
  * in the future we'll convert to dynamic category registration).
@@ -69,7 +69,7 @@
  * <pre>
  * class Foo : public cSimpleModule, public INotifiable {
  *     ...
- *     virtual void receiveChangeNotification(int category, cPolymorphic *details) {..}
+ *     virtual void receiveChangeNotification(int category, const cPolymorphic *details) {..}
  *     ...
  * };
  * </pre>
@@ -130,7 +130,7 @@ class INET_API NotificationBoard : public cSimpleModule
      * information about the change (e.g. exact location, specific attribute
      * that changed, old value, new value, etc).
      */
-    virtual void fireChangeNotification(int category, cPolymorphic *details=NULL);
+    virtual void fireChangeNotification(int category, const cPolymorphic *details=NULL);
     //@}
 };
 

@@ -52,7 +52,7 @@ class INET_API NAMTraceWriter : public cSimpleModule, public INotifiable
     /**
      * Redefined INotifiable method. Called by NotificationBoard on changes.
      */
-    virtual void receiveChangeNotification(int category, cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
 };
 

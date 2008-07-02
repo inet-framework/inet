@@ -110,7 +110,7 @@ void RoutingTable::initialize(int stage)
         nb->subscribe(this, NF_INTERFACE_DELETED);
         nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
         nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_IPv4_INTERFACECONFIG_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
 
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
@@ -202,7 +202,7 @@ void RoutingTable::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void RoutingTable::receiveChangeNotification(int category, cPolymorphic *details)
+void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
@@ -227,7 +227,7 @@ void RoutingTable::receiveChangeNotification(int category, cPolymorphic *details
     {
         //TODO invalidate routing cache
     }
-    else if (category==NF_IPv4_INTERFACECONFIG_CHANGED)
+    else if (category==NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
         // if anything IPv4-related changes in the interfaces, interface netmask
         // based routes have to be re-built.
@@ -427,6 +427,8 @@ void RoutingTable::addRoute(const IPv4Route *entry)
         multicastRoutes.push_back(const_cast<IPv4Route*>(entry));
 
     updateDisplayString();
+
+    nb->fireChangeNotification(NF_IPv4_ROUTE_ADDED, entry);
 }
 
 
@@ -437,6 +439,7 @@ bool RoutingTable::deleteRoute(const IPv4Route *entry)
     RouteVector::iterator i = std::find(routes.begin(), routes.end(), entry);
     if (i!=routes.end())
     {
+        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         routes.erase(i);
         delete entry;
         updateDisplayString();
@@ -445,6 +448,7 @@ bool RoutingTable::deleteRoute(const IPv4Route *entry)
     i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
     if (i!=multicastRoutes.end())
     {
+        nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         multicastRoutes.erase(i);
         delete entry;
         updateDisplayString();

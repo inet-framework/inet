@@ -136,7 +136,8 @@ void LDP::initialize(int stage)
     rebuildFecList();
 
     // listen for routing table modifications
-    nb->subscribe(this, NF_IPv4_ROUTINGTABLE_CHANGED);
+    nb->subscribe(this, NF_IPv4_ROUTE_ADDED);
+    nb->subscribe(this, NF_IPv4_ROUTE_DELETED);
 }
 
 void LDP::handleMessage(cMessage *msg)
@@ -1217,12 +1218,12 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
     return false;
 }
 
-void LDP::receiveChangeNotification(int category, cPolymorphic *details)
+void LDP::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
 
-    ASSERT(category == NF_IPv4_ROUTINGTABLE_CHANGED);
+    ASSERT(category==NF_IPv4_ROUTE_ADDED || category==NF_IPv4_ROUTE_DELETED);
 
     EV << "routing table changed, rebuild list of known FEC" << endl;
 

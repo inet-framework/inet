@@ -28,6 +28,13 @@
 #include "InterfaceEntry.h"
 #include "InterfaceTable.h"
 
+#ifndef WITHOUT_IPv4
+#include "IPv4InterfaceData.h"
+#endif
+
+#ifndef WITHOUT_IPv6
+#include "IPv6InterfaceData.h"
+#endif
 
 InterfaceEntry::InterfaceEntry()
 {
@@ -129,5 +136,25 @@ void InterfaceEntry::stateChanged()
         ownerp->interfaceStateChanged(this);
 }
 
+void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
+{
+#ifndef WITHOUT_IPv4
+    ipv4data = p;
+    p->ownerp = this;
+    configChanged();
+#else
+    opp_error("setIPv4Data(): INET was compiled without IPv4 support");
+#endif
+}
 
+void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
+{
+#ifndef WITHOUT_IPv6
+    ipv6data = p;
+    p->ownerp = this;
+    configChanged();
+#else
+    opp_error("setIPv4Data(): INET was compiled without IPv6 support");
+#endif
+}
 

@@ -40,14 +40,18 @@ const char *notificationCategoryName(int category)
         case NF_L2_BEACON_LOST: return "BEACON-LOST";
         case NF_L2_ASSOCIATED: return "ASSOCIATED";
 
-        case NF_INTERFACE_STATE_CHANGED: return "IFACE";
-        case NF_INTERFACE_CONFIG_CHANGED: return "IFACE-CFG";
+        case NF_INTERFACE_CREATED: return "IF-CREATED";
+        case NF_INTERFACE_DELETED: return "IF-DELETED";
+        case NF_INTERFACE_STATE_CHANGED: return "IF-STATE";
+        case NF_INTERFACE_CONFIG_CHANGED: return "IF-CFG";
+        case NF_INTERFACE_IPv4CONFIG_CHANGED: return "IPv4-CFG";
+        case NF_INTERFACE_IPv6CONFIG_CHANGED: return "IPv6-CFG";
 
-        case NF_IPv4_INTERFACECONFIG_CHANGED: return "IPv4-CFG";
-        case NF_IPv4_ROUTINGTABLE_CHANGED: return "ROUTINGTABLE";
+        case NF_IPv4_ROUTE_ADDED: return "IPv4-ROUTE-ADD";
+        case NF_IPv4_ROUTE_DELETED: return "IPv4-ROUTE-DEL";
+        case NF_IPv6_ROUTE_ADDED: return "IPv6-ROUTE-ADD";
+        case NF_IPv6_ROUTE_DELETED: return "IPv6-ROUTE-DEL";
 
-        case NF_IPv6_INTERFACECONFIG_CHANGED: return "IPv6-CFG";
-        case NF_IPv6_ROUTINGTABLE_CHANGED: return "IPv6-ROUTINGTABLE";
         case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
 
         case NF_OVERLAY_TRANSPORTADDRESS_CHANGED: return "OVERLAY-TRANSPORTADDESS";
@@ -59,7 +63,7 @@ const char *notificationCategoryName(int category)
     return s;
 }
 
-void printNotificationBanner(int category, cPolymorphic *details)
+void printNotificationBanner(int category, const cPolymorphic *details)
 {
     EV << "** Notification at T=" << simTime()
        << " to " << simulation.getContextModule()->getFullPath() << ": "

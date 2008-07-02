@@ -84,7 +84,7 @@ void NotificationBoard::unsubscribe(INotifiable *client, int category)
         clients.erase(it);
 }
 
-void NotificationBoard::fireChangeNotification(int category, cPolymorphic *details)
+void NotificationBoard::fireChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method("fireChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

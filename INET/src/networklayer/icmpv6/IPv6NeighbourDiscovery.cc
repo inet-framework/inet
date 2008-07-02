@@ -399,14 +399,14 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
         if (route->getNextHop().isUnspecified())
         {
             EV << "Dest is on-link, next-hop addr is same as dest addr.\n";
-            outIfID = route->getInterfaceID();
+            outIfID = route->getInterfaceId();
             nextHopAddr = destAddr;
         }
         else
         {
             EV << "A next-hop address was found with the route, dest is off-link\n";
             EV << "Assume next-hop address as the selected default router.\n";
-            outIfID = route->getInterfaceID();
+            outIfID = route->getInterfaceId();
             nextHopAddr = route->getNextHop();
         }
     }

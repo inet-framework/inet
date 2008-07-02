@@ -58,7 +58,7 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
     return frame;
 }
 
-void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

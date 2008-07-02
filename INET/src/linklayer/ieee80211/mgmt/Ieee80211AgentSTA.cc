@@ -95,7 +95,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveChangeNotification(int category, cPolymorphic *details)
+void Ieee80211AgentSTA::receiveChangeNotification(int category, const cPolymorphic *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

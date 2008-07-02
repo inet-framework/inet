@@ -57,15 +57,17 @@ enum
     NF_INTERFACE_DELETED,
     NF_INTERFACE_STATE_CHANGED,
     NF_INTERFACE_CONFIG_CHANGED,
+    NF_INTERFACE_IPv4CONFIG_CHANGED,
+    NF_INTERFACE_IPv6CONFIG_CHANGED,
     NF_TED_CHANGED,
 
     // layer 3 - IPv4
-    NF_IPv4_INTERFACECONFIG_CHANGED,
-    NF_IPv4_ROUTINGTABLE_CHANGED, //TODO split to: route added, route deleted, etc
+    NF_IPv4_ROUTE_ADDED,
+    NF_IPv4_ROUTE_DELETED,
+    NF_IPv6_ROUTE_ADDED,
+    NF_IPv6_ROUTE_DELETED,
 
     // layer 3 - IPv6
-    NF_IPv6_INTERFACECONFIG_CHANGED,
-    NF_IPv6_ROUTINGTABLE_CHANGED, //TODO split to: route added, route deleted, etc
     NF_IPv6_HANDOVER_OCCURRED,
 
     // - layer 4 (transport)
@@ -89,7 +91,7 @@ const char *notificationCategoryName(int category);
 /**
  * Utility function
  */
-void printNotificationBanner(int category, cPolymorphic *details);
+void printNotificationBanner(int category, const cPolymorphic *details);
 
 #endif
 

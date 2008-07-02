@@ -234,7 +234,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             }
             return;
         }
-        interfaceId = route->getInterfaceID();
+        interfaceId = route->getInterfaceId();
         nextHop = route->getNextHop();
         if (nextHop.isUnspecified())
             nextHop = destAddress;  // next hop is the host itself

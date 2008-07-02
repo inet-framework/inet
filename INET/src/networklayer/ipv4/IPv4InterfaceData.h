@@ -28,6 +28,7 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
+#include "InterfaceEntry.h"
 
 
 /**
@@ -36,7 +37,7 @@
  *
  * @see InterfaceEntry
  */
-class INET_API IPv4InterfaceData : public cPolymorphic
+class INET_API IPv4InterfaceData : public InterfaceProtocolData
 {
   public:
     typedef std::vector<IPAddress> IPAddressVector;
