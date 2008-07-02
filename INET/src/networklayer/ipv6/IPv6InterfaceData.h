@@ -317,16 +317,16 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Assigns the given address to the interface.
      */
-    void assignAddress(const IPv6Address& addr, bool tentative,
-                       simtime_t expiryTime, simtime_t prefExpiryTime);
+    virtual void assignAddress(const IPv6Address& addr, bool tentative,
+                               simtime_t expiryTime, simtime_t prefExpiryTime);
 
     /**
      * Update expiry times of addresses. Expiry times possibly come from
      * prefixes (with on-link flag set to either zero or one)
      * in Router Advertisements. Zero expiry time means infinity.
      */
-    void updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
-                                          simtime_t expiryTime=0, simtime_t prefExpiryTime=0);
+    virtual void updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
+                                     simtime_t expiryTime=0, simtime_t prefExpiryTime=0);
 
     /**
      * Returns the number of addresses the interface has.
@@ -365,7 +365,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Clears the "tentative" flag of an existing interface address.
      */
-    void permanentlyAssign(const IPv6Address& addr);
+    virtual void permanentlyAssign(const IPv6Address& addr);
 
     /**
      * Chooses a preferred address for the interface and returns it.
@@ -389,7 +389,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Removes the address. Called when the valid lifetime expires.
      */
-    void removeAddress(const IPv6Address& address);
+    virtual void removeAddress(const IPv6Address& address);
 
     /**
      *  Getters/Setters for all variables and constants defined in RFC 2461/2462
@@ -410,11 +410,11 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     simtime_t _getMinDelayBetweenRAs() {return routerConstants.minDelayBetweenRAs;}
     simtime_t _getMaxRADelayTime() {return routerConstants.maxRADelayTime;}
     /************Setters for Router Protocol Constants*************************/
-    void _setMaxInitialRtrAdvertInterval(simtime_t d) {routerConstants.maxInitialRtrAdvertInterval = d;}
-    void _setMaxInitialRtrAdvertisements(uint d) {routerConstants.maxInitialRtrAdvertisements = d;}
-    void _setMaxFinalRtrAdvertisements(uint d) {routerConstants.maxFinalRtrAdvertisements = d;}
-    void _setMinDelayBetweenRAs(simtime_t d) {routerConstants.minDelayBetweenRAs = d;}
-    void _setMaxRADelayTime(simtime_t d) {routerConstants.maxRADelayTime = d;}
+    virtual void _setMaxInitialRtrAdvertInterval(simtime_t d) {routerConstants.maxInitialRtrAdvertInterval = d;}
+    virtual void _setMaxInitialRtrAdvertisements(uint d) {routerConstants.maxInitialRtrAdvertisements = d;}
+    virtual void _setMaxFinalRtrAdvertisements(uint d) {routerConstants.maxFinalRtrAdvertisements = d;}
+    virtual void _setMinDelayBetweenRAs(simtime_t d) {routerConstants.minDelayBetweenRAs = d;}
+    virtual void _setMaxRADelayTime(simtime_t d) {routerConstants.maxRADelayTime = d;}
     /************End of Router Protocol Constant getters and setters***********/
 
     /************Getters for Host Protocol Constants***************************/
@@ -422,9 +422,9 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     simtime_t _getRtrSolicitationInterval() {return hostConstants.rtrSolicitationInterval;}
     uint _getMaxRtrSolicitations() {return hostConstants.maxRtrSolicitations;}
     /************Setters for Host Protocol Constants***************************/
-    void _setMaxRtrSolicitationDelay(simtime_t d) {hostConstants.maxRtrSolicitationDelay = d;}
-    void _setRtrSolicitationInterval(simtime_t d) {hostConstants.rtrSolicitationInterval = d;}
-    void _setMaxRtrSolicitations(uint d) {hostConstants.maxRtrSolicitations = d;}
+    virtual void _setMaxRtrSolicitationDelay(simtime_t d) {hostConstants.maxRtrSolicitationDelay = d;}
+    virtual void _setRtrSolicitationInterval(simtime_t d) {hostConstants.rtrSolicitationInterval = d;}
+    virtual void _setMaxRtrSolicitations(uint d) {hostConstants.maxRtrSolicitations = d;}
     /************End of Host Protocol Constant getters and setters*************/
 
     /************Getters for Node Protocol Constants***************************/
@@ -438,21 +438,21 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     double _getMinRandomFactor() {return nodeConstants.minRandomFactor;}
     double _getMaxRandomFactor() {return nodeConstants.maxRandomFactor;}
     /************Setters for Node Protocol Constants***************************/
-    void _setMaxMulticastSolicit(uint d) {nodeConstants.maxMulticastSolicit = d;}
-    void _setMaxUnicastSolicit(uint d) {nodeConstants.maxUnicastSolicit = d;}
-    void _setMaxAnycastDelayTime(simtime_t d) {nodeConstants.maxAnycastDelayTime = d;}
-    void _setMaxNeighbourAdvertisement(uint d) {nodeConstants.maxNeighbourAdvertisement = d;}
-    void _setReachableTime(simtime_t d) {nodeConstants.reachableTime = d;}
-    void _setRetransTimer(simtime_t d) {nodeConstants.retransTimer = d;}
-    void _setDelayFirstProbeTime(simtime_t d) {nodeConstants.delayFirstProbeTime = d;}
-    void _setMinRandomFactor(double d) {nodeConstants.minRandomFactor = d;}
-    void _setMaxRandomFactor(double d) {nodeConstants.maxRandomFactor = d;}
+    virtual void _setMaxMulticastSolicit(uint d) {nodeConstants.maxMulticastSolicit = d;}
+    virtual void _setMaxUnicastSolicit(uint d) {nodeConstants.maxUnicastSolicit = d;}
+    virtual void _setMaxAnycastDelayTime(simtime_t d) {nodeConstants.maxAnycastDelayTime = d;}
+    virtual void _setMaxNeighbourAdvertisement(uint d) {nodeConstants.maxNeighbourAdvertisement = d;}
+    virtual void _setReachableTime(simtime_t d) {nodeConstants.reachableTime = d;}
+    virtual void _setRetransTimer(simtime_t d) {nodeConstants.retransTimer = d;}
+    virtual void _setDelayFirstProbeTime(simtime_t d) {nodeConstants.delayFirstProbeTime = d;}
+    virtual void _setMinRandomFactor(double d) {nodeConstants.minRandomFactor = d;}
+    virtual void _setMaxRandomFactor(double d) {nodeConstants.maxRandomFactor = d;}
     /************End of Node Protocol Constant getters and setters*************/
 
     /************Getters for Node Variables************************************/
     int dupAddrDetectTransmits() {return nodeVars.dupAddrDetectTransmits;}
     /************Setters for Node Variables************************************/
-    void setDupAddrDetectTransmits(int d) {nodeVars.dupAddrDetectTransmits = d;}
+    virtual void setDupAddrDetectTransmits(int d) {nodeVars.dupAddrDetectTransmits = d;}
     /************End of Node Variables getters and setters*********************/
 
     /************Getters for Host Variables************************************/
@@ -462,11 +462,11 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     simtime_t getReachableTime() {return hostVars.reachableTime;}
     uint getRetransTimer() {return hostVars.retransTimer;}
     /************Setters for Host Variables************************************/
-    void setLinkMTU(uint d) {hostVars.linkMTU = d;}
-    void setCurHopLimit(short d) {hostVars.curHopLimit = d;}
-    void setBaseReachableTime(uint d) {hostVars.baseReachableTime = d;}
-    void setReachableTime(simtime_t d) {hostVars.reachableTime = d;}
-    void setRetransTimer(uint d) {hostVars.retransTimer = d;}
+    virtual void setLinkMTU(uint d) {hostVars.linkMTU = d;}
+    virtual void setCurHopLimit(short d) {hostVars.curHopLimit = d;}
+    virtual void setBaseReachableTime(uint d) {hostVars.baseReachableTime = d;}
+    virtual void setReachableTime(simtime_t d) {hostVars.reachableTime = d;}
+    virtual void setRetransTimer(uint d) {hostVars.retransTimer = d;}
     /************End of Host Variables getters and setters*********************/
 
     /************Getters for Router Configuration Variables********************/
@@ -481,16 +481,16 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     short getAdvCurHopLimit() {return rtrVars.advCurHopLimit;}
     simtime_t getAdvDefaultLifetime()  {return rtrVars.advDefaultLifetime;}
     /************Setters for Router Configuration Variables********************/
-    void setAdvSendAdvertisements(bool d) {rtrVars.advSendAdvertisements = d;}
-    void setMaxRtrAdvInterval(simtime_t d) {rtrVars.maxRtrAdvInterval = d;}
-    void setMinRtrAdvInterval(simtime_t d) {rtrVars.minRtrAdvInterval = d;}
-    void setAdvManagedFlag(bool d) {rtrVars.advManagedFlag = d;}
-    void setAdvOtherConfigFlag(bool d) {rtrVars.advOtherConfigFlag = d;}
-    void setAdvLinkMTU(int d) {rtrVars.advLinkMTU = d;}
-    void setAdvReachableTime(int d) {rtrVars.advReachableTime = d;}
-    void setAdvRetransTimer(int d) {rtrVars.advRetransTimer = d;}
-    void setAdvCurHopLimit(short d) {rtrVars.advCurHopLimit = d;}
-    void setAdvDefaultLifetime(simtime_t d) {rtrVars.advDefaultLifetime = d;}
+    virtual void setAdvSendAdvertisements(bool d) {rtrVars.advSendAdvertisements = d;}
+    virtual void setMaxRtrAdvInterval(simtime_t d) {rtrVars.maxRtrAdvInterval = d;}
+    virtual void setMinRtrAdvInterval(simtime_t d) {rtrVars.minRtrAdvInterval = d;}
+    virtual void setAdvManagedFlag(bool d) {rtrVars.advManagedFlag = d;}
+    virtual void setAdvOtherConfigFlag(bool d) {rtrVars.advOtherConfigFlag = d;}
+    virtual void setAdvLinkMTU(int d) {rtrVars.advLinkMTU = d;}
+    virtual void setAdvReachableTime(int d) {rtrVars.advReachableTime = d;}
+    virtual void setAdvRetransTimer(int d) {rtrVars.advRetransTimer = d;}
+    virtual void setAdvCurHopLimit(short d) {rtrVars.advCurHopLimit = d;}
+    virtual void setAdvDefaultLifetime(simtime_t d) {rtrVars.advDefaultLifetime = d;}
     /************End of Router Configuration Variables getters and setters*****/
 
     /** @name Router advertised prefixes */
@@ -498,7 +498,7 @@ class INET_API IPv6InterfaceData : public cPolymorphic
     /**
      * Adds the given advertised prefix to the interface.
      */
-    void addAdvPrefix(const AdvPrefix& advPrefix);
+    virtual void addAdvPrefix(const AdvPrefix& advPrefix);
 
     /**
      * Returns the number of advertised prefixes on the interface.
@@ -514,25 +514,25 @@ class INET_API IPv6InterfaceData : public cPolymorphic
      * Changes the configuration of the ith advertised prefix on the
      * interface. The prefix itself should stay the same.
      */
-    void setAdvPrefix(int i, const AdvPrefix& advPrefix);
+    virtual void setAdvPrefix(int i, const AdvPrefix& advPrefix);
 
     /**
      * Remove the ith advertised prefix on the interface. Prefixes
      * at larger indices will shift down.
      */
-    void removeAdvPrefix(int i);
+    virtual void removeAdvPrefix(int i);
 
     /**
      *  This method randomly generates a reachableTime given the MIN_RANDOM_FACTOR
      *  MAX_RANDOM_FACTOR and baseReachableTime. Refer to RFC 2461: Section 6.3.2
      */
-    simtime_t generateReachableTime(double MIN_RANDOM_FACTOR,
-        double MAX_RANDOM_FACTOR, uint baseReachableTime);
+    virtual simtime_t generateReachableTime(double MIN_RANDOM_FACTOR, double MAX_RANDOM_FACTOR,
+                                            uint baseReachableTime);
 
     /**
      * Arg-less version.
      */
-    simtime_t generateReachableTime();
+    virtual simtime_t generateReachableTime();
   };
 
 #endif

@@ -28,9 +28,27 @@
 
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on IPv4 and IPv6 stuff!
+class InterfaceTable;
+class InterfaceProtocolData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
-class InterfaceTable;
+
+/**
+ * Base class for protocol-specific data on an interface.
+ * Notable subclasses are IPv4InterfaceData and IPv6InterfaceData.
+ */
+class INET_API InterfaceProtocolData : public cPolymorphic
+{
+    friend class InterfaceEntry; //only this guy is allowed to set ownerp
+  protected:
+    InterfaceEntry *ownerp;
+  public:
+    /**
+     * Returns the InterfaceEntry that contains this data object, or NULL
+     */
+    InterfaceEntry *getInterfaceEntry() const {return ownerp;}
+};
+
 
 /**
  * Interface entry for the interface table in InterfaceTable.
@@ -60,8 +78,8 @@ class INET_API InterfaceEntry : public cNamedObject
 
     IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IP address, etc)
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
-    cPolymorphic *protocol3data;   ///< extension point: data for a 3rd network-layer protocol
-    cPolymorphic *protocol4data;   ///< extension point: data for a 4th network-layer protocol
+    InterfaceProtocolData *protocol3data; ///< extension point: data for a 3rd network-layer protocol
+    InterfaceProtocolData *protocol4data; ///< extension point: data for a 4th network-layer protocol
 
   private:
     // copying not supported: following are private and also left undefined
@@ -125,18 +143,18 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
-    IPv4InterfaceData *ipv4()       {return ipv4data;}
-    IPv6InterfaceData *ipv6()       {return ipv6data;}
-    cPolymorphic *getProtocol3()    {return protocol3data;}
-    cPolymorphic *getProtocol4()    {return protocol4data;}
+    IPv4InterfaceData *ipv4()  {return ipv4data;}
+    IPv6InterfaceData *ipv6()  {return ipv6data;}
+    InterfaceProtocolData *getProtocol3()  {return protocol3data;}
+    InterfaceProtocolData *getProtocol4()  {return protocol4data;}
     //@}
 
     /** @name Installing protocol-specific interface data */
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p)  {ipv4data = p; configChanged();}
     virtual void setIPv6Data(IPv6InterfaceData *p)  {ipv6data = p; configChanged();}
-    virtual void setProtocol3Data(cPolymorphic *p)  {protocol3data = p; configChanged();}
-    virtual void setProtocol4Data(cPolymorphic *p)  {protocol4data = p; configChanged();}
+    virtual void setProtocol3Data(InterfaceProtocolData *p)  {protocol3data = p; configChanged();}
+    virtual void setProtocol4Data(InterfaceProtocolData *p)  {protocol4data = p; configChanged();}
     //@}
 };
 

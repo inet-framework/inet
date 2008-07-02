@@ -41,11 +41,11 @@ class INET_API IPv4InterfaceData : public cPolymorphic
   public:
     typedef std::vector<IPAddress> IPAddressVector;
 
-  private:
-    IPAddress _inetAddr;    ///< IP address of interface
-    IPAddress _netmask;     ///< netmask
-    int _metric;            ///< link "cost"; see e.g. MS KB article Q299540
-    IPAddressVector _multicastGroups; ///< multicast groups
+  protected:
+    IPAddress inetAddr;  ///< IP address of interface
+    IPAddress netmask;   ///< netmask
+    int metric;          ///< link "cost"; see e.g. MS KB article Q299540
+    IPAddressVector multicastGroups; ///< multicast groups
 
   private:
     // copying not supported: following are private and also left undefined
@@ -58,15 +58,21 @@ class INET_API IPv4InterfaceData : public cPolymorphic
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    IPAddress getIPAddress() const  {return _inetAddr;}
-    IPAddress getNetmask() const      {return _netmask;}
-    int getMetric() const             {return _metric;}
-    const IPAddressVector& getMulticastGroups() const {return _multicastGroups;}
+    /** @name Getters */
+    //@{
+    IPAddress getIPAddress() const {return inetAddr;}
+    IPAddress getNetmask() const {return netmask;}
+    int getMetric() const  {return metric;}
+    const IPAddressVector& getMulticastGroups() const {return multicastGroups;}
+    //@}
 
-    void setIPAddress(IPAddress a) {_inetAddr = a;}
-    void setNetmask(IPAddress m)     {_netmask = m;}
-    void setMetric(int m)            {_metric = m;}
-    void setMulticastGroups(const IPAddressVector& v) {_multicastGroups = v;}
+    /** @name Setters */
+    //@{
+    virtual void setIPAddress(IPAddress a) {inetAddr = a;}
+    virtual void setNetmask(IPAddress m) {netmask = m;}
+    virtual void setMetric(int m) {metric = m;}
+    virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v;}
+    //@}
 };
 
 #endif

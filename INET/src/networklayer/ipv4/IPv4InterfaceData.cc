@@ -34,9 +34,9 @@
 IPv4InterfaceData::IPv4InterfaceData()
 {
     static const IPAddress allOnes("255.255.255.255");
-    _netmask = allOnes;
+    netmask = allOnes;
 
-    _metric = 0;
+    metric = 0;
 
     // TBD add default multicast groups!
 }
