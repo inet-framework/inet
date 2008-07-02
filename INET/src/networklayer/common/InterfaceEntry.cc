@@ -56,7 +56,7 @@ InterfaceEntry::InterfaceEntry()
 std::string InterfaceEntry::info() const
 {
     std::stringstream out;
-    out << (!ifname.empty() ? getName() : "*");
+    out << (getName()[0] ? getName() : "*");
     if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else
@@ -87,7 +87,7 @@ std::string InterfaceEntry::info() const
 std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
-    out << "name:" << (!ifname.empty() ? getName() : "*");
+    out << "name:" << (getName()[0] ? getName() : "*");
     if (getNetworkLayerGateIndex()==-1)
         out << "  on:-";
     else

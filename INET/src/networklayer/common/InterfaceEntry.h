@@ -37,16 +37,13 @@ class InterfaceTable;
  *
  * @see InterfaceTable
  */
-//FIXME remove interfaceId? pointer or name can be used instead
-//FIXME use cNamedObject as base class (instead of separate ifname?)
-class INET_API InterfaceEntry : public cObject
+class INET_API InterfaceEntry : public cNamedObject
 {
-    friend class InterfaceTable; //only this guy is allowed to set interfaceId and owner
+    friend class InterfaceTable; //only this guy is allowed to set interfaceId and ownerp
 
   protected:
     InterfaceTable *ownerp; ///< InterfaceTable that contains this interface, or NULL
     int interfaceId;      ///< identifies the interface in the InterfaceTable
-    std::string ifname;   ///< interface name (must be unique)
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
@@ -92,8 +89,7 @@ class INET_API InterfaceEntry : public cObject
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
-    int getInterfaceId() const        {return interfaceId;}   //FIXME remove on the long term! (clients should use interface pointer)
-    const char *getName() const       {return ifname.c_str();}
+    int getInterfaceId() const        {return interfaceId;}
     int getNetworkLayerGateIndex() const {return nwLayerGateIndex;}
     int getNodeOutputGateId() const   {return nodeOutputGateId;}
     int getNodeInputGateId() const    {return nodeInputGateId;}
@@ -111,7 +107,7 @@ class INET_API InterfaceEntry : public cObject
 
     /** @name Field setters */
     //@{
-    virtual void setName(const char *s)  {ifname = s; configChanged();}
+    virtual void setName(const char *s)  {cNamedObject::setName(s); configChanged();}
     virtual void setNetworkLayerGateIndex(int i) {nwLayerGateIndex = i; configChanged();}
     virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
     virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
