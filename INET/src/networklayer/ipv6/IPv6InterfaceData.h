@@ -124,7 +124,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     NodeConstants nodeConstants;
     /***************END of RFC 2461 Protocol Constants*************************/
 
-  private:
+  protected:
     // addresses
     struct AddressData
     {
@@ -301,17 +301,18 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     RouterVariables rtrVars;
     /***************END of RFC 2461 Host Variables*****************************/
 
-  private:
+  protected:
     int findAddress(const IPv6Address& addr) const;
     void choosePreferredAddress();
+    void changed1() {changed(NF_INTERFACE_IPv6CONFIG_CHANGED);}
+
     static bool addrLess(const AddressData& a, const AddressData& b);
 
   public:
     IPv6InterfaceData();
     virtual ~IPv6InterfaceData() {}
-
-    std::string info() const;  //displayed in Tkenv
-    std::string detailedInfo() const;  //displayed in Tkenv
+    std::string info() const;
+    std::string detailedInfo() const;
 
     /** @name Addresses */
     //@{

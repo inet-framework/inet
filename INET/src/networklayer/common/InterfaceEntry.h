@@ -24,6 +24,7 @@
 #include "INETDefs.h"
 #include "MACAddress.h"
 #include "InterfaceToken.h"
+#include "NotifierConsts.h"
 
 
 // Forward declarations. Do NOT #include the corresponding header files
@@ -40,8 +41,14 @@ class IPv6InterfaceData;
 class INET_API InterfaceProtocolData : public cPolymorphic
 {
     friend class InterfaceEntry; //only this guy is allowed to set ownerp
+
   protected:
-    InterfaceEntry *ownerp;
+    InterfaceEntry *ownerp;  // the interface entry this object belongs to
+
+  protected:
+    // fires notification with the given category, and the interface entry as details
+    virtual void changed(int category);
+
   public:
     /**
      * Returns the InterfaceEntry that contains this data object, or NULL
@@ -57,7 +64,8 @@ class INET_API InterfaceProtocolData : public cPolymorphic
  */
 class INET_API InterfaceEntry : public cNamedObject
 {
-    friend class InterfaceTable; //only this guy is allowed to set interfaceId and ownerp
+    friend class InterfaceTable; // only this guy is allowed to set interfaceId and ownerp
+    friend class InterfaceProtocolData; // to call protocolDataChanged()
 
   protected:
     InterfaceTable *ownerp; ///< InterfaceTable that contains this interface, or NULL
@@ -88,8 +96,9 @@ class INET_API InterfaceEntry : public cNamedObject
 
   protected:
     // change notifications
-    virtual void configChanged();
-    virtual void stateChanged();
+    virtual void configChanged() {changed(NF_INTERFACE_CONFIG_CHANGED);}
+    virtual void stateChanged() {changed(NF_INTERFACE_STATE_CHANGED);}
+    virtual void changed(int category);
 
     // to be invoked from InterfaceTable only
     virtual void setInterfaceTable(InterfaceTable *t) {ownerp = t;}

@@ -36,6 +36,15 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+
+void InterfaceProtocolData::changed(int category)
+{
+    // notify the containing InterfaceEntry that something changed
+    if (ownerp)
+        ownerp->changed(category);
+}
+
+
 InterfaceEntry::InterfaceEntry()
 {
     ownerp = NULL;
@@ -124,16 +133,10 @@ std::string InterfaceEntry::detailedInfo() const
     return out.str();
 }
 
-void InterfaceEntry::configChanged()
+void InterfaceEntry::changed(int category)
 {
     if (ownerp)
-        ownerp->interfaceConfigChanged(this);
-}
-
-void InterfaceEntry::stateChanged()
-{
-    if (ownerp)
-        ownerp->interfaceStateChanged(this);
+        ownerp->interfaceChanged(this, category);
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)

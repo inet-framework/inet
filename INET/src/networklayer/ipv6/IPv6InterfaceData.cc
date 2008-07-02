@@ -21,6 +21,8 @@
 #include <algorithm>
 #include "IPv6InterfaceData.h"
 
+//FIXME invoked changed() from state-changing methods, to trigger notification...
+
 
 IPv6InterfaceData::IPv6InterfaceData()
 {

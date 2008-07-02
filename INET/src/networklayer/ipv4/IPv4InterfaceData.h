@@ -48,6 +48,9 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     int metric;          ///< link "cost"; see e.g. MS KB article Q299540
     IPAddressVector multicastGroups; ///< multicast groups
 
+  protected:
+    void changed1() {changed(NF_INTERFACE_IPv4CONFIG_CHANGED);}
+
   private:
     // copying not supported: following are private and also left undefined
     IPv4InterfaceData(const IPv4InterfaceData& obj);
@@ -69,10 +72,10 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
     /** @name Setters */
     //@{
-    virtual void setIPAddress(IPAddress a) {inetAddr = a;}
-    virtual void setNetmask(IPAddress m) {netmask = m;}
-    virtual void setMetric(int m) {metric = m;}
-    virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v;}
+    virtual void setIPAddress(IPAddress a) {inetAddr = a; changed1();}
+    virtual void setNetmask(IPAddress m) {netmask = m; changed1();}
+    virtual void setMetric(int m) {metric = m; changed1();}
+    virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v; changed1();}
     //@}
 };
 

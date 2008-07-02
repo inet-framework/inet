@@ -215,14 +215,9 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = NULL;
 }
 
-void InterfaceTable::interfaceConfigChanged(InterfaceEntry *entry)
+void InterfaceTable::interfaceChanged(InterfaceEntry *entry, int category)
 {
-    nb->fireChangeNotification(NF_INTERFACE_CONFIG_CHANGED, entry);
-}
-
-void InterfaceTable::interfaceStateChanged(InterfaceEntry *entry)
-{
-    nb->fireChangeNotification(NF_INTERFACE_STATE_CHANGED, entry);
+    nb->fireChangeNotification(category, entry);
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)

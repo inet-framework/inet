@@ -87,8 +87,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
     virtual void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
 
     // called from InterfaceEntry
-    virtual void interfaceConfigChanged(InterfaceEntry *entry);
-    virtual void interfaceStateChanged(InterfaceEntry *entry);
+    virtual void interfaceChanged(InterfaceEntry *entry, int category);
 
     // internal
     virtual void invalidateTmpInterfaceList();
