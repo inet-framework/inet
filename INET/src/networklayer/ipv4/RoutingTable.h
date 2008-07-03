@@ -44,7 +44,6 @@ class RoutingTableParser;
  *
  * @see RoutingTable
  */
-//TODO add notification mechanism
 class INET_API IPv4Route : public cPolymorphic
 {
   public:

@@ -1,6 +1,5 @@
+TODO: actually use IRoutingTable, IInterfaceTable
 TODO RoutingTable[6]: if an interface gets deleted, drop all the routes that refer to it!!!
-
-TODO: fire NF_IPv4_INTERFACECONFIG_CHANGED !!!!
 
 TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
       if we change it to pointer, messages that are underway in the host during a deleteInterface()

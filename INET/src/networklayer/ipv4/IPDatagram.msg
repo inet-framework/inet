@@ -43,18 +43,32 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 
 
-//
-// IP options. Beware: these are not the "official" (RFC) codes!
-//
-enum IPOption
-{
-
-    IPOPTION_NO_OPTION = 0;
-    IPOPTION_RECORD_ROUTE = 1;
-    IPOPTION_TIMESTAMP = 2;
-    IPOPTION_LOOSE_SOURCE_ROUTING = 3;
-    IPOPTION_STRICT_SOURCE_ROUTING = 4;
-}
+  //
+  // IP options class
+  //
+  enum IPOptionClass
+  {
+	IPOPTION_CLASS_CONTROL = 0;
+	IPOPTION_CLASS_RESERVED = 1;
+	IPOPTION_CLASS_DEBUGGING = 2;
+	IPOPTION_CLASS_RESERVED2 = 3;
+  };
+  //
+  // IP option numbers
+  //
+  enum IPOption
+  {
+		IPOPTION_END_OF_OPTIONS = 0;
+		IPOPTION_NO_OPTION = 1;
+		IPOPTION_SECURITY = 2;
+		IPOPTION_LOOSE_SOURCE_ROUTING = 3;
+		IPOPTION_TIMESTAMP = 4;
+		IPOPTION_RECORD_ROUTE = 7;
+		IPOPTION_STREAM_ID = 8;
+		IPOPTION_STRICT_SOURCE_ROUTING = 9;
+		IPOPTION_ROUTER_ALERT = 20;
+  };
+  
 
 //
 // The timestamp flag uses the same numeric values as the IP Protocol
@@ -132,7 +146,8 @@ message IPDatagram
     int fragmentOffset;
     unsigned char diffServCodePoint;
 
-    int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
+    int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
+                                                         //#FIXME also: the RFC says that more than one IP-Option is allowed
     IPRecordRouteOption recordRoute;
     IPTimestampOption timestampOption;
     IPSourceRoutingOption sourceRoutingOption; // optionCode determines if strict or loose source routing
