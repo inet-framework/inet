@@ -38,6 +38,8 @@ Internal snapshot, for omnetpp-4.0b2.
   NF_INTERFACE_CONFIG_CHANGED; NF_IPv4_ROUTE_ADDED, NF_IPv4_ROUTE_DELETED,
   NF_IPv6_ROUTE_ADDED, NF_IPv6_ROUTE_DELETED, etc.
 
+- NotificationBoard: added hasSubscribers(int category) method, to allow for
+  optimizing out firing change notifications if there's no one listening.
 
 
 INET-20080624

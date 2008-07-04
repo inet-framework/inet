@@ -17,9 +17,9 @@
 //
 
 
+#include <algorithm>
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
-#include <algorithm>
 
 Define_Module(NotificationBoard);
 
@@ -69,6 +69,8 @@ void NotificationBoard::subscribe(INotifiable *client, int category)
     // add client if not already there
     if (std::find(clients.begin(), clients.end(), client) == clients.end())
         clients.push_back(client);
+
+    fireChangeNotification(NF_SUBSCRIBERLIST_CHANGED, NULL);
 }
 
 void NotificationBoard::unsubscribe(INotifiable *client, int category)
@@ -82,6 +84,14 @@ void NotificationBoard::unsubscribe(INotifiable *client, int category)
     NotifiableVector::iterator it = std::find(clients.begin(), clients.end(), client);
     if (it!=clients.end())
         clients.erase(it);
+
+    fireChangeNotification(NF_SUBSCRIBERLIST_CHANGED, NULL);
+}
+
+bool NotificationBoard::hasSubscribers(int category)
+{
+    ClientMap::iterator it = clientMap.find(category);
+    return it!=clientMap.end() && !it->second.empty();
 }
 
 void NotificationBoard::fireChangeNotification(int category, const cPolymorphic *details)

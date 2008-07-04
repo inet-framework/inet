@@ -26,6 +26,8 @@ const char *notificationCategoryName(int category)
     static char buf[8];
     switch (category)
     {
+        case NF_SUBSCRIBERLIST_CHANGED: return "SUBSCRIBERS";
+
         case NF_HOSTPOSITION_UPDATED: return "POS";
         case NF_NODE_FAILURE: return "FAILURE";
         case NF_NODE_RECOVERY: return "RECOVERY";

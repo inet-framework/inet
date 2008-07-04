@@ -120,6 +120,16 @@ class INET_API NotificationBoard : public cSimpleModule
      * Unsubscribe from changes of the given category
      */
     virtual void unsubscribe(INotifiable *client, int category);
+
+    /**
+     * Returns true if any client has subscribed to the given category.
+     * This, by using a local boolean 'hasSubscriber' flag, allows
+     * performance-critical clients to leave out calls to
+     * fireChangeNotification() if there's no one subscribed anyway.
+     * The flag should be refreshed on each NF_SUBSCRIBERLIST_CHANGED
+     * notification.
+     */
+    virtual bool hasSubscribers(int category);
     //@}
 
     /** @name Methods for producers of change notifications */

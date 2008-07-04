@@ -1,3 +1,11 @@
+2008-07-04  Andras Varga
+
+	* NotificationBoard: added bool hasSubscribers(int category) method.
+	By using a local boolean 'hasSubscriber' flag, it allows performance-
+	critical clients to leave out calls to fireChangeNotification() if 
+	there's no one subscribed anyway. The flag should be refreshed on 
+	each NF_SUBSCRIBERLIST_CHANGED notification (newly added too).
+
 2008-07-02  Andras Varga
 
 	* INotifiable: receiveChangeNotification() signature change: details

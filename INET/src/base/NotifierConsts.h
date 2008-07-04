@@ -31,6 +31,9 @@
 // TODO document associated notification detail structs
 enum
 {
+    // admin
+    NF_SUBSCRIBERLIST_CHANGED,
+
     // - host
     NF_HOSTPOSITION_UPDATED,
     NF_NODE_FAILURE,
