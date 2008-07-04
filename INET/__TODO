@@ -8,7 +8,8 @@ TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision
       if we change it to pointer, messages that are underway in the host during a deleteInterface()
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
       leave a hole in it?
-
+-----------------------
+PPP: optimize out fireNotifications() via a hasListeners flag! (NotificationBoard should fire a SUBSCRIBERS_CHANGE event!, plus add a hasSubscribers(int category) method)
 -----------------------
 - move "q=queue" too into the default display string
 - add gate @labels
