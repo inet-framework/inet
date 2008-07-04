@@ -1,4 +1,7 @@
 TODO: actually use IRoutingTable, IInterfaceTable
+
+TODO routingTable optimizations from Gamer!
+
 TODO RoutingTable[6]: if an interface gets deleted, drop all the routes that refer to it!!!
 
 TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
@@ -10,8 +13,7 @@ TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision
 - move "q=queue" too into the default display string
 - add gate @labels
 - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
------------------------
-- IPvXAddress: rename get4()/get6() to v4()/v6()
+
 -----------------------
 TODO rename the following TED.h methods to begin with a verb:
   unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
