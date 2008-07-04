@@ -5,7 +5,7 @@ INET_ROOT=`pwd`
 
 if [ "$BUILDID" = "" ]; then
 # generate our own build identifier   
-    export BUILDID=`date +%y%m%d`
+    export BUILDID=`date +%Y%m%d`
 fi
 
 FILENAME=$INET_ROOT/INET-$BUILDID-opp4-src.tgz
