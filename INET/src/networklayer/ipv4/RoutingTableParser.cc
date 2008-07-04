@@ -195,7 +195,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // inet_addr entry
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
-            ie->ipv4()->setIPAddress(IPAddress(parseEntry(ifconfigFile, "inet_addr:", charpointer,buf)));
+            ie->ipv4Data()->setIPAddress(IPAddress(parseEntry(ifconfigFile, "inet_addr:", charpointer,buf)));
             continue;
         }
 
@@ -208,7 +208,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // Mask entry
         if (streq(ifconfigFile + charpointer, "Mask:")) {
-            ie->ipv4()->setNetmask(IPAddress(parseEntry(ifconfigFile, "Mask:", charpointer,buf)));
+            ie->ipv4Data()->setNetmask(IPAddress(parseEntry(ifconfigFile, "Mask:", charpointer,buf)));
             continue;
         }
 
@@ -227,7 +227,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // Metric entry
         if (streq(ifconfigFile + charpointer, "Metric:")) {
-            ie->ipv4()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer,buf)));
+            ie->ipv4Data()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer,buf)));
             continue;
         }
 
@@ -279,7 +279,7 @@ char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
 
 void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *itf)
 {
-    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4()->getMulticastGroups();
+    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4Data()->getMulticastGroups();
 
     // add "224.0.0.1" automatically
     mcg.push_back(IPAddress::ALL_HOSTS_MCAST);
@@ -294,7 +294,7 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
     while ((token = tokenizer.nextToken())!=NULL)
         mcg.push_back(IPAddress(token));
 
-    itf->ipv4()->setMulticastGroups(mcg);
+    itf->ipv4Data()->setMulticastGroups(mcg);
 }
 
 void RoutingTableParser::parseRouting(char *routeFile)

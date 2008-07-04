@@ -155,8 +155,8 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
-    IPv4InterfaceData *ipv4()  {return ipv4data;}
-    IPv6InterfaceData *ipv6()  {return ipv6data;}
+    IPv4InterfaceData *ipv4Data()  {return ipv4data;}
+    IPv6InterfaceData *ipv6Data()  {return ipv6data;}
     InterfaceProtocolData *getProtocol3()  {return protocol3data;}
     InterfaceProtocolData *getProtocol4()  {return protocol4data;}
     //@}

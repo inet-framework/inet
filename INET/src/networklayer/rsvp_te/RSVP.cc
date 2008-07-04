@@ -331,7 +331,7 @@ void RSVP::setupHello()
     {
         ASSERT(ift->getInterfaceByName(token));
 
-        IPAddress peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4()->getIPAddress());
+        IPAddress peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
 
         HelloState_t h;
 
@@ -1126,7 +1126,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
                 return false;
             }
 
-            OI = ie->ipv4()->getIPAddress();
+            OI = ie->ipv4Data()->getIPAddress();
 
         }
         else
@@ -1157,7 +1157,7 @@ bool RSVP::evalNextHopInterface(IPAddress destAddr, const EroVector& ERO, IPAddr
                 return false;
             }
 
-            OI = ie->ipv4()->getIPAddress();
+            OI = ie->ipv4Data()->getIPAddress();
 
             HelloState_t *h = findHello(tedmod->getPeerByLocalAddress(OI));
             if (!h)

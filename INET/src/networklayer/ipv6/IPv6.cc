@@ -259,7 +259,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // set datagram source address if not yet set
     if (datagram->getSrcAddress().isUnspecified())
     {
-        const IPv6Address& srcAddr = ie->ipv6()->getPreferredAddress();
+        const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
         datagram->setSrcAddress(srcAddr);
     }
@@ -380,7 +380,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6()->getIPAddress());
+                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6Data()->getIPAddress());
 
                 // send
                 IPv6Address nextHopAddr = routes[i].gateway;

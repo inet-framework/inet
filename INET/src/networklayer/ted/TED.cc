@@ -94,7 +94,7 @@ void TED::initialize(int stage)
         //
         TELinkStateInfo entry;
         entry.advrouter = routerId;
-        entry.local = ie->ipv4()->getIPAddress();
+        entry.local = ie->ipv4Data()->getIPAddress();
         entry.linkid = linkid;
         entry.remote = remote;
         entry.MaxBandwidth = linkBandwidth;
@@ -103,7 +103,7 @@ void TED::initialize(int stage)
         entry.state = true;
 
         // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
-        entry.metric = rentry->getInterface()->ipv4()->getMetric();
+        entry.metric = rentry->getInterface()->ipv4Data()->getMetric();
 
         EV << "metric set to=" << entry.metric << endl;
 
@@ -118,12 +118,12 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (rt->getInterfaceByAddress(ie->ipv4()->getIPAddress()) != ie)
+        if (rt->getInterfaceByAddress(ie->ipv4Data()->getIPAddress()) != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
-                  ie->getName(), ie->ipv4()->getIPAddress().str().c_str());
+                  ie->getName(), ie->ipv4Data()->getIPAddress().str().c_str());
         if (!ie->isLoopback())
-            interfaceAddrs.push_back(ie->ipv4()->getIPAddress());
+            interfaceAddrs.push_back(ie->ipv4Data()->getIPAddress());
     }
 
     rebuildRoutingTable();

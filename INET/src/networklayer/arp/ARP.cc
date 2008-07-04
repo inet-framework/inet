@@ -249,7 +249,7 @@ void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)
 {
     // find our own IP address and MAC address on the given interface
     MACAddress myMACAddress = ie->getMacAddress();
-    IPAddress myIPAddress = ie->ipv4()->getIPAddress();
+    IPAddress myIPAddress = ie->ipv4Data()->getIPAddress();
 
     // both must be set
     ASSERT(!myMACAddress.isUnspecified());
@@ -417,7 +417,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
                 // find our own IP address and MAC address on the given interface
                 MACAddress myMACAddress = ie->getMacAddress();
-                IPAddress myIPAddress = ie->ipv4()->getIPAddress();
+                IPAddress myIPAddress = ie->ipv4Data()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
                 arp->setName("arpREPLY");

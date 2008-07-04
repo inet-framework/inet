@@ -101,9 +101,9 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
         for (int k = 0; k < ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->getInterface(k);
-            if (!ie->ipv6() || ie->isLoopback())
+            if (!ie->ipv6Data() || ie->isLoopback())
                 continue;
-            if (ie->ipv6()->getNumAdvPrefixes()>0)
+            if (ie->ipv6Data()->getNumAdvPrefixes()>0)
                 continue;  // already has one
 
             // add a prefix
@@ -124,11 +124,11 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
             p.advPreferredLifetime = 604800;
             // Default: TRUE
             p.advAutonomousFlag = true;
-            ie->ipv6()->addAdvPrefix(p);
+            ie->ipv6Data()->addAdvPrefix(p);
 
             // add a link-local address (tentative) if it doesn't have one
-            if (ie->ipv6()->getLinkLocalAddress().isUnspecified())
-                ie->ipv6()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, 0, 0);
+            if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
+                ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, 0, 0);
         }
     }
 }
@@ -159,10 +159,10 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
             if (ie->isLoopback())
                 continue;
 
-            for (int y = 0; y < ie->ipv6()->getNumAdvPrefixes(); y++)
-                if (ie->ipv6()->getAdvPrefix(y).prefix.isGlobal())
-                    rt->addOrUpdateOwnAdvPrefix(ie->ipv6()->getAdvPrefix(y).prefix,
-                                                ie->ipv6()->getAdvPrefix(y).prefixLength,
+            for (int y = 0; y < ie->ipv6Data()->getNumAdvPrefixes(); y++)
+                if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
+                    rt->addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
+                                                ie->ipv6Data()->getAdvPrefix(y).prefixLength,
                                                 x, 0);
         }
     }
@@ -202,9 +202,9 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             if (destIf->isLoopback())
                 continue;
 
-            for (int y = 0; y < destIf->ipv6()->getNumAdvPrefixes(); y++)
-                if (destIf->ipv6()->getAdvPrefix(y).prefix.isGlobal())
-                    destPrefixes.push_back(&destIf->ipv6()->getAdvPrefix(y));
+            for (int y = 0; y < destIf->ipv6Data()->getNumAdvPrefixes(); y++)
+                if (destIf->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
+                    destPrefixes.push_back(&destIf->ipv6Data()->getAdvPrefix(y));
         }
 
         std::string destModName = destNode->getModule()->getFullName();
@@ -251,7 +251,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop
-            IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6()->getLinkLocalAddress();
+            IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6Data()->getLinkLocalAddress();
 
             // traverse through address of each node
             // add to route table

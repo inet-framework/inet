@@ -248,7 +248,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
 
     // set datagram source address if not yet set
     if (datagram->getSrcAddress().isUnspecified())
-        datagram->setSrcAddress(destIE->ipv4()->getIPAddress());
+        datagram->setSrcAddress(destIE->ipv4Data()->getIPAddress());
 
     // default: send datagram to fragmentation
     EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHopAddr << "\n";
@@ -318,7 +318,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
         // set datagram source address if not yet set
         if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destIE->ipv4()->getIPAddress());
+            datagram->setSrcAddress(destIE->ipv4Data()->getIPAddress());
 
         // send
         fragmentAndSend(datagram, destIE, datagram->getDestAddress());
@@ -347,7 +347,7 @@ void IP::routeMulticastPacket(IPDatagram *datagram, InterfaceEntry *destIE, Inte
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(destIE->ipv4()->getIPAddress());
+                    datagramCopy->setSrcAddress(destIE->ipv4Data()->getIPAddress());
 
                 // send
                 IPAddress nextHopAddr = routes[i].gateway;

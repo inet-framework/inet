@@ -166,8 +166,8 @@ void RoutingTable::autoconfigRouterId()
             for (int i=0; i<ift->getNumInterfaces(); ++i)
             {
                 InterfaceEntry *ie = ift->getInterface(i);
-                if (!ie->isLoopback() && ie->ipv4()->getIPAddress().getInt() > _routerId.getInt())
-                    _routerId = ie->ipv4()->getIPAddress();
+                if (!ie->isLoopback() && ie->ipv4Data()->getIPAddress().getInt() > _routerId.getInt())
+                    _routerId = ie->ipv4Data()->getIPAddress();
             }
         }
     }
@@ -178,8 +178,8 @@ void RoutingTable::autoconfigRouterId()
         if (getInterfaceByAddress(_routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-            lo0->ipv4()->setIPAddress(_routerId);
-            lo0->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS);
+            lo0->ipv4Data()->setIPAddress(_routerId);
+            lo0->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS);
         }
     }
 }
@@ -258,7 +258,7 @@ std::vector<IPAddress> RoutingTable::gatherAddresses() const
     std::vector<IPAddress> addressvector;
 
     for (int i=0; i<ift->getNumInterfaces(); ++i)
-        addressvector.push_back(ift->getInterface(i)->ipv4()->getIPAddress());
+        addressvector.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
     return addressvector;
 }
 
@@ -281,7 +281,7 @@ InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPAddress& addr) const
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4()->getIPAddress()==addr)
+        if (ie->ipv4Data()->getIPAddress()==addr)
             return ie;
     }
     return NULL;
@@ -311,7 +311,7 @@ bool RoutingTable::isLocalAddress(const IPAddress& dest) const
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (dest==ie->ipv4()->getIPAddress())
+        if (dest==ie->ipv4Data()->getIPAddress())
             return true;
     }
     return false;
@@ -324,8 +324,8 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        for (unsigned int j=0; j < ie->ipv4()->getMulticastGroups().size(); j++)
-            if (dest.equals(ie->ipv4()->getMulticastGroups()[j]))
+        for (unsigned int j=0; j < ie->ipv4Data()->getMulticastGroups().size(); j++)
+            if (dest.equals(ie->ipv4Data()->getMulticastGroups()[j]))
                 return true;
     }
     return false;
@@ -494,15 +494,15 @@ void RoutingTable::updateNetmaskRoutes()
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4()->getNetmask()!=IPAddress::ALLONES_ADDRESS)
+        if (ie->ipv4Data()->getNetmask()!=IPAddress::ALLONES_ADDRESS)
         {
             IPRoute *route = new IPRoute();
             route->setType(IPRoute::DIRECT);
             route->setSource(IPRoute::IFACENETMASK);
-            route->setHost(ie->ipv4()->getIPAddress());
-            route->setNetmask(ie->ipv4()->getNetmask());
+            route->setHost(ie->ipv4Data()->getIPAddress());
+            route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPAddress());
-            route->setMetric(ie->ipv4()->getMetric());
+            route->setMetric(ie->ipv4Data()->getMetric());
             route->setInterface(ie);
             routes.push_back(route);
         }

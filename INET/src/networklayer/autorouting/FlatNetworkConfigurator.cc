@@ -103,8 +103,8 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
             {
-                ie->ipv4()->setIPAddress(IPAddress(addr));
-                ie->ipv4()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
+                ie->ipv4Data()->setIPAddress(IPAddress(addr));
+                ie->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }

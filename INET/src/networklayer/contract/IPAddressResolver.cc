@@ -137,16 +137,16 @@ IPvXAddress IPAddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     IPvXAddress ret;
     if (addrType==ADDR_IPv6 || addrType==ADDR_PREFER_IPv6)
     {
-        if (ie->ipv6())
+        if (ie->ipv6Data())
             ret = getInterfaceIPv6Address(ie);
-        if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv6 && ie->ipv4())
-            ret = ie->ipv4()->getIPAddress();
+        if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv6 && ie->ipv4Data())
+            ret = ie->ipv4Data()->getIPAddress();
     }
     else if (addrType==ADDR_IPv4 || addrType==ADDR_PREFER_IPv4)
     {
-        if (ie->ipv4())
-            ret = ie->ipv4()->getIPAddress();
-        if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv4 && ie->ipv6())
+        if (ie->ipv4Data())
+            ret = ie->ipv4Data()->getIPAddress();
+        if (ret.isUnspecified() && addrType==ADDR_PREFER_IPv4 && ie->ipv6Data())
             ret = getInterfaceIPv6Address(ie);
     }
     else
@@ -167,9 +167,9 @@ IPAddress IPAddressResolver::getIPv4AddressFrom(InterfaceTable *ift)
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4() && !ie->ipv4()->getIPAddress().isUnspecified() && !ie->isLoopback())
+        if (ie->ipv4Data() && !ie->ipv4Data()->getIPAddress().isUnspecified() && !ie->isLoopback())
         {
-            addr = ie->ipv4()->getIPAddress();
+            addr = ie->ipv4Data()->getIPAddress();
             break;
         }
     }
@@ -188,9 +188,9 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
     for (int i=0; i<ift->getNumInterfaces() && addr.isUnspecified(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->ipv6() || ie->isLoopback())
+        if (!ie->ipv6Data() || ie->isLoopback())
             continue;
-        IPv6Address ifAddr = ie->ipv6()->getPreferredAddress();
+        IPv6Address ifAddr = ie->ipv6Data()->getPreferredAddress();
         if (addr.isGlobal() && ifAddr.isGlobal() && addr!=ifAddr)
             EV << ift->getFullPath() << " has at least two globally routable addresses on different interfaces\n";
         if (ifAddr.isGlobal())
@@ -205,9 +205,9 @@ IPv6Address IPAddressResolver::getIPv6AddressFrom(InterfaceTable *ift)
 IPv6Address IPAddressResolver::getInterfaceIPv6Address(InterfaceEntry *ie)
 {
 #ifndef NO_IPv6
-    if (!ie->ipv6())
+    if (!ie->ipv6Data())
         return IPv6Address();
-    return ie->ipv6()->getPreferredAddress();
+    return ie->ipv6Data()->getPreferredAddress();
 #else
     return IPv6Address();
 #endif

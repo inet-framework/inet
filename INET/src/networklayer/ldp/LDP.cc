@@ -316,14 +316,14 @@ void LDP::rebuildFecList()
         if (ie->getNetworkLayerGateIndex() < 0)
             continue;
 
-        FecVector::iterator it = findFecEntry(oldList, ie->ipv4()->getIPAddress(), 32);
+        FecVector::iterator it = findFecEntry(oldList, ie->ipv4Data()->getIPAddress(), 32);
         if (it == oldList.end())
         {
             fec_t newItem;
             newItem.fecid = ++maxFecid;
-            newItem.addr = ie->ipv4()->getIPAddress();
+            newItem.addr = ie->ipv4Data()->getIPAddress();
             newItem.length = 32;
-            newItem.nextHop = ie->ipv4()->getIPAddress();
+            newItem.nextHop = ie->ipv4Data()->getIPAddress();
             fecList.push_back(newItem);
         }
         else
