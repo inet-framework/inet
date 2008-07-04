@@ -23,10 +23,13 @@ TODO rename the following TED.h methods to begin with a verb:
 rename IPv4/IPv6 stuff to be consistent???
   RoutingTable vs RoutingTable6
   IPv4Route vs IPv6Route
-  IPAddress vs IPv6Address (vs IPcXAddress)
-  get4() vs get6()
+  IPAddress vs IPv6Address (vs IPvXAddress)
+  get4() vs get6()    [IPvXAddress]
+  ipv4() vs ipv6()    [InterfaceEntry data]
   FlatNetworkConfigurator vs FlatNetworkConfigurator6
 
+-----------------------
+cache gate IDs to speed up sending
 -----------------------
 put all c++ code into "inet" namespace
 - UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
