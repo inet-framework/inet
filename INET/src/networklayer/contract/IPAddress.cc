@@ -103,7 +103,7 @@ std::string IPAddress::str() const
         return std::string("<unspec>");
 
     char buf[ADDRESS_STRING_SIZE];
-    sprintf(buf, "%hhu.%hhu.%hhu.%hhu", addr>>24, addr>>16, addr>>8, addr);   //XXX check this!!!
+    sprintf(buf, "%u.%u.%u.%u", (addr>>24)&255, (addr>>16)&255, (addr>>8)&255, addr&255);
     return std::string(buf);
 }
 
