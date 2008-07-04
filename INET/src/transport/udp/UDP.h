@@ -36,7 +36,6 @@ class ICMP;
 class ICMPv6;
 class UDPPacket;
 
-const char *ERROR_IP_ADDRESS = "10.0.0.255";
 const int UDP_HEADER_BYTES = 8;
 
 

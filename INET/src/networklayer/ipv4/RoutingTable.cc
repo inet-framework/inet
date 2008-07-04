@@ -237,7 +237,7 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     }
 }
 
-void deleteRoutesWith(InterfaceEntry *entry)
+void RoutingTable::deleteRoutesWith(InterfaceEntry *entry)
 {
     //FIXME
 }
