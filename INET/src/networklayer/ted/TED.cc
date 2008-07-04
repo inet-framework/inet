@@ -72,11 +72,11 @@ void TED::initialize(int stage)
         // in this model we haven't implemented HELLO but provide peer addresses via
         // preconfigured static host routes in routing table.
         //
-        const IPv4Route *rentry = NULL;
+        const IPRoute *rentry = NULL;
         for (int j = 0; j < rt->getNumRoutes(); j++)
         {
             rentry = rt->getRoute(j);
-            if (rentry->getInterface()==ie && rentry->getType()==IPv4Route::DIRECT)
+            if (rentry->getInterface()==ie && rentry->getType()==IPRoute::DIRECT)
                 break;
         }
         ASSERT(rentry);
@@ -217,7 +217,7 @@ void TED::rebuildRoutingTable()
     int j = 0;
     for (int i = 0; i < n; i++)
     {
-        const IPv4Route *entry = rt->getRoute(j);
+        const IPRoute *entry = rt->getRoute(j);
         if (entry->getHost().isMulticast())
         {
             ++j;
@@ -257,7 +257,7 @@ void TED::rebuildRoutingTable()
 
         ASSERT(isLocalPeer(V[nHop].node));
 
-        IPv4Route *entry = new IPv4Route;
+        IPRoute *entry = new IPRoute;
         entry->setHost(V[i].node);
 
         if (V[i].node == V[nHop].node)
@@ -271,7 +271,7 @@ void TED::rebuildRoutingTable()
             entry->setType(entry->REMOTE);
         }
         entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
-        entry->setSource(IPv4Route::OSPF);
+        entry->setSource(IPRoute::OSPF);
 
         entry->setNetmask(0xffffffff);
         entry->setMetric(0);
@@ -285,13 +285,13 @@ void TED::rebuildRoutingTable()
 
     for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
     {
-        IPv4Route *entry = new IPv4Route;
+        IPRoute *entry = new IPRoute;
 
         entry->setHost(getPeerByLocalAddress(interfaceAddrs[i]));
         entry->setGateway(IPAddress());
         entry->setType(entry->DIRECT);
         entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
-        entry->setSource(IPv4Route::OSPF);
+        entry->setSource(IPRoute::OSPF);
 
         entry->setNetmask(0xffffffff);
         entry->setMetric(0); // XXX FIXME what's that?

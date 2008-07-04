@@ -8,7 +8,7 @@
 
 namespace OSPF {
 
-class RoutingTableEntry : public IPv4Route
+class RoutingTableEntry : public IPRoute
 {
 public:
     enum RoutingPathType {
@@ -27,8 +27,8 @@ public:
 
 private:
     RoutingDestinationType  destinationType;
-    // destinationID is IPv4Route::host
-    // addressMask is IPv4Route::netmask
+    // destinationID is IPRoute::host
+    // addressMask is IPRoute::netmask
     OSPFOptions             optionalCapabilities;
     AreaID                  area;
     RoutingPathType         pathType;
@@ -36,8 +36,8 @@ private:
     Metric                  type2Cost;
     const OSPFLSA*          linkStateOrigin;
     std::vector<NextHop>    nextHops;
-    // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
-    // IPv4Route::gateway is nextHops[0].hopAddress
+    // IPRoute::interfacePtr comes from nextHops[0].ifIndex
+    // IPRoute::gateway is nextHops[0].hopAddress
 
 public:
             RoutingTableEntry  (void);
@@ -74,7 +74,7 @@ public:
 } // namespace OSPF
 
 inline OSPF::RoutingTableEntry::RoutingTableEntry(void) :
-    IPv4Route(),
+    IPRoute(),
     destinationType(OSPF::RoutingTableEntry::NetworkDestination),
     area(OSPF::BackboneAreaID),
     pathType(OSPF::RoutingTableEntry::IntraArea),
@@ -82,7 +82,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(void) :
     linkStateOrigin(NULL)
 {
     netmask = 0xFFFFFFFF;
-    source  = IPv4Route::OSPF;
+    source  = IPRoute::OSPF;
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 

@@ -48,6 +48,7 @@ struct AuthenticationKeyType {
     char    bytes[8];
 };
 
+//FIXME remove this type, use IPAddress instead
 struct IPv4Address {
     unsigned char   bytes[4];
 };

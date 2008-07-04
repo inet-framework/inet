@@ -229,7 +229,7 @@ void IP::routePacket(IPDatagram *datagram, InterfaceEntry *destIE, bool fromHL)
     else
     {
         // use IP routing (lookup in routing table)
-        const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
+        const IPRoute *re = rt->findBestMatchingRoute(destAddr);
 
         // error handling: destination address does not exist in routing table:
         // notify ICMP, throw packet away and continue

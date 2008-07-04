@@ -44,7 +44,7 @@ class RoutingTableParser;
  *
  * @see RoutingTable
  */
-class INET_API IPv4Route : public cPolymorphic
+class INET_API IPRoute : public cPolymorphic
 {
   public:
     /** Route type */
@@ -76,12 +76,12 @@ class INET_API IPv4Route : public cPolymorphic
 
   private:
     // copying not supported: following are private and also left undefined
-    IPv4Route(const IPv4Route& obj);
-    IPv4Route& operator=(const IPv4Route& obj);
+    IPRoute(const IPRoute& obj);
+    IPRoute& operator=(const IPRoute& obj);
 
   public:
-    IPv4Route();
-    virtual ~IPv4Route() {}
+    IPRoute();
+    virtual ~IPRoute() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
@@ -148,15 +148,15 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  * be read and modified during simulation, typically by routing protocol
  * implementations (e.g. OSPF).
  *
- * Entries in the route table are represented by IPv4Route objects.
- * IPv4Route objects can be polymorphic: if a routing protocol needs
- * to store additional data, it can simply subclass from IPv4Route,
+ * Entries in the route table are represented by IPRoute objects.
+ * IPRoute objects can be polymorphic: if a routing protocol needs
+ * to store additional data, it can simply subclass from IPRoute,
  * and add the derived object to the table.
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
  *
  *
- * @see InterfaceEntry, IPv4InterfaceData, IPv4Route
+ * @see InterfaceEntry, IPv4InterfaceData, IPRoute
  */
 class INET_API RoutingTable: public cSimpleModule, protected INotifiable
 {
@@ -170,7 +170,7 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
     //
     // Routes:
     //
-    typedef std::vector<IPv4Route *> RouteVector;
+    typedef std::vector<IPRoute *> RouteVector;
     RouteVector routes;          // Unicast route array
     RouteVector multicastRoutes; // Multicast route array
 
@@ -179,7 +179,7 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
     virtual void configureLoopbackForIPv4();
 
     // check if a route table entry corresponds to the following parameters
-    virtual bool routeMatches(const IPv4Route *entry,
+    virtual bool routeMatches(const IPRoute *entry,
         const IPAddress& target, const IPAddress& nmask, const IPAddress& gw,
         int metric, const char *dev) const;
 
@@ -191,6 +191,8 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
 
     // displays summary above the icon
     virtual void updateDisplayString();
+
+    virtual void deleteRoutesWith(InterfaceEntry *entry);
 
   public:
     RoutingTable();
@@ -252,7 +254,7 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
     /**
      * The routing function.
      */
-    virtual const IPv4Route *findBestMatchingRoute(const IPAddress& dest) const;
+    virtual const IPRoute *findBestMatchingRoute(const IPAddress& dest) const;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -301,26 +303,26 @@ class INET_API RoutingTable: public cSimpleModule, protected INotifiable
      * you must delete and re-add it instead. This rule is emphasized
      * by returning a const pointer.
      */
-    virtual const IPv4Route *getRoute(int k) const;
+    virtual const IPRoute *getRoute(int k) const;
 
     /**
      * Find first routing entry with the given parameters.
      */
-    virtual const IPv4Route *findRoute(const IPAddress& target, const IPAddress& netmask,
+    virtual const IPRoute *findRoute(const IPAddress& target, const IPAddress& netmask,
         const IPAddress& gw, int metric = 0, const char *dev = NULL) const;
 
     /**
      * Adds a route to the routing table. Note that once added, routes
      * cannot be modified; you must delete and re-add them instead.
      */
-    virtual void addRoute(const IPv4Route *entry);
+    virtual void addRoute(const IPRoute *entry);
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted correctly, false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(const IPv4Route *entry);
+    virtual bool deleteRoute(const IPRoute *entry);
 
     /**
      * Utility function: Returns a vector of all addresses of the node.
