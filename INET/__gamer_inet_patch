@@ -1,0 +1,323 @@
+diff -r src\base\ModuleAccess.h src-orig\base\ModuleAccess.h
+60c60
+<             cModule *m = findModuleWherever(name, name, simulation.contextModule());
+---
+>             cModule *m = findModuleSomewhereUp(name, simulation.contextModule());
+diff -r src\linklayer\ppp\PPP.cc src-orig\linklayer\ppp\PPP.cc
+170,173d169
+< //
+< // disable notification board for speedup
+< //
+< #ifndef _MAX_SPEED
+177d172
+< #endif
+198,199d192
+<     	
+< #ifndef _MAX_SPEED
+207d199
+< #endif
+223,224d214
+<     	
+< #ifndef _MAX_SPEED
+228d217
+< #endif
+diff -r src\networklayer\contract\IPControlInfo.msg src-orig\networklayer\contract\IPControlInfo.msg
+1c1
+<  //
+---
+> //
+64,68d63
+< //
+< // Scharf M.: for attack tracing, each packet contains an attack id
+< //        
+< 		short attackTag = 0;
+< 
+diff -r src\networklayer\contract\IPv6ControlInfo.msg src-orig\networklayer\contract\IPv6ControlInfo.msg
+59,62d58
+<                               //
+< // Scharf M.: for attack tracing, each packet contains an attack id
+< //        
+< 		short attackTag = 0;
+diff -r src\networklayer\ipv4\IP.cc src-orig\networklayer\ipv4\IP.cc
+404,409c404
+<         if (hasGate("transportOut",gateindex) && gate("transportOut",gateindex)->toGate()->isConnected()) {
+<          send(packet, "transportOut", gateindex);
+<         }
+<         else {
+<              EV << "Dropped a packet that was adressed to an unconnected Service\n";
+<         }
+---
+>         send(packet, "transportOut", gateindex);
+diff -r src\networklayer\ipv4\IPDatagram.msg src-orig\networklayer\ipv4\IPDatagram.msg
+2,4c2,17
+< // altered version of the IPDatagram Message originally given in 
+< // INET-Framework
+< // This message uses the RFC-conform IP-Options
+---
+> // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+> // Copyright (C) 2004 Andras Varga
+> //
+> // This program is free software; you can redistribute it and/or
+> // modify it under the terms of the GNU General Public License
+> // as published by the Free Software Foundation; either version 2
+> // of the License, or (at your option) any later version.
+> //
+> // This program is distributed in the hope that it will be useful,
+> // but WITHOUT ANY WARRANTY; without even the implied warranty of
+> // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> // GNU General Public License for more details.
+> //
+> // You should have received a copy of the GNU General Public License
+> // along with this program; if not, write to the Free Software
+> // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+33,58c46,57
+<   //
+<   // IP options class
+<   //
+<   enum IPOptionClass
+<   {
+< 	IPOPTION_CLASS_CONTROL = 0;
+< 	IPOPTION_CLASS_RESERVED = 1;
+< 	IPOPTION_CLASS_DEBUGGING = 2;
+< 	IPOPTION_CLASS_RESERVED2 = 3;
+<   };
+<   //
+<   // IP option numbers
+<   //
+<   enum IPOption
+<   {
+< 		IPOPTION_END_OF_OPTIONS = 0;
+< 		IPOPTION_NO_OPTION = 1;
+< 		IPOPTION_SECURITY = 2;
+< 		IPOPTION_LOOSE_SOURCE_ROUTING = 3;
+< 		IPOPTION_TIMESTAMP = 4;
+< 		IPOPTION_RECORD_ROUTE = 7;
+< 		IPOPTION_STREAM_ID = 8;
+< 		IPOPTION_STRICT_SOURCE_ROUTING = 9;
+< 		IPOPTION_ROUTER_ALERT = 20;
+<   };
+<   
+---
+> //
+> // IP options. Beware: these are not the "official" (RFC) codes!
+> //
+> enum IPOption
+> {
+> 
+>     IPOPTION_NO_OPTION = 0;
+>     IPOPTION_RECORD_ROUTE = 1;
+>     IPOPTION_TIMESTAMP = 2;
+>     IPOPTION_LOOSE_SOURCE_ROUTING = 3;
+>     IPOPTION_STRICT_SOURCE_ROUTING = 4;
+> }
+127a127
+> 
+135,140c135,136
+< //
+< //# FIXME:
+< // a) modify header length when options are present
+< // b) the RFC says, that more than one IP-Option is allowed
+< //
+<     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;
+---
+> 
+>     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //# FIXME modify header length when options are present
+144,148d139
+< 
+< //        
+< // Scharf M.: for attack tracing, each ip packet contains an attackTag
+< //
+< 		short attackTag = 0;
+diff -r src\networklayer\ipv4\RoutingTable.cc src-orig\networklayer\ipv4\RoutingTable.cc
+36c36
+< #include "assert.h"
+---
+> 
+103,105d102
+< #ifdef _MAX_SPEED
+<  defaultRoute = NULL;
+< #endif
+249d245
+< #ifndef _MAX_SPEED
+251,254d246
+< #else
+<     Enter_Method("interfaceByAddress()=?");
+< #endif
+< 
+284d275
+< #ifndef _MAX_SPEED
+286,288d276
+< #else
+<     Enter_Method("localDeliver() y/n");
+< #endif
+296,301d283
+< #ifdef _MAX_SPEED
+< 	else if (i>0) {  // ib: ugly speed hack: singlehomed, skip lo0
+< 		return false;
+< 	}
+< #endif
+< 
+308d289
+< #ifndef _MAX_SPEED
+310,312d290
+< #else
+<     Enter_Method("multicastLocalDeliver() y/n");
+< #endif
+331,349d308
+< 
+< #ifdef _MAX_SPEED
+<     RouteHashMap::iterator r = routeCache.find(dest.getInt());
+<     
+<     if(r != routeCache.end())
+< 		return r->second;
+< 	else
+< 	{
+< 		//
+< 		// maybe a route to another AS
+< 		//
+< 		r = routeCache.find(dest.doAnd(longestNetMask).getInt());
+< 		if(r != routeCache.end())
+< 			return r->second;
+< 		else
+< 			return defaultRoute;
+< 	}
+< #endif //_MAX_SPEED 
+< 
+360,365d318
+< 
+< //#ifdef _MAX_SPEED
+< //    routeCache.insert(RouteCacheEntry(dest.getInt(), bestRoute));
+< //    assert(routeCache.count(dest.getInt()) == 1);
+< //#endif //_MAX_SPEED 
+< 
+371d323
+< #ifndef _MAX_SPEED
+373,375d324
+< #else
+<     Enter_Method("interfaceForDestAddr()=?");
+< #endif
+384d332
+< #ifndef _MAX_SPEED
+386,388d333
+< #else
+<     Enter_Method("gatewayForDestAddr()=?");
+< #endif
+398d342
+< #ifndef _MAX_SPEED
+400,402d343
+< #else
+<     Enter_Method("multicastRoutesFor()=?");
+< #endif
+463c404
+< #ifndef _MAX_SPEED
+---
+> 
+473,505d413
+< #endif
+< #ifdef _MAX_SPEED
+< 	if((entry->host.isUnspecified() || entry->netmask.isUnspecified()) )
+< 	{
+< 		//
+< 		// add the default route
+< 		//
+< 		if(defaultRoute == NULL)
+< 			defaultRoute = entry;
+< 		else
+< 			opp_error("there already exists a default route");
+< 	}
+< 	else
+< 	{
+< 		if(longestNetMask.isUnspecified())
+< 		{
+< 			if(!entry->netmask.isUnspecified())
+< 				longestNetMask.set(entry->netmask.getInt());
+< 		} 
+< 		else
+< 		{
+< 			if(!entry->netmask.isUnspecified())
+< 				if(longestNetMask.getInt() > entry->netmask.getInt())
+< 					longestNetMask.set(entry->netmask.getInt());
+< 		}
+< 		//
+< 		// add route to hash
+< 		//
+< 		routeCache.insert(RouteCacheEntry(entry->host.getInt(), entry));
+< 	}
+<     //routeCache.erase(entry->host.getInt());
+<     //assert(routeCache.count(entry->host.getInt()) == 0);
+< #endif //_MAX_SPEED 
+514,521d421
+< #ifdef _MAX_SPEED
+< 	routeCache.erase(entry->host.getInt());
+< 	assert(routeCache.count(entry->host.getInt()) == 0);
+< 	return true;
+< #endif
+< //#ifdef _MAX_SPEED
+< //    routeCache.clear(); //bad fix, but erase doesn't work
+< //#endif //_MAX_SPEED
+526,530d425
+< //#ifdef _MAX_SPEED
+< //	routeCache.erase(entry->host.getInt()); //buggy
+< //	assert(routeCache.count(entry->host.getInt()) == 0);
+< //#endif //_MAX_SPEED 
+< 	 
+539,543d433
+< //#ifdef _MAX_SPEED
+< //	    routeCache.erase(entry->host.getInt());
+< //	    assert(routeCache.count(entry->host.getInt()) == 0);
+< //#endif //_MAX_SPEED 
+< 
+diff -r src\networklayer\ipv4\RoutingTable.h src-orig\networklayer\ipv4\RoutingTable.h
+33,35d32
+< #ifdef _MAX_SPEED
+< #include <ext/hash_map>
+< #endif
+163,170d159
+< 
+< #ifdef _MAX_SPEED
+<     typedef __gnu_cxx::hash_map<u_int32_t, RoutingEntry*> RouteHashMap;
+<     typedef std::pair<u_int32_t, RoutingEntry*> RouteCacheEntry;
+<     RouteHashMap routeCache;
+<     RoutingEntry *defaultRoute;
+<     IPAddress longestNetMask;
+< #endif
+diff -r src\transport\tcp\TCPConnection.h src-orig\transport\tcp\TCPConnection.h
+299c299
+<     virtual bool performStateTransition(const TCPEventCode& event);
+---
+>     bool performStateTransition(const TCPEventCode& event);
+326c326
+<     virtual TCPEventCode processSegmentInListen(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+---
+>     TCPEventCode processSegmentInListen(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+342c342
+<     virtual TCPConnection *cloneListeningConnection();
+---
+>     TCPConnection *cloneListeningConnection();
+453c453
+<     virtual ~TCPConnection();
+---
+>     ~TCPConnection();
+diff -r src\transport\udp\UDP.cc src-orig\transport\udp\UDP.cc
+45,46d44
+< const char *ERROR_IP_ADDRESS = "10.0.0.255";
+< const int UDP_HEADER_BYTES = 8;
+345d342
+< 	datagram->setLength(datagram->encapsulatedMsg()->length());
+diff -r src\transport\udp\UDP.h src-orig\transport\udp\UDP.h
+1c1
+<  //
+---
+> //
+32d31
+< #include "UDPPacket.h"
+38a38,39
+> const char *ERROR_IP_ADDRESS = "10.0.0.255";
+> const int UDP_HEADER_BYTES = 8;
+103,106c104
+<     //
+<     // hack --> override in UDP_hack
+<     //
+<     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
+---
+>     void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
