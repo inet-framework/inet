@@ -157,8 +157,8 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     IPv4InterfaceData *ipv4Data()  {return ipv4data;}
     IPv6InterfaceData *ipv6Data()  {return ipv6data;}
-    InterfaceProtocolData *getProtocol3()  {return protocol3data;}
-    InterfaceProtocolData *getProtocol4()  {return protocol4data;}
+    InterfaceProtocolData *getProtocol3Data()  {return protocol3data;}
+    InterfaceProtocolData *getProtocol4Data()  {return protocol4data;}
     //@}
 
     /** @name Installing protocol-specific interface data */
