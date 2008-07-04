@@ -223,10 +223,6 @@ while (<LISTFILE>)
     # add "const" to 'detail' argument in receiveChangeNotification()
     $txt =~ s/(\breceiveChangeNotification *\( *int +[a-zA-Z]+ *), *(cPolymorphic|cObject) *\*/$1, const $2 */mg;
 
-    # IPvXAddress
-    $txt =~ s/\bget4\(\)/v4()/mg;
-    $txt =~ s/\bget6\(\)/v6()/mg;
-
     # InterfaceEntry
     $txt =~ s/\bipv4\(\)/ipv4Data()/mg;
     $txt =~ s/\bipv6\(\)/ipv6Data()/mg;
