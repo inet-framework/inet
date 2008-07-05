@@ -131,6 +131,39 @@ The migration scripts only do part of the job. You need to do some more manual
 changes to get error-free NED files; and you'll probably want to make further
 changes, to make use of the new possibilities of NED.
 
+Revise module parameters
+
+  Especially simple module parameters. Many that came out as "double" or
+  "volatile double" after the migration script should actually be "int" or
+  "volatile int". (In 3.x there was only a "numeric" type, and the migration
+  script of course doesn't know whether they should be "int" or "double" now.)
+  Example:
+     volatile double numHosts;   // should be: int numHosts;
+
+  You can now provide default values to parameters, so that they can be
+  simply assigned in omnetpp.ini, with **.apply-default = true.
+
+  Also, some parameters need units. Like those that are time should have
+  @unit(s), packet length etc in bytes should have @unit(byte) or @unit(B),
+  etc.  Units should be added to values and default values too.
+  Examples:
+     double timeout;
+     double startTime;
+     volatile double sendInterval;
+  could be changed to:
+     double timeout @unit(s) = default(120s);
+     double startTime @unit(s) = default(uniform(1s,2s));
+     volatile double sendInterval @unit(s) = default(exponential(100ms));
+
+  By convention, parameter names begin with lowercase, and use camelCase
+  instead of under_scores.
+
+Adjust gate names
+
+   To be more compliant with the new INET naming convention, you may change
+   gate names to the style xxxIn/xxxOut, from the former from_xxx/to_xxx or
+   fromXxxx/toXxxx.
+
 Merge gates of routers/hosts
 
    If you have host or router models, change their gates like this:
@@ -219,11 +252,17 @@ Eliminate superfluous network definitions.
    Remember to change "myNetwork" to "MyNetwork" in the corresponding ini file,
    too!
 
-Eliminate superfluous icon specs from submodules.
+Add/make use of default icons.
 
-   In the new INET, almost all modules (protocol layers, hosts, routers etc)
-   have default icons, so the "i=" display string tags on submodules
-   are usualy superfluous; you can safely remove them.
+   Add default icons to your simple modules. Looks like this:
+       simple MyModule {
+           parameters:
+               @display("i=block/table");
+               ...
+       }
+   The modules in INET have default icons now too, so after this you can safely
+   kill off almost all "i=" stuff can be killed off from submodule display strings
+   in compound modules and networks.
 
 FlatNetworkConfigurator changes
 
@@ -240,6 +279,14 @@ FlatNetworkConfigurator changes
                string routingFile = default("");
            //...
        }
+
+   If you wrote your own Configurator, you'll probably want to revise it as well,
+   and use topo.extractByProperty("node") instead of extractByModuleType(..).
+   Existing extractByModuleType(..) calls probably won't work out of the box
+   anyway, because NED type names need to be referred to with fully qualified
+   name, that is, "inet.nodes.inet.StandardHost" instead of just "StandardHost".
+   The same for findModuleType(): they'll only work if you write fully qualified
+   names.
 
 
 5. C++ files
