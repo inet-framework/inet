@@ -24,7 +24,7 @@ Internal snapshot, for omnetpp-4.0b2.
 - InterfaceTable: added deleteInterface(). This also causes RoutingTable to 
   drop routes that correspond to the deleted interface.
 
-- RoutingTable: wrapped naked data members of IPv4Route into getters/setters;
+- RoutingTable: wrapped naked data members of IPRoute into getters/setters;
   enforce by returning "const" pointers that routes already added cannot be 
   changed any more (one must delete and re-add it)
 
