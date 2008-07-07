@@ -494,7 +494,13 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
 IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
+    IPDatagram *datagram = encapsulate(transportPacket, destIE, controlInfo);
+    delete controlInfo;
+    return datagram;
+}
 
+IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo)
+{
     IPDatagram *datagram = createIPDatagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
     datagram->encapsulate(transportPacket);
@@ -534,7 +540,6 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
     );
 
     datagram->setTransportProtocol(controlInfo->getProtocol());
-    delete controlInfo;
 
     // setting IP options is currently not supported
 
