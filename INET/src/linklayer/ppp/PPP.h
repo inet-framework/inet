@@ -24,6 +24,7 @@
 #include "INETDefs.h"
 #include "PPPFrame_m.h"
 #include "TxNotifDetails.h"
+#include "INotifiable.h"
 
 class InterfaceEntry;
 class IPassiveQueue;
@@ -32,7 +33,7 @@ class NotificationBoard;
 /**
  * PPP implementation. Derived from the p-to-p OMNeT++ sample simulation.
  */
-class INET_API PPP : public cSimpleModule
+class INET_API PPP : public cSimpleModule, public INotifiable
 {
   protected:
     bool connected;
@@ -49,6 +50,7 @@ class INET_API PPP : public cSimpleModule
 
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
+    bool hasSubscribers; // only notify if somebody is listening
 
     std::string oldConnColor;
 
@@ -66,6 +68,8 @@ class INET_API PPP : public cSimpleModule
     virtual void displayBusy();
     virtual void displayIdle();
     virtual void updateDisplayString();
+    virtual void updateHasSubcribers();
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
   public:
     PPP();

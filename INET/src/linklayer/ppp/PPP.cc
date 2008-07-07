@@ -42,83 +42,84 @@ PPP::~PPP()
 
 void PPP::initialize(int stage)
 {
+    // all initialization is done in the first stage
+    if (stage==0)
+    {
+        txQueue.setName("txQueue");
+        endTransmissionEvent = new cMessage("pppEndTxEvent");
+
+        txQueueLimit = par("txQueueLimit");
+
+        interfaceEntry = NULL;
+
+        numSent = numRcvdOK = numBitErr = numDroppedIfaceDown = 0;
+        WATCH(numSent);
+        WATCH(numRcvdOK);
+        WATCH(numBitErr);
+        WATCH(numDroppedIfaceDown);
+
+        // find queueModule
+        queueModule = NULL;
+        if (par("queueModule").stringValue()[0])
+        {
+            cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
+            queueModule = check_and_cast<IPassiveQueue *>(mod);
+        }
+
+        // we're connected if other end of connection path is an input gate
+        cGate *physOut = gate("phys$o");
+        connected = physOut->getDestinationGate()->getType()=='I';
+
+        // if we're connected, get the gate with transmission rate
+        gateToWatch = physOut;
+        datarate = 0;
+        if (connected)
+        {
+            while (gateToWatch)
+            {
+                // does this gate have data rate?
+                cBasicChannel *chan = dynamic_cast<cBasicChannel*>(gateToWatch->getChannel());
+                if (chan && (datarate=chan->par("datarate").doubleValue())>0)
+                    break;
+                // otherwise just check next connection in path
+                gateToWatch = gateToWatch->getToGate();
+            }
+            if (!gateToWatch)
+                error("gate phys must be connected (directly or indirectly) to a link with data rate");
+        }
+
+        // register our interface entry in IInterfaceTable
+        interfaceEntry = registerInterface(datarate);
+
+        // prepare to fire notifications
+        nb = NotificationBoardAccess().get();
+        notifDetails.setInterfaceEntry(interfaceEntry);
+        nb->subscribe(this, NF_SUBSCRIBERLIST_CHANGED);
+        updateHasSubcribers();
+
+        // if not connected, make it gray
+        if (ev.isGUI())
+        {
+            if (!connected)
+            {
+                getDisplayString().setTagArg("i",1,"#707070");
+                getDisplayString().setTagArg("i",2,"100");
+            }
+            oldConnColor = gateToWatch->getDisplayString().getTagArg("o",0);
+        }
+
+        // request first frame to send
+        if (queueModule)
+        {
+            EV << "Requesting first frame from queue module\n";
+            queueModule->requestPacket();
+        }
+    }
+
+    // update display string when addresses have been autoconfigured etc.
     if (stage==3)
     {
-        // update display string when addresses have been autoconfigured etc.
         updateDisplayString();
-        return;
-    }
-
-    // all initialization is done in the first stage
-    if (stage!=0)
-        return;
-
-    txQueue.setName("txQueue");
-    endTransmissionEvent = new cMessage("pppEndTxEvent");
-
-    txQueueLimit = par("txQueueLimit");
-
-    interfaceEntry = NULL;
-
-    numSent = numRcvdOK = numBitErr = numDroppedIfaceDown = 0;
-    WATCH(numSent);
-    WATCH(numRcvdOK);
-    WATCH(numBitErr);
-    WATCH(numDroppedIfaceDown);
-
-    // find queueModule
-    queueModule = NULL;
-    if (par("queueModule").stringValue()[0])
-    {
-        cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
-        queueModule = check_and_cast<IPassiveQueue *>(mod);
-    }
-
-    // we're connected if other end of connection path is an input gate
-    cGate *physOut = gate("phys$o");
-    connected = physOut->getDestinationGate()->getType()=='I';
-
-    // if we're connected, get the gate with transmission rate
-    gateToWatch = physOut;
-    datarate = 0;
-    if (connected)
-    {
-        while (gateToWatch)
-        {
-            // does this gate have data rate?
-            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(gateToWatch->getChannel());
-            if (chan && (datarate=chan->par("datarate").doubleValue())>0)
-                break;
-            // otherwise just check next connection in path
-            gateToWatch = gateToWatch->getToGate();
-        }
-        if (!gateToWatch)
-            error("gate phys must be connected (directly or indirectly) to a link with data rate");
-    }
-
-    // register our interface entry in IInterfaceTable
-    interfaceEntry = registerInterface(datarate);
-
-    // prepare to fire notifications
-    nb = NotificationBoardAccess().get();
-    notifDetails.setInterfaceEntry(interfaceEntry);
-
-    // if not connected, make it gray
-    if (ev.isGUI())
-    {
-        if (!connected)
-        {
-            getDisplayString().setTagArg("i",1,"#707070");
-            getDisplayString().setTagArg("i",2,"100");
-        }
-        oldConnColor = gateToWatch->getDisplayString().getTagArg("o",0);
-    }
-
-    // request first frame to send
-    if (queueModule)
-    {
-        EV << "Requesting first frame from queue module\n";
-        queueModule->requestPacket();
     }
 }
 
@@ -167,9 +168,12 @@ void PPP::startTransmitting(cMessage *msg)
     PPPFrame *pppFrame = encapsulate(msg);
     if (ev.isGUI()) displayBusy();
 
-    // fire notification
-    notifDetails.setMessage(pppFrame);
-    nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
+    if (hasSubscribers)
+    {
+        // fire notification
+        notifDetails.setMessage(pppFrame);
+        nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
+    }
 
     // send
     EV << "Starting transmission of " << pppFrame << endl;
@@ -194,9 +198,12 @@ void PPP::handleMessage(cMessage *msg)
         EV << "Transmission finished.\n";
         if (ev.isGUI()) displayIdle();
 
-        // fire notification
-        notifDetails.setMessage(NULL);
-        nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
+        if (hasSubscribers)
+        {
+            // fire notification
+            notifDetails.setMessage(NULL);
+            nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
+        }
 
         if (!txQueue.empty())
         {
@@ -212,9 +219,12 @@ void PPP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("phys$i"))
     {
-        // fire notification
-        notifDetails.setMessage(msg);
-        nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
+        if (hasSubscribers)
+        {
+            // fire notification
+            notifDetails.setMessage(msg);
+            nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
+        }
 
         // check for bit errors
         if (msg->hasBitError())
@@ -311,6 +321,19 @@ void PPP::updateDisplayString()
         sprintf(buf, "not connected\ndropped:%ld", numDroppedIfaceDown);
         getDisplayString().setTagArg("t",0,buf);
     }
+}
+
+void PPP::updateHasSubcribers()
+{
+    hasSubscribers = nb->hasSubscribers(NF_PP_TX_BEGIN) ||
+                     nb->hasSubscribers(NF_PP_TX_END) ||
+                     nb->hasSubscribers(NF_PP_RX_END);
+}
+
+void PPP::receiveChangeNotification(int category, const cPolymorphic *)
+{
+    if (category==NF_SUBSCRIBERLIST_CHANGED)
+        updateHasSubcribers();
 }
 
 PPPFrame *PPP::encapsulate(cMessage *msg)
