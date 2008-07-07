@@ -14,6 +14,8 @@ Internal snapshot, for omnetpp-4.0b3.
 - PPP and EtherMAC2: performance: don't fire tx begin/end notifications if 
   no one is listening
 
+- UDPEchoApp: messageLength parameter now understood in bytes not bits
+
 
 INET-20080630
 -------------

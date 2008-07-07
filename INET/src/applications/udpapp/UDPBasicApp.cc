@@ -43,7 +43,7 @@ void UDPBasicApp::initialize(int stage)
 
     localPort = par("localPort");
     destPort = par("destPort");
-    msgByteLength = par("messageLength").longValue() / 8;  // FIXME param should be in bytes instead
+    msgByteLength = par("messageLength").longValue();
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);

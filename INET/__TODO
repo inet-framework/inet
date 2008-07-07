@@ -9,8 +9,6 @@ TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
       leave a hole in it?
 -----------------------
-PPP: optimize out fireNotifications() via a hasListeners flag! (use NotificationBoard::hasSubscribers(int category) method)
------------------------
 - move "q=queue" too into the default display string
 - add gate @labels
 - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
@@ -35,7 +33,6 @@ rename IPv4/IPv6 stuff to be consistent???
 cache gate IDs to speed up sending
 -----------------------
 put all c++ code into "inet" namespace
-- UDPEchoApp etc ==> make it @unit(byte) not bit!!!!
 - networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
 - factor out common part of hosts/routers etc, and use subclassing
 - remove channelInstaller

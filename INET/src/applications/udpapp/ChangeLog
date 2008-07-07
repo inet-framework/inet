@@ -1,0 +1,3 @@
+2008-07-07  Andras Varga
+
+	* UDPEchoApp: messageLength parameter now understood in bytes not bits
