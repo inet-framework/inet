@@ -2,8 +2,6 @@ TODO: IRoutingTable6, ITED, etc!
 
 TODO routingTable optimizations from Gamer!
 
-TODO RoutingTable[6]: if an interface gets deleted, drop all the routes that refer to it!!!
-
 TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID. 
       if we change it to pointer, messages that are underway in the host during a deleteInterface()
       may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
@@ -19,16 +17,6 @@ TODO rename the following TED.h methods to begin with a verb:
   unsigned int linkIndex(IPAddress localInf)
   IPAddress peerRemoteInterface(IPAddress peerIP)
   IPAddress primaryAddress(IPAddress localInf)
-
------------------------
-rename IPv4/IPv6 stuff to be consistent???
-  RoutingTable vs RoutingTable6
-  IPv4Route vs IPv6Route
-  IPAddress vs IPv6Address (vs IPvXAddress)
-  get4() vs get6()    [IPvXAddress]
-  ipv4() vs ipv6()    [InterfaceEntry data]
-  FlatNetworkConfigurator vs FlatNetworkConfigurator6
-
 -----------------------
 cache gate IDs to speed up sending
 -----------------------

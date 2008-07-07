@@ -104,7 +104,8 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // displays summary above the icon
     virtual void updateDisplayString();
 
-    virtual void deleteRoutesWith(InterfaceEntry *entry);
+    // delete routes for the given interface
+    virtual void deleteInterfaceRoutes(InterfaceEntry *entry);
 
   public:
     RoutingTable();

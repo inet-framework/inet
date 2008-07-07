@@ -180,7 +180,7 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     {
         // remove all routes that point to that interface
         InterfaceEntry *entry = check_and_cast<InterfaceEntry*>(details);
-        deleteRoutesWith(entry);
+        deleteInterfaceRoutes(entry);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
@@ -198,9 +198,22 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     }
 }
 
-void RoutingTable::deleteRoutesWith(InterfaceEntry *entry)
+void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
 {
-    //FIXME
+    RouteVector::iterator it = routes.begin();
+    while (it != routes.end())
+    {
+        IPRoute *route = *it;
+        if (route->getInterface() == entry)
+        {
+            deleteRoute(route);
+            it = routes.begin();  // iterator became invalid -- start over
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 void RoutingTable::printRoutingTable() const
