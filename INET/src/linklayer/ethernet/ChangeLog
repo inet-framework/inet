@@ -1,3 +1,9 @@
+2008-07-07  Andras Varga
+
+	* removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has 
+	built-in message IDs, message tree IDs and sequence chart 
+	visualization)
+
 2008-06-29  Andras Varga
 
 	* moved class declarations from .cc files into separate .h files 
