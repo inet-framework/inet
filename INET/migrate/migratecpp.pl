@@ -227,6 +227,10 @@ while (<LISTFILE>)
     $txt =~ s/\bipv4\(\)/ipv4Data()/mg;
     $txt =~ s/\bipv6\(\)/ipv6Data()/mg;
 
+    # IInterfaceTable, IRoutingTable
+    $txt =~ s/\bInterfaceTable\b/IInterfaceTable/mg;
+    $txt =~ s/\bRoutingTable\b/IRoutingTable/mg;
+
     # print warnings
     $lineno = 0;
     foreach $linewithcomment (split ("\n", $txt)) {
