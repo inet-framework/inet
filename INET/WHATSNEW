@@ -11,6 +11,9 @@ Internal snapshot, for omnetpp-4.0b3.
   InterfaceTables and RoutingTables and plug them into INET simulations, 
   without any change to the base INET.
 
+- PPP and EtherMAC2: performance: don't fire tx begin/end notifications if 
+  no one is listening
+
 
 INET-20080630
 -------------

@@ -639,3 +639,9 @@ void EtherMAC::finish()
     recordScalar("collisions",     numCollisions);
     recordScalar("backoffs",       numBackoffs);
 }
+
+void EtherMAC::updateHasSubcribers()
+{
+    hasSubscribers = false;  // currently we don't fire any notifications
+}
+

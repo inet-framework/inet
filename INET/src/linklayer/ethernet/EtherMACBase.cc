@@ -110,9 +110,12 @@ void EtherMACBase::initializeMACAddress()
 
 void EtherMACBase::initializeNotificationBoard()
 {
+    hasSubscribers = false;
     if (interfaceEntry) {
         nb = NotificationBoardAccess().getIfExists();
         notifDetails.setInterfaceEntry(interfaceEntry);
+        nb->subscribe(this, NF_SUBSCRIBERLIST_CHANGED);
+        updateHasSubcribers();
     }
 }
 
@@ -668,3 +671,11 @@ void EtherMACBase::updateConnectionColor(int txState)
         g = g->getToGate();
     }
 }
+
+void EtherMACBase::receiveChangeNotification(int category, const cPolymorphic *)
+{
+    if (category==NF_SUBSCRIBERLIST_CHANGED)
+        updateHasSubcribers();
+}
+
+

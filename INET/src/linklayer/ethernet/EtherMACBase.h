@@ -28,6 +28,9 @@
 #include "TxNotifDetails.h"
 #include "NotificationBoard.h"
 
+
+//FIXME change into inner enums!!!
+
 // Self-message kind values
 #define ENDIFG             100
 #define ENDRECEPTION       101
@@ -55,7 +58,7 @@ class IPassiveQueue;
 /**
  * Base class for ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public cSimpleModule
+class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 {
   protected:
     bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
@@ -89,6 +92,7 @@ class INET_API EtherMACBase : public cSimpleModule
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
+    bool hasSubscribers; // only notify if somebody is listening
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -167,6 +171,11 @@ class INET_API EtherMACBase : public cSimpleModule
     // display
     virtual void updateDisplayString();
     virtual void updateConnectionColor(int txState);
+
+    // notifications
+    virtual void updateHasSubcribers() = 0;
+    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+
 };
 
 #endif

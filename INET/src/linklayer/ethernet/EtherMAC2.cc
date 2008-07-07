@@ -106,7 +106,12 @@ void EtherMAC2::startFrameTransmission()
     EtherFrame *frame = (EtherFrame *) origFrame->dup();
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
 
-    fireChangeNotification(NF_PP_TX_BEGIN, frame);
+    if (hasSubscribers)
+    {
+        // fire notification
+        notifDetails.setMessage(frame);
+        nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
+    }
 
     // fill in src address if not set
     if (frame->getSrc().isUnspecified())
@@ -138,7 +143,12 @@ void EtherMAC2::processMsgFromNetwork(cMessage *msg)
     EtherMACBase::processMsgFromNetwork(msg);
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
 
-    fireChangeNotification(NF_PP_RX_END, frame);
+    if (hasSubscribers)
+    {
+        // fire notification
+        notifDetails.setMessage(frame);
+        nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
+    }
 
     if (checkDestinationAddress(frame))
         frameReceptionComplete(frame);
@@ -153,7 +163,12 @@ void EtherMAC2::handleEndIFGPeriod()
 
 void EtherMAC2::handleEndTxPeriod()
 {
-    fireChangeNotification(NF_PP_TX_END, (cMessage *)txQueue.front());
+    if (hasSubscribers)
+    {
+        // fire notification
+        notifDetails.setMessage((cMessage *)txQueue.front());
+        nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
+    }
 
     if (checkAndScheduleEndPausePeriod())
         return;
@@ -162,3 +177,11 @@ void EtherMAC2::handleEndTxPeriod()
 
     beginSendFrames();
 }
+
+void EtherMAC2::updateHasSubcribers()
+{
+    hasSubscribers = nb->hasSubscribers(NF_PP_TX_BEGIN) ||
+                     nb->hasSubscribers(NF_PP_TX_END) ||
+                     nb->hasSubscribers(NF_PP_RX_END);
+}
+

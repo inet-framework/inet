@@ -4,6 +4,11 @@
 	built-in message IDs, message tree IDs and sequence chart 
 	visualization)
 
+	* EtherMAC2: performance: only fire notifications if someone is listening
+
+	* EtherMAC2: made notification consistent with PPP: use TxDetails as
+	"details" object
+
 2008-06-29  Andras Varga
 
 	* moved class declarations from .cc files into separate .h files 

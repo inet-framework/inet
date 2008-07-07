@@ -46,6 +46,9 @@ class INET_API EtherMAC2 : public EtherMACBase
     virtual void processMsgFromNetwork(cMessage *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
+
+    // notifications
+    virtual void updateHasSubcribers();
 };
 
 #endif

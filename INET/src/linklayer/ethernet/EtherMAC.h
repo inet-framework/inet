@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __ETHERMAC_H
+#define __ETHERMAC_H
+
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -86,4 +89,11 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void sendJamSignal();
     virtual void handleRetransmission();
     virtual void startFrameTransmission();
+
+    // notifications
+    virtual void updateHasSubcribers();
 };
+
+#endif
+
+
