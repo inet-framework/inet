@@ -94,13 +94,13 @@ void OSPFRouting::handleMessage(cMessage *msg)
 }
 
 /**
- * Looks up the interface name in InterfaceTable, and returns interfaceId a.k.a ifIndex.
+ * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
  */
 int OSPFRouting::ResolveInterfaceName(const std::string& name) const
 {
     InterfaceEntry* ie = ift->getInterfaceByName(name.c_str());
     if (!ie)
-        opp_error("error reading XML config: InterfaceTable contains no interface named '%s'", name.c_str());
+        opp_error("error reading XML config: IInterfaceTable contains no interface named '%s'", name.c_str());
     return ie->getInterfaceId();
 }
 

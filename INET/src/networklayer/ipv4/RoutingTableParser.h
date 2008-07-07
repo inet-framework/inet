@@ -40,14 +40,14 @@
 class INET_API RoutingTableParser
 {
   protected:
-    InterfaceTable *ift;
-    RoutingTable *rt;
+    IInterfaceTable *ift;
+    IRoutingTable *rt;
 
   public:
     /**
      * Constructor
      */
-    RoutingTableParser(InterfaceTable *ift, RoutingTable *rt);
+    RoutingTableParser(IInterfaceTable *ift, IRoutingTable *rt);
 
     /**
      * Read Routing Table file; return 0 on success, -1 on error

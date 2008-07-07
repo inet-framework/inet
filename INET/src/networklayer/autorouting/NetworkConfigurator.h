@@ -23,8 +23,8 @@
 #include "INETDefs.h"
 #include "IPAddress.h"
 
-class InterfaceTable;
-class RoutingTable;
+class IInterfaceTable;
+class IRoutingTable;
 
 
 /**
@@ -37,8 +37,8 @@ class INET_API NetworkConfigurator : public cSimpleModule
     struct NodeInfo {
         NodeInfo() {isIPNode=false;ift=NULL;rt=NULL;}
         bool isIPNode;
-        InterfaceTable *ift;
-        RoutingTable *rt;
+        IInterfaceTable *ift;
+        IRoutingTable *rt;
         bool usesDefaultRoute;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;

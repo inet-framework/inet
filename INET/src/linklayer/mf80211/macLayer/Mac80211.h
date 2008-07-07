@@ -70,7 +70,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
 
-    /** @brief Register the interface in InterfaceTable */
+    /** @brief Register the interface in IInterfaceTable */
     virtual void registerInterface();
 
   protected:

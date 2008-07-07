@@ -23,7 +23,7 @@
 #include "NAMTraceWriter.h"
 #include "NotificationBoard.h"
 #include "TxNotifDetails.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
 Define_Module(NAMTraceWriter);
@@ -67,7 +67,7 @@ void NAMTraceWriter::initialize(int stage)
     else if (stage==2 && nt!=NULL && nt->isEnabled())
     {
         // write "link" entries
-        InterfaceTable *ift = InterfaceTableAccess().get();
+        IInterfaceTable *ift = InterfaceTableAccess().get();
         cModule *node = getParentModule();  // the host or router
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {

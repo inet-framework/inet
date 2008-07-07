@@ -86,7 +86,7 @@ class INET_API EtherMACBase : public cSimpleModule
     IPassiveQueue *queueModule;     // optional module to receive messages from
 
     // notification stuff
-    InterfaceEntry *interfaceEntry;  // points into InterfaceTable
+    InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
 

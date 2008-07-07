@@ -24,8 +24,8 @@
 #define TED_TRAFFIC         1
 
 class TED;
-class RoutingTable;
-class InterfaceTable;
+class IRoutingTable;
+class IInterfaceTable;
 class InterfaceEntry;
 class NotificationBoard;
 

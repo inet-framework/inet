@@ -44,7 +44,7 @@ class INET_API PPP : public cSimpleModule
     cMessage *endTransmissionEvent;
     IPassiveQueue *queueModule;
 
-    InterfaceEntry *interfaceEntry;  // points into InterfaceTable
+    InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     double datarate;  // only cached for the display string
 
     NotificationBoard *nb;

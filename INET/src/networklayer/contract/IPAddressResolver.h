@@ -23,9 +23,9 @@
 #include <omnetpp.h>
 #include "IPvXAddress.h"
 
-class InterfaceTable;
+class IInterfaceTable;
 class InterfaceEntry;
-class RoutingTable;
+class IRoutingTable;
 class RoutingTable6;
 class NotificationBoard;
 
@@ -48,11 +48,11 @@ class INET_API IPAddressResolver
 {
   protected:
     // internal
-    virtual IPAddress getIPv4AddressFrom(InterfaceTable *ift);
+    virtual IPAddress getIPv4AddressFrom(IInterfaceTable *ift);
     // internal
-    virtual IPv6Address getIPv6AddressFrom(InterfaceTable *ift);
+    virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift);
     // internal
-    //virtual IPv6Address getIPv6AddressFrom(InterfaceTable *ift, int scope);
+    //virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift, int scope);
     // internal
     virtual IPv6Address getInterfaceIPv6Address(InterfaceEntry *ie);
 
@@ -90,7 +90,7 @@ class INET_API IPAddressResolver
     /**
      * Returns IPv4 or IPv6 address of the given host or router.
      *
-     * This function uses routingTableOf() to find the RoutingTable module,
+     * This function uses routingTableOf() to find the IRoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
     virtual IPvXAddress addressOf(cModule *host, int addrType=ADDR_PREFER_IPv6);
@@ -102,15 +102,15 @@ class INET_API IPAddressResolver
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
-     * the getRouterId() method of the RoutingTable submodule.
+     * the getRouterId() method of the IRoutingTable submodule.
      */
     virtual IPAddress routerIdOf(cModule *host);
 
     /**
-     * Returns the IPv4 or IPv6 address of the given host or router, given its InterfaceTable
+     * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
      * module. For IPv4, the first usable interface address is chosen.
      */
-    virtual IPvXAddress getAddressFrom(InterfaceTable *ift, int addrType=ADDR_PREFER_IPv6);
+    virtual IPvXAddress getAddressFrom(IInterfaceTable *ift, int addrType=ADDR_PREFER_IPv6);
 
     /**
      * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
@@ -118,20 +118,20 @@ class INET_API IPAddressResolver
     virtual IPvXAddress getAddressFrom(InterfaceEntry *ie, int addrType=ADDR_PREFER_IPv6);
 
     /**
-     * The function tries to look up the InterfaceTable module as submodule
+     * The function tries to look up the IInterfaceTable module as submodule
      * <tt>"interfaceTable"</tt> or <tt>"networkLayer.interfaceTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual InterfaceTable *interfaceTableOf(cModule *host);
+    virtual IInterfaceTable *interfaceTableOf(cModule *host);
 
     /**
-     * The function tries to look up the RoutingTable module as submodule
+     * The function tries to look up the IRoutingTable module as submodule
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual RoutingTable *routingTableOf(cModule *host);
+    virtual IRoutingTable *routingTableOf(cModule *host);
 
-#ifndef NO_IPv6
+#ifndef WITHOUT_IPv6
     /**
      * The function tries to look up the RoutingTable6 module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
@@ -150,14 +150,14 @@ class INET_API IPAddressResolver
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual InterfaceTable *findInterfaceTableOf(cModule *host);
+    virtual IInterfaceTable *findInterfaceTableOf(cModule *host);
 
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual RoutingTable *findRoutingTableOf(cModule *host);
+    virtual IRoutingTable *findRoutingTableOf(cModule *host);
 
-#ifndef NO_IPv6
+#ifndef WITHOUT_IPv6
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */

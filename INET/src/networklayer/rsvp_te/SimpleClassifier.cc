@@ -31,7 +31,7 @@ void SimpleClassifier::initialize(int stage)
     maxLabel = 0;
 
     RoutingTableAccess routingTableAccess;
-    RoutingTable *rt = routingTableAccess.get();
+    IRoutingTable *rt = routingTableAccess.get();
     routerId = rt->getRouterId();
 
     LIBTableAccess libTableAccess;

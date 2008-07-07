@@ -19,7 +19,7 @@
 #include <algorithm>
 #include "Ieee80211Mac.h"
 #include "RadioState.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "PhyControlInfo_m.h"
 
@@ -174,7 +174,7 @@ void Ieee80211Mac::initialize(int stage)
 
 void Ieee80211Mac::registerInterface()
 {
-    InterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (!ift)
         return;
 

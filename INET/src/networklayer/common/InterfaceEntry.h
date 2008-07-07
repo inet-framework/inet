@@ -29,7 +29,7 @@
 
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on IPv4 and IPv6 stuff!
-class InterfaceTable;
+class IInterfaceTable;
 class InterfaceEntry;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
@@ -61,18 +61,16 @@ class INET_API InterfaceProtocolData : public cPolymorphic
 
 
 /**
- * Interface entry for the interface table in InterfaceTable.
+ * Interface entry for the interface table in IInterfaceTable.
  *
- * @see InterfaceTable
+ * @see IInterfaceTable
  */
 class INET_API InterfaceEntry : public cNamedObject
 {
-    friend class InterfaceTable; // only this guy is allowed to set interfaceId and ownerp
     friend class InterfaceProtocolData; // to call protocolDataChanged()
-
   protected:
-    InterfaceTable *ownerp; ///< InterfaceTable that contains this interface, or NULL
-    int interfaceId;      ///< identifies the interface in the InterfaceTable
+    IInterfaceTable *ownerp; ///< IInterfaceTable that contains this interface, or NULL
+    int interfaceId;      ///< identifies the interface in the IInterfaceTable
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
@@ -103,8 +101,10 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void stateChanged() {changed(NF_INTERFACE_STATE_CHANGED);}
     virtual void changed(int category);
 
-    // to be invoked from InterfaceTable only
-    virtual void setInterfaceTable(InterfaceTable *t) {ownerp = t;}
+  public:
+    // internal: to be invoked from InterfaceTable only!
+    virtual void setInterfaceTable(IInterfaceTable *t) {ownerp = t;}
+    virtual void setInterfaceId(int id) {interfaceId = id;}
 
   public:
     InterfaceEntry();
@@ -113,9 +113,9 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual std::string detailedInfo() const;
 
     /**
-     * Returns the InterfaceTable this interface is in, or NULL
+     * Returns the IInterfaceTable this interface is in, or NULL
      */
-    InterfaceTable *getInterfaceTable() const {return ownerp;}
+    IInterfaceTable *getInterfaceTable() const {return ownerp;}
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{

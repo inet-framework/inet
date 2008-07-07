@@ -23,10 +23,10 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
+#include "IPRoute.h"  // not strictly required, but most clients will need it anyway
 
-class IPRoute;
 
-/** Returned as the result of multicast routing */
+/** Returned by IRoutingTable as the result of multicast routing */
 struct MulticastRoute
 {
     InterfaceEntry *interf;
@@ -36,17 +36,17 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
 
 
 /**
- * A C++ interface to abstract the functionality of RoutingTable.
- * Referring to RoutingTable via this interface makes it possible to
- * transparently replace RoutingTable with a different implementation,
+ * A C++ interface to abstract the functionality of IRoutingTable.
+ * Referring to IRoutingTable via this interface makes it possible to
+ * transparently replace IRoutingTable with a different implementation,
  * without any change to the base INET.
  *
- * @see RoutingTable, IPRoute
+ * @see IRoutingTable, IPRoute
  */
 class INET_API IRoutingTable
 {
   public:
-    virtual ~RoutingTable() {};
+    virtual ~IRoutingTable() {};
 
     /**
      * For debugging

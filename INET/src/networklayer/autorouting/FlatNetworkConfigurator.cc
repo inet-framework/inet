@@ -21,10 +21,11 @@
 #endif
 
 #include <algorithm>
-#include "RoutingTable.h"
-#include "InterfaceTable.h"
+#include "IRoutingTable.h"
+#include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
 #include "FlatNetworkConfigurator.h"
+#include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
 
 
@@ -97,7 +98,7 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
         nodeInfo[i].address.set(addr);
 
         // find interface table and assign address to all (non-loopback) interfaces
-        InterfaceTable *ift = nodeInfo[i].ift;
+        IInterfaceTable *ift = nodeInfo[i].ift;
         for (int k=0; k<ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->getInterface(k);
@@ -121,8 +122,8 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        InterfaceTable *ift = nodeInfo[i].ift;
-        RoutingTable *rt = nodeInfo[i].rt;
+        IInterfaceTable *ift = nodeInfo[i].ift;
+        IRoutingTable *rt = nodeInfo[i].rt;
 
         // count non-loopback interfaces
         int numIntf = 0;
@@ -183,7 +184,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
 
             IPAddress atAddr = nodeInfo[j].address;
 
-            InterfaceTable *ift = nodeInfo[j].ift;
+            IInterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->getInterfaceByNodeOutputGateId(outputGateId);
@@ -194,7 +195,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
-            RoutingTable *rt = nodeInfo[j].rt;
+            IRoutingTable *rt = nodeInfo[j].rt;
             IPRoute *e = new IPRoute();
             e->setHost(destAddr);
             e->setNetmask(IPAddress(255,255,255,255)); // full match needed

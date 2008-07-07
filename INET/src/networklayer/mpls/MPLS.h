@@ -24,7 +24,7 @@
 #include "ConstType.h"
 
 #include "LIBTable.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 
 #include "IClassifier.h"
 
@@ -41,7 +41,7 @@ class INET_API MPLS : public cSimpleModule
         //std::vector<bool> labelIf;
 
         LIBTable *lt;
-        InterfaceTable *ift;
+        IInterfaceTable *ift;
         IClassifier *pct;
 
     protected:

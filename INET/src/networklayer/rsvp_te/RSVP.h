@@ -28,8 +28,8 @@
 #include "NotificationBoard.h"
 
 class SimpleClassifier;
-class RoutingTable;
-class InterfaceTable;
+class IRoutingTable;
+class IInterfaceTable;
 class TED;
 class LIBTable;
 
@@ -171,8 +171,8 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
 
   protected:
     TED *tedmod;
-    RoutingTable *rt;
-    InterfaceTable *ift;
+    IRoutingTable *rt;
+    IInterfaceTable *ift;
     LIBTable *lt;
     NotificationBoard *nb;
 

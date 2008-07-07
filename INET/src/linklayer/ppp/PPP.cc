@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "PPP.h"
 #include "IPassiveQueue.h"
@@ -96,7 +96,7 @@ void PPP::initialize(int stage)
             error("gate phys must be connected (directly or indirectly) to a link with data rate");
     }
 
-    // register our interface entry in InterfaceTable
+    // register our interface entry in IInterfaceTable
     interfaceEntry = registerInterface(datarate);
 
     // prepare to fire notifications
@@ -153,7 +153,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setPointToPoint(true);
 
     // add
-    InterfaceTable *ift = InterfaceTableAccess().get();
+    IInterfaceTable *ift = InterfaceTableAccess().get();
     ift->addInterface(e, this);
 
     return e;

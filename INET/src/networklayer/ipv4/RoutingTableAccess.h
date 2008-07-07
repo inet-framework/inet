@@ -25,16 +25,16 @@
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"
-#include "RoutingTable.h"
+#include "IRoutingTable.h"
 
 
 /**
- * Gives access to the RoutingTable.
+ * Gives access to the IRoutingTable.
  */
-class INET_API RoutingTableAccess : public ModuleAccess<RoutingTable>
+class INET_API RoutingTableAccess : public ModuleAccess<IRoutingTable>
 {
     public:
-        RoutingTableAccess() : ModuleAccess<RoutingTable>("routingTable") {}
+        RoutingTableAccess() : ModuleAccess<IRoutingTable>("routingTable") {}
 };
 
 #endif

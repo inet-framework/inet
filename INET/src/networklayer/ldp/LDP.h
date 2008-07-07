@@ -36,8 +36,8 @@
 #define LDP_USER_TRAFFIC    100     // label switched user traffic
 
 
-class InterfaceTable;
-class RoutingTable;
+class IInterfaceTable;
+class IRoutingTable;
 class LIBTable;
 class TED;
 
@@ -113,8 +113,8 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     //
     // other variables:
     //
-    InterfaceTable *ift;
-    RoutingTable *rt;
+    IInterfaceTable *ift;
+    IRoutingTable *rt;
     LIBTable *lt;
     TED *tedmod;
     NotificationBoard *nb;

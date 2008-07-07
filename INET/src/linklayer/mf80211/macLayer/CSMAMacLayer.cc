@@ -20,7 +20,7 @@
 
 #include "CSMAMacLayer.h"
 #include "Ieee802Ctrl_m.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
 
@@ -54,7 +54,7 @@ void CSMAMacLayer::initialize(int stage)
 
         radioState = RadioState::IDLE; // until 1st receiveChangeNotification()
 
-        // get registered in InterfaceTable
+        // get registered in IInterfaceTable
         registerInterface();
     }
 }
@@ -101,7 +101,7 @@ void CSMAMacLayer::registerInterface()
     e->setPointToPoint(false);
 
     // add
-    InterfaceTable *ift = InterfaceTableAccess().get();
+    IInterfaceTable *ift = InterfaceTableAccess().get();
     ift->addInterface(e, this);
 }
 

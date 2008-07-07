@@ -33,99 +33,11 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "NotificationBoard.h"
+#include "IRoutingTable.h"
 
 class RoutingTableParser;
-
-
-/**
- * Routing entry in RoutingTable.
- *
- * @see RoutingTable
- */
-class INET_API IPRoute : public cPolymorphic
-{
-  public:
-    /** Route type */
-    enum RouteType
-    {
-        DIRECT,  ///< Directly attached to the router
-        REMOTE   ///< Reached through another router
-    };
-
-    /** Specifies where the route comes from */
-    enum RouteSource
-    {
-        MANUAL,       ///< manually added static route
-        IFACENETMASK, ///< comes from an interface's netmask
-        RIP,          ///< managed by the given routing protocol
-        OSPF,         ///< managed by the given routing protocol
-        BGP,          ///< managed by the given routing protocol
-        ZEBRA,        ///< managed by the Quagga/Zebra based model
-    };
-
-  protected:
-    IPAddress host;     ///< Destination
-    IPAddress netmask;  ///< Route mask
-    IPAddress gateway;  ///< Next hop
-    InterfaceEntry *interfacePtr; ///< interface
-    RouteType type;     ///< direct or remote
-    RouteSource source; ///< manual, routing prot, etc.
-    int metric;         ///< Metric ("cost" to reach the destination)
-
-  private:
-    // copying not supported: following are private and also left undefined
-    IPRoute(const IPRoute& obj);
-    IPRoute& operator=(const IPRoute& obj);
-
-  public:
-    IPRoute();
-    virtual ~IPRoute() {}
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
-
-    void setHost(IPAddress host)  {this->host = host;}
-    void setNetmask(IPAddress netmask)  {this->netmask = netmask;}
-    void setGateway(IPAddress gateway)  {this->gateway = gateway;}
-    void setInterface(InterfaceEntry *interfacePtr)  {this->interfacePtr = interfacePtr;}
-    void setType(RouteType type)  {this->type = type;}
-    void setSource(RouteSource source)  {this->source = source;}
-    void setMetric(int metric)  {this->metric = metric;}
-
-    /** Destination address prefix to match */
-    IPAddress getHost() const {return host;}
-
-    /** Represents length of prefix to match */
-    IPAddress getNetmask() const {return netmask;}
-
-    /** Next hop address */
-    IPAddress getGateway() const {return gateway;}
-
-    /** Next hop interface */
-    InterfaceEntry *getInterface() const {return interfacePtr;}
-
-    /** Convenience method */
-    const char *getInterfaceName() const {return interfacePtr ? interfacePtr->getName() : "";}
-
-    /** Route type: Direct or Remote */
-    RouteType getType() const {return type;}
-
-    /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
-
-    /** "Cost" to reach the destination */
-    int getMetric() const {return metric;}
-};
-
-
-/** Returned as the result of multicast routing */
-struct MulticastRoute
-{
-    InterfaceEntry *interf;
-    IPAddress gateway;
-};
-typedef std::vector<MulticastRoute> MulticastRoutes;
 
 
 /**
@@ -158,10 +70,10 @@ typedef std::vector<MulticastRoute> MulticastRoutes;
  *
  * @see InterfaceEntry, IPv4InterfaceData, IPRoute
  */
-class INET_API RoutingTable: public cSimpleModule, protected INotifiable
+class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protected INotifiable
 {
   protected:
-    InterfaceTable *ift; // cached pointer
+    IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
     IPAddress _routerId;

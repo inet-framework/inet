@@ -29,50 +29,11 @@
 
 #include "RoutingTable.h"
 #include "RoutingTableParser.h"
+#include "IPRoute.h"
 #include "IPv4InterfaceData.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
-
-
-IPRoute::IPRoute()
-{
-    interfacePtr = NULL;
-
-    metric = 0;
-    type = DIRECT;
-    source = MANUAL;
-}
-
-std::string IPRoute::info() const
-{
-    std::stringstream out;
-    out << "dest:"; if (host.isUnspecified()) out << "*  "; else out << host << "  ";
-    out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
-    out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
-    out << "metric:" << metric << " ";
-    out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "  ";
-    out << (type==DIRECT ? "DIRECT" : "REMOTE");
-    switch (source)
-    {
-        case MANUAL:       out << " MANUAL"; break;
-        case IFACENETMASK: out << " IFACENETMASK"; break;
-        case RIP:          out << " RIP"; break;
-        case OSPF:         out << " OSPF"; break;
-        case BGP:          out << " BGP"; break;
-        case ZEBRA:        out << " ZEBRA"; break;
-        default:           out << " ???"; break;
-    }
-    return out.str();
-}
-
-std::string IPRoute::detailedInfo() const
-{
-    return std::string();
-}
-
-
-//==============================================================
 
 
 Define_Module(RoutingTable);
@@ -100,7 +61,7 @@ void RoutingTable::initialize(int stage)
 {
     if (stage==0)
     {
-        // get a pointer to the NotificationBoard module and InterfaceTable
+        // get a pointer to the NotificationBoard module and IInterfaceTable
         nb = NotificationBoardAccess().get();
         ift = InterfaceTableAccess().get();
 
@@ -125,7 +86,7 @@ void RoutingTable::initialize(int stage)
 
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface IPv4 data structures.
-        InterfaceTable *interfaceTable = InterfaceTableAccess().get();
+        IInterfaceTable *interfaceTable = InterfaceTableAccess().get();
         for (int i=0; i<interfaceTable->getNumInterfaces(); ++i)
             configureInterfaceForIPv4(interfaceTable->getInterface(i));
         configureLoopbackForIPv4();
@@ -510,3 +471,5 @@ void RoutingTable::updateNetmaskRoutes()
 
     updateDisplayString();
 }
+
+

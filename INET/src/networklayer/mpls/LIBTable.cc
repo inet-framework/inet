@@ -29,7 +29,7 @@ void LIBTable::initialize(int stage)
     if (stage==4)
     {
         RoutingTableAccess routingTableAccess;
-        RoutingTable *rt = routingTableAccess.get();
+        IRoutingTable *rt = routingTableAccess.get();
         routerId = rt->getRouterId();
 
         // read configuration

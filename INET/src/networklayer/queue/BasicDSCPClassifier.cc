@@ -20,7 +20,7 @@
 #include <omnetpp.h>
 #include "BasicDSCPClassifier.h"
 #include "IPDatagram.h"
-#ifndef NO_IPv6
+#ifndef WITHOUT_IPv6
 #include "IPv6Datagram.h"
 #endif
 
@@ -42,7 +42,7 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
         int dscp = datagram->getDiffServCodePoint();
         return classifyByDSCP(dscp);
     }
-#ifndef NO_IPv6
+#ifndef WITHOUT_IPv6
     else if (dynamic_cast<IPv6Datagram *>(msg))
     {
         // IPv6 QoS: map Traffic Class to queue number

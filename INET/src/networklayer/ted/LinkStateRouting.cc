@@ -44,7 +44,7 @@ void LinkStateRouting::initialize(int stage)
     {
         tedmod = TEDAccess().get();
 
-        RoutingTable *rt = RoutingTableAccess().get();
+        IRoutingTable *rt = RoutingTableAccess().get();
         routerId = rt->getRouterId();
 
         // listen for TED modifications
@@ -54,7 +54,7 @@ void LinkStateRouting::initialize(int stage)
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
         cStringTokenizer tokenizer(par("peers"));
-        InterfaceTable *ift = InterfaceTableAccess().get();
+        IInterfaceTable *ift = InterfaceTableAccess().get();
         const char *token;
         while ((token = tokenizer.nextToken())!=NULL)
         {

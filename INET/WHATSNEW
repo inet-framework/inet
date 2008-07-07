@@ -1,6 +1,17 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-20080709
+-------------
+Internal snapshot, for omnetpp-4.0b3.
+
+- interface table and routing table are now accessed via the C++ interfaces 
+  IInterfaceTable and IRoutingTable. This is done to reduce interdependencies
+  among modules; more specifically, to allow users implement their own 
+  InterfaceTables and RoutingTables and plug them into INET simulations, 
+  without any change to the base INET.
+
+
 INET-20080630
 -------------
 Internal snapshot, for omnetpp-4.0b2.

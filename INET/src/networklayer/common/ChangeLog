@@ -1,3 +1,8 @@
+2008-07-07  Andras Varga
+
+	* introduced IInterfaceTable, to allow users implement their own 
+	InterfaceTables and plug them into INET simulations, without any 
+	change to the base INET.
 
 2008-07-01  Andras Varga
 

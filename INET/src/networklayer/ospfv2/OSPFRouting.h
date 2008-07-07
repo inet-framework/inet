@@ -18,8 +18,8 @@
 
 #include <vector>
 #include <omnetpp.h>
-#include "RoutingTable.h"
-#include "InterfaceTable.h"
+#include "IRoutingTable.h"
+#include "IInterfaceTable.h"
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
 
@@ -30,8 +30,8 @@
 class OSPFRouting :  public cSimpleModule
 {
   private:
-    InterfaceTable*     ift;        ///< Provides access to the interface table.
-    RoutingTable*       rt;         ///< Provides access to the IP routing table.
+    IInterfaceTable*     ift;        ///< Provides access to the interface table.
+    IRoutingTable*       rt;         ///< Provides access to the IP routing table.
     OSPF::Router*       ospfRouter; ///< Root object of the OSPF datastructure.
 
     int     ResolveInterfaceName(const std::string& name) const;

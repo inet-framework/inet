@@ -23,7 +23,8 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPv6Address.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
+#include "NotificationBoard.h"
 
 
 /**
@@ -46,7 +47,7 @@ class INET_API IPv6Route : public cPolymorphic
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
-    int _interfaceID;      //XXX IPv4 RoutingTable uses interface pointer
+    int _interfaceID;      //XXX IPv4 IRoutingTable uses interface pointer
     IPv6Address _nextHop;  // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;
@@ -102,7 +103,7 @@ class INET_API IPv6Route : public cPolymorphic
 class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
 {
   protected:
-    InterfaceTable *ift; // cached pointer
+    IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
     bool isrouter;
@@ -242,7 +243,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * in the Router Advertisements.
      *
      * NOTE: This method does NOT update the lifetime of matching addresses
-     * in the InterfaceTable (see IPv6InterfaceData); that has to be done
+     * in the IInterfaceTable (see IPv6InterfaceData); that has to be done
      * separately.
      */
     virtual void addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
@@ -253,7 +254,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * with zero lifetime, or to purge an expired prefix.
      *
      * NOTE: This method does NOT remove the matching addresses from the
-     * InterfaceTable (see IPv6InterfaceData); that has to be done separately.
+     * IInterfaceTable (see IPv6InterfaceData); that has to be done separately.
      */
     virtual void removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
 

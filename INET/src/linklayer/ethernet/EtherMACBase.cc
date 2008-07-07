@@ -22,7 +22,7 @@
 #include <omnetpp.h>
 #include "EtherMACBase.h"
 #include "IPassiveQueue.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
 static const double SPEED_OF_LIGHT = 200000000.0;
@@ -174,7 +174,7 @@ void EtherMACBase::initializeStatistics()
 
 void EtherMACBase::registerInterface(double txrate)
 {
-    InterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (!ift)
         return;
 

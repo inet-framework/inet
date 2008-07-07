@@ -21,8 +21,8 @@
 #endif
 
 #include <algorithm>
-#include "RoutingTable.h"
-#include "InterfaceTable.h"
+#include "IRoutingTable.h"
+#include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
 #include "NetworkConfigurator.h"
 #include "IPv4InterfaceData.h"
@@ -95,7 +95,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
         uint32 addr = base + (nodeCtr++ << 8);   // --> 10.nn.nn.0
 
         // assign address to all (non-loopback) interfaces
-        InterfaceTable *ift = nodeInfo[i].ift;
+        IInterfaceTable *ift = nodeInfo[i].ift;
         for (int k=0; k<ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->getInterface(k);
@@ -107,7 +107,7 @@ void NetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeI
         }
 
         // set routerId as well (if not yet configured)
-        RoutingTable *rt = nodeInfo[i].rt;
+        IRoutingTable *rt = nodeInfo[i].rt;
         if (rt->getRouterId().isUnspecified())
         {
             rt->setRouterId(IPAddress(addr | 1U)); // 10.nn.nn.1
@@ -129,7 +129,7 @@ void NetworkConfigurator::addPointToPointPeerRoutes(cTopology& topo, NodeInfoVec
 
         cTopology::Node *node = topo.getNode(i);
         //InterfaceTable *ift = nodeInfo[i].ift;
-        RoutingTable *rt = nodeInfo[i].rt;
+        IRoutingTable *rt = nodeInfo[i].rt;
 
         // loop through neighbors
         for (int j=0; j<node->getNumOutLinks(); j++)
@@ -192,8 +192,8 @@ void NetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& node
             continue;
 
         cTopology::Node *node = topo.getNode(i);
-        InterfaceTable *ift = nodeInfo[i].ift;
-        RoutingTable *rt = nodeInfo[i].rt;
+        IInterfaceTable *ift = nodeInfo[i].ift;
+        IRoutingTable *rt = nodeInfo[i].rt;
 
         // count non-loopback interfaces
         int numIntf = 0;
@@ -293,7 +293,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
 
             IPAddress atAddr = nodeInfo[j].address;
 
-            InterfaceTable *ift = nodeInfo[j].ift;
+            IInterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->getInterfaceByNodeOutputGateId(outputGateId);
@@ -304,7 +304,7 @@ void NetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nod
             EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
-            RoutingTable *rt = nodeInfo[j].rt;
+            IRoutingTable *rt = nodeInfo[j].rt;
             IPRoute *e = new IPRoute();
             e->setHost(destAddr);
             e->gateway = ???

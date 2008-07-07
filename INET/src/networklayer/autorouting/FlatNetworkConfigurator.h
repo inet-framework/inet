@@ -23,8 +23,8 @@
 #include "INETDefs.h"
 #include "IPAddress.h"
 
-class InterfaceTable;
-class RoutingTable;
+class IInterfaceTable;
+class IRoutingTable;
 
 
 /**
@@ -40,8 +40,8 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     struct NodeInfo {
         NodeInfo() {isIPNode=false;ift=NULL;rt=NULL;usesDefaultRoute=false;}
         bool isIPNode;
-        InterfaceTable *ift;
-        RoutingTable *rt;
+        IInterfaceTable *ift;
+        IRoutingTable *rt;
         IPAddress address;
         bool usesDefaultRoute;
     };

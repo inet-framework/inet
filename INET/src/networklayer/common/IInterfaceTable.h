@@ -21,21 +21,32 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
+#include "InterfaceEntry.h"  // not strictly required, but clients will need it anyway
 
-class InterfaceEntry;
 
 /**
- * A C++ interface to abstract the functionality of InterfaceTable.
- * Referring to InterfaceTable via this interface makes it possible to
- * transparently replace InterfaceTable with a different implementation,
+ * A C++ interface to abstract the functionality of IInterfaceTable.
+ * Referring to IInterfaceTable via this interface makes it possible to
+ * transparently replace IInterfaceTable with a different implementation,
  * without any change to the base INET.
  *
- * @see InterfaceTable, InterfaceEntry
+ * @see IInterfaceTable, InterfaceEntry
  */
 class INET_API IInterfaceTable
 {
+    friend class InterfaceEntry;  // so that it can call interfaceChanged()
+
+  protected:
+    // called from InterfaceEntry
+    virtual void interfaceChanged(InterfaceEntry *entry, int category) = 0;
+
   public:
     virtual ~IInterfaceTable() {}
+
+    /**
+     * Module path name
+     */
+    virtual std::string getFullPath() const = 0;
 
     /**
      * Adds an interface. The second argument should be a module which belongs
@@ -102,7 +113,7 @@ class INET_API IInterfaceTable
     /**
      * Returns the first interface with the isLoopback flag set.
      * (If there's no loopback, it returns NULL -- but this
-     * should never happen because InterfaceTable itself registers a
+     * should never happen because IInterfaceTable itself registers a
      * loopback interface on startup.)
      */
     virtual InterfaceEntry *getFirstLoopbackInterface() = 0;

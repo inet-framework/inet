@@ -32,9 +32,9 @@
 #include "ARPPacket_m.h"
 #include "IPControlInfo.h"
 #include "IPDatagram.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "RoutingTable.h"
+#include "IRoutingTable.h"
 #include "RoutingTableAccess.h"
 
 
@@ -79,8 +79,8 @@ class INET_API ARP : public cSimpleModule
 
     cQueue pendingQueue; // outbound packets waiting for ARP resolution
 
-    InterfaceTable *ift;
-    RoutingTable *rt;  // for Proxy ARP
+    IInterfaceTable *ift;
+    IRoutingTable *rt;  // for Proxy ARP
 
   public:
     ARP() {}

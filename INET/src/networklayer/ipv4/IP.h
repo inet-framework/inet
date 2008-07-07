@@ -22,7 +22,7 @@
 #include "QueueBase.h"
 #include "InterfaceTableAccess.h"
 #include "RoutingTableAccess.h"
-#include "RoutingTable.h"
+#include "IRoutingTable.h"
 #include "ICMPAccess.h"
 #include "IPControlInfo.h"
 #include "IPDatagram.h"
@@ -43,8 +43,8 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 class INET_API IP : public QueueBase
 {
   protected:
-    RoutingTable *rt;
-    InterfaceTable *ift;
+    IRoutingTable *rt;
+    IInterfaceTable *ift;
     ICMPAccess icmpAccess;
 
     // config

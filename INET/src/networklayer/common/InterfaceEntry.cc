@@ -21,12 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include <algorithm>
 #include <sstream>
 
 #include "InterfaceEntry.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 
 #ifndef WITHOUT_IPv4
 #include "IPv4InterfaceData.h"

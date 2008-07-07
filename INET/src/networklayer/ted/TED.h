@@ -19,8 +19,8 @@
 #include "TED_m.h"
 #include "IntServ.h"
 
-class RoutingTable;
-class InterfaceTable;
+class IRoutingTable;
+class IInterfaceTable;
 class InterfaceEntry;
 class NotificationBoard;
 
@@ -90,8 +90,8 @@ class TED : public cSimpleModule
     //@}
 
   protected:
-    RoutingTable *rt;
-    InterfaceTable *ift;
+    IRoutingTable *rt;
+    IInterfaceTable *ift;
     IPAddress routerId;
     NotificationBoard *nb;
 

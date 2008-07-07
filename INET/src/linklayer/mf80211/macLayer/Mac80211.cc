@@ -21,7 +21,7 @@
 #include "Mac80211.h"
 #include "Ieee802Ctrl_m.h"
 #include "RadioState.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 
 
@@ -74,7 +74,7 @@ void Mac80211::initialize(int stage)
         EIFS = SIFS + DIFS + computePacketDuration(LENGTH_ACK);
         EV << "SIFS: " << SIFS << " DIFS: " << DIFS << " EIFS: " << EIFS << endl;
 
-        // get registered in InterfaceTable
+        // get registered in IInterfaceTable
         registerInterface();
 
         WATCH(state);
@@ -125,7 +125,7 @@ void Mac80211::registerInterface()
     e->setPointToPoint(false);
 
     // add
-    InterfaceTable *ift = InterfaceTableAccess().get();
+    IInterfaceTable *ift = InterfaceTableAccess().get();
     ift->addInterface(e, this);
 }
 

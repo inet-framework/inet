@@ -18,21 +18,21 @@
 //
 
 
-#ifndef __INTERFACE_TABLE_ACCESS_H__
-#define __INTERFACE_TABLE_ACCESS_H__
+#ifndef __INTERFACETABLEACCESS_H__
+#define __INTERFACETABLEACCESS_H__
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 
 
 /**
- * Gives access to InterfaceTable.
+ * Gives access to IInterfaceTable.
  */
-class INET_API InterfaceTableAccess : public ModuleAccess<InterfaceTable>
+class INET_API InterfaceTableAccess : public ModuleAccess<IInterfaceTable>
 {
     public:
-        InterfaceTableAccess() : ModuleAccess<InterfaceTable>("interfaceTable") {}
+        InterfaceTableAccess() : ModuleAccess<IInterfaceTable>("interfaceTable") {}
 };
 
 #endif

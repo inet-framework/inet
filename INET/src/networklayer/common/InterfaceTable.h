@@ -22,6 +22,7 @@
 #include <vector>
 #include <omnetpp.h>
 #include "INETDefs.h"
+#include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
 #include "NotificationBoard.h"
 
@@ -39,7 +40,7 @@
  *
  * Interfaces are dynamically registered: at the start of the simulation,
  * every L2 module adds its own InterfaceEntry to the table; after that,
- * IPv4's RoutingTable and IPv6's RoutingTable6 (an possibly, further
+ * IPv4's IRoutingTable and IPv6's RoutingTable6 (an possibly, further
  * L3 protocols) add protocol-specific data on each InterfaceEntry
  * (see IPv4InterfaceData, IPv6InterfaceData, and InterfaceEntry::setIPv4Data(),
  * InterfaceEntry::setIPv6Data())
@@ -63,10 +64,8 @@
  *
  * @see InterfaceEntry
  */
-class INET_API InterfaceTable : public cSimpleModule, public INotifiable
+class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected INotifiable
 {
-    friend class InterfaceEntry;  // so that it can call interfaceConfigChanged()
-
   protected:
     NotificationBoard *nb; // cached pointer
 
@@ -95,6 +94,7 @@ class INET_API InterfaceTable : public cSimpleModule, public INotifiable
   public:
     InterfaceTable();
     virtual ~InterfaceTable();
+    virtual std::string getFullPath() const {return cSimpleModule::getFullPath();}
 
   protected:
     virtual int numInitStages() const {return 2;}

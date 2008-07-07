@@ -1,7 +1,7 @@
 #ifndef __OSPFROUTINGTABLEENTRY_HPP__
 #define __OSPFROUTINGTABLEENTRY_HPP__
 
-#include "RoutingTable.h"
+#include "IRoutingTable.h"
 #include "InterfaceTableAccess.h"
 #include "OSPFcommon.h"
 #include <memory.h>
@@ -108,7 +108,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
 inline void OSPF::RoutingTableEntry::SetPathType(RoutingPathType type)
 {
     pathType = type;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate RoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::Type2External) {
         metric = cost + type2Cost * 1000;
     } else {
@@ -119,7 +119,7 @@ inline void OSPF::RoutingTableEntry::SetPathType(RoutingPathType type)
 inline void OSPF::RoutingTableEntry::SetCost(Metric pathCost)
 {
     cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate RoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::Type2External) {
         metric = cost + type2Cost * 1000;
     } else {
@@ -130,7 +130,7 @@ inline void OSPF::RoutingTableEntry::SetCost(Metric pathCost)
 inline void OSPF::RoutingTableEntry::SetType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate RoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::Type2External) {
         metric = cost + type2Cost * 1000;
     } else {

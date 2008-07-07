@@ -16,13 +16,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "NetworkInfo.h"
-
-#include "RoutingTable.h"
-#include "IPAddressResolver.h"
-
 #include <fstream>
 #include <algorithm>
+
+#include "NetworkInfo.h"
+#include "IRoutingTable.h"
+#include "IPAddressResolver.h"
+#include "InterfaceEntry.h"
+
 
 Define_Module(NetworkInfo);
 
@@ -72,7 +73,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     {
         std::vector<std::string> lines;
 
-        RoutingTable *rt = check_and_cast<RoutingTable *>(rtmod);
+        IRoutingTable *rt = check_and_cast<IRoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++)
         {
             IPAddress host = rt->getRoute(i)->getHost();

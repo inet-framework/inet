@@ -31,7 +31,7 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6InterfaceData.h"
 #include "InterfaceEntry.h"
-#include "InterfaceTable.h"
+#include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "RoutingTable6.h"
 #include "RoutingTable6Access.h"
@@ -88,7 +88,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         //Packets awaiting Address Resolution or Next-Hop Determination.
         cQueue pendingQueue;
 
-        InterfaceTable *ift;
+        IInterfaceTable *ift;
         RoutingTable6 *rt6;
         ICMPv6 *icmpv6;
         IPv6NeighbourCache neighbourCache;

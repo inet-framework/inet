@@ -110,7 +110,7 @@ class BlackboardAccess;
  * {
  *     if (item==ref)
  *     {
- *         RoutingTable *rt = check_and_cast<RoutingTable *>(ref->getData());
+ *         IRoutingTable *rt = check_and_cast<IRoutingTable *>(ref->getData());
  *         ...
  *     }
  *     else ...

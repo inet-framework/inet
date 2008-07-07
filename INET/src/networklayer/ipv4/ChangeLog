@@ -1,3 +1,9 @@
+2008-07-07  Andras Varga
+
+	* introduced IRoutingTable, to allow users implement their own 
+	RoutingTables and plug them into INET simulations, without any 
+	change to the base INET.
+
 2008-07-02  Andras Varga
 
 	* RoutingTable: properly fire notifications on routing table changes

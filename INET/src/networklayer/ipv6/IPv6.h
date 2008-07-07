@@ -37,7 +37,7 @@ class ICMPv6Message;
 class INET_API IPv6 : public QueueBase
 {
   protected:
-    InterfaceTable *ift;
+    IInterfaceTable *ift;
     RoutingTable6 *rt;
     IPv6NeighbourDiscovery *nd;
     ICMPv6 *icmp;
