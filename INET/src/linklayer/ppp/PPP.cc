@@ -70,7 +70,7 @@ void PPP::initialize(int stage)
         physOutGate = gate("phys$o");
 
         // we're connected if other end of connection path is an input gate
-        connected = physOutGate->getDestinationGate()->getType()=='I';
+        connected = physOutGate->getDestinationGate()->getType()==cGate::INPUT;
 
         // if we're connected, get the gate with transmission rate
         gateToWatch = physOutGate;

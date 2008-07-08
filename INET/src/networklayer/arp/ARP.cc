@@ -45,6 +45,8 @@ void ARP::initialize()
     ift = InterfaceTableAccess().get();
     rt = RoutingTableAccess().get();
 
+    nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut",0)->id();
+
     retryTimeout = par("retryTimeout");
     retryCount = par("retryCount");
     cacheTimeout = par("cacheTimeout");
@@ -122,7 +124,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     if (!ie->isBroadcast())
     {
         EV << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
-        send(msg, "nicOut", ie->getNetworkLayerGateIndex());
+        send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
         return;
     }
 
@@ -242,7 +244,7 @@ void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& m
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, "nicOut", ie->getNetworkLayerGateIndex());
+    send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
 }
 
 void ARP::sendARPRequest(InterfaceEntry *ie, IPAddress ipAddress)

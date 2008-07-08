@@ -88,6 +88,8 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     cQueue txQueue;                 // output queue
     IPassiveQueue *queueModule;     // optional module to receive messages from
 
+    cGate *physOutGate;             // pointer to the "phys$o" gate
+
     // notification stuff
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
     NotificationBoard *nb;

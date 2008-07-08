@@ -9,9 +9,8 @@
 	* EtherMAC2: made notification consistent with PPP: use TxDetails as
 	"details" object
 
-	* EtherMAC2: performance: remember output gate pointer instead of 
-	looking up for each send()
-
+	* EtherMAC, EtherMAC2: performance: remember output gate pointer 
+	instead of looking up for each send()
 
 2008-06-29  Andras Varga
 

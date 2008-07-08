@@ -175,15 +175,15 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
         if (!g) continue;
 
         // find the host/router's gates that internally connect to this interface
-        if (g->getType()=='O' && g->getToGate() && g->getToGate()->getOwnerModule()==host)
+        if (g->getType()==cGate::OUTPUT && g->getToGate() && g->getToGate()->getOwnerModule()==host)
             entry->setNodeOutputGateId(g->getToGate()->getId());
-        if (g->getType()=='I' && g->getFromGate() && g->getFromGate()->getOwnerModule()==host)
+        if (g->getType()==cGate::INPUT && g->getFromGate() && g->getFromGate()->getOwnerModule()==host)
             entry->setNodeInputGateId(g->getFromGate()->getId());
 
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
-        if (g->getType()=='O' && g->getToGate() && g->getToGate()->isName("ifIn"))
+        if (g->getType()==cGate::OUTPUT && g->getToGate() && g->getToGate()->isName("ifIn"))
             nwlayerInGate = g->getToGate();
-        if (g->getType()=='I' && g->getFromGate() && g->getFromGate()->isName("ifOut"))
+        if (g->getType()==cGate::INPUT && g->getFromGate() && g->getFromGate()->isName("ifOut"))
             nwlayerOutGate = g->getFromGate();
     }
 

@@ -32,9 +32,6 @@
  */
 class INET_API EtherMAC2 : public EtherMACBase
 {
-  protected:
-    cGate *physOutGate;
-
   public:
     EtherMAC2();
 

@@ -1,0 +1,4 @@
+2008-07-08  Andras Varga
+
+	* ARP: performance: introduced nicOutBaseGateId for use in send(),
+	instead of looking up the gate by name each time

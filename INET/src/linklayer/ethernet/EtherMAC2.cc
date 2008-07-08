@@ -35,8 +35,6 @@ void EtherMAC2::initialize()
     EtherMACBase::initialize();
 
     duplexMode = true;
-    physOutGate = gate("phys$o");
-
     calculateParameters();
 
     beginSendFrames();

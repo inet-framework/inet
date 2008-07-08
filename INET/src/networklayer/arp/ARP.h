@@ -78,6 +78,7 @@ class INET_API ARP : public cSimpleModule
     ARPCache arpCache;
 
     cQueue pendingQueue; // outbound packets waiting for ARP resolution
+    int nicOutBaseGateId;  // id of the nicOut[0] gate
 
     IInterfaceTable *ift;
     IRoutingTable *rt;  // for Proxy ARP
