@@ -135,7 +135,7 @@ void TCPDumper::dump(const char *label, const char *msg)
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf,"[%.3f%s] ", SIMTIME_STR(simTime()), label);
+    sprintf(buf,"[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf;
 
     out << msg << "\n";

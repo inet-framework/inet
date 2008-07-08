@@ -18,7 +18,6 @@
 
 
 cplusplus {{
-#include "utils.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
 #include "Ieee802Ctrl_m.h" // for enums

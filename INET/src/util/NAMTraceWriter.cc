@@ -139,7 +139,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, const cPolymorphic 
     }
 }
 
-void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
+void NAMTraceWriter::recordNodeEvent(const char *state, const char *shape)
 {
     ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
@@ -151,7 +151,7 @@ void NAMTraceWriter::recordNodeEvent(char *state, char *shape)
     out << " -s " << namid << " -a " << namid << " -S " << state << " -v " << shape << endl;
 }
 
-void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t delay, char *state)
+void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t delay, const char *state)
 {
     ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
@@ -166,7 +166,7 @@ void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t d
     out << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
 }
 
-void NAMTraceWriter::recordPacketEvent(const char event, int peernamid, cMessage *msg)
+void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cMessage *msg)
 {
     ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();

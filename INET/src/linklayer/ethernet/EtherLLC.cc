@@ -18,7 +18,6 @@
 
 #include "EtherLLC.h"
 #include "Ieee802Ctrl_m.h"
-#include "utils.h"
 
 
 Define_Module(EtherLLC);

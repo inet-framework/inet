@@ -18,7 +18,6 @@
 
 #include "EtherHub.h"
 #include "EtherFrame_m.h"  // for EtherAutoconfig only
-#include "utils.h"
 
 
 Define_Module(EtherHub);

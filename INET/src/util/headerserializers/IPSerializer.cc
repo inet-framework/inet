@@ -110,7 +110,7 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;
 
-    if (headerLength > IP_HEADER_BYTES)
+    if (headerLength > (unsigned int)IP_HEADER_BYTES)
         EV << "Handling an captured IP packet with options. Dropping the options.\n";
     if (totalLength > bufsize)
         EV << "Can not handle IP packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";

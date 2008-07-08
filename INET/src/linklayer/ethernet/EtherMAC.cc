@@ -25,7 +25,6 @@
 #include <omnetpp.h>
 #include "EtherMAC.h"
 #include "Ieee802Ctrl_m.h"
-#include "utils.h"
 #include "IPassiveQueue.h"
 
 

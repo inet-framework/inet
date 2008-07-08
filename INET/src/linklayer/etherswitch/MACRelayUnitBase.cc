@@ -25,7 +25,6 @@
 
 #include "MACAddress.h"
 #include "EtherFrame_m.h"
-#include "utils.h"
 #include "Ethernet.h"
 
 

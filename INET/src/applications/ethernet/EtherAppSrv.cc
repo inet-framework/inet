@@ -21,7 +21,6 @@
 #include "EtherAppSrv.h"
 #include "Ieee802Ctrl_m.h"
 #include "EtherApp_m.h"
-#include "utils.h"
 
 Define_Module (EtherAppSrv);
 

@@ -24,7 +24,6 @@
 #include "EtherEncap.h"
 #include "EtherFrame_m.h"
 #include "Ieee802Ctrl_m.h"
-#include "utils.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "EtherMAC.h"

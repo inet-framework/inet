@@ -23,7 +23,6 @@
 
 #include "MACRelayUnitPP.h"
 #include "EtherFrame_m.h"
-#include "utils.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
 
