@@ -2,8 +2,8 @@
 
 	* performance: only fire notifications if someone is listening
 
-	* performance: remember output gate pointer instead of looking up for 
-	each send()
+	* performance: remember output gate pointer instead of looking up 
+	gate by name for each send()
 	
 2005-07-14  Andras Varga
 

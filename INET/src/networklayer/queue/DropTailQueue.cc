@@ -31,6 +31,8 @@ void DropTailQueue::initialize()
     qlenVec.setName("queue length");
     dropVec.setName("drops");
 
+    outGate = gate("out");
+
     // configuration
     frameCapacity = par("frameCapacity");
 }
@@ -67,7 +69,7 @@ cMessage *DropTailQueue::dequeue()
 
 void DropTailQueue::sendOut(cMessage *msg)
 {
-    send(msg, "out");
+    send(msg, outGate);
 }
 
 

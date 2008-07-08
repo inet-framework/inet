@@ -1,0 +1,4 @@
+2008-07-09  Andras Varga
+
+	* all queue modules: performance: remember output gate pointer 
+	instead of looking up gate by name for each send()

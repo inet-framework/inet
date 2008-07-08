@@ -34,6 +34,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
 
     // state
     cQueue queue;
+    cGate *outGate;
 
     // statistics
     cOutVector qlenVec;

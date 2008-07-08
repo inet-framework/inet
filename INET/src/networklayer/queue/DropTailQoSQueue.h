@@ -38,6 +38,8 @@ class INET_API DropTailQoSQueue : public PassiveQueueBase
     cQueue **queues;
     IQoSClassifier *classifier;
 
+    cGate *outGate;
+
   public:
     DropTailQoSQueue();
     virtual ~DropTailQoSQueue();

@@ -39,6 +39,8 @@ void REDQueue::initialize()
     maxp = par("maxp");
     pkrate = par("pkrate");
 
+    outGate = gate("out");
+
     // state
     avg = 0;
     q_time = 0;
@@ -154,7 +156,7 @@ cMessage *REDQueue::dequeue()
 
 void REDQueue::sendOut(cMessage *msg)
 {
-    send(msg, "out");
+    send(msg, outGate);
 }
 
 void REDQueue::finish()

@@ -42,6 +42,8 @@ class INET_API REDQueue : public PassiveQueueBase
     simtime_t q_time; // start of the queue idle time
     int count;        // packets since last marked packet
 
+    cGate *outGate;
+
     // statistics
     cOutVector avgQlenVec;
     cOutVector qlenVec;

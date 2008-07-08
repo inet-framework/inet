@@ -45,7 +45,7 @@ void ARP::initialize()
     ift = InterfaceTableAccess().get();
     rt = RoutingTableAccess().get();
 
-    nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut",0)->id();
+    nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut",0)->getId();
 
     retryTimeout = par("retryTimeout");
     retryCount = par("retryCount");
