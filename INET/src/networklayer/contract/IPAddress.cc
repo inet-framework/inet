@@ -2,7 +2,8 @@
 // Copyright (C) 2001  Vincent Oberle (vincent@oberle.com)
 // Institute of Telematics, University of Karlsruhe, Germany.
 // University Comillas, Madrid, Spain.
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2004, 2008 Andras Varga
+// Copyright (C) 2008  Ingmar Baumgart
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -28,6 +29,10 @@
 
 #include "IPAddress.h"
 
+/**
+ * Buffer length needed to hold an IP address in string form (dotted decimal notation)
+ */
+static const int IPADDRESS_STRING_SIZE = 20;
 
 // predefined addresses
 const IPAddress IPAddress::UNSPECIFIED_ADDRESS;
@@ -102,7 +107,7 @@ std::string IPAddress::str() const
     if (isUnspecified())
         return std::string("<unspec>");
 
-    char buf[ADDRESS_STRING_SIZE];
+    char buf[IPADDRESS_STRING_SIZE];
     sprintf(buf, "%u.%u.%u.%u", (addr>>24)&255, (addr>>16)&255, (addr>>8)&255, addr&255);
     return std::string(buf);
 }

@@ -34,27 +34,10 @@
 
 
 /**
- * String size to hold an address.
- * This is the size of the string that should be used to
- * initialize the IPAddress class, and it is the max length of the string
- * returned by IPAddress::str()
+ * TCP/UDP port numbers
  */
-const int ADDRESS_STRING_SIZE = 20;
-
-
-// FIXME do something (away) with this:
-#define IPADDRESS_UNDEF IPAddress()
-
-
-/**
- * TCP/UDP port number
- */
-typedef short PortNumber;
-
 const short PORT_UNDEF = 0;
 const short PORT_MAX = 0x7fff;
-
-
 
 /**
  * IPv4 address.
