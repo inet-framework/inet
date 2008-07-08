@@ -66,12 +66,14 @@ void PPP::initialize(int stage)
             queueModule = check_and_cast<IPassiveQueue *>(mod);
         }
 
+        // remember the output gate now, to speed up send()
+        physOutGate = gate("phys$o");
+
         // we're connected if other end of connection path is an input gate
-        cGate *physOut = gate("phys$o");
-        connected = physOut->getDestinationGate()->getType()=='I';
+        connected = physOutGate->getDestinationGate()->getType()=='I';
 
         // if we're connected, get the gate with transmission rate
-        gateToWatch = physOut;
+        gateToWatch = physOutGate;
         datarate = 0;
         if (connected)
         {
@@ -177,7 +179,7 @@ void PPP::startTransmitting(cMessage *msg)
 
     // send
     EV << "Starting transmission of " << pppFrame << endl;
-    send(pppFrame, "phys$o");
+    send(pppFrame, physOutGate);
 
     // schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmission = gateToWatch->getTransmissionFinishTime();
@@ -274,19 +276,19 @@ void PPP::handleMessage(cMessage *msg)
 void PPP::displayBusy()
 {
     getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
+    physOutGate->getDisplayString().setTagArg("o",0,"yellow");
+    physOutGate->getDisplayString().setTagArg("o",1,"3");
     gateToWatch->getDisplayString().setTagArg("o",0,"yellow");
     gateToWatch->getDisplayString().setTagArg("o",1,"3");
-    gate("phys$o")->getDisplayString().setTagArg("o",0,"yellow");
-    gate("phys$o")->getDisplayString().setTagArg("o",1,"3");
 }
 
 void PPP::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
+    physOutGate->getDisplayString().setTagArg("o",0,"black");
+    physOutGate->getDisplayString().setTagArg("o",1,"1");
     gateToWatch->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
     gateToWatch->getDisplayString().setTagArg("o",1,"1");
-    gate("phys$o")->getDisplayString().setTagArg("o",0,"black");
-    gate("phys$o")->getDisplayString().setTagArg("o",1,"1");
 }
 
 void PPP::updateDisplayString()

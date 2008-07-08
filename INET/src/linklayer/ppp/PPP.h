@@ -39,6 +39,7 @@ class INET_API PPP : public cSimpleModule, public INotifiable
     bool connected;
 
     long txQueueLimit;
+    cGate *physOutGate;
     cGate *gateToWatch;
 
     cQueue txQueue;

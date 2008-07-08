@@ -35,6 +35,8 @@ void EtherMAC2::initialize()
     EtherMACBase::initialize();
 
     duplexMode = true;
+    physOutGate = gate("phys$o");
+
     calculateParameters();
 
     beginSendFrames();
@@ -43,7 +45,7 @@ void EtherMAC2::initialize()
 void EtherMAC2::initializeTxrate()
 {
     // if we're connected, find the gate with transmission rate
-    cGate *g = gate("phys$o");
+    cGate *g = physOutGate;
     txrate = 0;
 
     if (connected)
@@ -119,7 +121,7 @@ void EtherMAC2::startFrameTransmission()
 
     // send
     EV << "Starting transmission of " << frame << endl;
-    send(frame, "phys$o");
+    send(frame, physOutGate);
     scheduleEndTxPeriod(frame);
 
     // update burst variables
