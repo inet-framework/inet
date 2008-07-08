@@ -140,10 +140,15 @@ class INET_API IRoutingTable
     virtual const IPRoute *getRoute(int k) const = 0;
 
     /**
-     * Find first routing entry with the given parameters.
+     * Finds and returns the default route, or NULL if it doesn't exist
      */
     virtual const IPRoute *findRoute(const IPAddress& target, const IPAddress& netmask,
         const IPAddress& gw, int metric = 0, const char *dev = NULL) const = 0;
+
+    /**
+     * Finds and returns the default route, or NULL if it doesn't exist
+     */
+    virtual const IPRoute *getDefaultRoute() const = 0;
 
     /**
      * Adds a route to the routing table. Note that once added, routes

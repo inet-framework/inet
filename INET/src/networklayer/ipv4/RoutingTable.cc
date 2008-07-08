@@ -393,6 +393,15 @@ const IPRoute *RoutingTable::getRoute(int k) const
     return NULL;
 }
 
+const IPRoute *RoutingTable::getDefaultRoute() const
+{
+    int n = (int)routes.size();
+    for (int i=0; i<n; i++)
+        if (routes[i]->getNetmask().isUnspecified())
+            return routes[i];
+    return NULL;
+}
+
 const IPRoute *RoutingTable::findRoute(const IPAddress& target, const IPAddress& netmask,
     const IPAddress& gw, int metric, const char *dev) const
 {
@@ -408,13 +417,20 @@ void RoutingTable::addRoute(const IPRoute *entry)
     Enter_Method("addRoute(...)");
 
     // check for null address and default route
-    if ((entry->getHost().isUnspecified() || entry->getNetmask().isUnspecified()) &&
-        (!entry->getHost().isUnspecified() || !entry->getNetmask().isUnspecified()))
+    if (entry->getHost().isUnspecified() != entry->getNetmask().isUnspecified())
         error("addRoute(): to add a default route, set both host and netmask to zero");
+
+    if (entry->getHost().doAnd(entry->getNetmask().isUnspecified()).getInt() != 0)
+        error("addRoute(): suspicious route: host %s has 1-bits outside netmask %s",
+              entry->getHost().str().c_str(), entry->getNetmask().str().c_str());
 
     // check that the interface exists
     if (!entry->getInterface())
         error("addRoute(): interface cannot be NULL");
+
+    // if this is a default route, remove old default route (we're replacing it)
+    if (entry->getNetmask().isUnspecified() && getDefaultRoute()!=NULL)
+        deleteRoute(getDefaultRoute());
 
     // add to tables
     if (!entry->getHost().isMulticast())

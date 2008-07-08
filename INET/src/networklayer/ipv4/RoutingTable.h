@@ -230,10 +230,15 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual const IPRoute *getRoute(int k) const;
 
     /**
-     * Find first routing entry with the given parameters.
+     * Finds the first route with the given parameters.
      */
     virtual const IPRoute *findRoute(const IPAddress& target, const IPAddress& netmask,
         const IPAddress& gw, int metric = 0, const char *dev = NULL) const;
+
+    /**
+     * Finds and returns the default route, or NULL if it doesn't exist
+     */
+    virtual const IPRoute *getDefaultRoute() const;
 
     /**
      * Adds a route to the routing table. Note that once added, routes
