@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef _MACRELAYUNITNP_H
-#define _MACRELAYUNITNP_H
+#ifndef __INET_MACRELAYUNITNP_H
+#define __INET_MACRELAYUNITNP_H
 
 
 #include "MACRelayUnitBase.h"

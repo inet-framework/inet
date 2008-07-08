@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __MPLSMODULE_H__
-#define __MPLSMODULE_H__
+#ifndef __INET_MPLSMODULE_H
+#define __INET_MPLSMODULE_H
 
 #include <vector>
 #include <omnetpp.h>

@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __ETHER_DUPLEX_MAC_H
-#define __ETHER_DUPLEX_MAC_H
+#ifndef __INET_ETHER_DUPLEX_MAC_H
+#define __INET_ETHER_DUPLEX_MAC_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

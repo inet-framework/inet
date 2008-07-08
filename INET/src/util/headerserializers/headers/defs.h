@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __HEADERS_DEFS_H
-#define __HEADERS_DEFS_H
+#ifndef __INET_HEADERS_DEFS_H
+#define __INET_HEADERS_DEFS_H
 
 //
 // Get integer types defined

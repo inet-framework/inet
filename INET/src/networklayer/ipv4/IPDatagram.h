@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPDATAGRAM_H
-#define __IPDATAGRAM_H
+#ifndef __INET_IPDATAGRAM_H
+#define __INET_IPDATAGRAM_H
 
 #include "IPDatagram_m.h"
 

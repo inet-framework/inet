@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_SINK_H
-#define __INET_SINK_H
+#ifndef __INET_INET_SINK_H
+#define __INET_INET_SINK_H
 
 #include "INETDefs.h"
 

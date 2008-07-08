@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __DROPTAILQUEUE_H__
-#define __DROPTAILQUEUE_H__
+#ifndef __INET_DROPTAILQUEUE_H
+#define __INET_DROPTAILQUEUE_H
 
 #include <omnetpp.h>
 #include "PassiveQueueBase.h"

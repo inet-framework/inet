@@ -20,8 +20,8 @@
  * This file declares the class RTPPayloadReceiver.
  */
 
-#ifndef __RTPPAYLOADRECEIVER_H__
-#define __RTPPAYLOADRECEIVER_H__
+#ifndef __INET_RTPPAYLOADRECEIVER_H
+#define __INET_RTPPAYLOADRECEIVER_H
 
 
 #include <fstream>

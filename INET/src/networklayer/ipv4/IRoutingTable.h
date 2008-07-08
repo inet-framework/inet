@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IROUTINGTABLE_H
-#define __IROUTINGTABLE_H
+#ifndef __INET_IROUTINGTABLE_H
+#define __INET_IROUTINGTABLE_H
 
 #include <vector>
 #include <omnetpp.h>

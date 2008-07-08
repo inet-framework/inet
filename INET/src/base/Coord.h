@@ -18,8 +18,8 @@
  **************************************************************************/
 
 
-#ifndef _COORD_H
-#define _COORD_H
+#ifndef __INET_COORD_H
+#define __INET_COORD_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __UDPBASICAPP_H__
-#define __UDPBASICAPP_H__
+#ifndef __INET_UDPBASICAPP_H
+#define __INET_UDPBASICAPP_H
 
 #include <vector>
 #include <omnetpp.h>

@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __LIBTABLE_H
-#define __LIBTABLE_H
+#ifndef __INET_LIBTABLE_H
+#define __INET_LIBTABLE_H
 
 #include <omnetpp.h>
 #include <vector>

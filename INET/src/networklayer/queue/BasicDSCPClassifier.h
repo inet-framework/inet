@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __BASICDSCPCLASSIFIER_H__
-#define __BASICDSCPCLASSIFIER_H__
+#ifndef __INET_BASICDSCPCLASSIFIER_H
+#define __INET_BASICDSCPCLASSIFIER_H
 
 #include "IQoSClassifier.h"
 

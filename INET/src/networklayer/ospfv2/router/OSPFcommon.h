@@ -1,5 +1,5 @@
-#ifndef __COMMON_HPP__
-#define __COMMON_HPP__
+#ifndef __INET_OSPFCOMMON_H
+#define __INET_OSPFCOMMON_H
 
 #include <ctype.h>
 #include <stdio.h>

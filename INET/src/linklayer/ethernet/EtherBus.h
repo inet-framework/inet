@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ETHERBUS_H
-#define __ETHERBUS_H
+#ifndef __INET_ETHERBUS_H
+#define __INET_ETHERBUS_H
 
 #include <vector>
 #include "INETDefs.h"

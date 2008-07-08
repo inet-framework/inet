@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPSPOOF_H_
-#define __TCPSPOOF_H_
+#ifndef __INET_TCPSPOOF_H
+#define __INET_TCPSPOOF_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

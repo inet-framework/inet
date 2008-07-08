@@ -36,7 +36,7 @@
 #define IPv6_DEFAULT_MAX_RTR_ADV_INT        600 //seconds-decrease to enable more periodic RAs
 #define IPv6_DEFAULT_ADV_REACHABLE_TIME     3600// seconds
 #define IPv6_DEFAULT_ADV_RETRANS_TIMER      1   // seconds
-#define IPv6_DEFAULT_ROUTER_HOPLIMIT        64
+#define IPv6__INET_DEFAULT_ROUTER_HOPLIMIT        64
 
 /**************RFC 2461: Section 10 Protocol Constants*************************/
 //Router Constants

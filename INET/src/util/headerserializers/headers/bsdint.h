@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __HEADERS_BSDINT_H
-#define __HEADERS_BSDINT_H
+#ifndef __INET_HEADERS_BSDINT_H
+#define __INET_HEADERS_BSDINT_H
 
 // non-stdc integer type names that occur in BSD headers
 

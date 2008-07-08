@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __LINKSTATEROUTING_H__
-#define __LINKSTATEROUTING_H__
+#ifndef __INET_LINKSTATEROUTING_H
+#define __INET_LINKSTATEROUTING_H
 
 #include <omnetpp.h>
 #include "NotificationBoard.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __IPASSIVEQUEUE_H__
-#define __IPASSIVEQUEUE_H__
+#ifndef __INET_IPASSIVEQUEUE_H
+#define __INET_IPASSIVEQUEUE_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

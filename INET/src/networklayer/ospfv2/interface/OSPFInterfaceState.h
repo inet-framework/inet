@@ -1,5 +1,5 @@
-#ifndef __OSPFINTERFACESTATE_HPP__
-#define __OSPFINTERFACESTATE_HPP__
+#ifndef __INET_OSPFINTERFACESTATE_H
+#define __INET_OSPFINTERFACESTATE_H
 
 #include "OSPFInterface.h"
 
@@ -19,5 +19,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __OSPFINTERFACESTATE_HPP__
+#endif // __INET_OSPFINTERFACESTATE_H
 

@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPVXADDRESS_H
-#define __IPVXADDRESS_H
+#ifndef __INET_IPVXADDRESS_H
+#define __INET_IPVXADDRESS_H
 
 #include <omnetpp.h>
 #include <string.h>

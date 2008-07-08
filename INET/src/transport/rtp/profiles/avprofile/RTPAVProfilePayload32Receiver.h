@@ -20,8 +20,8 @@
  * This file declares the class RTPAVProfilePayload32Receiver.
  */
 
-#ifndef __RTPAVPROFILEPAYLOAD32RECEIVER_H__
-#define __RTPAVPROFILEPAYLOAD32RECEIVER_H__
+#ifndef __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
+#define __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
 
 #include <omnetpp.h>
 

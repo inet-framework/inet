@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __BLACKBOARD_H
-#define __BLACKBOARD_H
+#ifndef __INET_BLACKBOARD_H
+#define __INET_BLACKBOARD_H
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)

@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef _ETHERNETDEFS_H
-#define _ETHERNETDEFS_H
+#ifndef __INET_ETHERNET_H
+#define __INET_ETHERNET_H
 
 #include "INETDefs.h"
 

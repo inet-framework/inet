@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __PROTOCOLMAP_H__
-#define __PROTOCOLMAP_H__
+#ifndef __INET_PROTOCOLMAP_H
+#define __INET_PROTOCOLMAP_H
 
 #include <vector>
 #include "INETDefs.h"

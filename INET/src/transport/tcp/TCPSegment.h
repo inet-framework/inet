@@ -17,8 +17,8 @@
 //
 
 
-#ifndef _TCPSEGMENT_H_
-#define _TCPSEGMENT_H_
+#ifndef __INET_TCPSEGMENT_H
+#define __INET_TCPSEGMENT_H
 
 #include <list>
 #include "INETDefs.h"

@@ -20,8 +20,8 @@
  * This file declares the class RTPPayloadSender.
  */
 
-#ifndef __RTPPAYLOADSENDER_H__
-#define __RTPPAYLOADSENDER_H__
+#ifndef __INET_RTPPAYLOADSENDER_H
+#define __INET_RTPPAYLOADSENDER_H
 
 #include <fstream>
 #include "INETDefs.h"

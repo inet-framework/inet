@@ -20,8 +20,8 @@
  * This file declares the class RTPSenderInfo.
  */
 
-#ifndef __RTPSENDERINFO_H__
-#define __RTPSENDERINFO_H__
+#ifndef __INET_RTPSENDERINFO_H
+#define __INET_RTPSENDERINFO_H
 
 #include "INETDefs.h"
 #include "RTPParticipantInfo.h"

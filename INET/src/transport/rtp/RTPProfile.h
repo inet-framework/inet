@@ -19,8 +19,8 @@
  * This file declares the class RTPProfile.
  */
 
-#ifndef __RTPPROFILE_H__
-#define __RTPPROFILE_H__
+#ifndef __INET_RTPPROFILE_H
+#define __INET_RTPPROFILE_H
 
 #include "INETDefs.h"
 #include "RTPInnerPacket.h"

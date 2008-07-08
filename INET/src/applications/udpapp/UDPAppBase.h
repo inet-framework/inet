@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __UDPAPPBASE_H__
-#define __UDPAPPBASE_H__
+#ifndef __INET_UDPAPPBASE_H
+#define __INET_UDPAPPBASE_H
 
 #include <omnetpp.h>
 #include "IPvXAddress.h"

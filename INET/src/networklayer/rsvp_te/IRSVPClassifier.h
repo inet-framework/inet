@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVPCLASSIFIER_H__
-#define __RSVPCLASSIFIER_H__
+#ifndef __INET_RSVPCLASSIFIER_H
+#define __INET_RSVPCLASSIFIER_H
 
 #include <omnetpp.h>
 

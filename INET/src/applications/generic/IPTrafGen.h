@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __IPTRAFGEN_H__
-#define __IPTRAFGEN_H__
+#ifndef __INET_IPTRAFGEN_H
+#define __INET_IPTRAFGEN_H
 
 #include <vector>
 #include <omnetpp.h>

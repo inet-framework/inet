@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __MODULEACCESS_H__
-#define __MODULEACCESS_H__
+#ifndef __INET_MODULEACCESS_H
+#define __INET_MODULEACCESS_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

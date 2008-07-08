@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPSESSIONAPP_H_
-#define __TCPSESSIONAPP_H_
+#ifndef __INET_TCPSESSIONAPP_H
+#define __INET_TCPSESSIONAPP_H
 
 #include <vector>
 #include <omnetpp.h>

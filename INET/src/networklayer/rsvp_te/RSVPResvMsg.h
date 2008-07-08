@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVPRESVMSG_H__
-#define __RSVPRESVMSG_H__
+#ifndef __INET_RSVPRESVMSG_H
+#define __INET_RSVPRESVMSG_H
 
 #include "RSVPResvMsg_m.h"
 

@@ -21,8 +21,8 @@
  */
 
 
-#ifndef __RTPINTERFACEPACKET_H__
-#define __RTPINTERFACEPACKET_H__
+#ifndef __INET_RTPINTERFACEPACKET_H
+#define __INET_RTPINTERFACEPACKET_H
 
 #include "INETDefs.h"
 #include "IPAddress.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __NOTIFIERCONSTS_H
-#define __NOTIFIERCONSTS_H
+#ifndef __INET_NOTIFIERCONSTS_H
+#define __INET_NOTIFIERCONSTS_H
 
 #include "INETDefs.h"
 

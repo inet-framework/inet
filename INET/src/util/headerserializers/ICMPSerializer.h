@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __ICMPSERIALIZER_H_
-#define __ICMPSERIALIZER_H_
+#ifndef __INET_ICMPSERIALIZER_H
+#define __INET_ICMPSERIALIZER_H
 
 #include "ICMPMessage_m.h"
 

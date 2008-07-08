@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPMESSAGERCVQUEUE_H
-#define __TCPMESSAGERCVQUEUE_H
+#ifndef __INET_TCPMESSAGERCVQUEUE_H
+#define __INET_TCPMESSAGERCVQUEUE_H
 
 #include <map>
 #include <string>

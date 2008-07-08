@@ -19,8 +19,8 @@
  * This file declares the source description classes SDESItem and SDESChunk.
  */
 
-#ifndef __SDES_H__
-#define __SDES_H__
+#ifndef __INET_SDES_H
+#define __INET_SDES_H
 
 #include "INETDefs.h"
 

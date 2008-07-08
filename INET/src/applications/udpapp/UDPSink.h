@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __UDPSINK_H__
-#define __UDPSINK_H__
+#ifndef __INET_UDPSINK_H
+#define __INET_UDPSINK_H
 
 #include <omnetpp.h>
 #include "UDPAppBase.h"

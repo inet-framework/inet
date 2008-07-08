@@ -23,8 +23,8 @@
 // Rewrite: Andras Varga 2004,2005
 //
 
-#ifndef __UDP_H__
-#define __UDP_H__
+#ifndef __INET_UDP_H
+#define __INET_UDP_H
 
 #include <map>
 #include <list>

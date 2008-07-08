@@ -1,5 +1,5 @@
-#ifndef __OSPFROUTER_HPP__
-#define __OSPFROUTER_HPP__
+#ifndef __INET_OSPFROUTER_H
+#define __INET_OSPFROUTER_H
 
 #include "OSPFcommon.h"
 #include "OSPFArea.h"
@@ -96,4 +96,4 @@ private:
 
 } // namespace OSPF
 
-#endif // __OSPFROUTER_HPP__
+#endif // __INET_OSPFROUTER_H

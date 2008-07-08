@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __UDPECHOAPP_H__
-#define __UDPECHOAPP_H__
+#ifndef __INET_UDPECHOAPP_H
+#define __INET_UDPECHOAPP_H
 
 #include <vector>
 #include <omnetpp.h>

@@ -17,8 +17,8 @@
 */
 
 
-#ifndef _MACRELAYUNITBASE_H
-#define _MACRELAYUNITBASE_H
+#ifndef __INET_MACRELAYUNITBASE_H
+#define __INET_MACRELAYUNITBASE_H
 
 #include <omnetpp.h>
 #include <map>

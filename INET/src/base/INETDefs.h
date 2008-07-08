@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef _INETDEFS_H__
-#define _INETDEFS_H__
+#ifndef __INET_INETDEFS_H
+#define __INET_INETDEFS_H
 
 //
 // General definitions.

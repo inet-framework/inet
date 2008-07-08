@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPSERIALIZER_H
-#define __IPSERIALIZER_H
+#ifndef __INET_IPSERIALIZER_H
+#define __INET_IPSERIALIZER_H
 
 #include "IPDatagram.h"
 

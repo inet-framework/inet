@@ -1,5 +1,5 @@
-#ifndef __IMESSAGEHANDLER_HPP__
-#define __IMESSAGEHANDLER_HPP__
+#ifndef __INET_IMESSAGEHANDLER_H
+#define __INET_IMESSAGEHANDLER_H
 
 #include "OSPFPacket_m.h"
 
@@ -23,4 +23,4 @@ public:
 
 } // namespace OSPF
 
-#endif // __IMESSAGEHANDLER_HPP__
+#endif // __INET_IMESSAGEHANDLER_H

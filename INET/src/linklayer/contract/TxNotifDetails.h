@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __TXNOTIFDETAILS_H
-#define __TXNOTIFDETAILS_H
+#ifndef __INET_TXNOTIFDETAILS_H
+#define __INET_TXNOTIFDETAILS_H
 
 #include "INETDefs.h"
 

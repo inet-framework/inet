@@ -19,8 +19,8 @@
  * TThis file declares the class RTPParticipantInfo.
  */
 
-#ifndef __RTPPARTICIPANTINFO_H__
-#define __RTPPARTICIPANTINFO_H__
+#ifndef __INET_RTPPARTICIPANTINFO_H
+#define __INET_RTPPARTICIPANTINFO_H
 
 #include <stdio.h>
 #include "INETDefs.h"

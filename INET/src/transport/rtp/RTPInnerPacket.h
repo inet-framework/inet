@@ -19,8 +19,8 @@
  * This file declares the class RTPInnerPacket.
  */
 
-#ifndef __RTPINNERPACKET_H__
-#define __RTPINNERPACKET_H__
+#ifndef __INET_RTPINNERPACKET_H
+#define __INET_RTPINNERPACKET_H
 
 #include "INETDefs.h"
 #include "IPAddress.h"

@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __ICMPACCESS_H__
-#define __ICMPACCESS_H__
+#ifndef __INET_ICMPACCESS_H
+#define __INET_ICMPACCESS_H
 
 //  Cleanup and rewrite: Andras Varga, 2004
 

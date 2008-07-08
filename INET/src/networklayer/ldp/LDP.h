@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __LDP_H__
-#define __LDP_H__
+#ifndef __INET_LDP_H
+#define __INET_LDP_H
 
 
 #include <string>

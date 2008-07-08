@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INTERFACETOKEN_H
-#define __INTERFACETOKEN_H
+#ifndef __INET_INTERFACETOKEN_H
+#define __INET_INTERFACETOKEN_H
 
 #include <vector>
 #include <omnetpp.h>

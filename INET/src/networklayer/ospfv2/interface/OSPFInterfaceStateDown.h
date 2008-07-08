@@ -1,5 +1,5 @@
-#ifndef __OSPFINTERFACESTATEDOWN_HPP__
-#define __OSPFINTERFACESTATEDOWN_HPP__
+#ifndef __INET_OSPFINTERFACESTATEDOWN_H
+#define __INET_OSPFINTERFACESTATEDOWN_H
 
 #include "OSPFInterfaceState.h"
 
@@ -14,5 +14,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __OSPFINTERFACESTATEDOWN_HPP__
+#endif // __INET_OSPFINTERFACESTATEDOWN_H
 

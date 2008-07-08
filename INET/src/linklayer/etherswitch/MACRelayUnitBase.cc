@@ -29,6 +29,8 @@
 #include "Ethernet.h"
 
 
+#define MAX_LINE 100
+
 
 /* unused for now
 static std::ostream& operator<< (std::ostream& os, cMessage *msg)
@@ -44,6 +46,28 @@ static std::ostream& operator<< (std::ostream& os, const MACRelayUnitBase::Addre
     return os;
 }
 
+/**
+ * Function reads from a file stream pointed to by 'fp' and stores characters
+ * until the '\n' or EOF character is found, the resultant string is returned.
+ * Note that neither '\n' nor EOF character is stored to the resultant string,
+ * also note that if on a line containing useful data that EOF occurs, then
+ * that line will not be read in, hence must terminate file with unused line.
+ */
+static char *fgetline (FILE *fp)
+{
+    // alloc buffer and read a line
+    char *line = new char[MAX_LINE];
+    if (fgets(line,MAX_LINE,fp)==NULL)
+        return NULL;
+
+    // chop CR/LF
+    line[MAX_LINE-1] = '\0';
+    int len = strlen(line);
+    while (len>0 && (line[len-1]=='\n' || line[len-1]=='\r'))
+        line[--len]='\0';
+
+    return line;
+}
 
 void MACRelayUnitBase::initialize()
 {

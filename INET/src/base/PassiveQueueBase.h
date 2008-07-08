@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __PASSIVEQUEUEBASE_H__
-#define __PASSIVEQUEUEBASE_H__
+#ifndef __INET_PASSIVEQUEUEBASE_H
+#define __INET_PASSIVEQUEUEBASE_H
 
 #include <omnetpp.h>
 #include "IPassiveQueue.h"

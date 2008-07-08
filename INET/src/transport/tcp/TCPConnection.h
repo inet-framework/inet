@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPCONNECTION_H
-#define __TCPCONNECTION_H
+#ifndef __INET_TCPCONNECTION_H
+#define __INET_TCPCONNECTION_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

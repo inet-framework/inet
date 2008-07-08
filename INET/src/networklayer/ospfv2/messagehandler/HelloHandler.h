@@ -1,5 +1,5 @@
-#ifndef __HELLOHANDLER_HPP__
-#define __HELLOHANDLER_HPP__
+#ifndef __INET_HELLOHANDLER_H
+#define __INET_HELLOHANDLER_H
 
 #include "IMessageHandler.h"
 
@@ -14,5 +14,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __HELLOHANDLER_HPP__
+#endif // __INET_HELLOHANDLER_H
 

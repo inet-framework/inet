@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INOTIFIABLE_H
-#define __INOTIFIABLE_H
+#ifndef __INET_INOTIFIABLE_H
+#define __INET_INOTIFIABLE_H
 
 #include <omnetpp.h>
 

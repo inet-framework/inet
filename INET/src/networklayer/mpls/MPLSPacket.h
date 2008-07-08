@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __MPLSPACKET_H
-#define __MPLSPACKET_H
+#ifndef __INET_MPLSPACKET_H
+#define __INET_MPLSPACKET_H
 
 #include <stack>
 #include <omnetpp.h>

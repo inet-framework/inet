@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPBASICCLIENTAPP_H_
-#define __TCPBASICCLIENTAPP_H_
+#ifndef __INET_TCPBASICCLIENTAPP_H
+#define __INET_TCPBASICCLIENTAPP_H
 
 #include <omnetpp.h>
 #include "TCPGenericCliAppBase.h"

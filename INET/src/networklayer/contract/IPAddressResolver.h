@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __IPADDRESSRESOLVER_H
-#define __IPADDRESSRESOLVER_H
+#ifndef __INET_IPADDRESSRESOLVER_H
+#define __INET_IPADDRESSRESOLVER_H
 
 #include <omnetpp.h>
 #include "IPvXAddress.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __REDQUEUE_H__
-#define __REDQUEUE_H__
+#ifndef __INET_REDQUEUE_H
+#define __INET_REDQUEUE_H
 
 #include <omnetpp.h>
 #include "PassiveQueueBase.h"

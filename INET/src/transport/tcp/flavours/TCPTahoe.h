@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPTAHOE_H
-#define __TCPTAHOE_H
+#ifndef __INET_TCPTAHOE_H
+#define __INET_TCPTAHOE_H
 
 #include <omnetpp.h>
 #include "TCPTahoeRenoFamily.h"

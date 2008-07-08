@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INTSERVPLUS_H__
-#define __INTSERVPLUS_H__
+#ifndef __INET_INTSERVPLUS_H
+#define __INET_INTSERVPLUS_H
 
 #include "IntServ_m.h"
 

@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVPPATHMSG_H__
-#define __RSVPPATHMSG_H__
+#ifndef __INET_RSVPPATHMSG_H
+#define __INET_RSVPPATHMSG_H
 
 #include "RSVPPathMsg_m.h"
 

@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPGENERICCLIAPPBASE_H_
-#define __TCPGENERICCLIAPPBASE_H_
+#ifndef __INET_TCPGENERICCLIAPPBASE_H
+#define __INET_TCPGENERICCLIAPPBASE_H
 
 #include <omnetpp.h>
 #include "TCPSocket.h"

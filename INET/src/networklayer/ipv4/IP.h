@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IP_H__
-#define __IP_H__
+#ifndef __INET_IP_H
+#define __INET_IP_H
 
 #include "QueueBase.h"
 #include "InterfaceTableAccess.h"

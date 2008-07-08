@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __TCPSOCKETMAP_H
-#define __TCPSOCKETMAP_H
+#ifndef __INET_TCPSOCKETMAP_H
+#define __INET_TCPSOCKETMAP_H
 
 
 #include <map>

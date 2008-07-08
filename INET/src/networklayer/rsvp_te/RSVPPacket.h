@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVPPACKET_H__
-#define __RSVPPACKET_H__
+#ifndef __INET_RSVPPACKET_H
+#define __INET_RSVPPACKET_H
 
 #include "RSVPPacket_m.h"
 

@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __ICMP_H__
-#define __ICMP_H__
+#ifndef __INET_ICMP_H
+#define __INET_ICMP_H
 
 //  Cleanup and rewrite: Andras Varga, 2004
 

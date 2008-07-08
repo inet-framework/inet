@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __ICLASSIFIER_H__
-#define __ICLASSIFIER_H__
+#ifndef __INET_ICLASSIFIER_H
+#define __INET_ICLASSIFIER_H
 
 #include <omnetpp.h>
 

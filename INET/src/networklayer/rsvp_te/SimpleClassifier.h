@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __SIMPLECLASSIFIER_H
-#define __SIMPLECLASSIFIER_H
+#ifndef __INET_SIMPLECLASSIFIER_H
+#define __INET_SIMPLECLASSIFIER_H
 
 #include <omnetpp.h>
 #include <vector>

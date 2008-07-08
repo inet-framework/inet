@@ -13,8 +13,8 @@
 *
 *********************************************************************/
 
-#ifndef __OSPFROUTING__H__
-#define __OSPFROUTING__H__
+#ifndef __INET_OSPFROUTING_H
+#define __INET_OSPFROUTING_H
 
 #include <vector>
 #include <omnetpp.h>
@@ -54,6 +54,6 @@ class OSPFRouting :  public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-#endif  // __OSPFROUTING__H__
+#endif  // __INET_OSPFROUTING_H
 
 

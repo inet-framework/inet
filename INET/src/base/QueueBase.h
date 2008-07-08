@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __QUEUEBASE_H__
-#define __QUEUEBASE_H__
+#ifndef __INET_QUEUEBASE_H
+#define __INET_QUEUEBASE_H
 
 #include "AbstractQueue.h"
 

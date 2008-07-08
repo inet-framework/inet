@@ -20,8 +20,8 @@
  * This file declares the class RTPReceiverInfo.
  */
 
-#ifndef __RTPRECEIVERINFO_H__
-#define __RTPRECEIVERINFO_H__
+#ifndef __INET_RTPRECEIVERINFO_H
+#define __INET_RTPRECEIVERINFO_H
 
 #include <cassert>
 #include "INETDefs.h"

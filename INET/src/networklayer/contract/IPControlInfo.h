@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPCONTROLINFO_H
-#define __IPCONTROLINFO_H
+#ifndef __INET_IPCONTROLINFO_H
+#define __INET_IPCONTROLINFO_H
 
 #include "IPControlInfo_m.h"
 

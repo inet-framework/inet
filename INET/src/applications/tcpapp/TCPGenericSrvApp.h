@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPGENERICSRVAPP_H_
-#define __TCPGENERICSRVAPP_H_
+#ifndef __INET_TCPGENERICSRVAPP_H
+#define __INET_TCPGENERICSRVAPP_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

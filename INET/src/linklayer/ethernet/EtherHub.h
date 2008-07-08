@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ETHERHUB_H
-#define __ETHERHUB_H
+#ifndef __INET_ETHERHUB_H
+#define __INET_ETHERHUB_H
 
 #include "INETDefs.h"
 

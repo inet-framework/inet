@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INETCOMMON_H
-#define __INETCOMMON_H
+#ifndef __INET_INETCOMMON_H
+#define __INET_INETCOMMON_H
 
 #include <omnetpp.h>
 #include <string>

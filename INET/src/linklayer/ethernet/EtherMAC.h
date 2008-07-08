@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ETHERMAC_H
-#define __ETHERMAC_H
+#ifndef __INET_ETHERMAC_H
+#define __INET_ETHERMAC_H
 
 #include <stdio.h>
 #include <string.h>

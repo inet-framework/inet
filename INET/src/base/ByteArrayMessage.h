@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __BYTEARRAYMESSAGE_H__
-#define __BYTEARRAYMESSAGE_H__
+#ifndef __INET_BYTEARRAYMESSAGE_H
+#define __INET_BYTEARRAYMESSAGE_H
 
 #include "ByteArrayMessage_m.h"
 

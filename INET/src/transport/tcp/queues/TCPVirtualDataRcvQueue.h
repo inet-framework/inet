@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPVIRTUALDATARCVQUEUE_H
-#define __TCPVIRTUALDATARCVQUEUE_H
+#ifndef __INET_TCPVIRTUALDATARCVQUEUE_H
+#define __INET_TCPVIRTUALDATARCVQUEUE_H
 
 #include <list>
 #include <string>

@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __IPFRAGBUF_H__
-#define __IPFRAGBUF_H__
+#ifndef __INET_IPFRAGBUF_H
+#define __INET_IPFRAGBUF_H
 
 #include <map>
 #include <vector>

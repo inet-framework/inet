@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TED_H__
-#define __TED_H__
+#ifndef __INET_TED_H
+#define __INET_TED_H
 
 #include <omnetpp.h>
 #include "TED_m.h"

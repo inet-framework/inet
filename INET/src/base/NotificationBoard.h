@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __NOTIFICATIONBOARD_H
-#define __NOTIFICATIONBOARD_H
+#ifndef __INET_NOTIFICATIONBOARD_H
+#define __INET_NOTIFICATIONBOARD_H
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)

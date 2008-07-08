@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPALGORITHM_H
-#define __TCPALGORITHM_H
+#ifndef __INET_TCPALGORITHM_H
+#define __INET_TCPALGORITHM_H
 
 #include <omnetpp.h>
 #include "TCPConnection.h"

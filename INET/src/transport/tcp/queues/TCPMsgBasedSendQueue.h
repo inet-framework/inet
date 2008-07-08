@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPMESSAGESENDQUEUE_H
-#define __TCPMESSAGESENDQUEUE_H
+#ifndef __INET_TCPMESSAGESENDQUEUE_H
+#define __INET_TCPMESSAGESENDQUEUE_H
 
 #include <list>
 #include "TCPSendQueue.h"

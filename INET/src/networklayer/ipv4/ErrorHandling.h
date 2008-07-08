@@ -20,8 +20,8 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#ifndef __ERRORHANDLING_H__
-#define __ERRORHANDLING_H__
+#ifndef __INET_ERRORHANDLING_H
+#define __INET_ERRORHANDLING_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

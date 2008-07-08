@@ -1,5 +1,5 @@
-#ifndef __XMLUTILS_H__
-#define __XMLUTILS_H__
+#ifndef __INET_XMLUTILS_H
+#define __INET_XMLUTILS_H
 
 #include <omnetpp.h>
 #include "IPAddress.h"

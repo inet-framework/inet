@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ETHERENCAP_H
-#define __ETHERENCAP_H
+#ifndef __INET_ETHERENCAP_H
+#define __INET_ETHERENCAP_H
 
 #include <stdio.h>
 #include "Ethernet.h"

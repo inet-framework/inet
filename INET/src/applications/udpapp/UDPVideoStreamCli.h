@@ -21,8 +21,8 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
-#ifndef _UDPVIDEOSTREAM_H
-#define _UDPVIDEOSTREAM_H
+#ifndef __INET_UDPVIDEOSTREAM_H
+#define __INET_UDPVIDEOSTREAM_H
 
 #include <omnetpp.h>
 #include "UDPAppBase.h"

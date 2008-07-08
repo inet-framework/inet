@@ -17,8 +17,8 @@
 //
 //
 
-#ifndef __ROUTING_TABLE6_ACCESS_H__
-#define __ROUTING_TABLE6_ACCESS_H__
+#ifndef __INET_ROUTING_TABLE6_ACCESS_H
+#define __INET_ROUTING_TABLE6_ACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

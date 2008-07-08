@@ -28,8 +28,8 @@
  * over the network.
  */
 
-#ifndef __RTCPPACKET_H__
-#define __RTCPPACKET_H__
+#ifndef __INET_RTCPPACKET_H
+#define __INET_RTCPPACKET_H
 
 #include <iostream>
 #include "INETDefs.h"

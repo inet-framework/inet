@@ -1,5 +1,5 @@
-#ifndef __OSPFNEIGHBOR_HPP__
-#define __OSPFNEIGHBOR_HPP__
+#ifndef __INET_OSPFNEIGHBOR_H
+#define __INET_OSPFNEIGHBOR_H
 
 #include "OSPFPacket_m.h"
 #include "OSPFTimer_m.h"
@@ -193,5 +193,5 @@ inline bool operator!= (OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPac
     return (!(leftID == rightID));
 }
 
-#endif // __OSPFNEIGHBOR_HPP__
+#endif // __INET_OSPFNEIGHBOR_H
 

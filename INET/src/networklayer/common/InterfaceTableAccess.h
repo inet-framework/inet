@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __INTERFACETABLEACCESS_H__
-#define __INTERFACETABLEACCESS_H__
+#ifndef __INET_INTERFACETABLEACCESS_H
+#define __INET_INTERFACETABLEACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVPACCESS_H__
-#define __RSVPACCESS_H__
+#ifndef __INET_RSVPACCESS_H
+#define __INET_RSVPACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

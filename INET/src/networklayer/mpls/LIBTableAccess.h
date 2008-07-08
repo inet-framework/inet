@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __LIB_TABLE_ACCESS_H__
-#define __LIB_TABLE_ACCESS_H__
+#ifndef __INET_LIB_TABLE_ACCESS_H
+#define __INET_LIB_TABLE_ACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

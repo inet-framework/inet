@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ARP_H__
-#define __ARP_H__
+#ifndef __INET_ARP_H
+#define __INET_ARP_H
 
 #ifdef _MSC_VER
 #pragma warning(disable:4786)

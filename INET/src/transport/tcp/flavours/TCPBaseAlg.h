@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPBASEALG_H
-#define __TCPBASEALG_H
+#ifndef __INET_TCPBASEALG_H
+#define __INET_TCPBASEALG_H
 
 #include <omnetpp.h>
 #include "TCPAlgorithm.h"

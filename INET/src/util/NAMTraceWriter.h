@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __NAMTRACEWRITER_H
-#define __NAMTRACEWRITER_H
+#ifndef __INET_NAMTRACEWRITER_H
+#define __INET_NAMTRACEWRITER_H
 
 #include <iostream>
 #include <fstream>

@@ -19,8 +19,8 @@
  * This header file declares the class RTP.
  */
 
-#ifndef __RTPENDSYSTEMMODULE_H__
-#define __RTPENDSYSTEMMODULE_H__
+#ifndef __INET_RTPENDSYSTEMMODULE_H
+#define __INET_RTPENDSYSTEMMODULE_H
 
 #include "INETDefs.h"
 #include "IPvXAddress.h"

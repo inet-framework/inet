@@ -1,5 +1,5 @@
-#ifndef __LINKSTATEUPDATEHANDLER_HPP__
-#define __LINKSTATEUPDATEHANDLER_HPP__
+#ifndef __INET_LINKSTATEUPDATEHANDLER_H
+#define __INET_LINKSTATEUPDATEHANDLER_H
 
 #include "IMessageHandler.h"
 #include "OSPFcommon.h"
@@ -31,5 +31,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __LINKSTATEUPDATEHANDLER_HPP__
+#endif // __INET_LINKSTATEUPDATEHANDLER_H
 

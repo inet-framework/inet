@@ -1,5 +1,5 @@
-#ifndef __OSPFNEIGHBORSTATEDOWN_HPP__
-#define __OSPFNEIGHBORSTATEDOWN_HPP__
+#ifndef __INET_OSPFNEIGHBORSTATEDOWN_H
+#define __INET_OSPFNEIGHBORSTATEDOWN_H
 
 #include "OSPFNeighborState.h"
 
@@ -14,5 +14,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __OSPFNEIGHBORSTATEDOWN_HPP__
+#endif // __INET_OSPFNEIGHBORSTATEDOWN_H
 

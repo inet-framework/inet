@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __IQOSCLASSIFIER_H__
-#define __IQOSCLASSIFIER_H__
+#ifndef __INET_IQOSCLASSIFIER_H
+#define __INET_IQOSCLASSIFIER_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

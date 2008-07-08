@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __FIFOBASE_H
-#define __FIFOBASE_H
+#ifndef __INET_ABSTRACTQUEUE_H
+#define __INET_ABSTRACTQUEUE_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"
@@ -25,7 +25,7 @@
 
 /**
  * Abstract base class for single-server queues. Contains special
- * optimization for zero service time (i.e. it does not schedule the 
+ * optimization for zero service time (i.e. it does not schedule the
  * endService timer then).
  */
 class INET_API AbstractQueue : public cSimpleModule

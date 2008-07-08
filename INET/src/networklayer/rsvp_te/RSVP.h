@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __RSVP__H__
-#define __RSVP__H__
+#ifndef __INET_RSVP_H
+#define __INET_RSVP_H
 
 #include <vector>
 #include <omnetpp.h>

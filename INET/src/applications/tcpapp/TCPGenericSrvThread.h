@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TCPGENERICSRVTHREAD_H_
-#define __TCPGENERICSRVTHREAD_H_
+#ifndef __INET_TCPGENERICSRVTHREAD_H
+#define __INET_TCPGENERICSRVTHREAD_H
 
 #include <omnetpp.h>
 #include "TCPSrvHostApp.h"

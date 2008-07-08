@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __TEDACCESS_H__
-#define __TEDACCESS_H__
+#ifndef __INET_TEDACCESS_H
+#define __INET_TEDACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"

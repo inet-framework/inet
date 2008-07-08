@@ -1,5 +1,5 @@
-#ifndef __OSPFAREA_HPP__
-#define __OSPFAREA_HPP__
+#ifndef __INET_OSPFAREA_H
+#define __INET_OSPFAREA_H
 
 #include <vector>
 #include <map>
@@ -130,5 +130,5 @@ inline std::ostream& operator<< (std::ostream& ostr, OSPF::Area& area)
     return ostr;
 }
 
-#endif // __OSPFAREA_HPP__
+#endif // __INET_OSPFAREA_H
 

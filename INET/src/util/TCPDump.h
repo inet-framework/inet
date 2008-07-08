@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __TCPDUMP_H
-#define __TCPDUMP_H
+#ifndef __INET_TCPDUMP_H
+#define __INET_TCPDUMP_H
 
 #include <omnetpp.h>
 #include "IPvXAddress.h"

@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __ETHERAPPSRV_H
-#define __ETHERAPPSRV_H
+#ifndef __INET_ETHERAPPSRV_H
+#define __INET_ETHERAPPSRV_H
 
 #include "INETDefs.h"
 #include "MACAddress.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __QUEUEWITHQOS_H__
-#define __QUEUEWITHQOS_H__
+#ifndef __INET_QUEUEWITHQOS_H
+#define __INET_QUEUEWITHQOS_H
 
 #include "AbstractQueue.h"
 #include "EnqueueHook.h"

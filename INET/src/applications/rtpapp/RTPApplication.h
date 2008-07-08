@@ -14,8 +14,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef __RTPAPPLICATION_H__
-#define __RTPAPPLICATION_H__
+#ifndef __INET_RTPAPPLICATION_H
+#define __INET_RTPAPPLICATION_H
 
 #include "INETDefs.h"
 

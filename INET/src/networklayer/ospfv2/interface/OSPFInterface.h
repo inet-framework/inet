@@ -1,5 +1,5 @@
-#ifndef __OSPFINTERFACE_HPP__
-#define __OSPFINTERFACE_HPP__
+#ifndef __INET_OSPFINTERFACE_H
+#define __INET_OSPFINTERFACE_H
 
 #include "OSPFcommon.h"
 #include "OSPFTimer_m.h"
@@ -152,5 +152,5 @@ public:
 
 } // namespace OSPF
 
-#endif // __OSPFINTERFACE_HPP__
+#endif // __INET_OSPFINTERFACE_H
 

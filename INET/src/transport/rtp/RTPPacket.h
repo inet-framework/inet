@@ -19,8 +19,8 @@
  * This file declares the class RTPPacket.
  */
 
-#ifndef __RTPPACKET_H__
-#define __RTPPACKET_H__
+#ifndef __INET_RTPPACKET_H
+#define __INET_RTPPACKET_H
 
 #include "INETDefs.h"
 

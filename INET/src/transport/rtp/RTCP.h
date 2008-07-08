@@ -19,8 +19,8 @@
  * This file declares the class RTCP.
  */
 
-#ifndef __RTCPENDSYSTEMMODULE_H__
-#define __RTCPENDSYSTEMMODULE_H__
+#ifndef __INET_RTCPENDSYSTEMMODULE_H
+#define __INET_RTCPENDSYSTEMMODULE_H
 
 #include "INETDefs.h"
 #include "IPAddress.h"

@@ -1,5 +1,5 @@
-#ifndef __OSPFROUTINGTABLEENTRY_HPP__
-#define __OSPFROUTINGTABLEENTRY_HPP__
+#ifndef __INET_OSPFROUTINGTABLEENTRY_H
+#define __INET_OSPFROUTINGTABLEENTRY_H
 
 #include "IRoutingTable.h"
 #include "InterfaceTableAccess.h"
@@ -223,4 +223,4 @@ inline std::ostream& operator<< (std::ostream& out, const OSPF::RoutingTableEntr
     return out;
 }
 
-#endif // __OSPFROUTINGTABLEENTRY_HPP__
+#endif // __INET_OSPFROUTINGTABLEENTRY_H

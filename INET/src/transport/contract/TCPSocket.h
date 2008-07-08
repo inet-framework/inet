@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __TCPSOCKET_H
-#define __TCPSOCKET_H
+#ifndef __INET_TCPSOCKET_H
+#define __INET_TCPSOCKET_H
 
 #include <omnetpp.h>
 #include "TCPCommand_m.h"

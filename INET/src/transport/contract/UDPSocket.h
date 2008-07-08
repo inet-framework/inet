@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __UDPSOCKET_H
-#define __UDPSOCKET_H
+#ifndef __INET_UDPSOCKET_H
+#define __INET_UDPSOCKET_H
 
 #include <omnetpp.h>
 #include "UDPControlInfo_m.h"
