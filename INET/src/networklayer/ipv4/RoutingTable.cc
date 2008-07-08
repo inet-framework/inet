@@ -76,7 +76,7 @@ void RoutingTable::initialize(int stage)
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
         WATCH(IPForward);
-        WATCH(_routerId);
+        WATCH(routerId);
     }
     else if (stage==1)
     {
@@ -100,7 +100,7 @@ void RoutingTable::initialize(int stage)
         // do it later in stage 3, after network configurators configured the interfaces)
         const char *routerIdStr = par("routerId").stringValue();
         if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
-            _routerId = IPAddress(routerIdStr);
+            routerId = IPAddress(routerIdStr);
     }
     else if (stage==3)
     {
@@ -118,7 +118,7 @@ void RoutingTable::initialize(int stage)
 
 void RoutingTable::autoconfigRouterId()
 {
-    if (_routerId.isUnspecified())  // not yet configured
+    if (routerId.isUnspecified())  // not yet configured
     {
         const char *routerIdStr = par("routerId").stringValue();
         if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in stage 1
@@ -127,8 +127,8 @@ void RoutingTable::autoconfigRouterId()
             for (int i=0; i<ift->getNumInterfaces(); ++i)
             {
                 InterfaceEntry *ie = ift->getInterface(i);
-                if (!ie->isLoopback() && ie->ipv4Data()->getIPAddress().getInt() > _routerId.getInt())
-                    _routerId = ie->ipv4Data()->getIPAddress();
+                if (!ie->isLoopback() && ie->ipv4Data()->getIPAddress().getInt() > routerId.getInt())
+                    routerId = ie->ipv4Data()->getIPAddress();
             }
         }
     }
@@ -136,10 +136,10 @@ void RoutingTable::autoconfigRouterId()
     {
         // if there is no interface with routerId yet, assign it to the loopback address;
         // TODO find out if this is a good practice, in which situations it is useful etc.
-        if (getInterfaceByAddress(_routerId)==NULL)
+        if (getInterfaceByAddress(routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-            lo0->ipv4Data()->setIPAddress(_routerId);
+            lo0->ipv4Data()->setIPAddress(routerId);
             lo0->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS);
         }
     }
@@ -151,10 +151,10 @@ void RoutingTable::updateDisplayString()
         return;
 
     char buf[80];
-    if (_routerId.isUnspecified())
+    if (routerId.isUnspecified())
         sprintf(buf, "%d+%d routes", routes.size(), multicastRoutes.size());
     else
-        sprintf(buf, "routerId: %s\n%d+%d routes", _routerId.str().c_str(), routes.size(), multicastRoutes.size());
+        sprintf(buf, "routerId: %s\n%d+%d routes", routerId.str().c_str(), routes.size(), multicastRoutes.size());
     getDisplayString().setTagArg("t",0,buf);
 }
 

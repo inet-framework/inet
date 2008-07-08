@@ -76,7 +76,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
-    IPAddress _routerId;
+    IPAddress routerId;
     bool IPForward;
 
     //
@@ -150,12 +150,12 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     /**
      * Returns routerId.
      */
-    virtual IPAddress getRouterId()  {return _routerId;}
+    virtual IPAddress getRouterId()  {return routerId;}
 
     /**
      * Sets routerId.
      */
-    virtual void setRouterId(IPAddress a)  {_routerId = a;}
+    virtual void setRouterId(IPAddress a)  {routerId = a;}
 
     /** @name Routing functions (query the route table) */
     //@{
