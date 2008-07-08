@@ -255,7 +255,8 @@ void RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
 
 InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPAddress& addr) const
 {
-    Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
+    Enter_Method("getInterfaceByAddress(%x)", addr.getInt()); // note: str().c_str() too slow here
+
     if (addr.isUnspecified())
         return NULL;
     for (int i=0; i<ift->getNumInterfaces(); ++i)
@@ -285,7 +286,7 @@ void RoutingTable::configureLoopbackForIPv4()
 
 bool RoutingTable::isLocalAddress(const IPAddress& dest) const
 {
-    Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalAddress(%x)", dest.getInt()); // note: str().c_str() too slow here
 
     if (localAddresses.empty())
     {
@@ -303,7 +304,7 @@ bool RoutingTable::isLocalAddress(const IPAddress& dest) const
 
 bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
 {
-    Enter_Method("isLocalMulticastAddress(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalMulticastAddress(%x)", dest.getInt()); // note: str().c_str() too slow here
 
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
@@ -342,7 +343,7 @@ const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 
 InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest) const
 {
-    Enter_Method("getInterfaceForDestAddr(%s)=?", dest.str().c_str());
+    Enter_Method("getInterfaceForDestAddr(%x)", dest.getInt()); // note: str().c_str() too slow here
 
     const IPRoute *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : NULL;
@@ -350,7 +351,7 @@ InterfaceEntry *RoutingTable::getInterfaceForDestAddr(const IPAddress& dest) con
 
 IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest) const
 {
-    Enter_Method("getGatewayForDestAddr(%s)=?", dest.str().c_str());
+    Enter_Method("getGatewayForDestAddr(%x)", dest.getInt()); // note: str().c_str() too slow here
 
     const IPRoute *e = findBestMatchingRoute(dest);
     return e ? e->getGateway() : IPAddress();
@@ -359,7 +360,7 @@ IPAddress RoutingTable::getGatewayForDestAddr(const IPAddress& dest) const
 
 MulticastRoutes RoutingTable::getMulticastRoutesFor(const IPAddress& dest) const
 {
-    Enter_Method("getMulticastRoutesFor(%s)=?", dest.str().c_str());
+    Enter_Method("getMulticastRoutesFor(%x)", dest.getInt()); // note: str().c_str() too slow here here
 
     MulticastRoutes res;
     res.reserve(16);
