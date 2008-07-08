@@ -16,6 +16,8 @@ Internal snapshot, for omnetpp-4.0b3.
 
 - UDPEchoApp: messageLength parameter now understood in bytes not bits
 
+- RoutingTable: implemented routing cache and other optimizations
+
 
 INET-20080630
 -------------

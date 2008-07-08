@@ -106,7 +106,7 @@ void RoutingTable::initialize(int stage)
     {
         // routerID selection must be after stage==2 when network autoconfiguration
         // assigns interface addresses
-        autoconfigRouterId();
+        configureRouterId();
 
         // we don't use notifications during initialize(), so we do it manually.
         // Should be in stage=3 because autoconfigurator runs in stage=2.
@@ -116,7 +116,7 @@ void RoutingTable::initialize(int stage)
     }
 }
 
-void RoutingTable::autoconfigRouterId()
+void RoutingTable::configureRouterId()
 {
     if (routerId.isUnspecified())  // not yet configured
     {
@@ -216,6 +216,12 @@ void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
     }
 }
 
+void RoutingTable::invalidateCache()
+{
+    routingCache.clear();
+    localAddresses.clear();
+}
+
 void RoutingTable::printRoutingTable() const
 {
     EV << "-- Routing table --\n";
@@ -281,14 +287,18 @@ bool RoutingTable::isLocalAddress(const IPAddress& dest) const
 {
     Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
-    // check if we have an interface with this address
-    for (int i=0; i<ift->getNumInterfaces(); i++)
+    if (localAddresses.empty())
     {
-        InterfaceEntry *ie = ift->getInterface(i);
-        if (dest==ie->ipv4Data()->getIPAddress())
-            return true;
+        // collect interface addresses if not yet done
+        for (int i=0; i<ift->getNumInterfaces(); i++)
+        {
+            IPAddress interfaceAddr = ift->getInterface(i)->ipv4Data()->getIPAddress();
+            localAddresses.insert(interfaceAddr);
+        }
     }
-    return false;
+
+    AddressSet::iterator it = localAddresses.find(dest);
+    return it!=localAddresses.end();
 }
 
 bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
@@ -308,6 +318,10 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
 
 const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 {
+    RoutingCache::iterator it = routingCache.find(dest);
+    if (it != routingCache.end())
+        return it->second;
+
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     const IPRoute *bestRoute = NULL;
@@ -322,6 +336,7 @@ const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
             longestNetmask = e->getNetmask().getInt();
         }
     }
+    routingCache[dest] = bestRoute;
     return bestRoute;
 }
 
@@ -407,6 +422,7 @@ void RoutingTable::addRoute(const IPRoute *entry)
     else
         multicastRoutes.push_back(const_cast<IPRoute*>(entry));
 
+    invalidateCache();
     updateDisplayString();
 
     nb->fireChangeNotification(NF_IPv4_ROUTE_ADDED, entry);
@@ -423,6 +439,7 @@ bool RoutingTable::deleteRoute(const IPRoute *entry)
         nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         routes.erase(i);
         delete entry;
+        invalidateCache();
         updateDisplayString();
         return true;
     }
@@ -432,6 +449,7 @@ bool RoutingTable::deleteRoute(const IPRoute *entry)
         nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry); // rather: going to be deleted
         multicastRoutes.erase(i);
         delete entry;
+        invalidateCache();
         updateDisplayString();
         return true;
     }
@@ -482,6 +500,7 @@ void RoutingTable::updateNetmaskRoutes()
         }
     }
 
+    invalidateCache();
     updateDisplayString();
 }
 

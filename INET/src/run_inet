@@ -1,0 +1,3 @@
+#! /bin/sh 
+DIR=`dirname $0`
+$DIR/inet -n $DIR/../examples:$DIR $*

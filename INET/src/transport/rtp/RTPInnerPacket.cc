@@ -33,7 +33,7 @@ RTPInnerPacket::RTPInnerPacket(const char *name) : cMessage(name) {
     _mtu = 0;
     _bandwidth = 0;
     _rtcpPercentage = 0;
-    _address = IPADDRESS_UNDEF;
+    _address = IPAddress::UNSPECIFIED_ADDRESS;
     _port = PORT_UNDEF;
     _ssrc = 0;
     _payloadType = 0;

@@ -86,6 +86,14 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     RouteVector routes;          // Unicast route array
     RouteVector multicastRoutes; // Multicast route array
 
+    // routing cache: maps destination address to the route
+    typedef std::map<IPAddress, const IPRoute *> RoutingCache;
+    mutable RoutingCache routingCache;
+
+    // local addresses cache (to speed up isLocalAddress())
+    typedef std::set<IPAddress> AddressSet;
+    mutable AddressSet localAddresses;
+
   protected:
     // set IP address etc on local loopback
     virtual void configureLoopbackForIPv4();
@@ -96,7 +104,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
         int metric, const char *dev) const;
 
     // set router Id
-    virtual void autoconfigRouterId();
+    virtual void configureRouterId();
 
     // adjust routes with src=IFACENETMASK to actual interface netmasks
     virtual void updateNetmaskRoutes();
@@ -106,6 +114,9 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
 
     // delete routes for the given interface
     virtual void deleteInterfaceRoutes(InterfaceEntry *entry);
+
+    // invalidates routing cache and local addresses cache
+    virtual void invalidateCache();
 
   public:
     RoutingTable();

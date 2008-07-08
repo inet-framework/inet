@@ -29,7 +29,7 @@ RTPInterfacePacket::RTPInterfacePacket(const char *name) : cMessage(name) {
     _commonName = NULL;
     _profileName = NULL;
     _bandwidth = 0;
-    _destinationAddress = IPADDRESS_UNDEF;
+    _destinationAddress = IPAddress::UNSPECIFIED_ADDRESS;
     _port = PORT_UNDEF;
     _ssrc = 0;
     _payloadType = 0;

@@ -1,3 +1,8 @@
+2008-07-08  Andras Varga
+
+	* RoutingTable: implemented routing cache [code based on OverSim 
+	patch]; similar performance optimization for isLocalAddress()
+
 2008-07-07  Andras Varga
 
 	* introduced IRoutingTable, to allow users implement their own 

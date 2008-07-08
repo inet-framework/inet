@@ -35,7 +35,7 @@ RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) : cObject() {
     // it but not to regard this endsystem as a sender
     // it is set to 3; see isSender() for details
     _silentIntervals = 3;
-    _address = IPADDRESS_UNDEF;
+    _address = IPAddress::UNSPECIFIED_ADDRESS;
     _rtpPort = PORT_UNDEF;
     _rtcpPort = PORT_UNDEF;
 };
