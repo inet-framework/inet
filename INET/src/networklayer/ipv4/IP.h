@@ -46,6 +46,7 @@ class INET_API IP : public QueueBase
     IRoutingTable *rt;
     IInterfaceTable *ift;
     ICMPAccess icmpAccess;
+    cGate *queueOutGate; // the most frequently used output gate
 
     // config
     int defaultTimeToLive;

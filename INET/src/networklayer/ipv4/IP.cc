@@ -38,6 +38,8 @@ void IP::initialize()
     ift = InterfaceTableAccess().get();
     rt = RoutingTableAccess().get();
 
+    queueOutGate = gate("queueOut");
+
     defaultTimeToLive = par("timeToLive");
     defaultMCTimeToLive = par("multicastTimeToLive");
     fragmentTimeoutTime = par("fragmentTimeout");
@@ -142,7 +144,7 @@ void IP::handleARP(ARPPacket *msg)
     routingDecision->setInterfaceId(fromIE->getInterfaceId());
     msg->setControlInfo(routingDecision);
 
-    send(msg, "queueOut");
+    send(msg, queueOutGate);
 }
 
 void IP::handleReceivedICMP(ICMPMessage *msg)
@@ -568,7 +570,7 @@ void IP::sendDatagramToOutput(IPDatagram *datagram, InterfaceEntry *ie, IPAddres
     routingDecision->setNextHopAddr(nextHopAddr);
     datagram->setControlInfo(routingDecision);
 
-    send(datagram, "queueOut");
+    send(datagram, queueOutGate);
 }
 
 
