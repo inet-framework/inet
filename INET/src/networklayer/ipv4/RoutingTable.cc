@@ -174,7 +174,7 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     if (category==NF_INTERFACE_CREATED)
     {
         // add netmask route for the new interface
-        updateNetmaskRoutes();     //FIXME only for the new one!!!
+        updateNetmaskRoutes();
     }
     else if (category==NF_INTERFACE_DELETED)
     {
@@ -184,11 +184,11 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
-        //TODO invalidate routing cache
+        invalidateCache();
     }
     else if (category==NF_INTERFACE_CONFIG_CHANGED)
     {
-        //TODO invalidate routing cache
+        invalidateCache();
     }
     else if (category==NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
