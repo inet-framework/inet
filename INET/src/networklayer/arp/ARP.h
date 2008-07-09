@@ -19,10 +19,6 @@
 #ifndef __INET_ARP_H
 #define __INET_ARP_H
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <vector>

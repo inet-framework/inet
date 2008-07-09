@@ -16,16 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
-
 #include "MACRelayUnitNP.h"
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
-
 
 
 Define_Module( MACRelayUnitNP );

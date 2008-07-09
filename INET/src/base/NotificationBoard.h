@@ -20,10 +20,6 @@
 #ifndef __INET_NOTIFICATIONBOARD_H
 #define __INET_NOTIFICATIONBOARD_H
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4786)
-#endif
-
 #include <omnetpp.h>
 #include <map>
 #include <vector>

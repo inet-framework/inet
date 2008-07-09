@@ -19,10 +19,6 @@
 #ifndef __INET_TCPMAIN_H
 #define __INET_TCPMAIN_H
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4786)
-#endif
-
 #include <map>
 #include <set>
 #include <omnetpp.h>

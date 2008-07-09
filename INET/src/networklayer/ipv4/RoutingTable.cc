@@ -319,6 +319,8 @@ bool RoutingTable::isLocalMulticastAddress(const IPAddress& dest) const
 
 const IPRoute *RoutingTable::findBestMatchingRoute(const IPAddress& dest) const
 {
+    Enter_Method("findBestMatchingRoute(%x)", dest.getInt()); // note: str().c_str() too slow here
+
     RoutingCache::iterator it = routingCache.find(dest);
     if (it != routingCache.end())
         return it->second;

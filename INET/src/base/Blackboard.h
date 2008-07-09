@@ -21,10 +21,6 @@
 #ifndef __INET_BLACKBOARD_H
 #define __INET_BLACKBOARD_H
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4786)
-#endif
-
 #include <map>
 #include <vector>
 #include <omnetpp.h>
