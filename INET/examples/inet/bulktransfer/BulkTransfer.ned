@@ -24,13 +24,13 @@ package inet.examples.inet.bulktransfer;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network BulkTransfer
 {
     types:
-        channel C extends BasicChannel
+        channel C extends DatarateChannel
         {
             datarate = 1Mbps;
             delay = 0.1us;

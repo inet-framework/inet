@@ -54,7 +54,7 @@ void EtherMAC2::initializeTxrate()
         while (g)
         {
             // does this gate have data rate?
-            cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->getChannel());
+            cDatarateChannel *chan = dynamic_cast<cDatarateChannel*>(g->getChannel());
             if (chan && (txrate=chan->par("datarate").doubleValue())>0)
                 break;
             // otherwise just check next connection in path

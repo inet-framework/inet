@@ -5,14 +5,14 @@ import inet.transport.rtp.RTPHost;
 network RTPNetwork
 {
     types:
-        channel ethernet extends ned.BasicChannel
+        channel ethernet extends ned.DatarateChannel
         {
             parameters:
                 delay = normal(0.00015s, 0.00005s);
                 datarate = 10Mbps;
                 ber = 0.00001;
         }
-    
+
     submodules:
         sender: RTPHost {
             parameters:

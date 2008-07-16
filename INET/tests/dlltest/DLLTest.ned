@@ -19,14 +19,14 @@
 
 
 
-channel fiberline extends BasicChannel
+channel fiberline extends DatarateChannel
 {
     parameters:
         delay = 1us;
         datarate = 512*1000000;
 }
 
-channel ethernetline extends BasicChannel
+channel ethernetline extends DatarateChannel
 {
     parameters:
         delay = 0.1us;

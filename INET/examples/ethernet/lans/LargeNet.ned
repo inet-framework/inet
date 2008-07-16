@@ -23,10 +23,10 @@ import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.ethernet.EtherHost;
 import inet.nodes.ethernet.EtherSwitch;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
-channel cable extends BasicChannel
+channel cable extends DatarateChannel
 {
     parameters:
         delay = 0.1us;

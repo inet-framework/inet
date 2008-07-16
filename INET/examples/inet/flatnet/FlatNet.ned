@@ -26,18 +26,18 @@ import inet.examples.ethernet.lans.ethernetline;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network FlatNet
 {
     types:
-        channel fiberline extends BasicChannel
+        channel fiberline extends DatarateChannel
         {
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends BasicChannel
+        channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;

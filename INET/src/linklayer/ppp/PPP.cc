@@ -80,7 +80,7 @@ void PPP::initialize(int stage)
             while (gateToWatch)
             {
                 // does this gate have data rate?
-                cBasicChannel *chan = dynamic_cast<cBasicChannel*>(gateToWatch->getChannel());
+                cDatarateChannel *chan = dynamic_cast<cDatarateChannel*>(gateToWatch->getChannel());
                 if (chan && (datarate=chan->par("datarate").doubleValue())>0)
                     break;
                 // otherwise just check next connection in path

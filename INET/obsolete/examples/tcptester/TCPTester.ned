@@ -121,7 +121,7 @@ module Server
 //
 // Part of TCPTester.
 //
-channel connectSwitchStation extends BasicChannel
+channel connectSwitchStation extends DatarateChannel
 {
     parameters:
         delay = normal (0.000001, 0.00000025); //mean, deviation

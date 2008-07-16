@@ -27,7 +27,7 @@ import inet.nodes.ethernet.EtherHost2;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.ethernet.EtherSwitch2;
 import inet.world.ChannelInstaller;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 //
@@ -151,7 +151,7 @@ network TwoHosts
 network SwitchedLAN
 {
     types:
-        channel C extends BasicChannel
+        channel C extends DatarateChannel
         {
             delay = 0.1us;
         }
@@ -259,7 +259,7 @@ network BusLAN
         bus.ethg[3] <--> hostD.ethg;
 }
 
-channel ethernetline extends BasicChannel
+channel ethernetline extends DatarateChannel
 {
     parameters:
         delay = 0.1us;

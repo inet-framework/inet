@@ -24,7 +24,7 @@ import inet.networklayer.autorouting.FlatNetworkConfigurator6;
 import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;
 import inet.util.TCPDump;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network DemoNetworkEth
@@ -32,7 +32,7 @@ network DemoNetworkEth
     parameters:
         int n;
     types:
-        channel ethernetline extends BasicChannel
+        channel ethernetline extends DatarateChannel
         {
             delay = 0.1us;
         }

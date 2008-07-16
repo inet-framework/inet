@@ -26,7 +26,7 @@
 #include "INETDefs.h"
 
 /**
- * A cBasicChannel extended with throughput calculation. Values
+ * A cDatarateChannel extended with throughput calculation. Values
  * get displayed on the link, using the connection's "t=" display
  * string tag.
  *
@@ -48,7 +48,7 @@
  * PROBLEM: display only gets updated if there's traffic! (For example, a
  * high pk/sec value might stay displayed even when the link becomes idle!)
  */
-class SIM_API ThruputMeteringChannel : public cBasicChannel
+class SIM_API ThruputMeteringChannel : public cDatarateChannel
 {
   protected:
     // configuration

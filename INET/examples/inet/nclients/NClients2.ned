@@ -21,7 +21,7 @@ package inet.examples.inet.nclients;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network NClients2
@@ -30,12 +30,12 @@ network NClients2
         int numRouters;
         int hostsPerRouter;
     types:
-        channel ethernetline2 extends BasicChannel
+        channel ethernetline2 extends DatarateChannel
         {
             delay = 0.1us;
             datarate = 100Mbps;
         }
-        channel gigabitline2 extends BasicChannel
+        channel gigabitline2 extends DatarateChannel
         {
             delay = 0.1us;
             datarate = 1Gbps;

@@ -5,7 +5,7 @@ import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
 import inet.world.ChannelInstaller;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network Backbone
@@ -13,7 +13,7 @@ network Backbone
     parameters:
         @display("p=10,10;b=736,568");
     types:
-        channel C extends BasicChannel
+        channel C extends DatarateChannel
         {
             delay = 0.1us;
         }

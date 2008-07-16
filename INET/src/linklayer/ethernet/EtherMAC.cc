@@ -60,7 +60,7 @@ void EtherMAC::initialize()
     cGate *g = physOutGate;
     while (g)
     {
-        cBasicChannel *chan = dynamic_cast<cBasicChannel*>(g->getChannel());
+        cDatarateChannel *chan = dynamic_cast<cDatarateChannel*>(g->getChannel());
         if (chan && chan->par("datarate").doubleValue()>0)
             error("connection on gate %s has data rate set: using data rate with EtherMAC "
                   "is forbidden, module's txrate parameter must be used instead",

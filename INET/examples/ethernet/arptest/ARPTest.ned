@@ -18,13 +18,13 @@ import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network ARPTest
 {
     types:
-        channel fiberline extends BasicChannel
+        channel fiberline extends DatarateChannel
         {
             delay = 1us;
             datarate = 512Mbps;

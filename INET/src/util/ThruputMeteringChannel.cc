@@ -23,7 +23,7 @@
 
 Register_Class(ThruputMeteringChannel);
 
-ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel(name)
+ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)
 {
     fmtp = NULL;
     batchSize = 10;    // packets
@@ -36,7 +36,7 @@ ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cBasicChannel
     intvlNumPackets = intvlNumBits = 0;
 }
 
-ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cBasicChannel()
+ThruputMeteringChannel::ThruputMeteringChannel(const ThruputMeteringChannel& ch) : cDatarateChannel()
 {
     setName(ch.getName());
     operator=(ch);
@@ -51,7 +51,7 @@ ThruputMeteringChannel::~ThruputMeteringChannel()
 ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringChannel& ch)
 {
     if (this==&ch) return *this;
-    cBasicChannel::operator=(ch);
+    cDatarateChannel::operator=(ch);
     numPackets = ch.numPackets;
     numBits = ch.numBits;
     return *this;
@@ -59,7 +59,7 @@ ThruputMeteringChannel& ThruputMeteringChannel::operator=(const ThruputMeteringC
 
 cPar& ThruputMeteringChannel::addPar(const char *s)
 {
-    cPar *p = &cBasicChannel::addPar(s);
+    cPar *p = &cDatarateChannel::addPar(s);
     if (!opp_strcmp(s,"format"))
         fmtp = p;
     return *p;
@@ -67,7 +67,7 @@ cPar& ThruputMeteringChannel::addPar(const char *s)
 
 cPar& ThruputMeteringChannel::addPar(cPar *p)
 {
-    cBasicChannel::addPar(p);
+    cDatarateChannel::addPar(p);
     const char *s = p->getName();
     if (!opp_strcmp(s,"format"))
         fmtp = p;
@@ -76,7 +76,7 @@ cPar& ThruputMeteringChannel::addPar(cPar *p)
 
 bool ThruputMeteringChannel::deliver(cMessage *msg, simtime_t t)
 {
-    bool ret = cBasicChannel::deliver(msg, t);
+    bool ret = cDatarateChannel::deliver(msg, t);
 
     // count packets and bits
     numPackets++;

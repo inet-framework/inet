@@ -6,7 +6,7 @@ package inet.examples.ospfv2.fulltest;
 import inet.linklayer.ethernet.EtherHub;
 import inet.nodes.inet.OSPFRouter;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 module OSPF_Area1
@@ -16,7 +16,7 @@ module OSPF_Area1
     gates:
         inout ethg[];
     types:
-        channel C extends BasicChannel
+        channel C extends DatarateChannel
         {
             delay = 0.1us;
         }

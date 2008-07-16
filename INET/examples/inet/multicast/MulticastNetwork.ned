@@ -25,23 +25,23 @@ package inet.examples.inet.multicast;
 
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network MulticastNetwork
 {
     types:
-        channel ethernet extends BasicChannel
+        channel ethernet extends DatarateChannel
         {
             delay = normal(0.00015s, 0.00005s);
             datarate = 10Mbps;
         }
-        channel dialup extends BasicChannel
+        channel dialup extends DatarateChannel
         {
             delay = normal(0.004s, 0.0018s);
             datarate = 64Kbps;
         }
-        channel fiberrouter extends BasicChannel
+        channel fiberrouter extends DatarateChannel
         {
             delay = normal(0.000001s, 0.0000001s);
             datarate = 512Mbps;

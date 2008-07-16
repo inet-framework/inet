@@ -17,13 +17,13 @@ import inet.nodes.inet.StandardHost;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.world.ChannelInstaller;
 import inet.world.NAMTrace;
-import ned.BasicChannel;
+import ned.DatarateChannel;
 
 
 network R37
 {
     types:
-        channel line extends BasicChannel
+        channel line extends DatarateChannel
         {
             delay = 15ms;
             datarate = 128Kbps;
