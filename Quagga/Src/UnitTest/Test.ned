@@ -1,7 +1,7 @@
 
 package org.omnetpp.inet.Network.Quagga.UnitTest;
 
-import ned.cBasicChannel;
+import ned.DatarateChannel;
 import org.omnetpp.inet.World.ChannelInstaller;
 
 
@@ -9,7 +9,7 @@ import org.omnetpp.inet.World.ChannelInstaller;
 network Test
 {
     types:
-        channel ethernetlineX extends cBasicChannel
+        channel ethernetlineX extends DatarateChannel
         {
             parameters:
                 delay = 10ms;

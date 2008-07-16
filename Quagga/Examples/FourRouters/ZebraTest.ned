@@ -23,7 +23,7 @@
 
 package org.omnetpp.inet.examples.Quagga.FourRouters;
 
-import ned.cBasicChannel;
+import ned.DatarateChannel;
 import org.omnetpp.inet.Network.Extras.FailureManager;
 import org.omnetpp.inet.Nodes.INET.QuaggaRouter;
 import org.omnetpp.inet.Nodes.INET.StandardHost;
@@ -38,12 +38,12 @@ network ZebraTest
     parameters:
         int n;
     types:
-        channel fiberline extends cBasicChannel
+        channel fiberline extends DatarateChannel
         {
             delay = 1ms;
             datarate = 1Mbps;
         }
-        channel ethernetline extends cBasicChannel
+        channel ethernetline extends DatarateChannel
         {
             delay = 10ms;
             datarate = 100Kbps;

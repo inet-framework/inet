@@ -1,7 +1,7 @@
 
 package org.omnetpp.inet.examples.Quagga.SimpleTest;
 
-import ned.cBasicChannel;
+import ned.DatarateChannel;
 import org.omnetpp.inet.NetworkInterfaces.Ethernet.EtherHub;
 import org.omnetpp.inet.Nodes.INET.QuaggaRouter;
 import org.omnetpp.inet.Nodes.INET.StandardHost;
@@ -13,7 +13,7 @@ network SimpleTest
     parameters:
         @display("p=10,10;b=712,152");
     types:
-        channel C extends cBasicChannel
+        channel C extends DatarateChannel
         {
             delay = 0.1us;
         }
