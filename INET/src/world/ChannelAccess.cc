@@ -85,7 +85,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
                 coreEV << "sending message to host listening on the same channel\n";
                 // account for propagation delay, based on distance in meters
                 // Over 300m, dt=1us=10 bit times @ 10Mbps
-                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, mod, radioGate->getId() + i);
+                sendDirect((cMessage *)msg->dup(), myHostRef->pos.distance(h->pos) / LIGHT_SPEED, msg->getDuration(), mod, radioGate->getId() + i);
             }
             else
                 coreEV << "skipping host listening on a different channel\n";

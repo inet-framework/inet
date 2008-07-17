@@ -45,6 +45,8 @@ void BasicSnrEval::initialize(int stage)
 
     if (stage == 0)
     {
+        gate("radioIn")->setDeliverOnReceptionStart(true);
+
         uppergateIn = findGate("uppergateIn");
         uppergateOut = findGate("uppergateOut");
 

@@ -403,7 +403,7 @@ void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const Sender
     if (handler == getId())
         scheduleAt(simTime() + delay, msg);
     else
-        sendDirect(msg, delay, mod, "from_rsvp");
+        sendDirect(msg, delay, 0, mod, "from_rsvp");
 }
 
 void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg* msg)

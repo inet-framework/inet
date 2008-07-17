@@ -36,6 +36,8 @@ void SnrEval::initialize(int stage)
 
     if (stage == 0)
     {
+        gate("radioIn")->setDeliverOnReceptionStart(true);
+
         // read parameters
         rs.setChannelNumber(par("channelNumber"));
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
@@ -481,7 +483,7 @@ void SnrEval::changeChannel(int channel)
                 // we need to send to each radioIn[] gate
                 cGate *radioGate = gate("radioIn");
                 for (int i = 0; i < radioGate->size(); i++)
-                    sendDirect((cMessage*)frame->dup(), frame->getTimestamp() + propagationDelay - simTime(), this, radioGate->getId() + i);
+                    sendDirect((cMessage*)frame->dup(), frame->getTimestamp() + propagationDelay - simTime(), frame->getDuration(), this, radioGate->getId() + i);
             }
             // if we hear some part of the message
             else if (frame->getTimestamp() + frame->getDuration() + propagationDelay > simTime())

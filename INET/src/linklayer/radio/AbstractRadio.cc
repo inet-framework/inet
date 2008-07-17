@@ -42,6 +42,8 @@ void AbstractRadio::initialize(int stage)
 
     if (stage == 0)
     {
+        gate("radioIn")->setDeliverOnReceptionStart(true);
+
         uppergateIn = findGate("uppergateIn");
         uppergateOut = findGate("uppergateOut");
 
@@ -592,7 +594,7 @@ void AbstractRadio::changeChannel(int channel)
 
                  // we need to send to each radioIn[] gate of this host
                  for (int i = 0; i < radioGate->size(); i++)
-                     sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), myHost, radioGate->getId() + i);
+                     sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
             }
             // if we hear some part of the message
             else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
