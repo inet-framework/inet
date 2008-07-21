@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>   // min,max
 #include "TCPTahoe.h"
 #include "TCP.h"
 
@@ -32,8 +33,8 @@ void TCPTahoe::recalculateSlowStartThreshold()
 {
     // set ssthresh to flight size/2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
-    uint flight_size = Min(state->snd_cwnd, state->snd_wnd);
-    state->ssthresh = Max(flight_size/2, 2*state->snd_mss);
+    uint flight_size = std::min(state->snd_cwnd, state->snd_wnd);
+    state->ssthresh = std::max(flight_size/2, 2*state->snd_mss);
     if (ssthreshVector) ssthreshVector->record(state->ssthresh);
 }
 

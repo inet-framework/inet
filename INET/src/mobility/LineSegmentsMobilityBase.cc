@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>   // min,max
 #include "LineSegmentsMobilityBase.h"
 #include "FWMath.h"
 
@@ -58,7 +59,7 @@ void LineSegmentsMobilityBase::beginNextMove(cMessage *msg)
     {
         // no movement, just wait
         step.x = step.y = 0;
-        scheduleAt(Max(targetTime,simTime()), msg);
+        scheduleAt(std::max(targetTime,simTime()), msg);
     }
     else
     {

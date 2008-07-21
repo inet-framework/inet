@@ -18,6 +18,7 @@
 
 
 #include <string.h>
+#include <algorithm>   // min,max
 #include "TCP.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
@@ -506,7 +507,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, int congestionWindow)
     // make agressive use of the window until the last byte
     while (bytesToSend>0)
     {
-        ulong bytes = Min(bytesToSend, state->snd_mss);
+        ulong bytes = std::min(bytesToSend, state->snd_mss);
         sendSegment(bytes);
         bytesToSend -= bytes;
     }
@@ -578,7 +579,7 @@ void TCPConnection::retransmitOneSegment()
     // retransmit one segment at snd_una, and set snd_nxt accordingly
     state->snd_nxt = state->snd_una;
 
-    ulong bytes = Min(state->snd_mss, state->snd_max - state->snd_nxt);
+    ulong bytes = std::min(state->snd_mss, state->snd_max - state->snd_nxt);
     ASSERT(bytes!=0);
 
     sendSegment(bytes);
@@ -597,7 +598,7 @@ void TCPConnection::retransmitData()
 
     while (bytesToSend>0)
     {
-        ulong bytes = Min(bytesToSend, state->snd_mss);
+        ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);
         sendSegment(bytes);
         bytesToSend -= bytes;
     }
