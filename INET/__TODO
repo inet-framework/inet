@@ -1,3 +1,4 @@
+
 TODO: IRoutingTable6, ITED, etc!
 
 TODO routingTable optimizations from Gamer!
@@ -10,6 +11,7 @@ TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision
 - move "q=queue" too into the default display string
 - add gate @labels
 - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
+- ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
 
 -----------------------
 TODO rename the following TED.h methods to begin with a verb:
