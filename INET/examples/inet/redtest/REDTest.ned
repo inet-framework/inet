@@ -68,7 +68,7 @@ network REDTest
             parameters:
                 @display("p=420,195;i=device/laptop");
         }
-    connections allowunconnected:
+    connections:
         r1.pppg++ <--> {  datarate = 1.5Mbps; delay = 20ms; } <--> r2.pppg++;
         s1.pppg++ <--> {  datarate = 10Mbps; delay = 2ms; } <--> r1.pppg++;
         s2.pppg++ <--> {  datarate = 10Mbps; delay = 3ms; } <--> r1.pppg++;

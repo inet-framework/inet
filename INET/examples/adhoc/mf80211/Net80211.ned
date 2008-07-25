@@ -47,6 +47,5 @@ network Net80211
             parameters:
                 @display("p=140,50");
         }
-    connections allowunconnected:
 }
 

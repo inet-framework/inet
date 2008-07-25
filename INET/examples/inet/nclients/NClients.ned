@@ -80,7 +80,7 @@ network NClients
             parameters:
                 @display("p=544,194;i=device/server_l");
         }
-    connections allowunconnected:
+    connections:
         for i=0..n-1 {
             cli[i].pppg++ <--> ethernetline <--> r1.pppg++;
         }

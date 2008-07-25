@@ -51,7 +51,7 @@ network NClients2
             parameters:
                 @display("i=device/server_l");
         }
-    connections allowunconnected:
+    connections:
         for i=0..numRouters-1, for j=0..hostsPerRouter-1 {
             cli[i*hostsPerRouter+j].pppg++ <--> ethernetline2 <--> r[i].pppg++;
         }

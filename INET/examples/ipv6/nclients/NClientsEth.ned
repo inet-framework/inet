@@ -49,7 +49,7 @@ network NClientsEth
         cli[n]: StandardHost6;
         srv: StandardHost6;
         hub: EtherHub;
-    connections allowunconnected:
+    connections:
         for i=0..n-1 {
             cli[i].ethg++ <--> ethernetline <--> hub.ethg++;
         }

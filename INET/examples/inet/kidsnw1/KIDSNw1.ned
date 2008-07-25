@@ -75,7 +75,7 @@ network KIDSNw1
             gates:
                 pppg[2];
         }
-    connections allowunconnected:
+    connections:
         // host connections
         host[0].pppg[0] <--> ethernet <--> fhrouter[0].pppg[0];
         host[1].pppg[0] <--> ethernet <--> fhrouter[0].pppg[1];

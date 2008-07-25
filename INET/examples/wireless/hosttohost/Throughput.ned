@@ -34,7 +34,7 @@ module ThroughputClient
     parameters:
         @display("i=device/wifilaptop");
     gates:
-        input radioIn;
+        input radioIn @directIn;
 
     submodules:
         notificationBoard: NotificationBoard {
@@ -64,7 +64,7 @@ module ThroughputServer
     parameters:
         @display("i=device/wifilaptop");
     gates:
-        input radioIn;
+        input radioIn @directIn;
 
     submodules:
         notificationBoard: NotificationBoard {
@@ -114,6 +114,5 @@ network Throughput
                 playgroundSizeY = playgroundSizeY;
                 @display("p=61,46");
         }
-    connections allowunconnected:
 }
 

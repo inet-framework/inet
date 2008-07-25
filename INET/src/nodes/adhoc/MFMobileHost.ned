@@ -53,7 +53,7 @@ module MFMobileHost
         string mobilityType = default("NullMobility");
         @display("i=device/pocketpc_s");
     gates:
-        input radioIn;
+        input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

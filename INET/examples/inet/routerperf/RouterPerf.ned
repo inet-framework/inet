@@ -56,7 +56,7 @@ network RouterPerfNetwork
             parameters:
                 @display("p=210,190");
         }
-    connections allowunconnected:
+    connections:
         for i=0..nodeNo-1 {
             sender[i].pppg++ <--> {  datarate = 1Mbps; } <--> router.pppg++;
             recip[i].pppg++ <--> {  datarate = 1Mbps; } <--> router.pppg++;

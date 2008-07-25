@@ -73,7 +73,7 @@ network REDTestTh
             parameters:
                 @display("p=259,163");
         }
-    connections allowunconnected:
+    connections:
         r1.pppg$i++ <-- {  datarate = 1.5Mbps; delay = 20ms; } <-- r2.pppg$o++;
         r1.pppg$o++ --> {  datarate = 1.5Mbps; delay = 20ms; } --> th.in;
         th.out --> r2.pppg$i++;

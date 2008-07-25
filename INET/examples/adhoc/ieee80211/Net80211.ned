@@ -43,6 +43,5 @@ network Net80211
         configurator: FlatNetworkConfigurator {
             @display("p=140,50");
         }
-    connections allowunconnected:
 }
 

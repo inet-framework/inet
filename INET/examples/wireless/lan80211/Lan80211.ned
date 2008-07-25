@@ -48,5 +48,4 @@ network Lan80211
             netmask = "255.255.0.0";
             @display("p=140,50");
         }
-    connections allowunconnected:
 }

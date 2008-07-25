@@ -104,7 +104,7 @@ network LDPTEST
             parameters:
                 @display("p=350,50");
         }
-    connections allowunconnected:
+    connections:
         LSR1.pppg[0] <--> C15 <--> LSR2.pppg[0];
         LSR1.pppg[1] <--> C5 <--> LSR4.pppg[0];
         LSR1.pppg[2] <--> C5 <--> LSR5.pppg[0];

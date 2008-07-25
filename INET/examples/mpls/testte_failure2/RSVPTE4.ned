@@ -89,7 +89,7 @@ network RSVPTE4
             parameters:
                 @display("p=500,50");
         }
-    connections allowunconnected:
+    connections:
         LSR1.pppg++ <--> {  delay = 15ms; datarate = 600Kbps; } <--> LSR2.pppg++;
         LSR1.pppg++ <--> {  delay = 5ms; datarate = 600Kbps; } <--> LSR3.pppg++;
         host2.pppg++ <--> {  delay = 10ms; datarate = 600Kbps; } <--> LSR1.pppg++;

@@ -44,6 +44,5 @@ module PlainMobilityHost
             parameters:
                 @display("p=132,141");
         }
-    connections allowunconnected:
 }
 

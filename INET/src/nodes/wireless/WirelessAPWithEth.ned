@@ -43,7 +43,7 @@ module WirelessAPWithEth
         @node();
         string relayUnitType = default("MACRelayUnitNP"); // type of the MACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
     gates:
-        input radioIn;
+        input radioIn @directIn;
         inout ethg[];
     submodules:
         relayUnit: <relayUnitType> like MACRelayUnit {

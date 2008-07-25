@@ -41,7 +41,7 @@ module WirelessAPSimplified
         @node();
         @display("i=device/accesspoint");
     gates:
-        input radioIn;
+        input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

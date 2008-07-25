@@ -43,7 +43,7 @@ network DemoNetworkEth
         cli[n]: StandardHost6;
         srv[n]: StandardHost6;
         linemonitor[n]: TCPDump;
-    connections allowunconnected:
+    connections:
         for i=0..n-1 {
             cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
             linemonitor[i].b <--> ethernetline <--> r1.ethg++;

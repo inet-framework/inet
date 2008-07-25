@@ -56,7 +56,7 @@ network FlatNet
             parameters:
                 @display("i=device/server_s");
         }
-    connections allowunconnected:
+    connections:
         cli[0].pppg++ <--> ethernetline <--> rte[50].pppg++;
         cli[1].pppg++ <--> ethernetline <--> rte[8].pppg++;
         srv.pppg++ <--> fiberline <--> rte[18].pppg++;

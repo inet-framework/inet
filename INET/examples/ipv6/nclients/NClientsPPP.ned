@@ -44,7 +44,7 @@ network NClientsPPP
         r3: Router6;
         cli[n]: StandardHost6;
         srv: StandardHost6;
-    connections allowunconnected:
+    connections:
         for i=0..n-1 {
             cli[i].pppg++ <--> fiberline <--> r1.pppg++;
         }

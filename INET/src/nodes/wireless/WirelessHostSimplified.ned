@@ -59,7 +59,7 @@ module WirelessHostSimplified
     gates:
         inout pppg[];
         inout ethg[];
-        input radioIn;
+        input radioIn @directIn;
     submodules:
         notificationBoard: NotificationBoard {
             parameters:

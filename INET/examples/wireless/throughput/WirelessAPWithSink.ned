@@ -35,7 +35,7 @@ module WirelessAPWithSink
         @node();
         @display("i=device/accesspoint");
     gates:
-        input radioIn;
+        input radioIn @directIn;
     submodules:
         sink: Sink {
             parameters:

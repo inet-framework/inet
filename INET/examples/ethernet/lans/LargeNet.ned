@@ -205,7 +205,7 @@ network LargeNet
         slanD[ds]: SmallLAN;
         mlanD[dm]: MediumLAN;
         llanD[dl]: LargeLAN;
-    connections allowunconnected:
+    connections:
         // "backbone" switches
         for k=0..n-1, for i=0..bbs-1 {
             switchBB[k].ethg++ <--> cable <--> slanBB[k*bbs+i].ethg;
