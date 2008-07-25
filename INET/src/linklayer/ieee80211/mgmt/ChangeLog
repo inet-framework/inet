@@ -1,0 +1,6 @@
+2008-07-25  Andras Varga
+
+	* Ieee80211AgentSTA.cc: randomize the start time of the scanning
+	process. (Randomizing the time of sending the first beacon in 
+	Ieee80211MgmtAP.cc was already done earlier.)
+	
