@@ -47,7 +47,7 @@ void Ieee80211AgentSTA::initialize(int stage)
         nb->subscribe(this, NF_L2_BEACON_LOST);
 
         // start up: send scan request
-        scheduleAt(simTime(), new cMessage("startUp", MK_STARTUP));
+        scheduleAt(simTime()+uniform(0,maxChannelTime), new cMessage("startUp", MK_STARTUP));
     }
 }
 
