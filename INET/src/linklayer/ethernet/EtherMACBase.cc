@@ -44,6 +44,8 @@ EtherMACBase::~EtherMACBase()
 
 void EtherMACBase::initialize()
 {
+    physOutGate = gate("phys$o");
+
     initializeFlags();
 
     initializeTxrate();
@@ -121,8 +123,6 @@ void EtherMACBase::initializeNotificationBoard()
 
 void EtherMACBase::initializeFlags()
 {
-    physOutGate = gate("phys$o");
-
     // initialize connected flag
     connected = physOutGate->getDestinationGate()->isConnected();
     if (!connected)

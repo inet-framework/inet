@@ -70,25 +70,11 @@ void PPP::initialize(int stage)
         physOutGate = gate("phys$o");
 
         // we're connected if other end of connection path is an input gate
-        connected = physOutGate->getDestinationGate()->getType()==cGate::INPUT;
+        bool connected = physOutGate->getDestinationGate()->getType()==cGate::INPUT;
 
         // if we're connected, get the gate with transmission rate
-        gateToWatch = physOutGate;
-        datarate = 0;
-        if (connected)
-        {
-            while (gateToWatch)
-            {
-                // does this gate have data rate?
-                cDatarateChannel *chan = dynamic_cast<cDatarateChannel*>(gateToWatch->getChannel());
-                if (chan && (datarate=chan->par("datarate").doubleValue())>0)
-                    break;
-                // otherwise just check next connection in path
-                gateToWatch = gateToWatch->getToGate();
-            }
-            if (!gateToWatch)
-                error("gate phys must be connected (directly or indirectly) to a link with data rate");
-        }
+        datarateChannel = connected ? physOutGate->getDatarateChannel() : NULL;
+        double datarate = connected ? datarateChannel->par("datarate").doubleValue() : 0;
 
         // register our interface entry in IInterfaceTable
         interfaceEntry = registerInterface(datarate);
@@ -99,15 +85,17 @@ void PPP::initialize(int stage)
         nb->subscribe(this, NF_SUBSCRIBERLIST_CHANGED);
         updateHasSubcribers();
 
-        // if not connected, make it gray
+        // display string stuff
         if (ev.isGUI())
         {
-            if (!connected)
-            {
+            if (connected) {
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("o",0);
+            }
+            else {
+                // we are not connected: gray out our icon
                 getDisplayString().setTagArg("i",1,"#707070");
                 getDisplayString().setTagArg("i",2,"100");
             }
-            oldConnColor = gateToWatch->getDisplayString().getTagArg("o",0);
         }
 
         // request first frame to send
@@ -182,13 +170,13 @@ void PPP::startTransmitting(cMessage *msg)
     send(pppFrame, physOutGate);
 
     // schedule an event for the time when last bit will leave the gate.
-    simtime_t endTransmission = gateToWatch->getTransmissionFinishTime();
-    scheduleAt(endTransmission, endTransmissionEvent);
+    simtime_t endTransmissionTime = datarateChannel->getTransmissionFinishTime();
+    scheduleAt(endTransmissionTime, endTransmissionEvent);
 }
 
 void PPP::handleMessage(cMessage *msg)
 {
-    if (!connected)
+    if (datarateChannel==NULL)
     {
         EV << "Interface is not connected, dropping packet " << msg << endl;
         delete msg;
@@ -276,42 +264,40 @@ void PPP::handleMessage(cMessage *msg)
 void PPP::displayBusy()
 {
     getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
-    physOutGate->getDisplayString().setTagArg("o",0,"yellow");
-    physOutGate->getDisplayString().setTagArg("o",1,"3");
-    gateToWatch->getDisplayString().setTagArg("o",0,"yellow");
-    gateToWatch->getDisplayString().setTagArg("o",1,"3");
+    datarateChannel->getDisplayString().setTagArg("o",0,"yellow");
+    datarateChannel->getDisplayString().setTagArg("o",1,"3");
 }
 
 void PPP::displayIdle()
 {
     getDisplayString().setTagArg("i",1,"");
-    physOutGate->getDisplayString().setTagArg("o",0,"black");
-    physOutGate->getDisplayString().setTagArg("o",1,"1");
-    gateToWatch->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
-    gateToWatch->getDisplayString().setTagArg("o",1,"1");
+    datarateChannel->getDisplayString().setTagArg("o",0,oldConnColor.c_str());
+    datarateChannel->getDisplayString().setTagArg("o",1,"1");
 }
 
 void PPP::updateDisplayString()
 {
-    char buf[80];
     if (ev.isDisabled())
     {
         // speed up things
         getDisplayString().setTagArg("t",0,"");
     }
-    else if (connected)
+    else if (datarateChannel!=NULL)
     {
-        char drate[40];
-        if (datarate>=1e9) sprintf(drate,"%gG", datarate/1e9);
-        else if (datarate>=1e6) sprintf(drate,"%gM", datarate/1e6);
-        else if (datarate>=1e3) sprintf(drate,"%gK", datarate/1e3);
-        else sprintf(drate,"%gbps", datarate);
+        double datarate = datarateChannel->par("datarate").doubleValue();
+        char datarateText[40];
+        if (datarate>=1e9) sprintf(datarateText,"%gG", datarate/1e9);
+        else if (datarate>=1e6) sprintf(datarateText,"%gM", datarate/1e6);
+        else if (datarate>=1e3) sprintf(datarateText,"%gK", datarate/1e3);
+        else sprintf(datarateText,"%gbps", datarate);
 
-/* TBD FIXME find solution for displaying IP address without dependence on IPv6 or IPv6
+/* TBD find solution for displaying IP address without dependence on IPv6 or IPv6
         IPAddress addr = interfaceEntry->ipv4Data()->getIPAddress();
-        sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), drate, numRcvdOK, numSent);
+        sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
 */
-        sprintf(buf, "%s\nrcv:%ld snt:%ld", drate, numRcvdOK, numSent);
+
+        char buf[80];
+        sprintf(buf, "%s\nrcv:%ld snt:%ld", datarateText, numRcvdOK, numSent);
 
         if (numBitErr>0)
             sprintf(buf+strlen(buf), "\nerr:%ld", numBitErr);
@@ -320,6 +306,7 @@ void PPP::updateDisplayString()
     }
     else
     {
+        char buf[80];
         sprintf(buf, "not connected\ndropped:%ld", numDroppedIfaceDown);
         getDisplayString().setTagArg("t",0,buf);
     }

@@ -52,3 +52,4 @@ class INET_API EtherMAC2 : public EtherMACBase
 };
 
 #endif
+

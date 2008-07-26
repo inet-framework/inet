@@ -1,3 +1,7 @@
+2008-07-26  Andras Varga
+
+	* EtherMAC2: refactored to use cGate::getDatarateChannel()
+
 2008-07-07  Andras Varga
 
 	* removed utils.h/cc: no longer needed with OMNeT++ 4.0 (which has 
@@ -10,7 +14,7 @@
 	"details" object
 
 	* EtherMAC, EtherMAC2: performance: remember output gate pointer 
-	instead of looking up for each send()
+	instead of looking it up for each send()
 
 2008-06-29  Andras Varga
 

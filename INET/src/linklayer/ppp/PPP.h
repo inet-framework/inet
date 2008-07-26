@@ -31,23 +31,20 @@ class IPassiveQueue;
 class NotificationBoard;
 
 /**
- * PPP implementation. Derived from the p-to-p OMNeT++ sample simulation.
+ * PPP implementation.
  */
 class INET_API PPP : public cSimpleModule, public INotifiable
 {
   protected:
-    bool connected;
-
     long txQueueLimit;
     cGate *physOutGate;
-    cGate *gateToWatch;
+    cChannel *datarateChannel; // NULL if we're not connected
 
     cQueue txQueue;
     cMessage *endTransmissionEvent;
     IPassiveQueue *queueModule;
 
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
-    double datarate;  // only cached for the display string
 
     NotificationBoard *nb;
     TxNotifDetails notifDetails;
