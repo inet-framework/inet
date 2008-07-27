@@ -1,3 +1,5 @@
+TODO: ethernet: use normal channels
+TODO: eliminate cast after dup(), like (AirFrame*)airframe->dup()
 
 TODO: IRoutingTable6, ITED, etc!
 
