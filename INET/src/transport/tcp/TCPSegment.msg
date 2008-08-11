@@ -23,22 +23,25 @@ cplusplus {{
 
 #define TCP_HEADER_OCTETS  20    // without options
 
-typedef cMessage *cMessagePtr;
+typedef cPacket *cPacketPtr;
 
-inline std::ostream& operator<<(std::ostream& os, cMessagePtr msg) {
+inline std::ostream& operator<<(std::ostream& os, cPacketPtr msg) {
     return os << "(" << msg->getClassName() << ") " << msg->getName() << ": " << msg->info();
 }
+
+inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
 
 }}
 
 
-struct cMessagePtr;
+struct cPacketPtr;
 
 
 struct TCPPayloadMessage
 {
     unsigned int endSequenceNo;
-    cMessagePtr msg;
+    cPacketPtr msg;
 }
 
 //
@@ -55,7 +58,7 @@ struct TCPPayloadMessage
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-message TCPSegment extends cMessage
+message TCPSegment
 {
     @customize(true);
     // Source Port

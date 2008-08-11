@@ -38,6 +38,8 @@ class INET_API TCPSegment : public TCPSegment_Base
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other.getName()) {operator=(other);}
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const {return new TCPSegment(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
 
     /** Generated but unused method, should not be called. */
     virtual void setPayloadArraySize(unsigned int size);
@@ -58,13 +60,13 @@ class INET_API TCPSegment : public TCPSegment_Base
      * Adds a message object to the TCP segment. The sequence number+1 of the
      * last byte of the message should be passed as 2nd argument
      */
-    virtual void addPayloadMessage(cMessage *msg, uint32 endSequenceNo);
+    virtual void addPayloadMessage(cPacket *msg, uint32 endSequenceNo);
 
     /**
      * Removes and returns the first message object in this TCP segment.
      * It also returns the sequence number+1 of its last octet in outEndSequenceNo.
      */
-    virtual cMessage *removeFirstPayloadMessage(uint32& outEndSequenceNo);
+    virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
 };
 
 #endif
