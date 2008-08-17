@@ -58,7 +58,7 @@ class INET_API TCPServerThreadBase : public cPolymorphic, public TCPSocket::Call
 
   protected:
     // internal: TCPSocket::CallbackInterface methods
-    virtual void socketDataArrived(int, void *, cMessage *msg, bool urgent) {dataArrived(msg,urgent);}
+    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) {dataArrived(msg,urgent);}
     virtual void socketEstablished(int, void *)  {established();}
     virtual void socketPeerClosed(int, void *) {peerClosed();}
     virtual void socketClosed(int, void *) {closed();}

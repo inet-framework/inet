@@ -20,7 +20,7 @@
 //
 // Message class used by UDPEchoApp.
 //
-message UDPEchoAppMsg
+packet UDPEchoAppMsg
 {
     bool isRequest = true;
 }

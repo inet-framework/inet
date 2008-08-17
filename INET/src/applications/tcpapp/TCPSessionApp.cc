@@ -54,7 +54,7 @@ void TCPSessionApp::parseScript(const char *script)
     }
 }
 
-void TCPSessionApp::count(cMessage *msg)
+void TCPSessionApp::count(cPacket *msg)
 {
     if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
@@ -77,7 +77,7 @@ void TCPSessionApp::waitUntil(simtime_t t)
     cMessage *msg=NULL;
     while ((msg=receive())!=timeoutMsg)
     {
-        count(msg);
+//FIXME ??? PK() or if (isPacket) ?        count(msg);
         socket.processMessage(msg);
     }
     delete timeoutMsg;
@@ -138,7 +138,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(tSend);
         EV << "sending " << sendBytes << " bytes\n";
-        cMessage *msg = new cMessage("data1");
+        cPacket *msg = new cPacket("data1");
         msg->setByteLength(sendBytes);
         socket.send(msg);
     }
@@ -146,7 +146,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(i->tSend);
         EV << "sending " << i->numBytes << " bytes\n";
-        cMessage *msg = new cMessage("data1");
+        cPacket *msg = new cPacket("data1");
         msg->setByteLength(i->numBytes);
         socket.send(msg);
     }
@@ -164,7 +164,7 @@ void TCPSessionApp::activity()
     for (;;)
     {
         cMessage *msg = receive();
-        count(msg);
+        count(PK(msg));
         socket.processMessage(msg);
     }
 }

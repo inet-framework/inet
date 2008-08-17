@@ -44,12 +44,12 @@ class INET_API UDPVideoStreamCli : public UDPAppBase
     //@{
     virtual void initialize();
     virtual void finish();
-    virtual void handleMessage(cMessage* msg);
+    virtual void handleMessage(cMessage *msg);
     //@}
 
   protected:
     virtual void requestStream();
-    virtual void receiveStream(cMessage* msg);
+    virtual void receiveStream(cPacket *msg);
 };
 
 

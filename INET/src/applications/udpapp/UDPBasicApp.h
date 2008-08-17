@@ -44,9 +44,9 @@ class INET_API UDPBasicApp : public UDPAppBase
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
-    virtual cMessage *createPacket();
+    virtual cPacket *createPacket();
     virtual void sendPacket();
-    virtual void processPacket(cMessage *msg);
+    virtual void processPacket(cPacket *msg);
 
   protected:
     virtual int numInitStages() const {return 4;}

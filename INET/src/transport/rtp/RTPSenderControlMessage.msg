@@ -38,7 +38,7 @@ cplusplus {{
 //    - SEEK_TIME : go to temporal position within the file (not allowed while playing)
 //    - SEEK_BYTE : go to data byte (not allowed while playing)
 //
-message RTPSenderControlMessage
+packet RTPSenderControlMessage
 {
     string command;
     float commandParameter1;

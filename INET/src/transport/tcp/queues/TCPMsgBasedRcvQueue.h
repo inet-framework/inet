@@ -33,7 +33,7 @@
 class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
 {
   protected:
-    typedef std::map<uint32, cMessage *> PayloadList;
+    typedef std::map<uint32, cPacket *> PayloadList;
     PayloadList payloadList;
 
   public:
@@ -65,7 +65,7 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
     /**
      *
      */
-    virtual cMessage *extractBytesUpTo(uint32 seq);
+    virtual cPacket *extractBytesUpTo(uint32 seq);
 
 };
 

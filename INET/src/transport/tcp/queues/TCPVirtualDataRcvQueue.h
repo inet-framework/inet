@@ -77,7 +77,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     /**
      *
      */
-    virtual cMessage *extractBytesUpTo(uint32 seq);
+    virtual cPacket *extractBytesUpTo(uint32 seq);
 
 };
 

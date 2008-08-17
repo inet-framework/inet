@@ -45,7 +45,7 @@ std::string TCPMsgBasedSendQueue::info() const
     return out.str();
 }
 
-void TCPMsgBasedSendQueue::enqueueAppData(cMessage *msg)
+void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     end += msg->getByteLength();
@@ -79,7 +79,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     while (i!=payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
     {
         if (!payloadName) payloadName = i->msg->getName();
-        tcpseg->addPayloadMessage((cMessage *)i->msg->dup(), i->endSequenceNo);
+        tcpseg->addPayloadMessage(i->msg->dup(), i->endSequenceNo);
         ++i;
     }
 

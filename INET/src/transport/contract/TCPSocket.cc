@@ -241,13 +241,13 @@ void TCPSocket::processMessage(cMessage *msg)
     {
         case TCP_I_DATA:
              if (cb)
-                 cb->socketDataArrived(connId, yourPtr, msg, false);
+                 cb->socketDataArrived(connId, yourPtr, PK(msg), false);
              else
                  delete msg;
              break;
         case TCP_I_URGENT_DATA:
              if (cb)
-                 cb->socketDataArrived(connId, yourPtr, msg, true);
+                 cb->socketDataArrived(connId, yourPtr, PK(msg), true);
              else
                  delete msg;
              break;

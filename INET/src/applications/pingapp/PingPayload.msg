@@ -26,7 +26,7 @@ cplusplus {{
 //
 // Represents payload in an ICMP/ICMPv6 Echo Request/Reply.
 //
-message PingPayload
+packet PingPayload
 {
     long originatorId; // sender module id
     long seqNo; // sequence number

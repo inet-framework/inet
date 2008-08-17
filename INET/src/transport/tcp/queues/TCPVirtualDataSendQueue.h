@@ -58,7 +58,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual void enqueueAppData(cMessage *msg);
+    virtual void enqueueAppData(cPacket *msg);
 
     /**
      *

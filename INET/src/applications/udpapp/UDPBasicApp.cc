@@ -67,19 +67,19 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
 }
 
 
-cMessage *UDPBasicApp::createPacket()
+cPacket *UDPBasicApp::createPacket()
 {
     char msgName[32];
     sprintf(msgName,"UDPBasicAppData-%d", counter++);
 
-    cMessage *payload = new cMessage(msgName);
+    cPacket *payload = new cPacket(msgName);
     payload->setByteLength(msgByteLength);
     return payload;
 }
 
 void UDPBasicApp::sendPacket()
 {
-    cMessage *payload = createPacket();
+    cPacket *payload = createPacket();
     IPvXAddress destAddr = chooseDestAddr();
     sendToUDP(payload, localPort, destAddr, destPort);
 
@@ -97,7 +97,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
     else
     {
         // process incoming packet
-        processPacket(msg);
+        processPacket(PK(msg));
     }
 
     if (ev.isGUI())
@@ -109,7 +109,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
 }
 
 
-void UDPBasicApp::processPacket(cMessage *msg)
+void UDPBasicApp::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
     printPacket(msg);

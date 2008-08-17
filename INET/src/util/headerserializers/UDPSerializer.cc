@@ -56,7 +56,7 @@ void UDPSerializer::parse(unsigned char *buf, unsigned int bufsize, UDPPacket *d
     dest->setSourcePort(ntohs(udphdr->uh_sport));
     dest->setDestinationPort(ntohs(udphdr->uh_dport));
     dest->setByteLength(8);
-    cMessage *encapPacket = new cMessage("Payload-from-wire");
+    cPacket *encapPacket = new cPacket("Payload-from-wire");
     encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());

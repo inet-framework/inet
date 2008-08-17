@@ -39,13 +39,13 @@ class INET_API UDPAppBase : public cSimpleModule
     /**
      * Sends a packet over UDP
      */
-    virtual void sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+    virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
 
     /**
      * Prints a brief about packets having an attached UDPControlInfo
      * (i.e. those which just arrived from UDP, or about to be send to UDP).
      */
-    virtual void printPacket(cMessage *msg);
+    virtual void printPacket(cPacket *msg);
 };
 
 

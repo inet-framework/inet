@@ -116,7 +116,7 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
         EV << "Can not handle IP packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
     dest->setByteLength(IP_HEADER_BYTES);
 
-    cMessage *encapPacket = NULL;
+    cPacket *encapPacket = NULL;
     switch (dest->getTransportProtocol())
     {
       case IP_PROT_ICMP:

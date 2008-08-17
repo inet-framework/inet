@@ -38,7 +38,7 @@ void UDPSink::initialize()
 
 void UDPSink::handleMessage(cMessage *msg)
 {
-    processPacket(msg);
+    processPacket(PK(msg));
 
     if (ev.isGUI())
     {
@@ -49,7 +49,7 @@ void UDPSink::handleMessage(cMessage *msg)
 
 }
 
-void UDPSink::processPacket(cMessage *msg)
+void UDPSink::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
     printPacket(msg);

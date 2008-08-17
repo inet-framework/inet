@@ -95,7 +95,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
     scheduleAt(simTime()+(simtime_t)par("thinkTime"), timeoutMsg);
 }
 
-void TelnetApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
+void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
 {
     int len = msg->getByteLength();
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);

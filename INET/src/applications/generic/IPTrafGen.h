@@ -35,8 +35,8 @@ class INET_API IPTrafSink : public cSimpleModule
   protected:
     int numReceived;
 
-    virtual void printPacket(cMessage *msg);
-    virtual void processPacket(cMessage *msg);
+    virtual void printPacket(cPacket *msg);
+    virtual void processPacket(cPacket *msg);
 
   protected:
     virtual void initialize();

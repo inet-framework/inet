@@ -46,7 +46,7 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     virtual void socketEstablished(int connId, void *yourPtr);
 
     /** Redefined. */
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
     /** Redefined to start another session after a delay. */
     virtual void socketClosed(int connId, void *yourPtr);

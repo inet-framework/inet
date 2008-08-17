@@ -17,7 +17,7 @@
 
 /** \file RTPInterfacePacket.h
  * This file declares the class RTPInterfacePacket. This class is derived from
- * cMessage and is used for controlling the rtp layer by the rtp application.
+ * cPacket and is used for controlling the rtp layer by the rtp application.
  */
 
 
@@ -37,7 +37,7 @@
  * rtp session, transmission of files and feedback about the success of the
  * operations.
  */
-class INET_API RTPInterfacePacket : public cMessage
+class INET_API RTPInterfacePacket : public cPacket
 {
 
     public:

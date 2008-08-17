@@ -35,7 +35,7 @@ cplusplus {{
 // @see RTPAVProfilePayload32Sender
 // @see RTPAVProfilePayload32Receiver
 //
-message RTPMpegPacket
+packet RTPMpegPacket
 {
     int headerLength = 4;
     int payloadLength; // size of the mpeg data

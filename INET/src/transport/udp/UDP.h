@@ -99,19 +99,19 @@ class INET_API UDP : public cSimpleModule
     virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPControlInfo *ctrl);
     virtual bool matchesSocket(SockDesc *sd, UDPPacket *udp, IPv6ControlInfo *ctrl);
     virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
-    virtual void sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
-    virtual void sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
+    virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
+    virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
     virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort);
 
     // process an ICMP error packet
-    virtual void processICMPError(cMessage *icmpErrorMsg); // TODO use ICMPMessage
+    virtual void processICMPError(cPacket *icmpErrorMsg); // TODO use ICMPMessage
 
     // process UDP packets coming from IP
     virtual void processUDPPacket(UDPPacket *udpPacket);
 
     // process packets from application
-    virtual void processMsgFromApp(cMessage *appData);
+    virtual void processMsgFromApp(cPacket *appData);
 
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);

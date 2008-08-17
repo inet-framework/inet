@@ -65,7 +65,7 @@
  * class MyModule : public cSimpleModule, public UDPSocket::CallbackInterface
  * {
  *    UDPSocket socket;
- *    virtual void socketDataArrived(int sockId, void *yourPtr, cMessage *msg, bool urgent);
+ *    virtual void socketDataArrived(int sockId, void *yourPtr, cPacket *msg, bool urgent);
  *    virtual void socketFailure(int sockId, void *yourPtr, int code);
  *    ...
  * };

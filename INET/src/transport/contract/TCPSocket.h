@@ -68,7 +68,7 @@ class TCPStatusInfo;
  * class MyModule : public cSimpleModule, public TCPSocket::CallbackInterface
  * {
  *     TCPSocket socket;
- *     virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+ *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
  *     virtual void socketFailure(int connId, void *yourPtr, int code);
  *     ...
  * };
@@ -84,7 +84,7 @@ class TCPStatusInfo;
  *         ...
  * }
  *
- * void MyModule::socketDataArrived(int, void *, cMessage *msg, bool) {
+ * void MyModule::socketDataArrived(int, void *, cPacket *msg, bool) {
  *     ev << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
@@ -136,7 +136,7 @@ class INET_API TCPSocket
     {
       public:
         virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent) = 0;
+        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
         virtual void socketClosed(int connId, void *yourPtr) {}

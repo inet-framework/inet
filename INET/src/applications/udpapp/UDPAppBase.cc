@@ -36,7 +36,7 @@ void UDPAppBase::bindToPort(int port)
     send(msg, "udpOut");
 }
 
-void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
+void UDPAppBase::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
 {
     // send message to UDP, with the appropriate control info attached
     msg->setKind(UDP_C_DATA);
@@ -53,7 +53,7 @@ void UDPAppBase::sendToUDP(cMessage *msg, int srcPort, const IPvXAddress& destAd
     send(msg, "udpOut");
 }
 
-void UDPAppBase::printPacket(cMessage *msg)
+void UDPAppBase::printPacket(cPacket *msg)
 {
     UDPControlInfo *ctrl = check_and_cast<UDPControlInfo *>(msg->getControlInfo());
 

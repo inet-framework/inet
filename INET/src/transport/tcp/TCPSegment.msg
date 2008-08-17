@@ -58,7 +58,7 @@ struct TCPPayloadMessage
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-message TCPSegment
+packet TCPSegment
 {
     @customize(true);
     // Source Port

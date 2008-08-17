@@ -68,6 +68,9 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 #define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
 
 
+#define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
+
+
 #ifdef _MSC_VER
 //
 // Implementation of the error function, from the Mobility Framework

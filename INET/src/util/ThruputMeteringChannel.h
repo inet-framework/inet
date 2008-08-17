@@ -1,5 +1,5 @@
 //FIXME upgrade and put back!!
-#if 0
+#if 0//XXX
 
 //
 // Copyright (C) 2005 Andras Varga

@@ -78,8 +78,8 @@ void NAMTraceWriter::initialize(int stage)
 
             // fill in peerNamIds in InterfaceEntries
             cGate *outgate = node->gate(ie->getNodeOutputGateId());
-            if (!outgate || !outgate->getToGate()) continue;
-            cModule *peernode = outgate->getToGate()->getOwnerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
+            if (!outgate || !outgate->getNextGate()) continue;
+            cModule *peernode = outgate->getNextGate()->getOwnerModule(); // FIXME not entirely correct: what if a subnet is "boxed"?
             cModule *peerwriter = peernode->getSubmodule("namTrace");
             if (!peerwriter) error("module %s doesn't have a submodule named namTrace", peernode->getFullPath().c_str());
             int peernamid = peerwriter->par("namid");
@@ -120,7 +120,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, const cPolymorphic 
     {
         TxNotifDetails *d = check_and_cast<TxNotifDetails *>(details);
         int peernamid = d->getInterfaceEntry()->getPeerNamId();
-        cMessage *msg = d->getMessage();
+        cPacket *msg = d->getPacket();
 
         switch(category)
         {
@@ -166,14 +166,14 @@ void NAMTraceWriter::recordLinkEvent(int peernamid, double datarate, simtime_t d
     out << "q -t * -s " << namid << " -d " << peernamid << " -a 0 " << endl;
 }
 
-void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cMessage *msg)
+void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cPacket *msg)
 {
     ASSERT(nt && nt->isEnabled());
     std::ostream& out = nt->out();
 
     int size = msg->getByteLength();
     int color = 0;
-    for (cMessage *em = msg; em; em = em->getEncapsulatedMsg())
+    for (cPacket *em = msg; em; em = em->getEncapsulatedMsg())
         if (em->hasPar("color"))
             {color = em->par("color").longValue(); break;}
 

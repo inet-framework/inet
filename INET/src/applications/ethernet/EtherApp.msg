@@ -29,7 +29,7 @@ cplusplus {{
 // sent back as response; if this value is greater than ~1400, the reply
 // will consist of several Ethernet frames. See also EtherAppResp.
 //
-message EtherAppReq
+packet EtherAppReq
 {
     long requestId;
     long responseBytes;
@@ -38,7 +38,7 @@ message EtherAppReq
 //
 // Packet sent back by EtherAppSrv in response to an EtherAppReq.
 //
-message EtherAppResp
+packet EtherAppResp
 {
     int requestId;
     int numFrames;

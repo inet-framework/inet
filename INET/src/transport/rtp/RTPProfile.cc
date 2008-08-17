@@ -179,8 +179,9 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 };
 
 
-void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
-    cModule *senderModule = gate("toPayloadSender")->getToGate()->getOwnerModule();
+void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
+{
+    cModule *senderModule = gate("toPayloadSender")->getNextGate()->getOwnerModule();
     senderModule->deleteModule();
 
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
@@ -191,7 +192,8 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn) {
 };
 
 
-void RTPProfile::senderModuleControl(RTPInnerPacket *rinp) {
+void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
+{
     send(rinp, "toPayloadSender");
 };
 
@@ -239,7 +241,8 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 };
 
 
-void RTPProfile::dataOut(RTPInnerPacket *rinp) {
+void RTPProfile::dataOut(RTPInnerPacket *rinp)
+{
     processOutgoingPacket(rinp);
     send(rinp, "toRTP");
 };
@@ -285,7 +288,8 @@ RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
 };
 
 
-RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc) {
+RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
+{
     SSRCGate *ssrcGate = new SSRCGate(ssrc);
     bool assigned = false;
     int receiverGateId = findGate("toPayloadReceiver",0);

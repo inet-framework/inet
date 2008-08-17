@@ -98,7 +98,7 @@ void TCPGenericCliAppBase::socketEstablished(int, void *)
     setStatusString("connected");
 }
 
-void TCPGenericCliAppBase::socketDataArrived(int, void *, cMessage *msg, bool)
+void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;

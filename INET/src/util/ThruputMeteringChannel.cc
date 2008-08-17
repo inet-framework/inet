@@ -1,5 +1,5 @@
 //FIXME to be updated and enabled again
-#if 0
+#if 0//XXX
 
 //
 // Copyright (C) 2005 Andras Varga
@@ -176,7 +176,7 @@ void ThruputMeteringChannel::updateDisplay()
     *p = '\0';
 
     // display label
-    getFromGate()->getDisplayString().setTagArg("t", 0, buf);
+    getSourceGate()->getDisplayString().setTagArg("t", 0, buf);
 }
 
 #endif

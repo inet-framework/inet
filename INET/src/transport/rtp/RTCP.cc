@@ -104,7 +104,7 @@ void RTCP::handleMessageFromRTP(cMessage *msg) {
 
 void RTCP::handleMessageFromUDP(cMessage *msg) {
     // from SocketLayer all message are of type cMessage
-    readRet(msg);
+    readRet(PK(msg));
 };
 
 
@@ -186,7 +186,7 @@ void RTCP::connectRet()
 };
 
 
-void RTCP::readRet(cMessage *sifpIn)
+void RTCP::readRet(cPacket *sifpIn)
 {
     RTCPCompoundPacket *packet = (RTCPCompoundPacket *)(sifpIn->decapsulate());
     processIncomingRTCPPacket(packet, IPAddress(_destinationAddress), _port);
@@ -313,7 +313,7 @@ void RTCP::createPacket()
 
     calculateAveragePacketSize(compoundPacket->getByteLength());
 
-    cMessage *msg = new cMessage("RTCPCompoundPacket");
+    cPacket *msg = new cPacket("RTCPCompoundPacket");
     msg->encapsulate(compoundPacket);
     msg->setKind(UDP_C_DATA);
     UDPControlInfo *ctrl = new UDPControlInfo();

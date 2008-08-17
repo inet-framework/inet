@@ -34,7 +34,7 @@ cplusplus {{
 //
 // @see TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
 //
-message GenericAppMsg
+packet GenericAppMsg
 {
     int expectedReplyLength; // in bytes
     double replyDelay;       // reply after this many seconds

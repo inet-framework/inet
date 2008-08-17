@@ -33,7 +33,7 @@ class INET_API TCPEchoApp : public cSimpleModule
     long bytesSent;
 
   protected:
-    virtual void sendOrSchedule(cMessage *msg);
+    virtual void sendDown(cMessage *msg);
 
   protected:
     virtual void initialize();

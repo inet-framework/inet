@@ -33,7 +33,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     struct Payload
     {
         unsigned int endSequenceNo;
-        cMessage *msg;
+        cPacket *msg;
     };
     typedef std::list<Payload> PayloadQueue;
     PayloadQueue payloadQueue;
@@ -65,7 +65,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual void enqueueAppData(cMessage *msg);
+    virtual void enqueueAppData(cPacket *msg);
 
     /**
      *

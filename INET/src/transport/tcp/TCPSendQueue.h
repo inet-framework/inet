@@ -115,7 +115,7 @@ class INET_API TCPSendQueue : public cPolymorphic
      * The msg object should not be referenced after this point (sendQueue may
      * delete it.)
      */
-    virtual void enqueueAppData(cMessage *msg) = 0;
+    virtual void enqueueAppData(cPacket *msg) = 0;
 
     /**
      * Returns the sequence number of the last byte stored in the buffer plus one.

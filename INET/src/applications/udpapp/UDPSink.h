@@ -34,7 +34,7 @@ class INET_API UDPSink : public UDPAppBase
     int numReceived;
 
   protected:
-    virtual void processPacket(cMessage *msg);
+    virtual void processPacket(cPacket *msg);
 
   protected:
     virtual void initialize();

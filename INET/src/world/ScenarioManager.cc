@@ -176,7 +176,7 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
     bubble((std::string("setting channel attr: ")+attrAttr+" = "+valueAttr).c_str());
 
     // make sure gate is connected at all
-    if (!g->getToGate())
+    if (!g->getNextGate())
         error("gate '%s' is not connected at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // find channel (or add one?)

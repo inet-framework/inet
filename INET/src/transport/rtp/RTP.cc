@@ -168,7 +168,7 @@ void RTP::enterSession(RTPInterfacePacket *rifp)
 
 void RTP::leaveSession(RTPInterfacePacket *rifp)
 {
-    cModule *profileModule = gate("toProfile")->getToGate()->getOwnerModule();
+    cModule *profileModule = gate("toProfile")->getNextGate()->getOwnerModule();
     profileModule->deleteModule();
     _leaveSession = true;
     RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");

@@ -33,13 +33,13 @@
 Register_Class(RTCPPacket);
 
 
-RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
+RTCPPacket::RTCPPacket(const char *name) : cPacket(name) {
     // initialize variables
     _version = 2;
     _padding = 0;
     _count = 0;
     _packetType = RTCP_PT_UNDEF;
-    // rtcpLength can be calculated with cMessage::getLength()
+    // rtcpLength can be calculated with cPacket::getLength()
 
     // RTCP header length size is 4 bytes
     // not all rtcp packets (in particular RTCPSDESPacket) have
@@ -48,7 +48,7 @@ RTCPPacket::RTCPPacket(const char *name) : cMessage(name) {
 };
 
 
-RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cMessage() {
+RTCPPacket::RTCPPacket(const RTCPPacket& rtcpPacket) : cPacket() {
     setName(rtcpPacket.getName());
     operator=(rtcpPacket);
 };
@@ -59,7 +59,7 @@ RTCPPacket::~RTCPPacket() {
 
 
 RTCPPacket& RTCPPacket::operator=(const RTCPPacket& rtcpPacket) {
-    cMessage::operator=(rtcpPacket);
+    cPacket::operator=(rtcpPacket);
     setName(rtcpPacket.getName());
     _version = rtcpPacket._version;
     _padding = rtcpPacket._padding;
@@ -395,14 +395,14 @@ void RTCPByePacket::setSSRC(uint32 ssrc) {
 Register_Class(RTCPCompoundPacket);
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cMessage(name) {
+RTCPCompoundPacket::RTCPCompoundPacket(const char *name) : cPacket(name) {
     _rtcpPackets = new cArray("RTCPPackets");
     // an empty rtcp compound packet has length 0 bytes
     setByteLength(0);
 };
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cMessage() {
+RTCPCompoundPacket::RTCPCompoundPacket(const RTCPCompoundPacket& rtcpCompoundPacket) : cPacket() {
     setName(rtcpCompoundPacket.getName());
     operator=(rtcpCompoundPacket);
 };
@@ -414,7 +414,7 @@ RTCPCompoundPacket::~RTCPCompoundPacket() {
 
 
 RTCPCompoundPacket& RTCPCompoundPacket::operator=(const RTCPCompoundPacket& rtcpCompoundPacket) {
-    cMessage::operator=(rtcpCompoundPacket);
+    cPacket::operator=(rtcpCompoundPacket);
     setByteLength(rtcpCompoundPacket.getByteLength());
     _rtcpPackets = new cArray(*(rtcpCompoundPacket._rtcpPackets));
     return *this;

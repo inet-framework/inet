@@ -85,7 +85,7 @@ class INET_API TCPReceiveQueue : public cPolymorphic
      * It should return NULL if there's no more data to be passed up --
      * this method is called several times until it returns NULL.
      */
-    virtual cMessage *extractBytesUpTo(uint32 seq) = 0;
+    virtual cPacket *extractBytesUpTo(uint32 seq) = 0;
 
 };
 

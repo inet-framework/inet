@@ -30,7 +30,7 @@ cplusplus {{
 // If a message must provide more information than just a string, a new class
 // defining this parameter can derived.
 //
-message RTPSenderStatusMessage
+packet RTPSenderStatusMessage
 {
     string status;
     uint32 timeStamp;

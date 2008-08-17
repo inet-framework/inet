@@ -103,7 +103,7 @@ class INET_API RTCP : public cSimpleModule
          * Called when this rtcp module receives data from the
          * socket layer.
          */
-        virtual void readRet(cMessage *sifpIn);
+        virtual void readRet(cPacket *sifpIn);
 
     protected:
 

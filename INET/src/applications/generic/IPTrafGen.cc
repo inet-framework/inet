@@ -36,7 +36,7 @@ void IPTrafSink::initialize()
 
 void IPTrafSink::handleMessage(cMessage *msg)
 {
-    processPacket(msg);
+    processPacket(check_and_cast<cPacket *>(msg));
 
     if (ev.isGUI())
     {
@@ -47,7 +47,7 @@ void IPTrafSink::handleMessage(cMessage *msg)
 
 }
 
-void IPTrafSink::printPacket(cMessage *msg)
+void IPTrafSink::printPacket(cPacket *msg)
 {
     IPvXAddress src, dest;
     int protocol = -1;
@@ -72,7 +72,7 @@ void IPTrafSink::printPacket(cMessage *msg)
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
-void IPTrafSink::processPacket(cMessage *msg)
+void IPTrafSink::processPacket(cPacket *msg)
 {
     EV << "Received packet: ";
     printPacket(msg);
@@ -133,7 +133,7 @@ void IPTrafGen::sendPacket()
     char msgName[32];
     sprintf(msgName,"appData-%d", counter++);
 
-    cMessage *payload = new cMessage(msgName);
+    cPacket *payload = new cPacket(msgName);
     payload->setByteLength(msgByteLength);
 
     IPvXAddress destAddr = chooseDestAddr();
@@ -179,7 +179,7 @@ void IPTrafGen::handleMessage(cMessage *msg)
     else
     {
         // process incoming packet
-        processPacket(msg);
+        processPacket(PK(msg));
     }
 
     if (ev.isGUI())

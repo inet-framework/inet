@@ -85,7 +85,7 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
      * Beware: this funcion deletes the incoming message, which might not be what you want.
      */
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
     /** Since remote TCP closed, invokes close(). Redefine if you want to do something else. */
     virtual void socketPeerClosed(int connId, void *yourPtr);

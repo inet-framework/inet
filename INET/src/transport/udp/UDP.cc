@@ -200,14 +200,14 @@ void UDP::handleMessage(cMessage *msg)
     if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
         if (dynamic_cast<ICMPMessage *>(msg) || dynamic_cast<ICMPv6Message *>(msg))
-            processICMPError(msg);
+            processICMPError(PK(msg));
         else
             processUDPPacket(check_and_cast<UDPPacket *>(msg));
     }
     else // received from application layer
     {
         if (msg->getKind()==UDP_C_DATA)
-            processMsgFromApp(msg);
+            processMsgFromApp(PK(msg));
         else
             processCommandFromApp(msg);
     }
@@ -263,7 +263,7 @@ bool UDP::matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAd
            (sd->remoteAddr.isUnspecified() || sd->remoteAddr==remoteAddr);
 }
 
-void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
+void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl, SockDesc *sd)
 {
     // send payload with UDPControlInfo up to the application -- IPv4 version
     UDPControlInfo *udpCtrl = new UDPControlInfo();
@@ -280,7 +280,7 @@ void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPControlInfo *ipCtrl,
     numPassedUp++;
 }
 
-void UDP::sendUp(cMessage *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
+void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl, SockDesc *sd)
 {
     // send payload with UDPControlInfo up to the application -- IPv6 version
     UDPControlInfo *udpCtrl = new UDPControlInfo();
@@ -324,7 +324,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
     }
 }
 
-void UDP::processICMPError(cMessage *msg)
+void UDP::processICMPError(cPacket *msg)
 {
     // extract details from the error message, then try to notify socket that sent bogus packet
     int type, code;
@@ -396,7 +396,7 @@ void UDP::processICMPError(cMessage *msg)
 
 void UDP::sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, short remotePort)
 {
-    cMessage *notifyMsg = new cMessage("ERROR", msgkind);
+    cPacket *notifyMsg = new cPacket("ERROR", msgkind);
     UDPControlInfo *udpCtrl = new UDPControlInfo();
     udpCtrl->setSockId(sd->sockId);
     udpCtrl->setUserId(sd->userId);
@@ -437,7 +437,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int matches = 0;
 
     // deliver a copy of the packet to each matching socket
-    cMessage *payload = udpPacket->getEncapsulatedMsg();
+    cPacket *payload = udpPacket->getEncapsulatedMsg();
     if (dynamic_cast<IPControlInfo *>(ctrl)!=NULL)
     {
         IPControlInfo *ctrl4 = (IPControlInfo *)ctrl;
@@ -447,7 +447,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl4))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                sendUp((cMessage*)payload->dup(), udpPacket, ctrl4, sd);
+                sendUp((cPacket*)payload->dup(), udpPacket, ctrl4, sd);
                 matches++;
             }
         }
@@ -461,7 +461,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             if (sd->onlyLocalPortIsSet || matchesSocket(sd, udpPacket, ctrl6))
             {
                 EV << "Socket sockId=" << sd->sockId << " matches, sending up a copy.\n";
-                sendUp((cMessage*)payload->dup(), udpPacket, ctrl6, sd);
+                sendUp((cPacket*)payload->dup(), udpPacket, ctrl6, sd);
                 matches++;
             }
         }
@@ -484,7 +484,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 }
 
 
-void UDP::processMsgFromApp(cMessage *appData)
+void UDP::processMsgFromApp(cPacket *appData)
 {
     UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(appData->removeControlInfo());
 

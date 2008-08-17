@@ -36,54 +36,55 @@ void TCPEchoApp::initialize()
     socket.listen();
 }
 
-void TCPEchoApp::sendOrSchedule(cMessage *msg)
+void TCPEchoApp::sendDown(cMessage *msg)
 {
-    if (delay==0)
-    {
-        bytesSent += msg->getByteLength();
-        send(msg, "tcpOut");
-    }
-    else
-    {
-        scheduleAt(simTime()+delay, msg);
-    }
+    if (msg->isPacket())
+        bytesSent += ((cPacket *)msg)->getByteLength();
+    send(msg, "tcpOut");
 }
 
 void TCPEchoApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        bytesSent += msg->getByteLength();
-        send(msg, "tcpOut");
+        sendDown(msg);
     }
     else if (msg->getKind()==TCP_I_PEER_CLOSED)
     {
         // we'll close too
         msg->setKind(TCP_C_CLOSE);
-        sendOrSchedule(msg);
+        if (delay==0)
+            sendDown(msg);
+        else
+            scheduleAt(simTime()+delay, msg); // send after a delay
     }
     else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        bytesRcvd += msg->getByteLength();
+        cPacket *pkt = check_and_cast<cPacket *>(msg);
+        bytesRcvd += pkt->getByteLength();
+
         if (echoFactor==0)
         {
-            delete msg;
+            delete pkt;
         }
         else
         {
             // reverse direction, modify length, and send it back
-            msg->setKind(TCP_C_SEND);
-            TCPCommand *ind = check_and_cast<TCPCommand *>(msg->removeControlInfo());
+            pkt->setKind(TCP_C_SEND);
+            TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
             TCPSendCommand *cmd = new TCPSendCommand();
             cmd->setConnId(ind->getConnId());
-            msg->setControlInfo(cmd);
+            pkt->setControlInfo(cmd);
             delete ind;
 
-            long byteLen = msg->getByteLength()*echoFactor;
+            long byteLen = pkt->getByteLength()*echoFactor;
             if (byteLen<1) byteLen=1;
-            msg->setByteLength(byteLen);
+            pkt->setByteLength(byteLen);
 
-            sendOrSchedule(msg);
+            if (delay==0)
+                sendDown(pkt);
+            else
+                scheduleAt(simTime()+delay, pkt); // send after a delay
         }
     }
     else

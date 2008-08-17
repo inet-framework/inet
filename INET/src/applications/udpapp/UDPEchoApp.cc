@@ -39,18 +39,18 @@ void UDPEchoApp::finish()
 {
 }
 
-cMessage *UDPEchoApp::createPacket()
+cPacket *UDPEchoApp::createPacket()
 {
     char msgName[32];
     sprintf(msgName,"UDPEcho-%d", counter++);
 
-    cMessage *message = new UDPEchoAppMsg(msgName);
+    UDPEchoAppMsg *message = new UDPEchoAppMsg(msgName);
     message->setByteLength(msgByteLength);
 
     return message;
 }
 
-void UDPEchoApp::processPacket(cMessage *msg)
+void UDPEchoApp::processPacket(cPacket *msg)
 {
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
 

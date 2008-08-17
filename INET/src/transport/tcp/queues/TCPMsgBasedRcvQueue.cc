@@ -57,7 +57,7 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 
-    cMessage *msg;
+    cPacket *msg;
     uint32 endSeqNo;
     while ((msg=tcpseg->removeFirstPayloadMessage(endSeqNo))!=NULL)
     {
@@ -70,7 +70,7 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     return rcv_nxt;
 }
 
-cMessage *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
+cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 {
     extractTo(seq);
 
@@ -78,7 +78,7 @@ cMessage *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
     if (payloadList.empty() || seqGreater(payloadList.begin()->first, seq))
         return NULL;
 
-    cMessage *msg = payloadList.begin()->second;
+    cPacket *msg = payloadList.begin()->second;
     payloadList.erase(payloadList.begin());
     return msg;
 }

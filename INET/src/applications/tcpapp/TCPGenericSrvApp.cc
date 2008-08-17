@@ -1,3 +1,4 @@
+#if 0 //XXX
 //
 // Copyright 2004 Andras Varga
 //
@@ -143,4 +144,4 @@ void TCPGenericSrvApp::finish()
     recordScalar("bytes sent", bytesSent);
     recordScalar("bytes rcvd", bytesRcvd);
 }
-
+#endif 0 //XXX

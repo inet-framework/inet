@@ -20,7 +20,7 @@ cplusplus {{
 //
 // Message that carries raw bytes. Used with emulation-related features.
 //
-message ByteArrayMessage
+packet ByteArrayMessage
 {
     @customize(true);
     char data[];

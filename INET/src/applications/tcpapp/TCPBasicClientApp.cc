@@ -96,7 +96,7 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     numRequestsToSend--;
 }
 
-void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cMessage *msg, bool urgent)
+void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 

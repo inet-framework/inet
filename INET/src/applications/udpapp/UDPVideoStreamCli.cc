@@ -50,7 +50,7 @@ void UDPVideoStreamCli::handleMessage(cMessage* msg)
     }
     else
     {
-        receiveStream(msg);
+        receiveStream(PK(msg));
     }
 }
 
@@ -70,11 +70,11 @@ void UDPVideoStreamCli::requestStream()
 
     bindToPort(localPort);
 
-    cMessage *msg = new cMessage("VideoStrmReq");
+    cPacket *msg = new cPacket("VideoStrmReq");
     sendToUDP(msg, localPort, svrAddr, svrPort);
 }
 
-void UDPVideoStreamCli::receiveStream(cMessage* msg)
+void UDPVideoStreamCli::receiveStream(cPacket *msg)
 {
     EV << "Video stream packet:\n";
     printPacket(msg);

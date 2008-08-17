@@ -163,7 +163,7 @@ void TCPDump::handleMessage(cMessage *msg)
         else
         {
             // search for encapsulated IP[v6]Datagram in it
-            cMessage *encapmsg = msg;
+            cPacket *encapmsg = PK(msg);
             while (encapmsg && dynamic_cast<IPDatagram *>(encapmsg)==NULL && dynamic_cast<IPv6Datagram_Base *>(encapmsg)==NULL)
                 encapmsg = encapmsg->getEncapsulatedMsg();
             if (!encapmsg)

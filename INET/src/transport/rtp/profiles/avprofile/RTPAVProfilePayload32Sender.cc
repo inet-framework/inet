@@ -142,7 +142,7 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     _initialDelay = delay;
 
     // wait initial delay
-    // cMessage *reminderMessage = new cMessage("next frame");
+    // cPacket *reminderMessage = new cMessage("next frame");
     // scheduleAt(simTime() + _initialDelay, reminderMessage);
     ev << "initializeSenderModule Exit"<<endl;
 };

@@ -46,13 +46,13 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 
     if (requestedBytes==0)
     {
-        delete msg;
+        delete appmsg;
     }
     else
     {
-        msg->setByteLength(requestedBytes);
-        delete msg->removeControlInfo();
-        getSocket()->send(msg);
+        appmsg->setByteLength(requestedBytes);
+        delete appmsg->removeControlInfo();
+        getSocket()->send(appmsg);
     }
 
     if (doClose)

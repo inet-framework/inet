@@ -31,8 +31,8 @@
 class UDPEchoApp : public UDPBasicApp
 {
   protected:
-    virtual cMessage *createPacket();
-    virtual void processPacket(cMessage *msg);
+    virtual cPacket *createPacket();
+    virtual void processPacket(cPacket *msg);
 
   protected:
     virtual void initialize(int stage);

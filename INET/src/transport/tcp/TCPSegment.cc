@@ -35,13 +35,13 @@ TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 void TCPSegment::parsimPack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimPack(b);
-    doPacking(payloadList);
+    doPacking(b, payloadList);
 }
 
 void TCPSegment::parsimUnpack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimUnpack(b);
-    doUnpacking(payloadList);
+    doUnpacking(b, payloadList);
 }
 
 void TCPSegment::setPayloadArraySize(unsigned int size)

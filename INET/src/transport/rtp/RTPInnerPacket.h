@@ -32,7 +32,7 @@
 /**
  * This class is used for communication between submodules of the rtp layer module.
  */
-class INET_API RTPInnerPacket : public cMessage
+class INET_API RTPInnerPacket : public cPacket
 {
 
     public:

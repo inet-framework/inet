@@ -439,7 +439,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 // accordingly! (right now we *always* advertise win=16384,
                 // that is, there's practically no receiver-imposed flow control!)
                 //
-                cMessage *msg;
+                cPacket *msg;
                 while ((msg=receiveQueue->extractBytesUpTo(state->rcv_nxt))!=NULL)
                 {
                     msg->setKind(TCP_I_DATA);  // TBD currently we never send TCP_I_URGENT_DATA
