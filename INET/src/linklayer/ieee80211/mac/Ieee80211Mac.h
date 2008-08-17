@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mï¿½szï¿½ros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -268,10 +268,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual void handleSelfMsg(cMessage *msg);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage *msg);
+    virtual void handleUpperMsg(cPacket *msg);
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerMsg(cMessage *msg);
+    virtual void handleLowerMsg(cPacket *msg);
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);

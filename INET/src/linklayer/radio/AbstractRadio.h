@@ -91,7 +91,7 @@ class INET_API AbstractRadio : public ChannelAccess
     virtual void sendDown(AirFrame *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
-    virtual AirFrame *encapsulatePacket(cMessage *msg);
+    virtual AirFrame *encapsulatePacket(cPacket *msg);
 
     /** Sets the radio state, and also fires change notification */
     virtual void setRadioState(RadioState::State newState);

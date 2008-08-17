@@ -51,7 +51,7 @@ void EtherMAC2::initializeTxrate()
         // that the other end is an EtherMAC2, since normal EtherMAC
         // insists that the connection has *no* datarate set.
         // if we're connected, get the gate with transmission rate
-        cChannel *datarateChannel = physOutGate->getDatarateChannel();
+        cChannel *datarateChannel = physOutGate->getTransmissionChannel();
         txrate = datarateChannel->par("datarate").doubleValue();
     }
 }
@@ -99,7 +99,7 @@ void EtherMAC2::startFrameTransmission()
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setMessage(frame);
+        notifDetails.setPacket(frame);
         nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
     }
 
@@ -128,7 +128,7 @@ void EtherMAC2::processFrameFromUpperLayer(EtherFrame *frame)
         startFrameTransmission();
 }
 
-void EtherMAC2::processMsgFromNetwork(cMessage *msg)
+void EtherMAC2::processMsgFromNetwork(cPacket *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
@@ -136,7 +136,7 @@ void EtherMAC2::processMsgFromNetwork(cMessage *msg)
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setMessage(frame);
+        notifDetails.setPacket(frame);
         nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
     }
 
@@ -156,7 +156,7 @@ void EtherMAC2::handleEndTxPeriod()
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setMessage((cMessage *)txQueue.front());
+        notifDetails.setPacket((cPacket *)txQueue.front());
         nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
     }
 

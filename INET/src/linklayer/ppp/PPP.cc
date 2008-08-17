@@ -70,10 +70,10 @@ void PPP::initialize(int stage)
         physOutGate = gate("phys$o");
 
         // we're connected if other end of connection path is an input gate
-        bool connected = physOutGate->getDestinationGate()->getType()==cGate::INPUT;
+        bool connected = physOutGate->getPathEndGate()->getType()==cGate::INPUT;
 
         // if we're connected, get the gate with transmission rate
-        datarateChannel = connected ? physOutGate->getDatarateChannel() : NULL;
+        datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
         double datarate = connected ? datarateChannel->par("datarate").doubleValue() : 0;
 
         // register our interface entry in IInterfaceTable
@@ -151,7 +151,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 }
 
 
-void PPP::startTransmitting(cMessage *msg)
+void PPP::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     delete msg->removeControlInfo();
@@ -161,7 +161,7 @@ void PPP::startTransmitting(cMessage *msg)
     if (hasSubscribers)
     {
         // fire notification
-        notifDetails.setMessage(pppFrame);
+        notifDetails.setPacket(pppFrame);
         nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
     }
 
@@ -191,14 +191,14 @@ void PPP::handleMessage(cMessage *msg)
         if (hasSubscribers)
         {
             // fire notification
-            notifDetails.setMessage(NULL);
+            notifDetails.setPacket(NULL);
             nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
         }
 
         if (!txQueue.empty())
         {
-            msg = (cMessage *) txQueue.pop();
-            startTransmitting(msg);
+            cPacket *pk = (cPacket *) txQueue.pop();
+            startTransmitting(pk);
             numSent++;
         }
         else if (queueModule)
@@ -212,12 +212,12 @@ void PPP::handleMessage(cMessage *msg)
         if (hasSubscribers)
         {
             // fire notification
-            notifDetails.setMessage(msg);
+            notifDetails.setPacket(PK(msg));
             nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
         }
 
         // check for bit errors
-        if (msg->hasBitError())
+        if (PK(msg)->hasBitError())
         {
             EV << "Bit error in " << msg << endl;
             numBitErr++;
@@ -226,7 +226,7 @@ void PPP::handleMessage(cMessage *msg)
         else
         {
             // pass up payload
-            cMessage *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
+            cPacket *payload = decapsulate(check_and_cast<PPPFrame *>(msg));
             numRcvdOK++;
             send(payload,"netwOut");
         }
@@ -251,7 +251,7 @@ void PPP::handleMessage(cMessage *msg)
         {
             // We are idle, so we can start transmitting right away.
             EV << "Received " << msg << " for transmission\n";
-            startTransmitting(msg);
+            startTransmitting(PK(msg));
             numSent++;
         }
     }
@@ -325,7 +325,7 @@ void PPP::receiveChangeNotification(int category, const cPolymorphic *)
         updateHasSubcribers();
 }
 
-PPPFrame *PPP::encapsulate(cMessage *msg)
+PPPFrame *PPP::encapsulate(cPacket *msg)
 {
     PPPFrame *pppFrame = new PPPFrame(msg->getName());
     pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
@@ -333,9 +333,9 @@ PPPFrame *PPP::encapsulate(cMessage *msg)
     return pppFrame;
 }
 
-cMessage *PPP::decapsulate(PPPFrame *pppFrame)
+cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 {
-    cMessage *msg = pppFrame->decapsulate();
+    cPacket *msg = pppFrame->decapsulate();
     delete pppFrame;
     return msg;
 }

@@ -235,15 +235,8 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
     handleWithFSM(msg);
 }
 
-void Ieee80211Mac::handleUpperMsg(cMessage *msg)
+void Ieee80211Mac::handleUpperMsg(cPacket *msg)
 {
-    // check if it's a command from the mgmt layer
-    if (msg->getBitLength()==0 && msg->getKind()!=0)
-    {
-        handleCommand(msg);
-        return;
-    }
-
     // check for queue overflow
     if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize)
     {
@@ -306,7 +299,7 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
     }
 }
 
-void Ieee80211Mac::handleLowerMsg(cMessage *msg)
+void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 

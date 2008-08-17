@@ -41,7 +41,7 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    virtual void processPacketFromHigherLayer(cMessage *msg);
+    virtual void processPacketFromHigherLayer(cPacket *msg);
     virtual void processFrameFromMAC(EtherFrame *msg);
     virtual void handleSendPause(cMessage *msg);
 

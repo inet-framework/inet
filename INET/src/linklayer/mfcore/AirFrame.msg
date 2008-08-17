@@ -45,7 +45,7 @@ class noncobject Coord;
 // the id with a pointer to the nodes coordinates itself.
 // @author Marc Loebbers
 //
-message AirFrame
+packet AirFrame
 {
     double pSend; // Power with which this packet is transmitted
     int channelNumber; // Channel on which the packet is sent

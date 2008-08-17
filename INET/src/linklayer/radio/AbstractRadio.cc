@@ -132,7 +132,7 @@ AbstractRadio::~AbstractRadio()
 void AbstractRadio::handleMessage(cMessage *msg)
 {
     // handle commands
-    if (msg->getArrivalGateId()==uppergateIn && msg->getBitLength()==0)
+    if (msg->getArrivalGateId()==uppergateIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
     {
         cPolymorphic *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)
@@ -144,7 +144,7 @@ void AbstractRadio::handleMessage(cMessage *msg)
 
     if (msg->getArrivalGateId() == uppergateIn)
     {
-        AirFrame *airframe = encapsulatePacket(msg);
+        AirFrame *airframe = encapsulatePacket(PK(msg));
         handleUpperMsg(airframe);
     }
     else if (msg->isSelfMessage())
@@ -184,7 +184,7 @@ void AbstractRadio::bufferMsg(AirFrame *airframe) //FIXME: add explicit simtime_
     scheduleAt(airframe->getArrivalTime() + airframe->getDuration(), endRxTimer);
 }
 
-AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
+AirFrame *AbstractRadio::encapsulatePacket(cPacket *frame)
 {
     PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
     ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
@@ -207,7 +207,7 @@ AirFrame *AbstractRadio::encapsulatePacket(cMessage *frame)
 
 void AbstractRadio::sendUp(AirFrame *airframe)
 {
-    cMessage *frame = airframe->decapsulate();
+    cPacket *frame = airframe->decapsulate();
     delete airframe;
     EV << "sending up frame " << frame->getName() << endl;
     send(frame, uppergateOut);
@@ -594,14 +594,14 @@ void AbstractRadio::changeChannel(int channel)
 
                  // we need to send to each radioIn[] gate of this host
                  for (int i = 0; i < radioGate->size(); i++)
-                     sendDirect((cMessage*)airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
+                     sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
             }
             // if we hear some part of the message
             else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
             {
                  EV << "missed beginning of frame, processing it as noise\n";
 
-                 AirFrame *frameDup = (AirFrame*)airframe->dup();
+                 AirFrame *frameDup = airframe->dup();
                  frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
                  handleLowerMsgStart(frameDup);
                  bufferMsg(frameDup);

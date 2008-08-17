@@ -65,13 +65,13 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void handleTimer(cMessage *frame) = 0;
 
     /** Should be redefined to encapsulate and enqueue msgs from higher layers */
-    virtual void handleUpperMessage(cMessage *msg) = 0;
+    virtual void handleUpperMessage(cPacket *msg) = 0;
 
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl) = 0;
 
     /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
-    virtual void sendOrEnqueue(cMessage *frame);
+    virtual void sendOrEnqueue(cPacket *frame);
 
     /** Redefined from PassiveQueueBase. */
     virtual bool enqueue(cMessage *msg);
@@ -86,7 +86,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);
 
     /** Utility method to decapsulate a data frame (encapsulation depends on adhoc/STA/AP) */
-    virtual cMessage *decapsulate(Ieee80211DataFrame *frame);
+    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
 
     /** Utility method: sends the packet to the upper layer */
     virtual void sendUp(cMessage *msg);

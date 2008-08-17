@@ -65,7 +65,7 @@ void EtherMAC::initialize()
             error("connection on gate %s has data rate set: using data rate with EtherMAC "
                   "is forbidden, module's txrate parameter must be used instead",
                   g->getFullPath().c_str());
-        g = g->getToGate();
+        g = g->getNextGate();
     }
 
     // launch autoconfig process
@@ -225,7 +225,7 @@ void EtherMAC::handleMessage (cMessage *msg)
         if (msg->getArrivalGate() == gate("upperLayerIn"))
             processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
         else
-            processMsgFromNetwork(msg);
+            processMsgFromNetwork(PK(msg));
     }
     else
     {
@@ -280,7 +280,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 }
 
 
-void EtherMAC::processMsgFromNetwork(cMessage *msg)
+void EtherMAC::processMsgFromNetwork(cPacket *msg)
 {
     EtherMACBase::processMsgFromNetwork(msg);
 
@@ -397,7 +397,7 @@ void EtherMAC::handleEndIFGPeriod()
     EtherMACBase::handleEndIFGPeriod();
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
-    cMessage *frame = (cMessage *)txQueue.front();
+    cPacket *frame = (cPacket *)txQueue.front();
 
     // Perform carrier extension if in Gigabit Ethernet
     if (carrierExtension && frame->getByteLength() < GIGABIT_MIN_FRAME_WITH_EXT)
@@ -412,9 +412,9 @@ void EtherMAC::handleEndIFGPeriod()
 
 void EtherMAC::startFrameTransmission()
 {
-    cMessage *origFrame = (cMessage *)txQueue.front();
+    cPacket *origFrame = (cPacket *)txQueue.front();
     EV << "Transmitting a copy of frame " << origFrame << endl;
-    cMessage *frame = (cMessage *) origFrame->dup();
+    cPacket *frame = origFrame->dup();
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
@@ -558,7 +558,7 @@ void EtherMAC::handleEndJammingPeriod()
 
 void EtherMAC::sendJamSignal()
 {
-    cMessage *jam = new cMessage("JAM_SIGNAL", JAM_SIGNAL);
+    cPacket *jam = new cPacket("JAM_SIGNAL", JAM_SIGNAL);
     jam->setByteLength(JAM_SIGNAL_BYTES);
     if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, physOutGate);
@@ -567,7 +567,7 @@ void EtherMAC::sendJamSignal()
     transmitState = JAMMING_STATE;
 }
 
-void EtherMAC::scheduleEndRxPeriod(cMessage *frame)
+void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
 {
     scheduleAt(simTime()+frame->getBitLength()*bitTime, endRxMsg);
     receiveState = RECEIVING_STATE;

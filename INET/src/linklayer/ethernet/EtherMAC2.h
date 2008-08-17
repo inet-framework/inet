@@ -43,7 +43,7 @@ class INET_API EtherMAC2 : public EtherMACBase
     // event handlers
     virtual void startFrameTransmission();
     virtual void processFrameFromUpperLayer(EtherFrame *frame);
-    virtual void processMsgFromNetwork(cMessage *msg);
+    virtual void processMsgFromNetwork(cPacket *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
 

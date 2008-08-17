@@ -44,7 +44,7 @@ class INET_API EtherLLC : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    virtual void processPacketFromHigherLayer(cMessage *msg);
+    virtual void processPacketFromHigherLayer(cPacket *msg);
     virtual void processFrameFromMAC(EtherFrameWithLLC *msg);
     virtual void handleRegisterSAP(cMessage *msg);
     virtual void handleDeregisterSAP(cMessage *msg);

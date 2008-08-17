@@ -124,7 +124,7 @@ void EtherMACBase::initializeNotificationBoard()
 void EtherMACBase::initializeFlags()
 {
     // initialize connected flag
-    connected = physOutGate->getDestinationGate()->isConnected();
+    connected = physOutGate->getPathEndGate()->isConnected();
     if (!connected)
         EV << "MAC not connected to a network.\n";
     WATCH(connected);
@@ -337,7 +337,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 
 }
 
-void EtherMACBase::processMsgFromNetwork(cMessage *frame)
+void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 {
     EV << "Received frame from network: " << frame << endl;
 
@@ -439,7 +439,7 @@ void EtherMACBase::handleEndIFGPeriod()
         error("End of IFG and no frame to transmit");
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
-    cMessage *frame = (cMessage *)txQueue.front();
+    cPacket *frame = (cPacket *)txQueue.front();
     EV << "IFG elapsed, now begin transmission of frame " << frame << endl;
 
     // Perform carrier extension if in Gigabit Ethernet
@@ -468,7 +468,7 @@ void EtherMACBase::handleEndTxPeriod()
         error("Frame under transmission cannot be found");
 
     // get frame from buffer
-    cMessage *frame = (cMessage*)txQueue.pop();
+    cPacket *frame = (cPacket *)txQueue.pop();
 
     numFramesSent++;
     numBytesSent += frame->getByteLength();
@@ -512,7 +512,7 @@ void EtherMACBase::scheduleEndIFGPeriod()
     transmitState = WAIT_IFG_STATE;
 }
 
-void EtherMACBase::scheduleEndTxPeriod(cMessage *frame)
+void EtherMACBase::scheduleEndTxPeriod(cPacket *frame)
 {
     scheduleAt(simTime()+frame->getBitLength()*bitTime, endTxMsg);
     transmitState = TRANSMITTING_STATE;
@@ -566,10 +566,10 @@ void EtherMACBase::beginSendFrames()
     }
 }
 
-void EtherMACBase::fireChangeNotification(int type, cMessage *msg)
+void EtherMACBase::fireChangeNotification(int type, cPacket *msg)
 {
     if (nb) {
-        notifDetails.setMessage(msg);
+        notifDetails.setPacket(msg);
         nb->fireChangeNotification(type, &notifDetails);
     }
 }
@@ -671,7 +671,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     {
         g->getDisplayString().setTagArg("o",0,color);
         g->getDisplayString().setTagArg("o",1, color[0] ? "3" : "1");
-        g = g->getToGate();
+        g = g->getNextGate();
     }
 }
 

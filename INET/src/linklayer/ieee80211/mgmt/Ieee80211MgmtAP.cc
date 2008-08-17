@@ -76,7 +76,7 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtAP::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 {
     // must be an EtherFrame frame arriving from MACRelayUnit, that is,
     // bridged from another interface of the AP (probably Ethernet).

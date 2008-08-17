@@ -71,7 +71,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     virtual void handleTimer(cMessage *msg);
 
     /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleUpperMessage(cMessage *msg);
+    virtual void handleUpperMessage(cPacket *msg);
 
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl);

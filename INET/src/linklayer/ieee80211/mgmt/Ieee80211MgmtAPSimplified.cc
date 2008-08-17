@@ -36,7 +36,7 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAPSimplified::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 {
     // convert Ethernet frames arriving from MACRelayUnit (i.e. from
     // the AP's other Ethernet or wireless interfaces)

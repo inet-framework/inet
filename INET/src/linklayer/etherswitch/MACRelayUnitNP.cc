@@ -1,3 +1,4 @@
+#if 0  //XXX
 /*
  * Copyright (C) 2003 CTIE, Monash University
  *
@@ -104,7 +105,7 @@ void MACRelayUnitNP::handleMessage(cMessage *msg)
     else
     {
         // Self message signal used to indicate a frame has finished processing
-        processFrame(msg);
+        processFrame(PK(msg));
     }
 }
 
@@ -156,7 +157,7 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
     bufferLevel.record(bufferUsed);
 }
 
-void MACRelayUnitNP::processFrame(cMessage *msg)
+void MACRelayUnitNP::processFrame(cPacket *msg)
 {
     int cpu = msg->getKind();
     EtherFrame *frame = (EtherFrame *) msg->decapsulate();
@@ -192,4 +193,4 @@ void MACRelayUnitNP::finish()
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("dropped frames", numDroppedFrames);
 }
-
+#endif //XXX

@@ -72,7 +72,7 @@ class INET_API EtherMAC : public EtherMACBase
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(cMessage *msg);
+    virtual void processMsgFromNetwork(cPacket *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndRxPeriod();
@@ -85,7 +85,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void printState();
 
     // helpers
-    virtual void scheduleEndRxPeriod(cMessage*);
+    virtual void scheduleEndRxPeriod(cPacket *);
     virtual void sendJamSignal();
     virtual void handleRetransmission();
     virtual void startFrameTransmission();

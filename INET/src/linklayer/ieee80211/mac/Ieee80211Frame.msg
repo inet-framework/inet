@@ -64,7 +64,7 @@ enum Ieee80211FrameType
 // Frame control format fields not supported by this model are omitted:
 // MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
-message Ieee80211Frame
+packet Ieee80211Frame
 {
     byteLength = 14;
     short type enum(Ieee80211FrameType); // type and subtype
@@ -80,14 +80,14 @@ message Ieee80211Frame
 //
 // Format of a 802.11 frame with address1 present, like ACK and CTS
 //
-message Ieee80211OneAddressFrame extends Ieee80211Frame
+packet Ieee80211OneAddressFrame extends Ieee80211Frame
 {
 }
 
 //
 // Format of the 802.11 ACK frame
 //
-message Ieee80211ACKFrame extends Ieee80211OneAddressFrame
+packet Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 {
     type = ST_ACK;
 }
@@ -95,7 +95,7 @@ message Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 //
 // Format of a 802.11 frame with address1 and address2 present
 //
-message Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
+packet Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 {
     byteLength = 20;
     MACAddress transmitterAddress; // aka address2
@@ -104,7 +104,7 @@ message Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 //
 // Format of the 802.11 RTS frame
 //
-message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
+packet Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
     type = ST_RTS;
 }
@@ -112,7 +112,7 @@ message Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 //
 // Format of the 802.11 CTS frame
 //
-message Ieee80211CTSFrame extends Ieee80211OneAddressFrame
+packet Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 {
     type = ST_CTS;
 }
@@ -120,7 +120,7 @@ message Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 //
 // Common base class for 802.11 data and management frames
 //
-message Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
+packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 {
     byteLength = 28;
     MACAddress address3;
@@ -131,7 +131,7 @@ message Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 //
 // Format of the 802.11 data frame
 //
-message Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
+packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 {
     type = ST_DATA;
     byteLength = 34;
@@ -141,7 +141,7 @@ message Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
-message Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
+packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
 {
 }
 

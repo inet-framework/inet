@@ -176,7 +176,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtSTA::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
@@ -203,7 +203,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
     delete ctrl;
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cMessage *msg)
+Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
 

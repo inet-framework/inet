@@ -132,11 +132,11 @@ class INET_API BasicSnrEval : public ChannelAccess
     virtual void sendDown(AirFrame *msg);
 
     /** @brief Encapsulates a MAC frame into an Air Frame*/
-    virtual AirFrame *encapsMsg(cMessage *msg);
+    virtual AirFrame *encapsMsg(cPacket *msg);
     /*@}*/
 
     /** @brief This function calculates the duration of the AirFrame */
-    virtual double calcDuration(cMessage*);
+    virtual double calcDuration(cPacket *);
 
     /** @brief Returns the channel we're listening on. This version always returns 0 (single radio channel supported) */
     virtual int getChannelNumber() const {return 0;}

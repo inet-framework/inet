@@ -65,11 +65,14 @@ class INET_API WirelessMacBase : public cSimpleModule
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMsg(cMessage *msg) = 0;
 
-    /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage *msg) = 0;
+    /** @brief Handle packets from upper layer */
+    virtual void handleUpperMsg(cPacket *msg) = 0;
 
-    /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage *msg) = 0;
+    /** @brief Handle commands from upper layer */
+    virtual void handleCommand(cMessage *msg) = 0;
+
+    /** @brief Handle packets from lower layer */
+    virtual void handleLowerMsg(cPacket *msg) = 0;
 
     virtual bool isUpperMsg(cMessage *msg);
     virtual bool isLowerMsg(cMessage *msg);

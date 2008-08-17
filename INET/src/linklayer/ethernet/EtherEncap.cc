@@ -51,7 +51,7 @@ void EtherEncap::handleMessage(cMessage *msg)
         {
             case IEEE802CTRL_DATA:
             case 0: // default message kind (0) is also accepted
-              processPacketFromHigherLayer(msg);
+              processPacketFromHigherLayer(PK(msg));
               break;
 
             case IEEE802CTRL_SENDPAUSE:
@@ -75,7 +75,7 @@ void EtherEncap::updateDisplayString()
     getDisplayString().setTagArg("t",0,buf);
 }
 
-void EtherEncap::processPacketFromHigherLayer(cMessage *msg)
+void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 {
     if (msg->getByteLength() > MAX_ETHERNET_DATA)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", msg->getByteLength(), MAX_ETHERNET_DATA);
@@ -109,7 +109,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     totalFromMAC++;
 
     // decapsulate and attach control info
-    cMessage *higherlayermsg = frame->decapsulate();
+    cPacket *higherlayermsg = frame->decapsulate();
 
     // add Ieee802Ctrl to packet
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();

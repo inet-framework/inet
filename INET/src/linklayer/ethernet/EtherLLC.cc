@@ -41,7 +41,7 @@ void EtherLLC::handleMessage(cMessage *msg)
     {
       case IEEE802CTRL_DATA:
         // data received from higher layer
-        processPacketFromHigherLayer(msg);
+        processPacketFromHigherLayer(PK(msg));
         break;
 
       case ETH_FRAME:
@@ -84,7 +84,7 @@ void EtherLLC::updateDisplayString()
     getDisplayString().setTagArg("t",0,buf);
 }
 
-void EtherLLC::processPacketFromHigherLayer(cMessage *msg)
+void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 {
     if (msg->getByteLength() > (MAX_ETHERNET_DATA-ETHER_LLC_HEADER_LENGTH))
         error("packet from higher layer (%d bytes) plus LLC header exceed maximum Ethernet payload length (%d)", msg->getByteLength(), MAX_ETHERNET_DATA);
@@ -133,7 +133,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
         return;
     }
 
-    cMessage *higherlayermsg = frame->decapsulate();
+    cPacket *higherlayermsg = frame->decapsulate();
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(frame->getSsap());

@@ -1,3 +1,4 @@
+#if 0 //XXX
 /*
  * Copyright (C) 2003 CTIE, Monash University
  *
@@ -159,7 +160,7 @@ void EtherBus::handleMessage (cMessage *msg)
 
         // send out on gate
         bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
-        cMessage *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
+        cPacket *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
         send(msg2, "ethg$o", tapPoint);
 
         // if not end of the bus, schedule for next tap
@@ -201,4 +202,4 @@ void EtherBus::finish ()
         recordScalar("messages/sec", numMessages/t);
 }
 
-
+#endif 0 //XXX

@@ -80,7 +80,7 @@ void BasicSnrEval::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGateId() == uppergateIn)
     {
-        AirFrame *frame = encapsMsg(msg);
+        AirFrame *frame = encapsMsg(PK(msg));
         handleUpperMsg(frame);
     }
     else if (msg->isSelfMessage())
@@ -135,7 +135,7 @@ void BasicSnrEval::bufferMsg(AirFrame * frame) //FIXME: add explicit simtime_t a
  * headerLength, sets the pSend (transmitterPower) and returns the
  * AirFrame.
  */
-AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
+AirFrame *BasicSnrEval::encapsMsg(cPacket *msg)
 {
     AirFrame *frame = createCapsulePkt();
     frame->setName(msg->getName());
@@ -156,7 +156,7 @@ AirFrame *BasicSnrEval::encapsMsg(cMessage *msg)
  *
  * Just redefine this function in such a case!
  */
-double BasicSnrEval::calcDuration(cMessage *af)
+double BasicSnrEval::calcDuration(cPacket *af)
 {
     double duration;
     duration = (double) af->getBitLength() / (double) bitrate;

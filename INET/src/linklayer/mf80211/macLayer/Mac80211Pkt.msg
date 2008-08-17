@@ -23,7 +23,7 @@ class MacPkt;
 //
 // This component has been taken over from Mobility Framework 1.0a5.
 //
-message Mac80211Pkt extends MacPkt
+packet Mac80211Pkt extends MacPkt
 {
     int address3;
     int address4;

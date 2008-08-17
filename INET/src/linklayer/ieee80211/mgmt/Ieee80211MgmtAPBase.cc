@@ -28,7 +28,7 @@ void Ieee80211MgmtAPBase::initialize(int stage)
 
     if (stage==0)
     {
-        hasRelayUnit = gate("uppergateOut")->getDestinationGate()->isConnected();
+        hasRelayUnit = gate("uppergateOut")->getPathEndGate()->isConnected();
         WATCH(hasRelayUnit);
     }
 }
@@ -58,7 +58,7 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame)
     //XXX set ethertype
 
     // encapsulate the payload in there
-    cMessage *payload = frame->decapsulate();
+    cPacket *payload = frame->decapsulate();
     delete frame;
     ASSERT(payload!=NULL);
     ethframe->encapsulate(payload);
@@ -78,7 +78,7 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
     frame->setAddress3(ethframe->getSrc());
 
     // encapsulate payload
-    cMessage *payload = ethframe->decapsulate();
+    cPacket *payload = ethframe->decapsulate();
     if (!payload)
         error("received empty EtherFrame from upper layer");
     frame->encapsulate(payload);

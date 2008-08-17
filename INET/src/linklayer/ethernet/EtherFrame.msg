@@ -52,7 +52,7 @@ enum SAPCode;
 //  - payload: stored a encapsulated packet (cMessage::encapsulate())
 //  - crc: represented by cMessage::hasBitError()
 //
-message EtherFrame
+packet EtherFrame
 {
     MACAddress dest;
     MACAddress src;
@@ -66,7 +66,7 @@ message EtherFrame
 //
 // Header length: src(6)+dest(6)+etherType(2) = 14 bytes
 //
-message EthernetIIFrame extends EtherFrame
+packet EthernetIIFrame extends EtherFrame
 {
     int etherType;
 }
@@ -77,7 +77,7 @@ message EthernetIIFrame extends EtherFrame
 //
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes
 //
-message EtherFrameWithLLC extends EtherFrame
+packet EtherFrameWithLLC extends EtherFrame
 {
     int ssap;
     int dsap;
@@ -94,7 +94,7 @@ message EtherFrameWithLLC extends EtherFrame
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1)+
 // orgCode(3)+localCode(2) = 22 bytes
 //
-message EtherFrameWithSNAP extends EtherFrame
+packet EtherFrameWithSNAP extends EtherFrame
 {
     long orgCode;  // SNAP organization code, 0 for IP and ARP
     int localcode; // SNAP local code (stores EtherType for IP and ARP)
@@ -104,7 +104,7 @@ message EtherFrameWithSNAP extends EtherFrame
 //
 // Ethernet frame used by the PAUSE protocol
 //
-message EtherPauseFrame extends EtherFrame
+packet EtherPauseFrame extends EtherFrame
 {
     int pauseTime; // in 512 bit-time units
 }
@@ -126,7 +126,7 @@ message EtherPauseFrame extends EtherFrame
 //   send true. Duplex operation only chosen by a MAC if nobody vetoed it by sending
 //   halfDuplex=true.
 //
-message EtherAutoconfig
+packet EtherAutoconfig
 {
     double txrate = 0;
     bool halfDuplex = false;

@@ -36,7 +36,7 @@ void SnrEval80211::initialize(int stage)
  * different bitrates of header and data. The header is sent with
  * 1Mbit/s and the rest with the bitrate read in in initialize().
  */
-double SnrEval80211::calcDuration(cMessage * frame)
+double SnrEval80211::calcDuration(cPacket *frame)
 {
     EV << "bits without header: " << frame->getBitLength() -
         headerLength << ", bits header: " << headerLength << endl;

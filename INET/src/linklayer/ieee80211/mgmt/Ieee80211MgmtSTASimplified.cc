@@ -39,7 +39,7 @@ void Ieee80211MgmtSTASimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtSTASimplified::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
@@ -50,7 +50,7 @@ void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cPolymorphic *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cMessage *msg)
+Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
 

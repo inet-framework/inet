@@ -34,7 +34,7 @@ void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAdhoc::handleUpperMessage(cMessage *msg)
+void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
@@ -45,7 +45,7 @@ void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cPolymorphic *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cMessage *msg)
+Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
 {
     Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
 

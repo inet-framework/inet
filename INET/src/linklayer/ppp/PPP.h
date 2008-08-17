@@ -60,9 +60,9 @@ class INET_API PPP : public cSimpleModule, public INotifiable
 
   protected:
     virtual InterfaceEntry *registerInterface(double datarate);
-    virtual void startTransmitting(cMessage *msg);
-    virtual PPPFrame *encapsulate(cMessage *msg);
-    virtual cMessage *decapsulate(PPPFrame *pppFrame);
+    virtual void startTransmitting(cPacket *msg);
+    virtual PPPFrame *encapsulate(cPacket *msg);
+    virtual cPacket *decapsulate(PPPFrame *pppFrame);
     virtual void displayBusy();
     virtual void displayIdle();
     virtual void updateDisplayString();

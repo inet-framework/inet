@@ -83,7 +83,7 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
      * Triggered when a frame has completed processing, it routes the frame
      * to the appropriate port, and starts processing the next frame.
      */
-    virtual void processFrame(cMessage *msg);
+    virtual void processFrame(cPacket *msg);
 };
 
 #endif

@@ -152,19 +152,19 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 
     // event handlers
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
-    virtual void processMsgFromNetwork(cMessage *msg);
+    virtual void processMsgFromNetwork(cPacket *msg);
     virtual void processMessageWhenNotConnected(cMessage *msg);
     virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
     virtual void handleEndPausePeriod();
     virtual void scheduleEndIFGPeriod();
-    virtual void scheduleEndTxPeriod(cMessage*);
+    virtual void scheduleEndTxPeriod(cPacket *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
 
     // helpers
     virtual bool checkAndScheduleEndPausePeriod();
-    virtual void fireChangeNotification(int type, cMessage *msg);
+    virtual void fireChangeNotification(int type, cPacket *msg);
     virtual void beginSendFrames();
     virtual void frameReceptionComplete(EtherFrame *frame);
     virtual void processReceivedDataFrame(EtherFrame *frame);

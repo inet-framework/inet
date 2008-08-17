@@ -38,7 +38,7 @@ class noncobject MACAddress;
 //
 //# FIXME just temporary here
 //
-message MacPkt
+packet MacPkt
 {
     MACAddress destAddr; // destination mac address
     MACAddress srcAddr; // source mac address

@@ -66,7 +66,7 @@
  * The TestApplLayer e.g. implements such a processing delay!
  *
  * @ingroup macLayer
- * @author Marc Löbbers, Yosia Hadisusanto
+ * @author Marc Lï¿½bbers, Yosia Hadisusanto
  */
 class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
 {
@@ -84,17 +84,20 @@ class INET_API CSMAMacLayer : public WirelessMacBase, public INotifiable
     /** @brief Delete all dynamically allocated objects of the module*/
     virtual void finish();
 
-    /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage*);
+    /** @brief Handle packets from lower layer */
+    virtual void handleLowerMsg(cPacket*);
 
-    /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage*);
+    /** @brief Handle commands from upper layer */
+    virtual void handleCommand(cMessage*);
+
+    /** @brief Handle packets from upper layer */
+    virtual void handleUpperMsg(cPacket*);
 
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMsg(cMessage*);
 
     /** @brief Encapsulate the given higher-layer packet into MacPkt */
-    virtual MacPkt *encapsMsg(cMessage *netw);
+    virtual MacPkt *encapsMsg(cPacket *netw);
 
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);

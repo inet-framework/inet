@@ -1,7 +1,7 @@
 /* -*- mode:c++ -*- ********************************************************
  * file:        Mac80211.h
  *
- * author:      David Raguin/Marc Löbbers
+ * author:      David Raguin/Marc Lï¿½bbers
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -80,11 +80,14 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     /** @brief Handle self messages such as timer... */
     virtual void handleSelfMsg(cMessage*);
 
-    /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage*);
+    /** @brief Handle packets from upper layer */
+    virtual void handleUpperMsg(cPacket*);
 
-    /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage*);
+    /** @brief Handle commands from upper layer */
+    virtual void handleCommand(cMessage*);
+
+    /** @brief Handle packets from lower layer */
+    virtual void handleLowerMsg(cPacket*);
 
     /** @brief handle end of contention */
     virtual void handleEndContentionTimer();
@@ -130,7 +133,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
     virtual void sendBROADCASTframe();
 
     /** @brief encapsulate packet */
-    virtual Mac80211Pkt* encapsMsg(cMessage *netw);
+    virtual Mac80211Pkt* encapsMsg(cPacket *netw);
 
     /** @brief decapsulate packet and send to higher layer */
     virtual void decapsulateAndSendUp(Mac80211Pkt *frame);

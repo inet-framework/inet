@@ -33,6 +33,6 @@ cplusplus {{
 //
 // @author Daniel Willkomm
 //
-message TransmComplete
+packet TransmComplete
 {
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  * file:        Mac80211.cc
  *
- * author:      David Raguin / Marc Löbbers
+ * author:      David Raguin / Marc Lï¿½bbers
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
@@ -129,12 +129,17 @@ void Mac80211::registerInterface()
     ift->addInterface(e, this);
 }
 
+void Mac80211::handleCommand(cMessage *msg)
+{
+    // no commands supported by Mac80211
+    error("Non-packet message arrived from higher layer: (%s)%s", msg->getClassName(), msg->getName());
+}
 
 /**
  * This implementation does not support fragmentation, so it is tested
  * if the maximum length of the MPDU is exceeded.
  */
-void Mac80211::handleUpperMsg(cMessage *msg)
+void Mac80211::handleUpperMsg(cPacket *msg)
 {
     if (msg->getByteLength() > 2312)
         error("packet from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
@@ -167,7 +172,7 @@ void Mac80211::handleUpperMsg(cMessage *msg)
  * Encapsulates the received network-layer packet into a MacPkt and set all needed
  * header fields.
  */
-Mac80211Pkt *Mac80211::encapsMsg(cMessage * netw)
+Mac80211Pkt *Mac80211::encapsMsg(cPacket *netw)
 {
     Mac80211Pkt *pkt = new Mac80211Pkt(netw->getName());
     pkt->setBitLength(272);        // headerLength, including final CRC-field
@@ -188,7 +193,7 @@ Mac80211Pkt *Mac80211::encapsMsg(cMessage * netw)
 
 void Mac80211::decapsulateAndSendUp(Mac80211Pkt *frame)
 {
-    cMessage *msg = frame->decapsulate();
+    cPacket *msg = frame->decapsulate();
     // FIXME TBD set control info
     delete frame;
     sendUp(msg);
@@ -200,7 +205,7 @@ void Mac80211::decapsulateAndSendUp(Mac80211Pkt *frame)
  *  handleMsgNotForMe(), handleBroadcastMsg(), or handleMsgForMe().
  *  Called by handleMessage().
  */
-void Mac80211::handleLowerMsg(cMessage *msg)
+void Mac80211::handleLowerMsg(cPacket *msg)
 {
     Mac80211Pkt *af = check_and_cast<Mac80211Pkt *>(msg);
 

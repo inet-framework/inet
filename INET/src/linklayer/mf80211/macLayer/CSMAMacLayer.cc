@@ -110,6 +110,11 @@ void CSMAMacLayer::finish()
 {
 }
 
+void CSMAMacLayer::handleCommand(cMessage *msg)
+{
+    // no commands supported by CSMAMacLayer
+    error("Non-packet message arrived from higher layer: (%s)%s", msg->getClassName(), msg->getName());
+}
 
 /**
  * First it has to be checked whether a frame is currently being
@@ -124,7 +129,7 @@ void CSMAMacLayer::finish()
  *
  * If channel is idle the frame will be transmitted immediately.
  */
-void CSMAMacLayer::handleUpperMsg(cMessage *msg)
+void CSMAMacLayer::handleUpperMsg(cPacket *msg)
 {
     MacPkt *mac = encapsMsg(msg);
 
@@ -205,7 +210,7 @@ void CSMAMacLayer::handleSelfMsg(cMessage *msg)
  * frame. If they are equal or the frame is broadcast, we send this
  * frame to the upper layer. If not delete it.
  */
-void CSMAMacLayer::handleLowerMsg(cMessage *msg)
+void CSMAMacLayer::handleLowerMsg(cPacket *msg)
 {
     MacPkt *mac = check_and_cast<MacPkt *>(msg);
 
@@ -226,7 +231,7 @@ void CSMAMacLayer::handleLowerMsg(cMessage *msg)
  * Encapsulates the received network-layer packet into a MacPkt and set all needed
  * header fields.
  */
-MacPkt *CSMAMacLayer::encapsMsg(cMessage *netw)
+MacPkt *CSMAMacLayer::encapsMsg(cPacket *netw)
 {
     MacPkt *pkt = new MacPkt(netw->getName());
     pkt->setBitLength(272);

@@ -89,16 +89,17 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     else
     {
         // packet from upper layers, to be sent out
-        EV << "Packet arrived from upper layers: " << msg << "\n";
-        if (msg->getByteLength() > 2312)
+        cPacket *pk = PK(msg);
+        EV << "Packet arrived from upper layers: " << pk << "\n";
+        if (pk->getByteLength() > 2312)
             error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                  msg->getClassName(), msg->getName(), msg->getByteLength());
+                  pk->getClassName(), pk->getName(), pk->getByteLength());
 
-        handleUpperMessage(msg);
+        handleUpperMessage(pk);
     }
 }
 
-void Ieee80211MgmtBase::sendOrEnqueue(cMessage *frame)
+void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
 {
     PassiveQueueBase::handleMessage(frame);
 }
@@ -158,9 +159,9 @@ void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
     numMgmtFramesDropped++;
 }
 
-cMessage *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
+cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 {
-    cMessage *payload = frame->decapsulate();
+    cPacket *payload = frame->decapsulate();
 
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     ctrl->setSrc(frame->getAddress3());

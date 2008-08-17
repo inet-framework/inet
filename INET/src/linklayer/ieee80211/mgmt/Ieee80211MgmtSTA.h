@@ -111,13 +111,13 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void handleTimer(cMessage *msg);
 
     /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleUpperMessage(cMessage *msg);
+    virtual void handleUpperMessage(cPacket *msg);
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleCommand(int msgkind, cPolymorphic *ctrl);
 
     /** Utility function for handleUpperMessage() */
-    virtual Ieee80211DataFrame *encapsulate(cMessage *msg);
+    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
 
     /** Utility function: sends authentication request */
     virtual void startAuthentication(APInfo *ap, simtime_t timeout);

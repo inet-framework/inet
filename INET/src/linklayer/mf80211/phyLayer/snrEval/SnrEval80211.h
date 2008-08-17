@@ -45,7 +45,7 @@ class INET_API SnrEval80211 : public SnrEval
 
   protected:
     /** @brief computes the duration of a 802.11 frame in seconds */
-    virtual double calcDuration(cMessage*);
+    virtual double calcDuration(cPacket *);
 };
 
 #endif

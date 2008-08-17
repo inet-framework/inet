@@ -26,7 +26,7 @@ cplusplus {{
 
 class noncobject MACAddress;
 
-message Ieee80211ManagementFrame;
+packet Ieee80211ManagementFrame;
 
 
 //
@@ -220,7 +220,7 @@ class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
 //
 // Authentication frame format (management frame + body)
 //
-message Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
+packet Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_AUTHENTICATION;
     byteLength = 28+getBody().getBodyLength();
@@ -230,7 +230,7 @@ message Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 //
 // De-authentication frame format (management frame + body)
 //
-message Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
+packet Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DEAUTHENTICATION;
     byteLength = 28+getBody().getBodyLength();
@@ -240,7 +240,7 @@ message Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 //
 // Dis-association frame format (management frame + body) (same as De-authentication)
 //
-message Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
+packet Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DISASSOCIATION;
     byteLength = 28+getBody().getBodyLength();
@@ -250,7 +250,7 @@ message Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 //
 // Probe request frame format (management frame + body)
 //
-message Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
+packet Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBEREQUEST;
     byteLength = 28+getBody().getBodyLength();
@@ -260,7 +260,7 @@ message Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 //
 // Association request frame format (management frame + body)
 //
-message Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
+packet Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONREQUEST;
     byteLength = 28+getBody().getBodyLength();
@@ -270,7 +270,7 @@ message Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 //
 // Re-association request frame format (management frame + body) (same as association)
 //
-message Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
+packet Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONREQUEST;
     byteLength = 28+getBody().getBodyLength();
@@ -280,7 +280,7 @@ message Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 //
 // Association response frame format (management frame + body)
 //
-message Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
+packet Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONRESPONSE;
     byteLength = 28+getBody().getBodyLength();
@@ -290,7 +290,7 @@ message Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 //
 // Re-association response frame format (management frame + body)
 //
-message Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
+packet Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONRESPONSE;
     byteLength = 28+getBody().getBodyLength();
@@ -300,7 +300,7 @@ message Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 //
 // Beacon frame format (management frame + body)
 //
-message Ieee80211BeaconFrame extends Ieee80211ManagementFrame
+packet Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     type = ST_BEACON;
     byteLength = 28+getBody().getBodyLength();
@@ -310,7 +310,7 @@ message Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 //
 // Probe response frame format (management frame + body); same as Beacon
 //
-message Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
+packet Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBERESPONSE;
     byteLength = 28+getBody().getBodyLength();

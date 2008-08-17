@@ -41,7 +41,7 @@ const int PPP_OVERHEAD_BYTES = 7;
 // Protocol field is not modelled because types of encapsulated messages
 // wil be determined from their class (using C++ dynamic_cast).
 //
-message PPPFrame
+packet PPPFrame
 {
 }
 

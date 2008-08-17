@@ -32,15 +32,15 @@
 class TxNotifDetails : public cPolymorphic
 {
   protected:
-    cMessage *msg;
+    cPacket *msg;
     InterfaceEntry *ie;
 
   public:
     TxNotifDetails() {msg=NULL; ie=NULL;}
 
-    cMessage *getMessage() const {return msg;}
+    cPacket *getPacket() const {return msg;}
     InterfaceEntry *getInterfaceEntry() const {return ie;}
-    void setMessage(cMessage *m) {msg = m;}
+    void setPacket(cPacket *m) {msg = m;}
     void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
 };
 

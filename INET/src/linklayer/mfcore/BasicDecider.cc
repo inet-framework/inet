@@ -93,7 +93,7 @@ void BasicDecider::handleMessage(cMessage *msg)
 void BasicDecider::sendUp(AirFrame * frame)
 {
     numSentUp++;
-    cMessage *macMsg = frame->decapsulate();
+    cPacket *macMsg = frame->decapsulate();
     send(macMsg, uppergateOut);
     coreEV << "sending up msg " << frame->getName() << endl;
     delete frame;
