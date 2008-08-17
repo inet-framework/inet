@@ -35,7 +35,7 @@ enum ManetControlType
 //
 // ICMP message class
 //
-message ControlManetRouting
+packet ControlManetRouting
 {
     IPAddress srcAddress;
     IPAddress destAddress;

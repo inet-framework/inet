@@ -33,7 +33,7 @@ class RSVPPacket;
 //
 // FIXME missing documentation
 //
-message RSVPResvMsg extends RSVPPacket
+packet RSVPResvMsg extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -44,7 +44,7 @@ message RSVPResvMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-message RSVPResvTear extends RSVPPacket
+packet RSVPResvTear extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -55,7 +55,7 @@ message RSVPResvTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-message RSVPResvError extends RSVPPacket
+packet RSVPResvError extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;

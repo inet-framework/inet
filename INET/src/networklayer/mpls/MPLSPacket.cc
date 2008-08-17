@@ -18,7 +18,7 @@
 #include "MPLSPacket.h"
 
 // constructors
-MPLSPacket::MPLSPacket(const char *name) : cMessage(name)
+MPLSPacket::MPLSPacket(const char *name) : cPacket(name)
 {
 }
 
@@ -31,7 +31,7 @@ MPLSPacket::MPLSPacket(const MPLSPacket & p)
 // assignment operator
 MPLSPacket & MPLSPacket::operator=(const MPLSPacket & p)
 {
-    cMessage::operator=(p);
+    cPacket::operator=(p);
     return *this;
 }
 

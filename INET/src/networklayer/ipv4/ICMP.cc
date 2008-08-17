@@ -43,7 +43,7 @@ void ICMP::handleMessage(cMessage *msg)
     // request from application
     if (!strcmp(arrivalGate->getName(), "pingIn"))
     {
-        sendEchoRequest(msg);
+        sendEchoRequest(PK(msg));
         return;
     }
 }
@@ -112,7 +112,7 @@ void ICMP::sendErrorMessage(IPDatagram *origDatagram, ICMPType type, ICMPCode co
     }
 }
 
-void ICMP::sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
+void ICMP::sendErrorMessage(cPacket *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code)
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
@@ -182,13 +182,13 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 void ICMP::processEchoReply(ICMPMessage *reply)
 {
     IPControlInfo *ctrl = check_and_cast<IPControlInfo*>(reply->removeControlInfo());
-    cMessage *payload = reply->decapsulate();
+    cPacket *payload = reply->decapsulate();
     payload->setControlInfo(ctrl);
     delete reply;
     send(payload, "pingOut");
 }
 
-void ICMP::sendEchoRequest(cMessage *msg)
+void ICMP::sendEchoRequest(cPacket *msg)
 {
     IPControlInfo *ctrl = check_and_cast<IPControlInfo*>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_ICMP);

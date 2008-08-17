@@ -48,7 +48,7 @@ struct OSPFOptions
 //
 // Represents an OSPF packet header
 //
-message OSPFPacket
+packet OSPFPacket
 {
     char version = 2;
     char type enum(OSPFPacketType) = HelloPacket;
@@ -65,7 +65,7 @@ message OSPFPacket
 //
 // Represents an OSPF Hello packet
 //
-message OSPFHelloPacket extends OSPFPacket
+packet OSPFHelloPacket extends OSPFPacket
 {
     IPAddress networkMask;
 
@@ -220,7 +220,7 @@ struct OSPFDDOptions
 //
 // Represents an OSPF Database Description packet
 //
-message OSPFDatabaseDescriptionPacket extends OSPFPacket
+packet OSPFDatabaseDescriptionPacket extends OSPFPacket
 {
     unsigned short interfaceMTU;
     OSPFOptions options;
@@ -239,7 +239,7 @@ struct LSARequest
 //
 // Represents an OSPF Link State Request packet
 //
-message OSPFLinkStateRequestPacket extends OSPFPacket
+packet OSPFLinkStateRequestPacket extends OSPFPacket
 {
     LSARequest requests[];
 }
@@ -247,7 +247,7 @@ message OSPFLinkStateRequestPacket extends OSPFPacket
 //
 // Represents an OSPF Link State Update packet
 //
-message OSPFLinkStateUpdatePacket extends OSPFPacket
+packet OSPFLinkStateUpdatePacket extends OSPFPacket
 {
     unsigned long numberOfLSAs;
     OSPFRouterLSA routerLSAs[];
@@ -259,7 +259,7 @@ message OSPFLinkStateUpdatePacket extends OSPFPacket
 //
 // Represents an OSPF Link State Acknowledgement packet
 //
-message OSPFLinkStateAcknowledgementPacket extends OSPFPacket
+packet OSPFLinkStateAcknowledgementPacket extends OSPFPacket
 {
     OSPFLSAHeader lsaHeaders[];
 }

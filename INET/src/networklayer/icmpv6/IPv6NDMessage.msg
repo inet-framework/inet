@@ -24,7 +24,7 @@ cplusplus {{
 }}
 
 
-message ICMPv6Message;
+packet ICMPv6Message;
 
 class noncobject IPv6Address;
 
@@ -55,7 +55,7 @@ class IPv6NDPrefixInformation
 //    - Checksum
 //    - Reserved
 //
-message IPv6NDMessage extends ICMPv6Message
+packet IPv6NDMessage extends ICMPv6Message
 {
     //customize=true;
     int code = 0;
@@ -65,7 +65,7 @@ message IPv6NDMessage extends ICMPv6Message
 // Router Solicitation Message Format
 // RFC 2461 Section 4.1
 //
-message IPv6RouterSolicitation extends IPv6NDMessage
+packet IPv6RouterSolicitation extends IPv6NDMessage
 {
     //Possible Options
     MACAddress sourceLinkLayerAddress;
@@ -75,7 +75,7 @@ message IPv6RouterSolicitation extends IPv6NDMessage
 // Router Advertisement Message Format
 // RFC 2461 Section 4.2
 //
-message IPv6RouterAdvertisement extends IPv6NDMessage
+packet IPv6RouterAdvertisement extends IPv6NDMessage
 {
     //Additional ICMP fields
     unsigned int curHopLimit;
@@ -95,7 +95,7 @@ message IPv6RouterAdvertisement extends IPv6NDMessage
 // Neighbour Solicitation Message Format
 // RFC 2461 Section 4.3
 //
-message IPv6NeighbourSolicitation extends IPv6NDMessage
+packet IPv6NeighbourSolicitation extends IPv6NDMessage
 {
     //Additional ICMP fields
     IPv6Address targetAddress;// MUST NOT be a multicast address.
@@ -108,7 +108,7 @@ message IPv6NeighbourSolicitation extends IPv6NDMessage
 // Neighbour Advertisement Message Format
 // RFC 2461 Section 4.4
 //
-message IPv6NeighbourAdvertisement extends IPv6NDMessage
+packet IPv6NeighbourAdvertisement extends IPv6NDMessage
 {
     //Additional ICMP fields
     bool routerFlag;
@@ -124,7 +124,7 @@ message IPv6NeighbourAdvertisement extends IPv6NDMessage
 // Redirect Message Format
 // RFC 2461 Section 4.5
 //
-message IPv6Redirect extends IPv6NDMessage
+packet IPv6Redirect extends IPv6NDMessage
 {
     //Additional ICMP fields
     IPv6Address targetAddress;

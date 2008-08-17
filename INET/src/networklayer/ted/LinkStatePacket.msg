@@ -28,7 +28,7 @@ struct TELinkStateInfo;
 // LinkStateRouting module which implements a minimalistic link state routing
 // protocol.
 //
-message LinkStateMsg
+packet LinkStateMsg
 {
     TELinkStateInfo linkInfo[];
 

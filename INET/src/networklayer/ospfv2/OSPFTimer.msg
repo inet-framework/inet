@@ -32,7 +32,7 @@ enum OSPFTimerType
 //
 // Represents an OSPF Timer
 //
-message OSPFTimer extends cMessage
+packet OSPFTimer extends cMessage
 {
     char timerKind enum(OSPFTimerType) = InterfaceHelloTimer;
 }

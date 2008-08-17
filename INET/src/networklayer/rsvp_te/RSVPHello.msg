@@ -25,7 +25,7 @@ class RSVPMessage;
 //
 // FIXME missing documentation
 //
-message RSVPHelloMsg extends RSVPMessage
+packet RSVPHelloMsg extends RSVPMessage
 {
     @customize(true);
     bool request;

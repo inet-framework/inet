@@ -39,7 +39,7 @@ class RSVPPacket;
 //
 // FIXME missing documentation
 //
-message RSVPPathMsg extends RSVPPacket
+packet RSVPPathMsg extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -54,7 +54,7 @@ message RSVPPathMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-message RSVPPathTear extends RSVPPacket
+packet RSVPPathTear extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -67,7 +67,7 @@ message RSVPPathTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-message RSVPPathError extends RSVPPacket
+packet RSVPPathError extends RSVPPacket
 {
     @customize(true);
     IPAddress errorNode;

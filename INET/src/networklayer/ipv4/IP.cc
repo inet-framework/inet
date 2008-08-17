@@ -73,7 +73,7 @@ void IP::endService(cMessage *msg)
 {
     if (msg->getArrivalGate()->isName("transportIn"))
     {
-        handleMessageFromHL(msg);
+        handleMessageFromHL(PK(msg));
     }
     else if (dynamic_cast<ARPPacket *>(msg))
     {
@@ -90,7 +90,7 @@ void IP::endService(cMessage *msg)
         updateDisplayString();
 }
 
-InterfaceEntry *IP::getSourceInterfaceFrom(cMessage *msg)
+InterfaceEntry *IP::getSourceInterfaceFrom(cPacket *msg)
 {
     cGate *g = msg->getArrivalGate();
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
@@ -171,7 +171,7 @@ void IP::handleReceivedICMP(ICMPMessage *msg)
     }
 }
 
-void IP::handleMessageFromHL(cMessage *msg)
+void IP::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0)
@@ -388,7 +388,7 @@ void IP::reassembleAndDeliver(IPDatagram *datagram)
 
     // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
-    cMessage *packet = decapsulateIP(datagram);
+    cPacket *packet = decapsulateIP(datagram);
 
     if (protocol==IP_PROT_ICMP)
     {
@@ -407,11 +407,11 @@ void IP::reassembleAndDeliver(IPDatagram *datagram)
     }
 }
 
-cMessage *IP::decapsulateIP(IPDatagram *datagram)
+cPacket *IP::decapsulateIP(IPDatagram *datagram)
 {
     // decapsulate transport packet
     InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
-    cMessage *packet = datagram->decapsulate();
+    cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
     IPControlInfo *controlInfo = new IPControlInfo();
@@ -493,7 +493,7 @@ void IP::fragmentAndSend(IPDatagram *datagram, InterfaceEntry *ie, IPAddress nex
 }
 
 
-IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
+IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
 {
     IPControlInfo *controlInfo = check_and_cast<IPControlInfo*>(transportPacket->removeControlInfo());
     IPDatagram *datagram = encapsulate(transportPacket, destIE, controlInfo);
@@ -501,7 +501,7 @@ IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
     return datagram;
 }
 
-IPDatagram *IP::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo)
+IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo)
 {
     IPDatagram *datagram = createIPDatagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);

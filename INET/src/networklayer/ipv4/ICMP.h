@@ -42,7 +42,7 @@ class INET_API ICMP : public cSimpleModule
     virtual void errorOut(ICMPMessage *);
     virtual void processEchoRequest (ICMPMessage *);
     virtual void processEchoReply (ICMPMessage *);
-    virtual void sendEchoRequest(cMessage *);
+    virtual void sendEchoRequest(cPacket *);
     virtual void sendToIP(ICMPMessage *, const IPAddress& dest);
     virtual void sendToIP(ICMPMessage *msg);
 
@@ -60,7 +60,7 @@ class INET_API ICMP : public cSimpleModule
      * so this function will wrap back the transport packet into the IP datagram
      * based on its IPControlInfo.
      */
-    virtual void sendErrorMessage(cMessage *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(cPacket *transportPacket, IPControlInfo *ctrl, ICMPType type, ICMPCode code);
 
   protected:
     virtual void handleMessage(cMessage *msg);

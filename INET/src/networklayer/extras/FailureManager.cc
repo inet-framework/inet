@@ -116,7 +116,7 @@ void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const 
         cGate *out = old->gate(outs, i);
         if(out->isConnected())
         {
-            cGate *to = out->getToGate();
+            cGate *to = out->getNextGate();
             cChannel *ch = check_and_cast<cChannel*>(out->getChannel()->dup());
             out->disconnect();
             n->gate(outs, i)->connectTo(to, ch);
@@ -128,7 +128,7 @@ void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const 
         cGate *in = old->gate(ins, i);
         if (in->isConnected())
         {
-            cGate *from = in->getFromGate();
+            cGate *from = in->getPreviousGate();
             cChannel *ch = check_and_cast<cChannel*>(from->getChannel()->dup());
             from->disconnect();
             from->connectTo(n->gate(ins, i), ch);

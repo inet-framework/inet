@@ -62,7 +62,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src)
         dest.push_back(src[i]);
 }
 
-cModule *getPayloadOwner(cMessage *msg)
+cModule *getPayloadOwner(cPacket *msg)
 {
     while(msg->getEncapsulatedMsg())
         msg = msg->getEncapsulatedMsg();

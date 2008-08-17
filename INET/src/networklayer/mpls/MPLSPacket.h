@@ -23,7 +23,7 @@
 /**
  * Represents a packet with MPLS headers
  */
-class INET_API MPLSPacket: public cMessage
+class INET_API MPLSPacket: public cPacket
 {
   protected:
     typedef std::stack<int> LabelStack;

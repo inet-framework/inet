@@ -56,7 +56,7 @@ class INET_API ICMPv6 : public cSimpleModule
      * so this function will wrap back the transport packet into the IP datagram
      * based on its IPControlInfo.
      */
-    virtual void sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
 
   protected:
     // internal helper functions
@@ -95,7 +95,7 @@ class INET_API ICMPv6 : public cSimpleModule
      *  Ping a machine. The information needed to do this is in the cMessage
      *  parameter.  TODO where in cMessage? document!!!
      */
-    virtual void sendEchoRequest(cMessage *);
+    virtual void sendEchoRequest(cPacket *);
 
     /**
      * Validate the received IPv6 datagram before responding with error message.

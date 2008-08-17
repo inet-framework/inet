@@ -126,7 +126,7 @@ class IPSourceRoutingOption
 //
 // Only only one of the option fields can exist at a time.
 //
-message IPDatagram
+packet IPDatagram
 {
     short version = 4;
     short headerLength = IP_HEADER_BYTES;

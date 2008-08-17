@@ -77,7 +77,7 @@ void IPv6::endService(cMessage *msg)
        (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)))//Added this for ICMP msgs from ICMP module-WEI
     {
         // packet from upper layers or ND: encapsulate and send out
-        handleMessageFromHL(msg);
+        handleMessageFromHL(PK(msg));
     }
     else
     {
@@ -90,7 +90,7 @@ void IPv6::endService(cMessage *msg)
         updateDisplayString();
 }
 
-InterfaceEntry *IPv6::getSourceInterfaceFrom(cMessage *msg)
+InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
 {
     cGate *g = msg->getArrivalGate();
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
@@ -125,7 +125,7 @@ void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
         routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram));
 }
 
-void IPv6::handleMessageFromHL(cMessage *msg)
+void IPv6::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0)
@@ -421,7 +421,7 @@ void IPv6::isLocalAddress(IPv6Datagram *datagram)
 */
     // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
-    cMessage *packet = decapsulate(datagram);
+    cPacket *packet = decapsulate(datagram);
 
     if (protocol==IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage*>(packet))
     {
@@ -476,11 +476,11 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 }
 
 
-cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
+cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
 {
     // decapsulate transport packet
     InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
-    cMessage *packet = datagram->decapsulate();
+    cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -499,7 +499,7 @@ cMessage *IPv6::decapsulate(IPv6Datagram *datagram)
     return packet;
 }
 
-IPv6Datagram *IPv6::encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE)
+IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE)
 {
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo*>(transportPacket->removeControlInfo());
 

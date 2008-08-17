@@ -42,7 +42,7 @@ class noncobject IPv6ExtensionHeaderPtr;
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
-message IPv6Datagram
+packet IPv6Datagram
 {
     @customize(true);
 

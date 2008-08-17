@@ -78,7 +78,7 @@ enum ICMPDestinationUnreachableCodes
 //
 // ICMP message class
 //
-message ICMPMessage
+packet ICMPMessage
 {
     int type enum(ICMPType);
     int code;

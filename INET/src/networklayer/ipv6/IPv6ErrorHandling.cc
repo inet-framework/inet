@@ -36,7 +36,7 @@ void IPv6ErrorHandling::initialize()
 void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     ICMPv6Message *icmpv6Msg = check_and_cast<ICMPv6Message *>(msg);
-    IPv6Datagram *d = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
+    IPv6Datagram *d = check_and_cast<IPv6Datagram *>(icmpv6Msg->getEncapsulatedMsg());
     int type = (int)icmpv6Msg->getType();
     int code;
     EV << " Type: " << type;

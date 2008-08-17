@@ -587,7 +587,7 @@ void LDP::socketEstablished(int, void *yourPtr)
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void LDP::socketDataArrived(int, void *yourPtr, cMessage *msg, bool)
+void LDP::socketDataArrived(int, void *yourPtr, cPacket *msg, bool)
 {
     peer_info& peer = myPeers[(long)yourPtr];
     EV << "Message arrived over TCP from peer " << peer.peerIP << "\n";

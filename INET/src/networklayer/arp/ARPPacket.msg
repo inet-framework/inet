@@ -54,7 +54,7 @@ enum ARPOpcode
 //   - hardware address length (6)
 //   - protocol address length (4)
 //
-message ARPPacket
+packet ARPPacket
 {
     int opcode enum(ARPOpcode);
     MACAddress srcMACAddress;

@@ -43,7 +43,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     // request from application
     if (msg->getArrivalGate()->isName("pingIn"))
     {
-        sendEchoRequest(msg);
+        sendEchoRequest(PK(msg));
         return;
     }
 }
@@ -111,13 +111,13 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
 {
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo*>(reply->removeControlInfo());
-    cMessage *payload = reply->decapsulate();
+    cPacket *payload = reply->decapsulate();
     payload->setControlInfo(ctrl);
     delete reply;
     send(payload, "pingOut");
 }
 
-void ICMPv6::sendEchoRequest(cMessage *msg)
+void ICMPv6::sendEchoRequest(cPacket *msg)
 {
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo*>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_IPv6_ICMP);
@@ -176,7 +176,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     }
 }
 
-void ICMPv6::sendErrorMessage(cMessage *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
+void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 

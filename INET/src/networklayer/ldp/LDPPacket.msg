@@ -59,7 +59,7 @@ struct FEC_TLV
 //
 // Base class for LDP packets
 //
-message LDPPacket
+packet LDPPacket
 {
     int type;
     IPAddress senderAddress;
@@ -70,7 +70,7 @@ message LDPPacket
 //
 // LDP Label Mapping Message
 //
-message LDPLabelMapping extends LDPPacket
+packet LDPLabelMapping extends LDPPacket
 {
     FEC_TLV fec;
     int label;
@@ -79,7 +79,7 @@ message LDPLabelMapping extends LDPPacket
 //
 // LDP Label Request Message
 //
-message LDPLabelRequest extends LDPPacket
+packet LDPLabelRequest extends LDPPacket
 {
     FEC_TLV fec;
 }
@@ -88,7 +88,7 @@ message LDPLabelRequest extends LDPPacket
 //
 // LDP Hello Message
 //
-message LDPHello extends LDPPacket
+packet LDPHello extends LDPPacket
 {
     double holdTime;
     bool tbit;
@@ -98,7 +98,7 @@ message LDPHello extends LDPPacket
 //
 // LDP notification message
 //
-message LDPNotify extends LDPPacket
+packet LDPNotify extends LDPPacket
 {
     int status;
     FEC_TLV fec;
@@ -108,7 +108,7 @@ message LDPNotify extends LDPPacket
 // LDP Ini Message
 //
 //# FIXME currently unused
-message LDPIni extends LDPPacket
+packet LDPIni extends LDPPacket
 {
     double keepAliveTime;
     bool abit;
@@ -121,7 +121,7 @@ message LDPIni extends LDPPacket
 // LDP Address Message
 //
 //# FIXME currently unused
-message LDPAddress extends LDPPacket
+packet LDPAddress extends LDPPacket
 {
     bool isWithdraw;
     string family;

@@ -52,7 +52,7 @@ struct EroObj_t;
 //
 // \RSVP message common part
 //
-message RSVPMessage
+packet RSVPMessage
 {
     int rsvpKind;
 }
@@ -60,7 +60,7 @@ message RSVPMessage
 //
 // FIXME missing documentation
 //
-message RSVPPacket extends RSVPMessage
+packet RSVPPacket extends RSVPMessage
 {
     @customize(true);
     SessionObj_t session;

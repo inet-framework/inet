@@ -45,9 +45,9 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 int find(const EroVector& ERO, IPAddress node);
 
 /**
- * TODO documentation
+ * XXX function appears to be unused
  */
-cModule *getPayloadOwner(cMessage *msg);
+cModule *getPayloadOwner(cPacket *msg);
 
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
 

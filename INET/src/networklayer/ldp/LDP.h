@@ -198,7 +198,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
     virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketDataArrived(int connId, void *yourPtr, cMessage *msg, bool urgent);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
     virtual void socketPeerClosed(int connId, void *yourPtr);
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);

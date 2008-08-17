@@ -68,7 +68,7 @@ class INET_API IP : public QueueBase
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual InterfaceEntry *getSourceInterfaceFrom(cMessage *msg);
+    virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
 
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
@@ -77,14 +77,14 @@ class INET_API IP : public QueueBase
      * Encapsulate packet coming from higher layers into IPDatagram, using
      * the control info attached to the packet.
      */
-    virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE);
+    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE);
 
     /**
      * Encapsulate packet coming from higher layers into IPDatagram, using
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
-    virtual IPDatagram *encapsulate(cMessage *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo);
+    virtual IPDatagram *encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, IPControlInfo *controlInfo);
 
     /**
      * Creates a blank IP datagram. Override when subclassing IPDatagram is needed
@@ -101,7 +101,7 @@ class INET_API IP : public QueueBase
      * Handle messages (typically packets to be send in IP) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
-    virtual void handleMessageFromHL(cMessage *msg);
+    virtual void handleMessageFromHL(cPacket *msg);
 
     /**
      * Handle incoming ARP packets by sending them over "queueOut" to ARP.
@@ -135,7 +135,7 @@ class INET_API IP : public QueueBase
     /**
      * Decapsulate and return encapsulated packet after attaching IPControlInfo.
      */
-    virtual cMessage *decapsulateIP(IPDatagram *datagram);
+    virtual cPacket *decapsulateIP(IPDatagram *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
