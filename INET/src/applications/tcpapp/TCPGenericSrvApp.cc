@@ -1,4 +1,3 @@
-#if 0 //XXX
 //
 // Copyright 2004 Andras Varga
 //
@@ -50,10 +49,20 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
-    msgsSent++;
-    bytesSent += msg->getByteLength();
+	GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg*>(msg);
 
-    EV << "sending \"" << msg->getName() << "\" to TCP, " << msg->getByteLength() << " bytes\n";
+	if (appmsg)
+	{
+		msgsSent++;
+		bytesSent += appmsg->getByteLength();
+
+		EV << "sending \"" << appmsg->getName() << "\" to TCP, " << appmsg->getByteLength() << " bytes\n";
+	}
+	else
+	{
+		EV << "sending \"" << msg->getName() << "\" to TCP\n";
+	}
+
     send(msg, "tcpOut");
 }
 
@@ -73,9 +82,6 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     }
     else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        msgsRcvd++;
-        bytesRcvd += msg->getByteLength();
-
         GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
         if (!appmsg)
             error("Message (%s)%s is not a GenericAppMsg -- "
@@ -84,6 +90,9 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                   "(try \"TCPMsgBasedSendQueue\" and \"TCPMsgBasedRcvQueue\")",
                   msg->getClassName(), msg->getName());
 
+        msgsRcvd++;
+        bytesRcvd += appmsg->getByteLength();
+
         long requestedBytes = appmsg->getExpectedReplyLength();
 
         simtime_t msgDelay = appmsg->getReplyDelay();
@@ -91,7 +100,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             maxMsgDelay = msgDelay;
 
         bool doClose = appmsg->getServerClose();
-        int connId = check_and_cast<TCPCommand *>(msg->getControlInfo())->getConnId();
+        int connId = check_and_cast<TCPCommand *>(appmsg->getControlInfo())->getConnId();
 
         if (requestedBytes==0)
         {
@@ -99,15 +108,15 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         }
         else
         {
-            delete msg->removeControlInfo();
+            delete appmsg->removeControlInfo();
             TCPSendCommand *cmd = new TCPSendCommand();
             cmd->setConnId(connId);
-            msg->setControlInfo(cmd);
+            appmsg->setControlInfo(cmd);
 
             // set length and send it back
-            msg->setKind(TCP_C_SEND);
-            msg->setByteLength(requestedBytes);
-            sendOrSchedule(msg, delay+msgDelay);
+            appmsg->setKind(TCP_C_SEND);
+            appmsg->setByteLength(requestedBytes);
+            sendOrSchedule(appmsg, delay+msgDelay);
         }
 
         if (doClose)
@@ -144,4 +153,3 @@ void TCPGenericSrvApp::finish()
     recordScalar("bytes sent", bytesSent);
     recordScalar("bytes rcvd", bytesRcvd);
 }
-#endif 0 //XXX
