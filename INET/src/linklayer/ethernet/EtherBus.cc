@@ -1,4 +1,3 @@
-#if 0 //XXX
 /*
  * Copyright (C) 2003 CTIE, Monash University
  *
@@ -128,20 +127,18 @@ void EtherBus::handleMessage (cMessage *msg)
         if (tapPoint>0)
         {
             // start UPSTREAM travel
-            cMessage *event = new cMessage("upstream", UPSTREAM);
-            event->setContextPointer(&tap[tapPoint-1]);
             // if goes downstream too, we need to make a copy
             cMessage *msg2 = (tapPoint<taps-1) ? (cMessage *)msg->dup() : msg;
-            event->encapsulate(msg2);
-            scheduleAt(simTime()+tap[tapPoint].propagationDelay[UPSTREAM], event);
+            msg2->setKind(UPSTREAM);
+            msg2->setContextPointer(&tap[tapPoint-1]);
+            scheduleAt(simTime()+tap[tapPoint].propagationDelay[UPSTREAM], msg2);
         }
         if (tapPoint<taps-1)
         {
             // start DOWNSTREAM travel
-            cMessage *event = new cMessage("downstream", DOWNSTREAM);
-            event->setContextPointer(&tap[tapPoint+1]);
-            event->encapsulate(msg);
-            scheduleAt(simTime()+tap[tapPoint].propagationDelay[DOWNSTREAM], event);
+        	msg->setKind(DOWNSTREAM);
+        	msg->setContextPointer(&tap[tapPoint+1]);
+            scheduleAt(simTime()+tap[tapPoint].propagationDelay[DOWNSTREAM], msg);
         }
         if (taps==1)
         {
@@ -160,14 +157,13 @@ void EtherBus::handleMessage (cMessage *msg)
 
         // send out on gate
         bool isLast = (direction==UPSTREAM) ? (tapPoint==0) : (tapPoint==taps-1);
-        cPacket *msg2 = isLast ? msg->decapsulate() : (cMessage *)msg->getEncapsulatedMsg()->dup();
+        cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
         send(msg2, "ethg$o", tapPoint);
 
         // if not end of the bus, schedule for next tap
         if (isLast)
         {
             EV << "End of bus reached\n";
-            delete msg;
         }
         else
         {
@@ -201,5 +197,3 @@ void EtherBus::finish ()
     if (t>0)
         recordScalar("messages/sec", numMessages/t);
 }
-
-#endif 0 //XXX

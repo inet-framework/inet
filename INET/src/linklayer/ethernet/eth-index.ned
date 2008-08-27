@@ -203,15 +203,14 @@
 // Messages sent by EtherMAC mark the beginning of a transmission.
 // The end of a transmission is not explicitly represented by a message,
 // but instead, the EtherMAC calculates it from the frame length and
-// the transmission rate. Frames are represented by EtherFrame, with
-// message kind=ETH_FRAME.
+// the transmission rate. Frames are represented by EtherFrame.
 //
 // When frames collide, the transmission is aborted -- in this case
 // EtherMAC makes use of the modelled jam signals to figure out
 // when colliding transmissions end.
 //
 // When a transmitting station senses a collision, it transmits a jam signal.
-// Jam signals are represented by a message with kind=JAM_SIGNAL.
+// Jam signals are represented by a EtherJam message.
 // When EtherMAC received a jam signal, it knows that one transmission
 // has ended in jamming -- thus when it receives as many jam messages
 // as colliding frames, it can be sure all transmissions have been aborted.
@@ -233,7 +232,7 @@
 // allowing the transmitter to resume immediately.
 //
 // EtherMAC will properly respond to PAUSE frames it receives
-// (EtherPauseFrame class, ETH_PAUSE message kind),
+// (EtherPauseFrame class),
 // however it will never send a PAUSE frame by itself. (For one thing,
 // it doesn't have an input buffer that can overflow.)
 //

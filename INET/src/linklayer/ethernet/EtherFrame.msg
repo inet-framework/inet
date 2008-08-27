@@ -21,10 +21,6 @@ cplusplus {{
 #include "Ethernet.h"
 #include "MACAddress.h"
 #include "Ieee802Ctrl_m.h" // for enums
-
-#define JAM_SIGNAL 2000   // jam signal on shared medium
-#define ETH_FRAME  2001   // Ethernet frame
-#define ETH_PAUSE  2002   // Ethernet PAUSE frame
 }}
 
 
@@ -36,7 +32,12 @@ enum EtherType;
 
 enum SAPCode;
 
-
+//
+// Represents jam on the Ethernet.
+//
+packet EtherJam
+{
+}
 
 //
 // Common base class for classes representing Ethernet II and 802.3 frame types,

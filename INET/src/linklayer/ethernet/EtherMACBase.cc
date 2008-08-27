@@ -288,13 +288,6 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
 {
     EV << "Received frame from upper layer: " << frame << endl;
 
-    // check message kind
-    if (frame->getKind()!=ETH_FRAME && frame->getKind()!=ETH_PAUSE)
-        error("message with unexpected message kind %d arrived from higher layer", frame->getKind());
-
-    // pause frames must be EtherPauseFrame AND kind==ETH_PAUSE
-    ASSERT((frame->getKind()==ETH_PAUSE) == (dynamic_cast<EtherPauseFrame *>(frame)!=NULL));
-
     if (frame->getDest().equals(address))
     {
         error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
@@ -304,8 +297,8 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     if (frame->getByteLength() > MAX_ETHERNET_FRAME)
         error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)", frame->getByteLength(), MAX_ETHERNET_FRAME);
 
-    // must be ETH_FRAME (or ETH_PAUSE) from upper layer
-    bool isPauseFrame = (frame->getKind()==ETH_PAUSE);
+    // must be EtherFrame (or EtherPauseFrame) from upper layer
+    bool isPauseFrame = (dynamic_cast<EtherPauseFrame*>(frame)!=NULL);
     if (!isPauseFrame)
     {
         numFramesFromHL++;
@@ -341,9 +334,9 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 {
     EV << "Received frame from network: " << frame << endl;
 
-    // frame must be ETH_FRAME, ETH_PAUSE or JAM_SIGNAL
-    if (frame->getKind()!=ETH_FRAME && frame->getKind()!=ETH_PAUSE && frame->getKind()!=JAM_SIGNAL)
-        error("message with unexpected message kind %d arrived from network", frame->getKind());
+    // frame must be EtherFrame or EtherJam
+    if (dynamic_cast<EtherFrame*>(frame)==NULL && dynamic_cast<EtherJam*>(frame)==NULL)
+        error("message with unexpected message class arrived from network");
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode && simTime()-frame->getSendingTime()>=shortestFrameDuration)
@@ -356,23 +349,19 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 void EtherMACBase::frameReceptionComplete(EtherFrame *frame)
 {
     int pauseUnits;
+    EtherPauseFrame *pauseFrame;
 
-    switch (frame->getKind())
+    if ((pauseFrame=dynamic_cast<EtherPauseFrame*>(frame))!=NULL)
     {
-      case ETH_FRAME:
-        processReceivedDataFrame((EtherFrame *)frame);
-        break;
-
-      case ETH_PAUSE:
-        pauseUnits = ((EtherPauseFrame *)frame)->getPauseTime();
+        pauseUnits = pauseFrame->getPauseTime();
         delete frame;
         numPauseFramesRcvd++;
         numPauseFramesRcvdVector.record(numPauseFramesRcvd);
         processPauseCommand(pauseUnits);
-        break;
-
-      default:
-        error("Invalid message kind %d",frame->getKind());
+    }
+    else
+    {
+        processReceivedDataFrame((EtherFrame *)frame);
     }
 }
 
@@ -475,7 +464,7 @@ void EtherMACBase::handleEndTxPeriod()
     numFramesSentVector.record(numFramesSent);
     numBytesSentVector.record(numBytesSent);
 
-    if (frame->getKind()==ETH_PAUSE)
+    if (dynamic_cast<EtherPauseFrame*>(frame)!=NULL)
     {
         numPauseFramesSent++;
         numPauseFramesSentVector.record(numPauseFramesSent);

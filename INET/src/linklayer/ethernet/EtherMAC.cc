@@ -289,7 +289,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     if (!duplexMode && transmitState==TRANSMITTING_STATE)
     {
         // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
-        if (msg->getKind()==JAM_SIGNAL)
+        if (dynamic_cast<EtherJam*>(msg) != NULL)
             error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
@@ -310,7 +310,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
     else if (receiveState==RX_IDLE_STATE)
     {
-        if (msg->getKind()==JAM_SIGNAL)
+        if (dynamic_cast<EtherJam*>(msg) != NULL)
             error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         EV << "Start reception of frame\n";
@@ -321,7 +321,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         scheduleEndRxPeriod(msg);
         channelBusySince = simTime();
     }
-    else if (receiveState==RECEIVING_STATE && msg->getKind()!=JAM_SIGNAL && endRxMsg->getArrivalTime()-simTime()<bitTime)
+    else if (receiveState==RECEIVING_STATE && dynamic_cast<EtherJam*>(msg)==NULL && endRxMsg->getArrivalTime()-simTime()<bitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -343,7 +343,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     else // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
     {
         // handle overlapping receptions
-        if (msg->getKind()==JAM_SIGNAL)
+        if (dynamic_cast<EtherJam*>(msg) != NULL)
         {
             if (numConcurrentTransmissions<=0)
                 error("numConcurrentTransmissions=%d on jam arrival (stray jam?)",numConcurrentTransmissions);
@@ -359,7 +359,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
                 scheduleAt(endRxTime, endRxMsg);
             }
         }
-        else // ETH_FRAME or ETH_PAUSE
+        else // EtherFrame or EtherPauseFrame
         {
             numConcurrentTransmissions++;
             if (endRxMsg->getArrivalTime() < endRxTime)
@@ -558,7 +558,7 @@ void EtherMAC::handleEndJammingPeriod()
 
 void EtherMAC::sendJamSignal()
 {
-    cPacket *jam = new cPacket("JAM_SIGNAL", JAM_SIGNAL);
+    cPacket *jam = new cPacket("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
     if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, physOutGate);

@@ -89,7 +89,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     EV << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
 
     Ieee802Ctrl *etherctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-    EthernetIIFrame *frame = new EthernetIIFrame(msg->getName(), ETH_FRAME);
+    EthernetIIFrame *frame = new EthernetIIFrame(msg->getName());
 
     frame->setSrc(etherctrl->getSrc());  // if blank, will be filled in by MAC
     frame->setDest(etherctrl->getDest());
@@ -138,7 +138,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     // create Ethernet frame
     char framename[30];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
+    EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);

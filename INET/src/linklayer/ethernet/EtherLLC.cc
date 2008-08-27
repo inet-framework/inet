@@ -37,37 +37,40 @@ void EtherLLC::initialize()
 
 void EtherLLC::handleMessage(cMessage *msg)
 {
-    switch (msg->getKind())
-    {
-      case IEEE802CTRL_DATA:
-        // data received from higher layer
-        processPacketFromHigherLayer(PK(msg));
-        break;
-
-      case ETH_FRAME:
+	if (msg->arrivedOn("lowerLayerIn"))
+	{
         // frame received from lower layer
         processFrameFromMAC(check_and_cast<EtherFrameWithLLC *>(msg));
-        break;
+	}
+	else
+	{
+		switch (msg->getKind())
+		{
+		  case IEEE802CTRL_DATA:
+			// data received from higher layer
+			processPacketFromHigherLayer(PK(msg));
+			break;
 
-      case IEEE802CTRL_REGISTER_DSAP:
-        // higher layer registers itself
-        handleRegisterSAP(msg);
-        break;
+		  case IEEE802CTRL_REGISTER_DSAP:
+			// higher layer registers itself
+			handleRegisterSAP(msg);
+			break;
 
-      case IEEE802CTRL_DEREGISTER_DSAP:
-        // higher layer deregisters itself
-        handleDeregisterSAP(msg);
-        break;
+		  case IEEE802CTRL_DEREGISTER_DSAP:
+			// higher layer deregisters itself
+			handleDeregisterSAP(msg);
+			break;
 
-      case IEEE802CTRL_SENDPAUSE:
-        // higher layer want MAC to send PAUSE frame
-        handleSendPause(msg);
-        break;
+		  case IEEE802CTRL_SENDPAUSE:
+			// higher layer want MAC to send PAUSE frame
+			handleSendPause(msg);
+			break;
 
-      default:
-        error("received message `%s' with unknown message kind %d",
-              msg->getName(), msg->getKind());
-    }
+		  default:
+			error("received message `%s' with unknown message kind %d",
+				  msg->getName(), msg->getKind());
+		}
+	}
 
     if (ev.isGUI())
         updateDisplayString();
@@ -102,7 +105,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     if (!etherctrl)
         error("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
 
-    EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->getName(), ETH_FRAME);
+    EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->getName());
 
     frame->setControl(0);
     frame->setSsap(etherctrl->getSsap());
@@ -205,7 +208,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     // create Ethernet frame
     char framename[30];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    EtherPauseFrame *frame = new EtherPauseFrame(framename, ETH_PAUSE);
+    EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
 
     frame->setByteLength(ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES);
