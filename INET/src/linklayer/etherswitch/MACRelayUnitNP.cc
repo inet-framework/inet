@@ -1,4 +1,3 @@
-#if 0  //XXX
 /*
  * Copyright (C) 2003 CTIE, Monash University
  *
@@ -43,7 +42,16 @@ MACRelayUnitNP::MACRelayUnitNP()
 MACRelayUnitNP::~MACRelayUnitNP()
 {
     for (int i=0; i<numCPUs; i++)
-        cancelAndDelete(endProcEvents[i]);
+    {
+    	cMessage *endProcEvent = endProcEvents[i];
+    	EtherFrame *etherFrame = (EtherFrame *)endProcEvent->getContextPointer();
+    	if (etherFrame)
+    	{
+    		endProcEvent->setContextPointer(NULL);
+    		delete etherFrame;
+    	}
+        cancelAndDelete(endProcEvent);
+    }
     delete [] endProcEvents;
 }
 
@@ -105,7 +113,7 @@ void MACRelayUnitNP::handleMessage(cMessage *msg)
     else
     {
         // Self message signal used to indicate a frame has finished processing
-        processFrame(PK(msg));
+        processFrame(msg);
     }
 }
 
@@ -141,7 +149,8 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
         {
             EV << "Idle CPU-" << i << " starting processing of incoming frame " << frame << endl;
             cMessage *msg = endProcEvents[i];
-            msg->encapsulate(frame);
+            ASSERT(msg->getContextPointer()==NULL);
+            msg->setContextPointer(frame);
             scheduleAt(simTime() + processingTime, msg);
         }
     }
@@ -157,10 +166,12 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
     bufferLevel.record(bufferUsed);
 }
 
-void MACRelayUnitNP::processFrame(cPacket *msg)
+void MACRelayUnitNP::processFrame(cMessage *msg)
 {
     int cpu = msg->getKind();
-    EtherFrame *frame = (EtherFrame *) msg->decapsulate();
+    EtherFrame *frame = (EtherFrame *) msg->getContextPointer();
+    ASSERT(frame);
+    msg->setContextPointer(NULL);
     long length = frame->getByteLength();
     int inputport = frame->getArrivalGate()->getIndex();
 
@@ -178,7 +189,7 @@ void MACRelayUnitNP::processFrame(cPacket *msg)
     if (!queue.empty())
     {
         EtherFrame *newframe = (EtherFrame *) queue.pop();
-        msg->encapsulate(newframe);
+        msg->setContextPointer(newframe);
         EV << "CPU-" << cpu << " starting processing of frame " << newframe << endl;
         scheduleAt(simTime()+processingTime, msg);
     }
@@ -193,4 +204,3 @@ void MACRelayUnitNP::finish()
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("dropped frames", numDroppedFrames);
 }
-#endif //XXX
