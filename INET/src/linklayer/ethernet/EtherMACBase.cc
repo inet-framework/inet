@@ -336,7 +336,8 @@ void EtherMACBase::processMsgFromNetwork(cPacket *frame)
 
     // frame must be EtherFrame or EtherJam
     if (dynamic_cast<EtherFrame*>(frame)==NULL && dynamic_cast<EtherJam*>(frame)==NULL)
-        error("message with unexpected message class arrived from network");
+        error("message with unexpected message class '%s' arrived from network (name='%s')",
+        		frame->getClassName(), frame->getFullName());
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode && simTime()-frame->getSendingTime()>=shortestFrameDuration)

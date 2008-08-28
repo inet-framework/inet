@@ -558,7 +558,7 @@ void EtherMAC::handleEndJammingPeriod()
 
 void EtherMAC::sendJamSignal()
 {
-    cPacket *jam = new cPacket("JAM_SIGNAL");
+    cPacket *jam = new EtherJam("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
     if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, physOutGate);
