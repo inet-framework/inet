@@ -1,10 +1,10 @@
 <!-- NOT a mobility trace. This file is used by the ScenarioManager. -->
 <scenario>
-    <set-param t="10" module="host[1].mobility" par="speed" value="1mps"/>
-    <set-param t="20" module="host[1].mobility" par="speed" value="30mps"/>
-    <set-param t="30" module="host[1].mobility" par="speed" value="5mps"/>
-    <set-param t="40" module="host[1].mobility" par="speed" value="40mps"/>
-    <set-param t="50" module="host[1].mobility" par="speed" value="5mps"/>
-    <set-param t="60" module="host[1].mobility" par="speed" value="40mps"/>
-    <set-param t="70" module="host[1].mobility" par="speed" value="5mps"/>
+    <set-param t="10s" module="host[1].mobility" par="speed" value="1mps"/>
+    <set-param t="20s" module="host[1].mobility" par="speed" value="30mps"/>
+    <set-param t="30s" module="host[1].mobility" par="speed" value="5mps"/>
+    <set-param t="40s" module="host[1].mobility" par="speed" value="40mps"/>
+    <set-param t="50s" module="host[1].mobility" par="speed" value="5mps"/>
+    <set-param t="60s" module="host[1].mobility" par="speed" value="40mps"/>
+    <set-param t="70s" module="host[1].mobility" par="speed" value="5mps"/>
 </scenario>
