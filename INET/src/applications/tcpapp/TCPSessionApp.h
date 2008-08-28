@@ -46,7 +46,7 @@ class INET_API TCPSessionApp : public cSimpleModule
   protected:
     virtual void parseScript(const char *script);
     virtual void waitUntil(simtime_t t);
-    virtual void count(cPacket *msg);
+    virtual void count(cMessage *msg);
 
     virtual void activity();
     virtual void finish();

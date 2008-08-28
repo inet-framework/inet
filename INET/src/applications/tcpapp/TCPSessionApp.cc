@@ -54,12 +54,12 @@ void TCPSessionApp::parseScript(const char *script)
     }
 }
 
-void TCPSessionApp::count(cPacket *msg)
+void TCPSessionApp::count(cMessage *msg)
 {
     if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
         packetsRcvd++;
-        bytesRcvd+=msg->getByteLength();
+        bytesRcvd+=PK(msg)->getByteLength();
     }
     else
     {
@@ -164,7 +164,7 @@ void TCPSessionApp::activity()
     for (;;)
     {
         cMessage *msg = receive();
-        count(PK(msg));
+        count(msg);
         socket.processMessage(msg);
     }
 }
