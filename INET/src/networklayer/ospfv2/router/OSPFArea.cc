@@ -1815,7 +1815,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::CalculateNextHops(OSPFLSA* destination, 
                         ((intfType == OSPF::Interface::Virtual) &&
                          (associatedInterfaces[i]->GetState() > OSPF::Interface::LoopbackState)))
                     {
-                        OSPF::Neighbor* ptpNeighbor = associatedInterfaces[i]->GetNeighbor(0);
+                        OSPF::Neighbor* ptpNeighbor = associatedInterfaces[i]->GetNeighborCount() > 0 ? associatedInterfaces[i]->GetNeighbor(0) : NULL;
                         if (ptpNeighbor != NULL) {
                             if (ptpNeighbor->GetNeighborID() == destinationRouterLSA->getHeader().getLinkStateID()) {
                                 NextHop nextHop;

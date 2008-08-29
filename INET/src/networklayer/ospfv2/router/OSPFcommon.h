@@ -51,6 +51,9 @@ struct AuthenticationKeyType {
 //FIXME remove this type, use IPAddress instead
 struct IPv4Address {
     unsigned char   bytes[4];
+
+
+    unsigned int asInt() { return (bytes[0]<<24) | bytes[1]<<16 | bytes[2]<<8 | bytes[3]; }
 };
 
 class IPv4Address_Less : public std::binary_function <IPv4Address, IPv4Address, bool>
@@ -107,20 +110,6 @@ const DesignatedRouterID    NullDesignatedRouterID = { 0, { {0, 0, 0, 0} } };
 
 } // namespace OSPF
 
-inline bool operator== (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
-{
-    return (leftID.routerID == rightID.routerID &&
-            leftID.ipInterfaceAddress.bytes[0] == rightID.ipInterfaceAddress.bytes[0] &&
-            leftID.ipInterfaceAddress.bytes[1] == rightID.ipInterfaceAddress.bytes[1] &&
-            leftID.ipInterfaceAddress.bytes[2] == rightID.ipInterfaceAddress.bytes[2] &&
-            leftID.ipInterfaceAddress.bytes[3] == rightID.ipInterfaceAddress.bytes[3]);
-}
-
-inline bool operator!= (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
-{
-    return (!(leftID == rightID));
-}
-
 inline bool operator== (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
 {
     return (leftAddress.bytes[0] == rightAddress.bytes[0] &&
@@ -136,19 +125,7 @@ inline bool operator!= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAd
 
 inline bool operator< (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
 {
-    if (leftAddress.bytes[0] < rightAddress.bytes[0]) {
-        return true;
-    }
-    if (leftAddress.bytes[1] < rightAddress.bytes[1]) {
-        return true;
-    }
-    if (leftAddress.bytes[2] < rightAddress.bytes[2]) {
-        return true;
-    }
-    if (leftAddress.bytes[3] < rightAddress.bytes[3]) {
-        return true;
-    }
-    return false;
+	return leftAddress.asInt() < rightAddress.asInt();
 }
 
 inline bool operator<= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
@@ -195,6 +172,17 @@ inline bool operator== (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4Addre
 inline bool operator!= (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
 {
     return (!(leftAddressRange == rightAddressRange));
+}
+
+inline bool operator== (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+{
+    return (leftID.routerID == rightID.routerID &&
+    		leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
+}
+
+inline bool operator!= (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+{
+    return (!(leftID == rightID));
 }
 
 inline bool OSPF::IPv4Address_Less::operator() (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress) const
