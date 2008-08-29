@@ -244,8 +244,9 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
 
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+    ASSERT(ie!=NULL);
     EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
-    ASSERT(!nextHop.isUnspecified() && ie!=NULL);
+    ASSERT(!nextHop.isUnspecified());
 
     MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);
     if (macAddr.isUnspecified())

@@ -161,7 +161,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
                 if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
                     rt->addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
                                                 ie->ipv6Data()->getAdvPrefix(y).prefixLength,
-                                                x, 0);
+                                                ie->getInterfaceId(), 0);
         }
     }
 }

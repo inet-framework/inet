@@ -123,7 +123,7 @@ void RoutingTable6::initialize(int stage)
                     if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
                         addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
                                                 ie->ipv6Data()->getAdvPrefix(y).prefixLength,
-                                                x, 0);
+                                                ie->getInterfaceId(), 0);
             }
         }
     }
