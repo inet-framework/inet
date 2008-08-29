@@ -45,11 +45,9 @@ void FailureManager::processCommand(const cXMLElement& node)
     {
         target->getDisplayString().setTagArg("i2",0,"status/cross");
         if(!strcmp(target->getModuleType()->getName(), "RSVP_LSR"))
-            replaceNode(target, "RSVP_FAILED");
+            replaceNode(target, "inet.nodes.mpls.RSVP_FAILED");
         else if(!strcmp(target->getModuleType()->getName(), "LDP_LSR"))
-            replaceNode(target, "LDP_FAILED");
-        else if(!strcmp(target->getModuleType()->getName(), "QuaggaRouter"))
-            replaceNode(target, "FailedRouter");
+            replaceNode(target, "inet.nodes.mpls.LDP_FAILED");
         else
             ASSERT(false);
     }
@@ -57,11 +55,9 @@ void FailureManager::processCommand(const cXMLElement& node)
     {
         target->getDisplayString().removeTag("i2");
         if(!strcmp(target->getModuleType()->getName(), "RSVP_FAILED"))
-            replaceNode(target, "RSVP_LSR");
+            replaceNode(target, "inet.nodes.mpls.RSVP_LSR");
         else if(!strcmp(target->getModuleType()->getName(), "LDP_FAILED"))
-            replaceNode(target, "LDP_LSR");
-        else if(!strcmp(target->getModuleType()->getName(), "FailedRouter"))
-            replaceNode(target, "QuaggaRouter");
+            replaceNode(target, "inet.nodes.mpls.LDP_LSR");
         else
             ASSERT(false);
     }
@@ -91,48 +87,92 @@ void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 
 void FailureManager::reconnectNode(cModule *old, cModule *n)
 {
-    for(int i = 0; i < old->getNumParams(); i++)
-        n->par(i) = old->par(i);
-
+	copyParams(old, n);
+	n->finalizeParameters();
     n->setDisplayString(old->getDisplayString().str());
 
-    // FIXME should examine which gates the "old" module has, and reconnect all of them
-    // automatically (ie eliminate hardcoded gate names from here)
-    reconnect(old, n, "in", "out");
-    //reconnect(old, n, "ethIn", "ethOut");
-
+    reconnectAllGates(old, n);
 }
 
-void FailureManager::reconnect(cModule *old, cModule *n, const char *ins, const char *outs)
+void FailureManager::reconnectAllGates(cModule *old, cModule *n)
 {
-    unsigned int insize = old->gateSize(ins);
-    unsigned int outsize = old->gateSize(outs);
+	std::vector<const char*> gateNames = old->getGateNames();
+	for (std::vector<const char*>::const_iterator it=gateNames.begin(); it!=gateNames.end(); ++it)
+	{
+		const char* gateName = *it;
+		if (old->isGateVector(gateName))
+		{
+			unsigned int size = old->gateSize(gateName);
+			n->setGateSize(gateName, size);
+			for (unsigned int i = 0; i < size; i++)
+				reconnectGates(old, n, gateName, i);
+		}
+		else
+		{
+			reconnectGates(old, n, gateName);
+		}
+	}
+}
 
-    n->setGateSize(ins, insize);
-    n->setGateSize(outs, outsize);
+void FailureManager::reconnectGates(cModule *old, cModule *n, const char *gateName, int gateIndex)
+{
+	cGate::Type gateType = old->gateType(gateName);
+	if (gateType == cGate::INOUT)
+	{
+		std::string ingateName = (std::string(gateName)+"$i");
+		std::string outgateName = (std::string(gateName)+"$o");
+		reconnectGate(old->gate(ingateName.c_str(), gateIndex), n->gate(ingateName.c_str(), gateIndex));
+		reconnectGate(old->gate(outgateName.c_str(), gateIndex), n->gate(outgateName.c_str(), gateIndex));
+	}
+	else
+	{
+		reconnectGate(old->gate(gateName, gateIndex), n->gate(gateName, gateIndex));
+	}
+}
 
-    for(unsigned int i = 0; i < outsize; i++)
+void FailureManager::reconnectGate(cGate *oldGate, cGate *newGate)
+{
+	cGate::Type gateType = oldGate->getType();
+    if (gateType == cGate::OUTPUT)
     {
-        cGate *out = old->gate(outs, i);
-        if(out->isConnected())
+        if(oldGate->isConnected())
         {
-            cGate *to = out->getNextGate();
-            cChannel *ch = check_and_cast<cChannel*>(out->getChannel()->dup());
-            out->disconnect();
-            n->gate(outs, i)->connectTo(to, ch);
+            cGate *to = oldGate->getNextGate();
+            cChannel *ch = copyChannel(oldGate->getChannel());
+            std::string displayString = oldGate->getChannel()->getDisplayString().str();
+            oldGate->disconnect();
+            newGate->connectTo(to, ch);
+            ch->setDisplayString(displayString.c_str());
         }
     }
-
-    for (unsigned int i = 0; i < insize; i++)
+    else if (gateType == cGate::INPUT)
     {
-        cGate *in = old->gate(ins, i);
-        if (in->isConnected())
+        if (oldGate->isConnected())
         {
-            cGate *from = in->getPreviousGate();
-            cChannel *ch = check_and_cast<cChannel*>(from->getChannel()->dup());
+            cGate *from = oldGate->getPreviousGate();
+            cChannel *ch = copyChannel(from->getChannel());
+            std::string displayString = from->getChannel()->getDisplayString().str();
             from->disconnect();
-            from->connectTo(n->gate(ins, i), ch);
+            from->connectTo(newGate, ch);
+            ch->setDisplayString(displayString.c_str());
         }
     }
+    else
+    {
+    	error("Unexpected gate type: %d", (int)gateType);
+    }
+}
+
+cChannel *FailureManager::copyChannel(cChannel *channel)
+{
+	cChannel *copy = channel->getChannelType()->create(channel->getName());
+	copyParams(channel, copy);
+    return copy;
+}
+
+void FailureManager::copyParams(cComponent *from, cComponent *to)
+{
+    for(int i = 0; i < from->getNumParams(); i++)
+    	to->par(i) = from->par(i);
 }
 
