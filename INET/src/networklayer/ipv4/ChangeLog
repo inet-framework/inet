@@ -1,8 +1,3 @@
-2008-09-09  Tamas Borbely
-
-	* IPAddress: isLinkLocalMulticast() fixed. It accepted
-          244.0.0.x instead of 224.0.0.x.
-
 2008-07-08  Andras Varga
 
 	* RoutingTable: implemented routing cache [code based on OverSim 

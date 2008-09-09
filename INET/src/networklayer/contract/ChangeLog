@@ -1,3 +1,8 @@
+2008-09-09  Tamas Borbely
+
+	* IPAddress: isLinkLocalMulticast() fixed. It accepted
+          244.0.0.x instead of 224.0.0.x.
+
 2008-07-01  Andras Varga
 
 	* InterfaceTable and associated files moved to new directory common/
