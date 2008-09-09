@@ -210,10 +210,13 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
 
     // adjust upstream mappings
     FecBindVector::iterator uit;
-    for (uit = fecUp.begin(); uit != fecUp.end(); uit++)
+    for (uit = fecUp.begin(); uit != fecUp.end();)
     {
         if (uit->fecid != oldItem.fecid)
+        {
+        	uit++;
             continue;
+        }
 
         std::string inInterface = findInterfaceFromPeerAddr(uit->peer);
         std::string outInterface = findInterfaceFromPeerAddr(oldItem.nextHop);
@@ -225,6 +228,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
 
             EV << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                     " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+            uit++;
         }
         else if (dit != fecDown.end())
         {
@@ -234,6 +238,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
 
             EV << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                     " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+            uit++;
         }
         else
         {
@@ -242,7 +247,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
             sendMapping(LABEL_WITHDRAW, uit->peer, uit->label, oldItem.addr, oldItem.length);
 
             // remove from US mappings
-            fecUp.erase(uit--);
+            uit = fecUp.erase(uit);
         }
     }
 
@@ -427,10 +432,13 @@ void LDP::processHelloTimeout(cMessage *msg)
     EV << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
     FecBindVector::iterator dit;
-    for (dit = fecDown.begin(); dit != fecDown.end(); dit++)
+    for (dit = fecDown.begin(); dit != fecDown.end();)
     {
         if (dit->peer != peerIP)
+        {
+        	dit++;
             continue;
+        }
 
         EV << "label=" << dit->label << endl;
 
@@ -439,23 +447,26 @@ void LDP::processHelloTimeout(cMessage *msg)
         // hello messages just disappeared?
         // does the protocol recover on its own (XXX check this)
 
-        fecDown.erase(dit--);
+        dit = fecDown.erase(dit);
     }
 
     EV << "removing bindings from sent to peer=" << peerIP << " from fecUp" << endl;
 
     FecBindVector::iterator uit;
-    for (uit = fecUp.begin(); uit != fecUp.end(); uit++)
+    for (uit = fecUp.begin(); uit != fecUp.end();)
     {
         if (uit->peer != peerIP)
+        {
+        	uit++;
             continue;
+        }
 
         EV << "label=" << uit->label << endl;
 
         // send withdraw message just in case (?)
         // see comment above...
 
-        fecUp.erase(uit--);
+        uit = fecUp.erase(uit);
     }
 
     EV << "updating fecList" << endl;
@@ -1114,10 +1125,13 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
     // respond to pending requests
 
     PendingVector::iterator pit;
-    for (pit = pending.begin(); pit != pending.end(); pit++)
+    for (pit = pending.begin(); pit != pending.end();)
     {
         if (pit->fecid != it->fecid)
+        {
+            pit++;
             continue;
+        }
 
         EV << "there's pending request for this FEC from " << pit->peer << ", sending mapping" << endl;
 
@@ -1137,7 +1151,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
         sendMapping(LABEL_MAPPING, pit->peer, newItem.label, it->addr, it->length);
 
         // remove request from the list
-        pending.erase(pit--);
+        pit = pending.erase(pit);
     }
 
     delete packet;

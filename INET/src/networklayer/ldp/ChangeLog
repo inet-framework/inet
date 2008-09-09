@@ -1,3 +1,8 @@
+2008-09-09  Tamas Borbely
+
+	* LDP: made combatible with MSVC 8.0. (In debug mode it asserts
+        that the std::vector iterator is not moved before begin().)
+
 2005-11-02  Andras Varga
 
 	* checked in Vojta Janota's implementation (losely based on Andras' code)
