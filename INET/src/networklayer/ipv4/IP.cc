@@ -535,12 +535,17 @@ IPDatagram *IP::encapsulate(cPacket *transportPacket, InterfaceEntry *&destIE, I
     datagram->setDontFragment (controlInfo->getDontFragment());
     datagram->setFragmentOffset(0);
 
-    datagram->setTimeToLive(
-           controlInfo->getTimeToLive() > 0 ?
-           controlInfo->getTimeToLive() :
-           (datagram->getDestAddress().isMulticast() ? defaultMCTimeToLive : defaultTimeToLive)
-    );
+    short ttl;
+    if (controlInfo->getTimeToLive() > 0)
+    	ttl = controlInfo->getTimeToLive();
+    else if (datagram->getDestAddress().isLinkLocalMulticast())
+    	ttl = 1;
+    else if (datagram->getDestAddress().isMulticast())
+    	ttl = defaultMCTimeToLive;
+    else
+    	ttl = defaultTimeToLive;
 
+    datagram->setTimeToLive(ttl);
     datagram->setTransportProtocol(controlInfo->getProtocol());
 
     // setting IP options is currently not supported

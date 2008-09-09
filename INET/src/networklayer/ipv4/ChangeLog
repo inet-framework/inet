@@ -1,3 +1,8 @@
+2008-09-09  Tamas Borbely
+
+	* IP: set timeToLive to 1 if the destination is isLinkLocalMulticast() to
+        prevent broadcasting to non-neighbouring routers.
+
 2008-07-08  Andras Varga
 
 	* RoutingTable: implemented routing cache [code based on OverSim 
