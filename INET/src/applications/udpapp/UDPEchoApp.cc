@@ -52,6 +52,12 @@ cPacket *UDPEchoApp::createPacket()
 
 void UDPEchoApp::processPacket(cPacket *msg)
 {
+	if (msg->getKind() == UDP_I_ERROR)
+	{
+		delete msg;
+		return;
+	}
+
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
 
     if (packet->getIsRequest())
