@@ -29,7 +29,7 @@
  * Operation: gradually rises in the module hierarchy, and searches
  * recursively among all submodules at every level.
  */
-cModule *findModuleWherever(const char *name, cModule *from);
+INET_API cModule *findModuleWherever(const char *name, cModule *from);
 
 /**
  * Find a module with given name, and "closest" to module "from".
@@ -37,7 +37,7 @@ cModule *findModuleWherever(const char *name, cModule *from);
  * Operation: gradually rises in the module hierarchy up to the @node
  * module, and searches recursively among all submodules at every level.
  */
-cModule *findModuleWhereverInNode(const char *name, cModule *from);
+INET_API cModule *findModuleWhereverInNode(const char *name, cModule *from);
 
 /**
  * Find a module with given name, and "closest" to module "from".
@@ -45,14 +45,14 @@ cModule *findModuleWhereverInNode(const char *name, cModule *from);
  * Operation: gradually rises in the module hierarchy, and looks for a submodule
  * of the given name.
  */
-cModule *findModuleSomewhereUp(const char *name, cModule *from);
+INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
  * Finds and returns the pointer to a module of type T and name N.
  * Uses findModuleWherever(). See usage e.g. at RoutingTableAccess.
  */
 template<typename T>
-class INET_API ModuleAccess
+class ModuleAccess
 {
      // Note: MSVC 6.0 doesn't like const char *N as template parameter,
      // so we have to pass it via the ctor...
