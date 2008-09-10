@@ -19,25 +19,43 @@
 
 #include "ModuleAccess.h"
 
-static cModule *findSubmodRecursive(cModule *curmod, const char *name, const char *classname)
+inline bool isNode(cModule *mod)
 {
-    for (cSubModIterator i(*curmod); !i.end(); i++)
+	cProperties *props = mod->getProperties();
+	return props && props->getAsBool("node");
+}
+
+static cModule *findSubmodRecursive(cModule *curmod, const char *name)
+{
+    for (cModule::SubmoduleIterator i(curmod); !i.end(); i++)
     {
         cModule *submod = i();
         if (!strcmp(submod->getFullName(), name))
             return submod;
-        cModule *foundmod = findSubmodRecursive(submod, name, classname);
+        cModule *foundmod = findSubmodRecursive(submod, name);
         if (foundmod)
             return foundmod;
     }
     return NULL;
 }
 
-cModule *findModuleWherever(const char *name, const char *classname, cModule *from)
+cModule *findModuleWherever(const char *name, cModule *from)
 {
     cModule *mod = NULL;
     for (cModule *curmod=from; !mod && curmod; curmod=curmod->getParentModule())
-        mod = findSubmodRecursive(curmod, name, classname);
+        mod = findSubmodRecursive(curmod, name);
+    return mod;
+}
+
+cModule *findModuleWhereverInNode(const char *name, cModule *from)
+{
+    cModule *mod = NULL;
+    for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
+    {
+        mod = findSubmodRecursive(curmod, name);
+        if (mod || isNode(curmod))
+        	break;
+    }
     return mod;
 }
 

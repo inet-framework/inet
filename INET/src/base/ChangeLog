@@ -1,3 +1,9 @@
+2008-09-10  Tamas Borbely
+
+	* ModuleAccess: use findModuleWhereverInNode() instead of
+        findModuleSomewhereUp. It goes up in the hierarchy up to
+        to @node module and search inside them recursively.
+
 2008-07-04  Andras Varga
 
 	* NotificationBoard: added bool hasSubscribers(int category) method.

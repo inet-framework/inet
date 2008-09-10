@@ -24,12 +24,20 @@
 
 
 /**
- * Find a module with given name and type "closest" to module "from".
+ * Find a module with given name, and "closest" to module "from".
  *
  * Operation: gradually rises in the module hierarchy, and searches
  * recursively among all submodules at every level.
  */
-cModule *findModuleWherever(const char *name, const char *classname, cModule *from);
+cModule *findModuleWherever(const char *name, cModule *from);
+
+/**
+ * Find a module with given name, and "closest" to module "from".
+ *
+ * Operation: gradually rises in the module hierarchy up to the @node
+ * module, and searches recursively among all submodules at every level.
+ */
+cModule *findModuleWhereverInNode(const char *name, cModule *from);
 
 /**
  * Find a module with given name, and "closest" to module "from".
@@ -59,7 +67,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleSomewhereUp(name, simulation.getContextModule());
+            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
             if (!m) opp_error("Module (%s)%s not found",opp_typename(typeid(T)),name);
             p = check_and_cast<T*>(m);
         }
@@ -70,7 +78,7 @@ class INET_API ModuleAccess
     {
         if (!p)
         {
-            cModule *m = findModuleSomewhereUp(name, simulation.getContextModule());
+            cModule *m = findModuleWhereverInNode(name, simulation.getContextModule());
             p = dynamic_cast<T*>(m);
         }
         return p;
