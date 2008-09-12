@@ -23,7 +23,7 @@
 
 class IPv6Datagram;
 
-class IPv6ControlInfo : public IPv6ControlInfo_Base
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
 {
   protected:
     IPv6Datagram *dgram;

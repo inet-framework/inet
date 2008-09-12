@@ -23,7 +23,7 @@
 
 class IPDatagram;
 
-class IPControlInfo : public IPControlInfo_Base
+class INET_API IPControlInfo : public IPControlInfo_Base
 {
   protected:
     IPDatagram *dgram;

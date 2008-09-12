@@ -1,3 +1,7 @@
+2008-09-12  Tamas Borbely
+
+	* DLL export IPControlInfo and IPv6ControlInfo.
+
 2008-09-09  Tamas Borbely
 
 	* IPAddress: isLinkLocalMulticast() fixed. It accepted
