@@ -1,3 +1,12 @@
+TODO:
+- fix Ethernet channel usage (should use datarate on the channel!)
+- failure/recovery (replacing with failed router is problematic!)
+- gate labelling for the NED editor
+
+
+
+
+
 TODO: ethernet: use normal channels
 TODO: eliminate cast after dup(), like (AirFrame*)airframe->dup()
 
