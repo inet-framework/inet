@@ -1,17 +1,34 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-20080920
+-------------
+Internal snapshot, for omnetpp-4.0b6.
+
+- performance optimization in all queue modules: remember output gate pointer
+  instead of looking up gate by name for each send()
+
+- Ieee80211AgentSTA.cc: randomize the start time of the scanning process.
+  (Randomizing the time of sending the first beacon in Ieee80211MgmtAP.cc
+  was already done earlier.)
+
+- IP: set TTL to 1 on new datagram if the destination address is link local
+  multicast, to prevent broadcasting to non-neighbouring routers.
+
+- several bugfixes
+
+
 INET-20080709
 -------------
 Internal snapshot, for omnetpp-4.0b3.
 
-- interface table and routing table are now accessed via the C++ interfaces 
+- interface table and routing table are now accessed via the C++ interfaces
   IInterfaceTable and IRoutingTable. This is done to reduce interdependencies
-  among modules; more specifically, to allow users implement their own 
-  InterfaceTables and RoutingTables and plug them into INET simulations, 
+  among modules; more specifically, to allow users implement their own
+  InterfaceTables and RoutingTables and plug them into INET simulations,
   without any change to the base INET.
 
-- PPP and EtherMAC2: performance: don't fire tx begin/end notifications if 
+- PPP and EtherMAC2: performance: don't fire tx begin/end notifications if
   no one is listening; remember output gate pointer instead of looking it up
   by name for each send
 
@@ -24,36 +41,36 @@ INET-20080630
 -------------
 Internal snapshot, for omnetpp-4.0b2.
 
-- to enable and encourage extending INET via subclassing (as opposed to 
-  patching), nearly all member functions made virtual (except in data classes 
-  like IPAddress), and also, private sections in most classes were changed to 
+- to enable and encourage extending INET via subclassing (as opposed to
+  patching), nearly all member functions made virtual (except in data classes
+  like IPAddress), and also, private sections in most classes were changed to
   protected.
 
 - some refactoring on TCP, UDP and IP, to allow subclassing of TCP, UDP and IP
   packets: packets are now created via factory methods that can be overridden
   if needed
 
-- AbstractQueue (base class for IP and other modules) made more efficient: now it 
+- AbstractQueue (base class for IP and other modules) made more efficient: now it
   doesn't schedule a timer if (when) serviceTime is zero.
 
 - IPAddress class made more efficient [code from Ingmar Baumgart, OverSim]
 
 - parsim: added pack/unpack functions for IPAddress, IPv6Address, IPvXAddress
 
-- InterfaceTable: added deleteInterface(). This also causes RoutingTable to 
+- InterfaceTable: added deleteInterface(). This also causes RoutingTable to
   drop routes that correspond to the deleted interface.
 
 - RoutingTable: wrapped naked data members of IPRoute into getters/setters;
-  enforce by returning "const" pointers that routes already added cannot be 
+  enforce by returning "const" pointers that routes already added cannot be
   changed any more (one must delete and re-add it)
 
-- InterfaceTable: created a getInterfaceById() method, NOT to be 
+- InterfaceTable: created a getInterfaceById() method, NOT to be
   confused with getInterface(pos)! Ids are stable after deletions,
   unlike 0..getNumInterfaces()-1 indices, and reliable/safe unlike
   InterfaceEntry* pointers
 
 - InterfaceTable and RoutingTable now fire proper notifications on changes:
-  NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, NF_INTERFACE_STATE_CHANGED, 
+  NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, NF_INTERFACE_STATE_CHANGED,
   NF_INTERFACE_CONFIG_CHANGED; NF_IPv4_ROUTE_ADDED, NF_IPv4_ROUTE_DELETED,
   NF_IPv6_ROUTE_ADDED, NF_IPv6_ROUTE_DELETED, etc.
 
@@ -71,11 +88,11 @@ Internal snapshot, for omnetpp-4.0b2.
   also eliminated @addGetVerb(true) from message classes
 
 - revived the RTP model: starting from Ahmed Ayadi's patch, migrated the code
-  to OMNeT++ 4.0, and started some refactoring (started introducing .msg files 
+  to OMNeT++ 4.0, and started some refactoring (started introducing .msg files
   for handcoded message classes; not yet finished)
 
 
-INET-20080606 
+INET-20080606
 -------------
 Internal snapshot, for omnetpp-4.0b1.
 
