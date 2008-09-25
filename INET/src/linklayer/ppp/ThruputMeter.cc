@@ -67,8 +67,8 @@ void ThruputMeter::beginNewInterval(simtime_t now)
     simtime_t duration = now - intvlStartTime;
 
     // record measurements
-    double bitpersec = intvlNumBits/duration;
-    double pkpersec = intvlNumPackets/duration;
+    double bitpersec = intvlNumBits/duration.dbl();
+    double pkpersec = intvlNumPackets/duration.dbl();
 
     bitpersecVector.recordWithTimestamp(intvlStartTime, bitpersec);
     pkpersecVector.recordWithTimestamp(intvlStartTime, pkpersec);
@@ -86,8 +86,8 @@ void ThruputMeter::finish()
     recordScalar("total packets", numPackets);
     recordScalar("total bits", numBits);
 
-    recordScalar("avg throughput (bit/s)", numBits/duration);
-    recordScalar("avg packets/s", numPackets/duration);
+    recordScalar("avg throughput (bit/s)", numBits/duration.dbl());
+    recordScalar("avg packets/s", numPackets/duration.dbl());
 }
 
 
