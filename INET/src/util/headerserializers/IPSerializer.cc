@@ -30,6 +30,8 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "IPSerializer.h"
 #include "ICMPSerializer.h"
 #include "UDPSerializer.h"
+#include "SCTPSerializer.h"	//I.R.
+#include "TCPSerializer.h"	//I.R.
 
 #if defined(_MSC_VER)
 #undef s_addr   /* MSVC #definition interferes with us */
@@ -37,6 +39,10 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #ifndef _WIN32 /*not MSVC or MinGW*/
 #include <netinet/in.h>  // htonl, ntohl, ...
+#endif
+
+#ifndef IPPROTO_SCTP	//I.R.
+#define IPPROTO_SCTP 132
 #endif
 
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
@@ -79,6 +85,25 @@ int IPSerializer::serialize(IPDatagram *dgram, unsigned char *buf, unsigned int 
         packetLength += UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
+      case IP_PROT_SCTP:	//I.R.
+        packetLength += SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
+                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
+        break;
+      case IP_PROT_TCP:		//I.R.
+	{
+	TCPSegment *tcpPacket = check_and_cast<TCPSegment *>(encapPacket);
+	pseudoheader *pseudo = (pseudoheader*)malloc(sizeof(pseudoheader));
+	pseudo->srcaddr = htonl(dgram->getSrcAddress().getInt());
+	pseudo->dstaddr = htonl(dgram->getDestAddress().getInt());
+	pseudo->zero = 0;
+	pseudo->ptcl = IPPROTO_TCP;
+	pseudo->len = htons(tcpPacket->getBitLength()/8);	
+        packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
+                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES, pseudo);
+	free(pseudo);
+	
+        break;
+	}
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dgram->getTransportProtocol());
     }
@@ -126,6 +151,10 @@ void IPSerializer::parse(unsigned char *buf, unsigned int bufsize, IPDatagram *d
       case IP_PROT_UDP:
         encapPacket = new UDPPacket("udp-from-wire");
         UDPSerializer().parse(buf + headerLength, std::min(totalLength, bufsize) - headerLength, (UDPPacket *)encapPacket);
+        break;
+      case IP_PROT_SCTP:
+        encapPacket = new SCTPMessage("sctp-from-wire");
+        SCTPSerializer().parse(buf + headerLength, (unsigned int)(std::min(totalLength, bufsize) - headerLength), (SCTPMessage *)encapPacket);
         break;
       default:
         opp_error("IPSerializer: cannot serialize protocol %d", dest->getTransportProtocol());
