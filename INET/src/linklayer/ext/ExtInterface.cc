@@ -192,7 +192,7 @@ void ExtInterface::updateDisplayString()
 	if (ev.disable_tracing)
 		getDisplayString().setTagArg("t",0,"");
 	if(connected)
-		sprintf(buf, "pcap device: %s\nrcv:%lu snt:%lu", device, numRcvd, numSent);
+		sprintf(buf, "pcap device: %s\nrcv:%llu snt:%llu", device, numRcvd, numSent);
 	else
 		sprintf(buf, "not connected");
 	getDisplayString().setTagArg("t", 0, buf);
