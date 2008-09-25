@@ -1,0 +1,11 @@
+A network consisting of three routers, a server and several clients
+can be used to simulate traffic between multiple clients and a server.
+Various parameters affecting the simulation can be configured in 
+the omnetpp.ini.
+
+IP addresses and routing tables are set up automatically, by using
+the FlatNetworkConfigurator module.
+
+
+
+
