@@ -11,7 +11,7 @@ To run this examples, some parameters have to be adjusted in the omnetpp.ini.
 - On your server, add a route to the host 10.1.1.1 and set the gateway to the 
   IP address of the computer, on which the simulation is running.
 
-
+Start the simulation with root priviledges.
 
 
 
