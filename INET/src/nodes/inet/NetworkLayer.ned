@@ -42,12 +42,14 @@ module NetworkLayer
         input ifIn[];
         input tcpIn;
         input udpIn;
+        input sctpIn;	//I.R.
         input rsvpIn;
         input ospfIn;
         input pingIn;
         output ifOut[];
         output TCPOut;
         output udpOut;
+        output sctpOut;	//I.R.
         output rsvpOut;
         output ospfOut;
         output pingOut;
@@ -58,11 +60,11 @@ module NetworkLayer
                 timeToLive = 32;
                 multicastTimeToLive = 32;
                 fragmentTimeout = 60s;
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5";
+                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6";	//I.R.
                 @display("p=85,95;q=queue");
             gates:
-                transportIn[6];
-                transportOut[6];
+                transportIn[7];	//I.R.
+                transportOut[7];
                 queueIn[sizeof(ifIn)];
         }
         arp: ARP {
@@ -103,6 +105,9 @@ module NetworkLayer
 
         ip.transportOut[5] --> ospfOut;
         ip.transportIn[5] <-- ospfIn;
+
+        ip.transportOut[6] --> sctpOut;		//I.R.
+        ip.transportIn[6] <-- sctpIn;
 
         icmp.pingOut --> pingOut;
         icmp.pingIn <-- pingIn;

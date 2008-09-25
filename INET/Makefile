@@ -9,7 +9,7 @@ cleanall:
 	cd src && $(MAKE) MODE=debug clean
 
 makefiles:
-	cd src && opp_makemake -f --deep -o inet
+	cd src && opp_makemake -f --deep -lpcap -o inet
 	@if [ "$$LANG" != "" -o "$$LANGUAGE" != "" ]; then \
 	echo; \
 	echo '==============================================================================='; \

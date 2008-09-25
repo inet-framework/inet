@@ -23,13 +23,17 @@ package inet.nodes.inet;
 import inet.applications.pingapp.PingApp;
 import inet.applications.tcpapp.TCPApp;
 import inet.applications.udpapp.UDPApp;
+import inet.applications.sctpapp.SCTPApp;	//I.R.
 import inet.base.NotificationBoard;
 import inet.linklayer.ethernet.EthernetInterface;
 import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.ext.ExtInterface;	//I.R.
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.transport.tcp.TCP;
 import inet.transport.udp.UDP;
+import inet.transport.sctp.SCTP;	//I.R.
+import inet.util.TCPDump;	//I.R.
 import inet.util.NAMTraceWriter;
 
 
@@ -42,8 +46,10 @@ module StandardHost
         @node();
         int numTcpApps = default(0);
         int numUdpApps = default(0);
+	int numSctpApps = default(0);	//I.R.
         string tcpAppType = default("n/a");
         string udpAppType = default("n/a");
+	string sctpAppType = default("n/a");	//I.R.
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
@@ -51,6 +57,7 @@ module StandardHost
     gates:
         inout pppg[];
         inout ethg[];
+	inout extg[]; 	//I.R.
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -88,6 +95,13 @@ module StandardHost
             parameters:
                 @display("p=272,154");
         }
+	sctpApp[numSctpApps]: <sctpAppType> like SCTPApp {	//I.R.
+            parameters:
+                @display("p=385,85");
+        }
+	sctp: SCTP {	//I.R.
+            @display("p=382,170;i=block/wheelbarrow");
+        }
         pingApp: PingApp {
             parameters:
                 @display("p=343,200");
@@ -97,8 +111,8 @@ module StandardHost
                 proxyARP = false;
                 @display("p=248,247;q=queue");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
+                ifIn[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];	//I.R.
+                ifOut[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
         }
         ppp[sizeof(pppg)]: PPPInterface {
             parameters:
@@ -107,6 +121,19 @@ module StandardHost
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
                 @display("p=240,350,row,90;q=txQueue");
+        }
+	ext[sizeof(extg)]: ExtInterface {	//I.R.
+            parameters:
+                @display("p=399,390,row,90;q=txQueue;i=block/ifcard");
+        }
+	tcpdump: TCPDump {	//I.R.
+            parameters:
+                @display("p=254,310;i=abstract/cache_s");
+            gates:
+                ifIn[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
+                in2[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
+                ifOut[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
+                out2[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {
@@ -125,20 +152,38 @@ module StandardHost
         udp.ipOut --> networkLayer.udpIn;
         udp.ipIn <-- networkLayer.udpOut;
 
+        for i=0..numSctpApps-1 {	//I.R.
+            sctpApp[i].sctpOut --> sctp.from_appl++;
+            sctp.to_appl++ --> sctpApp[i].sctpIn;
+        }
+        sctp.to_ip --> networkLayer.sctpIn;
+        networkLayer.sctpOut --> sctp.from_ip;
+
         networkLayer.pingOut --> pingApp.pingIn;
         networkLayer.pingIn <-- pingApp.pingOut;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
+            ppp[i].netwOut --> tcpdump.ifIn[i];	//I.R.
+            tcpdump.out2[i] --> networkLayer.ifIn[i];
+            ppp[i].netwIn <-- tcpdump.ifOut[i];
+            tcpdump.in2[i] <-- networkLayer.ifOut[i];
         }
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+            eth[i].netwOut --> tcpdump.ifIn[sizeof(pppg)];	//I.R.
+            tcpdump.out2[sizeof(pppg)] --> networkLayer.ifIn[sizeof(pppg)];
+            eth[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)];
+            tcpdump.in2[sizeof(pppg)] <-- networkLayer.ifOut[sizeof(pppg)];
+        }
+
+	for i=0..sizeof(extOut)-1 {	//I.R.
+            ext[i].netwOut --> tcpdump.ifIn[sizeof(pppg)+sizeof(ethg)+i];
+            tcpdump.out2[sizeof(pppg)+sizeof(ethg)+i] --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
+            ext[i].netwIn <-- tcpdump.ifOut[sizeof(pppg)+sizeof(ethg)+i];
+            tcpdump.in2[sizeof(pppg)+sizeof(ethg)+i] <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
         }
 }
 

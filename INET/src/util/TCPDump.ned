@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2005 Michael Tuexen
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -15,19 +15,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
-
-
 package inet.util;
 
 //
 // Provides tcpdump-like functionality
-//
-simple TCPDump
-{
-    parameters:
-        @node();
-        @display("i=device/clock");
-    gates:
-        inout a;
-        inout b;
+// 
+simple TCPDump {
+	parameters:
+		string dumpFile = default("");
+	gates:
+		input ifIn[];
+		input in2[];
+		output ifOut[];
+		output out2[];
 }

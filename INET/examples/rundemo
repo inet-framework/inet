@@ -47,6 +47,14 @@ foreach line {
    {"RouterPerf"             "inet/routerperf"      "./run"               "run"}
    {"BulkTransfer"           "inet/bulktransfer"    "./run"               "run"}
 
+   {"SCTP"}
+   {"NClients"               "sctp/nclients" 	    "./run" 		  "run"}
+   {"Multi-homing"           "sctp/multihomed"      "./run" 		  "run"}
+
+   {"External interface"}
+   {"Traceroute"	     "sctp/traceroute"	    "./run"		  "run"}
+   {"Host with external interface"  "sctp/extclient"	    "./run"		  "run"}
+
    {"Ad-hoc"}
    {"Mobility models"        "adhoc/mobility"       "./run"               "run"}
    {"802.11b ad-hoc"         "adhoc/ieee80211"      "./run"               "run"}
