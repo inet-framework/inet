@@ -32,7 +32,7 @@ class SCTPAssociation;
 class SCTPMessage;
 
 
-#define sctpEV3 (!SCTP::testing==true)?std::cout:std::cout
+#define sctpEV3 (!SCTP::testing==true)?std::cerr:std::cerr
 
 
 
