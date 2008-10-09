@@ -936,7 +936,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 							{
 								/* chunks are only fast retransmitted once */
 								bool fastRtx = false;
-								fastRtx = (pq->second->hasBeenFastRetransmitted == false);
+								fastRtx = ((pq->second->hasBeenFastRetransmitted == false) && (pq->second->numberOfRetransmissions==0));
 								if (fastRtx)
 								{
 									sctpEV3<<simulation.getSimTime()<<" Got "<<pq->second->gapReports<<" gap_reports, scheduling "<<pq->second->tsn<<" for RTX\n";
