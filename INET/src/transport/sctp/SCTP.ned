@@ -46,9 +46,6 @@ simple SCTP //
 	int ssModule = default(0); //ROUND_ROBIN=0
         int arwnd = default(65535);
 	int swsLimit = default(3000); //Limit for SWS
-        int dataRate @unit(bps) = default(1Gbps);
-        double errorRate = default(0);
-        double delayTime @unit(s) = default(0s);
     gates:
         input from_appl[];
         input from_ip;

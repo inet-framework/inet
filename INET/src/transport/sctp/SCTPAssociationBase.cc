@@ -52,7 +52,9 @@ SCTPPathVariables:: SCTPPathVariables(IPvXAddress addr, SCTPAssociation* assoc)
 	forceHb = false;
 	partialBytesAcked = 0;
 	outstandingBytes = 0;
-	pmtu = 1500;
+	RoutingTableAccess routingTableAccess;
+    	InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.get4());
+	pmtu = rtie->getMTU();
 	hbWasAcked = false;
 	rttvar = 0.0;
 

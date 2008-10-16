@@ -966,7 +966,7 @@ uint32 key=0, arwnd=0;
 	uint32 numGaps=state->numGaps;
 	uint32 numDups=state->dupList.size();
 	uint16 sackLength=SCTP_SACK_CHUNK_LENGTH + numGaps*4 + numDups*4;
-	uint32 mtu = 1500;
+	uint32 mtu = getPath(remoteAddr)->pmtu;
 
 	if (sackLength > mtu-32) // FIXME
 	{
@@ -2644,7 +2644,8 @@ void SCTPAssociation::pmStartPathManagement(void)
 	{
 		path=piter->second;
 		path->pathErrorCount = 0;
-		path->pmtu = 1500;
+		InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.get4());
+		path->pmtu = rtie->getMTU();
 		if (path->pmtu < state->assocPmtu) 
 		{
 			state->assocPmtu = path->pmtu;
