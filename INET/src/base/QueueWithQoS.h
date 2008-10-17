@@ -44,9 +44,9 @@ class INET_API QueueWithQoS : public AbstractQueue
 
   protected:
     virtual void initialize();
-    virtual void arrival(cMessage *msg);
-    virtual cMessage *arrivalWhenIdle(cMessage *msg);
-    virtual simtime_t startService(cMessage *msg);
+    virtual void arrival(cPacket *msg);
+    virtual cPacket *arrivalWhenIdle(cPacket *msg);
+    virtual simtime_t startService(cPacket *msg);
 };
 
 #endif

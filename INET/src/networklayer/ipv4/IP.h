@@ -161,7 +161,7 @@ class INET_API IP : public QueueBase
      * Processing of IP datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cMessage *msg);
+    virtual void endService(cPacket *msg);
 };
 
 #endif

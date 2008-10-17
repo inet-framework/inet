@@ -69,11 +69,11 @@ void IP::updateDisplayString()
     getDisplayString().setTagArg("t",0,buf);
 }
 
-void IP::endService(cMessage *msg)
+void IP::endService(cPacket *msg)
 {
     if (msg->getArrivalGate()->isName("transportIn"))
     {
-        handleMessageFromHL(PK(msg));
+        handleMessageFromHL( msg );
     }
     else if (dynamic_cast<ARPPacket *>(msg))
     {

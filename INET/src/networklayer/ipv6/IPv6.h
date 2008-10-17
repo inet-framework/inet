@@ -134,7 +134,7 @@ class INET_API IPv6 : public QueueBase
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cMessage *msg);
+    virtual void endService(cPacket *msg);
 };
 
 

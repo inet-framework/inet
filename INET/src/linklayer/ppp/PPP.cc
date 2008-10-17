@@ -33,10 +33,14 @@ Define_Module(PPP);
 PPP::PPP()
 {
     endTransmissionEvent = NULL;
+    nb = NULL;
 }
 
 PPP::~PPP()
 {
+	// kludgy way to check that nb is not deleted yet
+	if (nb && nb == NotificationBoardAccess().getIfExists())
+		nb->unsubscribe(this, NF_SUBSCRIBERLIST_CHANGED);
     cancelAndDelete(endTransmissionEvent);
 }
 

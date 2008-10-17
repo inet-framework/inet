@@ -26,17 +26,17 @@ void QueueBase::initialize()
     delay = par("procDelay");
 }
 
-void QueueBase::arrival(cMessage *msg)
+void QueueBase::arrival(cPacket *msg)
 {
     queue.insert(msg);
 }
 
-cMessage *QueueBase::arrivalWhenIdle(cMessage *msg)
+cPacket *QueueBase::arrivalWhenIdle(cPacket *msg)
 {
     return msg;
 }
 
-simtime_t QueueBase::startService(cMessage *msg)
+simtime_t QueueBase::startService(cPacket *msg)
 {
     return delay;
 }

@@ -70,14 +70,14 @@ void IPv6::updateDisplayString()
     getDisplayString().setTagArg("t",0,buf);
 }
 
-void IPv6::endService(cMessage *msg)
+void IPv6::endService(cPacket *msg)
 {
     if (msg->getArrivalGate()->isName("transportIn") ||
        (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage*>(msg)) ||
        (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message*>(msg)))//Added this for ICMP msgs from ICMP module-WEI
     {
         // packet from upper layers or ND: encapsulate and send out
-        handleMessageFromHL(PK(msg));
+        handleMessageFromHL( msg );
     }
     else
     {

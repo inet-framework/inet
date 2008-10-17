@@ -30,17 +30,17 @@ void QueueWithQoS::initialize()
 }
 
 
-void QueueWithQoS::arrival(cMessage *msg)
+void QueueWithQoS::arrival(cPacket *msg)
 {
     qosHook->enqueue(msg, queue);
 }
 
-cMessage *QueueWithQoS::arrivalWhenIdle(cMessage *msg)
+cPacket *QueueWithQoS::arrivalWhenIdle(cPacket *msg)
 {
-    return qosHook->dropIfNotNeeded(msg);
+    return PK(qosHook->dropIfNotNeeded(msg));
 }
 
-simtime_t QueueWithQoS::startService(cMessage *msg)
+simtime_t QueueWithQoS::startService(cPacket *msg)
 {
     return delay;
 }

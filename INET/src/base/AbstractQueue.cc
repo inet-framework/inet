@@ -23,7 +23,8 @@
 
 AbstractQueue::AbstractQueue()
 {
-    msgServiced = endServiceMsg = NULL;
+    msgServiced = NULL;
+    endServiceMsg = NULL;
 }
 
 AbstractQueue::~AbstractQueue()
@@ -47,7 +48,7 @@ void AbstractQueue::handleMessage(cMessage *msg)
     }
     else if (!msgServiced)
     {
-        cMessage *msg2 = arrivalWhenIdle( msg );
+        cPacket *msg2 = arrivalWhenIdle( PK(msg) );
         if (msg2)
         {
             msgServiced = msg2;
@@ -57,7 +58,7 @@ void AbstractQueue::handleMessage(cMessage *msg)
     }
     else
     {
-        arrival( msg );
+        arrival( PK(msg) );
     }
 }
 

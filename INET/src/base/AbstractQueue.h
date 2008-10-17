@@ -35,7 +35,7 @@ class INET_API AbstractQueue : public cSimpleModule
     virtual ~AbstractQueue();
 
   private:
-    cMessage *msgServiced;
+    cPacket *msgServiced;
     cMessage *endServiceMsg;
 
   private:
@@ -62,7 +62,7 @@ class INET_API AbstractQueue : public cSimpleModule
      *
      * Most straightforward implementation: <tt>queue.insert(msg);</tt>
      */
-    virtual void arrival(cMessage *msg) = 0;
+    virtual void arrival(cPacket *msg) = 0;
 
     /**
      * Called when a message arrives at the module when the queue is
@@ -76,14 +76,14 @@ class INET_API AbstractQueue : public cSimpleModule
      *
      * Most straightforward implementation: <tt>return msg;</tt>
      */
-    virtual cMessage *arrivalWhenIdle(cMessage *msg) = 0;
+    virtual cPacket *arrivalWhenIdle(cPacket *msg) = 0;
 
     /**
      * Called when a message starts service, and should return the service time.
      *
      * Example implementation: <tt>return 1.0;</tt>
      */
-    virtual simtime_t startService(cMessage *msg) = 0;
+    virtual simtime_t startService(cPacket *msg) = 0;
 
     /**
      * Called when a message completes service. The function may send it
@@ -91,7 +91,7 @@ class INET_API AbstractQueue : public cSimpleModule
      *
      * Most straightforward implementation: <tt>send(msg,"out");</tt>
      */
-    virtual void endService(cMessage *msg) = 0;
+    virtual void endService(cPacket *msg) = 0;
     //@}
 };
 
