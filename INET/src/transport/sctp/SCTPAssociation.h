@@ -715,7 +715,6 @@ class SCTPAssociation : public cSimpleModule
 		SCTPDataVariables* getOutboundDataChunk(IPvXAddress pid, int32 bytes);
 		SCTPDataMsg* dequeueOutboundDataMsg(int32 bytes);
 		void process_QUEUE(SCTPCommand *sctpCommand);
-		void putInTransmissionQ(uint32 tsn, SCTPDataVariables* datVar);
 		/**
 		* Flow control
 		*/
