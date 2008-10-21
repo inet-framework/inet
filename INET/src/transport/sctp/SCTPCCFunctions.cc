@@ -39,11 +39,7 @@ void SCTPAssociation::cwndUpdateAfterSack(bool rtxNecessary, SCTPPathVariables* 
 			path=iter->second;
 			if (path->requiresRtx) 
 			{
-				#ifdef RFC
-					path->ssthresh = (int32)max(path->cwnd / 2,  2 * path->pmtu);
-				#else
-					path->ssthresh = (int32)max(path->cwnd / 2,  4 * path->pmtu);
-				#endif
+				path->ssthresh = (int32)max(path->cwnd / 2,  4 * path->pmtu);
 				path->pathSsthresh->record(path->ssthresh);;
 				path->cwnd = path->ssthresh;
 				path->pathCwnd->record(path->cwnd);
