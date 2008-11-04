@@ -1231,11 +1231,6 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			if (datVar != NULL)
 			{
 				datVar->numberOfRetransmissions++;
-				if (datVar->hasBeenFastRetransmitted)
-				{
-					state->doFastRetransmission--;
-					state->fastRetransmittedBytes += datVar->len/8;
-				}
 				if (datVar->hasBeenAcked==false)
 				{
 					datVar->countsAsOutstanding = true;
@@ -2460,7 +2455,7 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 	{
 
 
-		sctpEV3<<"bytesAllowedToSend: osb="<<osb<<"  cwnd="<<iter->second->cwnd<<" FastRetrans="<<state->doFastRetransmission<<"\n";
+		sctpEV3<<"bytesAllowedToSend: osb="<<osb<<"  cwnd="<<iter->second->cwnd<<"\n";
 		CounterMap::iterator it = qCounter.roomTransQ.find(dpi);
 		sctpEV3<<"bytes in transQ="<<it->second<<"\n";
 		if (it->second>0)
