@@ -19,6 +19,8 @@
 
 // This file is based on the PPP.cc of INET written by Andras Varga.
 
+#define WANT_WINSOCK2
+
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -51,7 +53,7 @@ void ExtInterface::initialize(int stage)
 			connected = false;
 		}
 	}
-	
+
 	if (stage == 3)
 	{
 		// update display string when addresses have been autoconfigured etc.
@@ -80,7 +82,7 @@ void ExtInterface::initialize(int stage)
 }
 
 InterfaceEntry *ExtInterface::registerInterface()
-{	
+{
 	InterfaceEntry *e = new InterfaceEntry();
 
 	// interface name: our module name without special characters ([])
@@ -103,13 +105,13 @@ InterfaceEntry *ExtInterface::registerInterface()
 
 void ExtInterface::handleMessage(cMessage *msg)
 {
-	
+
 	if(dynamic_cast<ExtFrame *>(msg) != NULL)
 	{
 		// incoming real packet from wire (captured by pcap)
 		uint32 packetLength;
 		ExtFrame *rawPacket = check_and_cast<ExtFrame *>(msg);
-		
+
 		packetLength = rawPacket->getDataArraySize();
 		for(uint32 i=0; i < packetLength; i++)
 			buffer[i] = rawPacket->getData(i);
@@ -128,10 +130,10 @@ void ExtInterface::handleMessage(cMessage *msg)
 	}
 	else
 	{
-		bzero(buffer, 1<<16);
+		memset(buffer, 0, 1<<16);
 		IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
-		
-		if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) && 
+
+		if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&
 		    (ipPacket->getTransportProtocol() != IPPROTO_SCTP) &&
 		    (ipPacket->getTransportProtocol() != IPPROTO_UDP))
 		{
@@ -145,7 +147,7 @@ void ExtInterface::handleMessage(cMessage *msg)
 		{
 			struct sockaddr_in addr;
 			addr.sin_family      = AF_INET;
-#ifndef linux
+#if !defined(linux) && !defined(_WIN32)
 			addr.sin_len         = sizeof(struct sockaddr_in);
 #endif
 			addr.sin_port        = 0;

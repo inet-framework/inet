@@ -32,11 +32,10 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #ifndef _MSC_VER
 #include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#endif
 
 using namespace INETFw;
 
@@ -62,13 +61,13 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 
 	// SCTP chunks:
 	int32 noChunks = msg->getChunksArraySize();
-		
+
 		for(int32 cc = 0; cc < noChunks; cc++)
 		{
 			SCTPChunk *chunk = check_and_cast<SCTPChunk *>(msg->getChunks(cc));
-		
+
 			unsigned char chunkType = chunk->getChunkType();
-		
+
 			switch(chunkType)
 			{
 				case DATA:
@@ -148,7 +147,7 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: InitAck sent \n";
 					// destination is send buffer:
 					struct init_ack_chunk *iac = (struct init_ack_chunk*) (buf + writtenbytes); // append data to buffer
-	
+
 					// fill buffer with data from SCTP init ack chunk structure
 					iac->type = initAckChunk->getChunkType();
 //					iac->flags = initAckChunk->getFlags(); // no flags available in this type of SCTPChunk
@@ -158,14 +157,14 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 					iac->mis = htons(initAckChunk->getNoInStreams());
 					iac->initial_tsn = htonl(initAckChunk->getInitTSN());
 					// Var.-Len. Parameters
-					int32 parPtr=0; 
-				
+					int32 parPtr=0;
+
 					struct supported_address_types_parameter* sup_addr = (struct supported_address_types_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
 					sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
 					sup_addr->length = htons(6);
 					sup_addr->address_type = htons(INIT_PARAM_IPV4);
 					parPtr += 8;
-					
+
 					int32 numaddr = initAckChunk->getAddressesArraySize();
 					for(int32 i=0; i<numaddr; i++)
 					{
@@ -195,7 +194,7 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 						}
 					}
 
-					/*if(cookielen == 0)	
+					/*if(cookielen == 0)
 					{
 						cookielen = 4;
 						initAckChunk->setCookieArraySize(cookielen);
@@ -238,11 +237,11 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 				case SACK:
 				{
 					SCTPSackChunk *sackChunk = check_and_cast<SCTPSackChunk *>(chunk);
-	
+
 					// destination is send buffer:
 					struct sack_chunk *sac = (struct sack_chunk*) (buf + writtenbytes); // append data to buffer
 					writtenbytes += (sackChunk->getBitLength() / 8);
-	
+
 					// fill buffer with data from SCTP init ack chunk structure
 					sac->type = sackChunk->getChunkType();
 //					sac->flags = sackChunk->getFlags(); // no flags available in this type of SCTPChunk
@@ -273,17 +272,17 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 				{
 					//sctpEV3<<simulation.simTime()<<"  SCTPAssociation:: Heartbeat sent \n";
 					SCTPHeartbeatChunk *heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(chunk);
-					
+
 					// destination is send buffer:
 					struct heartbeat_chunk *hbc = (struct heartbeat_chunk*) (buf + writtenbytes); // append data to buffer
 					writtenbytes += (heartbeatChunk->getBitLength() / 8);
 
-	
+
 					// fill buffer with data from SCTP init ack chunk structure
 					hbc->type = heartbeatChunk->getChunkType();
 //					hbc->flags = heartbeatChunk->getFlags(); // no flags available in this type of SCTPChunk
 					hbc->length = htons(heartbeatChunk->getBitLength() / 8);
-					
+
 					// deliver info:
 					struct heartbeat_info *hbi = (struct heartbeat_info*) (((unsigned char*)hbc) + size_heartbeat_chunk);
 					IPvXAddress addr = heartbeatChunk->getRemoteAddr();
@@ -291,19 +290,19 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 					int32 infolen = sizeof(addr.get4().getInt()) + sizeof(uint32);
 					hbi->type = htons(1);	// mandatory
 					hbi->length = htons(infolen+4);
-					hbi->addr = htonl(addr.get4().getInt());
-					hbi->time = htonl((uint32)time.dbl());
+					HBI_ADDR(hbi) = htonl(addr.get4().getInt());
+					HBI_TIME(hbi) = htonl((uint32)time.dbl());
 					break;
 				}
 				case HEARTBEAT_ACK:
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: HeartbeatAck sent \n";
 					SCTPHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SCTPHeartbeatAckChunk *>(chunk);
-					
+
 					// destination is send buffer:
 					struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk*) (buf + writtenbytes); // append data to buffer
 					writtenbytes += (heartbeatAckChunk->getBitLength() / 8);
-	
+
 					// fill buffer with data from SCTP init ack chunk structure
 					hbac->type = heartbeatAckChunk->getChunkType();
 //					hbac->flags = heartbeatAckChunk->getFlags(); // no flags available in this type of SCTPChunk
@@ -318,7 +317,7 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 						hbi->length = htons(infolen+4);
 						for(int32 i=0; i<infolen; i++)
 						{
-							hbi->info[i] = heartbeatAckChunk->getInfo(i);
+							HBI_INFO(hbi)[i] = heartbeatAckChunk->getInfo(i);
 						}
 					}
 					else
@@ -327,10 +326,10 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 						infolen = sizeof(addr.get4().getInt()) + sizeof(uint32);
 						hbi->type = htons(1);	// mandatory
 						hbi->length = htons(infolen+4);
-						
+
 						simtime_t time = heartbeatAckChunk->getTimeField();
-						hbi->addr = htonl(addr.get4().getInt());
-						hbi->time = htonl((uint32)time.dbl());
+						HBI_ADDR(hbi) = htonl(addr.get4().getInt());
+						HBI_TIME(hbi) = htonl((uint32)time.dbl());
 					}
 					break;
 				}
@@ -338,11 +337,11 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: Abort sent \n";
 					SCTPAbortChunk *abortChunk = check_and_cast<SCTPAbortChunk *>(chunk);
-					
+
 					// destination is send buffer:
 					struct abort_chunk *ac = (struct abort_chunk*) (buf + writtenbytes); // append data to buffer
 					writtenbytes += (abortChunk->getBitLength() / 8);
-	
+
 					// fill buffer with data from SCTP init ack chunk structure
 					ac->type = abortChunk->getChunkType();
 					unsigned char flags = 0;
@@ -356,10 +355,10 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: CookieEcho sent \n";
 					SCTPCookieEchoChunk *cookieChunk = check_and_cast<SCTPCookieEchoChunk *>(chunk);
-					
+
 					struct cookie_echo_chunk *cec = (struct cookie_echo_chunk*) (buf + writtenbytes);
-					
-					
+
+
 					cec->type = cookieChunk->getChunkType();
 					cec->length = htons(cookieChunk->getBitLength() / 8);
 					int32 cookielen = cookieChunk->getCookieArraySize();
@@ -418,50 +417,50 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: CookieAck sent \n";
 					SCTPCookieAckChunk *cookieAckChunk = check_and_cast<SCTPCookieAckChunk *>(chunk);
-					
+
 					struct cookie_ack_chunk *cac = (struct cookie_ack_chunk*) (buf + writtenbytes);
 					writtenbytes += (cookieAckChunk->getBitLength() / 8);
-					
+
 					cac->type = cookieAckChunk->getChunkType();
 					cac->length = htons(cookieAckChunk->getBitLength() / 8);
-					
+
 					break;
 				}
 				case SHUTDOWN:
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
 					SCTPShutdownChunk *shutdownChunk = check_and_cast<SCTPShutdownChunk *>(chunk);
-					
+
 					struct shutdown_chunk *sac = (struct shutdown_chunk*) (buf + writtenbytes);
 					writtenbytes += (shutdownChunk->getBitLength() / 8);
-					
+
 					sac->type = shutdownChunk->getChunkType();
 					sac->cumulative_tsn_ack = htonl(shutdownChunk->getCumTsnAck());
 					sac->length = htons(shutdownChunk->getBitLength() / 8);
-					
+
 					break;
 				}
 				case SHUTDOWN_ACK:
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
 					SCTPShutdownAckChunk *shutdownAckChunk = check_and_cast<SCTPShutdownAckChunk *>(chunk);
-					
+
 					struct shutdown_ack_chunk *sac = (struct shutdown_ack_chunk*) (buf + writtenbytes);
 					writtenbytes += (shutdownAckChunk->getBitLength() / 8);
-					
+
 					sac->type = shutdownAckChunk->getChunkType();
 					sac->length = htons(shutdownAckChunk->getBitLength() / 8);
-					
+
 					break;
 				}
 				case SHUTDOWN_COMPLETE:
 				{
 					//sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
 					SCTPShutdownCompleteChunk *shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk *>(chunk);
-					
+
 					struct shutdown_complete_chunk *sac = (struct shutdown_complete_chunk*) (buf + writtenbytes);
 					writtenbytes += (shutdownCompleteChunk->getBitLength() / 8);
-					
+
 					sac->type = shutdownCompleteChunk->getChunkType();
 					sac->length = htons(shutdownCompleteChunk->getBitLength() / 8);
 					unsigned char flags = 0;
@@ -489,7 +488,7 @@ int32 SCTPSerializer::serialize(SCTPMessage *msg, unsigned char *buf, uint32 buf
 					printf("Serialize TODO: Implement for outgoing chunk type %d!\n", chunkType);
 					throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
 				// break;
-				
+
 			}
 
 			/*drop(chunk);
@@ -510,10 +509,10 @@ uint32 SCTPSerializer::checksum(unsigned char *buf, register uint32 len)
   uint32 h;
   unsigned char byte0, byte1, byte2, byte3;
   uint32 crc32c;
-  register uint32 i; 
+  register uint32 i;
   register uint32 res = (~0L);
-  for (i = 0; i < len; i++) 
-    CRC32C(res, buf[i]); 
+  for (i = 0; i < len; i++)
+    CRC32C(res, buf[i]);
   h      = ~res;
   byte0  = h & 0xff;
   byte1  = (h>>8) & 0xff;
@@ -538,9 +537,9 @@ void SCTPSerializer::parse(unsigned char *buf, uint32 bufsize, SCTPMessage *dest
 	int32 parptr, chunklen, cLen, woPadding;
 	struct common_header *common_header = (struct common_header*) (buf);
 	int32 tempChecksum = common_header->checksum;
-	common_header->checksum = 0; 
+	common_header->checksum = 0;
 	int32 chksum = checksum((unsigned char*)common_header, bufsize);
-	common_header->checksum = tempChecksum; 
+	common_header->checksum = tempChecksum;
 
 	const unsigned char *chunks = (unsigned char*) (buf + size_common_header);
 	sctpEV3<<"SCTPSerializer::parse SCTPMessage\n";
@@ -594,7 +593,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 					msg->setDataArraySize(datalen);
 					for(int32 i=0; i<datalen; i++)
 						msg->setData(i, dc->user_data[i]);
-					
+
 					chunk->encapsulate(msg);
 				}
 				sctpEV3<<"datachunkLength="<<chunk->getBitLength()<<"\n";
@@ -653,19 +652,18 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 								sctpEV3<<"IPv6\n";
 								const struct init_ipv6_address_parameter *ipv6addr;
 								ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
+								IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
+																	ipv6addr->address[2], ipv6addr->address[3]);
 								IPvXAddress *localv6Addr;
 								localv6Addr = new IPvXAddress("0:0:0:0:0:0:0:0");
-								const char* ap;
-								char addrbuf[100];
-								ap=inet_ntop(AF_INET6,(const void*)(ipv6addr->address),addrbuf,100);
-								sctpEV3<<"address"<<ap<<"\n";
-								localv6Addr->set(ap);
+								sctpEV3<<"address"<<ipv6Addr<<"\n";
+								localv6Addr->set(ipv6Addr);
 								chunk->setAddressesArraySize(++addrcounter);
 								chunk->setAddresses(addrcounter-1, *localv6Addr);
 								chunklen += 20;
 								break;
 							}
-							default: 
+							default:
 							{
 								sctpEV3 << "ExtInterface: Unknown SCTP INIT parameter type " << paramType<<"\n";
 								uint16 skip = (paramType & 0x8000) >> 15;
@@ -679,7 +677,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 									uint32 unknownLen=chunk->getUnrecognizedParametersArraySize();
 									chunk->setUnrecognizedParametersArraySize(unknownLen+ADD_PADDING(ntohs(unknown->length)));
 									struct data_vector* dv = (struct data_vector*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
-									
+
 									for (uint32 i=unknownLen; i<unknownLen+ADD_PADDING(ntohs(unknown->length)); i++)
 										chunk->setUnrecognizedParameters(i,dv->data[i-unknownLen]);
 								}
@@ -690,7 +688,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 						parptr += ADD_PADDING(ntohs(parameter->length));
 						parcounter++;
 					}
-					
+
 				}
 				chunk->setBitLength(chunklen*8);
 				dest->addChunk(chunk);
@@ -744,14 +742,13 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 								sctpEV3<<"IPv6\n";
 								const struct init_ipv6_address_parameter *ipv6addr;
 								ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char*)iac) + size_init_chunk + parptr);
+								IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
+																	ipv6addr->address[2], ipv6addr->address[3]);
 								IPvXAddress *localv6Addr;
 								localv6Addr = new IPvXAddress("0:0:0:0:0:0:0:0");
-								const char* ap;
-								char addrbuf[100];				
-								ap=inet_ntop(AF_INET6,(const void*)(ipv6addr->address),addrbuf,100);
-								sctpEV3<<"address"<<ap<<"\n";
-								localv6Addr->set(ap);
-							
+								sctpEV3<<"address"<<ipv6Addr<<"\n";
+								localv6Addr->set(ipv6Addr);
+
 								chunk->setAddressesArraySize(++addrcounter);
 								chunk->setAddresses(addrcounter-1, *localv6Addr);
 								chunklen += 20;
@@ -768,7 +765,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 								chunklen+=cookieLen+4;
 								break;
 							}
-							default: 
+							default:
 							{
 								sctpEV3 << "ExtInterface: Unknown SCTP INIT-ACK parameter type " << paramType<<"\n";
 								uint16 skip = (paramType & 0x8000) >> 15;
@@ -782,7 +779,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 									uint32 unknownLen=chunk->getUnrecognizedParametersArraySize();
 									chunk->setUnrecognizedParametersArraySize(unknownLen+ADD_PADDING(ntohs(unknown->length)));
 									struct data_vector* dv = (struct data_vector*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
-									
+
 									for (uint32 i=unknownLen; i<unknownLen+ADD_PADDING(ntohs(unknown->length)); i++)
 										chunk->setUnrecognizedParameters(i,dv->data[i-unknownLen]);
 								}
@@ -809,16 +806,16 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 				uint32 cumtsnack = ntohl(sac->cum_tsn_ack);
 				chunk->setCumTsnAck(cumtsnack);
 				chunk->setA_rwnd(ntohl(sac->a_rwnd));
-				
+
 				int32 ngaps = ntohs(sac->nr_of_gaps);
 				int32 ndups = ntohs(sac->nr_of_dups);
 				chunk->setNumGaps(ngaps);
 				chunk->setNumDupTsns(ndups);
-				
+
 				chunk->setGapStartArraySize(ngaps);
 				chunk->setGapStopArraySize(ngaps);
 				chunk->setDupTsnsArraySize(ndups);
-				
+
 				for(int32 i=0; i<ngaps; i++)
 				{
 					const struct sack_gap *gap = (struct sack_gap*) (((unsigned char*)sac) + size_sack_chunk + i*sizeof(sack_gap));
@@ -858,7 +855,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 							parcounter++;
 							chunk->setInfoArraySize(infoLen);
 							for(int32 i=0; i<infoLen; i++)
-								chunk->setInfo(i, hbi->info[i]);
+								chunk->setInfo(i, HBI_INFO(hbi)[i]);
 						}
 						else
 						{
@@ -890,8 +887,8 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 						{
 							parptr += sizeof(struct heartbeat_info);
 							parcounter++;
-							chunk->setRemoteAddr(IPvXAddress(ntohl(hbi->addr)));
-							chunk->setTimeField(ntohl((uint32)hbi->time));
+							chunk->setRemoteAddr(IPvXAddress(ntohl(HBI_ADDR(hbi))));
+							chunk->setTimeField(ntohl((uint32)HBI_TIME(hbi)));
 						}
 						else
 						{
@@ -899,7 +896,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 							parcounter++;
 							continue;
 						}
-						
+
 					}
 				}
 				chunk->setBitLength(cLen*8);

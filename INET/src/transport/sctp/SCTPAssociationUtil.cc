@@ -32,12 +32,14 @@
 #include "IPv6InterfaceData.h"
 #include "IPv6Address.h"
 #include <stdlib.h>
-#include <sys/time.h>
 
 
 //
 // helper functions
 //
+inline uint32 uint32rand() {
+	return (uint32)intrand(0xffff) << 16 + (uint32)intrand(0xffff);
+}
 
 void SCTPAssociation::printSctpPathMap()
 {
@@ -46,9 +48,9 @@ void SCTPAssociation::printSctpPathMap()
 	for (SCTPPathMap::iterator i = sctpPathMap.begin(); i!=sctpPathMap.end(); ++i)
 	{
 		path = i->second;
-			 
-			sctpEV3<<"address: "<<path->remoteAddress<<"  osb: "<<path->outstandingBytes<<" cwnd: "<<path->cwnd<<"\n"; 
-			
+
+			sctpEV3<<"address: "<<path->remoteAddress<<"  osb: "<<path->outstandingBytes<<" cwnd: "<<path->cwnd<<"\n";
+
 	}
 }
 
@@ -91,7 +93,7 @@ const char *SCTPAssociation::eventName(int32 event)
 		CASE(SCTP_E_RCV_SHUTDOWN);
 		CASE(SCTP_E_RCV_SHUTDOWN_ACK);
 		CASE(SCTP_E_RCV_SHUTDOWN_COMPLETE);
-		CASE(SCTP_E_TIMEOUT_INIT_TIMER);     
+		CASE(SCTP_E_TIMEOUT_INIT_TIMER);
 		CASE(SCTP_E_TIMEOUT_SHUTDOWN_TIMER);
 		CASE(SCTP_E_TIMEOUT_RTX_TIMER);
 		CASE(SCTP_E_TIMEOUT_HEARTBEAT_TIMER);
@@ -108,7 +110,7 @@ const char *SCTPAssociation::eventName(int32 event)
 	return s;
 #undef CASE
 }
-	
+
 const char *SCTPAssociation::indicationName(int32 code)
 {
 #define CASE(x) case x: s=#x+7; break
@@ -138,16 +140,16 @@ uint32 SCTPAssociation::chunkToInt(char* type)
 {
 	if (strcmp(type, "DATA")==0) return 0;
 	if (strcmp(type,  "INIT")==0) return 1;
-	if (strcmp(type,  "INIT_ACK")==0) return 2; 
+	if (strcmp(type,  "INIT_ACK")==0) return 2;
 	if (strcmp(type,  "SACK")==0) return 3;
-	if (strcmp(type,  "HEARTBEAT")==0) return 4; 
-	if (strcmp(type,  "HEARTBEAT_ACK")==0) return 5; 
+	if (strcmp(type,  "HEARTBEAT")==0) return 4;
+	if (strcmp(type,  "HEARTBEAT_ACK")==0) return 5;
 	if (strcmp(type,  "ABORT")==0) return 6;
-	if (strcmp(type,  "SHUTDOWN")==0) return 7; 
-	if (strcmp(type,  "SHUTDOWN_ACK")==0) return 8; 
-	if (strcmp(type,  "ERRORTYPE")==0) return 9; 
-	if (strcmp(type,  "COOKIE_ECHO")==0) return 10; 
-	if (strcmp(type,  "COOKIE_ACK")==0) return 11; 
+	if (strcmp(type,  "SHUTDOWN")==0) return 7;
+	if (strcmp(type,  "SHUTDOWN_ACK")==0) return 8;
+	if (strcmp(type,  "ERRORTYPE")==0) return 9;
+	if (strcmp(type,  "COOKIE_ECHO")==0) return 10;
+	if (strcmp(type,  "COOKIE_ACK")==0) return 11;
 	if (strcmp(type,  "SHUTDOWN_COMPLETE")==0) return 14;
 	sctpEV3<<"ChunkConversion not successful\n";
 	return 0;
@@ -162,38 +164,38 @@ void SCTPAssociation::printConnBrief()
 	sctpEV3 << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
 	sctpEV3 << "  on app[" << appGateIndex << "],assocId=" << assocId;
 	sctpEV3 << "  in " << stateName(fsm->getState()) << "\n";
-	
+
 }
 
 void SCTPAssociation::printSegmentBrief(SCTPMessage *sctpmsg)
 {
-	 
+
 	sctpEV3 << "." << sctpmsg->getSrcPort() << " > ";
 	sctpEV3 << "." << sctpmsg->getDestPort() << ": ";
-	
+
 	sctpEV3 << "initTag "<< sctpmsg->getTag() << "\n";
-	
+
 }
 
 SCTPAssociation *SCTPAssociation::cloneAssociation()
-{	
+{
 	SCTPAssociation *assoc = new SCTPAssociation(sctpMain,appGateIndex,assocId);
 	const char *queueClass = transmissionQ->getClassName();
 	assoc->transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
 	assoc->retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
-	
+
 	const char *sctpAlgorithmClass = sctpAlgorithm->getClassName();
 	assoc->sctpAlgorithm = check_and_cast<SCTPAlgorithm *>(createOne(sctpAlgorithmClass));
 	assoc->sctpAlgorithm->setAssociation(assoc);
 	assoc->sctpAlgorithm->initialize();
 	assoc->state = assoc->sctpAlgorithm->createStateVariables();
-	
+
 	assoc->state->active = false;
 	assoc->state->fork = true;
 	assoc->localAddr = localAddr;
 	assoc->localPort = localPort;
 	assoc->localAddressList = localAddressList;
-		
+
 	FSM_Goto((*assoc->fsm), SCTP_S_CLOSED);
 	sctpMain->printInfoConnMap();
 	return assoc;
@@ -229,7 +231,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg)
 
 void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress dest)
 {
-	
+
 	sctpmsg->setSrcPort(localPort);
 	sctpmsg->setDestPort(remotePort);
 	sctpmsg->setChecksumOk(true);
@@ -245,7 +247,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress dest)
 	}
 	else if (sctpmsg->getTag()==0)
 		sctpmsg->setTag(localVTag);
-	
+
 	if (dest.isIPv6())
 	{
 		IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -253,7 +255,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress dest)
 		controlInfo->setSrcAddr(IPv6Address());
 		controlInfo->setDestAddr(dest.get6());
 		sctpmsg->setControlInfo(controlInfo);
-		sctpMain->send(sctpmsg,"to_ipv6");	
+		sctpMain->send(sctpmsg,"to_ipv6");
 	}
 	else
 	{
@@ -264,7 +266,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress dest)
 		sctpmsg->setControlInfo(controlInfo);
 		sctpMain->send(sctpmsg,"to_ip");
 	}
-	
+
 	sctpEV3 << "Sent to "<<dest<<"\n ";
 
 }
@@ -287,7 +289,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress src, IPvXAddres
 	}
  	else if (sctpmsg->getTag()==0)
 		sctpmsg->setTag(localVTag);
-	
+
 	if (dest.isIPv6())
 	{
 		IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -295,7 +297,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress src, IPvXAddres
 		controlInfo->setSrcAddr(src.get6());
 		controlInfo->setDestAddr(dest.get6());
 		sctpmsg->setControlInfo(controlInfo);
-		sctpMain->send(sctpmsg,"to_ipv6");	
+		sctpMain->send(sctpmsg,"to_ipv6");
 	}
 	else
 	{
@@ -306,7 +308,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg, IPvXAddress src, IPvXAddres
 		sctpmsg->setControlInfo(controlInfo);
 		sctpMain->send(sctpmsg,"to_ip");
 	}
-	
+
 	sctpEV3 << "Sent to "<<dest<<"\n ";
 
 }
@@ -332,7 +334,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
 {
 	cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
 	msg->setKind(SCTP_I_ESTABLISHED);
-	
+
 	SCTPConnectInfo *ind = new SCTPConnectInfo("CI");
 	ind->setAssocId(assocId);
 	ind->setLocalAddr(localAddr);
@@ -348,7 +350,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
 
 void SCTPAssociation::sendToApp(cPacket *msg)
 {
-	
+
 	sctpMain->send(msg, "to_appl", appGateIndex);
 }
 
@@ -358,7 +360,7 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
 	// create send/receive queues
 	const char *queueClass = openCmd->getQueueClass();
 	transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
-	
+
 	retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
 	outboundStreams = openCmd->getOutboundStreams();
 	// create algorithm
@@ -379,9 +381,7 @@ void SCTPAssociation::sendInit()
 	InterfaceTableAccess interfaceTableAccess;
 	AddressVector adv;
 	uint32 length = SCTP_INIT_CHUNK_LENGTH;
-	struct timeval tv;
-	
-	
+
 	if (remoteAddr.isUnspecified() || remotePort==0)
 		opp_error("Error processing command ASSOCIATE: foreign socket unspecified");
 	if (localPort==0)
@@ -392,11 +392,8 @@ void SCTPAssociation::sendInit()
 	sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
 	SCTPInitChunk *initChunk = new SCTPInitChunk("INIT");
 	initChunk->setChunkType(INIT);
-	gettimeofday(&tv, NULL);
 
-	srandom((uint32)tv.tv_sec);
-
-	initChunk->setInitTag((unsigned long)(fmod(random(), 1.0+(double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
+	initChunk->setInitTag(uint32rand());
 
 	peerVTag = initChunk->getInitTag();
 	sctpEV3<<"INIT from "<<localAddr<<":InitTag="<<peerVTag<<"\n";
@@ -414,12 +411,12 @@ void SCTPAssociation::sendInit()
 		for (int32 i=0; i<ift->getNumInterfaces(); ++i)
 		{
 			if (ift->getInterface(i)->ipv4Data()!=NULL)
-			{ 
+			{
 				sctpEV3<<"save address "<<ift->getInterfaceById(i)->ipv4Data()->getIPAddress()<<"\n";
 				adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
 			}
 			else if (ift->getInterface(i)->ipv6Data()!=NULL)
-			{ 
+			{
 				for (int32 j=0; j<ift->getInterface(i)->ipv6Data()->getNumAddresses(); j++)
 				{
 					sctpEV3<<"add address "<<ift->getInterface(i)->ipv6Data()->getAddress(j)<<"\n";
@@ -443,7 +440,7 @@ void SCTPAssociation::sendInit()
 			{
 				initChunk->setAddressesArraySize(addrNum+1);
 				initChunk->setAddresses(addrNum++,(*i));
-				length+=20;	
+				length+=20;
 			}
 			sctpMain->addLocalAddress(this, (*i));
 			state->localAddresses.push_back((*i));
@@ -453,7 +450,7 @@ void SCTPAssociation::sendInit()
 	}
 	else
 	{
-		uint32 rlevel = getLevel(remoteAddr);	
+		uint32 rlevel = getLevel(remoteAddr);
 		sctpEV3<<"level of remote address="<<rlevel<<"\n";
 		for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
 		{
@@ -462,7 +459,7 @@ void SCTPAssociation::sendInit()
 			{
 				initChunk->setAddressesArraySize(addrNum+1);
 				initChunk->setAddresses(addrNum++,(*i));
-				length+=8;	
+				length+=8;
 				sctpMain->addLocalAddress(this, (*i));
 				state->localAddresses.push_back((*i));
 				if (localAddr.get4().getInt()==0)
@@ -508,20 +505,20 @@ void SCTPAssociation::sendInit()
 	sendToIP(sctpmsg);
 }
 
-void SCTPAssociation::retransmitInit() 
-{	
+void SCTPAssociation::retransmitInit()
+{
 	SCTPMessage *sctpmsg = new SCTPMessage();
 	sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
 	SCTPInitChunk *sctpinit;// = new SCTPInitChunk("INIT");
-	 
+
 	sctpEV3<<"Retransmit InitChunk="<<&sctpinit<<"\n";
-	
+
 	sctpinit=check_and_cast<SCTPInitChunk *>(state->initChunk->dup());
 	sctpinit->setChunkType(INIT);
 	sctpmsg->addChunk(sctpinit);
-	
+
 	sendToIP(sctpmsg);
-	
+
 }
 
 
@@ -529,28 +526,28 @@ void SCTPAssociation::retransmitInit()
 void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 {
 	uint32 length = SCTP_INIT_CHUNK_LENGTH;
-	
+
 	state->primaryPathIndex = remoteAddr;
 	// create segment
 	SCTPMessage *sctpinitack = new SCTPMessage();
 	sctpinitack->setBitLength(SCTP_COMMON_HEADER*8);
-	
+
 	sctpinitack->setSrcPort(localPort);
 	sctpinitack->setDestPort(remotePort);
 	SCTPInitAckChunk *initAckChunk = new SCTPInitAckChunk("INIT_ACK");
-	initAckChunk->setChunkType(INIT_ACK);	
+	initAckChunk->setChunkType(INIT_ACK);
 	SCTPCookie *cookie = new SCTPCookie("CookieUtil");
 	cookie->setCreationTime(simulation.getSimTime());
 	cookie->setLocalTieTagArraySize(32);
 	cookie->setPeerTieTagArraySize(32);
 	if (fsm->getState()==SCTP_S_CLOSED)
 	{
-		do 
+		do
 		{
-			peerVTag = (uint32)random();
+			peerVTag = uint32rand();
 		} while (peerVTag==0);
 		initAckChunk->setInitTag(peerVTag);
-		initAckChunk->setInitTSN(2000); 
+		initAckChunk->setInitTSN(2000);
 		state->nextTSN=initAckChunk->getInitTSN();
 		state->lastTSN = initAckChunk->getInitTSN() + state->numRequests - 1;
 		cookie->setLocalTag(localVTag);
@@ -560,7 +557,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 			cookie->setLocalTieTag(i,0);
 			cookie->setPeerTieTag(i,0);
 		}
-		sctpinitack->setTag(localVTag);	
+		sctpinitack->setTag(localVTag);
 		sctpEV3<<"state=closed: localVTag="<<localVTag<<" peerVTag="<<peerVTag<<"\n";
 	}
 	else if (fsm->getState()==SCTP_S_COOKIE_WAIT || fsm->getState()==SCTP_S_COOKIE_ECHOED)
@@ -574,26 +571,26 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 		cookie->setPeerTag(peerVTag);
 		for (int32 i=0; i<32; i++)
 		{
-			cookie->setPeerTieTag(i,(uint8)(random()%256));
+			cookie->setPeerTieTag(i,(uint8)intrand(256));
 			state->peerTieTag[i] = cookie->getPeerTieTag(i);
 			if (fsm->getState()==SCTP_S_COOKIE_ECHOED)
 			{
-				cookie->setLocalTieTag(i,(uint8)(random()%256));
+				cookie->setLocalTieTag(i,(uint8)intrand(256));
 				state->localTieTag[i] = cookie->getLocalTieTag(i);
 			}
 			else
-				cookie->setLocalTieTag(i,0);	
+				cookie->setLocalTieTag(i,0);
 		}
-		sctpinitack->setTag(initChunk->getInitTag());	
+		sctpinitack->setTag(initChunk->getInitTag());
 		sctpEV3<<"VTag in InitAck: "<<sctpinitack->getTag()<<"\n";
 	}
 	else
 	{
 		sctpEV3<<"other state\n";
 		uint32 tag;
-		do 
+		do
 		{
-				tag = (uint32)random();
+				tag = uint32rand();
 		} while (tag==0);
 				initAckChunk->setInitTag(tag);
 		initAckChunk->setInitTSN(state->nextTSN);
@@ -604,7 +601,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 			cookie->setPeerTieTag(i,state->peerTieTag[i]);
 			cookie->setLocalTieTag(i,state->localTieTag[i]);
 		}
-		sctpinitack->setTag(initChunk->getInitTag());	
+		sctpinitack->setTag(initChunk->getInitTag());
 	}
 	cookie->setBitLength(SCTP_COOKIE_LENGTH*8);
 	initAckChunk->setStateCookie(cookie);
@@ -612,7 +609,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 	initAckChunk->setA_rwnd(sctpMain->par("arwnd"));
 	initAckChunk->setNoOutStreams((unsigned int)min(outboundStreams,initChunk->getNoInStreams()));
 	initAckChunk->setNoInStreams(SCTP_DEFAULT_INBOUND_STREAMS);
-	
+
 	initTsn=initAckChunk->getInitTSN();
 	uint32 addrNum=0;
 	bool friendly = false;
@@ -637,7 +634,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 
 	initAckChunk->setBitLength((length+initAckChunk->getCookieArraySize())*8 + cookie->getBitLength());
 	inboundStreams = ((initChunk->getNoOutStreams()<initAckChunk->getNoInStreams())?initChunk->getNoOutStreams():initAckChunk->getNoInStreams());
-	outboundStreams = ((initChunk->getNoInStreams()<initAckChunk->getNoOutStreams())?initChunk->getNoInStreams():initAckChunk->getNoOutStreams());	
+	outboundStreams = ((initChunk->getNoInStreams()<initAckChunk->getNoOutStreams())?initChunk->getNoInStreams():initAckChunk->getNoOutStreams());
 	(this->*ssFunctions.ssInitStreams)(inboundStreams, outboundStreams);
 	sctpinitack->addChunk(initAckChunk);
 	if (fsm->getState()==SCTP_S_CLOSED)
@@ -647,7 +644,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 	else
 	{
 		sendToIP(sctpinitack);
-		
+
 	}
 	printSctpPathMap();
 }
@@ -656,9 +653,9 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk* initAckChunk)
 {
 	SCTPMessage *sctpcookieecho = new SCTPMessage();
 	sctpcookieecho->setBitLength(SCTP_COMMON_HEADER*8);
-	 
-	sctpEV3<<"SCTPAssociationUtil:sendCookieEcho\n"; 
-	
+
+	sctpEV3<<"SCTPAssociationUtil:sendCookieEcho\n";
+
 	sctpcookieecho->setSrcPort(localPort);
 	sctpcookieecho->setDestPort(remotePort);
 	SCTPCookieEchoChunk* cookieEchoChunk=new SCTPCookieEchoChunk("COOKIE_ECHO");
@@ -708,9 +705,9 @@ void SCTPAssociation::retransmitCookieEcho()
 		cookieEchoChunk->setStateCookie(state->cookieChunk->getStateCookie()->dup());
 	}
 	sctpmsg->addChunk(cookieEchoChunk);
-	 
+
 	sctpEV3<<"retransmitCookieEcho localAddr="<<localAddr<<"  remoteAddr"<<remoteAddr<<"\n";
-	
+
 	sendToIP(sctpmsg);
 }
 
@@ -718,8 +715,8 @@ void SCTPAssociation::sendHeartbeat(SCTPPathVariables *path, bool local)
 {
 	SCTPMessage *sctpheartbeat = new SCTPMessage();
 	sctpheartbeat->setBitLength(SCTP_COMMON_HEADER*8);
-	
-	sctpheartbeat->setSrcPort(localPort); 
+
+	sctpheartbeat->setSrcPort(localPort);
 	sctpheartbeat->setDestPort(remotePort);
 	SCTPHeartbeatChunk* heartbeatChunk=new SCTPHeartbeatChunk("HEARTBEAT");
 	heartbeatChunk->setChunkType(HEARTBEAT);
@@ -745,8 +742,8 @@ void SCTPAssociation::sendHeartbeatAck(SCTPHeartbeatChunk* heartbeatChunk, IPvXA
 {
 	SCTPMessage *sctpheartbeatack = new SCTPMessage();
 	sctpheartbeatack->setBitLength(SCTP_COMMON_HEADER*8);
-	
-	sctpheartbeatack->setSrcPort(localPort); 
+
+	sctpheartbeatack->setSrcPort(localPort);
 	sctpheartbeatack->setDestPort(remotePort);
 	SCTPHeartbeatAckChunk* heartbeatAckChunk=new SCTPHeartbeatAckChunk("HEARTBEAT_ACK");
 	heartbeatAckChunk->setChunkType(HEARTBEAT_ACK);
@@ -771,10 +768,10 @@ void SCTPAssociation::sendCookieAck(IPvXAddress dest)
 {
 	SCTPMessage *sctpcookieack = new SCTPMessage();
 	sctpcookieack->setBitLength(SCTP_COMMON_HEADER*8);
-	 
-	sctpEV3<<"SCTPAssociationUtil:sendCookieACK\n";  
-	
-	sctpcookieack->setSrcPort(localPort); 
+
+	sctpEV3<<"SCTPAssociationUtil:sendCookieACK\n";
+
+	sctpcookieack->setSrcPort(localPort);
 	sctpcookieack->setDestPort(remotePort);
 	SCTPCookieAckChunk* cookieAckChunk=new SCTPCookieAckChunk("COOKIE_ACK");
 	cookieAckChunk->setChunkType(COOKIE_ACK);
@@ -785,7 +782,7 @@ void SCTPAssociation::sendCookieAck(IPvXAddress dest)
 
 void SCTPAssociation::sendShutdownAck(IPvXAddress dest)
 {
-	sendAll(dest);	
+	sendAll(dest);
 	if (dest!=state->primaryPathIndex)
 		sendAll(state->primaryPathIndex);
 	if (getOutstandingBytes()==0)
@@ -793,10 +790,10 @@ void SCTPAssociation::sendShutdownAck(IPvXAddress dest)
 		performStateTransition(SCTP_E_NO_MORE_OUTSTANDING);
 		SCTPMessage *sctpshutdownack = new SCTPMessage();
 		sctpshutdownack->setBitLength(SCTP_COMMON_HEADER*8);
-		
-		sctpEV3<<"SCTPAssociationUtil:sendShutdownACK\n";  
-		
-		sctpshutdownack->setSrcPort(localPort); 
+
+		sctpEV3<<"SCTPAssociationUtil:sendShutdownACK\n";
+
+		sctpshutdownack->setSrcPort(localPort);
 		sctpshutdownack->setDestPort(remotePort);
 		SCTPShutdownAckChunk* shutdownAckChunk=new SCTPShutdownAckChunk("SHUTDOWN_ACK");
 		shutdownAckChunk->setChunkType(SHUTDOWN_ACK);
@@ -817,10 +814,10 @@ void SCTPAssociation::sendShutdownComplete()
 {
 	SCTPMessage *sctpshutdowncomplete = new SCTPMessage();
 	sctpshutdowncomplete->setBitLength(SCTP_COMMON_HEADER*8);
-	 
-	sctpEV3<<"SCTPAssociationUtil:sendShutdownComplete\n";  
-	
-	sctpshutdowncomplete->setSrcPort(localPort); 
+
+	sctpEV3<<"SCTPAssociationUtil:sendShutdownComplete\n";
+
+	sctpshutdowncomplete->setSrcPort(localPort);
 	sctpshutdowncomplete->setDestPort(remotePort);
 	SCTPShutdownCompleteChunk* shutdownCompleteChunk=new SCTPShutdownCompleteChunk("SHUTDOWN_COMPLETE");
 	shutdownCompleteChunk->setChunkType(SHUTDOWN_COMPLETE);
@@ -835,10 +832,10 @@ void SCTPAssociation::sendAbort()
 {
 	SCTPMessage *msg = new SCTPMessage();
 	msg->setBitLength(SCTP_COMMON_HEADER*8);
-	 
-	sctpEV3<<"SCTPAssociationUtil:sendABORT localPort="<<localPort<<"  remotePort="<<remotePort<<"\n"; 
-	
-	msg->setSrcPort(localPort); 
+
+	sctpEV3<<"SCTPAssociationUtil:sendABORT localPort="<<localPort<<"  remotePort="<<remotePort<<"\n";
+
+	msg->setSrcPort(localPort);
 	msg->setDestPort(remotePort);
 	SCTPAbortChunk* abortChunk = new SCTPAbortChunk("ABORT");
 	abortChunk->setChunkType(ABORT);
@@ -852,10 +849,10 @@ void SCTPAssociation::sendShutdown()
 {
 	SCTPMessage *msg = new SCTPMessage();
 	msg->setBitLength(SCTP_COMMON_HEADER*8);
-	 
-	sctpEV3<<"SCTPAssociationUtil:sendShutdown localPort="<<localPort<<"  remotePort="<<remotePort<<"\n"; 
-	
-	msg->setSrcPort(localPort); 
+
+	sctpEV3<<"SCTPAssociationUtil:sendShutdown localPort="<<localPort<<"  remotePort="<<remotePort<<"\n";
+
+	msg->setSrcPort(localPort);
 	msg->setDestPort(remotePort);
 	SCTPShutdownChunk* shutdownChunk = new SCTPShutdownChunk("Shutdown");
 	shutdownChunk->setChunkType(SHUTDOWN);
@@ -882,9 +879,9 @@ void SCTPAssociation::retransmitShutdown()
 	shutdownChunk=check_and_cast<SCTPShutdownChunk*>(state->shutdownChunk->dup());
 
 	sctpmsg->addChunk(shutdownChunk);
-	 
+
 	sctpEV3<<"retransmitShutdown localAddr="<<localAddr<<"  remoteAddr"<<remoteAddr<<"\n";
-	
+
 	sendToIP(sctpmsg);
 }
 
@@ -895,9 +892,9 @@ void SCTPAssociation::retransmitShutdownAck()
 	SCTPShutdownAckChunk* shutdownAckChunk;
 	shutdownAckChunk=check_and_cast<SCTPShutdownAckChunk*>(state->shutdownAckChunk->dup());
 	sctpmsg->addChunk(shutdownAckChunk);
-	 
+
 	sctpEV3<<"retransmitShutdownAck localAddr="<<localAddr<<"  remoteAddr"<<remoteAddr<<"\n";
-	
+
 	sendToIP(sctpmsg);
 }
 
@@ -912,21 +909,21 @@ void SCTPAssociation::scheduleSack(void)
 		state->ackState = sackFrequency;
 		state->firstChunkReceived = true;
 	}
-	 
+
 	sctpEV3<<"scheduleSack() : ackState is now: "<<state->ackState<<"\n";
-		
-	if (state->ackState <= sackFrequency - 1) 
-	{ 
+
+	if (state->ackState <= sackFrequency - 1)
+	{
 		/* start a SACK timer if none is running, to expire 200 ms (or parameter) from now */
 		if (!SackTimer->isScheduled())
 		{
 		 	startTimer(SackTimer, sackPeriod);
 		}
 		/* else: leave timer running, and do nothing... */ else {
-			/* is this possible at all ? Check this... */	
-			 
+			/* is this possible at all ? Check this... */
+
 			sctpEV3<<"SACK timer running, but scheduleSack() called\n";
-			
+
 		}
 	}
 }
@@ -935,24 +932,24 @@ void SCTPAssociation::scheduleSack(void)
 SCTPSackChunk* SCTPAssociation::createSack()
 {
 uint32 key=0, arwnd=0;
-	 
+
 	sctpEV3<<"SCTPAssociationUtil:createSACK localPort="<<localPort<<"  remotePort="<<remotePort<<"\n";
-	 
+
 	sctpEV3<<" localRwnd="<<state->localRwnd<<"  queuedBytes="<<state->queuedRcvBytes<<"\n";
-	if ((int32)(state->localRwnd - state->queuedRcvBytes) <= 0) 
+	if ((int32)(state->localRwnd - state->queuedRcvBytes) <= 0)
 	{
 		arwnd = 0;
 		if (state->swsLimit > 0)
 			state->swsAvoidanceInvoked = true;
-	} 
-	else if (state->localRwnd - state->queuedRcvBytes < state->swsLimit || state->swsAvoidanceInvoked == true) 
+	}
+	else if (state->localRwnd - state->queuedRcvBytes < state->swsLimit || state->swsAvoidanceInvoked == true)
 	{
 		arwnd = 1;
 		if (state->swsLimit > 0)
 			state->swsAvoidanceInvoked = true;
 		// SWS Avoidance ACTIVE !!!
-	} 
-	else 
+	}
+	else
 	{
 		arwnd = state->localRwnd - state->queuedRcvBytes;
 		sctpEV3<<simulation.getSimTime()<<" arwnd = "<<state->localRwnd<<" - "<<state->queuedRcvBytes<<" = "<<arwnd<<"\n";
@@ -984,10 +981,10 @@ uint32 key=0, arwnd=0;
 	sackChunk->setNumGaps(numGaps);
 	sackChunk->setNumDupTsns(numDups);
 	sackChunk->setBitLength(sackLength*8);
-	 
+
 	sctpEV3<<"Sack arwnd="<<sackChunk->getA_rwnd()<<" ctsnAck="<<state->cTsnAck<<" numGaps="<<numGaps<<" numDups="<<numDups<<"\n";
-	
-	if (numGaps > 0) 
+
+	if (numGaps > 0)
 	{
 		sackChunk->setGapStartArraySize(numGaps);
 		sackChunk->setGapStopArraySize(numGaps);
@@ -1012,9 +1009,9 @@ uint32 key=0, arwnd=0;
 	}
 	sctpEV3<<endl;
 	for (uint32 i=0; i<numGaps; i++)
-		sctpEV3<<sackChunk->getGapStart(i)<<" - "<<sackChunk->getGapStop(i)<<"\n";	
-	
-	sctpEV3<<"send "<<sackChunk->getName()<<" from "<<localAddr<<" to "<<state->lastDataSourceAddress<<"\n";	
+		sctpEV3<<sackChunk->getGapStart(i)<<" - "<<sackChunk->getGapStop(i)<<"\n";
+
+	sctpEV3<<"send "<<sackChunk->getName()<<" from "<<localAddr<<" to "<<state->lastDataSourceAddress<<"\n";
 	return sackChunk;
 }
 
@@ -1027,7 +1024,7 @@ void SCTPAssociation::sendSack(void)
 	stopTimer(SackTimer);
 	state->ackState = 0;
 	sackChunk = createSack();
-	
+
 	/* return the SACK to the address where we last got a data chunk from */
 	dpi = state->lastDataSourceAddress;
 	SCTPMessage* sctpmsg = new SCTPMessage();
@@ -1042,7 +1039,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 {
 	SCTPSackChunk* sackChunk=NULL;
 	uint32 chunksAdded=0,totalChunksSent=0,totalPacketsSent=0;
-	uint32 nextSsn=0, osb=0;	
+	uint32 nextSsn=0, osb=0;
 	bool headerCreated=false, forwPresent = false, firstTime=false;
 	IPvXAddress dpi, newDpi, pd;
 	int32 dataChunksAdded=0;
@@ -1080,26 +1077,26 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 	bcount = qCounter.bookedSumSendStreams;
 	sctpEV3<<"\nsend all on "<<pd<<": tcount="<<tcount<<"  scount="<<scount<<"  rtcount="<<rtcount<<" nextTsn="<<state->nextTSN<</*" numChunksAllowed="<<state->numChunksAllowed<<*/"\n";
 	if (!state->stopSending)  //for M3UA
-	{	
+	{
 		if (tcount>0)
 		{
 			rtxActive = true;
 			dpi = pd;
 			sctpEV3<<"dpi=pd="<<dpi<<"\n";
 		}
-			
-		if (tcount == 0 && scount == 0) 
+
+		if (tcount == 0 && scount == 0)
 		{
-			
-			sctpEV3<<"No chunk available!\n";		
+
+			sctpEV3<<"No chunk available!\n";
 			bytesToSend = 0;
 			bytes.bytesToSend = 0;
 			bytes.packet = false;
 			bytes.chunk = false;
 			dpi = pathId;
 			sctpEV3<<"dpi=pathId="<<dpi<<"\n";
-		} 
-		else 
+		}
+		else
 		{
 				if (tcount==0)
 				{
@@ -1112,7 +1109,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			newDpi = dpi;
 			sctpEV3<<"newDpi set to "<<newDpi<<" dpi="<<dpi<<"\n";
 		}
-		
+
 		if (newDpi==IPvXAddress("0.0.0.0"))
 			opp_error("newDpi unspecified");
 		if (bytesToSend < 0)  //24.11.2006
@@ -1127,17 +1124,17 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			probing = true;
 		/* schedule sending of SACKs at once, when we have fragments to report */
 		if ((state->numGaps > 0 || state->dupList.size() > 0) && state->sackAllowed)
-		{	 
+		{
 			sctpEV3<<"Gaps present ==> ackState = "<<sackFrequency<<"\n";
 			state->ackState = sackFrequency;
-		}		
-		if (state->ackState < sackFrequency && bytesToSend == 0 && bytes.chunk==false && bytes.packet==false && forwPresent == false) 
+		}
+		if (state->ackState < sackFrequency && bytesToSend == 0 && bytes.chunk==false && bytes.packet==false && forwPresent == false)
 		{
 			sctpEV3<<"sendAll: nothing to send...chunk pointer is NULL...BYE...\n";
 			return;
-		}	
-		
-	
+		}
+
+
 		sctpEV3<<"sendAll::bytesToSend="<<bytesToSend<<" osb="<<pathVar->outstandingBytes<<" cwnd="<<pathVar->cwnd<<" arwnd="<<state->peerRwnd<<"\n";
 		osb = pathVar->outstandingBytes;
 
@@ -1147,15 +1144,15 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 	}
 	else
 		dpi = pd;
-	
+
 	sctpEV3<<"ackState="<<state->ackState<<" Sacktimer="<<SackTimer->isScheduled()<<"\n";
-	if (state->ackState >= sackFrequency || (SackTimer->isScheduled() &&  (state->alwaysBundleSack  == true || pathId == dpi)) ) 
+	if (state->ackState >= sackFrequency || (SackTimer->isScheduled() &&  (state->alwaysBundleSack  == true || pathId == dpi)) )
 	{
 		sctpmsg = new SCTPMessage();
 		sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
-		 
-		sctpEV3<<"SCTPAssociationUtil:sendAll localPort="<<localPort<<"  remotePort="<<remotePort<<"\n";  
-		
+
+		sctpEV3<<"SCTPAssociationUtil:sendAll localPort="<<localPort<<"  remotePort="<<remotePort<<"\n";
+
 		/*build a SACK chunk....*/
 		headerCreated = true;
 		sackChunk = createSack();
@@ -1166,7 +1163,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		sctpEV3<<"SACK: dpi="<<dpi<<"\n";
 
 		/* ...and add a SACK to the packet... */
-			
+
 		chunksAdded++;
 		totalChunksSent++;
 		sctpmsg->addChunk(sackChunk);
@@ -1177,19 +1174,19 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		sctpEV3<<" peerRwnd="<<state->peerRwnd<<" bytesToSend="<<bytesToSend<<" nextTSN="<<state->nextTSN<<"\n";
 			SCTPDataMsg *datMsg = peekOutboundDataMsg();
 			uint32 ums = datMsg->getBooksize();
-				uint32 num = (uint32)floor((pathVar->pmtu-sctpmsg->getByteLength()-20)/(ums+SCTP_DATA_CHUNK_LENGTH));
+				uint32 num = (uint32)((pathVar->pmtu-sctpmsg->getByteLength()-20)/(ums+SCTP_DATA_CHUNK_LENGTH));
 				if (num*ums>state->peerRwnd)
 					bytesToSend = 0;
 				else
 					bytesToSend = num * ums;
 		}
 		sctpEV3<<"sendAll: appended "<<sackChunk->getBitLength()/8<<" bytes SACK chunk, msg length now "<<sctpmsg->getBitLength()/8<<"\n";
-		
+
 		state->ackState = 0;
 			/* stop SACK timer if it is running...				 */
 		stopTimer(SackTimer);
 		sctpAlgorithm->sackSent();
-		state->sackAllowed = false;	   
+		state->sackAllowed = false;
 	}
 	else
 
@@ -1200,13 +1197,13 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		sctpEV3<<" peerRwnd="<<state->peerRwnd<<" bytesToSend="<<bytesToSend<<" nextTSN="<<state->nextTSN<<"\n";
 			SCTPDataMsg *datMsg = peekOutboundDataMsg();
 			uint32 ums = datMsg->getBooksize();
-				uint32 num = (uint32)floor((pathVar->pmtu-32)/(ums+SCTP_DATA_CHUNK_LENGTH));
+				uint32 num = (uint32)((pathVar->pmtu-32)/(ums+SCTP_DATA_CHUNK_LENGTH));
 				if (num*ums>state->peerRwnd)
 					bytesToSend = 0;
 				else
 					bytesToSend = num * ums;
 		}
-		if (bytesToSend > 0 || bytes.chunk || bytes.packet || (bytes.chunk && probing)) 
+		if (bytesToSend > 0 || bytes.chunk || bytes.packet || (bytes.chunk && probing))
 		{
 			if (tcount>0 || scount>0 && (!(state->nagleEnabled && osb>0)||(uint32)scount>=pathVar->pmtu-32 ))
 			{
@@ -1214,15 +1211,15 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				headerCreated=true;
 				sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
 			}
-		} 
-		else 
-		{ 
+		}
+		else
+		{
 			sctpEV3<<"Logic Error in sendAll: no header created....???\n";
-			
+
 		}
 	}
 
-	while ((bytesToSend > 0 || bytes.chunk || bytes.packet ) && !(state->resetPending && firstTime) && headerCreated && !state->stopSending) 
+	while ((bytesToSend > 0 || bytes.chunk || bytes.packet ) && !(state->resetPending && firstTime) && headerCreated && !state->stopSending)
 	{
 		datVar = NULL;
 		datMsg = NULL;
@@ -1280,7 +1277,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				datVar->expiryTime = datMsg->getExpiryTime();
 				datVar->ppid = datMsg->getPpid();
 				datMsg->setInitialDestination(state->primaryPathIndex);//I.R.always send on primaryPath
-				datVar->initialDestination = datMsg->getInitialDestination(); 
+				datVar->initialDestination = datMsg->getInitialDestination();
 				dpi = datVar->initialDestination;  //I.R. 23.10.07
 				sctpEV3<<"initialDestination="<<datVar->initialDestination<<": data will be sent to "<<dpi<<"\n";
 				// datVar->len just data
@@ -1296,7 +1293,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				{
 					datVar->ssn=nextSsn++;
 					datVar->ordered = true;
-					if (nextSsn > 65535) 
+					if (nextSsn > 65535)
 						stream->setNextStreamSeqNum(0);
 					else
 						stream->setNextStreamSeqNum(nextSsn);
@@ -1308,7 +1305,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				}
 				firstTime=true;
 				delete datMsg;
-			 
+
 				sctpEV3<<"chunk "<<datVar<<" dequeued from StreamQ "<<datVar->sid<<" tsn="<<datVar->tsn<<" bytes now "<<qCounter.roomSumSendStreams<<"\n";
 			}
 			else
@@ -1345,7 +1342,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			chunk->countsAsOutstanding = true;
 			chunk->hasBeenRemoved = false;
 			chunk->sendTime = simulation.getSimTime(); //I.R. to send Fast RTX just once a RTT
-			if (chunk->numberOfTransmissions == 0) 
+			if (chunk->numberOfTransmissions == 0)
 			{
 				chunk->lastDestination = state->primaryPathIndex;
 				sctpEV3<<simulation.getSimTime()<<" firstTime, TSN "<<chunk->tsn<<": lastDestination set to "<<chunk->lastDestination<<"\n";
@@ -1355,8 +1352,8 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 					state->firstDataSent=true;
 				sctpEV3<<"insert in retransmissionQ tsn="<<chunk->tsn<<"\n";
 				if(!retransmissionQ->checkAndInsertVar(chunk->tsn, chunk))
-				{ 
-					sctpEV3<<"Cannot add message/chunk retransmission Q buffer (tsn="<<chunk->tsn<<")...terminating!\n";	
+				{
+					sctpEV3<<"Cannot add message/chunk retransmission Q buffer (tsn="<<chunk->tsn<<")...terminating!\n";
 				}
 				else
 				{
@@ -1367,25 +1364,25 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 					CounterMap::iterator q=qCounter.roomRetransQ.find(dpi);
 					q->second+= ADD_PADDING(chunk->len/8 + SCTP_DATA_CHUNK_LENGTH);
 				}
-			} 
+			}
 			else
 				sctpEV3<<"numberOfTransmissions="<<chunk->numberOfTransmissions<<"\n";
-	
+
 				/* chunk is already in the retransmissionQ */
 			chunk->numberOfTransmissions++;
-			
+
 			chunk->gapReports = 0;
 			chunk->hasBeenFastRetransmitted = false;
-			sctpEV3<<"sendAll(): adding new outbound data chunk to packet (tsn="<<chunk->tsn<<")...!!!\n";	
-		
+			sctpEV3<<"sendAll(): adding new outbound data chunk to packet (tsn="<<chunk->tsn<<")...!!!\n";
+
 			chunkPtr = transformDataChunk(chunk);
-			
+
 			/* update counters */
 			totalChunksSent++;
 			chunksAdded++;
 			dataChunksAdded++;
 			sctpmsg->addChunk(chunkPtr);
- 
+
 			if (chunk->booksize > state->peerRwnd)
 			{
 				state->peerRwnd = 0;
@@ -1395,7 +1392,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			}
 			else
 			{
-				
+
 				state->peerRwnd-=chunk->booksize;
 				if (bytes.chunk==false && bytes.packet==false)
 					bytesToSend -= chunk->booksize;
@@ -1404,7 +1401,7 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				else if (bytes.packet && packetFull)
 					bytes.packet = false;
 			}
-			
+
 			if (bytesToSend <= 0)
 			{
 				if (!packetFull && qCounter.roomSumSendStreams>pathVar->pmtu-32)
@@ -1425,11 +1422,11 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				sctpEV3<<"no data in send and transQ: packet full\n";
 			}
 			sctpEV3<<"bytesToSend after reduction: "<<bytesToSend<<"\n";
-				
+
 			chunk->lastDestination = newDpi;
 			sctpEV3<<simulation.getSimTime()<<" TSN "<<chunk->tsn<<": lastDestination set to "<<chunk->lastDestination<<"\n";
 			if (chunk->lastDestination==IPvXAddress("0.0.0.0"))
-					opp_error("newDpi unspecified"); 
+					opp_error("newDpi unspecified");
 		}
 		else if (headerCreated)
 		{
@@ -1445,18 +1442,18 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				datVar=NULL;
 			}
 		}
-			
+
 
 		if (packetFull || (dpi != newDpi) || sendBeforeRtx)
 		{
-			
+
 			sctpEV3<<simulation.getSimTime()<<"  packet full: totalLength="<<sctpmsg->getBitLength()/8 + 20<<", dpi="<<dpi<<", newDpi="<<newDpi<<" "<<dataChunksAdded<<" chunks added, osb now "<<getPath(dpi)->outstandingBytes<<"\n";
-			
-			if (headerCreated == true && chunksAdded > 0) 
+
+			if (headerCreated == true && chunksAdded > 0)
 			{
 				/* new chunks would exceed MTU, so we send old packet and build a new one */
 				/* this implies that at least one data chunk is send here */
-				if (dataChunksAdded > 0) 
+				if (dataChunksAdded > 0)
 				{
 					if (!pathVar->T3_RtxTimer->isScheduled())
 					{
@@ -1489,32 +1486,32 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				sctpEV3<<" peerRwnd="<<state->peerRwnd<<" bytesToSend="<<bytesToSend<<" nextTSN="<<state->nextTSN<<"\n";
 					SCTPDataMsg *datMsg = peekOutboundDataMsg();
 					uint32 ums = datMsg->getBooksize();
-						uint32 num =(uint32)floor((pathVar->pmtu-32)/(ums+SCTP_DATA_CHUNK_LENGTH));
+						uint32 num =(uint32)((pathVar->pmtu-32)/(ums+SCTP_DATA_CHUNK_LENGTH));
 						if (num*ums>state->peerRwnd)
 							bytesToSend = 0;
 						else
 							bytesToSend = num * ums;
 					sctpEV3<<"bytesToSend set to "<<bytesToSend<<"\n";
 				}
-			} 
-			else 
-			{
-				
-				sctpEV3<<"Logic Error: Packet Size + new chunk len exceed path mtu, but chunksAdded==0\n";
-				
 			}
-			
-		} 
+			else
+			{
 
-		
+				sctpEV3<<"Logic Error: Packet Size + new chunk len exceed path mtu, but chunksAdded==0\n";
+
+			}
+
+		}
+
+
 		sctpEV3<<"still "<<bytesToSend<<" bytes to send, headerCreated="<<headerCreated<<"\n";
 			/* else { */ /* place left in the MTU, so add chunk to packet...and go on */
-		if (!headerCreated && bytesToSend > 0) 
+		if (!headerCreated && bytesToSend > 0)
 		{
 			sctpEV3<<"headerCreated="<<headerCreated<<"  bytesToSend="<<bytesToSend<<"  sumSendStreams="<<qCounter.roomSumSendStreams<<"\n";
 			if ((state->nagleEnabled==false && (qCounter.roomSumSendStreams>0 || tq->second>0)) || (state->nagleEnabled==true && (qCounter.roomSumSendStreams>= (pathVar->pmtu - 32) || tq->second>0)))
 			{
-				sctpmsg = new SCTPMessage(); 
+				sctpmsg = new SCTPMessage();
 				headerCreated=true;
 				sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
 				tcount = tq->second;
@@ -1525,29 +1522,29 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 			else
 				bytesToSend=0;
 		}
-		
-	}
-		
-		//sctpEV3<<"end of while\n";
-		/* =============================================================  */			
-	
 
-	if (chunksAdded > 0 && headerCreated == true) 
+	}
+
+		//sctpEV3<<"end of while\n";
+		/* =============================================================  */
+
+
+	if (chunksAdded > 0 && headerCreated == true)
 	{
 		sctpEV3<<"out of while: headerCreated="<<headerCreated<<"  chunksAdded="<<chunksAdded<<" dataChunksAdded="<<dataChunksAdded<<"\n";
 		if (state->nagleEnabled==false || osb==0 || firstTime == false || (state->nagleEnabled && qCounter.roomSumSendStreams>= (pathVar->pmtu - 32)) || rtxActive == true)
 		{
 			/* this destination may have to be changed (e.g. to last fromAddress) */
-			if (dpi == IPvXAddress("0.0.0.0")) 
+			if (dpi == IPvXAddress("0.0.0.0"))
 				dpi = state->primaryPathIndex;
 			/* start T3 timer, if it is not already running, and turn off probing */
-			
-			if (dataChunksAdded > 0) 
+
+			if (dataChunksAdded > 0)
 			{
 				if (!getPath(dpi)->T3_RtxTimer->isScheduled())
 				{
 
-					startTimer(getPath(dpi)->T3_RtxTimer, getPath(dpi)->pathRto);	
+					startTimer(getPath(dpi)->T3_RtxTimer, getPath(dpi)->pathRto);
 				}
 			}
 		}
@@ -1558,31 +1555,31 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 		totalPacketsSent++;
 		rtxActive=false;
 		probing = false;
-	} 
-	else 
-	{
-		 
-		sctpEV3<<"sendAll: nothing more to send...BYE !\n";
-		
 	}
-	
+	else
+	{
+
+		sctpEV3<<"sendAll: nothing more to send...BYE !\n";
+
+	}
+
 }
 
 
 void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
 {
-	 
-	sctpEV3<<"SendDataArrivedNotification\n"; 
-	
+
+	sctpEV3<<"SendDataArrivedNotification\n";
+
 	cPacket* cmsg = new cPacket("DataArrivedNotification");
-	cmsg->setKind(SCTP_I_DATA_NOTIFICATION); 
+	cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
 	SCTPCommand *cmd = new SCTPCommand("notification");
 	cmd->setAssocId(assocId);
 	cmd->setSid(sid);
 	cmd->setNumMsgs(1);
 	cmsg->setControlInfo(cmd);
 
-	sendToApp(cmsg);                  
+	sendToApp(cmsg);
 }
 
 
@@ -1593,34 +1590,34 @@ void SCTPAssociation::putInDeliveryQ(uint16 sid)
 	SCTPReceiveStreamMap::iterator iter=receiveStreams.find(sid);
 	rStream = iter->second;
 	sctpEV3<<"putInDeliveryQ: first look for SSN "<<rStream->getExpectedStreamSeqNum()<<" of SID "<<sid<<" in orderedQ of size "<<rStream->getOrderedQ()->getQueueSize()<<"\n";
-	while (rStream->getOrderedQ()->getQueueSize()>0)  
+	while (rStream->getOrderedQ()->getQueueSize()>0)
 	{
 		/* dequeue first from reassembly Q */
 		chunk = rStream->getOrderedQ()-> dequeueVarBySsn(rStream->getExpectedStreamSeqNum());
 		if (chunk)
-		{	 
+		{
 			sctpEV3<<"putInDeliveryQ::chunk "<<chunk->tsn<<" , sid "<<chunk->sid<<" and ssn "<<chunk->ssn<<" dequeued from ordered queue. queuedRcvBytes="<<state->queuedRcvBytes<<" will be reduced by "<<chunk->len/8<<"\n";
 			state->queuedRcvBytes-=chunk->len/8;
 
 
 			qCounter.roomSumRcvStreams -= ADD_PADDING(chunk->len/8 + SCTP_DATA_CHUNK_LENGTH);
 			if (rStream->getDeliveryQ()->checkAndInsertVar(chunk->tsn, chunk))
-			{ 
+			{
 
-				state->queuedRcvBytes+=chunk->len/8;						
+				state->queuedRcvBytes+=chunk->len/8;
 
 				sctpEV3<<"data put in deliveryQ; queuedBytes now "<<state->queuedRcvBytes<<"\n";
 				qCounter.roomSumRcvStreams += ADD_PADDING(chunk->len/8 + SCTP_DATA_CHUNK_LENGTH);
 				int32 seqnum=rStream->getExpectedStreamSeqNum();
 				rStream->setExpectedStreamSeqNum(++seqnum);
-				if (rStream->getExpectedStreamSeqNum() > 65535) 
+				if (rStream->getExpectedStreamSeqNum() > 65535)
 					rStream->setExpectedStreamSeqNum(0);
 				sendDataArrivedNotification(sid);
 			}
 		}
-		else 
+		else
 		{
-			break; 
+			break;
 		}
 	}
 }
@@ -1640,41 +1637,41 @@ void SCTPAssociation::pushUlp()
 		restrict = true;
 
 	quBytes->record(state->queuedRcvBytes);
-	 
+
 	sctpEV3<<simulation.getSimTime()<<" Calling PUSH_ULP ("<<state->queuedRcvBytes<<" bytes queued)...\n";
 	uint32 i=state->nextRSid;
 	do
 	{
 		SCTPReceiveStreamMap::iterator iter=receiveStreams.find(i);
-		rStream=iter->second;	
-		sctpEV3<<"Size of stream "<<iter->first<<": "<<rStream->getDeliveryQ()->getQueueSize()<<"\n"; 
-		
-		while (!rStream->getDeliveryQ()->payloadQueue.empty() && (!restrict || (restrict && state->pushMessagesLeft>0))) 
+		rStream=iter->second;
+		sctpEV3<<"Size of stream "<<iter->first<<": "<<rStream->getDeliveryQ()->getQueueSize()<<"\n";
+
+		while (!rStream->getDeliveryQ()->payloadQueue.empty() && (!restrict || (restrict && state->pushMessagesLeft>0)))
 		{
-			chunk = rStream->getDeliveryQ()->extractMessage(); 
+			chunk = rStream->getDeliveryQ()->extractMessage();
 			qCounter.roomSumRcvStreams -= ADD_PADDING(chunk->len/8 + SCTP_DATA_CHUNK_LENGTH);
-			
+
 			if (state->pushMessagesLeft >0)
 				state->pushMessagesLeft--;
 
 			state->queuedRcvBytes-=chunk->len/8;
 
-			if (state->swsAvoidanceInvoked) 
+			if (state->swsAvoidanceInvoked)
 			{
 				quBytes->record(state->queuedRcvBytes);
-				if ((int32)(state->localRwnd - state->queuedRcvBytes) >= (int32)(state->swsLimit) && (int32)(state->localRwnd - state->queuedRcvBytes) <= (int32)(state->swsLimit+state->assocPmtu)) 
+				if ((int32)(state->localRwnd - state->queuedRcvBytes) >= (int32)(state->swsLimit) && (int32)(state->localRwnd - state->queuedRcvBytes) <= (int32)(state->swsLimit+state->assocPmtu))
 
 				{
 					/* only if the window has opened up more than one MTU we will send a SACK */
 					state->swsAvoidanceInvoked = false;
-					sctpEV3<<"pushUlp: Window opens up to "<<(int32)state->localRwnd-state->queuedRcvBytes<<" bytes: sending a SACK. SWS Avoidance INACTIVE\n"; 
-					
+					sctpEV3<<"pushUlp: Window opens up to "<<(int32)state->localRwnd-state->queuedRcvBytes<<" bytes: sending a SACK. SWS Avoidance INACTIVE\n";
+
 					sendSack();
 				}
 			}
-			sctpEV3<<"Push TSN "<<chunk->tsn<<": sid="<<chunk->sid<<" ssn="<<chunk->ssn<<"\n";	          
+			sctpEV3<<"Push TSN "<<chunk->tsn<<": sid="<<chunk->sid<<" ssn="<<chunk->ssn<<"\n";
 			cPacket* msg= (cPacket *)chunk->userData;
-			msg->setKind(SCTP_I_DATA); 
+			msg->setKind(SCTP_I_DATA);
 			SCTPCommand *cmd = new SCTPCommand("push");
 			cmd->setAssocId(assocId);
 			cmd->setGate(appGateIndex);
@@ -1685,12 +1682,12 @@ void SCTPAssociation::pushUlp()
 			state->numMsgsReq[count]--;
 			delete chunk;
 			sendToApp(msg);
-		} 
+		}
 
 		i = (i+1)%inboundStreams;
-			
+
 		count++;
-	} while (i!=state->nextRSid);	
+	} while (i!=state->nextRSid);
 
 	state->nextRSid = (state->nextRSid+1)%inboundStreams;
 
@@ -1728,24 +1725,24 @@ SCTPDataChunk* SCTPAssociation::transformDataChunk(SCTPDataVariables* datVar)
 
 void SCTPAssociation::addPath(IPvXAddress addr)
 {
-	 
+
 	sctpEV3<<"Add Path remote address: "<<addr<<"\n";
-	
+
 	SCTPPathMap::iterator i = sctpPathMap.find(addr);
-	if (i==sctpPathMap.end())	
+	if (i==sctpPathMap.end())
 	{
 		SCTPPathVariables* path = new SCTPPathVariables(addr, this);
 		sctpPathMap[addr] = path;
 		qCounter.roomTransQ[addr] = 0;
 		qCounter.roomRetransQ[addr] = 0;
 		qCounter.bookedTransQ[addr] = 0;
-	}	
+	}
 }
 
 void SCTPAssociation::removePath(IPvXAddress addr)
 {
 	SCTPPathMap::iterator j = sctpPathMap.find(addr);
-	if (j!=sctpPathMap.end())	
+	if (j!=sctpPathMap.end())
 	{
 		stopTimer(j->second->HeartbeatTimer);
 		delete j->second->HeartbeatTimer;
@@ -1757,12 +1754,12 @@ void SCTPAssociation::removePath(IPvXAddress addr)
 		delete j->second->CwndTimer;
 		sctpPathMap.erase(j);
 		delete j->second;
-	}	
+	}
 }
 
 void SCTPAssociation::deleteStreams()
 {
-	
+
 	for (SCTPSendStreamMap::iterator it=sendStreams.begin(); it != sendStreams.end(); it++)
 	{
 		it->second->deleteQueue();
@@ -1775,7 +1772,7 @@ void SCTPAssociation::deleteStreams()
 
 void SCTPAssociation::removeLastPath(IPvXAddress addr)
 {
-	SCTPPathVariables* path = getPath(addr);	
+	SCTPPathVariables* path = getPath(addr);
 	stopTimer(path->HeartbeatTimer);
 	delete path->HeartbeatTimer;
 	stopTimer(path->HeartbeatIntervalTimer);
@@ -1815,11 +1812,11 @@ sctpEV3<<simulation.getSimTime()<<": makeRoomForTsn: tsn="<<tsn<<", length="<<le
 			}
 			if (datVar!=NULL)
 			{
-				
+
 				sum+=datVar->len;
 				if (stream->deleteMsg(high))
 				{
-				sctpEV3<<high<<" found and deleted\n";					
+				sctpEV3<<high<<" found and deleted\n";
 
 				state->queuedRcvBytes-=datVar->len/8; //12.06.08
 				if (ssnGt(iter->second->getExpectedStreamSeqNum(),datVar->ssn))
@@ -1838,7 +1835,7 @@ sctpEV3<<simulation.getSimTime()<<": makeRoomForTsn: tsn="<<tsn<<", length="<<le
 			else
 			{
 
-				sctpEV3<<"TSN "<<high<<" not found in stream "<<iter->second->getStreamId()<<"\n"; 
+				sctpEV3<<"TSN "<<high<<" not found in stream "<<iter->second->getStreamId()<<"\n";
 
 			}
 		}
@@ -1854,7 +1851,7 @@ sctpEV3<<simulation.getSimTime()<<": makeRoomForTsn: tsn="<<tsn<<", length="<<le
 		if (tsn > state->highestTsnReceived)
 			return false;
 	}
-	return true;	
+	return true;
 }
 
 bool SCTPAssociation::tsnIsDuplicate(uint32 tsn)
@@ -1908,7 +1905,7 @@ int32 gapsize, numgaps;
 			}
 			else
 			{
-				
+
 				for (int32 j=i; j<=numgaps-1; j++)
 				{
 					state->gapStopList[j] = state->gapStopList[j+1];
@@ -1919,7 +1916,7 @@ int32 gapsize, numgaps;
 				state->numGaps--;
 				if (state->numGaps == 0)
 				{
-					if (removedTsn == state->lastTsnAck+1) 
+					if (removedTsn == state->lastTsnAck+1)
 					{
 						state->lastTsnAck = removedTsn;
 					}
@@ -1937,17 +1934,17 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 {
 	uint32 lo, hi, gapsize;
 
-	 
+
 	sctpEV3<<"Entering updateGapList(tsn=="<< receivedTsn<<" cTsnAck="<<state->cTsnAck<<" Number of Gaps="<<state->numGaps<<"\n";
-	
+
 	lo = state->cTsnAck + 1;
 	if ((int32)(state->localRwnd-state->queuedRcvBytes)<=0)
 	{
 		sctpEV3<<"window full\n";
 		//only check if cumTsnAck can be advanced
-		if (receivedTsn == lo) 
+		if (receivedTsn == lo)
 		{
-			sctpEV3<<"Window full, but cumTsnAck can be advanced:"<<lo<<"\n";	
+			sctpEV3<<"Window full, but cumTsnAck can be advanced:"<<lo<<"\n";
 
 		}
 		else
@@ -1956,7 +1953,7 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 
 	if (tsnGt(receivedTsn, state->highestTsnStored))	//17.06.08
 		state->highestTsnStored = receivedTsn;
-	
+
 	for (uint32 i=0; i<state->numGaps; i++)
 	{
 		if (state->gapStartList[i]>0)
@@ -1965,27 +1962,27 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 			if (tsnBetween(lo, receivedTsn, hi))
 			{
 				gapsize = hi - lo + 1;
-				if (gapsize > 1) 
+				if (gapsize > 1)
 				{
-					/** 
+					/**
 					* TSN either sits at the end of one gap, and thus changes gap
-					* boundaries, or it is in between two gaps, and becomes a new gap 
+					* boundaries, or it is in between two gaps, and becomes a new gap
 					*/
-					if (receivedTsn == hi) 
+					if (receivedTsn == hi)
 					{
-						 
+
 						sctpEV3<<"receivedTsn==hi....";
-						
+
 						state->gapStartList[i] = receivedTsn;
 						state->newChunkReceived = true;
 						return true;
-					} 
-					else if (receivedTsn == lo) 
+					}
+					else if (receivedTsn == lo)
 					{
-						 
+
 						sctpEV3<<"receivedTsn==lo=="<<lo<<"....."<< lo<<"\n";
-						
-						if (receivedTsn == (state->cTsnAck + 1)) 
+
+						if (receivedTsn == (state->cTsnAck + 1))
 						{
 							state->cTsnAck++;
 							state->newChunkReceived = true;
@@ -1995,13 +1992,13 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 						state->gapStopList[i-1] = receivedTsn;
 						state->newChunkReceived = true;
 						return true;
-					} 
-					else 
+					}
+					else
 					{    /* a gap in between */
 						state->numGaps++;
-						 
+
 						sctpEV3<<"Inserting new gap (start==stop=="<<receivedTsn<<"\n";
-						
+
 						for (uint32 j=state->numGaps; j>i; j--)
 						{
 							state->gapStartList[j] = state->gapStartList[j-1];
@@ -2011,18 +2008,18 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 						state->gapStopList[i]=receivedTsn;
 						state->newChunkReceived = true;
 						for (uint32 k=0; k<state->numGaps; k++)
-							 
+
 							sctpEV3<<"Gap "<<k<<": "<<state->gapStartList[k]<<" - "<<state->gapStopList[k]<<"\n";
-							
+
 						return true;
 					}
-				} 
-				else 
+				}
+				else
 				{ /* alright: gapsize is 1: our received tsn may close gap between fragments */
-					 
+
 					sctpEV3<<"gapsize="<<gapsize<<"\n";
-					
-					if (lo == state->cTsnAck + 1) 
+
+					if (lo == state->cTsnAck + 1)
 					{
 						state->cTsnAck = state->gapStopList[i];
 						if (i==state->numGaps-1)
@@ -2037,13 +2034,13 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 								state->gapStopList[j] = state->gapStopList[j+1];
 							}
 						state->numGaps--;
-						 
+
 						sctpEV3<<"state->numGaps="<<state->numGaps<<"\n";
-						
+
 						state->newChunkReceived = true;
 						return true;
-					} 
-					else 
+					}
+					else
 					{
 						state->gapStopList[i-1] = state->gapStopList[i];
 						if (i==state->numGaps-1)
@@ -2061,51 +2058,51 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 						state->newChunkReceived = true;
 						return true;
 					}
-	
+
 				}
-				
-			} 
-			else 
-			{  /* receivedTsn is not in the gap between these fragments... */		
+
+			}
+			else
+			{  /* receivedTsn is not in the gap between these fragments... */
 				lo = state->gapStopList[i] + 1;
-			}			
+			}
 		} /* end: for */
 	}/* end: for */
 
 	/* (NULL LIST)  OR  (End of Gap List passed) */
-	if (receivedTsn == lo) 
+	if (receivedTsn == lo)
 	{
 		/* just increase ctsna, handle further update of ctsna later */
-		if (receivedTsn == state->cTsnAck + 1) 
+		if (receivedTsn == state->cTsnAck + 1)
 		{
-			 
+
 			sctpEV3<<"Updating cTsnAck....now cTsnAck=="<<receivedTsn<<"\n";
-			
+
 			state->cTsnAck = receivedTsn;
 			state->newChunkReceived = true;
 			return true;
 		}
 		/* Update last fragment....increase stop_tsn by one */
 		state->gapStopList[state->numGaps-1]++;
-		
+
 		state->newChunkReceived = true;
 		return true;
-		
-	} 
-	else 
+
+	}
+	else
 	{                    /* a new fragment altogether, past the end of the list */
-		 
+
 		sctpEV3<<"Inserting new fragment after the end of the list (start==stop=="<<receivedTsn<<"\n";
-		
+
 		state->gapStartList[state->numGaps] = receivedTsn;
 		state->gapStopList[state->numGaps] = receivedTsn;
 		state->numGaps++;
 		state->newChunkReceived = true;
 		for (uint32 k=0; k<state->numGaps; k++)
-			 
+
 			sctpEV3<<"Gap "<<k<<": "<<state->gapStartList[k]<<" - "<<state->gapStopList[k]<<"\n";
-			
-		return true;		
+
+		return true;
 	}
 
 	return false;
@@ -2115,20 +2112,20 @@ bool SCTPAssociation::updateGapList(uint32 receivedTsn)
 bool SCTPAssociation::advanceCtsna(void)
 {
 int32 listLength, counter;
-	
+
 	ev<<"Entering advanceCtsna(ctsna now =="<< state->cTsnAck<<"\n";;
-	
+
 	listLength = state->numGaps;
-	
+
 	/* if there are no fragments, we cannot advance the ctsna */
 	if (listLength == 0) return false;
 	counter = 0;
-	
-	while(counter < listLength) 
+
+	while(counter < listLength)
 	{
-		/* if we take out a fragment here, we need to modify either counter or list_length */	
-		
-		if (state->cTsnAck + 1 == state->gapStartList[0]) 
+		/* if we take out a fragment here, we need to modify either counter or list_length */
+
+		if (state->cTsnAck + 1 == state->gapStartList[0])
 		{
 			/* BINGO ! */
 			state->cTsnAck = state->gapStopList[0];
@@ -2139,16 +2136,16 @@ int32 listLength, counter;
 				state->gapStartList[i-1] = state->gapStartList[i];
 				state->gapStopList[i-1] = state->gapStopList[i];
 			}
-			
-		} 
-		else 
+
+		}
+		else
 		{
 			ev<<"Entering advanceCtsna(when leaving: ctsna=="<<state->cTsnAck<<"\n";
 			return false;
 		}
-		
+
 	}	/* end while */
-	
+
 	ev<<"Entering advanceCtsna(when leaving: ctsna=="<< state->cTsnAck<<"\n";
 	return true;
 }
@@ -2156,11 +2153,11 @@ int32 listLength, counter;
 SCTPDataVariables* SCTPAssociation::makeVarFromMsg(SCTPDataChunk* dataChunk)
 {
 SCTPDataVariables* datVar=new SCTPDataVariables();
-	
+
 	datVar->sid = dataChunk->getSid();
 	datVar->ssn = dataChunk->getSsn();
 	datVar->ppid = dataChunk->getPpid();
-	datVar->tsn = dataChunk->getTsn(); 
+	datVar->tsn = dataChunk->getTsn();
 	if (!dataChunk->getUBit())
 		datVar->ordered = true;
 	else
@@ -2181,7 +2178,7 @@ SCTPDataVariables* datVar=new SCTPDataVariables();
 
 SCTPDataVariables* SCTPAssociation::getOutboundDataChunk(IPvXAddress pid, int32 bytes)
 {
-int32 len;	 
+int32 len;
 	/* are there chunks in the transmission queue ? If Yes -> dequeue and return it */
 	sctpEV3<<"getOutboundDataChunk: pid="<<pid<<" bytes="<<bytes<<"\n";
 	sctpEV3<<"chunks in transmissionQ="<<transmissionQ->getQueueSize()<<"\n";
@@ -2197,7 +2194,7 @@ int32 len;
 				len = ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
 				sctpEV3<<"getOutboundDataChunk() found chunk "<<chunk->tsn<<" in the transmission queue, length="<<len<<"\n";
 				if (len<=bytes)
-				{	
+				{
 					transmissionQ->payloadQueue.erase(it);
 					CounterMap::iterator i=qCounter.roomTransQ.find(pid);
 					i->second-= ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
@@ -2242,7 +2239,7 @@ SCTPDataVariables* SCTPAssociation::peekOutboundDataChunk(IPvXAddress pid)
 			}
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -2264,7 +2261,7 @@ SCTPDataVariables* SCTPAssociation::peekAbandonedChunk(IPvXAddress pid)
 			}
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -2275,29 +2272,29 @@ SCTPDataMsg* SCTPAssociation::peekOutboundDataMsg(void)
 	int32 nextStream = -1;
 	nextStream = (this->*ssFunctions.ssGetNextSid)(true);
 
-	if (nextStream == -1) 
+	if (nextStream == -1)
 	{
-		 
+
 		sctpEV3<<"peekOutboundDataMsg(): no valid stream found -> returning NULL !\n";
-		
+
 		return NULL;
 	}
-	 
+
 
 	for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); ++iter)
 	{
 		if ((int32)iter->first==nextStream)
 		{
 			SCTPSendStream* stream=iter->second;
-			if (!stream->getUnorderedStreamQ()->empty()) 
+			if (!stream->getUnorderedStreamQ()->empty())
 			{
 					return (datMsg);
 
 			}
-			if (!stream->getStreamQ()->empty()) 
+			if (!stream->getStreamQ()->empty())
 			{
 					return (datMsg);
-				
+
 			}
 		}
 	}
@@ -2312,22 +2309,22 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(int32 bytes)
 
 	sctpEV3<<"dequeueOutboundDataMsg: "<<bytes<<" bytes left to be sent\n";
 	nextStream = (this->*ssFunctions.ssGetNextSid)(false);
-	 
+
 	if (nextStream == -1)
 		return NULL;
-	
+
 	for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); ++iter)
 	{
 		if ((int32)iter->first==nextStream)
 		{
 			SCTPSendStream* stream=iter->second;
-			if (!stream->getUnorderedStreamQ()->empty()) 
+			if (!stream->getUnorderedStreamQ()->empty())
 			{
 				datMsg = (SCTPDataMsg*)stream->getUnorderedStreamQ()->pop();
-				
+
 				sctpEV3<<"DequeueOutboundDataMsg() found chunk ("<<&datMsg<<")  in the unordered stream queue "<<&iter->first<<"("<<stream->getUnorderedStreamQ()<<") queue size="<<stream->getUnorderedStreamQ()->getLength()<<"\n";
 			}
-			else if (!stream->getStreamQ()->empty()) 
+			else if (!stream->getStreamQ()->empty())
 			{
 
 				int32 b=ADD_PADDING( (check_and_cast<SCTPSimpleMessage*>(((SCTPDataMsg*)stream->getStreamQ()->back())->getEncapsulatedMsg())->getBitLength()/8+SCTP_DATA_CHUNK_LENGTH));
@@ -2339,7 +2336,7 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(int32 bytes)
 						state->appSendAllowed = true;
 						sendIndicationToApp(SCTP_I_SENDQUEUE_ABATED);
 					}
-					sendQueue->record(stream->getStreamQ()->getLength()); 
+					sendQueue->record(stream->getStreamQ()->getLength());
 				sctpEV3<<"DequeueOutboundDataMsg() found chunk ("<<&datMsg<<")  in the stream queue "<<&iter->first<<"("<<stream->getStreamQ()<<") queue size="<<stream->getStreamQ()->getLength()<<"\n";
 				}
 				else
@@ -2371,41 +2368,41 @@ IPvXAddress SCTPAssociation::getNextAddress(IPvXAddress pid)
 			{
 				if (++hit==1)
 					continue;
-				else 
+				else
 					break;
 			}
 			if (iter->second->activePath)
 				return iter->first;
 		}
 	}
-	return IPvXAddress("0.0.0.0");	
+	return IPvXAddress("0.0.0.0");
 }
 
 IPvXAddress SCTPAssociation::getNextDestination(SCTPDataVariables* chk)
 {
 	IPvXAddress dpi, last;
-	
-	 
-	sctpEV3<<"getNextDestination\n";	
-	
-	if (chk->numberOfTransmissions == 0) 
+
+
+	sctpEV3<<"getNextDestination\n";
+
+	if (chk->numberOfTransmissions == 0)
 	{
-		if (chk->initialDestination == IPvXAddress("0.0.0.0")) 
+		if (chk->initialDestination == IPvXAddress("0.0.0.0"))
 		{
 			dpi = state->primaryPathIndex;
-		} 
-		else 
+		}
+		else
 		{
 			dpi = chk->initialDestination;
 		}
-	} 
-	else 
+	}
+	else
 	{
 		if (chk->hasBeenFastRetransmitted)
 		{
-			 
+
 			sctpEV3<<"Chunk is scheduled for FastRetransmission. Next destination = "<<chk->lastDestination<<"\n";
-			
+
 			//chk->hasBeenFastRetransmitted=false;
 			return chk->lastDestination;
 		}
@@ -2414,36 +2411,36 @@ IPvXAddress SCTPAssociation::getNextDestination(SCTPDataVariables* chk)
 		SCTPPathMap::iterator iter=sctpPathMap.find(dpi);
 		do
 		{
-			 
-			sctpEV3<<"old dpi="<<iter->first<<"\n";		
-			
+
+			sctpEV3<<"old dpi="<<iter->first<<"\n";
+
 			iter++;
 			if (iter==sctpPathMap.end())
 				iter=sctpPathMap.begin();
 			dpi=iter->first;
-			
+
 		} while (iter->first != last && iter->second->activePath == false || iter->second->confirmed==false);
 	}
 
-	 
+
 	sctpEV3<<"sctp_get_next_destination: chunk was last sent to "<<last<<", will next be sent to path "<<dpi<<"\n";
-	
+
 	sctpEV3<<"new dpi="<<dpi<<"\n";
 	return (dpi);
 }
 
 void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 {
-	uint32 osb = 0;	
+	uint32 osb = 0;
 	int32 diff = 0;
 	SCTPPathMap::iterator iter;
 	bytes.chunk = false;
 	bytes.packet = false;
 	bytes.bytesToSend = 0;
-	
+
 	iter=sctpPathMap.find(dpi);
 	osb = getPath(dpi)->outstandingBytes;
-	sctpEV3<<"bytesAllowedToSend: osb="<<osb<<"  cwnd="<<iter->second->cwnd<<"\n";	
+	sctpEV3<<"bytesAllowedToSend: osb="<<osb<<"  cwnd="<<iter->second->cwnd<<"\n";
 	if (!state->firstDataSent)
 	{
 		bytes.chunk = true;
@@ -2461,8 +2458,8 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 	}
 	else
 	{
-	
-		
+
+
 		sctpEV3<<"bytesAllowedToSend: osb="<<osb<<"  cwnd="<<iter->second->cwnd<<" FastRetrans="<<state->doFastRetransmission<<"\n";
 		CounterMap::iterator it = qCounter.roomTransQ.find(dpi);
 		sctpEV3<<"bytes in transQ="<<it->second<<"\n";
@@ -2474,17 +2471,17 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 			{
 				bytes.bytesToSend = state->peerRwnd;
 				return;
-			}	
+			}
 			if (diff > 0)
 			{
 				CounterMap::iterator bit = qCounter.bookedTransQ.find(dpi);
 				if (bit->second > (uint32)diff)
 				{
 					bytes.bytesToSend = diff;
-					sctpEV3<<"cwnd does not allow all RTX\n"; 
+					sctpEV3<<"cwnd does not allow all RTX\n";
 					return;
 				}
-				else 
+				else
 				{
 					bytes.bytesToSend = bit->second;
 					sctpEV3<<"cwnd allows more than those "<<bytes.bytesToSend<<" bytes for retransmission\n";
@@ -2505,7 +2502,7 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 				sctpEV3<<"bookedSumSendStreams="<<qCounter.bookedSumSendStreams<<" bytes.bytesToSend="<<bytes.bytesToSend<<"\n";
 				diff = iter->second->cwnd - osb - bytes.bytesToSend;
 				if (diff>0)
-				if (qCounter.bookedSumSendStreams > (uint32)diff) 
+				if (qCounter.bookedSumSendStreams > (uint32)diff)
 				{
 					bytes.bytesToSend =  iter->second->cwnd - osb ;
 					sctpEV3<<"bytesToSend are limited by cwnd: "<<bytes.bytesToSend<<"\n";
@@ -2524,21 +2521,21 @@ void SCTPAssociation::bytesAllowedToSend(IPvXAddress dpi)
 void SCTPAssociation::printOutstandingTsns()
 {
 	uint32 first=0, second = 0;
-	
-	if (retransmissionQ->payloadQueue.empty()) 
+
+	if (retransmissionQ->payloadQueue.empty())
 	{
 		return;
 	}
 	for(SCTPQueue::PayloadQueue::iterator pl=retransmissionQ->payloadQueue.begin();pl!=retransmissionQ->payloadQueue.end();pl++)
 	{
-		if (pl->second->hasBeenAcked == false && pl->second->countsAsOutstanding == true) 
+		if (pl->second->hasBeenAcked == false && pl->second->countsAsOutstanding == true)
 		{
 			if (pl->second->tsn > second+1)
 			{
 				if (second != 0)
 				{
 					sctpEV3<<" - "<<second<<"\t";;
-					
+
 				}
 				first = second = pl->second->tsn;
 				sctpEV3<<pl->second->tsn;
@@ -2556,10 +2553,10 @@ void SCTPAssociation::printOutstandingTsns()
 uint32 SCTPAssociation::getOutstandingBytesOnPath(IPvXAddress pathId)
 {
 	uint32 osb = 0, queueLength = 0, first=0, second = 0;
-	
-	
+
+
 	if (retransmissionQ->payloadQueue.empty()) return 0;
-	
+
 	queueLength = retransmissionQ->getQueueSize();
 	sctpEV3<<"queueLength of retransmissionQ="<<queueLength<<"\n";
 	sctpEV3<<"outstanding TSNs\n";
@@ -2567,7 +2564,7 @@ uint32 SCTPAssociation::getOutstandingBytesOnPath(IPvXAddress pathId)
 	{
 		if (pl->second->lastDestination == pathId)
 		{
-			if (pl->second->hasBeenAcked == false && pl->second->countsAsOutstanding == true) 
+			if (pl->second->hasBeenAcked == false && pl->second->countsAsOutstanding == true)
 			{
 				//osb += pl->second->len/8;
 				if (pl->second->tsn > second+1)
@@ -2575,7 +2572,7 @@ uint32 SCTPAssociation::getOutstandingBytesOnPath(IPvXAddress pathId)
 					if (second != 0)
 					{
 						sctpEV3<<" - "<<second<<"\t";;
-						
+
 					}
 					first = second = pl->second->tsn;
 					sctpEV3<<pl->second->tsn;
@@ -2590,9 +2587,9 @@ uint32 SCTPAssociation::getOutstandingBytesOnPath(IPvXAddress pathId)
 		}
 	}
 	sctpEV3<<" - "<<second<<"\n";
-	 
+
 	sctpEV3<<"getOutstandingBytesOnPath("<<(pathId)<<") : currently "<<osb<<" bytes outstanding\n";
-	
+
 
 	return (osb);
 }
@@ -2611,23 +2608,23 @@ SCTPPathVariables* SCTPAssociation::getPath(IPvXAddress pid)
 }
 
 void  SCTPAssociation::pmDataIsSentOn(IPvXAddress pathId)
-{	
+{
 	SCTPPathVariables* path;
-	
+
 	/* restart hb_timer on this path */
 	path=getPath(pathId);
 	path->heartbeatTimeout = path->pathRto+ (double)sctpMain->par("hbInterval");
 	stopTimer(path->HeartbeatTimer);
-	startTimer(path->HeartbeatTimer, path->heartbeatTimeout);	
+	startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
 	path->cwndTimeout = path->pathRto;
 	stopTimer(path->CwndTimer);
 	startTimer(path->CwndTimer, path->cwndTimeout);
 
-	 
+
 	sctpEV3<<"Restarting HB timer on path "<<(pathId)<<" to expire at time "<<path->heartbeatTimeout<<"\n";
 	sctpEV3<<"Restarting CWND timer on path "<<(pathId)<<" to expire at time "<<path->cwndTimeout<<"\n";
-	
-	
+
+
 	/* AJ - 02-04-2004 - added for fullfilling section 8.2 */
 	state->lastUsedDataPath = pathId;
 }
@@ -2639,14 +2636,14 @@ void SCTPAssociation::pmStartPathManagement(void)
 	int32 i=0;
 	/* populate path structures !!! */
 	/* set a high start value...this is appropriately decreased later (below) */
-	state->assocPmtu = state->localRwnd;	
+	state->assocPmtu = state->localRwnd;
 	for(SCTPPathMap::iterator piter=sctpPathMap.begin(); piter!=sctpPathMap.end(); piter++)
 	{
 		path=piter->second;
 		path->pathErrorCount = 0;
 		InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.get4());
 		path->pmtu = rtie->getMTU();
-		if (path->pmtu < state->assocPmtu) 
+		if (path->pmtu < state->assocPmtu)
 		{
 			state->assocPmtu = path->pmtu;
 		}
@@ -2656,26 +2653,26 @@ void SCTPAssociation::pmStartPathManagement(void)
 		path->rttvar = 0.0;
 		/* from now on we may have one update per RTO/SRTT */
 		path->updateTime = 0.0;
-		
-	
+
+
 		path->partialBytesAcked = 0;
 		path->outstandingBytes = 0;
 		path->activePath = true;
 		path->hbWasAcked = true;
 		// Timer probably not running, but stop it anyway I.R.
 		stopTimer(path->T3_RtxTimer);
-		
+
 		path->heartbeatTimeout= (double)sctpMain->par("hbInterval")+i*path->pathRto;
 		stopTimer(path->HeartbeatTimer);
 		if (path->remoteAddress == state->initialPrimaryPath && !path->confirmed)
 		{
 			path->confirmed = true;
-			
+
 		}
 		sctpEV3<<getFullPath()<<" numberOfLocalAddresses="<<state->localAddresses.size()<<"\n";
 		if (state->localAddresses.size()>1)
 			sendHeartbeat(path, false);
-		else 
+		else
 			sendHeartbeat(path, true);
 		startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
 		startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
@@ -2688,8 +2685,8 @@ void SCTPAssociation::pmStartPathManagement(void)
 int32 SCTPAssociation::getQueuedBytes(void)
 {
 	int32 qb = 0;
-	SCTPReceiveStream* rStream;	
-	SCTPQueue* sq;	
+	SCTPReceiveStream* rStream;
+	SCTPQueue* sq;
 
     for (SCTPReceiveStreamMap::iterator iter=receiveStreams.begin(); iter!=receiveStreams.end(); iter++)
 	{
@@ -2708,12 +2705,12 @@ int32 SCTPAssociation::getQueuedBytes(void)
 		if (sq)
 		{
 			qb+=sq->getNumBytes();
-		}			
-	}	
+		}
+	}
 
-	 
-	sctpEV3<<"getQueuedBytes : currently "<<qb<<"  bytes  buffered\n";	
-	
+
+	sctpEV3<<"getQueuedBytes : currently "<<qb<<"  bytes  buffered\n";
+
 	return (qb);
 }
 
@@ -2730,22 +2727,22 @@ int32 SCTPAssociation::dequeueAckedChunks(uint32 tsna, IPvXAddress pathId, simti
 	int32 newlyAckedBytes = 0;
 	SCTPDataVariables* chunk = NULL;
 	simtime_t timeDiff = 0.0;
-	
+
 	/* set it ridiculously high */
 	*rttEstimation = -1.0;
 
 	/* are there chunks in the retransmission queue ? If Yes -> check for dequeue */
-	while (!retransmissionQ->payloadQueue.empty()) 
+	while (!retransmissionQ->payloadQueue.empty())
 	{
-	
+
 		SCTPQueue::PayloadQueue::iterator iter=retransmissionQ->payloadQueue.begin();
 		chunk = iter->second;
-		 
+
 		sctpEV3<<"dequeueAckedChunks() found chunk tsn "<<chunk->tsn<<" in the retransmissionQ\n";
-		
-	
-		if (tsnGe(tsna,chunk->tsn)) 
-		{		
+
+
+		if (tsnGe(tsna,chunk->tsn))
+		{
 			/* dequeue chunk, cause it has been acked */
 			if (transmissionQ->getVar(chunk->tsn))
 			{
@@ -2758,7 +2755,7 @@ int32 SCTPAssociation::dequeueAckedChunks(uint32 tsna, IPvXAddress pathId, simti
 			}
 			chunk = retransmissionQ->getAndExtractMessage(chunk->tsn);
 			sctpEV3<<"dequeueAckedChunks(): dequeue chunk tsn="<<chunk->tsn<<", tsna="<<tsna<<", "<<retransmissionQ->getQueueSize()<<" chunks still in queue \n";
-			
+
 			newlyAckedBytes += (chunk->booksize);
 			SCTP::AssocStatMap::iterator iter=sctpMain->assocStatMap.find(assocId);
 			iter->second.ackedBytes+=chunk->len/8;
@@ -2770,10 +2767,10 @@ int32 SCTPAssociation::dequeueAckedChunks(uint32 tsna, IPvXAddress pathId, simti
 				if (chunk->numberOfTransmissions == 1 && chunk->lastDestination == pathId)
 				{
 					timeDiff = simulation.getSimTime() - chunk->sendTime;
-					
-					if (timeDiff < *rttEstimation || *rttEstimation == -1.0) 
+
+					if (timeDiff < *rttEstimation || *rttEstimation == -1.0)
 						*rttEstimation = timeDiff;
-					
+
 					sctpEV3<<"dequeueAckedChunks(): computed rtt time diff == "<<timeDiff<<" for TSN"<<chunk->tsn<<"\n";
 				}
 				getPath(chunk->lastDestination)->outstandingBytes -= chunk->booksize;
@@ -2787,15 +2784,15 @@ int32 SCTPAssociation::dequeueAckedChunks(uint32 tsna, IPvXAddress pathId, simti
 				delete chunk->userData;
 			}
 			delete chunk;
-		} 
-		else 
+		}
+		else
 			break;
-	} 
-	
-	 
+	}
+
+
 	sctpEV3<<"dequeueAckedChunks(): newly_acked_bytes== "<<newlyAckedBytes<<", rtt estimation == "<<*rttEstimation<<"\n";
-	
-	
+
+
 	return (newlyAckedBytes);
 }
 
@@ -2805,22 +2802,22 @@ void SCTPAssociation::pmClearPathCounter(IPvXAddress pathId)
 	if (pm!=sctpPathMap.end())
 	{
 		pm->second->pathErrorCount = 0;
-	
-		if (pm->second->activePath==false) 
+
+		if (pm->second->activePath==false)
 		{
-			/* notify the application */				
-			pathStatusIndication(pathId, true);					
-			
+			/* notify the application */
+			pathStatusIndication(pathId, true);
+
 			sctpEV3<<"Path "<<pathId<<" state changes from INACTIVE to ACTIVE !!!!\n";
-			
+
 		}
 	}
 }
 
 void SCTPAssociation::pathStatusIndication(IPvXAddress pid, bool status)
-{	
+{
 	cPacket* msg=new cPacket("StatusInfo");
-	msg->setKind(SCTP_I_STATUS); 
+	msg->setKind(SCTP_I_STATUS);
 	SCTPStatusInfo *cmd = new SCTPStatusInfo();
 	cmd->setPathId(pid);
 	cmd->setAssocId(assocId);
@@ -2837,37 +2834,37 @@ void SCTPAssociation::pathStatusIndication(IPvXAddress pid, bool status)
 void SCTPAssociation::pmRttMeasurement(IPvXAddress pathId, simtime_t rttEstimate, int32 acknowledgedBytes)
 {
 
-	if (rttEstimate != -1.0) 
-	{		
+	if (rttEstimate != -1.0)
+	{
 		/* we have a valid estimation */
 		SCTPPathVariables* path=getPath(pathId);
 
-		if (simulation.getSimTime() > path->updateTime) 
-		{		
-			
-			if (path->updateTime == 0.0) 
+		if (simulation.getSimTime() > path->updateTime)
+		{
+
+			if (path->updateTime == 0.0)
 			{
 				path->rttvar = rttEstimate / 2;
 				path->srtt = rttEstimate;
 				path->pathRto = 3 * rttEstimate;
 				path->pathRto = max(min(path->pathRto.dbl(), sctpMain->par("rtoMax")), (double)sctpMain->par("rtoMin"));
 
-			} 
-			else 
+			}
+			else
 			{
 
 				path->rttvar = (1.0 - (double)sctpMain->par("rtoBeta")) * path->rttvar +	(double)sctpMain->par("rtoBeta") * fabs(path->srtt - rttEstimate);
-		
+
 				path->srtt = (1.0 - (double)sctpMain->par("rtoAlpha")) * path->srtt + (double)sctpMain->par("rtoAlpha") * rttEstimate;
-		
+
 				path->pathRto = path->srtt + 4 * path->rttvar;
 
-				path->pathRto = max(min(path->pathRto.dbl(), sctpMain->par("rtoMax")), (double)sctpMain->par("rtoMin"));	
+				path->pathRto = max(min(path->pathRto.dbl(), sctpMain->par("rtoMax")), (double)sctpMain->par("rtoMin"));
 			}
-			 
+
 			sctpEV3<<simulation.getSimTime()<<": Updating timer values for path "<<pathId<<"...RTO == "<<path->pathRto<<"\n";
 			sctpEV3<<" rttEstimat="<<rttEstimate<<"  SRTT == "<<path->srtt<<" ------>  RTTVAR == "<<path->rttvar<<"\n";
-			
+
 			/* RFC2960, sect.6.3.1: new RTT measurements SHOULD be made no more than once per round-trip */
 			path->updateTime = simulation.getSimTime() + path->srtt;
 		}
@@ -2875,7 +2872,7 @@ void SCTPAssociation::pmRttMeasurement(IPvXAddress pathId, simtime_t rttEstimate
 		path->pathRTT->record(rttEstimate);
     }
 
-	if (acknowledgedBytes > 0) 
+	if (acknowledgedBytes > 0)
 	{
 		/* we received a (new) SACK/HB ACK from our peer -- reset the error counters for this path */
 		state->errorCount = 0;
@@ -2886,75 +2883,75 @@ void SCTPAssociation::pmRttMeasurement(IPvXAddress pathId, simtime_t rttEstimate
 
 void SCTPAssociation::fcAdjustCounters(uint32 ackedBytes, uint32 osb, bool ctsnaAdvanced, IPvXAddress pathId, uint32 pathOsb, uint32 newOsb)
 {
-	SCTPPathVariables* path=getPath(pathId);	
-	
-	 
+	SCTPPathVariables* path=getPath(pathId);
+
+
 	sctpEV3<<"fcAdjustCounters: cwnd="<<path->cwnd<<" ssthresh="<<path->ssthresh<<" pathOsbBefore="<<pathOsb<<" osbBefore="<<osb<<" ackedBytes="<<ackedBytes<<"\n";
-	
-	
-	if (path->cwnd <=path->ssthresh) 
-	{	
+
+
+	if (path->cwnd <=path->ssthresh)
+	{
 		for (SCTPPathMap::iterator iter=sctpPathMap.begin(); iter!=sctpPathMap.end(); iter++)
 		{
 			iter->second->partialBytesAcked = 0;
 		}
 
 		/**
-		 * From the implementers guide: increase cwnd only if 
-		 * - the current congestion window is being fully utilized, 
-		 * - an incoming SACK advances the Cumulative TSN Ack Point, 
-		 * - and the data sender (sack receiver) is not in Fast Recovery. 
+		 * From the implementers guide: increase cwnd only if
+		 * - the current congestion window is being fully utilized,
+		 * - an incoming SACK advances the Cumulative TSN Ack Point,
+		 * - and the data sender (sack receiver) is not in Fast Recovery.
 		 */
-		 
+
 		sctpEV3<<"ctsnaAdvanced="<<ctsnaAdvanced<<"  fastRecoveryActive="<<state->fastRecoveryActive<<"\n";
-		
-		if (ctsnaAdvanced == true && pathOsb >= path->cwnd ) 
+
+		if (ctsnaAdvanced == true && pathOsb >= path->cwnd )
 		{
 			path->cwndAdjustmentTime = simulation.getSimTime();
-			
+
 			path->cwnd += (int32)min(path->pmtu, ackedBytes);
 			path->pathCwnd->record(path->cwnd);
-			 
+
 			sctpEV3<<"SLOW START: Setting CWND of path "<<pathId<<" to "<<path->cwnd<<" bytes\n";
-			
+
 		}
-		
-	} 
-	else 
+
+	}
+	else
 	{
 		path->partialBytesAcked += ackedBytes;
 	sctpEV3<<"partialBytesAcked="<<path->partialBytesAcked<<"  cwnd="<<path->cwnd<<"  osb="<<osb<<" advanced="<<ctsnaAdvanced<<"\n";
 		if ((path->partialBytesAcked  >= path->cwnd) &&
-			(osb >= path->cwnd) && (ctsnaAdvanced == true)) 
-		{		
+			(osb >= path->cwnd) && (ctsnaAdvanced == true))
+		{
 			path->cwnd += path->pmtu;
 			path->pathCwnd->record(path->cwnd);
 			// I.R. make the term easier
-			path->partialBytesAcked = 
+			path->partialBytesAcked =
 				((path->cwnd < path->partialBytesAcked) ?
 					(path->partialBytesAcked - path->cwnd) : 0);
 
 			/* get and store the time when CWND was adjusted here */
 			path->cwndAdjustmentTime = simulation.getSimTime();
-			
-			 
+
+
 			sctpEV3<<"CONG.AVOID.: Setting CWND of path "<<pathId<<" to "<<path->cwnd<<" bytes\n";
-			
+
 		}
 	}
-			
+
 
 	if (newOsb == 0) path->partialBytesAcked = 0;
 }
 
-bool SCTPAssociation::allPathsInactive(void) 
+bool SCTPAssociation::allPathsInactive(void)
 {
 	for(SCTPPathMap::iterator i=sctpPathMap.begin(); i!=sctpPathMap.end(); i++)
 	{
-		if (i->second->activePath) 
+		if (i->second->activePath)
 			return false;
 	}
-	
+
 	return true;
 }
 
@@ -2972,11 +2969,11 @@ uint32 SCTPAssociation::getLevel(IPvXAddress addr)
 			return 3;
 	}
 	else
-	{ 
+	{
 		//Addresses usable with SCTP, but not as destination or source address
 		if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("0.0.0.0"), IPAddress("255.0.0.0")) ||
-			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("224.0.0.0"), IPAddress("240.0.0.0")) || 
-			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("198.18.0.0"), IPAddress("255.255.255.0")) || 
+			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("224.0.0.0"), IPAddress("240.0.0.0")) ||
+			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("198.18.0.0"), IPAddress("255.255.255.0")) ||
 			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.88.99.0"), IPAddress("255.255.255.0")))
 			return 0;
 
@@ -2985,17 +2982,17 @@ uint32 SCTPAssociation::getLevel(IPvXAddress addr)
 		return 1;
 
 		//Link-local
-		if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("169.254.0.0"), IPAddress("255.255.0.0"))) 	
+		if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("169.254.0.0"), IPAddress("255.255.0.0")))
 			return 2;
-			
+
 		//Private
-		if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("10.0.0.0"), IPAddress("255.0.0.0")) || 
-			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("172.16.0.0"), IPAddress("255.240.0.0")) ||  
+		if (addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("10.0.0.0"), IPAddress("255.0.0.0")) ||
+			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("172.16.0.0"), IPAddress("255.240.0.0")) ||
 			addr.get4().maskedAddrAreEqual(addr.get4(), IPAddress("192.168.0.0"), IPAddress("255.255.0.0")))
 			return 3;
-	 }  
+	 }
 	//Global
-	return 4;                          
+	return 4;
 }
 
 void SCTPAssociation::disposeOf(SCTPMessage* sctpmsg)

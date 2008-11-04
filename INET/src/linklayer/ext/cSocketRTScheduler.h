@@ -20,20 +20,30 @@
 #ifndef __CSOCKETRTSCHEDULER_H__
 #define __CSOCKETRTSCHEDULER_H__
 
+#define WANT_WINSOCK2
+
 #include <platdep/timeutil.h>
 #include <platdep/sockets.h>
 #include "INETDefs.h"
 #include <omnetpp.h>
+
+// prevent pcap.h to redefine int8_t,... types on Windows
+#include "bsdint.h"
+#define HAVE_U_INT8_T
+#define HAVE_U_INT16_T
+#define HAVE_U_INT32_T
+#define HAVE_U_INT64_T
 #include <pcap.h>
+
 #include "ExtFrame_m.h"
 
 class cSocketRTScheduler : public cScheduler
 {
 	protected:
-		
-		
+
+
 		int fd;
-	
+
 		virtual bool receiveWithTimeout();
 		virtual int receiveUntil(const timeval& targetTime);
 		//virtual void packet_handler(u_char *, const struct pcap_pkthdr *, const u_char *);

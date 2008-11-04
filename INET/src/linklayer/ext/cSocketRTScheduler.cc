@@ -26,7 +26,7 @@
 #define IPPROTO_SCTP 132
 #endif
 
-#include <net/ethernet.h>
+#include <headers/ethernet.h>
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
 #define PCAP_TIMEOUT 10     /* Timeout in ms */
@@ -63,7 +63,7 @@ void cSocketRTScheduler::startRun()
 	fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 	if(fd == INVALID_SOCKET)
 		throw new cRuntimeError("cSocketRTScheduler: Root priviledges needed");
-	if(setsockopt(fd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+	if(setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
 		throw new cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 }
 
@@ -71,7 +71,7 @@ void cSocketRTScheduler::startRun()
 void cSocketRTScheduler::endRun()
 {
 	//pcap_stat ps;
-	
+
 	close(fd);
 	fd = INVALID_SOCKET;
 	/*std::cout<<"pds.size="<<pds.size()<<"\n";
@@ -98,14 +98,14 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 	pcap_t * pd;
 	int32 datalink;
 	int32 headerLength;
-	
+
 	/*if (module)
 		throw new cRuntimeError("cSocketRTScheduler::setInterfaceModule() already called");*/
 	if (!mod || !dev || !filter)
 		throw new cRuntimeError("cSocketRTScheduler::setInterfaceModule(): arguments must be non-NULL");
 
 	/* get pcap handle */
-	bzero(&errbuf, sizeof(errbuf));
+	memset(&errbuf, 0, sizeof(errbuf));
 	if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
 		throw new cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not open pcap device, error = %s", errbuf);
 	else if(strlen(errbuf) > 0)
@@ -125,7 +125,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 	/* FIXME MT: Will we do this also for Linux? */
 	if (pcap_setnonblock(pd, 1, errbuf) < 0)
 		throw new cRuntimeError("cSocketRTScheduler::pcap_setnonblock(): Can not put pcap device into non-blocking mode, error = %s", errbuf);
-	
+
 	switch (datalink) {
 	case DLT_NULL:
 		headerLength = 4;
@@ -157,12 +157,12 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *b
 	int32 datalink;
 	cModule *module;
 	struct ether_header *ethernet_hdr;
-	
+
 	i = *(uint16 *)user;
 	datalink = cSocketRTScheduler::datalinks.at(i);
 	headerLength = cSocketRTScheduler::headerLengths.at(i);
 	module = cSocketRTScheduler::modules.at(i);
-	
+
 	//std::cout << "Got something for pd[" << i << "] = "<< cSocketRTScheduler::pds.at(i) << ", headerLength = " << headerLength << ", hdr.caplen = " << hdr->caplen << ".\n";
 
 	// skip ethernet frames not encapsulating an IP packet.
@@ -264,7 +264,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
 	cMessage *msg = sim->msgQueue.peekFirst();
 	if (!msg)
 	{
-		targetTime.tv_sec = LONG_MAX; 
+		targetTime.tv_sec = LONG_MAX;
 		targetTime.tv_usec = 0;
 	}
 	else
@@ -297,9 +297,9 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
 	if (fd==INVALID_SOCKET)
 		throw new cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 
-	ssize_t sent = sendto(fd, buf, numBytes, 0, to, addrlen);
+	int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);
 
-	if(sent == (ssize_t) numBytes)
+	if(sent == (int) numBytes)
 		EV << "Sent an IP packet with length of " << sent << " bytes.\n";
 	else
 		EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";

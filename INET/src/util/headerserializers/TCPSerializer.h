@@ -36,11 +36,10 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #ifndef _MSC_VER
 #include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#endif
 
 using namespace INETFw;
 //#include "Checksum.h"
@@ -51,7 +50,7 @@ class TCPSerializer
 {
     public:
         TCPSerializer() {}
-	
+
         /**
          * Serializes a TCPMessage for transmission on the wire.
          * The checksum is NOT filled in. (The kernel does that when sending
@@ -60,10 +59,10 @@ class TCPSerializer
          */
 	int serialize(TCPSegment *msg, unsigned char *buf, unsigned int bufsize, pseudoheader *pseudo);
         /**
-         * Puts a packet sniffed from the wire into an SCTPMessage. 
+         * Puts a packet sniffed from the wire into an SCTPMessage.
          */
 //	void parse(unsigned char *buf, unsigned int bufsize, TCPSegment *dest);
-	
+
 	static unsigned short checksum(unsigned char *addr, unsigned int count);
 };
 

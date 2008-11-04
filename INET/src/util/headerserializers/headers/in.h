@@ -37,6 +37,10 @@
 #ifndef OPPSIM_NETINET_IN_H_
 #define OPPSIM_NETINET_IN_H_
 
+#ifdef s_addr
+#undef s_addr
+#endif
+
 /*
  * Constants and structures defined by the internet system,
  * Per RFC 790, September 1981, and numerous additions.
