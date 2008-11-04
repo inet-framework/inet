@@ -62,6 +62,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg, IPvXAddress src,
 			startTimer(T1_InitTimer,state->initRexmitTimeout);
 		}
 	}
+
 	srcPort = sctpmsg->getDestPort();
 	destPort = sctpmsg->getSrcPort();
 	
@@ -144,7 +145,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg, IPvXAddress src,
 			{
 				SCTPDataChunk* dataChunk;
 				dataChunk = check_and_cast<SCTPDataChunk *>(header);
-				if (dataChunk->getBitLength()/8-16>0)
+				if (dataChunk->getByteLength()-16>0)
 				{
 					dataChunkCount++;
 					event=processDataArrived(dataChunk, dataChunkCount);
@@ -315,8 +316,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg, IPvXAddress src,
 				
 		}
 	}
-		disposeOf(state->sctpmsg);
-		sctpEV3<<"state->sctpmsg was disposed\n";
+	disposeOf(state->sctpmsg);
 	sctpEV3<<"trans="<<trans<<"\n";
 	return trans;
 }
@@ -378,8 +378,10 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 			{
 				for (int32 i=0; i<ift->getNumInterfaces(); ++i)
 				{
+					//if (ift->getInterface(i)->ipv4()!=NULL)
 					if (ift->getInterface(i)->ipv4Data()!=NULL)
 					{ 
+						//adv.push_back(ift->getInterface(i)->ipv4()->getIPAddress());
 						adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
 					}
 					else if (ift->getInterface(i)->ipv6Data()!=NULL)
@@ -490,7 +492,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
 		stopTimer(T1_InitTimer);
 		state->initRexmitTimeout = SCTP_TIMEOUT_INIT_REXMIT;
 		trans=performStateTransition(SCTP_E_RCV_INIT_ACK);
-
+		//delete state->initChunk; will be deleted when state ESTABLISHED is entered
 		if (trans)
 		{
 			state->initialPrimaryPath = remoteAddr;
@@ -835,8 +837,8 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 				datVar = retransmissionQ->getVar(pos);
 				if (datVar)
 				{		
-					sctpEV3<<"TSN "<<datVar->tsn<<" found in retransmissionQ\n";
-					sctpEV3<<"acked="<<datVar->hasBeenAcked<<", abandoned="<<datVar->hasBeenAbandoned<<", removed="<<datVar->hasBeenRemoved<<"\n";
+					/*sctpEV3<<"TSN "<<datVar->tsn<<" found in retransmissionQ\n";
+					sctpEV3<<"acked="<<datVar->hasBeenAcked<<", abandoned="<<datVar->hasBeenAbandoned<<", removed="<<datVar->hasBeenRemoved<<"\n";*/
 					pmClearPathCounter(datVar->lastDestination);
 					if (datVar->numberOfTransmissions == 1 && datVar->lastDestination == pathId && datVar->hasBeenAcked == false && datVar->hasBeenRemoved == false) 
 					{
@@ -935,14 +937,14 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 							if (pq->second->gapReports >= (uint32) sctpMain->par("numGapReports")) 
 							{
 								/* chunks are only fast retransmitted once */
-								bool fastRtx = false;
-								fastRtx = ((pq->second->hasBeenFastRetransmitted == false) && (pq->second->numberOfRetransmissions==0));
+bool fastRtx = false;
+	fastRtx = ((pq->second->hasBeenFastRetransmitted == false) && (pq->second->numberOfRetransmissions==0));
 								if (fastRtx)
 								{
 									sctpEV3<<simulation.getSimTime()<<" Got "<<pq->second->gapReports<<" gap_reports, scheduling "<<pq->second->tsn<<" for RTX\n";
 									sctpEV3<<"last sendTime for TSN "<<pq->second->tsn<<" was "<<pq->second->sendTime<<". RTT for path "<<pq->second->lastDestination<<" is "<<getPath(pq->second->lastDestination)->srtt<<"\n";
 									
-									/* check that chunk is unique in the queue */
+
 									SCTPQueue::PayloadQueue::iterator it=transmissionQ->payloadQueue.find(pq->second->tsn);
 									if (it==transmissionQ->payloadQueue.end()) 
 									{
@@ -980,8 +982,6 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 										rtxNecessary = true;
 										if(bufferPosition == 0)
 											lowestTsnRetransmitted = true;
-										state->doFastRetransmission++;
-										sctpEV3<<"processSackArrived: doFastRetransmission="<<state->doFastRetransmission<<"\n";
 									}
 								}
 							}
@@ -1100,12 +1100,14 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 }
 
 
+
 SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk, uint32 chunkCount)
 {
 	SCTPEventCode event;
 	uint32 tsn;
 	bool checkCtsnaChange=false;
 	
+	//recordScalar("delay", simulation.getSimTime()-dataChunk->getEnqueuingTime());
 	state->newChunkReceived = false;
 	state->lastDataSourceAddress = remoteAddr;
 	SCTPPathVariables* path=getPath(remoteAddr);
@@ -1140,12 +1142,12 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk, uint
 	if (tsnLe(tsn, state->cTsnAck))
 	{
 
-		sctpEV3<<"sctp_handle_incoming_data_chunk: old TSN value...inserted to duplist - returning\n tsn="<<tsn<<"  lastAcked="<<state->cTsnAck<<"\n";
-		
-		state->dupList.push_back(tsn);
-		state->dupList.unique();
-		delete check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
-		return SCTP_E_DUP_RECEIVED;
+			sctpEV3<<"sctp_handle_incoming_data_chunk: old TSN value...inserted to duplist - returning\n tsn="<<tsn<<"  lastAcked="<<state->cTsnAck<<"\n";
+			
+			state->dupList.push_back(tsn);
+			state->dupList.unique();
+			delete check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
+			return SCTP_E_DUP_RECEIVED;
 	}
 
 
