@@ -1,3 +1,3 @@
 <buildspec version="4.0">
-<dir makemake-options="--deep --make-so -o INET -O out -pINET -lwpcap --meta:auto-include-path --meta:export-library --meta:use-exported-libs" path="src" type="makemake"/>
+<dir makemake-options="--deep --make-so -o INET -O out -pINET -lpcap --meta:auto-include-path --meta:export-library --meta:use-exported-libs" path="src" type="makemake"/>
 </buildspec>
