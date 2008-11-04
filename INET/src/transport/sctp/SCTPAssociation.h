@@ -338,7 +338,6 @@ class SCTPStateVariables : public cPolymorphic
 		uint64 queuedBytes;
 		uint64 queuedRcvBytes;	//number of messages in receive queues
 		uint32 fastRecoveryExitPoint;
-		uint32 fastRetransmittedBytes;
 		uint32 lastStreamScheduled;
 		uint32 assocPmtu; //smallest overall path mtu
 		uint32 msgNum; //indicates the sequence number of the message
@@ -355,7 +354,6 @@ class SCTPStateVariables : public cPolymorphic
 		uint16 header;
 		int32 probingTimeout;
 		int32 numMsgsReq[100];
-		int32 doFastRetransmission;
 		int32 cookieLifeTime;
 		/** Counter for init and cookie retransmissions */
 		int16 initRetransCounter;
