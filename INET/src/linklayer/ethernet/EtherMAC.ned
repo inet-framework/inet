@@ -150,6 +150,6 @@ simple EtherMAC
     gates:
         input upperLayerIn;    // to EtherLLC or MACRelayUnitPP
         output upperLayerOut;  // to EtherLLC or MACRelayUnitPP
-        inout phys;            // to physical layer or the network
+        inout phys @labels (ether); // to physical layer or the network
 }
 
