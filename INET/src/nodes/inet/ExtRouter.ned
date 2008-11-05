@@ -35,10 +35,10 @@ module ExtRouter
 {
     parameters:
         string routingFile = default("");
+        int numExtInterfaces = default(0);
     gates:
         inout pppg[];
         inout ethg[];
-	inout extg[];
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -72,7 +72,7 @@ module ExtRouter
         eth[sizeof(ethg)]: EthernetInterface {
             @display("p=297,265,row,110;q=l2queue;i=block/ifcard");
 	}
-       ext[sizeof(extg)]: ExtInterface {
+        ext[numExtInterfaces]: ExtInterface {
             @display("p=50,265,row,110;i=block/ifcard");
 	}
     connections allowunconnected:
@@ -88,9 +88,9 @@ module ExtRouter
             eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
             eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
         }
-	for i=0..sizeof(extg)-1 {
-        	ext[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
-        	ext[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
+	for i=0..numExtInterfaces-1 {
+            ext[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)+i];
+            ext[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)+i];
 	}
 	//ext.netwOut --> networkLayer.ifIn[sizeof(pppg)+sizeof(ethg)];
         //ext.netwIn <-- networkLayer.ifOut[sizeof(pppg)+sizeof(ethg)];

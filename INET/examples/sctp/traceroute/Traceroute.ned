@@ -172,10 +172,10 @@ network Traceroute //
         extRouter: ExtRouter {
             parameters:
                 routingFile = "extRouter.mrt";
-            @display("p=500,293;i=device/router_l");
+                numExtInterfaces = 1;
+                @display("p=500,293;i=device/router_l");
             gates:
                 pppg[2];
-		extg[1];
 	}
     connections allowunconnected:
         cli1.ethg[0]  <--> switch1.ethg[0];

@@ -28,16 +28,15 @@ channel etherline extends DatarateChannel {
 
 network ExtClient {
     parameters:
-        	double testTimeout @unit(s) = default(0s);
-        	bool testing = default(false);
+       double testTimeout @unit(s) = default(0s);
+       bool testing = default(false);
     submodules:
        peer: StandardHost {
             parameters:
                 IPForward = false;
                 routingFile = "cli1d.mrt";
-            @display("p=29,90;i=laptop3");
-            gates:
-                extg[1];
+                numExtInterfaces = 1;
+                @display("p=29,90;i=laptop3");
 	}
     connections allowunconnected:
 	

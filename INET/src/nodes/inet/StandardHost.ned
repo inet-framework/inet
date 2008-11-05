@@ -53,11 +53,11 @@ module StandardHost
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
+        int numExtInterfaces = default(0);
         @display("i=device/pc2");
     gates:
         inout pppg[];
         inout ethg[];
-	inout extg[]; 	//I.R.
     submodules:
         namTrace: NAMTraceWriter {
             parameters:
@@ -111,8 +111,8 @@ module StandardHost
                 proxyARP = false;
                 @display("p=248,247;q=queue");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];	//I.R.
-                ifOut[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
+                ifIn[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];	//I.R.
+                ifOut[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];
         }
         ppp[sizeof(pppg)]: PPPInterface {
             parameters:
@@ -122,7 +122,7 @@ module StandardHost
             parameters:
                 @display("p=240,350,row,90;q=txQueue");
         }
-	ext[sizeof(extg)]: ExtInterface {	//I.R.
+	ext[numExtInterfaces]: ExtInterface {	//I.R.
             parameters:
                 @display("p=399,390,row,90;q=txQueue;i=block/ifcard");
         }
@@ -130,10 +130,10 @@ module StandardHost
             parameters:
                 @display("p=254,310;i=abstract/cache_s");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
-                in2[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
-                out2[sizeof(pppg)+sizeof(ethg)+sizeof(extg)];
+                ifIn[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];
+                in2[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];
+                ifOut[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];
+                out2[sizeof(pppg)+sizeof(ethg)+numExtInterfaces];
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {
