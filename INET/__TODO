@@ -1,3 +1,6 @@
+TODO:  MTU patch from Irene Rungeler
+
+TODO: add SCTP to the whatsnew file
 
 - MAKE IT POSSIBLE TO USE DIFFERENT TYPES FOR EACH ELEMENT OF "LIKE" SUBMODULE VECTORS!
   In StandardHost etc, change 
