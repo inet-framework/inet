@@ -38,7 +38,7 @@ SCTPPathVariables:: SCTPPathVariables(IPvXAddress addr, SCTPAssociation* assoc)
 	primaryPathCandidate = false;
 	pathErrorCount =0;
 	pathErrorThreshold = assoc->getSctpMain()->par("pathMaxRetrans");
-	if (!pathErrorThreshold) 
+	if (!pathErrorThreshold)
 		pathErrorThreshold = PATH_MAX_RETRANS;
 	pathRto = assoc->getSctpMain()->par("rtoInitial");
 	heartbeatTimeout = pathRto;
@@ -46,7 +46,7 @@ SCTPPathVariables:: SCTPPathVariables(IPvXAddress addr, SCTPAssociation* assoc)
 
 	if (!interval)
 		interval = HB_INTERVAL;
-	heartbeatIntervalTimeout = pathRto+interval;	
+	heartbeatIntervalTimeout = pathRto+interval;
 	srtt = pathRto;
 	lastAckTime = 0;
 	forceHb = false;
@@ -59,7 +59,7 @@ SCTPPathVariables:: SCTPPathVariables(IPvXAddress addr, SCTPAssociation* assoc)
 	rttvar = 0.0;
 
 	cwndTimeout = pathRto;
-	cwnd = 0; 
+	cwnd = 0;
 	updateTime = 0.0;
 	cwndAdjustmentTime=0;
 	char str[70];
@@ -69,7 +69,7 @@ SCTPPathVariables:: SCTPPathVariables(IPvXAddress addr, SCTPAssociation* assoc)
 	HeartbeatIntervalTimer = new cMessage(str);
 	sprintf(str, "CWND_TIMER %d:%s",assoc->assocId,addr.str().c_str());
 	CwndTimer = new cMessage(str);
-	sprintf(str, "RTX_TIMER %d:%s",assoc->assocId,addr.str().c_str());	
+	sprintf(str, "RTX_TIMER %d:%s",assoc->assocId,addr.str().c_str());
 	T3_RtxTimer = new cMessage(str);
 	HeartbeatTimer->setContextPointer(association);
 	HeartbeatIntervalTimer->setContextPointer(association);
@@ -180,14 +180,12 @@ uint32 i;
 	initRetransCounter 	= 0;
 	nextTSN 		= 0;
 	cTsnAck 		= 0;
-	lastTsnAck		= 0; 
+	lastTsnAck		= 0;
 	highestTsnReceived 	= 0;
 	highestTsnAcked 	= 0;
 	highestTsnStored	= 0;
 	nextRSid		= 0;
 	ackState 		= 0;
-	doFastRetransmission 	= 0;
-	fastRetransmittedBytes 	= 0;
 	lastStreamScheduled 	= 0;
 	fastRecoveryExitPoint	= 0;
 	peerRwnd 		= 0;
@@ -199,7 +197,7 @@ uint32 i;
 	numGaps 		= 0;
 	msgNum 			= 0;
 	bytesRcvd 		= 0;
-	queuedMessages		= 0;	
+	queuedMessages		= 0;
 	queueLimit		= 0;
 	queuedRcvBytes		= 0;
 	probingTimeout		= 1;
@@ -232,13 +230,13 @@ SCTPStateVariables::~SCTPStateVariables()
 //
 
 SCTPAssociation::SCTPAssociation(SCTP *_mod, int32 _appGateIndex, int32 _assocId)
-{	
+{
 	sctpMain = _mod;
 	appGateIndex = _appGateIndex;
 	assocId = _assocId;
-	 
+
 	ev<<"SCTPAssociationBase:SCTPAssociation new assocId="<<assocId<<"\n";
-	
+
 	localPort = remotePort = 0;
 	localVTag = 0;
 	peerVTag = 0;
@@ -330,7 +328,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 	SCTPPathVariables* path = NULL;
 
 	sctpEV3 << msg->getName() << " timer expired at "<<simulation.getSimTime()<<"\n";
-	
+
 	SCTPPathInfo* pinfo = check_and_cast<SCTPPathInfo*>(msg->getControlInfo());
 	IPvXAddress addr = pinfo->getRemoteAddress();
 
@@ -340,7 +338,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 	SCTPEventCode event;
 	event = SCTP_E_IGNORE;
 	if (msg==T1_InitTimer)
-	{	
+	{
 		process_TIMEOUT_INIT_REXMIT(event);
 	}
 	else if (msg==SackTimer)
@@ -362,11 +360,11 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 		sctpMain->removeAssociation(this);
 	}
 	else if (path!=NULL && msg==path->HeartbeatIntervalTimer)
-	{     
+	{
 		process_TIMEOUT_HEARTBEAT_INTERVAL(path, path->forceHb);
 	}
 	else if (path!=NULL && msg==path->HeartbeatTimer)
-	{   
+	{
 		process_TIMEOUT_HEARTBEAT(path);
 	}
 	else if (path!=NULL && msg==path->T3_RtxTimer)
@@ -395,7 +393,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 
 bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg, IPvXAddress msgSrcAddr, IPvXAddress msgDestAddr)
 {
-	
+
 	printConnBrief();
 
 	localAddr=msgDestAddr;
@@ -403,7 +401,7 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg, IPvXAddress msgSr
 
 	remoteAddr=msgSrcAddr;
 	remotePort=sctpmsg->getSrcPort();
-	
+
 	return process_RCV_Message(sctpmsg, msgSrcAddr, msgDestAddr);
 }
 
@@ -461,12 +459,12 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
 bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 {
 	sctpEV3<<"performStateTransition\n";
-	if (event==SCTP_E_IGNORE)  
+	if (event==SCTP_E_IGNORE)
 	{
 		ev << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
 		return true;
 	}
-	
+
 	// state machine
 	int32 oldState = fsm->getState();
 	switch (fsm->getState())
@@ -484,7 +482,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 				default:;
 			}
 			break;
-	
+
 		case SCTP_S_COOKIE_WAIT:
 			switch (event)
 			{
@@ -495,13 +493,13 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 				default:;
 			}
 			break;
-			
+
 		case SCTP_S_COOKIE_ECHOED:
 			switch (event)
 			{
 				case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
 				case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-				case SCTP_E_RCV_COOKIE_ACK:FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break; 
+				case SCTP_E_RCV_COOKIE_ACK:FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
 				default:;
 			}
 			break;
@@ -511,14 +509,14 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 				case SCTP_E_SEND: FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
 				case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
 				case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-				case SCTP_E_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);  break; 
+				case SCTP_E_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);  break;
 				case SCTP_E_STOP_SENDING: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING); state->stopSending = true; state->lastTSN = state->nextTSN-1; break;  //I.R.
 				case SCTP_E_RCV_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED); break;
 				case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
 				default:;
 			}
 			break;
-	
+
 		case SCTP_S_SHUTDOWN_PENDING:
 			switch (event)
 			{
@@ -540,7 +538,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 				default:;
 			}
 			break;
-		
+
 		case SCTP_S_SHUTDOWN_SENT:
 			switch (event)
 			{
@@ -551,13 +549,13 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 				default:;
 			}
 			break;
-		
+
 		case SCTP_S_SHUTDOWN_ACK_SENT:
 			switch (event)
 			{
 				case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
 				case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-				case SCTP_E_RCV_SHUTDOWN_COMPLETE:     FSM_Goto((*fsm), SCTP_S_CLOSED); break; 
+				case SCTP_E_RCV_SHUTDOWN_COMPLETE:     FSM_Goto((*fsm), SCTP_S_CLOSED); break;
 				default:;
 			}
 			break;
