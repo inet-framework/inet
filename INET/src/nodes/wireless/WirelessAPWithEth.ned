@@ -76,7 +76,7 @@ module WirelessAPWithEth
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
         wlan.uppergateIn <-- relayUnit.lowerLayerOut[0];
         wlan.uppergateOut --> relayUnit.lowerLayerIn[0];
-        for i=0..sizeof(ethIn)-1 {
+        for i=0..sizeof(ethg)-1 {
             eth[i].upperLayerIn <-- relayUnit.lowerLayerOut[i+1];
             eth[i].upperLayerOut --> relayUnit.lowerLayerIn[i+1];
             eth[i].phys <--> ethg[i];
