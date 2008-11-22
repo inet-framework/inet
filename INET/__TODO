@@ -19,7 +19,41 @@ TODO:
 - gate labelling for the NED editor
 
 
+-----------------------
+mailing list post on 2008-11-17 "INET Framework accuracy":
+A really interesting paper is the technical report "Towards Comparable
+Network Simulators", from Pengfei Di, Yaser Houri, Kendy Kutzner and  Thomas
+Fuhrmann [see url below]. They measure 802.11 throughput with ns2 and
+OMNeT++ INET Fw, and come to the conclusion that they are hard to compare,
+due to differences in the radio model and MAC parameterization. Then they go
+on to wrap ns2's 802.11 model into an OMNeT++ simple module, and with that,
+the OMNeT++ simulation (not too surprisingly) shows excellent correspondence
+with the ns2 simulation :) 
 
+http://i30www.ira.uka.de/research/documents/p2p/2008/towards_comparable_netw
+ork_simulations.pdf
+
+The paper is excellent work, and literally cries for follow-ups:
+
+1. INET's radio model is pluggable, and as the report authors describe it,
+   the ns-2 radio model seems to be quite simple (i.e. propdelay is a constant
+   and does not depend on distance). Thus, it should be possible to reimplement
+   ns-2's radio model in OMNeT++ with not too much effort (and contribute it to
+   INET) and re-run the experiments with it.
+
+2. OTOH I'm wondering, why not test the radio model and the 802.11MAC
+   operation *separately*? I.e. write an ideal radio (ber==0 always) and test
+   different 802.11 MAC models over that in all scenarios; then have more
+   realistic radio models and test them with simple (contention-free) 802.11
+   setups
+
+3. INET 802.11MAC model parameterization could be adjusted so that it's
+   possible to set it up with *exactly* the same parameters as ns-2.
+
+4. the authors ported ns-2's 802.11 model into OMNeT++; wonder if this code
+   is publicly available, or is there any plan to release it? there certainly
+   would be value in doing that.
+-----------------------
 
 
 TODO: ethernet: use normal channels
