@@ -121,7 +121,6 @@ SCTPDataVariables::SCTPDataVariables()
 	hasBeenAbandoned = false;
 	hasBeenFastRetransmitted = false;
 	countsAsOutstanding = false;
-	wasDropped = false;
 	lastDestination = IPvXAddress("0.0.0.0");
 	nextDestination = IPvXAddress("0.0.0.0");
 	initialDestination = IPvXAddress("0.0.0.0");

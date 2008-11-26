@@ -220,8 +220,6 @@ class SCTPDataVariables : public cPolymorphic
 		bool hasBeenAbandoned;
 		bool hasBeenFastRetransmitted;
 		bool countsAsOutstanding;
-		bool wasDropped;  //for receiving side of PKTDROP chunk to see whether the chunk had been previously dropped when a SACK arrives
-		bool qs;	// if true, chunk was sent with quickstart
 		IPvXAddress lastDestination;
 		IPvXAddress initialDestination;
 		IPvXAddress nextDestination;

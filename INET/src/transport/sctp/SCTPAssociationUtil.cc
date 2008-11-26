@@ -1239,7 +1239,6 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 					sctpEV3<<"osb="<<getPath(datVar->nextDestination)->outstandingBytes<<"\n";
 					CounterMap::iterator i=qCounter.roomRetransQ.find(getPath(datVar->lastDestination)->remoteAddress);
 						i->second += ADD_PADDING(datVar->booksize+SCTP_DATA_CHUNK_LENGTH);
-					datVar->wasDropped = false;
 				}
 			}
 			else
@@ -2751,7 +2750,8 @@ int32 SCTPAssociation::dequeueAckedChunks(uint32 tsna, IPvXAddress pathId, simti
 			chunk = retransmissionQ->getAndExtractMessage(chunk->tsn);
 			sctpEV3<<"dequeueAckedChunks(): dequeue chunk tsn="<<chunk->tsn<<", tsna="<<tsna<<", "<<retransmissionQ->getQueueSize()<<" chunks still in queue \n";
 
-			newlyAckedBytes += (chunk->booksize);
+			if (!chunk->hasBeenAcked)
+				newlyAckedBytes += (chunk->booksize);
 			SCTP::AssocStatMap::iterator iter=sctpMain->assocStatMap.find(assocId);
 			iter->second.ackedBytes+=chunk->len/8;
 

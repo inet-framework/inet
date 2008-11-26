@@ -664,7 +664,7 @@ bool trans=false;
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 {
 	uint32 tsna, ackedBytes=0, osb=0, bufferPosition, osbPathBefore, osbBefore, lo, hi, hiAcked;
-	uint64 retransmittedBytes=0, arwnd;
+	uint64 arwnd;
 	uint16 numGaps, numDups;
 	bool ctsnaAdvanced = false, rtxNecessary=false, lowestTsnRetransmitted = false;
 	SCTPDataVariables *datVar;
@@ -977,7 +977,6 @@ bool fastRtx = false;
 											qb->second+=pq->second->booksize;
 											sctpEV3<<"Fast RTX: "<<transmissionQ->getQueueSize()<<" chunks = "<<q->second<<"bytes. OldPid="<<oldPid<<", newPid="<<pid<<"\n";
 										}
-										retransmittedBytes += pq->second->len/8;
 										path->requiresRtx = true;
 										rtxNecessary = true;
 										if(bufferPosition == 0)
@@ -1023,7 +1022,7 @@ bool fastRtx = false;
 	osb = getOutstandingBytes();
 	
 	/* compute current receiver window */
-	state->peerRwnd = arwnd - osb + retransmittedBytes;
+	state->peerRwnd = arwnd - osb;
 
 	// position of statement changed 20.07.05 I.R.
 	if ((int32)(state->peerRwnd)< 0) state->peerRwnd= 0;
@@ -1031,7 +1030,7 @@ bool fastRtx = false;
 	if (state->peerRwnd > state->initialPeerRwnd)
 		state->peerRwnd = state->initialPeerRwnd;
 
-	sctpEV3<<"rwnd set to "<<state->peerRwnd<<" ("<<arwnd<<"-"<<osb<<"+"<<retransmittedBytes<<")\n";
+	sctpEV3<<"rwnd set to "<<state->peerRwnd<<" ("<<arwnd<<"-"<<osb<<")\n";
 	sctpEV3<<"pathFlow="<<state->peerRwnd/rttEst<<"="<<state->peerRwnd<<"/"<<rttEst<<"\n";	 
 	sctpEV3<<"state->peerRwnd now "<<state->peerRwnd<<"\n";
 	if (arwnd == 1 || state->peerRwnd < state->swsLimit || arwnd == 0)
