@@ -32,6 +32,16 @@ TCPSegment& TCPSegment::operator=(const TCPSegment& other)
     return *this;
 }
 
+TCPSegment::~TCPSegment()
+{
+    while (!payloadList.empty())
+    {
+        cPacket *msg = payloadList.front().msg;
+        payloadList.pop_front();
+        dropAndDelete(msg);
+    }
+}
+
 void TCPSegment::parsimPack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimPack(b);
