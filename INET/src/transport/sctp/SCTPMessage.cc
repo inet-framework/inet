@@ -36,14 +36,13 @@ SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
 
 SCTPMessage::~SCTPMessage()
 {
-SCTPChunk* chunk;
-	if (this->getChunksArraySize()>0)
-	for (uint32 i=0; i<this->getChunksArraySize(); i++)
-	{
-		chunk = (SCTPChunk*)this->getChunks(i);
-		drop(chunk);
-		delete chunk;
-	}
+    SCTPChunk* chunk;
+    for (uint32 i=0; i<this->getChunksArraySize(); i++)
+    {
+        chunk = (SCTPChunk*)this->getChunks(i);
+        drop(chunk);
+        delete chunk;
+    }
 }
 
 void SCTPMessage::setChunksArraySize(uint32 size)
@@ -72,58 +71,58 @@ void SCTPMessage::setChunks(uint32 k, const cPacketPtr& chunks_var)
 
 void SCTPMessage::addChunk(cPacket* msg)
 {
-	char str[200];
-	take(msg);
-	if (this->chunkList.size()<9)
-	{
-		strcpy(str, this->getName());
-		sprintf(str, "%s %s",this->getName(), msg->getName());
-		this->setName(str);
-	}
-	this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()/8)*8);
-	chunkList.push_back(msg);
+    char str[200];
+    take(msg);
+    if (this->chunkList.size()<9)
+    {
+        strcpy(str, this->getName());
+        sprintf(str, "%s %s",this->getName(), msg->getName());
+        this->setName(str);
+    }
+    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()/8)*8);
+    chunkList.push_back(msg);
 }
 
 cPacket *SCTPMessage::removeChunk()
 {
-	if (chunkList.empty())
-		return NULL;
-	
-	cPacket *msg = chunkList.front();
-	chunkList.pop_front();
-	drop(msg);
-	this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
-	return msg;
+    if (chunkList.empty())
+        return NULL;
+
+    cPacket *msg = chunkList.front();
+    chunkList.pop_front();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
 }
 
 cPacket *SCTPMessage::removeLastChunk()
 {
-	if (chunkList.empty())
-		return NULL;
-	
-	cPacket *msg = chunkList.back();
-	chunkList.pop_back();
-	drop(msg);
-	this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
-	return msg;
+    if (chunkList.empty())
+        return NULL;
+
+    cPacket *msg = chunkList.back();
+    chunkList.pop_back();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
 }
 
 cPacket *SCTPMessage::peekFirstChunk()
 {
-	if (chunkList.empty())
-		return NULL;
-	
-	cPacket *msg = chunkList.front();
-	return msg;
+    if (chunkList.empty())
+        return NULL;
+
+    cPacket *msg = chunkList.front();
+    return msg;
 }
 
 cPacket *SCTPMessage::peekLastChunk()
 {
-	if (chunkList.empty())
-		return NULL;
-	
-	cPacket *msg = chunkList.back();
-	return msg;
+    if (chunkList.empty())
+        return NULL;
+
+    cPacket *msg = chunkList.back();
+    return msg;
 }
 
 
@@ -168,22 +167,22 @@ void SCTPErrorChunk::setParameters(uint32 k, const cPacketPtr& chunks_var)
 
 void SCTPErrorChunk::addParameters(cPacket* msg)
 {
-	take(msg);
+    take(msg);
 
-	this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
-	parameterList.push_back(msg);
+    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+    parameterList.push_back(msg);
 }
 
 cPacket *SCTPErrorChunk::removeParameter()
 {
-	if (parameterList.empty())
-		return NULL;
-	
-	cPacket *msg = parameterList.front();
-	parameterList.pop_front();
-	drop(msg);
-	this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
-	return msg;
+    if (parameterList.empty())
+        return NULL;
+
+    cPacket *msg = parameterList.front();
+    parameterList.pop_front();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
 }
 
 
