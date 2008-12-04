@@ -1272,6 +1272,7 @@ SCTPEventCode  SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk
 			state->primaryPathIndex = path->remoteAddress;
 		sctpEV3<<"primaryPath now "<<state->primaryPathIndex<<"\n";
 	}
+	path->pathErrorCount = 0;
 	return SCTP_E_IGNORE;
 }
 
