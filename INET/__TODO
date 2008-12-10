@@ -1,3 +1,14 @@
+TODO: eliminate ARP overhead for PPP interfaces; 
+  [Ingmar Baumgart email, 2008 dec 10, "INET Framework: ARP performance issue"]
+    The only issue which results in about 10% slowdown in our simulations is
+    the unnecessary use of the ARP module for PPP interfaces. A quick fix
+    would be to modify IP::sendDatagramToOutput() to use a sendDirect to
+    skip the ARP module, if the outgoing interface is not a broadcast
+    interface (mainly move the logic from ARP::processOutboundPacket() to
+    IP::sendDatagramToOutput).
+    Of course we could also remove the outgoing connection from the ARP
+    module and use there sendDirect as well.
+
 TODO: examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
 
 TODO: toplevel package legyen "org.omnetpp.inet"
