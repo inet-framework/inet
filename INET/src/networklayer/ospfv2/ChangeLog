@@ -1,3 +1,11 @@
+2008-12-11  Andras Varga
+
+	* added LGPL headers to files
+
+2007..2008  Andras Varga
+
+	* ported to OMNeT++ 4.0
+
 2006-05-01  Andras Varga
 
 	* checked in more patches from author of this model, Andras Babos

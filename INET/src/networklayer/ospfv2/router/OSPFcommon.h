@@ -1,3 +1,20 @@
+//
+// Copyright (C) 2006 Andras Babos and Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
 #ifndef __INET_OSPFCOMMON_H
 #define __INET_OSPFCOMMON_H
 
@@ -125,7 +142,7 @@ inline bool operator!= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAd
 
 inline bool operator< (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
 {
-	return leftAddress.asInt() < rightAddress.asInt();
+    return leftAddress.asInt() < rightAddress.asInt();
 }
 
 inline bool operator<= (OSPF::IPv4Address leftAddress, OSPF::IPv4Address rightAddress)
@@ -177,7 +194,7 @@ inline bool operator!= (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4Addre
 inline bool operator== (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (leftID.routerID == rightID.routerID &&
-    		leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
+            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
 }
 
 inline bool operator!= (OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
