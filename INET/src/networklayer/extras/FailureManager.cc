@@ -2,18 +2,17 @@
 // Copyright (C) 2005 Vojtech Janota
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
 #include "FailureManager.h"
@@ -87,8 +86,8 @@ void FailureManager::replaceNode(cModule *mod, const char *newNodeType)
 
 void FailureManager::reconnectNode(cModule *old, cModule *n)
 {
-	copyParams(old, n);
-	n->finalizeParameters();
+    copyParams(old, n);
+    n->finalizeParameters();
     n->setDisplayString(old->getDisplayString().str());
 
     reconnectAllGates(old, n);
@@ -96,43 +95,43 @@ void FailureManager::reconnectNode(cModule *old, cModule *n)
 
 void FailureManager::reconnectAllGates(cModule *old, cModule *n)
 {
-	std::vector<const char*> gateNames = old->getGateNames();
-	for (std::vector<const char*>::const_iterator it=gateNames.begin(); it!=gateNames.end(); ++it)
-	{
-		const char* gateName = *it;
-		if (old->isGateVector(gateName))
-		{
-			unsigned int size = old->gateSize(gateName);
-			n->setGateSize(gateName, size);
-			for (unsigned int i = 0; i < size; i++)
-				reconnectGates(old, n, gateName, i);
-		}
-		else
-		{
-			reconnectGates(old, n, gateName);
-		}
-	}
+    std::vector<const char*> gateNames = old->getGateNames();
+    for (std::vector<const char*>::const_iterator it=gateNames.begin(); it!=gateNames.end(); ++it)
+    {
+        const char* gateName = *it;
+        if (old->isGateVector(gateName))
+        {
+            unsigned int size = old->gateSize(gateName);
+            n->setGateSize(gateName, size);
+            for (unsigned int i = 0; i < size; i++)
+                reconnectGates(old, n, gateName, i);
+        }
+        else
+        {
+            reconnectGates(old, n, gateName);
+        }
+    }
 }
 
 void FailureManager::reconnectGates(cModule *old, cModule *n, const char *gateName, int gateIndex)
 {
-	cGate::Type gateType = old->gateType(gateName);
-	if (gateType == cGate::INOUT)
-	{
-		std::string ingateName = (std::string(gateName)+"$i");
-		std::string outgateName = (std::string(gateName)+"$o");
-		reconnectGate(old->gate(ingateName.c_str(), gateIndex), n->gate(ingateName.c_str(), gateIndex));
-		reconnectGate(old->gate(outgateName.c_str(), gateIndex), n->gate(outgateName.c_str(), gateIndex));
-	}
-	else
-	{
-		reconnectGate(old->gate(gateName, gateIndex), n->gate(gateName, gateIndex));
-	}
+    cGate::Type gateType = old->gateType(gateName);
+    if (gateType == cGate::INOUT)
+    {
+        std::string ingateName = (std::string(gateName)+"$i");
+        std::string outgateName = (std::string(gateName)+"$o");
+        reconnectGate(old->gate(ingateName.c_str(), gateIndex), n->gate(ingateName.c_str(), gateIndex));
+        reconnectGate(old->gate(outgateName.c_str(), gateIndex), n->gate(outgateName.c_str(), gateIndex));
+    }
+    else
+    {
+        reconnectGate(old->gate(gateName, gateIndex), n->gate(gateName, gateIndex));
+    }
 }
 
 void FailureManager::reconnectGate(cGate *oldGate, cGate *newGate)
 {
-	cGate::Type gateType = oldGate->getType();
+    cGate::Type gateType = oldGate->getType();
     if (gateType == cGate::OUTPUT)
     {
         if(oldGate->isConnected())
@@ -159,20 +158,20 @@ void FailureManager::reconnectGate(cGate *oldGate, cGate *newGate)
     }
     else
     {
-    	error("Unexpected gate type: %d", (int)gateType);
+        error("Unexpected gate type: %d", (int)gateType);
     }
 }
 
 cChannel *FailureManager::copyChannel(cChannel *channel)
 {
-	cChannel *copy = channel->getChannelType()->create(channel->getName());
-	copyParams(channel, copy);
+    cChannel *copy = channel->getChannelType()->create(channel->getName());
+    copyParams(channel, copy);
     return copy;
 }
 
 void FailureManager::copyParams(cComponent *from, cComponent *to)
 {
     for(int i = 0; i < from->getNumParams(); i++)
-    	to->par(i) = from->par(i);
+        to->par(i) = from->par(i);
 }
 
