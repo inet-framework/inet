@@ -1478,12 +1478,17 @@ void SCTPAssociation::sendAll(IPvXAddress pathId)
 				// Test whether a full packet can be filled
 				sctpEV3<<" peerRwnd="<<state->peerRwnd<<" bytesToSend="<<bytesToSend<<" nextTSN="<<state->nextTSN<<"\n";
 					SCTPDataMsg *datMsg = peekOutboundDataMsg();
-					uint32 ums = datMsg->getBooksize();
+					if (datMsg)
+					{
+						uint32 ums = datMsg->getBooksize();
 						uint32 num =(uint32)((pathVar->pmtu-32)/(ums+SCTP_DATA_CHUNK_LENGTH));
 						if (num*ums>state->peerRwnd)
 							bytesToSend = 0;
 						else
 							bytesToSend = num * ums;
+					}
+					else
+						bytesToSend = 0;
 					sctpEV3<<"bytesToSend set to "<<bytesToSend<<"\n";
 				}
 			}
