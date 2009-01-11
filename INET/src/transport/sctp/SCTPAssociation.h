@@ -372,7 +372,7 @@ class SCTPStateVariables : public cPolymorphic
 	
 
 
-class SCTPAssociation : public cSimpleModule
+class SCTPAssociation : public cObject
 {
 	public:
 		// connection identification by apps: appgateIndex+assocId
