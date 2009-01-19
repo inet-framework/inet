@@ -47,7 +47,7 @@ bool DropTailQueue::enqueue(cMessage *msg)
     }
     else
     {
-        queue.insert(msg);
+        queue.insert((cObject*)msg);
         qlenVec.record(queue.length());
         return false;
     }

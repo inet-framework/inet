@@ -409,16 +409,19 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 				if (initchunk->getAddresses(j).isIPv6())
 					continue;
 				// set path variables for this pathlocalAddresses
-				SCTPPathVariables* path = new SCTPPathVariables(initchunk->getAddresses(j), this);
-				for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
+				if (!getPath(initchunk->getAddresses(j)))
 				{
-					sctpMain->addRemoteAddress(this,(*k), initchunk->getAddresses(j));
-					this->remoteAddressList.push_back(initchunk->getAddresses(j));
-				}			
-				sctpPathMap[path->remoteAddress] = path;
-				qCounter.roomTransQ[path->remoteAddress] = 0;
-				qCounter.roomRetransQ[path->remoteAddress] = 0;
-				qCounter.bookedTransQ[path->remoteAddress] = 0;
+					SCTPPathVariables* path = new SCTPPathVariables(initchunk->getAddresses(j), this);
+					for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
+					{
+						sctpMain->addRemoteAddress(this,(*k), initchunk->getAddresses(j));
+						this->remoteAddressList.push_back(initchunk->getAddresses(j));
+					}			
+					sctpPathMap[path->remoteAddress] = path;
+					qCounter.roomTransQ[path->remoteAddress] = 0;
+					qCounter.roomRetransQ[path->remoteAddress] = 0;
+					qCounter.bookedTransQ[path->remoteAddress] = 0;
+				}
 			}
 			SCTPPathMap::iterator ite=sctpPathMap.find(remoteAddr);
 			if (ite==sctpPathMap.end())

@@ -1,7 +1,7 @@
 //***************************************************************************
 //* file:        Mac80211.ned
 //*
-//* author:      Marc Löbbers
+//* author:      Marc Lï¿½bbers
 //*
 //* copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 //*              Technische Universitaet Berlin, Germany.
@@ -42,6 +42,7 @@ simple Mac80211
         bool rtsCts = default(false);
         double bitrate @unit("bps");
         int broadcastBackoff;
+	int mtu = default(1500);
         @display("i=block/layer");
     gates:
         input uppergateIn;

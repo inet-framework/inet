@@ -32,6 +32,8 @@
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
+#define MAXBUFLENGTH 9000
+
 TCPDumper::TCPDumper(std::ostream& out)
 {
     outp = &out;
@@ -536,10 +538,10 @@ void TCPDump::handleMessage(cMessage *msg)
 struct pcaprec_hdr ph;
 simtime_t stime;
 int32 i;
-uint8 buf[1500];
+uint8 buf[MAXBUFLENGTH];
 bool l2r;
 
-for (i=0; i<1500; i++)
+for (i=0; i<MAXBUFLENGTH; i++)
     buf[i]=0;
     // dump
 
@@ -626,7 +628,7 @@ for (i=0; i<1500; i++)
         ph.ts_sec = (int32)stime.dbl();
         ph.ts_usec = (uint32)((stime.dbl()-ph.ts_sec)*1000000);
          // Write Ethernet header
-                HDR_ETHERNET.l3pid = htons(0x800);
+        HDR_ETHERNET.l3pid = htons(0x800);
         IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
         // IP header:
         //struct sockaddr_in *to = (struct sockaddr_in*) malloc(sizeof(struct sockaddr_in));

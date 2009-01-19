@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente Mészáros
+// Copyright (C) 2006 Andras Varga and Levente Mï¿½szï¿½ros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -64,6 +64,7 @@ simple Ieee80211Mac
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
+	int mtu = default(1500);
         @display("i=block/layer");
     gates:
         input uppergateIn;

@@ -142,7 +142,7 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
         if (i==numCPUs)
         {
             EV << "All CPUs busy, enqueueing incoming frame " << frame << " for later processing\n";
-            queue.insert(frame);
+            queue.insert((cObject*)frame);
         }
         else
         {

@@ -27,7 +27,7 @@
 
 
 class SCTPStatusInfo;
-class SCTPMain;
+class SCTP;
 
 
  

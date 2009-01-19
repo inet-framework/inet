@@ -189,14 +189,14 @@ void ARP::processOutboundPacket(cMessage *msg)
 
         // and queue up packet
         entry->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
+        pendingQueue.insert((cObject*)msg);
     }
     else if ((*it).second->pending)
     {
         // an ARP request is already pending for this address -- just queue up packet
         EV << "ARP resolution for " << nextHopAddr << " is pending, queueing up packet\n";
         (*it).second->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
+        pendingQueue.insert((cObject*)msg);
     }
     else if ((*it).second->lastUpdate+cacheTimeout<simTime())
     {
@@ -209,7 +209,7 @@ void ARP::processOutboundPacket(cMessage *msg)
 
         // and queue up packet
         entry->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
+        pendingQueue.insert((cObject*)msg);
     }
     else
     {
@@ -474,7 +474,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
         MsgPtrVector::iterator i = pendingPackets.begin();
         cMessage *msg = (*i);
         pendingPackets.erase(i);
-        pendingQueue.remove(msg);
+        pendingQueue.remove((cObject*)msg);
         EV << "Sending out queued packet " << msg << "\n";
         sendPacketToNIC(msg, entry->ie, macAddress);
     }
