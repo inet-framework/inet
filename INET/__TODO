@@ -29,6 +29,12 @@ TODO:
 - failure/recovery (replacing with failed router is problematic!)
 - gate labelling for the NED editor
 
+-----------------------
+add support for integrating the TIREM module?
+   http://www.alionscience.com/index.cfm?fuseaction=products.view&productid=19
+   "TIREM predicts radio frequency propagation loss over irregular terrain and seawater for
+   ground-based and air-borne transmitters and receivers. TIREM is commercially
+   available as a DLL and as a module in leading commercial M&S tools."
 
 -----------------------
 mailing list post on 2008-11-17 "INET Framework accuracy":
