@@ -32,6 +32,8 @@
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
+#define MAXBUFLENGTH 65536
+
 TCPDumper::TCPDumper(std::ostream& out)
 {
     outp = &out;
@@ -524,7 +526,7 @@ const char* file = this->par("dumpFile");
         fh.thiszone = 0;
         fh.sigfigs = 0;
         fh.snaplen = 65535;
-        fh.network = 1;
+        fh.network = 0;
         fwrite(&fh, sizeof(fh), 1, tcpdump.dumpfile);
     }
     else
@@ -536,10 +538,11 @@ void TCPDump::handleMessage(cMessage *msg)
 struct pcaprec_hdr ph;
 simtime_t stime;
 int32 i;
-uint8 buf[1500];
+uint8 buf[MAXBUFLENGTH];
 bool l2r;
+uint32 hdr;
 
-for (i=0; i<1500; i++)
+for (i=0; i<MAXBUFLENGTH; i++)
     buf[i]=0;
     // dump
 
@@ -625,17 +628,17 @@ for (i=0; i<1500; i++)
 
         ph.ts_sec = (int32)stime.dbl();
         ph.ts_usec = (uint32)((stime.dbl()-ph.ts_sec)*1000000);
-         // Write Ethernet header
-                HDR_ETHERNET.l3pid = htons(0x800);
+         // Write link layer header
+        hdr = 2; //AF_INET
         IPDatagram *ipPacket = check_and_cast<IPDatagram *>(msg);
         // IP header:
         //struct sockaddr_in *to = (struct sockaddr_in*) malloc(sizeof(struct sockaddr_in));
         //int32 tosize = sizeof(struct sockaddr_in);
         int32 serialized_ip = IPSerializer().serialize(ipPacket,buf, sizeof(buf));
-        ph.incl_len = serialized_ip+sizeof(HDR_ETHERNET);
+        ph.incl_len = serialized_ip+sizeof(uint32);
         ph.orig_len = ph.incl_len;
         fwrite(&ph, sizeof(ph), 1, tcpdump.dumpfile);
-        fwrite(&HDR_ETHERNET, sizeof(HDR_ETHERNET), 1, tcpdump.dumpfile);
+        fwrite(&hdr, sizeof(uint32), 1, tcpdump.dumpfile);
 
         fwrite(buf, serialized_ip, 1, tcpdump.dumpfile);
     }
