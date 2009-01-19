@@ -79,8 +79,6 @@ void SCTP::printInfoConnMap()
 void SCTP::initialize()
 {
 	nextEphemeralPort = (uint16)(rand()%10000 + 30000);
-	WATCH_PTRMAP(sctpConnMap);
-	WATCH_PTRMAP(sctpAppConnMap);
 
 	//sctpEV3<<"SCTPMain initialize\n";
 
