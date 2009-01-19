@@ -140,7 +140,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    e->setMtu(4470);
 
     // capabilities
     e->setMulticast(true);

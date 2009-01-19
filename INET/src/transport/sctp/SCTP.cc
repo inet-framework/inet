@@ -535,15 +535,6 @@ void SCTP::updateSockPair(SCTPAssociation *conn, IPvXAddress localAddr, IPvXAddr
 	key.localPort = conn->localPort = localPort;
 	key.remotePort = conn->remotePort = remotePort;
 
-	for (SctpConnMap::iterator i=sctpConnMap.begin(); i!=sctpConnMap.end(); i++)
-	{
-		if (i->second == conn)
-		{
-			sctpConnMap.erase(i);
-			break;
-		}
-	}
-
 	sctpEV3<<"updateSockPair conn="<<conn<<"  localAddr="<<key.localAddr<<"        remoteAddr="<<key.remoteAddr<<"  localPort="<<key.localPort<<"  remotePort="<<remotePort<<"\n";
 
 	sctpConnMap[key] = conn;

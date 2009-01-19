@@ -286,7 +286,6 @@ struct heartbeat_info {
 	} heartbeat_info_union;
 };
 
-
 #define HBI_INFO(hbi) ((hbi)->heartbeat_info_union.info)
 #define HBI_ADDR(hbi) ((hbi)->heartbeat_info_union.addr_and_time.addr)
 #define HBI_TIME(hbi) ((hbi)->heartbeat_info_union.addr_and_time.time)

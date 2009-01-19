@@ -220,14 +220,14 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         //and then queues the data packet pending completion of address resolution.
         EV << "Add packet to entry's queue until Address Resolution is complete.\n";
         nce->pendingPackets.push_back(msg);
-        pendingQueue.insert((cObject*)msg);
+        pendingQueue.insert(msg);
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::INCOMPLETE)
     {
         EV << "Reachability State is INCOMPLETE.Address Resolution already initiated.\n";
         bubble("Packet added to queue until Address Resolution is complete.");
         nce->pendingPackets.push_back(msg);
-        pendingQueue.insert((cObject*)msg);
+        pendingQueue.insert(msg);
     }
     else if (nce->macAddress.isUnspecified())
     {
@@ -235,7 +235,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         EV << "Initiate Address Resolution and add packet to queue.\n";
         initiateAddressResolution(msg->getSrcAddress(), nce);
         nce->pendingPackets.push_back(msg);
-        pendingQueue.insert((cObject*)msg);
+        pendingQueue.insert(msg);
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::STALE)
     {
@@ -1396,7 +1396,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
     }
     /*d) If the prefix advertised does not match the prefix of an address already
          in the list, and the Valid Lifetime is not 0, form an address (and add
-         it to the list) by combining the advertised prefix with the linkï¿½s
+         it to the list) by combining the advertised prefix with the link’s
          interface identifier as follows:*/
     if (isPrefixAssignedToInterface == false && validLifetime != 0)
     {

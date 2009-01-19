@@ -93,7 +93,7 @@ void CSMAMacLayer::registerInterface()
     e->setInterfaceToken(myMacAddr.formInterfaceIdentifier());
 
     // MTU on 802.11 = ?
-    e->setMtu(par("mtu"));  // FIXME
+    e->setMtu(1500);  // FIXME
 
     // capabilities
     e->setBroadcast(true);

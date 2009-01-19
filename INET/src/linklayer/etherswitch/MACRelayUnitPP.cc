@@ -111,7 +111,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
     if (length + bufferUsed < bufferSize)
     {
         int inputport = frame->getArrivalGate()->getIndex();
-        buffer[inputport].queue.insert((cObject*)frame);
+        buffer[inputport].queue.insert(frame);
         buffer[inputport].port = inputport;
         bufferUsed += length;
 

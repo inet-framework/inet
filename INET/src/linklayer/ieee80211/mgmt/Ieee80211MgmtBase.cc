@@ -111,7 +111,7 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     if (!isDataFrame)
     {
         // management frames are inserted into mgmtQueue
-        mgmtQueue.insert((cObject*)msg);
+        mgmtQueue.insert(msg);
         return false;
     }
     else if (frameCapacity && dataQueue.length() >= frameCapacity)
@@ -123,7 +123,7 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     }
     else
     {
-        dataQueue.insert((cObject*)msg);
+        dataQueue.insert(msg);
         dataQueueLenVec.record(dataQueue.length());
         return false;
     }

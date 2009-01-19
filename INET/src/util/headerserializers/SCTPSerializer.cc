@@ -854,9 +854,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 							parcounter++;
 							chunk->setInfoArraySize(infoLen);
 							for(int32 i=0; i<infoLen; i++)
-							{
 								chunk->setInfo(i, HBI_INFO(hbi)[i]);
-							}
 						}
 						else
 						{
