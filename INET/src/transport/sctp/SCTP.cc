@@ -78,10 +78,6 @@ void SCTP::printInfoConnMap()
 
 void SCTP::initialize()
 {
-    	struct timeval tv;
-
-	gettimeofday(&tv, NULL);
-	srand((uint32)tv.tv_sec);
 	nextEphemeralPort = (uint16)(rand()%10000 + 30000);
 	WATCH_PTRMAP(sctpConnMap);
 	WATCH_PTRMAP(sctpAppConnMap);
@@ -534,6 +530,15 @@ void SCTP::updateSockPair(SCTPAssociation *conn, IPvXAddress localAddr, IPvXAddr
 	key.remoteAddr = (conn->remoteAddr = remoteAddr);
 	key.localPort = conn->localPort = localPort;
 	key.remotePort = conn->remotePort = remotePort;
+
+	for (SctpConnMap::iterator i=sctpConnMap.begin(); i!=sctpConnMap.end(); i++)
+	{
+		if (i->second == conn)
+		{
+			sctpConnMap.erase(i);
+			break;
+		}
+	}
 
 	sctpEV3<<"updateSockPair conn="<<conn<<"  localAddr="<<key.localAddr<<"        remoteAddr="<<key.remoteAddr<<"  localPort="<<key.localPort<<"  remotePort="<<remotePort<<"\n";
 
