@@ -20,8 +20,9 @@ package inet.linklayer.ext;
 simple ExtInterface
 {
 	parameters:
-	string filterString;
-	string device;
+		string filterString;
+		string device;
+		int mtu = default(1500);
 	gates:
 		input netwIn;
 		output netwOut;

@@ -42,6 +42,7 @@ simple Mac80211
         bool rtsCts = default(false);
         double bitrate @unit("bps");
         int broadcastBackoff;
+        int mtu = default(1500);
         @display("i=block/layer");
     gates:
         input uppergateIn;

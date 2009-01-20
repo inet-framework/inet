@@ -94,7 +94,7 @@ InterfaceEntry *ExtInterface::registerInterface()
 	e->setName(interfaceName);
 	delete [] interfaceName;
 
-	e->setMtu(1500);
+	e->setMtu(par("mtu"));
 	e->setMulticast(true);
 	e->setPointToPoint(true);
 	IInterfaceTable *ift = InterfaceTableAccess().get();

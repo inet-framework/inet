@@ -195,7 +195,7 @@ void Ieee80211Mac::registerInterface()
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // FIXME: MTU on 802.11 = ?
-    e->setMtu(1500);
+    e->setMtu(par("mtu"));
 
     // capabilities
     e->setBroadcast(true);
