@@ -149,7 +149,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 	EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
 
-void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
+static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
 	unsigned i;
 	int32 headerLength;
