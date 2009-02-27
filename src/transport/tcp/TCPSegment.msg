@@ -30,12 +30,9 @@ inline std::ostream& operator<<(std::ostream& os, cPacketPtr msg) {
 
 inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
-
 }}
 
-
 struct cPacketPtr;
-
 
 struct TCPPayloadMessage
 {

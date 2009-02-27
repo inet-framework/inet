@@ -1,6 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
+- added SCTP from Michael Tuexen and Irene Ruengeler
+
 INET-20080920
 -------------
 Internal snapshot, for omnetpp-4.0b6.
