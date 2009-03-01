@@ -1,5 +1,7 @@
 #!/bin/sh
+cd `dirname $0`/..
 INETROOT=`pwd`
+
 echo "[General]
 cpu-time-limit = 3s" >tmp.ini
 
@@ -10,7 +12,7 @@ run() {
 Running: $1 $2
 
 "
-  $INETROOT/src/inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
+  $INETROOT/src/run_inet -u Cmdenv -n $INETROOT/src:$INETROOT/examples -c $2 `basename $1` $INETROOT/tmp.ini
 }
 
 run examples/ospfv2/areas/omnetpp.ini General
