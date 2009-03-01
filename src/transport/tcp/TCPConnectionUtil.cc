@@ -598,10 +598,11 @@ void TCPConnection::retransmitData()
     while (bytesToSend>0)
     {
         ulong bytes = std::min(bytesToSend, (ulong)state->snd_mss);
+        bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         sendSegment(bytes);
         // Do not send packets after the FIN.
-        // fixes bug occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
-        if(state->send_fin && state->snd_nxt==state->snd_fin_seq+1)
+        // fixes bug that occurs in examples/inet/bulktransfer at event #64043  T=13.861159213744
+        if (state->send_fin && state->snd_nxt==state->snd_fin_seq+1)
             break;
         bytesToSend -= bytes;
     }

@@ -1,3 +1,7 @@
+2009-03-01 Andras Varga
+
+	* fixed bug in TCPConnection::retransmitData(); patch from Claus Faller
+
 2008-06-29 Andras Varga
 
 	* some refactoring: created factory methods for TCPSegment and 
