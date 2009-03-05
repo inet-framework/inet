@@ -20,7 +20,7 @@ package inet.transport.sctp;
 simple SCTP //
 {
         parameters:
-        int numGapReports = default(4);
+        int numGapReports = default(3);
         double rtoMin @unit(s) = default(1s);
         double rtoMax @unit(s) = default(60s);
         double rtoInitial @unit(s) = default(3s);
