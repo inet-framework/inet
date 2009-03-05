@@ -79,6 +79,7 @@ Bottom-up:
      tcp/                TCP protocol
      udp/                UDP protocol
      rtp/                Realtime Transport Protocol (not yet integrated)
+     sctp/		 Stream Control Transmission Protocol
 
    applications/         application layer
      tcpapp/             TCP application models
