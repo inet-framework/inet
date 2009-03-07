@@ -1,0 +1,5 @@
+TraCI client modules to connect OMNeT++ and the SUMO road traffic simulator.
+
+This simulation requires SUMO to be started and listening for TraCI commands
+on a TCP socket, e.g. using "sumo-guisim -c sumo.sumo.cfg".
+

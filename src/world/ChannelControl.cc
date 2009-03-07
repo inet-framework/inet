@@ -153,6 +153,29 @@ ChannelControl::HostRef ChannelControl::registerHost(cModule * host, const Coord
     return &hosts.back(); // last element
 }
 
+void ChannelControl::unregisterHost(cModule *host)
+{
+    Enter_Method_Silent();
+    for (HostList::iterator it = hosts.begin(); it != hosts.end(); it++) {
+        if (it->host == host) {
+            HostRef h = &*it;
+
+            // erase host from all registered hosts' neighbor list
+            for (HostList::iterator i2 = hosts.begin(); i2 != hosts.end(); ++i2) {
+                HostRef h2 = &*i2;
+                h2->neighbors.erase(h);
+                h2->isModuleListValid = false;
+                h->isModuleListValid = false;
+            }
+
+            // erase host from registered hosts
+            hosts.erase(it);
+            return;
+        }
+    }
+    error("unregisterHost failed: no such host");
+}
+
 ChannelControl::HostRef ChannelControl::lookupHost(cModule *host)
 {
     Enter_Method_Silent();

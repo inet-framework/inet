@@ -117,6 +117,9 @@ class INET_API ChannelControl : public cSimpleModule
     /** @brief Registers the given host */
     virtual HostRef registerHost(cModule *host, const Coord& initialPos);
 
+    /** @brief Unregisters the given host */
+    virtual void unregisterHost(cModule *host);
+
     /** @brief Returns the "handle" of a previously registered host */
     virtual HostRef lookupHost(cModule *host);
 
