@@ -23,6 +23,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <stdexcept>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -64,6 +65,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 		void commandSetMaximumSpeed(int32_t nodeId, float maxSpeed);
 		void commandChangeRoute(int32_t nodeId, std::string roadId, double travelTime);
+		float commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
+		void commandStopNode(int32_t nodeId, std::string roadId, float pos, uint8_t laneid, float radius, double waittime);
 
 	protected:
 
@@ -75,6 +78,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		std::string host;
 		int port;
 		bool autoShutdown; /**< Shutdown module as soon as no more vehicles are in the simulation */
+		int margin;
 
 		int socket;
 		long statsSimStart;
@@ -95,85 +99,128 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void connect();
 		void addModule(int32_t nodeId, std::string type, std::string name, std::string displayString);
 
-		uint32_t commandSimStep(simtime_t targetTime, uint8_t positionType);
-
-		bool socketDataAvailable() {
-			int result;
-			fd_set readset;
-			struct timeval timeout;
-			timeout.tv_sec = 1;
-			timeout.tv_usec = 0;
-
-			do {
-				FD_ZERO(&readset);
-				FD_SET(socket, &readset);
-				result = select(socket + 1, &readset, NULL, NULL, &timeout);
-			} while (result == -1 && errno == EINTR);
-
-			if (result < 0) error("An error occured polling data from the TraCI server: %s", strerror(errno));
-
-			return FD_ISSET(socket, &readset);
-		}
-
-		template<typename T> T readFromSocket() {
-			if(traCISimulationEnded) error("Simulation has ended");
-			if (socket < 0) error("Connection to TraCI server lost");
-
-			T buf;
-			int receivedBytes = ::recv(socket, reinterpret_cast<char*>(&buf), sizeof(buf), MSG_WAITALL);
-			if (receivedBytes != sizeof(buf)) error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(buf), receivedBytes, strerror(errno));
-
-			T buf_to_return;
-        		short a = 0x0102;
-        		unsigned char *p_a = reinterpret_cast<unsigned char*>(&a);
-        		bool isBigEndian = (p_a[0] == 0x01);
-			if (isBigEndian) {
-				buf_to_return = buf;
-			} else {
-                		unsigned char *p_buf = reinterpret_cast<unsigned char*>(&buf);
-		                unsigned char *p_buf_to_return = reinterpret_cast<unsigned char*>(&buf_to_return);
-
-				for (size_t i=0; i<sizeof(buf); ++i)
-				{
-					p_buf_to_return[i] = p_buf[sizeof(buf)-1-i];
+		/**
+		 * Byte-buffer that stores values in TraCI byte-order
+		 */
+		class TraCIBuffer {
+			public:
+				TraCIBuffer() : buf() {
+					buf_index = 0;
 				}
-			}
 
-			return buf_to_return;
-		}
-
-		template<typename T> T readFromSocket(T& out) {
-			out = readFromSocket<T>();
-			return out;
-		}
-
-		template<typename T> void writeToSocket(T buf) {
-			if(traCISimulationEnded) error("Simulation has ended");
-			if (socket < 0) error("Connection to TraCI server lost");
-
-			T buf_to_send;
-        		short a = 0x0102;
-        		unsigned char *p_a = reinterpret_cast<unsigned char*>(&a);
-        		bool isBigEndian = (p_a[0] == 0x01);
-			if (isBigEndian) {
-				buf_to_send = buf;
-			} else {
-                		unsigned char *p_buf = reinterpret_cast<unsigned char*>(&buf);
-		                unsigned char *p_buf_to_send = reinterpret_cast<unsigned char*>(&buf_to_send);
-
-				for (size_t i=0; i<sizeof(buf); ++i)
-				{
-					p_buf_to_send[i] = p_buf[sizeof(buf)-1-i];
+				TraCIBuffer(std::string buf) : buf(buf) {
+					buf_index = 0;
 				}
-			}
 
-			int sentBytes = ::send(socket, reinterpret_cast<char*>(&buf_to_send), sizeof(buf), 0);
-			if (sentBytes != sizeof(buf)) error("Could not write %d bytes to TraCI server, sent only %d: %s", sizeof(buf), sentBytes, strerror(errno));
-		}
+				template<typename T> T read() {
+					T buf_to_return;
+					unsigned char *p_buf_to_return = reinterpret_cast<unsigned char*>(&buf_to_return);
+
+					if (isBigEndian()) {
+						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
+							if (eof()) throw std::runtime_error("Attempted to read past end of byte buffer");
+							p_buf_to_return[i] = buf[buf_index++];
+						}
+					} else {
+						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
+							if (eof()) throw std::runtime_error("Attempted to read past end of byte buffer");
+							p_buf_to_return[sizeof(buf_to_return)-1-i] = buf[buf_index++];
+						}
+					}
+
+					return buf_to_return;
+				}
+
+				template<typename T> void write(T inv) {
+					unsigned char *p_buf_to_send = reinterpret_cast<unsigned char*>(&inv);
+
+					if (isBigEndian()) {
+						for (size_t i=0; i<sizeof(inv); ++i) {
+							buf += p_buf_to_send[i];
+						}
+					} else {
+						for (size_t i=0; i<sizeof(inv); ++i) {
+							buf += p_buf_to_send[sizeof(inv)-1-i];
+						}
+					}
+				}
+
+				template<typename T> T read(T& out) {
+					out = read<T>();
+					return out;
+				}
+
+				template<typename T> TraCIBuffer& operator >>(T& out) {
+					out = read<T>();
+					return *this;
+				}
+
+				template<typename T> TraCIBuffer& operator <<(const T& inv) {
+					write(inv);
+					return *this;
+				}
+
+				bool eof() const {
+					return buf_index == buf.length();
+				}
+
+				void set(std::string buf) {
+					this->buf = buf;
+					buf_index = 0;
+				}
+
+				void clear() {
+					set("");
+				}
+
+				std::string str() const {
+					return buf;
+				}
+
+			protected:
+				bool isBigEndian() {
+					short a = 0x0102;
+					unsigned char *p_a = reinterpret_cast<unsigned char*>(&a);
+					return (p_a[0] == 0x01);
+				}
+
+				std::string buf;
+				size_t buf_index;
+		};
+
+		/**
+		 * sends a single command via TraCI, checks status response, returns additional responses
+		 */
+		TraCIBuffer queryTraCI(uint8_t commandId, const TraCIBuffer& buf = TraCIBuffer());
+
+		/**
+		 * returns byte-buffer containing a TraCI command with optional parameters
+		 */
+		std::string makeTraCICommand(uint8_t commandId, TraCIBuffer buf = TraCIBuffer());
+
+		/**
+		 * sends a message via TraCI (after adding the header)
+		 */
+		void sendTraCIMessage(std::string buf);
+
+		/**
+		 * receives a message via TraCI (and strips the header)
+		 */
+		std::string receiveTraCIMessage();
+
+		/**
+		 * convert TraCI coordinates to OMNeT++ coordinates
+		 */
+		Coord traci2omnet(Coord coord) const;
+
+		/**
+		 * convert OMNeT++ coordinates to TraCI coordinates
+		 */
+		Coord omnet2traci(Coord coord) const;
 };
 
-template<> std::string TraCIScenarioManager::readFromSocket();
-template<> void TraCIScenarioManager::writeToSocket(std::string buf);
+template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
+template<> std::string TraCIScenarioManager::TraCIBuffer::read();
 
 class TraCIScenarioManagerAccess : public ModuleAccess<TraCIScenarioManager>
 {

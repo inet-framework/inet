@@ -36,5 +36,6 @@ simple TraCIScenarioManager
         string host = default("localhost");  // TraCI server hostname
         int port = default(8888);  // TraCI server port
         bool autoShutdown = default(true);  // Shutdown module as soon as no more vehicles are in the simulation
+        int margin = default(25);  // margin to add to all received vehicle positions
 }
 
