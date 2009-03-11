@@ -116,13 +116,13 @@ void TraCIMobility::nextPosition(int x, int y, double speed, double angle, std::
 	this->speed = speed;
 	this->angle = angle;
 	this->road_id = road_id;
-	this->lastUpdate = simTime();
 	changePosition();
 }
 
 void TraCIMobility::changePosition()
 {
 	simtime_t updateInterval = simTime() - this->lastUpdate;
+	this->lastUpdate = simTime();
 
 	// keep speed statistics
 	if ((pos.x != -1) && (pos.y != -1)) {
